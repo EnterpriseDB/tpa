@@ -1,0 +1,2 @@
+This repository contains Ansible playbooks to provision, set up, and
+operate replicated PostgreSQL servers on EC2.
