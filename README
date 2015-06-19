@@ -1,2 +1,10 @@
 This repository contains Ansible playbooks to provision, set up, and
 operate replicated PostgreSQL servers on EC2.
+
+provision.yml provisions three EC2 instances in different regions:
+
+    ansible-playbook -i hosts provision.yml
+
+configure.yml sets up these instances to run Postgres:
+
+    ansible-playbook -i ec2.py configure.yml
