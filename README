@@ -3,8 +3,8 @@ operate replicated PostgreSQL servers on EC2.
 
 provision.yml provisions three EC2 instances in different regions:
 
-    ansible-playbook -i hosts provision.yml
+    ansible-playbook -i inventory/hosts provision.yml
 
 configure.yml sets up these instances to run Postgres:
 
-    ansible-playbook -i ec2.py configure.yml
+    ansible-playbook -i inventory/ec2.py configure.yml
