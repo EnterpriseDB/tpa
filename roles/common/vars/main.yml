@@ -1,0 +1,17 @@
+---
+
+# We don't install the Postgres packages here, because we need to set up
+# an encrypted data directory location first.
+
+packages:
+  - cryptsetup
+  - openvpn
+  - tcpdump
+  - vim
+  - git
+
+unwanted:
+  - popularity-contest
+  - vim-tiny
+  - vim-nox
+  - mlocate

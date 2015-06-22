@@ -1,0 +1,51 @@
+---
+
+# We create an encrypted volume on /dev/xvdb, create a filesystem on it,
+# and mount it under /var/lib/postgresql… but only if we haven't done it
+# all before.
+
+- name: Is LUKS setup complete?
+  command: cryptsetup isLuks /dev/xvdb
+  ignore_errors: true
+  register: luks
+
+# If we need to create the volume, we copy the passphrase from the local
+# vault to a temporary file on the server. Once we create and open the
+# encrypted volume, it can be removed again.
+
+- name: Load LUKS passphrase from vault
+  include_vars: passphrase.yml
+  when: luks|failed
+
+- name: Create temporary LUKS key file
+  copy: content="{{ luks_passphrase }}" dest=/root/passphrase mode=0600
+  when: luks|failed
+
+- name: Initialise LUKS volume on /dev/xvdb
+  command: cryptsetup -q luksFormat /dev/xvdb /root/passphrase
+  when: luks|failed
+
+- name: Map LUKS volume to /dev/mapper/postgres
+  command: cryptsetup luksOpen /dev/xvdb postgres --key-file /root/passphrase
+  when: luks|failed
+
+- name: Remove temporary LUKS key file
+  file: path=/root/passphrase state=absent
+  when: luks|failed
+
+# Now we have a mapped encrypted volume, so we can create a filesystem
+# on it and mount it. We create /var/lib/postgresql ourselves, because
+# it won't exist yet. We can't set ownership and permissions correctly,
+# but installing the Postgres packages later will fix that.
+
+- name: Create ext4 filesystem on /dev/xvdb
+  command: mkfs.ext4 /dev/mapper/postgres
+  when: luks|failed
+
+- name: Ensure Postgres mount point exists
+  file: path=/var/lib/postgresql state=directory
+  when: luks|failed
+
+- name: Mount /dev/mapper/postgres
+  command: mount /dev/mapper/postgres /var/lib/postgresql
+  when: luks|failed

@@ -1,0 +1,9 @@
+---
+
+- name: Install packages
+  apt: pkg={{ item }} state=latest
+  with_items: packages
+
+- name: Remove unwanted packages
+  apt: pkg={{ item }} state=absent purge=yes
+  with_items: unwanted
