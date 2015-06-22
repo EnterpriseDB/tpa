@@ -1,0 +1,10 @@
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+local   all             postgres                                peer
+local   all             all                                     trust
+host    all             all             127.0.0.1/32            trust
+host    all             all             ::1/128                 trust
+host    postgres        all             0.0.0.0/0               md5
+{% for host in groups['tag_Cap_One'] %}
+host    repmgr          repmgr    {{ hostvars[host]['ip'] }}/32 trust
+host    replication     all       {{ hostvars[host]['ip'] }}/32 trust
+{% endfor %}

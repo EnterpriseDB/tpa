@@ -7,3 +7,4 @@
   sudo: true
   roles:
     - common
+    - postgresql
