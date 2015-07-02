@@ -1,7 +1,11 @@
 ---
 
 # These tasks bring the managed node's Python installation up to
-# Ansible's expectations.
+# Ansible's expectations. (We install pip only for convenience.)
+
+- name: Install pip
+  apt: name=python-pip state=latest
+  sudo: yes
 
 # If we have neither ssl.match_hostname (included in Python ≥ 2.7.9) or
 # backports.ssl_match_hostname, we need to install the latter using pip.
@@ -11,11 +15,6 @@
 - name: Is this Python old enough to need backports.ssl_match_hostname? (< 2.7.9)
   command: python -c 'import sys; print sys.version_info[:3] <= (2, 7, 9)'
   register: version
-
-- name: Install pip
-  apt: name=python-pip state=latest
-  when: version.stdout='True'
-  sudo: yes
 
 - name: Install backports.ssl_match_hostname
   command: pip install backports.ssl_match_hostname
