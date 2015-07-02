@@ -9,8 +9,14 @@
 # XXX We really should be more careful here, but since Debian still
 # ships 2.7.3, we can get away with being sloppy for a while longer.
 
-- name: Install python-pip
-  apt: pkg=python-pip state=latest
+- name: Obtain if Python version is older
+  command: python -c 'import sys; print sys.version_info[:3] <= (2, 7, 9)'
+  register: version
+
+- name: Install pip
+  apt: name=python-pip state=latest
+  when: version.stdout='True'
+  sudo: yes
 
 - name: Install backports.ssl_match_hostname
   command: pip install backports.ssl_match_hostname
