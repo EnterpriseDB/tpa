@@ -3,13 +3,12 @@
 # These tasks bring the managed node's Python installation up to
 # Ansible's expectations.
 
-# For Python versions older than 2.7.9, we need to install the
-# ssl_match_hostname backport through pip.
-#
-# XXX We really should be more careful here, but since Debian still
-# ships 2.7.3, we can get away with being sloppy for a while longer.
+# If we have neither ssl.match_hostname (included in Python ≥ 2.7.9) or
+# backports.ssl_match_hostname, we need to install the latter using pip.
+# It's easier to check the version, and since running "pip install foo"
+# twice should have no effect the second time, that's what we do here.
 
-- name: Obtain if Python version is older
+- name: Is this Python old enough to need backports.ssl_match_hostname? (< 2.7.9)
   command: python -c 'import sys; print sys.version_info[:3] <= (2, 7, 9)'
   register: version
 
@@ -20,5 +19,4 @@
 
 - name: Install backports.ssl_match_hostname
   command: pip install backports.ssl_match_hostname
-  args:
-    creates: /usr/local/lib/python2.7/dist-packages/backports.ssl_match_hostname-3.4.0.2.egg-info
+  when: version.stdout='True'
