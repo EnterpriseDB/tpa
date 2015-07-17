@@ -48,13 +48,15 @@
         subnets:
           - cidr: "{{ item.subnet }}"
             resource_tags:
-              name: "{{ cluster_name }}/{{ item.region }}"
+              Name: "{{ cluster_name }}/{{ item.region }}"
         route_tables:
           - subnets:
               - "{{ item.subnet }}"
             routes:
               - dest: 0.0.0.0/0
                 gw: igw
+            resource_tags:
+              Name: "{{ cluster_name }}/{{ item.region }}"
         wait: yes
       with_items: instances
       register: vpcs
