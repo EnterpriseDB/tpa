@@ -4,13 +4,15 @@ operate PostgreSQL servers.
 To provision servers on AWS EC2, first create a configuration file for
 the cluster under config/, then run:
 
-    ansible-playbook provision/aws.yml --extra-vars @config/cluster.yml
+    ansible-playbook provision/aws.yml \
+        --extra-vars @config/cluster-aws.yml
 
 To deploy PostgreSQL on EC2 instances, first create a playbook under
 deploy/ that pulls in the desired roles and targets the appropriate
 hosts (e.g. by tags), then run:
 
-    ansible-playbook deploy/cluster.yml --extra-vars @config/cluster.yml
+    ansible-playbook -i inventory/ec2.py deploy/cluster.yml \
+        --extra-vars @config/cluster-aws.yml
 
 --
 Abhijit Menon-Sen <ams@2ndQuadrant.com>
