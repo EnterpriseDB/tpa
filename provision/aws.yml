@@ -113,12 +113,8 @@
       with_items: instances
       tags: keys
 
-    # Create the EC2 instances using the VPC subnets and security groups
-    # and access key we configured above.
-    #
-    # We also attach an extra EBS volume to the instance (this could be
-    # moved to the per-instance configuration above, but right now each
-    # instance needs the same thing).
+    # Create EC2 instances using the VPC subnets and security groups and
+    # access key we configured above.
 
     - name: Set up EC2 instances
       ec2:
@@ -132,10 +128,7 @@
         instance_tags: "{{ cluster_tags | merge(item.0.tags) }}"
         key_name: "{{ ec2_key_name }}"
         assign_public_ip: yes
-        volumes:
-          - device_name: /dev/xvdb
-            volume_type: standard
-            volume_size: 10
+        volumes: "{{ item.0.volumes }}"
         wait: yes
       with_together:
         - instances
