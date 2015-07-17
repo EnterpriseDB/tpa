@@ -1,48 +1,37 @@
 ---
 
-# This playbook provisions three EC2 instances in separate regions (and
-# therefore with separate VPCs, security groups, and access keys) with
-# elastic IPs and an extra EBS volume each.
+# Provision EC2 instances according to a separate configuration file.
 #
-# The image ids below are the "debian-wheezy-amd64-hvm-2015-01-28-ebs"
-# community AMI in each region.
-#
-# The appropriate AWS credentials must be supplied separately, e.g. in
-# ~/.boto or in the environment.
+# The appropriate AWS IAM credentials must be supplied separately, e.g.
+# in ~/.boto or in the environment.
 
 - hosts: localhost
-  connection: local
-  gather_facts: no
+
+  # The configuration comes from an external file, but we derive some
+  # sensible defaults for internal use. We must use different variable
+  # names to avoid template recursion when the values are overriden.
+
   vars:
-    cluster_name: "X2"
-    cluster_tags:
-      Cap: One
-    key_file: "id_{{ cluster_name | lower }}"
-    key_name: "2Q_{{ cluster_name | lower }}"
-    instances:
-      - type: i2.xlarge
-        region: us-east-1
-        image: ami-e0efab88
-        subnet: 10.1.0.0/24
-        ip: 10.1.0.1
-        tags:
-          db: primary
-      - type: t2.medium
-        region: us-west-2
-        image: ami-431a4273
-        subnet: 10.1.1.0/24
-        ip: 10.1.1.1
-        tags:
-          db: standby
-      - type: t2.medium
-        region: eu-west-1
-        image: ami-61e56916
-        subnet: 10.1.2.0/24
-        ip: 10.1.2.1
-        tags:
-          db: standby
+    ec2_key_file: "{{ key_file | default('id_' + cluster_name|lower) }}"
+    ec2_key_name: "{{ key_name | default('2Q_' + cluster_name|lower) }}"
 
   tasks:
+
+    # Make sure we're invoked with «--extra-vars @suitable-config.yml»
+    #
+    # XXX We assume that the instances are all in different regions, so
+    # that we must repeat the VPC/security group/keypair configuration
+    # in each region. Some reorganisation will be needed to support
+    # multiple instances in the same region.
+
+    - name: Ensure cluster configuration is present
+      assert:
+        msg: "Please rerun with «--extra-vars @clustername-aws.yml»"
+        that:
+          - cluster_name is defined and cluster_name != ''
+          - instances | length > 0
+          - instances | oneattr('region') | unique | length ==
+            instances | oneattr('region') | length
 
     # Set up a VPC in each region with a single public subnet and an
     # internet gateway. A VPC is an isolated network zone comprising
@@ -111,14 +100,14 @@
     # the EC2 instances we set up next.
 
     - name: Create a new keypair
-      command: ssh-keygen -P "" -f "{{ key_file }}" -C 2ndQuadrant
-        creates="{{ key_file }}"
+      command: ssh-keygen -P "" -f "{{ ec2_key_file }}" -C 2ndQuadrant
+        creates="{{ ec2_key_file }}"
       tags: keys
     - name: Set up keypair in each region
       ec2_key:
         state: present
-        name: "{{ key_name }}"
-        key_material: "{{ lookup('file', key_file + '.pub') }}"
+        name: "{{ ec2_key_name }}"
+        key_material: "{{ lookup('file', ec2_key_file + '.pub') }}"
         region: "{{ item.region }}"
         wait: yes
       with_items: instances
@@ -141,7 +130,7 @@
         instance_type: "{{ item.0.type }}"
         vpc_subnet_id: "{{ item.1.subnets[0].id }}"
         instance_tags: "{{ cluster_tags | merge(item.0.tags) }}"
-        key_name: "{{ key_name }}"
+        key_name: "{{ ec2_key_name }}"
         assign_public_ip: yes
         volumes:
           - device_name: /dev/xvdb
