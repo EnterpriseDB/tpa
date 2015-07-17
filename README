@@ -1,10 +1,18 @@
-This repository contains Ansible playbooks to provision, set up, and
-operate replicated PostgreSQL servers on EC2.
+This repository contains automation tools to provision, configure, and
+operate PostgreSQL servers.
 
-provision.yml provisions three EC2 instances in different regions:
+To provision servers on AWS EC2, first create a configuration file for
+the cluster under config/, then run:
 
-    ansible-playbook -i inventory/hosts provision.yml
+    ansible-playbook -i inventory/localhost provision/aws.yml \
+        --extra-vars @config/clustername-aws.yml
 
-configure.yml sets up these instances to run Postgres:
+To deploy PostgreSQL on EC2 instances, first create a playbook under
+deploy/ that pulls in the desired roles and targets the appropriate
+hosts (e.g. by tags), then run:
 
-    ansible-playbook -i inventory/ec2.py configure.yml
+    ansible-playbook -i inventory/ec2.py deploy/clustername.yml \
+        --extra-vars @config/clustername-aws.yml
+
+--
+Abhijit Menon-Sen <ams@2ndQuadrant.com>
