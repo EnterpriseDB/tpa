@@ -30,8 +30,8 @@
         that:
           - cluster_name is defined and cluster_name != ''
           - instances | length > 0
-          - instances | oneattr('region') | unique | length ==
-            instances | oneattr('region') | length
+          - instances | map(attribute='region') | list | unique | length ==
+            instances | map(attribute='region') | list | length
 
     # Set up a VPC in each region with a single public subnet and an
     # internet gateway. A VPC is an isolated network zone comprising
