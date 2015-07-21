@@ -5,7 +5,8 @@
 # The appropriate AWS IAM credentials must be supplied separately, e.g.
 # in ~/.boto or in the environment.
 
-- hosts: localhost
+- name: Provision EC2 instances
+  hosts: localhost
 
   # The configuration comes from an external file, but we derive some
   # sensible defaults for internal use. We must use different variable
