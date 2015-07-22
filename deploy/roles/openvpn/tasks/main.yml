@@ -51,6 +51,11 @@
   with_items: play_hosts
   when: inventory_hostname == primary_hostname
 
+- name: Store the VPN address as a fact
+  set_fact:
+    vpn_address: "{{ vpn_network|regex_replace('\\.[0-9]*$', '.'+node_id) }}"
+  tags: always
+
 # XXX We should do this only if some part of the configuration has
 # changed, but in this case it's not easy to determine.
 
