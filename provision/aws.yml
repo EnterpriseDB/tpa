@@ -105,7 +105,9 @@
 
     - name: Create a new keypair
       command: ssh-keygen -P "" -f "{{ ec2_key_file }}" -C 2ndQuadrant
-        creates="{{ ec2_key_file }}"
+      args:
+        chdir: "{{ playbook_dir }}/files"
+        creates: "{{ ec2_key_file }}"
       tags: keys
     - name: Set up keypair in each region
       ec2_key:
