@@ -19,5 +19,6 @@
 
 - name: Install backports.ssl_match_hostname
   command: pip install backports.ssl_match_hostname
-  changed_when: "'Requirement already satisfied' not in version.stdout"
+  register: backport
+  changed_when: "'Requirement already satisfied' not in backport.stdout"
   when: version.stdout=='True'
