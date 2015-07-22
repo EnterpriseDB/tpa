@@ -8,11 +8,6 @@
       - vpn_network is defined
       - vpn_netmask is defined
 
-- name: Determine VPN server address
-  set_fact: vpn_server="{{ item }}"
-  when: vpn_server_condition
-  with_items: play_hosts
-
 # XXX We could use a v2 block: to better encapsulate separate server and
 # client configuration actions.
 
@@ -23,21 +18,21 @@
 - name: Create client configuration directory
   file: path="{{ openvpn_dirname }}/ccd" mode=0755
     owner=root group=root state=directory
-  when: inventory_hostname == vpn_server
+  when: inventory_hostname == primary_hostname
 
 - name: Install main server configuration file
   template: src=server.conf.j2 dest="{{ openvpn_dirname }}.conf"
     mode=0644 owner=root group=root
-  when: inventory_hostname == vpn_server
+  when: inventory_hostname == primary_hostname
 
 - name: Install main client configuration file
   template: src=client.conf.j2 dest="{{ openvpn_dirname }}.conf"
     mode=0644 owner=root group=root
-  when: inventory_hostname != vpn_server
+  when: inventory_hostname != primary_hostname
 
 - name: Copy DH parameters to the server
   copy: src="{{ vpn_keys }}/dh2048.pem" dest="{{ openvpn_dirname }}"
-  when: inventory_hostname == vpn_server
+  when: inventory_hostname == primary_hostname
 
 - name: Copy CA certificate to all instances
   copy: src="{{ vpn_keys }}/ca.crt" dest="{{ openvpn_dirname }}"
@@ -54,7 +49,7 @@
 - name: Write CCD files on the server
   copy: src="{{ item }}" dest="{{ openvpn_dirname }}/ccd"
   with_fileglob: "{{ vpn_keys }}/ccd/*"
-  when: inventory_hostname == vpn_server
+  when: inventory_hostname == primary_hostname
 
 # XXX We should do this only if some part of the configuration has
 # changed, but in this case it's not easy to determine.
