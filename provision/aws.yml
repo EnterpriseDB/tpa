@@ -117,7 +117,7 @@
       ec2_key:
         state: present
         name: "{{ ec2_key_name }}"
-        key_material: "{{ lookup('file', ec2_key_file + '.pub') }}"
+        key_material: "{{ lookup('file', 'files/' + ec2_key_file + '.pub') }}"
         region: "{{ item.region }}"
         wait: yes
       with_items: instances
