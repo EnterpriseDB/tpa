@@ -1,0 +1,25 @@
+---
+
+- name: Add PGDG repository signing key
+  apt_key:
+    id=ACCC4CF8 url=https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state=present
+
+- name: Add the PGDG apt repository
+  apt_repository:
+    repo='deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main'
+    state=present update_cache=yes
+
+- name: Install Postgres packages
+  apt: pkg={{ item }}-{{ pgversion }} state=latest
+  with_items:
+    - postgresql
+    - postgresql-client
+    - postgresql-contrib
+    - postgresql-server-dev
+
+- name: Install auxiliary Postgres packages
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - repmgr
+    - barman
