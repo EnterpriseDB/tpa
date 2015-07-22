@@ -46,9 +46,9 @@
 - name: Copy individual private keys to all instances
   copy: src="{{ vpn_keys }}/{{ inventory_hostname }}.key" dest="{{ openvpn_dirname }}" mode=0600
 
-- name: Write CCD files on the server
-  copy: src="{{ item }}" dest="{{ openvpn_dirname }}/ccd"
-  with_fileglob: "{{ vpn_keys }}/ccd/*"
+- name: Install client-configuration-database files on the server
+  template: src=ccd.j2 dest="{{ openvpn_dirname }}/ccd/{{ item }}" mode=0644
+  with_items: play_hosts
   when: inventory_hostname == primary_hostname
 
 # XXX We should do this only if some part of the configuration has

@@ -1,0 +1,1 @@
+ifconfig-push {{ vpn_network|regex_replace('\\.[0-9]*$', '.'+hostvars[item].node_id) }} {{ vpn_network|regex_replace('\\.[0-9]*$', '.1') }}
