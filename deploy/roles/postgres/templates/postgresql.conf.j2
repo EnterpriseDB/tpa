@@ -2,7 +2,7 @@ data_directory = '{{ pgdata }}'
 hba_file = '{{ pgconf }}/pg_hba.conf'
 ident_file = '{{ pgconf }}/pg_ident.conf'
 external_pid_file = '{{ pgsock }}/{{ pgversion }}-main.pid'
-unix_socket_directory = '{{ pgsock }}'
+unix_socket_directories = '{{ pgsock }}'
 
 listen_addresses = '*'
 port = 5432
@@ -12,7 +12,7 @@ ssl = true
 ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'
 ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'
 
-shared_buffers = 128MB
+shared_buffers = 512MB
 work_mem = 16MB
 maintenance_work_mem = 512MB
 

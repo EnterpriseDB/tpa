@@ -1,36 +1,37 @@
 ---
 
-# Install packages from PGDG.
+- name: Ensure Postgres configuration is present
+  assert:
+    that:
+      - pgversion is defined
 
 - name: Add PGDG repository signing key
   apt_key:
     id=ACCC4CF8 url=https://www.postgresql.org/media/keys/ACCC4CF8.asc
     state=present
+
 - name: Add the PGDG apt repository
   apt_repository:
     repo='deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main'
     state=present update_cache=yes
+
 - name: Install Postgres packages
-  apt: pkg={{ item }}-9.4 state=latest
+  apt: pkg={{ item }}-{{ pgversion }} state=latest
   with_items:
     - postgresql
     - postgresql-client
     - postgresql-contrib
     - postgresql-server-dev
 
-# Install Postgres configuration files.
-
 - name: Install Postgres configuration files
   template:
-    src={{ item }}.j2 dest={{ pgconf }}/{{ item }}
+    src="{{ item }}.j2" dest="{{ pgconf }}/{{ item }}"
     owner=postgres group=postgres mode=0640
   with_items:
     - pg_hba.conf
     - postgresql.conf
-  register: pgconf
-
-# (We should also install and configure repmgr here.)
+  register: pgconfig
 
 - name: Restart Postgres
   service: name=postgresql state=restarted
-  when: pgconf.changed
+  when: pgconfig.changed
