@@ -66,6 +66,10 @@
     # Set up a security group in each VPC. A security group is a set of
     # firewall rules. We explicitly allow certain incoming traffic; by
     # default, there is an egress rule that allows everything.
+    #
+    # (There's also a network ACL associated with the VPC that is also a
+    # firewall, but we use the default that allows all inbound/outbound
+    # traffic. Ansible can't currently operate on ACLs anyway.)
 
     - name: Set up security groups
       ec2_group:
