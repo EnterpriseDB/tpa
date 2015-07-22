@@ -14,8 +14,10 @@
 
 - name: Is this Python old enough to need backports.ssl_match_hostname? (< 2.7.9)
   command: python -c 'import sys; print sys.version_info[:3] < (2, 7, 9)'
+  changed_when: False
   register: version
 
 - name: Install backports.ssl_match_hostname
   command: pip install backports.ssl_match_hostname
+  changed_when: "'Requirement already satisfied' not in version.stdout"
   when: version.stdout=='True'

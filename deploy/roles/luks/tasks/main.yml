@@ -15,6 +15,7 @@
 
 - name: Is LUKS setup complete?
   command: cryptsetup isLuks "{{ luks_device }}"
+  changed_when: False
   ignore_errors: true
   register: luks
 
