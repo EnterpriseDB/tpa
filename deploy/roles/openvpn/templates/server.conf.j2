@@ -1,0 +1,27 @@
+server {{ vpn_network }} {{ vpn_netmask }}
+
+local 0.0.0.0
+port 1194
+
+dev tun
+proto udp
+
+ca {{ vpn_name }}/ca.crt
+dh {{ vpn_name }}/dh2048.pem
+key {{ vpn_name }}/{{ inventory_hostname }}.key
+cert {{ vpn_name }}/{{ inventory_hostname }}.crt
+tls-auth {{ vpn_name }}/ta.key 0
+
+client-config-dir {{ vpn_name }}/ccd
+ifconfig-pool-persist {{ vpn_name }}/ipp.txt
+
+comp-lzo
+user nobody
+group nogroup
+keepalive 10 300
+tls-timeout = 120s
+client-to-client
+persist-key
+persist-tun
+
+log-append /var/log/openvpn.log
