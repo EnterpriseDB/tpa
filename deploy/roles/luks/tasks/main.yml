@@ -1,6 +1,10 @@
 ---
 
-# We expect the top-level playbook to pass in a configuration.
+# Create an encrypted volume named luks_volume on luks_device, create a
+# filesystem on it, and mount it under luks_mountpoint.
+#
+# XXX The passphrase should be generated and stored as an encrypted host
+# variable.
 
 - name: Ensure LUKS configuration is available
   assert:
@@ -8,63 +12,39 @@
       - luks_volume is defined
       - luks_device is defined
       - luks_mountpoint is defined
+      - ansible_version.major >= 2
 
-# We create an encrypted volume named luks_volume on luks_device, create
-# a filesystem on it, and mount it under luks_mountpoint… but only if we
-# haven't done it all before.
-
-- name: Is LUKS setup complete?
+- name: Is the encrypted volume already initialised?
   command: cryptsetup isLuks "{{ luks_device }}"
-  changed_when: False
   ignore_errors: true
+  changed_when: False
   register: luks
 
-# If we need to create the volume, we copy the passphrase from the local
-# vault to a temporary file on the server. Once we create and open the
-# encrypted volume, it can be removed again.
-#
-# XXX We should generate and store unique passphrases in encrypted
-# host_vars entries for each host. There's no way to do that right now,
-# because the inventory is dynamic and there's no way to vault-encrypt
-# something from a playbook (and the password lookup just won't do), so
-# we just store it in vars/passphrase.yml and load it on demand.
-#
-# XXX We could use a v2 block: to avoid repeating the conditionals and
-# handle errors better.
-#
-# XXX /root/passphrase shouldn't be hardcoded.
+- block:
+    - name: Load passphrase from vault
+      include_vars: passphrase.yml
 
-- name: Load LUKS passphrase from vault
-  include_vars: passphrase.yml
+    - name: Write passphrase to temporary file
+      copy: content="{{ luks_passphrase }}" dest="{{ tmpfile }}" mode=0600
+
+    - name: Initialise LUKS volume
+      command: cryptsetup -q luksFormat "{{ luks_device }}" "{{ tmpfile }}"
+
+    - name: Map LUKS volume to /dev/mapper/$name
+      command: cryptsetup luksOpen "{{ luks_device }}" "{{ luks_volume }}" --key-file "{{ tmpfile }}"
+
+    - name: Remove temporary key file
+      file: path="{{ tmpfile }}" state=absent
+
+    - name: Create ext4 filesystem on mapped LUKS device
+      command: mkfs.ext4 "/dev/mapper/{{ luks_volume }}"
+
+    - name: Ensure mount point exists
+      file: path="{{ luks_mountpoint }}" state=directory
+
+    - name: Mount mapped encrypted filesystem
+      command: mount "/dev/mapper/{{ luks_volume }}" "{{ luks_mountpoint }}"
+
   when: luks|failed
-
-- name: Create temporary LUKS key file
-  copy: content="{{ luks_passphrase }}" dest=/root/passphrase mode=0600
-  when: luks|failed
-
-- name: Initialise LUKS volume
-  command: cryptsetup -q luksFormat "{{ luks_device }}" /root/passphrase
-  when: luks|failed
-
-- name: Map LUKS volume to /dev/mapper/$name
-  command: cryptsetup luksOpen "{{ luks_device }}" "{{ luks_volume }}" --key-file /root/passphrase
-  when: luks|failed
-
-- name: Remove temporary LUKS key file
-  file: path=/root/passphrase state=absent
-  when: luks|failed
-
-# Now we have a mapped encrypted volume, so we can create a filesystem
-# on it and mount it. We create the mount point directory ourselves.
-
-- name: Create ext4 filesystem on mapped LUKS device
-  command: mkfs.ext4 "/dev/mapper/{{ luks_volume }}"
-  when: luks|failed
-
-- name: Ensure mount point exists
-  file: path="{{ luks_mountpoint }}" state=directory
-  when: luks|failed
-
-- name: Mount mapped encrypted filesystem
-  command: mount "/dev/mapper/{{ luks_volume }}" "{{ luks_mountpoint }}"
-  when: luks|failed
+  vars:
+    tmpfile: /root/passphrase
