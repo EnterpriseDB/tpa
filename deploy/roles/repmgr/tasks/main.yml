@@ -17,13 +17,13 @@
 - name: Create repmgr user on the primary
   postgresql_user: name=repmgr role_attr_flags=SUPERUSER state=present
   sudo_user: postgres
-  delegate_to: "{{ primary_hostname }}"
+  delegate_to: primary_hostname
   run_once: yes
 
 - name: Create repmgr database on the primary
   postgresql_db: name=repmgr owner=repmgr state=present
   sudo_user: postgres
-  delegate_to: "{{ primary_hostname }}"
+  delegate_to: primary_hostname
   run_once: yes
 
 - name: Check if the primary is registered
@@ -32,12 +32,12 @@
   changed_when: False
   sudo_user: postgres
   register: master
-  delegate_to: "{{ primary_hostname }}"
+  delegate_to: primary_hostname
   run_once: yes
 
 - name: Run repmgr master register on the primary
   command: repmgr -f /etc/repmgr/repmgr.conf --verbose master register
   sudo_user: postgres
-  delegate_to: "{{ primary_hostname }}"
+  delegate_to: primary_hostname
   run_once: yes
   when: master|failed
