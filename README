@@ -1,3 +1,6 @@
+Introduction
+------------
+
 This repository contains automation tools to provision, configure, and
 operate PostgreSQL servers.
 
@@ -13,6 +16,18 @@ hosts (e.g. by tags), then run:
 
     ansible-playbook -i inventory/ec2.py deploy/cluster.yml \
         --extra-vars @config/clustername-aws.yml
+
+Requirements
+------------
+
+Python 2.7.x
+
+Ansible 2.x
+    https://github.com/ansible/ansible/tree/devel
+    http://docs.ansible.com/ansible/intro_installation.html
+
+Recent versions of PyCrypto, jinja2, and boto. (Other Python libraries
+may be needed.)
 
 --
 Abhijit Menon-Sen <ams@2ndQuadrant.com>
