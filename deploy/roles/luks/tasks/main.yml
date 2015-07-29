@@ -46,5 +46,3 @@
       command: mount "/dev/mapper/{{ luks_volume }}" "{{ luks_mountpoint }}"
 
   when: luks|failed
-  vars:
-    tmpfile: /root/passphrase
