@@ -1,0 +1,62 @@
+---
+
+# Decommission a cluster according to a separate configuration file.
+#
+# The appropriate AWS IAM credentials must be supplied separately, e.g.
+# in ~/.boto or in the environment.
+
+- name: Decommission EC2 cluster
+  vars:
+    public_instances: []
+
+  pre_tasks:
+    - name: Determine predefined EC2 private IP addresses
+      set_fact: ec2_ip_addresses="{{ instances | map(attribute='ip') | list }}"
+
+    - name: Find EC2 instance
+      set_fact: public_instances="{{instances}} + [ {{ item }} ]"
+      when: "hostvars[item].ec2_private_ip_address in ec2_ip_addresses"
+      with_items: play_hosts
+
+  tasks:
+
+    # Make sure we're invoked with «--extra-vars @suitable-config.yml»
+    #
+    # XXX We assume that the instances are all in different regions, so
+    # that we must repeat the VPC configuration
+    # in each region. Some reorganisation will be needed to support
+    # multiple instances in the same region.
+
+    - name: Ensure cluster configuration is present
+      assert:
+        msg: "Please rerun with «--extra-vars @clustername-aws.yml»"
+        that:
+          - cluster_name is defined and cluster_name != ''
+          - instances | length > 0
+          - instances | map(attribute='region') | list | unique | length ==
+            instances | map(attribute='region') | list | length
+      tags: validate
+
+    - name: Deassociate Elastic IPs
+      ec2_eip:
+        state: absent
+        instance_id: "{{ item.ec2_id }}"   
+      with_items: public_instances
+
+    - name: Terminate EC2 instances
+      ec2:
+        state: absent
+        instance_id: "{{ item.ec2_id }}"
+      with_items: public_instances
+
+    - name: Terminate VPCs
+      ec2_vpc:
+        state: absent
+        region: "{{ item.region }}"
+        cidr_block: "{{ item.subnet }}"
+        resource_tags: "{{ cluster_tags }}"
+        wait: yes
+      with_items: instances
+
+
+
