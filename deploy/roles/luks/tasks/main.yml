@@ -24,17 +24,11 @@
     - name: Load passphrase from vault
       include_vars: passphrase.yml
 
-    - name: Write passphrase to temporary file {{ tmpfile }}
-      copy: content="{{ luks_passphrase }}" dest="{{ tmpfile }}" mode=0600
-
     - name: Initialise LUKS volume on {{ luks_device }}
-      command: cryptsetup -q luksFormat "{{ luks_device }}" "{{ tmpfile }}"
+      command: echo "{{ luks_passphrase }}" | cryptsetup -q luksFormat --key-file - "{{ luks_device }}"
 
     - name: Map LUKS volume to /dev/mapper/{{ luks_volume }}
-      command: cryptsetup luksOpen "{{ luks_device }}" "{{ luks_volume }}" --key-file "{{ tmpfile }}"
-
-    - name: Remove temporary key file {{ tmpfile }}
-      file: path="{{ tmpfile }}" state=absent
+      command: echo "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ luks_device }}" "{{ luks_volume }}"
 
     - name: Create ext4 filesystem on mapped LUKS volume {{ luks_volume }}
       command: mkfs.ext4 "/dev/mapper/{{ luks_volume }}"
