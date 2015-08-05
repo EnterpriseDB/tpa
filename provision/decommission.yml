@@ -49,6 +49,13 @@
         instance_id: "{{ item.ec2_id }}"
       with_items: public_instances
 
+    - name: Terminate EC2 volumes
+      ec2_vol:
+        instance: "{{ item.id }}"
+        name: "{{ cluster_name }}_{{ item.ec2_private_ip_address }}"
+        state: absent
+      with_items: instances
+
     - name: Terminate VPCs
       ec2_vpc:
         state: absent
@@ -57,6 +64,4 @@
         resource_tags: "{{ cluster_tags }}"
         wait: yes
       with_items: instances
-
-
 
