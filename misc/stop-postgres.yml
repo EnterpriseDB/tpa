@@ -1,15 +1,19 @@
 ---
 
-- name: Start_Stop PG on X2 cluster nodes
+- name: Stop PG on given nodes
   hosts: tag_Name_X2
   gather_facts: no
   remote_user: admin
   sudo_user: root
   sudo: true
-
-  roles:
-    - role: stop-pg
-      luks_volume: postgres
-      luks_device: /dev/xvdb
-      luks_mountpoint: /var/lib/postgresql
-      tags: stop-pg
+  vars:
+    luks_volume: postgres
+    luks_device: /dev/xvdb
+    luks_mountpoint: /var/lib/postgresql
+  tasks:
+   - name: stop postgresql
+     service: name=postgresql state=stopped
+   - name: Unmount mapped encrypted filesystem under {{ luks_mountpoint }}
+     command: umount "{{ luks_mountpoint }}"
+   - name: Close LUKS mapping volume to /dev/mapper/{{ luks_volume }}
+     command: cryptsetup luksClose "{{ luks_volume }}" 

@@ -1,9 +1,0 @@
----
-
-- name: stop postgresql
-  shell: service postgresql stop > /dev/null
-- name: Unmount mapped encrypted filesystem under {{ luks_mountpoint }}
-  command: umount "{{ luks_mountpoint }}"
-- name: Close LUKS mapping volume to /dev/mapper/{{ luks_volume }}
-  command: cryptsetup luksClose "{{ luks_volume }}"
-

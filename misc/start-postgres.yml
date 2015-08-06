@@ -1,15 +1,22 @@
 ---
 
-- name: Start_Stop PG on X2 cluster nodes
+- name: Start PG on given nodes
   hosts: tag_Name_X2
   gather_facts: no
   remote_user: admin
   sudo_user: root
   sudo: true
-
-  roles:
-    - role: start-pg
-      luks_volume: postgres
-      luks_device: /dev/xvdb
-      luks_mountpoint: /var/lib/postgresql
-      tags: start-pg
+  vars:
+    luks_volume: postgres
+    luks_device: /dev/xvdb
+    luks_mountpoint: /var/lib/postgresql
+  
+  tasks:
+     - name: Load passphrase from vault
+       include_vars: ../deploy/roles/luks/vars/passphrase.yml
+     - name: Map LUKS volume to /dev/mapper/{{ luks_volume }}
+       shell: echo -n "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ luks_device }}" "{{ luks_volume }}"
+     - name: Mount mapped encrypted filesystem under {{ luks_mountpoint }}
+       command: mount "/dev/mapper/{{ luks_volume }}" "{{ luks_mountpoint }}"
+     - name: start postgresql
+       service: name=postgresql state=started
