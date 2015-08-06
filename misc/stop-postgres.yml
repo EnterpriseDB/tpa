@@ -1,7 +1,7 @@
 ---
 
 - name: Stop PG on given nodes
-  hosts: tag_Name_X2
+  hosts: "{{ hosts }}"
   gather_facts: no
   remote_user: admin
   sudo_user: root
