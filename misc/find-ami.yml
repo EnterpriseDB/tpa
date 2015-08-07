@@ -10,7 +10,6 @@
        ec2_ami_find:
           region: "{{ region }}"
           name: "{{ name }}"
-          #ami_id: ami-431a4273
           sort: name
           sort_order: descending
           sort_end: 1
