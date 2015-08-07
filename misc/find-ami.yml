@@ -1,0 +1,21 @@
+---
+
+- hosts: localhost
+  tasks:
+     - assert:
+        that:
+          - region is defined
+          - name is defined
+     - name: Search
+       ec2_ami_find:
+          region: "{{ region }}"
+          name: "{{ name }}"
+          #ami_id: ami-431a4273
+          sort: name
+          sort_order: descending
+          sort_end: 1
+          no_result_action: fail
+       register: ami_result
+     - debug: msg="{{ region + ':' + item.ami_id + ' ' + item.name + ':' + item.root_device_type + ':' + item.root_device_name }}"
+       with_items: ami_result.results
+       
