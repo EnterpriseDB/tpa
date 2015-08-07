@@ -12,7 +12,7 @@
           name: "{{ name }}"
           sort: name
           sort_order: descending
-          sort_end: 1
+          sort_end: "{{ n|default(1) }}"
           no_result_action: fail
        register: ami_result
      - debug: msg="{{ region + ':' + item.ami_id + ' ' + item.name + ':' + item.root_device_type + ':' + item.root_device_name }}"
