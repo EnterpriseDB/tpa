@@ -35,10 +35,12 @@
     - name: Create ext4 filesystem on mapped LUKS volume {{ luks_volume }}
       command: mkfs.ext4 "/dev/mapper/{{ luks_volume }}"
 
-    - name: Ensure mount point {{ luks_mountpoint }} exists
-      file: path="{{ luks_mountpoint }}" state=directory
-
     - name: Mount mapped encrypted filesystem under {{ luks_mountpoint }}
-      command: mount "/dev/mapper/{{ luks_volume }}" "{{ luks_mountpoint }}"
+      mount:
+        name: "{{ luks_mountpoint }}"
+        src: "/dev/mapper/{{ luks_volume }}"
+        fstype: ext4
+        opts: noauto
+        state: mounted
 
   when: luks|failed
