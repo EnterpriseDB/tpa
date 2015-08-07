@@ -16,6 +16,7 @@
        include_vars: ../deploy/roles/luks/vars/passphrase.yml
      - name: Map LUKS volume to /dev/mapper/{{ luks_volume }}
        shell: echo -n "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ luks_device }}" "{{ luks_volume }}"
+       no_log: true
      - name: Mount mapped encrypted filesystem under {{ luks_mountpoint }}
        command: mount "/dev/mapper/{{ luks_volume }}" "{{ luks_mountpoint }}"
      - name: start postgresql
