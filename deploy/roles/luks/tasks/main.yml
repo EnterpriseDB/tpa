@@ -25,11 +25,11 @@
       include_vars: passphrase.yml
 
     - name: Initialise LUKS volume on {{ luks_device }}
-      command: echo "{{ luks_passphrase }}" | cryptsetup -q luksFormat --key-file - "{{ luks_device }}"
+      command: echo -n "{{ luks_passphrase }}" | cryptsetup -q luksFormat --key-file - "{{ luks_device }}"
       no_log: true
 
     - name: Map LUKS volume to /dev/mapper/{{ luks_volume }}
-      command: echo "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ luks_device }}" "{{ luks_volume }}"
+      command: echo -n "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ luks_device }}" "{{ luks_volume }}"
       no_log: true
 
     - name: Create ext4 filesystem on mapped LUKS volume {{ luks_volume }}
