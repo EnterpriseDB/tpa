@@ -2,7 +2,6 @@
 
 - name: Stop PG on given nodes
   hosts: "{{ hosts }}"
-  gather_facts: no
   remote_user: admin
   sudo_user: root
   sudo: true

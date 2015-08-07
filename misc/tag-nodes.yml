@@ -1,7 +1,6 @@
 ---
 
 - hosts: localhost
-  gather_facts: no
   tasks:
     - assert:
         that:
