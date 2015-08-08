@@ -52,10 +52,10 @@
 
     - name: Terminate EC2 volumes
       ec2_vol:
-        instance: "{{ item.id }}"
+        instance: "{{ item.ec2_id }}"
         name: "{{ cluster_name }}_{{ item.ec2_private_ip_address }}"
         state: absent
-      with_items: instances
+      with_items: public_instances
 
     - name: Terminate VPCs
       ec2_vpc:
