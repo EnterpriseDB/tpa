@@ -2,6 +2,12 @@
 
 # Decommission a cluster according to a separate configuration file.
 #
+# To decommission resources on AWS EC2, first create a configuration file
+# for the cluster under config/, then run:
+#
+#     ansible-playbook -i inventory/ec2.py provision/decommission.yml \
+#         --extra-vars @config/clustername-aws.yml
+#
 # The appropriate AWS IAM credentials must be supplied separately, e.g.
 # in ~/.boto or in the environment.
 
