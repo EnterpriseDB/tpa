@@ -6,6 +6,7 @@
 # in ~/.boto or in the environment.
 
 - name: Decommission EC2 cluster
+  hosts: tag_Name_X2
   vars:
     public_instances: []
 
