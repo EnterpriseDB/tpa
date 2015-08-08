@@ -14,8 +14,8 @@
     - name: Determine predefined EC2 private IP addresses
       set_fact: ec2_ip_addresses="{{ instances | map(attribute='ip') | list }}"
 
-    - name: Find EC2 instance
-      set_fact: public_instances="{{instances}} + [ {{ item }} ]"
+    - name: Find EC2 instances
+      set_fact: public_instances="{{ public_instances + [ hostvars[item] ] }}"
       when: "hostvars[item].ec2_private_ip_address in ec2_ip_addresses"
       with_items: play_hosts
 
