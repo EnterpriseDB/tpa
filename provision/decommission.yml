@@ -13,11 +13,14 @@
   pre_tasks:
     - name: Determine predefined EC2 private IP addresses
       set_fact: ec2_ip_addresses="{{ instances | map(attribute='ip') | list }}"
+      run_once: true
+      delegate_to: 127.0.0.1
 
     - name: Find EC2 instances
       set_fact: public_instances="{{ public_instances + [ hostvars[item] ] }}"
       when: "hostvars[item].ec2_private_ip_address in ec2_ip_addresses"
       with_items: play_hosts
+      delegate_to: 127.0.0.1
 
   tasks:
 
@@ -37,18 +40,22 @@
           - instances | map(attribute='region') | list | unique | length ==
             instances | map(attribute='region') | list | length
       tags: validate
+      run_once: true
+      delegate_to: 127.0.0.1
 
     - name: Deassociate Elastic IPs
       ec2_eip:
         state: absent
-        instance_id: "{{ item.ec2_id }}"   
+        instance_id: "{{ item.ec2_id }}"
       with_items: public_instances
+      delegate_to: 127.0.0.1
 
     - name: Terminate EC2 instances
       ec2:
         state: absent
         instance_id: "{{ item.ec2_id }}"
       with_items: public_instances
+      delegate_to: 127.0.0.1
 
     - name: Terminate EC2 volumes
       ec2_vol:
@@ -56,6 +63,7 @@
         name: "{{ cluster_name }}_{{ item.ec2_private_ip_address }}"
         state: absent
       with_items: public_instances
+      delegate_to: 127.0.0.1
 
     - name: Terminate VPCs
       ec2_vpc:
@@ -65,4 +73,5 @@
         resource_tags: "{{ cluster_tags }}"
         wait: yes
       with_items: instances
+      delegate_to: 127.0.0.1
 
