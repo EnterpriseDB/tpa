@@ -22,17 +22,20 @@ Requirements
 
 Python 2.7.x
 
+Recent versions of PyCrypto, jinja2, and boto. Install using pip rather
+than packages. (Other Python libraries may also be needed.)
+
 Ansible 2.x
     https://github.com/2ndQuadrant/ansible
     http://docs.ansible.com/ansible/intro_installation.html
-
-Recent versions of PyCrypto, jinja2, and boto. Install using pip rather
-than packages. (Other Python libraries may also be needed.)
 
 Use 2ndQuadrant/ansible in preference to ansible/ansible; the former is
 tested and includes local changes not present upstream. Install Ansible
 by cloning the git repository, export ANSIBLE_HOME=/path/to/clone, and
 invoke ansible* through the utils/ansible* wrappers provided here.
+
+The AWS CLI is useful and recommended, though not exactly required.
+    http://docs.aws.amazon.com/AWSEC2/latest/CommandLineReference/ec2-cli-get-set-up.html
 
 --
 Abhijit Menon-Sen <ams@2ndQuadrant.com>
