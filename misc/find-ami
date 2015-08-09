@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Example: misc/find-ami us-east-1 debian-wheezy-amd64-hvm-2015\*|jq '.Images[0].ImageId'
+
+region=${1:?No region specified}
+name=${2:?No AMI name pattern specified}
+
+aws --region $region ec2 describe-images \
+    --filters Name=name,Values="$name"
