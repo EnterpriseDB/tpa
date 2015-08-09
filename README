@@ -35,6 +35,7 @@ by cloning the git repository, export ANSIBLE_HOME=/path/to/clone, and
 invoke ansible* through the utils/ansible* wrappers provided here.
 
 The AWS CLI is useful and recommended, though not exactly required.
+    https://aws.amazon.com/cli/
     http://docs.aws.amazon.com/AWSEC2/latest/CommandLineReference/ec2-cli-get-set-up.html
 
 --
