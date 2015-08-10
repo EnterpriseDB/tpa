@@ -2,7 +2,7 @@
 
 # Decommission an already-provisioned AWS cluster:
 #
-#     ansible-playbook -i inventory/ec2.py provision/aws/deprovision.yml \
+#     ansible-playbook -i inventory/ec2.py platforms/aws/deprovision.yml \
 #         --extra-vars @config/clustername-aws.yml
 #
 # XXX Doesn't delete elastic IPs or extra provisioned volumes.
