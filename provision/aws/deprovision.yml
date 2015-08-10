@@ -1,74 +1,35 @@
 ---
 
-# Decommission a cluster according to a separate configuration file.
+# Decommission an already-provisioned AWS cluster:
 #
-# To decommission resources on AWS EC2, first create a configuration file
-# for the cluster under config/, then run:
-#
-#     ansible-playbook -i inventory/ec2.py provision/decommission.yml \
+#     ansible-playbook -i inventory/ec2.py provision/aws/deprovision.yml \
 #         --extra-vars @config/clustername-aws.yml
 #
-# The appropriate AWS IAM credentials must be supplied separately, e.g.
-# in ~/.boto or in the environment.
+# XXX Doesn't delete elastic IPs or extra provisioned volumes.
 
 - name: Decommission EC2 cluster
-  hosts: tag_Name_X2
-  vars:
-    public_instances: []
-
-  pre_tasks:
-    - name: Determine predefined EC2 private IP addresses
-      set_fact: ec2_ip_addresses="{{ instances | map(attribute='ip') | list }}"
-      run_once: true
-      delegate_to: 127.0.0.1
-
-    - name: Find EC2 instances
-      set_fact: public_instances="{{ public_instances + [ hostvars[item] ] }}"
-      when: "hostvars[item].ec2_private_ip_address in ec2_ip_addresses"
-      with_items: play_hosts
-      delegate_to: 127.0.0.1
-
+  hosts: tag_Name_{{ cluster_name }}
   tasks:
-
-    # Make sure we're invoked with «--extra-vars @suitable-config.yml»
-    #
-    # XXX We assume that the instances are all in different regions, so
-    # that we must repeat the VPC configuration
-    # in each region. Some reorganisation will be needed to support
-    # multiple instances in the same region.
-
     - name: Ensure cluster configuration is present
       assert:
         msg: "Please rerun with «--extra-vars @clustername-aws.yml»"
         that:
           - cluster_name is defined and cluster_name != ''
           - instances | length > 0
-          - instances | map(attribute='region') | list | unique | length ==
-            instances | map(attribute='region') | list | length
       tags: validate
       run_once: true
       delegate_to: 127.0.0.1
 
-    - name: Deassociate Elastic IPs
-      ec2_eip:
-        state: absent
-        instance_id: "{{ item.ec2_id }}"
-      with_items: public_instances
-      delegate_to: 127.0.0.1
+    - name: Discover EC2 instance facts
+      ec2_facts:
+      remote_user: admin
 
     - name: Terminate EC2 instances
       ec2:
         state: absent
-        instance_id: "{{ item.ec2_id }}"
-      with_items: public_instances
-      delegate_to: 127.0.0.1
-
-    - name: Terminate EC2 volumes
-      ec2_vol:
-        instance: "{{ item.ec2_id }}"
-        name: "{{ cluster_name }}_{{ item.ec2_private_ip_address }}"
-        state: absent
-      with_items: public_instances
+        instance_id: "{{ ansible_ec2_instance_id }}"
+        region: "{{ ansible_ec2_placement_region }}"
+        wait: yes
       delegate_to: 127.0.0.1
 
     - name: Terminate VPCs
@@ -80,4 +41,15 @@
         wait: yes
       with_items: instances
       delegate_to: 127.0.0.1
+      run_once: true
 
+    - name: Remove keypair in each region
+      ec2_key:
+        state: absent
+        name: "{{ ec2_key_name }}"
+        region: "{{ item.region }}"
+        wait: yes
+      with_items: instances
+      delegate_to: 127.0.0.1
+      run_once: true
+      tags: keys
