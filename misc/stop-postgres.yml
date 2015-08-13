@@ -15,4 +15,4 @@
    - name: Unmount mapped encrypted filesystem under {{ luks_mountpoint }}
      command: umount "{{ luks_mountpoint }}"
    - name: Close mapped volume /dev/mapper/{{ luks_volume }}
-     command: cryptsetup close "{{ luks_volume }}"
+     command: cryptsetup luksClose "{{ luks_volume }}"
