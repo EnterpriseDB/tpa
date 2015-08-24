@@ -19,3 +19,8 @@
 - name: Restart Postgres
   service: name=postgresql state=restarted
   when: pgconfig.changed
+
+- name: Disable Postgres autostart on reboot
+  service:
+     name: postgresql
+     enabled: no
