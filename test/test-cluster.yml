@@ -3,6 +3,12 @@
 - name: Test EC2 cluster
   hosts: tag_Name_{{ cluster_name }}
   remote_user: ec2-user
+  gather_facts: yes
+  vars:
+   luks_volume: postgres
+   luks_device: /dev/xvdb
+   luks_mountpoint: /var/lib/postgresql
+   pg_version: 9.4
   pre_tasks:
      - name: Ensure cluster configuration is present
        assert:
@@ -25,14 +31,42 @@
        remote_user: ec2-user
   
   tasks:
+    
+    - name: Set OS specific facts
+      set_fact:
+        luks_mountpoint: /var/lib/pgsql
+      when: ansible_os_family == "RedHat"
+
     - name: Check if added disk exists and mounted
-      stat: path=/dev/xvdb
+      stat: path={{ luks_device }}
       register: p
 
     - assert:
        that:
          - p.stat.exists
 
+    - name: Check if postgres volume /dev/mapper/{{ luks_volume }} is mounted 
+      stat: path=/dev/mapper/{{ luks_volume }}
+      register: mount_result
+    - assert:
+       that:
+        - mount_result.stat.exists
+   
+    - name: Check if {{ luks_device }} volume is encrypted
+      shell: cryptsetup isLuks {{ luks_device }}
+      sudo: yes
+      register: is_encrypted_result
+    - assert:
+       that:
+        - is_encrypted_result.rc == 0 
+    
+    - name: Check if postgres volume mount point exists
+      stat: path="{{ luks_mountpoint }}"
+      register: mount_result
+    - assert:
+       that:
+        - mount_result.stat.exists   
+    
     - name: check if postrgesql is installed
       shell: which psql
       always_run: true
@@ -49,7 +83,7 @@
     - assert:
        that:
          - "'not found' not in cmd_result.stderr"
-         - "'9.4' in cmd_result.stdout"
+         - "'{{ pg_version }}' in cmd_result.stdout"
 
     - name: check if 5432 is open for postgres
       wait_for: host={{ inventory_hostname }} port={{ item }} timeout=10
