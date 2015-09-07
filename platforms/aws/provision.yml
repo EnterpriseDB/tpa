@@ -135,7 +135,7 @@
         group_id: "{{ item.2.group_id }}"
         instance_type: "{{ item.0.type }}"
         vpc_subnet_id: "{{ item.1.subnets[0].id }}"
-        instance_tags: "{{ cluster_tags | merge(item.0.tags) }}"
+        instance_tags: "{{ cluster_tags | combine(item.0.tags) }}"
         key_name: "{{ ec2_key_name }}"
         assign_public_ip: yes
         volumes: "{{ item.0.volumes }}"
