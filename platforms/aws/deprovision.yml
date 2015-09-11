@@ -31,6 +31,7 @@
         region: "{{ ansible_ec2_placement_region }}"
         wait: yes
       delegate_to: localhost
+      tags: ec2
 
     - name: Terminate VPCs
       ec2_vpc:
@@ -42,6 +43,7 @@
       with_items: instances
       delegate_to: localhost
       run_once: true
+      tags: ec2
 
     - name: Remove keypair in each region
       ec2_key:
