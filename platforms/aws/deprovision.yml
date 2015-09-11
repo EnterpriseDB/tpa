@@ -18,7 +18,7 @@
           - instances | length > 0
       tags: validate
       run_once: true
-      delegate_to: 127.0.0.1
+      delegate_to: localhost
 
     - name: Discover EC2 instance facts
       ec2_facts:
@@ -30,7 +30,7 @@
         instance_id: "{{ ansible_ec2_instance_id }}"
         region: "{{ ansible_ec2_placement_region }}"
         wait: yes
-      delegate_to: 127.0.0.1
+      delegate_to: localhost
 
     - name: Terminate VPCs
       ec2_vpc:
@@ -40,7 +40,7 @@
         resource_tags: "{{ cluster_tags }}"
         wait: yes
       with_items: instances
-      delegate_to: 127.0.0.1
+      delegate_to: localhost
       run_once: true
 
     - name: Remove keypair in each region
@@ -50,6 +50,6 @@
         region: "{{ item.region }}"
         wait: yes
       with_items: instances
-      delegate_to: 127.0.0.1
+      delegate_to: localhost
       run_once: true
       tags: keys
