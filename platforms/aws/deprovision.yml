@@ -44,7 +44,7 @@
       with_items: instances
       delegate_to: localhost
       run_once: true
-      tags: ec2
+      tags: ec2_vpc
 
     - name: Remove keypair in each region
       ec2_key:
