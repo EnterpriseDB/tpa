@@ -154,6 +154,7 @@
         region: "{{ item.instances[0].region }}"
         instance_id: "{{ item.instances[0].id }}"
         reuse_existing_ip_allowed: true
+        in_vpc: true
       with_items: ec2_instances.results
       when: ec2_instances.changed
       register: eips
