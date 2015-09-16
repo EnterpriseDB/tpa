@@ -9,16 +9,16 @@
   sudo: no
 
 - name: Ensure ~postgres/.ssh exists
-  file: path=/home/postgres/.ssh state=directory owner=postgres group=postgres mode=0755
+  file: path=~/postgres/.ssh state=directory owner=postgres group=postgres mode=0755
 
 - name: Upload keypair to all nodes
-  copy: src={{item}} dest=/home/postgres/.ssh owner=postgres group=postgres mode=0600
+  copy: src={{item}} dest=~postgres/.ssh owner=postgres group=postgres mode=0600
   with_items:
     - "{{playbook_dir}}/id_rsa"
     - "{{playbook_dir}}/id_rsa.pub"
 
 - name: Set public key permissions
-  file: path=/home/postgres/.ssh/id_rsa.pub mode=0644
+  file: path=~postgres/.ssh/id_rsa.pub mode=0644
 
 - name: Install authorized keys
   authorized_key:
