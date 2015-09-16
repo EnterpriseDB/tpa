@@ -48,8 +48,7 @@
       ignore_errors: True
       changed_when: False
       register: standby
-    - name: Perform standby registration
-      block:
+    - block:
         - name: Stop Postgres
           service: name=postgresql state=stopped
         - name: Move existing cluster directory
