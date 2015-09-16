@@ -42,8 +42,7 @@
   run_once: yes
   when: master|failed
 
-- name: Perform standby registration (if required)
-  block:
+- block:
     - name: Check if the standby is registered
       command: repmgr -f /etc/repmgr/repmgr.conf cluster show
       ignore_errors: True
