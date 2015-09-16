@@ -42,23 +42,29 @@
   run_once: yes
   when: master|failed
 
-- block:
-    - name: Check if the standby is registered
-      command: repmgr -f /etc/repmgr/repmgr.conf cluster show
-      ignore_errors: True
-      changed_when: False
-      register: standby
-    - block:
-        - name: Stop Postgres
-          service: name=postgresql state=stopped
-        - name: Move existing cluster directory
-          command: mv /var/lib/postgresql/{{pgversion}}/main /var/lib/postgresql/{{pgversion}}/main.backup
-        - name: Create new cluster directory
-          file: path=/var/lib/postgresql/{{pgversion}}/main state=directory
-        - name: Run repmgr standby clone
-          command: repmgr -D /var/lib/postgresql/{{pgversion}}/main -d repmgr -U repmgr --verbose standby clone {{hostvars[primary_hostname]['vpn_address']}}
-        - name: Run repmgr standby register
-          command: repmgr -f /etc/repmgr/repmgr.conf --verbose standby register
-      when: standby|failed
+- name: Check if the standby is registered
+  command: repmgr -f /etc/repmgr/repmgr.conf cluster show
+  sudo_user: postgres
+  ignore_errors: True
+  changed_when: False
+  register: standby
   when: inventory_hostname != primary_hostname
+
+- block:
+    - name: Stop Postgres
+      service: name=postgresql state=stopped
+      sudo_user: root
+    - name: Move existing cluster directory
+      command: mv /var/lib/postgresql/{{pgversion}}/main /var/lib/postgresql/{{pgversion}}/main.backup
+      ignore_errors: yes
+    - name: Create new cluster directory
+      file: path=/var/lib/postgresql/{{pgversion}}/main state=directory
+    - name: Run repmgr standby clone
+      command: repmgr -D /var/lib/postgresql/{{pgversion}}/main -d repmgr -U repmgr --verbose standby clone {{hostvars[primary_hostname]['vpn_address']}}
+    - name: Start Postgres
+      service: name=postgresql state=started
+      sudo_user: root
+    - name: Run repmgr standby register
+      command: repmgr -f /etc/repmgr/repmgr.conf --verbose standby register
+  when: standby|failed and inventory_hostname != primary_hostname
   sudo_user: postgres
