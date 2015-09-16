@@ -24,3 +24,5 @@
   service:
      name: postgresql
      enabled: no
+
+- include: ssh.yml
