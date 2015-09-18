@@ -1,0 +1,21 @@
+---
+
+- name: Create repmgr user on the primary
+  postgresql_user: name=repmgr role_attr_flags=SUPERUSER state=present
+  sudo_user: postgres
+
+- name: Create repmgr database on the primary
+  postgresql_db: name=repmgr owner=repmgr state=present
+  sudo_user: postgres
+
+- name: Check if the primary is registered
+  command: repmgr -f /etc/repmgr/repmgr.conf cluster show
+  sudo_user: postgres
+  ignore_errors: True
+  changed_when: False
+  register: master
+
+- name: Run repmgr master register on the primary
+  command: repmgr -f /etc/repmgr/repmgr.conf --verbose master register
+  sudo_user: postgres
+  when: master|failed

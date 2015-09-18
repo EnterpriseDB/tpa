@@ -1,7 +1,7 @@
 cluster={{ cluster_name }}
 node={{ node_id }}
 node_name=db{{ node_id }}
-conninfo='host=192.168.61.{{ node_id }} user=repmgr dbname=repmgr'
+conninfo='host={{ vpn_address }} user=repmgr dbname=repmgr'
 master_response_timeout=60
 reconnect_attempts=6
 reconnect_interval=10
