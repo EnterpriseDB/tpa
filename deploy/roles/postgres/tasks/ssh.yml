@@ -9,7 +9,7 @@
   sudo: no
 
 - name: Ensure ~postgres/.ssh exists
-  file: path=~/postgres/.ssh state=directory owner=postgres group=postgres mode=0755
+  file: path=~postgres/.ssh state=directory owner=postgres group=postgres mode=0755
 
 - name: Upload keypair to all nodes
   copy: src={{item}} dest=~postgres/.ssh owner=postgres group=postgres mode=0600
