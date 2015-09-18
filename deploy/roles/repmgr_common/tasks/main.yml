@@ -1,5 +1,7 @@
 ---
 
+- include: packages.yml
+
 - name: Create repmgr configuration directory
   file: path=/etc/repmgr owner=postgres group=postgres mode=0755
     state=directory

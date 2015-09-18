@@ -17,9 +17,3 @@
     - postgresql-client
     - postgresql-contrib
     - postgresql-server-dev
-
-- name: Install auxiliary Postgres packages
-  apt: pkg={{ item }} state=latest
-  with_items:
-    - repmgr
-    - barman

@@ -8,6 +8,8 @@
       - vpn_network is defined
       - vpn_netmask is defined
 
+- include: packages.yml
+
 # XXX We could use a v2 block: to better encapsulate separate server and
 # client configuration actions.
 

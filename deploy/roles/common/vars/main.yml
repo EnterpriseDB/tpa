@@ -1,8 +1,6 @@
 ---
 
 packages:
-  - cryptsetup
-  - openvpn
   - tcpdump
   - vim
   - git
