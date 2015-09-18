@@ -2,7 +2,7 @@
 
 - name: Test EC2 cluster
   hosts: tag_Name_{{ cluster_name }}
-  remote_user: ec2-user
+  remote_user: admin
   gather_facts: yes
   vars:
    luks_volume: postgres
@@ -28,7 +28,6 @@
        tags: always
      - name: Discover EC2 instance facts
        ec2_facts:
-       remote_user: ec2-user
   
   tasks:
     
@@ -67,7 +66,7 @@
        that:
         - mount_result.stat.exists   
     
-    - name: check if postrgesql is installed
+    - name: check if Postgres is installed
       shell: which psql
       always_run: true
       register: cmd_result
@@ -86,12 +85,12 @@
          - "'{{ pg_version }}' in cmd_result.stdout"
 
     - name: check if 5432 is open for postgres
-      wait_for: host={{ inventory_hostname }} port={{ item }} timeout=10
+      wait_for: host={{ inventory_hostname }} port={{ item|int }} timeout=10
       always_run: true
       with_items:
         - 5432
  
-    - name: Verify postgresql streaming replication is working
+    - name: Verify Postgres streaming replication is working
       shell: psql -c "CREATE TABLE testtab (id int); INSERT INTO testtab values(1);"
       always_run: true
       sudo_user: postgres
