@@ -1,25 +1,24 @@
 ---
 
-# These tasks bring the managed node's Python installation up to
-# Ansible's expectations. (We install pip only for convenience.)
-
 - name: Install pip
   raw: apt-get -y install python-pip
   register: pip
-  changed_when: "'python-pip is already the newest version' not in pip.stdout"
+  changed_when: "'already the newest version' not in pip.stdout"
+  when: ansible_distribution == 'debian'
+
+- name: Install pip
+  raw: yum install -y python-pip
+  register: pip
+  changed_when: "'already installed and latest version' not in pip.stdout"
+  when: ansible_distribution == 'redhat'
 
 # If we have neither ssl.match_hostname (included in Python ≥ 2.7.9) or
 # backports.ssl_match_hostname, we need to install the latter using pip.
 # It's easier to check the version, and since running "pip install foo"
 # twice should have no effect the second time, that's what we do here.
 
-- name: Is this Python old enough to need backports.ssl_match_hostname? (< 2.7.9)
-  command: python -c 'import sys; print sys.version_info[:3] < (2, 7, 9)'
-  changed_when: False
-  register: version
-
 - name: Install backports.ssl_match_hostname
   command: pip install backports.ssl_match_hostname
   register: backport
   changed_when: "'Requirement already satisfied' not in backport.stdout"
-  when: version.stdout=='True'
+  when: ansible_python_version | version_compare('2.7.9', '<')

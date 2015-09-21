@@ -1,0 +1,8 @@
+---
+
+- name: Install pip
+  raw: rpm -ivh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+  register: pip
+  changed_when: "'is already installed' not in pip.stdout"
+  ignore_errors: yes
+  when: ansible_distribution == 'redhat'

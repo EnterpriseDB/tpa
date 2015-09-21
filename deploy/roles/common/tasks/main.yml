@@ -1,7 +1,6 @@
 ---
 
-- name: apt-get update
-  apt: update_cache=yes cache_valid_time=3600
-
+- include: setup.yml
+- include: raw_packages.yml
 - include: python.yml
 - include: packages.yml

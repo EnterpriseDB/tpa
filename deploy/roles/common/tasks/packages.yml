@@ -1,9 +1,17 @@
 ---
 
+- name: Update apt cache on Debian
+  apt: update_cache=yes cache_valid_time=3600
+  when: ansible_distribution == 'debian'
+
 - name: Install packages
-  apt: pkg={{ item }} state=latest
-  with_items: packages
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ packages[ansible_distribution] }}"
 
 - name: Remove unwanted packages
-  apt: pkg={{ item }} state=absent purge=yes
-  with_items: unwanted
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ unwanted_packages[ansible_distribution] }}"

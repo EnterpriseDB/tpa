@@ -1,12 +1,19 @@
 ---
 
 packages:
-  - tcpdump
-  - vim
-  - git
+  debian:
+    - tcpdump
+    - vim
+    - git
+  redhat:
+    - tcpdump
+    - vim
+    - git
 
-unwanted:
-  - popularity-contest
-  - vim-tiny
-  - vim-nox
-  - mlocate
+unwanted_packages:
+  debian:
+    - popularity-contest
+    - vim-tiny
+    - vim-nox
+    - mlocate
+  redhat: []
