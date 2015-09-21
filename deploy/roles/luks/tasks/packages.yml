@@ -1,6 +1,5 @@
 ---
 
 - name: Install packages
-  apt: pkg={{ item }} state=latest
-  with_items:
-    - cryptsetup
+  package: name={{ item }} state=latest
+  with_items: "{{ luks_packages[ansible_distribution] }}"

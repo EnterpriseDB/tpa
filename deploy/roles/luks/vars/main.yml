@@ -1,0 +1,7 @@
+---
+
+luks_packages:
+  debian:
+    - cryptsetup
+  redhat:
+    - cryptsetup
