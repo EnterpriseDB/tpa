@@ -17,7 +17,7 @@ ifconfig-pool-persist {{ vpn_name }}/ipp.txt
 
 comp-lzo
 user nobody
-group nogroup
+group {% if ansible_distribution == 'redhat' %} nobody {% else %} nogroup {% endif %}
 keepalive 10 300
 tls-timeout = 120s
 client-to-client

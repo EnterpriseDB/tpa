@@ -13,7 +13,7 @@ tls-auth {{ vpn_name }}/ta.key 1
 nobind
 comp-lzo
 user nobody
-group nogroup
+group {% if ansible_distribution == 'redhat' %} nobody {% else %} nogroup {% endif %}
 keepalive 10 30
 ns-cert-type server
 resolv-retry infinite
