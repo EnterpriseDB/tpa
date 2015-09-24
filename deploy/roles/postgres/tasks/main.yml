@@ -17,8 +17,8 @@
         state: present
     - name: Run initdb with the right data directory
       command: "{{pgbindir}}/postgresql{{pgversionNN}}-setup initdb"
-        args:
-          creates: "{{pgdata}}/PG_VERSION"
+      args:
+        creates: "{{pgdata}}/PG_VERSION"
   when: ansible_distribution == 'redhat'
 
 - name: Install Postgres configuration files
