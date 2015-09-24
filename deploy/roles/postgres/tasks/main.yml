@@ -39,7 +39,7 @@
   register: pgconfig
 
 - name: Restart Postgres
-  service: name=postgresql state=restarted
+  service: name="{{pgservice}}" state=restarted
   when: pgconfig.changed
 
 - name: Disable Postgres autostart on reboot
