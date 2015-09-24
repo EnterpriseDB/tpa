@@ -18,7 +18,7 @@
           - instances | length > 0
        tags: validate
        run_once: true
-       delegate_to: 127.0.0.1
+       delegate_to: localhost
 
     # Find the one host tagged as the primary and remember it for use
      - name: Determine primary hostname
@@ -94,7 +94,7 @@
       shell: psql -c "CREATE TABLE testtab (id int); INSERT INTO testtab values(1);"
       always_run: true
       sudo_user: postgres
-      delegate_to: primary_hostname
+      delegate_to: "{{primary_hostname}}"
       run_once: yes
    
     - name: Verify if id=1 exists on all nodes
@@ -109,5 +109,5 @@
       shell: psql -c "DROP TABLE testtab;"
       always_run: true
       sudo_user: postgres
-      delegate_to: primary_hostname
+      delegate_to: "{{primary_hostname}}"
       run_once: yes

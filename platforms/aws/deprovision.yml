@@ -22,7 +22,7 @@
 
     - name: Discover EC2 instance facts
       ec2_facts:
-      remote_user: admin
+      remote_user: ec2-user
       tags: always
 
     - name: Terminate EC2 instances
