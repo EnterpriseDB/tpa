@@ -8,6 +8,14 @@
 - include: packages.yml
 - include_vars: "{{ansible_distribution}}.yml"
 
+- name: Ensure the data directory exists
+  file:
+    path: "{{pgdata}}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
 - block:
     - name: Set PGDATA in postgresql-{{pgversion}}.service
       lineinfile:
