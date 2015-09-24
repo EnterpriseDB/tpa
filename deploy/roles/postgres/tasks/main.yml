@@ -8,6 +8,19 @@
 - include: packages.yml
 - include_vars: "{{ansible_distribution}}.yml"
 
+- block:
+    - name: Set PGDATA in postgresql-{{pgversion}}.service
+      lineinfile:
+        dest: "/lib/systemd/system/postgresql-{{pgversion}}.service"
+        line: "Environment=PGDATA={{pgdata}}"
+        regexp: "^Environment=PGDATA="
+        state: present
+    - name: Run initdb with the right data directory
+      command: "{{pgbindir}}/postgresql{{pgversionNN}}-setup initdb"
+        args:
+          creates: "{{pgdata}}/PG_VERSION"
+  when: ansible_distribution == 'redhat'
+
 - name: Install Postgres configuration files
   template:
     src="{{ item }}.j2" dest="{{ pgconf }}/{{ item }}"
