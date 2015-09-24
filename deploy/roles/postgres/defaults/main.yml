@@ -2,7 +2,4 @@
 
 pgversion: 9.4
 
-pgbindir: "/usr/lib/postgresql/{{ pgversion }}/bin"
 pgdata: "/var/lib/postgresql/{{ pgversion }}/main"
-pgconf: "/etc/postgresql/{{ pgversion }}/main"
-pgsock: "/var/run/postgresql"

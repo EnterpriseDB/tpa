@@ -6,6 +6,7 @@
       - pgversion is defined
 
 - include: packages.yml
+- include_vars: "{{ansible_distribution}}.yml"
 
 - name: Install Postgres configuration files
   template:
