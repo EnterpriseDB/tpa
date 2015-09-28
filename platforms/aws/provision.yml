@@ -18,16 +18,31 @@
 
   tasks:
 
-    # Make sure we're invoked with «--extra-vars @suitable-config.yml»
+    # Make sure we're invoked with a complete cluster configuration.
     #
     # XXX We assume that the instances are all in different regions, so
     # that we must repeat the VPC/security group/keypair configuration
     # in each region. Some reorganisation will be needed to support
     # multiple instances in the same region.
 
-    - name: Ensure cluster configuration is present
+    - name: Ensure cluster directory is specified
       assert:
-        msg: "Please rerun with «--extra-vars @clustername-aws.yml»"
+        msg: "Please rerun with «-e cluster=/path/to/dir»"
+        that:
+          - cluster is defined and cluster != ''
+      tags: validate
+
+    - name: Derive full path to cluster directory
+      set_fact: cluster_dir="{{ cluster|realpath }}"
+      tags: validate
+
+    - name: Load cluster configuration file
+      include_vars: "{{ cluster_dir }}/config.yml"
+      tags: validate
+
+    - name: Ensure cluster configuration is complete
+      assert:
+        msg: "Please define cluster configuration in {{cluster}}/config.yml"
         that:
           - cluster_name is defined and cluster_name != ''
           - instances | length > 0
@@ -110,14 +125,14 @@
     - name: Create a new keypair
       command: ssh-keygen -P "" -f "{{ ec2_key_file }}" -C 2ndQuadrant
       args:
-        chdir: "{{ playbook_dir }}/files"
+        chdir: "{{ cluster_dir }}"
         creates: "{{ ec2_key_file }}"
       tags: keys
     - name: Set up keypair in each region
       ec2_key:
         state: present
         name: "{{ ec2_key_name }}"
-        key_material: "{{ lookup('file', 'files/' + ec2_key_file + '.pub') }}"
+        key_material: "{{ lookup('file', cluster_dir + '/' + ec2_key_file + '.pub') }}"
         region: "{{ item.region }}"
         wait: yes
       with_items: instances
