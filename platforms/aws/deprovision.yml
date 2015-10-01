@@ -78,6 +78,7 @@
         state: absent
         vpc_id: "{{ item.value }}"
         region: "{{ item.key }}"
+        resource_tags: {}
         wait: yes
       with_dict_of_arrays: vpcs_by_region
       tags: ec2_vpcs
