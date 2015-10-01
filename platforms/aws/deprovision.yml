@@ -40,38 +40,41 @@
             that:
               - cluster_tag in groups
               - groups[cluster_tag] | length > 0
-
-        - name: Derive a unique list of regions from instances
-          set_fact:
-            regions: "{{ instances|map(attribute='region')|unique|list }}"
       tags: always
-
-    # For each unique region in instances, we find inventory hosts in
-    # that region and build a list of their instance_ids to terminate.
-
-    - name: Terminate EC2 instances in each region
-      ec2:
-        state: absent
-        region: "{{ item }}"
-        instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_id')|list }}"
-        wait: yes
-      with_items: regions
-      tags: ec2
 
     # Since ec2_vpc and ec2_key don't take a list of ids to remove, we
     # need to build up a hash indexed by unique region whose values are
     # lists of unique ids. Then we iterate over the keys and each value
     # in the list in turn using a custom lookup plugin.
 
-    - name: Build a list of keys and VPCs for each region
+    - name: Derive a unique list of regions from instances
       set_fact:
+        regions: "{{ instances|map(attribute='region')|unique|list }}"
+      tags: always
+
+    - name: Build a list of resources to remove in each region
+      set_fact:
+        ids_by_region: "{{ ids_by_region|default({})|combine({item: groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_id')|list}) }}"
         vpcs_by_region: "{{ vpcs_by_region|default({})|combine({item: groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_vpc_id')|unique|list}) }}"
         keys_by_region: "{{ keys_by_region|default({})|combine({item: groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_key_name')|unique|list}) }}"
       with_items: regions
-      tags: [ ec2_vpcs, ec2_keys ]
+      tags: always
+
+    # The ec2 module can take a list of instance ids directly, so we can
+    # just use with_dict directly.
+
+    - name: Terminate EC2 instances in each region
+      ec2:
+        state: absent
+        region: "{{ item.key }}"
+        instance_ids: "{{ item.value }}"
+        wait: yes
+      with_dict: ids_by_region
+      tags: ec2
 
     # This will probably fail, because it will not delete the associated
-    # igw, subnet, routing table, or security groups first.
+    # igw, subnet, routing table, or security groups first. But we can
+    # deal with that later.
 
     - name: Terminate VPCs in each region
       ec2_vpc:
@@ -82,6 +85,9 @@
         wait: yes
       with_dict_of_arrays: vpcs_by_region
       tags: ec2_vpcs
+
+    # We will probably just have the single cluster-wide keypair in each
+    # region, but we can cope with any number of keys.
 
     - name: Remove keypairs in each region
       ec2_key:
