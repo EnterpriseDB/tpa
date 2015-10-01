@@ -3,56 +3,90 @@
 # Decommission an already-provisioned AWS cluster:
 #
 #     ansible-playbook -i inventory/ec2.py platforms/aws/deprovision.yml \
-#         --extra-vars @config/clustername-aws.yml
+#         --extra-vars cluster=/path/to/cluster
 #
 # XXX Doesn't delete elastic IPs or extra provisioned volumes.
 
-- name: Decommission EC2 cluster
-  hosts: tag_Name_{{ cluster_name }}
+- name: Deprovision EC2 cluster
+  hosts: localhost
   tasks:
-    - name: Ensure cluster configuration is present
-      assert:
-        msg: "Please rerun with «--extra-vars @clustername-aws.yml»"
-        that:
-          - cluster_name is defined and cluster_name != ''
-          - instances | length > 0
-      tags: always
-      run_once: true
-      delegate_to: localhost
+    - block:
+        - name: Require cluster directory to be specified
+          assert:
+            msg: "Please rerun with «-e cluster=./clusters/name»"
+            that:
+              - cluster is defined and cluster != ''
 
-    - name: Discover EC2 instance facts
-      ec2_facts:
-      remote_user: ec2-user
+        - name: Derive full path to cluster directory
+          set_fact: cluster_dir="{{ cluster|realpath }}"
+
+        - name: Load cluster configuration file
+          include_vars: "{{ cluster_dir }}/config.yml"
+
+        - name: Ensure cluster configuration is complete
+          assert:
+            msg: "Please define cluster configuration in {{cluster}}/config.yml"
+            that:
+              - cluster_name is defined and cluster_name != ''
+              - instances | length > 0
+
+        - name: Derive EC2 group name for cluster
+          set_fact:
+            cluster_tag: "{{ 'tag_Name_' + cluster_name }}"
+
+        - name: Require inventory group {{cluster_tag}} to be defined
+          assert:
+            msg: "No hosts found in group {{cluster_tag}}"
+            that:
+              - cluster_tag in groups
+              - groups[cluster_tag] | length > 0
+
+        - name: Derive a unique list of regions from instances
+          set_fact:
+            regions: "{{ instances|map(attribute='region')|unique|list }}"
       tags: always
 
-    - name: Terminate EC2 instances
+    # For each unique region in instances, we find inventory hosts in
+    # that region and build a list of their instance_ids to terminate.
+
+    - name: Terminate EC2 instances in each region
       ec2:
         state: absent
-        instance_id: "{{ ansible_ec2_instance_id }}"
-        region: "{{ ansible_ec2_placement_region }}"
+        region: "{{ item }}"
+        instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_id')|list }}"
         wait: yes
-      delegate_to: localhost
+      with_items: regions
       tags: ec2
 
-    - name: Terminate VPCs
+    # Since ec2_vpc and ec2_key don't take a list of ids to remove, we
+    # need to build up a hash indexed by unique region whose values are
+    # lists of unique ids. Then we iterate over the keys and each value
+    # in the list in turn using a custom lookup plugin.
+
+    - name: Build a list of keys and VPCs for each region
+      set_fact:
+        vpcs_by_region: "{{ vpcs_by_region|default({})|combine({item: groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_vpc_id')|unique|list}) }}"
+        keys_by_region: "{{ keys_by_region|default({})|combine({item: groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_key_name')|unique|list}) }}"
+      with_items: regions
+      tags: [ ec2_vpcs, ec2_keys ]
+
+    # This will probably fail, because it will not delete the associated
+    # igw, subnet, routing table, or security groups first.
+
+    - name: Terminate VPCs in each region
       ec2_vpc:
         state: absent
-        region: "{{ item.region }}"
-        cidr_block: "{{ item.subnet }}"
-        resource_tags: "{{ cluster_tags }}"
+        vpc_id: "{{ item.value }}"
+        region: "{{ item.key }}"
         wait: yes
-      with_items: instances
-      delegate_to: localhost
-      run_once: true
-      tags: ec2_vpc
+      with_dict_of_arrays: vpcs_by_region
+      tags: ec2_vpcs
 
-    - name: Remove keypair in each region
+    - name: Remove keypairs in each region
       ec2_key:
         state: absent
-        name: "{{ ec2_key_name }}"
-        region: "{{ item.region }}"
+        name: "{{ item.value }}"
+        region: "{{ item.key }}"
         wait: yes
-      with_items: instances
-      delegate_to: localhost
-      run_once: true
-      tags: keys
+      with_dict_of_arrays: keys_by_region
+      tags: ec2_keys
