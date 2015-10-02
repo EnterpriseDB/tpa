@@ -19,36 +19,27 @@
   tasks:
 
     # Make sure we're invoked with a complete cluster configuration.
-    #
-    # XXX We assume that the instances are all in different regions, so
-    # that we must repeat the VPC/security group/keypair configuration
-    # in each region. Some reorganisation will be needed to support
-    # multiple instances in the same region.
 
-    - name: Ensure cluster directory is specified
-      assert:
-        msg: "Please rerun with «-e cluster=/path/to/dir»"
-        that:
-          - cluster is defined and cluster != ''
-      tags: validate
+    - block:
+        - name: Ensure cluster directory is specified
+          assert:
+            msg: "Please rerun with «-e cluster=/path/to/dir»"
+            that:
+              - cluster is defined and cluster != ''
 
-    - name: Derive full path to cluster directory
-      set_fact: cluster_dir="{{ cluster|realpath }}"
-      tags: validate
+        - name: Derive full path to cluster directory
+          set_fact: cluster_dir="{{ cluster|realpath }}"
 
-    - name: Load cluster configuration file
-      include_vars: "{{ cluster_dir }}/config.yml"
-      tags: validate
+        - name: Load cluster configuration file
+          include_vars: "{{ cluster_dir }}/config.yml"
 
-    - name: Ensure cluster configuration is complete
-      assert:
-        msg: "Please define cluster configuration in {{cluster}}/config.yml"
-        that:
-          - cluster_name is defined and cluster_name != ''
-          - instances | length > 0
-          - instances | map(attribute='region') | list | unique | length ==
-            instances | map(attribute='region') | list | length
-      tags: validate
+        - name: Ensure cluster configuration is complete
+          assert:
+            msg: "Please define cluster configuration in {{cluster}}/config.yml"
+            that:
+              - cluster_name is defined and cluster_name != ''
+              - instances | length > 0
+      tags: [always, validate]
 
     # Set up a VPC in each region with a single public subnet and an
     # internet gateway. A VPC is an isolated network zone comprising
@@ -76,7 +67,7 @@
         wait: yes
       with_items: instances
       register: vpcs
-      tags: vpcs
+      tags: ec2_vpcs
 
     # Set up a security group in each VPC. A security group is a set of
     # firewall rules. We explicitly allow certain incoming traffic; by
@@ -116,7 +107,7 @@
             cidr_ip: 0.0.0.0/0
       with_items: vpcs.results
       register: security_groups
-      tags: groups
+      tags: ec2_groups
 
     # Create an SSH keypair and make sure the public key is stored in
     # each region. This key is used to initially provide SSH access to
@@ -127,7 +118,7 @@
       args:
         chdir: "{{ cluster_dir }}"
         creates: "{{ ec2_key_file }}"
-      tags: keys
+      tags: ec2_keys
     - name: Set up keypair in each region
       ec2_key:
         state: present
@@ -136,7 +127,7 @@
         region: "{{ item.region }}"
         wait: yes
       with_items: instances
-      tags: keys
+      tags: ec2_keys
 
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above.
@@ -160,6 +151,7 @@
         - vpcs.results
         - security_groups.results
       register: ec2_instances
+      tags: [ec2, always]
 
     # Associate an elastic IP with each instance.
 
@@ -173,3 +165,4 @@
       with_items: ec2_instances.results
       when: ec2_instances.changed
       register: eips
+      tags: [ec2, always]
