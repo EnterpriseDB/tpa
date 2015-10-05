@@ -2,6 +2,9 @@
 
 pgxlversion: "9.5alpha1"
 
+# Parent directory where Postgres-XL binaries need to be 
+# placed on remote machine.
 pgxl: "/opt/pgxl"
 
+# Name of the Postgres-XL build bundle
 pgxl_tar_name: "Postgres-XL-9.5alpha1-1-linux-x86_64.tar.bz2"
