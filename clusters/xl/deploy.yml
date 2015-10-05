@@ -1,0 +1,15 @@
+---
+
+- name: Set up XLCloud demo cluster nodes
+  hosts: tag_Name_XLCloud
+  gather_facts: no
+  remote_user: ec2-user
+  sudo_user: root
+  sudo: true
+  vars:
+    pgxlversion: "9.5alpha1"
+
+  roles:
+
+    - role: xl
+      tags: always

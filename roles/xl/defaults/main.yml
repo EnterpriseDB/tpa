@@ -1,0 +1,7 @@
+---
+
+pgxlversion: "9.5alpha1"
+
+pgxl: "/opt/pgxl"
+
+pgxl_tar_name: "Postgres-XL-9.5alpha1-1-linux-x86_64.tar.bz2"
