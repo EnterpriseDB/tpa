@@ -117,8 +117,8 @@
             to_port: 1194
             cidr_ip: 0.0.0.0/0
       with_items: vpcs.results
-      register: security_groups
-      tags: ec2_groups
+      register: sgs
+      tags: ec2_vpcs
 
     # Create an SSH keypair and make sure the public key is stored in
     # each region. This key is used to initially provide SSH access to
@@ -150,20 +150,25 @@
         count_tag: "{{ cluster_tags }}"
         image: "{{ item.0.image }}"
         region: "{{ item.0.region }}"
-        group_id: "{{ item.2.group_id }}"
-        instance_type: "{{ item.0.type }}"
-        vpc_subnet_id: "{{ item.1.subnets[0].id }}"
-        instance_tags: "{{ cluster_tags | combine(item.0.tags) }}"
         key_name: "{{ ec2_key_name }}"
-        assign_public_ip: yes
+        instance_type: "{{ item.0.type }}"
+        instance_tags: "{{ cluster_tags | combine(item.0.tags) }}"
+        vpc_subnet_id: "{{ vpcs.results|
+          selectattr('vpc.region', 'equalto', item.region)|
+          selectattr('vpc.cidr_block', 'equalto', item.subnet)|
+          map(attribute='subnets')|first|
+          selectattr('cidr', 'equalto', item.subnet)|
+          map(attribute='id')|first }}"
+        group_id: "{{ sgs.results|
+          selectattr('item.vpc.region', 'equalto', item.region)|
+          selectattr('item.vpc.cidr_block', 'equalto', item.subnet)|
+          map(attribute='group_id')|first }}"
         volumes: "{{ item.0.volumes }}"
+        assign_public_ip: yes
         wait: yes
-      with_together:
-        - instances
-        - vpcs.results
-        - security_groups.results
+      with_items: instances
       register: ec2_instances
-      tags: [ec2, always]
+      tags: ec2
 
     # Associate an elastic IP with each instance.
 
@@ -177,4 +182,4 @@
       with_items: ec2_instances.results
       when: ec2_instances.changed
       register: eips
-      tags: [ec2, always]
+      tags: ec2
