@@ -147,12 +147,12 @@
     - name: Set up EC2 instances
       ec2:
         exact_count: 1
-        count_tag: "{{ cluster_tags }}"
+        count_tag: "{{ cluster_tags|combine(item.tags) }}"
         image: "{{ item.image }}"
         region: "{{ item.region }}"
         key_name: "{{ ec2_key_name }}"
         instance_type: "{{ item.type }}"
-        instance_tags: "{{ cluster_tags | combine(item.tags) }}"
+        instance_tags: "{{ cluster_tags|combine(item.tags) }}"
         vpc_subnet_id: "{{ vpcs.results|
           selectattr('vpc.region', 'equalto', item.region)|
           selectattr('vpc.cidr_block', 'equalto', item.subnet)|
@@ -175,11 +175,10 @@
     - name: Associate elastic IPs
       ec2_eip:
         state: present
-        region: "{{ item.instances[0].region }}"
-        instance_id: "{{ item.instances[0].id }}"
+        region: "{{ item.tagged_instances[0].region }}"
+        device_id: "{{ item.tagged_instances[0].id }}"
         reuse_existing_ip_allowed: true
         in_vpc: true
       with_items: ec2_instances.results
-      when: ec2_instances.changed
       register: eips
       tags: ec2
