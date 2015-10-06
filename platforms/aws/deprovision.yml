@@ -72,9 +72,9 @@
       with_dict: ids_by_region
       tags: ec2
 
-    # This will probably fail, because it will not delete the associated
-    # igw, subnet, routing table, or security groups first. But we can
-    # deal with that later.
+    # This will fail, because it does not delete any associated subnet,
+    # routing table, internet gateway, or security groups first. But we
+    # can deal with that later.
 
     - name: Terminate VPCs in each region
       ec2_vpc:
