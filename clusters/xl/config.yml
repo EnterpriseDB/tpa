@@ -23,7 +23,7 @@ instances:
             volume_size: 10
       tags:
         node: 1
-        role: coordinator+gtm
+        role: coordinator,gtm
     - type: t2.medium
       region: us-west-2
       image: ami-431a4273
