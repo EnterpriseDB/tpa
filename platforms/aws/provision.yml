@@ -41,31 +41,42 @@
               - instances | length > 0
       tags: [always, validate]
 
-    # Set up a VPC in each region with a single public subnet and an
+    - name: Derive a unique list of regions from instances
+      set_fact:
+        regions: "{{ instances|map(attribute='region')|unique|list }}"
+      tags: always
+
+    - name: Build a list of resources to create in each region
+      set_fact:
+        vpcs_by_region: "{{ vpcs_by_region|default({})|combine({item: instances|selectattr('region','equalto',item)|map(attribute='subnet')|unique|list}) }}"
+      with_items: regions
+      tags: always
+
+    # Set up VPCs for each region with a single public subnet and an
     # internet gateway. A VPC is an isolated network zone comprising
     # multiple subnets, gateways, etc.
 
     - name: Set up VPCs
       ec2_vpc:
         state: present
-        region: "{{ item.region }}"
-        cidr_block: "{{ item.subnet }}"
+        region: "{{ item.key }}"
+        cidr_block: "{{ item.value }}"
         resource_tags: "{{ cluster_tags }}"
         internet_gateway: yes
         subnets:
-          - cidr: "{{ item.subnet }}"
+          - cidr: "{{ item.value }}"
             resource_tags:
-              Name: "{{ cluster_name }}/{{ item.region }}"
+              Name: "{{ cluster_name }}/{{ item.key }}"
         route_tables:
           - subnets:
-              - "{{ item.subnet }}"
+              - "{{ item.value }}"
             routes:
               - dest: 0.0.0.0/0
                 gw: igw
             resource_tags:
-              Name: "{{ cluster_name }}/{{ item.region }}"
+              Name: "{{ cluster_name }}/{{ item.key }}"
         wait: yes
-      with_items: instances
+      with_dict_of_arrays: vpcs_by_region
       register: vpcs
       tags: ec2_vpcs
 
@@ -111,7 +122,8 @@
 
     # Create an SSH keypair and make sure the public key is stored in
     # each region. This key is used to initially provide SSH access to
-    # the EC2 instances we set up next.
+    # the EC2 instances we set up next. (We could support multiple keys
+    # per region as we do for VPCs, but we don't bother for now.)
 
     - name: Create a new keypair
       command: ssh-keygen -P "" -f "{{ ec2_key_file }}" -C 2ndQuadrant
@@ -122,11 +134,11 @@
     - name: Set up keypair in each region
       ec2_key:
         state: present
+        region: "{{ item }}"
         name: "{{ ec2_key_name }}"
         key_material: "{{ lookup('file', cluster_dir + '/' + ec2_key_file + '.pub') }}"
-        region: "{{ item.region }}"
         wait: yes
-      with_items: instances
+      with_items: regions
       tags: ec2_keys
 
     # Create EC2 instances using the VPC subnets and security groups and
