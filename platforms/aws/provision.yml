@@ -148,11 +148,11 @@
       ec2:
         exact_count: 1
         count_tag: "{{ cluster_tags }}"
-        image: "{{ item.0.image }}"
-        region: "{{ item.0.region }}"
+        image: "{{ item.image }}"
+        region: "{{ item.region }}"
         key_name: "{{ ec2_key_name }}"
-        instance_type: "{{ item.0.type }}"
-        instance_tags: "{{ cluster_tags | combine(item.0.tags) }}"
+        instance_type: "{{ item.type }}"
+        instance_tags: "{{ cluster_tags | combine(item.tags) }}"
         vpc_subnet_id: "{{ vpcs.results|
           selectattr('vpc.region', 'equalto', item.region)|
           selectattr('vpc.cidr_block', 'equalto', item.subnet)|
@@ -163,7 +163,7 @@
           selectattr('item.vpc.region', 'equalto', item.region)|
           selectattr('item.vpc.cidr_block', 'equalto', item.subnet)|
           map(attribute='group_id')|first }}"
-        volumes: "{{ item.0.volumes }}"
+        volumes: "{{ item.volumes }}"
         assign_public_ip: yes
         wait: yes
       with_items: instances
