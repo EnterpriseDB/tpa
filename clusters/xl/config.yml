@@ -17,6 +17,7 @@ instances:
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
+      assign_eip: yes
       volumes:
           - device_name: /dev/xvdb
             volume_type: standard

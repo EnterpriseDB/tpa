@@ -175,10 +175,13 @@
     - name: Associate elastic IPs
       ec2_eip:
         state: present
-        region: "{{ item.tagged_instances[0].region }}"
-        device_id: "{{ item.tagged_instances[0].id }}"
+        region: "{{ item.1.tagged_instances[0].region }}"
+        device_id: "{{ item.1.tagged_instances[0].id }}"
         reuse_existing_ip_allowed: true
         in_vpc: true
-      with_items: ec2_instances.results
+      when: item.0.assign_eip|d() and item.0.assign_eip
+      with_together:
+        - instances
+        - ec2_instances.results
       register: eips
       tags: ec2
