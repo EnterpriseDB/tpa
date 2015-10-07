@@ -4,18 +4,23 @@ Introduction
 This repository contains automation tools to provision, configure, and
 operate PostgreSQL servers.
 
-To provision servers on AWS EC2, first create a configuration file for
-the cluster under config/, then run:
+To provision servers on AWS EC2, create clusters/name/config.yml with
+the instance configuration (see clusters/test for an example) and run:
 
     utils/ansible-playbook platforms/aws/provision.yml \
-        --extra-vars @config/clustername-aws.yml
+        -e cluster=./clusters/name
 
-To deploy PostgreSQL on EC2 instances, first create a playbook under
-deploy/ that pulls in the desired roles and targets the appropriate
-hosts (e.g. by tags), then run:
+Next, to deploy Postgres on the EC2 instances provisioned above, create
+clusters/name/deploy.yml that applies the desired roles to the instances
+based on their tags (again, see clusters/test for an example), and run:
 
-    utils/ansible-playbook -i inventory/ec2.py deploy/cluster.yml \
-        --extra-vars @config/clustername-aws.yml
+    utils/ansible-playbook -i inventory/ec2.py clusters/name/deploy.yml \
+        -e cluster=./clusters/name
+
+To permanently deprovision a cluster, run:
+
+    utils/ansible-playbook platforms/aws/deprovision.yml \
+        -e cluster=./clusters/name
 
 Requirements
 ------------
