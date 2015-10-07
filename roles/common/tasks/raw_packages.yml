@@ -1,5 +1,9 @@
 ---
 
+- name: Run apt-get update
+  raw: apt-get -y update
+  when: ansible_distribution == 'debian'
+
 - name: Install EPEL release package
   raw: rpm -ivh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
   register: epel
