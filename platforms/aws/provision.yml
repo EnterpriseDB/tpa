@@ -18,7 +18,9 @@
 
   tasks:
 
-    # Make sure we're invoked with a complete cluster configuration.
+    # Make sure we're invoked with a complete cluster configuration. We
+    # expect $cluster_dir/config.yml to define a cluster name and a list
+    # of instances.
 
     - block:
         - name: Ensure cluster directory is specified
@@ -52,11 +54,20 @@
       with_items: regions
       tags: always
 
-    # Set up VPCs for each region with a single public subnet and an
-    # internet gateway. A VPC is an isolated network zone comprising
-    # multiple subnets, gateways, etc.
+    # A VPC (Virtual Private Cloud) is an isolated network container in
+    # a single region (although it may span multiple availability zones
+    # within the region). It comprises multiple subnets, routing tables,
+    # network gateways, etc.
+    #
+    # For more details, see:
+    # https://aws.amazon.com/vpc/
+    # https://aws.amazon.com/documentation/vpc/
+    #
+    # For each unique subnet in instances[], we create a VPC with one
+    # subnet (multiple subnets within a VPC are not supported) and an
+    # internet gateway with a routing table pointing to it.
 
-    - name: Set up VPCs
+    - name: Create VPCs in each region
       ec2_vpc:
         state: present
         region: "{{ item.key }}"
@@ -80,15 +91,17 @@
       register: vpcs
       tags: ec2_vpcs
 
-    # Set up a security group in each VPC. A security group is a set of
-    # firewall rules. We explicitly allow certain incoming traffic; by
-    # default, there is an egress rule that allows everything.
+    # A security group is a set of firewall rules that can be applied to
+    # instances in a VPC. (A subnet in a VPC can also have a network ACL
+    # associated with it, but we use the default that allows all inbound
+    # and outbound traffic. Ansible can't operate on ACLs anyway.)
     #
-    # (There's also a network ACL associated with the VPC that is also a
-    # firewall, but we use the default that allows all inbound/outbound
-    # traffic. Ansible can't currently operate on ACLs anyway.)
+    # http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html
+    # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html
+    #
+    # We create a security group for every VPC we created above.
 
-    - name: Set up security groups
+    - name: Create security groups for each VPC
       ec2_group:
         state: present
         vpc_id: "{{ item.vpc.id }}"
@@ -142,7 +155,10 @@
       tags: ec2_keys
 
     # Create EC2 instances using the VPC subnets and security groups and
-    # access key we configured above.
+    # access key we configured above. We loop over instances[], look up
+    # the VPC and group corresponding to the region/subnet defined for
+    # that instance, and extract the relevant subnet or group id from
+    # the responses registered above.
 
     - name: Set up EC2 instances
       ec2:
@@ -170,9 +186,11 @@
       register: ec2_instances
       tags: ec2
 
-    # Associate an elastic IP with each instance.
+    # If explicitly requested, we can also associate an elastic IP with
+    # one or more of the instances created above. The instance ids come
+    # from the results above, and the configuration is in instances[].
 
-    - name: Associate elastic IPs
+    - name: Associate elastic IPs with instances
       ec2_eip:
         state: present
         region: "{{ item.1.tagged_instances[0].region }}"
