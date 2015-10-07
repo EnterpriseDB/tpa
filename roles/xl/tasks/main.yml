@@ -1,0 +1,21 @@
+---
+
+- name: Ensure Postgres-XL config is present
+  assert:
+    that:
+      - pgxlversion is defined
+      - pgxl is defined
+      - pgxl_tar_name is defined
+
+- name: Ensure target directory exists
+  file:
+    path: "{{pgxl}}"
+    state: directory
+
+- name: Unarchive Postgres-XL tar ball
+  unarchive: src="{{ item }}" dest="{{ pgxl }}"
+  with_items:
+    - "{{ pgxl_tar_name }}"
+
+- name: Move Postgres-XL binaries to "{{ pgxlversion }}"
+  command: mv "{{ pgxl }}"/Postgres-XL-"{{ pgxlversion }}"  "{{ pgxl }}"/"{{ pgxlversion }}"
