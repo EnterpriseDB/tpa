@@ -20,53 +20,53 @@ instances:
       assign_eip: yes
       tags:
         node: 1
-        role: coordinator,gtm
+        role: gtm,coordinator,datanode
     - type: t2.medium
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
       tags:
         node: 2
-        role: coordinator
+        role: coordinator,datanode
     - type: t2.medium
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
       tags:
         node: 3
-        role: node
+        role: datanode
     - type: t2.medium
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
       tags:
         node: 4
-        role: node
+        role: datanode
     - type: t2.medium
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
       tags:
         node: 5
-        role: node
+        role: datanode
     - type: t2.medium
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
       tags:
         node: 6
-        role: node
+        role: datanode
     - type: t2.medium
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
       tags:
         node: 7
-        role: node
+        role: datanode
     - type: t2.medium
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
       tags:
         node: 8
-        role: node
+        role: datanode
