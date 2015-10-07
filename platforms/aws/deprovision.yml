@@ -42,58 +42,89 @@
               - groups[cluster_tag] | length > 0
       tags: always
 
-    # Since ec2_vpc and ec2_key don't take a list of ids to remove, we
-    # need to build up a hash indexed by unique region whose values are
-    # lists of unique ids. Then we iterate over the keys and each value
-    # in the list in turn using a custom lookup plugin.
-
     - name: Derive a unique list of regions from instances
       set_fact:
         regions: "{{ instances|map(attribute='region')|unique|list }}"
       tags: always
 
-    - name: Build a list of resources to remove in each region
-      set_fact:
-        ids_by_region: "{{ ids_by_region|default({})|combine({item: groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_id')|list}) }}"
-        vpcs_by_region: "{{ vpcs_by_region|default({})|combine({item: groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_vpc_id')|unique|list}) }}"
-        keys_by_region: "{{ keys_by_region|default({})|combine({item: groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_key_name')|unique|list}) }}"
-      with_items: regions
-      tags: always
-
-    # The ec2 module can take a list of instance ids directly, so we can
-    # just use with_dict directly.
+    # For each region, we build up a list of instance ids (by taking the
+    # intersection of hosts in the cluster with all hosts in the region,
+    # then extracting ec2_id from each one) and remove them.
 
     - name: Terminate EC2 instances in each region
       ec2:
         state: absent
-        region: "{{ item.key }}"
-        instance_ids: "{{ item.value }}"
+        region: "{{ item }}"
+        instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_id')|list }}"
         wait: yes
-      with_dict: ids_by_region
+      with_items: regions
       tags: ec2
 
-    # This will fail, because it does not delete any associated subnet,
-    # routing table, internet gateway, or security groups first. But we
-    # can deal with that later.
-
-    - name: Terminate VPCs in each region
-      ec2_vpc:
-        state: absent
-        vpc_id: "{{ item.value }}"
-        region: "{{ item.key }}"
-        resource_tags: {}
-        wait: yes
-      with_dict_of_arrays: vpcs_by_region
-      tags: ec2_vpcs
-
-    # We will probably just have the single cluster-wide keypair in each
-    # region, but we can cope with any number of keys.
+    # Next, remove keypairs in each region by the same strategy, except
+    # that ec2_key doesn't take a list directly, so we have to use the
+    # custom with_nested_dependents plugin instead of with_items. Note
+    # that we almost certainly have only a single cluster-wide keypair
+    # in each region, but we can cope with any number of keys.
 
     - name: Remove keypairs in each region
       ec2_key:
         state: absent
-        name: "{{ item.value }}"
-        region: "{{ item.key }}"
+        region: "{{ item.0 }}"
+        name: "{{ item.1 }}"
         wait: yes
-      with_dict_of_arrays: keys_by_region
+      with_nested_dependents:
+        - regions
+        - groups[cluster_tag]|intersect(groups[item.0])|map('lookup', hostvars, 'ec2_key_name')|unique|list
       tags: ec2_keys
+
+    # Before we can delete the VPCs in each region, we must delete the
+    # subnets in each VPC. Strangely, we have to use the vpc_id with a
+    # CIDR mask to identify a subnet, so we have to iterate over vpc_id
+    # from hostvars and subnet masks from instances.
+    #
+    # This means we will try to remove every known subnet in a region
+    # from every known VPC in the region, whether or not we ever created
+    # a particular subnet in a particular VPC. But we probably have only
+    # one subnet per VPC per region, so we don't waste too much effort.
+
+    - name: Remove VPC subnets in each region
+      ec2_vpc_subnet:
+        state: absent
+        region: "{{ item.0 }}"
+        vpc_id: "{{ item.1 }}"
+        cidr: "{{ item.2 }}"
+      with_nested_dependents:
+        - regions
+        - groups[cluster_tag]|intersect(groups[item.0])|map('lookup', hostvars, 'ec2_vpc_id')|unique|list
+        - instances|selectattr('region', 'equalto', item.0)|map(attribute='subnet')|unique|list
+      tags: ec2_vpcs
+
+    # Next, we do the same for security groups within the region. Note
+    # that 'ec2_security_group_names' is a comma-separated string, which
+    # we split into a list in an extra step.
+
+    - name: Remove security groups in each region
+      ec2_group:
+        state: absent
+        region: "{{ item.0 }}"
+        name: "{{ item.2 }}"
+        description: ''
+      with_nested_dependents:
+        - regions
+        - groups[cluster_tag]|intersect(groups[item.0])|map('lookup', hostvars, 'ec2_security_group_names')|unique|list
+        - item[1].split(',')
+      tags: ec2_vpcs
+
+    # Now we can finally delete each VPC in each region.
+
+    - name: Terminate VPCs in each region
+      ec2_vpc:
+        state: absent
+        region: "{{ item.0 }}"
+        vpc_id: "{{ item.1 }}"
+        resource_tags: {}
+        wait: yes
+      with_nested_dependents:
+        - regions
+        - groups[cluster_tag]|intersect(groups[item.0])|map('lookup', hostvars, 'ec2_vpc_id')|unique|list
+      tags: ec2_vpcs

@@ -131,7 +131,7 @@
             cidr_ip: 0.0.0.0/0
       with_items: vpcs.results
       register: sgs
-      tags: ec2_sgs
+      tags: ec2_vpcs
 
     # Create an SSH keypair and make sure the public key is stored in
     # each region. This key is used to initially provide SSH access to
