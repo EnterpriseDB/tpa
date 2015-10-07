@@ -5,7 +5,7 @@
 # run setup.
 
 - name: Determine what distribution we're running
-  shell: test -f /etc/debian_version && echo debian || test -f /etc/redhat-release && echo redhat
+  shell: (test -f /etc/debian_version && echo debian) || (test -f /etc/redhat-release && echo redhat)
   register: distribution
   changed_when: False
 
