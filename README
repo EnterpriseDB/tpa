@@ -22,6 +22,10 @@ To permanently deprovision a cluster, run:
     utils/ansible-playbook platforms/aws/deprovision.yml \
         -e cluster=./clusters/name
 
+Note that deprovision.yml DOES NOT currently remove additional volumes
+that are provisioned with delete_on_termination disabled. Such volumes
+MUST BE deleted by hand for now.
+
 Requirements
 ------------
 
