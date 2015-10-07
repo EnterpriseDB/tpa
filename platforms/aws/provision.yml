@@ -48,12 +48,6 @@
         regions: "{{ instances|map(attribute='region')|unique|list }}"
       tags: always
 
-    - name: Build a list of resources to create in each region
-      set_fact:
-        vpcs_by_region: "{{ vpcs_by_region|default({})|combine({item: instances|selectattr('region','equalto',item)|map(attribute='subnet')|unique|list}) }}"
-      with_items: regions
-      tags: always
-
     # A VPC (Virtual Private Cloud) is an isolated network container in
     # a single region (although it may span multiple availability zones
     # within the region). It comprises multiple subnets, routing tables,
@@ -70,24 +64,26 @@
     - name: Create VPCs in each region
       ec2_vpc:
         state: present
-        region: "{{ item.key }}"
-        cidr_block: "{{ item.value }}"
+        region: "{{ item.0 }}"
+        cidr_block: "{{ item.1 }}"
         resource_tags: "{{ cluster_tags }}"
         internet_gateway: yes
         subnets:
-          - cidr: "{{ item.value }}"
+          - cidr: "{{ item.1 }}"
             resource_tags:
-              Name: "{{ cluster_name }}/{{ item.key }}"
+              Name: "{{ cluster_name }}/{{ item.0 }}"
         route_tables:
           - subnets:
-              - "{{ item.value }}"
+              - "{{ item.1 }}"
             routes:
               - dest: 0.0.0.0/0
                 gw: igw
             resource_tags:
-              Name: "{{ cluster_name }}/{{ item.key }}"
+              Name: "{{ cluster_name }}/{{ item.0 }}"
         wait: yes
-      with_dict_of_arrays: vpcs_by_region
+      with_nested_dependents:
+        - regions
+        - instances|selectattr('region','equalto',item.0)|map(attribute='subnet')|unique|list
       register: vpcs
       tags: ec2_vpcs
 
