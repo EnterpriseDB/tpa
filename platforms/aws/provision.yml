@@ -175,7 +175,7 @@
           selectattr('item.vpc.region', 'equalto', item.region)|
           selectattr('item.vpc.cidr_block', 'equalto', item.subnet)|
           map(attribute='group_id')|first }}"
-        volumes: "{{ item.volumes }}"
+        volumes: "{{ item.volumes|default(omit) }}"
         assign_public_ip: yes
         wait: yes
       with_items: instances
