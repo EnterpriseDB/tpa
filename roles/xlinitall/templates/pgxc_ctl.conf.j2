@@ -26,10 +26,10 @@ gtmProxy=y
 
 # XXX Does this need to be gtm_pxy1 gtm_pxy2 even if they are on separate
 # servers?
-gtmProxyNames=({% ['gtm_pxy'*groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length]|join(' ') %})
+gtmProxyNames=({% (['gtm_pxy']*(groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length))|join(' ') %})
 gtmProxyServers=({% groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|join(' ') %})
-gtmProxyPorts=({% [20001*groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length]|join(' ') %})
-gtmProxyDirs=({% ['$gtmProxyDir'*groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length]|join(' ') %})
+gtmProxyPorts=({% (['20001']*(groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length))|join(' ') %})
+gtmProxyDirs=({% (['$gtmProxyDir']*(groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length))|join(' ') %})
 
 gtmPxyExtraConfig=none
 
@@ -40,15 +40,15 @@ coordArchLogDir=$HOME/coord_archlog
 
 # XXX Does this need to be coord1 coord2 even if they are on separate
 # servers?
-coordNames=({% ['coord'*groups['tag_role_coordinator']|length]|join(' ') %})
-coordPorts=({% ['30000'*groups['tag_role_coordinator']|length]|join(' ') %})
-poolerPorts=({% ['30001'*groups['tag_role_coordinator']|length]|join(' ') %})
+coordNames=({% (['coord']*(groups['tag_role_coordinator']|length))|join(' ') %})
+coordPorts=({% (['30000']*(groups['tag_role_coordinator']|length))|join(' ') %})
+poolerPorts=({% (['30001']*(groups['tag_role_coordinator']|length))|join(' ') %})
 coordPgHbaEntries=(::1/128)
 
 coordMasterServers=({% [groups['tag_role_coordinator']]|join(' ') %})
-coordMasterDirs=({% ['$coordMasterDir'*groups['tag_role_coordinator']|length]|join(' ') %})
+coordMasterDirs=({% (['$coordMasterDir']*(groups['tag_role_coordinator']|length))|join(' ') %})
 coordMaxWALsender=5
-coordMaxWALSenders=({% ['$coordMaxWALsender'*groups['tag_role_coordinator']|length]|join(' ') %})
+coordMaxWALSenders=({% (['$coordMaxWALsender']*(groups['tag_role_coordinator']|length))|join(' ') %})
 
 coordSlave=n
 
