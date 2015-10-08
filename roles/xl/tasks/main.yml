@@ -1,21 +1,27 @@
 ---
 
-- name: Ensure Postgres-XL config is present
-  assert:
-    that:
-      - pgxlversion is defined
-      - pgxl is defined
-      - pgxl_tar_name is defined
+- include: basics.yml
 
-- name: Ensure target directory exists
+- name: Appoint control node
+  set_fact: control_hostname="{{ item }}"
+  when: "hostvars[item].ec2_tag_node == '1'"
+  with_items: play_hosts
+
+- name: Unarchive Postgres-XL tarball onto control node
+  unarchive:
+    src: "{{ pgxl_tar_name }}"
+    dest: /opt
+    creates: "/opt/Postgres-XL-{{pgxlversion}}/bin/pgxc_ctl"
+  when: inventory_hostname == control_hostname
+
+- name: Copy /opt/Postgres-XL-{{pgxlversion}} to other nodes
+  command: rsync -qa "{{ hostvars[control_hostname].ec2_private_ip_address }}:/opt/Postgres-XL-{{pgxlversion}}" /opt
+  args:
+    creates: "/opt/Postgres-XL-{{pgxlversion}}/bin/pgxc_ctl"
+  when: inventory_hostname != control_hostname
+
+- name: Link /opt/pgxl to /opt/Postgres-XL-{{pgxlversion}}
   file:
-    path: "{{pgxl}}"
-    state: directory
-
-- name: Unarchive Postgres-XL tar ball
-  unarchive: src="{{ item }}" dest="{{ pgxl }}"
-  with_items:
-    - "{{ pgxl_tar_name }}"
-
-- name: Move Postgres-XL binaries to "{{ pgxlversion }}"
-  command: mv "{{ pgxl }}"/Postgres-XL-"{{ pgxlversion }}"  "{{ pgxl }}"/"{{ pgxlversion }}"
+    path: /opt/pgxl
+    src: "/opt/Postgres-XL-{{pgxlversion}}"
+    state: link

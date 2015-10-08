@@ -1,15 +1,50 @@
 ---
 
-- name: Set up XLCloud demo cluster nodes
+- name: Set up XLCloud cluster nodes
   hosts: tag_Name_XLCloud
   gather_facts: no
-  remote_user: ec2-user
+  remote_user: admin
   sudo_user: root
   sudo: true
   vars:
     pgxlversion: "9.5alpha1"
 
+  pre_tasks:
+
+    - block:
+        - name: Ensure cluster directory is specified
+          assert:
+            msg: "Please rerun with «-e cluster=/path/to/dir»"
+            that:
+              - cluster is defined and cluster != ''
+
+        - name: Derive full path to cluster directory
+          set_fact: cluster_dir="{{ cluster|realpath }}"
+
+        - name: Load cluster configuration file
+          include_vars: "{{ cluster_dir }}/config.yml"
+
+        - name: Ensure cluster configuration is complete
+          assert:
+            msg: "Please define cluster configuration in {{cluster}}/config.yml"
+            that:
+              - cluster_name is defined and cluster_name != ''
+              - instances | length > 0
+      tags: always
+
+    - name: Set the node id and hostname as facts
+      set_fact:
+        node_id: "{{ ec2_tag_node }}"
+        cluster_hostname: "{{ cluster_name|lower + ec2_tag_node }}"
+      tags: always
+
   roles:
 
-    - role: xl
+    - role: setup
       tags: always
+
+    - role: common
+      tags: common
+
+    - role: xl
+      tags: xl

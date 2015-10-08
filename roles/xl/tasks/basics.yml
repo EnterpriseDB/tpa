@@ -1,0 +1,72 @@
+---
+
+- name: Set the hostname
+  hostname: name="{{ cluster_hostname }}"
+
+- name: Does /etc/hosts contain the cluster hosts already?
+  command: grep -q "{{ cluster_hostname }}" /etc/hosts
+  ignore_errors: yes
+  changed_when: false
+  register: hosts
+
+- block:
+    - name: Populate /etc/hosts
+      shell: echo "{{ hostvars[item].ec2_ip_address + ' ' + hostvars[item].cluster_hostname }}" >> /etc/hosts
+      with_items: play_hosts
+  when: hosts|failed
+
+- name: Create postgres group
+  group: name=postgres state=present
+
+- name: Create postgres user
+  user: name=postgres group=postgres state=present
+
+- name: Install bashrc for postgres user
+  template:
+    src: bashrc.j2
+    dest: ~postgres/.bashrc
+    owner: postgres
+    group: postgres
+    mode: 0644
+
+- name: Generate keypair for postgres
+  local_action: command ssh-keygen -P "" -f id_postgres
+  args:
+    chdir: "{{ cluster_dir }}"
+    creates: id_postgres.pub
+  run_once: yes
+  sudo: no
+
+- name: Ensure ~postgres/.ssh exists
+  file: path=~postgres/.ssh state=directory owner=postgres group=postgres mode=0755
+
+- name: Upload keypair to all nodes
+  copy: src={{item|replace('rsa','postgres')}} dest=~postgres/.ssh/{{item|basename}} owner=postgres group=postgres mode=0600
+  with_items:
+    - "{{cluster_dir}}/id_rsa"
+    - "{{cluster_dir}}/id_rsa.pub"
+
+- name: Set public key permissions
+  file: path=~postgres/.ssh/id_rsa.pub mode=0644
+
+- name: Install authorized keys
+  authorized_key:
+    user: postgres
+    key: "{{ lookup('file', cluster_dir+'/id_rsa.pub') }}"
+
+- name: Check if known_hosts exists
+  stat: path=~postgres/.ssh/known_hosts
+  register: known
+
+- block:
+    - name: Add hosts to known_hosts
+      shell: ssh-keyscan -H "{{ hostvars[item].ec2_ip_address }}" "{{ hostvars[item].ec2_private_ip_address }}" "{{ hostvars[item].cluster_hostname }}" >> ~/.ssh/known_hosts
+      with_items: play_hosts
+      sudo_user: postgres
+      sudo: yes
+  when: not known.stat.exists
+
+- name: Ensure that /opt exists
+  file:
+    path: /opt
+    state: directory
