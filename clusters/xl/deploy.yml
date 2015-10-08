@@ -48,3 +48,6 @@
 
     - role: xl
       tags: xl
+
+    - role: xlinitall
+      tags: xlinitall
