@@ -40,8 +40,11 @@
 
   roles:
 
-    - role: common
+    - role: setup
       tags: always
+
+    - role: common
+      tags: common
 
     # We want our Postgres data directory on an encrypted volume. At
     # this point, /var/lib/postgresql won't exist because the packages
