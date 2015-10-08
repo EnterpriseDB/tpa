@@ -10,11 +10,11 @@ dataDirRoot=$HOME
 #---- GTM ------------------------------------------------------------------------------------
 gtmName=gtm
 
-gtmMasterServer=localhost
-gtmMasterPort=20001
+gtmMasterServer={% cluster_hostname %}
+gtmMasterPort=20000
 gtmMasterDir=$dataDirRoot/gtm
 
-gtmExtraConfig=/tmp/gtm_extra.conf
+gtmExtraConfig=none
 gtmMasterSpecificExtraConfig=none
 
 gtmSlave=n
@@ -23,12 +23,12 @@ gtmSlave=n
 gtmProxyDir=$dataDirRoot/gtm_pxy
 
 gtmProxy=y
-gtmProxyNames=(gtm_pxy1)
-gtmProxyServers=(localhost)
-gtmProxyPorts=(20101)
-gtmProxyDirs=($gtmProxyDir.1)
+gtmProxyNames=({% ['gtm_pxy'*groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length]|join(' ') %})
+gtmProxyServers=({% groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|join(' ') %})
+gtmProxyPorts=({% [20001*groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length]|join(' ') %})
+gtmProxyDirs=({% ['$gtmProxyDir'*groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length]|join(' ') %})
 
-gtmPxyExtraConfig=/tmp/gtmp_extra.conf
+gtmPxyExtraConfig=none
 
 #---- Coordinators ----------------------------------------------------------------------------------------------------
 coordMasterDir=$dataDirRoot/coord_master
