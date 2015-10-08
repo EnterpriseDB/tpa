@@ -52,7 +52,7 @@
 - name: Install authorized keys
   authorized_key:
     user: postgres
-    key: "{{ lookup('file', cluster_dir+'/id_rsa.pub') }}"
+    key: "{{ lookup('file', cluster_dir+'/id_postgres.pub') }}"
 
 - name: Check if known_hosts exists
   stat: path=~postgres/.ssh/known_hosts
