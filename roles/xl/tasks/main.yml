@@ -25,3 +25,14 @@
     path: /opt/pgxl
     src: "/opt/Postgres-XL-{{pgxlversion}}"
     state: link
+
+- block:
+    - name: Install pgxc_ctl.conf on control node
+      template:
+        src: pgxc_ctl.conf.j2
+        dest: ~postgres/pgxc_ctl.conf
+    - name: Run pgxc_ctl init all
+      command: echo pgxc_ctl init all
+  when: inventory_hostname == control_hostname
+  sudo_user: postgres
+  sudo: true
