@@ -23,6 +23,9 @@ gtmSlave=n
 gtmProxyDir=$dataDirRoot/gtm_pxy
 
 gtmProxy=y
+
+# XXX Does this need to be gtm_pxy1 gtm_pxy2 even if they are on separate
+# servers?
 gtmProxyNames=({% ['gtm_pxy'*groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length]|join(' ') %})
 gtmProxyServers=({% groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|join(' ') %})
 gtmProxyPorts=({% [20001*groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length]|join(' ') %})
@@ -35,15 +38,17 @@ coordMasterDir=$dataDirRoot/coord_master
 coordSlaveDir=$HOME/coord_slave
 coordArchLogDir=$HOME/coord_archlog
 
-coordNames=(coord1 coord2)
-coordPorts=(30001 30002)
-poolerPorts=(30011 30012)
+# XXX Does this need to be coord1 coord2 even if they are on separate
+# servers?
+coordNames=({% ['coord'*groups['tag_role_coordinator']|length]|join(' ') %})
+coordPorts=({% ['30000'*groups['tag_role_coordinator']|length]|join(' ') %})
+poolerPorts=({% ['30001'*groups['tag_role_coordinator']|length]|join(' ') %})
 coordPgHbaEntries=(::1/128)
 
-coordMasterServers=(localhost localhost)
-coordMasterDirs=($coordMasterDir.1 $coordMasterDir.2)
+coordMasterServers=({% [groups['tag_role_coordinator']]|join(' ') %})
+coordMasterDirs=({% ['$coordMasterDir'*groups['tag_role_coordinator']|length]|join(' ') %})
 coordMaxWALsender=5
-coordMaxWALSenders=($coordMaxWALsender $coordMaxWALsender)
+coordMaxWALSenders=({% ['$coordMaxWALsender'*groups['tag_role_coordinator']|length]|join(' ') %})
 
 coordSlave=n
 
