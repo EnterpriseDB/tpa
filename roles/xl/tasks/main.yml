@@ -7,11 +7,6 @@
   when: "hostvars[item].ec2_tag_node == '1'"
   with_items: play_hosts
 
-- name: Ensure that /opt exists
-  file:
-    path: /opt
-    state: directory
-
 - name: Ensure that /opt/Postgres-XL-{{pgxlversion}} exists
   file:
     path: /opt/Postgres-XL-{{pgxlversion}}
