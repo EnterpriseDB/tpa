@@ -5,10 +5,12 @@ packages:
     - tcpdump
     - vim
     - git
+    - rsync
   redhat:
     - tcpdump
     - vim
     - git
+    - rsync
 
 unwanted_packages:
   debian:
