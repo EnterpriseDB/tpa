@@ -7,6 +7,19 @@
   when: "hostvars[item].ec2_tag_node == '1'"
   with_items: play_hosts
 
+- name: Ensure that /opt exists
+  file:
+    path: /opt
+    state: directory
+
+- name: Ensure that /opt/Postgres-XL-{{pgxlversion}} exists
+  file:
+    path: /opt/Postgres-XL-{{pgxlversion}}
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
 - name: Unarchive Postgres-XL tarball onto control node
   unarchive:
     src: "{{ pgxl_tar_name }}"
@@ -15,9 +28,12 @@
   when: inventory_hostname == control_hostname
 
 - name: Copy /opt/Postgres-XL-{{pgxlversion}} to other nodes
-  command: rsync -qa "{{ hostvars[control_hostname].ec2_private_ip_address }}:/opt/Postgres-XL-{{pgxlversion}}" /opt
+  command: rsync -e 'ssh -o StrictHostKeyChecking=yes' -qa \
+    "{{ hostvars[control_hostname].ec2_private_ip_address }}:/opt/Postgres-XL-{{pgxlversion}}" /opt
   args:
     creates: "/opt/Postgres-XL-{{pgxlversion}}/bin/pgxc_ctl"
+  sudo_user: postgres
+  sudo: yes
   when: inventory_hostname != control_hostname
 
 - name: Link /opt/pgxl to /opt/Postgres-XL-{{pgxlversion}}

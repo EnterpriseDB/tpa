@@ -65,8 +65,3 @@
       sudo_user: postgres
       sudo: yes
   when: not known.stat.exists
-
-- name: Ensure that /opt exists
-  file:
-    path: /opt
-    state: directory
