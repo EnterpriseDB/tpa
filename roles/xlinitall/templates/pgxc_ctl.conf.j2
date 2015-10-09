@@ -25,9 +25,9 @@ gtmProxyDir=$dataDirRoot/gtm_pxy
 gtmProxy=y
 
 gtmProxyNames=({% for h in groups['tag_role_datanode']|difference(groups['tag_role_gtm']) %}gtm_pxy{{loop.index}}{% endfor %})
-gtmProxyServers=({% groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|join(' ') %})
-gtmProxyPorts=({% (['20001']*(groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length))|join(' ') %})
-gtmProxyDirs=({% (['$gtmProxyDir']*(groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length))|join(' ') %})
+gtmProxyServers=({{ groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|join(' ') }})
+gtmProxyPorts=({{ (['20001']*(groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length))|join(' ') }})
+gtmProxyDirs=({{ (['$gtmProxyDir']*(groups['tag_role_datanode']|difference(groups['tag_role_gtm'])|length))|join(' ') }})
 
 gtmPxyExtraConfig=none
 
@@ -37,14 +37,14 @@ coordSlaveDir=$HOME/coord_slave
 coordArchLogDir=$HOME/coord_archlog
 
 coordNames=({% for h in groups['tag_role_coordinator'] %}coord{{loop.index}}{% endfor %})
-coordPorts=({% (['30000']*(groups['tag_role_coordinator']|length))|join(' ') %})
-poolerPorts=({% (['30001']*(groups['tag_role_coordinator']|length))|join(' ') %})
+coordPorts=({{ (['30000']*(groups['tag_role_coordinator']|length))|join(' ') }})
+poolerPorts=({{ (['30001']*(groups['tag_role_coordinator']|length))|join(' ') }})
 coordPgHbaEntries=(::1/128)
 
-coordMasterServers=({% groups['tag_role_coordinator']|join(' ') %})
-coordMasterDirs=({% (['$coordMasterDir']*(groups['tag_role_coordinator']|length))|join(' ') %})
+coordMasterServers=({{ groups['tag_role_coordinator']|join(' ') }})
+coordMasterDirs=({{ (['$coordMasterDir']*(groups['tag_role_coordinator']|length))|join(' ') }})
 coordMaxWALsender=5
-coordMaxWALSenders=({% (['$coordMaxWALsender']*(groups['tag_role_coordinator']|length))|join(' ') %})
+coordMaxWALSenders=({{ (['$coordMaxWALsender']*(groups['tag_role_coordinator']|length))|join(' ') }})
 
 coordSlave=n
 
@@ -79,14 +79,14 @@ datanodeArchLogDir=$dataDirRoot/datanode_archlog
 
 primaryDatanode=datanode1
 datanodeNames=({% for h in groups['tag_role_datanode']|difference(groups['tag_role_coordinator']) %}datanode{{loop.index}}{% endfor %})
-datanodePorts=({% (['40000']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') %})
-datanodePoolerPorts=({% (['40001']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') %})
+datanodePorts=({{ (['40000']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') }})
+datanodePoolerPorts=({{ (['40001']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') }})
 datanodePgHbaEntries=(::1/128)
 
 datanodeMasterServers=({% groups['tag_role_coordinator']|join(' ') %})
-datanodeMasterDirs=({% (['$datanodeMasterDir']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') %})
+datanodeMasterDirs=({{ (['$datanodeMasterDir']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') }})
 datanodeMaxWalSender=5
-datanodeMaxWALSenders=({% (['$datanodeMasterDir']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') %})
+datanodeMaxWALSenders=({{ (['$datanodeMasterDir']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') }})
 
 datanodeSlave=n
 
