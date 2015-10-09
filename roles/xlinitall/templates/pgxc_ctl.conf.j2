@@ -24,11 +24,12 @@ gtmProxyDir=$dataDirRoot/gtm_pxy
 
 gtmProxy=y
 
-{% set g = groups['tag_role_datanode']|difference(groups['tag_role_gtm']) %}
+{% with g = groups['tag_role_datanode']|difference(groups['tag_role_gtm']) %}
 gtmProxyNames=({% for h in g %}gtm_pxy{{loop.index}} {% endfor %})
 gtmProxyServers=({{ g|join(' ') }})
 gtmProxyPorts=({{ (['20001']*(g|length))|join(' ') }})
 gtmProxyDirs=({{ (['$gtmProxyDir']*(g|length))|join(' ') }})
+{% endwith %}
 
 gtmPxyExtraConfig=none
 
@@ -37,7 +38,7 @@ coordMasterDir=$dataDirRoot/coord_master
 coordSlaveDir=$HOME/coord_slave
 coordArchLogDir=$HOME/coord_archlog
 
-{% set g = groups['tag_role_coordinator'] %}
+{% with g = groups['tag_role_coordinator'] %}
 coordNames=({% for h in g %}coord{{loop.index}} {% endfor %})
 coordPorts=({{ (['30000']*(g|length))|join(' ') }})
 poolerPorts=({{ (['30001']*(g|length))|join(' ') }})
@@ -47,6 +48,7 @@ coordMasterServers=({{ g|join(' ') }})
 coordMasterDirs=({{ (['$coordMasterDir']*(g|length))|join(' ') }})
 coordMaxWALsender=5
 coordMaxWALSenders=({{ (['$coordMaxWALsender']*(g|length))|join(' ') }})
+{% endwith %}
 
 coordSlave=n
 
@@ -79,7 +81,7 @@ datanodeMasterDir=$dataDirRoot/dn_master
 datanodeSlaveDir=$dataDirRoot/dn_slave
 datanodeArchLogDir=$dataDirRoot/datanode_archlog
 
-{% set g = groups['tag_role_datanode']|difference(groups['tag_role_coordinator']) %}
+{% with g = groups['tag_role_datanode']|difference(groups['tag_role_coordinator']) %}
 primaryDatanode=datanode1
 datanodeNames=({% for h in g %}datanode{{loop.index}} {% endfor %})
 datanodePorts=({{ (['40000']*(g|length))|join(' ') }})
@@ -90,6 +92,7 @@ datanodeMasterServers=({{ g|join(' ') }})
 datanodeMasterDirs=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
 datanodeMaxWalSender=5
 datanodeMaxWALSenders=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
+{% endwith %}
 
 datanodeSlave=n
 
