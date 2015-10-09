@@ -26,7 +26,7 @@ gtmProxy=y
 
 {% with g = groups['tag_role_datanode']|difference(groups['tag_role_gtm']) %}
 gtmProxyNames=({% for h in g %}gtm_pxy{{loop.index}} {% endfor %})
-gtmProxyServers=({{ g|join(' ') }})
+gtmProxyServers=({{ g|map('lookup',hostvars,'cluster_hostname')|join(' ') }})
 gtmProxyPorts=({{ (['20001']*(g|length))|join(' ') }})
 gtmProxyDirs=({{ (['$gtmProxyDir']*(g|length))|join(' ') }})
 {% endwith %}
@@ -44,7 +44,7 @@ coordPorts=({{ (['30000']*(g|length))|join(' ') }})
 poolerPorts=({{ (['30001']*(g|length))|join(' ') }})
 coordPgHbaEntries=(::1/128)
 
-coordMasterServers=({{ g|join(' ') }})
+coordMasterServers=({{ g|map('lookup',hostvars,'cluster_hostname')|join(' ') }})
 coordMasterDirs=({{ (['$coordMasterDir']*(g|length))|join(' ') }})
 coordMaxWALsender=5
 coordMaxWALSenders=({{ (['$coordMaxWALsender']*(g|length))|join(' ') }})
@@ -88,7 +88,7 @@ datanodePorts=({{ (['40000']*(g|length))|join(' ') }})
 datanodePoolerPorts=({{ (['40001']*(g|length))|join(' ') }})
 datanodePgHbaEntries=(::1/128)
 
-datanodeMasterServers=({{ g|join(' ') }})
+datanodeMasterServers=({{ g|map('lookup',hostvars,'cluster_hostname')|join(' ') }})
 datanodeMasterDirs=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
 datanodeMaxWalSender=5
 datanodeMaxWALSenders=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
