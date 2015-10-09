@@ -83,7 +83,7 @@ datanodePorts=({{ (['40000']*(groups['tag_role_datanode']|difference(groups['tag
 datanodePoolerPorts=({{ (['40001']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') }})
 datanodePgHbaEntries=(::1/128)
 
-datanodeMasterServers=({% groups['tag_role_coordinator']|join(' ') %})
+datanodeMasterServers=({{ groups['tag_role_coordinator']|join(' ') }})
 datanodeMasterDirs=({{ (['$datanodeMasterDir']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') }})
 datanodeMaxWalSender=5
 datanodeMaxWALSenders=({{ (['$datanodeMasterDir']*(groups['tag_role_datanode']|difference(groups['tag_role_coordinator'])|length))|join(' ') }})
