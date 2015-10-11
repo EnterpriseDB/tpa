@@ -45,7 +45,7 @@
 
     - name: Stop EC2 instances in each region
       ec2:
-        state: "{{ state|default('stopped') }}"
+        state: "{{ state|default('running') }}"
         region: "{{ item }}"
         instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_id')|list }}"
         wait: yes
