@@ -12,6 +12,8 @@
         dest: ~postgres/pgxc_ctl.conf
     - name: Run pgxc_ctl init all
       command: echo pgxc_ctl -c ~postgres/pgxc_ctl.conf init all
+      environment:
+        LANG: en_US.UTF-8
   when: inventory_hostname == control_hostname
   sudo_user: postgres
   sudo: true
