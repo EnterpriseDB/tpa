@@ -22,30 +22,7 @@
     # expect $cluster_dir/config.yml to define a cluster name and a list
     # of instances.
 
-    - block:
-        - name: Ensure cluster directory is specified
-          assert:
-            msg: "Please rerun with «-e cluster=/path/to/dir»"
-            that:
-              - cluster is defined and cluster != ''
-
-        - name: Derive full path to cluster directory
-          set_fact: cluster_dir="{{ cluster|realpath }}"
-
-        - name: Load cluster configuration file
-          include_vars: "{{ cluster_dir }}/config.yml"
-
-        - name: Ensure cluster configuration is complete
-          assert:
-            msg: "Please define cluster configuration in {{cluster}}/config.yml"
-            that:
-              - cluster_name is defined and cluster_name != ''
-              - instances | length > 0
-      tags: [always, validate]
-
-    - name: Derive a unique list of regions from instances
-      set_fact:
-        regions: "{{ instances|map(attribute='region')|unique|list }}"
+    - include: validate.yml
       tags: always
 
     # A VPC (Virtual Private Cloud) is an isolated network container in
