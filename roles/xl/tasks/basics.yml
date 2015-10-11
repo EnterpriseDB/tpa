@@ -19,7 +19,7 @@
   group: name=postgres state=present
 
 - name: Create postgres user
-  user: name=postgres group=postgres state=present
+  user: name=postgres group=postgres shell=/bin/bash state=present
 
 - name: Install bashrc for postgres user
   template:
