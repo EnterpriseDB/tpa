@@ -1,0 +1,53 @@
+---
+
+# ansible-playbook -i inventory/ec2.py state.yml \
+#     -e cluster=./clusters/x -e state=running
+
+- name: Stop hosts in a cluster
+  hosts: localhost
+  tasks:
+    - block:
+        - name: Require cluster directory to be specified
+          assert:
+            msg: "Please rerun with «-e cluster=./clusters/name»"
+            that:
+              - cluster is defined and cluster != ''
+
+        - name: Derive full path to cluster directory
+          set_fact: cluster_dir="{{ cluster|realpath }}"
+
+        - name: Load cluster configuration file
+          include_vars: "{{ cluster_dir }}/config.yml"
+
+        - name: Ensure cluster configuration is complete
+          assert:
+            msg: "Please define cluster configuration in {{cluster}}/config.yml"
+            that:
+              - cluster_name is defined and cluster_name != ''
+              - instances | length > 0
+
+        - name: Derive EC2 group name for cluster
+          set_fact:
+            cluster_tag: "{{ 'tag_Name_' + cluster_name }}"
+
+        - name: Require inventory group {{cluster_tag}} to be defined
+          assert:
+            msg: "No hosts found in group {{cluster_tag}}"
+            that:
+              - cluster_tag in groups
+              - groups[cluster_tag] | length > 0
+      tags: always
+
+    - name: Derive a unique list of regions from instances
+      set_fact:
+        regions: "{{ instances|map(attribute='region')|unique|list }}"
+      tags: always
+
+    - name: Stop EC2 instances in each region
+      ec2:
+        state: "{{ state|default('stopped') }}"
+        region: "{{ item }}"
+        instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_id')|list }}"
+        wait: yes
+      with_items: regions
+      tags: ec2
