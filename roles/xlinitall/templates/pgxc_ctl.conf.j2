@@ -50,6 +50,9 @@ coordMasterServers=({{ g|map('lookup',hostvars,'cluster_hostname')|sort|join(' '
 coordMasterDirs=({{ (['$coordMasterDir']*(g|length))|join(' ') }})
 coordMaxWALsender=5
 coordMaxWALSenders=({{ (['$coordMaxWALsender']*(g|length))|join(' ') }})
+
+coordSpecificExtraConfig=({{ (['none']*(g|length))|join(' ') }})
+coordSpecificExtraPgHba=({{ (['none']*(g|length))|join(' ') }})
 {% endwith %}
 
 coordSlave=n
@@ -75,9 +78,6 @@ log_error_verbosity=verbose
 #autovacuum=off
 EOF
 
-coordSpecificExtraConfig=({{ (['none']*(g|length))|join(' ') }})
-coordSpecificExtraPgHba=({{ (['none']*(g|length))|join(' ') }})
-
 #---- Datanodes -------------------------------------------------------------------------------------------------------
 datanodeMasterDir=$dataDirRoot/dn_master
 datanodeSlaveDir=$dataDirRoot/dn_slave
@@ -94,6 +94,9 @@ datanodeMasterServers=({{ g|map('lookup',hostvars,'cluster_hostname')|sort|join(
 datanodeMasterDirs=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
 datanodeMaxWalSender=5
 datanodeMaxWALSenders=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
+
+datanodeSpecificExtraConfig=({{ (['none']*(g|length))|join(' ') }})
+datanodeSpecificExtraPgHba=({{ (['none']*(g|length))|join(' ') }})
 {% endwith %}
 
 datanodeSlave=n
@@ -117,5 +120,3 @@ log_min_duration_statement=0
 log_error_verbosity=verbose
 #autovacuum=off
 EOF
-datanodeSpecificExtraConfig=({{ (['none']*(g|length))|join(' ') }})
-datanodeSpecificExtraPgHba=({{ (['none']*(g|length))|join(' ') }})
