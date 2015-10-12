@@ -16,6 +16,7 @@
         executable: /bin/bash
       environment:
         LC_ALL: en_US.UTF-8
+        PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
   when: inventory_hostname == control_hostname
   sudo_user: postgres
   sudo: true
