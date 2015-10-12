@@ -29,6 +29,14 @@
     group: postgres
     mode: 0644
 
+- name: Install profile for postgres user
+  template:
+    src: bashrc.j2
+    dest: ~postgres/.profile
+    owner: postgres
+    group: postgres
+    mode: 0644
+
 - name: Generate keypair for postgres
   local_action: command ssh-keygen -P "" -f id_postgres
   args:
