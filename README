@@ -26,7 +26,7 @@ based on their tags (again, see clusters/test for an example), and run:
 
 To permanently deprovision a cluster, run:
 
-    utils/ansible-playbook platforms/aws/deprovision.yml \
+    utils/ansible-playbook -i inventory/ec2.py platforms/aws/deprovision.yml \
         -e cluster=./clusters/name
 
 Note that deprovision.yml DOES NOT currently remove additional volumes
