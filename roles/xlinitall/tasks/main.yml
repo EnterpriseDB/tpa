@@ -5,6 +5,10 @@
   when: "hostvars[item].ec2_tag_node == '1'"
   with_items: play_hosts
 
+- name: Check if pgxc_ctl.conf exists
+  stat: path=~postgres/pgxc_ctl.conf
+  register: conf
+
 - block:
     - name: Install pgxc_ctl.conf on control node
       template:
@@ -17,6 +21,6 @@
       environment:
         LC_ALL: en_US.UTF-8
         PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
-  when: inventory_hostname == control_hostname
+  when: inventory_hostname == control_hostname and not conf.stat.exists
   sudo_user: postgres
   sudo: true
