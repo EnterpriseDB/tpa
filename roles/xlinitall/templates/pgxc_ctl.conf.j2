@@ -26,7 +26,7 @@ gtmProxyDir=$dataDirRoot/gtm_pxy
 
 gtmProxy=y
 
-{% with g = groups['tag_role_datanode']|difference(groups['tag_role_gtm']) %}
+{% with g = groups['tag_role_datanode'] %}
 gtmProxyNames=({% for h in g %}gtm_pxy{{loop.index}} {% endfor %})
 gtmProxyServers=({{ g|map('lookup',hostvars,'cluster_hostname')|sort|join(' ') }})
 gtmProxyPorts=({{ (['20001']*(g|length))|join(' ') }})
