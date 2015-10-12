@@ -44,7 +44,7 @@ coordArchLogDir=$HOME/coord_archlog
 coordNames=({% for h in g %}coord{{loop.index}} {% endfor %})
 coordPorts=({{ (['30000']*(g|length))|join(' ') }})
 poolerPorts=({{ (['30001']*(g|length))|join(' ') }})
-coordPgHbaEntries=(::1/128)
+coordPgHbaEntries=(10.63.1.0/24)
 
 coordMasterServers=({{ g|map('lookup',hostvars,'cluster_hostname')|sort|join(' ') }})
 coordMasterDirs=({{ (['$coordMasterDir']*(g|length))|join(' ') }})
@@ -75,8 +75,8 @@ log_error_verbosity=verbose
 #autovacuum=off
 EOF
 
-coordSpecificExtraConfig=(none none)
-coordSpecificExtraPgHba=(none none)
+coordSpecificExtraConfig=({{ (['none']*(g|length))|join(' ') }})
+coordSpecificExtraPgHba=({{ (['none']*(g|length))|join(' ') }})
 
 #---- Datanodes -------------------------------------------------------------------------------------------------------
 datanodeMasterDir=$dataDirRoot/dn_master
@@ -88,7 +88,7 @@ primaryDatanode=datanode1
 datanodeNames=({% for h in g %}datanode{{loop.index}} {% endfor %})
 datanodePorts=({{ (['40000']*(g|length))|join(' ') }})
 datanodePoolerPorts=({{ (['40001']*(g|length))|join(' ') }})
-datanodePgHbaEntries=(::1/128)
+datanodePgHbaEntries=(10.63.1.0/24)
 
 datanodeMasterServers=({{ g|map('lookup',hostvars,'cluster_hostname')|sort|join(' ') }})
 datanodeMasterDirs=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
@@ -117,3 +117,5 @@ log_min_duration_statement=0
 log_error_verbosity=verbose
 #autovacuum=off
 EOF
+datanodeSpecificExtraConfig=({{ (['none']*(g|length))|join(' ') }})
+datanodeSpecificExtraPgHba=({{ (['none']*(g|length))|join(' ') }})
