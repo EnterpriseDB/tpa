@@ -42,8 +42,8 @@ coordArchLogDir=$HOME/coord_archlog
 
 {% with g = groups['tag_role_coordinator'] %}
 coordNames=({% for h in g %}coord{{loop.index}} {% endfor %})
-coordPorts=({{ (['30000']*(g|length))|join(' ') }})
-poolerPorts=({{ (['30001']*(g|length))|join(' ') }})
+coordPorts=({{ (['20002']*(g|length))|join(' ') }})
+poolerPorts=({{ (['20003']*(g|length))|join(' ') }})
 coordPgHbaEntries=(10.63.1.0/24)
 
 coordMasterServers=({{ g|map('lookup',hostvars,'cluster_hostname')|sort|join(' ') }})
@@ -86,8 +86,8 @@ datanodeArchLogDir=$dataDirRoot/datanode_archlog
 {% with g = groups['tag_role_datanode']|difference(groups['tag_role_coordinator']) %}
 primaryDatanode=datanode1
 datanodeNames=({% for h in g %}datanode{{loop.index}} {% endfor %})
-datanodePorts=({{ (['40000']*(g|length))|join(' ') }})
-datanodePoolerPorts=({{ (['40001']*(g|length))|join(' ') }})
+datanodePorts=({{ (['20004']*(g|length))|join(' ') }})
+datanodePoolerPorts=({{ (['20005']*(g|length))|join(' ') }})
 datanodePgHbaEntries=(10.63.1.0/24)
 
 datanodeMasterServers=({{ g|map('lookup',hostvars,'cluster_hostname')|sort|join(' ') }})

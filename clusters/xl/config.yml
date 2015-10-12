@@ -11,6 +11,19 @@ cluster_name: "XLCloud"
 cluster_tags:
   Name: XLCloud
   Owner: AMS
+cluster_rules:
+  - proto: tcp
+    from_port: 22
+    to_port: 22
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 5432
+    to_port: 5432
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 20000
+    to_port: 20005
+    cidr_ip: 0.0.0.0/0
 
 instances:
     - type: t2.medium
