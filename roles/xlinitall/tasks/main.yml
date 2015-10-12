@@ -11,7 +11,7 @@
         src: pgxc_ctl.conf.j2
         dest: ~postgres/pgxc_ctl.conf
     - name: Run pgxc_ctl init all
-      command: pgxc_ctl -c ~postgres/pgxc_ctl.conf init all
+      shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf init all
       environment:
         LC_ALL: en_US.UTF-8
   when: inventory_hostname == control_hostname
