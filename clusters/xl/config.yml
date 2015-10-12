@@ -20,14 +20,14 @@ instances:
       assign_eip: yes
       tags:
         node: 1
-        role: gtm,coordinator,datanode
+        role: gtm,coordinator
     - type: t2.medium
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
       tags:
         node: 2
-        role: coordinator,datanode
+        role: datanode
     - type: t2.medium
       region: us-west-2
       image: ami-431a4273
@@ -69,4 +69,11 @@ instances:
       subnet: 10.63.1.0/24
       tags:
         node: 8
+        role: datanode
+    - type: t2.medium
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      tags:
+        node: 9
         role: datanode
