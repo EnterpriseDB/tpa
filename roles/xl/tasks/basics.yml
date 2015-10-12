@@ -11,7 +11,7 @@
 
 - block:
     - name: Populate /etc/hosts
-      shell: echo "{{ hostvars[item].ec2_ip_address + ' ' + hostvars[item].cluster_hostname }}" >> /etc/hosts
+      shell: echo "{{ hostvars[item].ec2_private_ip_address + ' ' + hostvars[item].cluster_hostname }}" >> /etc/hosts
       with_items: play_hosts
   when: hosts|failed
 
