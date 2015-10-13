@@ -43,12 +43,6 @@
 - name: Install python packages
   shell: pip install virtualenv
 
-- name: create file system
-  action: filesystem fstype=ext4 dev=/dev/xvdb
-
-- name: 
-  action: mount name=/data src=/dev/xvdb fstype=ext4 state=mounted
-
 - name: Ensure that /data/pgxl exists
   file:
     path: /data/pgxl
