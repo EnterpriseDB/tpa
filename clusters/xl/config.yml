@@ -32,6 +32,10 @@ instances:
       subnet: 10.63.1.0/24
       assign_eip: yes
       volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
           - device_name: /dev/xvdb
             volume_type: gp2
             volume_size: 100
