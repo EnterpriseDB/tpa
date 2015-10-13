@@ -36,3 +36,9 @@
     path: /opt/pgxl
     src: "/opt/Postgres-XL-{{pgxlversion}}"
     state: link
+
+- name: Install other required packages using apt-get
+  shell: apt-get install -y python-dev time
+
+- name: Install python packages
+  shell: pip install virtualenv
