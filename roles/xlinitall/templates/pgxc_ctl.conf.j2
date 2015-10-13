@@ -7,7 +7,7 @@ localTmpDir=$tmpDir
 
 configBackup=n
 
-dataDirRoot=$HOME
+dataDirRoot=/data
 
 #---- GTM ------------------------------------------------------------------------------------
 gtmName=gtm
@@ -67,15 +67,15 @@ log_destination = 'stderr'
 logging_collector = on
 log_directory = 'pg_log'
 log_line_prefix = '%p:%v:%x:%m:%C:%R'
-#trace_locks = true
 listen_addresses = '*'
-max_connections = 100
-max_prepared_transactions = 100
+max_connections = 1000
+max_prepared_transactions = 1000
 hot_standby = off
-log_min_messages=debug1
-log_min_duration_statement=0
 log_error_verbosity=verbose
-#autovacuum=off
+shared_buffers = 1GB
+work_mem = 512MB
+effective_cache_size = 200GB
+default_statistics_target = 10000
 EOF
 
 #---- Datanodes -------------------------------------------------------------------------------------------------------
@@ -112,11 +112,12 @@ log_directory = 'pg_log'
 log_line_prefix = '%p:%v:%x:%m:%C:%R'
 #trace_locks = true
 listen_addresses = '*'
-max_connections = 100
-max_prepared_transactions = 100
+max_connections = 1000
+max_prepared_transactions = 1000
 hot_standby = off
-log_min_messages=debug1
-log_min_duration_statement=0
 log_error_verbosity=verbose
-#autovacuum=off
+shared_buffers = 1GB
+work_mem = 512MB
+effective_cache_size = 200GB
+default_statistics_target = 10000
 EOF

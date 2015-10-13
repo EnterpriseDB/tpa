@@ -8,6 +8,9 @@
   sudo: true
   vars:
     pgxlversion: "9.5alpha1"
+    luks_volume: postgres
+    luks_device: /dev/xvdb
+    luks_mountpoint: /data
 
   pre_tasks:
 

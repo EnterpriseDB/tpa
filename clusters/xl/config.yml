@@ -31,6 +31,11 @@ instances:
       image: ami-431a4273
       subnet: 10.63.1.0/24
       assign_eip: yes
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
       tags:
         node: 1
         role: gtm,coordinator
@@ -38,6 +43,11 @@ instances:
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
       tags:
         node: 2
         role: datanode
@@ -45,6 +55,11 @@ instances:
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
       tags:
         node: 3
         role: datanode
@@ -52,6 +67,11 @@ instances:
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
       tags:
         node: 4
         role: datanode
@@ -59,6 +79,11 @@ instances:
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
       tags:
         node: 5
         role: datanode
@@ -66,6 +91,11 @@ instances:
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
       tags:
         node: 6
         role: datanode
@@ -73,6 +103,11 @@ instances:
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
       tags:
         node: 7
         role: datanode
@@ -80,6 +115,11 @@ instances:
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
       tags:
         node: 8
         role: datanode
@@ -87,6 +127,11 @@ instances:
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
       tags:
         node: 9
         role: datanode
