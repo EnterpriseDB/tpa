@@ -38,10 +38,16 @@
     state: link
 
 - name: Install other required packages using apt-get
-  shell: apt-get install -y python-dev time
+  shell: apt-get install -y python-dev time sysstat
 
 - name: Install python packages
   shell: pip install virtualenv
+
+- name: create file system
+  action: filesystem fstype=ext3 dev=/dev/xvdb
+
+- name: 
+  action: mount name=/data src=/dev/xvdb fstype=ext3 state=mounted
 
 - name: Ensure that /data/pgxl exists
   file:
