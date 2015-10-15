@@ -136,8 +136,8 @@
           selectattr('item.vpc.cidr_block', 'equalto', item.subnet)|
           map(attribute='group_id')|first }}"
         volumes: "{{ item.volumes|default(omit) }}"
-        spot_price: "{{ item.spot_price }}"
-        spot_wait_timeout: "{{ item.spot_wait_timeout }}"
+        spot_price: "{{ item.spot_price|default(omit) }}"
+        spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
         assign_public_ip: yes
         wait: yes
       with_items: instances
