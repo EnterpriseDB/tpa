@@ -26,7 +26,7 @@ cluster_rules:
     cidr_ip: 0.0.0.0/0
 
 instances:
-    - type: r3.2xlarge
+    - type: c3.4xlarge
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
@@ -152,4 +152,116 @@ instances:
             ephemeral: ephemeral0
       tags:
         node: 9
+        role: datanode
+    - type: i2.xlarge
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        node: 10
+        role: datanode
+    - type: i2.xlarge
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        node: 11
+        role: datanode
+    - type: i2.xlarge
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        node: 12
+        role: datanode
+    - type: i2.xlarge
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        node: 13
+        role: datanode
+    - type: i2.xlarge
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        node: 14
+        role: datanode
+    - type: i2.xlarge
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        node: 15
+        role: datanode
+    - type: i2.xlarge
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        node: 16
+        role: datanode
+    - type: i2.xlarge
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        node: 17
         role: datanode

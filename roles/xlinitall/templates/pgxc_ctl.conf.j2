@@ -73,12 +73,12 @@ max_prepared_transactions = 1000
 hot_standby = off
 log_error_verbosity=verbose
 shared_buffers = 8GB
-work_mem = 512MB
+work_mem = 1GB
 effective_cache_size = 20GB
 default_statistics_target = 10000
 shared_queue_size = 8192
 max_pool_size=200
-max_wal_size=8GB
+max_wal_size=16GB
 EOF
 
 #---- Datanodes -------------------------------------------------------------------------------------------------------
@@ -120,10 +120,10 @@ max_prepared_transactions = 1000
 hot_standby = off
 log_error_verbosity=verbose
 shared_buffers = 8GB
-work_mem = 512MB
+work_mem = 1GB
 effective_cache_size = 20GB
 default_statistics_target = 10000
 shared_queue_size = 8192
 max_pool_size=200
-max_wal_size=8GB
+max_wal_size=16GB
 EOF

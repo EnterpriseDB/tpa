@@ -44,10 +44,10 @@
   shell: pip install virtualenv
 
 - name: create file system
-  action: filesystem fstype=ext3 dev=/dev/xvdb
+  action: filesystem fstype=ext4 dev=/dev/xvdb force=yes
 
 - name: 
-  action: mount name=/data src=/dev/xvdb fstype=ext3 state=mounted
+  action: mount name=/data src=/dev/xvdb fstype=ext4 state=mounted
 
 - name: Ensure that /data/pgxl exists
   file:
