@@ -79,6 +79,9 @@ default_statistics_target = 10000
 shared_queue_size = 8192
 max_pool_size=200
 max_wal_size=16GB
+max_datanodes=32
+full_page_writes = off
+checkpoint_timeout = 1h
 EOF
 
 #---- Datanodes -------------------------------------------------------------------------------------------------------
@@ -87,7 +90,7 @@ datanodeSlaveDir=$dataDirRoot/dn_slave
 datanodeArchLogDir=$dataDirRoot/datanode_archlog
 
 {% with g = groups['tag_role_datanode']|difference(groups['tag_role_coordinator']) %}
-primaryDatanode=datanode1
+#primaryDatanode=datanode1
 datanodeNames=({% for h in g %}datanode{{loop.index}} {% endfor %})
 datanodePorts=({{ (['20004']*(g|length))|join(' ') }})
 datanodePoolerPorts=({{ (['20005']*(g|length))|join(' ') }})
@@ -126,4 +129,7 @@ default_statistics_target = 10000
 shared_queue_size = 8192
 max_pool_size=200
 max_wal_size=16GB
+max_datanodes=32
+full_page_writes = off
+checkpoint_timeout = 1h
 EOF

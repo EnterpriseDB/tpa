@@ -49,6 +49,18 @@
 - name: 
   action: mount name=/data src=/dev/xvdb fstype=ext4 state=mounted
 
+- name: create file system
+  action: filesystem fstype=ext4 dev=/dev/xvdc force=yes
+
+- name: 
+  action: mount name=/data_tblspc1 src=/dev/xvdc fstype=ext4 state=mounted
+
+- name: create file system
+  action: filesystem fstype=ext4 dev=/dev/xvdd force=yes
+
+- name: 
+  action: mount name=/data_tblspc2 src=/dev/xvdd fstype=ext4 state=mounted
+
 - name: Ensure that /data/pgxl exists
   file:
     path: /data/pgxl
@@ -56,3 +68,25 @@
     owner: postgres
     group: postgres
     mode: 0755
+
+- name: Ensure that /data_tblspc1/data exists
+  file:
+    path: /data_tblspc1/data
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
+- name: Ensure that /data_tblspc2/data exists
+  file:
+    path: /data_tblspc2/data
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
+- name: Create swap
+  command: "mkswap /dev/xvde"
+
+- name: Add swap
+  command: "swapon /dev/xvde"
