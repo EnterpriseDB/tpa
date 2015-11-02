@@ -37,6 +37,12 @@
     src: "/opt/Postgres-XL-{{pgxlversion}}"
     state: link
 
+- name: Enhance soft system limits for user postgres
+  shell: echo "postgres  soft   nofile   4096" >> /etc/security/limits.conf
+
+- name: Enhance hard system limits for user postgres
+  shell: echo "postgres  hard   nofile   32768" >> /etc/security/limits.conf
+
 - name: Install other required packages using apt-get
   shell: apt-get install -y python-dev time sysstat
 

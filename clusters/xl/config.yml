@@ -26,10 +26,13 @@ cluster_rules:
     cidr_ip: 0.0.0.0/0
 
 instances:
-    - type: c3.8xlarge
+    - type: d2.xlarge
       region: us-west-2
       image: ami-431a4273
       subnet: 10.63.1.0/24
+      spot_price: 0.15
+      spot_wait_timeout: 1800
+      spot_launch_group: xllaunchgrp
       volumes:
           - device_name: /dev/xvda
             volume_type: gp2
@@ -38,15 +41,13 @@ instances:
           - device_name: /dev/xvdb
             ephemeral: ephemeral0
           - device_name: /dev/xvdc
-            volume_type: gp2
-            volume_size: 32
-            delete_on_termination: true
-          - device_name: /dev/xvdd
-            volume_type: gp2
-            volume_size: 32
-            delete_on_termination: true
-          - device_name: /dev/xvde
             ephemeral: ephemeral1
+          - device_name: /dev/xvdd
+            ephemeral: ephemeral2
+          - device_name: /dev/xvde
+            volume_type: gp2
+            volume_size: 128
+            delete_on_termination: true
       tags:
         node: 1
         role: gtm,coordinator
@@ -849,4 +850,54 @@ instances:
             delete_on_termination: true
       tags:
         node: 33
+        role: datanode
+    - type: d2.xlarge
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      spot_price: 0.15
+      spot_wait_timeout: 1800
+      spot_launch_group: xllaunchgrp
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 32
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+          - device_name: /dev/xvdc
+            ephemeral: ephemeral1
+          - device_name: /dev/xvdd
+            ephemeral: ephemeral2
+          - device_name: /dev/xvde
+            volume_type: gp2
+            volume_size: 32
+            delete_on_termination: true
+      tags:
+        node: 34
+        role: datanode
+    - type: d2.xlarge
+      region: us-west-2
+      image: ami-431a4273
+      subnet: 10.63.1.0/24
+      spot_price: 0.15
+      spot_wait_timeout: 1800
+      spot_launch_group: xllaunchgrp
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 32
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+          - device_name: /dev/xvdc
+            ephemeral: ephemeral1
+          - device_name: /dev/xvdd
+            ephemeral: ephemeral2
+          - device_name: /dev/xvde
+            volume_type: gp2
+            volume_size: 32
+            delete_on_termination: true
+      tags:
+        node: 35
         role: datanode
