@@ -68,8 +68,10 @@
 
 - block:
     - name: Add hosts to known_hosts
-      shell: ssh-keyscan -H "{{ hostvars[item].ec2_ip_address }}" "{{ hostvars[item].ec2_private_ip_address }}" "{{ hostvars[item].cluster_hostname }}" >> ~/.ssh/known_hosts
-      with_items: play_hosts
+      shell: ssh-keyscan -H \
+        "{{ play_hosts|map('lookup', hostvars, 'ec2_ip_address')|join(' ') }}" \
+        "{{ play_hosts|map('lookup', hostvars, 'ec2_private_ip_address')|join(' ') }}" \
+        "{{ play_hosts|map('lookup', hostvars, 'cluster_hostname')|join(' ') }}" >> ~/.ssh/known_hosts
       sudo_user: postgres
       sudo: yes
   when: not known.stat.exists
