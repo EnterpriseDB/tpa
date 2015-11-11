@@ -3,17 +3,13 @@
 - name: Set the hostname
   hostname: name="{{ cluster_hostname }}"
 
-- name: Does /etc/hosts contain the cluster hosts already?
-  command: grep -q "{{ cluster_hostname }}" /etc/hosts
-  ignore_errors: yes
-  changed_when: false
-  register: hosts
-
-- block:
-    - name: Populate /etc/hosts
-      shell: echo "{{ hostvars[item].ec2_private_ip_address + ' ' + hostvars[item].cluster_hostname }}" >> /etc/hosts
-      with_items: "{{ play_hosts|sort }}"
-  when: hosts|failed
+- name: Populate /etc/hosts
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0644
 
 - name: Create postgres group
   group: name=postgres state=present

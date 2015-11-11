@@ -1,0 +1,6 @@
+127.0.0.1	localhost
+::1             localhost ip6-localhost ip6-loopback
+
+{% for h in play_hosts|sort %}
+{% hostvars[h].ec2_private_ip_address + ' ' + hostvars[h].cluster_hostname %}
+{% endfor %}
