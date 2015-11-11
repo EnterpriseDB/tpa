@@ -1,8 +1,14 @@
-Introduction
-------------
+2ndQuadrant Custom Cloud
+------------------------
 
 This repository contains automation tools to provision, configure, and
-operate PostgreSQL servers.
+operate database clusters. Blueprints are supported for
+* PostgreSQL
+* Postgres-XL
+
+Copyright 2ndQuadrant 2013-
+Confidential property of 2ndQuadrant
+No code here is for public release; we need to retain some competitive edge...
 
 Authentication with the AWS-related modules is needed. One of the convenient ways is to specify your access and secret key as ENV variables.
 
