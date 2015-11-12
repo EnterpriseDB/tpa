@@ -1,6 +1,6 @@
 127.0.0.1	localhost
 ::1             localhost ip6-localhost ip6-loopback
 
-{% for h in play_hosts|sort %}
+{% set v = {} %}{% for h in play_hosts -%}{{ v.update({h:hostvars[h].ec2_tag_node|int}) }}{% endfor %}{% for h,n in v|dictsort(false,'value') %}
 {{ hostvars[h].ec2_private_ip_address + ' ' + hostvars[h].cluster_hostname }}
 {% endfor %}
