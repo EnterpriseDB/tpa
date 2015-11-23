@@ -1,0 +1,51 @@
+---
+
+# An EC2 configuration for the CustomCloud proof-of-concept demo.
+#
+# The image ids below are the "debian-wheezy-amd64-hvm-2015-01-28-ebs"
+# community AMI in each region.
+#
+# Intended for deployment under the 2ndQuadrant AWS account.
+
+cluster_name: "Barman"
+cluster_tags:
+  Name: Barman
+  Owner: MH
+
+instances:
+    - type: t2.medium
+      region: us-east-1
+      image: ami-12663b7a
+      subnet: 10.61.0.0/24
+      ip: 10.61.0.1
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 10
+      tags:
+        db: primary
+        node: 1
+    - type: t2.medium
+      region: us-west-2
+      image: ami-4dbf9e7d
+      subnet: 10.61.1.0/24
+      ip: 10.61.1.1
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: standard
+            volume_size: 10
+      tags:
+        db: standby
+        node: 2
+    - type: t2.medium
+      region: eu-west-1
+      image: ami-25158352
+      subnet: 10.61.2.0/24
+      ip: 10.61.2.1
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: standard
+            volume_size: 10
+      tags:
+        db: barman
+        node: 3
