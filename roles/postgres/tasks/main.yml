@@ -14,7 +14,7 @@
     state: directory
     owner: postgres
     group: postgres
-    mode: 0755
+    mode: 0700
 
 - block:
     - name: Set PGDATA in postgresql-{{pgversion}}.service
