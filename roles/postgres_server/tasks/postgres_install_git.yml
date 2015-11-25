@@ -1,0 +1,50 @@
+---
+- name: clone or update PostgreSQL git
+  git: repo="{{postgres_git_url}}" dest="{{postgres_git_checkout_dir}}"
+       version="{{postgres_git_ref}}"
+       reference="{{postgres_git_reference_repo}}"
+  when: postgres_git_install
+
+- name: clean build directory if vpath
+  file: state=absent path="{{postgres_git_builddir}}" force=yes
+  when: "postgres_git_builddir != postgres_git_checkout_dir"
+  tags:
+    - postgres_make_clean
+
+- name: make build directory
+  file: state=directory path="{{postgres_git_builddir}}"
+  when: postgres_git_install
+
+- name: configure PostgreSQL
+  shell: "{{postgres_git_checkout_dir}}/configure --prefix={{postgres_git_install_dir|quote}} {% for arg in postgres_git_extra_configure_opts %}{{arg|quote}} {% endfor %}"
+  args:
+    chdir: "{{postgres_git_builddir}}"
+  environment: postgres_git_extra_configure_env
+  when: postgres_git_install
+
+- name: make clean
+  shell: "{{postgres_git_make_command}} clean"
+  args:
+    chdir: "{{postgres_git_builddir}}"
+  when: "{{postgres_git_install}}"
+  tags:
+    - postgres_make_clean
+
+- name: make PostgreSQL
+  shell: "{{postgres_git_make_command}} {{item}}"
+  args:
+    chdir: "{{postgres_git_builddir}}"
+  with_items: postgres_git_make_targets
+  when: postgres_git_install
+
+- name: install PostgreSQL
+  shell: "{{postgres_git_make_command}} {{item}}"
+  args:
+    chdir: "{{postgres_git_builddir}}"
+  with_items: postgres_git_make_install_targets
+  when: postgres_git_install
+
+- name: register install location
+  set_fact:
+    postgres_install_dir: "{{postgres_git_install_dir}}"
+    postgres_bin_dir: "{{postgres_git_install_dir}}/bin"

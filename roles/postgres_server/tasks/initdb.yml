@@ -1,0 +1,23 @@
+---
+
+- name: initdb
+  shell: "{{postgres_git_install_dir}}/bin/initdb -D {{postgres_datadir}} -U {{postgres_superuser}} {% for x in postgres_extra_initdb_opts %}{{x|quote}} {% endfor %}"
+  environment:
+    PATH: "{{postgres_git_install_dir}}/bin:{{ansible_env.PATH}}"
+
+- name: template postgresql.conf if supplied
+  template: src="{{postgresql_conf_template}}" dest="{{postgres_datadir}}/postgresql.conf"
+  when: "postgresql_conf_template != ''"
+
+- name: template pg_hba.conf
+  template: src="{{postgres_pg_hba_conf_template}}" dest="{{postgres_datadir}}/pg_hba.conf"
+
+- name: create include_dir
+  file: state=directory path="{{postgres_datadir}}/conf.d"
+
+- name: enable include_dir in postgresql.conf
+  lineinfile: dest="{{postgres_datadir}}/postgresql.conf"
+    line="include_dir = 'conf.d'" state=present regexp="^#?include_dir"
+
+- name: generate conf.d snippet
+  template: src="{{postgres_conf_d_template}}" dest="{{postgres_datadir}}/conf.d/from_ansible.conf"
