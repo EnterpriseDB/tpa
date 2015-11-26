@@ -95,5 +95,4 @@
 #      tags: replication
 
     - role: barman
-      #when: inventory_hostname == barman_hostname
       tags: barman
