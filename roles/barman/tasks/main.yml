@@ -1,0 +1,12 @@
+---
+
+- include: install.yml
+  when: inventory_hostname == barman_hostname
+- include: ssh-barman.yml
+  when: inventory_hostname == barman_hostname
+- include: configure.yml
+  when: inventory_hostname == barman_hostname
+- include: update-postrges-conf.yml current_host={{item}}
+  with_items: "{{db_servers}}"
+- include: ssh-db-servers.yml current_host={{item}}
+  with_items: "{{db_servers}}"

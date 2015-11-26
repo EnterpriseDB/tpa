@@ -1,0 +1,26 @@
+---
+
+- include_vars: "{{ansible_distribution}}.yml"
+
+- name: Configure barman
+  template:
+    src: barman.conf
+    dest: '{{barman_configuration_file_path}}'
+    owner: barman
+    group: barman
+    mode: 0644
+  tags: configuration
+
+- name: Add full backup to barman cron
+  lineinfile:
+    dest: /etc/cron.d/barman
+    line: "{{cron_full_backup_interval}} barman [ -x /usr/bin/barman ] && /usr/bin/barman backup --reuse-backup={{cron_full_backup_reuse_backup}} {{hostvars[item]['ec2_tag_db'] + hostvars[item]['ec2_tag_node']| lower}}"
+  with_items: "{{db_servers}}"
+  delegate_to: "{{barman_hostname}}"
+
+- name: Add incremental backup to barman cron
+  lineinfile:
+    dest: /etc/cron.d/barman
+    line: "{{cron_incremental_backup_interval}} barman [ -x /usr/bin/barman ] && /usr/bin/barman backup --reuse-backup={{cron_incremental_backup_reuse_backup}} {{hostvars[item]['ec2_tag_db'] + hostvars[item]['ec2_tag_node'] | lower}}"
+  with_items: "{{db_servers}}"
+  delegate_to: "{{barman_hostname}}"

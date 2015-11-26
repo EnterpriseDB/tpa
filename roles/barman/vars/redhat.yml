@@ -1,0 +1,5 @@
+---
+
+pgversion: 9.4
+pgservice: "postgresql-{{pgversion}}"
+pgdata: "/var/lib/postgresql/{{ pgversion }}/main"

@@ -15,7 +15,7 @@ cluster_tags:
 instances:
     - type: t2.medium
       region: us-east-1
-      image: ami-12663b7a
+      image: ami-e0efab88
       subnet: 10.61.0.0/24
       ip: 10.61.0.1
       volumes:
@@ -27,7 +27,7 @@ instances:
         node: 1
     - type: t2.medium
       region: us-west-2
-      image: ami-4dbf9e7d
+      image: ami-431a4273
       subnet: 10.61.1.0/24
       ip: 10.61.1.1
       volumes:
@@ -39,7 +39,7 @@ instances:
         node: 2
     - type: t2.medium
       region: eu-west-1
-      image: ami-25158352
+      image: ami-61e56916
       subnet: 10.61.2.0/24
       ip: 10.61.2.1
       volumes:
