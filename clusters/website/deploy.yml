@@ -1,0 +1,37 @@
+---
+
+- name: Set up 2ndQuadrant web site
+  hosts: tag_Name_2QWebsite
+  gather_facts: no
+  sudo_user: root
+  sudo: true
+  vars:
+    pgversion: 9.4
+
+  pre_tasks:
+
+    # Find the one host tagged as the primary and remember it for use in
+    # individual roles later. Also store the node id as a fact.
+
+    - name: Determine primary hostname
+      set_fact: primary_hostname="{{ item }}"
+      when: "hostvars[item].ec2_tag_db == 'primary'"
+      with_items: play_hosts
+      tags: always
+
+    - name: Set the node id as a fact
+      set_fact: node_id="{{ ec2_tag_node }}"
+      tags: always
+
+  roles:
+
+    - role: setup
+      tags: always
+
+    - role: common
+      tags: common
+
+    # Install the Postgres packages and basic configuration files.
+
+    - role: postgres
+      tags: postgres
