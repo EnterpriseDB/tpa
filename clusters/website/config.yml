@@ -10,10 +10,11 @@ cluster_tags:
   Owner: AMS
 
 instances:
-    - type: t2.medium
+    - type: t2.micro
       region: eu-central-1
       image: ami-98043785
       subnet: 10.0.1.0/24
+      assign_eip: yes
       tags:
         db: primary
         node: 1
