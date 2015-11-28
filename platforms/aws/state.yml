@@ -21,7 +21,7 @@
       ec2:
         state: "{{ state|default('running') }}"
         region: "{{ item }}"
-        instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('lookup', hostvars, 'ec2_id')|list }}"
+        instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('extract', hostvars, 'ec2_id')|list }}"
         wait: yes
       with_items: regions
       tags: ec2

@@ -16,7 +16,7 @@
 #        vpc_id: "{{ item.1 }}"
 #      with_nested_dependents:
 #        - regions
-#        - groups[cluster_tag]|intersect(groups[item.0])|map('lookup', hostvars, 'ec2_vpc_id')|unique|list
+#        - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_vpc_id')|unique|list
 #
 # Notice the reference to groups[item.0] in the second loop expression, where
 # item.0 evaluates to the name of each region in turn, and therefore the task
