@@ -1,0 +1,22 @@
+---
+
+# An EC2 cluster for pglogical testing.
+
+cluster_name: "PglogicalTests"
+cluster_tags:
+  Name: PglogicalTests
+  Owner: AMS
+
+instances:
+    - type: t2.micro
+      region: eu-central-1
+      image: ami-98043785
+      subnet: 10.0.2.0/24
+      tags:
+        node: 1
+    - type: t2.micro
+      region: eu-central-1
+      image: ami-98043785
+      subnet: 10.0.2.0/24
+      tags:
+        node: 2
