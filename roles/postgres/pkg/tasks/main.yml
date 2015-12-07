@@ -8,6 +8,11 @@
 - include: packages.yml
 - include_vars: "{{ansible_distribution}}.yml"
 
+- name: Install psycopg2
+  command: pip install psycopg2
+  environment:
+    PATH: /usr/local/bin:/usr/bin:/bin:{{ pgbindir }}
+
 - name: Ensure the data directory exists
   file:
     path: "{{pgdata}}"

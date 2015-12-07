@@ -1,19 +1,21 @@
 ---
 
 packages:
-  debian:
+  Debian:
     - tcpdump
     - vim
     - git
     - rsync
+    - python-dev
   redhat:
     - tcpdump
     - vim
     - git
     - rsync
+    - python-devel
 
 unwanted_packages:
-  debian:
+  Debian:
     - popularity-contest
     - vim-tiny
     - vim-nox
