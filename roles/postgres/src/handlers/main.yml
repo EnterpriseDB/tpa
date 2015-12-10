@@ -1,6 +1,0 @@
----
-
-- include: pg_ctl_start.yml
-- include: pg_ctl_stop.yml
-- include: pg_ctl_reload.yml
-- include: pg_ctl_restart.yml

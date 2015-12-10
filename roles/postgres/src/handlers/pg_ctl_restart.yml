@@ -1,7 +1,0 @@
----
-
-- name: Restart PostgreSQL
-  shell: "ulimit -c unlimited; {{postgres_git_install_dir}}/bin/pg_ctl -D {{postgres_datadir}} -w -m fast restart"
-  environment:
-    PATH: "{{postgres_git_install_dir}}/bin:{{ansible_env.PATH}}"
-    PGUSER: "{{postgres_superuser}}"

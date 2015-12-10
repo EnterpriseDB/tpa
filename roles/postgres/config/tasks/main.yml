@@ -1,0 +1,28 @@
+- name: Do we have a postgresql.conf template?
+  stat: path=templates/postgresql.conf.j2
+  register: conf
+
+- name: Install templated postgresql.conf
+  template: src=postgresql.conf.j2 dest="{{postgres_data_dir}}/postgresql.conf"
+  when: conf.stat.exists
+
+- name: Do we have a pg_hba.conf template?
+  stat: path=templates/pg_hba.conf.j2
+  register: hba
+
+- name: Install templated pg_hba.conf
+  template: src=pg_hba.conf.j2 dest="{{postgres_data_dir}}/pg_hba.conf"
+  when: hba.stat.exists
+
+- name: Create include_dir
+  file: state=directory path="{{postgres_data_dir}}/conf.d"
+
+- name: Enable include_dir in postgresql.conf
+  lineinfile:
+    dest: "{{postgres_data_dir}}/postgresql.conf"
+    line: "include_dir = 'conf.d'"
+    state: present
+    regexp: "^#?include_dir"
+
+- name: Generate configuration snippet from settings
+  template: src=managed.conf.j2 dest="{{postgres_data_dir}}/conf.d/managed.conf"

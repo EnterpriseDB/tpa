@@ -1,0 +1,39 @@
+- name: Set up pglogical test nodes
+  hosts: tag_Name_PglogicalTests
+  vars:
+    postgres_git_reference_repo: ~/extern/postgres
+    postgres_src_dir: ~/{{inventory_hostname}}-postgres
+    postgres_build_dir: ~/{{inventory_hostname}}-postgres-build
+    postgres_install_dir: ~/{{inventory_hostname}}-postgres-install
+    postgres_data_dir: ~/{{inventory_hostname}}-postgres-data
+    postgres_port: "{{5432+ec2_tag_node}}"
+
+  pre_tasks:
+    - name: Check if the data directory exists already
+      stat: path="{{postgres_data_dir}}"
+      register: datadir
+
+    - name: Make sure Postgres isn't running if the data directory exists
+      shell: "{{postgres_install_dir}}/bin/pg_ctl -D {{postgres_data_dir}} -w stop -m immediate"
+      environment:
+        PATH: "{{postgres_install_dir}}/bin"
+        PGPORT: "{{postgres_port|int}}"
+      register: pg_ctl_stopped
+      changed_when: "pg_ctl_stopped.rc == 0"
+      failed_when: false
+      when: datadir.stat.exists
+
+    - name: Remove any existing data directory
+      file: state=absent path="{{postgres_data_dir}}" force=yes
+      when: datadir.stat.exists
+
+  roles:
+    - role: 'postgres/src'
+    - role: 'postgres/initdb'
+    - role: 'postgres/config'
+
+  post_tasks:
+    - name: Start Postgres
+      shell: "{{postgres_install_dir}}/bin/pg_ctl -D {{postgres_data_dir}} -w start"
+      environment:
+        PATH: "{{postgres_install_dir}}/bin"

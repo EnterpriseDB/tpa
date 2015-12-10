@@ -1,7 +1,0 @@
----
-
-- name: Reload PostgreSQL
-  shell: "{{postgres_git_install_dir}}/bin/pg_ctl -D {{postgres_datadir}} reload"
-  environment:
-    PATH: "{{postgres_git_install_dir}}/bin:{{ansible_env.PATH}}"
-    PGUSER: "{{postgres_superuser}}"

@@ -1,0 +1,14 @@
+- hosts: localhost
+  tasks:
+    - add_host:
+        name: a
+        groups: tag_Name_PglogicalTests
+        ansible_connection: local
+        ec2_tag_node: 1
+    - add_host:
+        name: b
+        groups: tag_Name_PglogicalTests
+        ansible_connection: local
+        ec2_tag_node: 2
+
+- include: deploy.yml

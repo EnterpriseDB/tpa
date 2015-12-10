@@ -1,72 +1,30 @@
----
+## What should we build?
+#
+# We take a git repository URL to clone and a reference to checkout.
 
-# Required:
-#postgres_git_checkout_dir:
-#postgres_git_install_dir:
-#postgres_datadir:
-#postgres_pgport
-
-postgres_cleanup_only: false
-postgres_cleanup: true
-postgres_install: true
-
-postgres_git_url: "git://git.postgresql.org/git/postgresql.git"
-postgres_git_ref: "master"
-# local path of git repo to use as a reference when cloning, if any
+postgres_git_url: git://git.postgresql.org/git/postgresql.git
+postgres_git_ref: master
 postgres_git_reference_repo: ""
 
-postgres_git_makeclean: false
+## Locations
+#
+# We always do a VPATH build in a separate directory based on the
+# reference specified above.
 
-# If set to something other than the checkout dir, do a vpath
-# build.
-postgres_git_builddir: "{{postgres_git_checkout_dir}}"
+postgres_src_dir: /opt/postgres/src
+postgres_build_dir: /opt/postgres/build
+postgres_install_dir: /opt/postgres/{{pgversion}}
 
-postgres_git_extra_configure_opts: []
+## Build tweaks
+#
+# These should not normally need to be changed.
 
-# configure environment, e.g
-#    CC: "ccache gcc"
-postgres_git_extra_configure_env: {}
-
-postgres_git_make_command: "make"
-
-postgres_git_make_targets:
+postgres_configure_env: {}
+postgres_configure_opts: []
+postgres_make_command: "make"
+postgres_make_targets:
   - "all"
   - "-C contrib all"
-
-postgres_git_make_install_targets:
+postgres_make_install_targets:
   - "install"
   - "-C contrib install"
-
-# superuser to create at initdb time
-postgres_superuser: "postgres"
-
-# Should be a list or array, not just a string
-#
-# eg ['-U', 'someuser']
-#
-# Note that there's no point passing -A etc, as we'll just regenerate
-# pg_hba.conf anyway.
-postgres_extra_initdb_opts: []
-
-# A dictionary of postgresql.conf entries to add. Quoted values must be quoted
-# here, e.g.
-#
-#  - max_wal_senders: 4
-#  - archive_mode: "'logical'"
-postgresql_conf_entries: {}
-
-# The pg_hba.conf we generate
-pg_hba_conf_entries:
-  - "local   all             all                                    trust"
-  - "host    all             all             127.0.0.1/32           trust"
-  - "host    all             all             ::1/128                trust"
-
-postgres_pg_ctl_start_extra_args: []
-
-# Overrideable template locations
-postgres_conf_d_template: "postgres_ansible.conf.j2"
-postgres_pg_hba_conf_template: "pg_hba.conf.j2"
-
-# If provided, template an entire postgresql.conf
-# It'll still have include dir enabled and extra options added
-postgresql_conf_template: ""

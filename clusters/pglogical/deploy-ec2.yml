@@ -1,0 +1,5 @@
+- hosts: tag_Name_PglogicalTests
+  set_fact:
+    remote_user: admin
+
+- include: deploy.yml

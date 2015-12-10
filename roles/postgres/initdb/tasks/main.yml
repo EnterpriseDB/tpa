@@ -1,0 +1,4 @@
+- name: Run initdb to create data directory
+  shell: "{{postgres_install_dir}}/bin/initdb -D {{postgres_data_dir}} {% for x in postgres_initdb_opts %}{{x|quote}}{% endfor %}"
+  environment:
+    PATH: "{{postgres_install_dir}}/bin"

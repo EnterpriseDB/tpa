@@ -1,7 +1,0 @@
----
-
-- name: Stop PostgreSQL
-  shell: "{{postgres_git_install_dir}}/bin/pg_ctl -D {{postgres_datadir}} -w stop -m fast"
-  environment:
-    PATH: "{{postgres_git_install_dir}}/bin:{{ansible_env.PATH}}"
-    PGUSER: "{{postgres_superuser}}"

@@ -1,10 +1,32 @@
----
+- name: Fetch Postgres source from git repository
+  git:
+    repo: "{{postgres_git_url}}"
+    dest: "{{postgres_src_dir}}"
+    version: "{{postgres_git_ref}}"
+    reference: "{{postgres_git_reference_repo}}"
 
-- include: stop_postgres.yml
-  when: postgres_cleanup
+- name: Remove old build directory
+  file: state=absent path="{{postgres_build_dir}}" force=yes
+  tags: postgres-clean
 
-- include: postgres_install_git.yml tags=postgres_install
-  when: postgres_install and not postgres_cleanup_only
+- name: Ensure build directory exists
+  file: state=directory path="{{postgres_build_dir}}"
 
-- include: initdb.yml tags=postgres_initdb
-  when: postgres_install and not postgres_cleanup_only
+- name: Run ./configure for Postgres
+  shell: "{{postgres_src_dir}}/configure --prefix={{postgres_install_dir|expanduser}} {% for arg in postgres_configure_opts %}{{arg|quote}}{% endfor %}"
+  args:
+    chdir: "{{postgres_build_dir}}"
+  environment: "{{postgres_configure_env}}"
+  tags: postgres-clean
+
+- name: Build Postgres
+  shell: "{{postgres_make_command}} {{item}}"
+  args:
+    chdir: "{{postgres_build_dir}}"
+  with_items: postgres_make_targets
+
+- name: Install Postgres
+  shell: "{{postgres_make_command}} {{item}}"
+  args:
+    chdir: "{{postgres_build_dir}}"
+  with_items: postgres_make_install_targets
