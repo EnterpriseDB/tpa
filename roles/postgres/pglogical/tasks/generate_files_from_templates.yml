@@ -1,0 +1,18 @@
+---
+#regress_postgresql_conf_template: "regress-postgresql.conf.j2"
+
+#init_sql_template: "init.sql.j2"
+
+#init_out_templates: "init.out.j2"
+- template: src={{init_sql_template}} dest={{pglogical_ext_client_git_checkout_dir}}/sql/init_{{item.version}}.sql
+  with_items:
+    - servers
+
+- template: src={{init_out_template}} dest={{pglogical_ext_client_git_checkout_dir}}/sql/init_{{item.version}}.out
+  with_items:
+    - servers
+
+- template: src={{regress_postgresql_conf_template}} dest={{pglogical_ext_client_git_checkout_dir}}/tmp-regress-postgresql.conf
+  with_items:
+    - sources
+

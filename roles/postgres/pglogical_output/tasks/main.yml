@@ -1,0 +1,10 @@
+---
+
+- include: stop_postgres.yml
+  when: postgres_cleanup
+
+- include: pglogical_ext_install_git.yml tags=pglogical_ext_install
+  when: pglogical_ext_git_install
+
+- include: stop_postgres.yml
+  when: postgres_cleanup

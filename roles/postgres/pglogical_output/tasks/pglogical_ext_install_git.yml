@@ -1,0 +1,57 @@
+---
+- name: clone or update pglogical_output extension git
+  git: repo="{{pglogical_ext_git_url}}" dest="{{pglogical_ext_git_checkout_dir}}"
+       version="{{pglogical_ext_git_ref}}"
+       reference="{{pglogical_ext_git_reference_repo}}"
+  when: pglogical_ext_git_install
+
+- name: make build directory
+  file: state=directory path="{{pglogical_ext_git_builddir}}"
+  when: pglogical_ext_git_install
+
+- name: configure pglogical_output extension - make all
+  #shell: "{{pglogical_ext_git_make_command}} USE_PGXS=1 all"
+  shell: "{{pglogical_ext_git_make_command}} USE_PGXS=1 clean && {{pglogical_ext_git_make_command}} USE_PGXS=1 all && {{pglogical_ext_git_make_command}} USE_PGXS=1 install"
+  args:
+    chdir: "{{pglogical_ext_git_builddir}}"
+  environment:
+    PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  when: pglogical_ext_git_install
+  with_items:
+    - { install_dir: "{{postgres_git_install_dir}}" }
+    - { install_dir: "{{postgres_9_5_git_install_dir}}" }
+    - { install_dir: "{{postgres_9_4_git_install_dir}}" }
+
+- name: init postgresql DB with pglogical_output extension
+  shell: "{{item.install_dir}}/bin/initdb -A trust -D {{item.datadir}}"
+  environment:
+    PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  when: pglogical_ext_git_install
+  with_items:
+    - { install_dir: "{{postgres_git_install_dir}}", datadir: "{{postgres_datadir}}" }
+    - { install_dir: "{{postgres_9_5_git_install_dir}}", datadir: "{{postgres_9_5_datadir}}" }
+    - { install_dir: "{{postgres_9_4_git_install_dir}}", datadir: "{{postgres_9_4_datadir}}" }
+
+- name: start postgres server to run tests for pglogical_output with wal_level logical
+  shell: "PGPORT={{item.port}} postgres -D {{item.datadir}} -c max_replication_slots=5 -c wal_level=logical &"
+  environment:
+    PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  when: pglogical_ext_git_install
+  with_items:
+    - { install_dir: "{{postgres_git_install_dir}}", datadir: "{{postgres_datadir}}", port: "{{postgres_port}}" }
+    - { install_dir: "{{postgres_9_5_git_install_dir}}", datadir: "{{postgres_9_5_datadir}}", port: "{{postgres_9_5_port}}" }
+    - { install_dir: "{{postgres_9_4_git_install_dir}}", datadir: "{{postgres_9_4_datadir}}", port: "{{postgres_9_4_port}}" }
+
+- name: run tests for pglogical_output
+  shell: "PGPORT={{item.port}} {{pglogical_ext_git_make_command}}"
+  ignore_errors: yes
+  args:
+    chdir: "{{pglogical_ext_git_builddir}}/test"
+  environment:
+    PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  when: pglogical_ext_git_install
+  with_items:
+    - { install_dir: "{{postgres_git_install_dir}}", port: "{{postgres_port}}" }
+    - { install_dir: "{{postgres_9_5_git_install_dir}}", port: "{{postgres_9_5_port}}" }
+    - { install_dir: "{{postgres_9_4_git_install_dir}}", port: "{{postgres_9_4_port}}" }
+

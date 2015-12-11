@@ -1,0 +1,101 @@
+---
+#Need to change this like 9_5 server and 9_6 client one.
+- name: init postgresql DB
+  shell: "{{item.install_dir}}/bin/initdb -A trust -D {{item.datadir}}"
+  environment:
+    PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  when: pglogical_ext_git_install
+  with_items:
+    - { install_dir: "{{postgres_git_install_dir}}", datadir: "{{postgres_datadir}}" }
+#    - { install_dir: "{{postgres_9_5_git_install_dir}}", datadir: "{{postgres_9_5_datadir}}" }
+ #   - { install_dir: "{{postgres_9_4_git_install_dir}}", datadir: "{{postgres_9_4_datadir}}" }
+
+- copy: src={{pglogical_ext_client_git_checkout_dir}}/regress-pg_hba.conf dest={{item.datadir}}/pg_hba.conf
+  when: pglogical_ext_git_install
+  with_items:
+    - { install_dir: "{{postgres_git_install_dir}}", datadir: "{{postgres_datadir}}" }
+#    - { install_dir: "{{postgres_9_5_git_install_dir}}", datadir: "{{postgres_9_5_datadir}}" }
+#    - { install_dir: "{{postgres_9_4_git_install_dir}}", datadir: "{{postgres_9_4_datadir}}" }
+
+- name: start postgres server to run pglogical tests
+  shell: "PGPORT={{item.port}} postgres -D {{item.datadir}} -c max_replication_slots=10 -c wal_level=logical -c shared_preload_libraries='pglogical' -c max_wal_senders=10 -c track_commit_timestamp=on -c DateStyle='ISO, DMY' -c log_line_prefix='[%m] [%p] [%d] ' -c fsync=off &"
+  environment:
+    PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  when: pglogical_ext_git_install
+  with_items:
+    - { install_dir: "{{postgres_git_install_dir}}", datadir: "{{postgres_datadir}}", port: "{{postgres_port}}" }
+ #   - { install_dir: "{{postgres_9_5_git_install_dir}}", datadir: "{{postgres_9_5_datadir}}", port: "{{postgres_9_5_port}}" }
+ #   - { install_dir: "{{postgres_9_4_git_install_dir}}", datadir: "{{postgres_9_4_datadir}}", port: "{{postgres_9_4_port}}" }
+
+- name: create database regression on server
+  shell: "{{item.install_dir}}/bin/psql -p {{item.port}} -c 'CREATE DATABASE REGRESSION';"
+  environment:
+    PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  when: pglogical_ext_git_install
+  with_items:
+    - { install_dir: "{{postgres_git_install_dir}}", port: "{{postgres_port}}" }
+ #   - { install_dir: "{{postgres_9_5_git_install_dir}}", port: "{{postgres_9_5_port}}" }
+  #  - { install_dir: "{{postgres_9_4_git_install_dir}}", port: "{{postgres_9_4_port}}" }
+
+- name: create user nonsuper
+  shell: "{{item.install_dir}}/bin/psql -p {{item.port}} -c 'CREATE USER nonsuper WITH replication';"
+  environment:
+    PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  when: pglogical_ext_git_install
+  with_items:
+    - { install_dir: "{{postgres_git_install_dir}}", port: "{{postgres_port}}" }
+  #  - { install_dir: "{{postgres_9_5_git_install_dir}}", port: "{{postgres_9_5_port}}" }
+  #  - { install_dir: "{{postgres_9_4_git_install_dir}}", port: "{{postgres_9_4_port}}" }
+
+- name: create user super
+  shell: "{{item.install_dir}}/bin/psql -p {{item.port}} -c 'CREATE USER super SUPERUSER';"
+  environment:
+    PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  when: pglogical_ext_git_install
+  with_items:
+    - { install_dir: "{{postgres_git_install_dir}}", port: "{{postgres_port}}" }
+  #  - { install_dir: "{{postgres_9_5_git_install_dir}}", port: "{{postgres_9_5_port}}" }
+  #  - { install_dir: "{{postgres_9_4_git_install_dir}}", port: "{{postgres_9_4_port}}" }
+
+#- replace: dest={{pglogical_ext_client_git_checkout_dir}}/{{item[1]}} regexp='c regression' replace='c "port={{item[0].port}} host=/tmp dbname=regression"' backup=no
+ # with_nested:
+  #  - { port: "{{postgres_9_5_port}}" }
+   # - regress_files_to_overwrite
+
+#- name: drop database regression on server
+ # shell: "{{item.install_dir}}/bin/psql -p {{item.port}} -c 'DROP DATABASE REGRESSION';"
+  #environment:
+   # PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  #when: pglogical_ext_git_install
+  #with_items:
+   # - { install_dir: "{{postgres_9_5_git_install_dir}}", port: "{{postgres_9_5_port}}" }
+   # - { install_dir: "{{postgres_9_4_git_install_dir}}", port: "{{postgres_9_4_port}}" }
+
+- name: run make crossversioncheck
+  shell: "{{pglogical_ext_client_git_make_command}} USE_PGXS=1 crossversioncheck_9_6"
+  ignore_errors: yes
+  args:
+    chdir: "{{pglogical_ext_client_git_builddir}}"
+  environment:
+    PATH: "{{item.install_dir}}/bin:{{ansible_env.PATH}}"
+  when: pglogical_ext_client_git_install
+  with_items:
+   # - { install_dir: "{{postgres_git_install_dir}}" }
+    - { install_dir: "{{postgres_9_5_git_install_dir}}" }
+
+- name: clean regression_output dir
+  shell: "rm -rf {{pglogical_ext_client_git_checkout_dir}}/regression_output_9_6_server_9_5_client"
+  when: pglogical_ext_client_git_install
+
+#- name: clean tmp_check dir
+ # shell: "rm -rf {{pglogical_ext_client_git_checkout_dir}}/tmp_check_9_6_server_9_5_client"
+  #when: pglogical_ext_client_git_install
+
+- name: move regression_output dir to save
+  shell: "mv {{pglogical_ext_client_git_checkout_dir}}/regression_output {{pglogical_ext_client_git_checkout_dir}}/regression_output_9_6_server_9_5_client"
+  when: pglogical_ext_client_git_install
+
+#- name: move tmp_check dir to save
+  #shell: "mv {{pglogical_ext_client_git_checkout_dir}}/tmp_check {{pglogical_ext_client_git_checkout_dir}}/tmp_check_9_6_server_9_5_client"
+ # when: pglogical_ext_client_git_install
+

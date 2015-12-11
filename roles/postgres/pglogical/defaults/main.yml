@@ -1,0 +1,83 @@
+# Required:
+
+pglogical_ext_git_install: true
+pglogical_ext_rpm_install: false
+postgres_cleanup: true
+pglogical_cross_version_test: true
+
+pglogical_ext_git_url: "git@github.com:2ndQuadrant/pglogical_output.git"
+pglogical_ext_git_ref: "master"
+pglogical_ext_pg_config: "{{postgres_git_install_dir}}/bin/pg_config"
+# local path of git repo to use as a reference when cloning, if any
+pglogical_ext_git_reference_repo: ""
+
+pglogical_ext_git_makeclean: false
+
+# If set to something other than the checkout dir, do a vpath
+# build.
+pglogical_ext_git_builddir: "{{pglogical_ext_git_checkout_dir}}"
+
+pglogical_ext_git_extra_configure_opts: []
+
+# configure environment, e.g
+#    CC: "ccache gcc"
+pglogical_ext_git_extra_configure_env: {}
+
+pglogical_ext_git_make_command: "make"
+
+pglogical_ext_git_make_targets:
+  - "all"
+
+pglogical_ext_git_make_install_targets:
+  - "install"
+
+postgres_git_builddir: "{{postgres_git_checkout_dir}}"
+postgres_9_5_git_builddir: "{{postgres_9_5_git_checkout_dir}}"
+postgres_9_4_git_builddir: "{{postgres_9_4_git_checkout_dir}}"
+
+# Required:
+
+pglogical_ext_client_git_install: true
+pglogical_ext_client_rpm_install: false
+
+generate_files_from_templates: true
+
+pglogical_ext_client_git_url: "git@github.com:2ndQuadrant/pglogical.git"
+pglogical_ext_client_git_ref: "master"
+# local path of git repo to use as a reference when cloning, if any
+pglogical_ext_client_git_reference_repo: ""
+
+pglogical_ext_client_git_makeclean: false
+
+# If set to something other than the checkout dir, do a vpath
+# build.
+pglogical_ext_client_git_builddir: "{{pglogical_ext_client_git_checkout_dir}}"
+
+pglogical_ext_client_git_extra_configure_opts: []
+
+# configure environment, e.g
+#    CC: "ccache gcc"
+pglogical_ext_client_git_extra_configure_env: {}
+
+pglogical_ext_client_git_make_command: "make"
+
+pglogical_ext_client_git_make_targets:
+  - "all"
+
+pglogical_ext_client_git_make_install_targets:
+  - "install"
+
+regress_postgresql_conf_template: "regress-postgresql.conf.j2"
+
+init_sql_template: "init.sql.j2"
+
+init_out_templates: "init.out.j2"
+
+servers:
+  - version: 9_5
+    provider_dbname: "port=5599 host=/tmp dbname=regression"
+  - version: 9_6
+    provider_dbname: "port=5598 host=/tmp dbname=regression"
+
+sources:
+  - src_dir: "{{pglogical_ext_client_git_checkout_dir}}"
