@@ -12,7 +12,7 @@
 - name: Ensure build directory exists
   file: state=directory path="{{postgres_build_dir}}"
 
-- name: Run ./configure for Postgres
+- name: Configure Postgres
   shell: "{{postgres_src_dir}}/configure --prefix={{postgres_install_dir|expanduser}} {% for arg in postgres_configure_opts %}{{arg|quote}}{% endfor %}"
   args:
     chdir: "{{postgres_build_dir}}"
@@ -23,10 +23,10 @@
   shell: "{{postgres_make_command}} {{item}}"
   args:
     chdir: "{{postgres_build_dir}}"
-  with_items: postgres_make_targets
+  with_items: postgres_build_targets
 
 - name: Install Postgres
   shell: "{{postgres_make_command}} {{item}}"
   args:
     chdir: "{{postgres_build_dir}}"
-  with_items: postgres_make_install_targets
+  with_items: postgres_install_targets
