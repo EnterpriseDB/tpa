@@ -14,9 +14,9 @@
       register: datadir
 
     - name: Make sure Postgres isn't running if the data directory exists
-      shell: "{{postgres_install_dir}}/bin/pg_ctl -D {{postgres_data_dir}} -w stop -m immediate"
+      shell: "{{postgres_install_dir|expanduser}}/bin/pg_ctl -D {{postgres_data_dir}} -w stop -m immediate"
       environment:
-        PATH: "{{postgres_install_dir}}/bin"
+        PATH: "{{postgres_install_dir}}/bin:{{lookup('env', 'PATH')}}"
         PGPORT: "{{postgres_port|int}}"
       register: pg_ctl_stopped
       changed_when: "pg_ctl_stopped.rc == 0"
@@ -29,11 +29,18 @@
 
   roles:
     - role: 'postgres/src'
+    - role: 'postgres/ext'
+      postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical_output.git
+      postgres_ext_dir: "~/{{inventory_hostname}}-ext-output"
+    - role: 'postgres/ext'
+      postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical.git
+      postgres_ext_dir: "~/{{inventory_hostname}}-ext-logical"
     - role: 'postgres/initdb'
     - role: 'postgres/config'
 
   post_tasks:
     - name: Start Postgres
       shell: "{{postgres_install_dir}}/bin/pg_ctl -D {{postgres_data_dir}} -w start"
-      environment:
-        PATH: "{{postgres_install_dir}}/bin"
+
+  environment:
+    PATH: "{{postgres_install_dir|expanduser}}/bin:{{lookup('env', 'PATH')}}"
