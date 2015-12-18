@@ -1,13 +1,5 @@
 - name: Set up pglogical test nodes
   hosts: tag_Name_PglogicalTests
-  vars:
-    postgres_git_reference_repo: ~/extern/postgres
-    postgres_src_dir: ~/{{inventory_hostname}}-postgres
-    postgres_build_dir: ~/{{inventory_hostname}}-postgres-build
-    postgres_install_dir: ~/{{inventory_hostname}}-postgres-install
-    postgres_data_dir: ~/{{inventory_hostname}}-postgres-data
-    postgres_port: "{{5432+ec2_tag_node}}"
-
   pre_tasks:
     - name: Check if the data directory exists already
       stat: path="{{postgres_data_dir}}"
@@ -30,10 +22,10 @@
     - role: 'postgres/src'
     - role: 'postgres/ext'
       postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical_output.git
-      postgres_ext_dir: "~/{{inventory_hostname}}-ext-output"
+      postgres_ext_dir: "~/pglogical/{{inventory_hostname}}/pglogical_output"
     - role: 'postgres/ext'
       postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical.git
-      postgres_ext_dir: "~/{{inventory_hostname}}-ext-logical"
+      postgres_ext_dir: "~/pglogical/{{inventory_hostname}}/pglogical"
     - role: 'postgres/initdb'
     - role: 'postgres/config'
 

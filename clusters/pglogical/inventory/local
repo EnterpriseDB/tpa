@@ -1,0 +1,12 @@
+[tag_Name_PglogicalTests]
+postgres                ansible_connection=local ec2_tag_node=1 postgres_git_ref=master
+postgres95              ansible_connection=local ec2_tag_node=2 postgres_git_ref=REL9_5_STABLE
+postgresclient          ansible_connection=local ec2_tag_node=3 postgres_git_ref=master
+postgres95client        ansible_connection=local ec2_tag_node=4 postgres_git_ref=REL9_5_STABLE
+
+[tag_Name_PglogicalTests:vars]
+postgres_src_dir=~/pglogical/{{inventory_hostname}}/src
+postgres_build_dir=~/pglogical/{{inventory_hostname}}/build
+postgres_install_dir=~/pglogical/{{inventory_hostname}}/install
+postgres_data_dir=~/pglogical/{{inventory_hostname}}/data
+postgres_port="{{5432+ec2_tag_node}}"
