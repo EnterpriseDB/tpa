@@ -6,7 +6,7 @@
       register: datadir
 
     - name: Make sure Postgres isn't running if the data directory exists
-      shell: "{{postgres_install_dir|expanduser}}/bin/pg_ctl -D {{postgres_data_dir}} -w stop -m immediate"
+      shell: "pg_ctl -D {{postgres_data_dir}} -w stop -m immediate"
       environment:
         PGPORT: "{{postgres_port|int}}"
       register: pg_ctl_stopped
@@ -32,7 +32,13 @@
 
   post_tasks:
     - name: Start Postgres
-      shell: "{{postgres_install_dir}}/bin/pg_ctl -D {{postgres_data_dir}} -w start"
+      shell: "pg_ctl -D {{postgres_data_dir}} -w start"
+    - name: Create regression database
+      shell: "psql -p {{postgres_port}} -d postgres -c 'CREATE DATABASE regression'"
+    - name: Create user "super"
+      shell: "psql -p {{postgres_port}} -d postgres -c 'CREATE USER super SUPERUSER'"
+    - name: Create user "nonsuper"
+      shell: "psql -p {{postgres_port}} -d postgres -c 'CREATE USER nonsuper WITH replication'"
 
   environment:
     PATH: "{{postgres_install_dir|expanduser}}/bin:{{lookup('env', 'PATH')}}"
