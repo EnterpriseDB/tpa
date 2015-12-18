@@ -16,7 +16,6 @@
     - name: Make sure Postgres isn't running if the data directory exists
       shell: "{{postgres_install_dir|expanduser}}/bin/pg_ctl -D {{postgres_data_dir}} -w stop -m immediate"
       environment:
-        PATH: "{{postgres_install_dir}}/bin:{{lookup('env', 'PATH')}}"
         PGPORT: "{{postgres_port|int}}"
       register: pg_ctl_stopped
       changed_when: "pg_ctl_stopped.rc == 0"
