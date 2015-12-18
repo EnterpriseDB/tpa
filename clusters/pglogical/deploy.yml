@@ -27,6 +27,7 @@
       postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical.git
       postgres_ext_dir: "~/pglogical/{{inventory_hostname}}/pglogical"
     - role: 'postgres/initdb'
+      postgres_initdb_opts: ['-A', 'trust']
     - role: 'postgres/config'
 
   post_tasks:
