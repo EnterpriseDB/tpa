@@ -25,20 +25,32 @@
       postgres_ext_dir: "~/pglogical/{{inventory_hostname}}/pglogical_output"
     - role: 'postgres/ext'
       postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical.git
-      postgres_ext_dir: "~/pglogical/{{inventory_hostname}}/pglogical"
+      postgres_ext_dir: "{{pglogical_build_dir}}"
     - role: 'postgres/initdb'
       postgres_initdb_opts: ['-A', 'trust']
     - role: 'postgres/config'
+      postgres_config_settings:
+        wal_level: logical
+        max_wal_senders: 10
+        max_replication_slots: 10
+        track_commit_timestamp: on
+        shared_preload_libraries: pglogical
+        log_line_prefix: "'[%m] [%p] [%d] '"
+        DateStyle: "'ISO, DMY'"
+        fsync: off
 
   post_tasks:
     - name: Start Postgres
       shell: "pg_ctl -D {{postgres_data_dir}} -w start"
-    - name: Create regression database
-      shell: "psql -p {{postgres_port}} -d postgres -c 'CREATE DATABASE regression'"
-    - name: Create user "super"
-      shell: "psql -p {{postgres_port}} -d postgres -c 'CREATE USER super SUPERUSER'"
-    - name: Create user "nonsuper"
-      shell: "psql -p {{postgres_port}} -d postgres -c 'CREATE USER nonsuper WITH replication'"
 
   environment:
     PATH: "{{postgres_install_dir|expanduser}}/bin:{{lookup('env', 'PATH')}}"
+
+- name: Run regression tests
+  hosts: subscribers
+  tasks:
+    - include: test.yml
+      with_items: groups['providers']
+  environment:
+    PATH: "{{postgres_install_dir|expanduser}}/bin:{{lookup('env', 'PATH')}}"
+    PGPORT: "{{postgres_port|int}}"

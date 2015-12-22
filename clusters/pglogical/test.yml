@@ -1,0 +1,63 @@
+# TODO: Drop the provider slot if it exists. If some test fails, it may
+# not be dropped as expected.
+
+- name: Drop the provider database
+  command: dropdb --if-exists provider
+  delegate_to: "{{ item }}"
+
+- name: Drop the subscriber database
+  command: dropdb --if-exists subscriber
+
+- block:
+    - command: dropuser --if-exists super
+    - command: dropuser --if-exists nonsuper
+    - name: Recreate nonsuper user on provider
+      command: createuser --replication nonsuper
+    - name: Recreate super user on provider
+      command: createuser -s super
+  delegate_to: "{{ item }}"
+
+- block:
+    - command: dropuser --if-exists super
+    - command: dropuser --if-exists nonsuper
+    - name: Recreate nonsuper user on subscriber
+      command: createuser --replication nonsuper
+    - name: Recreate super user on subscriber
+      command: createuser -s super
+
+- name: Recreate the provider database
+  command: createdb -O super provider
+  delegate_to: "{{ item }}"
+
+- name: Recreate the subscriber database
+  command: createdb -O super subscriber
+
+- set_fact: provider_port="{{hostvars[item]['postgres_port']|int}}"
+- set_fact: subscriber_port="{{postgres_port|int}}"
+
+- name: Template provider DSN in test files
+  replace:
+    dest: "{{item}}"
+    regexp: "^(CREATE OR REPLACE FUNCTION public.pglogical_provider_dsn\\(\\) RETURNS text LANGUAGE SQL as \\$\\$ SELECT CAST \\()'[^x]*'( AS TEXT\\) \\$\\$;)$"
+    replace: "\\1'dbname=provider port={{provider_port}}'\\2"
+    backup: no
+  with_fileglob: "{{pglogical_build_dir}}/sql/*.sql"
+
+- name: Template subscriber DSN in test files
+  replace:
+    dest: "{{item}}"
+    regexp: "^(CREATE OR REPLACE FUNCTION public.pglogical_subscriber_dsn\\(\\) RETURNS text LANGUAGE SQL as \\$\\$ SELECT CAST \\()'[^']*'( AS TEXT\\) \\$\\$;)$"
+    replace: "\\1'dbname=subscriber port={{subscriber_port}}'\\2"
+    backup: no
+  with_fileglob: "{{pglogical_build_dir}}/sql/*.sql"
+
+- name: Run pg_regress
+  shell: >
+    {{postgres}}/lib/pgxs/src/test/regress/pg_regress \
+      --bindir={{postgres}}/bin \
+      --inputdir={{pglogical}}/sql \
+      --outputdir="{{pglogical}}/out-{{inventory_hostname}}-{{item}}" \
+      init basic extended toasted replication_set add_table
+  vars:
+    postgres: "{{postgres_install_dir|expanduser}}"
+    pglogical: "{{pglogical_build_dir|expanduser}}"
