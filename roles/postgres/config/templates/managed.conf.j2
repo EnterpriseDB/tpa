@@ -5,6 +5,6 @@
 
 port = {{postgres_port}}
 
-{% for k, v in postgresql_conf_entries.iteritems() %}
+{% for k, v in postgres_config_settings.iteritems() %}
 {{k}} = {{v}}
 {% endfor %}
