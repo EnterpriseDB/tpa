@@ -33,7 +33,7 @@ I don't care, I just want a test cluster
    [Read the INSTALL guide](INSTALL.md) for details.
 
 2. You need an AWS access key id and secret access key for API access.
-   [Read platforms/aws/README](platforms/aws/README) for details.
+   [Read platforms/aws/README](platforms/aws/README.md) for details.
 
 3. Pick a name for the cluster, and write a clustername/config.yml file
    describing the required instances, and a clustername/deploy.yml file
