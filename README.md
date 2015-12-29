@@ -25,17 +25,17 @@ I don't care, I just want a test cluster
 ========================================
 
 1. You need Python 2.x, various Python modules, and 2ndQuadrant's fork
-   of Ansible. Read the [INSTALL guide](INSTALL) for details.
+   of Ansible. [Read the INSTALL guide](INSTALL) for details.
 
 2. You need an AWS access key id and secret access key for API access.
-   Read [platforms/aws/README](platforms/aws/README) and write to
+   [Read platforms/aws/README](platforms/aws/README) and write to
    Abhijit, Marco, or Craig if you need help to get set up with AWS
    access.
 
 3. Pick a name for the cluster, and write a clustername/config.yml file
    describing the required instances, and a clustername/deploy.yml file
-   to apply the desired roles to these instances. Read
-   [clusters/README](clusters/README) for details.
+   to apply the desired roles to these instances.
+   [Read clusters/README](clusters/README) for details.
     
 4. Provision the cluster instances and deploy software to them:
 
