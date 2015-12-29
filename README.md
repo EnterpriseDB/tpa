@@ -38,20 +38,24 @@ I don't care, I just want a test cluster
     
 4. Provision the cluster instances and deploy software to them:
 
-    utils/ansible-playbook platforms/aws/provision.yml \
-        -e cluster=./clusters/name
+   ```
+   utils/ansible-playbook platforms/aws/provision.yml \
+       -e cluster=./clusters/name
 
-    utils/ansible-playbook -i inventory/ec2.py clusters/name/deploy.yml \
-        -e cluster=./clusters/name
+   utils/ansible-playbook -i inventory/ec2.py clusters/name/deploy.yml \
+       -e cluster=./clusters/name
+   ```
 
 5. Once you're done with testing, deprovision the cluster:
 
-    utils/ansible-playbook -i inventory/ec2.py platforms/aws/deprovision.yml \
-        -e cluster=./clusters/name
+   ```
+   utils/ansible-playbook -i inventory/ec2.py platforms/aws/deprovision.yml \
+       -e cluster=./clusters/name
+   ```
 
-   Note that deprovision.yml DOES NOT currently remove additional
-   volumes that are provisioned with delete_on_termination disabled.
-   Such volumes MUST BE deleted by hand for now.
+Note that deprovision.yml DOES NOT currently remove additional volumes
+that are provisioned with delete_on_termination disabled. Such volumes
+MUST BE deleted by hand for now.
 
 --
 Abhijit Menon-Sen <ams@2ndQuadrant.com>
