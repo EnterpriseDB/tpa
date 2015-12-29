@@ -6,20 +6,16 @@
 Confidential property of 2ndQuadrant; not for public release.
 
 This repository contains automation tools to provision, configure, and
-operate Postgres database clusters. These represent the best practices
-followed by 2ndQuadrant in setting up Postgres and associated programs.
+operate Postgres database clusters. With CustomCloud, you can:
 
-With CustomCloud, you can:
+(a) provision and deprovision hosts and other resources on AWS (and, in
+    future, other platforms) based on a simple configuration file
 
-    (a) provision and deprovision hosts and other resources on AWS (and,
-        in future, other platforms) based on a simple configuration file
+(b) configure the operating system (tweak kernel settings, install
+    packages, create users, set up password-less ssh between hosts…)
 
-    (b) configure the operating system (tweak kernel settings, install
-        packages, create users, set up password-less ssh between hosts…)
-
-    (c) install and configure Postgres or Postgres-XL (from source or
-        packages), Postgres extensions, and other software like repmgr
-        and Barman.
+(c) install and configure Postgres or Postgres-XL (from source or
+    packages), Postgres extensions, or repmgr and Barman, etc.
 
 These tools represent the best practices followed by 2ndQuadrant to set
 up Postgres and related programs, and are equally applicable to setting
