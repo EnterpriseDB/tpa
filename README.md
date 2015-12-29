@@ -29,8 +29,8 @@ tasks and configurations.
 I don't care, I just want a test cluster
 ========================================
 
-1. You need Python 2.x, various Python modules, and 2ndQuadrant's fork
-   of Ansible. [Read the INSTALL guide](INSTALL.md) for details.
+1. You need 2ndQuadrant's fork of Ansible.
+   [Read the INSTALL guide](INSTALL.md) for details.
 
 2. You need an AWS access key id and secret access key for API access.
    [Read platforms/aws/README](platforms/aws/README) and write to
