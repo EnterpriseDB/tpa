@@ -1,14 +1,33 @@
 2ndQuadrant Custom Cloud
 ------------------------
 
+© Copyright 2ndQuadrant, 2013
+
+Confidential property of 2ndQuadrant; not for public release.
+
 This repository contains automation tools to provision, configure, and
-operate database clusters. Blueprints are supported for
+operate Postgres database clusters. These represent the best practices
+followed by 2ndQuadrant in setting up Postgres and associated programs.
+
+With CustomCloud, you can:
+
+    (a) provision and deprovision hosts and other resources on AWS (and,
+        in future, other platforms) based on a simple configuration file
+
+    (b) configure the operating system (tweak kernel settings, install
+        packages, create users, set up password-less ssh between hosts…)
+
+    (c) install and configure Postgres or Postgres-XL (from source or
+        packages), Postgres extensions, and other software like repmgr
+        and Barman.
+
+These tools represent the best practices followed by 2ndQuadrant to set
+up Postgres and related programs, and are equally applicable to setting
+up quick one-off testbeds or production environments for customers.
+
+Blueprints are supported for
 * PostgreSQL
 * Postgres-XL
-
-Copyright 2ndQuadrant 2013-
-Confidential property of 2ndQuadrant
-No code here is for public release; we need to retain some competitive edge...
 
 Authentication with the AWS-related modules is needed. One of the convenient ways is to specify your access and secret key as ENV variables.
 
