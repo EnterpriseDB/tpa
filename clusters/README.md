@@ -13,17 +13,30 @@ http://docs.ansible.com/ansible/YAMLSyntax.html
 Provisioning
 ------------
 
-config.yml
+config.yml defines variables used by the provisioning process. It must
+define **cluster_name** (a string), **cluster_tags** (a hash of tag
+names and values), and **instances** (an array of hashes, one per
+instance).
 
 Deployment
 ----------
 
-deploy.yml
+deploy.yml is an Ansible playbook. It consists of one or more plays that
+target the provisioned hosts and applies the desired roles to them, as
+well as performing any other deployment tasks needed.
+
+For more about Ansible playbooks, see
+http://docs.ansible.com/ansible/playbooks.html
 
 Hybrid clusters
 ---------------
 
-inventory/static
+If your cluster is to contain hosts that aren't AWS EC2 instances, you
+need to add inventory files to define them.
+
+For more about Ansible inventory files, see
+http://docs.ansible.com/ansible/intro_inventory.html and
+http://docs.ansible.com/ansible/intro_dynamic_inventory.html
 
 Ask for help if you need it
 ---------------------------
