@@ -1,5 +1,5 @@
-2ndQuadrant Custom Cloud
-========================
+2ndQuadrant CustomCloud
+=======================
 
 © Copyright 2ndQuadrant, 2013
 

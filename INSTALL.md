@@ -1,5 +1,5 @@
-Custom Cloud Installation
-=========================
+CustomCloud Installation
+========================
 
 Requirements
 ------------
