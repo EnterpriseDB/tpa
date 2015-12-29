@@ -25,94 +25,37 @@ These tools represent the best practices followed by 2ndQuadrant to set
 up Postgres and related programs, and are equally applicable to setting
 up quick one-off testbeds or production environments for customers.
 
-Blueprints are supported for
-* PostgreSQL
-* Postgres-XL
+I don't care, I just want a test cluster
+----------------------------------------
 
-Authentication with the AWS-related modules is needed. One of the convenient ways is to specify your access and secret key as ENV variables.
+1. You need Python 2.x, various Python modules, and 2ndQuadrant's fork
+   of Ansible. Read the INSTALL guide for details.
 
-For environment variables:
+2. You need an AWS access key id and secret access key for API access.
+   Read platforms/aws/README and write to Abhijit, Marco, or Craig if
+   you need help to get set up with AWS access.
 
-export AWS_ACCESS_KEY_ID='AK123'
-export AWS_SECRET_ACCESS_KEY='abc123'
-
-To provision servers on AWS EC2, create clusters/name/config.yml with
-the instance configuration (see clusters/test for an example) and run:
+3. Pick a name for the cluster, and write a clustername/config.yml file
+   describing the required instances, and a clustername/deploy.yml file
+   to apply the desired roles to these instances. Read clusters/README
+   for details.
+    
+4. Provision the cluster instances and deploy software to them:
 
     utils/ansible-playbook platforms/aws/provision.yml \
         -e cluster=./clusters/name
 
-Next, to deploy Postgres on the EC2 instances provisioned above, create
-clusters/name/deploy.yml that applies the desired roles to the instances
-based on their tags (again, see clusters/test for an example), and run:
-
     utils/ansible-playbook -i inventory/ec2.py clusters/name/deploy.yml \
         -e cluster=./clusters/name
 
-To permanently deprovision a cluster, run:
+5. Once you're done with testing, deprovision the cluster:
 
     utils/ansible-playbook -i inventory/ec2.py platforms/aws/deprovision.yml \
         -e cluster=./clusters/name
 
-Note that deprovision.yml DOES NOT currently remove additional volumes
-that are provisioned with delete_on_termination disabled. Such volumes
-MUST BE deleted by hand for now.
-
-Requirements
-------------
-
-Python 2.7.x
-
-Recent versions of PyCrypto, jinja2, and boto. Install using pip rather
-than packages. (Other Python libraries may also be needed.)
-
-Ansible 2.x
-    https://github.com/2ndQuadrant/ansible
-    http://docs.ansible.com/ansible/intro_installation.html
-
-Use 2ndQuadrant/ansible in preference to ansible/ansible; the former is
-tested and includes local changes not present upstream. Install Ansible
-by cloning the git repository, export ANSIBLE_HOME=/path/to/clone, and
-invoke ansible* through the utils/ansible* wrappers provided here.
-
-The AWS CLI is useful and recommended, though not exactly required.
-    https://aws.amazon.com/cli/
-
-Installation
-------------
-
-Install Python 2.7 from operating system packages. For example, you need
-the python, python-pip, and python-virtualenv packages on Debian.
-
-Next, create a Python virtualenv in any convenient directory:
-
-    virtualenv ~/ansible-python
-
-    # The following line can go into your .bashrc
-    source ~/ansible-python/bin/activate
-
-Install the required Python packages:
-
-    pip install PyYAML jinja2 PyCrypto boto
-
-Install Ansible:
-
-    git clone --recursive https://github.com/2ndQuadrant/ansible
-
-And set ANSIBLE_HOME in your environment (and .bashrc):
-
-    export ANSIBLE_HOME=/path/to/ansibledir
-
-Now you should be able to run ./utils/ansible and the other scripts in
-this repository. The following simple tests should succeed if Ansible
-has been installed correctly:
-
-    ./utils/ansible localhost -m ping
-    ./utils/ansible localhost -c ssh -a "id"
-
-For convenience, you can also install the AWS cli according to the
-following instructions:
-    http://docs.aws.amazon.com/AWSEC2/latest/CommandLineReference/ec2-cli-get-set-up.html
+   Note that deprovision.yml DOES NOT currently remove additional
+   volumes that are provisioned with delete_on_termination disabled.
+   Such volumes MUST BE deleted by hand for now.
 
 --
 Abhijit Menon-Sen <ams@2ndQuadrant.com>
