@@ -21,24 +21,30 @@
           - groups[cluster_tag] | length > 0
       tags: always
 
-    # For each region, we build up a list of instance ids (by taking the
-    # intersection of hosts in the cluster with all hosts in the region,
-    # then extracting ec2_id from each one) and remove them.
-    #
-    # XXX: Note that terminating more than a few (e.g. 8) instances may
-    # take a long time and then timeout, even though the instances can
-    # be seen in the web UI to have been properly terminated. This may
-    # be a bug; pending investigation, if this task takes more than a
-    # couple of minutes, just interrupt it and rerun the playbook.
+    # For each region and each instance in that region, we issue an
+    # async ec2 task to deprovision the instance by its id, then wait
+    # for all the jobs to complete.
 
     - name: Terminate EC2 instances in each region
       ec2:
         state: absent
-        region: "{{ item }}"
-        instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('extract', hostvars, 'ec2_id')|list }}"
+        region: "{{ item.0 }}"
+        instance_id: "{{ item.1 }}"
         wait: yes
-      with_items: regions
+      with_nested_dependents:
+        - regions
+        - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_id')|unique|list
+      register: ec2_uninstances
+      async: 7200
+      poll: 0
       tags: ec2
+
+    - name: Wait for instance deprovisioning to complete
+      async_status: jid={{ item.ansible_job_id }}
+      register: ec2_jobs
+      until: ec2_jobs.finished
+      retries: 300
+      with_items: ec2_uninstances.results
 
     # Next, remove keypairs in each region by the same strategy, except
     # that ec2_key doesn't take a list directly, so we have to use the
