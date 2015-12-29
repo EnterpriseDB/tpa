@@ -10,16 +10,26 @@
 - name: Load cluster configuration file
   include_vars: "{{ cluster_dir }}/config.yml"
 
-- name: Ensure cluster configuration is complete
+- name: Ensure cluster_name is correctly configured
   assert:
-    msg: "Please define cluster configuration in {{cluster}}/config.yml"
+    msg: "Please define cluster_name (a non-empty string) in {{cluster}}/config.yml"
     that:
       - cluster_name is defined
       - cluster_name != ''
+
+- name: Ensure cluster_tags is correctly configured
+  assert:
+    msg: "Please define cluster_tags (a hash, including Owner) in {{cluster}}/config.yml"
+    that:
       - cluster_tags is defined
       - cluster_tags is mapping
       - cluster_tags['Owner'] is defined
       - cluster_tags['Owner'] != ''
+
+- name: Ensure instances is correctly configured
+  assert:
+    msg: "Please define instances (an array of hashes, one per instance) in {{cluster}}/config.yml"
+    that:
       - instances is defined
       - instances is sequence and instances is not string and instances is not mapping
       - instances | length > 0
