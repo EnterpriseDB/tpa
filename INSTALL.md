@@ -32,13 +32,13 @@ than your operating system's packages (which are often too old).
 To avoid installing the modules system-wide, they can go into an
 ansible-specific virtualenv (recommended):
 
-  virtualenv ~/ansible-python
+    virtualenv ~/ansible-python
 
-  # The following line can go into your .bashrc
-  source ~/ansible-python/bin/activate
+    # The following line can go into your .bashrc
+    source ~/ansible-python/bin/activate
 
-  # With the virtualenv activated, install packages
-  pip install jinja2 …
+    # With the virtualenv activated, install packages
+    pip install jinja2 …
 
 Ansible
 -------
