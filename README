@@ -1,5 +1,5 @@
 2ndQuadrant Custom Cloud
-------------------------
+========================
 
 © Copyright 2ndQuadrant, 2013
 
@@ -8,21 +8,21 @@ Confidential property of 2ndQuadrant; not for public release.
 This repository contains automation tools to provision, configure, and
 operate Postgres database clusters. With CustomCloud, you can:
 
-(a) provision and deprovision hosts and other resources on AWS (and, in
-    future, other platforms) based on a simple configuration file
+1. Provision and deprovision hosts and other resources on AWS (and, in
+   future, other platforms) based on a simple configuration file
 
-(b) configure the operating system (tweak kernel settings, install
-    packages, create users, set up password-less ssh between hosts…)
+2. Configure the operating system (tweak kernel settings, install
+   packages, create users, set up password-less ssh between hosts…)
 
-(c) install and configure Postgres or Postgres-XL (from source or
-    packages), Postgres extensions, or repmgr and Barman, etc.
+3. Install and configure Postgres or Postgres-XL (from source or
+   packages), Postgres extensions, or repmgr and Barman, etc.
 
 These tools represent the best practices followed by 2ndQuadrant to set
 up Postgres and related programs, and are equally applicable to setting
 up quick one-off testbeds or production environments for customers.
 
 I don't care, I just want a test cluster
-----------------------------------------
+========================================
 
 1. You need Python 2.x, various Python modules, and 2ndQuadrant's fork
    of Ansible. Read the INSTALL guide for details.
