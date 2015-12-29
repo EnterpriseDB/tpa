@@ -14,9 +14,14 @@
   assert:
     msg: "Please define cluster configuration in {{cluster}}/config.yml"
     that:
-      - cluster_name is defined and cluster_name != ''
-      - cluster_tags is defined and cluster_tags is mapping
-      - cluster_tags['Owner'] is defined and cluster_tags['Owner'] != ''
+      - cluster_name is defined
+      - cluster_name != ''
+      - cluster_tags is defined
+      - cluster_tags is mapping
+      - cluster_tags['Owner'] is defined
+      - cluster_tags['Owner'] != ''
+      - instances is defined
+      - instances is sequence and instances is not string and instances is not mapping
       - instances | length > 0
 
 - name: Derive EC2 group name for cluster
