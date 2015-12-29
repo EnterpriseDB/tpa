@@ -10,7 +10,7 @@ Use **Create Access Key** in the **Security Credentials** tab for your
 AWS IAM user to generate an access key, as described by
 http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html
 
-The key must be made available to the boto library, as described by
+Next, make the keypair available to the boto library, as described by
 https://boto.readthedocs.org/en/latest/boto_config_tut.html
 
 There are two easy ways to do this:
