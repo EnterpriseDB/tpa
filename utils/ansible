@@ -15,6 +15,14 @@ if [ -z "$config" -a ! -f ./ansible.cfg ]; then
     export ANSIBLE_CONFIG=$(dirname $0)/../ansible.cfg
 fi
 
+# If ANSIBLE_ROLES_PATH is not set, we'll set it to our roles directory,
+# just in case someone is trying to mix and match roles.
+
+roles=${ANSIBLE_ROLES_PATH:-""}
+if [ -z "$roles" ]; then
+    export ANSIBLE_ROLES_PATH=$(dirname $0)/../roles
+fi
+
 # This script may be invoked through symlinks as ansible, ansible-vault,
 # or ansible-playbook. If the requested command is already in the PATH,
 # we assume that everything's set up properly to run it. Otherwise, we
