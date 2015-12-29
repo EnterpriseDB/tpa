@@ -62,7 +62,7 @@ has been installed correctly:
 have more details about running from a source checkout.
 
 If you have trouble getting Ansible working, write to Abhijit, Richard,
-or Ian for help.
+Haroon, or Ian for help.
 
 Other software
 --------------

@@ -38,7 +38,7 @@ I don't care, I just want a test cluster
 3. Pick a name for the cluster, and write a clustername/config.yml file
    describing the required instances, and a clustername/deploy.yml file
    to apply the desired roles to these instances.
-   [Read clusters/README](clusters/README) for details.
+   [Read clusters/README](clusters/README.md) for details.
     
 4. Provision the cluster instances and deploy software to them:
 
