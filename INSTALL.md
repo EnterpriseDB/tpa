@@ -15,13 +15,13 @@ utils/ansible wrappers provided here.
 Python and modules
 ------------------
 
-You must have Python 2.7.x installed.
-
-Install any packages needed to get pip and virtualenv working. For
-example, on Debian, install python-pip and python-virtualenv.
+Install Python 2.7.x and any packages needed to get pip and virtualenv
+working. For example, on Debian, install python2.7, python-pip, and
+python-virtualenv.
 
 You will need recent versions of the following Python modules:
 
+* PyYAML
 * jinja2
 * boto
 * PyCrypto
