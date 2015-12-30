@@ -1,5 +1,5 @@
-CustomCloud clusters
-====================
+CustomCloud cluster configuration
+=================================
 
 To bring up a cluster with CustomCloud, you will need to write two YAML
 files: **config.yml** describes the instances required; **deploy.yml**

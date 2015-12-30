@@ -1,4 +1,4 @@
-CustomCloud Installation
+CustomCloud installation
 ========================
 
 To use CustomCloud, you will need Ansible from the
