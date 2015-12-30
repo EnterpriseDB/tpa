@@ -27,9 +27,8 @@ You will need recent versions of the following Python modules:
 * PyCrypto
 
 Install these modules using pip ("pip install jinja2 boto …") rather
-than your operating system's packages (which are often too old).
-
-To avoid installing the modules system-wide, they can go into an
+than your operating system's packages (which are often too old). To
+avoid installing the modules system-wide, they can go into an
 ansible-specific virtualenv (recommended):
 
     virtualenv ~/ansible-python
