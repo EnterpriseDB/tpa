@@ -1,0 +1,4 @@
+[{{ cluster_tag }}]
+{% for h in ec2_jobs.results %}
+{{ h.tagged_instances[0].public_ip }}
+{% endfor %}

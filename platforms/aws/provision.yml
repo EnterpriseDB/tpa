@@ -171,3 +171,17 @@
         - ec2_jobs.results
       register: eips
       tags: ec2_eips
+
+    # Write a static inventory file for the newly-provisioned hosts into
+    # the cluster's inventory directory.
+
+    - name: Ensure that the cluster's inventory directory exists
+      file:
+        path: "{{ cluster_dir }}/inventory"
+        state: directory
+
+    - name: Write a static inventory file for the cluster
+      template:
+        src: inventory.j2
+        dest: "{{ cluster_dir }}/inventory/aws"
+      when: ec2_jobs.changed
