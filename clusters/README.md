@@ -57,8 +57,37 @@ deploy.yml is an Ansible playbook. It consists of one or more plays that
 target the provisioned hosts and applies the desired roles to them, as
 well as performing any other deployment tasks needed.
 
+Hosts must be targeted not by name but by their attributes, e.g., group
+memberships or tag values (which are translated to group memberships by
+the ec2 inventory plugin). For example,
+
+  - hosts: tag_Name_SomeCluster
+    roles:
+      - …
+
+would target all hosts in the cluster, while
+
+  - hosts: tag_Name_SomeCluster:&tag_db_primary
+
+would target any hosts in the cluster with a tag named "db" with the
+value "primary".
+
+It's also possible (but less desirable, at least for reasons of clarity)
+to apply roles conditionally. For example,
+
+  - hosts: all
+    roles:
+      - { role: 'somerole', when: "…some condition…" }
+      - otherrole
+
+would apply somerole only to the hosts for which the condition evaluates
+to true, and otherrole to all hosts.
+
 For more about Ansible playbooks, see
 http://docs.ansible.com/ansible/playbooks.html
+and
+http://docs.ansible.com/ansible/intro_patterns.html
+for host patterns.
 
 Ask for help if you need it
 ---------------------------
