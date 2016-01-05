@@ -61,13 +61,13 @@ Hosts must be targeted not by name but by their attributes, e.g., group
 memberships or tag values (which are translated to group memberships by
 the ec2 inventory plugin). For example,
 
-  - hosts: tag_Name_SomeCluster
-    roles:
-      - …
+    - hosts: tag_Name_SomeCluster
+      roles:
+        - …
 
 would target all hosts in the cluster, while
 
-  - hosts: tag_Name_SomeCluster:&tag_db_primary
+    - hosts: tag_Name_SomeCluster:&tag_db_primary
 
 would target any hosts in the cluster with a tag named "db" with the
 value "primary".
@@ -75,10 +75,10 @@ value "primary".
 It's also possible (but less desirable, at least for reasons of clarity)
 to apply roles conditionally. For example,
 
-  - hosts: all
-    roles:
-      - { role: 'somerole', when: "…some condition…" }
-      - otherrole
+    - hosts: all
+      roles:
+        - { role: 'somerole', when: "…some condition…" }
+        - otherrole
 
 would apply somerole only to the hosts for which the condition evaluates
 to true, and otherrole to all hosts.
