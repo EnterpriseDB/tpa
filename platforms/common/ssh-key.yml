@@ -1,0 +1,12 @@
+- name: Run ssh-keygen
+  command: ssh-keygen -P "" -f "{{ keyfile }}" -C 2ndQuadrant
+  args:
+    chdir: "{{ cluster_dir }}"
+    creates: "{{ keyfile }}"
+  register: ssh_keygen
+
+- name: Run ssh-add
+  command: ssh-add "{{ keyfile }}"
+  args:
+    chdir: "{{ cluster_dir }}"
+  when: ssh_keygen.changed and lookup('env', 'SSH_AGENT_PID') is defined
