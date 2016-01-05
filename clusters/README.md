@@ -6,8 +6,8 @@ files: **config.yml** describes the instances required; **deploy.yml**
 is a playbook that maps the desired roles to the provisioned instances.
 
 These files should be in a cluster-specific directory; the location must
-be passed to playbooks using «-e cluster_dir=path/to/dir» on the command
-line to set the variable named "cluster_dir".
+be passed to playbooks using «-e cluster=path/to/dir» on the command
+line to set the variable named "cluster".
 
 There are several examples in this directory. Start with test/
 
