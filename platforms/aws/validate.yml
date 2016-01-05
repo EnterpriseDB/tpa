@@ -23,7 +23,7 @@
 
 - name: Derive EC2 group name for the cluster
   set_fact:
-    cluster_tag: "{{ 'tag_Name_' + cluster_tags[Name] }}"
+    cluster_tag: "{{ 'tag_Name_' + cluster_tags['Name'] }}"
 
 - name: Derive list of unique regions from instances
   set_fact:
