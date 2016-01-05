@@ -38,6 +38,10 @@
   set_fact:
     cluster_tag: "{{ 'tag_Name_' + cluster_name }}"
 
+- name: Ensure that the cluster name is set as a tag
+  set_fact:
+    cluster_tags: "{{ dict(Name=cluster_name)|combine(cluster_tags) }}"
+
 - name: Derive list of unique regions from instances
   set_fact:
     regions: "{{ instances|map(attribute='region')|unique|list }}"
