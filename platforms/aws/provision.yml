@@ -25,6 +25,35 @@
     - include: validate.yml
       tags: always
 
+    # If we're given an AMI name to search for, we do so in each region
+    # and build a lookup table.
+
+    - name: Initialise empty region→AMI table
+      set_fact:
+        ec2_region_amis: {}
+
+    - block:
+        - name: Find AMI named {{ ec2_ami_name }} in each region
+          ec2_ami_find:
+            name: "{{ ec2_ami_name }}"
+            owner: "{{ ec2_ami_owner|default(omit) }}"
+            region: "{{ item }}"
+            ami_tags: "{{ ec2_ami_tags|default(omit) }}"
+            sort: name
+            sort_order: descending
+            sort_end: 1
+            no_result_action: fail
+          register: ec2_amis
+          with_items: regions
+
+        - name: Initialise region→AMI table
+          set_fact:
+            ec2_region_amis: "{{ ec2_region_amis|combine({item.0: item.1.results.0.ami_id}) }}"
+          with_together:
+            - regions
+            - ec2_amis.results
+      when: ec2_ami_name is defined
+
     # A VPC (Virtual Private Cloud) is an isolated network container in
     # a single region (although it may span multiple availability zones
     # within the region). It comprises multiple subnets, routing tables,
@@ -120,7 +149,7 @@
       ec2:
         exact_count: 1
         count_tag: "{{ cluster_tags|combine(item.tags) }}"
-        image: "{{ item.image }}"
+        image: "{{ item.image|default(ec2_region_amis[item.region]) }}"
         region: "{{ item.region }}"
         key_name: "{{ ec2_key_name }}"
         instance_type: "{{ item.type }}"
