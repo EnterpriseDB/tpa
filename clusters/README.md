@@ -21,14 +21,19 @@ Provisioning starts with a description of a cluster and ends with the
 desired instances running and accessible by ssh. config.yml defines
 variables used by the provisioning process.
 
-The following variables must be defined:
+The following variables must always be defined:
 
 1. **cluster_name** (a string)
-2. **cluster_tags** (a hash of tag names and values)
-3. **instances** (an array of hashes, one per instance).
 
-The contents of config.yml are platform-specific; the above applies to
-AWS, which is the only platform we currently support.
+The remainder of the contents of config.yml are platform-specific. The
+only platform we currently support is AWS, for which the following
+variables must also be defined:
+
+1. **cluster_tags** (a hash of tag names and values)
+2. **instances** (an array of hashes, one per instance).
+
+For more details about AWS-specific configuration,
+[read platforms/aws/README](platforms/aws/README.md)
 
 Hybrid clusters
 ---------------
