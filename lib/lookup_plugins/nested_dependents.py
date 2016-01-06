@@ -27,9 +27,11 @@ __metaclass__ = type
 
 from jinja2.exceptions import UndefinedError
 
+from collections import Iterable
 from ansible.errors import AnsibleError, AnsibleUndefinedVariable
 from ansible.utils.listify import listify_lookup_plugin_terms
 from ansible.plugins.lookup import LookupBase
+from ansible.compat.six import string_types
 
 class LookupModule(LookupBase):
 
@@ -64,9 +66,18 @@ class LookupModule(LookupBase):
         results = []
 
         try:
-            list = listify_lookup_plugin_terms(current_term,
-                templar=self._templar, loader=self._loader,
-                fail_on_undefined=True)
+            expr = current_term
+            convert_bare = False
+
+            if isinstance(current_term, string_types):
+                expr = expr.strip()
+                convert_bare = True
+
+            list = self._templar.template(expr, cache=False,
+                fail_on_undefined=False, convert_bare=convert_bare)
+
+            if isinstance(list, string_types) or not isinstance(list, Iterable):
+                list = [list]
         except UndefinedError as e:
             raise AnsibleUndefinedVariable("Couldn't evaluate loop expression: %s" % e)
 
