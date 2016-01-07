@@ -14,6 +14,7 @@ instances:
       subnet: 10.0.2.0/24
       tags:
         node: 1
+        has_tct: yes
     - type: t2.micro
       region: eu-central-1
       image: ami-98043785

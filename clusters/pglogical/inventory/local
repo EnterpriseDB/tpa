@@ -12,6 +12,13 @@ subscriber      ec2_tag_node=2 postgres_git_ref=master
 subscriber95    ec2_tag_node=4 postgres_git_ref=REL9_5_STABLE
 subscriber94    ec2_tag_node=6 postgres_git_ref=REL9_4_STABLE
 
+# Hosts for which we can set track_commit_timestamp=on
+[tag_has_tct_yes]
+provider
+provider95
+subscriber
+subscriber95
+
 [tag_Name_PglogicalTests:vars]
 ansible_connection=local
 postgres_src_dir=~/pglogical/{{inventory_hostname}}/src
