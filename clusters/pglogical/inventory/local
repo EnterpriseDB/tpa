@@ -3,16 +3,17 @@ providers
 subscribers
 
 [providers]
-provider        ansible_connection=local ec2_tag_node=1 postgres_git_ref=master
-provider95      ansible_connection=local ec2_tag_node=3 postgres_git_ref=REL9_5_STABLE
-provider94      ansible_connection=local ec2_tag_node=5 postgres_git_ref=REL9_4_STABLE
+provider        ec2_tag_node=1 postgres_git_ref=master
+provider95      ec2_tag_node=3 postgres_git_ref=REL9_5_STABLE
+provider94      ec2_tag_node=5 postgres_git_ref=REL9_4_STABLE
 
 [subscribers]
-subscriber      ansible_connection=local ec2_tag_node=2 postgres_git_ref=master
-subscriber95    ansible_connection=local ec2_tag_node=4 postgres_git_ref=REL9_5_STABLE
-subscriber94    ansible_connection=local ec2_tag_node=6 postgres_git_ref=REL9_4_STABLE
+subscriber      ec2_tag_node=2 postgres_git_ref=master
+subscriber95    ec2_tag_node=4 postgres_git_ref=REL9_5_STABLE
+subscriber94    ec2_tag_node=6 postgres_git_ref=REL9_4_STABLE
 
 [tag_Name_PglogicalTests:vars]
+ansible_connection=local
 postgres_src_dir=~/pglogical/{{inventory_hostname}}/src
 postgres_build_dir=~/pglogical/{{inventory_hostname}}/build
 postgres_install_dir=~/pglogical/{{inventory_hostname}}/install
