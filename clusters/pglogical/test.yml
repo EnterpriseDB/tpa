@@ -61,7 +61,7 @@
 - name: Run pg_regress
   shell: >
     {{postgres}}/lib/postgresql/pgxs/src/test/regress/pg_regress \
-      --inputdir={{pglogical}}/sql \
+      --inputdir={{pglogical}} \
       --outputdir="{{pglogical}}/out-{{inventory_hostname}}-{{item}}" \
       init basic extended toasted replication_set add_table
   vars:
