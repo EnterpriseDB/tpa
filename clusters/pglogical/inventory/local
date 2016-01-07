@@ -22,8 +22,11 @@ pglogical_build_dir=~/pglogical/{{inventory_hostname}}/pglogical
 pglogical_output_build_dir=~/pglogical/{{inventory_hostname}}/pglogical_output
 postgres_port="{{5432+ec2_tag_node}}"
 
+[local_instances:children]
+tag_Name_PglogicalTests
+
 # Local copies of the source repositories will make the clone go faster.
-# Edit inventory/group_vars/tag_Name_PglogicalTests/reference_repos.yml
+# Edit inventory/group_vars/local_instances/reference_repos.yml
 # and set the following variables to the correct paths:
 #
 # postgres_reference_repo: ~/extern/postgres
