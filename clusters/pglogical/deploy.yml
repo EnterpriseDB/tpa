@@ -20,11 +20,14 @@
 
   roles:
     - role: 'postgres/src'
+      postgres_git_reference_repo: "{{postgres_reference_repo}}"
     - role: 'postgres/ext'
       postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical_output.git
+      postgres_ext_git_reference_repo: "{{pglogical_output_reference_repo}}"
       postgres_ext_dir: "{{pglogical_output_build_dir}}"
     - role: 'postgres/ext'
       postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical.git
+      postgres_ext_git_reference_repo: "{{pglogical_reference_repo}}"
       postgres_ext_dir: "{{pglogical_build_dir}}"
     - role: 'postgres/initdb'
       postgres_initdb_opts: ['-A', 'trust']
