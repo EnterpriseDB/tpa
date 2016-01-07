@@ -53,7 +53,7 @@
 
 - name: Run pg_regress
   shell: >
-    {{postgres}}/lib/pgxs/src/test/regress/pg_regress \
+    {{postgres}}/lib/postgresql/pgxs/src/test/regress/pg_regress \
       --bindir={{postgres}}/bin \
       --inputdir={{pglogical}}/sql \
       --outputdir="{{pglogical}}/out-{{inventory_hostname}}-{{item}}" \
