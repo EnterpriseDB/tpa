@@ -6,7 +6,15 @@ This is an overview of the various roles available for CustomCloud.
 common
 ------
 
-…
+The common role does the following:
+
+1. Make sure Python is installed and usable.
+2. Set up generic package repositories if required.
+3. Install any generic packages if required.
+4. Set the system hostname.
+
+If fact collection is required, it should be performed separately in a
+play that runs after the one that applies the common role.
 
 Postgres
 --------
