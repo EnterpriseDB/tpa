@@ -51,6 +51,11 @@
     backup: no
   with_fileglob: "{{pglogical_build_dir}}/sql/*.sql"
 
+- name: Create output directory
+  file:
+    path: "{{pglogical}}/out-{{inventory_hostname}}-{{item}}"
+    state: directory
+
 - name: Run pg_regress
   shell: >
     {{postgres}}/lib/postgresql/pgxs/src/test/regress/pg_regress \
