@@ -55,6 +55,8 @@
   file:
     path: "{{pglogical}}/out-{{inventory_hostname}}-{{item}}"
     state: directory
+  vars:
+    pglogical: "{{pglogical_build_dir|expanduser}}"
 
 - name: Run pg_regress
   shell: >
