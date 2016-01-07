@@ -22,7 +22,7 @@
     - role: 'postgres/src'
     - role: 'postgres/ext'
       postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical_output.git
-      postgres_ext_dir: "~/pglogical/{{inventory_hostname}}/pglogical_output"
+      postgres_ext_dir: "{{pglogical_output_build_dir}}"
     - role: 'postgres/ext'
       postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical.git
       postgres_ext_dir: "{{pglogical_build_dir}}"
