@@ -2,12 +2,12 @@
 providers
 subscribers
 
-[providers]
+[tag_group_providers]
 provider        ec2_tag_node=1 postgres_git_ref=master
 provider95      ec2_tag_node=3 postgres_git_ref=REL9_5_STABLE
 provider94      ec2_tag_node=5 postgres_git_ref=REL9_4_STABLE
 
-[subscribers]
+[tag_group_subscribers]
 subscriber      ec2_tag_node=2 postgres_git_ref=master
 subscriber95    ec2_tag_node=4 postgres_git_ref=REL9_5_STABLE
 subscriber94    ec2_tag_node=6 postgres_git_ref=REL9_4_STABLE

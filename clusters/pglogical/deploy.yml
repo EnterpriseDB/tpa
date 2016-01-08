@@ -51,10 +51,10 @@
     PATH: "{{postgres_install_dir|expanduser}}/bin:{{lookup('env', 'PATH')}}"
 
 - name: Run regression tests
-  hosts: subscribers
+  hosts: tag_group_subscribers
   tasks:
     - include: test.yml
-      with_items: groups['providers']
+      with_items: groups['tag_group_providers']
   environment:
     PATH: "{{postgres_install_dir|expanduser}}/bin:{{lookup('env', 'PATH')}}"
     PGPORT: "{{postgres_port|int}}"
