@@ -7,17 +7,42 @@ cluster_tags:
   Name: PglogicalTests
   Owner: AMS
 
+ec2_ami_name: "debian-wheezy-amd64-hvm-2015*"
+
 instances:
-    - type: t2.micro
+    - type: t2.nano
       region: eu-central-1
-      image: ami-98043785
       subnet: 10.0.2.0/24
       tags:
         node: 1
         has_tct: yes
-    - type: t2.micro
+    - type: t2.nano
       region: eu-central-1
-      image: ami-98043785
       subnet: 10.0.2.0/24
       tags:
         node: 2
+        has_tct: yes
+    - type: t2.nano
+      region: eu-central-1
+      subnet: 10.0.2.0/24
+      tags:
+        node: 3
+        has_tct: yes
+    - type: t2.nano
+      region: eu-central-1
+      subnet: 10.0.2.0/24
+      tags:
+        node: 4
+        has_tct: yes
+    - type: t2.nano
+      region: eu-central-1
+      subnet: 10.0.2.0/24
+      tags:
+        node: 5
+        has_tct: no
+    - type: t2.nano
+      region: eu-central-1
+      subnet: 10.0.2.0/24
+      tags:
+        node: 6
+        has_tct: no
