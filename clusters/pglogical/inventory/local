@@ -21,12 +21,6 @@ subscriber95
 
 [tag_Name_PglogicalTests:vars]
 ansible_connection=local
-postgres_src_dir=~/pglogical/{{inventory_hostname}}/src
-postgres_build_dir=~/pglogical/{{inventory_hostname}}/build
-postgres_install_dir=~/pglogical/{{inventory_hostname}}/install
-postgres_data_dir=~/pglogical/{{inventory_hostname}}/data
-pglogical_build_dir=~/pglogical/{{inventory_hostname}}/pglogical
-pglogical_output_build_dir=~/pglogical/{{inventory_hostname}}/pglogical_output
 postgres_port="{{5432+ec2_tag_node}}"
 
 [local_instances:children]
