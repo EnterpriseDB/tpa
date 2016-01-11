@@ -1,6 +1,6 @@
 [tag_Name_PglogicalTests:children]
-providers
-subscribers
+tag_group_providers
+tag_group_subscribers
 
 [tag_group_providers]
 provider        ec2_tag_node=1 postgres_git_ref=master
