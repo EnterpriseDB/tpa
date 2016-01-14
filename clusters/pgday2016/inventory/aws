@@ -1,0 +1,5 @@
+[tag_Name_PgDayUK2016]
+54.229.14.95
+
+[tag_Name_PgDayUK2016:vars]
+ansible_user=admin
