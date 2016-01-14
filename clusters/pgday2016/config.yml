@@ -1,0 +1,29 @@
+# An EC2 configuration for the PGDayUK 2016 web site.
+
+cluster_name: "PgDayUK2016"
+cluster_tags:
+  Owner: "Umair Shahid"
+cluster_rules:
+  - proto: tcp
+    from_port: 22
+    to_port: 22
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 80
+    to_port: 80
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 443
+    to_port: 443
+    cidr_ip: 0.0.0.0/0
+
+ec2_ami_name: 'debian-wheezy-amd64-hvm-2015*'
+
+instances:
+    - type: t2.micro
+      region: eu-west-1
+      subnet: 10.39.1.0/24
+      assign_eip: yes
+      tags:
+        db: none
+        node: 1
