@@ -1,21 +1,24 @@
 # TODO: Drop the provider slot if it exists. If some test fails, it may
 # not be dropped as expected.
 
+- set_fact: provider_port="{{hostvars[item]['postgres_port']|int}}"
+- set_fact: subscriber_port="{{postgres_port|int}}"
+
 - name: Drop the provider database
-  command: dropdb --if-exists provider
-  delegate_to: "{{ item }}"
+  command: dropdb -p {{provider_port}} --if-exists provider
+  delegate_to: "{{item}}"
 
 - name: Drop the subscriber database
   command: dropdb --if-exists subscriber
 
 - block:
-    - command: dropuser --if-exists super
-    - command: dropuser --if-exists nonsuper
+    - command: dropuser -p {{provider_port}} --if-exists super
+    - command: dropuser -p {{provider_port}} --if-exists nonsuper
     - name: Recreate nonsuper user on provider
-      command: createuser --replication nonsuper
+      command: createuser -p {{provider_port}} --replication nonsuper
     - name: Recreate super user on provider
-      command: createuser -s super
-  delegate_to: "{{ item }}"
+      command: createuser -p {{provider_port}} -s super
+  delegate_to: "{{item}}"
 
 - block:
     - command: dropuser --if-exists super
@@ -26,30 +29,21 @@
       command: createuser -s super
 
 - name: Recreate the provider database
-  command: createdb -O super provider
-  delegate_to: "{{ item }}"
+  command: createdb -p {{provider_port}} -O super provider
+  delegate_to: "{{item}}"
 
 - name: Recreate the subscriber database
   command: createdb -O super subscriber
 
-- set_fact: provider_port="{{hostvars[item]['postgres_port']|int}}"
-- set_fact: subscriber_port="{{postgres_port|int}}"
-
-- name: Template provider DSN in test files
+- name: Template DSN in test files
   replace:
     dest: "{{item}}"
-    regexp: "^(CREATE OR REPLACE FUNCTION public.pglogical_provider_dsn\\(\\) RETURNS text LANGUAGE SQL as \\$\\$ SELECT CAST \\()'[^x]*'( AS TEXT\\) \\$\\$;)$"
-    replace: "\\1'dbname=provider port={{provider_port}}'\\2"
+    regexp: "(?s)(CREATE OR REPLACE FUNCTION public.pglogical_regress_variables\\(.*? AS \\$f\\$).*?(\\$f\\$;)"
+    replace: "\\1SELECT 'dbname=provider port={{provider_port}}'::text, 'dbname=subscriber port={{subscriber_port}}'::text\\2"
     backup: no
-  with_fileglob: "{{pglogical_build_dir}}/sql/*.sql"
-
-- name: Template subscriber DSN in test files
-  replace:
-    dest: "{{item}}"
-    regexp: "^(CREATE OR REPLACE FUNCTION public.pglogical_subscriber_dsn\\(\\) RETURNS text LANGUAGE SQL as \\$\\$ SELECT CAST \\()'[^']*'( AS TEXT\\) \\$\\$;)$"
-    replace: "\\1'dbname=subscriber port={{subscriber_port}}'\\2"
-    backup: no
-  with_fileglob: "{{pglogical_build_dir}}/sql/*.sql"
+  with_items:
+    - "{{pglogical_build_dir}}/sql/preseed.sql"
+    - "{{pglogical_build_dir}}/expected/preseed.out"
 
 - name: Create output directory
   file:
@@ -63,7 +57,7 @@
     {{postgres}}/lib/postgresql/pgxs/src/test/regress/pg_regress \
       --inputdir={{pglogical}} \
       --outputdir="{{pglogical}}/out-{{inventory_hostname}}-{{item}}" \
-      init basic extended toasted replication_set add_table
+      preseed infofuncs init_fail init preseed_check basic extended toasted replication_set add_table matview bidirectional primary_key foreign_key functions copy drop
   vars:
     postgres: "{{postgres_install_dir|expanduser}}"
     pglogical: "{{pglogical_build_dir|expanduser}}"
