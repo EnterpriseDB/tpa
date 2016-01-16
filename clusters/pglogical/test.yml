@@ -12,28 +12,24 @@
   command: dropdb --if-exists subscriber
 
 - block:
-    - command: dropuser -p {{provider_port}} --if-exists super
-    - command: dropuser -p {{provider_port}} --if-exists nonsuper
-    - name: Recreate nonsuper user on provider
-      command: createuser -p {{provider_port}} --replication nonsuper
-    - name: Recreate super user on provider
-      command: createuser -p {{provider_port}} -s super
+    - name: Remove the super user on provider
+      command: dropuser -p {{provider_port}} --if-exists super
+    - name: Remove the nonsuper user on provider
+      command: dropuser -p {{provider_port}} --if-exists nonsuper
   delegate_to: "{{item}}"
 
 - block:
-    - command: dropuser --if-exists super
-    - command: dropuser --if-exists nonsuper
-    - name: Recreate nonsuper user on subscriber
-      command: createuser --replication nonsuper
-    - name: Recreate super user on subscriber
-      command: createuser -s super
+    - name: Remove the super user on subscriber
+      command: dropuser --if-exists super
+    - name: Remove the nonsuper user on subscribeer
+      command: dropuser --if-exists nonsuper
 
 - name: Recreate the provider database
-  command: createdb -p {{provider_port}} -O super provider
+  command: createdb -p {{provider_port}} provider
   delegate_to: "{{item}}"
 
 - name: Recreate the subscriber database
-  command: createdb -O super subscriber
+  command: createdb  subscriber
 
 - name: Template DSN in test files
   replace:
@@ -45,6 +41,15 @@
     - "{{pglogical_build_dir}}/sql/preseed.sql"
     - "{{pglogical_build_dir}}/expected/preseed.out"
 
+- name: Template slot names in test output
+  replace:
+    dest: "{{item}}"
+    regexp: "pgl_postgres_test_provider_test_sube55bf37"
+    replace: "pgl_subscriber_test_provider_test_sube55bf37"
+    backup: no
+  with_fileglob:
+    - "{{pglogical_build_dir}}/expected/*.out"
+
 - name: Create output directory
   file:
     path: "{{pglogical}}/out-{{inventory_hostname}}-{{item}}"
@@ -52,12 +57,20 @@
   vars:
     pglogical: "{{pglogical_build_dir|expanduser}}"
 
+- name: Set 9.4 test list
+  set_fact:
+    test_list: preseed infofuncs init_fail init preseed_check basic extended toasted replication_set add_table matview primary_key foreign_key functions copy drop
+  when: postgres_git_ref == "REL9_4_STABLE" or hostvars[item]['postgres_git_ref'] == "REL9_4_STABLE"
+- name: Set 9.5+ test list
+  set_fact:
+    test_list: preseed infofuncs init_fail init preseed_check basic extended toasted replication_set add_table matview bidirectional primary_key foreign_key functions copy drop
+  when: postgres_git_ref != "REL9_4_STABLE" and hostvars[item]['postgres_git_ref'] != "REL9_4_STABLE"
 - name: Run pg_regress
   shell: >
     {{postgres}}/lib/postgresql/pgxs/src/test/regress/pg_regress \
       --inputdir={{pglogical}} \
       --outputdir="{{pglogical}}/out-{{inventory_hostname}}-{{item}}" \
-      preseed infofuncs init_fail init preseed_check basic extended toasted replication_set add_table matview bidirectional primary_key foreign_key functions copy drop
+      {{test_list}}
   vars:
     postgres: "{{postgres_install_dir|expanduser}}"
     pglogical: "{{pglogical_build_dir|expanduser}}"
