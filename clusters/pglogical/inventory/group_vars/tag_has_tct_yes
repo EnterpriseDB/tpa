@@ -1,2 +1,0 @@
-extra_postgres_config:
-    track_commit_timestamp: on

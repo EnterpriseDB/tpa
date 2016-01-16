@@ -60,11 +60,11 @@
 - name: Set 9.4 test list
   set_fact:
     test_list: preseed infofuncs init_fail init preseed_check basic extended toasted replication_set add_table matview primary_key foreign_key functions copy drop
-  when: postgres_git_ref == "REL9_4_STABLE" or hostvars[item]['postgres_git_ref'] == "REL9_4_STABLE"
+  when: postgres_ver|int == 94 or hostvars[item]['postgres_ver']|int == 94
 - name: Set 9.5+ test list
   set_fact:
     test_list: preseed infofuncs init_fail init preseed_check basic extended toasted replication_set add_table matview bidirectional primary_key foreign_key functions copy drop
-  when: postgres_git_ref != "REL9_4_STABLE" and hostvars[item]['postgres_git_ref'] != "REL9_4_STABLE"
+  when: postgres_ver|int > 94 and hostvars[item]['postgres_ver']|int > 94
 - name: Run pg_regress
   shell: >
     {{postgres}}/lib/postgresql/pgxs/src/test/regress/pg_regress \

@@ -27,6 +27,12 @@
       file: state=absent path="{{postgres_data_dir}}" force=yes
       when: datadir.stat.exists
 
+    - name: Set track_commit_timestamp=on
+      set_fact:
+        extra_postgres_config:
+          track_commit_timestamp: on
+      when: postgres_ver|int > 94
+
   roles:
     - role: 'postgres/src'
       postgres_git_reference_repo: "{{postgres_reference_repo|default('')}}"
@@ -42,6 +48,10 @@
       postgres_initdb_opts: ['-A', 'trust']
     - role: 'postgres/config'
       postgres_config_settings: "{{default_postgres_config|combine(extra_postgres_config|default({}))}}"
+      postgres_hba_settings:
+        - "local   all             all         trust"
+        - "local   replication     super       trust"
+        - "local   replication     nonsuper    trust"
 
   post_tasks:
     - name: Start Postgres
@@ -53,8 +63,13 @@
 - name: Run regression tests
   hosts: tag_group_subscribers
   tasks:
-    - include: test.yml
+    - set_fact:
+        provider: "{{item}}"
+      when: postgres_ver|int >= hostvars[item]['postgres_ver']|int
       with_items: groups['tag_group_providers']
+      register: providers
+    - include: test.yml
+      with_items: "{{ providers.results | map(attribute='ansible_facts.provider') | list }}"
   environment:
     PATH: "{{postgres_install_dir|expanduser}}/bin:{{lookup('env', 'PATH')}}"
     PGPORT: "{{postgres_port|int}}"
