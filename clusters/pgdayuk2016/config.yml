@@ -17,7 +17,7 @@ cluster_rules:
     to_port: 443
     cidr_ip: 0.0.0.0/0
 
-ec2_ami_name: 'debian-wheezy-amd64-hvm-2015*'
+ec2_ami_name: 'ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20150325'
 
 instances:
     - type: t2.micro

@@ -1,5 +1,5 @@
 [tag_Name_PgDayUK2016]
-54.229.14.95
+52.19.173.43
 
 [tag_Name_PgDayUK2016:vars]
-ansible_user=admin
+ansible_user=ubuntu
