@@ -1,2 +1,0 @@
-[all:vars]
-ansible_user=admin
