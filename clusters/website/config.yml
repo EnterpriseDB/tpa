@@ -23,9 +23,17 @@ cluster_rules:
     cidr_ip: 0.0.0.0/0
 
 instances:
-    - type: t2.micro
-      region: eu-central-1
-      image: ami-98043785
+#    - type: t2.medium
+#      region: eu-central-1
+#      image: ami-98043785
+#      subnet: 10.0.1.0/24
+#      assign_eip: yes
+#      tags:
+#        db: primary
+#        node: 1
+    - type: t2.medium
+      region: eu-west-1
+      image: ami-a6be15d5
       subnet: 10.0.1.0/24
       assign_eip: yes
       tags:
