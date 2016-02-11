@@ -25,6 +25,7 @@ You will need recent versions of the following Python modules:
 * jinja2
 * boto
 * PyCrypto
+* six
 
 Install these modules using pip ("pip install jinja2 boto …") rather
 than your operating system's packages (which are often too old). To
