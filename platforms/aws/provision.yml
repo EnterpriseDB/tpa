@@ -19,8 +19,8 @@
   tasks:
 
     # Make sure we're invoked with a complete cluster configuration. We
-    # expect $cluster_dir/config.yml to define a cluster name and a list
-    # of instances.
+    # expect $cluster_dir/$config.yml to define a cluster name and a
+    # list of instances.
 
     - include: validate.yml
       tags: always

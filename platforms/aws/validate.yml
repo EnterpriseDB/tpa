@@ -2,7 +2,7 @@
 
 - name: Ensure cluster_tags is correctly configured
   assert:
-    msg: "Please define cluster_tags (a hash, including Owner) in {{cluster}}/config.yml"
+    msg: "Please define cluster_tags (a hash, including Owner) in {{config_file}}"
     that:
       - cluster_tags is defined
       - cluster_tags is mapping
@@ -11,7 +11,7 @@
 
 - name: Ensure instances is correctly configured
   assert:
-    msg: "Please define instances (an array of hashes, one per instance) in {{cluster}}/config.yml"
+    msg: "Please define instances (an array of hashes, one per instance) in {{config_file}}"
     that:
       - instances is defined
       - instances is sequence and instances is not string and instances is not mapping
