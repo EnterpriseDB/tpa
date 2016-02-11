@@ -222,4 +222,4 @@
     - name: Write a static inventory file for the cluster
       template:
         src: inventory.j2
-        dest: "{{ cluster_dir }}/inventory/aws"
+        dest: "{{ cluster_dir }}/inventory/{{ cluster_name }}"
