@@ -1,5 +1,6 @@
 ---
 
+- include: setup.yml
 - include: raw_packages.yml
 - include: python.yml
 - include: packages.yml
