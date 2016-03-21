@@ -52,6 +52,18 @@
         - "local   all             all         trust"
         - "local   replication     super       trust"
         - "local   replication     nonsuper    trust"
+        - "local   all             all                                  trust"
+        - "host    all             all             127.0.0.1/32         trust"
+        - "host    all             all             ::1/128              trust"
+        - "local   replication     super                                trust"
+        - "host    replication     super        127.0.0.1/32            trust"
+        - "host    replication     super        ::1/128                 trust"
+        - "local   replication     super2                                trust"
+        - "host    replication     super2        127.0.0.1/32            trust"
+        - "host    replication     super2        ::1/128                 trust"
+        - "local   replication     nonsuper                              trust"
+        - "host    replication     nonsuper        127.0.0.1/32          trust"
+        - "host    replication     nonsuper        ::1/128               trust"
 
   post_tasks:
     - name: Start Postgres
@@ -62,6 +74,7 @@
 
 - name: Run regression tests
   hosts: tag_group_subscribers
+  ignore_errors: yes
   tasks:
     - set_fact:
         provider: "{{item}}"
