@@ -25,14 +25,14 @@ There are three related things you can do with this stuff:
 
 3. Deploy postgres to the nodes provisioned above.
 
-deploy-ec2.yml and deploy-local.yml both just set the stage and include
+deploy-ec2.yml and deploy.yml both just set the stage and include
 deploy.yml, which does (3) by applying the 'src', 'initdb', and 'config'
 roles to it.
 
 It would be run as follows:
 
     # Build from scratch
-    utils/ansible-playbook clusters/pglogical/deploy-local.yml
+    utils/ansible-playbook clusters/pglogical/deploy.yml
 
     # Don't get rid of the old build dir and re-run configure
-    utils/ansible-playbook clusters/pglogical/deploy-local.yml --skip-tags postgres-clean
+    utils/ansible-playbook clusters/pglogical/deploy.yml --skip-tags postgres-clean
