@@ -25,6 +25,26 @@
     - include: validate.yml
       tags: always
 
+    # Create an ssh keypair for this cluster, and register its public
+    # key in each region. This key is used to initially provide ssh
+    # access to any provisioned instances.
+
+    - name: Create ssh key {{ ec2_key_file }}
+      include: ../common/ssh-key.yml
+      vars:
+        keyfile: "{{ ec2_key_file }}"
+      tags: ec2_keys
+
+    - name: Register key {{ ec2_key_name }} in each region
+      ec2_key:
+        state: present
+        region: "{{ item }}"
+        name: "{{ ec2_key_name }}"
+        key_material: "{{ lookup('file', cluster_dir + '/' + ec2_key_file + '.pub') }}"
+        wait: yes
+      with_items: regions
+      tags: ec2_keys
+
     # If we're given an AMI name to search for, we do so in each region
     # and build a lookup table.
 
@@ -117,27 +137,6 @@
       with_items: vpcs.results
       register: sgs
       tags: ec2_vpcs
-
-    # Create an SSH keypair and make sure the public key is stored in
-    # each region. This key is used to initially provide SSH access to
-    # the EC2 instances we set up next. (We could support multiple keys
-    # per region as we do for VPCs, but we don't bother for now.)
-
-    - name: Create a new keypair
-      include: ../common/ssh-key.yml
-      vars:
-        keyfile: "{{ ec2_key_file }}"
-      tags: ec2_keys
-
-    - name: Set up keypair in each region
-      ec2_key:
-        state: present
-        region: "{{ item }}"
-        name: "{{ ec2_key_name }}"
-        key_material: "{{ lookup('file', cluster_dir + '/' + ec2_key_file + '.pub') }}"
-        wait: yes
-      with_items: regions
-      tags: ec2_keys
 
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above. We loop over instances[], look up

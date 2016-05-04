@@ -5,7 +5,7 @@
     creates: "{{ keyfile }}"
   register: ssh_keygen
 
-- name: Run ssh-add
+- name: Run ssh-add to register the key with ssh-agent
   command: ssh-add "{{ keyfile }}"
   args:
     chdir: "{{ cluster_dir }}"
