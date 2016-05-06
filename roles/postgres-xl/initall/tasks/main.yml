@@ -3,7 +3,7 @@
 - name: Appoint control node
   set_fact: control_hostname="{{ item }}"
   when: "hostvars[item].ec2_tag_node == '1'"
-  with_items: play_hosts
+  with_items: "{{ play_hosts }}"
 
 - name: Check if pgxc_ctl.conf exists
   stat: path=~postgres/pgxc_ctl.conf

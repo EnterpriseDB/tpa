@@ -79,7 +79,7 @@
     - set_fact:
         provider: "{{item}}"
       when: postgres_ver|int >= hostvars[item]['postgres_ver']|int
-      with_items: groups['tag_group_providers']
+      with_items: "{{ groups['tag_group_providers'] }}"
       register: providers
     - include: test.yml
       with_items: "{{ providers.results | map(attribute='ansible_facts.provider') | list }}"

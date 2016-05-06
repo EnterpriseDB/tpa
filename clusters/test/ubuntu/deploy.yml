@@ -28,7 +28,7 @@
     - name: Determine primary hostname
       set_fact: primary_hostname="{{ item }}"
       when: "hostvars[item].ec2_tag_db == 'primary'"
-      with_items: play_hosts
+      with_items: "{{ play_hosts }}"
       tags: always
 
     - name: Set the node id as a fact

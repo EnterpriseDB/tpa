@@ -27,7 +27,7 @@
 
 - name: Add dbservers to barman's known_hosts
   shell: ssh-keyscan -H "{{ item }}" >> ~barman/.ssh/known_hosts
-  with_items: db_servers
+  with_items: "{{ db_servers }}"
   become_user: barman
   become: yes
   delegate_to: "{{barman_hostname}}"

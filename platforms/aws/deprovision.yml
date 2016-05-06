@@ -44,7 +44,7 @@
       register: ec2_jobs
       until: ec2_jobs.finished
       retries: 300
-      with_items: ec2_uninstances.results
+      with_items: "{{ ec2_uninstances.results }}"
 
     # Next, remove keypairs in each region by the same strategy, except
     # that ec2_key doesn't take a list directly, so we have to use the

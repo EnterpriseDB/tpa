@@ -23,10 +23,10 @@
   shell: "{{postgres_make_command}} {{item}}"
   args:
     chdir: "{{postgres_build_dir}}"
-  with_items: postgres_build_targets
+  with_items: "{{ postgres_build_targets }}"
 
 - name: Install Postgres
   shell: "{{postgres_make_command}} {{item}}"
   args:
     chdir: "{{postgres_build_dir}}"
-  with_items: postgres_install_targets
+  with_items: "{{ postgres_install_targets }}"

@@ -23,5 +23,5 @@
         region: "{{ item }}"
         instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('extract', hostvars, 'ec2_id')|list }}"
         wait: yes
-      with_items: regions
+      with_items: "{{ regions }}"
       tags: ec2

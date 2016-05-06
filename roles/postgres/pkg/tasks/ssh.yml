@@ -27,6 +27,6 @@
 
 - name: Add hosts to known_hosts
   shell: ssh-keyscan -H "{{ hostvars[item]['vpn_address'] }}" >> ~/.ssh/known_hosts
-  with_items: play_hosts
+  with_items: "{{ play_hosts }}"
   become_user: postgres
   become: yes
