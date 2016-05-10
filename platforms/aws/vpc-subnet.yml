@@ -1,0 +1,74 @@
+---
+
+# Given a region, vpc-id, and a list of subnet references, we find the
+# subnet-id of each existing subnet, and create the rest (and thereby
+# find their subnet-id too).
+
+- name: Initialise ec2_region_subnets['{{ region }}']
+  set_fact:
+    ec2_region_subnets: "{{
+      ec2_region_subnets|default({})|combine({region: {}})
+    }}"
+
+# We don't try to restrict our search to subnets that are referenced
+# from instance definitions. We can live with a few unused entries
+# in ec2_region_subnets.
+
+- name: Find all subnets for {{ vpc }} in {{ region }}
+  ec2_vpc_subnet_facts:
+    region: "{{ region }}"
+    filters:
+      vpc-id: "{{ vpc }}"
+  register: found
+
+- name: Record existing subnet-ids in {{ region }}
+  set_fact:
+    ec2_region_subnets: "{{
+      ec2_region_subnets|combine({
+        region: {item.cidr_block: item.id}
+      }, recursive=True)
+    }}"
+  with_items: "{{ found.subnets }}"
+
+# When we create a subnet, the cidr we specify is canonicalised, so the
+# cidr_block in the results may not be the same as the one we specified.
+# If you rerun the playbook, you'll get an error when it tries to create
+# the specified subnet, and it conflicts with the existing canonicalised
+# version. It's not worth trying to do anything about that; just write
+# the canonical version in the first place.
+
+- name: Create new subnets in {{ region }}
+  ec2_vpc_subnet:
+    state: present
+    cidr: "{{ item }}"
+    vpc_id: "{{ vpc }}"
+    region: "{{ region }}"
+    az: "{{ ec2_vpc_subnets[region][item] }}"
+    resource_tags:
+      Name: "Automatically created for {{ cluster_name }} in {{ ec2_vpc_subnets[region][item] }}"
+      CreatingCluster: "{{ cluster_name }}"
+  when: ec2_region_subnets[region][item] is not defined
+  with_items: "{{ subnets }}"
+  register: new_subnets
+
+- block:
+    - name: Record new subnet-ids in {{ region }}
+      set_fact:
+        ec2_region_subnets: "{{
+          ec2_region_subnets|combine({
+            region: {item.item: item.subnet.id}
+          }, recursive=True)
+        }}"
+      with_items: "{{ new_subnets.results }}"
+    - name: Create a route table for new subnets in {{ region }}
+      ec2_vpc_route_table:
+        region: "{{ region }}"
+        vpc_id: "{{ ec2_region_vpcs[region] }}"
+        tags:
+          Name: "Automatically created for {{ cluster_name }} in {{ region }}"
+          CreatingCluster: "{{ cluster_name }}"
+        subnets: "{{ new_subnets.results|map(attribute='subnet.id')|list }}"
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: igw
+  when: new_subnets.changed
