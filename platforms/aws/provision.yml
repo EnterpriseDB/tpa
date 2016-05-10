@@ -183,9 +183,6 @@
         - "{{ regions }}"
         - "{{ sgs.results }}"
 
-    - debug: var=ec2_region_groups
-    - fail: msg="wip"
-
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above. We loop over instances[], look up
     # the VPC and group corresponding to the region/subnet defined for
