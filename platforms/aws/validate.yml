@@ -9,6 +9,15 @@
       - cluster_tags['Owner'] is defined
       - cluster_tags['Owner'] != ''
 
+- name: Ensure ec2_vpc is configured
+  assert:
+    msg: "Please define ec2_vpc (a hash, including Name) in {{config_file}}"
+    that:
+      - ec2_vpc is defined
+      - ec2_vpc is mapping
+      - ec2_vpc['Name'] is defined
+      - ec2_vpc['Name'] != ''
+
 - name: Ensure instances is correctly configured
   assert:
     msg: "Please define instances (an array of hashes, one per instance) in {{config_file}}"

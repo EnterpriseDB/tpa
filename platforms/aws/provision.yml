@@ -79,44 +79,69 @@
             - ec2_amis.results
       when: ec2_ami_name is defined
 
-    # A VPC (Virtual Private Cloud) is an isolated network container in
-    # a single region (although it may span multiple availability zones
-    # within the region). It comprises multiple subnets, routing tables,
-    # network gateways, etc.
+    # When provisioning each instance, we must specify a vpc_subnet_id
+    # to place the instance in. If the instance configuration specifies
+    # "subnet: subnet-xxx" directly, we can use that value. This allows
+    # us to support existing complex network configurations, but is not
+    # especially convenient to use.
     #
-    # For more details, see:
-    # https://aws.amazon.com/vpc/
-    # https://aws.amazon.com/documentation/vpc/
+    # If there's no existing network to integrate with, we can set up a
+    # simple network configuration.
     #
-    # For each unique subnet in instances[], we create a VPC with one
-    # subnet (multiple subnets within a VPC are not supported) and an
-    # internet gateway with a routing table pointing to it.
+    # We limit cluster operations to a single VPC, which is defined by
+    # setting ec2_vpc at the top level:
+    #
+    #   ec2_vpc:
+    #     Name: ExampleVPC
+    #     cidr: 192.0.2.0/24
+    #
+    # This expression must uniquely identify a VPC in each region by its
+    # name and cidr. If the VPC does not exist, it will be created (and
+    # this cluster will be marked as its creator).
+    #
+    # The vpc-id for a region is then given by ec2_region_vpcs[region].
 
-    - name: Create VPCs in each region
-      ec2_vpc:
-        state: present
-        region: "{{ item.0 }}"
-        cidr_block: "{{ item.1 }}"
-        resource_tags: "{{ cluster_tags }}"
-        internet_gateway: yes
-        subnets:
-          - cidr: "{{ item.1 }}"
-            resource_tags:
-              Name: "{{ cluster_name }}/{{ item.0 }}"
-        route_tables:
-          - subnets:
-              - "{{ item.1 }}"
-            routes:
-              - dest: 0.0.0.0/0
-                gw: igw
-            resource_tags:
-              Name: "{{ cluster_name }}/{{ item.0 }}"
-        wait: yes
-      with_nested_dependents:
-        - regions
-        - instances|selectattr('region','equalto',item.0)|map(attribute='subnet')|unique|list
-      register: vpcs
-      tags: ec2_vpcs
+    - name: Resolve ec2_vpc specification
+      include: vpc.yml
+      vars:
+        vpc: "{{ ec2_vpc }}"
+        region: "{{ r }}"
+      with_items: "{{ regions }}"
+      loop_control:
+        loop_var: r
+
+    # Now that we know which VPC to use in each region, we try to make
+    # sense of the subnet references in each instance definition. If a
+    # CIDR corresponds to an existing subnet within the right VPC, we
+    # just use its subnet id.
+    #
+    # If not, we create the subnet; but to do so, we need to know what
+    # availability zone to create it in. This is specified by setting
+    # ec2_vpc_subnets so that ec2_vpc_subnets[region][cidr] gives the
+    # desired availability zone:
+    #
+    #   ec2_vpc_subnets:
+    #     us-east-1:
+    #       192.0.2.0/27: us-east-1b
+    #       192.0.2.100/27: us-east-1b
+    #     us-west-2:
+    #       192.0.2.200/27: us-west-2c
+    #       …
+    #
+    # Once all subnet references have been resolved, the subnet-id for a
+    # subnet in a region is given by ec2_region_subnets[region][cidr].
+
+    - name: Resolve subnet references in each region
+      include: vpc-subnet.yml
+      vars:
+        region: "{{ r }}"
+        vpc: "{{ ec2_region_vpcs[r] }}"
+        subnets: "{{
+          instances|selectattr('region','equalto',r)|map(attribute='subnet')|unique|list
+        }}"
+      with_items: "{{ regions }}"
+      loop_control:
+        loop_var: r
 
     # A security group is a set of firewall rules that can be applied to
     # instances in a VPC. (A subnet in a VPC can also have a network ACL
@@ -126,22 +151,40 @@
     # http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html
     # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html
     #
-    # We create a security group for every VPC we created above.
+    # We create a security group for every VPC we are using.
+
+    - name: Set default security group rules for the cluster
+      set_fact:
+        cluster_rules:
+          - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
+          - {proto: tcp, from_port: 5432, to_port: 5432, cidr_ip: 0.0.0.0/0}
+          - {proto: tcp, from_port: 1194, to_port: 1194, cidr_ip: 0.0.0.0/0}
+      when: cluster_rules is not defined
 
     - name: Create security groups for each VPC
       ec2_group:
         state: present
-        vpc_id: "{{ item.vpc.id }}"
-        region: "{{ item.vpc.region }}"
-        name: "{{ cluster_name }}/{{ item.vpc.region }}"
-        description: "Security group for {{ cluster_name }} in {{ item.vpc.region }}"
-        rules: "{{ cluster_rules|
-                default([dict(proto='tcp',from_port=22,to_port=22,cidr_ip='0.0.0.0/0'),
-                         dict(proto='tcp',from_port=5432,to_port=5432,cidr_ip='0.0.0.0/0'),
-                         dict(proto='udp',from_port=1194,to_port=1194,cidr_ip='0.0.0.0/0')]) }}"
-      with_items: "{{ vpcs.results }}"
+        region: "{{ item.key }}"
+        vpc_id: "{{ item.value }}"
+        name: "Group {{ cluster_name }}/{{ item.key }}"
+        description: "Automatically created for {{ cluster_name }} in {{ item.key }}"
+        rules: "{{ cluster_rules }}"
+      with_dict: "{{ ec2_region_vpcs }}"
       register: sgs
-      tags: ec2_vpcs
+
+    - name: Record security group ids in each region
+      set_fact:
+        ec2_region_groups: "{{
+          ec2_region_groups|default({})|combine({
+            item.0: item.1.group_id
+          })
+        }}"
+      with_together:
+        - "{{ regions }}"
+        - "{{ sgs.results }}"
+
+    - debug: var=ec2_region_groups
+    - fail: msg="wip"
 
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above. We loop over instances[], look up
@@ -158,16 +201,8 @@
         key_name: "{{ ec2_key_name }}"
         instance_type: "{{ item.type }}"
         instance_tags: "{{ cluster_tags|combine(item.tags) }}"
-        vpc_subnet_id: "{{ vpcs.results|
-          selectattr('vpc.region', 'equalto', item.region)|
-          selectattr('vpc.cidr_block', 'equalto', item.subnet)|
-          map(attribute='subnets')|first|
-          selectattr('cidr', 'equalto', item.subnet)|
-          map(attribute='id')|first }}"
-        group_id: "{{ sgs.results|
-          selectattr('item.vpc.region', 'equalto', item.region)|
-          selectattr('item.vpc.cidr_block', 'equalto', item.subnet)|
-          map(attribute='group_id')|first }}"
+        vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
+        group_id: "{{ ec2_region_groups[item.region] }}"
         volumes: "{{ item.volumes|default(omit) }}"
         spot_price: "{{ item.spot_price|default(omit) }}"
         spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
