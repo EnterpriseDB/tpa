@@ -37,13 +37,8 @@ class LookupModule(LookupBase):
 
     def run(self, terms, variables=None, **kwargs):
 
-        # We need to inject (and update) variables into the templar, but just
-        # calling set_available_variables() won't work, because it copies the
-        # supplied dict. We could just call it again after every update(), but
-        # I can't bring myself to condone that much copying.
-
-        self._templar.set_available_variables(variables)
-        v = self._templar._available_variables
+        v = variables.copy()
+        self._templar.set_available_variables(v)
 
         # We start with an array of "terms", which are expressions that yield an
         # array or a single value when evaluated.
