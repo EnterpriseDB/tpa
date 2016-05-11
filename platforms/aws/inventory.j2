@@ -4,4 +4,5 @@
 {% endfor %}
 
 [{{ cluster_tag }}:vars]
+cluster_name={{ cluster_name }}
 ansible_user={{ ec2_ami_user|default('admin') }}
