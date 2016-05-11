@@ -3,7 +3,6 @@
 - name: Set up CustomCloud demo cluster nodes
   hosts: tag_Name_CustomCloud
   gather_facts: no
-  remote_user: ec2-user
   sudo_user: root
   sudo: true
   vars:
@@ -29,6 +28,12 @@
       with_items: "{{ play_hosts }}"
       tags: always
 
+    - name: Set the primary hostname public IP address
+      set_fact: primary_hostname_ip="{{ hostvars[item].ec2_ip_address }}"
+      when: "hostvars[item].ec2_tag_db == 'primary'"
+      with_items: play_hosts
+      tags: always
+
     - name: Set the node id as a fact
       set_fact: node_id="{{ ec2_tag_node }}"
       tags: always
@@ -40,8 +45,8 @@
 
   roles:
 
-    - role: setup
-      tags: always
+#    - role: setup
+#      tags: always
 
     - role: common
       tags: common
@@ -51,31 +56,31 @@
     # aren't installed. We create it and mount an encrypted filesystem
     # on it, but leave it to the packages to set ownership/permissions.
 
-    - role: luks
-      tags: luks
+#    - role: luks
+#      tags: luks
 
     # We want all instances to share an encrypted network. It doesn't
     # matter which one the openvpn server is, but we might as well use
     # the primary. The keys and certificates must be generated prior to
     # running this playbook, for now: use «-e vpn_keys=/path/to/keydir».
 
-    - role: openvpn
-      tags: openvpn
+#    - role: openvpn
+#      tags: openvpn
 
     # Install the Postgres packages and basic configuration files.
 
-    - role: postgres
+    - role: postgres/pkg
       tags: postgres
 
     # Set up streaming replication.
 
-    - role: repmgr_common
+    - role: repmgr/common
       tags: replication
 
-    - role: repmgr_primary
+    - role: repmgr/primary
       when: inventory_hostname == primary_hostname
       tags: replication
 
-    - role: repmgr_standby
+    - role: repmgr/standby
       when: inventory_hostname != primary_hostname
       tags: replication

@@ -7,7 +7,7 @@
         state=present
     - name: Add the PGDG apt repository
       apt_repository:
-        repo='deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main'
+        repo='deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg {{ pgversion }} main'
         state=present update_cache=yes
   when: ansible_distribution == 'debian'
 
