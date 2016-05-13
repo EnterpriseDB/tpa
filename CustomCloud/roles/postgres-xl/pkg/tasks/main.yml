@@ -1,0 +1,98 @@
+---
+
+- include: basics.yml
+
+- name: Appoint control node
+  set_fact: control_hostname="{{ item }}"
+  when: "hostvars[item].ec2_tag_node == '1'"
+  with_items: "{{ play_hosts }}"
+
+- name: Ensure that /opt/Postgres-XL-{{pgxlversion}} exists
+  file:
+    path: /opt/Postgres-XL-{{pgxlversion}}
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
+- name: Unarchive Postgres-XL tarball onto control node
+  unarchive:
+    src: "{{ pgxl_tar_name }}"
+    dest: /opt
+    creates: "/opt/Postgres-XL-{{pgxlversion}}/bin/pgxc_ctl"
+  when: inventory_hostname == control_hostname
+
+- name: Copy /opt/Postgres-XL-{{pgxlversion}} to other nodes
+  command: rsync -e 'ssh -o StrictHostKeyChecking=yes' -qa \
+    "{{ hostvars[control_hostname].ec2_private_ip_address }}:/opt/Postgres-XL-{{pgxlversion}}" /opt
+  args:
+    creates: "/opt/Postgres-XL-{{pgxlversion}}/bin/pgxc_ctl"
+  sudo_user: postgres
+  sudo: yes
+  when: inventory_hostname != control_hostname
+
+- name: Link /opt/pgxl to /opt/Postgres-XL-{{pgxlversion}}
+  file:
+    path: /opt/pgxl
+    src: "/opt/Postgres-XL-{{pgxlversion}}"
+    state: link
+
+- name: Enhance soft system limits for user postgres
+  shell: echo "postgres  soft   nofile   4096" >> /etc/security/limits.conf
+
+- name: Enhance hard system limits for user postgres
+  shell: echo "postgres  hard   nofile   32768" >> /etc/security/limits.conf
+
+- name: Install other required packages using apt-get
+  shell: apt-get install -y python-dev time sysstat
+
+- name: Install python packages
+  shell: pip install virtualenv
+
+- name: create file system
+  action: filesystem fstype=ext4 dev=/dev/xvdb force=yes
+
+- name: 
+  action: mount name=/data src=/dev/xvdb fstype=ext4 state=mounted
+
+- name: create file system
+  action: filesystem fstype=ext4 dev=/dev/xvdc force=yes
+
+- name: 
+  action: mount name=/data_tblspc1 src=/dev/xvdc fstype=ext4 state=mounted
+
+- name: create file system
+  action: filesystem fstype=ext4 dev=/dev/xvdd force=yes
+
+- name: 
+  action: mount name=/data_tblspc2 src=/dev/xvdd fstype=ext4 state=mounted
+
+- name: Ensure that /data/pgxl exists
+  file:
+    path: /data/pgxl
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
+- name: Ensure that /data_tblspc1/data exists
+  file:
+    path: /data_tblspc1/data
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
+- name: Ensure that /data_tblspc2/data exists
+  file:
+    path: /data_tblspc2/data
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
+- name: Create swap
+  command: "mkswap /dev/xvde"
+
+- name: Add swap
+  command: "swapon /dev/xvde"

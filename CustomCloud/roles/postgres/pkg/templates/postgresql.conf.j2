@@ -1,0 +1,35 @@
+data_directory = '{{ pgdata }}'
+hba_file = '{{ pgconf }}/pg_hba.conf'
+ident_file = '{{ pgconf }}/pg_ident.conf'
+external_pid_file = '{{ pgsock }}/{{ pgversion }}-main.pid'
+unix_socket_directories = '{{ pgsock }}'
+
+listen_addresses = '*'
+port = 5432
+max_connections = 400
+
+ssl = true
+ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'
+
+shared_buffers = 512MB
+work_mem = 16MB
+maintenance_work_mem = 512MB
+
+checkpoint_segments = 32
+checkpoint_timeout = 30min
+checkpoint_completion_target = 0.9
+
+log_checkpoints = on
+log_connections = on
+log_disconnections = on
+log_line_prefix = '%t [%d:%p] '
+log_statement = 'ddl'
+log_lock_waits = on
+
+hot_standby = on
+archive_mode = on
+wal_level = hot_standby
+archive_command = '/bin/true'
+wal_keep_segments = 5000
+max_wal_senders = 3

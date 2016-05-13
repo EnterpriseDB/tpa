@@ -1,0 +1,137 @@
+#!/bin/bash
+
+pgxcOwner=postgres
+pgxcUser=postgres
+tmpDir=/tmp
+localTmpDir=$tmpDir
+
+configBackup=n
+
+dataDirRoot=/data/pgxl
+
+#---- GTM ------------------------------------------------------------------------------------
+gtmName=gtm
+
+gtmMasterServer={{ cluster_hostname }}
+gtmMasterPort=20000
+gtmMasterDir=$dataDirRoot/gtm
+
+gtmExtraConfig=none
+gtmMasterSpecificExtraConfig=none
+
+gtmSlave=n
+
+#---- GTM Proxy -------------------------------------------------------------------------------------------------------
+gtmProxyDir=$dataDirRoot/gtm_pxy
+
+gtmProxy=y
+
+{% with g = groups['tag_role_datanode'] %}
+gtmProxyNames=({% for h in g %}gtm_pxy{{loop.index}} {% endfor %})
+gtmProxyServers=({{ g|map('extract',hostvars,'cluster_hostname')|sort|join(' ') }})
+gtmProxyPorts=({{ (['20001']*(g|length))|join(' ') }})
+gtmProxyDirs=({{ (['$gtmProxyDir']*(g|length))|join(' ') }})
+{% endwith %}
+
+gtmPxyExtraConfig=none
+
+#---- Coordinators ----------------------------------------------------------------------------------------------------
+coordMasterDir=$dataDirRoot/coord_master
+coordSlaveDir=$HOME/coord_slave
+coordArchLogDir=$HOME/coord_archlog
+
+{% with g = groups['tag_role_coordinator'] %}
+coordNames=({% for h in g %}coord{{loop.index}} {% endfor %})
+coordPorts=({{ (['20002']*(g|length))|join(' ') }})
+poolerPorts=({{ (['20003']*(g|length))|join(' ') }})
+coordPgHbaEntries=(10.63.1.0/24)
+
+coordMasterServers=({{ g|map('extract',hostvars,'cluster_hostname')|sort|join(' ') }})
+coordMasterDirs=({{ (['$coordMasterDir']*(g|length))|join(' ') }})
+coordMaxWALsender=5
+coordMaxWALSenders=({{ (['$coordMaxWALsender']*(g|length))|join(' ') }})
+
+coordSpecificExtraConfig=({{ (['none']*(g|length))|join(' ') }})
+coordSpecificExtraPgHba=({{ (['none']*(g|length))|join(' ') }})
+{% endwith %}
+
+coordSlave=n
+
+#---- Configuration files---
+coordExtraConfig=coordExtraConfig
+cat > $coordExtraConfig <<EOF
+#================================================
+# Added to all the coordinator postgresql.conf
+# Original: $coordExtraConfig
+log_destination = 'stderr'
+logging_collector = on
+log_directory = 'pg_log'
+log_line_prefix = '%p:%v:%x:%m:%C:%R'
+listen_addresses = '*'
+max_connections = 2000
+max_prepared_transactions = 2000
+hot_standby = off
+log_error_verbosity=verbose
+shared_buffers = 8GB
+work_mem = 1GB
+effective_cache_size = 20GB
+default_statistics_target = 10000
+shared_queue_size = 8192
+max_pool_size=200
+max_wal_size=32GB
+max_datanodes=64
+max_coordinators=64
+full_page_writes = off
+checkpoint_timeout = 1h
+EOF
+
+#---- Datanodes -------------------------------------------------------------------------------------------------------
+datanodeMasterDir=$dataDirRoot/dn_master
+datanodeSlaveDir=$dataDirRoot/dn_slave
+datanodeArchLogDir=$dataDirRoot/datanode_archlog
+
+{% with g = groups['tag_role_datanode'] %}
+#primaryDatanode=datanode1
+datanodeNames=({% for h in g %}datanode{{loop.index}} {% endfor %})
+datanodePorts=({{ (['20004']*(g|length))|join(' ') }})
+datanodePoolerPorts=({{ (['20005']*(g|length))|join(' ') }})
+datanodePgHbaEntries=(10.63.1.0/24)
+
+datanodeMasterServers=({{ g|map('extract',hostvars,'cluster_hostname')|sort|join(' ') }})
+datanodeMasterDirs=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
+datanodeMaxWalSender=5
+datanodeMaxWALSenders=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
+
+datanodeSpecificExtraConfig=({{ (['none']*(g|length))|join(' ') }})
+datanodeSpecificExtraPgHba=({{ (['none']*(g|length))|join(' ') }})
+{% endwith %}
+
+datanodeSlave=n
+
+datanodeExtraConfig=datanodeExtraConfig	
+cat > $datanodeExtraConfig <<EOF
+#================================================
+# Added to all the datanode postgresql.conf
+# Original: $datanodeExtraConfig
+log_destination = 'stderr'
+logging_collector = on
+log_directory = 'pg_log'
+log_line_prefix = '%p:%v:%x:%m:%C:%R'
+#trace_locks = true
+listen_addresses = '*'
+max_connections = 2000
+max_prepared_transactions = 2000
+hot_standby = off
+log_error_verbosity=verbose
+shared_buffers = 8GB
+work_mem = 1GB
+effective_cache_size = 20GB
+default_statistics_target = 10000
+shared_queue_size = 8192
+max_pool_size=200
+max_wal_size=32GB
+max_datanodes=64
+max_coordinators=64
+full_page_writes = off
+checkpoint_timeout = 1h
+EOF

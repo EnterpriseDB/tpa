@@ -1,0 +1,86 @@
+---
+
+- name: Set up CustomCloud demo cluster nodes
+  hosts: tag_Name_CustomCloud
+  gather_facts: no
+  sudo_user: root
+  sudo: true
+  vars:
+    pgversion: 9.4
+
+    luks_volume: postgres
+    luks_device: /dev/xvdb
+    luks_mountpoint: /var/lib/postgresql
+
+    vpn_name: "{{ cluster_name|lower }}"
+    vpn_network: 192.168.61.0
+    vpn_netmask: 255.255.255.0
+
+  pre_tasks:
+
+    # Find the one host tagged as the primary and remember it for use in
+    # individual roles later. Also store the node id and each node's VPN
+    # address as facts.
+
+    - name: Determine primary hostname
+      set_fact: primary_hostname="{{ item }}"
+      when: "hostvars[item].ec2_tag_db == 'primary'"
+      with_items: "{{ play_hosts }}"
+      tags: always
+
+    - name: Set the primary hostname public IP address
+      set_fact: primary_hostname_ip="{{ hostvars[item].ec2_ip_address }}"
+      when: "hostvars[item].ec2_tag_db == 'primary'"
+      with_items: play_hosts
+      tags: always
+
+    - name: Set the node id as a fact
+      set_fact: node_id="{{ ec2_tag_node }}"
+      tags: always
+
+    - name: Store the VPN address as a fact
+      set_fact:
+        vpn_address: "{{ vpn_network|regex_replace('\\.[0-9]*$', '.'+node_id) }}"
+      tags: always
+
+  roles:
+
+#    - role: setup
+#      tags: always
+
+    - role: common
+      tags: common
+
+    # We want our Postgres data directory on an encrypted volume. At
+    # this point, /var/lib/postgresql won't exist because the packages
+    # aren't installed. We create it and mount an encrypted filesystem
+    # on it, but leave it to the packages to set ownership/permissions.
+
+#    - role: luks
+#      tags: luks
+
+    # We want all instances to share an encrypted network. It doesn't
+    # matter which one the openvpn server is, but we might as well use
+    # the primary. The keys and certificates must be generated prior to
+    # running this playbook, for now: use «-e vpn_keys=/path/to/keydir».
+
+#    - role: openvpn
+#      tags: openvpn
+
+    # Install the Postgres packages and basic configuration files.
+
+    - role: postgres/pkg
+      tags: postgres
+
+    # Set up streaming replication.
+
+    - role: repmgr/common
+      tags: replication
+
+    - role: repmgr/primary
+      when: inventory_hostname == primary_hostname
+      tags: replication
+
+    - role: repmgr/standby
+      when: inventory_hostname != primary_hostname
+      tags: replication

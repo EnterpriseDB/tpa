@@ -1,0 +1,32 @@
+---
+
+- name: Generate keypair for postgres
+  local_action: command ssh-keygen -P "" -f id_rsa
+  args:
+    chdir: "{{ playbook_dir }}"
+    creates: id_rsa.pub
+  run_once: yes
+  sudo: no
+
+- name: Ensure ~postgres/.ssh exists
+  file: path=~postgres/.ssh state=directory owner=postgres group=postgres mode=0755
+
+- name: Upload keypair to all nodes
+  copy: src={{item}} dest=~postgres/.ssh owner=postgres group=postgres mode=0600
+  with_items:
+    - "{{playbook_dir}}/id_rsa"
+    - "{{playbook_dir}}/id_rsa.pub"
+
+- name: Set public key permissions
+  file: path=~postgres/.ssh/id_rsa.pub mode=0644
+
+- name: Install authorized keys
+  authorized_key:
+    user: postgres
+    key: "{{ lookup('file', playbook_dir+'/id_rsa.pub') }}"
+
+- name: Add hosts to known_hosts
+  shell: ssh-keyscan -H "{{ hostvars[item]['vpn_address'] }}" >> ~/.ssh/known_hosts
+  with_items: "{{ play_hosts }}"
+  become_user: postgres
+  become: yes

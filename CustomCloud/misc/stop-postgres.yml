@@ -1,0 +1,18 @@
+---
+
+- name: Stop Postgres on given nodes
+  hosts: "{{ hosts }}"
+  remote_user: admin
+  sudo_user: root
+  sudo: true
+  vars:
+    luks_volume: postgres
+    luks_device: /dev/xvdb
+    luks_mountpoint: /var/lib/postgresql
+  tasks:
+   - name: Stop Postgres
+     service: name=postgresql state=stopped
+   - name: Unmount mapped encrypted filesystem under {{ luks_mountpoint }}
+     command: umount "{{ luks_mountpoint }}"
+   - name: Close mapped volume /dev/mapper/{{ luks_volume }}
+     command: cryptsetup luksClose "{{ luks_volume }}"

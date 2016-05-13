@@ -1,0 +1,73 @@
+---
+
+- name: Set the hostname
+  hostname: name="{{ cluster_hostname }}"
+
+- name: Populate /etc/hosts
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create postgres group
+  group: name=postgres state=present
+
+- name: Create postgres user
+  user: name=postgres group=postgres shell=/bin/bash state=present
+
+- name: Install bashrc for postgres user
+  template:
+    src: bashrc.j2
+    dest: ~postgres/.bashrc
+    owner: postgres
+    group: postgres
+    mode: 0644
+
+- name: Install profile for postgres user
+  template:
+    src: bashrc.j2
+    dest: ~postgres/.profile
+    owner: postgres
+    group: postgres
+    mode: 0644
+
+- name: Generate keypair for postgres
+  local_action: command ssh-keygen -P "" -f id_postgres
+  args:
+    chdir: "{{ cluster_dir }}"
+    creates: id_postgres.pub
+  run_once: yes
+  sudo: no
+
+- name: Ensure ~postgres/.ssh exists
+  file: path=~postgres/.ssh state=directory owner=postgres group=postgres mode=0755
+
+- name: Upload keypair to all nodes
+  copy: src={{item|replace('rsa','postgres')}} dest=~postgres/.ssh/{{item|basename}} owner=postgres group=postgres mode=0600
+  with_items:
+    - "{{cluster_dir}}/id_rsa"
+    - "{{cluster_dir}}/id_rsa.pub"
+
+- name: Set public key permissions
+  file: path=~postgres/.ssh/id_rsa.pub mode=0644
+
+- name: Install authorized keys
+  authorized_key:
+    user: postgres
+    key: "{{ lookup('file', cluster_dir+'/id_postgres.pub') }}"
+
+- name: Check if known_hosts exists
+  stat: path=~postgres/.ssh/known_hosts
+  register: known
+
+- block:
+    - name: Add hosts to known_hosts
+      shell: ssh-keyscan -H \
+        {{ play_hosts|map('extract', hostvars, 'ec2_ip_address')|join(' ') }} \
+        {{ play_hosts|map('extract', hostvars, 'ec2_private_ip_address')|join(' ') }} \
+        {{ play_hosts|map('extract', hostvars, 'cluster_hostname')|join(' ') }} > ~/.ssh/known_hosts
+      sudo_user: postgres
+      sudo: yes
+  when: not known.stat.exists

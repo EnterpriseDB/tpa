@@ -1,0 +1,38 @@
+pglogical testing infrastructure
+================================
+
+There are three related things you can do with this stuff:
+
+1. Provision (or deprovision) a pair of AWS EC2 instances to run the
+   tests on. This is documented in the top-level README, but here's a
+   quick summary:
+   
+   # Bring up two nodes based on config.yml
+   utils/ansible-playbook platforms/aws/provision.yml \
+       -e cluster=./clusters/pglogical
+
+   # Display the hosts so provisioned
+   utils/ansible -i clusters/pglogical/inventory/ec2.py \
+       tag_Name_PglogicalTests --list-hosts
+
+   # Get rid of the nodes and everything associated with them
+   utils/ansible-playbook -i clusters/pglogical/inventory/ec2.py \
+       platforms/aws/deprovision.yml -e cluster=./clusters/name
+
+2. Provision local "instances" to run the tests on. We just add two
+   hosts dynamically to the inventory with connection=local, so this
+   isn't really a separate step.
+
+3. Deploy postgres to the nodes provisioned above.
+
+deploy-ec2.yml and deploy.yml both just set the stage and include
+deploy.yml, which does (3) by applying the 'src', 'initdb', and 'config'
+roles to it.
+
+It would be run as follows:
+
+    # Build from scratch
+    utils/ansible-playbook clusters/pglogical/deploy.yml
+
+    # Don't get rid of the old build dir and re-run configure
+    utils/ansible-playbook clusters/pglogical/deploy.yml --skip-tags postgres-clean

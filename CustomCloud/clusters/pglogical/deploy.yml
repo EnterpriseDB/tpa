@@ -1,0 +1,88 @@
+- name: Set up pglogical test nodes
+  hosts: tag_Name_PglogicalTests
+  vars:
+    default_postgres_config:
+        wal_level: logical
+        max_wal_senders: 10
+        max_replication_slots: 10
+        shared_preload_libraries: pglogical
+        log_line_prefix: "'[%m] [%p] [%d] '"
+        DateStyle: "'ISO, DMY'"
+        fsync: off
+  pre_tasks:
+    - name: Check if the data directory exists already
+      stat: path="{{postgres_data_dir}}"
+      register: datadir
+
+    - name: Make sure Postgres isn't running if the data directory exists
+      shell: "pg_ctl -D {{postgres_data_dir}} -w stop -m immediate"
+      environment:
+        PGPORT: "{{postgres_port|int}}"
+      register: pg_ctl_stopped
+      changed_when: "pg_ctl_stopped.rc == 0"
+      failed_when: false
+      when: datadir.stat.exists
+
+    - name: Remove any existing data directory
+      file: state=absent path="{{postgres_data_dir}}" force=yes
+      when: datadir.stat.exists
+
+    - name: Set track_commit_timestamp=on
+      set_fact:
+        extra_postgres_config:
+          track_commit_timestamp: on
+      when: postgres_ver|int > 94
+
+  roles:
+    - role: 'postgres/src'
+      postgres_git_reference_repo: "{{postgres_reference_repo|default('')}}"
+    - role: 'postgres/ext'
+      postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical_output.git
+      postgres_ext_git_reference_repo: "{{pglogical_output_reference_repo|default('')}}"
+      postgres_ext_dir: "{{pglogical_output_build_dir}}"
+    - role: 'postgres/ext'
+      postgres_ext_git_url: git@github.com:2ndQuadrant/pglogical_internal.git
+      postgres_ext_git_reference_repo: "{{pglogical_reference_repo|default('')}}"
+      postgres_ext_dir: "{{pglogical_build_dir}}"
+    - role: 'postgres/initdb'
+      postgres_initdb_opts: ['-A', 'trust']
+    - role: 'postgres/config'
+      postgres_config_settings: "{{default_postgres_config|combine(extra_postgres_config|default({}))}}"
+      postgres_hba_settings:
+        - "local   all             all         trust"
+        - "local   replication     super       trust"
+        - "local   replication     nonsuper    trust"
+        - "local   all             all                                  trust"
+        - "host    all             all             127.0.0.1/32         trust"
+        - "host    all             all             ::1/128              trust"
+        - "local   replication     super                                trust"
+        - "host    replication     super        127.0.0.1/32            trust"
+        - "host    replication     super        ::1/128                 trust"
+        - "local   replication     super2                                trust"
+        - "host    replication     super2        127.0.0.1/32            trust"
+        - "host    replication     super2        ::1/128                 trust"
+        - "local   replication     nonsuper                              trust"
+        - "host    replication     nonsuper        127.0.0.1/32          trust"
+        - "host    replication     nonsuper        ::1/128               trust"
+
+  post_tasks:
+    - name: Start Postgres
+      shell: "pg_ctl -D {{postgres_data_dir}} -w start"
+
+  environment:
+    PATH: "{{postgres_install_dir|expanduser}}/bin:{{lookup('env', 'PATH')}}"
+
+- name: Run regression tests
+  hosts: tag_group_subscribers
+  ignore_errors: yes
+  tasks:
+    - set_fact:
+        provider: "{{item}}"
+      when: postgres_ver|int >= hostvars[item]['postgres_ver']|int
+      with_items: "{{ groups['tag_group_providers'] }}"
+      register: providers
+    - include: test.yml
+      with_items: "{{ providers.results | map(attribute='ansible_facts.provider') | list }}"
+  environment:
+    PATH: "{{postgres_install_dir|expanduser}}/bin:{{lookup('env', 'PATH')}}"
+    PGPORT: "{{postgres_port|int}}"

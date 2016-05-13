@@ -1,0 +1,23 @@
+client
+
+remote {{ primary_hostname }} 1194
+
+dev tun
+proto udp
+
+ca {{ vpn_name }}/ca.crt
+key {{ vpn_name }}/{{ inventory_hostname }}.key
+cert {{ vpn_name }}/{{ inventory_hostname }}.crt
+tls-auth {{ vpn_name }}/ta.key 1
+
+nobind
+comp-lzo
+user nobody
+group {% if ansible_distribution == 'redhat' %} nobody {% else %} nogroup {% endif %}
+keepalive 10 30
+ns-cert-type server
+resolv-retry infinite
+persist-key
+persist-tun
+
+log-append /var/log/openvpn.log

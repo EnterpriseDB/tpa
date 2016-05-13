@@ -1,0 +1,9 @@
+---
+
+pgversionNN: "{{pgversion|replace('.','')}}"
+
+repmgr_packages:
+  debian:
+    - repmgr
+  redhat:
+    - repmgr{{pgversionNN}}

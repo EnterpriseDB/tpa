@@ -1,0 +1,4 @@
+---
+
+- name: Install repmgr packages
+  package: name=postgresql-{{ pgversion }}-repmgr state=latest

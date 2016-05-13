@@ -1,0 +1,7 @@
+---
+
+pgbindir: "/usr/lib/postgresql/{{ pgversion }}/bin"
+pgconf: "/etc/postgresql/{{ pgversion }}/main"
+pgsock: "/var/run/postgresql"
+
+pgservice: 'postgresql'

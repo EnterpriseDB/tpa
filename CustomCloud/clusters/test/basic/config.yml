@@ -1,0 +1,63 @@
+---
+
+# An EC2 configuration for the CustomCloud proof-of-concept demo.
+#
+# The image ids below are the "debian-wheezy-amd64-hvm-2015-01-28-ebs"
+# community AMI in each region.
+#
+# Intended for deployment under the 2ndQuadrant AWS account.
+
+cluster_name: "CustomCloud"
+cluster_tags:
+  Name: CustomCloud
+  Owner: AMS
+
+ec2_vpc:
+  Name: RT_Cluster
+  cidr: 10.67.0.0/24
+
+ec2_vpc_subnets:
+  us-east-1:
+    10.67.0.0/25: us-east-1a
+  us-west-2:
+    10.67.0.64/26: us-west-2b
+  eu-west-1:
+    10.67.0.192/27: eu-west-1a
+
+instances:
+    - type: t2.medium
+      region: us-east-1
+      image: ami-12663b7a
+      subnet: 10.67.0.0/25
+      ip: 10.67.0.1
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 10
+      tags:
+        db: primary
+        node: 1
+    - type: t2.medium
+      region: us-west-2
+      image: ami-4dbf9e7d
+      subnet: 10.67.0.64/26
+      ip: 10.67.1.1
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: standard
+            volume_size: 10
+      tags:
+        db: standby
+        node: 2
+    - type: t2.medium
+      region: eu-west-1
+      image: ami-25158352
+      subnet: 10.67.0.192/27
+      ip: 10.67.2.1
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: standard
+            volume_size: 10
+      tags:
+        db: standby
+        node: 3

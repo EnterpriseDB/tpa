@@ -1,0 +1,7 @@
+---
+
+pgbindir: "/usr/pgsql-{{ pgversion }}/bin"
+pgconf: "{{ pgdata }}"
+pgsock: "/tmp"
+
+pgservice: "postgresql-{{pgversion}}"

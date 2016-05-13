@@ -1,0 +1,16 @@
+---
+
+pgversionNN: "{{pgversion|replace('.','')}}"
+
+postgres_packages:
+  debian:
+    - postgresql-{{pgversion}}
+    - postgresql-client-{{pgversion}}
+    - postgresql-contrib-{{pgversion}}
+    - postgresql-server-dev-{{pgversion}}
+  redhat:
+    - postgresql{{pgversionNN}}
+    - postgresql{{pgversionNN}}-contrib
+    - postgresql{{pgversionNN}}-server
+    - postgresql{{pgversionNN}}-devel
+    - postgresql{{pgversionNN}}-libs

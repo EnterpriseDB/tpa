@@ -1,0 +1,21 @@
+- name: Ensure that extension repository is specified
+  assert:
+    that:
+      - postgres_ext_git_url is defined and postgres_ext_git_url != ''
+
+- name: Remove old extension build directory
+  file: state=absent path="{{postgres_ext_dir}}" force=yes
+  tags: postgres-ext-clean
+
+- name: Fetch extension source from git repository
+  git:
+    repo: "{{postgres_ext_git_url}}"
+    dest: "{{postgres_ext_dir}}"
+    version: "{{postgres_ext_git_ref}}"
+    reference: "{{postgres_ext_git_reference_repo}}"
+
+- name: Build and install Postgres extension
+  shell: "{{postgres_ext_make_command}} {% for arg in postgres_ext_make_opts %}{{arg|quote}}{% endfor %} {{item}}"
+  args:
+    chdir: "{{postgres_ext_dir}}"
+  with_items: "{{ postgres_ext_targets }}"

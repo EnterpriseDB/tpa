@@ -1,0 +1,13 @@
+---
+
+- name: Install packages
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ packages[ansible_distribution] }}"
+
+- name: Remove unwanted packages
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ unwanted_packages[ansible_distribution] }}"

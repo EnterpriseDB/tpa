@@ -1,0 +1,5 @@
+---
+
+- name: Install packages
+  package: name={{ item }} state=latest
+  with_items: "{{ openvpn_packages[ansible_distribution] }}"

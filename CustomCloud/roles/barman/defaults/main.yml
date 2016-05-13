@@ -1,0 +1,21 @@
+---
+
+db_servers: []
+barman_home: /var/lib/barman
+barman_user: barman
+barman_group: barman
+barman_log_file: /var/log/barman/barman.log
+barman_configuration_file_path: /etc/barman.conf
+barman_log_file: /var/log/barman/barman.log
+barman_compression: gzip
+barman_reuse_backup: "link"
+barman_minimum_redundancy: 10
+barman_retention_policy: RECOVERY WINDOW OF 4 WEEKS
+barman_network_compression: false
+barman_basebackup_retry_times: 3
+barman_basebackup_retry_sleep: 30
+barman_last_backup_maximum_age: 6 MONTHS
+cron_full_backup_interval: "0 */6 * * *"
+cron_full_backup_reuse_backup: "off"
+cron_incremental_backup_interval: "0 * * * *"
+cron_incremental_backup_reuse_backup: "link"

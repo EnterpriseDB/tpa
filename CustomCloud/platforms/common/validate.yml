@@ -1,0 +1,21 @@
+- name: Require cluster directory to be specified
+  assert:
+    msg: "Please rerun with «-e cluster=./clusters/name»"
+    that:
+      - cluster is defined and cluster != ''
+
+- name: Derive full path to cluster directory
+  set_fact: cluster_dir="{{ cluster|realpath }}"
+
+- name: Derive name of the configuration file
+  set_fact: config_file="{{ cluster_dir }}/{{ config|default('config') }}.yml"
+
+- name: Load cluster configuration file
+  include_vars: "{{ config_file }}"
+
+- name: Ensure cluster_name is correctly configured
+  assert:
+    msg: "Please define cluster_name (a non-empty string) in {{config_file}}"
+    that:
+      - cluster_name is defined
+      - cluster_name != ''

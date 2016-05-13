@@ -1,0 +1,25 @@
+---
+
+- include_vars: "{{ansible_distribution}}.yml"
+
+- name: "Update postgresql.conf on {{current_host}}"
+  lineinfile:
+     dest="{{ pgdata }}/postgresql.conf"
+     regexp='\/bin\/true'
+     line="archive_command = 'rsync -a %p barman@{{barman_hostname}}:{{ barman_home }}/{{ hostvars[current_host]["ec2_tag_db"] + hostvars[current_host]["ec2_tag_node"] | lower}}/incoming/%f'"
+  delegate_to: "{{ current_host }}"
+  register: pgconfig
+
+- name: "Update pg_hba.conf on {{current_host}}"
+  lineinfile:
+     dest="{{ pgdata }}/pg_hba.conf"
+     regexp='host    postgres        all             0.0.0.0/0               md5'
+     insertbefore='host    postgres        all             0.0.0.0/0               md5'
+     line='host    postgres        all             {{barman_hostname}}/32               trust\nhost    postgres        all             0.0.0.0/0               md5'
+  delegate_to: "{{ current_host }}"
+  register: hbaconfig
+
+- name: Restart Postgres on "{{current_host}}"
+  service: name="{{pgservice}}" state=restarted
+  when: pgconfig.changed and hbaconfig.changed
+  delegate_to: "{{ current_host }}"

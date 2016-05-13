@@ -1,0 +1,17 @@
+---
+
+- include: packages.yml
+
+- name: Create repmgr configuration directory
+  file: path=/etc/repmgr owner=postgres group=postgres mode=0755
+    state=directory
+
+- name: Install repmgr.conf
+  template: src=repmgr.conf.j2 dest=/etc/repmgr/repmgr.conf
+
+- name: Install repmgr failover scripts
+  copy: src="{{ item }}" dest=/etc/repmgr/
+    owner=postgres group=postgres mode=0755
+  with_items:
+    - promote_command.sh
+    - follow_command.sh

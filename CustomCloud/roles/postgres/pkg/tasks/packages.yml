@@ -1,0 +1,30 @@
+---
+
+- block:
+    - name: Add PGDG repository signing key
+      apt_key:
+        id=ACCC4CF8 url=https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        state=present
+    - name: Add the PGDG apt repository
+      apt_repository:
+        repo='deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg {{ pgversion }} main'
+        state=present update_cache=yes
+  when: ansible_distribution == 'debian'
+
+- block:
+    - name: Install PGDG repository RPM
+      command: rpm -ivh http://yum.postgresql.org/9.4/redhat/rhel-7-x86_64/pgdg-redhat94-9.4-1.noarch.rpm
+      register: rpm
+      changed_when: "'is already installed' not in rpm.stdout"
+      ignore_errors: yes
+    - name: Ensure that postgresql comes from PGDG
+      ini_file:
+        dest: /etc/yum/pluginconf.d/rhnplugin.conf
+        section: main
+        option: exclude
+        value: postgresql*
+  when: ansible_distribution == 'redhat'
+
+- name: Install Postgres packages
+  package: name={{ item }} state=latest
+  with_items: "{{ postgres_packages[ansible_distribution] }}"

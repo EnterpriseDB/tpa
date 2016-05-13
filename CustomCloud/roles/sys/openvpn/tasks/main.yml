@@ -1,0 +1,64 @@
+---
+
+- name: Ensure openvpn configuration is present
+  assert:
+    that:
+      - vpn_keys is defined
+      - vpn_name is defined
+      - vpn_network is defined
+      - vpn_netmask is defined
+
+- include: packages.yml
+
+# XXX We could use a v2 block: to better encapsulate separate server and
+# client configuration actions.
+
+- name: Create openvpn configuration directory
+  file: path="{{ openvpn_dirname }}" mode=0755
+    owner=root group=root state=directory
+
+- name: Create client configuration directory
+  file: path="{{ openvpn_dirname }}/ccd" mode=0755
+    owner=root group=root state=directory
+  delegate_to: "{{primary_hostname}}"
+  run_once: yes
+
+- name: Install main server configuration file
+  template: src=server.conf.j2 dest="{{ openvpn_dirname }}.conf"
+    mode=0644 owner=root group=root
+  delegate_to: "{{primary_hostname}}"
+  run_once: yes
+
+- name: Install main client configuration file
+  template: src=client.conf.j2 dest="{{ openvpn_dirname }}.conf"
+    mode=0644 owner=root group=root
+  when: inventory_hostname != primary_hostname
+
+- name: Copy DH parameters to the server
+  copy: src="{{ vpn_keys }}/dh2048.pem" dest="{{ openvpn_dirname }}"
+  delegate_to: "{{primary_hostname}}"
+  run_once: yes
+
+- name: Copy CA certificate to all instances
+  copy: src="{{ vpn_keys }}/ca.crt" dest="{{ openvpn_dirname }}"
+
+- name: Copy TA key to all instances
+  copy: src="{{ vpn_keys }}/ta.key" dest="{{ openvpn_dirname }}" mode=0600
+
+- name: Copy individual key certificates to all instances
+  copy: src="{{ vpn_keys }}/{{ inventory_hostname }}.crt" dest="{{ openvpn_dirname }}"
+
+- name: Copy individual private keys to all instances
+  copy: src="{{ vpn_keys }}/{{ inventory_hostname }}.key" dest="{{ openvpn_dirname }}" mode=0600
+
+- name: Install client-configuration-database files on the server
+  template: src=ccd.j2 dest="{{ openvpn_dirname }}/ccd/{{ item }}" mode=0644
+  with_items: "{{ play_hosts|difference(inventory_hostname) }}"
+  delegate_to: "{{primary_hostname}}"
+  run_once: yes
+
+# XXX We should do this only if some part of the configuration has
+# changed, but in this case it's not easy to determine.
+
+- name: Make sure openvpn is started
+  service: name="{{ dict(debian='openvpn', redhat='openvpn@'+vpn_name)[ansible_distribution] }}" state=started

@@ -1,0 +1,50 @@
+#!/bin/sh
+
+IFS=
+set -e -u
+
+# If you invoke ansible directly (i.e. not through this script), you
+# must set ANSIBLE_CONFIG as below.
+#
+# If ANSIBLE_CONFIG is not set and the current directory doesn't contain
+# an ansible.cfg (which will be used automatically), we want to use our
+# top-level configuration file.
+
+config=${ANSIBLE_CONFIG:-""}
+if [ -z "$config" -a ! -f ./ansible.cfg ]; then
+    export ANSIBLE_CONFIG=$(dirname $0)/../ansible.cfg
+fi
+
+# If ANSIBLE_ROLES_PATH is not set, we'll set it to our roles directory,
+# just in case someone is trying to mix and match roles.
+
+roles=${ANSIBLE_ROLES_PATH:-""}
+if [ -z "$roles" ]; then
+    export ANSIBLE_ROLES_PATH=$(dirname $0)/../roles
+fi
+
+# This script may be invoked through symlinks as ansible, ansible-vault,
+# or ansible-playbook. If the requested command is already in the PATH,
+# we assume that everything's set up properly to run it. Otherwise, we
+# expect ANSIBLE_HOME to point to a git checkout and do approximately
+# what hacking/env-setup would do.
+
+cmd=$(basename $0)
+if ! which $cmd >/dev/null 2>&1; then
+    ansidir=${ANSIBLE_HOME:-""}
+    if [ -z "$ansidir" ]; then
+        echo "Please set ANSIBLE_HOME=/path/to/ansible/dir" 1>&2
+        exit
+    fi
+
+    if [ ! -x "$ansidir/bin/ansible" ]; then
+        echo "Can't find $ansidir/bin/ansible" 1>&2
+        exit
+    fi
+
+    export PYTHONPATH=$ansidir/lib:${PYTHONPATH:-""}
+
+    cmd="$ansidir/bin/$cmd"
+fi
+
+$cmd "$@"

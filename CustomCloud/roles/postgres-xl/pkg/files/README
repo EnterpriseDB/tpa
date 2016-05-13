@@ -1,0 +1,4 @@
+Postgres-XL build tar ball should be placed here.
+This tar ball is then placed and unarchived on remote machines.
+Since tar ball itself is not under version control, we are
+creating this README to retain an empty directory.

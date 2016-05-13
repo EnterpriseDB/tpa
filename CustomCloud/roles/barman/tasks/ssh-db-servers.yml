@@ -1,0 +1,7 @@
+---
+
+- name: Add barman server to known_hosts on db server "{{current_host}}"
+  shell: ssh-keyscan -H "{{ barman_hostname }}" >> ~postgres/.ssh/known_hosts
+  become_user: postgres
+  become: yes
+  delegate_to: "{{current_host}}"

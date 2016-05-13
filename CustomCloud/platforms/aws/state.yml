@@ -1,0 +1,27 @@
+---
+
+# ansible-playbook -i inventory/ec2.py state.yml \
+#     -e cluster=./clusters/x -e state=running
+
+- name: Stop hosts in a cluster
+  hosts: localhost
+  tasks:
+    - include: validate.yml
+      tags: always
+
+    - name: Require inventory group {{cluster_tag}} to be defined
+      assert:
+        msg: "No hosts found in group {{cluster_tag}}"
+        that:
+          - cluster_tag in groups
+          - groups[cluster_tag] | length > 0
+      tags: always
+
+    - name: Stop EC2 instances in each region
+      ec2:
+        state: "{{ state|default('running') }}"
+        region: "{{ item }}"
+        instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('extract', hostvars, 'ec2_id')|list }}"
+        wait: yes
+      with_items: "{{ regions }}"
+      tags: ec2

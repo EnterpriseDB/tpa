@@ -1,0 +1,76 @@
+# TODO: Drop the provider slot if it exists. If some test fails, it may
+# not be dropped as expected.
+
+- set_fact: provider_port="{{hostvars[item]['postgres_port']|int}}"
+- set_fact: subscriber_port="{{postgres_port|int}}"
+
+- name: Drop the provider database
+  command: dropdb -p {{provider_port}} --if-exists provider
+  delegate_to: "{{item}}"
+
+- name: Drop the subscriber database
+  command: dropdb --if-exists subscriber
+
+- block:
+    - name: Remove the super user on provider
+      command: dropuser -p {{provider_port}} --if-exists super
+    - name: Remove the nonsuper user on provider
+      command: dropuser -p {{provider_port}} --if-exists nonsuper
+  delegate_to: "{{item}}"
+
+- block:
+    - name: Remove the super user on subscriber
+      command: dropuser --if-exists super
+    - name: Remove the nonsuper user on subscribeer
+      command: dropuser --if-exists nonsuper
+
+- name: Recreate the provider database
+  command: createdb -p {{provider_port}} provider
+  delegate_to: "{{item}}"
+
+- name: Recreate the subscriber database
+  command: createdb  subscriber
+
+- name: Template DSN in test files
+  replace:
+    dest: "{{item}}"
+    regexp: "(?s)(CREATE OR REPLACE FUNCTION public.pglogical_regress_variables\\(.*? AS \\$f\\$).*?(\\$f\\$;)"
+    replace: "\\1SELECT 'dbname=provider port={{provider_port}}'::text, 'dbname=subscriber port={{subscriber_port}}'::text\\2"
+    backup: no
+  with_items:
+    - "{{pglogical_build_dir}}/sql/preseed.sql"
+    - "{{pglogical_build_dir}}/expected/preseed.out"
+
+- name: Template slot names in test output
+  replace:
+    dest: "{{item}}"
+    regexp: "pgl_postgres_test_provider_test_sube55bf37"
+    replace: "pgl_subscriber_test_provider_test_sube55bf37"
+    backup: no
+  with_fileglob:
+    - "{{pglogical_build_dir}}/expected/*.out"
+
+- name: Create output directory
+  file:
+    path: "{{pglogical}}/out-{{inventory_hostname}}-{{item}}"
+    state: directory
+  vars:
+    pglogical: "{{pglogical_build_dir|expanduser}}"
+
+- name: Set 9.4 test list
+  set_fact:
+    test_list: preseed infofuncs init_fail init preseed_check basic extended toasted replication_set add_table matview primary_key foreign_key functions copy drop
+  when: postgres_ver|int == 94 or hostvars[item]['postgres_ver']|int == 94
+- name: Set 9.5+ test list
+  set_fact:
+    test_list: preseed infofuncs init_fail init preseed_check basic extended toasted replication_set add_table matview bidirectional primary_key foreign_key functions copy drop
+  when: postgres_ver|int > 94 and hostvars[item]['postgres_ver']|int > 94
+- name: Run pg_regress
+  shell: >
+    {{postgres}}/lib/postgresql/pgxs/src/test/regress/pg_regress \
+      --inputdir={{pglogical}} \
+      --outputdir="{{pglogical}}/out-{{inventory_hostname}}-{{item}}" \
+      {{test_list}}
+  vars:
+    postgres: "{{postgres_install_dir|expanduser}}"
+    pglogical: "{{pglogical_build_dir|expanduser}}"

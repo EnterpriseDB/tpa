@@ -1,0 +1,39 @@
+- include: ../common/validate.yml
+
+- name: Ensure cluster_tags is correctly configured
+  assert:
+    msg: "Please define cluster_tags (a hash, including Owner) in {{config_file}}"
+    that:
+      - cluster_tags is defined
+      - cluster_tags is mapping
+      - cluster_tags['Owner'] is defined
+      - cluster_tags['Owner'] != ''
+
+- name: Ensure ec2_vpc is configured
+  assert:
+    msg: "Please define ec2_vpc (a hash, including Name) in {{config_file}}"
+    that:
+      - ec2_vpc is defined
+      - ec2_vpc is mapping
+      - ec2_vpc['Name'] is defined
+      - ec2_vpc['Name'] != ''
+
+- name: Ensure instances is correctly configured
+  assert:
+    msg: "Please define instances (an array of hashes, one per instance) in {{config_file}}"
+    that:
+      - instances is defined
+      - instances is sequence and instances is not string and instances is not mapping
+      - instances | length > 0
+
+- name: Ensure that the cluster name is set as a tag
+  set_fact:
+    cluster_tags: "{{ dict(Name=cluster_name)|combine(cluster_tags) }}"
+
+- name: Derive EC2 group name for the cluster
+  set_fact:
+    cluster_tag: "{{ 'tag_Name_' + cluster_tags['Name'] }}"
+
+- name: Derive list of unique regions from instances
+  set_fact:
+    regions: "{{ instances|map(attribute='region')|unique|list }}"

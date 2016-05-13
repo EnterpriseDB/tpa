@@ -1,0 +1,113 @@
+---
+
+- name: Test EC2 cluster
+  hosts: tag_Name_{{ cluster_name }}
+  remote_user: admin
+  gather_facts: yes
+  vars:
+   luks_volume: postgres
+   luks_device: /dev/xvdb
+   luks_mountpoint: /var/lib/postgresql
+   pg_version: 9.4
+  pre_tasks:
+     - name: Ensure cluster configuration is present
+       assert:
+        msg: "Please rerun with «--extra-vars @clustername-aws.yml»"
+        that:
+          - cluster_name is defined and cluster_name != ''
+          - instances | length > 0
+       tags: validate
+       run_once: true
+       delegate_to: localhost
+
+    # Find the one host tagged as the primary and remember it for use
+     - name: Determine primary hostname
+       set_fact: primary_hostname="{{ item }}"
+       when: "hostvars[item].ec2_tag_db == 'primary'"
+       with_items: "{{ play_hosts }}"
+       tags: always
+     - name: Discover EC2 instance facts
+       ec2_facts:
+  
+  tasks:
+    
+    - name: Set OS specific facts
+      set_fact:
+        luks_mountpoint: /var/lib/pgsql
+      when: ansible_os_family == "RedHat"
+
+    - name: Check if added disk exists and mounted
+      stat: path={{ luks_device }}
+      register: p
+
+    - assert:
+       that:
+         - p.stat.exists
+
+    - name: Check if postgres volume /dev/mapper/{{ luks_volume }} is mounted 
+      stat: path=/dev/mapper/{{ luks_volume }}
+      register: mount_result
+    - assert:
+       that:
+        - mount_result.stat.exists
+   
+    - name: Check if {{ luks_device }} volume is encrypted
+      shell: cryptsetup isLuks {{ luks_device }}
+      sudo: yes
+      register: is_encrypted_result
+    - assert:
+       that:
+        - is_encrypted_result.rc == 0 
+    
+    - name: Check if postgres volume mount point exists
+      stat: path="{{ luks_mountpoint }}"
+      register: mount_result
+    - assert:
+       that:
+        - mount_result.stat.exists   
+    
+    - name: check if Postgres is installed
+      shell: which psql
+      always_run: true
+      register: cmd_result
+    - assert:
+       that:
+         - "'no psql' not in cmd_result.stderr"
+         - "'psql' in cmd_result.stdout"
+
+    - name: check postrgesql version
+      shell: psql -V
+      always_run: true
+      register: cmd_result
+    - assert:
+       that:
+         - "'not found' not in cmd_result.stderr"
+         - "'{{ pg_version }}' in cmd_result.stdout"
+
+    - name: check if 5432 is open for postgres
+      wait_for: host={{ inventory_hostname }} port={{ item|int }} timeout=10
+      always_run: true
+      with_items:
+        - 5432
+ 
+    - name: Verify Postgres streaming replication is working
+      shell: psql -c "CREATE TABLE testtab (id int); INSERT INTO testtab values(1);"
+      always_run: true
+      sudo_user: postgres
+      delegate_to: "{{primary_hostname}}"
+      run_once: yes
+   
+    - name: Verify if id=1 exists on all nodes
+      shell: psql -c "SELECT * FROM testtab;"
+      sudo_user: postgres
+      register: cmd_result
+    - assert:
+        that:
+          - "'1 row' in cmd_result.stdout"
+
+    - name: Drop testtab from primary
+      shell: psql -c "DROP TABLE testtab;"
+      always_run: true
+      sudo_user: postgres
+      delegate_to: "{{primary_hostname}}"
+      run_once: yes

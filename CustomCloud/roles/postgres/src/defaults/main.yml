@@ -1,0 +1,38 @@
+## What should we build?
+#
+# We take a git repository URL to clone and a reference to checkout. An
+# optional local reference repository can be specified to save bandwidth
+# and time. By default we build the latest revision from postgresql.git.
+
+postgres_git_url: git://git.postgresql.org/git/postgresql.git
+postgres_git_ref: master
+postgres_git_reference_repo: ""
+
+## Build and install locations
+#
+# We clone the repository specified above into the src_dir given here,
+# do a VPATH build (configure+make) in the build_dir, and install to
+# the install_dir.
+#
+# By default, an empty build directory is created each time, but using
+# "--skip-tags postgres-clean" will use an existing build_dir (and not
+# re-run configure).
+
+postgres_src_dir: /opt/postgres/src
+postgres_build_dir: /opt/postgres/build
+postgres_install_dir: /opt/postgres/{{pgversion}}
+
+## Build customisation
+#
+# We install Postgres along with all contrib modules by default. These
+# settings can be used to customise the configure/build/install process.
+
+postgres_configure_env: {}
+postgres_configure_opts: []
+postgres_make_command: "make"
+postgres_build_targets:
+  - "all"
+  - "-C contrib all"
+postgres_install_targets:
+  - "install"
+  - "-C contrib install"
