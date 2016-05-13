@@ -259,3 +259,13 @@
       template:
         src: inventory.j2
         dest: "{{ cluster_dir }}/inventory/00-{{ cluster_name }}"
+
+    - name: Copy ec2.py to inventory directory
+      copy:
+        src: ec2.py
+        dest: "{{ cluster_dir }}/inventory/ec2.py"
+
+    - name: Install customised ec2.ini
+      template:
+        src: ec2.ini.j2
+        dest: "{{ cluster_dir }}/inventory/ec2.ini"
