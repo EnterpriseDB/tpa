@@ -1,6 +1,7 @@
 [ec2]
 
 regions = {{ regions|join(",") }}
+regions_exclude = us-gov-west-1,cn-north-1
 
 destination_variable = public_dns_name
 vpc_destination_variable = ip_address
