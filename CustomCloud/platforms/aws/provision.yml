@@ -264,6 +264,7 @@
       copy:
         src: ec2.py
         dest: "{{ cluster_dir }}/inventory/ec2.py"
+        mode: "0776"
 
     - name: Install customised ec2.ini
       template:
