@@ -4,6 +4,9 @@
 # we need to support more distributions, we will need a separate play to
 # run setup.
 
+- name: bootstrap python 2.7
+  raw: sudo apt-get update -qq && sudo apt-get install -qq python2.7
+
 - name: Determine what distribution we're running
   shell: (test -f /etc/debian_version && echo debian) || (test -f /etc/redhat-release && echo redhat)
   register: distribution
@@ -13,12 +16,22 @@
   set_fact:
     ansible_distribution: "{{ distribution.stdout }}"
 
+- name: Set Linux Distribution Codename
+  shell: lsb_release -cs
+  register: codename
+  when: ansible_distribution == 'debian'
+
+- name: Set ansible_distribution_release
+  set_fact:
+    ansible_distribution_release: "{{ codename.stdout }}"
+  when: ansible_distribution == 'debian'
+
 - name: Set ansible_pkg_mgr based on ansible_distribution
   set_fact:
     ansible_pkg_mgr: "{{dict(redhat='yum', debian='apt')[ansible_distribution]}}"
 
 - name: Determine Python version
-  command: python -c 'import platform; print platform.python_version()'
+  command: "{{ ansible_python_interpreter }} -c 'import platform; print platform.python_version()'"
   register: version
   changed_when: False
 

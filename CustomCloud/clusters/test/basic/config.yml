@@ -12,8 +12,11 @@ cluster_tags:
   Name: CustomCloud
   Owner: AMS
 
+ec2_ami_name: "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160420.3"
+ec2_ami_user: "ubuntu"
+
 ec2_vpc:
-  Name: RT_Cluster
+  Name: CustomCloud
   cidr: 10.67.0.0/24
 
 ec2_vpc_subnets:
@@ -27,7 +30,6 @@ ec2_vpc_subnets:
 instances:
     - type: t2.medium
       region: us-east-1
-      image: ami-12663b7a
       subnet: 10.67.0.0/25
       ip: 10.67.0.1
       volumes:
@@ -39,7 +41,6 @@ instances:
         node: 1
     - type: t2.medium
       region: us-west-2
-      image: ami-4dbf9e7d
       subnet: 10.67.0.64/26
       ip: 10.67.1.1
       volumes:
@@ -51,7 +52,6 @@ instances:
         node: 2
     - type: t2.medium
       region: eu-west-1
-      image: ami-25158352
       subnet: 10.67.0.192/27
       ip: 10.67.2.1
       volumes:

@@ -6,7 +6,7 @@
   sudo_user: root
   sudo: true
   vars:
-    pgversion: 9.4
+    pgversion: 9.5
 
     luks_volume: postgres
     luks_device: /dev/xvdb
@@ -38,9 +38,11 @@
       set_fact: node_id="{{ ec2_tag_node }}"
       tags: always
 
-    - name: Store the VPN address as a fact
+    - name: Store the VPN address (basically ec2 IP address) as a fact
       set_fact:
-        vpn_address: "{{ vpn_network|regex_replace('\\.[0-9]*$', '.'+node_id) }}"
+        vpn_address: "{{ hostvars[item].ec2_ip_address }}"
+      when: "hostvars[item].ec2_tag_node == node_id"
+      with_items: "{{ play_hosts }}"
       tags: always
 
   roles:

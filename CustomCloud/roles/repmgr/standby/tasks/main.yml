@@ -1,7 +1,7 @@
 ---
 
 - name: Check if the standby is registered
-  command: repmgr -f /etc/repmgr/repmgr.conf cluster show
+  shell: repmgr -f /etc/repmgr/repmgr.conf cluster show | grep {{hostvars[inventory_hostname]['vpn_address']}}
   sudo_user: postgres
   ignore_errors: True
   changed_when: False
