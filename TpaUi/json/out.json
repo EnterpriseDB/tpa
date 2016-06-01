@@ -1,0 +1,48 @@
+{
+    "InstanceCount": 2, 
+    "ClusterName": "MyPG", 
+    "ResourceId": "da2f538b-20b4-4162-8b4f-6270981f1b19", 
+    "ClusterType": "postgresql_9_5", 
+    "CustomerId": "POSJ", 
+    "ClusterTags": "{\"Name\": \"MyPG\"}", 
+    "Properties": {
+        "IAM": {
+            "AwsSecret": "some secret", 
+            "AwsKeyId": "AZADEDSSDEEDD"
+        }, 
+        "Instances": [
+            {
+                "Subnet": "xxxx", 
+                "Name": "Instance11", 
+                "Tags": "{\"tag1\": \"value1\"}", 
+                "Image": "myAmiXXX", 
+                "AllocatedStorage": 20, 
+                "Type": "t1_micro", 
+                "Region": "us_west_1"
+            }, 
+            {
+                "Subnet": "xxxx", 
+                "Name": "Instance12", 
+                "Tags": "{\"tag1\": \"value1\"}", 
+                "Image": "myAmiXXX", 
+                "AllocatedStorage": 20, 
+                "Type": "t1_micro", 
+                "Region": "us_west_1"
+            }
+        ], 
+        "Maintenance": {
+            "ExtraNumericField": 10, 
+            "ExtraTextField": "y", 
+            "AllowMajorVersionUpgrade": false, 
+            "AutoMinorVersionUpgrade": true, 
+            "PreferredBackupWindow": "0200-0300", 
+            "BackupRetentionPeriod": "7D", 
+            "ExtraBooleanField": true, 
+            "PreferredMaintenanceWindow": [
+                "3", 
+                "4"
+            ], 
+            "BackupFrequency": "7D"
+        }
+    }
+}

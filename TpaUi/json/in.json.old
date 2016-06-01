@@ -1,0 +1,63 @@
+{
+  "Engine": "POSTGRES9.5",
+  "CustomerId":"XXXXXXXX",
+  "ResourceId":"dfdfnddjds",
+  "Timestamp":"YYYY-MM-DD HH:MM:SS.ms +Z"
+  "Properties": {
+    "General": {
+      "AllocatedStorage": "20GB",
+      "PubliclyAccessible": true,
+      "AvailabilityZone": "us-east1"
+    },
+    "Instance": {
+      "DBClusterIdentifier": "MyPg",
+      "DBInstanceClass": "t2.small",
+      "DBInstanceIdentifier": "Pg2",
+      "MasterUsername": "postgres",
+      "MasterUserPassword": "postgres",
+      "Port": "5432",
+      "Iops": 300,
+      "OptionGroupName": "Xsa"
+    },
+    "Database": {
+      "DBName": "test",
+      "DBParameterGroupName": "sample",
+      "DBSecurityGroups": [
+        "x",
+        "y",
+        "z"
+      ],
+      "DBSnapshotIdentifier": "k",
+      "DBSubnetGroupName": "net01",
+      "VPCSecurityGroups": [
+        "x",
+        "y",
+        "z"
+      ]
+    },
+    "Maintainance": {
+      "AllowMajorVersionUpgrade": false,
+      "AutoMinorVersionUpgrade": true,
+      "BackupRetentionPeriod": "7D",
+      "BackupFrequency": "7D",
+      "PreferredBackupWindow": "0200-0300",
+      "PreferredMaintenanceWindow": "0300-0400"
+    },
+    "Addons": {
+      "HighAvailability": true,
+      "SourceDBInstanceIdentifier": "Master01",
+      "CharacterSetName": "UTF-8",
+      "StorageEncrypted": false,
+      "StorageType": "Type1"
+    },
+    "Others": {
+      "KmsKeyId": "AZADEDSSDEEDD",
+      "KmsSecret": "**",
+      "LicenseModel": "SomeDefault",
+      "Tags": [
+        "tag1",
+        "tag2"
+      ]
+    }
+  }
+}
