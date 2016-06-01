@@ -1,0 +1,21 @@
+# default settings for repmgrd. This file is sourced by /bin/sh from
+# /etc/init.d/repmgrd
+
+# disable repmgrd by default so it won't get started upon installation
+# valid values: yes/no
+REPMGRD_ENABLED=yes
+
+# configuration file (required)
+REPMGRD_CONF="/etc/repmgr/repmgr.conf"
+
+# additional options
+REPMGRD_OPTS="--verbose"
+
+# user to run repmgrd as
+REPMGRD_USER=postgres
+
+# repmgrd binary
+REPMGRD_BIN=/usr/bin/repmgrd
+
+# pid file
+REPMGRD_PIDFILE=/etc/repmgr/repmgrd.pid

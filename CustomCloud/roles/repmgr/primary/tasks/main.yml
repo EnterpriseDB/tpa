@@ -39,3 +39,7 @@
   command: repmgr -f /etc/repmgr/repmgr.conf --verbose master register
   sudo_user: postgres
   when: master|failed
+
+- name: Start repmgrd after primary registration
+  sudo_user: root
+  service: name=repmgrd state=restarted

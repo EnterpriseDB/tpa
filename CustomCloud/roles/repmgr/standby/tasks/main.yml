@@ -18,6 +18,12 @@
       file: path=/var/lib/postgresql/{{pgversion}}/main state=directory
     - name: Run repmgr standby clone
       command: repmgr -D /var/lib/postgresql/{{pgversion}}/main -d repmgr -U repmgr --verbose standby clone {{hostvars[primary_hostname]['vpn_address']}}
+    - name: Move over conf files to proper location
+      command: mv {{pgdata}}/{{item}} {{pgconf}}/{{item}}
+      with_items:
+        - postgresql.conf
+        - pg_hba.conf
+        - pg_ident.conf
     - name: Start Postgres
       service: name=postgresql state=started
       sudo_user: root
@@ -25,3 +31,7 @@
       command: repmgr -f /etc/repmgr/repmgr.conf --verbose standby register
   when: standby|failed
   sudo_user: postgres
+
+- name: Start repmgrd after standby registration
+  sudo_user: root
+  service: name=repmgrd state=restarted

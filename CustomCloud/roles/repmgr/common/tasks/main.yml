@@ -15,3 +15,12 @@
   with_items:
     - promote_command.sh
     - follow_command.sh
+
+- name: Overwrite repmgrd configuration file
+  sudo: true
+  copy: src="repmgrd" dest=/etc/default/repmgrd
+
+- name: Disable repmgrd autostart on reboot
+  service:
+     name: repmgrd
+     enabled: no
