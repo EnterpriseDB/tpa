@@ -1,0 +1,15 @@
+pg_stat_cluster
+- collect stats from all standby servers every N minutes
+- cumulative view required for unused index removal or deciding what indexes to add
+- historical view allows capacity planning
+
+pg_stat_statements
+- separate from sqlfirewall, so that pg_stat_statements views look identical
+- additional views for sqlfirewall
+- additional capability to measure typical run-time of statements, so that any query that goes over typical run-time gets logged individually
+
+Use pglogforward to extract out useful information from the logs, so we don't fill up the logs with crap
+- log lock waits
+- log temp files
+- log checkpoints
+- log autovacuum
