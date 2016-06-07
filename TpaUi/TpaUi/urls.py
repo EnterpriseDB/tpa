@@ -19,6 +19,8 @@ from django.contrib import admin
 #from usermgmt import views
 from usermgmt.views import ProvisioningWizard, FORMS
 from TpaUi.forms import ProvisionFormPage1, ProvisionFormPage3, ProvisionFormPage4
+from django.conf.urls.static import static
+from django.conf import settings
 #import TpaUi
 
 urlpatterns = [
@@ -28,4 +30,4 @@ urlpatterns = [
      #                                               ProvisionFormPage3, ProvisionFormPage4])),
      url(r'^provision/$', ProvisioningWizard.as_view(FORMS)),
      url(r'^provision1/$', ProvisioningWizard.as_view(FORMS)),
-]
+]  + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
