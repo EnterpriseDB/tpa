@@ -20,8 +20,11 @@ Python and modules
 ------------------
 
 Install Python 2.7.x and any packages needed to get pip and virtualenv
-working. For example, on Debian, install python2.7, python-pip, and
-python-virtualenv.
+working. For example, on Ubuntu, install 
+
+* python2.7 
+* python-pip
+* python-virtualenv
 
 To avoid installing the modules system-wide, they can go into an
 ansible-specific virtualenv (highly recommended). Once done, create
@@ -48,7 +51,7 @@ than your operating system's packages (which are often too old).
 
 ```
     # With the virtualenv activated, install packages
-    pip install jinja2 …
+    pip install jinja2 PyYAML boto PyCrypto six
 ```
 
 Ansible
