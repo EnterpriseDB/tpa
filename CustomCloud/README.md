@@ -39,7 +39,7 @@ Pre-requisites
 Trying out the TPA AWS cluster setup
 ================================
 
-1. [Read clusters/test/tpa/README](clusters/test/tpa/README) for details.
+1. [Read clusters/test/tpa/README](clusters/test/tpa/README.md) for details.
 
 I just want a test cluster
 ========================================
