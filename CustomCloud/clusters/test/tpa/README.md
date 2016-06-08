@@ -59,11 +59,11 @@ before doing anything else (python packages, virtualend, ansible)!
    instances are reachable over the network from your local machine
 
    ```
-   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh nikhils@52.90.44.83
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh ubuntu@52.90.44.83
 
-   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh nikhils@54.187.3.43
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh ubuntu@54.187.3.43
 
-   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh nikhils@54.194.62.203
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh ubuntu@54.194.62.203
    ```
 
 4. Carry out the actual software deploy
