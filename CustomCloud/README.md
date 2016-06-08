@@ -1,7 +1,7 @@
 2ndQuadrant CustomCloud
 =======================
 
-© Copyright 2ndQuadrant, 2013
+© Copyright 2ndQuadrant, 2016
 
 Confidential property of 2ndQuadrant; not for public release.
 
@@ -11,7 +11,7 @@ followed by 2ndQuadrant to set up Postgres, and are equally applicable
 to setting up quick one-off testbeds or production environments for
 customers.
 
-With CustomCloud, you can:
+With TPA/CustomCloud, you can:
 
 1. Provision hosts and other resources on AWS (and, in future, other
    platforms)
@@ -26,21 +26,31 @@ In most cases, a few simple configuration files are all you will need,
 but you can easily customise the process to handle more complex setup
 tasks and configurations.
 
-I don't care, I just want a test cluster
-========================================
+Pre-requisites
+==============
 
-1. You need 2ndQuadrant's fork of Ansible.
+1. You need 2ndQuadrant Ansible or Upstream Ansible.
    [Read the INSTALL guide](INSTALL.md) for details.
 
 2. You need an AWS access key id and secret access key for API access.
    [Read platforms/aws/README](platforms/aws/README.md) for details.
 
-3. Pick a name for the cluster, and write a clustername/config.yml file
+
+Trying out the TPA AWS cluster setup
+================================
+
+1. [Read clusters/test/tpa/README](clusters/test/tpa/README) for details.
+
+I just want a test cluster
+========================================
+
+
+1. Pick a name for the cluster, and write a clustername/config.yml file
    describing the required instances, and a clustername/deploy.yml file
    to apply the desired roles to these instances.
    [Read clusters/README](clusters/README.md) for details.
     
-4. Provision the cluster instances and deploy software to them:
+2. Provision the cluster instances and deploy software to them:
 
    ```
    utils/ansible-playbook platforms/aws/provision.yml \
@@ -50,7 +60,7 @@ I don't care, I just want a test cluster
        -e cluster=./clusters/name
    ```
 
-5. Once you're done with testing, deprovision the cluster:
+3. Once you're done with testing, deprovision the cluster:
 
    ```
    utils/ansible-playbook -i inventory/ec2.py platforms/aws/deprovision.yml \
