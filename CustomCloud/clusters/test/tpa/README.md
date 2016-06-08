@@ -10,7 +10,7 @@ before doing anything else (python packages, virtualend, ansible)!
 2. Provision the cluster instances
 
    ```
-   (ansible-python) ubuntu@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
 
    utils/ansible-playbook platforms/aws/provision.yml \
        -e cluster=./clusters/test/tpa -vvvv
@@ -29,7 +29,7 @@ before doing anything else (python packages, virtualend, ansible)!
    been provisioned. The inventory of the instances will be available as:
 
    ```
-   (ansible-python) ubuntu@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ cat clusters/test/tpa/inventory/00-TPA
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ cat clusters/test/tpa/inventory/00-TPA
 
    [tag_Name_TPA]
    52.90.44.83
@@ -50,7 +50,7 @@ before doing anything else (python packages, virtualend, ansible)!
    The above provisioning activity creates ssh keys which are uploaded to these instances.
 
    ```
-   (ansible-python) ubuntu@ubuntu-xenial:~/2ndQ/TPA/CustomCloud/clusters/test/tpa$ ls
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud/clusters/test/tpa$ ls
    config.yml  deploy.yml  id_rsa  id_rsa.pub  id_tpa  id_tpa.pub  inventory  README.md
    ```
    It also ensures that these keys are added locally via ssh-agent using ssh-add. If the
@@ -59,18 +59,18 @@ before doing anything else (python packages, virtualend, ansible)!
    instances are reachable over the network from your local machine
 
    ```
-   (ansible-python) ubuntu@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh ubuntu@52.90.44.83
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh nikhils@52.90.44.83
 
-   (ansible-python) ubuntu@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh ubuntu@52.90.44.83
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh nikhils@54.187.3.43
 
-   (ansible-python) ubuntu@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh ubuntu@52.90.44.83
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh nikhils@54.194.62.203
    ```
 
 4. Carry out the actual software deploy
 
    After checking step 3, fire off the command to do the actual deployment on these instances
    ```
-   (ansible-python) ubuntu@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
 
    utils/ansible-playbook -i clusters/test/tpa/inventory clusters/test/tpa/deploy.yml -e cluster=./clusters/test/tpa -vvvv
 
@@ -88,7 +88,7 @@ before doing anything else (python packages, virtualend, ansible)!
    manually from the AWS console. Here's the step to do the deprovisioning:
 
    ```
-   (ansible-python) ubuntu@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
+   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
 
    utils/ansible-playbook -i clusters/test/tpa/inventory platforms/aws/deprovision.yml -e cluster=./clusters/test/tpa -vvvv
    ```
