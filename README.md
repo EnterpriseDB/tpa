@@ -25,6 +25,16 @@ overarching goals in this endeavor of 2ndQuadrant Trusted PostgreSQL
 Architecture (TPA). It is basically going to draw on the years of experience
 that 2ndQuadrant has had while serving the community and customer base:
 
+I got what TPA is, how do I Get Started?
+========================================
+Click on [CustomCloud README](CustomCloud/README.md) to get started with
+installing Ansible, Python and other components.
+
+Click on [CustomCloud/clusters/test/tpa/README](CustomCloud/clusters/test/tpa/README.md)
+to create your own TPA cluster in minutes!
+
+Or read below for more on TPA.
+
 Binaries for all components
 ===========================
 We need to come up with a list of binaries that are going to be deployed.
@@ -98,3 +108,11 @@ This initiative should be certified for usage by Governments, Health IT and
 Finance Tech firms. Certifications like PCI-DSS, HIPAA, ISO 27001 etc. will be
 necessary to gain the trust and confidence of uses cases in the compulsory
 compliance domains.
+
+Get Started
+===========
+Click on [CustomCloud README](CustomCloud/README.md) to get started with
+installing Ansible, Python and other components.
+
+Click on [CustomCloud/clusters/test/tpa/README](CustomCloud/clusters/test/tpa/README.md)
+to create your own TPA cluster in minutes!
