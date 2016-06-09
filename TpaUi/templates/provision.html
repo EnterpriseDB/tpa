@@ -56,11 +56,14 @@
 <hr />
 <div class="btn-toolbar text-center">
 {% if wizard.steps.prev %}
-<button name="wizard_goto_step" type="submit" class="btn btn-primary" value="{{ wizard.steps.first }}">First Step</button>
-<button name="wizard_goto_step" type="submit" class="btn btn-primary" value="{{ wizard.steps.prev }}">Prev Step</button>
+<button name="wizard_goto_step" type="submit" class="btn btn-primary" value="{{ wizard.steps.prev }}">Previous</button>
+{% endif %}
+{% if wizard.steps.next %}
+<input type="submit" class="btn btn-primary" value="Next"/>
+{% else %}
+<input type="submit" class="btn btn-primary" value="Finish"/>
 {% endif %}
 
-<input type="submit" class="btn btn-primary" value="Next Step"/>
 </div>
 <hr />
 </form>
