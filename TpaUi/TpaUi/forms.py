@@ -1,20 +1,15 @@
 from django import forms
 import settings
 import json
-from django.forms.formsets import formset_factory
+from django.forms.formsets import formset_factory, BaseFormSet
+from models import MaintenanceHours
+from customwidgets import MaintenanceHoursWidget
+from django.core.exceptions import ValidationError
 
 jsonIn = open(settings.BASE_DIR + '/json/in.json','r')
-#data1= jsonIn.readlines()
 data1 =  json.load(jsonIn)
-#data2 = json.dumps(jsonIn)
-for x in data1:
-    print x
-
-
 jsonIn.close()
 
-
-print data1
 properties = data1['Properties']
 
 class FormWithDescription (forms.Form):
@@ -35,8 +30,8 @@ class ProvisionFormPage1(forms.Form):
                       (ENGINE1, "PostgreSQL 9.5"),
                       (ENGINE2, "PostgreSQL 9.4"),
                       (ENGINE3, "PostgreSQL 9.3"),
-                      (ENGINE1, "Postgres-XL 9.2"),
-                      (ENGINE1, "Postgres-XC 9.3"),
+                      (ENGINE4, "Postgres-XL 9.2"),
+                      (ENGINE5, "Postgres-XC 9.3"),
     )
 
     ClusterType = forms.ChoiceField(choices=ENGINE_CHOICES, label='Cluster Type', initial= data1['ClusterType'], widget=forms.Select(attrs={'class':'form-control'}))
@@ -44,7 +39,6 @@ class ProvisionFormPage1(forms.Form):
     
     ClusterTags = forms.CharField(max_length=256, initial = json.dumps(data1['ClusterTags']), label='Cluster Tags',  widget= forms.Textarea(attrs={'rows':6,'cols':20, 'class':'form-control'}))
     InstanceCount = forms.IntegerField(max_value=999, initial = data1['InstanceCount'],label = "Number of Instances (>1 for HA)", widget=forms.NumberInput(attrs={'class':'form-control'}) )
-    #InstanceCount = forms.BooleanField(initial=data1['HighAvailability'], label="High Availability")
     
 
 class InstanceForm(forms.Form):
@@ -60,27 +54,86 @@ class InstanceForm(forms.Form):
                       ("us_west_2","us-west-2"))
     
     Region = forms.ChoiceField(choices = REGION_CHOICES, label = "Availability Zone", initial= data['Region'], widget=forms.Select(attrs={'class':'form-control'}))
-    
-    Image = forms.CharField(max_length = 16, label = "AMI", initial= data['Image'], widget=forms.TextInput(attrs={'class':'form-control'}))
+
     Subnet = forms.CharField(max_length = 16, label ="Subnet", initial= data['Subnet'],widget=forms.TextInput(attrs={'class':'form-control'}) )
-    AllocatedStorage = forms.IntegerField(max_value=999, label='Allocated Storage (in GB)', initial= data['AllocatedStorage'],widget=forms.NumberInput(attrs={'class':'form-control'}))
     Tags= forms.CharField(max_length = 256, label ="Instance Tags (Use JSON KVP)", initial= json.dumps(data['Tags']),widget=forms.TextInput(attrs={'class':'form-control'}))
     
-    
+    Primary = forms.BooleanField(label = "Make this instance primary" , initial = data['Primary'], required = False, widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
 
-InstancesFormSet = formset_factory(InstanceForm, extra = 2)
-        
+    def has_changed(self):
+        changed_data = super(forms.Form, self).has_changed()
+        print "Changed "+str(changed_data)
+        print bool(self.initial or changed_data)
+        if self.initial:
+            return True
+        elif changed_data:
+            return True
+        else:
+            return True
+
+    ''' The ongoing radiobutton implementation of Primary, which did not work as expected
+    RADIO_CHOICES = ((0, False),
+                    (1, True))
+
+    ###Primary = forms.BooleanField(required = False,  widget = forms.RadioSelect(attrs={'class':'form-control'},choices = RADIO_CHOICES,))
+    
+    def __init__ (self, *args, **kwargs):
+        super(InstanceForm, self).__init__(*args, **kwargs)
+        CHOICES = ((self.prefix, ''),)
+        self.fields['Primary'] = forms.BooleanField(label = "Make this instance primary",required = False, widget = forms.RadioSelect(attrs={'class':'radio'}, choices = CHOICES))
+
+    def add_prefix(self, field):
+        if field == 'Primary':
+            ret = ('%s_%s') %(field, self.data)
+            print 'Primary filed data:: ' + field
+            print ret
+            print '~~~~~~~~~~~~~~~~~~~~~~'
+            return ret
+        else:
+            ret = self.prefix and ('%s-%s' % (self.prefix, field)) or field
+            print 'Non primary data:: ' + field
+            print ret
+            print '~~~~~~~~~~~~~~~~~~~~~~'
+            return ret'''
+
+class CustomFormSet(BaseFormSet):
+    def clean(self):
+        count = 0
+        for form in self.forms:
+            if 'Primary' in form.cleaned_data.keys():
+                if form.cleaned_data['Primary'] == True:
+                    count += 1
+                    if count > 1:
+                        raise ValidationError("Please mark only one instance as primary.")
+
+        if count < 1:
+            raise ValidationError("Please choose a primary instance.")
+
+        #return self.cleaned_data
+
+instances = properties['Instances']
+InstancesFormSet = formset_factory(InstanceForm, CustomFormSet, extra = len(instances))
+
 class ProvisionFormPage3(forms.Form):
     HOURS = ((1,"01:00"),(2,"02:00"),(3,"03:00"),(4,"04:00"))
     data = properties['Maintenance']
-    AllowMajorVersionUpgrade = forms.BooleanField(initial=data['AllowMajorVersionUpgrade'], label='Allow Major Version Upgrade', required = False, widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
     AutoMinorVersionUpgrade = forms.BooleanField(initial=json.dumps(data['AutoMinorVersionUpgrade']), label='Auto Minor Version Upgrade', widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
     BackupRetentionPeriod = forms.CharField(max_length=8, initial=data['BackupRetentionPeriod'], label='Backup Retention Period', widget=forms.TextInput(attrs={'class':'form-control'}))
     BackupFrequency = forms.CharField(max_length=8, initial=data['BackupFrequency'], label='Backup Frequency', widget=forms.TextInput(attrs={'class':'form-control'}))
-    PreferredBackupWindow = forms.CharField(max_length=16, initial=data['PreferredBackupWindow'], label='Preferred Backup Window', widget=forms.TextInput(attrs={'class':'form-control'}))
-    #PreferredMaintenanceWindow = forms.CharField(max_length=16, initial=data['PreferredMaintenanceWindow'], label='Preferred Maintenance Window', widget=forms.TextInput(attrs={'class':'form-control'}))
+    PreferredBackupWindow = forms.MultipleChoiceField(choices= HOURS, initial=data['PreferredBackupWindow'], label='Preferred Backup Window', widget=forms.SelectMultiple(attrs={'class':'form-control'}))
     PreferredMaintenanceWindow = forms.MultipleChoiceField(choices= HOURS, initial=data['PreferredMaintenanceWindow'], label='Preferred Maintenance Window', widget=forms.SelectMultiple(attrs={'class':'form-control'}))
-    
+
+    def clean(self):
+        backupWindow = self.cleaned_data['PreferredBackupWindow']
+        if(len(backupWindow) != 2):
+            raise ValidationError("Please select two items as start time and end time from backup window listbox.")
+
+        maintainenceWindow = self.cleaned_data['PreferredMaintenanceWindow']
+        if(len(maintainenceWindow) != 2):
+            raise ValidationError("Please select two items as start time and end time from maintenance window listbox.")
+        return self.cleaned_data
+
+    ''' These lines are for including extra fields from input JSON, something to be considered for July release
     def __init__(self, *args, **kwargs):
         data = properties['Maintenance']
         print 'Before delete'
@@ -102,17 +155,41 @@ class ProvisionFormPage3(forms.Form):
         print extra
 
         for i, key in enumerate(extra):
-            if isinstance( data[key], bool ):
-                self.fields[key] = forms.BooleanField(label=key, initial=data[key], required = False, widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
-            elif isinstance( data[key], ( int, long ) ):
-                self.fields[key] = forms.IntegerField(label=key, initial=data[key], widget=forms.NumberInput(attrs={'class':'form-control'}))
+            name,type = key.split('_')
+            if (type == 'bool' ):
+                self.fields[key] = forms.BooleanField(label=name, initial=data[key], required = False, widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
+            elif type == 'int':
+                self.fields[key] = forms.IntegerField(label=name, initial=data[key], widget=forms.NumberInput(attrs={'class':'form-control'}))
+            elif type == 'select':
+                print 'XX Selecy '
+                print data[key]
+                CHOICES = []
+                for choice in data[key]:
+                    CHOICES.append((str(choice), choice))
+
+                self.fields[key] = forms.ChoiceField(label=name,required = False, widget=forms.Select(attrs={'class':'form-control'}))
+
             else:
-                self.fields[key] = forms.CharField(label=key, initial=data[key], widget=forms.TextInput(attrs={'class':'form-control'}))
+                self.fields[key] = forms.CharField(label=name, initial=data[key], widget=forms.TextInput(attrs={'class':'form-control'}))
+             '''   
 
 class ProvisionFormPage4(forms.Form):
     data = properties['IAM']
     AwsKeyId = forms.CharField(max_length=16, initial=data['AwsKeyId'], label='AwsKeyId', widget=forms.TextInput(attrs={'class':'form-control'}))
     AwsSecret = forms.CharField(max_length=32, initial=data['AwsSecret'], label='AwsSecret', widget=forms.PasswordInput(attrs={'class':'form-control'})  )
-
     
+class ProvisionFormPage5(forms.ModelForm):
+    class Meta:
+        model = MaintenanceHours
+        fields = ('weekday', 'from_hour', 'to_hour')
+        widgets = {
+            'weekday': forms.HiddenInput(attrs={'class': 'hours-weekday'}),
+            'from_hour': MaintenanceHoursWidget(attrs={'class': 'hours-start'}),
+            'to_hour': forms.HiddenInput(attrs={'class': 'hours-end'}),
+        }
+        
+        
+BackupFormSet = formset_factory(ProvisionFormPage5, extra=0)
+
+
     

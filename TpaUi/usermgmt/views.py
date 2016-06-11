@@ -5,9 +5,7 @@ from django.conf import settings
 from random import choice
 from string import ascii_uppercase
 import logging, json, uuid
-from _codecs import decode
-import TpaUi
-from TpaUi.forms import ProvisionFormPage1
+from TpaUi import forms
 
 logr = logging.getLogger(__name__)
 
@@ -18,15 +16,17 @@ def first_view(req):
 STEP1 ="step1"
 STEP2= "step2"
 
-FORMS = [(STEP1, TpaUi.forms.ProvisionFormPage1),
-         (STEP2, TpaUi.forms.InstancesFormSet),
-         ("step3", TpaUi.forms.ProvisionFormPage3),
-         ("step4", TpaUi.forms.ProvisionFormPage4)]
+FORMS = [(STEP1, forms.ProvisionFormPage1),
+         (STEP2, forms.InstancesFormSet),
+         ("step3", forms.ProvisionFormPage3),
+         ("step4", forms.ProvisionFormPage4),
+         ]
 
 TEMPLATES = {STEP1: "provision.html",
              STEP2: "provision.html",
              "step3": "provision.html",
-             "step4": "provision.html"}
+             "step4": "provision.html"
+             }
 
 def assert_configure_ha(wizard):
     # Return true if user checks High Availability in step1
@@ -36,7 +36,6 @@ def assert_configure_ha(wizard):
 class ProvisioningWizard(SessionWizardView):
     def get_template_names(self):
         return [TEMPLATES[self.steps.current]]
-    #template_name = 'provision.html'
     
     def get_form_initial(self, step):
         
@@ -48,13 +47,11 @@ class ProvisioningWizard(SessionWizardView):
             if data is not None:
                 extra = int(data['InstanceCount'])
                 form_class.extra = extra
-                
             
         return SessionWizardView.get_form_initial(self, step)
     
     def done(self, form_list, **kwargs):
         form_data = process_form_data(form_list)
-        print form_data[1]
         temp = {"Instances": form_data[1], "Maintenance":form_data[2], "IAM":form_data[3]}
         temp2 = form_data[0]
         temp2['Properties'] = temp
@@ -68,17 +65,7 @@ class ProvisioningWizard(SessionWizardView):
         handler.write(out_json)
         handler.close();
         return render_to_response('success.html', {'form_data':form_data})
-    
-class HaPopup():
-    print "HA"
 
-        
 def process_form_data(form_list):
     form_data = [form.cleaned_data for form in form_list]
     return form_data
-    
-    
-    
-    
-    
-    

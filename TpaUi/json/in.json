@@ -10,46 +10,31 @@
   "Timestamp":"YYYY-MM-DD HH:MM:SS.ms +Z",
   "Properties": {
     "Instances": [{
-        "Name":"Instance1",
+        "Name":"Instance11",
         "Type":"t1_micro",
         "Region":"us_west_1",
-        "Image":"myAmiXXX",
-        "AllocatedStorage": 20,
         "Subnet":"xxxx",
+        "Primary":true,
+        "Tags": {
+            "tag1":"value1"
+      }
+    },
+    {
+        "Name":"Instance12",
+        "Type":"t1_micro",
+        "Region":"us_east_1",
+        "Subnet":"xxxx",
+        "Primary":false,
         "Tags": {
             "tag1":"value1"
       }
     }],
     "Maintenance": {
-      "AllowMajorVersionUpgrade": false,
       "AutoMinorVersionUpgrade": true,
       "BackupRetentionPeriod": "7D",
       "BackupFrequency": "7D",
       "PreferredBackupWindow": "0200-0300",
-      "PreferredMaintenanceWindow": "0300-0400",
-      "ExtraTextField":"y",
-      "ExtraNumericField":10,
-      "ExtraBooleanField":true
-    },
-    "Database": {
-      "DBClusterIdentifier": "MyPg",
-      "DBInstanceClass": "t2.small",
-      "DBInstanceIdentifier": "Pg2",
-      "DBParameterGroupName": "sample",
-      "DBSecurityGroups": [
-        "x",
-        "y",
-        "z"
-      ],
-      "DBSnapshotIdentifier": "k",
-      "DBSubnetGroupName": "net01"     
-    },
-    "Addons": {
-      "HighAvailability": true,
-      "SourceDBInstanceIdentifier": "Master01",
-      "CharacterSetName": "UTF-8",
-      "StorageEncrypted": false,
-      "StorageType": "standard"
+      "PreferredMaintenanceWindow": "0300-0400"
     },
     "IAM": {
       "AwsKeyId": "AZADEDSSDEEDD",

@@ -21,11 +21,16 @@
 {% if wizard.form.forms %}
     {{ wizard.form.management_form }}
     {{ formset.management_form }}
+    {% if wizard.form.non_form_errors %}
+        <div class="alert alert-warning"><strong>Validation Error: </strong>
+        {{ wizard.form.non_form_errors|striptags }}</div>
+    {% endif %}
+
     {% for form in wizard.form.forms %}
         <h4 class="text-right"><span class="label label-primary text-large">Instance-{{forloop.counter}}</span></h4>
         {% for field in form %}
             <div class="form-group fieldWrapper">
-                {{ field.errors }}
+                {% if field.errors %} <div class="alert alert-danger">{{ field.errors|striptags }}</div> {% endif %}
                 <label class="control-label col-sm-5 pull-left" for="{{ field.auto_id }}">{{ field.label }}</label>
                 <div class="col-sm-7"> {{ field }} </div>
                 {% if field.help_text %}
@@ -36,6 +41,11 @@
         <hr />
     {% endfor %}
 {% else %}
+    {% if wizard.form.non_field_errors %}
+        <div class="alert alert-warning"><strong>Validation Error: </strong>
+            {{ wizard.form.non_field_errors|striptags }}
+        </div>
+    {% endif %}
     {% for field in wizard.form %}
             {% ifequal field.label '' %}
                 <h4 class="text-right"><span class="label label-primary text-large">{{field.value}}</span></h4>

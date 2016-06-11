@@ -2,3 +2,5 @@
 /* text-align:right; */
 text-align:left;
 }
+
+fieldset.inlineLabels ul {list-style:none}

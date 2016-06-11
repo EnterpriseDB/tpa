@@ -1,13 +1,13 @@
 {
     "InstanceCount": 2, 
     "ClusterName": "MyPG", 
-    "ResourceId": "da2f538b-20b4-4162-8b4f-6270981f1b19", 
+    "ResourceId": "acd0c62c-41d3-4da0-b2cd-840a6939dacf", 
     "ClusterType": "postgresql_9_5", 
-    "CustomerId": "POSJ", 
+    "CustomerId": "OCCS", 
     "ClusterTags": "{\"Name\": \"MyPG\"}", 
     "Properties": {
         "IAM": {
-            "AwsSecret": "some secret", 
+            "AwsSecret": "2wwsdc", 
             "AwsKeyId": "AZADEDSSDEEDD"
         }, 
         "Instances": [
@@ -15,34 +15,31 @@
                 "Subnet": "xxxx", 
                 "Name": "Instance11", 
                 "Tags": "{\"tag1\": \"value1\"}", 
-                "Image": "myAmiXXX", 
-                "AllocatedStorage": 20, 
-                "Type": "t1_micro", 
-                "Region": "us_west_1"
+                "Region": "us_west_1", 
+                "Primary": true, 
+                "Type": "t1_micro"
             }, 
             {
                 "Subnet": "xxxx", 
                 "Name": "Instance12", 
                 "Tags": "{\"tag1\": \"value1\"}", 
-                "Image": "myAmiXXX", 
-                "AllocatedStorage": 20, 
-                "Type": "t1_micro", 
-                "Region": "us_west_1"
+                "Region": "us_west_1", 
+                "Primary": false, 
+                "Type": "t1_micro"
             }
         ], 
         "Maintenance": {
-            "ExtraNumericField": 10, 
-            "ExtraTextField": "y", 
-            "AllowMajorVersionUpgrade": false, 
-            "AutoMinorVersionUpgrade": true, 
-            "PreferredBackupWindow": "0200-0300", 
+            "PreferredBackupWindow": [
+                "2", 
+                "3"
+            ], 
             "BackupRetentionPeriod": "7D", 
-            "ExtraBooleanField": true, 
+            "BackupFrequency": "7D", 
             "PreferredMaintenanceWindow": [
                 "3", 
                 "4"
             ], 
-            "BackupFrequency": "7D"
+            "AutoMinorVersionUpgrade": true
         }
     }
 }
