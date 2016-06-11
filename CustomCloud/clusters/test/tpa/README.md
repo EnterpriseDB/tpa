@@ -45,6 +45,33 @@ before doing anything else (python packages, virtualend, ansible)!
    Obviously the IP addresses in your case will be different from the
    above sample output.
 
+   **NOTE 1** Sometimes you might get the following error:
+   ```
+   "msg": "boto required for this module"
+   ```
+   The above can be resolved by explicitly adding the virtualenv site-packages directory to PYTHONPATH.
+   ```
+   export PYTHONPATH=/home/ubuntu/ansible-python/lib/python2.7/site-packages:$PYTHONPATH
+   ```
+   
+   **NOTE 2** Sometimes you might get the following errors:
+   ```
+   loop_var = result._task.loop_control.get('loop_var') or 'item'
+   AttributeError: 'LoopControl' object has no attribute 'get'
+
+   or
+   
+   fatal: [localhost]: FAILED! => {"failed": true, "msg": "'r' is undefined"}
+   ```
+   
+   The above can be solved by checking out a specific commit tag of Upstream Ansible which is known to
+   work ok:
+   
+   ```
+   cd /path/to/upstream_ansible_dir
+   git checkout c06884eff03ad133b83a27c2839055a65f669d36
+   ```
+   
 3. Ensure that SSH to these instances works
 
    The above provisioning activity creates ssh keys which are uploaded to these instances.
@@ -55,8 +82,11 @@ before doing anything else (python packages, virtualend, ansible)!
    ```
    It also ensures that these keys are added locally via ssh-agent using ssh-add. If the
    keys are added properly, then SSH into all the 3 instances one by one and ensure that
-   SSH works seamlessly. This step is very important to ensure that all the three
-   instances are reachable over the network from your local machine
+   SSH works seamlessly. This step is very **important** to ensure that all the three
+   instances are reachable over the network from your local machine. 
+   
+   **NOTE 1** If you get issues accessing via ssh, then manually add the keys into your .ssh
+   or using ssh-add.
 
    ```
    (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh ubuntu@52.90.44.83
