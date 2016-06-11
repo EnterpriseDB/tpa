@@ -9,7 +9,8 @@ also try the [2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ans
 
 (2ndQuadrant/ansible is a curated version of the official ansible
 repository's devel branch, with some additional useful changes that have
-not yet been merged upstream.) Latest tests with upstream Ansible are
+not yet been merged upstream.) Latest tests with upstream Ansible (a specific
+commit tag which works ok is also provided below) are
 working fine, so probably 2ndQuadrant sources might not be needed.
 
 The quick version: clone Ansible sources, export
