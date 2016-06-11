@@ -1,0 +1,14 @@
+#slider-block-hidden {
+    display: none;
+}
+
+.slider-block {
+    text-align: center;
+    display: inline-block;
+    margin: 10px;
+}
+
+.slider {
+    margin: 10px;
+    height: 150px;
+}
