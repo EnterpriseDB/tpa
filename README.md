@@ -5,6 +5,50 @@
 
 Confidential property of 2ndQuadrant; not for public release.
 
+TPA defines a trusted architecture for a fully configureed PostgreSQL cluster.
+TPA also allows you to deploy that architecture in minutes using industry standard
+configuration management tools.
+
+TPA uses a library called CustomCloud to Provision and Deploy clusters.
+Installing that software is discussed here: [CustomCloud README](CustomCloud/README.md)
+
+TPA "creates a PostgreSQL cluster". TPA is designed to install complex configurations,
+including basic Streaming Replication clusters, BDR super-clusters and massively
+parallel clusters.
+If you just want a basic Streaming Replication cluster, click here
+[CustomCloud/clusters/test/tpa/README](CustomCloud/clusters/test/tpa/README.md)
+to find out how to get a cluster with 1 Master and 2 standby replicas.
+
+Clusters can be put together in complex ways, so to understand exactly what you'll get, lets look at the structure
+of a PostgreSQL cluster and introduce some new terms for the various parts. 
+
+Custom Cloud creates a new “cluster” as a ClusterGroup.
+A ClusterGroup contains at least one Cluster; a basic Cluster consists of a Cluster with 1 Master and 1 or more replica nodes.
+Actions at ClusterGroup level are therefore
+* Create ClusterGroup
+* Remove ClusterGroup
+
+(Each ClusterGroup has 1 or more Clusters)
+Clusters have these actions
+* Add Cluster (to ClusterGroup)
+* Remove Cluster (from ClusterGroup)
+* Switchover - move Master to another node, as a manual action
+* Add replica node
+* Remove replica node
+
+(Each Cluster has 1 or more Nodes. Nodes are also known as Instances)
+Each Node has these actions
+* Detach replica (“fork”)
+* Resize instance
+
+TPA June implements these actions
+* Add ClusterGroup consisting of 1 Master and 2 standby replicas.
+Link [CustomCloud/clusters/test/tpa/README](CustomCloud/clusters/test/tpa/README.md)
+* Remove ClusterGroup
+
+TPA July implements most of the remaining actions.
+
+
 Pre-amble
 =========
 2ndQuadrant acknowledges that there are a lot customers/users out there who

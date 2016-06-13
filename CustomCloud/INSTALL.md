@@ -9,7 +9,8 @@ also try the [2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ans
 
 (2ndQuadrant/ansible is a curated version of the official ansible
 repository's devel branch, with some additional useful changes that have
-not yet been merged upstream.) Latest tests with upstream Ansible are
+not yet been merged upstream.) Latest tests with upstream Ansible (a specific
+commit tag which works ok is also provided below) are
 working fine, so probably 2ndQuadrant sources might not be needed.
 
 The quick version: clone Ansible sources, export
@@ -82,8 +83,15 @@ has been installed correctly:
 have more details about running from a source checkout. But the above steps should
 be enough really to get you going with Ansible.
 
-If you have trouble getting Ansible working, write to Abhijit, Richard,
-Haroon, Nikhils or Ian for help.
+If you have trouble getting Ansible working, you might want to checkout a specific
+version of Upstream Ansible which is KNOWN to work ok. 
+```
+    cd /path/to/upstream_ansible_dir
+    git checkout c06884eff03ad133b83a27c2839055a65f669d36
+```
+
+If problems with Ansible persist, write to Abhijit, Richard, Haroon, Nikhils or Ian
+for help.
 
 Other software
 --------------

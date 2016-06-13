@@ -1,10 +1,11 @@
 ---
 
+# TODO: handle this shared_preload_libraries stuff better some day later..
 - name: Update postgresql.conf on Primary
   lineinfile:
      dest="{{ pgconf }}/postgresql.conf"
-     insertbefore=EOF
-     line="shared_preload_libraries = 'repmgr_funcs'"
+     regexp=^shared_preload_libraries
+     line="shared_preload_libraries = 'pg_stat_statements, auto_explain, repmgr_funcs'"
   register: pgconfig
 
 - name: Update pg_hba.conf on Primary
