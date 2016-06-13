@@ -25,10 +25,14 @@ log_disconnections = on
 log_line_prefix = '%t [%d:%p] '
 log_statement = 'ddl'
 log_lock_waits = on
+log_error_verbosity = verbose
 
 hot_standby = on
 archive_mode = on
 wal_level = hot_standby
+hot_standby_feedback = on
 archive_command = '/bin/true'
 wal_keep_segments = 5000
 max_wal_senders = 3
+fsync = on
+shared_preload_libraries = 'auto_explain, pg_stat_statements'

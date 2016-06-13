@@ -7,6 +7,9 @@ packages:
     - git
     - rsync
     - python-dev
+    - sysstat
+    - linux-tools-common
+    - linux-tools-generic
   redhat:
     - tcpdump
     - vim

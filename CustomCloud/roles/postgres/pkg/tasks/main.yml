@@ -34,6 +34,22 @@
         creates: "{{pgdata}}/PG_VERSION"
   when: ansible_distribution == 'redhat'
 
+# If data checksum is required, we need to delete old directories
+# We cannot just move them, because pg_createcluster will use a
+# different port number to avoid collision with existing clusters
+- block:
+    - name: Enable Data Checksum
+      service: name="{{pgservice}}" state=stopped
+      sudo_user: root
+    - name: Remove existing cluster directory
+      file: state=absent path="{{pgdata}}"
+    - name: Remove existing config directory
+      file: state=absent path="{{pgconf}}"
+    - name: invoke pg_createcluster with -k to enable data checksums
+      command: pg_createcluster -p 5432 --start {{pgversion}} main -- -k
+      sudo_user: root
+  when: enable_data_checksum == 'yes'
+
 - name: Install Postgres configuration files
   template:
     src="{{ item }}.j2" dest="{{ pgconf }}/{{ item }}"
