@@ -7,7 +7,7 @@
   sudo: true
   vars:
     pgversion: 9.5
-    enable_data_checksum: yes
+    enable_data_checksum: 'yes'
 
     luks_volume: postgres
     luks_device: /dev/xvdb
