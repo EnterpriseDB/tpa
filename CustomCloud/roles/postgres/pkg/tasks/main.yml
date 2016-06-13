@@ -45,8 +45,8 @@
       file: state=absent path="{{pgdata}}"
     - name: Remove existing config directory
       file: state=absent path="{{pgconf}}"
-    - name: invoke pg_createcluster with -k to enable data checksums
-      command: pg_createcluster -p 5432 --start {{pgversion}} main -- -k
+    - name: invoke pg_createcluster with --data-checksums
+      command: pg_createcluster -p 5432 --start {{pgversion}} main -- --data-checksums
       sudo_user: root
   when: enable_data_checksum == 'yes'
 
