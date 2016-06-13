@@ -21,17 +21,25 @@ class FormWithDescription (forms.Form):
 class ProvisionFormPage1(forms.Form):
     #desc = forms.CharField(initial='Cluster Basics', widget = forms.HiddenInput, label ='')
     
-    ENGINE1="postgresql_9_5"
-    ENGINE2="postgresql_9_4"
-    ENGINE3="postgresql_9_3"
-    ENGINE4="postgresxl_9_2"
-    ENGINE5="postgresxc_9_3"
+    ENGINE1="postgresql_9_4"
+    ENGINE2="postgresql_9_5"
+    ENGINE3="postgresql_9_6"
+    ENGINE4="2q_postgresql_9_4"
+    ENGINE5="2q_postgresql_9_5"
+    ENGINE6="2q_postgresql_9_6"
+    ENGINE7="postgresxl_9_5"
+    ENGINE8="2q_postgresxl_9_5"
+    ENGINE9="2q_bdr_9_4"
     ENGINE_CHOICES = (
-                      (ENGINE1, "PostgreSQL 9.5"),
-                      (ENGINE2, "PostgreSQL 9.4"),
-                      (ENGINE3, "PostgreSQL 9.3"),
-                      (ENGINE4, "Postgres-XL 9.2"),
-                      (ENGINE5, "Postgres-XC 9.3"),
+                      (ENGINE1, "PostgreSQL 9.4"),
+                      (ENGINE2, "PostgreSQL 9.5"),
+                      (ENGINE3, "PostgreSQL 9.6"),
+                      (ENGINE4, "2ndQuadrant PostgreSQL 9.4"),
+                      (ENGINE5, "2ndQuadrant PostgreSQL 9.5"),
+                      (ENGINE6, "2ndQuadrant PostgreSQL 9.6"),
+                      (ENGINE7, "Postgres-XL 9.5"),
+                      (ENGINE8, "2ndQuadrant Postgres-XL 9.5"),
+                      (ENGINE9, "2ndQuadrant BDR 9.5")
     )
 
     ClusterType = forms.ChoiceField(choices=ENGINE_CHOICES, label='Cluster Type', initial= data1['ClusterType'], widget=forms.Select(attrs={'class':'form-control'}))
@@ -39,6 +47,11 @@ class ProvisionFormPage1(forms.Form):
     
     ClusterTags = forms.CharField(max_length=256, initial = json.dumps(data1['ClusterTags']), label='Cluster Tags',  widget= forms.Textarea(attrs={'rows':6,'cols':20, 'class':'form-control'}))
     InstanceCount = forms.IntegerField(max_value=999, initial = data1['InstanceCount'],label = "Number of Instances (>1 for HA)", widget=forms.NumberInput(attrs={'class':'form-control'}) )
+
+    def clean(self):
+        if 'ClusterTags' in self.cleaned_data.keys():
+                self.cleaned_data['ClusterTags'] = json.loads(self.cleaned_data['ClusterTags'])
+        return self.cleaned_data
     
 
 class InstanceForm(forms.Form):
@@ -71,6 +84,7 @@ class InstanceForm(forms.Form):
         else:
             return True
 
+
     ''' The ongoing radiobutton implementation of Primary, which did not work as expected
     RADIO_CHOICES = ((0, False),
                     (1, True))
@@ -100,6 +114,9 @@ class CustomFormSet(BaseFormSet):
     def clean(self):
         count = 0
         for form in self.forms:
+            if 'Tags' in form.cleaned_data.keys():
+                form.cleaned_data['Tags'] = json.loads(form.cleaned_data['Tags'])
+
             if 'Primary' in form.cleaned_data.keys():
                 if form.cleaned_data['Primary'] == True:
                     count += 1
