@@ -1,6 +1,20 @@
 ---
 
 - block:
+    - name: Add 2ndQuadrant Postgres repository signing key
+      apt_key:
+        id=70549BC8 url=http://packages.2ndquadrant.com/2ndQPostgres/apt/70549BC8.asc
+        state=present
+    - name: Add the 2ndQuadrant Postgres apt repository
+      apt_repository:
+        repo='deb [arch=amd64] http://packages.2ndquadrant.com/2ndQPostgres/apt/ {{ ansible_distribution_release }}-2ndquadrant-testing {{ pgversion }}'
+        state=present update_cache=yes
+    - name: Copy apt "preferences" file
+      sudo: true
+      copy: src="preferences" dest=/etc/apt/preferences
+  when: (ansible_distribution == 'debian' and use_2ndquadrant_postgres == 'yes')
+
+- block:
     - name: Add PGDG repository signing key
       apt_key:
         id=ACCC4CF8 url=https://www.postgresql.org/media/keys/ACCC4CF8.asc

@@ -38,6 +38,13 @@
 # We cannot just move them, because pg_createcluster will use a
 # different port number to avoid collision with existing clusters
 - block:
+    - name: Check if Data Checksum is already enabled
+      shell: psql -t -c "show data_checksums"
+      register: dc_result
+      sudo_user: postgres
+  when: enable_data_checksum == 'yes'
+
+- block:
     - name: Enable Data Checksum
       service: name="{{pgservice}}" state=stopped
       sudo_user: root
@@ -48,7 +55,7 @@
     - name: invoke pg_createcluster with --data-checksums
       command: pg_createcluster -p 5432 --start {{pgversion}} main -- --data-checksums
       sudo_user: root
-  when: enable_data_checksum == 'yes'
+  when: (enable_data_checksum == 'yes' and 'off' in dc_result.stdout)
 
 - name: Install Postgres configuration files
   template:
