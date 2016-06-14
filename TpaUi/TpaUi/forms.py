@@ -5,12 +5,18 @@ from django.forms.formsets import formset_factory, BaseFormSet
 from models import MaintenanceHours
 from customwidgets import MaintenanceHoursWidget
 from django.core.exceptions import ValidationError
+from _functools import partial
+from functools import wraps, partial
 
-jsonIn = open(settings.BASE_DIR + '/json/in.json','r')
-data1 =  json.load(jsonIn)
-jsonIn.close()
+def parse_json():
+    jsonIn = open(settings.BASE_DIR + '/json/in.json','r')
+    data =  json.load(jsonIn)
+    jsonIn.close()
+    for instance in data['instances']:
+        instance['tags'] = json.dumps(instance['tags'])
+    return data
 
-properties = data1['Properties']
+data1 = parse_json()
 
 class FormWithDescription (forms.Form):
     def __init__ (self, title, desc):
@@ -42,36 +48,35 @@ class ProvisionFormPage1(forms.Form):
                       (ENGINE9, "2ndQuadrant BDR 9.5")
     )
 
-    ClusterType = forms.ChoiceField(choices=ENGINE_CHOICES, label='Cluster Type', initial= data1['ClusterType'], widget=forms.Select(attrs={'class':'form-control'}))
-    ClusterName = forms.CharField(max_length=16, initial = data1['ClusterName'], label='Cluster Name', widget=forms.TextInput(attrs={'class':'form-control'}))
+    cluster_type = forms.ChoiceField(choices=ENGINE_CHOICES, label='Cluster Type', initial= data1['cluster_type'], widget=forms.Select(attrs={'class':'form-control'}))
+    cluster_name = forms.CharField(max_length=16, initial = data1['cluster_name'], label='Cluster Name', widget=forms.TextInput(attrs={'class':'form-control'}))
     
-    ClusterTags = forms.CharField(max_length=256, initial = json.dumps(data1['ClusterTags']), label='Cluster Tags',  widget= forms.Textarea(attrs={'rows':6,'cols':20, 'class':'form-control'}))
-    InstanceCount = forms.IntegerField(max_value=999, initial = data1['InstanceCount'],label = "Number of Instances (>1 for HA)", widget=forms.NumberInput(attrs={'class':'form-control'}) )
+    cluster_tags = forms.CharField(max_length=256, initial = json.dumps(data1['cluster_tags']), label='Cluster Tags',  widget= forms.Textarea(attrs={'rows':6,'cols':20, 'class':'form-control'}))
+    instance_count = forms.IntegerField(max_value=999, initial = data1['instance_count'],label = "Number of Instances (>1 for HA)", widget=forms.NumberInput(attrs={'class':'form-control'}) )
 
     def clean(self):
-        if 'ClusterTags' in self.cleaned_data.keys():
-                self.cleaned_data['ClusterTags'] = json.loads(self.cleaned_data['ClusterTags'])
+        if 'cluster_tags' in self.cleaned_data.keys():
+                self.cleaned_data['cluster_tags'] = json.loads(self.cleaned_data['cluster_tags'])
         return self.cleaned_data
     
 
 class InstanceForm(forms.Form):
-    data = properties['Instances'][0]
     TYPE_CHOICES = (("t1_micro","t1.micro"),
                     ("m1_small","m1.small")
                     )# | db.m1.medium | db.m1.large | db.m1.xlarge | db.m2.xlarge |db.m2.2xlarge | db.m2.4xlarge | db.m3.medium | db.m3.large | db.m3.xlarge | db.m3.2xlarge | db.m4.large | db.m4.xlarge | db.m4.2xlarge | db.m4.4xlarge | db.m4.10xlarge | db.r3.large | db.r3.xlarge | db.r3.2xlarge | db.r3.4xlarge | db.r3.8xlarge | db.t2.micro | db.t2.small | db.t2.medium | db.t2.large)
     
-    Name = forms.CharField(max_length = 16, label = "Name", widget=forms.TextInput(attrs={'class':'form-control'}))
-    Type = forms.ChoiceField(choices = TYPE_CHOICES, label = "Instance Type", widget=forms.Select(attrs={'class':'form-control'}))
+    name = forms.CharField(max_length = 16, label = "Instance Name", widget=forms.TextInput(attrs={'class':'form-control'}))
+    type = forms.ChoiceField(choices = TYPE_CHOICES, label = "Instance Type", widget=forms.Select(attrs={'class':'form-control'}))
     REGION_CHOICES = (("us_east_1","us-east-1"),
                       ("us_west_1","us-west-1"),
                       ("us_west_2","us-west-2"))
     
-    Region = forms.ChoiceField(choices = REGION_CHOICES, label = "Availability Zone", widget=forms.Select(attrs={'class':'form-control'}))
+    region = forms.ChoiceField(choices = REGION_CHOICES, label = "Availability Zone", widget=forms.Select(attrs={'class':'form-control'}))
 
-    Subnet = forms.CharField(max_length = 16, label ="Subnet",widget=forms.TextInput(attrs={'class':'form-control'}) )
-    Tags= forms.CharField(max_length = 256, label ="Instance Tags (Use JSON KVP)",widget=forms.TextInput(attrs={'class':'form-control'}))
+    subnet = forms.CharField(max_length = 16, label ="Subnet",widget=forms.TextInput(attrs={'class':'form-control'}) )
+    tags= forms.CharField(max_length = 256, label ="Instance Tags (Use JSON KVP)",widget=forms.TextInput(attrs={'class':'form-control'}))
     
-    Primary = forms.BooleanField(label = "Make this instance primary" , required = False, widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
+    primary = forms.BooleanField(label = "Make this instance primary" , required = False, widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
 
     def has_changed(self):
         changed_data = super(forms.Form, self).has_changed()
@@ -114,11 +119,11 @@ class CustomFormSet(BaseFormSet):
     def clean(self):
         count = 0
         for form in self.forms:
-            if 'Tags' in form.cleaned_data.keys():
-                form.cleaned_data['Tags'] = json.loads(form.cleaned_data['Tags'])
+            if 'tags' in form.cleaned_data.keys():
+                form.cleaned_data['tags'] = json.loads(form.cleaned_data['tags'])
 
-            if 'Primary' in form.cleaned_data.keys():
-                if form.cleaned_data['Primary'] == True:
+            if 'primary' in form.cleaned_data.keys():
+                if form.cleaned_data['primary'] == True:
                     count += 1
                     if count > 1:
                         raise ValidationError("Please mark only one instance as primary.")
@@ -149,31 +154,29 @@ class CustomFormSet(BaseFormSet):
             defaults['empty_permitted'] = True
         defaults.update(kwargs)
         form = self.form(**defaults)
-        initial_value = properties['Instances'][i]
-        initial_value['Tags'] = json.dumps(initial_value['Tags'])
+        initial_value = data1['instances'][i]
         form.initial = initial_value
         self.add_fields(form, i)
         return form
 
-
-instances = properties['Instances']
+instances = data1['instances']
 InstancesFormSet = formset_factory(InstanceForm, CustomFormSet, extra = len(instances))
 
 class ProvisionFormPage3(forms.Form):
     HOURS = ((1,"01:00"),(2,"02:00"),(3,"03:00"),(4,"04:00"))
-    data = properties['Maintenance']
-    AutoMinorVersionUpgrade = forms.BooleanField(initial=json.dumps(data['AutoMinorVersionUpgrade']), label='Auto Minor Version Upgrade', widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
-    BackupRetentionPeriod = forms.CharField(max_length=8, initial=data['BackupRetentionPeriod'], label='Backup Retention Period', widget=forms.TextInput(attrs={'class':'form-control'}))
-    BackupFrequency = forms.CharField(max_length=8, initial=data['BackupFrequency'], label='Backup Frequency', widget=forms.TextInput(attrs={'class':'form-control'}))
-    PreferredBackupWindow = forms.MultipleChoiceField(choices= HOURS, initial=data['PreferredBackupWindow'], label='Preferred Backup Window', widget=forms.SelectMultiple(attrs={'class':'form-control'}))
-    PreferredMaintenanceWindow = forms.MultipleChoiceField(choices= HOURS, initial=data['PreferredMaintenanceWindow'], label='Preferred Maintenance Window', widget=forms.SelectMultiple(attrs={'class':'form-control'}))
+    data = data1['maintenance']
+    auto_minor_version_upgrade = forms.BooleanField(initial=json.dumps(data['auto_minor_version_upgrade']), label='Auto Minor Version Upgrade', widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
+    backup_retention_period = forms.CharField(max_length=8, initial=data['backup_retention_period'], label='Backup Retention Period', widget=forms.TextInput(attrs={'class':'form-control'}))
+    backup_frequency = forms.CharField(max_length=8, initial=data['backup_frequency'], label='Backup Frequency', widget=forms.TextInput(attrs={'class':'form-control'}))
+    preferred_backup_window = forms.MultipleChoiceField(choices= HOURS, initial=data['preferred_backup_window'], label='Preferred Backup Window', widget=forms.SelectMultiple(attrs={'class':'form-control'}))
+    preferred_maintenance_window = forms.MultipleChoiceField(choices= HOURS, initial=data['preferred_maintenance_window'], label='Preferred Maintenance Window', widget=forms.SelectMultiple(attrs={'class':'form-control'}))
 
     def clean(self):
-        backupWindow = self.cleaned_data['PreferredBackupWindow']
+        backupWindow = self.cleaned_data['preferred_backup_window']
         if(len(backupWindow) != 2):
             raise ValidationError("Please select two items as start time and end time from backup window listbox.")
 
-        maintainenceWindow = self.cleaned_data['PreferredMaintenanceWindow']
+        maintainenceWindow = self.cleaned_data['preferred_maintenance_window']
         if(len(maintainenceWindow) != 2):
             raise ValidationError("Please select two items as start time and end time from maintenance window listbox.")
         return self.cleaned_data
@@ -219,9 +222,9 @@ class ProvisionFormPage3(forms.Form):
              '''   
 
 class ProvisionFormPage4(forms.Form):
-    data = properties['IAM']
-    AwsKeyId = forms.CharField(max_length=16, initial=data['AwsKeyId'], label='AwsKeyId', widget=forms.TextInput(attrs={'class':'form-control'}))
-    AwsSecret = forms.CharField(max_length=32, initial=data['AwsSecret'], label='AwsSecret', widget=forms.PasswordInput(attrs={'class':'form-control'})  )
+    data = data1['iam']
+    aws_key_id = forms.CharField(max_length=16, initial=data['aws_key_id'], label='AWS Key ID', widget=forms.TextInput(attrs={'class':'form-control'}))
+    aws_secret = forms.CharField(max_length=32, initial=data['aws_secret'], label='AWS Secret', widget=forms.PasswordInput(attrs={'class':'form-control'})  )
     
 class ProvisionFormPage5(forms.ModelForm):
     class Meta:

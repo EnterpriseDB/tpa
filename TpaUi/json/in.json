@@ -1,44 +1,49 @@
 {
-  "ClusterType": "postgresql_9_5",
-  "ClusterName":"MyPG",
-  "ClusterTags" : {
-    "Name":"MyPG"
-    },
-  "InstanceCount":2 ,
-  "CustomerId":"XXXXXXXX",
-  "ResourceId":"dfdfnddjds",
-  "Timestamp":"YYYY-MM-DD HH:MM:SS.ms +Z",
-  "Properties": {
-    "Instances": [{
-        "Name":"Instance11",
-        "Type":"t1_micro",
-        "Region":"us_west_1",
-        "Subnet":"xxxx",
-        "Primary":true,
-        "Tags": {
-            "tag1":"value1"
-      }
-    },
-    {
-        "Name":"Instance12",
-        "Type":"t1_micro",
-        "Region":"us_east_1",
-        "Subnet":"xxxx",
-        "Primary":false,
-        "Tags": {
-            "tag1":"value1"
-      }
-    }],
-    "Maintenance": {
-      "AutoMinorVersionUpgrade": true,
-      "BackupRetentionPeriod": "7D",
-      "BackupFrequency": "7D",
-      "PreferredBackupWindow": "0200-0300",
-      "PreferredMaintenanceWindow": "0300-0400"
-    },
-    "IAM": {
-      "AwsKeyId": "AZADEDSSDEEDD",
-      "AwsSecret": "**"
-    }
-  }
+    "iam": {
+        "aws_secret": "12", 
+        "aws_key_id": "AZADEDSSDEEDD"
+    }, 
+    "cluster_tags": {
+                "Name": "MyPG"
+                }, 
+    "resource_id": "a7d9fde7-0ec9-4fbb-bd68-87645939b2d1", 
+    "cluster_type": "postgresql_9_5", 
+    "instance_count": 2, 
+    "cluster_name": "MyPG", 
+    "instances": [
+        {
+            "subnet": "xxxx", 
+            "name": "Instance11", 
+            "tags": {
+                "tag1": "value1"
+            }, 
+            "region": "us_west_1", 
+            "primary": true, 
+            "type": "t1_micro"
+        }, 
+        {
+            "subnet": "xxxx", 
+            "name": "Instance12", 
+            "tags": {
+                "tag1": "value1"
+            }, 
+            "region": "us_east_1", 
+            "primary": false, 
+            "type": "t1_micro"
+        }
+    ], 
+    "maintenance": {
+        "backup_retention_period": "7D", 
+        "auto_minor_version_upgrade": true, 
+        "preferred_backup_window": [
+            "2", 
+            "3"
+        ], 
+        "preferred_maintenance_window": [
+            "3", 
+            "4"
+        ], 
+        "backup_frequency": "7D"
+    }, 
+    "customer_id": "HBEW"
 }

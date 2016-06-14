@@ -4,7 +4,7 @@ from formtools.wizard.views import SessionWizardView
 from django.conf import settings
 from random import choice
 from string import ascii_uppercase
-import logging, json, uuid
+import logging, json, uuid, yaml
 from TpaUi import forms
 
 logr = logging.getLogger(__name__)
@@ -45,25 +45,31 @@ class ProvisioningWizard(SessionWizardView):
             
             #print data
             if data is not None:
-                extra = int(data['InstanceCount'])
+                extra = int(data['instance_count'])
                 form_class.extra = extra
             
         return SessionWizardView.get_form_initial(self, step)
     
     def done(self, form_list, **kwargs):
         form_data = process_form_data(form_list)
-        temp = {"Instances": form_data[1], "Maintenance":form_data[2], "IAM":form_data[3]}
-        temp2 = form_data[0]
-        temp2['Properties'] = temp
+        data = form_data[0]
         resourceId = uuid.uuid4().urn[9:]
-        temp2['ResourceId'] = resourceId
+        data['resource_id'] = resourceId
         customerId=''.join(choice(ascii_uppercase) for i in range(4))
-        temp2['CustomerId'] = customerId
-        out_json = json.dumps(temp2, indent=4, sort_keys=False)
+        data['customer_id'] = customerId
+        data['instances'] = form_data[1]
+        data['maintenance'] = form_data[2]
+        data['iam']= form_data[3]
+        out_json = json.dumps(data, indent=4, sort_keys=False)
+        out_yaml = yaml.safe_dump(data, default_flow_style=False)
+        print out_yaml
         #handler = open(settings.BASE_DIR + '/json/out_'+customerId+'_'+resourceId+'.json','r+')
         handler = open(settings.BASE_DIR + '/json/out.json','r+')
         handler.write(out_json)
-        handler.close();
+        handler.close()
+        handler = open(settings.BASE_DIR + '/json/out.yml','r+')
+        handler.write(out_yaml)
+        handler.close()
         return render_to_response('success.html', {'form_data':form_data})
 
 def process_form_data(form_list):

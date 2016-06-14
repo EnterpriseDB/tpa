@@ -1,45 +1,49 @@
 {
-    "InstanceCount": 2, 
-    "ClusterName": "MyPG", 
-    "ResourceId": "acd0c62c-41d3-4da0-b2cd-840a6939dacf", 
-    "ClusterType": "postgresql_9_5", 
-    "CustomerId": "OCCS", 
-    "ClusterTags": "{\"Name\": \"MyPG\"}", 
-    "Properties": {
-        "IAM": {
-            "AwsSecret": "2wwsdc", 
-            "AwsKeyId": "AZADEDSSDEEDD"
-        }, 
-        "Instances": [
-            {
-                "Subnet": "xxxx", 
-                "Name": "Instance11", 
-                "Tags": "{\"tag1\": \"value1\"}", 
-                "Region": "us_west_1", 
-                "Primary": true, 
-                "Type": "t1_micro"
+    "iam": {
+        "aws_secret": "121", 
+        "aws_key_id": "AZADEDSSDEEDD"
+    }, 
+    "cluster_tags": {
+        "Name": "MyPG"
+    }, 
+    "resource_id": "10f25110-9c94-4869-aa9d-3297c02165e8", 
+    "cluster_type": "postgresql_9_5", 
+    "instance_count": 2, 
+    "cluster_name": "MyPG", 
+    "instances": [
+        {
+            "subnet": "xxxx", 
+            "name": "Instance11", 
+            "tags": {
+                "tag1": "value1"
             }, 
-            {
-                "Subnet": "xxxx", 
-                "Name": "Instance12", 
-                "Tags": "{\"tag1\": \"value1\"}", 
-                "Region": "us_west_1", 
-                "Primary": false, 
-                "Type": "t1_micro"
-            }
-        ], 
-        "Maintenance": {
-            "PreferredBackupWindow": [
-                "2", 
-                "3"
-            ], 
-            "BackupRetentionPeriod": "7D", 
-            "BackupFrequency": "7D", 
-            "PreferredMaintenanceWindow": [
-                "3", 
-                "4"
-            ], 
-            "AutoMinorVersionUpgrade": true
+            "region": "us_west_1", 
+            "primary": true, 
+            "type": "t1_micro"
+        }, 
+        {
+            "subnet": "xxxx", 
+            "name": "Instance12", 
+            "tags": {
+                "tag1": "value1"
+            }, 
+            "region": "us_east_1", 
+            "primary": false, 
+            "type": "t1_micro"
         }
-    }
+    ], 
+    "maintenance": {
+        "backup_retention_period": "7D", 
+        "auto_minor_version_upgrade": true, 
+        "preferred_backup_window": [
+            "2", 
+            "3"
+        ], 
+        "preferred_maintenance_window": [
+            "3", 
+            "4"
+        ], 
+        "backup_frequency": "7D"
+    }, 
+    "customer_id": "STUM"
 }
