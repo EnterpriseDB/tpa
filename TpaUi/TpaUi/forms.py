@@ -60,18 +60,18 @@ class InstanceForm(forms.Form):
                     ("m1_small","m1.small")
                     )# | db.m1.medium | db.m1.large | db.m1.xlarge | db.m2.xlarge |db.m2.2xlarge | db.m2.4xlarge | db.m3.medium | db.m3.large | db.m3.xlarge | db.m3.2xlarge | db.m4.large | db.m4.xlarge | db.m4.2xlarge | db.m4.4xlarge | db.m4.10xlarge | db.r3.large | db.r3.xlarge | db.r3.2xlarge | db.r3.4xlarge | db.r3.8xlarge | db.t2.micro | db.t2.small | db.t2.medium | db.t2.large)
     
-    Name = forms.CharField(max_length = 16, label = "Name", initial= data['Name'],widget=forms.TextInput(attrs={'class':'form-control'}))
-    Type = forms.ChoiceField(choices = TYPE_CHOICES, label = "Instance Type", initial= data['Type'], widget=forms.Select(attrs={'class':'form-control'}))
+    Name = forms.CharField(max_length = 16, label = "Name", widget=forms.TextInput(attrs={'class':'form-control'}))
+    Type = forms.ChoiceField(choices = TYPE_CHOICES, label = "Instance Type", widget=forms.Select(attrs={'class':'form-control'}))
     REGION_CHOICES = (("us_east_1","us-east-1"),
                       ("us_west_1","us-west-1"),
                       ("us_west_2","us-west-2"))
     
-    Region = forms.ChoiceField(choices = REGION_CHOICES, label = "Availability Zone", initial= data['Region'], widget=forms.Select(attrs={'class':'form-control'}))
+    Region = forms.ChoiceField(choices = REGION_CHOICES, label = "Availability Zone", widget=forms.Select(attrs={'class':'form-control'}))
 
-    Subnet = forms.CharField(max_length = 16, label ="Subnet", initial= data['Subnet'],widget=forms.TextInput(attrs={'class':'form-control'}) )
-    Tags= forms.CharField(max_length = 256, label ="Instance Tags (Use JSON KVP)", initial= json.dumps(data['Tags']),widget=forms.TextInput(attrs={'class':'form-control'}))
+    Subnet = forms.CharField(max_length = 16, label ="Subnet",widget=forms.TextInput(attrs={'class':'form-control'}) )
+    Tags= forms.CharField(max_length = 256, label ="Instance Tags (Use JSON KVP)",widget=forms.TextInput(attrs={'class':'form-control'}))
     
-    Primary = forms.BooleanField(label = "Make this instance primary" , initial = data['Primary'], required = False, widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
+    Primary = forms.BooleanField(label = "Make this instance primary" , required = False, widget=forms.CheckboxInput(attrs={'class':'checkbox'}))
 
     def has_changed(self):
         changed_data = super(forms.Form, self).has_changed()
@@ -126,7 +126,35 @@ class CustomFormSet(BaseFormSet):
         if count < 1:
             raise ValidationError("Please choose a primary instance.")
 
-        #return self.cleaned_data
+    def _construct_form(self, i, **kwargs):
+        """
+        Instantiates and returns the i-th form instance in a formset.
+        """
+        defaults = {
+            'auto_id': self.auto_id,
+            'prefix': self.add_prefix(i),
+            'error_class': self.error_class,
+        }
+        if self.is_bound:
+            defaults['data'] = self.data
+            defaults['files'] = self.files
+        if self.initial and 'initial' not in kwargs:
+            try:
+                defaults['initial'] = self.initial[i]
+            except IndexError:
+                pass
+        # Allow extra forms to be empty, unless they're part of
+        # the minimum forms.
+        if i >= self.initial_form_count() and i >= self.min_num:
+            defaults['empty_permitted'] = True
+        defaults.update(kwargs)
+        form = self.form(**defaults)
+        initial_value = properties['Instances'][i]
+        initial_value['Tags'] = json.dumps(initial_value['Tags'])
+        form.initial = initial_value
+        self.add_fields(form, i)
+        return form
+
 
 instances = properties['Instances']
 InstancesFormSet = formset_factory(InstanceForm, CustomFormSet, extra = len(instances))
