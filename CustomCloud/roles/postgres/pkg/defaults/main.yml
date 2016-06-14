@@ -5,3 +5,5 @@ pgversion: 9.4
 pgdata: "/var/lib/postgresql/{{ pgversion }}/main"
 
 enable_data_checksum: "no"
+
+use_2ndquadrant_postgres: "no"
