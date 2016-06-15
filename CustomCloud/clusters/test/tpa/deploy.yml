@@ -10,9 +10,8 @@
     enable_data_checksum: 'yes'
     use_2ndquadrant_postgres: 'yes'
 
-    luks_volume: postgres
-    luks_device: /dev/xvdb
-    luks_mountpoint: /var/lib/postgresql
+    pg_device: /dev/xvdb
+    pg_mountpoint: /var/lib/postgresql
 
     vpn_name: "{{ cluster_name|lower }}"
     vpn_network: 192.168.61.0

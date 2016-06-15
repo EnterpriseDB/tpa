@@ -5,6 +5,7 @@
     that:
       - pgversion is defined
 
+- include: fs.yml
 - include: packages.yml
 - include_vars: "{{ansible_distribution}}.yml"
 

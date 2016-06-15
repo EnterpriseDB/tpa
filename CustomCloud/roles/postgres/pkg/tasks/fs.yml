@@ -1,0 +1,18 @@
+---
+
+# Create a filesystem and mount it under pg_mountpoint
+
+- block:
+
+    - name: Create ext4 filesystem on PG volume {{ pg_device }}
+      command: mkfs.ext4 "{{ pg_device }}"
+
+    - name: Mount filesystem under {{ pg_mountpoint }}
+      mount:
+        name: "{{ pg_mountpoint }}"
+        src: "{{ pg_device }}"
+        fstype: ext4
+        opts: noauto
+        state: mounted
+
+  when: pg_mountpoint is defined

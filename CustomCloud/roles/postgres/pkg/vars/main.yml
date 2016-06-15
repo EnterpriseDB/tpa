@@ -5,6 +5,7 @@ pgversionNN: "{{pgversion|replace('.','')}}"
 postgres_packages:
   debian:
     - postgresql-{{pgversion}}
+    - postgresql-{{pgversion}}-dbg
     - postgresql-client-{{pgversion}}
     - postgresql-contrib-{{pgversion}}
     - postgresql-server-dev-{{pgversion}}
