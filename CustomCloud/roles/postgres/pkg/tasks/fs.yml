@@ -1,6 +1,12 @@
 ---
 
 # Create a filesystem and mount it under pg_mountpoint
+# blkid works fine on both Ubuntu and Centos
+- block:
+  - name: Check if {{ pg_device }} needs a filesystem
+    shell: sudo blkid "{{ pg_device }}"
+    register: fstype
+  when: pg_mountpoint is defined
 
 - block:
 
@@ -15,4 +21,4 @@
         opts: noauto
         state: mounted
 
-  when: pg_mountpoint is defined
+  when: (pg_mountpoint is defined and 'ext4' not in fstype.stdout)
