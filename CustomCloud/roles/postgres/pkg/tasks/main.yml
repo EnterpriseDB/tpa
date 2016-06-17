@@ -43,6 +43,7 @@
       shell: psql -t -c "show data_checksums"
       register: dc_result
       sudo_user: postgres
+      ignore_errors: true
   when: enable_data_checksum == 'yes'
 
 - block:

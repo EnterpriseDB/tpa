@@ -6,6 +6,7 @@
   - name: Check if {{ pg_device }} needs a filesystem
     shell: sudo blkid "{{ pg_device }}"
     register: fstype
+    ignore_errors: true
   when: pg_mountpoint is defined
 
 - block:

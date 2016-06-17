@@ -51,25 +51,18 @@
     - role: common
       tags: common
 
-    # We want our Postgres data directory on an encrypted volume. At
-    # this point, /var/lib/postgresql won't exist because the packages
-    # aren't installed. We create it and mount an encrypted filesystem
-    # on it, but leave it to the packages to set ownership/permissions.
-    # NOTE: luks is disabled for now..
-
-#    - role: luks
-#      tags: luks
+    # setup complete. Update, Upgrade and restart the instances
+    - role: sys/instance
+      tags: instance
 
     # Install the Postgres packages and basic configuration files.
-
     - role: postgres/pkg
       tags: postgres
-
-    # Set up streaming replication.
 
     - role: repmgr/common
       tags: replication
 
+    # Set up streaming replication.
     - role: repmgr/primary
       when: inventory_hostname == primary_hostname
       tags: replication
