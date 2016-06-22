@@ -31,6 +31,7 @@ instances:
       region: us-east-1
       subnet: 10.67.0.0/25
       ip: 10.67.0.1
+      assign_eip: false
       volumes:
           - device_name: /dev/xvdb
             volume_type: gp2

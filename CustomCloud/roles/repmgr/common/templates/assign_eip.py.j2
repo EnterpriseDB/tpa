@@ -1,0 +1,66 @@
+import boto.ec2
+
+import sys
+import time
+
+from boto.ec2.connection import EC2Connection
+
+MAIN_IP = '{{hostvars[primary_hostname]['vpn_address']}}'
+NEW_MASTER_ID = '{{hostvars[inventory_hostname].ec2_id}}'
+
+class EC2Conn:
+
+        def __init__(self):
+                self.conn = None
+
+        def connect(self):
+                self.conn = boto.ec2.connect_to_region("{{hostvars[primary_hostname].ec2_region}}")
+
+        def associate_eip(self, ip, allocation_id, instance_id):
+                return self.conn.associate_address(instance_id=instance_id,
+				public_ip=ip, allocation_id=allocation_id,
+				dry_run=False)
+
+        def dissociate_eip(self, ip, association_id):
+                return self.conn.disassociate_address(public_ip=ip,
+				association_id=association_id, dry_run=False)
+
+        def get_all_addrs(self):
+                return self.conn.get_all_addresses()
+
+if __name__ == "__main__":
+	association_id = None
+	allocation_id = None
+
+        a = EC2Conn()
+        a.connect()
+
+	# Get all EIP addresses, there should really be only one
+        addrs = a.get_all_addrs()
+
+        for addr in addrs:
+		if addr.public_ip == MAIN_IP:
+			association_id = addr.association_id
+			allocation_id = addr.allocation_id
+
+	if association_id is None or allocation_id is None:
+		print "Cannot find details for " + MAIN_IP
+		sys.exit(1)
+
+        # Dissociate the elastic IP from the current instance
+	success = a.dissociate_eip(MAIN_IP, association_id)
+        if success:
+		print "Dissociation of "+MAIN_IP+" successful!"
+	else:
+		sys.exit(1)
+
+	# Associate with new master instance now
+	success = a.associate_eip(MAIN_IP, allocation_id, NEW_MASTER_ID)
+        if success:
+		print "Association of "+MAIN_IP+" to "+NEW_MASTER_ID+" successful!"
+                print "Sleeping for 30 seconds to let IP attach"
+                time.sleep(30)
+	else:
+		sys.exit(1)
+
+	sys.exit(0)

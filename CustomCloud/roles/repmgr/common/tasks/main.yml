@@ -9,6 +9,9 @@
 - name: Install repmgr.conf
   template: src=repmgr.conf.j2 dest=/etc/repmgr/repmgr.conf
 
+- name: Install assign_eip.py
+  template: src=assign_eip.py.j2 dest=/etc/repmgr/assign_eip.py
+
 - name: Install repmgr failover scripts
   copy: src="{{ item }}" dest=/etc/repmgr/
     owner=postgres group=postgres mode=0755

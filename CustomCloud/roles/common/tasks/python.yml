@@ -12,6 +12,10 @@
   changed_when: "'already installed and latest version' not in pip.stdout"
   when: ansible_distribution == 'redhat'
 
+# Python scripts installed in the repmgr role and others will need boto
+- name: Install boto
+  command: pip install boto
+
 # If we have neither ssl.match_hostname (included in Python ≥ 2.7.9) or
 # backports.ssl_match_hostname, we need to install the latter using pip.
 # It's easier to check the version, and since running "pip install foo"
