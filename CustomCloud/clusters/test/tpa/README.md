@@ -98,7 +98,30 @@ before doing anything else (python packages, virtualend, ansible)!
 
 4. Carry out the actual software deploy
 
-   After checking step 3, fire off the command to do the actual deployment on these instances
+   **NOTE 1** If you want to assign elastic IP to the primary, then edit clusters/test/tpa/config.yml and change the entry
+   ```
+   assign_eip: false
+   ```
+   to 
+   ```
+   assign_eip: true
+   ```
+   
+   **NOTE 2** The default config.yml/deploy.yml sets up a 1 master, 2 standby TPA cluster with automatic failover using repmgr in place. If you want to create a TPA cluster with its dedicated **barman** instance, then edit clusters/test/tpa/config.yml. You can add a new fourth instance here for the barman instance or just for testing, you can even convert the standby instance to a barman instance. If you add a fourth instance, be careful about specifying subnet and other values appropriately. For testing purposes, you can do the below
+   ```
+   tags:
+        db: standby
+        node: 3
+   ```
+   change the above to:
+   ```
+   tags:
+        db: barman
+        node: 3
+   ```
+   for the second standby listing. Or if not, feel free to add a fourth instance in the config.yml as appropriate.
+   
+   After checking step 3, and taking care of additional requirements if any from above three notes, fire off the command to do the actual deployment on these instances
    ```
    (ansible-python) nikhils@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
 
@@ -108,7 +131,8 @@ before doing anything else (python packages, virtualend, ansible)!
    If all the steps in the playbook are successfully deployed, then you will have a fully
    functional 3 instance cluster PostgreSQL 9.5 setup with automatic failover controlled by
    repmgr in place. You will now be able to access PostgreSQL on port 5432 using the
-   "postgres" user on the "primary" IP address obtained in step 1 above.
+   "postgres" user on the "primary" IP address obtained in step 1 above. 
+    
 
 5. Deprovision the resources
 
