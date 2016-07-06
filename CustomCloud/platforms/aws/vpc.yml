@@ -34,8 +34,6 @@
     }}"
   when: vpc[item] is defined
   with_items: ['Name', 'cidr']
-  loop_control:
-    loop_var: item
 
 - name: Search for VPC {{ vpc['Name'] }} in {{ region }}
   ec2_vpc_net_facts:
