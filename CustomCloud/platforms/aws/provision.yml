@@ -242,7 +242,13 @@
 
     - name: Set instance variables and elastic IP overrides
       set_fact:
-        instance_vars: "{{ instance_vars|default([])|union([ item.0.tagged_instances[0]|combine({'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip)}) ]) }}"
+        instance_vars: "{{
+          instance_vars|default([])|union([
+            item.0.tagged_instances[0]|combine({
+              'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip)
+            })
+          ])
+        }}"
       with_together:
         - ec2_jobs.results
         - ec2_eips.results
