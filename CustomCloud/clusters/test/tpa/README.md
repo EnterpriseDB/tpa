@@ -83,9 +83,9 @@ before doing anything else (python packages, virtualend, ansible)!
    It also ensures that these keys are added locally via ssh-agent using ssh-add. If the
    keys are added properly, then SSH into all the 3 instances one by one and ensure that
    SSH works seamlessly. This step is very **important** to ensure that all the three
-   instances are reachable over the network from your local machine. 
+   instances are reachable over the network from your local machine. Note that the **common** role also does a ssh-keyscan to add these instances to known_hosts of the ansible instance. So most likely, this should work ok without any intervention from your side. 
    
-   **NOTE 1** If you get issues accessing via ssh, then manually add the keys into your .ssh
+   **NOTE 1** If you still get issues accessing via ssh, then manually add the keys into your .ssh
    or using ssh-add.
 
    ```
