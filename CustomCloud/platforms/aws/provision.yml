@@ -183,6 +183,43 @@
         - "{{ regions }}"
         - "{{ sgs.results }}"
 
+    # Create a user that's specific to this cluster and is permitted to
+    # point elastic IPs to another instance.
+
+    - name: Create a utility AWS user for this cluster
+      iam:
+        iam_type: user
+        name: '{{ cluster_name }}'
+        state: present
+        access_key_state: create
+      register: utility
+
+    - name: Permit the utility user to associate-address
+      iam_policy:
+        iam_type: user
+        iam_name: '{{ cluster_name }}'
+        policy_name: "associate-address"
+        state: present
+        policy_json: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "Stmt1467856593433",
+                "Action": [
+                  "ec2:AssociateAddress"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              }
+            ]
+          }
+
+    # The newly-created user's access_key_id is available as
+    # utility.user_meta.access_keys[0].access_key_id (and likewise for
+    # the secret_access_key). These must be passed to the ec2 module's
+    # user_data in order to make them available for use on the servers.
+
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above. We loop over instances[], look up
     # the VPC and group corresponding to the region/subnet defined for
