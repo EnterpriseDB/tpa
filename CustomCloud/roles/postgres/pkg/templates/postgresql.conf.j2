@@ -12,9 +12,14 @@ ssl = true
 ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'
 ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'
 
+#------------------------------------------------------------------------------
+# RESOURCE USAGE (except WAL)
+#------------------------------------------------------------------------------
+
 shared_buffers = 512MB
 work_mem = 16MB
 maintenance_work_mem = 512MB
+autovacuum_work_mem = 256MB
 
 checkpoint_timeout = 30min
 checkpoint_completion_target = 0.9
@@ -36,3 +41,18 @@ wal_keep_segments = 5000
 max_wal_senders = 3
 fsync = on
 shared_preload_libraries = 'auto_explain, pg_stat_statements'
+
+#------------------------------------------------------------------------------
+# RUNTIME STATISTICS
+#------------------------------------------------------------------------------
+
+track_activities = on
+
+#------------------------------------------------------------------------------
+# AUTOVACUUM PARAMETERS
+#------------------------------------------------------------------------------
+
+autovacuum = on
+log_autovacuum_min_duration = 0
+autovacuum_max_workers = 3
+
