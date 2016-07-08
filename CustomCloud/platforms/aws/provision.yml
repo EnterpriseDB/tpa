@@ -183,29 +183,28 @@
         - "{{ regions }}"
         - "{{ sgs.results }}"
 
-    # Create a user that's specific to this cluster and is permitted to
-    # point elastic IPs to another instance.
+    # Create an "instance profile" (== an IAM role) for the cluster, and
+    # attach an inline policy with any permissions that the instances
+    # need (which is only associate-address now; when we need other
+    # rights, we should move the policy into a separate file).
 
-    - name: Create a utility AWS user for this cluster
+    - name: Create an instance profile for the cluster
       iam:
-        iam_type: user
-        name: '{{ cluster_name }}'
+        iam_type: role
+        iam_name: '{{ cluster_name }}_profile'
         state: present
-        access_key_state: create
-      register: utility
 
-    - name: Permit the utility user to associate-address
+    - name: Attach a policy to the instance profile
       iam_policy:
-        iam_type: user
-        iam_name: '{{ cluster_name }}'
-        policy_name: "associate-address"
+        iam_type: role
+        iam_name: '{{ cluster_name }}_profile'
+        policy_name: "{{ cluster_name }} instance permissions"
         state: present
         policy_json: |
           {
             "Version": "2012-10-17",
             "Statement": [
               {
-                "Sid": "Stmt1467856593433",
                 "Action": [
                   "ec2:AssociateAddress"
                 ],
@@ -230,14 +229,15 @@
         key_name: "{{ ec2_key_name }}"
         instance_type: "{{ item.type }}"
         instance_tags: "{{ cluster_tags|combine(item.tags) }}"
+        instance_profile_name: "{{ cluster_name }}"
         vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
         group_id: "{{ ec2_region_groups[item.region] }}"
         volumes: "{{ item.volumes|default(omit) }}"
         spot_price: "{{ item.spot_price|default(omit) }}"
         spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
         spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"
-        assign_public_ip: yes
         user_data: "{{ lookup('template', 'user-data.j2') }}"
+        assign_public_ip: yes
         wait: yes
       with_items: "{{ instances }}"
       register: ec2_instances
