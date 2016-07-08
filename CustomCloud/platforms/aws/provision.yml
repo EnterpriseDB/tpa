@@ -191,7 +191,7 @@
     - name: Create an instance profile for the cluster
       iam:
         iam_type: role
-        iam_name: '{{ cluster_name }}_profile'
+        name: '{{ cluster_name }}_profile'
         state: present
 
     - name: Attach a policy to the instance profile

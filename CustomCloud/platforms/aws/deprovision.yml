@@ -75,7 +75,7 @@
     - name: Remove instance profile for cluster
       iam:
         iam_type: role
-        iam_name: '{{ cluster_name }}_profile'
+        name: '{{ cluster_name }}_profile'
         state: absent
 
     # Before we can delete the VPCs in each region, we must delete the
