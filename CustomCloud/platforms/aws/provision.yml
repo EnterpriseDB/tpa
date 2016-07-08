@@ -229,7 +229,7 @@
         key_name: "{{ ec2_key_name }}"
         instance_type: "{{ item.type }}"
         instance_tags: "{{ cluster_tags|combine(item.tags) }}"
-        instance_profile_name: "{{ cluster_name }}"
+        instance_profile_name: "{{ cluster_name }}_profile"
         vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
         group_id: "{{ ec2_region_groups[item.region] }}"
         volumes: "{{ item.volumes|default(omit) }}"
