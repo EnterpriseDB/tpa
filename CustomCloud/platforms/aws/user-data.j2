@@ -1,0 +1,8 @@
+#!/bin/sh
+
+mkdir /root/.aws >/dev/null 2>&1
+cat > /root/.aws/credentials <<AWS
+[default]
+aws_access_key_id = {{ utility.user_meta.access_keys[0].access_key_id }}
+aws_secret_access_key = {{ utility.user_meta.access_keys[0].secret_access_key }}
+AWS

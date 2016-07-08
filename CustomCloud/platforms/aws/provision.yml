@@ -215,11 +215,6 @@
             ]
           }
 
-    # The newly-created user's access_key_id is available as
-    # utility.user_meta.access_keys[0].access_key_id (and likewise for
-    # the secret_access_key). These must be passed to the ec2 module's
-    # user_data in order to make them available for use on the servers.
-
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above. We loop over instances[], look up
     # the VPC and group corresponding to the region/subnet defined for
@@ -242,6 +237,7 @@
         spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
         spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"
         assign_public_ip: yes
+        user_data: "{{ lookup('template', 'user-data.j2') }}"
         wait: yes
       with_items: "{{ instances }}"
       register: ec2_instances
