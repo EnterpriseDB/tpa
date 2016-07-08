@@ -198,7 +198,7 @@
       iam_policy:
         iam_type: role
         iam_name: '{{ cluster_name }}_profile'
-        policy_name: "{{ cluster_name }} instance permissions"
+        policy_name: "{{ cluster_name }}_instance_permissions"
         state: present
         policy_json: |
           {
