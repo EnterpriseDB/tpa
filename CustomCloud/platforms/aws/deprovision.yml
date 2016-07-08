@@ -66,6 +66,13 @@
     # Remove the utility user we create to allow instances to update
     # elastic IPs.
 
+    - name: Remove associate-address policy for AWS utility user
+      iam_policy:
+        iam_type: user
+        iam_name: '{{ cluster_name }}'
+        policy_name: "associate-address"
+        state: absent
+
     - name: Remove utility AWS user for this cluster
       iam:
         iam_type: user
