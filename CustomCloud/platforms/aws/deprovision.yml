@@ -63,6 +63,15 @@
         - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_key_name')|unique|list
       tags: ec2_keys
 
+    # Remove the utility user we create to allow instances to update
+    # elastic IPs.
+
+    - name: Remove utility AWS user for this cluster
+      iam:
+        iam_type: user
+        name: '{{ cluster_name }}'
+        state: absent
+
     # Before we can delete the VPCs in each region, we must delete the
     # subnets in each VPC. Strangely, we have to use the vpc_id with a
     # CIDR mask to identify a subnet, so we have to iterate over vpc_id
