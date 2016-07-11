@@ -15,6 +15,7 @@
   vars:
     ec2_key_file: "{{ key_file | default('id_' + cluster_name|lower) }}"
     ec2_key_name: "{{ key_name | default('2Q_' + cluster_name|lower) }}"
+    variables: {}
 
   tasks:
 
