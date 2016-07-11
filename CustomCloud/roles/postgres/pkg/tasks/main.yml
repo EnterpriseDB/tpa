@@ -81,13 +81,33 @@
 # converted into standby instances. Hence need to check for
 # primary tag here..
 - block:
-  - name: Add pg_stat_statements to template1
-    shell: psql -d template1 -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements"
+  - name: Ensure pg_stat_statements are present in postgres
+    postgresql_ext:
+      state: present
+      name: pg_stat_statements
+      db: postgres
     sudo_user: postgres
 
-  - name: Add pg_stat_statements to postgres
-    shell: psql -d postgres -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements"
+  - name: Ensure pgstattuple are present in postgres
+    postgresql_ext:
+      state: present
+      name: pgstattuple
+      db: postgres
     sudo_user: postgres
-  when: (primary_hostname is defined and inventory_hostname == primary_hostname)
+  
+  - name: Ensure pg_stat_statements are present in template1
+    postgresql_ext:
+      state: present
+      name: pg_stat_statements
+      db: template1
+    sudo_user: postgres
+
+  - name: Ensure pgstattuple are present in template1
+    postgresql_ext:
+      state: present
+      name: pgstattuple
+      db: template1
+    sudo_user: postgres
+    when: (primary_hostname is defined and inventory_hostname == primary_hostname)
 
 - include: ssh.yml
