@@ -4,6 +4,16 @@
 # we need to support more distributions, we will need a separate play to
 # run setup.
 
+- name: Get rid of "are you sure you want to continue connecting..." ssh interactive output
+  known_hosts:
+    name="{{item}}"
+    state=present
+    key="{{ lookup('pipe', 'ssh-keyscan -t rsa {{ item }}') }}"
+  with_items: "{{ play_hosts }}"
+  sudo: false
+  delegate_to: 127.0.0.1
+  run_once: true
+
 - name: bootstrap python 2.7
   raw: sudo apt-get update -qq && sudo apt-get install -qq python2.7
 
