@@ -18,7 +18,7 @@
     stat: path=/var/run/reboot-required
 
   - name: Reboot the instance[s]
-    shell: sleep 2 && shutdown -r now "TPA updates triggered"
+    shell: sleep 5 && shutdown -r now "TPA updates triggered"
     async: 1
     poll: 0
     sudo: true
