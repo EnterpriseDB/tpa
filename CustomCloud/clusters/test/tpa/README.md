@@ -121,6 +121,12 @@ before doing anything else (python packages, virtualend, ansible)!
    ```
    for the second standby listing. Or if not, feel free to add a fourth instance in the config.yml as appropriate.
    
+   **Note 3** You can also **re-use an existing barman** instance. Obviously your ansible host will need access to the ssh keys of that instance to allow it to make calls to it. The exact details for secure sharing of these ssh keys are yet to be crystallized though. The first thing to do is to identify the tag name for this barman instance that you want to re-use. The tagname will typically follow the **TPA_Barman_AWS_Region_Name** syntax. For example, the barman in the ap-southeast-2 region will have the name **TPA_Barman_AP_SouthEast_2**. Also note that the barman instance should be in the same region as your TPA cluster setup. To re-use uncomment the following line (in two locations) in clusters/test/tpa/deploy.yml and also replace the tag name with an appropriate value for the barman instance for your region:
+   ```
+       #use_global_barman: 'TPA_Barman_AP_SouthEast_2'
+   ```
+   The deploy.yml will search for an instance with this tag name and gets details from it before going ahead. 
+   
    After checking step 3, and taking care of additional requirements if any from above three notes, fire off the command to do the actual deployment on these instances
    ```
    (ansible-python) nikhils@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
