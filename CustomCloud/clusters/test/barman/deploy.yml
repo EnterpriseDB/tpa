@@ -41,8 +41,8 @@
       tags: common
 
     # setup complete. Update, Upgrade and restart the instances
-    #- role: sys/instance
-    #  tags: instance
+    - role: sys/instance
+      tags: instance
 
     - role: barman
       tags: barman
