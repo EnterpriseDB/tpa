@@ -19,17 +19,15 @@ ec2_vpc:
   cidr: 10.67.0.0/24
 
 ec2_vpc_subnets:
-  us-east-1:
-    10.67.0.0/25: us-east-1a
-  us-west-2:
-    10.67.0.64/26: us-west-2b
-  eu-west-1:
-    10.67.0.192/27: eu-west-1a
+  ap-southeast-2:
+    10.67.0.0/26: ap-southeast-2a
+    10.67.0.64/26: ap-southeast-2a
+    10.67.0.192/27: ap-southeast-2c
 
 instances:
     - type: t2.small
-      region: us-east-1
-      subnet: 10.67.0.0/25
+      region: ap-southeast-2
+      subnet: 10.67.0.0/26
       ip: 10.67.0.1
       assign_eip: false
       volumes:
@@ -40,7 +38,7 @@ instances:
         db: primary
         node: 1
     - type: t2.small
-      region: us-west-2
+      region: ap-southeast-2
       subnet: 10.67.0.64/26
       ip: 10.67.1.1
       volumes:
@@ -51,7 +49,7 @@ instances:
         db: standby
         node: 2
     - type: t2.small
-      region: eu-west-1
+      region: ap-southeast-2
       subnet: 10.67.0.192/27
       ip: 10.67.2.1
       volumes:
@@ -61,3 +59,7 @@ instances:
       tags:
         db: standby
         node: 3
+variables:
+   customerid: A12345
+   serviceid: B67891
+   use_2ndquadrant_postgres: yes

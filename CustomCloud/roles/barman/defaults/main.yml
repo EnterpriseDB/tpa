@@ -4,7 +4,6 @@ db_servers: []
 barman_home: /var/lib/barman
 barman_user: barman
 barman_group: barman
-barman_log_file: /var/log/barman/barman.log
 barman_configuration_file_path: /etc/barman.conf
 barman_log_file: /var/log/barman/barman.log
 barman_compression: gzip
@@ -19,3 +18,4 @@ cron_full_backup_interval: "0 */6 * * *"
 cron_full_backup_reuse_backup: "off"
 cron_incremental_backup_interval: "0 * * * *"
 cron_incremental_backup_reuse_backup: "link"
+ssh_key_file: "{{ key_file | default('id_' + cluster_name|lower) }}"

@@ -64,3 +64,4 @@ System-level roles
 
 sys/luks
 sys/openvpn
+sys/instance

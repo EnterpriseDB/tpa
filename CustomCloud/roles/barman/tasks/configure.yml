@@ -10,17 +10,25 @@
     group: barman
     mode: 0644
   tags: configuration
+  when: use_global_barman is not defined
+
+- name: Configure barman when use_global_barman is defined
+  lineinfile:
+    dest: /etc/barman.conf
+    line: "[{{ customerid + '_' + serviceid + '_' + hostvars[item]['ec2_tag_db'] + hostvars[item]['ec2_tag_node']| lower}}]\nssh_command = ssh postgres@{{item}}\nconninfo = \"user=postgres host={{ item }} port=5432\"\n\n"
+  with_items: "{{db_servers}}"
+  when: use_global_barman is defined
 
 - name: Add full backup to barman cron
   lineinfile:
     dest: /etc/cron.d/barman
-    line: "{{cron_full_backup_interval}} barman [ -x /usr/bin/barman ] && /usr/bin/barman backup --reuse-backup={{cron_full_backup_reuse_backup}} {{hostvars[item]['ec2_tag_db'] + hostvars[item]['ec2_tag_node']| lower}}"
+    line: "{{cron_full_backup_interval}} barman [ -x /usr/bin/barman ] && /usr/bin/barman backup --reuse-backup={{cron_full_backup_reuse_backup}} {{customerid + '_' + serviceid + '_' + hostvars[item]['ec2_tag_db'] + hostvars[item]['ec2_tag_node']| lower}}"
   with_items: "{{db_servers}}"
   delegate_to: "{{barman_hostname}}"
 
 - name: Add incremental backup to barman cron
   lineinfile:
     dest: /etc/cron.d/barman
-    line: "{{cron_incremental_backup_interval}} barman [ -x /usr/bin/barman ] && /usr/bin/barman backup --reuse-backup={{cron_incremental_backup_reuse_backup}} {{hostvars[item]['ec2_tag_db'] + hostvars[item]['ec2_tag_node'] | lower}}"
+    line: "{{cron_incremental_backup_interval}} barman [ -x /usr/bin/barman ] && /usr/bin/barman backup --reuse-backup={{cron_incremental_backup_reuse_backup}} {{customerid + '_' + serviceid + '_' + hostvars[item]['ec2_tag_db'] + hostvars[item]['ec2_tag_node'] | lower}}"
   with_items: "{{db_servers}}"
   delegate_to: "{{barman_hostname}}"
