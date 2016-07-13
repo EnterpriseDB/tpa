@@ -12,18 +12,36 @@
   - name: Upgrade all packages to their latest versions
     apt: update_cache=yes upgrade=dist
     when: packages.stderr != ""
-
+        
   - name: Check if a reboot is required
     register: file
     stat: path=/var/run/reboot-required
-
+    
+  - name: Check if THP is enabled
+    command: cat /sys/kernel/mm/transparent_hugepage/enabled
+    register: thp
+    
+  - name: Insert/update disabling THP configuation block in /etc/rc.local
+    blockinfile:
+      dest: /etc/rc.local
+      mode: u+x
+      insertbefore: "exit 0"
+      block: |
+       if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+         echo never > /sys/kernel/mm/transparent_hugepage/enabled
+       fi
+       if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
+         echo never > /sys/kernel/mm/transparent_hugepage/defrag
+       fi
+    when: (thp.stdout.find('[never]') == -1)
+    
   - name: Reboot the instance[s]
     shell: sleep 5 && shutdown -r now "TPA updates triggered"
     async: 1
     poll: 0
     sudo: true
     ignore_errors: true
-    when: file.stat.exists == true
+    when: (file.stat.exists == true) or (thp.stdout.find('[never]') == -1)
 
   - name: Wait for instance[s] to restart. This may take some time..
     local_action:
@@ -35,3 +53,4 @@
     sudo: false
     when: file.stat.exists == true
   when: ansible_distribution == 'debian'
+  
