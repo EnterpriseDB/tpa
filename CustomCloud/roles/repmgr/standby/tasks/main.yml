@@ -17,7 +17,7 @@
     - name: Create new cluster directory
       file: path=/var/lib/postgresql/{{pgversion}}/main state=directory
     - name: Run repmgr standby clone
-      command: repmgr -D /var/lib/postgresql/{{pgversion}}/main -d repmgr -U repmgr --verbose standby clone {{hostvars[primary_hostname]['vpn_address']}}
+      command: repmgr -D /var/lib/postgresql/{{pgversion}}/main -d repmgr -U repmgr --verbose standby clone -h {{hostvars[primary_hostname]['vpn_address']}}
     - name: Move over conf files to proper location
       command: mv {{pgdata}}/{{item}} {{pgconf}}/{{item}}
       with_items:

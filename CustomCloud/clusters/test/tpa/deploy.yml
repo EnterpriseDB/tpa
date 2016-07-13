@@ -84,7 +84,7 @@
       with_items: "{{ play_hosts }}"
       tags: always
 
-    - add_host: name={{barman_hostname}} use_bman={{reuse_barman}} groups=bman_hosts dblist={{primary_hostname_ip}} bhost={{barman_hostname}} servid={{serviceid}} custid={{customerid}}
+    - add_host: name={{barman_hostname}} use_bman={{reuse_barman}} groups=bman_hosts dblist={{primary_hostname_ip}} bhost={{barman_hostname}} servid={{serviceid|default('B56789')}} custid={{customerid|default('A12345')}}
       tags: always
 
   roles:
