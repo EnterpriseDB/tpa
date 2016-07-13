@@ -1,0 +1,48 @@
+---
+
+- name: Set up TPA Barman node
+  hosts: tag_Name_TPA_Barman_AP_SouthEast_2
+  gather_facts: no
+  sudo_user: root
+  sudo: true
+  vars:
+    use_2ndquadrant_postgres: 'yes'
+
+    vpn_name: "{{ cluster_name|lower }}"
+    vpn_network: 192.168.61.0
+    vpn_netmask: 255.255.255.0
+
+  pre_tasks:
+
+    - name: Determine barman hostname
+      set_fact: barman_hostname="{{ item }}"
+      when: "hostvars[item].ec2_tag_db == 'barman'"
+      with_items: "{{ play_hosts }}"
+      tags: always
+
+    - name: Set the node id as a fact
+      set_fact: node_id="{{ ec2_tag_node }}"
+      tags: always
+
+    - name: Store the VPN address (basically ec2 IP address) as a fact
+      set_fact:
+        vpn_address: "{{ hostvars[item].ec2_ip_address }}"
+      when: "hostvars[item].ec2_tag_node == node_id"
+      with_items: "{{ play_hosts }}"
+      tags: always
+
+    - name: Store DB servers list
+      set_fact: 
+        db_servers: "{{play_hosts | difference([barman_hostname]) }}"
+      tags: always
+  roles:
+
+    - role: common
+      tags: common
+
+    # setup complete. Update, Upgrade and restart the instances
+    #- role: sys/instance
+    #  tags: instance
+
+    - role: barman
+      tags: barman
