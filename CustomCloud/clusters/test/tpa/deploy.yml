@@ -77,9 +77,9 @@
       set_fact: node_id="{{ ec2_tag_node }}"
       tags: always
 
-    - name: Store the VPN address (basically ec2 IP address) as a fact
+    - name: Store the VPN address (basically ec2 PRIVATE IP address) as a fact
       set_fact:
-        vpn_address: "{{ hostvars[item].ec2_ip_address }}"
+        vpn_address: "{{ hostvars[item].ec2_private_ip_address }}"
       when: "hostvars[item].ec2_tag_node == node_id"
       with_items: "{{ play_hosts }}"
       tags: always

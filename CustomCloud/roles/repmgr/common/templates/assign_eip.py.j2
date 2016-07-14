@@ -5,7 +5,7 @@ import time
 
 from boto.ec2.connection import EC2Connection
 
-MAIN_IP = '{{hostvars[primary_hostname]['vpn_address']}}'
+MAIN_IP = '{{hostvars[primary_hostname].ec2_ip_address}}'
 NEW_MASTER_ID = '{{hostvars[inventory_hostname].ec2_id}}'
 
 class EC2Conn:

@@ -12,7 +12,7 @@
   lineinfile:
      dest="{{ pgconf }}/pg_hba.conf"
      insertbefore='host    replication     all             192.168.61.0/24         trust'
-     line='host    replication     all             {{hostvars[item].ec2_ip_address}}/32         trust\nhost    repmgr          repmgr          {{hostvars[item].ec2_ip_address}}/32         trust\nhostssl    replication     all             {{hostvars[item].ec2_ip_address}}/32         trust\nhostssl    repmgr          repmgr          {{hostvars[item].ec2_ip_address}}/32         trust'
+     line='host    replication     all             {{hostvars[item].vpn_address}}/32         trust\nhost    repmgr          repmgr          {{hostvars[item].vpn_address}}/32         trust\nhostssl    replication     all             {{hostvars[item].vpn_address}}/32         trust\nhostssl    repmgr          repmgr          {{hostvars[item].vpn_address}}/32         trust'
   with_items: "{{ play_hosts }}"
   register: hbaconfig
 
