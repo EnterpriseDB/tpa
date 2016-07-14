@@ -1,0 +1,15 @@
+---
+
+- block:
+    - name: Add 2ndQuadrant pglogical repository signing key
+      apt_key:
+        id=AA7A6805 url=http://packages.2ndquadrant.com/pglogical/apt/AA7A6805.asc
+        state=present
+    - name: Add the 2ndQuadrant pglogical apt repository
+      apt_repository:
+        repo='deb [arch=amd64] http://packages.2ndquadrant.com/pglogical/apt/  {{ ansible_distribution_release }}-2ndquadrant main'
+        state=present update_cache=yes
+  when: (ansible_distribution == 'debian' and use_2ndquadrant_postgres == 'yes')
+
+- name: Install pglogical packages
+  package: name=postgresql-{{ pgversion }}-pglogical state=latest

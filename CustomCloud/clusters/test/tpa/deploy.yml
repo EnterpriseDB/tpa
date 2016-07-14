@@ -119,6 +119,11 @@
       when: reuse_barman != True and inventory_hostname == barman_hostname
       tags: barman
 
+    # install pglogical binaries
+    - role: pglogical/common
+      tags: pglogical
+      when: inventory_hostname != barman_hostname
+
 - name: Add the barman settings if requested
   hosts: bman_hosts
   gather_facts: no
