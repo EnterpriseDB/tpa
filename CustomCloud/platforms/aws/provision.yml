@@ -207,6 +207,8 @@
             "Statement": [
               {
                 "Action": [
+                  "ec2:DescribeAddresses",
+                  "ec2:DisassociateAddress",
                   "ec2:AssociateAddress"
                 ],
                 "Effect": "Allow",
