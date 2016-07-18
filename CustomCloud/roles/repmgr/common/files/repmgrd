@@ -18,4 +18,4 @@ REPMGRD_USER=postgres
 REPMGRD_BIN=/usr/bin/repmgrd
 
 # pid file
-REPMGRD_PIDFILE=/etc/repmgr/repmgrd.pid
+REPMGRD_PIDFILE=/var/run/repmgrd.pid
