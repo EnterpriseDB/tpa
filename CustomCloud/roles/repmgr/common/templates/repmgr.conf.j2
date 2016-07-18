@@ -1,6 +1,6 @@
 cluster={{ cluster_name|lower }}
 node={{ node_id }}
-node_name=db{{ node_id }}
+node_name=node{{ node_id }}
 conninfo='host={{hostvars[inventory_hostname]['vpn_address']}} user=repmgr dbname=repmgr'
 master_response_timeout=60
 reconnect_attempts=6
