@@ -8,6 +8,9 @@
   vars:
     use_2ndquadrant_postgres: 'yes'
 
+    bm_device: /dev/xvdb
+    bm_mountpoint: /var/lib/barman
+
     vpn_name: "{{ cluster_name|lower }}"
     vpn_network: 192.168.61.0
     vpn_netmask: 255.255.255.0

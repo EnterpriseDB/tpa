@@ -1,0 +1,25 @@
+---
+
+# Create a filesystem and mount it under barman_mountpoint
+# blkid works fine on both Ubuntu and Centos
+- block:
+  - name: Check if {{ bm_device }} needs a filesystem
+    shell: sudo blkid "{{ bm_device }}"
+    register: fstype
+    ignore_errors: true
+  when: bm_mountpoint is defined
+
+- block:
+
+    - name: Create ext4 filesystem on Barman volume {{ bm_device }}
+      command: mkfs.ext4 "{{ bm_device }}"
+
+    - name: Mount filesystem under {{ bm_mountpoint }}
+      mount:
+        name: "{{ bm_mountpoint }}"
+        src: "{{ bm_device }}"
+        fstype: ext4
+        opts: noauto
+        state: mounted
+
+  when: (bm_mountpoint is defined and 'ext4' not in fstype.stdout)

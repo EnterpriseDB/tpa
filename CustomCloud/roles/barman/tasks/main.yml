@@ -1,5 +1,7 @@
 ---
 
+- include: fs.yml
+  when: use_global_barman is not defined and inventory_hostname == barman_hostname
 - include: install.yml
   when: use_global_barman is not defined and inventory_hostname == barman_hostname
 - include: ssh-barman.yml
