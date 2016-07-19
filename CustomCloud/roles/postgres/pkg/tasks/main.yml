@@ -67,7 +67,18 @@
     - pg_hba.conf
     - postgresql.conf
   register: pgconfig
-
+  
+- name: Find the total RAM in kB
+  command: awk '/^MemTotal:/ { print $2}' /proc/meminfo 
+  register: memtotal
+      
+- name: Configure shared_buffers
+  lineinfile:
+     dest="{{ pgconf }}/postgresql.conf"
+     regexp=^shared_buffers
+     line="shared_buffers = {{ (memtotal.stdout|int/4096)|int|abs }}MB"     
+  register: shared_buffers
+  
 - name: Restart Postgres
   service: name="{{pgservice}}" state=restarted
   when: pgconfig.changed
@@ -94,7 +105,7 @@
       name: pgstattuple
       db: postgres
     sudo_user: postgres
-  
+
   - name: Ensure pg_stat_statements are present in template1
     postgresql_ext:
       state: present
