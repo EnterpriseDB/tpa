@@ -12,15 +12,15 @@
   - name: Upgrade all packages to their latest versions
     apt: update_cache=yes upgrade=dist
     when: packages.stderr != ""
-        
+
   - name: Check if a reboot is required
     register: file
     stat: path=/var/run/reboot-required
-    
+
   - name: Check if THP is enabled
     command: cat /sys/kernel/mm/transparent_hugepage/enabled
     register: thp
-    
+
   - name: Insert/update disabling THP configuation block in /etc/rc.local
     blockinfile:
       dest: /etc/rc.local
@@ -34,6 +34,29 @@
          echo never > /sys/kernel/mm/transparent_hugepage/defrag
        fi
     when: (thp.stdout.find('[never]') == -1)
+    
+  - name: Check if explicit huge pages is enabled
+    command: cat /proc/sys/vm/nr_hugepages 
+    register: hugepages
+    
+  - name: Find the total RAM in kB 
+    command: awk '/^MemTotal:/ { print $2}' /proc/meminfo 
+    register: memtotal  
+ 
+# We calculate explicit huge pages using the value of total memory
+# We get the total memory and divide it by 4 to get shared_buffers
+# Adding 3% of total memory to shared_buffers and dividing them by huge page size
+# which gives us a value for setting huge pages number
+# Size of huge pages is 2MB for x86 architectures and it might be different on other platforms 
+
+  - name: Configure explicit huge pages
+    sysctl:
+      name: vm.nr_hugepages
+      value: "{{ (((memtotal.stdout|int/4096) + ((memtotal.stdout|int*0.03)/1024))/2)|int|abs }}"
+      state: present
+      sysctl_file: /etc/sysctl.conf
+      reload: yes
+    when: hugepages.stdout|int == 0     
     
   - name: Reboot the instance[s]
     shell: sleep 5 && shutdown -r now "TPA updates triggered"
@@ -53,4 +76,4 @@
     sudo: false
     when: file.stat.exists == true
   when: ansible_distribution == 'debian'
-  
+    
