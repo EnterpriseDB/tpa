@@ -74,8 +74,10 @@ I got what TPA is, how do I Get Started?
 Click on [CustomCloud README](CustomCloud/README.md) to get started with
 installing Ansible, Python and other components.
 
-Click on [CustomCloud/clusters/test/tpa/README](CustomCloud/clusters/test/tpa/README.md)
+Click on [TPA Cluster README](CustomCloud/clusters/test/tpa/README.md)
 to create your own TPA cluster in minutes!
+
+Click on [Customer Provisioning Process](CustomCloud/clusters/CustomerProvision.md) to know about the typical provisioning process for a customer.
 
 Or read below for more on TPA.
 
