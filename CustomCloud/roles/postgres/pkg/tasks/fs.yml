@@ -9,6 +9,17 @@
     ignore_errors: true
   when: pg_mountpoint is defined
 
+- name: Configure block device readahead setting 
+  shell: blockdev --setra 2048 "{{ pg_device }}"
+  sudo: true
+    
+- name: Make readahead setting persistent after reboot
+  lineinfile: 
+    dest: /etc/rc.local
+    mode: u+x
+    insertbefore: "exit 0"
+    line: blockdev --setra 2048 "{{ pg_device }}"
+
 - block:
 
     - name: Create ext4 filesystem on PG volume {{ pg_device }}
