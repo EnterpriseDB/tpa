@@ -77,7 +77,7 @@ installing Ansible, Python and other components.
 Click on [TPA Cluster README](CustomCloud/clusters/test/tpa/README.md)
 to create your own TPA cluster in minutes!
 
-Click on [Customer Provisioning Process](CustomCloud/clusters/CustomerProvision.md) to know about the typical provisioning process for a customer.
+Click on [Customer Provisioning Process](https://github.com/2ndQuadrant/TPA/wiki/TPA%20Customer%20Provisioning%20Process) to know about the typical provisioning process for a customer.
 
 Or read below for more on TPA.
 
