@@ -21,7 +21,7 @@
     command: cat /sys/kernel/mm/transparent_hugepage/enabled
     register: thp
 
-  - name: Insert/update disabling THP configuation block in /etc/rc.local
+  - name: Insert/update disabling THP configuration block in /etc/rc.local
     blockinfile:
       dest: /etc/rc.local
       mode: u+x
@@ -57,6 +57,19 @@
       sysctl_file: /etc/sysctl.conf
       reload: yes
     when: hugepages.stdout|int == 0     
+
+  - name: Check if zone_reclaim_mode is enabled
+    command: cat /proc/sys/vm/zone_reclaim_mode
+    register: zone_reclaim_mode
+
+  - name: Disable zone_reclaim_mode if is enabled
+    sysctl:
+      name: vm.zone_reclaim_mode
+      value: 0
+      state: present
+      sysctl_file: /etc/sysctl.conf
+      reload: yes
+    when: zone_reclaim_mode.stdout|int != 0
     
   - name: Reboot the instance[s]
     shell: sleep 5 && shutdown -r now "TPA updates triggered"
