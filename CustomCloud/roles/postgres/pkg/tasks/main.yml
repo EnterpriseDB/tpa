@@ -92,32 +92,42 @@
 # converted into standby instances. Hence need to check for
 # primary tag here..
 - block:
-  - name: Ensure pg_stat_statements are present in postgres
+  - name: Ensure pg_stat_statements is present in postgres
     postgresql_ext:
       state: present
       name: pg_stat_statements
       db: postgres
     sudo_user: postgres
 
-  - name: Ensure pgstattuple are present in postgres
+  - name: Ensure pgstattuple is present in postgres
     postgresql_ext:
       state: present
       name: pgstattuple
       db: postgres
     sudo_user: postgres
 
-  - name: Ensure pg_stat_statements are present in template1
+  - name: Ensure pg_stat_statements is present in template1
     postgresql_ext:
       state: present
       name: pg_stat_statements
       db: template1
     sudo_user: postgres
 
-  - name: Ensure pgstattuple are present in template1
+  - name: Ensure pgstattuple is present in template1
     postgresql_ext:
       state: present
       name: pgstattuple
       db: template1
+    sudo_user: postgres
+    when: (primary_hostname is defined and inventory_hostname == primary_hostname)
+
+# Doesn't hurt to have pgespresso around always with or without barman since it
+# (backup using barman) can be configured in the future as well
+  - name: Ensure pgespresso is present in postgres
+    postgresql_ext:
+      state: present
+      name: pgespresso
+      db: postgres
     sudo_user: postgres
     when: (primary_hostname is defined and inventory_hostname == primary_hostname)
 

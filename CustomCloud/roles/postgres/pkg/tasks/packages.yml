@@ -42,3 +42,9 @@
 - name: Install Postgres packages
   package: name={{ item }} state=latest
   with_items: "{{ postgres_packages[ansible_distribution] }}"
+
+# Install pgespresso. Regardless of whether barman is part of the cluster.
+# Everyone needs backup and this can be configured after the fact as well
+- name: Install pgespresso
+  package: name=postgresql-{{ pgversion }}-pgespresso
+  when: ansible_distribution == 'debian'
