@@ -17,11 +17,15 @@
     register: file
     stat: path=/var/run/reboot-required
 
+#
+# Disable transparent huge pages
+#
+
   - name: Check if THP is enabled
     command: cat /sys/kernel/mm/transparent_hugepage/enabled
     register: thp
 
-  - name: Insert/update disabling THP configuation block in /etc/rc.local
+  - name: Insert/update disabling THP configuration block in /etc/rc.local
     blockinfile:
       dest: /etc/rc.local
       mode: u+x
@@ -34,6 +38,10 @@
          echo never > /sys/kernel/mm/transparent_hugepage/defrag
        fi
     when: (thp.stdout.find('[never]') == -1)
+
+#
+# Configure explicit huge pages
+#
     
   - name: Check if explicit huge pages is enabled
     command: cat /proc/sys/vm/nr_hugepages 
@@ -57,7 +65,75 @@
       sysctl_file: /etc/sysctl.conf
       reload: yes
     when: hugepages.stdout|int == 0     
+
+#
+# Disable zone_reclaim_mode 
+#
+
+  - name: Check if zone_reclaim_mode is enabled
+    command: cat /proc/sys/vm/zone_reclaim_mode
+    register: zone_reclaim_mode
+
+  - name: Disable zone_reclaim_mode if is enabled
+    sysctl:
+      name: vm.zone_reclaim_mode
+      value: 0
+      state: present
+      sysctl_file: /etc/sysctl.conf
+      reload: yes
+    when: zone_reclaim_mode.stdout|int != 0
     
+#
+# OS write cache setup 
+#
+
+# Changes below will make dirty pages get flush once there are 4GB worth of dirty pages
+# or 256MB of dirty background pages. It will also expire dirty pages after 10 seconds.
+
+  - name: Set vm dirty bytes
+    sysctl:
+      name: vm.dirty_bytes
+      value: 4294967296
+      state: present
+      sysctl_file: /etc/sysctl.conf
+      reload: yes
+
+  - name: Set vm dirty background bytes
+    sysctl:
+      name: vm.dirty_background_bytes
+      value: 268435456
+      state: present
+      sysctl_file: /etc/sysctl.conf
+      reload: yes
+
+  - name: Set vm dirty ratio
+    sysctl:
+      name: vm.dirty_ratio
+      value: 0
+      state: present
+      sysctl_file: /etc/sysctl.conf
+      reload: yes
+
+  - name: Set vm dirty background ratio
+    sysctl:
+      name: vm.dirty_background_ratio
+      value: 0
+      state: present
+      sysctl_file: /etc/sysctl.conf
+      reload: yes
+
+  - name: Set dirty expire centisecs
+    sysctl:
+      name: vm.dirty_expire_centisecs
+      value: 1000
+      state: present
+      sysctl_file: /etc/sysctl.conf
+      reload: yes
+
+#
+# Reboot the instances
+#
+
   - name: Reboot the instance[s]
     shell: sleep 5 && shutdown -r now "TPA updates triggered"
     async: 1
