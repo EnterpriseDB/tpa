@@ -6,11 +6,11 @@
   lineinfile:
      dest="{{ pgdata }}/postgresql.conf"
      regexp='\/bin\/true'
-     line="archive_command = 'rsync -a %p barman@{{barman_hostname}}:{{ barman_home }}/{{ customerid + \'_\' + serviceid + \'_\' + hostvars[current_host]["ec2_tag_db"] + hostvars[current_host]["ec2_tag_node"] | lower}}/incoming/%f'"
+     line="archive_command = 'rsync -a %p barman@{{barman_hostname}}:{{ barman_home }}/{{ customerid + \'_\' + serviceid + \'_\' + hostvars[standby]["ec2_tag_db"] + hostvars[standby]["ec2_tag_node"] | lower}}/incoming/%f'"
   delegate_to: "{{ current_host }}"
   register: pgconfig
 
-- name: "Update pg_hba.conf on {{current_host}}"
+- name: "Update pg_hba.conf on primary {{current_host}}"
   lineinfile:
      dest="{{ pgdata }}/pg_hba.conf"
      regexp='host    postgres        all             0.0.0.0/0               md5'
@@ -23,3 +23,19 @@
   service: name="{{pgservice}}" state=restarted
   when: pgconfig.changed and hbaconfig.changed
   delegate_to: "{{ current_host }}"
+
+- name: "Update pg_hba.conf on standby {{standby}}"
+  lineinfile:
+     dest="{{ pgdata }}/pg_hba.conf"
+     regexp='host    postgres        all             0.0.0.0/0               md5'
+     insertbefore='host    postgres        all             0.0.0.0/0               md5'
+     line='host    postgres        all             {{barman_hostname}}/32               trust\nhost    postgres        all             0.0.0.0/0               md5'
+  delegate_to: "{{ standby }}"
+  register: hbaconfig
+  when: standby != current_host
+
+- name: Restart Postgres on "{{standby}}"
+  service: name="{{pgservice}}" state=restarted
+  when: hbaconfig.changed
+  delegate_to: "{{ standby }}"
+  when: standby != current_host

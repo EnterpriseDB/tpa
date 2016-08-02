@@ -33,7 +33,7 @@
       tags: always
 
     - name: Set the primary hostname public IP address
-      set_fact: primary_hostname_ip="{{ hostvars[item].ec2_ip_address }}"
+      set_fact: primary_ip="{{ hostvars[item].ec2_ip_address }}"
       when: "hostvars[item].ec2_tag_db == 'primary'"
       with_items: play_hosts
       tags: always
@@ -84,7 +84,7 @@
       with_items: "{{ play_hosts }}"
       tags: always
 
-    - add_host: name={{barman_hostname}} use_bman={{reuse_barman}} groups=bman_hosts dblist={{primary_hostname_ip}} bhost={{barman_hostname}} servid={{serviceid|default('B56789')}} custid={{customerid|default('A12345')}}
+    - add_host: name={{barman_hostname}} use_bman={{reuse_barman}} groups=bman_hosts primary={{primary_ip}} dblist={{db_servers[0]}} bhost={{barman_hostname}} servid={{serviceid|default('B56789')}} custid={{customerid|default('A12345')}}
       tags: always
 
   roles:
@@ -141,6 +141,11 @@
     - name: Store DB servers list
       set_fact:
         db_servers: "{{dblist}}"
+      tags: always
+
+    - name: Store primary ip
+      set_fact:
+        primary_ip: "{{primary}}"
       tags: always
 
     - name: Determine barman hostname
