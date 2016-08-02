@@ -1,0 +1,371 @@
+.wcDocker {
+  background-color: #ffffff;
+}
+
+.wcPanelBackground {
+  background-color: #ffffff;
+}
+
+.wcPanelBackground .wcCenter {
+  background-color: #cccccc;
+}
+
+.wcFrameFlasher {
+  background-color: red;
+}
+
+.wcFrameShadower {
+  background-color: #dddddd;
+}
+
+.wcFrameTitle {
+  font-size: 13px;
+  padding-left: 8px;
+  vertical-align: middle;
+  text-align: left;
+  border-bottom: 1px none;
+  height: 100%;
+  padding-top: 10px;
+  background-color: #E2E2E2;
+}
+
+.wcFrameCenter {
+  top: 35px;
+}
+
+.wcFrameButton {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #9E9E9E;
+  background-color: #ddd;
+  font-size: 12px;
+  border-radius: 5px 5px 5px 5px;
+  margin-right: 2px;
+}
+
+.wcFrameMiniButton {
+  width: 8px;
+}
+
+.wcFrameButton.wcFrameButtonLeft {
+  right: 10px;
+}
+.wcFrameButton.wcFrameButtonRight {
+  right: 10px;
+}
+
+.wcFrameButton:hover {
+  border: 2px solid #CCCCCC;
+}
+
+.wcFrameButton:active {
+  border: 2px solid #DDDDDD;
+}
+
+.wcFrameButtonToggled, .wcFrameButtonToggled:hover {
+  border-style: inset;
+}
+
+.wcLayoutGrid, .wcLayoutGrid tr, .wcLayoutGrid td {
+  border: 1px solid #555555;
+}
+
+.wcLayoutGridAlternate tr:nth-child(even), .wcLayoutGridAltColor {
+  background-color: rgba(200, 150, 150, 0.2) !important;
+}
+
+.wcFrameEdge {
+  border: 1px solid #dddddd;
+  background-color: #dddddd;
+}
+.wcFrame > .wcFrameEdgeV ~ .wcFrameEdgeV {
+  box-shadow: 3px 6px 3px 1px #888888 !important;
+}
+
+.wcFrame > .wcFrameEdge ~ .wcFrameEdgeV {
+  box-shadow: 1px 0px 0px 0px #888888;
+}
+
+.wcFrame > .wcFrameEdgeH ~ .wcFrameEdgeH {
+  box-shadow: 2px 3px 3px 2px #888888 !important;
+}
+
+.wcFrame > .wcFrameEdgeH {
+  box-shadow: 1px 0px 0px 0px #888888;
+}
+
+.wcFrameEdgeH {
+  height: 4px;
+}
+
+.wcFrameEdgeV {
+  width: 4px;
+}
+.wcFrameCornerNW,
+.wcFrameCornerNE {
+  height: 4px;
+  width: 4px;
+}
+
+.wcSplitterBar {
+  border: 1px solid #aaaaaa;
+  background-color: #dddddd;
+}
+
+.wcSplitterBarV {
+  border-left: 3px solid #dddddd;
+  height: 100% !important;
+}
+
+.wcSplitterBarH {
+  border-top: 3px solid #dddddd;
+  width: 100% !important;
+}
+
+.wcPanelTab {
+  color: #337ab7;
+  background-color: #e6e6e6;
+  border: 0px;
+  border-radius: 4px 4px 0px 0px;
+  border-bottom: 0px;
+  margin-right: 1px;
+  margin-top: 10px;
+  font-size: 13px;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.wcPanelTab:hover {
+  background-color: #eeeeee;
+  padding-bottom: 10px;
+}
+
+.wcPanelTabActive {
+  background-color: #ffffff;
+  color: #000000;
+  margin-top: 5px;
+  line-height: 30px;
+  font-weight: normal;
+}
+
+.wcFloating .wcPanelTabActive {
+  background-color: #2C76B4;
+  margin-top: -2px;
+  font-weight: bold;
+  color: white;
+}
+
+.wcFloating .wcPanelTabActive:hover {
+  background-color: #74B5ED;
+}
+
+.wcGhost {
+  background-color: #74B5ED;
+  border-radius: 6px;
+}
+
+/*
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-corner {
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.7);
+}
+*/
+
+.wcMenuList, .context-menu-list {
+  border: 1px solid #dddddd;
+  z-index: 999 !important;
+  background: #dddddd;
+}
+
+.wcMenuItem, .context-menu-item {
+  background-color: #dddddd;
+}
+
+.wcMenuItemHover, .wcMenuItem:hover, .context-menu-item.hover {
+  background-color: #bbbbbb;
+}
+
+.wcMenuItem.disabled, .context-menu-item.disabled {
+  color: #311;
+  background-color: #aaaaaa;
+}
+
+.wcMenuSeparator, .context-menu-separator {
+  border: 2px solid #dddddd;
+  background-color: #eeeeee;
+}
+
+.wcInput, input {
+  background-color: transparent;
+}
+
+.wcSelect, select {
+  background-color: transparent;
+}
+
+.wcButton, button {
+  border: 1px outset #A44;
+  background-color: #A44;
+}
+
+.wcButtonHover, .wcButton:hover {
+  border: 1px outset #B66;
+  background-color: #B66;
+}
+
+.wcButtonActive, .wcButton:active {
+  border: 1px inset #B66;
+  background-color: #B66;
+}
+
+.wcButtonActive.wcButtonHover, .wcButton:hover.wcButtonActive, .wcButton:active.wcButtonHover, .wcButton:active:hover {
+  border: 1px inset #C88;
+  background-color: #C88;
+}
+
+.wcButtonDisabled, .wcButton.disabled {
+  border: 1px outset #933 !important;
+  background-color: #933 !important;
+  color: #533 !important;
+}
+
+.wcLayout, .wcLayout tr, .wcLayout td {
+  vertical-align: top;
+}
+
+.wcPanelTab > div > .wcTabIcon {
+  display: inline-block;
+  text-align: center;
+  padding-left: 20px;
+  margin-top: -5px;
+  margin-right: 5px;
+}
+
+.wcPanelTab > div .wcTabIcon.fa {
+  padding-left: 0px !important;
+  color: black;
+}
+
+.wcTabIcon.fa {
+  margin-right: 5px;
+}
+
+.wcFrameTitleBar {
+  background-color: #E2E2E2;
+  height: 35px;
+}
+
+.wcFloating .wcFrameTitleBar {
+  border-bottom: 2px solid darkgray;
+  background-color: #2C76B4;
+}
+
+.wcFloating .wcFrameTitleBar > div .wcTabIcon.fa {
+  color: white;
+}
+
+.wcFrameButtonBar {
+  top: 5px;
+  right: 5px;
+}
+.context-menu-list {
+font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 13px;
+}
+
+.context-menu-icon:before {
+  color: #222;
+  font-size: 13px;
+}
+
+.context-menu-icon-fa:before {
+  font-family: 'FontAwesome'
+}
+
+.context-menu-item {
+  display:block;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: normal;
+}
+
+.context-menu-list {
+    padding: 2px 0;
+    width: initial !important;
+}
+
+.context-menu-list > .context-menu-item {
+    display:block !important;
+}
+
+.context-menu-list > .context-menu-separator {
+    margin: 0;
+    border: 1px solid #fff;
+}
+
+.context-menu-icon-wcTabIcon {
+  text-align: left;
+  padding: 3px 28px;
+  height: auto;
+  background-position: 5px 50%;
+}
+
+ul.dropdown-menu > li.menu-item > a > i.wcTabIcon {
+  width: 14px;
+}
+
+.wcFrameButton .fa.fa-close {
+  margin-top: 3.5px;
+  padding-left: 1px;
+}
+
+span.fa.fa-arrow-left, .fa-arrow-right {
+  margin-top: 4px;
+}
+
+.wcMenuSubMenu {
+  visibility: hidden;
+}
+
+i.wcTabIcon {
+  min-width: 20px;
+}
+
+.wcLoadingBackground {
+  background: black;
+  opacity: 0.6 !important;
+}
+
+.wcLoadingIcon.fa-spinner {
+  position: absolute;
+  top: 34%;
+  left: 48%;
+  font-size: 50px;
+  color: #ccc;
+  height: 49px !important;
+}
+
+.wcLoadingLabel {
+  top: 40%;
+  left: 0;
+  color: #fff;
+  width: 100%;
+  font-size: 20px;
+  position: absolute;
+  text-align: center;
+}

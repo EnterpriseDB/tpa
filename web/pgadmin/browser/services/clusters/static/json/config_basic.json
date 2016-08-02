@@ -1,0 +1,58 @@
+{   
+    "clusters":[{
+        "cluster_name":"Primary",
+        "instances": [
+        {
+            "subnet": "xxxx", 
+            "name": "Instance11",
+            "ip": "10.67.0.1",
+            "volumes": [{
+                "device_name": "/dev/xvdb",
+                "volume_type": "gp2",
+                "volume_size": 10
+            }],
+            "tags": {
+                "tag1": "value1",
+                "db":"primary"
+            }, 
+            "region": "us_east_1b",
+            "type": "t1_micro"
+        }, 
+        {
+            "subnet": "xxxx", 
+            "name": "Instance12", 
+            "ip": "10.67.1.1",
+            "volumes": [{
+                "device_name": "/dev/xvdb",
+                "volume_type": "standard",
+                "volume_size": 10
+            }],
+            "tags": {
+                "tag1": "value1",
+                "db":"standby"
+            }, 
+            "region": "us_east_1b",
+            "type": "t1_micro"
+        },
+        {
+            "subnet": "xxxx", 
+            "name": "Instance13", 
+            "ip": "10.67.2.1",
+            "volumes": [{
+                "device_name": "/dev/xvdb",
+                "volume_type": "standard",
+                "volume_size": 10
+            }],
+            "tags": {
+                "tag1": "value1",
+                "db":"standby"
+            }, 
+            "region": "us_east_1c",
+            "type": "t1_micro"
+        }
+    ],
+    "cluster_tags":"x,y"
+    }
+
+    ]
+}

@@ -1,0 +1,1361 @@
+/* Overrides/fixes for pgAdmin specific styling */
+
+/* Ensure simple forms don't hit the top of the screen */
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+.app-icon {
+    vertical-align: middle;
+    font-size: 25px;
+}
+
+/* Use the full width of the screen */
+.container {
+    width: 100% !important;
+}
+
+.pg-panel-content { position:absolute;top:0px;left:0px;right:0px;bottom:0px; }
+
+/* iFrames should have no border */
+iframe {
+    border-width: 0;
+}
+
+/* Ensure the codemirror editor displays full height gutters when resized */
+.CodeMirror, .CodeMirror-gutters {
+    height: 100% !important; 
+} 
+
+/* Padding for the treeview */
+.browser-browser-pane {
+    padding-left: 0;
+}
+
+/* Prevent tree items wrapping */
+.aciTree .aciTreeItem {
+    white-space: nowrap !important;
+}
+
+/* Disabled menu items */
+.mnu-disabled {
+    color: #999999 !important;
+}
+
+/*
+ * Bootstrap 3 remove submenus as they don't work overly well on Mobile. The 
+ * following CSS adds them back in - for our purposes they actually work fine
+ * on Mobile and are perfectly responsive
+ */
+.dropdown-submenu {
+    position:relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -6px;
+    margin-left: -1px;
+    -webkit-border-radius: 0 6px 6px 6px;
+    -moz-border-radius: 0 6px 6px 6px;
+    border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+}
+
+.dropdown-submenu>a:after {
+    display: block;
+    content:" ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 5px 0 5px 5px;
+    border-left-color: #cccccc;
+    margin-top: 5px;
+    margin-right: -10px;
+}
+
+.dropdown-submenu:hover>a:after {
+    border-left-color: #ffffff;
+}
+
+.dropdown-submenu.pull-left {
+    float: none;
+}
+
+.dropdown-submenu.pull-left>.dropdown-menu {
+    left: -100%;
+    margin-left: 10px;
+    -webkit-border-radius: 6px 0 6px 6px;
+    -moz-border-radius: 6px 0 6px 6px;
+    border-radius: 6px 0 6px 6px;
+}
+
+.navbar-inverse > li > a,
+.navbar-inverse .navbar-nav > li > a {
+    color: #CACACA;
+}
+
+.navbar-inverse .navbar-brand {
+    color: #009DCF;
+}
+
+.navbar-inverse .navbar-brand:hover {
+    color: #009DCF;
+}
+
+.dropdown-menu > hr {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.dropdown-menu > li > a > i {
+    margin-left: -17px;
+}
+
+.dropdown-menu > li > a > span {
+    padding-left: 3px;
+    cursor:pointer;
+}
+
+.dropdown-menu > li > a > .has-icon {
+    padding-left: 0px;
+}
+
+.form-group fieldset {
+    background-color: #F2F2F2;
+    padding: 0px 0px 0px 5px;
+    border-width: 1px;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    border-color: #DDD;
+}
+
+.form-group legend {
+    padding: 0.1em 0.5em;
+    margin-bottom: 0px;
+    margin-left: 0;
+    text-align: left;
+    width: 95%;
+    font-size: 105%;
+}
+
+.form-group .fieldset-content {
+    width: 100%;
+}
+
+.obj_properties .backform-tab {
+    position: absolute;
+    margin: 0px 0px 75px;
+    padding: 0px;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+.obj_properties .backform-tab > .tab-content {
+    padding: 0px;
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+.backform-tab .tab-pane {
+    padding: 7px;
+}
+
+.form-group fieldset .caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 2px;
+    margin-top: -2px;
+    vertical-align: middle;
+    border-top: 5px solid;
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+}
+
+.form-group fieldset .collapsed .caret {
+    border-bottom: 5px solid transparent;
+    border-top: 5px solid transparent;
+    border-left: 5px solid;
+}
+
+.pgadmin-control {
+    padding: 0px 15px 5px 15px;
+    margin-bottom: 0px;
+    display: inline-block;
+    height: 30px;
+}
+
+.obj_properties {
+    padding: 0px;
+}
+
+.obj_properties .pgadmin-control .uneditable-input {
+    border: 0px !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    -webkit-transition: none !important;
+    -o-transition: none !important;
+    transition: none !important;
+    background-color: transparent !important;
+    height: 20px;
+    padding: 0px;
+    margin-top: 2px;
+    vertical-align: middle;
+}
+
+.obj_properties .set-group {
+    margin-bottom: 10px;
+}
+
+.pgadmin-control-group {
+    margin: 0px;
+    padding: 2px 0px;
+}
+
+.fieldset-content .pgadmin-control-group:nth-child(even): {
+    background-color: #FF0000;
+}
+
+.control-label {
+    margin: 0px;
+    padding: 5px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.pgadmin-controls {
+    padding-right: 3px;
+    padding-left: 3px;
+}
+.pgadmin-controls.SQL {
+  padding-right: 3px;
+  padding-left: 1px;
+}
+.pgadmin-controls > textarea.form-control,
+.pgadmin-controls > textarea.form-control[disabled] {
+   min-width: 100%;
+   max-width: 100%;
+}
+.pgadmin-controls > div.checkbox, .pgadmin-controls > div.checkbox[disabled] {
+    height: 28px;
+}
+
+.pgadmin-controls > .uneditable-input, .pgadmin-controls > .pgadmin-node-select,
+.pgadmin-controls > input.form-control, .pgadmin-controls > select.form-control,
+.pgadmin-controls > .uneditable-input[disabled],
+.pgadmin-controls > .pgadmin-node-select[disabled],
+.pgadmin-controls > input.form-control[disabled],
+.pgadmin-controls > select.form-control[disabled] {
+    min-height: 28px;
+    padding: 3px 6px !important;
+}
+
+.pgadmin-controls > span.select2 {
+    width: 100%;
+}
+
+.obj_properties fieldset > div > .pgadmin-control-group > label {
+    min-height: 28px;
+}
+
+.obj_properties fieldset > .fieldset-content {
+  border-radius:5px;
+  padding: 5px 10px;
+  border-color: #92AFC8;
+  border-width: 2px;
+  border-style: ridge;
+}
+
+.obj_properties .badge {
+  display: block;
+  text-align: left;
+  cursor: pointer;
+  margin-bottom: 1px;
+  background-color: #2C76B4;
+  border-radius:5px;
+  padding: 5px 7px;
+}
+
+.obj_properties .badge .caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 2px;
+    vertical-align: middle;
+    border-top: 5px solid;
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+    margin-top: -2px;
+    margin-right: 4px;
+}
+
+.obj_properties .collapsed .caret {
+    border-bottom: 5px solid transparent;
+    border-top: 5px solid transparent;
+    border-left: 5px solid;
+    vertical-align: middle;
+    margin-top: -2.5px;
+    padding-right: 0px;
+}
+
+.obj_properties table {
+  display: table !important;
+}
+
+.obj_properties table tr {
+    border: 0px white solid;
+    margin: 1em;
+}
+
+.obj_properties .pgadmin-properties {
+    border: 1px rgb(105, 78, 72) solid;
+    border-radius: 6px;
+    padding: 5px;
+    margin: 0.2px 2px 2px 2px;
+}
+
+.obj_properties table .spacer {
+    height: 2em;
+}
+
+.obj_properties table td {
+    vertical-align: middle;
+}
+
+.pg-prop-btn-group {
+  background-color: #D2D2D2;
+  border: 2px solid #A9A9A9;
+  left: 0px;
+  right: 0px;
+  padding: 2px;
+}
+
+.pg-prop-btn-group button {
+  padding: 5px;
+}
+
+.pg-prop-btn-group-below {
+    text-align: right;
+    border-color: #A9A9A9;
+    border-width: 2px 1px 0px;
+    border-style: inset;
+    border-left-style: solid
+}
+
+.pg-prop-btn-group > button {
+  margin: 2px 3px 2px 0px;
+}
+
+.pg-prop-btn-group > button:first-child {
+    margin-left: 3px;
+}
+
+.pg-prop-btn-group > button:last-child {
+    margin-right: 3px;
+}
+
+.pg-prop-content {
+    position: absolute;
+    overflow: auto;
+    padding-bottom: 7px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-left: 0;
+    height: 100%;
+}
+
+/* A generic class to make the overflow hidden of a DOM element */
+.pg-no-overflow {
+    overflow: hidden;
+}
+
+
+.pg-prop-has-btn-group-below {
+    margin-bottom: 33px;
+}
+
+.has-pg-prop-btn-group {
+    top: 39px;
+    padding-top: 8px;
+    height: calc(100% - 39px);
+}
+
+.pg-prop-content > div {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.pg-prop-content .uneditable-input {
+    white-space: initial;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overow: ellipsis;
+    height: auto !important;
+}
+
+.form-control {
+    color: #333333;
+    padding: 3px 6px;
+}
+
+.form-control[disabled],
+.form-control[readonly],
+fieldset[disabled] .form-control {
+    color: #666666;
+}
+
+.highlight {
+    padding: 5px;
+    margin-bottom: 5px;
+    background-color: #F7F7F9;
+    border: 1px solid #E1E1E8;
+    border-radius: 3px;
+}
+
+.highlight.has-error {
+    border-color: #A94442;
+}
+
+.icon-fa::before {
+    font: normal normal normal 14px/1 FontAwesome;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transform: translate(0, 0);
+    display: inline-block;
+    margin-left: -18px;
+    margin-right: 9px;
+}
+
+
+/* Sub-Node */
+
+.table-bordered > thead > tr > td, .table-bordered > thead > tr > th {
+    border-bottom-width: 1px;
+}
+
+.subnode > table.backgrid{
+    width: 100%;
+    margin: 0px;
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+.backgrid thead th{
+    background-color: #2C76B4;
+}
+
+.backgrid th, .backgrid td {
+  line-height: 18px;
+  font-size: 12px;
+}
+
+.backgrid th {
+    letter-spacing:0.5px
+}
+
+.backgrid td {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.backgrid thead th a {
+    color: white;
+}
+
+.backgrid > th.object {
+    width: 30px;
+}
+
+.edit-cell, .delete-cell {
+    text-align:center !important;
+    width:25px;
+}
+
+.backgrid.presentation {
+    background-color: #EEEEEE;
+}
+
+.backgrid.presentation td.renderable {
+    padding: 3px;
+}
+
+.backgrid:not(.presentation) td.renderable:not(.editable):not(.delete-cell) {
+    background-color: #F1F1F1;
+}
+
+.backgrid tr.header td.renderable:not(.editable):not(.delete-cell) {
+    background-color: #AAA;
+}
+
+.sql-editor-grid-container .backgrid th.renderable, .sql-editor-grid-container .backgrid td.renderable {
+    white-space: pre-wrap;
+}
+
+.subnode-header {
+    background-color: #2C76B4;
+    height: 35px;
+    color: #FFFFFF;
+    border-radius: 3px 3px 0px 0px;
+    padding-top: 3px;
+}
+
+.subnode-header .control-label {
+    font-size: 13px;
+    font-weight: normal !important;
+}
+
+.subnode-header > button.add {
+    float: right;
+    margin-right: 3px;
+    margin-bottom: 3px;
+    margin-top: 3px;
+}
+
+.subnode {
+    padding-top: 0px;
+}
+
+.subnode-dialog {
+    bottom: 0;
+    left: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+    right: 0;
+    height: auto;
+    margin-left: 23px;
+    background-color: #dadada;
+    margin-top: 0px;
+    border: 1px solid #a9a9a9;
+}
+.subnode-body {
+    height: auto;
+    overflow: inherit;
+
+}
+.subnode-footer {
+    height: 38px;
+    margin: 0px, 15px;
+    min-height: 40px;
+    vertical-align: bottom;
+}
+
+.sub-node-form {
+    height: auto;
+    padding: 1px;
+}
+
+.sub-node-form > .nav-tabs {
+    background-color: #DADADA;
+}
+
+.sub-node-form > ul.tab-content{
+    background-color: #FFFFFF;
+    padding-left: 15px;
+    left: 1px;
+}
+
+table.backgrid tr.new {
+    background-color: rgba(82, 168, 236, 0.1) !important;
+    box-sizing: border-box;
+    outline: 1px solid rgba(82, 168, 236, 0.8);
+    outline-offset: -1px;
+  }
+
+/* Remove default left padding from checkbox for bootstrap-switch */
+.checkbox {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+.checkbox label {
+    padding-left: 0px !important;
+}
+
+.bootstrap-switch > .bootstrap-switch-container > input {
+    height: 0px;
+    width: 0px;
+    margin: 0px;
+    padding: 0px;
+    border: 0px solid black;
+}
+
+.switch-cell {
+    height: 0px; width: 0px;
+}
+
+/* Center align the switch in backgrid */
+td.switch-cell > div.bootstrap-switch {
+  display: block;
+  margin: auto;
+}
+
+.width_percent_5 { width: 5%; }
+.width_percent_10 { width: 10%; }
+.width_percent_15 { width: 15%; }
+.width_percent_20 { width: 20%; }
+.width_percent_25 { width: 25%; }
+.width_percent_30 { width: 30%; }
+.width_percent_35 { width: 35%; }
+.width_percent_40 { width: 40%; }
+.width_percent_45 { width: 45%; }
+.width_percent_50 { width: 50%; }
+.width_percent_55 { width: 55%; }
+.width_percent_60 { width: 60%; }
+.width_percent_65 { width: 65%; }
+.width_percent_70 { width: 70%; }
+.width_percent_75 { width: 75%; }
+.width_percent_80 { width: 80%; }
+.width_percent_85 { width: 85%; }
+.width_percent_90 { width: 90%; }
+.width_percent_95 { width: 95%; }
+.width_percent_99 { width: 99%; }
+.width_percent_100 { width: 100%; }
+
+.pg-prop-status-bar {
+    left: 0px;
+    right: 0px;
+    background-color: #8E1A17;
+    color: white;
+    padding: 5px;
+    opacity: 0.8;
+}
+
+.pg-prop-status-bar:empty {
+  display: none;
+}
+
+.pg-prop-status-bar:hover {
+  opacity: 1;
+}
+
+.pg-prop-header {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top : 0;
+}
+
+.pg-prop-footer{
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom : 0;
+    z-index: 4;
+}
+.subnode-header-form {
+    background-color: #EEEEEE;
+    color: black;
+    padding: 3px 0 10px 0;
+    border-top: solid 1.5px white;
+    font-size: 12px;
+}
+
+.subnode-header-form button.add {
+    float: right;
+    margin-right: 0px;
+}
+
+.subnode-error .help-block {
+    color: #a94442;
+}
+
+.select2-container--default .select2-search--inline .select2-search__field {
+    background: transparent none repeat scroll 0% 0%;
+    border: medium none;
+    outline: 0px none;
+    box-shadow: none;
+    width: 100% !important;
+}
+
+.renderable > .select2-container {
+    width: 100% !important;
+}
+
+div.rolmembership {
+    border: 1.5px solid #faebd7;
+    margin-top: 15px;
+}
+
+fieldset.inline-fieldset {
+    margin: 0px; margin-left: 2px; margin-right: 2px;
+    padding-right: 10px; padding-left: 10px; padding-top: 6px; padding-bottom: 12px;
+    border: 1px solid; border-radius: 5px;
+    border-color: #C3C3C3; box-shadow: 0.1px 0.1px 0.1px #C3C3C3;
+}
+
+fieldset.inline-fieldset-without-border {
+    margin: 0px; margin-left: 0px; margin-right: 0px;
+    padding-right: 0px; padding-left: 0px; padding-top: 0px; padding-bottom: 0px;
+    border: 0px solid; border-radius: 0px; display: inline-block;
+}
+
+fieldset.inline-fieldset > legend {
+    display: block; border: 0px solid black; box-shadow: none;
+    box-sizing: content-box; top: auto; bottom: auto; left: auto;
+    font-size: 16px; font-style: normal; font-weight: 600;
+    height: 20px; line-height: 20px; margin: 0px; padding-bottom: 0px;
+    padding-left: 5px; padding-right: 5px; padding-top: 0px;
+    vertical-align: middle; width: auto;
+}
+
+fieldset.inline-fieldset-without-border legend {
+    border: none; margin-bottom: 0px !important;
+ }
+
+fieldset.inline-fieldset > div {
+    padding: 0px; margin: 0px; border: 0px;
+}
+
+div.inline-tab-panel {
+    float: left; width: 100%;
+}
+
+div.inline-tab-panel > ul.nav-tabs > li {
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+}
+
+div.inline-tab-panel > ul.nav-tabs > li:first-child {
+    border-top-left-radius: 3px; border-top-right-radius: 10px;
+}
+
+div.inline-tab-panel > ul.nav-tabs > li > a,
+div.inline-tab-panel > ul.nav-tabs > li > a:active,
+div.inline-tab-panel > ul.nav-tabs > li > a:hover,
+div.inline-tab-panel > ul.nav-tabs > li > a:focus {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+div.inline-tab-panel > ul.nav-tabs > li:first-child > a,
+div.inline-tab-panel > ul.nav-tabs > li:first-child > a:active,
+div.inline-tab-panel > ul.nav-tabs > li:first-child > a:hover,
+div.inline-tab-panel > ul.nav-tabs > li:first-child > a:focus {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  margin-left: 1px;
+}
+
+div.inline-tab-panel > ul.tab-content {
+  padding-left: 5px; padding-right: 5px; border-color: #DDD;
+  border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;
+  border-width: 0px 1px 1px 1px; border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px; border-style: solid solid;
+}
+
+div.inline-tab-panel > ul.tab-content > div.tab-pane {
+  min-height: 150px; padding: 0px !important;
+}
+
+div.inline-tab-panel > ul.tab-content > div.tab-pane > *:first-child {
+  margin-top: 5px;
+}
+
+div.inline-tab-panel > ul.tab-content > div.tab-pane > *:last-child {
+  margin-bottom: 5px;
+}
+
+.pgadmin-control-error-message{
+  padding-left: 4px;
+}
+
+.btn-group-sm>.btn, .btn-sm{
+  font-size: 11px;
+  padding: 3px 3px;
+}
+
+.pg-prop-btn-group > .btn {
+  min-width: 40px;
+}
+
+.pg-prop-btn-group > .btn-group > .btn {
+  min-width: 40px;
+}
+
+.pg-prop-btn-group > .btn-group > .btn + .dropdown-toggle {
+  min-width: 20px;
+}
+
+.pg-prop-btn-group button.dropdown-toggle {
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+}
+
+.pg-prop-btn-group .dropdown-menu {
+  min-width: initial;
+}
+
+.pg-prop-btn-group .backgrid-filter.form-search {
+  position: relative;
+  width: 248px;
+  height: 30px;
+  float: right;
+  margin-top: 2px;
+  margin-right: 10px;
+}
+
+td.edit-cell.editable.sortable.renderable.editor {
+  outline: 0px;
+}
+
+.privilege_label{
+  font-size: 10px!important;
+}
+
+.backgrid th, .backgrid td{
+  padding: 2px;
+  font-weight: normal!important;
+}
+
+.subnode > table.backgrid > thead > tr > th:first-child{
+  border-left-color: #2C76B4;
+}
+
+.subnode > table.backgrid > thead > tr > th:last-child{
+  border-right-color: #2C76B4;
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered{
+  padding-left: 5px;
+}
+
+/* Message panel shown on browser tabs */
+.pg-panel-message {
+    margin-top: 25px !important;
+    width: 80%;
+    margin: 0 auto;
+    position: relative;
+    text-align: center;
+}
+
+.backgrid .textarea-cell {
+    text-align: left;
+}
+
+.backgrid .textarea-cell.editor textarea {
+    width: 100%;
+    height: auto;
+}
+
+.select2-container--default.select2-container--focus
+.select2-selection--multiple {
+    border: 1px solid #aaa !important;
+    outline: 0 none;
+}
+
+/* CSS for SqlField control */
+.sql_field_layout {
+    border: 1px solid rgba(184, 184, 184, 1) !important;
+    border-radius: 4px;
+    padding: 0px;
+}
+
+/*
+ * Remove border right from "CodeMirror-gutters"
+ * class becuase its height doesn't increase
+ * with every new line added, instead add border
+ * right to ".CodeMirror-linenumber" class which
+ * adds a new div for every new line added
+ */
+.sql_field_layout .CodeMirror-gutters {
+    border-right: none;
+}
+
+.sql_field_layout .CodeMirror-linenumber {
+    border-right: 1px solid #ddd;
+    background-color: #f7f7f7;
+}
+
+.tab-pane.SQL {
+  padding: 0px 7px 0px 0px;
+}
+
+.pgadmin-control-group.sql {
+  margin: 0px;
+  padding: 0px;
+}
+
+.nav-tabs{
+	border-bottom:0px;
+}
+
+.nav-tabs>li {
+	margin-bottom:0px;
+}
+
+.nav-tabs>li>a{
+    border-radius: 5px 5px 0 0;
+	margin-right:1px;
+	border:0px;
+}
+
+.nav-tabs>li > a:hover , .nav-tabs>li > a:focus{
+	border:0px;
+	margin-bottom:0px;
+	color:black;
+	padding-bottom: 4px!important;
+}
+.nav-tabs>li.active>a ,.nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover ,.nav-tabs>li.active>a:active{
+	border:0px;
+	color:black;
+	margin-top: 0px;
+	padding-top: 7px!important;
+	padding-bottom: 4px!important;
+	margin-top:0px!important;
+}
+
+.obj_properties .nav>li>a {
+    font-size: 13px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+	padding-bottom:0px;
+	margin-top:3px;
+}
+
+.obj_properties .backform-tab > .nav-tabs {
+	background-color: #E2E2E2;
+}
+
+ul.nav.nav-tabs {
+    background-color: #E2E2E2;
+	padding-top: 4px;
+}
+
+.pg-panel-depends-container >table.backgrid.table-bordered {
+  border: 0px;
+}
+
+.pg-panel-depends-container > table > thead > tr > th {
+  padding: 2px;
+  border: 1px solid #ddd;
+}
+
+.pg-panel-depends-container > table > thead > tr > th:first-child {
+  border-left: 0px;
+}
+
+.pg-panel-depends-container > table > thead > tr > th:last-child {
+  border-right: 0px;
+}
+
+.pgadmin-control-group span.wcTabIcon {
+  padding-left: 20px;
+}
+
+.select2-results span.wcTabIcon {
+  padding-left: 20px;
+  background-position: 0px 2px;
+}
+
+.pgadmin-controls.SQL>.CodeMirror {
+  height: 500px!important;
+}
+
+/* This rule will stop Chrome apply highlighting to elements such as DIV's used as modals */ 
+*:focus {
+  outline: none;
+}
+
+/* Alert info panel */
+.alert-info-panel {
+  border: 2px solid #a1a1a1;
+  margin-top: 2em;
+  padding: 5px 5px; 
+  background: #dddddd;
+  border-radius: 5px;
+  height: 8em;
+  overflow: scroll;
+}
+/* Overrides alertify js headers */
+.alertify .ajs-header {
+  padding: 6px 10px!important;
+  min-height: 35px;
+  max-height: 35px;
+  border-bottom: 2px solid darkgray;
+  background-color: #2C76B4;
+  font-weight: bold;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 0;
+}
+
+.alertify.ajs-maximized .ajs-commands, .alertify.ajs-resizable .ajs-commands {
+  margin: 2px 0px 0 0;
+}
+
+/* Overrides alertify js headers hovering behaviour*/
+.alertify .ajs-header:hover {
+  background-color:#2C76B4;
+}
+/* Removes padding from alertify footer */
+.alertify .ajs-footer {
+  padding: 0;
+  min-height: 35px;
+}
+/* Restyling alertify buttons */
+.alertify .ajs-footer .ajs-buttons {
+  background-color: #D2D2D2;
+  border-width: 2px 0px 0px 0px;
+  border-style: solid;
+  border-color: rgb(85, 85, 85);
+}
+
+.alertify .ajs-footer .ajs-buttons.ajs-auxiliary .ajs-button, .alertify .ajs-footer .ajs-buttons.ajs-primary .ajs-button {
+  margin-left: 2px;
+  margin-right: 2px;
+  margin-top:2px;
+  margin-bottom:0px;
+}
+
+.alertify .ajs-footer .ajs-buttons .ajs-button {
+  min-width: 40px;
+  min-height: 30px;
+}
+
+.alertify .ajs-commands {
+  margin: -22px 4px 0 0;
+}
+
+/* Replaces alertify button icons */
+.alertify .ajs-commands button{
+  margin-left: 5px;
+}
+
+/* Prevent text blur in the runtime */
+.alertify .ajs-dimmer,
+.alertify .ajs-modal {
+  -webkit-transform: none;
+}
+
+.ajs-commands {
+  position: absolute;
+  width: auto!important;
+}
+
+.ajs-pin , .ajs-maximize , .ajs-close{
+  width: 20px;
+  height: 20px;
+  border: 2px solid #9E9E9E !important;
+  background-color: #ddd!important;
+  font-size: 12px;
+  border-radius: 5px 5px 5px 5px;
+  position: relative;
+  //float: right;
+  cursor: pointer;
+  text-align: center;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.ajs-pin:hover , .ajs-maximize:hover , .ajs-close:hover{
+  border: 2px solid #CCCCCC!important;
+}
+
+.alertify .ajs-commands button.ajs-maximize {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAZklEQVQ4jcWTuw2AMAxEn5jBs7B/e0gpmAiKEGRS5QDBSS7v+Q8fSsCWQgDTA+DsGgJYuypumTNkWCWZg9q/HIAOSDim/xTUcu0exXXaxQG0teRVWQPLx2Gbe8B55yNqv7C4GV/TDq//J11odoZgAAAAAElFTkSuQmCC);
+  background-size: 14px;
+}
+
+.alertify.ajs-modeless.ajs-pinnable .ajs-commands button.ajs-pin {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAkElEQVQ4jWNkwAR8DAwMBxkYGMTQxF8xMDDYMzAwfMKiBwMYMDAw3GRgYPgPxTehYiSBKCQDonApYiLV1KFjABsDA4MpEt8UKkYUkGBgYDjPgAhAGD4PlSPooqNYNMPwUXRXM+IwBAbaoXQlktg/ZMUsWAxAVvASmyZCBiCDNwTkCRrwasANIOgFQoADinECAAtnIEoWoODLAAAAAElFTkSuQmCC);
+  background-size: 13px;
+}
+
+.alertify .ajs-commands button.ajs-close {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAdklEQVQ4jd2SwQnAIAxF36GH0pOTFHEgF3IkR5LO0F4SCGJVEHroAy/f/E+igV+yAa6hO7nrcgAZuIBg9CBalppXEnDL0RA1q556ASdQqhBrLlLTxVch1uxHZiU2AuKs2Vdt23GGHSy/wfIvzOzBPhpjaRO/5wG/szevJ+ZXzAAAAABJRU5ErkJggg==);
+}
+
+.alertify.ajs-maximized .ajs-commands button.ajs-maximize {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA8klEQVQ4jZ3QMUpDQRCH8V+ewULQE4iERTyCrQiDCpbaCKKljbV4A89gqVgGrCMDWlpaWwVPoFYiIjYv8hBJXjLN7s7u9+3wZ4aKiOWI2IJOi8dHuM7MXxj3WMHe3CRBKeUGvVJKllJG8CrmoNty6jMsYKeGoY/jtgI4bez7OMjMr2oKwaieRzDMIljDRUSgXQZPeG2cv7GOffQ7ETGPcyw2HozWQWY+jLN3M/MzIu4wwNKf+zeMFVSQmY/YbfzeuiqIiAonZgi1quErHNa9F7xPM8FlAx5iA9ttJRVu8VHDm5k5rDNpLRERWxHR+6c/MZMfLIJDwzY66IkAAAAASUVORK5CYII=);
+}
+
+/* Restyling alertify dialogue panel boundaries */
+.alertify .ajs-dialog {
+  border: 3px solid #DDDDDD;
+  border-radius: 0;
+}
+.alertify .ajs-content {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.alertify .ajs-handle {
+  right: -4px;
+  bottom: -4px;
+}
+span.button-label {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: initial;
+}
+button.pg-alertify-button {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: auto;
+}
+.fa.pg-alertify-button:before {
+  font: normal normal normal 18px/1 FontAwesome;
+  margin-right: 5px;
+}
+.backform_control_notes {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  color: #333;
+  display: block;
+  font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+  font-size: 12px;
+  line-height: 1.42857;
+  margin: 0 0 10px;
+  overflow: auto;
+  padding: 5px 10px;
+  word-break: break-all;
+  word-wrap: break-word;
+}
+
+div.backform_control_notes label.control-label {
+  min-width: 0px;
+}
+
+form[name="change_password_form"] .help-block {
+    color: #A94442 !important;
+}
+
+.file_selection_ctrl .create_input span {
+  padding-right: 10px;
+  font-weight: bold;
+}
+
+.file_selection_ctrl .create_input input[type="text"] {
+  height: 23px;
+  padding: 2px;
+  width: 194px;
+  border-radius: 2px;
+}
+
+.file_selection_ctrl .browse_file_input {
+  display: inline-block;
+  width: 220px;
+  margin-right: 0;
+}
+
+.file_selection_ctrl button.select_item {
+  display: inline;
+  background: #777;
+  background: -webkit-linear-gradient(#777, #999999);
+  background: -o-linear-gradient(#777, #999);
+  background: -moz-linear-gradient(#777, #999);
+  background: linear-gradient(#777, #999);
+  color: #fff;
+  padding: 9px 0px 9px 0px;
+  margin-left: 0px;
+  margin-right: -7px;
+  margin-top: -4px;
+  min-width: 30px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.file_selection_ctrl button.select_item:focus,
+.file_selection_ctrl button.select_item:active {
+  outline: none;
+  box-shadow: none;
+}
+
+.file_selection_ctrl input[type="text"] {
+  width: calc(100% - 17px);
+  border: none;
+  margin-left: -6px;
+  margin-top: -3px;
+  height: 32px;
+  padding-left: 5px;
+}
+
+/* Overriding the css for the dropzone */
+.dropzone .dz-preview .dz-progress {
+  height: initial;
+}
+
+.dropzone .dz-preview .dz-progress .dz-upload {
+  bottom: initial;
+}
+
+/* Fix Alertify dialog alignment for Backform controls */
+.alertify_tools_dialog_properties {
+  bottom: 0 !important;
+  left: 0 !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 35px !important;
+}
+
+/* For Backup & Restore Dialog */
+.custom_switch_label_class {
+  min-width: 0px !important;
+  padding-bottom: 10px !important;
+  font-size: 13px !important;
+  font-weight: normal !important;
+}
+
+.custom_switch_control_class {
+  min-width: 0px !important;
+  padding-bottom: 10px !important;
+}
+
+/* animate blink */
+.blink {
+  animation: blink-animation 1s steps(5, start) infinite;
+  -webkit-animation: blink-animation 1s steps(5, start) infinite;
+
+}
+
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+
+@-webkit-keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+
+
+/* Override Backgrid's default z-index */
+.dashboard-tab-container .backgrid-filter .search {
+  z-index: 10 !important;
+}
+
+.dashboard-tab-container .backgrid-filter .clear {
+  z-index: 10 !important;
+}
+
+.backgrid .string-cell.editor input[type=password] {
+  text-align: left;
+}
+
+.backgrid td.editor input[type=password] {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0 5px;
+  margin: 0;
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+  -webkit-box-shadow: none;
+     -moz-box-shadow: none;
+          box-shadow: none;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+}
+
+.subnode-footer {
+  text-align: right;
+  border-color: #a9a9a9;
+  border-style: inset inset inset solid;
+  border-width: 2px 1px 0;
+  margin-top: -10px;
+}
+
+.subnode-footer .ajs-button {
+  margin: 2px 2px 0;
+}
+
+.user_management {
+  margin: 0 10px !important;
+  width: calc(100% - 20px);
+  height: 100%;
+  overflow: hidden;
+}
+
+.user_management .search_users form {
+  margin: 0;
+}
+
+.user_management table {
+  display: block;
+  height: 100%;
+  overflow: auto;
+  border: 0 none;
+}
+
+.user_management .backform-tab {
+  height: calc(100% - 75px);
+}
+
+.user_management .search_users {
+  float:right;
+  margin-right: 5px;
+  padding:0 !important;
+}
+
+.user_management .search_users input{
+  height:15px;
+  margin-top: 3px;
+}
+
+.user_management .user_container {
+height: calc(100% - 35px);
+}
+
+.user_management input[placeholder] {
+  font-size: 12px;
+}
+
+.alertify_tools_dialog_backgrid_properties {
+  top: 43px !important;
+}
+
+.user_management_pg-alertify-button {
+  line-height: 16px;
+}
+
+.pg-panel-statistics-container >table.backgrid.table-bordered {
+  border: 0px;
+}
+
+.pg-panel-statistics-container > table > thead > tr > th {
+  padding: 2px;
+  border: 1px solid #ddd;
+}
+
+.pg-panel-statistics-container > table > thead > tr > th:first-child {
+  border-left: 0px;
+}
+
+.pg-panel-statistics-container > table > thead > tr > th:last-child {
+  border-right: 0px;
+}
+
+.pgadmin-controls input[type="checkbox"]{
+  margin-left: 0 !important;
+  margin-top: 10px !important;
+}
+
+/* Ensure query tool results can horizontal scroll */
+table.backgrid {
+  overflow: auto;
+}
+
+.aciTree.aciTreeLoad {
+  background: none;
+}

@@ -1,0 +1,163 @@
+.ajs-bg-bgprocess.ajs-visible {
+  padding: 0px !important;
+}
+
+.ajs-bg-bgprocess > .pg-bg-bgprocess {
+  background-color: #2C76B4;
+  color: #FFFFFF;
+  padding: 0px;
+  border-radius: 5px;
+  text-align: left;
+}
+
+.ajs-bg-bgprocess .col-xs-12 {
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+.ajs-bg-bgprocess > .pg-bg-bgprocess > .pg-bg-notify-header {
+  background-color: #333;
+  margin-top: 0px;
+  margin-bottom: 5px;
+  padding: 5px;
+  white-space: pre-wrap;
+  text-align: center;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.ajs-bg-bgprocess > .pg-bg-bgprocess > .pg-bg-notify-body {
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.ajs-bg-bgprocess > .pg-bg-bgprocess > .pg-bg-status {
+  padding: 2px;
+  margin: 5px;
+  width: calc(100% - 10px);
+  text-align: center;
+  border-radius: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+}
+
+.pg-bg-process-logs {
+  width: 100%;
+}
+
+.pg-bg-etime {
+  width: 100%;
+  display: block;
+  font-size: 95%;
+  padding: 5px;
+  font-weight: bold;
+  color: #000;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: .25em;
+  background-color: #E2E2E2;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.pg-bg-click {
+  color: #E2E2E2;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pg-bg-click:hover {
+  color: #333;
+}
+
+.ajs-bg-bgprocess > .pg-bg-bgprocess > .pg-bg-status.bg-success,
+.bg-process-status .bg-bgprocess-success {
+  color: green;
+  font-weight: bold;
+}
+
+.bg-process-status .bg-bgprocess-failed {
+  color: red;
+  font-weight: bold;
+}
+
+.ajs-bg-bgprocess > .pg-bg-bgprocess > .pg-bg-status.bg-failed {
+  color: black;
+  background-color: #E99595;
+}
+
+.pg-bg-cmd {
+  color: #4156CC;
+  font-style: italic;
+}
+
+.pg-panel-content div.bg-process-watcher.col-xs-12 {
+  height: 100%;
+  padding: 0px 0px 0px 0px;
+  WebkitTransition: all 1s;
+  transition: all 1s;
+  background-color: #D9EDF7;
+}
+
+ol.pg-bg-process-logs {
+  padding: 5px 10px 5px 60px;
+  height: 100%;
+  overflow: auto;
+  width: 100%;
+  font-style: italic;
+  font-size: small;
+}
+
+.pg-bg-res-out, .pg-bg-res-err {
+  padding-left: 10px;
+  white-space: pre-wrap;
+}
+
+.pg-bg-res-out {
+  color: #337AB7;
+}
+
+.pg-bg-res-err {
+  color: rgba(212, 27, 57, 0.81);
+}
+
+.pg-panel-content .bg-process-details {
+  padding: 10px 15px;
+  min-height: 70px;
+  color: #000;
+  background-color: #E2E2E2;
+}
+
+.pg-panel-content .bg-process-stats p{
+  display: inline;
+  padding-left: 5px;
+  margin-bottom: 0;
+  font-size: 13px;
+}
+
+.pg-panel-content .bg-process-footer {
+  border-top: 1px solid #ccc;
+  padding: 10px 15px;
+  position: absolute;
+  bottom: 0;
+  background-color: #E2E2E2;
+}
+
+.pg-panel-content .bg-process-footer p {
+  display: inline;
+  padding-left: 5px;
+  font-size: 13px;
+}
+
+.pg-panel-content .bg-process-footer b, .bg-process-stats span b {
+  color: #333;
+}
+
+.bg-process-footer .bg-process-status {
+  padding-left: 0;
+}
+
+.bg-process-footer .bg-process-exec-time {
+  padding-right: 0;
+}

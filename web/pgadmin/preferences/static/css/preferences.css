@@ -1,0 +1,42 @@
+.preferences_dialog {
+  height: 100%;
+  width: 100%;
+  padding-top: 34px;
+  padding-bottom: 39px;
+}
+
+.preferences_tree{
+  padding: 0px;
+  padding-top: 2px;
+  height: 100%;
+  overflow: auto;
+  border-right: 2px solid #999999;
+  background-image: #FAFAFA;
+}
+
+.preferences_content {
+  padding-top: 10px;
+  height: 100%;
+  overflow: auto;
+}
+
+div.pgadmin-preference-body div.ajs-content {
+  top: 0px !important;
+  bottom: 0px !important;
+}
+
+.preferences_content .control-label, .preferences_content .pgadmin-controls {
+  min-width: 100px !important;
+}
+
+.pgadmin-preference-body {
+    min-width: 300px !important;
+    min-height: 400px !important;
+}
+
+@media (min-width: 768px) {
+  .pgadmin-preference-body {
+    min-width: 600px !important;
+    min-height: 480px !important;
+  }
+}

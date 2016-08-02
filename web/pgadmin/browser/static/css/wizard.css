@@ -1,0 +1,145 @@
+/** CSS for Wizard **/
+.pgadmin_grant_wizard_body .ajs-content {
+  padding: 0px !important;
+}
+
+.wizard-header {
+  padding: 6px 10px!important;
+  min-height: 35px;
+  max-height: 35px;
+  border-bottom: 2px solid darkgray;
+  background-color: #2C76B4;
+  font-weight: bold;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 0;
+}
+
+.wizard-header h3 {
+  font-size: 14px;
+  display: inline-block;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.wizard_dlg {
+  float: left;
+  height: 100%;
+  width: 100%;
+}
+
+.pgadmin-wizard {
+  width: 100%;
+  height: 100%;
+}
+
+.wizard-content {
+  position: relative;
+  padding: 0;
+  height: calc(100% - 97px);
+}
+
+.wizard-right-panel {
+  overflow-y: auto;
+  height: 100%;
+  top: 0;
+  right: 0;
+  position: absolute;
+  bottom: 0;
+}
+
+.wizard-left-panel {
+  position: absolute;
+  top: 0;
+  display: flex;
+  bottom: 0;
+  left: 0;
+  align-items: center;
+  justify-content: center;
+  right: 0;
+}
+
+.wizard-left-panel img {
+  width: 140px;
+}
+
+.wizard-right-panel_content {
+  height: calc(100% - 86px);
+  padding: 0;
+}
+
+/* Wizard Footer CSS */
+.pgadmin-wizard .footer {
+  background-color: #D2D2D2;
+  border-width: 2px 0px 0px 0px;
+  border-style: solid;
+  border-color: rgb(85, 85, 85);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.pgadmin-wizard .footer .row {
+  margin: 0 -6px 3px -6px;
+}
+
+/* Wizard Button CSS */
+.pgadmin-wizard .wizard-buttons {
+  float: right;
+}
+
+.pgadmin-wizard .wizard-buttons button {
+  float: left;
+  font-size: 14px;
+  margin: 3px 5px 0 0 !important;
+}
+
+.pgadmin-wizard .wizard-buttons button.wizard-next i.fa {
+  padding-left: 5px;
+}
+
+.pgadmin-wizard .wizard-buttons button.wizard-back i.fa,
+.pgadmin-wizard .wizard-buttons button.wizard-cancel i.fa {
+  padding-right: 5px;
+}
+
+.pgadmin-wizard .wizard-buttons .wizard-finish {
+  margin-right: 0 !important;
+}
+
+.wizard-header .wizard-cancel-event {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAdklEQVQ4jd2SwQnAIAxF36GH0pOTFHEgF3IkR5LO0F4SCGJVEHroAy/f/E+igV+yAa6hO7nrcgAZuIBg9CBalppXEnDL0RA1q556ASdQqhBrLlLTxVch1uxHZiU2AuKs2Vdt23GGHSy/wfIvzOzBPhpjaRO/5wG/szevJ+ZXzAAAAABJRU5ErkJggg==) no-repeat center center;
+  padding: 10px;
+  margin-top: -1px;
+}
+
+/* Wizard Status bar CSS */
+.pgadmin-wizard .wizard-description {
+  padding: 1.0em 0.1em;
+}
+
+/* Error message css */
+.pgadmin-wizard .error_msg_div {
+  background: #fff;
+  font-size: 13px;
+}
+
+.pgadmin-wizard .error_msg_div p {
+  background: #fff;
+  color: #b92c28;
+}
+
+/* In wizard select2 dropdown doesn't
+ * popup because z-index of alertify
+ * wizard is greater than the z-index
+ * of select2 dropdown. To make select2
+ * visible, set z-index of select2
+ * higher value than wizard's
+ */
+.select2-container--open {
+  z-index: 10000;
+}
