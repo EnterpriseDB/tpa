@@ -10,12 +10,14 @@ packages:
     - sysstat
     - linux-tools-common
     - linux-tools-generic
+    - acl
   redhat:
     - tcpdump
     - vim
     - git
     - rsync
     - python-devel
+    - acl
 
 unwanted_packages:
   debian:

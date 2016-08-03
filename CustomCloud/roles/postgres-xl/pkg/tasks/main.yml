@@ -5,7 +5,7 @@
 - name: Appoint control node
   set_fact: control_hostname="{{ item }}"
   when: "hostvars[item].ec2_tag_node == '1'"
-  with_items: "{{ play_hosts }}"
+  with_items: play_hosts
 
 - name: Ensure that /opt/Postgres-XL-{{pgxlversion}} exists
   file:
@@ -53,19 +53,16 @@
   action: filesystem fstype=ext4 dev=/dev/xvdb force=yes
 
 - name: 
-  action: mount name=/data src=/dev/xvdb fstype=ext4 state=mounted
+  action: mount name=/wal src=/dev/xvdb fstype=ext4 state=mounted
 
 - name: create file system
   action: filesystem fstype=ext4 dev=/dev/xvdc force=yes
 
-- name: 
-  action: mount name=/data_tblspc1 src=/dev/xvdc fstype=ext4 state=mounted
+- name: Create swap
+  command: "mkswap /dev/xvdc"
 
-- name: create file system
-  action: filesystem fstype=ext4 dev=/dev/xvdd force=yes
-
-- name: 
-  action: mount name=/data_tblspc2 src=/dev/xvdd fstype=ext4 state=mounted
+- name: Add swap
+  command: "swapon /dev/xvdc"
 
 - name: Ensure that /data/pgxl exists
   file:
@@ -75,24 +72,11 @@
     group: postgres
     mode: 0755
 
-- name: Ensure that /data_tblspc1/data exists
+- name: Ensure that /wal/pgxl exists
   file:
-    path: /data_tblspc1/data
+    path: /wal/pgxl
     state: directory
     owner: postgres
     group: postgres
     mode: 0755
 
-- name: Ensure that /data_tblspc2/data exists
-  file:
-    path: /data_tblspc2/data
-    state: directory
-    owner: postgres
-    group: postgres
-    mode: 0755
-
-- name: Create swap
-  command: "mkswap /dev/xvde"
-
-- name: Add swap
-  command: "swapon /dev/xvde"

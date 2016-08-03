@@ -90,7 +90,7 @@ datanodeMasterDir=$dataDirRoot/dn_master
 datanodeSlaveDir=$dataDirRoot/dn_slave
 datanodeArchLogDir=$dataDirRoot/datanode_archlog
 
-{% with g = groups['tag_role_datanode'] %}
+{% with g = groups['tag_role_datanode']|difference(groups['tag_role_coordinator']) %}
 #primaryDatanode=datanode1
 datanodeNames=({% for h in g %}datanode{{loop.index}} {% endfor %})
 datanodePorts=({{ (['20004']*(g|length))|join(' ') }})
