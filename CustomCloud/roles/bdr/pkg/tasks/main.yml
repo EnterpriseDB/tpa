@@ -1,0 +1,3 @@
+#- include: basics.yml
+# TODO: Issue 40
+# Add tasks related with pkg
