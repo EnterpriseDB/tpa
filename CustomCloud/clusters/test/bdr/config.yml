@@ -33,7 +33,7 @@ instances:
           - device_name: /dev/xvdb
             volume_type: standard
             volume_size: 10
-	    delete_on_termination: true
+            delete_on_termination: true
       tags:
         db: bdr
         node: 1
