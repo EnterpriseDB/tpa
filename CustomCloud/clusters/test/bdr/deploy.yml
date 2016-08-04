@@ -1,2 +1,20 @@
-# TODO: Issue 40
-# Add deploy.yml for BDR 
+---
+
+- name: Set up TPA BDR node
+  hosts: tag_Name_TPA_BDR
+  gather_facts: no
+  sudo_user: root
+  sudo: true
+  
+  roles:
+
+    - role: common
+      tags: common
+
+    # Setup complete. Update, Upgrade and restart the instances
+    - role: sys/instance
+      tags: instance
+
+    # Install the BDR packages and basic configuration files.
+    - role: bdr/pkg
+      tags: bdr
