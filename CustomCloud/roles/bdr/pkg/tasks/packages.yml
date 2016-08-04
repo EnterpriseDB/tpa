@@ -20,4 +20,4 @@
 # Do not remove the old packages if you have existing data directory!
 
 - name: Install the BDR packages
-  package: name=postgresql-bdr-9.4 state=latest
+  package: name=postgresql-bdr-{{ pgversion }} state=latest

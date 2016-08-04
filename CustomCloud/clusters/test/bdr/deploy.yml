@@ -6,7 +6,8 @@
   sudo_user: root
   sudo: true
   vars:
-    use_2ndquadrant_postgres: 'yes' 
+    use_2ndquadrant_postgres: 'yes'
+    pgversion: "9.4" 
  
   roles:
 
