@@ -34,6 +34,7 @@ instances:
           - device_name: /dev/xvdb
             volume_type: gp2
             volume_size: 10
+            delete_on_termination: true
       tags:
         db: primary
         node: 1
@@ -45,6 +46,7 @@ instances:
           - device_name: /dev/xvdb
             volume_type: standard
             volume_size: 10
+            delete_on_termination: true
       tags:
         db: standby
         node: 2
@@ -56,6 +58,7 @@ instances:
           - device_name: /dev/xvdb
             volume_type: standard
             volume_size: 10
+            delete_on_termination: true
       tags:
         db: standby
         node: 3
