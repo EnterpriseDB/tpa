@@ -1,0 +1,23 @@
+---
+
+# Adding the BDR repository
+
+- block:
+    - name: Add 2ndQuadrant BDR repository signing key
+      apt_key:
+        id=AA7A6805 url=http://packages.2ndquadrant.com/bdr/apt/AA7A6805.asc
+        state=present
+    - name: Add the 2ndQuadrant BDR apt repository
+      apt_repository:
+        repo='deb [arch=amd64] http://packages.2ndquadrant.com/bdr/apt/  {{ ansible_distribution_release }}-2ndquadrant main'
+        state=present update_cache=yes
+  when: (ansible_distribution == 'debian' and use_2ndquadrant_postgres == 'yes')
+
+# Install the BDR packages
+
+# Note: If you attempt to install this package when you already have postgresql-9.4 installed
+# you will get informed that the official package will be removed and confirmation will be required. 
+# Do not remove the old packages if you have existing data directory!
+
+- name: Install the BDR packages
+  package: name=postgresql-bdr-9.4 state=latest

@@ -5,7 +5,9 @@
   gather_facts: no
   sudo_user: root
   sudo: true
-  
+  vars:
+    use_2ndquadrant_postgres: 'yes' 
+ 
   roles:
 
     - role: common
