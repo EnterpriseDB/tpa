@@ -1,2 +1,49 @@
-# TODO: Issue 40
-# Add config.yml for BDR
+---
+
+# An EC2 configuration for TPA BDR cluster deployment
+#
+# We will be using Ubuntu 16.04 LTS 64 bit image for deployment
+#
+# Intended for deployment under the 2ndQuadrant AWS account.
+
+cluster_name: "TPA_BDR"
+cluster_tags:
+  Name: TPA_BDR
+  Owner: gulcin
+
+ec2_ami_name: "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627"
+ec2_ami_user: "ubuntu"
+
+ec2_vpc:
+  Name: TPA_BDR
+  cidr: 10.67.0.0/24
+
+ec2_vpc_subnets:
+  us-east-1:
+    10.67.0.0/26: us-east-1a
+    10.67.0.64/26: us-east-1a
+
+instances:
+    - type: t2.small
+      region: us-east-1
+      subnet: 10.67.0.0/26
+      ip: 10.67.0.1
+      assign_eip: false
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: standard
+            volume_size: 10
+      tags:
+        db: bdr
+        node: 1
+    - type: t2.small
+      region: us-east-1
+      subnet: 10.67.0.64/26
+      ip: 10.67.1.1
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: standard
+            volume_size: 10
+      tags:
+        db: bdr
+        node: 2
