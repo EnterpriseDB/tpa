@@ -1,0 +1,30 @@
+data_directory = '{{ pgdata }}'
+hba_file = '{{ pgconf }}/pg_hba.conf'
+ident_file = '{{ pgconf }}/pg_ident.conf'
+external_pid_file = '{{ pgsock }}/{{ pgversion }}-main.pid'
+unix_socket_directories = '{{ pgsock }}'
+
+listen_addresses = '*'
+
+ssl = true
+ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'
+
+#
+# Prerequisite PostgreSQL parameters
+#
+
+wal_level: "'logical'"
+shared_preload_libraries: "'bdr'"
+max_connections: 200
+max_worker_processes: 100
+max_replication_slots: 100
+max_wal_senders: 100
+track_commit_timestamp: "'on'"
+logging_collector: "'on'"
+log_statement: "'all'"
+log_min_messages: "'debug2'"
+log_line_prefix: "'%t %p:%l %v:%t %a: '"
+
+# If you want to default to BDR global sequences:
+default_sequenceam: "'bdr'"
