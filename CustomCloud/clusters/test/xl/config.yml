@@ -2,15 +2,16 @@
 
 # An example EC2 configuration for XL cluster deployment.
 #
-# The image ids below are the "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627"
-# community AMI in Sydney region.
-#
 # Intended for deployment under the 2ndQuadrant AWS account.
 
 cluster_name: "XLCloudTest"
 cluster_tags:
   Name: XLCloudTest
   Owner: Haroon
+
+ec2_ami_name: "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627"
+ec2_ami_user: "ubuntu"
+
 cluster_rules:
   - proto: tcp
     from_port: 22
@@ -36,7 +37,6 @@ ec2_vpc_subnets:
 instances:
     - type: d2.xlarge
       region: ap-southeast-2
-      image: ami-a387afc0
       subnet: 10.63.0.0/26
       ip: 10.63.0.1
       spot_price: 0.12
@@ -58,7 +58,6 @@ instances:
         role: gtm,coordinator
     - type: d2.xlarge
       region: ap-southeast-2
-      image: ami-a387afc0
       subnet: 10.63.0.0/26
       ip: 10.63.0.2
       spot_price: 0.12
@@ -80,7 +79,6 @@ instances:
         role: datanode
     - type: d2.xlarge
       region: ap-southeast-2
-      image: ami-a387afc0
       subnet: 10.63.0.0/26
       ip: 10.63.0.3
       spot_price: 0.12
