@@ -78,26 +78,29 @@
         name: '{{ cluster_name }}_profile'
         state: absent
 
-    # Before we can delete the VPCs in each region, we must delete the
-    # subnets in each VPC. Strangely, we have to use the vpc_id with a
-    # CIDR mask to identify a subnet, so we have to iterate over vpc_id
-    # from hostvars and subnet masks from instances.
-    #
-    # This means we will try to remove every known subnet in a region
-    # from every known VPC in the region, whether or not we ever created
-    # a particular subnet in a particular VPC. But we probably have only
-    # one subnet per VPC per region, so we don't waste too much effort.
+    # Next, we delete the subnets that we created within each VPC, i.e.,
+    # those subnets for which the CreatingCluster is set to this one.
 
-    - name: Remove VPC subnets in each region
+    - name: Search for this cluster's VPC subnets in each region
+      ec2_vpc_subnet_facts:
+        region: "{{ region }}"
+        filters:
+          "tag:CreatingCluster": "{{ cluster_name }}"
+      with_items: "{{ regions }}"
+      loop_control:
+        loop_var: region
+      register: subnets
+      tags: ec2_vpcs
+
+    - name: Remove this cluster's VPC subnets in each region
       ec2_vpc_subnet:
         state: absent
-        region: "{{ item.0 }}"
-        vpc_id: "{{ item.1 }}"
-        cidr: "{{ item.2 }}"
+        region: "{{ item.0.region }}"
+        vpc_id: "{{ item.1.vpc_id }}"
+        cidr: "{{ item.1.cidr_block }}"
       with_nested_dependents:
-        - regions
-        - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_vpc_id')|unique|list
-        - instances|selectattr('region', 'equalto', item.0)|map(attribute='subnet')|unique|list
+        - "{{ subnets.results }}"
+        - item.0.subnets
       tags: ec2_vpcs
 
     # Next, we do the same for security groups within the region. Note
@@ -116,16 +119,28 @@
         - item[1].split(',')
       tags: ec2_vpcs
 
-    # Now we can finally delete each VPC in each region.
+    # Now we can finally delete any VPCs that we created for this
+    # cluster, i.e., whose CreatingCluster is set to this one.
 
-    - name: Terminate VPCs in each region
-      ec2_vpc:
+    - name: Search for this cluster's VPC in each region
+      ec2_vpc_net_facts:
+        region: "{{ region }}"
+        filters:
+          "tag:CreatingCluster": "{{ cluster_name }}"
+      with_items: "{{ regions }}"
+      loop_control:
+        loop_var: region
+      register: vpcs
+      tags: ec2_vpcs
+
+    - name: Remove this cluster's VPC in each region
+      ec2_vpc_subnet:
         state: absent
-        region: "{{ item.0 }}"
-        vpc_id: "{{ item.1 }}"
+        region: "{{ item.0.region }}"
+        vpc_id: "{{ item.1.vpc_id }}"
         resource_tags: {}
         wait: yes
       with_nested_dependents:
-        - regions
-        - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_vpc_id')|unique|list
+        - "{{ vpcs.results }}"
+        - item.0.vpcs
       tags: ec2_vpcs
