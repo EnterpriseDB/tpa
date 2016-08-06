@@ -1,0 +1,8 @@
+[tag_Name_TPA_RHEL]
+54.171.69.90
+54.171.130.70
+
+[tag_Name_TPA_RHEL:vars]
+cluster_name=TPA_RHEL
+ansible_user=admin
+ansible_python_interpreter=/usr/bin/python2.7
