@@ -27,18 +27,17 @@ cluster_rules:
     cidr_ip: 0.0.0.0/0
 
 ec2_vpc:
-  Name: XLCloudTest
-  cidr: 10.63.0.0/24
+  Name: Test
+  cidr: 10.33.63.0/24
 
 ec2_vpc_subnets:
   ap-southeast-2:
-    10.63.0.0/26: ap-southeast-2a
+    10.33.63.0/26: ap-southeast-2a
 
 instances:
     - type: d2.xlarge
       region: ap-southeast-2
-      subnet: 10.63.0.0/26
-      ip: 10.63.0.1
+      subnet: 10.33.63.0/26
       spot_price: 0.12
       spot_wait_timeout: 1800
       spot_launch_group: xllaunchgrp
@@ -58,8 +57,7 @@ instances:
         role: gtm,coordinator
     - type: d2.xlarge
       region: ap-southeast-2
-      subnet: 10.63.0.0/26
-      ip: 10.63.0.2
+      subnet: 10.33.63.0/26
       spot_price: 0.12
       spot_wait_timeout: 1800
       spot_launch_group: xllaunchgrp
@@ -79,8 +77,7 @@ instances:
         role: datanode
     - type: d2.xlarge
       region: ap-southeast-2
-      subnet: 10.63.0.0/26
-      ip: 10.63.0.3
+      subnet: 10.33.63.0/26
       spot_price: 0.12
       spot_wait_timeout: 1800
       spot_launch_group: xllaunchgrp

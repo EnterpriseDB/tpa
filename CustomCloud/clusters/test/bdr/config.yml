@@ -15,19 +15,18 @@ ec2_ami_name: "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627"
 ec2_ami_user: "ubuntu"
 
 ec2_vpc:
-  Name: TPA_BDR
-  cidr: 10.67.0.0/24
+  Name: Test
+  cidr: 10.33.67.0/24
 
 ec2_vpc_subnets:
   us-east-1:
-    10.67.0.0/26: us-east-1a
-    10.67.0.64/26: us-east-1a
+    10.33.67.0/26: us-east-1a
+    10.33.67.64/26: us-east-1a
 
 instances:
     - type: t2.small
       region: us-east-1
-      subnet: 10.67.0.0/26
-      ip: 10.67.0.1
+      subnet: 10.33.67.0/26
       assign_eip: false
       volumes:
           - device_name: /dev/xvdb
@@ -39,8 +38,7 @@ instances:
         node: 1
     - type: t2.small
       region: us-east-1
-      subnet: 10.67.0.64/26
-      ip: 10.67.1.1
+      subnet: 10.33.67.64/26
       volumes:
           - device_name: /dev/xvdb
             volume_type: standard
