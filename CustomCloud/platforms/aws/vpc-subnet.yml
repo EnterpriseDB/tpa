@@ -43,7 +43,13 @@
     cidr: "{{ item }}"
     vpc_id: "{{ vpc }}"
     region: "{{ region }}"
-    az: "{{ ec2_vpc_subnets[region][item] }}"
+    az: "{{
+      (ec2_vpc_subnets and
+       region in ec2_vpc_subnets and
+       item in ec2_vpc_subnets[region] and
+       ec2_vpc_subnets[region][item])
+      or omit
+    }}"
     resource_tags:
       Name: "Automatically created for {{ cluster_name }} in {{ ec2_vpc_subnets[region][item] }}"
       CreatingCluster: "{{ cluster_name }}"
