@@ -43,7 +43,7 @@
 
 - name: Ensure there is at most one matching VPC
   assert:
-    msg: "{{ vpc['Name'] }}{{ (vpc['cidr'] is defined)|ternary(':'+vpc['cidr'],'') }} matches >1 VPC in {{ region }}"
+    msg: "{{ vpc['Name'] }}{{ ('cidr' in vpc and ':'+vpc['cidr']) or '' }} matches >1 VPC in {{ region }}"
     that:
       - found.vpcs|length < 2
 
