@@ -7,7 +7,7 @@
   sudo: true
   vars:
     pgversion: "9.4" 
- 
+    use_2ndquadrant_postgres: 'no'
   roles:
 
     - role: common
@@ -19,4 +19,7 @@
 
     # Install the BDR packages and basic configuration files.
     - role: bdr/pkg
+      tags: bdr
+
+    - role: bdr/config
       tags: bdr

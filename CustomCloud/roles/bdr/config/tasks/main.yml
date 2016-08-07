@@ -1,0 +1,4 @@
+- name: Generate bdr.conf 
+  template:
+    src: bdr.conf.j2
+    dest: "{{postgres_data_dir}}/conf.d/bdr.conf"

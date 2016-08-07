@@ -1,0 +1,11 @@
+---
+allow_duplicates: yes
+dependencies:
+    - role: 'postgres/config'
+      postgres_config_settings:
+        track_commit_timestamp: on
+        wal_level: 'logical'
+        shared_preload_libraries: 'bdr'
+        max_worker_processes: 100
+        max_replication_slots: 100
+        max_wal_senders: 100

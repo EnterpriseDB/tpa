@@ -12,25 +12,3 @@
         repo='deb [arch=amd64] http://packages.2ndquadrant.com/bdr/apt/  {{ ansible_distribution_release }}-2ndquadrant main'
         state=present update_cache=yes
   when: ansible_distribution == 'debian'
-
-# Adding PGDG repository
-
-- block:
-    - name: Add PGDG repository signing key
-      apt_key:
-        id=ACCC4CF8 url=https://www.postgresql.org/media/keys/ACCC4CF8.asc
-        state=present
-    - name: Add the PGDG apt repository
-      apt_repository:
-        repo='deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg {{ pgversion }} main'
-        state=present update_cache=yes
-  when: ansible_distribution == 'debian'
-
-# Install the BDR packages
-
-# Note: If you attempt to install this package when you already have postgresql-9.4 installed
-# you will get informed that the official package will be removed and confirmation will be required. 
-# Do not remove the old packages if you have existing data directory!
-
-- name: Install the BDR packages
-  package: name=postgresql-bdr-{{ pgversion }} state=latest
