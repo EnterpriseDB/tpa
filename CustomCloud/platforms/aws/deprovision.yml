@@ -134,10 +134,10 @@
       tags: ec2_vpcs
 
     - name: Remove this cluster's VPC in each region
-      ec2_vpc_subnet:
+      ec2_vpc:
         state: absent
         region: "{{ item.0.region }}"
-        vpc_id: "{{ item.1.vpc_id }}"
+        vpc_id: "{{ item.1.id }}"
         resource_tags: {}
         wait: yes
       with_nested_dependents:
