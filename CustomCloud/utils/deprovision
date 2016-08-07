@@ -1,0 +1,25 @@
+#!/bin/sh
+
+IFS=
+set -e -u
+
+utils=$(dirname $0)
+
+cluster=${1:?No cluster specified}
+shift
+
+for d in ./clusters/$cluster $utils/../clusters/$cluster; do
+    if [ -d $d ]; then
+        cluster_dir=$d
+    fi
+done
+
+if [ ! -s $cluster_dir ]; then
+    echo "Can't find directory clusters/$cluster"
+    exit
+fi
+
+$utils/ansible-playbook \
+    $utils/../platforms/aws/deprovision.yml \
+    -i $cluster_dir/inventory/ec2.py \
+    -e cluster=$cluster_dir $@

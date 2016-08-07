@@ -53,8 +53,7 @@ I just want a test cluster
 2. Provision the cluster instances and deploy software to them:
 
    ```
-   utils/ansible-playbook platforms/aws/provision.yml \
-       -e cluster=./clusters/name
+   utils/provision clustername
 
    utils/ansible-playbook -i inventory/ec2.py clusters/name/deploy.yml \
        -e cluster=./clusters/name
@@ -63,8 +62,7 @@ I just want a test cluster
 3. Once you're done with testing, deprovision the cluster:
 
    ```
-   utils/ansible-playbook -i inventory/ec2.py platforms/aws/deprovision.yml \
-       -e cluster=./clusters/name
+   utils/deprovision clustername
    ```
 
 Note that deprovision.yml does not currently remove additional volumes
