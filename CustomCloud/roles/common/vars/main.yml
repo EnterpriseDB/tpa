@@ -17,6 +17,8 @@ packages:
     - git
     - rsync
     - python-devel
+    - sysstat
+    - perf
     - acl
 
 unwanted_packages:
