@@ -4,7 +4,9 @@
   package:
     name: "{{ item }}"
     state: latest
-  with_items: "{{ packages[ansible_distribution] }}"
+  with_items:
+    - "{{ packages['common'] }}"
+    - "{{ packages[ansible_distribution] }}"
 
 - name: Remove unwanted packages
   package:
