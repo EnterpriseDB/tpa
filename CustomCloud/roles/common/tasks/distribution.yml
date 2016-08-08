@@ -12,6 +12,7 @@
       raw: lsb_release -ics
       sudo: false
       ignore_errors: yes
+      changed_when: False
       register: lsb_release
 
     - name: Set ansible_distribution based on lsb_release
@@ -24,6 +25,7 @@
         - name: Look for /etc/redhat-release
           raw: test -f /etc/redhat-release && echo RedHat
           ignore_errors: yes
+          changed_when: False
           register: redhat
 
         - name: Set ansible_distribution based on /etc/redhat-release
