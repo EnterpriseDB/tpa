@@ -1,20 +1,13 @@
 ---
 
-- name: Install pip
-  raw: apt-get -y install python-pip
-  register: pip
-  changed_when: "'already the newest version' not in pip.stdout"
-  when: ansible_distribution == 'debian'
+- name: Determine Python version
+  command: "{{ ansible_python_interpreter }} -c 'import platform; print platform.python_version()'"
+  register: version
+  changed_when: False
 
-- name: Install pip
-  raw: yum install -y python-pip
-  register: pip
-  changed_when: "'already installed and latest version' not in pip.stdout"
-  when: ansible_distribution == 'redhat'
-
-# Python scripts installed in the repmgr role and others will need boto
-- name: Install boto
-  command: pip install boto
+- name: Set ansible_python_version
+  set_fact:
+    ansible_python_version: "{{ version.stdout }}"
 
 # If we have neither ssl.match_hostname (included in Python ≥ 2.7.9) or
 # backports.ssl_match_hostname, we need to install the latter using pip.
@@ -26,3 +19,8 @@
   register: backport
   changed_when: "'Requirement already satisfied' not in backport.stdout"
   when: ansible_python_version | version_compare('2.7.9', '<')
+
+- name: Install boto
+  command: pip install boto
+  register: boto
+  changed_when: "'Requirement already satisfied' not in boto.stdout"

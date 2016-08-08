@@ -1,0 +1,49 @@
+---
+
+# If ansible_distribution is not specified in the inventory, we perform
+# "lightweight" distribution detection. We support Debian, RedHat, and
+# Ubuntu—and we aren't worried about detecting older versions of these
+# platforms accurately (since we control what runs on the machines).
+#
+# We can't rely on there being a usable Python installed yet.
+
+- block:
+    - name: Try to run lsb_release -is
+      raw: lsb_release -is
+      ignore_errors: yes
+      register: distribution
+
+    - name: Try to run lsb_release -cs
+      raw: lsb_release -cs
+      ignore_errors: yes
+      register: release
+      when: distribution|succeeded
+
+    - name: Look for /etc/redhat-release
+      raw: test -f /etc/redhat-release && echo RedHat
+      ignore_errors: yes
+      register: distribution
+      when: distribution|failed
+
+    - name: Set ansible_distribution
+      set_fact:
+        ansible_distribution: "{{ distribution.stdout|trim }}"
+      when: distribution|succeeded
+
+    - name: Set ansible_distribution_release
+      set_fact:
+        ansible_distribution_release: "{{ release.stdout|trim }}"
+      when: release|succeeded
+  when: ansible_distribution is not defined
+
+- name: Ensure ansible_distribution is supported
+  assert:
+    msg: "ansible_distribution must be set to Debian/RedHat/Ubuntu"
+    that:
+      - ansible_distribution is defined
+      - ansible_distribution in ('Debian', 'RedHat', 'Ubuntu')
+
+- name: Set ansible_pkg_mgr based on ansible_distribution
+  set_fact:
+    ansible_pkg_mgr: "{{ dict(Debian='apt', RedHat='yum', Ubuntu='apt')[ansible_distribution] }}"
+  when: ansible_pkg_mgr is not defined
