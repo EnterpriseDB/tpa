@@ -55,8 +55,7 @@ I just want a test cluster
    ```
    utils/provision clustername
 
-   utils/ansible-playbook -i inventory/ec2.py clusters/name/deploy.yml \
-       -e cluster=./clusters/name
+   utils/deploy clustername
    ```
 
 3. Once you're done with testing, deprovision the cluster:
