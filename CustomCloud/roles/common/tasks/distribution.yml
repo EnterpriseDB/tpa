@@ -8,33 +8,34 @@
 # We can't rely on there being a usable Python installed yet.
 
 - block:
-    - name: Try to run lsb_release -is
-      raw: lsb_release -is
+    - name: Try to run lsb_release -ics
+      raw: lsb_release -ics
       ignore_errors: yes
-      register: distribution
+      register: lsb_release
 
-    - name: Try to run lsb_release -cs
-      raw: lsb_release -cs
-      ignore_errors: yes
-      register: release
-      when: distribution|succeeded
+    - block:
+        - name: Set ansible_distribution based on lsb_release
+          set_fact:
+            ansible_distribution: "{{ lsb_release.stdout_lines[0] }}"
+        - name: Set ansible_distribution_release based on lsb_release
+          set_fact:
+            ansible_distribution_release: "{{ lsb_release.stdout_lines[1] }}"
+      when: lsb_release|succeeded
 
-    - name: Look for /etc/redhat-release
-      raw: test -f /etc/redhat-release && echo RedHat
-      ignore_errors: yes
-      register: distribution
-      when: distribution|failed
-
-    - name: Set ansible_distribution
-      set_fact:
-        ansible_distribution: "{{ distribution.stdout|trim }}"
-      when: distribution|succeeded
-
-    - name: Set ansible_distribution_release
-      set_fact:
-        ansible_distribution_release: "{{ release.stdout|trim }}"
-      when: release|succeeded
+    - block:
+        - name: Look for /etc/redhat-release
+          raw: test -f /etc/redhat-release && echo RedHat
+          ignore_errors: yes
+          register: redhat
+        - name: Set ansible_distribution based on /etc/redhat-release
+          set_fact:
+            ansible_distribution: "{{ redhat.stdout_lines[0] }}"
+          when: redhat|succeeded
+      when: lsb_release|failed
   when: ansible_distribution is not defined
+  sudo: false
+
+- debug: var=ansible_distribution
 
 - name: Ensure ansible_distribution is supported
   assert:
