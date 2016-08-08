@@ -1,0 +1,8 @@
+---
+
+# May be overriden either explicitly or by fact discovery.
+ansible_memtotal_mb: null
+
+# Either of these may be overriden explicitly.
+shared_buffers_ratio: 0.25
+shared_buffers_mb: null
