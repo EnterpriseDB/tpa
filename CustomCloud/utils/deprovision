@@ -22,4 +22,4 @@ fi
 $utils/ansible-playbook \
     $utils/../platforms/aws/deprovision.yml \
     -i $cluster_dir/inventory/ec2.py \
-    -e cluster=$cluster_dir $@
+    -e cluster=$cluster_dir "$@"
