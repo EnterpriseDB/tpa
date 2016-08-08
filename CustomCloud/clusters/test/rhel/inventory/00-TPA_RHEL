@@ -1,8 +1,8 @@
 [tag_Name_TPA_RHEL]
-54.171.69.90
-54.171.130.70
+54.154.199.56
+54.194.197.156
 
 [tag_Name_TPA_RHEL:vars]
 cluster_name=TPA_RHEL
-ansible_user=admin
+ansible_user=ec2-user
 ansible_python_interpreter=/usr/bin/python2.7
