@@ -1,0 +1,14 @@
+---
+
+- name: Set up TPA cluster nodes
+  hosts: tag_Name_TPA_RHEL
+  gather_facts: no
+  sudo_user: root
+  sudo: true
+  roles:
+
+    - role: common
+      tags: common
+
+    - role: sys/tune
+    - role: sys/sysctl

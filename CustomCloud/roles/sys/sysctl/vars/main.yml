@@ -1,0 +1,22 @@
+---
+
+# The caller may supply sysctl_values, which will be merged with the
+# sysctl_defaults values described below:
+#
+# zone_reclaim_mode should be disabled by default, but make sure anyway.
+#
+# When we accumulate more than 256MB of dirty pages, we want to start
+# writing them out in the background; writes should become synchronous
+# when we accumulate more than 4GB of dirty pages. Regardless of volume,
+# dirty pages should be written out every 10s at most.
+#
+# nr_hugepages is the size of shared_buffers plus 3% of total RAM,
+# divided by the size of a huge page (2MB on x86).
+
+sysctl_defaults:
+  vm.zone_reclaim_mode: 0
+  vm.dirty_bytes: 4294967296
+  vm.dirty_background_bytes: 268435456
+  vm.dirty_expire_centisecs: 1000
+  vm.nr_hugepages: >
+    {{ "%d"|format((shared_buffers_mb + ansible_memtotal_mb*0.03)/2) }}
