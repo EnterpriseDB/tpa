@@ -8,14 +8,15 @@ packages:
     - rsync
     - sysstat
     - acl
-  Debian: &debian_packages
+  Debian:
     - python-dev
-    - linux-tools-common
-    - linux-tools-generic
+    - linux-tools
   RedHat:
     - python-devel
     - perf
-  Ubuntu: *debian_packages
+  Ubuntu:
+    - python-dev
+    - linux-tools-generic
 
 unwanted_packages:
   Debian: &debian_unpackages
