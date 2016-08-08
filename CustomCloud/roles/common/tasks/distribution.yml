@@ -10,16 +10,14 @@
 - block:
     - name: Try to run lsb_release -ics
       raw: lsb_release -ics
+      sudo: false
       ignore_errors: yes
       register: lsb_release
 
-    - block:
-        - name: Set ansible_distribution based on lsb_release
-          set_fact:
-            ansible_distribution: "{{ lsb_release.stdout_lines[0] }}"
-        - name: Set ansible_distribution_release based on lsb_release
-          set_fact:
-            ansible_distribution_release: "{{ lsb_release.stdout_lines[1] }}"
+    - name: Set ansible_distribution based on lsb_release
+      set_fact:
+        ansible_distribution: "{{ lsb_release.stdout_lines[0] }}"
+        ansible_distribution_release: "{{ lsb_release.stdout_lines[1] }}"
       when: lsb_release|succeeded
 
     - block:
@@ -27,15 +25,13 @@
           raw: test -f /etc/redhat-release && echo RedHat
           ignore_errors: yes
           register: redhat
+
         - name: Set ansible_distribution based on /etc/redhat-release
           set_fact:
             ansible_distribution: "{{ redhat.stdout_lines[0] }}"
           when: redhat|succeeded
       when: lsb_release|failed
   when: ansible_distribution is not defined
-  sudo: false
-
-- debug: var=ansible_distribution
 
 - name: Ensure ansible_distribution is supported
   assert:
