@@ -12,7 +12,7 @@
     - name: Copy apt "preferences" file
       sudo: true
       copy: src="preferences" dest=/etc/apt/preferences
-  when: (ansible_distribution == 'debian' and use_2ndquadrant_postgres == 'yes')
+  when: (ansible_distribution == 'Debian' and use_2ndquadrant_postgres == 'yes')
 
 - block:
     - name: Add PGDG repository signing key
@@ -23,7 +23,20 @@
       apt_repository:
         repo='deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg {{ pgversion }} main'
         state=present update_cache=yes
-  when: ansible_distribution == 'debian'
+  when: ansible_distribution == 'Debian'
+
+- block:
+    - name: "Add {{ item.name }} repository signing key"
+      apt_key:
+        id={{ item.key_id}} url={{ item.key_url }}
+        state=present
+      with_items: "{{ extra_debian_repositories }}"
+    - name: "Add the {{ item.name }} apt repository"
+      apt_repository:
+        repo='deb {{ item.repo }}'
+        state=present update_cache=yes
+      with_items: "{{ extra_debian_repositories }}"
+  when: ansible_distribution == 'Debian'
 
 - block:
     - name: Install PGDG repository RPM
@@ -37,8 +50,19 @@
         section: main
         option: exclude
         value: postgresql*
-  when: ansible_distribution == 'redhat'
+  when: ansible_distribution == 'RedHat'
 
+# Disable automatic creation of data directory by package
+- block:
+    - name: Install postgresql-common package
+      package: name=postgresql-common state=latest
+    - name: Change contents of /etc/postgresql-common/createcluster.conf file
+      lineinfile:
+         dest="/etc/postgresql-common/createcluster.conf"
+         regexp=^#create_main_cluster
+         line="create_main_cluster = false"
+  when: ansible_distribution == 'Debian'      
+      
 - name: Install Postgres packages
   package: name={{ item }} state=latest
   with_items: "{{ postgres_packages[ansible_distribution] }}"
@@ -47,4 +71,4 @@
 # Everyone needs backup and this can be configured after the fact as well
 - name: Install pgespresso
   package: name=postgresql-{{ pgversion }}-pgespresso
-  when: ansible_distribution == 'debian'
+  when: ansible_distribution == 'Debian'

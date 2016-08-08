@@ -11,8 +11,8 @@ cluster_tags:
   Name: TPA_BDR
   Owner: gulcin
 
-ec2_ami_name: "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627"
-ec2_ami_user: "ubuntu"
+ec2_ami_name: "debian-wheezy-amd64-hvm-2015-01-28-ebs"
+ec2_ami_user: "admin"
 
 ec2_vpc:
   Name: Test

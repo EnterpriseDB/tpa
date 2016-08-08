@@ -1,2 +1,4 @@
 - name: Run initdb to create data directory
-  shell: "initdb -D {{postgres_data_dir}} {% for x in postgres_initdb_opts %}{{x|quote}} {% endfor %}"
+  shell: "{{ pgbindir }}/initdb -D {{postgres_data_dir}} {% for x in postgres_initdb_opts %}{{x|quote}} {% endfor %}"
+  become: yes
+  become_user: postgres
