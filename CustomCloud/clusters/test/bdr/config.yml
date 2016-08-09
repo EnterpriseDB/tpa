@@ -11,7 +11,7 @@ cluster_tags:
   Name: TPA_BDR
   Owner: gulcin
 
-ec2_ami_name: "debian-wheezy-amd64-hvm-2015-01-28-ebs"
+ec2_ami_name: "debian-jessie-amd64-hvm-2016-04-03-ebs"
 ec2_ami_user: "admin"
 
 ec2_vpc:
