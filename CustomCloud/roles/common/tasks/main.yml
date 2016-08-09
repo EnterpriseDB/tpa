@@ -12,8 +12,7 @@
 # that is required to run "pkg" below.
 - include: "os/{{ ansible_distribution }}.yml"
 
-# We have Python and pip; install any other required Python packages.
+# We have Python and pip; install any other required Python packages,
+# and then install/uninstall any system packages.
 - include: python.yml
-
-# Now we can install the system packages listed in vars/main.yml
 - include: packages.yml
