@@ -16,3 +16,17 @@
 
 - name: Update apt cache
   apt: update_cache=yes
+
+- block:
+    - name: Install postgresql-common package
+      package: name=postgresql-common state=latest
+    - name: Change contents of /etc/postgresql-common/createcluster.conf file
+      lineinfile:
+         dest="/etc/postgresql-common/createcluster.conf"
+         regexp=^#create_main_cluster
+         line="create_main_cluster = false"
+  when: ansible_distribution == 'Debian'
+
+- name: Install Postgres packages
+  package: name={{ item }} state=latest
+  with_items: "{{ postgres_packages[ansible_distribution] }}"
