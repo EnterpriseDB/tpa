@@ -10,6 +10,7 @@
     use_2ndquadrant_postgres: 'no'
     pg_device: /dev/xvdb
     pg_mountpoint: /var/lib/postgresql
+    pgbindir: "/usr/lib/postgresql/{{ pgversion }}/bin" 
     
   pre_tasks:
 
