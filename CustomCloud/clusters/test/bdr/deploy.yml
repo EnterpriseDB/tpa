@@ -30,8 +30,8 @@
       tags: common
 
     # Setup complete. Update, Upgrade and restart the instances
-    - role: sys/instance
-      tags: instance
+    - role: sys/tune
+    - role: sys/sysctl
 
     # Install the BDR packages and basic configuration files.
     - role: bdr/pkg
