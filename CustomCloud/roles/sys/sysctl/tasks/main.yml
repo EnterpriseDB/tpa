@@ -10,7 +10,7 @@
     state: present
     sysctl_file: /etc/sysctl.conf
     reload: yes
-  with_dict: "{{ sysctl_defaults|combine(sysctl_values|default({})) }}"
+  with_dict: "{{ sysctl_defaults|combine(sysctl_values) }}"
 
 # Transparent huge page support cannot be controlled by a sysctl. The
 # right way to disable it is to append "transparent_hugepage=never" to

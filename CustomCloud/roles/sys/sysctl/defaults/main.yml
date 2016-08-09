@@ -15,6 +15,7 @@ transparent_hugepage: never
 # nr_hugepages is the size of shared_buffers plus 3% of total RAM,
 # divided by the size of a huge page (2MB on x86).
 
+sysctl_values: {}
 sysctl_defaults:
   vm.zone_reclaim_mode: 0
   vm.dirty_bytes: 4294967296
