@@ -27,11 +27,13 @@
   roles:
 
     - role: common
-      tags: common
 
     # Setup complete. Update, Upgrade and restart the instances
     - role: sys/tune
+      tags: always
+
     - role: sys/sysctl
+      tags: sysctl
 
     # Install the BDR packages and basic configuration files.
     - role: bdr/pkg
