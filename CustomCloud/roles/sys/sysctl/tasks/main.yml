@@ -1,7 +1,7 @@
 ---
 
 # Set any sysctl values specified by the caller, which may augment or
-# override the default values defined in vars/main.yml.
+# override the default values defined in by this role.
 
 - name: Set sysctl values
   sysctl:
