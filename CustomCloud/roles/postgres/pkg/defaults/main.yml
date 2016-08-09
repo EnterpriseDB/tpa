@@ -1,5 +1,7 @@
 ---
 
+postgres_package_source: PGDG
+
 # Callers can specify apt_repositories to augment or override the
 # default_apt_repositories specified below. Note that this is a hash of
 # hashes, not an array of hashes. This is so that the two hashes can be
@@ -27,3 +29,5 @@ yum_repositories: {}
 default_yum_repositories:
   PGDG:
     rpm_url: http://yum.postgresql.org/9.4/redhat/rhel-7-x86_64/pgdg-redhat94-9.4-1.noarch.rpm
+  2ndQPostgres:
+    rpm_url: http://packages.2ndquadrant.com/2ndQPostgres/yum-repo-rpms/2ndQPostgres-rhel-1.0-1.noarch.rpm
