@@ -24,5 +24,6 @@ unwanted_packages:
     - vim-tiny
     - vim-nox
     - mlocate
+    - nano
   RedHat: []
   Ubuntu: *debian_unpackages
