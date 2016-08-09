@@ -1,5 +1,7 @@
 ---
 
+transparent_hugepage: never
+
 # The caller may supply sysctl_values, which will be merged with the
 # sysctl_defaults values described below:
 #

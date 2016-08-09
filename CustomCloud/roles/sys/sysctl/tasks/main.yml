@@ -12,15 +12,16 @@
     reload: yes
   with_dict: "{{ sysctl_defaults|combine(sysctl_values|default({})) }}"
 
-#  - name: Insert/update disabling THP configuration block in /etc/rc.local
-#    blockinfile:
-#      dest: /etc/rc.local
-#      mode: u+x
-#      insertbefore: "exit 0"
-#      block: |
-#       if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
-#         echo never > /sys/kernel/mm/transparent_hugepage/enabled
-#       fi
-#       if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
-#         echo never > /sys/kernel/mm/transparent_hugepage/defrag
-#       fi
+# Transparent huge page support cannot be controlled by a sysctl. The
+# right way to disable it is to append "transparent_hugepage=never" to
+# the kernel command line (GRUB_CMDLINE_LINUX in /etc/default/grub), so
+# that the kernel never creates any THPs at all; but for simplicity, we
+# just turn it off after startup for now.
+
+- name: Set transparent_hugepage/enabled in /etc/rc.local
+  lineinfile:
+    dest: /etc/rc.local
+    mode: 0755
+    line: test -f /sys/kernel/mm/transparent_hugepage/enabled && echo {{ transparent_hugepage }} > /sys/kernel/mm/transparent_hugepage/enabled
+    state: present
+    insertbefore: "exit 0"
