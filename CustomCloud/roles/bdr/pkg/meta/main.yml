@@ -3,11 +3,11 @@
 allow_duplicates: yes
 dependencies:
     - role: 'postgres/pkg'
-      extra_debian_repositories:
-        - name: BDR
+      apt_repositories:
+        BDR:
           key_id: AA7A6805
           key_url: http://packages.2ndquadrant.com/bdr/apt/AA7A6805.asc
-          repo: "http://packages.2ndquadrant.com/bdr/apt/  {{ ansible_distribution_release }}-2ndquadrant main"
+          repo: "deb http://packages.2ndquadrant.com/bdr/apt/  {{ ansible_distribution_release }}-2ndquadrant main"
       postgres_packages:
         Debian:
           - postgresql-bdr-{{ pgversion }}
