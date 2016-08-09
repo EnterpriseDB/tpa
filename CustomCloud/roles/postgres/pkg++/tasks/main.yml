@@ -1,0 +1,134 @@
+---
+
+- name: Ensure Postgres configuration is present
+  assert:
+    that:
+      - pgversion is defined
+
+- include: fs.yml
+- include: packages.yml
+- include_vars: "{{ansible_distribution}}.yml"
+
+- name: Install psycopg2
+  command: pip install psycopg2
+  environment:
+    PATH: /usr/local/bin:/usr/bin:/bin:{{ pgbindir }}
+
+- name: Ensure the data directory exists
+  file:
+    path: "{{pgdata}}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0700
+
+- block:
+    - name: Set PGDATA in postgresql-{{pgversion}}.service
+      lineinfile:
+        dest: "/lib/systemd/system/postgresql-{{pgversion}}.service"
+        line: "Environment=PGDATA={{pgdata}}"
+        regexp: "^Environment=PGDATA="
+        state: present
+    - name: Run initdb with the right data directory
+      command: "{{pgbindir}}/postgresql{{pgversionNN}}-setup initdb"
+      args:
+        creates: "{{pgdata}}/PG_VERSION"
+  when: ansible_distribution == 'RedHat'
+
+# If data checksum is required, we need to delete old directories
+# We cannot just move them, because pg_createcluster will use a
+# different port number to avoid collision with existing clusters
+- block:
+    - name: Check if Data Checksum is already enabled
+      shell: psql -t -c "show data_checksums"
+      register: dc_result
+      sudo_user: postgres
+      ignore_errors: true
+  when: enable_data_checksum == 'yes'
+
+- block:
+    - name: Enable Data Checksum
+      service: name="{{pgservice}}" state=stopped
+      sudo_user: root
+    - name: Remove existing cluster directory
+      file: state=absent path="{{pgdata}}"
+    - name: Remove existing config directory
+      file: state=absent path="{{pgconf}}"
+    - name: invoke pg_createcluster with --data-checksums
+      command: pg_createcluster -p 5432 --start {{pgversion}} main -- --data-checksums
+      sudo_user: root
+  when: (enable_data_checksum == 'yes' and 'off' in dc_result.stdout)
+
+- name: Install Postgres configuration files
+  template:
+    src="{{ item }}.j2" dest="{{ pgconf }}/{{ item }}"
+    owner=postgres group=postgres mode=0640
+  with_items:
+    - pg_hba.conf
+    - postgresql.conf
+  register: pgconfig
+  
+- name: Find the total RAM in kB
+  command: awk '/^MemTotal:/ { print $2}' /proc/meminfo 
+  register: memtotal
+      
+- name: Configure shared_buffers
+  lineinfile:
+     dest="{{ pgconf }}/postgresql.conf"
+     regexp=^shared_buffers
+     line="shared_buffers = {{ (memtotal.stdout|int/4096)|int|abs }}MB"     
+  register: shared_buffers
+  
+- name: Restart Postgres
+  service: name="{{pgservice}}" state=restarted
+  when: pgconfig.changed
+
+- name: Disable Postgres autostart on reboot
+  service:
+     name: postgresql
+     enabled: no
+
+# This will work ok once, but will fail when some nodes are
+# converted into standby instances. Hence need to check for
+# primary tag here..
+- block:
+  - name: Ensure pg_stat_statements is present in postgres
+    postgresql_ext:
+      state: present
+      name: pg_stat_statements
+      db: postgres
+    sudo_user: postgres
+
+  - name: Ensure pgstattuple is present in postgres
+    postgresql_ext:
+      state: present
+      name: pgstattuple
+      db: postgres
+    sudo_user: postgres
+
+  - name: Ensure pg_stat_statements is present in template1
+    postgresql_ext:
+      state: present
+      name: pg_stat_statements
+      db: template1
+    sudo_user: postgres
+
+  - name: Ensure pgstattuple is present in template1
+    postgresql_ext:
+      state: present
+      name: pgstattuple
+      db: template1
+    sudo_user: postgres
+    when: (primary_hostname is defined and inventory_hostname == primary_hostname)
+
+# Doesn't hurt to have pgespresso around always with or without barman since it
+# (backup using barman) can be configured in the future as well
+  - name: Ensure pgespresso is present in postgres
+    postgresql_ext:
+      state: present
+      name: pgespresso
+      db: postgres
+    sudo_user: postgres
+    when: (primary_hostname is defined and inventory_hostname == primary_hostname)
+
+- include: ssh.yml

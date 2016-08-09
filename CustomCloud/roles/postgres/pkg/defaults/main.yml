@@ -1,11 +1,29 @@
 ---
 
-pgversion: 9.4
+# Callers can specify apt_repositories to augment or override the
+# default_apt_repositories specified below. Note that this is a hash of
+# hashes, not an array of hashes. This is so that the two hashes can be
+# merged.
 
-pgdata: "/var/lib/postgresql/{{ pgversion }}/main"
+apt_repositories: {}
+default_apt_repositories:
+  PGDG:
+    key_id: ACCC4CF8
+    key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    repo: >
+      deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg {{ pgversion }} main
+  2ndQPostgres:
+    key_id: 70549BC8
+    key_url: http://packages.2ndquadrant.com/2ndQPostgres/apt/70549BC8.asc
+    repo: >
+      deb [arch=amd64] http://packages.2ndquadrant.com/2ndQPostgres/apt/ {{ ansible_distribution_release }}-2ndquadrant-testing {{ pgversion }}
 
-enable_data_checksum: "no"
+# Callers can specify yum_repositories to augment or override the
+# default_yum_repositories specified below. Note that this is a hash of
+# hashes, not an array of hashes. This is so that the two hashes can be
+# combined.
 
-use_2ndquadrant_postgres: "no"
-
-extra_debian_repositories: []
+yum_repositories: {}
+default_yum_repositories:
+  PGDG:
+    rpm_url: http://yum.postgresql.org/9.4/redhat/rhel-7-x86_64/pgdg-redhat94-9.4-1.noarch.rpm

@@ -1,0 +1,7 @@
+---
+
+- name: Install YUM repository packages
+  yum:
+    name: "{{ item.value.rpm_url }}"
+    state: present
+  with_dict: "{{ default_yum_repositories|combine(yum_repositories) }}"

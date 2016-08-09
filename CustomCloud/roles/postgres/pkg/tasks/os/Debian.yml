@@ -1,0 +1,18 @@
+---
+
+- name: Install apt repository signing keys
+  apt_key:
+    id: "{{ item.value.key_id }}"
+    url: "{{ item.value.key_url }}"
+    state: present
+  with_dict: "{{ default_apt_repositories|combine(apt_repositories) }}"
+
+- name: Install apt repositories
+  apt_repository:
+    repo: "{{ item.value.repo|trim }}"
+    state: present
+    update_cache: no
+  with_dict: "{{ default_apt_repositories|combine(apt_repositories) }}"
+
+- name: Update apt cache
+  apt: update_cache=yes
