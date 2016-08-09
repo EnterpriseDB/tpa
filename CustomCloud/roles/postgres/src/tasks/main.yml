@@ -13,7 +13,10 @@
   file: state=directory path="{{postgres_build_dir}}"
 
 - name: Configure Postgres
-  shell: "{{postgres_src_dir}}/configure --prefix={{postgres_install_dir|expanduser}} {% for arg in postgres_configure_opts %}{{arg|quote}}{% endfor %}"
+  shell: >
+    {{postgres_src_dir}}/configure \
+        --prefix={{postgres_install_dir|expanduser|quote}} \
+        {% for arg in postgres_configure_opts %}{{arg|quote}}{% endfor %}
   args:
     chdir: "{{postgres_build_dir}}"
   environment: "{{postgres_configure_env}}"
