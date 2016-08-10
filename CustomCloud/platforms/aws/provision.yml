@@ -217,6 +217,12 @@
             ]
           }
 
+    # Loop over the instances[], inspect the exact_count values and expand
+    # the list into as many entries as the sum of all exact_count values
+    - name: Expand/Flatten the EC2 instances list
+      set_fact:
+        instances: "{{ instances|expand_instances }}"
+
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above. We loop over instances[], look up
     # the VPC and group corresponding to the region/subnet defined for
