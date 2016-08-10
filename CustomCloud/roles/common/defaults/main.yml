@@ -11,6 +11,7 @@ packages:
   Debian:
     - python-dev
     - linux-tools
+    - python-psycopg2
   RedHat:
     - python-devel
     - perf
