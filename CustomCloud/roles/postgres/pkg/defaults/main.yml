@@ -38,6 +38,23 @@ default_yum_repositories:
   2ndQPostgres:
     rpm_url: http://packages.2ndquadrant.com/2ndQPostgres/yum-repo-rpms/2ndQPostgres-rhel-1.0-1.noarch.rpm
 
+# Hardcoded information about yum repositories that supply postgres
+# packages.
+
+yum_postgres_sources:
+  PGDG:
+    files:
+      - /etc/yum.repos.d/pgdg-{{pgversionNN}}-redhat.repo
+    sections:
+      - pgdg{{pgversionNN}}
+      - pgdg{{pgversionNN}}-source
+  2ndQPostgres:
+    files:
+      - /etc/yum.repos.d/2ndQPostgres.repo
+    sections:
+      - 2ndQPostgres
+      - 2ndQPostgres-testing
+
 # The default package list installs community or 2ndQuadrant postgres.
 # The caller may override this list entirely, or just augment it by
 # adding to extra_postgres_packages below.
