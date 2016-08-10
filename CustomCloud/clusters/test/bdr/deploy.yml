@@ -6,12 +6,12 @@
   sudo_user: root
   sudo: true
   vars:
-    pgversion: "9.4" 
+    pgversion: "9.4"
     use_2ndquadrant_postgres: 'no'
     pg_device: /dev/xvdb
     pg_mountpoint: /var/lib/postgresql
-    pgbindir: "/usr/lib/postgresql/{{ pgversion }}/bin" 
-    
+    pgbindir: "/usr/lib/postgresql/{{ pgversion }}/bin"
+
   pre_tasks:
 
     - name: Set the node id as a fact
@@ -39,9 +39,12 @@
     # Install the BDR packages and basic configuration files.
     - role: bdr/pkg
       tags: bdr
-    
+
     - role: postgres/initdb
       tags: postgres
 
     - role: bdr/config
+      tags: bdr
+
+    - role: bdr/node
       tags: bdr
