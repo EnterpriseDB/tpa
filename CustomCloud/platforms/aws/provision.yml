@@ -217,8 +217,8 @@
             ]
           }
 
-    # Loop over the instances[], inspect the exact_count values and expand
-    # the list into as many entries as the sum of all exact_count values
+    # Loop over the instances[], inspect the instance_count values and expand
+    # the list into as many entries as the sum of all instance_count values
     - name: Expand/Flatten the EC2 instances list
       set_fact:
         instances: "{{ instances|expand_instances }}"
