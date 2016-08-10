@@ -30,7 +30,3 @@
     dest: /etc/postgresql-common/createcluster.conf
     regexp: ^#create_main_cluster
     line: create_main_cluster = false
-
-- name: Install Postgres packages
-  package: name={{ item }} state=latest
-  with_items: "{{ postgres_packages[ansible_distribution] }}"

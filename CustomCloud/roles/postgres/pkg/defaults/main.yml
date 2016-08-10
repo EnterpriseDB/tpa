@@ -1,5 +1,9 @@
 ---
 
+pgversion: 9.5
+
+pgversionNN: "{{pgversion|replace('.','')}}"
+
 # The preferred source for Postgres packages.
 postgres_package_source: PGDG
 
@@ -32,3 +36,29 @@ default_yum_repositories:
     rpm_url: http://yum.postgresql.org/9.4/redhat/rhel-7-x86_64/pgdg-redhat94-9.4-1.noarch.rpm
   2ndQPostgres:
     rpm_url: http://packages.2ndquadrant.com/2ndQPostgres/yum-repo-rpms/2ndQPostgres-rhel-1.0-1.noarch.rpm
+
+# The default package list installs community or 2ndQuadrant postgres.
+# The caller may override this list entirely, or just augment it by
+# adding to extra_postgres_packages below.
+
+postgres_packages:
+  Debian: &debian_packages
+    - postgresql-{{pgversion}}
+    - postgresql-{{pgversion}}-dbg
+    - postgresql-client-{{pgversion}}
+    - postgresql-contrib-{{pgversion}}
+    - postgresql-server-dev-{{pgversion}}
+    - postgresql-{{pgversion}}-espresso
+  RedHat:
+    - postgresql{{pgversionNN}}
+    - postgresql{{pgversionNN}}-contrib
+    - postgresql{{pgversionNN}}-server
+    - postgresql{{pgversionNN}}-devel
+    - postgresql{{pgversionNN}}-libs
+    - pgespresso{{pgversionNN}}
+  Ubuntu: *debian_packages
+
+extra_postgres_packages:
+  Debian: &debian_extra_packages []
+  RedHat: []
+  Ubuntu: *debian_extra_packages

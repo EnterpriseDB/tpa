@@ -9,3 +9,12 @@
 # enable repositories and install Postgres packages.
 
 - include: "os/{{ ansible_distribution }}.yml"
+
+# At the moment, however, package installation is not distribution
+# specific. This can be moved into os/ if that ever changes.
+
+- name: Install Postgres packages
+  package: name={{ item }} state=latest
+  with_items:
+    - "{{ postgres_packages[ansible_distribution] }}"
+    - "{{ extra_postgres_packages[ansible_distribution] }}"
