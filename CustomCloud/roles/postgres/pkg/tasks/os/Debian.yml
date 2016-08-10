@@ -28,5 +28,5 @@
 - name: Unset create_main_cluster in /etc/postgresql-common/createcluster.conf
   lineinfile:
     dest: /etc/postgresql-common/createcluster.conf
-    regexp: ^#create_main_cluster
+    regexp: 'create_main_cluster *='
     line: create_main_cluster = false
