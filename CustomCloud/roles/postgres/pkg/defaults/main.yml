@@ -1,5 +1,6 @@
 ---
 
+# The preferred source for Postgres packages.
 postgres_package_source: PGDG
 
 # Callers can specify apt_repositories to augment or override the

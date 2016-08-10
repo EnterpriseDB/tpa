@@ -14,6 +14,11 @@
     update_cache: no
   with_dict: "{{ default_apt_repositories|combine(apt_repositories) }}"
 
+- name: Set preferred Postgres package source
+  template:
+    src: apt_preferences.j2
+    dest: /etc/apt/preferences.d/postgres
+
 - name: Update apt cache
   apt: update_cache=yes
 

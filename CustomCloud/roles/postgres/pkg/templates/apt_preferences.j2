@@ -1,0 +1,7 @@
+Package: *
+{% if postgres_package_source == 'PGDG' %}
+Pin: origin apt.postgresql.org
+{% else %}
+Pin: origin packages.2ndquadrant.com
+{% endif %}
+Pin-Priority: 700
