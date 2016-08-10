@@ -48,7 +48,7 @@ postgres_packages:
     - postgresql-client-{{pgversion}}
     - postgresql-contrib-{{pgversion}}
     - postgresql-server-dev-{{pgversion}}
-    - postgresql-{{pgversion}}-espresso
+    - postgresql-{{pgversion}}-pgespresso
   RedHat:
     - postgresql{{pgversionNN}}
     - postgresql{{pgversionNN}}-contrib
