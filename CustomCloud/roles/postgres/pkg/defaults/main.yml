@@ -33,7 +33,8 @@ default_apt_repositories:
 yum_repositories: {}
 default_yum_repositories:
   PGDG:
-    rpm_url: http://yum.postgresql.org/9.4/redhat/rhel-7-x86_64/pgdg-redhat94-9.4-1.noarch.rpm
+    rpm_url: >
+      http://yum.postgresql.org/{{pgversion}}/redhat/rhel-7-x86_64/pgdg-redhat{{pgversionNN}}-{{pgversion}}-1.noarch.rpm
   2ndQPostgres:
     rpm_url: http://packages.2ndquadrant.com/2ndQPostgres/yum-repo-rpms/2ndQPostgres-rhel-1.0-1.noarch.rpm
 
