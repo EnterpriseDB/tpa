@@ -1,0 +1,6 @@
+---
+
+- name: Create BDR database
+  postgresql_db:
+    state: present
+    name: "{{ bdr_db_name }}"

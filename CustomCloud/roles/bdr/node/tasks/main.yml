@@ -1,0 +1,7 @@
+---
+
+- include: pg_ctl_start.yml
+- include: set_dsn.yml
+- include: create_db.yml
+- include: create_extension.yml
+- include: bdr_group_manage.yml

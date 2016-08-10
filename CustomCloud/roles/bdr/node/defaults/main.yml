@@ -1,0 +1,5 @@
+bdr_db_name: bdr
+
+postgresql_exts:
+ - btree_gist
+ - bdr

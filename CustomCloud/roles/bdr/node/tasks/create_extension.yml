@@ -1,0 +1,8 @@
+---
+
+- name: Ensure PostgreSQL extensions are present
+  postgresql_ext:
+    state: present
+    name: "{{ item }}"
+    db: "{{ bdr_db_name }}"
+  with_items: postgresql_exts
