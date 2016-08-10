@@ -44,7 +44,7 @@ coordArchLogDir=$HOME/coord_archlog
 coordNames=({% for h in g %}coord{{loop.index}} {% endfor %})
 coordPorts=({{ (['20002']*(g|length))|join(' ') }})
 poolerPorts=({{ (['20003']*(g|length))|join(' ') }})
-coordPgHbaEntries=(10.63.0.0/24)
+coordPgHbaEntries=(10.33.63.0/24)
 
 coordMasterServers=({{ g|map('extract',hostvars,'cluster_hostname')|sort|join(' ') }})
 coordMasterDirs=({{ (['$coordMasterDir']*(g|length))|join(' ') }})
@@ -95,7 +95,7 @@ datanodeArchLogDir=$dataDirRoot/datanode_archlog
 datanodeNames=({% for h in g %}datanode{{loop.index}} {% endfor %})
 datanodePorts=({{ (['20004']*(g|length))|join(' ') }})
 datanodePoolerPorts=({{ (['20005']*(g|length))|join(' ') }})
-datanodePgHbaEntries=(10.63.0.0/24)
+datanodePgHbaEntries=(10.33.63.0/24)
 
 datanodeMasterServers=({{ g|map('extract',hostvars,'cluster_hostname')|sort|join(' ') }})
 datanodeMasterDirs=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
