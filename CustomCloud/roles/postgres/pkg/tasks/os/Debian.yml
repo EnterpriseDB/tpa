@@ -1,0 +1,32 @@
+---
+
+- name: Install apt repository signing keys
+  apt_key:
+    id: "{{ item.value.key_id }}"
+    url: "{{ item.value.key_url }}"
+    state: present
+  with_dict: "{{ default_apt_repositories|combine(apt_repositories) }}"
+
+- name: Install apt repositories
+  apt_repository:
+    repo: "{{ item.value.repo|trim }}"
+    state: present
+    update_cache: no
+  with_dict: "{{ default_apt_repositories|combine(apt_repositories) }}"
+
+- name: Set preferred Postgres package source
+  template:
+    src: apt_preferences.j2
+    dest: /etc/apt/preferences.d/postgres
+
+- name: Update apt cache
+  apt: update_cache=yes
+
+- name: Install postgresql-common
+  package: name=postgresql-common state=latest
+
+- name: Unset create_main_cluster in /etc/postgresql-common/createcluster.conf
+  lineinfile:
+    dest: /etc/postgresql-common/createcluster.conf
+    regexp: ^#create_main_cluster
+    line: create_main_cluster = false

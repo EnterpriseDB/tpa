@@ -3,16 +3,21 @@
 # Run ssh-keyscan on the provisioned hosts, and accept the keys blindly
 # in order to suppress interactive prompts. This is a temporary hack.
 - include: keyscan.yml
+  tags: common
 
 # Set ansible_distribution and ansible_pkg_mgr if required.
 - include: distribution.yml
+  tags: always
 
 # Once we know what distribution we are dealing with, we must ensure
 # that a usable Python (2.7.x) is installed, along with anything else
 # that is required to run "pkg" below.
 - include: "os/{{ ansible_distribution }}.yml"
+  tags: common
 
 # We have Python and pip; install any other required Python packages,
 # and then install/uninstall any system packages.
 - include: python.yml
+  tags: common
 - include: packages.yml
+  tags: common

@@ -1,11 +1,82 @@
 ---
 
-pgversion: 9.4
+pgversion: 9.5
 
-pgdata: "/var/lib/postgresql/{{ pgversion }}/main"
+pgversionNN: "{{pgversion|replace('.','')}}"
 
-enable_data_checksum: "no"
+# The preferred source for Postgres packages.
+postgres_package_source: PGDG
 
-use_2ndquadrant_postgres: "no"
+# Callers can specify apt_repositories to augment or override the
+# default_apt_repositories specified below. Note that this is a hash of
+# hashes, not an array of hashes. This is so that the two hashes can be
+# merged.
 
-extra_debian_repositories: []
+apt_repositories: {}
+default_apt_repositories:
+  PGDG:
+    key_id: ACCC4CF8
+    key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    repo: >
+      deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg {{ pgversion }} main
+  2ndQPostgres:
+    key_id: 70549BC8
+    key_url: http://packages.2ndquadrant.com/2ndQPostgres/apt/70549BC8.asc
+    repo: >
+      deb [arch=amd64] http://packages.2ndquadrant.com/2ndQPostgres/apt/ {{ ansible_distribution_release }}-2ndquadrant-testing {{ pgversion }}
+
+# Callers can specify yum_repositories to augment or override the
+# default_yum_repositories specified below. Note that this is a hash of
+# hashes, not an array of hashes. This is so that the two hashes can be
+# combined.
+
+yum_repositories: {}
+default_yum_repositories:
+  PGDG:
+    rpm_url: >
+      http://yum.postgresql.org/{{pgversion}}/redhat/rhel-7-x86_64/pgdg-redhat{{pgversionNN}}-{{pgversion}}-1.noarch.rpm
+  2ndQPostgres:
+    rpm_url: http://packages.2ndquadrant.com/2ndQPostgres/yum-repo-rpms/2ndQPostgres-rhel-1.0-1.noarch.rpm
+
+# Hardcoded information about yum repositories that supply postgres
+# packages.
+
+yum_postgres_sources:
+  PGDG:
+    files:
+      - /etc/yum.repos.d/pgdg-{{pgversionNN}}-redhat.repo
+    sections:
+      - pgdg{{pgversionNN}}
+      - pgdg{{pgversionNN}}-source
+  2ndQPostgres:
+    files:
+      - /etc/yum.repos.d/2ndQPostgres.repo
+    sections:
+      - 2ndQPostgres
+      - 2ndQPostgres-testing
+
+# The default package list installs community or 2ndQuadrant postgres.
+# The caller may override this list entirely, or just augment it by
+# adding to extra_postgres_packages below.
+
+postgres_packages:
+  Debian: &debian_packages
+    - postgresql-{{pgversion}}
+    - postgresql-{{pgversion}}-dbg
+    - postgresql-client-{{pgversion}}
+    - postgresql-contrib-{{pgversion}}
+    - postgresql-server-dev-{{pgversion}}
+    - postgresql-{{pgversion}}-pgespresso
+  RedHat:
+    - postgresql{{pgversionNN}}
+    - postgresql{{pgversionNN}}-contrib
+    - postgresql{{pgversionNN}}-server
+    - postgresql{{pgversionNN}}-devel
+    - postgresql{{pgversionNN}}-libs
+    - pgespresso{{pgversionNN}}
+  Ubuntu: *debian_packages
+
+extra_postgres_packages:
+  Debian: &debian_extra_packages []
+  RedHat: []
+  Ubuntu: *debian_extra_packages

@@ -1,0 +1,39 @@
+---
+
+- name: Install YUM repository packages
+  yum:
+    name: "{{ item.value.rpm_url }}"
+    state: present
+  with_dict: "{{ default_yum_repositories|combine(yum_repositories) }}"
+
+# Following the instructions in
+# https://wiki.postgresql.org/wiki/YUM_Installation, we exclude
+# postgresql from the base repositories.
+
+- name: Exclude postgresql packages from the base repository
+  ini_file:
+    dest: /etc/yum/pluginconf.d/rhnplugin.conf
+    section: main
+    option: exclude
+    value: postgresql*
+
+# Furthermore, since we have (at least) the PGDG and 2ndQPostgres
+# repositories providing Postgres packages, we add exclude lines to
+# repository configuration files based on postgres_package_source.
+#
+# This hardcodes information about (a) file names in /etc/yum.repos.d
+# (e.g., pgdg-94-redhat.repo) and (b) section names within those files.
+# We can live with that for the moment. It's better than having to add
+# --enablerepo/--disablerepo options to every yum invocation.
+
+- name: Set preferred postgres package source
+  ini_file:
+    dest: "{{ item.1 }}"
+    section: "{{ item.2 }}"
+    option: exclude
+    value: postgresql*
+  when: item.0 != postgres_package_source
+  with_nested_dependents:
+    - yum_postgres_sources.keys()
+    - yum_postgres_sources[item.0]['files']
+    - yum_postgres_sources[item.0]['sections']

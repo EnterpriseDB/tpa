@@ -1,7 +1,7 @@
 ---
 
 - name: Install EPEL release package
-  raw: rpm -ivh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-7.noarch.rpm
+  raw: rpm -ivh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
   register: epel
   changed_when: "'is already installed' not in epel.stdout"
   ignore_errors: yes
