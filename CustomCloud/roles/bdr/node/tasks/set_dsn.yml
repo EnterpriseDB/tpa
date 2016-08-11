@@ -1,5 +1,0 @@
----
-
-- name: Export bdr_node_dsn fact
-  set_fact:
-    bdr_node_dsn: "host={{ vpn_address }} port={{postgres_port}} dbname={{bdr_db_name}} user=postgres"
