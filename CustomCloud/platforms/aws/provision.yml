@@ -253,6 +253,7 @@
         spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
         spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"
         user_data: "{{ lookup('template', 'user-data.j2') }}"
+        termination_protection: "{{ item.termination_protection|default('no') }}"
         assign_public_ip: yes
         wait: yes
       with_items: "{{ instances }}"
