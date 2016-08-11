@@ -38,4 +38,4 @@
         timeout=300
     sudo: false
     when: file.stat.exists == true
-  when: ansible_distribution == 'debian'
+  when: ansible_distribution == 'Debian'
