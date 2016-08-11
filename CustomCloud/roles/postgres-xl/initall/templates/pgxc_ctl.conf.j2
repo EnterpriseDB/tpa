@@ -30,7 +30,7 @@ gtmProxy=y
 gtmProxyNames=({% for h in g %}gtm_pxy{{loop.index}} {% endfor %})
 gtmProxyServers=({{ g|map('extract',hostvars,'cluster_hostname')|sort|join(' ') }})
 gtmProxyPorts=({{ (['20001']*(g|length))|join(' ') }})
-gtmProxyDirs=({{ (['$gtmProxyDir']*(g|length))|join(' ') }})
+gtmProxyDirs=({% for h in g %}$dataDirRoot/gtm_pxy{{loop.index}} {% endfor %})
 {% endwith %}
 
 gtmPxyExtraConfig=none
@@ -47,9 +47,9 @@ poolerPorts=({{ (['20003']*(g|length))|join(' ') }})
 coordPgHbaEntries=(10.33.63.0/24)
 
 coordMasterServers=({{ g|map('extract',hostvars,'cluster_hostname')|sort|join(' ') }})
-coordMasterDirs=({{ (['$coordMasterDir']*(g|length))|join(' ') }})
-coordMaxWALsender=5
-coordMaxWALSenders=({{ (['$coordMaxWALsender']*(g|length))|join(' ') }})
+coordMasterDirs=({% for h in g %}$dataDirRoot/coord{{loop.index}}_master {% endfor %})
+coordMaxWALSender=5
+coordMaxWALSenders=({{ (['$coordMaxWALSender']*(g|length))|join(' ') }})
 
 coordSpecificExtraConfig=({{ (['none']*(g|length))|join(' ') }})
 coordSpecificExtraPgHba=({{ (['none']*(g|length))|join(' ') }})
@@ -98,9 +98,9 @@ datanodePoolerPorts=({{ (['20005']*(g|length))|join(' ') }})
 datanodePgHbaEntries=(10.33.63.0/24)
 
 datanodeMasterServers=({{ g|map('extract',hostvars,'cluster_hostname')|sort|join(' ') }})
-datanodeMasterDirs=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
-datanodeMaxWalSender=5
-datanodeMaxWALSenders=({{ (['$datanodeMasterDir']*(g|length))|join(' ') }})
+datanodeMasterDirs=({% for h in g %}$dataDirRoot/dn{{loop.index}}_master {% endfor %})
+datanodeMaxWALSender=5
+datanodeMaxWALSenders=({{ (['$datanodeMaxWALSender']*(g|length))|join(' ') }})
 
 datanodeSpecificExtraConfig=({{ (['none']*(g|length))|join(' ') }})
 datanodeSpecificExtraPgHba=({{ (['none']*(g|length))|join(' ') }})
