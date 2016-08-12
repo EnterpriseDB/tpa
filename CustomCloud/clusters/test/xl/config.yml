@@ -53,7 +53,6 @@ instances:
           - device_name: /dev/xvdd
             ephemeral: ephemeral2
       tags:
-        node: 1
         role: gtm,coordinator
     - type: d2.xlarge
       region: ap-southeast-2
@@ -73,25 +72,5 @@ instances:
           - device_name: /dev/xvdd
             ephemeral: ephemeral2
       tags:
-        node: 2
         role: datanode
-    - type: d2.xlarge
-      region: ap-southeast-2
-      subnet: 10.33.63.0/26
-      spot_price: 0.12
-      spot_wait_timeout: 1800
-      spot_launch_group: xllaunchgrp
-      volumes:
-          - device_name: /dev/xvda
-            volume_type: gp2
-            volume_size: 8
-            delete_on_termination: true
-          - device_name: /dev/xvdb
-            ephemeral: ephemeral0
-          - device_name: /dev/xvdc
-            ephemeral: ephemeral1
-          - device_name: /dev/xvdd
-            ephemeral: ephemeral2
-      tags:
-        node: 3
-        role: datanode
+      instance_count: 2
