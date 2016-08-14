@@ -8,6 +8,7 @@ packages:
     - rsync
     - sysstat
     - acl
+    - cryptsetup
   Debian:
     - python-dev
     - linux-tools

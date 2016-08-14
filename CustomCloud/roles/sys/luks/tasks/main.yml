@@ -14,8 +14,6 @@
       - luks_mountpoint is defined
       - ansible_version.major >= 2
 
-- include: packages.yml
-
 - name: Is the encrypted volume already initialised?
   command: cryptsetup isLuks "{{ luks_device }}"
   ignore_errors: true

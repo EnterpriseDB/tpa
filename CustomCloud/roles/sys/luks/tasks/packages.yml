@@ -1,5 +1,0 @@
----
-
-- name: Install packages
-  package: name={{ item }} state=latest
-  with_items: "{{ luks_packages[ansible_distribution] }}"
