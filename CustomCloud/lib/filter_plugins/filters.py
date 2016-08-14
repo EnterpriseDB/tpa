@@ -1,5 +1,6 @@
 import copy
 from jinja2 import Undefined
+from jinja2.runtime import StrictUndefined
 
 # This filter takes an array of hashes and returns a new array in which every
 # entry in the original array is represented by item[instance_count] entries.
@@ -43,9 +44,27 @@ def extract(item, container, morekeys=None):
 
     return value
 
+# Based on PR ansible/ansible#11083, this filter takes a container and a subkey
+# ('x.y.z', or [x,y,z]) and a default value, and returns container.x.y.z or the
+# default value if any of the levels is undefined.
+
+def try_subkey(container, keys, default=None):
+    try:
+        v = container
+        if isinstance(keys, basestring):
+            keys = keys.split('.')
+        for key in keys:
+            v = v.get(key, default)
+        if isinstance(v, StrictUndefined):
+            v = default
+        return v
+    except:
+        return default
+
 class FilterModule(object):
     def filters(self):
         return {
             'extract': extract,
             'expand_instances': expand_instances,
+            'try_subkey': try_subkey,
         }
