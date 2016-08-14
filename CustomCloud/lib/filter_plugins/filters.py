@@ -1,6 +1,10 @@
 import copy
 from jinja2 import Undefined
 
+# This filter takes an array of hashes and returns a new array in which every
+# entry in the original array is represented by item[instance_count] entries.
+# Furthermore, each entry has item[node] set to an increasing counter.
+
 def expand_instances(a):
     c = []
     idx = 1
