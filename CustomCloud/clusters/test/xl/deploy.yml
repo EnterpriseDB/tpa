@@ -7,7 +7,7 @@
   sudo_user: root
   sudo: true
   vars:
-    pgxlversion: "9.5.3"
+    pgxlversion: "9.5.4"
     pgxl_data_device: /dev/xvda
     pgxl_data_mountpoint: /data
     ansible_python_interpreter: '/usr/bin/python2.7'
