@@ -5,3 +5,4 @@
 - include: create_extension.yml
 - include: set_node_facts.yml
 - include: bdr_group_manage.yml
+- include: test_bdr.yml

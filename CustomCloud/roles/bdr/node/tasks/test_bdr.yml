@@ -1,0 +1,33 @@
+---
+
+- name: Appoint control node
+  set_fact: control_hostname="{{ item }}"
+  when: "hostvars[item].ec2_tag_node == '1'"
+  with_items: play_hosts
+
+- block:
+  - name: Create a table on first node
+    shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -Atw -c 'DROP TABLE IF EXISTS bdr_test; CREATE TABLE bdr_test (c1 INT, PRIMARY KEY (c1)); INSERT INTO bdr_test VALUES (1);'"
+
+  - name: Wait for replication to catch up
+    shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -Atw -c 'SELECT pg_xlog_wait_remote_apply(pg_current_xlog_location(), 0);'"
+
+  - name: Check the table on the other nodes
+    shell: "{{pgbindir}}/psql '{{hostvars[item].bdr_node_dsn}}' -Atw -c 'SELECT * FROM bdr_test;'"
+    when: "hostvars[item].ec2_tag_node != '1'"
+    with_items: play_hosts
+    register: bdr_rep
+
+  - name: Debug
+    debug: msg="{{item }}"
+    with_items: "{{ bdr_rep.results }}"
+
+  - name: Assert an error if test fails
+    fail:
+      message: "Fails"
+    when: "{{ item.stdout != '1' }}"
+    with_items: "{{ bdr_rep.results }}"
+
+  - name: Drop the test table
+    shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -Atw -c 'DROP TABLE bdr_test;'"
+  when: (control_hostname == inventory_hostname)
