@@ -10,7 +10,7 @@
       apt_repository:
         repo: 'deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main'
         state: present
-  when: ansible_distribution == 'debian'
+  when: ansible_distribution == 'Debian'
 
 - block:
     - name: Install PGDG repository RPM
@@ -24,14 +24,14 @@
         section: main
         option: exclude
         value: barman*
-  when: ansible_distribution == 'redhat'
+  when: ansible_distribution == 'RedHat'
 
 - name: Download barman for debian
   apt: pkg=barman state=latest update_cache=yes
-  when: ansible_distribution == 'debian'
+  when: ansible_distribution == 'Debian'
   tags: packages
 
 - name: Download barman for redhat
   yum: pkg=barman state=latest update_cache=yes
-  when: ansible_distribution == 'redhat'
+  when: ansible_distribution == 'RedHat'
   tags: packages
