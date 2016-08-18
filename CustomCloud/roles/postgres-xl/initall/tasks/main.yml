@@ -8,6 +8,7 @@
 - name: Check if pgxc_ctl.conf exists
   stat: path=~postgres/pgxc_ctl.conf
   register: conf
+  when: inventory_hostname == control_hostname
 
 - block:
     - name: Install pgxc_ctl.conf on control node
