@@ -8,7 +8,7 @@
   set_fact: cluster_dir="{{ cluster|realpath }}"
 
 - name: Derive name of the configuration file
-  set_fact: config_file="{{ cluster_dir }}/{{ config|default('config') }}.yml"
+  set_fact: config_file="{{ cluster_dir }}/{{ config|default('config.yml') }}"
 
 - name: Load cluster configuration file
   include_vars: "{{ config_file }}"
