@@ -55,9 +55,6 @@
 - name: 
   action: mount name=/wal src=/dev/xvdb fstype=ext4 state=mounted
 
-- name: create file system
-  action: filesystem fstype=ext4 dev=/dev/xvdc force=yes
-
 - name: Create swap
   command: "mkswap /dev/xvdc"
 
