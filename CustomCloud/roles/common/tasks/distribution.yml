@@ -19,6 +19,7 @@
       set_fact:
         ansible_distribution: "{{ lsb_release.stdout_lines[0] }}"
         ansible_distribution_release: "{{ lsb_release.stdout_lines[1] }}"
+        ansible_os_family: "Debian"
       when: lsb_release|succeeded
 
     - block:
@@ -31,6 +32,7 @@
         - name: Set ansible_distribution based on /etc/redhat-release
           set_fact:
             ansible_distribution: "{{ redhat.stdout_lines[0] }}"
+            ansible_os_family: "RedHat"
           when: redhat|succeeded
       when: lsb_release|failed
   when: ansible_distribution is not defined
