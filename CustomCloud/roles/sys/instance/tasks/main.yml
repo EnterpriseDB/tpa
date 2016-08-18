@@ -27,7 +27,7 @@
     poll: 0
     sudo: true
     ignore_errors: true
-    when: (file.stat.exists == true) or (thp.stdout.find('[never]') == -1)
+    when: file.stat.exists == true
 
   - name: Wait for instance[s] to restart. This may take some time..
     local_action:
