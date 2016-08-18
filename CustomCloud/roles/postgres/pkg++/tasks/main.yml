@@ -130,5 +130,3 @@
       db: postgres
     sudo_user: postgres
     when: (primary_hostname is defined and inventory_hostname == primary_hostname)
-
-- include: ssh.yml

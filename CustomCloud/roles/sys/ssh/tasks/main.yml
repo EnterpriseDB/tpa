@@ -1,0 +1,55 @@
+---
+
+# Enable password-less SSH access between all nodes for a given user.
+
+- name: Ensure {{playbook_dir}}/keys exists locally
+  local_action:
+    module: file
+    path: "{{ playbook_dir }}/keys"
+    state: directory
+  run_once: yes
+  sudo: no
+
+- name: Generate ssh keypair for {{user}}
+  local_action: command ssh-keygen -P "" -f id_{{user}}
+  args:
+    chdir: "{{ playbook_dir }}/keys"
+    creates: id_{{user}}.pub
+  run_once: yes
+  sudo: no
+
+- name: Install authorized_keys file
+  authorized_key:
+    user: "{{user}}"
+    key: "{{ lookup('file', playbook_dir+'/keys/id_'+user+'.pub') }}"
+
+- name: Install private and public key files
+  action: copy
+  args: "{{item}}"
+  with_items:
+    - mode: 0600
+      src: "{{playbook_dir}}/keys/id_{{user}}"
+      dest: "~{{user}}/.ssh/id_rsa"
+    - mode: 0640
+      src: "{{playbook_dir}}/keys/id_{{user}}.pub"
+      dest: "~{{user}}/.ssh/id_rsa.pub"
+
+- name: Check if known_hosts file exists
+  stat: path="~{{user}}/.ssh/known_hosts"
+  register: known
+
+- name: Add cluster hosts to known_hosts
+  shell: ssh-keyscan -H \
+    {{ play_hosts|map('extract', hostvars, 'ec2_ip_address')|join(' ') }} \
+    {{ play_hosts|map('extract', hostvars, 'ec2_private_ip_address')|join(' ') }} \
+    > known_hosts
+  args:
+    chdir: "~{{user}}/.ssh"
+  when: not known.stat.exists
+
+- name: Set owner/group for files
+  shell: chown -c --reference authorized_keys *
+  args:
+    chdir: "~{{user}}/.ssh"
+  register: chown
+  changed_when: chown.stdout != ''
