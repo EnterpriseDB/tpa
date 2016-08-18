@@ -20,6 +20,10 @@
   changed_when: "'Requirement already satisfied' not in backport.stdout"
   when: ansible_python_version | version_compare('2.7.9', '<')
 
+# In general, we prefer to install packages for Python modules, but boto
+# is a special case—we want the latest version, which is typically far
+# ahead of the version provided by OS packages.
+
 - name: Install boto
   command: pip install boto
   register: boto
