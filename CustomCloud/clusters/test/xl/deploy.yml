@@ -46,6 +46,12 @@
     - role: common
       tags: common
 
+    - role: sys/tune
+      tags: systune
+
+    - role: sys/sysctl
+      tags: sysctl
+
     - role: postgres-xl/pkg
       tags: xl
 
