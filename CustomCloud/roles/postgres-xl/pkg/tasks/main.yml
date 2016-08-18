@@ -49,17 +49,30 @@
 - name: Install python packages
   shell: pip install virtualenv
 
+- name: Check if /dev/xvdb needs a filesystem
+  shell: sudo blkid /dev/xvdb
+  register: fstype
+  ignore_errors: true
+
 - name: create file system
   action: filesystem fstype=ext4 dev=/dev/xvdb force=yes
+  when: ('ext4' not in fstype.stdout)
 
 - name: 
   action: mount name=/wal src=/dev/xvdb fstype=ext4 state=mounted
 
+- name: Check if /dev/xvdc needs a "swap" filesystem
+  shell: sudo blkid /dev/xvdc
+  register: fstype
+  ignore_errors: true
+
 - name: Create swap
   command: "mkswap /dev/xvdc"
+  when: ('swap' not in fstype.stdout)
 
 - name: Add swap
   command: "swapon /dev/xvdc"
+  when: ('swap' not in fstype.stdout)
 
 - name: Ensure that /data/pgxl exists
   file:
