@@ -25,6 +25,10 @@ cluster_rules:
     from_port: 20000
     to_port: 20005
     cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 20000
+    to_port: 22000
+    cidr_ip: 10.33.63.0/24
 
 ec2_vpc:
   Name: Test
