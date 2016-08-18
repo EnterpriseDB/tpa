@@ -21,3 +21,7 @@
   tags: common
 - include: packages.yml
   tags: common
+
+# Set node hostnames and generate /etc/hosts
+- include: hosts.yml
+  tags: common
