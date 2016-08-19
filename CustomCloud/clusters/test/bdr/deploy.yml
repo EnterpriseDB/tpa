@@ -14,6 +14,12 @@
 
   pre_tasks:
 
+    - name: Set the node id and hostname as facts
+      set_fact:
+        node_id: "{{ ec2_tag_node }}"
+        cluster_hostname: "{{ 'bdr'|lower + ec2_tag_node }}"
+      tags: always
+
     - name: Set the node id as a fact
       set_fact: node_id="{{ ec2_tag_node }}"
       tags: always
@@ -39,6 +45,10 @@
     # Install the BDR packages and basic configuration files.
     - role: bdr/pkg
       tags: bdr
+
+    - role: sys/ssh
+      user: postgres
+      tags: ssh
 
     - role: postgres/initdb
       tags: postgres
