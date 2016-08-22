@@ -11,12 +11,15 @@
   sudo: no
 
 - name: Generate ssh keypair for {{user}}
-  local_action: command ssh-keygen -P "" -f id_{{user}}
+  local_action: command ssh-keygen -N "" -f id_{{user}}
   args:
     chdir: "{{ playbook_dir }}/keys"
     creates: id_{{user}}.pub
   run_once: yes
   sudo: no
+
+# authorized_key will create .ssh if needed, and set the uid and gid
+# properly based on the user's /etc/passwd entry.
 
 - name: Install authorized_keys file
   authorized_key:
