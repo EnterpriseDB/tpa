@@ -1,17 +1,10 @@
 ---
 
-- name: Add barman server to known_hosts on primary db server "{{current_host}}"
+- name: Add barman server to known_hosts on db server "{{current_host}}"
   shell: ssh-keyscan -H "{{ barman_hostname }}" >> ~postgres/.ssh/known_hosts
   become_user: postgres
   become: yes
   delegate_to: "{{current_host}}"
-
-- name: Add barman server to known_hosts on standby db server "{{standby}}"
-  shell: ssh-keyscan -H "{{ barman_hostname }}" >> ~postgres/.ssh/known_hosts
-  become_user: postgres
-  become: yes
-  delegate_to: "{{standby}}"
-  when: standby != current_host
 
 # add the current host keys to the barman server
 # the postgres role creates a key with the name id_rsa.pub
@@ -34,18 +27,11 @@
   sudo: true
   delegate_to: "{{barman_hostname}}"
 
-- name: Install barman authorized keys on primary PG host
+- name: Install barman authorized keys on PG hosts
   authorized_key:
     user: postgres
     key: "{{ lookup('file', local_pub.stdout +'/id_rsa.pub') }}"
   delegate_to: "{{current_host}}"
-
-- name: Install barman authorized keys on standby PG host
-  authorized_key:
-    user: postgres
-    key: "{{ lookup('file', local_pub.stdout +'/id_rsa.pub') }}"
-  delegate_to: "{{standby}}"
-  when: standby != current_host
 
 - name: Delete temp pub file dir
   file: name="{{local_pub.stdout}}" state=absent

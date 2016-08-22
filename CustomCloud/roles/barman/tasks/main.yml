@@ -8,7 +8,7 @@
   when: inventory_hostname == barman_hostname
 - include: configure.yml
   when: inventory_hostname == barman_hostname
-- include: update-postgres-conf.yml current_host={{primary_ip}} standby={{item}}
+- include: update-postgres-conf.yml current_host={{item}}
   with_items: "{{db_servers}}"
-- include: ssh-db-servers.yml current_host={{primary_ip}} standby={{item}}
+- include: ssh-db-servers.yml current_host={{item}}
   with_items: "{{db_servers}}"
