@@ -45,6 +45,7 @@
       until: ec2_jobs.finished
       retries: 300
       with_items: "{{ ec2_uninstances.results }}"
+      tags: ec2
 
     # Next, remove keypairs in each region by the same strategy, except
     # that ec2_key doesn't take a list directly, so we have to use the
@@ -71,12 +72,14 @@
         iam_name: '{{ cluster_name }}_profile'
         policy_name: '{{ cluster_name }}_instance_permissions'
         state: absent
+      tags: iam
 
     - name: Remove instance profile for cluster
       iam:
         iam_type: role
         name: '{{ cluster_name }}_profile'
         state: absent
+      tags: iam
 
     # Next, we delete the subnets that we created within each VPC, i.e.,
     # those subnets for which the CreatingCluster is set to this one.
