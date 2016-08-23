@@ -1,0 +1,4 @@
+---
+
+pgservice: 'postgresql'
+pgdata: "/etc/postgresql/{{ pgversion | default('9.5') }}/main"
