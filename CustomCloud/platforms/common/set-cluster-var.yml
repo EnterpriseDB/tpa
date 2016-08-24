@@ -1,0 +1,12 @@
+---
+
+# Given a variable name and a value, we set a top-level fact, but also
+# add the value to cluster_vars so that we can write it out at the end.
+
+- name: Set cluster variable {{ name }}
+  action: set_fact
+  args:
+    "{{ name }}": "{{ value }}"
+    cluster_vars: "{{
+      cluster_vars|combine({name: value})
+    }}"

@@ -1,0 +1,10 @@
+---
+
+# Dump the contents of cluster_vars to vars.json. The values are either
+# the ones that were loaded by read-cluster-vars.yml, or those stored
+# later by including set-cluster-var.yml.
+
+- name: Write extra cluster variables to a file
+  copy:
+    dest: "{{ cluster_dir }}/vars.json"
+    content: "{{ cluster_vars|to_json }}"

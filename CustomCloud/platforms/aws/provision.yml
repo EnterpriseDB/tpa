@@ -346,3 +346,5 @@
       template:
         src: ec2.ini.j2
         dest: "{{ cluster_dir }}/inventory/ec2.ini"
+
+    - include: ../common/write-cluster-vars.yml

@@ -147,3 +147,10 @@
         - "{{ vpcs.results }}"
         - item.0.vpcs
       tags: ec2_vpcs
+
+    - name: Delete generated files for this cluster
+      file:
+        path: "{{ cluster_dir }}/{{ item }}"
+        state: absent
+      with_items:
+        - vars.json

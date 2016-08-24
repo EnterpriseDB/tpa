@@ -19,3 +19,5 @@
     that:
       - cluster_name is defined
       - cluster_name != ''
+
+- include: read-cluster-vars.yml

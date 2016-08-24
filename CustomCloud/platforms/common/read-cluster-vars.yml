@@ -1,0 +1,23 @@
+---
+
+# We load vars.json into cluster_vars, and set its keys as top-level
+# variables (so that we can refer to, e.g., instance_profile_arn in
+# playbooks).
+
+- name: Load extra cluster variables
+  include_vars:
+    file: "{{ item }}"
+    name: cluster_vars
+  with_fileglob:
+    - "{{ cluster_dir }}/vars.json"
+
+- name: Set empty cluster_vars if vars.json was not loaded
+  set_fact:
+    cluster_vars: {}
+  when: cluster_vars is not defined
+
+- name: Set facts from cluster_vars
+  action: set_fact
+  args:
+    "{{ item.key }}": "{{ item.value }}"
+  with_dict: "{{ cluster_vars }}"
