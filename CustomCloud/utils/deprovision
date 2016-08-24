@@ -14,7 +14,7 @@ for d in ./clusters/$cluster $utils/../clusters/$cluster; do
     fi
 done
 
-if [ ! -s $cluster_dir ]; then
+if [ -z ${cluster_dir+x} ]; then
     echo "Can't find directory clusters/$cluster"
     exit
 fi
