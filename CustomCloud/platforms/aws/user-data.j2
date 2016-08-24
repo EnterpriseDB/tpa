@@ -15,7 +15,7 @@ for k in rsa ecdsa; do
     for p in "" .pub; do
         /usr/local/bin/aws s3api get-object \
             --bucket "{{ cluster_bucket }}" \
-            --key "nodes/{{ item.tags.node }}/hostkeys/$k$p.txt" \
+            --key "nodes/{{ item.node }}/hostkeys/$k$p.txt" \
             /etc/ssh/ssh_host_${k}_key$p
     done
 done

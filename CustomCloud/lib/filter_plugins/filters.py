@@ -20,7 +20,7 @@ def expand_instances(a):
         exact_count = x['instance_count']
         while (inst_count < exact_count):
             y = copy.deepcopy(x)
-            y['tags']['node'] = idx
+            y['node'] = idx
             c.append(y)
             inst_count = inst_count + 1
             idx = idx + 1

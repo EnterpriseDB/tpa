@@ -17,41 +17,41 @@ instances:
       region: eu-central-1
       subnet: 10.33.172.0/27
       tags:
-        node: 1
         has_tct: yes
         group: providers
+      node: 1
     - type: t2.nano
       region: eu-central-1
       subnet: 10.33.172.0/27
       tags:
-        node: 2
         has_tct: yes
         group: subscribers
+      node: 2
     - type: t2.nano
       region: eu-central-1
       subnet: 10.33.172.0/27
       tags:
-        node: 3
         has_tct: yes
         group: providers
+      node: 3
     - type: t2.nano
       region: eu-central-1
       subnet: 10.33.172.0/27
       tags:
-        node: 4
         has_tct: yes
         group: subscribers
+      node: 4
     - type: t2.nano
       region: eu-central-1
       subnet: 10.33.172.0/27
       tags:
-        node: 5
         has_tct: no
         group: providers
+      node: 5
     - type: t2.nano
       region: eu-central-1
       subnet: 10.33.172.0/27
       tags:
-        node: 6
         has_tct: no
         group: subscribers
+      node: 6

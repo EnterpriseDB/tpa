@@ -35,7 +35,7 @@ instances:
             delete_on_termination: true
       tags:
         db: primary
-        node: 1
+      node: 1
     - type: t2.small
       region: ap-southeast-2
       subnet: 10.33.67.64/26
@@ -46,7 +46,7 @@ instances:
             delete_on_termination: true
       tags:
         db: standby
-        node: 2
+      node: 2
     - type: t2.small
       region: ap-southeast-2
       subnet: 10.33.67.192/27
@@ -57,7 +57,7 @@ instances:
             delete_on_termination: true
       tags:
         db: standby
-        node: 3
+      node: 3
 variables:
    customerid: A12345
    serviceid: B67891

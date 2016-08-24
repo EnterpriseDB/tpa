@@ -265,12 +265,12 @@
     - name: Set up EC2 instances
       ec2:
         exact_count: 1
-        count_tag: "{{ cluster_tags|combine(item.tags) }}"
+        count_tag: "{{ cluster_tags|combine(item.tags)|combine({'node': item.node}) }}"
         image: "{{ item.image|default(ec2_region_amis[item.region]) }}"
         region: "{{ item.region }}"
         key_name: "{{ ec2_key_name }}"
         instance_type: "{{ item.type }}"
-        instance_tags: "{{ cluster_tags|combine(item.tags) }}"
+        instance_tags: "{{ cluster_tags|combine(item.tags)|combine({'node': item.node}) }}"
         instance_profile_name: "{{ cluster_profile }}"
         private_ip: "{{ item.private_ip|default(omit) }}"
         vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"

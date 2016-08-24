@@ -35,4 +35,4 @@ instances:
             delete_on_termination: true
       tags:
         db: barman
-        node: 1
+      node: 1
