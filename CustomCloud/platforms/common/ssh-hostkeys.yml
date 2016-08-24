@@ -1,0 +1,20 @@
+---
+
+- name: Ensure {{cluster_dir}}/hostkeys exists locally
+  file:
+    path: "{{ cluster_dir }}/hostkeys"
+    state: directory
+
+- name: Generate RSA host keys
+  command: ssh-keygen -t rsa -N "" -C node-{{ item }} -f ssh_host_rsa_key_{{ item }}
+  args:
+    chdir: "{{ cluster_dir }}/hostkeys"
+    creates: "ssh_host_rsa_key_{{ item }}"
+  with_sequence: start=1 end={{ keys_needed }}
+
+- name: Generate ECDSA host keys
+  command: ssh-keygen -t ecdsa -N "" -C node-{{ item }} -f ssh_host_ecdsa_key_{{ item }}
+  args:
+    chdir: "{{ cluster_dir }}/hostkeys"
+    creates: "ssh_host_ecdsa_key_{{ item }}"
+  with_sequence: start=1 end={{ keys_needed }}

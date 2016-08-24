@@ -226,6 +226,7 @@
               }
             ]
           }
+      tags: iam
 
     # We start with the array of instances defined in config.yml, some
     # of whose entries may have instance_count > 1. We expand the array
@@ -242,6 +243,12 @@
     - name: Expand the array of EC2 instances
       set_fact:
         instances: "{{ instances|expand_instances }}"
+
+    # Generate as many SSH host keys as there are instances.
+
+    - include: ssh-hostkeys.yml
+      vars:
+        keys_needed: "{{ instances|count }}"
 
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above. We loop over instances[], look up

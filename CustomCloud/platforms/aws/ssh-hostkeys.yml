@@ -1,0 +1,73 @@
+---
+
+# First, we generate as many SSH host keys as we have instances.
+
+- include: ../common/ssh-hostkeys.yml
+
+# This is a backwards-compatibility measure for clusters that were
+# provisioned before we started storing instance_profile_arn in a
+# vars.json file.
+
+- block:
+    - name: Discover ARN for instance profile
+      command: aws iam get-role --role-name "{{ cluster_profile }}"
+      changed_when: false
+      register: profile
+    - include: ../common/set-cluster-var.yml
+      vars:
+        name: instance_profile_arn
+        value: "{{ (profile.stdout|from_json).Role.Arn }}"
+  when: instance_profile_arn is not defined
+
+- debug: var=instance_profile_arn
+
+- name: Create an S3 bucket for this cluster in each region
+  s3_bucket:
+    name: "{{ cluster_bucket }}"
+    region: "{{ item }}"
+    state: present
+    policy: >
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "InstanceRolesOnly",
+            "Action": ["s3:GetObject"],
+            "Resource": "arn:aws:s3:::{{cluster_bucket}}/*",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": [ "{{ instance_profile_arn }}" ]
+            }
+          }
+        ]
+      }
+  with_items: "{{ regions }}"
+  
+- name: Set S3 bucket contents to expire in a week
+  s3_lifecycle:
+    name: "{{ cluster_bucket }}"
+    region: "{{ item }}"
+    expiration_days: 7
+    status: enabled
+    state: present
+  with_items: "{{ regions }}"
+
+- set_fact:
+    node_id_list: "{{ range(1, keys_needed|int+1)|list }}"
+
+# We generated host keys into hostkeys/ssh_host_$type_key_$node{,.pub};
+# we now upload those to nodes/$node/hostkeys/$type{,.pub}.txt in S3.
+
+- name: Upload SSH host key files for each instance
+  s3:
+    bucket: "{{ cluster_bucket }}"
+    object: "nodes/{{ item.0 }}/hostkeys/{{ item.1 }}{{ item.2 }}.txt"
+    src: "{{ cluster_dir }}/hostkeys/ssh_host_{{ item.1 }}_key_{{ item.0 }}{{ item.2 }}"
+    overwrite: different
+    expiration: 3600
+    mode: put
+  with_nested:
+    - "{{ node_id_list }}"
+    - ["rsa", "ecdsa"]
+    - ["", ".pub"]
+  register: keyurls
