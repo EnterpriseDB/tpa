@@ -2,4 +2,4 @@
 
 postgres_initdb_opts: []
 
-- include: "os/{{ ansible_distribution }}.yml"
+include: "os/{{ ansible_distribution }}.yml"
