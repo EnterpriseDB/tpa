@@ -19,8 +19,6 @@
         value: "{{ (profile.stdout|from_json).Role.Arn }}"
   when: instance_profile_arn is not defined
 
-- debug: var=instance_profile_arn
-
 - name: Create an S3 bucket for this cluster in each region
   s3_bucket:
     name: "{{ cluster_bucket }}"
