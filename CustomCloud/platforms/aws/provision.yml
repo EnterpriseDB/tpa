@@ -192,13 +192,23 @@
     - name: Create an instance profile for the cluster
       iam:
         iam_type: role
-        name: '{{ cluster_name }}_profile'
+        name: "{{ cluster_profile }}"
         state: present
+      register: profile
+      tags: iam
+
+    - name: Record instance profile ARN for later use
+      include: ../common/set-cluster-var.yml
+      vars:
+        name: instance_profile_arn
+        value: "{{ profile.instance_profile_result.arn }}"
+      when: profile|changed
+      tags: iam
 
     - name: Attach a policy to the instance profile
       iam_policy:
         iam_type: role
-        iam_name: '{{ cluster_name }}_profile'
+        iam_name: '{{ cluster_profile }}'
         policy_name: "{{ cluster_name }}_instance_permissions"
         state: present
         policy_json: |
@@ -254,7 +264,7 @@
         key_name: "{{ ec2_key_name }}"
         instance_type: "{{ item.type }}"
         instance_tags: "{{ cluster_tags|combine(item.tags) }}"
-        instance_profile_name: "{{ cluster_name }}_profile"
+        instance_profile_name: "{{ cluster_profile }}"
         private_ip: "{{ item.private_ip|default(omit) }}"
         vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
         group_id: "{{ ec2_region_groups[item.region] }}"
