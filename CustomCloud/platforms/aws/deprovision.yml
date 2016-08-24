@@ -150,13 +150,12 @@
 
     # We can also remove the data stored in S3 for this cluster.
 
-    - name: Delete this cluster's S3 bucket in each region
+    - name: Delete this cluster's S3 bucket
       s3_bucket:
         name: "{{ cluster_bucket }}"
-        region: "{{ item }}"
+        region: "{{ regions[0] }}"
         state: absent
         force: yes
-      with_items: "{{ regions }}"
       tags: s3
 
     - name: Delete generated files for this cluster
