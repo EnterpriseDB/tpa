@@ -25,6 +25,9 @@ ec2_vpc_subnets:
   eu-central-1:
     10.33.67.128/26: eu-central-1a
     10.33.67.192/27: eu-central-1a
+  us-west-1:
+    10.33.67.224/28: us-west-1b
+    10.33.67.240/28: us-west-1c
 
 instances:
     - type: t2.small
@@ -48,7 +51,7 @@ instances:
             volume_size: 10
             delete_on_termination: true
       tags:
-        db: bdr
+        db: barman
         node: 2
     - type: t2.small
       region: eu-central-1
@@ -72,3 +75,25 @@ instances:
       tags:
         db: barman
         node: 4
+    - type: t2.small
+      region: us-west-1
+      subnet: 10.33.67.224/28
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: standard
+            volume_size: 10
+            delete_on_termination: true
+      tags:
+        db: bdr
+        node: 5
+    - type: t2.small
+      region: us-west-1
+      subnet: 10.33.67.240/28
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: standard
+            volume_size: 10
+            delete_on_termination: true
+      tags:
+        db: barman
+        node: 6
