@@ -1,9 +1,3 @@
-- name: Check if the data directory is not empty
-  stat: path={{ postgres_data_dir }}/PG_VERSION
-  register: data_dir
+---
 
-- name: Run initdb to create data directory
-  shell: "{{ pgbindir }}/initdb -D {{ postgres_data_dir }} {% for x in postgres_initdb_opts %}{{x|quote}} {% endfor %}"
-  become: yes
-  become_user: postgres
-  when: data_dir.stat.exists == false
+- include: "os/{{ ansible_distribution }}.yml"

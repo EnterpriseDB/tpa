@@ -16,7 +16,7 @@
 
 - name: Ensure the data directory exists
   file:
-    path: "{{pgdata}}"
+    path: "{{ postgres_data_dir }}"
     state: directory
     owner: postgres
     group: postgres
@@ -26,13 +26,13 @@
     - name: Set PGDATA in postgresql-{{pgversion}}.service
       lineinfile:
         dest: "/lib/systemd/system/postgresql-{{pgversion}}.service"
-        line: "Environment=PGDATA={{pgdata}}"
+        line: "Environment=PGDATA={{ postgres_data_dir }}"
         regexp: "^Environment=PGDATA="
         state: present
     - name: Run initdb with the right data directory
       command: "{{pgbindir}}/postgresql{{pgversionNN}}-setup initdb"
       args:
-        creates: "{{pgdata}}/PG_VERSION"
+        creates: "{{ postgres_data_dir }}/PG_VERSION"
   when: ansible_distribution == 'RedHat'
 
 # If data checksum is required, we need to delete old directories
@@ -51,7 +51,7 @@
       service: name="{{pgservice}}" state=stopped
       sudo_user: root
     - name: Remove existing cluster directory
-      file: state=absent path="{{pgdata}}"
+      file: state=absent path="{{ postgres_data_dir }}"
     - name: Remove existing config directory
       file: state=absent path="{{pgconf}}"
     - name: invoke pg_createcluster with --data-checksums

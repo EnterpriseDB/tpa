@@ -1,6 +1,6 @@
 ---
 
-- include: pg_ctl_start.yml
+- include: pgservice_start.yml
 - include: create_db.yml
 - include: create_extension.yml
 - include: set_node_facts.yml

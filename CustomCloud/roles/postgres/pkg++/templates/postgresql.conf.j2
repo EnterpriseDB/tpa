@@ -1,4 +1,4 @@
-data_directory = '{{ pgdata }}'
+data_directory = '{{ postgres_data_dir }}'
 hba_file = '{{ pgconf }}/pg_hba.conf'
 ident_file = '{{ pgconf }}/pg_ident.conf'
 external_pid_file = '{{ pgsock }}/{{ pgversion }}-main.pid'

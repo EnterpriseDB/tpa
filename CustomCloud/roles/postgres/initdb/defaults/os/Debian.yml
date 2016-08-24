@@ -1,4 +1,3 @@
 ---
 
-pgservice: 'postgresql'
 postgres_data_dir: "/etc/postgresql/{{ pgversion | default('9.5') }}/main"

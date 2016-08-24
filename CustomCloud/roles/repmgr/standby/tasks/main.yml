@@ -19,7 +19,7 @@
     - name: Run repmgr standby clone
       command: repmgr -D /var/lib/postgresql/{{pgversion}}/main -d repmgr -U repmgr --verbose standby clone -h {{hostvars[primary_hostname]['vpn_address']}}
     - name: Move over conf files to proper location
-      command: mv {{pgdata}}/{{item}} {{pgconf}}/{{item}}
+      command: mv {{ postgres_data_dir }}/{{ item }} {{ pgconf }}/{{ item }}
       with_items:
         - postgresql.conf
         - pg_hba.conf

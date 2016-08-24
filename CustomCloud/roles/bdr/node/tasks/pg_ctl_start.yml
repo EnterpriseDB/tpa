@@ -1,6 +1,0 @@
----
-
-- name: Start PostgreSQL
-  shell: "{{pgbindir}}/pg_ctl -D {{postgres_data_dir}} start"
-  become: yes
-  become_user: postgres
