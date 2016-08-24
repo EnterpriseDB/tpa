@@ -37,19 +37,6 @@
       src: "{{playbook_dir}}/keys/id_{{user}}.pub"
       dest: "~{{user}}/.ssh/id_rsa.pub"
 
-- name: Check if known_hosts file exists
-  stat: path="~{{user}}/.ssh/known_hosts"
-  register: known
-
-- name: Add cluster hosts to known_hosts
-  shell: ssh-keyscan -H \
-    {{ play_hosts|map('extract', hostvars, 'ec2_ip_address')|join(' ') }} \
-    {{ play_hosts|map('extract', hostvars, 'ec2_private_ip_address')|join(' ') }} \
-    > known_hosts
-  args:
-    chdir: "~{{user}}/.ssh"
-  when: not known.stat.exists
-
 - name: Set owner/group for files
   shell: chown -c --reference authorized_keys *
   args:
