@@ -8,14 +8,8 @@ utils=$(dirname $0)
 cluster=${1:?No cluster specified}
 shift
 
-for d in ./clusters/$cluster $utils/../clusters/$cluster; do
-    if [ -d $d ]; then
-        cluster_dir=$d
-        break
-    fi
-done
-
-if [ -z ${cluster_dir+x} ]; then
+cluster_dir=$(realpath $utils/../clusters/$cluster);
+if [ ! -d $cluster_dir ]; then
     echo "Can't find directory clusters/$cluster"
     exit
 fi
