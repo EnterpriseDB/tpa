@@ -8,7 +8,7 @@ type apt-get &>/dev/null && apt-get -y install unzip python2.7 || yum -y install
 
 curl -s "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o awscli-bundle.zip && \
     unzip awscli-bundle.zip -d /tmp && \
-    /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+    python2 /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 
 for k in rsa ecdsa; do
     for p in "" .pub; do
