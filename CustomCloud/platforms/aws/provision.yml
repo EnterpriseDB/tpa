@@ -322,7 +322,8 @@
         instance_vars: "{{
           instance_vars|default([])|union([
             item.0.tagged_instances[0]|combine({
-              'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip)
+              'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip),
+              'node': item.0.item.item.node,
             })
           ])
         }}"
@@ -353,5 +354,10 @@
       template:
         src: ec2.ini.j2
         dest: "{{ cluster_dir }}/inventory/ec2.ini"
+
+    - name: Generate known_hosts file for the cluster
+      template:
+        src: known_hosts.j2
+        dest: "{{ cluster_dir }}/known_hosts"
 
     - include: ../common/write-cluster-vars.yml

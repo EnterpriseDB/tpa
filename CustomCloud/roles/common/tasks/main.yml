@@ -1,9 +1,9 @@
 ---
 
-# Run ssh-keyscan on the provisioned hosts, and accept the keys blindly
-# in order to suppress interactive prompts. This is a temporary hack.
-- include: keyscan.yml
-  tags: common
+- name: Tell ssh to use this cluster's known_hosts file
+  set_fact:
+    ansible_ssh_common_args: "-o UserKnownHostsFile='{{playbook_dir}}/known_hosts'"
+  when: ansible_ssh_common_args == ""
 
 # Set ansible_distribution and ansible_pkg_mgr if required.
 - include: distribution.yml
