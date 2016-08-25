@@ -353,6 +353,8 @@
             item.0.tagged_instances[0]|combine({
               'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip),
               'node': item.0.item.item.node,
+              'role': item.0.item.item.tags|try_subkey('role'),
+              'db': item.0.item.item.tags|try_subkey('db'),
             })
           ])
         }}"
