@@ -10,10 +10,6 @@
 
   pre_tasks:
 
-    - name: Give error if there is more than 1 barman host
-      assert:
-        that: "{{ groups['tag_db_barman'] | length == 1}}"
-
     - name: Set the node id and hostname as facts
       set_fact:
         node_id: "{{ ec2_tag_node }}"
@@ -34,13 +30,21 @@
 
     - name: Store DB servers list
       set_fact:
-        db_servers: "{{ groups['tag_db_bdr'] }}"
+        db_servers: "{{ (db_servers|default([])) + [ item ] }}"
+      when: "hostvars[item].ec2_region == ec2_region"
+      with_items: "groups['tag_db_bdr']"
       tags: always
 
     - name: Define barman hostname
       set_fact:
-        barman_hostname: "{{ groups['tag_db_barman'] | first }}"
+        barman_hostname: "{{ item }}"
+      when: "hostvars[item].ec2_region == ec2_region"
+      with_items: "groups['tag_db_barman']"
       tags: always
+
+    - name: Give error if there is no barman node assigned for region
+      assert:
+        that: barman_hostname is defined
 
   roles:
 
@@ -80,8 +84,8 @@
     - role: bdr/node
       tags: bdr
 
-#    - role: barman
-#      tags: barman
+    - role: barman
+      tags: barman
 
 - name: Set up Barman node
   hosts: tag_Name_TPA_BDR:&tag_db_barman
