@@ -1,7 +1,7 @@
 {% for h in play_hosts %}
 {% for k in ['rsa', 'ecdsa'] %}
-{{ hostvars[h].ec2_ip_address }} {{ lookup('file', playbook_dir+'/hostkeys/ssh_host_'+k+'_key_'~hostvars[h].node_id~'.pub') }}
-{{ hostvars[h].ec2_private_ip_address }} {{ lookup('file', playbook_dir+'/hostkeys/ssh_host_'+k+'_key_'~hostvars[h].node_id~'.pub') }}
-{{ hostvars[h].cluster_hostname }} {{ lookup('file', playbook_dir+'/hostkeys/ssh_host_'+k+'_key_'~hostvars[h].node_id~'.pub') }}
+{{ hostvars[h].public_ip }} {{ lookup('file', playbook_dir+'/hostkeys/ssh_host_'+k+'_key_'~hostvars[h].node~'.pub') }}
+{{ hostvars[h].private_ip }} {{ lookup('file', playbook_dir+'/hostkeys/ssh_host_'+k+'_key_'~hostvars[h].node~'.pub') }}
+{{ hostvars[h].cluster_hostname }} {{ lookup('file', playbook_dir+'/hostkeys/ssh_host_'+k+'_key_'~hostvars[h].node~'.pub') }}
 {% endfor %}
 {% endfor %}

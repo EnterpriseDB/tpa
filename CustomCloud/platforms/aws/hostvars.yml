@@ -1,0 +1,16 @@
+---
+
+- name: Translate platform-specific variables names
+  action: set_fact
+  args:
+    "{{ item.var }}": "{{ vars[item.source]|default(item.default)|default(None) }}"
+  when: item.var not in vars
+  with_items:
+    - var: "db"
+      source: "ec2_tag_db"
+    - var: "node"
+      source: "ec2_tag_node"
+    - var: "public_ip"
+      source: "ec2_ip_address"
+    - var: "private_ip"
+      source: "ec2_private_ip_address"
