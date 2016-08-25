@@ -1,8 +1,10 @@
 [tag_Name_TPA_RHEL]
-54.154.199.56
-54.194.197.156
+54.246.174.253 node=1 role="" db="primary"
+54.229.108.66 node=2 role="" db="standby"
 
 [tag_Name_TPA_RHEL:vars]
 cluster_name=TPA_RHEL
 ansible_user=ec2-user
 ansible_python_interpreter=/usr/bin/python2.7
+ansible_ssh_private_key_file="clusters/test/rhel/id_tpa_rhel"
+ansible_ssh_common_args="-o UserKnownHostsFile='clusters/test/rhel/known_hosts'"
