@@ -15,7 +15,7 @@
     - name: Set the node id and hostname as facts
       set_fact:
         node_id: "{{ ec2_tag_node }}"
-        cluster_hostname: "{{ cluster_name|lower + ec2_tag_node }}"
+        cluster_hostname: "rhel-{{ ec2_tag_node }}"
       tags: always
 
   roles:
