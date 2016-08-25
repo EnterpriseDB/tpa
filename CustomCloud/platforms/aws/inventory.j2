@@ -10,4 +10,5 @@ ansible_python_interpreter=/usr/bin/python2.7
 {% for k,v in variables.iteritems(): %}
 {{ k }}={{v}}
 {% endfor %}
+ansible_ssh_private_key_file="{{ cluster_dir|relpath(playbook_dir+'/../..') }}/{{ ec2_key_file }}"
 ansible_ssh_common_args="-o UserKnownHostsFile='{{ cluster_dir|relpath(playbook_dir+'/../..') }}/known_hosts'"
