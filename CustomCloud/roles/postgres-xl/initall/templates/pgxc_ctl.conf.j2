@@ -134,7 +134,8 @@ shared_buffers = {{(shared_buffers_mb/(hostvars[groups['tag_role_datanode'][0]][
 work_mem = 1GB
 effective_cache_size = 20GB
 default_statistics_target = 10000
-shared_queue_size = 8192
+# TODO: Check shared_queue_size - larger values result in insane amounts of requested memory
+shared_queue_size = 256
 max_pool_size=200
 max_wal_size=32GB
 max_datanodes=64
