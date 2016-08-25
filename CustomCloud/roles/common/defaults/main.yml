@@ -13,6 +13,7 @@ packages:
     - python-dev
     - linux-tools
     - python-psycopg2
+    - dbus
   RedHat:
     - python-devel
     - perf
