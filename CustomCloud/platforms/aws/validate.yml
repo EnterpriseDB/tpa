@@ -26,6 +26,18 @@
       - instances is sequence and instances is not string and instances is not mapping
       - instances | length > 0
 
+# Either every instance should specify its node id explicitly (in which
+# case instance_count must not be set), or none should do so.
+
+- name: Ensure that node and instance_count do not conflict
+  assert:
+    msg: "Please set 'node' on every instance, or use instance_count"
+    that:
+      - instances|selectattr('node','defined')|list|count == 0 or
+        instances|selectattr('instance_count','defined')|list|count == 0
+      - instances|selectattr('node','defined')|list|count == 0 or
+        instances|selectattr('node','defined')|list|count == instances|count
+
 - name: Ensure that the cluster name is set as a tag
   set_fact:
     cluster_tags: "{{ dict(Name=cluster_name)|combine(cluster_tags) }}"
