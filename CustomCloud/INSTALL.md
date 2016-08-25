@@ -2,16 +2,11 @@ CustomCloud installation
 ========================
 
 To use CustomCloud, you will need Ansible from the
-[Upstream Ansible repository](https://github.com/ansible/ansible).
-
-For some reason if you get issues with upstream Ansible then you can
-also try the [2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ansible).
+[2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ansible).
 
 (2ndQuadrant/ansible is a curated version of the official ansible
 repository's devel branch, with some additional useful changes that have
-not yet been merged upstream.) Latest tests with upstream Ansible (a specific
-commit tag which works ok is also provided below) are
-working fine, so probably 2ndQuadrant sources might not be needed.
+not yet been merged upstream.)
 
 The quick version: clone Ansible sources, export
 ANSIBLE_HOME=/path/to/clone, and invoke ansible through the
