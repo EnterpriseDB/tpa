@@ -14,5 +14,6 @@
   command: ssh-add "{{ keyfile }}"
   args:
     chdir: "{{ cluster_dir }}"
-  when: lookup('env', 'SSH_AGENT_PID') is defined and
-        lookup('pipe', "ssh-add -l|grep $(ssh-keygen -l -f '{{ cluster_dir }}/{{ keyfile }}'|awk '{print $2}') || true") == ""
+  when:
+    - lookup('env', 'SSH_AGENT_PID') is defined
+    - lookup('pipe', "ssh-add -l|grep $(ssh-keygen -l -f '{{ cluster_dir }}/{{ keyfile }}'|awk '{print $2}') || true") == ""
