@@ -27,7 +27,8 @@ instances:
       volumes:
           - device_name: root
             volume_type: standard
-            volume_size: 10
+            volume_size: 13
+            delete_on_termination: false
       tags:
         db: standby
       node: 2

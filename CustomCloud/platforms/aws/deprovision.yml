@@ -47,6 +47,28 @@
       with_items: "{{ ec2_uninstances.results }}"
       tags: ec2
 
+    # With the instances gone, we can delete any volumes that were
+    # created for the cluster.
+
+    - name: Enumerate EBS volumes provisioned in each region
+      ec2_vol_facts:
+        region: "{{ item }}"
+        filters:
+          "tag:CreatingCluster": "{{ cluster_name }}"
+      with_items: "{{ regions }}"
+      register: volumes
+      tags: volumes
+
+    - name: Remove volumes provisioned for this cluster in each region
+      ec2_vol:
+        state: absent
+        id: "{{ item.1.id }}"
+        region: "{{ item.1.region }}"
+      with_nested_dependents:
+        - volumes.results
+        - item.0.volumes
+      tags: volumes
+
     # Next, remove keypairs in each region by the same strategy, except
     # that ec2_key doesn't take a list directly, so we have to use the
     # custom with_nested_dependents plugin instead of with_items. Note
