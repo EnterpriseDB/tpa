@@ -2,5 +2,4 @@
 
 - name: Start PostgreSQL
   service: name=postgresql state=started
-  sudo_user: root
-  sudo: true
+  become: true
