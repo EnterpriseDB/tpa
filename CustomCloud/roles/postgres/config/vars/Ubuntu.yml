@@ -1,0 +1,3 @@
+---
+
+postgres_conf_dir: "/etc/postgresql/{{ pgversion | default('9.5') }}/main"
