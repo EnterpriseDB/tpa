@@ -4,7 +4,8 @@ exec >> /var/log/tpa-firstboot.log 2>&1
 
 echo "$(date): start"
 
-type apt-get &>/dev/null && apt-get -y install unzip python2.7 || yum -y install unzip
+type apt-get &>/dev/null && apt-get -y install unzip curl python2.7
+type yum &>/dev/null && yum -y install unzip curl python
 
 curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o awscli-bundle.zip && \
     unzip awscli-bundle.zip -d /tmp && \
