@@ -15,7 +15,7 @@ instances:
       region: eu-west-1
       subnet: 10.33.173.0/24
       volumes:
-          - device_name: /dev/xvdb
+          - device_name: root
             volume_type: gp2
             volume_size: 10
       tags:
@@ -25,7 +25,7 @@ instances:
       region: eu-west-1
       subnet: 10.33.173.0/24
       volumes:
-          - device_name: /dev/xvda
+          - device_name: root
             volume_type: standard
             volume_size: 10
       tags:

@@ -53,10 +53,14 @@
     # its id by default.
     #
     # The AMI for a region is then given by ec2_region_amis[region].
+    #
+    # We also record the root device name for each AMI, so that we can
+    # specify "root" as the device_name in instances[].volumes[].
 
     - name: Initialise empty region→AMI table
       set_fact:
         ec2_region_amis: {}
+        ec2_ami_rootdevices: {}
 
     - block:
         - name: Find AMI named {{ ec2_ami_name }} in each region
@@ -75,6 +79,7 @@
         - name: Initialise region→AMI table
           set_fact:
             ec2_region_amis: "{{ ec2_region_amis|combine({item.0: item.1.results.0.ami_id}) }}"
+            ec2_ami_rootdevices: "{{ ec2_ami_rootdevices|combine({item.1.results.0.ami_id: item.1.results.0.root_device_name}) }}"
           with_together:
             - regions
             - ec2_amis.results
@@ -275,7 +280,11 @@
         private_ip: "{{ item.private_ip|default(omit) }}"
         vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
         group_id: "{{ ec2_region_groups[item.region] }}"
-        volumes: "{{ item.volumes|default(omit)|terminate_volumes }}"
+        volumes: "{{
+          item.volumes|default(omit)|define_volumes(
+            ec2_ami_rootdevices[item.image|default(ec2_region_amis[item.region])]
+          )
+        }}"
         spot_price: "{{ item.spot_price|default(omit) }}"
         spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
         spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"
