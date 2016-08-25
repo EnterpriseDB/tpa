@@ -275,7 +275,7 @@
         private_ip: "{{ item.private_ip|default(omit) }}"
         vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
         group_id: "{{ ec2_region_groups[item.region] }}"
-        volumes: "{{ item.volumes|default(omit) }}"
+        volumes: "{{ item.volumes|default(omit)|terminate_volumes }}"
         spot_price: "{{ item.spot_price|default(omit) }}"
         spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
         spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"

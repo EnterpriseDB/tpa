@@ -26,6 +26,16 @@ def expand_instances(a):
             idx = idx + 1
     return c
 
+# Given an array of volumes (as defined in instances[]), this filters sets
+# delete_on_termination to true unless it's been explicitly set to false.
+
+def terminate_volumes(v):
+    if isinstance(v, list):
+        for i in v:
+            if not 'delete_on_termination' in i:
+                i['delete_on_termination'] = True
+    return v
+
 # This filter takes an item and a container, and returns the value of the item
 # in the container (i.e. a key in a dict or an index in a list). It optionally
 # takes an array of keys to look up recursively in the first result:
@@ -67,4 +77,5 @@ class FilterModule(object):
             'extract': extract,
             'expand_instances': expand_instances,
             'try_subkey': try_subkey,
+            'terminate_volumes': terminate_volumes,
         }
