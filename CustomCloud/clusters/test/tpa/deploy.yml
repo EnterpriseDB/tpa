@@ -22,6 +22,8 @@
 
   pre_tasks:
 
+    - include: ../../../platforms/aws/hostvars.yml
+
     # Find the one host tagged as the primary and remember it for use in
     # individual roles later. Also store the node id and each node's VPN
     # address as facts.

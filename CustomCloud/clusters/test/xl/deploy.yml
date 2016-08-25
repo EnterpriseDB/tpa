@@ -35,6 +35,8 @@
               - instances | length > 0
       tags: always
 
+    - include: ../../../platforms/aws/hostvars.yml
+
     - name: Set the node id and hostname as facts
       set_fact:
         node_id: "{{ ec2_tag_node }}"

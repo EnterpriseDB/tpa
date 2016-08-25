@@ -9,6 +9,7 @@
     - vars/main.yml
 
   pre_tasks:
+    - include: ../../../platforms/aws/hostvars.yml
 
     - name: Set the node id and hostname as facts
       set_fact:

@@ -16,6 +16,7 @@
     vpn_netmask: 255.255.255.0
 
   pre_tasks:
+    - include: ../../../platforms/aws/hostvars.yml
 
     - name: Determine barman hostname
       set_fact: barman_hostname="{{ item }}"
