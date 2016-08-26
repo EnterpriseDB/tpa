@@ -4,7 +4,7 @@
 
 - name: "Update postgresql.conf on {{current_host}}"
   lineinfile:
-     dest="{{ postgres_data_dir }}/postgresql.conf"
+     dest="{{ postgres_conf_dir }}/postgresql.conf"
      regexp='\/bin\/true'
      line="archive_command = 'rsync -a %p barman@{{barman_hostname}}:{{ barman_home }}/{{ customerid + \'_\' + serviceid + \'_\' + hostvars[current_host]["ec2_tag_db"] + hostvars[current_host]["ec2_tag_node"] | lower}}/incoming/%f'"
   delegate_to: "{{ current_host }}"
@@ -12,7 +12,7 @@
 
 - name: "Update pg_hba.conf on {{current_host}}"
   lineinfile:
-     dest="{{ postgres_data_dir }}/pg_hba.conf"
+     dest="{{ postgres_conf_dir }}/pg_hba.conf"
      regexp='host    postgres        all             0.0.0.0/0               md5'
      insertbefore='host    postgres        all             0.0.0.0/0               md5'
      line='host    postgres        all             {{barman_hostname}}/32               trust\nhost    postgres        all             0.0.0.0/0               md5'
