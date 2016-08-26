@@ -49,42 +49,62 @@
 - name: Install python packages
   shell: pip install virtualenv
 
-- name: Check if /dev/xvdb needs a filesystem
-  shell: sudo blkid /dev/xvdb
-  register: fstype
-  ignore_errors: true
-
-- name: create file system
-  action: filesystem fstype=ext4 dev=/dev/xvdb force=yes
-  when: ('ext4' not in fstype.stdout)
-
-- name: 
-  action: mount name=/wal src=/dev/xvdb fstype=ext4 state=mounted
-
-- name: Check if /dev/xvdc needs a "swap" filesystem
-  shell: sudo blkid /dev/xvdc
-  register: fstype
-  ignore_errors: true
-
-- name: Create swap
-  command: "mkswap /dev/xvdc"
-  when: ('swap' not in fstype.stdout)
-
-- name: Add swap
-  command: "swapon /dev/xvdc"
-  when: ('swap' not in fstype.stdout)
-
-- name: Ensure that /data/pgxl exists
+- name: Ensure that /pgxl exists
   file:
-    path: /data/pgxl
+    path: /pgxl
     state: directory
     owner: postgres
     group: postgres
     mode: 0755
 
-- name: Ensure that /wal/pgxl exists
+- name: Check if /dev/xvdb needs a filesystem
+  shell: lsblk --noheadings --output FSTYPE /dev/xvdb
+  register: fstype
+
+- name: Create file system on /dev/xvdb
+  filesystem: fstype=ext4 dev=/dev/xvdb force=yes
+  when: fstype.stdout != 'ext4'
+
+- name: Mount /pgxl/data
+  mount: name=/pgxl/data src=/dev/xvdb fstype=ext4 state=mounted
+
+- name: Check if /dev/xvdc needs a filesystem
+  shell: lsblk --noheadings --output FSTYPE /dev/xvdc
+  register: fstype
+
+- name: Create file system on /dev/xvdc
+  filesystem: fstype=ext4 dev=/dev/xvdc force=yes
+  when: fstype.stdout != 'ext4'
+
+- name: Mount /pgxl/wal
+  mount: name=/pgxl/wal src=/dev/xvdc fstype=ext4 state=mounted
+
+- name: Check if /dev/xvdd needs a "swap" filesystem
+  shell: lsblk --noheadings --output FSTYPE /dev/xvdd
+  register: fstype
+
+- block:
+    - name: Create swap
+      command: "mkswap /dev/xvdd"
+
+    - name: Set swap
+      mount: src=/dev/xvdd name=none fstype=swap dump=0 passno=0 state=present
+
+    - name: Activate swap
+      command: "swapon /dev/xvdd"
+  when: fstype.stdout != 'swap'
+
+- name: Ensure that /pgxl/data exists
   file:
-    path: /wal/pgxl
+    path: /pgxl/data
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
+- name: Ensure that /pgxl/wal exists
+  file:
+    path: /pgxl/wal
     state: directory
     owner: postgres
     group: postgres
