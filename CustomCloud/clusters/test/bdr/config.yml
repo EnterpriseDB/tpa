@@ -96,3 +96,6 @@ instances:
       tags:
         db: barman
       node: 6
+variables:
+   customerid: A12345
+   serviceid: B67891
