@@ -25,3 +25,20 @@
   when: inventory_hostname == control_hostname and not conf.stat.exists
   sudo_user: postgres
   sudo: true
+
+- block:
+    - name: Test XL - createdb
+      shell: source ~/.profile && createdb test
+      args:
+        executable: /bin/bash
+    - name: Test XL - create replicated table
+      shell: source ~/.profile && psql test -c "create table tab distribute by replication as select id from generate_series(1, 128) id;"
+      args:
+        executable: /bin/bash
+    - name: Test XL - dropdb
+      shell: source ~/.profile && dropdb test
+      args:
+        executable: /bin/bash
+  become: true
+  become_user: postgres
+  when: inventory_hostname == control_hostname
