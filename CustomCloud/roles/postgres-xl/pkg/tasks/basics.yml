@@ -3,14 +3,6 @@
 - name: Set the hostname
   hostname: name="{{ cluster_hostname }}"
 
-- name: Populate /etc/hosts
-  template:
-    src: hosts.j2
-    dest: /etc/hosts
-    owner: root
-    group: root
-    mode: 0644
-
 - name: Create postgres group
   group: name=postgres state=present
 
