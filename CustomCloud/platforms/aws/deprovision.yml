@@ -187,3 +187,4 @@
       with_items:
         - vars.json
         - known_hosts
+        - inventory/00-{{ cluster_name }}
