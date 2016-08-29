@@ -58,6 +58,11 @@
     - role: sys/sysctl
       tags: sysctl
 
+    - role: sys/fs
+      device: /dev/xvdb
+      mountpoint: /var/lib/postgresql
+      tags: fs
+
 - name: Set up TPA BDR nodes
   hosts: tag_Name_TPA_BDR:&tag_db_bdr
   gather_facts: no
