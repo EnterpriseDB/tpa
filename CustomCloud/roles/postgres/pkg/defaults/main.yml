@@ -69,7 +69,7 @@ postgres_packages:
     - postgresql-{{pgversion}}-pgespresso
   RedHat:
     - postgresql{{pgversionNN}}
-    - postgresql{{pgversionNN}}-debug
+    - postgresql{{pgversionNN}}-debuginfo
     - postgresql{{pgversionNN}}-contrib
     - postgresql{{pgversionNN}}-server
     - postgresql{{pgversionNN}}-devel
