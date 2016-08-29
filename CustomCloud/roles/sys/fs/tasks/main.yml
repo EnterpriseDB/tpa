@@ -1,0 +1,33 @@
+---
+
+# Given a block device name and a mountpoint, does everything required
+# to make the volume available for use immediately and after subsequent
+# reboots.
+
+- name: Ensure filesystem configuration is specified
+  assert:
+    msg: "Please specify at least the device name and mountpoint"
+    that:
+      - device is defined
+      - mountpoint is defined
+
+- name: Set readahead on {{ device }} to {{ '%d' % ((readahead|int)/2048) }}MB
+  shell: >
+    blockdev --getra "{{ device }}" &&
+    blockdev --setra "{{ readahead }}" "{{ device }}"
+  register: ra
+  changed_when: ra.stdout != "{{ readahead }}"
+
+- name: Create filesystem on {{ device }}
+  filesystem:
+    dev: "{{ device }}"
+    fstype: "{{ fstype }}"
+    opts: "{{ fsopts|default(omit) }}"
+
+- name: Mount {{ device }} under {{ mountpoint }}
+  mount:
+    src: "{{ device }}"
+    name: "{{ mountpoint }}"
+    fstype: "{{ fstype }}"
+    opts: noauto
+    state: mounted

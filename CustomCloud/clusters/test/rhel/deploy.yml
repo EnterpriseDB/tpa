@@ -27,6 +27,11 @@
     - role: sys/sysctl
       tags: sysctl
 
+    - role: sys/fs
+      device: /dev/xvdb
+      mountpoint: /var/lib/postgresql
+      tags: fs
+
     - role: postgres/pkg
       tags: postgres
 

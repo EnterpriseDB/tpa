@@ -1,0 +1,4 @@
+---
+
+fstype: 'ext4'
+readahead: 32768
