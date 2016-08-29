@@ -11,6 +11,10 @@
       - device is defined
       - mountpoint is defined
 
+- name: Set up encryption on {{ device }}
+  include: "{{ encryption }}.yml"
+  when: encryption is defined
+
 - name: Set readahead on {{ device }} to {{ '%d' % ((readahead|int)/2048) }}MB
   shell: >
     blockdev --getra "{{ device }}" &&
