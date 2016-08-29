@@ -29,5 +29,5 @@
     src: "{{ device }}"
     name: "{{ mountpoint }}"
     fstype: "{{ fstype }}"
-    opts: noauto
+    opts: "{{ mountopts }}"
     state: mounted
