@@ -18,3 +18,15 @@
   with_items:
     - "{{ postgres_packages[ansible_distribution] }}"
     - "{{ extra_postgres_packages[ansible_distribution] }}"
+
+# We set pgbindir based on what packages we installed. Unfortunately, we
+# can not assume that all Postgres binaries (e.g., pg_config) will be in
+# our (or even postgres's) PATH.
+
+- name: Set pgbindir based on distribution
+  set_fact:
+    pgbindir: "{{ postgres_binary_directories[ansible_os_family] }}"
+  vars:
+    postgres_binary_directories:
+      Debian: "/usr/lib/postgresql/{{pgversion}}/bin"
+      RedHat: "/usr/pgsql-{{pgversion}}/bin"
