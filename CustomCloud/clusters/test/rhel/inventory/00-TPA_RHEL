@@ -1,6 +1,6 @@
 [tag_Name_TPA_RHEL]
-54.246.174.253 node=1 role="" db="primary"
-54.229.108.66 node=2 role="" db="standby"
+54.154.134.223 node=1 db="primary" role=""
+54.154.141.230 node=2 db="standby" role=""
 
 [tag_Name_TPA_RHEL:vars]
 cluster_name=TPA_RHEL

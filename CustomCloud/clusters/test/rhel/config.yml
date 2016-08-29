@@ -10,25 +10,35 @@ ec2_ami_user: "ec2-user"
 ec2_vpc:
   Name: Test
 
+ec2_vpc_subnets:
+  10.33.174.0/28: eu-west-1a
+  10.33.174.16/28: eu-west-1b
+
 instances:
-    - type: t2.micro
+    - node: 1
+      type: t2.micro
       region: eu-west-1
-      subnet: 10.33.173.0/24
+      subnet: 10.33.174.0/28
       volumes:
           - device_name: root
             volume_type: gp2
             volume_size: 10
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 16
       tags:
         db: primary
-      node: 1
-    - type: t2.micro
+    - node: 2
+      type: t2.micro
       region: eu-west-1
-      subnet: 10.33.173.0/24
+      subnet: 10.33.174.16/28
       volumes:
           - device_name: root
             volume_type: standard
             volume_size: 13
             delete_on_termination: false
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 16
       tags:
         db: standby
-      node: 2
