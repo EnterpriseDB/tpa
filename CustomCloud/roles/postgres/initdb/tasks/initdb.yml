@@ -1,0 +1,16 @@
+---
+
+# If we don't have any friendly packaging system to help us initialise a
+# cluster, we can just run initdb directly.
+
+- name: Run initdb to create data directory
+  command: >
+    {{ pgbindir }}/initdb -D {{ postgres_data_dir }} \
+      {% for x in postgres_initdb_opts %}{{x|quote}} {% endfor %}
+  become_user: postgres
+  become: yes
+
+# We're on our own here as far as making Postgres start up on boot is
+# concerned. Since this situation (no help from packages) is likely to
+# occur only on short-lived testbeds right now, we ignore the problem
+# until it becomes clearer.
