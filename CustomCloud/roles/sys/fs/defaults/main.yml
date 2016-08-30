@@ -2,4 +2,4 @@
 
 fstype: 'ext4'
 readahead: 32768
-mountopts: 'defaults, noatime'
+mountopts: 'defaults,noatime'
