@@ -5,23 +5,6 @@
     that:
       - pgversion is defined
 
-- include: fs.yml
-- include: packages.yml
-- include_vars: "{{ansible_distribution}}.yml"
-
-- name: Install psycopg2
-  command: pip install psycopg2
-  environment:
-    PATH: /usr/local/bin:/usr/bin:/bin:{{ pgbindir }}
-
-- name: Ensure the data directory exists
-  file:
-    path: "{{ postgres_data_dir }}"
-    state: directory
-    owner: postgres
-    group: postgres
-    mode: 0700
-
 - block:
     - name: Set PGDATA in postgresql-{{pgversion}}.service
       lineinfile:
@@ -118,15 +101,5 @@
       state: present
       name: pgstattuple
       db: template1
-    sudo_user: postgres
-    when: (primary_hostname is defined and inventory_hostname == primary_hostname)
-
-# Doesn't hurt to have pgespresso around always with or without barman since it
-# (backup using barman) can be configured in the future as well
-  - name: Ensure pgespresso is present in postgres
-    postgresql_ext:
-      state: present
-      name: pgespresso
-      db: postgres
     sudo_user: postgres
     when: (primary_hostname is defined and inventory_hostname == primary_hostname)
