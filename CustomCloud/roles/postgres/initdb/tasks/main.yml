@@ -1,3 +1,8 @@
 ---
-- include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Set default postgres data directory
+  set_fact:
+    postgres_data_dir: "{{ default_postgres_data_dirs[ansible_os_family] }}"
+  when: postgres_data_dir is not defined
+
 - include: "os/{{ ansible_os_family }}.yml"
