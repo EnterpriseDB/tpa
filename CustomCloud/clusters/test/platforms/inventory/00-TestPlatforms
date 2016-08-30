@@ -8,7 +8,27 @@
 
 [tag_Name_TestPlatforms:vars]
 cluster_name=TestPlatforms
-ansible_user=admin
 ansible_python_interpreter=/usr/bin/python2.7
 ansible_ssh_private_key_file="clusters/test/platforms/id_testplatforms"
 ansible_ssh_common_args="-o UserKnownHostsFile='clusters/test/platforms/known_hosts'"
+
+[Debian]
+54.154.183.47
+54.154.143.157
+
+[Debian:vars]
+ansible_user=admin
+
+[RedHat]
+54.154.186.121
+54.154.215.38
+
+[RedHat:vars]
+ansible_user=ec2-user
+
+[Ubuntu]
+54.154.187.187
+54.154.186.98
+
+[Ubuntu:vars]
+ansible_user=ubuntu

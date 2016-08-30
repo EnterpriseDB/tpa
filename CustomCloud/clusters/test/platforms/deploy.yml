@@ -1,7 +1,7 @@
 ---
 
 - name: Set up TPA cluster nodes
-  hosts: tag_Name_TPA_RHEL
+  hosts: tag_Name_TestPlatforms
   gather_facts: no
   sudo_user: root
   sudo: true
@@ -12,10 +12,9 @@
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
 
-    - name: Set the node id and hostname as facts
+    - name: Set the cluster_hostname for each node
       set_fact:
-        node_id: "{{ ec2_tag_node }}"
-        cluster_hostname: "rhel-{{ ec2_tag_node }}"
+        cluster_hostname: "tpa-{{ ec2_tag_node }}"
       tags: always
 
   roles:
