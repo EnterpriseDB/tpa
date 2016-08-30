@@ -1,10 +1,5 @@
 ---
 
-# Set up barman volume; superseded by sys/fs role.
-# Applicable only to the barman server.
-- include: fs.yml
-  when: use_global_barman is not defined and inventory_hostname == barman_hostname
-
 # Install barman packages; superseded by postgres/pkg and barman/pkg.
 # Applicable only to the barman server.
 - include: install.yml
