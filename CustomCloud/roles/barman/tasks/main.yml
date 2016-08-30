@@ -1,10 +1,5 @@
 ---
 
-# Install barman packages; superseded by postgres/pkg and barman/pkg.
-# Applicable only to the barman server.
-- include: install.yml
-  when: use_global_barman is not defined and inventory_hostname == barman_hostname
-
 # Enable password-less ssh FROM the barman host to every cluster node.
 # Applicable only to the barman server. Superseded in part by sys/ssh.
 - include: ssh-barman.yml
