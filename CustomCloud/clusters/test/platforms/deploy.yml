@@ -14,7 +14,7 @@
 
     - name: Set the cluster_hostname for each node
       set_fact:
-        cluster_hostname: "tpa-{{ ec2_tag_node }}"
+        cluster_hostname: "tpa-{{ node }}"
       tags: always
 
   roles:
