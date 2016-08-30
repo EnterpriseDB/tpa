@@ -1,6 +1,7 @@
 ---
 
-postgres_initdb_opts: []
+postgres_initdb_opts:
+  - --data-checksums
 
 default_postgres_data_dirs:
   Debian: "/var/lib/postgresql/{{ pgversion }}/main"
