@@ -15,7 +15,7 @@
     dest: /etc/yum/pluginconf.d/rhnplugin.conf
     section: main
     option: exclude
-    value: postgresql*
+    value: "postgresql* barman* repmgr*"
 
 # Furthermore, since we have (at least) the PGDG and 2ndQPostgres
 # repositories providing Postgres packages, we add exclude lines to
