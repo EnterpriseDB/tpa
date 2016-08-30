@@ -1,14 +1,30 @@
 ---
 
+# Set up barman volume; superseded by sys/fs role.
+# Applicable only to the barman server.
 - include: fs.yml
   when: use_global_barman is not defined and inventory_hostname == barman_hostname
+
+# Install barman packages; superseded by postgres/pkg and barman/pkg.
+# Applicable only to the barman server.
 - include: install.yml
   when: use_global_barman is not defined and inventory_hostname == barman_hostname
+
+# Enable password-less ssh FROM the barman host to every cluster node.
+# Applicable only to the barman server. Superseded in part by sys/ssh.
 - include: ssh-barman.yml
   when: inventory_hostname == barman_hostname
+
+# Install barman.conf on the barman server.
 - include: configure.yml
   when: inventory_hostname == barman_hostname
+
+# Set archive_command and tweak pg_hba.conf on every cluster node that
+# will be backed up to barman.
 - include: update-postgres-conf.yml current_host={{item}}
   with_items: "{{db_servers}}"
+
+# Enable password-less TO the barman server from every cluster node.
+# Superseded in part by sys/ssh.
 - include: ssh-db-servers.yml current_host={{item}}
   with_items: "{{db_servers}}"
