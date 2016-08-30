@@ -24,6 +24,11 @@
     name: "{{ cluster_bucket }}"
     region: "{{ regions[0] }}"
     state: present
+    tags: "{{
+      cluster_tags|combine({
+        'CreatingCluster': cluster_name
+      })
+    }}"
     policy: >
       {
         "Version": "2012-10-17",
