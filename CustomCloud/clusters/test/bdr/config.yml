@@ -18,20 +18,21 @@ ec2_vpc:
   Name: Test
 
 ec2_vpc_subnets:
-  us-east-1:
-    10.33.67.0/26: us-east-1a
-    10.33.67.64/26: us-east-1a
-  eu-central-1:
-    10.33.67.128/26: eu-central-1a
-    10.33.67.192/27: eu-central-1a
   us-west-1:
-    10.33.67.224/28: us-west-1b
-    10.33.67.240/28: us-west-1c
+    10.33.67.32/28: us-west-1b
+    10.33.67.112/28: us-west-1c
+  eu-central-1:
+    10.33.67.128/28: eu-central-1a
+    10.33.67.144/28: eu-central-1a
+  us-east-1:
+    10.33.67.160/28: us-east-1c
+    10.33.67.176/28: us-east-1c
+    10.33.67.192/28: us-east-1e
 
 instances:
     - type: t2.small
-      region: us-east-1
-      subnet: 10.33.67.0/26
+      region: us-west-1
+      subnet: 10.33.67.32/28
       assign_eip: false
       volumes:
           - device_name: /dev/xvdb
@@ -42,8 +43,8 @@ instances:
         db: bdr
       node: 1
     - type: t2.small
-      region: us-east-1
-      subnet: 10.33.67.64/26
+      region: us-west-1
+      subnet: 10.33.67.112/28
       volumes:
           - device_name: /dev/xvdb
             volume_type: standard
@@ -54,7 +55,7 @@ instances:
       node: 2
     - type: t2.small
       region: eu-central-1
-      subnet: 10.33.67.128/26
+      subnet: 10.33.67.128/28
       volumes:
           - device_name: /dev/xvdb
             volume_type: standard
@@ -65,7 +66,7 @@ instances:
       node: 3
     - type: t2.small
       region: eu-central-1
-      subnet: 10.33.67.192/27
+      subnet: 10.33.67.144/28
       volumes:
           - device_name: /dev/xvdb
             volume_type: standard
@@ -76,7 +77,7 @@ instances:
       node: 4
     - type: t2.small
       region: us-west-1
-      subnet: 10.33.67.224/28
+      subnet: 10.33.67.160/28
       volumes:
           - device_name: /dev/xvdb
             volume_type: standard
@@ -86,8 +87,8 @@ instances:
         db: bdr
       node: 5
     - type: t2.small
-      region: us-west-1
-      subnet: 10.33.67.240/28
+      region: us-east-1
+      subnet: 10.33.67.176/28
       volumes:
           - device_name: /dev/xvdb
             volume_type: standard
@@ -96,6 +97,18 @@ instances:
       tags:
         db: barman
       node: 6
+    - type: t2.small
+      region: us-east-1
+      subnet: 10.33.67.192/28
+      assign_eip: false
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: standard
+            volume_size: 10
+            delete_on_termination: true
+      tags:
+        db: control
+      node: 7
 variables:
    customerid: A12345
    serviceid: B67891
