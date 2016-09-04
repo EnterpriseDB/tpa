@@ -1,0 +1,11 @@
+# An on-disk queue is created for this action. If the remote host is
+# down, messages are spooled to disk and sent when it is up again.
+
+$ActionQueueFileName tpafwd
+$ActionQueueMaxDiskSpace 1g   # 1gb space limit (use as much as possible)
+$ActionQueueSaveOnShutdown on # save messages to disk on shutdown
+$ActionQueueType LinkedList   # run asynchronously
+$ActionResumeRetryCount -1    # infinite retries if host is down
+
+# Forward postgresql logs to {{control_hostname}}
+if $programname == 'postgres' then @{{control_hostname}}:514

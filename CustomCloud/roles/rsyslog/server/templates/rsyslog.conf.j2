@@ -1,0 +1,43 @@
+# modules
+$ModLoad imuxsock.so
+$ModLoad imklog.so
+$ModLoad imudp.so
+
+# listen on network
+$UDPServerAddress 0.0.0.0
+$UDPServerRun 514
+
+# enable non-kernel facility klog messages
+$KLogPermitNonKernelFacility on
+
+# reduce any duplicates
+$RepeatedMsgReduction on
+# enable disk mode for receive buffer
+$WorkDirectory /var/spool/rsyslog
+$MainMsgQueueFileName mainq
+
+# permissions
+$FileOwner syslog
+$FileGroup adm
+$FileCreateMode 0640
+$DirCreateMode 0755
+$Umask 0022
+$PrivDropToUser syslog
+$PrivDropToGroup syslog
+
+# basic local logging
+*.info;\
+	mail.none;\
+	authpriv.none;\
+	cron.none		/var/log/messages
+
+auth,authpriv.*			/var/log/auth.log
+kern.*					-/var/log/kern.log
+mail.*					-/var/log/mail.log
+cron.*					/var/log/cron.log
+
+*.emerg					:omusrmsg:*
+
+# configure per host logging for postgresql
+$template DailyPerHostLogs,"/var/log/hosts/%HOSTNAME%/%syslogfacility%.%$YEAR%-%$MONTH%-%$DAY%.log"
+if $programname == 'postgres' then -?DailyPerHostLogs;RSYSLOG_FileFormat

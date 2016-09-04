@@ -1,0 +1,34 @@
+---
+
+- name: Create rsyslog.d configuration directory
+  become: yes
+  file:
+    path: /etc/rsyslog.d
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+  tags:
+    - rsyslog
+
+- name: Create rsyslog configuration file for nodes
+  become: yes
+  template:
+    src: 99-tpa-node.conf.j2
+    dest: /etc/rsyslog.d/99-tpa-node.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart rsyslog
+  tags:
+    - rsyslog
+
+- name: Ensure rsyslog service is started and enabled on boot
+  become: yes
+  service:
+    name: rsyslog
+    state: started
+    enabled: yes
+  tags:
+    - rsyslog

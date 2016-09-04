@@ -69,6 +69,10 @@
       mountpoint: /var/lib/postgresql
       tags: fs
 
+    # Install rsyslog packages on all hosts
+    - role: rsyslog/pkg
+      tags: rsyslog
+
 - name: Set up TPA BDR nodes
   hosts: tag_Name_TPA_BDR:&tag_db_bdr
   gather_facts: no
@@ -90,14 +94,18 @@
     - role: postgres/initdb
       tags: postgres
 
+    # Configure and enable ryslog for BDR nodes
+    - role: rsyslog/client
+      tags: rsyslog
+
     - role: bdr/config
       tags: bdr
 
     - role: bdr/node
       tags: bdr
 
-    - role: barman
-      tags: barman
+   # - role: barman
+   #   tags: barman
 
 - name: Set up Barman node
   hosts: tag_Name_TPA_BDR:&tag_db_barman
@@ -107,12 +115,12 @@
   vars_files:
     - vars/main.yml
 
-  roles:
+  #roles:
 
     # Setup backup from the BDR nodes
-    - role: barman
-      when: inventory_hostname == barman_hostname
-      tags: barman
+    #- role: barman
+    #  when: inventory_hostname == barman_hostname
+    #  tags: barman
 
 - name: Set up control node
   hosts: tag_Name_TPA_BDR:&tag_db_control
@@ -124,6 +132,6 @@
 
   roles:
 
-    # Setup control log for central logging
-    -  role: rsyslog
-       tags: control
+    # Configure and enable rsyslog on central logging server
+    -  role: rsyslog/server
+       tags: rsyslog
