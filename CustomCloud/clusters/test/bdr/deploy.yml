@@ -47,6 +47,12 @@
       assert:
         that: barman_hostname is defined
 
+    - name: Define control hostname
+      set_fact:
+        control_hostname: "{{ item }}"
+      with_items: "groups['tag_db_control']"
+      tags: always
+
   roles:
 
     - role: common
@@ -107,3 +113,17 @@
     - role: barman
       when: inventory_hostname == barman_hostname
       tags: barman
+
+- name: Set up control node
+  hosts: tag_Name_TPA_BDR:&tag_db_control
+  gather_facts: no
+  sudo_user: root
+  sudo: true
+  vars_files:
+    - vars/main.yml
+
+  roles:
+
+    # Setup control log for central logging
+    -  role: rsyslog
+       tags: control
