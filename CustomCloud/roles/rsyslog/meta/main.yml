@@ -1,0 +1,7 @@
+---
+
+allow_duplicates: yes
+dependencies:
+    - { role: rsyslog/pkg }
+    - { role: rsyslog/client, when: ec2_tag_db != 'control' }
+    - { role: rsyslog/server, when: ec2_tag_db == 'control' }
