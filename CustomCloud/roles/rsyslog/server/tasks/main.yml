@@ -13,17 +13,6 @@
   tags:
     - rsyslog
 
-- name: Create rsyslog.d configuration directory
-  become: yes
-  file:
-    path: /etc/rsyslog.d
-    owner: root
-    group: root
-    mode: 0755
-    state: directory
-  tags:
-    - rsyslog
-
 - name: Ensure rsyslog service is started and enabled on boot
   become: yes
   service:
