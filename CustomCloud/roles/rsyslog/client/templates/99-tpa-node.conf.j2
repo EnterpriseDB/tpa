@@ -7,5 +7,26 @@ $ActionQueueSaveOnShutdown on # save messages to disk on shutdown
 $ActionQueueType LinkedList   # run asynchronously
 $ActionResumeRetryCount -1    # infinite retries if host is down
 
+# Configure TLS on logging servers
+$DefaultNetstreamDriver gtls
+
+# Mark the log file every 60 seconds to ensure it's still alive.
+$ModLoad immark.so
+$MarkMessagePeriod 60
+
+# Specify certificate files
+$DefaultNetstreamDriverCAFile    /etc/pki/rsyslog/ca.pem
+$DefaultNetstreamDriverCertFile  /etc/pki/rsyslog/rsyslog-cert.pem
+$DefaultNetstreamDriverKeyFile   /etc/pki/rsyslog/rsyslog-key.pem
+
+# Because we can't predict hostnames, and because cloud servers
+# are dynamically deployed and we don't want to have to create
+# unique certificates for each one, we will validate the
+# certificate itself but not insist that the name match.
+$ActionSendStreamDriverAuthMode x509/certvalid
+
+## How to send messages:  Mode=1 means TLS-only.
+$ActionSendStreamDriverMode 1
+
 # Forward postgresql logs to {{control_hostname}}
 if $programname == 'postgres' then @@{{control_hostname}}:514

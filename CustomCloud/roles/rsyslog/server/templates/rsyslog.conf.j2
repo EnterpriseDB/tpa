@@ -1,25 +1,42 @@
-# modules
+# Modules
 $ModLoad imuxsock.so
 $ModLoad imklog.so
 $ModLoad imudp.so
 $ModLoad imtcp.so
 
-# listen on network
+# Listen on network
 $UDPServerAddress 0.0.0.0
 $UDPServerRun 514
 $InputTCPServerAddress 0.0.0.0
 $InputTCPServerRun 514
 
-# enable non-kernel facility klog messages
+# Config for TLS
+$DefaultNetstreamDriver gtls
+
+# Specify the certificate files
+$DefaultNetstreamDriverCAFile    /etc/pki/rsyslog/ca.pem
+$DefaultNetstreamDriverCertFile  /etc/pki/rsyslog/rsyslog-cert.pem
+$DefaultNetstreamDriverKeyFile   /etc/pki/rsyslog/rsyslog-key.pem
+
+# Because we can't predict hostnames, and because cloud servers
+# are dynamically deployed and we don't want to have to create
+# unique certificates for each one, we will validate the
+# certificate itself but not insist that the name match.
+$InputTCPServerStreamDriverAuthMode x509/certvalid
+
+## How to accept connections
+$InputTCPServerStreamDriverMode 1 # run driver in TLS-only mode
+
+# Enable non-kernel facility klog messages
 $KLogPermitNonKernelFacility on
 
-# reduce any duplicates
+# Reduce any duplicates
 $RepeatedMsgReduction on
-# enable disk mode for receive buffer
+# Enable disk mode for receive buffer
 $WorkDirectory /var/spool/rsyslog
 $MainMsgQueueFileName mainq
 
-# permissions
+# Permissions
 $FileOwner syslog
 $FileGroup adm
 $FileCreateMode 0640
@@ -28,7 +45,7 @@ $Umask 0022
 $PrivDropToUser syslog
 $PrivDropToGroup syslog
 
-# basic local logging
+# Basic local logging
 *.info;\
 	mail.none;\
 	authpriv.none;\
@@ -41,6 +58,6 @@ cron.*					/var/log/cron.log
 
 *.emerg					:omusrmsg:*
 
-# configure per host logging for postgresql
+# Configure per host logging for postgresql
 $template DailyPerHostLogs,"/var/log/hosts/%HOSTNAME%/%PROGRAMNAME%.%$YEAR%-%$MONTH%-%$DAY%.log"
 if $programname == 'postgres' then -?DailyPerHostLogs;RSYSLOG_FileFormat
