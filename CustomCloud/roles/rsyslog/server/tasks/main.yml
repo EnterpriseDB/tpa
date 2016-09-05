@@ -8,16 +8,14 @@
     owner: root
     group: root
     mode: 0644
-  notify:
-    - restart rsyslog
   tags:
     - rsyslog
 
-- name: Ensure rsyslog service is started and enabled on boot
+- name: Ensure rsyslog service is restarted and enabled on boot
   become: yes
   service:
     name: rsyslog
-    state: started
+    state: restarted
     enabled: yes
   tags:
     - rsyslog
