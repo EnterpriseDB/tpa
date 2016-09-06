@@ -56,10 +56,6 @@ Ansible
 Clone the Ansible repository:
 
 ```
-    git clone --recursive https://github.com/ansible/ansible
-
-    or 
-
     git clone --recursive https://github.com/2ndQuadrant/ansible
 ```
 
@@ -78,21 +74,11 @@ has been installed correctly:
 have more details about running from a source checkout. But the above steps should
 be enough really to get you going with Ansible.
 
-If you have trouble getting Ansible working, you might want to checkout a specific
-version of Upstream Ansible which is KNOWN to work ok. 
-```
-    cd /path/to/upstream_ansible_dir
-    git checkout c06884eff03ad133b83a27c2839055a65f669d36
-```
-
-If problems with Ansible persist, write to Abhijit, Richard, Haroon, Nikhils or Ian
-for help.
+Write to Abhijit, Gülçin, Haroon, or Nikhils for help with Ansible.
 
 Other software
 --------------
 
-The [AWS CLI](https://aws.amazon.com/cli/) can be useful, but you
-probably won't need it. This is not needed for TPA. 
-
-If for some reason you do need it, follow the instructions at
+Follow the instructions at
 http://docs.aws.amazon.com/AWSEC2/latest/CommandLineReference/ec2-cli-get-set-up.html
+to install the [AWS CLI](https://aws.amazon.com/cli/).
