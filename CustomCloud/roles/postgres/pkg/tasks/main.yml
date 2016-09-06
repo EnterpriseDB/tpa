@@ -13,13 +13,11 @@
 # At the moment, however, package installation is not distribution
 # specific. This can be moved into os/ if that ever changes.
 #
-# We install python-psycopg2 using the package manager (because we need
-# it to use Ansible's postgresql_* modules), taking it for granted that
-# the Postgres packages we installed will satisfy its dependencies, and
-# also that it will know where to find pg_config (which may or may not
-# be in PATH). If either of these things turns out to not be true in a
-# given situation, we may need to install it using pip after setting
-# PATH to include pgbindir.
+# We also install the python-psycopg2 package (because we need it to use
+# Ansible's postgresql_* modules). If we install Postgres from source—or
+# can't satisfy the python-psycopg2 package dependencies for some other
+# reason—we'll need to "pip install psycopg2" after adding pgbindir to
+# PATH (because pg_config is not always in PATH).
 
 - name: Install Postgres packages
   package: name={{ item }} state=latest
