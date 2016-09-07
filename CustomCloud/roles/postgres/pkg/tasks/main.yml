@@ -35,6 +35,7 @@
 - name: Set pgbindir based on distribution
   set_fact:
     pgbindir: "{{ postgres_binary_directories[ansible_os_family] }}"
+  when: pgbindir is not defined
   vars:
     postgres_binary_directories:
       Debian: "/usr/lib/postgresql/{{pgversion}}/bin"
