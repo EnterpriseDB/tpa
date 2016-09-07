@@ -1,0 +1,17 @@
+---
+
+- name: Generate a Certificate Authority Private Key file using certtool
+  command: certtool --generate-privkey --outfile ca_key.pem --sec-param normal
+
+- name: Install Certificate Authority template
+  template: src=ca.j2 dest=/tmp/ca.j2
+
+- name: Combine the template file with the private key file to create the CA Certificate file
+  command: certtool --generate-self-signed \
+            --template /tmp/ca.j2 \
+            --load-privkey ca_key.pem \
+            --outfile ca_certificate.pem
+
+- name: Remove the template file which is unnecessary now
+  command: rm /tmp/ca.j2
+
