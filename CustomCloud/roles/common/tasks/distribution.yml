@@ -19,7 +19,6 @@
       set_fact:
         ansible_distribution: "{{ lsb_release.stdout_lines[0] }}"
         ansible_distribution_release: "{{ lsb_release.stdout_lines[1] }}"
-        ansible_os_family: "Debian"
       when: lsb_release|succeeded
 
     - block:
@@ -32,7 +31,6 @@
         - name: Set ansible_distribution based on /etc/redhat-release
           set_fact:
             ansible_distribution: "{{ redhat.stdout_lines[0] }}"
-            ansible_os_family: "RedHat"
           when: redhat|succeeded
       when: lsb_release|failed
   when: ansible_distribution is not defined
@@ -44,7 +42,21 @@
       - ansible_distribution is defined
       - ansible_distribution in ('Debian', 'RedHat', 'Ubuntu')
 
-- name: Set ansible_pkg_mgr based on ansible_distribution
+- name: Set ansible_os_family based on ansible_distribution
   set_fact:
-    ansible_pkg_mgr: "{{ dict(Debian='apt', RedHat='yum', Ubuntu='apt')[ansible_distribution] }}"
+    ansible_os_family: "{{ os_families[ansible_distribution] }}"
+  when: ansible_os_family is not defined
+  vars:
+    os_families:
+      Debian: Debian
+      RedHat: RedHat
+      Ubuntu: Debian
+
+- name: Set ansible_pkg_mgr based on ansible_os_family
+  set_fact:
+    ansible_pkg_mgr: "{{ package_managers[ansible_os_family] }}"
   when: ansible_pkg_mgr is not defined
+  vars:
+    package_managers:
+      Debian: apt
+      RedHat: yum
