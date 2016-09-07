@@ -13,12 +13,15 @@ packages:
     - python-dev
     - linux-tools
     - dbus
+    - gnutls-bin
   RedHat:
     - python-devel
     - perf
+    - gnutls-utils
   Ubuntu:
     - python-dev
     - linux-tools-generic
+    - gnutls-bin
 
 unwanted_packages:
   Debian: &debian_unpackages
