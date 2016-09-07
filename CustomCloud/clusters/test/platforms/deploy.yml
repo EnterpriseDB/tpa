@@ -24,16 +24,15 @@
       tags: always
 
     - role: sys/sysctl
-      tags: sysctl
+      tags: [sys, sysctl]
 
     - role: sys/fs
       device: /dev/xvdb
       mountpoint: /var/lib/postgresql
-      tags: fs
+      tags: [sys, fs]
 
     - role: postgres/pkg
-      tags: postgres
 
     - role: sys/ssh
       user: postgres
-      tags: ssh
+      tags: [sys, ssh]

@@ -9,6 +9,7 @@
 # enable repositories and install Postgres packages.
 
 - include: "os/{{ ansible_os_family }}.yml"
+  tags: [postgres, pkg]
 
 # At the moment, however, package installation is not distribution
 # specific. This can be moved into os/ if that ever changes.
@@ -25,6 +26,7 @@
     - "{{ postgres_packages[ansible_distribution] }}"
     - "{{ extra_postgres_packages[ansible_distribution] }}"
     - python-psycopg2
+  tags: [postgres, pkg]
 
 # We set pgbindir based on what packages we installed. Unfortunately, we
 # can not assume that all Postgres binaries (e.g., pg_config) will be in
@@ -37,3 +39,4 @@
     postgres_binary_directories:
       Debian: "/usr/lib/postgresql/{{pgversion}}/bin"
       RedHat: "/usr/pgsql-{{pgversion}}/bin"
+  tags: always
