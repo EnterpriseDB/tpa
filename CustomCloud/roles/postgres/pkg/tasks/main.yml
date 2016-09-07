@@ -32,12 +32,9 @@
 # can not assume that all Postgres binaries (e.g., pg_config) will be in
 # our (or even postgres's) PATH.
 
-- name: Set pgbindir based on distribution
+- name: Set postgres_bin_dir based on distribution
   set_fact:
-    pgbindir: "{{ postgres_binary_directories[ansible_os_family] }}"
-  when: pgbindir is not defined
-  vars:
-    postgres_binary_directories:
-      Debian: "/usr/lib/postgresql/{{pgversion}}/bin"
-      RedHat: "/usr/pgsql-{{pgversion}}/bin"
+    pgbindir: "{{ default_postgres_bin_dirs[ansible_os_family] }}"
+    postgres_bin_dir: "{{ default_postgres_bin_dirs[ansible_os_family] }}"
+  when: postgres_bin_dir is not defined
   tags: always
