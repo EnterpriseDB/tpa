@@ -32,6 +32,7 @@
       tags: [sys, fs]
 
     - role: postgres/pkg
+    - role: postgres/initdb
 
     - role: sys/ssh
       user: postgres
