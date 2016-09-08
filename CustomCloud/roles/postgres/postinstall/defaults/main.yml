@@ -2,5 +2,3 @@
 
 default_postgres_extensions:
   - pg_stat_statements
-  - pgstattuple
-  - pageinspect
