@@ -1,7 +1,5 @@
 ---
 
-pgversion: 9.5
-
 pgversionNN: "{{pgversion|replace('.','')}}"
 
 # The preferred source for Postgres packages.

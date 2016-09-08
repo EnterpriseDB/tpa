@@ -1,0 +1,9 @@
+---
+
+default_postgres_version: 9.5
+
+default_postgres_user: postgres
+
+default_postgres_home_dirs:
+  Debian: /var/lib/postgresql
+  RedHat: /var/lib/pgsql

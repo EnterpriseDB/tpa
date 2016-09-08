@@ -6,9 +6,6 @@
   sudo_user: root
   sudo: true
 
-  vars:
-    pgversion: 9.5
-
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
 
@@ -18,6 +15,9 @@
       tags: always
 
   roles:
+    - role: postgres/vars
+      postgres_version: 9.5
+
     - role: common
 
     - role: sys/tune
@@ -28,7 +28,7 @@
 
     - role: sys/fs
       device: /dev/xvdb
-      mountpoint: /var/lib/postgresql
+      mountpoint: "{{ postgres_home }}"
       tags: [sys, fs]
 
     - role: postgres/pkg
