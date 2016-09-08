@@ -9,7 +9,7 @@
   ignore_errors: yes
   register: common
 
-- name: Run pg_createcluster to create data directory
+- name: Run pg_createcluster to initialise data directory
   command: >
     pg_createcluster -d {{ postgres_data_dir }} -p 5432 --start-conf auto {{ pgversion }} main -- \
       {% for x in postgres_initdb_opts %}{{x|quote}} {% endfor %}
