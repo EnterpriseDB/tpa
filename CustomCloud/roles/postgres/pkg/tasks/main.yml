@@ -34,7 +34,6 @@
 
 - name: Set postgres_bin_dir based on distribution
   set_fact:
-    pgbindir: "{{ default_postgres_bin_dirs[ansible_os_family] }}"
-    postgres_bin_dir: "{{ default_postgres_bin_dirs[ansible_os_family] }}"
-  when: postgres_bin_dir is not defined
+    pgbindir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
+    postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
   tags: always

@@ -44,8 +44,7 @@
 
 - name: Set ansible_os_family based on ansible_distribution
   set_fact:
-    ansible_os_family: "{{ os_families[ansible_distribution] }}"
-  when: ansible_os_family is not defined
+    ansible_os_family: "{{ ansible_os_family|default(os_families[ansible_distribution]) }}"
   vars:
     os_families:
       Debian: Debian
@@ -54,8 +53,7 @@
 
 - name: Set ansible_pkg_mgr based on ansible_os_family
   set_fact:
-    ansible_pkg_mgr: "{{ package_managers[ansible_os_family] }}"
-  when: ansible_pkg_mgr is not defined
+    ansible_pkg_mgr: "{{ ansible_pkg_mgr|default(package_managers[ansible_os_family]) }}"
   vars:
     package_managers:
       Debian: apt
