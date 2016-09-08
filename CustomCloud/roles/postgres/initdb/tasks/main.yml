@@ -11,3 +11,18 @@
 
 - include: "os/{{ ansible_os_family }}.yml"
   when: not pgdata.stat.exists
+
+# If we're creating data directories outside the default Postgres
+# location for the distribution (/var/lib/postgresql or /var/lib/pgsql),
+# we may also need to relabel the directory with the appropriate SELinux
+# context, as well as setting permissions for the postgres user. This is
+# not distribution-specific, but matters most to RHEL because it enables
+# SELinux by default. We can't do this earlier (e.g., in sys/fs) because
+# the Postgres packages have not yet been installed. For the moment, we
+# stick with the default postgres root directory until it becomes clear
+# how best to solve the problem. This is what we'll need to do:
+#
+# $ semanage fcontext -a -t postgresql_db_t "/opt/postgresql(/.*)?"
+# $ restorecon -R -v /opt/postgresql
+#
+# https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/SELinux_Users_and_Administrators_Guide/sect-Managing_Confined_Services-PostgreSQL-Configuration_Examples.html
