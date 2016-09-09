@@ -9,6 +9,9 @@ packages:
     - sysstat
     - acl
     - cryptsetup
+    - time
+    - strace
+    - gdb
   Debian:
     - python-dev
     - linux-tools
