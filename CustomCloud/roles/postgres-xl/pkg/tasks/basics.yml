@@ -21,25 +21,3 @@
     owner: postgres
     group: postgres
     mode: 0644
-
-- name: Generate keypair for postgres
-  local_action: command ssh-keygen -P "" -f id_postgres
-  args:
-    chdir: "{{ cluster_dir }}"
-    creates: id_postgres.pub
-  run_once: yes
-  sudo: no
-
-- name: Install authorized keys
-  authorized_key:
-    user: postgres
-    key: "{{ lookup('file', cluster_dir+'/id_postgres.pub') }}"
-
-- name: Upload keypair to all nodes
-  copy: src={{item|replace('rsa','postgres')}} dest=~postgres/.ssh/{{item|basename}} owner=postgres group=postgres mode=0600
-  with_items:
-    - "{{cluster_dir}}/id_rsa"
-    - "{{cluster_dir}}/id_rsa.pub"
-
-- name: Set public key permissions
-  file: path=~postgres/.ssh/id_rsa.pub mode=0644
