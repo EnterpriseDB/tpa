@@ -1,8 +1,5 @@
 ---
 
-- name: Set the hostname
-  hostname: name="{{ cluster_hostname }}"
-
 - name: Create postgres group
   group: name=postgres state=present
 
