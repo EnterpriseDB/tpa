@@ -1,46 +1,43 @@
-CustomCloud installation
-========================
+Installation guide
+==================
 
-To use CustomCloud, you will need Ansible from the
-[2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ansible).
-
-(2ndQuadrant/ansible is a curated version of the official ansible
-repository's devel branch, with some additional useful changes that have
-not yet been merged upstream.)
-
-The quick version: clone Ansible sources, export
-ANSIBLE_HOME=/path/to/clone, and invoke ansible through the
-utils/ansible wrappers provided here.
+You will need to install Python 2.7 and some Python modules, Ansible
+from 2ndQuadrant's repository, and the AWS cli tools.
 
 Python and modules
 ------------------
 
-Install Python 2.7.x and any packages needed to get pip and virtualenv
-working. For example, on Ubuntu, install 
+Install Python 2.7.x, pip, and virtualenv:
 
-* python2.7 
-* python-pip
-* python-virtualenv
+```
+    # Debian or Ubuntu
+    apt-get install python2.7 python-pip python-virtualenv
 
-To avoid installing the modules system-wide, they can go into an
-ansible-specific virtualenv (highly recommended). Once done, create
-a virtual env
+    # RedHat
+    yum install python python-pip python-virtualenv
+```
+
+Create and activate a virtualenv, to avoid installing Ansible's Python
+module dependencies system-wide (highly recommended):
 
 ```
     virtualenv ~/ansible-python
 
-    # The following line can go into your .bashrc
+    # The following line can go into your .bashrc/.profile
     source ~/ansible-python/bin/activate
 ```
 
-CustomCloud needs recent versions of specific Python modules. After activating your virtualenv, they can be installed as below:
+Install the dependencies:
 
 ```
-    pip install -r /path/to/TPA/CustomCloud/python-requirements.txt
+    pip install -r python-requirements.txt
 ```
 
 Ansible
 -------
+
+You will need Ansible from the
+[2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ansible).
 
 Clone the Ansible repository:
 
@@ -48,37 +45,39 @@ Clone the Ansible repository:
     git clone --recursive https://github.com/2ndQuadrant/ansible
 ```
 
-Set ANSIBLE_HOME in your environment (and .bashrc):
+Set ANSIBLE_HOME in your environment (and .bashrc/.profile):
 
+```
     export ANSIBLE_HOME=/path/to/ansibledir
+```
 
 Now you should be able to run ./utils/ansible and the other scripts in
 this repository. The following simple tests should succeed if Ansible
 has been installed correctly:
 
+```
     ./utils/ansible localhost -m ping
     ./utils/ansible localhost -c ssh -a "id"
+```
 
 [The Ansible installation docs](http://docs.ansible.com/ansible/intro_installation.html)
-have more details about running from a source checkout. But the above steps should
-be enough really to get you going with Ansible.
-
+have more details about running from a source checkout, but the steps
+above should be all you need to get started.
 
 Other software
 --------------
 
-Follow the instructions at
+Install the [AWS CLI](https://aws.amazon.com/cli/):
+
+```
+    apt-get install awscli  # Debian or Ubuntu
+    yum install awscli      # RedHat
+```
+
+See 
 http://docs.aws.amazon.com/AWSEC2/latest/CommandLineReference/ec2-cli-get-set-up.html
-to install the [AWS CLI](https://aws.amazon.com/cli/).
+for more installation options.
 
-On Ubuntu, even a basic: 
-
-```
-    sudo apt install awscli
-```
-works ok enough for example.
-
---------------
+Help
+----
 Write to Abhijit, Gülçin, Haroon, or Nikhils for help with Ansible.
-
-
