@@ -83,3 +83,12 @@ Other software
 Follow the instructions at
 http://docs.aws.amazon.com/AWSEC2/latest/CommandLineReference/ec2-cli-get-set-up.html
 to install the [AWS CLI](https://aws.amazon.com/cli/).
+
+On Ubuntu, even a basic: 
+
+```
+    sudo apt install awscli
+```
+
+works ok enough for example.
+
