@@ -43,6 +43,11 @@
         cluster_hostname: "{{ cluster_name|lower|replace('_','-') ~ ec2_tag_node }}"
       tags: always
 
+    - name: Appoint control node
+      set_fact: control_hostname="{{ item }}"
+      when: "hostvars[item].ec2_tag_node == '1'"
+      with_items: play_hosts
+
   roles:
 
     - role: common
