@@ -49,6 +49,13 @@
     group: postgres
     mode: 0755
 
+# The following filesystem-level tasks should not be here at all. They
+# should use sys/fs (or perhaps sys/fs can be declared as a dependency
+# of this role, but 'pkg' isn't the right name for this role in that
+# case). Note that these are somewhat instance-type-specific. Also,
+# they're entirely too enthusiastic about blowing away existing
+# filesystems. Also, too much hardcoded stuff.
+
 - name: Check if /dev/xvdb needs a filesystem
   shell: lsblk --noheadings --output FSTYPE /dev/xvdb
   register: fstype
