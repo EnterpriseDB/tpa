@@ -41,9 +41,6 @@
 - name: Enhance hard system limits for user postgres
   shell: echo "postgres  hard   nofile   32768" >> /etc/security/limits.conf
 
-- name: Install other required packages using apt-get
-  shell: apt-get install -y python-dev time sysstat
-
 - name: Install python packages
   shell: pip install virtualenv
 
