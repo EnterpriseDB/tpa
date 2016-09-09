@@ -1,0 +1,8 @@
+---
+
+dependencies:
+  - role: 'postgres/user'
+    postgres_bin_dir: /opt/pgxl/bin
+    extra_bashrc_lines:
+      - export LD_LIBRARY_PATH=/opt/pgxl/lib:$LD_LIBRARY_PATH
+      - export PGPORT=20002
