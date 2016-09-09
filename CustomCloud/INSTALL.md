@@ -33,22 +33,10 @@ a virtual env
     source ~/ansible-python/bin/activate
 ```
 
-You will need recent versions of the following Python modules:
-
-* PyYAML
-* jinja2
-* boto
-* PyCrypto
-* six
-* python-dateutil
-
-Install these modules using pip ("pip install jinja2 boto …") rather
-than your operating system's packages (which are often too old).
-
+CustomCloud needs recent versions of specific Python modules. After activating your virtualenv, they can be installed as below:
 
 ```
-    # With the virtualenv activated, install packages
-    pip install jinja2 PyYAML boto PyCrypto six python-dateutil
+    pip install -r /path/to/TPA/CustomCloud/python-requirements.txt
 ```
 
 Ansible
@@ -90,6 +78,7 @@ On Ubuntu, even a basic:
 ```
 works ok enough for example.
 
+--------------
 Write to Abhijit, Gülçin, Haroon, or Nikhils for help with Ansible.
 
 
