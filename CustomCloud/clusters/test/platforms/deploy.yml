@@ -15,10 +15,10 @@
       tags: always
 
   roles:
+    - role: common
+
     - role: postgres/vars
       postgres_version: 9.5
-
-    - role: common
 
     - role: sys/tune
       tags: always
