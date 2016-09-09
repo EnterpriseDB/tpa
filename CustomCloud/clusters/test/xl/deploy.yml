@@ -57,9 +57,6 @@
     - role: postgres-xl/pkg
       tags: xl
 
-    - role: sys/ssh
-      user: postgres
-
     - role: sys/instance
       tags: upgrade
 
