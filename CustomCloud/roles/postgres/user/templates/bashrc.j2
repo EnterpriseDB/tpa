@@ -1,0 +1,4 @@
+export PATH={{ postgres_bin_dir }}:$PATH
+{% for l in extra_bashrc_lines %}
+{{ l }}
+{% endfor %}

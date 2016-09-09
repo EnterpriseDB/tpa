@@ -1,0 +1,38 @@
+---
+
+- assert:
+    msg: "Please include the postgres/vars role to define postgres_user"
+    that:
+      - postgres_user is defined
+
+- set_fact:
+    postgres_group: {{ postgres_group|default(postgres_user) }}
+
+- name: Create Postgres group: {{ postgres_group }}
+  group:
+    state: present
+    name: {{ postgres_group }}
+
+- name: Create Postgres user: {{ postgres_user }}
+  user:
+    state: present
+    name: {{ postgres_user }}
+    group: {{ postgres_group }}
+    shell: /bin/bash
+
+- name: Install ~{{ postgres_user }}/.bashrc
+  template:
+    src: bashrc.j2
+    dest: "~{{ postgres_user }}/.bashrc"
+    owner: {{ postgres_user }}
+    group: {{ postgres_group }}
+    mode: 0644
+
+- name: Install ~{{ postgres_user }}/.profile
+  copy:
+    content: >
+      . "$HOME/.bashrc"
+    dest: "~{{ postgres_user }}/.profile"
+    owner: {{ postgres_user }}
+    group: {{ postgres_group }}
+    mode: 0644
