@@ -40,6 +40,7 @@ You will need recent versions of the following Python modules:
 * boto
 * PyCrypto
 * six
+* python-dateutil
 
 Install these modules using pip ("pip install jinja2 boto …") rather
 than your operating system's packages (which are often too old).
@@ -47,7 +48,7 @@ than your operating system's packages (which are often too old).
 
 ```
     # With the virtualenv activated, install packages
-    pip install jinja2 PyYAML boto PyCrypto six
+    pip install jinja2 PyYAML boto PyCrypto six python-dateutil
 ```
 
 Ansible
