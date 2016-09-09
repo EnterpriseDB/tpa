@@ -2,10 +2,10 @@
 
 - name: Set pgversion/postgres_user/postgres_home
   set_fact:
-    pgversion: {{ postgres_version|default(default_postgres_version) }}
-    postgres_user: {{ postgres_user|default(default_postgres_user) }}
-    postgres_home: {{ postgres_home|default(default_postgres_home_dirs[ansible_os_family] }}
+    pgversion: "{{ postgres_version|default(default_postgres_version) }}"
+    postgres_user: "{{ postgres_user|default(default_postgres_user) }}"
+    postgres_home: "{{ postgres_home|default(default_postgres_home_dirs[ansible_os_family]) }}"
 
 - name: Set pgversionNN from pgversion
   set_fact:
-    pgversionNN: {{ pgversion|replace('.','') }}
+    pgversionNN: "{{ pgversion|replace('.','') }}"
