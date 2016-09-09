@@ -1,0 +1,6 @@
+boto>=2.40.0
+Jinja2>=2.8
+pycrypto>=2.6.1
+python-dateutil>=2.5.3
+PyYAML>=3.11
+six>=1.10.0
