@@ -6,12 +6,15 @@ This is an overview of the various roles available for CustomCloud.
 common
 ------
 
-The common role does the following:
+This role should be included first in every deployment playbook. It does
+the following things:
 
-1. Make sure Python is installed and usable.
-2. Set up generic package repositories if required.
-3. Install any generic packages if required.
-4. Set the system hostname.
+1. Determines and sets ansible_distribution/ansible_os_family/etc. This
+   is a lightweight alternative to fact discovery via the setup module.
+2. Makes sure Python is installed and usable, and installs any other
+   generic packages required (e.g., strace).
+3. Sets the system hostname and installs /etc/hosts and
+   /etc/ssh/known_hosts for every host in the cluster.
 
 If fact collection is required, it should be performed separately in a
 play that runs after the one that applies the common role.
