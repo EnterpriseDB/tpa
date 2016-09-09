@@ -41,9 +41,6 @@
 - name: Enhance hard system limits for user postgres
   shell: echo "postgres  hard   nofile   32768" >> /etc/security/limits.conf
 
-- name: Install python packages
-  shell: pip install virtualenv
-
 - name: Ensure that /pgxl exists
   file:
     path: /pgxl
