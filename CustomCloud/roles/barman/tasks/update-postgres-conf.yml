@@ -6,7 +6,7 @@
   lineinfile:
      dest="{{ postgres_conf_dir }}/postgresql.conf"
      regexp='\/bin\/true'
-     line="archive_command = 'rsync -a %p barman@{{barman_hostname}}:{{ barman_home }}/{{ customerid + \'_\' + serviceid + \'_\' + hostvars[current_host]["ec2_tag_db"] + hostvars[current_host]["ec2_tag_node"] | lower}}/incoming/%f'"
+     line="archive_command = 'rsync -a %p barman@{{barman_hostname}}:{{ barman_home }}/{{ customerid + \'_\' + serviceid + \'_\' + hostvars[current_host]["db"] + hostvars[current_host]["node"] | lower}}/incoming/%f'"
   delegate_to: "{{ current_host }}"
   register: pgconfig
 
