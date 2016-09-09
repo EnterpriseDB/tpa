@@ -75,7 +75,6 @@ has been installed correctly:
 have more details about running from a source checkout. But the above steps should
 be enough really to get you going with Ansible.
 
-Write to Abhijit, Gülçin, Haroon, or Nikhils for help with Ansible.
 
 Other software
 --------------
@@ -89,6 +88,8 @@ On Ubuntu, even a basic:
 ```
     sudo apt install awscli
 ```
+
+Write to Abhijit, Gülçin, Haroon, or Nikhils for help with Ansible.
 
 works ok enough for example.
 
