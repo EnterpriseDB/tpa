@@ -88,8 +88,8 @@ On Ubuntu, even a basic:
 ```
     sudo apt install awscli
 ```
+works ok enough for example.
 
 Write to Abhijit, Gülçin, Haroon, or Nikhils for help with Ansible.
 
-works ok enough for example.
 
