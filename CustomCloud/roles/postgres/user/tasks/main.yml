@@ -5,6 +5,10 @@
     that:
       - postgres_user is defined
 
+# Distribution packages will almost certainly want to create the user
+# and group, so this role should not be run before postgres/pkg. Any
+# time after it (or without it) is fine, though.
+
 - set_fact:
     postgres_group: "{{ postgres_group|default(postgres_user) }}"
 
@@ -20,6 +24,9 @@
     group: "{{ postgres_group }}"
     shell: /bin/bash
 
+# We want a sensible environment set up for the postgres user, so we
+# install our own .bashrc (read by interactive non-login shells).
+
 - name: Install ~{{ postgres_user }}/.bashrc
   template:
     src: bashrc.j2
@@ -27,6 +34,8 @@
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0644
+
+# We also refer to that .bashrc from .profile (read by login shells).
 
 - name: Install ~{{ postgres_user }}/.profile
   copy:
@@ -36,3 +45,32 @@
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0644
+
+# That should be enough, right? Alas, no. The PGDG RPMs install a
+# .bash_profile, which has priority over .profile. We could overwrite
+# it, but a comment says we run the risk of a future update overwriting
+# our changes:
+#
+#   «If you want to customize your settings,
+#   Use the file below. This is not overridden
+#   by the RPMS.»
+#
+# This comment is followed by a bafflingly commented-out line:
+#
+# #[ -f /var/lib/pgsql/.pgsql_profile ] && source /var/lib/pgsql/.pgsql_profile"
+#
+# So if you follow the advice and put your settings in .pgsql_profile,
+# you would still have to uncomment that line; and when you do so, you
+# become vulnerable to upstream changes again. Six of one, half a dozen
+# of the other. We don't engage in the contortions required to cope with
+# this odd scheme. If a .bash_profile exists at all, we'll just make it
+# read our .bashrc.
+
+- name: Make .bash_profile read .bashrc too
+  lineinfile:
+    dest: "~{{ postgres_user }}/.bash_profile"
+    create: no
+    state: present
+    insertafter: EOF
+    line: '. "$HOME/.bashrc"'
+  ignore_errors: true
