@@ -10,7 +10,14 @@
       source: "ec2_tag_db"
     - var: "node"
       source: "ec2_tag_node"
+    - var: "role"
+      source: "ec2_tag_role"
     - var: "public_ip"
       source: "ec2_ip_address"
     - var: "private_ip"
       source: "ec2_private_ip_address"
+
+# Convert 'role' to a list so that we can write «when: 'x' in role».
+
+- set_fact:
+    role: "{{ (role|default('')).split(',')|map('trim')|list }}"
