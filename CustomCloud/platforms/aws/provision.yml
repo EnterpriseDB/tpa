@@ -228,18 +228,6 @@
       when: profile|changed
       tags: iam
 
-    # When we create an AWS role, it takes some time for it to propagate
-    # such that it is available to later tasks that try to use it (e.g.,
-    # referring to the instance profile we just created while creating
-    # an S3 bucket or launching EC2 instances). Until Ansible adopts a
-    # consistent solution (e.g., ansible/ansible#17039), all we can do
-    # is to sleep for a while and hope it helps.
-
-    - name: Pause for a minute after creating instance profile
-      pause: seconds=60
-      when: profile|changed
-      tags: iam
-
     - name: Attach a policy to the instance profile
       iam_policy:
         iam_type: role
