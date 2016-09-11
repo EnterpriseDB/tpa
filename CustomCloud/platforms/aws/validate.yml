@@ -9,6 +9,14 @@
       - cluster_tags['Owner'] is defined
       - cluster_tags['Owner'] != ''
 
+- name: Ensure that the cluster name is set as a tag
+  set_fact:
+    cluster_tags: "{{ dict(Name=cluster_name)|combine(cluster_tags) }}"
+
+# We always need to know the name of the VPC, but we don't need the cidr
+# unless we may need to create the VPC. For the Test VPC (which we know
+# exists in every relevant region already), the name alone is enough.
+
 - name: Ensure ec2_vpc is configured
   assert:
     msg: "Please define ec2_vpc (a hash, including Name) in {{config_file}}"
@@ -38,9 +46,10 @@
       - instances|selectattr('node','defined')|list|count == 0 or
         instances|selectattr('node','defined')|list|count == instances|count
 
-- name: Ensure that the cluster name is set as a tag
-  set_fact:
-    cluster_tags: "{{ dict(Name=cluster_name)|combine(cluster_tags) }}"
+# TODO: There are a number of other sanity checks we can perform here.
+# For example, for every instance that has a "backup: xxx" tag, there
+# should be an instance with a "Name: xxx" tag. Same with "upstream",
+# for cascading replication.
 
 - name: Derive subsidiary resource names for the cluster
   set_fact:
