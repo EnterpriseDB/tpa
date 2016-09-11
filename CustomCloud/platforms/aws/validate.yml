@@ -46,10 +46,34 @@
       - instances|selectattr('node','defined')|list|count == 0 or
         instances|selectattr('node','defined')|list|count == instances|count
 
-# TODO: There are a number of other sanity checks we can perform here.
-# For example, for every instance that has a "backup: xxx" tag, there
-# should be an instance with a "Name: xxx" tag. Same with "upstream",
-# for cascading replication.
+# For every instance that has a "backup: xxx" tag, there should be
+# exactly one instance with "Name: xxx" and "role: …,barman,…" tags.
+#
+# Likewise, for every instance that has an "upstream: xxx" tag, there
+# should be exactly one instance with a "Name: xxx" tag.
+
+- set_fact:
+    barman_references: >
+      {{ instances|selectattr('tags.backup', 'defined')|map(attribute='tags.backup')|list }}
+    upstream_references: >
+      {{ instances|selectattr('tags.upstream', 'defined')|map(attribute='tags.upstream')|list }}
+
+- assert:
+    msg: "Please define a single barman instance with Name={{ item }}"
+    that:
+      - instances|
+        selectattr('tags.Name','defined')|selectattr('tags.Name','equalto',item)|
+        selectattr('tags.role','defined')|selectattr('tags.role','contains','barman')|
+        list|count == 1
+  with_items: "{{ barman_references }}"
+
+- assert:
+    msg: "Please define a single upstream server with Name={{ item }}"
+    that:
+      - instances|
+        selectattr('tags.Name','defined')|selectattr('tags.Name','equalto',item)|
+        list|count == 1
+  with_items: "{{ upstream_references }}"
 
 - name: Derive subsidiary resource names for the cluster
   set_fact:

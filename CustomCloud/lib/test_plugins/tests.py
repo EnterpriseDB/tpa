@@ -15,8 +15,14 @@ def has_subkey(container, keys):
     except KeyError:
         return False
 
+# Returns True if the given value is in the container, and False otherwise.
+
+def contains(container, value):
+    return value in container
+
 class TestModule(object):
     def tests(self):
         return {
             'has_subkey': has_subkey,
+            'contains': contains,
         }
