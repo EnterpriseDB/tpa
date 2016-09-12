@@ -54,9 +54,9 @@
 
 - set_fact:
     barman_references: >
-      {{ instances|selectattr('tags.backup', 'defined')|map(attribute='tags.backup')|list }}
+      {{ instances|selectattr('tags.backup', 'defined')|map(attribute='tags.backup')|unique|list }}
     upstream_references: >
-      {{ instances|selectattr('tags.upstream', 'defined')|map(attribute='tags.upstream')|list }}
+      {{ instances|selectattr('tags.upstream', 'defined')|map(attribute='tags.upstream')|unique|list }}
 
 - assert:
     msg: "Please define a single barman instance with Name={{ item }}"
