@@ -1,10 +1,5 @@
 ---
 
-# Enable password-less ssh FROM the barman host to every cluster node.
-# Applicable only to the barman server. Superseded in part by sys/ssh.
-- include: ssh-barman.yml
-  when: inventory_hostname == barman_hostname
-
 # Install barman.conf on the barman server.
 - include: configure.yml
   when: inventory_hostname == barman_hostname
@@ -14,7 +9,32 @@
 - include: update-postgres-conf.yml current_host={{item}}
   with_items: "{{db_servers}}"
 
-# Enable password-less TO the barman server from every cluster node.
-# Superseded in part by sys/ssh.
-- include: ssh-db-servers.yml current_host={{item}}
-  with_items: "{{db_servers}}"
+# Here's how to enable password-less SSH for Barman:
+#
+# 1. Generate a key for barman, install it in ~barman/.ssh on the Barman
+#    server, and put it in ~postgres/.ssh/authorized_keys on Postgres
+#    servers. (This allows ssh FROM barman@ to postgres@.)
+#
+# - role: sys/ssh/keygen
+#   user: barman
+# - role: sys/ssh/install
+#   user: barman
+#   when: 'barman' in role
+# - role: sys/ssh/authorize
+#   ssh_key_file: id_barman
+#   user: postgres
+#   when: 'postgres' in role
+#
+# 2. Generate a key for postgres, install it in ~postgres/.ssh on the
+#    Postgres servers, and put it in ~barman/.ssh/authorized_keys on the
+#    Barman server. (This allows ssh TO barman@ from postgres@.)
+# 
+# - role: sys/ssh/keygen
+#   user: postgres
+# - role: sys/ssh/install
+#   user: postgres
+#   when: 'postgres' in role
+# - role: sys/ssh/authorize
+#   ssh_key_file: id_postgres
+#   user: barman
+#   when: 'barman' in role
