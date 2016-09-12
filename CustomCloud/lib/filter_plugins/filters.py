@@ -21,7 +21,7 @@ def expand_instances(a):
         while (inst_count < exact_count):
             y = copy.deepcopy(x)
             y['node'] = idx
-            y['role'] = y['role'] or []
+            y['role'] = y.get('role',[])
             c.append(y)
             inst_count = inst_count + 1
             idx = idx + 1
