@@ -21,3 +21,14 @@
 
 - set_fact:
     role: "{{ (role|default('')).split(',')|map('trim')|list }}"
+
+# Just in case the instance has «db: primary» or «db: standby» set,
+# we'll add that to the list of roles. Note standby→replica.
+
+- set_fact:
+    role: "{{ role|union(['primary']) }}"
+  when: db == 'primary' and 'primary' not in role
+
+- set_fact:
+    role: "{{ role|union(['replica']) }}"
+  when: db == 'standby' and 'replica' not in role
