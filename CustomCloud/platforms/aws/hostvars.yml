@@ -32,3 +32,10 @@
 - set_fact:
     role: "{{ role|union(['replica']) }}"
   when: db == 'standby' and 'replica' not in role
+
+# Add 'postgres' to role when either 'primary' or 'replica' is given,
+# just as a convenience.
+
+- set_fact:
+    role: "{{ role|union(['postgres']) }}"
+  when: 'primary' in role or 'replica' in role
