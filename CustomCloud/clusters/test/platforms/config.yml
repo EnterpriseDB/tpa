@@ -29,7 +29,9 @@ instances:
             volume_size: 16
       tags:
         os: Debian
-        db: primary
+        role: primary
+        Name: debian-primary
+        backup: eu-barman
     - node: 2
       type: t2.nano
       image: ami-e079f893
@@ -44,7 +46,9 @@ instances:
             volume_size: 16
       tags:
         os: Debian
-        db: standby
+        role: replica
+        Name: debian-replica
+        upstream: debian-primary
 
     # RHEL-7.2_HVM_GA-20151112-x86_64-1-Hourly2-GP2
 
@@ -63,7 +67,9 @@ instances:
             volume_size: 16
       tags:
         os: RedHat
-        db: primary
+        role: primary
+        Name: redhat-primary
+        backup: eu-barman
     - node: 4
       type: t2.micro
       image: ami-8b8c57f8
@@ -78,7 +84,9 @@ instances:
             volume_size: 16
       tags:
         os: RedHat
-        db: standby
+        role: replica
+        Name: redhat-replica
+        upstream: redhat-primary
 
     # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627
 
@@ -93,7 +101,9 @@ instances:
             volume_size: 16
       tags:
         os: Ubuntu
-        db: primary
+        role: primary
+        Name: ubuntu-primary
+        backup: eu-barman
     - node: 6
       type: t2.nano
       image: ami-a4d44ed7
@@ -105,4 +115,25 @@ instances:
             volume_size: 16
       tags:
         os: Ubuntu
-        db: standby
+        role: replica
+        Name: ubuntu-replica
+        upstream: ubuntu-primary
+
+    # Another Debian node for barman.
+
+    - node: 7
+      type: t2.nano
+      image: ami-e079f893
+      region: eu-west-1
+      subnet: 10.33.174.16/28
+      volumes:
+          - device_name: root
+            volume_type: standard
+            volume_size: 13
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 32
+      tags:
+        os: Debian
+        role: barman
+        Name: eu-barman
