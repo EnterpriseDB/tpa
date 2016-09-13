@@ -10,6 +10,8 @@
       source: "ec2_tag_db"
     - var: "node"
       source: "ec2_tag_node"
+    - var: "name"
+      source: "ec2_tag_Name"
     - var: "role"
       source: "ec2_tag_role"
     - var: "public_ip"
