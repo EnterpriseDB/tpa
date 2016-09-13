@@ -1,4 +1,4 @@
-- hosts: tag_Name_PglogicalTests
+- hosts: tag_Cluster_PglogicalTests
   set_fact:
     remote_user: admin
 

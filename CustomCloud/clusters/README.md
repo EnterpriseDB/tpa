@@ -66,13 +66,13 @@ Hosts must be targeted not by name but by their attributes, e.g., group
 memberships or tag values (which are translated to group memberships by
 the ec2 inventory plugin). For example,
 
-    - hosts: tag_Name_SomeCluster
+    - hosts: tag_Cluster_SomeCluster
       roles:
         - …
 
 would target all hosts in the cluster, while
 
-    - hosts: tag_Name_SomeCluster:&tag_db_primary
+    - hosts: tag_Cluster_SomeCluster:&tag_db_primary
 
 would target any hosts in the cluster with a tag named "db" with the
 value "primary".

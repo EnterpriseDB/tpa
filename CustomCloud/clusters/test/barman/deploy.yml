@@ -1,7 +1,7 @@
 ---
 
 - name: Set up TPA Barman node
-  hosts: tag_Name_TPA_Barman_AP_SouthEast_2
+  hosts: tag_Cluster_TPA_Barman_AP_SouthEast_2
   gather_facts: no
   sudo_user: root
   sudo: true

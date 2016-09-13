@@ -1,7 +1,7 @@
 ---
 
 - name: Set up TPA cluster nodes
-  hosts: tag_Name_TPA
+  hosts: tag_Cluster_TPA
   gather_facts: no
   sudo_user: root
   sudo: true

@@ -13,7 +13,7 @@ There are three related things you can do with this stuff:
 
    # Display the hosts so provisioned
    utils/ansible -i clusters/pglogical/inventory/ec2.py \
-       tag_Name_PglogicalTests --list-hosts
+       tag_Cluster_PglogicalTests --list-hosts
 
    # Get rid of the nodes and everything associated with them
    utils/ansible-playbook -i clusters/pglogical/inventory/ec2.py \

@@ -31,12 +31,12 @@ before doing anything else (python packages, virtualend, ansible)!
    ```
    (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ cat clusters/test/tpa/inventory/00-TPA
 
-   [tag_Name_TPA]
+   [tag_Cluster_TPA]
    52.90.44.83
    54.187.3.43
    54.194.62.203
 
-   [tag_Name_TPA:vars]
+   [tag_Cluster_TPA:vars]
    cluster_name=TPA
    ansible_user=ubuntu
    ansible_python_interpreter=/usr/bin/python2.7

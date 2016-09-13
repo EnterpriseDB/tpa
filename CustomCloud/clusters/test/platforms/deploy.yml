@@ -3,7 +3,7 @@
 - name: Set up TPA cluster nodes
 
   # This play targets all hosts in the cluster.
-  hosts: tag_Name_TestPlatforms
+  hosts: tag_Cluster_TestPlatforms
 
   # Generally speaking, we want everything to run as root. We'll ssh in
   # to the servers as admin/ec2-user/ubuntu (depending on distribution),

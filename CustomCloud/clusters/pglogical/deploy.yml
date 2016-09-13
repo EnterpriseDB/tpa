@@ -1,5 +1,5 @@
 - name: Set up pglogical test nodes
-  hosts: tag_Name_PglogicalTests
+  hosts: tag_Cluster_PglogicalTests
   vars:
     default_postgres_config:
         wal_level: logical

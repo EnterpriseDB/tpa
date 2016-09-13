@@ -1,7 +1,7 @@
 ---
 
 - name: Set up XLCloudTest cluster nodes
-  hosts: tag_Name_XLCloudTest
+  hosts: tag_Cluster_XLCloudTest
   gather_facts: no
   remote_user: ubuntu
   sudo_user: root

@@ -1,7 +1,7 @@
 ---
 
 - name: Set up TPA BDR cluster
-  hosts: tag_Name_TPA_BDR
+  hosts: tag_Cluster_TPA_BDR
   gather_facts: no
   sudo_user: root
   sudo: true
@@ -73,7 +73,7 @@
       tags: rsyslog
 
 - name: Set up TPA BDR nodes
-  hosts: tag_Name_TPA_BDR:&tag_db_bdr
+  hosts: tag_Cluster_TPA_BDR:&tag_db_bdr
   gather_facts: no
   sudo_user: root
   sudo: true
@@ -103,7 +103,7 @@
    #   tags: barman
 
 - name: Set up Barman node
-  hosts: tag_Name_TPA_BDR:&tag_db_barman
+  hosts: tag_Cluster_TPA_BDR:&tag_db_barman
   gather_facts: no
   sudo_user: root
   sudo: true
