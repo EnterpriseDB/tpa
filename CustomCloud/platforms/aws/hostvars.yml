@@ -6,18 +6,22 @@
     "{{ item.var }}": "{{ vars[item.source]|default(item.default)|default(None) }}"
   when: item.var not in vars
   with_items:
-    - var: "db"
-      source: "ec2_tag_db"
-    - var: "node"
-      source: "ec2_tag_node"
-    - var: "name"
-      source: "ec2_tag_Name"
-    - var: "role"
-      source: "ec2_tag_role"
-    - var: "public_ip"
-      source: "ec2_ip_address"
-    - var: "private_ip"
-      source: "ec2_private_ip_address"
+    - var: db
+      source: ec2_tag_db
+    - var: node
+      source: ec2_tag_node
+    - var: name
+      source: ec2_tag_Name
+    - var: role
+      source: ec2_tag_role
+    - var: backup
+      source: ec2_tag_backup
+    - var: upstream
+      source: ec2_tag_upstream
+    - var: public_ip
+      source: ec2_ip_address
+    - var: private_ip
+      source: ec2_private_ip_address
 
 # Make a note of which address variables are set.
 
