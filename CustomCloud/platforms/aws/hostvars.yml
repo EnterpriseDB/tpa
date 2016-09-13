@@ -17,10 +17,10 @@
     - var: "private_ip"
       source: "ec2_private_ip_address"
 
-# Convert 'role' to a list so that we can write «when: 'x' in role».
+# Make a note of which address variables are set.
 
 - set_fact:
-    role: "{{ (role|default('')).split(',')|map('trim')|list }}"
+    ip_addresses: ['public_ip', 'private_ip']
 
 # Just in case the instance has «db: primary» or «db: standby» set,
 # we'll add that to the list of roles. Note standby→replica.
