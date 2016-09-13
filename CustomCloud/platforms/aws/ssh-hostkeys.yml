@@ -19,6 +19,10 @@
         value: "{{ (profile.stdout|from_json).Role.Arn }}"
   when: instance_profile_arn is not defined
 
+# This task is always inappropriately marked "changed"; see
+# https://github.com/ansible/ansible-modules-extras/issues/2618 for
+# details.
+
 - name: Create an S3 bucket for this cluster
   s3_bucket:
     name: "{{ cluster_bucket }}"
