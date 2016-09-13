@@ -1,0 +1,15 @@
+[tag_Cluster_TestPlatforms]
+54.171.188.102 node=1 db="" role="primary"
+54.154.199.105 node=2 db="" role="replica"
+54.154.184.50 node=3 db="" role="primary"
+54.171.95.179 node=4 db="" role="replica"
+54.171.94.19 node=5 db="" role="primary"
+54.171.171.212 node=6 db="" role="replica"
+54.171.190.85 node=7 db="" role="barman"
+
+[tag_Cluster_TestPlatforms:vars]
+cluster_name=TestPlatforms
+ansible_user=admin
+ansible_python_interpreter=/usr/bin/python2.7
+ansible_ssh_private_key_file="clusters/test/platforms/id_testplatforms"
+ansible_ssh_common_args="-o UserKnownHostsFile='clusters/test/platforms/known_hosts'"
