@@ -10,14 +10,6 @@
     group: barman
     mode: 0644
   tags: configuration
-  when: use_global_barman is not defined
-
-- name: Configure barman when use_global_barman is defined
-  lineinfile:
-    dest: /etc/barman.conf
-    line: "[{{ customerid + '_' + serviceid + '_' + hostvars[item]['db'] + hostvars[item]['node']| lower}}]\nssh_command = ssh postgres@{{item}}\nconninfo = \"user=postgres host={{ item }} port=5432\"\n\n"
-  with_items: "{{db_servers}}"
-  when: use_global_barman is defined
 
 - name: Add incremental backup to barman cron
   lineinfile:
