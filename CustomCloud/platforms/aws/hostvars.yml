@@ -38,4 +38,5 @@
 
 - set_fact:
     role: "{{ role|union(['postgres']) }}"
-  when: 'primary' in role or 'replica' in role
+  when: >
+    'primary' in role or 'replica' in role
