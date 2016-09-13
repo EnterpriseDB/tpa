@@ -10,16 +10,7 @@
   delegate_to: "{{ current_host }}"
   register: pgconfig
 
-- name: "Update pg_hba.conf on {{current_host}}"
-  lineinfile:
-     dest="{{ postgres_conf_dir }}/pg_hba.conf"
-     regexp='host    postgres        all             0.0.0.0/0               md5'
-     insertbefore='host    postgres        all             0.0.0.0/0               md5'
-     line='host    postgres        all             {{barman_hostname}}/32               trust\nhost    postgres        all             0.0.0.0/0               md5'
-  delegate_to: "{{ current_host }}"
-  register: hbaconfig
-
 - name: Restart Postgres on "{{current_host}}"
   service: name="{{pgservice}}" state=restarted
-  when: pgconfig.changed and hbaconfig.changed
+  when: pgconfig.changed
   delegate_to: "{{ current_host }}"

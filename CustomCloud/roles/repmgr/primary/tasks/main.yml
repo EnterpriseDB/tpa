@@ -8,17 +8,9 @@
      line="shared_preload_libraries = 'pg_stat_statements, auto_explain, repmgr_funcs'"
   register: pgconfig
 
-- name: Update pg_hba.conf on Primary
-  lineinfile:
-     dest="{{ pgconf }}/pg_hba.conf"
-     insertbefore='host    replication     all             192.168.61.0/24         trust'
-     line='host    replication     all             {{hostvars[item].vpn_address}}/32         trust\nhost    repmgr          repmgr          {{hostvars[item].vpn_address}}/32         trust\nhostssl    replication     all             {{hostvars[item].vpn_address}}/32         trust\nhostssl    repmgr          repmgr          {{hostvars[item].vpn_address}}/32         trust'
-  with_items: "{{ play_hosts }}"
-  register: hbaconfig
-
 - name: Restart Postgres on primary
   service: name="{{pgservice}}" state=restarted
-  when: hbaconfig.changed or pgconfig.changed
+  when: pgconfig.changed
 
 - name: Create repmgr user on the primary
   postgresql_user: name=repmgr role_attr_flags=SUPERUSER state=present

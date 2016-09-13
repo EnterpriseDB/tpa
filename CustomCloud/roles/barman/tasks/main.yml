@@ -4,8 +4,8 @@
 - include: configure.yml
   when: inventory_hostname == barman_hostname
 
-# Set archive_command and tweak pg_hba.conf on every cluster node that
-# will be backed up to barman.
+# Set archive_command on every cluster node that will be backed up to
+# barman.
 - include: update-postgres-conf.yml current_host={{item}}
   with_items: "{{db_servers}}"
 
