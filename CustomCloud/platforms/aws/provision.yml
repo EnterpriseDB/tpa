@@ -297,7 +297,7 @@
           {{
             cluster_tags|combine(item.tags)|combine({
               'Cluster': cluster_tags['Name'],
-              'role': (item.role|join(",")),
+              'role': (item.tags.role|join(",")),
               'node': item.node,
             })
           }}

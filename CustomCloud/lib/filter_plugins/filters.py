@@ -21,7 +21,10 @@ def expand_instances(a):
         while (inst_count < exact_count):
             y = copy.deepcopy(x)
             y['node'] = idx
-            y['role'] = y.get('role',[])
+            y['tags'] = y.get('tags', {})
+            y['tags']['role'] = y['tags'].get('role', [])
+            if not isinstance(y['tags']['role'], list):
+                y['tags']['role'] = map(lambda x: x.strip(), y['tags']['role'].split(","))
             c.append(y)
             inst_count = inst_count + 1
             idx = idx + 1

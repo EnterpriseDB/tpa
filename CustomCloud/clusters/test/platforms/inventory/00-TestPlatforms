@@ -1,11 +1,11 @@
 [tag_Cluster_TestPlatforms]
-54.171.188.102 node=1 db="" role="primary"
-54.154.199.105 node=2 db="" role="replica"
-54.154.184.50 node=3 db="" role="primary"
-54.171.95.179 node=4 db="" role="replica"
-54.171.94.19 node=5 db="" role="primary"
-54.171.171.212 node=6 db="" role="replica"
-54.171.190.85 node=7 db="" role="barman"
+54.154.158.57 node=1 db="" role="[u'primary']"
+54.171.236.66 node=2 db="" role="[u'replica']"
+54.194.2.87 node=3 db="" role="[u'primary']"
+54.171.209.58 node=4 db="" role="[u'replica']"
+54.154.188.37 node=5 db="" role="[u'primary']"
+54.171.205.101 node=6 db="" role="[u'replica']"
+54.171.92.206 node=7 db="" role="[u'barman']"
 
 [tag_Cluster_TestPlatforms:vars]
 cluster_name=TestPlatforms
