@@ -77,7 +77,7 @@
 
 - name: Derive subsidiary resource names for the cluster
   set_fact:
-    cluster_tag: "{{ 'tag_Name_' + cluster_tags['Name'] }}"
+    cluster_tag: "{{ cluster_tag|default('tag_Cluster_' + cluster_tags['Name']) }}"
     cluster_bucket: "2ndquadrant-tpa-{{ cluster_tags['Name']|lower|replace('_','-') }}"
     cluster_profile: "{{ cluster_tags['Name'] }}_profile"
 

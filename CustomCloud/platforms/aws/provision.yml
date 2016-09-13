@@ -296,6 +296,7 @@
         instance_tags: >
           {{
             cluster_tags|combine(item.tags)|combine({
+              'Cluster': cluster_tags['Name'],
               'role': (item.role|join(",")),
               'node': item.node,
             })
