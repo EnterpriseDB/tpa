@@ -11,36 +11,33 @@ before doing anything else (python packages, virtualend, ansible)!
 
    ```
    (ansible-python) nikhils@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
-
-   utils/ansible-playbook platforms/aws/provision.yml \
-       -e cluster=./clusters/test/tpa -vvvv
+   
+   utils/provision test/tpa -vvvv
    ```
 
    The above command will use the contents of
    ```
    TPA/CustomCloud/clusters/test/tpa/config.yml
    ```
-   to provision the instances. The first instance in this config.yml is tagged
-   as "primary" and the other two will be tagged as "standby" instances. Kindly
-   note the IP address of the "primary" instance as that is the IP where
-   users will be able to connect to access PostgreSQL.
-
    On successful completion of the above command, 3 instances will have
    been provisioned. The inventory of the instances will be available as:
 
    ```
    (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ cat clusters/test/tpa/inventory/00-TPA
-
    [tag_Cluster_TPA]
-   52.90.44.83
-   54.187.3.43
-   54.194.62.203
+   54.206.117.89 node=1 db="primary" role="[]"
+   54.206.16.159 node=2 db="standby" role="[]"
+   54.206.45.65 node=3 db="standby" role="[]"
 
    [tag_Cluster_TPA:vars]
    cluster_name=TPA
    ansible_user=ubuntu
    ansible_python_interpreter=/usr/bin/python2.7
-
+   serviceid=B67891
+   customerid=A12345
+   ansible_ssh_private_key_file="clusters/test/tpa/id_tpa"
+   ansible_ssh_common_args="-o UserKnownHostsFile='clusters/test/tpa/known_hosts'" 
+   
    ```
    Obviously the IP addresses in your case will be different from the
    above sample output.
@@ -54,49 +51,7 @@ before doing anything else (python packages, virtualend, ansible)!
    export PYTHONPATH=/home/ubuntu/ansible-python/lib/python2.7/site-packages:$PYTHONPATH
    ```
    
-   **NOTE 2** Sometimes you might get the following errors:
-   ```
-   loop_var = result._task.loop_control.get('loop_var') or 'item'
-   AttributeError: 'LoopControl' object has no attribute 'get'
-
-   or
-   
-   fatal: [localhost]: FAILED! => {"failed": true, "msg": "'r' is undefined"}
-   ```
-   
-   The above can be solved by checking out a specific commit tag of Upstream Ansible which is known to
-   work ok:
-   
-   ```
-   cd /path/to/upstream_ansible_dir
-   git checkout c06884eff03ad133b83a27c2839055a65f669d36
-   ```
-   
-3. Ensure that SSH to these instances works
-
-   The above provisioning activity creates ssh keys which are uploaded to these instances.
-
-   ```
-   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud/clusters/test/tpa$ ls
-   config.yml  deploy.yml  id_rsa  id_rsa.pub  id_tpa  id_tpa.pub  inventory  README.md
-   ```
-   It also ensures that these keys are added locally via ssh-agent using ssh-add. If the
-   keys are added properly, then SSH into all the 3 instances one by one and ensure that
-   SSH works seamlessly. This step is very **important** to ensure that all the three
-   instances are reachable over the network from your local machine. Note that the **common** role also does a ssh-keyscan to add these instances to known_hosts of the ansible instance. So most likely, this should work ok without any intervention from your side. 
-   
-   **NOTE 1** If you still get issues accessing via ssh, then manually add the keys into your .ssh
-   or using ssh-add.
-
-   ```
-   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh ubuntu@52.90.44.83
-
-   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh ubuntu@54.187.3.43
-
-   (ansible-python) nikhils@ubuntu-xenial:~/2ndQ/TPA/CustomCloud$ ssh ubuntu@54.194.62.203
-   ```
-
-4. Carry out the actual software deploy
+3. Carry out the actual software deploy
 
    **NOTE 1** If you want to assign elastic IP to the primary, then edit clusters/test/tpa/config.yml and change the entry
    ```
@@ -121,17 +76,11 @@ before doing anything else (python packages, virtualend, ansible)!
    ```
    for the second standby listing. Or if not, feel free to add a fourth instance in the config.yml as appropriate.
    
-   **Note 3** You can also **re-use an existing barman** instance. Obviously your ansible host will need access to the ssh keys of that instance to allow it to make calls to it. The exact details for secure sharing of these ssh keys are yet to be crystallized though. The first thing to do is to identify the tag name for this barman instance that you want to re-use. The tagname will typically follow the **TPA_Barman_AWS_Region_Name** syntax. For example, the barman in the ap-southeast-2 region will have the name **TPA_Barman_AP_SouthEast_2**. Also note that the barman instance should be in the same region as your TPA cluster setup. To re-use uncomment the following line (in two locations) in clusters/test/tpa/deploy.yml and also replace the tag name with an appropriate value for the barman instance for your region:
-   ```
-       #use_global_barman: 'TPA_Barman_AP_SouthEast_2'
-   ```
-   The deploy.yml will search for an instance with this tag name and gets details from it before going ahead. 
-   
-   After checking step 3, and taking care of additional requirements if any from above three notes, fire off the command to do the actual deployment on these instances
+   After taking care of additional requirements if any from above two notes, fire off the command to do the actual deployment on these instances
    ```
    (ansible-python) nikhils@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
 
-   utils/ansible-playbook -i clusters/test/tpa/inventory clusters/test/tpa/deploy.yml -e cluster=./clusters/test/tpa -vvvv
+   utils/deploy test/tpa -vvvv
 
    ```
    If all the steps in the playbook are successfully deployed, then you will have a fully
@@ -144,13 +93,12 @@ before doing anything else (python packages, virtualend, ansible)!
 
    This playbook provisions t2.small AWS instances and also provisions extra volumes. So,
    after carrying out your testing, please ensure that the instances are terminated if they
-   are not needed further. Right now the additional volumes also need to be deleted
-   manually from the AWS console. Here's the step to do the deprovisioning:
+   are not needed further. Here's the step to do the deprovisioning:
 
    ```
    (ansible-python) nikhils@ubuntu-xenial:~/2ndQ$cd TPA/CustomCloud
 
-   utils/ansible-playbook -i clusters/test/tpa/inventory platforms/aws/deprovision.yml -e cluster=./clusters/test/tpa -vvvv
+   utils/deprovision test/tpa -vvvv
    ```
 
 Please reach out to Nikhils, AMS, Haroon, The TPA team for any further queries/concerns/feedback.
