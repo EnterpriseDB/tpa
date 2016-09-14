@@ -22,3 +22,14 @@
     - role: sys/ssh
       user: postgres
       tags: [sys, ssh]
+    - role: sys/ssh
+      user: barman
+      tags: [sys, ssh]
+    - role: sys/ssh/authorize
+      ssh_key_file: id_barman
+      user: postgres
+      tags: [sys, ssh]
+    - role: sys/ssh/authorize
+      ssh_key_file: id_postgres
+      user: barman
+      tags: [sys, ssh]
