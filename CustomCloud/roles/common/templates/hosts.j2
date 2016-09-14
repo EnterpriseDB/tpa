@@ -2,5 +2,5 @@
 ::1             localhost ip6-localhost ip6-loopback
 
 {% set v = {} %}{% for h in play_hosts -%}{{ v.update({h:hostvars[h].node|int}) }}{% endfor %}{% for h,n in v|dictsort(false,'value') %}
-{{ hostvars[h].private_ip + ' ' + hostvars[h].cluster_hostname }}
+{{ hostvars[h].private_ip + ' ' + hostvars[h].inventory_hostname }}
 {% endfor %}
