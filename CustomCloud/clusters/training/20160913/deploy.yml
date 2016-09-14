@@ -1,0 +1,24 @@
+---
+
+- name: Set up TPA cluster nodes
+  hosts: tag_Cluster_2QTraining
+  sudo_user: root
+  sudo: true
+
+  pre_tasks:
+    - include: ../../../platforms/aws/hostvars.yml
+      tags: always
+
+  roles:
+    - role: common
+    - role: postgres/vars
+      postgres_version: 9.5
+    - role: sys/tune
+      tags: always
+    - role: sys/sysctl
+      tags: [sys, sysctl]
+    - role: postgres/pkg
+    - role: postgres/user
+    - role: sys/ssh
+      user: postgres
+      tags: [sys, ssh]

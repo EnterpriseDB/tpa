@@ -1,0 +1,38 @@
+[tag_Cluster_2QTraining]
+2qtraining-1 ansible_host=54.194.106.250 node=1 role='["postgres"]'
+2qtraining-2 ansible_host=54.194.108.147 node=2 role='["postgres"]'
+2qtraining-3 ansible_host=54.194.100.251 node=3 role='["postgres"]'
+2qtraining-4 ansible_host=54.171.134.142 node=4 role='["postgres"]'
+2qtraining-5 ansible_host=54.194.97.176 node=5 role='["postgres"]'
+2qtraining-6 ansible_host=54.194.108.252 node=6 role='["postgres"]'
+2qtraining-7 ansible_host=54.171.147.89 node=7 role='["postgres"]'
+2qtraining-8 ansible_host=54.194.99.165 node=8 role='["postgres"]'
+2qtraining-9 ansible_host=54.154.211.158 node=9 role='["postgres"]'
+2qtraining-10 ansible_host=54.194.108.113 node=10 role='["postgres"]'
+2qtraining-11 ansible_host=54.154.205.114 node=11 role='["postgres"]'
+2qtraining-12 ansible_host=54.194.103.119 node=12 role='["postgres"]'
+2qtraining-13 ansible_host=52.59.250.135 node=13 role='["postgres"]'
+2qtraining-14 ansible_host=54.93.161.171 node=14 role='["postgres"]'
+2qtraining-15 ansible_host=54.93.167.35 node=15 role='["postgres"]'
+2qtraining-16 ansible_host=52.59.237.193 node=16 role='["postgres"]'
+2qtraining-17 ansible_host=54.93.167.82 node=17 role='["postgres"]'
+2qtraining-18 ansible_host=54.93.74.59 node=18 role='["postgres"]'
+2qtraining-19 ansible_host=54.93.167.244 node=19 role='["postgres"]'
+2qtraining-20 ansible_host=52.59.250.179 node=20 role='["postgres"]'
+2qtraining-21 ansible_host=54.93.166.37 node=21 role='["postgres"]'
+2qtraining-22 ansible_host=52.53.150.242 node=22 role='["postgres"]'
+2qtraining-23 ansible_host=52.53.156.149 node=23 role='["postgres"]'
+2qtraining-24 ansible_host=54.67.23.17 node=24 role='["postgres"]'
+2qtraining-25 ansible_host=52.53.168.85 node=25 role='["postgres"]'
+2qtraining-26 ansible_host=54.67.119.240 node=26 role='["postgres"]'
+2qtraining-27 ansible_host=52.53.162.203 node=27 role='["postgres"]'
+2qtraining-28 ansible_host=54.67.102.147 node=28 role='["postgres"]'
+2qtraining-29 ansible_host=54.67.38.60 node=29 role='["postgres"]'
+2qtraining-30 ansible_host=52.53.168.234 node=30 role='["postgres"]'
+
+[tag_Cluster_2QTraining:vars]
+cluster_name=2QTraining
+ansible_user=ubuntu
+ansible_python_interpreter=/usr/bin/python2.7
+ansible_ssh_private_key_file="clusters/training/20160913/id_2qtraining"
+ansible_ssh_common_args="-o UserKnownHostsFile='clusters/training/20160913/known_hosts'"
