@@ -25,3 +25,7 @@
 # Set node hostnames and generate /etc/hosts
 - include: hosts.yml
   tags: common
+
+# Add TPA version number along with timestamp to the instance
+- include: tpa_version.yml
+  tags: common
