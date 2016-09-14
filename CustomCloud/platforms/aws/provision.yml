@@ -267,11 +267,9 @@
       set_fact:
         instances: "{{ instances|expand_instances }}"
 
-    # Generate as many SSH host keys as there are instances.
+    # Generate SSH host keys for instances.
 
     - include: ssh-hostkeys.yml
-      vars:
-        keys_needed: "{{ instances|count }}"
 
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above. We loop over instances[], look up

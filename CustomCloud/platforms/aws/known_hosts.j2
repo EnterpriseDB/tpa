@@ -1,5 +1,5 @@
 {% for h in instance_vars %}
-{% for k in ['rsa', 'ecdsa'] %}
-{{ h.public_ip }} {{ lookup('file', cluster_dir+'/hostkeys/ssh_host_'+k+'_key_'~h.node~'.pub') }}
-{% endfor %}
+{%   for k in ['rsa', 'ecdsa'] %}
+{{ h.public_ip }} {{ lookup('file', cluster_dir+'/hostkeys/ssh_host_'+k+'_key.pub') }}
+{%   endfor %}
 {% endfor %}
