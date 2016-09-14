@@ -19,7 +19,7 @@
 
 - name: Generate ssh keypair {{ ssh_key_file }}
   local_action: >
-    command ssh-keygen -N "" -f "{{ ssh_key_file }}"
+    command ssh-keygen -N "" -C "{{ user~'@'~cluster_name }}" -f "{{ ssh_key_file }}"
   args:
     chdir: "{{ ssh_key_dir }}"
     creates: "{{ ssh_key_file }}"
