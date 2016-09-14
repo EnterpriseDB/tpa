@@ -10,7 +10,7 @@
     ssh_key_dir: "{{ ssh_key_dir|default(playbook_dir+'/keys') }}"
     ssh_key_file: "{{ ssh_key_file|default('id_'+user) }}"
 
-- name: Install authorized_keys file
+- name: Install {{ ssh_key_file }}.pub to ~{{user}}/.ssh/authorized_keys
   authorized_key:
     user: "{{user}}"
     key: "{{ lookup('file', ssh_key_dir+'/'+ssh_key_file+'.pub') }}"

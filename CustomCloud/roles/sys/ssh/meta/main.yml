@@ -4,5 +4,8 @@ allow_duplicates: yes
 
 dependencies:
   - role: ssh/keygen
+    ssh_key_file: "{{ 'id_'+user }}"
   - role: ssh/authorize
+    ssh_key_file: "{{ 'id_'+user }}"
   - role: ssh/install
+    ssh_key_file: "{{ 'id_'+user }}"
