@@ -64,20 +64,6 @@ has been installed correctly:
 have more details about running from a source checkout, but the steps
 above should be all you need to get started.
 
-Other software
---------------
-
-Install the [AWS CLI](https://aws.amazon.com/cli/):
-
-```
-    apt-get install awscli  # Debian or Ubuntu
-    yum install awscli      # RedHat
-```
-
-See 
-http://docs.aws.amazon.com/AWSEC2/latest/CommandLineReference/ec2-cli-get-set-up.html
-for more installation options.
-
 Help
 ----
 Write to Abhijit, Gülçin, Haroon, or Nikhils for help with Ansible.
