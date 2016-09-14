@@ -3,6 +3,7 @@
 regions = {{ regions|join(",") }}
 regions_exclude = us-gov-west-1,cn-north-1
 
+hostname_variable = tag_Name
 destination_variable = public_dns_name
 vpc_destination_variable = ip_address
 
@@ -16,7 +17,7 @@ cache_path = ~/.ansible/tmp
 cache_max_age = 300
 
 nested_groups = False
-replace_dash_in_groups = True
+replace_dash_in_groups = False
 expand_csv_tags = True
 
 group_by_instance_id = True

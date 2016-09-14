@@ -116,7 +116,6 @@ instances:
       tags:
         os: Ubuntu
         role: replica
-        Name: ubuntu-replica
         upstream: ubuntu-primary
 
     # Another Debian node for barman.
@@ -135,5 +134,5 @@ instances:
             volume_size: 32
       tags:
         os: Debian
-        role: barman
+        role: barman,monitor
         Name: eu-barman

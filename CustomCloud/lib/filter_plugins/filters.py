@@ -25,6 +25,11 @@ def expand_instances(a):
             y['tags']['role'] = y['tags'].get('role', [])
             if not isinstance(y['tags']['role'], list):
                 y['tags']['role'] = map(lambda x: x.strip(), y['tags']['role'].split(","))
+            if 'name' in y['tags'] and not 'Name' in y['tags']:
+                y['tags']['Name'] = y['tags']['name']
+                del y['tags']['name']
+            if 'Name' in y['tags']:
+                y['tags']['Name'] = y['tags']['Name'].replace('_','-').lower()
             c.append(y)
             inst_count = inst_count + 1
             idx = idx + 1
@@ -60,10 +65,17 @@ def try_subkey(container, keys, default=None):
     except:
         return default
 
+# Given 'foo', returns '"foo"'. Blindly converts each embedded double quote in
+# the string to '\"'. Caveat emptor.
+
+def doublequote(str):
+    return '"%s"' % str.replace('"', '\"')
+
 class FilterModule(object):
     def filters(self):
         return {
             'expand_instances': expand_instances,
             'try_subkey': try_subkey,
             'define_volumes': define_volumes,
+            'doublequote': doublequote,
         }

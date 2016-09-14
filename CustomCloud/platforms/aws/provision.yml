@@ -288,7 +288,15 @@
     - name: Set up EC2 instances
       ec2:
         exact_count: 1
-        count_tag: "{{ cluster_tags|combine(item.tags)|combine({'node': item.node}) }}"
+        count_tag: >
+          {{
+            cluster_tags|combine(item.tags)|combine({
+              'Cluster': cluster_tags['Name'],
+              'Name': (item.tags.Name|default(cluster_name ~'-'~ item.node)|lower),
+              'role': (item.tags.role|join(",")),
+              'node': item.node,
+            })
+          }}
         image: "{{ item.image|default(ec2_region_amis[item.region]) }}"
         region: "{{ item.region }}"
         key_name: "{{ ec2_key_name }}"
@@ -297,6 +305,7 @@
           {{
             cluster_tags|combine(item.tags)|combine({
               'Cluster': cluster_tags['Name'],
+              'Name': (item.tags.Name|default(cluster_name ~'-'~ item.node)|lower),
               'role': (item.tags.role|join(",")),
               'node': item.node,
             })
@@ -377,9 +386,9 @@
           instance_vars|default([])|union([
             item.0.tagged_instances[0]|combine({
               'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip),
-              'node': item.0.item.item.node,
+              'Name': item.0.item.item.tags|try_subkey('Name'),
               'role': item.0.item.item.tags|try_subkey('role'),
-              'db': item.0.item.item.tags|try_subkey('db'),
+              'node': item.0.item.item.node,
             })
           ])
         }}"
