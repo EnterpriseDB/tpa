@@ -26,6 +26,15 @@
       - ec2_vpc['Name'] is defined
       - ec2_vpc['Name'] != ''
 
+# If we define ec2_ami_name, we'd better also define ec2_ami_user, since
+# there's no way to auto-discover the preferred username for an AMI.
+
+- name: Ensure that ec2_ami_user is set if ec2_ami_name is set
+  assert:
+    msg: "If you specify ec2_ami_name, please also set ec2_ami_user"
+    that:
+      - ec2_ami_name is not defined or ec2_ami_user is defined
+
 - name: Ensure instances is correctly configured
   assert:
     msg: "Please define instances (an array of hashes, one per instance) in {{config_file}}"
