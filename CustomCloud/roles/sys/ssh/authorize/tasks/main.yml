@@ -1,16 +1,13 @@
 ---
 
-# Uploads id_user.pub to ~user/.ssh/authorized_keys.
+# Uploads (playbook_dir/keys/)id_user.pub to ~user/.ssh/authorized_keys.
 #
-# Either the key filename or its location may be overriden by setting
-# ssh_key_file and ssh_key_dir respectively; the remote user may also be
-# overriden by setting user.
+# - role: sys/ssh/authorize
+#   user: xxx
+#   ssh_key_dir: '/some/other/dir'
+#   ssh_key_file: 'id_someotheruser'
 
-- set_fact:
-    ssh_key_dir: "{{ ssh_key_dir|default(playbook_dir+'/keys') }}"
-    ssh_key_file: "{{ ssh_key_file|default('id_'+user) }}"
-
-- name: Install {{ ssh_key_file }}.pub to ~{{user}}/.ssh/authorized_keys
+- name: Install {{ _ssh_key_file }}.pub to ~{{user}}/.ssh/authorized_keys
   authorized_key:
     user: "{{user}}"
-    key: "{{ lookup('file', ssh_key_dir+'/'+ssh_key_file+'.pub') }}"
+    key: "{{ lookup('file', _ssh_key_dir+'/'+_ssh_key_file+'.pub') }}"

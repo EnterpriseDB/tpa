@@ -1,0 +1,4 @@
+---
+
+_ssh_key_dir: "{{ ssh_key_dir|default(playbook_dir+'/keys') }}"
+_ssh_key_file: "{{ ssh_key_file|default('id_'+user) }}"

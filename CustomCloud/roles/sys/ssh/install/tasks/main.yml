@@ -1,14 +1,11 @@
 ---
 
-# Uploads id_user{,.pub} to ~user/.ssh.
+# Uploads (playbook_dir/keys/)id_user{,.pub} to ~user/.ssh.
 #
-# Either the key filename or its location may be overriden by setting
-# ssh_key_file and ssh_key_dir respectively; the remote user may also be
-# overriden by setting user.
-
-- set_fact:
-    ssh_key_dir: "{{ ssh_key_dir|default(playbook_dir+'/keys') }}"
-    ssh_key_file: "{{ ssh_key_file|default('id_'+user) }}"
+# - role: sys/ssh/install
+#   user: xxx
+#   ssh_key_dir: '/some/other/dir'
+#   ssh_key_file: 'id_someothername'
 
 # We copy the files as the target user and assume that they will be
 # created with the correct uid/gid. Of course, most of the time the
@@ -22,14 +19,14 @@
   become_user: "{{ user }}"
   become: yes
 
-- name: Install keypair {{ ssh_key_file }} to ~{{user}}/.ssh
+- name: Install keypair {{ _ssh_key_file }} to ~{{user}}/.ssh
   action: copy
   args: "{{item}}"
   with_items:
-    - src: "{{ ssh_key_dir }}/{{ ssh_key_file }}"
+    - src: "{{ _ssh_key_dir }}/{{ _ssh_key_file }}"
       dest: "~{{user}}/.ssh/id_rsa"
       mode: 0600
-    - src: "{{ ssh_key_dir }}/{{ ssh_key_file }}.pub"
+    - src: "{{ _ssh_key_dir }}/{{ _ssh_key_file }}.pub"
       dest: "~{{user}}/.ssh/id_rsa.pub"
       mode: 0640
   become_user: "{{ user }}"
