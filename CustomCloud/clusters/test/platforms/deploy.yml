@@ -27,7 +27,9 @@
     # handy defaults up front. The actual package installation happens a
     # few steps later.
     - role: postgres/vars
-      postgres_version: 9.5
+      vars:
+        postgres_version: 9.5
+      tags: always
 
     # Computes memory size and other instance-specific computations for
     # use in later steps (e.g. shared_buffers).
@@ -41,8 +43,9 @@
     # Set up any additional filesystems required. The block device
     # layout is instance-specific.
     - role: sys/fs
-      device: /dev/xvdb
-      mountpoint: "{{ postgres_home }}"
+      vars:
+        device: /dev/xvdb
+        mountpoint: "{{ postgres_home }}"
       tags: [sys, fs]
 
     # Install Postgres from packages.
