@@ -63,6 +63,8 @@ postgres_packages:
     - postgresql-contrib-{{pgversion}}
     - postgresql-server-dev-{{pgversion}}
     - postgresql-{{pgversion}}-pgespresso
+    - postgresql-plperl-{{pgversion}}
+    - postgresql-{{pgversion}}-plv8
   RedHat:
     - postgresql{{pgversionNN}}
     - postgresql{{pgversionNN}}-debuginfo
@@ -71,6 +73,8 @@ postgres_packages:
     - postgresql{{pgversionNN}}-devel
     - postgresql{{pgversionNN}}-libs
     - pgespresso{{pgversionNN}}
+    - postgresql{{pgversionNN}}-plperl
+    - plv8_{{pgversionNN}}
   Ubuntu: *debian_packages
 
 extra_postgres_packages:
