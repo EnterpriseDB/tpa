@@ -67,3 +67,4 @@
 
     # Set up Barman backups.
     - role: barman
+      tags: barman
