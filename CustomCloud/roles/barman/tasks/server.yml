@@ -4,6 +4,7 @@
 
 - name: Install Barman package
   package: name=barman state=latest
+  tags: pkg
 
 # Allow postgres@ on any Postgres server to ssh to barman@ on any Barman
 # server.
