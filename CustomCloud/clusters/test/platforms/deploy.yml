@@ -61,4 +61,6 @@
     # in this cluster.
     - role: sys/ssh
       user: postgres
+      when: >
+        'postgres' in role
       tags: [sys, ssh]
