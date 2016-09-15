@@ -11,11 +11,11 @@
 
 - include_role: name=sys/ssh/authorize
   vars:
-    user: barman
-    ssh_key_file: id_postgres
+    ssh_user: barman
+    ssh_key_name: id_postgres
 
 # Install barman's own keypair too.
 
 - include_role: name=sys/ssh/install
   vars:
-    user: barman
+    ssh_user: barman

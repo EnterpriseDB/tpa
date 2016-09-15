@@ -7,8 +7,11 @@
 
 - include_role: name=sys/ssh/keygen
   vars:
-    user: "{{ item }}"
-  with_items: [postgres, barman]
+    ssh_user: postgres
+
+- include_role: name=sys/ssh/keygen
+  vars:
+    ssh_user: barman
 
 # On any instance tagged as a Barman server (i.e., where tags.role
 # includes 'barman'), it will install and configure Barman.
@@ -34,8 +37,8 @@
 
 - include_role: name=sys/ssh/authorize
   vars:
-    user: postgres
-    ssh_key_file: id_barman
+    ssh_user: postgres
+    ssh_key_name: id_barman
   when: >
     'postgres' in role
 
