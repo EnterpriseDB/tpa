@@ -1,0 +1,10 @@
+---
+
+- name: Install build requirements
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - "{{ requirements['common'] }}"
+    - "{{ requirements[ansible_os_family] }}"
+
