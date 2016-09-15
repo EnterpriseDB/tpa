@@ -1,5 +1,0 @@
----
-
-allow_duplicates: yes
-dependencies:
-  - role: 'barman/pkg'

@@ -1,5 +1,0 @@
----
-
-- name: Install Barman package
-  package: name=barman state=latest
-  tags: packages

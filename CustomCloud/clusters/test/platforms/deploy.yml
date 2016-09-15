@@ -64,3 +64,6 @@
       when: >
         'postgres' in role
       tags: [sys, ssh]
+
+    # Set up Barman backups.
+    - role: barman

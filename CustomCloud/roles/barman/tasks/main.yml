@@ -1,40 +1,53 @@
 ---
 
-# Install barman.conf on the barman server.
-- include: configure.yml
-  when: inventory_hostname == barman_hostname
+# This role can be safely applied to every instance.
 
-# Set archive_command on every cluster node that will be backed up to
-# barman.
-- include: update-postgres-conf.yml current_host={{item}}
-  with_items: "{{db_servers}}"
+# First, we generate an ssh keypair for postgres (this has probably
+# already been done), and likewise for barman.
 
-# Here's how to enable password-less SSH for Barman:
+- include_role: name=sys/ssh/keygen
+  vars:
+    user: "{{ item }}"
+  with_items: [postgres, barman]
+
+# On any instance tagged as a Barman server (i.e., where tags.role
+# includes 'barman'), it will install and configure Barman.
+
+- include: server.yml
+  when: >
+    'barman' in role
+
+# On any instance that must be backed up (i.e., with tags.backup set to
+# the name of a Barman server), it will perform the necessary
+# client-side configuration.
+
+- include: client.yml
+  when: backup != ''
+
+# Allow barman to ssh to postgres on any Postgres server.
 #
-# 1. Generate a key for barman, install it in ~barman/.ssh on the Barman
-#    server, and put it in ~postgres/.ssh/authorized_keys on Postgres
-#    servers. (This allows ssh FROM barman@ to postgres@.)
+# We could have done this in client.yml for only those servers that are
+# specifically designated as needing to be backed up, but we don't want
+# to prevent barman from ssh'ing to the corresponding replicas. (In any
+# case, barman could ssh to postgres on the primary and thence to the
+# replica, so there's no point trying to be restrictive.)
+
+- include_role: name=sys/ssh/authorize
+  vars:
+    user: postgres
+    ssh_key_file: id_barman
+  when: >
+    'postgres' in role
+
+# On any other kind of instance, we do nothing.
 #
-# - role: sys/ssh/keygen
-#   user: barman
-# - role: sys/ssh/install
-#   user: barman
-#   when: 'barman' in role
-# - role: sys/ssh/authorize
-#   ssh_key_file: id_barman
-#   user: postgres
-#   when: 'postgres' in role
+# We could instead split this up into barman/server and barman/client
+# roles and apply them only to the right instances. That is the "right
+# thing" to do, and how it should have been in the first place, but for
+# simplicity—and because client-side configuration is minimal—we leave
+# it this way so that deploy.yml can just drop the barman role in place
+# and nothing else is needed.
 #
-# 2. Generate a key for postgres, install it in ~postgres/.ssh on the
-#    Postgres servers, and put it in ~barman/.ssh/authorized_keys on the
-#    Barman server. (This allows ssh TO barman@ from postgres@.)
-# 
-# - role: sys/ssh/keygen
-#   user: postgres
-# - role: sys/ssh/install
-#   user: postgres
-#   when: 'postgres' in role
-# - role: sys/ssh/authorize
-#   ssh_key_file: id_postgres
-#   user: barman
-#   when: 'barman' in role
+# If we find ourselves adding more complex logic within this role in
+# future, however, it would indicate the need to split up the role
+# (which can be begun by changing include→include_role above).
