@@ -20,7 +20,7 @@
     - role: postgres/pkg
     - role: postgres/user
     - role: sys/ssh
-      user: postgres
+      ssh_user: postgres
       tags: [sys, ssh]
     - role: sys/ssh
       user: barman

@@ -1,5 +1,5 @@
 ---
 
 _ssh_key_dir: "{{ ssh_key_dir|default(playbook_dir+'/keys') }}"
-_ssh_key_file: "{{ ssh_key_file|default('id_'+user) }}"
-_ssh_key_comment: "{{ ssh_key_name|default(user ~'@'~ cluster_name) }}"
+_ssh_key_name: "{{ ssh_key_name|default('id_'+ssh_user) }}"
+_ssh_key_comment: "{{ ssh_key_name|default(ssh_user ~'@'~ cluster_name) }}"

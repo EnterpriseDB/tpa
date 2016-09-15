@@ -3,11 +3,11 @@
 # Uploads (playbook_dir/keys/)id_user.pub to ~user/.ssh/authorized_keys.
 #
 # - role: sys/ssh/authorize
-#   user: xxx
+#   ssh_user: xxx
 #   ssh_key_dir: '/some/other/dir'
-#   ssh_key_file: 'id_someotheruser'
+#   ssh_key_name: 'id_someotheruser'
 
-- name: Install {{ _ssh_key_file }}.pub to ~{{user}}/.ssh/authorized_keys
+- name: Add {{ _ssh_key_name }}.pub to {{ ssh_user }}'s authorized_keys
   authorized_key:
-    user: "{{user}}"
-    key: "{{ lookup('file', _ssh_key_dir+'/'+_ssh_key_file+'.pub') }}"
+    user: "{{ ssh_user }}"
+    key: "{{ lookup('file', _ssh_key_dir+'/'+_ssh_key_name+'.pub') }}"

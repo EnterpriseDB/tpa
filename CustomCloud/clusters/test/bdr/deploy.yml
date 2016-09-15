@@ -87,8 +87,8 @@
       tags: bdr
 
     - role: sys/ssh
-      user: postgres
-      tags: ssh
+      ssh_user: postgres
+      tags: [sys, ssh]
 
     - role: postgres/initdb
       tags: postgres

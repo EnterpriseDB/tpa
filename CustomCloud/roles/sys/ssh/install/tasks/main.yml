@@ -5,29 +5,29 @@
 # - role: sys/ssh/install
 #   user: xxx
 #   ssh_key_dir: '/some/other/dir'
-#   ssh_key_file: 'id_someothername'
+#   ssh_key_name: 'id_someothername'
 
 # We copy the files as the target user and assume that they will be
 # created with the correct uid/gid. Of course, most of the time the
 # directory will be created correctly by the authorized_key module.
 
-- name: Ensure that ~{{user}}/.ssh exists
+- name: Ensure that ~{{ ssh_user }}/.ssh exists
   file:
-    path: "~{{user}}/.ssh"
+    path: "~{{ ssh_user }}/.ssh"
     state: directory
     mode: 0700
-  become_user: "{{ user }}"
+  become_user: "{{ ssh_user }}"
   become: yes
 
-- name: Install keypair {{ _ssh_key_file }} to ~{{user}}/.ssh
+- name: Install keypair {{ _ssh_key_name }} for user {{ ssh_user }}
   action: copy
   args: "{{item}}"
   with_items:
-    - src: "{{ _ssh_key_dir }}/{{ _ssh_key_file }}"
-      dest: "~{{user}}/.ssh/id_rsa"
+    - src: "{{ _ssh_key_dir }}/{{ _ssh_key_name }}"
+      dest: "~{{ ssh_user }}/.ssh/id_rsa"
       mode: 0600
-    - src: "{{ _ssh_key_dir }}/{{ _ssh_key_file }}.pub"
-      dest: "~{{user}}/.ssh/id_rsa.pub"
+    - src: "{{ _ssh_key_dir }}/{{ _ssh_key_name }}.pub"
+      dest: "~{{ ssh_user }}/.ssh/id_rsa.pub"
       mode: 0640
-  become_user: "{{ user }}"
+  become_user: "{{ ssh_user }}"
   become: yes

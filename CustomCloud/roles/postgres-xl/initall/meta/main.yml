@@ -2,5 +2,5 @@
 
 dependencies:
   - role: sys/ssh
-    user: postgres
+    ssh_user: postgres
     tags: [sys, ssh]

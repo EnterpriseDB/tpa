@@ -2,12 +2,29 @@
 
 # Enable password-less SSH access between all nodes for a given user.
 #
+# - role: sys/ssh
+#   ssh_user: postgres
+#
+# The following would be the preferred form to write the above, but it
+# does not work right now due to a series of obscure Ansible bugs:
+#
+# - role: sys/ssh
+#   vars:
+#     ssh_user: postgres
+#
+# When specified this way, the variables are visible to the immediate
+# role but not to roles invoked therein, either through the dependency
+# mechanism, or explicitly through include_role. In the latter case, an
+# additional bug renders even the first form inoperative. Even if the
+# top-level role is invoked through include_role (which uses only the
+# explicit vars: syntax), dependent roles don't see the variables.
+#
+# So the uneasy truce is to use the non-vars syntax to set the variable
+# when invoking sys/ssh, and treating the sub-roles as dependencies:
+#
 # 1. sys/ssh/keygen generates keys/id_user{,.pub}.
 # 2. sys/ssh/authorize installs the public key to authorized_keys.
 # 3. sys/ssh/install installs the keypair to ~user/.ssh.
 #
-# All of the above are declared as dependencies of this role, so there's
-# nothing to do here. You can just do:
-#
-# - role: sys/ssh
-#   user: postgres
+# All three are invoked through dependencies declared in meta/main.yml,
+# so there's nothing more to do here.

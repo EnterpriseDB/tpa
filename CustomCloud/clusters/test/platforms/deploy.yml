@@ -60,7 +60,7 @@
     # Set up password-less SSH for the user postgres between all hosts
     # in this cluster.
     - role: sys/ssh
-      user: postgres
+      ssh_user: postgres
       when: >
         'postgres' in role
       tags: [sys, ssh]
