@@ -20,7 +20,8 @@
     blockdev --getra "{{ device }}" &&
     blockdev --setra "{{ readahead }}" "{{ device }}"
   register: ra
-  changed_when: ra.stdout != "{{ readahead }}"
+  changed_when: >
+    ra|succeeded and ra.stdout != "{{ readahead }}"
 
 # TODO: We need to make the readahead setting persistent by adding the
 # above command to /etc/rc.local.

@@ -17,7 +17,8 @@
 - name: Install backports.ssl_match_hostname
   command: pip install backports.ssl_match_hostname
   register: backport
-  changed_when: "'Requirement already satisfied' not in backport.stdout"
+  changed_when: >
+    backport|succeeded and 'Requirement already satisfied' not in backport.stdout
   when: ansible_python_version | version_compare('2.7.9', '<')
 
 # In general, we prefer to install packages for Python modules, but boto
@@ -27,4 +28,5 @@
 - name: Install boto
   command: pip install boto
   register: boto
-  changed_when: "'Requirement already satisfied' not in boto.stdout"
+  changed_when: >
+    boto|succeeded and 'Requirement already satisfied' not in boto.stdout

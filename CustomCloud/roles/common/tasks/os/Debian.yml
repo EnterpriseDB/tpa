@@ -6,9 +6,11 @@
 - name: Install python 2.7
   raw: apt-get -y install python2.7
   register: python
-  changed_when: "'already the newest version' not in python.stdout"
+  changed_when: >
+    python|succeeded and 'already the newest version' not in python.stdout
 
 - name: Install pip
   raw: apt-get -y install python-pip
   register: pip
-  changed_when: "'already the newest version' not in pip.stdout"
+  changed_when: >
+    pip|succeeded and 'already the newest version' not in pip.stdout
