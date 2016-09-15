@@ -1,0 +1,52 @@
+---
+
+dependencies:
+  # First, we generate an ssh keypair for postgres (this has probably
+  # already been done), and likewise for barman.
+
+  - role: sys/ssh/keygen
+    vars:
+      ssh_user: postgres
+
+  - role: sys/ssh/keygen
+    vars:
+      ssh_user: barman
+
+  # Install Barman packages.
+
+  - role: barman/pkg
+    when: >
+      'barman' in role
+
+  # Allow postgres@ on any Postgres server to ssh to barman@ on any
+  # Barman server.
+
+  - role: sys/ssh/authorize
+    vars:
+      ssh_user: barman
+      ssh_key_name: id_postgres
+    when: >
+      'barman' in role
+
+  # Install barman's own keypair too.
+
+  - role: sys/ssh/install
+    vars:
+      ssh_user: barman
+    when: >
+      'barman' in role
+
+  # Allow barman to ssh to postgres on any Postgres server.
+  #
+  # We could try to do this for only those servers that are specifically
+  # designated as needing to be backed up, but we don't want to prevent
+  # barman from ssh'ing to the corresponding replicas. (In any case,
+  # barman could ssh to postgres on the primary and thence to the
+  # replica, so there's no point trying to be more restrictive.)
+
+  - role: sys/ssh/authorize
+    vars:
+      ssh_user: postgres
+      ssh_key_name: id_barman
+    when: >
+      'postgres' in role

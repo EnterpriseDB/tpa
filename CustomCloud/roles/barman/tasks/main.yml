@@ -1,17 +1,10 @@
 ---
 
 # This role can be safely applied to every instance.
-
-# First, we generate an ssh keypair for postgres (this has probably
-# already been done), and likewise for barman.
-
-- include_role: name=sys/ssh/keygen
-  vars:
-    ssh_user: postgres
-
-- include_role: name=sys/ssh/keygen
-  vars:
-    ssh_user: barman
+#
+# We declare dependencies on a series of sys/ssh modules in order to set
+# up password-less ssh between postgres@ and barman@. See meta/main.yml
+# for details.
 
 # On any instance tagged as a Barman server (i.e., where tags.role
 # includes 'barman'), it will install and configure Barman.
@@ -27,21 +20,6 @@
 - include: client.yml
   when: backup != ''
 
-# Allow barman to ssh to postgres on any Postgres server.
-#
-# We could have done this in client.yml for only those servers that are
-# specifically designated as needing to be backed up, but we don't want
-# to prevent barman from ssh'ing to the corresponding replicas. (In any
-# case, barman could ssh to postgres on the primary and thence to the
-# replica, so there's no point trying to be restrictive.)
-
-- include_role: name=sys/ssh/authorize
-  vars:
-    ssh_user: postgres
-    ssh_key_name: id_barman
-  when: >
-    'postgres' in role
-
 # On any other kind of instance, we do nothing.
 #
 # We could instead split this up into barman/server and barman/client
@@ -54,3 +32,6 @@
 # If we find ourselves adding more complex logic within this role in
 # future, however, it would indicate the need to split up the role
 # (which can be begun by changing include→include_role above).
+#
+# Another advantage of splitting the role would be considerably reduced
+# "skipping" output.

@@ -1,3 +1,15 @@
 ---
 
 # These tasks are executed on any instance that needs to be backed up.
+#
+# The only configuration required is to set archive_command.
+#
+# Note that we use rsync -a not because we expect to be invoked on any
+# directories, but because -a is a shortcut that includes options to
+# preserve owner/group/permissions/etc.
+
+#- name: Set archive_command to copy WAL segmets to the Barman server
+#  include: …
+#  vars:
+#    archive_command: >
+#      rsync -a %p barman@{{ hostvars[backup].ip_address }}:{{ hostvars[backup].barman_home }}/{{ inventory_hostname }}/incoming/%f

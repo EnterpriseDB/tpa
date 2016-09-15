@@ -2,20 +2,18 @@
 
 # These tasks are executed on any Barman server instance.
 
-- name: Install Barman package
-  package: name=barman state=latest
-  tags: pkg
-
-# Allow postgres@ on any Postgres server to ssh to barman@ on any Barman
-# server.
-
-- include_role: name=sys/ssh/authorize
-  vars:
-    ssh_user: barman
-    ssh_key_name: id_postgres
-
-# Install barman's own keypair too.
-
-- include_role: name=sys/ssh/install
-  vars:
-    ssh_user: barman
+#- name: Configure barman
+#  template:
+#    src: barman.conf
+#    dest: '{{barman_configuration_file_path}}'
+#    owner: barman
+#    group: barman
+#    mode: 0644
+#  tags: configuration
+#
+#- name: Add incremental backup to barman cron
+#  lineinfile:
+#    dest: /etc/cron.d/barman
+#    line: "{{cron_incremental_backup_interval}} barman [ -x /usr/bin/barman ] && /usr/bin/barman backup --reuse-backup={{cron_incremental_backup_reuse_backup}} {{customerid + '_' + serviceid + '_' + hostvars[item]['db'] + hostvars[item]['node'] | lower}}"
+#  with_items: "{{db_servers}}"
+#  delegate_to: "{{barman_hostname}}"
