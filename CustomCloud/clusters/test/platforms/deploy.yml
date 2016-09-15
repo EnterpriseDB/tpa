@@ -18,13 +18,6 @@
     - include: ../../../platforms/aws/hostvars.yml
       tags: always
 
-    # You can pick whatever naming scheme you like here. Just make sure
-    # every node has a unique hostname.
-    - name: Set the cluster_hostname for each node
-      set_fact:
-        cluster_hostname: "tpa-{{ node }}"
-      tags: always
-
   roles:
     # Finds ansible_distribution, makes sure python and other system
     # packages are installed, sets the hostname, etc.

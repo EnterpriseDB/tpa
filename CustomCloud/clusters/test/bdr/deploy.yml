@@ -11,14 +11,8 @@
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
 
-    - name: Set the node id and hostname as facts
-      set_fact:
+    - set_fact:
         node_id: "{{ ec2_tag_node }}"
-        cluster_hostname: "bdr-{{ ec2_tag_node }}"
-      tags: always
-
-    - name: Set the node id as a fact
-      set_fact: node_id="{{ ec2_tag_node }}"
       tags: always
 
     # We use public IPs because BDR setup is usually cross-region
