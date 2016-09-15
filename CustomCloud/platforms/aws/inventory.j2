@@ -1,6 +1,6 @@
 [{{ cluster_tag }}]
 {% for h in instance_vars %}
-{{ h.Name or (cluster_name ~'-'~ h.node)|lower }} ansible_host={{ h.public_ip }} node={{ h.node }} role='[{{ h.role|map("doublequote")|join(",") }}]'
+{{ h.Name or (cluster_name ~'-'~ h.node)|lower }} ansible_host={{ h.public_ip }} node={{ h.node }} role='[{{ h.role|select("notequalto","postgres")|map("doublequote")|join(",") }}]'
 {% endfor %}
 
 [{{ cluster_tag }}:vars]

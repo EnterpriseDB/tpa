@@ -22,14 +22,17 @@ def expand_instances(a):
             y = copy.deepcopy(x)
             y['node'] = idx
             y['tags'] = y.get('tags', {})
-            y['tags']['role'] = y['tags'].get('role', [])
-            if not isinstance(y['tags']['role'], list):
-                y['tags']['role'] = map(lambda x: x.strip(), y['tags']['role'].split(","))
             if 'name' in y['tags'] and not 'Name' in y['tags']:
                 y['tags']['Name'] = y['tags']['name']
                 del y['tags']['name']
             if 'Name' in y['tags']:
                 y['tags']['Name'] = y['tags']['Name'].replace('_','-').lower()
+            y['tags']['role'] = y['tags'].get('role', [])
+            if not isinstance(y['tags']['role'], list):
+                y['tags']['role'] = map(lambda x: x.strip(), y['tags']['role'].split(","))
+            if ('primary' in y['tags']['role'] or 'replica' in y['tags']['role']) and \
+                not 'postgres' in y['tags']['role']:
+                y['tags']['role'] = y['tags']['role'] + ['postgres']
             c.append(y)
             inst_count = inst_count + 1
             idx = idx + 1
