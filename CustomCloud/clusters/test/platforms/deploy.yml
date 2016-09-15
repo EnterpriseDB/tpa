@@ -50,8 +50,12 @@
 
     # Install Postgres from packages.
     - role: postgres/pkg
+
     - role: postgres/user
+      tags: postgres
+
     - role: postgres/initdb
+      tags: postgres
 
     # Set up password-less SSH for the user postgres between all hosts
     # in this cluster.
