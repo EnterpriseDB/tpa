@@ -23,9 +23,11 @@
     - var: private_ip
       source: ec2_private_ip_address
 
-# Make a note of which address variables are set.
+# By default, we use each node's private IP address for inter-node
+# communication. We also make note of which address variables are set.
 
 - set_fact:
+    ip_address: "{{ private_ip }}"
     ip_addresses: ['public_ip', 'private_ip']
 
 # Just in case the instance has «db: primary» or «db: standby» set,
