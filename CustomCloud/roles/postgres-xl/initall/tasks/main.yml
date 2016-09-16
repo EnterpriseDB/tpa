@@ -1,5 +1,26 @@
 ---
 
+## Ensure needed directories exist
+
+- name: Ensure that /pgxl/data exists
+  file:
+    path: /pgxl/data
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
+- name: Ensure that /pgxl/wal exists
+  file:
+    path: /pgxl/wal
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 0755
+
+
+## Initialize the cluster
+
 - name: Appoint control node
   set_fact: control_hostname="{{ item }}"
   when: "hostvars[item].node == '1'"
@@ -25,6 +46,9 @@
   when: inventory_hostname == control_hostname and not conf.stat.exists
   sudo_user: postgres
   sudo: true
+
+
+## Quick test to make sure that the cluster is operational
 
 - block:
     - name: Test XL - createdb

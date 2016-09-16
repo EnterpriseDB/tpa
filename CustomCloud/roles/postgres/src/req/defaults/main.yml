@@ -1,0 +1,12 @@
+---
+
+requirements:
+  common:
+    - flex
+    - bison
+  Debian:
+    - libreadline-dev
+    - zlib1g-dev
+  RedHat:
+    - readline-devel
+    - zlib-devel

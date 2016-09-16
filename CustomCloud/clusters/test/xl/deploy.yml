@@ -2,7 +2,6 @@
 
 - name: Set up XLCloudTest cluster nodes
   hosts: tag_Cluster_XLCloudTest
-  gather_facts: no
   remote_user: ubuntu
   sudo_user: root
   sudo: true
@@ -36,6 +35,7 @@
       tags: always
 
     - include: ../../../platforms/aws/hostvars.yml
+      tags: always
 
     - set_fact:
         node_id: "{{ ec2_tag_node }}"
@@ -57,11 +57,17 @@
     - role: sys/sysctl
       tags: sysctl
 
-    - role: postgres-xl/pkg
-      tags: xl
-
     - role: sys/instance
       tags: upgrade
+
+    - role: postgres/vars
+      tags: vars
+
+    - role: postgres-xl/src
+      tags: xl
+
+    - role: postgres-xl/config
+      tags: config
 
     - role: postgres-xl/initall
       tags: initall
