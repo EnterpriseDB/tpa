@@ -61,4 +61,4 @@
 # changed, but in this case it's not easy to determine.
 
 - name: Make sure openvpn is started
-  service: name="{{ dict(debian='openvpn', redhat='openvpn@'+vpn_name)[ansible_distribution] }}" state=started
+  service: name="{{ dict(Debian='openvpn', RedHat='openvpn@'+vpn_name)[ansible_os_family] }}" state=started
