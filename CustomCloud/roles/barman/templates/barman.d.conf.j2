@@ -1,0 +1,4 @@
+[{{ _backup_name }}]
+active = false
+ssh_command = "ssh postgres@{{ ip_address }}"
+conninfo = "host={{ ip_address }} port={{ postgres_port }} database=postgres user=barman"

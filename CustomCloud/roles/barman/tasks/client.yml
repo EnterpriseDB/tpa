@@ -2,14 +2,41 @@
 
 # These tasks are executed on any instance that needs to be backed up.
 #
-# The only configuration required is to set archive_command.
+# First, we delegate some per-client server configuration tasks to the
+# designated backup server for each host.
+
+- name: Install Barman configuration file for each client
+  template:
+    src: barman.d.conf.j2
+    dest: "/etc/barman.d/{{ _backup_name }}.conf"
+    owner: barman
+    group: barman
+    mode: 0600
+  delegate_to: "{{ backup }}"
+
+- name: Set up a cron job to take regular backups
+  cron:
+    user: barman
+    cron_file: /etc/cron.d/barman
+    name: Backup from server {{ _backup_name }}
+    job: >
+      [ -x /usr/bin/barman ] && /usr/bin/barman backup {{ _backup_name }}
+    state: present
+  delegate_to: "{{ backup }}"
+
+# On the client side, the most we need to do is configure
+# archive_command for Barman versions <2.0. Once 2.0 is generally
+# available, we won't need even that (and this task can be removed).
+# Everything else needed to stream (e.g., max_wal_senders) or archive
+# (e.g., archive_mode) is already set up by postgres/config.
 #
 # Note that we use rsync -a not because we expect to be invoked on any
 # directories, but because -a is a shortcut that includes options to
 # preserve owner/group/permissions/etc.
 
-#- name: Set archive_command to copy WAL segmets to the Barman server
-#  include: …
-#  vars:
-#    archive_command: >
-#      rsync -a %p barman@{{ hostvars[backup].ip_address }}:{{ hostvars[backup].barman_home }}/{{ inventory_hostname }}/incoming/%f
+- name: Set archive_command to copy WAL segments to the Barman server
+  include: ../../../postgres/config/tasks/set-variable.yml
+  vars:
+    name: archive_command
+    value: >
+      rsync -a %p barman@{{ hostvars[backup].ip_address }}:{{ hostvars[backup].barman_home }}/{{ inventory_hostname }}/incoming/%f

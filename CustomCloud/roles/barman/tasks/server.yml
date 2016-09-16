@@ -2,18 +2,22 @@
 
 # These tasks are executed on any Barman server instance.
 
-#- name: Configure barman
-#  template:
-#    src: barman.conf
-#    dest: '{{barman_configuration_file_path}}'
-#    owner: barman
-#    group: barman
-#    mode: 0644
-#  tags: configuration
-#
-#- name: Add incremental backup to barman cron
-#  lineinfile:
-#    dest: /etc/cron.d/barman
-#    line: "{{cron_incremental_backup_interval}} barman [ -x /usr/bin/barman ] && /usr/bin/barman backup --reuse-backup={{cron_incremental_backup_reuse_backup}} {{customerid + '_' + serviceid + '_' + hostvars[item]['db'] + hostvars[item]['node'] | lower}}"
-#  with_items: "{{db_servers}}"
-#  delegate_to: "{{barman_hostname}}"
+- name: Ensure that /etc/barman.d exists
+  file:
+    path: /etc/barman.d
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
+- name: Install global Barman configuration file
+  template:
+    src: barman.conf.j2
+    dest: /etc/barman.conf
+    owner: root
+    group: root
+    mode: 0644
+
+# We install a per-client configuration file in /etc/barman.d and create
+# a cron job to backup each client in client.yml by delegating to the
+# designated backup server.

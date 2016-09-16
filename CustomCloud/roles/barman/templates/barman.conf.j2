@@ -18,9 +18,4 @@ basebackup_retry_sleep = {{ barman_basebackup_retry_sleep }}
 
 last_backup_maximum_age = {{ barman_last_backup_maximum_age }}
 
-{% for host in db_servers %}
-[{{ customerid + '_' + serviceid + '_' + hostvars[host]['db'] + hostvars[host]['node']| lower}}]
-ssh_command = ssh postgres@{{ host }}
-conninfo = "user=postgres host={{ host }} port=5432"
-
-{% endfor %}
+configuration_files_directory = /etc/barman.d
