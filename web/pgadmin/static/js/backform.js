@@ -270,6 +270,62 @@
           path = attrArr.join('.'),
           value = this.getValueFromDOM(),
           changes = {};
+          target_name = e.target.name;
+          if(e.target.name == 'server_software') {
+            configs_length = document.getElementsByName('config_type').length;
+            var configs_wrapper = document.getElementsByClassName('config_type')[0].getElementsByClassName('radio')[0];
+            var configs = configs_wrapper.getElementsByClassName('radio-inline');
+            for (i=0; i<configs_length; i++) {
+                if(value <= 6) {
+                    if(configs[i].getElementsByTagName('input')[0].value == 1) {
+                        configs_wrapper.insertBefore(configs[i],configs[0]);
+                        configs[0].style.visibility = 'visible';
+                    }
+                    else if(configs[i].getElementsByTagName('input')[0].value == 2) {
+                        configs_wrapper.insertBefore(configs[i],configs[1]);
+                        configs[1].style.visibility = 'visible';
+                    }
+                    else if(configs[i].getElementsByTagName('input')[0].value == 3) {
+                        configs_wrapper.insertBefore(configs[i],configs[2]);
+                        configs[2].style.visibility = 'visible';
+                    }
+                    else
+                        configs[i].style.visibility ='hidden';
+                }
+
+                else if(value == 7||value == 8) {
+                    if(configs[i].getElementsByTagName('input')[0].value == 4) {
+                        configs_wrapper.insertBefore(configs[i],configs[0]);
+                        configs[0].style.visibility = 'visible';
+                    }
+                        
+                    else
+                        configs[i].style.visibility ='hidden';
+                }
+                else if(value == 9) {
+                    if(configs[i].getElementsByTagName('input')[0].value == 5) {
+                        configs_wrapper.insertBefore(configs[i],configs[0]);
+                        configs[0].style.visibility = 'visible';
+                    }
+                        
+                    else
+                        configs[i].style.visibility ='hidden';
+                }
+            }
+          }
+          else if(e.target.name == 'config_type') {
+                if(value == 1) {
+                    //document.getElementsByClassName('backup_frequency')[0].style.visibility ='hidden';
+                    //document.getElementsByClassName('backup_start')[0].style.visibility ='hidden';
+                    document.getElementsByClassName('backup_frequency')[0].getElementsByTagName('select')[0].disabled = true;
+                    document.getElementsByClassName('backup_start')[0].getElementsByTagName('input')[0].disabled = true;
+                       
+                }
+                else {
+                    document.getElementsByClassName('backup_frequency')[0].getElementsByTagName('select')[0].disabled = false;
+                    document.getElementsByClassName('backup_start')[0].getElementsByTagName('input')[0].disabled =false;
+                }
+            }
 
       if (this.model.errorModel instanceof Backbone.Model) {
         if (_.isEmpty(path)) {
@@ -448,6 +504,7 @@
   // Note: Value here is null or an array. Since jQuery val() returns either.
   var MultiSelectControl = Backform.MultiSelectControl = SelectControl.extend({
     defaults: {
+      type:"multiselect",
       label: "",
       options: [], // List of options as [{label:<label>, value:<value>}, ...]
       extraClasses: [],
