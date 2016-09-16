@@ -4,12 +4,12 @@ db_servers: []
 barman_home: /var/lib/barman
 barman_user: barman
 barman_group: barman
-barman_configuration_file_path: /etc/barman.conf
 barman_log_file: /var/log/barman/barman.log
 barman_compression: gzip
-barman_reuse_backup: "link"
+barman_reuse_backup: link
 barman_minimum_redundancy: 3
 barman_retention_policy: RECOVERY WINDOW OF 4 WEEKS
+barman_immediate_checkpoint: false
 barman_network_compression: false
 barman_basebackup_retry_times: 3
 barman_basebackup_retry_sleep: 30
