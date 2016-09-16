@@ -17,4 +17,3 @@ barman_last_backup_maximum_age: 1 WEEK
 barman_backup_options: concurrent_backup
 cron_incremental_backup_interval: "0 4 * * wed/sat"
 cron_incremental_backup_reuse_backup: "link"
-ssh_key_file: "{{ key_file | default('id_' + cluster_name|lower) }}"
