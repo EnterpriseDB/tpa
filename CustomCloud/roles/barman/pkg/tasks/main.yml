@@ -3,3 +3,10 @@
 - name: Install Barman package
   package: name=barman state=latest
   tags: [barman, pkg]
+
+- name: Install Postgres client package
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ postgres_client_packages[ansible_os_family] }}"
+  tags: [barman, pkg]
