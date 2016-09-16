@@ -1,0 +1,47 @@
+---
+
+- name: Ensure LUKS configuration is available
+  assert:
+    msg: "You must specify the luks_device to initialise"
+    that:
+      - luks_device is defined
+
+# If luks_device is already a LUKS device, we do nothing.
+
+- name: Is the encrypted volume already initialised?
+  command: cryptsetup isLuks "{{ luks_device }}"
+  ignore_errors: true
+  changed_when: False
+  register: luks
+
+# Otherwise, we initialise the device as a LUKS volume and map it to the
+# given luks_volume name, and override _device to the name of the mapped
+# device.
+
+- block:
+
+    # Load the LUKS passphrase from a vault-encrypted file. This assumes
+    # that ansible-playbook was invoked with the right --vault-password
+    # or --vault-password-file argument.
+    #
+    # TODO: This is a cluster-global file, which means that every host
+    # will share a LUKS passphrase. That is acceptable for the moment,
+    # but in future, we should generate individual passphrases for each
+    # host and store them in inventory/host_vars/…
+
+    - name: Load luks_passphrase from vault
+      include_vars: "{{ playbook_dir }}/vault/luks_passphrase.yml"
+
+    - name: Initialise LUKS volume on {{ luks_device }}
+      shell: >
+        echo -n "{{ luks_passphrase }}" | cryptsetup -q luksFormat --key-file - "{{ luks_device }}"
+      no_log: true
+
+    - name: Map LUKS volume to /dev/mapper/{{ luks_volume }}
+      shell: >
+        echo -n "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ luks_device }}" "{{ luks_volume }}"
+      no_log: true
+
+    - set_fact:
+        _device: "/dev/mapper/{{ luks_volume }}"
+  when: luks|failed

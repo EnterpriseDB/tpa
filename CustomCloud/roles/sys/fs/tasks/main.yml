@@ -11,14 +11,28 @@
       - device is defined
       - mountpoint is defined
 
-- name: Set up encryption on {{ device }}
-  include: "{{ encryption }}.yml"
+# device is what the caller specified; _device is what we use
+# internally, and is subject to being modified by luks.yml.
+
+- set_fact:
+    _device: "{{ device }}"
+
+- block:
+    - name: Set up encryption on {{ device }}
+      include: "{{ encryption }}.yml"
+      vars:
+        luks_device: "{{ _device }}"
+    - name: Set noauto in mount options for {{ _device }}
+      set_fact:
+        mountopts: "noauto{% if mountopts %},{{mountopts}}{% endif -%}"
+      when: >
+        'noauto' not in mountopts
   when: encryption is defined
 
-- name: Set readahead on {{ device }} to {{ '%d' % ((readahead|int)/2048) }}MB
+- name: Set readahead on {{ _device }} to {{ '%d' % ((readahead|int)/2048) }}MB
   shell: >
-    blockdev --getra "{{ device }}" &&
-    blockdev --setra "{{ readahead }}" "{{ device }}"
+    blockdev --getra "{{ _device }}" &&
+    blockdev --setra "{{ readahead }}" "{{ _device }}"
   register: ra
   changed_when: >
     ra|succeeded and ra.stdout != "{{ readahead }}"
@@ -26,15 +40,15 @@
 # TODO: We need to make the readahead setting persistent by adding the
 # above command to /etc/rc.local.
 
-- name: Create filesystem on {{ device }}
+- name: Create filesystem on {{ _device }}
   filesystem:
-    dev: "{{ device }}"
+    dev: "{{ _device }}"
     fstype: "{{ fstype }}"
     opts: "{{ fsopts|default(omit) }}"
 
-- name: Mount {{ device }} under {{ mountpoint }}
+- name: Mount {{ _device }} under {{ mountpoint }}
   mount:
-    src: "{{ device }}"
+    src: "{{ _device }}"
     name: "{{ mountpoint }}"
     fstype: "{{ fstype }}"
     opts: "{{ mountopts }}"
