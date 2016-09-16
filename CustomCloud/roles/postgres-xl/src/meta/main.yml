@@ -1,8 +1,6 @@
 ---
 
 dependencies:
-  - role: postgres-xl/src/req
-
   - role: postgres/src
     postgres_git_url: git://git.postgresql.org/git/postgres-xl.git
     postgres_git_ref: XL9_5_STABLE
