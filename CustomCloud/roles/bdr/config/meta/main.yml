@@ -3,7 +3,7 @@
 allow_duplicates: yes
 dependencies:
     - role: 'postgres/config'
-      postgres_config_settings:
+      postgres_conf_settings:
         listen_addresses: "'*'"
         track_commit_timestamp: on
         wal_level: 'logical'

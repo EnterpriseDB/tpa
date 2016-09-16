@@ -34,8 +34,9 @@
 # can not assume that all Postgres binaries (e.g., pg_config) will be in
 # our (or even postgres's) PATH.
 
-- name: Set postgres_bin_dir based on distribution
+- name: Set postgres_{bin,conf}_dir based on distribution
   set_fact:
     pgbindir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
     postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
+    postgres_conf_dir: "{{ postgres_conf_dir|default(default_postgres_conf_dirs[ansible_os_family]) }}"
   tags: always

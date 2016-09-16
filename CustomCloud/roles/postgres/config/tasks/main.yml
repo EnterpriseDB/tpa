@@ -1,45 +1,52 @@
 ---
 
-# The caller may define postgres_hba_template or postgres_hba_settings
-# to generate a custom pg_hba.conf (failing which we leave the default
-# alone).
+# These tasks are run on every Postgres primary instance.
 
-- include_vars: "{{ ansible_distribution }}.yml"
+# First, we generate pg_hba.conf. There are several options here:
+#
+# 1. We use a default pg_hba.conf template that allows access within the
+#    cluster's private network.
+# 2. Callers may specify postgres_hba_settings in order to generate a
+#    custom pg_hba.conf. This is handled within the template.
+# 3. The caller may define postgres_hba_template and override the
+#    defaults altogether. (Currently not used anywhere.)
+#
+# These methods are all useful in different circumstances.
 
-- name: Install pg_hba.conf from postgres_hba_template (optional)
+- name: Install pg_hba.conf
   template:
-    src: "{{postgres_hba_template}}"
-    dest: "{{postgres_conf_dir}}/pg_hba.conf"
-  when: postgres_hba_template != ''
+    src: >
+      {{ postgres_hba_template or 'pg_hba.conf.j2' }}
+    dest: "{{ postgres_conf_dir }}/pg_hba.conf"
 
-- name: Generate pg_hba.conf from postgres_hba_settings (optional)
+# Next, we generate postgresql.conf if the caller specifies a template.
+# Otherwise, we leave the default postgresql.conf alone.
+
+- name: Install postgresql.conf from postgres_conf_template (optional)
   template:
-    src: pg_hba.conf.j2
-    dest: "{{postgres_conf_dir}}/pg_hba.conf"
-  when: postgres_hba_settings|length > 0
+    src: "{{ postgres_conf_template }}"
+    dest: "{{ postgres_conf_dir }}/postgresql.conf"
+  when: postgres_conf_template != ''
 
-# The caller may define postgres_config_template to generate
-# postgresql.conf (failing which we leave the default alone).
-
-- name: Install postgresql.conf from postgres_config_template (optional)
-  template:
-    src: "{{postgres_config_template}}"
-    dest: "{{postgres_conf_dir}}/postgresql.conf"
-  when: postgres_config_template != ''
+# No matter where the config file lives (and where it came from), we
+# make it include a config dir in PGDATA.
 
 - name: Create include_dir for extra configuration settings
   file:
-    path: "{{postgres_conf_dir}}/conf.d"
+    path: "{{ postgres_data_dir }}/conf.d"
     state: directory
 
 - name: Enable include_dir in postgresql.conf
   lineinfile:
-    dest: "{{postgres_conf_dir}}/postgresql.conf"
-    line: "include_dir = 'conf.d'"
+    dest: "{{ postgres_conf_dir }}/postgresql.conf"
+    line: "include_dir = '{{ postgres_data_dir }}/conf.d'"
+    insertafter: EOF
     state: present
-    regexp: "^#?include_dir"
+
+# Now we can put any desired settings into conf.d, where they will
+# override the defaults.
 
 - name: Generate managed.conf from postgres_config_settings (optional)
   template:
     src: managed.conf.j2
-    dest: "{{postgres_conf_dir}}/conf.d/managed.conf"
+    dest: "{{ postgres_data_dir }}/conf.d/managed.conf"

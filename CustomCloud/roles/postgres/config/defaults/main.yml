@@ -1,5 +1,3 @@
-postgres_port: 5432
-
 # By default, we leave pg_hba.conf alone, but the caller can define an
 # optional template or just an array of lines to put in pg_hba.conf
 # instead.
@@ -11,5 +9,5 @@ postgres_hba_settings: []
 # an optional template. Any extra settings in the supplied hash will be
 # included via include_dir.
 
-postgres_config_template: ''
-postgres_config_settings: {}
+postgres_conf_template: ''
+postgres_conf_settings: {}
