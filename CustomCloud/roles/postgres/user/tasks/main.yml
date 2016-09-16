@@ -24,6 +24,13 @@
     group: "{{ postgres_group }}"
     shell: /bin/bash
 
+- name: Enhance soft/hard system limits for user postgres
+  blockinfile:
+    dest: /etc/security/limits.conf
+    block: |
+      postgres  soft   nofile   4096
+      postgres  hard   nofile   32768
+
 # We want a sensible environment set up for the postgres user, so we
 # install our own .bashrc (read by interactive non-login shells).
 

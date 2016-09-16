@@ -1,10 +1,10 @@
 ---
 
-- name: Enhance soft system limits for user postgres
-  shell: echo "postgres  soft   nofile   4096" >> /etc/security/limits.conf
+# TODO: this module temporarily holds tasks previously found in postgres-xl/pkg
+# which are now shared with postgres-xl/src
+# All tasks should be reviewed, improved, and moved to other more appropriate roles
+# (mostly making use or adapting sys/fs)
 
-- name: Enhance hard system limits for user postgres
-  shell: echo "postgres  hard   nofile   32768" >> /etc/security/limits.conf
 
 - name: Ensure that /pgxl exists
   file:
@@ -16,7 +16,7 @@
 
 # The following filesystem-level tasks should not be here at all. They
 # should use sys/fs (or perhaps sys/fs can be declared as a dependency
-# of this role, but 'pkg' isn't the right name for this role in that
+# of this role, but 'config' isn't the right name for this role in that
 # case). Note that these are somewhat instance-type-specific. Also,
 # they're entirely too enthusiastic about blowing away existing
 # filesystems. Also, too much hardcoded stuff.
@@ -57,20 +57,3 @@
     - name: Activate swap
       command: "swapon /dev/xvdd"
   when: fstype.stdout != 'swap'
-
-- name: Ensure that /pgxl/data exists
-  file:
-    path: /pgxl/data
-    state: directory
-    owner: postgres
-    group: postgres
-    mode: 0755
-
-- name: Ensure that /pgxl/wal exists
-  file:
-    path: /pgxl/wal
-    state: directory
-    owner: postgres
-    group: postgres
-    mode: 0755
-
