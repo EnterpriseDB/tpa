@@ -10,3 +10,32 @@
     state: latest
   with_items: "{{ postgres_client_packages[ansible_os_family] }}"
   tags: [barman, pkg]
+
+# The above tasks are all that we would normally need, but we're still
+# waiting for Barman 2.0 to be released. So we install the pre-release
+# packages on top of the normal ones for now. Once Barman 2.0 packages
+# are available in the main repositories, we just drop these tasks.
+#
+# NOTE: These URLs are not for public distribution.
+
+- block:
+    - name: Download pre-release Barman 2.0 deb package
+      get_url:
+        url: "http://download.pgbarman.org/release/2.0a1/deb/barman_2.0~a1-1.{{ ansible_distribution_release }}+1_all.deb"
+        dest: /tmp/barman.deb
+    - name: Install pre-release Barman 2.0 deb package
+      command: dpkg --skip-same-version -i /tmp/barman.deb
+      register: deb
+      changed_when: >
+        deb|succeeded and 'already installed' not in deb.stderr
+  when: ansible_os_family == 'Debian'
+  tags: [barman, pkg]
+
+- name: Install pre-release Barman 2.0 rpm packages
+  command: >
+    rpm -ivh http://download.pgbarman.org/release/2.0a1/rpm/barman-2.0-0.1.a1.el7.noarch.rpm
+  register: rpm
+  changed_when: >
+    rpm|succeeded and 'is already installed' not in rpm.stdout
+  when: ansible_os_family == 'RedHat'
+  tags: [barman, pkg]
