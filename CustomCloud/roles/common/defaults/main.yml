@@ -35,3 +35,11 @@ unwanted_packages:
     - nano
   RedHat: []
   Ubuntu: *debian_unpackages
+
+vault_roles:
+    - postgres_password
+    - barman_password
+    - luks_passphrase
+
+_vault_dir: "{{ playbook_dir }}/vault"
+_vault_passfile: "vault_pass.txt"

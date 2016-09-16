@@ -26,6 +26,10 @@
 - include: hosts.yml
   tags: common
 
+# Generate secrets for various components
+- include: secrets.yml
+  tags: [common, secrets]
+
 # Add TPA version number along with timestamp to the instance
 - include: tpa_version.yml
   tags: common
