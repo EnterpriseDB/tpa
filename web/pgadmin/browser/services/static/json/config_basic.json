@@ -3,53 +3,59 @@
         "cluster_id":1,
         "cluster_name":"Basic   ",
         "instances": [
-        {
-            "subnet": "xxxx", 
+                {
+            "type": "t2.small",
             "name": "Instance11",
-            "ip": "10.67.0.1",
-            "volumes": [{
-                "device_name": "/dev/xvdb",
-                "volume_type": "gp2",
-                "volume_size": 10
-            }],
+            "region": "ap-southeast-2",
+            "subnet": "10.33.67.0/26",
+            "volumes": [
+                {
+                    "device_name": "/dev/xvdb",
+                    "volume_type": "gp2",
+                    "volume_size": 10,
+                    "delete_on_termination": true
+                }
+            ],
             "tags": {
-                "tag1": "value1",
-                "db":"primary"
-            }, 
-            "region": "us_east_1b",
-            "type": "t1_micro"
-        }, 
-        {
-            "subnet": "xxxx", 
-            "name": "Instance12",
-            "ip": "10.67.1.1",
-            "volumes": [{
-                "device_name": "/dev/xvdb",
-                "volume_type": "standard",
-                "volume_size": 10
-            }],
-            "tags": {
-                "tag1": "value1",
-                "db":"standby"
-            }, 
-            "region": "us_east_1b",
-            "type": "t1_micro"
+                "db": "primary",
+                "node": 1
+            }
         },
         {
-            "subnet": "xxxx", 
-            "name": "Instance13", 
-            "ip": "10.67.2.1",
-            "volumes": [{
-                "device_name": "/dev/xvdb",
-                "volume_type": "standard",
-                "volume_size": 10
-            }],
+            "type": "t2.small",
+            "name": "Instance12",
+            "region": "ap-southeast-2",
+            "subnet": "10.33.67.64/26",
+            "volumes": [
+                {
+                    "device_name": "/dev/xvdb",
+                    "volume_type": "standard",
+                    "volume_size": 10,
+                    "delete_on_termination": true
+                }
+            ],
             "tags": {
-                "tag1": "value1",
-                "db":"standby"
-            }, 
-            "region": "us_east_1c",
-            "type": "t1_micro"
+                "db": "standby",
+                "node": 2
+            }
+        },
+        {
+            "type": "t2.small",
+            "name": "Instance13",
+            "region": "ap-southeast-2",
+            "subnet": "10.33.67.192/27",
+            "volumes": [
+                {
+                    "device_name": "/dev/xvdb",
+                    "volume_type": "standard",
+                    "volume_size": 10,
+                    "delete_on_termination": true
+                }
+            ],
+            "tags": {
+                "db": "standby",
+                "node": 3
+            }
         }
     ],
     "cluster_tags":"x,y"
