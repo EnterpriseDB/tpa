@@ -1,13 +1,10 @@
 # Modules
 $ModLoad imuxsock.so
 $ModLoad imklog.so
-$ModLoad imudp.so
 $ModLoad imtcp.so
 
 # Listen on network
-$UDPServerAddress 0.0.0.0
-$UDPServerRun 514
-$InputTCPServerAddress 0.0.0.0
+$InputTCPServerAddress {{vpn_address}}
 $InputTCPServerRun 514
 
 # Enable non-kernel facility klog messages
@@ -41,6 +38,10 @@ cron.*					/var/log/cron.log
 
 *.emerg					:omusrmsg:*
 
-# Configure per host logging for postgresql
+# Configure per host logging for remote logs
+$RuleSet remote
 $template DailyPerHostLogs,"/var/log/hosts/%HOSTNAME%/%PROGRAMNAME%.%$YEAR%-%$MONTH%-%$DAY%.log"
-if $programname == 'postgres' then -?DailyPerHostLogs;RSYSLOG_FileFormat
+. -?DailyPerHostLogs;RSYSLOG_FileFormat
+
+$InputTCPServerBindRuleset remote
+
