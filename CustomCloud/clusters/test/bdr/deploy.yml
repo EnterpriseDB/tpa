@@ -12,14 +12,14 @@
     - include: ../../../platforms/aws/hostvars.yml
 
     - set_fact:
-        node_id: "{{ ec2_tag_node }}"
+        node_id: "{{ node }}"
       tags: always
 
     # We use public IPs because BDR setup is usually cross-region
     - name: Store the VPN address (basically ec2 PUBLIC IP address) as a fact
       set_fact:
-        vpn_address: "{{ hostvars[item].ec2_ip_address }}"
-      when: "hostvars[item].ec2_tag_node == node_id"
+        vpn_address: "{{ hostvars[item].public_ip }}"
+      when: "hostvars[item].node == node_id"
       with_items: "{{ play_hosts }}"
       tags: always
 
@@ -27,14 +27,14 @@
       set_fact:
         db_servers: "{{ (db_servers|default([])) + [ item ] }}"
       when: "hostvars[item].ec2_region == ec2_region"
-      with_items: "groups['tag_db_bdr']"
+      with_items: "groups['tag_role_bdr']"
       tags: always
 
     - name: Define barman hostname
       set_fact:
         barman_hostname: "{{ item }}"
       when: "hostvars[item].ec2_region == ec2_region"
-      with_items: "groups['tag_db_barman']"
+      with_items: "groups['tag_role_barman']"
       tags: always
 
     - name: Give error if there is no barman node assigned for region
@@ -44,7 +44,7 @@
     - name: Define control hostname
       set_fact:
         control_hostname: "{{ item }}"
-      with_items: "groups['tag_db_control']"
+      with_items: "groups['tag_role_control']"
       tags: always
 
   roles:
@@ -73,7 +73,7 @@
       tags: rsyslog
 
 - name: Set up TPA BDR nodes
-  hosts: tag_Cluster_TPA_BDR:&tag_db_bdr
+  hosts: tag_Cluster_TPA_BDR:&tag_role_bdr
   gather_facts: no
   sudo_user: root
   sudo: true
@@ -84,7 +84,9 @@
 
     # Install the BDR packages and basic configuration files.
     - role: bdr/pkg
-      tags: bdr
+      when: >
+        'bdr' in role
+      tags:bdr
 
     - role: postgres/initdb
       when: >
@@ -100,16 +102,22 @@
       tags: [sys, ssh]
 
     - role: bdr/config
+      when: >
+        'bdr' in role
       tags: bdr
 
     - role: bdr/node
+      when: >
+        'bdr' in role
       tags: bdr
 
     - role: barman
+      when: >
+        'barman' in role
       tags: barman
 
 - name: Set up Barman node
-  hosts: tag_Cluster_TPA_BDR:&tag_db_barman
+  hosts: tag_Cluster_TPA_BDR:&tag_role_barman
   gather_facts: no
   sudo_user: root
   sudo: true
@@ -120,6 +128,7 @@
 
     # Setup backup from the BDR nodes
     - role: barman
-      when: inventory_hostname == barman_hostname
+      when: >
+        'barman' in role
       tags: barman
 
