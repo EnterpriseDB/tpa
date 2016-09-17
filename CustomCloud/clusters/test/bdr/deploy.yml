@@ -11,41 +11,10 @@
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
 
-    - set_fact:
-        node_id: "{{ node }}"
-      tags: always
-
     # We use public IPs because BDR setup is usually cross-region
-    - name: Store the VPN address (basically ec2 PUBLIC IP address) as a fact
+    - name: Store the public IP  as a fact
       set_fact:
-        vpn_address: "{{ hostvars[item].public_ip }}"
-      when: "hostvars[item].node == node_id"
-      with_items: "{{ play_hosts }}"
-      tags: always
-
-    - name: Store DB servers list
-      set_fact:
-        db_servers: "{{ (db_servers|default([])) + [ item ] }}"
-      when: "hostvars[item].ec2_region == ec2_region"
-      with_items: "groups['tag_role_bdr']"
-      tags: always
-
-    - name: Define barman hostname
-      set_fact:
-        barman_hostname: "{{ item }}"
-      when: "hostvars[item].ec2_region == ec2_region"
-      with_items: "groups['tag_role_barman']"
-      tags: always
-
-    - name: Give error if there is no barman node assigned for region
-      assert:
-        that: barman_hostname is defined
-
-    - name: Define control hostname
-      set_fact:
-        control_hostname: "{{ item }}"
-      with_items: "groups['tag_role_control']"
-      tags: always
+        bdr_address: "{{ public_ip }}"
 
   roles:
 
