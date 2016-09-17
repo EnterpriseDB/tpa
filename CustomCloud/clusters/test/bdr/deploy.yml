@@ -51,17 +51,23 @@
 
     - role: common
 
+    - role: postgres/vars
+      vars:
+        postgres_version: 9.4
+      tags: always
+
     # Setup complete. Update, Upgrade and restart the instances
     - role: sys/tune
       tags: always
 
     - role: sys/sysctl
-      tags: sysctl
+      tags: [sys, sysctl]
 
     - role: sys/fs
-      device: /dev/xvdb
-      mountpoint: /var/lib/postgresql
-      tags: fs
+      vars:
+        device: /dev/xvdb
+        mountpoint: "{{ postgres_home }}"
+      tags: [sys, fs]
 
     - role: rsyslog
       tags: rsyslog
@@ -80,12 +86,18 @@
     - role: bdr/pkg
       tags: bdr
 
+    - role: postgres/initdb
+      when: >
+        'postgres' in role
+      tags: postgres
+
+    # Set up password-less SSH for the user postgres between all hosts
+    # in this cluster.
     - role: sys/ssh
       ssh_user: postgres
+      when: >
+        'postgres' in role
       tags: [sys, ssh]
-
-    - role: postgres/initdb
-      tags: postgres
 
     - role: bdr/config
       tags: bdr
@@ -93,8 +105,8 @@
     - role: bdr/node
       tags: bdr
 
-   # - role: barman
-   #   tags: barman
+    - role: barman
+      tags: barman
 
 - name: Set up Barman node
   hosts: tag_Cluster_TPA_BDR:&tag_db_barman
@@ -104,10 +116,10 @@
   vars_files:
     - vars/main.yml
 
-  #roles:
+  roles:
 
     # Setup backup from the BDR nodes
-    #- role: barman
-    #  when: inventory_hostname == barman_hostname
-    #  tags: barman
+    - role: barman
+      when: inventory_hostname == barman_hostname
+      tags: barman
 
