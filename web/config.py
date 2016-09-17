@@ -86,7 +86,7 @@ FILE_LOG_FORMAT = '%(asctime)s: %(levelname)s\t%(name)s:\t%(message)s'
 # Log file name
 LOG_FILE = os.path.join(
     DATA_DIR,
-    'pgadmin4.log'
+    '2qpgadmin4.log'
 )
 
 ##########################################################################
@@ -159,7 +159,7 @@ MAX_SESSION_IDLE_TIME = 60
 # config file, but generates an absolute path for use througout the app.
 SQLITE_PATH = os.path.join(
     DATA_DIR,
-    'pgadmin4.db'
+    '2qpgadmin4.db'
 )
 # SQLITE_TIMEOUT will define how long to wait before throwing the error -
 # OperationError due to database lock. On slower system, you may need to change

@@ -14,7 +14,6 @@ import logging
 import os, sys
 from collections import defaultdict
 from importlib import import_module
-from celery import Celery
 
 from flask import Flask, abort, request, current_app
 from flask.ext.babel import Babel, gettext
@@ -111,7 +110,6 @@ def _find_blueprint():
 
 
 current_blueprint = LocalProxy(_find_blueprint)
-celery = Celery('pgadmin.browser.services', broker=config.CELERY_BROKER_URL, backend = config.CELERY_RESULT_BACKEND)
 
 
 def create_app(app_name=config.APP_NAME):
@@ -387,7 +385,5 @@ def create_app(app_name=config.APP_NAME):
     ##########################################################################
     app.logger.debug('URL map: %s' % app.url_map)
     
-    celery.conf.update(app.config)
-    celery.conf.CELERY_IMPORTS = ('pgadmin.tasks',)
     return app
     
