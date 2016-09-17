@@ -1,0 +1,13 @@
+---
+
+# Ansible will transparently decrypt vault-encrypted files
+- name: Load postgres_password from vault
+  include_vars: "{{ playbook_dir }}/vault/postgres_password.yml"
+
+- name: Create md5 password for the Postgres user
+  postgresql_user:
+    name: postgres
+    encrypted: yes
+    password: "md5{{ (postgres_password + 'postgres')|hash('md5') }}"
+  become_user: postgres
+  become: true
