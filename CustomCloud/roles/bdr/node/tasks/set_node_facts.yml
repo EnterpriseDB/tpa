@@ -2,7 +2,7 @@
 
 - name: Export bdr_node_dsn fact
   set_fact:
-    bdr_node_dsn: "host={{ bdr_address }} port={{postgres_port}} dbname={{bdr_db_name}} user=postgres"
+    bdr_node_dsn: "host={{ vpn_address }} port={{postgres_port}} dbname={{bdr_db_name}} user=postgres"
 
 - name: Check for bdr node setup in the database
   shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -qAtw -c \"SELECT 1 FROM bdr.bdr_nodes WHERE node_status != 'k' LIMIT 1;\""

@@ -14,7 +14,7 @@
     # We use public IPs because BDR setup is usually cross-region
     - name: Store the public IP  as a fact
       set_fact:
-        bdr_address: "{{ public_ip }}"
+        vpn_address: "{{ public_ip }}"
 
   roles:
 
