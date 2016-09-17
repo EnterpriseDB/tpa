@@ -36,10 +36,10 @@ unwanted_packages:
   RedHat: []
   Ubuntu: *debian_unpackages
 
-vault_roles:
+secrets:
+    - luks_passphrase
     - postgres_password
     - barman_password
-    - luks_passphrase
 
 _vault_dir: "{{ playbook_dir }}/vault"
 _vault_passfile: "vault_pass.txt"
