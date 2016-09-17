@@ -1,6 +1,5 @@
 ---
 
-db_servers: []
 barman_home: /var/lib/barman
 barman_user: barman
 barman_group: barman
