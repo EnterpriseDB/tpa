@@ -5,4 +5,3 @@ dependencies:
     - { role: rsyslog/pkg }
     - { role: rsyslog/client, when: db != 'control' }
     - { role: rsyslog/server, when: db == 'control' }
-    - { role: rsyslog/tls }

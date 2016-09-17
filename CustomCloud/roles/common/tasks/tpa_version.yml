@@ -25,4 +25,7 @@
     create: yes 
     state: present
     insertafter: EOF
-    line: "-------------------------------------------\nTPA {{ tpa_version }}\n{{ deploy_timestamp }}" 
+    line: |-
+      -------------------------------------------
+      TPA {{ tpa_version }}
+      {{ deploy_timestamp }}

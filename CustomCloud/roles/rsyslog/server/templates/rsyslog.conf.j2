@@ -10,23 +10,6 @@ $UDPServerRun 514
 $InputTCPServerAddress 0.0.0.0
 $InputTCPServerRun 514
 
-# Config for TLS
-$DefaultNetstreamDriver gtls
-
-# Specify the certificate files
-$DefaultNetstreamDriverCAFile    /etc/pki/rsyslog/ca.pem
-$DefaultNetstreamDriverCertFile  /etc/pki/rsyslog/rsyslog-cert.pem
-$DefaultNetstreamDriverKeyFile   /etc/pki/rsyslog/rsyslog-key.pem
-
-# Because we can't predict hostnames, and because cloud servers
-# are dynamically deployed and we don't want to have to create
-# unique certificates for each one, we will validate the
-# certificate itself but not insist that the name match.
-$InputTCPServerStreamDriverAuthMode x509/certvalid
-
-## How to accept connections
-$InputTCPServerStreamDriverMode 1 # run driver in TLS-only mode
-
 # Enable non-kernel facility klog messages
 $KLogPermitNonKernelFacility on
 

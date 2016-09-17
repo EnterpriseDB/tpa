@@ -79,5 +79,6 @@
     create: no
     state: present
     insertafter: EOF
-    line: '. "$HOME/.bashrc"'
+    line: >-
+      . "$HOME/.bashrc"
   ignore_errors: true

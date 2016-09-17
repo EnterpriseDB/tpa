@@ -22,6 +22,8 @@
   lineinfile:
     dest: /etc/rc.local
     mode: 0755
-    line: test -f /sys/kernel/mm/transparent_hugepage/enabled && echo {{ transparent_hugepage }} > /sys/kernel/mm/transparent_hugepage/enabled
+    line: >-
+      test -f /sys/kernel/mm/transparent_hugepage/enabled &&
+      echo {{ transparent_hugepage }} > /sys/kernel/mm/transparent_hugepage/enabled
     state: present
     insertbefore: "exit 0"

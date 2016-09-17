@@ -425,3 +425,5 @@
         dest: "{{ cluster_dir }}/known_hosts"
 
     - include: ../common/write-cluster-vars.yml
+
+    - include: ../common/set-vault-pass.yml
