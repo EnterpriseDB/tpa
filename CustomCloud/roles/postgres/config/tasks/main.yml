@@ -33,21 +33,38 @@
 
 - name: Create include_dir for extra configuration settings
   file:
-    path: "{{ postgres_data_dir }}/conf.d"
+    path: "{{ _include_dir }}"
     state: directory
 
 - name: Enable include_dir in postgresql.conf
   lineinfile:
     dest: "{{ postgres_conf_dir }}/postgresql.conf"
     line: >-
-      include_dir = '{{ postgres_data_dir }}/conf.d'
+      include_dir = '{{ _include_dir }}'
     insertafter: EOF
     state: present
 
 # Now we can put any desired settings into conf.d, where they will
 # override the defaults.
 
-- name: Generate managed.conf from postgres_config_settings (optional)
+- name: Install TPA configuration files
   template:
-    src: managed.conf.j2
-    dest: "{{ postgres_data_dir }}/conf.d/managed.conf"
+    src: "{{ item }}"
+    dest: "{{ _include_dir }}/{{ item|regex_replace('.j2$') }}"
+    owner: postgres
+    group: postgres
+    mode: 0644
+  with_fileglob:
+    - templates/conf/*.j2
+
+# And here's a file where anyone can add extra settings that will have
+# priority over our defaults, and will never be overwritten.
+
+- name: Create empty configuration override file
+  template:
+    force: no
+    src: override.conf.j2
+    dest: "{{ _include_dir }}/9999-override.conf"
+    owner: postgres
+    group: postgres
+    mode: 0644

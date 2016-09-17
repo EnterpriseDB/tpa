@@ -1,0 +1,3 @@
+---
+
+_include_dir: "{{ include_dir|default(postgres_data_dir+'/conf.d') }}"
