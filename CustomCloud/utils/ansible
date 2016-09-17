@@ -47,4 +47,4 @@ if ! which $cmd >/dev/null 2>&1; then
     cmd="$ansidir/bin/$cmd"
 fi
 
-$cmd "$@"
+PATH="$ansidir/bin:$PATH" $cmd "$@"
