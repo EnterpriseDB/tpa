@@ -53,6 +53,7 @@
       when: >
         'postgres' in role
 
+    # Set up the postgres (system) user.
     - role: postgres/user
       when: >
         'postgres' in role
@@ -61,6 +62,11 @@
     - role: postgres/initdb
       when: >
         'postgres' in role
+      tags: postgres
+
+    - role: postgres/config
+      when: >
+        'primary' in role
       tags: postgres
 
     # Set up password-less SSH for the user postgres between all hosts
