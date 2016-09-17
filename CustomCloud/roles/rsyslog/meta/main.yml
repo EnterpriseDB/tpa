@@ -2,6 +2,6 @@
 
 allow_duplicates: yes
 dependencies:
-    - { role: rsyslog/pkg }
-    - { role: rsyslog/client, when: db != 'control' }
-    - { role: rsyslog/server, when: db == 'control' }
+    - { role: rsyslog/pkg, when: log is defined or 'central-log' in role }
+    - { role: rsyslog/client, when: log is defined }
+    - { role: rsyslog/server, when: 'central-log' in role }
