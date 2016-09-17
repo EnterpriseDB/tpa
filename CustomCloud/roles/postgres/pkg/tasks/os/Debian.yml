@@ -29,4 +29,5 @@
   lineinfile:
     dest: /etc/postgresql-common/createcluster.conf
     regexp: 'create_main_cluster *='
-    line: create_main_cluster = false
+    line: >-
+      create_main_cluster = false
