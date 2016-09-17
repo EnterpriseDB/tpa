@@ -51,6 +51,7 @@ instances:
         os: Debian
         role: bdr
         backup: barman-us-west-1
+        log: cluster-control
     - node: 2
       type: t2.small
       region: us-west-1
@@ -63,6 +64,7 @@ instances:
       tags:
         os: Debian
         role: barman
+        log: cluster-control
         Name: barman-us-west-1
     - node: 3
       type: t2.small
@@ -77,6 +79,7 @@ instances:
         os: Debian
         role: bdr
         backup: barman-eu-central-1
+        log: cluster-control
     - node: 4
       type: t2.small
       region: eu-central-1
@@ -89,6 +92,7 @@ instances:
       tags:
         os: Debian
         role: barman
+        log: cluster-control
         Name: barman-eu-central-1
     - node: 5
       type: t2.small
@@ -103,6 +107,7 @@ instances:
         os: Debian
         role: bdr
         backup: barman-us-east-1
+        log: cluster-control
     - node: 6
       type: t2.small
       region: us-east-1
@@ -115,6 +120,7 @@ instances:
       tags:
         os: Debian
         role: barman
+        log: cluster-control
         Name: barman-us-east-1
     - node: 7
       type: t2.small
