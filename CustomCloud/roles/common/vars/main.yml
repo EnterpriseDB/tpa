@@ -1,0 +1,4 @@
+---
+
+_vault_dir: "{{ vault_dir|default(playbook_dir+'/vault') }}"
+_vault_passfile: "{{ vault_passfile|default('vault_pass.txt') }}"
