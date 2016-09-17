@@ -57,6 +57,20 @@
   with_fileglob:
     - templates/conf/*.j2
 
+# If any settings were specified in postgres_conf_settings, we put that
+# into a separate configuration file. Note that we expect values in this
+# hash to be quoted properly; we don't try to quote them when writing
+# out the configuration.
+
+- name: Generate configuration based on postgres_conf_settings (optional)
+  template:
+    src: settings.conf.j2
+    dest: "{{ _include_dir }}/8888-role-settings.conf"
+    owner: postgres
+    group: postgres
+    mode: 0644
+  when: postgres_conf_settings
+    
 # And here's a file where anyone can add extra settings that will have
 # priority over our defaults, and will never be overwritten.
 
