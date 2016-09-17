@@ -189,6 +189,7 @@ function($, _, S, pgAdmin, Menu, Backbone, Alertify, pgBrowser, Backform) {
       if (this.model) {
         // This will be the URL, used for object manipulation.
         // i.e. Create, Update in these cases
+
         var urlBase = this.generate_url(item, type, node, false);
 
         if (!urlBase)
@@ -252,7 +253,6 @@ function($, _, S, pgAdmin, Menu, Backbone, Alertify, pgBrowser, Backform) {
         if (_.size(fields)) {
           // This will contain the actual view
           var view;
-
           if (formType == 'fieldset') {
             // It is used to show, edit, create the object in the
             // properties tab.
@@ -394,6 +394,150 @@ function($, _, S, pgAdmin, Menu, Backbone, Alertify, pgBrowser, Backform) {
 
               return p;
             };
+//--1-1-1-1-1-1-1-1-1-11-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1--1-11-1--1-1-1-11--1
+// Devashish: Some work in progress here!!
+        if (args.action == 'create') {
+          // If we've parent, we will get the information of it for
+          // proper object manipulation.
+          //
+          // You know - we're working with RDBMS, relation is everything
+          // for us.
+          if (self.parent_type && !isParent(d)) {
+            // In browser tree, I can be under any node, But - that
+            // does not mean, it is my parent.
+            //
+            // We have some group nodes too.
+            //
+            // i.e.
+            // Tables, Views, etc. nodes under Schema node
+            //
+            // And, actual parent of a table is schema, not Tables.
+            while (i && t.hasParent(i)) {
+              i = t.parent(i);
+              pd = t.itemData(i);
+
+              if (isParent(pd)) {
+                // Assign the data, this is my actual parent.
+                d = pd;
+                break;
+              }
+            }
+          }
+
+          // Seriously - I really don't have parent data present?
+          //
+          // The only node - which I know - who does not have parent
+          // node, is the Server Group (and, comes directly under root
+          // node - which has no parent.)
+          if (!d || (this.parent_type != null && !isParent(d))) {
+            // It should never come here.
+            // If it is here, that means - we do have some bug in code.
+            return;
+          }
+
+          if (!d)
+            return;
+
+          l = S('{{ _("Create - %%s") }}').sprintf(
+              [this.label]).value();
+          p = addPanel();
+
+          setTimeout(function() {
+            o.showProperties(i, d, p, args.action);
+          }, 10);
+        }//--------------------------------------------------------------------------------------------------
+         else {
+          if (pgBrowser.Node.panels && pgBrowser.Node.panels[d.id] &&
+              pgBrowser.Node.panels[d.id].$container) {
+            p = pgBrowser.Node.panels[d.id];
+            /**  TODO ::
+             *  Run in edit mode (if asked) only when it is
+             *  not already been running edit mode
+             **/
+            var mode = p.$container.attr('action-mode');
+            if (mode) {
+              var msg = '{{ _('Are you sure want to stop editing the properties of the %%s - "%%s"?') }}';
+              if (args.action == 'edit') {
+                msg = '{{ _('Are you sure want to reset the current changes and re-open the panel for %%s - "%%s"?') }}';
+              }
+
+              Alertify.confirm(
+                '{{ _('Edit in progress?') }}',
+                S(msg).sprintf(o.label, d.label).value(),
+                function() {
+                  setTimeout(function() {
+                    o.showProperties(i, d, p, args.action);
+                  }, 10);
+                },
+                null).show();
+            } else {
+              setTimeout(function() {
+                o.showProperties(i, d, p, args.action);
+              }, 10);
+            }
+          } else {
+            pgBrowser.Node.panels = pgBrowser.Node.panels || {};
+            p = pgBrowser.Node.panels[d.id] = addPanel();
+
+            setTimeout(function() {
+              o.showProperties(i, d, p, args.action);
+            }, 10);
+          }
+        }
+
+        p.title(l);
+        p.icon('icon-' + this.type);
+
+        // Make sure the properties dialog is visible
+        p.focus();
+      },
+
+      provisioning_status: function(args, item) {
+      // Devashish: WIP
+        var t = pgBrowser.tree,
+          i = args.item || item || t.selected(),
+          d = i && i.length == 1 ? t.itemData(i) : undefined
+          o = this,
+          l = o.title.apply(this, [d]);
+
+        // Make sure - the properties dialog type registered
+        pgBrowser.Node.register_node_panel();
+
+        // No node selected.
+        if (!d)
+          return;
+
+        var self = this,
+            isParent = (_.isArray(this.parent_type) ?
+              function(d) {
+                return (_.indexOf(self.parent_type, d._type) != -1);
+              } : function(d) {
+                return (self.parent_type == d._type);
+              }),
+            addPanel = function() {
+              var d = window.document,
+                  b = d.body,
+                  el = d.createElement('div');
+
+              d.body.insertBefore(el, d.body.firstChild);
+
+              var pW = screen.width < 800 ? '95%' : '500px',
+                  pH = screen.height < 600 ? '95%' : '550px';
+                  w = pgAdmin.toPx(el, self.width || pW, 'width', true),
+                  h = pgAdmin.toPx(el, self.height|| pH, 'height', true),
+                  x = (b.offsetWidth - w) / 2,
+                  y = (b.offsetHeight - h) / 2;
+
+              p = pgBrowser.docker.addPanel(
+                'node_props', wcDocker.DOCK.FLOAT, undefined,
+                {w: w + 'px', h: h + 'px', x: x + 'px', y: y + 'px'}
+              );
+
+              b.removeChild(el);
+              delete(el);
+
+              return p;
+            };
 
         if (args.action == 'create') {
           // If we've parent, we will get the information of it for
@@ -489,6 +633,7 @@ function($, _, S, pgAdmin, Menu, Backbone, Alertify, pgBrowser, Backform) {
         // Make sure the properties dialog is visible
         p.focus();
       },
+
       // Delete the selected object
       delete_obj: function(args, item) {
           var input = args || {'url':'drop'},
@@ -1022,6 +1167,72 @@ function($, _, S, pgAdmin, Menu, Backbone, Alertify, pgBrowser, Backform) {
                 btn.click(function() {
                   onDialogHelp();
                 });
+              }
+            },{
+              label: '{{ _("Back") }}', type: 'back',
+              tooltip: '{{ _("last page.") }}',
+              extraClasses: ['btn-primary','wizard-back'],
+              icon: 'fa fa-lg fa-backward',
+              disabled: true,
+              register: function(btn) {
+                if(that.type == 'service') {
+                    // Save the changes
+                    btn.click(function() {
+                        var selectedTab = document.getElementsByClassName('nav-tabs')[0].getElementsByClassName('active')[0].getElementsByTagName('a')[0].getAttribute("data-tab-index");
+                        var nav_tabs = document.getElementsByClassName('nav-tabs')[0].getElementsByTagName('li');
+                        var tabs = document.getElementsByClassName('tab-pane');
+                        if(selectedTab <= 1 || selectedTab > 3)
+                            return;
+                        else {
+                            nav_tabs[selectedTab - 1].className = '';
+                            tabs[selectedTab - 1].className = tabs[selectedTab - 1].className.replace(/\bactive\b/,'');
+                            tabs[selectedTab - 1].className = tabs[selectedTab - 1].className.replace(/\bin\b/,'');
+                            nav_tabs[selectedTab - 2].className = 'active';
+                            tabs[selectedTab - 2].className += ' active in';
+                        }
+                    });
+                }
+                else {
+                    btn.hide();
+                }
+              }
+            },
+            {
+              label: '{{ _("Next") }}', type: 'next',
+              tooltip: '{{ _("Next page.") }}',
+              extraClasses: ['btn-primary','wizard-next'],
+              icon: 'fa fa-lg fa-forward',
+              disabled: true,
+              register: function(btn) {
+                if(that.type == 'service') {
+                    btn.click(function() {
+                        var selectedTab = document.getElementsByClassName('nav-tabs')[0].getElementsByClassName('active')[0].getElementsByTagName('a')[0].getAttribute("data-tab-index");
+                        var nav_tabs = document.getElementsByClassName('nav-tabs')[0].getElementsByTagName('li');
+                        var tabs = document.getElementsByClassName('tab-pane');
+                        if(selectedTab >= 3 || selectedTab < 1)
+                           return;
+                        else {
+                            var m = view.model,
+                                d = m.toJSON(true);
+                            if(selectedTab == 1 && (!d.server_software || d.name=="" || !d.plan)) {
+                               alert("Make sure you have selected a Server Software and a Plan, and also give your service a name!")
+                                return;
+                            }
+                            if(selectedTab == 2 && ! d.config_type) {
+                                alert("Make sure that you have selected a Configuration!")
+                               return;
+                            }
+                            nav_tabs[selectedTab - 1].className = '';
+                            tabs[selectedTab - 1].className = tabs[selectedTab - 1].className.replace(/\bactive\b/,'');
+                            tabs[selectedTab - 1].className = tabs[selectedTab - 1].className.replace(/\bin\b/,'');
+                            nav_tabs[selectedTab].className = 'active';
+                            tabs[selectedTab].className += ' active in';
+                        }
+                    });
+                }
+                else {
+                    btn.hide();
+                }
               }
             },{
               label: '{{ _("Save") }}', type: 'save',
