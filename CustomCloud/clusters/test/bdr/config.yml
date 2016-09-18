@@ -37,7 +37,8 @@ ec2_vpc_subnets:
     10.33.67.192/28: us-east-1e
 
 instances:
-    - type: t2.small
+    - node: 1
+      type: t2.small
       region: us-west-1
       subnet: 10.33.67.32/28
       assign_eip: false
@@ -47,9 +48,12 @@ instances:
             volume_size: 10
             delete_on_termination: true
       tags:
-        db: bdr
-      node: 1
-    - type: t2.small
+        os: Debian
+        role: bdr
+        backup: barman-us-west-1
+        log: cluster-control
+    - node: 2
+      type: t2.small
       region: us-west-1
       subnet: 10.33.67.112/28
       volumes:
@@ -58,9 +62,12 @@ instances:
             volume_size: 10
             delete_on_termination: true
       tags:
-        db: barman
-      node: 2
-    - type: t2.small
+        os: Debian
+        role: barman
+        log: cluster-control
+        Name: barman-us-west-1
+    - node: 3
+      type: t2.small
       region: eu-central-1
       subnet: 10.33.67.128/28
       volumes:
@@ -69,9 +76,12 @@ instances:
             volume_size: 10
             delete_on_termination: true
       tags:
-        db: bdr
-      node: 3
-    - type: t2.small
+        os: Debian
+        role: bdr
+        backup: barman-eu-central-1
+        log: cluster-control
+    - node: 4
+      type: t2.small
       region: eu-central-1
       subnet: 10.33.67.144/28
       volumes:
@@ -80,10 +90,13 @@ instances:
             volume_size: 10
             delete_on_termination: true
       tags:
-        db: barman
-      node: 4
-    - type: t2.small
-      region: us-west-1
+        os: Debian
+        role: barman
+        log: cluster-control
+        Name: barman-eu-central-1
+    - node: 5
+      type: t2.small
+      region: us-east-1
       subnet: 10.33.67.160/28
       volumes:
           - device_name: /dev/xvdb
@@ -91,9 +104,12 @@ instances:
             volume_size: 10
             delete_on_termination: true
       tags:
-        db: bdr
-      node: 5
-    - type: t2.small
+        os: Debian
+        role: bdr
+        backup: barman-us-east-1
+        log: cluster-control
+    - node: 6
+      type: t2.small
       region: us-east-1
       subnet: 10.33.67.176/28
       volumes:
@@ -102,9 +118,12 @@ instances:
             volume_size: 10
             delete_on_termination: true
       tags:
-        db: barman
-      node: 6
-    - type: t2.small
+        os: Debian
+        role: barman
+        log: cluster-control
+        Name: barman-us-east-1
+    - node: 7
+      type: t2.small
       region: us-east-1
       subnet: 10.33.67.192/28
       assign_eip: false
@@ -114,8 +133,9 @@ instances:
             volume_size: 10
             delete_on_termination: true
       tags:
-        db: control
-      node: 7
+        os: Debian
+        role: control, backup, openvpn-server, central-log
+        Name: cluster-control
 variables:
    customerid: A12345
    serviceid: B67891
