@@ -22,6 +22,7 @@
     state: present
     name: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
+    groups: ssl-cert
     shell: /bin/bash
 
 - name: Enhance soft/hard system limits for user postgres
