@@ -4,6 +4,7 @@
 {% endfor %}
 
 [{{ cluster_tag }}:vars]
+cluster_tag={{ cluster_tag }}
 cluster_name={{ cluster_name }}
 ansible_user={{ ec2_ami_user|default('admin') }}
 ansible_python_interpreter=/usr/bin/python2.7

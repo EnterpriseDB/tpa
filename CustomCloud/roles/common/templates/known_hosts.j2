@@ -1,4 +1,4 @@
-{% for h in play_hosts %}
+{% for h in groups[cluster_tag] %}
 {%   for a in hostvars[h].ip_addresses+['inventory_hostname'] %}
 {%     for k in ['rsa', 'ecdsa'] %}
 {{ hostvars[h][a] }} {{ lookup('file', playbook_dir+'/hostkeys/ssh_host_'+k+'_key.pub') }}
