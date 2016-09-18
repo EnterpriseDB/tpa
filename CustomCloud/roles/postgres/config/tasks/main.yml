@@ -21,7 +21,7 @@
   template:
     src: "{{ postgres_hba_template }}"
     dest: "{{ postgres_conf_dir }}/pg_hba.conf"
-    when: postgres_hba_template != ''
+  when: postgres_hba_template != ''
 
 # Next, we generate postgresql.conf if the caller specifies a template.
 # Otherwise, we leave the default postgresql.conf alone.
