@@ -6,25 +6,21 @@
     state: directory
     mode: 0755
 
-- name: Ensure ssl-cert group exists
-  group:
-    name: ssl-cert
-    state: present
-
 - name: Generate self-signed TLS key and certificate
   shell: >
-    umask 027 &&
+    umask 077 &&
     /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
     /usr/bin/openssl req -newkey rsa:2048 -keyout "{{ cluster_name }}.key" -nodes -x509 -days 365 -out "{{ cluster_name }}.crt"
   args:
     chdir: /etc/tpa
     creates: "{{ cluster_name }}.crt"
 
-- name: Set correct group and mode on key/certificate files
+- name: Set correct ownership and mode on key/certificate files
   file:
     path: "{{ item }}"
-    group: ssl-cert
-    mode: 0640
+    owner: postgres
+    group: postgres
+    mode: 0600
   with_items:
     - "/etc/tpa/{{ cluster_name }}.key"
     - "/etc/tpa/{{ cluster_name }}.crt"

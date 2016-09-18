@@ -85,3 +85,8 @@
     owner: postgres
     group: postgres
     mode: 0644
+
+# Finally, we generate the TLS certificates needed by Postgres.
+
+- include: tls.yml
+  tags: [postgres, tls]
