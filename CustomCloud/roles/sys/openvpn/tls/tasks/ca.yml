@@ -1,0 +1,40 @@
+---
+
+- name: Ensure that /etc/tpa/openvpn exists
+  file:
+    path: /etc/tpa/openvpn
+    state: directory
+    mode: 0755
+  run_once: yes
+
+- name: Generate the CA certificate
+  shell: >
+    umask 077 &&
+    /usr/bin/openssl genrsa -out "{{ cluster_name }}-root-CA.key" 4096
+  args:
+    chdir: /etc/tpa/openvpn/
+    creates: "{{ cluster_name }}-root-CA.key"
+  run_once: yes
+
+- name: Self sign the CA certificate
+    shell: >
+    umask 077 &&
+    /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
+    /usr/bin/openssl req -x509 -new -nodes -key "{{ cluster_name }}-root-CA.key" -sha256 -days 3650 -out "{{ cluster_name }}-root-CA.pem"
+  args:
+    chdir: /etc/tpa/openvpn/
+    creates: "{{ cluster_name }}-root-CA.pem"
+  run_once: yes
+
+- name: Set correct ownership and mode on key/certificate files
+  file:
+    path: "{{ item }}"
+    owner: postgres
+    group: postgres
+    mode: 0600
+  with_items:
+    - "/etc/tpa/openvpn/{{ cluster_name }}-root-CA.key"
+    - "/etc/tpa/openvpn/{{ cluster_name }}-root-CA.pem"
+
+- name: Fetch the certificate from control node to all hosts
+  fetch: src="/etc/tpa/openvpn/{{ cluster_name }}-root-CA.pem" dest="{{ playbook_dir }}/certs"

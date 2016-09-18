@@ -4,4 +4,4 @@ allow_duplicates: yes
 dependencies:
     - { role: openvpn/pkg }
     - { role: openvpn/config }
-    - { role: openvpn/tls, when: 'central-log' in role }
+    - { role: openvpn/tls }
