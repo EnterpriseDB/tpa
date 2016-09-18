@@ -1,8 +1,8 @@
-# By default, we leave pg_hba.conf alone, but the caller can define an
-# optional template or just an array of lines to put in pg_hba.conf
-# instead.
+# We have a default template, but the caller can override it to generate
+# their own (or set it to '' to leave the existing pg_hba.conf alone),
+# or just specify an array of lines to put in the file.
 
-postgres_hba_template: ''
+postgres_hba_template: 'pg_hba.conf.j2'
 postgres_hba_settings: []
 
 # By default, we leave postgresql.conf alone, but the caller can define

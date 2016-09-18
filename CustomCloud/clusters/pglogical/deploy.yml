@@ -48,6 +48,7 @@
       postgres_initdb_opts: ['-A', 'trust']
     - role: 'postgres/config'
       postgres_conf_settings: "{{default_postgres_config|combine(extra_postgres_config|default({}))}}"
+      postgres_hba_settings: 'pg_hba.lines.j2'
       postgres_hba_settings:
         - "local   all             all         trust"
         - "local   replication     super       trust"

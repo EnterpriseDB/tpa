@@ -4,20 +4,24 @@
 
 # First, we generate pg_hba.conf. There are several options here:
 #
-# 1. We use a default pg_hba.conf template that allows access within the
-#    cluster's private network.
-# 2. Callers may specify postgres_hba_settings in order to generate a
-#    custom pg_hba.conf. This is handled within the template.
-# 3. The caller may define postgres_hba_template and override the
-#    defaults altogether. (Currently not used anywhere.)
+# 1. You can leave the existing pg_hba.conf alone. To do this, just set
+#    postgres_hba_template to ''.
+# 2. You can set postgres_hba_template to 'pg_hba.lines.j2' and specify
+#    an array of lines in postgres_hba_settings; then pg_hba.conf will
+#    contain the lines you specify, and no other rules.
+# 3. The default postgres_hba_template 'pg_hba.conf.j2' will generate a
+#    sensible configuration for the cluster. Any extra lines you specify
+#    in postgres_hba_settings will be appended to these defaults.
+# 4. You can set postgres_hba_template to something else and do whatever
+#    you want in the custom template.
 #
 # These methods are all useful in different circumstances.
 
 - name: Install pg_hba.conf
   template:
-    src: >
-      {{ postgres_hba_template or 'pg_hba.conf.j2' }}
+    src: "{{ postgres_hba_template }}"
     dest: "{{ postgres_conf_dir }}/pg_hba.conf"
+    when: postgres_hba_template != ''
 
 # Next, we generate postgresql.conf if the caller specifies a template.
 # Otherwise, we leave the default postgresql.conf alone.
