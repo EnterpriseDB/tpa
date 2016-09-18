@@ -1,1 +1,14 @@
-# TODO
+---
+
+- name: Ensure that /etc/tpa/openvpn exists
+  file:
+    path: /etc/tpa/openvpn
+    state: directory
+    mode: 0755
+
+- include: ca.yml
+
+- name: Copy the certificate from localhost to all hosts
+  copy: src="{{ playbook_dir }}/certs"  dest="/etc/tpa/openvpn/{{ cluster_name }}-root-CA.pem"
+
+- include: certs.yml
