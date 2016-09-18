@@ -41,3 +41,5 @@
 - name: Copy the crt file to host
   copy: src="{{ playbook_dir }}/certs/{{ cluster_name }}-{{ inventory_hostname }}.crt"  dest="/etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.crt"
 
+- name: Copy the key file to key
+  copy: src="{{ playbook_dir }}/certs/{{ cluster_name }}-{{ inventory_hostname }}.key"  dest="/etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.key"

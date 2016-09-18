@@ -6,14 +6,13 @@ port 1194
 dev tun
 proto udp
 
-ca {{ vpn_name }}/ca.crt
-dh {{ vpn_name }}/dh2048.pem
-key {{ vpn_name }}/{{ inventory_hostname }}.key
-cert {{ vpn_name }}/{{ inventory_hostname }}.crt
-tls-auth {{ vpn_name }}/ta.key 0
+dh /etc/tpa/openvpn/dh2048.pem
+ca /etc/tpa/openvpn/{{ cluster_name }}-root-CA.pem
+cert /etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.crt
+key  /etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.key
 
-client-config-dir {{ vpn_name }}/ccd
-ifconfig-pool-persist {{ vpn_name }}/ipp.txt
+client-config-dir /etc/tpa/openvpn/ccd
+ifconfig-pool-persist /etc/tpa/openvpn/ipp.txt
 
 comp-lzo
 user nobody

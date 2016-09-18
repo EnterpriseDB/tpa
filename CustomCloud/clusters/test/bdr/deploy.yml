@@ -16,6 +16,13 @@
       set_fact:
         vpn_address: "{{ public_ip }}"
 
+    # VPN server hostname: all deploys which we will use sys/openvpn will need this
+    - name: Define vpn server hostname
+      set_fact:
+        vpn_server_hostname: "{{ item }}"
+      with_items: "groups['tag_role_openvpn_server']"
+      tags: always
+
   roles:
 
     - role: common

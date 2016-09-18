@@ -1,14 +1,13 @@
 client
 
-remote {{ primary_hostname }} 1194
+remote {{ hostvars[vpn_server_hostname].public_ip }} 1194
 
 dev tun
 proto udp
 
-ca {{ vpn_name }}/ca.crt
-key {{ vpn_name }}/{{ inventory_hostname }}.key
-cert {{ vpn_name }}/{{ inventory_hostname }}.crt
-tls-auth {{ vpn_name }}/ta.key 1
+ca /etc/tpa/openvpn/{{ cluster_name }}-root-CA.pem
+cert /etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.crt
+key  /etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.key
 
 nobind
 comp-lzo
