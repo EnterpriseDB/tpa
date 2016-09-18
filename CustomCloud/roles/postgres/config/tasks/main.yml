@@ -51,15 +51,13 @@
 # Now we can put any desired settings into conf.d, where they will
 # override the defaults.
 
-- name: Install TPA configuration files
+- name: Install default TPA configuration file
   template:
-    src: "{{ item }}"
-    dest: "{{ _include_dir }}/{{ item|basename|regex_replace('.j2$') }}"
+    src: tpa.conf.j2
+    dest: "{{ _include_dir }}/0000-tpa.conf"
     owner: postgres
     group: postgres
     mode: 0644
-  with_fileglob:
-    - conf_templates/*.j2
   when: postgres_conf_template == ''
 
 # If any settings were specified in postgres_conf_settings, we put that
