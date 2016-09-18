@@ -30,6 +30,10 @@
 - include: secrets.yml
   tags: [common, secrets]
 
+# Generate TLS key/certificate for the cluster.
+- include: tls.yml
+  tags: [common, tls]
+
 # Add TPA version number along with timestamp to the instance
 - include: tpa_version.yml
   tags: common
