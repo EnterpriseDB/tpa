@@ -8,7 +8,4 @@
 
 - include: ca.yml
 
-- name: Copy the certificate from localhost to all hosts
-  copy: src="{{ playbook_dir }}/certs"  dest="/etc/tpa/openvpn/{{ cluster_name }}-root-CA.pem"
-
 - include: certs.yml

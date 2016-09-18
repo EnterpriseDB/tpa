@@ -1,48 +1,43 @@
 ---
 
-- name: Ensure that /etc/tpa/openvpn exists
-  file:
-    path: /etc/tpa/openvpn
-    state: directory
-    mode: 0755
-  run_once: yes
-
 - name: Generate the host certificate
-  shell: >
+  local_action:
+    module: >
+    shell
     umask 077 &&
-    /usr/bin/openssl genrsa -out "{{ cluster_name }}-host-CA.key" 4096
+    /usr/bin/openssl genrsa -out "{{ cluster_name }}-{{ inventory_hostname }}.key" 4096
   args:
-    chdir: /etc/tpa/openvpn/
-    creates: "{{ cluster_name }}-host-CA.key"
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "{{ cluster_name }}-{{ inventory_hostname }}.key"
   run_once: yes
+  sudo: no
 
 - name: Generate the certificate signing request
-  shell: >
+  local_action:
+    module: >
+    shell
     umask 077 &&
     /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
-    /usr/bin/openssl req -new -key "{{ cluster_name }}-host-CA.key" -out "{{ cluster_name }}-host-CA.csr"
+    /usr/bin/openssl req -new -key "{{ cluster_name }}-{{ inventory_hostname }}.key" -out "{{ cluster_name }}-{{ inventory_hostname }}.csr"
   args:
-    chdir: /etc/tpa/openvpn/
-    creates: "{{ cluster_name }}-host-CA.csr"
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "{{ cluster_name }}-{{ inventory_hostname }}.csr"
   run_once: yes
+  sudo: no
 
-- name: Self sign the csr with our CA certificate
-    shell: >
+- name: Sign the csr with our CA certificate
+  local_action:
+    module: >
+    shell
     umask 077 &&
     /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
-    /usr/bin/openssl x509 -req -in "{{ cluster_name }}-host-CA.csr" -CA "{{ cluster_name }}-root-CA.pem" -CAkey "{{ cluster_name }}-root-CA.key" -CAcreateserial -out "{{ cluster_name }}-host.crt" -days 3650 -sha256
+    /usr/bin/openssl x509 -req -in "{{ cluster_name }}-{{ inventory_hostname }}.csr" -CA "{{ cluster_name }}-root-CA.pem" -CAkey "{{ cluster_name }}-root-CA.key" -CAcreateserial -out "{{ cluster_name }}-{{ inventory_hostname }}.crt" -days 3650 -sha256
   args:
-    chdir: /etc/tpa/openvpn/
-    creates: "{{ cluster_name }}-host.crt"
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "{{ cluster_name }}-{{ inventory_hostname }}.crt"
   run_once: yes
+  sudo: no
 
-- name: Set correct ownership and mode on key/certificate files
-  file:
-    path: "{{ item }}"
-    owner: postgres
-    group: postgres
-    mode: 0600
-  with_items:
-    - "/etc/tpa/openvpn/{{ cluster_name }}-root-CA.csr"
-    - "/etc/tpa/openvpn/{{ cluster_name }}-host.crt"
+- name: Copy the crt file to host
+  copy: src="{{ playbook_dir }}/certs/{{ cluster_name }}-{{ inventory_hostname }}.crt"  dest="/etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.crt"
 
