@@ -38,6 +38,9 @@
         mountpoint: "{{ postgres_home }}"
       tags: [sys, fs]
 
+    - role: sys/openvpn
+      tags: [sys, openvpn]
+
     - role: rsyslog
       tags: rsyslog
 
