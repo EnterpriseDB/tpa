@@ -3,6 +3,8 @@
 cluster_name: "TestPlatforms"
 cluster_tags:
   Owner: AMS
+cluster_vars:
+  customerId: 42
 
 ec2_vpc:
   Name: Test

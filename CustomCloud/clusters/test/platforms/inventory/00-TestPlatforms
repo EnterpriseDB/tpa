@@ -8,8 +8,12 @@ testplatforms-6 ansible_host=54.154.141.186 node=6 role='["replica"]'
 eu-barman ansible_host=54.154.158.107 node=7 role='["barman","monitor"]'
 
 [tag_Cluster_TestPlatforms:vars]
+cluster_tag=tag_Cluster_TestPlatforms
 cluster_name=TestPlatforms
 ansible_user=admin
 ansible_python_interpreter=/usr/bin/python2.7
 ansible_ssh_private_key_file="clusters/test/platforms/id_testplatforms"
 ansible_ssh_common_args="-o UserKnownHostsFile='clusters/test/platforms/known_hosts'"
+platform=AWS
+instance_profile_arn=arn:aws:iam::324077455750:role/TestPlatforms_profile
+customerId=42
