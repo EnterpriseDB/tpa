@@ -50,15 +50,6 @@
 # backup. TODO: This should use _backup_name, not inventory_hostname,
 # but we can't do that sensibly without include_role.
 
-- name: Create replication slot for Barman
-  command: >
-    /usr/bin/barman receive-wal --create-slot {{ inventory_hostname }}
-  delegate_to: "{{ backup }}"
-  when: >
-    'primary' in role
-  become_user: barman
-  become: yes
-
 - name: Set backups to active
   ini_file:
     dest: "/etc/barman.d/{{ inventory_hostname }}.conf"
@@ -66,7 +57,17 @@
     option: active
     value: "true"
   delegate_to: "{{ backup }}"
+  register: activate
   when: backup != ''
+
+- name: Create replication slot for Barman
+  command: >
+    /usr/bin/barman receive-wal --create-slot {{ inventory_hostname }}
+  delegate_to: "{{ backup }}"
+  when: >
+    'primary' in role and activate|changed
+  become_user: barman
+  become: yes
 
 # Force an immediate backup for all primary servers.
  
