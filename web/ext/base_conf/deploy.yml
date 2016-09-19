@@ -1,0 +1,83 @@
+---
+
+- name: Set up TPA cluster nodes
+
+  # This play targets all hosts in the cluster.
+  hosts: tag_Cluster_TmpTest
+
+  # Generally speaking, we want everything to run as root. We'll ssh in
+  # to the servers as admin/ec2-user/ubuntu (depending on distribution),
+  # and sudo to root. Tasks that need to run as some other user must set
+  # sudo/sudo_user (or become/become_user) explicitly.
+  sudo_user: root
+  sudo: true
+
+  pre_tasks:
+    # This will translate "ec2_tag_node" into just "node", and likewise
+    # for certain other ec2 tag values.
+    - include: ../../../platforms/aws/hostvars.yml
+      tags: always
+
+  roles:
+    # Finds ansible_distribution, makes sure python and other system
+    # packages are installed, sets the hostname, etc.
+    - role: common
+
+    # Declare that we want to install Postgres 9.5. This just sets a few
+    # handy defaults up front. The actual package installation happens a
+    # few steps later.
+    - role: postgres/vars
+      postgres_version: 9.5
+
+    # Computes memory size and other instance-specific computations for
+    # use in later steps (e.g. shared_buffers).
+    - role: sys/tune
+      tags: always
+
+    # Set kernel-level configuration parameters persistently.
+    - role: sys/sysctl
+      tags: [sys, sysctl]
+
+    # Set up any additional filesystems required. The block device
+    # layout is instance-specific.
+    - role: sys/fs
+      device: /dev/xvdb
+      mountpoint: "{{ postgres_home }}"
+      tags: [sys, fs]
+
+    # Install Postgres from packages.
+    - role: postgres/pkg
+      when: >
+        'postgres' in role or 'barman' in role
+
+    # Set up the postgres (system) user.
+    - role: postgres/user
+      when: >
+        'postgres' in role
+      tags: postgres
+
+    - role: postgres/initdb
+      when: >
+        'postgres' in role
+
+    - role: postgres/config
+      when: >
+        'primary' in role
+      tags: [postgres, config]
+
+    # Set up password-less SSH for the user postgres between all hosts
+    # in this cluster.
+    - role: sys/ssh
+      ssh_user: postgres
+      when: >
+        'postgres' in role
+      tags: [sys, ssh]
+
+    # Set up Barman backups.
+    - role: barman
+      tags: barman
+
+    - role: postgres/postinstall
+      when: >
+        'primary' in role
+      tags: [postgres, postinstall]
