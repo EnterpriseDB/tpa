@@ -208,8 +208,7 @@ class ServiceView(NodeView):
                 response={'id': sg.id, 'name': sg.name, 'server_software': sg.server_software, 'plan':sg.plan, 'config':sg.config},
                 status=200
             )
-            
- 
+
     def create(self):
         #TODO: (Devashish) Make all paths/filenames, patterns part of the config file
         data = request.form if request.form else json.loads(request.data.decode())
@@ -226,74 +225,91 @@ class ServiceView(NodeView):
                         success=0,
                         errormsg=gettext('Service already exists')
                     )
-                jsonIn = open('/home/devashish/2q/sources/workspace/pgadmin4/web/pgadmin/browser/services/static/json/config_basic.json')
-                conf = json.load(jsonIn)
-                service = Service(
-                    user_id=current_user.id,
-                    name=data[u'name'],
-                    server_software=data[u'server_software'],
-                    plan=data[u'plan'],
-                    config_type=data[u'config_type'],
-                    config= json.dumps(conf))
-
-                
-                db.session.add(service)
-                db.session.flush()
 
                 # Prepare directories
                 tpa_basedir = '/opt/tpa/clusters'
-                customerdir = 'customer/%s/%s_%s' %(str(current_user.id), str(service.id), service.name)
-                tpa_customerdir = os.path.join(tpa_basedir,customerdir)
-                if not os.path.exists(tpa_customerdir):
-                    os.makedirs(tpa_customerdir)
-                tpa_config_yml = os.path.join(tpa_customerdir, 'config.yml')
-                tpa_deploy_yml_base = os.path.join(tpa_basedir, 'base_conf/deploy.yml')
-
-                #TODO: (Devashish) Logically derive best region/AZs depending on the user's location(IP based)
-                #Prepare config.yml replacements
-                vars = {}
-                vars['serviceid'] = service.id
-                vars['customerid']= current_user.id
-                pg2q = 'no'
-                if 4 <= service.server_software <=6:
-                    pg2q = 'yes' 
-                vars['use_2ndquadrant_postgres'] = pg2q
-                qData = {}
-                qData['variables'] = vars
                 
-                qData['ec2_vpc'] = {'Name': 'Test','cidr': '10.33.67.0/24'}
-                qData['ec2_vpc_subnets'] = {'ap-southeast-2': {'10.33.67.0/26': 'ap-southeast-2a', '10.33.67.64/26': 'ap-southeast-2a','10.33.67.192/27': 'ap-southeast-2c'}}
-                qData['cluster_name']=service.name
-                qData['cluster_tags']={'Name':service.name, 'Owner':current_user.id}
-                qData['ec2_ami_name'] ="ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627"
-                qData['ec2_ami_user']= "ubuntu"
-                instances = conf['clusters'][0]['instances']
-                plan = MetaPlan.query.filter_by(id = service.plan).first().name[4:]
-                for instance in instances:
-                    instance['type'] = plan
-                qData['instances']= instances
+                # TODO: (Devashish) have multiple yml files based on regions.
+                tpa_conf_basedir = os.path.join(tpa_basedir, 'base_conf')
+                sfx = None
+                if data[u'config_type'] == 1 :
+                    sfx = 'basic'
+                elif data[u'config_type'] == 2 :
+                    sfx = 'basic_barman'
 
-                #Prepare deploy.yml replacements
-                serverSw = MetaServerSoftware.query.filter_by(id = service.server_software).first().name
-                temp = serverSw.split();
-                tmpsize = len(temp)
-                pgversion = temp[tmpsize-1]
+                tpa_config_yml_base = os.path.join(tpa_conf_basedir, 'config_%s.yml' %(sfx))
+                tpa_deploy_yml_base = os.path.join(tpa_conf_basedir, 'deploy.yml')
 
+                service = None
+                tpa_customerdir = None
 
-                # Create config.yml for service
-                with open(tpa_config_yml, 'w') as configFile:
-                    yaml.safe_dump(qData, configFile, default_flow_style=False)
+                cluster_vars_template = None
+
+                with open(tpa_config_yml_base, 'r') as configFileBase:
+                    configBase = yaml.load(configFileBase)
+                    configBase['cluster_name']=data[u'name']
+                    clusterTags = {}
+                    clusterTags['Owner'] = current_user.id #Replace with user's name post SSO Integration
+                    configBase['cluster_tags'] = clusterTags
+                    instances = configBase['instances']
+                    plan = MetaPlan.query.filter_by(id = data[u'plan']).first().name[4:] #Strip AWS off the plan name
+                    for instance in instances:
+                        instance['type'] = plan
+                    configBase['instances']= instances
+                    cluster_vars_template = configBase['cluster_vars']
+                    del configBase['cluster_vars']
+
+                    service = Service(
+                        user_id=current_user.id,
+                        name=data[u'name'],
+                        server_software=data[u'server_software'],
+                        plan=data[u'plan'],
+                        config_type=data[u'config_type'],
+                        config= json.dumps(configBase))
+
+                    db.session.add(service)
+                    db.session.flush()
+
+                    pg2q = 'no'
+                    if 4 <= service.server_software <=6:
+                        pg2q = 'yes'
+
+                    cluster_vars_template['customerId'] = current_user.id
+                    cluster_vars_template['serviceId'] = service.id
+                    cluster_vars_template['use_2ndquadrant_postgres'] = pg2q
+                    configBase['cluster_vars'] = cluster_vars_template
+
+                    customerdir = 'customer/%s/%s_%s' %(str(current_user.id), str(service.id), service.name)
+                    tpa_customerdir = os.path.join(tpa_basedir,customerdir)
+                    if not os.path.exists(tpa_customerdir):
+                        os.makedirs(tpa_customerdir)
+
+                    tpa_config_yml = os.path.join(tpa_customerdir, 'config.yml')
+                    with open(tpa_config_yml, 'w') as configFile:
+                        yaml.safe_dump(configBase, configFile, default_flow_style=False)
+                    with open(tpa_config_yml, 'r') as configFileR:
+                        configFileValidate = yaml.load(configFileR)
+                        print configFileValidate['instances'][1]['volumes'][1]['device_name']
+
 
                 # Create deploy.yml for service
                 with open(tpa_deploy_yml_base, 'r') as deployFileBase:
+                    #Prepare deploy.yml replacements
+                    serverSw = MetaServerSoftware.query.filter_by(id = service.server_software).first().name
+                    temp = serverSw.split();
+                    tmpsize = len(temp)
+
+                    pgversion = temp[tmpsize-1]
+
                     deployBase = yaml.load(deployFileBase)
-                    deployBase[0]['vars']['pgversion'] = pgversion
-                    deployBase[0]['vars']['use_2ndquadrant_postgres'] = pg2q
-                    deployBase[1]['vars']['use_2ndquadrant_postgres'] = pg2q
+                    deployBase[0]['roles'][1]['postgres_version'] = pgversion
+                    #deployBase[0]['vars']['use_2ndquadrant_postgres'] = pg2q
+                    #deployBase[1]['vars']['use_2ndquadrant_postgres'] = pg2q
 
                     tpa_deploy_yml = os.path.join(tpa_customerdir, 'deploy.yml')
                     with open(tpa_deploy_yml, 'w') as deployFile:
                         yaml.safe_dump(deployBase, deployFile, default_flow_style=False)
+
 
                 # Add to queue
                 queue=Queue(user_id = current_user.id, service_id = service.id, service_name = service.name,queued_at = datetime.datetime.utcnow())
