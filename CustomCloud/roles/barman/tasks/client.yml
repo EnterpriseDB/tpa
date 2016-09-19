@@ -23,20 +23,3 @@
       [ -x /usr/bin/barman ] && /usr/bin/barman backup {{ _backup_name }}
     state: present
   delegate_to: "{{ backup }}"
-
-# On the client side, the most we need to do is configure
-# archive_command for Barman versions <2.0. Once 2.0 is generally
-# available, we won't need even that (and this task can be removed).
-# Everything else needed to stream (e.g., max_wal_senders) or archive
-# (e.g., archive_mode) is already set up by postgres/config.
-#
-# Note that we use rsync -a not because we expect to be invoked on any
-# directories, but because -a is a shortcut that includes options to
-# preserve owner/group/permissions/etc.
-
-- name: Set archive_command to copy WAL segments to the Barman server
-  include: ../../../postgres/config/tasks/set-variable.yml
-  vars:
-    name: archive_command
-    value: >-
-      'rsync -a %p barman@{{ hostvars[backup].ip_address }}:{{ barman_home }}/{{ inventory_hostname }}/incoming/%f'
