@@ -5,12 +5,10 @@ dependencies:
   # already been done), and likewise for barman.
 
   - role: sys/ssh/keygen
-    vars:
-      ssh_user: postgres
+    ssh_user: postgres
 
   - role: sys/ssh/keygen
-    vars:
-      ssh_user: barman
+    ssh_user: barman
 
   # Install Barman packages.
 
@@ -22,17 +20,15 @@ dependencies:
   # Barman server.
 
   - role: sys/ssh/authorize
-    vars:
-      ssh_user: barman
-      ssh_key_name: id_postgres
+    ssh_user: barman
+    ssh_key_name: id_postgres
     when: >
       'barman' in role
 
   # Install barman's own keypair too.
 
   - role: sys/ssh/install
-    vars:
-      ssh_user: barman
+    ssh_user: barman
     when: >
       'barman' in role
 
@@ -45,8 +41,7 @@ dependencies:
   # replica, so there's no point trying to be more restrictive.)
 
   - role: sys/ssh/authorize
-    vars:
-      ssh_user: postgres
-      ssh_key_name: id_barman
+    ssh_user: postgres
+    ssh_key_name: id_barman
     when: >
       'postgres' in role
