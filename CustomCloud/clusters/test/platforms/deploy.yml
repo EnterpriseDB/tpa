@@ -51,7 +51,7 @@
     # Install Postgres from packages.
     - role: postgres/pkg
       when: >
-        'postgres' in role
+        'postgres' in role or 'barman' in role
 
     # Set up the postgres (system) user.
     - role: postgres/user
