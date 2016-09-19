@@ -1,8 +1,8 @@
 [{{ _backup_name }}]
 active = false
 description = "Streaming backups from {{ inventory_hostname }}"
-conninfo = "host={{ ip_address }} port={{ postgres_port }} database=postgres user=barman"
-streaming_conninfo = "host={{ ip_address }} port={{ postgres_port }} database=postgres user=streaming_barman"
+conninfo = "host={{ ip_address }} port={{ postgres_port }} dbname=postgres user=barman"
+streaming_conninfo = "host={{ ip_address }} port={{ postgres_port }} user=streaming_barman"
 ssh_command = "ssh postgres@{{ ip_address }}"
 backup_method = postgres
 reuse_backup = off
