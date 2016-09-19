@@ -68,6 +68,11 @@
         'primary' in role
       tags: [postgres, config]
 
+    - role: postgres/postinstall
+      when: >
+        'primary' in role
+      tags: [postgres, postinstall]
+
     # Set up password-less SSH for the user postgres between all hosts
     # in this cluster.
     - role: sys/ssh

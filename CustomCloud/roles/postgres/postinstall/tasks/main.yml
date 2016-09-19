@@ -4,6 +4,31 @@
 # tasks, we perform any followup actions that require Postgres to be
 # running.
 
+# We restart Postgres unconditionally for now. In the near future we
+# should use a notifier mechanism so that we restart only when the
+# Postgres configuration has changed.
+
+- name: Restart Postgres unconditionally
+  service: name={{ postgres_service_name }} state=restarted
+
+- include_vars: "{{ playbook_dir }}/vault/barman_password.yml"
+
+- name: Create the barman user
+  postgresql_user:
+    name: barman
+    password: "{{ barman_password }}"
+  become_user: postgres
+  become: yes
+
+- include_vars: "{{ playbook_dir }}/vault/streaming_barman_password.yml"
+
+- name: Create the streaming_barman user
+  postgresql_user:
+    name: streaming_barman
+    password: "{{ streaming_barman_password }}"
+  become_user: postgres
+  become: yes
+
 - name: Install default Postgres extensions
   postgresql_ext:
     state: present

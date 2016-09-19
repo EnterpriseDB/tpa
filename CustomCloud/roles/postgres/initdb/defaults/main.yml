@@ -6,3 +6,7 @@ postgres_initdb_opts:
 default_postgres_data_dirs:
   Debian: "/var/lib/postgresql/{{ pgversion }}/main"
   RedHat: "/var/lib/pgsql/{{ pgversion }}/data"
+
+default_postgres_service_names:
+  Debian: "postgresql"
+  RedHat: "postgresql-{{ pgversion }}"
