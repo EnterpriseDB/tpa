@@ -5,6 +5,7 @@ cluster_tags:
   Owner: AMS
 cluster_vars:
   customerId: 42
+  cluster_network: 10.33.174.0/24
 
 ec2_vpc:
   Name: Test
