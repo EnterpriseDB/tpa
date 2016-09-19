@@ -18,6 +18,22 @@
     group: root
     mode: 0644
 
+# Install a .pgpass file. For now, we use the same password for the
+# barman and streaming_barman users. If we change that and generate
+# per-client passwords, we can make the template iterate over
+# groups['tag_backup'+inventory_hostname] instead.
+
+- include_vars: "{{ playbook_dir }}/vault/barman_password.yml"
+- include_vars: "{{ playbook_dir }}/vault/streaming_barman_password.yml"
+
+- name: Install .pgpass file
+  template:
+    src: pgpass.j2
+    dest: ~barman/.pgpass
+    owner: barman
+    group: barman
+    mode: 0600
+
 # We install a per-client configuration file in /etc/barman.d and create
 # a cron job to backup each client in client.yml by delegating to the
 # designated backup server.

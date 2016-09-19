@@ -40,3 +40,4 @@ secrets:
     - luks_passphrase
     - postgres_password
     - barman_password
+    - streaming_barman_password
