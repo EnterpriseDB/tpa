@@ -7,7 +7,7 @@ log_file = {{ barman_log_file }}
 ; Default compression level: possible values are None (default), bzip2, gzip, pigz, pygzip or pybzip2
 compression = {{ barman_compression }}
 
-; Incremental backup support: possible values are None (default), link or copy
+; Incremental backup support: possible values are off (default), link or copy
 reuse_backup = {{ barman_reuse_backup }}
 
 ; Minimum number of required backups (redundancy) - default 0

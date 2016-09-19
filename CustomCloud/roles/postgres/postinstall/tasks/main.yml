@@ -60,13 +60,13 @@
   when: backup != ''
 
 # Force an immediate backup for all primary servers.
-# 
-# - name: Force an immediate backup
-#   command: >
-#     /usr/bin/barman backup all
-#   delegate_to: "{{ backup }}"
-#   run_once: true
-#   when: >
-#     'primary' in role
-#   become_user: barman
-#   become: yes
+ 
+- name: Force an immediate backup
+  command: >
+    /usr/bin/barman backup all
+  delegate_to: "{{ backup }}"
+  run_once: true
+  when: >
+    'primary' in role
+  become_user: barman
+  become: yes
