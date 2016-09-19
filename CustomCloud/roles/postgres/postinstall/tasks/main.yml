@@ -17,6 +17,7 @@
   postgresql_user:
     name: barman
     password: "{{ barman_password }}"
+    role_attr_flags: superuser
   become_user: postgres
   become: yes
 
@@ -26,6 +27,7 @@
   postgresql_user:
     name: streaming_barman
     password: "{{ streaming_barman_password }}"
+    role_attr_flags: superuser
   become_user: postgres
   become: yes
 
