@@ -16,13 +16,13 @@
     group: postgres
     mode: 0644
 
-- name: Install assign_eip.py
-  template:
-    src: assign_eip.py.j2
-    dest: /etc/repmgr/assign_eip.py
-    owner: postgres
-    group: postgres
-    mode: 0755
+# - name: Install assign_eip.py
+#   template:
+#     src: assign_eip.py.j2
+#     dest: /etc/repmgr/assign_eip.py
+#     owner: postgres
+#     group: postgres
+#     mode: 0755
 
 - name: Install additional repmgr scripts
   copy:
@@ -35,4 +35,4 @@
     - promote_command.sh
     - follow_command.sh
 
-- include "os/{{ ansible_os_family }}.yml
+# - include "os/{{ ansible_os_family }}.yml
