@@ -1,0 +1,25 @@
+{# common script part for inclusion #}
+
+if [ -f ~/bin/send_nsca ]; then
+  # A nsca-ng client binary that is built from the source
+  SEND_NSCA_PATH=~/bin/send_nsca
+else
+  SEND_NSCA_PATH={{send_nsca_path}}
+fi
+
+{% if (nsca_gateway|length) and (server_role != "nsca_gateway") %}
+SEND_NSCA="ssh -q -i $HOME/.ssh/id_2ndq_nsca_gateway {{nsca_gateway_user}}@{{nsca_gateway}} $SEND_NSCA_PATH -c conf/send_nsca.cfg"
+{% else %}
+SEND_NSCA="$SEND_NSCA_PATH -c $(ls -1d ~)/conf/send_nsca.cfg"
+{% endif %}
+
+TAB=$'\t'
+
+echo "${NSCA_MSG}" | \
+    sed -e "s/^/${HOSTNAME}${TAB}/" \
+        -e "s/^\([^: ]*\) /\1${TAB}/" \
+        -e "s/OK: /0${TAB}/" -e "s/WARNING: /1${TAB}/" \
+        -e "s/CRITICAL: /2${TAB}/" -e "s/UNKNOWN: /3${TAB}/" \
+   | tr '\n' '\027' \
+   | $SEND_NSCA
+

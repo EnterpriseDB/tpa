@@ -1,0 +1,16 @@
+{% import '_send_icinga_config.j2' as config with context -%}
+{% include '_send_icinga_init.sh.j2' -%}
+
+# 1. Run checks and collect output in $NSCA_MSG
+NSCA_MSG=$(
+{% for standby_name in groups['monitored'] %}
+{% if hostvars[standby_name].replication_type == "standby" and hostvars[standby_name].repmgr_node_id|default(0) %}
+    {{config.sudo}} ~/bin/check_repmgr.py -db {{repmgr_database|default(database_list|first)}} -C {{repmgr_cluster}} -n {{hostvars[standby_name].repmgr_node_id}} -w '5 minutes' -c '20 minutes'
+{% endif %}
+{% endfor %}
+)
+
+# 2. Send output to specified icinga hosts
+
+{% include '_send_nsca.sh.j2' -%}
+

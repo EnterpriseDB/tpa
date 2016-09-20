@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# {{ansible_managed}}
+
+{# See note in README.md #}
+{% if system_hostname|bool == true %}
+HOSTNAME=`hostname`
+{% else %}
+HOSTNAME="{{inventory_hostname}}"
+{% endif %}
+PG_PORT="{% if database_port %}--port={{database_port}}{% endif %}"
+PG_HOST="{% if database_host %}--host={{database_host}}{% endif %}"
+{% if have_postgres_sudo|bool == true -%}
+{% if pg_path|length %}
+PG_PATH="PATH={{pg_path}}:$PATH"
+{% else -%}
+PG_PATH=""
+{% endif -%}
+{% elif pg_path|length -%}
+PATH="{{pg_path}}:$PATH"
+{% endif -%}
+
+{% if pgcluster|length -%}
+export PGCLUSTER="{{pgcluster}}"
+{% endif -%}
+
+{% if check_pg_bouncer|bool == true %}
+PG_BOUNCER_PORT="--port={{pg_bouncer_port}}"
+PG_BOUNCER_USER="--dbuser={{pg_bouncer_user}}"
+{% endif -%}
+
+SHOWTIME="{% if showtime|bool == false %}--showtime=0{% endif %}"
+

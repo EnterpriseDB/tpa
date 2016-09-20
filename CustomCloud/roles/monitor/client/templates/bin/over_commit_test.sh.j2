@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Configuration options used
+# Warning percentage to which we alert with a warning about Over Commit
+warn_perc=(8/10)
+# Critical percentage after which we alert about the critical
+# situation related to OverCommit of memory
+crit_perc=(9/10)
+# Get the value of the limit of memory we can commit
+commit_limit=`egrep "^CommitLimit" /proc/meminfo | tr -s ' ' | cut -d' ' -f 2`
+# Calculate the warning threshold
+commit_limit_warning=`echo "scale=0;${commit_limit}*${warn_perc}" | bc`
+# Calculate the critical threshold
+commit_limit_critical=`echo "scale=0;${commit_limit}*${crit_perc}" | bc`
+# We need the committed memory to compare
+commited_as=`egrep "^Committed_AS" /proc/meminfo | tr -s ' ' | cut -d' ' -f 2`
+
+# We need the hostname for nsca
+{% if system_hostname|bool == true %}
+HOSTNAME=`hostname`
+{% else %}
+HOSTNAME="{{inventory_hostname}}"
+{% endif %}
+
+if [ $commit_limit_critical -lt $commited_as ]; then
+    # We are BAD!!!
+    NSCA_MSG=$(
+        echo -e "SYSTEM_OVERCOMMIT CRITICAL: Committed_AS: ${commited_as}, CommitLimit: ${commit_limit} ${HOSTNAME}"
+    )
+elif [ $commit_limit_warning -lt $commited_as ]; then
+    # Things are getting bad, so issue a warning alert
+    NSCA_MSG=$(
+        echo -e "SYSTEM_OVERCOMMIT WARNING: Committed_AS: ${commited_as}, CommitLimit: ${commit_limit} ${HOSTNAME}"
+    )
+else
+    # Everything is fine
+    NSCA_MSG=$(
+        echo -e "SYSTEM_OVERCOMMIT OK: Committed_AS: ${commited_as}, CommitLimit: ${commit_limit} ${HOSTNAME}"
+    )
+fi
+
+# 2. Send output to specified icinga hosts
+{% include '_send_nsca.sh.j2' %}

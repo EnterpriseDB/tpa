@@ -1,0 +1,297 @@
+---
+
+# roles/client/vars/main.yml
+#
+# Default client settings
+
+# We want to monitor all clients
+# - to exclude/remove monitoring from a particular
+#   client server, create a server-specific `host_vars` file
+#   containing "monitoring: false", e.g.
+#     creds/client/host_vars/some-server.yml
+
+monitoring: true
+
+# Always supply the database name(s) in list form, even if only
+# one database is being checked!
+database_list: ["postgres"]
+database_port: 5432
+database_host: false
+
+postgres_user: "postgres"
+
+bin_dir: "~/bin"
+
+# Set if PostgreSQL binary directory is not in the default PATH
+pg_path: ""
+
+# Required by avoid_anti_wraparound_vacuums.sh
+socket_dir: "/var/run/postgresql"
+
+# Usually we have sudo root/postgres access, but sometimes not
+have_root_sudo: true
+have_postgres_sudo: true
+
+# Attempt to install the appropriate nsca-ng package
+install_nsca: true
+
+nsca_package: nsca-ng-client
+send_nsca_path: "/usr/sbin/send_nsca"
+
+# As a last-ditch fallback for older systems where a package is
+# not available and it's not possible to compile send_icinga ourselves,
+# copy the binary
+copy_send_icinga: false
+
+
+# Can be one of:
+# - database
+# - barman
+# - nsca_gateway
+server_role: "database"
+
+# Use a gateway host to relay nsca_ng submissions
+# (needed in those cases where client network policy does not permit
+# outbound connections from monitored servers)
+nsca_gateway: ""
+
+nsca_gateway_user: ""
+
+# Normally only required when setting up gateway hosts
+# NOTE: must be an absolute path; an empty value will cause an error
+authorized_keys_file: ""
+
+# Actually add an entry for the crontab - normally we want this,
+# but sometimes - e.g. on initial setup - it's useful to install
+# the scripts but not activate them.
+add_cron: true
+
+# In at least one case we are not able to create our own cronjobs
+# on the client's server; in this case set up an empty script which
+# can be modified when necessary to run adhoc tasks (collection of
+# performance metrics etc.)
+placeholder_cron_script: false
+
+# temporary setting for migrating existing clients
+system_hostname: false
+
+# Don't copy any files into the 2ndq user's home directory
+# This is mainly for case where a single home directory on an
+# external volume is shared between multiple hosts in a network,
+# so we only need to make file-level changes on one of the
+# servers.
+homedir_no_write: false
+
+# Capture the output of the send_icinga.sh to diagnose any issues
+# (typically network-related or which manifest themselves due to
+# subtle differences between the shell and cron environments, etc.)
+
+log_date_command: "date -I"
+send_icinga_logging: false
+
+
+# On the offchance we need to specify this for particular Debian/Ubuntu
+# installations
+pgcluster: ""
+
+
+
+# Default settings for check_postgres.pl
+# --------------------------------------
+
+disk_space_warn: 90%
+disk_space_critical: 95%
+
+txn_idle_warning: "15 minutes"
+txn_idle_critical: "30 minutes"
+
+txn_time_warning: "60 minutes"
+txn_time_critical: "90 minutes"
+
+# This is on by default, but is probably not actually required,
+# and depends on the presence of Time::HiRes, which, believe it
+# or not, is not universally installted.
+showtime: true
+
+# Defaults for log rotation in PGDATA
+# -----------------------------------
+#
+# Used to configure 'log_retention_cleanup.sh'
+log_cleanup: false
+log_retention: 180          # Remove logs older than 6 months
+log_compression_delay: 1    # Compress all but the last two
+log_type_ext: log           # Log extension: log or csv
+
+# Defaults for replication monitoring
+# -----------------------------------
+#
+# NOTE: the thresholds should usually be defined on a per-customer
+# (or per-server) basis
+ 
+# checks replication connection (master) and lag (standby)
+check_replication: false
+# Units in seconds
+replication_lag_warn: 300
+replication_lag_crit: 600
+
+# Adjust replication lag monitoring during expected period of extended lag
+# Format: $start_hour,$duration_mins,$warn_seconds,$crit_seconds
+# ($start_hour is local server time)
+
+peak_lag: ""
+
+# checks for stale replication slots (master)
+check_replication_slots: false
+
+# Defaults for repmgr monitoring
+# ------------------------------
+repmgr_cluster: ""
+check_repmgr_lag: false
+
+# Intervals for scripts which send in short intervals
+send_icinga_interval: "*/5"
+send_icinga_hostup_interval: "*"
+send_icinga_bloat_interval: "*/5"
+send_icinga_freeze_interval: "*/5"
+send_icinga_replication_interval: "*/5"
+
+# Sequences checks
+# -----------------
+#
+# By default this check includes all sequences, however on databases
+# with a large number of sequences, it may produce too much output
+# for nsca-ng to process. In this case the most important sequences
+# to check should be placed in 'check_sequences_only'.
+#
+# NOTE: check_postgres.pl currently seems to ignore schema-qualified
+# sequences, so 'check_sequences_only' should only contain schemas
+# located in the search path, e.g.:
+#
+# check_sequences_only: ["foo_seq","bar_seq"]
+
+check_sequences: true
+check_sequences_only: []
+
+# Other monitoring options
+# ------------------------
+
+# A customised check_postgres.pl file
+custom_check_postgres: ""
+
+check_bloat: true
+check_autovac_freeze: true
+
+check_big_postgres: false
+log_meminfo: false
+log_vmstat: false
+over_commit_test: false
+multixact_stats: false
+
+# PostgreSQL version check - normally we'll want that. Very occasionally
+# the check might not be coming from the usual cronjob (LastFM, cough
+# cough) so we'll need the option to add the server-side Icinga configuration
+# only and let the client check be handled individually.
+#
+# Note that check_postgres needs to be able to connect to the public
+# internet to be able to determine the lastest PostgreSQL version; some
+# clients don't allow that so we can't run this check on them.
+check_pg_version_client: true
+check_pg_version_server: true
+
+
+# Vacuum script options
+# ---------------------
+
+# Currently mainly for Yodle; we could customise the parameters
+# for more general usage
+avoid_anti_wraparound_vacuums: false
+
+# Configuration for anti-wraparund
+#avoid_anti_wraparound_vacuums_once_weekly: true
+aawv_mwm: "512MB"
+aawv_vcd: "10ms"
+
+# vars for the AAWV script to run on tables with size between 10GB
+# and 100GB, for 2 hours, weekends starting at 2am.
+#
+avoid_anti_wraparound_vacuums_large_tables: false
+aawv_large_tables_timeout: 7200
+aawv_large_tables_upper_bound: 100000000000
+aawv_large_tables_lower_bound: 10000000000
+aawv_large_tables_hour: 2
+aawv_large_tables_minute: 0
+aawv_large_tables_weekday: "0,6"
+
+# vars for the AAWV script to run on tables with size between 10MB
+# and 1GB, for 2 hours, weekdays starting at midnight.
+#
+avoid_anti_wraparound_vacuums_medium_tables: false
+aawv_medium_tables_timeout: 7200
+aawv_medium_tables_upper_bound: 1000000000
+aawv_medium_tables_lower_bound: 10000000
+aawv_medium_tables_hour: 0
+aawv_medium_tables_minute: 0
+aawv_medium_tables_weekday: "1-5"
+
+# vars for the AAWV script to run on tables with size smaller than 10MB
+# for 1 hour, weekdays starting at 3am.
+#
+avoid_anti_wraparound_vacuums_small_tables: false
+aawv_small_tables_timeout: 3600
+aawv_small_tables_upper_bound: 1000000000
+aawv_small_tables_lower_bound: 10000000
+aawv_small_tables_hour: 3
+aawv_small_tables_minute: 0
+aawv_small_tables_weekday: "1-5"
+
+
+# Contacts
+# --------
+
+# Empty list by default (unless specifically requested we don't
+# provide Icinga notifications to clients)
+contacts: []
+
+# Items to add to known_hosts files (usually only relevant if
+# a nsca gateway server is in use)
+known_hosts: []
+
+# Barman
+# ------
+
+barman_home: "/var/lib/barman"
+
+# which volumes to monitor for disk space
+barman_disks: []
+
+# Path to nagios check_disk command, if not provided
+# by a standard package
+barman_check_disk: ""
+
+barman_become: yes
+
+# pgpool
+# ------
+
+check_pgpool: false
+check_pgpool_options: ""
+
+# pg_bouncer
+# ----------
+
+check_pg_bouncer: false
+
+pg_bouncer_port: 5433
+pg_bouncer_user: postgres
+
+# Number of backends below maximum
+pg_bouncer_backends_w: -10
+pg_bouncer_backends_c: -5
+
+# Clients waiting to connect:
+pg_bouncer_cl_waiting_w: 5
+pg_bouncer_cl_waiting_c: 15
+
+# Maximum connection wait time:
+pg_bouncer_maxwait_w: 5
+pg_bouncer_maxwait_c: 15

@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# TODO: make psql calls configurable; currently assume standard
+# values
+
+# Set up a pidfile to ensure multiple instances of the script
+# are not running at the same time
+PIDFILE=~/run/check_big_postgres.pid
+
+if [ -e $PIDFILE ]; then
+  PID=`cat $PIDFILE`
+  if kill -0 &>1 > /dev/null $PID; then
+    echo "Already running"
+    exit 1
+  fi
+
+  rm -f $PIDFILE
+fi
+
+echo $$ > $PIDFILE
+
+# Loop on lines from ps output, not each word
+IFS="
+"
+
+# Where we do the logging
+LOG=~/logs/postgres-OOM.`date -I`.log
+
+# We need the hostname for nsca
+{% if system_hostname|bool == true %}
+HOSTNAME=`hostname`
+{% else %}
+HOSTNAME="{{inventory_hostname}}"
+{% endif %}
+
+# We need to know at the end of the script if we caught an issue
+# We will use the var, set to 0 and changed in case something is
+# found inside the for loop
+problem=0
+pids=''
+
+for i in {1..12}
+do
+    for a in `ps axuw | grep ^[p]ostgres | tr -s ' ' | cut -d' ' -f2,5`
+    do
+	if [ `echo $a | cut -d' '  -f2` -gt 20000000 ]; then
+	    echo `date "+%Y-%m-%d %H:%M:%S"` $a >> $LOG
+	    pid=`echo $a | cut -d' '  -f1`
+	    if [ -e /proc/${pid}/status ]; then
+		echo "Output from /proc/${pid}/status"  >> $LOG
+		cat /proc/${pid}/status >> $LOG
+		echo >> $LOG
+		echo "pg_stat_activity for PID ${pid}" >> $LOG
+		sudo -u postgres psql -x -t -c "SELECT * FROM pg_stat_activity WHERE pid = ${pid}" >> $LOG
+		problem=1
+		if [ -z `echo $pids | egrep $pid` ]; then
+		    pids="$pids - $pid"
+		fi
+	    else
+		echo "Process ${pid} disapeared "  >> $LOG
+	    fi
+	fi
+    done
+    sleep 5
+done
+
+# Chop off the last '-' out of $pids
+pids=${pids%' - '}
+
+if [ `echo $problem ` -ne 0 ]; then
+    # We need to send the nsca message to hobby to alert the team
+    NSCA_MSG=$(
+	echo -e "POSTGRES_MEMORY CRITICAL: check PIDs ${pids} at ${HOSTNAME}"
+    )
+else
+    # Everything is fine
+    NSCA_MSG=$(
+        echo -e "POSTGRES_MEMORY OK: No postgres process with large amounts of memory on ${HOSTNAME}"
+    )
+fi
+
+
+{# NOTE: we should include '_send_nsca.sh.j2' here, but for reasons #}
+{# unknown this causes the script to fail with the error #}
+{# "No such file or directory" when trying to execute send_nsca #}
+
+# 2. Send output to specified icinga hosts
+SEND_NSCA="/usr/sbin/send_nsca"
+
+echo "${NSCA_MSG}" | \
+    sed -e "s/^/${HOSTNAME}\t/" \
+        -e 's/^\([^: ]*\) /\1\t/' \
+        -e 's/OK: /0\t/' -e 's/WARNING: /1\t/' \
+        -e 's/CRITICAL: /2\t/' -e 's/UNKNOWN: /3\t/' \
+   | tr '\n' '\027' \
+   | $SEND_NSCA

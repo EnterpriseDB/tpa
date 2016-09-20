@@ -1,0 +1,34 @@
+---
+
+# roles/client/tasks/add-gateway.yml
+#
+# Set up gateway server for nsca-ng
+#
+# Currently basically all we need to to is add a standard authorized
+# key and the send_nsca.cfg file
+
+- name: Add authorized_keys entry for id_2ndq_nsca_gateway.pub
+  authorized_key: user="{{nsca_gateway_user}}" path="{{authorized_keys_file}}" key="{{ lookup('file', 'ssh/id_2ndq_nsca_gateway.pub') }}"
+
+- name: Ensure ~/conf directory exists
+  file: path=~/conf state=directory
+
+# send_nsca.cfg
+- name: Add nsca-ng client configuration file
+  template: src=conf/send_nsca.cfg.j2 dest=~/conf/send_nsca.cfg
+
+- name: Ensure ~/bin directory exists
+  file: path={{bin_dir}} state=directory mode=0755
+  when: (bin_dir == "~/bin")
+
+# send_icinga_hostup.sh
+- name: Add send_icinga_hostup.sh
+  template: src=bin/send_icinga_hostup.sh.j2 dest=~/bin/send_icinga_hostup.sh mode=0755
+
+- name: Add send_icinga_hostup.sh as cronjob (without logging)
+  cron: name="send_icinga_hostup" minute="*" job="~/bin/send_icinga_hostup.sh"
+  when: (add_cron|bool == true) and (send_icinga_logging|bool == false)
+
+- name: Add send_icinga_hostup.sh as cronjob (with logging)
+  cron: name="send_icinga_hostup" minute="*" job="~/bin/send_icinga_hostup.sh >> ~/logs/send_icinga_hostup.`date -I`.log 2>&1"
+  when: (add_cron|bool == true) and (send_icinga_logging|bool == true)

@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# {{ansible_managed}}
+{% if system_hostname|bool == true %}
+HOSTNAME=`hostname`
+{% else %}
+HOSTNAME="{{inventory_hostname}}"
+{% endif %}
+
+# 1. Run checks and collect output in $NSCA_MSG
+NSCA_MSG=$(
+    echo -e "OK: ${HOSTNAME} is up"
+)
+
+# 2. Send output to specified icinga hosts
+
+{% include '_send_nsca.sh.j2' -%}

@@ -1,0 +1,17 @@
+{% import '_send_icinga_config.j2' as config with context -%}
+{% include '_send_icinga_init.sh.j2' -%}
+
+NSCA_MSG=$(
+{% if (replication_type == 'standby' or replication_type == 'cascading') %}
+   {{config.sudo}} ~/bin/check_replication.pl $PG_HOST $PG_PORT --check=lag --warning="{{replication_lag_warn}}" --critical="{{replication_lag_crit}}"{% if (peak_lag != '') %} --peak_lag={{peak_lag|join(',')}}{% endif -%}
+{% endif -%}
+{% if (replication_type == 'master' or replication_type == 'cascading') %}
+   {{config.sudo}} ~/bin/check_replication.pl $PG_HOST $PG_PORT --check=connection {% for server_name in groups['database-server'] -%}
+{% if(hostvars[server_name].upstream|default('') == inventory_hostname) -%} --standby {{ server_name }},{{ hostvars[server_name].client_addr }} {% endif -%}
+{% endfor -%}
+{% endif -%}
+)
+
+# 2. Send output to specified icinga hosts
+
+{% include '_send_nsca.sh.j2' %}

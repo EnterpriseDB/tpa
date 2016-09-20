@@ -1,0 +1,128 @@
+#!/usr/bin/env perl
+#
+# Wrapper script around check_postgres.pl which performs the same
+# check over multiple databases and concatenates the output into
+# a single service notification; the level code is set to the
+# most severe and output ordered by severity.
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+
+our $secondq_home = "{{ansible_user}}";
+
+our %exit_codes = (
+    'OK'       => 1,
+    'WARNING'  => 2,
+    'CRITICAL' => 3,
+    'UNKNOWN'  => 4,
+);
+
+our %options = (
+    'host'     => undef,
+    'port'     => 5432,
+    'showtime' => undef,
+    'action'   => undef,
+    'timeout'  => undef,
+    'critical' => undef,
+    'warning'  => undef,
+);
+
+our $dblist = undef;
+
+our %option_defs = (
+    'dblist=s'   => \$dblist,
+    'action=s'   => \$options{'action'},
+    'host:s'     => \$options{'host'},
+    'port:i'     => \$options{'port'},
+    'showtime:i' => \$options{'showtime'},
+    'timeout:s'  => \$options{'timeout'},
+    'critical:s' => \$options{'critical'},
+    'warning:s'  => \$options{'warning'},
+);
+
+GetOptions(%option_defs);
+
+if(!defined($dblist)) {
+    die qq|Please provide --dblist\n|;
+}
+
+if(!defined($options{'action'})) {
+    die qq|Please provide --action\n|;
+}
+
+my @dbs = split /,/, $dblist;
+
+my @cp_params;
+
+foreach my $option (keys %options) {
+    next unless defined($options{$option});
+
+    push @cp_params, sprintf(
+        q|--%s="%s"|,
+        $option,
+        $options{$option},
+    );
+}
+
+
+my $cp_params = join(' ', @cp_params);
+
+# Collate output by severity level
+my %output = (
+    1 => [],
+    2 => [],
+    3 => [],
+    4 => [],
+);
+
+my $check_type = undef;
+my $min_exit_code_level = 1;
+
+foreach my $database (@dbs) {
+    my $cp_cmd = sprintf(
+        q|~%s/bin/check_postgres.pl --db="%s" %s|,
+        $secondq_home,
+        $database,
+        $cp_params,
+    );
+
+    my $cp_outp = `$cp_cmd`;
+
+    next unless $cp_outp =~ m|^([\w_]+?)\s+(\w+?):\s+(.*)$|;
+
+    $check_type //= $1;
+    my $exit_code = $2;
+    my $outp = $3;
+
+    my $exit_code_level = $exit_codes{$exit_code};
+    if($exit_code_level > $min_exit_code_level) {
+        $min_exit_code_level = $exit_codes{$exit_code};
+    }
+
+    push @{$output{$exit_code_level}}, $outp;
+}
+
+my $final_exit_code = undef;
+foreach my $exit_code(keys %exit_codes) {
+    next unless $exit_codes{$exit_code} == $min_exit_code_level;
+
+    $final_exit_code = $exit_code;
+    last;
+}
+
+my @outp;
+foreach my $exit_code_level (reverse sort keys %output) {
+    foreach my $outp (@{$output{$exit_code_level}}) {
+        push @outp, $outp;
+    }
+}
+
+printf(
+    qq|%s %s: %s\n|,
+    $check_type,
+    $final_exit_code,
+    join(' | ', @outp),
+);
+

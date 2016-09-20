@@ -1,0 +1,12 @@
+{% import '_send_icinga_config.j2' as config with context -%}
+{% include '_send_icinga_init.sh.j2' -%}
+
+# 1. Run checks and collect output in $NSCA_MSG
+
+NSCA_MSG=$(
+    {{config.sudo}} ~/bin/check_postgres.pl $PG_PORT $PG_HOST $SHOWTIME --action autovac_freeze --include {{database_list|join(',')}}
+)
+
+# 2. Send output to specified icinga hosts
+
+{% include '_send_nsca.sh.j2' -%}

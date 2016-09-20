@@ -1,0 +1,411 @@
+---
+
+# roles/client/tasks/add-monitoring.yml
+#
+# Set up monitoring scripts on client server
+
+
+# Check that standard directories exist
+# -------------------------------------
+
+- name: Ensure ~/conf directory exists
+  file: path=~/conf state=directory
+  when: (homedir_no_write|bool == false)
+
+- name: Ensure ~/bin directory exists
+  file: path={{bin_dir}} state=directory mode=0755
+  when: (homedir_no_write|bool == false) and (bin_dir == "~/bin")
+
+- name: Ensure ~/bin is symlink to local directory
+  file: path="~/bin" state="link" src="{{bin_dir}}"
+  when: (homedir_no_write|bool == false) and (bin_dir != "~/bin")
+
+- name: Ensure ~/run directory exists
+  file: path=~/run state=directory
+  when: (homedir_no_write|bool == false)
+
+- name: Ensure ~/logs directory exists
+  file: path=~/logs state=directory
+  when: (homedir_no_write|bool == false)
+
+- name: Ensure 2ndq home directory is readable for postgres
+  file: path=~ state=directory mode=0755
+  when: (homedir_no_write|bool == false)
+
+
+# Add some 2ndq environment customisation
+# ---------------------------------------
+
+- name: Ensure .bashrc exists
+  file: dest="~/.bashrc" state=touch
+  changed_when: false
+
+- name: Check if .bashrc sources .bash_aliases
+  command: awk "/\. ~\/\.bash_aliases/" ~/.bashrc
+  register: bashalias
+  changed_when: false
+
+- name: Add custom .bash_aliases file
+  template: src=env/bash_aliases.j2 dest=~/.bash_aliases mode=0755
+  when: (homedir_no_write|bool == false) and bashalias.stdout | match(".*?bash_aliases.*")
+
+- name: Check if .bashrc includes ~/.bashrc.d
+  command: awk "/\.bashrc\.d/" ~/.bashrc
+  register: bashrc_d
+  changed_when: false
+
+- name: Add custom 2ndq bash include file
+  template: src=env/bash_aliases.j2 dest=~/.bashrc.d/2ndq mode=0755
+  when: (homedir_no_write|bool == false) and (bashrc_d.stdout | match(".*?bashrc.*"))
+
+
+# Install nsca package if required
+# --------------------------------
+
+- name: Install nsca-ng client
+  include: install-nsca-client.yml
+
+# Configuration
+# -------------
+
+# send_nsca.cfg
+- name: Add nsca-ng client configuration file
+  template: src=conf/send_nsca.cfg.j2 dest=~/conf/send_nsca.cfg
+  when: (homedir_no_write|bool == false)
+
+# SSH keys for nsca-ng gateway, if required
+
+- name: Ensure ~/.ssh exists with correct permissions
+  file: path="~/.ssh" state=directory mode=0700
+  when: (nsca_gateway|length)
+
+- name: Install id_2ndq_nsca_gateway
+  copy: src="ssh/id_2ndq_nsca_gateway" dest="~/.ssh/id_2ndq_nsca_gateway" mode=0600
+  when: (nsca_gateway|length)
+
+- name: Install id_2ndq_nsca_gateway.pub
+  copy: src="ssh/id_2ndq_nsca_gateway.pub" dest="~/.ssh/id_2ndq_nsca_gateway.pub" mode=0644
+  when: (nsca_gateway|length)
+
+# known_hosts
+
+- name: Ensure known_hosts exists
+  file:  dest="~/.ssh/known_hosts" state=touch mode=0644
+  when: (homedir_no_write|bool == false) and (known_hosts|length)
+  changed_when: false
+
+# TODO: use Ansible's known_hosts module
+- name: Install known_hosts
+  lineinfile: dest="~/.ssh/known_hosts" line="{{item}}"
+  with_items: "{{known_hosts}}"
+  when: (homedir_no_write|bool == false) and (known_hosts|length)
+
+# Install monitoring scripts and cronjobs
+# ---------------------------------------
+
+# General log cleanup
+- name: Add log directory cleanup cronjob
+  cron: name="Cleanup logs directory" hour="3" minute="0" job="find ~/logs/ -type f -mtime +45 -exec rm -f {} \;"
+  when: (add_cron|bool == true)
+
+# Standard check_postgres.pl
+- name: Install check_postgres.pl
+  copy: src=bin/check_postgres.pl dest=~/bin/check_postgres.pl mode=0755
+  when: (homedir_no_write|bool == false) and (custom_check_postgres|length == 0)
+
+# Customised check_postgres.pl
+- name: Add customized check_postgres.pl
+  copy: src=bin/{{custom_check_postgres}} dest=~/bin/check_postgres.pl mode=0755
+  when: (homedir_no_write|bool == false) and (custom_check_postgres|length > 0)
+
+# check_postgres_wrapper.pl
+- name: Install check_postgres_wrapper.pl
+  template: src=bin/check_postgres_wrapper.pl.j2 dest=~/bin/check_postgres_wrapper.pl mode=0755
+  when: (homedir_no_write|bool == false)
+
+# check-pgpool.pl
+- name: Install check-pgpool.pl
+  copy: src=bin/check-pgpool.pl dest=~/bin/check-pgpool.pl mode=0755
+  when: (homedir_no_write|bool == false) and (check_pgpool|bool == true)
+
+# check_replication.pl
+- name: Install check_replication.pl
+  copy: src=bin/check_replication.pl dest=~/bin/check_replication.pl mode=0755
+  when: (homedir_no_write|bool == false) and (check_replication|bool == true)
+
+# send_icinga.sh
+- name: Add send_icinga.sh
+  template: src=bin/send_icinga.sh.j2 dest=~/bin/send_icinga.sh mode=0755
+  when: (homedir_no_write|bool == false)
+
+- name: Add send_icinga.sh as cronjob (without logging)
+  cron: name="send_icinga" minute="{{send_icinga_interval}}" job="~/bin/send_icinga.sh"
+  when: (add_cron|bool == true) and (send_icinga_logging|bool == false)
+
+- name: Add send_icinga.sh as cronjob (with logging)
+  cron: name="send_icinga" minute="{{send_icinga_interval}}" job="~/bin/send_icinga.sh >> ~/logs/send_icinga.`{{log_date_command}}`.log 2>&1"
+  when: (add_cron|bool == true) and (send_icinga_logging|bool == true)
+
+# send_icinga_hostup.sh
+- name: Add send_icinga_hostup.sh
+  template: src=bin/send_icinga_hostup.sh.j2 dest=~/bin/send_icinga_hostup.sh mode=0755
+  when: (homedir_no_write|bool == false)
+
+- name: Add send_icinga_hostup.sh as cronjob (without logging)
+  cron: name="send_icinga_hostup" minute="{{send_icinga_hostup_interval}}" job="~/bin/send_icinga_hostup.sh"
+  when: (add_cron|bool == true) and (send_icinga_logging|bool == false)
+
+- name: Add send_icinga_hostup.sh as cronjob (with logging)
+  cron: name="send_icinga_hostup" minute="{{send_icinga_hostup_interval}}" job="~/bin/send_icinga_hostup.sh >> ~/logs/send_icinga_hostup.`{{log_date_command}}`.log 2>&1"
+  when: (add_cron|bool == true) and (send_icinga_logging|bool == true)
+
+# send_icinga_bloat.sh
+- name: Add send_icinga_bloat.sh
+  template: src=bin/send_icinga_bloat.sh.j2 dest=~/bin/send_icinga_bloat.sh mode=0755
+  when: (homedir_no_write|bool == false) and (check_bloat|bool == true)
+
+- name: Add send_icinga_bloat.sh as cronjob (without logging)
+  cron: name="send_icinga_bloat" minute="{{send_icinga_bloat_interval}}" job="~/bin/send_icinga_bloat.sh"
+  when: (add_cron|bool == true) and (check_bloat|bool == true) and (send_icinga_logging|bool == false)
+
+- name: Add send_icinga_bloat.sh as cronjob (with logging)
+  cron: name="send_icinga_bloat" minute="{{send_icinga_bloat_interval}}" job="~/bin/send_icinga_bloat.sh >> ~/logs/send_icinga_bloat.`{{log_date_command}}`.log 2>&1"
+  when: (add_cron|bool == true) and (check_bloat|bool == true) and (send_icinga_logging|bool == true)
+
+- name: Remove send_icinga_bloat.sh cronjob
+  cron: name="send_icinga_bloat" state="absent"
+  when: (add_cron|bool == true) and (check_bloat|bool == false)
+
+# send_icinga_freeze.sh
+- name: Add send_icinga_freeze.sh
+  template: src=bin/send_icinga_freeze.sh.j2 dest=~/bin/send_icinga_freeze.sh mode=0755
+  when: (homedir_no_write|bool == false) and (check_autovac_freeze|bool == true)
+
+- name: Add send_icinga_freeze.sh as cronjob (without logging)
+  cron: name="send_icinga_freeze" minute="{{send_icinga_freeze_interval}}" job="~/bin/send_icinga_freeze.sh"
+  when: (add_cron|bool == true) and (check_autovac_freeze|bool == true) and (replication_type != "standby") and (send_icinga_logging|bool == false)
+
+
+- name: Add send_icinga_freeze.sh as cronjob (with logging)
+  cron: name="send_icinga_freeze" minute="{{send_icinga_freeze_interval}}" job="~/bin/send_icinga_freeze.sh >> ~/logs/send_icinga_freeze.`{{log_date_command}}`.log 2>&1"
+  when: (add_cron|bool == true) and (check_autovac_freeze|bool == true) and (replication_type != "standby") and (send_icinga_logging|bool == true)
+
+- name: Remove send_icinga_freeze.sh cronjob
+  cron: name="send_icinga_freeze" state="absent"
+  when: (add_cron|bool == true) and (check_autovac_freeze|bool == false)
+
+
+# send_icinga_replication.sh
+- name: Add send_icinga_replication.sh
+  template: src=bin/send_icinga_replication.sh.j2 dest=~/bin/send_icinga_replication.sh mode=0755
+  when: (homedir_no_write|bool == false) and (check_replication|bool == true) and (replication_type != 'none')
+
+- name: Add send_icinga_replication.sh as cronjob (without logging)
+  cron: name="send_icinga_replication" minute="{{send_icinga_replication_interval}}" job="~/bin/send_icinga_replication.sh"
+  when: (add_cron|bool == true) and (check_replication|bool == true) and (send_icinga_logging|bool == false) and (replication_type != 'none')
+
+- name: Add send_icinga_replication.sh as cronjob (with logging)
+  cron: name="send_icinga_replication" minute="{{send_icinga_replication_interval}}" job="~/bin/send_icinga_replication.sh >> ~/logs/send_icinga_replication.`{{log_date_command}}`.log 2>&1"
+  when: (add_cron|bool == true) and (check_replication|bool == true) and (send_icinga_logging|bool == true) and (replication_type != 'none')
+
+- name: Remove send_icinga_replication.sh cronjob
+  cron: name="send_icinga_replication" state="absent"
+  when: (add_cron|bool == true) and (check_replication|bool == false)
+
+
+# send_icinga_pg_version.sh
+- name: Add send_icinga_pg_version.sh
+  template: src=bin/send_icinga_pg_version.sh.j2 dest=~/bin/send_icinga_pg_version.sh mode=0755
+  when: (homedir_no_write|bool == false) and (check_pg_version_client|bool == true)
+
+- name: Add send_icinga_pg_version.sh as cronjob (without logging)
+  cron: name="send_icinga_pg_version" hour="7,19" minute="30" job="~/bin/send_icinga_pg_version.sh"
+  when: (add_cron|bool == true) and (check_pg_version_client|bool == true) and (send_icinga_logging|bool == false)
+
+- name: Add send_icinga_pg_version.sh as cronjob (with logging)
+  cron: name="send_icinga_pg_version" hour="7,19" minute="30" job="~/bin/send_icinga_pg_version.sh >> ~/logs/send_icinga_pg_version.`{{log_date_command}}`.log 2>&1"
+  when: (add_cron|bool == true) and (check_pg_version_client|bool == true) and (send_icinga_logging|bool == true)
+
+- name: Remove send_icinga_pg_version.sh cronjob
+  cron: name="send_icinga_pg_version" state="absent"
+  when: (add_cron|bool == true) and (check_pg_version_client|bool == false)
+
+# send_icinga_repmgr.sh
+- name: Add check_repmgr.py
+  copy: src=bin/check_repmgr.py dest=~/bin/check_repmgr.py mode=0755
+  when: (homedir_no_write|bool == false) and (check_repmgr_lag|bool == true) and (replication_type == "master")
+
+- name: Add send_icinga_repmgr.sh
+  template: src=bin/send_icinga_repmgr.sh.j2 dest=~/bin/send_icinga_repmgr.sh mode=0755
+  when: (homedir_no_write|bool == false) and (check_repmgr_lag|bool == true) and (replication_type == "master")
+
+- name: Add send_icinga_repmgr.sh as cronjob (without logging)
+  cron: name="send_icinga_repmgr" minute="*/5" job="~/bin/send_icinga_repmgr.sh"
+  when: (add_cron|bool == true) and (check_repmgr_lag|bool == true) and (replication_type == "master")
+
+- name: Remove send_icinga_repmgr.sh cronjob
+  cron: name="send_icinga_repmgr" state="absent"
+  when: (add_cron|bool == true) and (check_repmgr_lag|bool == false)
+
+
+# send_adhoc.sh
+- name: Add adhoc script for use on servers without crontab access
+  template: src=bin/send_adhoc.sh.j2 dest=~/bin/send_adhoc.sh mode=0755
+  when: (homedir_no_write|bool == false) and (placeholder_cron_script|bool == true)
+
+
+# Add log retention in $PGDATA/pg_log/
+- name: Ensure postgres ~/bin directory exists
+  file: path=~/bin state=directory
+  become: yes
+  become_user: postgres
+  when: log_cleanup
+
+- name: Add log_retention_cleanup.sh
+  template: src=bin/log_retention_cleanup.sh.j2 dest=~/bin/log_retention_cleanup.sh mode=0755
+  become: yes
+  become_user: postgres
+  when: log_cleanup
+
+- name: Add log_retention_cleanup.sh as cronjob
+  cron: name="log_retention_cleanup" minute="0" hour="0" job="~/bin/log_retention_cleanup.sh"
+  become: yes
+  become_user: postgres
+  when: log_cleanup
+
+
+# MultiXact stats gathering
+- name: Add script to gather MultiXact stats
+  copy: src="bin/stats_collect_multixact.sh" dest="~/bin/stats_collect_multixact.sh" mode=0755
+  when: (multixact_stats|bool == true) and (replication_type == "master")
+
+# TODO: fix -D path - currently Yodle-specific
+- name: Add stats_2ndq.sh as cronjob
+  cron: name="stats_collect_multixact" job="~/bin/stats_collect_multixact.sh -d {{database_list|first}} -D /var/lib/postgresql/9.3/main -b /usr/lib/postgresql/9.3/bin/ -s {{postgres_user}}"
+  when: (multixact_stats|bool == true) and (replication_type == "master")
+
+# Script to prevent anti-wraparound vacuums
+# -----------------------------------------
+
+- name: Install avoid_anti_wraparound_vacuums.sh
+  copy: src=bin/avoid_anti_wraparound_vacuums.sh dest=~/bin/avoid_anti_wraparound_vacuums.sh mode=0755
+  when: (homedir_no_write|bool == false) and (avoid_anti_wraparound_vacuums|bool == true)
+
+# We also need to add the configuration file for AAWV
+- name: Install avoid_anti_wraparound_vacuums vacuum configuration file for large files
+  template: src=conf/aawv.conf.j2 dest=~/conf/aawv.conf mode=0644
+  when: (homedir_no_write|bool == false) and (avoid_anti_wraparound_vacuums|bool == true)
+
+#
+# Starting fresh with the wraparound script.
+#
+# What's above will shortly be removed
+#
+# avoid_anti_wraparound_vacuums.sh - on very large tables larger
+# (by default larger than 20GB)
+- name: Execute avoid_anti_wraparound_vacuums.sh on large tables
+  cron:
+    name: "avoid_anti_wraparound_vacuums on large tables"
+    minute: "{{aawv_large_tables_minute}}"
+    hour: "{{aawv_large_tables_hour}}"
+    weekday: "{{aawv_large_tables_weekday}}"
+    job: "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}} -t {{aawv_large_tables_timeout}} \
+    	       -S {{aawv_large_tables_upper_bound}} -s {{aawv_large_tables_lower_bound}} -c ~/conf/aawv.conf \
+	       > ~/logs/anti_wraparound_`hostname`_`date \'+\\%F_\\%H\\%M\\%S\'`.log 2>&1"
+  when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_large_tables|bool == true) and (replication_type != "standby")
+
+- name: Ensure large table avoid_anti_wraparound_vacuums.sh cronjob is absent on standbys
+  cron:
+    name: "avoid_anti_wraparound_vacuums on large tables"
+    state: absent
+  when: (add_cron|bool == true) and (replication_type == "standby")
+
+- name: Execute avoid_anti_wraparound_vacuums.sh on medium tables
+  cron:
+    name: "avoid_anti_wraparound_vacuums on medium tables"
+    minute: "{{aawv_medium_tables_minute}}"
+    hour: "{{aawv_medium_tables_hour}}"
+    weekday: "{{aawv_medium_tables_weekday}}"
+    job: "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}} -t {{aawv_medium_tables_timeout}} \
+    	       -S {{aawv_medium_tables_upper_bound}} -s {{aawv_medium_tables_lower_bound}} -c ~/conf/aawv.conf \
+	       > ~/logs/anti_wraparound_`hostname`_`date \'+\\%F_\\%H\\%M\\%S\'`.log 2>&1"
+  when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_medium_tables|bool == true) and (replication_type != "standby")
+
+- name: Ensure large table avoid_anti_wraparound_vacuums.sh cronjob is absent on standbys
+  cron:
+    name: "avoid_anti_wraparound_vacuums on medium tables"
+    state: absent
+  when: (add_cron|bool == true) and (replication_type == "standby")
+
+- name: Execute avoid_anti_wraparound_vacuums.sh on small tables
+  cron:
+    name: "avoid_anti_wraparound_vacuums on small tables"
+    minute: "{{aawv_small_tables_minute}}"
+    hour: "{{aawv_small_tables_hour}}"
+    weekday: "{{aawv_small_tables_weekday}}"
+    job: "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}} -t {{aawv_small_tables_timeout}} \
+    	       -S {{aawv_small_tables_upper_bound}} -c ~/conf/aawv.conf > ~/logs/anti_wraparound_`hostname`_`date \'+\\%F_\\%H\\%M\\%S\'`.log 2>&1"
+  when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_small_tables|bool == true) and (replication_type != "standby")
+
+- name: Ensure large table avoid_anti_wraparound_vacuums.sh cronjob is absent on standbys
+  cron:
+    name: "avoid_anti_wraparound_vacuums on small tables"
+    state: absent
+  when: (add_cron|bool == true) and (replication_type == "standby")
+
+
+# Script to check for excessive memory usage
+# ------------------------------------------
+
+- name: Add check_big_postgres.sh
+  template: src=bin/check_big_postgres.sh.j2 dest=~/bin/check_big_postgres.sh mode=0755
+  when: (homedir_no_write|bool == false) and (check_big_postgres|bool == true)
+
+- name: Add check_big_postgres.sh (without logging)
+  cron: name="check_big_postgres.sh" minute="*/1" job="~/bin/check_big_postgres.sh"
+  when: (add_cron|bool == true) and (check_big_postgres|bool == true) and (send_icinga_logging|bool == false)
+
+- name: Add check_big_postgres.sh (with logging)
+  cron: name="check_big_postgres.sh" minute="*/1" job="~/bin/check_big_postgres.sh >> ~/logs/cron.`{{log_date_command}}`.log 2>&1"
+  when: (add_cron|bool == true) and (check_big_postgres|bool == true) and (send_icinga_logging|bool == true)
+
+
+# Script to check for memory overcommit
+# -------------------------------------
+
+- name: Add over_commit_test.sh
+  template: src=bin/over_commit_test.sh.j2 dest=~/bin/over_commit_test.sh mode=0755
+  when: (homedir_no_write|bool == false) and (over_commit_test|bool == true)
+
+- name: Add cronjob for over_commit_test.sh (without logging)
+  cron: name="over_commit_test.sh" minute="*/1" job="~/bin/over_commit_test.sh"
+  when: (add_cron|bool == true) and (over_commit_test|bool == true) and (send_icinga_logging|bool == false)
+
+- name: Add cronjob for over_commit_test.sh (with logging)
+  cron: name="over_commit_test.sh" minute="*/1" job="~/bin/over_commit_test.sh  >> ~/logs/cron.`{{log_date_command}}`.log 2>&1"
+  when: (add_cron|bool == true) and (over_commit_test|bool == true) and (send_icinga_logging|bool == true)
+
+
+
+# Script to log memory statistics
+# --------------------------------
+
+- name: Install log-meminfo.sh
+  copy: src=bin/log-meminfo.sh dest=~/bin/log-meminfo.sh mode=0755
+  when: (homedir_no_write|bool == false) and (log_meminfo|bool == true)
+
+- name: Add cronjob for log-meminfo.sh
+  cron: name="log-meminfo.sh" minute="*/1" job="~/bin/log-meminfo.sh >> ~/logs/cron.`{{log_date_command}}`.log 2>&1"
+  when: (add_cron|bool == true) and (log_meminfo|bool == true)
+
+
+# Script to log vmstat output
+# ---------------------------
+
+- name: Install log-vmstat.sh
+  copy: src=bin/log-vmstat.sh dest=~/bin/log-vmstat.sh mode=0755
+  when: (homedir_no_write|bool == false) and (log_vmstat|bool == true)
+
+- name: Add cronjob for log-vmstat.sh
+  cron: name="log-vmstat.sh" minute="*/1" job="~/bin/log-vmstat.sh >> ~/logs/cron.`{{log_date_command}}`.log 2>&1"
+  when: (add_cron|bool == true) and (log_vmstat|bool == true)
