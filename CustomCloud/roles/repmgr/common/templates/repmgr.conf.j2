@@ -1,12 +1,12 @@
 cluster={{ cluster_name|lower }}
-node={{ node_id }}
-node_name=node{{ node_id }}
-conninfo='host={{hostvars[inventory_hostname]['vpn_address']}} user=repmgr dbname=repmgr'
+node={{ node }}
+node_name=node{{ node }}
+conninfo='host={{ ip_address }} user=repmgr dbname=repmgr'
 master_response_timeout=60
 reconnect_attempts=6
 reconnect_interval=10
 failover=automatic
-logfile='/var/log/postgresql/repmgrd.log'
-pg_bindir={{pgbindir}}
+pg_bindir={{ postgres_bin_dir }}
 promote_command='/etc/repmgr/promote_command.sh'
 follow_command='/etc/repmgr/follow_command.sh'
+logfile='/var/log/postgresql/repmgrd.log'
