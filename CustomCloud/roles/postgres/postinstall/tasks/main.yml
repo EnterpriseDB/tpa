@@ -4,6 +4,13 @@
 # tasks, we perform any followup actions that require Postgres to be
 # running.
 
+# Create superusers
+
+- include: create-superuser.yml
+  vars:
+    name: "{{ item }}"
+  with_items: "{{ _superusers }}"
+
 # We restart Postgres unconditionally for now. In the near future we
 # should use a notifier mechanism so that we restart only when the
 # Postgres configuration has changed.
@@ -25,36 +32,6 @@
 # There's more to this than just creating the extensions. We need to
 # change shared_preload_libraries and set up the pg_stat_statements
 # configuration, for example.
-
-- include_vars: "{{ playbook_dir }}/vault/barman_password.yml"
-
-- name: Create the barman user
-  postgresql_user:
-    name: barman
-    password: "{{ barman_password }}"
-    role_attr_flags: superuser
-  become_user: postgres
-  become: yes
-
-- include_vars: "{{ playbook_dir }}/vault/streaming_barman_password.yml"
-
-- name: Create the streaming_barman user
-  postgresql_user:
-    name: streaming_barman
-    password: "{{ streaming_barman_password }}"
-    role_attr_flags: superuser
-  become_user: postgres
-  become: yes
-
-- include_vars: "{{ playbook_dir }}/vault/repmgr_password.yml"
-
-- name: Create the repmgr user
-  postgresql_user:
-    name: repmgr
-    password: "{{ repmgr_password }}"
-    role_attr_flags: superuser
-  become_user: postgres
-  become: yes
 
 # Re-activate the per-client Barman backups on the server and force a
 # backup. TODO: This should use _backup_name, not inventory_hostname,

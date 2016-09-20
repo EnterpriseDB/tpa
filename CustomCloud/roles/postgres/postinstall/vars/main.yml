@@ -1,0 +1,5 @@
+---
+
+_postgres_extensions: "{{ postgres_extensions|default(default_postgres_extensions) }}"
+
+_superusers: "{{ superusers|default(default_superusers) }}"

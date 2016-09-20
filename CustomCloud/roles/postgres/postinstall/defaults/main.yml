@@ -2,3 +2,9 @@
 
 default_postgres_extensions:
   - pg_stat_statements
+
+default_superusers:
+  - postgres
+  - barman
+  - streaming_barman
+  - repmgr
