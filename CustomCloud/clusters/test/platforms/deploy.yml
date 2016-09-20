@@ -76,6 +76,10 @@
         'postgres' in role
       tags: [sys, ssh]
 
+    # Set up repmgr
+    - role: repmgr
+      tags: repmgr
+
     # Set up Barman backups.
     - role: barman
       tags: barman
