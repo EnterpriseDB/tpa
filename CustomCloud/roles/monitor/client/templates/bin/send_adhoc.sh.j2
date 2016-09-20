@@ -21,7 +21,7 @@
 
 {% if client_identifier == "lastfm" %}
 
-{% if replication_type != "standby" %}
+{% if 'replica' not in role %}
 # send_icinga_freeze
 # ------------------
 {% include 'send_icinga_freeze.sh.j2' %}

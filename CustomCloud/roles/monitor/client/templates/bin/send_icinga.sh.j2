@@ -9,11 +9,11 @@ NSCA_MSG=$(
     {{config.sudo}} ~/bin/check_postgres.pl $PG_HOST $PG_PORT $SHOWTIME --action prepared_txns --critical 1
     ({{config.sudo}} ~/bin/check_postgres.pl $PG_HOST $PG_PORT $SHOWTIME --action txn_idle --db postgres --warning='{{txn_idle_warning}}' --critical='{{txn_idle_critical}}' | tr '\n' ' ' | echo $(</dev/stdin))
     ({{config.sudo}} ~/bin/check_postgres.pl $PG_HOST $PG_PORT $SHOWTIME --action txn_time --db postgres --warning='{{txn_time_warning}}' --critical='{{txn_time_critical}}' --excludeapp='pg_dump' | tr '\n' ' ' | echo $(</dev/stdin))
-{% if replication_type != "standby" %}
+{% if 'replica' not in role %}
     ({{config.sudo}} ~/bin/check_postgres.pl $PG_HOST $PG_PORT $SHOWTIME --action txn_wraparound --db postgres | tr '\n' ' ' | echo $(</dev/stdin))
 {% endif %}
 
-{% if check_sequences|bool == true and replication_type != "standby" %}
+{% if check_sequences|bool == true and 'replica' not in role %}
     {{config.sudo}} ~/bin/check_postgres.pl $PG_HOST $PG_PORT $SHOWTIME --action sequence --db {{database_list|first}}{% if check_sequences_only %} --include={% for sequence in check_sequences_only %}"{{sequence}}"{% if not loop.last %},{% endif %}{% endfor %}{% endif %}
 {% endif %}
 
@@ -23,7 +23,7 @@ NSCA_MSG=$(
    {{config.sudo}} ~/bin/check_postgres.pl $PG_HOST $PG_BOUNCER_PORT $PG_BOUNCER_USER $SHOWTIME --action=pgb_pool_maxwait -w {{pg_bouncer_maxwait_w}} -c {{pg_bouncer_maxwait_c}}
 {% endif %}
 
-{% if (check_replication_slots|bool == true) and (replication_type == 'master') %}
+{% if (check_replication_slots|bool == true) and ('primary' in role) %}
    {{config.sudo}} ~/bin/check_replication.pl $PG_HOST $PG_PORT --check=slot
 {% endif %}
 )
