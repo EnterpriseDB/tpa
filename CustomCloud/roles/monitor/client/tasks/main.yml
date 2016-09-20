@@ -1,11 +1,8 @@
 ---
 
-# roles/client/tasks/main.yml
+# monitoring/client/tasks/main.yml
 #
-# Add or remove a client server from monitoring.
-#
-# Note that despite the `when` condition, Ansible will include each
-# playbook but skip all tasks if the `when` condition is not met.
+# Add a client server to monitoring.
 
 - name: Set up client server scripts for standard monitoring
   include: add-monitoring.yml
@@ -14,10 +11,6 @@
 - name: Set up client server scripts for barman monitoring
   include: add-barman-monitoring.yml
   when: (monitoring|bool == true) and (server_role == "barman")
-
-- name: Set up gateway server
-  include: add-gateway.yml
-  when: (monitoring|bool == true) and (server_role == "nsca_gateway")
 
 - name: Remove client server monitoring scripts
   include: remove-monitoring.yml
