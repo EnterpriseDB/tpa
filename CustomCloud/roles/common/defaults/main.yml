@@ -41,3 +41,4 @@ secrets:
     - postgres_password
     - barman_password
     - streaming_barman_password
+    - repmgr_password

@@ -46,6 +46,16 @@
   become_user: postgres
   become: yes
 
+- include_vars: "{{ playbook_dir }}/vault/repmgr_password.yml"
+
+- name: Create the repmgr user
+  postgresql_user:
+    name: repmgr
+    password: "{{ repmgr_password }}"
+    role_attr_flags: superuser
+  become_user: postgres
+  become: yes
+
 # Re-activate the per-client Barman backups on the server and force a
 # backup. TODO: This should use _backup_name, not inventory_hostname,
 # but we can't do that sensibly without include_role.
