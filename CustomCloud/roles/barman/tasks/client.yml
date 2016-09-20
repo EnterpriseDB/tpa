@@ -19,6 +19,9 @@
     user: barman
     cron_file: /etc/cron.d/barman
     name: Backup from server {{ _backup_name }}
+    weekday: 0
+    hour: 0
+    minute: 0
     job: >
       [ -x /usr/bin/barman ] && /usr/bin/barman backup {{ _backup_name }}
     state: present
