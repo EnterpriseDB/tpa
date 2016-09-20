@@ -13,39 +13,14 @@
   stat: path=~/bin/send_nsca
   register: nsca_user
 
-- name: Compile nsca (Ubuntu 12.04)
-  include: nsca-debian-old.yml
-  when: ((install_nsca|bool == true) and (copy_send_icinga|bool == false)) and (ansible_distribution == "Ubuntu") and (ansible_distribution_version < "14.04") and ((nsca_system.stat.exists != true) and (nsca_user.stat.exists != true))
-
-- name: Copy send_icinga binary (Ubuntu 12.04)
-  copy: src="bin/send_nsca.ubuntu-1204" dest="~/bin/send_nsca" mode=0700
-  when: ((install_nsca|bool == true) and (copy_send_icinga|bool == true)) and (ansible_distribution == "Ubuntu") and (ansible_distribution_version < "14.04")
-
 - name: Install nsca (Debian)
   apt: name="{{ nsca_package }}" state=latest
   become: yes
-  when: (install_nsca|bool == true) and (have_root_sudo|bool == true) and (ansible_distribution == "Debian") and (ansible_distribution_version|int >= 8)
+  when: (install_nsca|bool == true) and (have_root_sudo|bool == true) and (ansible_distribution == "Debian")
 
 - name: Install nsca (Ubuntu)
   apt: name="{{ nsca_package }}" state=latest
   become: yes
-  when: (install_nsca|bool == true) and (have_root_sudo|bool == true) and (ansible_distribution == "Ubuntu") and (ansible_distribution_version >= "14.04")
+  when: (install_nsca|bool == true) and (have_root_sudo|bool == true) and (ansible_distribution == "Ubuntu")
 
-# RedHat nsca-ng RPMS only available from: http://www.nsca-ng.org/download/redhat/
-# TODO: now also available via the Icinga EPEL repository for RHEL 7.x and later
-# see: https://packages.icinga.org/epel/
-- name: Install nsca (RedHat et al)
-  yum: name="http://www.nsca-ng.org/download/redhat/nsca-ng-client-1.4-1.el6.x86_64.rpm" state=present
-  become: yes
-  when: (install_nsca|bool == true) and (have_root_sudo|bool == true) and (ansible_os_family == "RedHat") and ((ansible_distribution == "Amazon" and ansible_distribution_version <= "2012.03"))
-
-- name: Install nsca (openSUSE)
-  zypper: name="{{ nsca_package }}" state=latest
-  become: yes
-  when: (install_nsca|bool == true) and (have_root_sudo|bool == true) and (ansible_os_family == "Suse")
-
-
-# Install nsca-ng on Solaris systems
-- name: Install nsca (Solaris)
-  include: nsca-solaris.yml
-  when: (install_nsca|bool == true) and (ansible_distribution == "Solaris") and ((nsca_system.stat.exists !=true) and (nsca_user.stat.exists != true))
+#TODO: install it on RedHat
