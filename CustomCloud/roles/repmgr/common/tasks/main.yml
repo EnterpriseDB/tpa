@@ -35,4 +35,4 @@
     - promote_command.sh
     - follow_command.sh
 
-- include: "os/{{ ansible_os_family }}.yml
+- include: "os/{{ ansible_os_family }}.yml"
