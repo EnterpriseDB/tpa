@@ -1,29 +1,38 @@
 ---
 
-- include: packages.yml
-
-- name: Create repmgr configuration directory
-  file: path=/etc/repmgr owner=postgres group=postgres mode=0755
-    state=directory
+- name: Ensure /etc/repmgr exists
+  file:
+    path: /etc/repmgr
+    owner: postgres
+    group: postgres
+    mode: 0755
+    state: directory
 
 - name: Install repmgr.conf
-  template: src=repmgr.conf.j2 dest=/etc/repmgr/repmgr.conf
+  template:
+    src: repmgr.conf.j2
+    dest: /etc/repmgr/repmgr.conf
+    owner: postgres
+    group: postgres
+    mode: 0644
 
 - name: Install assign_eip.py
-  template: src=assign_eip.py.j2 dest=/etc/repmgr/assign_eip.py
+  template:
+    src: assign_eip.py.j2
+    dest: /etc/repmgr/assign_eip.py
+    owner: postgres
+    group: postgres
+    mode: 0755
 
-- name: Install repmgr failover scripts
-  copy: src="{{ item }}" dest=/etc/repmgr/
-    owner=postgres group=postgres mode=0755
+- name: Install additional repmgr scripts
+  copy:
+    src: "{{ item }}"
+    dest: /etc/repmgr/
+    owner: postgres
+    group: postgres
+    mode: 0755
   with_items:
     - promote_command.sh
     - follow_command.sh
 
-- name: Overwrite repmgrd configuration file
-  sudo: true
-  copy: src="repmgrd" dest=/etc/default/repmgrd
-
-- name: Disable repmgrd autostart on reboot
-  service:
-     name: repmgrd
-     enabled: no
+- include "os/{{ ansible_os_family }}.yml

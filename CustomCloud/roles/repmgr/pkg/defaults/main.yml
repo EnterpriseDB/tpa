@@ -2,6 +2,6 @@
 
 repmgr_packages:
   Debian:
-    - repmgr
+    - postgresql-{{ pgversion }}-repmgr
   RedHat:
     - repmgr{{ pgversionNN }}

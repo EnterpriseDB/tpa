@@ -1,7 +1,0 @@
----
-
-repmgr_packages:
-  debian:
-    - repmgr
-  redhat:
-    - repmgr{{pgversionNN}}

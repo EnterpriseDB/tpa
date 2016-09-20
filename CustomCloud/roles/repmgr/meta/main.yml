@@ -2,3 +2,8 @@
 
 dependencies:
   - role: repmgr/pkg
+    when: >
+      'postgres' in role or 'witness' in role
+  - role: repmgr/common
+    when: >
+      'postgres' in role or 'witness' in role
