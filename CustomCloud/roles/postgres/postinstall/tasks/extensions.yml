@@ -1,0 +1,16 @@
+---
+
+- name: Install default Postgres extensions
+  postgresql_ext:
+    state: present
+    db: "{{ item.0 }}"
+    name: "{{ item.1 }}"
+  with_nested:
+    - [postgres, template1]
+    - "{{ postgres_extensions|default(default_postgres_extensions) }}"
+  become_user: postgres
+  become: true
+
+# There's more to this than just creating the extensions. We need to
+# change shared_preload_libraries and set up the pg_stat_statements
+# configuration, for example.
