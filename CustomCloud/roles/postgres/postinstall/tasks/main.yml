@@ -11,6 +11,21 @@
 - name: Restart Postgres unconditionally
   service: name={{ postgres_service_name }} state=restarted
 
+- name: Install default Postgres extensions
+  postgresql_ext:
+    state: present
+    db: "{{ item.0 }}"
+    name: "{{ item.1 }}"
+  with_nested:
+    - [postgres, template1]
+    - "{{ postgres_extensions|default(default_postgres_extensions) }}"
+  become_user: postgres
+  become: true
+
+# There's more to this than just creating the extensions. We need to
+# change shared_preload_libraries and set up the pg_stat_statements
+# configuration, for example.
+
 - include_vars: "{{ playbook_dir }}/vault/barman_password.yml"
 
 - name: Create the barman user
@@ -31,67 +46,47 @@
   become_user: postgres
   become: yes
 
-- name: Install default Postgres extensions
-  postgresql_ext:
-    state: present
-    db: "{{ item.0 }}"
-    name: "{{ item.1 }}"
-  with_nested:
-    - [postgres, template1]
-    - "{{ postgres_extensions|default(default_postgres_extensions) }}"
-  become_user: postgres
-  become: true
-
-# There's more to this than just creating the extensions. We need to
-# change shared_preload_libraries and set up the pg_stat_statements
-# configuration, for example.
-
 # Re-activate the per-client Barman backups on the server and force a
 # backup. TODO: This should use _backup_name, not inventory_hostname,
 # but we can't do that sensibly without include_role.
 
-- name: Set backups to active
-  ini_file:
-    dest: "/etc/barman.d/{{ inventory_hostname }}.conf"
-    section: "{{ inventory_hostname }}"
-    option: active
-    value: "true"
-  delegate_to: "{{ backup }}"
-  register: activate
-  when: backup != ''
+- block:
+    - name: Set backups to active
+      ini_file:
+        dest: "/etc/barman.d/{{ inventory_hostname }}.conf"
+        section: "{{ inventory_hostname }}"
+        option: active
+        value: "true"
+      delegate_to: "{{ backup }}"
 
-- name: Create replication slot for Barman
-  command: >
-    /usr/bin/barman receive-wal --create-slot {{ inventory_hostname }}
-  delegate_to: "{{ backup }}"
-  register: slot
-  ignore_errors: yes
-  when: >
-    'primary' in role and activate|changed
-  become_user: barman
-  become: yes
+    - name: Create replication slot for Barman
+      command: >
+        /usr/bin/barman receive-wal --create-slot {{ inventory_hostname }}
+      delegate_to: "{{ backup }}"
+      ignore_errors: yes
+      register: slot
+      become_user: barman
+      become: yes
 
-- fail: msg={{ slot.stderr }}
-  when: >
-    slot|failed and not "Replication slot 'barman' already exists" in slot.stderr
-    
-- name: Run barman switch-xlog for each client
-  command: >
-    /usr/bin/barman switch-xlog {{ inventory_hostname }}
-  delegate_to: "{{ backup }}"
-  when: >
-    'primary' in role and activate|changed
-  become_user: barman
-  become: yes
+    - fail: msg={{ slot.stderr }}
+      when: >
+        slot|failed and not "Replication slot 'barman' already exists" in slot.stderr
 
-# Force an immediate backup for all primary servers.
- 
-- name: Force an immediate backup
-  shell: >
-    sleep 60 && /usr/bin/barman backup all
-  delegate_to: "{{ backup }}"
-  run_once: true
+    - name: Run barman switch-xlog
+      command: >
+        /usr/bin/barman switch-xlog {{ inventory_hostname }}
+      delegate_to: "{{ backup }}"
+      become_user: barman
+      become: yes
+
+    - name: Pause to let a WAL segment be archived
+      pause: seconds=60
+
+    - name: Force an immediate backup
+      shell: >
+        /usr/bin/barman backup "{{ inventory_hostname }}"
+      delegate_to: "{{ backup }}"
+      become_user: barman
+      become: yes
   when: >
-    'primary' in role
-  become_user: barman
-  become: yes
+    backup != '' and initialise_backup

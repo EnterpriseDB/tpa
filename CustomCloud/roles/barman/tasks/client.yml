@@ -5,14 +5,35 @@
 # First, we delegate some per-client server configuration tasks to the
 # designated backup server for each host.
 
-- name: Install Barman configuration file for each client
+- name: Check if Barman client configuration file exists
+  stat:
+    path: "{{ _config_file }}"
+  delegate_to: "{{ backup }}"
+  register: conf
+
+- name: Install Barman client configuration file
   template:
     src: barman.d.conf.j2
-    dest: "/etc/barman.d/{{ _backup_name }}.conf"
+    dest: "{{ _config_file }}"
     owner: barman
     group: barman
     mode: 0600
   delegate_to: "{{ backup }}"
+
+# If we created the client configuration file, then this is the first
+# time we're setting up backups for this server.
+
+- block:
+    - set_fact: initialise_backup=True
+
+    - name: Set client configuration to inactive pending initialisation
+      ini_file:
+        dest: "{{ _config_file }}"
+        section: "{{ _backup_name }}"
+        option: active
+        value: "false"
+      delegate_to: "{{ backup }}"
+  when: not conf.stat.exists
 
 - name: Set up a cron job to take regular backups
   cron:
