@@ -183,12 +183,12 @@
 
 - name: Add send_icinga_freeze.sh as cronjob (without logging)
   cron: name="send_icinga_freeze" minute="{{send_icinga_freeze_interval}}" job="~/bin/send_icinga_freeze.sh"
-  when: (add_cron|bool == true) and (check_autovac_freeze|bool == true) and (replication_type != "standby") and (send_icinga_logging|bool == false)
+  when: (add_cron|bool == true) and (check_autovac_freeze|bool == true) and ('replica' not in role) and (send_icinga_logging|bool == false)
 
 
 - name: Add send_icinga_freeze.sh as cronjob (with logging)
   cron: name="send_icinga_freeze" minute="{{send_icinga_freeze_interval}}" job="~/bin/send_icinga_freeze.sh >> ~/logs/send_icinga_freeze.`{{log_date_command}}`.log 2>&1"
-  when: (add_cron|bool == true) and (check_autovac_freeze|bool == true) and (replication_type != "standby") and (send_icinga_logging|bool == true)
+  when: (add_cron|bool == true) and (check_autovac_freeze|bool == true) and ('replica' not in role) and (send_icinga_logging|bool == true)
 
 - name: Remove send_icinga_freeze.sh cronjob
   cron: name="send_icinga_freeze" state="absent"
@@ -198,15 +198,15 @@
 # send_icinga_replication.sh
 - name: Add send_icinga_replication.sh
   template: src=bin/send_icinga_replication.sh.j2 dest=~/bin/send_icinga_replication.sh mode=0755
-  when: (homedir_no_write|bool == false) and (check_replication|bool == true) and (replication_type != 'none')
+  when: (homedir_no_write|bool == false) and (check_replication|bool == true)
 
 - name: Add send_icinga_replication.sh as cronjob (without logging)
   cron: name="send_icinga_replication" minute="{{send_icinga_replication_interval}}" job="~/bin/send_icinga_replication.sh"
-  when: (add_cron|bool == true) and (check_replication|bool == true) and (send_icinga_logging|bool == false) and (replication_type != 'none')
+  when: (add_cron|bool == true) and (check_replication|bool == true) and (send_icinga_logging|bool == false)
 
 - name: Add send_icinga_replication.sh as cronjob (with logging)
   cron: name="send_icinga_replication" minute="{{send_icinga_replication_interval}}" job="~/bin/send_icinga_replication.sh >> ~/logs/send_icinga_replication.`{{log_date_command}}`.log 2>&1"
-  when: (add_cron|bool == true) and (check_replication|bool == true) and (send_icinga_logging|bool == true) and (replication_type != 'none')
+  when: (add_cron|bool == true) and (check_replication|bool == true) and (send_icinga_logging|bool == true)
 
 - name: Remove send_icinga_replication.sh cronjob
   cron: name="send_icinga_replication" state="absent"
@@ -233,15 +233,15 @@
 # send_icinga_repmgr.sh
 - name: Add check_repmgr.py
   copy: src=bin/check_repmgr.py dest=~/bin/check_repmgr.py mode=0755
-  when: (homedir_no_write|bool == false) and (check_repmgr_lag|bool == true) and (replication_type == "master")
+  when: (homedir_no_write|bool == false) and (check_repmgr_lag|bool == true) and ('primary' in role)
 
 - name: Add send_icinga_repmgr.sh
   template: src=bin/send_icinga_repmgr.sh.j2 dest=~/bin/send_icinga_repmgr.sh mode=0755
-  when: (homedir_no_write|bool == false) and (check_repmgr_lag|bool == true) and (replication_type == "master")
+  when: (homedir_no_write|bool == false) and (check_repmgr_lag|bool == true) and ('primary' in role)
 
 - name: Add send_icinga_repmgr.sh as cronjob (without logging)
   cron: name="send_icinga_repmgr" minute="*/5" job="~/bin/send_icinga_repmgr.sh"
-  when: (add_cron|bool == true) and (check_repmgr_lag|bool == true) and (replication_type == "master")
+  when: (add_cron|bool == true) and (check_repmgr_lag|bool == true) and ('primary' in role)
 
 - name: Remove send_icinga_repmgr.sh cronjob
   cron: name="send_icinga_repmgr" state="absent"
@@ -277,12 +277,12 @@
 # MultiXact stats gathering
 - name: Add script to gather MultiXact stats
   copy: src="bin/stats_collect_multixact.sh" dest="~/bin/stats_collect_multixact.sh" mode=0755
-  when: (multixact_stats|bool == true) and (replication_type == "master")
+  when: (multixact_stats|bool == true) and ('primary' in role)
 
 # TODO: fix -D path - currently Yodle-specific
 - name: Add stats_2ndq.sh as cronjob
   cron: name="stats_collect_multixact" job="~/bin/stats_collect_multixact.sh -d {{database_list|first}} -D /var/lib/postgresql/9.3/main -b /usr/lib/postgresql/9.3/bin/ -s {{postgres_user}}"
-  when: (multixact_stats|bool == true) and (replication_type == "master")
+  when: (multixact_stats|bool == true) and ('primary' in role)
 
 # Script to prevent anti-wraparound vacuums
 # -----------------------------------------
@@ -312,13 +312,13 @@
     job: "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}} -t {{aawv_large_tables_timeout}} \
     	       -S {{aawv_large_tables_upper_bound}} -s {{aawv_large_tables_lower_bound}} -c ~/conf/aawv.conf \
 	       > ~/logs/anti_wraparound_`hostname`_`date \'+\\%F_\\%H\\%M\\%S\'`.log 2>&1"
-  when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_large_tables|bool == true) and (replication_type != "standby")
+  when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_large_tables|bool == true) and ('replica' not in role)
 
 - name: Ensure large table avoid_anti_wraparound_vacuums.sh cronjob is absent on standbys
   cron:
     name: "avoid_anti_wraparound_vacuums on large tables"
     state: absent
-  when: (add_cron|bool == true) and (replication_type == "standby")
+  when: (add_cron|bool == true) and ('replica' in role)
 
 - name: Execute avoid_anti_wraparound_vacuums.sh on medium tables
   cron:
@@ -329,13 +329,13 @@
     job: "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}} -t {{aawv_medium_tables_timeout}} \
     	       -S {{aawv_medium_tables_upper_bound}} -s {{aawv_medium_tables_lower_bound}} -c ~/conf/aawv.conf \
 	       > ~/logs/anti_wraparound_`hostname`_`date \'+\\%F_\\%H\\%M\\%S\'`.log 2>&1"
-  when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_medium_tables|bool == true) and (replication_type != "standby")
+  when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_medium_tables|bool == true) and ('replica' not in role)
 
 - name: Ensure large table avoid_anti_wraparound_vacuums.sh cronjob is absent on standbys
   cron:
     name: "avoid_anti_wraparound_vacuums on medium tables"
     state: absent
-  when: (add_cron|bool == true) and (replication_type == "standby")
+  when: (add_cron|bool == true) and ('replica' in role)
 
 - name: Execute avoid_anti_wraparound_vacuums.sh on small tables
   cron:
@@ -345,13 +345,13 @@
     weekday: "{{aawv_small_tables_weekday}}"
     job: "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}} -t {{aawv_small_tables_timeout}} \
     	       -S {{aawv_small_tables_upper_bound}} -c ~/conf/aawv.conf > ~/logs/anti_wraparound_`hostname`_`date \'+\\%F_\\%H\\%M\\%S\'`.log 2>&1"
-  when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_small_tables|bool == true) and (replication_type != "standby")
+  when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_small_tables|bool == true) and ('replica' not in role)
 
 - name: Ensure large table avoid_anti_wraparound_vacuums.sh cronjob is absent on standbys
   cron:
     name: "avoid_anti_wraparound_vacuums on small tables"
     state: absent
-  when: (add_cron|bool == true) and (replication_type == "standby")
+  when: (add_cron|bool == true) and ('replica' in role)
 
 
 # Script to check for excessive memory usage
