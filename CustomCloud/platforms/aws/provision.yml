@@ -221,14 +221,6 @@
       register: profile
       tags: iam
 
-    - name: Record instance profile ARN for later use
-      include: ../common/set-cluster-var.yml
-      vars:
-        name: instance_profile_arn
-        value: "{{ profile.instance_profile_result.arn }}"
-      when: profile|changed
-      tags: iam
-
     - name: Attach a policy to the instance profile
       iam_policy:
         iam_type: role

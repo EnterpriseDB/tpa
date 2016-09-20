@@ -4,20 +4,16 @@
 
 - include: ../common/ssh-hostkeys.yml
 
-# This is a backwards-compatibility measure for clusters that were
-# provisioned before we started storing instance_profile_arn in a
-# vars.json file.
-
 - block:
-    - name: Discover ARN for instance profile
+    - name: Discover ARN for instance profile role
       command: aws iam get-role --role-name "{{ cluster_profile }}"
       changed_when: false
       register: profile
     - include: ../common/set-cluster-var.yml
       vars:
-        name: instance_profile_arn
+        name: instance_profile_role
         value: "{{ (profile.stdout|from_json).Role.Arn }}"
-  when: instance_profile_arn is not defined
+  when: instance_profile_role is not defined
 
 # This task is always inappropriately marked "changed"; see
 # https://github.com/ansible/ansible-modules-extras/issues/2618 for
@@ -43,7 +39,7 @@
             "Resource": "arn:aws:s3:::{{cluster_bucket}}/*",
             "Effect": "Allow",
             "Principal": {
-              "AWS": [ "{{ instance_profile_arn }}" ]
+              "AWS": [ "{{ instance_profile_role }}" ]
             }
           }
         ]
