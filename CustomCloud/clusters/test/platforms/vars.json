@@ -1,1 +1,1 @@
-{"cluster_network": "10.33.174.0/24", "instance_profile_arn": "arn:aws:iam::324077455750:role/TestPlatforms_profile", "customerId": 42}
+{"cluster_network": "10.33.174.0/24", "instance_profile_role": "arn:aws:iam::324077455750:role/TestPlatforms_profile", "customerId": 42}

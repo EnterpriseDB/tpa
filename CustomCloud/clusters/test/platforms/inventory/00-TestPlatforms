@@ -1,11 +1,11 @@
 [tag_Cluster_TestPlatforms]
-debian-primary ansible_host=54.154.183.202 node=1 role='["primary"]'
-debian-replica ansible_host=54.154.251.44 node=2 role='["replica"]'
-redhat-primary ansible_host=54.154.212.9 node=3 role='["primary"]'
-redhat-replica ansible_host=54.154.184.61 node=4 role='["replica"]'
-ubuntu-primary ansible_host=54.154.223.6 node=5 role='["primary"]'
-testplatforms-6 ansible_host=54.154.210.107 node=6 role='["replica"]'
-eu-barman ansible_host=54.154.137.26 node=7 role='["barman","monitor"]'
+debian-primary ansible_host=54.171.73.137 node=1 role='["primary"]'
+debian-replica ansible_host=54.171.229.89 node=2 role='["replica"]'
+redhat-primary ansible_host=54.154.188.55 node=3 role='["primary"]'
+redhat-replica ansible_host=54.154.223.6 node=4 role='["replica"]'
+ubuntu-primary ansible_host=54.171.236.252 node=5 role='["primary"]'
+testplatforms-6 ansible_host=54.154.206.48 node=6 role='["replica"]'
+eu-barman ansible_host=54.171.48.79 node=7 role='["barman","monitor"]'
 
 [tag_Cluster_TestPlatforms:vars]
 cluster_tag=tag_Cluster_TestPlatforms
@@ -15,5 +15,5 @@ ansible_python_interpreter=/usr/bin/python2.7
 ansible_ssh_private_key_file="clusters/test/platforms/id_testplatforms"
 ansible_ssh_common_args="-o UserKnownHostsFile='clusters/test/platforms/known_hosts'"
 cluster_network=10.33.174.0/24
-instance_profile_arn=arn:aws:iam::324077455750:role/TestPlatforms_profile
+instance_profile_role=arn:aws:iam::324077455750:role/TestPlatforms_profile
 customerId=42
