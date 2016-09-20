@@ -1,0 +1,6 @@
+---
+
+- name: Install repmgr package
+  package: name={{ item }} state=latest
+  with_items: "{{ repmgr_packages[ansible_os_family] }}"
+  tags: [repmgr, pkg]

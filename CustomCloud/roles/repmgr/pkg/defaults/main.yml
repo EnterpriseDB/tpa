@@ -1,0 +1,7 @@
+---
+
+repmgr_packages:
+  Debian:
+    - repmgr
+  RedHat:
+    - repmgr{{ pgversionNN }}
