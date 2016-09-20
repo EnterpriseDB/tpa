@@ -295,3 +295,6 @@ pg_bouncer_cl_waiting_c: 15
 # Maximum connection wait time:
 pg_bouncer_maxwait_w: 5
 pg_bouncer_maxwait_c: 15
+
+nsca_identity: ubuntu
+nsca_password: verysecret
