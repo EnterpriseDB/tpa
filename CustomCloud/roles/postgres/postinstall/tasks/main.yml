@@ -79,8 +79,14 @@
       become_user: barman
       become: yes
 
+    # XXX: This is a gross hack. Running "barman switch-xlog" and
+    # waiting for a while will clear up the "WAL archive: FAILED"
+    # problem in barman check, and backup attempts will succeed
+    # thereafter, but waiting for a random time is not a viable
+    # long-term solution.
+
     - name: Pause to let a WAL segment be archived
-      pause: seconds=60
+      pause: seconds=120
 
     - name: Force an immediate backup
       shell: >
