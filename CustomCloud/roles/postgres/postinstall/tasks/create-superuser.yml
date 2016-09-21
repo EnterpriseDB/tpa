@@ -1,6 +1,7 @@
 ---
 
 - include_vars: "{{ playbook_dir }}/vault/{{ name }}_password.yml"
+  no_log: true
 
 - name: Create the {{ user }} user
   postgresql_user:

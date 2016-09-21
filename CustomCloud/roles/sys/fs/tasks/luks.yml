@@ -31,6 +31,7 @@
 
     - name: Load luks_passphrase from vault
       include_vars: "{{ playbook_dir }}/vault/luks_passphrase.yml"
+      no_log: true
 
     - name: Initialise LUKS volume on {{ luks_device }}
       shell: >

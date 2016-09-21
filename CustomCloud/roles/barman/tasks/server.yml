@@ -36,7 +36,9 @@
 # groups['tag_backup'+inventory_hostname] instead.
 
 - include_vars: "{{ playbook_dir }}/vault/barman_password.yml"
+  no_log: true
 - include_vars: "{{ playbook_dir }}/vault/streaming_barman_password.yml"
+  no_log: true
 
 - name: Install .pgpass file
   template:

@@ -3,6 +3,7 @@
 # Ansible will transparently decrypt vault-encrypted files
 - name: Load postgres_password from vault
   include_vars: "{{ playbook_dir }}/vault/postgres_password.yml"
+  no_log: true
 
 - name: Create md5 password for the Postgres user
   postgresql_user:
