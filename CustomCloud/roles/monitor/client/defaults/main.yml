@@ -129,7 +129,7 @@ log_type_ext: log           # Log extension: log or csv
 # (or per-server) basis
  
 # checks replication connection (master) and lag (standby)
-check_replication: false
+check_replication: yes
 # Units in seconds
 replication_lag_warn: 300
 replication_lag_crit: 600
