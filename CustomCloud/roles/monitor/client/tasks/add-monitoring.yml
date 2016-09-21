@@ -246,6 +246,7 @@
 - name: Remove send_icinga_repmgr.sh cronjob
   cron: name="send_icinga_repmgr" state="absent"
   when: (add_cron|bool == true) and (check_repmgr_lag|bool == false)
+  ignore_errors: true
 
 
 # send_adhoc.sh
@@ -309,9 +310,11 @@
     minute: "{{aawv_large_tables_minute}}"
     hour: "{{aawv_large_tables_hour}}"
     weekday: "{{aawv_large_tables_weekday}}"
-    job: "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}} -t {{aawv_large_tables_timeout}} \
-    	       -S {{aawv_large_tables_upper_bound}} -s {{aawv_large_tables_lower_bound}} -c ~/conf/aawv.conf \
-	       > ~/logs/anti_wraparound_`hostname`_`date \'+\\%F_\\%H\\%M\\%S\'`.log 2>&1"
+    job: >
+         "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}}
+          -t {{aawv_large_tables_timeout}} -S {{aawv_large_tables_upper_bound}}
+          -s {{aawv_large_tables_lower_bound}} -c ~/conf/aawv.conf >
+          ~/logs/anti_wraparound_\`hostname\`_\`date \'+\\%F_\\%H\\%M\\%S\'\`.log 2>&1"
   when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_large_tables|bool == true) and ('replica' not in role)
 
 - name: Ensure large table avoid_anti_wraparound_vacuums.sh cronjob is absent on standbys
@@ -319,6 +322,7 @@
     name: "avoid_anti_wraparound_vacuums on large tables"
     state: absent
   when: (add_cron|bool == true) and ('replica' in role)
+  ignore_errors: true
 
 - name: Execute avoid_anti_wraparound_vacuums.sh on medium tables
   cron:
@@ -326,9 +330,11 @@
     minute: "{{aawv_medium_tables_minute}}"
     hour: "{{aawv_medium_tables_hour}}"
     weekday: "{{aawv_medium_tables_weekday}}"
-    job: "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}} -t {{aawv_medium_tables_timeout}} \
-    	       -S {{aawv_medium_tables_upper_bound}} -s {{aawv_medium_tables_lower_bound}} -c ~/conf/aawv.conf \
-	       > ~/logs/anti_wraparound_`hostname`_`date \'+\\%F_\\%H\\%M\\%S\'`.log 2>&1"
+    job: >
+          "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}}
+           -t {{aawv_medium_tables_timeout}} -S {{aawv_medium_tables_upper_bound}}
+           -s {{aawv_medium_tables_lower_bound}} -c ~/conf/aawv.conf >
+           ~/logs/anti_wraparound_\`hostname\`_\`date \'+\\%F_\\%H\\%M\\%S\'\`.log 2>&1"
   when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_medium_tables|bool == true) and ('replica' not in role)
 
 - name: Ensure large table avoid_anti_wraparound_vacuums.sh cronjob is absent on standbys
@@ -336,6 +342,7 @@
     name: "avoid_anti_wraparound_vacuums on medium tables"
     state: absent
   when: (add_cron|bool == true) and ('replica' in role)
+  ignore_errors: true
 
 - name: Execute avoid_anti_wraparound_vacuums.sh on small tables
   cron:
@@ -343,8 +350,11 @@
     minute: "{{aawv_small_tables_minute}}"
     hour: "{{aawv_small_tables_hour}}"
     weekday: "{{aawv_small_tables_weekday}}"
-    job: "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}} -t {{aawv_small_tables_timeout}} \
-    	       -S {{aawv_small_tables_upper_bound}} -c ~/conf/aawv.conf > ~/logs/anti_wraparound_`hostname`_`date \'+\\%F_\\%H\\%M\\%S\'`.log 2>&1"
+    job: >
+        "sudo -u postgres ~/bin/avoid_anti_wraparound_vacuums.sh -H {{socket_dir}}
+         -t {{aawv_small_tables_timeout}} -S {{aawv_small_tables_upper_bound}}
+         -c ~/conf/aawv.conf >
+         ~/logs/anti_wraparound_\`hostname\`_\`date \'+\\%F_\\%H\\%M\\%S\'\`.log 2>&1"
   when: (add_cron|bool == true) and (avoid_anti_wraparound_vacuums_small_tables|bool == true) and ('replica' not in role)
 
 - name: Ensure large table avoid_anti_wraparound_vacuums.sh cronjob is absent on standbys
@@ -352,6 +362,7 @@
     name: "avoid_anti_wraparound_vacuums on small tables"
     state: absent
   when: (add_cron|bool == true) and ('replica' in role)
+  ignore_errors: true
 
 
 # Script to check for excessive memory usage
