@@ -5,7 +5,7 @@
 
 - name: Create the {{ user }} user
   postgresql_user:
-    name: "{{ name }}"
+    name: "{{ username }}"
     encrypted: yes
     password: "md5{{ (vars[name+'_password'] + 'postgres')|hash('md5') }}"
     role_attr_flags: superuser

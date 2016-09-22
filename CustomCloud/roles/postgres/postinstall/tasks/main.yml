@@ -15,7 +15,7 @@
 
 - include: create-superuser.yml
   vars:
-    name: "{{ item }}"
+    username: "{{ item }}"
   with_items: "{{ _superusers }}"
 
 - include: barman.yml

@@ -39,6 +39,6 @@
     mode: 0644
   vars:
     conf: "{{ postgres_data_dir+'/conf.d' }}/8888-shared_preload_libraries.conf"
-    name: shared_preload_libraries
+    variable: shared_preload_libraries
     value: >
-      '{{ libs.stdout.split(',')|map('trim')|list|union([library])|join(', ') }}'
+      '{{ libs.stdout and libs.stdout.split(',')|map('trim')|list|union([library])|join(', ') or library }}'
