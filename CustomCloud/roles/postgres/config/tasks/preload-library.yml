@@ -1,0 +1,44 @@
+---
+
+# This file is meant to be included directly from outside the
+# postgres/config role. It expects to be passed the name and (properly
+# quoted) value of a postgresql.conf parameter, and will write a file
+# into the Postgres include_dir.
+#
+# We wouldn't have to repeat the definition of _include_dir here if we
+# could use include_role/tasks_from to invoke this, but that will have
+# to wait until include_role is no longer so broken.
+
+- assert:
+    that:
+      - library is defined
+
+# We're willing to be a bit flexible about what we read in here. We
+# accept multiple lines setting shared_preload_libraries (last one
+# wins), and commented-out assignments are ignored.
+
+- name: Read current value of shared_preload_libraries
+  shell: >
+    eval "libs=$(test -f {{ conf }} && sed -n 's/^shared_preload_libraries *= *//p' {{ conf }}|tail -1)" && echo $libs
+  changed_when: False
+  register: libs
+  vars:
+    conf: "{{ postgres_data_dir+'/conf.d' }}/8888-shared_preload_libraries.conf"
+
+# But when it comes to writing out the file again, we don't make any
+# attempt to retain whatever was in it before; as the warning clearly
+# says, this file—like any other in _include_dir—is subject to being
+# overwritten.
+
+- name: Append {{ library }} to shared_preload_libraries
+  template:
+    src: variable.j2
+    dest: "{{ conf }}"
+    owner: postgres
+    group: postgres
+    mode: 0644
+  vars:
+    conf: "{{ postgres_data_dir+'/conf.d' }}/8888-shared_preload_libraries.conf"
+    name: shared_preload_libraries
+    value: >
+      '{{ libs.stdout.split(',')|map('trim')|list|union([library])|join(', ') }}'
