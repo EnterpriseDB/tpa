@@ -257,6 +257,15 @@ THREADED_MODE = True
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_RESULT_BACKEND = 'amqp://guest:guest@localhost:5672//'
 
+##########################################################################
+# Email settings
+##########################################################################
+SMTP_HOST = 'smtp.gmail.com'
+SMTP_PORT = 587
+SMTP_USERNAME = 'devashish@2ndquadrant.com'
+SMTP_PASSWORD = 'create_an_app_password_and_put_it_here'
+PROVISIONING_REQUEST_RECIPIENTS = ['tpabeta@2ndquadrant.com']
+
 # Load distribution-specific config overrides
 try:
     from config_distro import *
