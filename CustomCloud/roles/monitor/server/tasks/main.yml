@@ -1,0 +1,38 @@
+---
+
+# roles/server/tasks/main.yml
+
+# nsca configuration
+- name: Add client nsca-ng configuration file
+  template: src=nsca-client-template.cfg.j2 dest="{{nsca_configdir}}/customer-{{item}}.cfg" owner=root
+  notify: Restart nsca-ng
+  delegate_to: rdba.2ndquadrant.com
+  run_once: yes
+  tags: nsca-ng
+  with_items: "{{client_identifier}}"
+
+- name: Add include directive for client configuration file
+  lineinfile: dest="{{nsca_configdir}}/{{nsca_includefile}}" line="include({{nsca_configdir}}/customer-{{item}}.cfg)" create=yes
+  notify: Restart nsca-ng
+  delegate_to: rdba.2ndquadrant.com
+  run_once: yes
+  tags: nsca-ng
+  with_items: "{{client_identifier}}"
+
+# Icinga configuration
+- name: Add client icinga contacts configuration file
+  template: src=icinga-contact-template.j2  dest="{{icinga_objects_dir}}/client-contacts-{{item}}.cfg" owner=root
+  delegate_to: rdba.2ndquadrant.com
+  run_once: yes
+  notify: Reload icinga
+  tags: icinga
+  with_items: "{{client_identifier}}"
+
+- name: Add client icinga host configuration file
+  template: src=icinga-server-template.j2 dest="{{icinga_objects_dir}}/client-hosts-{{item}}.cfg" owner=root
+  delegate_to: rdba.2ndquadrant.com
+  run_once: yes
+  notify: Reload icinga
+  tags: icinga
+  with_items: "{{client_identifier}}"
+

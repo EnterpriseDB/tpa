@@ -1,0 +1,737 @@
+# {{ansible_managed}}
+########################################################################
+#  Host and service groups
+########################################################################
+
+define hostgroup {
+    hostgroup_name {{item}}_postgres_servers
+    alias          All {{client_name}} Postgres servers
+    members        {% for server_name in groups['database-server'] %}{{server_name}}{% if not loop.last %}, {% endif %}{% endfor %}
+
+}
+
+{% if 'barman-server' in groups %}
+define hostgroup {
+    hostgroup_name {{item}}_barman_servers
+    alias          All {{client_name}} Barman servers
+    members        {% for server_name in groups['barman-server'] %}{{server_name}}{% if not loop.last %}, {% endif %}{% endfor %}
+
+}
+{% endif %}
+
+{% if 'gateway-server' in groups %}
+define hostgroup {
+    hostgroup_name {{item}}_gateway_servers
+    alias          All {{client_name}} gateway servers
+    members        {% for server_name in groups['gateway-server'] %}{{server_name}}{% if not loop.last %}, {% endif %}{% endfor %}
+
+}
+{% endif %}
+
+{% if 'cold-standby-server' in groups %}
+define hostgroup {
+    hostgroup_name {{item}}_cold_standby_servers
+    alias          All {{client_name}} cold standby servers
+    members        {% for server_name in groups['cold-standby-server'] %}{{server_name}}{% if not loop.last %}, {% endif %}{% endfor %}
+
+}
+{% endif %}
+
+########################################################################
+#  Hosts
+########################################################################
+
+define host {
+    use             rdba_monitored_host
+    name            {{item}}_monitored_host
+    alias           All {{client_name}} hosts
+    hostgroups      {{item}}_postgres_servers
+    contact_groups  {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
+    _customer       {{ rt_monitoring_user }}
+    _queue          {{ rt_queue }}
+    _graphiteprefix {{item}}
+    register        0
+}
+
+#-----------------------------------------------------------------------
+# Database servers
+#-----------------------------------------------------------------------
+{% for server_name in groups['database-server'] %}
+define host {
+    use             {{item}}_monitored_host
+    host_name       {{server_name}}
+    alias           {{hostvars[server_name].alias}}
+}
+
+{% endfor %}
+
+{% if 'barman-server' in groups %}
+#-----------------------------------------------------------------------
+# Barman servers
+#-----------------------------------------------------------------------
+
+define host {
+    use             rdba_monitored_host
+    name            {{item}}_monitored_barman_host
+    alias           All {{client_name}} barman hosts
+    hostgroups      {{item}}_barman_servers
+    contact_groups  {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
+    _customer       {{ rt_monitoring_user }}
+    _queue          {{ rt_queue }}
+    _graphiteprefix {{item}}
+    register        0
+}
+
+{% for server_name in groups['barman-server'] %}
+define host {
+    use             {{item}}_monitored_barman_host
+    host_name       {{server_name}}
+    alias           {{hostvars[server_name].alias}}
+}
+
+{% endfor %}
+{% endif %}
+
+
+{% if 'gateway-server' in groups %}
+#-----------------------------------------------------------------------
+# Gateway servers
+#-----------------------------------------------------------------------
+
+define host {
+    use             rdba_monitored_host
+    name            {{item}}_monitored_gateway_host
+    alias           All {{client_name}} gateway hosts
+    hostgroups      {{item}}_gateway_servers
+    contact_groups  {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
+    _customer       {{ rt_monitoring_user }}
+    _queue          {{ rt_queue }}
+    _graphiteprefix {{item}}
+    register        0
+}
+
+{% for server_name in groups['gateway-server'] %}
+define host {
+    use             {{item}}_monitored_gateway_host
+    host_name       {{server_name}}
+    alias           {{hostvars[server_name].alias}}
+}
+
+{% endfor %}
+{% endif %}
+
+
+{% if 'cold-standby-server' in groups %}
+#-----------------------------------------------------------------------
+# Cold standby servers
+#-----------------------------------------------------------------------
+
+define host {
+    use             rdba_monitored_host
+    name            {{item}}_monitored_cold_standby_host
+    alias           All {{client_name}} cold_standby hosts
+    hostgroups      {{item}}_cold_standby_servers
+    contact_groups  {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
+    _customer       {{ rt_monitoring_user }}
+    _queue          {{ rt_queue }}
+    _graphiteprefix {{item}}
+    register        0
+}
+
+{% for server_name in groups['cold-standby-server'] %}
+define host {
+    use             {{item}}_monitored_cold_standby_host
+    host_name       {{server_name}}
+    alias           {{hostvars[server_name].alias}}
+}
+
+{% endfor %}
+{% endif %}
+
+########################################################################
+#  Services common to all hosts
+########################################################################
+
+define service {
+    use              rdba_monitored_service
+    contact_groups   {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
+    name             {{item}}_monitored_service
+    _graphiteprefix  {{item}}
+    register         0
+}
+
+{% if 'barman-server' in groups %}
+define service {
+    use              rdba_monitored_service
+    contact_groups   {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
+    name             {{item}}_monitored_barman_service
+    _graphiteprefix  {{item}}
+    register         0
+}
+{% endif %}
+
+{% if 'gateway-server' in groups %}
+define service {
+    use              rdba_monitored_service
+    contact_groups   {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
+    name             {{item}}_monitored_gateway_service
+    register         0
+}
+{% endif %}
+
+{% if 'cold-standby-server' in groups %}
+define service {
+    use              rdba_monitored_service
+    contact_groups   {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
+    name             {{item}}_monitored_cold_standby_service
+    register         0
+}
+{% endif %}
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description POSTGRES_CONNECTION
+    check_command       check_dummy!2!"No Postgres connection check results"
+}
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description POSTGRES_BACKENDS
+}
+
+# Dependencies, if there is no CONNECTION, don't check BACKENDS
+{% for server_name in groups['database-server'] %}
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_BACKENDS
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+{% endfor %}
+
+{% if check_bloat|bool == true %}
+#-----------------------------------------------------------------------
+# Check Postgres BLOAT
+#-----------------------------------------------------------------------
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description POSTGRES_BLOAT
+}
+
+# BLOAT will depend on CONNECTION and BACKENDS
+{% for server_name in groups['database-server'] %}
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_BLOAT
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_BACKENDS
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_BLOAT
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+{% endfor %}
+{% endif %}
+
+#-----------------------------------------------------------------------
+# Check disk space (PostgreSQL servers)
+#-----------------------------------------------------------------------
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description POSTGRES_DISK_SPACE
+}
+
+# DISK_SPACE also depends on CONNECTION (don't know if BACKENDS)
+{% for server_name in groups['database-server'] %}
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_DISK_SPACE
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+{% endfor %}
+
+{% if 'barman-server' in groups %}
+#-----------------------------------------------------------------------
+# Check disk space (Barman servers)
+#-----------------------------------------------------------------------
+
+{% for server_name in groups['barman-server'] %}
+define service {
+    use                 {{item}}_monitored_barman_service
+    host_name           {{server_name}}
+    service_description DISK
+    check_command       check_dummy!2!"No disk space check results"
+}
+{% endfor %}
+
+{% endif %}
+
+
+#-----------------------------------------------------------------------
+# Check prepared transactions
+#-----------------------------------------------------------------------
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description POSTGRES_PREPARED_TXNS
+}
+
+# PREPARED_TXNS will depend on CONNECTION and BACKENDS
+{% for server_name in groups['database-server'] %}
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_PREPARED_TXNS
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_BACKENDS
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_PREPARED_TXNS
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+{% endfor %}
+
+#-----------------------------------------------------------------------
+# Check idle transactions
+#-----------------------------------------------------------------------
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description POSTGRES_TXN_IDLE
+}
+
+# TXN_IDLE will depend on CONNECTION and BACKENDS
+{% for server_name in groups['database-server'] %}
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_TXN_IDLE
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_BACKENDS
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_TXN_IDLE
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+{% endfor %}
+
+#-----------------------------------------------------------------------
+# Check transaction time
+#-----------------------------------------------------------------------
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description POSTGRES_TXN_TIME
+}
+
+# TXN_TIME will depend on CONNECTION and BACKENDS
+{% for server_name in groups['database-server'] %}
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_TXN_TIME
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_BACKENDS
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_TXN_TIME
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+{% endfor %}
+
+
+{% if check_pg_version_server|bool == true %}
+#-----------------------------------------------------------------------
+# Check PostgreSQL version
+#
+# We don't need to check this very often; twice daily should be
+# plenty enough. We neeed to override the various default intervals,
+# which are designed for frequent checks.
+#
+# Only send notifications on "critical" and "recovery".
+#-----------------------------------------------------------------------
+
+define service {
+    use                   {{item}}_monitored_service
+    hostgroup_name        {{item}}_postgres_servers
+    contacts              ticketraiser
+    service_description   POSTGRES_NEW_VERSION_PG
+    notification_options  c,r
+    check_interval        1440m
+    retry_interval        720m
+    notification_interval 1440m
+    freshness_threshold   86400
+}
+
+define servicedependency {
+    hostgroup_name                     {{item}}_postgres_servers
+    service_description                POSTGRES_CONNECTION
+    dependent_hostgroup_name           {{item}}_postgres_servers
+    dependent_service_description      POSTGRES_NEW_VERSION_PG
+    execution_failure_criteria         w,u,c
+    notification_failure_criteria      w,u,c
+}
+{% endif %}
+
+{% for server_name in groups['database-server'] %}
+{% if check_big_postgres in hostvars[server_name] and hostvars[server_name].check_big_postgres|bool == true %}
+define service {
+    use                           {{item}}_monitored_service
+    host_name                     {{server_name}}
+    service_description           SYSTEM_OVERCOMMIT
+}
+{% endif %}
+
+{% endfor %}
+
+########################################################################
+# Services that run only on a specific host
+########################################################################
+
+# There's no point checking a replica for autovac freeze age
+# so test only masters
+{% for server_name in groups['database-server'] %}
+
+{% if check_autovac_freeze|bool == true %}
+{% if hostvars[server_name].replication_type == "master"  %}
+define service {
+    use                 {{item}}_monitored_service
+    host_name           {{server_name}}
+    contacts            ticketraiser
+    service_description POSTGRES_AUTOVAC_FREEZE
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_AUTOVAC_FREEZE
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_BACKENDS
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_AUTOVAC_FREEZE
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+# Wraparound is also only a consideration for the masters
+{% for server_name in groups['database-server'] %}
+{% if hostvars[server_name].replication_type == "master"  %}
+define service {
+    use                 {{item}}_monitored_service
+    host_name           {{server_name}}
+    contacts            ticketraiser
+    service_description POSTGRES_TXN_WRAPAROUND
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_TXN_WRAPAROUND
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_BACKENDS
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_TXN_WRAPAROUND
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+{% endif %}
+{% endfor %}
+
+
+{% if check_sequences|bool == true %}
+#-----------------------------------------------------------------------
+# Check sequences
+#-----------------------------------------------------------------------
+
+{% for server_name in groups['database-server'] %}
+{% if hostvars[server_name].replication_type == "master"  %}
+define service {
+    use                     {{item}}_monitored_service
+    host_name               {{server_name}}
+    service_description     POSTGRES_SEQUENCE
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_BACKENDS
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_SEQUENCE
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description POSTGRES_SEQUENCE
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+{% endif %}
+{% endfor %}
+{% endif %}
+
+
+{% if check_replication|bool == true %}
+#-----------------------------------------------------------------------
+# Check replication
+#-----------------------------------------------------------------------
+
+# Standby connection checks (run on primary)
+
+{% for server_name in groups['database-server'] %}
+{% if (hostvars[server_name].replication_type == "master" or hostvars[server_name].replication_type == "cascading")
+  and ((hostvars[server_name].check_replication|default(check_replication))|bool == true) %}
+define service {
+    use                     {{item}}_monitored_service
+    host_name               {{server_name}}
+    service_description     REPLICATION_CONN
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_BACKENDS
+    dependent_host_name           {{server_name}}
+    dependent_service_description REPLICATION_CONN
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description REPLICATION_CONN
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+{% endif %}
+{% endfor %}
+
+# Standby lag checks (run on standby)
+{% for server_name in groups['database-server'] %}
+{% if (hostvars[server_name].replication_type == "standby" or hostvars[server_name].replication_type == "cascading")
+  and ((hostvars[server_name].check_replication|default(check_replication))|bool == true) %}
+define service {
+    use                     {{item}}_monitored_service
+    host_name               {{server_name}}
+    service_description     REPLICATION_LAG
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_BACKENDS
+    dependent_host_name           {{server_name}}
+    dependent_service_description REPLICATION_LAG
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description REPLICATION_LAG
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+{% endif %}
+{% endfor %}
+
+{% if check_replication_slots|bool == true %}
+{% for server_name in groups['database-server'] %}
+{% if (hostvars[server_name].replication_type == "master") and ((hostvars[server_name].check_replication|default(check_replication))|bool == true) %}
+define service {
+    use                     {{item}}_monitored_service
+    host_name               {{server_name}}
+    service_description     REPLICATION_SLOT
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_BACKENDS
+    dependent_host_name           {{server_name}}
+    dependent_service_description REPLICATION_SLOT
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+
+define servicedependency {
+    host_name                     {{server_name}}
+    service_description           POSTGRES_CONNECTION
+    dependent_host_name           {{server_name}}
+    dependent_service_description REPLICATION_SLOT
+    execution_failure_criteria    w,u,c
+    notification_failure_criteria w,u,c
+}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+
+{% endif %}
+
+
+{% for server_name in groups['database-server'] %}
+{% if check_repmgr_lag|bool == true and hostvars[server_name].replication_type == "master" %}
+########################################################################
+# Repmgr lag reported from {{server_name}}
+########################################################################
+
+define service {
+    use                 {{item}}_monitored_service
+    host_name           {{server_name}}
+    service_description REPMGR_LAG
+}
+
+{% for standby_name in groups['database-server'] %}
+{% if hostvars[standby_name].replication_type == "standby" and hostvars[standby_name].repmgr_node_id|default(0) %}
+define servicedependency {
+    host_name                           {{standby_name}}
+    service_description                 POSTGRES_CONNECTION
+    dependent_host_name                 {{server_name}}
+    dependent_service_description       REPMGR_LAG
+    execution_failure_criteria          w,u,c
+    notification_failure_criteria       w,u,c
+}
+
+{% endif %}
+{% endfor %}
+
+{% endif %}
+{% endfor %}
+
+
+{% if 'barman-server' in groups %}
+#-----------------------------------------------------------------------
+# Check barman
+#-----------------------------------------------------------------------
+
+{% for server_name in groups['barman-server'] %}
+define service {
+    use                 {{item}}_monitored_barman_service
+    host_name           {{server_name}}
+    service_description BARMAN
+    check_command       check_dummy!2!"No barman check results"
+}
+{% endfor %}
+
+{% endif %}
+
+
+
+{% if check_pgpool|bool == true %}
+#-----------------------------------------------------------------------
+# Check pgpool
+#-----------------------------------------------------------------------
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description CHECK_PGPOOL-II
+    check_command       check_dummy!2!"No pgpool check results"
+}
+
+{% endif %}
+
+{% if check_pg_bouncer|bool == true %}
+#-----------------------------------------------------------------------
+# Check pg_bouncer
+#-----------------------------------------------------------------------
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description POSTGRES_PGBOUNCER_BACKENDS
+    check_command       check_dummy!2!"No pg_bouncer check results"
+}
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description POSTGRES_PGB_POOL_CL_WAITING
+    check_command       check_dummy!2!"No pg_bouncer check results"
+}
+
+define service {
+    use                 {{item}}_monitored_service
+    hostgroup_name      {{item}}_postgres_servers
+    contacts            ticketraiser
+    service_description POSTGRES_PGB_POOL_MAXWAIT
+    check_command       check_dummy!2!"No pg_bouncer check results"
+}
+{% endif %}
+

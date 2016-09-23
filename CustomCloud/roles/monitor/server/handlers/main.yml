@@ -1,0 +1,24 @@
+---
+
+# roles/server/handlers/main.yml
+#
+# Generic service handler definitions
+
+# icinga
+ - name: Reload icinga
+   service: name=icinga state=reloaded
+   delegate_to: rdba.2ndquadrant.com
+   remote_user: admin
+   run_once: true
+
+ - name: Restart icinga
+   service: name=icinga state=restarted
+   delegate_to: rdba.2ndquadrant.com
+   remote_user: admin
+   run_once: true
+
+# nsca-ng
+ - name: Restart nsca-ng
+   service: name=nsca-ng-server state=restarted
+   delegate_to: rdba.2ndquadrant.com
+   run_once: true
