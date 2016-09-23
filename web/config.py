@@ -260,11 +260,16 @@ CELERY_RESULT_BACKEND = 'amqp://guest:guest@localhost:5672//'
 ##########################################################################
 # Email settings
 ##########################################################################
+SEND_EMAIL = True
 SMTP_HOST = 'smtp.gmail.com'
 SMTP_PORT = 587
 SMTP_USERNAME = 'devashish@2ndquadrant.com'
 SMTP_PASSWORD = 'create_an_app_password_and_put_it_here'
 PROVISIONING_REQUEST_RECIPIENTS = ['tpabeta@2ndquadrant.com']
+
+# Toggle for enabling enqueueing a new Service Request
+# Keep it off while we are provisioning manually
+ENQUEUE_SR = False
 
 # Load distribution-specific config overrides
 try:

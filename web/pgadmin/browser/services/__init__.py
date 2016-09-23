@@ -312,13 +312,15 @@ class ServiceView(NodeView):
                     with open(tpa_deploy_yml, 'w') as deployFile:
                         yaml.safe_dump(deployBase, deployFile, default_flow_style=False)
 
-                # Send Email to team
-                emailText = 'Team, please take care of the following request:\n User ID: %s \n Service ID: %s \n Server Software: %s \n Plan %s \n Config %s\n\nAttached are the generated yml files.\nThanks,\nTPA WebUI' %(str(current_user.id), service.id, pgversion, plan, sfx)
-                emailutil.send_mail(config.PROVISIONING_REQUEST_RECIPIENTS, 'TPA Cluster Provisioning Request', emailText, [tpa_config_yml,tpa_deploy_yml])
+                if config.SEND_EMAIL == True :
+                    # Send Email to team
+                    emailText = 'Team, please take care of the following request:\n User ID: %s \n Service ID: %s \n Server Software: %s \n Plan %s \n Config %s\n\nAttached are the generated yml files.\nThanks,\nTPA WebUI' %(str(current_user.id), service.id, pgversion, plan, sfx)
+                    emailutil.send_mail(config.PROVISIONING_REQUEST_RECIPIENTS, 'TPA Cluster Provisioning Request', emailText, [tpa_config_yml,tpa_deploy_yml])
 
-                # Add to queue
-                queue=Queue(user_id = current_user.id, service_id = service.id, service_name = service.name,queued_at = datetime.datetime.utcnow())
-                db.session.add(queue)
+                if config.ENQUEUE_SR == True:
+                    # Add to queue
+                    queue=Queue(user_id = current_user.id, service_id = service.id, service_name = service.name,queued_at = datetime.datetime.utcnow())
+                    db.session.add(queue)
                 db.session.commit()
                 #create_service_async.apply_async(args=(sg.id,))
 
