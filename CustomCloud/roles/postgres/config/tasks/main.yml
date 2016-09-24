@@ -38,6 +38,9 @@
 - name: Create include_dir for extra configuration settings
   file:
     path: "{{ _include_dir }}"
+    owner: postgres
+    group: postgres
+    mode: 0755
     state: directory
 
 - name: Enable include_dir in postgresql.conf
