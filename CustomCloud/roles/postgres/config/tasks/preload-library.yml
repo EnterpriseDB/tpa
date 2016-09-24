@@ -19,11 +19,12 @@
 
 - name: Read current value of shared_preload_libraries
   shell: >
-    eval "libs=$(test -f {{ conf }} && sed -n 's/^shared_preload_libraries *= *//p' {{ conf }}|tail -1)" && echo $libs
+    eval "libs=$(cat 2>/dev/null {{ conf }} {{ override }}|sed -n 's/^shared_preload_libraries *= *//p'|tail -1)" && echo $libs
   changed_when: False
   register: libs
   vars:
-    conf: "{{ postgres_data_dir+'/conf.d' }}/8888-shared_preload_libraries.conf"
+    conf: "{{ postgres_data_dir+'/conf.d' }}/0000-tpa.conf"
+    override: "{{ postgres_data_dir+'/conf.d' }}/8888-shared_preload_libraries.conf"
 
 # But when it comes to writing out the file again, we don't make any
 # attempt to retain whatever was in it before; as the warning clearly
