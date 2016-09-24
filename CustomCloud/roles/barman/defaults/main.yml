@@ -14,5 +14,5 @@ barman_basebackup_retry_times: 3
 barman_basebackup_retry_sleep: 30
 barman_last_backup_maximum_age: 1 WEEK
 barman_backup_options: concurrent_backup
-cron_incremental_backup_interval: "0 4 * * wed/sat"
-cron_incremental_backup_reuse_backup: "link"
+
+default_barman_backup_interval: '0 4 * * wed/sat'

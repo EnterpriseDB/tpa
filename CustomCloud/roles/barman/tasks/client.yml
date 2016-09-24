@@ -40,9 +40,11 @@
     user: barman
     cron_file: /etc/cron.d/barman
     name: Backup from server {{ _backup_name }}
-    weekday: 0
-    hour: 0
-    minute: 0
+    minute: "{{ _barman_backup_interval[0] }}"
+    hour: "{{ _barman_backup_interval[1] }}"
+    day: "{{ _barman_backup_interval[2] }}"
+    month: "{{ _barman_backup_interval[3] }}"
+    weekday: "{{ _barman_backup_interval[4] }}"
     job: >
       [ -x /usr/bin/barman ] && /usr/bin/barman backup {{ _backup_name }}
     state: present
