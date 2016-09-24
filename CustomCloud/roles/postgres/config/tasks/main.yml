@@ -86,6 +86,9 @@
     group: postgres
     mode: 0644
 
+- include: extensions.yml
+  tags: [postgres, extensions]
+
 # Finally, we generate the TLS certificates needed by Postgres.
 
 - include: tls.yml

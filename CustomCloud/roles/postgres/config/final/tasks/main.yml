@@ -1,0 +1,15 @@
+---
+
+# We've already installed configuration files for any extensions that we
+# care about; now it's time to issue CREATE EXTENSION commands.
+
+- name: Install default Postgres extensions
+  postgresql_ext:
+    state: present
+    db: "{{ item.0 }}"
+    name: "{{ item.1 }}"
+  with_nested:
+    - [postgres, template1]
+    - "{{ postgres_extensions|default([]) }}"
+  become_user: postgres
+  become: true

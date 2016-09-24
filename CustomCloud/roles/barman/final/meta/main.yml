@@ -1,0 +1,8 @@
+---
+
+dependencies:
+  - role: postgres/restart
+  - role: postgres/createuser
+    username: barman
+  - role: postgres/createuser
+    username: streaming_barman

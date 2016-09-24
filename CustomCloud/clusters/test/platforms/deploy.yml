@@ -84,7 +84,7 @@
     - role: barman
       tags: barman
 
-    - role: postgres/postinstall
+    - role: postgres/final
       when: >
         'primary' in role
-      tags: [postgres, postinstall]
+      tags: [postgres, final]

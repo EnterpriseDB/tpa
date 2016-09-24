@@ -1,0 +1,12 @@
+---
+
+dependencies:
+  - role: postgres/restart
+  - role: postgres/createuser
+    username: postgres
+  - role: postgres/config/final
+    when: >
+      'primary' in role
+  - role: barman/final
+    when: >
+      backup != '' and initialise_backup is defined

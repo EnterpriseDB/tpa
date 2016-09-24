@@ -1,0 +1,6 @@
+---
+
+dependencies:
+  - role: postgres/restart
+  - role: postgres/createuser
+    username: repmgr

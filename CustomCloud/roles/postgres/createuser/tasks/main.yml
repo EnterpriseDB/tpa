@@ -3,7 +3,7 @@
 - include_vars: "{{ playbook_dir }}/vault/{{ username }}_password.yml"
   no_log: true
 
-- name: Create the {{ user }} user
+- name: Create the {{ username }} superuser
   postgresql_user:
     name: "{{ username }}"
     encrypted: yes
