@@ -8,6 +8,7 @@ proto udp
 ca /etc/tpa/openvpn/{{ cluster_name }}-root-CA.pem
 cert /etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.crt
 key  /etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.key
+tls-auth /etc/tpa/openvpn/{{ cluster_name }}-ta.key 1
 
 nobind
 comp-lzo
