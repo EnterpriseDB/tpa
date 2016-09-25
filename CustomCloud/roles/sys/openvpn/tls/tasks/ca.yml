@@ -12,6 +12,30 @@
   run_once: yes
   sudo: no
 
+- name: Create DH parameters
+  local_action:
+    module: >
+    shell
+    umask 077 &&
+    /usr/bin/openssl dhparam -out "{{ cluster_name }}-dh4096.pem" 4096
+  args:
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "{{ cluster_name }}-dh4096.pem"
+  run_once: yes
+  sudo: no
+
+- name: Create TA key
+  local_action:
+    module: >
+    shell
+    umask 077 &&
+    /usr/local/sbin/openvpn --genkey --secret "{{ cluster_name }}-ta.key"
+  args:
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "{{ cluster_name }}-ta.key"
+  run_once: yes
+  sudo: no
+
 - name: Self sign the CA certificate
   local_action:
     module: >
@@ -27,3 +51,6 @@
 
 - name: Copy the certificate from localhost to all hosts
   copy: src="{{ playbook_dir }}/certs/{{ cluster_name }}-root-CA.pem"  dest="/etc/tpa/openvpn/{{ cluster_name }}-root-CA.pem"
+
+- name: Copy TA key from localhost to all hosts
+  copy: src="{{ playbook_dir }}/certs/{{ cluster_name }}-ta.key"  dest="/etc/tpa/openvpn/{{ cluster_name }}-ta.key"
