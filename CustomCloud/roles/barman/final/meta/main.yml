@@ -3,6 +3,8 @@
 dependencies:
   - role: postgres/restart
   - role: postgres/createuser
-    username: barman
+    vars:
+      username: barman
   - role: postgres/createuser
-    username: streaming_barman
+    vars:
+      username: streaming_barman

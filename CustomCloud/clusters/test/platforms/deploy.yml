@@ -86,5 +86,5 @@
 
     - role: postgres/final
       when: >
-        'primary' in role
+        'postgres' in role
       tags: [postgres, final]
