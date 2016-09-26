@@ -41,7 +41,8 @@
     - name: Run repmgr standby clone
       command: >
         {{ postgres_bin_dir }}/repmgr standby clone --verbose \
-          -D {{ postgres_data_dir }} -d repmgr -U repmgr -w 0 --fast-checkpoint \
+          -f /etc/repmgr/repmgr.conf -D {{ postgres_data_dir }} \
+          -d repmgr -U repmgr -w 0 --fast-checkpoint \
           -h {{ hostvars[upstream].inventory_hostname }}
       become_user: postgres
       become: true
