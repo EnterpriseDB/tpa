@@ -5,7 +5,7 @@ dependencies:
     vars:
       username: repmgr
     when: >
-      'primary' in role
+      'replica' not in role
   - role: repmgr/primary/final
     when: >
       'primary' in role
