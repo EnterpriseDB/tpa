@@ -24,9 +24,12 @@
   when: >
     slot|failed and not "Replication slot 'barman' already exists" in slot.stderr
 
-- name: Run barman receive-wal
+# Run barman cron instead of using barman receive-wal directly, because
+# the latter keeps the "command" task waiting forever.
+
+- name: Run barman cron
   command: >
-    /usr/bin/barman receive-wal {{ backup_name }}
+    /usr/bin/barman cron
   delegate_to: "{{ backup }}"
   become_user: barman
   become: yes
