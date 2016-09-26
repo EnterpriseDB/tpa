@@ -21,7 +21,7 @@
 - name: Check if the replica is registered
   shell: >
     {{ postgres_bin_dir }}/repmgr cluster show \
-      -f /etc/repmgr/repmgr.conf | grep {{ ip_address }}
+      -f /etc/repmgr/repmgr.conf | grep 'host={{ inventory_hostname }}'
   register: replica
   ignore_errors: True
   changed_when: False
@@ -42,7 +42,7 @@
       command: >
         {{ postgres_bin_dir }}/repmgr standby clone --verbose \
           -D {{ postgres_data_dir }} -d repmgr -U repmgr -w 0 --fast-checkpoint \
-          -h {{ hostvars[upstream].ip_address }}
+          -h {{ hostvars[upstream].inventory_hostname }}
       become_user: postgres
       become: true
 
