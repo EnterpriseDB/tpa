@@ -65,6 +65,7 @@ postgres_packages:
     - postgresql-{{pgversion}}-pgespresso
     - postgresql-plperl-{{pgversion}}
     - postgresql-{{pgversion}}-plv8
+    - barman-cli
   RedHat:
     - postgresql{{pgversionNN}}
     - postgresql{{pgversionNN}}-debuginfo
@@ -75,6 +76,7 @@ postgres_packages:
     - pgespresso{{pgversionNN}}
     - postgresql{{pgversionNN}}-plperl
     - plv8_{{pgversionNN}}
+    - barman-cli
   Ubuntu: *debian_packages
 
 extra_postgres_packages:
