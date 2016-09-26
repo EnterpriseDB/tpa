@@ -19,7 +19,7 @@
 
 - fail: msg="{{ create.stderr }}"
   when: >
-    'replica' not in role or 'Error: cluster configuration already exists' not in create.stderr
+    create|failed and ('replica' not in role or 'Error: cluster configuration already exists' not in create.stderr)
 
 - include: ../initdb.yml
   when: common|failed
