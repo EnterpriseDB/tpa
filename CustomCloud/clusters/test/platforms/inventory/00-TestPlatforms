@@ -1,11 +1,11 @@
 [tag_Cluster_TestPlatforms]
-debian-primary ansible_host=54.229.57.115 node=1 role='["primary"]'
-debian-replica ansible_host=54.229.89.254 node=2 role='["replica"]'
-redhat-primary ansible_host=54.229.150.237 node=3 role='["primary"]'
-redhat-replica ansible_host=54.229.142.110 node=4 role='["replica"]'
-ubuntu-primary ansible_host=54.194.234.231 node=5 role='["primary"]'
-testplatforms-6 ansible_host=54.229.152.147 node=6 role='["replica"]'
-eu-barman ansible_host=54.171.134.47 node=7 role='["barman","monitor"]'
+debian-primary ansible_host=54.229.186.66 node=1 role='["primary"]'
+debian-replica ansible_host=54.229.58.88 node=2 role='["replica"]'
+redhat-primary ansible_host=54.229.184.159 node=3 role='["primary"]'
+redhat-replica ansible_host=54.229.175.156 node=4 role='["replica"]'
+ubuntu-primary ansible_host=54.229.191.203 node=5 role='["primary"]'
+testplatforms-6 ansible_host=54.194.19.98 node=6 role='["replica"]'
+eu-barman ansible_host=54.154.140.240 node=7 role='["barman","monitor"]'
 
 [tag_Cluster_TestPlatforms:vars]
 cluster_tag=tag_Cluster_TestPlatforms
