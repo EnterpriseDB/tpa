@@ -7,6 +7,10 @@ default_postgres_data_dirs:
   Debian: "/var/lib/postgresql/{{ pgversion }}/main"
   RedHat: "/var/lib/pgsql/{{ pgversion }}/data"
 
+default_postgres_conf_dirs:
+  Debian: "/etc/postgresql/{{ pgversion }}/main"
+  RedHat: ""
+
 default_postgres_service_names:
   Debian: "postgresql"
   RedHat: "postgresql-{{ pgversion }}"
