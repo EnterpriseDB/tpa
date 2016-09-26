@@ -1,20 +1,19 @@
 ---
 
 # Re-activate the per-client Barman backups on the server and force a
-# backup. TODO: This should use _backup_name, not inventory_hostname,
-# but we can't do that sensibly without include_role.
+# backup.
 
 - name: Set backups to active
   ini_file:
-    dest: "/etc/barman.d/{{ inventory_hostname }}.conf"
-    section: "{{ inventory_hostname }}"
+    dest: "/etc/barman.d/{{ backup_name }}.conf"
+    section: "{{ backup_name }}"
     option: active
     value: "true"
   delegate_to: "{{ backup }}"
 
 - name: Create replication slot for Barman
   command: >
-    /usr/bin/barman receive-wal --create-slot {{ inventory_hostname }}
+    /usr/bin/barman receive-wal --create-slot {{ backup_name }}
   delegate_to: "{{ backup }}"
   ignore_errors: yes
   register: slot
@@ -38,7 +37,7 @@
 
 - name: Run barman switch-xlog
   command: >
-    /usr/bin/barman switch-xlog {{ inventory_hostname }}
+    /usr/bin/barman switch-xlog {{ backup_name }}
   delegate_to: "{{ backup }}"
   become_user: barman
   become: yes
@@ -54,7 +53,7 @@
 
 - name: Force an immediate backup
   shell: >
-    /usr/bin/barman backup "{{ inventory_hostname }}"
+    /usr/bin/barman backup "{{ backup_name }}"
   delegate_to: "{{ backup }}"
   become_user: barman
   become: yes

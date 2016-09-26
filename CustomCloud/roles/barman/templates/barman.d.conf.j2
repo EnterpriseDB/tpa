@@ -1,4 +1,4 @@
-[{{ _backup_name }}]
+[{{ backup_name }}]
 description = "Streaming backups from {{ inventory_hostname }}"
 conninfo = "host={{ ip_address }} port={{ postgres_port }} dbname=postgres user=barman"
 streaming_conninfo = "host={{ ip_address }} port={{ postgres_port }} user=streaming_barman"
