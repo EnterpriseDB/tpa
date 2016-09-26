@@ -34,12 +34,12 @@
 - name: Append {{ library }} to shared_preload_libraries
   template:
     src: variable.j2
-    dest: "{{ conf }}"
+    dest: "{{ spl_config }}"
     owner: postgres
     group: postgres
     mode: 0644
   vars:
-    conf: "{{ postgres_data_dir+'/conf.d' }}/8888-shared_preload_libraries.conf"
+    spl_config: "{{ postgres_data_dir+'/conf.d' }}/8888-shared_preload_libraries.conf"
     variable: shared_preload_libraries
     value: >
       '{{ libs.stdout and libs.stdout.split(',')|map('trim')|list|union([library])|join(', ') or library }}'
