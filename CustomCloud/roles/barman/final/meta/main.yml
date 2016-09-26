@@ -1,7 +1,6 @@
 ---
 
 dependencies:
-  - role: postgres/restart
   - role: postgres/createuser
     vars:
       username: barman
