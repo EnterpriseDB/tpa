@@ -15,11 +15,11 @@ ec2_vpc_subnets:
   10.33.174.16/28: eu-west-1b
 
 instances:
-    # debian-jessie-amd64-hvm-2016-04-03-ebs
+    # debian-jessie-amd64-hvm-2016-09-19-ebs
 
     - node: 1
       type: t2.nano
-      image: ami-e079f893
+      image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.174.0/28
       volumes:
@@ -37,7 +37,7 @@ instances:
         backup: eu-barman
     - node: 2
       type: t2.nano
-      image: ami-e079f893
+      image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.174.16/28
       volumes:
@@ -125,7 +125,7 @@ instances:
 
     - node: 7
       type: t2.nano
-      image: ami-e079f893
+      image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.174.16/28
       volumes:
