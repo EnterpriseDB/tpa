@@ -21,7 +21,6 @@
 - block:
     - name: Download pre-release Barman 2.0 deb package
       get_url:
-        url: "http://download.pgbarman.org/release/2.0a1/deb/barman_2.0~a1-1.{{ ansible_distribution_release }}+1_all.deb"
         url: "http://download.pgbarman.org/release/2.0b1/deb/barman_2.0~b1-1.{{ ansible_distribution_release }}+1_all.deb"
         dest: /tmp/barman.deb
     - name: Install pre-release Barman 2.0 deb package
