@@ -24,20 +24,23 @@
   when: >
     slot|failed and not "Replication slot 'barman' already exists" in slot.stderr
 
-# Run barman cron manually (i.e., as opposed to letting it run via
-# cron) so that we can be sure that pg_receivexlog is running when
-# we switch-xlog below.
-
-- name: Run barman cron
+- name: Run barman receive-wal
   command: >
-    /usr/bin/barman cron
+    /usr/bin/barman receive-wal {{ backup_name }}
   delegate_to: "{{ backup }}"
   become_user: barman
   become: yes
 
 - name: Run barman switch-xlog
   command: >
-    /usr/bin/barman switch-xlog {{ backup_name }}
+    /usr/bin/barman switch-xlog --force {{ backup_name }}
+  delegate_to: "{{ backup }}"
+  become_user: barman
+  become: yes
+
+- name: Run barman archive-wal
+  command: >
+    /usr/bin/barman archive-wal {{ backup_name }}
   delegate_to: "{{ backup }}"
   become_user: barman
   become: yes
