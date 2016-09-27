@@ -48,33 +48,9 @@
         mountpoint: "{{ postgres_home }}"
       tags: [sys, fs]
 
-    # Install Postgres from packages.
-    - role: postgres/pkg
-      when: >
-        'postgres' in role or 'barman' in role
-
-    # Set up the postgres (system) user.
-    - role: postgres/user
+    - role: postgres
       when: >
         'postgres' in role
-      tags: postgres
-
-    - role: postgres/initdb
-      when: >
-        'postgres' in role
-
-    - role: postgres/config
-      when: >
-        'primary' in role
-      tags: [postgres, config]
-
-    # Set up password-less SSH for the user postgres between all hosts
-    # in this cluster.
-    - role: sys/ssh
-      ssh_user: postgres
-      when: >
-        'postgres' in role
-      tags: [sys, ssh]
 
     # Set up Barman backups.
     - role: barman

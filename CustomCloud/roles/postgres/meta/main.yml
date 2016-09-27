@@ -1,0 +1,15 @@
+---
+
+allow_duplicates: no
+dependencies:
+  - role: postgres/pkg
+  - role: postgres/user
+    tags: [postgres, user]
+  - role: postgres/initdb
+  - role: postgres/config
+    when: >
+      'primary' in role
+    tags: [postgres, config]
+  - role: sys/ssh
+    ssh_user: postgres
+    tags: [sys, ssh]
