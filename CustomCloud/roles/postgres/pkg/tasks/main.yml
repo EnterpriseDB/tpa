@@ -38,5 +38,4 @@
   set_fact:
     pgbindir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
     postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
-    postgres_conf_dir: "{{ postgres_conf_dir|default(default_postgres_conf_dirs[ansible_os_family]) }}"
   tags: always

@@ -11,3 +11,6 @@ postgres_hba_settings: []
 
 postgres_conf_template: ''
 postgres_conf_settings: {}
+
+default_postgres_extensions:
+  - pg_stat_statements

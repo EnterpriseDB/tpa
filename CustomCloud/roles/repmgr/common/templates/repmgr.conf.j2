@@ -1,7 +1,7 @@
 cluster={{ cluster_name|lower }}
 node={{ node }}
 node_name=node{{ node }}
-conninfo='host={{ ip_address }} user=repmgr dbname=repmgr'
+conninfo='host={{ inventory_hostname }} user=repmgr dbname=repmgr'
 master_response_timeout=60
 reconnect_attempts=6
 reconnect_interval=10
@@ -10,3 +10,6 @@ pg_bindir={{ postgres_bin_dir }}
 promote_command='/etc/repmgr/promote_command.sh'
 follow_command='/etc/repmgr/follow_command.sh'
 logfile='/var/log/postgresql/repmgrd.log'
+{% if upstream and hostvars[upstream].backup != '' %}
+restore_command='/usr/bin/barman-wal-restore -U barman {{ hostvars[hostvars[upstream].backup].inventory_hostname }} {{ hostvars[upstream].backup_name }} %f %p'
+{% endif %}

@@ -1,0 +1,71 @@
+---
+
+# We arrive at this point after having already applied postgres/initdb
+# and creating the data directory. This is necessary because we depend
+# on pg_createcluster/postgresqlNN-setup to configure the database to
+# start at boot time, but it means we now have to remove our PGDATA
+# before cloning the primary's PGDATA.
+#
+# What we would like to do is not apply postgres/initdb on replicas, run
+# "repmgr standby clone" and configure Postgres to start at boot, either
+# by telling the setup tools to use the existing data directory—which is
+# something they don't support—or by installing our own unit files. That
+# way, we're never in the position of having to move aside an existing
+# data directory (albeit an empty one).
+#
+# We could also check that PGDATA doesn't exist here, run the setup tool
+# (e.g., include_role: postgres/initdb), then delete the data directory
+# it creates and replace it with "repmgr standby clone". But it doesn't
+# seem worth the bother (especially when include_role isn't reliable).
+
+- name: Check if the replica is registered
+  shell: >
+    {{ postgres_bin_dir }}/repmgr cluster show \
+      -f /etc/repmgr/repmgr.conf | grep 'host={{ inventory_hostname }}'
+  register: replica
+  ignore_errors: True
+  changed_when: False
+  become_user: postgres
+  become: yes
+
+- block:
+    - name: Stop Postgres
+      service:
+        name: "{{ postgres_service_name }}"
+        state: stopped
+
+    - name: Empty the existing data directory
+      shell: >
+        rm -rf {{ postgres_data_dir }}/*
+
+    - name: Run repmgr standby clone
+      command: >
+        {{ postgres_bin_dir }}/repmgr standby clone --verbose \
+          -f /etc/repmgr/repmgr.conf -D {{ postgres_data_dir }} \
+          -d repmgr -U repmgr -w 0 --fast-checkpoint \
+          -h {{ hostvars[upstream].inventory_hostname }}
+      become_user: postgres
+      become: true
+
+    - name: Move over conf files to proper location
+      command: mv {{ postgres_data_dir }}/{{ item }} {{ postgres_conf_dir }}/
+      with_items:
+        - postgresql.conf
+        - pg_ident.conf
+        - pg_hba.conf
+      when: >
+        postgres_conf_dir != postgres_data_dir
+
+    - name: Start Postgres
+      service:
+        name: "{{ postgres_service_name }}"
+        state: started
+
+    - name: Run repmgr standby register
+      command: >
+        {{ postgres_bin_dir }}/repmgr standby register --verbose \
+          -f /etc/repmgr/repmgr.conf
+      become_user: postgres
+      become: true
+
+  when: replica|failed

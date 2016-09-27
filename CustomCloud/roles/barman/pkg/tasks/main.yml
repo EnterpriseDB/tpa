@@ -21,7 +21,7 @@
 - block:
     - name: Download pre-release Barman 2.0 deb package
       get_url:
-        url: "http://download.pgbarman.org/release/2.0a1/deb/barman_2.0~a1-1.{{ ansible_distribution_release }}+1_all.deb"
+        url: "http://download.pgbarman.org/release/2.0b1/deb/barman_2.0~b1-1.{{ ansible_distribution_release }}+1_all.deb"
         dest: /tmp/barman.deb
     - name: Install pre-release Barman 2.0 deb package
       command: dpkg --skip-same-version -i /tmp/barman.deb
@@ -33,7 +33,7 @@
 
 - name: Install pre-release Barman 2.0 rpm packages
   command: >
-    rpm -ivh http://download.pgbarman.org/release/2.0a1/rpm/barman-2.0-0.1.a1.el7.noarch.rpm
+    rpm -ivh http://download.pgbarman.org/release/2.0b1/rpm/barman-2.0-0.1.b1.el7.noarch.rpm
   register: rpm
   changed_when: >
     rpm|succeeded and 'is already installed' not in rpm.stdout

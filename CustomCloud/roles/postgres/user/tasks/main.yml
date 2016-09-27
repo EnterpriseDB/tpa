@@ -82,3 +82,19 @@
     line: >-
       . "$HOME/.bashrc"
   ignore_errors: true
+
+# The following is necessary on RedHat, but the directory exists already
+# on Debian/Ubuntu.
+
+- name: Ensure /var/log/postgresql exists
+  file:
+    path: /var/log/postgresql
+    owner: postgres
+    group: postgres
+    mode: 0755
+    state: directory
+
+# Finally, we generate the TLS certificates needed by Postgres.
+
+- include: tls.yml
+  tags: [postgres, tls]

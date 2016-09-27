@@ -1,0 +1,4 @@
+---
+
+# There's no special configuration to install on a replica, everything
+# is done in repmgr/replica/final.

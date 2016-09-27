@@ -1,0 +1,31 @@
+---
+
+# Here we install any configuration required for the extensions to be
+# installed. The "CREATE EXTENSION" commands will be issued later, via
+# postgres/config/final.
+
+- set_fact:
+    postgres_extensions: "{{ _postgres_extensions }}"
+
+# We install a default configuration for the extensions we care about.
+# We don't need to have conditional logic in this template, because the
+# configuration will be ignored if we aren't installing a particular
+# extension after all.
+
+- name: Install default extension configuration file
+  template:
+    src: extensions.conf.j2
+    dest: "{{ _include_dir }}/1111-extensions.conf"
+    owner: postgres
+    group: postgres
+    mode: 0644
+
+# If we are installing pg_stat_statements, we need to add it to
+# shared_preload_libraries.
+
+- name: Add pg_stat_statements to shared_preload_libraries
+  include: ../../../postgres/config/tasks/preload-library.yml
+  vars:
+    library: pg_stat_statements
+  when: >
+    'pg_stat_statements' in postgres_extensions

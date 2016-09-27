@@ -1,0 +1,17 @@
+---
+
+dependencies:
+  - role: postgres/createuser
+    vars:
+      username: repmgr
+    when: >
+      'replica' not in role
+  - role: repmgr/primary/final
+    when: >
+      'primary' in role
+  - role: repmgr/replica/final
+    when: >
+      'replica' in role
+  - role: repmgr/witness/final
+    when: >
+      'witness' in role

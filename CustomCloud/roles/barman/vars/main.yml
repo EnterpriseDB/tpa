@@ -8,3 +8,5 @@
 _backup_name: "{{ backup_name|default(inventory_hostname) }}"
 
 _config_file: "/etc/barman.d/{{ _backup_name }}.conf"
+
+_barman_backup_interval: "{{ (barman_backup_interval|default(default_barman_backup_interval)).split(' ')|list }}"

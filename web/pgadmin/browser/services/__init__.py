@@ -23,6 +23,7 @@ from pgadmin.browser.utils import NodeView
 from pgadmin.utils.ajax import make_json_response, \
     make_response as ajax_response
 from pgadmin.utils.menu import MenuItem
+from pgadmin.utils import emailutil
 
 from pgadmin.model import db, Service, MetaServerSoftware, MetaPlan, Queue
 
@@ -245,6 +246,9 @@ class ServiceView(NodeView):
 
                 cluster_vars_template = None
 
+                pgversion = None
+                plan = None;
+
                 with open(tpa_config_yml_base, 'r') as configFileBase:
                     configBase = yaml.load(configFileBase)
                     configBase['cluster_name']=data[u'name']
@@ -298,9 +302,7 @@ class ServiceView(NodeView):
                     serverSw = MetaServerSoftware.query.filter_by(id = service.server_software).first().name
                     temp = serverSw.split();
                     tmpsize = len(temp)
-
                     pgversion = temp[tmpsize-1]
-
                     deployBase = yaml.load(deployFileBase)
                     deployBase[0]['roles'][1]['postgres_version'] = pgversion
                     #deployBase[0]['vars']['use_2ndquadrant_postgres'] = pg2q
@@ -310,13 +312,16 @@ class ServiceView(NodeView):
                     with open(tpa_deploy_yml, 'w') as deployFile:
                         yaml.safe_dump(deployBase, deployFile, default_flow_style=False)
 
+                if config.SEND_EMAIL == True :
+                    # Send Email to team
+                    emailText = 'Team, please take care of the following request:\n User ID: %s \n Service ID: %s \n Server Software: %s \n Plan %s \n Config %s\n\nAttached are the generated yml files.\nThanks,\nTPA WebUI' %(str(current_user.id), service.id, pgversion, plan, sfx)
+                    emailutil.send_mail(config.PROVISIONING_REQUEST_RECIPIENTS, 'TPA Cluster Provisioning Request', emailText, [tpa_config_yml,tpa_deploy_yml])
 
-                # Add to queue
-                queue=Queue(user_id = current_user.id, service_id = service.id, service_name = service.name,queued_at = datetime.datetime.utcnow())
-                db.session.add(queue)
-
+                if config.ENQUEUE_SR == True:
+                    # Add to queue
+                    queue=Queue(user_id = current_user.id, service_id = service.id, service_name = service.name,queued_at = datetime.datetime.utcnow())
+                    db.session.add(queue)
                 db.session.commit()
-
                 #create_service_async.apply_async(args=(sg.id,))
 
                 data[u'id'] = service.id

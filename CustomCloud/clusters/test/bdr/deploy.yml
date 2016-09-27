@@ -15,6 +15,8 @@
     - name: Store the public IP  as a fact
       set_fact:
         vpn_address: "{{ public_ip }}"
+        vpn_network: 192.168.61.0
+        vpn_netmask: 255.255.255.0
 
     # VPN server hostname: all deploys which we will use sys/openvpn will need this
     - name: Define vpn server hostname
@@ -37,6 +39,9 @@
       tags: always
 
     - role: sys/sysctl
+      vars:
+        sysctl_values:
+          net.ipv4.ip_forward: 1
       tags: [sys, sysctl]
 
     - role: sys/fs

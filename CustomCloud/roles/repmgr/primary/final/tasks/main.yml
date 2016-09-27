@@ -1,0 +1,27 @@
+---
+
+- name: Create repmgr database
+  postgresql_db:
+    name: repmgr
+    owner: repmgr
+    state: present
+  become_user: postgres
+  become: yes
+
+- name: Check if the primary is registered
+  command: >
+    {{ postgres_bin_dir }}/repmgr cluster show \
+      -f /etc/repmgr/repmgr.conf
+  register: primary
+  ignore_errors: True
+  changed_when: False
+  become_user: postgres
+  become: yes
+
+- name: Run 'repmgr primary register' on the primary
+  command: >
+    {{ postgres_bin_dir }}/repmgr primary register --verbose \
+      -f /etc/repmgr/repmgr.conf
+  become_user: postgres
+  become: yes
+  when: primary|failed

@@ -3,8 +3,15 @@
 - name: Set Postgres data directory
   set_fact:
     postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dirs[ansible_os_family]) }}"
+    postgres_conf_dir: "{{ postgres_conf_dir|default(default_postgres_conf_dirs[ansible_os_family]) }}"
     postgres_service_name: "{{ postgres_service_name|default(default_postgres_service_names[ansible_os_family]) }}"
   tags: always
+
+- name: Set default postgres_conf_dir
+  set_fact:
+    postgres_conf_dir: "{{ postgres_data_dir }}"
+  when: >
+    postgres_conf_dir == ''
 
 - name: Check to see if the data directory is empty
   stat: path="{{ postgres_data_dir }}/PG_VERSION"

@@ -1,0 +1,13 @@
+---
+
+- include_vars: "{{ playbook_dir }}/vault/{{ username }}_password.yml"
+  no_log: true
+
+- name: Create the {{ username }} superuser
+  postgresql_user:
+    name: "{{ username }}"
+    encrypted: yes
+    password: "md5{{ (vars[username+'_password'] + username)|hash('md5') }}"
+    role_attr_flags: superuser
+  become_user: postgres
+  become: yes

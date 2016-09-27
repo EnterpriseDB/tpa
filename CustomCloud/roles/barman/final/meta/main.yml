@@ -1,0 +1,9 @@
+---
+
+dependencies:
+  - role: postgres/createuser
+    vars:
+      username: barman
+  - role: postgres/createuser
+    vars:
+      username: streaming_barman

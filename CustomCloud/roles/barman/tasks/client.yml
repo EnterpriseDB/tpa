@@ -29,7 +29,7 @@
     - name: Set client configuration to inactive pending initialisation
       ini_file:
         dest: "{{ _config_file }}"
-        section: "{{ _backup_name }}"
+        section: "{{ backup_name }}"
         option: active
         value: "false"
       delegate_to: "{{ backup }}"
@@ -39,11 +39,13 @@
   cron:
     user: barman
     cron_file: /etc/cron.d/barman
-    name: Backup from server {{ _backup_name }}
-    weekday: 0
-    hour: 0
-    minute: 0
+    name: Backup from server {{ backup_name }}
+    minute: "{{ _barman_backup_interval[0] }}"
+    hour: "{{ _barman_backup_interval[1] }}"
+    day: "{{ _barman_backup_interval[2] }}"
+    month: "{{ _barman_backup_interval[3] }}"
+    weekday: "{{ _barman_backup_interval[4] }}"
     job: >
-      [ -x /usr/bin/barman ] && /usr/bin/barman backup {{ _backup_name }}
+      [ -x /usr/bin/barman ] && /usr/bin/barman backup {{ backup_name }}
     state: present
   delegate_to: "{{ backup }}"

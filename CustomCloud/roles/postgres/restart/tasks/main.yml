@@ -1,0 +1,8 @@
+---
+
+# We restart Postgres unconditionally for now. In the near future we
+# should use a notifier mechanism so that we restart only when the
+# Postgres configuration has changed.
+
+- name: Restart Postgres unconditionally
+  service: name={{ postgres_service_name }} state=restarted

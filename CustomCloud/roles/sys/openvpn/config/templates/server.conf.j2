@@ -6,10 +6,11 @@ port 1194
 dev tun
 proto udp
 
-dh /etc/tpa/openvpn/dh2048.pem
+dh /etc/tpa/openvpn/{{ cluster_name }}-dh4096.pem
 ca /etc/tpa/openvpn/{{ cluster_name }}-root-CA.pem
 cert /etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.crt
 key  /etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.key
+tls-auth /etc/tpa/openvpn/{{ cluster_name }}-ta.key 0
 
 client-config-dir /etc/tpa/openvpn/ccd
 ifconfig-pool-persist /etc/tpa/openvpn/ipp.txt

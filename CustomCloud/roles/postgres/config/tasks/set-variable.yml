@@ -11,7 +11,7 @@
 
 - assert:
     that:
-      - name is defined
+      - variable is defined
       - value is defined
 
 - name: Set override for variable {{ name }}

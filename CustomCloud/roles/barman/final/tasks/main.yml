@@ -1,20 +1,19 @@
 ---
 
 # Re-activate the per-client Barman backups on the server and force a
-# backup. TODO: This should use _backup_name, not inventory_hostname,
-# but we can't do that sensibly without include_role.
+# backup.
 
 - name: Set backups to active
   ini_file:
-    dest: "/etc/barman.d/{{ inventory_hostname }}.conf"
-    section: "{{ inventory_hostname }}"
+    dest: "/etc/barman.d/{{ backup_name }}.conf"
+    section: "{{ backup_name }}"
     option: active
     value: "true"
   delegate_to: "{{ backup }}"
 
 - name: Create replication slot for Barman
   command: >
-    /usr/bin/barman receive-wal --create-slot {{ inventory_hostname }}
+    /usr/bin/barman receive-wal --create-slot {{ backup_name }}
   delegate_to: "{{ backup }}"
   ignore_errors: yes
   register: slot
@@ -25,9 +24,8 @@
   when: >
     slot|failed and not "Replication slot 'barman' already exists" in slot.stderr
 
-# Run barman cron manually (i.e., as opposed to letting it run via
-# cron) so that we can be sure that pg_receivexlog is running when
-# we switch-xlog below.
+# Run barman cron instead of using barman receive-wal directly, because
+# the latter keeps the "command" task waiting forever.
 
 - name: Run barman cron
   command: >
@@ -38,7 +36,7 @@
 
 - name: Run barman switch-xlog
   command: >
-    /usr/bin/barman switch-xlog {{ inventory_hostname }}
+    /usr/bin/barman switch-xlog --force {{ backup_name }}
   delegate_to: "{{ backup }}"
   become_user: barman
   become: yes
@@ -52,9 +50,16 @@
 - name: Pause to let a WAL segment be archived
   pause: seconds=30
 
+- name: Run barman archive-wal
+  command: >
+    /usr/bin/barman archive-wal {{ backup_name }}
+  delegate_to: "{{ backup }}"
+  become_user: barman
+  become: yes
+
 - name: Force an immediate backup
   shell: >
-    /usr/bin/barman backup "{{ inventory_hostname }}"
+    /usr/bin/barman backup "{{ backup_name }}"
   delegate_to: "{{ backup }}"
   become_user: barman
   become: yes

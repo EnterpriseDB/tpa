@@ -1,0 +1,19 @@
+---
+
+dependencies:
+  - role: postgres/restart
+    when: >
+      'replica' not in role
+  - role: postgres/createuser
+    username: postgres
+    when: >
+      'replica' not in role
+  - role: postgres/config/final
+    when: >
+      'replica' not in role
+  - role: barman/final
+    when: >
+      backup != '' and initialise_backup is defined
+  - role: repmgr/final
+    when: >
+      initialise_replication is defined
