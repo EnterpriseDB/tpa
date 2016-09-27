@@ -5,7 +5,7 @@ redhat-primary ansible_host=54.229.184.159 node=3 role='["primary"]'
 redhat-replica ansible_host=54.229.175.156 node=4 role='["replica"]'
 ubuntu-primary ansible_host=54.229.191.203 node=5 role='["primary"]'
 testplatforms-6 ansible_host=54.194.19.98 node=6 role='["replica"]'
-eu-barman ansible_host=54.154.140.240 node=7 role='["barman","monitor"]'
+eu-barman ansible_host=54.154.140.240 node=7 role='["barman","monitor","witness"]'
 
 [tag_Cluster_TestPlatforms:vars]
 cluster_tag=tag_Cluster_TestPlatforms

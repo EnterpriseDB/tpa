@@ -137,5 +137,5 @@ instances:
             volume_size: 32
       tags:
         os: Debian
-        role: barman,monitor
+        role: barman,monitor,witness
         Name: eu-barman
