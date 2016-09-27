@@ -687,7 +687,7 @@ function($, _, S, pgAdmin, Menu, Backbone, Alertify, pgBrowser, Backform) {
           function() {
             $.ajax({
               url: obj.generate_url(i, input.url, d, true),
-              type:'STATUS',
+              type:'DELETE',
               success: function(res) {
                 if (res.success == 0) {
                   pgBrowser.report_error(res.errormsg, res.info);
