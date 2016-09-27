@@ -1,18 +1,29 @@
 ---
 
+## Barman server-wide defaults (/etc/barman.conf)
+
 barman_home: /var/lib/barman
 barman_user: barman
 barman_group: barman
 barman_log_file: /var/log/barman/barman.log
+
+## Per-server configuration (/etc/barman.d/servername.conf)
+
+barman_backup_method: postgres
+
 barman_compression: gzip
 barman_reuse_backup: link
-barman_minimum_redundancy: 3
-barman_retention_policy: RECOVERY WINDOW OF 4 WEEKS
+barman_backup_options: concurrent_backup
+
 barman_immediate_checkpoint: false
 barman_network_compression: false
 barman_basebackup_retry_times: 3
 barman_basebackup_retry_sleep: 30
+
+barman_minimum_redundancy: 3
+barman_retention_policy: RECOVERY WINDOW OF 4 WEEKS
 barman_last_backup_maximum_age: 1 WEEK
-barman_backup_options: concurrent_backup
+
+## Automatic backup schedule
 
 default_barman_backup_interval: '0 4 * * wed/sat'

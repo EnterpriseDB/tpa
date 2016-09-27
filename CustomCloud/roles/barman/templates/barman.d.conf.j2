@@ -1,9 +1,17 @@
 [{{ backup_name }}]
-description = "Streaming backups from {{ inventory_hostname }}"
+description = "Backups from {{ inventory_hostname }}"
+
+ssh_command = "ssh postgres@{{ inventory_hostname }}"
 conninfo = "host={{ inventory_hostname }} port={{ postgres_port }} dbname=postgres user=barman"
 streaming_conninfo = "host={{ inventory_hostname }} port={{ postgres_port }} user=streaming_barman"
-ssh_command = "ssh postgres@{{ inventory_hostname }}"
-backup_method = postgres
-reuse_backup = off
 streaming_archiver = on
 slot_name = barman
+
+backup_method = {{ barman_backup_method }}
+
+{% if barman_backup_method == 'rsync' %}
+compression = {{ barman_compression }}
+reuse_backup = {{ barman_reuse_backup }}
+{% else %}
+reuse_backup = off
+{% endif %}
