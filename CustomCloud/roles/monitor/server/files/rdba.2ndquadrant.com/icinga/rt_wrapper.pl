@@ -1,1 +1,0 @@
-../../common/icinga/rt_wrapper.pl
