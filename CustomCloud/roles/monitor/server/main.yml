@@ -1,0 +1,32 @@
+---
+
+# handlers/main.yml
+#
+# Generic service handler definitions
+
+# icinga
+ - name: Reload icinga
+   service: name=icinga state=reloaded
+
+ - name: Restart icinga
+   service: name=icinga state=restarted
+
+# nsca-ng
+ - name: Restart nsca-ng
+   service: name=nsca-ng-server state=restarted
+
+# apache2
+ - name: Restart apache
+   service: name=apache2 state=restarted
+
+# sshd
+ - name: Reload sshd
+   service: name=ssh state=reloaded
+
+# PostgreSQL
+ - name: Reload PostgreSQL
+   service: name=postgresql state=reloaded
+
+# apache2
+ - name: Reload Apache2
+   service: name=apache2 state=reloaded

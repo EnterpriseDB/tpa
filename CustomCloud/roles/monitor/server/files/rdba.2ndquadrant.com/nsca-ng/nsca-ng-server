@@ -1,0 +1,9 @@
+# /etc/default/nsca-ng
+#
+# !! ANSIBLE-MANAGED FILE !! DO NOT EDIT DIRECTLY !!
+#
+# Please read /usr/share/doc/nsca-ng-server/README.Debian for information
+# how to get nsca-ng working
+
+# start nsca-ng daemon (no/yes)
+NSCA_NG=yes
