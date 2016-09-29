@@ -8,7 +8,7 @@
   debconf: name=icinga-common question='icinga/check_external_commands' value=true vtype=boolean
 
 - name: Install icinga meta package
-  apt: pkg=icinga state=present default_release=wheezy-backports
+  apt: pkg=icinga state=latest
 
 - name: Remove icinga doc package
   apt: pkg=icinga-doc state=absent
@@ -26,7 +26,7 @@
     - timeperiods_icinga.cfg
 
 - name: htpasswd file
-  copy: src=common/htpasswd.users dest=/etc/icinga/htpasswd.users
+  copy: src=htpasswd.users dest=/etc/icinga/htpasswd.users
 
 # For the following two items, see: /usr/share/doc/icinga-common/README.Debian
 # Note: we should probably find a way of executing dpkg-statoverride as
@@ -40,20 +40,20 @@
   notify: Restart icinga
 
 - name: icinga.cfg
-  copy: src={{inventory_hostname}}/icinga/icinga.cfg dest=/etc/icinga/icinga.cfg
+  copy: src=icinga/icinga.cfg dest=/etc/icinga/icinga.cfg
   notify: Reload icinga
 
 - name: commands.cfg
-  copy: src={{inventory_hostname}}/icinga/commands.cfg dest=/etc/icinga/commands.cfg
+  copy: src=icinga/commands.cfg dest=/etc/icinga/commands.cfg
   notify: Reload icinga
 
 - name: resource.cfg
-  copy: src={{inventory_hostname}}/icinga/resource.cfg dest=/etc/icinga/resource.cfg owner=root group=nagios mode=0640
+  copy: src=icinga/resource.cfg dest=/etc/icinga/resource.cfg owner=root group=nagios mode=0640
   notify: Reload icinga
 
 - name: icinga object configuration files
   copy: src={{item}} dest=/etc/icinga/objects/
-  with_fileglob: "{{inventory_hostname}}/icinga/objects/*.cfg"
+  with_fileglob: "icinga/*.cfg"
   notify: Reload icinga
 
 - name: Apache configuration file for icingca
@@ -69,10 +69,10 @@
   notify: Restart apache
 
 - name: .rtrc for icinga
-  copy: src={{inventory_hostname}}/icinga/.rtrc dest=/var/lib/nagios/.rtrc owner=nagios group=nagios mode=0600
+  copy: src=icinga/.rtrc dest=/var/lib/nagios/.rtrc owner=nagios group=nagios mode=0600
 
 - name: rt wrapper
-  copy: src={{inventory_hostname}}/icinga/rt_wrapper.pl dest=/usr/local/bin/rt_wrapper.pl owner=root group=root mode=0755
+  copy: src=icinga/rt_wrapper.pl dest=/usr/local/bin/rt_wrapper.pl owner=root group=root mode=0755
 
 - name: spool directory for perfdata
   file: path=/var/lib/icinga/graphios owner=nagios group=nagios state=directory mode=0750 

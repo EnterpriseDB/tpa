@@ -5,22 +5,21 @@
 # Install nsca-ng packages and configuration files
 
 - name: Install nsca-ng server package
-  apt: pkg=nsca-ng-server state=present default_release=wheezy-backports
+  apt: pkg=nsca-ng-server state=latest
 
-- name: Ensure nsca-ng-server daemon starts on boot
-  copy: src={{inventory_hostname}}/nsca-ng/nsca-ng-server dest=/etc/default/nsca-ng-server
+#- name: Ensure nsca-ng-server daemon starts on boot
+#  copy: src={{inventory_hostname}}/nsca-ng/nsca-ng-server dest=/etc/default/nsca-ng-server
 
 - name: Remove /etc/nsca-ng/nsca-ng.local.cfg if exists
   file: path=/etc/nsca-ng/nsca-ng.local.cfg state=absent
 
 - name: Install nsca-ng main configuration file
-  copy: src={{inventory_hostname}}/nsca-ng/nsca-ng.cfg dest={{nsca_configfile}}
+  copy: src=nsca-ng/nsca-ng.cfg dest={{nsca_configfile}}
   notify: Restart nsca-ng
 
-- name: Ensure /etc/nsca-ng.d/ directory exists
-  file: dest=/etc/nsca-ng.d/ state=directory owner=root mode=0755
+#- name: Ensure /etc/nsca-ng.d/ directory exists
+#  file: dest=/etc/nsca-ng.d/ state=directory owner=root mode=0755
 
 - name: Install nsca-ng configuration include files
-  copy: src={{item}} dest=/etc/nsca-ng.d/
-  with_fileglob: "{{inventory_hostname}}/nsca-ng/nsca-ng.d/*"
+  copy: src=nsca-ng/client-tpa.cfg dest=/etc/nsca-ng/
   notify: Restart nsca-ng
