@@ -21,7 +21,7 @@
 - name: Check if the replica is registered
   shell: >
     {{ postgres_bin_dir }}/repmgr cluster show \
-      -f "{{ repmgr_conf_dir }}/repmgr.conf" | grep 'host={{ inventory_hostname }}'"
+      -f "{{ repmgr_conf_dir }}/repmgr.conf" | grep 'host={{ inventory_hostname }}'
   register: replica
   ignore_errors: True
   changed_when: False
