@@ -1,8 +1,8 @@
 ---
 
-- name: Ensure /etc/repmgr exists
+- name: Ensure repmgr configuration directory exists
   file:
-    path: /etc/repmgr
+    path: "{{ repmgr_conf_dir }}"
     owner: postgres
     group: postgres
     mode: 0755
@@ -11,7 +11,7 @@
 - name: Install repmgr.conf
   template:
     src: repmgr.conf.j2
-    dest: /etc/repmgr/repmgr.conf
+    dest: "{{ repmgr_conf_dir }}/repmgr.conf
     owner: postgres
     group: postgres
     mode: 0644
@@ -19,15 +19,15 @@
 # - name: Install assign_eip.py
 #   template:
 #     src: assign_eip.py.j2
-#     dest: /etc/repmgr/assign_eip.py
+#     dest: "{{ repmgr_conf_dir }}/assign_eip.py
 #     owner: postgres
 #     group: postgres
 #     mode: 0755
 
 - name: Install additional repmgr scripts
-  copy:
-    src: "{{ item }}"
-    dest: /etc/repmgr/
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ repmgr_conf_dir }}"
     owner: postgres
     group: postgres
     mode: 0755
