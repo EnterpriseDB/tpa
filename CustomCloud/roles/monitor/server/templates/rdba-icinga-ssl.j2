@@ -1,7 +1,7 @@
 # {{ansible_managed}}
 # We will redirect all non-ssl traffic on {{inventory_hostname_short}} to https
 <VirtualHost *:80>
-	ServerName {{hostname}}
+	ServerName {{inventory_hostname}}
 	DocumentRoot /var/www
 
 	RewriteEngine On
@@ -14,8 +14,8 @@
 <IfModule mod_ssl.c>
 
 <VirtualHost *:443>
-	ServerAdmin webmaster@2ndquadrant.com
-	ServerName {{hostname}}
+	ServerAdmin tpabeta@2ndquadrant.com
+	ServerName {{inventory_hostname}}
 
 	DocumentRoot /var/www
 	<Directory />
@@ -65,16 +65,15 @@
 	</DirectoryMatch>
 
 	LogLevel warn
-	CustomLog ${APACHE_LOG_DIR}/rdba_ssl_access.log combined
-	ErrorLog  ${APACHE_LOG_DIR}/rdba_ssl_error.log
+	CustomLog ${APACHE_LOG_DIR}/tpa_ssl_access.log combined
+	ErrorLog  ${APACHE_LOG_DIR}/tpa_ssl_error.log
 
 	SSLEngine on
 	SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-RC4-SHA:ECDHE-RSA-RC4-SHA:ECDH-ECDSA-RC4-SHA:ECDH-RSA-RC4-SHA:ECDHE-RSA-AES256-SHA:RC4-SHA:HIGH:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!CBC:!EDH:!kEDH:!PSK:!SRP:!kECDH;
 	SSLHonorCipherOrder on
 	SSLProtocol all -SSLv2 -SSLv3
-	SSLCertificateKeyFile   /etc/ssl/private/2ndQuadrant.com_wildcard_key.pem
-	SSLCertificateFile      /etc/ssl/certs/2ndQuadrant.com_wildcard_certificate.pem
-	SSLCertificateChainFile /etc/ssl/certs/2ndQuadrant.com_wildcard_intermediate_certs.pem
+	SSLCertificateKeyFile   /etc/ssl/private/ssl-cert-snakeoil.key
+	SSLCertificateFile      /etc/ssl/certs/ssl-cert-snakeoil.pem
 	#SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire
 	<FilesMatch "\.(cgi|shtml|phtml|php)$">
 		SSLOptions +StdEnvVars
@@ -88,39 +87,4 @@
 		downgrade-1.0 force-response-1.0
 	BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
 </VirtualHost>
-
-
-{% if ip == "144.76.39.197" %}
-<VirtualHost *:443>
-	ServerAdmin webmaster@2ndquadrant.com
-	ServerName customers.2ndquadrant.com
-
-	ErrorLog ${APACHE_LOG_DIR}/customers_error.log
-
-	# Possible values include: debug, info, notice, warn, error, crit,
-	# alert, emerg.
-	LogLevel warn
-
-	CustomLog ${APACHE_LOG_DIR}/customers_ssl_access.log combined
-
-	SSLEngine on
-	SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-RC4-SHA:ECDHE-RSA-RC4-SHA:ECDH-ECDSA-RC4-SHA:ECDH-RSA-RC4-SHA:ECDHE-RSA-AES256-SHA:RC4-SHA:HIGH:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!CBC:!EDH:!kEDH:!PSK:!SRP:!kECDH;
-	SSLHonorCipherOrder on
-	SSLProtocol all -SSLv2 -SSLv3
-	SSLCertificateFile    /etc/ssl/certs/2ndQuadrant.com_wildcard_certificate.pem
-	SSLCertificateKeyFile /etc/ssl/private/2ndQuadrant.com_wildcard_key.pem
-	SSLCertificateChainFile /etc/ssl/certs/2ndQuadrant.com_wildcard_intermediate_certs.pem
-	BrowserMatch "MSIE [2-6]" \
-		nokeepalive ssl-unclean-shutdown \
-		downgrade-1.0 force-response-1.0
-	# MSIE 7 and newer should be able to use keepalive
-	BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
-
-	ProxyRequests off
-	ProxyPreserveHost On
-	ProxyPass / http://localhost:3001/ keepalive=On
-	ProxyPassReverse / http://localhost:3001/
-	RequestHeader set X-Forwarded-HTTPS "1"
-</VirtualHost>
-{% endif %}
 </IfModule>
