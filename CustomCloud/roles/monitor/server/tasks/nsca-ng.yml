@@ -17,9 +17,15 @@
   copy: src=nsca-ng/nsca-ng.cfg dest={{nsca_configfile}}
   notify: Restart nsca-ng
 
-#- name: Ensure /etc/nsca-ng.d/ directory exists
-#  file: dest=/etc/nsca-ng.d/ state=directory owner=root mode=0755
-
-- name: Install nsca-ng configuration include files
-  copy: src=nsca-ng/client-tpa.cfg dest=/etc/nsca-ng/
+# nsca configuration
+- name: Add client nsca-ng configuration file
+  template: src=nsca-client-template.cfg.j2 dest="{{nsca_configdir}}/customer-{{item}}.cfg" owner=root
   notify: Restart nsca-ng
+  tags: nsca-ng
+  with_items: "{{client_identifier}}"
+
+- name: Add include directive for client configuration file
+  lineinfile: dest="{{nsca_configdir}}/{{nsca_includefile}}" line="include({{nsca_configdir}}/customer-{{item}}.cfg)" create=yes
+  notify: Restart nsca-ng
+  tags: nsca-ng
+  with_items: "{{client_identifier}}"

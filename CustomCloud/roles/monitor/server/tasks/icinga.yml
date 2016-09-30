@@ -76,3 +76,16 @@
 
 - name: spool directory for perfdata
   file: path=/var/lib/icinga/graphios owner=nagios group=nagios state=directory mode=0750 
+
+# Icinga configuration
+- name: Add client icinga contacts configuration file
+  template: src=icinga-contact-template.j2  dest="{{icinga_objects_dir}}/client-contacts-{{item}}.cfg" owner=root
+  notify: Reload icinga
+  tags: icinga
+  with_items: "{{client_identifier}}"
+
+- name: Add client icinga host configuration file
+  template: src=icinga-server-template.j2 dest="{{icinga_objects_dir}}/client-hosts-{{item}}.cfg" owner=root
+  notify: Reload icinga
+  tags: icinga
+  with_items: "{{client_identifier}}"
