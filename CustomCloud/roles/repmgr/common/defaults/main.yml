@@ -1,0 +1,3 @@
+---
+
+repmgr_conf_dir: "/etc/repmgr/{{ pgversion }}"

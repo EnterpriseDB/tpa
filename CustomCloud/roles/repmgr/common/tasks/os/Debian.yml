@@ -1,4 +1,0 @@
----
-
-- name: Overwrite repmgrd configuration file
-  copy: src="repmgrd" dest=/etc/default/repmgrd

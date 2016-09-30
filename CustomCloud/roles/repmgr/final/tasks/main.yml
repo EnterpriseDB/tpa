@@ -1,0 +1,4 @@
+---
+
+- name: Start repmgrd
+  service: name="repmgr{{ pgversionNN }}" state=restarted

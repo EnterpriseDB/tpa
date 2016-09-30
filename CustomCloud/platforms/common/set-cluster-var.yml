@@ -10,3 +10,5 @@
     cluster_vars: "{{
       cluster_vars|combine({name: value})
     }}"
+
+- include: write-cluster-vars.yml
