@@ -248,10 +248,6 @@ aawv_small_tables_weekday: "1-5"
 # Contacts
 # --------
 
-# Empty list by default (unless specifically requested we don't
-# provide Icinga notifications to clients)
-contacts: []
-
 # Items to add to known_hosts files (usually only relevant if
 # a nsca gateway server is in use)
 known_hosts: []
@@ -296,5 +292,18 @@ pg_bouncer_cl_waiting_c: 15
 pg_bouncer_maxwait_w: 5
 pg_bouncer_maxwait_c: 15
 
+client_identifier: tpa
+client_name: TPA
+rt_monitoring_user: tpabeta@2ndquadrant.com
+rt_queue: tpabeta
 nsca_identity: ubuntu
 nsca_password: verysecret
+nsca_configdir: /etc/nsca-ng
+nsca_configfile: /etc/nsca-ng/nsca-ng.cfg
+nsca_includefile: includes.cfg
+icinga_objects_dir: /etc/icinga/objects
+
+contacts:
+  tpas:
+    full_name: "TPA Support"
+    email: "tpabeta@2ndquadrant.com"
