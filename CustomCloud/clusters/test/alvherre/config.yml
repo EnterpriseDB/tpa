@@ -1,0 +1,21 @@
+---
+
+cluster_name: "AHBenchmarks"
+cluster_tags:
+  Owner: Álvaro
+
+ec2_vpc:
+  Name: Test
+
+ec2_ami_name: debian-jessie-amd64-hvm-2016-04-03-ebs*
+ec2_ami_user: admin
+
+instances:
+    - node: 1
+      type: c4.large
+      region: us-east-1
+      subnet: 10.33.137.0/28
+    - node: 2
+      type: c3.4xlarge
+      region: us-east-1
+      subnet: 10.33.137.0/28
