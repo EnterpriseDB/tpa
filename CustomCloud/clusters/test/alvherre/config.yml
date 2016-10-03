@@ -15,7 +15,14 @@ instances:
       type: c4.large
       region: us-east-1
       subnet: 10.33.137.0/28
+      tags:
+        role: adhoc
     - node: 2
       type: c3.4xlarge
       region: us-east-1
       subnet: 10.33.137.0/28
+      volumes:
+        - device_name: /dev/sdf
+          ephemeral: ephemeral0
+      tags:
+        role: adhoc
