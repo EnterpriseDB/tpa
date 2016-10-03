@@ -9,7 +9,7 @@
 
   - name: Check the table on the other nodes
     shell: "{{pgbindir}}/psql '{{hostvars[item].bdr_node_dsn}}' -Atw -c 'SELECT * FROM bdr_test;'"
-    with_items: bdr_other_hosts
+    with_items: "{{ bdr_other_hosts }}"
     register: bdr_rep
 
   - name: Assert an error if test fails
