@@ -27,6 +27,25 @@
     - include: validate.yml
       tags: always
 
+    # Create an inventory directory within cluster_dir and copy the ec2
+    # inventory plugin with a customised configuration into it.
+
+    - name: Ensure that the cluster's inventory directory exists
+      file:
+        path: "{{ cluster_dir }}/inventory"
+        state: directory
+
+    - name: Copy ec2.py to inventory directory
+      copy:
+        src: ec2.py
+        dest: "{{ cluster_dir }}/inventory/ec2.py"
+        mode: "0755"
+
+    - name: Install customised ec2.ini
+      template:
+        src: ec2.ini.j2
+        dest: "{{ cluster_dir }}/inventory/ec2.ini"
+
     # Create an ssh keypair for this cluster, and register its public
     # key in each region. This key is used to initially provide ssh
     # access to any provisioned instances.
@@ -390,26 +409,10 @@
     # Write a static inventory file for the newly-provisioned hosts into
     # the cluster's inventory directory.
 
-    - name: Ensure that the cluster's inventory directory exists
-      file:
-        path: "{{ cluster_dir }}/inventory"
-        state: directory
-
     - name: Write a static inventory file for the cluster
       template:
         src: inventory.j2
         dest: "{{ cluster_dir }}/inventory/00-{{ cluster_name }}"
-
-    - name: Copy ec2.py to inventory directory
-      copy:
-        src: ec2.py
-        dest: "{{ cluster_dir }}/inventory/ec2.py"
-        mode: "0755"
-
-    - name: Install customised ec2.ini
-      template:
-        src: ec2.ini.j2
-        dest: "{{ cluster_dir }}/inventory/ec2.ini"
 
     - name: Generate known_hosts file for the cluster
       template:
