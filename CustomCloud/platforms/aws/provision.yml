@@ -263,6 +263,19 @@
           }
       tags: iam
 
+    - name: Discover ARN for instance profile role
+      command: aws iam get-role --role-name "{{ cluster_profile }}"
+      register: role
+      when: >
+        profile|changed or instance_profile_role is not defined
+
+    - include: ../common/set-cluster-var.yml
+      vars:
+        name: instance_profile_role
+        value: "{{ (role.stdout|from_json).Role.Arn }}"
+      when: >
+        not role|skipped
+
     # We start with the array of instances defined in config.yml, some
     # of whose entries may have instance_count > 1. We expand the array
     # by replacing each such entry with instance_count identical copies.
@@ -420,3 +433,5 @@
         dest: "{{ cluster_dir }}/known_hosts"
 
     - include: ../common/set-vault-pass.yml
+
+    - include: ../common/write-cluster-vars.yml
