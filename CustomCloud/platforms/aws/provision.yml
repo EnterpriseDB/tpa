@@ -101,8 +101,8 @@
             ec2_region_amis: "{{ ec2_region_amis|combine({item.0: item.1.results.0.ami_id}) }}"
             ec2_ami_rootdevices: "{{ ec2_ami_rootdevices|combine({item.1.results.0.ami_id: item.1.results.0.root_device_name}) }}"
           with_together:
-            - regions
-            - ec2_amis.results
+            - "{{ regions }}"
+            - "{{ ec2_amis.results }}"
       when: ec2_ami_name is defined
 
     # We also need to discover the root devices for any AMIs specified
@@ -382,8 +382,8 @@
         in_vpc: true
       when: item.0.assign_eip|d() and item.0.assign_eip
       with_together:
-        - instances
-        - ec2_jobs.results
+        - "{{ instances }}"
+        - "{{ ec2_jobs.results }}"
       register: ec2_eips
       tags: ec2_eips
 
@@ -403,8 +403,8 @@
           ])
         }}"
       with_together:
-        - ec2_jobs.results
-        - ec2_eips.results
+        - "{{ ec2_jobs.results }}"
+        - "{{ ec2_eips.results }}"
 
     # Write a static inventory file for the newly-provisioned hosts into
     # the cluster's inventory directory.
