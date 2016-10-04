@@ -68,7 +68,6 @@ postgres_packages:
     - postgresql-client-{{pgversion}}
     - postgresql-contrib-{{pgversion}}
     - postgresql-server-dev-{{pgversion}}
-    - postgresql-{{pgversion}}-pgespresso
     - postgresql-plperl-{{pgversion}}
     - postgresql-{{pgversion}}-plv8
     - barman-cli
@@ -79,7 +78,6 @@ postgres_packages:
     - postgresql{{pgversionNN}}-server
     - postgresql{{pgversionNN}}-devel
     - postgresql{{pgversionNN}}-libs
-    - pgespresso{{pgversionNN}}
     - postgresql{{pgversionNN}}-plperl
     - plv8_{{pgversionNN}}
     - barman-cli

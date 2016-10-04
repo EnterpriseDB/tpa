@@ -37,6 +37,23 @@
     - python-psycopg2
   tags: [postgres, pkg]
 
+# On Postgres 9.5, pgespresso is required to support rsync-based backups
+# from a replica. (To do so, we also have to create the extension on the
+# corresponding primary, which we don't do by default yet, because the
+# extension has known crash-the-server problems.)
+
+- name: Install pgespresso packages for Postgres 9.5 and below
+  package: name={{ item }} state=latest
+  with_items: "{{ pgespresso_packages[ansible_os_family] }}"
+  when: >
+    postgres_version|version_compare(9.5, '<=')
+  vars:
+    pgespresso_packages:
+      Debian:
+        - postgresql-{{pgversion}}-pgespresso
+      RedHat:
+        - pgespresso{{pgversionNN}}
+
 # We set pgbindir based on what packages we installed. Unfortunately, we
 # can not assume that all Postgres binaries (e.g., pg_config) will be in
 # our (or even postgres's) PATH.
