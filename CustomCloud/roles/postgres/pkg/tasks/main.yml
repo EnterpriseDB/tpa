@@ -7,6 +7,13 @@
       - pgversion is defined
       - pgversionNN is defined
 
+- name: Don't try to use 2ndQPostgres for 9.6 yet
+  assert:
+    msg: "2ndQPostgres does not yet support 9.6"
+    that:
+      - postgres_version|version_compare(9.6, '<') or
+        postgres_package_source == 'PGDG'
+
 # Given a Postgres version, we perform distribution-specific tasks to
 # enable repositories and install Postgres packages.
 
