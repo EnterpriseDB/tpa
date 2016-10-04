@@ -14,7 +14,7 @@ default_apt_repositories:
     key_id: ACCC4CF8
     key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
     repo: >
-      deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg {{ pgversion }} main
+      deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
   2ndQPostgres:
     key_id: 70549BC8
     key_url: http://packages.2ndquadrant.com/2ndQPostgres/apt/70549BC8.asc
