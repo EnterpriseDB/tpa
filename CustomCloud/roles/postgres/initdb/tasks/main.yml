@@ -18,6 +18,8 @@
   register: pgdata
   tags: [postgres, initdb]
 
-- include: "os/{{ ansible_os_family }}.yml"
+- block:
+    - set_fact: initdb=True
+    - include: "os/{{ ansible_os_family }}.yml"
   when: not pgdata.stat.exists
   tags: [postgres, initdb]

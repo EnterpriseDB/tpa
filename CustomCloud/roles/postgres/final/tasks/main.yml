@@ -1,0 +1,18 @@
+---
+
+# Postgres is now running.
+#
+# On any primary that we just set up, we load some data.
+
+- include: load-data.yml
+  static: no
+  when: >
+    'primary' in role and initdb is defined
+
+# We force an immediate backup on any instances with a newly-created
+# backup configuration.
+
+- include: first-backup.yml
+  static: no
+  when: >
+    backup != '' and initialise_backup is defined

@@ -1,7 +1,6 @@
 ---
 
-# Re-activate the per-client Barman backups on the server and force a
-# backup.
+# Re-activate the per-client Barman backups on the server.
 
 - name: Set backups to active
   ini_file:
@@ -34,32 +33,6 @@
   become_user: barman
   become: yes
 
-- name: Run barman switch-xlog
-  command: >
-    /usr/bin/barman switch-xlog --force {{ backup_name }}
-  delegate_to: "{{ backup }}"
-  become_user: barman
-  become: yes
-
-# XXX: This is a gross hack. Running "barman switch-xlog" and
-# waiting for a while will clear up the "WAL archive: FAILED"
-# problem in barman check, and backup attempts will succeed
-# thereafter, but waiting for a random time is not a viable
-# long-term solution.
-
-- name: Pause to let a WAL segment be archived
-  pause: seconds=30
-
-- name: Run barman archive-wal
-  command: >
-    /usr/bin/barman archive-wal {{ backup_name }}
-  delegate_to: "{{ backup }}"
-  become_user: barman
-  become: yes
-
-- name: Force an immediate backup
-  shell: >
-    /usr/bin/barman backup "{{ backup_name }}"
-  delegate_to: "{{ backup }}"
-  become_user: barman
-  become: yes
+# We must now wait for an unpredictable amount of time for one WAL
+# segment to be archived before we can start a backup. Join us in
+# postgres/final for the next installment of this exciting tale.
