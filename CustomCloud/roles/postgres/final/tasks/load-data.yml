@@ -2,6 +2,6 @@
 
 - name: Run pgbench -i -s 10
   command: >
-    {{ postgres_bin_dir }}/pgbench -i -s 10 postgres
+    {{ postgres_bin_dir }}/pgbench -i -s 10 --foreign-keys postgres
   become_user: postgres
   become: true
