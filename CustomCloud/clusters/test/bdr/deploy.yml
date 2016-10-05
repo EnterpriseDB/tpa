@@ -72,14 +72,6 @@
         'bdr' in role
       tags:bdr
 
-    # Set up password-less SSH for the user postgres between all hosts
-    # in this cluster.
-    - role: sys/ssh
-      ssh_user: postgres
-      when: >
-        'postgres' in role
-      tags: [sys, ssh]
-
     - role: bdr/config
       when: >
         'bdr' in role
