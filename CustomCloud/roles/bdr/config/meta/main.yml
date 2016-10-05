@@ -4,15 +4,7 @@ allow_duplicates: yes
 dependencies:
     - role: 'postgres/config'
       postgres_conf_settings:
-        listen_addresses: "'*'"
-        track_commit_timestamp: on
-        wal_level: 'logical'
         shared_preload_libraries: 'bdr'
         max_worker_processes: 20
         max_replication_slots: 20
         max_wal_senders: 20
-        log_destination: 'syslog'
-      postgres_hba_settings:
-        - "local   all             all                       trust"
-        - "host    all             all     0.0.0.0/0         trust"
-        - "host    replication     all     0.0.0.0/0         trust"
