@@ -95,14 +95,7 @@
         'bdr' in role
       tags: bdr
 
-    - role: pgbouncer
-      when: >
-        'pgbouncer' in role
-      tags: pgbouncer
-
     - role: barman
-      when: >
-        'barman' in role
       tags: barman
 
 - name: Set up Barman node
@@ -117,7 +110,17 @@
 
     # Setup backup from the BDR nodes
     - role: barman
-      when: >
-        'barman' in role
       tags: barman
 
+- name: Set up pgbouncer node
+  hosts: tag_Cluster_TPA_BDR:&tag_role_pgbouncer
+  gather_facts: no
+  sudo_user: root
+  sudo: true
+  vars_files:
+    - vars/main.yml
+
+  roles:
+
+    - role: pgbouncer
+      tags: pgbouncer

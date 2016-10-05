@@ -1,0 +1,5 @@
+---
+
+pool_mode: session
+max_client_conn: 100
+default_pool_size: 20

@@ -1,6 +1,0 @@
----
-
-rsyslog_repeated_msg_reduction: "on"
-rsyslog_udp_enable: true
-rsyslog_udp_address: 127.0.0.1
-rsyslog_udp_port: 514

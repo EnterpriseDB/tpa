@@ -1,0 +1,44 @@
+---
+
+- include_vars: "{{ playbook_dir }}/vault/pgbouncer_password.yml"
+  no_log: true
+
+# For pidfile = /var/run/pgbouncer/pgbouncer.pid
+- name: Ensure /var/run/pgbouncer exists
+  file:
+    path: /var/run/pgbouncer
+    owner: postgres
+    group: postgres
+    mode: 0755
+    state: directory
+
+# For configuration files
+- name: Ensure /etc/pgbouncer exists
+  file:
+    path: /etc/pgbouncer
+    owner: postgres
+    group: postgres
+    mode: 0700
+    state: directory
+
+- name: Copy the main configuration file
+  template:
+    src: pgbouncer.ini.j2
+    dest: "/etc/pgbouncer/pgbouncer.ini"
+    owner: postgres
+    group: postgres
+    mode: 0640
+
+- name: Copy the userlist file
+  template:
+    src: userlist.txt.j2
+    dest: "/etc/pgbouncer/userlist.txt"
+    owner: postgres
+    group: postgres
+    mode: 0600
+
+- name: Restart the pgbouncer
+  service:
+    name: pgbouncer
+    state: restarted
+    enabled: yes
