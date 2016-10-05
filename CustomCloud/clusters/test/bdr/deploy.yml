@@ -95,6 +95,11 @@
         'bdr' in role
       tags: bdr
 
+    - role: pgbouncer
+      when: >
+        'pgbouncer' in role
+      tags: pgbouncer
+
     - role: barman
       when: >
         'barman' in role
