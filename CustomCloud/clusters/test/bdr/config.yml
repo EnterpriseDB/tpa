@@ -25,9 +25,9 @@ ec2_vpc:
   Name: Test
 
 ec2_vpc_subnets:
-  us-west-1:
-    10.33.67.32/28: us-west-1b
-    10.33.67.112/28: us-west-1c
+  eu-west-1:
+    10.33.67.32/28: eu-west-1b
+    10.33.67.112/28: eu-west-1c
   eu-central-1:
     10.33.67.128/28: eu-central-1a
     10.33.67.144/28: eu-central-1a
@@ -39,7 +39,7 @@ ec2_vpc_subnets:
 instances:
     - node: 1
       type: t2.small
-      region: us-west-1
+      region: eu-west-1
       subnet: 10.33.67.32/28
       assign_eip: false
       volumes:
@@ -50,11 +50,11 @@ instances:
       tags:
         os: Debian
         role: bdr
-        backup: barman-us-west-1
+        backup: barman-eu-west-1
         log: cluster-control
     - node: 2
       type: t2.small
-      region: us-west-1
+      region: eu-west-1
       subnet: 10.33.67.112/28
       volumes:
           - device_name: /dev/xvdb
@@ -65,7 +65,7 @@ instances:
         os: Debian
         role: barman
         log: cluster-control
-        Name: barman-us-west-1
+        Name: barman-eu-west-1
     - node: 3
       type: t2.small
       region: eu-central-1
