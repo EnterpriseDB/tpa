@@ -16,11 +16,13 @@
 - name: Install nsca (Debian)
   apt: name="{{ nsca_package }}" state=latest
   become: yes
+  become_user: root
   when: (install_nsca|bool == true) and (have_root_sudo|bool == true) and (ansible_distribution == "Debian")
 
 - name: Install nsca (Ubuntu)
   apt: name="{{ nsca_package }}" state=latest
   become: yes
+  become_user: root
   when: (install_nsca|bool == true) and (have_root_sudo|bool == true) and (ansible_distribution == "Ubuntu")
 
 #TODO: install it on RedHat

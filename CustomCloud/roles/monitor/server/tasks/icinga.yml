@@ -53,7 +53,7 @@
 
 - name: icinga object configuration files
   copy: src={{item}} dest=/etc/icinga/objects/
-  with_fileglob: "icinga/*.cfg"
+  with_fileglob: "icinga/objects/*.cfg"
   notify: Reload icinga
 
 - name: Apache configuration file for icingca
