@@ -197,12 +197,18 @@
     #
     # We create a security group for every VPC we are using.
 
+    # We default to 0.0.0.0 if cluster_network is not specified..
+    - name: Find security group rule for nsca-ng 
+      set_fact:
+        nsca_rule: "{{cluster_network|default('0.0.0.0/0')}}"
+
     - name: Set default security group rules for the cluster
       set_fact:
         cluster_rules:
           - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
           - {proto: tcp, from_port: 5432, to_port: 5432, cidr_ip: 0.0.0.0/0}
           - {proto: tcp, from_port: 1194, to_port: 1194, cidr_ip: 0.0.0.0/0}
+          - {proto: tcp, from_port: 5668, to_port: 5668, cidr_ip: "{{nsca_rule}}"}
       when: cluster_rules is not defined
 
     - name: Create security groups for each VPC
