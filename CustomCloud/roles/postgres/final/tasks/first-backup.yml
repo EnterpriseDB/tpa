@@ -1,0 +1,38 @@
+---
+
+# We now force an immediate backup of any instance for which we
+# configured backups on this run.
+
+# Barman will refuse to run switch-xlog against a replica. In that case,
+# we could connect to the upstream and execute pg_switch_xlog(), but we
+# don't bother with that yet.
+
+- name: Run barman switch-xlog
+  command: >
+    /usr/bin/barman switch-xlog --force {{ backup_name }}
+  delegate_to: "{{ backup }}"
+  become_user: barman
+  become: yes
+
+# XXX: This is a gross hack. Running "barman switch-xlog" and
+# waiting for a while will clear up the "WAL archive: FAILED"
+# problem in barman check, and backup attempts will succeed
+# thereafter, but waiting for a random time is not a viable
+# long-term solution.
+
+- name: Pause to let a WAL segment be archived
+  pause: seconds=60
+
+- name: Run barman archive-wal
+  command: >
+    /usr/bin/barman archive-wal {{ backup_name }}
+  delegate_to: "{{ backup }}"
+  become_user: barman
+  become: yes
+
+- name: Force an immediate backup
+  shell: >
+    /usr/bin/barman backup "{{ backup_name }}"
+  delegate_to: "{{ backup }}"
+  become_user: barman
+  become: yes

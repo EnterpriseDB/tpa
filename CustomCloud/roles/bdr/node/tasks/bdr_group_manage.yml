@@ -16,10 +16,10 @@
   - name: Execute bdr_group_join
     shell: "{{pgbindir}}/psql '{{hostvars[item].bdr_node_dsn}}' -qAtw -c \"SELECT bdr.bdr_group_join(local_node_name := '{{item}}', node_external_dsn := '{{hostvars[item].bdr_node_dsn}}', join_using_dsn := '{{bdr_node_dsn}}');\""
     when: "not hostvars[item].bdr_node_exists"
-    with_items: bdr_other_hosts
+    with_items: "{{ bdr_other_hosts }}"
 
   - name: Ensure that the node is ready to replicate
     shell: "{{pgbindir}}/psql '{{hostvars[item].bdr_node_dsn}}' -qAtw -c 'SELECT bdr.bdr_node_join_wait_for_ready();'"
     when: "not hostvars[item].bdr_node_exists"
-    with_items: bdr_other_hosts
+    with_items: "{{ bdr_other_hosts }}"
   when: (bdr_control_host == inventory_hostname)

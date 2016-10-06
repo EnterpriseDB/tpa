@@ -1,0 +1,5 @@
+---
+
+- name: Install pgbouncer package
+  package: name=pgbouncer state=latest
+  tags: packages

@@ -4,17 +4,6 @@
 
 - include: ../common/ssh-hostkeys.yml
 
-- block:
-    - name: Discover ARN for instance profile role
-      command: aws iam get-role --role-name "{{ cluster_profile }}"
-      changed_when: false
-      register: profile
-    - include: ../common/set-cluster-var.yml
-      vars:
-        name: instance_profile_role
-        value: "{{ (profile.stdout|from_json).Role.Arn }}"
-  when: instance_profile_role is not defined
-
 # This task is always inappropriately marked "changed"; see
 # https://github.com/ansible/ansible-modules-extras/issues/2618 for
 # details.

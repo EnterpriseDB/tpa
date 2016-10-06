@@ -134,7 +134,7 @@ instances:
             delete_on_termination: true
       tags:
         os: Debian
-        role: control, backup, openvpn_server, central-log
+        role: control, backup, openvpn_server, central-log, pgbouncer
         Name: cluster-control
 variables:
    customerid: A12345

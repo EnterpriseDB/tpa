@@ -4,6 +4,7 @@
   yum:
     name: "{{ item.value.rpm_url }}"
     state: present
+  when: postgres_version|float in item.value.versions
   with_dict: "{{ default_yum_repositories|combine(yum_repositories) }}"
 
 # Following the instructions in
@@ -32,7 +33,9 @@
     section: "{{ item.2 }}"
     option: exclude
     value: postgresql*
-  when: item.0 != postgres_package_source
+  when: >
+    item.0 != postgres_package_source and
+    postgres_version in yum_postgres_sources[item.0]['versions']
   with_nested_dependents:
     - yum_postgres_sources.keys()
     - yum_postgres_sources[item.0]['files']

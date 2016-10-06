@@ -29,6 +29,7 @@ fi
 # expect ANSIBLE_HOME to point to a git checkout and do approximately
 # what hacking/env-setup would do.
 
+NEWPATH=$PATH
 cmd=$(basename $0)
 if ! which $cmd >/dev/null 2>&1; then
     ansidir=${ANSIBLE_HOME:-""}
@@ -44,7 +45,8 @@ if ! which $cmd >/dev/null 2>&1; then
 
     export PYTHONPATH=$ansidir/lib:${PYTHONPATH:-""}
 
+    NEWPATH="$ansidir/bin:$PATH"
     cmd="$ansidir/bin/$cmd"
 fi
 
-PATH="$ansidir/bin:$PATH" $cmd "$@"
+PATH="$NEWPATH" $cmd "$@"

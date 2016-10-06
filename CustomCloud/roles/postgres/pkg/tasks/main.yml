@@ -7,6 +7,13 @@
       - pgversion is defined
       - pgversionNN is defined
 
+- name: Don't try to use 2ndQPostgres for 9.6 yet
+  assert:
+    msg: "2ndQPostgres does not yet support 9.6"
+    that:
+      - postgres_version|version_compare(9.6, '<') or
+        postgres_package_source == 'PGDG'
+
 # Given a Postgres version, we perform distribution-specific tasks to
 # enable repositories and install Postgres packages.
 
@@ -29,6 +36,23 @@
     - "{{ extra_postgres_packages[ansible_distribution] }}"
     - python-psycopg2
   tags: [postgres, pkg]
+
+# On Postgres 9.5, pgespresso is required to support rsync-based backups
+# from a replica. (To do so, we also have to create the extension on the
+# corresponding primary, which we don't do by default yet, because the
+# extension has known crash-the-server problems.)
+
+- name: Install pgespresso packages for Postgres 9.5 and below
+  package: name={{ item }} state=latest
+  with_items: "{{ pgespresso_packages[ansible_os_family] }}"
+  when: >
+    postgres_version|version_compare(9.5, '<=')
+  vars:
+    pgespresso_packages:
+      Debian:
+        - postgresql-{{pgversion}}-pgespresso
+      RedHat:
+        - pgespresso{{pgversionNN}}
 
 # We set pgbindir based on what packages we installed. Unfortunately, we
 # can not assume that all Postgres binaries (e.g., pg_config) will be in

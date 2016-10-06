@@ -27,6 +27,25 @@
     - include: validate.yml
       tags: always
 
+    # Create an inventory directory within cluster_dir and copy the ec2
+    # inventory plugin with a customised configuration into it.
+
+    - name: Ensure that the cluster's inventory directory exists
+      file:
+        path: "{{ cluster_dir }}/inventory"
+        state: directory
+
+    - name: Copy ec2.py to inventory directory
+      copy:
+        src: ec2.py
+        dest: "{{ cluster_dir }}/inventory/ec2.py"
+        mode: "0755"
+
+    - name: Install customised ec2.ini
+      template:
+        src: ec2.ini.j2
+        dest: "{{ cluster_dir }}/inventory/ec2.ini"
+
     # Create an ssh keypair for this cluster, and register its public
     # key in each region. This key is used to initially provide ssh
     # access to any provisioned instances.
@@ -82,8 +101,8 @@
             ec2_region_amis: "{{ ec2_region_amis|combine({item.0: item.1.results.0.ami_id}) }}"
             ec2_ami_rootdevices: "{{ ec2_ami_rootdevices|combine({item.1.results.0.ami_id: item.1.results.0.root_device_name}) }}"
           with_together:
-            - regions
-            - ec2_amis.results
+            - "{{ regions }}"
+            - "{{ ec2_amis.results }}"
       when: ec2_ami_name is defined
 
     # We also need to discover the root devices for any AMIs specified
@@ -244,6 +263,19 @@
           }
       tags: iam
 
+    - name: Discover ARN for instance profile role
+      command: aws iam get-role --role-name "{{ cluster_profile }}"
+      register: role
+      when: >
+        profile|changed or instance_profile_role is not defined
+
+    - include: ../common/set-cluster-var.yml
+      vars:
+        name: instance_profile_role
+        value: "{{ (role.stdout|from_json).Role.Arn }}"
+      when: >
+        not role|skipped
+
     # We start with the array of instances defined in config.yml, some
     # of whose entries may have instance_count > 1. We expand the array
     # by replacing each such entry with instance_count identical copies.
@@ -363,8 +395,8 @@
         in_vpc: true
       when: item.0.assign_eip|d() and item.0.assign_eip
       with_together:
-        - instances
-        - ec2_jobs.results
+        - "{{ instances }}"
+        - "{{ ec2_jobs.results }}"
       register: ec2_eips
       tags: ec2_eips
 
@@ -384,32 +416,16 @@
           ])
         }}"
       with_together:
-        - ec2_jobs.results
-        - ec2_eips.results
+        - "{{ ec2_jobs.results }}"
+        - "{{ ec2_eips.results }}"
 
     # Write a static inventory file for the newly-provisioned hosts into
     # the cluster's inventory directory.
-
-    - name: Ensure that the cluster's inventory directory exists
-      file:
-        path: "{{ cluster_dir }}/inventory"
-        state: directory
 
     - name: Write a static inventory file for the cluster
       template:
         src: inventory.j2
         dest: "{{ cluster_dir }}/inventory/00-{{ cluster_name }}"
-
-    - name: Copy ec2.py to inventory directory
-      copy:
-        src: ec2.py
-        dest: "{{ cluster_dir }}/inventory/ec2.py"
-        mode: "0755"
-
-    - name: Install customised ec2.ini
-      template:
-        src: ec2.ini.j2
-        dest: "{{ cluster_dir }}/inventory/ec2.ini"
 
     - name: Generate known_hosts file for the cluster
       template:
@@ -417,3 +433,5 @@
         dest: "{{ cluster_dir }}/known_hosts"
 
     - include: ../common/set-vault-pass.yml
+
+    - include: ../common/write-cluster-vars.yml

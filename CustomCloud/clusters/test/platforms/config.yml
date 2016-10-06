@@ -124,7 +124,7 @@ instances:
     # Another Debian node for barman.
 
     - node: 7
-      type: t2.nano
+      type: t2.micro
       image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.174.16/28

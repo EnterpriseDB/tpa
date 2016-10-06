@@ -5,4 +5,4 @@
     state: present
     name: "{{ item }}"
     db: "{{ bdr_db_name }}"
-  with_items: postgresql_exts
+  with_items: "{{ postgresql_exts }}"
