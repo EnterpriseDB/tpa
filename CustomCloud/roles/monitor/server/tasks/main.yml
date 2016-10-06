@@ -1,0 +1,9 @@
+---
+
+# roles/icinga-host/tasks/main.yml
+
+- include: icinga.yml
+  tags: icinga
+
+- include: nsca-ng.yml
+  tags: nsca-ng

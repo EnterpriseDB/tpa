@@ -1,6 +1,0 @@
-NOTE: the `id_2ndq_nsca_gateway` key is for use on clients who require
-submission of nsca-ng messages via a gateway server (e.g. landp, eurid).
-It is used for passwordless inter-server communication on the
-client's network, so is not encrypted or password protected.
-
-DO NOT use this key for any other purpose.

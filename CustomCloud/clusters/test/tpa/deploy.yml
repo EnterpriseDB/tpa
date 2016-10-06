@@ -2,91 +2,12 @@
 
 - name: Set up TPA cluster nodes
   hosts: tag_Cluster_TPA
-  gather_facts: no
   sudo_user: root
   sudo: true
-  vars:
-    pgversion: 9.5
-    enable_data_checksum: 'yes'
-    use_2ndquadrant_postgres: 'yes'
-    #use_global_barman: 'TPA_Barman_AP_SouthEast_2'
-    barman_hostname: '0.0.0.0'
-    reuse_barman: False
-
-    pg_device: /dev/xvdb
-    pg_mountpoint: /var/lib/postgresql
-
-    vpn_name: "{{ cluster_name|lower }}"
-    vpn_network: 192.168.61.0
-    vpn_netmask: 255.255.255.0
 
   pre_tasks:
 
     - include: ../../../platforms/aws/hostvars.yml
-
-    # Find the one host tagged as the primary and remember it for use in
-    # individual roles later. Also store the node id and each node's VPN
-    # address as facts.
-
-    - name: Determine primary hostname
-      set_fact: primary_hostname="{{ item }}"
-      when: "hostvars[item].ec2_tag_db == 'primary'"
-      with_items: "{{ play_hosts }}"
-      tags: always
-
-    - name: Set the primary hostname public IP address
-      set_fact: primary_hostname_ip="{{ hostvars[item].ec2_ip_address }}"
-      when: "hostvars[item].ec2_tag_db == 'primary'"
-      with_items: "{{ play_hosts }}"
-      tags: always
-
-    - name: Search for the Barman instance
-      ec2_remote_facts:
-        filters:
-          instance-state-name: running
-          "tag:Name": "{{ use_global_barman }}"
-        region: ap-southeast-2
-      when: use_global_barman is defined
-      delegate_to: 127.0.0.1
-      register: barman_inst
-      run_once: true
-      tags: always
-
-    - name: Determine barman hostname
-      set_fact: barman_hostname="{{ barman_inst.instances[0].public_ip_address }}"
-      when: use_global_barman is defined
-      tags: always
-
-    - name: Store DB servers list
-      set_fact:
-        db_servers: ["{{ item }}"]
-      when: "hostvars[item].ec2_tag_db == 'primary'"
-      with_items: "{{ play_hosts }}"
-      tags: always
-
-    - name: Determine barman hostname
-      set_fact: barman_hostname="{{ item }}"
-      when: "use_global_barman is not defined and hostvars[item].ec2_tag_db == 'barman'"
-      with_items: "{{ play_hosts }}"
-      tags: always
-
-    - name: Determine whether to use a global barman
-      set_fact: reuse_barman=True
-      when: use_global_barman is defined
-      tags: always
-
-    - name: Set the node id as a fact
-      set_fact: node_id="{{ ec2_tag_node }}"
-      tags: always
-
-    - name: Store the VPN address (basically ec2 PRIVATE IP address) as a fact
-      set_fact:
-        vpn_address: "{{ hostvars[item].ec2_private_ip_address }}"
-      when: "hostvars[item].ec2_tag_node == node_id"
-      with_items: "{{ play_hosts }}"
-      tags: always
-
-    - add_host: name={{barman_hostname}} use_bman={{reuse_barman}} groups=bman_hosts dblist={{primary_hostname_ip}} bhost={{barman_hostname}} servid={{serviceid|default('B56789')}} custid={{customerid|default('A12345')}}
       tags: always
 
   roles:
@@ -94,75 +15,44 @@
     - role: common
       tags: common
 
-    # setup complete. Update, Upgrade and restart the instances
-    - role: sys/instance
-      tags: instance
+    # Declare that we want to install Postgres 9.5. This just sets a few
+    # handy defaults up front. The actual package installation happens a
+    # few steps later.
+    - role: postgres/vars
+      vars:
+        postgres_version: 9.5
+      tags: always
 
-    # Install the Postgres packages and basic configuration files.
-    - role: postgres/pkg
-      tags: postgres
-      when: inventory_hostname != barman_hostname
+    # Computes memory size and other instance-specific computations for
+    # use in later steps (e.g. shared_buffers).
+    - role: sys/tune
+      tags: always
 
-    - role: repmgr/common
-      tags: replication
-      when: inventory_hostname != barman_hostname
+    # Set kernel-level configuration parameters persistently.
+    - role: sys/sysctl
+      tags: [sys, sysctl]
 
-    # Set up streaming replication.
-    - role: repmgr/primary
-      when: inventory_hostname == primary_hostname
-      tags: replication
+    # Set up any additional filesystems required. The block device
+    # layout is instance-specific.
+    - role: sys/fs
+      vars:
+        device: /dev/xvdb
+        mountpoint: "{{ postgres_home }}"
+      tags: [sys, fs]
 
-    - role: repmgr/standby
-      when: inventory_hostname != primary_hostname and inventory_hostname != barman_hostname
-      tags: replication
+    - role: postgres
+      when: >
+        'postgres' in role
 
-    # setup backup from the primary
+    # Set up Barman backups.
     - role: barman
-      when: reuse_barman != True and inventory_hostname == barman_hostname
       tags: barman
 
-    # install pglogical binaries
-    - role: pglogical/common
-      tags: pglogical
-      when: inventory_hostname != barman_hostname
+    # Set up repmgr
+    - role: repmgr
+      tags: repmgr
 
-- name: Add the barman settings if requested
-  hosts: bman_hosts
-  gather_facts: no
-  sudo_user: root
-  sudo: true
-  vars:
-    use_2ndquadrant_postgres: 'yes'
-    #use_global_barman: 'TPA_Barman_AP_SouthEast_2'
-    ansible_python_interpreter: '/usr/bin/python2.7'
-    ansible_user: 'ubuntu'
-
-  pre_tasks:
-    # The backup will be taken from the primary instance for various
-    # reasons for now
-    - name: Store DB servers list
-      set_fact:
-        db_servers: "{{dblist}}"
-      tags: always
-
-    - name: Determine barman hostname
-      set_fact: barman_hostname="{{ bhost }}"
-      tags: always
-
-    - name: Set customerid
-      set_fact: customerid="{{custid}}"
-      tags: always
-
-    - name: Set serviceid
-      set_fact: serviceid="{{servid}}"
-      tags: always
-
-  roles:
-    - role: common
-      tags: common1
-      when: use_bman == True
-
-    # setup backup from the primary
-    - role: barman
-      tags: barman1
-      when: use_bman == True
+    - role: postgres/final
+      when: >
+        'postgres' in role
+      tags: [postgres, final]

@@ -1,4 +1,6 @@
 # {{ansible_managed}}
 identity = "{{nsca_identity}}"
 password = "{{nsca_password}}"
-server = "144.76.39.197"
+{% for server_name in groups['tag_role_monitor-server'] %}
+server = "{{hostvars[server_name].private_ip}}"
+{% endfor %}

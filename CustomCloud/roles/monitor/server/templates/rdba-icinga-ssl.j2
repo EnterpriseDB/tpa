@@ -1,0 +1,90 @@
+# {{ansible_managed}}
+# We will redirect all non-ssl traffic on {{inventory_hostname_short}} to https
+<VirtualHost *:80>
+	ServerName {{inventory_hostname}}
+	DocumentRoot /var/www
+
+	RewriteEngine On
+	RewriteRule ^/(.*)  https://%{SERVER_NAME}/$1 [R,L]
+
+	CustomLog ${APACHE_LOG_DIR}/rdba_access.log combined
+	ErrorLog  ${APACHE_LOG_DIR}/rdba_error.log
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+
+<VirtualHost *:443>
+	ServerAdmin tpabeta@2ndquadrant.com
+	ServerName {{inventory_hostname}}
+
+	DocumentRoot /var/www
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+	<Directory /var/www/>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride None
+		Order allow,deny
+		allow from all
+	</Directory>
+
+	RedirectMatch ^/$ /icinga/
+
+	#ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
+	<Directory "/usr/lib/cgi-bin">
+		AllowOverride None
+		Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+		Order allow,deny
+		Allow from all
+	</Directory>
+
+	# apache configuration for icinga
+
+	ScriptAlias /cgi-bin/icinga /usr/lib/cgi-bin/icinga
+
+	# Where the stylesheets (config files) reside
+	Alias /icinga/stylesheets /etc/icinga/stylesheets
+
+	# Where the HTML pages live
+	Alias /icinga /usr/share/icinga/htdocs
+
+	<DirectoryMatch "^(/usr/share/icinga/htdocs|/usr/lib/cgi-bin/icinga|/etc/icinga/stylesheets)">
+        		Options FollowSymLinks
+
+        		DirectoryIndex index.html
+
+        		AllowOverride AuthConfig
+        		Order Allow,Deny
+        		Allow From All
+
+        		AuthName "Icinga Access"
+        		AuthType Basic
+        		AuthUserFile /etc/icinga/htpasswd.users
+        		Require valid-user
+	</DirectoryMatch>
+
+	LogLevel warn
+	CustomLog ${APACHE_LOG_DIR}/tpa_ssl_access.log combined
+	ErrorLog  ${APACHE_LOG_DIR}/tpa_ssl_error.log
+
+	SSLEngine on
+	SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-RC4-SHA:ECDHE-RSA-RC4-SHA:ECDH-ECDSA-RC4-SHA:ECDH-RSA-RC4-SHA:ECDHE-RSA-AES256-SHA:RC4-SHA:HIGH:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!CBC:!EDH:!kEDH:!PSK:!SRP:!kECDH;
+	SSLHonorCipherOrder on
+	SSLProtocol all -SSLv2 -SSLv3
+	SSLCertificateKeyFile   /etc/ssl/private/ssl-cert-snakeoil.key
+	SSLCertificateFile      /etc/ssl/certs/ssl-cert-snakeoil.pem
+	#SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire
+	<FilesMatch "\.(cgi|shtml|phtml|php)$">
+		SSLOptions +StdEnvVars
+	</FilesMatch>
+	<Directory /usr/lib/cgi-bin>
+		SSLOptions +StdEnvVars
+	</Directory>
+
+	BrowserMatch "MSIE [2-6]" \
+		nokeepalive ssl-unclean-shutdown \
+		downgrade-1.0 force-response-1.0
+	BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+</VirtualHost>
+</IfModule>
