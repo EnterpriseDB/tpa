@@ -27,7 +27,7 @@ define host {
     use             rdba_monitored_host
     name            {{item}}_monitored_host
     alias           All {{client_name}} hosts
-    hostgroups      {{item}}_postgres_servers
+    hostgroups      {{item}}_postgres_servers, postgres_servers
     contact_groups  {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
     _customer       {{ rt_monitoring_user }}
     _queue          {{ rt_queue }}
@@ -38,7 +38,7 @@ define host {
 #-----------------------------------------------------------------------
 # Database servers
 #-----------------------------------------------------------------------
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['tag_role_postgres'] if server_name not in groups['tag_role_barman'] %}
 define host {
     use             {{item}}_monitored_host
     host_name       {{server_name}}
@@ -56,7 +56,7 @@ define host {
     use             rdba_monitored_host
     name            {{item}}_monitored_barman_host
     alias           All {{client_name}} barman hosts
-    hostgroups      {{item}}_barman_servers
+    hostgroups      {{item}}_barman_servers, postgres_servers
     contact_groups  {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
     _customer       {{ rt_monitoring_user }}
     _queue          {{ rt_queue }}
