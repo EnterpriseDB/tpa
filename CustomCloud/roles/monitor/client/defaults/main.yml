@@ -30,7 +30,7 @@ socket_dir: "/var/run/postgresql"
 
 # Usually we have sudo root/postgres access, but sometimes not
 have_root_sudo: true
-have_postgres_sudo: true
+have_postgres_sudo: false
 
 # Attempt to install the appropriate nsca-ng package
 install_nsca: true
@@ -292,7 +292,7 @@ pg_bouncer_cl_waiting_c: 15
 pg_bouncer_maxwait_w: 5
 pg_bouncer_maxwait_c: 15
 
-client_identifier: tpa
+client_identifier: tpas #short for tpa service
 client_name: TPA
 rt_monitoring_user: tpabeta@2ndquadrant.com
 rt_queue: tpabeta
