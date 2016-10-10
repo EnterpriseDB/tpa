@@ -2,4 +2,4 @@
 
 - name: Install rsyslog package
   package: name=rsyslog state=latest
-  tags: packages
+  tags: pkg
