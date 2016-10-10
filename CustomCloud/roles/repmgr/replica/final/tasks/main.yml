@@ -43,19 +43,10 @@
         {{ postgres_bin_dir }}/repmgr standby clone --verbose \
           -f "{{ repmgr_conf_dir }}/repmgr.conf" -D {{ postgres_data_dir }} \
           -d repmgr -U repmgr -w 0 --fast-checkpoint \
-          --copy-external-config-files=pgdata \
+          --copy-external-config-files \
           -h {{ hostvars[upstream].inventory_hostname }}
       become_user: postgres
       become: true
-
-    - name: Move over conf files to proper location
-      command: mv {{ postgres_data_dir }}/{{ item }} {{ postgres_conf_dir }}/
-      with_items:
-        - postgresql.conf
-        - pg_ident.conf
-        - pg_hba.conf
-      when: >
-        postgres_conf_dir != postgres_data_dir
 
     - name: Start Postgres
       service:
