@@ -3,9 +3,9 @@
 - name: Generate the host certificate
   local_action:
     module: >
-    shell
-    umask 077 &&
-    /usr/bin/openssl genrsa -out "{{ cluster_name }}-{{ inventory_hostname }}.key" 4096
+      shell
+      umask 077 &&
+      /usr/bin/openssl genrsa -out "{{ cluster_name }}-{{ inventory_hostname }}.key" 4096
   args:
     chdir: "{{ playbook_dir }}/certs"
     creates: "{{ cluster_name }}-{{ inventory_hostname }}.key"
@@ -15,10 +15,10 @@
 - name: Generate the certificate signing request
   local_action:
     module: >
-    shell
-    umask 077 &&
-    /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
-    /usr/bin/openssl req -new -key "{{ cluster_name }}-{{ inventory_hostname }}.key" -out "{{ cluster_name }}-{{ inventory_hostname }}.csr"
+      shell
+      umask 077 &&
+      /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
+      /usr/bin/openssl req -new -key "{{ cluster_name }}-{{ inventory_hostname }}.key" -out "{{ cluster_name }}-{{ inventory_hostname }}.csr"
   args:
     chdir: "{{ playbook_dir }}/certs"
     creates: "{{ cluster_name }}-{{ inventory_hostname }}.csr"
@@ -28,10 +28,10 @@
 - name: Sign the csr with our CA certificate
   local_action:
     module: >
-    shell
-    umask 077 &&
-    /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
-    /usr/bin/openssl x509 -req -in "{{ cluster_name }}-{{ inventory_hostname }}.csr" -CA "{{ cluster_name }}-root-CA.pem" -CAkey "{{ cluster_name }}-root-CA.key" -CAcreateserial -out "{{ cluster_name }}-{{ inventory_hostname }}.crt" -days 3650 -sha256
+      shell
+      umask 077 &&
+      /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
+      /usr/bin/openssl x509 -req -in "{{ cluster_name }}-{{ inventory_hostname }}.csr" -CA "{{ cluster_name }}-root-CA.pem" -CAkey "{{ cluster_name }}-root-CA.key" -CAcreateserial -out "{{ cluster_name }}-{{ inventory_hostname }}.crt" -days 3650 -sha256
   args:
     chdir: "{{ playbook_dir }}/certs"
     creates: "{{ cluster_name }}-{{ inventory_hostname }}.crt"

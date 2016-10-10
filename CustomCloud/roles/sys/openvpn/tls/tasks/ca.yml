@@ -3,9 +3,9 @@
 - name: Generate the CA certificate
   local_action:
     module: >
-    shell
-    umask 077 &&
-    /usr/bin/openssl genrsa -out "{{ cluster_name }}-root-CA.key" 4096
+      shell
+      umask 077 &&
+      /usr/bin/openssl genrsa -out "{{ cluster_name }}-root-CA.key" 4096
   args:
     chdir: "{{ playbook_dir }}/certs"
     creates: "{{ cluster_name }}-root-CA.key"
@@ -15,9 +15,9 @@
 - name: Create DH parameters
   local_action:
     module: >
-    shell
-    umask 077 &&
-    /usr/bin/openssl dhparam -out "{{ cluster_name }}-dh4096.pem" 4096
+      shell
+      umask 077 &&
+      /usr/bin/openssl dhparam -out "{{ cluster_name }}-dh4096.pem" 4096
   args:
     chdir: "{{ playbook_dir }}/certs"
     creates: "{{ cluster_name }}-dh4096.pem"
@@ -27,9 +27,9 @@
 - name: Create TA key
   local_action:
     module: >
-    shell
-    umask 077 &&
-    /usr/local/sbin/openvpn --genkey --secret "{{ cluster_name }}-ta.key"
+      shell
+      umask 077 &&
+      /usr/local/sbin/openvpn --genkey --secret "{{ cluster_name }}-ta.key"
   args:
     chdir: "{{ playbook_dir }}/certs"
     creates: "{{ cluster_name }}-ta.key"
@@ -39,10 +39,10 @@
 - name: Self sign the CA certificate
   local_action:
     module: >
-    shell
-    umask 077 &&
-    /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
-    /usr/bin/openssl req -x509 -new -nodes -key "{{ cluster_name }}-root-CA.key" -sha256 -days 3650 -out "{{ cluster_name }}-root-CA.pem"
+      shell
+      umask 077 &&
+      /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
+      /usr/bin/openssl req -x509 -new -nodes -key "{{ cluster_name }}-root-CA.key" -sha256 -days 3650 -out "{{ cluster_name }}-root-CA.pem"
   args:
     chdir: "{{ playbook_dir }}/certs"
     creates: "{{ cluster_name }}-root-CA.pem"
