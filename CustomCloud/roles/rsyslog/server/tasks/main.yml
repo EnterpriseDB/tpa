@@ -1,21 +1,28 @@
 ---
 
 - name: Create rsyslog.conf configuration file
-  become: yes
   template:
     src: rsyslog.conf.j2
     dest: /etc/rsyslog.conf
     owner: root
     group: root
     mode: 0644
+  register: conf
   tags:
     - rsyslog
 
-- name: Ensure rsyslog service is restarted and enabled on boot
-  become: yes
+- name: Restart rsyslog when configuration changed
   service:
     name: rsyslog
     state: restarted
+  when: >
+    conf|changed
+  tags:
+    - rsyslog
+
+- name: Ensure rsyslog service is enabled on boot
+  service:
+    name: rsyslog
     enabled: yes
   tags:
     - rsyslog

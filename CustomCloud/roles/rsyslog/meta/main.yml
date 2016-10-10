@@ -2,6 +2,11 @@
 
 allow_duplicates: yes
 dependencies:
-    - { role: rsyslog/pkg, when: log is defined or 'central-log' in role }
-    - { role: rsyslog/client, when: log is defined }
-    - { role: rsyslog/server, when: 'central-log' in role }
+    - role: rsyslog/pkg
+      when: >
+        'log-server' in role or log is defined
+    - role: rsyslog/client
+      when: log is defined
+    - role: rsyslog/server
+      when: >
+        'log-server' in role

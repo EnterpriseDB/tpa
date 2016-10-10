@@ -60,6 +60,8 @@
     - role: repmgr
       tags: repmgr
 
+    - role: rsyslog
+
     - role: postgres/final
       when: >
         'postgres' in role
