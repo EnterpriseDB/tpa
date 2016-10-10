@@ -43,6 +43,7 @@
         {{ postgres_bin_dir }}/repmgr standby clone --verbose \
           -f "{{ repmgr_conf_dir }}/repmgr.conf" -D {{ postgres_data_dir }} \
           -d repmgr -U repmgr -w 0 --fast-checkpoint \
+          --copy-external-config-files=pgdata \
           -h {{ hostvars[upstream].inventory_hostname }}
       become_user: postgres
       become: true
