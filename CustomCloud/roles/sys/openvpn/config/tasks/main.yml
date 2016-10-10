@@ -25,12 +25,14 @@
     - name: Install client-configuration-database files on the server
       template: src=ccd.j2 dest="/etc/tpa/openvpn/ccd/{{ item }}" mode=0644
       with_items: "{{ play_hosts|difference(inventory_hostname) }}"
-  when: 'openvpn-server' in role
+  when: >
+    'openvpn-server' in role
 
 - name: Install main client configuration file
   template: src=client.conf.j2 dest="/etc/tpa/openvpn/client.conf"
     mode=0644 owner=root group=root
-  when: not 'openvpn-server' in role
+  when: >
+    not 'openvpn-server' in role
 
 # XXX We should do this only if some part of the configuration has
 # changed, but in this case it's not easy to determine.
