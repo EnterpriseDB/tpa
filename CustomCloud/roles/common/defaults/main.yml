@@ -14,15 +14,18 @@ packages:
     - gdb
   Debian:
     - python-dev
+    - python-passlib
     - linux-tools
     - dbus
     - gnutls-bin
   RedHat:
     - python-devel
+    - python-passlib
     - perf
     - gnutls-utils
   Ubuntu:
     - python-dev
+    - python-passlib
     - linux-tools-generic
     - gnutls-bin
 
@@ -42,3 +45,5 @@ secrets:
     - barman_password
     - streaming_barman_password
     - repmgr_password
+    - nsca_password
+    - icinga_password

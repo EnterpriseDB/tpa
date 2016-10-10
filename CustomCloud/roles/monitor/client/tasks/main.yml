@@ -4,6 +4,10 @@
 #
 # Add a client server to monitoring.
 
+- name: Get the nsca password from the vault
+  include_vars: "{{ playbook_dir }}/vault/nsca_password.yml"
+  no_log: true
+
 - name: Set up client server scripts for standard monitoring
   include: add-monitoring.yml
   when: (monitoring|bool == true) and (server_role == "database")

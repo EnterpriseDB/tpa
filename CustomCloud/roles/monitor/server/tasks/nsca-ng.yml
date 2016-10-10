@@ -17,6 +17,10 @@
   copy: src=nsca-ng/nsca-ng.cfg dest={{nsca_configfile}}
   notify: Restart nsca-ng
 
+- name: Get the nsca password from the vault
+  include_vars: "{{ playbook_dir }}/vault/nsca_password.yml"
+  no_log: true
+
 # nsca configuration
 - name: Add client nsca-ng configuration file
   template: src=nsca-client-template.cfg.j2 dest="{{nsca_configdir}}/customer-{{item}}.cfg" owner=root

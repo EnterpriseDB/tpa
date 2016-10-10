@@ -292,12 +292,13 @@ pg_bouncer_cl_waiting_c: 15
 pg_bouncer_maxwait_w: 5
 pg_bouncer_maxwait_c: 15
 
+# The nsca_password will be picked up from the vault later
+nsca_identity: TPA
+
 client_identifier: tpas #short for tpa service
 client_name: TPA
 rt_monitoring_user: tpabeta@2ndquadrant.com
 rt_queue: tpabeta
-nsca_identity: ubuntu
-nsca_password: verysecret
 nsca_configdir: /etc/nsca-ng
 nsca_configfile: /etc/nsca-ng/nsca-ng.cfg
 nsca_includefile: includes.cfg

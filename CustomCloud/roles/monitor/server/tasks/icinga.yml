@@ -25,8 +25,17 @@
     - services_icinga.cfg
     - timeperiods_icinga.cfg
 
+- name: Get the icinga password from the vault
+  include_vars: "{{ playbook_dir }}/vault/icinga_password.yml"
+  no_log: true
+
 - name: htpasswd file
-  copy: src=htpasswd.users dest=/etc/icinga/htpasswd.users
+  htpasswd:
+    path: /etc/icinga/htpasswd.users
+    name: icingaadmin
+    password: "{{ icinga_password }}"
+    owner: root
+    mode: 0644
 
 # For the following two items, see: /usr/share/doc/icinga-common/README.Debian
 # Note: we should probably find a way of executing dpkg-statoverride as
@@ -57,15 +66,19 @@
   notify: Reload icinga
 
 - name: Apache configuration file for icingca
-  template: src=rdba-icinga-ssl.j2 dest=/etc/apache2/sites-available/rdba-icinga-ssl
+  template: src=rdba-icinga-ssl.j2 dest=/etc/apache2/sites-available/rdba-icinga-ssl.conf
   notify: Restart apache
 
 - name: Apache site-enabled link
-  file: src=../sites-available/rdba-icinga-ssl dest=/etc/apache2/sites-enabled/rdba-icinga-ssl state=link force=yes
+  file: src=../sites-available/rdba-icinga-ssl.conf dest=/etc/apache2/sites-enabled/rdba-icinga-ssl.conf state=link force=yes
   notify: Restart apache
 
 - name: enable mod_rewrite
   apache2_module: state=present name=rewrite
+  notify: Restart apache
+
+- name: install mod_ssl
+  apache2_module: state=present name=ssl
   notify: Restart apache
 
 - name: .rtrc for icinga
