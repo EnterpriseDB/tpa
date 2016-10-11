@@ -14,6 +14,7 @@
 - include: server.yml
   when: >
     'barman' in role
+  static: no
 
 # On any instance that must be backed up (i.e., with tags.backup set to
 # the name of a Barman server), it will perform the necessary
@@ -21,6 +22,7 @@
 
 - include: client.yml
   when: backup != ''
+  static: no
 
 # On any other kind of instance, we do nothing.
 #
