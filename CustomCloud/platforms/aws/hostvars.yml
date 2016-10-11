@@ -4,7 +4,9 @@
   action: set_fact
   args:
     "{{ item.var }}": "{{ vars[item.source]|default(item.default)|default(None) }}"
-  when: item.var not in vars
+  when: >
+    item.var not in vars or
+    ('override' in item and item.override)
   with_items:
     - var: db
       source: ec2_tag_db
@@ -14,6 +16,7 @@
       source: ec2_tag_Name
     - var: role
       source: ec2_tag_role
+      override: true
     - var: backup
       source: ec2_tag_backup
     - var: upstream
