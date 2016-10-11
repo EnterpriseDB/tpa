@@ -50,13 +50,27 @@
     'primary' in role or 'replica' in role or 'witness' in role
 
 # If any instance is tagged with 'log-server', make every other instance
-# log to it. This can be overriden by setting 'log' for any instance.
+# log to it. This can be overriden by setting 'log_server' for any
+# instance.
 
 - set_fact:
-    log: "{{ groups[ls][0] }}"
+    log_server: "{{ groups[ls][0] }}"
   when: >
-    log is not defined and
+    log_server is not defined and
     ls in groups and groups[ls]|length > 0 and
     inventory_hostname != groups[ls][0]
   vars:
     ls: 'tag_role_log-server'
+
+# If any instance is tagged with 'openvpn-server', make every other
+# instance use it as its openvpn server. This can be overriden by
+# setting 'openvpn_server' for any instance.
+
+- set_fact:
+    openvpn_server: "{{ groups[os][0] }}"
+  when: >
+    openvpn_server is not defined and
+    os in groups and groups[os]|length > 0 and
+    inventory_hostname != groups[os][0]
+  vars:
+    os: 'tag_role_openvpn-server'

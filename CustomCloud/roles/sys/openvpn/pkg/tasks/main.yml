@@ -1,6 +1,6 @@
 ---
 
-- name: Install packages
+- name: Install openvpn packages
   package:
     name: "{{ item }}"
     state: latest

@@ -1,9 +1,3 @@
 ---
 
-openvpn_dirname: "/etc/openvpn/{{ vpn_name }}"
-
-openvpn_packages:
-  Debian:
-    - openvpn
-  RedHat:
-    - openvpn
+vpn_dir: "/etc/openvpn/{{ _vpn_name }}"

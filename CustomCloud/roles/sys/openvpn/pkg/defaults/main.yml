@@ -1,0 +1,7 @@
+---
+
+openvpn_packages:
+  Debian:
+    - openvpn
+  RedHat:
+    - openvpn

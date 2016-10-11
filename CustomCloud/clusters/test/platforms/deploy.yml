@@ -38,6 +38,9 @@
 
     # Set kernel-level configuration parameters persistently.
     - role: sys/sysctl
+      vars:
+        sysctl_values:
+          net.ipv4.ip_forward: 1
       tags: [sys, sysctl]
 
     # Set up any additional filesystems required. The block device
@@ -47,6 +50,10 @@
         device: /dev/xvdb
         mountpoint: "{{ postgres_home }}"
       tags: [sys, fs]
+
+    - role: sys/openvpn
+      vpn_network: 192.168.33.0/24
+      tags: [sys, openvpn]
 
     - role: postgres
       when: >

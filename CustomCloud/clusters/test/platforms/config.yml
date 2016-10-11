@@ -137,5 +137,5 @@ instances:
             volume_size: 32
       tags:
         os: Debian
-        role: barman,monitor,witness,log-server
+        role: barman,monitor,witness,log-server,openvpn-server
         Name: eu-barman

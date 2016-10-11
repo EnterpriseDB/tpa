@@ -1,4 +1,4 @@
-server {{ vpn_network }} {{ vpn_netmask }}
+server {{ vpn_network|ipaddr("network") }} {{ vpn_network|ipaddr("netmask") }}
 
 local 0.0.0.0
 port 1194
@@ -6,14 +6,14 @@ port 1194
 dev tun
 proto udp
 
-dh /etc/tpa/openvpn/{{ cluster_name }}-dh4096.pem
-ca /etc/tpa/openvpn/{{ cluster_name }}-root-CA.pem
-cert /etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.crt
-key  /etc/tpa/openvpn/{{ cluster_name }}-{{ inventory_hostname }}.key
-tls-auth /etc/tpa/openvpn/{{ cluster_name }}-ta.key 0
+dh {{ vpn_dir }}/dh4096.pem
+ca {{ vpn_dir }}/root-CA.pem
+cert {{ vpn_dir }}/{{ inventory_hostname }}.crt
+key  {{ vpn_dir }}/{{ inventory_hostname }}.key
+tls-auth {{ vpn_dir }}/ta.key 0
 
-client-config-dir /etc/tpa/openvpn/ccd
-ifconfig-pool-persist /etc/tpa/openvpn/ipp.txt
+client-config-dir {{ vpn_dir }}/ccd
+ifconfig-pool-persist {{ vpn_dir }}/ipp.txt
 
 comp-lzo
 user nobody

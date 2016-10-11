@@ -1,0 +1,3 @@
+---
+
+_vpn_name: "{{ vpn_name|default(cluster_name)|lower }}"

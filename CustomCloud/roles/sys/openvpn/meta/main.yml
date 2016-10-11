@@ -1,7 +1,6 @@
 ---
 
-allow_duplicates: yes
+allow_duplicates: no
 dependencies:
-    - { role: openvpn/pkg }
-    - { role: openvpn/config }
-    - { role: openvpn/tls }
+    - role: openvpn/pkg
+    - role: openvpn/config

@@ -1,0 +1,38 @@
+---
+
+- name: Generate the host certificate
+  local_action: >
+    shell
+    umask 077 &&
+    /usr/bin/openssl genrsa -out "{{ inventory_hostname }}.key" 4096
+  args:
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "{{ inventory_hostname }}.key"
+  sudo: no
+
+- name: Generate the certificate signing request
+  local_action: >
+    shell
+    umask 077 &&
+    /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n\n\n\n" |
+    /usr/bin/openssl req -new -key "{{ inventory_hostname }}.key" -out "{{ inventory_hostname }}.csr"
+  args:
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "{{ cluster_name }}-{{ inventory_hostname }}.csr"
+  sudo: no
+
+- name: Sign the csr with our CA certificate
+  local_action: >
+    shell
+    umask 077 &&
+    /usr/bin/openssl x509 -req -in "{{ inventory_hostname }}.csr" -CA "root-CA.pem" -CAkey "root-CA.key" -CAcreateserial -out "{{ inventory_hostname }}.crt" -days 3650 -sha256
+  args:
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "{{ inventory_hostname }}.crt"
+  sudo: no
+
+- name: Copy the crt file to host
+  copy: src="{{ playbook_dir }}/certs/{{ inventory_hostname }}.crt"  dest="{{ vpn_dir }}/{{ inventory_hostname }}.crt"
+
+- name: Copy the key file to key
+  copy: src="{{ playbook_dir }}/certs/{{ inventory_hostname }}.key"  dest="{{ vpn_dir }}/{{ inventory_hostname }}.key"

@@ -1,0 +1,52 @@
+---
+
+- name: Generate the CA certificate
+  local_action: >
+    shell
+    umask 077 &&
+    /usr/bin/openssl genrsa -out "root-CA.key" 4096
+  args:
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "root-CA.key"
+  run_once: yes
+  sudo: no
+
+- name: Create DH parameters
+  local_action: >
+    shell
+    umask 077 &&
+    /usr/bin/openssl dhparam -out "dh4096.pem" 4096
+  args:
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "dh4096.pem"
+  run_once: yes
+  sudo: no
+
+- name: Create TA key
+  local_action: >
+    shell
+    umask 077 &&
+    /usr/sbin/openvpn --genkey --secret "ta.key"
+  args:
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "ta.key"
+  run_once: yes
+  sudo: no
+
+- name: Self sign the CA certificate
+  local_action: >
+    shell
+    umask 077 &&
+    /bin/echo -e "--\nState\nCity\nOrganization\nOrganizationalUnit\nlocalhost.localdomain\nroot@localhost.localdomain\n" |
+    /usr/bin/openssl req -x509 -new -nodes -key "root-CA.key" -sha256 -days 3650 -out "root-CA.pem"
+  args:
+    chdir: "{{ playbook_dir }}/certs"
+    creates: "root-CA.pem"
+  run_once: yes
+  sudo: no
+
+- name: Copy the certificate from localhost to all hosts
+  copy: src="{{ playbook_dir }}/certs/root-CA.pem"  dest="{{ vpn_dir }}/root-CA.pem"
+
+- name: Copy TA key from localhost to all hosts
+  copy: src="{{ playbook_dir }}/certs/ta.key"  dest="{{ vpn_dir }}/ta.key"

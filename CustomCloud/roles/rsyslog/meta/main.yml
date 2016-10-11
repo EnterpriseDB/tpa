@@ -3,10 +3,8 @@
 allow_duplicates: yes
 dependencies:
     - role: rsyslog/pkg
-      when: >
-        'log-server' in role or log is defined
     - role: rsyslog/client
-      when: log is defined
+      when: log_server is defined and log_server != ''
     - role: rsyslog/server
       when: >
         'log-server' in role
