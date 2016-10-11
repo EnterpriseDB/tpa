@@ -55,6 +55,9 @@
       vpn_network: 192.168.33.0/24
       tags: [sys, openvpn]
 
+    - role: sys/hosts
+      tags: [sys, hosts]
+
     - role: postgres
       when: >
         'postgres' in role

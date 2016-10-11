@@ -13,6 +13,11 @@
 - set_fact:
     openvpn_ip: "{{ vpn_network|ipaddr('network')|regex_replace('\\.[0-9]*$', '.'~node) }}"
 
+- set_fact:
+    ip_address: "{{ openvpn_ip }}"
+    ip_addresses: ['public_ip', 'private_ip', 'openvpn_ip']
+    cluster_network: "{{ vpn_network }}"
+
 # Perform local initialisation tasks (generating keys and certificates).
 
 - include: local.yml

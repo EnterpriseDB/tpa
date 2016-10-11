@@ -1,8 +1,5 @@
 ---
 
-- name: Set the hostname
-  hostname: name="{{ inventory_hostname }}"
-
 - name: Generate /etc/hosts
   template:
     src: hosts.j2

@@ -22,8 +22,8 @@
 - include: packages.yml
   tags: [common, pkg]
 
-# Set node hostnames and generate /etc/hosts
-- include: hosts.yml
+- name: Set the hostname
+  hostname: name="{{ inventory_hostname }}"
   tags: common
 
 # Generate secrets for various components
