@@ -15,10 +15,10 @@
   local_action: >
     shell
     umask 077 &&
-    /usr/bin/openssl dhparam -out "dh4096.pem" 4096
+    /usr/bin/openssl dhparam -out "dh2048.pem" 2048
   args:
     chdir: "{{ playbook_dir }}/certs"
-    creates: "dh4096.pem"
+    creates: "dh2048.pem"
   run_once: yes
   sudo: no
 
