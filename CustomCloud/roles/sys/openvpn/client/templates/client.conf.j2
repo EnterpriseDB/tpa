@@ -15,7 +15,7 @@ comp-lzo
 user nobody
 group {% if ansible_distribution == 'RedHat' %} nobody {% else %} nogroup {% endif %}
 keepalive 10 30
-ns-cert-type server
+#remote-cert-tls server
 resolv-retry infinite
 persist-key
 persist-tun

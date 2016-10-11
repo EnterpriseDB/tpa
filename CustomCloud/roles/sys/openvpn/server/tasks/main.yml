@@ -19,7 +19,7 @@
     mode: 0644
   with_items: "{{ play_hosts|difference(inventory_hostname) }}"
 
-- name: Install the DH paramters
+- name: Install the DH parameters
   copy:
     src: "{{ _local_cert_dir }}/dh2048.pem"
     dest: "{{ _vpn_dir }}/dh2048.pem"
