@@ -1,0 +1,11 @@
+---
+
+- name: Install main client configuration file
+  template:
+    src: client.conf.j2
+    dest: "/etc/openvpn/{{ _vpn_name }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart openvpn

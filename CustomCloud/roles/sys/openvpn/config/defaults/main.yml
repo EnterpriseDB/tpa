@@ -1,3 +1,0 @@
----
-
-vpn_dir: "/etc/openvpn/{{ _vpn_name }}"

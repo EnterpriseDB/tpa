@@ -1,0 +1,42 @@
+---
+
+- name: Create openvpn client configuration directory
+  file:
+    path: "{{ _vpn_dir }}/ccd"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
+# XXX We shouldn't use play_hosts here.
+
+- name: Install client-configuration-database files
+  template:
+    src: ccd.j2
+    dest: "{{ _vpn_dir }}/ccd/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ play_hosts|difference(inventory_hostname) }}"
+
+- name: Install the DH paramters
+  copy:
+    src: "{{ _local_cert_dir }}/dh2048.pem"
+    dest: "{{ _vpn_dir }}/dh2048.pem"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart openvpn
+
+- name: Install main server configuration file
+  template:
+    src: server.conf.j2
+    dest: "/etc/openvpn/{{ _vpn_name }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart openvpn
+
+- meta: flush_handlers

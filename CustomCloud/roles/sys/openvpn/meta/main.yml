@@ -3,4 +3,10 @@
 allow_duplicates: no
 dependencies:
     - role: openvpn/pkg
-    - role: openvpn/config
+    - role: openvpn/common
+    - role: openvpn/server
+      when: >
+        'openvpn-server' in role
+    - role: openvpn/client
+      when: >
+        openvpn_server is defined and openvpn_server != ''

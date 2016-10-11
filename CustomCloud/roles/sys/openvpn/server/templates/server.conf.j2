@@ -1,0 +1,34 @@
+mode server
+
+tls-server
+topology subnet
+push "topology [topology]"
+
+ifconfig {{ openvpn_ip }} {{ vpn_network|ipaddr("netmask") }}
+push "route {{ vpn_network|ipaddr("network") }} {{ vpn_network|ipaddr("netmask") }}"
+push "route-gateway {{ openvpn_ip }}"
+
+local 0.0.0.0
+port 1194
+
+dev tun
+proto udp
+
+dh {{ _vpn_dir }}/dh2048.pem
+ca {{ _vpn_dir }}/ca.crt
+key {{ _vpn_dir }}/{{ inventory_hostname }}.key
+cert {{ _vpn_dir }}/{{ inventory_hostname }}.crt
+tls-auth {{ _vpn_dir }}/ta.key 0
+
+client-config-dir {{ _vpn_dir }}/ccd
+
+comp-lzo
+user nobody
+group {% if ansible_distribution == 'RedHat' %} nobody {% else %} nogroup {% endif %}
+keepalive 10 300
+tls-timeout = 120s
+client-to-client
+persist-key
+persist-tun
+
+log-append /var/log/openvpn.log

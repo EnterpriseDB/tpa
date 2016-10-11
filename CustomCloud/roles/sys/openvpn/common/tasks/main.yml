@@ -1,0 +1,47 @@
+---
+
+- name: Ensure openvpn configuration is present
+  assert:
+    msg: "Please define vpn_network in CIDR format"
+    that:
+      - vpn_network is defined
+
+# Set the openvpn IP address for each host based on its node number. I
+# wish there were a more graceful way to do this. (Note that we cannot
+# assume that the openvpn server will be assigned the .1 address.)
+
+- set_fact:
+    openvpn_ip: "{{ vpn_network|ipaddr('network')|regex_replace('\\.[0-9]*$', '.'~node) }}"
+
+# Perform local initialisation tasks (generating keys and certificates).
+
+- include: local.yml
+
+# Perform instance initialisation tasks.
+
+- name: Create openvpn configuration directory
+  file:
+    path: "{{ _vpn_dir }}"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
+- name: Install key and certificate files on each instance
+  copy:
+    src: "{{ _local_cert_dir }}/{{ item.name }}"
+    dest: "{{ _vpn_dir }}/"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  with_items:
+    - name: ca.crt
+      mode: "0644"
+    - name: "{{ inventory_hostname }}.crt"
+      mode: "0644"
+    - name: "{{ inventory_hostname }}.key"
+      mode: "0600"
+    - name: ta.key
+      mode: "0600"
+  notify:
+    - Restart openvpn

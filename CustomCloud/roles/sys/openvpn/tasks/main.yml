@@ -1,0 +1,6 @@
+---
+
+- name: Ensure openvpn is enabled on boot
+  service:
+    name: "openvpn@{{ _vpn_name }}"
+    enabled: yes
