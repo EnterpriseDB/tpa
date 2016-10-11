@@ -1,0 +1,6 @@
+---
+
+- name: Ensure rsyslog service is enabled on boot
+  service:
+    name: rsyslog
+    enabled: yes

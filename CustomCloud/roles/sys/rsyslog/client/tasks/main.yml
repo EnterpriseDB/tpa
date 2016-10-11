@@ -7,8 +7,6 @@
     group: root
     mode: 0755
     state: directory
-  tags:
-    - rsyslog
 
 - name: Create rsyslog configuration file for nodes
   template:
@@ -17,22 +15,5 @@
     owner: root
     group: root
     mode: 0644
-  register: conf
-  tags:
-    - rsyslog
-
-- name: Restart rsyslog when configuration changed
-  service:
-    name: rsyslog
-    state: restarted
-  when: >
-    conf|changed
-  tags:
-    - rsyslog
-
-- name: Ensure rsyslog service is enabled on boot
-  service:
-    name: rsyslog
-    enabled: yes
-  tags:
-    - rsyslog
+  notify:
+    - Restart rsyslog

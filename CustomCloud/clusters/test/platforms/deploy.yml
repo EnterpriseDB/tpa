@@ -58,6 +58,9 @@
     - role: sys/hosts
       tags: [sys, hosts]
 
+    - role: sys/rsyslog
+      tags: [sys, rsyslog]
+
     - role: postgres
       when: >
         'postgres' in role
@@ -69,8 +72,6 @@
     # Set up repmgr
     - role: repmgr
       tags: repmgr
-
-    - role: rsyslog
 
     - role: postgres/final
       when: >
