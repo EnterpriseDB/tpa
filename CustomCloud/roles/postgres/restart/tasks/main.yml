@@ -1,8 +1,10 @@
 ---
 
-# We restart Postgres unconditionally for now. In the near future we
-# should use a notifier mechanism so that we restart only when the
-# Postgres configuration has changed.
+# We start or restart Postgres depending on whether any tasks have
+# notified the 'Note Postgres restart required' handler. Either way,
+# Postgres will be running after this role completes.
 
-- name: Restart Postgres unconditionally
-  service: name={{ postgres_service_name }} state=restarted
+- name: Start or restart Postgres
+  service:
+    name: "{{ postgres_service_name }}"
+    state: "{{ postgres_service_end_state|default('started') }}"

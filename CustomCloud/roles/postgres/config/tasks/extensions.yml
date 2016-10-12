@@ -19,6 +19,8 @@
     owner: postgres
     group: postgres
     mode: 0644
+  notify:
+    - Note Postgres restart required
 
 # If we are installing pg_stat_statements, we need to add it to
 # shared_preload_libraries.

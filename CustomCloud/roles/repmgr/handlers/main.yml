@@ -1,0 +1,5 @@
+---
+
+- name: Note repmgrd restart required
+  set_fact:
+    repmgrd_service_end_state: restarted

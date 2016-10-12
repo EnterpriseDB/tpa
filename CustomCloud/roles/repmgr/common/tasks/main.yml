@@ -23,6 +23,8 @@
     - {mode: "0755", path: promote_command.sh}
     - {mode: "0755", path: follow_command.sh}
     # - {mode: "0755", path: assign_eip.py}
+  notify:
+    - Note repmgrd restart required
 
 - name: Install repmgr unit file
   template:
@@ -31,3 +33,5 @@
     owner: root
     group: root
     mode: 0644
+  notify:
+    - Note repmgrd restart required

@@ -21,3 +21,5 @@
     owner: postgres
     group: postgres
     mode: 0644
+  notify:
+    - Note Postgres restart required

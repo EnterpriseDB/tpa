@@ -1,4 +1,6 @@
 ---
 
 - name: Start repmgrd
-  service: name="repmgr{{ pgversionNN }}" state=restarted
+  service:
+    name: "repmgr{{ pgversionNN }}"
+    state: "{{ repmgr_service_end_state|default('started') }}"

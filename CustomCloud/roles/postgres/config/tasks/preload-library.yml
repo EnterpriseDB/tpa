@@ -43,3 +43,5 @@
     variable: shared_preload_libraries
     value: >
       '{{ libs.stdout and libs.stdout.split(',')|map('trim')|list|union([library])|join(', ') or library }}'
+  notify:
+    - Note Postgres restart required

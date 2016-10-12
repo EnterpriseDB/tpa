@@ -22,6 +22,8 @@
     src: "{{ postgres_hba_template }}"
     dest: "{{ postgres_conf_dir }}/pg_hba.conf"
   when: postgres_hba_template != ''
+  notify:
+    - Note Postgres restart required
 
 # Next, we generate postgresql.conf if the caller specifies a template.
 # Otherwise, we leave the default postgresql.conf alone.
@@ -31,6 +33,8 @@
     src: "{{ postgres_conf_template }}"
     dest: "{{ postgres_conf_dir }}/postgresql.conf"
   when: postgres_conf_template != ''
+  notify:
+    - Note Postgres restart required
 
 # No matter where the config file lives (and where it came from), we
 # make it include a config dir in PGDATA.
@@ -50,6 +54,8 @@
       include_dir = '{{ _include_dir }}'
     insertafter: EOF
     state: present
+  notify:
+    - Note Postgres restart required
 
 # Now we can put any desired settings into conf.d, where they will
 # override the defaults.
@@ -62,6 +68,8 @@
     group: postgres
     mode: 0644
   when: postgres_conf_template == ''
+  notify:
+    - Note Postgres restart required
 
 # If any settings were specified in postgres_conf_settings, we put that
 # into a separate configuration file. Note that we expect values in this
@@ -76,6 +84,8 @@
     group: postgres
     mode: 0644
   when: postgres_conf_settings
+  notify:
+    - Note Postgres restart required
     
 # And here's a file where anyone can add extra settings that will have
 # priority over our defaults, and will never be overwritten.
@@ -88,6 +98,8 @@
     owner: postgres
     group: postgres
     mode: 0644
+  notify:
+    - Note Postgres restart required
 
 - include: extensions.yml
   tags: [postgres, extensions]
