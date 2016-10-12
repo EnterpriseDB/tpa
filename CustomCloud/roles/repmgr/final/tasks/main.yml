@@ -1,6 +1,8 @@
 ---
 
-- name: Start repmgrd
+- meta: flush_handlers
+
+- name: Start or restart repmgrd
   service:
     name: "repmgr{{ pgversionNN }}"
     state: "{{ repmgr_service_end_state|default('started') }}"

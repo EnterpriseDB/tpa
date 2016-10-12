@@ -4,6 +4,8 @@
 # notified the 'Note Postgres restart required' handler. Either way,
 # Postgres will be running after this role completes.
 
+- meta: flush_handlers
+
 - name: Start or restart Postgres
   service:
     name: "{{ postgres_service_name }}"
