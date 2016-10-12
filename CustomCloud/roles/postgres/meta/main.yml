@@ -8,7 +8,7 @@ dependencies:
   - role: postgres/initdb
   - role: postgres/config
     when: >
-      'primary' in role
+      'replica' not in role
     tags: [postgres, config]
   - role: sys/ssh
     ssh_user: postgres
