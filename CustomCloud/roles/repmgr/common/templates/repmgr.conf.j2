@@ -1,6 +1,6 @@
-cluster={{ cluster_name|lower }}
+cluster={{ upstream or inventory_hostname }}
 node={{ node }}
-node_name=node{{ node }}
+node_name={{ inventory_hostname }}
 conninfo='host={{ inventory_hostname }} user=repmgr dbname=repmgr'
 master_response_timeout=60
 reconnect_attempts=6

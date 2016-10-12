@@ -139,3 +139,4 @@ instances:
         os: Debian
         role: barman,monitor,witness,log-server,openvpn-server
         Name: eu-barman
+        upstream: debian-primary

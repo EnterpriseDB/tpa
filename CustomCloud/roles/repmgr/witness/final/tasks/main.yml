@@ -1,3 +1,28 @@
 ---
 
-# Run repmgr witness register here.
+- name: Create repmgr database
+  postgresql_db:
+    name: repmgr
+    owner: repmgr
+    state: present
+  become_user: postgres
+  become: yes
+
+- name: Check if the witness is registered
+  shell: >
+    {{ postgres_bin_dir }}/repmgr cluster show \
+      -f "{{ repmgr_conf_dir }}/repmgr.conf" | grep 'host={{ inventory_hostname }}'
+  register: witness
+  ignore_errors: True
+  changed_when: False
+  become_user: postgres
+  become: yes
+
+- name: Run 'repmgr witness register' on the witness
+  command: >
+    {{ postgres_bin_dir }}/repmgr witness register --verbose \
+      -f "{{ repmgr_conf_dir }}/repmgr.conf" \
+      -h "{{ upstream }}"
+  become_user: postgres
+  become: yes
+  when: witness|failed
