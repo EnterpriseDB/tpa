@@ -38,7 +38,7 @@
 - name: Set up a cron job to take regular backups
   cron:
     user: barman
-    cron_file: /etc/cron.d/barman
+    cron_file: /etc/cron.d/{{ backup_name }}
     name: Backup from server {{ backup_name }}
     minute: "{{ _barman_backup_interval[0] }}"
     hour: "{{ _barman_backup_interval[1] }}"
