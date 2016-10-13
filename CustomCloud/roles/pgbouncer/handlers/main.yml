@@ -1,0 +1,6 @@
+---
+
+- name: Restart pgbouncer
+  service:
+    name: pgbouncer
+    state: restarted

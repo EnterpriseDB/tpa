@@ -1,12 +1,12 @@
 ---
 
-allow_duplicates: yes
+allow_duplicates: no
 dependencies:
     - role: pgbouncer/pkg
     - role: postgres/createuser
       username: 'pgbouncer'
       when: >
-        'bdr' in role or 'primary' in role
+        'primary' in role or 'bdr' in role
     - role: pgbouncer/config
       when: >
         'pgbouncer' in role

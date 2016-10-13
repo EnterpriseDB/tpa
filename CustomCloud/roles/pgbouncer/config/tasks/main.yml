@@ -28,6 +28,8 @@
     owner: postgres
     group: postgres
     mode: 0640
+  notify:
+    - Restart pgbouncer
 
 - name: Copy the userlist file
   template:
@@ -36,9 +38,10 @@
     owner: postgres
     group: postgres
     mode: 0600
+  notify:
+    - Restart pgbouncer
 
-- name: Restart the pgbouncer
+- name: Enable pgbouncer on boot
   service:
     name: pgbouncer
-    state: restarted
     enabled: yes
