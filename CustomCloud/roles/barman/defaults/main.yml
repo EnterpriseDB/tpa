@@ -26,4 +26,4 @@ barman_last_backup_maximum_age: 1 WEEK
 
 ## Automatic backup schedule
 
-default_barman_backup_interval: '0 4 * * wed/sat'
+default_barman_backup_interval: '0 4 * * wed,sat'
