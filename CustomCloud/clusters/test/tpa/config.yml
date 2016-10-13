@@ -1,80 +1,64 @@
 ---
 
-# An EC2 configuration for the CustomCloud TPA setup
-#
-# We will be using Ubuntu 16.04 LTS 64 bit image for deployment
-#
-# Intended for deployment under the 2ndQuadrant AWS account.
-
 cluster_name: "TPA"
 cluster_tags:
-  Owner: Nikhils
+  Owner: AMS
 cluster_vars:
-  customerId: 42
-  cluster_network: 10.33.67.0/24
-
-ec2_ami_name: "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627"
-ec2_ami_user: "ubuntu"
+  cluster_network: 10.42.171.0/24
 
 ec2_vpc:
   Name: Test
-  cidr: 10.33.67.0/24
 
 ec2_vpc_subnets:
-  ap-southeast-2:
-    10.33.67.0/26: ap-southeast-2a
-    10.33.67.64/26: ap-southeast-2a
-    10.33.67.192/27: ap-southeast-2c
+  10.42.171.0/28: eu-west-1a
+  10.42.171.16/28: eu-west-1b
 
 instances:
+    # debian-jessie-amd64-hvm-2016-09-19-ebs
+
     - node: 1
       type: t2.nano
-      region: ap-southeast-2
-      subnet: 10.33.67.0/26
+      image: ami-ff0e758c
+      region: eu-west-1
+      subnet: 10.42.171.0/28
       volumes:
-          - device_name: /dev/xvdb
+          - device_name: root
             volume_type: gp2
             volume_size: 10
-            delete_on_termination: true
+            delete_on_termination: false
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 16
       tags:
-        os: Ubuntu
-        role: primary,monitor-client
-        Name: ubuntu-primary
-        backup: ap-ctrl-barman
+        os: Debian
+        role: primary
+        Name: debian-primary
+        backup: eu-barman
     - node: 2
       type: t2.nano
-      region: ap-southeast-2
-      subnet: 10.33.67.64/26
+      image: ami-ff0e758c
+      region: eu-west-1
+      subnet: 10.42.171.16/28
       volumes:
+          - device_name: root
+            volume_type: standard
+            volume_size: 13
           - device_name: /dev/xvdb
             volume_type: gp2
             volume_size: 16
-            delete_on_termination: true
       tags:
-        os: Ubuntu
-        role: replica,monitor-client
-        Name: ubuntu-replica1
-        upstream: ubuntu-primary
-    - node: 3
-      type: t2.nano
-      region: ap-southeast-2
-      subnet: 10.33.67.64/26
-      volumes:
-          - device_name: /dev/xvdb
-            volume_type: gp2
-            volume_size: 16
-            delete_on_termination: true
-      tags:
-        os: Ubuntu
-        role: replica,monitor-client
-        Name: ubuntu-replica2
-        upstream: ubuntu-primary
+        os: Debian
+        role: replica
+        Name: debian-replica
+        upstream: debian-primary
+
     # Another Debian node for barman.
-    - node: 4
-      type: t2.nano
-      image: ami-74300017 
-      region: ap-southeast-2
-      subnet: 10.33.67.192/27
+
+    - node: 3
+      type: t2.micro
+      image: ami-ff0e758c
+      region: eu-west-1
+      subnet: 10.42.171.16/28
       volumes:
           - device_name: root
             volume_type: standard
@@ -84,5 +68,6 @@ instances:
             volume_size: 32
       tags:
         os: Debian
-        role: barman,postgres,monitor-server
-        Name: ap-ctrl-barman
+        role: barman,monitor,witness,log-server,openvpn-server
+        Name: debian-witness
+        upstream: debian-primary
