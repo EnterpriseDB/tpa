@@ -65,6 +65,10 @@
   with_fileglob: "icinga/objects/*.cfg"
   notify: Reload icinga
 
+- name: enable mod_rewrite
+  apache2_module: state=present name=rewrite
+  notify: Restart apache
+
 - name: Apache configuration file for icingca
   template: src=rdba-icinga-ssl.j2 dest=/etc/apache2/sites-available/rdba-icinga-ssl.conf
   notify: Restart apache
@@ -73,9 +77,6 @@
   file: src=../sites-available/rdba-icinga-ssl.conf dest=/etc/apache2/sites-enabled/rdba-icinga-ssl.conf state=link force=yes
   notify: Restart apache
 
-- name: enable mod_rewrite
-  apache2_module: state=present name=rewrite
-  notify: Restart apache
 
 - name: install mod_ssl
   apache2_module: state=present name=ssl
