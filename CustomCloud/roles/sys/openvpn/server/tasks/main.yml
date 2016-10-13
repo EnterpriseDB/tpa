@@ -38,5 +38,3 @@
     mode: 0644
   notify:
     - Restart openvpn
-
-- meta: flush_handlers
