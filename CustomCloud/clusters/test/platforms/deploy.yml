@@ -74,6 +74,10 @@
     - role: repmgr
       tags: repmgr
 
+    # Set up pgbouncer
+    - role: pgbouncer
+      tags: pgbouncer
+
     - role: postgres/final
       when: >
         'postgres' in role
