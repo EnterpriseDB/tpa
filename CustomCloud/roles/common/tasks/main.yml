@@ -5,6 +5,14 @@
     ansible_ssh_common_args: "-o UserKnownHostsFile='{{playbook_dir}}/known_hosts'"
   when: ansible_ssh_common_args == ""
 
+# If pwgen is not installed, we would silently generate invalid YAML
+# in roles/secret, so we check up-front and fail early.
+
+- assert:
+    msg: "Please install pwgen locally to generate passwords"
+    that:
+      - "'{{ lookup('pipe', 'which pwgen || true') }}' != ''"
+
 # Set ansible_distribution and ansible_pkg_mgr if required.
 - include: distribution.yml
   tags: always
@@ -25,10 +33,6 @@
 - name: Set the hostname
   hostname: name="{{ inventory_hostname }}"
   tags: common
-
-# Generate secrets for various components
-- include: secrets.yml
-  tags: [always, common, secrets]
 
 # Add TPA version number along with timestamp to the instance
 - include: tpa_version.yml

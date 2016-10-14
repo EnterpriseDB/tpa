@@ -1,3 +1,7 @@
 ---
 
 allow_duplicates: yes
+dependencies:
+  - role: secret
+    vars:
+      secret_name: "{{ username }}_password"

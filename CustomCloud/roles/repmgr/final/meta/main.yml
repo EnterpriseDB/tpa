@@ -2,8 +2,7 @@
 
 dependencies:
   - role: postgres/createuser
-    vars:
-      username: repmgr
+    username: repmgr
     when: >
       'replica' not in role
   - role: repmgr/primary/final

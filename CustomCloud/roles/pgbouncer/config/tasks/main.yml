@@ -1,8 +1,5 @@
 ---
 
-- include_vars: "{{ playbook_dir }}/vault/pgbouncer_password.yml"
-  no_log: true
-
 # For pidfile = /var/run/pgbouncer/pgbouncer.pid
 - name: Ensure /var/run/pgbouncer exists
   file:

@@ -25,10 +25,6 @@
     - services_icinga.cfg
     - timeperiods_icinga.cfg
 
-- name: Get the icinga password from the vault
-  include_vars: "{{ playbook_dir }}/vault/icinga_password.yml"
-  no_log: true
-
 - name: htpasswd file
   htpasswd:
     path: /etc/icinga/htpasswd.users

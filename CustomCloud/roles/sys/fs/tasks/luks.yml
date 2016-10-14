@@ -29,10 +29,6 @@
     # but in future, we should generate individual passphrases for each
     # host and store them in inventory/host_vars/…
 
-    - name: Load luks_passphrase from vault
-      include_vars: "{{ playbook_dir }}/vault/luks_passphrase.yml"
-      no_log: true
-
     - name: Initialise LUKS volume on {{ luks_device }}
       shell: >
         echo -n "{{ luks_passphrase }}" | cryptsetup -q luksFormat --key-file - "{{ luks_device }}"
