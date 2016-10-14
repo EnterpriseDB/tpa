@@ -1,6 +1,5 @@
 ---
 
-- name: Restart openvpn
-  service:
-    name: "openvpn@{{ _vpn_name }}"
-    state: restarted
+- name: Note openvpn restart required
+  set_fact:
+    openvpn_service_end_state: restarted

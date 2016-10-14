@@ -37,4 +37,4 @@
     - name: ta.key
       mode: "0600"
   notify:
-    - Restart openvpn
+    - Note openvpn restart required

@@ -6,6 +6,19 @@
     enabled: yes
   tags: openvpn
 
+# The server has already been started or restarted in openvpn/server, so
+# here we only apply the task to clients.
+
+- meta: flush_handlers
+
+- name: Start or restart openvpn on the clients
+  service:
+    name: "openvpn@{{ _vpn_name }}"
+    state: "{{ openvpn_service_end_state|default('started') }}"
+  when: >
+    'openvpn-server' not in role
+  tags: openvpn
+
 - set_fact:
     ip_address: "{{ openvpn_ip }}"
     ip_addresses: ['public_ip', 'private_ip', 'openvpn_ip']

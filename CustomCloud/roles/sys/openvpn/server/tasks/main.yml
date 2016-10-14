@@ -27,7 +27,7 @@
     group: root
     mode: 0644
   notify:
-    - Restart openvpn
+    - Note openvpn restart required
 
 - name: Install main server configuration file
   template:
@@ -37,4 +37,11 @@
     group: root
     mode: 0644
   notify:
-    - Restart openvpn
+    - Note openvpn restart required
+
+- meta: flush_handlers
+
+- name: Start or restart openvpn on the server
+  service:
+    name: "openvpn@{{ _vpn_name }}"
+    state: "{{ openvpn_service_end_state|default('started') }}"
