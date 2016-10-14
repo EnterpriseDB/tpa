@@ -10,6 +10,3 @@ dependencies:
     - role: pgbouncer/config
       when: >
         'pgbouncer' in role
-    - role: pgbouncer/final
-      when: >
-        'pgbouncer' in role
