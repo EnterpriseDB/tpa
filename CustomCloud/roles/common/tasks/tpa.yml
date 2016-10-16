@@ -1,15 +1,17 @@
 ---
 
+- name: Ensure that /etc/tpa exists
+  file:
+    path: /etc/tpa
+    owner: root
+    group: root
+    state: directory
+    mode: 0755
+
 # Read the version string and append it to the /etc/tpa/tpa.log file
 # on the instance. If this '/etc/tpa' directory does not exist, then
 # we will create it first and we always APPEND to the tpa.log file
 # to preserve earlier deployment history if any
-
-- name: Ensure that /etc/tpa directory exists
-  file:
-    path: /etc/tpa
-    state: directory
-    mode: 0755
 
 - name: Read the TPA version string
   set_fact:

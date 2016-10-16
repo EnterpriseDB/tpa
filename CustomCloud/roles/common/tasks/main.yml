@@ -24,6 +24,5 @@
   hostname: name="{{ inventory_hostname }}"
   tags: common
 
-# Add TPA version number along with timestamp to the instance
-- include: tpa_version.yml
+- include: tpa.yml
   tags: common

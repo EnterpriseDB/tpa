@@ -1,11 +1,5 @@
 ---
 
-- name: Ensure that /etc/tpa exists
-  file:
-    path: /etc/tpa
-    state: directory
-    mode: 0755
-
 - name: Generate self-signed TLS key and certificate
   shell: >
     umask 077 &&
