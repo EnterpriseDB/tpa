@@ -1,17 +1,7 @@
 ---
 
-- name: Tell ssh to use this cluster's known_hosts file
-  set_fact:
-    ansible_ssh_common_args: "-o UserKnownHostsFile='{{playbook_dir}}/known_hosts'"
-  when: ansible_ssh_common_args == ""
-
-# If pwgen is not installed, we would silently generate invalid YAML
-# in roles/secret, so we check up-front and fail early.
-
-- assert:
-    msg: "Please install pwgen locally to generate passwords"
-    that:
-      - "'{{ lookup('pipe', 'which pwgen || true') }}' != ''"
+- include: local.yml
+  tags: common
 
 # Set ansible_distribution and ansible_pkg_mgr if required.
 - include: distribution.yml
