@@ -2,3 +2,8 @@
   template:
     src: bdr.conf.j2
     dest: "{{postgres_conf_dir}}/conf.d/bdr.conf"
+
+- name: Add bdr to shared_preload_libraries
+  include: ../../postgres/config/tasks/preload-library.yml
+  vars:
+    library: bdr
