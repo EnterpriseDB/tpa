@@ -15,6 +15,7 @@
 
 - name: Create /etc/tpa/rc.local
   copy:
+    force: no
     dest: /etc/tpa/rc.local
     owner: root
     group: root
