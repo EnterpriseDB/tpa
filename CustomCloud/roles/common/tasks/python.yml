@@ -30,3 +30,9 @@
   register: boto
   changed_when: >
     boto|succeeded and 'Requirement already satisfied' not in boto.stdout
+
+- name: Install awscli
+  command: pip install awscli
+  register: awscli
+  changed_when: >
+    awscli|succeeded and 'Requirement already satisfied' not in awscli.stdout
