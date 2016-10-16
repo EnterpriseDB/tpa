@@ -1,0 +1,7 @@
+---
+
+dependencies:
+    - role: postgres/createuser
+      username: 'pgbouncer'
+      when: >
+        'primary' in role or 'bdr' in role

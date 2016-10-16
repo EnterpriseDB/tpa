@@ -1,0 +1,10 @@
+---
+
+- meta: flush_handlers
+
+- name: Start or restart pgbouncer
+  service:
+    name: pgbouncer
+    state: "{{ pgbouncer_service_end_state|default('started') }}"
+  when: >
+    'pgbouncer' in role

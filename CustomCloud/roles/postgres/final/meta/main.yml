@@ -17,3 +17,6 @@ dependencies:
   - role: repmgr/final
     when: >
       initialise_replication is defined
+  - role: pgbouncer/final
+    when: >
+      initialise_pgbouncer is defined

@@ -1,6 +1,5 @@
 ---
 
-- name: Restart pgbouncer
-  service:
-    name: pgbouncer
-    state: restarted
+- name: Note pgbouncer restart required
+  set_fact:
+    pgbouncer_service_end_state: restarted
