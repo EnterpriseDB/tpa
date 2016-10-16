@@ -37,8 +37,13 @@
   changed_when: >
     ra|succeeded and ra.stdout != "{{ readahead }}"
 
-# TODO: We need to make the readahead setting persistent by adding the
-# above command to /etc/rc.local.
+- name: Set readahead on {{ _device }} at startup
+  lineinfile:
+    dest: /etc/tpa/rc.local
+    line: >-
+      blockdev --setra "{{ readahead }}" "{{ _device }}"
+    state: present
+    insertbefore: EOF
 
 - name: Create filesystem on {{ _device }}
   filesystem:
