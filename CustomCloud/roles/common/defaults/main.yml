@@ -12,6 +12,8 @@ packages:
     - time
     - strace
     - gdb
+    - unzip
+    - curl
   Debian:
     - python-dev
     - python-passlib
