@@ -1,7 +1,7 @@
 ---
 
 - name: Run apt-get update
-  raw: apt-get -q -y update
+  raw: test -d /etc/tpa || apt-get -q -y update
 
 - name: Install python 2.7
   raw: apt-get -q -y install python2.7
