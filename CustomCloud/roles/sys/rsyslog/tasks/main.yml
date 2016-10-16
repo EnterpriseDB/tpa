@@ -4,3 +4,5 @@
   service:
     name: rsyslog
     enabled: yes
+
+- meta: flush_handlers
