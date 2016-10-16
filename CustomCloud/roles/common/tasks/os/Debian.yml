@@ -2,6 +2,9 @@
 
 - name: Run apt-get update
   raw: test -d /etc/tpa || apt-get -q -y update
+  register: update
+  changed_when: >
+    update|succeeded and 'Reading package lists' in update.stdout
 
 - name: Install python 2.7
   raw: apt-get -q -y install python2.7
