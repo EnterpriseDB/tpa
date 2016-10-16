@@ -8,6 +8,7 @@ dependencies:
           key_id: AA7A6805
           key_url: http://packages.2ndquadrant.com/bdr/apt/AA7A6805.asc
           repo: "deb http://packages.2ndquadrant.com/bdr/apt/  {{ ansible_distribution_release }}-2ndquadrant main"
+          versions: [9.4]
       postgres_packages:
         Debian:
           - postgresql-bdr-{{ pgversion }}
