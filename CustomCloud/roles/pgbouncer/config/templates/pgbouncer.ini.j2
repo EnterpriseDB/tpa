@@ -328,3 +328,12 @@ log_disconnections = 0
 ;; Read additional config from the /etc/pgbouncer/pgbouncer-other.ini file
 ;%include /etc/pgbouncer/pgbouncer-other.ini
 
+;;;
+;;; Setting in this config file need careful review!
+;;;
+
+;; TODO: We should review the pgbouncer.ini.
+;; We will use a templating scheme that uses defaults/
+;; to define default_some_value and vars/ that
+;; defines_some_value:"{{ some_value|default(default_some_value) }}",
+;; the way we do in postgres/config.
