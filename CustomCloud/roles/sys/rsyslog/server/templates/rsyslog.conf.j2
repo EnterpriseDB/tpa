@@ -4,8 +4,7 @@ $ModLoad imklog.so
 $ModLoad imtcp.so
 
 # Listen on network
-$InputTCPServerAddress {{ip_address}}
-$InputTCPServerRun 514
+input(type="imptcp" port="514" address="{{ip_address}}")
 
 # Enable non-kernel facility klog messages
 $KLogPermitNonKernelFacility on
