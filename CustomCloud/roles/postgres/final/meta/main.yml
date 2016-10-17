@@ -13,7 +13,7 @@ dependencies:
       'replica' not in role
   - role: barman/final
     when: >
-      backup != ''
+      'barman' in role or backup != ''
   - role: repmgr/final
     when: >
       initialise_replication is defined
