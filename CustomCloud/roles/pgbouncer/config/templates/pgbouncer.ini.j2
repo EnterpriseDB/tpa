@@ -45,8 +45,8 @@ client_tls_ca_file = '{{ ssl_ca_file|default("") }}'
 
 ;; Private key and cert to present to clients.
 ;; Required for accepting TLS connections from clients.
-client_tls_key_file = '{{ ssl_cert_file|default("") }}'
-client_tls_cert_file = '{{ ssl_key_file|default("") }}'
+client_tls_key_file = '{{ ssl_key_file|default("/etc/tpa/"+cluster_name+".key") }}'
+client_tls_cert_file = '{{ ssl_cert_file|default("/etc/tpa/"+cluster_name+".crt") }}'
 
 ;; fast, normal, secure, legacy, <ciphersuite string>
 ;client_tls_ciphers = fast
