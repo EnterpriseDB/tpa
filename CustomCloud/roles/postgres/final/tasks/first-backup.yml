@@ -41,40 +41,31 @@
 
 - name: Force switch to a new WAL segment
   command: >
-    psql -qAtc 'select pg_switch_xlog()'
+    psql -qAtc 'select pg_xlogfile_name(pg_switch_xlog())'
   become_user: postgres
   become: yes
   delegate_to: "{{ upstream or inventory_hostname }}"
-  register: switch
+  register: segment
   failed_when: >
-    switch|failed and not 'recovery is in progress' in switch.stderr
+    segment|failed and not 'recovery is in progress' in segment.stderr
 
-# Now that we've forced a segment switch, we wait for the flush_location
-# for pg_receivexlog to advance past the LSN returned by pg_switch_xlog.
-# Once that happens, «barman archive-wal» should succeed.
+# Now we have the name of the WAL segment file corresponding to the LSN
+# returned by pg_switch_xlog(), and we must wait for it to be archived.
+# First, pg_receivexlog will rename streaming/$n.partial to …/$n. Then
+# «barman archive-wal» will move it from streaming/ to wals/. We could
+# wait for the file to show up in streaming/ and invoke archive-wal to
+# archive the segment immediately, but that would be in a race against
+# any archive-wal that is invoked by «barman cron». So the file may be
+# moved away from streaming/ before we notice it. Instead, we wait for
+# the file to appear in wals/. This isn't racy, but it does depend on
+# the unpredictable cron invocation of archive-wal.
 
-- name: Check that pg_receivexlog has advanced to the new segment
-  shell: >
-    psql -qAtc "
-    select pg_xlog_location_diff(flush_location, '{{ switch.stdout }}') > 0, flush_location, '{{ switch.stdout }}'
-    from pg_stat_replication r join pg_replication_slots s on (r.pid=s.active_pid)
-    where application_name='barman_receive_wal' and slot_name='barman'
-    "
-  become_user: postgres
-  become: yes
-  register: advanced
-  until: >
-    advanced.stdout.startswith('t|')
-  changed_when: False
-  retries: 6
-  delay: 10
-
-- name: Run barman archive-wal
-  command: >
-    /usr/bin/barman archive-wal {{ backup_name }}
+- name: Wait for old WAL segment to be archived
+  wait_for:
+    path: "{{ barman_home }}/{{ backup_name }}/wals/{{ segment.stdout[0:16] }}/{{ segment.stdout }}"
+    delay: 3
+    timeout: 130
   delegate_to: "{{ backup }}"
-  become_user: barman
-  become: yes
 
 - name: Force an immediate backup
   shell: >
