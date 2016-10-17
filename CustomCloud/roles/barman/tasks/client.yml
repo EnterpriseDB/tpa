@@ -24,8 +24,6 @@
 # time we're setting up backups for this server.
 
 - block:
-    - set_fact: initialise_backup=True
-
     - name: Set client configuration to inactive pending initialisation
       ini_file:
         dest: "{{ _config_file }}"
