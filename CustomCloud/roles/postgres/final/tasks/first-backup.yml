@@ -1,27 +1,73 @@
 ---
 
-# We now force an immediate backup of any instance for which we
-# configured backups on this run.
+# We force an immediate backup of any instance for which we configured
+# backups on this run. Barman will not start a backup until the server
+# has archived at least one WAL segment, so we try to make sure that
+# happens before we try.
+#
+# TODO: We should do this for any instance that doesn't have a backup.
+# That would help to gracefully deal with failures during the initial
+# backup attempt.
 
-# Barman will refuse to run switch-xlog against a replica. In that case,
-# we could connect to the upstream and execute pg_switch_xlog(), but we
-# don't bother with that yet.
+# barman/final should have started pg_receivexlog (via barman cron). We
+# check by looking for the corresponding entries in pg_stat_replication
+# and pg_replication_slots. We know we ran barman cron, so we don't wait
+# for the full minute that cron could potentially take to run it.
 
-- name: Run barman switch-xlog
-  command: >
-    /usr/bin/barman switch-xlog --force {{ backup_name }}
-  delegate_to: "{{ backup }}"
-  become_user: barman
+- name: Check that pg_receivexlog is running
+  shell: >
+    psql -qAtc "
+    select count(*)
+    from pg_stat_replication r join pg_replication_slots s on (r.pid=s.active_pid)
+    where application_name='barman_receive_wal' and slot_name='barman' and state='streaming'
+    "
+  become_user: postgres
   become: yes
+  register: receiver
+  until: >
+    receiver.stdout == '1'
+  changed_when: False
+  retries: 5
+  delay: 3
 
-# XXX: This is a gross hack. Running "barman switch-xlog" and
-# waiting for a while will clear up the "WAL archive: FAILED"
-# problem in barman check, and backup attempts will succeed
-# thereafter, but waiting for a random time is not a viable
-# long-term solution.
+# Having convinced ourselves that we're streaming, we force a switch to
+# a new WAL segment to give the archiver something to do. We could use
+# «barman switch-xlog», but that doesn't work on replicas, so we run
+# pg_switch_xlog() via psql on the instance or its upstream.
+#
+# TODO: This doesn't work with cascading replication setups where the
+# upstream is another replica, but we can't set up cascading yet anyway,
+# so we gracefully ignore that problem for now.
 
-- name: Pause to let a WAL segment be archived
-  pause: seconds=60
+- name: Force switch to a new WAL segment
+  command: >
+    psql -qAtc 'select pg_switch_xlog()'
+  become_user: postgres
+  become: yes
+  delegate_to: "{{ upstream or inventory_hostname }}"
+  register: switch
+  failed_when: >
+    switch|failed and not 'recovery is in progress' in switch.stderr
+
+# Now that we've forced a segment switch, we wait for the flush_location
+# for pg_receivexlog to advance past the LSN returned by pg_switch_xlog.
+# Once that happens, «barman archive-wal» should succeed.
+
+- name: Check that pg_receivexlog has advanced to the new segment
+  shell: >
+    psql -qAtc "
+    select pg_xlog_location_diff(flush_location, '{{ switch.stdout }}') > 0, flush_location, '{{ switch.stdout }}'
+    from pg_stat_replication r join pg_replication_slots s on (r.pid=s.active_pid)
+    where application_name='barman_receive_wal' and slot_name='barman'
+    "
+  become_user: postgres
+  become: yes
+  register: advanced
+  until: >
+    advanced.stdout.startswith('t|')
+  changed_when: False
+  retries: 6
+  delay: 10
 
 - name: Run barman archive-wal
   command: >

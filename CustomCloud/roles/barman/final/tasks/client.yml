@@ -1,0 +1,51 @@
+---
+
+# When we first create /etc/barman.d/backup_name.conf, we set it to
+# inactive (in barman/tasks/client.yml), and re-enable it here.
+
+- name: Set backups to active
+  ini_file:
+    dest: "/etc/barman.d/{{ backup_name }}.conf"
+    section: "{{ backup_name }}"
+    option: active
+    value: "true"
+  delegate_to: "{{ backup }}"
+  register: conf
+
+# Now we create a replication slot for pg_receivexlog.
+#
+# TODO: We don't create the slot when we are configured to use rsync for
+# backups, but in the (fairly realistic) situation where we start with a
+# streaming backup and later switch to rsync in order to use incremental
+# backups, we should also remove the slot.
+
+- name: Create replication slot for Barman
+  command: >
+    /usr/bin/barman receive-wal --create-slot {{ backup_name }}
+  delegate_to: "{{ backup }}"
+  register: slot
+  failed_when: >
+    slot|failed and not "Replication slot 'barman' already exists" in slot.stderr
+  changed_when: >
+    slot|succeeded
+  when: >
+    barman_backup_method == 'postgres'
+  become_user: barman
+  become: yes
+
+# If we have just activated the backup configuration, we also run barman
+# cron in order to start pg_receivexlog immediately (rather than waiting
+# for the packaged cron job to start it sometime in the next minute).
+
+- name: Run barman cron
+  command: >
+    /usr/bin/barman cron
+  delegate_to: "{{ backup }}"
+  when: >
+    conf|changed
+  become_user: barman
+  become: yes
+
+# We must now wait for an unpredictable amount of time for one WAL
+# segment to be archived before we can start a backup. Join us in
+# postgres/final for the next installment of this exciting tale.

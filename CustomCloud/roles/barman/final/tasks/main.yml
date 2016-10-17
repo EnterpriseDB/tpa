@@ -1,56 +1,10 @@
 ---
 
-# Install a .pgpass file. For now, we use the same password for the
-# barman and streaming_barman users. If we change that and generate
-# per-client passwords, we can make the template iterate over
-# groups['tag_backup'+inventory_hostname] instead.
-#
-# We do this here mostly for convenience, because the passwords are
-# available through the dependency on postgres/createuser.
-
-- name: Install .pgpass file
-  template:
-    src: pgpass.j2
-    dest: ~barman/.pgpass
-    owner: barman
-    group: barman
-    mode: 0600
-  delegate_to: "{{ backup }}"
-  run_once: yes
-
-# Re-activate the per-client Barman backups on the server.
-
-- name: Set backups to active
-  ini_file:
-    dest: "/etc/barman.d/{{ backup_name }}.conf"
-    section: "{{ backup_name }}"
-    option: active
-    value: "true"
-  delegate_to: "{{ backup }}"
-
-- name: Create replication slot for Barman
-  command: >
-    /usr/bin/barman receive-wal --create-slot {{ backup_name }}
-  delegate_to: "{{ backup }}"
-  ignore_errors: yes
-  register: slot
-  become_user: barman
-  become: yes
-
-- fail: msg={{ slot.stderr }}
+- include: server.yml
   when: >
-    slot|failed and not "Replication slot 'barman' already exists" in slot.stderr
+    'barman' in role
+  static: no
 
-# Run barman cron instead of using barman receive-wal directly, because
-# the latter keeps the "command" task waiting forever.
-
-- name: Run barman cron
-  command: >
-    /usr/bin/barman cron
-  delegate_to: "{{ backup }}"
-  become_user: barman
-  become: yes
-
-# We must now wait for an unpredictable amount of time for one WAL
-# segment to be archived before we can start a backup. Join us in
-# postgres/final for the next installment of this exciting tale.
+- include: client.yml
+  when: backup != ''
+  static: no

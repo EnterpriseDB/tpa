@@ -1,0 +1,17 @@
+---
+
+# Install a .pgpass file on the server.
+#
+# This task is here for convenience, because the passwords are available
+# through the dependency on postgres/createuser and they are the same on
+# all instances. If we were to generate different passwords, this should
+# move to client.yml and use delegate_to (but beware of race conditions;
+# the safest thing to do would be to assemble per-instance files).
+
+- name: Install .pgpass file
+  template:
+    src: pgpass.j2
+    dest: ~barman/.pgpass
+    owner: barman
+    group: barman
+    mode: 0600
