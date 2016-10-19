@@ -57,6 +57,9 @@
     - role: sys/sysctl
       tags: sysctl
 
+    - role: sys/hosts
+      tags: [sys, hosts]
+
     - role: sys/instance
       tags: upgrade
 
