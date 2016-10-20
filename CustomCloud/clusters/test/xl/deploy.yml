@@ -74,3 +74,12 @@
 
     - role: postgres-xl/initall
       tags: initall
+
+  # TODO: handle restart notifications correctly
+  # For now we add a handler here to catch the notifications
+  # from some postgres roles (e.g. user)
+  handlers:
+    - name: Note Postgres restart required
+      set_fact:
+        postgres_service_end_state: restarted
+
