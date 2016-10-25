@@ -39,10 +39,10 @@ ec2_vpc_subnets:
     10.33.63.0/26: ap-southeast-2a
 
 instances:
-    - type: d2.xlarge
+    - type: i2.xlarge
       region: ap-southeast-2
       subnet: 10.33.63.0/26
-      spot_price: 0.12
+      spot_price: 0.2
       spot_wait_timeout: 1800
       spot_launch_group: xllaunchgrp
       volumes:
@@ -52,16 +52,12 @@ instances:
             delete_on_termination: true
           - device_name: /dev/xvdb
             ephemeral: ephemeral0
-          - device_name: /dev/xvdc
-            ephemeral: ephemeral1
-          - device_name: /dev/xvdd
-            ephemeral: ephemeral2
       tags:
         role: gtm,coordinator
-    - type: d2.xlarge
+    - type: i2.xlarge
       region: ap-southeast-2
       subnet: 10.33.63.0/26
-      spot_price: 0.12
+      spot_price: 0.2
       spot_wait_timeout: 1800
       spot_launch_group: xllaunchgrp
       volumes:
@@ -71,10 +67,7 @@ instances:
             delete_on_termination: true
           - device_name: /dev/xvdb
             ephemeral: ephemeral0
-          - device_name: /dev/xvdc
-            ephemeral: ephemeral1
-          - device_name: /dev/xvdd
-            ephemeral: ephemeral2
       tags:
         role: datanode
+        num_datanode: 2
       instance_count: 2
