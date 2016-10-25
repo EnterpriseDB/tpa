@@ -27,10 +27,24 @@ module dependencies system-wide (highly recommended):
     source ~/ansible-python/bin/activate
 ```
 
-Install the dependencies:
+Install the python dependencies:
 
 ```
     pip install -r python-requirements.txt
+```
+
+Install pwgen:
+
+TPA uses pwgen to generate random passwords for various roles. Depending on your platform, corresponding commands might be needed. 
+
+Ubuntu:
+```
+    sudo apt-get install pwgen
+```
+
+Mac:
+```
+    sudo port install pwgen
 ```
 
 Ansible
