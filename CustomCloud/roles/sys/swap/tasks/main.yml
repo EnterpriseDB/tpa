@@ -1,0 +1,38 @@
+---
+
+## This support for setting up swap on a disk was moved here
+## from XL scripts. Needs review and some possible improvements
+## when/if used elsewhere and for production purposes.
+
+# TODO: We should probably set swappiness as well
+
+# Given a block device name, does everything required
+# to make the volume available for swap immediately and
+# after subsequent reboots.
+
+- name: Ensure device for swap is specified
+  assert:
+    msg: "Please specify the swap device name"
+    that:
+      - device is defined
+
+- name: Check if {{ device }} needs a "swap" filesystem
+  shell: lsblk --noheadings --output FSTYPE "{{ device}}"
+  register: fstype
+
+- block:
+    - name: Create swap
+      command: "mkswap {{ device}}"
+
+    - name: Set swap
+      mount:
+        src: "{{ device}}"
+        name: none
+        fstype: swap
+        dump: 0
+        passno: 0
+        state: present
+
+    - name: Activate swap
+      command: "swapon {{ device}}"
+  when: fstype.stdout != 'swap'

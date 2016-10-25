@@ -51,6 +51,14 @@
     - role: common
       tags: common
 
+    # Set up any additional filesystems required. The block device
+    # layout is instance-specific.
+    - role: sys/fs
+      vars:
+        device: /dev/xvdb
+        mountpoint: /pgxl
+      tags: [sys, fs]
+
     - role: sys/tune
       tags: systune
 
@@ -68,9 +76,6 @@
 
     - role: postgres-xl/src
       tags: xl
-
-    - role: postgres-xl/config
-      tags: config
 
     - role: postgres-xl/initall
       tags: initall
