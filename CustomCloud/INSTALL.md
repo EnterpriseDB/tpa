@@ -34,6 +34,7 @@ Install the python dependencies:
 ```
 
 Install pwgen:
+--------------
 
 TPA uses pwgen to generate random passwords for various roles. Depending on your platform, corresponding commands might be needed. 
 
@@ -45,6 +46,22 @@ Ubuntu:
 Mac:
 ```
     sudo port install pwgen
+```
+
+
+Install openvpn:
+----------------
+
+If you are planning to use the openvpn role, then you will need to install openvpn. Depending on your platform, corresponding commands might be needed.
+
+Ubuntu:
+```
+    sudo apt-get install openvpn
+```
+
+Mac:
+```
+    sudo [brew or port] install openvpn
 ```
 
 Ansible
