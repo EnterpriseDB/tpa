@@ -1,0 +1,50 @@
+---
+
+# Given a list of regions and a list of AMIs, this playbook generates a
+# config.yml for a cluster with one instance per AMI per region based on
+# the config.yml.j2 template.
+
+- hosts: localhost
+  vars:
+    # Which regions do we want to build new AMIs in?
+    regions:
+      - us-east-1
+      - us-west-1
+      - us-west-2
+      - eu-west-1
+      - eu-central-1
+
+    # Which AMIs should we start with?
+    #
+    # In future, we could consider searching for the latest AMI to match
+    # criteria defined here, rather than specifying its full name.
+    base_amis:
+      - name: debian-jessie-amd64-hvm-2016-09-19-ebs
+      - name: RHEL-7.3_HVM_GA-20161026-x86_64-1-Hourly2-GP2
+      - name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20161020
+
+  tasks:
+    - name: Search for base AMIs in each region
+      ec2_ami_find:
+        region: "{{ item.0 }}"
+        name: "{{ item.1.name }}"
+        sort: name
+        sort_end: 1
+        sort_order: descending
+        no_result_action: fail
+      with_nested:
+        - "{{ regions }}"
+        - "{{ base_amis }}"
+      register: amis
+
+    - set_fact:
+        region_amis: "{{ region_amis|default({})|combine({item: []}) }}"
+      with_items: "{{ regions }}"
+
+    - set_fact:
+        region_amis: "{{ region_amis|combine({item.item.0: region_amis[item.item.0]|union([item.results.0.ami_id])}) }}"
+      with_items: "{{ amis.results }}"
+
+    - template:
+        src: config.yml.j2
+        dest: "{{ playbook_dir }}/config.yml"

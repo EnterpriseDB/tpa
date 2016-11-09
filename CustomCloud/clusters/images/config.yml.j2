@@ -1,0 +1,29 @@
+---
+
+cluster_name: "TPAImages"
+cluster_tags:
+  Owner: AMS
+
+ec2_vpc:
+  Name: Test
+
+instances:
+
+{% set n = [0] %}
+{% for r in regions %}
+{% for i in region_amis[r] %}
+{% if n.append(n.pop()+1) %}{% endif %}
+    - node: {{ n[0] }}
+      type: t2.micro
+      image: {{ i }}
+      region: {{ r }}
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: primary,barman,monitor,log-server,openvpn-server
+
+{% endfor %}
+{% endfor %}
