@@ -16,4 +16,5 @@ fi
 
 $utils/ansible-playbook \
     $utils/../platforms/aws/provision.yml \
+    -i $cluster_dir/inventory \
     -e cluster=$cluster_dir "$@"
