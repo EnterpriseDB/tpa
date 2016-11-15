@@ -50,16 +50,6 @@
     - role: sys/rsyslog
       tags: [sys, rsyslog]
 
-- name: Set up TPA BDR nodes
-  hosts: tag_Cluster_TPA_BDR:&tag_role_bdr
-  gather_facts: no
-  sudo_user: root
-  sudo: true
-  vars_files:
-    - vars/main.yml
-
-  roles:
-
     # Install the BDR packages and basic configuration files.
     - role: bdr/pkg
       when: >
@@ -76,32 +66,9 @@
         'bdr' in role
       tags: bdr
 
-    - role: barman
-      tags: barman
-
-- name: Set up Barman node
-  hosts: tag_Cluster_TPA_BDR:&tag_role_barman
-  gather_facts: no
-  sudo_user: root
-  sudo: true
-  vars_files:
-    - vars/main.yml
-
-  roles:
-
     # Setup backup from the BDR nodes
     - role: barman
       tags: barman
-
-- name: Set up pgbouncer node
-  hosts: tag_Cluster_TPA_BDR:&tag_role_pgbouncer
-  gather_facts: no
-  sudo_user: root
-  sudo: true
-  vars_files:
-    - vars/main.yml
-
-  roles:
 
     - role: pgbouncer
       tags: pgbouncer
