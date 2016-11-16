@@ -1,17 +1,17 @@
 ---
 
-cluster_name: "TPA"
+cluster_name: "repmgr_test"
 cluster_tags:
-  Owner: AMS
+  Owner: gulcin
 cluster_vars:
-  cluster_network: 10.42.171.0/24
+  cluster_network: 10.33.7.0/24
 
 ec2_vpc:
   Name: Test
 
 ec2_vpc_subnets:
-  10.42.171.0/28: eu-west-1a
-  10.42.171.16/28: eu-west-1b
+  10.33.7.0/28: eu-west-1a
+  10.33.5.16/28: eu-west-1b
 
 instances:
     # debian-jessie-amd64-hvm-2016-09-19-ebs
@@ -20,7 +20,7 @@ instances:
       type: t2.nano
       image: ami-ff0e758c
       region: eu-west-1
-      subnet: 10.42.171.0/28
+      subnet: 10.33.7.0/28
       volumes:
           - device_name: root
             volume_type: gp2
@@ -33,12 +33,12 @@ instances:
         os: Debian
         role: primary
         Name: debian-primary
-        backup: eu-barman
+        backup: debian-witness
     - node: 2
       type: t2.nano
       image: ami-ff0e758c
       region: eu-west-1
-      subnet: 10.42.171.16/28
+      subnet: 10.33.10.16/28
       volumes:
           - device_name: root
             volume_type: standard
@@ -58,7 +58,7 @@ instances:
       type: t2.micro
       image: ami-ff0e758c
       region: eu-west-1
-      subnet: 10.42.171.16/28
+      subnet: 10.33.7.16/28
       volumes:
           - device_name: root
             volume_type: standard
