@@ -1,0 +1,8 @@
+-r base.txt
+coverage
+factory_boy
+flake8
+pep8
+pylint
+pytest-django
+responses
