@@ -20,8 +20,8 @@
 
 - name: Check if the replica is registered
   shell: >
-    {{ postgres_bin_dir }}/repmgr cluster show \
-      -f "{{ repmgr_conf_dir }}/repmgr.conf" | grep 'host={{ inventory_hostname }}'
+    {{ postgres_bin_dir }}/psql 'host={{ inventory_hostname }} user=repmgr dbname=repmgr' \
+      -qAtw -c "SELECT type FROM \"repmgr_{{ upstream }}\".repl_nodes WHERE type = 'standby' and name = '{{ inventory_hostname }}';"
   register: replica
   ignore_errors: True
   changed_when: False
@@ -60,4 +60,4 @@
       become_user: postgres
       become: true
 
-  when: replica|failed
+  when: replica.stdout.find('standby') == -1
