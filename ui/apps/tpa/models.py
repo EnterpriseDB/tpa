@@ -9,6 +9,7 @@ from __future__ import unicode_literals, absolute_import, print_function
 import logging
 
 from django.conf import settings
+from django.contrib.postgres.fields import HStoreField
 from django.core.exceptions import ValidationError
 from django.db.models import (UUIDField, CharField, ForeignKey)
 from django.db import models
@@ -38,6 +39,8 @@ class TimestampMixin(models.Model):
 
 
 class BaseModel(UUIDMixin, TimestampMixin):
+    name = CharField()
+
     class Meta(object):
         abstract = True
 
@@ -45,45 +48,36 @@ class BaseModel(UUIDMixin, TimestampMixin):
 
 
 class Provider(BaseModel):
-    name = CharField()
+    pass
 
 
 class Region(BaseModel):
     provider = ForeignKey('Provider')
-    name = CharField()
     location = CharField()
 
 
 class Zone(BaseModel):
     region = ForeignKey('Region')
-    name = CharField()
     location = CharField()
 
 
 class InstanceType(BaseModel):
     zone = ForeignKey('Zone')
-    name = CharField()
     hardware_configuration = CharField()
 
 ##
 
 
 class Tenant(BaseModel):
-    name = CharField()
+    pass
 
 
 class TenantOwnedMixin(BaseModel):
     tentant = ForeignKey('Tenant')
+    user_tags = HStoreField()
 
     class Meta:
         abstract = True
-
-
-class ProviderCredential(TenantOwnedMixin):
-    provider = ForeignKey('Provider')
-    name = CharField()
-    shared_identity = CharField()
-    shared_secret = CharField()
 
 
 class Cluster(TenantOwnedMixin):
@@ -98,8 +92,13 @@ class Cluster(TenantOwnedMixin):
     )
 
     # Fields
-    name = CharField()
     cluster_type = CharField(choices=C_TYPES, max_length=1)
+
+
+class ProviderCredential(TenantOwnedMixin):
+    provider = ForeignKey('Provider')
+    shared_identity = CharField()
+    shared_secret = CharField()
 
 
 class Subnet(TenantOwnedMixin):
@@ -119,7 +118,6 @@ class Instance(TenantOwnedMixin):
 
 class Role(TenantOwnedMixin):
     instance = ForeignKey('Instance')
-    name = CharField()
 
 
 class RoleLink(TenantOwnedMixin):
