@@ -6,7 +6,7 @@
 
 from __future__ import unicode_literals, absolute_import, print_function
 
-from .test import *
+from .local import *
 
 DEPLOYMENT = 'test'
 
