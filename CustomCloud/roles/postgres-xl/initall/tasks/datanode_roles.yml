@@ -1,0 +1,33 @@
+---
+
+# iterate over an instance's list of datanodes and datanode replicas
+# check if the directory already exists. If not, issue a pgxc_ctl
+# command to set the component up
+
+- name: Check if Datanode exists 
+  stat: path=/pgxl/data/dn{{dnode}}_{{dtype}}
+  register: dirstat
+
+- name: Add Datanode Master if it does not exist 
+  shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add datanode master datanode{{dnode}} {{inventory_hostname}} {{20003 + dnode|int}} {{21003 + dnode|int}} /pgxl/data/dn{{dnode}}_master none none none 
+  args:
+    executable: /bin/bash
+  environment:
+    LC_ALL: en_US.UTF-8
+    PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
+  when: dtype == 'master' and not dirstat.stat.exists
+  sudo_user: postgres
+  sudo: true
+  delegate_to: "{{ control_hostname }}"
+
+- name: Add Datanode Replica if it does not exist 
+  shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add datanode slave datanode{{dnode}} {{inventory_hostname}} {{20503 + dnode|int}} {{21503 + dnode|int}} /pgxl/data/dn{{dnode}}_replica none /pgxl/wal/dn{{dnode}}_archive
+  args:
+    executable: /bin/bash
+  environment:
+    LC_ALL: en_US.UTF-8
+    PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
+  when: dtype == 'replica' and not dirstat.stat.exists
+  sudo_user: postgres
+  sudo: true
+  delegate_to: "{{ control_hostname }}"

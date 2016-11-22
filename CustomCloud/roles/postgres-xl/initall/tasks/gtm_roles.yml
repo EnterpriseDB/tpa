@@ -1,0 +1,35 @@
+---
+
+- name: Check if GTM exists
+  stat: path=/pgxl/data/gtm
+  register: dirstat
+  when: gtype == 'gtm'
+
+- name: Add GTM node if it does not exist 
+  shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add gtm master gtm {{inventory_hostname}} 20000 /pgxl/data/gtm 
+  args:
+    executable: /bin/bash
+  environment:
+    LC_ALL: en_US.UTF-8
+    PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
+  when: gtype == 'gtm' and not dirstat.stat.exists
+  sudo_user: postgres
+  sudo: true
+  delegate_to: "{{ control_hostname }}"
+
+- name: Check if GTM Standby exists
+  stat: path=/pgxl/data/gtm_standby
+  register: dirstat
+  when: gtype == 'gtm_standby'
+
+- name: Add GTM Standby if it does not exist 
+  shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add gtm slave gtm_standby {{inventory_hostname}} 20000 /pgxl/data/gtm_standby 
+  args:
+    executable: /bin/bash
+  environment:
+    LC_ALL: en_US.UTF-8
+    PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
+  when: gtype == 'gtm_standby' and not dirstat.stat.exists
+  sudo_user: postgres
+  sudo: true
+  delegate_to: "{{ control_hostname }}"

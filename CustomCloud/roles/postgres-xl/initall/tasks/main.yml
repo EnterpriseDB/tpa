@@ -36,17 +36,35 @@
       template:
         src: pgxc_ctl.conf.j2
         dest: ~postgres/pgxc_ctl.conf
-    - name: Run pgxc_ctl init all
-      shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf init all
-      args:
-        executable: /bin/bash
-      environment:
-        LC_ALL: en_US.UTF-8
-        PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
   when: inventory_hostname == control_hostname and not conf.stat.exists
   sudo_user: postgres
   sudo: true
 
+- include: gtm_roles.yml gtype=gtm
+  when: >
+    'gtm' in role
+
+- include: gtm_roles.yml gtype=gtm_standby
+  when: >
+    'gtm-standby' in role
+
+- include: gtm_proxy_roles.yml gpindex="{{ 1+item.0 }}" gphost="{{item.1}}" dtype=gtm-proxy
+  with_indexed_items: "{{ groups['tag_role_datanode'] }}"
+
+- include: coord_roles.yml ctype=master cnode={{item}}
+  with_items: "{{hostvars[inventory_hostname].ec2_tag_co_list|default([])}}"
+  when: >
+    'coordinator' in role
+
+- include: datanode_roles.yml dnode={{item}} dtype=master
+  with_items: "{{hostvars[inventory_hostname].ec2_tag_dn_list|default([])}}"
+  when: >
+    'datanode' in role
+
+- include: datanode_roles.yml dnode={{item}} dtype=replica
+  with_items: "{{hostvars[inventory_hostname].ec2_tag_dn_replica_list|default([])}}"
+  when: >
+    'datanode-replica' in role
 
 ## Quick test to make sure that the cluster is operational
 
