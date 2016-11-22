@@ -6,13 +6,15 @@
 
 from __future__ import unicode_literals, absolute_import, print_function
 
+from .base import *
+
 # Application definition
 
 INSTALLED_APPS += [
     'django.contrib.sites',
     'rest_framework',
     'tpa',
-    'fe',
+    #'fe',
 ]
 
 MIDDLEWARE += [
@@ -40,8 +42,8 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ),
     'COERCE_DECIMAL_TO_STRING': False,
-    'DATE_INPUT_FORMATS': (DATE_FORMAT, 'iso-8601'),
-    'DATE_FORMAT': DATE_FORMAT,
+    'DATE_INPUT_FORMATS': ('iso-8601', ),
+    'DATE_FORMAT': 'iso-8601',
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'EXCEPTION_HANDLER': 'boacsite.api.v1.exceptions.custom_exception_handler',
 }
