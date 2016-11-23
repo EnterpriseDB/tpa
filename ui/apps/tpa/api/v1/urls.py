@@ -10,12 +10,17 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.http import Http404
 
+from rest_framework import routers
+
 from . import views
 
-urlpatterns = [
-    # TODO api view urls.
-]
+router = routers.SimpleRouter()
 
+for view_class in views.ALL_VIEWS:
+    router.register(view_class.object_class, view_class)
+    print("registered:", view_class)
+
+urlpatterns = router.urls
 
 def unknown_api_endpoint(request):
     raise Http404("Unknown API endpoint")

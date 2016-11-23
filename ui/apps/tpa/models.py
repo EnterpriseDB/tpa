@@ -6,6 +6,12 @@
 
 from __future__ import unicode_literals, absolute_import, print_function
 
+__all__ = '''
+Provider Region Zone InstanceType VolumeType
+Tenant Cluster ProviderCredential Subnet
+Instance Role RoleLink Volume VolumeUse
+'''.split()
+
 import logging
 
 from django.conf import settings
