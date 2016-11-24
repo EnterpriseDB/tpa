@@ -14,11 +14,10 @@ from rest_framework import routers
 
 from . import views
 
-router = routers.SimpleRouter()
+router = routers.DefaultRouter()
 
 for view_class in views.ALL_VIEWS:
     router.register(view_class.object_class, view_class)
-    print("registered:", view_class)
 
 urlpatterns = router.urls
 

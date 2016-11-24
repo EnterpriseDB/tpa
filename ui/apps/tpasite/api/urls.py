@@ -6,5 +6,5 @@ from __future__ import unicode_literals, absolute_import, print_function
 from django.conf.urls import include, url
 
 urlpatterns = [
-    url("^v1/", include("tpasite.api.v1.urls", namespace="v1")),
+    url(r"^v1/", include("tpasite.api.v1.urls")),
 ]

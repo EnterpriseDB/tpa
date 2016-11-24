@@ -10,4 +10,4 @@ from .test import *
 
 DEPLOYMENT = 'dev'
 
-DATABASES['default']['name'] = "tpa-dev"
+DATABASES['default']['NAME'] = "tpa-dev"

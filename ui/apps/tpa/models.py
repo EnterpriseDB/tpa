@@ -53,7 +53,7 @@ class TimestampMixin(models.Model):
 
 
 class BaseModel(UUIDMixin, TimestampMixin):
-    name = TextLineField(db_index=True, blank=False)
+    name = TextLineField(db_index=True, blank=True)
 
     class Meta(object):
         abstract = True
