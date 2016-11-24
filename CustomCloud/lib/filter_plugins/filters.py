@@ -74,6 +74,14 @@ def try_subkey(container, keys, default=None):
 def doublequote(str):
     return '"%s"' % str.replace('"', '\"')
 
+# Given a hostname and hostvars, returns the name of the earliest ancestor that
+# doesn't have an upstream defined.
+
+def upstream_root(root, hostvars):
+    while root in hostvars and hostvars[root].get('upstream', '') != '':
+        root = hostvars[root].get('upstream')
+    return root
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -81,4 +89,5 @@ class FilterModule(object):
             'try_subkey': try_subkey,
             'define_volumes': define_volumes,
             'doublequote': doublequote,
+            'upstream_root': upstream_root,
         }
