@@ -11,6 +11,7 @@ from .base import *
 # Application definition
 
 INSTALLED_APPS += [
+    'django.contrib.postgres',
     'django.contrib.sites',
     'rest_framework',
     'tpa',
@@ -38,14 +39,14 @@ DATABASES = {
 STATIC_URL = '/fe/'
 
 REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (
+    'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-    ),
+    ],
     'COERCE_DECIMAL_TO_STRING': False,
     'DATE_INPUT_FORMATS': ('iso-8601', ),
     'DATE_FORMAT': 'iso-8601',
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
-    'EXCEPTION_HANDLER': 'boacsite.api.v1.exceptions.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'tpasite.exceptions.rest_exception_handler',
 }
 
 LOGGING = {

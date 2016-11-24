@@ -10,4 +10,4 @@ from .local import *
 
 DEPLOYMENT = 'prod'
 
-DATABASES['default']['name'] = 'tpa-prod'
+DATABASES['default']['NAME'] = 'tpa-prod'

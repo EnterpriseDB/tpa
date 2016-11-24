@@ -6,6 +6,6 @@ from __future__ import unicode_literals, absolute_import, print_function
 from django.conf.urls import include, url
 
 urlpatterns = [
-    url(r'api/', include('tpasite.api.urls', namespace='api')),
+    url(r'^api/', include('tpasite.api.urls', namespace='api')),
     # TODO - fe urls.
 ]

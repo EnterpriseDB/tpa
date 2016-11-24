@@ -6,11 +6,19 @@
 
 from __future__ import unicode_literals, absolute_import, print_function
 
+__all__ = '''
+Provider Region Zone InstanceType VolumeType
+Tenant Cluster ProviderCredential Subnet
+Instance Role RoleLink Volume VolumeUse
+'''.split()
+
 import logging
 
 from django.conf import settings
+from django.contrib.postgres.fields import HStoreField
 from django.core.exceptions import ValidationError
-from django.db.models import (UUIDField, CharField, ForeignKey)
+from django.db.models import (UUIDField, CharField, ForeignKey, BooleanField,
+                              PositiveIntegerField)
 from django.db import models
 
 
@@ -19,6 +27,13 @@ import uuid
 logger = logging.getLogger(__name__)
 
 # Mixins
+
+class TextLineField(CharField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('max_length', 255)
+        super(TextLineField, TextLineField).__init__(self, *args, **kwargs)
+
+LocationField = TextLineField
 
 
 class UUIDMixin(models.Model):
@@ -38,6 +53,8 @@ class TimestampMixin(models.Model):
 
 
 class BaseModel(UUIDMixin, TimestampMixin):
+    name = TextLineField(db_index=True, blank=True)
+
     class Meta(object):
         abstract = True
 
@@ -45,45 +62,40 @@ class BaseModel(UUIDMixin, TimestampMixin):
 
 
 class Provider(BaseModel):
-    name = CharField()
+    pass
 
 
 class Region(BaseModel):
     provider = ForeignKey('Provider')
-    name = CharField()
-    location = CharField()
+    location = LocationField(null=True)
 
 
 class Zone(BaseModel):
     region = ForeignKey('Region')
-    name = CharField()
-    location = CharField()
+    location = LocationField(null=True)
 
 
 class InstanceType(BaseModel):
     zone = ForeignKey('Zone')
-    name = CharField()
-    hardware_configuration = CharField()
+    hardware_configuration = TextLineField()
+
+
+class VolumeType(BaseModel):
+    provider = ForeignKey('Provider')
 
 ##
 
 
 class Tenant(BaseModel):
-    name = CharField()
+    pass
 
 
 class TenantOwnedMixin(BaseModel):
     tentant = ForeignKey('Tenant')
+    user_tags = HStoreField()
 
     class Meta:
         abstract = True
-
-
-class ProviderCredential(TenantOwnedMixin):
-    provider = ForeignKey('Provider')
-    name = CharField()
-    shared_identity = CharField()
-    shared_secret = CharField()
 
 
 class Cluster(TenantOwnedMixin):
@@ -98,42 +110,53 @@ class Cluster(TenantOwnedMixin):
     )
 
     # Fields
-    name = CharField()
     cluster_type = CharField(choices=C_TYPES, max_length=1)
+
+
+class ProviderCredential(TenantOwnedMixin):
+    provider = ForeignKey('Provider')
+    shared_identity = TextLineField()
+    shared_secret = TextLineField()
 
 
 class Subnet(TenantOwnedMixin):
     cluster = ForeignKey('Cluster')
     zone = ForeignKey('Zone')
     credentials = ForeignKey('ProviderCredential')
-    netmask = CharField()
+    netmask = TextLineField()
 
 
 class Instance(TenantOwnedMixin):
     subnet = ForeignKey('Subnet')
     instance_type = ForeignKey('InstanceType')
 
-    hostname = CharField()
-    domain = CharField()
+    hostname = TextLineField()
+    domain = TextLineField()
+
+    assign_eip = BooleanField(default=False)
+
+    @property
+    def fqdn(self):
+        return self.hostname + '.' + self.domain
 
 
 class Role(TenantOwnedMixin):
     instance = ForeignKey('Instance')
-    name = CharField()
 
 
 class RoleLink(TenantOwnedMixin):
-    client_role = ForeignKey('Role')
-    server_role = ForeignKey('Role')
+    client_role = ForeignKey('Role', related_name='client_links')
+    server_role = ForeignKey('Role', related_name='server_links')
 
 
 class Volume(TenantOwnedMixin):
     instance = ForeignKey('Instance')
-    mount_point = CharField()
-    size = CharField()
+    volume_type = TextLineField()
+    volume_size = PositiveIntegerField()
+    delete_on_termination = BooleanField(default=False)
 
     class Meta:
-        unique_together = (('instance', 'mount_point'),)
+        unique_together = (('instance', 'name'),)
 
 
 class VolumeUse(TenantOwnedMixin):
