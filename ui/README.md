@@ -51,3 +51,26 @@ redirect them to tpa-ui along with authentication and session info via JWT.
 * __fe/__ Client browser frontend app -- HTML/CSS/JS.
 * __req/__ Python requirements for app, by deployment type.
 * __ansible/__ Ansible roles for deployment and dependencies.
+
+
+
+## Development Quickstart
+
+It's assumed you have a Debian-derived system with basic Python and Postgres
+development tools installed. By default, the system will be configured with
+dev settings. This can be changed by setting the DJANGO_SETTINGS_MODULE to
+one of the other role configs in tpasite.conf.
+
+* Create a virtualenv for the project and activate it.
+
+* Setup the environment and run the internal dev server on port 8000:
+
+```
+~/tpa/ui > pip install -r req/dev.txt
+...
+~/tpa/ui > createdb tpa-dev
+...
+~/tpa/ui > ./apps/manage.py migrate
+...
+~/tpa/ui > ./apps/manage.py runserver
+```
