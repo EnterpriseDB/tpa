@@ -11,8 +11,10 @@ ec2_vpc:
   Name: Test
 
 ec2_vpc_subnets:
-  10.33.174.0/28: eu-west-1a
-  10.33.174.16/28: eu-west-1b
+  10.33.174.0/28:
+    az: eu-west-1a
+  10.33.174.16/28:
+    az: eu-west-1b
 
 instances:
     # debian-jessie-amd64-hvm-2016-09-19-ebs
