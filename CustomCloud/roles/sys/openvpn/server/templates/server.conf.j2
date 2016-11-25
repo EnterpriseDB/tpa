@@ -25,7 +25,7 @@ client-config-dir {{ _vpn_dir }}/ccd
 comp-lzo
 user nobody
 group {% if ansible_distribution == 'RedHat' %} nobody {% else %} nogroup {% endif %}
-#remote-cert-tls client
+remote-cert-tls client
 keepalive 10 300
 tls-timeout = 120s
 client-to-client
