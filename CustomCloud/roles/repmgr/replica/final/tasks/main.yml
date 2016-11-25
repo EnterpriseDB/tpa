@@ -20,8 +20,8 @@
 
 - name: Check if the replica is registered
   shell: >
-    {{ postgres_bin_dir }}/psql 'host={{ inventory_hostname }} user=repmgr dbname=repmgr' \
-      -qAtw -c "SELECT type FROM \"repmgr_{{ upstream }}\".repl_nodes WHERE type = 'standby' and name = '{{ inventory_hostname }}';"
+    {{ postgres_bin_dir }}/psql 'host={{ upstream_primary }} user=repmgr dbname=repmgr' \
+      -qAtw -c "SELECT type FROM \"repmgr_{{ upstream_primary }}\".repl_nodes WHERE type = 'standby' and name = '{{ inventory_hostname }}';"
   register: replica
   ignore_errors: True
   changed_when: False
@@ -44,7 +44,7 @@
           -f "{{ repmgr_conf_dir }}/repmgr.conf" -D {{ postgres_data_dir }} \
           -d repmgr -U repmgr -w 0 --fast-checkpoint \
           --copy-external-config-files \
-          -h {{ hostvars[upstream].inventory_hostname }}
+          -h {{ upstream_primary }}
       become_user: postgres
       become: true
 
