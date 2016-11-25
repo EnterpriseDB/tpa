@@ -1,6 +1,3 @@
 ---
 
 - set_fact: initialise_replication=True
-
-- set_fact:
-    upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"

@@ -1,5 +1,8 @@
 ---
 
+- set_fact:
+    upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"
+
 - name: Ensure repmgr directories exist
   file:
     path: "{{ item }}"
