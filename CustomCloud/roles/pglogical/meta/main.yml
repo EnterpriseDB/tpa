@@ -1,0 +1,6 @@
+---
+
+dependencies:
+  - role: pglogical/pkg
+    when: >
+      'postgres' in role

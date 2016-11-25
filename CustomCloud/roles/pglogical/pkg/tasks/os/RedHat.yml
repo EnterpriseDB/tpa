@@ -1,0 +1,6 @@
+---
+
+- name: Install pglogical YUM repository packages
+  yum:
+    name: http://packages.2ndquadrant.com/pglogical/yum-repo-rpms/pglogical-rhel-1.0-2.noarch.rpm
+    state: present

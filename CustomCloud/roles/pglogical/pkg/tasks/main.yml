@@ -1,0 +1,8 @@
+---
+
+- include: "os/{{ ansible_os_family }}.yml"
+
+- name: Install pglogical packages
+  package:
+    name: "{{ pglogical_packages[ansible_distribution] }}"
+    state: latest

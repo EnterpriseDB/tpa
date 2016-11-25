@@ -1,0 +1,14 @@
+---
+
+- name: Add 2ndQuadrant pglogical repository signing key
+  apt_key:
+    id: AA7A6805
+    state: present
+    url: http://packages.2ndquadrant.com/pglogical/apt/AA7A6805.asc
+
+- name: Add the 2ndQuadrant pglogical apt repository
+  apt_repository:
+    state: present
+    update_cache: yes
+    repo: >-
+      deb [arch=amd64] http://packages.2ndquadrant.com/pglogical/apt/ {{ ansible_distribution_release }}-2ndquadrant main
