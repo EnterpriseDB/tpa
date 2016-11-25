@@ -4,7 +4,18 @@
 '''Cluster domain model.
 '''
 
-from __future__ import unicode_literals, absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
+
+import logging
+from uuid import uuid4
+
+from django.contrib.postgres.fields import JSONField
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.db.models import (BooleanField, CharField, DateTimeField,
+                              ForeignKey, PositiveIntegerField, UUIDField)
+
+logger = logging.getLogger(__name__)
 
 __all__ = '''
 Provider Region Zone InstanceType VolumeType
@@ -12,41 +23,29 @@ Tenant Cluster ProviderCredential Subnet
 Instance Role RoleLink Volume VolumeUse
 '''.split()
 
-import logging
-
-from django.conf import settings
-from django.contrib.postgres.fields import HStoreField
-from django.core.exceptions import ValidationError
-from django.db.models import (UUIDField, CharField, ForeignKey, BooleanField,
-                              PositiveIntegerField)
-from django.db import models
-
-
-import uuid
-
-logger = logging.getLogger(__name__)
 
 # Mixins
+
 
 class TextLineField(CharField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('max_length', 255)
         super(TextLineField, TextLineField).__init__(self, *args, **kwargs)
 
+
 LocationField = TextLineField
 
 
 class UUIDMixin(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4,
-                            editable=False)
+    uuid = UUIDField(primary_key=True, default=uuid4, editable=False)
 
     class Meta(object):
         abstract = True
 
 
 class TimestampMixin(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    created = DateTimeField(auto_now_add=True)
+    updated = DateTimeField(auto_now=True)
 
     class Meta(object):
         abstract = True
@@ -54,6 +53,7 @@ class TimestampMixin(models.Model):
 
 class BaseModel(UUIDMixin, TimestampMixin):
     name = TextLineField(db_index=True, blank=True)
+    description = TextLineField(blank=True)
 
     class Meta(object):
         abstract = True
@@ -91,26 +91,15 @@ class Tenant(BaseModel):
 
 
 class TenantOwnedMixin(BaseModel):
-    tentant = ForeignKey('Tenant')
-    user_tags = HStoreField()
+    tenant = ForeignKey('Tenant')
+    user_tags = JSONField()
 
     class Meta:
         abstract = True
 
 
 class Cluster(TenantOwnedMixin):
-    T_PG = 'P'
-    T_BDR = 'B'
-    T_XL = 'X'
-
-    C_TYPES = (
-        (T_PG, 'PostgreSQL'),
-        (T_BDR, 'Bidirectional replication'),
-        (T_XL, 'Postgres XL')
-    )
-
-    # Fields
-    cluster_type = CharField(choices=C_TYPES, max_length=1)
+    pass
 
 
 class ProviderCredential(TenantOwnedMixin):
@@ -119,9 +108,14 @@ class ProviderCredential(TenantOwnedMixin):
     shared_secret = TextLineField()
 
 
+class VPC(TenantOwnedMixin):
+    provider = ForeignKey('Provider')
+
+
 class Subnet(TenantOwnedMixin):
     cluster = ForeignKey('Cluster')
     zone = ForeignKey('Zone')
+    vpc = ForeignKey('VPC')
     credentials = ForeignKey('ProviderCredential')
     netmask = TextLineField()
 
@@ -153,7 +147,7 @@ class Volume(TenantOwnedMixin):
     instance = ForeignKey('Instance')
     volume_type = TextLineField()
     volume_size = PositiveIntegerField()
-    delete_on_termination = BooleanField(default=False)
+    delete_on_termination = BooleanField(default=True)
 
     class Meta:
         unique_together = (('instance', 'name'),)

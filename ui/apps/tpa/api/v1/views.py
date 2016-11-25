@@ -13,6 +13,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+# Generic ModelViewSets for all model classes
+
+
 ALL_VIEWS = []
 
 
@@ -31,16 +35,18 @@ def create_generic_view(g, model_class):
     serializer = type(str("%sSerializer" % model_name),
                       (serializers.HyperlinkedModelSerializer,),
                       {'Meta': Meta,
-                       '__module__': 'tpa.api.v1.views'})
+                       '__module__': __name__,
+                       })
 
     view_class = type(str(view_class_name),
                       (viewsets.ModelViewSet,),
-                      {
-                          'queryset': model_class.objects.all(),
-                          'serializer_class': serializer,
-                          'object_class': model_name.lower(),
-                          'lookup_field': 'uuid',
+                      {'queryset': model_class.objects.all(),
+                       'serializer_class': serializer,
+                       'object_class': model_name.lower(),
+                       'lookup_field': 'uuid',
+                       '__module__': __name__,
                       })
+
     g[view_class_name] = view_class
     g[serializer.__name__] = serializer
     ALL_VIEWS.append(view_class)

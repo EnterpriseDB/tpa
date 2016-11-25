@@ -41,6 +41,7 @@ STATIC_URL = '/fe/'
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.CoreJSONRenderer',
     ],
     'COERCE_DECIMAL_TO_STRING': False,
     'DATE_INPUT_FORMATS': ('iso-8601', ),
