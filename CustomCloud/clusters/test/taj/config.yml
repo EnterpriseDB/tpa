@@ -1,0 +1,19 @@
+---
+
+cluster_name: "InterfaceDemo"
+cluster_tags:
+  Owner: AMS
+
+ec2_vpc:
+  Name: Test
+
+ec2_ami_name: debian-jessie-amd64-hvm-2016-09-19-ebs
+ec2_ami_user: admin
+
+instances:
+    - node: 1
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.217.0/28
+      tags:
+        role: adhoc
