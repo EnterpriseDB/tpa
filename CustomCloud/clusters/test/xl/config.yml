@@ -35,8 +35,8 @@ ec2_vpc:
   cidr: 10.33.63.0/24
 
 ec2_vpc_subnets:
-  ap-southeast-2:
-    10.33.63.0/26: ap-southeast-2a
+  10.33.63.0/26:
+    az: ap-southeast-2a
 
 instances:
     - type: i2.xlarge
