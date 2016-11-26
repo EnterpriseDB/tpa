@@ -15,9 +15,6 @@
       - eu-central-1
 
     # Which AMIs should we start with?
-    #
-    # In future, we could consider searching for the latest AMI to match
-    # criteria defined here, rather than specifying its full name.
     base_amis:
       - name: debian-jessie-amd64-hvm-2016-09-19-ebs
       - name: RHEL-7.3_HVM_GA-20161026-x86_64-1-Hourly2-GP2
