@@ -4,7 +4,8 @@
 # config.yml for a cluster with one instance per AMI per region based on
 # the config.yml.j2 template.
 
-- hosts: localhost
+- name: Generate config.yml for clusters/images
+  hosts: localhost
   vars:
     # Which regions do we want to build new AMIs in?
     regions:
@@ -42,6 +43,7 @@
         region_amis: "{{ region_amis|combine({item.item.0: region_amis[item.item.0]|union([item.results.0.ami_id])}) }}"
       with_items: "{{ amis.results }}"
 
-    - template:
+    - name: Expand config.yml template
+      template:
         src: config.yml.j2
         dest: "{{ playbook_dir }}/config.yml"
