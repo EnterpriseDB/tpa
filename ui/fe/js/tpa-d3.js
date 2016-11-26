@@ -1,21 +1,20 @@
 
 //var test_data_url = "/api/v1/tpa/provider/c2b1c094-03fd-5d95-b7f3-656fc9f62d72/"
 var api_url = "/api/v1/tpa/";
-var test_data_url = "/test-cluster.json";
+var test_data_url = "/test-cluster-extended.json";
 var width = 800;
 var height = 450;
 var diameter = width*2+60;
 
 var root = null;
-var tree = d3.tree().size([height, width-160])
+var tree = d3.cluster().size([height, width-160])
         .separation(function(a, b) {
-            switch (model_class(b)) {
-                case 'role':
-                    return 0.1;
-                default:
-                    return 1;
-            }
+                return 0.1;
         });
+
+//d3.select('.treeview').call(d3.zoom().on("zoom", zoomed));
+
+/* Support for json structure */
 
 var model_class = function(d) {
     if ( d && d.url && d.url.indexOf(api_url) === 0) {
@@ -28,13 +27,14 @@ var model_class = function(d) {
 };
 
 var data_class = function(d) {
-    return model_class(d.data)
-}
+    return model_class(d.data);
+};
 
 var class_method = function() {
     return multimethod().dispatch(data_class);
-}
+};
 
+/* Renderer */
 
 d3.json(test_data_url,
     function(model_object, error) {
@@ -45,12 +45,14 @@ d3.json(test_data_url,
 var draw_cluster = function (cluster) {
     console.log("Cluster data:", cluster);
 
+    d3.select('.cluster_name').text(cluster.name);
+
     root = d3.hierarchy([cluster], multimethod().dispatch(model_class)
         .when("cluster", function(c) {
             return c.instance_set;
         })
         .when("instance", function(i) {
-            return i.instance_set;
+            return i.role_set;
         })
         .default(function(d) {
             if (d.length && d.length > 0) {
@@ -76,12 +78,13 @@ var draw_cluster = function (cluster) {
         .enter().append("path")
         .attr("class", "edge")
         .attr("d", function(d) {
-            console.log("edge data for:", model_class(d.data), d);
+            var path = d3.path();
+            path.moveTo(d.y, d.x);
+            path.bezierCurveTo(d.parent.y+200, d.x,
+                                d.y-100, d.x,
+                                d.parent.y, d.parent.x);
 
-            return "M" + d.y + "," + d.x
-                + "C" + (d.parent.y + 200) + "," + d.x
-                + " " + (d.parent.y + 200) + "," + d.parent.x
-                + " " + d.parent.y + "," + d.parent.x;
+            return path;
         });
 
     var node = g.selectAll(".node")
@@ -113,8 +116,6 @@ var draw_cluster = function (cluster) {
                     + " m "+radius+", 0"
                     + " a "+radius+","+radius+" 0 1,1 "+(2*radius)+",0"
                     + " a "+radius+","+radius+" 0 1,1 "+(-2*radius)+",0";
-
-                console.log(d, circle);
                 return circle;
             }));
 
@@ -122,22 +123,19 @@ var draw_cluster = function (cluster) {
         .attr("class", "name")
         .attr("dy", 3)
         .attr("x", 10)
-        //.attr("x", function(d) { return d.children ? -8 : 8; })
-        //.style("text-anchor", function(d) { return d.children ? "end" : "start"; })
         .attr("transform", function(d) {
-            return "translate(0, -20)";
+            return "scale(1.2, 1.2) translate(0, -20)";
         })
         .text(function(d) {
             return d.data.name;
         });
+
     node.append("text")
-        .attr("class", "type")
+        .attr("class", "model_class")
         .attr("dy", -3)
         .attr("x", 20)
-        //.attr("x", function(d) { return d.children ? -8 : 8; })
-        //.style("text-anchor", function(d) { return d.children ? "end" : "start"; })
         .attr("transform", function(d) {
-            return "translate(0, 20)";
+            return "translate(50, -20)";
         })
         .text(function(d) {
             return model_class(d.data);
