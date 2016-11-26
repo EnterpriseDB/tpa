@@ -19,7 +19,7 @@ instances:
     # debian-jessie-amd64-hvm-2016-09-19-ebs
 
     - node: 1
-      type: t2.small
+      type: t2.micro
       image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.7.0/28
@@ -37,7 +37,7 @@ instances:
         Name: debian-primary
         backup: debian-witness
     - node: 2
-      type: t2.small
+      type: t2.micro
       image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.10.16/28
@@ -57,7 +57,7 @@ instances:
     # Another Debian node for barman.
 
     - node: 3
-      type: t2.small
+      type: t2.micro
       image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.7.16/28
