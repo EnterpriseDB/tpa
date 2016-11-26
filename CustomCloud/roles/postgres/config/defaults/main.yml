@@ -14,3 +14,4 @@ postgres_conf_settings: {}
 
 default_postgres_extensions:
   - pg_stat_statements
+  - pglogical
