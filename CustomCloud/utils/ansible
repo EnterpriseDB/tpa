@@ -13,8 +13,8 @@ set -e -u
 config=${ANSIBLE_CONFIG:-""}
 if [ -z "$config" -a ! -f ./ansible.cfg ]; then
     export ANSIBLE_CONFIG=$(dirname $0)/../ansible.cfg
-    export ANSIBLE_INVENTORY=$(dirname $0)/../inventory/static
 fi
+export ANSIBLE_INVENTORY=$(dirname $0)/../inventory/static
 
 # If ANSIBLE_ROLES_PATH is not set, we'll set it to our roles directory,
 # just in case someone is trying to mix and match roles.
