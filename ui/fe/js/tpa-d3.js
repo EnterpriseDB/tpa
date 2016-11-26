@@ -1,11 +1,14 @@
 
 //var test_data_url = "/api/v1/tpa/provider/c2b1c094-03fd-5d95-b7f3-656fc9f62d72/"
+var api_url = "/api/v1/tpa/"
 var test_data_url = "/test-cluster.json"
 var diameter = 960;
 var width = 300;
 var height = 300;
 
 var root = null;
+var tree = d3.cluster().size([height, width-160]);
+
 
 d3.json(test_data_url,
     function(model_object, error) {
@@ -15,24 +18,30 @@ d3.json(test_data_url,
 
 
 var draw_cluster = function (cluster) {
-    console.log(cluster);
+    console.log("Cluster data:", cluster);
 
     root = d3.hierarchy([cluster], function(d) {
-        console.log("hier for", d)
+        console.log("hier for", model_class(d), d)
 
-        if (d.instance_set && d.instance_set.length > 0) {
-            return d.instance_set;
+        switch(model_class(d)) {
+            case 'cluster':
+                if (d.instance_set && d.instance_set.length > 0) {
+                    return d.instance_set;
+                };
+                break;
+            case 'instance':
+                if (d.role_set && d.role_set.length > 0) {
+                    return d.role_set;
+                };
+                break;
+            case undefined:
+                if (d.length && d.length > 0) {
+                    return d;
+                }
+                break;
+            default:
+                return null;
         }
-
-        if (d.role_set && d.role_set.length > 0) {
-            return d.role_set;
-        }
-
-        if (d.length && d.length > 0) {
-            return d;
-        }
-
-        return null;
     });
 
     tree(root);
@@ -52,9 +61,11 @@ var draw_cluster = function (cluster) {
         .enter().append("path")
         .attr("class", "link")
         .attr("d", function(d) {
+            console.log("link data for:", d);
+
             return "M" + d.y + "," + d.x
-                + "C" + (d.parent.y + 100) + "," + d.x
-                + " " + (d.parent.y + 100) + "," + d.parent.x
+                + "C" + (d.parent.y + 200) + "," + d.x
+                + " " + (d.parent.y + 200) + "," + d.parent.x
                 + " " + d.parent.y + "," + d.parent.x;
         });
 
@@ -80,3 +91,14 @@ var draw_cluster = function (cluster) {
             return d.data.name;
         });
 };
+
+
+var model_class = function(d) {
+    if ( d && d.url && d.url.indexOf(api_url) == 0) {
+        obj_path = d.url.slice(api_url.length);
+        next_slash = obj_path.indexOf("/");
+        return obj_path.slice(0, next_slash);
+    }
+
+    return undefined;
+}
