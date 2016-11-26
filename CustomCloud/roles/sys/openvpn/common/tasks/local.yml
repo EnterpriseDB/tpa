@@ -32,11 +32,29 @@
     creates: "{{ inventory_hostname }}.key"
   sudo: no
 
+- name: Set extension type for server_exts
+  set_fact:
+    openssl_extensions: server_exts
+  when: >
+    'openvpn-server' in role
+  tags: openvpn
+
+- name: Set extension type for client_exts
+  set_fact:
+    openssl_extensions: client_exts
+  when: >
+    'openvpn-server' not in role
+  tags: openvpn
+
+- name: Copy openssl.cnf.j2 to local
+  local_action: template dest="{{ _local_cert_dir }}/openssl.cnf.j2" src="openssl.cnf.j2"
+  sudo: no
+
 - name: Sign each CSR with the CA certificate
   local_action: >
     shell
     umask 077 &&
-    openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in "{{ inventory_hostname }}.csr" -out "{{ inventory_hostname }}.crt" -days 3650 -sha256
+    openssl x509 -extensions "{{ openssl_extensions  }}"  -req -CA ca.crt -CAkey ca.key -CAcreateserial -in "{{ inventory_hostname }}.csr" -out "{{ inventory_hostname }}.crt" -days 3650 -sha256 -extfile openssl.cnf.j2
   args:
     chdir: "{{ _local_cert_dir }}"
     creates: "{{ inventory_hostname }}.crt"
