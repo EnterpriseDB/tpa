@@ -32,7 +32,6 @@ cluster_rules:
 
 ec2_vpc:
   Name: Test
-  cidr: 10.33.63.0/24
 
 ec2_vpc_subnets:
   10.33.63.0/26:
