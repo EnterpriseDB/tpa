@@ -1,0 +1,37 @@
+{
+    "url": "/api/v1/tpa/cluster/123/",
+    "name": "InterfaceDemo",
+    "default_image": "debian-jessie-amd64-hvm-2016-09-19-ebs",
+    "image_user": "admin",
+    "user_tags": {
+        "owner": "AMS"
+    },
+    "vpc_set": [
+        {
+            "url": "/api/v1/tpa/vpc/1",
+            "name": "Test"
+        }
+    ],
+    "subnet_set": [
+        {
+            "url": "/api/v1/tpa/subnet/1",
+            "name": "10.33.217.0/28",
+            "cidr": "10.33.217.0/28",
+            "region": "eu-west-1"
+        }
+    ],
+    "instance_set": [
+        {
+            "url": "/api/v1/tpa/instance/1",
+            "name": "adhoc instance",
+            "instance_type": "t2.micro",
+            "subnet": "/api/v1/tpa/subnet/1",
+            "role_set": [
+                {
+                    "url": "/api/v1/tpa/role/1",
+                    "name": "adhoc"
+                }
+            ]
+        }
+    ]
+}

@@ -5,7 +5,10 @@ from __future__ import unicode_literals, absolute_import, print_function
 
 from django.conf.urls import include, url
 
+from django.conf import settings
+from django.contrib.staticfiles import views
+
 urlpatterns = [
     url(r'^api/', include('tpasite.api.urls', namespace='api')),
-    # TODO - fe urls.
+    url(r'^(?P<path>.*)$', views.serve)
 ]
