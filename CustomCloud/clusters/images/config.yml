@@ -1,0 +1,191 @@
+---
+
+cluster_name: "TPAImages"
+cluster_tags:
+  Owner: AMS
+
+ec2_vpc:
+  Name: Test
+
+instances:
+
+    - node: 1
+      type: t2.micro
+      image: ami-9d6c128a
+      region: us-east-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 2
+      type: t2.micro
+      image: ami-b63769a1
+      region: us-east-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 3
+      type: t2.micro
+      image: ami-40d28157
+      region: us-east-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 4
+      type: t2.micro
+      image: ami-84cc83e4
+      region: us-west-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 5
+      type: t2.micro
+      image: ami-2cade64c
+      region: us-west-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 6
+      type: t2.micro
+      image: ami-6e165d0e
+      region: us-west-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 7
+      type: t2.micro
+      image: ami-2a34e94a
+      region: us-west-2
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 8
+      type: t2.micro
+      image: ami-6f68cf0f
+      region: us-west-2
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 9
+      type: t2.micro
+      image: ami-a9d276c9
+      region: us-west-2
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 10
+      type: t2.micro
+      image: ami-ff0e758c
+      region: eu-west-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 11
+      type: t2.micro
+      image: ami-02ace471
+      region: eu-west-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 12
+      type: t2.micro
+      image: ami-0d77397e
+      region: eu-west-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 13
+      type: t2.micro
+      image: ami-30e01d5f
+      region: eu-central-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 14
+      type: t2.micro
+      image: ami-e4c63e8b
+      region: eu-central-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
+    - node: 15
+      type: t2.micro
+      image: ami-8504fdea
+      region: eu-central-1
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 8
+      tags:
+        role: image
+
