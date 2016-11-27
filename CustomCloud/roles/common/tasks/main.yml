@@ -7,17 +7,7 @@
 - include: distribution.yml
   tags: always
 
-# Once we know what distribution we are dealing with, we must ensure
-# that a usable Python (2.7.x) is installed, along with anything else
-# that is required to run "pkg" below.
-- include: "os/{{ ansible_os_family }}.yml"
-  tags: [common, pkg]
-
-# We have Python and pip; install any other required Python packages,
-# and then install/uninstall any system packages.
-- include: python.yml
-  tags: [common, pkg]
-- include: packages.yml
+- include_role: name=common/pkg
   tags: [common, pkg]
 
 - name: Set the hostname
