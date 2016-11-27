@@ -3,3 +3,5 @@
 ansible_user: admin
 ansible_distribution: Debian
 ansible_distribution_release: jessie
+ansible_os_family: Debian
+ansible_pkg_mgr: apt
