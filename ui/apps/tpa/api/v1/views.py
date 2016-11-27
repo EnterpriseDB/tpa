@@ -6,10 +6,10 @@
 
 from __future__ import unicode_literals, absolute_import, print_function
 
-from rest_framework import serializers, viewsets
-from tpa import models
 import logging
 
+from rest_framework import serializers, viewsets
+from tpa import models
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +18,19 @@ logger = logging.getLogger(__name__)
 
 
 ALL_VIEWS = []
+
+
+class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
+    def build_relational_field(self, field_name, relation_info):
+        field_class, field_kwargs = \
+            super(NamespaceViewSerializer, self).build_relational_field(
+                field_name, relation_info)
+        field_kwargs['lookup_field'] = 'uuid'
+        field_kwargs['view_name'] = "api:%s-detail" \
+            % (relation_info.related_model._meta.object_name.lower(),)
+
+        return field_class, field_kwargs
+
 
 
 def create_generic_view(g, model_class):
@@ -33,7 +46,7 @@ def create_generic_view(g, model_class):
         }
 
     serializer = type(str("%sSerializer" % model_name),
-                      (serializers.HyperlinkedModelSerializer,),
+                      (NamespaceViewSerializer,),
                       {'Meta': Meta,
                        '__module__': __name__,
                        })
