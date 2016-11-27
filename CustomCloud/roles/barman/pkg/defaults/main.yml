@@ -4,4 +4,4 @@ postgres_client_packages:
   Debian:
     - postgresql-client-{{ pgversion }}
   RedHat:
-    - postgresql{{ pgversion }}
+    - postgresql{{ pgversionNN }}
