@@ -22,6 +22,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: debian-us-east-1
         role: image
         os: Debian
 
@@ -35,6 +36,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: redhat-us-east-1
         role: image
         os: RedHat
 
@@ -48,6 +50,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: ubuntu-us-east-1
         role: image
         os: Ubuntu
 
@@ -61,6 +64,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: debian-us-west-1
         role: image
         os: Debian
 
@@ -74,6 +78,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: redhat-us-west-1
         role: image
         os: RedHat
 
@@ -87,6 +92,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: ubuntu-us-west-1
         role: image
         os: Ubuntu
 
@@ -100,6 +106,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: debian-us-west-2
         role: image
         os: Debian
 
@@ -113,6 +120,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: redhat-us-west-2
         role: image
         os: RedHat
 
@@ -126,6 +134,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: ubuntu-us-west-2
         role: image
         os: Ubuntu
 
@@ -139,6 +148,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: debian-eu-west-1
         role: image
         os: Debian
 
@@ -152,6 +162,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: redhat-eu-west-1
         role: image
         os: RedHat
 
@@ -165,6 +176,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: ubuntu-eu-west-1
         role: image
         os: Ubuntu
 
@@ -178,6 +190,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: debian-eu-central-1
         role: image
         os: Debian
 
@@ -191,6 +204,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: redhat-eu-central-1
         role: image
         os: RedHat
 
@@ -204,6 +218,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: ubuntu-eu-central-1
         role: image
         os: Ubuntu
 

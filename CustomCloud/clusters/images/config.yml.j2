@@ -26,6 +26,7 @@ instances:
           volume_type: gp2
           volume_size: 16
       tags:
+        Name: {{ i.os|lower }}-{{ r }}
         role: image
         os: {{ i.os }}
 
