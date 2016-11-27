@@ -18,7 +18,7 @@ instances:
 {% if n.append(n.pop()+1) %}{% endif %}
     - node: {{ n[0] }}
       type: t2.micro
-      image: {{ i }}
+      image: {{ i.ami_id }}
       region: {{ r }}
       subnet: 10.33.0.0/24
       volumes:
@@ -27,6 +27,7 @@ instances:
           volume_size: 16
       tags:
         role: image
+        os: {{ i.os }}
 
 {% endfor %}
 {% endfor %}
