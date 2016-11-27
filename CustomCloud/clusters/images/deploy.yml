@@ -1,0 +1,24 @@
+---
+
+- name: Set up TPA image nodes
+  hosts: tag_Cluster_TPAImages
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  sudo_user: root
+  sudo: true
+
+  pre_tasks:
+    - include: ../../platforms/aws/hostvars.yml
+      tags: always
+
+  roles:
+    - role: common/pkg
+    - role: postgres/vars
+      vars:
+        postgres_version: 9.6
+    - role: postgres/pkg
+    - role: pglogical/pkg
+    - role: sys/openvpn/pkg
+    - role: pgbouncer/pkg
+    - role: barman/pkg
+    - role: repmgr/pkg
