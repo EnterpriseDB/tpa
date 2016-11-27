@@ -22,3 +22,5 @@
     - role: pgbouncer/pkg
     - role: barman/pkg
     - role: repmgr/pkg
+
+    - role: sys/upgrade

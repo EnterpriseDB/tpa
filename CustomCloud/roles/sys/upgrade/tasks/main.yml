@@ -1,0 +1,12 @@
+---
+
+# Use with caution.
+#
+# This role runs "apt-get dist-upgrade" or "yum update" to upgrade all
+# packages to the latest available versions, and may involve stopping
+# and restarting arbitrary services.
+#
+# It's meant to be used from clusters/images when building new images,
+# and is probably not a good idea to include in any "normal" playbook.
+
+- include: "os/{{ ansible_os_family }}.yml"
