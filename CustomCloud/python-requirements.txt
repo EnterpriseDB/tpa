@@ -1,5 +1,5 @@
 boto3>=1.4.0
-boto>=2.40.0
+boto>=2.43.0
 Jinja2>=2.8
 pycrypto>=2.6.1
 python-dateutil>=2.5.3
