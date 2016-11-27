@@ -13,3 +13,7 @@ logrotate, is acceptable. Installing packages is just the obvious thing
 to start with. We can always move more tasks to the image stage as the
 fancy strikes us; and if we miss some, well, deploy.yml will take care
 of it later, because it's carefully written to be idempotent.)
+
+To rebuild the images, run
+
+    clusters/images/build-images -r

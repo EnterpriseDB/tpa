@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -e -u
+
+if [ ! -d clusters/images ]; then
+    echo "Please run clusters/images/build-images (from the TPA/CustomCloud directory)"
+    exit
+fi
+
+opt=${1:-""}
+if [ "$opt" = "-r" ]; then
+    utils/ansible-playbook clusters/images/generate-config.yml
+fi
+
+utils/provision images -v
+
+# Wait for a while for the instances to replace their SSH host keys.
+sleep 120
+
+utils/deploy images -v
+utils/deprovision images -v
+rm -rf clusters/images/id_tpaimages* \
+    clusters/images/inventory/00* clusters/images/inventory/ec2.* \
+    clusters/images/{hostkeys,vault}
