@@ -7,19 +7,20 @@
   sudo_user: root
   sudo: true
 
-  vars_files:
-    - vars/main.yml
+  vars:
+    ansible_distribution: Debian
+    ansible_distribution_release: jessie
 
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
 
   roles:
+    - role: common
+
     - role: postgres/vars
       vars:
         postgres_version: 9.4
       tags: always
-
-    - role: common
 
     - role: sys/tune
       tags: always
@@ -31,8 +32,7 @@
       tags: [sys, sysctl]
 
     - role: sys/openvpn
-      vars:
-        vpn_network: 192.168.33.0/24
+      vpn_network: 192.168.33.0/24
       tags: [sys, openvpn]
 
     - role: sys/hosts
