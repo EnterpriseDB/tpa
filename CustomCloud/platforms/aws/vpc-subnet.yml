@@ -45,9 +45,13 @@
     region: "{{ region }}"
     az: "{{ ec2_vpc_subnets|try_subkey([region,item,'az']) | default(omit) }}"
     resource_tags:
-      Name: "{{ ec2_vpc_subnets|try_subkey([region,item,'Name'],cluster_name+'/'+ ec2_vpc_subnets|try_subkey([region,item,'az'],region)) }}"
+      Name: "{{
+        ec2_vpc_subnets|try_subkey([region,item,'Name'],
+          cluster_name+'/'+ec2_vpc_subnets|try_subkey([region,item,'az'], region)
+        )
+      }}"
       Description: "Automatically created for {{ cluster_name }} in {{
-        ec2_vpc_subnets|try_subkey([region,item,'az'],region)
+        ec2_vpc_subnets|try_subkey([region,item,'az'], region)
       }}"
       CreatingCluster: "{{ cluster_name }}"
   when: ec2_region_subnets[region][item] is not defined
@@ -63,12 +67,13 @@
           }, recursive=True)
         }}"
       with_items: "{{ new_subnets.results }}"
+
     - name: Create a route table for new subnets in {{ region }}
       ec2_vpc_route_table:
         region: "{{ region }}"
         vpc_id: "{{ ec2_region_vpcs[region] }}"
         tags:
-          Name: "{{ ec2_region_subnets|try_subkey([region,item,'Name'],cluster_name+'/'+ec2_region_subnets|try_subkey([region,item,'az'],region+'/'+'routes')) }}"
+          Name: "{{ cluster_name }}/{{ region }}/routes"
           Description: "Automatically created for {{ cluster_name }} in {{ region }}"
           CreatingCluster: "{{ cluster_name }}"
         subnets: "{{ new_subnets.results|map(attribute='subnet.id')|list }}"

@@ -34,8 +34,9 @@ ec2_vpc:
   Name: Test
 
 ec2_vpc_subnets:
-  10.33.63.0/26:
-    az: ap-southeast-2a
+  ap-southeast-2:
+    10.33.63.0/26:
+      az: ap-southeast-2a
 
 instances:
     - type: i2.xlarge

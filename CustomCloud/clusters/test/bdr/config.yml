@@ -14,20 +14,27 @@ ec2_vpc:
   Name: Test
 
 ec2_vpc_subnets:
-  10.33.67.32/28:
-    az: eu-west-1b
-  10.33.67.112/28:
-    az: eu-west-1c
-  10.33.67.128/28:
-    az: eu-central-1a
-  10.33.67.144/28:
-    az: eu-central-1a
-  10.33.67.160/28:
-    az: us-east-1c
-  10.33.67.176/28:
-    az: us-east-1c
-  10.33.67.192/28:
-    az: us-east-1e
+  eu-west-1:
+    10.33.67.32/28:
+      Name: first
+      az: eu-west-1b
+    10.33.67.112/28:
+      az: eu-west-1c
+  eu-central-1:
+    10.33.67.128/28:
+      Name: second
+      az: eu-central-1a
+    10.33.67.144/28:
+      az: eu-central-1b
+  us-east-1:
+    10.33.67.160/28:
+      Name: third
+      az: us-east-1a
+    10.33.67.176/28:
+      az: us-east-1c
+    10.33.67.192/28:
+      Name: last
+      az: us-east-1e
 
 instances:
     # One BDR instance and a corresponding Barman instance in each of
