@@ -1,15 +1,12 @@
 ---
 
 - name: Set up TPA BDR cluster
-
-  # This play targets all hosts in the cluster.
   hosts: tag_Cluster_TPA_BDR
-  gather_facts: no
   any_errors_fatal: True
   max_fail_percentage: 0
-
   sudo_user: root
   sudo: true
+
   vars_files:
     - vars/main.yml
 
@@ -17,15 +14,13 @@
     - include: ../../../platforms/aws/hostvars.yml
 
   roles:
-
-    - role: common
-
     - role: postgres/vars
       vars:
         postgres_version: 9.4
       tags: always
 
-    # Setup complete. Update, Upgrade and restart the instances
+    - role: common
+
     - role: sys/tune
       tags: always
 
@@ -35,14 +30,10 @@
           net.ipv4.ip_forward: 1
       tags: [sys, sysctl]
 
-    - role: sys/fs
-      vars:
-        device: /dev/xvdb
-        mountpoint: "{{ postgres_home }}"
-      tags: [sys, fs]
-
     - role: sys/openvpn
-      vpn_network: 192.168.33.0/24
+      vars:
+        vpn_network: 192.168.33.0/24
+      tags: [sys, openvpn]
 
     - role: sys/hosts
       tags: [sys, hosts]
@@ -50,7 +41,6 @@
     - role: sys/rsyslog
       tags: [sys, rsyslog]
 
-    # Install the BDR packages and basic configuration files.
     - role: bdr/pkg
       when: >
         'bdr' in role
@@ -66,7 +56,6 @@
         'bdr' in role
       tags: bdr
 
-    # Setup backup from the BDR nodes
     - role: barman
       tags: barman
 
