@@ -21,7 +21,7 @@ default_apt_repositories:
     key_url: http://packages.2ndquadrant.com/2ndQPostgres/apt/70549BC8.asc
     repo: >-
       deb [arch=amd64] http://packages.2ndquadrant.com/2ndQPostgres/apt/ {{ ansible_distribution_release }}-2ndquadrant {{ pgversion }}
-    versions: [9.5]
+    versions: [9.5, 9.6]
 
 # Callers can specify yum_repositories to augment or override the
 # default_yum_repositories specified below. Note that this is a hash of
@@ -36,7 +36,7 @@ default_yum_repositories:
     versions: [9.5, 9.6]
   2ndQPostgres:
     rpm_url: http://packages.2ndquadrant.com/2ndQPostgres/yum-repo-rpms/2ndQPostgres-rhel-1.0-1.noarch.rpm
-    versions: [9.5]
+    versions: [9.5, 9.6]
 
 # Hardcoded information about yum repositories that supply postgres
 # packages.
@@ -55,7 +55,7 @@ yum_postgres_sources:
     sections:
       - 2ndQPostgres
       - 2ndQPostgres-testing
-    versions: [9.5]
+    versions: [9.5, 9.6]
 
 # The default package list installs community or 2ndQuadrant postgres.
 # The caller may override this list entirely, or just augment it by
