@@ -18,7 +18,8 @@ cluster_rules:
  - {proto: udp, from_port: 514, to_port: 514, cidr_ip: 0.0.0.0/0}
  - {proto: tcp, from_port: 514, to_port: 514, cidr_ip: 0.0.0.0/0}
 
-ec2_ami_name: "debian-jessie-amd64-hvm-2016-04-03-ebs"
+ec2_ami:
+  Name: debian-jessie-amd64-hvm-2016-04-03-ebs
 ec2_ami_user: "admin"
 
 ec2_vpc:

@@ -68,9 +68,9 @@
 
     # When provisioning each instance, we must specify an AMI id to use.
     # If the instance configuration specifies "image: ami-xxx" directly,
-    # we can use that value. As a convenience, if ec2_ami_name is set at
-    # the top level, we search for a matching AMI in each region and use
-    # its id by default.
+    # we can use that value. As a convenience, if ec2_ami is set at the
+    # top level, we search for a matching AMI in each region and use its
+    # id by default.
     #
     # The AMI for a region is then given by ec2_region_amis[region].
     #
@@ -83,12 +83,12 @@
         ec2_ami_rootdevices: {}
 
     - block:
-        - name: Find AMI named {{ ec2_ami_name }} in each region
+        - name: Find AMI named {{ ec2_ami['Name'] }} in each region
           ec2_ami_find:
-            name: "{{ ec2_ami_name }}"
-            owner: "{{ ec2_ami_owner|default(omit) }}"
+            name: "{{ ec2_ami['Name'] }}"
+            owner: "{{ ec2_ami['Owner']|default(omit) }}"
+            ami_tags: "{{ ec2_ami['tags']|default(omit) }}"
             region: "{{ item }}"
-            ami_tags: "{{ ec2_ami_tags|default(omit) }}"
             sort: name
             sort_order: descending
             sort_end: 1
@@ -103,7 +103,7 @@
           with_together:
             - "{{ regions }}"
             - "{{ ec2_amis.results }}"
-      when: ec2_ami_name is defined
+      when: ec2_ami is defined
 
     # We also need to discover the root devices for any AMIs specified
     # directly by id.

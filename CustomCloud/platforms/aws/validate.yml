@@ -26,15 +26,6 @@
       - ec2_vpc['Name'] is defined
       - ec2_vpc['Name'] != ''
 
-# If we define ec2_ami_name, we'd better also define ec2_ami_user, since
-# there's no way to auto-discover the preferred username for an AMI.
-
-- name: Ensure that ec2_ami_user is set if ec2_ami_name is set
-  assert:
-    msg: "If you specify ec2_ami_name, please also set ec2_ami_user"
-    that:
-      - ec2_ami_name is not defined or ec2_ami_user is defined
-
 - name: Ensure instances is correctly configured
   assert:
     msg: "Please define instances (an array of hashes, one per instance) in {{config_file}}"
@@ -42,6 +33,25 @@
       - instances is defined
       - instances is sequence and instances is not string and instances is not mapping
       - instances | length > 0
+
+# Make sure ec2_ami is defined (and specifies at least the AMI Name), or
+# that every instance has an image explicitly specified by id.
+
+- name: Ensure that every instance specifies an image, or ec2_ami is defined
+  assert:
+    msg: "Please set 'image' on every instance, or use ec2_ami"
+    that:
+      - instances|selectattr('image','defined')|list|count == instances|count or
+        (ec2_ami is defined and ec2_ami is mapping and ec2_ami['Name'] is defined)
+
+# If we define ec2_ami, we'd better also define ec2_ami_user, since
+# there's no way to auto-discover the preferred username for an AMI.
+
+- name: Ensure that ec2_ami_user is set if ec2_ami is set
+  assert:
+    msg: "If you specify ec2_ami, please also set ec2_ami_user"
+    that:
+      - ec2_ami is not defined or ec2_ami_user is defined
 
 # Either every instance should specify its node id explicitly (in which
 # case instance_count must not be set), or none should do so.

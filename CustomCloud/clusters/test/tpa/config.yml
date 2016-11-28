@@ -1,6 +1,6 @@
 ---
 
-cluster_name: "repmgr_test"
+cluster_name: "TPATest"
 cluster_tags:
   Owner: gulcin
 cluster_vars:
@@ -15,12 +15,13 @@ ec2_vpc_subnets:
   10.33.5.16/28:
     az: eu-west-1b
 
-instances:
-    # debian-jessie-amd64-hvm-2016-09-19-ebs
+ec2_ami:
+  Name: debian-jessie-amd64-hvm-2016-09-19-ebs
+ec2_ami_user: admin
 
+instances:
     - node: 1
       type: t2.micro
-      image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.7.0/28
       volumes:
@@ -36,9 +37,9 @@ instances:
         role: primary
         Name: debian-primary
         backup: debian-witness
+
     - node: 2
       type: t2.micro
-      image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.10.16/28
       volumes:
@@ -54,11 +55,8 @@ instances:
         Name: debian-replica
         upstream: debian-primary
 
-    # Another Debian node for barman.
-
     - node: 3
       type: t2.micro
-      image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.7.16/28
       volumes:
