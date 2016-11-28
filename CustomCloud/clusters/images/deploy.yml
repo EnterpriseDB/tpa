@@ -31,12 +31,13 @@
   tasks:
     - name: Generate new AMIs
       ec2_ami:
-        name: "2ndQuadrant-TPA-{{ ansible_distribution }}-{{ lookup('pipe', 'date +%Y%m%d') }}"
+        name: "2ndQuadrant-TPA-{{ ansible_distribution }}-PGDG-{{ lookup('pipe', 'date +%Y%m%d') }}"
         description: "TPA/{{ ansible_distribution }} deployment image"
         instance_id: "{{ ec2_id }}"
         region: "{{ ec2_region }}"
         tags:
           os: "{{ ansible_distribution }}"
+          Postgres: PGDG
         wait: yes
       delegate_to: localhost
       tags: ami
