@@ -1,0 +1,130 @@
+- model: tpa.tenant
+  pk: d9073da2-138f-4342-8cb8-3462be0b325a
+  fields:
+    name: "2nd Quadant"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+
+- model: tpa.providercredential
+  pk: 08258259-a0f5-41ec-b927-ca9443f98b77
+  fields:
+    name: "Dummy EC2 Access Key"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    provider: c2b1c094-03fd-5d95-b7f3-656fc9f62d72
+    shared_identity: "$access_key"
+    shared_secret: "$secret_access_key"
+    user_tags: "{}"
+
+- model: tpa.cluster
+  pk: 8d4ad6a9-e679-4662-acac-ce25e1f4246d
+  fields:
+    name: "Test Cluster"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    user_tags: "{}"
+
+- model: tpa.vpc
+  pk: fdaa7b86-d7ca-4306-8897-e858af83b73b
+  fields:
+    name: "VPC 0"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    user_tags: "{}"
+    provider: c2b1c094-03fd-5d95-b7f3-656fc9f62d72
+
+- model: tpa.subnet
+  pk: 87973b87-e221-47f0-bb7f-0e67b1e3139c
+  fields:
+    name: "VPC 0"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    user_tags: "{}"
+    cluster: 8d4ad6a9-e679-4662-acac-ce25e1f4246d
+    vpc: fdaa7b86-d7ca-4306-8897-e858af83b73b
+    credentials: 08258259-a0f5-41ec-b927-ca9443f98b77
+    zone: 99db7c26-6a77-50ed-a04b-ff49d4f4239c
+    netmask: "192.168.10.0/24"
+
+
+- model: tpa.instance
+  pk: ab33bb32-28a8-405f-8d26-48d6fa7b6e39
+  fields:
+    name: "Test Primary"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    user_tags: "{}"
+    subnet: 87973b87-e221-47f0-bb7f-0e67b1e3139c
+    instance_type: 76b63f21-0b8a-58fa-8571-b5c5149b7655
+    hostname: "primary-01"
+    domain: "subnet-0.example.com"
+
+- model: tpa.role
+  pk: dd8847b1-af6d-438e-ad22-ae1bbbe2d613
+  fields:
+    name: "primary"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    user_tags: "{}"
+    instance: ab33bb32-28a8-405f-8d26-48d6fa7b6e39
+
+- model: tpa.instance
+  pk: b4ae55e3-080f-4c7b-8831-d37eafae17c1
+  fields:
+    name: "Test Replica"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    user_tags: "{}"
+    subnet: 87973b87-e221-47f0-bb7f-0e67b1e3139c
+    instance_type: 76b63f21-0b8a-58fa-8571-b5c5149b7655
+    hostname: "replica-01"
+    domain: "subnet-0.example.com"
+
+- model: tpa.role
+  pk: 8bee115c-453b-4d80-a777-6080cabe3220
+  fields:
+    name: "replica"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    user_tags: "{}"
+    instance: b4ae55e3-080f-4c7b-8831-d37eafae17c1
+
+- model: tpa.role
+  pk: d98e7da8-02c8-4d23-b9ef-9b5ad87546e5
+  fields:
+    name: "barman"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    user_tags: "{}"
+    instance: b4ae55e3-080f-4c7b-8831-d37eafae17c1
+
+- model: tpa.rolelink
+  pk: 2800860f-7435-4a50-b2d0-cf81c2d4d54b
+  fields:
+    name: "replication"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    user_tags: "{}"
+    client_role: 8bee115c-453b-4d80-a777-6080cabe3220
+    server_role: dd8847b1-af6d-438e-ad22-ae1bbbe2d613
+
+- model: tpa.rolelink
+  pk: e710dbe7-d8fa-4026-9a83-0bbc894f6b49
+  fields:
+    name: "backup"
+    created: "2016-11-28T10:25+0000"
+    updated: "2016-11-28T10:25+0000"
+    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
+    user_tags: "{}"
+    client_role: d98e7da8-02c8-4d23-b9ef-9b5ad87546e5
+    server_role: 8bee115c-453b-4d80-a777-6080cabe3220

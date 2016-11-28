@@ -1,74 +1,44 @@
 
 //var test_data_url = "/api/v1/tpa/provider/c2b1c094-03fd-5d95-b7f3-656fc9f62d72/"
-var api_url = "/api/v1/tpa/";
-var test_data_url = "/test-cluster-extended.json";
-var width = 800;
+var global_cluster = null;
+var width = 1000;
 var height = 450;
-var diameter = width*2+60;
 
 var root = null;
-var tree = d3.cluster().size([height, width-160])
+var tree = d3.cluster().size([height, width-100])
         .separation(function(a, b) {
-                return 0.1;
+            return Math.min(5-b.depth, 1);
         });
 
 //d3.select('.treeview').call(d3.zoom().on("zoom", zoomed));
 
-/* Support for json structure */
-
-var model_class = function(d) {
-    if ( d && d.url && d.url.indexOf(api_url) === 0) {
-        obj_path = d.url.slice(api_url.length);
-        next_slash = obj_path.indexOf("/");
-        return obj_path.slice(0, next_slash);
-    }
-
-    return undefined;
-};
-
-var data_class = function(d) {
-    return model_class(d.data);
-};
-
-var class_method = function() {
-    return multimethod().dispatch(data_class);
-};
 
 /* Renderer */
 
-d3.json(test_data_url,
-    function(model_object, error) {
-        if (error) throw error;
-        draw_cluster(model_object);
-});
-
 var draw_cluster = function (cluster) {
+    global_cluster = cluster;
     console.log("Cluster data:", cluster);
 
-    d3.select('.cluster_name').text(cluster.name);
+    d3.select('.cluster_name').text(": " + cluster.name);
 
-    root = d3.hierarchy([cluster], multimethod().dispatch(model_class)
+    root = d3.hierarchy([cluster], multimethod().dispatch(tpa.model_class)
         .when("cluster", function(c) {
             return c.instance_set;
         })
         .when("instance", function(i) {
             return i.role_set;
         })
-        .default(function(d) {
-            if (d.length && d.length > 0) {
-                return d;
-            }
-
-            return null;
-        }));
+        .default(function(d) { return (d.length && d.length > 0) ? d: null;}
+        ));
 
     tree(root);
 
-    var svg = d3.select(".treeview")
-    .attr('width', diameter)
-    .attr('height', diameter);
+    var svg = d3.select(".cluster_view")
+        .append('svg')
+            .attr('width', width)
+            .attr('height', height);
 
-    g = svg.append("g").attr("transform", "translate(60,0)");
+    g = svg.append("g").attr("transform", "translate(0,0)");
 
     //var stratify = d3.stratify()
     //    .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
@@ -90,35 +60,72 @@ var draw_cluster = function (cluster) {
     var node = g.selectAll(".node")
         .data(root.descendants())
         .enter().append("g")
-        .attr("class", function(d) { 
-            return "node" + (d.children ? 
-                " node--internal" : " node--leaf"); })
-        .attr("transform", function(d) {
-            return "translate(" + d.y +','+d.x + ")";
-        });
+            .attr("class", function(d) {
+                return "node" + (d.children ?
+                    " node--internal" : " node--leaf"); })
+            .attr("transform", function(d) {
+                return "translate(" + d.y +','+d.x + ")"; })
+            .attr('url', function(d) {
+                return d.data.url ? d.data.url : null;
+            });
 
+    // ellipse
     node.append("path")
-        .attr('url', function(d) {
-            return d.data.url ? d.data.url : null;
-        })
-        .attr('class', function(d) {
-            var cls = model_class(d.data);
-            if (cls) {
-                return "node " + cls;
-            }
-            return "node";
-        })
-        .attr('d', class_method()
+        .classed('container_shape', true)
+        .attr('d', tpa.class_method()
+            .when('instance', function(d) {
+                var width = 100,
+                    height = 100,
+                    path = d3.path(),
+                    radius = width/2,
+                    rect = {
+                        top_left: {
+                            x: -width/2,
+                            y: -height/2
+                        },
+                        top_right: {
+                            x: +width/2,
+                            y: -height/2
+                        },
+                        bottom_right: {
+                            x: +width/2,
+                            y: +height/2,
+                        },
+                        bottom_left: {
+                            x: -width/2,
+                            y: +height/2
+                        }
+                    };
+
+                path.moveTo(rect.top_right.x, rect.top_right.y);
+                path.quadraticCurveTo(rect.top_right.x+width/2, 0,
+                                    rect.bottom_right.x, rect.bottom_right.y);
+                path.lineTo(rect.bottom_left.x, rect.bottom_left.y);
+                path.quadraticCurveTo(rect.bottom_left.x-width/2, 0,
+                                    rect.top_left.x, rect.top_left.y);
+                path.lineTo(rect.top_right.x, rect.top_right.y);
+                path.closePath();
+
+                console.log(path);
+
+                return path;
+            }));
+
+    // icon
+    node.append("path")
+        .classed('icon', true)
+        .attr('d', tpa.class_method()
             .default(function(d) {
                 var radius = 5;
 
-                var circle = "M 0 0 "
-                    + " m "+radius+", 0"
-                    + " a "+radius+","+radius+" 0 1,1 "+(2*radius)+",0"
-                    + " a "+radius+","+radius+" 0 1,1 "+(-2*radius)+",0";
+                var circle = "M 0 0 " +
+                    " m "+radius+", 0" +
+                    " a "+radius+","+radius+" 0 1,1 "+(2*radius)+",0" +
+                    " a "+radius+","+radius+" 0 1,1 "+(-2*radius)+",0";
                 return circle;
             }));
 
+    // name
     node.append("text")
         .attr("class", "name")
         .attr("dy", 3)
@@ -130,15 +137,16 @@ var draw_cluster = function (cluster) {
             return d.data.name;
         });
 
+    // class
     node.append("text")
         .attr("class", "model_class")
         .attr("dy", -3)
         .attr("x", 20)
         .attr("transform", function(d) {
-            return "translate(50, -20)";
+            return "translate(0, 20)";
         })
         .text(function(d) {
-            return model_class(d.data);
+            return tpa.model_class(d.data);
         });
 
 };

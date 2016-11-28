@@ -11,3 +11,11 @@ from .test import *
 DEPLOYMENT = 'dev'
 
 DATABASES['default']['NAME'] = "tpa-dev"
+
+INSTALLED_APPS += [
+    'livereload'
+]
+
+MIDDLEWARE += [
+    'livereload.middleware.LiveReloadScript',
+]

@@ -4,11 +4,12 @@
 <style>
     .logo { position: relative; }
     .logo img { position: absolute; top: 0px; right: 0px; width: 200; height: 50;}
+
     .name { stroke: green; fill:none;}
     .node { stroke: black; fill: blue;}
     .edge { stroke: black; fill:none;}
     .node .cluster { stroke: grey; fill: brown; }
-    .node .model_class { transform: scale(0.8, 0.8); }
+    .container_shape { stroke: black; fill: blue; }
 </style>
 </head>
 <body>
@@ -23,16 +24,29 @@
     <script src="https://d3js.org/d3-selection.v1.min.js"></script>
     <script src="https://d3js.org/d3-timer.v1.min.js"></script>
     <script src="https://d3js.org/d3-transition.v1.min.js"></script>
+    <script src="https://d3js.org/d3-shape.v1.min.js"></script>
     <script src="https://d3js.org/d3-zoom.v1.min.js"></script>
-    <script src="http://underscorejs.org/underscore-min.js"></script>
-    <script src="/js/multimethod-min.js"></script>
 
+    <script src="http://underscorejs.org/underscore-min.js"></script>
+
+    <script src="/js/multimethod-min.js"></script>
+    <script src="/js/es6-promise.auto.min.js"></script>
+    <script src="/js/d3.promise.min.js"></script>
+
+    <script src="/js/tpa-api.js"></script>
     <script src="/js/tpa-d3.js"></script>
+    <script>
+        d3.json(tpa.TEST_CLUSTER, function(o, e) {
+            if (e) throw e;
+            return draw_cluster(o);
+        });
+
+    </script>
 
     <div class="logo">
-        <img src="https://2ndquadrant.com/static/images/logo.png">
+        <img src="https://2ndquadrant.com/static/images/logo.png" alt="2Q">
     </div>
-    <h1>TPA Cluster: <span class="cluster_name"/></h1>
-    <svg class="treeview"/>
+    <h1>TPA Cluster <span class="cluster_name"/></h1>
+    <div class="cluster_view"></div>
 </body>
 </html>
