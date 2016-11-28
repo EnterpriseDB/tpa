@@ -8,8 +8,6 @@ dependencies:
     tags: [postgres, user]
   - role: postgres/initdb
   - role: postgres/config
-    when: >
-      'replica' not in role
     tags: [postgres, config]
   - role: sys/ssh
     ssh_user: postgres

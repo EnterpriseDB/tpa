@@ -2,8 +2,6 @@
 
 dependencies:
   - role: postgres/restart
-    when: >
-      'replica' not in role
   - role: postgres/createuser
     username: postgres
     when: >
