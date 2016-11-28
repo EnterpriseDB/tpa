@@ -26,7 +26,9 @@
 
     - role: sys/upgrade
 
-  post_tasks:
+- name: Generate AMIs
+  hosts: tag_Cluster_TPAImages
+  tasks:
     - name: Generate new AMIs
       ec2_ami:
         name: "2q-TPA-{{ ansible_distribution }}-{{ lookup('pipe', 'date +%Y%m%d') }}"
