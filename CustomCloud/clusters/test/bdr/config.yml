@@ -1,14 +1,10 @@
 ---
 
-# An EC2 configuration for TPA BDR cluster deployment
-#
-# We will be using Ubuntu 16.04 LTS 64 bit image for deployment
-#
-# Intended for deployment under the 2ndQuadrant AWS account.
+# BDR test cluster
 
 cluster_name: "TPA_BDR"
 cluster_tags:
-  Owner: gulcin
+  Owner: AMS
 
 cluster_rules:
  - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
@@ -41,105 +37,68 @@ ec2_vpc_subnets:
     az: us-east-1e
 
 instances:
+    # One BDR instance and a corresponding Barman instance in each of
+    # three regions, plus a control node.
+
     - node: 1
       type: t2.micro
       region: eu-west-1
       subnet: 10.33.67.32/28
-      assign_eip: false
-      volumes:
-          - device_name: /dev/xvdb
-            volume_type: standard
-            volume_size: 10
-            delete_on_termination: true
       tags:
-        os: Debian
         role: bdr
         backup: barman-eu-west-1
         log: cluster-control
+
     - node: 2
       type: t2.micro
       region: eu-west-1
       subnet: 10.33.67.112/28
-      volumes:
-          - device_name: /dev/xvdb
-            volume_type: standard
-            volume_size: 10
-            delete_on_termination: true
       tags:
-        os: Debian
         role: barman
         log: cluster-control
         Name: barman-eu-west-1
+
     - node: 3
       type: t2.micro
       region: eu-central-1
       subnet: 10.33.67.128/28
-      volumes:
-          - device_name: /dev/xvdb
-            volume_type: standard
-            volume_size: 10
-            delete_on_termination: true
       tags:
-        os: Debian
         role: bdr
         backup: barman-eu-central-1
         log: cluster-control
+
     - node: 4
       type: t2.micro
       region: eu-central-1
       subnet: 10.33.67.144/28
-      volumes:
-          - device_name: /dev/xvdb
-            volume_type: standard
-            volume_size: 10
-            delete_on_termination: true
       tags:
-        os: Debian
         role: barman
         log: cluster-control
         Name: barman-eu-central-1
+
     - node: 5
       type: t2.micro
       region: us-east-1
       subnet: 10.33.67.160/28
-      volumes:
-          - device_name: /dev/xvdb
-            volume_type: standard
-            volume_size: 10
-            delete_on_termination: true
       tags:
-        os: Debian
         role: bdr
         backup: barman-us-east-1
         log: cluster-control
+
     - node: 6
       type: t2.micro
       region: us-east-1
       subnet: 10.33.67.176/28
-      volumes:
-          - device_name: /dev/xvdb
-            volume_type: standard
-            volume_size: 10
-            delete_on_termination: true
       tags:
-        os: Debian
         role: barman
         log: cluster-control
         Name: barman-us-east-1
+
     - node: 7
       type: t2.micro
       region: us-east-1
       subnet: 10.33.67.192/28
-      assign_eip: false
-      volumes:
-          - device_name: /dev/xvdb
-            volume_type: standard
-            volume_size: 10
-            delete_on_termination: true
+      assign_eip: yes
       tags:
-        os: Debian
         role: control, backup, openvpn-server, log-server, pgbouncer
         Name: cluster-control
-variables:
-   customerid: A12345
-   serviceid: B67891
