@@ -2,40 +2,39 @@ import copy
 from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
 
-# This filter takes an array of hashes and returns a new array in which every
-# entry in the original array is represented by item[instance_count] entries.
-# Furthermore, each entry has item[node] set to an increasing counter.
+# This filter takes an array of instance definitions and returns a new
+# array with each instance adjusted to have the expected tags.
 
-def expand_instances(a):
+def expand_instance_tags(a):
     c = []
-    idx = 1
     for x in a:
-        inst_count = 0
-        # check if instance_count has been specified, default to 1 if not
-        try:
-            x['instance_count']
-        except KeyError:
-            x['instance_count'] = 1
+        y = copy.deepcopy(x)
+        y['tags'] = y.get('tags', {})
 
-        exact_count = x['instance_count']
-        while (inst_count < exact_count):
-            y = copy.deepcopy(x)
-            y['node'] = idx
-            y['tags'] = y.get('tags', {})
-            if 'name' in y['tags'] and not 'Name' in y['tags']:
-                y['tags']['Name'] = y['tags']['name']
-                del y['tags']['name']
-            if 'Name' in y['tags']:
-                y['tags']['Name'] = y['tags']['Name'].replace('_','-').lower()
-            y['tags']['role'] = y['tags'].get('role', [])
-            if not isinstance(y['tags']['role'], list):
-                y['tags']['role'] = map(lambda x: x.strip(), y['tags']['role'].split(","))
-            if ('primary' in y['tags']['role'] or 'replica' in y['tags']['role']) and \
-                not 'postgres' in y['tags']['role']:
-                y['tags']['role'] = y['tags']['role'] + ['postgres']
-            c.append(y)
-            inst_count = inst_count + 1
-            idx = idx + 1
+        # The 'Name' tag specifies the hostname of the instance, so it
+        # should not contain underscores. Also translate name to Name
+        # for convenience.
+
+        if 'name' in y['tags'] and not 'Name' in y['tags']:
+            y['tags']['Name'] = y['tags']['name']
+            del y['tags']['name']
+        if 'Name' in y['tags']:
+            y['tags']['Name'] = y['tags']['Name'].replace('_','-').lower()
+
+        # The role tag should be a list, so we convert comma-separated
+        # strings if that's what we're given.
+
+        y['tags']['role'] = y['tags'].get('role', [])
+        if not isinstance(y['tags']['role'], list):
+            y['tags']['role'] = map(lambda x: x.strip(), y['tags']['role'].split(","))
+
+        # primary/replica instances must also be tagged 'postgres'.
+
+        if ('primary' in y['tags']['role'] or 'replica' in y['tags']['role']) and \
+            not 'postgres' in y['tags']['role']:
+            y['tags']['role'] = y['tags']['role'] + ['postgres']
+
+        c.append(y)
     return c
 
 # Given an array of volumes (as defined in instances[]), this filters sets
@@ -85,7 +84,7 @@ def upstream_root(root, hostvars):
 class FilterModule(object):
     def filters(self):
         return {
-            'expand_instances': expand_instances,
+            'expand_instance_tags': expand_instance_tags,
             'try_subkey': try_subkey,
             'define_volumes': define_volumes,
             'doublequote': doublequote,

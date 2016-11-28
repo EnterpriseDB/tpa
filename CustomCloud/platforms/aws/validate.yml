@@ -53,17 +53,13 @@
     that:
       - ec2_ami is not defined or ec2_ami_user is defined
 
-# Either every instance should specify its node id explicitly (in which
-# case instance_count must not be set), or none should do so.
+# Every instance should specify its node id explicitly.
 
-- name: Ensure that node and instance_count do not conflict
+- name: Ensure that every instance specifies a node id
   assert:
-    msg: "Please set 'node' on every instance, or use instance_count"
+    msg: "Please set 'node' on every instance"
     that:
-      - instances|selectattr('node','defined')|list|count == 0 or
-        instances|selectattr('instance_count','defined')|list|count == 0
-      - instances|selectattr('node','defined')|list|count == 0 or
-        instances|selectattr('node','defined')|list|count == instances|count
+      - instances|selectattr('node','defined')|list|count == instances|count
 
 # For every instance that has a "backup: xxx" tag, there should be
 # exactly one instance with "Name: xxx" and "role: …,barman,…" tags.

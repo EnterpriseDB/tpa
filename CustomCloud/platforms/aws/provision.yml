@@ -284,21 +284,11 @@
       when: >
         not role|skipped
 
-    # We start with the array of instances defined in config.yml, some
-    # of whose entries may have instance_count > 1. We expand the array
-    # by replacing each such entry with instance_count identical copies.
-    #
-    # We want stable node numbers (because they're used in count_tags
-    # and to assign IP addresses, among other things), so it's not safe
-    # to change instance_counts after provisioning. Entries should only
-    # ever be appended to instances[], even if that means duplicating an
-    # earlier entry. Here's a dire uppercased warning to that effect:
-    #
-    # !!! DON'T CHANGE instance_count AFTER PROVISIONING !!!
+    # Adjust the tags defined for instances
 
-    - name: Expand the array of EC2 instances
+    - name: Expand the tags for each defined instance
       set_fact:
-        instances: "{{ instances|expand_instances }}"
+        instances: "{{ instances|expand_instance_tags }}"
 
     # Generate SSH host keys for instances.
 
