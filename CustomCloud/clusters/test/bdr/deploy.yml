@@ -1,7 +1,7 @@
 ---
 
 - name: Set up TPA BDR cluster
-  hosts: tag_Cluster_TPA_BDR
+  hosts: tag_Cluster_BDRTest
   any_errors_fatal: True
   max_fail_percentage: 0
   sudo_user: root

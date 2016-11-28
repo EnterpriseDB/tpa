@@ -2,7 +2,7 @@
 
 # BDR test cluster
 
-cluster_name: "TPA_BDR"
+cluster_name: "BDRTest"
 cluster_tags:
   Owner: AMS
 
