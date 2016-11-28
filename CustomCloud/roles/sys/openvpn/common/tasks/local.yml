@@ -8,6 +8,13 @@
   run_once: yes
   sudo: no
 
+- name: Copy custom openssl configuration to certs directory
+  local_action:
+    module: template
+    src: openssl.cnf.j2
+    dest: "{{ _local_cert_dir }}/openssl.cnf"
+  sudo: no
+
 - name: Generate CA key and self-signed CA certificate
   local_action: >
     shell
@@ -32,29 +39,20 @@
     creates: "{{ inventory_hostname }}.key"
   sudo: no
 
-- name: Set extension type for server_exts
+- name: Select extension type for host certificate
   set_fact:
-    openssl_extensions: server_exts
-  when: >
-    'openvpn-server' in role
-  tags: openvpn
-
-- name: Set extension type for client_exts
-  set_fact:
-    openssl_extensions: client_exts
-  when: >
-    'openvpn-server' not in role
-  tags: openvpn
-
-- name: Copy openssl.cnf.j2 to local
-  local_action: template dest="{{ _local_cert_dir }}/openssl.cnf.j2" src="openssl.cnf.j2"
-  sudo: no
+    openssl_extensions: "{{
+      ('openvpn-server' in role)|ternary('server_exts', 'client_exts')
+    }}"
 
 - name: Sign each CSR with the CA certificate
   local_action: >
     shell
     umask 077 &&
-    openssl x509 -extensions "{{ openssl_extensions  }}"  -req -CA ca.crt -CAkey ca.key -CAcreateserial -in "{{ inventory_hostname }}.csr" -out "{{ inventory_hostname }}.crt" -days 3650 -sha256 -extfile openssl.cnf.j2
+    openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial
+    -in "{{ inventory_hostname }}.csr" -out "{{ inventory_hostname }}.crt"
+    -extensions {{ openssl_extensions }} -extfile openssl.cnf
+    -days 3650 -sha256
   args:
     chdir: "{{ _local_cert_dir }}"
     creates: "{{ inventory_hostname }}.crt"
