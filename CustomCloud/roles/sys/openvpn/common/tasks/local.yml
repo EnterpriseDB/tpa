@@ -49,7 +49,7 @@
   local_action: >
     shell
     umask 077 &&
-    openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial
+    openssl x509 -req -CA ca.crt -CAkey ca.key -set_serial {{ node }}
     -in "{{ inventory_hostname }}.csr" -out "{{ inventory_hostname }}.crt"
     -extensions {{ openssl_extensions }} -extfile openssl.cnf
     -days 3650 -sha256
