@@ -31,7 +31,7 @@
   tasks:
     - name: Generate new AMIs
       ec2_ami:
-        name: "2q-TPA-{{ ansible_distribution }}-{{ lookup('pipe', 'date +%Y%m%d') }}"
+        name: "2Q-TPA-{{ ansible_distribution }}-{{ lookup('pipe', 'date +%Y%m%d') }}"
         region: "{{ ec2_region }}"
         instance_id: "{{ ec2_id }}"
         wait: yes
