@@ -1,0 +1,5 @@
+---
+
+- name: Note Postgres restart required
+  set_fact:
+    postgres_service_end_state: restarted

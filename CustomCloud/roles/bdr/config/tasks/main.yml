@@ -1,7 +1,7 @@
 - name: Generate bdr.conf
   template:
     src: bdr.conf.j2
-    dest: "{{postgres_conf_dir}}/conf.d/bdr.conf"
+    dest: "{{postgres_data_dir}}/conf.d/7777-bdr.conf"
 
 - name: Add bdr to shared_preload_libraries
   include: ../../postgres/config/tasks/preload-library.yml

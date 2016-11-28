@@ -1,6 +1,14 @@
 ---
 
+allow_duplicates: no
+
 dependencies:
   - role: bdr/pkg
+  - role: postgres/user
+    tags: [postgres, user]
+  - role: postgres/initdb
   - role: bdr/config
   - role: bdr/node
+  - role: sys/ssh
+    ssh_user: postgres
+    tags: [sys, ssh]
