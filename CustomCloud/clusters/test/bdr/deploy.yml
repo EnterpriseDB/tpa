@@ -41,17 +41,7 @@
     - role: sys/rsyslog
       tags: [sys, rsyslog]
 
-    - role: bdr/pkg
-      when: >
-        'bdr' in role
-      tags: bdr
-
-    - role: bdr/config
-      when: >
-        'bdr' in role
-      tags: bdr
-
-    - role: bdr/node
+    - role: bdr
       when: >
         'bdr' in role
       tags: bdr
