@@ -13,6 +13,7 @@
 
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
+      tags: always
 
   roles:
     - role: common
