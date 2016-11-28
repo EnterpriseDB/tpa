@@ -56,48 +56,6 @@ instances:
 
     - node: 4
       type: t2.micro
-      image: ami-77055f12
-      region: us-east-2
-      subnet: 10.33.0.0/24
-      volumes:
-        - device_name: root
-          volume_type: gp2
-          volume_size: 16
-      tags:
-        Name: debian-us-east-2
-        role: image
-        os: Debian
-
-    - node: 5
-      type: t2.micro
-      image: ami-0932686c
-      region: us-east-2
-      subnet: 10.33.0.0/24
-      volumes:
-        - device_name: root
-          volume_type: gp2
-          volume_size: 16
-      tags:
-        Name: redhat-us-east-2
-        role: image
-        os: RedHat
-
-    - node: 6
-      type: t2.micro
-      image: ami-153e6470
-      region: us-east-2
-      subnet: 10.33.0.0/24
-      volumes:
-        - device_name: root
-          volume_type: gp2
-          volume_size: 16
-      tags:
-        Name: ubuntu-us-east-2
-        role: image
-        os: Ubuntu
-
-    - node: 7
-      type: t2.micro
       image: ami-84cc83e4
       region: us-west-1
       subnet: 10.33.0.0/24
@@ -110,7 +68,7 @@ instances:
         role: image
         os: Debian
 
-    - node: 8
+    - node: 5
       type: t2.micro
       image: ami-2cade64c
       region: us-west-1
@@ -124,7 +82,7 @@ instances:
         role: image
         os: RedHat
 
-    - node: 9
+    - node: 6
       type: t2.micro
       image: ami-6e165d0e
       region: us-west-1
@@ -138,7 +96,7 @@ instances:
         role: image
         os: Ubuntu
 
-    - node: 10
+    - node: 7
       type: t2.micro
       image: ami-2a34e94a
       region: us-west-2
@@ -152,7 +110,7 @@ instances:
         role: image
         os: Debian
 
-    - node: 11
+    - node: 8
       type: t2.micro
       image: ami-6f68cf0f
       region: us-west-2
@@ -166,7 +124,7 @@ instances:
         role: image
         os: RedHat
 
-    - node: 12
+    - node: 9
       type: t2.micro
       image: ami-a9d276c9
       region: us-west-2
@@ -180,7 +138,7 @@ instances:
         role: image
         os: Ubuntu
 
-    - node: 13
+    - node: 10
       type: t2.micro
       image: ami-ff0e758c
       region: eu-west-1
@@ -194,7 +152,7 @@ instances:
         role: image
         os: Debian
 
-    - node: 14
+    - node: 11
       type: t2.micro
       image: ami-02ace471
       region: eu-west-1
@@ -208,7 +166,7 @@ instances:
         role: image
         os: RedHat
 
-    - node: 15
+    - node: 12
       type: t2.micro
       image: ami-0d77397e
       region: eu-west-1
@@ -222,7 +180,7 @@ instances:
         role: image
         os: Ubuntu
 
-    - node: 16
+    - node: 13
       type: t2.micro
       image: ami-30e01d5f
       region: eu-central-1
@@ -236,7 +194,7 @@ instances:
         role: image
         os: Debian
 
-    - node: 17
+    - node: 14
       type: t2.micro
       image: ami-e4c63e8b
       region: eu-central-1
@@ -250,7 +208,7 @@ instances:
         role: image
         os: RedHat
 
-    - node: 18
+    - node: 15
       type: t2.micro
       image: ami-8504fdea
       region: eu-central-1

@@ -10,7 +10,7 @@
     # Which regions do we want to build new AMIs in?
     regions:
       - us-east-1
-      - us-east-2
+      #- us-east-2 # (commented out due to lack of official Debian image)
       - us-west-1
       - us-west-2
       - eu-west-1
