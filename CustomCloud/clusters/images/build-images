@@ -20,5 +20,5 @@ sleep 120
 utils/deploy images -v
 utils/deprovision images -v
 rm -rf clusters/images/id_tpaimages* \
-    clusters/images/inventory/00* clusters/images/inventory/ec2.* \
+    clusters/images/inventory/ec2.* \
     clusters/images/{hostkeys,vault}
