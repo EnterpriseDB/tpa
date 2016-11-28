@@ -8,7 +8,6 @@
 
 cluster_name: "TPA_BDR"
 cluster_tags:
-  Name: TPA_BDR
   Owner: gulcin
 
 cluster_rules:

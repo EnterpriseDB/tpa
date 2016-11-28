@@ -4,7 +4,6 @@
 
 cluster_name: "PglogicalTests"
 cluster_tags:
-  Name: PglogicalTests
   Owner: AMS
 
 ec2_ami:

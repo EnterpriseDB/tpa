@@ -312,7 +312,7 @@
         count_tag: >
           {{
             cluster_tags|combine(item.tags)|combine({
-              'Cluster': cluster_tags['Name'],
+              'Cluster': cluster_name,
               'Name': (item.tags.Name|default(cluster_name ~'-'~ item.node)|lower),
               'role': (item.tags.role|join(",")),
               'node': item.node,
@@ -325,7 +325,7 @@
         instance_tags: >
           {{
             cluster_tags|combine(item.tags)|combine({
-              'Cluster': cluster_tags['Name'],
+              'Cluster': cluster_name,
               'Name': (item.tags.Name|default(cluster_name ~'-'~ item.node)|lower),
               'role': (item.tags.role|join(",")),
               'node': item.node,

@@ -6,7 +6,6 @@
 
 cluster_name: "XLCloudTest"
 cluster_tags:
-  Name: XLCloudTest
   Owner: Haroon
 
 ec2_ami:

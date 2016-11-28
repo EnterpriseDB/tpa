@@ -9,9 +9,9 @@
       - cluster_tags['Owner'] is defined
       - cluster_tags['Owner'] != ''
 
-- name: Ensure that the cluster name is set as a tag
+- name: Ensure that the cluster_name is set as a tag
   set_fact:
-    cluster_tags: "{{ dict(Name=cluster_name)|combine(cluster_tags) }}"
+    cluster_tags: "{{ cluster_tags|combine(dict(Name=cluster_name)) }}"
 
 # We always need to know the name of the VPC, but we don't need the cidr
 # unless we may need to create the VPC. For the Test VPC (which we know
@@ -92,9 +92,9 @@
 
 - name: Derive subsidiary resource names for the cluster
   set_fact:
-    cluster_tag: "{{ cluster_tag|default('tag_Cluster_' + cluster_tags['Name']) }}"
-    cluster_bucket: "2ndquadrant-tpa-{{ cluster_tags['Name']|lower|replace('_','-') }}"
-    cluster_profile: "{{ cluster_tags['Name'] }}_profile"
+    cluster_tag: "{{ cluster_tag|default('tag_Cluster_' + cluster_name) }}"
+    cluster_bucket: "2ndquadrant-tpa-{{ cluster_name|lower|replace('_','-') }}"
+    cluster_profile: "{{ cluster_name }}_profile"
 
 - name: Derive list of unique regions from instances
   set_fact:
