@@ -345,7 +345,11 @@
         spot_price: "{{ item.spot_price|default(omit) }}"
         spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
         spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"
-        user_data: "{{ lookup('template', 'user-data.j2') }}"
+        user_data: "{{
+          lookup('template', 'user-data.j2',
+            vars=dict(image=ec2_ami_properties[item.image])
+          )
+        }}"
         termination_protection: "{{ item.termination_protection|default('no') }}"
         assign_public_ip: yes
         wait: yes
