@@ -14,13 +14,16 @@ var tpa = (function() {
     api.TEST_CLUSTER = api.url + "cluster/8d4ad6a9-e679-4662-acac-ce25e1f4246d/";
 
     api.model_class = function(d) {
-        if ( d && d.url && d.url.indexOf(api.url) === 0) {
-            obj_path = d.url.slice(api.url.length);
-            next_slash = obj_path.indexOf("/");
-            return obj_path.slice(0, next_slash);
+        if ( d && d.url) {
+            var api_idx = d.url.indexOf(api.url);
+            if (api_idx >= 0) {
+                obj_path = d.url.slice(api_idx+api.url.length);
+                next_slash = obj_path.indexOf("/");
+                return obj_path.slice(0, next_slash);
+            }
         }
 
-        return undefined;
+        return null;
     };
 
 

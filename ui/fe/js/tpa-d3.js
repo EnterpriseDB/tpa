@@ -21,17 +21,12 @@ var draw_cluster = function (cluster) {
 
     d3.select('.cluster_name').text(": " + cluster.name);
 
-    root = d3.hierarchy([cluster], multimethod().dispatch(tpa.model_class)
-        .when("cluster", function(c) {
-            return c.subnets;
-        })
+    root = d3.hierarchy(cluster.subnets, multimethod().dispatch(tpa.model_class)
         .when("subnet", function(s) {
             return s.instances;
         })
-        .when("instance", function(i) {
-            return i.roles;
-        })
-        .default(function(d) { return (d.length && d.length > 0) ? d: null;}
+        .default(function(d) {
+            return (d.length && d.length > 0) ? d: null;}
         ));
 
     tree(root);
@@ -45,11 +40,15 @@ var draw_cluster = function (cluster) {
 
     //var stratify = d3.stratify()
     //    .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
+    var node_rect = d3.local();
 
     var edge = g.selectAll(".edge")
-        .data(root.descendants().slice(1))
+        .data(root.descendants().filter(tpa.class_method()
+            .when('instance', true)
+            .default(false)
+        ))
         .enter().append("path")
-        .attr("class", "edge")
+        .classed("edge", true)
         .attr("d", function(d) {
             var path = d3.path();
             path.moveTo(d.y, d.x);
@@ -61,7 +60,11 @@ var draw_cluster = function (cluster) {
         });
 
     var node = g.selectAll(".node")
-        .data(root.descendants())
+        .data(root.descendants().filter(tpa.class_method()
+                .when('instance', true)
+                .when('subnet', true)
+                .default(false)
+        ))
         .enter().append("g")
             .attr("class", function(d) {
                 return "node" + (d.children ?
@@ -109,8 +112,6 @@ var draw_cluster = function (cluster) {
                 path.lineTo(rect.top_right.x, rect.top_right.y);
                 path.closePath();
 
-                console.log(path);
-
                 return path;
             }));
 
@@ -121,7 +122,7 @@ var draw_cluster = function (cluster) {
             .default(function(d) {
                 var radius = 5;
 
-                var circle = "M 0 0 " +
+                var circle = "M -75 0 " +
                     " m "+radius+", 0" +
                     " a "+radius+","+radius+" 0 1,1 "+(2*radius)+",0" +
                     " a "+radius+","+radius+" 0 1,1 "+(-2*radius)+",0";
@@ -129,16 +130,16 @@ var draw_cluster = function (cluster) {
             }));
 
     // name
+    /*
     node.append("text")
         .attr("class", "name")
-        .attr("dy", 3)
-        .attr("x", 10)
         .attr("transform", function(d) {
-            return "scale(1.2, 1.2) translate(0, -20)";
+            return "translate(-50, -20)";
         })
         .text(function(d) {
             return d.data.name;
         });
+    */
 
     // class
     node.append("text")
@@ -146,10 +147,9 @@ var draw_cluster = function (cluster) {
         .attr("dy", -3)
         .attr("x", 20)
         .attr("transform", function(d) {
-            return "translate(0, 20)";
+            return "translate(-50, 20)";
         })
         .text(function(d) {
             return tpa.model_class(d.data);
         });
-
 };

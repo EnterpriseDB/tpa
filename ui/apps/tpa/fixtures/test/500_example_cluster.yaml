@@ -39,7 +39,7 @@
 - model: tpa.subnet
   pk: 87973b87-e221-47f0-bb7f-0e67b1e3139c
   fields:
-    name: "VPC 0"
+    name: "Subnet 0"
     created: "2016-11-28T10:25+0000"
     updated: "2016-11-28T10:25+0000"
     tenant: d9073da2-138f-4342-8cb8-3462be0b325a
