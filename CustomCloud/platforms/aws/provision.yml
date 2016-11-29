@@ -74,13 +74,12 @@
     #
     # The AMI for a region is then given by ec2_region_amis[region].
     #
-    # We also record the root device name for each AMI, so that we can
-    # specify "root" as the device_name in instances[].volumes[].
+    # We also record the properties of each AMI id for later use.
 
     - name: Initialise empty region→AMI table
       set_fact:
         ec2_region_amis: {}
-        ec2_ami_rootdevices: {}
+        ec2_ami_properties: {}
 
     - block:
         - name: Find AMI named {{ ec2_ami['Name'] }} in each region
@@ -99,13 +98,13 @@
         - name: Initialise region→AMI table
           set_fact:
             ec2_region_amis: "{{ ec2_region_amis|combine({item.0: item.1.results.0.ami_id}) }}"
-            ec2_ami_rootdevices: "{{ ec2_ami_rootdevices|combine({item.1.results.0.ami_id: item.1.results.0.root_device_name}) }}"
+            ec2_ami_properties: "{{ ec2_ami_properties|combine({item.1.results.0.ami_id: item.1.results.0}) }}"
           with_together:
             - "{{ regions }}"
             - "{{ ec2_amis.results }}"
       when: ec2_ami is defined
 
-    # We also need to discover the root devices for any AMIs specified
+    # We also need to retrieve the properties for any AMIs specified
     # directly by id.
 
     - name: Look for AMIs specified directly by id
@@ -116,10 +115,10 @@
       with_items: "{{ instances|select('has_subkey','image')|list }}"
       register: ec2_direct_amis
 
-    - name: Extend AMI→root_device_name table
+    - name: Extend AMI→properties table
       set_fact:
-        ec2_ami_rootdevices: "{{
-            ec2_ami_rootdevices|combine({item.results.0.ami_id: item.results.0.root_device_name})
+        ec2_ami_properties: "{{
+            ec2_ami_properties|combine({item.results.0.ami_id: item.results.0})
         }}"
       with_items: "{{ ec2_direct_amis.results }}"
 
@@ -333,7 +332,7 @@
         group_id: "{{ ec2_region_groups[item.region] }}"
         volumes: "{{
           item.volumes|default(omit)|define_volumes(
-            ec2_ami_rootdevices[item.image|default(ec2_region_amis[item.region])]
+            ec2_ami_properties[item.image|default(ec2_region_amis[item.region])].root_device_name
           )
         }}"
         spot_price: "{{ item.spot_price|default(omit) }}"
