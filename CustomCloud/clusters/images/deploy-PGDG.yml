@@ -13,8 +13,6 @@
 
   roles:
     - role: postgres/vars
-      vars:
-        postgres_version: 9.6
 
     - role: common/pkg
     - role: postgres/pkg

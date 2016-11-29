@@ -21,7 +21,7 @@ exec >> /var/log/tpa-firstboot.log 2>&1
 
 echo "$(date): start"
 
-{% if not image['name'].startswith('2ndQuadrant-TPA-') %}
+{% if not image['name'].startswith('TPA-') %}
 {%   if 'RHEL' in image['name'] %}
 {%     include 'user-data/yum.j2' %}
 {%   elif 'debian' in image['name'].lower() %}
