@@ -18,12 +18,14 @@ ec2_vpc_subnets:
     10.33.174.16/28:
       az: eu-west-1b
 
+ec2_ami:
+  Name: debian-jessie-amd64-hvm-2016-09-19-ebs
+ec2_ami_user: admin
+
 instances:
-    # debian-jessie-amd64-hvm-2016-09-19-ebs
 
     - node: 1
       type: t2.micro
-      image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.174.0/28
       volumes:
@@ -39,9 +41,9 @@ instances:
         role: primary
         Name: debian-primary
         backup: eu-barman
+
     - node: 2
       type: t2.micro
-      image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.174.16/28
       volumes:
@@ -77,6 +79,7 @@ instances:
         role: primary
         Name: redhat-primary
         backup: eu-barman
+
     - node: 4
       type: t2.micro
       image: ami-8b8c57f8
@@ -111,6 +114,7 @@ instances:
         role: primary
         Name: ubuntu-primary
         backup: eu-barman
+
     - node: 6
       type: t2.micro
       image: ami-a4d44ed7
@@ -129,7 +133,6 @@ instances:
 
     - node: 7
       type: t2.micro
-      image: ami-ff0e758c
       region: eu-west-1
       subnet: 10.33.174.16/28
       volumes:
