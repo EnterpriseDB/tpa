@@ -9,15 +9,19 @@ fi
 
 opt=${1:-""}
 if [ "$opt" = "-r" ]; then
+    shift
     utils/ansible-playbook clusters/images/generate-config.yml
 fi
+
+variant=${1:-"PGDG"}
 
 utils/provision images -v
 
 # Wait for a while for the instances to replace their SSH host keys.
 sleep 120
 
-utils/deploy images -v
+utils/deploy images/deploy-$variant.yml -v
+utils/ansible-cluster images/generate-ami.yml -v -e postgres_variant=$variant
 utils/deprovision images -v
 rm -rf clusters/images/id_tpaimages* \
     clusters/images/inventory/ec2.* \

@@ -16,7 +16,7 @@ of it later, because it's carefully written to be idempotent.)
 
 To rebuild the images for every region (see generate-config.yml), run
 
-    clusters/images/build-images -r
+    clusters/images/build-images -r PGDG
 
 This will generate config.yml containing one instance per distribution
 per region, provision the cluster, deploy packages, generate AMIs, and

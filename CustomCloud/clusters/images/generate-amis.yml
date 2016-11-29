@@ -1,0 +1,17 @@
+---
+
+- name: Generate AMIs
+  hosts: tag_Cluster_TPAImages
+  tasks:
+    - name: Generate new AMIs
+      ec2_ami:
+        name: "2ndQuadrant-TPA-{{ ansible_distribution }}-{{ postgres_variant }}-{{ lookup('pipe', 'date +%Y%m%d') }}"
+        description: "TPA/{{ ansible_distribution }} deployment image"
+        instance_id: "{{ ec2_id }}"
+        region: "{{ ec2_region }}"
+        tags:
+          os: "{{ ansible_distribution }}"
+          Postgres: {{ postgres_variant }}
+        wait: yes
+      delegate_to: localhost
+      tags: ami
