@@ -1,8 +1,0 @@
-postgres_packages:
-  Debian:
-    - postgresql-bdr-{{ pgversion }}
-    - postgresql-bdr-{{ pgversion }}-dbg
-    - postgresql-bdr-client-{{pgversion}}
-    - postgresql-bdr-contrib-{{pgversion}}
-    - postgresql-bdr-server-dev-{{pgversion}}
-    - postgresql-bdr-{{pgversion}}-bdr-plugin
