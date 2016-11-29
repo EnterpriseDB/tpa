@@ -19,7 +19,8 @@ ec2_vpc_subnets:
       az: eu-west-1b
 
 ec2_ami:
-  Name: debian-jessie-amd64-hvm-2016-09-19-ebs
+  Name: 2ndQuadrant-TPA-Debian-PGDG-2016*
+  Owner: self
 ec2_ami_user: admin
 
 instances:
@@ -31,7 +32,7 @@ instances:
       volumes:
           - device_name: root
             volume_type: gp2
-            volume_size: 10
+            volume_size: 17
             delete_on_termination: false
           - device_name: /dev/xvdb
             volume_type: gp2
@@ -49,7 +50,7 @@ instances:
       volumes:
           - device_name: root
             volume_type: standard
-            volume_size: 13
+            volume_size: 18
           - device_name: /dev/xvdb
             volume_type: gp2
             volume_size: 16
@@ -134,6 +135,7 @@ instances:
     - node: 7
       type: t2.micro
       region: eu-west-1
+      image: ami-ff0e758c
       subnet: 10.33.174.16/28
       volumes:
           - device_name: root
