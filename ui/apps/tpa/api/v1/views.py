@@ -116,7 +116,7 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
                 depth = 0
 
             field_kwargs['view_name'] = model_view_name
-            #field_kwargs['lookup_field'] = 'uuid'
+            field_kwargs['lookup_field'] = 'uuid'
 
         return NestedSerializer, field_kwargs
 
