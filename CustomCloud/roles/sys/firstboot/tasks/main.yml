@@ -1,0 +1,41 @@
+---
+
+# Use with caution.
+#
+# This role changes the cloud-init configuration on base images to suit
+# the needs of TPA. cloud-init is neither very smart nor very reliable,
+# and it's poorly documented, so be very conservative here. Resist the
+# temptation to make cloud-init do more stuff on new instances.
+#
+# Any other tasks related to very early configuration for pre-built
+# images may also belong here.
+#
+# It's meant to be used from clusters/images when building new images,
+# and is probably not a good idea to include in any "normal" playbook.
+
+## Rename the default admin user.
+#
+# We could use lineinfile to change the default username in
+# /etc/cloud/cloud.cfg:
+#
+# system_info:
+#   default_user:
+#     name: admin
+#     …
+#
+# When an instance is booted with the new AMI, cloud-init will then
+# presumably create the admin user. But the build instances launched
+# from the base RHEL or Ubuntu AMIs will already have an ec2-user or
+# ubuntu user, which we certainly don't want hanging around.
+
+## Suppress SSH key generation
+#
+# cloud-init generates SSH host keys, which we then replace in the
+# user-data script for every instance. Can we avoid that?
+
+# The user-data script that we fed to the base AMI would have created
+# this log file, so we want to get rid of it in the final image.
+
+- file:
+    path: /var/log/tpa-firstboot.log
+    state: absent

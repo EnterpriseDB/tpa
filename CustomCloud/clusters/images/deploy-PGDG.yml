@@ -25,3 +25,4 @@
     - role: repmgr/pkg
 
     - role: sys/upgrade
+    - role: sys/firstboot
