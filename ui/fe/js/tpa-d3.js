@@ -23,10 +23,13 @@ var draw_cluster = function (cluster) {
 
     root = d3.hierarchy([cluster], multimethod().dispatch(tpa.model_class)
         .when("cluster", function(c) {
-            return c.instance_set;
+            return c.subnets;
+        })
+        .when("subnet", function(s) {
+            return s.instances;
         })
         .when("instance", function(i) {
-            return i.role_set;
+            return i.roles;
         })
         .default(function(d) { return (d.length && d.length > 0) ? d: null;}
         ));

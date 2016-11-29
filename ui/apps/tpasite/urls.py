@@ -12,3 +12,9 @@ urlpatterns = [
     url(r'^api/', include('tpasite.api.urls', namespace='api')),
     url(r'^(?P<path>.*)$', views.serve)
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]

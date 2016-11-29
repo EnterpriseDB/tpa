@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 __all__ = '''
 Provider Region Zone InstanceType VolumeType
 Tenant Cluster ProviderCredential Subnet
-Instance Role RoleLink Volume VolumeUse
+Instance Role RoleLink Volume VolumeUse VPC
 '''.split()
 
 
@@ -36,6 +36,10 @@ class TextLineField(CharField):
 LocationField = TextLineField
 
 
+class OwnerKey(ForeignKey):
+    pass
+
+
 class UUIDMixin(models.Model):
     uuid = UUIDField(primary_key=True, default=uuid4, editable=False)
 
@@ -44,8 +48,8 @@ class UUIDMixin(models.Model):
 
 
 class TimestampMixin(models.Model):
-    created = DateTimeField(auto_now_add=True)
-    updated = DateTimeField(auto_now=True)
+    created = DateTimeField(auto_now_add=True, editable=False)
+    updated = DateTimeField(auto_now=True, editable=False)
 
     class Meta(object):
         abstract = True
@@ -62,26 +66,27 @@ class BaseModel(UUIDMixin, TimestampMixin):
 
 
 class Provider(BaseModel):
-    pass
+    owned_fields = ('regions',)
 
 
 class Region(BaseModel):
-    provider = ForeignKey('Provider')
+    provider = OwnerKey('Provider', related_name='regions')
     location = LocationField(null=True)
 
 
 class Zone(BaseModel):
-    region = ForeignKey('Region')
+    region = OwnerKey('Region', related_name='zones')
     location = LocationField(null=True)
 
 
 class InstanceType(BaseModel):
-    zone = ForeignKey('Zone')
+    zone = OwnerKey('Zone', related_name="instance_types")
     hardware_configuration = TextLineField()
 
 
 class VolumeType(BaseModel):
-    provider = ForeignKey('Provider')
+    provider = OwnerKey('Provider', related_name="volume_types")
+
 
 ##
 
@@ -91,7 +96,7 @@ class Tenant(BaseModel):
 
 
 class TenantOwnedMixin(BaseModel):
-    tenant = ForeignKey('Tenant')
+    tenant = ForeignKey('Tenant', editable=False)
     user_tags = JSONField()
 
     class Meta:
@@ -99,30 +104,31 @@ class TenantOwnedMixin(BaseModel):
 
 
 class Cluster(TenantOwnedMixin):
+    #tenant = OwnerKey('Tenant', editable=False)
     pass
 
 
 class ProviderCredential(TenantOwnedMixin):
-    provider = ForeignKey('Provider')
+    provider = ForeignKey('Provider', related_name='credentials')
     shared_identity = TextLineField()
     shared_secret = TextLineField()
 
 
 class VPC(TenantOwnedMixin):
-    provider = ForeignKey('Provider')
+    provider = ForeignKey('Provider', related_name='vpcs')
 
 
 class Subnet(TenantOwnedMixin):
-    cluster = ForeignKey('Cluster')
-    zone = ForeignKey('Zone')
-    vpc = ForeignKey('VPC')
-    credentials = ForeignKey('ProviderCredential')
+    cluster = OwnerKey('Cluster', related_name='subnets')
+    zone = ForeignKey('Zone', related_name='subnets')
+    vpc = ForeignKey('VPC', related_name='subnets')
+    credentials = ForeignKey('ProviderCredential', related_name='subnets')
     netmask = TextLineField()
 
 
 class Instance(TenantOwnedMixin):
-    subnet = ForeignKey('Subnet')
-    instance_type = ForeignKey('InstanceType')
+    subnet = OwnerKey('Subnet', related_name='instances')
+    instance_type = ForeignKey('InstanceType', related_name='instances')
 
     hostname = TextLineField()
     domain = TextLineField()
@@ -135,16 +141,19 @@ class Instance(TenantOwnedMixin):
 
 
 class Role(TenantOwnedMixin):
-    instance = ForeignKey('Instance')
+    instance = OwnerKey('Instance', related_name='roles')
 
 
 class RoleLink(TenantOwnedMixin):
-    client_role = ForeignKey('Role', related_name='client_links')
+    client_role = OwnerKey('Role', related_name='client_links')
     server_role = ForeignKey('Role', related_name='server_links')
+
+    class Meta:
+        unique_together = (('client_role', 'server_role'),)
 
 
 class Volume(TenantOwnedMixin):
-    instance = ForeignKey('Instance')
+    instance = ForeignKey('Instance', related_name='volumes')
     volume_type = TextLineField()
     volume_size = PositiveIntegerField()
     delete_on_termination = BooleanField(default=True)
@@ -154,8 +163,8 @@ class Volume(TenantOwnedMixin):
 
 
 class VolumeUse(TenantOwnedMixin):
-    role = ForeignKey('Role')
-    volume = ForeignKey('Volume')
+    role = ForeignKey('Role', related_name='used_volumes')
+    volume = ForeignKey('Volume', related_name='used_by_roles')
 
     class Meta:
         unique_together = (('role', 'volume'),)
