@@ -60,9 +60,26 @@ instances:
         Name: debian-replica
         upstream: debian-primary
 
+    - node: 3
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.174.16/28
+      volumes:
+          - device_name: root
+            volume_type: standard
+            volume_size: 18
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 16
+      tags:
+        os: Debian
+        role: replica
+        Name: debian-rereplica
+        upstream: debian-replica
+
     # RHEL-7.2_HVM_GA-20151112-x86_64-1-Hourly2-GP2
 
-    - node: 3
+    - node: 4
       type: t2.micro
       image: ami-8b8c57f8
       region: eu-west-1
@@ -81,7 +98,7 @@ instances:
         Name: redhat-primary
         backup: eu-barman
 
-    - node: 4
+    - node: 5
       type: t2.micro
       image: ami-8b8c57f8
       region: eu-west-1
@@ -101,7 +118,7 @@ instances:
 
     # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627
 
-    - node: 5
+    - node: 6
       type: t2.micro
       image: ami-a4d44ed7
       region: eu-west-1
@@ -116,7 +133,7 @@ instances:
         Name: ubuntu-primary
         backup: eu-barman
 
-    - node: 6
+    - node: 7
       type: t2.micro
       image: ami-a4d44ed7
       region: eu-west-1
@@ -132,7 +149,7 @@ instances:
 
     # Another Debian node for barman.
 
-    - node: 7
+    - node: 8
       type: t2.micro
       region: eu-west-1
       image: ami-ff0e758c
