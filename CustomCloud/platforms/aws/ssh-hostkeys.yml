@@ -1,6 +1,6 @@
 ---
 
-# First, we generate as many SSH host keys as we have instances.
+# First, we generate a pair of SSH host keys in each supported format.
 
 - include: ../common/ssh-hostkeys.yml
 
