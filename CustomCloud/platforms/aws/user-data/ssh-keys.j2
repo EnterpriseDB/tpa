@@ -1,0 +1,22 @@
+{#
+    First, download and install the pre-generated SSH host keys.
+#}
+
+for k in rsa ecdsa; do
+    for p in "" .pub; do
+        aws s3api get-object --bucket "{{ cluster_bucket }}" \
+            --key "hostkeys/$k$p.txt" /etc/ssh/ssh_host_${k}_key$p
+    done
+done
+
+{#
+    On RHEL AMIs, we also need to make sure that sshd doesn't generate
+    more host keys to replace the ones we remove below.
+#}
+{% if 'RHEL' in image['name'] %}
+F=/etc/sysconfig/sshd
+LINE="AUTOCREATE_SERVER_KEYS=''"
+grep -qx "$LINE" $F || echo "$LINE" >> $F
+{% endif %}
+
+find /etc/ssh -iname ssh_host_\*_key\* '!' -iname ssh_host_rsa_key\* '!' -iname ssh_host_ecdsa_key\* -exec rm {} \;

@@ -1,0 +1,17 @@
+{#
+    If awscli is not available, install it from the latest bundle.
+
+    Why don't we pip install awscli? On RHEL, we have to first enable
+    the EPEL repository to install python-pip (fine), but the install
+    then fails because libyaml is not installed by default.
+
+    Why don't we use operating system packages? The RHEL awscli package
+    doesn't install because of a dependency on python-docutils that is
+    apparently not available by default even in EPEL.
+#}
+
+test -x /usr/bin/aws -o -x /usr/local/bin/aws || (                                      \
+    curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o awscli-bundle.zip &&   \
+    unzip awscli-bundle.zip -d /tmp &&                                                  \
+    python2.7 /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws        \
+)

@@ -1,31 +1,36 @@
 #!/bin/bash
+{#
+    This template generates the user-data that each instance receives at
+    startup. Its primary purpose is to download pre-generated SSH host
+    keys from S3 and install them.
+
+    We need awscli to download the keys from S3. (It would be nice to
+    use curl, but S3's HTTP download URLs may sometimes issue redirects
+    in an XML format that curl cannot act upon.)
+
+    TPA-generated AMIs include awscli already. For other instances, we
+    can install the latest awscli-bundle.zip. To do this, we will need
+    to install some packages (e.g., curl) in a platform-specific way.
+    (Unfortunately, we can figure out what the target AMI is only by
+    string matching against the AMI name.)
+
+    Once awscli is available, we can just replace the SSH host keys.
+#}
 
 exec >> /var/log/tpa-firstboot.log 2>&1
 
 echo "$(date): start"
 
-type yum &>/dev/null && yum -y install unzip curl python
-type apt-get &>/dev/null && apt-get -q -y update && apt-get -q -y install unzip curl python2.7
-
-curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o awscli-bundle.zip && \
-    unzip awscli-bundle.zip -d /tmp && \
-    python2.7 /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
-
-for k in rsa ecdsa; do
-    for p in "" .pub; do
-        /usr/local/bin/aws s3api get-object \
-            --bucket "{{ cluster_bucket }}" \
-            --key "hostkeys/$k$p.txt" \
-            /etc/ssh/ssh_host_${k}_key$p
-    done
-done
-
-F=/etc/sysconfig/sshd
-if [ -f $F ]; then
-    LINE="AUTOCREATE_SERVER_KEYS=''"
-    grep -qx "$LINE" $F || echo "$LINE" >> $F
-fi
-
-find /etc/ssh -iname ssh_host_\*_key\* '!' -iname ssh_host_rsa_key\* '!' -iname ssh_host_ecdsa_key\* -exec rm {} \;
+{% if not image['name'].startswith('2ndQuadrant-TPA-') %}
+{%   if 'RHEL' in image['name'] %}
+{%     include 'user-data/yum.j2' %}
+{%   elif 'debian' in image['name'].lower() %}
+{%     include 'user-data/apt.j2' %}
+{%   elif 'ubuntu' in image['name'].lower() %}
+{%     include 'user-data/apt.j2' %}
+{%   endif %}
+{%   include 'user-data/awscli.j2' %}
+{% endif %}
+{% include 'user-data/ssh-keys.j2' %}
 
 echo "$(date): end"
