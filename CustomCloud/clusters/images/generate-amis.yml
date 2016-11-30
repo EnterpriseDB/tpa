@@ -6,13 +6,13 @@
     - name: Generate new AMIs
       ec2_ami:
         name: "TPA-{{ ansible_distribution }}-{{ postgres_variant }}-{{ postgres_version }}-{{ lookup('pipe', 'date +%Y%m%d') }}"
-        description: "2ndQuadrant TPA/{{ ansible_distribution }} deployment image"
+        description: "2ndQuadrant TPA {{ ansible_distribution }}/{{ postgres_variant }}/{{ postgres_version }} image"
         instance_id: "{{ ec2_id }}"
         region: "{{ ec2_region }}"
         tags:
-          os: {{ ansible_distribution }}
-          postgres: {{ postgres_variant }}
-          postgres_version: {{ postgres_version }}
+          os: "{{ ansible_distribution }}"
+          postgres: "{{ postgres_variant }}"
+          postgres_version: "{{ postgres_version }}"
         wait: yes
       delegate_to: localhost
       tags: ami
