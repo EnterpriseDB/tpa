@@ -1,19 +1,19 @@
 ---
 
-cluster_name: "TPATest"
+cluster_name: "CascadingTest"
 cluster_tags:
-  Owner: gulcin
+  Owner: Gulcin
 cluster_vars:
-  cluster_network: 10.33.7.0/24
+  cluster_network: 10.33.21.0/24
 
 ec2_vpc:
   Name: Test
 
 ec2_vpc_subnets:
   eu-west-1:
-    10.33.7.0/28:
+    10.33.29.0/28:
       az: eu-west-1a
-    10.33.5.16/28:
+    10.33.27.16/28:
       az: eu-west-1b
 
 ec2_ami:
@@ -24,7 +24,7 @@ instances:
     - node: 1
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.7.0/28
+      subnet: 10.33.26.0/28
       volumes:
           - device_name: root
             volume_type: gp2
@@ -42,7 +42,7 @@ instances:
     - node: 2
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.10.16/28
+      subnet: 10.33.24.16/28
       volumes:
           - device_name: root
             volume_type: standard
@@ -59,7 +59,24 @@ instances:
     - node: 3
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.7.16/28
+      subnet: 10.33.28.16/28
+      volumes:
+          - device_name: root
+            volume_type: standard
+            volume_size: 13
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 16
+      tags:
+        os: Debian
+        role: replica
+        Name: debian-cas-replica
+        upstream: debian-replica
+
+    - node: 4
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.36.16/28
       volumes:
           - device_name: root
             volume_type: standard
