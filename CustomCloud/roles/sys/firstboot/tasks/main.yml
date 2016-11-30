@@ -33,9 +33,14 @@
 # cloud-init generates SSH host keys, which we then replace in the
 # user-data script for every instance. Can we avoid that?
 
-# The user-data script that we fed to the base AMI would have created
-# this log file, so we want to get rid of it in the final image.
+## General instance cleanup
+#
+# The user-data script and other parts of the deployment process may
+# create files that we want to get rid of in the final image.
 
-- file:
-    path: /var/log/tpa-firstboot.log
+- name: Remove deployment artifacts
+  file:
+    path: "{{ item }}"
     state: absent
+  with_items:
+    - /var/log/tpa-firstboot.log
