@@ -10,8 +10,17 @@
     apparently not available by default even in EPEL.
 #}
 
-test -x /usr/bin/aws -o -x /usr/local/bin/aws || (                                      \
-    curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o awscli-bundle.zip &&   \
-    unzip awscli-bundle.zip -d /tmp &&                                                  \
-    python2.7 /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws        \
+{% if not image['name'].startswith('TPA-') %}
+test -x /usr/bin/aws -o -x /usr/local/bin/aws || (
+{%   if 'RHEL' in image['name'] %}
+{%     include 'user-data/os/RedHat.j2' %}
+{%   elif 'debian' in image['name'].lower() %}
+{%     include 'user-data/os/Debian.j2' %}
+{%   elif 'ubuntu' in image['name'].lower() %}
+{%     include 'user-data/os/Ubuntu.j2' %}
+{%   endif %} &&
+    curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o awscli-bundle.zip &&
+    unzip awscli-bundle.zip -d /tmp &&
+    python2.7 /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 )
+{% endif %}
