@@ -3,26 +3,25 @@
 IFS=
 set -e -u
 
+TOP=$(dirname $0)/..
+type realpath &>/dev/null && TOP=$(realpath $TOP)
+
 # If you invoke ansible directly (i.e. not through this script), you
 # must set ANSIBLE_CONFIG as below.
 #
-# If ANSIBLE_CONFIG is not set and the current directory doesn't contain
-# an ansible.cfg (which will be used automatically), we want to use our
-# top-level configuration file.
+# Set ANSIBLE_CONFIG, ANSIBLE_LOG_PATH, and ANSIBLE_INVENTORY to our
+# versions if they are not already set.
 
-config=${ANSIBLE_CONFIG:-""}
-if [ -z "$config" -a ! -f ./ansible.cfg ]; then
-    export ANSIBLE_CONFIG=$(dirname $0)/../ansible.cfg
-fi
-export ANSIBLE_INVENTORY=$(dirname $0)/../inventory/static
+export ANSIBLE_CONFIG=${ANSIBLE_CONFIG:-TOP/ansible.cfg}
+export ANSIBLE_LOG_PATH=${ANSIBLE_LOG_PATH:-$TOP/ansible.log}
+export ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-$TOP/inventory/static}
 
-# If ANSIBLE_ROLES_PATH is not set, we'll set it to our roles directory,
-# just in case someone is trying to mix and match roles.
+# Append our directories to various search paths.
 
-roles=${ANSIBLE_ROLES_PATH:-""}
-if [ -z "$roles" ]; then
-    export ANSIBLE_ROLES_PATH=$(dirname $0)/../roles
-fi
+export ANSIBLE_ROLES_PATH=${ANSIBLE_ROLES_PATH:+$ANSIBLE_ROLES_PATH:}$TOP/roles
+export ANSIBLE_FILTER_PLUGINS=${ANSIBLE_FILTER_PLUGINS:+$ANSIBLE_FILTER_PLUGINS:}$TOP/lib/filter_plugins
+export ANSIBLE_LOOKUP_PLUGINS=${ANSIBLE_LOOKUP_PLUGINS:+$ANSIBLE_LOOKUP_PLUGINS:}$TOP/lib/lookup_plugins
+export ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TOP/lib/test_plugins
 
 # This script may be invoked through symlinks as ansible, ansible-vault,
 # or ansible-playbook. If the requested command is already in the PATH,
