@@ -1,0 +1,28 @@
+---
+
+# This playbook creates the "2ndquadrant-tpa" S3 bucket and sets the
+# appropriate policy and lifecycle for it. This bucket is used only to
+# store short-lived confidential data that must be made available to
+# authenticated TPA instances (e.g., SSH host keys).
+
+- name: Create S3 bucket 2ndquadrant-tpa
+  hosts: localhost
+  tasks:
+
+    # This task is always inappropriately marked "changed"; see
+    # https://github.com/ansible/ansible-modules-extras/issues/2618 for
+    # details.
+
+    - name: Create S3 bucket 2ndquadrant-tpa
+      s3_bucket:
+        name: 2ndquadrant-tpa
+        state: present
+        tags:
+          Owner: TPA
+      
+    - name: Set S3 bucket contents to expire in a day
+      s3_lifecycle:
+        name: 2ndquadrant-tpa
+        expiration_days: 1
+        status: enabled
+        state: present

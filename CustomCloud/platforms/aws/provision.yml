@@ -174,10 +174,8 @@
         - "{{ sgs.results }}"
       tags: ec2_vpc
 
-    # Create an "instance profile" (== an IAM role) for the cluster, and
-    # attach an inline policy with any permissions that the instances
-    # need (which is only associate-address now; when we need other
-    # rights, we should move the policy into a separate file).
+    # Create an "instance profile" IAM role for the cluster, and attach
+    # an inline policy with any permissions that the instances need.
 
     - name: Create an instance profile for the cluster
       iam:
@@ -205,23 +203,17 @@
                 ],
                 "Effect": "Allow",
                 "Resource": "*"
+              },
+              {
+                "Action": [
+                  "s3:GetObject"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::2ndquadrant-tpa/{{ cluster_name }}/*"
               }
             ]
           }
       tags: iam
-
-    - name: Discover ARN for instance profile role
-      command: aws iam get-role --role-name "{{ cluster_profile }}"
-      register: role
-      when: >
-        profile|changed or instance_profile_role is not defined
-
-    - include: ../common/set-cluster-var.yml
-      vars:
-        name: instance_profile_role
-        value: "{{ (role.stdout|from_json).Role.Arn }}"
-      when: >
-        not role|skipped
 
     # Generate SSH host keys for instances.
 
