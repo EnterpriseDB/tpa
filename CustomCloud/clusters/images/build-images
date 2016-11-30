@@ -4,6 +4,7 @@
 #
 # clusters/images/build-images [-r] [PGDG|2ndQPostgres|…] [9.5|9.6|…]
 
+IFS=
 set -e -u
 
 if [ ! -d clusters/images ]; then
@@ -19,6 +20,7 @@ fi
 
 variant=${1:-"PGDG"}
 version=${2:-"9.6"}
+suffix=${3:-""}
 
 utils/provision images -v
 
@@ -26,9 +28,9 @@ utils/provision images -v
 sleep 120
 
 utils/deploy images/deploy-$variant.yml -v \
-    -e postgres_variant=$variant -e postgres_version=$version
+    -e postgres_variant=$variant -e postgres_version=$version -e suffix=$suffix
 utils/ansible-cluster images/generate-amis.yml -v \
-    -e postgres_variant=$variant -e postgres_version=$version
+    -e postgres_variant=$variant -e postgres_version=$version -e suffix=$suffix
 
 utils/deprovision images -v
 rm -rf clusters/images/id_tpaimages* \
