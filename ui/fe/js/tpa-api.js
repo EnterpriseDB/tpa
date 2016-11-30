@@ -34,7 +34,7 @@ var tpa = (function() {
 
     // Used by selections
     api.data_class = function(d) {
-        return api.model_class(d.data);
+        return api.model_class(d.data.data);
     };
 
     api.class_method = function() {

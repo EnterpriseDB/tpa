@@ -1,15 +1,18 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head>
 <title>TPA UI</title>
+<link rel="stylesheet" href="css/colorscheme.css">
 <style>
+
     .logo { position: relative; }
     .logo img { position: absolute; top: 0px; right: 0px; width: 200; height: 50;}
 
-    .name { stroke: grey; fill: grey; font-size: 110%;}
+    .name { stroke: #010409; fill: #010409; font-size: 110%;}
     .node { stroke: black; fill: blue;}
     .edge { stroke: black; fill:none;}
     .node .cluster { stroke: grey; fill: brown; }
-    .container_shape { stroke: none; fill: thistle; }
+    .container_shape { stroke: none; fill: #B9CC91; }
+    .icon { fill: #3F5217; stroke: #090D00; }
 </style>
 </head>
 <body>
@@ -35,6 +38,7 @@
 
     <script src="/js/tpa-api.js"></script>
     <script src="/js/tpa-d3.js"></script>
+    <script src="/js/diagram.js"></script>
     <script>
         d3.json(tpa.TEST_CLUSTER, function(o, e) {
             if (e) throw e;
