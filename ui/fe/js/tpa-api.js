@@ -26,7 +26,6 @@ var tpa = (function() {
         return null;
     };
 
-
     api.get_obj = function(o) {
         return d3.promise.json(o.url);
     };
@@ -34,7 +33,11 @@ var tpa = (function() {
 
     // Used by selections
     api.data_class = function(d) {
-        return api.model_class(d.data.data);
+        return api.model_class(d.data);
+    };
+
+    api.method = function() {
+        return multimethod().dispatch(api.model_class);
     };
 
     api.class_method = function() {
@@ -47,5 +50,3 @@ var tpa = (function() {
 
     return api;
 }());
-
-console.log(tpa);

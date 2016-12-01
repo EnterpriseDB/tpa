@@ -20,7 +20,6 @@ var dgm_objects = function(cluster) {
 
     var roles = {};
     var instance_parents = {};
-    var instance_children = {};
 
     cluster.subnets.forEach(function(s) {
         s.instances.forEach(function(i) {
@@ -40,9 +39,9 @@ var dgm_objects = function(cluster) {
                     if (i == other_end) {
                         return;
                     }
-                    if (!(i in instance_parents)) {
-                        instance_parents[i] = l;
-                        accum.push([i, l])
+                    if (!(i.url in instance_parents)) {
+                        instance_parents[i.url] = l;
+                        accum.push([i, l]);
                     }
                     // set link's ancestor to other instance
                     accum.push([l, other_end]);
@@ -55,10 +54,9 @@ var dgm_objects = function(cluster) {
 
     cluster.subnets.forEach(function(s) {
         s.instances.forEach(function(i) {
-            console.log("check instance:", i, instance_parents[i]);
-            if (! (i in instance_parents[i])) {
-                console.log('reparenting');
+            if (!(i.url in instance_parents)) {
                 accum.push([i, s]);
+                instance_parents[i] = s.url;
             }
         });
     });
@@ -72,7 +70,6 @@ var dgm_objects = function(cluster) {
         parent_id[o.url] = p.url;
     });
 
-    console.log(roles, result, parent_id, instance_parents);
     return [result, parent_id];
 };
 
@@ -85,6 +82,13 @@ var draw_cluster = function (cluster) {
                 (objects);
 
     root = d3.hierarchy(table);
+
+    // remove the double-reference introduced by stratify
+    root.data = root.data.data;
+    root.descendants().forEach(function(d) {
+        d.data = d.data.data;
+    });
+
     tree(root);
 
     global_cluster = cluster;
@@ -98,73 +102,79 @@ var draw_cluster = function (cluster) {
 
     g = svg.append("g").attr("transform", "translate(50,0) scale(0.8)");
 
-    var node_rect = d3.local();
     var node_model = d3.local();
+    var node_url = d3.local();
+    var node_size = d3.local();
+    var node_rect = d3.local();
 
-    var edge = g.selectAll(".edge")
-        .data(root.descendants().filter(function(d) {
-            var val = tpa.class_method()
-                    .when('rolelink', function(l) { return true; })
-                    .default(false);
-            console.log("EDGE:", d, tpa.data_class(d), val(d));
-            return val;
-        }))
-        .enter().append("path")
-        .classed("edge", true)
-        .attr("d", function(d) {
-            var path = d3.path();
-            if ( !d.parent ) return "";
-            path.moveTo(d.y, d.x);
-            path.bezierCurveTo(d.parent.y+200, d.x,
-                                d.y-100, d.x,
-                                d.parent.y, d.parent.x);
+    var role_idx = d3.local();
 
-            return path;
+    var display_role_list = function(s) {
+        s.data(root.descendants().filter(tpa.class_method()
+            .when('instance', true).default(false)))
+        .enter().append('g')
+        .classed('roles', true)
+        .attr('transform', function(d) {return "translate("+d.y+","+d.x+")";})
+        .each(function(d) {
+            node_model.set(this, d);
+            role_idx.set(this, {idx: 0});
+
+            var sel = d3.select(this).selectAll(".role")
+                .data(d.data.roles)
+                .enter().append("text");
+
+            sel.classed("role", true)
+                .attr('transform', function(r) {
+                    var idx = role_idx.get(this).idx;
+                    var top = idx*15;
+                    role_idx.get(this).idx = idx+1;
+                    return "translate("+0+","+top+")";
+                })
+                .text(function(r) {
+                    return r.name;
+                });
         });
+        return s;
+    };
 
     var node = g.selectAll(".node")
-        .data(root.descendants().filter(function(d) {
-            return tpa.class_method()
-                .when('instance', true)
-                .default(false)(d);
-        }))
+        .data(root.descendants().filter(tpa.class_method()
+            .when('instance', true).default(false)
+        ))
         .enter().append("g")
             .attr("class", function(d) {
                 return "node" + (d.children ?
                     " node--internal" : " node--leaf"); })
             .attr("transform", function(d) {
                 return "translate(" + d.y +','+d.x + ")"; })
-            .attr('url', function(d) {
-                return d.data.data.url ? d.data.data.url : null;
+            .property('model-url', function(d) {
+                return d.data.url ? d.data.url : null;
+            })
+        .each(function(d) {
+            var h = 80, w = 100;
+            node_model.set(this, d.data);
+            node_url.set(this, d.data.url);
+            node_size.set(this, [w, h]);
+            node_rect.set(this, {
+                 top_left:       {   x:   -w/2,   y:   -h/2    },
+                 top_right:      {   x:   +w/2,   y:   -h/2    },
+                 bottom_right:   {   x:   +w/2,   y:   +h/2,   },
+                 bottom_left:    {   x:   -w/2,   y:   +h/2    }
             });
+
+        });
+
+    g.selectAll(".roles").call(display_role_list);
 
     // ellipse
     node.append("path")
         .classed('container_shape', true)
         .attr('d', tpa.class_method()
             .when('instance', function(d) {
-                var width = 100,
-                    height = 80,
-                    path = d3.path(),
-                    radius = width/2,
-                    rect = {
-                        top_left: {
-                            x: -width/2,
-                            y: -height/2
-                        },
-                        top_right: {
-                            x: +width/2,
-                            y: -height/2
-                        },
-                        bottom_right: {
-                            x: +width/2,
-                            y: +height/2,
-                        },
-                        bottom_left: {
-                            x: -width/2,
-                            y: +height/2
-                        }
-                    };
+                var rect = node_rect.get(this);
+                var path = d3.path(), width, height, radius;
+                [width, height] = node_size.get(this);
+                radius = width/2;
 
                 path.moveTo(rect.top_right.x, rect.top_right.y);
                 path.quadraticCurveTo(rect.top_right.x+width, 0,
@@ -193,21 +203,34 @@ var draw_cluster = function (cluster) {
 
     // name
     node.append("text")
-        .attr("class", "name")
+        .classed("name", true)
         .attr("transform", function(d) {
             return "translate(-50, -20)";
         })
         .text(function(d) {
-            return d.data.data.name;
+            return d.data.name;
         });
 
-    // roles
-    node.append("path")
-        .classed('role', true)
-         .attr("transform", function(d) {
-            return "translate(-50, -20)";
-        })
-        .text(function(d) {
-            return d.data.data.name;
+    // EDGES
+
+    var edge = g.selectAll(".edge")
+        .data(root.descendants().filter(function(d) {
+            var val = tpa.class_method()
+                    .when('rolelink', function(l) { return true; })
+                    .default(false);
+            return val;
+        }))
+        .enter().append("path")
+        .classed("edge", true)
+        .attr("d", function(d) {
+            // draw line from server instance to client instance
+            var path = d3.path();
+            if ( !d.parent ) return "";
+            path.moveTo(d.y, d.x);
+            path.bezierCurveTo(d.parent.y+200, d.x,
+                                d.y-100, d.x,
+                                d.parent.y, d.parent.x);
+
+            return path;
         });
 };
