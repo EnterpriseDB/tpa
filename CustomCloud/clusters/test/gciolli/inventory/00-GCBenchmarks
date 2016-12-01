@@ -1,13 +1,13 @@
 [tag_Cluster_GCBenchmarks]
-primary ansible_host=52.53.192.165 node=1 role='["primary"]'
-replica-1 ansible_host=54.183.212.169 node=2 role='["replica"]'
-replica-2 ansible_host=54.183.189.37 node=3 role='["replica"]'
-replica-3 ansible_host=54.183.150.242 node=4 role='["replica"]'
-replica-4 ansible_host=54.67.25.170 node=5 role='["replica"]'
-replica-5 ansible_host=54.193.8.85 node=6 role='["replica"]'
-replica-6 ansible_host=54.153.46.154 node=7 role='["replica"]'
-replica-7 ansible_host=54.193.18.9 node=8 role='["replica"]'
-barman ansible_host=54.153.101.22 node=9 role='["barman","witness"]'
+primary ansible_host=54.193.26.87 node=1 role='["primary"]'
+replica-1 ansible_host=54.67.120.91 node=2 role='["replica"]'
+replica-2 ansible_host=54.153.71.137 node=3 role='["replica"]'
+replica-3 ansible_host=54.193.75.50 node=4 role='["replica"]'
+replica-4 ansible_host=54.153.60.28 node=5 role='["replica"]'
+replica-5 ansible_host=54.183.180.92 node=6 role='["replica"]'
+replica-6 ansible_host=54.193.76.64 node=7 role='["replica"]'
+replica-7 ansible_host=54.67.26.136 node=8 role='["replica"]'
+barman ansible_host=54.67.6.229 node=9 role='["barman","witness"]'
 
 [tag_Cluster_GCBenchmarks:vars]
 cluster_tag=tag_Cluster_GCBenchmarks
