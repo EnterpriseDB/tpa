@@ -12,11 +12,6 @@
 # something they don't support—or by installing our own unit files. That
 # way, we're never in the position of having to move aside an existing
 # data directory (albeit an empty one).
-#
-# We could also check that PGDATA doesn't exist here, run the setup tool
-# (e.g., include_role: postgres/initdb), then delete the data directory
-# it creates and replace it with "repmgr standby clone". But it doesn't
-# seem worth the bother (especially when include_role isn't reliable).
 
 - name: Check if the replica is registered
   shell: >
