@@ -31,8 +31,15 @@
   changed_when: >
     boto|succeeded and 'Requirement already satisfied' not in boto.stdout
 
-- name: Install awscli
+# If awscli still isn't installed, it's safest to install it using pip.
+# (See the comments in platforms/aws/user-data/awscli.j2. The user-data
+# script should have installed awscli already, so we shouldn't usually
+# need to do anything here for cloud instances.)
+
+- name: Ensure awscli is installed
   command: pip install awscli
   register: awscli
   changed_when: >
     awscli|succeeded and 'Requirement already satisfied' not in awscli.stdout
+  when: >
+    {{ lookup('pipe', 'which aws || true') }} == ''
