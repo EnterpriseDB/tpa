@@ -42,4 +42,4 @@
   changed_when: >
     awscli|succeeded and 'Requirement already satisfied' not in awscli.stdout
   when: >
-    {{ lookup('pipe', 'which aws || true') }} == ''
+    "{{ lookup('pipe', 'which aws || true') }}" == ""
