@@ -25,12 +25,12 @@
     # packages are installed, sets the hostname, etc.
     - role: common
 
-    # Declare that we want to install Postgres 9.5. This just sets a few
+    # Declare that we want to install Postgres 9.6. This just sets a few
     # handy defaults up front. The actual package installation happens a
     # few steps later.
     - role: postgres/vars
       vars:
-        postgres_version: 9.5
+        postgres_version: 9.6
       tags: always
 
     # Computes memory size and other instance-specific computations for

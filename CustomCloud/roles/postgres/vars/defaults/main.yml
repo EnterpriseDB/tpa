@@ -1,6 +1,6 @@
 ---
 
-default_postgres_version: 9.5
+default_postgres_version: 9.6
 
 default_postgres_user: postgres
 
