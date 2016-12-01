@@ -1,5 +1,5 @@
 This playbook sets up a 3 node cluster. It installs PostgreSQL
-9.5 on the nodes. The repmgr packages are used to setup the standby nodes.
+9.6 on the nodes. The repmgr packages are used to setup the standby nodes.
 The repmgrd daemon gets configured appropriately to allow automatic
 failover in case the primary goes down. The VMs are installed with
 Ubuntu 16.04 LTS 64 bit (Xenial) distro.

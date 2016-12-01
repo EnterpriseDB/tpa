@@ -23,7 +23,7 @@
     # packages are installed, sets the hostname, etc.
     - role: common
 
-    # Declare that we want to install Postgres 9.5. This just sets a few
+    # Declare that we want to install Postgres 9.6. This just sets a few
     # handy defaults up front. The actual package installation happens a
     # few steps later.
     - role: postgres/vars
@@ -53,7 +53,6 @@
 
     - role: sys/openvpn
       vpn_network: 192.168.33.0/24
-      tags: [sys, openvpn]
 
     - role: sys/hosts
       tags: [sys, hosts]
