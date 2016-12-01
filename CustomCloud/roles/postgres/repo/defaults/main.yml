@@ -15,13 +15,13 @@ default_apt_repositories:
     key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
     repo: >-
       deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
-    versions: [9.5, 9.6]
+    versions: [9.4, 9.5, 9.6]
   2ndQPostgres:
     key_id: 70549BC8
     key_url: http://packages.2ndquadrant.com/2ndQPostgres/apt/70549BC8.asc
     repo: >-
       deb [arch=amd64] http://packages.2ndquadrant.com/2ndQPostgres/apt/ {{ ansible_distribution_release }}-2ndquadrant {{ pgversion }}
-    versions: [9.5, 9.6]
+    versions: [9.4, 9.5, 9.6]
 
 # Callers can specify yum_repositories to augment or override the
 # default_yum_repositories specified below. Note that this is a hash of
@@ -33,10 +33,10 @@ default_yum_repositories:
   PGDG:
     rpm_url: >-
       http://yum.postgresql.org/{{pgversion}}/redhat/rhel-7-x86_64/pgdg-redhat{{pgversionNN}}-{{pgversion}}-3.noarch.rpm
-    versions: [9.5, 9.6]
+    versions: [9.4, 9.5, 9.6]
   2ndQPostgres:
     rpm_url: http://packages.2ndquadrant.com/2ndQPostgres/yum-repo-rpms/2ndQPostgres-rhel-1.0-1.noarch.rpm
-    versions: [9.5, 9.6]
+    versions: [9.4, 9.5, 9.6]
 
 # Hardcoded information about yum repositories that supply postgres
 # packages.
@@ -48,11 +48,11 @@ yum_postgres_sources:
     sections:
       - pgdg{{pgversionNN}}
       - pgdg{{pgversionNN}}-source
-    versions: [9.5, 9.6]
+    versions: [9.4, 9.5, 9.6]
   2ndQPostgres:
     files:
       - /etc/yum.repos.d/2ndQPostgres.repo
     sections:
       - 2ndQPostgres
       - 2ndQPostgres-testing
-    versions: [9.5, 9.6]
+    versions: [9.4, 9.5, 9.6]
