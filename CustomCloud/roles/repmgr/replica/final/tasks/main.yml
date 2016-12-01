@@ -21,13 +21,12 @@
 - name: Check if the replica is registered
   shell: >
     {{ psql }} '{{ primary_conninfo }}' -qAtw -c
-    "SELECT type FROM \"{{ repmgr_schema }}\".repl_nodes WHERE type='standby' and name='{{ inventory_hostname }}'"
+    "SELECT 'replica' FROM \"{{ repmgr_schema }}\".repl_nodes WHERE type='standby' and name='{{ inventory_hostname }}'"
   vars:
     psql: '{{ postgres_bin_dir }}/psql'
     primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
     repmgr_schema: 'repmgr_{{ upstream_primary }}'
   register: replica
-  ignore_errors: True
   changed_when: False
   become_user: postgres
   become: yes
@@ -64,4 +63,4 @@
       become_user: postgres
       become: true
 
-  when: replica.stdout.find('standby') == -1
+  when: replica.stdout == 'replica'

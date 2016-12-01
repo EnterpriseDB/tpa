@@ -17,7 +17,6 @@
     primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
     repmgr_schema: 'repmgr_{{ upstream_primary }}'
   register: witness
-  ignore_errors: True
   changed_when: False
   become_user: postgres
   become: yes
@@ -29,4 +28,4 @@
       -h "{{ upstream_primary }}"
   become_user: postgres
   become: yes
-  when: witness.stdout.find('witness') == -1
+  when: witness.stdout == 'witness'
