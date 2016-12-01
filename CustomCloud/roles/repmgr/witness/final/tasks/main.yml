@@ -10,8 +10,12 @@
 
 - name: Check if the witness is registered
   shell: >
-    {{ postgres_bin_dir }}/psql 'host={{ upstream_primary }} user=repmgr dbname=repmgr' \
-      -qAtw -c "SELECT type FROM \"repmgr_{{ upstream_primary }}\".repl_nodes WHERE type = 'witness' and name = '{{ inventory_hostname }}';"
+    {{ psql }} '{{ primary_conninfo }}' -qAtw -c
+    "SELECT type FROM \"{{ repmgr_schema }}\".repl_nodes WHERE type='witness' and name='{{ inventory_hostname }}'"
+  vars:
+    psql: '{{ postgres_bin_dir }}/psql'
+    primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
+    repmgr_schema: 'repmgr_{{ upstream_primary }}'
   register: witness
   ignore_errors: True
   changed_when: False
