@@ -6,5 +6,7 @@
     encrypted: yes
     password: "md5{{ (vars[username+'_password'] + username)|hash('md5') }}"
     role_attr_flags: superuser
+    port: "{{ postgres_port }}"
+    login_host: "{{ postgres_host }}"
   become_user: postgres
   become: yes
