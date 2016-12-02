@@ -17,11 +17,10 @@
         postgres_version: 9.4
 
     - role: common/pkg
-    - role: postgres/pkg
-    - role: pglogical/pkg
     - role: sys/openvpn/pkg
     - role: sys/rsyslog/pkg
     - role: bdr/pkg
+    - role: pglogical/pkg
     - role: pgbouncer/pkg
     - role: barman/pkg
     - role: repmgr/pkg
