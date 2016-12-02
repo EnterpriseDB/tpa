@@ -97,7 +97,7 @@ class Tenant(BaseModel):
 
 class TenantOwnedMixin(BaseModel):
     tenant = ForeignKey('Tenant', editable=False)
-    user_tags = JSONField()
+    user_tags = JSONField(default={})
 
     class Meta:
         abstract = True
@@ -115,6 +115,7 @@ class ProviderCredential(TenantOwnedMixin):
 
 
 class VPC(TenantOwnedMixin):
+    cluster = OwnerKey('Cluster')
     provider = ForeignKey('Provider', related_name='vpcs')
 
 
