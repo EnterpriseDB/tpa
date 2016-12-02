@@ -14,18 +14,16 @@
     postgres_conf_dir == ''
   tags: always
 
-# postgres_data_dir is something like /var/lib/pgsql/9.6/data. We can
-# expect postgres_home (/var/lib/pgsql) to exist and have the right
-# ownership (postgres:postgres), but we may need to create the next
-# level of subdirectories.
-
-- name: Ensure the data directory exists
+- name: Ensure postgres directories exist and have the right permissions
   file:
-    path: "{{ postgres_data_dir }}"
+    path: "{{ item }}"
     owner: postgres
     group: postgres
     mode: 0700
     state: directory
+  with_items:
+    - "{{ postgres_home_dir }}"
+    - "{{ postgres_data_dir }}"
   tags: [postgres, initdb]
 
 - name: Check to see if the data directory is empty

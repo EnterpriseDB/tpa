@@ -9,7 +9,7 @@ from __future__ import unicode_literals, absolute_import, print_function
 import logging
 
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.db import transaction
 from yaml import Loader, load as yaml_load
 
@@ -17,8 +17,25 @@ import tpa.models as m
 
 logger = logging.getLogger(__name__)
 
+# Same as 500_example_cluster
 TEST_TENANT = "d9073da2-138f-4342-8cb8-3462be0b325a"
 TEST_PROVIDER = "EC2"
+
+FWD, REV = True, False
+
+# Link direction, type, client role, server role
+ROLE_LINKS = [
+    # TPA cluster
+    (FWD, 'upstream', 'replica', 'primary'),
+    (FWD, 'upstream', 'replica', 'replica'),
+    (REV, 'backup', 'replica', 'barman'),
+    (REV, 'backup', 'primary', 'barman'),
+    # TODO XL Cluster
+    # TODO BDR Cluster
+    (REV, 'backup', 'bdr', 'barman'),
+    (REV, 'log', 'bdr', 'log-server'),
+    (REV, 'control', 'bdr', 'control'),
+]
 
 
 class Command(BaseCommand):
@@ -29,14 +46,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         tenant = m.Tenant.objects.get(uuid=TEST_TENANT)
-        provider = m.Provider.objects.get(name='EC2')
+        provider = m.Provider.objects.get(name=TEST_PROVIDER)
 
         creds = m.ProviderCredential.objects.get(provider=provider,
-                                                   tenant=tenant)
+                                                 tenant=tenant)
 
-        if creds:
-            creds = creds
-        else:
+        if not creds:
             creds = m.ProviderCredential.objects.create(
                 provider=provider,
                 tenant=tenant,
@@ -45,23 +60,22 @@ class Command(BaseCommand):
                 shared_secret='SAK')
 
         for yaml_file in options['yaml']:
+            cluster = None
             with open(yaml_file, 'r') as fd:
                 root = yaml_load(fd.read(), Loader)
             with transaction.atomic():
                 cluster = self.generate_cluster(root, tenant, provider, creds)
-                assert "Skipping Create"
-
+            print("New cluster ID:", cluster.uuid)
 
     def generate_cluster(self, root, tenant, provider, creds):
-        upstreams = {}
         subnets = {}
-        instance_by_name = {}
-        backups = {}
+        roles = {}
+        links = []  # client instance, role_name, server instance, role_name
 
         cluster = m.Cluster.objects.create(
             tenant=tenant,
             name=root["cluster_name"],
-            user_tags = root['cluster_tags'])
+            user_tags=root['cluster_tags'])
 
         vpc = m.VPC.objects.create(
             name=root["ec2_vpc"]["Name"],
@@ -85,14 +99,13 @@ class Command(BaseCommand):
                     credentials=creds
                 )
 
-        print("Subnets:", subnets)
-
         for ins_def in root["instances"]:
+            ins_tags = ins_def['tags']
             subnet = subnets[ins_def['subnet']]
             instance = m.Instance.objects.create(
                 tenant=tenant,
                 subnet=subnet,
-                name=ins_def['tags']['Name'],
+                name=ins_tags['Name'],
                 instance_type=m.InstanceType.objects.get(
                     zone=subnet.zone,
                     name=ins_def['type']),
@@ -100,14 +113,46 @@ class Command(BaseCommand):
                 domain="",
                 assign_eip=ins_def.get('assign_eip', False))
 
-            instance_by_name[instance.name] = instance
+            for role_name in ins_tags.get('role', '').split(','):
+                role_name = role_name.strip()
 
-            if ins_def.get('upstream'):
-                upstreams.append((ins_def['upstream'], instance))
+                if not role_name:
+                    continue
 
-            if ins_def.get('backup'):
-                backups.append((ins_def['backup'], instance))
+                role = m.Role.objects.create(
+                    instance=instance,
+                    tenant=tenant,
+                    name=role_name)
 
-        # TODO Roles, Links - Upstream, Backups
+                roles[(instance.name, role_name)] = role
 
+            for (dirn, rel_name, client_role, server_role) in ROLE_LINKS:
+                if rel_name in ins_tags and client_role in ins_tags['role']:
+                    links.append((dirn, rel_name,
+                                  instance.name, client_role,
+                                  ins_tags[rel_name], server_role),)
 
+        # Links
+        for (dirn, rel_name,
+             client_name, client_role,
+             server_name, server_role) in links:
+
+            if (server_name, server_role) not in roles:
+                print("skipping",
+                      rel_name, client_name, client_role,
+                      server_name, server_role)
+                continue
+
+            server_role = roles[(server_name, server_role)]
+            client_role = roles[(client_name, client_role)]
+
+            if dirn == REV:
+                (server_role, client_role) = (client_role, server_role)
+
+            m.RoleLink.objects.create(
+                tenant=tenant,
+                name=rel_name,
+                server_role=server_role,
+                client_role=client_role)
+
+        return cluster

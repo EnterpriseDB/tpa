@@ -1,17 +1,5 @@
 
-//var test_data_url = "/api/v1/tpa/provider/c2b1c094-03fd-5d95-b7f3-656fc9f62d72/"
 var global_cluster = null;
-var width = 1000;
-var height = 450;
-
-var root = null;
-var tree = d3.cluster().size([height, width-100])
-        .separation(function(a, b) {
-            return Math.min(5-b.depth, 1);
-        });
-
-//d3.select('.treeview').call(d3.zoom().on("zoom", zoomed));
-
 
 /* Renderer */
 
@@ -29,8 +17,11 @@ var dgm_objects = function(cluster) {
         });
     });
 
+
+    accum.push([cluster, ""]); // Cluster is root
+
     cluster.subnets.forEach(function(s) {
-        accum.push([s, ""]);
+        accum.push([s, cluster]);
         s.instances.forEach(function(i) {
             i.roles.forEach(function(r) {
                 r.client_links.forEach(function(l) {
@@ -73,69 +64,81 @@ var dgm_objects = function(cluster) {
     return [result, parent_id];
 };
 
-var draw_cluster = function (cluster) {
+var draw_cluster = function (cluster, width, height) {
     var [objects, parent_id] = dgm_objects(cluster);
 
+
+    // MAKE TREE
+    //
     var table = d3.stratify()
                     .id(function(d) { return d.url; })
                     .parentId(function(d) { return parent_id[d.url]; })
                 (objects);
-
-    root = d3.hierarchy(table);
-
-    // remove the double-reference introduced by stratify
-    root.data = root.data.data;
-    root.descendants().forEach(function(d) {
-        d.data = d.data.data;
-    });
+    var root = d3.hierarchy(table);
+    var tree = d3.cluster().size([height*0.2, width*0.8])
+        .separation(function(a, b) {
+            return Math.min(5-b.depth, 1);
+        });
 
     tree(root);
+    var root_x = root.y, root_y = root.x;
+    root.x = root_x;
+    root.y = root_y;
+    root.data = root.data.data;
+
+    root.descendants().forEach(function(d) {
+        // rotate 90 deg, assume root is not displayed
+        var x=d.y, y=d.x;
+        d.x=x-root.x;
+        d.y=y;
+
+        // remove the double-reference introduced by stratify
+        d.data = d.data.data;
+    });
 
     global_cluster = cluster;
     console.log("Cluster data:", cluster, 'table', table);
     d3.select('.cluster_name').text(": " + cluster.name);
+
+    // RENDER IT
 
     var svg = d3.select(".cluster_view")
         .append('svg')
             .attr('width', width)
             .attr('height', height);
 
-    g = svg.append("g").attr("transform", "translate(50,0) scale(0.8)");
+    g = svg.append("g").attr("transform", "translate(0,0) scale(1.0)");
 
     var node_model = d3.local();
     var node_url = d3.local();
     var node_size = d3.local();
     var node_rect = d3.local();
 
-    var role_idx = d3.local();
+    // Links
 
-    var display_role_list = function(s) {
-        s.data(root.descendants().filter(tpa.class_method()
-            .when('instance', true).default(false)))
-        .enter().append('g')
-        .classed('roles', true)
-        .attr('transform', function(d) {return "translate("+d.y+","+d.x+")";})
-        .each(function(d) {
-            node_model.set(this, d);
-            role_idx.set(this, {idx: 0});
-
-            var sel = d3.select(this).selectAll(".role")
-                .data(d.data.roles)
-                .enter().append("text");
-
-            sel.classed("role", true)
-                .attr('transform', function(r) {
-                    var idx = role_idx.get(this).idx;
-                    var top = idx*15;
-                    role_idx.get(this).idx = idx+1;
-                    return "translate("+0+","+top+")";
-                })
-                .text(function(r) {
-                    return r.name;
-                });
+    var edge = g.selectAll(".edge")
+        .data(root.descendants().filter(
+            tpa.class_method().when('rolelink', true).default(false)))
+        .enter().append("path")
+        .classed("edge", true)
+        .attr("d", function(d) {
+            // draw line from server instance to client instance
+            if ( !d.parent ) return "";
+            var path = d3.path();
+            var p = d.parent, c = d.children[0];
+            var y1 = p.y, y2 = c.y;
+            if (y1 > y2) {
+                y1 = c.y;
+                y2 = p.y;
+            }
+            path.moveTo(p.x, p.y);
+            path.bezierCurveTo(
+                d.x + (d.x-c.x)/3, y1,
+                p.x + (d.x-p.x)/3, y2,
+                c.x, c.y);
+            return path;
         });
-        return s;
-    };
+
 
     var node = g.selectAll(".node")
         .data(root.descendants().filter(tpa.class_method()
@@ -146,7 +149,7 @@ var draw_cluster = function (cluster) {
                 return "node" + (d.children ?
                     " node--internal" : " node--leaf"); })
             .attr("transform", function(d) {
-                return "translate(" + d.y +','+d.x + ")"; })
+                return "translate(" + d.x +','+d.y + ")"; })
             .property('model-url', function(d) {
                 return d.data.url ? d.data.url : null;
             })
@@ -161,10 +164,9 @@ var draw_cluster = function (cluster) {
                  bottom_right:   {   x:   +w/2,   y:   +h/2,   },
                  bottom_left:    {   x:   -w/2,   y:   +h/2    }
             });
-
         });
 
-    g.selectAll(".roles").call(display_role_list);
+    // g.selectAll(".roles").call(display_role_list);
 
     // ellipse
     node.append("path")
@@ -172,15 +174,13 @@ var draw_cluster = function (cluster) {
         .attr('d', tpa.class_method()
             .when('instance', function(d) {
                 var rect = node_rect.get(this);
-                var path = d3.path(), width, height, radius;
-                [width, height] = node_size.get(this);
-                radius = width/2;
+                var path = d3.path(), n_w = node_size.get(this)[0];
 
                 path.moveTo(rect.top_right.x, rect.top_right.y);
-                path.quadraticCurveTo(rect.top_right.x+width, 0,
+                path.quadraticCurveTo(rect.top_right.x+n_w/2.5, 0,
                                     rect.bottom_right.x, rect.bottom_right.y);
                 path.lineTo(rect.bottom_left.x, rect.bottom_left.y);
-                path.quadraticCurveTo(rect.bottom_left.x-width, 0,
+                path.quadraticCurveTo(rect.bottom_left.x-n_w, 0,
                                     rect.top_left.x, rect.top_left.y);
                 path.lineTo(rect.top_right.x, rect.top_right.y);
                 path.closePath();
@@ -211,26 +211,31 @@ var draw_cluster = function (cluster) {
             return d.data.name;
         });
 
-    // EDGES
+    // roles
+    var role_idx = d3.local();
 
-    var edge = g.selectAll(".edge")
-        .data(root.descendants().filter(function(d) {
-            var val = tpa.class_method()
-                    .when('rolelink', function(l) { return true; })
-                    .default(false);
-            return val;
-        }))
-        .enter().append("path")
-        .classed("edge", true)
-        .attr("d", function(d) {
-            // draw line from server instance to client instance
-            var path = d3.path();
-            if ( !d.parent ) return "";
-            path.moveTo(d.y, d.x);
-            path.bezierCurveTo(d.parent.y+200, d.x,
-                                d.y-100, d.x,
-                                d.parent.y, d.parent.x);
+    node.append("g")
+        .classed('roles', true)
+        .attr('transform', function(d) {
+            var x = -20, y=-15;
 
-            return path;
+            return "translate("+x+","+y+")";
+        })
+        .each(function(d) {
+            role_idx.set(this, {idx: 1});
+
+           d3.select(this).selectAll(".role")
+                .data(d.data.roles.slice(0,3))
+                .enter().append("text")
+                    .classed("role", true)
+                    .attr('transform', function(r) {
+                        var idx = role_idx.get(this).idx;
+                        var top = idx*15;
+                        role_idx.get(this).idx = idx+1;
+                        return "translate("+"-5"+","+top+")";
+                    })
+                    .text(function(r) {
+                        return r.name;
+                    });
         });
 };
