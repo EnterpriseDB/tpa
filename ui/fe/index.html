@@ -290,15 +290,16 @@
     <script src="/js/es6-promise.auto.min.js"></script>
     <script src="/js/d3.promise.min.js"></script>
 
+    <script src="/js/utils.js"></script>
     <script src="/js/tpa-api.js"></script>
     <script src="/js/tpa-d3.js"></script>
     <script src="/js/diagram.js"></script>
     <script>
-        d3.json(tpa.TEST_CLUSTER, function(o, e) {
-            if (e) throw e;
-            return draw_cluster(o, 1000, 1000);
-        });
-
+        var next_cluster = show_clusters(tpa.TEST_TENANT,
+                                        d3.select(".cluster_view"),
+                                        1000, 1000);
+        d3.select(".fa-plus")
+            .on("click", function(d,i) { next_cluster(); });
     </script>
 </body>
 </html>

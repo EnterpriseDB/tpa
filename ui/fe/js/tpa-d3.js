@@ -3,6 +3,43 @@ var global_cluster = null;
 
 /* Renderer */
 
+var show_clusters = function (tenant, selection, width, height) {
+    var clusters = [];
+    var current_cluster_idx = -1;
+
+    d3.json(tpa.url+"cluster/", function(c, e) {
+        if (e) { 
+            alert("API Server communication error");
+            throw e;
+        }
+        clusters = c;
+        console.log("clusters:", c);
+
+        if (clusters.length > 0) {
+            current_cluster_idx = 0;
+            draw_cluster(clusters[current_cluster_idx],
+                        selection, width, height);
+        }
+    });
+
+    var next_cluster = function () {
+        if (clusters.length < 1) {
+            return;
+        }
+
+        current_cluster_idx = current_cluster_idx+1;
+        if (current_cluster_idx >= clusters.length) {
+            current_cluster_idx = 0;
+        }
+        draw_cluster(clusters[current_cluster_idx],
+                    selection, width, height);
+
+    };
+
+    return next_cluster;
+};
+
+
 var dgm_objects = function(cluster) {
     var accum = [], result = [], parent_id = {};
 
@@ -64,7 +101,7 @@ var dgm_objects = function(cluster) {
     return [result, parent_id];
 };
 
-var draw_cluster = function (cluster, width, height) {
+var draw_cluster = function (cluster, selection, width, height) {
     var [objects, parent_id] = dgm_objects(cluster);
 
 
@@ -97,15 +134,13 @@ var draw_cluster = function (cluster, width, height) {
     });
 
     global_cluster = cluster;
-    console.log("Cluster data:", cluster, 'table', table);
-    d3.select('.cluster_name').text(": " + cluster.name);
 
     // RENDER IT
+    selection.selectAll("svg").remove();
 
-    var svg = d3.select(".cluster_view")
-        .append('svg')
-            .attr('width', width)
-            .attr('height', height);
+    var svg = selection.append('svg')
+        .attr('width', width)
+        .attr('height', height);
 
     g = svg.append("g").attr("transform", "translate(0,0) scale(1.0)");
 

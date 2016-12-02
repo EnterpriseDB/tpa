@@ -28,7 +28,7 @@ var tpa = (function() {
     };
 
     api.get_obj = function(o) {
-        return d3.promise.json(o.url);
+        return d3.json(o.url);
     };
 
 
