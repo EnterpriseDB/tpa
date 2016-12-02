@@ -36,3 +36,17 @@ pgxl_build_targets:
 pgxl_install_targets:
   - "install"
   - "-C contrib install"
+
+#
+# We install the python-psycopg2 package (because we need it to use
+# Ansible's postgresql_* modules). This is a duplication from the
+# postgres/pkg module, but that module does a lot more unnecessary
+# stuff which does not make sense for postgres-xl
+#
+# Change RedHat extra packages entry appropriately if any new
+# package name differs in the future
+pgxl_extra_packages:
+  Debian: &debian_packages
+    - python-psycopg2
+  RedHat: *debian_packages
+  Ubuntu: *debian_packages
