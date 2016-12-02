@@ -114,41 +114,7 @@ var draw_cluster = function (cluster, width, height) {
     var node_size = d3.local();
     var node_rect = d3.local();
 
-    var role_idx = d3.local();
-
-    var display_role_list = function(sel) {
-        s.data(root.descendants().filter(tpa.class_method()
-            .when('instance', true).default(false)))
-        .enter().append('g')
-        .classed('roles', true)
-        .attr('transform', function(d) {
-            var x = d.x-20, y=d.x-15;
-
-            return "translate("+x+","+y+")";
-        })
-        .each(function(d) {
-            node_model.set(this, d);
-            role_idx.set(this, {idx: 1});
-
-            var sel = d3.select(this).selectAll(".role")
-                .data(d.data.roles.slice(0,3))
-                .enter().append("text");
-
-            sel.classed("role", true)
-                .attr('transform', function(r) {
-                    var idx = role_idx.get(this).idx;
-                    var top = idx*15;
-                    role_idx.get(this).idx = idx+1;
-                    return "translate("+"-5"+","+top+")";
-                })
-                .text(function(r) {
-                    return r.name;
-                });
-        });
-        return s;
-    };
-
-    // EDGES
+    // Links
 
     var edge = g.selectAll(".edge")
         .data(root.descendants().filter(
@@ -157,13 +123,19 @@ var draw_cluster = function (cluster, width, height) {
         .classed("edge", true)
         .attr("d", function(d) {
             // draw line from server instance to client instance
-            var path = d3.path();
             if ( !d.parent ) return "";
-            path.moveTo(d.x, d.y);
-            path.bezierCurveTo(d.parent.x, d.y,
-                                d.x-100, d.y,
-                                d.parent.x, d.parent.y);
-
+            var path = d3.path();
+            var p = d.parent, c = d.children[0];
+            var y1 = p.y, y2 = c.y;
+            if (y1 > y2) {
+                y1 = c.y;
+                y2 = p.y;
+            }
+            path.moveTo(p.x, p.y);
+            path.bezierCurveTo(
+                d.x + (d.x-c.x)/3, y1,
+                p.x + (d.x-p.x)/3, y2,
+                c.x, c.y);
             return path;
         });
 
@@ -240,6 +212,8 @@ var draw_cluster = function (cluster, width, height) {
         });
 
     // roles
+    var role_idx = d3.local();
+
     node.append("g")
         .classed('roles', true)
         .attr('transform', function(d) {
@@ -248,22 +222,20 @@ var draw_cluster = function (cluster, width, height) {
             return "translate("+x+","+y+")";
         })
         .each(function(d) {
-            node_model.set(this, d);
             role_idx.set(this, {idx: 1});
 
-            var sel = d3.select(this).selectAll(".role")
+           d3.select(this).selectAll(".role")
                 .data(d.data.roles.slice(0,3))
-                .enter().append("text");
-
-            sel.classed("role", true)
-                .attr('transform', function(r) {
-                    var idx = role_idx.get(this).idx;
-                    var top = idx*15;
-                    role_idx.get(this).idx = idx+1;
-                    return "translate("+"-5"+","+top+")";
-                })
-                .text(function(r) {
-                    return r.name;
-                });
+                .enter().append("text")
+                    .classed("role", true)
+                    .attr('transform', function(r) {
+                        var idx = role_idx.get(this).idx;
+                        var top = idx*15;
+                        role_idx.get(this).idx = idx+1;
+                        return "translate("+"-5"+","+top+")";
+                    })
+                    .text(function(r) {
+                        return r.name;
+                    });
         });
 };
