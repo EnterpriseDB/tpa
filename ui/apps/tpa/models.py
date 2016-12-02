@@ -104,7 +104,6 @@ class TenantOwnedMixin(BaseModel):
 
 
 class Cluster(TenantOwnedMixin):
-    #tenant = OwnerKey('Tenant', editable=False)
     pass
 
 
