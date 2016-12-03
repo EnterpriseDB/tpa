@@ -1,0 +1,48 @@
+---
+
+# We want to clone a replica, i.e., set up cascading replication.
+#
+# In the best case, the replica we want to clone is up and running and
+# registered already. Then we don't need to do anything special.
+
+- name: Check if we can connect to the defined upstream
+  command: >
+    {{ psql }} '{{ upstream_conninfo }}' -qAtw -c "SELECT 1"
+  vars:
+    psql: '{{ postgres_bin_dir }}/psql'
+    upstream_conninfo: 'host={{ upstream }} user=repmgr dbname=repmgr'
+  register: upstreamup
+  ignore_errors: True
+  changed_when: False
+  become_user: postgres
+  become: yes
+
+- set_fact:
+    upstream_to_clone: "{{
+      (upstreamup|succeeded and upstreamup.stdout == '1') |
+      ternary(upstream, upstream_primary)
+    }}"
+
+# If the upstream replica is not available (most probably because it's
+# being set up in parallel with this node), we insert an entry with the
+# correct conninfo for it into repl_nodes, so that repmgr standby clone
+# generates a correct recovery.conf. When the upstream executes standby
+# register itself, this entry will be corrected and activated.
+
+- name: Ensure that the upstream exists in repl_nodes
+  command: >
+    {{ psql }} '{{ primary_conninfo }}' -qAtw -c
+    "INSERT INTO \"{{ repmgr_schema }}\".repl_nodes
+    (id, type, cluster, name, conninfo, priority, active) VALUES
+    ({{ hostvars[upstream].node }}, 'standby', '{{ upstream_primary }}', '{{ upstream }}', '{{ upstream_conninfo }}', 100, 'f')
+    ON CONFLICT DO NOTHING"
+  vars:
+    psql: '{{ postgres_bin_dir }}/psql'
+    primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
+    upstream_conninfo: 'host={{ upstream }} user=repmgr dbname=repmgr'
+    repmgr_schema: 'repmgr_{{ upstream_primary }}'
+  changed_when: False
+  become_user: postgres
+  become: yes
+  when: >
+    upstream_to_clone != upstream

@@ -9,17 +9,24 @@
   become: yes
 
 - name: Check if the witness is registered
-  shell: >
+  command: >
     {{ psql }} '{{ primary_conninfo }}' -qAtw -c
     "SELECT type FROM \"{{ repmgr_schema }}\".repl_nodes WHERE type='witness' and name='{{ inventory_hostname }}'"
   vars:
     psql: '{{ postgres_bin_dir }}/psql'
     primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
     repmgr_schema: 'repmgr_{{ upstream_primary }}'
-  register: witness
+  register: regtype
   changed_when: False
   become_user: postgres
   become: yes
+
+- fail:
+    msg: >
+      {{ inventory_hostname }} is tagged as witness for {{ upstream_primary }},
+      but is registered as a {{ regtype.stdout }} already
+  when:
+    regtype.stdout != '' and regtype.stdout != 'witness'
 
 - name: Run 'repmgr witness register' on the witness
   command: >
@@ -28,4 +35,4 @@
       -h "{{ upstream_primary }}"
   become_user: postgres
   become: yes
-  when: witness.stdout == 'witness'
+  when: regtype.stdout == ''

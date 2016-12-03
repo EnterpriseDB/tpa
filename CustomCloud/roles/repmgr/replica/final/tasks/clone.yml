@@ -1,0 +1,55 @@
+# We arrive at this point after having already applied postgres/initdb
+# and creating the data directory. This is necessary because we depend
+# on pg_createcluster/postgresqlNN-setup to configure the database to
+# start at boot time, but it means we now have to remove our PGDATA
+# before cloning the primary's PGDATA.
+#
+# What we would like to do is not apply postgres/initdb on replicas, run
+# "repmgr standby clone" and configure Postgres to start at boot, either
+# by telling the setup tools to use the existing data directory—which is
+# something they don't support—or by installing our own unit files. That
+# way, we're never in the position of having to move aside an existing
+# data directory (albeit an empty one).
+
+- name: Stop Postgres
+  service:
+    name: "{{ postgres_service_name }}"
+    state: stopped
+
+- name: Empty the existing data directory
+  shell: >
+    rm -rf {{ postgres_data_dir }}/*
+
+# Now we have to decide where to clone from.
+#
+# The obvious answer is our 'upstream' instance, which may be a primary
+# or another replica. The problem is that if it's a replica, it may not
+# have been initialised yet. We check if we can connect to the upstream
+# and if so, clone from it; if not, we clone from the primary and do a
+# little magic to make the replication work as desired afterwards.
+
+- include: clone-upstream.yml
+  when: >
+    upstream != upstream_primary
+    
+- name: Run repmgr standby clone
+  command: >
+    {{ postgres_bin_dir }}/repmgr standby clone --verbose \
+      -f "{{ repmgr_conf_dir }}/repmgr.conf" -D {{ postgres_data_dir }} \
+      -d repmgr -U repmgr -w 0 --fast-checkpoint \
+      --copy-external-config-files \
+      -h {{ upstream_to_clone|default(upstream_primary) }}
+  become_user: postgres
+  become: true
+
+- name: Start Postgres
+  service:
+    name: "{{ postgres_service_name }}"
+    state: started
+
+- name: Run repmgr standby register
+  command: >
+    {{ postgres_bin_dir }}/repmgr standby register --verbose \
+      -f "{{ repmgr_conf_dir }}/repmgr.conf" --force
+  become_user: postgres
+  become: true

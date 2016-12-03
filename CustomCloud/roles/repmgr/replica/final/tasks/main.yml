@@ -1,61 +1,30 @@
 ---
 
-# We arrive at this point after having already applied postgres/initdb
-# and creating the data directory. This is necessary because we depend
-# on pg_createcluster/postgresqlNN-setup to configure the database to
-# start at boot time, but it means we now have to remove our PGDATA
-# before cloning the primary's PGDATA.
-#
-# What we would like to do is not apply postgres/initdb on replicas, run
-# "repmgr standby clone" and configure Postgres to start at boot, either
-# by telling the setup tools to use the existing data directory—which is
-# something they don't support—or by installing our own unit files. That
-# way, we're never in the position of having to move aside an existing
-# data directory (albeit an empty one).
+# If the replica is already registered, we don't need to do anything.
 
 - name: Check if the replica is registered
-  shell: >
+  command: >
     {{ psql }} '{{ primary_conninfo }}' -qAtw -c
     "SELECT 'replica' FROM \"{{ repmgr_schema }}\".repl_nodes WHERE type='standby' and name='{{ inventory_hostname }}'"
   vars:
     psql: '{{ postgres_bin_dir }}/psql'
     primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
     repmgr_schema: 'repmgr_{{ upstream_primary }}'
-  register: replica
+  register: regtype
   changed_when: False
   become_user: postgres
   become: yes
 
-- block:
-    - name: Stop Postgres
-      service:
-        name: "{{ postgres_service_name }}"
-        state: stopped
+# Just to be on the safe side, fail if the instance is registered as
+# something other than a replica.
 
-    - name: Empty the existing data directory
-      shell: >
-        rm -rf {{ postgres_data_dir }}/*
+- fail:
+    msg: >
+      {{ inventory_hostname }} is tagged as replica of {{ upstream_primary }},
+      but is registered as a {{ regtype.stdout }} already"
+  when: >
+    regtype.stdout != '' and regtype.stdout != 'replica'
 
-    - name: Run repmgr standby clone
-      command: >
-        {{ postgres_bin_dir }}/repmgr standby clone --verbose \
-          -f "{{ repmgr_conf_dir }}/repmgr.conf" -D {{ postgres_data_dir }} \
-          -d repmgr -U repmgr -w 0 --fast-checkpoint \
-          --copy-external-config-files \
-          -h {{ upstream_primary }}
-      become_user: postgres
-      become: true
-
-    - name: Start Postgres
-      service:
-        name: "{{ postgres_service_name }}"
-        state: started
-
-    - name: Run repmgr standby register
-      command: >
-        {{ postgres_bin_dir }}/repmgr standby register --verbose \
-          -f "{{ repmgr_conf_dir }}/repmgr.conf"
-      become_user: postgres
-      become: true
-
-  when: replica.stdout == 'replica'
+- include: clone.yml
+  when: >
+    regtype.stdout == ''
