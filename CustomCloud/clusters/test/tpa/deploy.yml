@@ -28,7 +28,7 @@
     # few steps later.
     - role: postgres/vars
       vars:
-        postgres_version: 9.5
+        postgres_version: 9.6
       tags: always
 
     # Computes memory size and other instance-specific computations for

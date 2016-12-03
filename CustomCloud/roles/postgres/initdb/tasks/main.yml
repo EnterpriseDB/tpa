@@ -22,7 +22,7 @@
     mode: 0700
     state: directory
   with_items:
-    - "{{ postgres_home_dir }}"
+    - "{{ postgres_home }}"
     - "{{ postgres_data_dir }}"
   tags: [postgres, initdb]
 
