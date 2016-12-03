@@ -28,10 +28,22 @@ def doublequote(str):
 # Given a hostname and hostvars, returns the name of the earliest ancestor that
 # doesn't have an upstream defined.
 
-def upstream_root(root, hostvars):
-    while root in hostvars and hostvars[root].get('upstream', '') != '':
-        root = hostvars[root].get('upstream')
-    return root
+def upstream_root(h, hostvars):
+    while h in hostvars and hostvars[h].get('upstream', '') != '':
+        h = hostvars[h].get('upstream')
+    return h
+
+# Given a list of hostnames and a primary name and hostvars, returns the name of
+# the first listed instance that is descended from the primary and has a backup
+# instance defined, or None if none of the given named instances meets those
+# criteria.
+
+def instance_with_backup_of(hosts, primary, hostvars):
+    for h in hosts:
+        if hostvars[h].get('backup', None) is not None and \
+            upstream_root(h, hostvars) == primary:
+            return h
+    return None
 
 class FilterModule(object):
     def filters(self):
@@ -39,4 +51,5 @@ class FilterModule(object):
             'try_subkey': try_subkey,
             'doublequote': doublequote,
             'upstream_root': upstream_root,
+            'instance_with_backup_of': instance_with_backup_of,
         }

@@ -10,6 +10,6 @@ pg_bindir={{ postgres_bin_dir }}
 promote_command='{{ repmgr_conf_dir }}/promote_command.sh'
 follow_command='{{ repmgr_conf_dir }}/follow_command.sh'
 logfile='/var/log/postgresql/repmgrd.log'
-{% if upstream and hostvars[upstream].backup != '' %}
-restore_command='/usr/bin/barman-wal-restore -U barman {{ hostvars[hostvars[upstream].backup].inventory_hostname }} {{ hostvars[upstream].backup_name }} %f %p'
+{% if upstream_backedup != '' %}
+restore_command='/usr/bin/barman-wal-restore -U barman {{ hostvars[upstream_backedup].backup }} {{ hostvars[upstream_backedup].backup_name }} %f %p'
 {% endif %}
