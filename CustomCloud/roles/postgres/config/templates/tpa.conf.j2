@@ -30,8 +30,8 @@ syslog_facility = {{ syslog_facility|default('LOCAL0') }}
 syslog_ident = {{ syslog_ident|default('postgres') }}
 
 log_checkpoints = on
-log_connections = on
-log_disconnections = on
+log_connections = {{ log_connections|default('off') }}
+log_disconnections = {{ log_disconnections|default('off') }}
 log_duration = off
 log_hostname = off
 log_lock_waits = on
