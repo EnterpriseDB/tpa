@@ -8,6 +8,8 @@ from __future__ import unicode_literals, absolute_import, print_function
 
 from .local import *
 
+DEBUG = False
+
 DEPLOYMENT = 'prod'
 
 DATABASES['default']['NAME'] = 'tpa-prod'
