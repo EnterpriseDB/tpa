@@ -280,13 +280,12 @@
     <script src="/js/tpa-d3.js"></script>
     <script src="/js/diagram.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function(e) { 
+        document.addEventListener("DOMContentLoaded", function(e) {
             var next_cluster = show_clusters(tpa.TEST_TENANT,
                                             d3.select(".cluster_view"),
                                             1000, 1000);
             d3.select(".fa-plus")
-                .on("click", function(d,i) {
-                    next_cluster(); })
+                .on("click", function(d,i) { next_cluster(); })
                 .each(console.log);
         });
     </script>

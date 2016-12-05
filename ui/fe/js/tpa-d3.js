@@ -7,8 +7,9 @@ var show_clusters = function (tenant, selection, width, height) {
     var clusters = [];
     var current_cluster_idx = -1;
 
-    d3.json(tpa.url+"cluster/", function(c, e) {
-        if (e) { 
+
+    tpa.get_obj_by_url(tpa.url+"cluster/", function(c, e) {
+        if (e) {
             alert("API Server communication error");
             throw e;
         }
@@ -43,6 +44,9 @@ var show_clusters = function (tenant, selection, width, height) {
 var dgm_objects = function(cluster) {
     var accum = [], result = [], parent_id = {};
 
+    var regions = [];
+    var instances_in_zone = [];
+
     var roles = {};
     var instance_parents = {};
 
@@ -57,8 +61,13 @@ var dgm_objects = function(cluster) {
 
     accum.push([cluster, ""]); // Cluster is root
 
+    // Regions and zones
+
     cluster.subnets.forEach(function(s) {
-        accum.push([s, cluster]);
+        var subnet_zone = {url: s.zone};
+        accum.push([subnet_zone, cluster]);
+        accum.push([s, subnet_zone]);
+
         s.instances.forEach(function(i) {
             i.roles.forEach(function(r) {
                 r.client_links.forEach(function(l) {
@@ -76,8 +85,6 @@ var dgm_objects = function(cluster) {
                 });
             });
         });
-        //accum.push(s.zone);
-        //accum.push(s.zone.region);
     });
 
     cluster.subnets.forEach(function(s) {
@@ -90,20 +97,29 @@ var dgm_objects = function(cluster) {
     });
 
 
-    accum.forEach(function([o, p]) {
-        if (o.url in parent_id) {
+    accum.forEach(function(v) {
+        console.log("accum:", v);
+        var o=v[0], p=v[1];
+
+        var url = o.url;
+
+        if (url in parent_id) {
             return;
         }
+
         result.push(o);
-        parent_id[o.url] = p.url;
+        parent_id[url] = p.url;
     });
 
     return [result, parent_id];
 };
 
 var draw_cluster = function (cluster, selection, width, height) {
-    var [objects, parent_id] = dgm_objects(cluster);
+    console.log("draw_cluster:", cluster);
+    var dgm = dgm_objects(cluster);
 
+    var objects = dgm[0];
+    var parent_id = dgm[1];
 
     // MAKE TREE
     //
@@ -112,15 +128,23 @@ var draw_cluster = function (cluster, selection, width, height) {
                     .parentId(function(d) { return parent_id[d.url]; })
                 (objects);
     var root = d3.hierarchy(table);
-    var tree = d3.cluster().size([height*0.2, width*0.8])
-        .separation(function(a, b) {
-            return Math.min(5-b.depth, 1);
-        });
+    var tree = d3.cluster()
+                .size([height*0.2, width*0.8])
+                .nodeSize([width/10, height/10]);
 
     tree(root);
-    var root_x = root.y, root_y = root.x;
-    root.x = root_x;
+
+    console.log('table', table);
+    console.log("before:", root.x, root.y);
+
+    var root_x = root.y,
+        root_y = root.x;
+
+    root.x = 0;
     root.y = root_y;
+
+    console.log("after:", root.x, root.y);
+
     root.data = root.data.data;
 
     root.descendants().forEach(function(d) {
@@ -133,6 +157,10 @@ var draw_cluster = function (cluster, selection, width, height) {
         d.data = d.data.data;
     });
 
+    console.log("objects:", objects);
+    console.log("parents:", parent_id);
+    console.log("root:", root);
+
     global_cluster = cluster;
 
     // RENDER IT
@@ -142,7 +170,32 @@ var draw_cluster = function (cluster, selection, width, height) {
         .attr('width', width)
         .attr('height', height);
 
-    g = svg.append("g").attr("transform", "translate(0,0) scale(1.0)");
+    g = svg.append("g")
+            .classed("diagram", true);
+
+    // Background grid
+    var yScale = d3.scale.linear()
+        .domain([-height/2, height*1.5])
+        .range([root.y-500, root.y+500]);
+
+    g.selectAll("line.horizontalGrid").data(yScale.ticks(50)).enter()
+        .append("line")
+            .attr("class", "horizontalGrid")
+            .attr("x1", -width)
+            .attr("x2", width)
+            .attr("y1", yScale)
+            .attr("y2", yScale);
+
+    // Zoom
+
+    var zoom = d3.zoom()
+        .scaleExtent([0.5, 40])
+        .translateExtent([[-width/2, -height/2], [width*2, height*2]])
+        .on("zoom", function () { g.attr("transform", d3.event.transform); });
+
+    svg.call(zoom);
+
+    // Locals
 
     var node_model = d3.local();
     var node_url = d3.local();
@@ -175,6 +228,22 @@ var draw_cluster = function (cluster, selection, width, height) {
         });
 
 
+    var zone_node = g.selectAll(".diagram-zone")
+        .data(root.descendants().filter(tpa.class_method()
+            .when('zone', true).default(false)
+        ))
+        .enter().append("text")
+            .attr("class", function(d) {
+                console.log("zone:", d);
+                return "diagram--zone" + (d.children ?
+                    "" : " diagram--zone--empty"); })
+            .attr("transform", function(d) {
+                return "translate(" + 0 +','+d.y + ")"; })
+            .property('model-url', function(d) {
+                return d.data.url ? d.data.url : null;
+            })
+            .text(function(d) { return tpa.url_cache[d.data.url].name; });
+
     var node = g.selectAll(".node")
         .data(root.descendants().filter(tpa.class_method()
             .when('instance', true).default(false)
@@ -189,7 +258,8 @@ var draw_cluster = function (cluster, selection, width, height) {
                 return d.data.url ? d.data.url : null;
             })
         .each(function(d) {
-            var h = 80, w = 100;
+            var h = 25+14*(d.data.roles.length+1),
+                w = 8*(d.data.name.length+1);
             node_model.set(this, d.data);
             node_url.set(this, d.data.url);
             node_size.set(this, [w, h]);
@@ -201,21 +271,20 @@ var draw_cluster = function (cluster, selection, width, height) {
             });
         });
 
-    // g.selectAll(".roles").call(display_role_list);
-
     // ellipse
     node.append("path")
         .classed('container_shape', true)
         .attr('d', tpa.class_method()
             .when('instance', function(d) {
                 var rect = node_rect.get(this);
-                var path = d3.path(), n_w = node_size.get(this)[0];
+                var path = d3.path(), n_h = node_size.get(this)[1];
+                var pointy_size = d3.min(n_h, node_size.get(this)[0]*3.0/4.0);
 
                 path.moveTo(rect.top_right.x, rect.top_right.y);
-                path.quadraticCurveTo(rect.top_right.x+n_w/2.5, 0,
+                path.quadraticCurveTo(rect.top_right.x+n_h/2.5, 0,
                                     rect.bottom_right.x, rect.bottom_right.y);
                 path.lineTo(rect.bottom_left.x, rect.bottom_left.y);
-                path.quadraticCurveTo(rect.bottom_left.x-n_w, 0,
+                path.quadraticCurveTo(rect.bottom_left.x-n_h/2.3, 0,
                                     rect.top_left.x, rect.top_left.y);
                 path.lineTo(rect.top_right.x, rect.top_right.y);
                 path.closePath();
@@ -228,8 +297,9 @@ var draw_cluster = function (cluster, selection, width, height) {
         .classed('icon', true)
         .attr('d', tpa.class_method()
             .default(function(d) {
-                var radius = 16;
-                var circle = "M -110 0 " +
+                var ns = node_size.get(this);
+                var radius = ns[1]/4;
+                var circle = "M "+ (-(ns[0]/2+ns[1]/2)) +" 0 " +
                     " m "+radius+", 0" +
                     " a "+radius+","+radius+" 0 1,1 "+(2*radius)+",0" +
                     " a "+radius+","+radius+" 0 1,1 "+(-2*radius)+",0";
@@ -240,7 +310,8 @@ var draw_cluster = function (cluster, selection, width, height) {
     node.append("text")
         .classed("name", true)
         .attr("transform", function(d) {
-            return "translate(-50, -20)";
+            var ns = node_size.get(this);
+            return "translate("+(-ns[0]/3)+", " + (-ns[1]/2+20) + ")";
         })
         .text(function(d) {
             return d.data.name;
@@ -249,25 +320,43 @@ var draw_cluster = function (cluster, selection, width, height) {
     // roles
     var role_idx = d3.local();
 
-    node.append("g")
+    var dgm_roles = node.append("g")
         .classed('roles', true)
         .attr('transform', function(d) {
-            var x = -20, y=-15;
+            var x = -node_size.get(this)[0]/4,
+                y=-node_size.get(this)[1]/2+25;
 
             return "translate("+x+","+y+")";
+        });
+
+    /*
+     * FIXME: needs to resize to text corectly.
+    dgm_roles.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', function (d) {
+            return 8+8*d3.max(d.data.roles.map(function(r) {
+                return r.name.length;
+            }));
         })
-        .each(function(d) {
+        .attr('height', function (d) {
+            return 20*d.data.roles.length;
+        });
+    */
+
+    dgm_roles.each(function(d) {
             role_idx.set(this, {idx: 1});
 
            d3.select(this).selectAll(".role")
-                .data(d.data.roles.slice(0,3))
+                .data(d.data.roles)
                 .enter().append("text")
                     .classed("role", true)
                     .attr('transform', function(r) {
+                        var ns = node_size.get(this);
                         var idx = role_idx.get(this).idx;
-                        var top = idx*15;
+                        var top = 15+(idx-1)*15;
                         role_idx.get(this).idx = idx+1;
-                        return "translate("+"-5"+","+top+")";
+                        return "translate("+"4"+","+top+")";
                     })
                     .text(function(r) {
                         return r.name;
