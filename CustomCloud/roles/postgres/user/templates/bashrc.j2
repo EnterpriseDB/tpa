@@ -1,5 +1,5 @@
 export PS1='\u@\h:\w $ '
-export PATH={{ postgres_bin_dir }}:$PATH
+export PATH=$PATH:{{ postgres_bin_dir }}
 {% for l in extra_bashrc_lines|default([]) %}
 {{ l }}
 {% endfor %}
