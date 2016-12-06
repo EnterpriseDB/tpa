@@ -1,2 +1,2 @@
-*:*:*:postgres:{{ postgres_password }}
-*:*:*:repmgr:{{ repmgr_password }}
+*:*:*:postgres:{{ postgres_password|replace("\\","\\\\")|replace(':','\:') }}
+*:*:*:repmgr:{{ repmgr_password|replace("\\","\\\\")|replace(':','\:') }}
