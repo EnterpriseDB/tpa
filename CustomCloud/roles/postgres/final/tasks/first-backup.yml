@@ -34,17 +34,13 @@
 # a new WAL segment to give the archiver something to do. We could use
 # «barman switch-xlog», but that doesn't work on replicas, so we run
 # pg_switch_xlog() via psql on the instance or its upstream.
-#
-# TODO: This doesn't work with cascading replication setups where the
-# upstream is another replica, but we can't set up cascading yet anyway,
-# so we gracefully ignore that problem for now.
 
 - name: Force switch to a new WAL segment
   command: >
     psql -qAtc 'select pg_xlogfile_name(pg_switch_xlog())'
   become_user: postgres
   become: yes
-  delegate_to: "{{ upstream or inventory_hostname }}"
+  delegate_to: "{{ inventory_hostname|upstream_root(hostvars) }}"
   register: segment
   failed_when: >
     segment|failed and not 'recovery is in progress' in segment.stderr
