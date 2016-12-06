@@ -217,6 +217,7 @@
     # Generate SSH host keys for instances.
 
     - include: ssh-hostkeys.yml
+      tags: ssh
 
     # When provisioning each instance, we must specify an AMI id to use.
     # If the instance configuration specifies "image: ami-xxx" directly,
