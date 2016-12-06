@@ -2,8 +2,8 @@
 
 dependencies:
   - role: postgres/restart
-  - role: postgres/createuser
-    username: postgres
+  - role: postgres/pgpass
+  - role: postgres/createuser/final
     when: >
       'replica' not in role
   - role: postgres/config/final

@@ -7,9 +7,11 @@ local   all             postgres                                peer
 local   all             all                                     trust
 host    all             all             127.0.0.1/32            trust
 host    all             all             ::1/128                 trust
-hostssl    postgres        all             0.0.0.0/0               md5
-host    replication     all             {{ cluster_network }}   trust
-host    repmgr          repmgr          {{ cluster_network }}   trust
+host    postgres        barman          {{ cluster_network }}   md5
+host    repmgr          repmgr          {{ cluster_network }}   md5
+host    replication     all             {{ cluster_network }}   md5
+host    all             all             {{ cluster_network }}   md5
+hostssl all             all             0.0.0.0/0               md5
 
 {% for l in postgres_hba_settings %}
 {{l}}

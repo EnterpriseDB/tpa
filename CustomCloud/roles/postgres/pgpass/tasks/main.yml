@@ -1,0 +1,9 @@
+---
+
+- name: Install .pgpass file in ~postgres
+  template:
+    src: pgpass.j2
+    dest: ~postgres/.pgpass
+    owner: postgres
+    group: postgres
+    mode: 0600

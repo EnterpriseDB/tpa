@@ -45,3 +45,13 @@ dependencies:
     ssh_key_name: id_barman
     when: >
       'postgres' in role
+
+  # The barman and streaming_barman users must be created on any primary
+  # that we want to backup (whether directly or through a replica), and
+  # their passwords must be in ~barman/.pgpass on the backup server. We
+  # create the users on *every* primary straightaway.
+
+  - role: postgres/createuser
+    username: barman
+  - role: postgres/createuser
+    username: streaming_barman

@@ -1,12 +1,9 @@
 ---
 
-- name: Create the {{ username }} superuser
-  postgresql_user:
-    name: "{{ username }}"
-    encrypted: yes
-    password: "md5{{ (vars[username+'_password'] + username)|hash('md5') }}"
-    role_attr_flags: superuser
-    port: "{{ postgres_port }}"
-    login_host: "{{ postgres_host }}"
-  become_user: postgres
-  become: yes
+- name: Record {{ username }} in the list of database users to create
+  set_fact:
+    postgres_superusers: "{{
+      postgres_superusers|default([])|union([{
+        'username': username,
+      }])
+    }}"

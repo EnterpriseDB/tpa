@@ -1,10 +1,6 @@
 ---
 
 dependencies:
-  - role: postgres/createuser
-    username: repmgr
-    when: >
-      'replica' not in role
   - role: repmgr/primary/final
     when: >
       'primary' in role
