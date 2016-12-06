@@ -40,7 +40,7 @@ def upstream_root(h, hostvars):
 
 def instance_with_backup_of(hosts, primary, hostvars):
     for h in hosts:
-        if hostvars[h].get('backup', None) is not None and \
+        if hostvars[h].get('backup', '') != '' and \
             upstream_root(h, hostvars) == primary:
             return h
     return None
