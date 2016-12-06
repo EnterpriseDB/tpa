@@ -9,8 +9,6 @@
 
 - name: Deprovision EC2 cluster
   hosts: localhost
-  vars:
-    ansible_python_interpreter: /usr/bin/env python
   tasks:
     - include: validate.yml
       tags: always
