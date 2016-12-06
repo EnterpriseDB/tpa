@@ -34,7 +34,6 @@ instances:
         os: Debian
         role: primary
         Name: debian-primary
-        backup: debian-witness
 
     - node: 2
       type: t2.micro
@@ -49,6 +48,7 @@ instances:
         role: replica
         Name: debian-replica
         upstream: debian-primary
+        backup: debian-witness
 
     - node: 3
       type: t2.micro
@@ -76,4 +76,3 @@ instances:
         os: Debian
         role: barman,monitor,witness,log-server,openvpn-server
         Name: debian-witness
-        upstream: debian-primary
