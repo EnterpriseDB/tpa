@@ -1,6 +1,7 @@
 ---
 
 - name: Set up TPA cluster nodes
+  any_errors_fatal: True
 
   # This play targets all hosts in the cluster.
   hosts: tag_Cluster_CascadingTest
