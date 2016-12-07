@@ -47,9 +47,23 @@
     name: "{{ postgres_service_name }}"
     state: started
 
+- name: Wait for Postgres to become available
+  command: >
+    {{ postgres_bin_dir }}/pg_isready --timeout 5
+  become_user: postgres
+  become: yes
+  register: ready
+  ignore_errors: yes
+  until: >
+    ready.rc == 0
+  failed_when: ready.rc > 1
+  changed_when: False
+  retries: 3
+  delay: 5
+
 - name: Run repmgr standby register
   command: >
     {{ postgres_bin_dir }}/repmgr standby register --verbose \
-      -f "{{ repmgr_conf_dir }}/repmgr.conf" --force
+      -f "{{ repmgr_conf_dir }}/repmgr.conf" --force --wait-sync
   become_user: postgres
   become: true
