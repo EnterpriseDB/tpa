@@ -4,10 +4,6 @@
 # backups on this run. Barman will not start a backup until the server
 # has archived at least one WAL segment, so we try to make sure that
 # happens before we try.
-#
-# TODO: We should do this for any instance that doesn't have a backup.
-# That would help to gracefully deal with failures during the initial
-# backup attempt.
 
 # barman/final should have started pg_receivexlog (via barman cron). We
 # check by looking for the corresponding entries in pg_stat_replication
