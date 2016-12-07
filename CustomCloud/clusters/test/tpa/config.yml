@@ -74,6 +74,11 @@ instances:
             volume_size: 32
       tags:
         os: Debian
-        role: barman,monitor,witness,log-server,openvpn-server
+        role:
+          - barman
+          - witness
+          - log-server
+          - openvpn-server
+          - monitoring-server
         Name: debian-witness
         upstream: debian-primary
