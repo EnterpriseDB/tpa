@@ -77,3 +77,16 @@
     inventory_hostname != groups[os][0]
   vars:
     os: 'tag_role_openvpn-server'
+
+# If any instance is tagged with 'monitoring-server', make every other
+# instance use it as its monitoring server. This can be overriden by
+# setting 'monitoring_server' for any instance.
+
+- set_fact:
+    monitoring_server: "{{ groups[ms][0] }}"
+  when: >
+    monitoring_server is not defined and
+    ms in groups and groups[ms]|length > 0 and
+    inventory_hostname != groups[ms][0]
+  vars:
+    ms: 'tag_role_monitoring-server'
