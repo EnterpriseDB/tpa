@@ -8,6 +8,7 @@
   static: no
   when: >
     'primary' in role and initdb is defined
+  tags: pgbench
 
 # We force an immediate backup for any instances that do not have any
 # backups at all.
@@ -27,3 +28,23 @@
   static: no
   when: >
     backup != '' and backups.stdout == '0'
+
+- block:
+    - name: Run read/write pgbench
+      include: pgbench.yml
+      vars:
+        pgbench_opts: -v -c 10 -j 5 -T 180
+      static: no
+      when: >
+        'primary' in role
+
+    - name: Run read-only pgbench on replicas
+      include: pgbench.yml
+      vars:
+        pgbench_opts: -n -c 10 -j 5 -T 180 -S
+      static: no
+      when: >
+        'replica' in role
+  when: >
+    pgbench|default('') == 'run'
+  tags: pgbench

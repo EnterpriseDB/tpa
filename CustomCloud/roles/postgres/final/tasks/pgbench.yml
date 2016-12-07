@@ -1,0 +1,7 @@
+---
+
+- name: Run pgbench
+  command: >
+    pgbench {{ pgbench_opts }}
+  become_user: postgres
+  become: yes
