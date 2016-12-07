@@ -78,16 +78,6 @@
         'postgres' in role
       tags: [postgres, final]
 
-    # Set up monitor server
-    - role: monitor/server
-      when: >
-        'monitor-server' in role
-      tags: [monitor, server]
-
-    # Set up monitor client
-    - role: monitor/client
-      become: true
-      become_user: postgres
-      when: >
-        'monitor-client' in role
-      tags: [monitor, client]
+    # Set up monitoring
+    - role: monitoring
+      tags: monitoring
