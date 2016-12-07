@@ -26,17 +26,3 @@
   static: no
 
 # On any other kind of instance, we do nothing.
-#
-# We could instead split this up into barman/server and barman/client
-# roles and apply them only to the right instances. That is the "right
-# thing" to do, and how it should have been in the first place, but for
-# simplicity—and because client-side configuration is minimal—we leave
-# it this way so that deploy.yml can just drop the barman role in place
-# and nothing else is needed.
-#
-# If we find ourselves adding more complex logic within this role in
-# future, however, it would indicate the need to split up the role
-# (which can be begun by changing include→include_role above).
-#
-# Another advantage of splitting the role would be considerably reduced
-# "skipping" output.
