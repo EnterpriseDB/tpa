@@ -30,6 +30,14 @@
     group: root
     mode: 0644
 
+- name: Install .pgpass file for Barman
+  template:
+    src: pgpass.j2
+    dest: ~barman/.pgpass
+    owner: barman
+    group: barman
+    mode: 0600
+
 # We install a per-client configuration file in /etc/barman.d and create
 # a cron job to backup each client in client.yml by delegating to the
 # designated backup server.
