@@ -25,7 +25,7 @@
 # Some extensions need entries in shared_preload_libraries.
 
 - name: Add entries to shared_preload_libraries
-  include: ../../../postgres/config/tasks/preload-library.yml
+  include_role: name=postgres/config tasks_from=preload-library
   vars:
     library: "{{ item }}"
   when: item in postgres_extensions
