@@ -23,7 +23,7 @@
     dest: "{{ postgres_conf_dir }}/pg_hba.conf"
   when: postgres_hba_template != ''
   notify:
-    - Note Postgres restart required
+    - Note Postgres reload required
 
 # Next, we generate postgresql.conf if the caller specifies a template.
 # Otherwise, we leave the default postgresql.conf alone.
@@ -86,7 +86,7 @@
   when: postgres_conf_settings
   notify:
     - Note Postgres restart required
-    
+
 # And here's a file where anyone can add extra settings that will have
 # priority over our defaults, and will never be overwritten.
 

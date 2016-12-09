@@ -1,12 +1,14 @@
 ---
 
-# We start or restart Postgres depending on whether any tasks have
-# notified the 'Note Postgres restart required' handler. Either way,
-# Postgres will be running after this role completes.
+# We start, restart or reload Postgres depending on whether any tasks have
+# notified the 'Note Postgres restart required' or
+# 'Note Postgres reload required' handlers.
+# In any case, Postgres will be running after this role completes.
 
 - meta: flush_handlers
 
-- name: Start or restart Postgres
+- name: Start, restart or reload Postgres
   service:
     name: "{{ postgres_service_name }}"
     state: "{{ postgres_service_end_state|default('started') }}"
+
