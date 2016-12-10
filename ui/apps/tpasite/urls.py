@@ -20,7 +20,7 @@ if settings.DEBUG:
     ]
 
 urlpatterns += [
-    url(r'^/$', RedirectView.as_view(url="/index.html")),
+    url(r'^$', RedirectView.as_view(url="/index.html")),
     url(r'^api/', include('tpasite.api.urls', namespace='api')),
     url(r'^(?P<path>.*)$', views.serve),
 ]

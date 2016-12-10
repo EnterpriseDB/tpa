@@ -6,6 +6,9 @@
 
 from __future__ import unicode_literals, absolute_import, print_function
 
+import os
+import os.path
+
 from .base import *
 
 # Application definition
@@ -38,8 +41,15 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+BUILD_PATH = os.getenv('BUILD_PATH', 'build')
+BUILD_PATH_REL = (BUILD_PATH if BUILD_PATH.startswith('/') else
+                  os.path.join(BASE_DIR, "..", "..", BUILD_PATH))
+
+print("BUILD_PATH_REL:", BUILD_PATH_REL)
+
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "../fe"),
+    os.path.join(BASE_DIR, "..", "fe"),
+    os.path.join(BUILD_PATH_REL, 'static'),
 ]
 
 REST_FRAMEWORK = {
