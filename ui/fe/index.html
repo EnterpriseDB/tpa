@@ -255,39 +255,6 @@
     <!-- Custom Theme JavaScript -->
     <script src="assets/js/template.js"></script>
 
-    <script src="https://d3js.org/d3.v2.min.js"></script>
-    <script src="https://d3js.org/d3-color.v1.min.js"></script>
-    <script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
-    <script src="https://d3js.org/d3-drag.v1.min.js"></script>
-    <script src="https://d3js.org/d3-ease.v1.min.js"></script>
-    <script src="https://d3js.org/d3-hierarchy.v1.min.js"></script>
-    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-    <script src="https://d3js.org/d3-path.v1.min.js"></script>
-    <script src="https://d3js.org/d3-selection.v1.min.js"></script>
-    <script src="https://d3js.org/d3-timer.v1.min.js"></script>
-    <script src="https://d3js.org/d3-transition.v1.min.js"></script>
-    <script src="https://d3js.org/d3-shape.v1.min.js"></script>
-    <script src="https://d3js.org/d3-zoom.v1.min.js"></script>
-
-    <script src="http://underscorejs.org/underscore-min.js"></script>
-
-    <script src="/js/multimethod-min.js"></script>
-    <script src="/js/es6-promise.auto.min.js"></script>
-    <script src="/js/d3.promise.min.js"></script>
-
-    <script src="/js/utils.js"></script>
-    <script src="/js/tpa-api.js"></script>
-    <script src="/js/tpa-d3.js"></script>
-    <script src="/js/diagram.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function(e) {
-            var next_cluster = show_clusters(tpa.TEST_TENANT,
-                                            d3.select(".cluster_view"),
-                                            1000, 1000);
-            d3.select(".fa-plus")
-                .on("click", function(d,i) { next_cluster(); })
-                .each(console.log);
-        });
-    </script>
+    <script src="bundle.js"></script>
 </body>
 </html>
