@@ -3,10 +3,10 @@
 - name: Translate platform-specific variables names
   action: set_fact
   args:
-    "{{ item.var }}": "{{ vars[item.source]|default(item.default)|default(None) }}"
-  when: >
-    (item.var not in vars and item.source in vars) or
-    ('override' in item and item.override)
+    "{{ item.var }}": "{{ vars[item.source] }}"
+  when:
+    item.source in vars and
+    (item.var not in vars or ('override' in item and item.override))
   with_items:
     - var: node
       source: ec2_tag_node
