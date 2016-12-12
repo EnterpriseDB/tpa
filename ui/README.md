@@ -19,10 +19,17 @@ implemented with Bootstrap, Vue.js and D3.
 populated by the 2nd Quadrant central monitoring and alerting system. This
 uses Celery for task queues.
 
-
 ## Requirements
 
 ### External services
+
+* TPA: From the perspective of this UI application, TPA is a provisioning
+and discovery service. The web app will run TPA from a batch queue on
+a non-frontline server, and the input will always be a well-formed and
+validated config.yml file representing the desired cluster provisioned
+state.
+
+The syntax or format of the response message from TPA is yet to be specified.
 
 * Target provider on which TPA managed clusters (will) reside. Currently this
 is AWS only. This will be accessed both via the web app for discovery, and TPA
@@ -35,7 +42,6 @@ update task will reside on the same system as the database.
 * The 2ndQuadrant Customer Portal will be expected to authenticate users and
 redirect them to tpa-ui along with authentication and session info via JWT.
 
-
 ### Runtime service dependencies
 
 * PostgreSQL - app persistence.
@@ -44,6 +50,19 @@ redirect them to tpa-ui along with authentication and session info via JWT.
 * UWSGI - Python WSGI container.
 * Supervisor - Process management.
 
+### Environment
+
+* Debian stable with Python 2.x, Node.js 6.x and PostgreSQL 9.x.
+* Python tools such as virtualenv and pip.
+
+### Environment Variables
+
+Python app:
+
+* VIRTUAL_ENV=/path/to/virtualenv
+* DJANGO_SETTINGS_MODULE=tpasite.conf.*
+* DEBUG=(True|False)
+* [dev/test only] BUILD_PATH=/path/to/build/output (default ./build)
 
 ## Directories
 
@@ -52,25 +71,38 @@ redirect them to tpa-ui along with authentication and session info via JWT.
 * __req/__ Python requirements for app, by deployment type.
 * __ansible/__ Ansible roles for deployment and dependencies.
 
+* [build]/static -- webpack will place the runtime static bundle here.
+* [build]/node_modules -- npm will use this as its "global"
+installation prefix.
 
+Note that this means you have to run npm with the -g option set, and
+ensure you source ./initenv.sh before running npm.
 
 ## Development Quickstart
 
-It's assumed you have a Debian-derived system with basic Python and Postgres
-development tools installed. By default, the system will be configured with
-dev settings. This can be changed by setting the DJANGO_SETTINGS_MODULE to
-one of the other role configs in tpasite.conf.
+By default, the system will be configured with dev settings. This can
+be changed by setting the DJANGO_SETTINGS_MODULE to one of the other
+role configs in tpasite.conf.
 
 * Create a virtualenv for the project and activate it.
 
 * Setup the environment and run the internal dev server on port 8000:
 
+[ TODO -- Add instructions about the Makefile, npm and webpack. ]
+
 ```
+~/tpa/ui > . ./initenv.sh
+...
+~/tpa/ui > make dev-setup
+...
+
 ~/tpa/ui > pip install -r req/dev.txt
 ...
 ~/tpa/ui > createdb tpa-dev
 ...
 ~/tpa/ui > ./apps/manage.py migrate
+...
+~/tpa/ui > webpack -hw &
 ...
 ~/tpa/ui > ./apps/manage.py runserver
 ```
