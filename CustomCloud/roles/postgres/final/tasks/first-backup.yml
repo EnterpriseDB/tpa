@@ -12,7 +12,7 @@
 
 - name: Check that pg_receivexlog is running
   shell: >
-    psql -qAtc "
+    {{ postgres_bin_dir }}/psql -h {{postgres_host}} -p {{postgres_port}} -qAtc "
     select count(*)
     from pg_stat_replication r join pg_replication_slots s on (r.pid=s.active_pid)
     where application_name='barman_receive_wal' and slot_name='barman' and state='streaming'
@@ -33,7 +33,7 @@
 
 - name: Force switch to a new WAL segment
   command: >
-    psql -qAtc 'select pg_xlogfile_name(pg_switch_xlog())'
+    {{ postgres_bin_dir }}/psql -h {{postgres_host}} -p {{postgres_port}} -qAtc 'select pg_xlogfile_name(pg_switch_xlog())'
   become_user: postgres
   become: yes
   delegate_to: "{{ inventory_hostname|upstream_root(hostvars) }}"
