@@ -22,3 +22,4 @@ svg { font-weight: normal; border: "thick solid #aaaaaa"; }
 .container_shape { fill: #c0c0c0; stroke: none; }
 .instance .name { stroke: #010409; fill: #010409; font-size: 100%;}
 .role { font-size: 85%; font-weight: normal; stroke: white; fill: white; }
+.diagram--zonesep { stroke: red; fill: red; };
