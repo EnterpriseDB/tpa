@@ -3,6 +3,7 @@ const build_dir = process.env.BUILD_PATH ? process.env.BUILD_PATH
 const node_modules = build_dir+'/node_modules/lib/node_modules';
 
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
     entry: './fe/js/main.js',
@@ -38,6 +39,11 @@ module.exports = {
                 test: /\.css$/,
                 loader: 'style!css'
             },
+        ],
+        plugins: [
+            new webpack.ProvidePlugin({
+                d3: 'd3',
+            })
         ]
     }
 };
