@@ -143,6 +143,34 @@ class Instance(TenantOwnedMixin):
 class Role(TenantOwnedMixin):
     instance = OwnerKey('Instance', related_name='roles')
 
+    # This isn't used anywhere yet, but some are needed when defining
+    # role link types, since the config.yml attaches links to instances and
+    # not roles.
+
+    # Generated with:
+    # find -iname config.yml | xargs grep role: | \
+    #   sed 's/^.*role://g; s/\s//g; s/,/\n/g' | sort | uniq
+
+    KNOWN_TYPES = [
+        'adhoc',
+        'backup',
+        'barman',
+        'bdr',
+        'control',
+        'coordinator',
+        'datanode',
+        'datanode-replica',
+        'gtm',
+        'image',
+        'log-server',
+        'monitor',
+        'openvpn-server',
+        'pgbouncer',
+        'primary',
+        'replica',
+        'witness',
+    ]
+
 
 class RoleLink(TenantOwnedMixin):
     client_role = OwnerKey('Role', related_name='client_links')
