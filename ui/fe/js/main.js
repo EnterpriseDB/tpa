@@ -22,7 +22,5 @@ document.addEventListener("DOMContentLoaded", function(e) {
     var next_cluster = tpa_d3.show_clusters(tpa.TEST_TENANT,
                                     d3.select(".cluster_view"),
                                     1000, 1000);
-    d3.select(".fa-plus")
-        .on("click", function(d,i) { next_cluster(); })
-        .each(console.log);
+    d3.select("button.btn-primary").on("click", () => next_cluster());
 });
