@@ -65,13 +65,13 @@ before doing anything else (python packages, virtualend, ansible)!
    **NOTE 2** The default config.yml/deploy.yml sets up a 1 master, 2 standby TPA cluster with automatic failover using repmgr in place. If you want to create a TPA cluster with its dedicated **barman** instance, then edit clusters/test/tpa/config.yml. You can add a new fourth instance here for the barman instance or just for testing, you can even convert the standby instance to a barman instance. If you add a fourth instance, be careful about specifying subnet and other values appropriately. For testing purposes, you can do the below
    ```
    tags:
-        db: standby
+        role: replica
         node: 3
    ```
    change the above to:
    ```
    tags:
-        db: barman
+        role: barman
         node: 3
    ```
    for the second standby listing. Or if not, feel free to add a fourth instance in the config.yml as appropriate.
