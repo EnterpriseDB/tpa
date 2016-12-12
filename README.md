@@ -53,7 +53,7 @@ Pre-amble
 =========
 2ndQuadrant acknowledges that there are a lot customers/users out there who
 will be moving towards (or are already) using PostgreSQL. Many of these
-customers not just want to use Postgres but they also want to setup
+customers don't just want to use Postgres but they also want to setup
 replication, they worry about backup and monitoring and all related aspects.
 Besides Postgres, there’s the associated ecosystem: barman, repmgr, etc. So
 which version of these would go along with their Postgres install, how and what
