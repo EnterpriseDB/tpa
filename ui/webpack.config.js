@@ -1,9 +1,8 @@
-
-var build_dir = process.env.BUILD_PATH ? process.env.BUILD_PATH
+const build_dir = process.env.BUILD_PATH ? process.env.BUILD_PATH
                     : ( __dirname+'/build' );
-var node_modules = build_dir+'/node_modules/lib/node_modules';
-var path = require('path');
+const node_modules = build_dir+'/node_modules/lib/node_modules';
 
+const path = require('path');
 
 module.exports = {
     entry: './fe/js/main.js',
@@ -12,21 +11,24 @@ module.exports = {
         filename: 'bundle.js',
         publicPath: '/'
     },
+    resolve: {
+        root: path.resolve(node_modules),
+    },
     resolveLoader: {
         root: path.resolve(node_modules),
     },
-    devtool: 'source-map', // or 'inline-source-map',
+    devtool: 'source-map',
     module: {
         loaders: [
             // via: https://github.com/jtangelder/sass-loader
             {
                 test: /\.scss$/,
-                exclude: node_modules,
-                loaders: ['style-loader', 'css-loader?SourceMap', 'sass-loader?sourceMap']
+                loaders: ['style-loader',
+                        'css-loader?SourceMap',
+                        'sass-loader?SourceMap']
             },
             {
                 test: /\.js$/,
-                exclude: node_modules,
                 loader: 'babel-loader',
                 query: {
                     presets: ['es2015']
@@ -34,7 +36,6 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                exclude: node_modules,
                 loader: 'style!css'
             },
         ]
