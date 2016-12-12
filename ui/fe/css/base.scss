@@ -1,0 +1,48 @@
+
+
+@import "./colorscheme";
+@import "./colorscheme-alert";
+
+body { font-family: 'FontAwesome' }
+
+/* Diagram objects */
+
+.cluster_view { font-weight: normal; border: "thick solid #aaaaaa"; }
+
+.diagram {
+    text {
+        fill: black;
+        stroke: black;
+        font-weight: normal;
+    }
+
+    .node {
+        text {
+            font-weight: lighter;
+        }
+
+        fill: $color-complement-3;
+        stroke: $color-complement-2;
+        .icon { fill: $color-normal-4; }
+
+        text.role {
+            font-size: 80%;
+            fill: black;
+            stroke: black;
+        }
+        text.name {
+            stroke: $color-complement-2;
+            fill: $color-complement-2;
+        }
+    }
+
+    .edge {
+        stroke: $color-normal-4; fill: none; stroke-width: 3;
+    }
+
+    .horizontalGrid { stroke: #eeeeff; fill: none; stroke-dasharray: "100, 10";}
+
+    /* TPA objects */
+
+    .diagram--zonesep { stroke: red; fill: red; }
+}

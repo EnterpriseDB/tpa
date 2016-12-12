@@ -1,17 +1,20 @@
 
 // vim:ts=4:sts=4:sw=4:et:ff=unix:fileencoding=utf-8
-//
+
+
+/**
+ * Primary entry point for TPA UI app.
+ */
+
+
+require('./styles.js');
 
 var d3 = require("d3");
 
-
-/*
-require("./diagram");
-require("./utils");
-*/
-
 var tpa = require("./tpa-api");
 var tpa_d3 = require("./tpa-d3");
+// require("./diagram");
+// require("./utils");
 
 // XXX This is for testing the cluster diagram.
 
