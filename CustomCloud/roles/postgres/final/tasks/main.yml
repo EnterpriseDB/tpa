@@ -13,21 +13,10 @@
 # We force an immediate backup for any instances that do not have any
 # backups at all.
 
-- name: Count the number of backups for each instance
-  shell: >
-    barman list-backup {{ backup_name }} | grep -v FAILED | wc -l
-  register: backups
-  delegate_to: "{{ backup }}"
-  changed_when: False
-  become_user: barman
-  become: yes
-  when: >
-    backup != ''
-
-- include: first-backup.yml
+- include: barman/first-backup
   static: no
   when: >
-    backup != '' and backups.stdout == '0'
+    backup != ''
 
 - block:
     - name: Run read/write pgbench
