@@ -10,7 +10,6 @@ function show_clusters(tenant, selection, width, height) {
     var clusters = [];
     var current_cluster_idx = -1;
 
-
     tpa.get_obj_by_url(tpa.url+"cluster/", function(c, e) {
         if (e) {
             alert("API Server communication error");
@@ -147,62 +146,23 @@ function tree_layout(objects, parent_id, width, height) {
 }
 
 
-function setup_viewport(selection, width, height) {
-    var vp_size = {width: width*2, height: height*2};
-    selection.selectAll("svg").remove();
-
-    var svg = selection.append('svg')
-        .classed("diagram-viewport", true)
-        .attr('width', width)
-        .attr('height', height);
-
-    var viewport_contents = svg.append('g');
-
-    // Zoom
-
-    var zoom = d3.zoom()
-        //.scaleExtent([0.5, 40])
-        .translateExtent([[-width/2, -height/2], [width*2, height*2]])
-        .on("zoom", () => viewport_contents.attr("transform", d3.event.transform));
-
-    svg.call(zoom);
-
-    var diagram = viewport_contents.append("g")
-        .classed("diagram", true)
-        .attr('transform', `translate(${width/2}, ${height/2})`);
-
-    return {svg: svg, diagram: diagram};
-}
-
-
-
 function draw_cluster(cluster, selection, width, height) {
     console.log("draw_cluster:", cluster, width, height);
 
     var viewport = setup_viewport(selection, width, height);
+    var diagram = viewport.diagram;
 
     var [objects, parent_id] = dgm_objects(cluster);
     var layout = tree_layout(objects, parent_id, width, height);
     var tree = layout.tree;
     var root = layout.root;
 
-    var g = viewport.diagram;
-    draw_background_grid(g, root.y, width, height);
+    draw_background_grid(diagram, root.y, width, height);
 
-    // Locals
-
-    var node_model = d3.local();
-    var node_url = d3.local();
-    var node_size = d3.local();
-    var node_rect = d3.local();
-
-    // Links
-
-    var edge = g.selectAll(".edge")
-        .data(root.descendants().filter(
-            tpa.class_method().when('rolelink', true).default(false)))
+    var edge = diagram.selectAll(".edge")
+        .data(root.descendants().filter(tpa.is_instance('rolelink')))
         .enter().append("path")
-        .classed("edge", true)
+        .classed("edge rolelink", true)
         .attr("d", function(d) {
             // draw line from server instance to client instance
             if ( !d.parent ) return "";
@@ -221,12 +181,9 @@ function draw_cluster(cluster, selection, width, height) {
             return path;
         });
 
-
     // Zone
-    var zone_display = g.selectAll(".diagram--zone")
-        .data(root.descendants().filter(tpa.class_method()
-            .when('zone', true).default(false)
-        ))
+    var zone_display = diagram.selectAll(".diagram--zone")
+        .data(root.descendants().filter(tpa.is_instance('zone')))
         .enter().append('g')
             .attr("class", d => "diagram--zone" +
                 (d.children ? "" : " diagram--zone--empty"))
@@ -250,64 +207,72 @@ function draw_cluster(cluster, selection, width, height) {
         .attr('x2', width)
         .attr('y2', function (d) { return zone_sep_y.get(this); });
 
-    // Instances
+    var instances = diagram.selectAll(".instance")
+            .data(root.descendants().filter(tpa.is_instance('instance')))
+            .enter().call(function(d) { draw_instance(d, diagram); });
+ }
 
-    var node = g.selectAll(".node")
-        .data(root.descendants().filter(tpa.class_method()
-            .when('instance', true).default(false)
-        ))
-        .enter().append("g")
-            .attr("class", d => "node" +
-                (d.children ? " node--internal" : " node--leaf"))
-            .attr("transform", d => `translate(${d.x}, ${d.y})`)
-            .property('model-url', d => d.data.url ? d.data.url : null)
+
+function make_rect(w, h) {
+    return {
+        width: w,
+        height: h,
+        top_left:     { x: -w/2, y: -h/2 },
+        top_right:    { x: +w/2, y: -h/2 },
+        bottom_right: { x: +w/2, y: +h/2 },
+        bottom_left:  { x: -w/2, y: +h/2 }
+    };
+}
+
+function draw_instance(selection, instance) {
+    var node_rect = d3.local();
+    var node_model = d3.local();
+    var node_url = d3.local();
+
+    var node = selection.append("g")
+        .attr("class", d => "instance node" +
+            (d.children ? " node--internal" : " node--leaf"))
+        .attr("transform", d => `translate(${d.x}, ${d.y})`)
+        .property('model-url', d => d.data.url ? d.data.url : null)
         .each(function(d) {
             var h = 25+14*(d.data.roles.length+1),
                 w = 8*(d.data.name.length+1);
             node_model.set(this, d.data);
             node_url.set(this, d.data.url);
-            node_size.set(this, {width: w, height: h});
-            node_rect.set(this, {
-                 top_left:       {   x:   -w/2,   y:   -h/2    },
-                 top_right:      {   x:   +w/2,   y:   -h/2    },
-                 bottom_right:   {   x:   +w/2,   y:   +h/2,   },
-                 bottom_left:    {   x:   -w/2,   y:   +h/2    }
-            });
+            node_rect.set(this, make_rect(w, h));
         });
 
     // ellipse
     node.append("path")
         .classed('container_shape', true)
-        .attr('d', tpa.class_method()
-            .when('instance', function(d) {
-                var rect = node_rect.get(this);
-                var ns = node_size.get(this);
-                var path = d3.path();
-                var pointy_size = d3.min(ns.height, ns.width*3.0/4.0);
+        .attr('d', function(d) {
+            var rect = node_rect.get(this);
+            var path = d3.path();
+            var pointy_size = d3.min(rect.height, rect.width*3.0/4.0);
 
-                path.moveTo(rect.top_right.x, rect.top_right.y);
+            path.moveTo(rect.top_right.x, rect.top_right.y);
 
-                path.quadraticCurveTo(rect.top_right.x+ns.height/2.5, 0,
-                                    rect.bottom_right.x, rect.bottom_right.y);
-                path.lineTo(rect.bottom_left.x, rect.bottom_left.y);
+            path.quadraticCurveTo(rect.top_right.x+rect.height/2.5, 0,
+                                rect.bottom_right.x, rect.bottom_right.y);
+            path.lineTo(rect.bottom_left.x, rect.bottom_left.y);
 
-                path.quadraticCurveTo(rect.bottom_left.x-ns.height/2.3, 0,
-                                    rect.top_left.x, rect.top_left.y);
-                path.lineTo(rect.top_right.x, rect.top_right.y);
+            path.quadraticCurveTo(rect.bottom_left.x-rect.height/2.3, 0,
+                                rect.top_left.x, rect.top_left.y);
+            path.lineTo(rect.top_right.x, rect.top_right.y);
 
-                path.closePath();
+            path.closePath();
 
-                return path;
-            }));
+            return path;
+            });
 
     // icon
     node.append("path")
         .classed('icon', true)
         .attr('d', tpa.class_method()
             .default(function(d) {
-                var ns = node_size.get(this);
-                var radius = ns.height/4;
-                var circle = "M "+ (-(ns.width/2+ns.height/2)) +" 0 " +
+                var ns = node_rect.get(this);
+                var radius = Math.min(ns.height/5, ns.width/5, 10);
+                var circle = "M "+ (-(ns.width/2+ns.height/3)) +" 0 " +
                     " m "+radius+", 0" +
                     " a "+radius+","+radius+" 0 1,1 "+(2*radius)+",0" +
                     " a "+radius+","+radius+" 0 1,1 "+(-2*radius)+",0";
@@ -318,7 +283,7 @@ function draw_cluster(cluster, selection, width, height) {
     node.append("text")
         .classed("name", true)
         .attr("transform", function(d) {
-            var ns = node_size.get(this);
+            var ns = node_rect.get(this);
             return "translate("+(-ns.width/3)+", " + (-ns.height/2+20) + ")";
         })
         .text(d => d.data.name);
@@ -329,8 +294,8 @@ function draw_cluster(cluster, selection, width, height) {
     var dgm_roles = node.append("g")
         .classed('roles', true)
         .attr('transform', function(d) {
-            var x = -node_size.get(this).width/4,
-                y = -node_size.get(this).height/2+25;
+            var x = -node_rect.get(this).width/5,
+                y = -node_rect.get(this).height/2+25;
 
             return "translate("+x+","+y+")";
         });
@@ -362,7 +327,7 @@ function draw_cluster(cluster, selection, width, height) {
 
         diagram_data_item(d3.select(this), 'text', 'role', d.data.roles)
             .attr('transform', function(r) {
-                var ns = node_size.get(this);
+                var ns = node_rect.get(this);
                 var idx = role_idx.get(this).idx;
                 var top = 15+(idx-1)*15;
                 role_idx.get(this).idx = idx+1;
@@ -370,9 +335,35 @@ function draw_cluster(cluster, selection, width, height) {
             })
             .text(function(r) { return r.name; });
     });
+
 }
 
-function draw_instance(selection, i) {
+
+function setup_viewport(selection, width, height) {
+    var vp_size = {width: width*2, height: height*2};
+    selection.selectAll("svg").remove();
+
+    var svg = selection.append('svg')
+        .classed("diagram-viewport", true)
+        .attr('width', width)
+        .attr('height', height);
+
+    var viewport_contents = svg.append('g');
+
+    // Zoom
+
+    var zoom = d3.zoom()
+        //.scaleExtent([0.5, 40])
+        .translateExtent([[-width/2, -height/2], [width*2, height*2]])
+        .on("zoom", () => viewport_contents.attr("transform", d3.event.transform));
+
+    svg.call(zoom);
+
+    var diagram = viewport_contents.append("g")
+        .classed("diagram", true)
+        .attr('transform', `translate(${width/2}, ${height/2})`);
+
+    return {svg: svg, diagram: diagram};
 }
 
 

@@ -93,6 +93,12 @@ api.class_method = function class_method() {
     return multimethod().dispatch(api.data_class);
 };
 
+
+api.is_instance = function is_instance(filter) {
+    return multimethod().dispatch(api.data_class)
+        .when(filter, true).default(false);
+};
+
 api.load_provider = function load_provider() {
     return ; // TODO
 };
