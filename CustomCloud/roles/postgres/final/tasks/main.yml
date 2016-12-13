@@ -13,7 +13,7 @@
 # We force an immediate backup for any instances that do not have any
 # backups at all.
 
-- include: barman/first-backup
+- include_role: name=barman/first-backup
   static: no
   when: >
     backup != ''
