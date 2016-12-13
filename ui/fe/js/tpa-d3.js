@@ -3,8 +3,6 @@ import * as d3 from "d3";
 import * as tpa from "./tpa-api";
 import {scaleLinear} from "d3-scale";
 
-//const d3_scale = require('d3-scale');
-
 
 function show_clusters(tenant, selection, width, height) {
     var clusters = [];
@@ -40,15 +38,53 @@ function show_clusters(tenant, selection, width, height) {
     return next_cluster;
 }
 
+function draw_cluster(cluster, selection, width, height) {
+    console.log("draw_cluster:", cluster, width, height);
 
-/**
- * Returns the minimum and maximum Y values for the descendants of this
- * diagram element.
- */
-function node_yspan(d) {
-    return {min_y: d3.min(d.descendants().map(c => c.y)),
-            max_y: d3.max(d.descendants().map(c => c.y+height))
-            };
+    var viewport = setup_viewport(selection, width, height);
+    var diagram = viewport.diagram;
+
+    var [objects, parent_id] = dgm_objects(cluster);
+    var layout = tree_layout(objects, parent_id, width, height);
+    var tree = layout.tree;
+    var root = layout.root;
+
+    var dom_context = d3.local();
+
+    draw_background_grid(diagram, root.y, width, height);
+
+    function draw_all_of_class(c, draw) {
+        diagram.selectAll("."+c)
+        .data(root.descendants().filter(tpa.is_instance(c)))
+        .enter()
+        .call(d => draw(d, diagram, {width: width, height: height}));
+    }
+
+    draw_all_of_class('zone', draw_zone);
+    draw_all_of_class('rolelink', draw_rolelink);
+    draw_all_of_class('instance', draw_instance);
+}
+
+function draw_rolelink(selection, rolelink) {
+    return selection.append("path")
+        .classed("edge rolelink", true)
+        .attr("d", function(d) {
+            // draw line from server instance to client instance
+            if ( !d.parent ) return "";
+            let path = d3.path();
+            let p = d.parent, c = d.children[0];
+            let y1 = p.y, y2 = c.y;
+            if (y1 > y2) {
+                y1 = c.y;
+                y2 = p.y;
+            }
+            path.moveTo(p.x, p.y);
+            path.bezierCurveTo(
+                d.x + (d.x-c.x)/3, y1,
+                p.x + (d.x-p.x)/3, y2,
+                c.x, c.y);
+            return path;
+        });
 }
 
 
@@ -65,6 +101,11 @@ function dgm_objects(cluster) {
     var roles = {};
     var instance_parents = {};
 
+    // Grammar:
+    // cluster -> region -> zone -> (subnet?) -> instance 
+    //   (-> rolelink -> instance)*
+
+    // TODO this is needed until the model linker is written
     cluster.subnets.forEach(s =>
         s.instances.forEach(i =>
             i.roles.forEach(function(r) { roles[r.url] = i; })
@@ -113,116 +154,30 @@ function dgm_objects(cluster) {
 }
 
 
-function tree_layout(objects, parent_id, width, height) {
-    var table = d3.stratify().id(d=> d.url).parentId(d => parent_id[d.url])
-                (objects);
-    var root = d3.hierarchy(table);
-    var tree = d3.cluster()
-                .size([height, width])
-                .nodeSize([height/10, width/10]);
-
-
-    tree(root);
-
-    var diagram_left = root.y;
-
-    root.descendants().forEach(function(d) {
-        // rotate 90 deg, assume root is not displayed
-        let x = (d.y ? d.y : 0),
-            y = (d.x ? d.x : 0);
-
-        d.x = x - diagram_left;
-        d.y = y;
-
-        // remove the double-reference introduced by stratify
-        d.data = d.data.data;
-    });
-
-    console.log("objects:", objects);
-    console.log("parents:", parent_id);
-    console.log("root:", root);
-
-    return {tree: tree, root: root};
-}
-
-
-function draw_cluster(cluster, selection, width, height) {
-    console.log("draw_cluster:", cluster, width, height);
-
-    var viewport = setup_viewport(selection, width, height);
-    var diagram = viewport.diagram;
-
-    var [objects, parent_id] = dgm_objects(cluster);
-    var layout = tree_layout(objects, parent_id, width, height);
-    var tree = layout.tree;
-    var root = layout.root;
-
-    draw_background_grid(diagram, root.y, width, height);
-
-    var edge = diagram.selectAll(".edge")
-        .data(root.descendants().filter(tpa.is_instance('rolelink')))
-        .enter().append("path")
-        .classed("edge rolelink", true)
-        .attr("d", function(d) {
-            // draw line from server instance to client instance
-            if ( !d.parent ) return "";
-            let path = d3.path();
-            let p = d.parent, c = d.children[0];
-            let y1 = p.y, y2 = c.y;
-            if (y1 > y2) {
-                y1 = c.y;
-                y2 = p.y;
-            }
-            path.moveTo(p.x, p.y);
-            path.bezierCurveTo(
-                d.x + (d.x-c.x)/3, y1,
-                p.x + (d.x-p.x)/3, y2,
-                c.x, c.y);
-            return path;
-        });
-
-    // Zone
-    var zone_display = diagram.selectAll(".diagram--zone")
-        .data(root.descendants().filter(tpa.is_instance('zone')))
-        .enter().append('g')
-            .attr("class", d => "diagram--zone" +
-                (d.children ? "" : " diagram--zone--empty"))
-            .attr("transform", d => `translate(${-root.x}, ${d.y})`)
-            .property('model-url', d => d.data.url ? d.data.url : null);
-
-    zone_display.append("text")
-            .text(d => tpa.url_cache[d.data.url].name);
-
+function draw_zone(selection, zone, size) {
     var zone_sep_y = d3.local();
 
+    var zone_display = selection.append('g')
+        .attr("class", d => "zone" +
+            (d.children ? "" : "zone--empty"))
+        .attr("transform", d => `translate(${-d.parent.x}, ${d.y})`)
+        .property('model-url', d => d.data.url ? d.data.url : null);
+
+    zone_display.append("text")
+        .text(d => tpa.url_cache[d.data.url].name);
+
+    // display a line between each zone
     zone_display.append('line')
-        .classed('diagram--zonesep', true)
         .attr('x1', 0)
         .attr('y1', function (d) {
-            let desc = d.descendants();
-            let y = d.y + desc[desc.length-1].y + (10 + tree.nodeSize[0]) ;
+            let y = d3.max(d.descendants().map(e => e.y)) + 20;
             zone_sep_y.set(this, y);
             return  y;
         })
-        .attr('x2', width)
+        .attr('x2', size.width)
         .attr('y2', function (d) { return zone_sep_y.get(this); });
-
-    var instances = diagram.selectAll(".instance")
-            .data(root.descendants().filter(tpa.is_instance('instance')))
-            .enter().call(function(d) { draw_instance(d, diagram); });
- }
-
-
-function make_rect(w, h) {
-    return {
-        width: w,
-        height: h,
-        top_left:     { x: -w/2, y: -h/2 },
-        top_right:    { x: +w/2, y: -h/2 },
-        bottom_right: { x: +w/2, y: +h/2 },
-        bottom_left:  { x: -w/2, y: +h/2 }
-    };
 }
+
 
 function draw_instance(selection, instance) {
     var node_rect = d3.local();
@@ -336,6 +291,68 @@ function draw_instance(selection, instance) {
             .text(function(r) { return r.name; });
     });
 
+
+    return node;
+}
+
+
+/*********
+ * View and geometry helpers.
+ */
+
+function tree_layout(objects, parent_id, width, height) {
+    var table = d3.stratify().id(d=> d.url).parentId(d => parent_id[d.url])
+                (objects);
+    var root = d3.hierarchy(table);
+    var tree = d3.cluster()
+                .size([height, width])
+                .nodeSize([height/10, width/10]);
+
+
+    tree(root);
+
+    var diagram_left = root.y;
+
+    root.descendants().forEach(function(d) {
+        // rotate 90 deg, assume root is not displayed
+        let x = (d.y ? d.y : 0),
+            y = (d.x ? d.x : 0);
+
+        d.x = x - diagram_left;
+        d.y = y;
+
+        // remove the double-reference introduced by stratify
+        d.data = d.data.data;
+    });
+
+    console.log("objects:", objects);
+    console.log("parents:", parent_id);
+    console.log("root:", root);
+
+    return {tree: tree, root: root};
+}
+
+
+/**
+ * Returns the minimum and maximum Y values for the descendants of this
+ * diagram element.
+ */
+function node_yspan(d) {
+    return {min_y: d3.min(d.descendants().map(c => c.y)),
+            max_y: d3.max(d.descendants().map(c => c.y+height))
+            };
+}
+
+
+function make_rect(w, h) {
+    return {
+        width: w,
+        height: h,
+        top_left:     { x: -w/2, y: -h/2 },
+        top_right:    { x: +w/2, y: -h/2 },
+        bottom_right: { x: +w/2, y: +h/2 },
+        bottom_left:  { x: -w/2, y: +h/2 }
+    };
 }
 
 
@@ -386,4 +403,3 @@ function draw_background_grid(selection, cy, width, height) {
 
 
 exports.show_clusters = show_clusters;
-

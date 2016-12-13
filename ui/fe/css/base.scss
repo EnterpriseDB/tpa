@@ -25,11 +25,6 @@ body { font-family: 'FontAwesome' }
         stroke: $color-complement-2;
         .icon { fill: $color-normal-4; }
 
-        text.role {
-            font-size: 80%;
-            fill: black;
-            stroke: black;
-        }
         text.name {
             stroke: $color-complement-2;
             fill: $color-complement-2;
@@ -44,5 +39,11 @@ body { font-family: 'FontAwesome' }
 
     /* TPA objects */
 
-    .diagram--zonesep { stroke: red; fill: red; }
+    .zone line { stroke: red; fill: red; }
+
+    .role {
+        font-size: 80%;
+        fill: black;
+        stroke: black;
+    }
 }
