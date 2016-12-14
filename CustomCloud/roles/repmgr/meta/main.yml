@@ -1,6 +1,9 @@
 ---
 
 dependencies:
+  - role: secret
+    vars:
+      secret_name: repmgr_password
   - role: repmgr/pkg
     when: >
       'postgres' in role
