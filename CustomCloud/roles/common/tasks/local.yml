@@ -6,10 +6,14 @@
   when: ansible_ssh_common_args == ""
 
 # If pwgen is not installed, we would silently generate invalid YAML
-# in roles/secret, so we check up-front and fail early.
+# in roles/secret, so we check up-front and fail early. We depend on
+# flock to workaround a problem with run_once, so check for that too.
 
-- name: Ensure pwgen is installed
+- name: Ensure that local dependencies are installed
   assert:
-    msg: "Please install pwgen locally to generate passwords"
+    msg: "Please install {{ item }} locally"
     that:
-      - "'{{ lookup('pipe', 'which pwgen || true') }}' != ''"
+      - "'{{ lookup('pipe', 'which {{ item }} || true') }}' != ''"
+  with_items:
+    - pwgen
+    - flock
