@@ -4,7 +4,8 @@
 # installed. The "CREATE EXTENSION" commands will be issued later, via
 # postgres/config/final.
 
-- set_fact:
+- name: Set list of Postgres extensions
+  set_fact:
     postgres_extensions: "{{ _postgres_extensions }}"
 
 # We install a default configuration for the extensions we care about.

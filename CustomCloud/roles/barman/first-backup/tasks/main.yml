@@ -2,7 +2,6 @@
 
 # We force an immediate backup for any instances that do not have any
 # backups at all.
-- debug: var=backup
 
 - name: Count the number of backups for each instance
   shell: >

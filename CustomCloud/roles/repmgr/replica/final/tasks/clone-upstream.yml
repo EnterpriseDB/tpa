@@ -17,7 +17,8 @@
   become_user: postgres
   become: yes
 
-- set_fact:
+- name: Record name of upstream to clone
+  set_fact:
     upstream_to_clone: "{{
       (upstreamup|succeeded and upstreamup.stdout == '1') |
       ternary(upstream, upstream_primary)

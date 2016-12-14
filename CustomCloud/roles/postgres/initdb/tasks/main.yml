@@ -32,7 +32,8 @@
   tags: [postgres, initdb]
 
 - block:
-    - set_fact: initdb=True
+    - name: Note that we ran initdb
+      set_fact: initdb=True
     - include: "os/{{ ansible_os_family }}.yml"
   when: not pgdata.stat.exists
   tags: [postgres, initdb]

@@ -19,7 +19,8 @@
     'openvpn-server' not in role
   tags: openvpn
 
-- set_fact:
+- name: Override primary IP address
+  set_fact:
     ip_address: "{{ openvpn_ip }}"
     ip_addresses: ['public_ip', 'private_ip', 'openvpn_ip']
     cluster_network: "{{ vpn_network }}"

@@ -3,14 +3,16 @@
 # Determine the upstream primary for this host, that is, the primary at
 # the root of the cascading replication setup.
 
-- set_fact:
+- name: Record name of the upstream primary
+  set_fact:
     upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"
 
 # Find any backed-up instance that is, or is a replica of, said primary.
 # This isn't clever about trying to find a backup in the same region or
 # anything like that. It'll be happy with any backup it finds.
 
-- set_fact:
+- name: Record name of any upstream or sibling with backups
+  set_fact:
     upstream_backedup: "{{
       groups[cluster_tag]|instance_with_backup_of(upstream_primary, hostvars)
     }}"

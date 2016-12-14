@@ -15,5 +15,6 @@
     pgversionNN: "{{ pgversion|replace('.','') }}"
   tags: always
 
-- set_fact: backup_name="{{ _backup_name }}"
+- name: Set backup_name for the instance
+  set_fact: backup_name="{{ _backup_name }}"
   tags: always

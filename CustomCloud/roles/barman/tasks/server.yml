@@ -11,7 +11,8 @@
 # setting up this Barman server.
 
 - block:
-    - set_fact: barman_installed=True
+    - name: Note that Barman was just installed
+      set_fact: barman_installed=True
 
     - name: Create /etc/barman.d
       file:

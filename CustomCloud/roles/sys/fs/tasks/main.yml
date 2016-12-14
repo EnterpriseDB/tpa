@@ -14,7 +14,8 @@
 # device is what the caller specified; _device is what we use
 # internally, and is subject to being modified by luks.yml.
 
-- set_fact:
+- name: Record device name
+  set_fact:
     _device: "{{ device }}"
 
 - block:

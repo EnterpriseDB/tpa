@@ -4,5 +4,6 @@
 # wish there were a more graceful way to do this. (Note that we cannot
 # assume that the openvpn server will be assigned the .1 address.)
 
-- set_fact:
+- name: Record openvpn IP address
+  set_fact:
     openvpn_ip: "{{ vpn_network|ipaddr('network')|regex_replace('\\.[0-9]*$', '.'~node) }}"

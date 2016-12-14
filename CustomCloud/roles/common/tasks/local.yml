@@ -8,7 +8,8 @@
 # If pwgen is not installed, we would silently generate invalid YAML
 # in roles/secret, so we check up-front and fail early.
 
-- assert:
+- name: Ensure pwgen is installed
+  assert:
     msg: "Please install pwgen locally to generate passwords"
     that:
       - "'{{ lookup('pipe', 'which pwgen || true') }}' != ''"

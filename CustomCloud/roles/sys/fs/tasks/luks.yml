@@ -39,6 +39,7 @@
         echo -n "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ luks_device }}" "{{ luks_volume }}"
       no_log: true
 
-    - set_fact:
+    - name: Record updated mapped device name
+      set_fact:
         _device: "/dev/mapper/{{ luks_volume }}"
   when: luks|failed
