@@ -176,6 +176,8 @@ function draw_zone(selection, zone, size) {
         })
         .attr('x2', size.width)
         .attr('y2', function (d) { return zone_sep_y.get(this); });
+
+    return zone_display;
 }
 
 
@@ -291,7 +293,6 @@ function draw_instance(selection, instance) {
             .text(function(r) { return r.name; });
     });
 
-
     return node;
 }
 
@@ -389,16 +390,20 @@ function draw_background_grid(selection, cy, width, height) {
         .domain([-height/2, height*1.5])
         .range([cy-500, cy+500]);
 
-    selection.append('g')
+    var grid = selection.append('g')
         .classed('background-grid', true)
-        .selectAll("line.horizontalGrid")
+        .selectAll("line.horizontal")
         .data(yScale.ticks(50)).enter()
         .append("line")
-            .classed('horizontalGrid', true)
+            .classed('horizontal', true)
             .attr("x1", -width)
             .attr("x2", width)
             .attr("y1", yScale)
             .attr("y2", yScale);
+
+    var xAxis = d3.axisLeft(yScale);
+
+    grid.call(xAxis);
 }
 
 

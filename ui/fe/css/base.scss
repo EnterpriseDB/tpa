@@ -10,6 +10,12 @@ body { font-family: 'FontAwesome' }
 .cluster_view { font-weight: normal; border: "thick solid #aaaaaa"; }
 
 .diagram {
+    .background-grid {
+        stroke: #eeeeff;
+        fill: none;
+        stroke-dasharray: "100, 10";
+    }
+
     text {
         fill: black;
         stroke: black;
@@ -35,7 +41,6 @@ body { font-family: 'FontAwesome' }
         stroke: $color-normal-4; fill: none; stroke-width: 3;
     }
 
-    .horizontalGrid { stroke: #eeeeff; fill: none; stroke-dasharray: "100, 10";}
 
     /* TPA objects */
 

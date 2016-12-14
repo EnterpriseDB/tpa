@@ -3,8 +3,11 @@
  * Copyright 2013-2016 Start Bootstrap
  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap/blob/gh-pages/LICENSE)
  */
+
+@import "./colorscheme";
+
 body {
-  background-color: #f8f8f8;
+  background-color: $color-primary-0;
 }
 #wrapper {
   width: 100%;
@@ -78,7 +81,7 @@ body {
   border-bottom: 1px solid #e7e7e7;
 }
 .sidebar ul li a.active {
-  background-color: #eeeeee;
+  background-color: white;
 }
 .sidebar .arrow {
   float: right;

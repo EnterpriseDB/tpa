@@ -1,3 +1,5 @@
+var $ = require("jquery");
+
 $(function() {
     $('#side-menu').metisMenu();
 });
