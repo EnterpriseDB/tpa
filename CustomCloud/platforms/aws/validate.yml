@@ -1,5 +1,3 @@
-- include: ../common/validate.yml
-
 - name: Ensure cluster_tags is correctly configured
   assert:
     msg: "Please define cluster_tags (a hash, including Owner) in {{config_file}}"

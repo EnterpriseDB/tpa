@@ -5,6 +5,9 @@
 # The appropriate AWS IAM credentials must be supplied separately, e.g.
 # in ~/.boto or in the environment.
 
+- include: ../common/provision.yml
+  tags: common
+
 - name: Provision AWS cluster
   hosts: localhost
 
@@ -26,14 +29,6 @@
     - include: validate.yml
       tags: always
 
-    # Create an inventory directory within cluster_dir and copy the ec2
-    # inventory plugin with a customised configuration into it.
-
-    - name: Ensure that the cluster's inventory directory exists
-      file:
-        path: "{{ cluster_dir }}/inventory"
-        state: directory
-
     - name: Copy ec2.py to inventory directory
       copy:
         src: ec2.py
@@ -45,15 +40,8 @@
         src: ec2.ini.j2
         dest: "{{ cluster_dir }}/inventory/ec2.ini"
 
-    # Create an ssh keypair for this cluster, and register its public
-    # key in each region. This key is used to initially provide ssh
-    # access to any provisioned instances.
-
-    - name: Create ssh key {{ ec2_key_file }}
-      include: ../common/ssh-key.yml
-      vars:
-        keyfile: "{{ ec2_key_file }}"
-      tags: ec2_keys
+    # Register this cluster's ssh public key in each region. This key is
+    # used to initially provide ssh access to any provisioned instances.
 
     - name: Register key {{ ec2_key_name }} in each region
       ec2_key:
@@ -214,9 +202,21 @@
           }
       tags: iam
 
-    # Generate SSH host keys for instances.
+    # We generated host keys into hostkeys/ssh_host_$type_key{,.pub};
+    # we now upload those to hostkeys/$type{,.pub}.txt in S3.
 
-    - include: ssh-hostkeys.yml
+    - name: Upload SSH host key files
+      s3:
+        bucket: "{{ cluster_bucket }}"
+        object: "{{ cluster_name }}/hostkeys/{{ item.0 }}{{ item.1 }}.txt"
+        src: "{{ cluster_dir }}/hostkeys/ssh_host_{{ item.0 }}_key{{ item.1 }}"
+        overwrite: different
+        expiration: 3600
+        mode: put
+      with_nested:
+        - ["rsa", "ecdsa"]
+        - ["", ".pub"]
+      register: keyurls
       tags: ssh
 
     # When provisioning each instance, we must specify an AMI id to use.
@@ -428,7 +428,5 @@
       template:
         src: known_hosts.j2
         dest: "{{ cluster_dir }}/known_hosts"
-
-    - include: ../common/set-vault-pass.yml
 
     - include: ../common/write-cluster-vars.yml

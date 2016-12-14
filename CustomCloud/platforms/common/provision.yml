@@ -1,0 +1,28 @@
+---
+
+- name: Platform-independent provisioning tasks
+  hosts: localhost
+  vars:
+    ssh_key_file: "{{ key_file | default('id_' + cluster_name|lower) }}"
+
+  tasks:
+    - include: validate.yml
+      tags: always
+
+    - name: Ensure that the cluster's inventory directory exists
+      file:
+        path: "{{ cluster_dir }}/inventory"
+        state: directory
+      tags: common
+
+    - name: Create ssh keypair {{ ssh_key_file }}
+      include: ssh-key.yml
+      vars:
+        keyfile: "{{ ssh_key_file }}"
+      tags: common
+
+    - include: ssh-hostkeys.yml
+      tags: common
+
+    - include: set-vault-pass.yml
+      tags: common
