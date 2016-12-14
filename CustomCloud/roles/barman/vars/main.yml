@@ -1,12 +1,5 @@
 ---
 
-# This is the name by which Barman will know a given host for the
-# purposes of taking backups from it. By default, we just use the
-# hostname, but we can do something else here (e.g., override on a
-# per-host or per-group basis).
-
-_backup_name: "{{ backup_name|default(inventory_hostname) }}"
-
-_config_file: "/etc/barman.d/{{ _backup_name }}.conf"
+_config_file: "/etc/barman.d/{{ backup_name }}.conf"
 
 _barman_backup_interval: "{{ (barman_backup_interval|default(default_barman_backup_interval)).split(' ')|list }}"

@@ -6,9 +6,6 @@
 # up password-less ssh between postgres@ and barman@. See meta/main.yml
 # for details.
 
-- set_fact: backup_name="{{ _backup_name }}"
-  tags: always
-
 # On any instance tagged as a Barman server (i.e., where tags.role
 # includes 'barman'), it will install and configure Barman.
 

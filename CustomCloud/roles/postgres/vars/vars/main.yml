@@ -1,0 +1,8 @@
+---
+
+# This is the name by which Barman will know a given host for the
+# purposes of taking backups from it. By default, we just use the
+# hostname, but we can do something else here (e.g., override on a
+# per-host or per-group basis).
+
+_backup_name: "{{ backup_name|default(inventory_hostname) }}"
