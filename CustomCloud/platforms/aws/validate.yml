@@ -67,13 +67,15 @@
 # Likewise, for every instance that has an "upstream: xxx" tag, there
 # should be exactly one instance with a "Name: xxx" tag.
 
-- set_fact:
+- name: Collect upstream and backup references
+  set_fact:
     barman_references: >
       {{ instances|selectattr('tags.backup', 'defined')|map(attribute='tags.backup')|unique|list }}
     upstream_references: >
       {{ instances|selectattr('tags.upstream', 'defined')|map(attribute='tags.upstream')|unique|list }}
 
-- assert:
+- name: Validate backup references
+  assert:
     msg: "Please define a single barman instance with Name={{ item }}"
     that:
       - instances|
@@ -82,7 +84,8 @@
         list|count == 1
   with_items: "{{ barman_references }}"
 
-- assert:
+- name: Validate upstream references
+  assert:
     msg: "Please define a single upstream server with Name={{ item }}"
     that:
       - instances|

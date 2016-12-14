@@ -27,14 +27,16 @@
 # By default, we use each node's private IP address for inter-node
 # communication. We also make note of which address variables are set.
 
-- set_fact:
+- name: Set primary IP and list available addresses
+  set_fact:
     ip_address: "{{ private_ip }}"
     ip_addresses: ['public_ip', 'private_ip']
 
 # Add 'postgres' to role when any of 'primary' or 'replica' or 'witness'
 # is given, just as a convenience.
 
-- set_fact:
+- name: Add implicit postgres role if needed
+  set_fact:
     role: "{{ role|union(['postgres']) }}"
   when: >
     'primary' in role or 'replica' in role or 'witness' in role
@@ -43,7 +45,8 @@
 # log to it. This can be overriden by setting 'log_server' for any
 # instance.
 
-- set_fact:
+- name: Set common log_server for the entire cluster
+  set_fact:
     log_server: "{{ groups[ls][0] }}"
   when: >
     log_server is not defined and
@@ -56,7 +59,8 @@
 # instance use it as its openvpn server. This can be overriden by
 # setting 'openvpn_server' for any instance.
 
-- set_fact:
+- name: Set common openvpn_server for the entire cluster
+  set_fact:
     openvpn_server: "{{ groups[os][0] }}"
   when: >
     openvpn_server is not defined and
@@ -69,7 +73,8 @@
 # instance use it as its monitoring server. This can be overriden by
 # setting 'monitoring_server' for any instance.
 
-- set_fact:
+- name: Set common monitoring_server for the entire cluster
+  set_fact:
     monitoring_server: "{{ groups[ms][0] }}"
   when: >
     monitoring_server is not defined and
