@@ -67,6 +67,8 @@
     'datanode-replica' in role
 
 ## Quick test to make sure that the cluster is operational
+- set_fact:
+    createdb_ran: False
 
 - block:
     - name: Test XL - createdb
@@ -81,6 +83,9 @@
       shell: source ~/.profile && dropdb test
       args:
         executable: /bin/bash
+    - set_fact:
+        createdb_ran: True
   become: true
   become_user: postgres
-  when: inventory_hostname == control_hostname
+  when: >
+    'coordinator' in role and createdb_ran == False
