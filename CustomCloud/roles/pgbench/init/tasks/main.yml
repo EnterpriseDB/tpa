@@ -1,0 +1,9 @@
+---
+
+- name: Run pgbench -i -s 10
+  command: >
+    {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} -i -s 10 postgres
+  become_user: postgres
+  become: true
+  when: >
+    'primary' in role or 'coordinator' in role
