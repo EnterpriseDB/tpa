@@ -57,34 +57,14 @@ function draw_cluster(cluster, selection, width, height) {
         diagram.selectAll("."+c)
         .data(root.descendants().filter(tpa.is_instance(c)))
         .enter()
-        .call(d => draw(d, diagram, {width: width, height: height}));
+        .call(d => draw(d, diagram, {width: width, height: height})
+            .classed(c, true)
+        );
     }
 
     draw_all_of_class('zone', draw_zone);
     draw_all_of_class('rolelink', draw_rolelink);
     draw_all_of_class('instance', draw_instance);
-}
-
-function draw_rolelink(selection, rolelink) {
-    return selection.append("path")
-        .classed("edge rolelink", true)
-        .attr("d", function(d) {
-            // draw line from server instance to client instance
-            if ( !d.parent ) return "";
-            let path = d3.path();
-            let p = d.parent, c = d.children[0];
-            let y1 = p.y, y2 = c.y;
-            if (y1 > y2) {
-                y1 = c.y;
-                y2 = p.y;
-            }
-            path.moveTo(p.x, p.y);
-            path.bezierCurveTo(
-                d.x + (d.x-c.x)/3, y1,
-                p.x + (d.x-p.x)/3, y2,
-                c.x, c.y);
-            return path;
-        });
 }
 
 
@@ -137,6 +117,7 @@ function dgm_objects(cluster) {
         });
     });
 
+    // if an instance has no parent yet, the subnet is its parent.
     cluster.subnets.forEach(
         s => s.instances.filter(i => !(i.url in instance_parents))
             .forEach(function(i) {
@@ -144,6 +125,7 @@ function dgm_objects(cluster) {
                 instance_parents[i] = s.url;
             }));
 
+    // dedupe
     accum.filter(v => (v[0] in parent_id? false : true))
         .forEach(function([o, p]) {
             objects.push(o);
@@ -158,8 +140,7 @@ function draw_zone(selection, zone, size) {
     var zone_sep_y = d3.local();
 
     var zone_display = selection.append('g')
-        .attr("class", d => "zone" +
-            (d.children ? "" : "zone--empty"))
+        .classed('zone--empty',  d => d.children)
         .attr("transform", d => `translate(${-d.parent.x}, ${d.y})`)
         .property('model-url', d => d.data.url ? d.data.url : null);
 
@@ -296,6 +277,27 @@ function draw_instance(selection, instance) {
     return node;
 }
 
+function draw_rolelink(selection, rolelink) {
+    return selection.append("path")
+        .classed("edge", true)
+        .attr("d", function(d) {
+            // draw line from server instance to client instance
+            if ( !d.parent ) return "";
+            let path = d3.path();
+            let p = d.parent, c = d.children[0];
+            let y1 = p.y, y2 = c.y;
+            if (y1 > y2) {
+                y1 = c.y;
+                y2 = p.y;
+            }
+            path.moveTo(p.x, p.y);
+            path.bezierCurveTo(
+                d.x + (d.x-c.x)/3, y1,
+                p.x + (d.x-p.x)/3, y2,
+                c.x, c.y);
+            return path;
+        });
+}
 
 /*********
  * View and geometry helpers.
@@ -339,9 +341,10 @@ function tree_layout(objects, parent_id, width, height) {
  * diagram element.
  */
 function node_yspan(d) {
-    return {min_y: d3.min(d.descendants().map(c => c.y)),
-            max_y: d3.max(d.descendants().map(c => c.y+height))
-            };
+    return {
+        min_y: d3.min(d.descendants().map(c => c.y)),
+        max_y: d3.max(d.descendants().map(c => c.y+height))
+    };
 }
 
 
