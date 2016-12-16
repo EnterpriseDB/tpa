@@ -12,6 +12,10 @@ dependencies:
 
   # Install Barman packages.
 
+  - role: postgres/repo
+    when: >
+      'barman' in role
+
   - role: barman/pkg
     when: >
       'barman' in role
@@ -44,7 +48,7 @@ dependencies:
     ssh_user: postgres
     ssh_key_name: id_barman
     when: >
-      'postgres' in role
+      'postgres' in role or 'postgres-xl' in role
 
   # The barman and streaming_barman users must be created on any primary
   # that we want to backup (whether directly or through a replica), and
