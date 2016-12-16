@@ -48,7 +48,7 @@
 - set_fact:
     role: "{{ role|union(['postgres-xl']) }}"
   when: >
-    'coordinator' in role or 'datanode' in role or 'coordinator-replica' in role or 'datanode-role' in role
+    'coordinator' in role or 'datanode' in role or 'coordinator-replica' in role or 'datanode-replica' in role
 
 # If any instance is tagged with 'log-server', make every other instance
 # log to it. This can be overriden by setting 'log_server' for any
