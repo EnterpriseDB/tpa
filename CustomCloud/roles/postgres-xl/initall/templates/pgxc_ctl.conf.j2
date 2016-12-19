@@ -120,6 +120,16 @@ coordArchLogDirs=()
 # These files will go to corresponding files for the master.
 # You may supply your bash script to setup extra config lines and extra pg_hba.conf entries 
 # Or you may supply these files manually.
+coordExtraPgHba=coordExtraPgHba
+cat >$coordExtraPgHba << EOF
+#================================================
+# Added to all the coordinator ph_hba.conf
+# Original: $coordExtraPgHba
+host replication all 10.33.63.0/24 trust
+host postgres barman 10.33.63.0/24 trust
+host postgres streaming_barman 10.33.63.0/24 trust
+EOF
+
 coordExtraConfig=coordExtraConfig	# Extra configuration file for coordinators.  
 						# This file will be added to all the coordinators'
 						# postgresql.conf
@@ -149,6 +159,9 @@ max_datanodes=64
 max_coordinators=64
 full_page_writes = off
 checkpoint_timeout = 1h
+wal_level=archive
+max_replication_slots=5
+max_wal_senders=5
 EOF
 
 # Additional Configuration file for specific coordinator master.
@@ -204,6 +217,16 @@ datanodeArchLogDirs=()
 # You may supply your bash script to setup extra config lines and extra pg_hba.conf entries here.
 # These files will go to corresponding files for the master.
 # Or you may supply these files manually.
+datanodeExtraPgHba=datanodeExtraPgHba
+cat >$datanodeExtraPgHba << EOF
+#================================================
+# Added to all the datanode pg_hba.conf
+# Original: $datanodeExtraPgHba
+host replication all 10.33.63.0/24 trust
+host postgres barman 10.33.63.0/24 trust
+host postgres streaming_barman 10.33.63.0/24 trust
+EOF
+
 datanodeExtraConfig=datanodeExtraConfig	
 cat > $datanodeExtraConfig <<EOF
 #================================================
@@ -231,6 +254,9 @@ max_datanodes=64
 max_coordinators=64
 full_page_writes = off
 checkpoint_timeout = 1h
+wal_level=archive
+max_replication_slots=5
+max_wal_senders=5
 EOF
 # Additional Configuration file for specific datanode master.
 # You can define each setting by similar means as above.
