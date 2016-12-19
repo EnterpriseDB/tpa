@@ -10,6 +10,12 @@ body { font-family: 'FontAwesome' }
 .cluster_view { font-weight: normal; border: "thick solid #aaaaaa"; }
 
 .diagram {
+    .background-grid {
+        stroke: #eeeeff;
+        fill: none;
+        stroke-dasharray: "100, 10";
+    }
+
     text {
         fill: black;
         stroke: black;
@@ -25,11 +31,6 @@ body { font-family: 'FontAwesome' }
         stroke: $color-complement-2;
         .icon { fill: $color-normal-4; }
 
-        text.role {
-            font-size: 80%;
-            fill: black;
-            stroke: black;
-        }
         text.name {
             stroke: $color-complement-2;
             fill: $color-complement-2;
@@ -40,9 +41,14 @@ body { font-family: 'FontAwesome' }
         stroke: $color-normal-4; fill: none; stroke-width: 3;
     }
 
-    .horizontalGrid { stroke: #eeeeff; fill: none; stroke-dasharray: "100, 10";}
 
     /* TPA objects */
 
-    .diagram--zonesep { stroke: red; fill: red; }
+    .zone line { stroke: red; fill: red; }
+
+    .role {
+        font-size: 80%;
+        fill: black;
+        stroke: black;
+    }
 }

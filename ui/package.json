@@ -1,5 +1,6 @@
 {
   "name": "tpa",
+  "private": true,
   "version": "0.0.0",
   "description": "TPA PG Cluster Management UI",
   "main": "index.html",
@@ -42,7 +43,6 @@
     "multimethods": "",
     "node-sass": "",
     "npm": "",
-    "sass-loader": "",
     "style-loader": "",
     "underscore": "",
     "webpack": "",

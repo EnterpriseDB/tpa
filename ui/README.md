@@ -71,8 +71,8 @@ Python app:
 * __req/__ Python requirements for app, by deployment type.
 * __ansible/__ Ansible roles for deployment and dependencies.
 
-* [build]/static -- webpack will place the runtime static bundle here.
-* [build]/node_modules -- npm will use this as its "global"
+* __[build]/static__ -- webpack will place the runtime static bundle here.
+* __[build]/node_modules__ -- npm will use this as its "global"
 installation prefix.
 
 Note that this means you have to run npm with the -g option set, and
@@ -105,4 +105,61 @@ role configs in tpasite.conf.
 ~/tpa/ui > webpack -hw &
 ...
 ~/tpa/ui > ./apps/manage.py runserver
+```
+
+
+## YAML tags
+
+__TODO__ - Audit and ensure we support all in ui/db/yaml.
+
+```
+cluster_rules
+cluster_vars
+co_list
+customerId
+delete_on_termination
+device_name
+dn_list
+dn_replica_list
+ephemeral
+from_port
+group
+has_tct
+log
+node
+os
+proto
+x region
+spot_launch_group
+spot_price
+spot_wait_timeout
+termination_protection
+to_port
+x type
+volume_size
+volume_type
+volumes
+
+Done:
+
+x Name
+x Owner
+x assign_eip
+x az
+x backup
+x cidr
+x cidr_ip
+x cluster_name
+x cluster_network
+x cluster_tags
+x ec2_ami
+x ec2_ami_user
+x ec2_vpc
+x ec2_vpc_subnets
+x image
+x instances
+x role
+x subnet
+x tags
+x upstream
 ```

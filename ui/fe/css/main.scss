@@ -3,8 +3,12 @@
  * Copyright 2013-2016 Start Bootstrap
  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap/blob/gh-pages/LICENSE)
  */
+
+@import "./colorscheme";
+@import "./colorscheme-alert";
+
 body {
-  background-color: #f8f8f8;
+  background-color: $color-primary-0;
 }
 #wrapper {
   width: 100%;
@@ -78,7 +82,7 @@ body {
   border-bottom: 1px solid #e7e7e7;
 }
 .sidebar ul li a.active {
-  background-color: #eeeeee;
+  background-color: white;
 }
 .sidebar .arrow {
   float: right;
@@ -118,19 +122,19 @@ body {
   transition: all .5s;
 }
 .btn-primary.btn-outline {
-  color: #428bca;
+  color: $color-secondary-2-3;
 }
 .btn-success.btn-outline {
-  color: #5cb85c;
+  color: $color-normal-4;
 }
 .btn-info.btn-outline {
-  color: #5bc0de;
+  color: $color-inactive-4;
 }
 .btn-warning.btn-outline {
-  color: #f0ad4e;
+  color: $color-warning-4;
 }
 .btn-danger.btn-outline {
-  color: #d9534f;
+  color: $color-danger-4;
 }
 .btn-primary.btn-outline:hover,
 .btn-success.btn-outline:hover,
@@ -249,7 +253,7 @@ table.dataTable thead .sorting:after {
   color: #5cb85c;
 }
 .panel-green > a:hover {
-  color: #3d8b3d;
+  color: $color-secondary-1-2;
 }
 .panel-red {
   border-color: #d9534f;
@@ -377,10 +381,10 @@ table.dataTable thead .sorting:after {
   border-left-width: 0;
 }
 .timeline-badge.primary {
-  background-color: #2e6da4 !important;
+  background-color: $color-primary-3 !important;
 }
 .timeline-badge.success {
-  background-color: #3f903f !important;
+  background-color: $color-secondary-1-0 !important;
 }
 .timeline-badge.warning {
   background-color: #f0ad4e !important;
