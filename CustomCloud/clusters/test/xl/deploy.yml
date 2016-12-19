@@ -1,7 +1,7 @@
 ---
 
-- name: Set up XLCloudTest cluster nodes
-  hosts: tag_Cluster_XLCloudTest
+- name: Set up XLTEST cluster nodes
+  hosts: tag_Cluster_XLTEST
   remote_user: ubuntu
   sudo_user: root
   sudo: true
@@ -76,6 +76,49 @@
 
     - role: postgres-xl/initall
       tags: initall
+
+    - role: postgres-xl/backup
+      tags: backup
+
+  # TODO: handle restart notifications correctly
+  # For now we add a handler here to catch the notifications
+  # from some postgres roles (e.g. user)
+  handlers:
+    - name: Note Postgres restart required
+      set_fact:
+        postgres_service_end_state: restarted
+
+
+- name: Configure backup of XL components
+  hosts: backup_nodes
+  remote_user: ubuntu
+  sudo_user: root
+  sudo: true
+  vars:
+    ansible_python_interpreter: '/usr/bin/python2.7'
+
+  roles:
+    - role: postgres/vars
+      vars:
+        postgres_version: 9.5
+      tags: always
+
+    # install barman 2.0
+    - role: barman
+      tags: barman
+
+    - role: barman/final
+      tags: barman
+
+    - role: pgbench/init
+      vars:
+        postgres_bin_dir: /opt/pgxl/bin
+      tags: pgbench
+
+    - role: barman/first-backup
+      vars:
+        postgres_bin_dir: /opt/pgxl/bin
+      tags: barmanfinal
 
   # TODO: handle restart notifications correctly
   # For now we add a handler here to catch the notifications

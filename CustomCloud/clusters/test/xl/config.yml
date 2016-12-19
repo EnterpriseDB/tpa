@@ -4,9 +4,10 @@
 #
 # Intended for deployment under the 2ndQuadrant AWS account.
 
-cluster_name: "XLCloudTest"
+cluster_name: "XLTEST"
 cluster_tags:
-  Owner: Haroon
+  Name: XLTEST
+  Owner: Nikhils
 
 ec2_ami:
   Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627
@@ -39,7 +40,8 @@ ec2_vpc_subnets:
       az: ap-southeast-2a
 
 instances:
-    - type: i2.xlarge
+    - node: 1
+      type: i2.xlarge
       region: ap-southeast-2
       subnet: 10.33.63.0/26
       spot_price: 0.2
@@ -55,7 +57,8 @@ instances:
       tags:
         role: gtm,coordinator
         co_list: 1
-    - type: i2.xlarge
+    - node: 2
+      type: i2.xlarge
       region: ap-southeast-2
       subnet: 10.33.63.0/26
       spot_price: 0.2
@@ -72,7 +75,8 @@ instances:
         role: datanode,datanode-replica
         dn_list: 1,2
         dn_replica_list: 3,4
-    - type: i2.xlarge
+    - node: 3
+      type: i2.xlarge
       region: ap-southeast-2
       subnet: 10.33.63.0/26
       spot_price: 0.2
