@@ -15,7 +15,7 @@
     role: "{{ hostvars[item].role }}"
     parent_inventory_hostname: "{{item}}"
     backup: ""
-  with_items: "{{ groups['tag_role_barman'] }}"
+  with_items: "{{ groups['tag_role_barman']|default([]) }}"
 
 - name: Add coordinators to backup_nodes group
   add_host:
@@ -25,7 +25,7 @@
     groups: [backup_nodes, "{{ hostvars[item.0].cluster_tag }}"]
     backup_name: "{{item.0}}-coord-{{item.1}}"
     postgres_port: "20002"
-    backup: "{{ groups['tag_role_barman'][0] }}-barman"
+    backup: "{{ hostvars[item.0].backup }}-barman"
     ansible_os_family: "{{ hostvars[item.0].ansible_os_family }}"
     ansible_distribution_release: "{{ hostvars[item.0].ansible_distribution_release }}"
     ansible_pkg_mgr: "{{ hostvars[item.0].ansible_pkg_mgr }}"
@@ -35,6 +35,8 @@
   with_nested_dependents:
         - groups['tag_role_coordinator']
         - hostvars[item.0].ec2_tag_co_list|default([])
+  when: >
+    hostvars[item.0].backup is defined and hostvars[item.0].backup != ''
 
 - name: Add datanodes to backup_nodes group
   add_host:
@@ -44,7 +46,7 @@
     groups: [backup_nodes, "{{ hostvars[item.0].cluster_tag }}"]
     backup_name: "{{item.0}}-datanode-{{item.1}}"
     postgres_port: "{{item.1|int+20003}}"
-    backup: "{{ groups['tag_role_barman'][0] }}-barman"
+    backup: "{{ hostvars[item.0].backup }}-barman"
     ansible_os_family: "{{ hostvars[item.0].ansible_os_family }}"
     ansible_distribution_release: "{{ hostvars[item.0].ansible_distribution_release }}"
     ansible_pkg_mgr: "{{ hostvars[item.0].ansible_pkg_mgr }}"
@@ -54,3 +56,5 @@
   with_nested_dependents:
         - groups['tag_role_datanode']
         - hostvars[item.0].ec2_tag_dn_list|default([])
+  when: >
+    hostvars[item.0].backup is defined and hostvars[item.0].backup != ''
