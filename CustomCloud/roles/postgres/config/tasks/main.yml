@@ -60,16 +60,29 @@
 # Now we can put any desired settings into conf.d, where they will
 # override the defaults.
 
-- name: Install default TPA configuration file
-  template:
-    src: tpa.conf.j2
-    dest: "{{ _include_dir }}/0000-tpa.conf"
-    owner: postgres
-    group: postgres
-    mode: 0644
+- block:
+    - name: Install default TPA configuration file
+      template:
+        src: tpa.conf.j2
+        dest: "{{ _include_dir }}/0000-tpa.conf"
+        owner: postgres
+        group: postgres
+        mode: 0644
+      notify:
+        - Note Postgres reload required
+
+    - name: Install TPA restart-only configuration file
+      template:
+        src: tpa_restart.conf.j2
+        dest: "{{ _include_dir }}/0001-tpa_restart.conf"
+        owner: postgres
+        group: postgres
+        mode: 0644
+      register: tpa_restart
+      when: tpa_restart.changed
+      notify:
+        - Note Postgres restart required
   when: postgres_conf_template == ''
-  notify:
-    - Note Postgres restart required
 
 # If any settings were specified in postgres_conf_settings, we put that
 # into a separate configuration file. Note that we expect values in this
