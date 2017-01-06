@@ -77,7 +77,7 @@
     - role: postgres-xl/initall
       tags: initall
 
-    - role: postgres-xl/backup
+    - role: postgres-xl/backup/add_hosts
       tags: backup
 
   # TODO: handle restart notifications correctly
@@ -114,6 +114,12 @@
       vars:
         postgres_bin_dir: /opt/pgxl/bin
       tags: pgbench
+
+    # set up gtm backup
+    - role: postgres-xl/backup/gtm
+      vars:
+        postgres_bin_dir: /opt/pgxl/bin
+      tags: gtm
 
     - role: barman/first-backup
       vars:
