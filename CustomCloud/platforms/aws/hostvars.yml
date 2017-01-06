@@ -42,13 +42,13 @@
     'primary' in role or 'replica' in role or 'witness' in role
 
 # Add 'postgres-xl' to role when any of 'coordinator' or 'datanode'
-# or 'coordinator-replica' or 'datanode-replica'
-# is given
+# or 'coordinator-replica' or 'datanode-replica' or 'gtm' or
+# 'gtm-standby' is given
 
 - set_fact:
     role: "{{ role|union(['postgres-xl']) }}"
   when: >
-    'coordinator' in role or 'datanode' in role or 'coordinator-replica' in role or 'datanode-replica' in role
+    'coordinator' in role or 'datanode' in role or 'coordinator-replica' in role or 'datanode-replica' in role or 'gtm' in role or 'gtm-standby' in role
 
 # If any instance is tagged with 'log-server', make every other instance
 # log to it. This can be overriden by setting 'log_server' for any
