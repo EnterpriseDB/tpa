@@ -1,0 +1,4 @@
+---
+
+_gtm_backup_basedir: '{{ (gtm_backup_basedir|default("/var/lib/barman/"+backup_name)) }}'
+_gtm_backup_interval: "{{ (gtm_backup_interval|default(default_gtm_backup_interval)).split(' ')|list }}"
