@@ -4,7 +4,7 @@
 
 cluster_name: "BDRTest"
 cluster_tags:
-  Owner: AMS
+  Owner: gulcin
 
 ec2_ami:
   Name: debian-jessie-amd64-hvm-2016-04-03-ebs
