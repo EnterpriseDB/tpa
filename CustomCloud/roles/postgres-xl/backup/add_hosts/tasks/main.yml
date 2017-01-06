@@ -12,7 +12,8 @@
     ansible_distribution_release: "{{ hostvars[item].ansible_distribution_release }}"
     ansible_pkg_mgr: "{{ hostvars[item].ansible_pkg_mgr }}"
     cluster_name: "{{ hostvars[item].cluster_name }}"
-    role: "{{ hostvars[item].role }}"
+#   role: "{{ hostvars[item].role }}"
+    role: [ "barman" ]
     parent_inventory_hostname: "{{item}}"
     backup: ""
   with_items: "{{ groups['tag_role_barman']|default([]) }}"
@@ -30,7 +31,8 @@
     ansible_distribution_release: "{{ hostvars[item.0].ansible_distribution_release }}"
     ansible_pkg_mgr: "{{ hostvars[item.0].ansible_pkg_mgr }}"
     cluster_name: "{{ hostvars[item.0].cluster_name }}"
-    role: "{{ hostvars[item.0].role }}"
+#   role: "{{ hostvars[item.0].role }}"
+    role: [ "coordinator","postgres-xl" ]
     parent_inventory_hostname: "{{item.0}}"
   with_nested_dependents:
         - groups['tag_role_coordinator']
@@ -51,10 +53,32 @@
     ansible_distribution_release: "{{ hostvars[item.0].ansible_distribution_release }}"
     ansible_pkg_mgr: "{{ hostvars[item.0].ansible_pkg_mgr }}"
     cluster_name: "{{ hostvars[item.0].cluster_name }}"
-    role: "{{ hostvars[item.0].role }}"
+#   role: "{{ hostvars[item.0].role }}"
+    role: [ "datanode","postgres-xl" ]
     parent_inventory_hostname: "{{item.0}}"
   with_nested_dependents:
         - groups['tag_role_datanode']
         - hostvars[item.0].ec2_tag_dn_list|default([])
   when: >
     hostvars[item.0].backup is defined and hostvars[item.0].backup != ''
+
+# We need to pass on a coordinator to allow us to issue "CREATE BARRIER"
+# against it.
+- name: Add GTM to backup_nodes group
+  add_host:
+    name: "{{item}}-gtm"
+    ansible_host: "{{ hostvars[item].public_ip }}"
+    ip_address: "{{ hostvars[item].ip_address }}"
+    coord_ip_address: "{{ hostvars[groups['tag_role_coordinator'][0]].ip_address }}"
+    coord_port: "20002"
+    groups: [backup_nodes, "{{ hostvars[item].cluster_tag }}"]
+    backup: ""
+    gtm_backup: "{{ hostvars[item].backup }}-barman"
+    backup_name: "{{item}}-gtm"
+    ansible_os_family: "{{ hostvars[item].ansible_os_family }}"
+    ansible_distribution_release: "{{ hostvars[item].ansible_distribution_release }}"
+    ansible_pkg_mgr: "{{ hostvars[item].ansible_pkg_mgr }}"
+    cluster_name: "{{ hostvars[item].cluster_name }}"
+    role: [ "gtm","postgres-xl" ]
+    parent_inventory_hostname: "{{item}}"
+  with_items: "{{ groups['tag_role_gtm']|default([]) }}"
