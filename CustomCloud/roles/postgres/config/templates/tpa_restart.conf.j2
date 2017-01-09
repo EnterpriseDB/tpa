@@ -14,7 +14,9 @@ max_worker_processes = {{ max_worker_processes|default(16) }}
 
 logging_collector = {{ logging_collector|default('off') }}
 
+{% if pgversion|version_compare('9.4', '>') %}
 cluster_name = '{{ inventory_hostname }}'
+{% endif %}
 
 archive_mode = on
 

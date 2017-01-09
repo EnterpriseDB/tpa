@@ -44,8 +44,6 @@ log_min_duration_statement = {{ log_min_duration_statement|default('5s') }}
 
 log_line_prefix = '{{ log_line_prefix|default("%t [%u@%r/%a/%d:%p]: [%l] ") }}'
 
-cluster_name = '{{ inventory_hostname }}'
-
 seq_page_cost = {{ seq_page_cost|default(1.0) }}
 random_page_cost = {{ random_page_cost|default(4.0) }}
 cpu_tuple_cost = {{ cpu_tuple_cost|default(0.01) }}
@@ -103,7 +101,6 @@ synchronous_commit = {{ synchronous_commit|default('on') }}
 
 full_page_writes = {{ full_page_writes|default('on') }}
 wal_log_hints = {{ wal_log_hints|default('on') }}
-wal_compression = {{ wal_compression|default('off') }}
 wal_buffers = {{ wal_buffers|default(-1) }}
 commit_delay = {{ commit_delay|default(0) }}
 commit_siblings = {{ commit_siblings|default(5) }}
@@ -119,13 +116,17 @@ min_wal_size = {{ min_wal_size|default('128MB') }}
 checkpoint_segments = {{ checkpoint_segments|default(128) }}
 {% endif %}
 
+{% if pgversion|version_compare('9.4', '>') %}
+wal_compression = {{ wal_compression|default('off') }}
+operator_precedence_warning = {{ operator_precedence_warning|default('off') }}
+{% endif %}
+
 transform_null_equals = {{ transform_null_equals|default('off') }}
 array_nulls = {{ array_nulls|default('on') }}
 backslash_quote = {{ backslash_quote|default('safe_encoding') }}
 default_with_oids = {{ default_with_oids|default('off') }}
 escape_string_warning = {{ escape_string_warning|default('on') }}
 lo_compat_privileges = {{ lo_compat_privileges|default('off') }}
-operator_precedence_warning = {{ operator_precedence_warning|default('off') }}
 quote_all_identifiers = {{ quote_all_identifiers|default('off') }}
 sql_inheritance = {{ sql_inheritance|default('on') }}
 standard_conforming_strings = {{ standard_conforming_strings|default('on') }}
