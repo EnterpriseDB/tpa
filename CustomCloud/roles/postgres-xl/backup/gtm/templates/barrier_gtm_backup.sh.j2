@@ -4,14 +4,18 @@
 # create a directory with proper timestamp and then copy
 # contents of the GTM directory into it
 
-backup_dir=/var/lib/barman/{{ backup_name }}/backup/$(date +%Y%m%d)T$(date +%H%M%S)
+barrier_id=$(date +%Y%m%d)T$(date +%H%M%S)
+backup_dir=/var/lib/barman/xltest-1-gtm/backup/$barrier_id
 mkdir -p $backup_dir
 
 # issue a CREATE BARRIER against a coordinator. This will also sync up
 # GTM config contents
 
-{{ postgres_bin_dir }}/psql -d postgres -h {{ coord_ip_address }} -p {{ coord_port }} -qAtc 'CREATE BARRIER'
+{{ postgres_bin_dir }}/psql -d postgres -h {{ coord_ip_address }} -p {{ coord_port }} -qAtc "CREATE BARRIER '$barrier_id'" 
 
 # scp the contents of GTM directory into $backup_dir
 
-scp -r postgres@{{ parent_inventory_hostname }}:/pgxl/data/gtm/* $backup_dir
+# scp gtm.conf and GTM_$barrier_id.control from GTM directory into $backup_dir
+
+scp postgres@xltest-1:/pgxl/data/gtm/gtm.conf $backup_dir
+scp postgres@xltest-1:/pgxl/data/gtm/GTM_$barrier_id.control $backup_dir
