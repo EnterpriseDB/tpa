@@ -78,8 +78,6 @@
         owner: postgres
         group: postgres
         mode: 0644
-      register: tpa_restart
-      when: tpa_restart.changed
       notify:
         - Note Postgres restart required
   when: postgres_conf_template == ''
