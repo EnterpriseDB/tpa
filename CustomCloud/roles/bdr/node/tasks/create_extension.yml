@@ -6,3 +6,5 @@
     name: "{{ item }}"
     db: "{{ bdr_db_name }}"
   with_items: "{{ postgresql_exts }}"
+  become_user: postgres
+  become: yes

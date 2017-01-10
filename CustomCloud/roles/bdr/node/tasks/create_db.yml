@@ -4,3 +4,5 @@
   postgresql_db:
     state: present
     name: "{{ bdr_db_name }}"
+  become_user: postgres
+  become: yes
