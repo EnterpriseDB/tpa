@@ -1,9 +1,10 @@
 ---
 
+- name: Note Postgres reload required
+  set_fact:
+    postgres_service_end_state: reloaded
+
 - name: Note Postgres restart required
   set_fact:
     postgres_service_end_state: restarted
 
-- name: Note Postgres reload required
-  set_fact:
-    postgres_service_end_state: reloaded
