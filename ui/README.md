@@ -107,38 +107,46 @@ role configs in tpasite.conf.
 ~/tpa/ui > ./apps/manage.py runserver
 ```
 
+## Authentication and Authorization
+
+The app uses JWT for authenticating users. There is an n-to-n relationship
+between Users and Tenants, where Tenant represents and organization
+or institution which owns clusters and deputes users to manage them on
+its behalf. Access to view and edit tenant-owned resources by users is
+implemented using django-guardian for RBAC.
 
 ## YAML tags
 
 __TODO__ - Audit and ensure we support all in ui/db/yaml.
 
 ```
+LATER
+
 cluster_rules
+    from_port
+    to_port
+    proto
+
 cluster_vars
-co_list
 customerId
-delete_on_termination
-device_name
+
+co_list
 dn_list
 dn_replica_list
-ephemeral
-from_port
-group
-has_tct
+
 log
 node
 os
-proto
-x region
 spot_launch_group
 spot_price
 spot_wait_timeout
 termination_protection
-to_port
-x type
-volume_size
-volume_type
-volumes
+
+PGLOGICAL
+
+tags:
+    group
+    has_tct
 
 Done:
 
@@ -156,10 +164,21 @@ x ec2_ami
 x ec2_ami_user
 x ec2_vpc
 x ec2_vpc_subnets
+x ephemeral
 x image
 x instances
 x role
+x region
+x type
 x subnet
 x tags
 x upstream
+
+x volumes
+x     volume_size
+x     volume_type
+x     delete_on_termination
+x     device_name
+
+
 ```
