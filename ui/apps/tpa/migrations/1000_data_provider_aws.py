@@ -204,3 +204,8 @@ INSTANCE_TYPES = '''
     d2.2xlarge
     d2.4xlarge
     d2.8xlarge'''.split()
+
+VOLUME_TYPES = [
+    'gp2',
+    'standard'
+]
