@@ -62,6 +62,9 @@ class BaseModel(UUIDMixin, TimestampMixin):
     class Meta(object):
         abstract = True
 
+    def __unicode__(self):
+        return unicode(self.name or self.uuid)
+
 ###
 
 
