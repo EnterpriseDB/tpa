@@ -11,9 +11,12 @@ from uuid import uuid4
 
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (BooleanField, CharField, DateTimeField,
-                              ForeignKey, PositiveIntegerField, UUIDField)
+                              ForeignKey, PositiveIntegerField,
+                              TextField, UUIDField)
+
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +98,7 @@ class VolumeType(BaseModel):
 
 
 class Tenant(BaseModel):
-    pass
+    ssh_public_keys = ArrayField(TextField(), default=[])
 
 
 class TenantOwnedMixin(BaseModel):
