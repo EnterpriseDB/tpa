@@ -15,7 +15,7 @@ from .base import *
 
 INSTALLED_APPS += [
     'django.contrib.postgres',
-    'django.contrib.sites',
+    #'django.contrib.sites',
     'rest_framework',
     'tpa',
     #'fe',
