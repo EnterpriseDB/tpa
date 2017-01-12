@@ -132,6 +132,28 @@ class Command(BaseCommand):
                                   instance.name, client_role,
                                   ins_tags[rel_name], server_role),)
 
+            for vol_def in ins_def.get('volumes', []):
+                volume = m.Volume.objects.create(
+                    tenant=tenant,
+                    instance=instance,
+                    name=vol_def['device_name'],
+                    volume_type=m.VolumeType.objects.get(
+                        provider=provider,
+                        name=vol_def['volume_type']
+                    ),
+                    volume_size=vol_def['volume_size'],
+                    delete_on_termination=vol_def.get('delete_on_termination',
+                                                      True)
+                )
+
+                # EC2 ephemeral volume
+                if 'ephemeral' in vol_def:
+                    volume.user_tags = {
+                        'ephemeral': vol_def['ephemeral']
+                    }
+                    volume.save()
+
+
         # Links
         for (dirn, rel_name,
              client_name, client_role,

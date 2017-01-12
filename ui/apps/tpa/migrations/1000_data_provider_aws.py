@@ -30,6 +30,7 @@ def load_aws_data(apps, schema_editor):
     Region = apps.get_model('tpa', 'Region')
     Zone = apps.get_model('tpa', 'Zone')
     InstanceType = apps.get_model('tpa', 'InstanceType')
+    VolumeType = apps.get_model('tpa', 'VolumeType')
 
     db_alias = schema_editor.connection.alias
 
@@ -41,9 +42,11 @@ def load_aws_data(apps, schema_editor):
     ]
     Provider.objects.using(db_alias).bulk_create(providers)
 
+    provider_ec2 = [p for p in providers if p.name == 'EC2'][0]
+
     regions = [
         Region(uuid=gen_uuid('region', "EC2", name),
-               provider=[p for p in providers if p.name == 'EC2'][0],
+               provider=provider_ec2,
                name=name,
                description='')
             for name in REGIONS
@@ -70,6 +73,14 @@ def load_aws_data(apps, schema_editor):
     ]
     InstanceType.objects.using(db_alias).bulk_create(instance_types)
 
+    volume_types = [
+        VolumeType(uuid=gen_uuid('volume_type', "EC2",
+                                volume_type_name),
+                   name=volume_type_name,
+                   provider=provider_ec2)
+            for volume_type_name in VOLUME_TYPES
+    ]
+    VolumeType.objects.using(db_alias).bulk_create(volume_types)
 
 
 class Migration(migrations.Migration):
@@ -204,3 +215,8 @@ INSTANCE_TYPES = '''
     d2.2xlarge
     d2.4xlarge
     d2.8xlarge'''.split()
+
+VOLUME_TYPES = [
+    'gp2',
+    'standard'
+]

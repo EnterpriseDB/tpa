@@ -9,6 +9,7 @@ dependencies:
   - role: postgres/initdb
   - role: bdr/config
   - role: postgres/restart
+  - role: postgres/pgpass
   - role: bdr/node
   - role: sys/ssh
     ssh_user: postgres

@@ -8,20 +8,24 @@ from django.conf.urls import include, url
 from django.conf import settings
 from django.contrib.staticfiles import views
 from django.views.generic.base import RedirectView
+from django.contrib import admin
+
+from rest_framework_jwt.views import obtain_jwt_token
+
+admin.autodiscover()
 
 urlpatterns = []
 
 if settings.DEBUG:
     import debug_toolbar
-    from django.contrib import admin
     urlpatterns += [
-        url(r'^admin/', include(admin.site.urls)),
         url(r'^__debug__/', include(debug_toolbar.urls)),
     ]
 
 urlpatterns += [
     url(r'^$', RedirectView.as_view(url="/index.html")),
+    url(r'^api-token-auth/', obtain_jwt_token),
     url(r'^api/', include('tpasite.api.urls', namespace='api')),
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^(?P<path>.*)$', views.serve),
 ]
-
