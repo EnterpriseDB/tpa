@@ -196,7 +196,7 @@
                   "s3:GetObject"
                 ],
                 "Effect": "Allow",
-                "Resource": "arn:aws:s3:::2ndquadrant-tpa/{{ cluster_name }}/*"
+                "Resource": "arn:aws:s3:::{{ cluster_bucket }}/{{ cluster_name }}/*"
               }
             ]
           }
