@@ -47,8 +47,8 @@
         'bdr' in role
       tags: bdr
 
-    #- role: barman
-    #  tags: barman
+    - role: barman
+      tags: barman
 
     - role: pgbouncer
       tags: pgbouncer
