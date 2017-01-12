@@ -1,2 +1,4 @@
 *:*:*:postgres:{{ postgres_password|replace("\\","\\\\")|replace(':','\:') }}
+{% if repmgr_password is defined %}
 *:*:*:repmgr:{{ repmgr_password|replace("\\","\\\\")|replace(':','\:') }}
+{% endif %}
