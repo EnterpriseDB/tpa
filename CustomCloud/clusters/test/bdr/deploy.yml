@@ -10,7 +10,6 @@
   vars:
     ansible_distribution: Debian
     ansible_distribution_release: jessie
-    #barman_backup_method: rsync
 
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
