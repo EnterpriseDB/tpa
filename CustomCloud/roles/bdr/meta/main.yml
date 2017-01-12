@@ -7,10 +7,9 @@ dependencies:
   - role: postgres/user
     tags: [postgres, user]
   - role: postgres/initdb
+  - role: postgres/createuser
+    username: postgres
   - role: bdr/config
-  - role: postgres/restart
-  - role: postgres/pgpass
-  - role: bdr/node
   - role: sys/ssh
     ssh_user: postgres
     tags: [sys, ssh]
