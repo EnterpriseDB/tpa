@@ -7,4 +7,4 @@
 dependencies:
   - role: postgres/createuser/final
     when: >
-      backup != '' and ('coordinator' in role or 'postgres' in role) and 'replica' not in role
+      backup is defined and ('coordinator' in role or 'postgres' in role) and 'replica' not in role

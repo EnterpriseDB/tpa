@@ -19,7 +19,7 @@
 # client-side configuration.
 
 - include: client.yml
-  when: backup != ''
+  when: backup is defined
   static: no
 
 # On any other kind of instance, we do nothing.

@@ -16,7 +16,7 @@
 - include_role: name=barman/first-backup
   static: no
   when: >
-    backup != ''
+    backup is defined
 
 - block:
     - name: Run read/write pgbench

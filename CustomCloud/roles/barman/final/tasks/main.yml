@@ -6,5 +6,5 @@
   static: no
 
 - include: client.yml
-  when: backup != ''
+  when: backup is defined
   static: no

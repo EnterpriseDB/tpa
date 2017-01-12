@@ -12,9 +12,9 @@
   become_user: barman
   become: yes
   when: >
-    backup != ''
+    backup is defined
 
 - include: first-backup.yml
   static: no
   when: >
-    backup != '' and backups.stdout == '0'
+    backup is defined and backups.stdout == '0'
