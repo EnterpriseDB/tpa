@@ -332,8 +332,10 @@ log_disconnections = 0
 ;;; Setting in this config file need careful review!
 ;;;
 
+{% raw %}
 ;; TODO: We should review the pgbouncer.ini.
 ;; We will use a templating scheme that uses defaults/
 ;; to define default_some_value and vars/ that
 ;; defines_some_value:"{{ some_value|default(default_some_value) }}",
 ;; the way we do in postgres/config.
+{% endraw %}
