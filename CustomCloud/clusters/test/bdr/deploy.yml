@@ -10,6 +10,7 @@
   vars:
     ansible_distribution: Debian
     ansible_distribution_release: jessie
+    #barman_backup_method: rsync
 
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
@@ -46,8 +47,18 @@
         'bdr' in role
       tags: bdr
 
-    - role: barman
-      tags: barman
+    #- role: barman
+    #  tags: barman
 
     - role: pgbouncer
       tags: pgbouncer
+
+    - role: postgres/final
+      when: >
+        'bdr' in role
+      tags: [postgres, final]
+
+    - role: bdr/node
+      when: >
+        'bdr' in role
+      tags: bdr
