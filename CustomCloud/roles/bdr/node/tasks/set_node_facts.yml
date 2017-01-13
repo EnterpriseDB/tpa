@@ -15,7 +15,7 @@
     bdr_node_exists: "{{ bdr_node_result.stdout|int == 1 }}"
 
 - name: Set bdr_control_host
-  set_fact: bdr_control_host="{{play_hosts |first}}"
+  set_fact: bdr_control_host= "{{ groups['tag_role_bdr'] |first}}"
 
 - name: Set bdr_other_hosts
-  set_fact: bdr_other_hosts="{{ play_hosts | difference([bdr_control_host]) | list }}"
+  set_fact: bdr_other_hosts= "{{ groups['tag_role_bdr'] | difference([bdr_control_host]) | list }}"
