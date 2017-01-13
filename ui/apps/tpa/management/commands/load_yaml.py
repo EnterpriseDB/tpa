@@ -43,11 +43,14 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('yaml', nargs='+', type=str)
+        parser.add_argument('--tenant', '-t', nargs='?', type=str,
+                            default=TEST_TENANT)
+        parser.add_argument('--provider', '-p', nargs='?', type=str,
+                            default=TEST_PROVIDER)
 
     def handle(self, *args, **options):
-        tenant = m.Tenant.objects.get(uuid=TEST_TENANT)
-        provider = m.Provider.objects.get(name=TEST_PROVIDER)
-
+        tenant = m.Tenant.objects.get(uuid=options['tenant'])
+        provider = m.Provider.objects.get(name=options['provider'])
         creds = m.ProviderCredential.objects.get(provider=provider,
                                                  tenant=tenant)
 
@@ -84,7 +87,8 @@ class Command(BaseCommand):
             tenant=tenant,
         )
 
-        for (region_name, region_subnets) in root['ec2_vpc_subnets'].iteritems():
+        for (region_name, region_subnets) \
+                in root['ec2_vpc_subnets'].iteritems():
             region = m.Region.objects.get(provider=provider,
                                           name=region_name)
             for netmask, subnet in region_subnets.iteritems():
@@ -152,7 +156,6 @@ class Command(BaseCommand):
                         'ephemeral': vol_def['ephemeral']
                     }
                     volume.save()
-
 
         # Links
         for (dirn, rel_name,
