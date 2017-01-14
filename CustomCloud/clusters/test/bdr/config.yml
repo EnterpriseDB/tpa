@@ -20,21 +20,20 @@ ec2_vpc_subnets:
       az: eu-west-1b
     10.33.67.112/28:
       az: eu-west-1c
+    10.33.67.160/28:
+      Name: third
+      az: eu-west-1b
+    10.33.67.176/28:
+      az: eu-west-1c
+    10.33.67.192/28:
+      Name: last
+      az: eu-west-1b
   eu-central-1:
     10.33.67.128/28:
       Name: second
       az: eu-central-1a
     10.33.67.144/28:
       az: eu-central-1b
-  us-east-1:
-    10.33.67.160/28:
-      Name: third
-      az: us-east-1a
-    10.33.67.176/28:
-      az: us-east-1c
-    10.33.67.192/28:
-      Name: last
-      az: us-east-1e
 
 instances:
     # One BDR instance and a corresponding Barman instance in each of
@@ -78,25 +77,25 @@ instances:
 
     - node: 5
       type: t2.micro
-      region: us-east-1
+      region: eu-west-1
       subnet: 10.33.67.160/28
       tags:
         role: bdr
-        backup: barman-us-east-1
+        backup: barman-eu-west-1
         log: cluster-control
 
     - node: 6
       type: t2.micro
-      region: us-east-1
+      region: eu-west-1
       subnet: 10.33.67.176/28
       tags:
         role: barman
         log: cluster-control
-        Name: barman-us-east-1
+        Name: barman-eu-west-1-extra
 
     - node: 7
       type: t2.micro
-      region: us-east-1
+      region: eu-west-1
       subnet: 10.33.67.192/28
       assign_eip: yes
       tags:
