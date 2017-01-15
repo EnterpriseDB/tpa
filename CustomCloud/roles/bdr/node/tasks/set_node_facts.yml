@@ -14,8 +14,24 @@
   set_fact:
     bdr_node_exists: "{{ bdr_node_result.stdout|int == 1 }}"
 
-- name: Set bdr_control_host
-  set_fact: bdr_control_host= "{{ groups['tag_role_bdr'] |first}}"
+# There are two possible scenarios, either this is a new cluster in which case
+# we can pick any host which is supposed to be part of the bdr cluster
+# as the control host or this is an already existing cluster in which case
+#  we need to pick a host that is part of that existing cluster
+# (in other words we must be careful to avoid picking any newly added host
+# that is not yet part of the existing cluster) because the control host
+# is also used by the other hosts to connect to the cluster
+
+- name: Set default bdr_control_host in case of new cluster
+  set_fact:
+    bdr_control_host: "{{ groups['tag_role_bdr'] | first }}"
+
+- name: Set bdr_control_host in case of an existing cluster
+  set_fact:
+    bdr_control_host: "{{ item }}"
+  when: "hostvars[item].bdr_node_exists"
+  with_items: "{{ groups['tag_role_bdr'] }}"
 
 - name: Set bdr_other_hosts
-  set_fact: bdr_other_hosts= "{{ groups['tag_role_bdr'] | difference([bdr_control_host]) | list }}"
+  set_fact:
+    bdr_other_hosts: "{{ groups['tag_role_bdr'] | difference([bdr_control_host]) | list }}"
