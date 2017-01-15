@@ -5,7 +5,7 @@
     shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -Atw -c 'DROP TABLE IF EXISTS bdr_test; CREATE TABLE bdr_test (c1 INT, PRIMARY KEY (c1)); INSERT INTO bdr_test VALUES (1);'"
 
   - name: Wait for replication to catch up
-    shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -Atw -c 'SELECT pg_xlog_wait_remote_apply(pg_current_xlog_location(), 0);'"
+    shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -Atw -c 'SELECT pg_xlog_wait_remote_apply(pg_current_xlog_location(), pid) FROM pg_stat_replication WHERE application_name like $$bdr%$$;'"
 
   - name: Check the table on the other nodes
     shell: "{{pgbindir}}/psql '{{hostvars[item].bdr_node_dsn}}' -Atw -c 'SELECT * FROM bdr_test;'"
