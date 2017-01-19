@@ -1,5 +1,5 @@
 
-.PHONY = demo all dev-init
+.PHONY = demo all dev-setup
 build := build
 
 all:
@@ -10,7 +10,7 @@ demo:
 $(build):
 	mkdir -p $(build)
 
-dev-init: $(build)/env $(build)/node_modules $(build)/static $(build)/bundle
+dev-setup: $(build)/env $(build)/node_modules $(build)/static $(build)/bundle
 
 $(build)/env: $(build)
 	virtualenv --no-site-packages $(build)/env
