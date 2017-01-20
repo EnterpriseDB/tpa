@@ -390,7 +390,7 @@
         device_id: "{{ item.1.tagged_instances[0].id }}"
         reuse_existing_ip_allowed: true
         in_vpc: true
-      when: item.0.assign_eip|d() and item.0.assign_eip
+      when: item.0.assign_elastic_ip|d() and item.0.assign_elastic_ip
       with_together:
         - "{{ instances }}"
         - "{{ ec2_jobs.results }}"

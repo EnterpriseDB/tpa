@@ -55,11 +55,11 @@ before doing anything else (python packages, virtualend, ansible)!
 
    **NOTE 1** If you want to assign elastic IP to the primary, then edit clusters/test/tpa/config.yml and change the entry
    ```
-   assign_eip: false
+   assign_elastic_ip: false
    ```
    to 
    ```
-   assign_eip: true
+   assign_elastic_ip: true
    ```
    
    **NOTE 2** The default config.yml/deploy.yml sets up a 1 master, 2 standby TPA cluster with automatic failover using repmgr in place. If you want to create a TPA cluster with its dedicated **barman** instance, then edit clusters/test/tpa/config.yml. You can add a new fourth instance here for the barman instance or just for testing, you can even convert the standby instance to a barman instance. If you add a fourth instance, be careful about specifying subnet and other values appropriately. For testing purposes, you can do the below
