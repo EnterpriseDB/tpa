@@ -55,6 +55,10 @@ redirect them to tpa-ui along with authentication and session info via JWT.
 * Debian stable with Python 2.x, Node.js 6.x and PostgreSQL 9.x.
 * Python tools such as virtualenv and pip.
 
+Node and npm must be installed from the nodesource distribution:
+    https://github.com/nodesource/distributions#manual-installation
+
+
 ### Environment Variables
 
 Python app:
@@ -95,10 +99,11 @@ role configs in tpasite.conf.
 ...
 ~/tpa/ui > make dev-setup
 ...
-
+~/tpa/ui > npm -g install
+...
 ~/tpa/ui > pip install -r req/dev.txt
 ...
-~/tpa/ui > createdb tpa-dev
+~/tpa/ui > createdb tpa-dev   # DB suffix matches profile
 ...
 ~/tpa/ui > ./apps/manage.py migrate
 ...

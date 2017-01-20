@@ -1,0 +1,4 @@
+---
+pyapp_sitename: tpa.2ndquadrant.com
+ssl_certificate: "/etc/letsencrypt/live/tpa.2ndquadrant.com/cert.pem"
+ssl_certificate_key: "/etc/letsencrypt/live/tpa.2ndquadrant.com/privkey.pem"
