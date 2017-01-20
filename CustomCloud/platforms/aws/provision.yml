@@ -343,7 +343,7 @@
           )
         }}"
         termination_protection: "{{ item.termination_protection|default('no') }}"
-        assign_public_ip: yes
+        assign_public_ip: "{{ item.assign_public_ip|default('yes') }}"
         wait: yes
       with_items: "{{ instances }}"
       register: ec2_instances
