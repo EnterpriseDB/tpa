@@ -10,22 +10,29 @@
   "author": "2nd Quadrant",
   "license": "UNLICENSED",
   "devDependencies": {
-    "webpack": "~1.14.0",
-    "babel-loader": "~6.2.9",
-    "babel-core": "~6.20.0",
-    "babel-preset-es2015": "~6.18.0"
-  },
-  "files": [
-    "fe/"
-  ],
-  "dependencies": {
-    "sass-loader": "^4.0.2",
-    "babel": "",
-    "babel-core": "",
-    "babel-loader": "",
     "babel-preset-es2015": "",
-    "bootstrap": "",
+    "webpack": "",
+    "webpack-dev-server": "",
+
+    "babel-core": "~6.20.0",
+    "babel-loader": "",
     "css-loader": "",
+    "sass-loader": "",
+    "node-sass": "",
+    "imports-loader": "",
+    "style-loader": "",
+    "file-loader": "",
+    "url-loader": "",
+    "resolve-url-loader": "",
+    "extract-text-webpack-plugin" : "",
+    "bootstrap-loader": "^1.0.0",
+    "bootstrap-sass": ""
+},
+"files": [
+    "fe/"
+],
+"dependencies": {
+    "npm": "",
     "d3": "",
     "d3-color": "",
     "d3-dispatch": "",
@@ -34,19 +41,15 @@
     "d3-path": "",
     "d3-request": "",
     "d3-scale": "",
-    "d3-selection": "",
     "d3-timer": "",
+    "d3-selection": "",
     "d3-zoom": "",
     "es6-promise": "",
     "jquery": "",
+    "metismenu": "",
     "multimethod": "",
-    "multimethods": "",
-    "node-sass": "",
-    "npm": "",
-    "style-loader": "",
     "underscore": "",
-    "webpack": "",
-    "webpack-dev-server": ""
+    "vue": ""
   }
 }
 
