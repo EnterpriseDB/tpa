@@ -79,9 +79,6 @@ Python app:
 * __[build]/node_modules__ -- npm will use this as its "global"
 installation prefix.
 
-Note that this means you have to run npm with the -g option set, and
-ensure you source ./initenv.sh before running npm.
-
 ## Development Quickstart
 
 By default, the system will be configured with dev settings. This can
@@ -99,7 +96,7 @@ role configs in tpasite.conf.
 ...
 ~/tpa/ui > make dev-setup
 ...
-~/tpa/ui > npm -g install
+~/tpa/ui > npm install
 ...
 ~/tpa/ui > pip install -r req/dev.txt
 ...
