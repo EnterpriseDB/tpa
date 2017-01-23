@@ -1,6 +1,5 @@
 const build_dir = process.env.BUILD_PATH ? process.env.BUILD_PATH
                     : ( __dirname+'/build' );
-const node_modules = build_dir+'/node_modules/lib/node_modules';
 
 const path = require('path');
 const webpack = require('webpack');
@@ -13,13 +12,9 @@ module.exports = {
         publicPath: '/'
     },
     resolve: {
-        root: path.resolve(node_modules),
         alias: {
             'vue$': 'vue/dist/vue.common.js'
         }
-    },
-    resolveLoader: {
-        root: path.resolve(node_modules),
     },
     devtool: 'source-map',
     module: {
