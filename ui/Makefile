@@ -10,12 +10,12 @@ demo:
 $(build):
 	mkdir -p $(build)
 
-dev-setup: $(build)/env $(build)/node_modules $(build)/static $(build)/bundle
+dev-setup: $(build)/env ./node_modules $(build)/static $(build)/bundle
 
 $(build)/env: $(build)
 	virtualenv --no-site-packages $(build)/env
 
-$(build)/node_modules: $(build)
-	mkdir -p $(build)/node_modules \
-		&& npm -g --prefix $(build)/node_modules install npm@latest \
-		|| rmdir -f $(build)/node_modules
+./node_modules: $(build)
+	mkdir -p ./node_modules \
+		&& npm install npm@latest \
+		|| rmdir -f ./node_modules

@@ -12,6 +12,7 @@ from django.conf import settings
 from django.db.models.fields.reverse_related import ManyToOneRel
 
 from rest_framework import serializers, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.utils.field_mapping import get_nested_relation_kwargs
 
 from tpa import models
@@ -53,7 +54,7 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
             super(NamespaceViewSerializer, self).build_relational_field(
                 field_name, relation_info)
         if issubclass(field_class, serializers.HyperlinkedRelatedField):
-            field_kwargs['view_name'] = "api:"+field_kwargs['view_name']
+            field_kwargs['view_name'] = "api:" + field_kwargs['view_name']
 
         return field_class, field_kwargs
 
@@ -65,7 +66,7 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
         logger.debug("Default kwargs: %s", field_kwargs)
 
         if issubclass(field_class, serializers.HyperlinkedRelatedField):
-            field_kwargs['view_name'] = "api:"+field_kwargs['view_name']
+            field_kwargs['view_name'] = "api:" + field_kwargs['view_name']
             field_kwargs['lookup_field'] = 'url'
 
         logger.debug("url for %s field_kwargs: %s", field_class, field_kwargs)
@@ -93,21 +94,22 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
         model_view_name = get_detail_view(relation_info.related_model)
         remote_field = getattr(relation_info.model_field, 'remote_field', None)
 
-        logger.debug("relation_info: %s remote: %s", relation_info, remote_field)
+        logger.debug("relation_info: %s remote: %s",
+                     relation_info, remote_field)
 
         expand_child = False
 
         if remote_field:
             if isinstance(remote_field, models.OwnerKey):
-                expand_child=True
+                expand_child = True
         elif relation_info.to_many:
-            expand_child=True
+            expand_child = True
 
         if expand_child:
             NestedSerializer = \
                 NamespaceViewSerializer.create_model_serializer_class(
                     relation_info.related_model,
-                    meta = {
+                    meta={
                         'depth': nested_depth - 1,
                     }
                 )
@@ -176,6 +178,10 @@ def get_detail_view(model_class):
     return "api:%s-detail" % (model_class.__name__.lower(),)
 
 
+class TenantOwnedViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+
+
 def create_generic_view(g, model_class):
     model_name = model_class.__name__
     view_class_name = "%s" % model_name
@@ -183,15 +189,22 @@ def create_generic_view(g, model_class):
     serializer_class = \
         NamespaceViewSerializer.create_model_serializer_class(model_class)
 
+    if issubclass(model_class, models.TenantOwnedMixin):
+        logger.debug("tenant: %s", model_class)
+        view_base = TenantOwnedViewSet
+    else:
+        logger.debug("not tenant: %s", model_class)
+        view_base = viewsets.ModelViewSet
+
     view_class = type(str(view_class_name),
-                      (viewsets.ModelViewSet,),
+                      (view_base,),
                       {'queryset': model_class.objects.all(),
                        'serializer_class': serializer_class,
                        'object_class': model_name.lower(),
                        'model': model_class,
                        'lookup_field': 'uuid',
                        '__module__': __name__,
-                      })
+                       })
 
     g[view_class_name] = view_class
     ALL_VIEWS.append(view_class)
