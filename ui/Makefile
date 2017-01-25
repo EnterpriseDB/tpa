@@ -5,7 +5,7 @@ build := build
 all:
 
 demo:
-	ssh -to ForwardAgent=yes tpademo@tpademo -- cd /home/tpademo/tpa/TPA \; git pull
+	ssh -to ForwardAgent=yes tpademo@tpa-demo -- cd /home/tpademo/tpa/TPA \; git pull
 
 $(build):
 	mkdir -p $(build)
