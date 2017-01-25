@@ -5,8 +5,8 @@
 * Tools for accessing the TPA API via the REST server.
 */
 
-
-
+import * as d3 from "d3";
+import {multimethod} from "./multimethod";
 
 var api = exports;
 api.url = "/api/v1/tpa/";
@@ -15,8 +15,6 @@ api.TEST_TENANT = api.url + "tenant/d9073da2-138f-4342-8cb8-3462be0b325a/";
 api.TEST_CLUSTER = api.url + "cluster/3beb6124-a95d-4625-8d2f-48835803ff2b/";
 
 
-import * as d3 from "d3";
-import {multimethod} from "multimethod";
 
 
 api.provider = null;
