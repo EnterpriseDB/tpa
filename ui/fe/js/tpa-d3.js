@@ -4,9 +4,14 @@ import * as tpa from "./tpa-api";
 import {scaleLinear} from "d3-scale";
 
 
-function show_clusters(tenant, selection, width, height) {
+function show_clusters(tenant, selection) {
     var clusters = [];
     var current_cluster_idx = -1;
+
+    var bbox = selection.node().getBoundingClientRect();
+    var width = bbox.width;
+    var height = bbox.height;
+
 
     tpa.get_obj_by_url(tpa.url+"cluster/", function(c, e) {
         if (e) {
@@ -382,7 +387,7 @@ function setup_viewport(selection, width, height) {
 
     var diagram = viewport_contents.append("g")
         .classed("diagram", true)
-        .attr('transform', `translate(${width/2}, ${height/2})`);
+        .attr('transform', `translate(0, ${height/2})`);
 
     return {svg: svg, diagram: diagram};
 }
@@ -390,8 +395,8 @@ function setup_viewport(selection, width, height) {
 
 function draw_background_grid(selection, cy, width, height) {
     var yScale = scaleLinear()
-        .domain([-height/2, height*1.5])
-        .range([cy-500, cy+500]);
+        .domain([-height, height*3])
+        .range([cy-1000, cy+1000]);
 
     var grid = selection.append('g')
         .classed('background-grid', true)
@@ -407,6 +412,26 @@ function draw_background_grid(selection, cy, width, height) {
     var xAxis = d3.axisLeft(yScale);
 
     grid.call(xAxis);
+
+    var xScale = scaleLinear()
+        .domain([-width, width])
+        .range([cy-1000, cy+1000]);
+
+    var gridy = selection.append('g')
+        .classed('background-grid', true)
+        .selectAll("line.vertical")
+        .data(xScale.ticks(50)).enter()
+        .append("line")
+            .classed('horizontal', true)
+            .attr("y1", -height)
+            .attr("y2", height)
+            .attr("x1", xScale)
+            .attr("x2", xScale);
+
+    var yAxis = d3.axisTop(yScale);
+
+    gridy.call(yAxis);
+
 }
 
 
