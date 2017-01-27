@@ -9,6 +9,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 from uuid import uuid4
 
+from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import ArrayField
@@ -98,6 +99,9 @@ class VolumeType(BaseModel):
 
 
 class Tenant(BaseModel):
+    owner = ForeignKey(settings.AUTH_USER_MODEL, editable=False,
+                       on_delete=models.CASCADE,
+                       null=True)
     ssh_public_keys = ArrayField(TextField(), default=[])
 
 
