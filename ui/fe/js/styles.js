@@ -11,10 +11,6 @@ require('es6-promise').polyfill();
 //
 require("jquery");
 require("bootstrap-loader");
-require("../assets/js/lib/metisMenu.js");
-require("../assets/js/template");
-
-require('../css/colorscheme.scss');
 require('../css/main.scss');
-require('../css/base.scss');
+require('../css/diagram.scss');
 require('../css/signin.scss');

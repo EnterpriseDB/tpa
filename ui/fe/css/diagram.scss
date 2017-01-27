@@ -7,7 +7,13 @@ body { font-family: 'FontAwesome' }
 
 /* Diagram objects */
 
-.cluster_view { font-weight: normal; border: "thick solid #aaaaaa"; }
+.cluster_view { 
+    font-weight: normal;
+    border: "thick solid #aaaaaa";
+    width: 100%;
+    height: 1000px;
+    background-color: white;
+}
 
 .diagram {
     .background-grid {
