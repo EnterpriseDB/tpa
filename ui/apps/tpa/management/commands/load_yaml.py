@@ -105,7 +105,20 @@ class Command(BaseCommand):
 
         for ins_def in root["instances"]:
             ins_tags = ins_def['tags']
-            subnet = subnets[ins_def['subnet']]
+            subnet_cidr = ins_def['subnet']
+            if subnet_cidr in subnets:
+                subnet = subnets[subnet_cidr]
+            else:
+                # Create implicit subnet
+                subnet = subnets[subnet_cidr] = m.Subnet.objects.create(
+                    name=subnet_cidr,
+                    netmask=subnet_cidr,
+                    zone=subnets.values()[0].zone,
+                    cluster=cluster,
+                    tenant=tenant,
+                    vpc=subnets.values()[0].vpc,
+                    credentials=creds)
+
             instance = m.Instance.objects.create(
                 tenant=tenant,
                 subnet=subnet,
