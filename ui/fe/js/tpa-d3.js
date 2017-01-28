@@ -395,8 +395,8 @@ function setup_viewport(selection, width, height) {
 
 function draw_background_grid(selection, cy, width, height) {
     var yScale = scaleLinear()
-        .domain([-height, height*3])
-        .range([cy-1000, cy+1000]);
+        .domain([-height, height])
+        .range([-height*2, height*2]);
 
     var grid = selection.append('g')
         .classed('background-grid', true)
@@ -404,8 +404,8 @@ function draw_background_grid(selection, cy, width, height) {
         .data(yScale.ticks(50)).enter()
         .append("line")
             .classed('horizontal', true)
-            .attr("x1", -width)
-            .attr("x2", width)
+            .attr("x1", -width*2)
+            .attr("x2", width*2)
             .attr("y1", yScale)
             .attr("y2", yScale);
 
@@ -415,7 +415,7 @@ function draw_background_grid(selection, cy, width, height) {
 
     var xScale = scaleLinear()
         .domain([-width, width])
-        .range([cy-1000, cy+1000]);
+        .range([-width*2, width*2]);
 
     var gridy = selection.append('g')
         .classed('background-grid', true)
@@ -423,8 +423,8 @@ function draw_background_grid(selection, cy, width, height) {
         .data(xScale.ticks(50)).enter()
         .append("line")
             .classed('horizontal', true)
-            .attr("y1", -height)
-            .attr("y2", height)
+            .attr("y1", -height*2)
+            .attr("y2", height*2)
             .attr("x1", xScale)
             .attr("x2", xScale);
 
