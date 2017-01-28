@@ -1,0 +1,103 @@
+---
+
+# BDR test cluster
+
+cluster_name: "BDRTest"
+cluster_tags:
+  Owner: gulcin
+
+ec2_ami:
+  Name: debian-jessie-amd64-hvm-2016-04-03-ebs
+ec2_ami_user: "admin"
+
+ec2_vpc:
+  Name: Test
+
+ec2_vpc_subnets:
+  eu-west-1:
+    10.33.67.32/28:
+      Name: first
+      az: eu-west-1b
+    10.33.67.112/28:
+      az: eu-west-1c
+    10.33.67.160/28:
+      Name: third
+      az: eu-west-1b
+    10.33.67.176/28:
+      az: eu-west-1c
+    10.33.67.192/28:
+      Name: last
+      az: eu-west-1b
+  eu-central-1:
+    10.33.67.128/28:
+      Name: second
+      az: eu-central-1a
+    10.33.67.144/28:
+      az: eu-central-1b
+
+instances:
+    # One BDR instance and a corresponding Barman instance in each of
+    # three regions, plus a control node.
+
+    - node: 1
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.67.32/28
+      tags:
+        role: bdr
+        backup: barman-eu-west-1
+        log: cluster-control
+
+    - node: 2
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.67.112/28
+      tags:
+        role: barman
+        log: cluster-control
+        Name: barman-eu-west-1
+
+    - node: 3
+      type: t2.micro
+      region: eu-central-1
+      subnet: 10.33.67.128/28
+      tags:
+        role: bdr
+        backup: barman-eu-central-1
+        log: cluster-control
+
+    - node: 4
+      type: t2.micro
+      region: eu-central-1
+      subnet: 10.33.67.144/28
+      tags:
+        role: barman
+        log: cluster-control
+        Name: barman-eu-central-1
+
+    - node: 5
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.67.160/28
+      tags:
+        role: bdr
+        backup: barman-eu-west-1
+        log: cluster-control
+
+    - node: 6
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.67.176/28
+      tags:
+        role: barman
+        log: cluster-control
+        Name: barman-eu-west-1-extra
+
+    - node: 7
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.67.192/28
+      assign_elastic_ip: yes
+      tags:
+        role: control, backup, openvpn-server, log-server, pgbouncer
+        Name: cluster-control

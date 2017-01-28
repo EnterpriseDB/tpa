@@ -1,0 +1,95 @@
+---
+
+# An example EC2 configuration for XL cluster deployment.
+#
+# Intended for deployment under the 2ndQuadrant AWS account.
+
+cluster_name: "XLTEST"
+cluster_tags:
+  Name: XLTEST
+  Owner: Nikhils
+
+ec2_ami:
+  Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20160627
+ec2_ami_user: "ubuntu"
+
+cluster_rules:
+  - proto: tcp
+    from_port: 22
+    to_port: 22
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 5432
+    to_port: 5432
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 20000
+    to_port: 20005
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 20000
+    to_port: 22000
+    cidr_ip: 10.33.63.0/24
+
+ec2_vpc:
+  Name: Test
+
+ec2_vpc_subnets:
+  ap-southeast-2:
+    10.33.63.0/26:
+      az: ap-southeast-2a
+
+instances:
+    - node: 1
+      type: i2.xlarge
+      region: ap-southeast-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: xllaunchgrp
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 8
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        role: gtm,coordinator
+        co_list: 1
+    - node: 2
+      type: i2.xlarge
+      region: ap-southeast-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: xllaunchgrp
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 8
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        role: datanode,datanode-replica
+        dn_list: 1,2
+        dn_replica_list: 3,4
+    - node: 3
+      type: i2.xlarge
+      region: ap-southeast-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: xllaunchgrp
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 8
+            delete_on_termination: true
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      tags:
+        role: datanode,datanode-replica
+        dn_list: 3,4
+        dn_replica_list: 1,2
