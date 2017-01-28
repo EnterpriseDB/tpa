@@ -109,7 +109,7 @@ class Command(BaseCommand):
             instance = m.Instance.objects.create(
                 tenant=tenant,
                 subnet=subnet,
-                name=ins_tags['Name'],
+                name=ins_tags.get('Name', ins_def['node']),
                 instance_type=m.InstanceType.objects.get(
                     zone=subnet.zone,
                     name=ins_def['type']),
