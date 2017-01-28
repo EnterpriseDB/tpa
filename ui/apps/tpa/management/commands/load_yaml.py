@@ -6,6 +6,7 @@
 
 from __future__ import unicode_literals, absolute_import, print_function
 
+import types
 import logging
 
 
@@ -130,7 +131,11 @@ class Command(BaseCommand):
                 domain="",
                 assign_eip=ins_def.get('assign_eip', False))
 
-            for role_name in ins_tags.get('role', '').split(','):
+            role_names = ins_tags.get('role', [])
+            if type(role_names) in types.StringTypes:
+                role_names = role_names.split(',')
+
+            for role_name in role_names:
                 role_name = role_name.strip()
 
                 if not role_name:
