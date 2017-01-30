@@ -172,7 +172,7 @@ class Command(BaseCommand):
                     roles[(instance.name, role_name)] = role
 
             for (dirn, rel_name, client_role, server_role) in ROLE_LINKS:
-                if rel_name in ins_tags and client_role in ins_tags['role']:
+                if rel_name in ins_tags and client_role in role_names:
                     links.append((dirn, rel_name,
                                   instance.name, client_role,
                                   ins_tags[rel_name], server_role),)
