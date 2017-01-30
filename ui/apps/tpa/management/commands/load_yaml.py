@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim:ts=4:sts=4:sw=4:et:ff=unix:fileencoding=utf-8
 
-'''
+'''TPA config.yml loader.
 '''
 
 from __future__ import unicode_literals, absolute_import, print_function
@@ -75,6 +75,8 @@ class Command(BaseCommand):
         subnets = {}
         roles = {}
         links = []  # client instance, role_name, server instance, role_name
+        dn_roles = {} # id -> dn_role
+        dnr_roles = {} # id -> dnr_role
 
         cluster = m.Cluster.objects.create(
             tenant=tenant,
@@ -131,6 +133,7 @@ class Command(BaseCommand):
                 domain="",
                 assign_eip=ins_def.get('assign_eip', False))
 
+            # Role names can be in CSV or expanded list.
             role_names = ins_tags.get('role', [])
             if type(role_names) in types.StringTypes:
                 role_names = role_names.split(',')
@@ -141,12 +144,32 @@ class Command(BaseCommand):
                 if not role_name:
                     continue
 
-                role = m.Role.objects.create(
-                    instance=instance,
-                    tenant=tenant,
-                    name=role_name)
+                if role_name == 'datanode':
+                    # generate one role per dn index
+                    for dn_id in ins_tags.get('dn_list', []):
+                        dn_name = ('%s-%s' % (role_name, dn_id,))
+                        role = m.Role.objects.create(
+                            instance=instance,
+                            tenant=tenant,
+                            name=dn_name)
+                        roles[(instance.name, dn_name)] = role
+                        dn_roles[dn_id] = role
+                elif role_name == 'datanode-replica':
+                    for dn_id in ins_tags.get('dn_replica_list', []):
+                        dnr_name = ('%s-%s' % (role_name, dn_id,))
+                        role = m.Role.objects.create(
+                                instance=instance,
+                                tenant=tenant,
+                                name=dnr_name)
+                        roles[(instance.name, dnr_name)] = role
+                        dnr_roles[dn_id] = role
+                else:
+                    role = m.Role.objects.create(
+                        instance=instance,
+                        tenant=tenant,
+                        name=role_name)
 
-                roles[(instance.name, role_name)] = role
+                    roles[(instance.name, role_name)] = role
 
             for (dirn, rel_name, client_role, server_role) in ROLE_LINKS:
                 if rel_name in ins_tags and client_role in ins_tags['role']:
@@ -202,5 +225,13 @@ class Command(BaseCommand):
                 name=rel_name,
                 server_role=server_role,
                 client_role=client_role)
+
+        # XL links
+        for (dn_idx, dnr_role) in dnr_roles.iteritems():
+            m.RoleLink.objects.create(
+                tenant=tenant,
+                name=dnr_role.name,
+                server_role=dn_roles[dn_idx],
+                client_role=dnr_role)
 
         return cluster
