@@ -218,5 +218,6 @@ INSTANCE_TYPES = '''
 
 VOLUME_TYPES = [
     'gp2',
-    'standard'
+    'standard',
+    'ephemeral',
 ]

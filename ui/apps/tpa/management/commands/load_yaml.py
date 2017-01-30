@@ -155,15 +155,20 @@ class Command(BaseCommand):
                                   ins_tags[rel_name], server_role),)
 
             for vol_def in ins_def.get('volumes', []):
+                if 'ephemeral' in vol_def:
+                    vol_type = 'ephemeral'
+                else:
+                    vol_type = vol_def['volume_type']
+
                 volume = m.Volume.objects.create(
                     tenant=tenant,
                     instance=instance,
                     name=vol_def['device_name'],
                     volume_type=m.VolumeType.objects.get(
                         provider=provider,
-                        name=vol_def['volume_type']
-                    ),
-                    volume_size=vol_def['volume_size'],
+                        name=vol_type
+                    ).name,
+                    volume_size=vol_def.get('volume_size', "0"),
                     delete_on_termination=vol_def.get('delete_on_termination',
                                                       True)
                 )
