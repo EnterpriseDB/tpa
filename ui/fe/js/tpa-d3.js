@@ -304,7 +304,7 @@ function draw_rolelink(selection, rolelink) {
         .classed("edge", true)
         .attr("d", function(d) {
             // draw line from server instance to client instance
-            if ( !d.parent ) return "";
+            if ( !d.parent || !d.children) return "";
             let path = d3.path();
             let p = d.parent, c = d.children[0];
             let y1 = p.y, y2 = c.y;
