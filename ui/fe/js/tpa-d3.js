@@ -1,8 +1,13 @@
 
+/**
+ * Generate SVG diagrams from TPA clusters using d3 and the TPA API.
+ */
+
 import * as d3 from "d3";
 import * as tpa from "./tpa-api";
 import {scaleLinear} from "d3-scale";
 
+var MIN_NODE_WIDTH = 100;
 
 function show_clusters(tenant, selection) {
     var clusters = [];
@@ -124,13 +129,16 @@ function dgm_objects(cluster) {
 
     // if an instance has no parent yet, the subnet is its parent.
     cluster.subnets.forEach(
-        s => s.instances.filter(i => !(i.url in instance_parents))
+        s => s.instances
+            .filter(function(i) { return !(i.url in instance_parents);})
             .forEach(function(i) {
                 accum.push([i, s]);
                 instance_parents[i] = s.url;
             }));
 
     // dedupe
+    console.log('Accum before dedupe:', accum);
+
     accum.filter(v => (v[0] in parent_id? false : true))
         .forEach(function([o, p]) {
             objects.push(o);
@@ -166,6 +174,16 @@ function draw_zone(selection, zone, size) {
     return zone_display;
 }
 
+function instance_size(instance) {
+    var max_role_length = d3.max(instance.roles.map( r => r.name.length));
+    var h = 25+14*(instance.roles.length+1),
+        w = d3.max([8*(instance.name.length+1),
+                    6*(max_role_length+4),
+                    MIN_NODE_WIDTH]);
+
+    return {"width": w, "height": h};
+}
+
 
 function draw_instance(selection, instance) {
     var node_rect = d3.local();
@@ -178,11 +196,10 @@ function draw_instance(selection, instance) {
         .attr("transform", d => `translate(${d.x}, ${d.y})`)
         .property('model-url', d => d.data.url ? d.data.url : null)
         .each(function(d) {
-            var h = 25+14*(d.data.roles.length+1),
-                w = 8*(d.data.name.length+1);
+            var size = instance_size(d.data);
             node_model.set(this, d.data);
             node_url.set(this, d.data.url);
-            node_rect.set(this, make_rect(w, h));
+            node_rect.set(this, make_rect(size.width, size.height));
         });
 
     // ellipse
@@ -312,10 +329,9 @@ function tree_layout(objects, parent_id, width, height) {
     var table = d3.stratify().id(d=> d.url).parentId(d => parent_id[d.url])
                 (objects);
     var root = d3.hierarchy(table);
-    var tree = d3.cluster()
+    var tree = d3.tree()
                 .size([height, width])
-                .nodeSize([height/10, width/10]);
-
+                .nodeSize([height/10, MIN_NODE_WIDTH*2]);
 
     tree(root);
 
@@ -333,8 +349,9 @@ function tree_layout(objects, parent_id, width, height) {
         d.data = d.data.data;
     });
 
+    console.log("LAYOUT -----------");
     console.log("objects:", objects);
-    console.log("parents:", parent_id);
+    console.log("stratified:", table);
     console.log("root:", root);
 
     return {tree: tree, root: root};
