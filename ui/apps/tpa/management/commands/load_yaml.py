@@ -146,7 +146,7 @@ class Command(BaseCommand):
 
                 if role_name == 'datanode':
                     # generate one role per dn index
-                    for dn_id in ins_tags.get('dn_list', []):
+                    for dn_id in ins_tags.get('dn_list', "").split(','):
                         dn_name = ('%s-%s' % (role_name, dn_id,))
                         role = m.Role.objects.create(
                             instance=instance,
@@ -156,7 +156,7 @@ class Command(BaseCommand):
                         roles[(instance.name, dn_name)] = role
                         dn_roles[dn_id] = role
                 elif role_name == 'datanode-replica':
-                    for dn_id in ins_tags.get('dn_replica_list', []):
+                    for dn_id in ins_tags.get('dn_replica_list', "").split(','):
                         dnr_name = ('%s-%s' % (role_name, dn_id,))
                         role = m.Role.objects.create(
                                 instance=instance,
