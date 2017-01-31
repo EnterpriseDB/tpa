@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "description": "TPA PG Cluster Management UI",
-  "main": "index.html",
+  "main": "fe/index.html",
   "scripts": {
     "dev": "node build/dev-server.js",
     "build": "node build/build.js",
