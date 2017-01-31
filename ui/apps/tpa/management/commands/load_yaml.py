@@ -133,7 +133,7 @@ class Command(BaseCommand):
                 domain="",
                 assign_eip=ins_def.get('assign_eip', False))
 
-            # Role names can be in CSV or expanded list.
+            # Roles: names can be in CSV or expanded list.
             role_names = ins_tags.get('role', [])
             if type(role_names) in types.StringTypes:
                 role_names = role_names.split(',')
@@ -151,7 +151,8 @@ class Command(BaseCommand):
                         role = m.Role.objects.create(
                             instance=instance,
                             tenant=tenant,
-                            name=dn_name)
+                            name=dn_name,
+                            role_type=role_name)
                         roles[(instance.name, dn_name)] = role
                         dn_roles[dn_id] = role
                 elif role_name == 'datanode-replica':
@@ -160,23 +161,27 @@ class Command(BaseCommand):
                         role = m.Role.objects.create(
                                 instance=instance,
                                 tenant=tenant,
-                                name=dnr_name)
+                                name=dnr_name,
+                                role_type=role_name)
                         roles[(instance.name, dnr_name)] = role
                         dnr_roles[dn_id] = role
                 else:
                     role = m.Role.objects.create(
                         instance=instance,
                         tenant=tenant,
-                        name=role_name)
+                        name=role_name,
+                        role_type=role_name)
 
                     roles[(instance.name, role_name)] = role
 
+            # Role links (deferred)
             for (dirn, rel_name, client_role, server_role) in ROLE_LINKS:
                 if rel_name in ins_tags and client_role in role_names:
                     links.append((dirn, rel_name,
                                   instance.name, client_role,
                                   ins_tags[rel_name], server_role),)
 
+            # Volumes
             for vol_def in ins_def.get('volumes', []):
                 if 'ephemeral' in vol_def:
                     vol_type = 'ephemeral'

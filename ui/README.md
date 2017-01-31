@@ -132,13 +132,12 @@ cluster_rules
 cluster_vars
 customerId
 
-co_list
-dn_list
-dn_replica_list
+x co_list
+x dn_list
+x dn_replica_list
 
 log
 node
-os
 spot_launch_group
 spot_price
 spot_wait_timeout
