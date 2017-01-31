@@ -38,6 +38,12 @@ ROLE_LINKS = [
     (REV, 'control', 'bdr', 'control'),
 ]
 
+IMPLICIT_ROLE_LINKS = [
+    (FWD, 'gtm', 'coordinator', 'gtm'),
+    (FWD, 'coordinator', 'datanode', 'coordinator'),
+    (FWD, 'coordinator', 'datanode-replica', 'coordinator'),
+]
+
 
 class Command(BaseCommand):
     help = 'Closes the specified poll for voting'
@@ -75,8 +81,12 @@ class Command(BaseCommand):
         subnets = {}
         roles = {}
         links = []  # client instance, role_name, server instance, role_name
+
+        # XL
         dn_roles = {} # id -> dn_role
         dnr_roles = {} # id -> dnr_role
+        gtm_roles = []
+        coord_roles = []
 
         cluster = m.Cluster.objects.create(
             tenant=tenant,
@@ -174,6 +184,11 @@ class Command(BaseCommand):
 
                     roles[(instance.name, role_name)] = role
 
+                    if role_name == 'gtm':
+                        gtm_roles.append(role)
+                    elif role_name == 'coordinator':
+                        coord_roles.append(role)
+
             # Role links (deferred)
             for (dirn, rel_name, client_role, server_role) in ROLE_LINKS:
                 if rel_name in ins_tags and client_role in role_names:
@@ -235,8 +250,31 @@ class Command(BaseCommand):
         for (dn_idx, dnr_role) in dnr_roles.iteritems():
             m.RoleLink.objects.create(
                 tenant=tenant,
-                name=dnr_role.name,
+                name='datanode-replica',
                 server_role=dn_roles[dn_idx],
                 client_role=dnr_role)
+
+            for coord_role in coord_roles:
+                m.RoleLink.objects.create(
+                    tenant=tenant,
+                    name='coordinator',
+                    server_role=coord_role,
+                    client_role=dnr_role)
+
+        for (dn_idx, dn_role) in dn_roles.iteritems():
+            for coord_role in coord_roles:
+                m.RoleLink.objects.create(
+                    tenant=tenant,
+                    name='coordinator',
+                    server_role=coord_role,
+                    client_role=dn_role)
+
+        for coord_role in coord_roles:
+            for gtm_role in gtm_roles:
+                m.RoleLink.objects.create(
+                    tenant=tenant,
+                    name='gtm',
+                    server_role=gtm_role,
+                    client_role=coord_role)
 
         return cluster
