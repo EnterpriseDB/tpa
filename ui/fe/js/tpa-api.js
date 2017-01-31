@@ -12,13 +12,29 @@ var api = exports;
 api.url = "/api/v1/tpa/";
 
 api.TEST_TENANT = api.url + "tenant/d9073da2-138f-4342-8cb8-3462be0b325a/";
-api.TEST_CLUSTER = api.url + "cluster/3beb6124-a95d-4625-8d2f-48835803ff2b/";
-
-
-
 
 api.provider = null;
 api.url_cache = {};
+
+
+/**
+ * Returns the basic type of the cluster. Since the cluster doesn't have a type
+ * tag of any kind, just use various roles.
+ * Returns tpa (primary, replica etc) or xl (gtm, coord etc)
+ */
+api.cluster_type = function cluster_type(cluster) {
+    var cluster_type = "tpa";
+
+    cluster.subnets.forEach(s =>
+        s.instances.forEach(i =>
+            i.roles.forEach(function(r) {
+                if (r.role_type == "gtm" || r.role_type == "coordinator") {
+                    cluster_type = "xl";
+                }
+            })));
+
+    return cluster_type;
+};
 
 
 api.model_class = function model_class(d) {
