@@ -9,6 +9,7 @@ import {scaleLinear} from "d3-scale";
 
 var MIN_NODE_WIDTH = 100;
 
+
 function show_clusters(tenant, selection) {
     var clusters = [];
     var current_cluster_idx = -1;
@@ -16,7 +17,6 @@ function show_clusters(tenant, selection) {
     var bbox = selection.node().getBoundingClientRect();
     var width = bbox.width;
     var height = bbox.height;
-
 
     tpa.get_obj_by_url(tpa.url+"cluster/", function(c, e) {
         if (e) {
@@ -48,13 +48,24 @@ function show_clusters(tenant, selection) {
     return next_cluster;
 }
 
+
 function draw_cluster(cluster, selection, width, height) {
-    console.log("draw_cluster:", cluster, width, height);
+    console.log("draw_cluster:", cluster, width, height,
+                tpa.cluster_type(cluster));
 
     var viewport = setup_viewport(selection, width, height);
     var diagram = viewport.diagram;
 
-    var [objects, parent_id] = dgm_objects(cluster);
+    var graph = null;
+
+    if (tpa.cluster_type(cluster) == 'xl') {
+        graph = build_xl_graph(cluster);
+    } 
+    else {
+        graph = build_tpa_graph(cluster);
+    }
+
+    var [objects, parent_id] = graph; 
     var layout = tree_layout(objects, parent_id, width, height);
     var tree = layout.tree;
     var root = layout.root;
@@ -77,16 +88,90 @@ function draw_cluster(cluster, selection, width, height) {
     draw_all_of_class('instance', draw_instance);
 }
 
+function build_xl_graph(cluster) {
+    var parent_id = {};
+    var objects = [cluster];
+    var gtm_instances = [];
+    var coord_instances = [];
+    var roles = {}; // role url -> instance
+
+    parent_id[cluster.url] =  "";
+
+    cluster.subnets.forEach(function(s) {
+        objects.push(s);
+        parent_id[s.url] = cluster.url;
+
+        s.instances.forEach(function(i) {
+            objects.push(i);
+
+            i.roles.forEach(function(r) {
+                roles[r.url] = i;
+                if (r.role_type == "gtm") {
+                    gtm_instances.push(i);
+                    parent_id[i.url] = s.url;
+                }
+                if (r.role_type == "coordinator") {
+                    coord_instances.push(i);
+                }
+            });
+        });
+    });
+
+    var gtm_center = gtm_instances[Math.floor(gtm_instances.length/2)];
+    var coord_center = (coord_instances.length > 0) ?
+            coord_instances[Math.floor(coord_instances.length/2)]
+            : gtm_center;
+
+    cluster.subnets.forEach(s =>
+        s.instances.filter(i => !(i.url in parent_id))
+            .forEach(function(i) {
+                i.roles.forEach(function(r) {
+                    if (r.role_type == 'datanode-replica') {
+                        r.client_links.forEach(function(ln) {
+                            if (ln.name == 'datanode-replica') {
+                                objects.push(ln);
+                                parent_id[ln.url] = roles[ln.server_role].url;
+                                parent_id[i.url] = ln.url;
+                            }
+                        });
+                    }
+                    else if (r.role_type == 'coordinator') {
+                        r.client_links.forEach(function(ln) {
+                            if (ln.name == 'gtm') {
+                                objects.push(ln);
+                                parent_id[ln.url] = roles[ln.server_role].url;
+                                parent_id[i.url] = ln.url;
+                            }
+                        });
+                    }
+                    else if (r.role_type == 'datanode') {
+                        r.client_links.forEach(function(ln) {
+                            if (ln.name == 'coordinator' && !(i.url in parent_id)) {
+                                objects.push(r);
+                                parent_id[r.url] = coord_center.url;
+                                parent_id[i.url] = r.url;
+                            }
+                        });
+                    }
+                });
+                if ( !(i.url in parent_id)) {
+                    parent_id[i.url] = coord_center.url;
+                }
+            }));
+
+    return [objects, parent_id];
+}
+
 
 /**
  * Returns the objects and their parents relevant to drawing a cluster
  * as a tree.
+ * 
+ * Cluster -> Region -> Zone -> Subnet -> Instance(root) -> 
+ * (-> rolelink -> instance)*
  */
-function dgm_objects(cluster) {
+function build_tpa_graph(cluster) {
     var accum = [], objects = [], parent_id = {};
-
-    var regions = [];
-    var instances_in_zone = [];
 
     var roles = {};
     var instance_parents = {};
@@ -95,33 +180,37 @@ function dgm_objects(cluster) {
     // cluster -> region -> zone -> (subnet?) -> instance 
     //   (-> rolelink -> instance)*
 
+    accum.push([cluster, ""]); // Cluster is root
+
     // TODO this is needed until the model linker is written
     cluster.subnets.forEach(s =>
         s.instances.forEach(i =>
-            i.roles.forEach(function(r) { roles[r.url] = i; })
+            i.roles.forEach(function(r) { 
+                roles[r.url] = i;
+            })
         ));
 
-    accum.push([cluster, ""]); // Cluster is root
-
-    cluster.subnets.forEach(function(s) {
-        var subnet_zone = {url: s.zone};
+    cluster.subnets.forEach(function(subnet) {
+        var subnet_zone = {url: subnet.zone};
         accum.push([subnet_zone, cluster]);
-        accum.push([s, subnet_zone]);
+        accum.push([subnet, subnet_zone]);
 
-        s.instances.forEach(function(i) {
+        subnet.instances.forEach(function(i) {
             i.roles.forEach(function(r) {
                 r.client_links.forEach(function(l) {
-                    var other_end = roles[l.server_role];
+                    var server_instance = roles[l.server_role];
                     // set my ancestor to this link
-                    if (i == other_end) {
+                    if (i == server_instance) {
+                        // Client and server on same instance.
                         return;
                     }
                     if (!(i.url in instance_parents)) {
                         instance_parents[i.url] = l;
+
                         accum.push([i, l]);
                     }
-                    // set link's ancestor to other instance
-                    accum.push([l, other_end]);
+                    // set link's parent to other instance
+                    accum.push([l, server_instance]);
                 });
             });
         });
@@ -161,6 +250,7 @@ function draw_zone(selection, zone, size) {
         .text(d => tpa.url_cache[d.data.url].name);
 
     // display a line between each zone
+    /*
     zone_display.append('line')
         .attr('x1', 0)
         .attr('y1', function (d) {
@@ -170,6 +260,7 @@ function draw_zone(selection, zone, size) {
         })
         .attr('x2', size.width)
         .attr('y2', function (d) { return zone_sep_y.get(this); });
+    */
 
     return zone_display;
 }
@@ -189,6 +280,7 @@ function draw_instance(selection, instance) {
     var node_rect = d3.local();
     var node_model = d3.local();
     var node_url = d3.local();
+    var MIN_NODE_WIDTH = 100;
 
     var node = selection.append("g")
         .attr("class", d => "instance node" +
@@ -300,11 +392,14 @@ function draw_instance(selection, instance) {
 }
 
 function draw_rolelink(selection, rolelink) {
+    console.log("DRAW_ROLELINK:", selection, rolelink);
     return selection.append("path")
         .classed("edge", true)
         .attr("d", function(d) {
+            console.log("rolelink:", d, d.data);
             // draw line from server instance to client instance
             if ( !d.parent || !d.children) return "";
+            console.log("rolelink ACCEPT:", d, d.data);
             let path = d3.path();
             let p = d.parent, c = d.children[0];
             let y1 = p.y, y2 = c.y;
@@ -321,6 +416,7 @@ function draw_rolelink(selection, rolelink) {
         });
 }
 
+
 /*********
  * View and geometry helpers.
  */
@@ -331,7 +427,7 @@ function tree_layout(objects, parent_id, width, height) {
     var root = d3.hierarchy(table);
     var tree = d3.tree()
                 .size([height, width])
-                .nodeSize([height/10, MIN_NODE_WIDTH*2]);
+                .nodeSize([height/10, MIN_NODE_WIDTH*1.5]);
 
     tree(root);
 
