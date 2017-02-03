@@ -9,7 +9,9 @@ module.exports = {
     output: {
         path: build_dir+'/static',
         filename: 'bundle.js',
-        publicPath: '/'
+        publicPath: '/',
+        libraryTarget: "var",
+        library: "tpa"
     },
     resolve: {
         alias: {
