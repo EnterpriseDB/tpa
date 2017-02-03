@@ -86,6 +86,8 @@ function draw_cluster(cluster, selection, width, height) {
     draw_all_of_class('zone', draw_zone);
     draw_all_of_class('rolelink', draw_rolelink);
     draw_all_of_class('instance', draw_instance);
+
+    d3.select("span.cluster_name").text(cluster.name);
 }
 
 function build_xl_graph(cluster) {
@@ -392,14 +394,11 @@ function draw_instance(selection, instance) {
 }
 
 function draw_rolelink(selection, rolelink) {
-    console.log("DRAW_ROLELINK:", selection, rolelink);
     return selection.append("path")
         .classed("edge", true)
         .attr("d", function(d) {
-            console.log("rolelink:", d, d.data);
             // draw line from server instance to client instance
             if ( !d.parent || !d.children) return "";
-            console.log("rolelink ACCEPT:", d, d.data);
             let path = d3.path();
             let p = d.parent, c = d.children[0];
             let y1 = p.y, y2 = c.y;
