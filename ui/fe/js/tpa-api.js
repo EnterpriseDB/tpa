@@ -7,9 +7,11 @@
 
 import * as d3 from "d3";
 import {multimethod} from "./multimethod";
+import {JWTAuth} from "./jwt-auth.js";
 
 var api = exports;
 api.url = "/api/v1/tpa/";
+api.auth = new JWTAuth(api.url+"auth/");
 
 api.TEST_TENANT = api.url + "tenant/d9073da2-138f-4342-8cb8-3462be0b325a/";
 
@@ -57,7 +59,8 @@ api.get_obj_by_url = function get_obj_by_url(url, _then) {
     }
 
     if (!api.provider) {
-        d3.json(api.url+'provider/', function(error, pdata) {
+        api.auth.json_request(api.url+'provider/')
+                .get(function(error, pdata) {
             if(error) throw error;
             api.provider = pdata;
             console.log("provider data:", pdata);
@@ -82,7 +85,7 @@ api.get_obj_by_url = function get_obj_by_url(url, _then) {
         _then(api.provider, undefined);
     }
 
-    d3.json(url, function(e, o) {
+    api.auth.json_request(url).get(url, function(e, o) {
         if (e) throw(e);
         api.url_cache[o.url] = o;
         _then(o);
