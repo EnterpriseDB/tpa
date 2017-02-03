@@ -18,7 +18,7 @@ function show_clusters(tenant, selection) {
     var width = bbox.width;
     var height = bbox.height;
 
-    tpa.get_obj_by_url(tpa.url+"cluster/", function(c, e) {
+    tpa.get_obj_by_url(tpa.API_URL+"cluster/", function(c, e) {
         if (e) {
             alert("API Server communication error");
             throw e;

@@ -6,30 +6,21 @@
  * Primary entry point for TPA UI app.
  */
 
+import "./styles";
+import * as api from "./tpa-api";
+import * as tpa_diagram from "./tpa-d3";
+import * as d3 from "d3";
 
-require('./styles.js');
-var d3 = require("d3");
-
-var tpa = require("./tpa-api");
-var tpa_d3 = require("./tpa-d3");
-var jwt_auth = require("./jwt-auth");
-
-var current_tenant = tpa.TEST_TENANT;
-
-// require("./diagram");
-// require("./utils");
-//
+var current_tenant = api.TEST_TENANT;
 
 export function display_cluster_diagram() {
     document.addEventListener("DOMContentLoaded", function(e) {
-        var next_cluster = tpa_d3.show_clusters(current_tenant,
+        var next_cluster = tpa_diagram.show_clusters(current_tenant,
                                         d3.select(".cluster_view"),
                                         1000, 1000);
         d3.select("button.next-cluster").on("click", () => next_cluster());
     });
 }
-
-
 
 
 export function register_login() {
@@ -40,8 +31,7 @@ export function register_login() {
 
             d3.event.preventDefault();
 
-            tpa.auth.login(username, password, function(error, result) {
-                console.log("error:", error, "result:", result);
+            api.auth.login(username, password, function(error, result) {
                 if (!error) {
                     window.location = "/cluster.html";
                 }
