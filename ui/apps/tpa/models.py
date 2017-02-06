@@ -161,7 +161,6 @@ class Role(TenantOwnedMixin):
 
     ROLE_TYPES = [
         'adhoc',
-        'backup',
         'barman',
         'bdr',
         'control',
@@ -169,7 +168,6 @@ class Role(TenantOwnedMixin):
         'datanode',
         'datanode-replica',
         'gtm',
-        'image',
         'log-server',
         'monitor',
         'openvpn-server',
