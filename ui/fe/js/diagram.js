@@ -1,23 +1,19 @@
 
-/**
- * Box
- * Container
- * EdgeConnector
- *
- *
- */
-//var diagram = function() {
-//    var _ = {};
-//
-//    class Diagram {
-//        constructor() {
-//
-//        }
-//    }
-//
-//    var Diagram = 
-//
-//    box
-//    link
-//    container
-//}();
+class Diagram {
+    constructor(viewport) {
+        this.viewport = viewport;
+    }
+}
+
+
+class Item {
+    draw() {
+    }
+}
+
+
+class Node extends Item {
+}
+
+class Edge extends Item{
+}

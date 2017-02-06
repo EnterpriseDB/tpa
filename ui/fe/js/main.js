@@ -11,13 +11,10 @@ import * as api from "./tpa-api";
 import * as tpa_diagram from "./tpa-d3";
 import * as d3 from "d3";
 
-var current_tenant = api.TEST_TENANT;
-
 export function display_cluster_diagram() {
     document.addEventListener("DOMContentLoaded", function(e) {
-        var next_cluster = tpa_diagram.show_clusters(current_tenant,
-                                        d3.select(".cluster_view"),
-                                        1000, 1000);
+        var next_cluster = tpa_diagram.show_clusters(
+                d3.select(".cluster_view"));
         d3.select("button.next-cluster").on("click", () => next_cluster());
     });
 }

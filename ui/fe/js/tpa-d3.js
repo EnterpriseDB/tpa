@@ -10,13 +10,33 @@ import {scaleLinear} from "d3-scale";
 var MIN_NODE_WIDTH = 100;
 
 
-function show_clusters(tenant, selection) {
+function list_cycle(lst) {
+    var current_idx = -1;
+
+    function next() {
+        if (lst.length < 1) {
+            return;
+        }
+
+        current_idx = current_idx+1;
+        if (current_idx >= lst.length) {
+            current_idx = 0;
+        }
+        return lst[current_id];
+    }
+
+    return next;
+}
+
+
+/**
+ * Display all clusters belonging to the current tenant, one at a time.
+ * Displays the first cluster immediately, returns a function to cycle to
+ * the next when called.
+*/
+export function show_clusters(viewport) {
     var clusters = [];
     var current_cluster_idx = -1;
-
-    var bbox = selection.node().getBoundingClientRect();
-    var width = bbox.width;
-    var height = bbox.height;
 
     tpa.get_obj_by_url(tpa.API_URL+"cluster/", function(c, e) {
         if (e) {
@@ -27,8 +47,7 @@ function show_clusters(tenant, selection) {
 
         if (clusters.length > 0) {
             current_cluster_idx = 0;
-            draw_cluster(clusters[current_cluster_idx],
-                        selection, width, height);
+            draw_cluster(clusters[current_cluster_idx], viewport);
         }
     });
 
@@ -41,44 +60,42 @@ function show_clusters(tenant, selection) {
         if (current_cluster_idx >= clusters.length) {
             current_cluster_idx = 0;
         }
-        draw_cluster(clusters[current_cluster_idx], selection, width, height);
-
+        draw_cluster(clusters[current_cluster_idx], viewport);
     }
 
     return next_cluster;
 }
 
 
-function draw_cluster(cluster, selection, width, height) {
-    console.log("draw_cluster:", cluster, width, height,
-                tpa.cluster_type(cluster));
+function draw_cluster(cluster, viewport) {
+    console.log("draw_cluster:", cluster, tpa.cluster_type(cluster));
 
-    var viewport = setup_viewport(selection, width, height);
-    var diagram = viewport.diagram;
+    var bbox = viewport.node().getBoundingClientRect();
+    var diagram = setup_viewport(viewport, bbox.width, bbox.height);
 
     var graph = null;
 
     if (tpa.cluster_type(cluster) == 'xl') {
         graph = build_xl_graph(cluster);
-    } 
+    }
     else {
         graph = build_tpa_graph(cluster);
     }
 
-    var [objects, parent_id] = graph; 
-    var layout = tree_layout(objects, parent_id, width, height);
+    var [objects, parent_id] = graph;
+    var layout = tree_layout(objects, parent_id, bbox.width, bbox.height);
     var tree = layout.tree;
     var root = layout.root;
 
     var dom_context = d3.local();
 
-    draw_background_grid(diagram, root.y, width, height);
+    draw_background_grid(diagram, bbox.width, bbox.height);
 
     function draw_all_of_class(c, draw) {
         diagram.selectAll("."+c)
         .data(root.descendants().filter(tpa.is_instance(c)))
         .enter()
-        .call(d => draw(d, diagram, {width: width, height: height})
+        .call(d => draw(d, diagram, {width: bbox.width, height: bbox.height})
             .classed(c, true)
         );
     }
@@ -128,38 +145,41 @@ function build_xl_graph(cluster) {
         s.instances.filter(i => !(i.url in parent_id))
             .forEach(function(i) {
                 i.roles.forEach(function(r) {
-                    if (r.role_type == 'datanode-replica') {
-                        r.client_links.forEach(function(ln) {
-                            if (ln.name == 'datanode-replica') {
-                                objects.push(ln);
-                                parent_id[ln.url] = roles[ln.server_role].url;
-                                parent_id[i.url] = ln.url;
-                            }
-                        });
-                    }
-                    else if (r.role_type == 'coordinator') {
-                        r.client_links.forEach(function(ln) {
-                            if (ln.name == 'gtm') {
-                                objects.push(ln);
-                                parent_id[ln.url] = roles[ln.server_role].url;
-                                parent_id[i.url] = ln.url;
-                            }
-                        });
-                    }
-                    else if (r.role_type == 'datanode') {
-                        r.client_links.forEach(function(ln) {
-                            if (ln.name == 'coordinator' && !(i.url in parent_id)) {
-                                objects.push(r);
-                                parent_id[r.url] = coord_center.url;
-                                parent_id[i.url] = r.url;
-                            }
-                        });
+                    switch (r.role_type) {
+                        case 'datanode-replica':
+                            r.client_links.forEach(function(ln) {
+                                if (ln.name == 'datanode-replica') {
+                                    objects.push(ln);
+                                    parent_id[ln.url] = roles[ln.server_role].url;
+                                    parent_id[i.url] = ln.url;
+                                }
+                            });
+                            break;
+                        case 'coordinator':
+                            r.client_links.forEach(function(ln) {
+                                if (ln.name == 'gtm') {
+                                    objects.push(ln);
+                                    parent_id[ln.url] = roles[ln.server_role].url;
+                                    parent_id[i.url] = ln.url;
+                                }
+                            });
+                            break;
+                        case 'datanode':
+                            r.client_links.forEach(function(ln) {
+                                if (ln.name == 'coordinator'
+                                    && !(i.url in parent_id)) {
+                                    objects.push(r);
+                                    parent_id[r.url] = coord_center.url;
+                                    parent_id[i.url] = r.url;
+                                }
+                            });
+                            break;
                     }
                 });
                 if ( !(i.url in parent_id)) {
                     parent_id[i.url] = coord_center.url;
                 }
-            }));
+        }));
 
     return [objects, parent_id];
 }
@@ -296,6 +316,7 @@ function draw_instance(selection, instance) {
             node_rect.set(this, make_rect(size.width, size.height));
         });
 
+    /*
     // ellipse
     node.append("path")
         .classed('container_shape', true)
@@ -317,7 +338,9 @@ function draw_instance(selection, instance) {
             path.closePath();
 
             return path;
-            });
+        });
+
+    */
 
     // icon
     node.append("path")
@@ -326,7 +349,7 @@ function draw_instance(selection, instance) {
             .default(function(d) {
                 var ns = node_rect.get(this);
                 var radius = Math.min(ns.height/5, ns.width/5, 10);
-                var circle = "M "+ (-(ns.width/2+ns.height/3)) +" 0 " +
+                var circle = "M 0 0 " +
                     " m "+radius+", 0" +
                     " a "+radius+","+radius+" 0 1,1 "+(2*radius)+",0" +
                     " a "+radius+","+radius+" 0 1,1 "+(-2*radius)+",0";
@@ -353,21 +376,6 @@ function draw_instance(selection, instance) {
 
             return "translate("+x+","+y+")";
         });
-
-    /*
-     * FIXME: needs to resize to text corectly.
-    dgm_roles.append('rect')
-        .attr('x', 0)
-        .attr('y', 0)
-        .attr('width', function (d) {
-            return 8+8*d3.max(d.data.roles.map(function(r) {
-                return r.name.length;
-            }));
-        })
-        .attr('height', function (d) {
-            return 20*d.data.roles.length;
-        });
-    */
 
     function diagram_data_item(selection, el_name, data_class, data) {
         return selection.selectAll("."+data_class)
@@ -501,16 +509,16 @@ function setup_viewport(selection, width, height) {
         .classed("diagram", true)
         .attr('transform', `translate(0, ${height/2})`);
 
-    return {svg: svg, diagram: diagram};
+    return diagram;
 }
 
 
-function draw_background_grid(selection, cy, width, height) {
+function draw_background_grid(diagram, width, height) {
     var yScale = scaleLinear()
         .domain([-height, height])
         .range([-height*2, height*2]);
 
-    var grid = selection.append('g')
+    var grid = diagram.append('g')
         .classed('background-grid', true)
         .selectAll("line.horizontal")
         .data(yScale.ticks(50)).enter()
@@ -529,7 +537,7 @@ function draw_background_grid(selection, cy, width, height) {
         .domain([-width, width])
         .range([-width*2, width*2]);
 
-    var gridy = selection.append('g')
+    var gridy = diagram.append('g')
         .classed('background-grid', true)
         .selectAll("line.vertical")
         .data(xScale.ticks(50)).enter()
@@ -545,6 +553,3 @@ function draw_background_grid(selection, cy, width, height) {
     gridy.call(yAxis);
 
 }
-
-
-exports.show_clusters = show_clusters;

@@ -31,7 +31,6 @@ ROLE_LINKS = [
     (FWD, 'upstream', 'replica', 'replica'),
     (REV, 'backup', 'replica', 'barman'),
     (REV, 'backup', 'primary', 'barman'),
-    # TODO XL Cluster
     # TODO BDR Cluster
     (REV, 'backup', 'bdr', 'barman'),
     (REV, 'log', 'bdr', 'log-server'),

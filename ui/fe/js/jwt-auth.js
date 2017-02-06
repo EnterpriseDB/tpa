@@ -27,21 +27,21 @@ export class JWTAuth {
     }
 
     login(username, password, callback) {
-        let that = this;
+        let auth = this;
         console.log("Signing in:", username, this);
 
         request(this.auth_url_base+'login/')
             .header("Content-Type", "application/json")
             .on('load', function(xhr) {
-                var json_response = JSON.parse(xhr.responseText);
+                let json_response = JSON.parse(xhr.responseText);
 
                 console.log("Login success:", json_response.token);
-                that.set_token(username, json_response.token);
+                auth.set_token(username, json_response.token);
                 callback(null, json_response.token);
             })
             .on('error', function(error) {
                 console.log("Login failed:", error);
-                that.set_token(null, null);
+                auth.set_token(null, null);
                 callback(error);
             })
             .send('POST', JSON.stringify({
