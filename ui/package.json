@@ -21,6 +21,7 @@
     "style-loader": "",
     "bootstrap-loader": "^1.0.0",
     "bootstrap-sass": "",
+    "resolve-url-loader": "",
 
     "autoprefixer": "^6.4.0",
     "babel-core": "^6.0.0",
