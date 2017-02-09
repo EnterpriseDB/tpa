@@ -114,8 +114,42 @@ role configs in tpasite.conf.
 The app uses JWT for authenticating users. There is an n-to-n relationship
 between Users and Tenants, where Tenant represents and organization
 or institution which owns clusters and deputes users to manage them on
-its behalf. Access to view and edit tenant-owned resources by users is
-implemented using django-guardian for RBAC.
+its behalf. One user is granted ownership of a Tenant by assigning the
+owner attribute on the Tenant object. This user is implied to have final
+superuser authority on that tenant.
+
+
+## Operations Guide
+
+* Create the initial superuser:
+
+```
+~/tpa/ui > ./apps/manage.py createsuperuser
+```
+
+Most further admin operations can be performed via the site admin
+page published at `<site url>/admin/`. Exceptions will be noted below.
+The admin system has its own login screen, though user credentials are
+shared with the main site. Admin operations will require a user with
+elevated privileges, such as a superuser account.
+
+ * **Create a new user**: Visit the site admin system and
+ click on the `+ Add` button next to the Users row in the Authentication
+ and Authorization section. Regular users don't require any additional
+ permission classes or groups at this time, and their association with
+ one or more Tenants will be handled elsewhere.
+
+ * **Add a new Tenant**: First create the user that will own the new
+ Tenant via the process listed above. Then visit the site admin and
+ click on the `+ Add` button next to the Tenants row in the TPA section.
+
+ * **Upload a config.yml for a new cluster**: use the cluster upload
+ form published at `<site url>/cluster_upload.html`. You will need the
+ UUID of the Tenant that will own the new cluster. On successful upload
+ and parse, the UUID of the new cluster and a link to its diagram page
+ will be displayed.
+
+
 
 ## YAML tags
 
