@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="TPA login screen.">
+    <meta name="author" content="2nd Quadrant">
+    <link rel="icon" href="/favicon.ico">
+
+    <title>TPA: Cluster config.yml upload</title>
+    </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">2ndQuadrant TPA</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+        <hr>
+        <h4>New cluster from config.yml</h4>
+        <form id="cluster_upload_yml">
+            <div class="form-group">
+                <input type="text" placeHolder="Tenant" class="form-control tenant">
+            </div>
+            <div class="form-group">
+                <input type="textarea" placeHolder="YAML data" class="form-control config_yml">
+            </div>
+            <button type="submit" class="btn btn-success">Upload</button>
+        </form>
+    </div> <!-- /container -->
+    <script src="bundle.js"></script>
+    <script lang="javascript">tpa.register_cluster_upload();</script>
+  </body>
+</html>
