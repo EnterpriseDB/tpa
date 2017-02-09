@@ -79,8 +79,7 @@ export function get_obj_by_url(url, _then) {
         _then(provider, undefined);
     }
 
-    console.log("REQUEST!");
-    auth.json_request(url).get(url, function(e, o) {
+    auth.json_request(url).get(function(e, o) {
         if (e) throw(e);
         url_cache[o.url] = o;
         _then(o);
@@ -91,6 +90,21 @@ export function get_obj(o) {
     return get_obj_by_url(o.url);
 }
 
+
+export function cluster_upload(tenant, config_yml, callback) {
+
+    var req_data = JSON.stringify({
+            'tenant': tenant,
+            'config_yml': config_yml
+        });
+
+    console.log("Uploading:", req_data);
+
+    auth.json_request(API_URL+'cluster_upload_yml/')
+        .on('load', r => callback(null, JSON.parse(r.responseText)))
+        .on('error', e => callback(e, null))
+        .send('POST', req_data);
+}
 
 // Used by selections
 export function data_class(d) {

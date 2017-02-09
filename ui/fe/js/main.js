@@ -44,3 +44,26 @@ export function register_login() {
 
     document.addEventListener("DOMContentLoaded", do_login);
 }
+
+export function register_cluster_upload() {
+    function submit_cluster_upload() {
+        d3.select("form.cluster_upload_yml").on("submit", () => {
+            let tenant = d3.select("input.tenant").node().value;
+            let config_yml = d3.select("input.config_yml").node().value;
+
+            d3.event.preventDefault();
+
+            api.cluster_upload(tenant, config_yml, function(error, res) {
+                if (!error) {
+                    window.location = "/cluster.html?cluster=" + res.cluster;
+                }
+                else{
+                    alert(error);
+                }
+            });
+            return true;
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", submit_cluster_upload);
+}
