@@ -99,7 +99,7 @@ class VolumeType(BaseModel):
 
 
 class Tenant(BaseModel):
-    owner = ForeignKey(settings.AUTH_USER_MODEL, editable=False,
+    owner = ForeignKey(settings.AUTH_USER_MODEL, editable=True,
                        on_delete=models.CASCADE,
                        null=True)
     ssh_public_keys = ArrayField(TextField(), default=[])
