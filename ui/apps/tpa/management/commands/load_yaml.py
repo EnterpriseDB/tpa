@@ -65,7 +65,7 @@ class Command(BaseCommand):
                 provider=provider,
                 tenant=tenant,
                 name='Dummy EC2 Creds',
-                shared_identitity='AK',
+                shared_identity='AK',
                 shared_secret='SAK')
         else:
             creds = creds[0]
