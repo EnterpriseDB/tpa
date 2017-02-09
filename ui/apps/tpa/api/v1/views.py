@@ -12,10 +12,13 @@ from django.conf import settings
 from django.db.models.fields.reverse_related import ManyToOneRel
 
 from rest_framework import serializers, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.utils.field_mapping import get_nested_relation_kwargs
 
 from tpa import models
+from .serializers import ConfigYmlSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -176,6 +179,17 @@ def filter_fields(model_class):
 
 def get_detail_view(model_class):
     return "api:%s-detail" % (model_class.__name__.lower(),)
+
+
+@api_view(('POST',))
+@permission_classes((IsAdminUser,))
+def cluster_upload_yml(request):
+    if request.method != 'POST':
+        return Response(status=400, data="")
+
+    ser = ConfigYmlSerializer(data=request.data)
+
+    return Response(status=200, data="Done: %s" % (ser.tenant,))
 
 
 class TenantOwnedViewSet(viewsets.ModelViewSet):

@@ -36,6 +36,7 @@ auth_patterns = [
 ]
 
 urlpatterns += [
+    url(r'^cluster_upload_yml/', views.cluster_upload_yml),
     url(r'^auth/', include(auth_patterns)),
     url(r'', unknown_api_endpoint, name='unknown-api-endpoint')
 ]
