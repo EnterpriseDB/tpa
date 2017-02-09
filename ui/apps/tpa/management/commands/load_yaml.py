@@ -57,8 +57,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         tenant = m.Tenant.objects.get(uuid=options['tenant'])
         provider = m.Provider.objects.get(name=options['provider'])
-        creds = m.ProviderCredential.objects.get(provider=provider,
-                                                 tenant=tenant)
+        creds = m.ProviderCredential.objects.filter(provider=provider,
+                                                  tenant=tenant)
 
         if not creds:
             creds = m.ProviderCredential.objects.create(
@@ -67,6 +67,8 @@ class Command(BaseCommand):
                 name='Dummy EC2 Creds',
                 shared_identitity='AK',
                 shared_secret='SAK')
+        else:
+            creds = creds[0]
 
         for yaml_file in options['yaml']:
             cluster = None
