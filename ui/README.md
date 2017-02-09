@@ -143,12 +143,18 @@ elevated privileges, such as a superuser account.
  Tenant via the process listed above. Then visit the site admin and
  click on the `+ Add` button next to the Tenants row in the TPA section.
 
- * **Upload a config.yml for a new cluster**: use the cluster upload
- form published at `<site url>/cluster_upload.html`. You will need the
- UUID of the Tenant that will own the new cluster. On successful upload
- and parse, the UUID of the new cluster and a link to its diagram page
- will be displayed.
+ * **Upload a config.yml for a new cluster**: If command line access to the
+ API server is available, use the management command to create the cluster:
 
+ ```
+ ~/tpa/ui > ./apps/manage.py load_yaml --tenant <tenant uuid> <config.yml path>
+ New Cluster ID: <cluster uuid>
+ ```
+
+ For web-based upload, use the cluster upload form published at `<site
+ url>/cluster_upload.html`. You will need the UUID of the Tenant that
+ will own the new cluster. On successful upload and parse, the UUID of
+ the new cluster and a link to its diagram page will be displayed.
 
 
 ## YAML tags
