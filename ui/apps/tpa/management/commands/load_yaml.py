@@ -77,6 +77,7 @@ class Command(BaseCommand):
             with transaction.atomic():
                 cluster = self.generate_cluster(root, tenant, provider, creds)
             print("New cluster ID:", cluster.uuid)
+            print("Display URL: /cluster.html?cluster=%s" % (cluster.uuid,));
 
     def generate_cluster(self, root, tenant, provider, creds):
         subnets = {}
@@ -84,8 +85,8 @@ class Command(BaseCommand):
         links = []  # client instance, role_name, server instance, role_name
 
         # XL
-        dn_roles = {} # id -> dn_role
-        dnr_roles = {} # id -> dnr_role
+        dn_roles = {}   # id -> dn_role
+        dnr_roles = {}  # id -> dnr_role
         gtm_roles = []
         coord_roles = []
 

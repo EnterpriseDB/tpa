@@ -10,12 +10,30 @@ import "./styles";
 import * as api from "./tpa-api";
 import * as tpa_diagram from "./tpa-d3";
 import * as d3 from "d3";
+import {get_url_vars} from "./utils";
 
-export function display_cluster_diagram() {
+export function display_all_cluster_diagrams() {
     document.addEventListener("DOMContentLoaded", function(e) {
         var next_cluster = tpa_diagram.show_clusters(
                 d3.select(".cluster_view"));
         d3.select("button.next-cluster").on("click", () => next_cluster());
+    });
+}
+
+export function display_cluster_diagram(viewport) {
+    document.addEventListener("DOMContentLoaded", function(e) {
+        let vars = get_url_vars();
+
+        if (vars.cluster) { 
+            d3.select("button.next-cluster").style("visibility", "hidden");
+            tpa_diagram.display_cluster_by_uuid(vars.cluster,
+                    d3.select(viewport));
+        }
+        else {
+            var next_cluster = tpa_diagram.show_clusters(d3.select(viewport));
+            d3.select("button.next-cluster").on("click", () => next_cluster());
+        }
+
     });
 }
 

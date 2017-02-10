@@ -67,6 +67,20 @@ export function show_clusters(viewport) {
 }
 
 
+export function display_cluster_by_uuid(cluster_uuid, viewport) {
+    tpa.get_obj_by_url(tpa.API_URL+"cluster/"+cluster_uuid+"/",
+        function(cluster, error) {
+            if(error) {
+                alert("Cluster load error");
+                throw e;
+            }
+            else {
+                draw_cluster(cluster, viewport);
+            }
+        });
+}
+
+
 function draw_cluster(cluster, viewport) {
     console.log("draw_cluster:", cluster, tpa.cluster_type(cluster));
 

@@ -101,6 +101,7 @@ export function cluster_upload(tenant, config_yml, callback) {
     console.log("Uploading:", req_data);
 
     auth.json_request(API_URL+'cluster_upload_yml/')
+        .header("Content-Type", "application/json")
         .on('load', r => callback(null, JSON.parse(r.responseText)))
         .on('error', e => callback(e, null))
         .send('POST', req_data);
