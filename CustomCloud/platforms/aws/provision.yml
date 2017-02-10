@@ -127,7 +127,20 @@
     # http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html
     # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html
     #
-    # We create a security group for every VPC we are using.
+    # To use an existing security group, specify it as follows:
+    #
+    # ec2_groups:
+    #   us-east-1:
+    #     group-name: foo
+    #
+    # That is, ec2_groups maps region names to a filter expression that
+    # uniquely identifies a security group in any of the ways documented
+    # at http://docs.ansible.com/ansible/ec2_group_facts_module.html and
+    # https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html
+    #
+    # Existing security groups are assumed to contain all required rules
+    # already. If no security group is specified, we create one for each
+    # VPC with the correct rules.
 
     - name: Set default security group rules for the cluster
       set_fact:
@@ -135,6 +148,31 @@
           - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
           - {proto: udp, from_port: 1194, to_port: 1194, cidr_ip: 0.0.0.0/0}
       when: cluster_rules is not defined
+      tags: ec2_vpc
+
+    - name: Initialise empty ec2_region_groups
+      set_fact:
+        ec2_region_groups: {}
+
+    # Find the security group corresponding to each entry in ec2_groups
+    # and add entries to ec2_region_groups.
+
+    - name: Find existing security groups
+      ec2_group_facts:
+        region: "{{ item.key }}"
+        filters: "{{ item.value }}"
+      with_dict: "{{ ec2_groups|default([]) }}"
+      register: sgs
+      tags: ec2_vpc
+
+    - name: Extend ec2_region_groups
+      set_fact:
+        ec2_region_groups: "{{
+          ec2_region_groups|combine({
+            item.item.key: item.security_groups[0].group_id
+          })
+        }}"
+      with_items: "{{ sgs.results }}"
       tags: ec2_vpc
 
     - name: Create security groups for each VPC
@@ -145,8 +183,10 @@
         name: "Group {{ cluster_name }}/{{ item.key }}"
         description: "Automatically created for {{ cluster_name }} in {{ item.key }}"
         rules: "{{ cluster_rules }}"
+      when:
+        item.key not in ec2_region_groups
       with_dict: "{{ ec2_region_vpcs }}"
-      register: sgs
+      register: new_sgs
       tags: ec2_vpc
 
     - name: Record security group ids in each region
@@ -158,7 +198,7 @@
         }}"
       with_together:
         - "{{ regions }}"
-        - "{{ sgs.results }}"
+        - "{{ new_sgs.results }}"
       tags: ec2_vpc
 
     # Create an "instance profile" IAM role for the cluster, and attach
