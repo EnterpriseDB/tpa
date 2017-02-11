@@ -72,7 +72,6 @@ export function display_cluster_by_uuid(cluster_uuid, viewport) {
         function(cluster, error) {
             if(error) {
                 alert("Cluster load error");
-                throw e;
             }
             else {
                 draw_cluster(cluster, viewport);

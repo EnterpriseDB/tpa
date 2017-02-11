@@ -54,24 +54,12 @@ export function get_obj_by_url(url, _then) {
         return;
     }
 
+    if (!auth.logged_in) {
+        auth.popup_login(() => get_obj_by_url(url, _then));
+    }
+
     if (!provider) {
-        auth.json_request(API_URL+'provider/')
-                .get(function(error, pdata) {
-            if(error) throw error;
-            provider = pdata;
-
-            pdata.forEach(function(p) {
-                url_cache[p.url] = p;
-                p.regions.forEach(function(r) {
-                    url_cache[r.url] = r;
-                    r.zones.forEach(function(z) {
-                        url_cache[z.url] = z;
-                    });
-                });
-            });
-
-            get_obj_by_url(url, _then);
-        });
+        load_provider(() => get_obj_by_url(url, _then));
         return;
     }
 
@@ -79,10 +67,27 @@ export function get_obj_by_url(url, _then) {
         _then(provider, undefined);
     }
 
-    auth.json_request(url).get(function(e, o) {
-        if (e) throw(e);
-        url_cache[o.url] = o;
-        _then(o);
+    auth.json_request(url).get(function(error, o) {
+        if (error) {
+            console.log("API fetch error:", error, "url:", url);
+            if (error.currentTarget.status == 403) {
+                auth.popup_login(() => get_obj_by_url(url, _then));
+                return;
+            }
+            else if (error.currentTarget.status == 404) {
+                alert("No such object.");
+            }
+            else {
+                alert("Server load error. Please try again later.");
+            }
+        }
+        else {
+            console.log("API get URL:", url);
+            url_cache[o.url] = o;
+            if (_then) {
+                _then(o);
+            }
+        }
     });
 }
 
@@ -125,6 +130,38 @@ export function is_instance(filter) {
         .when(filter, true).default(false);
 }
 
-export function load_provider() {
-    return ; // TODO
+export function load_provider(callback) {
+    auth.json_request(API_URL+'provider/')
+        .get(function(error, pdata) {
+            if(error) {
+                if (error.currentTarget.status == 403) {
+                    auth.popup_login(() => load_provider(callback));
+                    return;
+                }
+                else {
+                    console.log(e);
+                    alert("Provider load error. Please try again later.");
+                }
+            }
+            else {
+                provider = pdata;
+
+                pdata.forEach(function(p) {
+                    url_cache[p.url] = p;
+                    p.regions.forEach(function(r) {
+                        url_cache[r.url] = r;
+                        r.zones.forEach(function(z) {
+                            url_cache[z.url] = z;
+                        });
+                    });
+                });
+
+                callback();
+            }
+        });
 }
+
+
+// forms
+
+

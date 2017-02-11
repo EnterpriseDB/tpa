@@ -9,7 +9,9 @@
  *
  */
 
-import {request} from "d3-request";
+import * as d3 from "d3";
+
+import $ from "jquery";
 
 export class JWTAuth {
     constructor(auth_url_base, local_storage=true) {
@@ -28,14 +30,12 @@ export class JWTAuth {
 
     login(username, password, callback) {
         let auth = this;
-        console.log("Signing in:", username, this);
 
-        request(this.auth_url_base+'login/')
+        d3.request(this.auth_url_base+'login/')
             .header("Content-Type", "application/json")
             .on('load', function(xhr) {
                 let json_response = JSON.parse(xhr.responseText);
 
-                console.log("Login success:", json_response.token);
                 auth.set_token(username, json_response.token);
                 callback(null, json_response.token);
             })
@@ -69,11 +69,38 @@ export class JWTAuth {
         var bearer = (auth_token === null || auth_token === undefined) ?  ""
                 : ("JWT " + auth_token);
 
-        console.log("Bearer:", bearer);
-
-        return request(url)
+        return d3.request(url)
             .mimeType("application/json")
             .header("Authorization", bearer)
             .response(r => JSON.parse(r.responseText));
+    }
+
+    popup_login(on_success) {
+        var login_form = d3.select("form.login-form");
+        var auth = this;
+
+        login_form.on("submit", () => {
+            let username = d3.select("input.username").node().value;
+            let password = d3.select("input.password").node().value;
+
+            d3.event.preventDefault();
+
+            auth.login(username, password, function(error, result) {
+                if (error) {
+                    alert("Login failed, please check your credentials.");
+                    auth.popup_login(on_success);
+                }
+                else {
+                    $("#LoginForm").modal("hide");
+                    if (on_success) {
+                        on_success();
+                    }
+                }
+            });
+
+            return true;
+        });
+
+        $("#LoginForm").modal("show");
     }
 }

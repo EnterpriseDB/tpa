@@ -36,12 +36,31 @@
         </div><!--/.navbar-collapse -->
       </div>
     </nav>
-
+    <div class="modal fade" tabindex="-1" role="dialog" id="LoginForm">
+        <div class="modal-dialog">
+            <div class="model-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">x</button>
+                    <h3>Login to TPA</h3>
+                </div>
+                <div class="modal-body">
+                    <form class="login-form">
+                        <p><input type="text" class="span3 username" name="username" placeholder="Username"></p>
+                        <p><input type="password" class="span3 password" name="password" placeholder="Password"></p>
+                        <p><button type="submit" class="btn btn-primary">Sign in</button>
+                        <a href="#">Forgot Password?</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container-fluid">
         <div class="cluster_view"></div>
     </div><!-- /#wrapper -->
-
     <script src="bundle.js"></script>
-    <script lang="javascript">tpa.display_cluster_diagram(".cluster_view");</script>
+    <script lang="javascript">
+        tpa.display_cluster_diagram(".cluster_view");
+    </script>
 </body>
 </html>
