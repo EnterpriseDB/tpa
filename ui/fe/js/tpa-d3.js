@@ -444,10 +444,12 @@ function draw_rolelink(selection, rolelink) {
             let p_y = parent_out_top +
                 LINK_CONNECTOR_HEIGHT * p.children.indexOf(d);
 
+            let c_y = p_y - p.y + c.y;
+
             path.moveTo(p.x, p_y);
             path.lineTo(p.x+LINK_CONNECTOR_LENGTH, p_y);
-            path.lineTo(c.x-LINK_CONNECTOR_LENGTH, c.y);
-            path.lineTo(c.x, c.y);
+            path.lineTo(c.x-LINK_CONNECTOR_LENGTH, c_y);
+            path.lineTo(c.x, c_y);
             return path;
         });
 }
