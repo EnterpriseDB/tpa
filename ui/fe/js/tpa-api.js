@@ -5,13 +5,36 @@
 * Tools for accessing the TPA API via the REST server.
 */
 
+
 import {multimethod} from "./multimethod";
 import {JWTAuth} from "./jwt-auth.js";
 
 const API_URL = "/api/v1/tpa/";
 const AUTH_URL = API_URL+"auth/";
 
+const ROLES_BY_PRIORITY = [
+        'primary',
+        'replica'
 
+/*
+ * TODO Roles require further specification.
+ *
+        'barman',
+        'bdr',
+        'control',
+        'coordinator',
+        'datanode',
+        'datanode-replica',
+        'gtm',
+        'log-server',
+        'monitor',
+        'openvpn-server',
+        'pgbouncer',
+        'witness',
+        'adhoc',
+*/
+
+];
 
 
 // Default provider data (currently only EC2)
@@ -165,6 +188,24 @@ export function cluster_type(cluster) {
 
     return cluster_type;
 }
+
+
+/**
+ * Returns the primary role of this instance, or undefined if no relevant
+ * roles are found.
+ */
+export function instance_role(instance) {
+    for (let primary_role_name of ROLES_BY_PRIORITY) {
+        for (let role of instance.roles) {
+            if (role.role_type == primary_role_name) {
+                return role;
+            }
+        }
+    }
+
+    return undefined;
+}
+
 
 
 // Used by selections
