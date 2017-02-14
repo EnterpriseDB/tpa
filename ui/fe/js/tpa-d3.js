@@ -12,7 +12,7 @@ const MIN_NODE_WIDTH = 100;
 const MAX_CIRCLE_RADIUS = MIN_NODE_HEIGHT*0.66;
 
 const LINK_CONNECTOR_HEIGHT = 5;
-const LINK_CONNECTOR_LENGTH = MIN_NODE_WIDTH/2;
+const LINK_CONNECTOR_LENGTH = MIN_NODE_WIDTH;
 
 
 
@@ -436,15 +436,8 @@ function draw_rolelink(selection, rolelink) {
             let p = d.parent, c = d.children[0];
             let path = d3.path();
 
-            let parent_out_total_height =
-                LINK_CONNECTOR_HEIGHT*p.children.length;
-            let parent_out_top = p.y + (LINK_CONNECTOR_HEIGHT/2) - 
-                                (parent_out_total_height/2);
-
-            let p_y = parent_out_top +
-                LINK_CONNECTOR_HEIGHT * p.children.indexOf(d);
-
-            let c_y = p_y - p.y + c.y;
+            let p_y = p.y + LINK_CONNECTOR_HEIGHT * p.children.indexOf(d);
+            let c_y = c.y;
 
             path.moveTo(p.x, p_y);
             path.lineTo(p.x+LINK_CONNECTOR_LENGTH, p_y);
