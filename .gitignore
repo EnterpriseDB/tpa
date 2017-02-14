@@ -1,2 +1,4 @@
 # Default build artifact directory for ui.
 ui/build/
+# npm module install location.
+ui/node_modules/
