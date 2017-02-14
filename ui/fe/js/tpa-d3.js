@@ -10,23 +10,6 @@ import {scaleLinear} from "d3-scale";
 var MIN_NODE_WIDTH = 100;
 
 
-function list_cycle(lst) {
-    var current_idx = -1;
-
-    function next() {
-        if (lst.length < 1) {
-            return;
-        }
-
-        current_idx = current_idx+1;
-        if (current_idx >= lst.length) {
-            current_idx = 0;
-        }
-        return lst[current_id];
-    }
-
-    return next;
-}
 
 
 /**
@@ -38,11 +21,7 @@ export function show_clusters(viewport) {
     var clusters = [];
     var current_cluster_idx = -1;
 
-    tpa.get_obj_by_url(tpa.API_URL+"cluster/", function(c, e) {
-        if (e) {
-            alert("API Server communication error");
-            throw e;
-        }
+    tpa.get_all("cluster", null, c => {
         clusters = c;
 
         if (clusters.length > 0) {
@@ -51,7 +30,7 @@ export function show_clusters(viewport) {
         }
     });
 
-    function next_cluster() {
+    return function next_cluster() {
         if (clusters.length < 1) {
             return;
         }
@@ -61,22 +40,12 @@ export function show_clusters(viewport) {
             current_cluster_idx = 0;
         }
         draw_cluster(clusters[current_cluster_idx], viewport);
-    }
-
-    return next_cluster;
+    };
 }
 
 
 export function display_cluster_by_uuid(cluster_uuid, viewport) {
-    tpa.get_obj_by_url(tpa.API_URL+"cluster/"+cluster_uuid+"/",
-        function(cluster, error) {
-            if(error) {
-                alert("Cluster load error");
-            }
-            else {
-                draw_cluster(cluster, viewport);
-            }
-        });
+    tpa.get_cluster_by_uuid(cluster_uuid, c => draw_cluster(c, viewport));
 }
 
 
