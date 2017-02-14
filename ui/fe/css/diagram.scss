@@ -33,9 +33,11 @@ body { font-family: 'FontAwesome' }
             font-weight: lighter;
         }
 
-        fill: $color-complement-3;
-        stroke: $color-complement-2;
-        .icon { fill: $color-normal-4; }
+        .icon { 
+            fill: #ffffff; 
+            stroke: $color-normal-4;
+            stroke-width: 3;
+        }
 
         text.name {
             stroke: $color-complement-2;
