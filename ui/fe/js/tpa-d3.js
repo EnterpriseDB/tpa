@@ -500,18 +500,7 @@ function tree_layout(objects, parent_id, width, height) {
 
     root.eachAfter(d => {
         if (d.children && d.children.length > 0) {
-            let first_child = d.children[0];
-            d.child_y_shift = (d.y - first_child.y);
-        }
-        else {
-            d.child_y_shift = 0;
-        }
-        console.log("shift", d.depth, d.data.name, d.child_y_shift);
-    });
-
-    root.eachBefore(d => {
-        if (d.parent && d.parent.child_y_shift) {
-            d.y = d.parent.y + d.parent.child_y_shift;
+            d.y = d.children[0].y;
         }
     });
 
