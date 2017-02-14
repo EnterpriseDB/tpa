@@ -9,7 +9,6 @@ import {multimethod} from "./multimethod";
 import {JWTAuth} from "./jwt-auth.js";
 
 export const API_URL = "/api/v1/tpa/";
-export const TEST_TENANT = API_URL + "tenant/d9073da2-138f-4342-8cb8-3462be0b325a/";
 
 export var url_cache = {};
 export var auth = new JWTAuth(API_URL+"auth/");
