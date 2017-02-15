@@ -31,20 +31,20 @@ extractStyles: false
 # Thus, derived Bootstrap variables can depend on values from here.
 # See the Bootstrap _variables.scss file for examples of derived Bootstrap variables.
 #
-# preBootstrapCustomizations: ./path/to/bootstrap/pre-customizations.scss
+preBootstrapCustomizations: ./fe/css/_variables.scss
 
 
 # This gets loaded after bootstrap/variables is loaded
 # Thus, you may customize Bootstrap variables
 # based on the values established in the Bootstrap _variables.scss file
 #
-bootstrapCustomizations: ./fe/css/bootstrap-custom.scss
+# bootstrapCustomizations: ./fe/css/bootstrap-custom.scss
 
 
 # Import your custom styles here
 # Usually this endpoint-file contains list of @imports of your application styles
 #
-# appStyles: ./path/to/your/app/styles/endpoint.scss
+appStyles: ./fe/css/_bootswatch.scss
 
 
 ### Bootstrap styles
