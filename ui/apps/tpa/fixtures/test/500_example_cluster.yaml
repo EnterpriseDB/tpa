@@ -69,6 +69,7 @@
   pk: dd8847b1-af6d-438e-ad22-ae1bbbe2d613
   fields:
     name: "primary"
+    role_type: "primary"
     created: "2016-11-28T10:25+0000"
     updated: "2016-11-28T10:25+0000"
     tenant: d9073da2-138f-4342-8cb8-3462be0b325a
@@ -92,6 +93,7 @@
   pk: 8bee115c-453b-4d80-a777-6080cabe3220
   fields:
     name: "replica"
+    role_type: "replica"
     created: "2016-11-28T10:25+0000"
     updated: "2016-11-28T10:25+0000"
     tenant: d9073da2-138f-4342-8cb8-3462be0b325a
@@ -102,6 +104,7 @@
   pk: d98e7da8-02c8-4d23-b9ef-9b5ad87546e5
   fields:
     name: "barman"
+    role_type: "barman"
     created: "2016-11-28T10:25+0000"
     updated: "2016-11-28T10:25+0000"
     tenant: d9073da2-138f-4342-8cb8-3462be0b325a
@@ -147,6 +150,7 @@
   pk: 8bee115c-453b-4d80-a777-6080cabe3221
   fields:
     name: "replica2"
+    role_type: "replica"
     created: "2016-11-28T10:25+0000"
     updated: "2016-11-28T10:25+0000"
     tenant: d9073da2-138f-4342-8cb8-3462be0b325a
@@ -157,6 +161,7 @@
   pk: d98e7da8-02c8-4d23-b9ef-9b5ad87546e6
   fields:
     name: "barman"
+    role_type: "barman"
     created: "2016-11-28T10:25+0000"
     updated: "2016-11-28T10:25+0000"
     tenant: d9073da2-138f-4342-8cb8-3462be0b325a
