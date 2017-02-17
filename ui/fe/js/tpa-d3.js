@@ -6,7 +6,7 @@
 import * as d3 from "d3";
 import * as tpa from "./tpa-api";
 import {scaleLinear} from "d3-scale";
-import {Accumulator} from "./utils";
+import {Accumulator, sort_by_attr} from "./utils";
 
 const MIN_NODE_HEIGHT = 20;
 const MIN_NODE_WIDTH = 100;
@@ -250,13 +250,6 @@ function build_xl_graph(cluster) {
 
 const DG_POSTGRES_ROLES = {primary: true, replica: true};
 
-function sort_by_name(array) {
-    array.sort((obj_a, obj_b) => {
-        if (obj_a.name < obj_b.name) return -1;
-        if (obj_a.name > obj_b.name) return 1;
-        return 0;
-    });
-}
 
 /**
  * Returns the objects and their parents relevant to drawing a cluster
@@ -281,7 +274,7 @@ function build_tpa_graph(cluster) {
         zones.push(subnet.zone);
     }
 
-    sort_by_name(zones);
+    sort_by_attr(zones, 'name');
 
     for (let zone of zones) {
         accum.push([zone, cluster]);
@@ -311,7 +304,7 @@ function build_tpa_graph(cluster) {
         }
     }
 
-    sort_by_name(pg_instances);
+    sort_by_attr(pg_instances, 'name');
 
     let dummy_idx = 0;
 
@@ -415,14 +408,14 @@ function draw_instance(selection, instance) {
         .classed('icon', true)
         .attr('d', tpa.class_method()
             .default(function(d) {
-                var ns = node_rect.get(this);
-                var radius = MAX_CIRCLE_RADIUS; // TODO calculate from instype
+                let ns = node_rect.get(this);
+                let radius = MAX_CIRCLE_RADIUS; // TODO calculate from instype
+                let diameter = 2*radius;
 
-                var circle = "M 0 0 " +
-                    " m -"+radius+", 0" +
-                    " a "+radius+","+radius+" 0 1,1 "+(2*radius)+",0" +
-                    " a "+radius+","+radius+" 0 1,1 "+(-2*radius)+",0";
-                return circle;
+                return "M 0 0 " +
+                    ` m -${radius}, 0` +
+                    ` a ${radius},${radius} 0 1,1 ${diameter},0` +
+                    ` a ${radius},${radius} 0 1,1 ${diameter},0`;
             }));
 
     // name
@@ -435,45 +428,10 @@ function draw_instance(selection, instance) {
         })
         .text(d => d.data.name);
 
-    // roles
-    /*
-    var role_idx = d3.local();
-
-    var dgm_roles = node.append("g")
-        .classed('roles', true)
-        .attr('transform', function(d) {
-            var x = -node_rect.get(this).width/5,
-                y = -node_rect.get(this).height/2+25;
-
-            return "translate("+x+","+y+")";
-        });
-
-    function diagram_data_item(selection, el_name, data_class, data) {
-        return selection.selectAll("."+data_class)
-                .data(data).enter().append(el_name)
-                .classed(data_class, true)
-                .property('model:url', d => d.url);
-    }
-
-    dgm_roles.each(function(d) {
-        role_idx.set(this, {idx: 1});
-
-        diagram_data_item(d3.select(this), 'text', 'role', d.data.roles)
-            .attr('transform', function(r) {
-                var ns = node_rect.get(this);
-                var idx = role_idx.get(this).idx;
-                var top = 15+(idx-1)*15;
-                role_idx.get(this).idx = idx+1;
-                return "translate("+"4"+","+top+")";
-            })
-            .text(function(r) { return r.name; });
-    });
-    */
-
     return node;
 }
 
-function draw_rolelink(selection, rolelink, sz, dobj_for_model) {
+function draw_rolelink(selection, rolelink, size, dobj_for_model) {
     return selection.append("path")
         .classed("edge", true)
         .attr("d", function(d) {
