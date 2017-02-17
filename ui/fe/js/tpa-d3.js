@@ -250,6 +250,14 @@ function build_xl_graph(cluster) {
 
 const DG_POSTGRES_ROLES = {primary: true, replica: true};
 
+function sort_by_name(array) {
+    array.sort((obj_a, obj_b) => {
+        if (obj_a.name < obj_b.name) return -1;
+        if (obj_a.name > obj_b.name) return 1;
+        return 0;
+    });
+}
+
 /**
  * Returns the objects and their parents relevant to drawing a cluster
  * as a tree.
@@ -273,11 +281,7 @@ function build_tpa_graph(cluster) {
         zones.push(subnet.zone);
     }
 
-    zones.sort((zone_a, zone_b) => {
-        if (zone_a.name < zone_b.name) return -1;
-        if (zone_a.name > zone_b.name) return 1;
-        return 0;
-    });
+    sort_by_name(zones);
 
     for (let zone of zones) {
         accum.push([zone, cluster]);
@@ -306,6 +310,8 @@ function build_tpa_graph(cluster) {
             }
         }
     }
+
+    sort_by_name(pg_instances);
 
     let dummy_idx = 0;
 
