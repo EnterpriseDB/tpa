@@ -262,7 +262,7 @@ function build_tpa_graph(cluster) {
     var accum = [];
     var objects = [];
     var parent_id = {};
-    var roles = {};
+    var role_instance = {};
     var instance_parents = {};
     var pg_instances = [];
     var zone_instances = new Accumulator(); // zone -> [instance, ...]
@@ -292,6 +292,7 @@ function build_tpa_graph(cluster) {
         }
     }
 
+    let dummy_idx = 0;
 
     pg_instances.forEach(function(i) {
         i.roles.forEach(function(r) {
@@ -302,6 +303,17 @@ function build_tpa_graph(cluster) {
                 // Client and server instances must be different
                 if (i == server_instance) return;
 
+                if (server_instance.zone != i.zone) {
+                    server_instance = {
+                        url: `dummyparent:${dummy_idx}`,
+                        zone: i.zone
+                    };
+                    dummy_idx += 1;
+
+                    accum.push([server_instance, i.zone]);
+                    instance_parents[server_instance.url] = i.zone;
+                    zone_instances.add(i.zone.url, server_instance);
+                }
 
                 if (!(i.url in instance_parents)) {
                     instance_parents[i.url] = client_link;

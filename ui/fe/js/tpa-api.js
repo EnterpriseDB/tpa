@@ -125,13 +125,13 @@ export function load_provider(callback) {
 
 export function get_all(klass, filter, _then) {
     // TODO: implement filtering.
-    return get_obj_by_url(API_URL + klass+  "/", _then);
+    return get_obj_by_url(`${API_URL}${klass}/`, _then);
 }
+
 
 export function get_cluster_by_uuid(cluster_uuid, _then) {
     return get_obj_by_url(
         `${API_URL}cluster/${cluster_uuid}/`,
-        //API_URL + "cluster/" + cluster_uuid + "/",
         _then);
 }
 
