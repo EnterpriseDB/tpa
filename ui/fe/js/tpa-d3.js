@@ -462,13 +462,16 @@ function draw_instance(selection, instance) {
     return node;
 }
 
-function draw_rolelink(selection, rolelink) {
+function draw_rolelink(selection, rolelink, sz, dobj_for_model) {
     return selection.append("path")
         .classed("edge", true)
         .attr("d", function(d) {
             // draw line from server instance to client instance
-            if ( !d.parent || !d.children) return "";
-            let p = d.parent, c = d.children[0];
+            if ( !d.parent || !d.children) {
+                return "";
+            }
+            let p = dobj_for_model[d.data.server_instance.url],
+                c = d.children[0];
             let path = d3.path();
 
             let p_y = p.y + LINK_CONNECTOR_HEIGHT * p.children.indexOf(d);
