@@ -261,10 +261,27 @@ function build_tpa_graph(cluster) {
     var tree = new Tree();
 
     var accum = [];
-    var objects = [];
+    var objects = [cluster];
     var parent_id = {};
     var role_instance = {};
     var pg_instances = [];
+
+    var zones = [];
+
+    for(let subnet of cluster.subnets) {
+        subnet.zone = tpa.url_cache[subnet.zone];
+        zones.push(subnet.zone);
+    }
+
+    zones.sort((zone_a, zone_b) => {
+        if (zone_a.name < zone_b.name) return -1;
+        if (zone_a.name > zone_b.name) return 1;
+        return 0;
+    });
+
+    for (let zone of zones) {
+        accum.push([zone, cluster]);
+    }
 
     function add_instance_parent(instance, parent) {
         accum.push([instance, parent]);
@@ -275,12 +292,7 @@ function build_tpa_graph(cluster) {
     // cluster -> region -> zone -> (subnet?) -> instance 
     //   (-> rolelink -> instance)*
 
-    accum.push([cluster, ""]); // Cluster is root
-
     for (let subnet of cluster.subnets) {
-        subnet.zone = tpa.url_cache[subnet.zone];
-        accum.push([subnet.zone, cluster]);
-
         for (let instance of subnet.instances) {
             if (DG_POSTGRES_ROLES[tpa.instance_role(instance).role_type]) {
                     pg_instances.push(instance);
