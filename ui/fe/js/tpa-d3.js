@@ -6,6 +6,7 @@
 import * as d3 from "d3";
 import * as tpa from "./tpa-api";
 import {scaleLinear} from "d3-scale";
+import {Accumulator} from "./utils";
 
 const MIN_NODE_HEIGHT = 20;
 const MIN_NODE_WIDTH = 100;
@@ -253,6 +254,7 @@ function build_tpa_graph(cluster) {
     var accum = [], objects = [], parent_id = {};
     var roles = {};
     var instance_parents = {};
+    var zone_instances = new Accumulator(); // zone -> [instance, ...]
 
     // Grammar:
     // cluster -> region -> zone -> (subnet?) -> instance 
@@ -272,6 +274,7 @@ function build_tpa_graph(cluster) {
         var subnet_zone = {url: subnet.zone};
         accum.push([subnet_zone, cluster]);
         accum.push([subnet, subnet_zone]);
+                    zone_instances.add(subnet.zone.url, instance);
 
         subnet.instances.forEach(function(i) {
             i.roles.forEach(function(r) {
