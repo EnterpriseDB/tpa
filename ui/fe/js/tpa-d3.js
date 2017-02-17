@@ -264,9 +264,12 @@ function build_tpa_graph(cluster) {
     var objects = [];
     var parent_id = {};
     var role_instance = {};
-    var instance_parents = {};
     var pg_instances = [];
-    var zone_instances = new Accumulator(); // zone -> [instance, ...]
+
+    function add_instance_parent(instance, parent) {
+        accum.push([instance, parent]);
+        parent_id[instance.url] = parent.url;
+    }
 
     // Grammar:
     // cluster -> region -> zone -> (subnet?) -> instance 
@@ -281,7 +284,6 @@ function build_tpa_graph(cluster) {
         for (let instance of subnet.instances) {
             if (DG_POSTGRES_ROLES[tpa.instance_role(instance).role_type]) {
                     pg_instances.push(instance);
-                    zone_instances.add(subnet.zone.url, instance);
                     instance.zone = subnet.zone;
 
                     // TODO this is needed until the model linker is written
@@ -295,49 +297,43 @@ function build_tpa_graph(cluster) {
 
     let dummy_idx = 0;
 
-    pg_instances.forEach(function(i) {
-        i.roles.forEach(function(r) {
-            if (!(r.role_type in DG_POSTGRES_ROLES)) return;
+    for (let client_instance of pg_instances) {
+        for (let r of client_instance.roles) {
+            if (!(r.role_type in DG_POSTGRES_ROLES)) continue;
 
-            r.client_links.forEach(function(client_link) {
+            for (let client_link of r.client_links) {
                 let server_instance = role_instance[client_link.server_role];
-                // Client and server instances must be different
-                if (i == server_instance) return;
+                if (client_instance == server_instance) return;
 
-                if (server_instance.zone != i.zone) {
+                // FIXME for drawing role!
+                client_link.server_instance = role_instance[client_link.server_role];
+
+                if (server_instance.zone != client_instance.zone) {
                     server_instance = {
-                        url: `dummyparent:${dummy_idx}`,
-                        zone: i.zone
+                        url: `dummyparent:${dummy_idx++}`,
+                        zone: client_instance.zone
                     };
-                    dummy_idx += 1;
 
-                    accum.push([server_instance, i.zone]);
-                    instance_parents[server_instance.url] = i.zone;
-                    zone_instances.add(i.zone.url, server_instance);
+                    add_instance_parent(server_instance, client_instance.zone);
                 }
 
-                if (!(i.url in instance_parents)) {
-                    instance_parents[i.url] = client_link;
-                    accum.push([i, client_link]);
+                if (!(client_instance.url in parent_id)) {
+                    add_instance_parent(client_instance, client_link);
                 }
                 // set link's parent to other instance
                 accum.push([client_link, server_instance]);
-                // FIXME for drawing role!
-                client_link.server_instance = role_instance[client_link.server_role];
-            });
-        });
-    });
+            }
+        }
+    }
 
-    // if an instance has no parent yet, the subnet is its parent.
-    cluster.subnets.forEach(
-        subnet => subnet.instances
-            .forEach(function(i) {
-                if (!(i.url in instance_parents)) {
-                    accum.push([i, i.zone]);
-                    instance_parents[i.url] = i.zone;
-                }
-            }));
+    // if an instance has no parent yet, the zone is its parent.
+    for(let i of pg_instances) {
+        if (!(i.url in parent_id)) {
+            add_instance_parent(i, i.zone);
+        }
+    }
 
+    // create final parent lookup
     accum.forEach(function([o, p]) {
         if (!(o in parent_id)) {
             objects.push(o);
