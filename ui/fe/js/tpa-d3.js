@@ -247,6 +247,7 @@ function build_xl_graph(cluster) {
 }
 
 
+const DG_POSTGRES_ROLES = {primary: true, replica: true};
 
 /**
  * Returns the objects and their parents relevant to drawing a cluster
@@ -258,9 +259,12 @@ function build_xl_graph(cluster) {
 function build_tpa_graph(cluster) {
     var tree = new Tree();
 
-    var accum = [], objects = [], parent_id = {};
+    var accum = [];
+    var objects = [];
+    var parent_id = {};
     var roles = {};
     var instance_parents = {};
+    var pg_instances = [];
     var zone_instances = new Accumulator(); // zone -> [instance, ...]
 
     // Grammar:
@@ -269,55 +273,64 @@ function build_tpa_graph(cluster) {
 
     accum.push([cluster, ""]); // Cluster is root
 
-    // TODO this is needed until the model linker is written
-    cluster.subnets.forEach(s =>
-        s.instances.forEach(i =>
-            i.roles.forEach(function(r) { 
-                roles[r.url] = i;
-            })
-        ));
+    for (let subnet of cluster.subnets) {
+        subnet.zone = tpa.url_cache[subnet.zone];
+        accum.push([subnet.zone, cluster]);
 
-    cluster.subnets.forEach(function(subnet) {
-        var subnet_zone = {url: subnet.zone};
-        accum.push([subnet_zone, cluster]);
-        accum.push([subnet, subnet_zone]);
+        for (let instance of subnet.instances) {
+            if (DG_POSTGRES_ROLES[tpa.instance_role(instance).role_type]) {
+                    pg_instances.push(instance);
                     zone_instances.add(subnet.zone.url, instance);
+                    instance.zone = subnet.zone;
 
-        subnet.instances.forEach(function(i) {
-            i.roles.forEach(function(r) {
-                r.client_links.forEach(function(l) {
-                    var server_instance = roles[l.server_role];
-                    // set my ancestor to this link
-                    if (i == server_instance) {
-                        // Client and server on same instance.
-                        return;
+                    // TODO this is needed until the model linker is written
+                    for(let role of instance.roles) {
+                        role.instance = instance;
+                        role_instance[role.url] = instance;
                     }
-                    if (!(i.url in instance_parents)) {
-                        instance_parents[i.url] = l;
+            }
+        }
+    }
 
-                        accum.push([i, l]);
-                    }
-                    // set link's parent to other instance
-                    accum.push([l, server_instance]);
-                });
+
+    pg_instances.forEach(function(i) {
+        i.roles.forEach(function(r) {
+            if (!(r.role_type in DG_POSTGRES_ROLES)) return;
+
+            r.client_links.forEach(function(client_link) {
+                let server_instance = role_instance[client_link.server_role];
+                // Client and server instances must be different
+                if (i == server_instance) return;
+
+
+                if (!(i.url in instance_parents)) {
+                    instance_parents[i.url] = client_link;
+                    accum.push([i, client_link]);
+                }
+                // set link's parent to other instance
+                accum.push([client_link, server_instance]);
+                // FIXME for drawing role!
+                client_link.server_instance = role_instance[client_link.server_role];
             });
         });
     });
 
     // if an instance has no parent yet, the subnet is its parent.
     cluster.subnets.forEach(
-        s => s.instances
-            .filter(i => !(i.url in instance_parents))
+        subnet => subnet.instances
             .forEach(function(i) {
-                accum.push([i, s]);
-                instance_parents[i] = s.url;
+                if (!(i.url in instance_parents)) {
+                    accum.push([i, i.zone]);
+                    instance_parents[i.url] = i.zone;
+                }
             }));
 
-    accum.filter(v => (v[0] in parent_id ? false : true))
-        .forEach(function([o, p]) {
+    accum.forEach(function([o, p]) {
+        if (!(o in parent_id)) {
             objects.push(o);
             parent_id[o.url] = p.url;
-        });
+        }
+    });
 
     return [objects, parent_id];
 }
