@@ -143,6 +143,12 @@ function draw_cluster(cluster, viewport) {
     var tree = layout.tree;
     var root = layout.root;
 
+    var dobj_for_model = {}; // map obj url -> diagram item
+
+    root.eachAfter(d => {
+        dobj_for_model[d.data.url] = d;
+    });
+
     var dom_context = d3.local();
 
     draw_background_grid(diagram, bbox.width, bbox.height);
@@ -151,7 +157,8 @@ function draw_cluster(cluster, viewport) {
         diagram.selectAll("."+c)
         .data(root.descendants().filter(tpa.is_instance(c)))
         .enter()
-        .call(d => draw(d, diagram, {width: bbox.width, height: bbox.height})
+        .call(d => draw(d, diagram, {width: bbox.width, height: bbox.height},
+                    dobj_for_model)
             .classed(c, true)
         );
     }
