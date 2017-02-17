@@ -179,6 +179,7 @@ function build_xl_graph(cluster) {
 
     parent_id[cluster.url] =  "";
 
+
     cluster.subnets.forEach(function(s) {
         objects.push(s);
         parent_id[s.url] = cluster.url;
@@ -357,20 +358,17 @@ function draw_zone(selection, zone, size) {
         .property('model-url', d => d.data.url ? d.data.url : null);
 
     zone_display.append("text")
-        .text(d => tpa.url_cache[d.data.url].name);
+        .text(d => d.data.name);
 
-    // display a line between each zone
-    /*
     zone_display.append('line')
         .attr('x1', 0)
         .attr('y1', function (d) {
-            let y = d3.max(d.descendants().map(e => e.y)) + 20;
-            zone_sep_y.set(this, y);
-            return  y;
+            return -MIN_NODE_HEIGHT*2;
         })
         .attr('x2', size.width)
-        .attr('y2', function (d) { return zone_sep_y.get(this); });
-    */
+        .attr('y2', function (d) {
+            return -MIN_NODE_HEIGHT*2;
+        });
 
     return zone_display;
 }
@@ -385,7 +383,6 @@ function draw_instance(selection, instance) {
     var node_rect = d3.local();
     var node_model = d3.local();
     var node_url = d3.local();
-    var MIN_NODE_WIDTH = 100;
 
     var node = selection.append("g")
         .attr("class", d => "instance node" +
@@ -513,7 +510,7 @@ function tree_layout(objects, parent_id, width, height) {
 
     var tree = d3.tree()
                 .size([height, width])
-                .nodeSize([height/10, MIN_NODE_WIDTH*1.5]);
+                .nodeSize([height/15, MIN_NODE_WIDTH*1.5]);
 
     tree(root);
 
