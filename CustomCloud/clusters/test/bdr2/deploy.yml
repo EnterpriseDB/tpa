@@ -1,0 +1,68 @@
+---
+
+- name: Set up TPA BDR2 cluster
+  hosts: tag_Cluster_BDR2Test
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  sudo_user: root
+  sudo: true
+
+  vars:
+    ansible_distribution: Debian
+    ansible_distribution_release: jessie
+    BDR_apt_repositories:
+      key_id: AA7A6805
+      key_url: http://packages.2ndquadrant.com/bdr/apt/AA7A6805.asc
+      repo: "http://ci.2ndquadrant.it/packages/internal-testing/bdr_2.0/latest/deb/"
+      versions: [9.6]
+
+  pre_tasks:
+    - include: ../../../platforms/aws/hostvars.yml
+      tags: always
+
+  roles:
+    - role: common
+
+    - role: postgres/vars
+      vars:
+        postgres_version: 9.6
+      tags: always
+
+    - role: sys/tune
+      tags: always
+
+    - role: sys/sysctl
+      vars:
+        sysctl_values:
+          net.ipv4.ip_forward: 1
+      tags: [sys, sysctl]
+
+    - role: sys/openvpn
+      vpn_network: 192.168.33.0/24
+
+    - role: sys/hosts
+      tags: [sys, hosts]
+
+    - role: sys/rsyslog
+      tags: [sys, rsyslog]
+
+    - role: bdr
+      when: >
+        'bdr' in role
+      tags: bdr
+
+    - role: barman
+      tags: barman
+
+    - role: pgbouncer
+      tags: pgbouncer
+
+    - role: postgres/final
+      when: >
+        'bdr' in role
+      tags: [postgres, final]
+
+    - role: bdr/node
+      when: >
+        'bdr' in role
+      tags: bdr
