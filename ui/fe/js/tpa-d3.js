@@ -15,6 +15,7 @@ const MAX_CIRCLE_RADIUS = MIN_NODE_HEIGHT*0.66;
 const LINK_CONNECTOR_HEIGHT = 5;
 const LINK_CONNECTOR_LENGTH = MIN_NODE_WIDTH;
 
+const DG_POSTGRES_ROLES = {primary: true, replica: true};
 
 
 /**
@@ -246,9 +247,6 @@ function build_xl_graph(cluster) {
 
     return [objects, parent_id];
 }
-
-
-const DG_POSTGRES_ROLES = {primary: true, replica: true};
 
 
 /**
@@ -538,6 +536,3 @@ function make_rect(w, h) {
         bottom_left:  { x: -w/2, y: +h/2 }
     };
 }
-
-
-

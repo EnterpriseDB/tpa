@@ -88,7 +88,7 @@ class Zone(BaseModel):
 
 class InstanceType(BaseModel):
     zone = OwnerKey('Zone', related_name="instance_types")
-    hardware_configuration = TextLineField()
+    hardware = JSONField(default="")
 
 
 class VolumeType(BaseModel):
