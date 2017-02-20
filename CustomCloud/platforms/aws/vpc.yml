@@ -81,6 +81,14 @@
           - vpc['Name'] is defined
           - vpc['cidr'] is defined
 
+    - name: Ensure that vpc-id is not given for this VPC
+      assert:
+        msg: "Refusing to create VPC when vpc-id is specified in ec2_vpc"
+        that:
+          - vpc['filters']['vpc-id'] is not defined
+      when:
+        vpc['filters'] is defined
+
     - name: Create VPC {{ vpc['Name'] }}:{{ vpc['cidr'] }} in {{ region }}
       ec2_vpc_net:
         state: present
