@@ -131,6 +131,20 @@ function draw_cluster(cluster, viewport) {
     let cluster_diagram = new ClusterDiagram(cluster, viewport,
                                             objects, parent_id);
 
+    for (let d of cluster_diagram.root.descendants()) {
+        if (tpa.model_class(d.data) == 'rolelink') {
+            let p = cluster_diagram.dobj_for_model[d.data.server_instance.url];
+
+            if (!p.num_children) {
+                p.num_children = 1;
+                d.parent_idx = 0;
+            }
+            else {
+                d.parent_idx = p.num_children++;
+            }
+        }
+    }
+
 
 
     function draw_all_of_class(c, draw) {
@@ -420,7 +434,7 @@ function draw_rolelink(selection, cluster_diagram) {
                 c = d.children[0];
             let path = d3.path();
 
-            let p_y = p.y + LINK_CONNECTOR_HEIGHT * p.children.indexOf(d);
+            let p_y = p.y + LINK_CONNECTOR_HEIGHT * d.parent_idx;
             let c_y = c.y;
 
             path.moveTo(p.x, p_y);
