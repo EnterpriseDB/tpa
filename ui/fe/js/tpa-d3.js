@@ -437,7 +437,8 @@ function draw_rolelink(selection, cluster_diagram) {
             let p_y = p.y + LINK_CONNECTOR_HEIGHT * d.parent_idx;
             let c_y = c.y;
 
-            path.moveTo(p.x, p_y);
+            path.moveTo(p.x, p.y);
+            path.lineTo(p.x, p_y);
             path.lineTo(p.x+LINK_CONNECTOR_LENGTH, p_y);
             path.lineTo(c.x-LINK_CONNECTOR_LENGTH, c_y);
             path.lineTo(c.x, c_y);
