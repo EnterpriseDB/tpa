@@ -4,9 +4,12 @@
  */
 
 import * as d3 from "d3";
+
+
 import * as tpa from "./tpa-api";
-import {scaleLinear} from "d3-scale";
 import {Accumulator, sort_by_attr} from "./utils";
+import {make_rect} from "./geometry";
+import {setup_viewport, tree_rotate} from "./diagram";
 
 const MIN_NODE_HEIGHT = 20;
 const MIN_NODE_WIDTH = 100;
@@ -54,73 +57,6 @@ export function display_cluster_by_uuid(cluster_uuid, viewport) {
     tpa.get_cluster_by_uuid(cluster_uuid, c => draw_cluster(c, viewport));
 }
 
-function setup_viewport(viewport, width, height) {
-    viewport.selectAll("svg").remove();
-
-    var svg = viewport.append('svg')
-        .classed("diagram-viewport", true)
-        .attr('width', width)
-        .attr('height', height);
-
-    var viewport_contents = svg.append('g');
-
-    // Zoom
-
-    var zoom = d3.zoom()
-        //.scaleExtent([0.5, 40])
-        .translateExtent([[-width/2, -height/2], [width*2, height*2]])
-        .on("zoom", () => viewport_contents.attr("transform", d3.event.transform));
-
-    svg.call(zoom);
-
-    var diagram = viewport_contents.append("g")
-        .classed("diagram", true)
-        .attr('transform', `translate(0, ${height/2})`);
-
-    return diagram;
-}
-
-
-function draw_background_grid(diagram, width, height) {
-    var yScale = scaleLinear()
-        .domain([-height, height])
-        .range([-height*2, height*2]);
-
-    var grid = diagram.append('g')
-        .classed('background-grid', true)
-        .selectAll("line.horizontal")
-        .data(yScale.ticks(50)).enter()
-        .append("line")
-            .classed('horizontal', true)
-            .attr("x1", -width*2)
-            .attr("x2", width*2)
-            .attr("y1", yScale)
-            .attr("y2", yScale);
-
-    var xAxis = d3.axisLeft(yScale);
-
-    grid.call(xAxis);
-
-    var xScale = scaleLinear()
-        .domain([-width, width])
-        .range([-width*2, width*2]);
-
-    var gridy = diagram.append('g')
-        .classed('background-grid', true)
-        .selectAll("line.vertical")
-        .data(xScale.ticks(50)).enter()
-        .append("line")
-            .classed('horizontal', true)
-            .attr("y1", -height*2)
-            .attr("y2", height*2)
-            .attr("x1", xScale)
-            .attr("x2", xScale);
-
-    var yAxis = d3.axisTop(yScale);
-
-    gridy.call(yAxis);
-
-}
 
 // TPA Diagram
 
@@ -151,8 +87,6 @@ function draw_cluster(cluster, viewport) {
     });
 
     var dom_context = d3.local();
-
-    draw_background_grid(diagram, bbox.width, bbox.height);
 
     function draw_all_of_class(c, draw) {
         diagram.selectAll("."+c)
@@ -472,7 +406,7 @@ class Tree {
 
 function tree_layout(objects, parent_id, width, height) {
     var table = d3.stratify()
-        .id(d=> d.url)
+        .id(d => d.url)
         .parentId(d => parent_id[d.url])
     (objects);
 
@@ -483,22 +417,13 @@ function tree_layout(objects, parent_id, width, height) {
                 .nodeSize([height/15, MIN_NODE_WIDTH*1.5]);
 
     tree(root);
-
-    var diagram_left = root.y;
-
-    root.descendants().forEach(function(d) {
-        // rotate 90 deg, assume root is not displayed
-        let x = (d.y ? d.y : 0),
-            y = (d.x ? d.x : 0);
-
-        d.x = x - diagram_left;
-        d.y = y;
-
-        // remove the double-reference introduced by stratify
-        d.data = d.data.data;
-    });
+    tree_rotate(root);
 
     root.eachAfter(d => {
+        // remove the double-reference introduced by stratify
+        d.data = d.data.data;
+
+        // set y position to same as first child.
         if (d.children && d.children.length > 0) {
             d.y = d.children[0].y;
         }
@@ -514,25 +439,4 @@ function tree_layout(objects, parent_id, width, height) {
 }
 
 
-/**
- * Returns the minimum and maximum Y values for the descendants of this
- * diagram element.
- */
-function node_yspan(d) {
-    return {
-        min_y: d3.min(d.descendants().map(c => c.y)),
-        max_y: d3.max(d.descendants().map(c => c.y+height))
-    };
-}
 
-
-function make_rect(w, h) {
-    return {
-        width: w,
-        height: h,
-        top_left:     { x: -w/2, y: -h/2 },
-        top_right:    { x: +w/2, y: -h/2 },
-        bottom_right: { x: +w/2, y: +h/2 },
-        bottom_left:  { x: -w/2, y: +h/2 }
-    };
-}
