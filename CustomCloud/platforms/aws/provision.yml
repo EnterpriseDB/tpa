@@ -81,6 +81,8 @@
         vpc: "{{ ec2_vpc }}"
         region: "{{ r }}"
       with_items: "{{ regions }}"
+      when:
+        ec2_vpc is defined
       loop_control:
         loop_var: r
       tags: ec2_vpc
