@@ -6,14 +6,16 @@
 import * as d3 from "d3";
 import * as tpa from "./tpa-api";
 import {scaleLinear} from "d3-scale";
+import {Accumulator, sort_by_attr} from "./utils";
 
 const MIN_NODE_HEIGHT = 20;
 const MIN_NODE_WIDTH = 100;
 const MAX_CIRCLE_RADIUS = MIN_NODE_HEIGHT*0.66;
 
 const LINK_CONNECTOR_HEIGHT = 5;
-const LINK_CONNECTOR_LENGTH = MIN_NODE_WIDTH/2;
+const LINK_CONNECTOR_LENGTH = MIN_NODE_WIDTH;
 
+const DG_POSTGRES_ROLES = {primary: true, replica: true};
 
 
 /**
@@ -142,6 +144,12 @@ function draw_cluster(cluster, viewport) {
     var tree = layout.tree;
     var root = layout.root;
 
+    var dobj_for_model = {}; // map obj url -> diagram item
+
+    root.eachAfter(d => {
+        dobj_for_model[d.data.url] = d;
+    });
+
     var dom_context = d3.local();
 
     draw_background_grid(diagram, bbox.width, bbox.height);
@@ -150,7 +158,8 @@ function draw_cluster(cluster, viewport) {
         diagram.selectAll("."+c)
         .data(root.descendants().filter(tpa.is_instance(c)))
         .enter()
-        .call(d => draw(d, diagram, {width: bbox.width, height: bbox.height})
+        .call(d => draw(d, diagram, {width: bbox.width, height: bbox.height},
+                    dobj_for_model)
             .classed(c, true)
         );
     }
@@ -170,6 +179,7 @@ function build_xl_graph(cluster) {
     var roles = {}; // role url -> instance
 
     parent_id[cluster.url] =  "";
+
 
     cluster.subnets.forEach(function(s) {
         objects.push(s);
@@ -239,7 +249,6 @@ function build_xl_graph(cluster) {
 }
 
 
-
 /**
  * Returns the objects and their parents relevant to drawing a cluster
  * as a tree.
@@ -250,64 +259,96 @@ function build_xl_graph(cluster) {
 function build_tpa_graph(cluster) {
     var tree = new Tree();
 
-    var accum = [], objects = [], parent_id = {};
-    var roles = {};
-    var instance_parents = {};
+    var accum = [];
+    var objects = [cluster];
+    var parent_id = {};
+    var role_instance = {};
+    var pg_instances = [];
+
+    var zones = [];
+
+    for(let subnet of cluster.subnets) {
+        subnet.zone = tpa.url_cache[subnet.zone];
+        zones.push(subnet.zone);
+    }
+
+    sort_by_attr(zones, 'name');
+
+    for (let zone of zones) {
+        accum.push([zone, cluster]);
+    }
+
+    function add_instance_parent(instance, parent) {
+        accum.push([instance, parent]);
+        parent_id[instance.url] = parent.url;
+    }
 
     // Grammar:
     // cluster -> region -> zone -> (subnet?) -> instance 
     //   (-> rolelink -> instance)*
 
-    accum.push([cluster, ""]); // Cluster is root
+    for (let subnet of cluster.subnets) {
+        for (let instance of subnet.instances) {
+            if (DG_POSTGRES_ROLES[tpa.instance_role(instance).role_type]) {
+                    pg_instances.push(instance);
+                    instance.zone = subnet.zone;
 
-    // TODO this is needed until the model linker is written
-    cluster.subnets.forEach(s =>
-        s.instances.forEach(i =>
-            i.roles.forEach(function(r) { 
-                roles[r.url] = i;
-            })
-        ));
-
-    cluster.subnets.forEach(function(subnet) {
-        var subnet_zone = {url: subnet.zone};
-        accum.push([subnet_zone, cluster]);
-        accum.push([subnet, subnet_zone]);
-
-        subnet.instances.forEach(function(i) {
-            i.roles.forEach(function(r) {
-                r.client_links.forEach(function(l) {
-                    var server_instance = roles[l.server_role];
-                    // set my ancestor to this link
-                    if (i == server_instance) {
-                        // Client and server on same instance.
-                        return;
+                    // TODO this is needed until the model linker is written
+                    for(let role of instance.roles) {
+                        role.instance = instance;
+                        role_instance[role.url] = instance;
                     }
-                    if (!(i.url in instance_parents)) {
-                        instance_parents[i.url] = l;
+            }
+        }
+    }
 
-                        accum.push([i, l]);
-                    }
-                    // set link's parent to other instance
-                    accum.push([l, server_instance]);
-                });
-            });
-        });
-    });
+    sort_by_attr(pg_instances, 'name');
 
-    // if an instance has no parent yet, the subnet is its parent.
-    cluster.subnets.forEach(
-        s => s.instances
-            .filter(i => !(i.url in instance_parents))
-            .forEach(function(i) {
-                accum.push([i, s]);
-                instance_parents[i] = s.url;
-            }));
+    let dummy_idx = 0;
 
-    accum.filter(v => (v[0] in parent_id ? false : true))
-        .forEach(function([o, p]) {
+    for (let client_instance of pg_instances) {
+        for (let r of client_instance.roles) {
+            if (!(r.role_type in DG_POSTGRES_ROLES)) continue;
+
+            for (let client_link of r.client_links) {
+                let server_instance = role_instance[client_link.server_role];
+                if (client_instance == server_instance) return;
+
+                // FIXME for drawing role!
+                client_link.server_instance = role_instance[client_link.server_role];
+
+                if (server_instance.zone != client_instance.zone) {
+                    server_instance = {
+                        url: `dummyparent:${dummy_idx++}`,
+                        zone: client_instance.zone
+                    };
+
+                    add_instance_parent(server_instance, client_instance.zone);
+                }
+
+                if (!(client_instance.url in parent_id)) {
+                    add_instance_parent(client_instance, client_link);
+                }
+                // set link's parent to other instance
+                accum.push([client_link, server_instance]);
+            }
+        }
+    }
+
+    // if an instance has no parent yet, the zone is its parent.
+    for(let i of pg_instances) {
+        if (!(i.url in parent_id)) {
+            add_instance_parent(i, i.zone);
+        }
+    }
+
+    // create final parent lookup
+    accum.forEach(function([o, p]) {
+        if (!(o in parent_id)) {
             objects.push(o);
             parent_id[o.url] = p.url;
-        });
+        }
+    });
 
     return [objects, parent_id];
 }
@@ -322,20 +363,17 @@ function draw_zone(selection, zone, size) {
         .property('model-url', d => d.data.url ? d.data.url : null);
 
     zone_display.append("text")
-        .text(d => tpa.url_cache[d.data.url].name);
+        .text(d => d.data.name);
 
-    // display a line between each zone
-    /*
     zone_display.append('line')
         .attr('x1', 0)
         .attr('y1', function (d) {
-            let y = d3.max(d.descendants().map(e => e.y)) + 20;
-            zone_sep_y.set(this, y);
-            return  y;
+            return -MIN_NODE_HEIGHT*2;
         })
         .attr('x2', size.width)
-        .attr('y2', function (d) { return zone_sep_y.get(this); });
-    */
+        .attr('y2', function (d) {
+            return -MIN_NODE_HEIGHT*2;
+        });
 
     return zone_display;
 }
@@ -350,7 +388,6 @@ function draw_instance(selection, instance) {
     var node_rect = d3.local();
     var node_model = d3.local();
     var node_url = d3.local();
-    var MIN_NODE_WIDTH = 100;
 
     var node = selection.append("g")
         .attr("class", d => "instance node" +
@@ -369,14 +406,14 @@ function draw_instance(selection, instance) {
         .classed('icon', true)
         .attr('d', tpa.class_method()
             .default(function(d) {
-                var ns = node_rect.get(this);
-                var radius = MAX_CIRCLE_RADIUS; // TODO calculate from instype
+                let ns = node_rect.get(this);
+                let radius = MAX_CIRCLE_RADIUS; // TODO calculate from instype
+                let diameter = 2*radius;
 
-                var circle = "M 0 0 " +
-                    " m -"+radius+", 0" +
-                    " a "+radius+","+radius+" 0 1,1 "+(2*radius)+",0" +
-                    " a "+radius+","+radius+" 0 1,1 "+(-2*radius)+",0";
-                return circle;
+                return "M 0 0 " +
+                    ` m -${radius}, 0` +
+                    ` a ${radius},${radius} 0 1,1 ${diameter},0` +
+                    ` a ${radius},${radius} 0 1,1 ${diameter},0`;
             }));
 
     // name
@@ -389,62 +426,23 @@ function draw_instance(selection, instance) {
         })
         .text(d => d.data.name);
 
-    // roles
-    /*
-    var role_idx = d3.local();
-
-    var dgm_roles = node.append("g")
-        .classed('roles', true)
-        .attr('transform', function(d) {
-            var x = -node_rect.get(this).width/5,
-                y = -node_rect.get(this).height/2+25;
-
-            return "translate("+x+","+y+")";
-        });
-
-    function diagram_data_item(selection, el_name, data_class, data) {
-        return selection.selectAll("."+data_class)
-                .data(data).enter().append(el_name)
-                .classed(data_class, true)
-                .property('model:url', d => d.url);
-    }
-
-    dgm_roles.each(function(d) {
-        role_idx.set(this, {idx: 1});
-
-        diagram_data_item(d3.select(this), 'text', 'role', d.data.roles)
-            .attr('transform', function(r) {
-                var ns = node_rect.get(this);
-                var idx = role_idx.get(this).idx;
-                var top = 15+(idx-1)*15;
-                role_idx.get(this).idx = idx+1;
-                return "translate("+"4"+","+top+")";
-            })
-            .text(function(r) { return r.name; });
-    });
-    */
-
     return node;
 }
 
-function draw_rolelink(selection, rolelink) {
+function draw_rolelink(selection, rolelink, size, dobj_for_model) {
     return selection.append("path")
         .classed("edge", true)
         .attr("d", function(d) {
             // draw line from server instance to client instance
-            if ( !d.parent || !d.children) return "";
-            let p = d.parent, c = d.children[0];
+            if ( !d.parent || !d.children) {
+                return "";
+            }
+            let p = dobj_for_model[d.data.server_instance.url],
+                c = d.children[0];
             let path = d3.path();
 
-            let parent_out_total_height =
-                LINK_CONNECTOR_HEIGHT*p.children.length;
-            let parent_out_top = p.y + (LINK_CONNECTOR_HEIGHT/2) - 
-                                (parent_out_total_height/2);
-
-            let p_y = parent_out_top +
-                LINK_CONNECTOR_HEIGHT * p.children.indexOf(d);
-
-            let c_y = p_y - p.y + c.y;
+            let p_y = p.y + LINK_CONNECTOR_HEIGHT * p.children.indexOf(d);
+            let c_y = c.y;
 
             path.moveTo(p.x, p_y);
             path.lineTo(p.x+LINK_CONNECTOR_LENGTH, p_y);
@@ -482,7 +480,7 @@ function tree_layout(objects, parent_id, width, height) {
 
     var tree = d3.tree()
                 .size([height, width])
-                .nodeSize([height/10, MIN_NODE_WIDTH*1.5]);
+                .nodeSize([height/15, MIN_NODE_WIDTH*1.5]);
 
     tree(root);
 
@@ -538,6 +536,3 @@ function make_rect(w, h) {
         bottom_left:  { x: -w/2, y: +h/2 }
     };
 }
-
-
-

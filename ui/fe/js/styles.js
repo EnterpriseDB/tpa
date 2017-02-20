@@ -11,6 +11,7 @@ require('es6-promise').polyfill();
 //
 require("jquery");
 require("bootstrap-loader");
-require('../css/main.scss');
+//require("../css/_bootswatch.scss");
+//require('../css/main.scss');
 require('../css/diagram.scss');
 require('../css/signin.scss');

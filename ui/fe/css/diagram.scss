@@ -33,15 +33,15 @@ body { font-family: 'FontAwesome' }
             font-weight: lighter;
         }
 
-        .icon { 
-            fill: #ffffff; 
+        .icon {
+            fill: #ffffff;
             stroke: $color-normal-4;
             stroke-width: 3;
         }
 
         text.name {
-            stroke: $color-complement-2;
-            fill: $color-complement-2;
+            // stroke: $color-complement-2;
+            // fill: $color-complement-2;
         }
     }
 
@@ -52,7 +52,15 @@ body { font-family: 'FontAwesome' }
 
     /* TPA objects */
 
-    .zone line { stroke: red; fill: red; }
+    .zone {
+        text {
+            stroke: $color-complement-1;
+            fill: $color-complement-1;
+            font-size: 150%;
+        }
+
+        line { stroke: $color-complement-1; }
+    }
 
     .role {
         font-size: 80%;

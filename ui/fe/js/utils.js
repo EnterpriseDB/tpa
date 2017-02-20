@@ -19,3 +19,31 @@ export function get_url_vars()
     }
     return vars;
 }
+
+
+
+export class Accumulator {
+    constructor () {
+        this.dict = {};
+        this.keys = [];
+    }
+
+    add(key, value) {
+        if ( !(key in this.dict) ) {
+            this.dict[key] = [value];
+            this.keys.push(key);
+        }
+        else if (this.dict[key].indexOf(value) < 0) {
+            this.dict[key].push(value);
+        }
+    }
+}
+
+
+export function sort_by_attr(array, attr) {
+    array.sort((obj_a, obj_b) => {
+        if (obj_a[attr] < obj_b[attr]) return -1;
+        if (obj_a[attr] > obj_b[attr]) return 1;
+        return 0;
+    });
+}
