@@ -43,7 +43,7 @@ var provider = null;
 export const auth = new JWTAuth(AUTH_URL);
 
 // url -> obj
-export const url_cache = {};
+const url_cache = {};
 
 // API Operations
 
@@ -125,17 +125,36 @@ export function load_provider(callback) {
         });
 }
 
+function link_provider(cluster) {
+    for (let subnet of cluster.subnets) {
+        subnet.zone = url_cache[subnet.zone];
+        for (let instance of subnet.instances) {
+            instance.zone = subnet.zone;
+            instance.instance_type = url_cache[instance.instance_type];
+        }
+    }
+}
+
 
 export function get_all(klass, filter, _then) {
     // TODO: implement filtering.
-    return get_obj_by_url(`${API_URL}${klass}/`, _then);
+    return get_obj_by_url(`${API_URL}${klass}/`, objects => {
+        for (let o of objects) {
+            if (model_class(o) == 'cluster') {
+                link_provider(o);
+            }
+        }
+        _then(objects);
+    });
 }
 
 
 export function get_cluster_by_uuid(cluster_uuid, _then) {
     return get_obj_by_url(
-        `${API_URL}cluster/${cluster_uuid}/`,
-        _then);
+        `${API_URL}cluster/${cluster_uuid}/`, c => {
+            link_provider(c);
+            _then(c);
+        });
 }
 
 

@@ -127,7 +127,6 @@ function draw_cluster(cluster, viewport) {
         [objects, parent_id] = build_tpa_graph(cluster);
     }
 
-
     let cluster_diagram = new ClusterDiagram(cluster, viewport,
                                             objects, parent_id);
 
@@ -144,8 +143,6 @@ function draw_cluster(cluster, viewport) {
             }
         }
     }
-
-
 
     function draw_all_of_class(c, draw) {
         cluster_diagram.diagram
@@ -261,7 +258,6 @@ function build_tpa_graph(cluster) {
     var zones = [];
 
     for(let subnet of cluster.subnets) {
-        subnet.zone = tpa.url_cache[subnet.zone];
         zones.push(subnet.zone);
     }
 
@@ -285,12 +281,8 @@ function build_tpa_graph(cluster) {
             let primary_role = tpa.instance_role(instance);
             if (primary_role && DG_POSTGRES_ROLES[primary_role.role_type]) {
                     pg_instances.push(instance);
-                    instance.zone = subnet.zone;
-                    instance.instance_type = tpa.url_cache[instance.instance_type];
-
                     // TODO this is needed until the model linker is written
                     for(let role of instance.roles) {
-                        role.instance = instance;
                         role_instance[role.url] = instance;
                     }
             }
