@@ -264,12 +264,14 @@ function build_tpa_graph(cluster) {
     sort_by_attr(zones, 'name');
 
     for (let zone of zones) {
-        accum.push([zone, cluster]);
+        if (!(zone.url in parent_id)) {
+            accum.push([zone, cluster]);
+        }
     }
 
     function add_instance_parent(instance, parent) {
+        console.log("instance:", instance, "parent:", parent);
         accum.push([instance, parent]);
-        parent_id[instance.url] = parent.url;
     }
 
     // Grammar:
@@ -281,7 +283,6 @@ function build_tpa_graph(cluster) {
             let primary_role = tpa.instance_role(instance);
             if (primary_role && DG_POSTGRES_ROLES[primary_role.role_type]) {
                     pg_instances.push(instance);
-                    // TODO this is needed until the model linker is written
                     for(let role of instance.roles) {
                         role_instance[role.url] = instance;
                     }
@@ -313,10 +314,7 @@ function build_tpa_graph(cluster) {
                     add_instance_parent(server_instance, client_instance.zone);
                 }
 
-                if (!(client_instance.url in parent_id)) {
-                    add_instance_parent(client_instance, client_link);
-                }
-                // set link's parent to other instance
+                add_instance_parent(client_instance, client_link);
                 accum.push([client_link, server_instance]);
             }
         }
@@ -331,7 +329,7 @@ function build_tpa_graph(cluster) {
 
     // create final parent lookup
     accum.forEach(function([o, p]) {
-        if (!(o in parent_id)) {
+        if (!(o.url in parent_id)) {
             objects.push(o);
             parent_id[o.url] = p.url;
         }
