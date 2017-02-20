@@ -13,33 +13,18 @@
   set_fact:
     cluster_tags: "{{ cluster_tags|combine(dict(Name=cluster_name)) }}"
 
-- name: Ensure that ec2_vpc or ec2_region_vpcs is specified
-  assert:
-    msg: "Please defined ec2_vpc or ec2_region_vpcs in {{config_file}}"
-    that:
-      - ec2_vpc is defined or ec2_region_vpcs is defined
-
 # We always need to know the name of the VPC, but we don't need the cidr
 # unless we may need to create the VPC. For the Test VPC (which we know
 # exists in every relevant region already), the name alone is enough.
 
-- name: Ensure ec2_vpc is correctly configured
+- name: Ensure ec2_vpc is configured
   assert:
     msg: "Please define ec2_vpc (a hash, including Name) in {{config_file}}"
     that:
+      - ec2_vpc is defined
       - ec2_vpc is mapping
       - ec2_vpc['Name'] is defined
       - ec2_vpc['Name'] != ''
-  when:
-    ec2_vpc is defined
-
-- name: Ensure ec2_region_vpcs is correctly configured
-  assert:
-    msg: "ec2_region_vpcs must map from region to VPC id in {{config_file}}"
-    that:
-      - ec2_region_vpcs is mapping
-  when:
-    ec2_region_vpcs is defined
 
 - name: Ensure instances is correctly configured
   assert:
