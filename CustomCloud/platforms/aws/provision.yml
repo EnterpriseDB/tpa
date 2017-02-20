@@ -161,7 +161,7 @@
       ec2_group_facts:
         region: "{{ item.key }}"
         filters: "{{ item.value }}"
-      with_dict: "{{ ec2_groups|default([]) }}"
+      with_dict: "{{ ec2_groups|default({}) }}"
       register: sgs
       tags: ec2_vpc
 
