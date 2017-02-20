@@ -413,7 +413,7 @@ function draw_instance(selection, instance) {
                 return "M 0 0 " +
                     ` m -${radius}, 0` +
                     ` a ${radius},${radius} 0 1,1 ${diameter},0` +
-                    ` a ${radius},${radius} 0 1,1 ${diameter},0`;
+                    ` a ${radius},${radius} 0 1,1 -${diameter},0`;
             }));
 
     // name
