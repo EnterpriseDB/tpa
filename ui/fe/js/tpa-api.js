@@ -14,23 +14,23 @@ const AUTH_URL = API_URL+"auth/";
 
 const ROLES_BY_PRIORITY = [
         'primary',
-        'replica'
+        'replica',
+        'barman',
 
 /*
  * TODO Roles require further specification.
  *
-        'barman',
         'bdr',
         'control',
+        'gtm',
         'coordinator',
         'datanode',
         'datanode-replica',
-        'gtm',
         'log-server',
         'monitor',
-        'openvpn-server',
         'pgbouncer',
         'witness',
+        'openvpn-server',
         'adhoc',
 */
 

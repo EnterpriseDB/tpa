@@ -282,7 +282,8 @@ function build_tpa_graph(cluster) {
 
     for (let subnet of cluster.subnets) {
         for (let instance of subnet.instances) {
-            if (DG_POSTGRES_ROLES[tpa.instance_role(instance).role_type]) {
+            let primary_role = tpa.instance_role(instance);
+            if (primary_role && DG_POSTGRES_ROLES[primary_role.role_type]) {
                     pg_instances.push(instance);
                     instance.zone = subnet.zone;
                     instance.instance_type = tpa.url_cache[instance.instance_type];
