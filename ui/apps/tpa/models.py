@@ -89,6 +89,8 @@ class Zone(BaseModel):
 class InstanceType(BaseModel):
     zone = OwnerKey('Zone', related_name="instance_types")
     hardware = JSONField(default="")
+    vcpus = PositiveIntegerField(null=True)
+    memory = PositiveIntegerField(null=True)
 
 
 class VolumeType(BaseModel):

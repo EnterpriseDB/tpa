@@ -113,6 +113,9 @@ export function load_provider(callback) {
                         url_cache[r.url] = r;
                         r.zones.forEach(function(z) {
                             url_cache[z.url] = z;
+                            for(let it of z.instance_types) {
+                                url_cache[it.url] = it;
+                            }
                         });
                     });
                 });

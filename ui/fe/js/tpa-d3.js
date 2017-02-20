@@ -4,9 +4,12 @@
  */
 
 import * as d3 from "d3";
+
+
 import * as tpa from "./tpa-api";
-import {scaleLinear} from "d3-scale";
 import {Accumulator, sort_by_attr} from "./utils";
+import {make_rect} from "./geometry";
+import {setup_viewport, tree_rotate} from "./diagram";
 
 const MIN_NODE_HEIGHT = 20;
 const MIN_NODE_WIDTH = 100;
@@ -54,114 +57,104 @@ export function display_cluster_by_uuid(cluster_uuid, viewport) {
     tpa.get_cluster_by_uuid(cluster_uuid, c => draw_cluster(c, viewport));
 }
 
-function setup_viewport(viewport, width, height) {
-    viewport.selectAll("svg").remove();
 
-    var svg = viewport.append('svg')
-        .classed("diagram-viewport", true)
-        .attr('width', width)
-        .attr('height', height);
+class ClusterDiagram {
+    constructor (cluster, viewport, objects, parent_id) {
+        this.viewport = viewport;
+        this.cluster = cluster;
+        this.objects = objects;
+        this.parent_id = parent_id;
 
-    var viewport_contents = svg.append('g');
+        let bbox = viewport.node().getBoundingClientRect();
 
-    // Zoom
+        this.width = bbox.width;
+        this.height = bbox.height;
+        this.diagram = setup_viewport(viewport, bbox.width, bbox.height);
 
-    var zoom = d3.zoom()
-        //.scaleExtent([0.5, 40])
-        .translateExtent([[-width/2, -height/2], [width*2, height*2]])
-        .on("zoom", () => viewport_contents.attr("transform", d3.event.transform));
+        this.layout_graph();
 
-    svg.call(zoom);
+        // map obj url -> diagram item
+        this.dobj_for_model = {};
 
-    var diagram = viewport_contents.append("g")
-        .classed("diagram", true)
-        .attr('transform', `translate(0, ${height/2})`);
+        this.root.eachAfter(d => {
+            this.dobj_for_model[d.data.url] = d;
+        });
+    }
 
-    return diagram;
+    layout_graph() {
+        var table = d3.stratify()
+            .id(d => d.url)
+            .parentId(d => this.parent_id[d.url])
+        (this.objects);
+
+        this.root = d3.hierarchy(table);
+        this.tree = d3.tree()
+                    .size([this.height, this.width])
+                    .nodeSize([this.height/15, MIN_NODE_WIDTH*1.5]);
+
+        this.tree(this.root);
+        tree_rotate(this.root);
+
+        this.root.eachAfter(d => {
+            // remove the double-reference introduced by stratify
+            d.data = d.data.data;
+
+            // set y position to same as first child.
+            if (d.children && d.children.length > 0) {
+                d.y = d.children[0].y;
+            }
+        });
+
+        console.log("LAYOUT -----------");
+        console.log("objects:", this.objects);
+        console.log("stratified:", table);
+        console.log("root:", this.root);
+    }
 }
 
-
-function draw_background_grid(diagram, width, height) {
-    var yScale = scaleLinear()
-        .domain([-height, height])
-        .range([-height*2, height*2]);
-
-    var grid = diagram.append('g')
-        .classed('background-grid', true)
-        .selectAll("line.horizontal")
-        .data(yScale.ticks(50)).enter()
-        .append("line")
-            .classed('horizontal', true)
-            .attr("x1", -width*2)
-            .attr("x2", width*2)
-            .attr("y1", yScale)
-            .attr("y2", yScale);
-
-    var xAxis = d3.axisLeft(yScale);
-
-    grid.call(xAxis);
-
-    var xScale = scaleLinear()
-        .domain([-width, width])
-        .range([-width*2, width*2]);
-
-    var gridy = diagram.append('g')
-        .classed('background-grid', true)
-        .selectAll("line.vertical")
-        .data(xScale.ticks(50)).enter()
-        .append("line")
-            .classed('horizontal', true)
-            .attr("y1", -height*2)
-            .attr("y2", height*2)
-            .attr("x1", xScale)
-            .attr("x2", xScale);
-
-    var yAxis = d3.axisTop(yScale);
-
-    gridy.call(yAxis);
-
-}
 
 // TPA Diagram
 
 function draw_cluster(cluster, viewport) {
     console.log("draw_cluster:", cluster, tpa.cluster_type(cluster));
 
-    var bbox = viewport.node().getBoundingClientRect();
-    var diagram = setup_viewport(viewport, bbox.width, bbox.height);
-
-    var graph = null;
+    let objects, parent_id;
 
     if (tpa.cluster_type(cluster) == 'xl') {
-        graph = build_xl_graph(cluster);
+        [objects, parent_id] = build_xl_graph(cluster);
     }
     else {
-        graph = build_tpa_graph(cluster);
+        [objects, parent_id] = build_tpa_graph(cluster);
     }
 
-    var [objects, parent_id] = graph;
-    var layout = tree_layout(objects, parent_id, bbox.width, bbox.height);
-    var tree = layout.tree;
-    var root = layout.root;
 
-    var dobj_for_model = {}; // map obj url -> diagram item
+    let cluster_diagram = new ClusterDiagram(cluster, viewport,
+                                            objects, parent_id);
 
-    root.eachAfter(d => {
-        dobj_for_model[d.data.url] = d;
-    });
+    for (let d of cluster_diagram.root.descendants()) {
+        if (tpa.model_class(d.data) == 'rolelink') {
+            let p = cluster_diagram.dobj_for_model[d.data.server_instance.url];
 
-    var dom_context = d3.local();
+            if (!p.num_children) {
+                p.num_children = 1;
+                d.parent_idx = 0;
+            }
+            else {
+                d.parent_idx = p.num_children++;
+            }
+        }
+    }
 
-    draw_background_grid(diagram, bbox.width, bbox.height);
+
 
     function draw_all_of_class(c, draw) {
-        diagram.selectAll("."+c)
-        .data(root.descendants().filter(tpa.is_instance(c)))
-        .enter()
-        .call(d => draw(d, diagram, {width: bbox.width, height: bbox.height},
-                    dobj_for_model)
-            .classed(c, true)
-        );
+        cluster_diagram.diagram
+            .selectAll("."+c)
+            .data(cluster_diagram.root.descendants().filter(tpa.is_instance(c)))
+            .enter()
+            .call(d => draw(d, cluster_diagram)
+                .classed(c, true)
+            );
     }
 
     draw_all_of_class('zone', draw_zone);
@@ -292,6 +285,7 @@ function build_tpa_graph(cluster) {
             if (DG_POSTGRES_ROLES[tpa.instance_role(instance).role_type]) {
                     pg_instances.push(instance);
                     instance.zone = subnet.zone;
+                    instance.instance_type = tpa.url_cache[instance.instance_type];
 
                     // TODO this is needed until the model linker is written
                     for(let role of instance.roles) {
@@ -354,7 +348,7 @@ function build_tpa_graph(cluster) {
 }
 
 
-function draw_zone(selection, zone, size) {
+function draw_zone(selection, cluster_diagram) {
     //var zone_sep_y = d3.local();
 
     var zone_display = selection.append('g')
@@ -370,7 +364,7 @@ function draw_zone(selection, zone, size) {
         .attr('y1', function (d) {
             return -MIN_NODE_HEIGHT*2;
         })
-        .attr('x2', size.width)
+        .attr('x2', cluster_diagram.width)
         .attr('y2', function (d) {
             return -MIN_NODE_HEIGHT*2;
         });
@@ -384,7 +378,17 @@ function instance_size(instance) {
 }
 
 
-function draw_instance(selection, instance) {
+function instance_vcpus(instance) {
+    let vcpus = parseInt(instance.instance_type.vcpus);
+
+    if (!vcpus) {
+        return 1;
+    }
+
+    return Math.min(Math.sqrt(vcpus)/2, 1);
+}
+
+function draw_instance(selection, cluster_diagram) {
     var node_rect = d3.local();
     var node_model = d3.local();
     var node_url = d3.local();
@@ -407,13 +411,14 @@ function draw_instance(selection, instance) {
         .attr('d', tpa.class_method()
             .default(function(d) {
                 let ns = node_rect.get(this);
-                let radius = MAX_CIRCLE_RADIUS; // TODO calculate from instype
+
+                let radius = MAX_CIRCLE_RADIUS*instance_vcpus(d.data);
                 let diameter = 2*radius;
 
                 return "M 0 0 " +
                     ` m -${radius}, 0` +
                     ` a ${radius},${radius} 0 1,1 ${diameter},0` +
-                    ` a ${radius},${radius} 0 1,1 ${diameter},0`;
+                    ` a ${radius},${radius} 0 1,1 -${diameter},0`;
             }));
 
     // name
@@ -421,15 +426,15 @@ function draw_instance(selection, instance) {
         .classed("name", true)
         .attr("transform", function(d) {
             let ns = node_rect.get(this);
-            return "translate("+(MAX_CIRCLE_RADIUS)+", " + 
-                (-MAX_CIRCLE_RADIUS) + ")";
+            let offset = MAX_CIRCLE_RADIUS*(instance_vcpus(d.data)+0.25);
+            return `translate(${offset},-${offset})`;
         })
         .text(d => d.data.name);
 
     return node;
 }
 
-function draw_rolelink(selection, rolelink, size, dobj_for_model) {
+function draw_rolelink(selection, cluster_diagram) {
     return selection.append("path")
         .classed("edge", true)
         .attr("d", function(d) {
@@ -437,14 +442,15 @@ function draw_rolelink(selection, rolelink, size, dobj_for_model) {
             if ( !d.parent || !d.children) {
                 return "";
             }
-            let p = dobj_for_model[d.data.server_instance.url],
+            let p = cluster_diagram.dobj_for_model[d.data.server_instance.url],
                 c = d.children[0];
             let path = d3.path();
 
-            let p_y = p.y + LINK_CONNECTOR_HEIGHT * p.children.indexOf(d);
+            let p_y = p.y + LINK_CONNECTOR_HEIGHT * d.parent_idx;
             let c_y = c.y;
 
-            path.moveTo(p.x, p_y);
+            path.moveTo(p.x, p.y);
+            path.lineTo(p.x, p_y);
             path.lineTo(p.x+LINK_CONNECTOR_LENGTH, p_y);
             path.lineTo(c.x-LINK_CONNECTOR_LENGTH, c_y);
             path.lineTo(c.x, c_y);
@@ -470,69 +476,5 @@ class Tree {
 }
 
 
-function tree_layout(objects, parent_id, width, height) {
-    var table = d3.stratify()
-        .id(d=> d.url)
-        .parentId(d => parent_id[d.url])
-    (objects);
-
-    var root = d3.hierarchy(table);
-
-    var tree = d3.tree()
-                .size([height, width])
-                .nodeSize([height/15, MIN_NODE_WIDTH*1.5]);
-
-    tree(root);
-
-    var diagram_left = root.y;
-
-    root.descendants().forEach(function(d) {
-        // rotate 90 deg, assume root is not displayed
-        let x = (d.y ? d.y : 0),
-            y = (d.x ? d.x : 0);
-
-        d.x = x - diagram_left;
-        d.y = y;
-
-        // remove the double-reference introduced by stratify
-        d.data = d.data.data;
-    });
-
-    root.eachAfter(d => {
-        if (d.children && d.children.length > 0) {
-            d.y = d.children[0].y;
-        }
-    });
 
 
-    console.log("LAYOUT -----------");
-    console.log("objects:", objects);
-    console.log("stratified:", table);
-    console.log("root:", root);
-
-    return {tree: tree, root: root};
-}
-
-
-/**
- * Returns the minimum and maximum Y values for the descendants of this
- * diagram element.
- */
-function node_yspan(d) {
-    return {
-        min_y: d3.min(d.descendants().map(c => c.y)),
-        max_y: d3.max(d.descendants().map(c => c.y+height))
-    };
-}
-
-
-function make_rect(w, h) {
-    return {
-        width: w,
-        height: h,
-        top_left:     { x: -w/2, y: -h/2 },
-        top_right:    { x: +w/2, y: -h/2 },
-        bottom_right: { x: +w/2, y: +h/2 },
-        bottom_left:  { x: -w/2, y: +h/2 }
-    };
-}
