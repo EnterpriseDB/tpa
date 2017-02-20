@@ -18,11 +18,10 @@
   set_fact:
     _vpc_name: "{{ vpc['Name']|default('<unnamed>') }}"
 
-- name: Try to use vpc-id to name unnamed VPCs
+- name: Use vpc-id to name VPCs whenever specified
   set_fact:
     _vpc_name: "{{ vpc['filters']['vpc-id'] }}"
   when:
-    _vpc_name == '<unnamed>' and
     vpc['filters'] is defined and
     vpc['filters']['vpc-id'] is defined
 
