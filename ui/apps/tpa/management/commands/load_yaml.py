@@ -103,7 +103,7 @@ class Command(BaseCommand):
         )
 
         for (region_name, region_subnets) \
-                in root['ec2_vpc_subnets'].iteritems():
+                in root.get('ec2_vpc_subnets', {}).iteritems():
             region = m.Region.objects.get(provider=provider,
                                           name=region_name)
             for netmask, subnet in region_subnets.iteritems():
