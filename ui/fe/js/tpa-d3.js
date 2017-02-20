@@ -285,6 +285,7 @@ function build_tpa_graph(cluster) {
             if (DG_POSTGRES_ROLES[tpa.instance_role(instance).role_type]) {
                     pg_instances.push(instance);
                     instance.zone = subnet.zone;
+                    instance.instance_type = tpa.url_cache[instance.instance_type];
 
                     // TODO this is needed until the model linker is written
                     for(let role of instance.roles) {
@@ -377,6 +378,16 @@ function instance_size(instance) {
 }
 
 
+function instance_vcpus(instance) {
+    let vcpus = parseInt(instance.instance_type.vcpus);
+
+    if (!vcpus) {
+        return 1;
+    }
+
+    return Math.min(Math.sqrt(vcpus)/2, 1);
+}
+
 function draw_instance(selection, cluster_diagram) {
     var node_rect = d3.local();
     var node_model = d3.local();
@@ -400,7 +411,8 @@ function draw_instance(selection, cluster_diagram) {
         .attr('d', tpa.class_method()
             .default(function(d) {
                 let ns = node_rect.get(this);
-                let radius = MAX_CIRCLE_RADIUS; // TODO calculate from instype
+
+                let radius = MAX_CIRCLE_RADIUS*instance_vcpus(d.data);
                 let diameter = 2*radius;
 
                 return "M 0 0 " +
@@ -414,8 +426,8 @@ function draw_instance(selection, cluster_diagram) {
         .classed("name", true)
         .attr("transform", function(d) {
             let ns = node_rect.get(this);
-            return "translate("+(MAX_CIRCLE_RADIUS)+", " + 
-                (-MAX_CIRCLE_RADIUS) + ")";
+            let offset = MAX_CIRCLE_RADIUS*(instance_vcpus(d.data)+0.25);
+            return `translate(${offset},-${offset})`;
         })
         .text(d => d.data.name);
 
