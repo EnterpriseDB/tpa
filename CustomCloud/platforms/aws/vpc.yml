@@ -1,7 +1,8 @@
 ---
 
-# Given a region and a VPC specification, we return a vpc-id. If the VPC
-# does not exist, we must create it first.
+# Given a region and a VPC specification (which may take various forms),
+# we return a vpc-id. If the desired VPC does not already exist, we try
+# to create it if a Name and cidr are specified.
 #
 # The natural way to express this would be to call ec2_vpc_net with the
 # given name and cidr, and also call ec2_tag if it "changed". Alas, due
@@ -13,41 +14,52 @@
 # subnets to make them be the way we would have created them. So we
 # search for the VPC first and create it if nothing matches.
 
+- name: Determine display name for the VPC
+  set_fact:
+    _vpc_name: "{{ vpc['Name']|default('<unnamed>') }}"
+
+- name: Try to use vpc-id to name unnamed VPCs
+  set_fact:
+    _vpc_name: "{{ vpc['filters']['vpc-id'] }}"
+  when:
+    _vpc_name == '<unnamed>' and
+    vpc['filters'] is defined and
+    vpc['filters']['vpc-id'] is defined
+
 - name: Initialise VPC search expression
   set_fact:
-    ec2_vpc_filter: {}
+    ec2_vpc_filters: "{{ vpc['filters']|default({}) }}"
     ec2_vpc_filter_tags:
       Name: "tag:Name"
 
-# We must express {Name: x, cidr: y} as a DescribeVpcs filter list.
-#
-# If a need should arise, we could support other filter expressions
-# either with a translation mechanism, as for Name → tag:Name, or
-# directly as for cidr.
+# We must express {Name: x, cidr: y} as a DescribeVpcs filter list, if
+# filters are not directly specified.
 
-- name: Add Name and cidr filters
+- name: Fall back to Name and cidr filters if required
   set_fact:
-    ec2_vpc_filter: "{{
-      ec2_vpc_filter|combine({
+    ec2_vpc_filters: "{{
+      ec2_vpc_filters|combine({
         ec2_vpc_filter_tags[item]|default(item): vpc[item]
       })
     }}"
-  when: vpc[item] is defined
+  when:
+    vpc[item] is defined and
+    vpc['filters'] is not defined
   with_items: ['Name', 'cidr']
 
-- name: Search for VPC {{ vpc['Name'] }} in {{ region }}
+- name: Search for VPC {{ _vpc_name }} in {{ region }}
   ec2_vpc_net_facts:
     region: "{{ region }}"
-    filters: "{{ ec2_vpc_filter }}"
+    filters: "{{ ec2_vpc_filters }}"
   register: found
 
 - name: Ensure there is at most one matching VPC
   assert:
-    msg: "{{ vpc['Name'] }}{{ ('cidr' in vpc and ':'+vpc['cidr']) or '' }} matches >1 VPC in {{ region }}"
+    msg: "{{ _vpc_name }}{{ ('cidr' in vpc and ':'+vpc['cidr']) or '' }} matches >1 VPC in {{ region }}"
     that:
       - found.vpcs|length < 2
 
-- name: Record existing VPC {{ vpc['Name'] }} in {{ region }}
+- name: Record existing VPC {{ _vpc_name }} in {{ region }}
   set_fact:
     ec2_region_vpcs: "{{
       ec2_region_vpcs|default({})|combine({
@@ -60,15 +72,15 @@
 # like. We create a VPC and internet gateway; subnets and a routing
 # table will come later. (We could create them here, but we want to
 # be able to create new subnets in an existing VPC.)
-#
-# Until this point, ec2_vpc['cidr'] was optional. Now it's mandatory.
 
 - block:
-    - name: Ensure we are given a CIDR for the VPC
+    - name: Ensure that Name and cidr are given for this VPC
       assert:
-        msg: "Cannot create VPC {{ vpc['Name'] }} without cidr in ec2_vpc"
+        msg: "Cannot create VPC without both Name and cidr in ec2_vpc"
         that:
+          - vpc['Name'] is defined
           - vpc['cidr'] is defined
+
     - name: Create VPC {{ vpc['Name'] }}:{{ vpc['cidr'] }} in {{ region }}
       ec2_vpc_net:
         state: present
@@ -82,11 +94,13 @@
           })
         }}"
       register: v
+
     - name: Create internet gateway for VPC {{ vpc['Name'] }}
       ec2_vpc_igw:
         vpc_id: "{{ v.vpc.id }}"
         region: "{{ region }}"
         state: present
+
     - name: Record new VPC {{ vpc['Name'] }} in {{ region }}
       set_fact:
         ec2_region_vpcs: "{{

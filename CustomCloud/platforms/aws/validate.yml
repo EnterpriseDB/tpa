@@ -13,18 +13,12 @@
   set_fact:
     cluster_tags: "{{ cluster_tags|combine(dict(Name=cluster_name)) }}"
 
-# We always need to know the name of the VPC, but we don't need the cidr
-# unless we may need to create the VPC. For the Test VPC (which we know
-# exists in every relevant region already), the name alone is enough.
-
 - name: Ensure ec2_vpc is configured
   assert:
-    msg: "Please define ec2_vpc (a hash, including Name) in {{config_file}}"
+    msg: "Please define ec2_vpc (a hash) in {{config_file}}"
     that:
       - ec2_vpc is defined
       - ec2_vpc is mapping
-      - ec2_vpc['Name'] is defined
-      - ec2_vpc['Name'] != ''
 
 - name: Ensure instances is correctly configured
   assert:

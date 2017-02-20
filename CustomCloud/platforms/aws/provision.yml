@@ -62,23 +62,40 @@
     # If there's no existing network to integrate with, we can set up a
     # simple network configuration.
     #
-    # We limit cluster operations to a single VPC, which is defined by
-    # setting ec2_vpc at the top level:
+    # To begin with, we must specify the VPC to use. This can be done in
+    # many different ways.
     #
+    #   # Every region must have a VPC named ExampleVPC.
+    #   ec2_vpc:
+    #     Name: ExampleVPC
+    #
+    #   # Every region must have a VPC named ExampleVPC with a matching
+    #   # CIDR; if it does not exist, we will try to create it.
     #   ec2_vpc:
     #     Name: ExampleVPC
     #     cidr: 192.0.2.0/24
     #
-    # This expression must uniquely identify a VPC in each region by its
-    # name and cidr. If the VPC does not exist, it will be created (and
-    # this cluster will be marked as its creator).
+    #   # In order to use different VPCs in each region, for example to
+    #   # specify VPCs by id, this expanded form maps from region names
+    #   # to a VPC filter specification. If the VPC does not exist, and
+    #   # both Name and cidr are given, we will try to create it.
+    #   ec2_vpc:
+    #     us-east-1:
+    #       Name: ExampleVPC
+    #       cidr: 192.0.2.0/24
+    #       filters:
+    #         vpc-id: vpc-abcdef
+    #
+    # In each case, ec2_vpc must uniquely identify a VPC in each region.
+    # If Name/cidr are specified, we will attempt to create the VPC if
+    # it does not exist (and mark this cluster as its creator).
     #
     # The vpc-id for a region is then given by ec2_region_vpcs[region].
 
     - name: Resolve ec2_vpc specification
       include: vpc.yml
       vars:
-        vpc: "{{ ec2_vpc }}"
+        vpc: "{{ ec2_vpc[r]|default(ec2_vpc) }}"
         region: "{{ r }}"
       with_items: "{{ regions }}"
       loop_control:
