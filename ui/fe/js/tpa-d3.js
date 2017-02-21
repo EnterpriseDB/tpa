@@ -270,7 +270,6 @@ function build_tpa_graph(cluster) {
     }
 
     function add_instance_parent(instance, parent) {
-        console.log("instance:", instance, "parent:", parent);
         accum.push([instance, parent]);
     }
 
@@ -372,25 +371,21 @@ function instance_size(instance) {
 function instance_vcpus(instance) {
     let vcpus = parseInt(instance.instance_type.vcpus);
 
-    if (!vcpus) {
-        return 1;
-    }
-
-    return Math.min(Math.sqrt(vcpus)/2, 1);
+    return Math.max(Math.sqrt(vcpus ? vcpus : 1), 1);
 }
 
 function draw_instance(selection, cluster_diagram) {
-    var node_rect = d3.local();
-    var node_model = d3.local();
-    var node_url = d3.local();
+    let node_rect = d3.local();
+    let node_model = d3.local();
+    let node_url = d3.local();
 
-    var node = selection.append("g")
+    let node = selection.append("g")
         .attr("class", d => "instance node" +
             (d.children ? " node--internal" : " node--leaf"))
         .attr("transform", d => `translate(${d.x}, ${d.y})`)
         .property('model-url', d => d.data.url ? d.data.url : null)
         .each(function(d) {
-            var size = instance_size(d.data);
+            let size = instance_size(d.data);
             node_model.set(this, d.data);
             node_url.set(this, d.data.url);
             node_rect.set(this, make_rect(size.width, size.height));
