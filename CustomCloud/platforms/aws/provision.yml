@@ -78,7 +78,8 @@
     #   # In order to use different VPCs in each region, for example to
     #   # specify VPCs by id, this expanded form maps from region names
     #   # to a VPC filter specification. If the VPC does not exist, and
-    #   # both Name and cidr are given, we will try to create it.
+    #   # both Name and cidr are given (and vpc-id is not in filters),
+    #   # we will try to create it.
     #   ec2_vpc:
     #     us-east-1:
     #       Name: ExampleVPC
