@@ -127,7 +127,6 @@ function draw_cluster(cluster, viewport) {
         [objects, parent_id] = build_tpa_graph(cluster);
     }
 
-
     let cluster_diagram = new ClusterDiagram(cluster, viewport,
                                             objects, parent_id);
 
@@ -144,8 +143,6 @@ function draw_cluster(cluster, viewport) {
             }
         }
     }
-
-
 
     function draw_all_of_class(c, draw) {
         cluster_diagram.diagram
@@ -261,19 +258,19 @@ function build_tpa_graph(cluster) {
     var zones = [];
 
     for(let subnet of cluster.subnets) {
-        subnet.zone = tpa.url_cache[subnet.zone];
         zones.push(subnet.zone);
     }
 
     sort_by_attr(zones, 'name');
 
     for (let zone of zones) {
-        accum.push([zone, cluster]);
+        if (!(zone.url in parent_id)) {
+            accum.push([zone, cluster]);
+        }
     }
 
     function add_instance_parent(instance, parent) {
         accum.push([instance, parent]);
-        parent_id[instance.url] = parent.url;
     }
 
     // Grammar:
@@ -285,12 +282,7 @@ function build_tpa_graph(cluster) {
             let primary_role = tpa.instance_role(instance);
             if (primary_role && DG_POSTGRES_ROLES[primary_role.role_type]) {
                     pg_instances.push(instance);
-                    instance.zone = subnet.zone;
-                    instance.instance_type = tpa.url_cache[instance.instance_type];
-
-                    // TODO this is needed until the model linker is written
                     for(let role of instance.roles) {
-                        role.instance = instance;
                         role_instance[role.url] = instance;
                     }
             }
@@ -321,10 +313,7 @@ function build_tpa_graph(cluster) {
                     add_instance_parent(server_instance, client_instance.zone);
                 }
 
-                if (!(client_instance.url in parent_id)) {
-                    add_instance_parent(client_instance, client_link);
-                }
-                // set link's parent to other instance
+                add_instance_parent(client_instance, client_link);
                 accum.push([client_link, server_instance]);
             }
         }
@@ -339,7 +328,7 @@ function build_tpa_graph(cluster) {
 
     // create final parent lookup
     accum.forEach(function([o, p]) {
-        if (!(o in parent_id)) {
+        if (!(o.url in parent_id)) {
             objects.push(o);
             parent_id[o.url] = p.url;
         }
@@ -382,25 +371,21 @@ function instance_size(instance) {
 function instance_vcpus(instance) {
     let vcpus = parseInt(instance.instance_type.vcpus);
 
-    if (!vcpus) {
-        return 1;
-    }
-
-    return Math.min(Math.sqrt(vcpus)/2, 1);
+    return Math.max(Math.sqrt(vcpus ? vcpus : 1), 1);
 }
 
 function draw_instance(selection, cluster_diagram) {
-    var node_rect = d3.local();
-    var node_model = d3.local();
-    var node_url = d3.local();
+    let node_rect = d3.local();
+    let node_model = d3.local();
+    let node_url = d3.local();
 
-    var node = selection.append("g")
+    let node = selection.append("g")
         .attr("class", d => "instance node" +
             (d.children ? " node--internal" : " node--leaf"))
         .attr("transform", d => `translate(${d.x}, ${d.y})`)
         .property('model-url', d => d.data.url ? d.data.url : null)
         .each(function(d) {
-            var size = instance_size(d.data);
+            let size = instance_size(d.data);
             node_model.set(this, d.data);
             node_url.set(this, d.data.url);
             node_rect.set(this, make_rect(size.width, size.height));
