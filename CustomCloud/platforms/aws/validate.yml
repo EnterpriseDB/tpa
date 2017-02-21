@@ -91,7 +91,7 @@
   set_fact:
     cluster_tag: "{{ cluster_tag|default('tag_Cluster_' + cluster_name) }}"
     cluster_bucket: "{{ cluster_bucket|default('2ndquadrant-tpa') }}"
-    cluster_profile: "{{ cluster_name }}_profile"
+    cluster_profile: "{{ cluster_profile|default(cluster_name+'_profile') }}"
 
 - name: Derive list of unique regions from instances
   set_fact:
