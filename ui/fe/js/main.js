@@ -99,3 +99,9 @@ export function register_cluster_upload() {
 
     document.addEventListener("DOMContentLoaded", submit_cluster_upload);
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Called");
+    d3.selectAll("#cover").style("visibility", "hidden");
+});
