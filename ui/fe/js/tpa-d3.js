@@ -5,7 +5,6 @@
 
 import * as d3 from "d3";
 
-
 import * as tpa from "./tpa-api";
 import {Accumulator, sort_by_attr} from "./utils";
 import {make_rect} from "./geometry";
