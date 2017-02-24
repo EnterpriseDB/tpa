@@ -214,6 +214,9 @@
             item.0: item.1.group_id
           })
         }}"
+      when:
+        ec2_region_groups[item.0] is not defined and
+        item.1.group_id is defined
       with_together:
         - "{{ regions }}"
         - "{{ new_sgs.results }}"
