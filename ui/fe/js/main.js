@@ -12,6 +12,9 @@ import * as tpa_diagram from "./tpa-d3";
 import * as d3 from "d3";
 import {get_url_vars} from "./utils";
 
+export function require_login() {
+    api.auth.popup_login();
+}
 
 export function display_all_cluster_diagrams() {
     document.addEventListener("DOMContentLoaded", function(e) {
@@ -99,3 +102,9 @@ export function register_cluster_upload() {
 
     document.addEventListener("DOMContentLoaded", submit_cluster_upload);
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Called");
+    d3.selectAll("#cover").style("visibility", "hidden");
+});

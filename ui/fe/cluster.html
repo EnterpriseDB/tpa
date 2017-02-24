@@ -14,8 +14,12 @@
 
     <!-- Custom Fonts -->
     <link href="assets/css/lib/font-awesome.css" rel="stylesheet" type="text/css">
+<style>
+#cover {position: fixed; height: 100%; width: 100%; top:0; left: 0; background: #000; z-index:9999;}
+</style>
 </head>
 <body>
+    <div id="cover"></div>
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -40,6 +44,7 @@
         </div><!--/.navbar-collapse -->
       </div>
     </nav>
+    <!-- LOGIN FORM -->
     <div id="LoginForm" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -60,6 +65,8 @@
             </div>
         </div>
     </div>
+    <!-- LOGIN FORM END -->
+
     <div class="container-fluid">
         <div class="cluster_view"></div>
     </div><!-- /#wrapper -->

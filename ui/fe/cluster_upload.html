@@ -10,8 +10,35 @@
     <link rel="icon" href="/favicon.ico">
 
     <title>TPA: Cluster config.yml upload</title>
+<style>
+#cover {position: fixed; height: 100%; width: 100%; top:0; left: 0; background: #000; z-index:9999;}
+</style>
     </head>
   <body>
+      <div id="cover"></div>
+    <!-- LOGIN FORM -->
+    <div id="LoginForm" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Login to TPA</h3>
+                </div>
+                <form class="login-form">
+                    <div class="modal-body">
+                        <p><input type="text" class="username" name="username" placeholder="Username"></p>
+                        <p><input type="password" class="password" name="password" placeholder="Password"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <p><button type="submit" class="btn btn-primary">Sign in</button>
+                        <!-- <a href="#">Forgot Password?</a> -->
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- LOGIN FORM END -->
+
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -40,6 +67,9 @@
         </form>
     </div> <!-- /container -->
     <script src="bundle.js"></script>
-    <script lang="javascript">tpa.register_cluster_upload();</script>
+    <script lang="javascript">
+        tpa.register_cluster_upload();
+        tpa.require_login();
+    </script>
   </body>
 </html>
