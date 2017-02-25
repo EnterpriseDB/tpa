@@ -11,9 +11,9 @@
     ansible_distribution: Debian
     ansible_distribution_release: jessie
     BDR_apt_repositories:
-      key_id: AA7A6805
-      key_url: http://packages.2ndquadrant.com/bdr/apt/AA7A6805.asc
-      repo: "http://ci.2ndquadrant.it/packages/internal-testing/bdr_2.0/latest/deb/"
+      key_id: 7ED05910
+      key_url: "https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/7ED05910.asc"
+      repo: "deb http://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/bdr_2.0/latest/deb/ {{ ansible_distribution_release }} main"
       versions: [9.6]
 
   pre_tasks:

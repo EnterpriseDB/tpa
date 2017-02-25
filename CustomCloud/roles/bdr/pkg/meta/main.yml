@@ -10,15 +10,15 @@ dependencies:
           repo: >-
             deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
           versions: [9.4, 9.6]
-        BDR: {{ BDR_apt_repositories }}
+        BDR: "{{ BDR_apt_repositories }}"
       yum_repositories:
         PGDG:
           rpm_url: >-
             http://yum.postgresql.org/{{pgversion}}/redhat/rhel-7-x86_64/pgdg-redhat{{pgversionNN}}-{{pgversion}}-3.noarch.rpm
           versions: [9.4, 9.6]
-        BDR: {{ BDR_yum_repositories }}
+        BDR: "{{ BDR_yum_repositories }}"
       postgres_packages:
-        Debian: {{ BDR_Debian_packages[pgversionNN] }}
-        RedHat: {{ BDR_RedHat_packages[pgversionNN] }}
-        Ubuntu: {{ BDR_Ubuntu_packages[pgversionNN] }}
+        Debian: "{{ BDR_Debian_packages[pgversionNN] }}"
+        RedHat: "{{ BDR_RedHat_packages[pgversionNN] }}"
+        Ubuntu: "{{ BDR_Ubuntu_packages[pgversionNN] }}"
 

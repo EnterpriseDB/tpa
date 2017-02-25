@@ -12,14 +12,14 @@ BDR_yum_repositories:
   versions: [9.4, 9.6]
 
 BDR_Debian_packages: &debian_packages
-  94:
+  "94":
     - postgresql-bdr-{{ pgversion }}
     - postgresql-bdr-{{ pgversion }}-dbg
     - postgresql-bdr-client-{{pgversion}}
     - postgresql-bdr-contrib-{{pgversion}}
     - postgresql-bdr-server-dev-{{pgversion}}
     - postgresql-bdr-{{pgversion}}-bdr-plugin
-  96:
+  "96":
     - postgresql-{{ pgversion }}
     - postgresql-{{ pgversion }}-dbg
     - postgresql-client-{{pgversion}}
@@ -28,7 +28,7 @@ BDR_Debian_packages: &debian_packages
     - postgresql-{{pgversion}}-bdr-plugin
 
 BDR_RedHat_packages:
-  94:
+  "94":
     - postgresql-bdr{{pgversionNN}}-bdr
     - postgresql-bdr{{pgversionNN}}-debuginfo
     - postgresql-bdr{{pgversionNN}}-contrib
@@ -36,7 +36,7 @@ BDR_RedHat_packages:
     - postgresql-bdr{{pgversionNN}}-devel
     - postgresql-bdr{{pgversionNN}}-libs
     - postgresql-bdr{{pgversionNN}}-plperl
-  96:
+  "96":
     - postgresql{{pgversionNN}}-bdr
     - postgresql{{pgversionNN}}-debuginfo
     - postgresql{{pgversionNN}}-contrib
@@ -45,5 +45,5 @@ BDR_RedHat_packages:
     - postgresql{{pgversionNN}}-libs
     - postgresql{{pgversionNN}}-plperl
 
-BDR_Ubuntu_packages: *debian_packages
-
+BDR_Ubuntu_packages:
+  <<: *debian_packages

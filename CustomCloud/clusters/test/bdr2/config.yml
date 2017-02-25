@@ -2,7 +2,7 @@
 
 # BDR test cluster
 
-cluster_name: "BDRTest"
+cluster_name: "BDR2Test"
 cluster_tags:
   Owner: gulcin
 
