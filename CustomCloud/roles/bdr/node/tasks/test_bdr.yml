@@ -2,7 +2,7 @@
 
 - block:
   - name: Create a table on first node
-    shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -Atw -c 'DROP TABLE IF EXISTS bdr_test; CREATE TABLE bdr_test (c1 INT, PRIMARY KEY (c1)); INSERT INTO bdr_test VALUES (1);'"
+    shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -Atw -c 'DROP TABLE IF EXISTS public.bdr_test; SELECT bdr.bdr_replicate_ddl_command($$CREATE TABLE public.bdr_test(c1 INT, PRIMARY KEY (c1));$$); INSERT INTO public.bdr_test VALUES (1);'"
 
   - name: Wait for replication to catch up
     shell: |
@@ -19,7 +19,7 @@
       EOF
 
   - name: Check the table on the other nodes
-    shell: "{{pgbindir}}/psql '{{hostvars[item].bdr_node_dsn}}' -Atw -c 'SELECT * FROM bdr_test;'"
+    shell: "{{pgbindir}}/psql '{{hostvars[item].bdr_node_dsn}}' -Atw -c 'SELECT * FROM public.bdr_test;'"
     with_items: "{{ bdr_other_hosts }}"
     register: bdr_rep
 
@@ -30,7 +30,7 @@
     with_items: "{{ bdr_rep.results }}"
 
   - name: Drop the test table
-    shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -Atw -c 'DROP TABLE bdr_test;'"
+    shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -Atw -c 'DROP TABLE public.bdr_test;'"
   when: (bdr_control_host == inventory_hostname)
   become_user: postgres
   become: yes
