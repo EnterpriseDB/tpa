@@ -33,12 +33,12 @@ nginx_vhosts:
           #proxy_set_header      X-Forwarded-Proto http;
         }
 
-        location =/bundle.js {
-          root {{ built_static_root }}/;
+        location ~ ^/(assets|css)/ {
+          root   {{ static_content_root }};
         }
 
         location / {
-          root   {{ static_content_root }};
+          root {{ built_static_root }}/;
           index index.html;
           rewrite ^/$ /index.html break;
         }
