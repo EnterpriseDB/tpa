@@ -53,15 +53,30 @@ module.exports = {
             {
                 test: /.jpe?g$|.gif$|.png$|.svg$|.woff$|.woff2$|.ttf$|.eot$/,
                 loader: "url"
-            },
-        ],
-        plugins: [
-            new webpack.ProvidePlugin({
-                d3: 'd3',
-                $: 'jquery',
-                jQuery: 'jquery',
-                jquery: 'jquery'
-            })
+            }
         ]
-    }
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: './fe/index.html.ejs',
+            filename: 'index.html',
+            inject: 'body',
+        }),
+        new HtmlWebpackPlugin({
+            template: './fe/cluster.html.ejs',
+            filename: 'cluster.html',
+            inject: 'body',
+        }),
+        new HtmlWebpackPlugin({
+            template: './fe/cluster_upload.html.ejs',
+            filename: 'cluster_upload.html',
+            inject: 'body',
+        }),
+        new webpack.ProvidePlugin({
+            d3: 'd3',
+            $: 'jquery',
+            jQuery: 'jquery',
+            jquery: 'jquery'
+        })
+    ]
 };
