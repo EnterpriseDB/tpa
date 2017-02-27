@@ -3,6 +3,7 @@ const build_dir = process.env.BUILD_PATH ? process.env.BUILD_PATH
 
 const path = require('path');
 const webpack = require('webpack');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry: './fe/js/main.js',
