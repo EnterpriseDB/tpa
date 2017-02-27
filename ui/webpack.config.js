@@ -9,7 +9,7 @@ module.exports = {
     entry: './fe/js/main.js',
     output: {
         path: build_dir+'/static',
-        filename: 'bundle.js',
+        filename: 'bundle.[hash].js',
         publicPath: '/',
         libraryTarget: "var",
         library: "tpa"
