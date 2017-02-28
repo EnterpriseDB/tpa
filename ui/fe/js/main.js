@@ -74,9 +74,9 @@ function cluster_diagram() {
 
 
 function cluster_upload() {
-    d3.selectAll("form.cluster_upload_yml").on("submit", () => {
+    d3.selectAll("form.cluster_upload").on("submit", () => {
         let tenant = d3.select("input.tenant").node().value;
-        let config_yml = d3.select("input.config_yml").node().value;
+        let config_yml = d3.select("input.config_yml").node().files[0];
 
         d3.event.preventDefault();
 

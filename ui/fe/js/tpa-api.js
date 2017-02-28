@@ -159,17 +159,12 @@ export function get_cluster_by_uuid(cluster_uuid, _then) {
 
 
 export function cluster_upload(tenant, config_yml, callback) {
-
-    var req_data = JSON.stringify({
-            'tenant': tenant,
-            'config_yml': config_yml
-        });
-
-    console.log("Uploading:", req_data);
+    var req_data = new FormData();
+    req_data.append("tenant", tenant);
+    req_data.append("config_yml", config_yml);
 
     auth.json_request(API_URL+'cluster_upload_yml/')
-        .header("Content-Type", "application/json")
-        .on('load', r => callback(null, JSON.parse(r.responseText)))
+        .on('load', r => callback(null, r))
         .on('error', e => callback(e, null))
         .send('POST', req_data);
 }

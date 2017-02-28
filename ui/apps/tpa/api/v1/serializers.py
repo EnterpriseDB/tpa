@@ -46,7 +46,7 @@ class ConfigYmlSerializer(serializers.Serializer):
     '''Parse a config.yml and create a new cluster.
     '''
     tenant = serializers.CharField()
-    config_yml = serializers.CharField()
+    config_yml = serializers.FileField()
 
     def create(self, validated_data):
         tenant = m.Tenant.objects.get(uuid=validated_data['tenant'])
@@ -68,7 +68,7 @@ class ConfigYmlSerializer(serializers.Serializer):
         with transaction.atomic():
             cluster = self.generate_cluster(root, tenant, provider, creds)
 
-        return cluster.uuid
+        return cluster
 
     def update(self):
         raise NotImplementedError
