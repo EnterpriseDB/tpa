@@ -379,8 +379,8 @@ function draw_instance(selection, cluster_diagram) {
     let node_url = d3.local();
 
     let node = selection.append("g")
-        .attr("class", d => "instance node" +
-            (d.children ? " node--internal" : " node--leaf"))
+        .attr("class", d =>
+            "instance node " + (d.children ? "node--internal" : "node--leaf"))
         .attr("transform", d => `translate(${d.x}, ${d.y})`)
         .property('model-url', d => d.data.url ? d.data.url : null)
         .each(function(d) {
@@ -459,7 +459,4 @@ class Tree {
         this.queue.push([o, parent]);
     }
 }
-
-
-
 

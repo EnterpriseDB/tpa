@@ -51,7 +51,7 @@ export class JWTAuth {
             .on('error', function(error) {
                 console.log("Login failed:", error);
                 auth.set_token(null, null);
-                auth.dispatch("denied");
+                auth.dispatch.call("denied");
                 callback(error);
 
             })

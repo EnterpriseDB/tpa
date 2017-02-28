@@ -19,8 +19,8 @@ function unhide_page_once_scripts_loaded() {
 }
 
 
-function process_login_form() {
-    d3.selectAll("form.login-form").on("submit", () => {
+function login_form() {
+    d3.selectAll("form.login_form").on("submit", () => {
         let username = d3.select("input.username").node().value;
         let password = d3.select("input.password").node().value;
 
@@ -54,8 +54,8 @@ function process_login_form() {
 }
 
 
-function display_cluster_diagram() {
-    const container = d3.select(".cluster_view");
+function cluster_diagram() {
+    const container = d3.select(".cluster_diagram");
     if (container.empty()) {
         return;
     }
@@ -73,7 +73,7 @@ function display_cluster_diagram() {
 }
 
 
-function submit_cluster_upload() {
+function cluster_upload() {
     d3.selectAll("form.cluster_upload_yml").on("submit", () => {
         let tenant = d3.select("input.tenant").node().value;
         let config_yml = d3.select("input.config_yml").node().value;
@@ -97,7 +97,7 @@ function submit_cluster_upload() {
 
 document.addEventListener("DOMContentLoaded", () => {
     unhide_page_once_scripts_loaded();
-    process_login_form();
-    display_cluster_diagram();
-    submit_cluster_upload();
+    login_form();
+    cluster_diagram();
+    cluster_upload();
 });
