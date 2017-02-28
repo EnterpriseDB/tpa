@@ -11,12 +11,20 @@
 
 import * as d3 from "d3";
 
-import $ from "jquery";
-
 export class JWTAuth {
     constructor(auth_url_base, local_storage=true) {
         this.auth_url_base = auth_url_base;
         this.storage = local_storage ? localStorage : sessionStorage;
+        this.dispatch = d3.dispatch("login", "logout", "denied", "error");
+        this.login_display_handler = function null_handler() {};
+    }
+
+    set_login_display(handler) {
+        this.login_display_handler = handler;
+    }
+
+    display_login(on_success) {
+        this.login_display_handler(on_success);
     }
 
     set_token(username, token) {
@@ -37,17 +45,24 @@ export class JWTAuth {
                 let json_response = JSON.parse(xhr.responseText);
 
                 auth.set_token(username, json_response.token);
+                auth.dispatch.call("login");
                 callback(null, json_response.token);
             })
             .on('error', function(error) {
                 console.log("Login failed:", error);
                 auth.set_token(null, null);
+                auth.dispatch("denied");
                 callback(error);
+
             })
             .send('POST', JSON.stringify({
                 'username': username,
                 'password': password
             }));
+    }
+
+    on(event, callback) {
+        return this.dispatch.on(event, callback);
     }
 
     get logged_in() {
@@ -62,6 +77,7 @@ export class JWTAuth {
 
     logout() {
         this.set_token(null, null);
+        this.dispatch.call("logout");
     }
 
     json_request(url) {
@@ -73,34 +89,5 @@ export class JWTAuth {
             .mimeType("application/json")
             .header("Authorization", bearer)
             .response(r => JSON.parse(r.responseText));
-    }
-
-    popup_login(on_success) {
-        var login_form = d3.select("form.login-form");
-        var auth = this;
-
-        login_form.on("submit", () => {
-            let username = d3.select("input.username").node().value;
-            let password = d3.select("input.password").node().value;
-
-            d3.event.preventDefault();
-
-            auth.login(username, password, function(error, result) {
-                if (error) {
-                    alert("Login failed, please check your credentials.");
-                    auth.popup_login(on_success);
-                }
-                else {
-                    $("#LoginForm").modal("hide");
-                    if (on_success) {
-                        on_success();
-                    }
-                }
-            });
-
-            return true;
-        });
-
-        $("#LoginForm").modal("show");
     }
 }

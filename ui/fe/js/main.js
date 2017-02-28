@@ -11,46 +11,67 @@ import * as api from "./tpa-api";
 import * as tpa_diagram from "./tpa-d3";
 import * as d3 from "d3";
 import {get_url_vars} from "./utils";
+import $ from "jquery";
 
-function display_cluster_diagram() {
-    const viewport = d3.select(".cluster_view");
-    if (!viewport.empty()) {
-        let vars = get_url_vars();
 
-        if (vars.cluster) {
-            d3.select("button.next-cluster").style("visibility", "hidden");
-            tpa_diagram.display_cluster_by_uuid(vars.cluster,
-                    viewport);
-        }
-        else {
-            var next_cluster = tpa_diagram.show_clusters(viewport);
-            d3.select("button.next-cluster").on("click", () => next_cluster());
-        }
-    }
+function unhide_page_once_scripts_loaded() {
+    d3.selectAll("#cover").style("visibility", "hidden");
 }
 
 
-function do_login() {
+function process_login_form() {
     d3.selectAll("form.login-form").on("submit", () => {
         let username = d3.select("input.username").node().value;
         let password = d3.select("input.password").node().value;
 
         d3.event.preventDefault();
 
-        api.auth.login(username, password, function(error, result) {
-            console.log("Login! error", error, "result", result);
+        api.auth.login(username, password, (error, result) => {
             if (!error) {
-                window.location = "/cluster.html";
+                let next = d3.select("input.on-success-redirect");
+                if (!next.empty() && next.node().value) {
+                    window.location = next.node().value;
+                }
             }
             else {
-                // error
                 alert("Login failed, please check your credentials.");
             }
         });
-
-        return true;
     });
+
+
+    api.auth.on("login.popup", () => {
+        $("#LoginForm").modal("hide");
+    });
+
+    api.auth.set_login_display(() => {
+        $("#LoginForm").modal("show");
+    });
+
+    if(!d3.select("meta#login-required").empty()) {
+        api.auth.display_login();
+    }
 }
+
+
+function display_cluster_diagram() {
+    const container = d3.select(".cluster_view");
+    if (container.empty()) {
+        return;
+    }
+
+    let vars = get_url_vars();
+
+    if (vars.cluster) {
+        d3.select("button.next-cluster").style("visibility", "hidden");
+        tpa_diagram.display_cluster_by_uuid(vars.cluster, container);
+    }
+    else {
+        var next_cluster = tpa_diagram.show_clusters(container);
+        d3.select("button.next-cluster").on("click", () => next_cluster());
+    }
+}
+
 
 function submit_cluster_upload() {
     d3.selectAll("form.cluster_upload_yml").on("submit", () => {
@@ -61,7 +82,7 @@ function submit_cluster_upload() {
 
         api.cluster_upload(tenant, config_yml, function(error, res) {
             if (!error) {
-                window.location = "/cluster.html?cluster=" + res.cluster;
+                window.location = `/cluster.html?cluster={res.cluster}`;
             }
             else{
                 alert(error);
@@ -71,15 +92,12 @@ function submit_cluster_upload() {
     });
 }
 
+
 // Main entry point.
 
 document.addEventListener("DOMContentLoaded", () => {
-    d3.selectAll("#cover").style("visibility", "hidden");
-    if(!d3.select("meta#login-required").empty()) {
-        console.log("Login required!");
-        api.auth.popup_login();
-    }
-    do_login();
+    unhide_page_once_scripts_loaded();
+    process_login_form();
     display_cluster_diagram();
     submit_cluster_upload();
 });

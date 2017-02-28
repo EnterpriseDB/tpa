@@ -54,7 +54,7 @@ export function get_obj_by_url(url, _then) {
     }
 
     if (!auth.logged_in) {
-        auth.popup_login(() => get_obj_by_url(url, _then));
+        auth.display_login(() => get_obj_by_url(url, _then));
     }
 
     if (!provider) {
@@ -70,7 +70,7 @@ export function get_obj_by_url(url, _then) {
         if (error) {
             console.log("API fetch error:", error, "url:", url);
             if (error.currentTarget.status == 403) {
-                auth.popup_login(() => get_obj_by_url(url, _then));
+                auth.display_login(() => get_obj_by_url(url, _then));
                 return;
             }
             else if (error.currentTarget.status == 404) {
@@ -96,7 +96,7 @@ export function load_provider(callback) {
         .get(function(error, pdata) {
             if(error) {
                 if (error.currentTarget.status == 403) {
-                    auth.popup_login(() => load_provider(callback));
+                    auth.display_login(() => load_provider(callback));
                     return;
                 }
                 else {
