@@ -353,6 +353,21 @@
         }}"
       tags: ec2
 
+    - name: Ensure that we know security group ids in every region
+      assert:
+        msg: "Group reference undefined"
+        that:
+          - ec2_region_groups[item.region] is defined
+      with_items: "{{ instances }}"
+
+    - name: Ensure that we know subnet ids in every region
+      assert:
+        msg: "Subnet reference undefined"
+        that:
+          - ec2_region_subnets[item.region] is defined
+          - ec2_region_subnets[item.region][item.subnet] is defined
+      with_items: "{{ instances }}"
+
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above. We loop over instances[], look up
     # the VPC and group corresponding to the region/subnet defined for
