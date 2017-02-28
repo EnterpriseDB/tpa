@@ -82,7 +82,7 @@ function submit_cluster_upload() {
 
         api.cluster_upload(tenant, config_yml, function(error, res) {
             if (!error) {
-                window.location = `/cluster.html?cluster={res.cluster}`;
+                window.location = `/cluster.html?cluster=${res.cluster}`;
             }
             else{
                 alert(error);
