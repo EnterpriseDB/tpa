@@ -13,11 +13,10 @@ from django.db.models.fields.reverse_related import ManyToOneRel
 
 from rest_framework import serializers, viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import (
-    api_view, permission_classes, parser_classes)
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.utils.field_mapping import get_nested_relation_kwargs
+from rest_framework.views import APIView
 
 from tpa import models
 from .serializers import ConfigYmlSerializer
@@ -183,18 +182,16 @@ def get_detail_view(model_class):
     return "api:%s-detail" % (model_class.__name__.lower(),)
 
 
-@api_view(('POST',))
-@permission_classes((IsAdminUser,))
-@parser_classes((MultiPartParser, FormParser))
-def cluster_upload_yml(request):
-    if request.method != 'POST':
-        return Response(status=400, data="")
+class ClusterUploadView(APIView):
+    permission_classes = (IsAdminUser,)
+    parser_classes = (MultiPartParser, FormParser)
 
-    ser = ConfigYmlSerializer(data=request.data)
-    ser.is_valid()
-    cluster = ser.create(ser.validated_data)
+    def post(self, request):
+        ser = ConfigYmlSerializer(data=request.data)
+        ser.is_valid()
+        cluster = ser.create(ser.validated_data)
 
-    return Response(status=200, data={"cluster": cluster.uuid})
+        return Response(status=200, data={"cluster": cluster.uuid})
 
 
 class TenantOwnedViewSet(viewsets.ModelViewSet):
