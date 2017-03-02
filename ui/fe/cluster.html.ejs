@@ -17,7 +17,6 @@
 <style>
 #cover {position: fixed; height: 100%; width: 100%; top:0; left: 0; background: #000; z-index:9999;}
 body { visibility: hidden; }
-
 </style>
 </head>
 <body>
@@ -46,31 +45,10 @@ body { visibility: hidden; }
         </div><!--/.navbar-collapse -->
       </div>
     </nav>
-    <!-- LOGIN FORM -->
-    <div id="LoginForm" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Login to TPA</h3>
-                </div>
-                <form class="login_form">
-                    <div class="modal-body">
-                        <p><input type="text" class="username" name="username" placeholder="Username"></p>
-                        <p><input type="password" class="password" name="password" placeholder="Password"></p>
-                    </div>
-                    <div class="modal-footer">
-                        <p><button type="submit" class="btn btn-primary">Sign in</button>
-                        <!-- <a href="#">Forgot Password?</a> -->
-                        </p>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- LOGIN FORM END -->
-
     <div class="container-fluid">
         <div class="cluster_diagram"></div>
+        <div class="cluster_detail_panel">
+        </div>
     </div><!-- /#wrapper -->
 </body>
 </html>
