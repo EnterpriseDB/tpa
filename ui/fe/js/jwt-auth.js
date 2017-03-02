@@ -19,6 +19,10 @@ export class JWTAuth {
         this.login_display_handler = function null_handler() {};
     }
 
+    on(event, callback) {
+        return this.dispatch.on(event, callback);
+    }
+
     set_login_display(handler) {
         this.login_display_handler = handler;
     }
@@ -34,6 +38,10 @@ export class JWTAuth {
         this.storage.setItem('jwt_auth_token_timestamp',
             (token === undefined || token === null) ? null : Date()
         );
+    }
+
+    get token() {
+        return this.storage.getItem('jwt_auth_token');
     }
 
     login(username, password, callback) {
@@ -61,8 +69,54 @@ export class JWTAuth {
             }));
     }
 
-    on(event, callback) {
-        return this.dispatch.on(event, callback);
+    verify(callback) {
+        let auth = this;
+
+        if (!auth.token) {
+            console.log("no!");
+            auth.dispatch.call("logout");
+
+            if (callback) {
+                callback(false);
+            }
+            return;
+        }
+        console.log("Sending...");
+
+        d3.request(`${auth.auth_url_base}verify/`)
+            .header("Content-Type", "application/json")
+            .on('load', function(xhr) {
+                console.log("ok!");
+                let json_response = JSON.parse(xhr.responseText);
+                auth.dispatch.call("login");
+                if (callback) {
+                    callback(null, json_response.token);
+                }
+            })
+            .on('error', function(error) {
+                console.log("Verify failed:", error);
+                auth.set_token(null, null);
+                auth.dispatch.call("logout");
+                if (callback) {
+                    callback(error);
+                }
+
+            })
+            .send('POST', JSON.stringify({
+                'token': auth.token
+            }));
+    }
+
+    logged_in_or_redirect(login_page) {
+        console.log("testing...");
+        let auth = this;
+        auth.on("logout.redirect", () => {
+            console.log("redirecting...");
+            let next = encodeURIComponent(window.location);
+            window.location = `${login_page}?next=${next}`;
+        });
+
+        auth.verify();
     }
 
     get logged_in() {
