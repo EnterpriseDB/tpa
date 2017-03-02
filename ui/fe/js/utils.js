@@ -15,7 +15,7 @@ export function get_url_vars()
     {
         pair = pairs[i].split('=');
         vars.push(pair[0]);
-        vars[pair[0]] = pair[1];
+        vars[pair[0]] = decodeURIComponent(pair[1]);
     }
     return vars;
 }
