@@ -241,8 +241,8 @@ function build_xl_graph(cluster) {
 /**
  * Returns the objects and their parents relevant to drawing a cluster
  * as a tree.
- * 
- * Cluster -> Region -> Zone -> Subnet -> Instance(root) -> 
+ *
+ * Cluster -> Region -> Zone -> Subnet -> Instance(root) ->
  * (-> rolelink -> instance)*
  */
 function build_tpa_graph(cluster) {
@@ -256,11 +256,26 @@ function build_tpa_graph(cluster) {
 
     var zones = [];
 
+    // Sort zones by (has primary)/name
     for(let subnet of cluster.subnets) {
-        zones.push(subnet.zone);
+        if (subnet_has_primary(subnet)) {
+            zones.push(subnet.zone) );
+        }
     }
 
     sort_by_attr(zones, 'name');
+
+    var replica_zones = [];
+
+    for(let subnet of cluster.subnets) {
+        if (!subnet_has_primary(subnet)) {
+            replica_zones.push(subnet.zone) );
+        }
+    }
+
+    sort_by_attr(replica_zones, 'name');
+
+    zones = zones.concat(replica_zones);
 
     for (let zone of zones) {
         if (!(zone.url in parent_id)) {
