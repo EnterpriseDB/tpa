@@ -223,10 +223,10 @@ export function instance_role(instance) {
     return undefined;
 }
 
-r
+
 export function subnet_has_primary(subnet) {
     for (let instance of subnet.instances) {
-        if (instance_role(instance) == 'primary') {
+        if (instance_role(instance).role_type == 'primary') {
             return true;
         }
     }

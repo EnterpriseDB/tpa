@@ -258,23 +258,21 @@ function build_tpa_graph(cluster) {
 
     // Sort zones by (has primary)/name
     for(let subnet of cluster.subnets) {
-        if (subnet_has_primary(subnet)) {
-            zones.push(subnet.zone) );
+        if (tpa.subnet_has_primary(subnet)) {
+            zones.push(subnet.zone);
         }
     }
 
     sort_by_attr(zones, 'name');
-
     var replica_zones = [];
 
     for(let subnet of cluster.subnets) {
-        if (!subnet_has_primary(subnet)) {
-            replica_zones.push(subnet.zone) );
+        if (!tpa.subnet_has_primary(subnet)) {
+            replica_zones.push(subnet.zone);
         }
     }
 
     sort_by_attr(replica_zones, 'name');
-
     zones = zones.concat(replica_zones);
 
     for (let zone of zones) {
