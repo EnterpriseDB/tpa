@@ -27,10 +27,17 @@ function login_form() {
         d3.event.preventDefault();
 
         api.auth.login(username, password, (error, result) => {
+
             if (!error) {
-                let next = d3.select("input.on-success-redirect");
-                if (!next.empty() && next.node().value) {
-                    window.location = next.node().value;
+                let url_vars = get_url_vars();
+                if (url_vars.next) {
+                    window.location = url_vars.next;
+                }
+                else {
+                    let next = d3.select("input.on-success-redirect");
+                    if (!next.empty() && next.node().value) {
+                        window.location = next.node().value;
+                    }
                 }
             }
             else {
