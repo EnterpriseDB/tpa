@@ -55,9 +55,6 @@ function login_form() {
         $("#LoginForm").modal("show");
     });
 
-    if(!d3.select("meta#login-required").empty()) {
-        api.auth.display_login();
-    }
 }
 
 
@@ -101,6 +98,14 @@ function cluster_upload() {
 
 
 // Main entry point.
+api.auth.on("login.unhide-body", () => {
+    console.log("visible");
+    d3.selectAll("body").style("visibility", "visible");
+});
+
+if(!d3.select("meta#login-required").empty()) {
+    api.auth.logged_in_or_redirect("/index.html");
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     unhide_page_once_scripts_loaded();
