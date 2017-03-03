@@ -61,9 +61,6 @@ max_replication_slots = {{ max_replication_slots|default(16) }}
 wal_keep_segments = {{ wal_keep_segments|default(0) }}
 wal_sender_timeout = {{ wal_sender_timeout|default('60s') }}
 wal_receiver_timeout = {{ wal_sender_timeout|default('60s') }}
-{% if pgversion|version_compare('9.4', '>') %}
-track_commit_timestamp = {{ track_commit_timestamp|default('on') }}
-{% endif %}
 
 hot_standby = on
 hot_standby_feedback = on

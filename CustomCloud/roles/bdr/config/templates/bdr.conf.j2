@@ -2,6 +2,7 @@
 default_sequenceam = {{ default_sequenceam|default('bdr') }}
 {% endif %}
 
+track_commit_timestamp = on
 bdr.conflict_logging_include_tuples = on
 bdr.log_conflicts_to_table = on
 bdr.synchronous_commit = off
