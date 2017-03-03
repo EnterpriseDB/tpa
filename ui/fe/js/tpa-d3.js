@@ -254,24 +254,23 @@ function build_tpa_graph(cluster) {
     var role_instance = {};
     var pg_instances = [];
 
-    var zones = [];
+    var zones = [], replica_zones = [];
+
+    function add_instance_parent(instance, parent) {
+        accum.push([instance, parent]);
+    }
 
     // Sort zones by (has primary)/name
     for(let subnet of cluster.subnets) {
         if (tpa.subnet_has_primary(subnet)) {
             zones.push(subnet.zone);
         }
-    }
-
-    sort_by_attr(zones, 'name');
-    var replica_zones = [];
-
-    for(let subnet of cluster.subnets) {
-        if (!tpa.subnet_has_primary(subnet)) {
+        else {
             replica_zones.push(subnet.zone);
         }
     }
 
+    sort_by_attr(zones, 'name');
     sort_by_attr(replica_zones, 'name');
     zones = zones.concat(replica_zones);
 
@@ -281,22 +280,18 @@ function build_tpa_graph(cluster) {
         }
     }
 
-    function add_instance_parent(instance, parent) {
-        accum.push([instance, parent]);
-    }
-
     // Grammar:
-    // cluster -> region -> zone -> (subnet?) -> instance 
+    // cluster -> region -> zone -> (subnet?) -> instance
     //   (-> rolelink -> instance)*
 
     for (let subnet of cluster.subnets) {
         for (let instance of subnet.instances) {
             let primary_role = tpa.instance_role(instance);
             if (primary_role && DG_POSTGRES_ROLES[primary_role.role_type]) {
-                    pg_instances.push(instance);
-                    for(let role of instance.roles) {
-                        role_instance[role.url] = instance;
-                    }
+                pg_instances.push(instance);
+                for(let role of instance.roles) {
+                    role_instance[role.url] = instance;
+                }
             }
         }
     }
