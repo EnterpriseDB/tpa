@@ -32,7 +32,6 @@ export class JWTAuth {
     }
 
     set_token(username, token) {
-        console.log("JWT token:", token);
         this.storage.setItem('jwt_auth_username', username);
         this.storage.setItem('jwt_auth_token', token);
         this.storage.setItem('jwt_auth_token_timestamp',
@@ -73,7 +72,6 @@ export class JWTAuth {
         let auth = this;
 
         if (!auth.token) {
-            console.log("no!");
             auth.dispatch.call("logout");
 
             if (callback) {
@@ -81,12 +79,10 @@ export class JWTAuth {
             }
             return;
         }
-        console.log("Sending...");
 
         d3.request(`${auth.auth_url_base}verify/`)
             .header("Content-Type", "application/json")
             .on('load', function(xhr) {
-                console.log("ok!");
                 let json_response = JSON.parse(xhr.responseText);
                 auth.dispatch.call("login");
                 if (callback) {
@@ -94,7 +90,6 @@ export class JWTAuth {
                 }
             })
             .on('error', function(error) {
-                console.log("Verify failed:", error);
                 auth.set_token(null, null);
                 auth.dispatch.call("logout");
                 if (callback) {
@@ -108,10 +103,8 @@ export class JWTAuth {
     }
 
     logged_in_or_redirect(login_page) {
-        console.log("testing...");
         let auth = this;
         auth.on("logout.redirect", () => {
-            console.log("redirecting...");
             let next = encodeURIComponent(window.location);
             window.location = `${login_page}?next=${next}`;
         });
