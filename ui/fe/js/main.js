@@ -8,7 +8,7 @@
 
 import "./styles";
 import * as api from "./tpa-api";
-import * as tpa_diagram from "./tpa-d3";
+import * as cluster_diagram from "./cluster-diagram";
 import * as d3 from "d3";
 import {get_url_vars} from "./utils";
 import $ from "jquery";
@@ -58,24 +58,6 @@ function login_form() {
 }
 
 
-function cluster_diagram() {
-    const container = d3.select(".cluster_diagram");
-    if (container.empty()) {
-        return;
-    }
-
-    let vars = get_url_vars();
-
-    if (vars.cluster) {
-        d3.select("button.next-cluster").style("visibility", "hidden");
-        tpa_diagram.display_cluster_by_uuid(vars.cluster, container);
-    }
-    else {
-        var next_cluster = tpa_diagram.show_clusters(container);
-        d3.select("button.next-cluster").on("click", () => next_cluster());
-    }
-}
-
 
 function cluster_upload() {
     d3.selectAll("form.cluster_upload").on("submit", () => {
@@ -110,6 +92,6 @@ if(!d3.select("meta#login-required").empty()) {
 document.addEventListener("DOMContentLoaded", () => {
     unhide_page_once_scripts_loaded();
     login_form();
-    cluster_diagram();
+    cluster_diagram.show_cluster_diagram();
     cluster_upload();
 });
