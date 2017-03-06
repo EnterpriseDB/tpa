@@ -214,7 +214,7 @@ export function cluster_type(cluster) {
 export function instance_role(instance) {
     for (let primary_role_name of ROLES_BY_PRIORITY) {
         for (let role of instance.roles) {
-            if (role.role_type == primary_role_name) {
+            if (role && role.role_type == primary_role_name) {
                 return role;
             }
         }
