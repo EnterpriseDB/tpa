@@ -1,4 +1,3 @@
-
 /**
  * Generate SVG diagrams from TPA clusters using d3 and the TPA API.
  */
@@ -17,7 +16,11 @@ const MAX_CIRCLE_RADIUS = MIN_NODE_HEIGHT*0.66;
 const LINK_CONNECTOR_HEIGHT = 5;
 const LINK_CONNECTOR_LENGTH = MIN_NODE_WIDTH;
 
-const DG_POSTGRES_ROLES = {primary: true, replica: true};
+const DG_POSTGRES_ROLES = {
+    primary: true,
+    replica: true,
+    barman: true
+};
 
 
 /**
@@ -62,6 +65,8 @@ class ClusterDiagram {
         this.viewport = viewport;
         this.cluster = cluster;
         this.objects = objects;
+        this.current_selection = null;
+
         this.parent_id = parent_id;
 
         let bbox = viewport.node().getBoundingClientRect();
@@ -78,6 +83,37 @@ class ClusterDiagram {
         this.root.eachAfter(d => {
             this.dobj_for_model[d.data.url] = d;
         });
+
+        this.dispatch = d3.dispatch("selected", "deselected");
+
+        this.on("selected", function() {
+            let node = this;
+            let bbox = node.getBoundingClientRect();
+            console.log("selected", node );
+
+            d3.select(node)
+                .classed("selected", true)
+                .append("rect")
+                    .classed("selection", true)
+                    .attr("transform",
+                        `translate(${-bbox.width/2}, ${-bbox.height/2})`)
+                    .attr("width", bbox.width)
+                    .attr("height", bbox.height);
+        });
+
+        this.on("deselected", function() {
+            let node = this;
+            console.log("deselected", node );
+            d3.select(node)
+                .classed("selected", false)
+                .selectAll(".selection")
+                .remove();
+        });
+
+    }
+
+    on(event, callback) {
+        return this.dispatch.on(event, callback);
     }
 
     layout_graph() {
@@ -108,6 +144,20 @@ class ClusterDiagram {
         console.log("objects:", this.objects);
         console.log("stratified:", table);
         console.log("root:", this.root);
+    }
+
+    get selection() {
+        return this.current_selection;
+    }
+
+    set selection(d) {
+        if(this.current_selection) {
+            this.dispatch.call("deselected", this.current_selection);
+            this.current_selection = null;
+        }
+
+        this.current_selection = d;
+        this.dispatch.call("selected", this.current_selection);
     }
 }
 
@@ -168,7 +218,6 @@ function build_xl_graph(cluster) {
     var roles = {}; // role url -> instance
 
     parent_id[cluster.url] =  "";
-
 
     cluster.subnets.forEach(function(s) {
         objects.push(s);
@@ -280,10 +329,7 @@ function build_tpa_graph(cluster) {
         }
     }
 
-    // Grammar:
-    // cluster -> region -> zone -> (subnet?) -> instance
-    //   (-> rolelink -> instance)*
-
+    // filter relevant instances
     for (let subnet of cluster.subnets) {
         for (let instance of subnet.instances) {
             let primary_role = tpa.instance_role(instance);
@@ -298,6 +344,7 @@ function build_tpa_graph(cluster) {
 
     sort_by_attr(pg_instances, 'name');
 
+    // create instance graph
     let dummy_idx = 0;
 
     for (let client_instance of pg_instances) {
@@ -374,7 +421,6 @@ function instance_size(instance) {
             height: MIN_NODE_HEIGHT};
 }
 
-
 function instance_vcpus(instance) {
     let vcpus = parseInt(instance.instance_type.vcpus);
 
@@ -391,6 +437,9 @@ function draw_instance(selection, cluster_diagram) {
             "instance node " + (d.children ? "node--internal" : "node--leaf"))
         .attr("transform", d => `translate(${d.x}, ${d.y})`)
         .property('model-url', d => d.data.url ? d.data.url : null)
+        .on("click.selection", function(d) {
+            cluster_diagram.selection = this;
+        })
         .each(function(d) {
             let size = instance_size(d.data);
             node_model.set(this, d.data);

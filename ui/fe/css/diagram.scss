@@ -22,6 +22,12 @@ body { font-family: 'FontAwesome' }
         stroke-dasharray: "100, 10";
     }
 
+    .selection {
+        fill: none;
+        stroke: #555555;
+        stroke-dasharray: "3, 3";
+    }
+
     text {
         fill: black;
         stroke: black;
