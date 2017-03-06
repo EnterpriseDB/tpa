@@ -1,0 +1,10 @@
+---
+
+- name: Add internal-testing-bdr_2.0 repository
+  yum_repository:
+    name: internal-testing-bdr_2.0
+    description: Internal-testing repository for bdr_2.0 rpm-centos-7 - x86_64
+    baseurl: http://ci.2ndquadrant.com/packages/internal-testing/bdr_2.0/latest/rpm/centos-7/x86_64/
+    gpgkey: https://internal-testing:WueVVMiEoyRFFo3V@ci.2ndquadrant.com/packages/internal-testing/RPM-GPG-KEY-2NDQ-INTERNAL-TESTING
+    gpgcheck: yes
+  when: pgversionNN | version_compare('9.6', '=')
