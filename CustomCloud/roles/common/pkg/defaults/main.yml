@@ -16,6 +16,7 @@ packages:
     - curl
     - htop
     - iotop
+    - screen
   Debian:
     - python-dev
     - python-passlib
