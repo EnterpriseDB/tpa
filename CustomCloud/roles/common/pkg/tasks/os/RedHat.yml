@@ -6,7 +6,7 @@
   changed_when: >
     epel|succeeded and 'is already installed' not in epel.stdout
   ignore_errors: yes
-  tags: epel
+  tags: [ epel, public_repos ]
 
 - name: Install Python 2.7
   raw: yum -y install python

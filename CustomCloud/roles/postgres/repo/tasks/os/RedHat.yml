@@ -6,6 +6,7 @@
     state: present
   when: postgres_version|float in item.value.versions
   with_dict: "{{ default_yum_repositories|combine(yum_repositories) }}"
+  tags: public_repos
 
 # Following the instructions in
 # https://wiki.postgresql.org/wiki/YUM_Installation, we exclude
@@ -17,6 +18,7 @@
     section: main
     option: exclude
     value: "postgresql* barman* repmgr*"
+  tags: public_repos
 
 # Furthermore, since we have (at least) the PGDG and 2ndQPostgres
 # repositories providing Postgres packages, we add exclude lines to
@@ -40,3 +42,4 @@
     - yum_postgres_sources.keys()
     - yum_postgres_sources[item.0]['files']
     - yum_postgres_sources[item.0]['sections']
+  tags: public_repos
