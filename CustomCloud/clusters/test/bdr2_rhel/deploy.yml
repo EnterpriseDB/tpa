@@ -14,6 +14,14 @@
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
       tags: always
+  # This is temporary hack for internal repository
+    - name: Add internal-testing-bdr_2.0 repository
+      yum_repository:
+        name: internal-testing-bdr_2.0
+        description: Internal-testing repository for bdr_2.0 rpm-centos-7 - x86_64
+        baseurl: https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/bdr_2.0/latest/rpm/centos-7/x86_64/
+        gpgkey: https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/RPM-GPG-KEY-2NDQ-INTERNAL-TESTING
+        gpgcheck: yes
 
   roles:
     - role: common
@@ -21,6 +29,9 @@
     - role: postgres/vars
       vars:
         postgres_version: 9.6
+      tags: always
+
+    - role: postgres/repo
       tags: always
 
     - role: sys/tune
