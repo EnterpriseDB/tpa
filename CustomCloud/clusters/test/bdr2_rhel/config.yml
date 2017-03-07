@@ -7,7 +7,7 @@ cluster_tags:
   Owner: gulcin
 
 ec2_ami:
-  Name: CentOS Atomic Host 7 x86_64 HVM EBS 1701_01
+  Name: RHEL-7.3_HVM_GA-20161026-x86_64-1-Hourly2-GP2
 ec2_ami_user: "ec2-user"
 
 ec2_vpc:

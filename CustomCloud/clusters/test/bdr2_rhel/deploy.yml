@@ -7,6 +7,10 @@
   sudo_user: root
   sudo: true
 
+  vars:
+    ansible_distribution: RedHat
+    ansible_distribution_release: 7.3
+
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
       tags: always
