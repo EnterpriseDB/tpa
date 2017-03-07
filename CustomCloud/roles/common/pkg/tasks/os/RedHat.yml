@@ -1,7 +1,7 @@
 ---
 
 - name: Install EPEL release package
-  raw: yum install -y epel-release
+  raw: rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
   register: epel
   changed_when: >
     epel|succeeded and 'is already installed' not in epel.stdout
