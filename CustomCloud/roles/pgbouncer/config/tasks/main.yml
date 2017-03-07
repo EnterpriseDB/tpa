@@ -1,9 +1,5 @@
 ---
 
-# Enable TLS for clients connecting pgbouncer
-- name: Include TLS key/cert files created for the Postgres backend
-  include: ../../postgres/user/tasks/tls.yml
-
 # For pidfile = /var/run/pgbouncer/pgbouncer.pid
 - name: Ensure /var/run/pgbouncer exists
   file:

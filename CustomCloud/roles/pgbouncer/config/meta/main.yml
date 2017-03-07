@@ -1,5 +1,8 @@
 ---
 
 dependencies:
+  - role: postgres/pkg
   - role: postgres/createuser
     username: pgbouncer
+  - role: postgres/user
+
