@@ -84,6 +84,17 @@ body {
   right: 0;
   left: auto;
 }
+
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: #f5f5f5;
+}
+
 /*
 .sidebar .sidebar-nav.navbar-collapse {
   padding-left: 0;

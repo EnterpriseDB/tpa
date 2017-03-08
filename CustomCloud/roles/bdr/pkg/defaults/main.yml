@@ -9,7 +9,7 @@ BDR_apt_repositories:
 BDR_yum_repositories:
   rpm_url: >-
     http://packages.2ndquadrant.com/postgresql-bdr{{ pgversionNN }}-2ndquadrant/yum-repo-rpms/postgresql-bdr{{ pgversionNN }}-2ndquadrant-redhat-latest.noarch.rpm
-  versions: [9.4, 9.6]
+  versions: [9.4]
 
 BDR_Debian_packages: &debian_packages
   "94":

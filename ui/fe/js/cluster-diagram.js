@@ -8,6 +8,7 @@ import * as tpa from "./tpa-api";
 import {Accumulator, sort_by_attr} from "./utils";
 import {make_rect} from "./geometry";
 import {setup_viewport, tree_rotate} from "./diagram";
+import {get_url_vars} from "./utils";
 
 const MIN_NODE_HEIGHT = 20;
 const MIN_NODE_WIDTH = 100;
@@ -21,6 +22,26 @@ const DG_POSTGRES_ROLES = {
     replica: true,
     barman: true
 };
+
+
+export function show_cluster_diagram() {
+    const container = d3.select(".cluster_diagram");
+    if (container.empty()) {
+        return;
+    }
+
+    let vars = get_url_vars();
+
+    if (vars.cluster) {
+        d3.select("button.next-cluster").style("visibility", "hidden");
+        display_cluster_by_uuid(vars.cluster, container);
+    }
+    else {
+        var next_cluster = show_clusters(container);
+        d3.select("button.next-cluster").on("click", () => next_cluster());
+    }
+}
+
 
 
 /**
@@ -52,6 +73,34 @@ export function show_clusters(viewport) {
         }
         draw_cluster(clusters[current_cluster_idx], viewport);
     };
+}
+
+
+function display_selected_instance_detail(instance) {
+    function add_detail(selection, attr_name, attr_value) {
+        var g = selection.append("span")
+                .classed(attr_name, true);
+
+        g.append("dt")
+            .classed("attr_name", true)
+            .html(attr_name);
+        g.append("dd")
+            .classed("attr_value", true)
+            .html(attr_value);
+
+        return g;
+    }
+
+    d3.selectAll(".selected_instance_detail")
+        .selectAll("dl")
+        .remove();
+
+    d3.selectAll(".selected_instance_detail")
+        .append("dl")
+        .call(add_detail, 'Name', instance.name)
+        .call(add_detail, 'Description', instance.description)
+        .call(add_detail, 'Subnet', instance.subnet)
+        .call(add_detail, 'External IP', instance.assign_eip);
 }
 
 
@@ -89,8 +138,6 @@ class ClusterDiagram {
         this.on("selected", function() {
             let node = this;
             let bbox = node.getBoundingClientRect();
-            console.log("selected", node );
-
             d3.select(node)
                 .classed("selected", true)
                 .append("rect")
@@ -103,13 +150,18 @@ class ClusterDiagram {
 
         this.on("deselected", function() {
             let node = this;
-            console.log("deselected", node );
             d3.select(node)
                 .classed("selected", false)
                 .selectAll(".selection")
                 .remove();
         });
 
+
+        this.on("selected.detail", function() {
+            let node = this;
+
+            display_selected_instance_detail(node.__data__.data);
+        });
     }
 
     on(event, callback) {
@@ -178,6 +230,10 @@ function draw_cluster(cluster, viewport) {
 
     let cluster_diagram = new ClusterDiagram(cluster, viewport,
                                             objects, parent_id);
+
+
+    // Assign numerical order to each rolelink item on in-edges to its
+    // parent.
 
     for (let d of cluster_diagram.root.descendants()) {
         if (tpa.model_class(d.data) == 'rolelink') {

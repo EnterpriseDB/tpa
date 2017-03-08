@@ -1,12 +1,12 @@
 ---
 
 - name: Install EPEL release package
-  raw: rpm -ivh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
+  raw: rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
   register: epel
   changed_when: >
     epel|succeeded and 'is already installed' not in epel.stdout
   ignore_errors: yes
-  tags: epel
+  tags: [ epel, public_repos ]
 
 - name: Install Python 2.7
   raw: yum -y install python
