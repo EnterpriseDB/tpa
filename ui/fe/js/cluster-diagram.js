@@ -111,15 +111,16 @@ export function display_cluster_by_uuid(cluster_uuid, viewport) {
 
 class ClusterDiagram {
     constructor (cluster, viewport, objects, parent_id) {
-        this.viewport = viewport;
         this.cluster = cluster;
+        this.viewport = viewport;
         this.objects = objects;
-        this.current_selection = null;
-
         this.parent_id = parent_id;
 
-        let bbox = viewport.node().getBoundingClientRect();
+        this.dispatch = d3.dispatch("selected", "deselected");
+        this.current_selection = null;
+        this.setup_selection();
 
+        let bbox = viewport.node().getBoundingClientRect();
         this.width = bbox.width;
         this.height = bbox.height;
         this.diagram = setup_viewport(viewport, bbox.width, bbox.height);
@@ -132,9 +133,13 @@ class ClusterDiagram {
         this.root.eachAfter(d => {
             this.dobj_for_model[d.data.url] = d;
         });
+    }
 
-        this.dispatch = d3.dispatch("selected", "deselected");
+    on(event, callback) {
+        return this.dispatch.on(event, callback);
+    }
 
+    setup_selection() {
         this.on("selected", function() {
             let node = this;
             let bbox = node.getBoundingClientRect();
@@ -149,23 +154,29 @@ class ClusterDiagram {
         });
 
         this.on("deselected", function() {
-            let node = this;
-            d3.select(node)
+            d3.select(this)
                 .classed("selected", false)
                 .selectAll(".selection")
                 .remove();
         });
 
-
         this.on("selected.detail", function() {
-            let node = this;
-
-            display_selected_instance_detail(node.__data__.data);
+            display_selected_instance_detail(this.__data__.data);
         });
     }
 
-    on(event, callback) {
-        return this.dispatch.on(event, callback);
+    get selection() {
+        return this.current_selection;
+    }
+
+    set selection(d) {
+        if(this.current_selection) {
+            this.dispatch.call("deselected", this.current_selection);
+            this.current_selection = null;
+        }
+
+        this.current_selection = d;
+        this.dispatch.call("selected", this.current_selection);
     }
 
     layout_graph() {
@@ -197,20 +208,6 @@ class ClusterDiagram {
         console.log("stratified:", table);
         console.log("root:", this.root);
     }
-
-    get selection() {
-        return this.current_selection;
-    }
-
-    set selection(d) {
-        if(this.current_selection) {
-            this.dispatch.call("deselected", this.current_selection);
-            this.current_selection = null;
-        }
-
-        this.current_selection = d;
-        this.dispatch.call("selected", this.current_selection);
-    }
 }
 
 
@@ -228,25 +225,19 @@ function draw_cluster(cluster, viewport) {
         [objects, parent_id] = build_tpa_graph(cluster);
     }
 
-    let cluster_diagram = new ClusterDiagram(cluster, viewport,
-                                            objects, parent_id);
+    let cluster_diagram = new ClusterDiagram(
+        cluster, viewport, objects, parent_id);
 
 
     // Assign numerical order to each rolelink item on in-edges to its
     // parent.
 
     for (let d of cluster_diagram.root.descendants()) {
-        if (tpa.model_class(d.data) == 'rolelink') {
-            let p = cluster_diagram.dobj_for_model[d.data.server_instance.url];
+        if (tpa.model_class(d.data) != 'rolelink') continue;
 
-            if (!p.num_children) {
-                p.num_children = 1;
-                d.parent_idx = 0;
-            }
-            else {
-                d.parent_idx = p.num_children++;
-            }
-        }
+        let p = cluster_diagram.dobj_for_model[d.data.server_instance.url];
+        if (!p.num_children) { p.num_children = 0; }
+        d.parent_idx = p.num_children++;
     }
 
     function draw_all_of_class(c, draw) {
@@ -409,7 +400,7 @@ function build_tpa_graph(cluster) {
 
             for (let client_link of r.client_links) {
                 let server_instance = role_instance[client_link.server_role];
-                if (client_instance == server_instance) return;
+                if (client_instance == server_instance) continue;
 
                 // FIXME for drawing role!
                 client_link.server_instance = role_instance[client_link.server_role];

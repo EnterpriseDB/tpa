@@ -38,7 +38,7 @@ const ROLES_BY_PRIORITY = [
 
 
 // Default provider data (currently only EC2)
-var provider = null;
+var default_provider = null;
 
 export const auth = new JWTAuth(AUTH_URL);
 
@@ -49,21 +49,20 @@ const url_cache = {};
 
 export function get_obj_by_url(url, _then) {
     if (url_cache[url]) {
-        _then(url_cache[url]);
+        if (_then) {
+            _then(url_cache[url]);
+        }
         return;
     }
 
     if (!auth.logged_in) {
         auth.display_login(() => get_obj_by_url(url, _then));
-    }
-
-    if (!provider) {
-        load_provider(() => get_obj_by_url(url, _then));
         return;
     }
 
-    if (url in provider) {
-        _then(provider);
+    if (!default_provider) {
+        load_provider(() => get_obj_by_url(url, _then));
+        return;
     }
 
     auth.json_request(url).get(function(error, o) {
@@ -71,7 +70,6 @@ export function get_obj_by_url(url, _then) {
             console.log("API fetch error:", error, "url:", url);
             if (error.currentTarget.status == 403) {
                 auth.display_login(() => get_obj_by_url(url, _then));
-                return;
             }
             else if (error.currentTarget.status == 404) {
                 alert("No such object.");
@@ -79,53 +77,57 @@ export function get_obj_by_url(url, _then) {
             else {
                 alert("Server load error. Please try again later.");
             }
+
+            return;
         }
-        else {
-            console.log("API get URL:", url);
-            url_cache[o.url] = o;
-            if (_then) {
-                _then(o);
-            }
+
+        console.log("API get URL:", url);
+        url_cache[o.url] = o;
+        if (_then) {
+            _then(o);
         }
     });
 }
 
 
 export function load_provider(callback) {
-    auth.json_request(API_URL+'provider/')
-        .get(function(error, pdata) {
-            if(error) {
-                if (error.currentTarget.status == 403) {
-                    auth.display_login(() => load_provider(callback));
-                    return;
-                }
-                else {
-                    console.log(e);
-                    alert("Provider load error. Please try again later.");
-                }
+    console.log("fetching providers");
+    auth.json_request(`${API_URL}provider/`).get((error, providers) => {
+        if(error) {
+            console.log(error);
+            if (error.currentTarget.status == 403) {
+                console.log("Returned 403");
+                auth.display_login(() => load_provider(callback));
             }
             else {
-                provider = pdata;
-
-                pdata.forEach(function(p) {
-                    url_cache[p.url] = p;
-                    p.regions.forEach(function(r) {
-                        url_cache[r.url] = r;
-                        r.zones.forEach(function(z) {
-                            url_cache[z.url] = z;
-                            for(let it of z.instance_types) {
-                                url_cache[it.url] = it;
-                            }
-                        });
-                    });
-                });
-
-                callback();
+                alert("Provider load error. Please try again later.");
             }
-        });
+            return;
+        }
+
+        default_provider = providers;
+        providers.forEach(link_provider);
+        callback();
+    });
 }
 
-function link_provider(cluster) {
+
+function link_provider(provider) {
+    url_cache[provider.url] = provider;
+    provider.regions.forEach(region => {
+        url_cache[region.url] = region;
+        region.provider = provider;
+        region.zones.forEach(zone => {
+            url_cache[zone.url] = zone;
+            for(let it of zone.instance_types) {
+                url_cache[it.url] = it;
+            }
+        });
+    });
+}
+
+
+function link_cluster(cluster) {
     for (let subnet of cluster.subnets) {
         subnet.zone = url_cache[subnet.zone];
         for (let instance of subnet.instances) {
@@ -141,7 +143,7 @@ export function get_all(klass, filter, _then) {
     return get_obj_by_url(`${API_URL}${klass}/`, objects => {
         for (let o of objects) {
             if (model_class(o) == 'cluster') {
-                link_provider(o);
+                link_cluster(o);
             }
         }
         _then(objects);
@@ -152,7 +154,7 @@ export function get_all(klass, filter, _then) {
 export function get_cluster_by_uuid(cluster_uuid, _then) {
     return get_obj_by_url(
         `${API_URL}cluster/${cluster_uuid}/`, c => {
-            link_provider(c);
+            link_cluster(c);
             _then(c);
         });
 }
