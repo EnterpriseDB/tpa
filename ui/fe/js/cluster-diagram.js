@@ -101,10 +101,17 @@ function display_selected_instance_detail(instance) {
 
     clear_detail_panel();
 
+    let roles = instance.roles.map(r => r.role_type).join(", ");
+
     d3.selectAll(".selected_instance_detail")
         .call(add_detail, 'Name', instance.name)
+        .call(add_detail, 'Roles', roles)
         .call(add_detail, 'Description', instance.description)
-        .call(add_detail, 'Subnet', instance.subnet)
+        .call(add_detail, 'Instance type', instance.instance_type.name)
+        .call(add_detail, 'VCPUs', instance.instance_type.vcpus)
+        .call(add_detail, 'Region', instance.subnet.zone.region.name)
+        .call(add_detail, 'Zone', instance.subnet.zone.name)
+        .call(add_detail, 'Subnet', instance.subnet.cidr)
         .call(add_detail, 'External IP', instance.assign_eip);
 }
 
