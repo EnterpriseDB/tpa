@@ -121,12 +121,21 @@ export function display_cluster_by_uuid(cluster_uuid, viewport) {
 }
 
 
+function draw_cluster(cluster, viewport) {
+    let cluster_diagram = new ClusterDiagram(cluster, viewport);
+
+    cluster_diagram.draw_items_of_class('zone', draw_zone);
+    cluster_diagram.draw_items_of_class('rolelink', draw_rolelink);
+    cluster_diagram.draw_items_of_class('instance', draw_instance);
+
+    d3.selectAll(".cluster_name").text(cluster.name);
+}
+
+
 class ClusterDiagram {
-    constructor (cluster, viewport, objects, parent_id) {
+    constructor (cluster, viewport) {
         this.cluster = cluster;
         this.viewport = viewport;
-        this.objects = objects;
-        this.parent_id = parent_id;
 
         this.dispatch = d3.dispatch("selected", "deselected");
         this.current_selection = null;
@@ -137,6 +146,7 @@ class ClusterDiagram {
         this.height = bbox.height;
         this.diagram = setup_viewport(viewport, bbox.width, bbox.height);
 
+        [this.objects, this.parent_id] = this.build_graph();
         this.layout_graph();
 
         // map obj url -> diagram item
@@ -145,6 +155,17 @@ class ClusterDiagram {
         this.root.eachAfter(d => {
             this.dobj_for_model[d.data.url] = d;
         });
+
+        // Assign numerical order to each rolelink item on in-edges to its
+        // parent.
+
+        for (let d of this.root.descendants()) {
+            if (tpa.model_class(d.data) != 'rolelink') continue;
+
+            let p = this.dobj_for_model[d.data.server_instance.url];
+            if (!p.num_children) { p.num_children = 0; }
+            d.parent_idx = p.num_children++;
+        }
     }
 
     on(event, callback) {
@@ -197,6 +218,14 @@ class ClusterDiagram {
         this.dispatch.call("selected", this.current_selection);
     }
 
+    build_graph() {
+        if (tpa.cluster_type(this.cluster) == 'xl') {
+            return build_xl_graph(this.cluster);
+        }
+
+        return build_tpa_graph(this.cluster);
+    }
+
     layout_graph() {
         var table = d3.stratify()
             .id(d => d.url)
@@ -221,59 +250,27 @@ class ClusterDiagram {
             }
         });
 
+
         console.log("LAYOUT -----------");
         console.log("objects:", this.objects);
         console.log("stratified:", table);
         console.log("root:", this.root);
+    }
+
+    draw_items_of_class(klazz, draw) {
+        this.diagram
+            .selectAll("."+klazz)
+            .data(this.root.descendants().filter(tpa.is_instance(klazz)))
+            .enter()
+            .call(d => draw(d, this)
+                .classed(klazz, true)
+            );
     }
 }
 
 
 // TPA Diagram
 
-function draw_cluster(cluster, viewport) {
-    console.log("draw_cluster:", cluster, tpa.cluster_type(cluster));
-
-    let objects, parent_id;
-
-    if (tpa.cluster_type(cluster) == 'xl') {
-        [objects, parent_id] = build_xl_graph(cluster);
-    }
-    else {
-        [objects, parent_id] = build_tpa_graph(cluster);
-    }
-
-    let cluster_diagram = new ClusterDiagram(
-        cluster, viewport, objects, parent_id);
-
-
-    // Assign numerical order to each rolelink item on in-edges to its
-    // parent.
-
-    for (let d of cluster_diagram.root.descendants()) {
-        if (tpa.model_class(d.data) != 'rolelink') continue;
-
-        let p = cluster_diagram.dobj_for_model[d.data.server_instance.url];
-        if (!p.num_children) { p.num_children = 0; }
-        d.parent_idx = p.num_children++;
-    }
-
-    function draw_all_of_class(c, draw) {
-        cluster_diagram.diagram
-            .selectAll("."+c)
-            .data(cluster_diagram.root.descendants().filter(tpa.is_instance(c)))
-            .enter()
-            .call(d => draw(d, cluster_diagram)
-                .classed(c, true)
-            );
-    }
-
-    draw_all_of_class('zone', draw_zone);
-    draw_all_of_class('rolelink', draw_rolelink);
-    draw_all_of_class('instance', draw_instance);
-
-    d3.selectAll(".cluster_name").text(cluster.name);
-}
 
 function build_xl_graph(cluster) {
     var parent_id = {};
@@ -360,8 +357,6 @@ function build_xl_graph(cluster) {
  * (-> rolelink -> instance)*
  */
 function build_tpa_graph(cluster) {
-    var tree = new Tree();
-
     var accum = [];
     var objects = [cluster];
     var parent_id = {};
@@ -481,17 +476,6 @@ function draw_zone(selection, cluster_diagram) {
     return zone_display;
 }
 
-function instance_size(instance) {
-    return {width: MIN_NODE_WIDTH,
-            height: MIN_NODE_HEIGHT};
-}
-
-function instance_vcpus(instance) {
-    let vcpus = parseInt(instance.instance_type.vcpus);
-
-    return Math.max(Math.sqrt(vcpus ? vcpus : 1), 1);
-}
-
 function draw_instance(selection, cluster_diagram) {
     let node_rect = d3.local();
     let node_model = d3.local();
@@ -570,15 +554,13 @@ function draw_rolelink(selection, cluster_diagram) {
  * View and geometry helpers.
  */
 
-class Tree {
-    constructor() {
-        this.objects = [];
-        this.queue = [];  // [object, parent]
-        this.parent = {}; // url -> parent object
-    }
-
-    add(o, parent) {
-        this.queue.push([o, parent]);
-    }
+function instance_size(instance) {
+    return {width: MIN_NODE_WIDTH,
+            height: MIN_NODE_HEIGHT};
 }
 
+function instance_vcpus(instance) {
+    let vcpus = parseInt(instance.instance_type.vcpus);
+
+    return Math.max(Math.sqrt(vcpus ? vcpus : 1), 1);
+}
