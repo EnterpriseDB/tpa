@@ -91,22 +91,20 @@ export function get_obj_by_url(url, _then) {
 
 
 export function load_provider(callback) {
-    console.log("fetching providers");
     auth.json_request(`${API_URL}provider/`).get((error, providers) => {
         if(error) {
-            console.log(error);
             if (error.currentTarget.status == 403) {
                 console.log("Returned 403");
                 auth.display_login(() => load_provider(callback));
             }
             else {
-                alert("Provider load error. Please try again later.");
+                console.log(error);
             }
             return;
         }
 
         default_provider = providers;
-        providers.forEach(link_provider);
+        providers.forEach(p => link_provider(p));
         callback();
     });
 }
@@ -119,6 +117,7 @@ function link_provider(provider) {
         region.provider = provider;
         region.zones.forEach(zone => {
             url_cache[zone.url] = zone;
+            zone.region = region;
             for(let it of zone.instance_types) {
                 url_cache[it.url] = it;
             }
@@ -131,6 +130,7 @@ function link_cluster(cluster) {
     for (let subnet of cluster.subnets) {
         subnet.zone = url_cache[subnet.zone];
         for (let instance of subnet.instances) {
+            instance.subnet = subnet;
             instance.zone = subnet.zone;
             instance.instance_type = url_cache[instance.instance_type];
         }
