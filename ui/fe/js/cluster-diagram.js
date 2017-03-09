@@ -76,6 +76,12 @@ export function show_clusters(viewport) {
 }
 
 
+function clear_detail_panel() {
+    d3.selectAll(".selected_instance_detail")
+        .selectAll("*")
+        .remove();
+}
+
 function display_selected_instance_detail(instance) {
     function add_detail(selection, attr_name, attr_value) {
         var g = selection.append("span")
@@ -91,9 +97,7 @@ function display_selected_instance_detail(instance) {
         return g;
     }
 
-    d3.selectAll(".selected_instance_detail")
-        .selectAll("dl")
-        .remove();
+    clear_detail_panel();
 
     d3.selectAll(".selected_instance_detail")
         .append("dl")
@@ -160,9 +164,15 @@ class ClusterDiagram {
                 .remove();
         });
 
+        this.on("deselected.detail", function() {
+            clear_detail_panel();
+        });
+
         this.on("selected.detail", function() {
             display_selected_instance_detail(this.__data__.data);
         });
+
+        clear_detail_panel();
     }
 
     get selection() {
