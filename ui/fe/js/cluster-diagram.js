@@ -84,13 +84,15 @@ function clear_detail_panel() {
 
 function display_selected_instance_detail(instance) {
     function add_detail(selection, attr_name, attr_value) {
-        var g = selection.append("span")
+        if ( !attr_value ) { return; }
+
+        let g = selection.append("div")
                 .classed(attr_name, true);
 
-        g.append("dt")
+        g.append("b")
             .classed("attr_name", true)
-            .html(attr_name);
-        g.append("dd")
+            .html(attr_name+": ");
+        g.append("span")
             .classed("attr_value", true)
             .html(attr_value);
 
@@ -100,7 +102,6 @@ function display_selected_instance_detail(instance) {
     clear_detail_panel();
 
     d3.selectAll(".selected_instance_detail")
-        .append("dl")
         .call(add_detail, 'Name', instance.name)
         .call(add_detail, 'Description', instance.description)
         .call(add_detail, 'Subnet', instance.subnet)
