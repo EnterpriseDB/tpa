@@ -17,6 +17,13 @@ const MAX_CIRCLE_RADIUS = MIN_NODE_HEIGHT*0.66;
 const LINK_CONNECTOR_HEIGHT = 5;
 const LINK_CONNECTOR_LENGTH = MIN_NODE_WIDTH;
 
+// Fudge factors to include instance label in selection box.
+const ISOF_Y = 1.6/2;
+const ISOF_X = 0.5;
+const ISF_X = 1.5;
+const ISF_Y = 1.25;
+
+
 const DG_POSTGRES_ROLES = {
     primary: true,
     replica: true,
@@ -175,15 +182,15 @@ class ClusterDiagram {
     setup_selection() {
         this.on("selected", function() {
             let node = this;
-            let bbox = node.getBoundingClientRect();
+            let bbox = node.getBBox();
             d3.select(node)
                 .classed("selected", true)
                 .append("rect")
                     .classed("selection", true)
                     .attr("transform",
-                        `translate(${-bbox.width/2}, ${-bbox.height/2})`)
-                    .attr("width", bbox.width)
-                    .attr("height", bbox.height);
+                        `translate(${-bbox.width*ISOF_X}, ${-bbox.height*ISOF_Y})`)
+                    .attr("width", bbox.width*ISF_X)
+                    .attr("height", bbox.height*ISF_Y);
         });
 
         this.on("deselected", function() {
