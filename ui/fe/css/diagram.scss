@@ -21,9 +21,20 @@ body { font-family: 'FontAwesome' }
     padding-top: 5px;
     padding-bottom: 5px;
 
-    height: 120px;
-    color: #ffffff;
+    color: $color-complement-4;
     background: $color-primary-4;
+
+    .container-fluid {
+        width: 100%;
+
+        .row {
+            width: 100%;
+        }
+    }
+
+    .attr_name {
+        color: $color-complement-0;
+    }
 }
 
 .diagram {
@@ -40,8 +51,8 @@ body { font-family: 'FontAwesome' }
     }
 
     text {
-        fill: black;
-        stroke: black;
+        fill: $color-primary-4;
+        stroke: $color-primary-4;
         font-weight: normal;
     }
 
@@ -55,15 +66,12 @@ body { font-family: 'FontAwesome' }
             stroke: $color-normal-4;
             stroke-width: 3;
         }
-
-        text.name {
-            // stroke: $color-complement-2;
-            // fill: $color-complement-2;
-        }
     }
 
     .edge {
-        stroke: $color-normal-4; fill: none; stroke-width: 3;
+        stroke: $color-normal-4;
+        fill: none;
+        stroke-width: 3;
     }
 
 

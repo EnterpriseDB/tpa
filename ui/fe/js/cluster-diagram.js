@@ -94,13 +94,13 @@ function display_selected_instance_detail(instance) {
         if ( !attr_value ) { return; }
 
         let g = selection.append("div")
-                .classed(attr_name, true);
+                .classed(`${attr_name} row`, true);
 
-        g.append("b")
-            .classed("attr_name", true)
+        g.append("div")
+            .classed("attr_name text-right col-xs-3", true)
             .html(attr_name+": ");
-        g.append("span")
-            .classed("attr_value", true)
+        g.append("div")
+            .classed("attr_value col-xs-9", true)
             .html(attr_value);
 
         return g;
@@ -109,23 +109,26 @@ function display_selected_instance_detail(instance) {
     clear_detail_panel();
 
     let roles = instance.roles.map(r => r.role_type).join(", ");
-
     let row = d3.selectAll(".selected_instance_detail");
 
-    row.append("div").attr("class", "col")
+    function detail_column() {
+        return row.append("div").attr("class", "col-xs-4");
+    }
+
+    detail_column()
         .call(add_detail, 'Name', instance.name)
+        .call(add_detail, 'Type', instance.instance_type.name)
+        .call(add_detail, 'VCPUs', instance.instance_type.vcpus);
+
+    detail_column()
+        .call(add_detail, 'Region', instance.subnet.zone.region.name)
+        .call(add_detail, 'Zone', instance.subnet.zone.name)
+        .call(add_detail, 'Subnet', instance.subnet.name)
+        .call(add_detail, 'Ext. IP', instance.assign_eip);
+
+    detail_column()
         .call(add_detail, 'Roles', roles)
         .call(add_detail, 'Description', instance.description);
-
-    row.append("div").attr("class", "col")
-        .call(add_detail, 'Instance type', instance.instance_type.name)
-        .call(add_detail, 'VCPUs', instance.instance_type.vcpus)
-        .call(add_detail, 'Region', instance.subnet.zone.region.name);
-
-    row.append("div").attr("class", "col")
-        .call(add_detail, 'Zone', instance.subnet.zone.name)
-        .call(add_detail, 'Subnet', instance.subnet.cidr)
-        .call(add_detail, 'External IP', instance.assign_eip);
 }
 
 
@@ -194,7 +197,7 @@ class ClusterDiagram {
                 .append("rect")
                     .classed("selection", true)
                     .attr("transform",
-                        `translate(${-bbox.width*ISOF_X}, ${-bbox.height*ISOF_Y})`)
+                        `translate(${-bbox.width*ISOF_X}, ${5-bbox.height*ISOF_Y})`)
                     .attr("width", bbox.width*ISF_X)
                     .attr("height", bbox.height*ISF_Y);
         });
