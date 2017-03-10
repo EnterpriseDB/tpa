@@ -26,13 +26,13 @@ body { font-family: 'FontAwesome' }
     .background-grid {
         stroke: #eeeeff;
         fill: none;
-        stroke-dasharray: "100, 10";
+        stroke-dasharray: 3, 1, 1, 1;
     }
 
     .selection {
         fill: none;
-        stroke: #555555;
-        stroke-dasharray: "3, 3";
+        stroke: $color-secondary-2-0;
+        stroke-dasharray: 3, 2;
     }
 
     text {
