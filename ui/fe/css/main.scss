@@ -10,27 +10,26 @@
 body {
   background-color: $color-primary-0;
 }
+
+html, body, .main_content {
+    height: 100%;
+    min-height: 100%;
+    min-width: 100% !important;
+}
+
+.main_content {
+    display: table;
+    box-sizing: border-box;
+    height: 100% !important;
+}
+
 #wrapper {
   width: 100%;
 }
-/*
-#page-wrapper {
-  padding: 0 15px;
-  min-height: 568px;
-  background-color: white;
-}
-@media (min-width: 768px) {
-  #page-wrapper {
-    position: inherit;
-    margin: 0 0 0 250px;
-    padding: 0 30px;
-    border-left: 1px solid #e7e7e7;
-  }
-}
-*/
 
 .navbar {
     background-color: $color-primary-3;
+    height: 66px;
 }
 
 .nav-buttons {
