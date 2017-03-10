@@ -15,6 +15,13 @@ body { font-family: 'FontAwesome' }
     background-color: white;
 }
 
+.cluster_detail_panel {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
 .diagram {
     .background-grid {
         stroke: #eeeeff;
