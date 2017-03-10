@@ -97,8 +97,8 @@ function display_selected_instance_detail(instance) {
                 .classed(`${attr_name} row`, true);
 
         g.append("div")
-            .classed("attr_name text-right col-xs-3", true)
-            .html(attr_name+": ");
+            .classed("attr_name col-xs-3", true)
+            .html(attr_name+" ");
         g.append("div")
             .classed("attr_value col-xs-9", true)
             .html(attr_value);

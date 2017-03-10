@@ -21,8 +21,8 @@ body { font-family: 'FontAwesome' }
     padding-top: 5px;
     padding-bottom: 5px;
 
-    color: $color-complement-4;
-    background: $color-primary-4;
+    color: $color-primary-3;
+    background: $color-complement-4;
 
     .container-fluid {
         width: 100%;
@@ -33,7 +33,15 @@ body { font-family: 'FontAwesome' }
     }
 
     .attr_name {
-        color: $color-complement-0;
+        color: $color-primary-1;
+        font-weight: bold;
+        font-size: 90%;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .attr_value {
+        background: $color-complement-3;
     }
 }
 
