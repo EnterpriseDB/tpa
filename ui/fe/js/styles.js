@@ -3,10 +3,6 @@
 /**
  * TPA base style sheet, using colorscheme.
  */
-
-require('es6-promise').polyfill();
-
-
 // Bootstrap and dependencies
 //
 require("jquery");

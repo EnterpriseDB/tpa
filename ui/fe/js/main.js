@@ -6,6 +6,9 @@
  * Primary entry point for TPA UI app.
  */
 
+
+require('es6-promise').polyfill();
+
 import "./styles";
 import * as api from "./tpa-api";
 import * as cluster_diagram from "./cluster-diagram";
