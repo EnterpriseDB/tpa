@@ -173,7 +173,6 @@ def filter_fields(model_class):
 
     if 'url' not in all_fields:
         all_fields.insert(0, 'url')
-        all_fields.remove('uuid')
 
     return tuple(all_fields)
 
