@@ -2,48 +2,13 @@
 
 @import "./colorscheme";
 @import "./colorscheme-alert";
+@import "./_variables.scss";
 
-/* Diagram objects */
-
-.cluster_diagram {
-    font-weight: normal;
-    border: "thick solid #aaaaaa";
+.diagram {
     width: 100%;
     min-height: 100%;
     background-color: white;
-}
 
-.cluster_detail_panel {
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-
-    color: $color-primary-3;
-    background: $color-complement-4;
-
-    .container-fluid {
-        width: 100%;
-
-        .row {
-            width: 100%;
-        }
-    }
-
-    .attr_name {
-        color: $color-primary-1;
-        font-weight: bold;
-        font-size: 90%;
-        padding-left: 5px;
-        padding-right: 5px;
-    }
-
-    .attr_value {
-        background: $color-complement-3;
-    }
-}
-
-.diagram {
     .background-grid {
         stroke: #eeeeff;
         fill: none;
@@ -65,6 +30,7 @@
     .node {
         text {
             font-weight: lighter;
+            font-family: $headings-font-family;
         }
 
         .icon {
@@ -79,7 +45,10 @@
         fill: none;
         stroke-width: 3;
     }
+}
 
+.cluster_diagram {
+    @extend .diagram;
 
     /* TPA objects */
 
@@ -87,7 +56,7 @@
         text {
             stroke: $color-complement-1;
             fill: $color-complement-1;
-            font-size: 150%;
+            font-size: $font-size-h3;
         }
 
         line { stroke: $color-complement-1; }
@@ -97,5 +66,37 @@
         font-size: 80%;
         fill: black;
         stroke: black;
+    }
+}
+
+.cluster_detail_panel {
+//    padding-left: $padding-small-horizontal;
+//    padding-right: $padding-small-horizontal;
+//    padding-top: $padding-small-vertical;
+//    padding-bottom: $padding-small-vertical;
+
+//    color: $color-primary-3;
+//   background: $color-complement-4;
+    margin-bottom: 0;
+
+    .container-fluid {
+        width: 100%;
+
+        .row {
+            width: 100%;
+        }
+    }
+
+    .attr_name {
+        font-weight: bold;
+        font-size: $font-size-h6;
+        font-family: $headings-font-family;
+        //color: $color-primary-1;
+        // padding-left: $padding-xs-horizontal;
+        // padding-right: $padding-xs-horizontal;
+    }
+
+    .attr_value {
+        // background: $color-complement-3;
     }
 }
