@@ -3,3 +3,18 @@
 
 @import "_variables.scss";
 @import "_bootswatch.scss";
+
+.navbar {
+    background-color: $color-primary-3;
+    height: 66px;
+}
+
+.navbar-btn {
+    margin-top: 5px !important;
+}
+
+.nav-buttons {
+    height: 50px;
+    padding-top: 10px;
+    padding-right: 20px;
+}
