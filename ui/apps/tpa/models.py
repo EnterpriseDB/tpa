@@ -193,7 +193,7 @@ class RoleLink(TenantOwnedMixin):
 
 
 class Volume(TenantOwnedMixin):
-    instance = ForeignKey('Instance', related_name='volumes')
+    instance = OwnerKey('Instance', related_name='volumes')
     volume_type = TextLineField()
     volume_size = PositiveIntegerField()
     delete_on_termination = BooleanField(default=True)
@@ -203,7 +203,7 @@ class Volume(TenantOwnedMixin):
 
 
 class VolumeUse(TenantOwnedMixin):
-    role = ForeignKey('Role', related_name='used_volumes')
+    role = OwnerKey('Role', related_name='used_volumes')
     volume = ForeignKey('Volume', related_name='used_by_roles')
 
     class Meta:
