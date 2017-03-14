@@ -61,7 +61,6 @@ function login_form() {
 }
 
 
-
 function cluster_upload() {
     d3.selectAll("form.cluster_upload").on("submit", () => {
         let tenant = d3.select("input.tenant").node().value;
