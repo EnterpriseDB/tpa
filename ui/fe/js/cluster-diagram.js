@@ -108,8 +108,8 @@ function display_selected_instance_detail(instance) {
 
     clear_detail_panel();
 
-    let roles = instance.roles.map(r => r.role_type).join(", ");
     let row = d3.selectAll(".selected_instance_detail");
+    let volumes = instance.volumes ? instance.volumes: [];
 
     function detail_column() {
         return row.append("div").attr("class", "col-xs-4");
@@ -118,7 +118,8 @@ function display_selected_instance_detail(instance) {
     detail_column()
         .call(add_detail, 'Name', instance.name)
         .call(add_detail, 'Type', instance.instance_type.name)
-        .call(add_detail, 'VCPUs', instance.instance_type.vcpus);
+        .call(add_detail, 'VCPUs', instance.instance_type.vcpus)
+        .call(add_detail, 'RAM', instance.instance_type.memory);
 
     detail_column()
         .call(add_detail, 'Region', instance.subnet.zone.region.name)
@@ -127,8 +128,14 @@ function display_selected_instance_detail(instance) {
         .call(add_detail, 'Ext. IP', instance.assign_eip);
 
     detail_column()
-        .call(add_detail, 'Roles', roles)
-        .call(add_detail, 'Description', instance.description);
+        .call(add_detail, 'Description', instance.description)
+        .call(add_detail, 'Roles',
+            instance.roles.map(r => r.role_type).join(", "))
+        .call(add_detail, "Volumes",
+            volumes.map(vol => {
+                let p = vol.delete_on_termination ?  "" : " persistent";
+                return `${vol.name} (${vol.volume_size}g${p} ${vol.volume_type})`;
+            }).join(", "));
 }
 
 
