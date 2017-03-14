@@ -11,7 +11,7 @@ require('es6-promise').polyfill();
 
 import "./styles";
 import * as api from "./tpa-api";
-import * as cluster_diagram from "./cluster-diagram";
+import {show_cluster_diagram} from "./cluster-diagram";
 import * as d3 from "d3";
 import {get_url_vars} from "./utils";
 import $ from "jquery";
@@ -81,6 +81,43 @@ function cluster_upload() {
 }
 
 
+function cluster_list() {
+    let column_names = ["Name", "Created", "Last update"];
+    let root = d3.select(".cluster_list");
+    if (root.empty()) { return; }
+
+    root.append("h3").text("Clusters");
+
+    let table = root.append("table").classed("table table-bordered", true);
+
+    function add_cluster(selection) {
+        selection.append("td")
+            .append("a")
+            .attr("href", d => `/cluster.html?cluster_uuid=${d.uuid}`)
+            .text(d => d.name);
+
+        selection.append("td") .text(d => Date(d.created).toLocaleString());
+        selection.append("td") .text(d => Date(d.updated).toLocaleString());
+    }
+
+    table.append("tr")
+        .classed("header_row", true)
+        .selectAll("th")
+        .data(column_names)
+        .enter()
+            .append("th")
+            .text(d => d);
+
+    api.get_all("cluster", null, function(clusters) {
+        table.selectAll("tr.cluster_row")
+            .data(clusters)
+            .enter()
+                .append("tr")
+                .classed("cluster_row", true)
+                .call(add_cluster);
+    });
+}
+
 // Main entry point.
 api.auth.on("login.unhide-body", () => {
     console.log("visible");
@@ -94,6 +131,7 @@ if(!d3.select("meta#login-required").empty()) {
 document.addEventListener("DOMContentLoaded", () => {
     unhide_page_once_scripts_loaded();
     login_form();
-    cluster_diagram.show_cluster_diagram();
+    cluster_list();
+    show_cluster_diagram();
     cluster_upload();
 });
