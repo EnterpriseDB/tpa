@@ -125,7 +125,7 @@ api.auth.on("login.unhide-body", () => {
 });
 
 if(!d3.select("meta#login-required").empty()) {
-    api.auth.logged_in_or_redirect("/index.html");
+    api.auth.logged_in_or_redirect("/login.html");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
