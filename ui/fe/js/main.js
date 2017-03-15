@@ -93,7 +93,7 @@ function cluster_list() {
     function add_cluster(selection) {
         selection.append("td")
             .append("a")
-            .attr("href", d => `/cluster.html?cluster_uuid=${d.uuid}`)
+            .attr("href", d => `/cluster.html?cluster=${d.uuid}`)
             .text(d => d.name);
 
         selection.append("td") .text(d => Date(d.created).toLocaleString());
