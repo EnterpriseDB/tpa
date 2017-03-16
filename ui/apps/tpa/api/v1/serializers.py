@@ -8,7 +8,6 @@ from __future__ import unicode_literals, absolute_import, print_function
 
 import logging
 
-from django.conf import settings
 from django.db.models.fields.reverse_related import ManyToOneRel
 
 from rest_framework import serializers
@@ -16,27 +15,9 @@ from rest_framework.utils.field_mapping import get_nested_relation_kwargs
 
 from tpa import models
 from tpa.config_yml import yml_to_cluster, DEFAULT_PROVIDER_NAME
+from tpa.utils import log_trace
 
 logger = logging.getLogger(__name__)
-
-
-def log_trace(fn):
-    '''Trace log utility decorator'''
-    if not settings.DEBUG:
-        return fn
-
-    def trace_call(*args, **kwargs):
-        result = None
-        logger.debug("C: %s with args(*%s, **%s)", fn, args, kwargs)
-
-        try:
-            result = fn(*args, **kwargs)
-        finally:
-            logger.debug("R: %s", result)
-
-        return result
-
-    return trace_call
 
 
 class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
@@ -44,7 +25,7 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
     '''
     lookup_field = 'uuid'
 
-    @log_trace
+    @log_trace(logger)
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = \
             super(NamespaceViewSerializer, self).build_relational_field(
@@ -54,7 +35,7 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
 
         return field_class, field_kwargs
 
-    @log_trace
+    @log_trace(logger)
     def build_url_field(self, field_name, model_class):
         field_class, field_kwargs = super(NamespaceViewSerializer, self)\
             .build_url_field(field_name, model_class)
@@ -68,7 +49,7 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
         logger.debug("url for %s field_kwargs: %s", field_class, field_kwargs)
         return field_class, field_kwargs
 
-    @log_trace
+    @log_trace(logger)
     def build_nested_field(self, field_name, relation_info, nested_depth):
         """
         Create nested fields for forward and reverse relationships.
