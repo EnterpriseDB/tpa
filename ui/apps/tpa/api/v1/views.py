@@ -41,8 +41,24 @@ class ClusterUploadView(APIView):
 class TenantOwnedViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
+    def get_queryset(self):
+        queryset = super(TenantOwnedViewSet, self).get_queryset()
+        queryset = self.filter_by_tenant(queryset)
 
-def create_generic_view(model_class):
+        return queryset
+
+    def filter_by_tenant(self, queryset):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return queryset
+
+        # TODO replace with "currently active tenant"
+        user_tenants = models.Tenant.objects.filter(owner=user)
+
+        return queryset.filter(tenant_in=user_tenants)
+
+
+def create_generic_viewset(model_class):
     '''Create and return a ViewSet for a TPA model class. If the class
     is owned by a tenant, a TenantOwnedViewSet is created. Otherwise,
     a generic ViewSet with customizations is created.
@@ -74,6 +90,6 @@ def create_generic_view(model_class):
 
 
 for _cls_name in models.__all__:
-    (name, klazz) = create_generic_view(getattr(models, _cls_name))
+    (name, klazz) = create_generic_viewset(getattr(models, _cls_name))
     globals()[name] = klazz
     ALL_VIEWS.append(klazz)
