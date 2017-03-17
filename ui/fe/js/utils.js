@@ -8,12 +8,19 @@
 // Read a page's GET URL variables and return them as an associative array.
 export function get_url_vars()
 {
-    var vars = [], pair;
-    var pairs = window.location.href.slice(
-            window.location.href.indexOf('?') + 1).split('&');
-    for(var i = 0; i < pairs.length; i++)
+    let vars = [];
+    let href = window.location.href;
+
+    let frag_pos = href.indexOf('#');
+
+    if (frag_pos >= 0) {
+        href = href.slice(0, frag_pos);
+    }
+
+    let pairs = href.slice(href.indexOf('?') + 1).split('&');
+    for(let pair_str of pairs)
     {
-        pair = pairs[i].split('=');
+        let pair = pair_str.split('=');
         vars.push(pair[0]);
         vars[pair[0]] = decodeURIComponent(pair[1]);
     }
