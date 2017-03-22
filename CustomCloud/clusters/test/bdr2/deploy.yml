@@ -10,6 +10,7 @@
   vars:
     ansible_distribution: Debian
     ansible_distribution_release: jessie
+    id_extra: 'customer'
     BDR_apt_repositories:
       key_id: 7ED05910
       key_url: "https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/7ED05910.asc"
@@ -28,6 +29,9 @@
         postgres_version: 9.6
       tags: always
 
+    - role: postgres/repo
+      tags: always
+
     - role: sys/tune
       tags: always
 
@@ -36,6 +40,12 @@
         sysctl_values:
           net.ipv4.ip_forward: 1
       tags: [sys, sysctl]
+
+    - role: sys/ssh/authorize
+      ssh_user: "{{ ec2_ami_user|default('admin') }}"
+      ssh_key_name: "{{ id_extra }}"
+      when: >
+        "{{ id_extra|default("") }}" != ""
 
     - role: sys/openvpn
       vpn_network: 192.168.33.0/24
