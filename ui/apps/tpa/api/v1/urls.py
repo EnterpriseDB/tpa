@@ -29,14 +29,18 @@ def unknown_api_endpoint(request):
     raise Http404("Unknown API endpoint")
 
 auth_patterns = [
+    url(r'^user-invite/$',
+        views.UserInvitationView.as_view(), name="user-invite"),
+    url(r'^user-invite/(?P<uuid>[a-z0-9-]+)/$',
+        views.UserInviteConfirmationView.as_view(),
+        name="user-invite-confirmation"),
     url(r'^login/', obtain_jwt_token),
     url(r'^refresh/', refresh_jwt_token),
     url(r'^verify/', verify_jwt_token),
-    #url(r'^register/$', AuthRegister.as_view()),
 ]
 
 urlpatterns += [
-    url(r'^cluster_upload_yml/', views.ClusterUploadView.as_view()),
     url(r'^auth/', include(auth_patterns)),
+    url(r'^cluster_upload_yml/', views.ClusterUploadView.as_view()),
     url(r'', unknown_api_endpoint, name='unknown-api-endpoint')
 ]

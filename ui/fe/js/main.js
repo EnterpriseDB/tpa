@@ -21,6 +21,8 @@ function unhide_page_once_scripts_loaded() {
     d3.selectAll("#cover").style("visibility", "hidden");
 }
 
+export const _d3 = d3;
+
 
 function login_form() {
     d3.selectAll("form.login_form").on("submit", () => {
@@ -58,6 +60,51 @@ function login_form() {
         $("#LoginForm").modal("show");
     });
 
+}
+
+function user_invite() {
+    d3.selectAll("form.user_invite").on("submit", function() {
+        d3.event.preventDefault();
+
+        let email = d3.select("input.invite-email").node().value;
+
+        api.user_invite(email, (error, data) => {
+            console.log("invite called", email, error, data);
+            if(error) {
+                alert("Invite Error:" + error);
+                return;
+            }
+
+            d3.selectAll("input.invite-email").attr("value", "");
+
+            alert(`Invitation sent to ${email}.`);
+        });
+    });
+}
+
+function user_invite_accept() {
+    d3.selectAll("form.user_invite_accept").on("submit", function() {
+        d3.event.preventDefault();
+
+        let sub = d3.select(this);
+
+        let invite = get_url_vars().invite;
+        let username = sub.select("input.username").node().value;
+        let password = sub.select("input.password").node().value;
+        let ssh_public_keys = sub.select("input.ssh_public_keys").node().value;
+
+        console.log("called:", invite);
+
+        api.user_invite_accept(invite, username, password, ssh_public_keys,
+            (error, data) => {
+            if(error) {
+                alert("Registration Error:" + error);
+                return;
+            }
+
+            window.location = "/user_home.html";
+        });
+    });
 }
 
 
@@ -131,6 +178,8 @@ if(!d3.select("meta#login-required").empty()) {
 document.addEventListener("DOMContentLoaded", () => {
     unhide_page_once_scripts_loaded();
     login_form();
+    user_invite();
+    user_invite_accept();
     cluster_list();
     show_cluster_diagram();
     cluster_upload();

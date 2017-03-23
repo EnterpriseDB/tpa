@@ -33,11 +33,11 @@ body { visibility: hidden; }
           <a class="navbar-brand" href="#"><img src="/assets/images/2q-logo-nav.png" width="148" height="40"></a>
           <a class="navbar-brand" href="#">TPA</a><a class="navbar-brand" href="#"><i class="fa fa-chevron-right" aria-hidden="true"></i>
               Clusters
-              <i class="fa fa-chevron-right" aria-hidden="true"></i>
               </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <span class="navbar-right nav-buttons">
+                <button type="button" class="btn navbar-btn new_cluster">New Cluster</button>
                 <button type="button" class="btn btn-primary navbar-btn"><i class="glyphicon glyphicon-menu-hamburger"></i>
                 </button></span>
         </div><!--/.navbar-collapse -->
@@ -45,6 +45,20 @@ body { visibility: hidden; }
     </nav>
     <div class="container-fluid"</div>
         <div class="main_content">
+                <div class="row">
+                    <div class="col-sm-offset-8">
+                        <form class="user_invite form-horizontal">
+                            <div class="form_group">
+                                <div class="col-sm-9">
+                                    <input type="text" placeholder="Email" id="invite-email" class="form-control invite-email">
+                                </div>
+                                <div class="col-sm-3">
+                                    <button class="btn navbar-btn">Invite</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             <div class="row cluster_list"></div>
         </div>
     </div>

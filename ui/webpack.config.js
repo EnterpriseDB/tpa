@@ -63,15 +63,21 @@ module.exports = {
             inject: 'body',
         }),
         new HtmlWebpackPlugin({
-            template: './fe/user_home.html.ejs',
-            title: "My Clusters",
-            filename: 'user_home.html',
-            inject: 'body',
-        }),
-        new HtmlWebpackPlugin({
             template: './fe/login.html.ejs',
             title: "Login",
             filename: 'login.html',
+            inject: 'body',
+        }),
+        new HtmlWebpackPlugin({
+            template: './fe/user_invite_accept.html.ejs',
+            title: "Login",
+            filename: 'user_invite_accept.html',
+            inject: 'body',
+        }),
+        new HtmlWebpackPlugin({
+            template: './fe/user_home.html.ejs',
+            title: "My Clusters",
+            filename: 'user_home.html',
             inject: 'body',
         }),
         new HtmlWebpackPlugin({

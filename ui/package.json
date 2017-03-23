@@ -102,6 +102,7 @@
     "es6-promise": "",
     "jquery": "",
     "metismenu": "",
+    "url-parse": "^1.1.8",
     "underscore": "",
     "vue": "^2.1.0"
   },

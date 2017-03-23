@@ -90,6 +90,31 @@ export function get_obj_by_url(url, _then) {
 }
 
 
+export function user_invite(email, callback) {
+    var req_data = new FormData();
+    req_data.append("email", email);
+
+    return auth.json_request(`${API_URL}auth/user-invite/`)
+        .on('load', r => callback(null, r))
+        .on('error', e => callback(e, null))
+        .send('POST', req_data);
+}
+
+export function user_invite_accept(invite, username, password, ssh_public_keys, 
+        callback ) {
+    var req_data = new FormData();
+    req_data.append("invite", invite);
+    req_data.append("username", username);
+    req_data.append("password", password);
+    req_data.append("ssh_public_keys", JSON.stringify(ssh_public_keys));
+
+    return auth.json_request(`${API_URL}auth/user-invite/${invite}/`)
+        .on('load', r => callback(null, r))
+        .on('error', e => callback(e, null))
+        .send('POST', req_data);
+}
+
+
 export function load_provider(callback) {
     auth.json_request(`${API_URL}provider/`).get((error, providers) => {
         if(error) {

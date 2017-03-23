@@ -9,6 +9,8 @@ from __future__ import unicode_literals, absolute_import, print_function
 import logging
 
 from django.db.models.fields.reverse_related import ManyToOneRel
+from django.db import transaction
+from django.contrib.auth import get_user_model
 
 from rest_framework import serializers
 from rest_framework.utils.field_mapping import get_nested_relation_kwargs
@@ -109,7 +111,7 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
         depth = 5
 
     @classmethod
-    def create_model_serializer_class(klazz, model_class, meta={}):
+    def create_model_serializer_class(cls, model_class, meta={}):
         serializer_class_name = str("%sSerializer" % (model_class.__name__,))
         fields = filter_fields(model_class)
         logger.debug("fields for %s: %s", model_class.__name__, fields)
@@ -123,9 +125,9 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
         }
 
         meta_fields.update(meta)
-        meta = type(str('Meta'), (klazz.Meta,), meta_fields)
+        meta = type(str('Meta'), (cls.Meta,), meta_fields)
         serializer_class = type(serializer_class_name,
-                                (klazz,),
+                                (cls,),
                                 {'Meta': meta})
 
         return serializer_class
@@ -167,4 +169,59 @@ class ConfigYmlSerializer(serializers.Serializer):
             yaml_text=validated_data['config_yml'])
 
     def update(self, *args, **kwargs):
+        raise NotImplementedError
+
+
+class UserInvitationSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    new_tenant_name = serializers.CharField(required=False)
+
+    class Meta:
+        model = models.UserInvitation
+        fields = ('email', 'new_tenant_name')
+
+    def create(self, data):
+        invite = models.UserInvitation.objects.create(
+            email=data['email'],
+            new_tenant_name=data.get("new_tenant_name") or data['email'],
+        )
+
+        return invite
+
+
+class UserInvitedRegistrationSerializer(serializers.ModelSerializer):
+    invite = serializers.CharField()
+    ssh_public_keys = serializers.ListField(
+        child=serializers.CharField(allow_blank=True))
+
+    class Meta:
+        model = get_user_model()
+        fields = ('uuid', 'username', 'password', 'invite', 'ssh_public_keys')
+
+    def validate(self, data):
+        super(UserInvitedRegistrationSerializer, self).validate(data)
+        self.invite = models.UserInvitation.objects.get(uuid=data['invite'])
+
+    def update(self, instance, data):
+        with transaction.atomic():
+            instance.username = data['username']
+            instance.password = data['password']
+            instance.is_active = True
+            instance.save()
+
+            tenant = models.Tenant.objects.get(owner=instance)
+            tenant.ssh_public_keys = data['ssh_public_keys']
+            tenant.save()
+
+            self.invite.delete()
+
+        return instance
+
+    def delete(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def create(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def get(self, *args, **kwargs):
         raise NotImplementedError

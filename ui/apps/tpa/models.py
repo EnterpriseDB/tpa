@@ -10,14 +10,14 @@ import logging
 from uuid import uuid4
 
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ValidationError
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (BooleanField, CharField, DateTimeField,
-                              ForeignKey, PositiveIntegerField,
-                              TextField, UUIDField)
-
+                              ForeignKey, PositiveIntegerField, TextField,
+                              UUIDField)
+from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ Instance Role RoleLink Volume VolumeUse VPC
 
 
 class TextLineField(CharField):
+
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('max_length', 255)
         super(TextLineField, TextLineField).__init__(self, *args, **kwargs)
@@ -98,6 +99,13 @@ class VolumeType(BaseModel):
 
 
 ##
+
+class UserInvitation(UUIDMixin, TimestampMixin):
+    '''An invitation to an unregistered user
+    '''
+    email = models.EmailField(unique=True)
+    user_id = TextField(unique=True)
+    new_tenant_name = TextField(null=True)
 
 
 class Tenant(BaseModel):
