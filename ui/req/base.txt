@@ -2,7 +2,8 @@ celery[redis]
 Django>=1.10.0, <=1.11.0
 djangorestframework
 djangorestframework-jwt
-psycopg2 
+django-ses
+psycopg2
 requests
 six
 uwsgi
