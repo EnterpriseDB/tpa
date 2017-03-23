@@ -31,15 +31,13 @@ body { visibility: hidden; }
             <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand" href="#"><img src="/assets/images/2q-logo-nav.png" width="148" height="40"></a>
-          <a class="navbar-brand" href="#">TPA</a><a class="navbar-brand" href="#"><i class="fa fa-chevron-right" aria-hidden="true"></i>
+          <a class="navbar-brand" href="#">TPA</a><a class="navbar-brand" href="/user_home.html"><i class="fa fa-chevron-right" aria-hidden="true"></i>
               Clusters
               <i class="fa fa-chevron-right" aria-hidden="true"></i>
               <span class="cluster_name"></span></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <span class="navbar-right nav-buttons">
-                <button type="button" class="btn btn btn-primary next-cluster navbar-btn"><i class="fa fa-plus"></i>
-                </button>
                 <button type="button" class="btn btn-primary navbar-btn"><i class="glyphicon glyphicon-menu-hamburger"></i>
                 </button></span>
         </div><!--/.navbar-collapse -->
@@ -49,12 +47,22 @@ body { visibility: hidden; }
         <div class="cluster_diagram"></div>
     </div>
     <div class="navbar-fixed-bottom panel panel-default cluster_detail_panel">
-        <ul class="nav nav-tabs" id="detail-tabs" role="tablist">
+        <ul class="nav nav-tabs" id="detail-panel-tabs" role="tablist">
+            <li role="presentation">
+                <a href="#cluster-detail" id="cluster-detail-tab" role="tab" data-toggle="tab" aria-controls="Instance" aria-expanded="true">Cluster</a>
+
+            </li>
             <li role="presentation" class="active">
                 <a href="#instance-detail" id="instance-detail-tab" role="tab" data-toggle="tab" aria-controls="Instance" aria-expanded="true">Instance</a>
             </li>
         </ul>
         <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade in" role="tabpanel" id="cluster-detail" aria-labelledby="cluster-detail-tab">
+                <div class="container-fluid">
+                    <div class="selected_cluster_detail"></div>
+                </div>
+            </div>
+
             <div class="tab-pane fade in active" role="tabpanel" id="instance-detail" aria-labelledby="instance-detail-tab">
                 <div class="container-fluid">
                     <div class="row selected_instance_detail"></div>
