@@ -185,16 +185,16 @@ class UserInvitationSerializer(serializers.ModelSerializer):
 
 
 class UserInvitedRegistrationSerializer(serializers.ModelSerializer):
-    invite = serializers.CharField()
+    invite = serializers.UUIDField()
     ssh_public_keys = serializers.ListField(
         child=serializers.CharField(allow_blank=True))
 
     class Meta:
         model = get_user_model()
-        fields = ('uuid', 'username', 'first_name', 'last_name', 'password', 'invite', 'ssh_public_keys')
+        fields = ('id', 'username', 'first_name', 'last_name', 'password', 'invite', 'ssh_public_keys')
         write_only_fields = ('password',)
         read_only_fields = ('is_staff', 'is_superuser',
-                            'is_active', 'date_joined', 'uuid')
+                            'is_active', 'date_joined', 'id')
 
     def validate(self, data):
         super(UserInvitedRegistrationSerializer, self).validate(data)

@@ -109,8 +109,9 @@ class UserInviteConfirmationView(APIView):
         '''User invited registration form submission.
         '''
         invite = models.UserInvitation.objects.get(uuid=uuid)
-        ser = serializers.UserInvitedRegistrationSerializer(id=invite.user_id,
-                                                            data=request.data)
+        data = request.data
+        data["id"] = invite.user_id
+        ser = serializers.UserInvitedRegistrationSerializer(data=data)
         if not ser.is_valid():
             return Response(status=400, data={"error": "Invalid registration"})
 
