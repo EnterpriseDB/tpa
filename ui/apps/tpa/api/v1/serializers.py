@@ -72,10 +72,6 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
 
         model_view_name = get_detail_view(relation_info.related_model)
         remote_field = getattr(relation_info.model_field, 'remote_field', None)
-
-        logger.debug("relation_info: %s remote: %s",
-                     relation_info, remote_field)
-
         expand_child = False
 
         if remote_field:
@@ -111,10 +107,9 @@ class NamespaceViewSerializer(serializers.HyperlinkedModelSerializer):
         depth = 5
 
     @classmethod
-    def create_model_serializer_class(cls, model_class, meta={}):
+    def create_model_serializer_class(cls, model_class, meta=None):
+        meta = meta or {}
         serializer_class_name = str("%sSerializer" % (model_class.__name__,))
-        fields = filter_fields(model_class)
-        logger.debug("fields for %s: %s", model_class.__name__, fields)
 
         meta_fields = {
             'model': model_class,
@@ -196,7 +191,10 @@ class UserInvitedRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('uuid', 'username', 'password', 'invite', 'ssh_public_keys')
+        fields = ('uuid', 'username', 'first_name', 'last_name', 'password', 'invite', 'ssh_public_keys')
+        write_only_fields = ('password',)
+        read_only_fields = ('is_staff', 'is_superuser',
+                            'is_active', 'date_joined', 'uuid')
 
     def validate(self, data):
         super(UserInvitedRegistrationSerializer, self).validate(data)
@@ -204,8 +202,10 @@ class UserInvitedRegistrationSerializer(serializers.ModelSerializer):
 
     def update(self, instance, data):
         with transaction.atomic():
+            instance.set_password(data['password'])
             instance.username = data['username']
-            instance.password = data['password']
+            instance.first_name = data.get('first_name', '')
+            instance.last_name = data.get('last_name', '')
             instance.is_active = True
             instance.save()
 
