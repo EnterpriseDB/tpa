@@ -15,7 +15,7 @@ from django.contrib.auth import get_user_model
 
 from rest_framework import viewsets
 from rest_framework.parsers import FormParser, MultiPartParser
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
@@ -94,6 +94,8 @@ class UserInvitationView(APIView):
 
 
 class UserInviteConfirmationView(APIView):
+    permission_classes = (AllowAny,)
+
     def get(self, request, uuid):
         '''User has clicked the invite link.
         '''
@@ -109,10 +111,10 @@ class UserInviteConfirmationView(APIView):
         invite = models.UserInvitation.objects.get(uuid=uuid)
         ser = serializers.UserInvitedRegistrationSerializer(id=invite.user_id,
                                                             data=request.data)
-        ser.is_valid()
+        if not ser.is_valid():
+            return Response(status=400, data={"error": "Invalid registration"})
 
-        return Response(status=200, data={"user": user.id,
-                                          "valid": ser.is_valid()})
+        return Response(status=200, data={"user": user.id})
 
 
 # Cluster
