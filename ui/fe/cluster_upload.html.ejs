@@ -35,15 +35,18 @@ body { visibility: hidden; }
     </nav>
 
     <div class="container">
-        <hr>
-        <h4>New cluster from config.yml</h4>
-        <form class="cluster_upload">
-            <div class="form-group">
-                <input type="text" placeHolder="Tenant" class="form-control tenant">
-                <input type="file" class="form-control config_yml">
+        <div class="main_content">
+            <div class="col-sm-offset-3 col-sm-6">
+                <h4 class="col-sm-offset-1">New cluster from config.yml</h4>
+                <form class="cluster_upload form-horizontal">
+                    <div class="form-group">
+                        <input type="text" placeHolder="Tenant" class="col-sm-1 form-control tenant">
+                        <input type="file" class="form-control config_yml col-sm-1">
+                    </div>
+                    <button type="submit" class="btn btn-success col-sm-offset-2">Upload</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn-success">Upload</button>
-        </form>
+        <div class="main_content">
     </div> <!-- /container -->
   </body>
 </html>
