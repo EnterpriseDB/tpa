@@ -196,9 +196,10 @@ class UserInvitedRegistrationSerializer(serializers.ModelSerializer):
         read_only_fields = ('is_staff', 'is_superuser',
                             'is_active', 'date_joined', 'id')
 
-    def validate(self, data):
-        super(UserInvitedRegistrationSerializer, self).validate(data)
+    def validate(self, data, *args, **kwargs):
         self.invite = models.UserInvitation.objects.get(uuid=data['invite'])
+        data["id"] = self.invite.user_id
+        return super(UserInvitedRegistrationSerializer, self).validate(data, *args, **kwargs)
 
     def update(self, instance, data):
         with transaction.atomic():
