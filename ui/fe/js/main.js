@@ -65,19 +65,28 @@ function user_invite() {
     d3.selectAll("form.user_invite").on("submit", function() {
         d3.event.preventDefault();
 
-        let email = d3.select("input.invite-email").node().value;
+        let email_el = d3.select(this).select("input.email");
+        let email = email_el.node().value;
 
-        api.user_invite(email, (error, data) => {
-            console.log("invite called", email, error, data);
-            if(error) {
-                alert("Invite Error:" + error);
-                return;
-            }
+        api.object_create("auth/user-invite",
+            { email: email },
+            (error, data) => {
+                if(error) {
+                    alert(`Invite Error: ${error.currentTarget.response}`);
+                    return;
+                }
 
-            d3.selectAll("input.invite-email").attr("value", "");
+                email_el.attr("value", "");
 
-            alert(`Invitation sent to ${email}.`);
-        });
+                alert(`Invitation sent to ${email}.`);
+
+                $("#user_invite_dialog").modal("hide");
+            });
+    });
+
+    d3.selectAll("a.user_invite").on("click", function() {
+        console.log("click");
+        $("#user_invite_dialog").modal("show");
     });
 }
 

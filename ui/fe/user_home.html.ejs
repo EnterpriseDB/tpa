@@ -44,7 +44,7 @@ body { visibility: hidden; }
                         <button type="button" class="btn btn-primary navbar-btn current_user_btn dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-user"></i><span class="caret"></span></button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <a class="dropdown-item list-group-item" href="#">(Current User Name)</a>
-                            <a class="dropdown-item list-group-item" href="#">Invite</a>
+                            <a class="dropdown-item list-group-item user_invite" href="#">Invite</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item list-group-item" href="#">Logout</a>
                         </div>
@@ -58,22 +58,32 @@ body { visibility: hidden; }
     <div class="container-fluid"</div>
         <div class="main_content">
             <div class="row">
-                <div class="col-sm-offset-8">
-                    <form class="user_invite navbar-form">
-                        <div class="btn-group">
-                            <div class="col-sm-9">
-                                <input type="text" placeholder="Email" id="invite-email" class="form-control invite-email nav">
-                            </div>
-                            <div class="col-sm-3">
-                                <button class="btn btn-sm">Invite</button>
-                            </div>
+                <div class="col-sm-offset-1 col-sm-10">
+                    <div class="cluster_list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invite dialog -->
+        <div id="user_invite_dialog" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form class="user_invite form-horizontal">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Invite someone to TPA</h4>
+                        </div>
+                        <div class="modal-body">
+                            <input type="text" placeholder="Email" id="email" class="form-control email">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Send</button>
                         </div>
                     </form>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-offset-1 col-sm-10">
-                    <div class="cluster_list"></div>
+        </div>
                 </div>
             </div>
         </div>

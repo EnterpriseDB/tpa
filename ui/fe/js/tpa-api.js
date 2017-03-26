@@ -96,9 +96,6 @@ export function class_to_url(cls) {
 export function uuid_to_url(cls, uuid) {
     return `${API_URL}${cls}/${uuid}/`
 }
-export function user_invite(email, callback) {
-    var req_data = new FormData();
-    req_data.append("email", email);
 
 function json_to_form(json_object) {
     let form = new FormData();
@@ -110,12 +107,12 @@ function json_to_form(json_object) {
     }
     console.log("Form:", form);
     return form;
-    return auth.json_request(`${API_URL}auth/user-invite/`)
-        .on('load', r => callback(null, r))
-        .on('error', e => callback(e, null))
-        .send('POST', req_data);
 }
 
+export function object_get(cls, uuid, callback) {
+    return auth.json_request(`${API_URL}${cls}/${uuid}/`)
+        .get(callback);
+}
 export function user_invite_accept(invite, username, password, ssh_public_keys, 
         callback ) {
     var req_data = new FormData();
