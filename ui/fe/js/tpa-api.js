@@ -125,6 +125,12 @@ export function object_create(cls, json_object, callback) {
         .header("Content-Type", "application/json")
         .post(JSON.stringify(json_object), callback);
 }
+
+export function object_list(cls, filter, callback) {
+    let filter_text = filter ? `?${filter}` : "";
+    return auth.json_request(`${API_URL}${cls}/${filter_text}`)
+        .header("Content-Type", "application/json")
+        .get(callback);
 }
 
 

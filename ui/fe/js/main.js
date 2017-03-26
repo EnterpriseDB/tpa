@@ -175,7 +175,11 @@ function cluster_list() {
             .append("th")
             .text(d => d);
 
-    api.get_all("cluster", null, function(clusters) {
+    api.object_list("cluster", "", (error, clusters) => {
+        if (error) {
+            table.append("h4").text("(Load error)");
+            return;
+        }
         table.selectAll("tr.cluster_row")
             .data(clusters)
             .enter()
