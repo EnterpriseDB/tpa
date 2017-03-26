@@ -116,22 +116,33 @@ function user_invite_accept() {
 }
 
 
-function cluster_upload() {
-    d3.selectAll("form.cluster_upload").on("submit", () => {
-        let tenant = d3.select("input.tenant").node().value;
-        let config_yml = d3.select("input.config_yml").node().files[0];
-
+function cluster_import() {
+    d3.selectAll("form.cluster_import").on("submit", function()  {
         d3.event.preventDefault();
 
-        api.cluster_upload(tenant, config_yml, function(error, res) {
-            if (!error) {
+        let root = d3.select(this)
+        let tenant = root.select("input.tenant").node().value;
+        let config_yml = root.select("input.config_yml").node().files[0];
+
+        // api.cluster_upload(tenant, config_yml, function(error, res) {
+
+        api.object_create('cluster_upload_yml',
+            {
+                tenant: tenant,
+                config_yml: config_yml
+            },
+            (error, res) => {
+                if (error) {
+                    alert(`Import Error: ${error.currentTarget.responseText}`);
+                    return;
+                }
                 window.location = `/cluster.html?cluster=${res.cluster}`;
-            }
-            else{
-                alert(error);
-            }
         });
         return true;
+    });
+
+    d3.selectAll("button.cluster_import").on("click", function() {
+        $("#cluster_import_dialog").modal("show");
     });
 }
 
@@ -198,9 +209,9 @@ document.addEventListener("DOMContentLoaded", () => {
     user_invite();
     user_invite_accept();
     cluster_list();
+    cluster_import();
     cluster_create();
 
     // Cluster page
     show_cluster_diagram();
-    cluster_upload();
 });

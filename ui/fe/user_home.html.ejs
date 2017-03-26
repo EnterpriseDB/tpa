@@ -38,7 +38,7 @@ body { visibility: hidden; }
         <div id="navbar" class="navbar-collapse collapse">
             <span class="navbar-right nav-buttons">
                 <button type="button" class="btn navbar-btn btn-sm new_cluster">New Cluster</button>
-                <button class="btn navbar-btn btn-sm upload_config_yml">Import</button>
+                <button type="button" class="btn navbar-btn btn-sm cluster_import">Import</button>
                 <div class="btn-group">
                     <div class="dropdown">
                         <button type="button" class="btn btn-primary navbar-btn current_user_btn dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-user"></i><span class="caret"></span></button>
@@ -84,6 +84,29 @@ body { visibility: hidden; }
                 </div>
             </div>
         </div>
+
+        <!-- Cluster upload -->
+        <div id="cluster_import_dialog" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form class="cluster_import form-horizontal">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Import a cluster design</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <input type="text" placeholder="Tenant" class="form-control tenant col-xs-4">
+                                <input type="file" class="form-control config_yml col-sm-2">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Import</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

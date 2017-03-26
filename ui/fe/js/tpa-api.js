@@ -125,6 +125,12 @@ export function user_invite_accept(invite, username, password, ssh_public_keys,
         .on('load', r => callback(null, r))
         .on('error', e => callback(e, null))
         .send('POST', req_data);
+
+export function object_create(cls, json_object, callback) {
+    return auth.json_request(`${API_URL}${cls}/`)
+        .header("Content-Type", "application/json")
+        .post(JSON.stringify(json_object), callback);
+}
 }
 
 
