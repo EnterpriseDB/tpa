@@ -40,7 +40,8 @@ class UserInvitationView(APIView):
     def post(self, request):
         logger.debug("data: %s", request.data)
         ser = serializers.UserInvitationSerializer(data=request.data)
-        ser.is_valid()
+        if not ser.is_valid():
+            raise ValidationError(ser.errors)
         data = ser.validated_data
 
         invites = models.UserInvitation.objects.filter(email=data['email'])
@@ -126,7 +127,8 @@ class ClusterUploadView(APIView):
 
     def post(self, request):
         ser = serializers.ConfigYmlSerializer(data=request.data)
-        ser.is_valid()
+        if not ser.is_valid():
+            raise ValidationError(ser.errors);
         cluster = ser.create(ser.validated_data)
 
         return Response(status=200, data={"cluster": cluster.uuid})
