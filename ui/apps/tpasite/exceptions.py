@@ -22,6 +22,7 @@ def rest_exception_handler(exc, context):
     if response is not None:
         response.data['status_code'] = response.status_code
     elif isinstance(exc, ValidationError):
+        logger.debug("ValidationError: %s - %s", exc.message, exc)
         response = Response({
             'status': 'error',
             'error_code': 'ERR_VALIDATION',

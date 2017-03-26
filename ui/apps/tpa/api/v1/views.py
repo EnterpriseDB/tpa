@@ -19,6 +19,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
+from rest_framework.serializers import ValidationError
 
 from tpa import models
 
@@ -114,7 +115,7 @@ class UserInviteConfirmationView(APIView):
         data["id"] = invite.user_id
         ser = serializers.UserInvitedRegistrationSerializer(data=data)
         if not ser.is_valid():
-            return Response(status=400, data={"error": "Invalid registration"})
+            raise ValidationError(ser.errors)
 
         return Response(status=200, data={"user": user.id})
 
