@@ -113,18 +113,12 @@ export function object_get(cls, uuid, callback) {
     return auth.json_request(`${API_URL}${cls}/${uuid}/`)
         .get(callback);
 }
-export function user_invite_accept(invite, username, password, ssh_public_keys, 
-        callback ) {
-    var req_data = new FormData();
-    req_data.append("invite", invite);
-    req_data.append("username", username);
-    req_data.append("password", password);
-    req_data.append("ssh_public_keys", JSON.stringify(ssh_public_keys));
 
-    return auth.json_request(`${API_URL}auth/user-invite/${invite}/`)
-        .on('load', r => callback(null, r))
-        .on('error', e => callback(e, null))
-        .send('POST', req_data);
+export function object_update(cls, uuid, json_object, callback) {
+    return auth.json_request(`${API_URL}${cls}/${uuid}/`)
+        .header("Content-Type", "application/json")
+        .post(JSON.stringify(json_object), callback);
+}
 
 export function object_create(cls, json_object, callback) {
     return auth.json_request(`${API_URL}${cls}/`)

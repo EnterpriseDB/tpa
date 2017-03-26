@@ -97,19 +97,20 @@ function user_invite_accept() {
         let sub = d3.select(this);
 
         let invite = get_url_vars().invite;
-        let username = sub.select("input.username").node().value;
-        let password = sub.select("input.password").node().value;
-        let ssh_public_keys = sub.select("input.ssh_public_keys").node().value;
 
-        console.log("called:", invite);
-
-        api.user_invite_accept(invite, username, password, ssh_public_keys,
+        api.object_update('auth/user-invite', invite, {
+                username: sub.select("input.username").node().value,
+                password: sub.select("input.password").node().value,
+                first_name: sub.select("input.first_name").node().value,
+                last_name: sub.select("input.last_name").node().value,
+                ssh_public_keys: 
+                    JSON.stringify(sub.select("input.ssh_public_keys").node().value),
+            },
             (error, data) => {
-            if(error) {
-                alert("Registration Error:" + error);
-                return;
-            }
-
+                if(error) {
+                    alert(`Invite Error: ${error.currentTarget.response}`);
+                    return;
+                }
             window.location = "/user_home.html";
         });
     });
