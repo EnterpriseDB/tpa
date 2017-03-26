@@ -175,6 +175,13 @@ class UserInvitationSerializer(serializers.ModelSerializer):
         model = models.UserInvitation
         fields = ('email', 'new_tenant_name')
 
+    def validate(self, data):
+        logger.debug("UIS: validate %s", data)
+        validated_data = super(UserInvitationSerializer, self).validate(data)
+        if 'email' not in validated_data:
+            raise ValidationError({"message", "Email is required"});
+        return validated_data
+
     def create(self, data):
         invite = models.UserInvitation.objects.create(
             email=data['email'],
