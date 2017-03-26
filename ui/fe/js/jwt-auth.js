@@ -126,15 +126,20 @@ export class JWTAuth {
         this.dispatch.call("logout");
     }
 
-    json_request(url) {
-        let req = d3.request(url)
-            .header('Content-Type', 'application/json')
-            .response(r => JSON.parse(r.responseText));
+    request(url) {
+        console.log("Requested:", url);
+        let req = d3.request(url);
 
         if (!this.logged_in) {
             return req;
         }
 
         return req.header("Authorization", `JWT ${this.token}`);
+    }
+
+    json_request(url) {
+        return this.request(url)
+            .mimeType('application/json')
+            .response(r => JSON.parse(r.responseText));
     }
 }
