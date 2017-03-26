@@ -113,14 +113,13 @@ export class JWTAuth {
     }
 
     get logged_in() {
-        return (this.storage.getItem('jwt_auth_token') ? true : false);
+        return (this.token ? true : false);
     }
 
     get username() {
-        return this.storage.getItem('jwt_auth_token') ?
-            this.storage.getItem('jwt_auth_username')
-            : "";
+        return this.token ? this.storage.getItem('jwt_auth_username') : "";
     }
+
 
     logout() {
         this.set_token(null, null);
@@ -128,13 +127,14 @@ export class JWTAuth {
     }
 
     json_request(url) {
-        var auth_token = this.storage.getItem("jwt_auth_token");
-        var bearer = (auth_token === null || auth_token === undefined) ?  ""
-                : ("JWT " + auth_token);
-
-        return d3.request(url)
-            .mimeType("application/json")
-            .header("Authorization", bearer)
+        let req = d3.request(url)
+            .header('Content-Type', 'application/json')
             .response(r => JSON.parse(r.responseText));
+
+        if (!this.logged_in) {
+            return req;
+        }
+
+        return req.header("Authorization", `JWT ${this.token}`);
     }
 }
