@@ -89,11 +89,27 @@ export function get_obj_by_url(url, _then) {
     });
 }
 
+export function class_to_url(cls) {
+    return `${API_URL}${cls}/`
+}
 
+export function uuid_to_url(cls, uuid) {
+    return `${API_URL}${cls}/${uuid}/`
+}
 export function user_invite(email, callback) {
     var req_data = new FormData();
     req_data.append("email", email);
 
+function json_to_form(json_object) {
+    let form = new FormData();
+    for (let key in json_object) {
+        if (json_object.hasOwnProperty(key)) {
+            console.log("key", key, "val:", json_object[key]);
+            form.append(key, json_object[key]);
+        }
+    }
+    console.log("Form:", form);
+    return form;
     return auth.json_request(`${API_URL}auth/user-invite/`)
         .on('load', r => callback(null, r))
         .on('error', e => callback(e, null))
@@ -190,10 +206,9 @@ export function cluster_upload(tenant, config_yml, callback) {
     req_data.append("tenant", tenant);
     req_data.append("config_yml", config_yml);
 
-    auth.json_request(API_URL+'cluster_upload_yml/')
-        .on('load', r => callback(null, r))
-        .on('error', e => callback(e, null))
-        .send('POST', req_data);
+    auth.request(class_to_url('cluster_upload_yml'))
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .post(req_data, callback);
 }
 
 
