@@ -47,6 +47,15 @@ const url_cache = {};
 
 // API Operations
 
+export function class_to_url(cls) {
+    return `${API_URL}${cls}/`
+}
+
+export function uuid_to_url(cls, uuid) {
+    return `${API_URL}${cls}/${uuid}/`
+}
+
+
 export function get_obj_by_url(url, _then) {
     if (url_cache[url]) {
         if (_then) {
@@ -89,13 +98,6 @@ export function get_obj_by_url(url, _then) {
     });
 }
 
-export function class_to_url(cls) {
-    return `${API_URL}${cls}/`
-}
-
-export function uuid_to_url(cls, uuid) {
-    return `${API_URL}${cls}/${uuid}/`
-}
 
 function json_to_form(json_object) {
     let form = new FormData();
@@ -202,18 +204,6 @@ export function get_cluster_by_uuid(cluster_uuid, _then) {
             _then(c);
         });
 }
-
-
-export function cluster_upload(tenant, config_yml, callback) {
-    var req_data = new FormData();
-    req_data.append("tenant", tenant);
-    req_data.append("config_yml", config_yml);
-
-    auth.request(class_to_url('cluster_upload_yml'))
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .post(req_data, callback);
-}
-
 
 // Reflection
 

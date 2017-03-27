@@ -121,23 +121,19 @@ function cluster_import() {
     d3.selectAll("form.cluster_import").on("submit", function()  {
         d3.event.preventDefault();
 
-        let root = d3.select(this)
-        let tenant = root.select("input.tenant").node().value;
-        let config_yml = root.select("input.config_yml").node().files[0];
+        let root = d3.select(this);
 
         // api.cluster_upload(tenant, config_yml, function(error, res) {
-
-        api.object_create('cluster_upload_yml',
-            {
-                tenant: tenant,
-                config_yml: config_yml
-            },
-            (error, res) => {
-                if (error) {
-                    alert(`Import Error: ${error.currentTarget.responseText}`);
-                    return;
-                }
-                window.location = `/cluster.html?cluster=${res.cluster}`;
+        api.auth.json_request(api.class_to_url('cluster_upload_yml'))
+            .post(api.json_to_form({
+                tenant: root.select("input.tenant").node().value,
+                config_yml: root.select("input.config_yml").node().files[0]}),
+                (error, res) => {
+                    if (error) {
+                        alert(`Import Error: ${error.currentTarget.responseText}`);
+                        return;
+                    }
+                    window.location = `/cluster.html?cluster=${res.cluster}`;
         });
         return true;
     });
