@@ -26,16 +26,6 @@
           <a class="navbar-brand" href="#">Trusted PostgreSQL Architecture</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
-          <form class="navbar-form navbar-right login_form">
-            <div class="form-group">
-              <input type="text" placeholder="Username" class="form-control username">
-              <input type="hidden" class="on-success-redirect" value="/home.html">
-            </div>
-            <div class="form-group">
-              <input type="password" placeholder="Password" class="form-control password">
-            </div>
-            <button type="submit" class="btn btn-success btn-sm">Sign In</button>
-          </form>
         </div><!--/.navbar-collapse -->
       </div>
     </nav>
@@ -43,8 +33,20 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
       <div class="container">
-        <h2>Welcome to 2ndQuadrant TPA</h2>
+        <h3>Welcome to 2ndQuadrant TPA</h3>
         <p>Thanks for your interest! Access is currently limited to invited users only.</p>
+        <div class="row">
+            <form class="navbar-form navbar-right login_form">
+                <div class="form-group">
+                    <input type="text" placeholder="Username" class="form-control username">
+                    <input type="hidden" class="on-success-redirect" value="/home.html">
+                </div>
+                <div class="form-group">
+                    <input type="password" placeholder="Password" class="form-control password">
+                </div>
+                <button type="submit" class="btn btn-success btn-sm">Sign In</button>
+            </form>
+        </div>
       </div>
     </div>
 
