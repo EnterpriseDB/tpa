@@ -112,7 +112,6 @@ class UserInviteConfirmationView(APIView):
         '''
         invite = models.UserInvitation.objects.get(uuid=uuid)
         data = request.data
-        data["id"] = invite.user_id
         ser = serializers.UserInvitedRegistrationSerializer(data=data)
         if not ser.is_valid():
             raise ValidationError(ser.errors)
