@@ -69,12 +69,6 @@ module.exports = {
             inject: 'body',
         }),
         new HtmlWebpackPlugin({
-            template: './fe/user_invite_accept.html.ejs',
-            title: "Login",
-            filename: 'user_invite_accept.html',
-            inject: 'body',
-        }),
-        new HtmlWebpackPlugin({
             template: './fe/user_home.html.ejs',
             title: "My Clusters",
             filename: 'user_home.html',
@@ -86,8 +80,9 @@ module.exports = {
             inject: 'body',
         }),
         new HtmlWebpackPlugin({
-            template: './fe/cluster_upload.html.ejs',
-            filename: 'cluster_upload.html',
+            template: './fe/user_invite_accept.html.ejs',
+            title: "Login",
+            filename: 'user_invite_accept.html',
             inject: 'body',
         }),
         new webpack.ProvidePlugin({
