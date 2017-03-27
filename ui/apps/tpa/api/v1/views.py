@@ -14,6 +14,7 @@ from django.db import transaction
 from django.contrib.auth import get_user_model
 
 from rest_framework import viewsets
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -97,6 +98,7 @@ class UserInvitationView(APIView):
 
 class UserInviteConfirmationView(APIView):
     permission_classes = (AllowAny,)
+    authentication_classes = (BasicAuthentication,)
 
     def get(self, request, uuid):
         '''User has clicked the invite link.
@@ -110,8 +112,8 @@ class UserInviteConfirmationView(APIView):
     def post(self, request, uuid):
         '''User invited registration form submission.
         '''
-        invite = models.UserInvitation.objects.get(uuid=uuid)
         data = request.data
+        data['invite'] = uuid
         ser = serializers.UserInvitedRegistrationSerializer(data=data)
         if not ser.is_valid():
             raise ValidationError(ser.errors)

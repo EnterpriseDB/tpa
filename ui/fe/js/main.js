@@ -98,6 +98,8 @@ function user_invite_accept() {
 
         let invite = get_url_vars().invite;
 
+        api.auth.logout();
+
         api.object_update('auth/user-invite', invite, {
                 username: sub.select("input.username").node().value,
                 password: sub.select("input.password").node().value,
