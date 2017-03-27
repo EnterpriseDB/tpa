@@ -45,8 +45,6 @@ export const auth = new JWTAuth(AUTH_URL);
 // url -> obj
 const url_cache = {};
 
-// API Operations
-
 export function class_to_url(cls) {
     return `${API_URL}${cls}/`
 }
@@ -55,6 +53,14 @@ export function uuid_to_url(cls, uuid) {
     return `${API_URL}${cls}/${uuid}/`
 }
 
+export function method() {
+    return multimethod().dispatch(model_class);
+}
+
+const link_object = method();
+
+// API Operations
+//
 
 export function get_obj_by_url(url, _then) {
     if (url_cache[url]) {
@@ -90,6 +96,10 @@ export function get_obj_by_url(url, _then) {
             return;
         }
 
+        if (o.url) {
+            link_object(o);
+        }
+
         url_cache[o.url] = o;
         if (_then) {
             _then(o);
@@ -102,11 +112,9 @@ function json_to_form(json_object) {
     let form = new FormData();
     for (let key in json_object) {
         if (json_object.hasOwnProperty(key)) {
-            console.log("key", key, "val:", json_object[key]);
             form.append(key, json_object[key]);
         }
     }
-    console.log("Form:", form);
     return form;
 }
 
@@ -139,7 +147,6 @@ export function load_provider(callback) {
     auth.json_request(`${API_URL}provider/`).get((error, providers) => {
         if(error) {
             if (error.currentTarget.status == 403) {
-                console.log("Returned 403");
                 auth.display_login(() => load_provider(callback));
             }
             else {
@@ -149,7 +156,7 @@ export function load_provider(callback) {
         }
 
         default_provider = providers;
-        providers.forEach(p => link_provider(p));
+        providers.forEach(p => link_object(p));
         callback();
     });
 }
@@ -168,7 +175,11 @@ function link_provider(provider) {
             }
         });
     });
+
+    return provider;
 }
+
+link_object.when('provider', link_provider);
 
 
 function link_cluster(cluster) {
@@ -180,28 +191,24 @@ function link_cluster(cluster) {
             instance.instance_type = url_cache[instance.instance_type];
         }
     }
+
+    return cluster;
 }
+
+link_object.when('cluster', link_cluster);
 
 
 export function get_all(klass, filter, _then) {
     // TODO: implement filtering.
     return get_obj_by_url(`${API_URL}${klass}/`, objects => {
-        for (let o of objects) {
-            if (model_class(o) == 'cluster') {
-                link_cluster(o);
-            }
-        }
+        objects.each(link_object);
         _then(objects);
     });
 }
 
 
 export function get_cluster_by_uuid(cluster_uuid, _then) {
-    return get_obj_by_url(
-        `${API_URL}cluster/${cluster_uuid}/`, c => {
-            link_cluster(c);
-            _then(c);
-        });
+    return get_obj_by_url(uuid_to_url('cluster', cluster_uuid), _then);
 }
 
 // Reflection
@@ -273,9 +280,6 @@ export function data_class(d) {
     return model_class(d.data);
 }
 
-export function method() {
-    return multimethod().dispatch(model_class);
-}
 
 export function class_method() {
     return multimethod().dispatch(data_class);
