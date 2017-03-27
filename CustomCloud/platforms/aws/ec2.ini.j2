@@ -4,8 +4,14 @@ regions = {{ regions|join(",") }}
 regions_exclude = us-gov-west-1,cn-north-1
 
 hostname_variable = tag_Name
+
+{% if cluster_addressing|default('public') == 'private' %}
+destination_variable = private_dns_name
+vpc_destination_variable = private_ip_address
+{% else %}
 destination_variable = public_dns_name
 vpc_destination_variable = ip_address
+{% endif %}
 
 all_instances = True
 
