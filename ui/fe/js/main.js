@@ -97,6 +97,14 @@ function user_invite_accept() {
         let sub = d3.select(this);
 
         let invite = get_url_vars().invite;
+        let ssh_keys = sub.select("input.ssh_public_keys").node().value;
+
+        if (ssh_keys) {
+            ssh_keys = JSON.parse(ssh_keys);
+        }
+        else {
+            ssh_keys = [];
+        }
 
         api.auth.logout();
 
@@ -105,8 +113,7 @@ function user_invite_accept() {
                 password: sub.select("input.password").node().value,
                 first_name: sub.select("input.first_name").node().value,
                 last_name: sub.select("input.last_name").node().value,
-                ssh_public_keys: 
-                    JSON.stringify(sub.select("input.ssh_public_keys").node().value),
+                ssh_public_keys: ssh_keys
             },
             (error, data) => {
                 if(error) {

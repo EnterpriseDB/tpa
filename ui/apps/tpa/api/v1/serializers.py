@@ -199,14 +199,9 @@ class UserInvitedRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ('id', 'username', 'first_name', 'last_name', 'password', 'invite', 'ssh_public_keys')
-        write_only_fields = ('password',)
+        write_only_fields = ('password', 'invite')
         read_only_fields = ('is_staff', 'is_superuser',
                             'is_active', 'date_joined', 'id')
-
-    def validate(self, data, *args, **kwargs):
-        self.invite = models.UserInvitation.objects.get(uuid=data['invite'])
-        data["id"] = self.invite.user_id
-        return super(UserInvitedRegistrationSerializer, self).validate(data, *args, **kwargs)
 
     def update(self, instance, data):
         with transaction.atomic():
@@ -221,7 +216,7 @@ class UserInvitedRegistrationSerializer(serializers.ModelSerializer):
             tenant.ssh_public_keys = data['ssh_public_keys']
             tenant.save()
 
-            self.invite.delete()
+            self._invite.delete()
 
         return instance
 

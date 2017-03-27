@@ -113,12 +113,16 @@ class UserInviteConfirmationView(APIView):
         '''User invited registration form submission.
         '''
         data = request.data
+        invite = models.UserInvitation.objects.get(uuid=uuid)
+        user = get_user_model().objects.get(id=invite.user_id)
         data['invite'] = uuid
-        ser = serializers.UserInvitedRegistrationSerializer(data=data)
-        if not ser.is_valid():
-            raise ValidationError(ser.errors)
 
-        return Response(status=200, data={"user": user.id})
+        ser = serializers.UserInvitedRegistrationSerializer(user, data=data)
+        ser._invite = invite
+        ser.is_valid(raise_exception=True)
+        ser.save()
+
+        return Response(status=200, data={"user": invite.user_id})
 
 
 # Cluster
