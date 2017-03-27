@@ -45,9 +45,16 @@ FIXTURE_DIRS = [
     'apps/tpa/fixtures/test',
 ]
 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'colored': {
+            '()': 'tpasite.color_formatter.DjangoColorsFormatter',
+            'format': '%(levelname)s %(module)s %(message)s',
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse',
@@ -65,6 +72,7 @@ LOGGING = {
         'console_debug': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+            'formatter': 'colored',
         },
         'null': {
             'class': 'logging.NullHandler',
