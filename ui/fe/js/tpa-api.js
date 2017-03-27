@@ -76,7 +76,7 @@ export function get_obj_by_url(url, _then) {
 
     auth.json_request(url).get(function(error, o) {
         if (error) {
-            console.log("API fetch error:", error, "url:", url);
+            console.log("get_obj_by_url: fetch error", error);
             if (error.currentTarget.status == 403) {
                 auth.display_login(() => get_obj_by_url(url, _then));
             }
@@ -90,7 +90,6 @@ export function get_obj_by_url(url, _then) {
             return;
         }
 
-        console.log("API get URL:", url);
         url_cache[o.url] = o;
         if (_then) {
             _then(o);
