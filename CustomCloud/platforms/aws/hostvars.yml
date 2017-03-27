@@ -19,18 +19,33 @@
       source: ec2_tag_backup
     - var: upstream
       source: ec2_tag_upstream
-    - var: public_ip
-      source: ec2_ip_address
-    - var: private_ip
-      source: ec2_private_ip_address
 
-# By default, we use each node's private IP address for inter-node
-# communication. We also make note of which address variables are set.
+# EC2 instances in a VPC always have a private IP address, so we prepare
+# to use that by default. If a public IP address is assigned, we can use
+# that instead.
 
-- name: Set primary IP and list available addresses
+- name: Set private IP address
+  set_fact:
+    private_ip: "{{ ec2_private_ip_address }}"
+  when:
+    private_ip is not defined
+
+- name: Set public IP address if available
+  set_fact:
+    public_ip: "{{ ec2_ip_address }}"
+  when:
+    public_ip is not defined and ec2_ip_address is defined
+
+- name: Set private IP address as the primary address
   set_fact:
     ip_address: "{{ private_ip }}"
-    ip_addresses: ['public_ip', 'private_ip']
+    ip_addresses: ['private_ip']
+
+- name: Add public_ip to the address list if available
+  set_fact:
+    ip_addresses: "{{ ip_addresses|union(['public_ip']) }}"
+  when:
+    public_ip is defined
 
 # Add 'postgres' to role when any of 'primary' or 'replica' or 'witness'
 # is given, just as a convenience.
