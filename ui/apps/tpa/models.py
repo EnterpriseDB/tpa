@@ -124,7 +124,23 @@ class TenantOwnedMixin(BaseModel):
 
 
 class Cluster(TenantOwnedMixin):
-    pass
+    P_DESIGN = 'D'
+    P_REQUESTED = 'R'
+    P_PROVISIONED = 'P'
+    P_HISTORICAL = 'H'
+    P_TEMPLATE = 'T'
+
+    provision_state = CharField(max_length=1, choices=[
+        (P_DESIGN, 'Design'),
+        (P_REQUESTED, 'Requested'),
+        (P_PROVISIONED, 'Provisioned'),
+        (P_HISTORICAL, 'Historical'),
+        (P_TEMPLATE, 'Template')
+    ], default=P_DESIGN)
+    parent_cluster = ForeignKey('Cluster',
+                                null=True,
+                                editable=False,
+                                related_name='children')
 
 
 class ProviderCredential(TenantOwnedMixin):
