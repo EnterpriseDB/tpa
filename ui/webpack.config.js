@@ -69,9 +69,9 @@ module.exports = {
             inject: 'body',
         }),
         new HtmlWebpackPlugin({
-            template: './fe/user_home.html.ejs',
+            template: './fe/home.html.ejs',
             title: "My Clusters",
-            filename: 'user_home.html',
+            filename: 'home.html',
             inject: 'body',
         }),
         new HtmlWebpackPlugin({

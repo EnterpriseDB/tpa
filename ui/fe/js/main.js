@@ -111,7 +111,7 @@ function user_invite_accept() {
                     alert(`Invite Error: ${error.currentTarget.response}`);
                     return;
                 }
-            window.location = "/user_home.html";
+            window.location = "/home.html";
         });
     });
 }
