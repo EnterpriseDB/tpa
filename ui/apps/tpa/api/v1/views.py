@@ -157,7 +157,7 @@ class TenantOwnedViewSet(viewsets.ModelViewSet):
         # TODO replace with "currently active tenant"
         user_tenants = models.Tenant.objects.filter(owner=user)
 
-        return queryset.filter(tenant_in=user_tenants)
+        return queryset.filter(tenant__in=user_tenants)
 
 
 def create_generic_viewset(model_class):
