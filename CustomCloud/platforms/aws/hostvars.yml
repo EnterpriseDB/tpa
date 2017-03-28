@@ -24,6 +24,10 @@
 # to use that by default. If a public IP address is assigned, we can use
 # that instead.
 
+- name: Set ip_addresses to []
+  set_fact:
+    ip_addresses: []
+
 - name: Set private IP address
   set_fact:
     private_ip: "{{ ec2_private_ip_address }}"
@@ -44,13 +48,13 @@
 
 - name: Add private_ip to the address list if available
   set_fact:
-    ip_addresses: "{{ ip_addresses|default([])|union(['private_ip']) }}"
+    ip_addresses: "{{ ip_addresses|union(['private_ip']) }}"
   when:
     private_ip is defined
 
 - name: Add public_ip to the address list if available
   set_fact:
-    ip_addresses: "{{ ip_addresses|default([])|union(['public_ip']) }}"
+    ip_addresses: "{{ ip_addresses|union(['public_ip']) }}"
   when:
     public_ip is defined
 
