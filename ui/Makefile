@@ -10,6 +10,11 @@ ifeq "$(role)" ""
 role := dev
 endif
 
+ifneq "$(VIRTUAL_ENV)" ""
+env = "$(VIRTUAL_ENV)"
+endif
+
+
 django_manage := DJANGO_SETTINGS_CONFIG="tpasite.conf.$(role)" ./apps/manage.py
 
 all:
