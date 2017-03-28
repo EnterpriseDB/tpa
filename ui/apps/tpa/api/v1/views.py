@@ -18,9 +18,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 from rest_framework.views import APIView
-from rest_framework.serializers import ValidationError
 
 from tpa import models
 
@@ -42,8 +40,7 @@ class UserInvitationView(APIView):
     def post(self, request):
         logger.debug("data: %s", request.data)
         ser = serializers.UserInvitationSerializer(data=request.data)
-        if not ser.is_valid():
-            raise ValidationError(ser.errors)
+        ser.is_valid(raise_exception=True)
         data = ser.validated_data
 
         invites = models.UserInvitation.objects.filter(email=data['email'])
@@ -133,8 +130,7 @@ class ClusterUploadView(APIView):
 
     def post(self, request):
         ser = serializers.ConfigYmlSerializer(data=request.data)
-        if not ser.is_valid():
-            raise ValidationError(ser.errors);
+        ser.is_valid(raise_exception=True)
         cluster = ser.create(ser.validated_data)
 
         return Response(status=200, data={"cluster": cluster.uuid})
