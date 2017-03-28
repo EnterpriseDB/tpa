@@ -20,9 +20,15 @@
     - var: upstream
       source: ec2_tag_upstream
 
-# EC2 instances in a VPC always have a private IP address, so we prepare
-# to use that by default. If a public IP address is assigned, we can use
-# that instead.
+# An EC2 instance in a VPC will always have a private IP address. It may
+# also have a public IP address (which may or may not be an elastic IP).
+# The static inventory file that we generate will have ansible_host set
+# to an elastic IP, or if one does not exist, the public IP, or if that
+# doesn't exist either, the private IP.
+#
+# Here we enumerate the available ip_addresses (so that we can generate
+# an appropriate known_hosts, for example) and pick a default address to
+# use within the cluster.
 
 - name: Set ip_addresses to []
   set_fact:
@@ -30,10 +36,9 @@
 
 - name: Set private IP address
   set_fact:
-    private_ip: "{{ ec2_private_ip_address }}"
+    private_ip: "{{ ec2_private_ip_address|default(ansible_host) }}"
   when:
-    private_ip is not defined and
-    ec2_private_ip_address is defined
+    private_ip is not defined
 
 - name: Set public IP address if available
   set_fact:
@@ -42,21 +47,21 @@
     public_ip is not defined and
     ec2_ip_address is defined
 
-- name: Set primary IP address
-  set_fact:
-    ip_address: "{{ private_ip|default(public_ip)|default(ansible_host) }}"
-
-- name: Add private_ip to the address list if available
+- name: Add private_ip to the address list
   set_fact:
     ip_addresses: "{{ ip_addresses|union(['private_ip']) }}"
   when:
     private_ip is defined
 
-- name: Add public_ip to the address list if available
+- name: Add public_ip to the address list
   set_fact:
     ip_addresses: "{{ ip_addresses|union(['public_ip']) }}"
   when:
     public_ip is defined
+
+- name: Set primary IP address
+  set_fact:
+    ip_address: "{{ private_ip|default(public_ip) }}"
 
 # Add 'postgres' to role when any of 'primary' or 'replica' or 'witness'
 # is given, just as a convenience.
