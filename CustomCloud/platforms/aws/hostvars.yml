@@ -28,22 +28,29 @@
   set_fact:
     private_ip: "{{ ec2_private_ip_address }}"
   when:
-    private_ip is not defined
+    private_ip is not defined and
+    ec2_private_ip_address is defined
 
 - name: Set public IP address if available
   set_fact:
     public_ip: "{{ ec2_ip_address }}"
   when:
-    public_ip is not defined and ec2_ip_address is defined
+    public_ip is not defined and
+    ec2_ip_address is defined
 
-- name: Set private IP address as the primary address
+- name: Set primary IP address
   set_fact:
-    ip_address: "{{ private_ip }}"
-    ip_addresses: ['private_ip']
+    ip_address: "{{ private_ip|default(public_ip)|default(ansible_host) }}"
+
+- name: Add private_ip to the address list if available
+  set_fact:
+    ip_addresses: "{{ ip_addresses|default([])|union(['private_ip']) }}"
+  when:
+    private_ip is defined
 
 - name: Add public_ip to the address list if available
   set_fact:
-    ip_addresses: "{{ ip_addresses|union(['public_ip']) }}"
+    ip_addresses: "{{ ip_addresses|default([])|union(['public_ip']) }}"
   when:
     public_ip is defined
 
