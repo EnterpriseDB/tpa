@@ -46,8 +46,6 @@ BUILD_PATH = os.getenv('BUILD_PATH', 'build')
 BUILD_PATH_REL = (BUILD_PATH if BUILD_PATH.startswith('/') else
                   os.path.join(BASE_DIR, "..", "..", BUILD_PATH))
 
-print("BUILD_PATH_REL:", BUILD_PATH_REL)
-
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "..", "fe"),
     os.path.join(BUILD_PATH_REL, 'static'),

@@ -14,6 +14,7 @@ from django.db import transaction
 from django.contrib.auth import get_user_model
 
 from rest_framework import viewsets
+from rest_framework.decorators import api_view
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
@@ -154,6 +155,15 @@ class TenantOwnedViewSet(viewsets.ModelViewSet):
         user_tenants = models.Tenant.objects.filter(owner=user)
 
         return queryset.filter(tenant__in=user_tenants)
+
+
+@api_view()
+def template_list(request):
+    templates = models.Cluster.objects.filter(
+        provision_state=models.Cluster.P_TEMPLATE)
+    ser = ClusterViewSet.serializer_class(templates, many=True)
+
+    return Response(200, ser)
 
 
 def create_generic_viewset(model_class):

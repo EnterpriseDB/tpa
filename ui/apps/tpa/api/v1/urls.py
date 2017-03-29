@@ -42,5 +42,6 @@ auth_patterns = [
 urlpatterns += [
     url(r'^auth/', include(auth_patterns)),
     url(r'^cluster_upload_yml/', views.ClusterUploadView.as_view()),
+    url(r'^template/', views.template_list),
     url(r'', unknown_api_endpoint, name='unknown-api-endpoint')
 ]
