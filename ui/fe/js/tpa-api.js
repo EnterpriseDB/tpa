@@ -108,7 +108,7 @@ export function get_obj_by_url(url, _then) {
 }
 
 
-function json_to_form(json_object) {
+export function json_to_form(json_object) {
     let form = new FormData();
     for (let key in json_object) {
         if (json_object.hasOwnProperty(key)) {
