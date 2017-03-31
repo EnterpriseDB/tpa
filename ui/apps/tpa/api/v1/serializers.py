@@ -157,7 +157,6 @@ def validate_tenant_for_cluster_create(view, value):
     default_tenant = models.Tenant.for_request(request)
 
     if not value:
-        logging.debug("returning default tenant for view %s, %s", view, default_tenant)
         return default_tenant
 
     tenant = models.Tenant.objects.get(uuid=value)
@@ -166,7 +165,7 @@ def validate_tenant_for_cluster_create(view, value):
         if tenant.owner == user or user.is_staff or user.is_admin:
             return tenant
 
-    raise ValidationError("Not allowed to change ownership")
+    raise serializers.ValidationError("Not allowed to change ownership")
 
 
 class ConfigYmlSerializer(serializers.ModelSerializer):
@@ -208,30 +207,26 @@ class ClusterFromTemplateSerializer(serializers.ModelSerializer):
     validate_tenant = validate_tenant_for_cluster_create
 
     def validate_template(self, value):
-        return models.Cluster.get(uuid=value,
-                                  provision_state=models.Cluster.P_TEMPLATE)
+        return models.Cluster.objects.get(
+            uuid=value,
+            provision_state=models.Cluster.P_TEMPLATE)
 
     def create(self, validated_data):
-        tenant = (validated_data.get('tenant') or self.validate_tenant(None))
-        return models.Cluster.clone_cluster(tenant, validated_data['template'])
+        return models.Cluster.clone(
+            validated_data['template'],
+            tenant=validated_data.get('tenant') or self.validate_tenant(None))
 
     def update(self, *args, **kwargs):
-        raise NotImplementedErrror
+        raise NotImplementedError
+
 
 class UserInvitationSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField()
+    email = serializers.EmailField(required=True)
     new_tenant_name = serializers.CharField(required=False)
 
     class Meta:
         model = models.UserInvitation
         fields = ('email', 'new_tenant_name')
-
-    def validate(self, data):
-        logger.debug("UIS: validate %s", data)
-        validated_data = super(UserInvitationSerializer, self).validate(data)
-        if 'email' not in validated_data:
-            raise ValidationError({"message", "Email is required"});
-        return validated_data
 
     def create(self, data):
         invite = models.UserInvitation.objects.create(
