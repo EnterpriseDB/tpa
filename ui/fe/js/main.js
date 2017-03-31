@@ -133,7 +133,7 @@ function cluster_import() {
         let root = d3.select(this);
 
         // api.cluster_upload(tenant, config_yml, function(error, res) {
-        api.auth.json_request(api.class_to_url('cluster_upload_yml'))
+        api.auth.json_request(api.class_to_url('cluster')+"import")
             .post(api.json_to_form({
                 tenant: root.select("input.tenant").node().value,
                 config_yml: root.select("input.config_yml").node().files[0]}),
@@ -149,6 +149,35 @@ function cluster_import() {
 
     d3.selectAll("button.cluster_import").on("click", function() {
         $("#cluster_import_dialog").modal("show");
+    });
+}
+
+function cluster_create() {
+    d3.selectAll("form.cluster_create").on("submit", function()  {
+        d3.event.preventDefault();
+
+        let root = d3.select(this);
+        let tmpl = root.select("select.template").node();
+        let template = tmpl.options[tmpl.selectedIndex].value;
+
+        api.auth.json_request(api.class_to_url('cluster')+"import")
+            .post(api.json_to_form({
+                name: root.select("input.name").node().value,
+                tenant: root.select("input.tenant").node().value,
+                template: template
+            }),
+                (error, res) => {
+                    if (error) {
+                        alert(`Import Error: ${error.currentTarget.responseText}`);
+                        return;
+                    }
+                    window.location = `/cluster.html?cluster=${res.cluster}`;
+                });
+        return true;
+    });
+
+    d3.selectAll("button.cluster_create").on("click", function() {
+        $("#cluster_create_dialog").modal("show");
     });
 }
 
@@ -192,10 +221,6 @@ function cluster_list() {
                 .classed("cluster_row", true)
                 .call(add_cluster);
     });
-}
-
-function cluster_create() {
-    // TODO
 }
 
 // Main entry point.

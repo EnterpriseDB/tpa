@@ -13,7 +13,7 @@ import string
 from django.db import transaction
 from django.contrib.auth import get_user_model
 
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from rest_framework.decorators import api_view
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -45,11 +45,10 @@ class UserInvitationView(APIView):
         data = ser.validated_data
 
         invites = models.UserInvitation.objects.filter(email=data['email'])
+        users = get_user_model().objects.filter(email=data['email'])
 
         if invites.exists():
             invites.delete()
-
-        users = models.UserInvitation.objects.filter(email=data['email'])
 
         if users:
             user = users.first()
@@ -69,7 +68,7 @@ class UserInvitationView(APIView):
 
             tenant = models.Tenant.objects.create(
                 name=data.get('new_tenant_name', data['email']),
-                              owner=user)
+                owner=user)
 
             invite = ser.create(data)
             invite.user_id = user.id
@@ -94,7 +93,7 @@ class UserInvitationView(APIView):
         return Response(status=200, data={"user": user.id})
 
 
-class UserInviteConfirmationView(APIView):
+class UserInvitationRetrieveView(generics.RetrieveAPIView):
     permission_classes = (AllowAny,)
     authentication_classes = (BasicAuthentication,)
 
@@ -125,16 +124,9 @@ class UserInviteConfirmationView(APIView):
 
 # Cluster
 
-class ClusterUploadView(APIView):
+class ClusterUploadView(generics.CreateAPIView):
     permission_classes = (IsAdminUser,)
     parser_classes = (MultiPartParser, FormParser)
-
-    def post(self, request):
-        ser = serializers.ConfigYmlSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
-        cluster = ser.create(ser.validated_data)
-
-        return Response(status=200, data={"cluster": cluster.uuid})
 
 
 # Generic views

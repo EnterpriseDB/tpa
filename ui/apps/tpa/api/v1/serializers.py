@@ -167,6 +167,40 @@ class ConfigYmlSerializer(serializers.Serializer):
         raise NotImplementedError
 
 
+class ClusterFromTemplateSerializer(serializers.ModelSerializer):
+    template = serializers.UUIDField()
+    name = serializers.CharField(required=False)
+
+    class Meta:
+        model = models.Cluster
+        fields = ('template', 'name')
+
+    def validate_template(self, value):
+        return models.Cluster.get(uuid=value,
+                                  provision_state=models.Cluster.P_TEMPLATE)
+
+    def validate_tenant(self, value):
+        user = self.context['request'].user
+        default_tenant = models.Tenant.for_request(user)
+
+        if not value:
+            return default_tenant
+
+        tenant = models.Tenant.objects.get(uuid=value)
+
+        if tenant.uuid != default_tenant.uuid:
+            if tenant.owner == user or user.is_staff or user.is_admin:
+                return tenant
+
+        raise ValidationError("Not allowed to change ownership")
+
+    def create(self, validated_data):
+        return models.Cluster.clone_cluster(validated_data['tenant'],
+                                            validated_data['template'])
+
+    def update(self, *args, **kwargs):
+        raise NotImplementedErrror
+
 class UserInvitationSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
     new_tenant_name = serializers.CharField(required=False)

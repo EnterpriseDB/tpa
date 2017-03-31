@@ -23,8 +23,6 @@ router = routers.DefaultRouter()
 for view_class in views.ALL_VIEWS:
     router.register(view_class.object_class, view_class)
 
-urlpatterns = router.urls
-
 def unknown_api_endpoint(request):
     raise Http404("Unknown API endpoint")
 
@@ -41,7 +39,7 @@ auth_patterns = [
 
 urlpatterns = [
     url(r'^auth/', include(auth_patterns)),
-    url(r'^cluster_upload_yml/', views.ClusterUploadView.as_view()),
+    url(r'^cluster/import', views.ClusterUploadView.as_view()),
     url(r'^template/', views.template_list),
 ]
 
