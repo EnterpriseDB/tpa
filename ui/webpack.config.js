@@ -53,7 +53,12 @@ module.exports = {
             {
                 test: /.jpe?g$|.gif$|.png$|.svg$|.woff$|.woff2$|.ttf$|.eot$/,
                 loader: "url"
-            }
+            },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
+            },
+
         ]
     },
     plugins: [
@@ -91,5 +96,10 @@ module.exports = {
             jQuery: 'jquery',
             jquery: 'jquery'
         })
-    ]
+    ],
+    vue: {
+        loaders: {
+            js: 'babel?presets[]=es2015'
+        }
+    }
 };
