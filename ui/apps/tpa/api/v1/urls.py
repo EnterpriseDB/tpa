@@ -39,9 +39,14 @@ auth_patterns = [
     url(r'^verify/', verify_jwt_token),
 ]
 
-urlpatterns += [
+urlpatterns = [
     url(r'^auth/', include(auth_patterns)),
     url(r'^cluster_upload_yml/', views.ClusterUploadView.as_view()),
     url(r'^template/', views.template_list),
+]
+
+urlpatterns += router.urls
+
+urlpatterns += [
     url(r'', unknown_api_endpoint, name='unknown-api-endpoint')
 ]
