@@ -154,7 +154,7 @@ def filter_fields(model_class):
 class ConfigYmlSerializer(serializers.Serializer):
     '''Parse a config.yml and create a new cluster.
     '''
-    tenant = serializers.UUIDField()
+    tenant = serializers.UUIDField(required=False)
     config_yml = serializers.FileField(required=True)
 
     def create(self, validated_data):
