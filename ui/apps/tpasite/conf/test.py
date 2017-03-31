@@ -86,22 +86,22 @@ LOGGING = {
     'loggers': {
         'tpa.api.v1.views': {
             'handlers': ['console_debug'],
-            'level': DEBUG,
+            'level': 'DEBUG',
             'propagate': True,
         },
         'tpa.api.v1.serializers': {
             'handlers': ['console_debug'],
-            'level': DEBUG,
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django': {
             'handlers': ['console_debug'],
-            'level': DEBUG,
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django.request': {
             'handlers': ['console_debug'],
-            'level': 'ERROR',
+            'level': 'DEBUG',
             'propagate': False,
         },
         'django.security': {
