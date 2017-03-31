@@ -128,6 +128,10 @@ class ClusterUploadView(generics.CreateAPIView):
     permission_classes = (IsAdminUser,)
     parser_classes = (MultiPartParser, FormParser)
 
+    def get_serializer_class(self):
+        if 'template' in self.request.data:
+            return serializers.ClusterFromTemplateSerializer
+        return serializers.ConfigYmlSerializer
 
 # Generic views
 
