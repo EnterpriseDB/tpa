@@ -15,6 +15,8 @@ import {show_cluster_diagram} from "./cluster-diagram";
 import * as d3 from "d3";
 import {get_url_vars} from "./utils";
 import $ from "jquery";
+import Vue from 'vue';
+import App from '../App.vue';
 
 
 function unhide_page_once_scripts_loaded() {
@@ -133,17 +135,17 @@ function cluster_import() {
         let root = d3.select(this);
 
         // api.cluster_upload(tenant, config_yml, function(error, res) {
-        api.auth.json_request(api.class_to_url('cluster')+"import")
-            .post(api.json_to_form({
-                tenant: root.select("input.tenant").node().value,
-                config_yml: root.select("input.config_yml").node().files[0]}),
-                (error, res) => {
-                    if (error) {
-                        alert(`Import Error: ${error.currentTarget.responseText}`);
-                        return;
-                    }
-                    window.location = `/cluster.html?cluster=${res.cluster}`;
-        });
+        api.cluster_create({
+            tenant: root.select("input.tenant").node().value,
+            config_yml: root.select("input.config_yml").node().files[0]
+        },
+            (error, res) => {
+                if (error) {
+                    alert(`Import Error: ${error.currentTarget.responseText}`);
+                    return;
+                }
+                window.location = `/cluster.html?cluster=${res.uuid}`;
+            });
         return true;
     });
 
@@ -160,19 +162,18 @@ function cluster_create() {
         let tmpl = root.select("select.template").node();
         let template = tmpl.options[tmpl.selectedIndex].value;
 
-        api.auth.json_request(api.class_to_url('cluster')+"import")
-            .post(api.json_to_form({
-                name: root.select("input.name").node().value,
-                tenant: root.select("input.tenant").node().value,
-                template: template
-            }),
-                (error, res) => {
-                    if (error) {
-                        alert(`Import Error: ${error.currentTarget.responseText}`);
-                        return;
-                    }
-                    window.location = `/cluster.html?cluster=${res.cluster}`;
-                });
+        api.cluster_create({
+            name: root.select("input.name").node().value,
+            tenant: root.select("input.tenant").node().value,
+            template: template
+        },
+            (error, res) => {
+                if (error) {
+                    alert(`Create Error: ${error.currentTarget.responseText}`);
+                    return;
+                }
+                window.location = `/cluster.html?cluster=${res.uuid}`;
+            });
         return true;
     });
 
@@ -249,4 +250,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Cluster page
     show_cluster_diagram();
+
+    /* eslint-disable no-new */
+    new Vue({
+    el: '#app',
+    template: '<App/>',
+    components: { App }
+    })
+
 });

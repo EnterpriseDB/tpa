@@ -151,15 +151,43 @@ def filter_fields(model_class):
     return tuple(all_fields)
 
 
-class ConfigYmlSerializer(serializers.Serializer):
+def validate_tenant_for_cluster_create(view, value):
+    request = view.context['request']
+    user = request.user
+    default_tenant = models.Tenant.for_request(request)
+
+    if not value:
+        logging.debug("returning default tenant for view %s, %s", view, default_tenant)
+        return default_tenant
+
+    tenant = models.Tenant.objects.get(uuid=value)
+
+    if tenant.uuid != default_tenant.uuid:
+        if tenant.owner == user or user.is_staff or user.is_admin:
+            return tenant
+
+    raise ValidationError("Not allowed to change ownership")
+
+
+class ConfigYmlSerializer(serializers.ModelSerializer):
     '''Parse a config.yml and create a new cluster.
     '''
-    tenant = serializers.UUIDField(required=False)
-    config_yml = serializers.FileField(required=True)
+    uuid = serializers.UUIDField(read_only=True)
+    name = serializers.CharField(required=False)
+    tenant = serializers.UUIDField(required=False, write_only=True)
+    config_yml = serializers.FileField(required=True, write_only=True)
+
+    class Meta:
+        model = models.Cluster
+        fields = ('uuid', 'name', 'tenant', 'config_yml')
+
+    validate_tenant = validate_tenant_for_cluster_create
 
     def create(self, validated_data):
+        tenant = (validated_data.get('tenant') or self.validate_tenant(None))
+
         return yml_to_cluster(
-            tenant_uuid=validated_data['tenant'],
+            tenant_uuid=tenant.uuid,
             provider_name=DEFAULT_PROVIDER_NAME,
             yaml_text=validated_data['config_yml'])
 
@@ -168,35 +196,24 @@ class ConfigYmlSerializer(serializers.Serializer):
 
 
 class ClusterFromTemplateSerializer(serializers.ModelSerializer):
-    template = serializers.UUIDField()
+    uuid = serializers.UUIDField(read_only=True)
     name = serializers.CharField(required=False)
+    tenant = serializers.UUIDField(required=False, write_only=True)
+    template = serializers.UUIDField(required=True, write_only=True)
 
     class Meta:
         model = models.Cluster
-        fields = ('template', 'name')
+        fields = ('uuid', 'name', 'tenant', 'template')
+
+    validate_tenant = validate_tenant_for_cluster_create
 
     def validate_template(self, value):
         return models.Cluster.get(uuid=value,
                                   provision_state=models.Cluster.P_TEMPLATE)
 
-    def validate_tenant(self, value):
-        user = self.context['request'].user
-        default_tenant = models.Tenant.for_request(user)
-
-        if not value:
-            return default_tenant
-
-        tenant = models.Tenant.objects.get(uuid=value)
-
-        if tenant.uuid != default_tenant.uuid:
-            if tenant.owner == user or user.is_staff or user.is_admin:
-                return tenant
-
-        raise ValidationError("Not allowed to change ownership")
-
     def create(self, validated_data):
-        return models.Cluster.clone_cluster(validated_data['tenant'],
-                                            validated_data['template'])
+        tenant = (validated_data.get('tenant') or self.validate_tenant(None))
+        return models.Cluster.clone_cluster(tenant, validated_data['template'])
 
     def update(self, *args, **kwargs):
         raise NotImplementedErrror

@@ -156,7 +156,7 @@ export function load_provider(callback) {
         }
 
         default_provider = providers;
-        providers.forEach(p => link_object(p));
+        providers.forEach(link_object);
         callback();
     });
 }
@@ -198,9 +198,15 @@ function link_cluster(cluster) {
 link_object.when('cluster', link_cluster);
 
 
+export function cluster_create(json_object, callback) {
+    return auth.json_request(class_to_url('cluster')+"import")
+        .post(json_to_form(json_object), callback);
+};
+
+
 export function get_all(klass, filter, _then) {
     // TODO: implement filtering.
-    return get_obj_by_url(`${API_URL}${klass}/`, objects => {
+    return get_obj_by_url(class_to_url(klass), objects => {
         objects.each(link_object);
         _then(objects);
     });
