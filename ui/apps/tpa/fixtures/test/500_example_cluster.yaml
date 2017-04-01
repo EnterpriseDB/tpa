@@ -1,21 +1,3 @@
-- model: tpa.tenant
-  pk: d9073da2-138f-4342-8cb8-3462be0b325a
-  fields:
-    name: "2nd Quadant"
-    created: "2016-11-28T10:25+0000"
-    updated: "2016-11-28T10:25+0000"
-
-- model: tpa.providercredential
-  pk: 08258259-a0f5-41ec-b927-ca9443f98b77
-  fields:
-    name: "Dummy EC2 Access Key"
-    created: "2016-11-28T10:25+0000"
-    updated: "2016-11-28T10:25+0000"
-    tenant: d9073da2-138f-4342-8cb8-3462be0b325a
-    provider: c2b1c094-03fd-5d95-b7f3-656fc9f62d72
-    shared_identity: "$access_key"
-    shared_secret: "$secret_access_key"
-    user_tags: "{}"
 
 - model: tpa.cluster
   pk: 8d4ad6a9-e679-4662-acac-ce25e1f4246d
