@@ -152,13 +152,13 @@ class TenantOwnedViewSet(viewsets.ModelViewSet):
         return queryset.filter(tenant__in=user_tenants)
 
 
-@api_view()
-def template_list(request):
-    templates = models.Cluster.objects.filter(
-        provision_state=models.Cluster.P_TEMPLATE)
-    ser = ClusterViewSet.serializer_class(templates, many=True)
+class TemplateListView(generics.ListAPIView):
+    def get_serializer_class(self):
+        return Cluster.serializer_class
 
-    return Response(200, ser)
+    def get_queryset(self):
+        return models.Cluster.objects.filter(
+            provision_state=models.Cluster.P_TEMPLATE)
 
 
 def create_generic_viewset(model_class):

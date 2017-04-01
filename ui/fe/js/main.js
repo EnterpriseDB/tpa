@@ -134,7 +134,6 @@ function cluster_import() {
 
         let root = d3.select(this);
 
-        // api.cluster_upload(tenant, config_yml, function(error, res) {
         api.cluster_create({
             tenant: root.select("input.tenant").node().value,
             config_yml: root.select("input.config_yml").node().files[0]
@@ -178,8 +177,32 @@ function cluster_create() {
     });
 
     d3.selectAll("button.cluster_create").on("click", function() {
+        refresh_cluster_create_form();
         $("#cluster_create_dialog").modal("show");
     });
+}
+
+
+function refresh_cluster_create_form() {
+    d3.selectAll("form.cluster_create")
+        .select("select.template")
+        .call(function(template_selection) {
+            api.object_list("template", "",
+                (error, clusters) => {
+                    if (error) {
+                        template_selection.text("(Load error)");
+                        return;
+                    }
+
+                    template_selection
+                        .selectAll("option")
+                        .data(clusters)
+                        .enter()
+                        .append("option")
+                        .attr("value", (t) => t.uuid)
+                        .text((t) => t.name);
+                });
+        });
 }
 
 

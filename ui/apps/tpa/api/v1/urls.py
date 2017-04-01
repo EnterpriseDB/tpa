@@ -35,7 +35,7 @@ auth_patterns = [
 urlpatterns = [
     url(r'^auth/', include(auth_patterns)),
     url(r'^cluster/import', views.ClusterUploadView.as_view()),
-    url(r'^template/', views.template_list),
+    url(r'^template/', views.TemplateListView.as_view()),
 ]
 
 router = routers.DefaultRouter()
