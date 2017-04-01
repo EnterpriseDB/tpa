@@ -12,7 +12,7 @@ from uuid import uuid4
 from django.conf import settings
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.postgres.fields import ArrayField, JSONField
-from django.core.exceptions import ValidationError
+#from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import (BooleanField, CharField, DateTimeField,
                               ForeignKey, PositiveIntegerField, TextField,
@@ -70,7 +70,21 @@ class BaseModel(UUIDMixin, TimestampMixin):
     def __unicode__(self):
         return unicode(self.name or self.uuid)
 
-###
+    @classmethod
+    def clone(cls, __source, link_map=None, role_map=None, **kwargs):
+        new_obj = __source.__class__.objects.get(uuid=__source.uuid)
+        new_obj.uuid = None
+        new_obj.created = None
+        new_obj.updated = None
+
+        for (field, value) in kwargs.iteritems():
+            setattr(new_obj, field, value)
+
+        new_obj.save()
+
+        return new_obj
+
+# Provider
 
 
 class Provider(BaseModel):
@@ -98,7 +112,7 @@ class VolumeType(BaseModel):
     provider = OwnerKey('Provider', related_name="volume_types")
 
 
-##
+# User
 
 class UserInvitation(UUIDMixin, TimestampMixin):
     '''An invitation to an unregistered user
@@ -108,11 +122,17 @@ class UserInvitation(UUIDMixin, TimestampMixin):
     new_tenant_name = TextField(null=True)
 
 
+# Tenant
+
 class Tenant(BaseModel):
     owner = ForeignKey(settings.AUTH_USER_MODEL, editable=True,
                        on_delete=models.CASCADE,
                        null=True)
     ssh_public_keys = ArrayField(TextField(), default=[])
+
+    @classmethod
+    def for_request(cls, request):
+        return cls.objects.filter(owner=request.user.id).first()
 
 
 class TenantOwnedMixin(BaseModel):
@@ -121,6 +141,47 @@ class TenantOwnedMixin(BaseModel):
 
     class Meta:
         abstract = True
+
+
+class ProviderCredential(TenantOwnedMixin):
+    provider = ForeignKey('Provider', related_name='credentials')
+    shared_identity = TextLineField()
+    shared_secret = TextLineField()
+
+    @classmethod
+    def default_for_tenant(cls, tenant, provider):
+        return cls.objects.get(tenant=tenant, provider=provider)
+
+    @classmethod
+    def create_default_for_tenant(cls, tenant, provider):
+        cred = cls(tenant=tenant,
+                   provider=provider,
+                   shared_identity='',
+                   shared_secret='')
+        cred.save()
+        return cred
+
+    @classmethod
+    def clone(cls, __source, tenant, **kwargs):
+        # Ensure we are never copying secrets between tenants.
+        if tenant == __source.tenant:
+            return __source
+
+        # look for creds matching provider
+        t_creds = cls.objects.filter(provider=__source.provider)
+        if not t_creds.empty():
+            return t_creds
+
+        # new stub creds for same provider
+        return super(ProviderCredential, cls).clone(
+            __source,
+            name=__source.provider.name,
+            tenant=tenant,
+            shared_identity='',
+            shared_secret='',
+            **kwargs)
+
+# Cluster
 
 
 class Cluster(TenantOwnedMixin):
@@ -142,16 +203,50 @@ class Cluster(TenantOwnedMixin):
                                 editable=False,
                                 related_name='children')
 
+    @classmethod
+    def clone(cls, __source, tenant, **kwargs):
+        new_cluster = super(Cluster, cls).clone(__source,
+                                                tenant=tenant,
+                                                provision_state=cls.P_DESIGN,
+                                                parent_cluster=None,
+                                                **kwargs)
 
-class ProviderCredential(TenantOwnedMixin):
-    provider = ForeignKey('Provider', related_name='credentials')
-    shared_identity = TextLineField()
-    shared_secret = TextLineField()
+        link_map = {}
+        role_map = {}
+
+        for vpc in __source.vpc_set.all():
+            vpc.__class__.clone(vpc,
+                                cluster=new_cluster,
+                                link_map=link_map,
+                                role_map=role_map,
+                                **kwargs)
+
+        # set client role for new links to new roles corresponding to source
+        for (source_link_uuid, new_link) in link_map.iteritems():
+            source_link = RoleLink.objects.get(uuid=source_link_uuid)
+            old_server_role = source_link.server_role
+            new_link.server_role = role_map[old_server_role.uuid]
+            new_link.save()
+
+        return new_cluster
 
 
 class VPC(TenantOwnedMixin):
     cluster = OwnerKey('Cluster')
     provider = ForeignKey('Provider', related_name='vpcs')
+
+    @classmethod
+    def clone(cls, __source, cluster, **kwargs):
+        new_vpc = super(VPC, cls).clone(__source,
+                                        tenant=cluster.tenant,
+                                        cluster=cluster,
+                                        **kwargs)
+
+        for subnet in __source.subnets.all():
+            subnet.__class__.clone(subnet, vpc=new_vpc, cluster=cluster,
+                                   **kwargs)
+
+        return new_vpc
 
 
 class Subnet(TenantOwnedMixin):
@@ -160,6 +255,27 @@ class Subnet(TenantOwnedMixin):
     vpc = ForeignKey('VPC', related_name='subnets')
     credentials = ForeignKey('ProviderCredential', related_name='subnets')
     netmask = TextLineField()
+
+    @classmethod
+    def clone(cls, __source, vpc, cluster, **kwargs):
+        new_credentials = __source.credentials.__class__.clone(
+            __source.credentials,
+            tenant=cluster.tenant,
+            **kwargs)
+
+        new_subnet = super(Subnet, cls).clone(
+            __source,
+            vpc=vpc,
+            zone=__source.zone,
+            tenant=cluster.tenant,
+            cluster=cluster,
+            credentials=new_credentials,
+            **kwargs)
+
+        for instance in __source.instances.all():
+            instance.__class__.clone(instance, subnet=new_subnet, **kwargs)
+
+        return new_subnet
 
 
 class Instance(TenantOwnedMixin):
@@ -175,11 +291,32 @@ class Instance(TenantOwnedMixin):
     def fqdn(self):
         return self.hostname + '.' + self.domain
 
+    @classmethod
+    def clone(cls, __source, subnet, **kwargs):
+        new_instance = BaseModel.clone(__source,
+                                       tenant=subnet.tenant,
+                                       subnet=subnet,
+                                       instance_type=__source.instance_type,
+                                       **kwargs)
+
+        # src_vol.uuid -> new_vol, used to remap VolumeUse.volume.
+        vol_map = {}
+
+        for vol in __source.volumes.all():
+            new_vol = vol.__class__.clone(vol, instance=new_instance, **kwargs)
+            vol_map[vol.uuid] = new_vol
+
+        for role in __source.roles.all():
+            role.__class__.clone(role,
+                                 instance=new_instance,
+                                 vol_map=vol_map,
+                                 **kwargs)
+
+        return new_instance
+
 
 class Role(TenantOwnedMixin):
-    # This isn't used anywhere yet, but some are needed when defining
-    # role link types, since the config.yml attaches links to instances and
-    # not roles.
+    instance = OwnerKey('Instance', related_name='roles')
 
     # Generated with:
     # find -iname config.yml | xargs grep role: | \
@@ -203,9 +340,33 @@ class Role(TenantOwnedMixin):
         'witness',
     ]
 
-    instance = OwnerKey('Instance', related_name='roles')
     role_type = TextLineField(choices=[(_c, _c) for _c in ROLE_TYPES],
                               default='adhoc')
+
+    @classmethod
+    def clone(cls, __source, instance, vol_map, link_map, role_map, **kwargs):
+        new_role = super(Role, cls).clone(__source,
+                                          instance=instance,
+                                          tenant=instance.tenant,
+                                          **kwargs)
+
+        role_map[__source.uuid] = new_role
+
+        for source_link in __source.client_links.all():
+            new_link = RoleLink.clone(source_link,
+                                      tenant=new_role.tenant,
+                                      client_role=new_role,
+                                      **kwargs)
+            link_map[source_link.uuid] = new_link
+
+        for vol_use in __source.used_volumes.all():
+            vol_use.__class__.clone(
+                vol_use,
+                tenant=new_role.tenant,
+                role=new_role,
+                volume=vol_map[vol_use.uuid])
+
+        return new_role
 
 
 class RoleLink(TenantOwnedMixin):

@@ -35,14 +35,13 @@ ALL_VIEWS = []
 # User
 
 
-class UserInvitationView(APIView):
+class UserInvitationCreateView(generics.CreateAPIView):
     permission_classes = (IsAdminUser,)
+    serializer_class = serializers.UserInvitationSerializer
+    model = models.UserInvitation
 
-    def post(self, request):
-        logger.debug("data: %s", request.data)
-        ser = serializers.UserInvitationSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
-        data = ser.validated_data
+    def perform_create(self, serializer):
+        data = serializer.validated_data
 
         invites = models.UserInvitation.objects.filter(email=data['email'])
         users = get_user_model().objects.filter(email=data['email'])
