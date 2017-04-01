@@ -124,7 +124,7 @@ class UserInvitationRetrieveView(generics.RetrieveAPIView):
 # Cluster
 
 class ClusterUploadView(generics.CreateAPIView):
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAuthenticated,)
     parser_classes = (MultiPartParser, FormParser)
 
     def get_serializer_class(self):
