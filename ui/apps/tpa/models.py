@@ -169,8 +169,8 @@ class ProviderCredential(TenantOwnedMixin):
 
         # look for creds matching provider
         t_creds = cls.objects.filter(provider=__source.provider)
-        if not t_creds.empty():
-            return t_creds
+        if t_creds:
+            return t_creds.first()
 
         # new stub creds for same provider
         return super(ProviderCredential, cls).clone(
