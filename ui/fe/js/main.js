@@ -19,6 +19,33 @@ import Vue from 'vue';
 import App from '../App.vue';
 
 
+function main_app() {
+    unhide_page_once_scripts_loaded();
+
+    // User registration page
+    user_invite_accept();
+
+    // Login page
+    login_form();
+
+    // User Home page
+    cluster_list();
+    user_invite();
+    cluster_import();
+    cluster_create();
+
+    // Cluster page
+    show_cluster_diagram();
+
+    /* eslint-disable no-new */
+    new Vue({
+        el: '#app',
+        template: '<App/>',
+        components: { App }
+    });
+}
+
+
 function unhide_page_once_scripts_loaded() {
     d3.selectAll("#cover").style("visibility", "hidden");
 }
@@ -259,26 +286,5 @@ api.auth.on("login.unhide-body", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    unhide_page_once_scripts_loaded();
-
-    // Login page
-    login_form();
-
-    // User home
-    user_invite();
-    user_invite_accept();
-    cluster_list();
-    cluster_import();
-    cluster_create();
-
-    // Cluster page
-    show_cluster_diagram();
-
-    /* eslint-disable no-new */
-    new Vue({
-    el: '#app',
-    template: '<App/>',
-    components: { App }
-    })
-
+    main_app();
 });
