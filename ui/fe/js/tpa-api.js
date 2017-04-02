@@ -9,6 +9,9 @@
 import {multimethod} from "./multimethod";
 import {JWTAuth} from "./jwt-auth.js";
 
+
+// Constants and Globals
+
 const API_URL = "/api/v1/tpa/";
 const AUTH_URL = API_URL+"auth/";
 
@@ -37,13 +40,21 @@ const ROLES_BY_PRIORITY = [
 ];
 
 
-// Default provider data (currently only EC2)
-var default_provider = null;
 
-export const auth = new JWTAuth(AUTH_URL);
+// Model
 
-// url -> obj
-const url_cache = {};
+export function model_class(d) {
+    if ( d && d.url) {
+        var api_idx = d.url.indexOf(API_URL);
+        if (api_idx >= 0) {
+            var obj_path = d.url.slice(api_idx+API_URL.length);
+            var next_slash = obj_path.indexOf("/");
+            return obj_path.slice(0, next_slash);
+        }
+    }
+
+    return null;
+}
 
 export function class_to_url(cls) {
     return `${API_URL}${cls}/`
@@ -57,10 +68,58 @@ export function method() {
     return multimethod().dispatch(model_class);
 }
 
-const link_object = method();
-
-// API Operations
+// API authentication
 //
+
+export const auth = new JWTAuth(AUTH_URL);
+
+
+// Basic API Operations
+//
+
+export function object_get(cls, uuid, callback) {
+    return auth.json_request(`${API_URL}${cls}/${uuid}/`)
+        .get(callback);
+}
+
+export function object_update(cls, uuid, json_object, callback) {
+    return auth.json_request(`${API_URL}${cls}/${uuid}/`)
+        .header("Content-Type", "application/json")
+        .post(JSON.stringify(json_object), callback);
+}
+
+export function object_create(cls, json_object, callback) {
+    return auth.json_request(`${API_URL}${cls}/`)
+        .header("Content-Type", "application/json")
+        .post(JSON.stringify(json_object), callback);
+}
+
+export function object_list(cls, filter, callback) {
+    let filter_text = filter ? `?${filter}` : "";
+    return auth.json_request(`${API_URL}${cls}/${filter_text}`)
+        .header("Content-Type", "application/json")
+        .get(callback);
+}
+
+
+export function json_to_form(json_object) {
+    let form = new FormData();
+    for (let key in json_object) {
+        if (json_object.hasOwnProperty(key)) {
+            form.append(key, json_object[key]);
+        }
+    }
+    return form;
+}
+
+
+// TPA operations providing linking when fetching deeply serialized objects.
+//
+
+const link_object = method();
+const url_cache = {};
+var default_provider = null;
+
 
 export function get_obj_by_url(url, _then) {
     if (url_cache[url]) {
@@ -108,40 +167,16 @@ export function get_obj_by_url(url, _then) {
 }
 
 
-export function json_to_form(json_object) {
-    let form = new FormData();
-    for (let key in json_object) {
-        if (json_object.hasOwnProperty(key)) {
-            form.append(key, json_object[key]);
-        }
-    }
-    return form;
+export function get_all(klass, filter, _then) {
+    // TODO: implement filtering.
+    return get_obj_by_url(class_to_url(klass), objects => {
+        objects.each(link_object);
+        _then(objects);
+    });
 }
 
-export function object_get(cls, uuid, callback) {
-    return auth.json_request(`${API_URL}${cls}/${uuid}/`)
-        .get(callback);
-}
 
-export function object_update(cls, uuid, json_object, callback) {
-    return auth.json_request(`${API_URL}${cls}/${uuid}/`)
-        .header("Content-Type", "application/json")
-        .post(JSON.stringify(json_object), callback);
-}
-
-export function object_create(cls, json_object, callback) {
-    return auth.json_request(`${API_URL}${cls}/`)
-        .header("Content-Type", "application/json")
-        .post(JSON.stringify(json_object), callback);
-}
-
-export function object_list(cls, filter, callback) {
-    let filter_text = filter ? `?${filter}` : "";
-    return auth.json_request(`${API_URL}${cls}/${filter_text}`)
-        .header("Content-Type", "application/json")
-        .get(callback);
-}
-
+// Provider data
 
 export function load_provider(callback) {
     auth.json_request(`${API_URL}provider/`).get((error, providers) => {
@@ -182,6 +217,8 @@ function link_provider(provider) {
 link_object.when('provider', link_provider);
 
 
+// Cluster data
+
 function link_cluster(cluster) {
     for (let subnet of cluster.subnets) {
         subnet.zone = url_cache[subnet.zone];
@@ -204,33 +241,8 @@ export function cluster_create(json_object, callback) {
 };
 
 
-export function get_all(klass, filter, _then) {
-    // TODO: implement filtering.
-    return get_obj_by_url(class_to_url(klass), objects => {
-        objects.each(link_object);
-        _then(objects);
-    });
-}
-
-
 export function get_cluster_by_uuid(cluster_uuid, _then) {
     return get_obj_by_url(uuid_to_url('cluster', cluster_uuid), _then);
-}
-
-// Reflection
-
-
-export function model_class(d) {
-    if ( d && d.url) {
-        var api_idx = d.url.indexOf(API_URL);
-        if (api_idx >= 0) {
-            var obj_path = d.url.slice(api_idx+API_URL.length);
-            var next_slash = obj_path.indexOf("/");
-            return obj_path.slice(0, next_slash);
-        }
-    }
-
-    return null;
 }
 
 
@@ -253,6 +265,7 @@ export function cluster_type(cluster) {
     return cluster_type;
 }
 
+// Instance
 
 /**
  * Returns the primary role of this instance, or undefined if no relevant
@@ -271,6 +284,8 @@ export function instance_role(instance) {
 }
 
 
+// Subnet
+
 export function subnet_has_primary(subnet) {
     for (let instance of subnet.instances) {
         if (instance_role(instance).role_type == 'primary') {
@@ -281,7 +296,8 @@ export function subnet_has_primary(subnet) {
     return false;
 }
 
-// Used by selections
+// Used by diagram selections, should be elsewhere
+
 export function data_class(d) {
     return model_class(d.data);
 }
@@ -295,7 +311,3 @@ export function is_instance(filter) {
     return multimethod().dispatch(data_class)
         .when(filter, true).default(false);
 }
-
-// forms
-
-
