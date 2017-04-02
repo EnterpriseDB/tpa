@@ -69,7 +69,7 @@ class UserInvitationCreateView(generics.CreateAPIView):
                 name=data.get('new_tenant_name', data['email']),
                 owner=user)
 
-            invite = ser.create(data)
+            invite = serializer.create(data)
             invite.user_id = user.id
             invite.save()
 
