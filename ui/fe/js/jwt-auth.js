@@ -48,13 +48,6 @@ export class JWTAuth {
 
         d3.request(this.auth_url_base+'login/')
             .header("Content-Type", "application/json")
-            .on('load', function(xhr) {
-                let json_response = JSON.parse(xhr.responseText);
-
-                auth.set_token(username, json_response.token);
-                auth.dispatch.call("login");
-                callback(null, json_response.token);
-            })
             .on('error', function(error) {
                 console.log("Login failed:", error);
                 auth.set_token(null, null);
@@ -62,11 +55,59 @@ export class JWTAuth {
                 callback(error);
 
             })
+            .on('load', function(xhr) {
+                let json_response = JSON.parse(xhr.responseText);
+
+                auth.set_token(username, json_response.token);
+                auth.poll_refresh();
+                auth.dispatch.call("login");
+                callback(null, json_response.token);
+            })
             .send('POST', JSON.stringify({
                 'username': username,
                 'password': password
             }));
     }
+
+    poll_refresh() {
+        let auth = this;
+        let original_token = auth.token;
+        let poll_wait = 2*60*1000;
+
+        function refresh_until_token_changed() {
+            console.log("auth refresh");
+            if (!auth.token) {
+                console.log("auth refresh: logging out");
+                auth.dispatch.call("logout");
+                return;
+            }
+
+            if (auth.token != original_token) { return; }
+
+            d3.request(`${auth.auth_url_base}refresh/`)
+                .header("Content-Type", "application/json")
+                .on('load', function(xhr) {
+                    console.log("auth refresh: ok");
+                    let json_response = JSON.parse(xhr.responseText);
+                    original_token = json_response.token;
+                    auth.set_token(auth.username, json_response.token);
+                    window.setTimeout(refresh_until_token_changed, poll_wait);
+
+                    auth.dispatch.call("login");
+                })
+                .on('error', function(error) {
+                    console.log("auth refresh: ERROR");
+                    auth.set_token(null, null);
+                    auth.dispatch.call("logout");
+                })
+                .send('POST', JSON.stringify({
+                    'token': original_token
+                }));
+        }
+
+        window.setTimeout(refresh_until_token_changed, poll_wait);
+    }
+
 
     verify(callback) {
         let auth = this;
@@ -84,6 +125,7 @@ export class JWTAuth {
             .header("Content-Type", "application/json")
             .on('load', function(xhr) {
                 let json_response = JSON.parse(xhr.responseText);
+                auth.poll_refresh();
                 auth.dispatch.call("login");
                 if (callback) {
                     callback(null, json_response.token);
