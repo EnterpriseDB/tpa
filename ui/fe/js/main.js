@@ -234,7 +234,7 @@ function refresh_cluster_create_form() {
 
 
 function cluster_list() {
-    let column_names = ["Name", "Created", "Last update"];
+    let column_names = ["Name"];
     let root = d3.select(".cluster_list");
     if (root.empty()) { return; }
 
@@ -247,9 +247,6 @@ function cluster_list() {
             .append("a")
             .attr("href", d => `/cluster.html?cluster=${d.uuid}`)
             .text(d => d.name);
-
-        selection.append("td") .text(d => Date(d.created).toLocaleString());
-        selection.append("td") .text(d => Date(d.updated).toLocaleString());
     }
 
     table.append("tr")
