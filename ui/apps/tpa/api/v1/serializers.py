@@ -185,10 +185,16 @@ class ConfigYmlSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tenant = (validated_data.get('tenant') or self.validate_tenant(None))
 
-        return yml_to_cluster(
+        cluster = yml_to_cluster(
             tenant_uuid=tenant.uuid,
             provider_name=DEFAULT_PROVIDER_NAME,
             yaml_text=validated_data['config_yml'])
+
+        if 'name' in validated_data:
+            cluster.name = validated_data['name']
+            cluster.save()
+
+        return cluster
 
     def update(self, *args, **kwargs):
         raise NotImplementedError
@@ -214,6 +220,7 @@ class ClusterFromTemplateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return models.Cluster.clone(
             validated_data['template'],
+            name=validated_data.get('name') or validated_data['template'].name,
             tenant=validated_data.get('tenant') or self.validate_tenant(None))
 
     def update(self, *args, **kwargs):

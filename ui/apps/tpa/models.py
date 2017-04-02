@@ -204,9 +204,10 @@ class Cluster(TenantOwnedMixin):
                                 related_name='children')
 
     @classmethod
-    def clone(cls, __source, tenant, **kwargs):
+    def clone(cls, __source, name, tenant, **kwargs):
         new_cluster = super(Cluster, cls).clone(__source,
                                                 tenant=tenant,
+                                                name=name,
                                                 provision_state=cls.P_DESIGN,
                                                 parent_cluster=None,
                                                 **kwargs)
