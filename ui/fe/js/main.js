@@ -15,8 +15,7 @@ import {show_cluster_diagram} from "./cluster-diagram";
 import * as d3 from "d3";
 import {get_url_vars} from "./utils";
 import $ from "jquery";
-import Vue from 'vue';
-import App from '../App.vue';
+//import Vue from 'vue';
 
 
 function main_app() {
@@ -37,12 +36,13 @@ function main_app() {
     // Cluster page
     show_cluster_diagram();
 
-    /* eslint-disable no-new */
+    /*
     new Vue({
         el: '#app',
         template: '<App/>',
         components: { App }
     });
+    */
 }
 
 
