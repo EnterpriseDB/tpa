@@ -26,7 +26,6 @@ from . import serializers
 
 logger = logging.getLogger(__name__)
 
-
 # Generic ModelViewSets for all model classes
 
 ALL_VIEWS = []
@@ -104,6 +103,13 @@ class UserInvitationRetrieveView(generics.RetrieveAPIView):
             "user": invite.user_id,
         })
 
+
+class UserInvitedRegistrationView(generics.UpdateAPIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = (BasicAuthentication,)
+    serializer_class = serializers.UserInvitedRegistrationSerializer
+    queryset = get_user_model().objects
+
     def post(self, request, uuid):
         '''User invited registration form submission.
         '''
@@ -139,6 +145,7 @@ for _cls_name in models.__all__:
 
 
 class TemplateListView(generics.ListAPIView):
+
     def get_serializer_class(self):
         return Cluster.serializer_class
 

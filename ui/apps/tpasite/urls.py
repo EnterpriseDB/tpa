@@ -20,6 +20,12 @@ if settings.DEBUG:
         url(r'^__debug__/', include(debug_toolbar.urls)),
     ]
 
+
+
+if 'django_ses' in settings.INSTALLED_APPS:
+    urlpatterns += [url(r'^admin/django-ses/', include('django_ses.urls'))]
+
+
 urlpatterns += [
     url(r'^$', RedirectView.as_view(url="/index.html")),
     url(r'^api/', include('tpasite.api.urls', namespace='api')),

@@ -2,6 +2,11 @@
 # vim:ts=4:sts=4:sw=4:et:ff=unix:fileencoding=utf-8
 
 '''Common changes to default Django config for all roles.
+
+NOTE:
+    Instead of changing base.py, change this. base.py is to remain in generated
+    condition.
+
 '''
 
 from __future__ import unicode_literals, absolute_import, print_function
@@ -12,14 +17,25 @@ import datetime
 
 from .base import *
 
+
+# TPA Email
+
+
+TPA_PROVISION_EMAIL_SENDER="tpa@2ndquadrant.com"
+
+# Amazon SES template.
+#EMAIL_BACKEND = 'django_ses.SESBackend'
+AWS_SES_ACCESS_KEY_ID = None
+AWS_SES_SECRET_ACCESS_KEY = None
+AWS_SES_AUTO_THROTTLE = 0.5 # (default; safety factor applied to rate limit)
+
 # Application definition
 
 INSTALLED_APPS += [
     'django.contrib.postgres',
-    #'django.contrib.sites',
     'rest_framework',
+    #'django_ses',
     'tpa',
-    #'fe',
 ]
 
 MIDDLEWARE += [
