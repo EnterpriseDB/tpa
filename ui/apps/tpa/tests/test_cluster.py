@@ -13,7 +13,7 @@ import pytest
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db()
 def test_cluster_clone():
     from tpa.models import Cluster
     old_cluster = Cluster.objects.filter(provision_state='T').first()

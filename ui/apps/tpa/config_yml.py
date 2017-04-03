@@ -6,11 +6,13 @@
 
 from __future__ import unicode_literals, absolute_import, print_function
 
-import types
 import logging
 
+import types
+import itertools
+
 from django.db import transaction
-from yaml import Loader, load as yaml_load
+from yaml import Loader, load as yaml_load, safe_dump
 
 import tpa.models as m
 
@@ -67,6 +69,8 @@ def yml_to_cluster(tenant_uuid, provider_name, yaml_text):
 
 
 def generate_cluster(root, tenant, provider, creds):
+    '''Walk the parsed yaml tree and generate a new cluster.
+    '''
     subnets = {}
     roles = {}
     links = []  # client instance, role_name, server instance, role_name
@@ -267,6 +271,67 @@ def generate_cluster(root, tenant, provider, creds):
                 client_role=coord_role)
 
     return cluster
+
+
+def generate_yml(cluster):
+    vpcs = m.VPC.objects.filter(cluster=cluster)
+    subnets = m.Subnet.objects.filter(vpc__in=vpcs)
+    instances = m.Instance.objects.filter(subnet__in=subnets)
+    roles = m.Role.objects.filter(instance__in=instances)
+    links = m.RoleLink.objects.filter(client_role__in=roles)
+    volumes = m.Volume.objects.filter(instance__in=instances)
+
+    zones = {}
+    regions = {}
+
+    for s in subnets.all():
+        zones.setdefault(s.zone, []).append(s)
+
+    for z in zones.iterkeys():
+        regions.setdefault(z.region, []).append(z)
+
+    root = {
+        "cluster_name": cluster.name,
+        "cluster_tags": cluster.user_tags,
+        "ec2_vpc": ({
+            "Name": vpcs.first().name,
+        } if vpcs.count() == 1 else [
+            {"Name": vpc.name} for vpc in vpcs.all()
+        ]),
+        "ec2_vpc_subnets": dict(
+            (region.name, dict(
+                (subnet.netmask, {'az': zone.name})
+                for zone in region_zones
+                for subnet in zones[zone]
+             ))
+            for (region, region_zones) in regions.iteritems()),
+        "instances": [{
+            'node': instance_node_id,
+            'type': instance.instance_type.name,
+            'region': instance.subnet.zone.region.name,
+            'subnet': instance.subnet.name,
+            'volumes': [{
+                'device_name': volume.name,
+                'volume_type': volume.volume_type,
+                'volume_size': volume.volume_size,
+                'delete_on_termination': volume.delete_on_termination,
+            } for volume in volumes.filter(instance=instance).all()],
+            'tags': dict(itertools.chain(
+                instance.user_tags.iteritems(),
+                [
+                    ('os', 'Debian'),
+                    ('role', [role.role_type for role in roles.filter(instance=instance).all()]),
+                    ('Name', instance.name),
+                ], [
+                    (link.name, link.server_role.instance.name)
+                        for role in roles.filter(instance=instance).all()
+                        for link in role.client_links.all()
+                ]
+            )),
+        } for (instance_node_id, instance) in enumerate(instances.all())]
+    }
+
+    return safe_dump(root, default_flow_style=False)
 
 
 if __name__ == '__main__':
