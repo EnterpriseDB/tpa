@@ -13,15 +13,14 @@ import string
 from django.db import transaction
 from django.contrib.auth import get_user_model
 
-from rest_framework import viewsets, generics
-from rest_framework.decorators import api_view
+from rest_framework import generics
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from tpa import models
+from tpa.generics import create_generic_viewset
 
 from . import serializers
 
@@ -132,24 +131,11 @@ class ClusterUploadView(generics.CreateAPIView):
             return serializers.ClusterFromTemplateSerializer
         return serializers.ConfigYmlSerializer
 
-# Generic views
 
-class TenantOwnedViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        queryset = super(TenantOwnedViewSet, self).get_queryset()
-        return self.filter_by_tenant(queryset)
-
-    def filter_by_tenant(self, queryset):
-        user = self.request.user
-        if user.is_staff or user.is_superuser:
-            return queryset
-
-        # TODO replace with "currently active tenant"
-        user_tenants = models.Tenant.objects.filter(owner=user)
-
-        return queryset.filter(tenant__in=user_tenants)
+for _cls_name in models.__all__:
+    (name, klazz) = create_generic_viewset(getattr(models, _cls_name))
+    globals()[name] = klazz
+    ALL_VIEWS.append(klazz)
 
 
 class TemplateListView(generics.ListAPIView):
@@ -159,39 +145,3 @@ class TemplateListView(generics.ListAPIView):
     def get_queryset(self):
         return models.Cluster.objects.filter(
             provision_state=models.Cluster.P_TEMPLATE)
-
-
-def create_generic_viewset(model_class):
-    '''Create and return a ViewSet class for a TPA model class. If the class
-    is owned by a tenant, a TenantOwnedViewSet is created. Otherwise,
-    a generic ViewSet with customizations is created.
-    '''
-    model_name = model_class.__name__
-    view_class_name = "%s" % model_name
-
-    serializer_class = \
-        serializers.NamespaceViewSerializer.create_model_serializer_class(
-            model_class)
-
-    if issubclass(model_class, models.TenantOwnedMixin):
-        view_base = TenantOwnedViewSet
-    else:
-        view_base = viewsets.ModelViewSet
-
-    view_class = type(str(view_class_name),
-                      (view_base,),
-                      {'queryset': model_class.objects.all(),
-                       'serializer_class': serializer_class,
-                       'object_class': model_name.lower(),
-                       'model': model_class,
-                       'lookup_field': 'uuid',
-                       '__module__': __name__,
-                       })
-
-    return (view_class_name, view_class)
-
-
-for _cls_name in models.__all__:
-    (name, klazz) = create_generic_viewset(getattr(models, _cls_name))
-    globals()[name] = klazz
-    ALL_VIEWS.append(klazz)

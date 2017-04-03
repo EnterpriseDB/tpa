@@ -10,7 +10,6 @@ import logging
 from uuid import uuid4
 
 from django.conf import settings
-from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.postgres.fields import ArrayField, JSONField
 #from django.core.exceptions import ValidationError
 from django.db import models
