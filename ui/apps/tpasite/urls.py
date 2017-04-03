@@ -24,5 +24,30 @@ urlpatterns += [
     url(r'^$', RedirectView.as_view(url="/index.html")),
     url(r'^api/', include('tpasite.api.urls', namespace='api')),
     url(r'^admin/', include(admin.site.urls)),
+]
+
+
+# static
+
+
+def rewrite_static_object(request, page, uuid, rest, *args, **kwargs):
+    new_static_path = "{0}.html".format(page)
+    request.query_params[page] = uuid
+    return views.serve(request, path=new_static_path, *args, **kwargs)
+
+def rewrite_static_list(request, page, rest, *args, **kwargs):
+    new_static_path = "{0}.html".format(page)
+    return views.serve(request, path=new_static_path, *args, **kwargs)
+
+PAGES = '''
+    index home cluster user_accept_invite login
+'''.strip().split();
+
+PAGE_MATCH = '|'.join(PAGES)
+
+urlpatterns += [
+    url(r'^(?P<page>'+PAGE_MATCH+')/(?P<uuid>[a-z0-9+])/(?P<rest>.*)$',
+        rewrite_static_object),
+    url(r'^(?P<page>'+PAGE_MATCH+')/(?P<rest>.*)$', rewrite_static_list),
     url(r'^(?P<path>.*)$', views.serve),
 ]
