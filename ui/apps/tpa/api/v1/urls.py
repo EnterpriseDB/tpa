@@ -7,7 +7,7 @@
 from __future__ import unicode_literals, absolute_import, print_function
 
 from django.conf.urls import url, include
-from django.http import Http404
+from django.http import HttpResponseNotFound
 
 from rest_framework_jwt.views import (obtain_jwt_token,
                                       refresh_jwt_token,
@@ -18,8 +18,20 @@ from rest_framework import routers
 from . import views
 
 
-def unknown_api_endpoint(request):
-    raise Http404("Unknown API endpoint")
+def unknown_api_endpoint(request, *args, **kwargs):
+    return HttpResponseNotFound("Unknown API endpoint")
+
+
+def view_by_method(**view_map):
+    default = view_map.get('default')
+
+    def method_selector_view(request, *args, **kwargs):
+        method_view = view_map.get(request.method, default)
+        if not method_view:
+            return HttpResponseNotFound("No handler for this method")
+        return method_view(request, *args, **kwargs)
+
+    return method_selector_view
 
 
 auth_patterns = [

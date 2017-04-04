@@ -10,6 +10,7 @@ from django.contrib.staticfiles import views
 from django.views.generic.base import RedirectView
 from django.contrib import admin
 
+
 admin.autodiscover()
 
 urlpatterns = []
@@ -35,25 +36,16 @@ urlpatterns += [
 
 # static
 
-
-def rewrite_static_object(request, page, uuid, rest, *args, **kwargs):
-    new_static_path = "{0}.html".format(page)
-    request.query_params[page] = uuid
-    return views.serve(request, path=new_static_path, *args, **kwargs)
-
-def rewrite_static_list(request, page, rest, *args, **kwargs):
-    new_static_path = "{0}.html".format(page)
-    return views.serve(request, path=new_static_path, *args, **kwargs)
-
 PAGES = '''
-    index home cluster user_accept_invite login
+    index login home cluster user_accept_invite
 '''.strip().split();
 
 PAGE_MATCH = '|'.join(PAGES)
 
+def rewrite_root_dir_to_html(request, page, rest, *args, **kwargs):
+    return views.serve(request, path=page+".html", *args, **kwargs)
+
 urlpatterns += [
-    url(r'^(?P<page>'+PAGE_MATCH+')/(?P<uuid>[a-z0-9+])/(?P<rest>.*)$',
-        rewrite_static_object),
-    url(r'^(?P<page>'+PAGE_MATCH+')/(?P<rest>.*)$', rewrite_static_list),
+    url(r'^(?P<page>'+PAGE_MATCH+')/(?P<rest>.*)$', rewrite_root_dir_to_html),
     url(r'^(?P<path>.*)$', views.serve),
 ]
