@@ -128,6 +128,7 @@ export function get_obj_by_url(url, _then) {
         }
         return;
     }
+    auth.logged_in_or_redirect(login_page)
 
     if (!auth.logged_in) {
         auth.display_login(() => get_obj_by_url(url, _then));
@@ -141,7 +142,6 @@ export function get_obj_by_url(url, _then) {
 
     auth.json_request(url).get(function(error, o) {
         if (error) {
-            console.log("get_obj_by_url: fetch error", error);
             if (error.currentTarget.status == 403) {
                 auth.display_login(() => get_obj_by_url(url, _then));
             }
@@ -149,6 +149,7 @@ export function get_obj_by_url(url, _then) {
                 alert("No such object.");
             }
             else {
+                console.log("Server error", error);
                 alert("Server load error. Please try again later.");
             }
 
