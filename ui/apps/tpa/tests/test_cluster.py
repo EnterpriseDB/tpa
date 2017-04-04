@@ -15,9 +15,13 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.django_db()
 def test_cluster_clone():
-    from tpa.models import Cluster
+    from tpa.models import Cluster,
     old_cluster = Cluster.objects.filter(provision_state='T').first()
-    new_cluster = Cluster.clone(old_cluster, tenant=old_cluster.tenant)
+    new_cluster = Cluster.clone(old_cluster,
+                                name=old_cluster.name,
+                                tenant=old_cluster.tenant)
+
+    assert new_cluster
 
 
 if __name__ == '__main__':
