@@ -39,9 +39,8 @@ export function show_cluster_diagram() {
 
     let vars = get_url_vars();
 
-    if (vars.cluster) {
-        d3.select("button.next-cluster").style("visibility", "hidden");
-        display_cluster_by_uuid(vars.cluster, container);
+    if (vars.uuid) {
+        tpa.get_cluster_by_uuid(vars.uuid, c => draw_cluster(c, container));
     }
 }
 
@@ -105,11 +104,6 @@ function display_selected_instance_detail(instance) {
                 let p = vol.delete_on_termination ?  "" : " persistent";
                 return `${vol.name} (${vol.volume_size}g${p} ${vol.volume_type})`;
             }).join(", "));
-}
-
-
-export function display_cluster_by_uuid(cluster_uuid, viewport) {
-    tpa.get_cluster_by_uuid(cluster_uuid, c => draw_cluster(c, viewport));
 }
 
 

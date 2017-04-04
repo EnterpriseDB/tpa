@@ -149,7 +149,7 @@ function user_invite_accept() {
                     alert(`Invite Error: ${error.currentTarget.response}`);
                     return;
                 }
-            window.location = "/home.html";
+            window.location = "/home/";
         });
     });
 }
@@ -170,7 +170,7 @@ function cluster_import() {
                     alert(`Import Error: ${error.currentTarget.responseText}`);
                     return;
                 }
-                window.location = `/cluster.html?cluster=${res.uuid}`;
+                window.location = `/cluster/${res.uuid}/`;
             });
         return true;
     });
@@ -198,7 +198,7 @@ function cluster_create() {
                     alert(`Create Error: ${error.currentTarget.responseText}`);
                     return;
                 }
-                window.location = `/cluster.html?cluster=${res.uuid}`;
+                window.location = `/cluster/${res.uuid}/`;
             });
         return true;
     });
@@ -245,7 +245,7 @@ function cluster_list() {
     function add_cluster(selection) {
         selection.append("td")
             .append("a")
-            .attr("href", d => `/cluster.html?cluster=${d.uuid}`)
+            .attr("href", d => `/cluster/${d.uuid}/`)
             .text(d => d.name);
     }
 
@@ -274,7 +274,7 @@ function cluster_list() {
 // Main entry point.
 d3.select("meta#login-required").call((s) => {
     if ( !s.empty()  ) {
-        api.auth.logged_in_or_redirect("/login.html");
+        api.auth.logged_in_or_redirect("/login/");
     }
 });
 
