@@ -43,43 +43,6 @@ export function show_cluster_diagram() {
         d3.select("button.next-cluster").style("visibility", "hidden");
         display_cluster_by_uuid(vars.cluster, container);
     }
-    else {
-        var next_cluster = show_clusters(container);
-        d3.select("button.next-cluster").on("click", () => next_cluster());
-    }
-}
-
-
-
-/**
- * Display all clusters belonging to the current tenant, one at a time.
- * Displays the first cluster immediately, returns a function to cycle to
- * the next when called.
-*/
-export function show_clusters(viewport) {
-    var clusters = [];
-    var current_cluster_idx = -1;
-
-    tpa.get_all("cluster", null, c => {
-        clusters = c;
-
-        if (clusters.length > 0) {
-            current_cluster_idx = 0;
-            draw_cluster(clusters[current_cluster_idx], viewport);
-        }
-    });
-
-    return function next_cluster() {
-        if (clusters.length < 1) {
-            return;
-        }
-
-        current_cluster_idx = current_cluster_idx+1;
-        if (current_cluster_idx >= clusters.length) {
-            current_cluster_idx = 0;
-        }
-        draw_cluster(clusters[current_cluster_idx], viewport);
-    };
 }
 
 
@@ -480,6 +443,10 @@ function build_tpa_graph(cluster) {
     return [objects, parent_id];
 }
 
+
+/**
+ * Drawing methods for diagram items by data class.
+ */
 
 function draw_zone(selection, cluster_diagram) {
     //var zone_sep_y = d3.local();
