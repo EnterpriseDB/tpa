@@ -37,11 +37,14 @@ export function show_cluster_diagram() {
         return;
     }
 
-    let vars = get_url_vars();
+    let model = tpa.window_model();
 
-    if (vars.uuid) {
-        tpa.get_cluster_by_uuid(vars.uuid, c => draw_cluster(c, container));
+    if(!model.uuid) {
+        window.location = "/home/";
+        return;
     }
+
+    tpa.get_obj_by_url(model.api_url, c => draw_cluster(c, container));
 }
 
 

@@ -68,6 +68,24 @@ export function method() {
     return multimethod().dispatch(model_class);
 }
 
+// Turn the url into a model name and maybe an object uuid
+export function window_model() {
+    let dir_names = window.location.pathname.split('/');
+
+    let info = {
+        model: dir_names[1],
+        uuid: dir_names[2],
+    };
+
+    let api_path = dir_names.slice(1, 3).filter(d => d).map(d => d+"/").join("");
+
+    if (api_path) {
+        info.api_url = `${API_URL}${api_path}`;
+    }
+
+    return info;
+}
+
 // API authentication
 //
 
@@ -128,7 +146,8 @@ export function get_obj_by_url(url, _then) {
         }
         return;
     }
-    auth.logged_in_or_redirect(login_page)
+
+    auth.logged_in_or_redirect('/login/');
 
     if (!auth.logged_in) {
         auth.display_login(() => get_obj_by_url(url, _then));
@@ -240,11 +259,6 @@ export function cluster_create(json_object, callback) {
     return auth.json_request(class_to_url('cluster')+"import")
         .post(json_to_form(json_object), callback);
 };
-
-
-export function get_cluster_by_uuid(cluster_uuid, _then) {
-    return get_obj_by_url(uuid_to_url('cluster', cluster_uuid), _then);
-}
 
 
 /**

@@ -5,6 +5,8 @@
  * Misc utilities.
  */
 
+//import * as URL from 'url-parse';
+
 // Read a page's GET URL variables and return them as an associative array.
 export function get_url_vars()
 {
@@ -26,7 +28,6 @@ export function get_url_vars()
     }
     return vars;
 }
-
 
 
 export class Accumulator {

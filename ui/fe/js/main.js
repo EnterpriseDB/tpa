@@ -21,20 +21,22 @@ import $ from "jquery";
 function main_app() {
     unhide_page_once_scripts_loaded();
 
-    // User registration page
-    user_invite_accept();
+    let window_model = api.window_model();
 
     // Login page
     login_form();
 
     // User Home page
     cluster_list();
-    user_invite();
     cluster_import();
     cluster_create();
+    user_invite();
 
     // Cluster page
     show_cluster_diagram();
+
+    // User registration page
+    user_invite_accept();
 
     /*
     new Vue({
