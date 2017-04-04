@@ -151,12 +151,11 @@ def get_detail_view(model_class):
 
 
 # Generic views
-
-class TenantOwnedViewSet(viewsets.ModelViewSet):
+class TenantOwnedMixin(object):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        queryset = super(TenantOwnedViewSet, self).get_queryset()
+        queryset = super(TenantOwnedMixin, self).get_queryset()
         return self.filter_by_tenant(queryset)
 
     def filter_by_tenant(self, queryset):
@@ -168,6 +167,10 @@ class TenantOwnedViewSet(viewsets.ModelViewSet):
         user_tenants = models.Tenant.objects.filter(owner=user)
 
         return queryset.filter(tenant__in=user_tenants)
+
+
+class TenantOwnedViewSet(TenantOwnedMixin, viewsets.ModelViewSet):
+    pass
 
 
 def create_generic_viewset(model_class):

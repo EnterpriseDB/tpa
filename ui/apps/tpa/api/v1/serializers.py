@@ -69,6 +69,15 @@ class ConfigYmlSerializer(ModelSerializer):
         raise NotImplementedError
 
 
+class ClusterToYmlSerializer(ModelSerializer):
+    uuid = UUIDField(read_only=True)
+
+    def to_representation(self, obj):
+        from tpa.config_yml import generate_yml
+        logger.warn("OBJ: %s", obj)
+        return generate_yml(obj)
+
+
 class ClusterFromTemplateSerializer(ModelSerializer):
     uuid = UUIDField(read_only=True)
     name = CharField(required=False)
@@ -94,6 +103,7 @@ class ClusterFromTemplateSerializer(ModelSerializer):
 
     def update(self, *args, **kwargs):
         raise NotImplementedError
+
 
 
 class UserInvitationSerializer(ModelSerializer):

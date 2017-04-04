@@ -49,7 +49,8 @@ auth_patterns = [
 
 urlpatterns = [
     url(r'^auth/', include(auth_patterns)),
-    url(r'^cluster/import', views.ClusterUploadView.as_view()),
+    url(r'^cluster/import', views.ClusterImportView.as_view()),
+    url(r'^cluster/(?P<uuid>[a-z0-9-]+)/export', views.ClusterExportView.as_view()),
     url(r'^template/', views.TemplateListView.as_view()),
 ]
 

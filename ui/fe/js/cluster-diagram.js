@@ -54,6 +54,7 @@ function clear_detail_panel() {
         .remove();
 }
 
+
 function display_selected_instance_detail(instance) {
     function add_detail(selection, attr_name, attr_value) {
         if ( !attr_value ) { return; }
@@ -223,7 +224,7 @@ class ClusterDiagram {
 
         this.root = d3.hierarchy(table);
         this.tree = d3.tree()
-                    .size([this.height, this.width])
+                    .size([this.height*0.8, this.width])
                     .nodeSize([this.height/15, MIN_NODE_WIDTH*1.5]);
 
         this.tree(this.root);

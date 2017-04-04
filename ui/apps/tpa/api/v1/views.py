@@ -20,7 +20,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from tpa import models
-from tpa.generics import create_generic_viewset
+from tpa.generics import create_generic_viewset, TenantOwnedMixin
 
 from . import serializers
 
@@ -128,7 +128,7 @@ class UserInvitedRegistrationView(generics.UpdateAPIView):
 
 # Cluster
 
-class ClusterUploadView(generics.CreateAPIView):
+class ClusterImportView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated,)
     parser_classes = (MultiPartParser, FormParser)
 
@@ -138,6 +138,12 @@ class ClusterUploadView(generics.CreateAPIView):
         return serializers.ConfigYmlSerializer
 
 
+class ClusterExportView(TenantOwnedMixin, generics.RetrieveAPIView):
+    queryset = models.Cluster.objects
+    lookup_field = 'uuid'
+    serializer_class = serializers.ClusterToYmlSerializer
+
+
 for _cls_name in models.__all__:
     (name, klazz) = create_generic_viewset(getattr(models, _cls_name))
     globals()[name] = klazz
@@ -145,7 +151,6 @@ for _cls_name in models.__all__:
 
 
 class TemplateListView(generics.ListAPIView):
-
     def get_serializer_class(self):
         return Cluster.serializer_class
 

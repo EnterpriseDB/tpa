@@ -30,6 +30,7 @@ function main_app() {
     cluster_list();
     cluster_import();
     cluster_create();
+    cluster_export();
     user_invite();
 
     // Cluster page
@@ -232,6 +233,21 @@ function refresh_cluster_create_form() {
                         .text((t) => t.name);
                 });
         });
+}
+
+
+function cluster_export() {
+    d3.selectAll("button.cluster_export").on("click", function() {
+        api.auth.request(api.window_model().api_url+"export")
+            .get((error, config_yml) => {
+                if(error) {
+                    alert("Export error.");
+                    return;
+                }
+                else {
+                    alert(config_yml);
+                }
+            })});
 }
 
 
