@@ -1,6 +1,6 @@
 <template>
 <!-- Cluster upload -->
-<div id="cluster_export_dialog" class="modal fade">
+<div id="cluster-export" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
                 <div class="modal-header">
@@ -9,12 +9,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <p>{{ user_message }}</p>
+                        <h4 class="message">{{ user_message }}</h4>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-failure">Cancel</button>
-                    <a :href="config_yml" class="btn btn-success">Download</a>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <a :href="download_data" download="config.yml" class="btn btn-success download" :style="dlb_style">Download</a>
+
                 </div>
             </form>
         </div>
@@ -27,33 +28,56 @@
 import * as d3 from "d3";
 import $ from "jquery";
 import * as api from "../js/tpa-api";
+import Vue from "vue";
 
-module.exports = {
-    el: "#cluster-export",
+const B64_PF = "data:text/octet-stream;base64,";
+
+export default Vue.extend({
+    name: "cluster-export",
     data: () => ({
         user_message: "Downloading cluster in export format, please wait.",
-        config_yml: ""
+        download_data: "",
+        dlb_style: "visiblity: hidden"
     }),
+    mounted: function() {
+        let self = this;
+        d3.selectAll("button.cluster_export").on("click", () => {
+            d3.event.preventDefault();
+            self.show_modal();
+        });
+
+        d3.selectAll("a.download").on("click", () => {
+            window.setTimeout(() => {
+                self.reset_dialog();
+            }, 500);
+        });
+
+    },
 
     methods: {
         show_modal() {
-            let self = this;
-            console.log("this:", this);
-
             api.auth.json_request(api.window_model().api_url+"export")
-                .get((error, cluster) => {
+                .get((error, export_data) => {
                     if(error) {
                         alert("Export error.");
                         return;
                     }
 
-                    self.config_yml = cluster.config_yml;
+                    this.download_data = B64_PF + btoa(export_data.config_yml);
+
+                    this.dlb_style = "visibility: visible";
+                    this.user_message="Export ready. Click the button to download.";
                 });
 
-            $("#cluster_export_dialog").modal("show");
+            $("#cluster-export").modal("show");
+        },
+        reset_dialog() {
+            $("#cluster-export").modal("hide");
+            this.dlb_style = "visibility: hidden";
+            this.user_message="";
         }
     }
-}
+});
 </script>
 
 <style scoped>

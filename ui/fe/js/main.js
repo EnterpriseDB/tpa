@@ -238,11 +238,7 @@ function refresh_cluster_create_form() {
 
 
 function cluster_export() {
-    let my_vue = new Vue(ClusterExport);
-
-    d3.selectAll("button.cluster_export").on("click", () => {
-        my_vue.show_modal();
-    });
+    new ClusterExport({el:"#cluster-export"});
 }
 
 
