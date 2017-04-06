@@ -15,7 +15,8 @@ import {show_cluster_diagram} from "./cluster-diagram";
 import * as d3 from "d3";
 import {get_url_vars} from "./utils";
 import $ from "jquery";
-//import Vue from 'vue';
+import ClusterExport from '../components/ClusterExport.vue';
+import Vue from 'vue';
 
 
 function main_app() {
@@ -237,17 +238,11 @@ function refresh_cluster_create_form() {
 
 
 function cluster_export() {
-    d3.selectAll("button.cluster_export").on("click", function() {
-        api.auth.request(api.window_model().api_url+"export")
-            .get((error, config_yml) => {
-                if(error) {
-                    alert("Export error.");
-                    return;
-                }
-                else {
-                    alert(config_yml);
-                }
-            })});
+    let my_vue = new Vue(ClusterExport);
+
+    d3.selectAll("button.cluster_export").on("click", () => {
+        my_vue.show_modal();
+    });
 }
 
 
