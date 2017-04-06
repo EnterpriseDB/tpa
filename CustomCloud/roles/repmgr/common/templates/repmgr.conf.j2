@@ -2,6 +2,7 @@ cluster={{ upstream_primary }}
 node={{ node }}
 node_name={{ inventory_hostname }}
 conninfo='host={{ inventory_hostname }} user=repmgr dbname=repmgr'
+use_replication_slots=1
 master_response_timeout=60
 reconnect_attempts=6
 reconnect_interval=10
