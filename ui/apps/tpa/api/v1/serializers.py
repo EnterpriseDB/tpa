@@ -74,8 +74,8 @@ class ClusterToYmlSerializer(ModelSerializer):
 
     def to_representation(self, obj):
         from tpa.config_yml import generate_yml
-        logger.warn("OBJ: %s", obj)
-        return generate_yml(obj)
+        config_yml_text = generate_yml(obj)
+        return {"config_yml": config_yml_text}
 
 
 class ClusterFromTemplateSerializer(ModelSerializer):
