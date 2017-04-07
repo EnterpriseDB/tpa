@@ -22,7 +22,6 @@ if settings.DEBUG:
     ]
 
 
-
 if 'django_ses' in settings.INSTALLED_APPS:
     urlpatterns += [url(r'^admin/django-ses/', include('django_ses.urls'))]
 
@@ -36,14 +35,13 @@ urlpatterns += [
 
 # static
 
-PAGES = '''
-    index login home cluster user_accept_invite
-'''.strip().split();
-
+PAGES = ["index", "login", "home", "cluster", "user_invite_accept"]
 PAGE_MATCH = '|'.join(PAGES)
+
 
 def rewrite_root_dir_to_html(request, page, rest, *args, **kwargs):
     return views.serve(request, path=page+".html", *args, **kwargs)
+
 
 urlpatterns += [
     url(r'^(?P<page>'+PAGE_MATCH+')/(?P<rest>.*)$', rewrite_root_dir_to_html),
