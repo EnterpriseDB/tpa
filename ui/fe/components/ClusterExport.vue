@@ -5,11 +5,11 @@
         <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Export a cluster design</h4>
+                    <h4 class="modal-title">Export this cluster to config.yml</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <h4 class="message">{{ user_message }}</h4>
+                        <div class="message">{{ user_message }}</div>
                     </div>
                 </div>
                 <div class="modal-footer">

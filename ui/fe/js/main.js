@@ -8,21 +8,25 @@
 
 
 require('es6-promise').polyfill();
+import * as d3 from "d3";
+import $ from "jquery";
 
 import "./styles";
 import * as api from "./tpa-api";
 import {show_cluster_diagram} from "./cluster-diagram";
-import * as d3 from "d3";
 import {get_url_vars} from "./utils";
-import $ from "jquery";
+
 import ClusterExport from '../components/ClusterExport.vue';
-import Vue from 'vue';
+
+// For help with debugging.
+export const _d3 = d3;
+export const _api = api;
 
 
 function main_app() {
     unhide_page_once_scripts_loaded();
 
-    let window_model = api.window_model();
+    let w_m = api.window_model();
 
     // Login page
     login_form();
@@ -31,22 +35,18 @@ function main_app() {
     cluster_list();
     cluster_import();
     cluster_create();
-    cluster_export();
     user_invite();
 
     // Cluster page
-    show_cluster_diagram();
+    if (w_m.model == 'cluster') {
+        show_cluster_diagram();
+        new ClusterExport({el:"#cluster-export"});
+    }
 
     // User registration page
     user_invite_accept();
 
-    /*
-    new Vue({
-        el: '#app',
-        template: '<App/>',
-        components: { App }
-    });
-    */
+
 }
 
 
@@ -54,7 +54,7 @@ function unhide_page_once_scripts_loaded() {
     d3.selectAll("#cover").style("visibility", "hidden");
 }
 
-export const _d3 = d3;
+
 
 
 function login_form() {
@@ -236,10 +236,6 @@ function refresh_cluster_create_form() {
         });
 }
 
-
-function cluster_export() {
-    new ClusterExport({el:"#cluster-export"});
-}
 
 
 function cluster_list() {
