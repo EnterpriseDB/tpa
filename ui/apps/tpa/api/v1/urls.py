@@ -39,7 +39,7 @@ auth_patterns = [
         views.UserInvitationCreateView.as_view(), name="user-invite"),
     url(r'^user-invite/(?P<uuid>[a-z0-9-]+)/$',
         views.UserInvitationRetrieveView.as_view(), name="user-invite-detail"),
-    url(r'^user/invite=(?P<uuid>[a-z0-9-]+)$',
+    url(r'^user/invite/(?P<uuid>[a-z0-9-]+)/$',
         views.UserInvitedRegistrationView.as_view(),
         name="user-registration-invite"),
     url(r'^login/', obtain_jwt_token),

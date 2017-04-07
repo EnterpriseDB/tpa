@@ -126,33 +126,25 @@ function user_invite() {
 function user_invite_accept() {
     d3.selectAll("form.user_invite_accept").on("submit", function() {
         d3.event.preventDefault();
-
-        let sub = d3.select(this);
-
-        let invite = get_url_vars().invite;
-        let ssh_keys = sub.select("input.ssh_public_keys").node().value;
-
-        if (ssh_keys) {
-            ssh_keys = JSON.parse(ssh_keys);
-        }
-        else {
-            ssh_keys = [];
-        }
-
         api.auth.logout();
 
-        api.object_update('auth/user-invite', invite, {
-                username: sub.select("input.username").node().value,
-                password: sub.select("input.password").node().value,
-                first_name: sub.select("input.first_name").node().value,
-                last_name: sub.select("input.last_name").node().value,
-                ssh_public_keys: ssh_keys
-            },
-            (error, data) => {
-                if(error) {
-                    alert(`Invite Error: ${error.currentTarget.response}`);
-                    return;
-                }
+        let sub = d3.select(this);
+        let invite = api.window_model().uuid;
+        let form = {};
+
+        for (let field of ["username", "password", "first_name",
+                            "last_name", 'ssh_public_keys']) {
+            form[field] = sub.select(`input.${field}`).node().value;
+        }
+
+        form.ssh_public_keys = form.ssh_public_keys ?
+            JSON.parse(form.ssh_public_keys) : [];
+
+        api.object_update('auth/user/invite', invite, form, (error, data) => {
+            if(error) {
+                alert(`Invite Error: ${error.currentTarget.response}`);
+                return;
+            }
             window.location = "/home/";
         });
     });
@@ -235,7 +227,6 @@ function refresh_cluster_create_form() {
                 });
         });
 }
-
 
 
 function cluster_list() {
