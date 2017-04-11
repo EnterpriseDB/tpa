@@ -41,7 +41,7 @@ REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'].append(
     'rest_framework.renderers.BrowsableAPIRenderer'
 )
 
-FIXTURE_DIRS = [
+FIXTURE_DIRS += [
     'apps/tpa/fixtures/test',
 ]
 
