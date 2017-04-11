@@ -38,8 +38,8 @@ function main_app() {
     user_invite();
 
     // Cluster page
-    if (w_m.model == 'cluster') {
-        show_cluster_diagram();
+    if (w_m.model == 'cluster' && w_m.uuid) {
+        d3.select(".cluster_diagram").call(show_cluster_diagram);
         new ClusterExport({el:"#cluster-export"});
     }
 
