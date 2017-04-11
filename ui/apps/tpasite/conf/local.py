@@ -38,9 +38,6 @@ INSTALLED_APPS += [
     'tpa',
 ]
 
-MIDDLEWARE += [
-]
-
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
@@ -62,14 +59,15 @@ FIXTURE_DIRS = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
-STATIC_URL = '/static/'
+TPA_DEV_BASE = os.path.dirname(os.path.dirname(BASE_DIR))
 BUILD_PATH = os.getenv('BUILD_PATH', 'build')
-BUILD_PATH_REL = (BUILD_PATH if BUILD_PATH.startswith('/') else
-                  os.path.join(BASE_DIR, "..", "..", BUILD_PATH))
+BUILD_PATH_ABS = (BUILD_PATH if BUILD_PATH.startswith('/') else
+                  os.path.join(TPA_DEV_BASE, BUILD_PATH))
 
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "..", "fe"),
-    os.path.join(BUILD_PATH_REL, 'static'),
+    ("assets", os.path.join(TPA_DEV_BASE, "fe/assets")),
+    ("", os.path.join(BUILD_PATH_ABS, 'static')),
 ]
 
 REST_FRAMEWORK = {
