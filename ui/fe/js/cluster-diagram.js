@@ -31,9 +31,8 @@ const DG_POSTGRES_ROLES = {
 };
 
 
-export function show_cluster_diagram(selection) {
-    tpa.get_obj_by_url(tpa.window_model().api_url,
-                        c => draw_cluster(c, selection));
+export function show_cluster_diagram(selection, cluster_url) {
+    tpa.get_obj_by_url(cluster_url, c => draw_cluster(c, selection));
 }
 
 

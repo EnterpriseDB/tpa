@@ -28,23 +28,25 @@ function main_app() {
 
     let w_m = api.window_model();
 
-    // Login page
+    // Login form, can appear on many pages.
     login_form();
 
-    // User Home page
-    cluster_list();
-    cluster_import();
-    cluster_create();
-    user_invite();
-
-    // Cluster page
-    if (w_m.model == 'cluster' && w_m.uuid) {
-        d3.select(".cluster_diagram").call(show_cluster_diagram);
-        new ClusterExport({el:"#cluster-export"});
+    switch(w_m.model) {
+        case 'home':
+            cluster_list();
+            cluster_import();
+            cluster_create();
+            user_invite();
+            break;
+        case 'cluster':
+            if(!w_m.uuid) break;
+            d3.select(".cluster_diagram").call(show_cluster_diagram, w_m.api_url);
+            new ClusterExport({el:"#cluster-export"});
+            break;
+        case 'user_invite_accept':
+            user_invite_accept();
+            break;
     }
-
-    // User registration page
-    user_invite_accept();
 }
 
 
@@ -196,13 +198,13 @@ function cluster_create() {
     });
 
     d3.selectAll("button.cluster_create").on("click", function() {
-        refresh_cluster_create_form();
+        populate_template_list();
         $("#cluster_create_dialog").modal("show");
     });
 }
 
 
-function refresh_cluster_create_form() {
+function populate_template_list() {
     d3.selectAll("form.cluster_create")
         .select("select.template")
         .call(function(template_selection) {
