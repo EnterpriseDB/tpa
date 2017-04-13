@@ -1,26 +1,23 @@
 <template>
 <div id="cluster-carousel" class="carousel slide" data-ride="carousel">
-  <!-- Indicators -->
   <ol class="carousel-indicators">
-      <template v-for="cluster in clusters">
-      <li data-target="#cluster-carousel" data-slide-to="0" :class="active(cluster)">
+      <template v-for="(cluster, index) in clusters">
+        <li data-target="#cluster-carousel" :data-slide-to="index" :class="active(cluster)">
       </li>
       </template>
   </ol>
 
-  <!-- Wrapper for slides -->
   <div class="carousel-inner" role="listbox">
       <div v-for="cluster in clusters" :class="'item '+active(cluster)">
-          <div :class="'carousel_cluster_diagram cluster_diagram diagram_'+cluster.uuid">
+          <div class="carousel_cluster_diagram cluster_diagram" :href="cluster.url">
           </div>
-          {{ diagram(cluster) }}
           <div class="carousel-caption">
               <h3>{{ cluster.name }}</h3>
+              <p v-if="cluster.description">{{ cluster.description }}</p>
           </div>
       </div>
   </div>
 
-  <!-- Left and right controls -->
   <a class="left carousel-control" href="#cluster-carousel" role="button" data-slide="prev">
     <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
     <span class="sr-only">Previous</span>
@@ -54,13 +51,21 @@ export default Vue.extend({
             return this.clusters[idx];
         }
     },
-    mounted: function() {
+    mounted() {
         let self = this;
         $("#cluster-carousel").on("slid.bs.carousel", () => {
             let viewing = self.viewing_cluster;
             if(self.current_cluster != viewing) {
                 self.current_cluster = viewing;
             }
+        });
+    },
+    updated() {
+        let containers = d3.select(this.$el).selectAll("div.carousel_cluster_diagram");
+
+        containers.each(function() {
+            let container = d3.select(this);
+            show_cluster_diagram(container, container.attr('href'));
         });
     },
     methods: {
@@ -72,20 +77,6 @@ export default Vue.extend({
         },
         active(cluster) {
             return (cluster == this.current_cluster) ? "active": "";
-        },
-        diagram(cluster) {
-            let el = d3.select(this.$el);
-            window.setTimeout(() => {
-                let container = el.selectAll("div.diagram_"+cluster.uuid);
-                console.log("rendering container on:", cluster, container);
-                let url = cluster.url;
-                if (url.startsWith("http:")) {
-                    url = "https"+url.slice(4);
-                }
-                show_cluster_diagram(container, url);
-            }, 5);
-
-            return '';
         }
     }
 });
