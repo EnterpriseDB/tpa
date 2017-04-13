@@ -78,7 +78,11 @@ export default Vue.extend({
             window.setTimeout(() => {
                 let container = el.selectAll("div.diagram_"+cluster.uuid);
                 console.log("rendering container on:", cluster, container);
-                show_cluster_diagram(container, cluster.url);
+                let url = cluster.url;
+                if (url.startsWith("http:")) {
+                    url = "https"+url.slice(4);
+                }
+                show_cluster_diagram(container, url);
             }, 5);
 
             return '';
