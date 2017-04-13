@@ -45,16 +45,12 @@ function main_app() {
 
     // User registration page
     user_invite_accept();
-
-
 }
 
 
 function unhide_page_once_scripts_loaded() {
     d3.selectAll("#cover").style("visibility", "hidden");
 }
-
-
 
 
 function login_form() {

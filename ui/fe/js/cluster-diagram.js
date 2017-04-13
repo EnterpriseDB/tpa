@@ -31,20 +31,9 @@ const DG_POSTGRES_ROLES = {
 };
 
 
-export function show_cluster_diagram() {
-    const container = d3.select(".cluster_diagram");
-    if (container.empty()) {
-        return;
-    }
-
-    let model = tpa.window_model();
-
-    if(!model.uuid) {
-        window.location = "/home/";
-        return;
-    }
-
-    tpa.get_obj_by_url(model.api_url, c => draw_cluster(c, container));
+export function show_cluster_diagram(selection) {
+    tpa.get_obj_by_url(tpa.window_model().api_url,
+                        c => draw_cluster(c, selection));
 }
 
 
@@ -124,38 +113,20 @@ function draw_cluster(cluster, viewport) {
 
 class ClusterDiagram {
     constructor (cluster, viewport) {
-        this.cluster = cluster;
         this.viewport = viewport;
+        this.cluster = cluster;
+        this.dobj_for_model = {};
+
+        let bbox = viewport.node().getBoundingClientRect();
+        this.width = bbox.width;
+        this.height = bbox.height;
 
         this.dispatch = d3.dispatch("selected", "deselected");
         this.current_selection = null;
         this.setup_selection();
 
-        let bbox = viewport.node().getBoundingClientRect();
-        this.width = bbox.width;
-        this.height = bbox.height;
-        this.diagram = setup_viewport(viewport, bbox.width, bbox.height);
-
-        [this.objects, this.parent_id] = this.build_graph();
-        this.layout_graph();
-
-        // map obj url -> diagram item
-        this.dobj_for_model = {};
-
-        this.root.eachAfter(d => {
-            this.dobj_for_model[d.data.url] = d;
-        });
-
-        // Assign numerical order to each rolelink item on in-edges to its
-        // parent.
-
-        for (let d of this.root.descendants()) {
-            if (tpa.model_class(d.data) != 'rolelink') continue;
-
-            let p = this.dobj_for_model[d.data.server_instance.url];
-            if (!p.num_children) { p.num_children = 0; }
-            d.parent_idx = p.num_children++;
-        }
+        this.diagram = setup_viewport(this.viewport, this.width, this.height);
+        this.draw();
     }
 
     on(event, callback) {
@@ -208,12 +179,34 @@ class ClusterDiagram {
         this.dispatch.call("selected", this.current_selection);
     }
 
-    build_graph() {
-        if (tpa.cluster_type(this.cluster) == 'xl') {
-            return build_xl_graph(this.cluster);
+
+    draw() {
+        let build_graph = build_tpa_graph;
+
+        switch(tpa.cluster_type(this.cluster)) {
+            case 'xl':
+                build_graph = build_xl_graph;
+                break;
         }
 
-        return build_tpa_graph(this.cluster);
+        [this.objects, this.parent_id] = build_graph(this.cluster);
+
+        this.layout_graph();
+
+        this.root.eachAfter(d => {
+            this.dobj_for_model[d.data.url] = d;
+        });
+
+        // Assign numerical order to each rolelink item on in-edges to its
+        // parent.
+
+        for (let d of this.root.descendants()) {
+            if (tpa.model_class(d.data) != 'rolelink') continue;
+
+            let p = this.dobj_for_model[d.data.server_instance.url];
+            if (!p.num_children) { p.num_children = 0; }
+            d.parent_idx = p.num_children++;
+        }
     }
 
     layout_graph() {
@@ -240,11 +233,7 @@ class ClusterDiagram {
             }
         });
 
-
-        console.log("LAYOUT -----------");
-        console.log("objects:", this.objects);
-        console.log("stratified:", table);
-        console.log("root:", this.root);
+        console.log("LAYOUT: o:", this.objects, "t:", table, "r:", this.root);
     }
 
     draw_items_of_class(klazz, draw) {
@@ -261,8 +250,8 @@ class ClusterDiagram {
 
 // TPA Diagram
 
-
 function build_xl_graph(cluster) {
+    // TODO: XL graph builder is outdated.
     var parent_id = {};
     var objects = [cluster];
     var gtm_instances = [];
@@ -459,13 +448,9 @@ function draw_zone(selection, cluster_diagram) {
 
     zone_display.append('line')
         .attr('x1', 0)
-        .attr('y1', function (d) {
-            return -MIN_NODE_HEIGHT*2;
-        })
+        .attr('y1', (d) => -MIN_NODE_HEIGHT*2)
         .attr('x2', cluster_diagram.width)
-        .attr('y2', function (d) {
-            return -MIN_NODE_HEIGHT*2;
-        });
+        .attr('y2', (d) => -MIN_NODE_HEIGHT*2)
 
     return zone_display;
 }

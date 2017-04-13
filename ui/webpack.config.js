@@ -1,5 +1,5 @@
 const build_dir = process.env.BUILD_PATH ? process.env.BUILD_PATH
-                    : ( __dirname+'/build' );
+    : ( __dirname + '/build' );
 
 const path = require('path');
 const webpack = require('webpack');
@@ -8,7 +8,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     entry: './fe/js/main.js',
     output: {
-        path: build_dir+'/static',
+        path: build_dir + '/static',
         filename: 'bundle.[hash].js',
         publicPath: '/',
         libraryTarget: "var",
@@ -26,8 +26,8 @@ module.exports = {
             {
                 test: /\.scss$/,
                 loaders: ['style-loader',
-                        'css-loader?SourceMap',
-                        'sass-loader?SourceMap']
+                    'css-loader?SourceMap',
+                    'sass-loader?SourceMap']
             },
             {
                 test: /\.js$/,
