@@ -17,6 +17,7 @@ import {show_cluster_diagram} from "./cluster-diagram";
 import {get_url_vars} from "./utils";
 
 import ClusterExport from '../components/ClusterExport.vue';
+import ClusterCarousel from '../components/ClusterCarousel.vue';
 
 // For help with debugging.
 export const _d3 = d3;
@@ -175,6 +176,8 @@ function cluster_import() {
 }
 
 function cluster_create() {
+    let carousel = new ClusterCarousel({el: "#cluster-carousel"});
+
     d3.selectAll("form.cluster_create").on("submit", function()  {
         d3.event.preventDefault();
 
@@ -198,13 +201,13 @@ function cluster_create() {
     });
 
     d3.selectAll("button.cluster_create").on("click", function() {
-        populate_template_list();
+        populate_template_list(carousel);
         $("#cluster_create_dialog").modal("show");
     });
 }
 
 
-function populate_template_list() {
+function populate_template_list(carousel) {
     d3.selectAll("form.cluster_create")
         .select("select.template")
         .call(function(template_selection) {
@@ -222,6 +225,8 @@ function populate_template_list() {
                         .append("option")
                         .attr("value", (t) => t.uuid)
                         .text((t) => t.name);
+
+                    clusters.forEach(c => carousel.add_cluster(c));
                 });
         });
 }

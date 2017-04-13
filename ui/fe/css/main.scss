@@ -1,4 +1,4 @@
-/*!
+/*
  * Start Bootstrap - SB Admin 2 v3.3.7+1 (http://startbootstrap.com/template-overviews/sb-admin-2)
  * Copyright 2013-2016 Start Bootstrap
  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap/blob/gh-pages/LICENSE)
@@ -18,6 +18,15 @@ html, body, .main_content {
     box-sizing: border-box;
     height: 100% !important;
     padding-top: 66px;
+}
+
+#cluster-carousel {
+    width: 100%;
+    height: 400px;
+}
+
+.carousel_cluster_diagram {
+    height: 400px;
 }
 
 #wrapper {
