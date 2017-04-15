@@ -18,6 +18,8 @@ import {get_url_vars} from "./utils";
 
 import ClusterExport from '../components/ClusterExport.vue';
 import ClusterCarousel from '../components/ClusterCarousel.vue';
+import ClusterEditor from '../components/ClusterEditor.vue';
+
 
 // For help with debugging.
 export const _d3 = d3;
@@ -41,8 +43,8 @@ function main_app() {
             break;
         case 'cluster':
             if(!w_m.uuid) break;
-            d3.select(".cluster_diagram").call(show_cluster_diagram, w_m.api_url);
-            new ClusterExport({el:"#cluster-export"});
+            new ClusterEditor({ el: '#cluster-editor' });
+            new ClusterExport({ el: "#cluster-export" });
             break;
         case 'user_invite_accept':
             user_invite_accept();

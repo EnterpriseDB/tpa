@@ -4,6 +4,11 @@
 @import "./colorscheme-alert";
 @import "./_variables.scss";
 
+
+.diagram-viewport {
+    min-height: 100%;
+}
+
 .diagram {
     width: 100%;
     min-height: 100%;
