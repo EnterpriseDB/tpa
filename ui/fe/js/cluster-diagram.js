@@ -135,6 +135,11 @@ class ClusterDiagram {
         this.width = bbox.width;
         this.height = bbox.height;
 
+        if (this.height == 0) {
+            // use parent's max height.
+            this.height = viewport.node().parentNode.getBoundingClientRect().height;
+        }
+
         this.dispatch = d3.dispatch("selected", "deselected");
         this.current_selection = null;
         this.setup_selection();
