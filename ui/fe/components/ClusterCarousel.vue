@@ -3,9 +3,8 @@
 
         <div class="carousel-inner" role="listbox">
             <div v-for="cluster in clusters" :class="'item '+active(cluster)">
-                <div class="carousel_cluster_diagram cluster_diagram" :href="cluster.url">
-                    <p>Loading...</p>
-                </div>
+                <cluster-diagram :url="cluster.url" class="carousel_cluster_diagram">
+                </cluster-diagram>
                 <div class="carousel-caption">
                     <h3>{{ cluster.name }}</h3>
                     <p v-if="cluster.description">{{ cluster.description }}</p>
@@ -38,7 +37,8 @@ import $ from "jquery";
 import Vue from "vue";
 
 import * as api from "../js/tpa-api";
-import {show_cluster_diagram} from "../js/cluster-diagram.js";
+
+import ClusterDiagram from "./ClusterDiagram.vue";
 
 export default Vue.extend({
     name: "cluster-carousel",
@@ -62,16 +62,6 @@ export default Vue.extend({
             }
         });
     },
-    updated() {
-        let containers = d3.select(this.$el)
-            .selectAll("div.carousel_cluster_diagram");
-
-        containers.each(function() {
-            let container = d3.select(this);
-            container.selectAll("p").remove();
-            show_cluster_diagram(container, container.attr('href'));
-        });
-    },
     methods: {
         add_cluster(cluster) {
             if (this.clusters.indexOf(cluster) >= 0) { return; }
@@ -84,6 +74,9 @@ export default Vue.extend({
         active(cluster) {
             return (cluster == this.current_cluster) ? "active": "";
         }
+    },
+    components: {
+        ClusterDiagram
     }
 });
 
