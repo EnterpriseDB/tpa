@@ -10,18 +10,29 @@ import {make_rect} from "./geometry";
 import {setup_viewport, tree_rotate, data_method, data_class, is_instance}
     from "./diagram";
 
-const MIN_NODE_HEIGHT = 20;
-const MIN_NODE_WIDTH = 100;
-const MAX_CIRCLE_RADIUS = MIN_NODE_HEIGHT*0.66;
 
-const LINK_CONNECTOR_HEIGHT = 5;
-const LINK_CONNECTOR_LENGTH = MIN_NODE_WIDTH;
+const DG_SIZE = {
+    S_HEIGHT: 0.5,
+    S_WIDTH: 0.5
+};
+
+const NODE_SIZE = {
+    M_HEIGHT: 20,
+    M_WIDTH: 100
+};
+
+const MAX_CIRCLE_RADIUS = NODE_SIZE.M_HEIGHT*0.66;
+
+const EDGE_END_HEIGHT = 5;
+const EDGE_END_LENGTH = NODE_SIZE.M_WIDTH;
 
 // Fudge factors to include instance label in selection box.
-const ISOF_Y = 1.6/2;
-const ISOF_X = 0.5;
-const ISF_X = 1.5;
-const ISF_Y = 1.25;
+const ISF = {
+    O_Y: 1.6/2,
+    O_X: 0.5,
+    W: 1.5,
+    H: 1.25
+};
 
 
 const DG_POSTGRES_ROLES = {
@@ -141,9 +152,9 @@ class ClusterDiagram {
                 .append("rect")
                     .classed("selection", true)
                     .attr("transform",
-                        `translate(${-bbox.width*ISOF_X}, ${5-bbox.height*ISOF_Y})`)
-                    .attr("width", bbox.width*ISF_X)
-                    .attr("height", bbox.height*ISF_Y);
+                        `translate(${-bbox.width*ISF.O_X}, ${5-bbox.height*ISF.O_Y})`)
+                    .attr("width", bbox.width*ISF.W)
+                    .attr("height", bbox.height*ISF.H);
         });
 
         this.on("deselected", function() {
@@ -216,8 +227,9 @@ class ClusterDiagram {
 
         this.root = d3.hierarchy(table);
         this.tree = d3.tree()
-                    .size([this.height*0.8, this.width])
-                    .nodeSize([this.height/15, MIN_NODE_WIDTH*1.5]);
+                    .size([this.height*DG_SIZE.S_HEIGHT,
+                            this.width*DG_SIZE.S_WIDTH])
+                    .nodeSize([this.height/15, NODE_SIZE.M_WIDTH*1.5]);
 
         this.tree(this.root);
         tree_rotate(this.root);
@@ -335,13 +347,13 @@ function build_xl_graph(cluster) {
  * (-> rolelink -> instance)*
  */
 function build_tpa_graph(cluster) {
-    var accum = [];
-    var objects = [cluster];
-    var parent_id = {};
-    var role_instance = {};
-    var pg_instances = [];
+    let accum = [];
+    let objects = [cluster];
+    let parent_id = {};
+    let role_instance = {};
+    let pg_instances = [];
 
-    var zones = [], replica_zones = [];
+    let zones = [], replica_zones = [];
 
     function add_instance_parent(instance, parent) {
         accum.push([instance, parent]);
@@ -447,9 +459,9 @@ function draw_zone(selection, cluster_diagram) {
 
     zone_display.append('line')
         .attr('x1', 0)
-        .attr('y1', (d) => -MIN_NODE_HEIGHT*2)
+        .attr('y1', (d) => -NODE_SIZE.M_HEIGHT*2)
         .attr('x2', cluster_diagram.width)
-        .attr('y2', (d) => -MIN_NODE_HEIGHT*2)
+        .attr('y2', (d) => -NODE_SIZE.M_HEIGHT*2)
 
     return zone_display;
 }
@@ -508,21 +520,20 @@ function draw_rolelink(selection, cluster_diagram) {
         .classed("edge", true)
         .attr("d", function(d) {
             // draw line from server instance to client instance
-            if ( !d.parent || !d.children) {
-                return "";
-            }
-            let p = cluster_diagram.dobj_for_model[d.data.server_instance.url],
-                c = d.children[0];
-            let path = d3.path();
+            if ( !d.parent || !d.children) { return ""; }
 
-            let p_y = p.y + LINK_CONNECTOR_HEIGHT * d.parent_idx;
-            let c_y = c.y;
+            let p = cluster_diagram.dobj_for_model[d.data.server_instance.url],
+                c = d.children[0],
+                p_y = p.y + EDGE_END_HEIGHT * d.parent_idx,
+                c_y = c.y,
+                path = d3.path();
 
             path.moveTo(p.x, p.y);
             path.lineTo(p.x, p_y);
-            path.lineTo(p.x+LINK_CONNECTOR_LENGTH, p_y);
-            path.lineTo(c.x-LINK_CONNECTOR_LENGTH, c_y);
+            path.lineTo(p.x+EDGE_END_LENGTH, p_y);
+            path.lineTo(c.x-EDGE_END_LENGTH, c_y);
             path.lineTo(c.x, c_y);
+
             return path;
         });
 }
@@ -533,8 +544,8 @@ function draw_rolelink(selection, cluster_diagram) {
  */
 
 function instance_size(instance) {
-    return {width: MIN_NODE_WIDTH,
-            height: MIN_NODE_HEIGHT};
+    return {width: NODE_SIZE.M_WIDTH,
+            height: NODE_SIZE.M_HEIGHT};
 }
 
 function instance_vcpus(instance) {
