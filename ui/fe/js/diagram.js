@@ -1,7 +1,28 @@
+
 import * as d3 from "d3";
 import {scaleLinear} from "d3-scale";
+import {multimethod} from "./multimethod";
+import {model_class} from "./tpa-api";
 
 const GRID_SPACING = 50;
+
+// Reflection helpers.
+
+export function data_class(d) {
+    return model_class(d.data);
+}
+
+export function data_method() {
+    return multimethod().dispatch(data_class);
+}
+
+export function is_instance(filter) {
+    return multimethod().dispatch(data_class)
+        .when(filter, true).default(false);
+}
+
+
+// Should eventually be a vue
 
 class Diagram {
     constructor(viewport, model) {

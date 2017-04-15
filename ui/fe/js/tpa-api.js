@@ -7,7 +7,7 @@
 
 
 import {multimethod} from "./multimethod";
-import {JWTAuth} from "./jwt-auth.js";
+import {JWTAuth} from "./jwt-auth";
 
 
 // Constants and Globals
@@ -19,10 +19,8 @@ const ROLES_BY_PRIORITY = [
         'primary',
         'replica',
         'barman',
+/* TODO Roles require further specification.
 
-/*
- * TODO Roles require further specification.
- *
         'bdr',
         'control',
         'gtm',
@@ -36,24 +34,19 @@ const ROLES_BY_PRIORITY = [
         'openvpn-server',
         'adhoc',
 */
-
 ];
-
-
 
 // Model
 
 export function model_class(d) {
-    if ( d && d.url) {
-        var api_idx = d.url.indexOf(API_URL);
-        if (api_idx >= 0) {
-            var obj_path = d.url.slice(api_idx+API_URL.length);
-            var next_slash = obj_path.indexOf("/");
-            return obj_path.slice(0, next_slash);
-        }
-    }
+    if ( !(d && d.url) ) { return null; }
 
-    return null;
+    let api_idx = d.url.indexOf(API_URL);
+    if (api_idx < 0) { return null; }
+
+    let obj_path = d.url.slice(api_idx+API_URL.length);
+    let next_slash = obj_path.indexOf("/");
+    return obj_path.slice(0, next_slash);
 }
 
 export function class_to_url(cls) {
@@ -309,20 +302,4 @@ export function subnet_has_primary(subnet) {
     }
 
     return false;
-}
-
-// Used by diagram selections, should be elsewhere
-
-export function data_class(d) {
-    return model_class(d.data);
-}
-
-
-export function class_method() {
-    return multimethod().dispatch(data_class);
-}
-
-export function is_instance(filter) {
-    return multimethod().dispatch(data_class)
-        .when(filter, true).default(false);
 }

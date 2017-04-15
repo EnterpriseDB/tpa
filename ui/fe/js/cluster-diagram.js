@@ -7,8 +7,8 @@ import * as d3 from "d3";
 import * as tpa from "./tpa-api";
 import {Accumulator, sort_by_attr} from "./utils";
 import {make_rect} from "./geometry";
-import {setup_viewport, tree_rotate} from "./diagram";
-import {get_url_vars} from "./utils";
+import {setup_viewport, tree_rotate, data_method, data_class, is_instance}
+    from "./diagram";
 
 const MIN_NODE_HEIGHT = 20;
 const MIN_NODE_WIDTH = 100;
@@ -238,7 +238,7 @@ class ClusterDiagram {
     draw_items_of_class(klazz, draw) {
         this.diagram
             .selectAll("."+klazz)
-            .data(this.root.descendants().filter(tpa.is_instance(klazz)))
+            .data(this.root.descendants().filter(is_instance(klazz)))
             .enter()
             .call(d => draw(d, this)
                 .classed(klazz, true)
@@ -477,7 +477,7 @@ function draw_instance(selection, cluster_diagram) {
     // icon
     node.append("path")
         .classed('icon', true)
-        .attr('d', tpa.class_method()
+        .attr('d', data_method()
             .default(function(d) {
                 let ns = node_rect.get(this);
 
