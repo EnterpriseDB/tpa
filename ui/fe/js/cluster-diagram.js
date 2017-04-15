@@ -9,6 +9,7 @@ import {Accumulator, sort_by_attr} from "./utils";
 import {make_rect} from "./geometry";
 import {setup_viewport, tree_rotate, data_method, data_class, is_instance}
     from "./diagram";
+import {multimethod} from "./multimethod";
 
 
 const DG_SIZE = {
@@ -40,6 +41,9 @@ const DG_POSTGRES_ROLES = {
     replica: true,
     barman: true
 };
+
+
+let draw_object = multimethod(o => data_class(o.data()[0]));
 
 
 export function show_cluster_diagram(selection, cluster_url) {
@@ -83,7 +87,7 @@ function display_selected_instance_detail(instance) {
         `, ${instance.instance_type.memory}g memory` : "";
 
     detail_column()
-        .call(add_detail, 'Name', instance.name)
+        .call(add_detail, "Name", instance.name)
         .call(add_detail, 'Type', `${instance.instance_type.name}\
             (${instance.instance_type.vcpus} vcpus${mem})`)
         .call(add_detail, 'Description', instance.description);
@@ -113,9 +117,9 @@ function display_selected_instance_detail(instance) {
 function draw_cluster(cluster, viewport) {
     let cluster_diagram = new ClusterDiagram(cluster, viewport);
 
-    cluster_diagram.draw_items_of_class('zone', draw_zone);
-    cluster_diagram.draw_items_of_class('rolelink', draw_rolelink);
-    cluster_diagram.draw_items_of_class('instance', draw_instance);
+    cluster_diagram.draw_items_of_class('zone');
+    cluster_diagram.draw_items_of_class('rolelink');
+    cluster_diagram.draw_items_of_class('instance');
 
     d3.selectAll(".cluster_name").text(cluster.name);
 }
@@ -247,14 +251,20 @@ class ClusterDiagram {
         console.log("LAYOUT: o:", this.objects, "t:", table, "r:", this.root);
     }
 
-    draw_items_of_class(klazz, draw) {
+    draw_items_of_class(klazz) {
+        let self = this;
+
         this.diagram
             .selectAll("."+klazz)
             .data(this.root.descendants().filter(is_instance(klazz)))
             .enter()
-            .call(d => draw(d, this)
-                .classed(klazz, true)
-            );
+            .each(function(c) {
+                d3.select(this).call(os => {
+                    let oe = draw_object(os, self);
+                    if (!oe || oe.empty()) { return; }
+                    oe.classed(klazz, true);
+                });
+            });
     }
 }
 
@@ -465,6 +475,7 @@ function draw_zone(selection, cluster_diagram) {
 
     return zone_display;
 }
+draw_object.when('zone', draw_zone);
 
 function draw_instance(selection, cluster_diagram) {
     let node_rect = d3.local();
@@ -514,6 +525,7 @@ function draw_instance(selection, cluster_diagram) {
 
     return node;
 }
+draw_object.when('instance', draw_instance);
 
 function draw_rolelink(selection, cluster_diagram) {
     return selection.append("path")
@@ -537,6 +549,7 @@ function draw_rolelink(selection, cluster_diagram) {
             return path;
         });
 }
+draw_object.when('rolelink', draw_rolelink);
 
 
 /*********
