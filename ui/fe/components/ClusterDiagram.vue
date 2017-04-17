@@ -14,20 +14,29 @@
 
 import * as d3 from "d3";
 import Vue from "vue";
+import * as tpa from "../js/tpa-api";
 
-import {show_cluster_diagram} from "../js/cluster-diagram";
+import {ClusterDiagram} from "../js/cluster-diagram";
 
 export default Vue.extend({
     name: "cluster-diagram",
     props: ["url"],
-    data: () => ({}),
-    mounted() { this.refresh_diagram(); },
+    data: () => ({cluster: null}),
     updated() { this.refresh_diagram(); },
+    created() {
+        let self = this;
+        tpa.get_obj_by_url(self.url, c => {
+            self.cluster = c;
+            self.diagram = new ClusterDiagram(c, d3.select(self.$el));
+            self.diagram.on_select(obj => self.$emit("selected", obj));
+        });
+    },
     methods: {
         refresh_diagram() {
-            show_cluster_diagram(d3.select(this.$el), this.url);
+            if(!this.cluster) return;
+            this.diagram.draw();
         }
-    }
+    },
 });
 
 </script>

@@ -42,12 +42,6 @@ const DG_POSTGRES_ROLES = {
     barman: true
 };
 
-
-export function show_cluster_diagram(selection, cluster_url) {
-    tpa.get_obj_by_url(cluster_url, c => draw_cluster(c, selection));
-}
-
-
 function clear_detail_panel() {
     d3.selectAll(".selected_instance_detail")
         .selectAll("*")
@@ -110,22 +104,10 @@ function display_selected_instance_detail(instance) {
             }).join(", "));
 }
 
-
-function draw_cluster(cluster, viewport) {
-    let cluster_diagram = new ClusterDiagram(cluster, viewport);
-
-    cluster_diagram.draw_items_of_class('zone');
-    cluster_diagram.draw_items_of_class('rolelink');
-    cluster_diagram.draw_items_of_class('instance');
-
-    d3.selectAll(".cluster_name").text(cluster.name);
-}
-
-
-class ClusterDiagram {
+export class ClusterDiagram {
     constructor (cluster, viewport, enable_select=true) {
-        this.viewport = viewport;
         this.cluster = cluster;
+        this.viewport = viewport;
         this.dobj_for_model = {};
 
         let bbox = viewport.node().getBoundingClientRect();
@@ -138,8 +120,8 @@ class ClusterDiagram {
         }
 
         this.diagram = setup_viewport(this.viewport, this.width, this.height).diagram;
-        this.draw();
         this.setup_selection(enable_select);
+        this.draw();
         clear_detail_panel();
     }
 
@@ -169,6 +151,15 @@ class ClusterDiagram {
                     `translate(${-bbox.width*ISF.O_X}, ${5-bbox.height*ISF.O_Y})`)
                 .attr("width", bbox.width*ISF.W)
                 .attr("height", bbox.height*ISF.H);
+    }
+
+    on_select(callback) {
+        this.selector.on("selected.parent", function() {
+            callback(this.__data__.data);
+        });
+        this.selector.on("deselected.parent", function() {
+            callback(null);
+        });
     }
 
     draw() {
@@ -201,6 +192,10 @@ class ClusterDiagram {
             if (!p.num_children) { p.num_children = 0; }
             d.parent_idx = p.num_children++;
         }
+
+        // draw
+        ['zone', 'rolelink', 'instance'].forEach(
+            c => this.draw_items_of_class(c));
     }
 
     layout_graph() {
