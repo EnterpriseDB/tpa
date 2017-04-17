@@ -9,6 +9,7 @@ import {Accumulator, sort_by_attr} from "./utils";
 import {make_rect} from "./geometry";
 import {setup_viewport, tree_rotate, data_method, draw_item, is_instance}
     from "./diagram";
+import {UserSelection} from "./selection";
 
 
 const DG_SIZE = {
@@ -122,7 +123,7 @@ function draw_cluster(cluster, viewport) {
 
 
 class ClusterDiagram {
-    constructor (cluster, viewport) {
+    constructor (cluster, viewport, enable_select=true) {
         this.viewport = viewport;
         this.cluster = cluster;
         this.dobj_for_model = {};
@@ -136,62 +137,38 @@ class ClusterDiagram {
             this.height = viewport.node().parentNode.getBoundingClientRect().height;
         }
 
-        this.dispatch = d3.dispatch("selected", "deselected");
-        this.current_selection = null;
-        this.setup_selection();
-
-        this.diagram = setup_viewport(this.viewport, this.width, this.height);
+        this.diagram = setup_viewport(this.viewport, this.width, this.height).diagram;
         this.draw();
-    }
-
-    on(event, callback) {
-        return this.dispatch.on(event, callback);
-    }
-
-    setup_selection() {
-        this.on("selected", function() {
-            let node = this;
-            let bbox = node.getBBox();
-            d3.select(node)
-                .classed("selected", true)
-                .append("rect")
-                    .classed("selection", true)
-                    .attr("transform",
-                        `translate(${-bbox.width*ISF.O_X}, ${5-bbox.height*ISF.O_Y})`)
-                    .attr("width", bbox.width*ISF.W)
-                    .attr("height", bbox.height*ISF.H);
-        });
-
-        this.on("deselected", function() {
-            d3.select(this)
-                .classed("selected", false)
-                .selectAll(".selection")
-                .remove();
-        });
-
-        this.on("deselected.detail", function() {
-            clear_detail_panel();
-        });
-
-        this.on("selected.detail", function() {
-            display_selected_instance_detail(this.__data__.data);
-        });
-
+        this.setup_selection(enable_select);
         clear_detail_panel();
     }
 
-    get selection() {
-        return this.current_selection;
+    setup_selection(enabled) {
+        let self = this;
+
+        self.selector = new UserSelection(
+            self.viewport, name="diagram", enabled=enabled);
+        self.selector.on("selected", function() {
+            self.draw_selection(this);
+            display_selected_instance_detail(this.__data__.data);
+        });
+        self.selector.on("deselected", () => {
+            this.viewport.selectAll(".selection").remove();
+            clear_detail_panel();
+        });
     }
 
-    set selection(d) {
-        if(this.current_selection) {
-            this.dispatch.call("deselected", this.current_selection);
-            this.current_selection = null;
-        }
+    draw_selection(node) {
+        if (!node) return;
 
-        this.current_selection = d;
-        this.dispatch.call("selected", this.current_selection);
+        let bbox = node.getBBox();
+        d3.select(node)
+            .append("rect")
+                .classed("selection", true)
+                .attr("transform",
+                    `translate(${-bbox.width*ISF.O_X}, ${5-bbox.height*ISF.O_Y})`)
+                .attr("width", bbox.width*ISF.W)
+                .attr("height", bbox.height*ISF.H);
     }
 
     draw() {
@@ -405,7 +382,7 @@ function build_tpa_graph(cluster) {
 
     sort_by_attr(pg_instances, 'name');
 
-    // create instance graph
+    // create instance tree
     let dummy_idx = 0;
 
     for (let client_instance of pg_instances) {
@@ -483,8 +460,11 @@ function draw_instance(selection, cluster_diagram) {
     let node = selection.append("g")
         .attr("class", d =>
             "instance node " + (d.children ? "node--internal" : "node--leaf"))
-        .attr("transform", d => `translate(${d.x}, ${d.y})`)
-        .each(function(d) { node_rect.set(this, instance_rect(d.data)); });
+        .attr("transform", d => `translate(${d.x}, ${d.y})`);
+
+    cluster_diagram.selector.set_selectable(node);
+
+    node.each(function(d) { node_rect.set(this, instance_rect(d.data)); });
 
     // icon
     node.append("path")

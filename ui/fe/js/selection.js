@@ -14,6 +14,13 @@ export class UserSelection {
         this.dispatch = d3.dispatch("selected", "deselected");
     }
 
+    set_selectable(selection) {
+        let self = this;
+        selection.on("click.selection", function() {
+            self.current = this;
+        });
+    }
+
     on(event, callback) {
         return this.dispatch.on(event+'.'+this.name, callback);
     }
@@ -21,17 +28,21 @@ export class UserSelection {
     get current() { return this._current; }
 
     set current(o) {
+        let self = this;
         if(!self._enabled) return;
 
-        if(this._current) {
-            d3.select(this._current).classed("selected", false);
-            this.dispatch.call("deselected", this._current);
-            this._current = null;
+        if(self._current) {
+            d3.select(self._current).classed("selected", false);
+            self.dispatch.call("deselected", self._current);
+            self._current = null;
         }
 
-        this._current = o;
-        d3.select(this._current).classed("selected", true);
-        this.dispatch.call("selected", this._current);
+        self._current = o;
+
+        if(self._current) {
+            d3.select(self._current).classed("selected", true);
+            self.dispatch.call("selected", self._current);
+        }
     }
 
     set enabled(v) {
