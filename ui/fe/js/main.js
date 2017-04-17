@@ -13,7 +13,6 @@ import $ from "jquery";
 
 import "./styles";
 import * as api from "./tpa-api";
-import {show_cluster_diagram} from "./cluster-diagram";
 import {get_url_vars} from "./utils";
 
 import ClusterExport from '../components/ClusterExport.vue';
@@ -184,13 +183,11 @@ function cluster_create() {
         d3.event.preventDefault();
 
         let root = d3.select(this);
-        let tmpl = root.select("select.template").node();
-        let template = tmpl.options[tmpl.selectedIndex].value;
 
         api.cluster_create({
             name: root.select("input.name").node().value,
             tenant: root.select("input.tenant").node().value,
-            template: template
+            template: carousel.current_cluster,
         },
             (error, res) => {
                 if (error) {
@@ -203,34 +200,9 @@ function cluster_create() {
     });
 
     d3.selectAll("button.cluster_create").on("click", function() {
-        populate_template_list(carousel);
         $("#cluster_create_dialog").modal("show");
+        carousel.$forceUpdate();
     });
-}
-
-
-function populate_template_list(carousel) {
-    d3.selectAll("form.cluster_create")
-        .select("select.template")
-        .call(function(template_selection) {
-            api.object_list("template", "",
-                (error, clusters) => {
-                    if (error) {
-                        template_selection.text("(Load error)");
-                        return;
-                    }
-
-                    template_selection
-                        .selectAll("option")
-                        .data(clusters)
-                        .enter()
-                        .append("option")
-                        .attr("value", (t) => t.uuid)
-                        .text((t) => t.name);
-
-                    clusters.forEach(c => carousel.add_cluster(c));
-                });
-        });
 }
 
 
