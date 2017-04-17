@@ -7,9 +7,8 @@ import * as d3 from "d3";
 import * as tpa from "./tpa-api";
 import {Accumulator, sort_by_attr} from "./utils";
 import {make_rect} from "./geometry";
-import {setup_viewport, tree_rotate, data_method, data_class, is_instance}
+import {setup_viewport, tree_rotate, data_method, draw_item, is_instance}
     from "./diagram";
-import {multimethod} from "./multimethod";
 
 
 const DG_SIZE = {
@@ -41,9 +40,6 @@ const DG_POSTGRES_ROLES = {
     replica: true,
     barman: true
 };
-
-
-let draw_object = multimethod(o => data_class(o.data()[0]));
 
 
 export function show_cluster_diagram(selection, cluster_url) {
@@ -198,13 +194,15 @@ class ClusterDiagram {
         this.dispatch.call("selected", this.current_selection);
     }
 
-
     draw() {
-        let build_graph = build_tpa_graph;
+        let build_graph;
 
         switch(tpa.cluster_type(this.cluster)) {
             case 'xl':
                 build_graph = build_xl_graph;
+            case 'tpa':
+            default:
+                build_graph = build_tpa_graph;
                 break;
         }
 
@@ -263,21 +261,19 @@ class ClusterDiagram {
             .selectAll("."+klazz)
             .data(this.root.descendants().filter(is_instance(klazz)))
             .enter()
-            .each(function(c) {
-                d3.select(this).call(os => {
-                    let oe = draw_object(os, self);
-                    if (!oe || oe.empty()) { return; }
-                    oe.classed(klazz, true);
-                });
+            .each(function() {
+                let oe = draw_item(d3.select(this), self);
+                if (!oe || oe.empty()) { return; }
+                oe.classed(klazz, true);
             });
     }
 }
 
 
-// TPA Diagram
+// XL Diagram
+// TODO: XL graph builder is outdated.
 
 function build_xl_graph(cluster) {
-    // TODO: XL graph builder is outdated.
     var parent_id = {};
     var objects = [cluster];
     var gtm_instances = [];
@@ -370,7 +366,7 @@ function build_tpa_graph(cluster) {
 
     let zones = [], replica_zones = [];
 
-    function add_instance_parent(instance, parent) {
+    function add_parent(instance, parent) {
         accum.push([instance, parent]);
     }
 
@@ -390,7 +386,7 @@ function build_tpa_graph(cluster) {
 
     for (let zone of zones) {
         if (!(zone.url in parent_id)) {
-            accum.push([zone, cluster]);
+            add_parent(zone, cluster);
         }
     }
 
@@ -429,11 +425,11 @@ function build_tpa_graph(cluster) {
                         zone: client_instance.zone
                     };
 
-                    add_instance_parent(server_instance, client_instance.zone);
+                    add_parent(server_instance, client_instance.zone);
                 }
 
-                add_instance_parent(client_instance, client_link);
-                accum.push([client_link, server_instance]);
+                add_parent(client_instance, client_link);
+                add_parent(client_link, server_instance);
             }
         }
     }
@@ -441,7 +437,7 @@ function build_tpa_graph(cluster) {
     // if an instance has no parent yet, the zone is its parent.
     for(let i of pg_instances) {
         if (!(i.url in parent_id)) {
-            add_instance_parent(i, i.zone);
+            add_parent(i, i.zone);
         }
     }
 
@@ -466,8 +462,7 @@ function draw_zone(selection, cluster_diagram) {
 
     var zone_display = selection.append('g')
         .classed('zone--empty',  d => d.children)
-        .attr("transform", d => `translate(${-d.parent.x}, ${d.y})`)
-        .property('model-url', d => d.data.url ? d.data.url : null);
+        .attr("transform", d => `translate(${-d.parent.x}, ${d.y})`);
 
     zone_display.append("text")
         .text(d => d.data.name);
@@ -480,27 +475,16 @@ function draw_zone(selection, cluster_diagram) {
 
     return zone_display;
 }
-draw_object.when('zone', draw_zone);
+draw_item.when('zone', draw_zone);
 
 function draw_instance(selection, cluster_diagram) {
     let node_rect = d3.local();
-    let node_model = d3.local();
-    let node_url = d3.local();
 
     let node = selection.append("g")
         .attr("class", d =>
             "instance node " + (d.children ? "node--internal" : "node--leaf"))
         .attr("transform", d => `translate(${d.x}, ${d.y})`)
-        .property('model-url', d => d.data.url ? d.data.url : null)
-        .on("click.selection", function(d) {
-            cluster_diagram.selection = this;
-        })
-        .each(function(d) {
-            let size = instance_size(d.data);
-            node_model.set(this, d.data);
-            node_url.set(this, d.data.url);
-            node_rect.set(this, make_rect(size.width, size.height));
-        });
+        .each(function(d) { node_rect.set(this, instance_rect(d.data)); });
 
     // icon
     node.append("path")
@@ -530,7 +514,7 @@ function draw_instance(selection, cluster_diagram) {
 
     return node;
 }
-draw_object.when('instance', draw_instance);
+draw_item.when('instance', draw_instance);
 
 function draw_rolelink(selection, cluster_diagram) {
     return selection.append("path")
@@ -554,16 +538,15 @@ function draw_rolelink(selection, cluster_diagram) {
             return path;
         });
 }
-draw_object.when('rolelink', draw_rolelink);
+draw_item.when('rolelink', draw_rolelink);
 
 
 /*********
  * View and geometry helpers.
  */
 
-function instance_size(instance) {
-    return {width: NODE_SIZE.M_WIDTH,
-            height: NODE_SIZE.M_HEIGHT};
+function instance_rect(instance) {
+    return make_rect(NODE_SIZE.M_WIDTH, NODE_SIZE.M_HEIGHT);
 }
 
 function instance_vcpus(instance) {

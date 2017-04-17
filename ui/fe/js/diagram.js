@@ -22,6 +22,9 @@ export function is_instance(filter) {
 }
 
 
+export const draw_item = multimethod(o => data_class(o.data()[0]));
+
+
 // Should eventually be a vue
 
 class Diagram {
@@ -44,12 +47,12 @@ class Diagram {
 
         viewport.selectAll("svg").remove();
 
-        var svg = viewport.append('svg')
+        let svg = viewport.append('svg')
             .classed("diagram-viewport", true)
             .attr('width', width)
             .attr('height', height);
 
-        var diagram = diagram_contents.append("g")
+        let diagram = diagram_contents.append("g")
             .classed("diagram", true)
             .attr('transform', `translate(0, ${height/2})`);
 
@@ -59,11 +62,11 @@ class Diagram {
     }
 
     draw_background_grid(diagram, width, height) {
-        var yScale = scaleLinear()
+        let yScale = scaleLinear()
             .domain([-height, height])
             .range([-height*2, height*2]);
 
-        var grid = diagram.append('g')
+        let grid = diagram.append('g')
             .classed('background-grid', true)
             .selectAll("line.horizontal")
             .data(yScale.ticks(GRID_SPACING)).enter()
@@ -74,15 +77,15 @@ class Diagram {
                 .attr("y1", yScale)
                 .attr("y2", yScale);
 
-        var xAxis = d3.axisLeft(yScale);
+        let xAxis = d3.axisLeft(yScale);
 
         grid.call(xAxis);
 
-        var xScale = scaleLinear()
+        let xScale = scaleLinear()
             .domain([-width, width])
             .range([-width*2, width*2]);
 
-        var gridy = diagram.append('g')
+        let gridy = diagram.append('g')
             .classed('background-grid', true)
             .selectAll("line.vertical")
             .data(xScale.ticks(GRID_SPACING)).enter()
@@ -93,7 +96,7 @@ class Diagram {
                 .attr("x1", xScale)
                 .attr("x2", xScale);
 
-        var yAxis = d3.axisTop(yScale);
+        let yAxis = d3.axisTop(yScale);
 
         gridy.call(yAxis);
 
@@ -105,7 +108,7 @@ class Diagram {
 
     setup_zoom(viewport) {
         let svg = this.viewport.selectAll('svg');
-        var zoom = d3.zoom()
+        let zoom = d3.zoom()
             //.scaleExtent([0.5, 40])
             .translateExtent([[-this.width/2, -this.height/2],
                             [this.width*2, this.height*2]])
@@ -120,38 +123,39 @@ class Diagram {
 export function setup_viewport(viewport, width, height) {
     viewport.selectAll("svg").remove();
 
-    var svg = viewport.append('svg')
-        .classed("diagram-viewport", true)
-        .attr('width', width)
-        .attr('height', height);
+    let svg = viewport.append('svg')
+        .classed("diagram-viewport svg-content-responsive", true);
 
-    var viewport_contents = svg.append('g');
+    let viewport_contents = svg.append('g');
 
     // Zoom
 
-    var zoom = d3.zoom()
-        //.scaleExtent([0.5, 40])
+    let zoom = d3.zoom()
         .translateExtent([[-width/2, -height/2], [width*2, height*2]])
         .on("zoom", () => viewport_contents.attr("transform", d3.event.transform));
 
     svg.call(zoom);
 
-    var diagram = viewport_contents.append("g")
+    let diagram = viewport_contents.append("g")
         .classed("diagram", true)
         .attr('transform', `translate(0, ${height/2})`);
 
     draw_background_grid(diagram, width, height);
 
-    return diagram;
+    return {
+        diagram: diagram,
+        width: width,
+        height: height
+    };
 }
 
 
 export function draw_background_grid(diagram, width, height) {
-    var yScale = scaleLinear()
+    let yScale = scaleLinear()
         .domain([-height, height])
         .range([-height*2, height*2]);
 
-    var grid = diagram.append('g')
+    let grid = diagram.append('g')
         .classed('background-grid', true)
         .selectAll("line.horizontal")
         .data(yScale.ticks(GRID_SPACING)).enter()
@@ -162,36 +166,37 @@ export function draw_background_grid(diagram, width, height) {
             .attr("y1", yScale)
             .attr("y2", yScale);
 
-    var xAxis = d3.axisLeft(yScale);
+    let xAxis = d3.axisLeft(yScale);
 
     grid.call(xAxis);
 
-    var xScale = scaleLinear()
+    let xScale = scaleLinear()
         .domain([-width, width])
         .range([-width*2, width*2]);
 
-    var gridy = diagram.append('g')
+    let gridy = diagram.append('g')
         .classed('background-grid', true)
         .selectAll("line.vertical")
         .data(xScale.ticks(GRID_SPACING)).enter()
         .append("line")
-            .classed('horizontal', true)
+            .classed('vertical', true)
             .attr("y1", -height*2)
             .attr("y2", height*2)
             .attr("x1", xScale)
             .attr("x2", xScale);
 
-    var yAxis = d3.axisTop(yScale);
+    let yAxis = d3.axisTop(yScale);
 
     gridy.call(yAxis);
 
 }
 
+
 /**
  * Rotate tree 90 degrees, converting from top-down to left-to-right.
  */
 export function tree_rotate(root) {
-    var diagram_left = root.y;
+    let diagram_left = root.y;
 
     root.each(d => {
         let x = (d.y ? d.y : 0),
@@ -202,13 +207,16 @@ export function tree_rotate(root) {
     });
 }
 
+
 /**
  * Returns the minimum and maximum Y values for the descendants of this
  * diagram element.
  */
-function node_yspan(d) {
+export function node_yspan(d) {
+    let y_values = d.descendants().map(c => c.y);
+
     return {
-        min_y: d3.min(d.descendants().map(c => c.y)),
-        max_y: d3.max(d.descendants().map(c => c.y+height))
+        min_y: d3.min(y_values),
+        max_y: d3.max(y_values)
     };
 }
