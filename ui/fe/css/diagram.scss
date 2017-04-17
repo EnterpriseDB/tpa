@@ -4,14 +4,28 @@
 @import "./colorscheme-alert";
 @import "./_variables.scss";
 
+.svg-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%; /* aspect ratio */
+    vertical-align: top;
+    overflow: hidden;
+}
+
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
+}
 
 .diagram-viewport {
     min-height: 100%;
+    min-width: 100%;
 }
 
 .diagram {
-    width: 100%;
-    min-height: 100%;
     background-color: white;
 
     .background-grid {
@@ -39,7 +53,7 @@
         }
 
         .icon {
-            fill: #ffffff;
+            fill: white;
             stroke: $color-normal-4;
             stroke-width: 3;
         }

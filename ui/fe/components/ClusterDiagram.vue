@@ -1,6 +1,13 @@
 
 <template>
-<div id="cluster-diagram" class="cluster_diagram" :url="url"></div>
+<div id="cluster-diagram" class="svg-container cluster_diagram" :url="url">
+<!--
+<svg class=svg-content-responsive diagram-viewport" preserveAspectRatio="xMinYMin meet" viewBox="0 0 600 400">
+    <g>
+        <g class="diagram"></g>
+    </g>
+</div>
+-->
 </template>
 
 <script>
