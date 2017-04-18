@@ -187,7 +187,7 @@ function cluster_create() {
         api.cluster_create({
             name: root.select("input.name").node().value,
             tenant: root.select("input.tenant").node().value,
-            template: carousel.current_cluster,
+            template: carousel.current_cluster.uuid,
         },
             (error, res) => {
                 if (error) {
