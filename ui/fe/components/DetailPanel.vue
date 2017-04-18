@@ -6,11 +6,11 @@
             <li v-for="model in models" role="presentation" :class="pane_active(model)">
                 <a :href="'#'+model_id(model)" :id="model_id(model)+'-tab'" role="tab" data-toggle="tab" aria-expanded="true">{{ cls(model) }}</a>
             </li>
-        </ul>
-        <div class="nav-buttons navbar-right">
-            <button type="button" class="btn navbar-btn btn-sm">create</button>
-            <button type="button" class="btn navbar-btn btn-sm">remove</button>
+        <div class="btn-group btn-group-xs navbar-right">
+            <button type="button" class="btn navbar-btn">create</button>
+            <button type="button" class="btn navbar-btn">remove</button>
         </div>
+        </ul>
         <div class="tab-content" id="myTabContent">
             <div v-for="model in models" :class="'tab-pane fade in '+pane_active(model)" role="tabpanel" :id="model_id(model)">
                 <div v-if="model" class="container-fluid">
@@ -102,8 +102,8 @@ export default Vue.extend({
             props: ['object', 'attr', 'value', "edit"],
             template: `
 <div class="row">
-    <div class="attr_name col-xs-3">{{ attr }} </div><div class="attr_value col-xs-6">{{ value }}</div>
-    <div v-if="edit" class="attr_edit col-xs-3"><button type="button" class="btn navbar-btn btn-sm" @click="emit_edit(edit)">edit</button></div>
+    <div class="attr_name col-xs-3">{{ attr }} </div><div class="attr_value col-xs-7">{{ value }}</div>
+    <div v-if="edit" class="attr_edit btn-group btn-group-xs col-xs-2"><button type="button" class="btn navbar-btn" @click="emit_edit(edit)">edit</button></div>
 </div>`,
             methods: {
                 emit_edit(edit) {
