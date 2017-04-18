@@ -1,5 +1,5 @@
 <template>
-<div id="cluster-carousel" class="carousel slide" data-ride="carousel">
+<div id="cluster-carousel" class="carousel slide" data-ride="carousel" data-interval="false">
 
     <div class="carousel-inner" role="listbox">
         <div v-for="cluster in clusters" :class="'item '+active(cluster)">
