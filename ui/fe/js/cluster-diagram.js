@@ -43,65 +43,13 @@ const DG_POSTGRES_ROLES = {
 };
 
 
-function display_selected_instance_detail(instance) {
-    function add_detail(selection, attr_name, attr_value) {
-        if ( !attr_value ) { return; }
-
-        let g = selection.append("div")
-                .classed(`${attr_name} row`, true);
-
-        g.append("div")
-            .classed("attr_name col-xs-3", true)
-            .html(attr_name+" ");
-        g.append("div")
-            .classed("attr_value col-xs-9", true)
-            .html(attr_value);
-
-        return g;
-    }
-
-    let row = d3.selectAll(".selected_instance_detail");
-
-    function detail_column() {
-        return row.append("div").attr("class", "col-xs-4");
-    }
-
-    let mem = instance.instance_type.memory ?
-        `, ${instance.instance_type.memory}g memory` : "";
-
-    detail_column()
-        .call(add_detail, "Name", instance.name)
-        .call(add_detail, 'Type', `${instance.instance_type.name}\
-            (${instance.instance_type.vcpus} vcpus${mem})`)
-        .call(add_detail, 'Description', instance.description);
-
-    detail_column()
-        .call(add_detail, 'Region', instance.subnet.zone.region.name)
-        .call(add_detail, 'Zone', instance.subnet.zone.name)
-        .call(add_detail, 'Subnet', instance.subnet.name)
-        .call(add_detail, 'VPC', instance.subnet.vpc.name)
-        .call(add_detail, 'Ext. IP', instance.assign_eip)
-        .call(add_detail, 'Tags', instance.user_tags ?
-            (Object.keys(instance.user_tags).map(
-                k => k + ": " + instance.user_tags[k]).join(", "))
-            : "");
-
-    detail_column()
-        .call(add_detail, 'Roles',
-            instance.roles.map(r => r.role_type).join(", "))
-        .call(add_detail, "Volumes",
-            instance.volumes.map(vol => {
-                let p = vol.delete_on_termination ?  "" : " persistent";
-                return `${vol.name} (${vol.volume_size}g${p} ${vol.volume_type})`;
-            }).join(", "));
-}
-
 export class ClusterDiagram {
     constructor (cluster, viewport, enable_select=true) {
         this.cluster = cluster;
         this.viewport = viewport;
         this.dobj_for_model = {};
 
+        // Calculate diagram size
         let bbox = viewport.node().getBoundingClientRect();
         this.width = bbox.width;
         this.height = bbox.height;
@@ -109,6 +57,19 @@ export class ClusterDiagram {
         if (this.height == 0) {
             // use parent's max height.
             this.height = viewport.node().parentNode.getBoundingClientRect().height;
+        }
+
+        if(this.height == 0) {
+            this.height = 300; // whatever.
+        }
+
+        if (this.width == 0) {
+            // use parent's max width.
+            this.width = viewport.node().parentNode.getBoundingClientRect().width;
+        }
+
+        if(this.width == 0) {
+            this.width = 300; // whatever.
         }
 
         this.diagram = setup_viewport(this.viewport, this.width, this.height).diagram;

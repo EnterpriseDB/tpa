@@ -1,5 +1,11 @@
 <template>
 <div id="cluster-carousel" class="carousel slide" data-ride="carousel" data-interval="false">
+    <ol class="carousel-indicators">
+        <template v-for="(cluster, index) in clusters">
+            <li data-target="#cluster-carousel" :data-slide-to="index" :class="active(cluster)">
+            </li>
+        </template>
+    </ol>
 
     <div class="carousel-inner" role="listbox">
         <div v-for="cluster in clusters" :class="'item '+active(cluster)">
@@ -11,13 +17,6 @@
             </div>
         </div>
     </div>
-
-    <ol class="carousel-indicators">
-        <template v-for="(cluster, index) in clusters">
-            <li data-target="#cluster-carousel" :data-slide-to="index" :class="active(cluster)">
-            </li>
-        </template>
-    </ol>
 
     <a class="left carousel-control col-sm-2" href="#cluster-carousel" role="button" data-slide="prev">
         <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
