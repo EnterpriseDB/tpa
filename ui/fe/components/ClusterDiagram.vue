@@ -29,6 +29,7 @@ export default Vue.extend({
             self.cluster = c;
             self.diagram = new ClusterDiagram(c, d3.select(self.$el));
             self.diagram.on_select(obj => self.$emit("selected", obj));
+            self.$emit("cluster", c);
         });
     },
     methods: {
