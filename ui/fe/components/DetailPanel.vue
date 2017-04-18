@@ -3,16 +3,20 @@
 <div id="detail-panel">
     <div class="navbar-fixed-bottom panel panel-default cluster_detail_panel">
         <ul class="nav nav-tabs" id="detail-panel-tabs" role="tablist">
-            <li v-for="model in models" role="presentation">
+            <li v-for="model in models" role="presentation" :class="pane_active(model)">
                 <a :href="'#'+model_id(model)" :id="model_id(model)+'-tab'" role="tab" data-toggle="tab" aria-expanded="true">{{ cls(model) }}</a>
             </li>
         </ul>
+        <div class="nav-buttons navbar-right">
+            <button type="button" class="btn navbar-btn btn-sm">create</button>
+            <button type="button" class="btn navbar-btn btn-sm">remove</button>
+        </div>
         <div class="tab-content" id="myTabContent">
-            <div v-for="model in models" class="tab-pane fade in" role="tabpanel" :id="model_id(model)">
+            <div v-for="model in models" :class="'tab-pane fade in '+pane_active(model)" role="tabpanel" :id="model_id(model)">
                 <div v-if="model" class="container-fluid">
                     <div :class="pane_classes(model)">
                         <div v-for="attrs in columns(model)" class="col-xs-4">
-                            <detail-item v-for="attr in attrs" :attr="attr[0]" :value="attr[1]"></detail-item>
+                            <detail-item v-for="attr in attrs" :attr="attr[0]" :value="attr[1]" :edit="attr[2]"></detail-item>
                         </div>
                     </div>
                 </div>
@@ -43,12 +47,22 @@ export default Vue.extend({
 
             return `row detail_pane selected_${tpa.model_class(m)}_detail`;
         },
+        pane_active(obj) {
+            let models = this.models;
+            return (models[models.length-1] == obj) ? "active" : "";
+        },
         columns(model_obj) {
             if (!model_obj) { return []; };
             console.log("Detail:", model_obj);
-            let result = [
-                [["Name", model_obj.name],
-                ['Description', model_obj.description]]];
+
+            let result = [[
+                ["Name", model_obj.name],
+                ['Description', model_obj.description],
+                ['Tags', model_obj.user_tags ?
+                    Object.keys(model_obj.user_tags).map(
+                        k => k + ": " + model_obj.user_tags[k]).join(", ")
+                    : ""]
+            ]];
 
             if(tpa.model_class(model_obj) != 'instance') {
                 return result;
@@ -59,24 +73,19 @@ export default Vue.extend({
             let mem = (ins_type && ins_type.memory) ?
                 `, ${ins_type.memory}g memory` : "";
 
-            result[0].push(
-                ['Type', `${ins_type.name} (${ins_type.vcpus} vcpus${mem})`]
-            );
-
             result.push([
-                ['Region', instance.subnet.zone.region.name],
-                ['Zone', instance.subnet.zone.name],
+                ['Type', `${ins_type.name} (${ins_type.vcpus} vcpus${mem})`,
+                "EDIT"],
+                ['Location',
+                    `${instance.subnet.zone.region.name}/${instance.subnet.zone.name}`,
+                    "EDIT"],
                 ['Subnet', instance.subnet.name],
                 ['VPC', instance.subnet.vpc.name],
-                ['Ext. IP', instance.assign_eip],
-                ['Tags', instance.user_tags ?
-                    Object.keys(instance.user_tags).map(
-                        k => k + ": " + instance.user_tags[k]).join(", ")
-                    : ""]
+                ['Ext. IP', instance.assign_eip]
             ]);
 
-            result.push([[
-                'Roles',
+            result.push([
+                ['Roles',
                     instance.roles.map(r => r.role_type).join(", ")],
                 ["Volumes",
                     instance.volumes.map(vol => {
@@ -90,11 +99,17 @@ export default Vue.extend({
     },
     components: {
         'detail-item': {
-            props: ['object', 'attr', 'value'],
+            props: ['object', 'attr', 'value', "edit"],
             template: `
 <div class="row">
-    <div class="attr_name col-xs-3">{{ attr }} </div><div class="attr_value col-xs-6">{{ value }}</div><div class="attr_edit col-xs-3"></div>
-</div>`
+    <div class="attr_name col-xs-3">{{ attr }} </div><div class="attr_value col-xs-6">{{ value }}</div>
+    <div v-if="edit" class="attr_edit col-xs-3"><button type="button" class="btn navbar-btn btn-sm" @click="emit_edit(edit)">edit</button></div>
+</div>`,
+            methods: {
+                emit_edit(edit) {
+                    this.$emit("edit", this.object, this.attr, this.value, edit);
+                }
+            },
         }
     }
 });
