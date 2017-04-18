@@ -1,0 +1,97 @@
+---
+
+cluster_name: "Cluster B"
+cluster_tags:
+  Owner: 2ndQuadrant
+cluster_vars:
+  cluster_network: 10.33.21.0/24
+
+ec2_vpc:
+  Name: Test
+
+ec2_vpc_subnets:
+  us-west-1:
+    10.33.29.0/28:
+      az: us-west-1a
+  us-east-1:
+    10.33.19.0/28:
+      az: us-east-1a
+    10.33.17.16/28:
+      az: us-east-1b
+
+
+ec2_ami:
+  Name: TPA-Debian-PGDG-9.6-2016*
+  Owner: self
+ec2_ami_user: admin
+
+instances:
+    - node: 1
+      type: t2.micro
+      region: us-west-1
+      subnet: 10.33.29.0/28
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 16
+      tags:
+        os: Debian
+        role: primary
+        Name: primary
+
+    - node: 2
+      type: t2.micro
+      region: us-west-1
+      subnet: 10.33.29.0/28
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 16
+      tags:
+        os: Debian
+        role: replica
+        Name: replica-1
+        upstream: primary
+
+    - node: 3
+      type: t2.micro
+      region: us-east-1
+      subnet: 10.33.19.0/28
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 16
+      tags:
+        os: Debian
+        role: replica
+        Name: replica-2
+        upstream: primary
+        backup: barman
+
+    - node: 4
+      type: t2.micro
+      region: us-east-1
+      subnet: 10.33.19.0/28
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 32
+      tags:
+        os: Debian
+        role:
+          - barman
+        Name: barman
+
+    - node: 5
+      type: t2.micro
+      region: us-east-1
+      subnet: 10.33.36.16/28
+      volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 16
+      tags:
+        os: Debian
+        role: replica
+        Name: cas-replica
+        upstream: replica-2
