@@ -46,16 +46,11 @@ export default Vue.extend({
         current_cluster: null
     }),
     computed: {
-        viewing_cluster() {
-            let idx = $("#cluster_carousel").find("div.active").index();
-            if (idx < 0) { return null; }
-            return this.clusters[idx];
-        }
     },
     mounted() {
         let self = this;
         $("#cluster-carousel").on("slid.bs.carousel", () => {
-            let viewing = self.viewing_cluster;
+            let viewing = self.viewing_cluster();
             if(self.current_cluster != viewing) {
                 self.current_cluster = viewing;
             }
@@ -63,6 +58,11 @@ export default Vue.extend({
         this.load_templates();
     },
     methods: {
+        viewing_cluster() {
+            let idx = $("#cluster-carousel").find("div.active").index();
+            if (idx < 0) { return null; }
+            return this.clusters[idx];
+        },
         cluster_url(cluster) {
             if (window.location.protocol == 'http:') {
                 return cluster.url;
