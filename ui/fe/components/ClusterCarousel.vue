@@ -3,7 +3,7 @@
 
     <div class="carousel-inner" role="listbox">
         <div v-for="cluster in clusters" :class="'item '+active(cluster)">
-            <cluster-diagram :url="cluster.url" class="carousel_cluster_diagram">
+            <cluster-diagram :url="cluster_url(cluster)" class="carousel_cluster_diagram">
             </cluster-diagram>
             <div class="carousel-caption">
                 <h3>{{ cluster.name }}</h3>
@@ -53,9 +53,6 @@ export default Vue.extend({
             return this.clusters[idx];
         }
     },
-    created() {
-
-    },
     mounted() {
         let self = this;
         $("#cluster-carousel").on("slid.bs.carousel", () => {
@@ -67,6 +64,13 @@ export default Vue.extend({
         this.load_templates();
     },
     methods: {
+        cluster_url(cluster) {
+            if (window.location.protocol == 'http:') {
+                return cluster.url;
+            }
+
+            return cluster.url.replace('http:', window.location.protocol);
+        },
         load_templates() {
             api.object_list("template", "",
                 (error, clusters) => {
