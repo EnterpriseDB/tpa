@@ -42,12 +42,6 @@ const DG_POSTGRES_ROLES = {
     barman: true
 };
 
-function clear_detail_panel() {
-    d3.selectAll(".selected_instance_detail")
-        .selectAll("*")
-        .remove();
-}
-
 
 function display_selected_instance_detail(instance) {
     function add_detail(selection, attr_name, attr_value) {
@@ -65,8 +59,6 @@ function display_selected_instance_detail(instance) {
 
         return g;
     }
-
-    clear_detail_panel();
 
     let row = d3.selectAll(".selected_instance_detail");
 
@@ -122,7 +114,6 @@ export class ClusterDiagram {
         this.diagram = setup_viewport(this.viewport, this.width, this.height).diagram;
         this.setup_selection(enable_select);
         this.draw();
-        clear_detail_panel();
     }
 
     setup_selection(enabled) {
@@ -132,11 +123,9 @@ export class ClusterDiagram {
             self.viewport, name="diagram", enabled=enabled);
         self.selector.on("selected", function() {
             self.draw_selection(this);
-            display_selected_instance_detail(this.__data__.data);
         });
         self.selector.on("deselected", () => {
             this.viewport.selectAll(".selection").remove();
-            clear_detail_panel();
         });
     }
 

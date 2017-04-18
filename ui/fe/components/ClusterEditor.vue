@@ -1,6 +1,6 @@
 
 <template>
-<cluster-diagram :url="url" @selected="set_panel_detail">
+<cluster-diagram :url="url" @selected="set_panel_detail" @cluster="set_cluster">
 </cluster-diagram>
 </template>
 
@@ -15,27 +15,30 @@ import * as api from "../js/tpa-api";
 export default Vue.extend({
     name: "cluster-editor",
     data: () => ({
-        url: api.window_model().api_url
+        url: api.window_model().api_url,
+        cluster: null
     }),
     created() {
         // spawn detail panel outside the main_content container.
-        d3.select("body").append("div").attr("id", "detail-panel");
+        d3.select("body").append("div").attr("id", "detail-panel",
+        );
         this.detail_panel = new DetailPanel({
             el: "#detail-panel",
-            master: this.url,
-            detail: this.url,
         });
     },
     mounted() {
-        this.set_panel_detail(this.url);
+        this.detail_panel.objects = [this.cluster];
     },
     components: {
         ClusterDiagram,
         DetailPanel,
     },
     methods: {
+        set_cluster(c) {
+            this.cluster = c;
+        },
         set_panel_detail(obj) {
-            this.detail_panel.detail = obj ? obj : this.url;
+            this.detail_panel.objects = [this.cluster, obj];
         }
     }
 });
