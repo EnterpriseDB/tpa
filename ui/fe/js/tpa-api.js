@@ -129,7 +129,7 @@ export function json_to_form(json_object) {
 
 const link_object = method();
 const url_cache = {};
-var default_provider = null;
+export var default_provider = null;
 
 
 export function get_obj_by_url(url, _then) {
