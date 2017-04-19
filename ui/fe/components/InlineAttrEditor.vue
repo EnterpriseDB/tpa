@@ -9,10 +9,11 @@
                 <div class="modal-body">
                     <div class="row">
                         <p class="col-xs-2">{{ name }}</p>
-                        <component :class="'attribute-value-editor value-editor-'+model" ref="editor" :is="model" :object="object" :name="name" :original_value="value"></component>
+                        <component :class="'attribute-value-editor value-editor-'+model" ref="editor" :is="model" :object="object" :name="name"></component>
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-default" @click="reset">Reset</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-success attr-save" @click="save">Save</button>
                 </div>
@@ -29,21 +30,50 @@ import * as tpa from "../js/tpa-api";
 import Vue from "vue";
 
 let ValueEditor = Vue.extend({
-    props: ["original_value"],
+    props: ['object', 'name'],
+    template:
+`<input v-model="selected_value" :name="name" class="col-xs-4"></input>`,
     data() {
         return {
-            object: null,
-            name: null,
-            value: this.original_value
+            prev_object: null,
+            value: null,
         }
     },
-    computed() {
+    computed: {
+        selected_value: {
+            get() {
+                if (this.value) {
+                    if (this.prev_object == this.object) {
+                        return this.value;
+                    }
+                    else {
+                        this.prev_object = this.object;
+                        this.value = null;
+                    }
+                }
+
+                return this.get_current_value();
+            },
+            set(v) {
+                if(v == this.selected_value) { return; }
+
+                this.value = v;
+                this.prev_object = this.object;
+            }
+        }
     },
-    template: `<input v-model="value" :name="name" class="col-xs-4"></input>`,
     methods: {
+        reset() {
+            this.value = null;
+            this.prev_object = null;
+        },
+        get_current_value() {
+            return this.object[this.name.toLowerCase()];
+        },
         save() {
             this.object[this.name.toLowerCase()] = this.value;
             this.value = null;
+            this.prev_object = null;
         }
     }
 });
@@ -55,14 +85,13 @@ let ZoneEditor = ValueEditor.extend({
     <option disabled value="">Select a region...</option>
     <option v-for="region in available_regions" :value="region.uuid">{{ region.name }}</option>
 </select>
-<select v-model="selected_zone">
+<select v-model="selected_value">
     <option disabled value="">Select a zone...</option>
     <option v-for="zone in available_zones" :value="zone.uuid">{{ zone.name }}</option>
 </select></div>`,
     data() {
         return {
             selected_region: null,
-            selected_zone: null,
         }
     },
     computed: {
@@ -80,16 +109,12 @@ let ZoneEditor = ValueEditor.extend({
     mounted() {
         if(!this.object) {return;}
         this.selected_region = this.object.subnet.zone.region.uuid;
-        this.selected_zone = this.object.subnet.zone.uuid;
-    },
-    watch: {
-        value() {
-            if(!this.object) {return;}
-            this.selected_region = this.object.subnet.zone.region.uuid;
-            this.selected_zone = this.object.subnet.zone.uuid;
-        }
     },
     methods: {
+        get_current_value() {
+            if(!this.object) { return null; }
+            return this.object.subnet.zone.uuid;
+        },
         save() {
         }
     }
@@ -98,37 +123,24 @@ let ZoneEditor = ValueEditor.extend({
 
 let InstanceTypeEditor = ValueEditor.extend({
     template:
-`<div><select v-model="selected_type">
+`<div><select v-model="selected_value">
     <option disabled value="">Select a type...</option>
     <option v-for="itype in available_types" :value="itype.uuid">{{ itype.name }}</option>
 </select></div>`,
-    data: () => ({
-        selected_type: null,
-    }),
     computed: {
         available_types() {
             if(!this.object) { return []; };
              return this.object.subnet.zone.instance_types;
         },
-        curr_type() {
-            if(!this.object) { return null; };
-            return this.available_types.filter(r => r.uuid == this.selected_type)[0];
-        },
-    },
-    mounted() {
-        if(!this.object) {return;}
-        this.selected_type = this.object.instance_type.uuid;
-    },
-    watch: {
-        value() {
-            if(!this.object) {return;}
-            this.selected_region = this.object.subnet.zone.region.uuid;
-            this.selected_zone = this.object.subnet.zone.uuid;
-        }
     },
     methods: {
+        get_current_value() {
+            return this.object.instance_type.uuid;
+        },
         save() {
-            this.object.instance_type = this.curr_type;
+            this.object.instance_type =
+                this.available_types.filter(
+                    t => t.uuid == this.selected_value)[0];
         }
     }
 });
@@ -139,23 +151,22 @@ export default Vue.extend({
     data: () => ({
         object: null,
         name: null,
-        value: null,
         model: null,
     }),
     computed: {
-        object_name() {
-            return this.object ? this.object.name: "<none>";
+        object_name() { return this.object ? this.object.name: "<none>";
         }
     },
     methods: {
+        reset() {
+            this.$refs.editor.reset();
+        },
         show_modal(object, name, value, model) {
-            console.log("show", this.object, this.name);
             this.object = object;
             this.name = name;
-            this.value = value;
             this.model = model;
-            this.$forceUpdate();
             $(this.$el).modal("show");
+            this.$forceUpdate();
         },
         save() {
             this.$refs.editor.save(this.object);
@@ -164,7 +175,6 @@ export default Vue.extend({
 
             this.object = null;
             this.name = null;
-            this.value = null;
             this.model = null;
         }
     },

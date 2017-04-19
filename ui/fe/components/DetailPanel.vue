@@ -12,11 +12,17 @@
             </div>
         </ul>
         <div class="tab-content">
-            <div v-for="model in models" :class="'tab-pane fade in '+pane_active(model)" role="tabpanel" :id="model_id(model)">
+            <div v-for="model in models"
+                    :class="'tab-pane fade in '+pane_active(model)"
+                    role="tabpanel" :id="model_id(model)">
                 <div class="container-fluid">
                     <div :class="pane_classes(model)">
                         <div v-for="attrs in columns(model)" class="col-xs-4">
-                            <detail-item v-for="attr in attrs" :object="model" :attr="attr[0]" :value="attr[1]" :edit="attr[2]" @edit="show_editor"></detail-item>
+                            <detail-item v-for="attr in attrs"
+                                :object="model" :attr="attr[0]"
+                                :value="attr[1]" :edit="attr[2]"
+                                @edit="show_editor">
+                            </detail-item>
                         </div>
                     </div>
                 </div>
@@ -99,9 +105,8 @@ export default Vue.extend({
             return result;
         },
         show_editor(object, attr, value, edit) {
-            console.log("show_editor", object, name);
-            this.editor_open = true;
             this.$refs.editor.show_modal(object, attr, value, edit);
+            this.editor_open = true;
         },
         editor_saved() {
             this.editor_open = false;
@@ -112,7 +117,8 @@ export default Vue.extend({
             props: ['object', 'attr', 'value', "edit"],
             template:
 `<div class="row">\
-<div class="attr_name col-xs-3">{{ attr }} </div><div class="attr_value col-xs-7">{{ value }}</div>\
+<div class="attr_name col-xs-3">{{ attr }} </div>\
+<div class="attr_value col-xs-7">{{ value }}</div>\
 <div v-if="edit" class="attr_edit btn-group btn-group-xs col-xs-2">\
 <button type="button" class="btn navbar-btn" @click="emit_edit">edit</button></div>\
 </div>`,
