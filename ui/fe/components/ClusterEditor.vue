@@ -20,8 +20,7 @@ export default Vue.extend({
     }),
     created() {
         // spawn detail panel outside the main_content container.
-        d3.select("body").append("div").attr("id", "detail-panel",
-        );
+        d3.select("body").append("div").attr("id", "detail-panel");
         this.detail_panel = new DetailPanel({
             el: "#detail-panel",
         });

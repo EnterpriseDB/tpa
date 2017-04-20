@@ -4,7 +4,10 @@
     <div class="navbar-fixed-bottom panel panel-default cluster_detail_panel">
         <ul class="nav nav-tabs" id="detail-panel-tabs" role="tablist">
             <li v-for="model in models" role="presentation" :class="pane_active(model)">
-                <a :href="'#'+model_id(model)" :id="model_id(model)+'-tab'" role="tab" data-toggle="tab" aria-expanded="true">{{ cls(model) }}</a>
+                <a :href="'#'+model_id(model)"
+                    :id="model_id(model)+'-tab'" 
+                    role="tab" data-toggle="tab" 
+                    aria-expanded="true">{{ cls(model) }}</a>
             </li>
             <div id="object-actions" class="btn-group btn-group-xs navbar-right">
                 <button type="button" class="btn navbar-btn">create</button>

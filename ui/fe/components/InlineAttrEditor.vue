@@ -37,20 +37,23 @@ let ValueEditor = Vue.extend({
         return {
             prev_object: null,
             value: null,
+            dirty: false
         }
     },
     computed: {
         selected_value: {
             get() {
-                if (this.value) {
-                    if (this.prev_object == this.object) {
-                        return this.value;
-                    }
-                    else {
-                        this.prev_object = this.object;
-                        this.value = null;
-                    }
+                if(!this.dirty) {
+                    return this.get_current_value();
                 }
+
+                if (this.prev_object == this.object) {
+                    return this.value;
+                }
+
+                // Editing a new object.
+                this.reset();
+                this.prev_object = this.object;
 
                 return this.get_current_value();
             },
@@ -59,21 +62,43 @@ let ValueEditor = Vue.extend({
 
                 this.value = v;
                 this.prev_object = this.object;
+                this.dirty = true;
             }
+        },
+        real_attr_name() {
+            return this.name.toLowerCase();
         }
     },
     methods: {
         reset() {
             this.value = null;
             this.prev_object = null;
+            this.dirty = false;
         },
         get_current_value() {
-            return this.object[this.name.toLowerCase()];
+            if(!this.object) { return null; }
+            return this.object[this.real_attr_name];
+        },
+        set_current_value() {
+            this.object[this.real_attr_name] = this.selected_value;
+        },
+        commit() {
+            tpa.object_setattr(this.object,
+                this.real_attr_name, this.selected_value,
+                (error, result) => {
+                    if(error) {
+                        alert("error!");
+                        return;
+                    }
+                    this.set_current_value();
+                });
         },
         save() {
-            this.object[this.name.toLowerCase()] = this.value;
-            this.value = null;
-            this.prev_object = null;
+            if(this.dirty) {
+                this.commit();
+                this.$emit("changed", this.object, this.attr, this.selected_value);
+            }
+            this.reset();
         }
     }
 });
@@ -111,11 +136,18 @@ let ZoneEditor = ValueEditor.extend({
         this.selected_region = this.object.subnet.zone.region.uuid;
     },
     methods: {
+        reset() {
+            this.selected_region = null;
+            this.value = null;
+            this.dirty = false;
+            this.prev_object = null;
+        },
         get_current_value() {
             if(!this.object) { return null; }
             return this.object.subnet.zone.uuid;
         },
-        save() {
+        set_current_value() {
+            this.object.subnet = null; ??
         }
     }
 });
@@ -132,16 +164,14 @@ let InstanceTypeEditor = ValueEditor.extend({
             if(!this.object) { return []; };
              return this.object.subnet.zone.instance_types;
         },
+        real_attr_name() {
+            return 'instance_type';
+        }
     },
     methods: {
         get_current_value() {
             return this.object.instance_type.uuid;
         },
-        save() {
-            this.object.instance_type =
-                this.available_types.filter(
-                    t => t.uuid == this.selected_value)[0];
-        }
     }
 });
 
