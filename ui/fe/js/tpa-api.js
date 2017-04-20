@@ -93,6 +93,15 @@ export function object_get(cls, uuid, callback) {
         .get(callback);
 }
 
+export function object_setattr(obj, attr, value, callback) {
+    let cls = model_class(obj), uuid = obj.uuid;
+    console.log("obj:", obj, "attr:", attr, "value", value);
+
+    return auth.json_request(`${API_URL}${cls}/${uuid}/`)
+        .header("Content-Type", "application/json")
+        .send("PATCH", JSON.stringify({[attr]: value}), callback);
+}
+
 export function object_update(cls, uuid, json_object, callback) {
     return auth.json_request(`${API_URL}${cls}/${uuid}/`)
         .header("Content-Type", "application/json")
@@ -111,7 +120,6 @@ export function object_list(cls, filter, callback) {
         .header("Content-Type", "application/json")
         .get(callback);
 }
-
 
 export function json_to_form(json_object) {
     let form = new FormData();
@@ -290,7 +298,6 @@ export function instance_role(instance) {
 
     return undefined;
 }
-
 
 // Subnet
 
