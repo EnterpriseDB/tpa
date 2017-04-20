@@ -5,8 +5,8 @@
         <ul class="nav nav-tabs" id="detail-panel-tabs" role="tablist">
             <li v-for="model in models" role="presentation" :class="pane_active(model)">
                 <a :href="'#'+model_id(model)"
-                    :id="model_id(model)+'-tab'" 
-                    role="tab" data-toggle="tab" 
+                    :id="model_id(model)+'-tab'"
+                    role="tab" data-toggle="tab"
                     aria-expanded="true">{{ cls(model) }}</a>
             </li>
             <div id="object-actions" class="btn-group btn-group-xs navbar-right">
@@ -32,7 +32,7 @@
             </div>
         </div>
     </div>
-    <inline-attr-editor ref="editor" @saved="editor_saved"></inline-attr-editor>
+    <inline-attr-editor ref="editor" @value_changed="editor_saved"></inline-attr-editor>
 </div>
 </template>
 
@@ -92,7 +92,7 @@ export default Vue.extend({
                     "zone"],
                 ['Subnet', instance.subnet.name],
                 ['VPC', instance.subnet.vpc.name],
-                ['Assign EIP', instance.assign_eip]
+                ['Ext IP', instance.assign_eip]
             ]);
 
             result.push([
@@ -113,6 +113,7 @@ export default Vue.extend({
         },
         editor_saved() {
             this.editor_open = false;
+            this.$emit("object_changed");
         },
     },
     components: {

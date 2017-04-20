@@ -9,7 +9,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <p class="col-xs-2">{{ name }}</p>
-                        <component :class="'attribute-value-editor value-editor-'+model" ref="editor" :is="model" :object="object" :name="name"></component>
+                        <component :class="'attribute-value-editor value-editor-'+model" ref="editor" :is="model" :object="object" :name="name" @changed="value_changed"></component>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -147,7 +147,7 @@ let ZoneEditor = ValueEditor.extend({
             return this.object.subnet.zone.uuid;
         },
         set_current_value() {
-            this.object.subnet = null; ??
+            this.object.subnet = null;
         }
     }
 });
@@ -184,8 +184,7 @@ export default Vue.extend({
         model: null,
     }),
     computed: {
-        object_name() { return this.object ? this.object.name: "<none>";
-        }
+        object_name() { return this.object ? this.object.name: "<none>"; }
     },
     methods: {
         reset() {
@@ -201,11 +200,13 @@ export default Vue.extend({
         save() {
             this.$refs.editor.save(this.object);
             $(this.$el).modal("hide");
-            this.$emit("saved");
 
             this.object = null;
             this.name = null;
             this.model = null;
+        },
+        value_changed() {
+            this.$emit("value_changed");
         }
     },
     components: {

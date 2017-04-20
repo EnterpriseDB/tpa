@@ -95,8 +95,6 @@ export function object_get(cls, uuid, callback) {
 
 export function object_setattr(obj, attr, value, callback) {
     let cls = model_class(obj), uuid = obj.uuid;
-    console.log("obj:", obj, "attr:", attr, "value", value);
-
     return auth.json_request(`${API_URL}${cls}/${uuid}/`)
         .header("Content-Type", "application/json")
         .send("PATCH", JSON.stringify({[attr]: value}), callback);
@@ -140,8 +138,8 @@ const url_cache = {};
 export var default_provider = null;
 
 
-export function get_obj_by_url(url, _then) {
-    if (url_cache[url]) {
+export function get_obj_by_url(url, _then, allow_cache=true) {
+    if (allow_cache && url_cache[url]) {
         if (_then) {
             _then(url_cache[url]);
         }

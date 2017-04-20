@@ -23,16 +23,21 @@ export default Vue.extend({
     props: ["url"],
     data: () => ({cluster: null}),
     updated() { this.refresh_diagram(); },
-    created() {
-        let self = this;
-        tpa.get_obj_by_url(self.url, c => {
-            self.cluster = c;
-            self.diagram = new ClusterDiagram(c, d3.select(self.$el));
-            self.diagram.on_select(obj => self.$emit("selected", obj));
-            self.$emit("cluster", c);
-        });
+    mounted() {
+        this.reload_cluster();
     },
     methods: {
+        reload_cluster() {
+            if(!this.url) { return; }
+
+            let self = this;
+            tpa.get_obj_by_url(self.url, c => {
+                self.cluster = c;
+                self.diagram = new ClusterDiagram(c, d3.select(self.$el));
+                self.diagram.on_select(obj => self.$emit("selected", obj));
+                self.$emit("cluster", c);
+            });
+        },
         refresh_diagram() {
             if(!this.cluster) return;
             this.diagram.draw();
