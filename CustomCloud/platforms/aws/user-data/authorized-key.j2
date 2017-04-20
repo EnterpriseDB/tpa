@@ -1,0 +1,6 @@
+sed -i.bak 's/PermitRootLogin no/#PermitRootLogin no/' /etc/ssh/sshd_config
+service sshd restart
+
+cat >> /root/.ssh/authorized_keys <<KEY
+{{ lookup('file', cluster_dir + '/' + ec2_key_file + '.pub') }}
+KEY

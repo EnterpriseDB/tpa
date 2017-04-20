@@ -25,4 +25,8 @@ echo "$(date): start"
 
 {% include 'user-data/ssh-keys.j2' %}
 
+{% if install_authorized_key %}
+{% include 'user-data/authorized-key.j2' %}
+{% endif %}
+
 echo "$(date): end"
