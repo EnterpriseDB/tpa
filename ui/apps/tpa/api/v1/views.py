@@ -144,6 +144,12 @@ class ClusterExportView(TenantOwnedMixin, generics.RetrieveAPIView):
     serializer_class = serializers.ClusterToYmlSerializer
 
 
+class InstanceUpdateView(TenantOwnedMixin, generics.UpdateAPIView):
+    queryset = models.Instance.objects
+    lookup_field = 'uuid'
+    serializer_class = serializers.InstanceUpdateSerializer
+
+
 for _cls_name in models.__all__:
     (name, klazz) = create_generic_viewset(getattr(models, _cls_name))
     globals()[name] = klazz

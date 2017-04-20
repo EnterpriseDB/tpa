@@ -105,7 +105,6 @@ class ClusterFromTemplateSerializer(ModelSerializer):
         raise NotImplementedError
 
 
-
 class UserInvitationSerializer(ModelSerializer):
     email = serializers.EmailField(required=True)
     new_tenant_name = CharField(required=False)
@@ -158,3 +157,59 @@ class UserInvitedRegistrationSerializer(ModelSerializer):
 
     def get(self, *args, **kwargs):
         raise NotImplementedError
+
+
+class InstanceUpdateSerializer(ModelSerializer):
+    zone = UUIDField(write_only=True, required=False)
+
+    class Meta:
+        model = models.Instance
+        fields = ('zone', 'name', 'description', 'instance_type')
+
+    def update(self, instance, validated_data):
+        data = validated_data
+
+        with transaction.atomic():
+            for f in ['name', 'description', 'instance_type']:
+                if f in data:
+                    setattr(instance, f, data[f])
+
+            if 'zone' in data:
+                # user has requested a zone transfer, which means a
+                # subnet transfer.
+                new_zone = data['zone']
+                old_subnet = instance.subnet
+
+                avail_subnets = models.Subnet.objects.filter(
+                    credentials=old_subnet.credentials,
+                    vpc=old_subnet.vpc,
+                    zone=new_zone)
+
+                if avail_subnets.empty():
+                    # create an implicit subnet in this zone for the instance.
+                    new_subnet = models.Subnet.objects.create(
+                        name=old_subnet.name,
+                        tenant=old_subnet.tenant,
+                        cluster=old_subnet.vpc.cluster,
+                        credentials=old_subnet.credentials,
+                        netmask=generate_cidr(
+                            old_subnet.netmask or old_subnet.name),
+                        vpc=old_subnet.vpc,
+                        zone=new_zone)
+                else:
+                    new_subnet = avail_subnets.first()
+
+                instance.subnet = new_subnet
+
+            instance.save()
+
+        return instance
+
+
+def generate_cidr(old_cidr):
+    (ip, bits) = old_cidr.split('/')
+    ip_num = [int(n) for n in ip.split('.')]
+    ip_num[2] += 100  # FIXME
+    new_ip = '.'.join(ip_num)
+
+    return '%s/%s' % (new_ip, bits)
