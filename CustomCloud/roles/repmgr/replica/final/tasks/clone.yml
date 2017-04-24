@@ -30,7 +30,7 @@
 
 - include: clone-upstream.yml
   when: >
-    upstream != upstream_primary
+    upstream|default(upstream_primary) != upstream_primary
     
 - name: Run repmgr standby clone
   command: >

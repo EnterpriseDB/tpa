@@ -14,6 +14,6 @@ logfile='/var/log/postgresql/repmgrd.log'
 {% if upstream_backedup != '' %}
 restore_command='/usr/bin/barman-wal-restore -U barman {{ hostvars[upstream_backedup].backup }} {{ hostvars[upstream_backedup].backup_name }} %f %p'
 {% endif %}
-{% if upstream and upstream != upstream_primary %}
+{% if upstream|default(upstream_primary) != upstream_primary %}
 upstream_node={{ hostvars[upstream].node }}
 {% endif %}
