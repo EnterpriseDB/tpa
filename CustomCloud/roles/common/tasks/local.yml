@@ -17,3 +17,10 @@
   with_items:
     - pwgen
     - flock
+
+- name: Wait for instances to be available
+  local_action:
+    module: wait_for
+    port: "{{ ansible_port|default(22) }}"
+    host: "{{ ansible_host }}"
+    search_regex: OpenSSH
