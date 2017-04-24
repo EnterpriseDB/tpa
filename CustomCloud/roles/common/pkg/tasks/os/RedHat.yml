@@ -15,7 +15,8 @@
     python|succeeded and 'already installed and latest version' not in python.stdout
 
 - name: Install pip
-  raw: yum -y install python-pip
+  raw: which pip || yum -y install python-pip
   register: pip
   changed_when: >
-    pip|succeeded and 'already installed and latest version' not in pip.stdout
+    pip|succeeded and 'already installed and latest version' not in pip.stdout and
+    not pip.stdout.endswith('/pip')
