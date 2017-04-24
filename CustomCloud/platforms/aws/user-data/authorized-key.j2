@@ -1,8 +1,15 @@
-sed -i.bak 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
-service sshd restart
+{% if ec2_ami_user|default('admin') == 'root' %}
+sed -i.bak 's/^PermitRootLogin/# PermitRootLogin/' /etc/ssh/sshd_config
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+{% endif %}
+{% if cluster_ssh_port|default(22) != 22 %}
+echo "Port {{ cluster_ssh_port }}" >> /etc/ssh/sshd_config
+{% endif %}
 
 cat >> /root/.ssh/authorized_keys <<KEY
 {{ lookup('file', cluster_dir + '/' + ec2_key_file + '.pub') }}
 KEY
 
 chmod 600 /root/.ssh/authorized_keys
+
+service sshd restart
