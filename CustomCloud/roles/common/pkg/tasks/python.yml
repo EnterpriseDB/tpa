@@ -26,6 +26,7 @@
 # ahead of the version provided by OS packages.
 
 - name: Install boto
+  #shell: python -c 'import boto' &>/dev/null || pip install boto
   command: pip install boto
   register: boto
   changed_when: >
