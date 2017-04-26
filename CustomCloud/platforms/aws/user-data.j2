@@ -23,10 +23,12 @@ echo "$(date): start"
 
 {% include 'user-data/awscli.j2' %}
 
-{% include 'user-data/ssh-keys.j2' %}
+{% include 'user-data/ssh-hostkeys.j2' %}
 
-{% if install_authorized_key|d() and install_authorized_key %}
+{% if install_authorized_key|default(false) %}
 {% include 'user-data/authorized-key.j2' %}
 {% endif %}
+
+{% include 'user-data/sshd-config.j2' %}
 
 echo "$(date): end"
