@@ -149,7 +149,9 @@
     #
     # ec2_groups:
     #   us-east-1:
-    #     group-name: foo
+    #     group-name:
+    #       - foo
+    #       - bar
     #
     # That is, ec2_groups maps region names to a filter expression that
     # uniquely identifies a security group in any of the ways documented
