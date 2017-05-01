@@ -1,6 +1,6 @@
 {% if ec2_ami_user|default('admin') == 'root' %}
-sed -i.bak 's/^PermitRootLogin/# PermitRootLogin/' /etc/ssh/sshd_config
-echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+sed -i.bak 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
+service sshd restart
 {% endif %}
 
 {% if cluster_ssh_port|default(22) != 22 %}
@@ -12,4 +12,3 @@ echo "Port {{ cluster_ssh_port }}" >> /etc/ssh/sshd_config
 /opt/centrify/domain-join.sh {{ centrify_ad_domain }} {{ centrify_ad_group }} aws
 {% endif %}
 
-service sshd restart
