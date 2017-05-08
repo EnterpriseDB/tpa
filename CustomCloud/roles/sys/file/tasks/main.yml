@@ -1,0 +1,17 @@
+---
+
+- name: Ensure all necessary parameters are present
+  assert:
+    msg: "Please specify at least path, owner, group, and mode"
+    that:
+      - path is defined
+      - owner is defined
+      - group is defined
+      - mode is defined
+
+- name: Set requested owner, group, and permissions
+  file:
+    path: "{{ path }}"
+    owner: "{{ owner }}"
+    group: "{{ group }}"
+    mode: "{{ mode }}"
