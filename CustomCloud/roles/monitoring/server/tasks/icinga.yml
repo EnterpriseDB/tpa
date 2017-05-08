@@ -65,7 +65,7 @@
   apache2_module: state=present name=rewrite
   notify: Restart apache
 
-- name: Apache configuration file for icingca
+- name: Apache configuration file for icinga
   template: src=rdba-icinga-ssl.j2 dest=/etc/apache2/sites-available/rdba-icinga-ssl.conf
   notify: Restart apache
 
