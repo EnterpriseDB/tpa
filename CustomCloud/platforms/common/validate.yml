@@ -21,3 +21,10 @@
       - cluster_name != ''
 
 - include: read-cluster-vars.yml
+
+- name: Convert cluster_network to a list
+  set_fact:
+    cluster_network:
+      - "{{ cluster_network }}"
+  when:
+    cluster_network|d() and cluster_network is string
