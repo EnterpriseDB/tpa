@@ -7,7 +7,7 @@ local   all             postgres                                peer
 local   all             all                                     trust
 host    all             all             127.0.0.1/32            trust
 host    all             all             ::1/128                 trust
-{% for n in cluster_network %}
+{% for n in cluster_networks|default([cluster_network]) %}
 host    postgres        barman          {{ n }}   md5
 host    repmgr          repmgr          {{ n }}   md5
 host    replication     all             {{ n }}   md5

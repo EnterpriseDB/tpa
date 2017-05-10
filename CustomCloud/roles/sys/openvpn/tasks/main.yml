@@ -23,6 +23,7 @@
   set_fact:
     ip_address: "{{ openvpn_ip }}"
     ip_addresses: ['public_ip', 'private_ip', 'openvpn_ip']
-    cluster_network:
+    cluster_network: "{{ vpn_network }}"
+    cluster_networks:
       - "{{ vpn_network }}"
   tags: always
