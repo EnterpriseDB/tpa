@@ -16,4 +16,4 @@
     chdir: "{{ cluster_dir }}"
   when:
     - lookup('env', 'SSH_AGENT_PID')|default('') != ''
-    - lookup('pipe', "ssh-add -l|grep $(ssh-keygen -l -f '{{ cluster_dir }}/{{ keyfile }}'|awk '{print $2}') || true") == ""
+    - lookup('pipe', "ssh-add -l|grep $(ssh-keygen -l -f '" ~ cluster_dir ~ "/" ~ keyfile ~"'|awk '{print $2}') || true") == ""
