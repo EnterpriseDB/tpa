@@ -17,6 +17,7 @@ packages:
     - htop
     - iotop
     - screen
+    - rsync
   Debian:
     - python-dev
     - python-passlib
