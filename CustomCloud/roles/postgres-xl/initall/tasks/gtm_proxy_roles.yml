@@ -18,4 +18,5 @@
     sudo_user: postgres
     sudo: true
     delegate_to: "{{ control_hostname }}"
-  when: "dtype == 'gtm-proxy' and '{{ inventory_hostname }}' == '{{ gphost }}'"
+  when:
+    dtype == 'gtm-proxy' and inventory_hostname == gphost

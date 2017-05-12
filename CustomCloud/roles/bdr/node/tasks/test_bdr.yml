@@ -26,7 +26,7 @@
   - name: Assert an error if test fails
     fail:
       message: "BDR replication fails, please check the bdr nodes."
-    when: "{{ item.stdout != '1' }}"
+    when: item.stdout != '1'
     with_items: "{{ bdr_rep.results }}"
 
   - name: Drop the test table
