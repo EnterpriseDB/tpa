@@ -45,7 +45,7 @@
       ssh_user: "{{ ec2_ami_user|default('admin') }}"
       ssh_key_name: "{{ id_extra }}"
       when: >
-        "{{ id_extra|default("") }}" != ""
+        id_extra|default("") != ""
 
     - role: sys/openvpn
       vpn_network: 192.168.33.0/24
