@@ -53,6 +53,11 @@
       with_items: "{{ regions }}"
       tags: ec2_keys
 
+    - name: Set ec2_instance_key
+      set_fact:
+        ec2_instance_key: "{{ ec2_key_name }}"
+      tags: ec2_keys
+
     # When provisioning each instance, we must specify a vpc_subnet_id
     # to place the instance in. If the instance configuration specifies
     # "subnet: subnet-xxx" directly, we can use that value. This allows
@@ -396,7 +401,7 @@
           }}
         image: "{{ item.image }}"
         region: "{{ item.region }}"
-        key_name: "{{ ec2_key_name }}"
+        key_name: "{{ ec2_instance_key|default(omit) }}"
         instance_type: "{{ item.type }}"
         instance_tags: >
           {{
