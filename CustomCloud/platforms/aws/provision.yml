@@ -508,5 +508,3 @@
       template:
         src: known_hosts.j2
         dest: "{{ cluster_dir }}/known_hosts"
-
-    - include: ../common/write-cluster-vars.yml
