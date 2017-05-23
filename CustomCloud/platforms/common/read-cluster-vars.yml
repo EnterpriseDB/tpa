@@ -14,9 +14,3 @@
   set_fact:
     extra_cluster_vars: {}
   when: extra_cluster_vars is not defined
-
-- name: Set facts from extra_cluster_vars
-  action: set_fact
-  args:
-    "{{ item.key }}": "{{ item.value }}"
-  with_dict: "{{ extra_cluster_vars }}"

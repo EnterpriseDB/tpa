@@ -14,6 +14,3 @@ ansible_ssh_common_args="-o UserKnownHostsFile='{{ cluster_dir|relpath(playbook_
 {% for k,v in (platform_vars|combine(cluster_vars)).iteritems(): %}
 {{ k }}={{v}}
 {% endfor %}
-{% for k,v in (platform_vars|combine(extra_cluster_vars)).iteritems(): %}
-{{ k }}={{v}}
-{% endfor %}
