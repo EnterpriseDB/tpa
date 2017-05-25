@@ -390,15 +390,9 @@
     - name: Set up EC2 instances
       ec2:
         exact_count: 1
-        count_tag: >
-          {{
-            cluster_tags|combine(item.tags)|combine({
-              'Cluster': cluster_name,
-              'Name': item.tags.Name,
-              'role': (item.tags.role|join(",")),
-              'node': item.node,
-            })
-          }}
+        count_tag:
+          Cluster: "{{ cluster_name }}"
+          node: "{{ item.node }}"
         image: "{{ item.image }}"
         region: "{{ item.region }}"
         key_name: "{{ ec2_instance_key|default(omit) }}"
