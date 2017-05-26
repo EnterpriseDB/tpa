@@ -31,4 +31,8 @@ echo "$(date): start"
 
 {% include 'user-data/sshd-config.j2' %}
 
+{% if extra_user_data|d() %}
+{{ extra_user_data }}
+{% endif %}
+
 echo "$(date): end"
