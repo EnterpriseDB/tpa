@@ -1,4 +1,1 @@
-# pgbouncer user to connect the databases
-# here we're using the user that we created by using postgres/createuser role
-# we ran postgres/createuser role only on bdr nodes or primary nodes
 "pgbouncer" "md5{{ (vars['pgbouncer_password'] + 'pgbouncer')|hash('md5') }}"
