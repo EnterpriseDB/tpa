@@ -380,12 +380,6 @@
     # the VPC and group corresponding to the region/subnet defined for
     # that instance, and extract the relevant subnet or group id from
     # the responses registered above.
-    #
-    # Using "volumes" as we do here means that we can't tag the volumes
-    # that we create; if delete_on_termination isn't set, that means we
-    # can't find them later to clean them up. We should use ec2_vol to
-    # create tagged volumes and attach them to the instances. Then we
-    # can use ec2_vol_facts to find them later.
 
     - name: Set up EC2 instances
       ec2:
