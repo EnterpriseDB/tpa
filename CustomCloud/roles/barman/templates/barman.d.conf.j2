@@ -1,7 +1,7 @@
 [{{ backup_name }}]
 description = "Backups from {{ parent_inventory_hostname|default(inventory_hostname) }}"
 
-ssh_command = "ssh postgres@{{ parent_inventory_hostname|default(inventory_hostname) }}"
+ssh_command = "ssh -q postgres@{{ parent_inventory_hostname|default(inventory_hostname) }}"
 conninfo = "host={{ parent_inventory_hostname|default(inventory_hostname) }} port={{ postgres_port }} dbname=postgres user=barman"
 streaming_conninfo = "host={{ parent_inventory_hostname|default(inventory_hostname) }} port={{ postgres_port }} user=streaming_barman"
 streaming_archiver = on
