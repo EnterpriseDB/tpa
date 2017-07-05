@@ -21,6 +21,8 @@ exec >> /var/log/tpa-firstboot.log 2>&1
 
 echo "$(date): start"
 
+set -x
+
 {% include 'user-data/awscli.j2' %}
 
 {% if item.volumes|select('has_subkey', 'raid_device')|list|count > 0 %}
