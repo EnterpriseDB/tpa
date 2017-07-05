@@ -18,6 +18,7 @@ packages:
     - iotop
     - screen
     - rsync
+    - mdadm
   Debian:
     - python-dev
     - python-passlib

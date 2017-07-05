@@ -23,6 +23,10 @@ echo "$(date): start"
 
 {% include 'user-data/awscli.j2' %}
 
+{% if item.volumes|select('has_subkey', 'raid_device')|list|count > 0 %}
+{% include 'user-data/mdadm.j2' %}
+{% endif %}
+
 {% include 'user-data/ssh-hostkeys.j2' %}
 
 {% if install_authorized_key|default(false) %}

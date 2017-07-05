@@ -74,12 +74,34 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
     for i in old_instances:
         j = copy.deepcopy(i)
 
-        for v in j.get('volumes', []):
+        volumes = []
+        for vol in j.get('volumes', []):
+            v = copy.deepcopy(vol)
+
             if v['device_name'] == 'root':
                 v['device_name'] = ec2_ami_properties[j['image']]['root_device_name']
             if not 'delete_on_termination' in v:
                 v['delete_on_termination'] = True
 
+            volumes.append(v)
+
+            # If the entry specifies raid_device, then we repeat this volume
+            # raid_units-1 times.
+
+            if 'raid_device' in v:
+                n = v['raid_units'] - 1
+
+                vn = v
+                while n > 0:
+                    vn = copy.deepcopy(vn)
+
+                    name = vn['device_name']
+                    vn['device_name'] = name[0:-1] + chr(ord(name[-1])+1)
+
+                    volumes.append(vn)
+                    n -= 1
+
+        j['volumes'] = volumes
         instances.append(j)
 
     return instances

@@ -1,0 +1,17 @@
+{#
+    If mdadm is not available, install it.
+#}
+
+test -x /sbin/mdadm || (
+{%   if 'RHEL' in image['name'] %}
+{%     include 'user-data/os/RedHat/mdadm.j2' %}
+{%   elif 'debian' in image['name'].lower() %}
+{%     include 'user-data/os/Debian/mdadm.j2' %}
+{%   elif 'ubuntu' in image['name'].lower() %}
+{%     include 'user-data/os/Ubuntu/mdadm.j2' %}
+{%   endif %}
+)
+
+{% for md, units in item.volumes|groupby('raid_device') %}
+mdadm --create --verbose {{ md }} --level={{ units[0].raid_level|default(0) }} {{ units|map(attribute='device_name')|join(" ") }}
+{% endfor %}

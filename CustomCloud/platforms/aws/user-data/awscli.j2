@@ -13,11 +13,11 @@
 {% if not image['name'].startswith('TPA-') %}
 test -x /usr/bin/aws -o -x /usr/local/bin/aws || (
 {%   if 'RHEL' in image['name'] %}
-{%     include 'user-data/os/RedHat.j2' %}
+{%     include 'user-data/os/RedHat/awscli.j2' %}
 {%   elif 'debian' in image['name'].lower() %}
-{%     include 'user-data/os/Debian.j2' %}
+{%     include 'user-data/os/Debian/awscli.j2' %}
 {%   elif 'ubuntu' in image['name'].lower() %}
-{%     include 'user-data/os/Ubuntu.j2' %}
+{%     include 'user-data/os/Ubuntu/awscli.j2' %}
 {%   endif %}
 )
 {% endif %}
