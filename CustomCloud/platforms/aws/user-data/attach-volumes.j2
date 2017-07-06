@@ -7,3 +7,4 @@ instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 {% for v in item.volumes|select('has_subkey','volume_id') %}
 aws ec2 attach-volume --region {{ item.region }} --volume-id {{ v.volume_id }} --instance-id $instance_id --device {{ v.device_name }}
 {% endfor %}
+aws ec2 wait volume-in-use --region {{ item.region }} --volume-ids {{ item.volumes|select('has_subkey','volume_id')|map(attribute='volume_id')|list|join(" ") }}

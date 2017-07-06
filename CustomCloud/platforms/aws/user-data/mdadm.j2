@@ -12,6 +12,8 @@ test -x /sbin/mdadm || (
 {%   endif %}
 )
 
+udevadm control --stop-exec-queue
 {% for md, units in item.volumes|groupby('raid_device') %}
 mdadm --create --verbose {{ md }} --level={{ units[0].raid_level|default(0) }} --raid-devices={{ units|count }} {{ units|map(attribute='device_name')|join(" ") }}
 {% endfor %}
+udevadm control --start-exec-queue
