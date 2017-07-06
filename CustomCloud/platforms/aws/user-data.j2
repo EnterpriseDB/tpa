@@ -1,20 +1,7 @@
 #!/bin/bash
 {#
-    This template generates the user-data that each instance receives at
-    startup. Its primary purpose is to download pre-generated SSH host
-    keys from S3 and install them.
-
-    We need awscli to download the keys from S3. (It would be nice to
-    use curl, but S3's HTTP download URLs may sometimes issue redirects
-    in an XML format that curl cannot act upon.)
-
-    TPA-generated AMIs include awscli already. For other instances, we
-    can install the latest awscli-bundle.zip. To do this, we will need
-    to install some packages (e.g., curl) in a platform-specific way.
-    (Unfortunately, we can figure out what the target AMI is only by
-    string matching against the AMI name.)
-
-    Once awscli is available, we can just replace the SSH host keys.
+    This template is filled in and provided to newly-launched instances
+    as a user-data script to execute on first boot.
 #}
 
 exec >> /var/log/tpa-firstboot.log 2>&1
@@ -23,22 +10,41 @@ echo "$(date): start"
 
 set -x
 
+{#
+    Install awscli if it's not available. We need it to attach/detach
+    EBS volumes and to download things from S3.
+#}
 {% include 'user-data/awscli.j2' %}
 
+{#
+    Attach existing EBS volumes to the instance if requested.
+#}
 {% if item.volumes|select('has_subkey', 'volume_id')|list|count > 0 %}
 {% include 'user-data/attach-volumes.j2' %}
 {% endif %}
 
+{#
+    Next, create any RAID arrays that are required on this system.
+#}
 {% if item.volumes|select('has_subkey', 'raid_device')|list|count > 0 %}
 {% include 'user-data/mdadm.j2' %}
 {% endif %}
 
+{#
+    Install new SSH host keys downloaded from S3.
+#}
 {% include 'user-data/ssh-hostkeys.j2' %}
 
+{#
+    If requested, add an SSH public key to ~/.ssh/authorized_keys.
+#}
 {% if install_authorized_key|default(false) %}
 {% include 'user-data/authorized-key.j2' %}
 {% endif %}
 
+{#
+    Adjust sshd configuration (Port, PermitRootLogin, etc.).
+#}
 {% include 'user-data/sshd-config.j2' %}
 
 {% if extra_user_data|d() %}
