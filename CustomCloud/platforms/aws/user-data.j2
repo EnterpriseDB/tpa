@@ -25,6 +25,10 @@ set -x
 
 {% include 'user-data/awscli.j2' %}
 
+{% if item.volumes|select('has_subkey', 'volume_id')|list|count > 0 %}
+{% include 'user-data/attach-volumes.j2' %}
+{% endif %}
+
 {% if item.volumes|select('has_subkey', 'raid_device')|list|count > 0 %}
 {% include 'user-data/mdadm.j2' %}
 {% endif %}

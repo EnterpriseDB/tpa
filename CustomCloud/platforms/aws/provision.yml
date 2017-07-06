@@ -252,6 +252,10 @@
             "Statement": [
               {
                 "Action": [
+                  "ec2:AttachVolume",
+                  "ec2:DetachVolume",
+                  "ec2:DescribeVolumes",
+                  "ec2:DescribeInstances",
                   "ec2:DescribeAddresses",
                   "ec2:DisassociateAddress",
                   "ec2:AssociateAddress"
@@ -297,8 +301,9 @@
     #
     # We also record the properties of each AMI id for later use.
 
-    - name: Initialise empty region→AMI table
+    - name: Initialise empty mapping tables
       set_fact:
+        ec2_volumes: {}
         ec2_region_amis: {}
         ec2_ami_properties: {}
       tags: ec2
@@ -347,6 +352,35 @@
       with_items: "{{ ec2_direct_amis.results }}"
       tags: ec2
 
+    # If «attach_existing» is specified for any volume in a region, we
+    # build a table to map the names of unattached volumes in that
+    # region to their volume-ids.
+
+    - name: Look for existing attachable EBS volumes
+      ec2_vol_facts:
+        region: "{{ r }}"
+        filters:
+          status: available
+          "tag:CreatingCluster": "{{ cluster_name }}"
+      register: ec2_attachable_volumes
+      with_items: "{{ regions }}"
+      loop_control:
+        loop_var: r
+      when: >
+        instances|selectattr('region','equalto',r)|sum(attribute='volumes', start=[])
+        |select('has_subkey', 'attach_existing')|list|count > 0
+
+    - name: Create volume name→volume table
+      set_fact:
+        ec2_volumes: "{{
+          ec2_volumes|combine({
+            item.1.region ~ ':' ~ item.1.tags.Name: item.1
+          })
+        }}"
+      with_nested_dependents:
+        - ec2_attachable_volumes.results
+        - item.0.volumes
+
     # Preprocess instance definitions through various helpful filters to
     # set things that aren't set and check things that need checking.
 
@@ -357,6 +391,7 @@
           |expand_instance_tags(cluster_name)
           |expand_instance_image(ec2_region_amis)
           |expand_instance_volumes(ec2_ami_properties)
+          |match_existing_volumes(cluster_name, ec2_volumes)
         }}"
       tags: ec2
 
@@ -404,7 +439,7 @@
         private_ip: "{{ item.private_ip|default(omit) }}"
         vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
         group_id: "{{ ec2_region_groups[item.region] }}"
-        volumes: "{{ item.volumes|default(omit) }}"
+        volumes: "{{ item.volumes|reject('has_subkey','volume_id')|list|default(omit) }}"
         spot_price: "{{ item.spot_price|default(omit) }}"
         spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
         spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"

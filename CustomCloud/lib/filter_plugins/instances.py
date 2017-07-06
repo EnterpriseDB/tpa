@@ -81,7 +81,7 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
             if v['device_name'] == 'root':
                 v['device_name'] = ec2_ami_properties[j['image']]['root_device_name']
             if not 'delete_on_termination' in v:
-                v['delete_on_termination'] = True
+                v['delete_on_termination'] = not v.get('attach_existing',False)
 
             volumes.append(v)
 
@@ -106,10 +106,37 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
 
     return instances
 
+# This filter sets the volume_id for any volumes that match existing attachable
+# volumes as discovered by a tag search.
+
+def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
+    instances = []
+
+    for i in old_instances:
+        for v in i.get('volumes', []):
+            if not v.get('attach_existing', False):
+                continue
+
+            name = ':'.join([i['region'], cluster_name, str(i['node']), v['device_name']])
+            if name in ec2_volumes:
+                ev = ec2_volumes[name]
+
+                if v['volume_size'] != ev['size'] or \
+                    v.get('iops', ev['iops']) != ev['iops'] or \
+                    v.get('volume_type', ev['type']) != ev['type']:
+                    continue
+
+                v['volume_id'] = ev['id']
+
+        instances.append(i)
+
+    return instances
+
 class FilterModule(object):
     def filters(self):
         return {
             'expand_instance_tags': expand_instance_tags,
             'expand_instance_image': expand_instance_image,
             'expand_instance_volumes': expand_instance_volumes,
+            'match_existing_volumes': match_existing_volumes,
         }
