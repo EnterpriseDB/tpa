@@ -380,6 +380,8 @@
       with_nested_dependents:
         - ec2_attachable_volumes.results
         - item.0.volumes
+      when: >
+        'volumes' in ec2_attachable_volumes.results
 
     # Preprocess instance definitions through various helpful filters to
     # set things that aren't set and check things that need checking.
