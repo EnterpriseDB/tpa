@@ -412,6 +412,15 @@
           - ec2_region_subnets[item.region][item.subnet] is defined
       with_items: "{{ instances }}"
 
+    - name: Debug user-data for instances
+      debug:
+        msg: "{{
+          lookup('template', 'user-data.j2',
+            vars=dict(image=ec2_ami_properties[item.image])
+          )
+        }}"
+      with_items: "{{ instances }}"
+
     # Create EC2 instances using the VPC subnets and security groups and
     # access key we configured above. We loop over instances[], look up
     # the VPC and group corresponding to the region/subnet defined for
