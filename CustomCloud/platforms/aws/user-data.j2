@@ -11,6 +11,13 @@ echo "$(date): start"
 set -x
 
 {#
+    Include early setup tasks, if any are specified.
+#}
+{% if pre_user_data|d() %}
+{{ pre_user_data }}
+{% endif %}
+
+{#
     Set any environment variables that are specified in config.yml.
 #}
 {% for k in (user_data_environment|default({})).keys() %}
