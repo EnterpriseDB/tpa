@@ -11,6 +11,13 @@ echo "$(date): start"
 set -x
 
 {#
+    Set any environment variables that are specified in config.yml.
+#}
+{% for k in (user_data_environment|default({})).keys() %}
+export {{ k }}="{{ user_data_environment[k] }}"
+{% endfor %}
+
+{#
     Install awscli if it's not available. We need it to attach/detach
     EBS volumes and to download things from S3.
 #}
