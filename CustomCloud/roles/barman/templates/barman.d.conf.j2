@@ -15,3 +15,11 @@ reuse_backup = {{ barman_reuse_backup }}
 {% else %}
 reuse_backup = off
 {% endif %}
+
+{% if barman_pre_archive_retry_script|d() %}
+pre_archive_retry_script = "{{ barman_pre_archive_retry_script }}"
+{% endif %}
+
+{% if barman_post_backup_retry_script|d() %}
+post_backup_retry_script = "{{ barman_post_backup_retry_script }}"
+{% endif %}
