@@ -1,6 +1,9 @@
 cluster={{ upstream_primary }}
 node={{ node }}
 node_name={{ inventory_hostname }}
+{% if repmgr_priority|d() %}
+priority={{ repmgr_priority }}
+{% endif %}
 conninfo='host={{ inventory_hostname }} user=repmgr dbname=repmgr'
 use_replication_slots=1
 master_response_timeout=60
