@@ -19,6 +19,7 @@ packages:
     - screen
     - rsync
     - mdadm
+    - pigz
   Debian:
     - python-dev
     - python-passlib
