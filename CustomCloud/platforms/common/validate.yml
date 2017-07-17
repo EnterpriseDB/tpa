@@ -20,6 +20,19 @@
       - cluster_name is defined
       - cluster_name != ''
 
+- name: Ensure cluster_tags is correctly configured
+  assert:
+    msg: "Please define cluster_tags (a hash, including Owner) in {{config_file}}"
+    that:
+      - cluster_tags is defined
+      - cluster_tags is mapping
+      - cluster_tags['Owner'] is defined
+      - cluster_tags['Owner'] != ''
+
+- name: Ensure that the cluster_name is set as a tag
+  set_fact:
+    cluster_tags: "{{ cluster_tags|combine(dict(Name=cluster_name)) }}"
+
 - include: read-cluster-vars.yml
 
 - name: Convert cluster_network to a list
@@ -29,3 +42,51 @@
   when:
     cluster_network|d() and cluster_network is string and
     not cluster_networks|d()
+
+- name: Ensure instances is correctly configured
+  assert:
+    msg: "Please define instances (an array of hashes, one per instance) in {{config_file}}"
+    that:
+      - instances is defined
+      - instances is sequence and instances is not string and instances is not mapping
+      - instances | length > 0
+
+# Every instance should specify its node id explicitly.
+
+- name: Ensure that every instance specifies a node id
+  assert:
+    msg: "Please set 'node' on every instance"
+    that:
+      - instances|selectattr('node','defined')|list|count == instances|count
+
+# For every instance that has a "backup: xxx" tag, there should be
+# exactly one instance with "Name: xxx" and "role: …,barman,…" tags.
+#
+# Likewise, for every instance that has an "upstream: xxx" tag, there
+# should be exactly one instance with a "Name: xxx" tag.
+
+- name: Collect upstream and backup references
+  set_fact:
+    barman_references: >
+      {{ instances|selectattr('tags.backup', 'defined')|map(attribute='tags.backup')|unique|list }}
+    upstream_references: >
+      {{ instances|selectattr('tags.upstream', 'defined')|map(attribute='tags.upstream')|unique|list }}
+
+- name: Validate backup references
+  assert:
+    msg: "Please define a single barman instance with Name={{ item }}"
+    that:
+      - instances|
+        selectattr('tags.Name','defined')|selectattr('tags.Name','equalto',item)|
+        selectattr('tags.role','defined')|selectattr('tags.role','contains','barman')|
+        list|count == 1
+  with_items: "{{ barman_references }}"
+
+- name: Validate upstream references
+  assert:
+    msg: "Please define a single upstream server with Name={{ item }}"
+    that:
+      - instances|
+        selectattr('tags.Name','defined')|selectattr('tags.Name','equalto',item)|
+        list|count == 1
+  with_items: "{{ upstream_references }}"
