@@ -51,13 +51,19 @@
       - instances is sequence and instances is not string and instances is not mapping
       - instances | length > 0
 
-# Every instance should specify its node id explicitly.
-
-- name: Ensure that every instance specifies a node id
+- name: Ensure that every instance specifies a node id and name
   assert:
-    msg: "Please set 'node' on every instance"
+    msg: "Please set 'node' and 'tags.Name' on every instance"
     that:
       - instances|selectattr('node','defined')|list|count == instances|count
+      - instances|selectattr('tags.Name','defined')|list|count == instances|count
+
+- name: Validate hostnames (lowercase, no underscores)
+  assert:
+    msg: "Please ensure 'Name' contains only [a-z0-9-]"
+    that:
+      - item.tags.Name|match('^[a-z0-9-]+$')
+  with_items: "{{ instances }}"
 
 # For every instance that has a "backup: xxx" tag, there should be
 # exactly one instance with "Name: xxx" and "role: …,barman,…" tags.
