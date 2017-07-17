@@ -1,6 +1,7 @@
 ---
 
-# Provision EC2 instances according to a separate configuration file.
+# Provision EC2 instances and other necessary AWS resources (e.g., VPCs,
+# security groups, subnets, etc.) based on the cluster definition file.
 #
 # The appropriate AWS IAM credentials must be supplied separately, e.g.
 # in ~/.boto or in the environment.
