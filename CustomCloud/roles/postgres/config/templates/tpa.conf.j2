@@ -63,7 +63,9 @@ wal_sender_timeout = {{ wal_sender_timeout|default('60s') }}
 wal_receiver_timeout = {{ wal_sender_timeout|default('60s') }}
 
 hot_standby = on
-hot_standby_feedback = on
+hot_standby_feedback = {{ hot_standby_feedback|default('on') }}
+
+max_standby_streaming_delay = {{ max_standby_streaming_delay|default('30s') }}
 
 ssl = on
 ssl_ca_file = '{{ ssl_ca_file|default("") }}'
