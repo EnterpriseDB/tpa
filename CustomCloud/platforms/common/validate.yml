@@ -15,10 +15,11 @@
 
 - name: Ensure cluster_name is correctly configured
   assert:
-    msg: "Please define cluster_name (a non-empty string) in {{config_file}}"
+    msg: "Please define cluster_name (letters, numbers, underscores) in {{config_file}}"
     that:
       - cluster_name is defined
       - cluster_name != ''
+      - cluster_name|match('^[_a-zA-Z0-9]+$')
 
 - name: Ensure cluster_tags is correctly configured
   assert:
