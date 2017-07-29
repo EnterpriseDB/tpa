@@ -15,7 +15,7 @@
   vars:
     psql: '{{ postgres_bin_dir }}/psql'
     primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
-    repmgr_schema: 'repmgr_{{ upstream_primary }}'
+    repmgr_schema: 'repmgr_{{ cluster_name }}'
   register: regtype
   changed_when: False
   become_user: postgres
