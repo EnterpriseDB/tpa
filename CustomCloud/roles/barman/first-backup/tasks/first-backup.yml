@@ -28,8 +28,8 @@
 
 # Having convinced ourselves that we're streaming, we force a switch to
 # a new WAL segment to give the archiver something to do. We could use
-# «barman switch-xlog», but that doesn't work on replicas, so we run
-# pg_switch_xlog() via psql on the instance or its upstream.
+# «barman switch-xlog --archive», but that doesn't work on replicas, so
+# we run pg_switch_xlog() via psql on the instance or its upstream.
 
 - name: Force switch to a new WAL segment
   command: >
@@ -57,7 +57,44 @@
     path: "{{ barman_home }}/{{ backup_name }}/wals/{{ segment.stdout[0:16] }}/{{ segment.stdout }}"
     delay: 3
     timeout: 130
+  register: archived
+  async: 300
+  poll: 0
   delegate_to: "{{ backup }}"
+
+# While we're waiting, we can upload the script we'll be using in the
+# next step.
+
+- name: Upload barman lockfile script
+  copy:
+    dest: /tmp/lock
+    mode: 0755
+    content: |
+      #!/usr/bin/env python
+
+      import sys
+      from barman.lockfile import LockFile
+
+      if __name__ == '__main__':
+          try:
+              LockFile(sys.argv[1]).acquire(raise_if_fail=True, wait=True)
+          except:
+              pass
+
+- name: Wait for async wait_for to complete
+  async_status: jid="{{ archived.ansible_job_id }}"
+  register: waiting
+  until: waiting.finished
+  retries: 300
+
+# We know now that «barman archive-wal» has been invoked and moved the
+# WAL segment into wals/, but we don't know if it has finished updating
+# the xlogdb. We know it must have acquired the WAL archive lock before
+# doing so, so we wait to acquire it (and release it) before we invoke
+# «barman backup» (which will fail if the segment isn't in xlogdb).
+
+- name: Acquire and release Barman WAL archive lock
+  command: /tmp/lock "{{ barman_home }}/.{{ backup_name }}-archive-wal.lock"
 
 - name: Force an immediate backup
   shell: >
