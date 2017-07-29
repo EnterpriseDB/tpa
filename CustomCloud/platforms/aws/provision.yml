@@ -121,10 +121,13 @@
     #
     #   ec2_vpc_subnets:
     #     us-east-1:
-    #       192.0.2.0/27: us-east-1b
-    #       192.0.2.100/27: us-east-1b
+    #       192.0.2.0/27:
+    #         az: us-east-1b
+    #       192.0.2.100/27:
+    #         az: us-east-1b
     #     us-west-2:
-    #       192.0.2.200/27: us-west-2c
+    #       192.0.2.200/27:
+    #         az: us-west-2c
     #       …
     #
     # Once all subnet references have been resolved, the subnet-id for a
