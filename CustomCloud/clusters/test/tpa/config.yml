@@ -25,7 +25,7 @@ instances:
     - node: 1
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.26.0/28
+      subnet: 10.33.29.0/28
       volumes:
           - device_name: /dev/xvdb
             volume_type: gp2
@@ -38,7 +38,7 @@ instances:
     - node: 2
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.24.16/28
+      subnet: 10.33.29.0/28
       volumes:
           - device_name: /dev/xvdb
             volume_type: gp2
@@ -53,7 +53,7 @@ instances:
     - node: 3
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.28.16/28
+      subnet: 10.33.27.16/28
       volumes:
           - device_name: /dev/xvdb
             volume_type: gp2
@@ -67,7 +67,7 @@ instances:
     - node: 4
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.36.16/28
+      subnet: 10.33.27.16/28
       volumes:
           - device_name: /dev/xvdb
             volume_type: gp2
