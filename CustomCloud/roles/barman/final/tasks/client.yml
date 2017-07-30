@@ -28,8 +28,6 @@
     slot|failed and not "Replication slot 'barman' already exists" in slot.stderr
   changed_when: >
     slot|succeeded
-  when: >
-    barman_backup_method == 'postgres'
   become_user: barman
   become: yes
 
