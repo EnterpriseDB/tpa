@@ -13,7 +13,7 @@
 # We force an immediate backup for any instances that do not have any
 # backups at all.
 
-- include_role: name=barman/first-backup
+- include: ../../../barman/first-backup/tasks/main.yml
   static: no
   when: >
     backup is defined

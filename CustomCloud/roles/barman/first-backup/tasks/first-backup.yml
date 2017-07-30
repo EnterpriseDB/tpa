@@ -52,19 +52,6 @@
 # the file to appear in wals/. This isn't racy, but it does depend on
 # the unpredictable cron invocation of archive-wal.
 
-- name: Wait for old WAL segment to be archived
-  wait_for:
-    path: "{{ barman_home }}/{{ backup_name }}/wals/{{ segment.stdout[0:16] }}/{{ segment.stdout }}"
-    delay: 3
-    timeout: 130
-  register: archived
-  async: 300
-  poll: 0
-  delegate_to: "{{ backup }}"
-
-# While we're waiting, we can upload the script we'll be using in the
-# next step.
-
 - name: Upload barman lockfile script
   copy:
     dest: /tmp/lock
@@ -81,11 +68,12 @@
           except:
               pass
 
-- name: Wait for async wait_for to complete
-  async_status: jid="{{ archived.ansible_job_id }}"
-  register: waiting
-  until: waiting.finished
-  retries: 300
+- name: Wait for old WAL segment to be archived
+  wait_for:
+    path: "{{ barman_home }}/{{ backup_name }}/wals/{{ segment.stdout[0:16] }}/{{ segment.stdout }}"
+    delay: 3
+    timeout: 130
+  delegate_to: "{{ backup }}"
 
 # We know now that «barman archive-wal» has been invoked and moved the
 # WAL segment into wals/, but we don't know if it has finished updating
