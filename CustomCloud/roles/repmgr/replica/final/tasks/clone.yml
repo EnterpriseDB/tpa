@@ -34,7 +34,7 @@
     
 - name: Run repmgr standby clone
   command: >
-    {{ postgres_bin_dir }}/repmgr standby clone --verbose \
+    {{ postgres_bin_dir }}/repmgr standby clone -F --verbose \
       -f "{{ repmgr_conf_dir }}/repmgr.conf" -D {{ postgres_data_dir }} \
       -d repmgr -U repmgr -w 0 --fast-checkpoint --no-conninfo-password \
       --copy-external-config-files \
