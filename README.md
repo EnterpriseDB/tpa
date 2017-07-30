@@ -1,13 +1,13 @@
 # TPA
 2ndQuadrant Trusted PostgreSQL Architecture
 
-© Copyright 2ndQuadrant, 2016
+© Copyright 2ndQuadrant, 2016-17
 
 Confidential property of 2ndQuadrant; not for public release.
 
-TPA defines a trusted architecture for a fully configureed PostgreSQL cluster.
+TPA defines a trusted architecture for a fully configured PostgreSQL cluster.
 TPA also allows you to deploy that architecture in minutes using industry standard
-configuration management tools.
+configuration management tools, though in general we say "in 1 hour".
 
 TPA uses a library called CustomCloud to Provision and Deploy clusters.
 Installing that software is discussed here: [CustomCloud README](CustomCloud/README.md)
@@ -22,7 +22,7 @@ to find out how to get a cluster with 1 Master and 2 standby replicas.
 Clusters can be put together in complex ways, so to understand exactly what you'll get, lets look at the structure
 of a PostgreSQL cluster and introduce some new terms for the various parts. 
 
-Custom Cloud creates a new “cluster” as a ClusterGroup.
+CustomCloud creates a new “cluster” as a ClusterGroup.
 A ClusterGroup contains at least one Cluster; a basic Cluster consists of a Cluster with 1 Master and 1 or more replica nodes.
 Actions at ClusterGroup level are therefore
 * Create ClusterGroup
