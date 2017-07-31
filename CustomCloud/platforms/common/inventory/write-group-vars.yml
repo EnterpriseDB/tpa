@@ -1,0 +1,23 @@
+---
+
+# Writes the given group_vars to group_name/file_name.yml in the
+# inventory.
+
+- assert:
+    that:
+      - file_name is defined
+      - group_name is defined
+      - group_vars is defined
+
+- block:
+    - name: Ensure that group_vars/{{ group_name }} exists
+      file:
+        path: "{{ group_dir }}"
+        state: directory
+
+    - name: Write group_vars/{{ group_name }}/{{ file_name }}
+      template:
+        src: group_vars.j2
+        dest: "{{ group_dir }}/{{ file_name }}.yml"
+  vars:
+    group_dir: "{{ cluster_dir }}/inventory/group_vars/{{ group_name }}"
