@@ -9,10 +9,14 @@
     - include: validate.yml
       tags: always
 
-    - name: Ensure that the cluster's inventory directory exists
+    - name: Ensure that the cluster's inventory directories exist
       file:
-        path: "{{ cluster_dir }}/inventory"
+        path: "{{ cluster_dir }}/{{ item }}"
         state: directory
+      with_items:
+        - inventory
+        - inventory/host_vars
+        - inventory/group_vars
       tags: common
 
     - name: Create ssh keypair {{ ssh_key_file }}
