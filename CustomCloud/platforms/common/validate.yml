@@ -38,8 +38,6 @@
   set_fact:
     cluster_tags: "{{ cluster_tags|combine(dict(Name=cluster_name)) }}"
 
-- include: read-cluster-vars.yml
-
 - name: Convert cluster_network to a list
   set_fact:
     cluster_networks:
