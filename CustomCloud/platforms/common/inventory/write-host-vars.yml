@@ -1,0 +1,23 @@
+---
+
+# Writes the given host_vars to host_name/file_name.yml in the
+# inventory.
+
+- assert:
+    that:
+      - file_name is defined
+      - host_name is defined
+      - host_vars is defined
+
+- block:
+    - name: Ensure that host_vars/{{ host_name }} exists
+      file:
+        path: "{{ host_dir }}"
+        state: directory
+
+    - name: Write host_vars/{{ host_name }}/{{ file_name }}
+      template:
+        src: host_vars.j2
+        dest: "{{ host_dir }}/{{ file_name }}.yml"
+  vars:
+    host_dir: "{{ cluster_dir }}/inventory/host_vars/{{ host_name }}"
