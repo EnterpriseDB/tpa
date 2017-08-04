@@ -16,6 +16,8 @@
   register: create
   ignore_errors: True
   when: common|succeeded
+  environment:
+    TZ: UTC
 
 - fail: msg="{{ create.stderr }}"
   when: >

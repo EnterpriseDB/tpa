@@ -9,6 +9,8 @@
       {% for x in postgres_initdb_opts %}{{x|quote}} {% endfor %}
   become_user: postgres
   become: yes
+  environment:
+    TZ: UTC
 
 # We're on our own here as far as making Postgres start up on boot is
 # concerned. Since this situation (no help from packages) is likely to
