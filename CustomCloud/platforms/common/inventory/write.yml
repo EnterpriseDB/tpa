@@ -1,0 +1,44 @@
+---
+
+- name: Write static inventory file
+  template:
+    src: inventory.j2
+    dest: "{{ cluster_dir }}/inventory/00-{{ cluster_name }}"
+
+- name: Write ansible group_vars
+  include: write-group-vars.yml
+  vars:
+    file_name: "00-ansible"
+    group_name: "{{ cluster_tag }}"
+    group_vars:
+      ansible_user: "{{ ansible_user }}"
+      ansible_port: "{{ ansible_port }}"
+      ansible_python_interpreter: /usr/bin/python2.7
+      ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
+      ansible_ssh_common_args: "-o UserKnownHostsFile='{{ cluster_dir|relpath(playbook_dir+'/../..') }}/known_hosts'"
+
+- name: Write cluster group_vars
+  include: write-group-vars.yml
+  vars:
+    file_name: "01-{{ cluster_name }}"
+    group_name: "{{ cluster_tag }}"
+    group_vars: "{{
+      cluster_vars|default({})|combine({
+        'cluster_tag': cluster_tag,
+        'cluster_name': cluster_name
+      })
+    }}"
+
+- name: Write initial host roles
+  include: write-host-vars.yml
+  vars:
+    file_name: "10-role"
+    host_name: "{{ item.Name }}"
+    host_vars:
+      role: "{{ item.role|select('notequalto', 'postgres')|list }}"
+  with_items: "{{ instance_vars }}"
+
+- name: Generate known_hosts file for the cluster
+  template:
+    src: known_hosts.j2
+    dest: "{{ cluster_dir }}/known_hosts"

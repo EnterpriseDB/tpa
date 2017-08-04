@@ -560,15 +560,10 @@
         (item.0.route53_zone|d() or route53_zone|d())
       tags: route53
 
-    # Write a static inventory file for the newly-provisioned hosts into
-    # the cluster's inventory directory.
+    # Write inventory and known_hosts for the newly-provisioned hosts.
 
-    - name: Write a static inventory file for the cluster
-      template:
-        src: inventory.j2
-        dest: "{{ cluster_dir }}/inventory/00-{{ cluster_name }}"
-
-    - name: Generate known_hosts file for the cluster
-      template:
-        src: known_hosts.j2
-        dest: "{{ cluster_dir }}/known_hosts"
+    - include: ../common/inventory/write.yml
+      vars:
+        ansible_user: "{{ ec2_ami_user|default('admin') }}"
+        ansible_port: "{{ cluster_ssh_port|default(22) }}"
+        ansible_ssh_private_key_file: "{{ cluster_dir|relpath(playbook_dir+'/../..') }}/{{ ec2_key_file }}"
