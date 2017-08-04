@@ -54,18 +54,22 @@
       - instances is sequence and instances is not string and instances is not mapping
       - instances | length > 0
 
+- name: Preprocess instance definitions
+  set_fact:
+    instances: "{{ instances|expand_instance_tags(cluster_name) }}"
+
 - name: Ensure that every instance specifies a node id and name
   assert:
-    msg: "Please set 'node' and 'tags.Name' on every instance"
+    msg: "Please set 'node' and 'Name' on every instance"
     that:
       - instances|selectattr('node','defined')|list|count == instances|count
-      - instances|selectattr('tags.Name','defined')|list|count == instances|count
+      - instances|selectattr('Name','defined')|list|count == instances|count
 
 - name: Validate hostnames (lowercase, no underscores)
   assert:
     msg: "Please ensure 'Name' contains only [a-z0-9-]"
     that:
-      - item.tags.Name|match('^[a-z0-9-]+$')
+      - item.Name|match('^[a-z0-9-]+$')
   with_items: "{{ instances }}"
 
 # For every instance that has a "backup: xxx" tag, there should be
@@ -77,17 +81,17 @@
 - name: Collect upstream and backup references
   set_fact:
     barman_references: >
-      {{ instances|selectattr('tags.backup', 'defined')|map(attribute='tags.backup')|unique|list }}
+      {{ instances|selectattr('backup', 'defined')|map(attribute='backup')|unique|list }}
     upstream_references: >
-      {{ instances|selectattr('tags.upstream', 'defined')|map(attribute='tags.upstream')|unique|list }}
+      {{ instances|selectattr('upstream', 'defined')|map(attribute='upstream')|unique|list }}
 
 - name: Validate backup references
   assert:
     msg: "Please define a single barman instance with Name={{ item }}"
     that:
       - instances|
-        selectattr('tags.Name','defined')|selectattr('tags.Name','equalto',item)|
-        selectattr('tags.role','defined')|selectattr('tags.role','contains','barman')|
+        selectattr('Name','defined')|selectattr('Name','equalto',item)|
+        selectattr('role','defined')|selectattr('role','contains','barman')|
         list|count == 1
   with_items: "{{ barman_references }}"
 
@@ -96,6 +100,6 @@
     msg: "Please define a single upstream server with Name={{ item }}"
     that:
       - instances|
-        selectattr('tags.Name','defined')|selectattr('tags.Name','equalto',item)|
+        selectattr('Name','defined')|selectattr('Name','equalto',item)|
         list|count == 1
   with_items: "{{ upstream_references }}"

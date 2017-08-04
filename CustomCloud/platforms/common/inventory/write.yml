@@ -29,13 +29,17 @@
       })
     }}"
 
-- name: Write initial host roles
+- name: Write topology variables for hosts
   include: write-host-vars.yml
   vars:
-    file_name: "10-role"
+    file_name: "02-topology"
     host_name: "{{ item.Name }}"
-    host_vars:
-      role: "{{ item.role|select('notequalto', 'postgres')|list }}"
+    host_vars: "{{
+      {}
+      |combine((item.role|ternary({'role': item.role|select('notequalto', 'postgres')|list}, {})))
+      |combine((item.backup|ternary({'backup': item.backup}, {})))
+      |combine((item.upstream|ternary({'upstream': item.upstream}, {})))
+    }}"
   with_items: "{{ instance_vars }}"
 
 - name: Generate known_hosts file for the cluster

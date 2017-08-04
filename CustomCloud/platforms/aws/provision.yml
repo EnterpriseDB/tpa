@@ -377,7 +377,7 @@
       set_fact:
         ec2_volumes: "{{
           ec2_volumes|combine({
-            item.1.region ~ ':' ~ item.1.tags.Name: item.1
+            item.1.region ~ ':' ~ item.1.Name: item.1
           })
         }}"
       with_nested_dependents:
@@ -389,11 +389,10 @@
     # Preprocess instance definitions through various helpful filters to
     # set things that aren't set and check things that need checking.
 
-    - name: Preprocess instance definitions
+    - name: Expand instance definitions based on discovered information
       set_fact:
         instances: "{{
           instances
-          |expand_instance_tags(cluster_name)
           |expand_instance_image(ec2_region_amis)
           |expand_instance_volumes(ec2_ami_properties)
           |match_existing_volumes(cluster_name, ec2_volumes)
@@ -444,9 +443,8 @@
           {{
             cluster_tags|combine(item.tags)|combine({
               'Cluster': cluster_name,
-              'Name': item.tags.Name,
-              'role': (item.tags.role|join(",")),
               'node': item.node,
+              'Name': item.Name,
             })
           }}
         instance_profile_name: "{{ cluster_profile }}"
@@ -528,9 +526,11 @@
               'ip_address': item.1.public_ip|default(item.0.tagged_instances[0].public_ip)
                 or item.0.tagged_instances[0].private_ip,
               'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip),
-              'Name': item.0.item.item.tags|try_subkey('Name'),
-              'role': item.0.item.item.tags|try_subkey('role'),
+              'Name': item.0.item.item.Name,
               'node': item.0.item.item.node,
+              'role': item.0.item.item|try_subkey('role'),
+              'backup': item.0.item.item|try_subkey('backup'),
+              'upstream': item.0.item.item|try_subkey('upstream'),
             })
           ])
         }}"

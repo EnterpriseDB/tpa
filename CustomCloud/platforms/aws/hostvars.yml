@@ -8,17 +8,8 @@
     item.source in vars and
     (item.var not in vars or ('override' in item and item.override))
   with_items:
-    - var: node
-      source: ec2_tag_node
     - var: name
       source: ec2_tag_Name
-    - var: role
-      source: ec2_tag_role
-      override: true
-    - var: backup
-      source: ec2_tag_backup
-    - var: upstream
-      source: ec2_tag_upstream
 
 # An EC2 instance in a VPC will always have a private IP address. It may
 # also have a public IP address (which may or may not be an elastic IP).
@@ -63,24 +54,6 @@
   set_fact:
     ip_address: "{{ private_ip|default(public_ip) }}"
 
-# Add 'postgres' to role when any of 'primary' or 'replica' or 'witness'
-# is given, just as a convenience.
-
-- name: Add implicit postgres role if needed
-  set_fact:
-    role: "{{ role|union(['postgres']) }}"
-  when: >
-    'primary' in role or 'replica' in role or 'witness' in role
-
-# Add 'postgres-xl' to role when any of 'coordinator' or 'datanode'
-# or 'coordinator-replica' or 'datanode-replica' or 'gtm' or
-# 'gtm-standby' is given
-
-- set_fact:
-    role: "{{ role|union(['postgres-xl']) }}"
-  when: >
-    'coordinator' in role or 'datanode' in role or 'coordinator-replica' in role or 'datanode-replica' in role or 'gtm' in role or 'gtm-standby' in role
-
 # If any instance is tagged with 'log-server', make every other instance
 # log to it. This can be overriden by setting 'log_server' for any
 # instance.
@@ -122,3 +95,5 @@
     inventory_hostname != groups[ms][0]
   vars:
     ms: 'tag_role_monitoring-server'
+
+- include: ../common/hostvars.yml

@@ -17,22 +17,26 @@ def expand_instance_tags(old_instances, cluster_name):
         j = copy.deepcopy(i)
         tags = j.get('tags', {})
 
-        tags['node'] = j['node']
-
         # Every instance must have a sensible name (lowercase, without
-        # underscores). For convenience, we translate name to Name.
+        # underscores). If it's set under .tags, we'll move it up.
 
-        name = tags.get('Name', tags.get('name', None))
-        if 'name' in tags:
-            del tags['name']
+        name = j.get('Name', tags.get('Name', None))
         if name is None:
-            name = cluster_name +'-'+ str(tags['node'])
-        tags['Name'] = name.replace('_', '-').lower()
+            name = cluster_name +'-'+ str(j['node'])
+        j['Name'] = name.replace('_', '-').lower()
+
+        # The upstream, backup, and role tags should be moved one level up if
+        # they're specified at all.
+
+        for t in ['upstream', 'backup', 'role']:
+            if t in tags:
+                j[t] = tags[t]
+                del tags[t]
 
         # The role tag should be a list, so we convert comma-separated
         # strings if that's what we're given.
 
-        role = tags.get('role', [])
+        role = j.get('role', [])
         if not isinstance(role, list):
             role = map(lambda x: x.strip(), role.split(","))
 
@@ -42,8 +46,15 @@ def expand_instance_tags(old_instances, cluster_name):
             if 'postgres' not in role:
                 role = role + ['postgres']
 
-        tags['role'] = role
+        j['role'] = role
         j['tags'] = tags
+
+        # Name and node should be in tags, but we'll add them in when we're
+        # actually creating the tags, not before.
+
+        for t in ['name', 'Name', 'node']:
+            if t in tags:
+                del tags[t]
 
         instances.append(j)
 
