@@ -49,7 +49,7 @@
     # layout is instance-specific.
     - role: sys/fs
       vars:
-        device: /dev/xvdb
+        device: "{{ volumes[0].device }}"
         mountpoint: "{{ postgres_home }}"
       tags: [sys, fs]
 

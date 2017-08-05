@@ -33,7 +33,7 @@ instances:
             volume_size: 16
             raid_units: 2
             vars:
-              mountpoint: /var/lib/postgresql
+              mount_as: postgres_home
       tags:
         os: Debian
         role: primary
@@ -67,6 +67,8 @@ instances:
           - device_name: /dev/xvdb
             volume_type: gp2
             volume_size: 16
+            vars:
+              mount_as: postgres_home
       tags:
         os: Debian
         role: replica
@@ -81,6 +83,8 @@ instances:
           - device_name: /dev/xvdb
             volume_type: gp2
             volume_size: 32
+            vars:
+              mount_as: postgres_home
       tags:
         os: Debian
         role:
