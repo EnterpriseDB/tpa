@@ -54,6 +54,10 @@
   set_fact:
     ip_address: "{{ private_ip|default(public_ip) }}"
 
+- name: Create role-based groups
+  group_by: key="tag_role_{{ item }}"
+  with_items: "{{ role }}"
+
 # If any instance is tagged with 'log-server', make every other instance
 # log to it. This can be overriden by setting 'log_server' for any
 # instance.
