@@ -1,5 +1,12 @@
 ---
 
+- name: Set up inventory variables
+  hosts: tag_Cluster_tpa_test
+  any_errors_fatal: True
+  tasks:
+    - include: ../../../platforms/aws/hostvars.yml
+      tags: always
+
 - name: Set up TPA cluster nodes
   any_errors_fatal: True
 
@@ -12,12 +19,6 @@
   # sudo/sudo_user (or become/become_user) explicitly.
   sudo_user: root
   sudo: true
-
-  pre_tasks:
-    # This will translate "ec2_tag_node" into just "node", and likewise
-    # for certain other ec2 tag values.
-    - include: ../../../platforms/aws/hostvars.yml
-      tags: always
 
   roles:
     # Finds ansible_distribution, makes sure python and other system
