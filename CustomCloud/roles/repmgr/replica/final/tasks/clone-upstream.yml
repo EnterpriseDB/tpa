@@ -6,21 +6,19 @@
 # registered already. Then we don't need to do anything special.
 
 - name: Check if we can connect to the defined upstream
-  command: >
-    {{ psql }} '{{ upstream_conninfo }}' -qAtw -c "SELECT 1"
-  vars:
-    psql: '{{ postgres_bin_dir }}/psql'
-    upstream_conninfo: 'host={{ upstream }} user=repmgr dbname=repmgr'
-  register: upstreamup
-  ignore_errors: True
-  changed_when: False
+  postgresql_query:
+    conninfo: "host={{ upstream }} dbname=repmgr user=repmgr"
+    query: >
+      SELECT 42 as up
+  register: upstreamconn
+  ignore_errors: yes
   become_user: postgres
   become: yes
 
 - name: Record name of upstream to clone
   set_fact:
     upstream_to_clone: "{{
-      (upstreamup|succeeded and upstreamup.stdout == '1') |
+      (upstreamconn|succeeded and upstreamconn.up == 42) |
       ternary(upstream, upstream_primary)
     }}"
 

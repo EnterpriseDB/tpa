@@ -8,25 +8,29 @@
   become_user: postgres
   become: yes
 
+# If this instance is registered as a witness already, we don't need to
+# do anything. If it's registered as anything else, it's an error. Only
+# if it's not registered at all do we register it as a witness.
+
 - name: Check if the witness is registered
-  command: >
-    {{ psql }} '{{ primary_conninfo }}' -qAtw -c
-    "SELECT type FROM \"{{ repmgr_schema }}\".repl_nodes WHERE type='witness' and name='{{ inventory_hostname }}'"
+  postgresql_query:
+    conninfo: "host={{ upstream_primary }} dbname=repmgr user=repmgr"
+    query: >
+      SELECT (case when type='standby' then 'replica' else type end) as type
+      FROM "{{ repmgr_schema }}".repl_nodes
+      WHERE name='{{ inventory_hostname }}'
   vars:
-    psql: '{{ postgres_bin_dir }}/psql'
-    primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
     repmgr_schema: 'repmgr_{{ cluster_name }}'
-  register: regtype
-  changed_when: False
+  register: registration
   become_user: postgres
   become: yes
 
 - fail:
     msg: >
       {{ inventory_hostname }} is tagged as witness for {{ upstream_primary }},
-      but is registered as a {{ regtype.stdout }} already
+      but is registered as a {{ registration.type }} already
   when:
-    regtype.stdout != '' and regtype.stdout != 'witness'
+    registration.results|length > 0 and registration.type != 'witness'
 
 - name: Run 'repmgr witness register' on the witness
   command: >
@@ -35,4 +39,4 @@
       -h "{{ upstream_primary }}"
   become_user: postgres
   become: yes
-  when: regtype.stdout == ''
+  when: registration.results|length == 0

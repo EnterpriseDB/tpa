@@ -1,30 +1,30 @@
 ---
 
-# If the replica is already registered, we don't need to do anything.
+# If this instance is registered as a replica already, we don't need to
+# do anything. If it's registered as something else, it's an error, and
+# we don't do anything. Only if it's not registered at all do we clone
+# it and register it as a replica.
 
-- name: Check if the replica is registered
-  command: >
-    {{ psql }} '{{ primary_conninfo }}' -qAtw -c
-    "SELECT 'replica' FROM \"{{ repmgr_schema }}\".repl_nodes WHERE type='standby' and name='{{ inventory_hostname }}'"
+- name: Check if this instance is registered as a replica
+  postgresql_query:
+    conninfo: "host={{ upstream_primary }} dbname=repmgr user=repmgr"
+    query: >
+      SELECT (case when type='standby' then 'replica' else type end) as type
+      FROM "{{ repmgr_schema }}".repl_nodes
+      WHERE name='{{ inventory_hostname }}'
   vars:
-    psql: '{{ postgres_bin_dir }}/psql'
-    primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
     repmgr_schema: 'repmgr_{{ cluster_name }}'
-  register: regtype
-  changed_when: False
+  register: registration
   become_user: postgres
   become: yes
-
-# Just to be on the safe side, fail if the instance is registered as
-# something other than a replica.
 
 - fail:
     msg: >
       {{ inventory_hostname }} is tagged as replica of {{ upstream_primary }},
-      but is registered as a {{ regtype.stdout }} already"
-  when: >
-    regtype.stdout != '' and regtype.stdout != 'replica'
+      but is registered as a {{ registration.type }} already"
+  when:
+    registration.results|length > 0 and registration.type != 'replica'
 
 - include: clone.yml
-  when: >
-    regtype.stdout == ''
+  when:
+    registration.results|length == 0

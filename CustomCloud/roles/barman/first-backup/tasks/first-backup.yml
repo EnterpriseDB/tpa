@@ -11,35 +11,37 @@
 # for the full minute that cron could potentially take to run it.
 
 - name: Check that pg_receivexlog is running
-  shell: >
-    {{ postgres_bin_dir }}/psql -h {{postgres_host}} -p {{postgres_port}} -qAtc "
-    select count(*)
-    from pg_stat_replication r join pg_replication_slots s on (r.pid=s.active_pid)
-    where application_name='barman_receive_wal' and slot_name='barman' and state='streaming'
-    "
+  postgresql_query:
+    conninfo: "host={{postgres_host}} port={{postgres_port}}"
+    query: >
+      select count(*)
+      from pg_stat_replication r join pg_replication_slots s on (r.pid=s.active_pid)
+      where application_name='barman_receive_wal' and
+      slot_name='barman' and state='streaming'
   become_user: postgres
   become: yes
-  register: receiver
+  register: receivers
   until: >
-    receiver.stdout == '1'
-  changed_when: False
+    receivers.count == 1
   retries: 5
   delay: 3
 
 # Having convinced ourselves that we're streaming, we force a switch to
 # a new WAL segment to give the archiver something to do. We could use
 # «barman switch-xlog --archive», but that doesn't work on replicas, so
-# we run pg_switch_xlog() via psql on the instance or its upstream.
+# we run pg_switch_xlog() on the instance or its upstream.
 
 - name: Force switch to a new WAL segment
-  command: >
-    {{ postgres_bin_dir }}/psql -h {{postgres_host}} -p {{postgres_port}} -qAtc 'select pg_xlogfile_name(pg_switch_xlog())'
+  postgresql_query:
+    conninfo: "host={{postgres_host}} port={{postgres_port}}"
+    query: >
+      select pg_xlogfile_name(pg_switch_xlog()) as filename
+  delegate_to: "{{ inventory_hostname|upstream_root(hostvars) }}"
   become_user: postgres
   become: yes
-  delegate_to: "{{ inventory_hostname|upstream_root(hostvars) }}"
-  register: segment
+  register: xlog
   failed_when: >
-    segment|failed and not 'recovery is in progress' in segment.stderr
+    xlog|failed and not 'recovery is in progress' in segment.err
 
 # Now we have the name of the WAL segment file corresponding to the LSN
 # returned by pg_switch_xlog(), and we must wait for it to be archived.
@@ -70,7 +72,7 @@
 
 - name: Wait for old WAL segment to be archived
   wait_for:
-    path: "{{ barman_home }}/{{ backup_name }}/wals/{{ segment.stdout[0:16] }}/{{ segment.stdout }}"
+    path: "{{ barman_home }}/{{ backup_name }}/wals/{{ xlog.filename[0:16] }}/{{ xlog.filename }}"
     delay: 3
     timeout: 130
   delegate_to: "{{ backup }}"
