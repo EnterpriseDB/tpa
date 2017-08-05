@@ -75,10 +75,10 @@ def main():
 
     try:
         conn = psycopg2.connect(dsn=conninfo)
-    except Exception:
-        e = get_exception()
-        module.fail_json(msg="unable to connect to database: %s" %(text, str(e)))
+    except Exception, e:
+        module.fail_json(msg="Could not connect to database", err=str(e))
 
+    m = dict()
     try:
         cur = conn.cursor()
         cur.execute(query)
@@ -87,17 +87,15 @@ def main():
             results.append(dict(zip(column_names, row)))
         cur.close()
         conn.close()
-    except NotSupportedError:
-        e = get_exception()
-        module.fail_json(msg=str(e))
-    except SystemExit:
-        # Avoid catching this on Python 2.4
-        raise
-    except Exception:
-        e = get_exception()
-        module.fail_json(msg="Database query failed: %s" % (str(e)))
+    except Exception, e:
+        module.fail_json(msg="Database query failed", err=str(e))
 
-    module.exit_json(changed=changed, results=results)
+    m['changed'] = changed
+    m['results'] = results
+    if len(results) == 1 and len(results[0]) == 1:
+        for k,v in results[0].iteritems():
+            m[k] = v
+    module.exit_json(**m)
 
 # import module snippets
 from ansible.module_utils.basic import *
