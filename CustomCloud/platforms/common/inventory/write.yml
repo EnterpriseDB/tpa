@@ -37,7 +37,7 @@
     host_vars: "{{ item.vars }}"
   with_items: "{{ instance_vars }}"
   when: >
-    item.vars|ternary(item.vars,[])|length > 0
+    item.vars|length > 0
 
 - name: Write topology variables for hosts
   include: write-host-vars.yml

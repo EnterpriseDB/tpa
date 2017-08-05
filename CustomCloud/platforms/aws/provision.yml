@@ -528,10 +528,10 @@
               'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip),
               'Name': item.0.item.item.Name,
               'node': item.0.item.item.node,
-              'role': item.0.item.item|try_subkey('role'),
+              'role': item.0.item.item|try_subkey('role', []),
               'backup': item.0.item.item|try_subkey('backup'),
               'upstream': item.0.item.item|try_subkey('upstream'),
-              'vars': item.0.item.item|try_subkey('vars'),
+              'vars': item.0.item.item|try_subkey('vars', {}),
             })
           ])
         }}"

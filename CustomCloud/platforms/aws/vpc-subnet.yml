@@ -43,7 +43,7 @@
     cidr: "{{ item }}"
     vpc_id: "{{ vpc }}"
     region: "{{ region }}"
-    az: "{{ ec2_vpc_subnets|try_subkey([region,item,'az']) | default(omit) }}"
+    az: "{{ ec2_vpc_subnets|try_subkey([region,item,'az'], null)|default(omit) }}"
     resource_tags:
       Name: "{{
         ec2_vpc_subnets|try_subkey([region,item,'Name'],
