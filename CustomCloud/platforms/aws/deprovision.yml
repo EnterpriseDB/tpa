@@ -177,4 +177,6 @@
       with_items:
         - vars.json
         - known_hosts
+        - inventory/ec2.py
+        - inventory/ec2.ini
         - inventory/00-{{ cluster_name }}
