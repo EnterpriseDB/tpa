@@ -531,6 +531,7 @@
               'role': item.0.item.item|try_subkey('role', []),
               'backup': item.0.item.item|try_subkey('backup'),
               'upstream': item.0.item.item|try_subkey('upstream'),
+              'volumes': item.0.item.item|try_subkey('volumes', []),
               'vars': item.0.item.item|try_subkey('vars', {}),
             })
           ])

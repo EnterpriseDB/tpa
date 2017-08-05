@@ -27,9 +27,13 @@ instances:
       region: eu-west-1
       subnet: 10.33.29.0/28
       volumes:
-          - device_name: /dev/xvdb
+          - raid_device: /dev/md0
+            device_name: /dev/xvdb
             volume_type: gp2
             volume_size: 16
+            raid_units: 2
+            vars:
+              mountpoint: /var/lib/postgresql
       tags:
         os: Debian
         role: primary
@@ -46,6 +50,8 @@ instances:
           - device_name: /dev/xvdb
             volume_type: gp2
             volume_size: 16
+            vars:
+              mountpoint: /var/lib/postgresql
       tags:
         os: Debian
         role: replica

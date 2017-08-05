@@ -52,6 +52,40 @@
     }}"
   with_items: "{{ instance_vars }}"
 
+# We start with an expanded list of volumes per instance (i.e., RAID
+# devices will have multiple entries), which looks like this:
+#
+# volumes:
+#   - raid_device: /dev/md0
+#     device_name: /dev/xvdb
+#     vars:
+#       mountpoint: /var/lib/postgresql
+#     …
+#   - raid_device: /dev/md0
+#     device_name: /dev/xvdc
+#     vars:
+#       mountpoint: /var/lib/postgresql
+#     …
+#   - device_name: /dev/xvdd
+#     vars:
+#       mountpoint: /var/lib/barman
+#     …
+#
+# We run this through a custom filter to extract the device name that
+# matters (raid_device if set, device_name otherwise) and remove any
+# duplicates based on the device name.
+
+- name: Write volume definitions for hosts
+  include: write-host-vars.yml
+  vars:
+    file_name: "03-volumes"
+    host_name: "{{ item.Name }}"
+    host_vars:
+      volumes: "{{ item.volumes|get_device_variables }}"
+  with_items: "{{ instance_vars }}"
+  when: >
+    item.volumes|select('has_subkey', 'vars')|list|length > 0
+
 - name: Generate known_hosts file for the cluster
   template:
     src: known_hosts.j2

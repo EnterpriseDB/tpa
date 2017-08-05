@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import copy
 from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
@@ -45,6 +48,20 @@ def instance_with_backup_of(hosts, primary, hostvars):
             return h
     return None
 
+# Takes a list of volumes and returns a new list where there is only one entry
+# per device name (raid_device if defined, else device_name), consisting of the
+# device name and any variables defined for it.
+
+def get_device_variables(volumes):
+    seen = set()
+    results = []
+    for v in volumes:
+        dev = v.get('raid_device', v.get('device_name'))
+        if dev not in seen:
+            seen.add(dev)
+            results.append(dict(device=dev, vars=v.get('vars', [])))
+    return results
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -52,4 +69,5 @@ class FilterModule(object):
             'doublequote': doublequote,
             'upstream_root': upstream_root,
             'instance_with_backup_of': instance_with_backup_of,
+            'get_device_variables': get_device_variables,
         }
