@@ -34,6 +34,9 @@ instances:
         os: Debian
         role: primary
         Name: debian-primary
+      vars:
+        max_connections: 333
+        shared_buffers: '64MB'
 
     - node: 2
       type: t2.micro

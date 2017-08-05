@@ -29,6 +29,14 @@
       })
     }}"
 
+- name: Write general variables for hosts
+  include: write-host-vars.yml
+  vars:
+    file_name: "01-instance_vars"
+    host_name: "{{ item.Name }}"
+    host_vars: "{{ item.vars }}"
+  with_items: "{{ instance_vars }}"
+
 - name: Write topology variables for hosts
   include: write-host-vars.yml
   vars:
