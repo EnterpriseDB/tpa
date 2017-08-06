@@ -1,0 +1,22 @@
+---
+
+# We load vars.json into provisioning_vars, and set its keys as
+# top-level variables.
+
+- name: Load provisioning variables
+  include_vars:
+    file: "{{ item }}"
+    name: provisioning_vars
+  with_fileglob:
+    - "{{ cluster_dir }}/vars.json"
+
+- name: Set empty provisioning_vars if vars.json was not loaded
+  set_fact:
+    provisioning_vars: {}
+  when: provisioning_vars is not defined
+
+- name: Set facts from provisioning_vars
+  action: set_fact
+  args:
+    "{{ item.key }}": "{{ item.value }}"
+  with_dict: "{{ provisioning_vars }}"

@@ -40,6 +40,8 @@
         src: ec2.ini.j2
         dest: "{{ cluster_dir }}/inventory/ec2.ini"
 
+    - include: ../common/read-provisioning-vars.yml
+
     # Register this cluster's ssh public key in each region. This key is
     # used to initially provide ssh access to any provisioned instances.
 
