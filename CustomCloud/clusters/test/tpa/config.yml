@@ -39,7 +39,7 @@ instances:
         role: primary
         Name: debian-primary
       vars:
-        max_connections: 333
+        max_connections: 222
         shared_buffers: '64MB'
 
     - node: 2
