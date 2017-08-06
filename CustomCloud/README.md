@@ -64,9 +64,5 @@ I just want a test cluster
    utils/deprovision clustername
    ```
 
-Note that deprovision.yml does not currently remove additional volumes
-that are provisioned with delete_on_termination disabled. Such volumes
-**MUST BE DELETED** by hand for now.
-
 --
 Abhijit Menon-Sen <ams@2ndQuadrant.com>
