@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# Provisions a cluster according to config.yml
 
 IFS=
 set -e -u

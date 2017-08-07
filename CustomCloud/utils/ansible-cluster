@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Runs a playbook in the context of a cluster—i.e., with the correct
+# path to the cluster's inventory and so on.
 
 IFS=
 set -e -u

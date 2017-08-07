@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# Destroys a cluster and all its associated resources permanently.
 
 IFS=
 set -e -u

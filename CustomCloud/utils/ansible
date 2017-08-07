@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# This is a wrapper for bin/ansible that sets various environment
+# variables before invoking the real executable.
 
 IFS=
 set -e -u
