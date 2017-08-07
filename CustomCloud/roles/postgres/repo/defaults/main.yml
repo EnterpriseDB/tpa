@@ -18,7 +18,7 @@ default_apt_repositories:
     versions: [9.4, 9.5, 9.6]
   2ndQPostgres:
     key_id: 70549BC8
-    key_url: http://packages.2ndquadrant.com/2ndQPostgres/apt/70549BC8.asc_20170619
+    key_url: http://packages.2ndquadrant.com/2ndQPostgres/apt/70549BC8.asc
     repo: >-
       deb [arch=amd64] http://packages.2ndquadrant.com/2ndQPostgres/apt/ {{ ansible_distribution_release }}-2ndquadrant {{ pgversion }}
     versions: [9.4, 9.5, 9.6]
