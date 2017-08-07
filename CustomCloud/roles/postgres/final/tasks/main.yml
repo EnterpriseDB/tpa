@@ -1,14 +1,6 @@
 ---
 
 # Postgres is now running.
-#
-# On any primary that we just set up, we load some data.
-
-- include: load-data.yml
-  static: no
-  when: >
-    'primary' in role and initdb is defined
-  tags: pgbench
 
 # We force an immediate backup for any instances that do not have any
 # backups at all.
@@ -18,7 +10,18 @@
   when: >
     backup is defined
 
+# Were we invoked with pgbench=run?
+
 - block:
+    # If so, we must first decide whether to run pgbench -i on the
+    # primary (i.e., if it hasn't already been done).
+
+    - include: load-data.yml
+      static: no
+      when: >
+        'primary' in role
+      tags: pgbench
+
     - name: Run read/write pgbench
       include: pgbench.yml
       vars:
