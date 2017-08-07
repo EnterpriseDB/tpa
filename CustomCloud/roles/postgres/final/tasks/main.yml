@@ -13,30 +13,32 @@
 # Were we invoked with pgbench=run?
 
 - block:
-    # If so, we must first decide whether to run pgbench -i on the
-    # primary (i.e., if it hasn't already been done).
-
-    - include: load-data.yml
-      static: no
-      when: >
-        'primary' in role
-      tags: pgbench
-
-    - name: Run read/write pgbench
-      include: pgbench.yml
-      vars:
-        pgbench_opts: -v -c 10 -j 5 -T 180
-      static: no
+    - block:
+        - name: Determine if pgbench -i was run already
+          postgresql_query:
+            conninfo: "dbname=postgres user=postgres"
+            query: >
+              select count(*) as exists from information_schema.tables
+              where table_name='pgbench_history'
+          register: pgbench_history
+        - include_role: name=pgbench/init
+          when:
+            pgbench_history.exists == 0
+        - name: Run read/write pgbench
+          include_tasks: pgbench.yml
+          vars:
+            pgbench_opts: -v -c 10 -j 5 -T 180
       when: >
         'primary' in role
 
     - name: Run read-only pgbench on replicas
-      include: pgbench.yml
+      include_tasks: pgbench.yml
       vars:
         pgbench_opts: -n -c 10 -j 5 -T 180 -S
-      static: no
       when: >
         'replica' in role
   when: >
     pgbench|default('') == 'run'
+  become_user: postgres
+  become: yes
   tags: pgbench
