@@ -14,7 +14,7 @@
       ansible_user: "{{ ansible_user }}"
       ansible_port: "{{ ansible_port }}"
       ansible_python_interpreter: /usr/bin/python2.7
-      ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
+      ansible_ssh_private_key_file: "{{ cluster_dir|relpath(playbook_dir+'/../..') }}/{{ ssh_key_file }}"
       ansible_ssh_common_args: "-o ServerAliveInterval=60 -o UserKnownHostsFile='{{ cluster_dir|relpath(playbook_dir+'/../..') }}/known_hosts'"
 
 - name: Write cluster group_vars

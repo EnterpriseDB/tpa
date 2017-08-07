@@ -1,8 +1,8 @@
 - name: Run ssh-keygen
-  command: ssh-keygen -P "" -f "{{ keyfile }}" -C 2ndQuadrant
+  command: ssh-keygen -P "" -f "{{ key_file }}" -C 2ndQuadrant
   args:
     chdir: "{{ cluster_dir }}"
-    creates: "{{ keyfile }}"
+    creates: "{{ key_file }}"
   register: ssh_keygen
 
 # Run ssh-add on the cluster's key if ssh-agent is running and the key
@@ -11,9 +11,9 @@
 # the key fingerprint.)
 
 - name: Run ssh-add to register the key with ssh-agent
-  command: ssh-add "{{ keyfile }}"
+  command: ssh-add "{{ key_file }}"
   args:
     chdir: "{{ cluster_dir }}"
   when:
     - lookup('env', 'SSH_AGENT_PID')|default('') != ''
-    - lookup('pipe', "ssh-add -l|grep $(ssh-keygen -l -f '" ~ cluster_dir ~ "/" ~ keyfile ~"'|awk '{print $2}') || true") == ""
+    - lookup('pipe', "ssh-add -l|grep $(ssh-keygen -l -f '" ~ cluster_dir ~ "/" ~ key_file ~"'|awk '{print $2}') || true") == ""

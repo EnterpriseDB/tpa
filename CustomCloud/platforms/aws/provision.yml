@@ -11,17 +11,7 @@
 
 - name: Provision AWS cluster
   hosts: localhost
-
-  # The configuration comes from an external file, but we derive some
-  # sensible defaults for internal use. We must use different variable
-  # names to avoid template recursion when the values are overriden.
-
-  vars:
-    ec2_key_file: "{{ key_file | default('id_' + cluster_name|lower) }}"
-    ec2_key_name: "{{ key_name | default('2Q_' + cluster_name|lower) }}"
-
   tasks:
-
     # Make sure we're invoked with a complete cluster configuration. We
     # expect $cluster_dir/$config.yml to define a cluster name and a
     # list of instances.
@@ -50,7 +40,7 @@
         state: present
         region: "{{ item }}"
         name: "{{ ec2_key_name }}"
-        key_material: "{{ lookup('file', cluster_dir + '/' + ec2_key_file + '.pub') }}"
+        key_material: "{{ lookup('file', cluster_dir + '/' + ssh_key_file + '.pub') }}"
         wait: yes
       with_items: "{{ regions }}"
       tags: ec2_keys
@@ -570,4 +560,3 @@
       vars:
         ansible_user: "{{ ec2_ami_user|default('admin') }}"
         ansible_port: "{{ cluster_ssh_port|default(22) }}"
-        ansible_ssh_private_key_file: "{{ cluster_dir|relpath(playbook_dir+'/../..') }}/{{ ec2_key_file }}"

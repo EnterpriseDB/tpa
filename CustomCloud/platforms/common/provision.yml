@@ -2,9 +2,6 @@
 
 - name: Platform-independent provisioning tasks
   hosts: localhost
-  vars:
-    ssh_key_file: "{{ key_file | default('id_' + cluster_name|lower) }}"
-
   tasks:
     - include: validate.yml
       tags: always
@@ -19,14 +16,20 @@
         - inventory/group_vars
       tags: common
 
-    - name: Create ssh keypair {{ ssh_key_file }}
+    - name: Determine ssh_key_file
+      set_fact:
+        ssh_key_file: "id_{{ cluster_name|lower }}"
+      when:
+        ssh_key_file is not defined
+
+    - name: Create ssh keypair
       include: ssh-key.yml
       vars:
-        keyfile: "{{ ssh_key_file }}"
-      tags: common
+        key_file: "{{ ssh_key_file }}"
+      tags: [common, ssh, keygen]
 
     - include: ssh-hostkeys.yml
-      tags: common
+      tags: [common, ssh, keygen]
 
     - include: set-vault-pass.yml
       tags: common

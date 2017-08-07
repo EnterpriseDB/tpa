@@ -31,6 +31,7 @@
     cluster_tag: "{{ cluster_tag|default('tag_Cluster_' + cluster_name) }}"
     cluster_bucket: "{{ cluster_bucket|default('2ndquadrant-tpa') }}"
     cluster_profile: "{{ cluster_profile|default(cluster_name+'_profile') }}"
+    ec2_key_name: "{{ ec2_key_name|default('tpa_' + cluster_name|lower) }}"
 
 - name: Derive list of unique regions from instances
   set_fact:
