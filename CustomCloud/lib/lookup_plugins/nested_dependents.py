@@ -31,7 +31,7 @@ from collections import Iterable
 from ansible.errors import AnsibleError, AnsibleUndefinedVariable
 from ansible.utils.listify import listify_lookup_plugin_terms
 from ansible.plugins.lookup import LookupBase
-from ansible.compat.six import string_types
+from ansible.module_utils.six import string_types
 
 class LookupModule(LookupBase):
 
