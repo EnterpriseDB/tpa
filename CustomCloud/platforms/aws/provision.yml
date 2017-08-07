@@ -420,7 +420,7 @@
       debug:
         msg: "{{
           lookup('template', 'user-data.j2',
-            vars=dict(image=ec2_ami_properties[item.image])
+            template_vars=dict(image=ec2_ami_properties[item.image])
           )
         }}"
       with_items: "{{ instances }}"
@@ -459,7 +459,7 @@
         spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"
         user_data: "{{
           lookup('template', 'user-data.j2',
-            vars=dict(image=ec2_ami_properties[item.image])
+            template_vars=dict(image=ec2_ami_properties[item.image])
           )
         }}"
         termination_protection: "{{ item.termination_protection|default('no') }}"
