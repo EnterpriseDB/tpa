@@ -1,17 +1,15 @@
 #!/bin/bash
 #
-# Runs a playbook in the context of a cluster—i.e., with the correct
-# path to the cluster's inventory and so on.
+# Runs ansible in the context of a cluster—i.e., with the correct path
+# to the cluster's inventory and so on. This is for ad-hoc commands, not
+# to run playbooks; see also ansible-cluster-playbook.
+#
+# Example: utils/ansible-cluster test/tpa all -m ping
 
 IFS=
 set -e -u
 
 utils=$(dirname $0)
-
-script=deploy.yml
-if [ "$(basename $0)" != "ansible-cluster" ]; then
-    script=$(basename $0).yml
-fi
 
 cluster=${1:?No cluster specified}
 cluster=$(echo $cluster|sed 's,^clusters/,,')
@@ -23,26 +21,12 @@ arg="$clusters/$cluster"
 
 if [ -d $arg ]; then
     cluster_dir=$arg
-    if [ ! -f "$cluster_dir/$script" ]; then
-        echo "Can't find script $cluster/$script"
-        exit
-    fi
-elif [ -d $(dirname $arg) ]; then
-    cluster_dir=$(dirname $arg)
-    if [ -f $arg ]; then
-        script=$(basename $arg)
-    else
-        echo "Can't find script clusters/$cluster"
-        exit
-    fi
 else
     echo "Can't find directory clusters/$cluster"
     exit
 fi
 
-$utils/ansible-playbook \
-    $cluster_dir/$script \
+$utils/ansible \
     -i $cluster_dir/inventory \
     --vault-password-file $cluster_dir/vault/vault_pass.txt \
-    -e ansible_ssh_common_args="\"-o UserKnownHostsFile='$cluster_dir/known_hosts'\"" \
     -e cluster=$cluster_dir "$@"
