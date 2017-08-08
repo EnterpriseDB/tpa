@@ -35,15 +35,8 @@ Pre-requisites
 2. You need an AWS access key id and secret access key for API access.
    [Read platforms/aws/README](platforms/aws/README.md) for details.
 
-
-Trying out the TPA AWS cluster setup
-================================
-
-1. [Read clusters/test/tpa/README](clusters/test/tpa/README.md) for details.
-
 I just want a test cluster
-========================================
-
+==========================
 
 1. Pick a name for the cluster, and write a clustername/config.yml file
    describing the required instances, and a clustername/deploy.yml file
