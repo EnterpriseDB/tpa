@@ -1,7 +1,7 @@
-CustomCloud cluster configuration
-=================================
+TPA cluster configuration
+=========================
 
-To bring up a cluster with CustomCloud, you will need to write two YAML
+To bring up a cluster with TPA, you will need to write two YAML
 files: **config.yml** describes the instances required; **deploy.yml**
 is a playbook that maps the desired roles to the provisioned instances.
 

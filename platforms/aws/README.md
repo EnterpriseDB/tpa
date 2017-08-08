@@ -1,5 +1,5 @@
-CustomCloud on AWS
-==================
+TPA on AWS
+==========
 
 Access setup
 ------------

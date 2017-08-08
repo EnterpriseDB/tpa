@@ -8,7 +8,7 @@ IFS=
 set -e -u
 
 if [ ! -d clusters/images ]; then
-    echo "Please run clusters/images/build-images (from the TPA/CustomCloud directory)"
+    echo "Please run clusters/images/build-images (from the TPA directory)"
     exit
 fi
 

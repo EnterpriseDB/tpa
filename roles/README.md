@@ -1,7 +1,7 @@
-CustomCloud roles
-=================
+TPA roles
+=========
 
-This is an overview of the various roles available for CustomCloud.
+This is an overview of the various roles available for TPA.
 
 common
 ------
