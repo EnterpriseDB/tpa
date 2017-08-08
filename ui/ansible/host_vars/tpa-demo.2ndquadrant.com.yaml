@@ -1,6 +1,0 @@
----
-pyapp_sitename: tpa-demo.2ndquadrant.com
-ssl_certificate: "/etc/letsencrypt/live/tpa-demo.2ndquadrant.com/cert.pem"
-ssl_certificate_key: "/etc/letsencrypt/live/tpa-demo.2ndquadrant.com/privkey.pem"
-static_content_root: "/home/tpademo/tpa/TPA/ui/fe"
-built_static_root: "/home/tpademo/tpa/TPA/ui/build/static"

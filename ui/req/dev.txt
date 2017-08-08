@@ -1,6 +1,0 @@
--r test.txt
-autopep8
-django-debug-toolbar
-django-livereload-server
-django-rest-swagger
-isort

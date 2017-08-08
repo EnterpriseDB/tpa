@@ -1,5 +1,0 @@
----
-pyapp_sitename: "{{ ansible_fqdn }}"
-ssl_certificate: "/etc/nginx/ssl/{{ pyapp_sitename }}.crt"
-ssl_certificate_key: "/etc/nginx/ssl/{{ pyapp_sitename }}.key"
-static_content_root: "/var/www/{{ pyapp_sitename }}"
