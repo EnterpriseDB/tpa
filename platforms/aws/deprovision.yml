@@ -174,9 +174,15 @@
       file:
         path: "{{ cluster_dir }}/{{ item }}"
         state: absent
+        force: yes
       with_items:
+        - tmp
+        - keys
+        - certs
+        - vault
+        - hostkeys
+        - inventory
         - vars.json
         - known_hosts
-        - inventory/ec2.py
-        - inventory/ec2.ini
-        - inventory/00-{{ cluster_name }}
+        - id_{{ cluster_name }}
+        - id_{{ cluster_name }}.pub
