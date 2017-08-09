@@ -54,6 +54,7 @@
       tags: [sys, fs]
 
     - role: sys/sysstat
+      tags: [sys, sysstat]
 
     - role: sys/openvpn
       vpn_network: 192.168.33.0/24
