@@ -39,6 +39,7 @@
         - postgresql-{{pgversion}}-pgespresso
       RedHat:
         - pgespresso{{pgversionNN}}
+  tags: [postgres, pkg]
 
 # We set pgbindir based on what packages we installed. Unfortunately, we
 # can not assume that all Postgres binaries (e.g., pg_config) will be in
