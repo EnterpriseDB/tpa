@@ -1,0 +1,19 @@
+---
+
+- name: Enable sysstat
+  lineinfile:
+    path: /etc/default/sysstat
+    regexp: '^ENABLED='
+    line: >-
+      ENABLED="true"
+  register: sysstat
+
+# XXX We should increase the frequency of collection from the default
+# */10 (every ten minutes) in /etc/cron.d/sysstat.
+
+- name: Restart sysstat if required
+  service:
+    name: sysstat
+    state: restarted
+  when:
+    sysstat|changed

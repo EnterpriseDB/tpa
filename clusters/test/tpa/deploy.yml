@@ -53,6 +53,8 @@
         mountpoint: "{{ postgres_home }}"
       tags: [sys, fs]
 
+    - role: sys/sysstat
+
     - role: sys/openvpn
       vpn_network: 192.168.33.0/24
 
