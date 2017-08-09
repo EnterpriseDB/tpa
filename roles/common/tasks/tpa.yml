@@ -41,7 +41,7 @@
 
 - name: Read the TPA version string
   set_fact:
-    tpa_version: "{{ lookup('file', '../../../../VERSION.md') }}" #relative to playbook_dir
+    tpa_version: "{{ lookup('file', '../../../VERSION.md') }}" #relative to playbook_dir
 
 - name: Read the deploy timestamp 
   set_fact:
