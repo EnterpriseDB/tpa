@@ -39,10 +39,6 @@
 # we will create it first and we always APPEND to the tpa.log file
 # to preserve earlier deployment history if any
 
-- name: Read the TPA version string
-  set_fact:
-    tpa_version: "{{ lookup('file', '../../../VERSION.md') }}" #relative to playbook_dir
-
 - name: Read the deploy timestamp 
   set_fact:
     deploy_timestamp: "{{ lookup('pipe','date \"+%Y-%m-%d %T %Z %::z\"') }}"

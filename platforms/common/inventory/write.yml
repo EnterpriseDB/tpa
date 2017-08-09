@@ -25,7 +25,8 @@
     group_vars: "{{
       cluster_vars|default({})|combine({
         'cluster_tag': cluster_tag,
-        'cluster_name': cluster_name
+        'cluster_name': cluster_name,
+        'tpa_version': lookup('file', playbook_dir+'/../../VERSION.md')
       })
     }}"
 
