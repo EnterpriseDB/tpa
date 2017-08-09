@@ -20,6 +20,7 @@ packages:
     - rsync
     - mdadm
     - pigz
+    - dstat
   Debian:
     - python-dev
     - python-passlib
