@@ -14,4 +14,8 @@ postgres_conf_settings: {}
 
 default_postgres_extensions:
   - pg_stat_statements
+  - pg_freespacemap
+  - pg_visibility
+  - pageinspect
+  - pgstattuple
   - pglogical
