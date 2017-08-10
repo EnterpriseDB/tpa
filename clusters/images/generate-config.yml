@@ -10,7 +10,7 @@
     # Which regions do we want to build new AMIs in?
     regions:
       - us-east-1
-      #- us-east-2 # (commented out due to lack of official Debian image)
+      - us-east-2
       - us-west-1
       - us-west-2
       - eu-west-1
@@ -18,13 +18,13 @@
 
     # Which AMIs should we start with?
     base_amis:
-      - Name: debian-jessie-amd64-hvm-2016-09-19-ebs
+      - Name: debian-jessie-amd64-hvm-2017-01-15-1221-ebs
         Owner: 379101102735
         os: Debian
-      - Name: RHEL-7.3_HVM_GA-20161026-x86_64-1-Hourly2-GP2
+      - Name: RHEL-7.4_HVM_GA-20170724-x86_64-1-Hourly2-GP2
         Owner: 309956199498
         os: RedHat
-      - Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20161020
+      - Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170803
         Owner: 099720109477
         os: Ubuntu
 
