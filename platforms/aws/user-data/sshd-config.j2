@@ -11,6 +11,10 @@ echo "Port {{ cluster_ssh_port }}" >> /etc/ssh/sshd_config
 service sshd restart
 {% endif %}
 
+{#
+    XXX: This should be moved to an extra_user_data definition for the
+    clusters that need it. We have no way to test any of this inhouse.
+#}
 {% if centrify_ad_domain|default(false) and centrify_ad_group|default(false) %}
 /opt/centrify/domain-leave.sh
 /opt/centrify/domain-join.sh {{ centrify_ad_domain }} {{ centrify_ad_group }} aws
