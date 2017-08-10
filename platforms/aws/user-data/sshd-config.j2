@@ -4,6 +4,7 @@ service sshd restart
 {% endif %}
 
 {% if cluster_ssh_port|default(22) != 22 %}
+echo "" >> /etc/ssh/sshd_config
 echo "Port {{ cluster_ssh_port }}" >> /etc/ssh/sshd_config
 {% endif %}
 
