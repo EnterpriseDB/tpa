@@ -1,7 +1,7 @@
 ---
 
 - name: Generate AMIs
-  hosts: tag_Cluster_TPAImages
+  hosts: all
   tasks:
     - name: Generate new AMIs
       ec2_ami:

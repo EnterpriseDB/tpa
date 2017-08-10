@@ -1,7 +1,7 @@
 ---
 
 - name: Set up TPA image nodes
-  hosts: tag_Cluster_TPAImages
+  hosts: all
   any_errors_fatal: True
   max_fail_percentage: 0
   sudo_user: root

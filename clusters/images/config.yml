@@ -1,6 +1,6 @@
 ---
 
-cluster_name: "TPAImages"
+cluster_name: tpa_images
 cluster_tags:
   Owner: AMS
 
