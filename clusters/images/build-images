@@ -12,16 +12,19 @@ if [ ! -d clusters/images ]; then
     exit
 fi
 
+reconfig=0
 opt=${1:-""}
 if [ "$opt" = "-r" ]; then
+    reconfig=1
     shift
-    utils/ansible-playbook clusters/images/generate-config.yml
 fi
 
 variant=${1:-"PGDG"}
 version=${2:-"9.6"}
 suffix=${3:-""}
 
+test $reconfig = 1 && \
+    utils/ansible-playbook clusters/images/generate-config.yml
 utils/provision images -v
 
 # Wait for a while for the instances to replace their SSH host keys.
