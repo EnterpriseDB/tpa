@@ -36,6 +36,3 @@ utils/ansible-cluster-playbook images/generate-amis.yml -v \
     -e postgres_variant=$variant -e postgres_version=$version -e suffix=$suffix
 
 utils/deprovision images -v
-rm -rf clusters/images/id_tpaimages* \
-    clusters/images/inventory/ec2.* \
-    clusters/images/{hostkeys,vault}
