@@ -14,7 +14,7 @@ instances:
 
     - node: 1
       type: t2.micro
-      image: ami-9d6c128a
+      image: ami-b14ba7a7
       region: us-east-1
       subnet: 10.33.0.0/24
       volumes:
@@ -28,7 +28,7 @@ instances:
 
     - node: 2
       type: t2.micro
-      image: ami-b63769a1
+      image: ami-cdc999b6
       region: us-east-1
       subnet: 10.33.0.0/24
       volumes:
@@ -42,7 +42,7 @@ instances:
 
     - node: 3
       type: t2.micro
-      image: ami-40d28157
+      image: ami-d14062aa
       region: us-east-1
       subnet: 10.33.0.0/24
       volumes:
@@ -56,7 +56,49 @@ instances:
 
     - node: 4
       type: t2.micro
-      image: ami-84cc83e4
+      image: ami-b2795cd7
+      region: us-east-2
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 16
+      tags:
+        Name: debian-us-east-2
+        role: image
+        os: Debian
+
+    - node: 5
+      type: t2.micro
+      image: ami-e4537381
+      region: us-east-2
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 16
+      tags:
+        Name: redhat-us-east-2
+        role: image
+        os: RedHat
+
+    - node: 6
+      type: t2.micro
+      image: ami-70fcdc15
+      region: us-east-2
+      subnet: 10.33.0.0/24
+      volumes:
+        - device_name: root
+          volume_type: gp2
+          volume_size: 16
+      tags:
+        Name: ubuntu-us-east-2
+        role: image
+        os: Ubuntu
+
+    - node: 7
+      type: t2.micro
+      image: ami-94bdeef4
       region: us-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -68,9 +110,9 @@ instances:
         role: image
         os: Debian
 
-    - node: 5
+    - node: 8
       type: t2.micro
-      image: ami-2cade64c
+      image: ami-f4def794
       region: us-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -82,9 +124,9 @@ instances:
         role: image
         os: RedHat
 
-    - node: 6
+    - node: 9
       type: t2.micro
-      image: ami-6e165d0e
+      image: ami-c1775ca1
       region: us-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -96,9 +138,9 @@ instances:
         role: image
         os: Ubuntu
 
-    - node: 7
+    - node: 10
       type: t2.micro
-      image: ami-2a34e94a
+      image: ami-221ea342
       region: us-west-2
       subnet: 10.33.0.0/24
       volumes:
@@ -110,9 +152,9 @@ instances:
         role: image
         os: Debian
 
-    - node: 8
+    - node: 11
       type: t2.micro
-      image: ami-6f68cf0f
+      image: ami-52766d2b
       region: us-west-2
       subnet: 10.33.0.0/24
       volumes:
@@ -124,9 +166,9 @@ instances:
         role: image
         os: RedHat
 
-    - node: 9
+    - node: 12
       type: t2.micro
-      image: ami-a9d276c9
+      image: ami-db3bdda3
       region: us-west-2
       subnet: 10.33.0.0/24
       volumes:
@@ -138,9 +180,9 @@ instances:
         role: image
         os: Ubuntu
 
-    - node: 10
+    - node: 13
       type: t2.micro
-      image: ami-ff0e758c
+      image: ami-402f1a33
       region: eu-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -152,9 +194,9 @@ instances:
         role: image
         os: Debian
 
-    - node: 11
+    - node: 14
       type: t2.micro
-      image: ami-02ace471
+      image: ami-a04da4d9
       region: eu-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -166,9 +208,9 @@ instances:
         role: image
         os: RedHat
 
-    - node: 12
+    - node: 15
       type: t2.micro
-      image: ami-0d77397e
+      image: ami-da28dfa3
       region: eu-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -180,9 +222,9 @@ instances:
         role: image
         os: Ubuntu
 
-    - node: 13
+    - node: 16
       type: t2.micro
-      image: ami-30e01d5f
+      image: ami-5900cc36
       region: eu-central-1
       subnet: 10.33.0.0/24
       volumes:
@@ -194,9 +236,9 @@ instances:
         role: image
         os: Debian
 
-    - node: 14
+    - node: 17
       type: t2.micro
-      image: ami-e4c63e8b
+      image: ami-773c9118
       region: eu-central-1
       subnet: 10.33.0.0/24
       volumes:
@@ -208,9 +250,9 @@ instances:
         role: image
         os: RedHat
 
-    - node: 15
+    - node: 18
       type: t2.micro
-      image: ami-8504fdea
+      image: ami-6df55b02
       region: eu-central-1
       subnet: 10.33.0.0/24
       volumes:
