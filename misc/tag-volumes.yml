@@ -1,0 +1,34 @@
+---
+
+# Quick hack:
+#
+# This playbook can be used to create Name/CreatingCluster tags on all
+# EBS volumes attached to instances in a cluster. Must be invoked in the
+# context of a cluster's inventory (and needs host facts from ec2.py).
+#
+# XXX: This doesn't merge in cluster_tags from config.yml, as
+# provision.yml would ordinarily do.
+#
+# TODO: Extend to verify/set delete_on_termination=no for non-root
+# volumes as well.
+
+- hosts: all
+  tasks:
+    - ec2_vol_facts:
+        region: "{{ ec2_region }}"
+        filters:
+          attachment.instance-id: "{{ ec2_id }}"
+      register: v
+      delegate_to: localhost
+    - ec2_tag:
+        state: present
+        region: "{{ item.region }}"
+        resource: "{{ item.id }}"
+        tags:
+          Name: "{{ cluster_name ~ ':' ~ ec2_tag_node ~ ':' ~ item.attachment_set.device }}"
+          CreatingCluster: "{{ cluster_name }}"
+      with_items: "{{ v.volumes }}"
+      when: >
+        'CreatingCluster' not in item.tags or
+        'Name' not in item.tags
+      delegate_to: localhost
