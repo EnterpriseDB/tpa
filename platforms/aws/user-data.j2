@@ -58,6 +58,11 @@ export {{ k }}="{{ user_data_environment[k] }}"
 
 {#
     Adjust sshd configuration (Port, PermitRootLogin, etc.).
+
+    If we set a non-standard cluster_ssh_port, we can wait_for it to
+    become available, and know that the built-in parts of user-data have
+    been completed successfully. (If the extra_user_data does something
+    that needs to be waited for, it must make its own arrangements.)
 #}
 {% include 'user-data/sshd-config.j2' %}
 
