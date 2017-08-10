@@ -10,6 +10,11 @@
   pre_tasks:
     - include: ../../platforms/aws/hostvars.yml
       tags: always
+    - name: Wait for instances to be available
+      local_action:
+        module: wait_for
+        port: "{{ ansible_port|default(22) }}"
+        host: "{{ ansible_host }}"
 
   roles:
     - role: postgres/vars
