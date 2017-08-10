@@ -184,5 +184,5 @@
         - inventory
         - vars.json
         - known_hosts
-        - id_{{ cluster_name }}
-        - id_{{ cluster_name }}.pub
+        - id_{{ cluster_name|lower }}
+        - id_{{ cluster_name|lower }}.pub
