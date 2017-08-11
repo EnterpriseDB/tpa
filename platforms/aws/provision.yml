@@ -369,14 +369,14 @@
       set_fact:
         ec2_volumes: "{{
           ec2_volumes|combine({
-            item.1.region ~ ':' ~ item.1.Name: item.1
+            item.1.region ~ ':' ~ item.1.tags.Name: item.1
           })
         }}"
       with_nested_dependents:
         - ec2_attachable_volumes.results
         - item.0.volumes
       when: >
-        'volumes' in ec2_attachable_volumes.results
+        ec2_attachable_volumes.results|sum(attribute='volumes', start=[])|list|count > 0
 
     # Preprocess instance definitions through various helpful filters to
     # set things that aren't set and check things that need checking.
