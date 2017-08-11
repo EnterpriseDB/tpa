@@ -362,21 +362,23 @@
       loop_control:
         loop_var: r
       when: >
-        instances|selectattr('region','equalto',r)|sum(attribute='volumes', start=[])
-        |select('has_subkey', 'attach_existing')|list|count > 0
+        instances
+        |json_query("[?region=='"+r+"'].volumes[]|[?attach_existing]")
+        |count > 0
+
+    # If we found any volumes, we store them in a form that allows
+    # |match_existing_volumes to match them to volume definitions for
+    # instances in the next step.
 
     - name: Create volume name→volume table
       set_fact:
         ec2_volumes: "{{
           ec2_volumes|combine({
-            item.1.region ~ ':' ~ item.1.tags.Name: item.1
+            item.region ~ ':' ~ item.tags.Name: item
           })
         }}"
-      with_nested_dependents:
-        - ec2_attachable_volumes.results
-        - item.0.volumes
-      when: >
-        ec2_attachable_volumes.results|sum(attribute='volumes', start=[])|list|count > 0
+      with_items: >
+        {{ ec2_attachable_volumes|json_query('results[?volumes][].volumes') }}
 
     # Preprocess instance definitions through various helpful filters to
     # set things that aren't set and check things that need checking.
