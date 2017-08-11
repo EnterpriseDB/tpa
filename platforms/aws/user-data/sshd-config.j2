@@ -6,6 +6,7 @@ sed -i.bak 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
 {% if cluster_ssh_port|default(22) != 22 %}
 echo "" >> /etc/ssh/sshd_config
 echo "Port {{ cluster_ssh_port }}" >> /etc/ssh/sshd_config
+$(type -p selinuxenabled) && semanage port -a -t ssh_port_t -p tcp {{ cluster_ssh_port }}
 {% endif %}
 
 service sshd restart
