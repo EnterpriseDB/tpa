@@ -1,14 +1,16 @@
-{% if (ec2_ami_user|default('admin') == 'root') or (cluster_ssh_port|default(22) != 22) %}
 {% if ec2_ami_user|default('admin') == 'root' %}
+{% set restart_ssh = true %}
 sed -i.bak 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
 {% endif %}
 
 {% if cluster_ssh_port|default(22) != 22 %}
+{% set restart_ssh = true %}
 echo "" >> /etc/ssh/sshd_config
 echo "Port {{ cluster_ssh_port }}" >> /etc/ssh/sshd_config
 $(type -p selinuxenabled) && semanage port -a -t ssh_port_t -p tcp {{ cluster_ssh_port }}
 {% endif %}
 
+{% if restart_ssh %}
 service sshd restart
 {% endif %}
 
