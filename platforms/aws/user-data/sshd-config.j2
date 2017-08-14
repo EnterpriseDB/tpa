@@ -1,3 +1,4 @@
+{% set restart_ssh = false %}
 {% if ec2_ami_user|default('admin') == 'root' %}
 {% set restart_ssh = true %}
 sed -i.bak 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
