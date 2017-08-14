@@ -1,0 +1,87 @@
+---
+- hosts: all
+  tasks:
+    # We can only rehydrate one instance at a time.
+    - assert:
+        msg: "Please use «--limit hostname» to specify a single host"
+        that:
+          - ansible_play_hosts|count == 1
+      run_once: true
+
+    # Every volume attached to the instance is required to have "Name"
+    # and "CreatingCluster" tags with the correct values, so that it
+    # will be found when provisioning a new instance.
+
+    - name: Find all volumes attached to this instance.
+      ec2_vol_facts:
+        region: "{{ ec2_region }}"
+        filters:
+          "attachment.instance-id": "{{ ec2_id }}"
+      delegate_to: localhost
+      register: volumes
+
+    - name: Ensure volumes are correctly tagged
+      assert:
+        msg: "Volume {{ item.id }} does not have correct Name/CreatingCluster tags"
+        that:
+          - item.tags|has_subkey('Name')
+          - item.tags|has_subkey('CreatingCluster')
+          - item.tags.CreatingCluster == cluster_name
+          - item.tags.Name == "{{ cluster_name }}:{{ ec2_tag_node }}:{{ item.attachment_set.device }}"
+      with_items:
+        "{{ volumes.volumes }}"
+
+    # The root volume should be deleted when the instance is terminated,
+    # but the remaining volumes must not be deleted, because we depend
+    # on their staying around to be attached to the new instance.
+
+    - name: Gather volume delete_on_termination status
+      command: >
+        aws ec2 describe-volumes --region {{ item.region }} --volume-ids {{ item.id }} --query 
+        "Volumes[].Attachments[0].[Device,to_string(DeleteOnTermination)]|[0]"
+      delegate_to: localhost
+      with_items:
+        "{{ volumes.volumes }}"
+      register: status
+
+    - name: Ensure delete_on_termination is set correctly
+      assert:
+        msg: "{{ device_termination[0] }} should not have delete_on_termination={{ device_termination[1] }}"
+        that:
+          - device_termination[1] == 'false' or device_termination[0] == '/dev/xvda'
+      with_items: "{{ status.results }}"
+      vars:
+        device_termination: "{{ item.stdout|from_json }}"
+
+    # Make the user type 'yes' before we terminate the instance. This is
+    # a poor substitute for being able to undo an instance termination,
+    # in user interface terms.
+
+    - name: Prompt for confirmation
+      pause:
+        prompt: "Type «yes» to terminate {{ inventory_hostname }}"
+      register: prompt
+
+    - name: Ensure that user confirmed termination
+      assert:
+        msg: "You didn't type «yes», aborting"
+        that:
+          - prompt.user_input == 'yes'
+
+    # Terminate the instance and wait until its state changes to
+    # terminated (after shutting-down).
+
+    - name: Terminate the instance
+      command: >
+        aws ec2 terminate-instances --region {{ ec2_region }} --instance-ids {{ ec2_id }}
+      delegate_to: localhost
+
+    - name: Wait until the instance is terminated
+      command: >
+        aws ec2 describe-instances --region {{ ec2_region }} --instance-ids {{ ec2_id }}
+        --query 'Reservations[*].Instances[*].State.Name|[0]'
+      delegate_to: localhost
+      register: state
+      until:
+        (state.stdout|from_json)[0] == 'terminated'
+      retries: 30
