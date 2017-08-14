@@ -48,7 +48,7 @@
       assert:
         msg: "{{ device_termination[0] }} should not have delete_on_termination={{ device_termination[1] }}"
         that:
-          - device_termination[1] == 'false' or device_termination[0] == '/dev/xvda'
+          - device_termination[1] == 'false' or device_termination[0] in ['/dev/xvda','/dev/sda1']
       with_items: "{{ status.results }}"
       vars:
         device_termination: "{{ item.stdout|from_json }}"
