@@ -21,7 +21,7 @@ fi
 
 variant=${1:-"PGDG"}
 version=${2:-"9.6"}
-suffix=${3:-"$(date +%Y%m%d)"}
+suffix=${3:-""}
 
 test $reconfig = 1 && \
     utils/ansible-playbook clusters/images/generate-config.yml
