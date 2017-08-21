@@ -1,0 +1,64 @@
+---
+
+# This playbook searches for self-owned AMIs whose name matches a
+# particular pattern across regions, and removes them. Be careful.
+
+- hosts: localhost
+  vars:
+    regions:
+      - us-east-1
+      - us-east-2
+      - us-west-1
+      - us-west-2
+      - eu-west-1
+      - eu-central-1
+
+  tasks:
+
+    # Set the name to a pattern matching whatever AMIs you want to
+    # remove. The expression below is written this way so that the
+    # 'TPA-' prefix can't be accidentally omitted.
+
+    - ec2_ami_find:
+        name: "{{ 'TPA-' ~ '*2ndQPostgres-9.6-*2016*' }}"
+        owner: self
+        region: "{{ r }}"
+      with_items: "{{ regions }}"
+      loop_control:
+        loop_var: r
+      register: ec2_amis
+
+    # Now ec2_amis.results looks like this:
+    #
+    # [{r: …, results: [{ami_id: …}, …]},
+    #  {r: …, results: …}]
+    #
+    # The outer results array has as many entries as there are regions,
+    # and any of the inner results arrays may contain zero or more AMI
+    # descriptions (alas, not including the region).
+    #
+    # We need to invoke ec2_ami with (r, ami_id), so we transform the
+    # above into a more tractable structure that we can iterate over
+    # easily using with_nested_dependents.
+    #
+    # [{region: …, amis: [ami-xxx, ami-yyy, …]}, …]
+
+    - set_fact:
+        region_amis: "{{
+          ec2_amis.results|json_query('[*].{region:r,amis:[results[*].[ami_id][]][]}')
+        }}"
+
+    # Iterate over region_amis and remove each AMI that we found.
+    #
+    # (There's no reason we couldn't iterate over the original structure
+    # using with_nested_dependents. I just happened to be playing with
+    # JMESpath syntax and came up with the above transformation.)
+
+    - ec2_ami:
+        region: "{{ item.0.region }}"
+        image_id: "{{ item.1 }}"
+        delete_snapshot: yes
+        state: absent
+      with_nested_dependents:
+        - region_amis
+        - item.0.amis
