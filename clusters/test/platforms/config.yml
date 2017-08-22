@@ -19,7 +19,7 @@ ec2_vpc_subnets:
       az: eu-west-1b
 
 ec2_ami:
-  Name: TPA-Debian-PGDG-9.6-2016*
+  Name: TPA-Debian-PGDG-9.6-2017*
   Owner: self
 ec2_ami_user: admin
 
