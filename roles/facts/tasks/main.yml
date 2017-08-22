@@ -1,0 +1,5 @@
+---
+
+# Set ansible_distribution and ansible_pkg_mgr if required.
+- include: distribution.yml
+  tags: always

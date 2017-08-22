@@ -1,12 +1,5 @@
 ---
 
-- include: local.yml
-  tags: common
-
-# Set ansible_distribution and ansible_pkg_mgr if required.
-- include: distribution.yml
-  tags: always
-
 - include_role: name=common/pkg
   tags: [common, pkg]
 

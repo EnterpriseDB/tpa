@@ -3,8 +3,22 @@
 - name: Set up inventory variables
   hosts: tag_Cluster_tpa_test
   any_errors_fatal: True
-  tasks:
+  pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
+      tags: always
+  roles:
+    - role: local
+      tags: common
+
+    - role: facts
+      tags: always
+
+    # Declare that we want to install Postgres 9.6. This just sets a few
+    # handy defaults up front. The actual package installation happens a
+    # few steps later.
+    - role: postgres/vars
+      vars:
+        postgres_version: 9.6
       tags: always
 
 - name: Set up TPA cluster nodes
@@ -24,14 +38,6 @@
     # Finds ansible_distribution, makes sure python and other system
     # packages are installed, sets the hostname, etc.
     - role: common
-
-    # Declare that we want to install Postgres 9.6. This just sets a few
-    # handy defaults up front. The actual package installation happens a
-    # few steps later.
-    - role: postgres/vars
-      vars:
-        postgres_version: 9.6
-      tags: always
 
     # Computes memory size and other instance-specific computations for
     # use in later steps (e.g. shared_buffers).
