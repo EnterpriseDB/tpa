@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# Given a cluster and an instance name, "rehydrates" the instance as
+# described below:
+#
+# 1. Ensures that all extra volumes attached to the instance are tagged
+#    correctly and set to not be deleted on termination of the instance.
+# 2. Terminates the instance and waits for the operation to complete.
+# 3. Provisions a replacement for the instance.
+# 4. Redeploys software on the new instance.
+#
+# Example: utils/rehydrate test/cluster instancename
+
+IFS=
+set -e -u
+
+utils=$(dirname $0)
+
+cluster=${1:?No cluster specified}
+instance=${2:?No instance specified}
+
+cluster=$(echo $cluster|sed 's,^clusters/,,')
+clusters=$(realpath $utils/../clusters);
+cluster_dir="$clusters/$cluster"
+
+if [ ! -d $cluster_dir ]; then
+    echo "Can't find directory $cluster_dir"
+    exit
+fi
+
+# Terminate the old instance after performing sanity checks.
+
+$utils/ansible-playbook \
+    $utils/../platforms/aws/terminate-for-rehydration.yml \
+    -i $cluster_dir/inventory \
+    -e cluster=$cluster_dir \
+    --limit "$instance"
+
+# Provision a replacement for the terminated instance.
+
+$utils/ansible-playbook \
+    $utils/../platforms/aws/provision.yml \
+    -e cluster=$cluster_dir
+
+# Redeploy to the new instance.
+
+$utils/ansible-playbook \
+    $cluster_dir/deploy.yml \
+    -i $cluster_dir/inventory \
+    --vault-password-file $cluster_dir/vault/vault_pass.txt \
+    -e cluster=$cluster_dir "$@"
