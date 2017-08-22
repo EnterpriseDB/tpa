@@ -1,15 +1,30 @@
 ---
 
-# Given a variable name and a value, we set a top-level fact, but also
-# add the value to provisioning_vars so that we can write it out at the
-# end.
+# Given a variable name and a value, we set a top-level fact and add the
+# setting to provisioning_vars and write it out to vars.json.
 
 - name: Set provisioning variable {{ name }}
   action: set_fact
   args:
-    "{{ name }}": "{{ value }}"
     provisioning_vars: "{{
       provisioning_vars|combine({name: value})
     }}"
 
 - include: write-provisioning-vars.yml
+
+# We don't set the top-level fact along with provisioning_vars above to
+# avoid an Ansible bug. Suppose we're invoked from within somefile.yml
+# that is itself included like this:
+#
+# - include: somefile.yml
+#   when:
+#     varname is not defined
+#
+# Then we could skip including write-provisioning-vars.yml above because
+# we've just defined varname in the previous step. Doing it as the last
+# step avoids this problem and is harmless.
+
+- name: Set fact {{ name }}
+  action: set_fact
+  args:
+    "{{ name }}": "{{ value }}"
