@@ -62,6 +62,23 @@ def get_device_variables(volumes):
             results.append(dict(device=dev, vars=v.get('vars', [])))
     return results
 
+# Takes a dict and a list of keys and returns a new dict which has none of the
+# keys in the list.
+
+def remove_keys(d, keys):
+    if not isinstance(d, dict):
+        raise errors.AnsibleFilterError("|remove_keys takes a dict as its first argument, got " + repr(d))
+
+    if not isinstance(keys, list):
+        raise errors.AnsibleFilterError("|remove_keys takes a list as its second argument, got " + repr(keys))
+
+    d2 = copy.deepcopy(d)
+    for k in keys:
+        if k in d2:
+            del d2[k]
+
+    return d2
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -70,4 +87,5 @@ class FilterModule(object):
             'upstream_root': upstream_root,
             'instance_with_backup_of': instance_with_backup_of,
             'get_device_variables': get_device_variables,
+            'remove_keys': remove_keys,
         }

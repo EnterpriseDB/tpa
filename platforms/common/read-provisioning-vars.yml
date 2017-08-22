@@ -16,10 +16,27 @@
     provisioning_vars: {}
   when: provisioning_vars is not defined
 
-- name: Set facts from provisioning_vars
+- name: Find provisioning_vars that will be overriden
+  set_fact:
+    overriden_keys: "{{
+      overriden_keys|default([])|union([item.key])
+    }}"
+  when:
+    item.key in vars
+  with_dict: "{{ provisioning_vars }}"
+
+- name: Remove overriden variables from provisioning_vars
+  set_fact:
+    provisioning_vars: "{{ provisioning_vars|remove_keys(overriden_keys) }}"
+  when:
+    overriden_keys|d() and overriden_keys|length > 0
+  register: overriden
+
+- include: write-provisioning-vars.yml
+  when: not overriden|skipped
+
+- name: Set facts from remaining provisioning_vars
   action: set_fact
   args:
     "{{ item.key }}": "{{ item.value }}"
-  when:
-    item.key not in vars
   with_dict: "{{ provisioning_vars }}"
