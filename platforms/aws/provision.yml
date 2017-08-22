@@ -32,22 +32,13 @@
 
     - include: ../common/read-provisioning-vars.yml
 
-    # Register this cluster's ssh public key in each region. This key is
-    # used to initially provide ssh access to any provisioned instances.
+    # We register an SSH public key in each region to provide SSH access
+    # to newly provisioned instances, unless ec2_key_name is explicitly
+    # set to "" in config.yml.
 
-    - name: Register key {{ ec2_key_name }} in each region
-      ec2_key:
-        state: present
-        region: "{{ item }}"
-        name: "{{ ec2_key_name }}"
-        key_material: "{{ lookup('file', cluster_dir + '/' + ssh_key_file + '.pub') }}"
-        wait: yes
-      with_items: "{{ regions }}"
-      tags: ec2_keys
-
-    - name: Set ec2_instance_key
-      set_fact:
-        ec2_instance_key: "{{ ec2_key_name }}"
+    - include: ec2-register-key.yml
+      when:
+        ec2_instance_key is not defined and ec2_key_name != ''
       tags: ec2_keys
 
     # When provisioning each instance, we must specify a vpc_subnet_id

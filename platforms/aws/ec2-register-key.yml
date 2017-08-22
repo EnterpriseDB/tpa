@@ -1,0 +1,24 @@
+---
+
+# We register ssh_key_file.pub as ec2_key_name in each region, and set
+# ec2_instance_key to the name of the registered key.
+
+- assert:
+    msg: "Please set ec2_key_name"
+    that:
+      - ec2_key_name != ''
+
+- name: Register key {{ ec2_key_name }} in each region
+  ec2_key:
+    state: present
+    region: "{{ item }}"
+    name: "{{ ec2_key_name }}"
+    key_material: "{{ lookup('file', cluster_dir + '/' + ssh_key_file + '.pub') }}"
+    wait: yes
+  with_items: "{{ regions }}"
+
+- name: Set ec2_instance_key
+  include: ../common/set-provisioning-var.yml
+  vars:
+    name: ec2_instance_key
+    value: "{{ ec2_key_name }}"
