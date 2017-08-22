@@ -215,49 +215,13 @@
         - "{{ new_sgs.results }}"
       tags: ec2_vpc
 
-    # Create an "instance profile" IAM role for the cluster, and attach
-    # an inline policy with any permissions that the instances need.
+    # We create an instance profile IAM role for the cluster and attach
+    # an inline policy with any permissions that the instances need,
+    # unless cluster_profile is explicitly set to '' in config.yml.
 
-    - name: Create an instance profile for the cluster
-      iam:
-        iam_type: role
-        name: "{{ cluster_profile }}"
-        state: present
-      register: profile
-      tags: iam
-
-    - name: Attach a policy to the instance profile
-      iam_policy:
-        iam_type: role
-        iam_name: '{{ cluster_profile }}'
-        policy_name: "{{ cluster_name }}_instance_permissions"
-        state: present
-        policy_json: |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Action": [
-                  "ec2:AttachVolume",
-                  "ec2:DetachVolume",
-                  "ec2:DescribeVolumes",
-                  "ec2:DescribeInstances",
-                  "ec2:DescribeAddresses",
-                  "ec2:DisassociateAddress",
-                  "ec2:AssociateAddress"
-                ],
-                "Effect": "Allow",
-                "Resource": "*"
-              },
-              {
-                "Action": [
-                  "s3:GetObject"
-                ],
-                "Effect": "Allow",
-                "Resource": "arn:aws:s3:::{{ cluster_bucket }}/{{ cluster_name }}/*"
-              }
-            ]
-          }
+    - include: iam-instance-profile.yml
+      when:
+        instance_profile_name is not defined and cluster_profile != ''
       tags: iam
 
     # We generated host keys into hostkeys/ssh_host_$type_key{,.pub};
@@ -432,7 +396,7 @@
               'Name': item.Name,
             })
           }}
-        instance_profile_name: "{{ cluster_profile }}"
+        instance_profile_name: "{{ instance_profile_name|default(omit) }}"
         private_ip: "{{ item.private_ip|default(omit) }}"
         vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
         group_id: "{{ ec2_region_groups[item.region] }}"

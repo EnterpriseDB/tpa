@@ -1,0 +1,48 @@
+---
+
+- name: Create an instance profile for the cluster
+  iam:
+    iam_type: role
+    name: "{{ cluster_profile }}"
+    state: present
+
+# XXX We should be able to override these permissions in config.yml
+
+- name: Attach a policy to the instance profile
+  iam_policy:
+    iam_type: role
+    iam_name: "{{ cluster_profile }}"
+    policy_name: "{{ cluster_name }}_instance_permissions"
+    state: present
+    policy_json: |
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": [
+              "ec2:AttachVolume",
+              "ec2:DetachVolume",
+              "ec2:DescribeVolumes",
+              "ec2:DescribeInstances",
+              "ec2:DescribeAddresses",
+              "ec2:DisassociateAddress",
+              "ec2:AssociateAddress"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+          },
+          {
+            "Action": [
+              "s3:GetObject"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::{{ cluster_bucket }}/{{ cluster_name }}/*"
+          }
+        ]
+      }
+
+- name: Set instance_profile_name
+  include: ../common/set-provisioning-var.yml
+  vars:
+    name: instance_profile_name
+    value: "{{ cluster_profile }}"
