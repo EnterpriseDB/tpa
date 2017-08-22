@@ -37,6 +37,13 @@ $utils/ansible-playbook \
     --limit "$instance"
 
 # Provision a replacement for the terminated instance.
+#
+# XXX We don't have a good way to check that, for each volume that was
+# retained after termination, we have «attach_existing: yes» set in the
+# config.yml. Also, despite checking the volumes in the previous step,
+# it may be prudent to also check during provisioning that we did find
+# volumes corresponding to attach_existing volume definitions. (This is
+# a lower risk because the correct volumes are there somewhere.)
 
 $utils/ansible-playbook \
     $utils/../platforms/aws/provision.yml \
