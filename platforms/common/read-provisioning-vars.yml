@@ -1,7 +1,8 @@
 ---
 
 # We load vars.json into provisioning_vars, and set its keys as
-# top-level variables.
+# top-level variables (unless they are already set, i.e., we give
+# precedence to config.yml or explicit settings).
 
 - name: Load provisioning variables
   include_vars:
@@ -19,4 +20,6 @@
   action: set_fact
   args:
     "{{ item.key }}": "{{ item.value }}"
+  when:
+    item.key not in vars
   with_dict: "{{ provisioning_vars }}"
