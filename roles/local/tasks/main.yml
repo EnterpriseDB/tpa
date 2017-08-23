@@ -10,6 +10,7 @@
 # flock to workaround a problem with run_once, so check for that too.
 
 - name: Ensure that local dependencies are installed
+  become: no
   assert:
     msg: "Please install {{ item }} locally"
     that:
@@ -20,6 +21,7 @@
   run_once: yes
 
 - name: Wait for instances to be available
+  become: no
   local_action:
     module: wait_for
     port: "{{ ansible_port|default(22) }}"
