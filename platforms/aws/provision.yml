@@ -169,6 +169,18 @@
       when: cluster_rules is not defined
       tags: ec2_vpc
 
+    - name: Add custom ssh port to security group
+      set_fact:
+        cluster_rules: "{{ cluster_rules|union([custom_rule]) }}"
+      vars:
+        custom_port: "{{ cluster_ssh_port|default(22)|int }}"
+        custom_rule:
+          proto: tcp
+          from_port: "{{ custom_port }}"
+          to_port: "{{ custom_port }}"
+          cidr_ip: 0.0.0.0/0
+      when: custom_port != 22
+
     - name: Initialise empty ec2_region_groups
       set_fact:
         ec2_region_groups: {}
