@@ -1,11 +1,11 @@
 ---
 - hosts: all
   tasks:
-    # We can only rehydrate one instance at a time.
     - assert:
-        msg: "Please use «--limit hostname» to specify a single host"
+        msg: "Rehydrating every host at the same time is not recommended or supported"
         that:
-          - ansible_play_hosts|count == 1
+          - ansible_play_hosts|count == 1 or
+            ansible_play_hosts|count < groups[cluster_tag]|count
       run_once: true
 
     # Every volume attached to the instance is required to have "Name"
