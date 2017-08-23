@@ -51,16 +51,8 @@ $utils/ansible-playbook \
 # volumes corresponding to attach_existing volume definitions. (This is
 # a lower risk because the correct volumes are there somewhere.)
 
-$utils/ansible-playbook \
-    $utils/../platforms/aws/provision.yml \
-    -e cluster=$cluster_dir
+$utils/provision $cluster_dir
 
 # Redeploy to the new instance.
 
-$utils/ansible-playbook \
-    $cluster_dir/deploy.yml \
-    -i $cluster_dir/inventory \
-    --vault-password-file $cluster_dir/vault/vault_pass.txt \
-    -e cluster=$cluster_dir \
-    -e deploy_hosts="$instance" \
-    "$@"
+$utils/deploy $cluster_dir -e deploy_hosts="$instance" "$@"
