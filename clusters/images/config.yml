@@ -5,9 +5,6 @@ cluster_tags:
   Owner: AMS
 
 cluster_ssh_port: 222
-cluster_rules:
-    - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
-    - {proto: tcp, from_port: 222, to_port: 222, cidr_ip: 0.0.0.0/0}
 
 ec2_vpc:
   Name: Test
