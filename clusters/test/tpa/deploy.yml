@@ -93,3 +93,15 @@
     # Set up monitoring
     - role: monitoring
       tags: monitoring
+
+# Finally, we must make sure we don't leave stale entries in /etc/hosts
+# anywhere. (This won't matter for an initial deployment, because the
+# role has already been applied above, but it will matter if we run a
+# re-deployment limited to certain hosts.)
+
+- hosts: all
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  roles:
+    - role: sys/hosts
+      tags: [sys, hosts]
