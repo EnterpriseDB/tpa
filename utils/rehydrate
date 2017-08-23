@@ -17,7 +17,10 @@ set -e -u
 utils=$(dirname $0)
 
 cluster=${1:?No cluster specified}
-instance=${2:?No instance specified}
+shift
+
+instance=${1:?No instance specified}
+shift
 
 cluster=$(echo $cluster|sed 's,^clusters/,,')
 clusters=$(realpath $utils/../clusters);
