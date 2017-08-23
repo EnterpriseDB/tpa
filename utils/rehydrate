@@ -22,6 +22,12 @@ shift
 instance=${1:?No instance specified}
 shift
 
+DESTROY=no
+if [ "$1" = "I_REALLY_WANT_TO_DESTROY_MY_ENTIRE_CLUSTER=yes" ]; then
+    DESTROY=yes
+    shift
+fi
+
 cluster_dir=$cluster
 if [[ ${cluster_dir:0:1} != '/' ]]; then
     clusters=$(realpath $utils/../clusters);
@@ -38,6 +44,7 @@ fi
 
 $utils/ansible-playbook \
     $utils/../platforms/aws/terminate-for-rehydration.yml \
+    -e i_really_want_to_destroy_my_entire_cluster=$DESTROY \
     -i $cluster_dir/inventory \
     -e cluster=$cluster_dir \
     --limit "$instance"
