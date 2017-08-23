@@ -36,7 +36,7 @@
     blockdev --setra "{{ readahead }}" "{{ _device }}"
   register: ra
   changed_when: >
-    ra|succeeded and ra.stdout != "{{ readahead }}"
+    ra|succeeded and ra.stdout != readahead
 
 - name: Set readahead on {{ _device }} at startup
   lineinfile:
