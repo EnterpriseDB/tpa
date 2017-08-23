@@ -4,7 +4,20 @@
 # with the correct path to the cluster's inventory and so on. To run
 # ad-hoc commands, see ansible-cluster.
 #
-# Example: ansible-cluster-playbook test/tpa/x.yml
+# You must specify two things: a cluster and a script to run.
+#
+# Examples:
+#
+# utils/ansible-cluster-playbook test/tpa/x.yml
+# utils/ansible-cluster-playbook ~/clustername/x.yml
+#
+# If invoked through a symlink (foo → ansible-cluster-playbook), the
+# script to be executed will default to foo.yml, so you can do:
+#
+# utils/foo test/tpa
+# utils/foo ~/clustername
+#
+# (This is how utils/deploy works.)
 
 IFS=
 set -e -u
