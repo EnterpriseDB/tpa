@@ -30,6 +30,14 @@
         src: inventory/ec2.ini.j2
         dest: "{{ cluster_dir }}/inventory/ec2.ini"
 
+    - name: Remove old inventory cache
+      file:
+        path: "{{ cluster_dir }}/tmp/{{ item }}"
+        state: absent
+      with_items:
+        - ansible-ec2.cache
+        - ansible-ec2.index
+
     - include: ../common/read-provisioning-vars.yml
 
     # We register an SSH public key in each region to provide SSH access

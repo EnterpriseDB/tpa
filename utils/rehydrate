@@ -53,18 +53,6 @@ $utils/ansible-playbook \
 
 $utils/provision $cluster_dir
 
-# It's possible that ec2.py's cache (which was—at the very latest—filled
-# by the invocation of terminate-for-rehydration.yml above) may still be
-# valid, and we definitely don't want stale results when running deploy.
-# We use utils/ansible-cluster to run ec2.py --refresh because it sets
-# PYTHONPATH. (Alas, «-m meta -a refresh_inventory» doesn't know about
-# ec2.py's cache.)
-
-$utils/ansible-cluster $cluster_dir localhost \
-    -a "$cluster_dir/inventory/ec2.py --refresh" \
-    &> $cluster_dir/tmp/ec2.refresh.$$ && \
-    rm $cluster_dir/tmp/ec2.refresh.$$
-
 # Redeploy to the new instance.
 
 $utils/deploy $cluster_dir -e deploy_hosts="$instance" "$@"
