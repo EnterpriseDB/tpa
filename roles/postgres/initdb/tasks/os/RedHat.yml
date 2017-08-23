@@ -19,7 +19,7 @@
         {{ postgres_bin_dir }}/postgresql{{pgversionNN}}-setup initdb
       environment:
         TZ: UTC
-        PGSETUP_INITDB_OPTS: >
+        PGSETUP_INITDB_OPTIONS: >
           {% for x in postgres_initdb_opts %}{{x|quote}} {% endfor %}
   when: setup.stat.exists
 
