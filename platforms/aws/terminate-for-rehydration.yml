@@ -61,7 +61,7 @@
 
     - name: Prompt for confirmation
       pause:
-        prompt: "Type «yes» to terminate {{ inventory_hostname }}"
+        prompt: "Type «yes» to terminate {{ ansible_play_hosts|join(',') }}"
       register: prompt
 
     - name: Ensure that user confirmed termination
@@ -69,6 +69,7 @@
         msg: "You didn't type «yes», aborting"
         that:
           - prompt.user_input == 'yes'
+      when: prompt|d()
 
     # Terminate the instance and wait until its state changes to
     # terminated (after shutting-down).
