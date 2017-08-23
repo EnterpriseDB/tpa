@@ -17,6 +17,7 @@
   with_items:
     - pwgen
     - flock
+  run_once: yes
 
 - name: Wait for instances to be available
   local_action:
