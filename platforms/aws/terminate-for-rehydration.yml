@@ -1,5 +1,7 @@
 ---
 - hosts: all
+  any_errors_fatal: True
+  max_fail_percentage: 0
   tasks:
     - assert:
         msg: "Rehydrating every host at the same time is not recommended or supported"
