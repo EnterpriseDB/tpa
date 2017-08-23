@@ -3,6 +3,7 @@
 - name: Set up inventory variables
   hosts: all
   any_errors_fatal: True
+  max_fail_percentage: 0
   pre_tasks:
     - include: ../../../platforms/aws/hostvars.yml
       tags: always
@@ -23,6 +24,7 @@
 
 - name: Set up TPA cluster nodes
   any_errors_fatal: True
+  max_fail_percentage: 0
 
   # This play targets all hosts in the cluster.
   hosts: "{{ deploy_hosts|default('all') }}"
