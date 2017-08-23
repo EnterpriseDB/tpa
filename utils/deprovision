@@ -10,9 +10,15 @@ utils=$(dirname $0)
 cluster=${1:?No cluster specified}
 shift
 
-cluster_dir=$(realpath $utils/../clusters/$cluster)
+cluster_dir=$cluster
+if [[ ${cluster_dir:0:1} != '/' ]]; then
+    clusters=$(realpath $utils/../clusters);
+    cluster=$(echo $cluster|sed 's,^clusters/,,')
+    cluster_dir="$clusters/$cluster"
+fi
+
 if [ ! -d $cluster_dir ]; then
-    echo "Can't find directory clusters/$cluster"
+    echo "Can't find directory $cluster_dir"
     exit
 fi
 

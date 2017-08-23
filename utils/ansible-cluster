@@ -12,17 +12,17 @@ set -e -u
 utils=$(dirname $0)
 
 cluster=${1:?No cluster specified}
-cluster=$(echo $cluster|sed 's,^clusters/,,')
 shift
 
-clusters=$(realpath $utils/../clusters);
+cluster_dir=$cluster
+if [[ ${cluster_dir:0:1} != '/' ]]; then
+    clusters=$(realpath $utils/../clusters);
+    cluster=$(echo $cluster|sed 's,^clusters/,,')
+    cluster_dir="$clusters/$cluster"
+fi
 
-arg="$clusters/$cluster"
-
-if [ -d $arg ]; then
-    cluster_dir=$arg
-else
-    echo "Can't find directory clusters/$cluster"
+if [ ! -d $cluster_dir ]; then
+    echo "Can't find directory $cluster_dir"
     exit
 fi
 

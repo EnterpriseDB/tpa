@@ -17,12 +17,14 @@ if [ "$(basename $0)" != "ansible-cluster-playbook" ]; then
 fi
 
 cluster=${1:?No cluster specified}
-cluster=$(echo $cluster|sed 's,^clusters/,,')
 shift
 
-clusters=$(realpath $utils/../clusters);
-
-arg="$clusters/$cluster"
+arg=$cluster
+if [[ ${arg:0:1} != '/' ]]; then
+    clusters=$(realpath $utils/../clusters);
+    cluster=$(echo $cluster|sed 's,^clusters/,,')
+    arg="$clusters/$cluster"
+fi
 
 if [ -d $arg ]; then
     cluster_dir=$arg
@@ -30,16 +32,11 @@ if [ -d $arg ]; then
         echo "Can't find script $cluster/$script"
         exit
     fi
-elif [ -d $(dirname $arg) ]; then
+elif [ -f $arg -a -d $(dirname $arg) ]; then
     cluster_dir=$(dirname $arg)
-    if [ -f $arg ]; then
-        script=$(basename $arg)
-    else
-        echo "Can't find script clusters/$cluster"
-        exit
-    fi
+    script=$(basename $arg)
 else
-    echo "Can't find directory clusters/$cluster"
+    echo "Can't interpret $cluster as cluster or script path"
     exit
 fi
 
