@@ -163,6 +163,7 @@
 
     - name: Set default security group rules for the cluster
       set_fact:
+        custom_port: "{{ cluster_ssh_port|default(22)|int }}"
         cluster_rules:
           - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
           - {proto: udp, from_port: 1194, to_port: 1194, cidr_ip: 0.0.0.0/0}
@@ -173,13 +174,12 @@
       set_fact:
         cluster_rules: "{{ cluster_rules|union([custom_rule]) }}"
       vars:
-        custom_port: "{{ cluster_ssh_port|default(22)|int }}"
         custom_rule:
           proto: tcp
           from_port: "{{ custom_port }}"
           to_port: "{{ custom_port }}"
           cidr_ip: 0.0.0.0/0
-      when: custom_port != 22
+      when: custom_port|int != 22
 
     - name: Initialise empty ec2_region_groups
       set_fact:
