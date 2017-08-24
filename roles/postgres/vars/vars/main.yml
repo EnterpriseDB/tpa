@@ -6,3 +6,7 @@
 # per-host or per-group basis).
 
 _backup_name: "{{ backup_name|default(inventory_hostname) }}"
+
+# This is the value of the "cluster=" setting in repmgr.conf.
+
+_repmgr_cluster: "{{ repmgr_cluster|default(cluster_name) }}"

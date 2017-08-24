@@ -15,6 +15,10 @@
     pgversionNN: "{{ pgversion|replace('.','') }}"
   tags: always
 
+- name: Set repmgr_cluster for the cluster
+  set_fact: repmgr_cluster="{{ _repmgr_cluster }}"
+  tags: always
+
 - name: Set backup_name for the instance
   set_fact: backup_name="{{ _backup_name }}"
   tags: always

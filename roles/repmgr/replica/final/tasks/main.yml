@@ -13,7 +13,7 @@
       FROM "{{ repmgr_schema }}".repl_nodes
       WHERE name='{{ inventory_hostname }}'
   vars:
-    repmgr_schema: 'repmgr_{{ cluster_name }}'
+    repmgr_schema: 'repmgr_{{ repmgr_cluster }}'
   register: registration
   become_user: postgres
   become: yes
