@@ -12,6 +12,7 @@ ec2_ami_user: "admin"
 
 ec2_vpc:
   Name: Test
+  cidr: 10.33.0.0/16
 
 ec2_vpc_subnets:
   eu-west-1:
