@@ -4,4 +4,6 @@
   service:
     name: "repmgr{{ pgversionNN }}"
     enabled: yes
+  when: >
+    'postgres' in role
   tags: repmgr
