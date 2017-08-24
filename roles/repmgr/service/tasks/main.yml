@@ -1,0 +1,7 @@
+---
+
+- name: Enable repmgr service
+  service:
+    name: "repmgr{{ pgversionNN }}"
+    enabled: yes
+  tags: repmgr

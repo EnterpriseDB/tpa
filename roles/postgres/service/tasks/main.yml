@@ -1,0 +1,7 @@
+---
+
+- name: Enable postgres service
+  service:
+    name: "{{ postgres_service_name }}"
+    enabled: yes
+  tags: postgres
