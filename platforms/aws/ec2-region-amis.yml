@@ -1,0 +1,44 @@
+---
+
+# We start with ec2_ami and set up ec2_region_amis to map every region
+# to the AMI id to use when provisioning instances in that region.
+#
+# XXX We use an intermediate fact instead of setting ec2_region_amis
+# at the start to work around Ansible bugs that may cause tasks to be
+# skipped inside conditional includes if the condition changes.
+
+- name: Initialise empty mapping tables
+  set_fact:
+    images: {}
+    properties: {}
+
+- name: Search for AMI named {{ ec2_ami['Name'] }}
+  ec2_ami_find:
+    name: "{{ ec2_ami['Name'] }}"
+    owner: "{{ ec2_ami['Owner']|default(omit) }}"
+    ami_tags: "{{ ec2_ami['tags']|default(omit) }}"
+    region: "{{ item }}"
+    sort: name
+    sort_order: descending
+    sort_end: 1
+    no_result_action: fail
+  with_items: "{{ regions }}"
+  register: ec2_amis
+
+- name: Record existing AMIs in each region
+  set_fact:
+    images: "{{ images|combine({item.0: item.1.results.0.ami_id}) }}"
+    properties: "{{ properties|combine({item.1.results.0.ami_id: item.1.results.0}) }}"
+  with_together:
+    - "{{ regions }}"
+    - "{{ ec2_amis.results }}"
+
+- include: ../common/set-provisioning-var.yml
+  vars:
+    name: ec2_ami_properties
+    value: "{{ properties }}"
+
+- include: ../common/set-provisioning-var.yml
+  vars:
+    name: ec2_region_amis
+    value: "{{ images }}"

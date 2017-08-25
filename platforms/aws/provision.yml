@@ -23,6 +23,23 @@
 
     - include: ../common/read-provisioning-vars.yml
 
+    # We generated host keys into hostkeys/ssh_host_$type_key{,.pub};
+    # we now upload those to hostkeys/$type{,.pub}.txt in S3.
+
+    - name: Upload SSH host key files
+      s3:
+        bucket: "{{ cluster_bucket }}"
+        object: "{{ cluster_name }}/hostkeys/{{ item.0 }}{{ item.1 }}.txt"
+        src: "{{ cluster_dir }}/hostkeys/ssh_host_{{ item.0 }}_key{{ item.1 }}"
+        overwrite: different
+        expiration: 3600
+        mode: put
+      with_nested:
+        - ["rsa", "ecdsa"]
+        - ["", ".pub"]
+      register: keyurls
+      tags: ssh
+
     # We register an SSH public key in each region to provide SSH access
     # to newly provisioned instances, unless ec2_key_name is explicitly
     # set to "" in config.yml.
@@ -158,23 +175,6 @@
         instance_profile_name is not defined and cluster_profile != ''
       tags: iam
 
-    # We generated host keys into hostkeys/ssh_host_$type_key{,.pub};
-    # we now upload those to hostkeys/$type{,.pub}.txt in S3.
-
-    - name: Upload SSH host key files
-      s3:
-        bucket: "{{ cluster_bucket }}"
-        object: "{{ cluster_name }}/hostkeys/{{ item.0 }}{{ item.1 }}.txt"
-        src: "{{ cluster_dir }}/hostkeys/ssh_host_{{ item.0 }}_key{{ item.1 }}"
-        overwrite: different
-        expiration: 3600
-        mode: put
-      with_nested:
-        - ["rsa", "ecdsa"]
-        - ["", ".pub"]
-      register: keyurls
-      tags: ssh
-
     # When provisioning each instance, we must specify an AMI id to use.
     # If the instance configuration specifies "image: ami-xxx" directly,
     # we can use that value. As a convenience, if ec2_ami is set at the
@@ -185,60 +185,27 @@
     #
     # We also record the properties of each AMI id for later use.
 
-    - name: Initialise empty mapping tables
-      set_fact:
-        ec2_volumes: {}
-        ec2_region_amis: {}
-        ec2_ami_properties: {}
-      tags: ec2
+    - include: ec2-region-amis.yml
+      when:
+        ec2_region_amis is not defined and ec2_ami is defined
+      tags: ami
 
-    - block:
-        - name: Find AMI named {{ ec2_ami['Name'] }} in each region
-          ec2_ami_find:
-            name: "{{ ec2_ami['Name'] }}"
-            owner: "{{ ec2_ami['Owner']|default(omit) }}"
-            ami_tags: "{{ ec2_ami['tags']|default(omit) }}"
-            region: "{{ item }}"
-            sort: name
-            sort_order: descending
-            sort_end: 1
-            no_result_action: fail
-          with_items: "{{ regions }}"
-          register: ec2_amis
+    # If any instances[] reference an image whose properties we do not
+    # already know, we need to look them up too.
 
-        - name: Initialise region→AMI table
-          set_fact:
-            ec2_region_amis: "{{ ec2_region_amis|combine({item.0: item.1.results.0.ami_id}) }}"
-            ec2_ami_properties: "{{ ec2_ami_properties|combine({item.1.results.0.ami_id: item.1.results.0}) }}"
-          with_together:
-            - "{{ regions }}"
-            - "{{ ec2_amis.results }}"
-      when: ec2_ami is defined
-      tags: ec2
-
-    # We also need to retrieve the properties for any AMIs specified
-    # directly by id.
-
-    - name: Look for AMIs specified directly by id
-      ec2_ami_find:
-        ami_id: "{{ item.image }}"
-        region: "{{ item.region }}"
-        no_result_action: fail
-      with_items: "{{ instances|select('has_subkey','image')|list }}"
-      register: ec2_direct_amis
-      tags: ec2
-
-    - name: Extend AMI→properties table
-      set_fact:
-        ec2_ami_properties: "{{
-            ec2_ami_properties|combine({item.results.0.ami_id: item.results.0})
-        }}"
-      with_items: "{{ ec2_direct_amis.results }}"
-      tags: ec2
+    - include: ec2-ami-properties.yml
+      when:
+        ec2_ami_properties is not defined or
+        (instances|json_query('[*].image')|difference(ec2_ami_properties|json_query('keys(@)'))|list) > 0
+      tags: ami
 
     # If «attach_existing» is specified for any volume in a region, we
     # build a table to map the names of unattached volumes in that
     # region to their volume-ids.
+
+    - name: Initialise empty mapping tables
+      set_fact:
+        ec2_volumes: {}
 
     - name: Look for existing attachable EBS volumes
       ec2_vol_facts:
