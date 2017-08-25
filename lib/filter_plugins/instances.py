@@ -77,7 +77,7 @@ def expand_instance_image(old_instances, ec2_region_amis):
 
 # This filter translates a device name of 'root' to the given root
 # device name, and sets delete_on_termination to true if it's not
-# explicitly set.
+# implied by attach_existing or explicitly set to be false.
 
 def expand_instance_volumes(old_instances, ec2_ami_properties):
     instances = []
