@@ -69,6 +69,7 @@
               LockFile(sys.argv[1]).acquire(raise_if_fail=True, wait=True)
           except:
               pass
+  delegate_to: "{{ backup }}"
 
 - name: Wait for old WAL segment to be archived
   wait_for:
@@ -85,6 +86,7 @@
 
 - name: Acquire and release Barman WAL archive lock
   command: /tmp/lock "{{ barman_home }}/.{{ backup_name }}-archive-wal.lock"
+  delegate_to: "{{ backup }}"
 
 - name: Force an immediate backup
   shell: >
