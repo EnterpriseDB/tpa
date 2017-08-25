@@ -1,0 +1,19 @@
+---
+
+- name: Tell ssh to use this cluster's known_hosts file
+  set_fact:
+    ansible_ssh_common_args: "-o UserKnownHostsFile='{{playbook_dir}}/known_hosts'"
+  when: ansible_ssh_common_args == ""
+
+# We wait until we can connect to the SSH port on each instance.
+#
+# If ansible_port is 22, this will connect as soon as sshd is started,
+# but if config.yml specifies a custom cluster_ssh_port, then it's set
+# as the very last step in user-data, so when we're able to connect to
+# the non-standard port, we know that user-data has finished executing.
+
+- name: Wait for ssh to be available
+  local_action:
+    module: wait_for
+    host: "{{ ansible_host }}"
+    port: "{{ ansible_port|default(22) }}"

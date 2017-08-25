@@ -1,22 +1,23 @@
 ---
 
-- name: Set up inventory variables
-  hosts: all
+# Deploys Postgres and associated software to a cluster.
+
+- name: Basic initialisation and fact discovery
   any_errors_fatal: True
   max_fail_percentage: 0
-  pre_tasks:
-    - include: ../../platforms/aws/hostvars.yml
-      tags: always
+
+  # This play must always be applied to all hosts in the cluster. Here
+  # we do any platform-specific checks and initialisation, confirm that
+  # all hosts are available, and perform basic fact discovery.
+
+  hosts: all
   roles:
-    - role: local
-      tags: common
+    - role: platforms
+      tags: always
 
     - role: facts
       tags: always
 
-    # Declare that we want to install Postgres 9.6. This just sets a few
-    # handy defaults up front. The actual package installation happens a
-    # few steps later.
     - role: postgres/vars
       vars:
         postgres_version: 9.6

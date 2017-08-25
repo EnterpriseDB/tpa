@@ -1,0 +1,7 @@
+---
+
+dependencies:
+  - role: platforms/aws
+    when:
+      ec2_id is defined
+  - role: platforms/common

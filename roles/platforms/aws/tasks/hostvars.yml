@@ -99,5 +99,3 @@
     inventory_hostname != groups[ms][0]
   vars:
     ms: 'tag_role_monitoring-server'
-
-- include: ../common/hostvars.yml
