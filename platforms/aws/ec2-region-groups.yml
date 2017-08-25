@@ -1,0 +1,87 @@
+---
+
+# Starting with ec2_groups (optional) and cluster_rules, we need to set
+# up ec2_region_groups to map every region to the security groups to use
+# when provisioning instances in that region.
+#
+# XXX We use an intermediate fact instead of setting ec2_region_groups
+# at the start to work around Ansible bugs that may cause tasks to be
+# skipped inside conditional includes if the condition changes.
+
+- name: Initialise empty security_groups
+  set_fact:
+    security_groups: {}
+
+# Enumerate all existing security groups matching ec2_groups.
+
+- name: Search for existing security groups
+  ec2_group_facts:
+    region: "{{ item.key }}"
+    filters: "{{ item.value }}"
+  with_dict: "{{ ec2_groups|default({}) }}"
+  register: sgs
+
+- name: Record existing security groups in each region
+  set_fact:
+    security_groups: "{{
+      security_groups|combine({
+        item.item.key: item|json_query('security_groups[*].group_id')
+      })
+    }}"
+  with_items: "{{ sgs.results }}"
+
+# If we need to create any security groups ourselves, they should have
+# the following rules.
+
+- name: Set default security group rules for the cluster
+  set_fact:
+    ssh_port: "{{ cluster_ssh_port|default(22)|int }}"
+    cluster_rules: "{{ cluster_rules|default(default_cluster_rules) }}"
+  vars:
+    default_cluster_rules:
+      - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
+      - {proto: udp, from_port: 1194, to_port: 1194, cidr_ip: 0.0.0.0/0}
+
+- name: Add custom ssh port to security group
+  set_fact:
+    cluster_rules: "{{
+      cluster_rules|union([
+        dict(proto='tcp', from_port=ssh_port, to_port=ssh_port, cidr_ip='0.0.0.0/0')
+      ])
+    }}"
+  when:
+    ssh_port|int != 22
+
+# If there are any regions without security groups, create them.
+
+- name: Create security groups for each VPC
+  ec2_group:
+    state: present
+    region: "{{ item.key }}"
+    vpc_id: "{{ item.value }}"
+    name: "Group {{ cluster_name }}/{{ item.key }}"
+    description: "Automatically created for {{ cluster_name }} in {{ item.key }}"
+    rules: "{{ cluster_rules }}"
+  when:
+    item.key not in security_groups
+  with_dict: "{{ ec2_region_vpcs }}"
+  register: new_sgs
+
+- name: Record new security groups in each region
+  set_fact:
+    security_groups: "{{
+      security_groups|default({})|combine({
+        item.0: item.1.group_id
+      })
+    }}"
+  when:
+    security_groups[item.0] is not defined and
+    item.1.group_id is defined
+  with_together:
+    - "{{ regions }}"
+    - "{{ new_sgs.results }}"
+
+- include: ../common/set-provisioning-var.yml
+  vars:
+    name: ec2_region_groups
+    value: "{{ security_groups }}"

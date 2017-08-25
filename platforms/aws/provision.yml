@@ -144,79 +144,10 @@
     # already. If no security group is specified, we create one for each
     # VPC with the correct rules.
 
-    - name: Set default security group rules for the cluster
-      set_fact:
-        custom_port: "{{ cluster_ssh_port|default(22)|int }}"
-        cluster_rules:
-          - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
-          - {proto: udp, from_port: 1194, to_port: 1194, cidr_ip: 0.0.0.0/0}
-      when: cluster_rules is not defined
-      tags: ec2_vpc
-
-    - name: Add custom ssh port to security group
-      set_fact:
-        cluster_rules: "{{ cluster_rules|union([custom_rule]) }}"
-      vars:
-        custom_rule:
-          proto: tcp
-          from_port: "{{ custom_port }}"
-          to_port: "{{ custom_port }}"
-          cidr_ip: 0.0.0.0/0
-      when: custom_port|int != 22
-
-    - name: Initialise empty ec2_region_groups
-      set_fact:
-        ec2_region_groups: {}
-
-    # Find the security group corresponding to each entry in ec2_groups
-    # and add entries to ec2_region_groups.
-
-    - name: Find existing security groups
-      ec2_group_facts:
-        region: "{{ item.key }}"
-        filters: "{{ item.value }}"
-      with_dict: "{{ ec2_groups|default({}) }}"
-      register: sgs
-      tags: ec2_vpc
-
-    - name: Extend ec2_region_groups
-      set_fact:
-        ec2_region_groups: "{{
-          ec2_region_groups|combine({
-            item.item.key: item|json_query('security_groups[*].group_id')
-          })
-        }}"
-      with_items: "{{ sgs.results }}"
-      tags: ec2_vpc
-
-    - name: Create security groups for each VPC
-      ec2_group:
-        state: present
-        region: "{{ item.key }}"
-        vpc_id: "{{ item.value }}"
-        name: "Group {{ cluster_name }}/{{ item.key }}"
-        description: "Automatically created for {{ cluster_name }} in {{ item.key }}"
-        rules: "{{ cluster_rules }}"
+    - include: ec2-region-groups.yml
       when:
-        item.key not in ec2_region_groups
-      with_dict: "{{ ec2_region_vpcs }}"
-      register: new_sgs
-      tags: ec2_vpc
-
-    - name: Record security group ids in each region
-      set_fact:
-        ec2_region_groups: "{{
-          ec2_region_groups|default({})|combine({
-            item.0: item.1.group_id
-          })
-        }}"
-      when:
-        ec2_region_groups[item.0] is not defined and
-        item.1.group_id is defined
-      with_together:
-        - "{{ regions }}"
-        - "{{ new_sgs.results }}"
-      tags: ec2_vpc
+        ec2_region_groups is not defined
+      tags: sgs
 
     # We create an instance profile IAM role for the cluster and attach
     # an inline policy with any permissions that the instances need,
