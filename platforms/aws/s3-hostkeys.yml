@@ -1,0 +1,19 @@
+---
+
+- name: Upload SSH host key files
+  s3:
+    bucket: "{{ cluster_bucket }}"
+    object: "{{ cluster_name }}/hostkeys/{{ item.0 }}{{ item.1 }}.txt"
+    src: "{{ cluster_dir }}/hostkeys/ssh_host_{{ item.0 }}_key{{ item.1 }}"
+    overwrite: different
+    expiration: 3600
+    mode: put
+  with_nested:
+    - ["rsa", "ecdsa"]
+    - ["", ".pub"]
+  register: keyurls
+
+- include: ../common/set-provisioning-var.yml
+  vars:
+    name: s3_hostkey_expiry
+    value: "{{ lookup('pipe', 'date +%s')|int + 2700 }}"
