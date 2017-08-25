@@ -1,0 +1,30 @@
+---
+
+- name: Initialise empty volumes table
+  set_fact:
+    ec2_attachable_volumes: {}
+
+- name: Search for attachable EBS volumes
+  ec2_vol_facts:
+    region: "{{ r }}"
+    filters:
+      status: available
+      "tag:CreatingCluster": "{{ cluster_name }}"
+  register: ec2_volumes
+  with_items: "{{ regions }}"
+  loop_control:
+    loop_var: r
+  when: >
+    instances
+    |json_query("[?region=='"+r+"'].volumes[]|[?attach_existing]")
+    |count > 0
+
+- name: Record existing volumes in each region
+  set_fact:
+    ec2_attachable_volumes: "{{
+      ec2_attachable_volumes|combine({
+        item.region ~ ':' ~ item.tags.Name: item
+      })
+    }}"
+  with_items: >
+    {{ ec2_volumes|json_query('results[?volumes][].volumes') }}

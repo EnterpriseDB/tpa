@@ -204,38 +204,10 @@
     # build a table to map the names of unattached volumes in that
     # region to their volume-ids.
 
-    - name: Initialise empty mapping tables
-      set_fact:
-        ec2_volumes: {}
-
-    - name: Look for existing attachable EBS volumes
-      ec2_vol_facts:
-        region: "{{ r }}"
-        filters:
-          status: available
-          "tag:CreatingCluster": "{{ cluster_name }}"
-      register: ec2_attachable_volumes
-      with_items: "{{ regions }}"
-      loop_control:
-        loop_var: r
-      when: >
-        instances
-        |json_query("[?region=='"+r+"'].volumes[]|[?attach_existing]")
-        |count > 0
-
-    # If we found any volumes, we store them in a form that allows
-    # |match_existing_volumes to match them to volume definitions for
-    # instances in the next step.
-
-    - name: Create volume name→volume table
-      set_fact:
-        ec2_volumes: "{{
-          ec2_volumes|combine({
-            item.region ~ ':' ~ item.tags.Name: item
-          })
-        }}"
-      with_items: >
-        {{ ec2_attachable_volumes|json_query('results[?volumes][].volumes') }}
+    - include: ec2-attachable-volumes.yml
+      when:
+        instances|json_query('[*].volumes[]|[?attach_existing]')|count > 0
+      tags: ebs
 
     # Preprocess instance definitions through various helpful filters to
     # set things that aren't set and check things that need checking.
@@ -246,7 +218,7 @@
           instances
           |expand_instance_image(ec2_region_amis)
           |expand_instance_volumes(ec2_ami_properties)
-          |match_existing_volumes(cluster_name, ec2_volumes)
+          |match_existing_volumes(cluster_name, ec2_attachable_volumes)
         }}"
       tags: ec2
 
