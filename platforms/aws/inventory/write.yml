@@ -1,0 +1,20 @@
+---
+
+- name: Copy ec2.py to inventory directory
+  copy:
+    src: ec2.py
+    dest: "{{ cluster_dir }}/inventory/ec2.py"
+    mode: "0755"
+
+- name: Install customised ec2.ini
+  template:
+    src: ec2.ini.j2
+    dest: "{{ cluster_dir }}/inventory/ec2.ini"
+
+- name: Remove old inventory cache
+  file:
+    path: "{{ cluster_dir }}/tmp/{{ item }}"
+    state: absent
+  with_items:
+    - ansible-ec2.cache
+    - ansible-ec2.index

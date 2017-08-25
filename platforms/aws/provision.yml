@@ -19,24 +19,7 @@
     - include: validate.yml
       tags: always
 
-    - name: Copy ec2.py to inventory directory
-      copy:
-        src: inventory/ec2.py
-        dest: "{{ cluster_dir }}/inventory/ec2.py"
-        mode: "0755"
-
-    - name: Install customised ec2.ini
-      template:
-        src: inventory/ec2.ini.j2
-        dest: "{{ cluster_dir }}/inventory/ec2.ini"
-
-    - name: Remove old inventory cache
-      file:
-        path: "{{ cluster_dir }}/tmp/{{ item }}"
-        state: absent
-      with_items:
-        - ansible-ec2.cache
-        - ansible-ec2.index
+    - include: inventory/write.yml
 
     - include: ../common/read-provisioning-vars.yml
 
@@ -446,9 +429,7 @@
       with_items: "{{ ec2_instances.results }}"
       tags: ec2
 
-    # Tag all volumes attached to the instances we provisioned.
-
-    - name: Tag volumes attached to instances
+    - name: Tag all volumes attached to the provisioned instances
       ec2_tag:
         state: present
         region: "{{ item.1.region }}"
@@ -470,18 +451,7 @@
     # one or more of the instances created above. The instance ids come
     # from the results above, and the configuration is in instances[].
 
-    - name: Associate elastic IPs with instances
-      ec2_eip:
-        state: present
-        region: "{{ item.1.tagged_instances[0].region }}"
-        device_id: "{{ item.1.tagged_instances[0].id }}"
-        reuse_existing_ip_allowed: true
-        in_vpc: true
-      when: item.0.assign_elastic_ip|d() and item.0.assign_elastic_ip
-      with_together:
-        - "{{ instances }}"
-        - "{{ ec2_jobs.results }}"
-      register: ec2_eips
+    - include: ec2-eip.yml
       tags: ec2_eips
 
     # Now we have ec2_public_ips in ec2_jobs.results, but some of them
@@ -513,25 +483,8 @@
     # and route53_hosted_zone (or if they are specified globally, which
     # applies to all instances).
 
-    - name: Update DNS records in Route53
-      route53:
-        command: create
-        zone: "{{ item.0.route53_zone|default(route53_zone) }}"
-        hosted_zone_id: "{{ item.0.route53_hosted_zone_id|default(route53_hosted_zone_id) }}"
-        record: "{{ item.1.Name }}.{{ item.0.route53_zone|default(route53_zone) }}"
-        value: "{{ item.1.ip_address }}"
-        type: A
-        ttl: 60
-        wait: yes
-      with_together:
-        - "{{ instances }}"
-        - "{{ instance_vars }}"
-      when:
-        (item.0.route53_hosted_zone_id|d() or route53_hosted_zone_id|d()) and
-        (item.0.route53_zone|d() or route53_zone|d())
+    - include: route53.yml
       tags: route53
-
-    # Write inventory and known_hosts for the newly-provisioned hosts.
 
     - include: ../common/inventory/write.yml
       vars:
