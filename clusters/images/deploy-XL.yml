@@ -1,54 +1,18 @@
 ---
 
 - name: Set up TPA image nodes
-  hosts: all
   any_errors_fatal: True
   max_fail_percentage: 0
   sudo_user: root
   sudo: true
 
-  pre_tasks:
+  # This is incomplete and currently untested.
 
-    - block:
-        - name: Ensure cluster directory is specified
-          assert:
-            msg: "Please rerun with «-e cluster=/path/to/dir»"
-            that:
-              - cluster is defined and cluster != ''
-
-        - name: Derive full path to cluster directory
-          set_fact: cluster_dir="{{ cluster|realpath }}"
-
-        - name: Load cluster configuration file
-          include_vars: "{{ cluster_dir }}/config.yml"
-
-        - name: Ensure cluster configuration is complete
-          assert:
-            msg: "Please define cluster configuration in {{cluster}}/config.yml"
-            that:
-              - cluster_name is defined and cluster_name != ''
-              - instances | length > 0
-      tags: always
-
-    - include: ../../platforms/aws/hostvars.yml
-      tags: always
-
-    - set_fact:
-        node_id: "{{ ec2_tag_node }}"
-      tags: always
-
-    - name: Appoint control node
-      set_fact: control_hostname="{{ item }}"
-      when: "hostvars[item].ec2_tag_node == '1'"
-      with_items: "{{ play_hosts }}"
-
-    - name: Wait for instances to be available
-      local_action:
-        module: wait_for
-        port: "{{ ansible_port|default(22) }}"
-        host: "{{ ansible_host }}"
-
+  hosts: all
   roles:
+    - role: platforms
+      become: no
+
     - role: common/pkg
     - role: postgres/vars
     - role: postgres-xl/src
@@ -61,4 +25,3 @@
 
     - role: sys/upgrade
     - role: sys/firstboot
-

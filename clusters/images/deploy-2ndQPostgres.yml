@@ -1,22 +1,16 @@
 ---
 
 - name: Set up TPA image nodes
-  hosts: all
   any_errors_fatal: True
   max_fail_percentage: 0
   sudo_user: root
   sudo: true
 
-  pre_tasks:
-    - include: ../../platforms/aws/hostvars.yml
-      tags: always
-    - name: Wait for instances to be available
-      local_action:
-        module: wait_for
-        port: "{{ ansible_port|default(22) }}"
-        host: "{{ ansible_host }}"
-
+  hosts: all
   roles:
+    - role: platforms
+      become: no
+
     - role: postgres/vars
 
     - role: common/pkg
