@@ -36,7 +36,7 @@
     parent_inventory_hostname: "{{item.0}}"
   with_nested_dependents:
         - groups['tag_role_coordinator']
-        - hostvars[item.0].ec2_tag_co_list|default([])
+        - hostvars[item.0].co_list|default([])
   when: >
     hostvars[item.0].backup is defined and hostvars[item.0].backup != ''
 
@@ -58,7 +58,7 @@
     parent_inventory_hostname: "{{item.0}}"
   with_nested_dependents:
         - groups['tag_role_datanode']
-        - hostvars[item.0].ec2_tag_dn_list|default([])
+        - hostvars[item.0].dn_list|default([])
   when: >
     hostvars[item.0].backup is defined and hostvars[item.0].backup != ''
 

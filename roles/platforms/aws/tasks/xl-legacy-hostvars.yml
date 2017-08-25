@@ -1,0 +1,30 @@
+---
+
+# XXX roles/postgres-xl needs these for now, but they should be migrated
+# to the inventory instead of set as AWS tags. And whenever we do that,
+# the ec2_tag_ prefixes going away means we also have a chance to use
+# nicer names like "coordinator_list" and "replica_list".
+
+- name: Translate XL-specific list tags
+  action: set_fact
+  args:
+    "{{ item.var }}": "{{ vars[item.source].split(',') }}"
+  when:
+    item.source in vars and item.var not in vars
+  with_items:
+    - var: co_list
+      source: ec2_tag_co_list
+    - var: dn_list
+      source: ec2_tag_dn_list
+    - var: dn_replica_list
+      source: ec2_tag_dn_replica_list
+
+- name: Translate XL-specific string tags
+  action: set_fact
+  args:
+    "{{ item.var }}": "{{ vars[item.source] }}"
+  when:
+    item.source in vars and item.var not in vars
+  with_items:
+    - var: num_datanode
+      source: ec2_tag_num_datanode
