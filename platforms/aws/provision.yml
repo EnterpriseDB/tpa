@@ -196,7 +196,8 @@
     - include: ec2-ami-properties.yml
       when:
         ec2_ami_properties is not defined or
-        (instances|json_query('[*].image')|difference(ec2_ami_properties|json_query('keys(@)'))|list) > 0
+        (instances|json_query('[*].image')|difference(ec2_ami_properties|json_query('keys(@)'))|list)
+        |count > 0
       tags: ami
 
     # If «attach_existing» is specified for any volume in a region, we
