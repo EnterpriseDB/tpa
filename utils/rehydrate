@@ -23,7 +23,7 @@ instance=${1:?No instance specified}
 shift
 
 DESTROY=no
-if [ "$1" = "I_REALLY_WANT_TO_DESTROY_MY_ENTIRE_CLUSTER=yes" ]; then
+if [ "${1:-'NO_PLEASE_SAVE_MY_CLUSTER'}" = "I_REALLY_WANT_TO_DESTROY_MY_ENTIRE_CLUSTER=yes" ]; then
     DESTROY=yes
     shift
 fi
