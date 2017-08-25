@@ -17,6 +17,7 @@
   local_action:
     module: ec2_instance_status
     instance_id: "{{ ec2_id }}"
+    region: "{{ ec2_region }}"
   register: i
   until: >
     i.result.instance_state.name == 'running'
