@@ -1,14 +1,12 @@
 ---
 
-# Deploys Postgres and associated software to a cluster.
+# This play must always be applied to all hosts in the cluster. Here we
+# do any platform-specific checks and initialisation, confirm that all
+# hosts are available, and perform basic fast discovery.
 
 - name: Basic initialisation and fact discovery
   any_errors_fatal: True
   max_fail_percentage: 0
-
-  # This play must always be applied to all hosts in the cluster. Here
-  # we do any platform-specific checks and initialisation, confirm that
-  # all hosts are available, and perform basic fact discovery.
 
   hosts: all
   roles:
@@ -23,36 +21,18 @@
         postgres_version: 9.6
       tags: always
 
+# Now the cluster hosts are reachable by ssh and have all the required
+# inventory variables set. We can get on with installing Postgres.
+
 - name: Set up TPA cluster nodes
   any_errors_fatal: True
   max_fail_percentage: 0
-
-  # This play targets all hosts in the cluster.
-  hosts: "{{ deploy_hosts|default('all') }}"
-
-  # Generally speaking, we want everything to run as root. We'll ssh in
-  # to the servers as admin/ec2-user/ubuntu (depending on distribution),
-  # and sudo to root. Tasks that need to run as some other user must set
-  # sudo/sudo_user (or become/become_user) explicitly.
   sudo_user: root
   sudo: true
 
+  hosts: "{{ deploy_hosts|default('all') }}"
   roles:
-    # Finds ansible_distribution, makes sure python and other system
-    # packages are installed, sets the hostname, etc.
     - role: common
-
-    # Computes memory size and other instance-specific computations for
-    # use in later steps (e.g. shared_buffers).
-    - role: sys/tune
-      tags: always
-
-    # Set kernel-level configuration parameters persistently.
-    - role: sys/sysctl
-      vars:
-        sysctl_values:
-          net.ipv4.ip_forward: 1
-      tags: [sys, sysctl]
 
     # Set up any additional filesystems required. The block device
     # layout is instance-specific.
@@ -61,6 +41,17 @@
         device: "{{ volumes[0].device }}"
         mountpoint: "{{ postgres_home }}"
       tags: [sys, fs]
+
+    # Computes memory size and other instance-specific computations for
+    # use in later steps (e.g., setting shared_buffers).
+    - role: sys/tune
+      tags: always
+
+    - role: sys/sysctl
+      vars:
+        sysctl_values:
+          net.ipv4.ip_forward: 1
+      tags: [sys, sysctl]
 
     - role: sys/sysstat
       tags: [sys, sysstat]
@@ -78,11 +69,9 @@
       when: >
         'postgres' in role
 
-    # Set up Barman backups.
     - role: barman
       tags: barman
 
-    # Set up repmgr
     - role: repmgr
       tags: repmgr
 
@@ -91,7 +80,6 @@
         'postgres' in role
       tags: [postgres, final]
 
-    # Set up monitoring
     - role: monitoring
       tags: monitoring
 
@@ -100,9 +88,12 @@
 # role has already been applied above, but it will matter if we run a
 # re-deployment limited to certain hosts.)
 
-- hosts: all
+- name: Ensure /etc/hosts is correct cluster-wide
   any_errors_fatal: True
   max_fail_percentage: 0
+  sudo_user: root
+  sudo: yes
+  hosts: all
   roles:
     - role: sys/hosts
       tags: [sys, hosts]
