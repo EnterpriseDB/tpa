@@ -17,7 +17,7 @@
 
 - name: Copy /opt/Postgres-XL-{{pgxlversion}} to other nodes
   command: rsync -e 'ssh -o StrictHostKeyChecking=yes' -qa \
-    "{{ hostvars[control_hostname].ec2_private_ip_address }}:/opt/Postgres-XL-{{pgxlversion}}" /opt
+    "{{ hostvars[control_hostname].private_ip }}:/opt/Postgres-XL-{{pgxlversion}}" /opt
   args:
     creates: "/opt/Postgres-XL-{{pgxlversion}}/bin/pgxc_ctl"
   sudo_user: postgres
