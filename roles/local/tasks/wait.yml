@@ -1,0 +1,34 @@
+---
+
+# First, we wait for each instance's reachability check to pass.
+#
+# This is normally quite fast, but some instances may take a long time
+# to become reachable (or it may never happen). For more details, see:
+#
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-system-instance-status-check.html
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstances.html
+
+- name: Wait for instance reachability
+  local_action:
+    module: ec2_instance_status
+    instance_id: "{{ ec2_id }}"
+  register: i
+  until: >
+    i.result.instance_state.name == 'running'
+    and i.result.system_status.status == 'ok'
+    and i.result.instance_status.status == 'ok'
+    and i.result.system_status|json_query("details[?name=='reachability'].status|[0]") == 'passed'
+    and i.result.instance_status|json_query("details[?name=='reachability'].status|[0]") == 'passed'
+  retries: 60
+
+# Next, we wait until we can connect to the SSH port on each instance.
+# If ansible_port is 22, this will connect as soon as sshd is started,
+# but if config.yml specifies a custom cluster_ssh_port, then it's set
+# as the very last step in user-data, so when we're able to connect to
+# the non-standard port, we know that user-data has finished executing.
+
+- name: Wait for SSH to be available on instances
+  local_action:
+    module: wait_for
+    host: "{{ ansible_host }}"
+    port: "{{ ansible_port|default(22) }}"
