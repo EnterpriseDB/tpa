@@ -1,5 +1,0 @@
-* Use same event model as OpenStack Trove DBaaS API
-* Compatibility with OpenStack Trove DBaaS API
-* Have TPA GUI act as a plugin to OpenStack Horizon dashboard
-
-
