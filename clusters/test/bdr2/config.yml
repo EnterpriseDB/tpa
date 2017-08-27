@@ -6,6 +6,10 @@ cluster_name: "BDR2Test"
 cluster_tags:
   Owner: gulcin
 
+cluster_vars:
+  cluster_network: 10.33.67.0/24
+  vpn_network: 192.168.33.0/24
+
 ec2_ami:
   Name: debian-jessie-amd64-hvm-2016-04-03-ebs
 ec2_ami_user: "admin"
