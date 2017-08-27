@@ -16,6 +16,11 @@ dependencies:
     when: >
       'barman' in role
 
+  # Barman package depends on Postgres package being installed.
+  - role: postgres/pkg
+    when: >
+      'barman' in role
+
   - role: barman/pkg
     when: >
       'barman' in role
