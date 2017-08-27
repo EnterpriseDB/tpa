@@ -1,7 +1,0 @@
----
-
-dependencies:
-  - role: postgres/config
-    vars:
-      postgres_extensions:
-        - pg_stat_statements
