@@ -38,7 +38,7 @@
 # need to do anything here for cloud instances.)
 
 - name: Ensure awscli is installed
-  shell: which aws || pip install awscli
+  shell: command -v aws || pip install awscli
   register: awscli
   changed_when: >
     awscli|succeeded and 'Requirement already satisfied' not in awscli.stdout and

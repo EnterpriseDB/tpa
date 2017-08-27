@@ -9,7 +9,7 @@
   assert:
     msg: "Please install {{ item }} locally"
     that:
-      - "'{{ lookup('pipe', 'which {{ item }} || true') }}' != ''"
+      - "'{{ lookup('pipe', 'command -v {{ item }} || true') }}' != ''"
   with_items:
     - pwgen
     - flock

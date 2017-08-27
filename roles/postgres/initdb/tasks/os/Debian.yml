@@ -5,7 +5,7 @@
 # Otherwise, we fall back to initdb.
 
 - name: Check for pg_createcluster
-  command: which pg_createcluster
+  command: command -v pg_createcluster
   ignore_errors: yes
   register: common
 

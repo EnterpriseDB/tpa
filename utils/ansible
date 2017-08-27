@@ -36,7 +36,7 @@ export ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TOP/
 
 NEWPATH=$PATH
 cmd=$(basename $0)
-if ! which $cmd >/dev/null 2>&1; then
+if ! command -v $cmd &>/dev/null; then
     ansidir=${ANSIBLE_HOME:-""}
     if [ -z "$ansidir" ]; then
         echo "Please set ANSIBLE_HOME=/path/to/ansible/dir" 1>&2
