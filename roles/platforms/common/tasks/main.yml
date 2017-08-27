@@ -17,3 +17,13 @@
     role: "{{ role|union(['postgres-xl']) }}"
   when: >
     'coordinator' in role or 'datanode' in role or 'coordinator-replica' in role or 'datanode-replica' in role or 'gtm' in role or 'gtm-standby' in role
+
+# If there's anything tagged as an openvpn server, we have to make sure
+# vpn_network is defined.
+
+- assert:
+    msg: "Please define vpn_network to use sys/openvpn"
+    that:
+      - vpn_network is defined
+  when: >
+    'openvpn-server' in role

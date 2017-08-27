@@ -57,7 +57,9 @@
       tags: [sys, sysstat]
 
     - role: sys/openvpn
-      vpn_network: 192.168.33.0/24
+      when: >
+        'tag_role_openvpn-server' in groups
+        and vpn_network is defined
 
     - role: sys/hosts
       tags: [sys, hosts]
@@ -81,6 +83,8 @@
       tags: [postgres, final]
 
     - role: monitoring
+      when: >
+        'tag_role_monitoring-server' in groups
       tags: monitoring
 
 # Finally, we must make sure we don't leave stale entries in /etc/hosts
