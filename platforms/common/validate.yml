@@ -1,3 +1,7 @@
+- name: Set tpa_dir
+  set_fact:
+    tpa_dir: "{{ lookup('env', 'TPA_DIR') or (playbook_dir|regex_replace('/platforms/common/*', '')) }}"
+
 - name: Require cluster directory to be specified
   assert:
     msg: "Please rerun with «-e cluster=./clusters/name»"

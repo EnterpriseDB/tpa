@@ -15,6 +15,7 @@ type realpath &>/dev/null && TOP=$(realpath $TOP)
 # Set ANSIBLE_CONFIG, ANSIBLE_LOG_PATH, and ANSIBLE_INVENTORY to our
 # versions if they are not already set.
 
+export TPA_DIR=${TPA_DIR:-$TOP}
 export ANSIBLE_CONFIG=${ANSIBLE_CONFIG:-$TOP/ansible.cfg}
 export ANSIBLE_LOG_PATH=${ANSIBLE_LOG_PATH:-$TOP/ansible.log}
 export ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-$TOP/inventory/static}
