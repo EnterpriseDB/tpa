@@ -13,7 +13,7 @@
 # will—but that's only when we can get in at all. On the whole, this has
 # caused enough debugging problems that it's worth waiting longer.)
 
-- name: Wait for instance reachability
+- name: Wait for instance reachability checks to pass
   local_action:
     module: ec2_instance_status
     instance_id: "{{ ec2_id }}"
