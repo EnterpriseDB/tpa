@@ -8,6 +8,7 @@
   args:
     chdir: /etc/tpa
     creates: "{{ cluster_name }}.crt"
+    executable: /bin/bash
   notify:
     - Note Postgres restart required
 

@@ -32,11 +32,15 @@
     - name: Initialise LUKS volume on {{ luks_device }}
       shell: >
         echo -n "{{ luks_passphrase }}" | cryptsetup -q luksFormat --key-file - "{{ luks_device }}"
+      args:
+        executable: /bin/bash
       no_log: true
 
     - name: Map LUKS volume to /dev/mapper/{{ luks_volume }}
       shell: >
         echo -n "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ luks_device }}" "{{ luks_volume }}"
+      args:
+        executable: /bin/bash
       no_log: true
 
     - name: Record updated mapped device name

@@ -19,6 +19,8 @@
 - name: Empty the existing data directory
   shell: >
     rm -rf {{ postgres_data_dir }}/*
+  args:
+    executable: /bin/bash
 
 # Now we have to decide where to clone from.
 #

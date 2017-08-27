@@ -6,6 +6,8 @@
 - name: Count the number of backups for each instance
   shell: >
     barman list-backup {{ backup_name }} | grep -v FAILED | wc -l
+  args:
+    executable: /bin/bash
   register: backups
   delegate_to: "{{ backup }}"
   changed_when: False

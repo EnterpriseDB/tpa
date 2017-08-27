@@ -89,7 +89,7 @@
   delegate_to: "{{ backup }}"
 
 - name: Force an immediate backup
-  shell: >
+  command: >
     /usr/bin/barman backup "{{ backup_name }}"
   delegate_to: "{{ backup }}"
   become_user: barman

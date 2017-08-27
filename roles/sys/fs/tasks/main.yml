@@ -34,6 +34,8 @@
   shell: >
     blockdev --getra "{{ _device }}" &&
     blockdev --setra "{{ readahead }}" "{{ _device }}"
+  args:
+    executable: /bin/bash
   register: ra
   changed_when: >
     ra|succeeded and ra.stdout != readahead|string

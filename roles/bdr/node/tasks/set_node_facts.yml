@@ -5,7 +5,7 @@
     bdr_node_dsn: "host={{ ip_address }} port={{postgres_port}} dbname={{bdr_db_name}} user=postgres"
 
 - name: Check for bdr node setup in the database
-  shell: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -qAtw -c \"SELECT 1 FROM bdr.bdr_nodes WHERE node_status != 'k' LIMIT 1;\""
+  command: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -qAtw -c \"SELECT 1 FROM bdr.bdr_nodes WHERE node_status != 'k' LIMIT 1;\""
   register: bdr_node_result
   become_user: postgres
   become: yes

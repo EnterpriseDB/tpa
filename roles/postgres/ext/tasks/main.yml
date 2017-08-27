@@ -18,4 +18,5 @@
   shell: "{{postgres_ext_make_command}} {% for arg in postgres_ext_make_opts %}{{arg|quote}}{% endfor %} {{item}}"
   args:
     chdir: "{{postgres_ext_dir}}"
+    executable: /bin/bash
   with_items: "{{ postgres_ext_targets }}"

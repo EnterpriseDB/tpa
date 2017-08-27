@@ -39,6 +39,8 @@
 
 - name: Ensure awscli is installed
   shell: command -v aws || pip install awscli
+  args:
+    executable: /bin/bash
   register: awscli
   changed_when: >
     awscli|succeeded and 'Requirement already satisfied' not in awscli.stdout and

@@ -19,6 +19,7 @@
         {% for arg in postgres_configure_opts %}{{arg|quote}}{% endfor %}
   args:
     chdir: "{{postgres_build_dir}}"
+    executable: /bin/bash
   environment: "{{postgres_configure_env}}"
   tags: postgres-clean
 
@@ -26,10 +27,12 @@
   shell: "{{postgres_make_command}} {{item}}"
   args:
     chdir: "{{postgres_build_dir}}"
+    executable: /bin/bash
   with_items: "{{ postgres_build_targets }}"
 
 - name: Install Postgres
   shell: "{{postgres_make_command}} {{item}}"
   args:
     chdir: "{{postgres_build_dir}}"
+    executable: /bin/bash
   with_items: "{{ postgres_install_targets }}"

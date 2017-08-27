@@ -17,7 +17,7 @@
       - device is defined
 
 - name: Check if {{ device }} needs a "swap" filesystem
-  shell: lsblk --noheadings --output FSTYPE "{{ device}}"
+  command: lsblk --noheadings --output FSTYPE "{{ device}}"
   register: fstype
 
 - block:
