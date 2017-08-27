@@ -30,6 +30,10 @@
       - cluster_tags['Owner'] is defined
       - cluster_tags['Owner'] != ''
 
+- name: Set default empty cluster_vars
+  set_fact:
+    cluster_vars: "{{ cluster_vars|default({}) }}"
+
 # It is not currently meaningful to set cluster_tags['Name'] to anything
 # other than cluster_name. We only use the latter value, so it will only
 # lead to confusion to allow the former to be set.
@@ -37,14 +41,6 @@
 - name: Ensure that the cluster_name is set as a tag
   set_fact:
     cluster_tags: "{{ cluster_tags|combine(dict(Name=cluster_name)) }}"
-
-- name: Convert cluster_network to a list
-  set_fact:
-    cluster_networks:
-      - "{{ cluster_network }}"
-  when:
-    cluster_network|d() and cluster_network is string and
-    not cluster_networks|d()
 
 - name: Ensure instances is correctly configured
   assert:

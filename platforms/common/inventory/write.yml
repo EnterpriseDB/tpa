@@ -23,7 +23,7 @@
     file_name: "01-{{ cluster_name }}"
     group_name: "{{ cluster_tag }}"
     group_vars: "{{
-      cluster_vars|default({})|combine({
+      cluster_vars|combine({
         'cluster_tag': cluster_tag,
         'cluster_name': cluster_name,
         'tpa_version': lookup('file', playbook_dir+'/../../VERSION.md')
