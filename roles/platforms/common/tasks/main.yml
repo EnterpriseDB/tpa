@@ -7,7 +7,7 @@
   set_fact:
     role: "{{ role|union(['postgres']) }}"
   when: >
-    'primary' in role or 'replica' in role or 'witness' in role
+    'primary' in role or 'replica' in role or 'witness' in role or 'bdr' in role
 
 # Add 'postgres-xl' to role when any of 'coordinator' or 'datanode'
 # or 'coordinator-replica' or 'datanode-replica' or 'gtm' or
