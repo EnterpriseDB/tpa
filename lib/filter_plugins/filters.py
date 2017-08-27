@@ -4,6 +4,7 @@
 import copy
 from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
+from ansible.errors import AnsibleFilterError
 
 # Based on PR ansible/ansible#11083, this filter takes a container and a subkey
 # ('x.y.z', or [x,y,z]) and a default value, and returns container.x.y.z or the
@@ -67,10 +68,10 @@ def get_device_variables(volumes):
 
 def remove_keys(d, keys):
     if not isinstance(d, dict):
-        raise errors.AnsibleFilterError("|remove_keys takes a dict as its first argument, got " + repr(d))
+        raise AnsibleFilterError("|remove_keys takes a dict as its first argument, got " + repr(d))
 
     if not isinstance(keys, list):
-        raise errors.AnsibleFilterError("|remove_keys takes a list as its second argument, got " + repr(keys))
+        raise AnsibleFilterError("|remove_keys takes a list as its second argument, got " + repr(keys))
 
     d2 = copy.deepcopy(d)
     for k in keys:
