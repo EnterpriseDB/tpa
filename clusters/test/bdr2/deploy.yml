@@ -1,5 +1,28 @@
 ---
 
+# Deploys Postgres and associated software to a cluster.
+
+- name: Basic initialisation and fact discovery
+  any_errors_fatal: True
+  max_fail_percentage: 0
+
+  # This play must always be applied to all hosts in the cluster. Here
+  # we do any platform-specific checks and initialisation, confirm that
+  # all hosts are available, and perform basic fact discovery.
+
+  hosts: all
+  roles:
+    - role: platforms
+      tags: always
+
+    - role: facts
+      tags: always
+
+    - role: postgres/vars
+      vars:
+        postgres_version: 9.6
+      tags: always
+
 - name: Set up TPA BDR2 cluster
   hosts: tag_Cluster_BDR2Test
   any_errors_fatal: True
@@ -11,26 +34,19 @@
     ansible_distribution: Debian
     ansible_distribution_release: jessie
     id_extra: 'customer'
-    BDR_apt_repositories:
-      key_id: 7ED05910
-      key_url: "https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/7ED05910.asc"
-      repo: "deb http://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/bdr_2.0/latest/deb/ {{ ansible_distribution_release }} main"
-      versions: [9.6]
-
-  pre_tasks:
-    - include: ../../../platforms/aws/hostvars.yml
-      tags: always
+    apt_repositories:
+      BDR:
+        key_id: 7ED05910
+        key_url: "https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/7ED05910.asc"
+        repo: "deb http://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/bdr_2.0/latest/deb/ {{ ansible_distribution_release }} main"
+        versions: [9.6]
+    extra_postgres_packages:
+      Debian: &debian_extra_packages ['postgresql-{{pgversion}}-bdr-plugin']
+      RedHat: ['postgresql{{pgversionNN}}-bdr']
+      Ubuntu: *debian_extra_packages
 
   roles:
     - role: common
-
-    - role: postgres/vars
-      vars:
-        postgres_version: 9.6
-      tags: always
-
-    - role: postgres/repo
-      tags: always
 
     - role: sys/tune
       tags: always
@@ -41,20 +57,17 @@
           net.ipv4.ip_forward: 1
       tags: [sys, sysctl]
 
-    - role: sys/ssh/authorize
-      ssh_user: "{{ ec2_ami_user|default('admin') }}"
-      ssh_key_name: "{{ id_extra }}"
-      when: >
-        id_extra|default("") != ""
-
     - role: sys/openvpn
-      vpn_network: 192.168.33.0/24
 
     - role: sys/hosts
       tags: [sys, hosts]
 
     - role: sys/rsyslog
       tags: [sys, rsyslog]
+
+    - role: postgres
+      when: >
+        'postgres' in role
 
     - role: bdr
       when: >
@@ -69,10 +82,26 @@
 
     - role: postgres/final
       when: >
-        'bdr' in role
+        'postgres' in role
       tags: [postgres, final]
 
     - role: bdr/node
       when: >
         'bdr' in role
       tags: bdr
+
+    - role: monitoring
+      when: >
+        'tag_role_monitoring-server' in groups
+      tags: monitoring
+
+- name: Ensure /etc/hosts is correct cluster-wide
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  sudo_user: root
+  sudo: yes
+  hosts: all
+  roles:
+    - role: sys/hosts
+      tags: [sys, hosts]
+
