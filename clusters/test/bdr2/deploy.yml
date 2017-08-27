@@ -44,6 +44,12 @@
       Debian: &debian_extra_packages ['postgresql-{{pgversion}}-bdr-plugin']
       RedHat: ['postgresql{{pgversionNN}}-bdr']
       Ubuntu: *debian_extra_packages
+    postgres_extensions:
+      - pg_stat_statements
+      - pg_freespacemap
+      - pg_visibility
+      - pageinspect
+      - pgstattuple
 
   roles:
     - role: common
@@ -69,7 +75,7 @@
       when: >
         'postgres' in role
 
-    - role: bdr
+    - role: bdr/config
       when: >
         'bdr' in role
       tags: bdr
@@ -77,8 +83,8 @@
     - role: barman
       tags: barman
 
-    - role: pgbouncer
-      tags: pgbouncer
+    #- role: pgbouncer
+    #  tags: pgbouncer
 
     - role: postgres/final
       when: >

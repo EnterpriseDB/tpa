@@ -4,18 +4,12 @@
 # we use it to create the cluster and make sure it starts up on boot.
 # Otherwise, we fall back to initdb.
 
-- name: Check for pg_createcluster
-  command: which pg_createcluster
-  ignore_errors: yes
-  register: common
-
 - name: Run pg_createcluster to initialise data directory
   command: >
     pg_createcluster -d {{ postgres_data_dir }} -p 5432 --start-conf auto {{ pgversion }} main -- \
       {% for x in postgres_initdb_opts %}{{x|quote}} {% endfor %}
   register: create
   ignore_errors: True
-  when: common|succeeded
   environment:
     TZ: UTC
 
@@ -23,5 +17,3 @@
   when: >
     create|failed and ('replica' not in role or 'Error: cluster configuration already exists' not in create.stderr)
 
-- include: ../initdb.yml
-  when: common|failed
