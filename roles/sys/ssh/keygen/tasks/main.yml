@@ -8,19 +8,21 @@
 #   ssh_key_name: 'id_somefilename'
 #   ssh_key_comment: 'xxx@yyy'
 
-- name: Ensure {{ _ssh_key_dir }} exists locally
-  local_action:
-    module: file
-    path: "{{ _ssh_key_dir }}"
-    state: directory
-  run_once: yes
-  sudo: no
-
 - name: Generate ssh keypair {{ _ssh_key_name }}
   local_action: >
-    command ssh-keygen -N "" -C "{{ _ssh_key_comment }}" -f "{{ _ssh_key_name }}"
+    shell ( flock -w 0.01 -n 9 || exit 99;
+    test -f {{ keyfile }} && exit 0;
+    test -d {{ _ssh_key_dir }} || mkdir {{ _ssh_key_dir }};
+    ssh-keygen -N "" -C "{{ _ssh_key_comment }}" -f "{{ keyfile }}";
+    exit 88 ) 9>/tmp/keygen
   args:
-    chdir: "{{ _ssh_key_dir }}"
-    creates: "{{ _ssh_key_name }}"
-  run_once: yes
+    creates: "{{ keyfile }}"
+    executable: /bin/bash
+  register: key
+  failed_when:
+    key.rc not in [0, 88, 99]
+  changed_when:
+    key.rc == 88
   sudo: no
+  vars:
+    keyfile: "{{ _ssh_key_dir }}/{{ _ssh_key_name }}"
