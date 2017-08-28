@@ -19,5 +19,6 @@
       - password != ''
   vars:
     password: "{{ lookup('pipe', '{{ tpa_dir }}/utils/password || true') }}"
+  run_once: yes
 
 - include: ssh.yml
