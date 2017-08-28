@@ -1,6 +1,5 @@
 ---
 
-
 # The default package list installs community or 2ndQuadrant postgres.
 # The caller may override this list entirely, or just augment it by
 # adding to extra_postgres_packages below.
@@ -32,6 +31,6 @@ extra_postgres_packages:
   RedHat: []
   Ubuntu: *debian_extra_packages
 
-default_postgres_bin_dirs:
-  Debian: "/usr/lib/postgresql/{{pgversion}}/bin"
-  RedHat: "/usr/pgsql-{{pgversion}}/bin"
+default_postgres_service_names:
+  Debian: "postgresql"
+  RedHat: "postgresql-{{ pgversion }}"

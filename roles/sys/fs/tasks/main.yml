@@ -61,11 +61,3 @@
     fstype: "{{ fstype }}"
     opts: "{{ mountopts }}"
     state: mounted
-
-# TODO: If the caller specifies an SELinux context, we should use
-# semanage and restorecon to set the context on the mountpoint:
-#
-# $ semanage fcontext -a -t postgresql_db_t "/opt/postgresql(/.*)?"
-# $ restorecon -R -v /opt/postgresql
-#
-# https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/SELinux_Users_and_Administrators_Guide/sect-Managing_Confined_Services-PostgreSQL-Configuration_Examples.html

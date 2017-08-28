@@ -1,24 +1,32 @@
 ---
 
-- name: Set pgversion, postgres_{user,home,port}
+- name: Set postgres_version
   set_fact:
-    pgversion: "{{ postgres_version|default(default_postgres_version) }}"
+    pgversion: "{{ version }}"
+    pgversionNN: "{{ version|replace('.','') }}"
+    postgres_version: "{{ version }}"
+  vars:
+    version: "{{ postgres_version|default(default_postgres_version) }}"
+  tags: always
+
+- name: Set postgres_{user,home,port} etc.
+  set_fact:
     postgres_user: "{{ postgres_user|default(default_postgres_user) }}"
+    postgres_group: "{{ postgres_group|default(default_postgres_group) }}"
     postgres_home: "{{ postgres_home|default(default_postgres_home_dirs[ansible_os_family]) }}"
-    postgres_port: "{{ postgres_port|default(5432) }}"
-    postgres_version: "{{ postgres_version|default(default_postgres_version) }}"
+    postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
+    postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
+    pgbindir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
     postgres_host: "{{ postgres_host|default('localhost') }}"
+    postgres_port: "{{ postgres_port|default(5432) }}"
+    postgres_service_name: postgres
+    backup_name: "{{ backup_name|default(inventory_hostname) }}"
+    repmgr_cluster: "{{ repmgr_cluster|default(cluster_name) }}"
   tags: always
 
-- name: Set pgversionNN from pgversion
+- name: Set default postgres_conf_dir
   set_fact:
-    pgversionNN: "{{ pgversion|replace('.','') }}"
-  tags: always
-
-- name: Set repmgr_cluster for the cluster
-  set_fact: repmgr_cluster="{{ _repmgr_cluster }}"
-  tags: always
-
-- name: Set backup_name for the instance
-  set_fact: backup_name="{{ _backup_name }}"
+    postgres_conf_dir: "{{ postgres_data_dir }}"
+  when: >
+    postgres_conf_dir|default('') == ''
   tags: always

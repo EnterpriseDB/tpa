@@ -1,19 +1,5 @@
 ---
 
-- name: Set Postgres data directory
-  set_fact:
-    postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dirs[ansible_os_family]) }}"
-    postgres_conf_dir: "{{ postgres_conf_dir|default(default_postgres_conf_dirs[ansible_os_family]) }}"
-    postgres_service_name: "{{ postgres_service_name|default(default_postgres_service_names[ansible_os_family]) }}"
-  tags: always
-
-- name: Set default postgres_conf_dir
-  set_fact:
-    postgres_conf_dir: "{{ postgres_data_dir }}"
-  when: >
-    postgres_conf_dir == ''
-  tags: always
-
 - name: Ensure postgres directories exist and have the right permissions
   file:
     path: "{{ item }}"
@@ -26,14 +12,32 @@
     - "{{ postgres_data_dir }}"
   tags: [postgres, initdb]
 
+# https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/SELinux_Users_and_Administrators_Guide/sect-Managing_Confined_Services-PostgreSQL-Configuration_Examples.html
+
+- name: Set correct SELinux context for {{ postgres_data_dir }}
+  shell: >
+    if $(type -p selinuxenabled &>/dev/null); then
+    semanage fcontext -a -t postgresql_db_t "{{ postgres_data_dir }}(/.*)?" &&
+    restorecon -R -v "{{ postgres_data_dir }}";
+    fi
+  args:
+    executable: /bin/bash
+  when:
+    postgres_data_dir != default_postgres_data_dirs[ansible_os_family]
+
 - name: Check to see if the data directory is empty
   stat: path="{{ postgres_data_dir }}/PG_VERSION"
   register: pgdata
   tags: [postgres, initdb]
 
-- block:
-    - name: Note that we ran initdb
-      set_fact: initdb=True
-    - include: "os/{{ ansible_os_family }}.yml"
-  when: not pgdata.stat.exists
+- name: Run initdb to initialise data directory
+  command: >
+    {{ postgres_bin_dir }}/initdb -D {{ postgres_data_dir }} \
+      {% for x in postgres_initdb_opts %}{{x|quote}} {% endfor %}
+  environment:
+    TZ: UTC
+  become_user: postgres
+  become: yes
+  when:
+    not pgdata.stat.exists and 'replica' not in role
   tags: [postgres, initdb]

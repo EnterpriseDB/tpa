@@ -3,7 +3,14 @@
 default_postgres_version: 9.6
 
 default_postgres_user: postgres
+default_postgres_group: postgres
 
 default_postgres_home_dirs:
   Debian: /var/lib/postgresql
   RedHat: /var/lib/pgsql
+
+default_postgres_data_dir: /opt/postgres/data
+
+default_postgres_bin_dirs:
+  Debian: "/usr/lib/postgresql/{{ pgversion }}/bin"
+  RedHat: "/usr/pgsql-{{ pgversion }}/bin"

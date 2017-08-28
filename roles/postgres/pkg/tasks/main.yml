@@ -41,12 +41,12 @@
         - pgespresso{{pgversionNN}}
   tags: [postgres, pkg]
 
-# We set pgbindir based on what packages we installed. Unfortunately, we
-# can not assume that all Postgres binaries (e.g., pg_config) will be in
-# our (or even postgres's) PATH.
+# We install our own service units later, so we disable the packaged
+# versions here.
 
-- name: Set postgres_bin_dir based on distribution
-  set_fact:
-    pgbindir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
-    postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
-  tags: always
+- name: Disable default postgresql services
+  systemd:
+    name: "{{ default_postgres_service_names[ansible_os_family] }}"
+    state: stopped
+    masked: yes
+    enabled: no

@@ -11,6 +11,8 @@ dependencies:
     username: postgres
     tags: [postgres, user]
   - role: postgres/config
+    when: >
+      'replica' not in role
     tags: [postgres, config]
   - role: sys/ssh
     ssh_user: postgres

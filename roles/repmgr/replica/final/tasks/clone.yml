@@ -1,26 +1,13 @@
-# We arrive at this point after having already applied postgres/initdb
-# and creating the data directory. This is necessary because we depend
-# on pg_createcluster/postgresqlNN-setup to configure the database to
-# start at boot time, but it means we now have to remove our PGDATA
-# before cloning the primary's PGDATA.
-#
-# What we would like to do is not apply postgres/initdb on replicas, run
-# "repmgr standby clone" and configure Postgres to start at boot, either
-# by telling the setup tools to use the existing data directory—which is
-# something they don't support—or by installing our own unit files. That
-# way, we're never in the position of having to move aside an existing
-# data directory (albeit an empty one).
+---
 
-- name: Stop Postgres
-  service:
-    name: "{{ postgres_service_name }}"
-    state: stopped
+- name: Check to see if the data directory is empty
+  stat: path="{{ postgres_data_dir }}/PG_VERSION"
+  register: pgdata
 
-- name: Empty the existing data directory
-  shell: >
-    rm -rf {{ postgres_data_dir }}/*
-  args:
-    executable: /bin/bash
+- name: Fail if the data directory exists
+  fail:
+    msg: "Can't run 'repmgr standby clone' over existing PGDATA"
+  when: pgdata.stat.exists
 
 # Now we have to decide where to clone from.
 #

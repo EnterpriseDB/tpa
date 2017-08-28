@@ -1,9 +1,18 @@
 ---
 
+- name: Install custom service unit file
+  template:
+    src: postgres.service.j2
+    dest: /etc/systemd/system/postgres.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: [postgres, service]
+
 - name: Enable postgres service
   service:
     name: "{{ postgres_service_name }}"
     enabled: yes
   when: >
     'postgres' in role
-  tags: postgres
+  tags: [postgres, service]

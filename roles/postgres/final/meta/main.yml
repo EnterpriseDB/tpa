@@ -1,6 +1,7 @@
 ---
 
 dependencies:
+  - role: postgres/service
   - role: postgres/restart
   - role: postgres/pgpass
   - role: postgres/createuser/final
