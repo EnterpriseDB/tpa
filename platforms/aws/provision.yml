@@ -229,6 +229,26 @@
           - ec2_region_subnets[item.region][item.subnet] is defined
       with_items: "{{ instances }}"
 
+    - debug: var=ec2_attachable_volumes
+    - block:
+        - name: Ensure that we found volume_ids for all attach_existing volumes
+          assert:
+            msg: >
+              Couldn't find volume_id for
+              {{ cluster_name }}:{{ item.node }}:{{ unid_volumes|join(',') }}
+              on {{ item.Name }}
+            that:
+              - unid_volumes|count == 0
+          with_items: "{{ instances }}"
+          when:
+            item.Name in reattach_hosts
+          vars:
+            unid_volumes: "{{
+              item|json_query('volumes[?attach_existing&&!volume_id].device_name')
+            }}"
+      when:
+        require_reattachment|default('no') == 'yes' and reattach_hosts is defined
+
     - name: Debug user-data for instances
       debug:
         msg: "{{
