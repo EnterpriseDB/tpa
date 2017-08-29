@@ -60,15 +60,9 @@ $utils/ansible-playbook \
 
 $utils/provision $cluster_dir
 
-# XXX I don't know why, but running deploy immediately after provision,
-# even with the ec2 cache invalidated, a custom SSH port set, and a new
-# known_hosts file written sometimes results in a key validation prompt
-# or failure. Sleeping for even a little while makes it go away. Anyway
-# it's safe to rerun deploy on the cluster using the command below.
-
-echo "Allowing the CPU to cool down before deployment"
-sleep 70
-
 # Redeploy to the new instance.
+#
+# If this fails for any reason, it's safe to rerun the command below by
+# hand. Other than defining deploy_hosts, it's a normal deploy command.
 
 $utils/deploy $cluster_dir -e deploy_hosts="$instance" "$@"
