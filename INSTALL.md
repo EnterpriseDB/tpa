@@ -13,7 +13,7 @@ Install Python 2.7.x, pip, and virtualenv:
     # Debian or Ubuntu
     apt-get install python2.7 python-pip python-virtualenv
 
-    # RedHat
+    # RedHat or CentOS
     yum install python python-pip python-virtualenv
 ```
 
@@ -84,6 +84,19 @@ Optional
 
 Install pwgen for better password generation (strongly recommended for
 production clusters).
+
+SELinux known issue
+-------------------
+
+A bug with virtualenv on some versions of a RHEL derivative host (RHEL and CentOS) can mean
+this error is generated from ansible:
+"Aborting, target uses selinux but python bindings (libselinux-python) aren't installed!"
+
+A workaround is to copy selinux package into the virtual environment: 
+
+```
+    cp -p /usr/lib64/python2.7/site-packages/selinux ~/ansible-python/lib/python2.7/site-packages
+```
 
 Help
 ----
