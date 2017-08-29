@@ -1,19 +1,27 @@
-{% set restart_ssh = false %}
+R=0
+CONF=/etc/ssh/sshd_config
+
 {% if ec2_ami_user|default('admin') == 'root' %}
-{% set restart_ssh = true %}
-sed -i.bak 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
+R=1
+sed -i.bak 's/^PermitRootLogin no/PermitRootLogin yes/' $CONF
 {% endif %}
 
 {% if cluster_ssh_port|default(22) != 22 %}
-{% set restart_ssh = true %}
-echo "" >> /etc/ssh/sshd_config
-echo "Port {{ cluster_ssh_port }}" >> /etc/ssh/sshd_config
+R=1
 $(type -p selinuxenabled) && semanage port -a -t ssh_port_t -p tcp {{ cluster_ssh_port }}
+echo "" >> $CONF
+echo "Port {{ cluster_ssh_port }}" >> $CONF
 {% endif %}
 
-{% if restart_ssh %}
-service sshd restart
-{% endif %}
+if ! grep -q '^Port 22$' $CONF; then
+    R=1
+    echo "" >> $CONF
+    echo "Port 22" >> $CONF
+fi
+
+if [ $R = 1 ]; then
+    service sshd restart
+fi
 
 {#
     XXX: This should be moved to an extra_user_data definition for the
@@ -23,4 +31,3 @@ service sshd restart
 /opt/centrify/domain-leave.sh
 /opt/centrify/domain-join.sh {{ centrify_ad_domain }} {{ centrify_ad_group }} aws
 {% endif %}
-
