@@ -18,6 +18,52 @@
   when: >
     'coordinator' in role or 'datanode' in role or 'coordinator-replica' in role or 'datanode-replica' in role or 'gtm' in role or 'gtm-standby' in role
 
+- name: Create role-based groups
+  group_by: key="tag_role_{{ item }}"
+  with_items: "{{ role }}"
+
+# If any instance is tagged with 'log-server', make every other instance
+# log to it. This can be overriden by setting 'log_server' for any
+# instance.
+
+- name: Set common log_server for the entire cluster
+  set_fact:
+    log_server: "{{ groups[ls][0] }}"
+  when: >
+    log_server is not defined and
+    ls in groups and groups[ls]|length > 0 and
+    inventory_hostname != groups[ls][0]
+  vars:
+    ls: 'tag_role_log-server'
+
+# If any instance is tagged with 'monitoring-server', make every other
+# instance use it as its monitoring server. This can be overriden by
+# setting 'monitoring_server' for any instance.
+
+- name: Set common monitoring_server for the entire cluster
+  set_fact:
+    monitoring_server: "{{ groups[ms][0] }}"
+  when: >
+    monitoring_server is not defined and
+    ms in groups and groups[ms]|length > 0 and
+    inventory_hostname != groups[ms][0]
+  vars:
+    ms: 'tag_role_monitoring-server'
+
+# If any instance is tagged with 'openvpn-server', make every other
+# instance use it as its openvpn server. This can be overriden by
+# setting 'openvpn_server' for any instance.
+
+- name: Set common openvpn_server for the entire cluster
+  set_fact:
+    openvpn_server: "{{ groups[os][0] }}"
+  when: >
+    openvpn_server is not defined and
+    os in groups and groups[os]|length > 0 and
+    inventory_hostname != groups[os][0]
+  vars:
+    os: 'tag_role_openvpn-server'
+
 # If there's anything tagged as an openvpn server, we have to make sure
 # vpn_network is defined.
 
