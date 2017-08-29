@@ -91,3 +91,8 @@
   template:
     src: known_hosts.j2
     dest: "{{ cluster_dir }}/known_hosts"
+
+- name: Generate ssh_config file for the cluster
+  template:
+    src: ssh_config.j2
+    dest: "{{ cluster_dir }}/ssh_config"

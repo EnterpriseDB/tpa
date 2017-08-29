@@ -183,6 +183,7 @@
         - hostkeys
         - inventory
         - vars.json
+        - ssh_config
         - known_hosts
         - id_{{ cluster_name|lower }}
         - id_{{ cluster_name|lower }}.pub
