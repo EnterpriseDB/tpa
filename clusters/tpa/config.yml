@@ -5,7 +5,6 @@ cluster_tags:
   Owner: AMS
 cluster_vars:
   vpn_network: 192.168.33.0/24
-  cluster_network: 10.33.28.0/22
 
 ec2_vpc:
   Name: Test
