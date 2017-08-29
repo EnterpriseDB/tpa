@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Given a cluster and an instance name, "rehydrates" the instance as
-# described below:
+# Given a cluster and a comma-separated list of one or more instance
+# names, "rehydrates" each instance as described below:
 #
 # 1. Ensures that all extra volumes attached to the instance are tagged
 #    correctly and set to not be deleted on termination of the instance.
@@ -9,7 +9,7 @@
 # 3. Provisions a replacement for the instance.
 # 4. Redeploys software on the new instance.
 #
-# Example: utils/rehydrate test/cluster instancename
+# Example: utils/rehydrate test/cluster instance[,instance2,…]
 
 IFS=
 set -e -u
@@ -19,7 +19,7 @@ utils=$(dirname $0)
 cluster=${1:?No cluster specified}
 shift
 
-instance=${1:?No instance specified}
+instances=${1:?No instances specified}
 shift
 
 DESTROY=no
@@ -40,24 +40,24 @@ if [ ! -d $cluster_dir ]; then
     exit
 fi
 
-# Terminate the old instance after performing sanity checks.
+# Terminate the old instances after performing sanity checks.
 
 $utils/ansible-playbook \
     $utils/../platforms/aws/terminate-for-rehydration.yml \
     -e i_really_want_to_destroy_my_entire_cluster=$DESTROY \
     -i $cluster_dir/inventory \
     -e cluster=$cluster_dir \
-    --limit "$instance"
+    --limit "$instances"
 
-# Provision a replacement for the terminated instance.
+# Provision a replacement for the terminated instances.
 
 $utils/provision $cluster_dir \
     -e require_reattachment=yes \
-    -e reattach_hosts="$instance"
+    -e reattach_hosts="$instances"
 
-# Redeploy to the new instance.
+# Redeploy to the new instances.
 #
 # If this fails for any reason, it's safe to rerun the command below by
 # hand. Other than defining deploy_hosts, it's a normal deploy command.
 
-$utils/deploy $cluster_dir -e deploy_hosts="$instance" "$@"
+$utils/deploy $cluster_dir -e deploy_hosts="$instances" "$@"
