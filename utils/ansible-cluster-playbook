@@ -9,6 +9,7 @@
 # Examples:
 #
 # utils/ansible-cluster-playbook test/tpa/x.yml
+# utils/ansible-cluster-playbook test/tpa ~/x.yml
 # utils/ansible-cluster-playbook ~/clustername/x.yml
 #
 # If invoked through a symlink (foo → ansible-cluster-playbook), the
@@ -24,7 +25,7 @@ set -e -u
 
 utils=$(dirname $0)
 
-script=deploy.yml
+script=""
 if [ "$(basename $0)" != "ansible-cluster-playbook" ]; then
     script=$(basename $0).yml
 fi
@@ -39,22 +40,34 @@ if [[ ${arg:0:1} != '/' ]]; then
     arg="$clusters/$cluster"
 fi
 
-if [ -d $arg ]; then
-    cluster_dir=$arg
-    if [ ! -f "$cluster_dir/$script" ]; then
-        echo "Can't find script $cluster/$script"
-        exit
-    fi
-elif [ -f $arg -a -d $(dirname $arg) ]; then
+maybescript=${1:-''}
+if [ ! -f $arg -a "$maybescript" != "" -a -f "$maybescript" ]; then
+    script=$1
+    shift
+fi
+
+if [ -f $arg -a -d $(dirname $arg) ]; then
     cluster_dir=$(dirname $arg)
-    script=$(basename $arg)
+    script=$arg
+elif [ -d $arg ]; then
+    cluster_dir=$arg
+    if [ "$script" = "" ]; then
+        echo "No script specified"
+        exit
+    elif [ ! -f $script ]; then
+        if [ -f "$cluster_dir/$script" ]; then
+            script=$cluster_dir/$script
+        else
+            echo "Can't find script $cluster/$script"
+            exit
+        fi
+    fi
 else
     echo "Can't interpret $cluster as cluster or script path"
     exit
 fi
 
-$utils/ansible-playbook \
-    $cluster_dir/$script \
+$utils/ansible-playbook $script \
     -i $cluster_dir/inventory \
     --vault-password-file $cluster_dir/vault/vault_pass.txt \
     -e cluster=$cluster_dir "$@"
