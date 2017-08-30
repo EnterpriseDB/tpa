@@ -33,7 +33,7 @@ variables must also be defined:
 2. **instances** (an array of hashes, one per instance).
 
 For more details about AWS-specific configuration,
-[read platforms/aws/README](platforms/aws/README.md)
+[read platforms/aws/README](../platforms/aws/README.md)
 
 Hybrid clusters
 ---------------
