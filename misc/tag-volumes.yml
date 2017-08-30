@@ -8,9 +8,6 @@
 #
 # XXX: This doesn't merge in cluster_tags from config.yml, as
 # provision.yml would ordinarily do.
-#
-# TODO: Extend to verify/set delete_on_termination=no for non-root
-# volumes as well.
 
 - hosts: all
   tasks:
@@ -26,9 +23,11 @@
         resource: "{{ item.id }}"
         tags:
           Name: "{{ cluster_name ~ ':' ~ ec2_tag_node ~ ':' ~ item.attachment_set.device }}"
+          TPAAttachmentLabel: "{{ cluster_name ~ ':' ~ ec2_tag_node ~ ':' ~ item.attachment_set.device }}"
           CreatingCluster: "{{ cluster_name }}"
       with_items: "{{ v.volumes }}"
       when: >
+        'TPAAttachmentLabel' not in item.tags or
         'CreatingCluster' not in item.tags or
         'Name' not in item.tags
       delegate_to: localhost

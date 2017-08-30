@@ -9,6 +9,7 @@
     region: "{{ r }}"
     filters:
       status: available
+      "tag-key": TPAAttachmentLabel
       "tag:CreatingCluster": "{{ cluster_name }}"
   register: ec2_volumes
   with_items: "{{ regions }}"
@@ -23,7 +24,7 @@
   set_fact:
     ec2_attachable_volumes: "{{
       ec2_attachable_volumes|combine({
-        item.region ~ ':' ~ item.tags.Name: item
+        item.region ~ ':' ~ item.tags.TPAAttachmentLabel: item
       })
     }}"
   with_items: >

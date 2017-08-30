@@ -11,9 +11,11 @@
             i_really_want_to_destroy_my_entire_cluster|default('no') == 'yes'
       run_once: true
 
-    # Every volume attached to the instance is required to have "Name"
-    # and "CreatingCluster" tags with the correct values, so that it
-    # will be found when provisioning a new instance.
+    # Every volume attached to the instance is required to have
+    # "TPAAttachmentLabel" and "CreatingCluster" tags with the correct
+    # values, so that it will be found when provisioning a new instance.
+    # (We ignore the volume Name, even though it's probably set, because
+    # it's prone to changes outside our control.)
 
     - name: Find all volumes attached to this instance.
       ec2_vol_facts:
@@ -25,14 +27,25 @@
 
     - name: Ensure volumes are correctly tagged
       assert:
-        msg: "Volume {{ item.id }} does not have correct Name/CreatingCluster tags"
+        msg: >
+          Volume {{ item.id }} should be tagged:
+          {% if item.tags['CreatingCluster']|default('no tag') != cluster_name -%}
+          CreatingCluster={{ cluster_name }}
+          (has {{ item.tags['CreatingCluster']|default('no tag') }})
+          {% endif -%}
+          {% if item.tags['TPAAttachmentLabel']|default('no tag') != label -%}
+          TPAAttachmentLabel={{ label }}
+          (has {{ item.tags['TPAAttachmentLabel']|default('no tag') }})
+          {% endif -%}
         that:
-          - item.tags|has_subkey('Name')
           - item.tags|has_subkey('CreatingCluster')
+          - item.tags|has_subkey('TPAAttachmentLabel')
           - item.tags.CreatingCluster == cluster_name
-          - item.tags.Name == "{{ cluster_name }}:{{ ec2_tag_node }}:{{ item.attachment_set.device }}"
+          - item.tags.TPAAttachmentLabel == label
       with_items:
         "{{ volumes.volumes }}"
+      vars:
+        label: "{{ cluster_name }}:{{ ec2_tag_node }}:{{ item.attachment_set.device }}"
 
     # The root volume should be deleted when the instance is terminated,
     # but the remaining volumes must not be deleted, because we depend

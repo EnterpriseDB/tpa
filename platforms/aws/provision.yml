@@ -321,6 +321,7 @@
           {{
             cluster_tags|combine({
               "Name": cluster_name + ':' + item.1.tags.node + ':' + item.2,
+              "TPAAttachmentLabel": cluster_name + ':' + item.1.tags.node + ':' + item.2,
               "CreatingCluster": cluster_name,
             })
           }}
