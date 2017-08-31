@@ -7,7 +7,7 @@ cluster_tags:
   Owner: gulcin
 
 cluster_vars:
-  cluster_network: 10.33.67.0/24
+  cluster_network: 10.33.125.0/24
   vpn_network: 192.168.33.0/24
 
 ec2_ami:
@@ -19,24 +19,24 @@ ec2_vpc:
 
 ec2_vpc_subnets:
   eu-west-1:
-    10.33.67.16/28:
+    10.33.125.16/28:
       az: eu-west-1b
-    10.33.67.32/28:
+    10.33.125.32/28:
       az: eu-west-1c
-    10.33.67.48/28:
+    10.33.125.48/28:
       az: eu-west-1b
-    10.33.67.64/28:
+    10.33.125.64/28:
       az: eu-west-1c
   eu-central-1:
-    10.33.67.80/28:
+    10.33.125.80/28:
       az: eu-central-1a
-    10.33.67.96/28:
+    10.33.125.96/28:
       az: eu-central-1b
-    10.33.67.112/28:
+    10.33.125.112/28:
       az: eu-central-1a
-    10.33.67.128/28:
+    10.33.125.128/28:
       az: eu-central-1b
-    10.33.67.144/28:
+    10.33.125.144/28:
       az: eu-central-1b
 
 instances:
@@ -46,7 +46,7 @@ instances:
     - node: 1
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.67.16/28
+      subnet: 10.33.125.16/28
       tags:
         role:
           - bdr
@@ -57,7 +57,7 @@ instances:
     - node: 2
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.67.32/28
+      subnet: 10.33.125.32/28
       tags:
         role: barman
         log: cluster-control
@@ -66,7 +66,7 @@ instances:
     - node: 3
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.67.48/28
+      subnet: 10.33.125.48/28
       tags:
         role:
           - bdr
@@ -77,7 +77,7 @@ instances:
     - node: 4
       type: t2.micro
       region: eu-west-1
-      subnet: 10.33.67.64/28
+      subnet: 10.33.125.64/28
       tags:
         role:
           - bdr
@@ -88,7 +88,7 @@ instances:
     - node: 5
       type: t2.micro
       region: eu-central-1
-      subnet: 10.33.67.80/28
+      subnet: 10.33.125.80/28
       tags:
         role:
           - bdr
@@ -99,7 +99,7 @@ instances:
     - node: 6
       type: t2.micro
       region: eu-central-1
-      subnet: 10.33.67.96/28
+      subnet: 10.33.125.96/28
       tags:
         role: barman
         log: cluster-control
@@ -108,7 +108,7 @@ instances:
     - node: 7
       type: t2.micro
       region: eu-central-1
-      subnet: 10.33.67.112/28
+      subnet: 10.33.125.112/28
       tags:
         role:
           - bdr
@@ -119,7 +119,7 @@ instances:
     - node: 8
       type: t2.micro
       region: eu-central-1
-      subnet: 10.33.67.128/28
+      subnet: 10.33.125.128/28
       tags:
         role:
           - bdr
@@ -130,7 +130,7 @@ instances:
     - node: 9
       type: t2.micro
       region: eu-central-1
-      subnet: 10.33.67.144/28
+      subnet: 10.33.125.144/28
       assign_elastic_ip: yes
       tags:
         role: control, backup, openvpn-server, log-server, pgbouncer
