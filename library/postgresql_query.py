@@ -21,7 +21,7 @@ options:
   conninfo:
     description:
       - A conninfo string to define connection parameters
-    required: true
+    required: false
     default: ""
 notes:
    - This module requires the I(psycopg2) Python library to be installed.
@@ -100,7 +100,6 @@ def main():
             m[k] = v
     module.exit_json(**m)
 
-# import module snippets
 from ansible.module_utils.basic import *
 from ansible.module_utils.database import *
 
