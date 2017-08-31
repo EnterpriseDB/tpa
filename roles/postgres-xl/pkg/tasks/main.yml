@@ -4,8 +4,8 @@
   file:
     path: /opt/Postgres-XL-{{pgxlversion}}
     state: directory
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0755
 
 - name: Unarchive Postgres-XL tarball onto control node

@@ -5,7 +5,7 @@ dependencies:
   # already been done), and likewise for barman.
 
   - role: sys/ssh/keygen
-    ssh_user: postgres
+    ssh_user: "{{ postgres_user }}"
 
   - role: sys/ssh/keygen
     ssh_user: barman
@@ -45,7 +45,7 @@ dependencies:
   # replica, so there's no point trying to be more restrictive.)
 
   - role: sys/ssh/authorize
-    ssh_user: postgres
+    ssh_user: "{{ postgres_user }}"
     ssh_key_name: id_barman
     when: >
       'postgres' in role or 'postgres-xl' in role

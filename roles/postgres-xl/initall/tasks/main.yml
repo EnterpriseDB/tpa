@@ -6,16 +6,16 @@
   file:
     path: /pgxl/data
     state: directory
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0755
 
 - name: Ensure that /pgxl/wal exists
   file:
     path: /pgxl/wal
     state: directory
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0755
 
 

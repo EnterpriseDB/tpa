@@ -278,7 +278,7 @@ check_pgpool_options: ""
 check_pg_bouncer: false
 
 pg_bouncer_port: 5433
-pg_bouncer_user: postgres
+pg_bouncer_user: "{{ postgres_user }}"
 
 # Number of backends below maximum
 pg_bouncer_backends_w: -10

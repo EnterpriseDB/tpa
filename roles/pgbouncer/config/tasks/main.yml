@@ -4,8 +4,8 @@
 - name: Ensure /var/run/pgbouncer exists
   file:
     path: /var/run/pgbouncer
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    owner: "{{ postgres_group }}"
     mode: 0755
     state: directory
 
@@ -13,8 +13,8 @@
 - name: Ensure /etc/pgbouncer exists
   file:
     path: /etc/pgbouncer
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    owner: "{{ postgres_group }}"
     mode: 0700
     state: directory
 
@@ -22,8 +22,8 @@
   template:
     src: pgbouncer.ini.j2
     dest: "/etc/pgbouncer/pgbouncer.ini"
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    owner: "{{ postgres_group }}"
     mode: 0640
   notify:
     - Note pgbouncer restart required
@@ -32,8 +32,8 @@
   template:
     src: userlist.txt.j2
     dest: "/etc/pgbouncer/userlist.txt"
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    owner: "{{ postgres_group }}"
     mode: 0600
   notify:
     - Note pgbouncer restart required

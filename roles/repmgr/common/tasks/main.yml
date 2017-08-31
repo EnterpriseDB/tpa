@@ -20,8 +20,8 @@
 - name: Ensure repmgr directories exist
   file:
     path: "{{ item }}"
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0755
     state: directory
   with_items:
@@ -32,8 +32,8 @@
   template:
     src: "{{ item.path }}.j2"
     dest: "{{ repmgr_conf_dir }}/{{ item.path }}"
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: "{{ item.mode }}"
   with_items:
     - {mode: "0644", path: repmgr.conf}
