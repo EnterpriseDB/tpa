@@ -20,7 +20,8 @@
     region: "{{ ec2_region }}"
   register: i
   until: >
-    i.result.instance_state.name == 'running'
+    i|succeeded
+    and i.result.instance_state.name == 'running'
     and i.result.system_status.status == 'ok'
     and i.result.instance_status.status == 'ok'
     and i.result.system_status|json_query("details[?name=='reachability'].status|[0]") == 'passed'
