@@ -14,42 +14,11 @@ description:
      module is not named postgresql_facts).
 version_added: "2.4"
 options:
-  postgres_version:
+  conninfo:
     description:
-      - The declared Postgres version number (m.n)
-    required: true
-  postgres_user:
-    description:
-      - The declared Postgres system username
-    required: true
-  postgres_group:
-    description:
-      - The declared Postgres system group name
-    required: true
-  postgres_home:
-    description:
-      - The declared Postgres system user's home directory
-    required: true
-  postgres_bin_dir:
-    description:
-      - The declared Postgres binary installation path
-    required: true
-  postgres_data_dir:
-    description:
-      - The declared Postgres data directory
-    required: true
-  postgres_host:
-    description:
-      - The declared Postgres server hostname or address
-    required: true
-  postgres_port:
-    description:
-      - The declared Postgres server port number
-    required: true
-  postgres_service_name:
-    description:
-      - The declared Postgres init service name
-    required: true
+      - A conninfo string for this server
+    required: false
+    default: ""
 notes:
    - This module requires the I(psycopg2) Python library to be installed.
 requirements: [ psycopg2 ]
@@ -59,21 +28,16 @@ author: "Abhijit Menon-Sen <ams@2ndQuadrant.com>"
 EXAMPLES = '''
 - name: Collect facts about the Postgres cluster
   cluster_discovery:
-    postgres_version: "{{ postgres_version }}"
-    postgres_user: "{{ postgres_user }}"
-    postgres_group: "{{ postgres_group }}"
-    postgres_home: "{{ postgres_home }}"
-    postgres_bin_dir: "{{ postgres_bin_dir }}"
-    postgres_data_dir: "{{ postgres_data_dir }}"
-    postgres_host: "{{ postgres_host }}"
-    postgres_port: "{{ postgres_port }}"
-    postgres_service_name: "{{ postgres_service_name }}"
+    conninfo: dbname=postgres
   register: p
 - debug: msg="the data directory is {{ p.postgres_data_dir }}"
 '''
 
+import io
 import os
 import sys
+import pwd
+import grp
 
 try:
     import psycopg2
@@ -84,17 +48,14 @@ else:
     psycopg2_found = True
 
 def main():
+
+    # We are passed in all of the overridable values set by postgres/vars, and
+    # have to test to see if they match this instance in reality. Then we can
+    # query the server and discover its role in the cluster.
+
     module = AnsibleModule(
         argument_spec=dict(
-            postgres_version=dict(required=True),
-            postgres_user=dict(required=True),
-            postgres_group=dict(required=True),
-            postgres_home=dict(required=True),
-            postgres_bin_dir=dict(required=True),
-            postgres_data_dir=dict(required=True),
-            postgres_host=dict(required=True),
-            postgres_port=dict(required=True),
-            postgres_service_name=dict(required=True)
+            conninfo=dict(default=""),
         ),
         supports_check_mode = True
     )
@@ -103,6 +64,60 @@ def main():
         module.fail_json(msg="the python psycopg2 module is required")
 
     m = dict(changed=False)
+
+    # We need to connect to Postgres as a superuser. The caller must provide a
+    # suitable conninfo string and invoke this module as a user that can use it
+    # to connect.
+
+    conninfo = module.params['conninfo']
+    try:
+        conn = psycopg2.connect(dsn=conninfo)
+        cur = conn.cursor()
+
+        m['pg_settings'] = settings = {}
+        cur.execute('SELECT name,setting FROM pg_settings')
+        for s in cur.fetchall():
+            settings.update({s[0]: s[1]})
+
+        m['postgres_port'] = int(settings['port'])
+        m['postgres_data_dir'] = settings['data_directory']
+
+        cur.execute('SELECT version()')
+        m['postgres_version_string'] = cur.fetchone()[0]
+        m['postgres_version_int'] = conn.server_version
+        m['postgres_version'] = '%d.%d.%d' % (
+            (conn.server_version/10000)%10,
+            (conn.server_version/100)%10,
+            (conn.server_version)%10,
+        )
+
+        cur.execute('SELECT pg_backend_pid()')
+        pid = cur.fetchone()[0]
+        m['postgres_bin_dir'] = os.path.dirname(os.readlink('/proc/%d/exe' % pid))
+
+        with io.open('/proc/%d/status' % pid, 'r') as status:
+            for line in status:
+                s = line.split()
+
+                if s[0] == 'Uid:':
+                    ent = pwd.getpwuid(int(s[1]))
+                    m['postgres_user'] = ent.pw_name
+                    m['postgres_home'] = ent.pw_dir
+                    
+                elif s[0] == 'Gid:':
+                    ent = grp.getgrgid(int(s[1]))
+                    m['postgres_group'] = ent.gr_name
+
+        cur.execute('SELECT pg_is_in_recovery()')
+        m['postgres_is_in_recovery'] = cur.fetchone()[0]
+
+    except Exception as e:
+        m['error'] = str(e)
+
+    # If we can't connect, all we can do is to check a few likely
+    # places to see if we can find matches for the basic OS-level facts.
+
+    m['failed'] = 'error' in m
 
     module.exit_json(**m)
 

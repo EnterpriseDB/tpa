@@ -2,15 +2,8 @@
 
 - name: Collect facts about the Postgres cluster
   cluster_discovery:
-    postgres_version: "{{ postgres_version }}"
-    postgres_user: "{{ postgres_user }}"
-    postgres_group: "{{ postgres_group }}"
-    postgres_home: "{{ postgres_home }}"
-    postgres_bin_dir: "{{ postgres_bin_dir }}"
-    postgres_data_dir: "{{ postgres_data_dir }}"
-    postgres_host: "{{ postgres_host }}"
-    postgres_port: "{{ postgres_port }}"
-    postgres_service_name: "{{ postgres_service_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
   register: p
 
 - debug: var=p
