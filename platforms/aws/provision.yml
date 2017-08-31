@@ -168,18 +168,19 @@
       tags: iam
 
     # When provisioning each instance, we must specify an AMI id to use.
-    # If the instance configuration specifies "image: ami-xxx" directly,
-    # we can use that value. As a convenience, if ec2_ami is set at the
-    # top level, we search for a matching AMI in each region and use its
-    # id by default.
+    # We search for an AMI matching ec2_ami['Name'] in each region and
+    # use its id by default. You can set "image: ami-xxx" directly for
+    # an instance if absolutely necessary, but this is not recommended.
     #
-    # The AMI for a region is then given by ec2_region_amis[region].
+    # The AMI id for a region is then given by ec2_region_amis[region].
     #
     # We also record the properties of each AMI id for later use.
 
     - include: ec2-region-amis.yml
       when:
-        ec2_region_amis is not defined and ec2_ami is defined
+        ec2_ami is defined and
+        (ec2_region_amis is not defined or ec2_cached_ami is not defined or
+         ec2_cached_ami != ec2_ami['Name'])
       tags: ami
 
     # If any instances[] reference an image whose properties we do not

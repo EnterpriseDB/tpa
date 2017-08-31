@@ -35,6 +35,11 @@
 
 - include: ../common/set-provisioning-var.yml
   vars:
+    name: ec2_cached_ami
+    value: "{{ ec2_ami['Name'] }}"
+
+- include: ../common/set-provisioning-var.yml
+  vars:
     name: ec2_ami_properties
     value: "{{ properties }}"
 
