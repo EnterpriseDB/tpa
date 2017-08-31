@@ -52,7 +52,6 @@ instances:
           - bdr
           - primary
         backup: barman-eu-west-1
-        log: cluster-control
 
     - node: 2
       type: t2.micro
@@ -60,7 +59,6 @@ instances:
       subnet: 10.33.125.32/28
       tags:
         role: barman
-        log: cluster-control
         Name: barman-eu-west-1
 
     - node: 3
@@ -71,8 +69,8 @@ instances:
         role:
           - bdr
           - replica
+        upstream: gds-1
         backup: barman-eu-west-1
-        log: cluster-control
 
     - node: 4
       type: t2.micro
@@ -82,8 +80,8 @@ instances:
         role:
           - bdr
           - replica
+        upstream: gds-1
         backup: barman-eu-west-1
-        log: cluster-control
 
     - node: 5
       type: t2.micro
@@ -94,7 +92,6 @@ instances:
           - bdr
           - primary
         backup: barman-eu-central-1
-        log: cluster-control
 
     - node: 6
       type: t2.micro
@@ -102,7 +99,6 @@ instances:
       subnet: 10.33.125.96/28
       tags:
         role: barman
-        log: cluster-control
         Name: barman-eu-central-1
 
     - node: 7
@@ -113,8 +109,8 @@ instances:
         role:
           - bdr
           - replica
+        upstream: gds-5
         backup: barman-eu-central-1
-        log: cluster-control
 
     - node: 8
       type: t2.micro
@@ -124,8 +120,8 @@ instances:
         role:
           - bdr
           - replica
+        upstream: gds-5
         backup: barman-eu-central-1
-        log: cluster-control
 
     - node: 9
       type: t2.micro
@@ -133,5 +129,10 @@ instances:
       subnet: 10.33.125.144/28
       assign_elastic_ip: yes
       tags:
-        role: control, backup, openvpn-server, log-server, pgbouncer
+        role:
+          - control
+          - backup
+          - openvpn-server
+          - log-server
+          - pgbouncer
         Name: cluster-control
