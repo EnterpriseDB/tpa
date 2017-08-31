@@ -4,6 +4,8 @@ allow_duplicates: no
 dependencies:
   - role: postgres/pkg
   - role: pglogical/pkg
+  - role: postgres/facts
+    tags: always
   - role: postgres/user
     tags: [postgres, user]
   - role: postgres/initdb
