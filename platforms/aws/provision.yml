@@ -241,13 +241,15 @@
               - unid_volumes|count == 0
           with_items: "{{ instances }}"
           when:
-            item.Name in reattach_hosts
+            item.Name in hosts_to_check
           vars:
             unid_volumes: "{{
               item|json_query('volumes[?attach_existing&&!volume_id].device_name')
             }}"
       when:
         require_reattachment|default('no') == 'yes' and reattach_hosts is defined
+      vars:
+       hosts_to_check: "{{ reattach_hosts.split(',') }}"
 
     - name: Debug user-data for instances
       debug:
