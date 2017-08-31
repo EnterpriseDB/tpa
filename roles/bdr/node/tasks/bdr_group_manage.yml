@@ -4,22 +4,22 @@
 
 - block:
   - name: Execute bdr_group_create
-    command: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -qAtw -c \"SELECT bdr.bdr_group_create(local_node_name := '{{inventory_hostname}}', node_external_dsn := '{{bdr_node_dsn}}');\""
+    command: "{{postgres_bin_dir}}/psql '{{bdr_node_dsn}}' -qAtw -c \"SELECT bdr.bdr_group_create(local_node_name := '{{inventory_hostname}}', node_external_dsn := '{{bdr_node_dsn}}');\""
     when: not bdr_node_exists
 
   - name: Ensure that the node is ready to replicate
-    command: "{{pgbindir}}/psql '{{bdr_node_dsn}}' -qAtw 'SELECT bdr.bdr_node_join_wait_for_ready();'"
+    command: "{{postgres_bin_dir}}/psql '{{bdr_node_dsn}}' -qAtw 'SELECT bdr.bdr_node_join_wait_for_ready();'"
     when: not bdr_node_exists
 
 # Configure other nodes from first node
 
   - name: Execute bdr_group_join
-    command: "{{pgbindir}}/psql '{{hostvars[item].bdr_node_dsn}}' -qAtw -c \"SELECT bdr.bdr_group_join(local_node_name := '{{item}}', node_external_dsn := '{{hostvars[item].bdr_node_dsn}}', join_using_dsn := '{{bdr_node_dsn}}');\""
+    command: "{{postgres_bin_dir}}/psql '{{hostvars[item].bdr_node_dsn}}' -qAtw -c \"SELECT bdr.bdr_group_join(local_node_name := '{{item}}', node_external_dsn := '{{hostvars[item].bdr_node_dsn}}', join_using_dsn := '{{bdr_node_dsn}}');\""
     when: "not hostvars[item].bdr_node_exists"
     with_items: "{{ bdr_other_hosts }}"
 
   - name: Ensure that the node is ready to replicate
-    command: "{{pgbindir}}/psql '{{hostvars[item].bdr_node_dsn}}' -qAtw -c 'SELECT bdr.bdr_node_join_wait_for_ready();'"
+    command: "{{postgres_bin_dir}}/psql '{{hostvars[item].bdr_node_dsn}}' -qAtw -c 'SELECT bdr.bdr_node_join_wait_for_ready();'"
     when: "not hostvars[item].bdr_node_exists"
     with_items: "{{ bdr_other_hosts }}"
   when: (bdr_control_host == inventory_hostname)
