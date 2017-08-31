@@ -11,5 +11,5 @@
   with_nested:
     - [postgres, template1]
     - "{{ postgres_extensions|default([]) }}"
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: true

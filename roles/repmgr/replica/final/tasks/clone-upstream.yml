@@ -12,7 +12,7 @@
       SELECT 42 as up
   register: upstreamconn
   ignore_errors: yes
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
 
 - name: Record name of upstream to clone
@@ -41,7 +41,7 @@
     upstream_conninfo: 'host={{ upstream }} user=repmgr dbname=repmgr'
     repmgr_schema: 'repmgr_{{ repmgr_cluster }}'
   changed_when: False
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
   when: >
     upstream_to_clone != upstream

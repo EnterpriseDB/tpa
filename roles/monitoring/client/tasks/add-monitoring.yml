@@ -259,19 +259,19 @@
 - name: Ensure postgres ~/bin directory exists
   file: path=~/bin state=directory
   become: yes
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   when: log_cleanup
 
 - name: Add log_retention_cleanup.sh
   template: src=bin/log_retention_cleanup.sh.j2 dest=~/bin/log_retention_cleanup.sh mode=0755
   become: yes
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   when: log_cleanup
 
 - name: Add log_retention_cleanup.sh as cronjob
   cron: name="log_retention_cleanup" minute="0" hour="0" job="~/bin/log_retention_cleanup.sh"
   become: yes
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   when: log_cleanup
 
 

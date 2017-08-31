@@ -34,5 +34,5 @@
   - name: Drop the test table
     command: "{{postgres_bin_dir}}/psql '{{bdr_node_dsn}}' -Atw -c 'SELECT bdr.bdr_replicate_ddl_command($$DROP TABLE public.bdr_test;$$);'"
   when: (bdr_control_host == inventory_hostname)
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes

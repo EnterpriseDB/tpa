@@ -15,7 +15,7 @@
   vars:
     repmgr_schema: 'repmgr_{{ repmgr_cluster }}'
   register: registration
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
 
 - fail:

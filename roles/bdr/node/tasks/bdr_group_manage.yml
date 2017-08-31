@@ -23,5 +23,5 @@
     when: "not hostvars[item].bdr_node_exists"
     with_items: "{{ bdr_other_hosts }}"
   when: (bdr_control_host == inventory_hostname)
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes

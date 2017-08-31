@@ -36,7 +36,7 @@
       {% for x in postgres_initdb_opts %}{{x|quote}} {% endfor %}
   environment:
     TZ: UTC
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
   when:
     not pgdata.stat.exists and 'replica' not in role

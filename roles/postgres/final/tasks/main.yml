@@ -39,6 +39,6 @@
         'replica' in role
   when: >
     pgbench|default('') == 'run'
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
   tags: pgbench

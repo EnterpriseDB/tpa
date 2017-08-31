@@ -20,7 +20,7 @@
     "{{ hostvars[control_hostname].private_ip }}:/opt/Postgres-XL-{{pgxlversion}}" /opt
   args:
     creates: "/opt/Postgres-XL-{{pgxlversion}}/bin/pgxc_ctl"
-  sudo_user: postgres
+  sudo_user: "{{ postgres_user }}"
   sudo: yes
   when: inventory_hostname != control_hostname
 

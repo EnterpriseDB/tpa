@@ -5,7 +5,7 @@
     name: repmgr
     owner: repmgr
     state: present
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
 
 - name: Check if the primary is registered
@@ -15,13 +15,13 @@
   register: primary
   ignore_errors: True
   changed_when: False
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
 
 - name: Run 'repmgr primary register' on the primary
   command: >
     {{ postgres_bin_dir }}/repmgr primary register --verbose \
       -f "{{ repmgr_conf_dir }}/repmgr.conf"
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
   when: primary|failed

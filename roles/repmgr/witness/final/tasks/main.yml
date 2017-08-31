@@ -5,7 +5,7 @@
     name: repmgr
     owner: repmgr
     state: present
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
 
 # If this instance is registered as a witness already, we don't need to
@@ -22,7 +22,7 @@
   vars:
     repmgr_schema: 'repmgr_{{ repmgr_cluster }}'
   register: registration
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
 
 - fail:
@@ -37,6 +37,6 @@
     {{ postgres_bin_dir }}/repmgr witness register --verbose \
       -f "{{ repmgr_conf_dir }}/repmgr.conf" \
       -h "{{ upstream_primary }}"
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
   when: registration.results|length == 0

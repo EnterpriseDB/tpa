@@ -16,7 +16,7 @@
     LC_ALL: en_US.UTF-8
     PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
   when: dtype == 'master' and not dirstat.stat.exists
-  sudo_user: postgres
+  sudo_user: "{{ postgres_user }}"
   sudo: true
   delegate_to: "{{ control_hostname }}"
 
@@ -28,6 +28,6 @@
     LC_ALL: en_US.UTF-8
     PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
   when: dtype == 'replica' and not dirstat.stat.exists
-  sudo_user: postgres
+  sudo_user: "{{ postgres_user }}"
   sudo: true
   delegate_to: "{{ control_hostname }}"

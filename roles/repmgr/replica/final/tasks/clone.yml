@@ -28,7 +28,7 @@
       -d repmgr -U repmgr -w 0 --fast-checkpoint --no-conninfo-password \
       --copy-external-config-files \
       -h {{ upstream_to_clone|default(upstream_primary) }}
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: true
 
 - name: Start Postgres
@@ -39,7 +39,7 @@
 - name: Wait for Postgres to become available
   command: >
     {{ postgres_bin_dir }}/pg_isready --timeout 5
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
   register: ready
   ignore_errors: yes
@@ -54,5 +54,5 @@
   command: >
     {{ postgres_bin_dir }}/repmgr standby register --verbose \
       -f "{{ repmgr_conf_dir }}/repmgr.conf" --force --wait-sync
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: true

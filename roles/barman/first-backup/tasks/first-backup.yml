@@ -18,7 +18,7 @@
       from pg_stat_replication r join pg_replication_slots s on (r.pid=s.active_pid)
       where application_name='barman_receive_wal' and
       slot_name='barman' and state='streaming'
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
   register: receivers
   until: >
@@ -37,7 +37,7 @@
     query: >
       select pg_xlogfile_name(pg_switch_xlog()) as filename
   delegate_to: "{{ inventory_hostname|upstream_root(hostvars) }}"
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
   register: xlog
   failed_when: >

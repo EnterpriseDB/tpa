@@ -3,5 +3,5 @@
 - name: Run pgbench
   command: >
     pgbench {{ pgbench_opts }}
-  become_user: postgres
+  become_user: "{{ postgres_user }}"
   become: yes
