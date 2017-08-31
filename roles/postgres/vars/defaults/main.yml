@@ -3,7 +3,6 @@
 default_postgres_version: 9.6
 
 default_postgres_user: postgres
-default_postgres_group: postgres
 
 default_postgres_home_dirs:
   Debian: /var/lib/postgresql

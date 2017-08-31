@@ -9,10 +9,6 @@
 # and group, so this role should not be run before postgres/pkg. Any
 # time after it (or without it) is fine, though.
 
-- name: Record the postgres group name
-  set_fact:
-    postgres_group: "{{ postgres_group|default(postgres_user) }}"
-
 - name: Create Postgres group {{ postgres_group }}
   group:
     state: present
