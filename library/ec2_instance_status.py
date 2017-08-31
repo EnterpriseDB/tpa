@@ -63,6 +63,8 @@ def get_instance_status(module, client):
         status = client.describe_instance_status(InstanceIds=[instance_id])['InstanceStatuses'][0]
     except (botocore.exceptions.ClientError) as e:
         module.fail_json(msg=e.response['Error']['Message'])
+    except Exception as e:
+        module.fail_json(msg=str(e))
 
     return camel_dict_to_snake_dict(status)
 
@@ -83,6 +85,8 @@ def main():
         client = boto3_conn(module, conn_type='client', resource='ec2', region=region, endpoint=ec2_url, **aws_connect_params)
     except (botocore.exceptions.NoCredentialsError, botocore.exceptions.ProfileNotFound) as e:
         module.fail_json(msg=e.message, exception=traceback.format_exc(), **camel_dict_to_snake_dict(e.response))
+    except Exception as e:
+        module.fail_json(msg=str(e))
 
     module.exit_json(result=get_instance_status(module, client))
 
