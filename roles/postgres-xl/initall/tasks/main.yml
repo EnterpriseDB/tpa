@@ -37,8 +37,8 @@
         src: pgxc_ctl.conf.j2
         dest: ~postgres/pgxc_ctl.conf
   when: inventory_hostname == control_hostname and not conf.stat.exists
-  sudo_user: "{{ postgres_user }}"
-  sudo: true
+  become_user: "{{ postgres_user }}"
+  become: true
 
 - include: gtm_roles.yml gtype=gtm
   when: >

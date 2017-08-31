@@ -10,7 +10,7 @@
 - block:
     - name: Try to run lsb_release -ics
       raw: lsb_release -ics
-      sudo: false
+      become: false
       ignore_errors: yes
       changed_when: False
       register: lsb_release

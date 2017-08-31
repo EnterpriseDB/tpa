@@ -27,8 +27,8 @@
   hosts: tag_Cluster_BDR2Test
   any_errors_fatal: True
   max_fail_percentage: 0
-  sudo_user: root
-  sudo: true
+  become_user: root
+  become: true
 
   vars:
     ansible_distribution: Debian
@@ -104,8 +104,8 @@
 - name: Ensure /etc/hosts is correct cluster-wide
   any_errors_fatal: True
   max_fail_percentage: 0
-  sudo_user: root
-  sudo: yes
+  become_user: root
+  become: yes
   hosts: all
   roles:
     - role: sys/hosts

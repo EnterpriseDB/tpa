@@ -15,8 +15,8 @@
       LC_ALL: en_US.UTF-8
       PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
     when: not dirstat.stat.exists
-    sudo_user: "{{ postgres_user }}"
-    sudo: true
+    become_user: "{{ postgres_user }}"
+    become: true
     delegate_to: "{{ control_hostname }}"
   when:
     dtype == 'gtm-proxy' and inventory_hostname == gphost

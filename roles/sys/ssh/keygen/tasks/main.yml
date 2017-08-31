@@ -23,6 +23,6 @@
     key.rc not in [0, 88, 99]
   changed_when:
     key.rc == 88
-  sudo: no
+  become: no
   vars:
     keyfile: "{{ _ssh_key_dir }}/{{ _ssh_key_name }}"

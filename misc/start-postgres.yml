@@ -3,8 +3,8 @@
 - name: Start Postgres on given nodes
   hosts: "{{ hosts }}"
   remote_user: admin
-  sudo_user: root
-  sudo: true
+  become_user: root
+  become: true
   vars:
     luks_volume: postgres
     luks_device: /dev/xvdb

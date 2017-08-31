@@ -6,14 +6,14 @@
     path: "{{ _local_cert_dir }}"
     state: directory
   run_once: yes
-  sudo: no
+  become: no
 
 - name: Copy custom openssl configuration to certs directory
   local_action:
     module: template
     src: openssl.cnf.j2
     dest: "{{ _local_cert_dir }}/openssl.cnf"
-  sudo: no
+  become: no
 
 - name: Generate CA key and self-signed CA certificate
   local_action: >
@@ -26,7 +26,7 @@
     chdir: "{{ _local_cert_dir }}"
     creates: "ca.key"
   run_once: yes
-  sudo: no
+  become: no
 
 - name: Generate host key and CSR for each instance
   local_action: >
@@ -39,7 +39,7 @@
   args:
     chdir: "{{ _local_cert_dir }}"
     creates: "{{ inventory_hostname }}.key"
-  sudo: no
+  become: no
 
 - name: Select extension type for host certificate
   set_fact:
@@ -58,7 +58,7 @@
   args:
     chdir: "{{ _local_cert_dir }}"
     creates: "{{ inventory_hostname }}.crt"
-  sudo: no
+  become: no
 
 - name: Generate DH parameters
   local_action: >
@@ -69,7 +69,7 @@
     chdir: "{{ _local_cert_dir }}"
     creates: "dh2048.pem"
   run_once: yes
-  sudo: no
+  become: no
 
 - name: Generate TLS authentication key
   local_action: >
@@ -80,4 +80,4 @@
     chdir: "{{ _local_cert_dir }}"
     creates: "ta.key"
   run_once: yes
-  sudo: no
+  become: no

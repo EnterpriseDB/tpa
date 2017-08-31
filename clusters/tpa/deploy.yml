@@ -27,8 +27,8 @@
 - name: Set up TPA cluster nodes
   any_errors_fatal: True
   max_fail_percentage: 0
-  sudo_user: root
-  sudo: true
+  become_user: root
+  become: true
 
   hosts: "{{ deploy_hosts|default('all') }}"
   roles:
@@ -95,8 +95,8 @@
 - name: Ensure /etc/hosts is correct cluster-wide
   any_errors_fatal: True
   max_fail_percentage: 0
-  sudo_user: root
-  sudo: yes
+  become_user: root
+  become: yes
   hosts: all
   roles:
     - role: sys/hosts

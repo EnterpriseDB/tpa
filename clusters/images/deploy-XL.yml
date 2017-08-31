@@ -3,8 +3,8 @@
 - name: Set up TPA image nodes
   any_errors_fatal: True
   max_fail_percentage: 0
-  sudo_user: root
-  sudo: true
+  become_user: root
+  become: true
 
   # This is incomplete and currently untested.
 

@@ -13,8 +13,8 @@
     LC_ALL: en_US.UTF-8
     PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
   when: gtype == 'gtm' and not dirstat.stat.exists
-  sudo_user: "{{ postgres_user }}"
-  sudo: true
+  become_user: "{{ postgres_user }}"
+  become: true
   delegate_to: "{{ control_hostname }}"
 
 - name: Check if GTM Standby exists
@@ -30,6 +30,6 @@
     LC_ALL: en_US.UTF-8
     PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
   when: gtype == 'gtm_standby' and not dirstat.stat.exists
-  sudo_user: "{{ postgres_user }}"
-  sudo: true
+  become_user: "{{ postgres_user }}"
+  become: true
   delegate_to: "{{ control_hostname }}"

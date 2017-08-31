@@ -16,8 +16,8 @@
     LC_ALL: en_US.UTF-8
     PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
   when: dtype == 'master' and not dirstat.stat.exists
-  sudo_user: "{{ postgres_user }}"
-  sudo: true
+  become_user: "{{ postgres_user }}"
+  become: true
   delegate_to: "{{ control_hostname }}"
 
 - name: Add Datanode Replica if it does not exist 
@@ -28,6 +28,6 @@
     LC_ALL: en_US.UTF-8
     PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
   when: dtype == 'replica' and not dirstat.stat.exists
-  sudo_user: "{{ postgres_user }}"
-  sudo: true
+  become_user: "{{ postgres_user }}"
+  become: true
   delegate_to: "{{ control_hostname }}"
