@@ -24,14 +24,14 @@
 
 - name: Set default bdr_control_host in case of new cluster
   set_fact:
-    bdr_control_host: "{{ groups['tag_role_bdr'] | first }}"
+    bdr_control_host: "{{ groups['tag_role_primary'] | first }}"
 
 - name: Set bdr_control_host in case of an existing cluster
   set_fact:
     bdr_control_host: "{{ item }}"
   when: "hostvars[item].bdr_node_exists"
-  with_items: "{{ groups['tag_role_bdr'] }}"
+  with_items: "{{ groups['tag_role_primary'] }}"
 
 - name: Set bdr_other_hosts
   set_fact:
-    bdr_other_hosts: "{{ groups['tag_role_bdr'] | difference([bdr_control_host]) | list }}"
+    bdr_other_hosts: "{{ groups['tag_role_primary'] | difference([bdr_control_host]) | list }}"
