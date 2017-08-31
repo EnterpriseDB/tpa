@@ -6,23 +6,23 @@
 
 postgres_packages:
   Debian: &debian_packages
-    - postgresql-{{pgversion}}
-    - postgresql-{{pgversion}}-dbg
-    - postgresql-client-{{pgversion}}
-    - postgresql-contrib-{{pgversion}}
-    - postgresql-server-dev-{{pgversion}}
-    - postgresql-plperl-{{pgversion}}
-    - postgresql-{{pgversion}}-plv8
+    - postgresql-{{postgres_version}}
+    - postgresql-{{postgres_version}}-dbg
+    - postgresql-client-{{postgres_version}}
+    - postgresql-contrib-{{postgres_version}}
+    - postgresql-server-dev-{{postgres_version}}
+    - postgresql-plperl-{{postgres_version}}
+    - postgresql-{{postgres_version}}-plv8
     - barman-cli
   RedHat:
-    - postgresql{{pgversionNN}}
-    - postgresql{{pgversionNN}}-debuginfo
-    - postgresql{{pgversionNN}}-contrib
-    - postgresql{{pgversionNN}}-server
-    - postgresql{{pgversionNN}}-devel
-    - postgresql{{pgversionNN}}-libs
-    - postgresql{{pgversionNN}}-plperl
-    - plv8_{{pgversionNN}}
+    - postgresql{{postgres_versionNN}}
+    - postgresql{{postgres_versionNN}}-debuginfo
+    - postgresql{{postgres_versionNN}}-contrib
+    - postgresql{{postgres_versionNN}}-server
+    - postgresql{{postgres_versionNN}}-devel
+    - postgresql{{postgres_versionNN}}-libs
+    - postgresql{{postgres_versionNN}}-plperl
+    - plv8_{{postgres_versionNN}}
     - barman-cli
   Ubuntu: *debian_packages
 
@@ -33,4 +33,4 @@ extra_postgres_packages:
 
 default_postgres_service_names:
   Debian: "postgresql"
-  RedHat: "postgresql-{{ pgversion }}"
+  RedHat: "postgresql-{{ postgres_version }}"

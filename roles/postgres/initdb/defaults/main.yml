@@ -4,5 +4,5 @@ postgres_initdb_opts:
   - --data-checksums
 
 default_postgres_data_dirs:
-  Debian: "/var/lib/postgresql/{{ pgversion }}/main"
-  RedHat: "/var/lib/pgsql/{{ pgversion }}/data"
+  Debian: "/var/lib/postgresql/{{ postgres_version }}/main"
+  RedHat: "/var/lib/pgsql/{{ postgres_version }}/data"

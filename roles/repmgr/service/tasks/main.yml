@@ -2,7 +2,7 @@
 
 - name: Enable repmgr service
   service:
-    name: "repmgr{{ pgversionNN }}"
+    name: "repmgr{{ postgres_versionNN }}"
     enabled: yes
   when: >
     'postgres' in role

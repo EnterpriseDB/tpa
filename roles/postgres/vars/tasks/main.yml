@@ -2,9 +2,8 @@
 
 - name: Set postgres_version
   set_fact:
-    pgversion: "{{ version }}"
-    pgversionNN: "{{ version|replace('.','') }}"
     postgres_version: "{{ version }}"
+    postgres_versionNN: "{{ version|replace('.','') }}"
   vars:
     version: "{{ postgres_version|default(default_postgres_version) }}"
   tags: always

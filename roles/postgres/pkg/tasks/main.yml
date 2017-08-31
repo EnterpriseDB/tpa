@@ -36,9 +36,9 @@
   vars:
     pgespresso_packages:
       Debian:
-        - postgresql-{{pgversion}}-pgespresso
+        - postgresql-{{postgres_version}}-pgespresso
       RedHat:
-        - pgespresso{{pgversionNN}}
+        - pgespresso{{postgres_versionNN}}
   tags: [postgres, pkg]
 
 # We install our own service units later, so we disable the packaged

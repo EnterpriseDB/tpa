@@ -4,5 +4,5 @@
 
 - name: Start or restart repmgrd
   service:
-    name: "repmgr{{ pgversionNN }}"
+    name: "repmgr{{ postgres_versionNN }}"
     state: "{{ repmgr_service_end_state|default('started') }}"

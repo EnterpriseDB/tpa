@@ -2,10 +2,10 @@
 
 - name: Ensure Postgres configuration is present
   assert:
-    msg: "Please include the postgres/vars role to define pgversion"
+    msg: "Please include the postgres/vars role to define postgres_version"
     that:
-      - pgversion is defined
-      - pgversionNN is defined
+      - postgres_version is defined
+      - postgres_versionNN is defined
 
 # Given a Postgres version, we perform distribution-specific tasks to
 # enable repositories and install Postgres packages.

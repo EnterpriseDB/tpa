@@ -24,12 +24,12 @@ Postgres
 
 The easiest way to install Postgres is from operating system packages.
 The postgres/pkg role can be applied to any host to install the PGDG
-packages for any supported distribution. Change pgversion to install
-some other version than the default 9.4.
+packages for any supported distribution. Change postgres_version to
+install some other version than the default 9.6.
 
     roles:
       - role: 'postgres/pkg'
-        pgversion: 9.3
+        postgres_version: 9.4
 
 The postgres/src and postgres/ext roles are provided to build and
 install Postgres from source.
@@ -43,7 +43,7 @@ configure and build flags.
       - role: 'postgres/src'
         postgres_git_url: git://git.postgresql.org/git/postgresql.git
         postgres_git_ref: REL9_5_STABLE
-        pgversion: 9.5
+        postgres_version: 9.5
 
 Once installed, the postgres/initdb and postgres/config roles can be
 used to create a database cluster and configure it. On platforms where

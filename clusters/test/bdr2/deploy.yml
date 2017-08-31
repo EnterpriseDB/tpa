@@ -41,8 +41,8 @@
         repo: "deb http://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/bdr_2.0/latest/deb/ {{ ansible_distribution_release }} main"
         versions: [9.6]
     extra_postgres_packages:
-      Debian: &debian_extra_packages ['postgresql-{{pgversion}}-bdr-plugin']
-      RedHat: ['postgresql{{pgversionNN}}-bdr']
+      Debian: &debian_extra_packages ['postgresql-{{postgres_version}}-bdr-plugin']
+      RedHat: ['postgresql{{postgres_versionNN}}-bdr']
       Ubuntu: *debian_extra_packages
     postgres_extensions:
       - pg_stat_statements

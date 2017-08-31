@@ -20,7 +20,7 @@ postgres_git_reference_repo: ""
 
 postgres_src_dir: /opt/postgres/src
 postgres_build_dir: /opt/postgres/build
-postgres_install_dir: /opt/postgres/{{pgversion}}
+postgres_install_dir: /opt/postgres/{{postgres_version}}
 
 ## Build customisation
 #

@@ -11,5 +11,5 @@ default_postgres_home_dirs:
 default_postgres_data_dir: /opt/postgres/data
 
 default_postgres_bin_dirs:
-  Debian: "/usr/lib/postgresql/{{ pgversion }}/bin"
-  RedHat: "/usr/pgsql-{{ pgversion }}/bin"
+  Debian: "/usr/lib/postgresql/{{ postgres_version }}/bin"
+  RedHat: "/usr/pgsql-{{ postgres_version }}/bin"

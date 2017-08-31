@@ -80,14 +80,14 @@ checkpoint_warning = {{ checkpoint_warning|default('2min') }}
 checkpoint_timeout = {{ checkpoint_timeout|default('30min') }}
 checkpoint_completion_target = {{ checkpoint_completion_target|default(0.9) }}
 
-{% if pgversion|version_compare('9.5', '>=') %}
+{% if postgres_version|version_compare('9.5', '>=') %}
 max_wal_size = {{ max_wal_size|default('4GB') }}
 min_wal_size = {{ min_wal_size|default('128MB') }}
 {% else %}
 checkpoint_segments = {{ checkpoint_segments|default(128) }}
 {% endif %}
 
-{% if pgversion|version_compare('9.4', '>') %}
+{% if postgres_version|version_compare('9.4', '>') %}
 wal_compression = {{ wal_compression|default('off') }}
 operator_precedence_warning = {{ operator_precedence_warning|default('off') }}
 {% endif %}

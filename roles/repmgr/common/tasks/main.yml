@@ -45,7 +45,7 @@
 - name: Install repmgr unit file
   template:
     src: repmgr.service.j2
-    dest: /etc/systemd/system/repmgr{{pgversionNN}}.service
+    dest: /etc/systemd/system/repmgr{{postgres_versionNN}}.service
     owner: root
     group: root
     mode: 0644
