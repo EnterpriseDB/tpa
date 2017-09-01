@@ -59,8 +59,17 @@ def get_instance_status(module, client):
 
     instance_id = module.params.get('instance_id')
 
+    status = {'failed': True}
     try:
-        status = client.describe_instance_status(InstanceIds=[instance_id])['InstanceStatuses'][0]
+        ret = client.describe_instance_status(InstanceIds=[instance_id])
+        status['results'] = ret
+        if 'InstanceStatuses' in ret:
+            del status['failed']
+            ret = ret['InstanceStatuses']
+            status['request_status'] = 'unknown'
+            if len(ret) == 1:
+                status = ret[0]
+                status['request_status'] = 'ok'
     except (botocore.exceptions.ClientError) as e:
         module.fail_json(msg=e.response['Error']['Message'])
     except Exception as e:
@@ -88,7 +97,7 @@ def main():
     except Exception as e:
         module.fail_json(msg=str(e))
 
-    module.exit_json(result=get_instance_status(module, client))
+    module.exit_json(**get_instance_status(module, client))
 
 if __name__ == '__main__':
     main()

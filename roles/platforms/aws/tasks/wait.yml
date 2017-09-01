@@ -20,10 +20,11 @@
     region: "{{ ec2_region }}"
   register: i
   until: >
-    i|succeeded
-    and i.result.instance_state.name == 'running'
-    and i.result.system_status.status == 'ok'
-    and i.result.instance_status.status == 'ok'
-    and i.result.system_status|json_query("details[?name=='reachability'].status|[0]") == 'passed'
-    and i.result.instance_status|json_query("details[?name=='reachability'].status|[0]") == 'passed'
+    i|failed
+    or (i.request_status == 'ok'
+    and i.system_status.status == 'ok'
+    and i.instance_status.status == 'ok'
+    and i.instance_state.name == 'running'
+    and i.system_status|json_query("details[?name=='reachability'].status|[0]") == 'passed'
+    and i.instance_status|json_query("details[?name=='reachability'].status|[0]") == 'passed')
   retries: 60
