@@ -10,7 +10,7 @@ module: ec2_instance_status
 short_description: Return DescribeInstanceResults for a single EC2 instance
 description:
    - Issue a DescribeInstanceStatus request for a single instance and return the
-     (first/only) resulting "InstanceStatuses" as a dict in 'result'.
+     (first/only) resulting "InstanceStatuses".
 version_added: "2.4"
 options:
   instance_id:
@@ -31,13 +31,6 @@ EXAMPLES = '''
   register: i
 '''
 
-RETURN = '''
-result:
-  description: "First InstanceStatuses entry"
-  returned: always
-  type: dict
-'''
-
 import traceback
 
 try:
@@ -55,6 +48,13 @@ def get_instance_status(module, client):
     results.
 
     http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstanceStatus.html
+
+    The results are described in the following links:
+
+    http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceStatus.html
+    http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceState.html
+    http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceStatusSummary.html
+    http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceStatusDetails.html
     """
 
     instance_id = module.params.get('instance_id')
@@ -67,14 +67,31 @@ def get_instance_status(module, client):
             ret = ret['InstanceStatuses']
             status['request_status'] = 'unknown'
             if len(ret) == 1:
-                status = ret[0]
+                status = camel_dict_to_snake_dict(ret[0])
                 status['request_status'] = 'ok'
+
+                # InstanceStatusSummary.status may be 'ok', 'impaired',
+                # 'insufficient-data', 'not-applicable', or 'initializing'.
+
+                if status['instance_status']['status'] == 'impaired' or \
+                    status['system_status']['status'] == 'impaired':
+                    status['failed'] = True
+
+                # InstanceStatusDetails.status may be 'passed', 'failed',
+                # 'insufficient-data', or 'initializing'.
+
+                for i in status['instance_status']['details'] + \
+                    status['system_status']['details']:
+                    if i['status'] == 'failed':
+                        status['failed'] = True
+                        break
+
     except (botocore.exceptions.ClientError) as e:
         module.fail_json(msg=e.response['Error']['Message'])
     except Exception as e:
         module.fail_json(msg=str(e))
 
-    return camel_dict_to_snake_dict(status)
+    return status
 
 def main():
     argument_spec = ec2_argument_spec()
