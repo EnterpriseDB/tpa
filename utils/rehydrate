@@ -28,6 +28,11 @@ if [ "${1:-'NO_PLEASE_SAVE_MY_CLUSTER'}" = "I_REALLY_WANT_TO_DESTROY_MY_ENTIRE_C
     shift
 fi
 
+V=${1:-''}
+if [ "$V" != "" -a "${V:0:2}" = "-v" ]; then
+    shift
+fi
+
 cluster_dir=$cluster
 if [[ ${cluster_dir:0:1} != '/' ]]; then
     clusters=$(realpath $utils/../clusters);
@@ -42,7 +47,7 @@ fi
 
 # Terminate the old instances after performing sanity checks.
 
-$utils/ansible-playbook \
+$utils/ansible-playbook $V \
     $utils/../platforms/aws/terminate-for-rehydration.yml \
     -e i_really_want_to_destroy_my_entire_cluster=$DESTROY \
     -i $cluster_dir/inventory \
@@ -53,11 +58,11 @@ $utils/ansible-playbook \
 
 $utils/provision $cluster_dir \
     -e require_reattachment=yes \
-    -e reattach_hosts="$instances"
+    -e reattach_hosts="$instances" $V
 
 # Redeploy to the new instances.
 #
 # If this fails for any reason, it's safe to rerun the command below by
 # hand. Other than defining deploy_hosts, it's a normal deploy command.
 
-$utils/deploy $cluster_dir -e deploy_hosts="$instances" "$@"
+$utils/deploy $cluster_dir -e deploy_hosts="$instances" "$@" $V
