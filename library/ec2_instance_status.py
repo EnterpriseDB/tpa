@@ -64,7 +64,6 @@ def get_instance_status(module, client):
         ret = client.describe_instance_status(InstanceIds=[instance_id])
         status['results'] = ret
         if 'InstanceStatuses' in ret:
-            del status['failed']
             ret = ret['InstanceStatuses']
             status['request_status'] = 'unknown'
             if len(ret) == 1:
