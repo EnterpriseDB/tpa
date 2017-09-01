@@ -44,6 +44,8 @@
           - item.tags.TPAAttachmentLabel == label
       with_items:
         "{{ volumes.volumes }}"
+      when:
+        item.attachment_set.device not in ['/dev/xvda','/dev/sda1']
       vars:
         label: "{{ cluster_name }}:{{ ec2_tag_node }}:{{ item.attachment_set.device }}"
 
