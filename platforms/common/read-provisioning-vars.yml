@@ -14,7 +14,9 @@
 - name: Set empty provisioning_vars if vars.json was not loaded
   set_fact:
     provisioning_vars: {}
-  when: provisioning_vars is not defined
+  when:
+    provisioning_vars is not defined
+    or discard_cache|default('no') == 'yes'
 
 - name: Find provisioning_vars that will be overriden
   set_fact:
@@ -33,7 +35,9 @@
   register: overriden
 
 - include: write-provisioning-vars.yml
-  when: not overriden|skipped
+  when:
+    not overriden|skipped
+    or discard_cache|default('no') == 'yes'
 
 - name: Set facts from remaining provisioning_vars
   action: set_fact
