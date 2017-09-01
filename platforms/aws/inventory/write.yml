@@ -13,8 +13,8 @@
 
 - name: Remove old inventory cache
   file:
-    path: "{{ cluster_dir }}/tmp/{{ item }}"
+    path: "{{ item }}"
     state: absent
-  with_items:
-    - ansible-ec2.cache
-    - ansible-ec2.index
+  with_fileglob:
+    - "{{ cluster_dir }}/tmp/ansible-ec2*.cache"
+    - "{{ cluster_dir }}/tmp/ansible-ec2*.index"
