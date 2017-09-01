@@ -11,6 +11,12 @@
             i_really_want_to_destroy_my_entire_cluster|default('no') == 'yes'
       run_once: true
 
+    - assert:
+        msg: "This host was not found in the EC2 dynamic inventory output"
+        that:
+          - ec2_id is defined
+          - ec2_region is defined
+
     # Every volume attached to the instance is required to have
     # "TPAAttachmentLabel" and "CreatingCluster" tags with the correct
     # values, so that it will be found when provisioning a new instance.
