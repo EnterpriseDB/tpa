@@ -1,9 +1,25 @@
 ---
 
+# We take it for granted that we can connect to localhost as postgres to
+# gather cluster facts.
+
 - name: Collect facts about the Postgres cluster
   cluster_discovery:
+    conninfo: ""
   become_user: "{{ postgres_user }}"
   become: yes
   register: p
 
-- debug: var=p
+# Update the role of this server if it has changed.
+
+- name: Override instance role if required
+  set_fact:
+    role: "{{
+      role
+      |reject('equalto', 'primary')
+      |reject('equalto', 'replica')
+      |list|union([p.role])
+    }}"
+  when: >
+    ('primary' in role and 'replica' in p) or
+    ('replica' in role and 'replica' not in p)
