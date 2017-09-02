@@ -22,7 +22,7 @@ options:
     description:
       - A conninfo string to define connection parameters
     required: false
-    default: ""
+    default: "''"
 notes:
    - This module requires the I(psycopg2) Python library to be installed.
 requirements: [ psycopg2 ]
