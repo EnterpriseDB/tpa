@@ -43,8 +43,7 @@ instances:
       tags:
         role: primary
       vars:
-        max_connections: 222
-        shared_buffers: '64MB'
+        work_mem: 16MB
 
     - node: 2
       Name: plum
@@ -62,6 +61,8 @@ instances:
         role: replica
         upstream: pear
         backup: peach
+      vars:
+        work_mem: 21MB
 
     - node: 3
       Name: kiwi
