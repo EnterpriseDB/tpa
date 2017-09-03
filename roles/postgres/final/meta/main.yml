@@ -3,6 +3,8 @@
 dependencies:
   - role: postgres/service
   - role: postgres/restart
+  - role: postgres/facts
+    tags: always
   - role: postgres/pgpass
   - role: postgres/createuser/final
     when: >

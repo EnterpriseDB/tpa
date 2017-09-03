@@ -6,6 +6,7 @@
 - name: Collect facts about the Postgres cluster
   cluster_discovery:
     conninfo: ""
+    postgres_data_dir: "{{ postgres_data_dir }}"
   become_user: "{{ postgres_user }}"
   become: yes
   register: p
@@ -21,5 +22,6 @@
       |list|union([p.role])
     }}"
   when: >
-    ('primary' in role and 'replica' in p) or
-    ('replica' in role and 'replica' not in p)
+    'role' in p and
+    (('primary' in role and 'replica' in p) or
+     ('replica' in role and 'replica' not in p))

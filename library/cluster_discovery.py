@@ -42,13 +42,13 @@
 # above). We connect to Postgres and execute queries that can be used to find
 # out the state of replication and decide if anything needs to be done.
 #
-# We might need to find—rather that assume—answers to the first four questions
-# if we needed to run on systems where Postgres was not set up by TPA. That is
-# not the case at present, and we already handle the initial setup (even with
-# custom packages, user/group, and data directory location). We are also not
-# interested in collecting the answers to longer-term performance monitoring
-# questions (in the context of this module). If these circumstances change,
-# expanding the scope of the questions we ask may be reasonable.
+# We might need to find—rather that assume—answers to earlier questions if we
+# needed to run on systems where Postgres was not set up by TPA. That is not the
+# case at present, and we already handle the initial setup (even with custom
+# packages, user/group, and data directory location). We are also not interested
+# in collecting the answers to longer-term performance monitoring questions (in
+# the context of this module). If these circumstances change, expanding the
+# scope of the questions we ask may be reasonable.
 
 from __future__ import absolute_import, division, print_function
 
@@ -77,9 +77,13 @@ version_added: "2.4"
 options:
   conninfo:
     description:
-      - A conninfo string for this server
+      - A conninfo string for this instance
     required: false
     default: "''"
+  postgres_data_dir:
+    description:
+      - The expected location of PGDATA for this instance
+    required: true
 notes:
    - This module requires the I(psycopg2) Python library to be installed.
 requirements: [ psycopg2 ]
@@ -90,6 +94,7 @@ EXAMPLES = '''
 - name: Collect facts about the Postgres cluster
   cluster_discovery:
     conninfo: dbname=postgres
+    postgres_data_dir: "{{ postgres_data_dir }}"
   become_user: "{{ postgres_user }}"
   become: yes
   register: p
@@ -105,6 +110,7 @@ def main():
         supports_check_mode = True,
         argument_spec = dict(
             conninfo = dict(default=""),
+            postgres_data_dir = dict(required=True),
         )
     )
 
@@ -113,13 +119,31 @@ def main():
 
     m = dict(changed=False)
 
+    conn = None
     try:
         conn = psycopg2.connect(dsn=module.params['conninfo'])
         m.update(cluster_discovery(module, conn))
     except Exception as e:
         m['error'] = str(e)
 
+        # If we were unable to connect to Postgres, the only acceptable reason
+        # is that Postgres is not initialised on this instance at all.
+
+        pgdata = module.params['postgres_data_dir']
+        if conn is None and not pgdata_initialised(pgdata):
+            m['postgres_data_dir'] = pgdata
+            m['pgdata_initialised'] = False
+            del m['error']
+
     module.exit_json(failed=('error' in m), **m)
+
+def pgdata_initialised(postgres_data_dir):
+    try:
+        st = os.stat(os.path.join(postgres_data_dir, 'PG_VERSION'))
+    except OSError as e:
+        return False
+    else:
+        return True
 
 def cluster_discovery(module, conn):
     m = dict()
@@ -188,7 +212,9 @@ def cluster_discovery(module, conn):
         query_results(conn, "SELECT * from pg_replication_slots")
     })
 
-    m['repmgr'] = repmgr_discovery(module, conn, m)
+    repmgr = repmgr_discovery(module, conn, m)
+    if repmgr is not None:
+        m['repmgr'] = repmgr
 
     m['role'] = 'primary'
     if 'replica' in m:
@@ -231,6 +257,10 @@ def replica_discovery(module, conn, m0):
 def repmgr_discovery(module, conn, m0):
     m = dict()
 
+    repmgr_conf = read_repmgr_conf(m0)
+    if repmgr_conf is not None:
+        m['repmgr_conf'] = repmgr_conf
+
     if have_repmgr_db(conn):
         repmgr_conn = psycopg2.connect(module.params['conninfo'] + ' dbname=repmgr')
 
@@ -241,9 +271,7 @@ def repmgr_discovery(module, conn, m0):
                 repmgr_conn, "SELECT * FROM \"%s\".repl_nodes" % repmgr_schema
             )
 
-    m['repmgr_conf'] = read_repmgr_conf(m0)
-
-    return m
+    return m or None
 
 def read_recovery_conf(m0):
     m = dict()
@@ -263,14 +291,17 @@ def read_repmgr_conf(m0):
 
     # XXX We shouldn't hardcode this path
     repmgr_conf = os.path.join('/etc/repmgr/9.6/repmgr.conf')
-    for line in io.open(repmgr_conf, 'r'):
-        [k, v] = [x.strip() for x in line.split('=', 1)]
-        if v.startswith("'") and v.endswith("'") or \
-           v.startswith('"') and v.endswith('"'):
-            v = v[1:-1]
-        m.update({k: v})
+    try:
+        for line in io.open(repmgr_conf, 'r'):
+            [k, v] = [x.strip() for x in line.split('=', 1)]
+            if v.startswith("'") and v.endswith("'") or \
+               v.startswith('"') and v.endswith('"'):
+                v = v[1:-1]
+            m.update({k: v})
+    except IOError, OSError:
+        pass
 
-    return m
+    return m or None
 
 def have_pg_stat_wal_receiver(conn):
     cur = conn.cursor()
