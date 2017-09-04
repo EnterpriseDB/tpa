@@ -49,4 +49,3 @@
     name: "{{ default_postgres_service_names[ansible_os_family] }}"
     state: stopped
     masked: yes
-    enabled: no
