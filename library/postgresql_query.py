@@ -45,7 +45,6 @@ results:
     sample: "acme"
 '''
 
-
 try:
     import psycopg2
     import psycopg2.extras
@@ -62,8 +61,8 @@ class NotSupportedError(Exception):
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            query=dict(required=True),
             conninfo=dict(default=""),
+            query=dict(required=True, type='list'),
         ),
         supports_check_mode = False
     )
@@ -71,34 +70,36 @@ def main():
     if not psycopg2_found:
         module.fail_json(msg="the python psycopg2 module is required")
 
-    query = module.params["query"]
     conninfo = module.params["conninfo"]
-    changed = False
-    results = []
-
     try:
         conn = psycopg2.connect(dsn=conninfo)
     except Exception, e:
         module.fail_json(msg="Could not connect to database", err=str(e))
 
-    m = dict()
+    m = dict(changed=False)
+
+    results = []
     try:
-        cur = conn.cursor()
-        cur.execute(query)
-        column_names = [desc[0] for desc in cur.description]
-        for row in cur:
-            results.append(dict(zip(column_names, row)))
-        cur.close()
+        for q in module.params['query']:
+            res=[]
+            cur = conn.cursor()
+            cur.execute(q)
+            column_names = [desc[0] for desc in cur.description]
+            for row in cur:
+                res.append(dict(zip(column_names, row)))
+            results.append(res)
+            cur.close()
+
         conn.close()
     except Exception, e:
         module.fail_json(msg="Database query failed", err=str(e))
 
-    m['changed'] = changed
-    m['results'] = results
+    if len(results) == 1:
+        results = results[0]
     if len(results) == 1 and len(results[0]) == 1:
         for k,v in results[0].iteritems():
             m[k] = v
-    module.exit_json(**m)
+    module.exit_json(results=results, **m)
 
 from ansible.module_utils.basic import *
 from ansible.module_utils.database import *
