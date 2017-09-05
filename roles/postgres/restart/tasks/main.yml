@@ -11,4 +11,5 @@
   service:
     name: "{{ postgres_service_name }}"
     state: "{{ postgres_service_end_state|default('started') }}"
-
+  when:
+    pgdata_initialised
