@@ -124,8 +124,8 @@ def main():
     except Exception, e:
         conn.rollback()
         module.fail_json(msg="Database query failed", err=str(e))
-
-    conn.commit()
+    else:
+        conn.commit()
 
     if len(results) == 1:
         results = results[0]
