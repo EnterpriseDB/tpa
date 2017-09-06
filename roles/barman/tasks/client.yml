@@ -2,14 +2,20 @@
 
 # These tasks are executed on any instance that needs to be backed up.
 #
-# First, we delegate some per-client server configuration tasks to the
-# designated backup server for each host.
+# Backups for an instance are configured in /etc/barman.d/name.conf on
+# the designated backup server. When we first set up backups, we must
+# set active=false (which we do in a separate file) and then activate
+# the backups in barman/final.
+#
+# We also need to handle the special case of detaching /var/lib/barman
+# from a working instance and attaching it to a new instance, where we
+# would have /var/lib/barman/name but not /etc/barman.d/name.conf.
 
-- name: Check if Barman client configuration file exists
+- name: Check if Barman backup directory exists
   stat:
-    path: "{{ _config_file }}"
+    path: "{{ _barman_backup_directory }}"
   delegate_to: "{{ backup }}"
-  register: conf
+  register: backup_dir
 
 - name: Install Barman client configuration file
   template:
@@ -19,19 +25,8 @@
     group: barman
     mode: 0600
   delegate_to: "{{ backup }}"
-
-# If we created the client configuration file, then this is the first
-# time we're setting up backups for this server.
-
-- block:
-    - name: Set client configuration to inactive pending initialisation
-      ini_file:
-        dest: "{{ _config_file }}"
-        section: "{{ backup_name }}"
-        option: active
-        value: "false"
-      delegate_to: "{{ backup }}"
-  when: not conf.stat.exists
+  vars:
+    active: "{{ backup_dir.stat.exists }}"
 
 - name: Set up a cron job to take regular backups
   cron:

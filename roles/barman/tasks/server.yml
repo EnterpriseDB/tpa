@@ -2,27 +2,6 @@
 
 # These tasks are executed on any Barman server instance.
 
-- name: Check if /etc/barman.d exists
-  stat:
-    path: /etc/barman.d
-  register: conf
-
-# If /etc/barman.d doesn't exist, then this is the first time we're
-# setting up this Barman server.
-
-- block:
-    - name: Note that Barman was just installed
-      set_fact: barman_installed=True
-
-    - name: Create /etc/barman.d
-      file:
-        path: /etc/barman.d
-        owner: root
-        group: root
-        mode: 0755
-        state: directory
-  when: not conf.stat.exists
-
 - name: Install global Barman configuration file
   template:
     src: barman.conf.j2
@@ -30,6 +9,14 @@
     owner: root
     group: root
     mode: 0644
+
+- name: Ensure /etc/barman.d exists
+  file:
+    path: /etc/barman.d
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
 
 - name: Install .pgpass file for Barman
   template:

@@ -23,3 +23,4 @@ pre_archive_retry_script = "{{ barman_pre_archive_retry_script }}"
 {% if barman_post_backup_retry_script|d() %}
 post_backup_retry_script = "{{ barman_post_backup_retry_script }}"
 {% endif %}
+active = {{ active|lower }}

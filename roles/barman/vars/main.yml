@@ -2,4 +2,6 @@
 
 _config_file: "/etc/barman.d/{{ backup_name }}.conf"
 
+_barman_backup_directory: "/var/lib/barman/{{ backup_name }}"
+
 _barman_backup_interval: "{{ (barman_backup_interval|default(default_barman_backup_interval)).split(' ')|list }}"
