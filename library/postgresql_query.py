@@ -16,7 +16,8 @@ options:
   query:
     description:
       - Text of the SQL query to execute, or a list of queries. Instead of the
-        query text alone, may also be a dict with 'text' and 'args'
+        query text alone, may also be a dict with 'text' and 'args'. All of the
+        queries are executed in the same transaction.
     required: true
   conninfo:
     description:
