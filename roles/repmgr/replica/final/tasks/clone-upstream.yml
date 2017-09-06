@@ -29,18 +29,26 @@
 # register itself, this entry will be corrected and activated.
 
 - name: Ensure that the upstream exists in repl_nodes
-  command: >
-    {{ psql }} '{{ primary_conninfo }}' -qAtw -c
-    "INSERT INTO \"{{ repmgr_schema }}\".repl_nodes
-    (id, type, cluster, name, conninfo, priority, active) VALUES
-    ({{ hostvars[upstream].node }}, 'standby', '{{ cluster_name }}', '{{ upstream }}', '{{ upstream_conninfo }}', 100, 'f')
-    ON CONFLICT DO NOTHING"
+  postgresql_query:
+    conninfo: "{{ primary_conninfo }}"
+    query:
+      - text: >
+          INSERT INTO "{{ repmgr_schema }}".repl_nodes
+          (id, type, cluster, name, conninfo, priority, active)
+          VALUES (%s, %s, %s, %s, %s, %s, %s)
+          ON CONFLICT DO NOTHING
+        args:
+          - "{{ hostvars[upstream].node }}"
+          - standby
+          - "{{ cluster_name }}"
+          - "{{ upstream }}"
+          - "{{ upstream_conninfo }}"
+          - 100
+          - False
   vars:
-    psql: '{{ postgres_bin_dir }}/psql'
     primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
     upstream_conninfo: 'host={{ upstream }} user=repmgr dbname=repmgr'
     repmgr_schema: 'repmgr_{{ repmgr_cluster }}'
-  changed_when: False
   become_user: "{{ postgres_user }}"
   become: yes
   when: >
