@@ -15,9 +15,9 @@ version_added: "2.4"
 options:
   query:
     description:
-      - Text of the SQL query to execute.
+      - Text of the SQL query to execute, or a list of queries. Instead of the
+        query text alone, may also be a dict with 'text' and 'args'
     required: true
-    default: null
   conninfo:
     description:
       - A conninfo string to define connection parameters
@@ -31,18 +31,35 @@ author: "Abhijit Menon-Sen <ams@2ndQuadrant.com>"
 
 EXAMPLES = '''
 - postgresql_query:
-    query: "SELECT 42 as a"
+    query: SELECT 42 as a
     conninfo: "dbname=postgres"
   register: query
 - debug: msg="the answer is {{ query.results[0].a }}"
+- postgresql_query:
+    query:
+      - text: insert into x(a,b) values (%s, %s)
+        args:
+          - 42
+          - foo
+      - SELECT 42 as a
+- debug: msg="{{ query.rowcounts[0] }} rows"
 '''
 
 RETURN = '''
+rowcounts:
+    description: An array of rowcounts from each query executed.
+    type: list
 results:
-    description: Name of the schema
+    description: An array of dicts, each containing data from a single row of
+    query results. If multiple queries are specified, then this is an array of
+    arrays of dicts instead.
     returned: success, changed
-    type: string
-    sample: "acme"
+    type: list
+    sample: [
+        {
+            "a": 42
+        }
+    ]
 '''
 
 try:
@@ -76,29 +93,48 @@ def main():
     except Exception, e:
         module.fail_json(msg="Could not connect to database", err=str(e))
 
-    m = dict(changed=False)
+    m = dict()
+    changed = False
 
     results = []
+    rowcounts = []
     try:
         for q in module.params['query']:
-            res=[]
             cur = conn.cursor()
-            cur.execute(q)
-            column_names = [desc[0] for desc in cur.description]
-            for row in cur:
-                res.append(dict(zip(column_names, row)))
+
+            text = q
+            args = []
+            if isinstance(q, dict):
+                text = q['text']
+                args = q.get('args', [])
+
+            cur.execute(text, args)
+
+            res=[]
+            if cur.description is not None:
+                column_names = [desc[0] for desc in cur.description]
+                for row in cur:
+                    res.append(dict(zip(column_names, row)))
+            elif cur.rowcount:
+                changed=True
+
+            rowcounts.append(cur.rowcount)
             results.append(res)
             cur.close()
-
-        conn.close()
     except Exception, e:
+        conn.rollback()
         module.fail_json(msg="Database query failed", err=str(e))
+
+    conn.commit()
 
     if len(results) == 1:
         results = results[0]
     if len(results) == 1 and len(results[0]) == 1:
         for k,v in results[0].iteritems():
             m[k] = v
+
+    m['changed'] = changed
+    m['rowcounts'] = rowcounts
     module.exit_json(results=results, **m)
 
 from ansible.module_utils.basic import *
