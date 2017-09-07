@@ -80,10 +80,6 @@ options:
       - A conninfo string for this instance
     required: false
     default: "''"
-  postgres_data_dir:
-    description:
-      - The expected location of PGDATA for this instance
-    required: true
 notes:
    - This module requires the I(psycopg2) Python library to be installed.
 requirements: [ psycopg2 ]
@@ -94,7 +90,6 @@ EXAMPLES = '''
 - name: Collect facts about the Postgres cluster
   cluster_discovery:
     conninfo: dbname=postgres
-    postgres_data_dir: "{{ postgres_data_dir }}"
   become_user: "{{ postgres_user }}"
   become: yes
   register: p
@@ -110,7 +105,6 @@ def main():
         supports_check_mode = True,
         argument_spec = dict(
             conninfo = dict(default=""),
-            postgres_data_dir = dict(required=True),
         )
     )
 
@@ -126,24 +120,7 @@ def main():
     except Exception as e:
         m['error'] = str(e)
 
-        # If we were unable to connect to Postgres, the only acceptable reason
-        # is that Postgres is not initialised on this instance at all.
-
-        pgdata = module.params['postgres_data_dir']
-        if conn is None and not pgdata_initialised(pgdata):
-            m['postgres_data_dir'] = pgdata
-            m['pgdata_initialised'] = False
-            del m['error']
-
     module.exit_json(failed=('error' in m), **m)
-
-def pgdata_initialised(postgres_data_dir):
-    try:
-        st = os.stat(os.path.join(postgres_data_dir, 'PG_VERSION'))
-    except OSError as e:
-        return False
-    else:
-        return True
 
 def cluster_discovery(module, conn):
     m = dict()
