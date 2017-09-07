@@ -1,13 +1,9 @@
 ---
 
-- name: Check to see if the data directory is empty
-  stat: path="{{ postgres_data_dir }}/PG_VERSION"
-  register: pgdata
-
 - name: Fail if the data directory exists
   fail:
     msg: "Can't run 'repmgr standby clone' over existing PGDATA"
-  when: pgdata.stat.exists
+  when: pgdata_initialised
 
 # Now we have to decide where to clone from.
 #
