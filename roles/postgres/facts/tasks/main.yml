@@ -12,7 +12,8 @@
   when: >
     pgdata_initialised
 
-# Update the role of this server if it has changed.
+# If the role or upstream of the server has changed from what it was
+# initially set to in config.yml, we override it here.
 
 - name: Override instance role if required
   set_fact:
@@ -26,3 +27,16 @@
     'role' in p and
     (('primary' in role and 'replica' in p) or
      ('replica' in role and 'replica' not in p))
+
+- name: Record where this instance is streaming from
+  set_fact:
+    streaming_from: "{{ p.replica.primary_conninfo|parse_conninfo('host') }}"
+  when: >
+    'replica' in p and 'primary_conninfo' in p.replica
+
+- name: Override upstream if required
+  set_fact:
+    upstream: "{{ streaming_from }}"
+  when:
+    streaming_from is defined and
+    (upstream is not defined or upstream != streaming_from)
