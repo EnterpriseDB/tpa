@@ -80,6 +80,29 @@ def remove_keys(d, keys):
 
     return d2
 
+# Takes a conninfo string and returns a dict of the settings it represents, or
+# if given a key, returns the value if the key is specified, or None.
+
+def parse_conninfo(conninfo, key=None):
+
+    settings = {}
+    for str in conninfo.split(' '):
+        parts = [x.strip() for x in str.strip().split('=', 1)]
+
+        v = None
+        if len(parts) == 2:
+            v = parts[1]
+            if v.startswith("'") and v.endswith("'") or \
+               v.startswith('"') and v.endswith('"'):
+                v = v[1:-1]
+
+        settings[parts[0]] = v
+
+    if key:
+        return settings.get(key, None)
+
+    return settings
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -89,4 +112,5 @@ class FilterModule(object):
             'instance_with_backup_of': instance_with_backup_of,
             'get_device_variables': get_device_variables,
             'remove_keys': remove_keys,
+            'parse_conninfo': parse_conninfo,
         }
