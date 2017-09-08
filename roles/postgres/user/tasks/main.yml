@@ -91,6 +91,30 @@
     mode: 0755
     state: directory
 
+# Allow postgres_user to run various Postgres-related systemctl commands
+# as root using sudo.
+
+- name: Collect a list of postgres commands to allow in sudoers
+  set_fact:
+    postgres_commands: "{{
+      postgres_commands|default([])|union([
+        '/bin/systemctl ' ~ item.1 ~ ' ' ~ item.0
+      ])
+    }}"
+  with_nested:
+    - ['{{ postgres_service_name }}', 'repmgr{{ postgres_versionNN }}']
+    - [start, stop, restart, status]
+
+- name: Add postgres to sudoers
+  blockinfile:
+    path: /etc/sudoers
+    state: present
+    insertafter: EOF
+    validate: 'visudo -cf %s'
+    block: |
+      Cmnd_Alias POSTGRES_COMMANDS = {{ postgres_commands|join(", ") }}
+      {{ postgres_user }} ALL=(ALL) NOPASSWD: POSTGRES_COMMANDS
+
 # Finally, we generate the TLS certificates needed by Postgres.
 
 - include: tls.yml
