@@ -29,12 +29,12 @@
   stat:
     path: "{{ postgres_data_dir }}/PG_VERSION"
   register: pgdata
-  tags: [postgres, initdb]
+  tags: always
 
 - name: Set pgdata_initialised
   set_fact:
     pgdata_initialised: "{{ pgdata.stat.exists }}"
-  tags: [postgres, initdb]
+  tags: always
 
 - name: Initialise PGDATA={{ postgres_data_dir }}
   block:
