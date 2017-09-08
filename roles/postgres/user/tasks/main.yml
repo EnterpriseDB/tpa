@@ -103,7 +103,7 @@
     }}"
   with_nested:
     - ['{{ postgres_service_name }}', 'repmgr{{ postgres_versionNN }}']
-    - [start, stop, restart, status]
+    - [start, stop, reload, restart, status]
 
 - name: Add postgres to sudoers
   blockinfile:
