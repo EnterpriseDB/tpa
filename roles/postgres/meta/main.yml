@@ -15,5 +15,5 @@ dependencies:
       'replica' not in role
     tags: [postgres, config]
   - role: sys/ssh
-    ssh_user: postgres
+    ssh_user: "{{ postgres_user }}"
     tags: [sys, ssh]

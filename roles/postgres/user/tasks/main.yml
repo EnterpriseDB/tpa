@@ -25,8 +25,8 @@
   blockinfile:
     path: /etc/security/limits.conf
     block: |
-      postgres  soft   nofile   4096
-      postgres  hard   nofile   32768
+      {{ postgres_user }}  soft   nofile   4096
+      {{ postgres_user }}  hard   nofile   32768
 
 # We want a sensible environment set up for the postgres user, so we
 # install our own .bashrc (read by interactive non-login shells).
@@ -86,8 +86,8 @@
 - name: Ensure /var/log/postgresql exists
   file:
     path: /var/log/postgresql
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0755
     state: directory
 

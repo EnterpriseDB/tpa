@@ -3,8 +3,8 @@
 - name: Ensure postgres directories exist and have the right permissions
   file:
     path: "{{ item }}"
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0700
     state: directory
   with_items:

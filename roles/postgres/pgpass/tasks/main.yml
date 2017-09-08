@@ -4,6 +4,6 @@
   template:
     src: pgpass.j2
     dest: ~postgres/.pgpass
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0600

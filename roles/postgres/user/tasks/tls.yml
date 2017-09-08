@@ -15,8 +15,8 @@
 - name: Set correct ownership and mode on key/certificate files
   file:
     path: "{{ item }}"
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0600
   with_items:
     - "/etc/tpa/{{ cluster_name }}.key"

@@ -3,14 +3,14 @@
 # Enable password-less SSH access between all nodes for a given user.
 #
 # - role: sys/ssh
-#   ssh_user: postgres
+#   ssh_user: "{{ postgres_user }}"
 #
 # The following would be the preferred form to write the above, but it
 # does not work right now due to a series of obscure Ansible bugs:
 #
 # - role: sys/ssh
 #   vars:
-#     ssh_user: postgres
+#     ssh_user: "{{ postgres_user }}"
 #
 # When specified this way, the variables are visible to the immediate
 # role but not to roles invoked therein, either through the dependency

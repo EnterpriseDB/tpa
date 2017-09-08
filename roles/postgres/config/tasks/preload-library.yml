@@ -37,8 +37,8 @@
   template:
     src: variable.j2
     dest: "{{ spl_config }}"
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0644
   vars:
     spl_config: "{{ postgres_data_dir+'/conf.d' }}/8888-shared_preload_libraries.conf"

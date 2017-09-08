@@ -17,8 +17,8 @@
   template:
     src: extensions.conf.j2
     dest: "{{ _include_dir }}/1111-extensions.conf"
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0644
   notify:
     - Note Postgres restart required

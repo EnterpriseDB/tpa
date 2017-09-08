@@ -18,8 +18,8 @@
   template:
     src: variable.j2
     dest: "{{ include_dir|default(postgres_data_dir+'/conf.d') }}/8888-{{ name }}.conf"
-    owner: postgres
-    group: postgres
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0644
   notify:
     - Note Postgres restart required
