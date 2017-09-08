@@ -102,7 +102,7 @@
       ])
     }}"
   with_nested:
-    - ['{{ postgres_service_name }}', 'repmgr{{ postgres_versionNN }}']
+    - ['{{ postgres_service_name }}', 'repmgr']
     - [start, stop, reload, restart, status]
 
 - name: Add postgres to sudoers

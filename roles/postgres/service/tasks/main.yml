@@ -13,6 +13,4 @@
   service:
     name: "{{ postgres_service_name }}"
     enabled: yes
-  when: >
-    'postgres' in role
   tags: [postgres, service]

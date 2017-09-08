@@ -26,7 +26,6 @@
     state: directory
   with_items:
     - "{{ repmgr_conf_dir }}"
-    - /var/run/repmgr
 
 - name: Install repmgr.conf and additional scripts
   template:
@@ -39,15 +38,5 @@
     - {mode: "0644", path: repmgr.conf}
     - {mode: "0755", path: promote_command.sh}
     - {mode: "0755", path: follow_command.sh}
-  notify:
-    - Note repmgrd restart required
-
-- name: Install repmgr unit file
-  template:
-    src: repmgr.service.j2
-    dest: /etc/systemd/system/repmgr{{postgres_versionNN}}.service
-    owner: root
-    group: root
-    mode: 0644
   notify:
     - Note repmgrd restart required

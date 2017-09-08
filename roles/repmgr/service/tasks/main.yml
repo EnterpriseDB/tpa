@@ -1,9 +1,21 @@
 ---
 
+# We want to call this repmgrd.service, but there's a systemd bug (at
+# least on Debian 8) that prevents us from overriding the unit that is
+# created by the late generator from /etc/init.d/repmgrd. Using a name
+# that doesn't conflict is the easiest workaround.
+
+- name: Install custom repmgr service unit file
+  template:
+    src: repmgrd.service.j2
+    dest: /etc/systemd/system/repmgr.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: [repmgr, service]
+
 - name: Enable repmgr service
   service:
-    name: "repmgr{{ postgres_versionNN }}"
+    name: repmgr
     enabled: yes
-  when: >
-    'postgres' in role
-  tags: repmgr
+  tags: [repmgr, service]

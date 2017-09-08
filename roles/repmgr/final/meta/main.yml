@@ -1,6 +1,7 @@
 ---
 
 dependencies:
+  - role: repmgr/service
   - role: repmgr/primary/final
     when: >
       'primary' in role

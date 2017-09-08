@@ -1,0 +1,19 @@
+[Unit]
+Description=Postgres replication manager
+After=syslog.target
+After=network.target
+After=postgres.service
+
+[Service]
+Type=simple
+User=postgres
+Group=postgres
+Environment=REPMGRDCONF={{ repmgr_conf_dir }}/repmgr.conf
+StandardOutput=syslog
+ExecStart={{ postgres_bin_dir }}/repmgrd -f ${REPMGRDCONF} --verbose
+ExecStop=/bin/kill -TERM $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

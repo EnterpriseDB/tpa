@@ -4,3 +4,19 @@
   package: name={{ item }} state=latest
   with_items: "{{ repmgr_packages[ansible_os_family] }}"
   tags: [repmgr, pkg]
+
+# We install our own service units later, so we disable the packaged
+# versions here. The default service name on Debian is repmgrd, but it
+# has only an init file, not a unit file. However, we used to install a
+# repmgr96.service file to match what was installed by default on RHEL.
+# So we try to disable all of them and ignore failures.
+
+- name: Disable default repmgr services
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    masked: yes
+  ignore_errors: yes
+  with_items:
+    - repmgrd
+    - repmgr{{ postgres_versionNN }}
