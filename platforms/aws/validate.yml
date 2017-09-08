@@ -7,6 +7,12 @@
       - ec2_vpc is defined
       - ec2_vpc is mapping
 
+- name: Ensure that every instance has a defined instance type
+  assert:
+    msg: "Please set 'type' on every instance"
+    that:
+      - instances|selectattr('type','defined')|list|count == instances|count
+
 # Make sure ec2_ami is defined (and specifies at least the AMI Name), or
 # that every instance has an image explicitly specified by id.
 
