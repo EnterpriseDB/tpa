@@ -27,7 +27,7 @@
 
 - name: Make /etc/rc.local invoke /etc/tpa/rc.local
   lineinfile:
-    dest: /etc/rc.local
+    path: /etc/rc.local
     mode: 0755
     line: >-
       test -x /etc/tpa/rc.local && /etc/tpa/rc.local
@@ -45,7 +45,7 @@
 
 - name: Append to tpa.log file
   lineinfile:
-    dest: "/etc/tpa/tpa.log"
+    path: /etc/tpa/tpa.log
     create: yes 
     state: present
     insertafter: EOF

@@ -42,7 +42,7 @@
 
 - name: Set readahead on {{ _device }} at startup
   lineinfile:
-    dest: /etc/tpa/rc.local
+    path: /etc/tpa/rc.local
     line: >-
       blockdev --setra "{{ readahead }}" "{{ _device }}"
     state: present

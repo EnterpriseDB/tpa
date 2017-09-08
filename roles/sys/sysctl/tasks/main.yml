@@ -20,7 +20,7 @@
 
 - name: Set transparent_hugepage/enabled in /etc/tpa/rc.local
   lineinfile:
-    dest: /etc/tpa/rc.local
+    path: /etc/tpa/rc.local
     line: >-
       test -f /sys/kernel/mm/transparent_hugepage/enabled &&
       echo {{ transparent_hugepage }} > /sys/kernel/mm/transparent_hugepage/enabled

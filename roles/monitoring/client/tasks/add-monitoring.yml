@@ -96,7 +96,7 @@
 
 # TODO: use Ansible's known_hosts module
 - name: Install known_hosts
-  lineinfile: dest="~/.ssh/known_hosts" line="{{item}}"
+  lineinfile: path="~/.ssh/known_hosts" line="{{item}}"
   with_items: "{{known_hosts}}"
   when: (homedir_no_write|bool == false) and (known_hosts|length)
 

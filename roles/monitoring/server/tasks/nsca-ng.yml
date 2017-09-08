@@ -25,7 +25,7 @@
   with_items: "{{client_identifier}}"
 
 - name: Add include directive for client configuration file
-  lineinfile: dest="{{nsca_configdir}}/{{nsca_includefile}}" line="include({{nsca_configdir}}/customer-{{item}}.cfg)" create=yes
+  lineinfile: path="{{nsca_configdir}}/{{nsca_includefile}}" line="include({{nsca_configdir}}/customer-{{item}}.cfg)" create=yes
   notify: Restart nsca-ng
   tags: nsca-ng
   with_items: "{{client_identifier}}"

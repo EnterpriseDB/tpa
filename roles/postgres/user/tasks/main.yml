@@ -23,7 +23,7 @@
 
 - name: Enhance soft/hard system limits for user postgres
   blockinfile:
-    dest: /etc/security/limits.conf
+    path: /etc/security/limits.conf
     block: |
       postgres  soft   nofile   4096
       postgres  hard   nofile   32768
@@ -72,7 +72,7 @@
 
 - name: Make .bash_profile read .bashrc too
   lineinfile:
-    dest: "~{{ postgres_user }}/.bash_profile"
+    path: "~{{ postgres_user }}/.bash_profile"
     create: no
     state: present
     insertafter: EOF

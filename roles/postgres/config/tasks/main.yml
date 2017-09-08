@@ -49,7 +49,7 @@
 
 - name: Enable include_dir in postgresql.conf
   lineinfile:
-    dest: "{{ postgres_conf_dir }}/postgresql.conf"
+    path: "{{ postgres_conf_dir }}/postgresql.conf"
     line: >-
       include_dir = '{{ _include_dir }}'
     insertafter: EOF
