@@ -109,4 +109,5 @@
       register: state
       until:
         (state.stdout|from_json)[0] == 'terminated'
-      retries: 30
+      retries: 10
+      delay: 30
