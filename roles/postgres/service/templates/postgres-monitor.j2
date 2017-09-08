@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python
 #
 # This script waits until Postgres is accepting connections and returns
 # success as quickly as possible after this happens, or fails if it is
@@ -15,16 +15,36 @@
 # is entirely likely that postgres has not yet started listening on 5432
 # at all when we first invoke pg_isready.
 
-set -e -u
+from __future__ import absolute_import, division, print_function
 
-trap 'echo ERROR' ERR
+import sys, time
+import psycopg2
 
-first=1
-while true; do
-    {{ postgres_bin_dir }}/pg_isready && exit 0
-    if [ ${rc:=$?} -ne 1 -a $first -ne 1 ]; then
-        exit $rc
-    fi
-    first=0
-    sleep 10
-done
+def main():
+    first = 1
+
+    while True:
+        err = None
+
+        try:
+            psycopg2.connect('').close()
+        except Exception as e:
+            err = str(e).strip()
+            if not recoverable(err) and not first:
+                print('exiting: %s' % err)
+                sys.exit(1)
+        else:
+            print('ok')
+            sys.exit(0)
+
+        print('retrying: %s' % err)
+        time.sleep(10)
+        first = 0
+
+def recoverable(err):
+    return err.startswith('FATAL: ') and \
+        (err.endswith('the database system is starting up') or \
+        err.endswith('the database system is in recovery mode'))
+
+if __name__ == '__main__':
+    main()
