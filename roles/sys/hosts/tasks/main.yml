@@ -8,6 +8,15 @@
     group: root
     mode: 0644
 
+- name: Disable manage_etc_hosts in cloud.cfg
+  copy:
+    dest: /etc/cloud/cloud.cfg.d/99_hosts.cfg
+    owner: root
+    group: root
+    mode: 0644
+    content: >-
+      manage_etc_hosts: False
+
 - name: Install global ssh known hosts file
   template:
     src: known_hosts.j2
@@ -15,3 +24,4 @@
     owner: root
     group: root
     mode: 0644
+
