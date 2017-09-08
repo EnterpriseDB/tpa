@@ -1,16 +1,32 @@
 ---
 
-- name: Install custom service unit file
+- name: Install postgres-monitor
   template:
-    src: postgres.service.j2
-    dest: /etc/systemd/system/postgres.service
+    src: postgres-monitor.j2
+    dest: /etc/tpa/postgres-monitor
+    owner: root
+    group: root
+    mode: 0755
+  tags: [postgres, service]
+
+- name: Install Postgres service unit files
+  template:
+    src: "{{ item.0 }}.service.j2"
+    dest: "/etc/systemd/system/{{ item.1 }}.service"
     owner: root
     group: root
     mode: 0644
+  with_together:
+    - [postgres, postgres-monitor]
+    - ['{{ postgres_service_name }}',
+       '{{ postgres_service_name }}-monitor']
   tags: [postgres, service]
 
-- name: Enable postgres service
-  service:
-    name: "{{ postgres_service_name }}"
+- name: Enable postgres services
+  systemd:
+    name: "{{ item }}"
     enabled: yes
+  with_items:
+    - "{{ postgres_service_name }}"
+    - "{{ postgres_service_name }}-monitor"
   tags: [postgres, service]

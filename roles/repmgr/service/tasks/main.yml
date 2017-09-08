@@ -15,7 +15,7 @@
   tags: [repmgr, service]
 
 - name: Enable repmgr service
-  service:
+  systemd:
     name: repmgr
     enabled: yes
   tags: [repmgr, service]

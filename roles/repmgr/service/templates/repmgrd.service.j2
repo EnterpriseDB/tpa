@@ -1,16 +1,14 @@
 [Unit]
 Description=Postgres replication manager
-After=syslog.target
-After=network.target
-After=postgres.service
+After={{ postgres_service_name }}-monitor.service
+Requires={{ postgres_service_name }}-monitor.service
 
 [Service]
 Type=simple
 User=postgres
 Group=postgres
-Environment=REPMGRDCONF={{ repmgr_conf_dir }}/repmgr.conf
 StandardOutput=syslog
-ExecStart={{ postgres_bin_dir }}/repmgrd -f ${REPMGRDCONF} --verbose
+ExecStart={{ postgres_bin_dir }}/repmgrd -f {{ repmgr_conf_dir }}/repmgr.conf --verbose
 ExecStop=/bin/kill -TERM $MAINPID
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure

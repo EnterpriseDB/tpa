@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# This script waits until Postgres is accepting connections and returns
+# success as quickly as possible after this happens, or fails if it is
+# convinced that it will not happen.
+#
+# In an ideal world, it would wait only when an attempt to connect to
+# Postgres returns a FATAL 'the database system is starting up' error,
+# and it can observe that the startup process is not stalled (even if
+# the progress is slow).
+#
+# Instead, we just run pg_isready and accept any 'rejecting connections'
+# error (not only 'is starting up') and do not attempt to establish that
+# recovery is making progress. We skip the first rc==2 status because it
+# is entirely likely that postgres has not yet started listening on 5432
+# at all when we first invoke pg_isready.
+
+set -e -u
+
+trap 'echo ERROR' ERR
+
+first=1
+while true; do
+    {{ postgres_bin_dir }}/pg_isready && exit 0
+    if [ ${rc:=$?} -ne 1 -a $first -ne 1 ]; then
+        exit $rc
+    fi
+    first=0
+    sleep 10
+done

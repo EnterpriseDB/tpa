@@ -1,0 +1,14 @@
+[Unit]
+Description=Postgres startup monitor
+After=postgres.service
+Requires=postgres.service
+
+[Service]
+Type=oneshot
+User={{ postgres_user }}
+Group={{ postgres_group }}
+ExecStart=/etc/tpa/postgres-monitor
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
