@@ -219,15 +219,16 @@ def replica_discovery(module, conn, m0):
                 'primary_conninfo': res[0]['conninfo'],
                 'primary_slot_name': res[0]['slot_name'],
             })
-    else:
-        if 'primary_conninfo' in m['recovery_settings']:
-            m.update({
-                'primary_conninfo': m['recovery_settings']['primary_conninfo']
-            })
-        if 'primary_slot_name' in m['recovery_settings']:
-            m.update({
-                'primary_slot_name': m['recovery_settings']['primary_slot_name']
-            })
+
+    if 'primary_conninfo' not in m and 'primary_conninfo' in m['recovery_settings']:
+        m.update({
+            'primary_conninfo': m['recovery_settings']['primary_conninfo']
+        })
+
+    if 'primary_slot_name' not in m and 'primary_slot_name' in m['recovery_settings']:
+        m.update({
+            'primary_slot_name': m['recovery_settings']['primary_slot_name']
+        })
 
     return m
 
