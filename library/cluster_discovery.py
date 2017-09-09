@@ -70,9 +70,8 @@ DOCUMENTATION = '''
 module: cluster_discovery
 short_description: Discover a Postgres server's place in a cluster
 description:
-   - Performs a sequence of tests against a Postgres server and returns the
-     results as ordinary variables (not as ansible facts, which is why this
-     module is not named postgresql_facts).
+   - Performs a sequence of tests against a Postgres server and returns a dict
+     of the results as a fact named cluster_facts.
 version_added: "2.4"
 options:
   conninfo:
@@ -92,8 +91,7 @@ EXAMPLES = '''
     conninfo: dbname=postgres
   become_user: "{{ postgres_user }}"
   become: yes
-  register: p
-- debug: msg="the data directory is {{ p.postgres_data_dir }}"
+- debug: msg="the data directory is {{ cluster_facts.postgres_data_dir }}"
 '''
 
 def main():
@@ -116,7 +114,11 @@ def main():
     conn = None
     try:
         conn = psycopg2.connect(dsn=module.params['conninfo'])
-        m.update(cluster_discovery(module, conn))
+        m.update({
+            'ansible_facts': {
+                'cluster_facts': cluster_discovery(module, conn)
+            }
+        })
     except Exception as e:
         m['error'] = str(e)
 

@@ -8,9 +8,14 @@
     conninfo: ""
   become_user: "{{ postgres_user }}"
   become: yes
-  register: p
   when: >
     pgdata_initialised
+
+- name: Set empty cluster_facts for other instances
+  set_fact:
+    cluster_facts: {}
+  when:
+    cluster_facts is not defined
 
 # If the role or upstream of the server has changed from what it was
 # initially set to in config.yml, we override it here.
@@ -21,18 +26,20 @@
       role
       |reject('equalto', 'primary')
       |reject('equalto', 'replica')
-      |list|union([p.role])
+      |list|union([cluster_facts.role])
     }}"
   when: >
-    'role' in p and
-    (('primary' in role and 'replica' in p) or
-     ('replica' in role and 'replica' not in p))
+    'role' in cluster_facts and
+    (('primary' in role and 'replica' in cluster_facts) or
+     ('replica' in role and 'replica' not in cluster_facts))
 
-- name: Record where this instance is streaming from
+- name: Record where this instance is configured to stream from
   set_fact:
-    streaming_from: "{{ p.replica.primary_conninfo|parse_conninfo('host') }}"
+    streaming_from: "{{ primary_conninfo|parse_conninfo('host') }}"
   when: >
-    'replica' in p and 'primary_conninfo' in p.replica
+    primary_conninfo != ''
+  vars:
+    primary_conninfo: "{{ cluster_facts|try_subkey(['replica', 'primary_conninfo'], '') }}"
 
 - name: Override upstream if required
   set_fact:
