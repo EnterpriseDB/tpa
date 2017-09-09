@@ -250,35 +250,42 @@ def repmgr_discovery(module, conn, m0):
 
     return m or None
 
-def read_recovery_conf(m0):
+def parse_kv_lines(filename):
     m = dict()
 
-    recovery_conf = os.path.join(m0['postgres_data_dir'], 'recovery.conf')
-    for line in io.open(recovery_conf, 'r'):
-        [k, v] = [x.strip() for x in line.split('=', 1)]
-        if v.startswith("'") and v.endswith("'") or \
-           v.startswith('"') and v.endswith('"'):
-            v = v[1:-1]
-        m.update({k: v})
+    for line in io.open(filename, 'r'):
+        line = line.strip()
+        if line == '' or line.startswith('#'):
+            continue
+
+        parts = [x.strip() for x in line.split('=', 1)]
+
+        v = None
+        if len(parts) == 2:
+            v = parts[1]
+            if v.startswith("'") and v.endswith("'") or \
+               v.startswith('"') and v.endswith('"'):
+                v = v[1:-1]
+
+        m[parts[0]] = v
 
     return m
 
+def read_recovery_conf(m0):
+    recovery_conf = os.path.join(m0['postgres_data_dir'], 'recovery.conf')
+    return parse_kv_lines(recovery_conf)
+
 def read_repmgr_conf(m0):
-    m = dict()
+    m = None
 
     # XXX We shouldn't hardcode this path
     repmgr_conf = os.path.join('/etc/repmgr/9.6/repmgr.conf')
     try:
-        for line in io.open(repmgr_conf, 'r'):
-            [k, v] = [x.strip() for x in line.split('=', 1)]
-            if v.startswith("'") and v.endswith("'") or \
-               v.startswith('"') and v.endswith('"'):
-                v = v[1:-1]
-            m.update({k: v})
+        m = parse_kv_lines(repmgr_conf)
     except IOError, OSError:
         pass
 
-    return m or None
+    return m
 
 def have_pg_stat_wal_receiver(conn):
     cur = conn.cursor()
