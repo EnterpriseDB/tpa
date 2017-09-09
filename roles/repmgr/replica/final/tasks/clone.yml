@@ -27,32 +27,18 @@
   become_user: "{{ postgres_user }}"
   become: true
 
-- include: ../../../postgres/config/tasks/replica.yml
+# Replica-specific configuration files are usually installed earlier by
+# postgres/config, but would have been skipped on this instance because
+# PGDATA didn't exist until just now. So we install the override files,
+# and can leave it to postgres/config to manage them together with the
+# other instances in subsequent deployments.
+#
+# XXX We would like to use include_role/tasks_from here, but can't due
+# to various bugs, so we duplicate the definition of _include_dir from
+# postgres/config/vars.
+
+- include: "{{ tpa_dir }}/roles/postgres/config/tasks/replica.yml"
   vars:
     _include_dir: "{{ postgres_data_dir }}/conf.d"
 
-- name: Start Postgres
-  service:
-    name: "{{ postgres_service_name }}"
-    state: started
-
-- name: Wait for Postgres to become available
-  command: >
-    {{ postgres_bin_dir }}/pg_isready --timeout 5
-  become_user: "{{ postgres_user }}"
-  become: yes
-  register: ready
-  ignore_errors: yes
-  until: >
-    ready.rc == 0
-  failed_when: ready.rc > 1
-  changed_when: False
-  retries: 3
-  delay: 5
-
-- name: Run repmgr standby register
-  command: >
-    {{ postgres_bin_dir }}/repmgr standby register --verbose \
-      -f "{{ repmgr_conf_dir }}/repmgr.conf" --force --wait-sync
-  become_user: "{{ postgres_user }}"
-  become: true
+- set_fact: pgdata_initialised=True

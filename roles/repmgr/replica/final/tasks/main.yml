@@ -1,9 +1,94 @@
 ---
 
-# If this instance is registered as a replica already, we don't need to
-# do anything. If it's registered as something else, it's an error, and
-# we don't do anything. Only if it's not registered at all do we clone
-# it and register it as a replica.
+# This role is applied to every postgres replica instance.
+#
+# A replica must have a valid PGDATA (cloned from the primary), must
+# have a valid recovery.conf, must be streaming from the primary, and
+# must be correctly registered with repmgr.
+#
+# First: do we have a valid PGDATA? If not, run repmgr standby clone.
+
+- include_tasks: clone.yml
+  when:
+    not pgdata_initialised
+
+# Do we have a valid recovery.conf?
+#
+# We have the information required to create one, but we would prefer to
+# let repmgr handle it for us, so for now we do nothing beyond checking
+# that the file exists (out of an abundance of caution).
+#
+# If we arrive here after cloning PGDATA above, we won't have access to
+# facts collected earlier during cluster_discovery (this instance would
+# have been skipped at the time). But we must ensure that recovery.conf
+# is present before starting Postgres, so we write the following tests
+# to work both with and without cluster_facts available.
+
+- include_tasks: recovery.yml
+  when:
+    not cluster_facts
+    or (cluster_facts and not recovery_settings)
+  vars:
+    recovery_settings: "{{ cluster_facts|try_subkey(['replica', 'recovery_settings'], {}) }}"
+
+# Next we must check if the replica is streaming properly, for which we
+# need Postgres to be running. If it's already running, the tasks below
+# should succeed immediately.
+
+- name: Ensure that Postgres is running
+  service:
+    name: "{{ postgres_service_name }}"
+    state: started
+
+- name: Wait for Postgres to become available
+  command: /etc/tpa/postgres-monitor
+  changed_when: False
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# Now we can collect cluster_facts for this instance if they are not yet
+# available, and subsequent sanity checks can depend on the presence of
+# these facts.
+
+- include: "{{ tpa_dir }}/roles/postgres/facts/tasks/main.yml"
+  when:
+    not cluster_facts
+
+# Now we can check that this instance is in fact a replica, and has a
+# reasonable configuration.
+
+- name: Ensure that this instance is a replica
+  assert:
+    msg: "Postgres is not running as a replica"
+    that:
+      - role.__contains__('replica')
+      - cluster_facts.pg_is_in_recovery
+
+- name: Ensure that primary_conninfo is configured
+  assert:
+    msg: "No primary_conninfo configured in recovery.conf"
+    that:
+      - cluster_facts.replica.get('primary_conninfo', '') != ''
+
+# TODO
+#
+# If we just started Postgres, we waited until it reached a consistent
+# recovery point and started accepting connections (postgres-monitor),
+# but it may still be performing archive recovery and not have started
+# streaming, so we can't just fail if pg_stat_wal_receiver is empty.
+#
+# We should check if primary_slot_name is configured and, if so, check
+# that the correct upstream instance actually has a slot by that name.
+# This is not straightforward, because we may not have initialised the
+# correct upstream instance yet.
+
+# Is this instance correctly registered with repmgr?
+#
+# If we are streaming from the primary, then our view of repl_nodes is
+# authoritative. However, if we are not streaming (whether because we
+# are still in archive recovery, or because of a configuration error),
+# the contents of repl_nodes collected above may be misleading. As a
+# stopgap measure, we query the upstream server directly.
 
 - name: Check if this instance is registered as a replica
   postgresql_query:
@@ -18,13 +103,11 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
-- fail:
-    msg: >
-      {{ inventory_hostname }} is tagged as replica of {{ upstream_primary }},
-      but is registered as a {{ registration.type }} already"
+- name: Run repmgr standby register
+  command: >
+    {{ postgres_bin_dir }}/repmgr standby register --verbose \
+      -f "{{ repmgr_conf_dir }}/repmgr.conf" --force --wait-sync
+  become_user: "{{ postgres_user }}"
+  become: true
   when:
-    registration.results|length > 0 and registration.type != 'replica'
-
-- include: clone.yml
-  when:
-    registration.results|length == 0
+    registration.rowcount == 0 or registration.type != 'replica'

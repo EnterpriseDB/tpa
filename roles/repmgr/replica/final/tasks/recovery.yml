@@ -1,0 +1,12 @@
+---
+
+- name: Check if recovery.conf exists
+  stat:
+    path: "{{ postgres_data_dir }}/recovery.conf"
+  register: recoveryconf
+
+- name: Fail if recovery.conf does not exist
+  fail:
+    msg: "Couldn't find {{ postgres_data_dir }}/recovery.conf"
+  when:
+    not recoveryconf.stat.exists
