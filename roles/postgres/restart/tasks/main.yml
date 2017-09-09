@@ -15,17 +15,9 @@
     pgdata_initialised
 
 - name: Wait for Postgres to become available
-  command: >
-    {{ postgres_bin_dir }}/pg_isready --timeout 5
+  command: /etc/tpa/postgres-monitor
+  changed_when: False
   become_user: "{{ postgres_user }}"
   become: yes
-  register: ready
-  until: >
-    ready.rc == 0
-  failed_when: ready.rc > 1
-  changed_when: False
-  ignore_errors: yes
-  retries: 6
-  delay: 10
   when:
     pgdata_initialised
