@@ -12,7 +12,7 @@ dependencies:
     tags: [postgres, user]
   - role: postgres/config
     when: >
-      'replica' not in role
+      pgdata_initialised
     tags: [postgres, config]
   - role: sys/ssh
     ssh_user: "{{ postgres_user }}"

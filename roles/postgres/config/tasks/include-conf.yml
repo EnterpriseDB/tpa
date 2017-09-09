@@ -1,0 +1,23 @@
+---
+
+# No matter where the config file lives (and where it came from), we
+# make it include a config dir in PGDATA.
+
+- name: Create include_dir for extra configuration settings
+  file:
+    path: "{{ _include_dir }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0755
+    state: directory
+
+- name: Enable include_dir in postgresql.conf
+  lineinfile:
+    path: "{{ postgres_conf_dir }}/postgresql.conf"
+    line: >-
+      include_dir = '{{ _include_dir }}'
+    insertafter: EOF
+    state: present
+  notify:
+    - Note Postgres restart required
+

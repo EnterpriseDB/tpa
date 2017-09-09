@@ -1,0 +1,83 @@
+---
+
+# First, we generate pg_hba.conf. There are several options here:
+#
+# 1. You can leave the existing pg_hba.conf alone. To do this, just set
+#    postgres_hba_template to ''.
+# 2. You can set postgres_hba_template to 'pg_hba.lines.j2' and specify
+#    an array of lines in postgres_hba_settings; then pg_hba.conf will
+#    contain the lines you specify, and no other rules.
+# 3. The default postgres_hba_template 'pg_hba.conf.j2' will generate a
+#    sensible configuration for the cluster. Any extra lines you specify
+#    in postgres_hba_settings will be appended to these defaults.
+# 4. You can set postgres_hba_template to something else and do whatever
+#    you want in the custom template.
+#
+# These methods are all useful in different circumstances.
+
+- name: Install pg_hba.conf
+  template:
+    src: "{{ postgres_hba_template }}"
+    dest: "{{ postgres_conf_dir }}/pg_hba.conf"
+  when: postgres_hba_template != ''
+  notify:
+    - Note Postgres reload required
+
+# Next, we generate postgresql.conf if the caller specifies a template.
+# Otherwise, we leave the default postgresql.conf alone.
+
+- name: Install postgresql.conf from postgres_conf_template (optional)
+  template:
+    src: "{{ postgres_conf_template }}"
+    dest: "{{ postgres_conf_dir }}/postgresql.conf"
+  when: postgres_conf_template != ''
+  notify:
+    - Note Postgres restart required
+
+- include_tasks: include-conf.yml
+
+# Now we can put any desired settings into conf.d, where they will
+# override the defaults.
+
+- block:
+    - name: Install default TPA configuration file
+      template:
+        src: tpa.conf.j2
+        dest: "{{ _include_dir }}/0000-tpa.conf"
+        owner: "{{ postgres_user }}"
+        group: "{{ postgres_group }}"
+        mode: 0644
+      notify:
+        - Note Postgres reload required
+
+    - name: Install TPA restart-only configuration file
+      template:
+        src: tpa_restart.conf.j2
+        dest: "{{ _include_dir }}/0001-tpa_restart.conf"
+        owner: "{{ postgres_user }}"
+        group: "{{ postgres_group }}"
+        mode: 0644
+      notify:
+        - Note Postgres restart required
+  when: postgres_conf_template == ''
+
+# If any settings were specified in postgres_conf_settings, we put that
+# into a separate configuration file. Note that we expect values in this
+# hash to be quoted properly; we don't try to quote them when writing
+# out the configuration.
+
+- name: Generate configuration based on postgres_conf_settings (optional)
+  template:
+    src: settings.conf.j2
+    dest: "{{ _include_dir }}/9900-role-settings.conf"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
+  when: postgres_conf_settings
+  notify:
+    - Note Postgres restart required
+
+- include_tasks: override.yml
+
+- include_tasks: extensions.yml
+  tags: [postgres, extensions]

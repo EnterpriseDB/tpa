@@ -27,6 +27,10 @@
   become_user: "{{ postgres_user }}"
   become: true
 
+- include: ../../../postgres/config/tasks/replica.yml
+  vars:
+    _include_dir: "{{ postgres_data_dir }}/conf.d"
+
 - name: Start Postgres
   service:
     name: "{{ postgres_service_name }}"

@@ -1,116 +1,39 @@
 ---
 
-# These tasks are run on every Postgres primary instance.
-
-# First, we generate pg_hba.conf. There are several options here:
+# This role is applied to every postgres instance with a valid PGDATA.
 #
-# 1. You can leave the existing pg_hba.conf alone. To do this, just set
-#    postgres_hba_template to ''.
-# 2. You can set postgres_hba_template to 'pg_hba.lines.j2' and specify
-#    an array of lines in postgres_hba_settings; then pg_hba.conf will
-#    contain the lines you specify, and no other rules.
-# 3. The default postgres_hba_template 'pg_hba.conf.j2' will generate a
-#    sensible configuration for the cluster. Any extra lines you specify
-#    in postgres_hba_settings will be appended to these defaults.
-# 4. You can set postgres_hba_template to something else and do whatever
-#    you want in the custom template.
+# We aspire to the following configuration layout:
 #
-# These methods are all useful in different circumstances.
+# postgres_data_dir/
+#   pg_hba.conf
+#   postgresql.conf
+#   conf.d/
+#     0000-tpa.conf
+#     0001-tpa_restart.conf
+#     1111-extensions.conf
+#     8888-{{ variable_name }}*.conf
+#     8900-replica.conf
+#     8901-replica_restart.conf
+#     9900-role-settings.conf
+#     9999-override.conf
+#
+# On a primary, we create pg_hba.conf and postgresql.conf, make the
+# latter include conf.d, and create the various files inside conf.d.
+#
+# On a replica, we assume that the above configuration has been cloned
+# and install the two replica override files (which include only those
+# instance-specific settings that differ from the primary). As a minor
+# concession to existing replicas, we make sure the include_dir+conf.d
+# setup is in place, but do not create the other configuration files.
+#
+# We do not support making replica-specific changes to pg_hba.conf as a
+# matter of principle (which is that such differences may interfere with
+# switchover/failover operations).
 
-- name: Install pg_hba.conf
-  template:
-    src: "{{ postgres_hba_template }}"
-    dest: "{{ postgres_conf_dir }}/pg_hba.conf"
-  when: postgres_hba_template != ''
-  notify:
-    - Note Postgres reload required
+- include_tasks: primary.yml
+  when: >
+    'replica' not in role
 
-# Next, we generate postgresql.conf if the caller specifies a template.
-# Otherwise, we leave the default postgresql.conf alone.
-
-- name: Install postgresql.conf from postgres_conf_template (optional)
-  template:
-    src: "{{ postgres_conf_template }}"
-    dest: "{{ postgres_conf_dir }}/postgresql.conf"
-  when: postgres_conf_template != ''
-  notify:
-    - Note Postgres restart required
-
-# No matter where the config file lives (and where it came from), we
-# make it include a config dir in PGDATA.
-
-- name: Create include_dir for extra configuration settings
-  file:
-    path: "{{ _include_dir }}"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0755
-    state: directory
-
-- name: Enable include_dir in postgresql.conf
-  lineinfile:
-    path: "{{ postgres_conf_dir }}/postgresql.conf"
-    line: >-
-      include_dir = '{{ _include_dir }}'
-    insertafter: EOF
-    state: present
-  notify:
-    - Note Postgres restart required
-
-# Now we can put any desired settings into conf.d, where they will
-# override the defaults.
-
-- block:
-    - name: Install default TPA configuration file
-      template:
-        src: tpa.conf.j2
-        dest: "{{ _include_dir }}/0000-tpa.conf"
-        owner: "{{ postgres_user }}"
-        group: "{{ postgres_group }}"
-        mode: 0644
-      notify:
-        - Note Postgres reload required
-
-    - name: Install TPA restart-only configuration file
-      template:
-        src: tpa_restart.conf.j2
-        dest: "{{ _include_dir }}/0001-tpa_restart.conf"
-        owner: "{{ postgres_user }}"
-        group: "{{ postgres_group }}"
-        mode: 0644
-      notify:
-        - Note Postgres restart required
-  when: postgres_conf_template == ''
-
-# If any settings were specified in postgres_conf_settings, we put that
-# into a separate configuration file. Note that we expect values in this
-# hash to be quoted properly; we don't try to quote them when writing
-# out the configuration.
-
-- name: Generate configuration based on postgres_conf_settings (optional)
-  template:
-    src: settings.conf.j2
-    dest: "{{ _include_dir }}/8888-role-settings.conf"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0644
-  when: postgres_conf_settings
-  notify:
-    - Note Postgres restart required
-
-# And here's a file where anyone can add extra settings that will have
-# priority over our defaults, and will never be overwritten.
-
-- name: Create empty configuration override file
-  template:
-    force: no
-    src: override.conf.j2
-    dest: "{{ _include_dir }}/9999-override.conf"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0644
-  notify:
-    - Note Postgres restart required
-
-- include: extensions.yml
-  tags: [postgres, extensions]
+- include_tasks: replica.yml
+  when: >
+    'replica' in role

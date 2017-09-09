@@ -1,0 +1,17 @@
+---
+
+# And here's a file where anyone can add extra settings that will have
+# priority over our defaults, and will never be overwritten.
+
+- set_fact: dot="{{ tpa_dir }}/roles/postgres/config"
+
+- name: Create empty configuration override file
+  template:
+    force: no
+    src: "{{ dot }}/templates/override.conf.j2"
+    dest: "{{ _include_dir }}/9999-override.conf"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
+  notify:
+    - Note Postgres restart required
