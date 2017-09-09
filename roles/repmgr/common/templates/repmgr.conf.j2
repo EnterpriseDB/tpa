@@ -20,3 +20,8 @@ restore_command='/usr/bin/barman-wal-restore -U barman -z -p 8 {{ hostvars[upstr
 {% if upstream|default(upstream_primary) != upstream_primary %}
 upstream_node={{ hostvars[upstream].node }}
 {% endif %}
+
+service_start_command = sudo systemctl start {{ postgres_service_name }}
+service_stop_command = sudo systemctl stop {{ postgres_service_name }}
+service_restart_command = sudo systemctl restart {{ postgres_service_name }}
+service_reload_command = sudo systemctl reload {{ postgres_service_name }}
