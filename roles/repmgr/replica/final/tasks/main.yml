@@ -11,7 +11,7 @@
     query: >
       SELECT (case when type='standby' then 'replica' else type end) as type
       FROM "{{ repmgr_schema }}".repl_nodes
-      WHERE name='{{ inventory_hostname }}'
+      WHERE name='{{ inventory_hostname }}' AND active
   vars:
     repmgr_schema: 'repmgr_{{ repmgr_cluster }}'
   register: registration
