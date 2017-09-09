@@ -36,6 +36,9 @@ EXAMPLES = '''
     conninfo: "dbname=postgres"
   register: query
 - debug: msg="the answer is {{ query.results[0].a }}"
+- debug: msg="the answer is also {{ query.a }}"
+  when:
+    query.rowcounts[0] == 1
 - postgresql_query:
     query:
       - text: insert into x(a,b) values (%s, %s)
@@ -44,6 +47,9 @@ EXAMPLES = '''
           - foo
       - SELECT 42 as a
 - debug: msg="{{ query.rowcounts[0] }} rows"
+- debug: msg="also {{ query.rowcount }} rows"
+  when:
+    query.rowcounts|length == 1
 '''
 
 RETURN = '''
@@ -134,9 +140,11 @@ def main():
         for k,v in results[0].iteritems():
             m[k] = v
 
-    m['changed'] = changed
     m['rowcounts'] = rowcounts
-    module.exit_json(results=results, **m)
+    if len(rowcounts) == 1:
+        m['rowcount'] = rowcounts[0]
+
+    module.exit_json(changed=changed, results=results, **m)
 
 from ansible.module_utils.basic import *
 from ansible.module_utils.database import *
