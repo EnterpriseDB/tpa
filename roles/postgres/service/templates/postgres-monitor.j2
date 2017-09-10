@@ -4,16 +4,15 @@
 # success as quickly as possible after this happens, or fails if it is
 # convinced that it will not happen.
 #
-# In an ideal world, it would wait only when an attempt to connect to
-# Postgres returns a FATAL 'the database system is starting up' error,
-# and it can observe that the startup process is not stalled (even if
-# the progress is slow).
+# We try to connect (and must ignore the first error, because although
+# we were invoked after postgres, it's entirely likely that it has not
+# yet started listening on 5432 when we first check), and keep trying
+# periodically so long as we receive only 'database is starting up'
+# errors that we expect to go away eventually.
 #
-# Instead, we just run pg_isready and accept any 'rejecting connections'
-# error (not only 'is starting up') and do not attempt to establish that
-# recovery is making progress. We skip the first rc==2 status because it
-# is entirely likely that postgres has not yet started listening on 5432
-# at all when we first invoke pg_isready.
+# In an ideal world, we would stop trying if we could establish that the
+# recovery was not making progress, but for now, we resign ourselves to
+# waiting indefinitely.
 
 from __future__ import absolute_import, division, print_function
 
