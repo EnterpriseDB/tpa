@@ -39,7 +39,7 @@
   when: >
     primary_conninfo != ''
   vars:
-    primary_conninfo: "{{ cluster_facts|try_subkey(['replica', 'primary_conninfo'], '') }}"
+    primary_conninfo: "{{ cluster_facts|try_subkey('replica.primary_conninfo', '') }}"
 
 - name: Override upstream if required
   set_fact:
