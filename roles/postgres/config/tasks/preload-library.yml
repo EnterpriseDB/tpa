@@ -35,7 +35,7 @@
 
 - name: Append {{ library }} to shared_preload_libraries
   template:
-    src: variable.j2
+    src: "{{ tpa_dir }}/roles/postgres/config/templates/variable.j2"
     dest: "{{ spl_config }}"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"

@@ -1,6 +1,6 @@
 ---
 
 - name: Add repmgr_funcs to shared_preload_libraries
-  include: ../../../postgres/config/tasks/preload-library.yml
+  include_tasks: "{{ tpa_dir }}/roles/postgres/config/tasks/preload-library.yml"
   vars:
     library: repmgr_funcs

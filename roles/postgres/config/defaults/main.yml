@@ -2,7 +2,7 @@
 # their own (or set it to '' to leave the existing pg_hba.conf alone),
 # or just specify an array of lines to put in the file.
 
-postgres_hba_template: 'pg_hba.conf.j2'
+#postgres_hba_template: 'pg_hba.conf.j2'
 postgres_hba_settings: []
 
 # By default, we leave postgresql.conf alone, but the caller can define

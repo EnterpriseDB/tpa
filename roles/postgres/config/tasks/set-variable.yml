@@ -16,7 +16,7 @@
 
 - name: Set override for variable {{ name }}
   template:
-    src: variable.j2
+    src: "{{ tpa_dir }}/roles/postgres/config/templates/variable.j2"
     dest: "{{ include_dir|default(postgres_data_dir+'/conf.d') }}/8888-{{ name }}.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"

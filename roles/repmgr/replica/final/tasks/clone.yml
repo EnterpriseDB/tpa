@@ -27,18 +27,20 @@
   become_user: "{{ postgres_user }}"
   become: true
 
-# Replica-specific configuration files are usually installed earlier by
-# postgres/config, but would have been skipped on this instance because
-# PGDATA didn't exist until just now. So we install the override files,
-# and can leave it to postgres/config to manage them together with the
-# other instances in subsequent deployments.
+# PGDATA didn't exist until we just created it, so postgres/config would
+# have skipped this instance earlier. We install the configuration files
+# here; on subsequent deployments, postgres/config will manage them with
+# the other instances.
 #
 # XXX We would like to use include_role/tasks_from here, but can't due
 # to various bugs, so we duplicate the definition of _include_dir from
 # postgres/config/vars.
 
-- include: "{{ tpa_dir }}/roles/postgres/config/tasks/replica.yml"
+- include: "{{ tpa_dir }}/roles/postgres/config/tasks/main.yml"
   vars:
     _include_dir: "{{ postgres_data_dir }}/conf.d"
+    _postgres_extensions: "{{
+      postgres_extensions|default(default_postgres_extensions)
+    }}"
 
 - set_fact: pgdata_initialised=True
