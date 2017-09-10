@@ -50,37 +50,14 @@
 # available, and subsequent sanity checks can depend on the presence of
 # these facts.
 
-- include: "{{ tpa_dir }}/roles/postgres/facts/tasks/main.yml"
+- include_tasks: "{{ tpa_dir }}/roles/postgres/facts/tasks/main.yml"
   when:
     not cluster_facts
 
 # Now we can check that this instance is in fact a replica, and has a
 # reasonable configuration.
 
-- name: Ensure that this instance is a replica
-  assert:
-    msg: "Postgres is not running as a replica"
-    that:
-      - role.__contains__('replica')
-      - cluster_facts.pg_is_in_recovery
-
-- name: Ensure that primary_conninfo is configured
-  assert:
-    msg: "No primary_conninfo configured in recovery.conf"
-    that:
-      - cluster_facts.replica.get('primary_conninfo', '') != ''
-
-# TODO
-#
-# If we just started Postgres, we waited until it reached a consistent
-# recovery point and started accepting connections (postgres-monitor),
-# but it may still be performing archive recovery and not have started
-# streaming, so we can't just fail if pg_stat_wal_receiver is empty.
-#
-# We should check if primary_slot_name is configured and, if so, check
-# that the correct upstream instance actually has a slot by that name.
-# This is not straightforward, because we may not have initialised the
-# correct upstream instance yet.
+- include_tasks: check-replica.yml
 
 # Is this instance correctly registered with repmgr?
 #
