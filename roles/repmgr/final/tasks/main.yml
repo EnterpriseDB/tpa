@@ -6,3 +6,25 @@
   service:
     name: repmgr
     state: "{{ repmgr_service_end_state|default('started') }}"
+
+# If we find any inactive slots and can prove that the replica they are
+# meant for is configured to not use them, then we can drop them. We're
+# conservative about this because, of course, the most likely reason is
+# not a misconfiguration, but a temporary disconnection.
+
+- block:
+    - include_tasks: drop-slot.yml
+      vars:
+        slot: "{{ item }}"
+      with_items:
+        "{{ inactive_slots }}"
+  when: >
+    'primary' in role or
+    'replica' in role
+  vars:
+    all_hostvars:
+      h: "{{ hostvars.values() }}"
+    all_cluster_facts: >
+      {{ all_hostvars|json_query('h[*].cluster_facts') }}
+    inactive_slots: >
+      {{ cluster_facts|json_query('pg_replication_slots[?!active]') }}

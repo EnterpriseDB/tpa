@@ -1,0 +1,37 @@
+---
+
+# We drop the slot only if all of the following conditions are met:
+#
+# (a) the slot is named "repmgr_slot_N",
+# (b) there is a replica with primary_slot_name=repmgr_slot_N,
+# (c) that replica's primary_conninfo points to some other instance.
+#
+# In other words, it's not enough that the slot is inactive, nor that
+# we can't find a replica that is configured to use it, nor that the
+# replica isn't using it at the moment. We must be able to prove that
+# the slot cannot be used before we'll drop it.
+
+- name: Drop replication slot {{ slot.slot_name }}
+  postgresql_query:
+    conninfo: ""
+    query:
+      - text: SELECT pg_drop_replication_slot(%s)
+        args:
+          - "{{ slot.slot_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    - slot.slot_name|match('repmgr_slot_[0-9]+')
+    - replica_with_slot|count == 1
+    - replica_streams_from not in ['', inventory_hostname]
+  vars:
+    replica_with_slot: >
+      {{
+        all_cluster_facts|json_query(
+          "[?replica.primary_slot_name=='" + slot.slot_name + "']"
+        )
+      }}
+    replica_streams_from: >
+      {{
+        replica_with_slot|try_subkey('replica.primary_conninfo_parts.host', '')
+      }}
