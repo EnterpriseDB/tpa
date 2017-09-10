@@ -7,6 +7,15 @@
     name: repmgr
     state: "{{ repmgr_service_end_state|default('started') }}"
 
+# Since the topology of the cluster may have changed during the repmgr
+# setup process, we collect cluster_facts again.
+
+- name: Collect facts about the Postgres cluster
+  cluster_discovery:
+    conninfo: ""
+  become_user: "{{ postgres_user }}"
+  become: yes
+
 # If we find any inactive slots and can prove that the replica they are
 # meant for is configured to not use them, then we can drop them. We're
 # conservative about this because, of course, the most likely reason is
@@ -28,3 +37,35 @@
       {{ all_hostvars|json_query('h[*].cluster_facts') }}
     inactive_slots: >
       {{ cluster_facts|json_query('pg_replication_slots[?!active]') }}
+
+# If we find any replica that is configured to use a slot that doesn't
+# exist on this instance, we need to create it (XXX and hope that the
+# WAL required by the replica hasn't been discarded already).
+
+- block:
+    - include_tasks: create-slot.yml
+      when:
+        slot_name not in existing_slots
+      vars:
+        slot_name: "{{ item }}"
+      with_items:
+        "{{ expected_slots }}"
+  when: >
+    'primary' in role or
+    'replica' in role
+  vars:
+    all_hostvars:
+      h: "{{ hostvars.values() }}"
+    all_cluster_facts: >
+      {{ all_hostvars|json_query('h[*].cluster_facts') }}
+    existing_slots: >
+      {{
+        cluster_facts|json_query('pg_replication_slots[*].slot_name')
+      }}
+    expected_slots: >
+      {{
+        all_cluster_facts|json_query(
+          "[?replica.primary_conninfo_parts.host=='" + inventory_hostname + "']"
+          + ".replica.primary_slot_name"
+        )
+      }}

@@ -1,0 +1,22 @@
+---
+
+# If any replica references a slot on this instance that does not exist,
+# we create it, even though we can't guarantee that the WAL required by
+# the replica still exists.
+
+- name: Create replication slot
+  postgresql_query:
+    conninfo: ""
+    query:
+      - text: "{{ create_slot_query }}"
+        args:
+          - "{{ slot_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  vars:
+    create_slot_query: >
+      SELECT pg_create_physical_replication_slot(%s
+        {%- if postgres_version|version_compare('9.6', '>=') -%}
+          , TRUE
+        {%- endif -%}
+      )
