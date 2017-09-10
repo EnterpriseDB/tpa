@@ -232,6 +232,10 @@ def replica_discovery(module, conn, m0):
             'primary_slot_name': m['recovery_settings']['primary_slot_name']
         })
 
+    m.update({
+        'primary_conninfo_parts': parse_conninfo(m['primary_conninfo'])
+    })
+
     return m
 
 def repmgr_discovery(module, conn, m0):
@@ -253,24 +257,32 @@ def repmgr_discovery(module, conn, m0):
 
     return m or None
 
+def parse_kv(str):
+    parts = [x.strip() for x in str.split('=', 1)]
+
+    v = None
+    if len(parts) == 2:
+        v = parts[1]
+        if v.startswith("'") and v.endswith("'") or \
+           v.startswith('"') and v.endswith('"'):
+            v = v[1:-1]
+
+    return {parts[0]: v}
+
+def parse_conninfo(conninfo):
+    settings = {}
+    for str in conninfo.split(' '):
+        settings.update(parse_kv(str.strip()))
+
+    return settings
+
 def parse_kv_lines(filename):
     m = dict()
 
     for line in io.open(filename, 'r'):
         line = line.strip()
-        if line == '' or line.startswith('#'):
-            continue
-
-        parts = [x.strip() for x in line.split('=', 1)]
-
-        v = None
-        if len(parts) == 2:
-            v = parts[1]
-            if v.startswith("'") and v.endswith("'") or \
-               v.startswith('"') and v.endswith('"'):
-                v = v[1:-1]
-
-        m[parts[0]] = v
+        if not (line == '' or line.startswith('#')):
+            m.update(parse_kv(line))
 
     return m
 
