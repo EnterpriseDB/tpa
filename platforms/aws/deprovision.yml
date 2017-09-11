@@ -4,8 +4,6 @@
 #
 #     ansible-playbook -i inventory/ec2.py platforms/aws/deprovision.yml \
 #         --extra-vars cluster=/path/to/cluster
-#
-# XXX Doesn't delete elastic IPs or extra provisioned volumes.
 
 - name: Deprovision EC2 cluster
   hosts: localhost
