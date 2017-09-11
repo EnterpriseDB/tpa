@@ -37,8 +37,8 @@
     apt_repositories:
       BDR:
         key_id: 7ED05910
-        key_url: "https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/7ED05910.asc"
-        repo: "deb http://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@ci.2ndquadrant.com/packages/internal-testing/bdr_2.0/latest/deb/ {{ ansible_distribution_release }} main"
+        key_url: "https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@temp-packages.2ndquadrant.com/7ED05910.asc"
+        repo: "deb https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@temp-packages.2ndquadrant.com/bdr_2.0/latest/deb/ {{ ansible_distribution_release }} main"
         versions: [9.6]
     extra_postgres_packages:
       Debian: &debian_extra_packages ['postgresql-{{postgres_version}}-bdr-plugin']
