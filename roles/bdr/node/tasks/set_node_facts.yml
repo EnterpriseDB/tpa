@@ -5,14 +5,17 @@
     bdr_node_dsn: "host={{ ip_address }} port={{postgres_port}} dbname={{bdr_db_name}} user=postgres"
 
 - name: Check for bdr node setup in the database
-  command: "{{postgres_bin_dir}}/psql '{{bdr_node_dsn}}' -qAtw -c \"SELECT 1 FROM bdr.bdr_nodes WHERE node_status != 'k' LIMIT 1;\""
+  postgresql_query:
+    conninfo: "{{ bdr_node_dsn }}"
+    query: >
+      SELECT 1 FROM bdr.bdr_nodes WHERE node_status != 'k' LIMIT 1;
   register: bdr_node_result
   become_user: "{{ postgres_user }}"
   become: yes
 
 - name: Set bdr_node_exists fact
   set_fact:
-    bdr_node_exists: "{{ bdr_node_result.stdout|int == 1 }}"
+    bdr_node_exists: "{{ bdr_node_result.results|length > 0 }}"
 
 # There are two possible scenarios, either this is a new cluster in which case
 # we can pick any host which is supposed to be part of the bdr cluster
