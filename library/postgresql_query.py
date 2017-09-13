@@ -103,7 +103,7 @@ def main():
         argument_spec=dict(
             conninfo=dict(default=""),
             queries=dict(type='list'),
-            query=dict(type='str'),
+            query=dict(type='!json'),
         ),
         required_one_of=[['query','queries']],
         mutually_exclusive=[['query','queries']],
@@ -121,7 +121,7 @@ def main():
 
     queries = module.params['queries'] or module.params['query']
     if isinstance(queries, string_types):
-        queries = [queries]
+        queries = [queries.strip()]
         if queries[0].startswith('['):
             module.fail_json(msg="you probably didn't mean to pass this query as a list")
         if queries[0].startswith('{'):
