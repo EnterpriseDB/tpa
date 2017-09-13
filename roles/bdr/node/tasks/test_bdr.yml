@@ -4,7 +4,7 @@
   - name: Create a table on first node
     postgresql_query:
       conninfo: "{{ bdr_node_dsn }}"
-      query:
+      queries:
         - SELECT bdr.bdr_replicate_ddl_command('DROP TABLE IF EXISTS public.bdr_test;');
         - SELECT bdr.bdr_replicate_ddl_command('CREATE TABLE public.bdr_test(c1 INT, PRIMARY KEY (c1));');
         - INSERT INTO public.bdr_test VALUES (1);

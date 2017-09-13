@@ -15,9 +15,17 @@ version_added: "2.4"
 options:
   query:
     description:
-      - Text of the SQL query to execute, or a list of queries. Instead of the
-        query text alone, may also be a dict with 'text' and 'args'. All of the
+      - Text of an SQL query to execute. (This form does not accept text and
+        args separately; if you want to use placeholders, use 'queries'.)
+        You must specify exactly one of 'query' or 'queries'.
+    required: true
+  queries:
+    description:
+      - A list of SQL queries to execute. Each element in the list may be either
+        a string (i.e., the query text) or a dict with the query 'text' and a
+        list of 'args' to bind to %s placeholders in the query. All of the
         queries are executed in the same transaction.
+        You must specify exactly one of 'query' or 'queries'.
     required: true
   conninfo:
     description:
@@ -40,7 +48,7 @@ EXAMPLES = '''
   when:
     query.rowcounts[0] == 1
 - postgresql_query:
-    query:
+    queries:
       - text: insert into x(a,b) values (%s, %s)
         args:
           - 42
@@ -56,6 +64,16 @@ RETURN = '''
 rowcounts:
     description: An array of rowcounts from each query executed.
     type: list
+    sample: [
+        1,
+        2,
+        3
+    ]
+rowcount:
+    description: If only one query was executed, the rowcount is set separately
+    as a single integer (in addition to the 'rowcounts' array).
+    type: int
+    sample: 42
 results:
     description: An array of dicts, each containing data from a single row of
     query results. If multiple queries are specified, then this is an array of
@@ -64,10 +82,13 @@ results:
     type: list
     sample: [
         {
-            "a": 42
+            "a": 42,
+            "b": 31
         }
     ]
 '''
+
+from ansible.module_utils.six import string_types
 
 try:
     import psycopg2
@@ -77,17 +98,15 @@ except ImportError:
 else:
     psycopg2_found = True
 
-
-class NotSupportedError(Exception):
-    pass
-
-
 def main():
     module = AnsibleModule(
         argument_spec=dict(
             conninfo=dict(default=""),
-            query=dict(required=True, type='list'),
+            queries=dict(type='list'),
+            query=dict(type='str'),
         ),
+        required_one_of=[['query','queries']],
+        mutually_exclusive=[['query','queries']],
         supports_check_mode = False
     )
 
@@ -100,13 +119,21 @@ def main():
     except Exception, e:
         module.fail_json(msg="Could not connect to database", err=str(e))
 
+    queries = module.params['queries'] or module.params['query']
+    if isinstance(queries, string_types):
+        queries = [queries]
+        if queries[0].startswith('['):
+            module.fail_json(msg="you probably didn't mean to pass this query as a list")
+        if queries[0].startswith('{'):
+            module.fail_json(msg="you probably didn't mean to pass this query as a dict")
+
     m = dict()
     changed = False
 
     results = []
     rowcounts = []
     try:
-        for q in module.params['query']:
+        for q in queries:
             cur = conn.cursor()
 
             text = q

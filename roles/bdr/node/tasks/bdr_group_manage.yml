@@ -6,8 +6,9 @@
   - name: Execute bdr_group_create
     postgresql_query:
       conninfo: "{{ bdr_node_dsn }}"
-      query:
-        - SELECT bdr.bdr_group_create(local_node_name := '{{inventory_hostname}}', node_external_dsn := '{{bdr_node_dsn}}');
+      query: >
+        SELECT bdr.bdr_group_create(local_node_name := '{{inventory_hostname}}',
+        node_external_dsn := '{{bdr_node_dsn}}');
     when: not bdr_node_exists
 
   - name: Ensure that the node is ready to replicate
@@ -22,8 +23,10 @@
   - name: Execute bdr_group_join
     postgresql_query:
       conninfo: "{{ hostvars[item].bdr_node_dsn }}"
-      query:
-        - SELECT bdr.bdr_group_join(local_node_name := '{{item}}', node_external_dsn := '{{hostvars[item].bdr_node_dsn}}', join_using_dsn := '{{bdr_node_dsn}}');
+      query: >
+        SELECT bdr.bdr_group_join(local_node_name := '{{item}}',
+        node_external_dsn := '{{hostvars[item].bdr_node_dsn}}',
+        join_using_dsn := '{{bdr_node_dsn}}');
     when: "not hostvars[item].bdr_node_exists"
     with_items: "{{ bdr_other_hosts }}"
 

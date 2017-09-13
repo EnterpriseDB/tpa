@@ -14,7 +14,7 @@
 - name: Drop replication slot {{ slot.slot_name }}
   postgresql_query:
     conninfo: ""
-    query:
+    queries:
       - text: SELECT pg_drop_replication_slot(%s)
         args:
           - "{{ slot.slot_name }}"

@@ -31,7 +31,7 @@
 - name: Ensure that the upstream exists in repl_nodes
   postgresql_query:
     conninfo: "{{ primary_conninfo }}"
-    query:
+    queries:
       - text: >
           INSERT INTO "{{ repmgr_schema }}".repl_nodes
           (id, type, cluster, name, conninfo, priority, active)
