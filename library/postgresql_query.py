@@ -107,7 +107,7 @@ def main():
         ),
         required_one_of=[['query','queries']],
         mutually_exclusive=[['query','queries']],
-        supports_check_mode = False
+        supports_check_mode = True
     )
 
     if not psycopg2_found:
@@ -161,7 +161,10 @@ def main():
         conn.rollback()
         module.fail_json(msg="Database query failed", err=str(e))
     else:
-        conn.commit()
+        if module.check_mode:
+            conn.rollback()
+        else:
+            conn.commit()
 
     if len(results) == 1:
         results = results[0]
