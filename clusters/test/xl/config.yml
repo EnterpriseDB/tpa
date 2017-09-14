@@ -1,0 +1,72 @@
+---
+
+cluster_name: xl_test
+cluster_tags:
+  Owner: AMS
+
+ec2_vpc:
+  Name: Test
+
+ec2_vpc_subnets:
+  ap-southeast-2:
+    10.33.63.0/26:
+      az: ap-southeast-2a
+
+ec2_ami:
+  Name: TPA-Debian-PGDG-9.6-2017*
+  Owner: self
+ec2_ami_user: admin
+
+instances:
+    - node: 1
+      type: i2.xlarge
+      region: ap-southeast-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: xllaunchgrp
+      role: [gtm,coordinator]
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 8
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      vars:
+        coordinator_list: [1]
+
+    - node: 2
+      type: i2.xlarge
+      region: ap-southeast-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: xllaunchgrp
+      role: [datanode,datanode-replica]
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 8
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      vars:
+        datanode_list: [1,2]
+        datanode_replica_list: [3,4]
+
+    - node: 3
+      type: i2.xlarge
+      region: ap-southeast-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: xllaunchgrp
+      role: [datanode,datanode-replica]
+      volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 8
+          - device_name: /dev/xvdb
+            ephemeral: ephemeral0
+      vars:
+        datanode_list: [3,4]
+        datanode_replica_list: [1,2]
