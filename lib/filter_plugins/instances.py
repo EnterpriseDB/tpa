@@ -1,6 +1,48 @@
 import copy
 from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
+from ansible.errors import AnsibleFilterError
+
+# This table is distilled from the content at
+# https://aws.amazon.com/ec2/instance-types/
+
+ephemeral_storage = {
+    'm3.medium': 1, # 4GB
+    'm3.large': 1, # 32GB
+    'm3.xlarge': 2, # 40GB
+    'm3.2xlarge': 2, # 80GB
+
+    'c3.large': 2, # 16GB
+    'c3.xlarge': 2, # 40GB
+    'c3.2xlarge': 2, # 80GB
+    'c3.4xlarge': 2, # 160GB
+    'c3.8xlarge': 2, # 320GB
+
+    'x1e.32xlarge': 2, # 1920GB
+    'x1.32xlarge': 2, # 1920GB
+    'x1.16xlarge': 1, # 1920GB
+
+    'r3.large': 1, # 32GB
+    'r3.xlarge': 1, # 80GB
+    'r3.2xlarge': 1, # 160GB
+    'r3.4xlarge': 1, # 320GB
+    'r3.8xlarge': 2, # 320GB
+
+    'f1.2xlarge': 1, # 470GB
+    'f1.16xlarge': 4, # 940GB
+
+    'i3.large': 1, # 475GB
+    'i3.xlarge': 1, # 950GB
+    'i3.2xlarge': 1, # 1900GB
+    'i3.4xlarge': 2, # 1900GB
+    'i3.8xlarge': 4, # 1900GB
+    'i3.16xlarge': 8, # 1900GB
+
+    'd2.xlarge': 3, # 2000GB
+    'd2.2xlarge': 6, # 2000GB
+    'd2.4xlarge': 12, # 2000GB
+    'd2.8xlarge': 24, # 2000GB
+}
 
 ## Instance filters
 #
@@ -100,7 +142,17 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
             # raid_units-1 times.
 
             if 'raid_device' in v:
-                n = v['raid_units'] - 1
+                n = v['raid_units']
+
+                if n == 'all':
+                    if 'ephemeral' in v:
+                        if i['type'] in ephemeral_storage:
+                            n = ephemeral_storage[i['type']]
+                        else:
+                            raise AnsibleFilterError("ephemeral storage unavailable for %s" % i['type'])
+                    else:
+                        raise AnsibleFilterError("raid_units=all can be used only with ephemeral storage")
+                n -= 1
 
                 vn = v
                 while n > 0:
