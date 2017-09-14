@@ -109,6 +109,10 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
                     name = vn['device_name']
                     vn['device_name'] = name[0:-1] + chr(ord(name[-1])+1)
 
+                    if 'ephemeral' in vn:
+                        ename = vn['ephemeral']
+                        vn['ephemeral'] = ename[0:-1] + chr(ord(ename[-1])+1)
+
                     volumes.append(vn)
                     n -= 1
 
