@@ -4,7 +4,7 @@
   assert:
     msg: "Postgres is not running as a replica"
     that:
-      - role.__contains__('replica')
+      - role|contains('replica')
       - cluster_facts.pg_is_in_recovery
 
 - name: Ensure that primary_conninfo is configured
