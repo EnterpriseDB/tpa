@@ -1,5 +1,4 @@
 ---
 
 - include: hostvars.yml
-- include: xl-legacy-hostvars.yml
 - include: wait.yml
