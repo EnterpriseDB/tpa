@@ -103,7 +103,7 @@ def main():
         argument_spec=dict(
             conninfo=dict(default=""),
             queries=dict(type='list'),
-            query=dict(type='!json'),
+            query=dict(type='str'),
         ),
         required_one_of=[['query','queries']],
         mutually_exclusive=[['query','queries']],
