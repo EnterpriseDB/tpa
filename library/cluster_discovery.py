@@ -109,6 +109,8 @@ def main():
     if not psycopg2_found:
         module.fail_json(msg="the python psycopg2 module is required")
 
+    register_casts()
+
     m = dict(changed=False)
 
     conn = None
@@ -334,6 +336,18 @@ def query_results(conn, query):
     for row in cur:
         res.append(dict(zip(column_names, row)))
     return res
+
+def cast_interval(value, cur):
+    if value is None:
+        return None
+    return str(value)
+
+def register_casts():
+    intervaloid = 1186
+    interval = psycopg2.extensions.new_type(
+        (intervaloid,), "interval", cast_interval
+    )
+    psycopg2.extensions.register_type(interval)
 
 if __name__ == '__main__':
     main()
