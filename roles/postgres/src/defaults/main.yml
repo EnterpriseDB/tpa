@@ -5,7 +5,7 @@
 # and time. By default we build the latest revision from postgresql.git.
 
 postgres_git_url: git://git.postgresql.org/git/postgresql.git
-postgres_git_ref: master
+postgres_git_ref: "REL{{ postgres_version|version_compare('10','<')|ternary(postgres_version|replace('.', '_'),'_'+postgres_version) }}_STABLE"
 postgres_git_reference_repo: ""
 
 ## Build and install locations
