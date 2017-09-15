@@ -36,3 +36,10 @@
     chdir: "{{postgres_build_dir}}"
     executable: /bin/bash
   with_items: "{{ postgres_install_targets }}"
+
+- name: Override postgres_bin_dir
+  set_fact:
+    postgres_bin_dir: "{{ postgres_install_dir }}/bin"
+  when:
+    postgres_installation_source == 'src'
+  tags: always
