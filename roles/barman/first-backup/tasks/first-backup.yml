@@ -35,14 +35,17 @@
   postgresql_query:
     conninfo: "host={{postgres_host}} port={{postgres_port}}"
     query: >
-      select pg_xlogfile_name(pg_switch_xlog()) as filename
+      select pg_{{wal}}file_name(pg_switch_{{wal}}()) as filename
   delegate_to: "{{ inventory_hostname|upstream_root(hostvars) }}"
   become_user: "{{ postgres_user }}"
   become: yes
-  register: xlog
-  failed_when: >
-    xlog|failed and not 'recovery is in progress' in segment.err
-
+  register: seg
+  vars:
+    wal: >-
+      {%- if postgres_version|version_compare('10', '>=') -%}wal
+      {%- else -%}xlog
+      {%- endif -%}
+    
 # Now we have the name of the WAL segment file corresponding to the LSN
 # returned by pg_switch_xlog(), and we must wait for it to be archived.
 # First, pg_receivexlog will rename streaming/$n.partial to …/$n. Then
@@ -73,7 +76,7 @@
 
 - name: Wait for old WAL segment to be archived
   wait_for:
-    path: "{{ barman_home }}/{{ backup_name }}/wals/{{ xlog.filename[0:16] }}/{{ xlog.filename }}"
+    path: "{{ barman_home }}/{{ backup_name }}/wals/{{ seg.filename[0:16] }}/{{ seg.filename }}"
     delay: 3
     timeout: 130
   delegate_to: "{{ backup }}"
