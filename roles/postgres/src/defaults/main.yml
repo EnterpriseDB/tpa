@@ -29,8 +29,9 @@ postgres_install_dir: /opt/postgres/{{postgres_version}}
 
 postgres_configure_env: {}
 postgres_configure_opts:
+  - -q
   - --with-openssl
-postgres_make_command: "make"
+postgres_make_command: "make -s"
 postgres_build_targets:
   - "all"
   - "-C contrib all"

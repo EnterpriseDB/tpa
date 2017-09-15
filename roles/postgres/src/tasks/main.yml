@@ -16,7 +16,7 @@
   shell: >
     {{postgres_src_dir}}/configure \
         --prefix={{postgres_install_dir|expanduser|quote}} \
-        {% for arg in postgres_configure_opts %}{{arg|quote}}{% endfor %}
+        {% for arg in postgres_configure_opts %}{{arg|quote}} {% endfor %}
   args:
     chdir: "{{postgres_build_dir}}"
     executable: /bin/bash
