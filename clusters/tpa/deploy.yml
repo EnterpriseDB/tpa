@@ -18,7 +18,8 @@
 
     - role: postgres/vars
       vars:
-        postgres_version: 9.6
+        postgres_version: 10
+        postgres_installation_source: src
       tags: always
 
 # Now the cluster hosts are reachable by ssh and have all the required
