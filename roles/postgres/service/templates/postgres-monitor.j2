@@ -22,11 +22,15 @@ import psycopg2
 def main():
     first = 1
 
+    conninfo = ''
+    if len(sys.argv) == 2:
+        conninfo = sys.argv[1]
+
     while True:
         err = None
 
         try:
-            psycopg2.connect('').close()
+            psycopg2.connect(conninfo).close()
         except Exception as e:
             err = str(e).strip()
             if not recoverable(err) and not first:
@@ -37,7 +41,7 @@ def main():
             sys.exit(0)
 
         print('retrying: %s' % err)
-        time.sleep(10)
+        time.sleep(10-7*first)
         first = 0
 
 def recoverable(err):
