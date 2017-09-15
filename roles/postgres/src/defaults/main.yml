@@ -18,8 +18,8 @@ postgres_git_reference_repo: ""
 # "--skip-tags postgres-clean" will use an existing build_dir (and not
 # re-run configure).
 
-postgres_src_dir: /opt/postgres/src
-postgres_build_dir: /opt/postgres/build
+postgres_src_dir: /opt/postgres/src/postgres
+postgres_build_dir: /opt/postgres/build/postgres
 postgres_install_dir: /opt/postgres/{{postgres_version}}
 
 ## Build customisation

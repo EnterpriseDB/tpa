@@ -1,0 +1,19 @@
+- name: Fetch repmgr source from git repository
+  git:
+    repo: "{{ repmgr_git_url }}"
+    dest: "{{ repmgr_src_dir }}"
+    version: "{{ repmgr_git_ref }}"
+    reference: "{{ repmgr_git_reference_repo }}"
+
+- name: Remove old build artifacts
+  command: git clean -dxf
+  args:
+    chdir: "{{ repmgr_src_dir }}"
+  tags: repmgr-clean
+
+- name: Build and install repmgr
+  shell: >
+    PATH={{ postgres_bin_dir }}:$PATH make -s USE_PGXS=1 install
+  args:
+    chdir: "{{ repmgr_src_dir }}"
+    executable: /bin/bash

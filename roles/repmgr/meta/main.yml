@@ -1,9 +1,14 @@
 ---
 
 dependencies:
+  - role: repmgr/src
+    when: >
+      'postgres' in role
+      and postgres_installation_source == 'src'
   - role: repmgr/pkg
     when: >
       'postgres' in role
+      and postgres_installation_source == 'pkg'
   - role: repmgr/common
     when: >
       'postgres' in role
