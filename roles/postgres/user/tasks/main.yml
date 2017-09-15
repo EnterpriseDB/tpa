@@ -80,16 +80,28 @@
       . "$HOME/.bashrc"
   ignore_errors: true
 
-# The following is necessary on RedHat, but the directory exists already
-# on Debian/Ubuntu.
+# We depend on /var/{log,run}/postgresql to exist.
 
-- name: Ensure /var/log/postgresql exists
+- name: Ensure postgres runtime directories exist
   file:
-    path: /var/log/postgresql
+    path: "{{ item.path }}"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0755
+    mode: "{{ item.mode }}"
     state: directory
+  with_items:
+    - {path: /var/log/postgresql, mode: '0775'}
+    - {path: /var/run/postgresql, mode: '02775'}
+
+- name: Install tmpfiles.d entries for postgres runtime directories
+  copy:
+    dest: /etc/tmpfiles.d/postgresql.conf
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      d /var/run/postgresql 2775 postgres postgres - -
+      d /var/log/postgresql 0775 postgres postgres - -
 
 # Allow postgres_user to run various Postgres-related systemctl commands
 # as root using sudo.
