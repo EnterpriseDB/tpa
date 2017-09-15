@@ -2,7 +2,12 @@
 
 allow_duplicates: no
 dependencies:
+  - role: postgres/src
+    when:
+      postgres_installation_source == 'src'
   - role: postgres/pkg
+    when:
+      postgres_installation_source == 'pkg'
   - role: pglogical/pkg
   - role: postgres/user
     tags: [postgres, user]
