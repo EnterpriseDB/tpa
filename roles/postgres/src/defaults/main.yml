@@ -28,7 +28,8 @@ postgres_install_dir: /opt/postgres/{{postgres_version}}
 # settings can be used to customise the configure/build/install process.
 
 postgres_configure_env: {}
-postgres_configure_opts: []
+postgres_configure_opts:
+  - --with-openssl
 postgres_make_command: "make"
 postgres_build_targets:
   - "all"
