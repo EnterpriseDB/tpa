@@ -3,6 +3,7 @@
 
 listen_addresses = '*'
 port = {{ postgres_port }}
+unix_socket_directories = '/var/run/postgresql, /tmp'
 
 max_connections = {{ max_connections|default(250) }}
 
