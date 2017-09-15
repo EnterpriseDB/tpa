@@ -21,4 +21,4 @@ dependencies:
     tags: [postgres, config]
   - role: sys/ssh
     ssh_user: "{{ postgres_user }}"
-    tags: [sys, ssh]
+    tags: [postgres, ssh]
