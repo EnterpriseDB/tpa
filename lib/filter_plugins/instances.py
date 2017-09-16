@@ -31,6 +31,11 @@ ephemeral_storage = {
     'f1.2xlarge': 1, # 470GB
     'f1.16xlarge': 4, # 940GB
 
+    'i2.xlarge': 1, # 800GB
+    'i2.2xlarge': 2, # 800GB
+    'i2.4xlarge': 4, # 800GB
+    'i2.8xlarge': 8, # 800GB
+
     'i3.large': 1, # 475GB
     'i3.xlarge': 1, # 950GB
     'i3.2xlarge': 1, # 1900GB
