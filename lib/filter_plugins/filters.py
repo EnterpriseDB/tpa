@@ -60,7 +60,8 @@ def get_device_variables(volumes):
         dev = v.get('raid_device', v.get('device_name'))
         if dev not in seen:
             seen.add(dev)
-            results.append(dict(device=dev, vars=v.get('vars', [])))
+            vars = v.get('vars', {})
+            results.append(dict(device=dev, **vars))
     return results
 
 # Takes a dict and a list of keys and returns a new dict which has none of the

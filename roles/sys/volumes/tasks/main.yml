@@ -1,0 +1,27 @@
+---
+
+# Each instance has a list of attached volumes, including the device
+# name and any vars specified for it. We invoke sys/fs on each one.
+
+- name: Define mount_as translations
+  set_fact:
+    _translations:
+      postgres_data_dir:
+        mountpoint: "{{ postgres_data_dir }}"
+      barman_home:
+        mountpoint: /var/lib/barman
+
+- include_role: name=sys/fs
+  vars:
+    _mount_as: >-
+      {{ item.get('mount_as', None) }}
+    _settings: >
+      {{
+        _translations[_mount_as]|default({
+          'mountpoint': item.mountpoint
+        })
+      }}
+    device: "{{ item.device }}"
+    mountpoint: "{{ _settings['mountpoint'] }}"
+  with_items:
+    "{{ volumes|default([]) }}"

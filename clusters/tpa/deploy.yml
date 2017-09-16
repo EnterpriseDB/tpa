@@ -37,10 +37,7 @@
 
     # Set up any additional filesystems required. The block device
     # layout is instance-specific.
-    - role: sys/fs
-      vars:
-        device: "{{ volumes[0].device }}"
-        mountpoint: "{{ postgres_home }}"
+    - role: sys/volumes
       tags: [sys, fs]
 
     # Computes memory size and other instance-specific computations for
