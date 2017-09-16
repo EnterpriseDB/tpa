@@ -5,7 +5,7 @@
 # We force an immediate backup for any instances that do not have any
 # backups at all.
 
-- include_tasks: "{{ tpa_dir }}/roles/barman/first-backup/tasks/main.yml"
+- include_role: name=barman/first-backup
   when: >
     backup is defined
 
