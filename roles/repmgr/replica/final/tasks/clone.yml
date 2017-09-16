@@ -31,16 +31,7 @@
 # have skipped this instance earlier. We install the configuration files
 # here; on subsequent deployments, postgres/config will manage them with
 # the other instances.
-#
-# XXX We would like to use include_role/tasks_from here, but can't due
-# to various bugs, so we duplicate the definition of _include_dir from
-# postgres/config/vars.
 
-- include: "{{ tpa_dir }}/roles/postgres/config/tasks/main.yml"
-  vars:
-    _include_dir: "{{ postgres_data_dir }}/conf.d"
-    _postgres_extensions: "{{
-      postgres_extensions|default(default_postgres_extensions)
-    }}"
+- include_role: name=postgres/config
 
 - set_fact: pgdata_initialised=True

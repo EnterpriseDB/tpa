@@ -15,7 +15,7 @@
 
 - name: Install default extension configuration file
   template:
-    src: "{{ dot }}/templates/extensions.conf.j2"
+    src: extensions.conf.j2
     dest: "{{ _include_dir }}/1111-extensions.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
@@ -26,7 +26,7 @@
 # Some extensions need entries in shared_preload_libraries.
 
 - name: Add entries to shared_preload_libraries
-  include_tasks: "{{ tpa_dir }}/roles/postgres/config/tasks/preload-library.yml"
+  include_tasks: preload-library.yml
   vars:
     library: "{{ item }}"
   when: item in postgres_extensions
