@@ -39,7 +39,7 @@ instances:
             raid_units: 2
             attach_existing: yes
             vars:
-              mount_as: postgres_data_dir
+              volume_for: postgres_data
       tags:
         role: primary
       vars:
@@ -75,7 +75,7 @@ instances:
             volume_type: gp2
             volume_size: 16
             vars:
-              mount_as: postgres_data_dir
+              volume_for: postgres_data
       tags:
         role: replica
         upstream: plum
@@ -90,7 +90,7 @@ instances:
             volume_type: gp2
             volume_size: 32
             vars:
-              mount_as: postgres_data_dir
+              volume_for: postgres_data
       tags:
         role:
           - barman
