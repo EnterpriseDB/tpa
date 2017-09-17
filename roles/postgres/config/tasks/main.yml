@@ -80,6 +80,8 @@
 - name: Enable include_dir in postgresql.conf
   lineinfile:
     path: "{{ postgres_conf_dir }}/postgresql.conf"
+    regexp: >
+      ^include_dir = '[^']*/conf.d'$
     line: >-
       include_dir = '{{ _include_dir }}'
     insertafter: EOF
