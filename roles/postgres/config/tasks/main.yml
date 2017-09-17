@@ -81,9 +81,9 @@
   lineinfile:
     path: "{{ postgres_conf_dir }}/postgresql.conf"
     regexp: >
-      ^include_dir = '[^']*/conf.d'$
+      ^include_dir = '[^']*conf.d'$
     line: >-
-      include_dir = '{{ _include_dir }}'
+      include_dir = '{{ _include_dir|relpath(postgres_data_dir) }}'
     insertafter: EOF
     state: present
   notify:
