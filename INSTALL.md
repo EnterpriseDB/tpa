@@ -48,6 +48,12 @@ Mac:
     sudo [brew or port] install openvpn
 ```
 
+RedHat / CentOS:
+```
+    yum install epel-release
+    yum install openvpn
+```
+
 Ansible
 -------
 
@@ -95,7 +101,7 @@ this error is generated from ansible:
 A workaround is to copy selinux package into the virtual environment: 
 
 ```
-    cp -p /usr/lib64/python2.7/site-packages/selinux ~/ansible-python/lib/python2.7/site-packages
+    cp -rp /usr/lib64/python2.7/site-packages/selinux ~/ansible-python/lib/python2.7/site-packages
 ```
 
 Help
