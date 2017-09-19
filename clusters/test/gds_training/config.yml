@@ -1,0 +1,67 @@
+---
+
+# GDS Training Cluster
+
+cluster_name: "gds_training"
+cluster_tags:
+  Owner: gulcin
+
+cluster_vars:
+  cluster_network: 10.33.91.0/24
+  vpn_network: 192.168.33.0/24
+
+ec2_ami:
+  Name: debian-jessie-amd64-hvm-2016-04-03-ebs
+ec2_ami_user: "admin"
+
+ec2_vpc:
+  Name: Test
+
+ec2_vpc_subnets:
+  eu-west-1:
+    10.33.91.32/28:
+      az: eu-west-1b
+    10.33.91.112/28:
+      az: eu-west-1c
+  eu-central-1:
+    10.33.91.128/28:
+      az: eu-central-1a
+
+instances:
+    - node: 1
+      Name: picard
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.91.32/28
+      tags:
+        role: primary
+        backup: janeway
+        log: janeway
+
+    - node: 2
+      Name: sisko
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.91.112/28
+      tags:
+        role: replica
+        upstream: picard
+        backup: janeway
+        log: janeway
+
+    - node: 3
+      Name: janeway
+      type: t2.micro
+      region: eu-central-1
+      subnet: 10.33.91.128/28
+      assign_elastic_ip: yes
+      tags:
+        role:
+          - witness
+          - barman
+          - log-server
+          - openvpn-server
+          - monitoring-server
+          - pgbouncer
+        upstream: picard
+
