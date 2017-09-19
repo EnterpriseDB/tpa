@@ -1,0 +1,93 @@
+---
+
+# Deploys Postgres and associated software to a cluster.
+
+- name: Basic initialisation and fact discovery
+  any_errors_fatal: True
+  max_fail_percentage: 0
+
+  # This play must always be applied to all hosts in the cluster. Here
+  # we do any platform-specific checks and initialisation, confirm that
+  # all hosts are available, and perform basic fact discovery.
+
+  hosts: all
+  roles:
+    - role: platforms
+      tags: always
+
+    - role: facts
+      tags: always
+
+    - role: postgres/vars
+      vars:
+        postgres_version: 9.6
+      tags: always
+
+- name: Set up GDS DB cluster
+  hosts: tag_Cluster_gdsdb
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: true
+
+  vars:
+    ansible_distribution: Debian
+    ansible_distribution_release: jessie
+
+  roles:
+    - role: common
+
+    - role: sys/tune
+      tags: always
+
+    - role: sys/sysctl
+      vars:
+        sysctl_values:
+          net.ipv4.ip_forward: 1
+      tags: [sys, sysctl]
+
+    - role: sys/openvpn
+      when: >
+        'tag_role_openvpn-server' in groups
+        and vpn_network is defined
+
+    - role: sys/hosts
+      tags: [sys, hosts]
+
+    - role: sys/rsyslog
+      tags: [sys, rsyslog]
+
+    - role: postgres
+      when: >
+        'postgres' in role
+
+    - role: barman
+      tags: barman
+
+    - role: repmgr
+      tags: repmgr
+
+    - role: pgbouncer
+      tags: pgbouncer
+      when: >
+        'postgres' in role
+
+    - role: postgres/final
+      when: >
+        'postgres' in role
+      tags: [postgres, final]
+
+    - role: monitoring
+      when: >
+        'tag_role_monitoring-server' in groups
+      tags: monitoring
+
+- name: Ensure /etc/hosts is correct cluster-wide
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  hosts: all
+  roles:
+    - role: sys/hosts
+      tags: [sys, hosts]
