@@ -10,7 +10,7 @@ dependencies:
       postgres_installation_source == 'pkg'
   - role: pglogical/pkg
     when:
-      "{{ pglogical_install|default(true) }}"
+      pglogical_install|default(true)
   - role: postgres/user
     tags: [postgres, user]
   - role: postgres/initdb
