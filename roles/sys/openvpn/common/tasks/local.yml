@@ -1,5 +1,17 @@
 ---
 
+# We'll need to execute openvpn on the control (local) instance several
+# times, so we check that it's accessible through $PATH, which we have
+# already added some likely …/sbin locations to.
+
+- name: Ensure openvpn is in $PATH
+  assert:
+    msg: "Please add the location of openvpn to your PATH"
+    that: openvpn_path != ''
+  vars:
+    openvpn_path: >
+      {{ lookup('pipe', 'command -v openvpn || true') }}
+
 - name: Ensure certs directory exists locally
   local_action:
     module: file
@@ -75,7 +87,7 @@
   local_action: >
     shell
     umask 077 &&
-    /usr/sbin/openvpn --genkey --secret "ta.key"
+    openvpn --genkey --secret "ta.key"
   args:
     chdir: "{{ _local_cert_dir }}"
     creates: "ta.key"
