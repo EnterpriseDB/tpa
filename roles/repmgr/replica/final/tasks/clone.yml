@@ -25,6 +25,9 @@
       -h {{ upstream_to_clone|default(upstream_primary) }}
   become_user: "{{ postgres_user }}"
   become: true
+  register: this
+  failed_when:
+    this.rc != 0 or 'error' in this.stderr
 
 # PGDATA didn't exist until we just created it, so postgres/config would
 # have skipped this instance earlier. We install the configuration files
