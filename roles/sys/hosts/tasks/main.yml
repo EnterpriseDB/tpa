@@ -17,6 +17,15 @@
     content: >-
       manage_etc_hosts: False
 
+# We pre-generate /etc/ssh/ssh_known_hosts to allow ssh between cluster
+# instances without host key verification prompts. We must skip this if
+# for some reason we do not have known host keys for the instances.
+#
+# (We used to build up known-hosts on each instance using ssh-keyscan,
+# but the first significant XL deployments showed that this was far too
+# slow. Generating the file locally is the only approach with acceptable
+# performance for more than a couple of instances.)
+
 - name: Install global ssh known hosts file
   template:
     src: known_hosts.j2
@@ -24,4 +33,8 @@
     owner: root
     group: root
     mode: 0644
-
+  when:
+    lookup('pipe', hostkeys) == 'exists'
+  vars:
+    hostkeys: >
+      test -d {{ playbook_dir }}/hostkeys && echo exists; true
