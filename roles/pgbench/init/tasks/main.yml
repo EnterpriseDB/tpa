@@ -1,9 +1,8 @@
 ---
 
-- name: Run pgbench -i -s 10
+- name: Run pgbench -i -s {{ pgbench_scale_factor }}
   command: >
-    {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} -i -s 10 postgres
+    {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} -i -s {{ pgbench_scale_factor }} postgres
   become_user: "{{ postgres_user }}"
   become: true
-  when: >
-    'primary' in role or 'coordinator' in role
+  tags: pgbench

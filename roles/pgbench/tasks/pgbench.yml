@@ -5,3 +5,4 @@
     pgbench {{ pgbench_opts }}
   become_user: "{{ postgres_user }}"
   become: yes
+  tags: pgbench
