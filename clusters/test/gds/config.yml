@@ -1,6 +1,6 @@
 ---
 
-# GDS test cluster
+# GDS test cluster that runs on BDR3 and PostgreSQL 10
 
 cluster_name: "gds"
 cluster_tags:
@@ -11,8 +11,8 @@ cluster_vars:
   vpn_network: 192.168.33.0/24
 
 ec2_ami:
-  Name: debian-jessie-amd64-hvm-2016-04-03-ebs
-ec2_ami_user: admin
+  Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170803
+ec2_ami_user: ubuntu
 
 ec2_vpc:
   Name: Test
@@ -134,5 +134,6 @@ instances:
           - backup
           - openvpn-server
           - log-server
+          - monitoring-server
           - pgbouncer
         Name: cluster-control
