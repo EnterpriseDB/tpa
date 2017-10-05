@@ -1,72 +1,161 @@
 ---
 
-cluster_name: xl_test
+cluster_name: xltest
 cluster_tags:
-  Owner: AMS
+  Owner: Mark
 
 ec2_vpc:
   Name: Test
 
 ec2_vpc_subnets:
-  ap-southeast-2:
+  us-west-2:
     10.33.63.0/26:
-      az: ap-southeast-2a
+      az: us-west-2b
 
 ec2_ami:
-  Name: TPA-Debian-PGDG-9.6-2017*
+  Name: TPA-Ubuntu-PGDG-9.6-2017*
   Owner: self
-ec2_ami_user: admin
+ec2_ami_user: ubuntu
 
 instances:
     - node: 1
       type: i2.xlarge
-      region: ap-southeast-2
+      region: us-west-2
       subnet: 10.33.63.0/26
       spot_price: 0.2
       spot_wait_timeout: 1800
-      spot_launch_group: xllaunchgrp
-      role: [gtm,coordinator]
+      spot_launch_group: marklaunchgrp
       volumes:
-          - device_name: /dev/xvda
-            volume_type: gp2
-            volume_size: 8
-          - device_name: /dev/xvdb
-            ephemeral: ephemeral0
+        - device_name: /dev/xvdb
+          ephemeral: ephemeral0
+      role: [gtm,coordinator]
       vars:
         coordinator_list: [1]
 
     - node: 2
-      type: i2.xlarge
-      region: ap-southeast-2
+      type: i2.2xlarge
+      region: us-west-2
       subnet: 10.33.63.0/26
-      spot_price: 0.2
+      spot_price: 0.5
       spot_wait_timeout: 1800
-      spot_launch_group: xllaunchgrp
-      role: [datanode,datanode-replica]
+      spot_launch_group: marklaunchgrp
       volumes:
-          - device_name: /dev/xvda
-            volume_type: gp2
-            volume_size: 8
-          - device_name: /dev/xvdb
-            ephemeral: ephemeral0
+        - raid_device: /dev/md0
+          device_name: /dev/xvdb
+          ephemeral: ephemeral0
+          raid_units: all
+      role: [gtm,coordinator]
       vars:
-        datanode_list: [1,2]
-        datanode_replica_list: [3,4]
+        coordinator_list: [1]
 
     - node: 3
       type: i2.xlarge
-      region: ap-southeast-2
+      region: us-west-2
       subnet: 10.33.63.0/26
       spot_price: 0.2
       spot_wait_timeout: 1800
-      spot_launch_group: xllaunchgrp
-      role: [datanode,datanode-replica]
+      spot_launch_group: marklaunchgrp
       volumes:
-          - device_name: /dev/xvda
-            volume_type: gp2
-            volume_size: 8
-          - device_name: /dev/xvdb
-            ephemeral: ephemeral0
+        - device_name: /dev/xvdb
+          ephemeral: ephemeral0
+      role: [datanode]
       vars:
-        datanode_list: [3,4]
-        datanode_replica_list: [1,2]
+        datanode_list: [1]
+
+    - node: 4
+      type: i2.xlarge
+      region: us-west-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: marklaunchgrp
+      volumes:
+        - device_name: /dev/xvdb
+          ephemeral: ephemeral0
+      role: [datanode]
+      vars:
+        datanode_list: [2]
+
+    - node: 5
+      type: i2.xlarge
+      region: us-west-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: marklaunchgrp
+      volumes:
+        - device_name: /dev/xvdb
+          ephemeral: ephemeral0
+      role: [datanode]
+      vars:
+        datanode_list: [3]
+
+    - node: 6
+      type: i2.xlarge
+      region: us-west-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: marklaunchgrp
+      volumes:
+        - device_name: /dev/xvdb
+          ephemeral: ephemeral0
+      role: [datanode]
+      vars:
+        datanode_list: [4]
+
+    - node: 7
+      type: i2.xlarge
+      region: us-west-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: marklaunchgrp
+      volumes:
+        - device_name: /dev/xvdb
+          ephemeral: ephemeral0
+      role: [datanode]
+      vars:
+        datanode_list: [5]
+
+    - node: 8
+      type: i2.xlarge
+      region: us-west-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: marklaunchgrp
+      volumes:
+        - device_name: /dev/xvdb
+          ephemeral: ephemeral0
+      role: [datanode]
+      vars:
+        datanode_list: [6]
+
+    - node: 9
+      type: i2.xlarge
+      region: us-west-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: marklaunchgrp
+      volumes:
+        - device_name: /dev/xvdb
+          ephemeral: ephemeral0
+      role: [datanode]
+      vars:
+        datanode_list: [7]
+
+    - node: 10
+      type: i2.xlarge
+      region: us-west-2
+      subnet: 10.33.63.0/26
+      spot_price: 0.2
+      spot_wait_timeout: 1800
+      spot_launch_group: marklaunchgrp
+      volumes:
+        - device_name: /dev/xvdb
+          ephemeral: ephemeral0
+      role: [datanode]
+      vars:
+        datanode_list: [8]
