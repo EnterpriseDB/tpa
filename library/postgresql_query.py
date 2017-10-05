@@ -32,6 +32,13 @@ options:
       - A conninfo string to define connection parameters
     required: false
     default: "''"
+  autocommit:
+    description:
+      - Defines if queries should be run with AUTOCOMMIT isolation mode.
+        Some queries like VACUUM or CREATE DATABASE can't run within a transaction.
+        For such statements autocommit should be set to 'yes'.
+    required: false
+    default: 'no'
 notes:
    - This module requires the I(psycopg2) Python library to be installed.
 requirements: [ psycopg2 ]
@@ -93,6 +100,7 @@ from ansible.module_utils.six import string_types
 try:
     import psycopg2
     import psycopg2.extras
+    from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 except ImportError:
     psycopg2_found = False
 else:
@@ -104,6 +112,7 @@ def main():
             conninfo=dict(default=""),
             queries=dict(type='list'),
             query=dict(type='str'),
+            autocommit=dict(type='bool', default=False),
         ),
         required_one_of=[['query','queries']],
         mutually_exclusive=[['query','queries']],
@@ -118,6 +127,10 @@ def main():
         conn = psycopg2.connect(dsn=conninfo)
     except Exception, e:
         module.fail_json(msg="Could not connect to database", err=str(e))
+
+    autocommit = module.params["autocommit"]
+    if autocommit:
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
     queries = module.params['queries'] or module.params['query']
     if isinstance(queries, string_types):
