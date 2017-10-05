@@ -19,8 +19,8 @@ With TPA, you can:
 2. Configure the operating system (tweak kernel settings, install
    packages, create users, set up password-less ssh between hosts…)
 
-3. Deploy Postgres or Postgres-XL (from source or packages), Postgres
-   extensions, repmgr and Barman, etc.
+3. Deploy Postgres, Postgres-BDR, or Postgres-XL (from source or
+   packages), Postgres extensions, repmgr and Barman, etc.
 
 In most cases, a few simple configuration files are all you will need,
 but you can easily customise the process to handle more complex setup
