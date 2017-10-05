@@ -9,6 +9,6 @@
     - Note Postgres restart required
 
 - name: Add bdr to shared_preload_libraries
-  include_tasks: "{{ tpa_dir }}/roles/postgres/config/tasks/preload-library.yml"
+  include_role: name=postgres/config tasks_from=preload-library.yml
   vars:
     library: bdr
