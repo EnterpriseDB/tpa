@@ -2,4 +2,4 @@
 
 - name: Set tpa_dir
   set_fact:
-    tpa_dir: "{{ lookup('env', 'TPX_DIR') or (role_path|regex_replace('/roles/platforms/vars/*', '')) }}"
+    tpa_dir: "{{ lookup('env', 'TPA_DIR') or (role_path|regex_replace('/roles/platforms/vars/*', '')) }}"
