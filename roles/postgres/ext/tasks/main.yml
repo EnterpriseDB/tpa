@@ -5,7 +5,7 @@
 
 - name: Remove old extension build directory
   file: state=absent path="{{postgres_ext_dir}}" force=yes
-  tags: postgres-ext-clean
+  tags: [build-clean, postgres-ext-clean]
 
 - name: Fetch extension source from git repository
   git:

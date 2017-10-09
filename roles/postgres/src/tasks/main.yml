@@ -7,7 +7,7 @@
 
 - name: Remove old build directory
   file: state=absent path="{{postgres_build_dir}}" force=yes
-  tags: postgres-clean
+  tags: [build-clean, postgres-clean]
 
 - name: Ensure build directory exists
   file: state=directory path="{{postgres_build_dir}}"
@@ -21,7 +21,7 @@
     chdir: "{{postgres_build_dir}}"
     executable: /bin/bash
   environment: "{{postgres_configure_env}}"
-  tags: postgres-clean
+  tags: [build-clean, postgres-clean]
 
 - name: Build Postgres
   shell: "{{postgres_make_command}} {{item}}"

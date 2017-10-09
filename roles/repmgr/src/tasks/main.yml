@@ -9,7 +9,7 @@
   command: git clean -dxf
   args:
     chdir: "{{ repmgr_src_dir }}"
-  tags: repmgr-clean
+  tags: [build-clean, repmgr-clean]
 
 - name: Build and install repmgr
   shell: >
