@@ -36,7 +36,7 @@
     all_cluster_facts: >
       {{ all_hostvars|json_query('h[*].cluster_facts') }}
     inactive_slots: >
-      {{ cluster_facts|json_query('pg_replication_slots[?!active]') }}
+      {{ cluster_facts|default({})|json_query('pg_replication_slots[?!active]') }}
 
 # If we find any replica that is configured to use a slot that doesn't
 # exist on this instance, we need to create it (XXX and hope that the
