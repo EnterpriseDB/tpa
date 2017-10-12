@@ -74,7 +74,14 @@
 #
 # We run this through a custom filter to extract the device name that
 # matters (raid_device if set, device_name otherwise) and remove any
-# duplicates based on the device name.
+# duplicates based on the device name. We end up with something like
+# this:
+#
+# volumes:
+#   - device: /dev/md0
+#     mountpoint: /var/lib/postgresql
+#   - device: /dev/xvdd
+#     mountpoint: /var/lib/barman
 
 - name: Write volume definitions for hosts
   include: write-host-vars.yml
