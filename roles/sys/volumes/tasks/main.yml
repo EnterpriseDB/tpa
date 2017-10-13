@@ -1,27 +1,83 @@
 ---
 
-# Each instance has a list of attached volumes, including the device
-# name and any vars specified for it. We invoke sys/fs on each one.
+# In platforms/common/inventory/write.yml, we write a list of attached
+# volumes for each instance to host_vars/instance/03-volumes.yml:
+#
+# volumes:
+#   - device: /dev/sda1
+#   - device: /dev/md0
+#     volume_for: postgres_data
+#   - device: /dev/xvdd
+#     mountpoint: /var/lib/barman
+#   - device: /dev/xvde
+#     mountpoint: /foo
+#     foo: 42
+#   - device: /dev/xvdf
+#
+# We filter out volumes without annotations (the first and last above),
+# translate 'volume_for' into a mountpoint, and finally invoke sys/fs on
+# each (device,mountpoint) thus derived.
 
-- name: Define volume_for translations
+- name: Initialise _volumes and _translations lists
   set_fact:
+    _volumes: []
     _translations:
       postgres_data:
         mountpoint: /opt/postgres
       barman_data:
         mountpoint: /var/lib/barman
 
-- include_role: name=sys/fs
+# Although expand_instance_volumes() rejects unrecognised values by
+# duplicating our _translations table, we double-check that we don't
+# have an untranslate-able volume_for anyway.
+
+- name: Verify volume_for annotations
+  assert:
+    msg: "Cannot translate volume_for={{ item.volume_for }} to a mountpoint"
+    that:
+      - item.volume_for in _translations
+  with_items: >
+    {{ volumes|json_query('[?volume_for]') }}
+
+# We filter out volumes with neither mountpoint/volume_for set and merge
+# in any settings found based on volume_for, including the mountpoint.
+
+- name: Collect a list of devices and mountpoints to act on
+  set_fact:
+    _volumes: >
+      {{ _volumes|union([item|combine(_translated_settings)]) }}
+  with_items: >
+    {{ volumes }}
   vars:
     _volume_for: >-
       {{ item.get('volume_for', None) }}
-    _settings: >
+    _translated_settings: >
       {{
-        _translations[_volume_for]|default({
-          'mountpoint': item.mountpoint
-        })
+        _translations.get(_volume_for, {'mountpoint': item.mountpoint})
       }}
+  when: >
+    'mountpoint' in item or 'volume_for' in item
+    
+# We end up with a list that looks like this:
+#
+# _volumes:
+#   - device: /dev/md0
+#     mountpoint: /opt/postgres
+#   - device: /dev/xvdd
+#     mountpoint: /var/lib/barman
+#   - device: /dev/xvde
+#     mountpoint: /foo
+#     foo: 42
+#
+# Note that any extra settings (either from host_vars, or from the table
+# of translations above) are retained in this list, as for /dev/xvde. We
+# could eventually use this to pass in uid/gid/SELinux context.
+#
+# We can now invoke sys/fs on each entry in this list.
+
+- include_role: name=sys/fs
+  vars:
     device: "{{ item.device }}"
-    mountpoint: "{{ _settings['mountpoint'] }}"
+    mountpoint: "{{ item.mountpoint }}"
   with_items:
-    "{{ volumes|default([]) }}"
+    "{{ _volumes }}"
