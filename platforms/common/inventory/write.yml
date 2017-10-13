@@ -91,8 +91,6 @@
     host_vars:
       volumes: "{{ item.volumes|get_device_variables }}"
   with_items: "{{ instance_vars }}"
-  when: >
-    item.volumes|select('has_subkey', 'vars')|list|length > 0
 
 - name: Generate known_hosts file for the cluster
   template:
