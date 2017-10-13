@@ -135,11 +135,22 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
         volumes = []
         for vol in j.get('volumes', []):
             v = copy.deepcopy(vol)
+            vars = v.get('vars', {})
 
             if v['device_name'] == 'root':
                 v['device_name'] = ec2_ami_properties[j['image']]['root_device_name']
+                if 'mountpoint' in vars or 'volume_for' in vars:
+                    raise AnsibleFilterError("root volume cannot have mountpoint/volume_for set")
             if not 'delete_on_termination' in v:
                 v['delete_on_termination'] = not v.get('attach_existing',False)
+
+            if 'mountpoint' in vars and 'volume_for' in vars:
+                raise AnsibleFilterError("volume %s should not have both mountpoint and volume_for set" % v['device_name'])
+
+            volume_for = vars.get('volume_for', None)
+            if volume_for and \
+                volume_for not in ['postgres_data', 'barman_data']:
+                raise AnsibleFilterError("volume_for=%s is not recognised for volume %s" % (volume_for, v['device_name']))
 
             volumes.append(v)
 
