@@ -86,11 +86,15 @@ instances:
       region: eu-west-1
       subnet: 10.33.27.16/28
       volumes:
+          - device_name: root
+            volume_type: gp2
+            volume_size: 16
           - device_name: /dev/xvdb
             volume_type: gp2
             volume_size: 32
             vars:
               volume_for: postgres_data
+              random: 42
       tags:
         role:
           - barman
