@@ -20,10 +20,10 @@
 
     - role: postgres/vars
       vars:
-        postgres_version: 9.6
+        postgres_version: 10
       tags: always
 
-- name: Set up GDS cluster
+- name: Set up GDS cluster on BDR3 and Postgres10
   hosts: tag_Cluster_gds
   any_errors_fatal: True
   max_fail_percentage: 0
@@ -31,15 +31,34 @@
   become: true
 
   vars:
-    ansible_distribution: Debian
-    ansible_distribution_release: jessie
-    id_extra: 'customer'
+    ansible_distribution: Ubuntu
+    ansible_distribution_release: xenial
+    postgres_packages:
+      Ubuntu:
+        - postgresql-{{postgres_version}}
+        - postgresql-{{postgres_version}}-dbg
+        - postgresql-client-{{postgres_version}}
+        - postgresql-contrib-{{postgres_version}}
+        - postgresql-server-dev-{{postgres_version}}
+        - postgresql-plperl-{{postgres_version}}
+        - barman-cli
     apt_repositories:
+      PGDG:
+        key_id: ACCC4CF8
+        key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        repo: >-
+          deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main 10
+        versions: [10]
+      pglogical:
+        key_id: 7ED05910
+        key_url: "https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@temp-packages.2ndquadrant.com/7ED05910.asc"
+        repo: "deb https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@temp-packages.2ndquadrant.com/pglogical-pipeline/latest/deb/ {{ ansible_distribution_release }} main"
+        versions: [10]
       BDR:
         key_id: 7ED05910
         key_url: "https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@temp-packages.2ndquadrant.com/7ED05910.asc"
-        repo: "deb https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@temp-packages.2ndquadrant.com/bdr_2.0/latest/deb/ {{ ansible_distribution_release }} main"
-        versions: [9.6]
+        repo: "deb https://{{ lookup('env', 'BDR_USERNAME') }}:{{ lookup('env', 'BDR_PASSWORD') }}@temp-packages.2ndquadrant.com/bdr3-pipeline/branches/bdr-plugin/REL3_0_DEV/latest/deb/ {{ ansible_distribution_release }} main"
+        versions: [10]
     extra_postgres_packages:
       Debian: &debian_extra_packages ['postgresql-{{postgres_version}}-bdr-plugin']
       RedHat: ['postgresql{{postgres_versionNN}}-bdr']
@@ -50,6 +69,7 @@
       - pg_visibility
       - pageinspect
       - pgstattuple
+      - pglogical
 
   roles:
     - role: common
@@ -64,6 +84,9 @@
       tags: [sys, sysctl]
 
     - role: sys/openvpn
+      when: >
+        'tag_role_openvpn-server' in groups
+        and vpn_network is defined
 
     - role: sys/hosts
       tags: [sys, hosts]
