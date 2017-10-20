@@ -19,7 +19,7 @@ udevadm control --stop-exec-queue
 test -b {{ md }} \
   || mdadm --assemble --verbose {{ md }} {{ units|map(attribute='device_name')|join(" ") }} \
   || mdadm --create --verbose {{ md }} --level={{ units[0].raid_level|default(0) }} --raid-devices={{ units|count }} {{ units|map(attribute='device_name')|join(" ") }} \
-  || touch /tmp/mdadm.failed
+  || echo "Couldn't assemble or create {{ md }}" > /var/log/tpa-firstboot-failures.log
 {% endfor %}
 udevadm control --start-exec-queue
 

@@ -2,3 +2,20 @@
 
 - include: hostvars.yml
 - include: wait.yml
+
+- name: Retrieve user-data failure log entries
+  shell: >
+    test -s {{ faillog }} && cat {{ faillog }}
+  args:
+    executable: /bin/bash
+  register: failures
+  failed_when: False
+  changed_when: >
+    failures.stdout_lines|count > 0
+  vars:
+    faillog: /var/log/tpa-firstboot-failures.log
+
+- name: Fail if user-data execution failed
+  fail:
+    msg: "{{ failures.stdout }}"
+  when: failures.stdout_lines|count > 0
