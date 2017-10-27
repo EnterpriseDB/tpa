@@ -12,7 +12,7 @@
 
 - name: Generate the vault passphrase for this cluster
   local_action: >
-    shell {{ tpa_dir }}/utils/password > vault_pass.txt
+    shell {{ tpa_dir }}/bin/password > vault_pass.txt
   args:
     chdir: "{{ cluster_dir }}/vault"
     creates: "vault_pass.txt"

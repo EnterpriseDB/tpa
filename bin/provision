@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# Provisions a cluster according to config.yml
+
+IFS=
+set -e -u
+
+TOP=$(dirname $0)/..
+type realpath &>/dev/null && TOP=$(realpath $TOP)
+export TPA_DIR=${TPA_DIR:-$TOP}
+
+cluster=${1:?No cluster specified}
+shift
+
+cluster_dir=$cluster
+if [[ ${cluster_dir:0:1} != '/' && ${cluster_dir:0:2} != './' ]]; then
+    cluster=$(echo $cluster|sed 's,^clusters/,,')
+    cluster_dir="$TPA_DIR/clusters/$cluster"
+fi
+
+if [ ! -d $cluster_dir ]; then
+    echo "Can't find directory $cluster_dir"
+    exit
+fi
+
+cd $cluster_dir
+
+$TPA_DIR/ansible/ansible-playbook \
+    $TPA_DIR/platforms/aws/provision.yml \
+    -e cluster=$(pwd) "$@"

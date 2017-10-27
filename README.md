@@ -46,15 +46,15 @@ I just want a test cluster
 2. Provision the cluster instances and deploy software to them:
 
    ```
-   utils/provision clustername
+   bin/provision clustername
 
-   utils/deploy clustername
+   bin/deploy clustername
    ```
 
 3. Once you're done with testing, deprovision the cluster:
 
    ```
-   utils/deprovision clustername
+   bin/deprovision clustername
    ```
 
 --

@@ -4,21 +4,22 @@
 # to the cluster's inventory and so on. This is for ad-hoc commands, not
 # to run playbooks; see also ansible-cluster-playbook.
 #
-# Example: utils/ansible-cluster test/tpa all -m ping
+# Example: ansible-cluster test/tpa all -m ping
 
 IFS=
 set -e -u
 
-utils=$(dirname $0)
+TOP=$(dirname $0)/..
+type realpath &>/dev/null && TOP=$(realpath $TOP)
+export TPA_DIR=${TPA_DIR:-$TOP}
 
 cluster=${1:?No cluster specified}
 shift
 
 cluster_dir=$cluster
-if [[ ${cluster_dir:0:1} != '/' ]]; then
-    clusters=$(realpath $utils/../clusters);
+if [[ ${cluster_dir:0:1} != '/' && ${cluster_dir:0:2} != './' ]]; then
     cluster=$(echo $cluster|sed 's,^clusters/,,')
-    cluster_dir="$clusters/$cluster"
+    cluster_dir="$TPA_DIR/clusters/$cluster"
 fi
 
 if [ ! -d $cluster_dir ]; then
@@ -26,7 +27,8 @@ if [ ! -d $cluster_dir ]; then
     exit
 fi
 
-$utils/ansible \
-    -i $cluster_dir/inventory \
-    --vault-password-file $cluster_dir/vault/vault_pass.txt \
-    -e cluster=$cluster_dir "$@"
+cd $cluster_dir
+
+$TPA_DIR/ansible/ansible \
+    -i inventory --vault-password-file vault/vault_pass.txt \
+    -e cluster=$(pwd) "$@"

@@ -7,7 +7,11 @@
 IFS=
 set -e -u
 
-if [ ! -d clusters/images ]; then
+TOP=$(dirname $0)/../..
+type realpath &>/dev/null && TOP=$(realpath $TOP)
+export TPA_DIR=${TPA_DIR:-$TOP}
+
+if [ ! -d $TPA_DIR/clusters/images ]; then
     echo "Please run clusters/images/build-images (from the TPA directory)"
     exit
 fi
@@ -24,13 +28,13 @@ version=${2:-"9.6"}
 suffix=${3:-""}
 
 test $reconfig = 1 && \
-    utils/ansible-playbook clusters/images/generate-config.yml
+    $TPA_DIR/ansible/ansible-playbook clusters/images/generate-config.yml
 
-utils/provision images -v
+$TPA_DIR/bin/provision images -v
 
-utils/ansible-cluster-playbook images/deploy-$variant.yml -T120 -v \
+$TPA_DIR/bin/ansible-cluster-playbook images/deploy-$variant.yml -T120 -v \
     -e postgres_variant=$variant -e postgres_version=$version -e suffix=$suffix
-utils/ansible-cluster-playbook images/generate-amis.yml -v \
+$TPA_DIR/bin/ansible-cluster-playbook images/generate-amis.yml -v \
     -e postgres_variant=$variant -e postgres_version=$version -e suffix=$suffix
 
-utils/deprovision images -v
+$TPA_DIR/bin/deprovision images -v

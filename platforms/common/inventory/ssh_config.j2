@@ -2,8 +2,8 @@ Host *
     User {{ ansible_user }}
     Port {{ ansible_port }}
     IdentitiesOnly yes
-    IdentityFile "{{ cluster_dir|relpath(tpa_dir) }}/{{ ssh_key_file }}"
-    UserKnownHostsFile "{{ cluster_dir|relpath(tpa_dir) }}/known_hosts"
+    IdentityFile "{{ ssh_key_file }}"
+    UserKnownHostsFile "known_hosts"
     ServerAliveInterval 60
 
 {% for h in instance_vars %}

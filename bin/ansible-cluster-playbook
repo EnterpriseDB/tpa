@@ -8,22 +8,24 @@
 #
 # Examples:
 #
-# utils/ansible-cluster-playbook test/tpa/x.yml
-# utils/ansible-cluster-playbook test/tpa ~/x.yml
-# utils/ansible-cluster-playbook ~/clustername/x.yml
+# ansible-cluster-playbook test/tpa/x.yml
+# ansible-cluster-playbook test/tpa ~/x.yml
+# ansible-cluster-playbook ~/clustername/x.yml
 #
 # If invoked through a symlink (foo → ansible-cluster-playbook), the
 # script to be executed will default to foo.yml, so you can do:
 #
-# utils/foo test/tpa
-# utils/foo ~/clustername
+# foo test/tpa
+# foo ~/clustername
 #
-# (This is how utils/deploy works.)
+# (This is how bin/deploy works.)
 
 IFS=
 set -e -u
 
-utils=$(dirname $0)
+TOP=$(dirname $0)/..
+type realpath &>/dev/null && TOP=$(realpath $TOP)
+export TPA_DIR=${TPA_DIR:-$TOP}
 
 script=""
 if [ "$(basename $0)" != "ansible-cluster-playbook" ]; then
@@ -34,10 +36,9 @@ cluster=${1:?No cluster specified}
 shift
 
 arg=$cluster
-if [[ ${arg:0:1} != '/' ]]; then
-    clusters=$(realpath $utils/../clusters);
+if [[ ${arg:0:1} != '/' && ${arg:0:2} != './' ]]; then
     cluster=$(echo $cluster|sed 's,^clusters/,,')
-    arg="$clusters/$cluster"
+    arg="$TPA_DIR/clusters/$cluster"
 fi
 
 maybescript=${1:-''}
@@ -67,7 +68,8 @@ else
     exit
 fi
 
-$utils/ansible-playbook $script \
-    -i $cluster_dir/inventory \
-    --vault-password-file $cluster_dir/vault/vault_pass.txt \
-    -e cluster=$cluster_dir "$@"
+cd $cluster_dir
+
+$TPA_DIR/ansible/ansible-playbook $script \
+    -i inventory --vault-password-file vault/vault_pass.txt \
+    -e cluster=$(pwd) "$@"

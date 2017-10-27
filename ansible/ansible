@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# This is a wrapper for bin/ansible that sets various environment
+# variables before invoking the real executable.
+
+IFS=
+set -e -u
+
+# TPA must be installed in the parent directory of this script, or
+# TPA_DIR must be explicitly set to the correct location.
+
+TOP=$(dirname $0)/..
+type realpath &>/dev/null && TOP=$(realpath $TOP)
+export TPA_DIR=${TPA_DIR:-$TOP}
+
+# If you invoke ansible directly (i.e. not through this script), you
+# must set ANSIBLE_CONFIG as below.
+#
+# Set ANSIBLE_CONFIG, ANSIBLE_LOG_PATH, and ANSIBLE_INVENTORY to our
+# versions if they are not already set.
+
+export ANSIBLE_CONFIG=${ANSIBLE_CONFIG:-$TPA_DIR/ansible.cfg}
+export ANSIBLE_LOG_PATH=${ANSIBLE_LOG_PATH:-$TPA_DIR/ansible.log}
+export ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-$TPA_DIR/inventory/static}
+
+# Append our directories to various search paths.
+
+export ANSIBLE_LIBRARY=${ANSIBLE_LIBRARY:+$ANSIBLE_LIBRARY:}$TPA_DIR/library
+export ANSIBLE_ROLES_PATH=${ANSIBLE_ROLES_PATH:+$ANSIBLE_ROLES_PATH:}$TPA_DIR/roles
+export ANSIBLE_ACTION_PLUGINS=${ANSIBLE_ACTION_PLUGINS:+$ANSIBLE_ACTION_PLUGINS:}$TPA_DIR/lib/action_plugins
+export ANSIBLE_FILTER_PLUGINS=${ANSIBLE_FILTER_PLUGINS:+$ANSIBLE_FILTER_PLUGINS:}$TPA_DIR/lib/filter_plugins
+export ANSIBLE_LOOKUP_PLUGINS=${ANSIBLE_LOOKUP_PLUGINS:+$ANSIBLE_LOOKUP_PLUGINS:}$TPA_DIR/lib/lookup_plugins
+export ANSIBLE_CALLBACK_PLUGINS=${ANSIBLE_CALLBACK_PLUGINS:+$ANSIBLE_CALLBACK_PLUGINS:}$TPA_DIR/lib/callback_plugins
+export ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TPA_DIR/lib/test_plugins
+
+# This script may be invoked through symlinks as ansible, ansible-vault,
+# or ansible-playbook. If ANSIBLE_HOME is set, we expect it to point to
+# a git checkout, and do approximately what hacking/env-setup would do.
+# Otherwise, we just try to run ansible.
+
+NEWPATH=$PATH
+cmd=$(basename $0)
+
+if test -s "$ANSIBLE_HOME"; then
+    ansidir=$ANSIBLE_HOME
+    if [ ! -x "$ansidir/bin/ansible" ]; then
+        echo "Can't find $ansidir/bin/ansible" 1>&2
+        exit
+    fi
+
+    export PYTHONPATH=$ansidir/lib:${PYTHONPATH:-""}
+
+    NEWPATH="$ansidir/bin:$PATH"
+    cmd="$ansidir/bin/$cmd"
+fi
+
+PATH="$NEWPATH" $cmd "$@"

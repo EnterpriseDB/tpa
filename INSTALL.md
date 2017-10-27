@@ -72,13 +72,12 @@ Set ANSIBLE_HOME in your environment (and .bashrc/.profile):
     export ANSIBLE_HOME=/path/to/ansibledir
 ```
 
-Now you should be able to run ./utils/ansible and the other scripts in
-this repository. The following simple tests should succeed if Ansible
-has been installed correctly:
+Now you should be able to run ./ansible/ansible. The following simple
+tests should succeed if Ansible has been installed correctly:
 
 ```
-    ./utils/ansible localhost -m ping
-    ./utils/ansible localhost -c ssh -a "id"
+    ./ansible/ansible localhost -m ping
+    ./ansible/ansible localhost -c ssh -a "id"
 ```
 
 [The Ansible installation docs](http://docs.ansible.com/ansible/intro_installation.html)

@@ -9,12 +9,14 @@
 # 3. Provisions a replacement for the instance.
 # 4. Redeploys software on the new instance.
 #
-# Example: utils/rehydrate test/cluster instance[,instance2,…]
+# Example: rehydrate test/cluster instance[,instance2,…]
 
 IFS=
 set -e -u
 
-utils=$(dirname $0)
+TOP=$(dirname $0)/..
+type realpath &>/dev/null && TOP=$(realpath $TOP)
+export TPA_DIR=${TPA_DIR:-$TOP}
 
 cluster=${1:?No cluster specified}
 shift
@@ -34,10 +36,9 @@ if [ "$V" != "" -a "${V:0:2}" = "-v" ]; then
 fi
 
 cluster_dir=$cluster
-if [[ ${cluster_dir:0:1} != '/' ]]; then
-    clusters=$(realpath $utils/../clusters);
+if [[ ${cluster_dir:0:1} != '/' && ${cluster_dir:0:2} != './' ]]; then
     cluster=$(echo $cluster|sed 's,^clusters/,,')
-    cluster_dir="$clusters/$cluster"
+    cluster_dir="$TPA_DIR/clusters/$cluster"
 fi
 
 if [ ! -d $cluster_dir ]; then
@@ -45,18 +46,20 @@ if [ ! -d $cluster_dir ]; then
     exit
 fi
 
+cd $cluster_dir
+
 # Terminate the old instances after performing sanity checks.
 
-$utils/ansible-playbook $V \
-    $utils/../platforms/aws/terminate-for-rehydration.yml \
+$TPA_DIR/ansible/ansible-playbook $V \
+    $TPA_DIR/platforms/aws/terminate-for-rehydration.yml \
     -e i_really_want_to_destroy_my_entire_cluster=$DESTROY \
-    -i $cluster_dir/inventory \
-    -e cluster=$cluster_dir \
+    -i inventory \
+    -e cluster=$(pwd) \
     --limit "$instances"
 
 # Provision a replacement for the terminated instances.
 
-$utils/provision $cluster_dir \
+$TPA_DIR/bin/provision $(pwd) \
     -e require_reattachment=yes \
     -e reattach_hosts="$instances" $V
 
@@ -65,4 +68,4 @@ $utils/provision $cluster_dir \
 # If this fails for any reason, it's safe to rerun the command below by
 # hand. Other than defining deploy_hosts, it's a normal deploy command.
 
-$utils/deploy $cluster_dir -e deploy_hosts="$instances" "$@" $V
+$TPA_DIR/bin/deploy $(pwd) -e deploy_hosts="$instances" "$@" $V
