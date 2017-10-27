@@ -28,5 +28,5 @@ sysctl_defaults:
   vm.dirty_bytes: 4294967296
   vm.dirty_background_bytes: 268435456
   vm.dirty_expire_centisecs: 1000
-  vm.nr_hugepages: >
+  vm.nr_hugepages: >-
     {{ "%d"|format((shared_buffers_mb + ansible_memtotal_mb*0.03)/2) }}
