@@ -11,6 +11,8 @@ barman_log_file: /var/log/barman/barman.log
 
 barman_backup_method: rsync
 
+barman_parallel_jobs: 1
+
 barman_compression: pigz
 barman_reuse_backup: link
 barman_backup_options: concurrent_backup

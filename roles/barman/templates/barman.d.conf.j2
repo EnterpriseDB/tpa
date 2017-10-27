@@ -9,6 +9,8 @@ slot_name = barman
 
 backup_method = {{ barman_backup_method }}
 
+barman_parallel_jobs = {{ barman_parallel_jobs }}
+
 {% if barman_backup_method == 'rsync' %}
 compression = {{ barman_compression }}
 reuse_backup = {{ barman_reuse_backup }}
