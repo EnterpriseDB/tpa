@@ -30,5 +30,4 @@ There are two easy ways to do this:
    aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
    ```
 
-Write to Abhijit, Marco, or Craig if you need help to get set up with
-AWS access under the 2ndQuadrant account.
+Write to Abhijit if you need help.

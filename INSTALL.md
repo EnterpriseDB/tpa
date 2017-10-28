@@ -106,4 +106,4 @@ A workaround is to copy selinux package into the virtual environment:
 
 Help
 ----
-Write to Abhijit, Gülçin, Haroon, or Nikhils for help with Ansible.
+Write to Abhijit for help with Ansible.

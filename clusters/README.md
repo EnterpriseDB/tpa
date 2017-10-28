@@ -99,4 +99,4 @@ Ask for help if you need it
 
 If you can't figure out how to express your cluster in terms of the
 configuration files described above, or you are having some other
-problem, write to Abhijit or Haroon for help.
+problem, write to Abhijit for help.
