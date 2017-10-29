@@ -1,0 +1,80 @@
+---
+
+# BDR test cluster
+
+cluster_name: "BDR1Training"
+cluster_tags:
+  Owner: Martin
+  Name: "BDR1_Training"
+
+cluster_vars:
+  cluster_network: 10.33.67.0/24
+  vpn_network: 192.168.33.0/24
+
+ec2_ami:
+  Name: TPA-RedHat-BDR-9.4-20161203
+ec2_ami_user: "ec2-user"
+
+ec2_vpc:
+  Name: Test
+
+ec2_vpc_subnets:
+  eu-west-1:
+    10.33.67.32/28:
+      Name: first
+      az: eu-west-1b
+    10.33.67.112/28:
+      az: eu-west-1c
+    10.33.67.160/28:
+      Name: third
+      az: eu-west-1b
+    10.33.67.176/28:
+      az: eu-west-1c
+    10.33.67.192/28:
+      Name: last
+      az: eu-west-1b
+  eu-central-1:
+    10.33.67.128/28:
+      Name: second
+      az: eu-central-1a
+    10.33.67.144/28:
+      az: eu-central-1b
+
+instances:
+
+    - node: 1
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.67.32/28
+      tags:
+        role: bdr
+        log: cluster-control
+        Name: bdr1-eu-west-1-1
+
+    - node: 2
+      type: t2.micro
+      region: eu-west-1
+      subnet: 10.33.67.112/28
+      tags:
+        role: bdr
+        log: cluster-control
+        Name: bdr1-eu-west-1-2
+
+    - node: 3
+      type: t2.micro
+      region: eu-central-1
+      subnet: 10.33.67.128/28
+      tags:
+        role: bdr
+        log: cluster-control
+        Name: bdr1-eu-central-1-1
+
+    - node: 4
+      type: t2.micro
+      region: eu-central-1
+      subnet: 10.33.67.144/28
+      tags:
+        role: bdr
+        log: cluster-control
+        Name: bdr1-eu-central-1-2
+
