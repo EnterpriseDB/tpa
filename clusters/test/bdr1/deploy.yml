@@ -24,7 +24,7 @@
       tags: always
 
 - name: Set up TPA BDR1 cluster
-  hosts: tag_Cluster_BDR1Test
+  hosts: all
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root
@@ -33,20 +33,12 @@
   vars:
     ansible_distribution: "Red Hat Enterprise Linux"
     ansible_distribution_release: "7"
-    id_extra: 'customer'
-    extra_postgres_packages:
-      Debian: &debian_extra_packages ['postgresql-{{postgres_version}}-bdr-plugin']
-      RedHat: ['postgresql{{postgres_versionNN}}-bdr']
-      Ubuntu: *debian_extra_packages
-    postgres_extensions:
-      - pg_stat_statements
-      - pg_freespacemap
-      - pg_visibility
-      - pageinspect
-      - pgstattuple
 
   roles:
     - role: common
+
+    - role: sys/volumes
+      tags: [sys, fs]
 
     - role: sys/tune
       tags: always
@@ -68,34 +60,6 @@
     - role: postgres
       when: >
         'postgres' in role
-
-    - role: bdr/config
-      when: >
-        'bdr' in role and 'primary' in role
-      tags: bdr
-
-    - role: barman
-      tags: barman
-
-    - role: pgbouncer
-      tags: pgbouncer
-      when: >
-        'postgres' in role
-
-    - role: postgres/final
-      when: >
-        'postgres' in role
-      tags: [postgres, final]
-
-    - role: bdr/node
-      when: >
-        'bdr' in role and 'primary' in role
-      tags: bdr
-
-    - role: monitoring
-      when: >
-        'tag_role_monitoring-server' in groups
-      tags: monitoring
 
 - name: Ensure /etc/hosts is correct cluster-wide
   any_errors_fatal: True
