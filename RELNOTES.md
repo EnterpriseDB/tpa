@@ -4,7 +4,8 @@
 
 Features:
 
-…
+- Place provision/deprovision/rehydrate in bin/, and make them location
+  independent (i.e., not require to be run from TPA_DIR).
 
 Bugfixes:
 
