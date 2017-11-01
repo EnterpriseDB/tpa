@@ -1,0 +1,68 @@
+--- # GDS DB Prod cluster # Do not touch this config do not delete any instance listed here.  
+cluster_name: "gdsdb_prod"
+cluster_tags:
+  Owner: GDS
+
+cluster_vars:
+  cluster_network:
+    - 10.66.0.0/16
+    - 10.77.0.0/16
+  vpn_network: 192.168.33.0/24
+
+ec2_ami:
+  Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170803
+ec2_ami_user: ubuntu
+
+ec2_vpc:
+  Name: GDS-PROD
+
+ec2_vpc_subnets:
+  us-east-1:
+    10.66.0.32/28:
+      az: us-east-1a
+    10.66.2.32/28:
+      az: us-east-1b
+  us-west-1:
+    10.77.0.32/28:
+      az: us-west-1b
+
+instances:
+    - node: 1
+      Name: horizons
+      type: t2.micro
+      region: us-east-1
+      subnet: 10.66.0.32/28
+      private_ip: 10.66.0.40
+      tags:
+        role: primary
+        backup: rainbow
+        log: rainbow
+
+    - node: 2
+      Name: mutiny
+      type: t2.micro
+      region: us-east-1
+      subnet: 10.66.2.32/28
+      private_ip: 10.66.2.40
+      tags:
+        role: replica
+        upstream: horizons
+        backup: rainbow
+        log: rainbow
+
+    - node: 3
+      Name: rainbow
+      type: t2.micro
+      region: us-west-1
+      subnet: 10.77.0.32/28
+      private_ip: 10.77.0.40
+      tags:
+        role:
+          - witness
+          - barman
+          - log-server
+          - openvpn-server
+          - monitoring-server
+          - pgbouncer
+        upstream: horizons
+
