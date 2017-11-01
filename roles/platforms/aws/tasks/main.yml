@@ -11,11 +11,12 @@
   register: failures
   failed_when: False
   changed_when: >
-    failures.stdout_lines|count > 0
+    'stdout_lines' in failures and failures.stdout_lines|count > 0
   vars:
     faillog: /var/log/tpa-firstboot-failures.log
 
 - name: Fail if user-data execution failed
   fail:
     msg: "{{ failures.stdout }}"
-  when: failures.stdout_lines|count > 0
+  when: >
+    'stdout_lines' in failures and failures.stdout_lines|count > 0
