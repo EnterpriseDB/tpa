@@ -1,3 +1,9 @@
 ---
 
-# XXX I don't know how to enable sysstat on RHEL.
+- name: Update frequency of collection
+  template:
+    src: sysstat-redhat
+    dest: /etc/cron.d/sysstat
+    owner: root
+    group: root
+    mode: 0600
