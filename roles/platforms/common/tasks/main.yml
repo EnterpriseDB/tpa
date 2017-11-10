@@ -1,5 +1,11 @@
 ---
 
+- name: Set role=[] if no role is defined
+  set_fact:
+    role: []
+  when:
+    role is not defined
+
 # Add 'postgres' to role when any of 'primary' or 'replica' or 'witness'
 # is given, just as a convenience.
 
