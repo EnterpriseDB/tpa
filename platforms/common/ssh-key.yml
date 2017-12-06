@@ -4,16 +4,3 @@
     chdir: "{{ cluster_dir }}"
     creates: "{{ key_file }}"
   register: ssh_keygen
-
-# Run ssh-add on the cluster's key if ssh-agent is running and the key
-# hasn't already been added. (We add "|| true" so that Ansible doesn't
-# think the pipe lookup has failed when grep doesn't find a match for
-# the key fingerprint.)
-
-- name: Run ssh-add to register the key with ssh-agent
-  command: ssh-add "{{ key_file }}"
-  args:
-    chdir: "{{ cluster_dir }}"
-  when:
-    - lookup('env', 'SSH_AGENT_PID')|default('') != ''
-    - lookup('pipe', "ssh-add -l|grep $(ssh-keygen -l -f '" ~ cluster_dir ~ "/" ~ key_file ~"'|awk '{print $2}') || true") == ""
