@@ -61,21 +61,19 @@
 
 # Is this instance correctly registered with repmgr?
 #
-# If we are streaming from the primary, then our view of repl_nodes is
+# If we are streaming from the primary, then our view of nodes is
 # authoritative. However, if we are not streaming (whether because we
 # are still in archive recovery, or because of a configuration error),
-# the contents of repl_nodes collected above may be misleading. As a
-# stopgap measure, we query the upstream server directly.
+# the contents of nodes collected above may be misleading. As a stopgap
+# measure, we query the upstream server directly.
 
 - name: Check if this instance is registered as a replica
   postgresql_query:
     conninfo: "host={{ upstream_primary }} dbname=repmgr user=repmgr"
     query: >
       SELECT (case when type='standby' then 'replica' else type end) as type
-      FROM "{{ repmgr_schema }}".repl_nodes
-      WHERE name='{{ inventory_hostname }}' AND active
-  vars:
-    repmgr_schema: 'repmgr_{{ repmgr_cluster }}'
+      FROM repmgr.nodes
+      WHERE node_name='{{ inventory_hostname }}' AND active
   register: registration
   become_user: "{{ postgres_user }}"
   become: yes

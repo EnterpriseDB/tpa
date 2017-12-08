@@ -24,31 +24,31 @@
 
 # If the upstream replica is not available (most probably because it's
 # being set up in parallel with this node), we insert an entry with the
-# correct conninfo for it into repl_nodes, so that repmgr standby clone
+# correct conninfo for it into nodes, so that repmgr standby clone
 # generates a correct recovery.conf. When the upstream executes standby
 # register itself, this entry will be corrected and activated.
 
-- name: Ensure that the upstream exists in repl_nodes
+- name: Ensure that the upstream exists in nodes
   postgresql_query:
     conninfo: "{{ primary_conninfo }}"
     queries:
       - text: >
-          INSERT INTO "{{ repmgr_schema }}".repl_nodes
-          (id, type, cluster, name, conninfo, priority, active)
-          VALUES (%s, %s, %s, %s, %s, %s, %s)
+          INSERT INTO repmgr.nodes
+          (node_id, node_name, type, conninfo, priority, active, repluser, config_file)
+          VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
           ON CONFLICT DO NOTHING
         args:
           - "{{ hostvars[upstream].node }}"
-          - standby
-          - "{{ cluster_name }}"
           - "{{ upstream }}"
+          - standby
           - "{{ upstream_conninfo }}"
           - 100
           - False
+          - repmgr
+          - "{{ repmgr_conf_dir }}/repmgr.conf"
   vars:
     primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
     upstream_conninfo: 'host={{ upstream }} user=repmgr dbname=repmgr'
-    repmgr_schema: 'repmgr_{{ repmgr_cluster }}'
   become_user: "{{ postgres_user }}"
   become: yes
   when: >

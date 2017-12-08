@@ -20,7 +20,6 @@
     postgres_service_name: postgres
     postgres_installation_source: "{{ postgres_installation_source|default('pkg') }}"
     backup_name: "{{ backup_name|default(inventory_hostname) }}"
-    repmgr_cluster: "{{ repmgr_cluster|default(cluster_name) }}"
   tags: always
 
 - name: Set default postgres_conf_dir

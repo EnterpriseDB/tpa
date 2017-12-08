@@ -253,8 +253,8 @@ def repmgr_discovery(module, conn, m0):
         repmgr_schema = repmgr_schema_name(repmgr_conn)
         if repmgr_schema is not None:
             m['repmgr_schema'] = repmgr_schema
-            m['repl_nodes'] = query_results(
-                repmgr_conn, "SELECT * FROM \"%s\".repl_nodes" % repmgr_schema
+            m['nodes'] = query_results(
+                repmgr_conn, "SELECT * FROM \"%s\".nodes" % repmgr_schema
             )
 
     return m or None
@@ -320,7 +320,7 @@ def repmgr_schema_name(conn):
     cur = conn.cursor()
     cur.execute("""SELECT nspname
         FROM pg_class c JOIN pg_namespace n ON (c.relnamespace=n.oid)
-        WHERE n.nspname LIKE 'repmgr_%' AND c.relname = 'repl_nodes'""")
+        WHERE n.nspname LIKE 'repmgr%' AND c.relname = 'nodes'""")
 
     repmgr_schema = None
     if cur.rowcount:

@@ -1,6 +1,6 @@
 ---
 
-- name: Add repmgr_funcs to shared_preload_libraries
+- name: Add repmgr to shared_preload_libraries
   include_role: name=postgres/config tasks_from=preload-library.yml
   vars:
-    library: repmgr_funcs
+    library: repmgr

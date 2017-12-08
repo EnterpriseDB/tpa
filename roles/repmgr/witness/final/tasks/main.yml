@@ -17,10 +17,8 @@
     conninfo: "host={{ upstream_primary }} dbname=repmgr user=repmgr"
     query: >
       SELECT (case when type='standby' then 'replica' else type end) as type
-      FROM "{{ repmgr_schema }}".repl_nodes
-      WHERE name='{{ inventory_hostname }}'
-  vars:
-    repmgr_schema: 'repmgr_{{ repmgr_cluster }}'
+      FROM repmgr.nodes
+      WHERE node_name='{{ inventory_hostname }}'
   register: registration
   become_user: "{{ postgres_user }}"
   become: yes

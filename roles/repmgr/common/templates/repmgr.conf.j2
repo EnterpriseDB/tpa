@@ -1,24 +1,22 @@
-cluster={{ repmgr_cluster }}
-node={{ node }}
+node_id={{ node }}
 node_name={{ inventory_hostname }}
+conninfo='host={{ inventory_hostname }} user=repmgr dbname=repmgr'
+data_directory={{ postgres_data_dir }}
+pg_bindir={{ postgres_bin_dir }}
 {% if repmgr_priority|d() %}
 priority={{ repmgr_priority }}
 {% endif %}
-conninfo='host={{ inventory_hostname }} user=repmgr dbname=repmgr'
+replication_type=physical
 use_replication_slots=1
-master_response_timeout=60
+async_query_timeout=60
 reconnect_attempts=6
 reconnect_interval=10
 failover=automatic
 ssh_options=-q
-pg_bindir={{ postgres_bin_dir }}
 promote_command='{{ repmgr_conf_dir }}/promote_command.sh'
 follow_command='{{ repmgr_conf_dir }}/follow_command.sh'
 {% if upstream_backedup != '' %}
 restore_command='/usr/bin/barman-wal-restore -U barman -z -p 8 {{ hostvars[upstream_backedup].backup }} {{ hostvars[upstream_backedup].backup_name }} %f %p'
-{% endif %}
-{% if upstream|default(upstream_primary) != upstream_primary %}
-upstream_node={{ hostvars[upstream].node }}
 {% endif %}
 
 service_start_command = sudo systemctl start {{ postgres_service_name }}
