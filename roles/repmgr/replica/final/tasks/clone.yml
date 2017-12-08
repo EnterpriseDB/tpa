@@ -22,7 +22,10 @@
     {{ postgres_bin_dir }}/repmgr standby clone -F --verbose \
       -f "{{ repmgr_conf_dir }}/repmgr.conf" -D {{ postgres_data_dir }} \
       -d repmgr -U repmgr --fast-checkpoint \
+      --upstream-conninfo "{{ upstream_conninfo }}" \
       -h {{ upstream_to_clone|default(upstream_primary) }}
+  vars:
+    upstream_conninfo: "host={{ upstream }} dbname=repmgr user=repmgr"
   become_user: "{{ postgres_user }}"
   become: true
   register: this
