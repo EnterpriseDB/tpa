@@ -6,6 +6,9 @@ pg_bindir={{ postgres_bin_dir }}
 {% if repmgr_priority|d() %}
 priority={{ repmgr_priority }}
 {% endif %}
+{% if repmgr_location|d() and repmgr_location != '' %}
+location={{ repmgr_location }}
+{% endif %}
 replication_type=physical
 use_replication_slots=1
 async_query_timeout=60

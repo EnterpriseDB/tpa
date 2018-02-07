@@ -1,0 +1,17 @@
+# We need to retrieve the instance's availability zone, which (a) can
+# not always be inferred from config.yml (can be left unspecified), and
+# (b) isn't provided by the inventory plugin. It's available directly
+# from the instance metadata.
+#
+# If we ever need to retrieve more meta-data in future, we could parse
+# the output of "aws ec2 describe-instances" or use ec2_instance_facts,
+# or (depending on what it is) consider extending the inventory plugin.
+
+- name: Retrieve current availability zone
+  command: >
+    curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone
+  register: curl
+
+- name: Set availability zone as fact
+  set_fact:
+    ec2_availability_zone: "{{ curl.stdout }}"

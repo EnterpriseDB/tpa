@@ -20,3 +20,5 @@
     msg: "{{ failures.stdout }}"
   when: >
     'stdout_lines' in failures and failures.stdout_lines|count > 0
+
+- include: metadata.yml

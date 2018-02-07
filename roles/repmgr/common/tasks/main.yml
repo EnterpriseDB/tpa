@@ -17,6 +17,10 @@
       groups[cluster_tag]|instance_with_backup_of(upstream_primary, hostvars)
     }}"
 
+- name: Set default repmgr_location
+  set_fact:
+    repmgr_location: "{{ repmgr_location|default(ec2_availability_zone) }}"
+
 - name: Ensure repmgr directories exist
   file:
     path: "{{ item }}"
