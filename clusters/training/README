@@ -1,0 +1,29 @@
+Training VMs
+============
+
+The process to request VMs for training is documented here:
+
+    https://redmine.2ndquadrant.it/projects/courses/wiki/Virtual_Machines_for_training
+
+Once a request has been received, e.g.,
+
+    https://redmine.2ndquadrant.it/issues/10973
+
+this is the process to create the required hosts.
+
+1. Run "./generate-config.sh 10973 15 > config.yml" in clusters/training
+   (10973 is the redmine issue, 15 is the number of hosts requested) to
+   generate config.yml with the correct number of entries.
+
+2. Run "bin/provision training -v" to provision the hosts on AWS EC2
+   according to config.yml.
+
+3. Run "bin/deploy training -v" to complete the deployment.
+
+Once this is done, the following files should be provided to the
+requestor:
+
+1. ssh_config
+2. known_hosts
+3. id_training*
+4. inventory/00-*
