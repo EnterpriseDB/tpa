@@ -39,8 +39,8 @@ for name in $(sort --random-sort hostnames.txt|head -$hosts);
 do
     i=$((i+1))
 cat <<INSTANCE
-  - node: $n
-    Name: $i
+  - node: $i
+    Name: $name
     type: t2.micro
     region: eu-west-1
     subnet: 10.33.115.0/24
