@@ -29,17 +29,9 @@ keyhole
 keynote
 keyword
 khaki
-kibbutz
-kibitz
 kibosh
 kicker
-kickier
 kickoff
-kicky
-kidder
-kiddie
-kiddo
-kiddy
 kidnap
 kidney
 killer
@@ -87,9 +79,7 @@ knelt
 knife
 knight
 knitter
-knobby
 knock
-knocker
 knoll
 knotty
 known
@@ -136,9 +126,6 @@ quavery
 queasy
 queen
 queenly
-queer
-queerer
-queerly
 quell
 quench
 query
