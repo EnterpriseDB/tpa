@@ -17,6 +17,42 @@
         - cluster_tag in groups
         - groups[cluster_tag] | length > 0
 
+    # Remove any keypair that matches the cluster's default 'tpa_xxx'
+    # name. We don't try to remove any other keypairs, because it's
+    # possible to configure a cluster to use existing keys.
+    #
+    # Keypairs can't be tagged with CreatingCluster, so we have to
+    # depend on the name to guess whether we generated the key.
+
+    - name: Remove keypairs in each region
+      ec2_key:
+        state: absent
+        region: "{{ item.0 }}"
+        name: "tpa_{{ cluster_name|lower }}"
+        wait: yes
+      with_items: "{{ regions }}"
+      tags: ec2_keys
+
+    # Remove the cluster's instance profile role and associated policy.
+    #
+    # Roles can't be tagged with CreatingCluster, so we have to depend
+    # on the cluster_name to match.
+
+    - name: Remove inline policy for instance profile
+      iam_policy:
+        iam_type: role
+        iam_name: '{{ cluster_profile }}'
+        policy_name: '{{ cluster_name }}_instance_permissions'
+        state: absent
+      tags: iam
+
+    - name: Remove instance profile for cluster
+      iam:
+        iam_type: role
+        name: '{{ cluster_profile }}'
+        state: absent
+      tags: iam
+
     # With the instances gone, we can delete any volumes that were
     # created for the cluster.
 
@@ -39,22 +75,28 @@
         - item.0.volumes
       tags: volumes
 
-    # Remove the cluster's instance profile role and associated policy.
+    # Next, remove any security groups created for this cluster.
 
-    - name: Remove inline policy for instance profile
-      iam_policy:
-        iam_type: role
-        iam_name: '{{ cluster_profile }}'
-        policy_name: '{{ cluster_name }}_instance_permissions'
-        state: absent
-      tags: iam
+    - name: Search for this cluster's security groups in each region
+      ec2_group_facts:
+        region: "{{ region }}"
+        filters:
+          "tag:CreatingCluster": "{{ cluster_name }}"
+      with_items: "{{ regions }}"
+      loop_control:
+        loop_var: region
+      register: ec2_groups
+      tags: ec2_groups
 
-    - name: Remove instance profile for cluster
-      iam:
-        iam_type: role
-        name: '{{ cluster_profile }}'
+    - name: Remove this cluster's security groups in each region
+      ec2_group:
         state: absent
-      tags: iam
+        region: "{{ item.0.region }}"
+        name: "{{ item.1.group_id }}"
+      with_nested_dependents:
+        - "{{ ec2_groups.results }}"
+        - item.0.security_groups
+      tags: ec2_groups
 
     # Next, we delete the subnets that we created within each VPC, i.e.,
     # those subnets for which the CreatingCluster is set to this one.
@@ -80,29 +122,6 @@
         - "{{ subnets.results }}"
         - item.0.subnets
       tags: ec2_vpcs
-
-    # Next, we do the same for security groups within the region.
-
-    - name: Search for this cluster's security groups in each region
-      ec2_group_facts:
-        region: "{{ region }}"
-        filters:
-          "tag:CreatingCluster": "{{ cluster_name }}"
-      with_items: "{{ regions }}"
-      loop_control:
-        loop_var: region
-      register: ec2_groups
-      tags: ec2_groups
-
-    - name: Remove this cluster's security groups in each region
-      ec2_group:
-        state: absent
-        region: "{{ item.0.region }}"
-        name: "{{ item.1.group_id }}"
-      with_nested_dependents:
-        - "{{ ec2_groups.results }}"
-        - item.0.security_groups
-      tags: ec2_groups
 
     # Now we can finally delete any VPCs that we created for this
     # cluster, i.e., whose CreatingCluster is set to this one.
