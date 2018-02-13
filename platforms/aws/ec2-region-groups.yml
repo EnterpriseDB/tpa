@@ -62,6 +62,8 @@
     name: "Group {{ cluster_name }}/{{ item.key }}"
     description: "Automatically created for {{ cluster_name }} in {{ item.key }}"
     rules: "{{ cluster_rules }}"
+    tags:
+      CreatingCluster: "{{ cluster_name }}"
   when:
     item.key not in security_groups
   with_dict: "{{ ec2_region_vpcs }}"
