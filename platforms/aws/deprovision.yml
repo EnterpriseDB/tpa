@@ -27,7 +27,7 @@
     - name: Remove keypairs in each region
       ec2_key:
         state: absent
-        region: "{{ item.0 }}"
+        region: "{{ item }}"
         name: "tpa_{{ cluster_name|lower }}"
         wait: yes
       with_items: "{{ regions }}"
