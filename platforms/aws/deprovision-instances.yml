@@ -1,0 +1,50 @@
+# For each region and each instance in that region, we issue an
+# async ec2 task to deprovision the instance by its id, then wait
+# for all the jobs to complete.
+
+- name: Terminate EC2 instances in each region
+  ec2:
+    state: absent
+    region: "{{ item.0 }}"
+    instance_id: "{{ item.1 }}"
+    wait: yes
+  with_nested_dependents:
+    - regions
+    - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_id')|unique|list
+  register: ec2_uninstances
+  async: 7200
+  poll: 0
+  tags: ec2
+
+- name: Wait for instance deprovisioning to complete
+  async_status: jid={{ item.ansible_job_id }}
+  register: ec2_jobs
+  until: ec2_jobs.finished
+  retries: 300
+  with_items: "{{ ec2_uninstances.results }}"
+  tags: ec2
+
+# Next, remove keypairs in each region by the same strategy, except
+# that ec2_key doesn't take a list directly, so we have to use the
+# custom with_nested_dependents plugin instead of with_items. Note
+# that we almost certainly have only a single cluster-wide keypair
+# in each region, but we can cope with any number of keys.
+#
+# Note that keypairs can't be tagged, so association with instances in
+# the cluster is the only way we can figure out which ones to remove.
+#
+# XXX: If we've used existing keypairs rather than creating them, then
+# it's inappropriate to remove them (there's no "still in use" check),
+# but I can't think of a way to avoid this. Always leave keys lying
+# around? Only ever try to remove keys matching cluster_name?
+
+- name: Remove keypairs in each region
+  ec2_key:
+    state: absent
+    region: "{{ item.0 }}"
+    name: "{{ item.1 }}"
+    wait: yes
+  with_nested_dependents:
+    - regions
+    - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_key_name')|unique|list
+  tags: ec2_keys
