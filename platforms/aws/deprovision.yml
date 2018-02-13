@@ -126,21 +126,28 @@
         - item.0.subnets
       tags: ec2_vpcs
 
-    # Next, we do the same for security groups within the region. Note
-    # that 'ec2_security_group_names' is a comma-separated string, which
-    # we split into a list in an extra step.
+    # Next, we do the same for security groups within the region.
 
-    - name: Remove security groups in each region
+    - name: Search for this cluster's security groups in each region
+      ec2_group_facts:
+        region: "{{ region }}"
+        filters:
+          "tag:CreatingCluster": "{{ cluster_name }}"
+      with_items: "{{ regions }}"
+      loop_control:
+        loop_var: region
+      register: ec2_groups
+      tags: ec2_groups
+
+    - name: Remove this cluster's security groups in each region
       ec2_group:
         state: absent
-        region: "{{ item.0 }}"
-        name: "{{ item.2 }}"
-        description: ''
+        region: "{{ item.0.region }}"
+        name: "{{ item.1.group_id }}"
       with_nested_dependents:
-        - regions
-        - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_security_group_names')|unique|list
-        - item[1].split(',')
-      tags: ec2_vpcs
+        - "{{ ec2_groups.results }}"
+        - item.0.security_groups
+      tags: ec2_groups
 
     # Now we can finally delete any VPCs that we created for this
     # cluster, i.e., whose CreatingCluster is set to this one.
