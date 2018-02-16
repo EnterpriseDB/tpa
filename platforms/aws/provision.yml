@@ -128,6 +128,41 @@
         loop_var: r
       tags: ec2_vpc
 
+    # If required, we create an igw (internet gateway) in each region.
+    # To create one in every region, you can set
+    #
+    #   ec2_instance_reachability: public
+    #
+    # For more fine-grained control, you can set
+    #
+    #   ec2_vpc_igw:
+    #     eu-west-1: yes
+    #     eu-central-1: yes
+    #     us-east-1: no
+    #     …
+    #       
+    # If you do the latter, you must also make sure that the correct
+    # subnets have a route to the igw.
+
+    - name: Create internet gateways in each region
+      ec2_vpc_igw:
+        region: "{{ r }}"
+        vpc_id: "{{ ec2_region_vpcs[r] }}"
+        state: "{{ state }}"
+      vars:
+        igws: "{{ ec2_vpc_igw|default({}) }}"
+        state: >-
+          {%- if r in igws and igws[r] == 'no' -%} absent
+          {%- else -%} present
+          {%- endif -%}
+      with_items: "{{ regions }}"
+      loop_control:
+        loop_var: r
+      when:
+        r in igws or
+        ec2_instance_reachability|default('private') == 'public'
+      tags: ec2_vpc_igw
+
     # A security group is a set of firewall rules that can be applied to
     # instances in a VPC. (A subnet in a VPC can also have a network ACL
     # associated with it, but we use the default that allows all inbound

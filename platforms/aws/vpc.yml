@@ -102,12 +102,6 @@
         }}"
       register: v
 
-    - name: Create internet gateway for VPC {{ vpc['Name'] }}
-      ec2_vpc_igw:
-        vpc_id: "{{ v.vpc.id }}"
-        region: "{{ region }}"
-        state: present
-
     - name: Record new VPC {{ vpc['Name'] }} in {{ region }}
       set_fact:
         ec2_region_vpcs: "{{

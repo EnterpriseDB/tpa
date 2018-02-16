@@ -16,6 +16,8 @@ ec2_vpc_subnets:
     10.33.27.16/28:
       az: eu-west-1b
 
+ec2_instance_reachability: public
+
 # To use another AMI, you can override ec2_ami* from the command-line:
 #
 # «-e '{"ec2_ami":{"Name":"TPA-RedHat-PGDG-9.6-2017*","Owner":"self"}}' -e ec2_ami_user=ec2-user»
