@@ -163,6 +163,32 @@
         ec2_instance_reachability|default('private') == 'public'
       tags: ec2_vpc_igw
 
+    # We require internet access for all of the subnets in the cluster.
+    #
+    # One way to avoid this requirement might be to mark one instance as
+    # the gateway for the rest of the cluster, and set up an SSH tunnel
+    # through it. Then only one instance would need internet access. We
+    # don't currently support this, however.
+
+    - name: Create routing tables in each region
+      ec2_vpc_route_table:
+        region: "{{ r }}"
+        vpc_id: "{{ ec2_region_vpcs[r] }}"
+        subnets: "{{ ec2_region_subnets[r].values()|list }}"
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: igw
+        tags:
+          Name: "{{ cluster_name }}/{{ r }}/routes"
+          Description: "Automatically created for {{ cluster_name }} in {{ r }}"
+          CreatingCluster: "{{ cluster_name }}"
+      with_items: "{{ regions }}"
+      when:
+        ec2_instance_reachability|default('private') == 'public'
+      loop_control:
+        loop_var: r
+      tags: ec2_vpc_route_table
+
     # A security group is a set of firewall rules that can be applied to
     # instances in a VPC. (A subnet in a VPC can also have a network ACL
     # associated with it, but we use the default that allows all inbound
