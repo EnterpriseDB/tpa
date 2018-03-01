@@ -39,6 +39,7 @@
 
 - name: Create new subnets in {{ region }}
   ec2_vpc_subnet:
+    wait: yes
     state: present
     cidr: "{{ item }}"
     vpc_id: "{{ vpc }}"
