@@ -6,7 +6,7 @@
 # The appropriate AWS IAM credentials must be supplied separately, e.g.
 # in ~/.boto or in the environment.
 
-- include_tasks: ../common/provision.yml
+- import_playbook: ../common/provision.yml
   tags: common
 
 - name: Provision AWS cluster
