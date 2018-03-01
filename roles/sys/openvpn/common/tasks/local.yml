@@ -9,7 +9,7 @@
     msg: "Please add the location of openvpn to your PATH"
     that: openvpn_path != ''
   vars:
-    openvpn_path: >
+    openvpn_path: >-
       {{ lookup('pipe', 'command -v openvpn || true') }}
 
 - name: Ensure certs directory exists locally
