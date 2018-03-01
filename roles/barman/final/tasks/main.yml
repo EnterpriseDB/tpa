@@ -1,10 +1,8 @@
 ---
 
-- include: server.yml
+- include_tasks: server.yml
   when: >
     'barman' in role
-  static: no
 
-- include: client.yml
+- include_tasks: client.yml
   when: backup is defined
-  static: no

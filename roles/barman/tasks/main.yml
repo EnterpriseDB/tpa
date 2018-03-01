@@ -9,17 +9,15 @@
 # On any instance tagged as a Barman server (i.e., where tags.role
 # includes 'barman'), it will install and configure Barman.
 
-- include: server.yml
+- include_tasks: server.yml
   when: >
     'barman' in role
-  static: no
 
 # On any instance that must be backed up (i.e., with tags.backup set to
 # the name of a Barman server), it will perform the necessary
 # client-side configuration.
 
-- include: client.yml
+- include_tasks: client.yml
   when: backup is defined
-  static: no
 
 # On any other kind of instance, we do nothing.

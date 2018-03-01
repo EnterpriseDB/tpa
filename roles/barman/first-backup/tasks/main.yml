@@ -16,7 +16,6 @@
   when: >
     backup is defined
 
-- include: first-backup.yml
-  static: no
+- include_tasks: first-backup.yml
   when: >
     backup is defined and backups.stdout == '0'
