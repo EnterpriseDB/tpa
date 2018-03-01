@@ -6,25 +6,9 @@
 - name: Set provisioning variable {{ name }}
   action: set_fact
   args:
+    "{{ name }}": "{{ value }}"
     provisioning_vars: "{{
       provisioning_vars|combine({name: value})
     }}"
 
 - include_tasks: write-provisioning-vars.yml
-
-# We don't set the top-level fact along with provisioning_vars above to
-# avoid an Ansible bug. Suppose we're invoked from within somefile.yml
-# that is itself included like this:
-#
-# - include: somefile.yml
-#   when:
-#     varname is not defined
-#
-# Then we could skip including write-provisioning-vars.yml above because
-# we've just defined varname in the previous step. Doing it as the last
-# step avoids this problem and is harmless.
-
-- name: Set fact {{ name }}
-  action: set_fact
-  args:
-    "{{ name }}": "{{ value }}"
