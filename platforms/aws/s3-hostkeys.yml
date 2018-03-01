@@ -13,7 +13,7 @@
     - ["", ".pub"]
   register: keyurls
 
-- include: ../common/set-provisioning-var.yml
+- include_tasks: ../common/set-provisioning-var.yml
   vars:
     name: s3_hostkey_expiry
     value: "{{ lookup('pipe', 'date +%s')|int + 2700 }}"

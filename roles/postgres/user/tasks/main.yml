@@ -129,5 +129,5 @@
 
 # Finally, we generate the TLS certificates needed by Postgres.
 
-- include: tls.yml
+- include_tasks: tls.yml
   tags: [postgres, tls]

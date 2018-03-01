@@ -1,6 +1,6 @@
 ---
 
-- include: "os/{{ ansible_os_family }}.yml"
+- include_tasks: "os/{{ ansible_os_family }}.yml"
   tags: [pglogical, pkg]
 
 - name: Install pglogical packages

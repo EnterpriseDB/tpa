@@ -83,7 +83,7 @@
     - "{{ regions }}"
     - "{{ new_sgs.results }}"
 
-- include: ../common/set-provisioning-var.yml
+- include_tasks: ../common/set-provisioning-var.yml
   vars:
     name: ec2_region_groups
     value: "{{ security_groups }}"

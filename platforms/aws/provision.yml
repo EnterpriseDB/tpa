@@ -6,7 +6,7 @@
 # The appropriate AWS IAM credentials must be supplied separately, e.g.
 # in ~/.boto or in the environment.
 
-- include: ../common/provision.yml
+- include_tasks: ../common/provision.yml
   tags: common
 
 - name: Provision AWS cluster
@@ -16,17 +16,17 @@
     # expect $cluster_dir/$config.yml to define a cluster name and a
     # list of instances.
 
-    - include: validate.yml
+    - include_tasks: validate.yml
       tags: always
 
-    - include: inventory/write.yml
+    - include_tasks: inventory/write.yml
 
-    - include: ../common/read-provisioning-vars.yml
+    - include_tasks: ../common/read-provisioning-vars.yml
 
     # We generated host keys into hostkeys/ssh_host_$type_key{,.pub};
     # we now upload those to hostkeys/$type{,.pub}.txt in S3.
 
-    - include: s3-hostkeys.yml
+    - include_tasks: s3-hostkeys.yml
       when:
         s3_hostkey_expiry is not defined or
         lookup('pipe', 'date +%s')|int > s3_hostkey_expiry|int
@@ -36,7 +36,7 @@
     # to newly provisioned instances, unless ec2_key_name is explicitly
     # set to "" in config.yml.
 
-    - include: ec2-register-key.yml
+    - include_tasks: ec2-register-key.yml
       when:
         ec2_instance_key is not defined and ec2_key_name != ''
       tags: ec2_keys
@@ -82,7 +82,7 @@
     # The vpc-id for a region is then given by ec2_region_vpcs[region].
 
     - name: Resolve ec2_vpc specification
-      include: vpc.yml
+      include_tasks: vpc.yml
       vars:
         vpc: "{{ ec2_vpc[r]|default(ec2_vpc) }}"
         region: "{{ r }}"
@@ -116,7 +116,7 @@
     # subnet in a region is given by ec2_region_subnets[region][cidr].
 
     - name: Resolve subnet references in each region
-      include: vpc-subnet.yml
+      include_tasks: vpc-subnet.yml
       vars:
         region: "{{ r }}"
         vpc: "{{ ec2_region_vpcs[r] }}"
@@ -214,7 +214,7 @@
     # already. If no security group is specified, we create one for each
     # VPC with the correct rules.
 
-    - include: ec2-region-groups.yml
+    - include_tasks: ec2-region-groups.yml
       when:
         ec2_region_groups is not defined
       tags: sgs
@@ -223,7 +223,7 @@
     # an inline policy with any permissions that the instances need,
     # unless cluster_profile is explicitly set to '' in config.yml.
 
-    - include: iam-instance-profile.yml
+    - include_tasks: iam-instance-profile.yml
       when:
         instance_profile_name is not defined and cluster_profile != ''
       tags: iam
@@ -237,7 +237,7 @@
     #
     # We also record the properties of each AMI id for later use.
 
-    - include: ec2-region-amis.yml
+    - include_tasks: ec2-region-amis.yml
       when:
         ec2_ami is defined and
         (ec2_region_amis is not defined or ec2_cached_ami is not defined or
@@ -247,7 +247,7 @@
     # If any instances[] reference an image whose properties we do not
     # already know, we need to look them up too.
 
-    - include: ec2-ami-properties.yml
+    - include_tasks: ec2-ami-properties.yml
       when:
         ec2_ami_properties is not defined or
         (instances|json_query('[*].image')|difference(ec2_ami_properties|json_query('keys(@)'))|list)
@@ -258,7 +258,7 @@
     # build a table to map the names of unattached volumes in that
     # region to their volume-ids.
 
-    - include: ec2-attachable-volumes.yml
+    - include_tasks: ec2-attachable-volumes.yml
       when:
         instances|json_query('[*].volumes[]|[?attach_existing]')|count > 0
       tags: ebs
@@ -399,7 +399,7 @@
     # one or more of the instances created above. The instance ids come
     # from the results above, and the configuration is in instances[].
 
-    - include: ec2-eip.yml
+    - include_tasks: ec2-eip.yml
       tags: ec2_eips
 
     # Now we have ec2_public_ips in ec2_jobs.results, but some of them
@@ -431,10 +431,10 @@
     # and route53_hosted_zone (or if they are specified globally, which
     # applies to all instances).
 
-    - include: route53.yml
+    - include_tasks: route53.yml
       tags: route53
 
-    - include: ../common/inventory/write.yml
+    - include_tasks: ../common/inventory/write.yml
       vars:
         ansible_user: "{{ ec2_ami_user|default('admin') }}"
         ansible_port: "{{ cluster_ssh_port|default(22) }}"

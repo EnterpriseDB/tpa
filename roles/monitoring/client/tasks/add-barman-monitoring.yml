@@ -25,7 +25,7 @@
 # ---------------------
 
 - name: Install nsca-ng client
-  include: install-nsca-client.yml
+  include_tasks: install-nsca-client.yml
   become: "{{barman_become}}"
 
 - name: Install nagios-plugins-basic (Debian et al)

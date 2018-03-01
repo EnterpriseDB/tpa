@@ -1,4 +1,4 @@
-- include: ../common/validate.yml
+- include_tasks: ../common/validate.yml
 
 - name: Ensure ec2_vpc is configured
   assert:
@@ -59,4 +59,4 @@
       instances|map(attribute='subnet')|unique|select('contains','/')|list
     }}"
 
-- include: ../common/validate-post.yml
+- include_tasks: ../common/validate-post.yml

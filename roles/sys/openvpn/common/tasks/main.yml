@@ -10,7 +10,7 @@
 # We tweak $PATH to increase the likelihood that we'll find the system
 # openvpn without intervention on Linux and MacOS X.
 
-- include: local.yml
+- include_tasks: local.yml
   environment:
     PATH: >
       {{ lookup('env', 'PATH') }}:/usr/sbin:/usr/local/opt/openvpn/sbin

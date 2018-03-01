@@ -10,7 +10,7 @@
       provisioning_vars|combine({name: value})
     }}"
 
-- include: write-provisioning-vars.yml
+- include_tasks: write-provisioning-vars.yml
 
 # We don't set the top-level fact along with provisioning_vars above to
 # avoid an Ansible bug. Suppose we're invoked from within somefile.yml

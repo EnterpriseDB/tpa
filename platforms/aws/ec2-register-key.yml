@@ -18,7 +18,7 @@
   with_items: "{{ regions }}"
 
 - name: Set ec2_instance_key
-  include: ../common/set-provisioning-var.yml
+  include_tasks: ../common/set-provisioning-var.yml
   vars:
     name: ec2_instance_key
     value: "{{ ec2_key_name }}"

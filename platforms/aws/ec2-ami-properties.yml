@@ -19,7 +19,7 @@
     }}"
   with_items: "{{ ec2_direct_amis.results }}"
 
-- include: ../common/set-provisioning-var.yml
+- include_tasks: ../common/set-provisioning-var.yml
   vars:
     name: ec2_ami_properties
     value: "{{ properties }}"

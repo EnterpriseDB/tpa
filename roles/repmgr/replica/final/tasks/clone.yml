@@ -13,7 +13,7 @@
 # and if so, clone from it; if not, we clone from the primary and do a
 # little magic to make the replication work as desired afterwards.
 
-- include: clone-upstream.yml
+- include_tasks: clone-upstream.yml
   when: >
     upstream|default(upstream_primary) != upstream_primary
     

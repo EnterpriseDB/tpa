@@ -3,7 +3,7 @@
 - name: Platform-independent provisioning tasks
   hosts: localhost
   tasks:
-    - include: validate.yml
+    - include_tasks: validate.yml
       tags: always
 
     - name: Ensure that the cluster's inventory directories exist
@@ -23,13 +23,13 @@
         ssh_key_file is not defined
 
     - name: Create ssh keypair
-      include: ssh-key.yml
+      include_tasks: ssh-key.yml
       vars:
         key_file: "{{ ssh_key_file }}"
       tags: [common, ssh, keygen]
 
-    - include: ssh-hostkeys.yml
+    - include_tasks: ssh-hostkeys.yml
       tags: [common, ssh, keygen]
 
-    - include: set-vault-pass.yml
+    - include_tasks: set-vault-pass.yml
       tags: common

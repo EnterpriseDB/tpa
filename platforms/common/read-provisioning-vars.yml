@@ -34,7 +34,7 @@
     overriden_keys|d() and overriden_keys|length > 0
   register: overriden
 
-- include: write-provisioning-vars.yml
+- include_tasks: write-provisioning-vars.yml
   when:
     not overriden|skipped
     or discard_cache|default('no') == 'yes'

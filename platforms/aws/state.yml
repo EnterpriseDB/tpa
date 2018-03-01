@@ -6,7 +6,7 @@
 - name: Stop hosts in a cluster
   hosts: localhost
   tasks:
-    - include: validate.yml
+    - include_tasks: validate.yml
       tags: always
 
     - name: Require inventory group {{cluster_tag}} to be defined

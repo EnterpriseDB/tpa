@@ -9,4 +9,4 @@
 # It's meant to be used from clusters/images when building new images,
 # and is probably not a good idea to include in any "normal" playbook.
 
-- include: "os/{{ ansible_os_family }}.yml"
+- include_tasks: "os/{{ ansible_os_family }}.yml"

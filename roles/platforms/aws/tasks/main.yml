@@ -1,7 +1,7 @@
 ---
 
-- include: hostvars.yml
-- include: wait.yml
+- include_tasks: hostvars.yml
+- include_tasks: wait.yml
 
 - name: Retrieve user-data failure log entries
   shell: >
@@ -21,4 +21,4 @@
   when: >
     'stdout_lines' in failures and failures.stdout_lines|count > 0
 
-- include: metadata.yml
+- include_tasks: metadata.yml

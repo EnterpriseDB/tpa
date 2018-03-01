@@ -20,7 +20,7 @@
 
 - block:
     - name: Set up encryption on {{ device }}
-      include: "{{ encryption }}.yml"
+      include_tasks: "{{ encryption }}.yml"
       vars:
         luks_device: "{{ _device }}"
     - name: Set noauto in mount options for {{ _device }}

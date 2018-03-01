@@ -63,7 +63,7 @@
 # --------------------------------
 
 - name: Install nsca-ng client
-  include: install-nsca-client.yml
+  include_tasks: install-nsca-client.yml
 
 # Configuration
 # -------------

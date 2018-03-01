@@ -21,4 +21,4 @@
     password: "{{ lookup('pipe', '{{ tpa_dir }}/bin/password || true') }}"
   run_once: yes
 
-- include: ssh.yml
+- include_tasks: ssh.yml

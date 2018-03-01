@@ -7,7 +7,7 @@
 - name: Deprovision EC2 cluster
   hosts: localhost
   tasks:
-    - include: validate.yml
+    - include_tasks: validate.yml
       tags: always
 
     # If there are any instances in this cluster, we can terminate them.

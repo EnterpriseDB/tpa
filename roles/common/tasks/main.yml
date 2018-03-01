@@ -7,5 +7,5 @@
   hostname: name="{{ inventory_hostname }}"
   tags: common
 
-- include: tpa.yml
+- include_tasks: tpa.yml
   tags: common

@@ -5,13 +5,13 @@
 # Add a client server to monitoring.
 
 - name: Set up client server scripts for standard monitoring
-  include: add-monitoring.yml
+  include_tasks: add-monitoring.yml
   when: (monitoring|bool == true) and (server_role == "database")
 
 - name: Set up client server scripts for barman monitoring
-  include: add-barman-monitoring.yml
+  include_tasks: add-barman-monitoring.yml
   when: (monitoring|bool == true) and (server_role == "barman")
 
 - name: Remove client server monitoring scripts
-  include: remove-monitoring.yml
+  include_tasks: remove-monitoring.yml
   when: (monitoring|bool == false) and (server_role == "database")
