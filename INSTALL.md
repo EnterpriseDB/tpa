@@ -72,8 +72,9 @@ Set ANSIBLE_HOME in your environment (and .bashrc/.profile):
     export ANSIBLE_HOME=/path/to/ansibledir
 ```
 
-Now you should be able to run ./ansible/ansible. The following simple
-tests should succeed if Ansible has been installed correctly:
+Now you should be able to run ./ansible/ansible from your local copy of
+the TPA repository. The following simple tests should succeed if Ansible
+has been installed correctly:
 
 ```
     ./ansible/ansible localhost -m ping
