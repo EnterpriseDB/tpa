@@ -29,3 +29,7 @@
     and i.instance_status|json_query("details[?name=='reachability'].status|[0]") == 'passed')
   retries: 60
   delay: 10
+
+- name: Set availability zone as fact
+  set_fact:
+    ec2_availability_zone: "{{ i.availability_zone }}"

@@ -6,6 +6,9 @@
 # If we ever need to retrieve more meta-data in future, we could parse
 # the output of "aws ec2 describe-instances" or use ec2_instance_facts,
 # or (depending on what it is) consider extending the inventory plugin.
+#
+# XXX Note this is superseded by setting the availability zone directly
+# from ec2_instance_status, and therefore not included at all for now.
 
 - name: Retrieve current availability zone
   shell: >
