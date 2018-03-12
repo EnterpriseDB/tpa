@@ -25,6 +25,18 @@
       #
       # TPA startup tasks.
 
+- name: Create /etc/rc.local if needed
+  copy:
+    force: no
+    dest: /etc/rc.local
+    owner: root
+    group: root
+    mode: 0755
+    content: |
+      #!/bin/sh
+      #
+      exit 0
+
 - name: Make /etc/rc.local invoke /etc/tpa/rc.local
   lineinfile:
     path: /etc/rc.local
