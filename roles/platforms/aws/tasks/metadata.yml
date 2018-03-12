@@ -8,10 +8,15 @@
 # or (depending on what it is) consider extending the inventory plugin.
 
 - name: Retrieve current availability zone
-  command: >
-    curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone
-  register: curl
+  shell: >
+    if command -v wget >/dev/null 2>&1; then wget -q -O - {{ zone_url }};
+    elif command -v curl >/dev/null 2>&1; then curl -s {{ zone_url }};
+    else exit 2;
+    fi
+  register: az
+  vars:
+    zone_url: http://169.254.169.254/latest/meta-data/placement/availability-zone
 
 - name: Set availability zone as fact
   set_fact:
-    ec2_availability_zone: "{{ curl.stdout }}"
+    ec2_availability_zone: "{{ az.stdout }}"
