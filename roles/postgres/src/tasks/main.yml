@@ -46,7 +46,7 @@
 
 - name: Install psycopg2
   shell: >
-    PATH=$PATH:{{ postgres_bin_dir }} pip install psycopg2
+    PATH=$PATH:{{ postgres_bin_dir }} pip install psycopg2-binary
   register: psycopg
   changed_when: >
     psycopg|succeeded and 'Requirement already satisfied' not in psycopg.stdout
