@@ -1,5 +1,5 @@
 repmgr_git_url: git://github.com/2ndQuadrant/repmgr.git
-repmgr_git_ref: "REL3_3_STABLE"
+repmgr_git_ref: "REL4_0_STABLE"
 repmgr_git_reference_repo: ""
 
 repmgr_src_dir: /opt/postgres/src/repmgr
