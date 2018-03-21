@@ -11,6 +11,15 @@
     chdir: "{{ repmgr_src_dir }}"
   tags: [build-clean, repmgr-clean]
 
+- name: Configure repmgr if necessary
+  shell: >
+    test -x ./configure &&
+    PATH={{ postgres_bin_dir }}:$PATH ./configure
+  args:
+    chdir: "{{ repmgr_src_dir }}"
+    executable: /bin/bash
+  tags: [build-clean, repmgr-clean]
+
 - name: Build and install repmgr
   shell: >
     PATH={{ postgres_bin_dir }}:$PATH make -s USE_PGXS=1 install
