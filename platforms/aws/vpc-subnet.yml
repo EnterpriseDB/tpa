@@ -68,4 +68,6 @@
           }, recursive=True)
         }}"
       with_items: "{{ new_subnets.results }}"
+      when: >
+        'subnet' in item
   when: new_subnets.changed
