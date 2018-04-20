@@ -11,11 +11,9 @@
   when: >
     pgdata_initialised
 
-- name: Set empty cluster_facts for other instances
+- name: Ensure cluster_facts is set for all hosts
   set_fact:
-    cluster_facts: {}
-  when:
-    cluster_facts is not defined
+    cluster_facts: "{{ cluster_facts|default({}) }}"
 
 # If the role or upstream of the server has changed from what it was
 # initially set to in config.yml, we override it here.

@@ -21,15 +21,15 @@
 # If we arrive here after cloning PGDATA above, we won't have access to
 # facts collected earlier during cluster_discovery (this instance would
 # have been skipped at the time). But we must ensure that recovery.conf
-# is present before starting Postgres, so we write the following tests
-# to work both with and without cluster_facts available.
+# is present before starting Postgres, so the following tests must work
+# whether cluster_facts is populated or not.
 
 - include_tasks: recovery.yml
   when:
-    not cluster_facts
-    or (cluster_facts and not recovery_settings)
+    recovery_settings is empty
   vars:
-    recovery_settings: "{{ cluster_facts|try_subkey('replica.recovery_settings', {}) }}"
+    recovery_settings: >
+      {{ cluster_facts|try_subkey('replica.recovery_settings', {}) }}
 
 # Next we must check if the replica is streaming properly, for which we
 # need Postgres to be running. If it's already running, the tasks below
@@ -52,7 +52,7 @@
 
 - include_role: name=postgres/facts
   when:
-    not cluster_facts
+    cluster_facts is empty
 
 # Now we can check that this instance is in fact a replica, and has a
 # reasonable configuration.
