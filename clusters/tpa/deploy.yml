@@ -19,7 +19,7 @@
     - role: postgres/vars
       vars:
         postgres_version: 10
-        postgres_installation_source: src
+        postgres_installation_source: pkg
       tags: always
 
 # Now the cluster hosts are reachable by ssh and have all the required
@@ -61,6 +61,9 @@
 
     - role: sys/hosts
       tags: [sys, hosts]
+
+    - role: sys/cloudinit
+      tags: [sys, cloudinit]
 
     - role: sys/rsyslog
       tags: [sys, rsyslog]

@@ -1,0 +1,19 @@
+---
+
+# If we're in the unenviable position of being on a host that's managed
+# by cloud-init, we have some configuration tweaks to apply.
+
+- name: Check if /etc/cloud/cloud.cfg.d exists
+  stat:
+    path: /etc/cloud/cloud.cfg.d
+  register: cloudcfg
+
+- name: Disable manage_etc_hosts in cloud.cfg
+  copy:
+    dest: /etc/cloud/cloud.cfg.d/99_hosts.cfg
+    owner: root
+    group: root
+    mode: 0644
+    content: >-
+      manage_etc_hosts: False
+  when: cloudcfg.stat.exists

@@ -8,15 +8,6 @@
     group: root
     mode: 0644
 
-- name: Disable manage_etc_hosts in cloud.cfg
-  copy:
-    dest: /etc/cloud/cloud.cfg.d/99_hosts.cfg
-    owner: root
-    group: root
-    mode: 0644
-    content: >-
-      manage_etc_hosts: False
-
 # We pre-generate /etc/ssh/ssh_known_hosts to allow ssh between cluster
 # instances without host key verification prompts. We must skip this if
 # for some reason we do not have known host keys for the instances.
