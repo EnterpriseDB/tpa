@@ -1,7 +1,7 @@
 [Unit]
 Description=Postgres replication manager
 After={{ postgres_service_name }}-monitor.service
-Requires={{ postgres_service_name }}-monitor.service
+Wants={{ postgres_service_name }}-monitor.service
 
 [Service]
 Type=simple
