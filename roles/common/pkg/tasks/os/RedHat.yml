@@ -20,9 +20,3 @@
   changed_when: >
     pip|succeeded and 'already installed and latest version' not in pip.stdout and
     not pip.stdout.endswith('/pip')
-
-- name: Install Boto
-  raw: yum -y install python-boto
-  register: boto
-  changed_when: >
-    boto|succeeded and 'already installed and latest version' not in boto.stdout
