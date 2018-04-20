@@ -1,0 +1,26 @@
+---
+
+# In general, we prefer to install packages for Python modules, but boto
+# is a special case—we want the latest version, which is typically far
+# ahead of the version provided by OS packages.
+
+- name: Install boto
+  #shell: python -c 'import boto' &>/dev/null || pip install boto
+  command: pip install boto
+  register: boto
+  changed_when: >
+    boto|succeeded and 'Requirement already satisfied' not in boto.stdout
+
+# If awscli still isn't installed, it's safest to install it using pip.
+# (See the comments in platforms/aws/user-data/awscli.j2. The user-data
+# script should have installed awscli already, so we shouldn't usually
+# need to do anything here for cloud instances.)
+
+- name: Ensure awscli is installed
+  shell: command -v aws || pip install awscli
+  args:
+    executable: /bin/bash
+  register: awscli
+  changed_when: >
+    awscli|succeeded and 'Requirement already satisfied' not in awscli.stdout and
+    not awscli.stdout.endswith('/aws')
