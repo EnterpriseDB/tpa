@@ -19,6 +19,7 @@
   package: name={{ item }} state=latest
   with_items:
     - "{{ postgres_packages[ansible_distribution] }}"
+    - "{{ postgres_debug_packages[ansible_distribution] }}"
     - "{{ extra_postgres_packages[ansible_distribution] }}"
     - python-psycopg2
   tags: [postgres, pkg]

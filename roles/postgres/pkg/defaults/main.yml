@@ -7,7 +7,6 @@
 postgres_packages:
   Debian: &debian_packages
     - postgresql-{{postgres_version}}
-    - postgresql-{{postgres_version}}-dbg
     - postgresql-client-{{postgres_version}}
     - postgresql-contrib-{{postgres_version}}
     - postgresql-server-dev-{{postgres_version}}
@@ -16,7 +15,6 @@ postgres_packages:
     - barman-cli
   RedHat:
     - postgresql{{postgres_versionNN}}
-    - postgresql{{postgres_versionNN}}-debuginfo
     - postgresql{{postgres_versionNN}}-contrib
     - postgresql{{postgres_versionNN}}-server
     - postgresql{{postgres_versionNN}}-devel
@@ -25,6 +23,14 @@ postgres_packages:
     - plv8_{{postgres_versionNN}}
     - barman-cli
   Ubuntu: *debian_packages
+
+postgres_debug_packages:
+  Debian:
+    - postgresql-{{postgres_version}}-dbg{%- if postgres_version|version_compare('10', '>=') -%}sym{%- endif -%}
+  RedHat:
+    - postgresql{{postgres_versionNN}}-debuginfo
+  Ubuntu:
+    - postgresql-{{postgres_version}}-dbg
 
 extra_postgres_packages:
   Debian: &debian_extra_packages []
