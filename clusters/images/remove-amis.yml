@@ -19,10 +19,11 @@
     # remove. The expression below is written this way so that the
     # 'TPA-' prefix can't be accidentally omitted.
 
-    - ec2_ami_find:
-        name: "{{ 'TPA-' ~ '*2ndQPostgres-9.6-*2016*' }}"
-        owner: self
+    - ec2_ami_facts:
         region: "{{ r }}"
+        owner: self
+        filters:
+          name: "{{ 'TPA-' ~ '*2ndQPostgres-9.6-*2016*' }}"
       with_items: "{{ regions }}"
       loop_control:
         loop_var: r
@@ -30,8 +31,8 @@
 
     # Now ec2_amis.results looks like this:
     #
-    # [{r: …, results: [{ami_id: …}, …]},
-    #  {r: …, results: …}]
+    # [{r: …, images: [{image_id: …}, …]},
+    #  {r: …, images: …}]
     #
     # The outer results array has as many entries as there are regions,
     # and any of the inner results arrays may contain zero or more AMI
@@ -45,7 +46,7 @@
 
     - set_fact:
         region_amis: "{{
-          ec2_amis.results|json_query('[*].{region:r,amis:[results[*].[ami_id][]][]}')
+          ec2_amis.results|json_query('[*].{region:r,amis:[images[*].[image_id][]][]}')
         }}"
 
     # Iterate over region_amis and remove each AMI that we found.

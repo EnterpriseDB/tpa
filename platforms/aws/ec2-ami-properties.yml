@@ -5,17 +5,16 @@
     properties: "{{ ec2_ami_properties|default({}) }}"
 
 - name: Look for AMIs specified directly by id
-  ec2_ami_find:
-    ami_id: "{{ item.image }}"
+  ec2_ami_facts:
+    image_ids: "{{ item.image }}"
     region: "{{ item.region }}"
-    no_result_action: fail
   with_items: "{{ instances|select('has_subkey','image')|list }}"
   register: ec2_direct_amis
 
 - name: Extend AMI→properties table
   set_fact:
     properties: "{{
-        properties|combine({item.results.0.ami_id: item.results.0})
+        properties|combine({item.images.0.image_id: item.images.0})
     }}"
   with_items: "{{ ec2_direct_amis.results }}"
 
