@@ -9,6 +9,9 @@
     image_ids: "{{ item.image }}"
     region: "{{ item.region }}"
   with_items: "{{ instances|select('has_subkey','image')|list }}"
+  loop_control:
+    label: >-
+      {{ item.region }}:{{ item.image }}
   register: ec2_direct_amis
 
 - name: Extend AMI→properties table
@@ -17,6 +20,9 @@
         properties|combine({item.images.0.image_id: item.images.0})
     }}"
   with_items: "{{ ec2_direct_amis.results }}"
+  loop_control:
+    label: >-
+      {{ item.images.0.image_id }}
 
 - include_tasks: ../common/set-provisioning-var.yml
   vars:

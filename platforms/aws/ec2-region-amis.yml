@@ -33,6 +33,9 @@
   with_together:
     - "{{ regions }}"
     - "{{ ec2_amis.results }}"
+  loop_control:
+    label: >-
+      {{ item.0 }}
 
 - name: Record existing AMIs in each region
   set_fact:
@@ -47,6 +50,9 @@
   with_together:
     - "{{ regions }}"
     - "{{ ec2_amis.results }}"
+  loop_control:
+    label: >-
+      {{ item.0 }}:{{ item.1.images.0.image_id }}
 
 - include_tasks: ../common/set-provisioning-var.yml
   vars:

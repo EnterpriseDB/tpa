@@ -278,10 +278,13 @@
 
     - name: Ensure that we know security group ids in every region
       assert:
-        msg: "Group reference undefined"
+        msg: "Security group reference undefined"
         that:
           - ec2_region_groups[item.region] is defined
       with_items: "{{ instances }}"
+      loop_control:
+        label: >-
+          {{ item.region }}:{{ item.Name }}
 
     - name: Ensure that we know subnet ids in every region
       assert:
@@ -290,6 +293,9 @@
           - ec2_region_subnets[item.region] is defined
           - ec2_region_subnets[item.region][item.subnet] is defined
       with_items: "{{ instances }}"
+      loop_control:
+        label: >-
+          {{ item.region }}:{{ item.Name }}
 
     - block:
         - name: Ensure that we found volume_ids for all attach_existing volumes
@@ -301,6 +307,9 @@
             that:
               - unid_volumes|count == 0
           with_items: "{{ instances }}"
+          loop_control:
+            label: >-
+              {{ item.region }}:{{ item.Name }}
           when:
             item.Name in hosts_to_check
           vars:
@@ -353,6 +362,9 @@
         assign_public_ip: "{{ item.assign_public_ip|default('yes') }}"
         wait: yes
       with_items: "{{ instances }}"
+      loop_control:
+        label: >-
+          {{ item.region }}:{{ item.Name }}
       register: ec2_instances
       async: 7200
       poll: 0
@@ -364,6 +376,9 @@
       until: ec2_jobs.finished
       retries: 300
       with_items: "{{ ec2_instances.results }}"
+      loop_control:
+        label: >-
+          {{ item.ansible_job_id }}
       tags: ec2
 
     - name: Tag all volumes attached to the provisioned instances
@@ -383,6 +398,9 @@
         - ec2_jobs.results
         - item.0.tagged_instances
         - item.1.block_device_mapping.keys()|list
+      loop_control:
+        label: >-
+          {{ item.1.region }}:{{ item.1.block_device_mapping[item.2].volume_id }}
       tags: ec2
 
     # If explicitly requested, we can also associate an elastic IP with
@@ -416,6 +434,9 @@
       with_together:
         - "{{ ec2_jobs.results }}"
         - "{{ ec2_eips.results }}"
+      loop_control:
+        label: >-
+          {{ item.0.item.item.Name }}
 
     # We update A records for any instance with a route53_hosted_zone_id
     # and route53_hosted_zone (or if they are specified globally, which

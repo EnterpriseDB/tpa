@@ -11,4 +11,7 @@
   with_together:
     - "{{ instances }}"
     - "{{ ec2_jobs.results }}"
+  loop_control:
+    label: >-
+      {{ item.1.tagged_instances[0].region }}:{{ item.1.tagged_instances[0].id }}
   register: ec2_eips

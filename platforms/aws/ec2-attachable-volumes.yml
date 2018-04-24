@@ -29,3 +29,6 @@
     }}"
   with_items: >
     {{ ec2_volumes|json_query('results[?volumes][].volumes') }}
+  loop_control:
+    label: >-
+      {{ item.region }}:{{ item.tags.TPAAttachmentLabel }}

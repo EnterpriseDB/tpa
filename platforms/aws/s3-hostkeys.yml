@@ -11,6 +11,9 @@
   with_nested:
     - ["rsa", "ecdsa"]
     - ["", ".pub"]
+  loop_control:
+    label: >-
+      ssh_host_{{ item.0 }}_key{{ item.1 }}
   register: keyurls
 
 - include_tasks: ../common/set-provisioning-var.yml

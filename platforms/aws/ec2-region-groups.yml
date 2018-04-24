@@ -29,6 +29,9 @@
       })
     }}"
   with_items: "{{ sgs.results }}"
+  loop_control:
+    label: >-
+      {{ item.item.key }}
 
 # If we need to create any security groups ourselves, they should have
 # the following rules.
@@ -67,6 +70,9 @@
   when:
     item.key not in security_groups
   with_dict: "{{ ec2_region_vpcs }}"
+  loop_control:
+    label: >-
+      {{ item.key }}:{{ item.value }}
   register: new_sgs
 
 - name: Record new security groups in each region
@@ -82,6 +88,9 @@
   with_together:
     - "{{ regions }}"
     - "{{ new_sgs.results }}"
+  loop_control:
+    label: >-
+      {{ item.0 }}:{{ item.1.group_id }}
 
 - include_tasks: ../common/set-provisioning-var.yml
   vars:

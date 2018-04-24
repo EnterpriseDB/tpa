@@ -73,6 +73,9 @@
       with_nested_dependents:
         - volumes.results
         - item.0.volumes
+      loop_control:
+        label: >-
+          {{ item.1.region }}:{{ item.1.id }} ({{ item.1.tags.Name }})
       tags: volumes
 
     # Next, remove any security groups created for this cluster.
@@ -96,6 +99,9 @@
       with_nested_dependents:
         - "{{ ec2_groups.results }}"
         - item.0.security_groups
+      loop_control:
+        label: >-
+          {{ item.0.region }}:{{ item.1.group_id }}
       tags: ec2_groups
 
     # Next, we delete the subnets that we created within each VPC, i.e.,
@@ -121,6 +127,9 @@
       with_nested_dependents:
         - "{{ subnets.results }}"
         - item.0.subnets
+      loop_control:
+        label: >-
+          {{ item.0.region }}:{{ item.1.cidr_block }}
       tags: ec2_vpcs
 
     # Now we can finally delete any VPCs that we created for this
@@ -146,6 +155,9 @@
       with_nested_dependents:
         - "{{ vpcs.results }}"
         - item.0.vpcs
+      loop_control:
+        label: >-
+          {{ item.0.region }}:{{ item.1.cidr_block }}
       tags: ec2_vpcs
 
     - name: Delete generated files for this cluster

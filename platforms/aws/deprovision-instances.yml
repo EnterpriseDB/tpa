@@ -11,6 +11,9 @@
   with_nested_dependents:
     - regions
     - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_id')|unique|list
+  loop_control:
+    label: >-
+      {{ item.0 }}:{{ item.1 }}
   register: ec2_uninstances
   async: 7200
   poll: 0
@@ -22,4 +25,7 @@
   until: ec2_jobs.finished
   retries: 300
   with_items: "{{ ec2_uninstances.results }}"
+  loop_control:
+    label: >-
+      {{ item.ansible_job_id }}
   tags: ec2

@@ -29,6 +29,9 @@
       }, recursive=True)
     }}"
   with_items: "{{ found.subnets }}"
+  loop_control:
+    label: >-
+      {{ region }}:{{ item.cidr_block }}
 
 # When we create a subnet, the cidr we specify is canonicalised, so the
 # cidr_block in the results may not be the same as the one we specified.
@@ -57,6 +60,9 @@
       CreatingCluster: "{{ cluster_name }}"
   when: ec2_region_subnets[region][item] is not defined
   with_items: "{{ subnets }}"
+  loop_control:
+    label: >-
+      {{ region }}:{{ vpc }}:{{ item }}
   register: new_subnets
 
 - block:
@@ -68,6 +74,9 @@
           }, recursive=True)
         }}"
       with_items: "{{ new_subnets.results }}"
+      loop_control:
+        label: >-
+          {{ region }}:{{ item.item }}
       when: >
         'subnet' in item
   when: new_subnets.changed

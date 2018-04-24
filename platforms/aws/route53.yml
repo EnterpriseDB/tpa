@@ -13,6 +13,9 @@
   with_together:
     - "{{ instances }}"
     - "{{ instance_vars }}"
+  loop_control:
+    label: >-
+      {{ item.1.Name }}
   when:
     (item.0.route53_hosted_zone_id|d() or route53_hosted_zone_id|d()) and
     (item.0.route53_zone|d() or route53_zone|d())

@@ -37,6 +37,9 @@
     host_name: "{{ item.Name }}"
     host_vars: "{{ item.vars }}"
   with_items: "{{ instance_vars }}"
+  loop_control:
+    label: >-
+      {{ item.Name }}
   when: >
     item.vars|length > 0
 
