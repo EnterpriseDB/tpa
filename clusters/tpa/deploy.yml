@@ -2,21 +2,21 @@
 
 # This play must always be applied to all hosts in the cluster. Here we
 # do any platform-specific checks and initialisation, confirm that all
-# hosts are available, and perform basic fact discovery.
+# hosts are available, and perform basic fast discovery.
 
 - name: Basic initialisation and fact discovery
   any_errors_fatal: True
   max_fail_percentage: 0
 
   hosts: all
-  tasks:
-    - include_role: name=platforms
+  roles:
+    - role: platforms
       tags: always
 
-    - include_role: name=facts
+    - role: facts
       tags: always
 
-    - include_role: name=postgres/vars
+    - role: postgres/vars
       vars:
         postgres_version: 10
         postgres_installation_source: pkg
@@ -32,58 +32,58 @@
   become: true
 
   hosts: "{{ deploy_hosts|default('all') }}"
-  tasks:
-    - include_role: name=common
+  roles:
+    - role: common
 
     # Set up any additional filesystems required. The block device
     # layout is instance-specific.
-    - include_role: name=sys/volumes
+    - role: sys/volumes
       tags: [sys, fs]
 
     # Computes memory size and other instance-specific computations for
     # use in later steps (e.g., setting shared_buffers).
-    - include_role: name=sys/tune
+    - role: sys/tune
       tags: always
 
-    - include_role: name=sys/sysctl
+    - role: sys/sysctl
       vars:
         sysctl_values:
           net.ipv4.ip_forward: 1
       tags: [sys, sysctl]
 
-    - include_role: name=sys/sysstat
+    - role: sys/sysstat
       tags: [sys, sysstat]
 
-    - include_role: name=sys/openvpn
+    - role: sys/openvpn
       when: >
-        vpn_network is defined and
         'tag_role_openvpn-server' in groups
+        and vpn_network is defined
 
-    - include_role: name=sys/hosts
+    - role: sys/hosts
       tags: [sys, hosts]
 
-    - include_role: name=sys/cloudinit
+    - role: sys/cloudinit
       tags: [sys, cloudinit]
 
-    - include_role: name=sys/rsyslog
+    - role: sys/rsyslog
       tags: [sys, rsyslog]
 
-    - include_role: name=postgres
+    - role: postgres
       when: >
         'postgres' in role
 
-    - include_role: name=barman
+    - role: barman
       tags: barman
 
-    - include_role: name=repmgr
+    - role: repmgr
       tags: repmgr
 
-    - include_role: name=postgres/final
+    - role: postgres/final
       when: >
         'postgres' in role
       tags: [postgres, final]
 
-    - include_role: name=monitoring
+    - role: monitoring
       when: >
         'tag_role_monitoring-server' in groups
       tags: monitoring
@@ -99,6 +99,6 @@
   become_user: root
   become: yes
   hosts: all
-  tasks:
-    - include_role: name=sys/hosts
+  roles:
+    - role: sys/hosts
       tags: [sys, hosts]
