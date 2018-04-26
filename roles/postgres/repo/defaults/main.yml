@@ -25,8 +25,15 @@ default_apt_repositories:
 yum_repositories: {}
 default_yum_repositories:
   PGDG:
-    rpm_url: >-
-      http://yum.postgresql.org/{{postgres_version}}/redhat/rhel-7-x86_64/pgdg-redhat{{postgres_versionNN}}-{{postgres_version}}-3.noarch.rpm
+    rpm_urls:
+      9.4: >-
+        http://yum.postgresql.org/{{postgres_version}}/redhat/rhel-7-x86_64/pgdg-redhat{{postgres_versionNN}}-{{postgres_version}}-3.noarch.rpm
+      9.5: >-
+        http://yum.postgresql.org/{{postgres_version}}/redhat/rhel-7-x86_64/pgdg-redhat{{postgres_versionNN}}-{{postgres_version}}-3.noarch.rpm
+      9.6: >-
+        http://yum.postgresql.org/{{postgres_version}}/redhat/rhel-7-x86_64/pgdg-redhat{{postgres_versionNN}}-{{postgres_version}}-3.noarch.rpm
+      10: >-
+        http://yum.postgresql.org/{{postgres_version}}/redhat/rhel-7-x86_64/pgdg-redhat{{postgres_versionNN}}-{{postgres_version}}-2.noarch.rpm
     versions: [9.4, 9.5, 9.6, 10]
 
 # Hardcoded information about yum repositories that supply postgres
