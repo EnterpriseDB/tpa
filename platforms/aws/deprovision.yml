@@ -171,9 +171,43 @@
         - certs
         - vault
         - hostkeys
-        - inventory
         - vars.json
         - ssh_config
         - known_hosts
         - id_{{ cluster_name|lower }}
         - id_{{ cluster_name|lower }}.pub
+        - inventory/ec2.py
+        - inventory/ec2.ini
+        - inventory/00-{{ cluster_name }}
+        - inventory/group_vars/{{ cluster_tag }}/00-ansible.yml
+        - inventory/group_vars/{{ cluster_tag }}/01-{{ cluster_name }}.yml
+
+    # We really want something like «with_fileglob: host_vars/*» here,
+    # but with_fileglob is serious about the "file" glob part, and will
+    # not return directories matching a wildcard. Hence the awkward find
+    # invocations below (-path '*/host_vars/*' is a POSIX-ly correct way
+    # to write -mindepth 1).
+
+    - name: Delete more generated files for this cluster
+      shell: >
+        test -d {{ dir }} &&
+        find {{ dir }} '(' -name 01-instance_vars.yml -o -name 02-topology.yml -o -name 03-volumes.yml ')' -exec rm {} ';' &&
+        find {{ dir }} -path '*/host_vars/*' -type d -delete &&
+        echo 'changed'
+      ignore_errors: yes
+      register: rm
+      changed_when: rm.stdout == 'changed'
+      vars:
+        dir: "{{ cluster_dir }}/inventory/host_vars"
+
+    - name: Try to delete inventory directories for this cluster
+      file:
+        path: "{{ cluster_dir }}/{{ item }}"
+        state: absent
+        force: no
+      with_items:
+        - inventory/group_vars/{{ cluster_tag }}
+        - inventory/group_vars
+        - inventory/host_vars
+        - inventory
+      ignore_errors: yes
