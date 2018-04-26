@@ -5,15 +5,19 @@ cluster_tags:
   Owner: AMS
 
 cluster_ssh_port: 222
+cluster_rules:
+    - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
 
 ec2_vpc:
   Name: Test
+
+ec2_instance_reachability: public
 
 instances:
 
     - node: 1
       type: t2.micro
-      image: ami-b14ba7a7
+      image: ami-47d90438
       region: us-east-1
       subnet: 10.33.0.0/24
       volumes:
@@ -27,7 +31,7 @@ instances:
 
     - node: 2
       type: t2.micro
-      image: ami-cdc999b6
+      image: ami-c998b6b2
       region: us-east-1
       subnet: 10.33.0.0/24
       volumes:
@@ -41,7 +45,7 @@ instances:
 
     - node: 3
       type: t2.micro
-      image: ami-d14062aa
+      image: ami-927185ef
       region: us-east-1
       subnet: 10.33.0.0/24
       volumes:
@@ -55,7 +59,7 @@ instances:
 
     - node: 4
       type: t2.micro
-      image: ami-b2795cd7
+      image: ami-60eede05
       region: us-east-2
       subnet: 10.33.0.0/24
       volumes:
@@ -69,7 +73,7 @@ instances:
 
     - node: 5
       type: t2.micro
-      image: ami-e4537381
+      image: ami-cfdafaaa
       region: us-east-2
       subnet: 10.33.0.0/24
       volumes:
@@ -83,7 +87,7 @@ instances:
 
     - node: 6
       type: t2.micro
-      image: ami-70fcdc15
+      image: ami-b9daeddc
       region: us-east-2
       subnet: 10.33.0.0/24
       volumes:
@@ -97,7 +101,7 @@ instances:
 
     - node: 7
       type: t2.micro
-      image: ami-94bdeef4
+      image: ami-d6a5b5b6
       region: us-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -111,7 +115,7 @@ instances:
 
     - node: 8
       type: t2.micro
-      image: ami-f4def794
+      image: ami-66eec506
       region: us-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -125,7 +129,7 @@ instances:
 
     - node: 9
       type: t2.micro
-      image: ami-c1775ca1
+      image: ami-264c4646
       region: us-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -139,7 +143,7 @@ instances:
 
     - node: 10
       type: t2.micro
-      image: ami-221ea342
+      image: ami-310d6c49
       region: us-west-2
       subnet: 10.33.0.0/24
       volumes:
@@ -153,7 +157,7 @@ instances:
 
     - node: 11
       type: t2.micro
-      image: ami-52766d2b
+      image: ami-9fa343e7
       region: us-west-2
       subnet: 10.33.0.0/24
       volumes:
@@ -167,7 +171,7 @@ instances:
 
     - node: 12
       type: t2.micro
-      image: ami-db3bdda3
+      image: ami-78a22900
       region: us-west-2
       subnet: 10.33.0.0/24
       volumes:
@@ -181,7 +185,7 @@ instances:
 
     - node: 13
       type: t2.micro
-      image: ami-402f1a33
+      image: ami-08025971
       region: eu-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -195,7 +199,7 @@ instances:
 
     - node: 14
       type: t2.micro
-      image: ami-a04da4d9
+      image: ami-bb9a6bc2
       region: eu-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -209,7 +213,7 @@ instances:
 
     - node: 15
       type: t2.micro
-      image: ami-da28dfa3
+      image: ami-0b541372
       region: eu-west-1
       subnet: 10.33.0.0/24
       volumes:
@@ -223,7 +227,7 @@ instances:
 
     - node: 16
       type: t2.micro
-      image: ami-5900cc36
+      image: ami-b693ca5d
       region: eu-central-1
       subnet: 10.33.0.0/24
       volumes:
@@ -237,7 +241,7 @@ instances:
 
     - node: 17
       type: t2.micro
-      image: ami-773c9118
+      image: ami-d74be5b8
       region: eu-central-1
       subnet: 10.33.0.0/24
       volumes:
@@ -251,7 +255,7 @@ instances:
 
     - node: 18
       type: t2.micro
-      image: ami-6df55b02
+      image: ami-bc4925d3
       region: eu-central-1
       subnet: 10.33.0.0/24
       volumes:
