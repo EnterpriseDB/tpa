@@ -7,7 +7,6 @@ cluster_tags:
 cluster_ssh_port: 222
 cluster_rules:
     - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
-    - {proto: tcp, from_port: 222, to_port: 222, cidr_ip: 0.0.0.0/0}
 
 ec2_vpc:
   Name: Test
@@ -20,7 +19,7 @@ instances:
 {% if n.append(n.pop()+1) %}{% endif %}
     - node: {{ n[0] }}
       type: t2.micro
-      image: {{ i.ami_id }}
+      image: {{ i.image_id }}
       region: {{ r }}
       subnet: 10.33.0.0/24
       volumes:

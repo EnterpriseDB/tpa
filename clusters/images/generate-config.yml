@@ -54,7 +54,7 @@
       with_items: "{{ regions }}"
 
     - set_fact:
-        region_amis: "{{ region_amis|combine({item.item.0: region_amis[item.item.0]|union([{'ami_id': item.results.0.ami_id, 'os': item.item.1.os}])}) }}"
+        region_amis: "{{ region_amis|combine({item.item.0: region_amis[item.item.0]|union([{'image_id': item.images.0.image_id, 'os': item.item.1.os}])}) }}"
       with_items: "{{ amis.results }}"
 
     - name: Expand config.yml template
