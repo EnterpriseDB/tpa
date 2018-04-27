@@ -1,0 +1,42 @@
+---
+
+# At this point, ec2_vpc is either {Name: …, cidr: …} (one specification
+# across regions) or {r1: {Name: …, cidr: …, filters: …}, r2: …}
+# (different specifications for different regions).
+#
+# XXX We assume that ec2_vpc[r] is the correct specification for region
+# r, but do not check that ec2_vpc either has no region keys, or all of
+# the ones in the list of regions. We originally accepted ec2_vpc with
+# or without regions to maintain backwards compatibility, but I think
+# the dual scheme is too clever for its own good.
+#
+# We invoke vpc.yml with a region and the VPC specification for that
+# region, and expect it to define ec2_region_vpcs[region].
+
+- include_tasks: vpc.yml
+  vars:
+    region: "{{ r }}"
+    cached_vpcs: >
+      {{ ec2_cached_vpcs|default({}) }}
+    cached_vpc: >
+      {{ cached_vpcs[r]|default(cached_vpcs) }}
+    vpc: >
+      {{ ec2_vpc[r]|default(ec2_vpc) }}
+  with_items: "{{ regions }}"
+  loop_control:
+    loop_var: r
+  when:
+    region not in ec2_region_vpcs|default({}) or
+    vpc != cached_vpc
+
+# We cache whatever ec2_vpc is set to, and check it at two levels. In
+# provision.yml, we check "has ec2_vpc changed at all"; here, we also
+# check if the specification for a region has changed from what was
+# cached earlier, so we can skip VPCs whose specifications have not
+# changed.
+
+- include_tasks: ../common/set-provisioning-vars.yml
+  vars:
+    variables:
+      ec2_cached_vpc: "{{ ec2_vpc }}"
+      ec2_region_vpcs: "{{ ec2_region_vpcs }}"

@@ -3,14 +3,10 @@
 # Starting with ec2_groups (optional) and cluster_rules, we need to set
 # up ec2_region_groups to map every region to the security groups to use
 # when provisioning instances in that region.
-#
-# XXX We use an intermediate fact instead of setting ec2_region_groups
-# at the start to work around Ansible bugs that may cause tasks to be
-# skipped inside conditional includes if the condition changes.
 
-- name: Initialise empty security_groups
+- name: Initialise empty ec2_region_groups
   set_fact:
-    security_groups: {}
+    ec2_region_groups: {}
 
 # Enumerate all existing security groups matching ec2_groups.
 
@@ -23,9 +19,9 @@
 
 - name: Record existing security groups in each region
   set_fact:
-    security_groups: "{{
-      security_groups|combine({
-        item.item.key: item|json_query('security_groups[*].group_id')
+    ec2_region_groups: "{{
+      ec2_region_groups|combine({
+        item.item.key: item|json_query('ec2_region_groups[*].group_id')
       })
     }}"
   with_items: "{{ sgs.results }}"
@@ -68,7 +64,7 @@
     tags:
       CreatingCluster: "{{ cluster_name }}"
   when:
-    item.key not in security_groups
+    item.key not in ec2_region_groups
   with_dict: "{{ ec2_region_vpcs }}"
   loop_control:
     label: >-
@@ -77,13 +73,13 @@
 
 - name: Record new security groups in each region
   set_fact:
-    security_groups: "{{
-      security_groups|default({})|combine({
+    ec2_region_groups: "{{
+      ec2_region_groups|default({})|combine({
         item.0: item.1.group_id
       })
     }}"
   when:
-    security_groups[item.0] is not defined and
+    ec2_region_groups[item.0] is not defined and
     item.1.group_id is defined
   with_together:
     - "{{ regions }}"
@@ -95,4 +91,4 @@
 - include_tasks: ../common/set-provisioning-var.yml
   vars:
     name: ec2_region_groups
-    value: "{{ security_groups }}"
+    value: "{{ ec2_region_groups }}"

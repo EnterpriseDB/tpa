@@ -41,8 +41,7 @@
         ]
       }
 
-- name: Set instance_profile_name
-  include_tasks: ../common/set-provisioning-var.yml
+- include_tasks: ../common/set-provisioning-var.yml
   vars:
     name: instance_profile_name
     value: "{{ cluster_profile }}"

@@ -25,23 +25,6 @@
 
     - include_tasks: ../common/read-provisioning-vars.yml
 
-    # Provisioned instances must have known SSH host keys.
-    #
-    # We generated SSH host keypairs into hostkeys/ above. Now we upload
-    # them to S3, so that instances can download them on first boot and
-    # replace their randomly-generated hostkeys.
-    #
-    # To use a different S3 bucket, set «cluster_bucket: xxx».
-    #
-    # Instances must be able to access the S3 bucket. Access is usually
-    # granted through the cluster's instance profile (see below).
-
-    - include_tasks: s3-hostkeys.yml
-      when:
-        s3_hostkey_expiry is not defined or
-        lookup('pipe', 'date +%s')|int > s3_hostkey_expiry|int
-      tags: ssh
-
     # We need an SSH key to access the newly-provisioned instances.
     #
     # We generated an SSH keypair named id_clustername above. Now we
@@ -56,8 +39,25 @@
 
     - include_tasks: ec2-register-key.yml
       when:
-        ec2_instance_key is not defined and ec2_key_name != ''
+        - ec2_key_name != ''
+        - ec2_instance_key is not defined
       tags: ec2_keys
+
+    # Provisioned instances must have known SSH host keys.
+    #
+    # We generated SSH host keypairs into hostkeys/ above. Now we upload
+    # them to S3, so that instances can download them on first boot and
+    # replace their randomly-generated hostkeys.
+    #
+    # To use a different S3 bucket, set «cluster_bucket: xxx».
+    #
+    # Instances must be able to access the S3 bucket. Access is usually
+    # granted through the cluster's instance profile (see below).
+
+    - include_tasks: s3-hostkeys.yml
+      when:
+        lookup('pipe', 'date +%s')|int > s3_hostkey_expiry|default(0)|int
+      tags: ssh
 
     # Every instance must be in a particular subnet.
     #
@@ -111,13 +111,11 @@
     # ec2_region_vpcs[region] → vpc_id
 
     - name: Resolve ec2_vpc specification
-      include_tasks: vpc.yml
-      vars:
-        vpc: "{{ ec2_vpc[r]|default(ec2_vpc) }}"
-        region: "{{ r }}"
-      with_items: "{{ regions }}"
-      loop_control:
-        loop_var: r
+      include_tasks: ec2-region-vpcs.yml
+      when:
+        - ec2_vpc is defined
+        - ec2_region_vpcs is not defined or
+          ec2_vpc != ec2_cached_vpc|default(None)
       tags: ec2_vpc
 
     # Now that we know which VPC to use, we check if each instance's
@@ -141,17 +139,22 @@
     #
     # ec2_region_subnets[region][cidr] → subnet_id
 
-    - name: Resolve subnet references in each region
-      include_tasks: vpc-subnet.yml
+    - name: Collect all subnet references by region
+      set_fact:
+        ec2_subnets: >
+          {{ ec2_subnets|default({})|combine({r: region_subnets}) }}
       vars:
-        region: "{{ r }}"
-        vpc: "{{ ec2_region_vpcs[r] }}"
-        subnets: "{{
-          instances|selectattr('region','equalto',r)|map(attribute='subnet')|unique|list
-        }}"
+        region_subnets: >
+          {{ instances|selectattr('region', 'equalto', r)|map(attribute='subnet')|unique|list }}
       with_items: "{{ regions }}"
       loop_control:
         loop_var: r
+
+    - name: Resolve subnet references in each region
+      include_tasks: ec2-region-subnets.yml
+      when:
+        - ec2_region_subnets is not defined or
+          ec2_subnets != ec2_cached_subnets|default(None)
       tags: ec2_vpc
 
     # If required, we create an igw (internet gateway) in each region.
@@ -185,8 +188,10 @@
       loop_control:
         loop_var: r
       when:
-        r in igws or
-        ec2_instance_reachability|default('private') == 'public'
+        - ec2_instance_reachability|default('private') == 'public' or
+          r in igws
+        - ec2_region_vpcs is not defined or
+          ec2_vpc != ec2_cached_vpc|default(None)
       tags: ec2_vpc_igw
 
     # We require internet access for all of the subnets in the cluster.
@@ -210,7 +215,9 @@
           CreatingCluster: "{{ cluster_name }}"
       with_items: "{{ regions }}"
       when:
-        ec2_instance_reachability|default('private') == 'public'
+        - ec2_instance_reachability|default('private') == 'public'
+        - ec2_region_subnets is not defined or
+          ec2_subnets != ec2_cached_subnets|default(None)
       loop_control:
         loop_var: r
       tags: ec2_vpc_route_table
@@ -261,20 +268,6 @@
         ec2_region_groups is not defined
       tags: sgs
 
-    # We create an instance profile IAM role for the cluster and attach
-    # an inline policy with any permissions that the instances need.
-    #
-    # To change the name of the role, set «cluster_profile: xxx».
-    #
-    # To use an existing role without making any changes to it, set
-    # «instance_profile_name: yyy». The role must have all required
-    # permissions assigned to it separately.
-
-    - include_tasks: iam-instance-profile.yml
-      when:
-        instance_profile_name is not defined and cluster_profile != ''
-      tags: iam
-
     # We must specify an AMI to use when launching instances:
     #
     #   ec2_ami:
@@ -309,19 +302,22 @@
 
     - include_tasks: ec2-region-amis.yml
       when:
-        ec2_ami is defined and
-        (ec2_region_amis is not defined or ec2_cached_ami is not defined or
-         ec2_cached_ami != ec2_ami['Name'])
+        - ec2_ami is defined
+        - ec2_region_amis is not defined or
+          ec2_ami != ec2_cached_ami|default(None)
       tags: ami
 
     # If any instances[] directly reference an image whose properties we
     # do not already know, we need to look them up too.
 
     - include_tasks: ec2-ami-properties.yml
+      vars:
+        wanted_properties: >
+          {{ instances|json_query('[*].image') }}
+        known_properties: >
+          {{ ec2_ami_properties|default({})|json_query('keys(@)') }}
       when:
-        ec2_ami_properties is not defined or
-        (instances|json_query('[*].image')|difference(ec2_ami_properties|json_query('keys(@)'))|list)
-        |count > 0
+        (wanted_properties|difference(known_properties)|list)|count > 0
       tags: ami
 
     # If «attach_existing» is specified for any volume in a region, we
@@ -332,6 +328,21 @@
       when:
         instances|json_query('[*].volumes[]|[?attach_existing]')|count > 0
       tags: ebs
+
+    # We create an instance profile IAM role for the cluster and attach
+    # an inline policy with any permissions that the instances need.
+    #
+    # To change the name of the role, set «cluster_profile: xxx».
+    #
+    # To use an existing role without making any changes to it, set
+    # «instance_profile_name: yyy». The role must have all required
+    # permissions assigned to it separately.
+
+    - include_tasks: iam-instance-profile.yml
+      when:
+        - cluster_profile != ''
+        - instance_profile_name is not defined
+      tags: iam
 
     # Preprocess instance definitions through various helpful filters to
     # set things that aren't set and check things that need checking.
@@ -451,18 +462,19 @@
           {{ item.ansible_job_id }}
       tags: ec2
 
-    - name: Tag all volumes attached to the provisioned instances
-      ec2_tag:
-        state: present
-        region: "{{ item.1.region }}"
-        resource: "{{ item.1.block_device_mapping[item.2].volume_id }}"
-        tags: >
+    - name: Collect all volumes to be tagged
+      set_fact:
+        ec2_attached_volumes: >
           {{
-            cluster_tags|combine({
-              "Name": cluster_name + ':' + item.1.tags.node + ':' + item.2,
-              "TPAAttachmentLabel": cluster_name + ':' + item.1.tags.node + ':' + item.2,
-              "CreatingCluster": cluster_name,
-            })
+            ec2_attached_volumes|default([])|union([{
+              'region': item.1.region,
+              'resource': item.1.block_device_mapping[item.2].volume_id,
+              'tags': cluster_tags|combine({
+                'Name': attachment_label,
+                'TPAAttachmentLabel': attachment_label,
+                'CreatingCluster': cluster_name,
+              })
+            }])
           }}
       with_nested_dependents:
         - ec2_jobs.results
@@ -471,6 +483,13 @@
       loop_control:
         label: >-
           {{ item.1.region }}:{{ item.1.block_device_mapping[item.2].volume_id }}
+      vars:
+        attachment_label: >-
+          {{ cluster_name ~':'~ item.1.tags.node ~':'~ item.2 }}
+
+    - include_tasks: ec2-tag-volumes.yml
+      when:
+        ec2_attached_volumes != ec2_cached_attached_volumes|default(None)
       tags: ec2
 
     # If explicitly requested, we can also associate an elastic IP with

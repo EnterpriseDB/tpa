@@ -7,8 +7,7 @@
   action: set_fact
   args:
     "{{ name }}": "{{ value }}"
-    provisioning_vars: "{{
-      provisioning_vars|combine({name: value})
-    }}"
+    provisioning_vars: >
+      {{ provisioning_vars|combine({name: value}) }}
 
 - include_tasks: write-provisioning-vars.yml

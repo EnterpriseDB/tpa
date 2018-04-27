@@ -1,0 +1,15 @@
+---
+
+# Given a dict of variable names and values, we set a top-level fact for
+# each variable, add the settings to provisioning_vars, and write it out
+# to vars.json.
+
+- name: Set provisioning variables {{ variables.keys()|join(', ') }}
+  action: set_fact
+  args:
+    "{{ item.key }}": "{{ item.value }}"
+    provisioning_vars: >
+      {{ provisioning_vars|combine({item.key: item.value}) }}
+  with_dict: "{{ variables }}"
+
+- include_tasks: write-provisioning-vars.yml

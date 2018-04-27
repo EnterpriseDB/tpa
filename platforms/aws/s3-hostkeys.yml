@@ -1,5 +1,13 @@
 ---
 
+# We upload hostkeys/ssh_host_xxx_key{,.pub} to cluster_bucket in S3.
+#
+# We cache a semi-arbitrary "expiry time" (less than the S3 expiration
+# time of one hour) after which provision.yml will reinvoke us. This is
+# easier and cheaper than trying to decide if (a) any of the objects in
+# S3 have expired, and/or (b) any of the keys has changed on disk (which
+# they shouldn't do often anyway).
+
 - name: Upload SSH host key files
   aws_s3:
     bucket: "{{ cluster_bucket }}"

@@ -1,0 +1,32 @@
+---
+
+# We invoke vpc-subnet.yml for each region with its VPC and a list of
+# subnet references in the region, and expect it to define
+# ec2_region_subnets[region][cidr] for each one.
+
+- name: Resolve subnet references in each region
+  include_tasks: vpc-subnet.yml
+  vars:
+    region: "{{ i.key }}"
+    vpc: "{{ ec2_region_vpcs[i.key] }}"
+    subnets: "{{ i.value }}"
+  with_dict: "{{ ec2_subnets }}"
+  when:
+    i.key not in ec2_region_subnets|default({}) or
+    subnets != ec2_cached_subnets[i.key]|default(None)
+  loop_control:
+    loop_var: i
+    label: >
+      {{ i.key }}
+
+# We cache whatever ec2_subnets is set to, and check it at two levels.
+# In provision.yml, we check if the list of all subnets has changed at
+# all; here, we also check if the list of subnets in each region has
+# changed from what was cached earlier, so we can skip regions whose
+# subnets have not changed.
+
+- include_tasks: ../common/set-provisioning-vars.yml
+  vars:
+    variables:
+      ec2_cached_subnets: "{{ ec2_subnets }}"
+      ec2_region_subnets: "{{ ec2_region_subnets }}"

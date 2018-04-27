@@ -2,6 +2,12 @@
 
 # We register ssh_key_file.pub as ec2_key_name in each region, and set
 # ec2_instance_key to the name of the registered key.
+#
+# We cache ec2_instance_key so that provision.yml can avoid invoking us
+# if the key is already registered. As long as vars.json disappears when
+# the key does, that works fine. (To do any better, we would also need to
+# cache the key_material and compare it to the key on disk. That doesn't
+# seem worth the effort, because the key shouldn't change.)
 
 - assert:
     msg: "Please set ec2_key_name"
@@ -13,12 +19,11 @@
     state: present
     region: "{{ item }}"
     name: "{{ ec2_key_name }}"
-    key_material: "{{ lookup('file', cluster_dir + '/' + ssh_key_file + '.pub') }}"
+    key_material: "{{ lookup('file', '%s/%s.pub' % (cluster_dir, ssh_key_file)) }}"
     wait: yes
   with_items: "{{ regions }}"
 
-- name: Set ec2_instance_key
-  include_tasks: ../common/set-provisioning-var.yml
+- include_tasks: ../common/set-provisioning-var.yml
   vars:
     name: ec2_instance_key
     value: "{{ ec2_key_name }}"

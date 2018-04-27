@@ -1,0 +1,17 @@
+---
+
+- name: Tag all volumes attached to the provisioned instances
+  ec2_tag:
+    state: present
+    region: "{{ item.region }}"
+    resource: "{{ item.resource }}"
+    tags: "{{ item.tags }}"
+  with_items: "{{ ec2_attached_volumes }}"
+  loop_control:
+    label: >
+      {{ item.region }}:{{ item.resource }}
+
+- include_tasks: ../common/set-provisioning-var.yml
+  vars:
+    name: ec2_cached_attached_volumes
+    value: "{{ ec2_attached_volumes }}"

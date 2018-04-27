@@ -54,17 +54,9 @@
     label: >-
       {{ item.0 }}:{{ item.1.images.0.image_id }}
 
-- include_tasks: ../common/set-provisioning-var.yml
+- include_tasks: ../common/set-provisioning-vars.yml
   vars:
-    name: ec2_cached_ami
-    value: "{{ ec2_ami['Name'] }}"
-
-- include_tasks: ../common/set-provisioning-var.yml
-  vars:
-    name: ec2_ami_properties
-    value: "{{ ec2_ami_properties }}"
-
-- include_tasks: ../common/set-provisioning-var.yml
-  vars:
-    name: ec2_region_amis
-    value: "{{ ec2_region_amis }}"
+    variables:
+      ec2_cached_ami: "{{ ec2_ami }}"
+      ec2_region_amis: "{{ ec2_region_amis }}"
+      ec2_ami_properties: "{{ ec2_ami_properties }}"
