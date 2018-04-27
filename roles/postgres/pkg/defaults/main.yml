@@ -25,12 +25,11 @@ postgres_packages:
   Ubuntu: *debian_packages
 
 postgres_debug_packages:
-  Debian:
-    - postgresql-{{postgres_version}}-dbg{%- if postgres_version|version_compare('10', '>=') -%}sym{%- endif -%}
+  Debian: &debian_debug_packages
+    - postgresql-{{postgres_version}}-dbg
   RedHat:
     - postgresql{{postgres_versionNN}}-debuginfo
-  Ubuntu:
-    - postgresql-{{postgres_version}}-dbg
+  Ubuntu: *debian_debug_packages
 
 extra_postgres_packages:
   Debian: &debian_extra_packages []
