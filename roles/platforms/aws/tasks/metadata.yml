@@ -11,7 +11,7 @@
 # from ec2_instance_status, and therefore not included at all for now.
 
 - name: Retrieve current availability zone
-  shell: >
+  raw: >
     if command -v wget >/dev/null 2>&1; then wget -q -O - {{ zone_url }};
     elif command -v curl >/dev/null 2>&1; then curl -s {{ zone_url }};
     else exit 2;

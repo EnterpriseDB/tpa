@@ -4,10 +4,8 @@
 - include_tasks: wait.yml
 
 - name: Retrieve user-data failure log entries
-  shell: >
+  raw: >
     test -s {{ faillog }} && cat {{ faillog }}
-  args:
-    executable: /bin/bash
   register: failures
   failed_when: False
   changed_when: >
