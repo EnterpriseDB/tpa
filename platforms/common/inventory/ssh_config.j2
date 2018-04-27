@@ -1,5 +1,7 @@
 Host *
+{% if ansible_user != '' %}
     User {{ ansible_user }}
+{% endif %}
     Port {{ ansible_port }}
     IdentitiesOnly yes
     IdentityFile "{{ ssh_key_file }}"
