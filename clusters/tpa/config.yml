@@ -23,7 +23,7 @@ ec2_instance_reachability: public
 # «-e '{"ec2_ami":{"Name":"TPA-RedHat-PGDG-9.6-2017*","Owner":"self"}}' -e ec2_ami_user=ec2-user»
 
 ec2_ami:
-  Name: TPA-Debian-PGDG-9.6-2017*
+  Name: TPA-Debian-PGDG-10-2018*
   Owner: self
 ec2_ami_user: admin
 
