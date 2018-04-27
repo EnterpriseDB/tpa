@@ -10,13 +10,14 @@
     name: provisioning_vars
   with_fileglob:
     - "{{ cluster_dir }}/vars.json"
+  when:
+    use_cached_vars|default(false)|bool
 
 - name: Set empty provisioning_vars if vars.json was not loaded
   set_fact:
     provisioning_vars: {}
   when:
     provisioning_vars is not defined
-    or discard_cache|default('no') == 'yes'
 
 - name: Find provisioning_vars that will be overriden
   set_fact:
@@ -31,13 +32,12 @@
   set_fact:
     provisioning_vars: "{{ provisioning_vars|remove_keys(overriden_keys) }}"
   when:
-    overriden_keys|d() and overriden_keys|length > 0
+    overriden_keys|default({})|length > 0
   register: overriden
 
 - include_tasks: write-provisioning-vars.yml
   when:
-    not overriden|skipped
-    or discard_cache|default('no') == 'yes'
+    not overriden is skipped
 
 - name: Set facts from remaining provisioning_vars
   action: set_fact
