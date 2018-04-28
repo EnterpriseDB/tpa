@@ -2,7 +2,7 @@
 
 - name: Install YUM repository packages
   yum:
-    name: "{{ item.value.rpm_urls[postgres_version] }}"
+    name: "{{ item.value.rpm_urls[postgres_version|float] }}"
     state: present
   when: postgres_version|float in item.value.versions
   with_dict: "{{ default_yum_repositories|combine(yum_repositories) }}"
