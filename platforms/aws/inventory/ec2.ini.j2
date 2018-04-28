@@ -19,9 +19,6 @@ route53 = False
 rds = False
 elasticache = False
 
-cache_path = ~/.ansible/tmp
-cache_max_age = 300
-
 nested_groups = False
 replace_dash_in_groups = False
 expand_csv_tags = True
@@ -40,4 +37,5 @@ group_by_route53_names = True
 
 instance_filters = tag:Cluster={{ cluster_name }}
 
-cache_path = {{ cluster_dir }}/tmp
+cache_max_age = 300
+cache_path = tmp
