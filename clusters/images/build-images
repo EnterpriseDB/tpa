@@ -24,7 +24,7 @@ if [ "$opt" = "-r" ]; then
 fi
 
 variant=${1:-"PGDG"}
-version=${2:-"9.6"}
+version=${2:-"10"}
 suffix=${3:-""}
 
 test $reconfig = 1 && \
