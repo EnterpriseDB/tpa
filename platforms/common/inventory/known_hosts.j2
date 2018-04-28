@@ -1,5 +1,9 @@
 {% for h in instance_vars %}
 {%   for k in ['rsa', 'ecdsa'] %}
+{%     if cluster_ssh_port != 22 %}
+[{{ h.ip_address }}]:{{ cluster_ssh_port }} {{ lookup('file', cluster_dir+'/hostkeys/ssh_host_'+k+'_key.pub') }}
+{%     else %}
 {{ h.ip_address }} {{ lookup('file', cluster_dir+'/hostkeys/ssh_host_'+k+'_key.pub') }}
+{%     endif %}
 {%   endfor %}
 {% endfor %}
