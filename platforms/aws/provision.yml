@@ -1,10 +1,16 @@
 ---
 
-# Provision EC2 instances and other necessary AWS resources (e.g., VPCs,
-# security groups, subnets, etc.) based on the cluster definition file.
+# Takes a cluster configuration file (config.yml) and provisions EC2
+# instances and associated AWS resources (e.g., VPCs, security groups,
+# subnets, etc.) as configured.
 #
-# The appropriate AWS IAM credentials must be supplied separately, e.g.
-# in ~/.boto or in the environment.
+# You should invoke this with «bin/provision clustername» to use your
+# cluster configuration file in clustername/config.yml.
+#
+# AWS credentials must be supplied separately (e.g., in ~/.boto or in
+# the environment).
+#
+# See platforms/aws/README.md for more details.
 
 - import_playbook: ../common/provision.yml
   tags: common
@@ -12,10 +18,6 @@
 - name: Provision AWS cluster
   hosts: localhost
   tasks:
-    # Make sure we're invoked with a complete cluster configuration. We
-    # expect $cluster_dir/$config.yml to define a cluster name and a
-    # list of instances.
-
     - include_tasks: validate.yml
       tags: always
 
@@ -23,8 +25,16 @@
 
     - include_tasks: ../common/read-provisioning-vars.yml
 
-    # We generated host keys into hostkeys/ssh_host_$type_key{,.pub};
-    # we now upload those to hostkeys/$type{,.pub}.txt in S3.
+    # Provisioned instances must have known SSH host keys.
+    #
+    # We generated SSH host keypairs into hostkeys/ above. Now we upload
+    # them to S3, so that instances can download them on first boot and
+    # replace their randomly-generated hostkeys.
+    #
+    # To use a different S3 bucket, set «cluster_bucket: xxx».
+    #
+    # Instances must be able to access the S3 bucket. Access is usually
+    # granted through the cluster's instance profile (see below).
 
     - include_tasks: s3-hostkeys.yml
       when:
@@ -32,54 +42,73 @@
         lookup('pipe', 'date +%s')|int > s3_hostkey_expiry|int
       tags: ssh
 
-    # We register an SSH public key in each region to provide SSH access
-    # to newly provisioned instances, unless ec2_key_name is explicitly
-    # set to "" in config.yml.
+    # We need an SSH key to access the newly-provisioned instances.
+    #
+    # We generated an SSH keypair named id_clustername above. Now we
+    # register the public key in each region and later reference it by
+    # name when launching the instances.
+    #
+    # To use an existing keypair (which must already be registered in
+    # all relevant regions), set «ec2_instance_key: xxx» in config.yml.
+    #
+    # To register the generated keypair under a different name, set
+    # «ec2_key_name: yyy».
 
     - include_tasks: ec2-register-key.yml
       when:
         ec2_instance_key is not defined and ec2_key_name != ''
       tags: ec2_keys
 
-    # When provisioning each instance, we must specify a vpc_subnet_id
-    # to place the instance in. If the instance configuration specifies
-    # "subnet: subnet-xxx" directly, we can use that value. This allows
-    # us to support existing complex network configurations, but is not
-    # especially convenient to use.
+    # Every instance must be in a particular subnet.
     #
-    # If there's no existing network to integrate with, we can set up a
-    # simple network configuration.
+    # You can reference existing subnets directly by their subnet id if
+    # you set «subnet: subnet-nnn» for each instance. This allows us to
+    # integrate with an arbitrarily complex network configuration, but
+    # is inconvenient to use otherwise.
     #
-    # To begin with, we must specify the VPC to use. This can be done in
-    # many different ways.
+    # Instead, we can set up a networking configuration for the cluster
+    # that comprises VPCs, internet gateways, subnets, routing tables,
+    # and security groups.
     #
-    #   # Every region must have a VPC named ExampleVPC.
+    # First, identify a VPC to use by setting ec2_vpc:
+    #
     #   ec2_vpc:
-    #     Name: ExampleVPC
+    #     Name: Test
     #
-    #   # Every region must have a VPC named ExampleVPC with a matching
-    #   # CIDR; if it does not exist, we will try to create it.
-    #   ec2_vpc:
-    #     Name: ExampleVPC
-    #     cidr: 192.0.2.0/24
+    # In this case, a VPC with this name must exist in each relevant
+    # region. You can also specify different VPCs per region, and use
+    # filter expressions to match existing VPCs more precisely than by
+    # Name (and optional cidr) alone.
     #
-    #   # In order to use different VPCs in each region, for example to
-    #   # specify VPCs by id, this expanded form maps from region names
-    #   # to a VPC filter specification. If the VPC does not exist, and
-    #   # both Name and cidr are given (and vpc-id is not in filters),
-    #   # we will try to create it.
     #   ec2_vpc:
+    #     eu-west-1:
+    #       Name: Test
+    #       cidr: 172.16.0.0/16
     #     us-east-1:
-    #       Name: ExampleVPC
-    #       cidr: 192.0.2.0/24
     #       filters:
-    #         vpc-id: vpc-abcdef
+    #         vpc-id: vpc-nnn
+    #     us-east-2:
+    #       Name: Example
+    #       filters:
+    #         …filter expressions…
     #
-    # In each case, ec2_vpc must uniquely identify a VPC in each region.
-    # If Name/cidr are specified, we will attempt to create the VPC if
-    # it does not exist (and mark this cluster as its creator).
+    # For more details about the filter expressions, see
+    # http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html
     #
-    # The vpc-id for a region is then given by ec2_region_vpcs[region].
+    # In any case, ec2_vpc must uniquely identify a VPC in each region.
+    #
+    # If the VPC does not exist, and both Name and cidr are given, and
+    # vpc-id is not in filters (i.e., you are not expecting the VPC to
+    # exist), we will try to create it.
+    #
+    # [Note: You probably don't want to create a new VPC. There is a
+    # small limit on the number of VPCs permitted per region; in most
+    # cases, you should use the existing Test VPC instead, and run
+    # misc/find-unused-subnets to avoid conflicts with other clusters.]
+    #
+    # After this task:
+    #
+    # ec2_region_vpcs[region] → vpc_id
 
     - name: Resolve ec2_vpc specification
       include_tasks: vpc.yml
@@ -91,29 +120,26 @@
         loop_var: r
       tags: ec2_vpc
 
-    # Now that we know which VPC to use in each region, we try to make
-    # sense of the subnet references in each instance definition. If a
-    # CIDR corresponds to an existing subnet within the right VPC, we
-    # just use its subnet id.
+    # Now that we know which VPC to use, we check if each instance's
+    # «subnet: xxx» reference corresponds to the cidr of an existing
+    # subnet in the VPC. If so, we can just use its subnet id (as if
+    # «subnet: subnet-nnn» had been specified).
     #
-    # If not, we create the subnet; but to do so, we need to know what
-    # availability zone to create it in. This is specified by setting
-    # ec2_vpc_subnets so that ec2_vpc_subnets[region][cidr] gives the
-    # desired availability zone:
+    # Otherwise, we try to create the subnet. To specify its name and
+    # availability zone, set ec2_vpc_subnets:
     #
     #   ec2_vpc_subnets:
-    #     us-east-1:
+    #     eu-west-1:
     #       192.0.2.0/27:
     #         az: us-east-1b
+    #         Name: example1
     #       192.0.2.100/27:
     #         az: us-east-1b
-    #     us-west-2:
-    #       192.0.2.200/27:
-    #         az: us-west-2c
-    #       …
+    #         Name: example2
     #
-    # Once all subnet references have been resolved, the subnet-id for a
-    # subnet in a region is given by ec2_region_subnets[region][cidr].
+    # After this task:
+    #
+    # ec2_region_subnets[region][cidr] → subnet_id
 
     - name: Resolve subnet references in each region
       include_tasks: vpc-subnet.yml
@@ -189,30 +215,46 @@
         loop_var: r
       tags: ec2_vpc_route_table
 
-    # A security group is a set of firewall rules that can be applied to
-    # instances in a VPC. (A subnet in a VPC can also have a network ACL
-    # associated with it, but we use the default that allows all inbound
-    # and outbound traffic. Ansible can't operate on ACLs anyway.)
+    # Each instance may be associated with one or more security groups
+    # (each comprising a set of firewall rules).
     #
-    # http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html
-    # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html
+    # By default, we create a security group for the cluster in each
+    # VPC. To use an existing security group instead, set ec2_groups:
     #
-    # To use an existing security group, specify it as follows:
+    #   ec2_groups:
+    #     us-east-1:
+    #       group-name:
+    #         - foo
     #
-    # ec2_groups:
-    #   us-east-1:
-    #     group-name:
-    #       - foo
-    #       - bar
+    # The filter expression for each region must uniquely identify the
+    # security group to use.
     #
-    # That is, ec2_groups maps region names to a filter expression that
-    # uniquely identifies a security group in any of the ways documented
-    # at http://docs.ansible.com/ansible/ec2_group_facts_module.html and
+    # For more details about the filter expressions,
     # https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html
+    # http://docs.ansible.com/ansible/ec2_group_facts_module.html
     #
-    # Existing security groups are assumed to contain all required rules
-    # already. If no security group is specified, we create one for each
-    # VPC with the correct rules.
+    # If we create the security group, we also create firewall rules to
+    # suit the cluster. By default, we permit inbound ssh (to port 22 as
+    # well as «cluster_ssh_port», if set) and all outbound traffic. You
+    # can specify additional firewall rules:
+    #
+    #   cluster_rules:
+    #     - {proto: tcp, from_port: 80, to_port: 80, cidr_ip: 0.0.0.0/0}
+    #     - …
+    #
+    # (Note: from_port and to_port define a numeric range of ports, not
+    # a source and destination.)
+    #
+    # Existing security groups are assumed to have been appropriately
+    # configured already,
+    #
+    # A subnet in a VPC may also have a network ACL associated with it.
+    # We use the default that allows all inbound and outbound traffic,
+    # and do not support operating on ACLs.
+    #
+    # After this task:
+    #
+    # ec2_region_groups[region] → group_id
 
     - include_tasks: ec2-region-groups.yml
       when:
@@ -220,22 +262,50 @@
       tags: sgs
 
     # We create an instance profile IAM role for the cluster and attach
-    # an inline policy with any permissions that the instances need,
-    # unless cluster_profile is explicitly set to '' in config.yml.
+    # an inline policy with any permissions that the instances need.
+    #
+    # To change the name of the role, set «cluster_profile: xxx».
+    #
+    # To use an existing role without making any changes to it, set
+    # «instance_profile_name: yyy». The role must have all required
+    # permissions assigned to it separately.
 
     - include_tasks: iam-instance-profile.yml
       when:
         instance_profile_name is not defined and cluster_profile != ''
       tags: iam
 
-    # When provisioning each instance, we must specify an AMI id to use.
-    # We search for an AMI matching ec2_ami['Name'] in each region and
-    # use its id by default. You can set "image: ami-xxx" directly for
-    # an instance if absolutely necessary, but this is not recommended.
+    # We must specify an AMI to use when launching instances:
     #
-    # The AMI id for a region is then given by ec2_region_amis[region].
+    #   ec2_ami:
+    #     Name: xxx
     #
-    # We also record the properties of each AMI id for later use.
+    # If you want to be more precise, you can add owner and filter
+    # specifications:
+    #
+    #   ec2_ami:
+    #     Name: xxx
+    #     Owner: self
+    #     filters:
+    #       architecture: x86_64
+    #       …more «key: value» filters…
+    #
+    # For more details about the filter expressions, see
+    # https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
+    # https://docs.ansible.com/ansible/2.5/modules/ec2_ami_facts_module.html
+    #
+    # In any case, ec2_ami must uniquely identify one AMI that exists
+    # and is accessible to us in each relevant region. We look up the
+    # ami-nnn id and use it when launching instances. We also record
+    # properties of each AMI for later use.
+    #
+    # It is possible to leave ec2_ami undefined and set «image: ami-nnn»
+    # for each instance, but this is not recommended.
+    #
+    # After this task:
+    #
+    # ec2_region_amis[region] → image_id
+    # ec2_ami_properties[image_id] → properties
 
     - include_tasks: ec2-region-amis.yml
       when:
@@ -244,8 +314,8 @@
          ec2_cached_ami != ec2_ami['Name'])
       tags: ami
 
-    # If any instances[] reference an image whose properties we do not
-    # already know, we need to look them up too.
+    # If any instances[] directly reference an image whose properties we
+    # do not already know, we need to look them up too.
 
     - include_tasks: ec2-ami-properties.yml
       when:
