@@ -37,6 +37,11 @@
       #
       exit 0
 
+- name: Ensure that /etc/rc.local is executable
+  file:
+    path: /etc/rc.local
+    mode: 0755
+
 - name: Make /etc/rc.local invoke /etc/tpa/rc.local
   lineinfile:
     path: /etc/rc.local
