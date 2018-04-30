@@ -8,7 +8,7 @@
     tags: "{{ item.tags }}"
   with_items: "{{ ec2_attached_volumes }}"
   loop_control:
-    label: >
+    label: >-
       {{ item.region }}:{{ item.resource }}
 
 - include_tasks: ../common/set-provisioning-var.yml
