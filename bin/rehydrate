@@ -68,4 +68,4 @@ $TPA_DIR/bin/provision $(pwd) \
 # If this fails for any reason, it's safe to rerun the command below by
 # hand. Other than defining deploy_hosts, it's a normal deploy command.
 
-$TPA_DIR/bin/deploy $(pwd) -e deploy_hosts="$instances" "$@" $V
+$TPA_DIR/bin/deploy $(pwd) -e rehydrate=yes -e deploy_hosts="$instances" "$@" $V

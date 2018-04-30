@@ -86,4 +86,4 @@
   become_user: "{{ postgres_user }}"
   become: true
   when:
-    registration.rowcount == 0 or registration.type != 'replica'
+    registration.rowcount == 0 or registration.type != 'replica' or rehydrate|default(false)|bool
