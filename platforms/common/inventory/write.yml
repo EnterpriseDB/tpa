@@ -20,31 +20,57 @@
     }}"
   when: ansible_user != ''
 
-- name: Write ansible group_vars
-  include_tasks: write-group-vars.yml
+- name: Create group_vars and host_vars subdirectories
+  shell: >
+    mkdir -p group_vars/{{ cluster_tag }}
+    host_vars/{{ '{' + (hostnames|join(',')) + '}' }}
+  args:
+    chdir: "{{ cluster_dir }}/inventory"
+    executable: /bin/bash
+  ignore_errors: yes
+  changed_when: false
   vars:
-    file_name: "00-ansible"
-    group_name: "{{ cluster_tag }}"
+    hostnames: >
+      {{ instance_vars|json_query('[*].Name')|list }}
+
+- name: Write group_vars/{{ cluster_tag }}/{{ file_name }}
+  copy:
+    content: |
+      {{ group_vars|to_nice_yaml }}
+    dest: "{{ group_dir }}/{{ file_name }}"
+    force: yes
+  vars:
+    file_name: "00-ansible.yml"
+    group_dir: "{{ cluster_dir }}/inventory/group_vars/{{ cluster_tag }}"
     group_vars: "{{ ansible_group_vars }}"
 
-- name: Write cluster group_vars
-  include_tasks: write-group-vars.yml
+- name: Write group_vars/{{ cluster_tag }}/{{ file_name }}
+  copy:
+    content: |
+      {{ group_vars|to_nice_yaml }}
+    dest: "{{ group_dir }}/{{ file_name }}"
+    force: yes
   vars:
-    file_name: "01-{{ cluster_name }}"
-    group_name: "{{ cluster_tag }}"
-    group_vars: "{{
-      cluster_vars|combine({
-        'cluster_tag': cluster_tag,
-        'cluster_name': cluster_name,
-        'tpa_version': lookup('file', tpa_dir+'/VERSION.md')
-      })
-    }}"
+    file_name: "01-{{ cluster_name }}.yml"
+    group_dir: "{{ cluster_dir }}/inventory/group_vars/{{ cluster_tag }}"
+    group_vars: >
+      {{
+        cluster_vars|combine({
+          'cluster_tag': cluster_tag,
+          'cluster_name': cluster_name,
+          'tpa_version': lookup('file', tpa_dir+'/VERSION.md')
+        })
+      }}
 
 - name: Write general variables for hosts
-  include_tasks: write-host-vars.yml
+  copy:
+    content: |
+      {{ host_vars|to_nice_yaml }}
+    dest: "{{ host_dir }}/{{ file_name }}"
+    force: yes
   vars:
-    file_name: "01-instance_vars"
-    host_name: "{{ item.Name }}"
+    file_name: "01-instance_vars.yml"
+    host_dir: "{{ cluster_dir }}/inventory/host_vars/{{ item.Name }}"
     host_vars: "{{ item.vars }}"
   with_items: "{{ instance_vars }}"
   loop_control:
@@ -54,17 +80,25 @@
     item.vars|length > 0
 
 - name: Write topology variables for hosts
-  include_tasks: write-host-vars.yml
+  copy:
+    content: |
+      {{ host_vars|to_nice_yaml }}
+    dest: "{{ host_dir }}/{{ file_name }}"
+    force: yes
   vars:
-    file_name: "02-topology"
-    host_name: "{{ item.Name }}"
-    host_vars: "{{
-      {}
-      |combine((item.role|ternary({'role': item.role|select('notequalto', 'postgres')|list}, {})))
-      |combine((item.backup|ternary({'backup': item.backup}, {})))
-      |combine((item.upstream|ternary({'upstream': item.upstream}, {})))
-    }}"
+    file_name: "02-topology.yml"
+    host_dir: "{{ cluster_dir }}/inventory/host_vars/{{ item.Name }}"
+    host_vars: >
+      {{
+        {}
+        |combine((item.role|ternary({'role': item.role|select('notequalto', 'postgres')|list}, {})))
+        |combine((item.backup|ternary({'backup': item.backup}, {})))
+        |combine((item.upstream|ternary({'upstream': item.upstream}, {})))
+      }}
   with_items: "{{ instance_vars }}"
+  loop_control:
+    label: >-
+      {{ item.Name }}
 
 # We start with an expanded list of volumes per instance (i.e., RAID
 # devices will have multiple entries), which looks like this:
@@ -97,13 +131,20 @@
 #     mountpoint: /var/lib/barman
 
 - name: Write volume definitions for hosts
-  include_tasks: write-host-vars.yml
+  copy:
+    content: |
+      {{ host_vars|to_nice_yaml }}
+    dest: "{{ host_dir }}/{{ file_name }}"
+    force: yes
   vars:
-    file_name: "03-volumes"
-    host_name: "{{ item.Name }}"
+    file_name: "03-volumes.yml"
+    host_dir: "{{ cluster_dir }}/inventory/host_vars/{{ item.Name }}"
     host_vars:
       volumes: "{{ item.volumes|get_device_variables }}"
   with_items: "{{ instance_vars }}"
+  loop_control:
+    label: >-
+      {{ item.Name }}
 
 - name: Generate known_hosts file for the cluster
   template:
