@@ -1,7 +1,9 @@
 ---
 
 - include_tasks: hostvars.yml
+  tags: always
 - include_tasks: wait.yml
+  tags: always
 
 - name: Retrieve user-data failure log entries
   raw: >
