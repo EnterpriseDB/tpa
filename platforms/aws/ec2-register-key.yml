@@ -23,7 +23,10 @@
     wait: yes
   with_items: "{{ regions }}"
 
+- set_fact:
+    ec2_instance_key: "{{ ec2_key_name }}"
+
 - include_tasks: ../common/set-provisioning-var.yml
   vars:
     name: ec2_instance_key
-    value: "{{ ec2_key_name }}"
+    value: "{{ ec2_instance_key }}"

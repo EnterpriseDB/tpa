@@ -1,12 +1,10 @@
 ---
 
-# Given a variable name and a value, we set a top-level fact and add the
-# setting to provisioning_vars and write it out to vars.json.
+# We add the given variable name and value to provisioning_vars and
+# write the result out to vars.json.
 
 - name: Set provisioning variable {{ name }}
-  action: set_fact
-  args:
-    "{{ name }}": "{{ value }}"
+  set_fact:
     provisioning_vars: >
       {{ provisioning_vars|combine({name: value}) }}
 
