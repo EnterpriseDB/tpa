@@ -16,6 +16,9 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
+- set_fact:
+    cluster_facts: "{{ ansible_facts.cluster_facts|default({}) }}"
+
 # If we find any inactive slots and can prove that the replica they are
 # meant for is configured to not use them, then we can drop them. We're
 # conservative about this because, of course, the most likely reason is

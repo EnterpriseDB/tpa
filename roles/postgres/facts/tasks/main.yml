@@ -13,9 +13,7 @@
 
 - name: Ensure cluster_facts is set for all hosts
   set_fact:
-    cluster_facts: "{{ cluster_facts|default({}) }}"
-  when:
-    cluster_facts is not defined
+    cluster_facts: "{{ ansible_facts.cluster_facts|default({}) }}"
 
 # If the role or upstream of the server has changed from what it was
 # initially set to in config.yml, we override it here.
