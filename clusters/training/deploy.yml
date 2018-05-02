@@ -1,0 +1,39 @@
+---
+
+- name: Training cluster setup
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: true
+
+  hosts: all
+  roles:
+    - role: platforms
+      tags: always
+
+    - role: facts
+      tags: always
+
+    - role: postgres/vars
+      vars:
+        postgres_version: 10
+      tags: always
+
+    - role: common
+
+    - role: sys/volumes
+      tags: [sys, fs]
+
+    - role: sys/tune
+      tags: always
+
+    - role: sys/sysctl
+      vars:
+        sysctl_values:
+          net.ipv4.ip_forward: 1
+      tags: [sys, sysctl]
+
+    - role: sys/hosts
+      tags: [sys, hosts]
+
+    - role: postgres
