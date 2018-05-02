@@ -11,4 +11,4 @@
     }}"
   when:
     ansible_distribution_release in ['stretch']
-    and postgres_version|version_compare('10', '>=')
+    and postgres_version is version('10', '>=')

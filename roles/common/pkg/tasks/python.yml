@@ -19,7 +19,7 @@
   register: backport
   changed_when: >
     backport|succeeded and 'Requirement already satisfied' not in backport.stdout
-  when: ansible_python_version | version_compare('2.7.9', '<')
+  when: ansible_python_version is version('2.7.9', '<')
 
 # Install AWS-related Python modules.
 #

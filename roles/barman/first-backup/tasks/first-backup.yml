@@ -42,7 +42,7 @@
   register: seg
   vars:
     wal: >-
-      {%- if postgres_version|version_compare('10', '>=') -%}wal
+      {%- if postgres_version is version('10', '>=') -%}wal
       {%- else -%}xlog
       {%- endif -%}
     

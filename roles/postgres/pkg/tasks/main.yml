@@ -33,7 +33,7 @@
   package: name={{ item }} state=latest
   with_items: "{{ pgespresso_packages[ansible_os_family] }}"
   when: >
-    postgres_version|version_compare(9.5, '<=')
+    postgres_version is version(9.5, '<=')
   vars:
     pgespresso_packages:
       Debian:

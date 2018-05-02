@@ -16,7 +16,7 @@
   vars:
     create_slot_query: >
       SELECT pg_create_physical_replication_slot(%s
-        {%- if postgres_version|version_compare('9.6', '>=') -%}
+        {%- if postgres_version is version('9.6', '>=') -%}
           , TRUE
         {%- endif -%}
       )
