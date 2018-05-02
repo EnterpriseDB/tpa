@@ -25,7 +25,7 @@ cluster_rules:
   - {proto: tcp, from_port: 0, to_port: 65535, cidr_ip: 0.0.0.0/0}
 
 ec2_ami:
-  Name: debian-jessie-amd64-hvm-2017-01-15-1221-ebs
+  Name: TPA-Debian-PGDG-10-2018*
 ec2_ami_user: admin
 
 ec2_vpc:
