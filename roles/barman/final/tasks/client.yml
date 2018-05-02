@@ -23,11 +23,12 @@
   command: >
     /usr/bin/barman receive-wal --create-slot {{ backup_name }}
   delegate_to: "{{ backup }}"
-  register: slot
+  register: slot_creation
   failed_when: >
-    slot|failed and not "Replication slot 'barman' already exists" in slot.stderr
+    slot_creation is not successful
+    and not "Replication slot 'barman' already exists" in slot_creation.stderr
   changed_when: >
-    slot|succeeded
+    slot_creation is successful
   become_user: barman
   become: yes
 
@@ -40,7 +41,7 @@
     /usr/bin/barman cron
   delegate_to: "{{ backup }}"
   when: >
-    conf|changed
+    conf is changed
   become_user: barman
   become: yes
 

@@ -16,9 +16,10 @@
 
 - name: Install backports.ssl_match_hostname
   command: pip install backports.ssl_match_hostname
-  register: backport
+  register: backport_install
   changed_when: >
-    backport|succeeded and 'Requirement already satisfied' not in backport.stdout
+    backport_install is successful
+    and 'Requirement already satisfied' not in backport_install.stdout
   when: ansible_python_version is version('2.7.9', '<')
 
 # Install AWS-related Python modules.

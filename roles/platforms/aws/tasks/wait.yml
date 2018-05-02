@@ -20,7 +20,7 @@
     region: "{{ ec2_region }}"
   register: i
   until: >
-    i|failed
+    i is not successful
     or (i.request_status == 'ok'
     and i.system_status.status == 'ok'
     and i.instance_status.status == 'ok'

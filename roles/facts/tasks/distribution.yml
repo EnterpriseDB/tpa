@@ -13,26 +13,26 @@
       become: false
       ignore_errors: yes
       changed_when: False
-      register: lsb_release
+      register: lsb_check
 
     - name: Set ansible_distribution based on lsb_release
       set_fact:
-        ansible_distribution: "{{ lsb_release.stdout_lines[0] }}"
-        ansible_distribution_release: "{{ lsb_release.stdout_lines[1] }}"
-      when: lsb_release|succeeded
+        ansible_distribution: "{{ lsb_check.stdout_lines[0] }}"
+        ansible_distribution_release: "{{ lsb_check.stdout_lines[1] }}"
+      when: lsb_check is successful
 
     - block:
         - name: Look for /etc/redhat-release
           raw: test -f /etc/redhat-release && echo RedHat
           ignore_errors: yes
           changed_when: False
-          register: redhat
+          register: redhat_check
 
         - name: Set ansible_distribution based on /etc/redhat-release
           set_fact:
-            ansible_distribution: "{{ redhat.stdout_lines[0] }}"
-          when: redhat|succeeded
-      when: lsb_release|failed
+            ansible_distribution: "{{ redhat_check.stdout_lines[0] }}"
+          when: redhat_check is successful
+      when: lsb_check is not successful
   when: ansible_distribution is not defined
 
 - name: Ensure ansible_distribution is supported

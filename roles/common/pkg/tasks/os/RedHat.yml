@@ -2,21 +2,24 @@
 
 - name: Install EPEL release package
   raw: rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  register: epel
+  register: epel_setup
   changed_when: >
-    epel|succeeded and 'is already installed' not in epel.stdout
+    epel_setup is successful
+    and 'is already installed' not in epel_setup.stdout
   ignore_errors: yes
   tags: [ epel, public_repos ]
 
 - name: Install Python 2.7
   raw: yum -y install python
-  register: python
+  register: python_install
   changed_when: >
-    python|succeeded and 'already installed and latest version' not in python.stdout
+    python_install is successful
+    and 'already installed and latest version' not in python_install.stdout
 
 - name: Install pip
   raw: command -v pip || yum -y install python-pip
-  register: pip
+  register: pip_install
   changed_when: >
-    pip|succeeded and 'already installed and latest version' not in pip.stdout and
-    not pip.stdout.endswith('/pip')
+    pip_install is successful
+    and 'already installed and latest version' not in pip_install.stdout
+    and not pip_install.stdout.endswith('/pip')

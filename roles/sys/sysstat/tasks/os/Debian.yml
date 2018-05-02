@@ -21,4 +21,4 @@
     name: sysstat
     state: restarted
   when:
-    sysstat|changed
+    sysstat is changed

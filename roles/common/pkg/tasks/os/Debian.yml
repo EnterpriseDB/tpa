@@ -4,16 +4,19 @@
   raw: test -d /etc/tpa || apt-get -q -y update
   register: update
   changed_when: >
-    update|succeeded and 'Reading package lists' in update.stdout
+    update is successful
+    and 'Reading package lists' in update.stdout
 
 - name: Install python 2.7
   raw: apt-get -q -y install python2.7
-  register: python
+  register: python_install
   changed_when: >
-    python|succeeded and 'already the newest version' not in python.stdout
+    python_install is successful
+    and 'already the newest version' not in python_install.stdout
 
 - name: Install pip
   raw: apt-get -q -y install python-pip
-  register: pip
+  register: pip_install
   changed_when: >
-    pip|succeeded and 'already the newest version' not in pip.stdout
+    pip_install is successful
+    and 'already the newest version' not in pip_install.stdout

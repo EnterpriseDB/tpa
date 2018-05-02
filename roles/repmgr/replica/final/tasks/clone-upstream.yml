@@ -18,7 +18,7 @@
 - name: Record name of upstream to clone
   set_fact:
     upstream_to_clone: "{{
-      (upstreamconn|succeeded and upstreamconn.up == 42) |
+      (upstreamconn is successful and upstreamconn.up == 42) |
       ternary(upstream, upstream_primary)
     }}"
 

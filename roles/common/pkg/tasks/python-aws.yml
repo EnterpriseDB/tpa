@@ -7,9 +7,10 @@
 - name: Install boto
   #shell: python -c 'import boto' &>/dev/null || pip install boto
   command: pip install boto
-  register: boto
+  register: boto_install
   changed_when: >
-    boto|succeeded and 'Requirement already satisfied' not in boto.stdout
+    boto_install is successful
+    and 'Requirement already satisfied' not in boto_install.stdout
 
 # If awscli still isn't installed, it's safest to install it using pip.
 # (See the comments in platforms/aws/user-data/awscli.j2. The user-data
@@ -20,7 +21,8 @@
   shell: command -v aws || pip install awscli
   args:
     executable: /bin/bash
-  register: awscli
+  register: awscli_install
   changed_when: >
-    awscli|succeeded and 'Requirement already satisfied' not in awscli.stdout and
-    not awscli.stdout.endswith('/aws')
+    awscli_install is successful
+    and 'Requirement already satisfied' not in awscli_install.stdout
+    and not awscli_install.stdout.endswith('/aws')

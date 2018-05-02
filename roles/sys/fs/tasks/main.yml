@@ -36,9 +36,9 @@
     blockdev --setra "{{ readahead }}" "{{ _device }}"
   args:
     executable: /bin/bash
-  register: ra
+  register: setra
   changed_when: >
-    ra|succeeded and ra.stdout != readahead|string
+    setra is successful and setra.stdout != readahead|string
 
 - name: Set readahead on {{ _device }} at startup
   lineinfile:

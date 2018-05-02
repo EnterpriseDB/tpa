@@ -12,7 +12,7 @@
   command: cryptsetup isLuks "{{ luks_device }}"
   ignore_errors: true
   changed_when: False
-  register: luks
+  register: isluks_check
 
 # Otherwise, we initialise the device as a LUKS volume and map it to the
 # given luks_volume name, and override _device to the name of the mapped
@@ -46,4 +46,4 @@
     - name: Record updated mapped device name
       set_fact:
         _device: "/dev/mapper/{{ luks_volume }}"
-  when: luks|failed
+  when: isluks_check is not successful

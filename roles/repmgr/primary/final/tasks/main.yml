@@ -12,7 +12,7 @@
   command: >
     {{ postgres_bin_dir }}/repmgr cluster show \
       -f "{{ repmgr_conf_dir }}/repmgr.conf"
-  register: primary
+  register: primary_check
   ignore_errors: True
   changed_when: False
   become_user: "{{ postgres_user }}"
@@ -24,4 +24,4 @@
       -f "{{ repmgr_conf_dir }}/repmgr.conf"
   become_user: "{{ postgres_user }}"
   become: yes
-  when: primary|failed
+  when: primary_check is not successful
