@@ -3,10 +3,10 @@ node_name={{ inventory_hostname }}
 conninfo='host={{ inventory_hostname }} user=repmgr dbname=repmgr connect_timeout=2'
 data_directory={{ postgres_data_dir }}
 pg_bindir={{ postgres_bin_dir }}
-{% if repmgr_priority|d() %}
+{% if repmgr_priority is defined %}
 priority={{ repmgr_priority }}
 {% endif %}
-{% if repmgr_location|d() and repmgr_location != '' %}
+{% if repmgr_location is defined and repmgr_location != '' %}
 location={{ repmgr_location }}
 {% endif %}
 replication_type=physical
