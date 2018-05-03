@@ -23,15 +23,21 @@
 - name: Create group_vars and host_vars subdirectories
   shell: >
     mkdir -p group_vars/{{ cluster_tag }}
-    host_vars/{{ '{' + (hostnames|join(',')) + '}' }}
+    host_vars/{{ dirnames }}
   args:
     chdir: "{{ cluster_dir }}/inventory"
     executable: /bin/bash
   ignore_errors: yes
   changed_when: false
   vars:
-    hostnames: >
+    hostlist: >
       {{ instance_vars|json_query('[*].Name')|list }}
+    dirnames: >
+      {{
+        (hostlist|length == 1)|ternary(
+          hostlist[0], '{'~ (hostlist|join(',')) ~'}'
+        )
+      }}
 
 - name: Write group_vars/{{ cluster_tag }}/{{ file_name }}
   copy:
