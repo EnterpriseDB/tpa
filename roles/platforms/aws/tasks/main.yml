@@ -11,7 +11,7 @@
   register: failures
   failed_when: False
   changed_when: >
-    'stdout_lines' in failures and failures.stdout_lines|count > 0
+    'stdout' in failures and failures.stdout.strip() != ''
   vars:
     faillog: /var/log/tpa-firstboot-failures.log
 
@@ -19,4 +19,4 @@
   fail:
     msg: "{{ failures.stdout }}"
   when: >
-    'stdout_lines' in failures and failures.stdout_lines|count > 0
+    'stdout' in failures and failures.stdout.strip() != ''
