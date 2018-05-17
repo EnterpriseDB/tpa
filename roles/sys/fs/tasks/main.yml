@@ -46,7 +46,7 @@
     line: >-
       blockdev --setra "{{ readahead }}" "{{ _device }}"
     state: present
-    insertbefore: EOF
+    insertafter: EOF
 
 - name: Create filesystem on {{ _device }}
   filesystem:
