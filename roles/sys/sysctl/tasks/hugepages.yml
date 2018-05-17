@@ -1,0 +1,32 @@
+---
+
+# By default, we want to use huge pages, but disable transparent huge
+# page support.
+#
+# Transparent huge page support cannot be controlled by a sysctl, unlike
+# vm.nr_hugepages, but we can use tunables in /sys to try to control it.
+#
+# The following is overkill. We only need to «echo 'never' > …/enabled».
+# We don't need to touch the other files, and we don't need all of this
+# configurability, but it's there as an example of how we can handle a
+# series of dependent tunables (e.g., when setting up test scenarios).
+
+- name: Set transparent_hugepage/enabled in /etc/tpa/rc.local
+  blockinfile:
+    path: /etc/tpa/rc.local
+    marker: "## {mark} Transparent huge pages"
+    block: |
+      test -f /sys/kernel/mm/transparent_hugepage/enabled &&
+        echo {{ enabled }} > /sys/kernel/mm/transparent_hugepage/enabled
+      test -f /sys/kernel/mm/transparent_hugepage/defrag &&
+        echo {{ defrag }} > /sys/kernel/mm/transparent_hugepage/defrag
+      test -f /sys/kernel/mm/transparent_hugepage/khugepaged/defrag &&
+        echo {{ kdefrag }} > /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
+    state: present
+  vars:
+    enabled: >-
+      {{ transparent_hugepage }}
+    defrag: >-
+      {{ transparent_hugepage_defrag|default(transparent_hugepage) }}
+    kdefrag: >-
+      {{ transparent_hugepage_khugepaged_defrag|default((defrag == 'always')|ternary(1, 0)) }}
