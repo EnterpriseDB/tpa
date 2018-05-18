@@ -32,6 +32,7 @@ packages:
     - python-passlib
     - perf
     - gnutls-utils
+    - policycoreutils-python
   Ubuntu:
     - python-dev
     - python-passlib
