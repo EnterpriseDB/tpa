@@ -51,6 +51,11 @@
     state: present
     insertbefore: "exit 0"
 
+- name: Enable rc-local service
+  systemd:
+    name: rc-local
+    enabled: yes
+
 # Read the version string and append it to the /etc/tpa/tpa.log file
 # on the instance. If this '/etc/tpa' directory does not exist, then
 # we will create it first and we always APPEND to the tpa.log file
