@@ -1,6 +1,6 @@
 node_id={{ node }}
 node_name={{ inventory_hostname }}
-conninfo='host={{ inventory_hostname }} user=repmgr dbname=repmgr connect_timeout=2'
+conninfo='host={{ inventory_hostname }} application_name={{ inventory_hostname }} user=repmgr dbname=repmgr connect_timeout=2'
 data_directory={{ postgres_data_dir }}
 pg_bindir={{ postgres_bin_dir }}
 {% if repmgr_priority is defined %}
