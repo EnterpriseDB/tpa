@@ -1,0 +1,20 @@
+---
+
+# RedHat has /etc/default/grub and grub-mkconfig, but the more common
+# way to change the boot configuration from scripts is to use grubby,
+# which does NOT use /etc/default/grub. So we should stick to using
+# grubby to avoid trouble.
+
+- name: Run grubby to update kernel command line
+  shell: >
+    if ! grep -q transparent_hugepage= /boot/grub2/grub.cfg || ! grep -q hugepages= /boot/grub2/grub.cfg;
+    then grubby --update-kernel=ALL --args="hugepages={{ hugepages }} transparent_hugepage=never";
+    else echo unchanged;
+    fi
+  args:
+    executable: /bin/bash
+  register: grubby
+  changed_when: grubby.stdout != 'unchanged'
+  vars:
+    sysctls: "{{ sysctl_defaults|combine(sysctl_values) }}"
+    hugepages: "{{ sysctls['vm.nr_hugepages'] }}"

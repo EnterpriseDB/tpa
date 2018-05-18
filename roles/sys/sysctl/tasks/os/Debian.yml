@@ -1,0 +1,28 @@
+---
+
+# Add hugepages=N and transparent_hugepage=never to GRUB_CMDLINE_LINUX
+# in /etc/default/grub and run update-grub.
+#
+# Because it's fiddly to try to add to GRUB_CMDLINE_LINUX in place, and
+# because /etc/default/grub is documented to be a shell script that is
+# source'd, we can just add an extra line to it.
+
+- name: Set kernel commandline in /etc/default/grub
+  shell: >
+    source /etc/default/grub;
+    if ! [[ "$GRUB_CMDLINE_LINUX" =~ 'transparent_hugepage=' && "$GRUB_CMDLINE_LINUX" =~ 'hugepage=' ]];
+    then echo 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX hugepages={{ hugepages }} transparent_hugepage={{ transparent_hugepage }}"' >> /etc/default/grub;
+    else echo unchanged;
+    fi
+  args:
+    executable: /bin/bash
+  register: cmdline
+  changed_when: cmdline.stdout != 'unchanged'
+  vars:
+    sysctls: "{{ sysctl_defaults|combine(sysctl_values) }}"
+    hugepages: "{{ sysctls['vm.nr_hugepages'] }}"
+
+- name: Run update-grub
+  command: update-grub
+  when:
+    cmdline is changed

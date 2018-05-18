@@ -30,3 +30,15 @@
       {{ transparent_hugepage_defrag|default(transparent_hugepage) }}
     kdefrag: >-
       {{ transparent_hugepage_khugepaged_defrag|default((defrag == 'always')|ternary(1, 0)) }}
+
+# Overkill or not, controlling transparent huge pages via /sys is not as
+# reliable as doing so by appending "transparent_hugepage=never" to the
+# kernel command-line.
+#
+# Likewise, setting vm.nr_hugepages is not a guarantee that the required
+# number of pages will be made available (due to memory fragmentation).
+# The better way to do it is to set "hugepages=N" on the kernel command
+# line, where the request will be processed much earlier, during kernel
+# startup rather than via /etc/rc.local.
+
+- include_tasks: "os/{{ ansible_os_family }}.yml"
