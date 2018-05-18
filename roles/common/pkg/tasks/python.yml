@@ -29,3 +29,4 @@
 # instances may also need awscli.
 
 - include_tasks: python-aws.yml
+  tags: python-aws

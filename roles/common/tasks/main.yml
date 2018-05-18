@@ -5,7 +5,7 @@
 
 - name: Set the hostname
   hostname: name="{{ inventory_hostname }}"
-  tags: common
+  tags: [common, hostname]
 
 - include_tasks: tpa.yml
   tags: common

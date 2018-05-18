@@ -8,6 +8,7 @@
 - include_role: name=barman/first-backup
   when: >
     backup is defined
+  tags: firstbackup
 
 # Were we invoked with pgbench=run?
 

@@ -51,6 +51,7 @@
   vars:
     tmpl: pg_hba.conf.j2
     hba: "{{ postgres_hba_template|default(tmpl) }}"
+  tags: [postgres, hba]
 
 # Next, we generate postgresql.conf if the caller specifies a template.
 # Otherwise, we leave the default postgresql.conf alone. Any changes to

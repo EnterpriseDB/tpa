@@ -17,3 +17,4 @@
     module: wait_for
     host: "{{ ansible_host }}"
     port: "{{ ansible_port|default(22) }}"
+  tags: wait_for

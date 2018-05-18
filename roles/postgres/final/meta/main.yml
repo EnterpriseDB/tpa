@@ -6,6 +6,7 @@ dependencies:
   - role: postgres/facts
     tags: always
   - role: postgres/pgpass
+    tags: pgpass
   - role: postgres/createuser/final
     when: >
       'replica' not in role

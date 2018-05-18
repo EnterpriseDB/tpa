@@ -13,6 +13,7 @@
     state: "{{ postgres_service_end_state|default('started') }}"
   when:
     pgdata_initialised
+  tags: [postgres, service, restart]
 
 - name: Wait for Postgres to become available
   command: /etc/tpa/postgres-monitor
