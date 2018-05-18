@@ -10,11 +10,11 @@ priority={{ repmgr_priority }}
 location={{ repmgr_location }}
 {% endif %}
 replication_type=physical
-use_replication_slots=1
+use_replication_slots={{ repmgr_use_slots }}
 async_query_timeout=60
 reconnect_attempts=6
 reconnect_interval=10
-failover=automatic
+failover={{ repmgr_failover }}
 ssh_options=-q
 promote_command='{{ repmgr_conf_dir }}/promote_command.sh'
 follow_command='{{ repmgr_conf_dir }}/follow_command.sh'
