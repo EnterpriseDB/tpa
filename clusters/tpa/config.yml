@@ -42,8 +42,7 @@ instances:
             attach_existing: yes
             vars:
               volume_for: postgres_data
-      tags:
-        role: primary
+      role: primary
       vars:
         work_mem: 16MB
 
@@ -59,10 +58,9 @@ instances:
             attach_existing: yes
             vars:
               mountpoint: /var/lib/postgresql
-      tags:
-        role: replica
-        upstream: pear
-        backup: peach
+      role: replica
+      upstream: pear
+      backup: peach
       vars:
         work_mem: 21MB
         postgres_data_dir: /var/lib/postgresql/data
@@ -78,9 +76,8 @@ instances:
             volume_size: 16
             vars:
               volume_for: postgres_data
-      tags:
-        role: replica
-        upstream: plum
+      role: replica
+      upstream: plum
 
     - node: 4
       Name: peach
@@ -97,11 +94,10 @@ instances:
             vars:
               volume_for: postgres_data
               random: 42
-      tags:
-        role:
-          - barman
-          - witness
-          - log-server
-          - openvpn-server
-          - monitoring-server
-        upstream: pear
+      role:
+        - barman
+        - witness
+        - log-server
+        - openvpn-server
+        - monitoring-server
+      upstream: pear
