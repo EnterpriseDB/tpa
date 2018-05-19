@@ -133,6 +133,7 @@
   when: postgres_conf_settings
   notify:
     - Note Postgres restart required
+  tags: conf_settings
 
 # And here's a file where anyone can add extra settings that will have
 # priority over our defaults, and will never be overwritten.
