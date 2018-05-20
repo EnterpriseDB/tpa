@@ -37,7 +37,8 @@
 
 - name: Preprocess instance definitions
   set_fact:
-    instances: "{{ instances|expand_instance_tags(cluster_name) }}"
+    instances: >
+      {{ instances|set_instance_defaults(cluster_name, platform|default('aws')) }}
 
 - name: Ensure that every instance specifies a node id and name
   assert:
@@ -52,4 +53,3 @@
     that:
       - item.Name|match('^[a-z0-9-]+$')
   with_items: "{{ instances }}"
-

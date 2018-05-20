@@ -10,12 +10,9 @@
 
 - name: Collect list of platforms
   set_fact:
-    cluster_platforms: >
-      {{
-        cluster_platforms|default([])|union([
-          item.platform|default(platform|default('aws'))
-        ])
-      }}
+    cluster_platforms: "{{
+      cluster_platforms|default([])|union([item.platform])
+    }}"
   with_items: "{{ instances }}"
 
 ## Platform-specific validation

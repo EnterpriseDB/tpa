@@ -55,9 +55,9 @@ ephemeral_storage = {
 # and other inputs and return a new array of instances with parameters
 # suitably adjusted.
 
-# Every instance must have tags; some tags must be in a specific format.
+# Every instance must have certain settings (e.g., tags) in a specific format.
 
-def expand_instance_tags(old_instances, cluster_name):
+def set_instance_defaults(old_instances, cluster_name, platform):
     instances = []
 
     for i in old_instances:
@@ -71,6 +71,7 @@ def expand_instance_tags(old_instances, cluster_name):
         if name is None:
             name = cluster_name +'-'+ str(j['node'])
         j['Name'] = name.replace('_', '-').lower()
+        j['platform'] = j.get('platform', platform)
 
         # The upstream, backup, and role tags should be moved one level up if
         # they're specified at all.
@@ -218,7 +219,7 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
 class FilterModule(object):
     def filters(self):
         return {
-            'expand_instance_tags': expand_instance_tags,
+            'set_instance_defaults': set_instance_defaults,
             'expand_instance_image': expand_instance_image,
             'expand_instance_volumes': expand_instance_volumes,
             'match_existing_volumes': match_existing_volumes,
