@@ -1,0 +1,45 @@
+---
+
+## Platform-independent validation
+#
+# Every config.yml needs to set cluster_name and follow certain other
+# rules, which we verify here. We also derive the list of platforms
+# mentioned by the cluster configuration.
+
+- import_tasks: common/validate.yml
+
+- name: Collect list of platforms
+  set_fact:
+    cluster_platforms: >
+      {{
+        cluster_platforms|default([])|union([
+          item.platform|default(platform|default('aws'))
+        ])
+      }}
+  with_items: "{{ instances }}"
+
+## Platform-specific validation
+#
+# We use import_tasks here so that we propagate 'tags: always' from our
+# own higher-level import; but that also means we can't just loop over
+# cluster_platforms.
+#
+# (This also means that modifying cluster_platforms in these validators
+# might lead to unexpected results, since the condition is pushed down
+# to the imported tasks, rather than applied here.)
+
+- import_tasks: aws/validate.yml
+  when: >
+    'aws' in cluster_platforms
+    
+- import_tasks: bare/validate.yml
+  when: >
+    'bare' in cluster_platforms
+
+## Final topology validation
+#
+# Once all the platform-specific validations have been run and given an
+# opportunity to fix anything they can, we perform some sanity checks on
+# the cluster topology.
+
+- import_tasks: common/validate-topology.yml

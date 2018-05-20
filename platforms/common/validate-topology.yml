@@ -1,0 +1,50 @@
+---
+
+# For every instance that has a "backup: xxx" tag, there should be
+# exactly one instance with "Name: xxx" and "role: …,barman,…" tags.
+#
+# Likewise, for every instance that has an "upstream: xxx" tag, there
+# should be exactly one instance with a "Name: xxx" tag.
+
+- name: Collect upstream and backup references
+  set_fact:
+    barman_references: >
+      {{ instances|selectattr('backup', 'defined')|map(attribute='backup')|unique|list }}
+    upstream_references: >
+      {{ instances|selectattr('upstream', 'defined')|map(attribute='upstream')|unique|list }}
+
+- name: Validate backup references
+  assert:
+    msg: "Please define a single barman instance with Name={{ item }}"
+    that:
+      - instances|
+        selectattr('Name','defined')|selectattr('Name','equalto',item)|
+        selectattr('role','defined')|selectattr('role','contains','barman')|
+        list|count == 1
+  with_items: "{{ barman_references }}"
+
+- name: Validate upstream references
+  assert:
+    msg: "Please define a single upstream server with Name={{ item }}"
+    that:
+      - instances|
+        selectattr('Name','defined')|selectattr('Name','equalto',item)|
+        list|count == 1
+  with_items: "{{ upstream_references }}"
+
+- name: Ensure cluster_networks/cluster_network is set
+  assert:
+    msg: "Please define cluster_networks (list) or cluster_network (scalar)"
+    that:
+      - ('cluster_network' in cluster_vars or
+        'cluster_networks' in cluster_vars)
+
+- name: Convert cluster_network to cluster_networks
+  set_fact:
+    cluster_vars: "{{
+      cluster_vars|remove_keys(['cluster_network'])|combine({'cluster_networks': [n]})
+    }}"
+  when:
+    n is string and 'cluster_networks' not in cluster_vars
+  vars:
+    n: "{{ cluster_vars.get('cluster_network', []) }}"

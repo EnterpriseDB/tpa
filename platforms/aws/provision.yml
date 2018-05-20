@@ -12,529 +12,520 @@
 #
 # See platforms/aws/README.md for more details.
 
-- import_playbook: ../common/provision.yml
-  tags: common
+- include_tasks: inventory/write.yml
 
-- name: Provision AWS cluster
-  hosts: localhost
-  tasks:
-    - include_tasks: validate.yml
-      tags: always
+- include_tasks: ../common/read-provisioning-vars.yml
 
-    - include_tasks: inventory/write.yml
+# We need an SSH key to access the newly-provisioned instances.
+#
+# We generated an SSH keypair named id_clustername above. Now we
+# register the public key in each region and later reference it by
+# name when launching the instances.
+#
+# To use an existing keypair (which must already be registered in
+# all relevant regions), set «ec2_instance_key: xxx» in config.yml.
+#
+# To register the generated keypair under a different name, set
+# «ec2_key_name: yyy».
 
-    - include_tasks: ../common/read-provisioning-vars.yml
+- include_tasks: ec2-register-key.yml
+  when:
+    - ec2_key_name != ''
+    - ec2_instance_key is not defined
+  tags: ec2_keys
 
-    # We need an SSH key to access the newly-provisioned instances.
-    #
-    # We generated an SSH keypair named id_clustername above. Now we
-    # register the public key in each region and later reference it by
-    # name when launching the instances.
-    #
-    # To use an existing keypair (which must already be registered in
-    # all relevant regions), set «ec2_instance_key: xxx» in config.yml.
-    #
-    # To register the generated keypair under a different name, set
-    # «ec2_key_name: yyy».
+# Provisioned instances must have known SSH host keys.
+#
+# We generated SSH host keypairs into hostkeys/ above. Now we upload
+# them to S3, so that instances can download them on first boot and
+# replace their randomly-generated hostkeys.
+#
+# To use a different S3 bucket, set «cluster_bucket: xxx».
+#
+# Instances must be able to access the S3 bucket. Access is usually
+# granted through the cluster's instance profile (see below).
 
-    - include_tasks: ec2-register-key.yml
-      when:
-        - ec2_key_name != ''
-        - ec2_instance_key is not defined
-      tags: ec2_keys
+- include_tasks: s3-hostkeys.yml
+  when:
+    lookup('pipe', 'date +%s')|int > s3_hostkey_expiry|default(0)|int
+  tags: ssh
 
-    # Provisioned instances must have known SSH host keys.
-    #
-    # We generated SSH host keypairs into hostkeys/ above. Now we upload
-    # them to S3, so that instances can download them on first boot and
-    # replace their randomly-generated hostkeys.
-    #
-    # To use a different S3 bucket, set «cluster_bucket: xxx».
-    #
-    # Instances must be able to access the S3 bucket. Access is usually
-    # granted through the cluster's instance profile (see below).
+# Every instance must be in a particular subnet.
+#
+# You can reference existing subnets directly by their subnet id if
+# you set «subnet: subnet-nnn» for each instance. This allows us to
+# integrate with an arbitrarily complex network configuration, but
+# is inconvenient to use otherwise.
+#
+# Instead, we can set up a networking configuration for the cluster
+# that comprises VPCs, internet gateways, subnets, routing tables,
+# and security groups.
+#
+# First, identify a VPC to use by setting ec2_vpc:
+#
+#   ec2_vpc:
+#     Name: Test
+#
+# In this case, a VPC with this name must exist in each relevant
+# region. You can also specify different VPCs per region, and use
+# filter expressions to match existing VPCs more precisely than by
+# Name (and optional cidr) alone.
+#
+#   ec2_vpc:
+#     eu-west-1:
+#       Name: Test
+#       cidr: 172.16.0.0/16
+#     us-east-1:
+#       filters:
+#         vpc-id: vpc-nnn
+#     us-east-2:
+#       Name: Example
+#       filters:
+#         …filter expressions…
+#
+# For more details about the filter expressions, see
+# http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html
+#
+# In any case, ec2_vpc must uniquely identify a VPC in each region.
+#
+# If the VPC does not exist, and both Name and cidr are given, and
+# vpc-id is not in filters (i.e., you are not expecting the VPC to
+# exist), we will try to create it.
+#
+# [Note: You probably don't want to create a new VPC. There is a
+# small limit on the number of VPCs permitted per region; in most
+# cases, you should use the existing Test VPC instead, and run
+# misc/find-unused-subnets to avoid conflicts with other clusters.]
+#
+# After this task:
+#
+# ec2_region_vpcs[region] → vpc_id
 
-    - include_tasks: s3-hostkeys.yml
-      when:
-        lookup('pipe', 'date +%s')|int > s3_hostkey_expiry|default(0)|int
-      tags: ssh
+- name: Resolve ec2_vpc specification
+  include_tasks: ec2-region-vpcs.yml
+  when:
+    - ec2_vpc is defined
+    - ec2_region_vpcs is not defined or
+      ec2_vpc != ec2_cached_vpc|default(None)
+  tags: ec2_vpc
 
-    # Every instance must be in a particular subnet.
-    #
-    # You can reference existing subnets directly by their subnet id if
-    # you set «subnet: subnet-nnn» for each instance. This allows us to
-    # integrate with an arbitrarily complex network configuration, but
-    # is inconvenient to use otherwise.
-    #
-    # Instead, we can set up a networking configuration for the cluster
-    # that comprises VPCs, internet gateways, subnets, routing tables,
-    # and security groups.
-    #
-    # First, identify a VPC to use by setting ec2_vpc:
-    #
-    #   ec2_vpc:
-    #     Name: Test
-    #
-    # In this case, a VPC with this name must exist in each relevant
-    # region. You can also specify different VPCs per region, and use
-    # filter expressions to match existing VPCs more precisely than by
-    # Name (and optional cidr) alone.
-    #
-    #   ec2_vpc:
-    #     eu-west-1:
-    #       Name: Test
-    #       cidr: 172.16.0.0/16
-    #     us-east-1:
-    #       filters:
-    #         vpc-id: vpc-nnn
-    #     us-east-2:
-    #       Name: Example
-    #       filters:
-    #         …filter expressions…
-    #
-    # For more details about the filter expressions, see
-    # http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html
-    #
-    # In any case, ec2_vpc must uniquely identify a VPC in each region.
-    #
-    # If the VPC does not exist, and both Name and cidr are given, and
-    # vpc-id is not in filters (i.e., you are not expecting the VPC to
-    # exist), we will try to create it.
-    #
-    # [Note: You probably don't want to create a new VPC. There is a
-    # small limit on the number of VPCs permitted per region; in most
-    # cases, you should use the existing Test VPC instead, and run
-    # misc/find-unused-subnets to avoid conflicts with other clusters.]
-    #
-    # After this task:
-    #
-    # ec2_region_vpcs[region] → vpc_id
+# Now that we know which VPC to use, we check if each instance's
+# «subnet: xxx» reference corresponds to the cidr of an existing
+# subnet in the VPC. If so, we can just use its subnet id (as if
+# «subnet: subnet-nnn» had been specified).
+#
+# Otherwise, we try to create the subnet. To specify its name and
+# availability zone, set ec2_vpc_subnets:
+#
+#   ec2_vpc_subnets:
+#     eu-west-1:
+#       192.0.2.0/27:
+#         az: us-east-1b
+#         Name: example1
+#       192.0.2.100/27:
+#         az: us-east-1b
+#         Name: example2
+#
+# After this task:
+#
+# ec2_region_subnets[region][cidr] → subnet_id
 
-    - name: Resolve ec2_vpc specification
-      include_tasks: ec2-region-vpcs.yml
-      when:
-        - ec2_vpc is defined
-        - ec2_region_vpcs is not defined or
-          ec2_vpc != ec2_cached_vpc|default(None)
-      tags: ec2_vpc
+- name: Collect all subnet references by region
+  set_fact:
+    ec2_subnets: >
+      {{ ec2_subnets|default({})|combine({r: region_subnets}) }}
+  vars:
+    region_subnets: >
+      {{ instances|selectattr('region', 'equalto', r)|map(attribute='subnet')|unique|list }}
+  with_items: "{{ regions }}"
+  loop_control:
+    loop_var: r
 
-    # Now that we know which VPC to use, we check if each instance's
-    # «subnet: xxx» reference corresponds to the cidr of an existing
-    # subnet in the VPC. If so, we can just use its subnet id (as if
-    # «subnet: subnet-nnn» had been specified).
-    #
-    # Otherwise, we try to create the subnet. To specify its name and
-    # availability zone, set ec2_vpc_subnets:
-    #
-    #   ec2_vpc_subnets:
-    #     eu-west-1:
-    #       192.0.2.0/27:
-    #         az: us-east-1b
-    #         Name: example1
-    #       192.0.2.100/27:
-    #         az: us-east-1b
-    #         Name: example2
-    #
-    # After this task:
-    #
-    # ec2_region_subnets[region][cidr] → subnet_id
+- name: Resolve subnet references in each region
+  include_tasks: ec2-region-subnets.yml
+  when:
+    - ec2_region_subnets is not defined or
+      ec2_subnets != ec2_cached_subnets|default(None)
+  tags: ec2_vpc
 
-    - name: Collect all subnet references by region
-      set_fact:
-        ec2_subnets: >
-          {{ ec2_subnets|default({})|combine({r: region_subnets}) }}
-      vars:
-        region_subnets: >
-          {{ instances|selectattr('region', 'equalto', r)|map(attribute='subnet')|unique|list }}
-      with_items: "{{ regions }}"
-      loop_control:
-        loop_var: r
+# If required, we create an igw (internet gateway) in each region.
+# To create one in every region, you can set
+#
+#   ec2_instance_reachability: public
+#
+# For more fine-grained control, you can set
+#
+#   ec2_vpc_igw:
+#     eu-west-1: yes
+#     eu-central-1: yes
+#     us-east-1: no
+#     …
+#       
+# If you do the latter, you must also make sure that the correct
+# subnets have a route to the igw.
 
-    - name: Resolve subnet references in each region
-      include_tasks: ec2-region-subnets.yml
-      when:
-        - ec2_region_subnets is not defined or
-          ec2_subnets != ec2_cached_subnets|default(None)
-      tags: ec2_vpc
+- name: Create internet gateways in each region
+  ec2_vpc_igw:
+    region: "{{ r }}"
+    vpc_id: "{{ ec2_region_vpcs[r] }}"
+    state: "{{ state }}"
+  vars:
+    igws: "{{ ec2_vpc_igw|default({}) }}"
+    state: >-
+      {%- if r in igws and igws[r] == 'no' -%} absent
+      {%- else -%} present
+      {%- endif -%}
+  with_items: "{{ regions }}"
+  loop_control:
+    loop_var: r
+  when:
+    - ec2_instance_reachability|default('private') == 'public' or
+      r in igws
+    - ec2_region_vpcs is not defined or
+      ec2_vpc != ec2_cached_vpc|default(None)
+  tags: ec2_vpc_igw
 
-    # If required, we create an igw (internet gateway) in each region.
-    # To create one in every region, you can set
-    #
-    #   ec2_instance_reachability: public
-    #
-    # For more fine-grained control, you can set
-    #
-    #   ec2_vpc_igw:
-    #     eu-west-1: yes
-    #     eu-central-1: yes
-    #     us-east-1: no
-    #     …
-    #       
-    # If you do the latter, you must also make sure that the correct
-    # subnets have a route to the igw.
+# We require internet access for all of the subnets in the cluster.
+#
+# One way to avoid this requirement might be to mark one instance as
+# the gateway for the rest of the cluster, and set up an SSH tunnel
+# through it. Then only one instance would need internet access. We
+# don't currently support this, however.
 
-    - name: Create internet gateways in each region
-      ec2_vpc_igw:
-        region: "{{ r }}"
-        vpc_id: "{{ ec2_region_vpcs[r] }}"
-        state: "{{ state }}"
-      vars:
-        igws: "{{ ec2_vpc_igw|default({}) }}"
-        state: >-
-          {%- if r in igws and igws[r] == 'no' -%} absent
-          {%- else -%} present
-          {%- endif -%}
-      with_items: "{{ regions }}"
-      loop_control:
-        loop_var: r
-      when:
-        - ec2_instance_reachability|default('private') == 'public' or
-          r in igws
-        - ec2_region_vpcs is not defined or
-          ec2_vpc != ec2_cached_vpc|default(None)
-      tags: ec2_vpc_igw
+- name: Create routing tables in each region
+  ec2_vpc_route_table:
+    region: "{{ r }}"
+    vpc_id: "{{ ec2_region_vpcs[r] }}"
+    subnets: "{{ ec2_region_subnets[r].values()|list }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: igw
+    tags:
+      Name: "{{ cluster_name }}/{{ r }}/routes"
+      Description: "Automatically created for {{ cluster_name }} in {{ r }}"
+      CreatingCluster: "{{ cluster_name }}"
+  with_items: "{{ regions }}"
+  when:
+    - ec2_instance_reachability|default('private') == 'public'
+    - ec2_region_subnets is not defined or
+      ec2_subnets != ec2_cached_subnets|default(None)
+  loop_control:
+    loop_var: r
+  tags: ec2_vpc_route_table
 
-    # We require internet access for all of the subnets in the cluster.
-    #
-    # One way to avoid this requirement might be to mark one instance as
-    # the gateway for the rest of the cluster, and set up an SSH tunnel
-    # through it. Then only one instance would need internet access. We
-    # don't currently support this, however.
+# Each instance may be associated with one or more security groups
+# (each comprising a set of firewall rules).
+#
+# By default, we create a security group for the cluster in each
+# VPC. To use an existing security group instead, set ec2_groups:
+#
+#   ec2_groups:
+#     us-east-1:
+#       group-name:
+#         - foo
+#
+# The filter expression for each region must uniquely identify the
+# security group to use.
+#
+# For more details about the filter expressions,
+# https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html
+# http://docs.ansible.com/ansible/ec2_group_facts_module.html
+#
+# If we create the security group, we also create firewall rules to
+# suit the cluster. By default, we permit inbound ssh (to port 22 as
+# well as «cluster_ssh_port», if set) and all outbound traffic. You
+# can specify additional firewall rules:
+#
+#   cluster_rules:
+#     - {proto: tcp, from_port: 80, to_port: 80, cidr_ip: 0.0.0.0/0}
+#     - …
+#
+# (Note: from_port and to_port define a numeric range of ports, not
+# a source and destination.)
+#
+# Existing security groups are assumed to have been appropriately
+# configured already,
+#
+# A subnet in a VPC may also have a network ACL associated with it.
+# We use the default that allows all inbound and outbound traffic,
+# and do not support operating on ACLs.
+#
+# After this task:
+#
+# ec2_region_groups[region] → group_id
 
-    - name: Create routing tables in each region
-      ec2_vpc_route_table:
-        region: "{{ r }}"
-        vpc_id: "{{ ec2_region_vpcs[r] }}"
-        subnets: "{{ ec2_region_subnets[r].values()|list }}"
-        routes:
-          - dest: 0.0.0.0/0
-            gateway_id: igw
-        tags:
-          Name: "{{ cluster_name }}/{{ r }}/routes"
-          Description: "Automatically created for {{ cluster_name }} in {{ r }}"
-          CreatingCluster: "{{ cluster_name }}"
-      with_items: "{{ regions }}"
-      when:
-        - ec2_instance_reachability|default('private') == 'public'
-        - ec2_region_subnets is not defined or
-          ec2_subnets != ec2_cached_subnets|default(None)
-      loop_control:
-        loop_var: r
-      tags: ec2_vpc_route_table
+- include_tasks: ec2-region-groups.yml
+  when:
+    ec2_region_groups is not defined
+  tags: sgs
 
-    # Each instance may be associated with one or more security groups
-    # (each comprising a set of firewall rules).
-    #
-    # By default, we create a security group for the cluster in each
-    # VPC. To use an existing security group instead, set ec2_groups:
-    #
-    #   ec2_groups:
-    #     us-east-1:
-    #       group-name:
-    #         - foo
-    #
-    # The filter expression for each region must uniquely identify the
-    # security group to use.
-    #
-    # For more details about the filter expressions,
-    # https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html
-    # http://docs.ansible.com/ansible/ec2_group_facts_module.html
-    #
-    # If we create the security group, we also create firewall rules to
-    # suit the cluster. By default, we permit inbound ssh (to port 22 as
-    # well as «cluster_ssh_port», if set) and all outbound traffic. You
-    # can specify additional firewall rules:
-    #
-    #   cluster_rules:
-    #     - {proto: tcp, from_port: 80, to_port: 80, cidr_ip: 0.0.0.0/0}
-    #     - …
-    #
-    # (Note: from_port and to_port define a numeric range of ports, not
-    # a source and destination.)
-    #
-    # Existing security groups are assumed to have been appropriately
-    # configured already,
-    #
-    # A subnet in a VPC may also have a network ACL associated with it.
-    # We use the default that allows all inbound and outbound traffic,
-    # and do not support operating on ACLs.
-    #
-    # After this task:
-    #
-    # ec2_region_groups[region] → group_id
+# We must specify an AMI to use when launching instances:
+#
+#   ec2_ami:
+#     Name: xxx
+#
+# If you want to be more precise, you can add owner and filter
+# specifications:
+#
+#   ec2_ami:
+#     Name: xxx
+#     Owner: self
+#     filters:
+#       architecture: x86_64
+#       …more «key: value» filters…
+#
+# For more details about the filter expressions, see
+# https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
+# https://docs.ansible.com/ansible/2.5/modules/ec2_ami_facts_module.html
+#
+# In any case, ec2_ami must uniquely identify one AMI that exists
+# and is accessible to us in each relevant region. We look up the
+# ami-nnn id and use it when launching instances. We also record
+# properties of each AMI for later use.
+#
+# It is possible to leave ec2_ami undefined and set «image: ami-nnn»
+# for each instance, but this is not recommended.
+#
+# After this task:
+#
+# ec2_region_amis[region] → image_id
+# ec2_ami_properties[image_id] → properties
 
-    - include_tasks: ec2-region-groups.yml
-      when:
-        ec2_region_groups is not defined
-      tags: sgs
+- include_tasks: ec2-region-amis.yml
+  when:
+    - ec2_ami is defined
+    - ec2_region_amis is not defined or
+      ec2_ami != ec2_cached_ami|default(None)
+  tags: ami
 
-    # We must specify an AMI to use when launching instances:
-    #
-    #   ec2_ami:
-    #     Name: xxx
-    #
-    # If you want to be more precise, you can add owner and filter
-    # specifications:
-    #
-    #   ec2_ami:
-    #     Name: xxx
-    #     Owner: self
-    #     filters:
-    #       architecture: x86_64
-    #       …more «key: value» filters…
-    #
-    # For more details about the filter expressions, see
-    # https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
-    # https://docs.ansible.com/ansible/2.5/modules/ec2_ami_facts_module.html
-    #
-    # In any case, ec2_ami must uniquely identify one AMI that exists
-    # and is accessible to us in each relevant region. We look up the
-    # ami-nnn id and use it when launching instances. We also record
-    # properties of each AMI for later use.
-    #
-    # It is possible to leave ec2_ami undefined and set «image: ami-nnn»
-    # for each instance, but this is not recommended.
-    #
-    # After this task:
-    #
-    # ec2_region_amis[region] → image_id
-    # ec2_ami_properties[image_id] → properties
+# If any instances[] directly reference an image whose properties we
+# do not already know, we need to look them up too.
 
-    - include_tasks: ec2-region-amis.yml
-      when:
-        - ec2_ami is defined
-        - ec2_region_amis is not defined or
-          ec2_ami != ec2_cached_ami|default(None)
-      tags: ami
+- include_tasks: ec2-ami-properties.yml
+  vars:
+    wanted_properties: >
+      {{ instances|json_query('[*].image') }}
+    known_properties: >
+      {{ ec2_ami_properties|default({})|json_query('keys(@)') }}
+  when:
+    (wanted_properties|difference(known_properties)|list)|count > 0
+  tags: ami
 
-    # If any instances[] directly reference an image whose properties we
-    # do not already know, we need to look them up too.
+# If «attach_existing» is specified for any volume in a region, we
+# build a table to map the names of unattached volumes in that
+# region to their volume-ids.
 
-    - include_tasks: ec2-ami-properties.yml
-      vars:
-        wanted_properties: >
-          {{ instances|json_query('[*].image') }}
-        known_properties: >
-          {{ ec2_ami_properties|default({})|json_query('keys(@)') }}
-      when:
-        (wanted_properties|difference(known_properties)|list)|count > 0
-      tags: ami
+- include_tasks: ec2-attachable-volumes.yml
+  when:
+    instances|json_query('[*].volumes[]|[?attach_existing]')|count > 0
+  tags: ebs
 
-    # If «attach_existing» is specified for any volume in a region, we
-    # build a table to map the names of unattached volumes in that
-    # region to their volume-ids.
+# We create an instance profile IAM role for the cluster and attach
+# an inline policy with any permissions that the instances need.
+#
+# To change the name of the role, set «cluster_profile: xxx».
+#
+# To use an existing role without making any changes to it, set
+# «instance_profile_name: yyy». The role must have all required
+# permissions assigned to it separately.
 
-    - include_tasks: ec2-attachable-volumes.yml
-      when:
-        instances|json_query('[*].volumes[]|[?attach_existing]')|count > 0
-      tags: ebs
+- include_tasks: iam-instance-profile.yml
+  when:
+    - cluster_profile != ''
+    - instance_profile_name is not defined
+  tags: iam
 
-    # We create an instance profile IAM role for the cluster and attach
-    # an inline policy with any permissions that the instances need.
-    #
-    # To change the name of the role, set «cluster_profile: xxx».
-    #
-    # To use an existing role without making any changes to it, set
-    # «instance_profile_name: yyy». The role must have all required
-    # permissions assigned to it separately.
+# Preprocess instance definitions through various helpful filters to
+# set things that aren't set and check things that need checking.
 
-    - include_tasks: iam-instance-profile.yml
-      when:
-        - cluster_profile != ''
-        - instance_profile_name is not defined
-      tags: iam
+- name: Expand instance definitions based on discovered information
+  set_fact:
+    instances: "{{
+      instances
+      |expand_instance_image(ec2_region_amis)
+      |expand_instance_volumes(ec2_ami_properties)
+      |match_existing_volumes(cluster_name, ec2_attachable_volumes)
+    }}"
+  tags: ec2
 
-    # Preprocess instance definitions through various helpful filters to
-    # set things that aren't set and check things that need checking.
+- name: Ensure that we know security group ids in every region
+  assert:
+    msg: "Security group reference undefined"
+    that:
+      - ec2_region_groups[item.region] is defined
+  with_items: "{{ instances }}"
+  loop_control:
+    label: >-
+      {{ item.region }}:{{ item.Name }}
 
-    - name: Expand instance definitions based on discovered information
-      set_fact:
-        instances: "{{
-          instances
-          |expand_instance_image(ec2_region_amis)
-          |expand_instance_volumes(ec2_ami_properties)
-          |match_existing_volumes(cluster_name, ec2_attachable_volumes)
-        }}"
-      tags: ec2
+- name: Ensure that we know subnet ids in every region
+  assert:
+    msg: "Subnet reference undefined"
+    that:
+      - ec2_region_subnets[item.region] is defined
+      - ec2_region_subnets[item.region][item.subnet] is defined
+  with_items: "{{ instances }}"
+  loop_control:
+    label: >-
+      {{ item.region }}:{{ item.Name }}
 
-    - name: Ensure that we know security group ids in every region
+- block:
+    - name: Ensure that we found volume_ids for all attach_existing volumes
       assert:
-        msg: "Security group reference undefined"
+        msg: >
+          Couldn't find volume_id for
+          {{ cluster_name }}:{{ item.node }}:{{ unid_volumes|join(',') }}
+          on {{ item.Name }}
         that:
-          - ec2_region_groups[item.region] is defined
+          - unid_volumes|count == 0
       with_items: "{{ instances }}"
       loop_control:
         label: >-
           {{ item.region }}:{{ item.Name }}
-
-    - name: Ensure that we know subnet ids in every region
-      assert:
-        msg: "Subnet reference undefined"
-        that:
-          - ec2_region_subnets[item.region] is defined
-          - ec2_region_subnets[item.region][item.subnet] is defined
-      with_items: "{{ instances }}"
-      loop_control:
-        label: >-
-          {{ item.region }}:{{ item.Name }}
-
-    - block:
-        - name: Ensure that we found volume_ids for all attach_existing volumes
-          assert:
-            msg: >
-              Couldn't find volume_id for
-              {{ cluster_name }}:{{ item.node }}:{{ unid_volumes|join(',') }}
-              on {{ item.Name }}
-            that:
-              - unid_volumes|count == 0
-          with_items: "{{ instances }}"
-          loop_control:
-            label: >-
-              {{ item.region }}:{{ item.Name }}
-          when:
-            item.Name in hosts_to_check
-          vars:
-            unid_volumes: "{{
-              item|json_query('volumes[?attach_existing&&!volume_id].device_name')
-            }}"
       when:
-        require_reattachment|default('no') == 'yes' and reattach_hosts is defined
+        item.Name in hosts_to_check
       vars:
-       hosts_to_check: "{{ reattach_hosts.split(',') }}"
-
-    # Create EC2 instances using the VPC subnets and security groups and
-    # access key we configured above. We loop over instances[], look up
-    # the VPC and group corresponding to the region/subnet defined for
-    # that instance, and extract the relevant subnet or group id from
-    # the responses registered above.
-
-    - name: Set up EC2 instances
-      ec2:
-        exact_count: 1
-        count_tag:
-          Cluster: "{{ cluster_name }}"
-          node: "{{ item.node }}"
-        image: "{{ item.image }}"
-        region: "{{ item.region }}"
-        key_name: "{{ ec2_instance_key|default(omit) }}"
-        instance_type: "{{ item.type }}"
-        instance_tags: >
-          {{
-            cluster_tags|combine(item.tags)|combine({
-              'Cluster': cluster_name,
-              'node': item.node,
-              'Name': item.Name,
-            })
-          }}
-        instance_profile_name: "{{ instance_profile_name|default(omit) }}"
-        private_ip: "{{ item.private_ip|default(omit) }}"
-        vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
-        group_id: "{{ ec2_region_groups[item.region] }}"
-        volumes: "{{ item.volumes|reject('has_subkey','volume_id')|list|default(omit) }}"
-        spot_price: "{{ item.spot_price|default(omit) }}"
-        spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
-        spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"
-        user_data: "{{
-          lookup('template', 'user-data.j2',
-            template_vars=dict(image=ec2_ami_properties[item.image])
-          )
+        unid_volumes: "{{
+          item|json_query('volumes[?attach_existing&&!volume_id].device_name')
         }}"
-        termination_protection: "{{ item.termination_protection|default('no') }}"
-        assign_public_ip: "{{ item.assign_public_ip|default('yes') }}"
-        wait: yes
-      with_items: "{{ instances }}"
-      loop_control:
-        label: >-
-          {{ item.region }}:{{ item.Name }}
-      register: ec2_instances
-      async: 7200
-      poll: 0
-      tags: ec2
+  when:
+    require_reattachment|default('no') == 'yes' and reattach_hosts is defined
+  vars:
+   hosts_to_check: "{{ reattach_hosts.split(',') }}"
 
-    - name: Wait for instance provisioning to complete
-      async_status: jid={{ item.ansible_job_id }}
-      register: ec2_jobs
-      until: ec2_jobs.finished
-      retries: 300
-      with_items: "{{ ec2_instances.results }}"
-      loop_control:
-        label: >-
-          {{ item.ansible_job_id }}
-      tags: ec2
+# Create EC2 instances using the VPC subnets and security groups and
+# access key we configured above. We loop over instances[], look up
+# the VPC and group corresponding to the region/subnet defined for
+# that instance, and extract the relevant subnet or group id from
+# the responses registered above.
 
-    - name: Collect all volumes to be tagged
-      set_fact:
-        ec2_attached_volumes: >
-          {{
-            ec2_attached_volumes|default([])|union([{
-              'region': item.1.region,
-              'resource': item.1.block_device_mapping[item.2].volume_id,
-              'tags': cluster_tags|combine({
-                'Name': attachment_label,
-                'TPAAttachmentLabel': attachment_label,
-                'CreatingCluster': cluster_name,
-              })
-            }])
-          }}
-      with_nested_dependents:
-        - ec2_jobs.results
-        - item.0.tagged_instances
-        - item.1.block_device_mapping.keys()|list
-      loop_control:
-        label: >-
-          {{ item.1.region }}:{{ item.1.block_device_mapping[item.2].volume_id }}
-      vars:
-        attachment_label: >-
-          {{ cluster_name ~':'~ item.1.tags.node ~':'~ item.2 }}
+- name: Set up EC2 instances
+  ec2:
+    exact_count: 1
+    count_tag:
+      Cluster: "{{ cluster_name }}"
+      node: "{{ item.node }}"
+    image: "{{ item.image }}"
+    region: "{{ item.region }}"
+    key_name: "{{ ec2_instance_key|default(omit) }}"
+    instance_type: "{{ item.type }}"
+    instance_tags: >
+      {{
+        cluster_tags|combine(item.tags)|combine({
+          'Cluster': cluster_name,
+          'node': item.node,
+          'Name': item.Name,
+        })
+      }}
+    instance_profile_name: "{{ instance_profile_name|default(omit) }}"
+    private_ip: "{{ item.private_ip|default(omit) }}"
+    vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
+    group_id: "{{ ec2_region_groups[item.region] }}"
+    volumes: "{{ item.volumes|reject('has_subkey','volume_id')|list|default(omit) }}"
+    spot_price: "{{ item.spot_price|default(omit) }}"
+    spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
+    spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"
+    user_data: "{{
+      lookup('template', 'user-data.j2',
+        template_vars=dict(image=ec2_ami_properties[item.image])
+      )
+    }}"
+    termination_protection: "{{ item.termination_protection|default('no') }}"
+    assign_public_ip: "{{ item.assign_public_ip|default('yes') }}"
+    wait: yes
+  with_items: "{{ instances }}"
+  loop_control:
+    label: >-
+      {{ item.region }}:{{ item.Name }}
+  register: ec2_instances
+  async: 7200
+  poll: 0
+  tags: ec2
 
-    - include_tasks: ec2-tag-volumes.yml
-      when:
-        ec2_attached_volumes != ec2_cached_attached_volumes|default(None)
-      tags: ec2
+- name: Wait for instance provisioning to complete
+  async_status: jid={{ item.ansible_job_id }}
+  register: ec2_jobs
+  until: ec2_jobs.finished
+  retries: 300
+  with_items: "{{ ec2_instances.results }}"
+  loop_control:
+    label: >-
+      {{ item.ansible_job_id }}
+  tags: ec2
 
-    # If explicitly requested, we can also associate an elastic IP with
-    # one or more of the instances created above. The instance ids come
-    # from the results above, and the configuration is in instances[].
+- name: Collect all volumes to be tagged
+  set_fact:
+    ec2_attached_volumes: >
+      {{
+        ec2_attached_volumes|default([])|union([{
+          'region': item.1.region,
+          'resource': item.1.block_device_mapping[item.2].volume_id,
+          'tags': cluster_tags|combine({
+            'Name': attachment_label,
+            'TPAAttachmentLabel': attachment_label,
+            'CreatingCluster': cluster_name,
+          })
+        }])
+      }}
+  with_nested_dependents:
+    - ec2_jobs.results
+    - item.0.tagged_instances
+    - item.1.block_device_mapping.keys()|list
+  loop_control:
+    label: >-
+      {{ item.1.region }}:{{ item.1.block_device_mapping[item.2].volume_id }}
+  vars:
+    attachment_label: >-
+      {{ cluster_name ~':'~ item.1.tags.node ~':'~ item.2 }}
 
-    - include_tasks: ec2-eip.yml
-      tags: ec2_eips
+- include_tasks: ec2-tag-volumes.yml
+  when:
+    ec2_attached_volumes != ec2_cached_attached_volumes|default(None)
+  tags: ec2
 
-    # Now we have ec2_public_ips in ec2_jobs.results, but some of them
-    # may have been overriden by elastic IP addresses.
+# If explicitly requested, we can also associate an elastic IP with
+# one or more of the instances created above. The instance ids come
+# from the results above, and the configuration is in instances[].
 
-    - name: Set instance variables and elastic IP overrides
-      set_fact:
-        instance_vars: "{{
-          instance_vars|default([])|union([
-            item.0.tagged_instances[0]|combine({
-              'ip_address': item.1.public_ip|default(item.0.tagged_instances[0].public_ip)
-                or item.0.tagged_instances[0].private_ip,
-              'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip),
-              'Name': item.0.item.item.Name,
-              'node': item.0.item.item.node,
-              'role': item.0.item.item|try_subkey('role', []),
-              'backup': item.0.item.item|try_subkey('backup'),
-              'upstream': item.0.item.item|try_subkey('upstream'),
-              'volumes': item.0.item.item|try_subkey('volumes', []),
-              'vars': item.0.item.item|try_subkey('vars', {}),
-            })
-          ])
-        }}"
-      with_together:
-        - "{{ ec2_jobs.results }}"
-        - "{{ ec2_eips.results }}"
-      loop_control:
-        label: >-
-          {{ item.0.item.item.Name }}
+- include_tasks: ec2-eip.yml
+  tags: ec2_eips
 
-    # We update A records for any instance with a route53_hosted_zone_id
-    # and route53_hosted_zone (or if they are specified globally, which
-    # applies to all instances).
+# Now we have ec2_public_ips in ec2_jobs.results, but some of them
+# may have been overriden by elastic IP addresses.
 
-    - include_tasks: route53.yml
-      tags: route53
+- name: Set instance variables and elastic IP overrides
+  set_fact:
+    instance_vars: "{{
+      instance_vars|default([])|union([
+        item.0.tagged_instances[0]|combine({
+          'ip_address': item.1.public_ip|default(item.0.tagged_instances[0].public_ip)
+            or item.0.tagged_instances[0].private_ip,
+          'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip),
+          'Name': item.0.item.item.Name,
+          'node': item.0.item.item.node,
+          'role': item.0.item.item|try_subkey('role', []),
+          'backup': item.0.item.item|try_subkey('backup'),
+          'upstream': item.0.item.item|try_subkey('upstream'),
+          'volumes': item.0.item.item|try_subkey('volumes', []),
+          'vars': item.0.item.item|try_subkey('vars', {}),
+        })
+      ])
+    }}"
+  with_together:
+    - "{{ ec2_jobs.results }}"
+    - "{{ ec2_eips.results }}"
+  loop_control:
+    label: >-
+      {{ item.0.item.item.Name }}
 
-    - include_tasks: ../common/inventory/write.yml
-      vars:
-        ansible_user: "{{ ec2_ami_user|default('') }}"
-        ansible_port: "{{ cluster_ssh_port|default(22) }}"
+# We update A records for any instance with a route53_hosted_zone_id
+# and route53_hosted_zone (or if they are specified globally, which
+# applies to all instances).
+
+- include_tasks: route53.yml
+  tags: route53
+
+- include_tasks: ../common/inventory/write.yml
+  vars:
+    ansible_user: "{{ ec2_ami_user|default('') }}"
+    ansible_port: "{{ cluster_ssh_port|default(22) }}"

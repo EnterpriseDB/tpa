@@ -58,5 +58,3 @@
     subnets: "{{
       instances|map(attribute='subnet')|unique|select('contains','/')|list
     }}"
-
-- include_tasks: ../common/validate-post.yml

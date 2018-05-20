@@ -1,0 +1,64 @@
+---
+
+# Running «bin/provision clustername» brings us here.
+
+- name: Provision cluster
+  hosts: localhost
+  tasks:
+    ## Configuration
+    #
+    # We will provision the cluster described by clustername/config.yml
+    # (run «provision … -e config=x.yml» to use a different filename).
+    #
+    # The configuration must define an array of instances along with
+    # other supporting top-level settings described elsewhere.
+    #
+    #   cluster_name: Example
+    #   platform: bare
+    #
+    #   instances:
+    #     - node: 1
+    #       Name: foo
+    #       …
+    #
+    #     - node: 2
+    #       Name: bar
+    #       platform: aws
+    #       …
+    #
+    # Each instance may declare the platform it is to be provisioned on.
+    # If the instance definition does not specify a platform, we default
+    # to the top-level platform setting (or 'aws' if unspecified).
+    #
+    # First, we load the configuration file and validate it (which has
+    # both platform-independent and platform-specific parts).
+
+    - import_tasks: load-config.yml
+      tags: always
+
+    ## Validation
+    #
+    # Now we can perform some generic sanity checks of the configuration
+    # followed by platform-specific ones. (We also set derived facts in
+    # the validation tasks, so they can never be skipped.)
+
+    - import_tasks: validate.yml
+      tags: always
+
+    ## Provisioning
+    #
+    # Now we perform platform-independent provisioning tasks, then give
+    # each platform handler a chance to do whatever it wants.
+
+    - import_tasks: common/provision.yml
+      tags: common
+
+    - import_tasks: aws/provision.yml
+      when: >
+        'aws' in cluster_platforms
+      tags: aws
+
+    - import_tasks: bare/provision.yml
+      when: >
+        'bare' in cluster_platforms
+      tags: bare

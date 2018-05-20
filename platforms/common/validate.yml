@@ -1,22 +1,3 @@
-- name: Set tpa_dir
-  set_fact:
-    tpa_dir: "{{ lookup('env', 'TPA_DIR') or (playbook_dir|regex_replace('/platforms/common/*', '')) }}"
-
-- name: Require cluster directory to be specified
-  assert:
-    msg: "Please rerun with «-e cluster=./clusters/name»"
-    that:
-      - cluster is defined and cluster != ''
-
-- name: Derive full path to cluster directory
-  set_fact: cluster_dir="{{ cluster|realpath }}"
-
-- name: Derive name of the configuration file
-  set_fact: config_file="{{ cluster_dir }}/{{ config|default('config.yml') }}"
-
-- name: Load cluster configuration file
-  include_vars: "{{ config_file }}"
-
 - name: Ensure cluster_name is correctly configured
   assert:
     msg: "Please define cluster_name (letters, numbers, underscores) in {{config_file}}"
@@ -72,34 +53,3 @@
       - item.Name|match('^[a-z0-9-]+$')
   with_items: "{{ instances }}"
 
-# For every instance that has a "backup: xxx" tag, there should be
-# exactly one instance with "Name: xxx" and "role: …,barman,…" tags.
-#
-# Likewise, for every instance that has an "upstream: xxx" tag, there
-# should be exactly one instance with a "Name: xxx" tag.
-
-- name: Collect upstream and backup references
-  set_fact:
-    barman_references: >
-      {{ instances|selectattr('backup', 'defined')|map(attribute='backup')|unique|list }}
-    upstream_references: >
-      {{ instances|selectattr('upstream', 'defined')|map(attribute='upstream')|unique|list }}
-
-- name: Validate backup references
-  assert:
-    msg: "Please define a single barman instance with Name={{ item }}"
-    that:
-      - instances|
-        selectattr('Name','defined')|selectattr('Name','equalto',item)|
-        selectattr('role','defined')|selectattr('role','contains','barman')|
-        list|count == 1
-  with_items: "{{ barman_references }}"
-
-- name: Validate upstream references
-  assert:
-    msg: "Please define a single upstream server with Name={{ item }}"
-    that:
-      - instances|
-        selectattr('Name','defined')|selectattr('Name','equalto',item)|
-        list|count == 1
-  with_items: "{{ upstream_references }}"

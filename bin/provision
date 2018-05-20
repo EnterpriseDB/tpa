@@ -26,5 +26,5 @@ fi
 cd $cluster_dir
 
 $TPA_DIR/ansible/ansible-playbook \
-    $TPA_DIR/platforms/aws/provision.yml \
+    $TPA_DIR/platforms/provision.yml \
     -e cluster=$(pwd) "$@"

@@ -1,35 +1,26 @@
 ---
 
-- name: Platform-independent provisioning tasks
-  hosts: localhost
-  tasks:
-    - include_tasks: validate.yml
-      tags: always
+- name: Ensure that the cluster's inventory directories exist
+  file:
+    path: "{{ cluster_dir }}/{{ item }}"
+    state: directory
+  with_items:
+    - inventory
+    - inventory/host_vars
+    - inventory/group_vars
 
-    - name: Ensure that the cluster's inventory directories exist
-      file:
-        path: "{{ cluster_dir }}/{{ item }}"
-        state: directory
-      with_items:
-        - inventory
-        - inventory/host_vars
-        - inventory/group_vars
-      tags: common
+- name: Set ssh_key_file
+  set_fact:
+    ssh_key_file: >-
+      {{ ssh_key_file|default('id_' + cluster_name|lower) }}
 
-    - name: Determine ssh_key_file
-      set_fact:
-        ssh_key_file: "id_{{ cluster_name|lower }}"
-      when:
-        ssh_key_file is not defined
+- name: Create ssh keypair
+  include_tasks: ssh-key.yml
+  vars:
+    key_file: "{{ ssh_key_file }}"
+  tags: [ssh, keygen]
 
-    - name: Create ssh keypair
-      include_tasks: ssh-key.yml
-      vars:
-        key_file: "{{ ssh_key_file }}"
-      tags: [common, ssh, keygen]
+- include_tasks: ssh-hostkeys.yml
+  tags: [ssh, keygen]
 
-    - include_tasks: ssh-hostkeys.yml
-      tags: [common, ssh, keygen]
-
-    - include_tasks: set-vault-pass.yml
-      tags: common
+- include_tasks: set-vault-pass.yml
