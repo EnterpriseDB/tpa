@@ -523,7 +523,5 @@
 - include_tasks: route53.yml
   tags: route53
 
-- include_tasks: ../common/inventory/write.yml
-  vars:
-    ansible_user: "{{ ec2_ami_user|default('') }}"
-    ansible_port: "{{ cluster_ssh_port|default(22) }}"
+- set_fact:
+    cluster_ssh_user: "{{ cluster_ssh_user|default(ec2_ami_user) }}"
