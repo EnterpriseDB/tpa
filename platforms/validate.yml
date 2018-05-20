@@ -8,12 +8,25 @@
 
 - import_tasks: common/validate.yml
 
+# We derive the list of platforms relevant to this cluster and separate
+# instances[] into xxx_instances[] lists for each platform xxx.
+
 - name: Collect list of platforms
   set_fact:
     cluster_platforms: "{{
       cluster_platforms|default([])|union([item.platform])
     }}"
   with_items: "{{ instances }}"
+  loop_control:
+    label: >-
+      {{ item.Name }}
+
+- name: Separate instances into platform-specific lists
+  set_fact:
+  args:
+    "{{ item }}_instances": >
+      {{ instances|selectattr('platform', 'equalto', item)|list }}
+  with_items: "{{ cluster_platforms }}"
 
 ## Platform-specific validation
 #
@@ -25,22 +38,10 @@
 # might lead to unexpected results, since the condition is pushed down
 # to the imported tasks, rather than applied here.)
 
-- set_fact:
-    aws_instances: >
-      {{ instances|selectattr('platform', 'equalto', 'aws')|list }}
-  when: >
-    'aws' in cluster_platforms
-
 - import_tasks: aws/validate.yml
   when: >
     'aws' in cluster_platforms
     
-- set_fact:
-    bare_instances: >
-      {{ instances|selectattr('platform', 'equalto', 'bare')|list }}
-  when: >
-    'bare' in cluster_platforms
-
 - import_tasks: bare/validate.yml
   when: >
     'bare' in cluster_platforms
