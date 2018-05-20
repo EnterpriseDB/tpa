@@ -1,6 +1,0 @@
-- name: Run ssh-keygen
-  command: ssh-keygen -P "" -f "{{ key_file }}" -C 2ndQuadrant
-  args:
-    chdir: "{{ cluster_dir }}"
-    creates: "{{ key_file }}"
-  register: ssh_keygen

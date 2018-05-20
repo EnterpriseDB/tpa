@@ -5,6 +5,8 @@
     path: "{{ cluster_dir }}/{{ item }}"
     state: directory
   with_items:
+    - vault
+    - hostkeys
     - inventory
     - inventory/host_vars
     - inventory/group_vars
@@ -13,14 +15,32 @@
   set_fact:
     ssh_key_file: >-
       {{ ssh_key_file|default('id_' + cluster_name|lower) }}
+  tags: [ssh]
 
-- name: Create ssh keypair
-  include_tasks: ssh-key.yml
-  vars:
-    key_file: "{{ ssh_key_file }}"
+- name: Run ssh-keygen
+  command: ssh-keygen -P "" -f "{{ ssh_key_file }}" -C 2ndQuadrant
+  args:
+    chdir: "{{ cluster_dir }}"
+    creates: "{{ ssh_key_file }}"
   tags: [ssh, keygen]
 
-- include_tasks: ssh-hostkeys.yml
+- name: Generate RSA and ECDSA host keys
+  command: ssh-keygen -t {{ item }} -N "" -C "{{ cluster_name }}" -f ssh_host_{{ item }}_key
+  args:
+    chdir: "{{ cluster_dir }}/hostkeys"
+    creates: "ssh_host_{{ item }}_key"
+  with_items:
+    - rsa
+    - ecdsa
   tags: [ssh, keygen]
 
-- include_tasks: set-vault-pass.yml
+# We generate a random vault passphrase and store it in a text file.
+# This obviously needs improvement—we should GPG-encrypt it with the
+# public keys of everyone who needs access to the secret.
+
+- name: Generate the vault passphrase for this cluster
+  local_action: >
+    shell {{ tpa_dir }}/bin/password > vault_pass.txt
+  args:
+    chdir: "{{ cluster_dir }}/vault"
+    creates: vault_pass.txt
