@@ -1,5 +1,5 @@
 cat >> /root/.ssh/authorized_keys <<KEY
-{{ lookup('file', cluster_dir + '/' + ssh_key_file + '.pub') }}
+{{ lookup('file', '%s/%s.pub' % (cluster_dir, ssh_key_file)) }}
 KEY
 
 chmod 600 /root/.ssh/authorized_keys
