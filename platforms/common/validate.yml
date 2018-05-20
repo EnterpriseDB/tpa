@@ -35,10 +35,13 @@
       - instances is sequence and instances is not string and instances is not mapping
       - instances | length > 0
 
-- name: Preprocess instance definitions
+- name: Set defaults for instance definitions
   set_fact:
-    instances: >
-      {{ instances|set_instance_defaults(cluster_name, platform|default('aws')) }}
+    instances: "{{
+      instances|set_instance_defaults(cluster_name,
+        {'platform': 'aws'}|combine(instance_defaults|default({}))
+      )
+    }}"
 
 - name: Ensure that every instance specifies a node id and name
   assert:

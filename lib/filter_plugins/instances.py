@@ -57,7 +57,7 @@ ephemeral_storage = {
 
 # Every instance must have certain settings (e.g., tags) in a specific format.
 
-def set_instance_defaults(old_instances, cluster_name, platform):
+def set_instance_defaults(old_instances, cluster_name, instance_defaults):
     instances = []
 
     for i in old_instances:
@@ -71,7 +71,12 @@ def set_instance_defaults(old_instances, cluster_name, platform):
         if name is None:
             name = cluster_name +'-'+ str(j['node'])
         j['Name'] = name.replace('_', '-').lower()
-        j['platform'] = j.get('platform', platform)
+
+        # Anything set in instance_defaults should be copied to the instance,
+        # unless the instance has a setting that overrides the default.
+
+        for kd in instance_defaults:
+            j[kd] = j.get(kd, instance_defaults[kd])
 
         # The upstream, backup, and role tags should be moved one level up if
         # they're specified at all.

@@ -14,7 +14,9 @@
     # other supporting top-level settings described elsewhere.
     #
     #   cluster_name: Example
-    #   platform: bare
+    #
+    #   instance_defaults:
+    #     platform: bare
     #
     #   instances:
     #     - node: 1
@@ -27,8 +29,8 @@
     #       …
     #
     # Each instance may declare the platform it is to be provisioned on.
-    # If the instance definition does not specify a platform, we default
-    # to the top-level platform setting (or 'aws' if unspecified).
+    # If the instance definition does not specify a platform, we use the
+    # default value given at the top level (or 'aws' if unspecified).
     #
     # First, we load the configuration file and validate it (which has
     # both platform-independent and platform-specific parts).
