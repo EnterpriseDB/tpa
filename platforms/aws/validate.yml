@@ -1,5 +1,3 @@
-- include_tasks: ../common/validate.yml
-
 - name: Ensure ec2_vpc is configured
   assert:
     msg: "Please define ec2_vpc (a hash) in {{config_file}}"
