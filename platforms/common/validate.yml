@@ -28,6 +28,7 @@
 - name: Ensure that the cluster_name is set as a tag
   set_fact:
     cluster_tags: "{{ cluster_tags|combine(dict(Name=cluster_name)) }}"
+    cluster_tag: "{{ cluster_tag|default('tag_Cluster_' + cluster_name) }}"
 
 - name: Ensure instances is correctly configured
   assert:
