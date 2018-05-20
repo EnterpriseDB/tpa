@@ -10,7 +10,7 @@
 
 # We used to allow route53_zone and route53_hosted_zone_id to be
 # specified at the top level and overriden by instances, but now
-# instance_defaults in the place for them.
+# instance_defaults is the place for them.
 
 - set_fact:
     compat_defaults: >
