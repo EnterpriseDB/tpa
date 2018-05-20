@@ -131,7 +131,7 @@
       {{ ec2_subnets|default({})|combine({r: region_subnets}) }}
   vars:
     region_subnets: >
-      {{ instances|selectattr('region', 'equalto', r)|map(attribute='subnet')|unique|list }}
+      {{ aws_instances|selectattr('region', 'equalto', r)|map(attribute='subnet')|unique|list }}
   with_items: "{{ regions }}"
   loop_control:
     loop_var: r
@@ -299,7 +299,7 @@
 - include_tasks: ec2-ami-properties.yml
   vars:
     wanted_properties: >
-      {{ instances|json_query('[*].image') }}
+      {{ aws_instances|json_query('[*].image') }}
     known_properties: >
       {{ ec2_ami_properties|default({})|json_query('keys(@)') }}
   when:
@@ -312,7 +312,7 @@
 
 - include_tasks: ec2-attachable-volumes.yml
   when:
-    instances|json_query('[*].volumes[]|[?attach_existing]')|count > 0
+    aws_instances|json_query('[*].volumes[]|[?attach_existing]')|count > 0
   tags: ebs
 
 # We create an instance profile IAM role for the cluster and attach
@@ -335,8 +335,8 @@
 
 - name: Expand instance definitions based on discovered information
   set_fact:
-    instances: "{{
-      instances
+    aws_instances: "{{
+      aws_instances
       |expand_instance_image(ec2_region_amis)
       |expand_instance_volumes(ec2_ami_properties)
       |match_existing_volumes(cluster_name, ec2_attachable_volumes)
@@ -348,7 +348,7 @@
     msg: "Security group reference undefined"
     that:
       - ec2_region_groups[item.region] is defined
-  with_items: "{{ instances }}"
+  with_items: "{{ aws_instances }}"
   loop_control:
     label: >-
       {{ item.region }}:{{ item.Name }}
@@ -359,7 +359,7 @@
     that:
       - ec2_region_subnets[item.region] is defined
       - ec2_region_subnets[item.region][item.subnet] is defined
-  with_items: "{{ instances }}"
+  with_items: "{{ aws_instances }}"
   loop_control:
     label: >-
       {{ item.region }}:{{ item.Name }}
@@ -373,7 +373,7 @@
           on {{ item.Name }}
         that:
           - unid_volumes|count == 0
-      with_items: "{{ instances }}"
+      with_items: "{{ aws_instances }}"
       loop_control:
         label: >-
           {{ item.region }}:{{ item.Name }}
@@ -428,7 +428,7 @@
     termination_protection: "{{ item.termination_protection|default('no') }}"
     assign_public_ip: "{{ item.assign_public_ip|default('yes') }}"
     wait: yes
-  with_items: "{{ instances }}"
+  with_items: "{{ aws_instances }}"
   loop_control:
     label: >-
       {{ item.region }}:{{ item.Name }}

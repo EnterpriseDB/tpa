@@ -25,10 +25,22 @@
 # might lead to unexpected results, since the condition is pushed down
 # to the imported tasks, rather than applied here.)
 
+- set_fact:
+    aws_instances: >
+      {{ instances|selectattr('platform', 'equalto', 'aws')|list }}
+  when: >
+    'aws' in cluster_platforms
+
 - import_tasks: aws/validate.yml
   when: >
     'aws' in cluster_platforms
     
+- set_fact:
+    bare_instances: >
+      {{ instances|selectattr('platform', 'equalto', 'bare')|list }}
+  when: >
+    'bare' in cluster_platforms
+
 - import_tasks: bare/validate.yml
   when: >
     'bare' in cluster_platforms

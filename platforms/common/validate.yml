@@ -1,3 +1,7 @@
+- name: Set default empty cluster_vars
+  set_fact:
+    cluster_vars: "{{ cluster_vars|default({}) }}"
+
 - name: Ensure cluster_name is correctly configured
   assert:
     msg: "Please define cluster_name (letters, numbers, underscores) in {{config_file}}"
@@ -14,10 +18,6 @@
       - cluster_tags is mapping
       - cluster_tags['Owner'] is defined
       - cluster_tags['Owner'] != ''
-
-- name: Set default empty cluster_vars
-  set_fact:
-    cluster_vars: "{{ cluster_vars|default({}) }}"
 
 # It is not currently meaningful to set cluster_tags['Name'] to anything
 # other than cluster_name. We only use the latter value, so it will only

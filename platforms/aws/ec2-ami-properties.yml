@@ -4,7 +4,7 @@
   ec2_ami_facts:
     image_ids: "{{ item.image }}"
     region: "{{ item.region }}"
-  with_items: "{{ instances|select('has_subkey','image')|list }}"
+  with_items: "{{ aws_instances|select('has_subkey','image')|list }}"
   loop_control:
     label: >-
       {{ item.region }}:{{ item.image }}

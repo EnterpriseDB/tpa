@@ -16,7 +16,7 @@
   loop_control:
     loop_var: r
   when: >
-    instances
+    aws_instances
     |json_query("[?region=='"+r+"'].volumes[]|[?attach_existing]")
     |count > 0
 

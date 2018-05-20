@@ -11,7 +11,7 @@
     item.0.assign_elastic_ip is defined
     and item.0.assign_elastic_ip
   with_together:
-    - "{{ instances }}"
+    - "{{ aws_instances }}"
     - "{{ ec2_jobs.results }}"
   loop_control:
     label: >-

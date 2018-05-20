@@ -11,7 +11,7 @@
     ttl: 60
     wait: yes
   with_together:
-    - "{{ instances }}"
+    - "{{ aws_instances }}"
     - "{{ instance_vars }}"
   loop_control:
     label: >-

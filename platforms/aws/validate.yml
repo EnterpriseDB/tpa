@@ -5,22 +5,6 @@
       - ec2_vpc is defined
       - ec2_vpc is mapping
 
-- name: Ensure that every instance has a defined instance type
-  assert:
-    msg: "Please set 'type' on every instance"
-    that:
-      - instances|selectattr('type','defined')|list|count == instances|count
-
-# Make sure ec2_ami is defined (and specifies at least the AMI Name), or
-# that every instance has an image explicitly specified by id.
-
-- name: Ensure that every instance specifies an image, or ec2_ami is defined
-  assert:
-    msg: "Please set 'image' on every instance, or use ec2_ami"
-    that:
-      - instances|selectattr('image','defined')|list|count == instances|count or
-        (ec2_ami is defined and ec2_ami is mapping and ec2_ami['Name'] is defined)
-
 # If we define ec2_ami, we'd better also define ec2_ami_user, since
 # there's no way to auto-discover the preferred username for an AMI.
 
@@ -37,9 +21,25 @@
     cluster_profile: "{{ cluster_profile|default(cluster_name+'_profile') }}"
     ec2_key_name: "{{ ec2_key_name|default('tpa_' + cluster_name|lower) }}"
 
+- name: Ensure that every instance has a defined instance type
+  assert:
+    msg: "Please set 'type' on every instance"
+    that:
+      - aws_instances|selectattr('type','defined')|list|count == aws_instances|count
+
+# Make sure ec2_ami is defined (and specifies at least the AMI Name), or
+# that every instance has an image explicitly specified by id.
+
+- name: Ensure that every instance specifies an image, or ec2_ami is defined
+  assert:
+    msg: "Please set 'image' on every instance, or use ec2_ami"
+    that:
+      - aws_instances|selectattr('image','defined')|list|count == aws_instances|count or
+        (ec2_ami is defined and ec2_ami is mapping and ec2_ami['Name'] is defined)
+
 - name: Derive list of unique regions from instances
   set_fact:
-    regions: "{{ instances|map(attribute='region')|unique|list }}"
+    regions: "{{ aws_instances|map(attribute='region')|unique|list }}"
 
 # If cluster_network or cluster_networks are not set in cluster_vars, we
 # can set cluster_networks to a list of all subnet references.
@@ -54,5 +54,5 @@
     - ('cluster_networks' not in cluster_vars)
   vars:
     subnets: "{{
-      instances|map(attribute='subnet')|unique|select('contains','/')|list
+      aws_instances|map(attribute='subnet')|unique|select('contains','/')|list
     }}"
