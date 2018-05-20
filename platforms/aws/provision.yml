@@ -132,7 +132,7 @@
   vars:
     region_subnets: >
       {{ aws_instances|selectattr('region', 'equalto', r)|map(attribute='subnet')|unique|list }}
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   loop_control:
     loop_var: r
 
@@ -170,7 +170,7 @@
       {%- if r in igws and igws[r] == 'no' -%} absent
       {%- else -%} present
       {%- endif -%}
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   loop_control:
     loop_var: r
   when:
@@ -199,7 +199,7 @@
       Name: "{{ cluster_name }}/{{ r }}/routes"
       Description: "Automatically created for {{ cluster_name }} in {{ r }}"
       CreatingCluster: "{{ cluster_name }}"
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   when:
     - ec2_instance_reachability|default('private') == 'public'
     - ec2_region_subnets is not defined or

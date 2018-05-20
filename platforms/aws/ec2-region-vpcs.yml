@@ -22,7 +22,7 @@
       {{ cached_vpcs[r]|default(cached_vpcs) }}
     vpc: >
       {{ ec2_vpc[r]|default(ec2_vpc) }}
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   loop_control:
     loop_var: r
   when:

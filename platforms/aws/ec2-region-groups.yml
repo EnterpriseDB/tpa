@@ -82,7 +82,7 @@
     ec2_region_groups[item.0] is not defined and
     item.1.group_id is defined
   with_together:
-    - "{{ regions }}"
+    - "{{ aws_regions }}"
     - "{{ new_sgs.results }}"
   loop_control:
     label: >-

@@ -39,7 +39,35 @@
 
 - name: Derive list of unique regions from instances
   set_fact:
-    regions: "{{ aws_instances|map(attribute='region')|unique|list }}"
+    aws_regions: "{{ aws_instances|map(attribute='region')|unique|list }}"
+
+# https://docs.aws.amazon.com/general/latest/gr/rande.html lists the
+# valid AWS regions.
+
+- name: Ensure region references are valid
+  assert:
+    msg: "Region {{ item }} is not a valid AWS region"
+    that: item in aws_known_regions
+  with_items: "{{ aws_regions }}"
+  vars:
+    aws_known_regions:
+      - us-east-2
+      - us-east-1
+      - us-west-1
+      - us-west-2
+      - ap-south-1
+      - ap-northeast-2
+      - ap-northeast-3
+      - ap-southeast-1
+      - ap-southeast-2
+      - ap-northeast-1
+      - ca-central-1
+      - cn-north-1
+      - eu-central-1
+      - eu-west-1
+      - eu-west-2
+      - eu-west-3
+      - sa-east-1
 
 # If cluster_network or cluster_networks are not set in cluster_vars, we
 # can set cluster_networks to a list of all subnet references.

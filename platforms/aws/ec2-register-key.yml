@@ -21,7 +21,7 @@
     name: "{{ ec2_key_name }}"
     key_material: "{{ lookup('file', '%s/%s.pub' % (cluster_dir, ssh_key_file)) }}"
     wait: yes
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
 
 - set_fact:
     ec2_instance_key: "{{ ec2_key_name }}"

@@ -19,7 +19,7 @@
     region: "{{ item }}"
     name: "tpa_{{ cluster_name|lower }}"
     wait: yes
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   tags: ec2_keys
 
 # Remove the cluster's instance profile role and associated policy.
@@ -50,7 +50,7 @@
     region: "{{ item }}"
     filters:
       "tag:CreatingCluster": "{{ cluster_name }}"
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   register: volumes
   tags: volumes
 
@@ -74,7 +74,7 @@
     region: "{{ region }}"
     filters:
       "tag:CreatingCluster": "{{ cluster_name }}"
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   loop_control:
     loop_var: region
   register: ec2_groups
@@ -101,7 +101,7 @@
     region: "{{ region }}"
     filters:
       "tag:CreatingCluster": "{{ cluster_name }}"
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   loop_control:
     loop_var: region
   register: subnets
@@ -129,7 +129,7 @@
     region: "{{ region }}"
     filters:
       "tag:CreatingCluster": "{{ cluster_name }}"
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   loop_control:
     loop_var: region
   register: vpcs

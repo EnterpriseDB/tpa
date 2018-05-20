@@ -1,6 +1,6 @@
 [ec2]
 
-regions = {{ regions|join(",") }}
+regions = {{ aws_regions|join(",") }}
 regions_exclude = us-gov-west-1,cn-north-1
 
 hostname_variable = tag_Name

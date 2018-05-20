@@ -18,7 +18,7 @@
           'name': ec2_ami['Name']
         })
       }}
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   register: ec2_amis
 
 # The ec2_ami filter expression in config.yml must match exactly one AMI
@@ -31,7 +31,7 @@
     that:
       - item.1.images|length == 1
   with_together:
-    - "{{ regions }}"
+    - "{{ aws_regions }}"
     - "{{ ec2_amis.results }}"
   loop_control:
     label: >-
@@ -48,7 +48,7 @@
         ec2_ami_properties|combine({item.1.images.0.image_id: item.1.images.0})
       }}
   with_together:
-    - "{{ regions }}"
+    - "{{ aws_regions }}"
     - "{{ ec2_amis.results }}"
   loop_control:
     label: >-

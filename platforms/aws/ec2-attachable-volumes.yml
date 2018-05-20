@@ -12,7 +12,7 @@
       "tag-key": TPAAttachmentLabel
       "tag:CreatingCluster": "{{ cluster_name }}"
   register: ec2_volumes
-  with_items: "{{ regions }}"
+  with_items: "{{ aws_regions }}"
   loop_control:
     loop_var: r
   when: >

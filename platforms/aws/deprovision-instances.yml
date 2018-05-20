@@ -9,7 +9,7 @@
     instance_id: "{{ item.1 }}"
     wait: yes
   with_nested_dependents:
-    - regions
+    - aws_regions
     - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_id')|unique|list
   loop_control:
     label: >-
