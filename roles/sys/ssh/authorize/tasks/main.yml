@@ -10,4 +10,4 @@
 - name: Add {{ _ssh_key_name }}.pub to {{ ssh_user }}'s authorized_keys
   authorized_key:
     user: "{{ ssh_user }}"
-    key: "{{ lookup('file', _ssh_key_dir+'/'+_ssh_key_name+'.pub') }}"
+    key: "{{ lookup('file', '%s/%s.pub' % (_ssh_key_dir, _ssh_key_name)) }}"
