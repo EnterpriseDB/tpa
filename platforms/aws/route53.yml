@@ -3,9 +3,9 @@
 - name: Update DNS records in Route53
   route53:
     command: create
-    zone: "{{ item.0.route53_zone|default(route53_zone) }}"
-    hosted_zone_id: "{{ item.0.route53_hosted_zone_id|default(route53_hosted_zone_id) }}"
-    record: "{{ item.1.Name }}.{{ item.0.route53_zone|default(route53_zone) }}"
+    zone: "{{ item.0.route53_zone }}"
+    hosted_zone_id: "{{ item.0.route53_hosted_zone_id }}"
+    record: "{{ item.1.Name }}.{{ item.0.route53_zone }}"
     value: "{{ item.1.ip_address }}"
     type: A
     ttl: 60
@@ -17,5 +17,5 @@
     label: >-
       {{ item.1.Name }}
   when:
-    (item.0.route53_hosted_zone_id is defined or route53_hosted_zone_id is defined) and
-    (item.0.route53_zone is defined or route53_zone is defined)
+    - item.0.route53_hosted_zone_id is defined
+    - item.0.route53_zone is defined

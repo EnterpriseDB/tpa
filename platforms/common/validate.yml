@@ -1,3 +1,5 @@
+- import_tasks: validate-compat.yml
+
 - name: Set default empty cluster_vars
   set_fact:
     cluster_vars: "{{ cluster_vars|default({}) }}"
@@ -39,7 +41,7 @@
   set_fact:
     instances: "{{
       instances|set_instance_defaults(cluster_name,
-        {'platform': 'aws'}|combine(instance_defaults|default({}))
+        compat_defaults|combine(instance_defaults|default({}))
       )
     }}"
 

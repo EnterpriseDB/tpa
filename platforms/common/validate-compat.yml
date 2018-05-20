@@ -1,0 +1,22 @@
+---
+
+# This is where we transform settings for backwards compatibility.
+
+# By default, 'platform' is 'aws' for instances.
+
+- set_fact:
+    compat_defaults:
+      platform: aws
+
+# We used to allow route53_zone and route53_hosted_zone_id to be
+# specified at the top level and overriden by instances, but now
+# instance_defaults in the place for them.
+
+- set_fact:
+    compat_defaults: >
+      {{ compat_defaults|combine({item: vars[item]}) }}
+  with_items:
+    - route53_zone
+    - route53_hosted_zone_id
+  when:
+    item in vars
