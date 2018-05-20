@@ -11,6 +11,8 @@
     - inventory/host_vars
     - inventory/group_vars
 
+- include_tasks: ../common/read-provisioning-vars.yml
+
 - name: Set ssh_key_file
   set_fact:
     ssh_key_file: >-

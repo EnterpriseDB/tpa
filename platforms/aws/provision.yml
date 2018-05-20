@@ -14,8 +14,6 @@
 
 - include_tasks: inventory/write.yml
 
-- include_tasks: ../common/read-provisioning-vars.yml
-
 # We need an SSH key to access the newly-provisioned instances.
 #
 # We generated an SSH keypair named id_clustername above. Now we
