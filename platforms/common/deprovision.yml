@@ -1,0 +1,47 @@
+---
+
+- name: Delete generated files for this cluster
+  file:
+    path: "{{ cluster_dir }}/{{ item }}"
+    state: absent
+    force: yes
+  with_items:
+    - tmp
+    - keys
+    - certs
+    - vault
+    - hostkeys
+    - vars.json
+    - ssh_config
+    - known_hosts
+    - id_{{ cluster_name|lower }}
+    - id_{{ cluster_name|lower }}.pub
+    - inventory/00-{{ cluster_name }}
+    - inventory/group_vars/{{ cluster_tag }}/00-ansible.yml
+    - inventory/group_vars/{{ cluster_tag }}/01-{{ cluster_name }}.yml
+
+# First, we delete any files we may have generated into host_vars.
+# We really want something like «with_fileglob: host_vars/*» here,
+# but with_fileglob is serious about the "file" glob part, and will
+# not return directories matching a wildcard.
+
+- name: Delete host_vars files generated for this cluster
+  shell: >
+    find {{ cluster_dir }}/inventory/host_vars
+    '(' -name 01-instance_vars.yml -o -name 02-topology.yml -o -name 03-volumes.yml ')'
+    -exec rm {} ';'
+  register: rm
+  ignore_errors: yes
+  changed_when: >
+    'No such file or directory' not in rm.stderr
+
+# Now we try to remove as many empty directories as we can, up to
+# and including the top-level inventory directory.
+
+- name: Delete any empty inventory directories
+  shell: >
+    find {{ cluster_dir }}/inventory -depth -type d -exec rmdir {} ';'
+  register: rm
+  ignore_errors: yes
+  changed_when: >
+    'Directory not empty' not in rm.stderr

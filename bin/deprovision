@@ -26,6 +26,6 @@ fi
 cd $cluster_dir
 
 $TPA_DIR/ansible/ansible-playbook \
-    $TPA_DIR/platforms/aws/deprovision.yml \
-    -i inventory/ec2.py \
+    $TPA_DIR/platforms/deprovision.yml \
+    -i inventory \
     -e cluster=$(pwd) "$@"

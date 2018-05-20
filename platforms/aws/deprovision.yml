@@ -1,209 +1,159 @@
 ---
 
-# Decommission an already-provisioned AWS cluster:
+- include_tasks: deprovision-instances.yml
+  when:
+    - cluster_tag in groups
+    - groups[cluster_tag] | length > 0
+    - groups[cluster_tag] | selectattr('ec2_id', 'defined') | list | length > 0
+
+# Remove any keypair that matches the cluster's default 'tpa_xxx'
+# name. We don't try to remove any other keypairs, because it's
+# possible to configure a cluster to use existing keys.
 #
-#     bin/deprovision cluster_name
+# Keypairs can't be tagged with CreatingCluster, so we have to
+# depend on the name to guess whether we generated the key.
 
-- name: Deprovision EC2 cluster
-  hosts: localhost
-  tasks:
-    - include_tasks: validate.yml
-      tags: always
+- name: Remove keypairs in each region
+  ec2_key:
+    state: absent
+    region: "{{ item }}"
+    name: "tpa_{{ cluster_name|lower }}"
+    wait: yes
+  with_items: "{{ regions }}"
+  tags: ec2_keys
 
-    # If there are any instances in this cluster, we can terminate them.
+# Remove the cluster's instance profile role and associated policy.
+#
+# Roles can't be tagged with CreatingCluster, so we have to depend
+# on the cluster_name to match.
 
-    - include_tasks: deprovision-instances.yml
-      when:
-        - cluster_tag in groups
-        - groups[cluster_tag] | length > 0
+- name: Remove inline policy for instance profile
+  iam_policy:
+    iam_type: role
+    iam_name: '{{ cluster_profile }}'
+    policy_name: '{{ cluster_name }}_instance_permissions'
+    state: absent
+  tags: iam
 
-    # Remove any keypair that matches the cluster's default 'tpa_xxx'
-    # name. We don't try to remove any other keypairs, because it's
-    # possible to configure a cluster to use existing keys.
-    #
-    # Keypairs can't be tagged with CreatingCluster, so we have to
-    # depend on the name to guess whether we generated the key.
+- name: Remove instance profile for cluster
+  iam:
+    iam_type: role
+    name: '{{ cluster_profile }}'
+    state: absent
+  tags: iam
 
-    - name: Remove keypairs in each region
-      ec2_key:
-        state: absent
-        region: "{{ item }}"
-        name: "tpa_{{ cluster_name|lower }}"
-        wait: yes
-      with_items: "{{ regions }}"
-      tags: ec2_keys
+# With the instances gone, we can delete any volumes that were
+# created for the cluster.
 
-    # Remove the cluster's instance profile role and associated policy.
-    #
-    # Roles can't be tagged with CreatingCluster, so we have to depend
-    # on the cluster_name to match.
+- name: Enumerate EBS volumes provisioned in each region
+  ec2_vol_facts:
+    region: "{{ item }}"
+    filters:
+      "tag:CreatingCluster": "{{ cluster_name }}"
+  with_items: "{{ regions }}"
+  register: volumes
+  tags: volumes
 
-    - name: Remove inline policy for instance profile
-      iam_policy:
-        iam_type: role
-        iam_name: '{{ cluster_profile }}'
-        policy_name: '{{ cluster_name }}_instance_permissions'
-        state: absent
-      tags: iam
+- name: Remove volumes provisioned for this cluster in each region
+  ec2_vol:
+    state: absent
+    id: "{{ item.1.id }}"
+    region: "{{ item.1.region }}"
+  with_nested_dependents:
+    - volumes.results
+    - item.0.volumes
+  loop_control:
+    label: >-
+      {{ item.1.region }}:{{ item.1.id }} ({{ item.1.tags.Name }})
+  tags: volumes
 
-    - name: Remove instance profile for cluster
-      iam:
-        iam_type: role
-        name: '{{ cluster_profile }}'
-        state: absent
-      tags: iam
+# Next, remove any security groups created for this cluster.
 
-    # With the instances gone, we can delete any volumes that were
-    # created for the cluster.
+- name: Search for this cluster's security groups in each region
+  ec2_group_facts:
+    region: "{{ region }}"
+    filters:
+      "tag:CreatingCluster": "{{ cluster_name }}"
+  with_items: "{{ regions }}"
+  loop_control:
+    loop_var: region
+  register: ec2_groups
+  tags: ec2_groups
 
-    - name: Enumerate EBS volumes provisioned in each region
-      ec2_vol_facts:
-        region: "{{ item }}"
-        filters:
-          "tag:CreatingCluster": "{{ cluster_name }}"
-      with_items: "{{ regions }}"
-      register: volumes
-      tags: volumes
+- name: Remove this cluster's security groups in each region
+  ec2_group:
+    state: absent
+    region: "{{ item.0.region }}"
+    name: "{{ item.1.group_id }}"
+  with_nested_dependents:
+    - "{{ ec2_groups.results }}"
+    - item.0.security_groups
+  loop_control:
+    label: >-
+      {{ item.0.region }}:{{ item.1.group_id }}
+  tags: ec2_groups
 
-    - name: Remove volumes provisioned for this cluster in each region
-      ec2_vol:
-        state: absent
-        id: "{{ item.1.id }}"
-        region: "{{ item.1.region }}"
-      with_nested_dependents:
-        - volumes.results
-        - item.0.volumes
-      loop_control:
-        label: >-
-          {{ item.1.region }}:{{ item.1.id }} ({{ item.1.tags.Name }})
-      tags: volumes
+# Next, we delete the subnets that we created within each VPC, i.e.,
+# those subnets for which the CreatingCluster is set to this one.
 
-    # Next, remove any security groups created for this cluster.
+- name: Search for this cluster's VPC subnets in each region
+  ec2_vpc_subnet_facts:
+    region: "{{ region }}"
+    filters:
+      "tag:CreatingCluster": "{{ cluster_name }}"
+  with_items: "{{ regions }}"
+  loop_control:
+    loop_var: region
+  register: subnets
+  tags: ec2_vpcs
 
-    - name: Search for this cluster's security groups in each region
-      ec2_group_facts:
-        region: "{{ region }}"
-        filters:
-          "tag:CreatingCluster": "{{ cluster_name }}"
-      with_items: "{{ regions }}"
-      loop_control:
-        loop_var: region
-      register: ec2_groups
-      tags: ec2_groups
+- name: Remove this cluster's VPC subnets in each region
+  ec2_vpc_subnet:
+    state: absent
+    region: "{{ item.0.region }}"
+    vpc_id: "{{ item.1.vpc_id }}"
+    cidr: "{{ item.1.cidr_block }}"
+  with_nested_dependents:
+    - "{{ subnets.results }}"
+    - item.0.subnets
+  loop_control:
+    label: >-
+      {{ item.0.region }}:{{ item.1.cidr_block }}
+  tags: ec2_vpcs
 
-    - name: Remove this cluster's security groups in each region
-      ec2_group:
-        state: absent
-        region: "{{ item.0.region }}"
-        name: "{{ item.1.group_id }}"
-      with_nested_dependents:
-        - "{{ ec2_groups.results }}"
-        - item.0.security_groups
-      loop_control:
-        label: >-
-          {{ item.0.region }}:{{ item.1.group_id }}
-      tags: ec2_groups
+# Now we can finally delete any VPCs that we created for this
+# cluster, i.e., whose CreatingCluster is set to this one.
 
-    # Next, we delete the subnets that we created within each VPC, i.e.,
-    # those subnets for which the CreatingCluster is set to this one.
+- name: Search for this cluster's VPC in each region
+  ec2_vpc_net_facts:
+    region: "{{ region }}"
+    filters:
+      "tag:CreatingCluster": "{{ cluster_name }}"
+  with_items: "{{ regions }}"
+  loop_control:
+    loop_var: region
+  register: vpcs
+  tags: ec2_vpcs
 
-    - name: Search for this cluster's VPC subnets in each region
-      ec2_vpc_subnet_facts:
-        region: "{{ region }}"
-        filters:
-          "tag:CreatingCluster": "{{ cluster_name }}"
-      with_items: "{{ regions }}"
-      loop_control:
-        loop_var: region
-      register: subnets
-      tags: ec2_vpcs
+- name: Remove this cluster's VPC in each region
+  ec2_vpc_net:
+    state: absent
+    region: "{{ item.0.region }}"
+    name: "{{ item.1.tags.Name }}"
+    cidr_block: "{{ item.1.cidr_block }}"
+  with_nested_dependents:
+    - "{{ vpcs.results }}"
+    - item.0.vpcs
+  loop_control:
+    label: >-
+      {{ item.0.region }}:{{ item.1.cidr_block }}
+  tags: ec2_vpcs
 
-    - name: Remove this cluster's VPC subnets in each region
-      ec2_vpc_subnet:
-        state: absent
-        region: "{{ item.0.region }}"
-        vpc_id: "{{ item.1.vpc_id }}"
-        cidr: "{{ item.1.cidr_block }}"
-      with_nested_dependents:
-        - "{{ subnets.results }}"
-        - item.0.subnets
-      loop_control:
-        label: >-
-          {{ item.0.region }}:{{ item.1.cidr_block }}
-      tags: ec2_vpcs
-
-    # Now we can finally delete any VPCs that we created for this
-    # cluster, i.e., whose CreatingCluster is set to this one.
-
-    - name: Search for this cluster's VPC in each region
-      ec2_vpc_net_facts:
-        region: "{{ region }}"
-        filters:
-          "tag:CreatingCluster": "{{ cluster_name }}"
-      with_items: "{{ regions }}"
-      loop_control:
-        loop_var: region
-      register: vpcs
-      tags: ec2_vpcs
-
-    - name: Remove this cluster's VPC in each region
-      ec2_vpc_net:
-        state: absent
-        region: "{{ item.0.region }}"
-        name: "{{ item.1.tags.Name }}"
-        cidr_block: "{{ item.1.cidr_block }}"
-      with_nested_dependents:
-        - "{{ vpcs.results }}"
-        - item.0.vpcs
-      loop_control:
-        label: >-
-          {{ item.0.region }}:{{ item.1.cidr_block }}
-      tags: ec2_vpcs
-
-    - name: Delete generated files for this cluster
-      file:
-        path: "{{ cluster_dir }}/{{ item }}"
-        state: absent
-        force: yes
-      with_items:
-        - tmp
-        - keys
-        - certs
-        - vault
-        - hostkeys
-        - vars.json
-        - ssh_config
-        - known_hosts
-        - id_{{ cluster_name|lower }}
-        - id_{{ cluster_name|lower }}.pub
-        - inventory/ec2.py
-        - inventory/ec2.ini
-        - inventory/00-{{ cluster_name }}
-        - inventory/group_vars/{{ cluster_tag }}/00-ansible.yml
-        - inventory/group_vars/{{ cluster_tag }}/01-{{ cluster_name }}.yml
-
-    # First, we delete any files we may have generated into host_vars.
-    # We really want something like «with_fileglob: host_vars/*» here,
-    # but with_fileglob is serious about the "file" glob part, and will
-    # not return directories matching a wildcard.
-
-    - name: Delete host_vars files generated for this cluster
-      shell: >
-        find {{ cluster_dir }}/inventory/host_vars
-        '(' -name 01-instance_vars.yml -o -name 02-topology.yml -o -name 03-volumes.yml ')'
-        -exec rm {} ';'
-      register: rm
-      ignore_errors: yes
-      changed_when: >
-        'No such file or directory' not in rm.stderr
-
-    # Now we try to remove as many empty directories as we can, up to
-    # and including the top-level inventory directory.
-
-    - name: Delete any empty inventory directories
-      shell: >
-        find {{ cluster_dir }}/inventory -depth -type d -exec rmdir {} ';'
-      register: rm
-      ignore_errors: yes
-      changed_when: >
-        'Directory not empty' not in rm.stderr
+- name: Delete generated files for this cluster
+  file:
+    path: "{{ cluster_dir }}/{{ item }}"
+    state: absent
+    force: yes
+  with_items:
+    - inventory/ec2.py
+    - inventory/ec2.ini
