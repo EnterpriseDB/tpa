@@ -17,7 +17,7 @@
   set_fact:
     ssh_key_file: >-
       {{ ssh_key_file|default('id_' + cluster_name|lower) }}
-  tags: [ssh]
+  tags: always
 
 - name: Run ssh-keygen
   command: ssh-keygen -P "" -f "{{ ssh_key_file }}" -C 2ndQuadrant

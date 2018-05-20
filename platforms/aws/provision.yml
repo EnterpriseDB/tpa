@@ -1,18 +1,15 @@
 ---
 
-# Takes a cluster configuration file (config.yml) and provisions EC2
-# instances and associated AWS resources (e.g., VPCs, security groups,
-# subnets, etc.) as configured.
-#
-# You should invoke this with «bin/provision clustername» to use your
-# cluster configuration file in clustername/config.yml.
+# Provisions EC2 instances and associated AWS resources (e.g., VPCs,
+# security groups, subnets, etc.) as configured.
 #
 # AWS credentials must be supplied separately (e.g., in ~/.boto or in
 # the environment).
 #
 # See platforms/aws/README.md for more details.
 
-- include_tasks: inventory/write.yml
+- import_tasks: inventory/write.yml
+  tags: inventory
 
 # We need an SSH key to access the newly-provisioned instances.
 #
