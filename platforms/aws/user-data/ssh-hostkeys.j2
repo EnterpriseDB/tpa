@@ -14,7 +14,7 @@ done
     On RHEL AMIs, we also need to make sure that sshd doesn't generate
     more host keys to replace the ones we remove below.
 #}
-{% if 'RHEL' in image['name'] %}
+{% if OS == 'RedHat' %}
 F=/etc/sysconfig/sshd
 LINE="AUTOCREATE_SERVER_KEYS=''"
 grep -qx "$LINE" $F || echo "$LINE" >> $F

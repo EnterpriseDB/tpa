@@ -104,6 +104,21 @@ def parse_conninfo(conninfo, key=None):
 
     return settings
 
+# Takes the name of an image and returns a string corresponding to
+# ansible_distribution values.
+
+def identify_os(name):
+    name = name.lower()
+
+    if 'rhel' in name or 'redhat' in name:
+        return 'RedHat'
+    elif 'debian' in name:
+        return 'Debian'
+    elif 'ubuntu' in name:
+        return 'Ubuntu'
+
+    return 'Unknown'
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -114,4 +129,5 @@ class FilterModule(object):
             'get_device_variables': get_device_variables,
             'remove_keys': remove_keys,
             'parse_conninfo': parse_conninfo,
+            'identify_os': identify_os,
         }

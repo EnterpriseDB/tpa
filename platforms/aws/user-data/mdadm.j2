@@ -3,15 +3,9 @@
 #}
 
 {% if not image['name'].startswith('TPA-') %}
-test -x /sbin/mdadm || (
-{%   if 'RHEL' in image['name'] %}
-{%     include 'user-data/os/RedHat/mdadm.j2' %}
-{%   elif 'debian' in image['name'].lower() %}
-{%     include 'user-data/os/Debian/mdadm.j2' %}
-{%   elif 'ubuntu' in image['name'].lower() %}
-{%     include 'user-data/os/Ubuntu/mdadm.j2' %}
-{%   endif %}
-)
+if ! command -v mdadm &>/dev/null; then
+{% include 'user-data/os/'+OS+'/mdadm.j2' %}
+; fi
 {% endif %}
 
 udevadm control --stop-exec-queue

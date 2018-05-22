@@ -4,6 +4,8 @@
     as a user-data script to execute on first boot.
 #}
 
+{% set OS = image['name']|identify_os %}
+
 exec >> /var/log/tpa-firstboot.log 2>&1
 
 echo "$(date): start"

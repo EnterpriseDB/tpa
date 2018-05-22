@@ -5,6 +5,7 @@
     - cluster_tag in groups
     - groups[cluster_tag] | length > 0
     - groups[cluster_tag] | map('extract', hostvars, 'ec2_id') | select('defined') | list | length > 0
+  tags: ec2
 
 # Remove any keypair that matches the cluster's default 'tpa_xxx'
 # name. We don't try to remove any other keypairs, because it's
