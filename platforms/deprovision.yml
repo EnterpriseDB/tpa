@@ -13,15 +13,7 @@
     - import_tasks: validate.yml
       tags: always
 
-    - import_tasks: aws/deprovision.yml
-      when: >
-        'aws' in cluster_platforms
-      tags: aws
-
-    - import_tasks: bare/deprovision.yml
-      when: >
-        'bare' in cluster_platforms
-      tags: bare
-
-    - import_tasks: common/deprovision.yml
-      tags: common
+    - include_tasks: "{{ item }}/deprovision.yml"
+      with_items:
+        - "{{ cluster_platforms }}"
+        - common
