@@ -10,8 +10,10 @@
     - inventory
     - inventory/host_vars
     - inventory/group_vars
+  tags: always
 
-- include_tasks: ../common/read-provisioning-vars.yml
+- import_tasks: ../common/read-provisioning-vars.yml
+  tags: always
 
 - name: Set ssh_key_file
   set_fact:
@@ -24,7 +26,7 @@
   args:
     chdir: "{{ cluster_dir }}"
     creates: "{{ ssh_key_file }}"
-  tags: [ssh, keygen]
+  tags: [common, ssh, keygen]
 
 - name: Generate RSA and ECDSA host keys
   command: ssh-keygen -t {{ item }} -N "" -C "{{ cluster_name }}" -f ssh_host_{{ item }}_key
@@ -34,7 +36,7 @@
   with_items:
     - rsa
     - ecdsa
-  tags: [ssh, keygen]
+  tags: [common, ssh, hostkeys]
 
 # We generate a random vault passphrase and store it in a text file.
 # This obviously needs improvement—we should GPG-encrypt it with the
@@ -46,3 +48,4 @@
   args:
     chdir: "{{ cluster_dir }}/vault"
     creates: vault_pass.txt
+  tags: [common, vault]

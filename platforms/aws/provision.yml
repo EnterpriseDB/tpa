@@ -8,8 +8,8 @@
 #
 # See platforms/aws/README.md for more details.
 
-- import_tasks: inventory/write.yml
-  tags: inventory
+- include_tasks: inventory/write.yml
+  tags: [aws, inventory]
 
 # We need an SSH key to access the newly-provisioned instances.
 #
@@ -27,7 +27,7 @@
   when:
     - ec2_key_name != ''
     - ec2_instance_key is not defined
-  tags: ec2_keys
+  tags: [aws, ec2, key]
 
 # Provisioned instances must have known SSH host keys.
 #
@@ -43,7 +43,7 @@
 - include_tasks: s3-hostkeys.yml
   when:
     lookup('pipe', 'date +%s')|int > s3_hostkey_expiry|default(0)|int
-  tags: ssh
+  tags: [aws, s3, ssh, hostkeys]
 
 # Every instance must be in a particular subnet.
 #
@@ -102,7 +102,7 @@
     - ec2_vpc is defined
     - ec2_region_vpcs is not defined or
       ec2_vpc != ec2_cached_vpc|default(None)
-  tags: ec2_vpc
+  tags: [aws, vpc]
 
 # Now that we know which VPC to use, we check if each instance's
 # «subnet: xxx» reference corresponds to the cidr of an existing
@@ -135,13 +135,14 @@
   with_items: "{{ aws_regions }}"
   loop_control:
     loop_var: r
+  tags: [aws, vpc, subnet]
 
 - name: Resolve subnet references in each region
   include_tasks: ec2-region-subnets.yml
   when:
     - ec2_region_subnets is not defined or
       ec2_subnets != ec2_cached_subnets|default(None)
-  tags: ec2_vpc
+  tags: [aws, vpc, subnet]
 
 # If required, we create an igw (internet gateway) in each region.
 # To create one in every region, you can set
@@ -178,7 +179,7 @@
       r in igws
     - ec2_region_vpcs is not defined or
       ec2_vpc != ec2_cached_vpc|default(None)
-  tags: ec2_vpc_igw
+  tags: [aws, vpc, igw]
 
 # We require internet access for all of the subnets in the cluster.
 #
@@ -206,7 +207,7 @@
       ec2_subnets != ec2_cached_subnets|default(None)
   loop_control:
     loop_var: r
-  tags: ec2_vpc_route_table
+  tags: [aws, vpc, route]
 
 # Each instance may be associated with one or more security groups
 # (each comprising a set of firewall rules).
@@ -252,7 +253,7 @@
 - include_tasks: ec2-region-groups.yml
   when:
     ec2_region_groups is not defined
-  tags: sgs
+  tags: [aws, vpc, group]
 
 # We must specify an AMI to use when launching instances:
 #
@@ -291,7 +292,7 @@
     - ec2_ami is defined
     - ec2_region_amis is not defined or
       ec2_ami != ec2_cached_ami|default(None)
-  tags: ami
+  tags: [aws, ec2, ami]
 
 # If any instances[] directly reference an image whose properties we
 # do not already know, we need to look them up too.
@@ -304,7 +305,7 @@
       {{ ec2_ami_properties|default({})|json_query('keys(@)') }}
   when:
     (wanted_properties|difference(known_properties)|list)|count > 0
-  tags: ami
+  tags: [aws, ec2, ami]
 
 # If «attach_existing» is specified for any volume in a region, we
 # build a table to map the names of unattached volumes in that
@@ -313,7 +314,7 @@
 - include_tasks: ec2-attachable-volumes.yml
   when:
     aws_instances|json_query('[*].volumes[]|[?attach_existing]')|count > 0
-  tags: ebs
+  tags: [aws, ebs]
 
 # We create an instance profile IAM role for the cluster and attach
 # an inline policy with any permissions that the instances need.
@@ -328,7 +329,7 @@
   when:
     - cluster_profile != ''
     - instance_profile_name is not defined
-  tags: iam
+  tags: [aws, iam]
 
 # Preprocess instance definitions through various helpful filters to
 # set things that aren't set and check things that need checking.
@@ -341,7 +342,6 @@
       |expand_instance_volumes(ec2_ami_properties)
       |match_existing_volumes(cluster_name, ec2_attachable_volumes)
     }}"
-  tags: ec2
 
 - name: Ensure that we know security group ids in every region
   assert:
@@ -435,7 +435,7 @@
   register: ec2_instances
   async: 7200
   poll: 0
-  tags: ec2
+  tags: [aws, ec2]
 
 - name: Wait for instance provisioning to complete
   async_status: jid={{ item.ansible_job_id }}
@@ -446,7 +446,7 @@
   loop_control:
     label: >-
       {{ item.ansible_job_id }}
-  tags: ec2
+  tags: [aws, ec2]
 
 - name: Collect all volumes to be tagged
   set_fact:
@@ -472,18 +472,19 @@
   vars:
     attachment_label: >-
       {{ cluster_name ~':'~ item.1.tags.node ~':'~ item.2 }}
+  tags: [aws, ebs]
 
 - include_tasks: ec2-tag-volumes.yml
   when:
     ec2_attached_volumes != ec2_cached_attached_volumes|default(None)
-  tags: ec2
+  tags: [aws, ebs]
 
 # If explicitly requested, we can also associate an elastic IP with
 # one or more of the instances created above. The instance ids come
 # from the results above, and the configuration is in instances[].
 
 - include_tasks: ec2-eip.yml
-  tags: ec2_eips
+  tags: [aws, eip]
 
 # Now we have ec2_public_ips in ec2_jobs.results, but some of them
 # may have been overriden by elastic IP addresses.
@@ -518,7 +519,7 @@
 # applies to all instances).
 
 - include_tasks: route53.yml
-  tags: route53
+  tags: [aws, route53]
 
 - set_fact:
     cluster_ssh_user: "{{ cluster_ssh_user|default(ec2_ami_user) }}"

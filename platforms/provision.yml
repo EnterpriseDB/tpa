@@ -72,4 +72,3 @@
       vars:
         ansible_user: "{{ cluster_ssh_user|default('') }}"
         ansible_port: "{{ cluster_ssh_port|default(22) }}"
-      tags: [common, inventory]

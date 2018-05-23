@@ -9,11 +9,6 @@
 # cache the key_material and compare it to the key on disk. That doesn't
 # seem worth the effort, because the key shouldn't change.)
 
-- assert:
-    msg: "Please set ec2_key_name"
-    that:
-      - ec2_key_name != ''
-
 - name: Register key {{ ec2_key_name }} in each region
   ec2_key:
     state: present
