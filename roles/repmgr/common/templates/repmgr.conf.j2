@@ -16,6 +16,9 @@ reconnect_attempts=6
 reconnect_interval=10
 failover={{ repmgr_failover }}
 ssh_options=-q
+
+log_level=INFO
+
 promote_command='{{ repmgr_conf_dir }}/promote_command.sh'
 follow_command='{{ repmgr_conf_dir }}/follow_command.sh'
 {% if upstream_backedup != '' %}
