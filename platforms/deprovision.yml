@@ -13,7 +13,9 @@
     - import_tasks: validate.yml
       tags: always
 
-    - include_tasks: "{{ item }}/deprovision.yml"
+    - include_tasks: "{{ platform }}/deprovision.yml"
       with_items:
         - "{{ cluster_platforms }}"
         - common
+      loop_control:
+        loop_var: platform

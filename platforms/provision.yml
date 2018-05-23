@@ -57,10 +57,12 @@
     # each platform handler a chance to do whatever it wants with its
     # subset of the defined instances.
 
-    - include_tasks: "{{ item }}/provision.yml"
+    - include_tasks: "{{ platform }}/provision.yml"
       with_items:
         - common
         - "{{ cluster_platforms }}"
+      loop_control:
+        loop_var: platform
 
     ## Writing the inventory
     #
