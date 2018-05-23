@@ -73,10 +73,17 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults):
         j['Name'] = name.replace('_', '-').lower()
 
         # Anything set in instance_defaults should be copied to the instance,
-        # unless the instance has a setting that overrides the default.
+        # unless the instance has a setting that overrides the default. As a
+        # convenience, we also merge dict keys (so that once can, for example,
+        # set some vars in instance_defaults and some on the instance, and get
+        # all of them, with the instance settings overriding the defaults).
 
         for kd in instance_defaults:
             j[kd] = j.get(kd, instance_defaults[kd])
+            if isinstance(j[kd], dict) and isinstance(instance_defaults[kd], dict):
+                b = copy.deepcopy(instance_defaults[kd])
+                b.update(j[kd])
+                j[kd] = b
 
         # The upstream, backup, and role tags should be moved one level up if
         # they're specified at all.
