@@ -1,9 +1,29 @@
 ---
 
-- name: Install .pgpass file in ~postgres
-  template:
-    src: pgpass.j2
-    dest: ~postgres/.pgpass
+- name: Ensure that ~postgres/.pgpass exists
+  file:
+    path: ~postgres/.pgpass
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0600
+    state: touch
+
+- name: Add postgres password to .pgpass
+  lineinfile:
+    path: ~postgres/.pgpass
+    line: >-
+      *:*:*:postgres:{{ pass }}
+  vars:
+    pass: >-
+      {{ postgres_password|replace("\\","\\\\")|replace(':','\:') }}
+
+- name: Add repmgr password to .pgpass
+  lineinfile:
+    path: ~postgres/.pgpass
+    line: >-
+      *:*:*:repmgr:{{ pass }}
+  vars:
+    pass: >-
+      {{ repmgr_password|replace("\\","\\\\")|replace(':','\:') }}
+  when:
+    repmgr_password is defined
