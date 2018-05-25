@@ -11,19 +11,21 @@
 - name: Add postgres password to .pgpass
   lineinfile:
     path: ~postgres/.pgpass
+    regexp: '^\*:\*:\*:postgres:'
     line: >-
       *:*:*:postgres:{{ escaped_password }}
   vars:
     escaped_password: >-
-      {{ postgres_password|replace("\\","\\\\")|replace(':','\:') }}
+      {{ postgres_password|regex_replace('\\', '\\\\')|replace(':', '\:') }}
 
 - name: Add repmgr password to .pgpass
   lineinfile:
     path: ~postgres/.pgpass
+    regexp: '^\*:\*:\*:repmgr:'
     line: >-
       *:*:*:repmgr:{{ escaped_password }}
   vars:
     escaped_password: >-
-      {{ repmgr_password|replace("\\","\\\\")|replace(':','\:') }}
+      {{ repmgr_password|regex_replace('\\', '\\\\')|replace(':', '\:') }}
   when:
     repmgr_password is defined
