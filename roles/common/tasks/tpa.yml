@@ -40,6 +40,7 @@
 - name: Ensure that /etc/rc.local is executable
   file:
     path: /etc/rc.local
+    follow: yes
     mode: 0755
 
 - name: Make /etc/rc.local invoke /etc/tpa/rc.local
