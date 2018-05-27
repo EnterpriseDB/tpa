@@ -4,5 +4,5 @@ dependencies:
   - role: platforms/vars
   - role: platforms/aws
     when:
-      ec2_id is defined
+      platform == 'aws'
   - role: platforms/common

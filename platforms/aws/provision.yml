@@ -504,6 +504,7 @@
           'upstream': item.0.item.item|try_subkey('upstream'),
           'volumes': item.0.item.item|try_subkey('volumes', []),
           'vars': item.0.item.item|try_subkey('vars', {}),
+          'platform': 'aws',
         })
       ])
     }}"
