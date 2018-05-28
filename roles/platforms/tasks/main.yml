@@ -1,5 +1,12 @@
 ---
 
+- assert:
+    msg: "Ansible 2.6.x is required"
+    that:
+      - ansible_version.major == 2
+      - ansible_version.minor == 6
+  tags: prereqs
+
 - name: Ensure that local dependencies are installed
   become: no
   assert:
