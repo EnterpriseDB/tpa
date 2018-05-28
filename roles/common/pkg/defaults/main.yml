@@ -27,6 +27,7 @@ packages:
     - linux-tools
     - dbus
     - gnutls-bin
+    - apt-transport-https
   RedHat:
     - python-devel
     - python-passlib
@@ -38,6 +39,7 @@ packages:
     - python-passlib
     - linux-tools-generic
     - gnutls-bin
+    - apt-transport-https
 
 unwanted_packages:
   Debian: &debian_unpackages
