@@ -1,8 +1,7 @@
 #!/bin/sh
 #
 # Builds a tarball of the current branch's HEAD including TPA itself,
-# 2ndQuadrant/ansible, and all python dependencies bundled up into a
-# virtualenv.
+# ansible, and all python dependencies bundled up into a virtualenv.
 
 set -e
 

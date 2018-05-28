@@ -1,8 +1,10 @@
 Installation guide
 ==================
 
-You will need to install Python 2.7 and some Python modules, Ansible
-from 2ndQuadrant's repository, and the AWS cli tools.
+You will need Ansible 2.6, Python 2.7, and some Python modules.
+
+Don't even bother to try to use any other version of Ansible or Python.
+It will not work.
 
 Python and modules
 ------------------
@@ -57,18 +59,16 @@ RedHat / CentOS:
 Ansible
 -------
 
-You will need Ansible from the
-[2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ansible).
+You will need [Ansible 2.6](https://github.com/ansible/ansible).
 
-Clone the Ansible repository:
+You can install Ansible using distribution packages or ``pip install``.
+If Ansible is in your path, it will be detected and used automatically.
 
-```
-    git clone --recursive https://github.com/2ndQuadrant/ansible
-```
-
-Set ANSIBLE_HOME in your environment (and .bashrc/.profile):
+Alternatively, you can also clone the Ansible repository and set
+ANSIBLE_HOME in your environment (and .bashrc/.profile):
 
 ```
+    git clone https://github.com/ansible/ansible
     export ANSIBLE_HOME=/path/to/ansibledir
 ```
 
