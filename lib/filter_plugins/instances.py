@@ -55,6 +55,20 @@ ephemeral_storage = {
 # and other inputs and return a new array of instances with parameters
 # suitably adjusted.
 
+# Returns a hash of the IP addresses specified for a given instance.
+
+def ip_addresses(instance):
+    addresses = {}
+
+    for a in ['ip_address', 'public_ip', 'private_ip']:
+        ip = instance.get(a)
+        if ip is not None:
+            addresses[a] = ip
+
+    addresses['ip_address'] = instance.get('ip_address', instance.get('public_ip', instance.get('private_ip')))
+
+    return addresses
+
 # Every instance must have certain settings (e.g., tags) in a specific format.
 
 def set_instance_defaults(old_instances, cluster_name, instance_defaults):
@@ -71,6 +85,7 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults):
         if name is None:
             name = cluster_name +'-'+ str(j['node'])
         j['Name'] = name.replace('_', '-').lower()
+        j['vars'] = j.get('vars', {})
 
         # Anything set in instance_defaults should be copied to the instance,
         # unless the instance has a setting that overrides the default. As a
@@ -231,6 +246,7 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
 class FilterModule(object):
     def filters(self):
         return {
+            'ip_addresses': ip_addresses,
             'set_instance_defaults': set_instance_defaults,
             'expand_instance_image': expand_instance_image,
             'expand_instance_volumes': expand_instance_volumes,

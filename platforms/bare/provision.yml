@@ -3,21 +3,23 @@
 - name: Set instance variables
   set_fact:
     instance_vars: "{{
-      instance_vars|default([])|union([{
-        'ip_address': item.vars.public_ip or item.vars.private_ip,
-        'public_ip': item.vars.public_ip,
-        'Name': item.Name,
-        'node': item.node,
-        'role': item|try_subkey('role', []),
-        'backup': item|try_subkey('backup'),
-        'upstream': item|try_subkey('upstream'),
-        'volumes': item|try_subkey('volumes', []),
-        'vars': item|try_subkey('vars', {}),
-        'platform': 'bare',
-      }])
+      instance_vars|default([])|union([
+        addresses|combine({
+          'Name': item.Name,
+          'node': item.node,
+          'role': item|try_subkey('role', []),
+          'backup': item|try_subkey('backup'),
+          'upstream': item|try_subkey('upstream'),
+          'volumes': item|try_subkey('volumes', []),
+          'vars': addresses|combine(item.vars),
+          'platform': 'bare',
+        })
+      ])
     }}"
   with_items:
     "{{ bare_instances }}"
   loop_control:
     label: >-
       {{ item.Name }}
+  vars:
+    addresses: "{{ item|ip_addresses }}"
