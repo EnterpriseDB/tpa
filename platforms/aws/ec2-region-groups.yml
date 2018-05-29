@@ -21,7 +21,7 @@
   set_fact:
     ec2_region_groups: "{{
       ec2_region_groups|combine({
-        item.item.key: item|json_query('ec2_region_groups[*].group_id')
+        item.item.key: item|json_query('security_groups[*].group_id')
       })
     }}"
   with_items: "{{ sgs.results }}"
@@ -86,7 +86,7 @@
     - "{{ new_sgs.results }}"
   loop_control:
     label: >-
-      {{ item.0 }}:{{ item.1.group_id }}
+      {{ item.0 }}:{{ item.1.group_id|default('skipped') }}
 
 - include_tasks: ../common/set-provisioning-var.yml
   vars:
