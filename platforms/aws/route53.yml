@@ -9,6 +9,7 @@
     value: "{{ item.1.ip_address }}"
     type: A
     ttl: 60
+    overwrite: yes
     wait: yes
   with_together:
     - "{{ aws_instances }}"
