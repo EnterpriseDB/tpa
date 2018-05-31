@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# Runs provision/deprovision/deploy etc.
+
+IFS=
+set -e -u
+
+TOP=$(dirname $0)/..
+type realpath &>/dev/null && TOP=$(realpath $TOP)
+export TPA_DIR=${TPA_DIR:-$TOP}
+
+command=${1:?No command specified}
+shift
+
+# For now, we only accept selected command names, and not just anything
+# within bin/
+
+case "$command" in
+    provision)
+        ;;
+    deprovision)
+        ;;
+    deploy)
+        ;;
+    rehydrate)
+        ;;
+    *)
+        echo "Can't execute $command"
+        exit
+        ;;
+esac
+
+$TPA_DIR/bin/$command "$@"
