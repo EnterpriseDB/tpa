@@ -1,11 +1,9 @@
 ---
 
-# Once we know what distribution we are dealing with, we must ensure
-# that a usable Python (2.7.x) is installed, along with anything else
-# that is required to run "pkg" below.
-- include_tasks: "os/{{ ansible_os_family }}.yml"
+# We must ensure that a usable Python (2.7.x) is installed, along with
+# anything else we need to run Ansible modules such as "pkg" below.
 
-# We have Python and pip; install any other required Python packages,
-# and then install/uninstall any system packages.
-- include_tasks: python.yml
+- include_tasks: "os/{{ ansible_os_family }}/python.yml"
+- include_tasks: "os/{{ ansible_os_family }}/repositories.yml"
 - include_tasks: packages.yml
+- include_tasks: python.yml

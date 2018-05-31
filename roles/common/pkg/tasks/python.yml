@@ -1,27 +1,5 @@
 ---
 
-- name: Determine Python version
-  command: "{{ ansible_python_interpreter }} -c 'import platform; print platform.python_version()'"
-  register: version
-  changed_when: False
-
-- name: Set ansible_python_version
-  set_fact:
-    ansible_python_version: "{{ version.stdout }}"
-
-# If we have neither ssl.match_hostname (included in Python ≥ 2.7.9) or
-# backports.ssl_match_hostname, we need to install the latter using pip.
-# It's easier to check the version, and since running "pip install foo"
-# twice should have no effect the second time, that's what we do here.
-
-- name: Install backports.ssl_match_hostname
-  command: pip install backports.ssl_match_hostname
-  register: backport_install
-  changed_when: >
-    backport_install is successful
-    and 'Requirement already satisfied' not in backport_install.stdout
-  when: ansible_python_version is version('2.7.9', '<')
-
 # Install AWS-related Python modules.
 #
 # We could make this conditional, but it can't be as simple as checking

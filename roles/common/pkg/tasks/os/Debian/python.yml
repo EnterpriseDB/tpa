@@ -14,9 +14,12 @@
     python_install is successful
     and 'already the newest version' not in python_install.stdout
 
-- name: Install pip
-  raw: apt-get -q -y install python-pip
-  register: pip_install
+- name: Install backports.ssl_match_hostname
+  raw: >
+    if [[ $(python -c 'import sys; print "old" if sys.version_info < (2,7,9) else "ok"') != "ok" ]];
+    then apt-get -q -y install python-backports.ssl-match-hostname;
+    fi
+  register: backport_install
   changed_when: >
-    pip_install is successful
-    and 'already the newest version' not in pip_install.stdout
+    backport_install is successful
+    and 'already the newest version' not in backport_install.stdout

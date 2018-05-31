@@ -1,13 +1,10 @@
 {#
-    If awscli is not available, install it.
+    If awscli is not available, install it using pip.
 
-    Debian and Ubuntu have an awscli package, and it's even installed by
-    default on Debian, so we just use that. (We could use pip here, but
-    for some reason it has 75MB or so of dependencies.)
-
-    On RHEL, the awscli package doesn't install because of a dependency
-    on python-docutils that is apparently not available by default even
-    in EPEL. So we use pip to install it instead.
+    XXX We should check not only if awscli is available, but also that
+    it is recent enough (Debian and Ubuntu have an awscli package that
+    is even installed by default in the EC2 AMIs, but it's older than
+    some of the features we depend on).
 #}
 
 {% if not image['name'].startswith('TPA-') %}

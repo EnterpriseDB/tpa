@@ -1,2 +1,5 @@
 apt-get -q -y update &&
-apt-get -q -y --no-install-recommends install awscli
+apt-get -q -y --no-install-recommends install python python-virtualenv &&
+virtualenv /usr/local/share/tpa/python-virtualenv &&
+source /usr/local/share/tpa/python-virtualenv/bin/activate &&
+pip install awscli

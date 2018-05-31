@@ -1,0 +1,18 @@
+---
+
+- name: Install Python 2.7
+  raw: yum -y install python
+  register: python_install
+  changed_when: >
+    python_install is successful
+    and 'already installed and latest version' not in python_install.stdout
+
+- name: Install backports.ssl_match_hostname
+  raw: >
+    if [[ $(python -c 'import sys; print "old" if sys.version_info < (2,7,9) else "ok"') != "ok" ]];
+    then yum -y install python-backports-ssl_match_hostname;
+    fi
+  register: backport_install
+  changed_when: >
+    backport_install is successful
+    and 'already installed and latest version' not in backport_install.stdout
