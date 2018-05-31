@@ -11,6 +11,15 @@
 # but if config.yml specifies a custom cluster_ssh_port, then it's set
 # as the very last step in user-data, so when we're able to connect to
 # the non-standard port, we know that user-data has finished executing.
+#
+# XXX wait_for tries to connect to the given host:port, which will never
+# work for hosts that we can access only through an ssh ProxyCommand. On
+# the other hand, wait_for_connection uses the underlying ssh transport,
+# but it tries to execute the ping module, which depends on Python being
+# set up on the target host already (which is not always the case).
+#
+# Until this is solved, just use «--skip-tags wait_for» if you need to
+# use a ProxyCommand.
 
 - name: Wait for ssh to be available
   local_action:
