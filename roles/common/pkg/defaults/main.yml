@@ -21,6 +21,7 @@ packages:
     - mdadm
     - pigz
     - dstat
+    - python-virtualenv
   Debian:
     - python-dev
     - python-passlib
