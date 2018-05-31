@@ -10,3 +10,4 @@
     name: awscli
     state: present
     virtualenv: /usr/local/share/tpa/python-virtualenv
+    virtualenv_site_packages: yes

@@ -1,4 +1,4 @@
 yum -y install python python-virtualenv &&
-virtualenv /usr/local/share/tpa/python-virtualenv &&
+virtualenv --system-site-packages /usr/local/share/tpa/python-virtualenv &&
 source /usr/local/share/tpa/python-virtualenv/bin/activate &&
 pip install awscli
