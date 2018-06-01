@@ -11,7 +11,6 @@ postgres_packages:
     - postgresql-contrib-{{postgres_version}}
     - postgresql-server-dev-{{postgres_version}}
     - postgresql-plperl-{{postgres_version}}
-    - postgresql-{{postgres_version}}-plv8
     - barman-cli
   RedHat:
     - postgresql{{postgres_versionNN}}
@@ -20,7 +19,6 @@ postgres_packages:
     - postgresql{{postgres_versionNN}}-devel
     - postgresql{{postgres_versionNN}}-libs
     - postgresql{{postgres_versionNN}}-plperl
-    - plv8_{{postgres_versionNN}}
     - barman-cli
   Ubuntu: *debian_packages
 
