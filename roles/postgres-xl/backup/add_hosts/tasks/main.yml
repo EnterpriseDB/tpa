@@ -10,7 +10,6 @@
     groups: [backup_nodes, "{{ hostvars[item].cluster_tag }}"]
     ansible_os_family: "{{ hostvars[item].ansible_os_family }}"
     ansible_distribution_release: "{{ hostvars[item].ansible_distribution_release }}"
-    ansible_pkg_mgr: "{{ hostvars[item].ansible_pkg_mgr }}"
     cluster_name: "{{ hostvars[item].cluster_name }}"
 #   role: "{{ hostvars[item].role }}"
     role: [ "barman" ]
@@ -29,7 +28,6 @@
     backup: "{{ hostvars[item.0].backup }}-barman"
     ansible_os_family: "{{ hostvars[item.0].ansible_os_family }}"
     ansible_distribution_release: "{{ hostvars[item.0].ansible_distribution_release }}"
-    ansible_pkg_mgr: "{{ hostvars[item.0].ansible_pkg_mgr }}"
     cluster_name: "{{ hostvars[item.0].cluster_name }}"
 #   role: "{{ hostvars[item.0].role }}"
     role: [ "coordinator","postgres-xl" ]
@@ -51,7 +49,6 @@
     backup: "{{ hostvars[item.0].backup }}-barman"
     ansible_os_family: "{{ hostvars[item.0].ansible_os_family }}"
     ansible_distribution_release: "{{ hostvars[item.0].ansible_distribution_release }}"
-    ansible_pkg_mgr: "{{ hostvars[item.0].ansible_pkg_mgr }}"
     cluster_name: "{{ hostvars[item.0].cluster_name }}"
 #   role: "{{ hostvars[item.0].role }}"
     role: [ "datanode","postgres-xl" ]
@@ -77,7 +74,6 @@
     backup_name: "{{item}}-gtm"
     ansible_os_family: "{{ hostvars[item].ansible_os_family }}"
     ansible_distribution_release: "{{ hostvars[item].ansible_distribution_release }}"
-    ansible_pkg_mgr: "{{ hostvars[item].ansible_pkg_mgr }}"
     cluster_name: "{{ hostvars[item].cluster_name }}"
     role: [ "gtm","postgres-xl" ]
     parent_inventory_hostname: "{{item}}"

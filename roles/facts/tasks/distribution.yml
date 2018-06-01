@@ -50,11 +50,3 @@
       Debian: Debian
       RedHat: RedHat
       Ubuntu: Debian
-
-- name: Set ansible_pkg_mgr based on ansible_os_family
-  set_fact:
-    ansible_pkg_mgr: "{{ ansible_pkg_mgr|default(package_managers[ansible_os_family]) }}"
-  vars:
-    package_managers:
-      Debian: apt
-      RedHat: yum

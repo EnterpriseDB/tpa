@@ -1,5 +1,5 @@
 ---
 
-# Set ansible_distribution and ansible_pkg_mgr if required.
+# Set ansible_distribution if required.
 - include_tasks: distribution.yml
   tags: always
