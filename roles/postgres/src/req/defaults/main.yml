@@ -12,3 +12,4 @@ requirements:
     - readline-devel
     - zlib-devel
     - openssl-devel
+    - "@Development tools"
