@@ -1,15 +1,25 @@
 ---
 
-- name: Install packages
+- name: Install required packages
+  package:
+    name: >
+      {{ query('flattened', package_lists) }}
+    state: latest
+  vars:
+    package_lists:
+      - "{{ packages['common'] }}"
+      - "{{ packages[ansible_distribution] }}"
+
+- name: Install optional packages
   package:
     name: "{{ item }}"
     state: latest
   with_items:
-    - "{{ packages['common'] }}"
-    - "{{ packages[ansible_distribution] }}"
+    - "{{ optional_packages['common'] }}"
+    - "{{ optional_packages[ansible_distribution] }}"
+  ignore_errors: yes
 
 - name: Remove unwanted packages
   package:
-    name: "{{ item }}"
+    name: "{{ unwanted_packages[ansible_distribution] }}"
     state: absent
-  with_items: "{{ unwanted_packages[ansible_distribution] }}"

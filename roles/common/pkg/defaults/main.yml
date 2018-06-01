@@ -14,33 +14,39 @@ packages:
     - gdb
     - unzip
     - curl
-    - htop
     - iotop
     - screen
     - rsync
     - mdadm
-    - pigz
     - dstat
     - python-virtualenv
   Debian:
     - python-dev
-    - python-passlib
     - linux-tools
     - dbus
     - gnutls-bin
     - apt-transport-https
   RedHat:
     - python-devel
-    - python-passlib
     - perf
     - gnutls-utils
     - policycoreutils-python
   Ubuntu:
     - python-dev
-    - python-passlib
     - linux-tools-generic
     - gnutls-bin
     - apt-transport-https
+
+optional_packages:
+  common:
+    # The following packages are available only through the EPEL
+    # repository on RHEL.
+    - htop
+    - pigz
+    - python-passlib
+  Debian: []
+  RedHat: []
+  Ubuntu: []
 
 unwanted_packages:
   Debian: &debian_unpackages

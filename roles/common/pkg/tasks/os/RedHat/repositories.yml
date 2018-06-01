@@ -1,3 +1,10 @@
 ---
 
-
+- name: Install EPEL release package
+  raw: rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  register: epel_setup
+  changed_when: >
+    epel_setup is successful
+    and 'is already installed' not in epel_setup.stdout
+  ignore_errors: yes
+  tags: [ epel, public_repos ]

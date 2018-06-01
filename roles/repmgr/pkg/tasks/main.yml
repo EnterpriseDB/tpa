@@ -1,8 +1,9 @@
 ---
 
 - name: Install repmgr package
-  package: name={{ item }} state=latest
-  with_items: "{{ repmgr_packages[ansible_os_family] }}"
+  package:
+    name: "{{ repmgr_packages[ansible_os_family] }}"
+    state: latest
   tags: [repmgr, pkg]
 
 # We install our own service units later, so we disable the packaged

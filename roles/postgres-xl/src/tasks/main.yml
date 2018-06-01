@@ -1,7 +1,7 @@
 ---
 
-- name: Install PGXL related packages
-  package: name={{ item }} state=latest
-  with_items:
-    - "{{ pgxl_extra_packages[ansible_distribution] }}"
+- name: Install additional Postgres-XL related packages
+  package:
+    name: "{{ pgxl_extra_packages[ansible_distribution] }}"
+    state: latest
   tags: [pgxl, pkg]

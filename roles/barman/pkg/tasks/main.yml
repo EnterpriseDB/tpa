@@ -6,7 +6,6 @@
 
 - name: Install Postgres client package
   package:
-    name: "{{ item }}"
+    name: "{{ postgres_client_packages[ansible_os_family] }}"
     state: latest
-  with_items: "{{ postgres_client_packages[ansible_os_family] }}"
   tags: [barman, pkg]

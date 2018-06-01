@@ -2,9 +2,10 @@
 
 - name: Install build requirements
   package:
-    name: "{{ item }}"
+    name: >
+      {{ query('flattened', package_lists) }}
     state: latest
-  with_items:
-    - "{{ requirements['common'] }}"
-    - "{{ requirements[ansible_os_family] }}"
-
+  vars:
+    package_lists:
+      - "{{ requirements['common'] }}"
+      - "{{ requirements[ansible_os_family] }}"

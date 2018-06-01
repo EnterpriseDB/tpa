@@ -16,12 +16,16 @@
 # PATH (because pg_config is not always in PATH).
 
 - name: Install Postgres packages
-  package: name={{ item }} state=latest
-  with_items:
-    - "{{ postgres_packages[ansible_distribution] }}"
-    - "{{ postgres_debug_packages[ansible_distribution] }}"
-    - "{{ extra_postgres_packages[ansible_distribution] }}"
-    - python-psycopg2
+  package:
+    name: >
+      {{ query('flattened', package_lists) }}
+    state: latest
+  vars:
+    package_lists:
+      - "{{ postgres_packages[ansible_distribution] }}"
+      - "{{ postgres_debug_packages[ansible_distribution] }}"
+      - "{{ extra_postgres_packages[ansible_distribution] }}"
+      - python-psycopg2
   tags: [postgres, pkg]
 
 # On Postgres 9.5, pgespresso is required to support rsync-based backups
@@ -30,8 +34,9 @@
 # extension has known crash-the-server problems.)
 
 - name: Install pgespresso packages for Postgres 9.5 and below
-  package: name={{ item }} state=latest
-  with_items: "{{ pgespresso_packages[ansible_os_family] }}"
+  package:
+    name: "{{ pgespresso_packages[ansible_os_family] }}"
+    state: latest
   when: >
     postgres_version is version(9.5, '<=')
   vars:

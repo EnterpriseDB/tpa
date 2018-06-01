@@ -2,7 +2,6 @@
 
 - name: Install openvpn packages
   package:
-    name: "{{ item }}"
+    name: "{{ openvpn_packages[ansible_os_family] }}"
     state: latest
-  with_items: "{{ openvpn_packages[ansible_os_family] }}"
   tags: [sys, openvpn, pkg]
