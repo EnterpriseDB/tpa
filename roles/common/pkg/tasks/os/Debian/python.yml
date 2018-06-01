@@ -19,6 +19,8 @@
     if [[ $(python -c 'import sys; print "old" if sys.version_info < (2,7,9) else "ok"') != "ok" ]];
     then apt-get -q -y install python-backports.ssl-match-hostname;
     fi
+  args:
+    executable: /bin/bash
   register: backport_install
   changed_when: >
     backport_install is successful
