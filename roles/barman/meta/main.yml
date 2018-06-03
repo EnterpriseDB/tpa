@@ -12,10 +12,6 @@ dependencies:
 
   # Install Barman packages.
 
-  - role: postgres/repo
-    when: >
-      'barman' in role
-
   - role: barman/pkg
     when: >
       'barman' in role

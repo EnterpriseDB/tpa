@@ -1,5 +1,12 @@
 ---
 
+- name: Ensure Postgres configuration is present
+  assert:
+    msg: "Please include the postgres/vars role to define postgres_version"
+    that:
+      - postgres_version is defined
+      - postgres_versionNN is defined
+
 # We must ensure that a usable Python (2.7.x) is installed, along with
 # anything else we need to run Ansible modules such as "pkg" below.
 

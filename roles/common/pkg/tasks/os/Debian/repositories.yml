@@ -1,3 +1,24 @@
 ---
 
+- name: Install apt repository signing keys
+  apt_key:
+    id: "{{ item.value.key_id }}"
+    url: "{{ item.value.key_url }}"
+    state: present
+  with_dict: "{{ default_apt_repositories|combine(apt_repositories) }}"
 
+- name: Install apt repositories
+  apt_repository:
+    repo: "{{ item.value.repo }}"
+    state: present
+    update_cache: no
+  when: postgres_version|float in item.value.versions
+  with_dict: "{{ default_apt_repositories|combine(apt_repositories) }}"
+
+- name: Set preferred Postgres package source
+  template:
+    src: apt_preferences.j2
+    dest: /etc/apt/preferences.d/postgres
+
+- name: Update apt cache
+  apt: update_cache=yes
