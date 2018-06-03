@@ -43,46 +43,6 @@ yum_postgres_sources:
       - pgdg{{postgres_versionNN}}
       - pgdg{{postgres_versionNN}}-source
     versions: [9.4, 9.5, 9.6, 10]
-# Callers can specify apt_repositories to augment or override the
-# default_apt_repositories specified below. Note that this is a hash of
-# hashes, not an array of hashes. This is so that the two hashes can be
-# merged.
-
-apt_repositories: {}
-default_apt_repositories:
-  PGDG:
-    key_id: ACCC4CF8
-    key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    repo: >-
-      deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
-    versions: [9.4, 9.5, 9.6, 10]
-
-# Callers can specify yum_repositories to augment or override the
-# default_yum_repositories specified below. Note that this is a hash of
-# hashes, not an array of hashes. This is so that the two hashes can be
-# combined.
-
-yum_repositories: {}
-default_yum_repositories:
-  PGDG:
-    rpm_urls:
-      9.4: http://yum.postgresql.org/9.4/redhat/rhel-7-x86_64/pgdg-redhat94-9.4-3.noarch.rpm
-      9.5: http://yum.postgresql.org/9.5/redhat/rhel-7-x86_64/pgdg-redhat95-9.5-3.noarch.rpm
-      9.6: http://yum.postgresql.org/9.6/redhat/rhel-7-x86_64/pgdg-redhat96-9.6-3.noarch.rpm
-      10: http://yum.postgresql.org/10/redhat/rhel-7-x86_64/pgdg-redhat10-10-2.noarch.rpm
-    versions: [9.4, 9.5, 9.6, 10]
-
-# Hardcoded information about yum repositories that supply postgres
-# packages.
-
-yum_postgres_sources:
-  PGDG:
-    files:
-      - /etc/yum.repos.d/pgdg-{{postgres_versionNN}}-redhat.repo
-    sections:
-      - pgdg{{postgres_versionNN}}
-      - pgdg{{postgres_versionNN}}-source
-    versions: [9.4, 9.5, 9.6, 10]
 
 packages:
   common:
