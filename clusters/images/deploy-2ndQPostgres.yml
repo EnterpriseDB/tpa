@@ -17,7 +17,6 @@
     - role: postgres/pkg
       vars:
         postgres_package_source: 2ndQPostgres
-    - role: pglogical/pkg
     - role: sys/openvpn/pkg
     - role: pgbouncer/pkg
     - role: barman/pkg

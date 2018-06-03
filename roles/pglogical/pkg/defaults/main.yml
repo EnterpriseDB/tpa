@@ -1,8 +1,0 @@
----
-
-pglogical_packages:
-  Debian: &debian_packages
-    - postgresql-{{postgres_version}}-pglogical
-  RedHat:
-    - postgresql{{postgres_versionNN}}-pglogical
-  Ubuntu: *debian_packages

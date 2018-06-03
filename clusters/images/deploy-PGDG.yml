@@ -15,7 +15,6 @@
 
     - role: common/pkg
     - role: postgres/pkg
-    - role: pglogical/pkg
     - role: sys/openvpn/pkg
     - role: pgbouncer/pkg
     - role: barman/pkg

@@ -1,7 +1,0 @@
----
-
-- name: Install pglogical packages
-  package:
-    name: "{{ pglogical_packages[ansible_distribution] }}"
-    state: latest
-  tags: [pglogical, pkg]

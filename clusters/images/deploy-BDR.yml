@@ -19,7 +19,6 @@
     - role: sys/openvpn/pkg
     - role: sys/rsyslog/pkg
     - role: bdr/pkg
-    - role: pglogical/pkg
     - role: pgbouncer/pkg
     - role: barman/pkg
     - role: repmgr/pkg
