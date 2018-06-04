@@ -7,19 +7,28 @@
     state: latest
   vars:
     package_lists:
-      - "{{ packages['common'] }}"
-      - "{{ packages[ansible_distribution] }}"
+      - "{{ default_packages['common'] }}"
+      - "{{ packages['common']|default([]) }}"
+      - "{{ default_packages[ansible_distribution] }}"
+      - "{{ packages[ansible_distribution]|default([]) }}"
 
 - name: Install optional packages
   package:
     name: "{{ item }}"
     state: latest
   with_items:
-    - "{{ optional_packages['common'] }}"
-    - "{{ optional_packages[ansible_distribution] }}"
+    - "{{ default_optional_packages['common'] }}"
+    - "{{ optional_packages['common']|default([]) }}"
+    - "{{ default_optional_packages[ansible_distribution] }}"
+    - "{{ optional_packages[ansible_distribution]|default([]) }}"
   ignore_errors: yes
 
 - name: Remove unwanted packages
   package:
-    name: "{{ unwanted_packages[ansible_distribution] }}"
+    name: >
+      {{ query('flattened', package_lists) }}
     state: absent
+  vars:
+    package_lists:
+      - "{{ default_unwanted_packages[ansible_distribution] }}"
+      - "{{ unwanted_packages[ansible_distribution]|default([]) }}"

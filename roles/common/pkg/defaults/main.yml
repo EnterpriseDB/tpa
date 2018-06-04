@@ -44,7 +44,27 @@ yum_postgres_sources:
       - pgdg{{postgres_versionNN}}-source
     versions: [9.4, 9.5, 9.6, 10]
 
-packages:
+
+## Packages
+#
+# We define three hashes of package lists here.
+#
+# 1. Required packages, installed all together.
+# 2. Optional packages, installed one by one (failures are ignored).
+# 3. Unwanted packages, which should not be installed at all.
+#
+# Within each hash is a 'common' list (packages that have the same name
+# in all supported distributions) and one list against the name of each
+# distribution (for packages specific to that distribution).
+#
+# There are two versions of each hash, e.g., default_packages and
+# packages. We define the defaults, and the caller may define any
+# additional packages in the same format.
+#
+# For convenience, all these lists are flattened before use.
+
+packages: {}
+default_packages:
   common:
     - tcpdump
     - vim
@@ -81,7 +101,8 @@ packages:
     - gnutls-bin
     - apt-transport-https
 
-optional_packages:
+optional_packages: {}
+default_optional_packages:
   common:
     # The following packages are available only through the EPEL
     # repository on RHEL.
@@ -92,7 +113,8 @@ optional_packages:
   RedHat: []
   Ubuntu: []
 
-unwanted_packages:
+unwanted_packages: {}
+default_unwanted_packages:
   Debian: &debian_unpackages
     - popularity-contest
     - vim-tiny
