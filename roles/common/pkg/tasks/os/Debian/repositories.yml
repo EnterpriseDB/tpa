@@ -1,24 +1,40 @@
 ---
 
+- name: Install apt-transport-https to support https repositories
+  raw: apt-get -q -y install apt-transport-https
+  register: ath_install
+  changed_when: >
+    ath_install is successful
+    and 'already the newest version' not in ath_install.stdout
+
+# We need to support https://user:pass@host/… key and repository URLs,
+# which work only if we enable force_basic_auth for fetch_url(). Since
+# the default apt_key module does not allow this, we use a local copy
+# that forwards the parameter.
+
 - name: Install apt repository signing keys
   apt_key:
-    id: "{{ item.value.key_id }}"
-    url: "{{ item.value.key_url }}"
+    id: "{{ r.key_id }}"
+    url: "{{ r.key_url }}"
     state: present
-  with_dict: "{{ default_apt_repositories|combine(apt_repositories) }}"
+    force_basic_auth: yes
+  with_items: "{{ apt_repository_list }}"
+  vars:
+    repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
+    r: "{{ repos[item] }}"
+  tags: public_repos
 
 - name: Install apt repositories
   apt_repository:
-    repo: "{{ item.value.repo }}"
+    repo: "{{ r.repo }}"
     state: present
     update_cache: no
-  when: postgres_version|float in item.value.versions
-  with_dict: "{{ default_apt_repositories|combine(apt_repositories) }}"
-
-- name: Set preferred Postgres package source
-  template:
-    src: apt_preferences.j2
-    dest: /etc/apt/preferences.d/postgres
+  with_items: "{{ apt_repository_list }}"
+  vars:
+    repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
+    r: "{{ repos[item] }}"
+  tags: public_repos
 
 - name: Update apt cache
   apt: update_cache=yes
+  tags: public_repos

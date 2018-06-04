@@ -1,12 +1,26 @@
 ---
 
-# The preferred source for Postgres packages.
-postgres_package_source: PGDG
+## Repositories
+#
+# By default, we install the PGDG repository (all community packages),
+# the 2Q repository (all 2Q packages), and the 2ndQPostgres repository
+# (only 2ndQPostgres packages; not yet available).
+#
+# The package versions in these repositories are defined in such a way
+# that packages in the 2ndQPostgres repository override the other two,
+# and packages in the 2Q repository override the PGDG equivalents, but
+# missing dependencies may still be satisfied from other repositories
+# when required.
+#
+# The 2Q repository is available in four "flavours": public, internal,
+# internal-testing, internal-snapshot, in decreasing order of maturity.
+# You need only one flavour at a time, because internal-snapshot is a
+# superset of internal-testing, and so on. By default, we install the
+# 2Q internal repository. You can set tpa_2q_repo to override this.
+#
+# All of the above applies to both apt and yum.
 
-# Callers can specify apt_repositories to augment or override the
-# default_apt_repositories specified below. Note that this is a hash of
-# hashes, not an array of hashes. This is so that the two hashes can be
-# merged.
+tpa_2q_repo: "internal"
 
 apt_repositories: {}
 default_apt_repositories:
@@ -14,36 +28,68 @@ default_apt_repositories:
     key_id: ACCC4CF8
     key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
     repo: >-
-      deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
-    versions: [9.4, 9.5, 9.6, 10]
+      deb https://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
 
-# Callers can specify yum_repositories to augment or override the
-# default_yum_repositories specified below. Note that this is a hash of
-# hashes, not an array of hashes. This is so that the two hashes can be
-# combined.
+  2Q:
+    key_id: D0B689ABB65CA2A0
+    key_url: >-
+      {{ _2q_apt_baseurl }}/site/keys/D0B689ABB65CA2A0.asc
+    repo: >-
+      deb {{ _2q_apt_baseurl }} {{ ansible_distribution_release }}-2ndquadrant main
+
+  #2ndQPostgres:
+  #  key_id: …
+  #  key_url: …
+  #  repo: >-
+  #    deb …
+
+apt_repository_list: "{{ default_apt_repositories.keys()|list }}"
 
 yum_repositories: {}
 default_yum_repositories:
+  EPEL:
+    rpm_url: >-
+      https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
   PGDG:
-    rpm_urls:
-      9.4: http://yum.postgresql.org/9.4/redhat/rhel-7-x86_64/pgdg-redhat94-9.4-3.noarch.rpm
-      9.5: http://yum.postgresql.org/9.5/redhat/rhel-7-x86_64/pgdg-redhat95-9.5-3.noarch.rpm
-      9.6: http://yum.postgresql.org/9.6/redhat/rhel-7-x86_64/pgdg-redhat96-9.6-3.noarch.rpm
-      10: http://yum.postgresql.org/10/redhat/rhel-7-x86_64/pgdg-redhat10-10-2.noarch.rpm
-    versions: [9.4, 9.5, 9.6, 10]
+    rpm_url: >-
+      https://yum.postgresql.org/{{ postgres_version }}/redhat/rhel-7-x86_64/pgdg-redhat{{ postgres_versionNN }}-{{ postgres_version }}-{{ _pgdg_yum_repoversions[postgres_version|float] }}.noarch.rpm
 
-# Hardcoded information about yum repositories that supply postgres
-# packages.
+  2Q:
+    rpm_url: >-
+      {{ _2q_rpm_baseurl }}/site/content/2ndquadrant-repo-{{ postgres_version }}{{ _2q_repo_suffix }}-1-1.el7.noarch.rpm
 
-yum_postgres_sources:
-  PGDG:
-    files:
-      - /etc/yum.repos.d/pgdg-{{postgres_versionNN}}-redhat.repo
-    sections:
-      - pgdg{{postgres_versionNN}}
-      - pgdg{{postgres_versionNN}}-source
-    versions: [9.4, 9.5, 9.6, 10]
+  #2ndQPostgres:
+  #  rpm_url: >-
+  #    …
 
+yum_repository_list: "{{ default_yum_repositories.keys()|list }}"
+
+## 2Q repository administrivia
+#
+# Some internal variables that only help to make the repository
+# definitions above shorter.
+
+_2q_repo_username: "{{ lookup('env', 'TPA_2Q_REPO_USERNAME') or 'internal' }}"
+_2q_repo_password: "{{ lookup('env', 'TPA_2Q_REPO_PASSWORD') }}"
+_2q_repo_userinfo: "{{
+  (tpa_2q_repo in ['', 'public'])|ternary(
+    '', '%s:%s@' % (_2q_repo_username, _2q_repo_password)
+  )
+}}"
+_2q_repo_suffix: >-
+  {{ (tpa_2q_repo in ['', 'public'])|ternary('', '-%s' % tpa_2q_repo) }}
+
+_2q_apt_baseurl: >-
+  https://{{ '%sapt%s' % (_2q_repo_userinfo, _2q_repo_suffix) }}.2ndquadrant.com
+_2q_rpm_baseurl: >-
+  https://{{ '%srpm%s' % (_2q_repo_userinfo, _2q_repo_suffix) }}.2ndquadrant.com
+
+_pgdg_yum_repoversions:
+  9.4: 3
+  9.5: 3
+  9.6: 3
+  10: 2
 
 ## Packages
 #
@@ -89,7 +135,6 @@ default_packages:
     - linux-tools
     - dbus
     - gnutls-bin
-    - apt-transport-https
   RedHat:
     - python-devel
     - perf
@@ -99,7 +144,6 @@ default_packages:
     - python-dev
     - linux-tools-generic
     - gnutls-bin
-    - apt-transport-https
 
 optional_packages: {}
 default_optional_packages:

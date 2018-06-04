@@ -1,20 +1,19 @@
 ---
 
-- name: Install EPEL release package
-  raw: rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  register: epel_setup
-  changed_when: >
-    epel_setup is successful
-    and 'is already installed' not in epel_setup.stdout
-  ignore_errors: yes
-  tags: [ epel, public_repos ]
+# We need to support https://user:pass@host/… key and repository URLs,
+# which work only if we enable force_basic_auth for fetch_url(). Since
+# the default yum module does not allow this, we use a local copy that
+# forwards the parameter.
 
 - name: Install YUM repository packages
   yum:
-    name: "{{ item.value.rpm_urls[postgres_version|float] }}"
+    name: "{{ r.rpm_url }}"
     state: present
-  when: postgres_version|float in item.value.versions
-  with_dict: "{{ default_yum_repositories|combine(yum_repositories) }}"
+    force_basic_auth: yes
+  with_items: "{{ yum_repository_list }}"
+  vars:
+    repos: "{{ default_yum_repositories|combine(yum_repositories) }}"
+    r: "{{ repos[item] }}"
   tags: public_repos
 
 # Following the instructions in
@@ -27,28 +26,4 @@
     section: main
     option: exclude
     value: "postgresql* barman* repmgr*"
-  tags: public_repos
-
-# Furthermore, since we have (at least) the PGDG and 2ndQPostgres
-# repositories providing Postgres packages, we add exclude lines to
-# repository configuration files based on postgres_package_source.
-#
-# This hardcodes information about (a) file names in /etc/yum.repos.d
-# (e.g., pgdg-94-redhat.repo) and (b) section names within those files.
-# We can live with that for the moment. It's better than having to add
-# --enablerepo/--disablerepo options to every yum invocation.
-
-- name: Set preferred postgres package source
-  ini_file:
-    dest: "{{ item.1 }}"
-    section: "{{ item.2 }}"
-    option: exclude
-    value: postgresql*
-  when: >
-    item.0 != postgres_package_source and
-    postgres_version in yum_postgres_sources[item.0]['versions']
-  with_nested_dependents:
-    - yum_postgres_sources.keys()
-    - yum_postgres_sources[item.0]['files']
-    - yum_postgres_sources[item.0]['sections']
   tags: public_repos
