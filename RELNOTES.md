@@ -1,16 +1,47 @@
 # TPA release notes
 
-## v2017.11 (not yet tagged)
+## v2018.06 (2018-06-05)
 
-Features:
+Notable changes:
 
-- Place provision/deprovision/rehydrate in bin/, and make them location
-  independent (i.e., not require to be run from TPA_DIR).
+- Top-level tpaexec command.
+
+- Framework for multiple platform support, with each instance declaring
+  its «platform: xxx» in config.yml.
+
+- Centralise all repository management in common/pkg. We now install
+  PGDG and the 2Q repository by default. (The 2ndQPostgres repository
+  will be added back when it is available again.)
+
+- Location-independent commands (i.e., you can run $TPA_DIR/bin/tpaexec
+  from anywhere, not just cd $TPA_DIR && bin/tpaexec).
+
+- Support repmgr4 (installed from source or package).
+
+- Allow common instance_defaults[] to be specified in config.yml, with
+  the option to override them in instances[] if needed.
+
+- Better support to disable THP system-wide.
+
+- Better support for training clusters.
+
+- Ansible compatibility fixes.
+
+- Documentation updates.
+
+- AWS:
+
+  - Separate routing table and igw creation from VPC creation.
+  - Support for «-e use_cached_vars=1» during provisioning.
+  - More comprehensive cluster deprovisioning support.
 
 Bugfixes:
 
 - Fix a bug with repmgr/final dying on non-Postgres instances
 - Fix some bugs with volume_for/mountpoint declarations
+- Fix repmgr and postgres service dependencies
+- Don't overwrite .pgpass each time
+- Make sure /etc/rc.local is used
 
 ## v2017.10 (2017-10-05)
 
