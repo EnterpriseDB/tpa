@@ -8,7 +8,7 @@ To use the AWS API, you need an access key id and a secret access key.
 
 Use **Create Access Key** in the **Security Credentials** tab for your
 AWS IAM user to generate an access key, as described by
-http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html
+https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
 
 Next, make the keypair available to the boto library, as described by
 https://boto.readthedocs.org/en/latest/boto_config_tut.html
