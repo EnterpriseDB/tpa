@@ -29,7 +29,7 @@ tasks and configurations.
 Pre-requisites
 ==============
 
-1. You need 2ndQuadrant Ansible.
+1. You need Python, Ansible, and various Python modules.
    [Read the INSTALL guide](INSTALL.md) for details.
 
 2. You need an AWS access key id and secret access key for API access.
