@@ -1,5 +1,13 @@
 # TPA release notes
 
+## v3.0 (2018-06-05)
+
+TPA has switched from vYYYY.MM.NN to vM.N version numbers.
+
+The new version numbers are not semantic versions. They do not imply
+anything about compatibility or incompatibility, nor an intention to
+maintain multiple branches with varying features or maturity.
+
 ## v2018.06 (2018-06-05)
 
 Notable changes:
