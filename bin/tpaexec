@@ -13,14 +13,37 @@ command=${1:?No command specified}
 shift
 
 case "$command" in
-    # We pass selected subcommands through to existing scripts.
     provision|deprovision|deploy|rehydrate)
         $TPA_DIR/bin/$command "$@"
         ;;
-    info|version)
+
+    info)
+        subcommand=${1:-""}
+        case "$subcommand" in
+            "")
+                echo "TPA $(cat $TPA_DIR/VERSION.md)"
+                ;;
+            platforms)
+                find $TPA_DIR/platforms -name common -prune -o -type d -print|  \
+                    sed -e 's,^.*/platforms/,,' -e 's,/.*$,,'|sort -u|          \
+                    awk '{if ($1){print $1}}'
+                ;;
+            architectures)
+                find $TPA_DIR/architectures -type d -print|                     \
+                    sed -e 's,^.*/architectures/,,' -e 's,/.*$,,'|sort -u|      \
+                    awk '{if ($1){print $1}}'
+                ;;
+            *)
+                echo "Unrecognised info subcommand: $subcommand"
+                ;;
+        esac
+        ;;
+
+    version)
         echo "TPA $(cat $TPA_DIR/VERSION.md)"
         ;;
+
     *)
-        echo "Unrecognised command: $command"
+        echo "Unrecognised tpaexec command: $command"
         ;;
 esac
