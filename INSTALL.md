@@ -68,8 +68,10 @@ Alternatively, you can also clone the Ansible repository and set
 ANSIBLE_HOME in your environment (and .bashrc/.profile):
 
 ```
+    cd
     git clone https://github.com/ansible/ansible
-    export ANSIBLE_HOME=/path/to/ansibledir
+    cd ansible && git checkout -t origin/stable-2.6
+    export ANSIBLE_HOME=~/ansible
 ```
 
 Now you should be able to run ./ansible/ansible from your local copy of
