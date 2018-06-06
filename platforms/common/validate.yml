@@ -19,12 +19,18 @@
       - cluster_name != ''
       - cluster_name|match('^[_a-zA-Z0-9]+$')
 
-- name: Ensure cluster_tags is correctly configured
+- name: Set default cluster_tags (including Owner)
+  set_fact:
+    cluster_tags: "{{ default_tags|combine(cluster_tags|default({})) }}"
+  vars:
+    default_tags:
+      Owner: >-
+        {{ lookup('env', 'USER') or lookup('pipe', 'id -u -n || true') }}
+
+- name: Ensure cluster_tags[Owner] is defined
   assert:
-    msg: "Please define cluster_tags (a hash, including Owner) in {{config_file}}"
+    msg: "Please define cluster_tags[Owner] in {{config_file}}"
     that:
-      - cluster_tags is defined
-      - cluster_tags is mapping
       - cluster_tags['Owner'] is defined
       - cluster_tags['Owner'] != ''
 
