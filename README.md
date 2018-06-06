@@ -57,5 +57,7 @@ I just want a test cluster
    bin/deprovision clustername
    ```
 
---
-Abhijit Menon-Sen <ams@2ndQuadrant.com>
+Help
+====
+
+Write to tpa@2ndQuadrant.com for help.

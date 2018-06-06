@@ -148,7 +148,7 @@ A workaround is to copy selinux package into the virtual environment:
 
 Help
 ----
-Write to Abhijit for help with Ansible.
+Write to tpa@2ndQuadrant.com for help with Ansible.
 
 ------
 

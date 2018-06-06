@@ -29,5 +29,3 @@ There are two easy ways to do this:
    aws_access_key_id = AKIAIOSFODNN7EXAMPLE
    aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
    ```
-
-Write to Abhijit if you need help.

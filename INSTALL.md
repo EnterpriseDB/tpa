@@ -105,7 +105,3 @@ A workaround is to copy selinux package into the virtual environment:
 ```
     cp -rp /usr/lib64/python2.7/site-packages/selinux ~/ansible-python/lib/python2.7/site-packages
 ```
-
-Help
-----
-Write to Abhijit for help with Ansible.
