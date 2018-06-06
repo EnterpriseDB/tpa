@@ -23,15 +23,8 @@ case "$command" in
             "")
                 echo "TPA $(cat $TPA_DIR/VERSION.md)"
                 ;;
-            platforms)
-                find $TPA_DIR/platforms -name common -prune -o -type d -print|  \
-                    sed -e 's,^.*/platforms/,,' -e 's,/.*$,,'|sort -u|          \
-                    awk '{if ($1){print $1}}'
-                ;;
-            architectures)
-                find $TPA_DIR/architectures -type d -print|                     \
-                    sed -e 's,^.*/architectures/,,' -e 's,/.*$,,'|sort -u|      \
-                    awk '{if ($1){print $1}}'
+            platforms|architectures|platforms/*|architectures/*)
+                cat $TPA_DIR/$subcommand/README.md
                 ;;
             *)
                 echo "Unrecognised info subcommand: $subcommand"
