@@ -1,5 +1,12 @@
 ---
 
+- name: Ensure repository list is defined
+  assert:
+    msg: "Repository {{ item }} is not defined in yum_repositories"
+    that: item in default_yum_repositories|combine(yum_repositories)
+  with_items: "{{ yum_repository_list }}"
+  tags: public_repos
+
 # We need to support https://user:pass@host/… key and repository URLs,
 # which work only if we enable force_basic_auth for fetch_url(). Since
 # the default yum module does not allow this, we use a local copy that
