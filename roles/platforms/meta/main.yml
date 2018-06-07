@@ -1,8 +1,0 @@
----
-
-dependencies:
-  - role: platforms/vars
-  - role: platforms/aws
-    when:
-      platform == 'aws'
-  - role: platforms/common

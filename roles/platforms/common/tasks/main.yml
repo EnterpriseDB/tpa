@@ -79,3 +79,5 @@
       - vpn_network is defined
   when: >
     'openvpn-server' in role
+
+- include_tasks: hostvars.yml

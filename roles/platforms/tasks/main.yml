@@ -7,6 +7,10 @@
       - ansible_version.minor == 6
   tags: prereqs
 
+- name: Set tpa_dir
+  set_fact:
+    tpa_dir: "{{ lookup('env', 'TPA_DIR') or (role_path|regex_replace('/roles/platforms/vars/*', '')) }}"
+
 - name: Ensure that local dependencies are installed
   become: no
   assert:
@@ -29,3 +33,8 @@
   run_once: yes
 
 - include_tasks: ssh.yml
+
+- include_role:
+    name: "platforms/{{ platform }}"
+
+- include_role: name=platforms/common
