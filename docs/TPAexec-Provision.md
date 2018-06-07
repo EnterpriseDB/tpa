@@ -1,17 +1,17 @@
 ---
 title: TPAexec configuration guide - provision
-version: 1.0
-date: 01/June/2018
+version: 1.1
+date: 07/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
-copyright-years: 2018
+copyright-years: 2014-2018
 toc: true
 ---
 
 TPAexec configuration guide - provision
 ==================
 
-© Copyright 2ndQuadrant, 2018. Confidential property of 2ndQuadrant; not for public release.
+© Copyright 2ndQuadrant, 2014-2018. Confidential property of 2ndQuadrant; not for public release.
 
 ### TPAexec Overview
 
@@ -254,7 +254,7 @@ instances:
 
 ### AWS EC2 parameters - advanced
 
-It is possible to use different VPCs in each region, e.g. specifying VPCs by id, this expanded form maps from region names to a VPC filter specification. If the VPC does not exist, and both Name, cidr are given (*and* vpc-id is not in filters), it will be created.
+It is possible to use different VPCs in each region, e.g. specifying VPCs by id, this expanded form maps from region names to a VPC filter specification. If the VPC does not exist, and both Name, cidr are given ( *and* vpc-id is not in filters), it will be created.
 
 ###### Example - ec2_vpc with vpc-id specified
 
@@ -277,7 +277,7 @@ ec2_vpc:
 
 ###### Example - ec2_vpc_subnets - complex
 
-This block is from a more complicated config which can be found under [TPA/clusters/test/gds](https://github.com/2ndQuadrant/TPA/tree/master/clusters/test/gds). 
+This block is from a more complicated config.
 
     ec2_ami:
       Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170803
