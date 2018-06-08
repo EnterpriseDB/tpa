@@ -243,6 +243,29 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
 
     return instances
 
+# Given an instance definition, returns a dict mapping any keys mentioned in
+# export_as_vars to the values set for the instance. For example, for an
+# instance defined like this
+#
+# - node: 1
+#   xyz: 123
+#   pqr: 234
+#   export_as_vars:
+#     - xyz
+#     - pqr
+#   vars:
+#     abc: 345
+#
+# it would return {xyz: 123, pqr: 234}, which could then be combined with vars.
+
+def export_as_vars(instance):
+    exports = {}
+
+    for k in instance.get('export_as_vars', []):
+        exports[k] = instance.get(k)
+
+    return exports
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -251,4 +274,5 @@ class FilterModule(object):
             'expand_instance_image': expand_instance_image,
             'expand_instance_volumes': expand_instance_volumes,
             'match_existing_volumes': match_existing_volumes,
+            'export_as_vars': export_as_vars,
         }

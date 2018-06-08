@@ -11,7 +11,7 @@
           'backup': item|try_subkey('backup'),
           'upstream': item|try_subkey('upstream'),
           'volumes': item|try_subkey('volumes', []),
-          'vars': addresses|combine(item.vars),
+          'vars': addresses|combine(exports)|combine(item.vars),
           'platform': 'bare',
         })
       ])
@@ -23,3 +23,4 @@
       {{ item.Name }}
   vars:
     addresses: "{{ item|ip_addresses }}"
+    exports: "{{ item|export_as_vars }}"
