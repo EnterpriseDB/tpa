@@ -168,6 +168,9 @@ def cluster_discovery(module, conn):
     for line in io.open('/proc/%d/status' % pid, 'r'):
         s = line.split()
 
+        if not s:
+            continue
+
         if s[0] == 'Uid:':
             ent = pwd.getpwuid(int(s[1]))
             m['postgres_user'] = ent.pw_name
