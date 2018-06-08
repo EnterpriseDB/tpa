@@ -137,10 +137,7 @@ def cluster_discovery(module, conn):
     cur.execute("SELECT version()")
     m['postgres_version_string'] = cur.fetchone()[0]
     m['postgres_version_int'] = conn.server_version
-    m['postgres_version'] = '%d.%d' % (
-        (conn.server_version/10000)%10,
-        (conn.server_version/100)%10,
-    )
+    m['postgres_version'] = major_version(conn.server_version)
 
     # We collect and return everything in pg_settings, and use that to also
     # fill in postgres_data_dir and postgres_port. (There's no easy way to
@@ -207,6 +204,13 @@ def cluster_discovery(module, conn):
         m['role'] = 'replica'
 
     return m
+
+def major_version(version_num):
+    v = str(int(version_num/10000))
+    if 10 > int(version_num)/10000:
+        v = '%s.%s' % (v, str(int(version_num/100)%10))
+
+    return v
 
 def replica_discovery(module, conn, m0):
     # On a replica, we need primary_conninfo and primary_slot_name. If we
@@ -300,8 +304,7 @@ def read_recovery_conf(m0):
 def read_repmgr_conf(m0):
     m = None
 
-    # XXX We shouldn't hardcode this path
-    repmgr_conf = os.path.join('/etc/repmgr/9.6/repmgr.conf')
+    repmgr_conf = os.path.join('/etc/repmgr/%s/repmgr.conf' % m0['postgres_version'])
     try:
         m = parse_kv_lines(repmgr_conf)
     except IOError, OSError:
