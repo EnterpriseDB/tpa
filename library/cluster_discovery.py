@@ -53,6 +53,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os, io, sys, pwd, grp
+import traceback
 
 from ansible.module_utils.basic import *
 from ansible.module_utils.database import *
@@ -123,6 +124,7 @@ def main():
         })
     except Exception as e:
         m['error'] = str(e)
+        m['exception'] = traceback.format_exc()
 
     module.exit_json(failed=('error' in m), **m)
 
