@@ -5,7 +5,7 @@
 - name: Start or restart repmgrd
   service:
     name: repmgr
-    state: "{{ repmgr_service_end_state|default('started') }}"
+    state: "{{ repmgrd_service_end_state|default('started') }}"
   tags: [repmgr, service, restart]
 
 # Since the topology of the cluster may have changed during the repmgr
