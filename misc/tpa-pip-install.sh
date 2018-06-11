@@ -14,7 +14,7 @@ if [ "$NO_PIP" = "0" ] ; then
   WHERES_PIP=$(pip -V | tail -1 | grep "from /usr/lib/" | wc -l)
   if [ $WHERES_PIP = 0 ]; then
 # Upgrade pip whilst we are here
-    pip install --upgrade --no-cache-dir --no-index --find-links=file:/opt/2ndQuadrant/TPA/pip-packages pip>=10.0.1
+    pip install --upgrade --no-cache-dir --no-index --find-links=file:/opt/2ndQuadrant/TPA/pip-packages "pip>=10.0.1"
     pip install --no-cache-dir --no-index --find-links=file:/opt/2ndQuadrant/TPA/pip-packages -r /opt/2ndQuadrant/TPA/python-requirements.txt
     pip install --no-cache-dir --no-index --find-links=file:/opt/2ndQuadrant/TPA/pip-packages -r /opt/2ndQuadrant/TPA/pip-packages/ansible/requirements.txt
     pip install --no-cache-dir file:/opt/2ndQuadrant/TPA/pip-packages/ansible/
