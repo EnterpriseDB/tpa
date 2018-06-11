@@ -31,7 +31,7 @@
   with_items:
     - "{{ repmgr_conf_dir }}"
 
-- name: Install repmgr.conf and additional scripts
+- name: Install repmgr.conf
   template:
     src: "{{ item.path }}.j2"
     dest: "{{ repmgr_conf_dir }}/{{ item.path }}"
@@ -40,7 +40,16 @@
     mode: "{{ item.mode }}"
   with_items:
     - {mode: "0644", path: repmgr.conf}
-    - {mode: "0755", path: promote_command.sh}
-    - {mode: "0755", path: follow_command.sh}
   notify:
     - Note repmgrd restart required
+
+- name: Install additional repmgr scripts
+  template:
+    src: "{{ item.path }}.j2"
+    dest: "{{ repmgr_conf_dir }}/{{ item.path }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - {mode: "0755", path: promote_command.sh}
+    - {mode: "0755", path: follow_command.sh}
