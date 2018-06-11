@@ -83,6 +83,12 @@ As root, create and populate a virtualenv, to avoid installing Ansible's Python 
     # Install the python dependencies into the virtualenv (including ansible)
     [root]# /opt/2ndQuadrant/TPA/misc/tpa-pip-install.sh
 ```
+For RedHat or Centos, workaround an SELinux bug
+```
+    # RedHat or CentOS
+    [root]# cp -rp /usr/lib64/python2.7/site-packages/selinux \
+    /opt/2ndQuadrant/TPA/tpa-virtualenv/lib/python2.7/site-packages
+```
 Set TPA_HOME and add the TPA bin directory to your path in the TPAexec user environment (and .bashrc / .profile):
 ```
     [tpa]$ export TPA_HOME=/opt/2ndQuadrant/TPA/
