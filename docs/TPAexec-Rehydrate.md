@@ -1,10 +1,10 @@
 ---
 title: TPAexec guide - rehydrate
-version: 1.0
-date: 01/June/2018
+version: 1.1
+date: 11/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
-copyright-years: 2018
+copyright-years: 2014-2018
 toc: true
 ---
 
@@ -30,13 +30,13 @@ To be able to use rehydration, 2 volume attributes need to be set in config.yml:
 
 ### Simple Rehydrate example
 
-This example assumes that environment variable TPA_HOME has been set; that \$TPA_HOME/bin has been added to the tpauser's PATH. It also assumes that you have a running cluster called **night**, with the configuration files located in **\$TPA_HOME/clusters/night** and that the instance we want to rehydrate is called **zombie**.
+This example assumes that environment variable TPA_HOME has been set; that \$TPA_HOME/bin has been added to the tpauser's PATH. It also assumes that you have a running cluster called **night**, with the configuration files located in **~/tpa/clusters/night** and that the instance we want to rehydrate is called **zombie**.
 
 Use the AWS console to check that all the instances in the cluster are running, and that all checks have passed, not just the instance(s) being hydrated, especially the master node - if they are in “stopped” or “terminated” state, TPAexec will build a new instance, which isn't what we want.
 
 
 
-Before we can run **rehydrate night zombie** we first need to check and edit **config.yml**
+Before we can run **tpaexec rehydrate ~/tpa/clusters/night zombie** we first need to check and edit **config.yml**
 
 Update the **ec2_ami** name with the AMI that you want the new instance to be built with (in this example we will be setting it to "TPA-Debian-PGDG-10-2018*" )
 
@@ -72,11 +72,11 @@ instances:
 
 ### Command line:
 
-**`$TPA_HOME/bin/rehydrate \<clusterdir> \<node1>[,node2[,node3]]... `**
+**`tpaexec rehydrate <clusterdir> <node1>[,node2[,node3]]... `**
 
 ```
 <clusterdir>
-	The directory containing the cluster config - if no path is given, it assumes that the directory will be under the "clusters" directory
+	The directory containing the cluster config - if no path is given, it assumes that the directory will be under the "$TPA_HOME/clusters" directory
 
 <node1>
 	There must be at least one node specified for the rehydrate command to execute
@@ -88,8 +88,8 @@ rehydrate will check whether delete_on_termination has been set to false for any
 So, for our simple example:
 
 ```
-[tpa]$ cd $TPA_HOME
-[tpa]$ rehydrate night zombie
+[tpa]$ cd ~/tpa/clusters
+[tpa]$ tpaexec rehydrate ./night zombie
 ```
 
 ------
@@ -128,15 +128,15 @@ Rehydration is performed on the list of remaining nodes.
 
 #### Detail 
 
-Edit $TPA_HOME/clusters/config.yml and change the ec2_ami Name to required AMI value
+Edit ~/tpa/clusters/config.yml and change the ec2_ami Name to required AMI value
 
 ##### Phase 1:
 
 Rehydrate nodes
 
 ```
-[tpa]$ cd $TPA_HOME
-[tpa]$ rehydrate night zombie1,zombie3,igor,minion1
+[tpa]$ cd ~/tpa/clusters
+[tpa]$ tpaexec rehydrate ./night zombie1,zombie3,igor,minion1
 
 ```
 
@@ -178,8 +178,8 @@ DETAIL: node "zombie1" is now primary but node "vlad" is not reachable
 Rehydrate remaining nodes:
 
 ```
-[tpa]$ cd $TPA_HOME
-[tpa]$ rehydrate night vlad,zombie2,zombie4,fritz,minion2
+[tpa]$ cd ~/tpa/clusters
+[tpa]$ tpaexec rehydrate ./night vlad,zombie2,zombie4,fritz,minion2
 ```
 
 Force a reregister as standby on each rehydrated Replica (only DB instances, not barman)
@@ -215,3 +215,4 @@ $ aws ec2 modify-instance-attribute --region eu-west-1 --instance-id i-0ca212ac1
 Check that this has worked  via the Amazon EC2 management console. Click on ‘Instances’, select instance (in this case zombie), under the ‘Description’ tab, scroll down to ‘Block devices’, and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag, which should now be false. It is worth waiting for 30 seconds before running rehydrate, as it can take time to propagate the settings.
 
 [^Information Classification: Confidential]: [ISP008] Information Classification Policy
+
