@@ -74,34 +74,41 @@ This will install TPAexec into /opt/2ndQuadrant/TPA/
     # RedHat or CentOS
     [root]# yum install tpaexec-<version-number>.noarch.rpm
 ```
-Change the ownership or permissions on the TPA_HOME/clusters directory so that the required users(s) can create new clusters - e.g.
+As root, create and populate a virtualenv, to avoid installing Ansible's Python module dependencies system-wide (highly recommended):
+
 ```
-    [root]# chown <user> /opt/2ndQuadrant/TPA/clusters
+    [root]# virtualenv /opt/2ndQuadrant/TPA/tpa-virtualenv
+    # Activate it so that we can install pip modules
+    [root]# source /opt/2ndQuadrant/TPA/tpa-virtualenv/bin/activate
+    # Install the python dependencies into the virtualenv (including ansible)
+    [root]# /opt/2ndQuadrant/TPA/misc/tpa-pip-install.sh
 ```
 Set TPA_HOME and add the TPA bin directory to your path in the TPAexec user environment (and .bashrc / .profile):
 ```
     [tpa]$ export TPA_HOME=/opt/2ndQuadrant/TPA/
     [tpa]$ export PATH=$PATH:$TPA_HOME/bin
 ```
-Create and activate a virtualenv, to avoid installing Ansible's Python
-module dependencies system-wide (highly recommended):
+It is suggested that a `~/tpa` is created, which can contain TPA related files and directories.
+```
+    [tpa]$ mkdir ~/tpa
+    # Copy the example clusters directory
+    [tpa]$ cp -r $TPA_HOME/clusters tpa
+```
+
+Activate a virtualenv that was already created in $TPA_HOME/tpa-virtualenv :
 
 ```
-    [tpa]$ virtualenv ~/ansible-python
-
     # Activate ansible-python ( and add command to .bashrc/.profile)
-    [tpa]$ source ~/ansible-python/bin/activate
+    [tpa]$ source $TPA_HOME/tpa-virtualenv/bin/activate
 ```
 
-Install the python dependencies into the virtualenv (including ansible:
-```
-    [tpa]$ $TPA_HOME/misc/tpa-pip-install.sh
-```
 Set ANSIBLE_HOME & ANSIBLE_LOG_PATH in your environment (and .bashrc / .profile):
 ```
-    [tpa]$ export ANSIBLE_HOME=~/ansible-python
+    [tpa]$ export ANSIBLE_HOME=$TPA_HOME/tpa-virtualenv
     [tpa]$ export ANSIBLE_LOG_PATH=~/ansible.log
 ```
+Ansible creates retry files which can be used to retry commands when a playbook fails and retry_files_enabled is True (the default). This is configured in TPA_HOME/ansible.cfg and is set by default to `retry_files_save_path = ~/.ansible-retry`
+
 Now you should be able to run ./ansible/ansible from your local copy of the TPA repository. 
 The following simple tests should succeed if Ansible has been installed correctly:
 
@@ -124,8 +131,21 @@ Set TPA_HOME and add the TPA bin directory to your path in the TPAexec user envi
     [tpa]$ export TPA_HOME=/path/to/TPA
     [tpa]$ export PATH=$PATH:$TPA_HOME/bin
 ```
+Create and activate a virtualenv, to avoid installing Ansible's Python
+module dependencies system-wide (highly recommended):
 
-You will need Ansible from the [2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ansible).
+```
+    [tpa]$ virtualenv ~/tpa-virtualenv
+
+    # Activate ansible-python ( and add command to .bashrc/.profile)
+    [tpa]$ source ~/tpa-virtualenv/bin/activate
+```
+
+Install the python dependencies into the virtualenv (including ansible:
+```
+    [tpa]$ pip install -r $TPA_HOME/python-requirements.txt
+```
+You will need Ansible 2.6 from the [2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ansible).
 
 Clone the Ansible repository:
 
@@ -139,6 +159,7 @@ Set ANSIBLE_HOME in your environment (and .bashrc / .profile):
     [tpa]$ export ANSIBLE_HOME=/path/to/ansibledir
 ```
 
+Ansible creates retry files which can be used to retry commands when a playbook fails and retry_files_enabled is True (the default). This is configured in TPA_HOME/ansible.cfg and is set by default to `retry_files_save_path = ~/.ansible-retry`
 
 Now you should be able to run ./ansible/ansible from your local copy of the TPA repository. 
 The following simple tests should succeed if Ansible has been installed correctly:
@@ -175,3 +196,5 @@ Write to tpa@2ndQuadrant.com for help with Ansible.
 ------
 
 [^Information Classification: Internal]: [ISP008] Information Classification Policy
+
+
