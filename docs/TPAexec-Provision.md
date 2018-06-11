@@ -1,7 +1,7 @@
 ---
 title: TPAexec configuration guide - provision
-version: 1.1
-date: 07/June/2018
+version: 1.2
+date: 11/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -30,23 +30,23 @@ and can also be used for
 
 ### Pre-requisites
 
-1. You need 2ndQuadrant Ansible. [Read the INSTALL guide](https://github.com/2ndQuadrant/TPA/blob/master/INSTALL.md) and [Detailed Install guide](https://github.com/2ndQuadrant/TPA/blob/craigalsop-docs-update/docs/Detailed-Install.md) for more details.
+1. You need 2ndQuadrant Ansible. [Read the INSTALL guide](https://github.com/2ndQuadrant/TPA/blob/master/INSTALL.md) and [Detailed Install guide](https://github.com/2ndQuadrant/TPA/blob/master/docs/TPAexec-Detailed_Install.md) for more details.
 2. You need an AWS access key id and secret access key for API access.[Read platforms/aws/README](https://github.com/2ndQuadrant/TPA/blob/master/platforms/aws/README.md) for details.
 
 ### TPA cluster configuration
 
-First read the [Cluster configuration guide](https://github.com/2ndQuadrant/TPA/blob/master/clusters/README.md). There is an example configuration located under **\$TPA_HOME/clusters/tpa** and more examples under **\$TPA_HOME/clusters/test**. It is suggested that **\$TPA_HOME/clusters/tpa** is copied and used as a starting point. For the following example, we have called the new cluster **speedy**, and copied the files to **\$TPA_HOME/clusters/test/speedy**. 
+First read the [Cluster configuration guide](https://github.com/2ndQuadrant/TPA/blob/master/clusters/README.md). There is an example configuration located under **\$TPA_HOME/clusters/tpa**. It is suggested that **\$TPA_HOME/clusters/tpa** is copied and used as a starting point. For the following example, we have called the new cluster **speedy**, and copied the files to **~/tpa/clusters/speedy**. 
 
 ```
 	$ cd $TPA_HOME
-	$ cp -r clusters/tpa clusters/test/speedy
-	$ ls $TPA_HOME/clusters/test/speedy
+	$ cp -r clusters/tpa ~/tpa/clusters/speedy
+	$ ls ~/tpa/clusters/speedy
 	config.yml  deploy.yml
 ```
 
 ### Provisioning
 
-Before we can run **\$TPA_HOME/bin/provision test/speedy** we first need to edit **config.yml**
+Before we can run **tpaexec provision ~/tpa/clusters/speedy** we first need to edit **config.yml**
 
 The file config.yml has been split into logical sections for the purposes of description, and duplicate descriptions ommitted from the tables where possible
 
@@ -327,8 +327,9 @@ ssh_key_file: "../../id_speedy"
 
 See [TPA/platforms/common/provision.yml](https://github.com/2ndQuadrant/TPA/platforms/common/provision.yml) for more information. 
 
-2/ Alternatively, you can copy both public and private keys into the cluster directory (which contains config.yml and deploy.yml) before running TPA/utils/provision.
+2/ Alternatively, you can copy both public and private keys into the cluster directory (which contains config.yml and deploy.yml) before running tpaexec provision.
 
 They will need to be named **id\_\<clustername>.pub** and **id\_\<clustername>** respectively - in this example they would be named id\_speedy.pub and id\_speedy.
 
 [^Information Classification: Confidential]: [ISP008] Information Classification Policy
+

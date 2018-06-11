@@ -1,10 +1,10 @@
 ---
 title: TPA configuration guide - deploy
-version: 1.0
-date: 01/June/2018
+version: 1.1
+date: 11/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
-copyright-years: 2018
+copyright-years: 2014-2018
 toc: true
 ---
 
@@ -20,14 +20,14 @@ This guide is designed to follow on from the TPA configuration guide - provision
 
 ### Pre-requisite
 
-You will need to have run the provision stage first ( **\$TPA_HOME/bin/provision \<clustername>** )  - see [TPAexec configuration guide - provision](https://github.com/2ndQuadrant/TPA/blob/craigalsop-docs-update/docs/TPAexec-provision.md).
+You will need to have run the provision stage first ( **tpaexec provision \<clustername>** )  - see [TPAexec configuration guide - provision](https://github.com/2ndQuadrant/TPA/tree/master/docs/TPAexec-provision.md).
 
 ### TPA cluster Deployment
 
-First read the [Cluster configuration guide](https://github.com/2ndQuadrant/TPA/blob/master/clusters/README.md). In this document, we are continuing where [TPAexec configuration guide - provision](https://github.com/2ndQuadrant/TPA/blob/craigalsop-docs-update/docs/TPAexec-provision.md) left off, and assuming that we have provisioned a new cluster **speedy**, with TPA config files in **\$TPA_HOME/clusters/test/speedy**. 
+First read the [Cluster configuration guide](https://github.com/2ndQuadrant/TPA/blob/master/clusters/README.md). In this document, we are continuing where [TPAexec configuration guide - provision](https://github.com/2ndQuadrant/TPA/blob/master/docs/TPAexec-provision.md) left off, and assuming that we have provisioned a new cluster **speedy**, with TPA config files in **~/tpa/clusters/test/speedy**. 
 
 ```
-	$ ls $TPA_HOME/clusters/test/speedy
+	$ ls ~/tpa/clusters/test/speedy
 	certs       hostkeys       inventory    ssh_config  vault
 	config.yml  id_speedy      keys         tmp
 	deploy.yml  id_speedy.pub  known_hosts  vars.json
@@ -36,7 +36,7 @@ First read the [Cluster configuration guide](https://github.com/2ndQuadrant/TPA/
 Looking in the inventory directory, we can see that a file called **00-speedy** has been created, containing the hostname information - this can be used to cross-check the information being used to build the servers.
 
 ```
-	$ cat $TPA_HOME/clusters/speedy/inventory/00-speedy
+	$ cat ~/tpa/clusters/speedy/inventory/00-speedy
 	[tag_Cluster_speedy]
 	speedy-a ansible_host=34.240.16.222 node=1
 	speedy-b ansible_host=54.154.64.43 node=2
@@ -46,7 +46,7 @@ Looking in the inventory directory, we can see that a file called **00-speedy** 
 
 
 
-Before we can run **\$TPA_HOME/bin/deploy test/speedy** we first need to edit **deploy.yml**
+Before we can run **tpaexec deploy ~/tpa/clusters/speedy** we first need to edit **deploy.yml**
 
 The file deploy.yml has been split into logical sections for the purposes of description
 
@@ -171,7 +171,7 @@ The file deploy.yml has been split into logical sections for the purposes of des
 | max_fail_percentage: | This should be left set to "0"                               |
 | sudo_user:           | Set to the user to run sudo commands as.                     |
 | sudo:                | **true** - Used to set whether sudo is to be used.           |
-| hosts:               | **"{{ deploy_hosts\|default('all') }}"** - Defines which hosts will be deployed to. For the \$TPA_HOME/bin/**deploy** script, this will default to all; when deploy.yml  is used by the \$TPA_HOME/bin/**rehydrate** script, it will define the individual hosts to be rehydrated. See [TPAexec guide - rehydrate](https://github.com/2ndQuadrant/TPA/blob/craigalsop-docs-update/docs/TPAexec-rehydrate.md) for more info. |
+| hosts:               | **"{{ deploy_hosts\|default('all') }}"** - Defines which hosts will be deployed to. For the \$TPA_HOME/bin/**deploy** script, this will default to all; when deploy.yml  is used by the \$TPA_HOME/bin/**rehydrate** script, it will define the individual hosts to be rehydrated. See [TPAexec guide - rehydrate](https://github.com/2ndQuadrant/TPA/blob/master/docs/TPAexec-rehydrate.md) for more info. |
 | roles:               | Sets up all the deployment roles                             |
 | - role:              | **common** - Applied to all hosts                            |
 | - role:              | **sys/fs** - Sets up the filesystems. See [TPA/roles/sys/fs/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/sys/fs/tasks/main.yml) for more info. |
@@ -221,8 +221,11 @@ This code block is there to ensure that a re-deployment works even when limited 
 
 ### Deploy
 
-Run **$TPA_HOME/bin/deploy test/speedy**
+Run **tpaexec deploy ~/tpa/clusters/speedy**
+
+(Note, the previous method of running **$TPA_HOME/bin/deploy ~/tpa/clusters/speedy** will still work)
 
 
 
 [^Information Classification: Confidential]: [ISP008] Information Classification Policy
+
