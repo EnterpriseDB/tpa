@@ -1,10 +1,10 @@
 ---
 title: TPAexec - Postgres configuration and other customisations
-version: 1.0
-date: 01/June/2018
+version: 1.1
+date: 11/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
-copyright-years: 2018
+copyright-years: 2014-2018
 toc: true
 ---
 
@@ -15,7 +15,9 @@ TPAexec - Postgres configuration and other customisations
 
 ### Postgres postgresql.conf configuration variables
 
-These can be configured by TPAexec at build time by setting the relevant parameters as node vars in the **$TPA_HOME/clusters/\<clustername>/config.yml** file - as in this excerpt:
+These can be configured by TPAexec at build time by setting the relevant parameters as node vars in the **~/tpa/clusters/\<clustername>/config.yml** file (it is suggested that $TPA_HOME/clusters is copied to ~/tpa/clusters).
+
+An excerpt:
 
 ```
 instances:
@@ -82,7 +84,7 @@ These are automatically generated during deploy phase by TPAexec and should not 
 
 ### Other customisations
 
-It is possible to set up many other customisations during the build process by adding post_tasks and handlers to the final play in **$TPA_HOME/clusters/\<clustername>/deploy.yml**.
+It is possible to set up many other customisations during the build process by adding post_tasks and handlers to the final play in **~/tpa/clusters/\<clustername>/deploy.yml**.
 
 In this snippet, designed to be part of a training lab, we create a user "student", add them to admin group, set password, allow them to ssh with just password authentication, update /etc/sudoers, and restart ssh service. 
 
@@ -134,3 +136,4 @@ $6$cRmk8XVtYzS.52Hk$ISMY65gigtvdzeBs0nr7B66mx7BOLoWq7tjQ2hxOJ9r28fLkVo1RscMhW9t2
 In this manner, post_tasks can be used to configure and modify server files - see [user](http://docs.ansible.com/ansible/latest/modules/user_module.html#user-module) and [lineinfile](http://docs.ansible.com/ansible/latest/modules/lineinfile_module.html) for more information on how to use those particular modules. Information about all the current modules available for Ansible can be found [here](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html) or just the system modules [here](http://docs.ansible.com/ansible/latest/modules/list_of_system_modules.html). The [shell](http://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module) module can be used to run commands on the nodes.
 
 [^Information Classification: Confidential]: [ISP008] Information Classification Policy
+
