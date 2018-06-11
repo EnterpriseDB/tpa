@@ -74,6 +74,10 @@ This will install TPAexec into /opt/2ndQuadrant/TPA/
     # RedHat or CentOS
     [root]# yum install tpaexec-<version-number>.noarch.rpm
 ```
+Change the ownership or permissions on the TPA_HOME/clusters directory so that the required users(s) can create new clusters - e.g.
+```
+    [root]# chown <user> /opt/2ndQuadrant/TPA/clusters
+```
 Set TPA_HOME and add the TPA bin directory to your path in the TPAexec user environment (and .bashrc / .profile):
 ```
     [tpa]$ export TPA_HOME=/opt/2ndQuadrant/TPA/
