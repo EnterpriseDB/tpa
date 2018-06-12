@@ -1,7 +1,7 @@
 ---
 title: TPA configuration guide - deploy
-version: 1.1
-date: 11/June/2018
+version: 1.2
+date: 12/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -21,6 +21,12 @@ This guide is designed to follow on from the TPA configuration guide - provision
 ### Pre-requisite
 
 You will need to have run the provision stage first ( **tpaexec provision \<clustername>** )  - see [TPAexec configuration guide - provision](https://github.com/2ndQuadrant/TPA/tree/master/docs/TPAexec-provision.md).
+
+If you are not using a private repo for the deployment packages, you will need to specify a repo password for the relevant 2ndQuadrant repo [RHEL/Centos rpms](https://rpm-internal.2ndquadrant.com/site/content/) or [Debian/Ubunto deb packages](https://apt-internal.2ndquadrant.com/site/content/)
+   ```
+   export TPA_2Q_REPO_PASSWORD=putPASSWORDhere
+   ```
+
 
 ### TPA cluster Deployment
 
