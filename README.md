@@ -1,7 +1,7 @@
 2ndQuadrant TPA
 ===============
 
-© Copyright 2ndQuadrant, 2016
+© Copyright 2ndQuadrant, 2014-2018
 
 Confidential property of 2ndQuadrant; not for public release.
 
@@ -35,6 +35,11 @@ Pre-requisites
 2. You need an AWS access key id and secret access key for API access.
    [Read platforms/aws/README](platforms/aws/README.md) for details.
 
+3. You may need to set the repo password for the relevant 2ndQuadrant repo [rpm-internal.2ndquadrant.com](https://rpm-internal.2ndquadrant.com/site/content/) or [apt-internal.2ndquadrant.com](https://apt-internal.2ndquadrant.com/site/content/)
+   ```
+   export TPA_2Q_REPO_PASSWORD=putPASSWORDhere
+   ```
+
 I just want a test cluster
 ==========================
 
@@ -46,15 +51,15 @@ I just want a test cluster
 2. Provision the cluster instances and deploy software to them:
 
    ```
-   bin/provision clustername
+   tpaexec provision clustername
 
-   bin/deploy clustername
+   tpaexec deploy clustername
    ```
 
 3. Once you're done with testing, deprovision the cluster:
 
    ```
-   bin/deprovision clustername
+   tpaexec deprovision clustername
    ```
 
 Help
