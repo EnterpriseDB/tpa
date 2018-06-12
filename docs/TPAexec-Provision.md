@@ -1,7 +1,7 @@
 ---
 title: TPAexec configuration guide - provision
-version: 1.2
-date: 11/June/2018
+version: 1.3
+date: 12/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -318,7 +318,7 @@ In this we can see that 9 subnets have been set up - these are to allow one BDR 
 
 By default, the $TPA_HOME/bin/provision utility will create new RSA keys for ssh connection to the cluster hosts. If you want to reuse existing keys, then you can either 
 
-1/ set the ssh_key_file variable in config.yml, giving it a relative path - for example with **id_speedy** and **id_speedy.pub** both sitting in the \$TPA_HOME directory:
+1/ set the ssh_key_file variable in config.yml, giving it a relative path - for example with **id_speedy** and **id_speedy.pub** both sitting in the ~/tpa directory:
 
 ```
 cluster_name: speedy
