@@ -51,15 +51,15 @@ I just want a test cluster
 2. Provision the cluster instances and deploy software to them:
 
    ```
-   tpaexec provision clustername
+   tpaexec provision path-to-clusterdir
 
-   tpaexec deploy clustername
+   tpaexec deploy path-to-clusterdir
    ```
 
 3. Once you're done with testing, deprovision the cluster:
 
    ```
-   tpaexec deprovision clustername
+   tpaexec deprovision path-to-clusterdir
    ```
 
 Help
