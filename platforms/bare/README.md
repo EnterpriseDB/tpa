@@ -27,7 +27,8 @@ instances:
       Name: igor
       public_ip: 54.93.200.233
       private_ip: 10.33.241.230
-      repmgr_location: dc1
+      vars:
+        repmgr_location: dc1
 ```
 The following actions must be performed for each target host:
 
