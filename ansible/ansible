@@ -9,8 +9,11 @@ set -e -u
 # TPA must be installed in the parent directory of this script, or
 # TPA_DIR must be explicitly set to the correct location.
 
-TOP=$(dirname $0)/..
-type realpath &>/dev/null && TOP=$(realpath $TOP)
+TOP=/opt/2ndQuadrant/TPA
+if [[ ! -d $TOP ]]; then
+    TOP=$(dirname $0)/..
+    type realpath &>/dev/null && TOP=$(realpath $TOP)
+fi
 export TPA_DIR=${TPA_DIR:-$TOP}
 
 # If you invoke ansible directly (i.e. not through this script), you
