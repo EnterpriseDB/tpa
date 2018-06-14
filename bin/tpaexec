@@ -9,6 +9,12 @@ TOP=$(dirname $0)/..
 type realpath &>/dev/null && TOP=$(realpath $TOP)
 export TPA_DIR=${TPA_DIR:-$TOP}
 
+if [[ -f $TPA_DIR/VERSION ]]; then
+    VERSION=$(cat $TPA_DIR/VERSION)
+else
+    VERSION=$(cd $TPA_DIR && git describe)
+fi
+
 command=${1:?No command specified}
 shift
 
@@ -21,7 +27,7 @@ case "$command" in
         subcommand=${1:-""}
         case "$subcommand" in
             "")
-                echo "TPA $(cat $TPA_DIR/VERSION.md)"
+                echo "TPA $VERSION"
                 ;;
             platforms|architectures|platforms/*|architectures/*)
                 cat $TPA_DIR/$subcommand/README.md
@@ -33,7 +39,7 @@ case "$command" in
         ;;
 
     version)
-        echo "TPA $(cat $TPA_DIR/VERSION.md)"
+        echo "TPA $VERSION"
         ;;
 
     *)
