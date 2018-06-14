@@ -36,10 +36,6 @@ cluster=${1:?No cluster specified}
 shift
 
 arg=$cluster
-if [[ ${arg:0:1} != '/' && ${arg:0:2} != './' ]]; then
-    cluster=$(echo $cluster|sed 's,^clusters/,,')
-    arg="$TPA_DIR/clusters/$cluster"
-fi
 
 maybescript=${1:-''}
 if [ ! -f $arg -a "$maybescript" != "" -a -f "$maybescript" ]; then
