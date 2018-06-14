@@ -1,7 +1,7 @@
 ---
 title: TPAexec - Detailed Installation guide
-version: 1.1
-date: 11/June/2018
+version: 1.2
+date: 14/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -89,38 +89,38 @@ For RedHat or Centos, workaround an SELinux bug
     [root]# cp -rp /usr/lib64/python2.7/site-packages/selinux \
     /opt/2ndQuadrant/TPA/tpa-virtualenv/lib/python2.7/site-packages
 ```
-Set TPA_HOME and add the TPA bin directory to your path in the TPAexec user environment (and .bashrc / .profile):
+Set TPA_DIR and add the TPA bin directory to your path in the TPAexec user environment (and .bashrc / .profile):
 ```
-    [tpa]$ export TPA_HOME=/opt/2ndQuadrant/TPA/
-    [tpa]$ export PATH=$PATH:$TPA_HOME/bin
+    [tpa]$ export TPA_DIR=/opt/2ndQuadrant/TPA/
+    [tpa]$ export PATH=$PATH:$TPA_DIR/bin
 ```
 It is suggested that a `~/tpa` is created, which can contain TPA related files and directories.
 ```
     [tpa]$ mkdir ~/tpa
     # Copy the example clusters directory
-    [tpa]$ cp -r $TPA_HOME/clusters tpa
+    [tpa]$ cp -r $TPA_DIR/clusters tpa
 ```
 
-Activate a virtualenv that was already created in $TPA_HOME/tpa-virtualenv :
+Activate a virtualenv that was already created in $TPA_DIR/tpa-virtualenv :
 
 ```
     # Activate ansible-python ( and add command to .bashrc/.profile)
-    [tpa]$ source $TPA_HOME/tpa-virtualenv/bin/activate
+    [tpa]$ source $TPA_DIR/tpa-virtualenv/bin/activate
 ```
 
-Set ANSIBLE_HOME & ANSIBLE_LOG_PATH in your environment (and .bashrc / .profile):
+Set ANSIBLE_DIR & ANSIBLE_LOG_PATH in your environment (and .bashrc / .profile):
 ```
-    [tpa]$ export ANSIBLE_HOME=$TPA_HOME/tpa-virtualenv
+    [tpa]$ export ANSIBLE_HOME=$TPA_DIR/tpa-virtualenv
     [tpa]$ export ANSIBLE_LOG_PATH=~/ansible.log
 ```
-Ansible creates retry files which can be used to retry commands when a playbook fails and retry_files_enabled is True (the default). This is configured in TPA_HOME/ansible.cfg and is set by default to `retry_files_save_path = ~/.ansible-retry`
+Ansible creates retry files which can be used to retry commands when a playbook fails and retry_files_enabled is True (the default). This is configured in TPA_DIR/ansible.cfg and is set by default to `retry_files_save_path = ~/.ansible-retry`
 
 Now you should be able to run ./ansible/ansible from your local copy of the TPA repository. 
 The following simple tests should succeed if Ansible has been installed correctly:
 
 ```
-    [tpa]$ $TPA_HOME/ansible/ansible localhost -m ping
-    [tpa]$ $TPA_HOME/ansible/ansible localhost -c ssh -a "id"
+    [tpa]$ $TPA_DIR/ansible/ansible localhost -m ping
+    [tpa]$ $TPA_DIR/ansible/ansible localhost -c ssh -a "id"
 ```
 
 ------
@@ -132,10 +132,10 @@ Clone the TPAexec repository
 ```
     [tpa]$ git clone --recursive https://github.com/2ndQuadrant/TPA
 ```
-Set TPA_HOME and add the TPA bin directory to your path in the TPAexec user environment (and .bashrc / .profile):
+Set TPA_DIR and add the TPA bin directory to your path in the TPAexec user environment (and .bashrc / .profile):
 ```
-    [tpa]$ export TPA_HOME=/path/to/TPA
-    [tpa]$ export PATH=$PATH:$TPA_HOME/bin
+    [tpa]$ export TPA_DIR=/path/to/TPA
+    [tpa]$ export PATH=$PATH:$TPA_DIR/bin
 ```
 Create and activate a virtualenv, to avoid installing Ansible's Python
 module dependencies system-wide (highly recommended):
@@ -149,7 +149,7 @@ module dependencies system-wide (highly recommended):
 
 Install the python dependencies into the virtualenv (including ansible:
 ```
-    [tpa]$ pip install -r $TPA_HOME/python-requirements.txt
+    [tpa]$ pip install -r $TPA_DIR/python-requirements.txt
 ```
 You will need Ansible 2.6 from the [2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ansible).
 
@@ -165,14 +165,14 @@ Set ANSIBLE_HOME in your environment (and .bashrc / .profile):
     [tpa]$ export ANSIBLE_HOME=/path/to/ansibledir
 ```
 
-Ansible creates retry files which can be used to retry commands when a playbook fails and retry_files_enabled is True (the default). This is configured in TPA_HOME/ansible.cfg and is set by default to `retry_files_save_path = ~/.ansible-retry`
+Ansible creates retry files which can be used to retry commands when a playbook fails and retry_files_enabled is True (the default). This is configured in TPA_DIR/ansible.cfg and is set by default to `retry_files_save_path = ~/.ansible-retry`
 
 Now you should be able to run ./ansible/ansible from your local copy of the TPA repository. 
 The following simple tests should succeed if Ansible has been installed correctly:
 
 ```
-    [tpa]$ $TPA_HOME/ansible/ansible localhost -m ping
-    [tpa]$ $TPA_HOME/ansible/ansible localhost -c ssh -a "id"
+    [tpa]$ $TPA_DIR/ansible/ansible localhost -m ping
+    [tpa]$ $TPA_DIR/ansible/ansible localhost -c ssh -a "id"
 ```
 
 [The Ansible installation docs](http://docs.ansible.com/ansible/intro_installation.html)

@@ -1,7 +1,7 @@
 ---
 title: TPAexec configuration guide - provision
-version: 1.3
-date: 12/June/2018
+version: 1.4
+date: 14/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -35,18 +35,12 @@ and can also be used for
 
 ### TPA cluster configuration
 
-First read the [Cluster configuration guide](https://github.com/2ndQuadrant/TPA/blob/master/clusters/README.md). There is an example configuration located under **\$TPA_HOME/clusters/tpa**. It is suggested that **\$TPA_HOME/clusters/tpa** is copied and used as a starting point. For the following example, we have called the new cluster **speedy**, and copied the files to **~/tpa/clusters/speedy**. 
-
-```
-	$ cd $TPA_HOME
-	$ cp -r clusters/tpa ~/tpa/clusters/speedy
-	$ ls ~/tpa/clusters/speedy
-	config.yml  deploy.yml
-```
+To bring up a cluster with TPA, you will need to write two YAML files: config.yml describes the instances required; deploy.yml is a playbook that maps the desired roles to the provisioned instances. These files should be in a cluster-specific directory.
+For the following example, we have called the new cluster **speedy**, and created config.yml & deploy.yml files in **~/tpa/clusters/speedy**. 
 
 ### Provisioning
 
-Before we can run **tpaexec provision ~/tpa/clusters/speedy** we first need to edit **config.yml**
+Before we can run **tpaexec provision ~/tpa/clusters/speedy** we first need to create **config.yml**
 
 The file config.yml has been split into logical sections for the purposes of description, and duplicate descriptions ommitted from the tables where possible
 
@@ -81,7 +75,7 @@ This is a simple example with 2 subnets, 2 availability zones in one AWS region.
 In order to find 2 available subnets, the script **find-unused-subnets** was used as follows:
 
 ```
-$ $TPA_HOME/misc/find-unused-subnets 2
+$ $TPA_DIR/misc/find-unused-subnets 2
 10.33.29.0/28
 10.33.27.16/28
 ```
@@ -316,7 +310,7 @@ In this we can see that 9 subnets have been set up - these are to allow one BDR 
 
 ### Using existing RSA keys
 
-By default, the $TPA_HOME/bin/provision utility will create new RSA keys for ssh connection to the cluster hosts. If you want to reuse existing keys, then you can either 
+By default, the $TPA_DIR/bin/provision utility will create new RSA keys for ssh connection to the cluster hosts. If you want to reuse existing keys, then you can either 
 
 1/ set the ssh_key_file variable in config.yml, giving it a relative path - for example with **id_speedy** and **id_speedy.pub** both sitting in the ~/tpa directory:
 

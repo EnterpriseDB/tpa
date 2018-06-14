@@ -1,7 +1,7 @@
 ---
 title: TPA configuration guide - deploy
-version: 1.2
-date: 12/June/2018
+version: 1.3
+date: 14/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -30,7 +30,7 @@ If you are not using a private repo for the deployment packages, you will need t
 
 ### TPA cluster Deployment
 
-First read the [Cluster configuration guide](https://github.com/2ndQuadrant/TPA/blob/master/clusters/README.md). In this document, we are continuing where [TPAexec configuration guide - provision](https://github.com/2ndQuadrant/TPA/blob/master/docs/TPAexec-provision.md) left off, and assuming that we have provisioned a new cluster **speedy**, with TPA config files in **~/tpa/clusters/test/speedy**. 
+In this document, we are continuing where [TPAexec configuration guide - provision](https://github.com/2ndQuadrant/TPA/blob/master/docs/TPAexec-provision.md) left off, and assuming that we have provisioned a new cluster **speedy**, with TPA config files in **~/tpa/clusters/test/speedy**. 
 
 ```
 	$ ls ~/tpa/clusters/test/speedy
@@ -177,7 +177,7 @@ The file deploy.yml has been split into logical sections for the purposes of des
 | max_fail_percentage: | This should be left set to "0"                               |
 | sudo_user:           | Set to the user to run sudo commands as.                     |
 | sudo:                | **true** - Used to set whether sudo is to be used.           |
-| hosts:               | **"{{ deploy_hosts\|default('all') }}"** - Defines which hosts will be deployed to. For the \$TPA_HOME/bin/**deploy** script, this will default to all; when deploy.yml  is used by the \$TPA_HOME/bin/**rehydrate** script, it will define the individual hosts to be rehydrated. See [TPAexec guide - rehydrate](https://github.com/2ndQuadrant/TPA/blob/master/docs/TPAexec-rehydrate.md) for more info. |
+| hosts:               | **"{{ deploy_hosts\|default('all') }}"** - Defines which hosts will be deployed to. For the \$TPA_DIR/bin/**deploy** script, this will default to all; when deploy.yml  is used by the \$TPA_DIR/bin/**rehydrate** script, it will define the individual hosts to be rehydrated. See [TPAexec guide - rehydrate](https://github.com/2ndQuadrant/TPA/blob/master/docs/TPAexec-rehydrate.md) for more info. |
 | roles:               | Sets up all the deployment roles                             |
 | - role:              | **common** - Applied to all hosts                            |
 | - role:              | **sys/fs** - Sets up the filesystems. See [TPA/roles/sys/fs/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/sys/fs/tasks/main.yml) for more info. |
@@ -229,7 +229,7 @@ This code block is there to ensure that a re-deployment works even when limited 
 
 Run **tpaexec deploy ~/tpa/clusters/speedy**
 
-(Note, the previous method of running **$TPA_HOME/bin/deploy ~/tpa/clusters/speedy** will still work)
+(Note, the previous method of running **$TPA_DIR/bin/deploy ~/tpa/clusters/speedy** will still work)
 
 
 

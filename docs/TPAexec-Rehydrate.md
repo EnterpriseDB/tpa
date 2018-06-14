@@ -1,7 +1,7 @@
 ---
 title: TPAexec guide - rehydrate
-version: 1.1
-date: 11/June/2018
+version: 1.2
+date: 14/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -30,7 +30,7 @@ To be able to use rehydration, 2 volume attributes need to be set in config.yml:
 
 ### Simple Rehydrate example
 
-This example assumes that environment variable TPA_HOME has been set; that \$TPA_HOME/bin has been added to the tpauser's PATH. It also assumes that you have a running cluster called **night**, with the configuration files located in **~/tpa/clusters/night** and that the instance we want to rehydrate is called **zombie**.
+This example assumes that environment variable TPA_DIR has been set; that \$TPA_DIR/bin has been added to the tpauser's PATH. It also assumes that you have a running cluster called **night**, with the configuration files located in **~/tpa/clusters/night** and that the instance we want to rehydrate is called **zombie**.
 
 Use the AWS console to check that all the instances in the cluster are running, and that all checks have passed, not just the instance(s) being hydrated, especially the master node - if they are in “stopped” or “terminated” state, TPAexec will build a new instance, which isn't what we want.
 
@@ -76,7 +76,7 @@ instances:
 
 ```
 <clusterdir>
-	The directory containing the cluster config - if no path is given, it assumes that the directory will be under the "$TPA_HOME/clusters" directory
+	The directory containing the cluster config - if no path is given, it assumes that the directory will be under the current directory.
 
 <node1>
 	There must be at least one node specified for the rehydrate command to execute

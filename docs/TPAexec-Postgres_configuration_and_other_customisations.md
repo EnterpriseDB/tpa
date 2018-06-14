@@ -1,7 +1,7 @@
 ---
 title: TPAexec - Postgres configuration and other customisations
-version: 1.1
-date: 11/June/2018
+version: 1.2
+date: 14/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -15,7 +15,7 @@ TPAexec - Postgres configuration and other customisations
 
 ### Postgres postgresql.conf configuration variables
 
-These can be configured by TPAexec at build time by setting the relevant parameters as node vars in the **~/tpa/clusters/\<clustername>/config.yml** file (it is suggested that $TPA_HOME/clusters is copied to ~/tpa/clusters).
+These can be configured by TPAexec at build time by setting the relevant parameters as node vars in the **~/tpa/clusters/\<clustername>/config.yml** file.
 
 An excerpt:
 
@@ -50,7 +50,7 @@ During the deploy phase, TPAexec creates a directory on each Postgres node which
 include_dir = 'conf.d'
 ```
 
-and is created in the $PGDATA directory (**/opt/postgres/data** by default).
+and is created in the $PGDATA directory ( **/opt/postgres/data** by default).
 
 Multiple files within the include directory are processed in file name order (according to C locale rules, i.e. numbers before letters, and uppercase letters before lowercase ones) - this means that only the last setting encountered for a particular parameter while the server is reading configuration files will be used. 
 
@@ -62,10 +62,10 @@ Multiple files within the include directory are processed in file name order (ac
 
 Settings which can be dynamically set are written during the TPAexec deploy phase to **0000-tpa.conf** and settings which require a db restart are written to **0001-tpa_restart.conf**.
 
-More information regarding default settings that TPAexec will use during deployment can be found under **$TPA_HOME/roles/postgres/config/templates** in files **tpa.conf.j2** & **tpa_restart.conf.j2**
+More information regarding default settings that TPAexec will use during deployment can be found under **$TPA_DIR/roles/postgres/config/templates** in files **tpa.conf.j2** & **tpa_restart.conf.j2**
 
 ```
-[tpa-server]$ ls $TPA_HOME/roles/postgres/config/templates
+[tpa-server]$ ls $TPA_DIR/roles/postgres/config/templates
 extensions.conf.j2  pg_hba.conf.j2   settings.conf.j2  tpa_restart.conf.j2
 override.conf.j2    pg_hba.lines.j2  tpa.conf.j2       variable.j2
 ```

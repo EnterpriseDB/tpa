@@ -1,12 +1,12 @@
 #!/bin/bash
 #
 # Prints one or more random /24 subnets within the 10.33.0.0/16 Test VPC
-# that are not already used by any cluster under clusters/. The number
+# that are not already used by any cluster under <cluster dir>/. The number
 # of subnets desired may be specified as an optional integer argument.
 #
 # Example:
 #
-# $ misc/find-unused-subnets 3
+# $ misc/find-unused-subnets ~/tpa/clusters 3
 # 10.33.28.0/24
 # 10.33.34.0/24
 # 10.33.251.0/24
@@ -16,9 +16,28 @@
 IFS=
 set -e -u
 
-misc=$(dirname $0)
-clusters=$(realpath $misc/../clusters)
+case $# in
+    2)
+        clusters=$(realpath $1)
+        numbersubnets=$2
+        ;;
+    1)
+        clusters=$(realpath $1)
+        numbersubnets=1
+        ;;
+    0)
+# For backwards compatibility - assumes TPA/clusters
+        clusters=$(realpath $(dirname $0)/../clusters)
+        numbersubnets=1
+        ;;
+esac
+if [ ! -d $clusters ]; then
+    echo "Can't find directory $clusters"
+    echo "usage: $0 <cluster-dir> [ <number of subnets> ]"
+    exit
+fi
 
+echo "Searching under $clusters ..."
 # We don't use git ls-files here, because there may be uncommitted
 # clusters.
 
@@ -27,5 +46,5 @@ find $clusters -name config.yml | \
         sed -e 's/^10.33.//' -e 's/\..*$//' | \
             sort -un > /tmp/subnets
 
-seq 0 254 | grep -vxf /tmp/subnets | shuf | head -n "${1:-1}" | \
+seq 0 254 | grep -vxf /tmp/subnets | shuf | head -n "${numbersubnets:-1}" | \
     sed -e 's/^/10.33./' -e 's,$,.0/24,'
