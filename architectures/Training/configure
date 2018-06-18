@@ -123,6 +123,7 @@ esac
 
 cat > $cluster/config.yml <<PREAMBLE
 ---
+architecture: Training
 
 cluster_name: training_$issue
 cluster_tags:
