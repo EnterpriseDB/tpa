@@ -33,3 +33,4 @@
   with_items:
     - pg_stat_statements
     - pglogical
+    - bdr
