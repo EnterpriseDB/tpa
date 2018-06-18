@@ -48,7 +48,6 @@ configure() {
         error "unknown deployment architecture: $arch"
     fi
 
-    mkdir $cluster
     $archdir/configure $cluster "$@"
 }
 
@@ -227,10 +226,6 @@ case "$command" in
     configure)
         cluster=${1:?No cluster specified}
         shift
-
-        if [[ -d $cluster ]]; then
-            error "cannot configure existing cluster: $cluster"
-        fi
         ;;
 
     provision|deploy|deprovision|rehydrate)

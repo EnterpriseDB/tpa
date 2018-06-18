@@ -1,9 +1,14 @@
 #!/bin/bash
 
+IFS=
+set -e -u
+
 archdir=$(dirname $0)
 
 cluster=${1:?"No cluster directory specified (please run this script via 'tpaexec config clustername …')"}
 shift
+
+mkdir $cluster
 
 while [[ $# -gt 0 ]]; do
     opt=$1
