@@ -31,35 +31,25 @@ version () {
 }
 
 configure() {
-    # We should eventually switch to using getopt for this.
+    if [[ "${1:-''}" != --arch* ]]; then
+        error "no architecture specified (use '--architecture xxx')"
+    fi
 
-    while [[ $# -gt 0 ]]; do
-        opt=$1
-        shift
+    shift
+    arch=${1:?No argument specified to --architecture}
+    shift
 
-        case "$opt" in
-            --arch*)
-                arch=${1:?No argument specified to --architecture}
-                shift
-                ;;
-            *)
-                error "unrecognised parameter: $opt"
-                ;;
-        esac
-    done
+    # Find the relevant architecture configuration script and let it do
+    # whatever it wants to generate the cluster configuration into the
+    # target directory. Any remaining arguments belong to that script.
 
-    arch=${arch:?Please specify --architecture xxx}
     archdir=$TPA_DIR/architectures/$arch
-    if [[ ! -d $archdir ]]; then
+    if [[ ! -d $archdir || ! -x $archdir/configure ]]; then
         error "unknown deployment architecture: $arch"
     fi
 
-    # We copy the files from the architecture directory to the cluster
-    # directory. In future, we will need to perform template expansion
-    # based on command-line options like --platform, --region, etc.
-
-    cp -a $archdir $cluster
-    rm $cluster/README.md
+    mkdir $cluster
+    $archdir/configure $cluster "$@"
 }
 
 provision() {
