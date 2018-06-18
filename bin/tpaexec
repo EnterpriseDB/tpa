@@ -249,10 +249,6 @@ case "$command" in
         help "$*"
         ;;
 
-    version)
-        version
-        ;;
-
     info)
         subcommand=${1:-""}
         case "$subcommand" in
@@ -271,7 +267,7 @@ case "$command" in
         esac
         ;;
 
-    configure|provision|deploy|deprovision|rehydrate)
+    version|configure|provision|deploy|deprovision|rehydrate)
         $command "$@"
         ;;
 
