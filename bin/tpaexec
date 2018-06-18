@@ -5,6 +5,9 @@
 IFS=
 set -e -u
 
+# If $TPA_DIR is not already set, we use /opt/2ndQuadrant/TPA if it
+# exists, or guess TPA_DIR based on $0.
+
 TOP=/opt/2ndQuadrant/TPA
 if [[ ! -d $TOP ]]; then
     TOP=$(dirname $0)/..
@@ -12,40 +15,224 @@ if [[ ! -d $TOP ]]; then
 fi
 export TPA_DIR=${TPA_DIR:-$TOP}
 
-if [[ -f $TPA_DIR/VERSION ]]; then
-    VERSION=$(cat $TPA_DIR/VERSION)
-else
-    VERSION=$(cd $TPA_DIR && git describe)
-fi
+ansible=$TPA_DIR/ansible/ansible
 
-command=${1:?No command specified}
-shift
+## Command functions
+#
+# These functions handle the various tpaexec commands.
+
+version () {
+    if [[ -f $TPA_DIR/VERSION ]]; then
+        VERSION=$(cat $TPA_DIR/VERSION)
+    else
+        VERSION=$(cd $TPA_DIR && git describe)
+    fi
+    echo "TPA $VERSION"
+}
+
+provision() {
+    $ansible-playbook $TPA_DIR/platforms/provision.yml \
+        -e cluster=$(pwd) "$@"
+}
+
+deploy() {
+    $ansible-playbook deploy.yml \
+        -i inventory --vault-password-file vault/vault_pass.txt \
+        -e cluster=$(pwd) "$@"
+}
+
+deprovision() {
+    $ansible-playbook $TPA_DIR/platforms/deprovision.yml \
+        -i inventory \
+        -e cluster=$(pwd) "$@"
+}
+
+rehydrate() {
+    # We terminate the old instances after performing some sanity
+    # checks, provision replacements for them, and deploy to the
+    # newly-provisioned instances.
+
+    $ansible-playbook $TPA_DIR/platforms/aws/terminate-for-rehydration.yml \
+        -e i_really_want_to_destroy_my_entire_cluster=$DESTROY \
+        -i inventory \
+        -e cluster=$(pwd) \
+        --limit "$instances" "$@"
+
+    provision -e require_reattachment=yes -e reattach_hosts="$instances" "$@"
+    deploy -e rehydrate=yes -e deploy_hosts="$instances" "$@"
+}
+
+help() {
+    topic=${1:-""}
+    case "$topic" in
+        "")
+            cat <<TOPICS
+Available help topics:
+    info
+    provision, deploy, deprovision
+    rehydrate
+
+Run 'tpaexec help topicname' for more details.
+TOPICS
+            ;;
+
+        info*)
+            cat <<INFO
+Available info subcommands:
+
+    tpaexec info version
+        Displays current TPA version
+
+    tpaexec info platforms
+        Displays currently-supported platforms
+
+    tpaexec info architectures
+        Displays currently-supported deployment architectures
+
+    tpaexec info platforms/xxx
+        Displays information about a particular platform
+
+    tpaexec info architectures/xxx
+        Displays information about a particular deployment architecture
+INFO
+            ;;
+
+        provision)
+            cat <<PROVISION
+Command: tpaexec provision clustername
+
+Provisions a cluster according to clustername/config.yml
+PROVISION
+            ;;
+
+        deploy)
+            cat <<DEPLOY
+Command: tpaexec deploy clustername
+
+Deploys a cluster according to clustername/deploy.yml
+DEPLOY
+            ;;
+
+        deprovision)
+            cat <<DEPROVISION
+Command: tpaexec deprovision clustername
+
+Completely destroys a clustername and all associated resources
+DEPROVISION
+            ;;
+
+        rehydrate)
+            cat <<REHYDRATE
+Command: tpaexec rehydrate clustername instance1[,instance2,…]
+
+Takes a comma-separated list of hostnames and "rehydrates" each host:
+
+1. Ensures that all extra volumes attached to the instance are tagged
+   correctly and set to not be deleted on termination of the instance.
+2. Terminates the instances and waits for the operation to complete.
+3. Provisions replacements for each terminated instance.
+4. Redeploys software on the new instances.
+REHYDRATE
+            ;;
+
+        *)
+            echo "Sorry, no help available for $topic"
+            echo "Please contact tpa@2ndQuadrant.com for assistance"
+            exit 1
+            ;;
+    esac
+}
+
+error() {
+    echo "ERROR: $@"
+    exit 1
+}
+
+## Command handling
+#
+# We may be invoked as "tpaexec command …", or through a symbolic link
+# from command → tpaexec (for backwards compatibility).
+
+exec=$(basename $0)
+case "$exec" in
+    tpaexec)
+        command=${1:?No command specified}
+        shift
+        ;;
+    provision|deprovision|deploy|rehydrate)
+        command=$exec
+        ;;
+    *)
+        echo "ERROR: unrecognised tpaexec command link: $exec"
+        exit 1
+        ;;
+esac
+
+# Some commands take the path to a cluster directory as an argument, in
+# which case we chdir to it beforehand.
 
 case "$command" in
-    provision|deprovision|deploy|rehydrate)
-        $TPA_DIR/bin/$command "$@"
+    provision|deploy|deprovision|rehydrate)
+        cluster=${1:?No cluster specified}
+        shift
+
+        if [[ ! -d $cluster ]]; then
+            error "cluster directory does not exist: $cluster"
+        fi
+
+        cd $cluster
+        ;;
+esac
+
+# Now we can look at the command-line arguments and decide which
+# function to call.
+
+case "$command" in
+    help)
+        IFS=" "
+        help "$*"
+        ;;
+
+    version)
+        version
         ;;
 
     info)
         subcommand=${1:-""}
         case "$subcommand" in
             "")
-                echo "TPA $VERSION"
+                help;
+                ;;
+            version)
+                version
                 ;;
             platforms|architectures|platforms/*|architectures/*)
                 cat $TPA_DIR/$subcommand/README.md
                 ;;
             *)
-                echo "Unrecognised info subcommand: $subcommand"
+                error "unrecognised info subcommand: $subcommand"
                 ;;
         esac
         ;;
 
-    version)
-        echo "TPA $VERSION"
+    provision|deploy|deprovision)
+        $command "$@"
+        ;;
+
+    rehydrate)
+        instances=${1:?No instances specified}
+        shift
+
+        DESTROY=no
+        if [ "${1:-'NO_PLEASE_SAVE_MY_CLUSTER'}" = "I_REALLY_WANT_TO_DESTROY_MY_ENTIRE_CLUSTER=yes" ]; then
+            DESTROY=yes
+            shift
+        fi
+
+        $command "$@"
         ;;
 
     *)
-        echo "Unrecognised tpaexec command: $command"
+        error "unrecognised tpaexec command: $command"
         ;;
 esac
