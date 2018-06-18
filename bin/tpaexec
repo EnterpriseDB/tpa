@@ -48,6 +48,15 @@ deprovision() {
 }
 
 rehydrate() {
+    instances=${1:?No instances specified}
+    shift
+
+    DESTROY=no
+    if [ "${1:-'NO_PLEASE_SAVE_MY_CLUSTER'}" = "I_REALLY_WANT_TO_DESTROY_MY_ENTIRE_CLUSTER=yes" ]; then
+        DESTROY=yes
+        shift
+    fi
+
     # We terminate the old instances after performing some sanity
     # checks, provision replacements for them, and deploy to the
     # newly-provisioned instances.
@@ -215,20 +224,7 @@ case "$command" in
         esac
         ;;
 
-    provision|deploy|deprovision)
-        $command "$@"
-        ;;
-
-    rehydrate)
-        instances=${1:?No instances specified}
-        shift
-
-        DESTROY=no
-        if [ "${1:-'NO_PLEASE_SAVE_MY_CLUSTER'}" = "I_REALLY_WANT_TO_DESTROY_MY_ENTIRE_CLUSTER=yes" ]; then
-            DESTROY=yes
-            shift
-        fi
-
+    provision|deploy|deprovision|rehydrate)
         $command "$@"
         ;;
 
