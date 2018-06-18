@@ -1,0 +1,160 @@
+#!/bin/bash
+
+archdir=$(dirname $0)
+
+cluster=${1:?"No cluster directory specified (please run this script via 'tpaexec config clustername …')"}
+shift
+
+while [[ $# -gt 0 ]]; do
+    opt=$1
+    shift
+
+    case "$opt" in
+        --redmine*|--ticket|--issue)
+            issue=${1:?Redmine issue id not specified}
+            shift
+            ;;
+        --instances)
+            instances=${1:?Number of instances not specified}
+            shift
+            ;;
+        --platform)
+            platform=${1:?Platform name not specified}
+            shift
+            ;;
+        --region)
+            region=${1:?Region name not specified}
+            shift
+            ;;
+        --subnet)
+            subnet=${1:?Subnet address/mask not specified}
+            shift
+            ;;
+        --distribution|--os)
+            distribution=${1:?Distribution name not specified}
+            shift
+            ;;
+        --minimal)
+            minimal=-minimal
+            ;;
+        *)
+            echo "ERROR: unrecognised parameter: $opt"
+            exit 1
+            ;;
+    esac
+done
+
+if [[ ! "$issue" || ! "$instances" ]]; then
+    echo "ERROR: --redmine-id <num> and --instances <num> are both required"
+    exit 1
+fi
+
+platform=${platform:-aws}
+region=${region:-eu-west-1}
+subnet=${subnet:-10.33.115.0/24}
+distribution=${distribution:-Debian}
+minimal=${minimal:-''}
+
+if [[ "$platform" != "aws" ]]; then
+    echo "ERROR: currently unsupported platform: $platform (use '--platform aws')"
+    exit 1
+fi
+
+names=$(wc -l $archdir/hostnames.txt|awk '{print $1}')
+if [[ $instances -gt $names ]];
+then
+    echo "ERROR: hostnames.txt contains fewer than $instances hostnames"
+    exit 1
+fi
+
+case "$distribution$minimal" in
+    Debian)
+        ami_name=TPA-Debian-PGDG-10-2018*
+        ami_owner=self
+        ;;
+
+    Debian-minimal)
+        ami_name=debian-stretch-hvm-x86_64-gp2-2018-04-09-292
+        ami_owner=379101102735
+        ;;
+
+    RedHat)
+        ami_name=TPA-RedHat-PGDG-10-2018*
+        ami_owner=self
+        ;;
+
+    RedHat-minimal)
+        ami_name=RHEL-7.4_HVM_GA-20170808-x86_64-2-Hourly2-GP2
+        ami_owner=309956199498
+        ;;
+
+    Ubuntu)
+        ami_name=TPA-Ubuntu-PGDG-10-2018*
+        ami_owner=self
+        ;;
+
+    Ubuntu-minimal)
+        ami_name=ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180228.1
+        ami_owner=099720109477
+        ;;
+
+    *)
+        echo "ERROR: unsupported distribution: $distribution$minimal"
+        exit 1
+        ;;
+esac
+
+case "$distribution" in
+    Debian)
+        ami_user=admin
+        ;;
+    RedHat)
+        ami_user=ec2-user
+        ;;
+    Ubuntu)
+        ami_user=ubuntu
+        ;;
+esac
+
+cat > $cluster/config.yml <<PREAMBLE
+---
+
+cluster_name: training_$issue
+cluster_tags:
+  Reference: https://redmine.2ndquadrant.it/issues/$issue
+
+cluster_vars:
+  cluster_network: $subnet
+
+cluster_rules:
+  - {proto: tcp, from_port: 0, to_port: 65535, cidr_ip: 0.0.0.0/0}
+
+ec2_ami:
+  Name: $ami_name
+  Owner: $ami_owner
+ec2_ami_user: $ami_user
+
+ec2_vpc:
+  Name: Test
+
+instance_defaults:
+    type: t2.micro
+    region: $region
+    subnet: $subnet
+    role:
+        - primary
+
+instances:
+PREAMBLE
+
+i=0
+for name in $(sort --random-sort $archdir/hostnames.txt|head -$instances);
+do
+    i=$((i+1))
+cat >> $cluster/config.yml <<INSTANCE
+  - node: $i
+    Name: $name
+INSTANCE
+done
+
+cp $archdir/deploy.yml $cluster
