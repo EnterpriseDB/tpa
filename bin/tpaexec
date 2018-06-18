@@ -30,6 +30,38 @@ version () {
     echo "TPA $VERSION"
 }
 
+configure() {
+    # We should eventually switch to using getopt for this.
+
+    while [[ $# -gt 0 ]]; do
+        opt=$1
+        shift
+
+        case "$opt" in
+            --arch*)
+                arch=${1:?No argument specified to --architecture}
+                shift
+                ;;
+            *)
+                error "unrecognised parameter: $opt"
+                ;;
+        esac
+    done
+
+    arch=${arch:?Please specify --architecture xxx}
+    archdir=$TPA_DIR/architectures/$arch
+    if [[ ! -d $archdir ]]; then
+        error "unknown deployment architecture: $arch"
+    fi
+
+    # We copy the files from the architecture directory to the cluster
+    # directory. In future, we will need to perform template expansion
+    # based on command-line options like --platform, --region, etc.
+
+    cp -a $archdir $cluster
+    rm $cluster/README.md
+}
+
 provision() {
     $ansible-playbook $TPA_DIR/platforms/provision.yml \
         -e cluster=$(pwd) "$@"
@@ -78,6 +110,7 @@ help() {
             cat <<TOPICS
 Available help topics:
     info
+    generate-config
     provision, deploy, deprovision
     rehydrate
 
@@ -104,6 +137,18 @@ Available info subcommands:
     tpaexec info architectures/xxx
         Displays information about a particular deployment architecture
 INFO
+            ;;
+
+        *config*)
+            cat <<CONFIG
+Command: tpaexec generate-config clustername --architecture "archname"
+
+Creates a clustername directory containing config.yml and deploy.yml
+according to the selected architecture. After this step, you can run
+'tpaexec provision clustername'.
+
+It is not (yet) possible to re-configure an existing cluster.
+CONFIG
             ;;
 
         provision)
@@ -177,10 +222,19 @@ case "$exec" in
         ;;
 esac
 
-# Some commands take the path to a cluster directory as an argument, in
-# which case we chdir to it beforehand.
+# Some commands take the path to a cluster directory as an argument, and
+# we may need to chdir to it beforehand.
 
 case "$command" in
+    generate-config|configure|config)
+        cluster=${1:?No cluster specified}
+        shift
+
+        if [[ -d $cluster ]]; then
+            error "cannot configure existing cluster: $cluster"
+        fi
+        ;;
+
     provision|deploy|deprovision|rehydrate)
         cluster=${1:?No cluster specified}
         shift
@@ -222,6 +276,10 @@ case "$command" in
                 error "unrecognised info subcommand: $subcommand"
                 ;;
         esac
+        ;;
+
+    generate-config|configure|config)
+        configure "$@"
         ;;
 
     provision|deploy|deprovision|rehydrate)
