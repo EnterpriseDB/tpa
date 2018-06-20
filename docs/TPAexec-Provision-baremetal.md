@@ -1,7 +1,7 @@
 ---
 title: TPAexec configuration guide - provision - baremetal
-version: 1.0
-date: 19/June/2018
+version: 1.1
+date: 20/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -27,13 +27,18 @@ TPAexec setup works in Stages:
 ### OS cluster
 For baremetal deployment, we assume that the servers/VMs have already been created and booted to the OS, and that they are accessible via SSH.
 
-Pre-requisites that you will need:
-Hostname and external ip address of each server (Name, public_ip)
-Cluster network CIDR (cluster_network)
-Cluster ssh user - the ssh user to administer cluster commands (cluster_ssh_user)
-Ansible ssh user - the admin user used to ssh to each host by tpaexec (ansible_user)
-If using repmgr, you will need to know logically which data centre hosts are in.
-###### Creating OS cluster using Vagrant with VirtualBox
+**Pre-requisites that you will need:**
+
+- Hostname and external ip address of each server (Name, public_ip)
+
+- Private IP address of each server if different from public (private_ip)
+- Cluster network CIDR (cluster_network)
+- Cluster ssh user - the ssh user to administer cluster commands (cluster_ssh_user)
+- Ansible ssh user - the admin user used to ssh to each host by tpaexec (ansible_user)
+- If using repmgr, you will need to know logically which data centre hosts are in.
+
+**Creating OS cluster using Vagrant with VirtualBox**
+
 One method of quickly creating VMs for testing purposes is with [Vagrant](https://www.vagrantup.com/),which is becoming increasingly popular for managing VMs - an example Vagrantfile which creates 3 Centos servers which can be used by the TPA example below can be found in **Appendix 2** of this document.
 
 Assuming that you have copied the **Vagrantfile** into a new vagrant project directory, and are using the tpa user to run vagrant, you should be able to run:
@@ -162,7 +167,6 @@ instances:
         work_mem: 20MB
         max_connections: 234
         shared_buffers: 128MB
-    
     - node: 2
       Name: lab-backup
       public_ip: 192.168.56.103
@@ -176,7 +180,6 @@ instances:
       vars:
         ansible_user: admin
         repmgr_location: dc1
-    
     - node: 3
       Name: lab-replica
       public_ip: 192.168.56.102
@@ -210,7 +213,6 @@ Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
   config.vm.provision "file", source: "~/tpa/sshkeys/id_night.pub", destination: "/tmp/.ssh/authorized_keys"
   config.vm.provision "shell", inline: $script
-
   config.vm.define "primary" do |primary|
     primary.vm.hostname = 'lab-primary'
     primary.vm.network :private_network, ip: "192.168.56.101"
@@ -221,7 +223,6 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--memory", 512]
       v.customize ["modifyvm", :id, "--name", "lab-primary"]
     end
-
   end
   config.vm.define "replica" do |replica|
     replica.vm.hostname = 'lab-replica'
@@ -256,3 +257,4 @@ Vagrant will first copy the public key to /tmp, then via a script, create a user
 The VirtualBox forwarded SSH ports have been set to 10122, 10222 & 10322 respectively.
 
 [^Information Classification: Confidential]: [ISP008] Information Classification Policy
+
