@@ -1,14 +1,14 @@
 #!/bin/bash
 
-IFS=
-set -e -u
+IFS=$' \t\n'
+set -eu
 
 archdir=$(dirname $0)
+libdir=$(dirname $0)/../lib
+namesfile=()
 
 cluster=${1:?"No cluster directory specified (please run this script via 'tpaexec config clustername …')"}
 shift
-
-mkdir $cluster
 
 while [[ $# -gt 0 ]]; do
     opt=$1
@@ -42,6 +42,10 @@ while [[ $# -gt 0 ]]; do
         --minimal)
             minimal=-minimal
             ;;
+        --hostnames-from)
+            namesfile=(${1:?Hostname list file not specified})
+            shift
+            ;;
         *)
             echo "ERROR: unrecognised parameter: $opt"
             exit 1
@@ -49,7 +53,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ ! "$issue" || ! "$instances" ]]; then
+if [[ ! "${issue:-}" || ! "${instances:-}" ]]; then
     echo "ERROR: --redmine-id <num> and --instances <num> are both required"
     exit 1
 fi
@@ -62,13 +66,6 @@ minimal=${minimal:-''}
 
 if [[ "$platform" != "aws" ]]; then
     echo "ERROR: currently unsupported platform: $platform (use '--platform aws')"
-    exit 1
-fi
-
-names=$(wc -l $archdir/hostnames.txt|awk '{print $1}')
-if [[ $instances -gt $names ]];
-then
-    echo "ERROR: hostnames.txt contains fewer than $instances hostnames"
     exit 1
 fi
 
@@ -121,6 +118,10 @@ case "$distribution" in
         ;;
 esac
 
+mkdir $cluster
+
+trap "rm -rf $cluster" ERR
+
 cat > $cluster/config.yml <<PREAMBLE
 ---
 architecture: Training
@@ -153,13 +154,12 @@ instance_defaults:
 instances:
 PREAMBLE
 
-i=0
-for name in $(sort --random-sort $archdir/hostnames.txt|head -$instances);
+hostnames=($($libdir/hostnames $instances "${namesfile[@]}"))
+for i in $(seq 1 $instances);
 do
-    i=$((i+1))
-cat >> $cluster/config.yml <<INSTANCE
+    cat >> $cluster/config.yml <<INSTANCE
   - node: $i
-    Name: $name
+    Name: ${hostnames[$i-1]}
 INSTANCE
 done
 

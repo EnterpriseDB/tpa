@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# hostnames 33
+#   Returns 33 randomly-selected hostnames
+#
+# hostnames 33 /usr/share/dict/words
+#   Returns 33 randomly-selected hostnames from /usr/share/dict/words
+#
+# hostnames 33 /usr/share/dict/words '^[a-m]{3}[n-z]{3,4}$'
+#   Returns 33 randomly-selected hostnames from /usr/share/dict/words
+#   that match the given pattern
+
+IFS=$' \t\n'
+set -eu
+
+libdir=$(dirname $0)
+wanted=${1:?Number of hostnames not specified}
+namesfile=${2:-$libdir/hostnames.txt}
+pattern=${3:-'^[a-zA-Z0-9-]*$'}
+
+type realpath &>/dev/null && namesfile=$(realpath $namesfile)
+if [[ ! -f $namesfile ]]; then
+    echo "ERROR: could not open hostname list: $namesfile"
+    exit 1
+fi
+
+names=($(grep -E "$pattern" $namesfile|sort --random-sort|head -$wanted))
+if [[ "${#names[@]}" -lt $wanted ]];
+then
+    echo "ERROR: found only ${#names[@]}/$wanted names matching '$pattern' in $namesfile" >&2
+    exit 1
+fi
+
+echo "${names[@]}"
