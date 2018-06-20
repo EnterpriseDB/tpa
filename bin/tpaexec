@@ -259,7 +259,13 @@ case "$command" in
                 version
                 ;;
             platforms|architectures|platforms/*|architectures/*)
-                cat $TPA_DIR/$subcommand/README.md
+                doc=$TPA_DIR/$subcommand/README.md
+                if [[ ! -f $doc ]]; then
+                    echo "Sorry, no documentation available for $subcommand"
+                    echo "Please contact tpa@2ndQuadrant.com for assistance"
+                    exit 1
+                fi
+                cat $doc
                 ;;
             *)
                 error "unrecognised info subcommand: $subcommand"
