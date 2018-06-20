@@ -13,8 +13,8 @@
 #
 # If you want something smaller, split up a /24 subnet yourself.
 
-IFS=
-set -e -u
+IFS=$' \t\n'
+set -eu
 
 case $# in
     2)

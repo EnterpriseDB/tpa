@@ -3,8 +3,8 @@
 # This is a wrapper for bin/ansible that sets various environment
 # variables before invoking the real executable.
 
-IFS=
-set -e -u
+IFS=$' \t\n'
+set -eu
 
 # TPA must be installed in the parent directory of this script, or
 # TPA_DIR must be explicitly set to the correct location.

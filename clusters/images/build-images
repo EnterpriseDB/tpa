@@ -4,8 +4,8 @@
 #
 # clusters/images/build-images [-r] [PGDG|2ndQPostgres|…] [9.5|9.6|…]
 
-IFS=
-set -e -u
+IFS=$' \t\n'
+set -eu
 
 TOP=/opt/2ndQuadrant/TPA
 if [[ ! -d $TOP ]]; then

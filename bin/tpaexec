@@ -2,8 +2,8 @@
 #
 # Runs provision/deprovision/deploy etc.
 
-IFS=
-set -e -u
+IFS=$' \t\n'
+set -eu
 
 # If $TPA_DIR is not already set, we use /opt/2ndQuadrant/TPA if it
 # exists, or guess TPA_DIR based on $0.
@@ -245,7 +245,6 @@ esac
 
 case "$command" in
     help)
-        IFS=" "
         help "$*"
         ;;
 

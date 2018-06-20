@@ -6,8 +6,8 @@
 #
 # Example: ansible-cluster test/tpa all -m ping
 
-IFS=
-set -e -u
+IFS=$' \t\n'
+set -eu
 
 TOP=/opt/2ndQuadrant/TPA
 if [[ ! -d $TOP ]]; then
