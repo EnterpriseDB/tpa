@@ -277,8 +277,12 @@ case "$command" in
         esac
         ;;
 
-    version|configure|provision|deploy|deprovision|rehydrate)
+    version|configure)
         $command "$@"
+        ;;
+
+    provision|deploy|deprovision|rehydrate)
+        time $command "$@"
         ;;
 
     *)
