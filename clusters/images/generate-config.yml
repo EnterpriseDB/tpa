@@ -27,6 +27,9 @@
       - Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180228.1
         Owner: 099720109477
         os: Ubuntu
+      #- Name: suse-sles-12-sp3-v20180215-hvm-ssd-x86_64
+      #  Owner: 013907871322
+      #  os: SLES
 
   tasks:
     - name: Search for base AMIs in each region
