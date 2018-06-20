@@ -1,0 +1,73 @@
+#!/bin/bash
+#
+# image Debian
+#   Returns image_name, image_owner, and image_user corresponding to the
+#   TPA Debian AMI on AWS.
+#
+# image Debian-minimal
+#   Returns image_name, image_owner, and image_user corresponding to the
+#   stock Debian AMI on AWS.
+#
+# image Debian gke
+#   Returns an error because only AWS is currently supported.
+
+distribution=${1:?Distribution name not specified}
+platform=${2:-aws}
+
+if [[ $platform != 'aws' ]]; then
+    echo "ERROR: distribution images are not available for platform: $platform" >&2
+    exit 1
+fi
+
+case "$distribution" in
+    Debian)
+        image_name=TPA-Debian-PGDG-10-2018*
+        image_owner=self
+        ;;
+
+    Debian-minimal)
+        image_name=debian-stretch-hvm-x86_64-gp2-2018-04-09-292
+        image_owner=379101102735
+        ;;
+
+    RedHat)
+        image_name=TPA-RedHat-PGDG-10-2018*
+        image_owner=self
+        ;;
+
+    RedHat-minimal)
+        image_name=RHEL-7.4_HVM_GA-20170808-x86_64-2-Hourly2-GP2
+        image_owner=309956199498
+        ;;
+
+    Ubuntu)
+        image_name=TPA-Ubuntu-PGDG-10-2018*
+        image_owner=self
+        ;;
+
+    Ubuntu-minimal)
+        image_name=ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180228.1
+        image_owner=099720109477
+        ;;
+
+    *)
+        echo "ERROR: unsupported distribution: $distribution$minimal" >&2
+        exit 1
+        ;;
+esac
+
+case "$distribution" in
+    Debian*)
+        image_user=admin
+        ;;
+    RedHat*)
+        image_user=ec2-user
+        ;;
+    Ubuntu*)
+        image_user=ubuntu
+        ;;
+esac
+
+echo image_name=$image_name
+echo image_owner=$image_owner
+echo image_user=$image_user

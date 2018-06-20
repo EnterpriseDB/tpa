@@ -20,7 +20,7 @@ pattern=${3:-'^[a-zA-Z0-9-]*$'}
 
 type realpath &>/dev/null && namesfile=$(realpath $namesfile)
 if [[ ! -f $namesfile ]]; then
-    echo "ERROR: could not open hostname list: $namesfile"
+    echo "ERROR: could not open hostname list: $namesfile" >&2
     exit 1
 fi
 

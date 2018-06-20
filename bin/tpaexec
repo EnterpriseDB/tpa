@@ -187,7 +187,7 @@ REHYDRATE
 }
 
 error() {
-    echo "ERROR: $@"
+    echo "ERROR: $@" >&2
     exit 1
 }
 
@@ -206,8 +206,7 @@ case "$exec" in
         command=$exec
         ;;
     *)
-        echo "ERROR: unrecognised tpaexec command link: $exec"
-        exit 1
+        error "unrecognised tpaexec command link: $exec"
         ;;
 esac
 
