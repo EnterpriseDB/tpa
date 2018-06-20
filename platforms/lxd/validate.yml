@@ -1,0 +1,19 @@
+# Make that every instance has an image explicitly specified by id.
+
+- name: Ensure that every instance has a defined alias image
+  assert:
+    msg: "Please set 'alias' on every instance"
+    that:
+      - instances|selectattr('alias','defined')|list|count == instances|count
+
+
+- name: Derive subsidiary resource names for the cluster
+  set_fact:
+    cluster_tag: "{{ cluster_tag|default('tag_Cluster_' + cluster_name) }}"
+
+- name: Ensure that an IP address is specified for the instance
+  assert:
+    msg: "LXD instances must specify an ip_address"
+    that:
+      item.get('ip_address')
+  with_items: "{{ lxd_instances }}"

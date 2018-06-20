@@ -1,0 +1,7 @@
+- name: Delete a container
+  lxd_container:
+    url: "{{ item.lxd_url | default('unix:/var/snap/lxd/common/lxd/unix.socket') }}"
+    name: "{{ item.Name }}"
+    state: absent
+  with_items:
+    - "{{ instances }}"

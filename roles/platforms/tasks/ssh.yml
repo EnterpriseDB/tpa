@@ -26,4 +26,5 @@
     module: wait_for
     host: "{{ ansible_host }}"
     port: "{{ ansible_port|default(22) }}"
+  when: platform != 'lxd'
   tags: wait_for

@@ -41,10 +41,14 @@
 - import_tasks: aws/validate.yml
   when: >
     'aws' in cluster_platforms
-    
+
 - import_tasks: bare/validate.yml
   when: >
     'bare' in cluster_platforms
+
+- import_tasks: lxd/validate.yml
+  when: >
+    'lxd' in cluster_platforms
 
 ## Final topology validation
 #

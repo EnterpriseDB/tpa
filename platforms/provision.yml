@@ -64,6 +64,9 @@
     - include_tasks: bare/provision.yml
       when: >
         'bare' in cluster_platforms
+    - include_tasks: lxd/provision.yml
+      when: >
+        'lxd' in cluster_platforms
 
     ## Writing the inventory
     #

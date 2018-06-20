@@ -7,3 +7,6 @@ platforms/bare
 
 platforms/aws
   AWS EC2 instances
+
+platforms/lxd
+  lxd containers

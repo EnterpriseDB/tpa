@@ -19,4 +19,7 @@
     - include_tasks: bare/deprovision.yml
       when: >
         'bare' in cluster_platforms
+    - include_tasks: lxd/deprovision.yml
+      when: >
+        'lxd' in cluster_platforms
     - include_tasks: common/deprovision.yml

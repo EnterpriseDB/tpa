@@ -1,4 +1,8 @@
 [{{ cluster_tag }}]
 {% for h in instance_vars %}
+{% if h.platform == 'lxd' %}
+{{ h.Name }} ansible_connection=lxd node={{ h.node }} platform={{ h.platform }}
+{% else%}
 {{ h.Name }} ansible_host={{ h.ip_address }} node={{ h.node }} platform={{ h.platform }}
+{% endif%}
 {% endfor %}

@@ -1,0 +1,84 @@
+---
+
+# Provision LXD instances based on the cluster definition file.
+
+- name: Deploy Containers
+  lxd_container:
+    url: "{{ item.lxd_url | default('unix:/var/snap/lxd/common/lxd/unix.socket') }}"
+    name: "{{ item.Name }}"
+    state: "started"
+    source:
+      type: image
+      mode: "{{ item.mode | default () }}"
+      server: "{{ item.server | default () }}"
+      protocol: "{{ item.protocol | default ('lxd') }}"
+      alias: "{{ item.alias }}"
+      architecture: "{{ item.architecture | default()}}"
+    profiles: ["{{ item.profile | default ('default') }}"]
+    config:
+      limits.memory: "{{ item.memory | default () }}"
+      security.nesting: "{{ item.nesting | default ('false') }}"
+      security.privileged: "{{ item.privileged | default ('false')}}"
+    devices:
+      root:
+        path: /
+        pool: "{{ item.storage_pool | default ('default') }}"
+        size: "{{ item.disk_space | default () }}"
+        type: "{{ item.disk_type | default ('disk') }}"
+      eth0:
+        nictype: "{{ item.nictype | default ('bridged') }}"
+        parent: "{{ item.network | default ('lxdbr0') }}"
+        type: "{{ item.interface_type | default ('nic') }}"
+        ipv4.address: "{{ addresses.ip_address }}"
+    wait_for_ipv4_addresses: "{{ item.wait_for_ipv4_addresses | default ('false') }}"
+    timeout: 600
+  register: lxd_containers
+  with_items: "{{ lxd_instances }}"
+  vars:
+    addresses: "{{ item|ip_addresses }}"
+  async: 7200
+  poll: 0
+  tags:
+    - lxd
+    - lxd-containers
+
+- name: Wait for instance provisioning to complete
+  async_status: jid={{ item.ansible_job_id }}
+  register: lxd_jobs
+  until: lxd_jobs.finished
+  retries: 300
+  with_items: "{{ lxd_containers.results }}"
+  tags: lxd
+
+- name: Set instance variables and IP
+  set_fact:
+    instance_vars: "{{
+      instance_vars|default([])|union([
+        addresses|combine({
+          'Name': item.item.item.Name,
+          'node': item.item.item.node,
+          'role': item.item.item|try_subkey('role', []),
+          'backup': item.item.item|try_subkey('backup'),
+          'upstream': item.item.item|try_subkey('upstream'),
+          'volumes': item.item.item|try_subkey('volumes', []),
+          'vars': addresses|combine(exports)|combine(item.item.item.vars),
+          'platform': 'lxd',
+        })
+      ])
+    }}"
+  with_items:
+    "{{ lxd_jobs.results }}"
+  loop_control:
+    label: >-
+      {{ item.item.item.Name }}
+  vars:
+    addresses: "{{ item.item.item|ip_addresses }}"
+    exports: "{{ item.item.item|export_as_vars }}"
+
+- name: Debug
+  debug:
+    msg: "{{ item }}"
+  with_items: "{{ instance_vars }}"
+
+- set_fact:
+    cluster_ssh_user: "{{ cluster_vars.cluster_ssh_user|default('root') }}"
