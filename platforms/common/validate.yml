@@ -55,7 +55,7 @@
   set_fact:
     instances: "{{
       instances|set_instance_defaults(cluster_name,
-        compat_defaults|combine(instance_defaults|default({}))
+        compat_defaults|combine(instance_defaults|default({}), recursive=True)
       )
     }}"
 

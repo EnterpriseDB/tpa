@@ -422,7 +422,10 @@
     spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"
     user_data: "{{
       lookup('template', 'user-data.j2',
-        template_vars=dict(image=ec2_ami_properties[item.image])
+        template_vars=dict(
+          image=ec2_ami_properties[item.image],
+          ansible_user=item.vars|try_subkey('ansible_user', 'admin')
+        )
       )
     }}"
     termination_protection: "{{ item.termination_protection|default('no') }}"
@@ -521,6 +524,3 @@
 
 - include_tasks: route53.yml
   tags: [aws, route53]
-
-- set_fact:
-    cluster_ssh_user: "{{ cluster_ssh_user|default(ec2_ami_user) }}"

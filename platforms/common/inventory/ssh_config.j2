@@ -1,7 +1,4 @@
 Host *
-{% if ansible_user != '' %}
-    User {{ ansible_user }}
-{% endif %}
     Port {{ ansible_port }}
     IdentitiesOnly yes
     IdentityFile "{{ ssh_key_file }}"
@@ -10,5 +7,8 @@ Host *
 
 {% for h in instance_vars %}
 Host {{ h.Name }}
+{% if 'ansible_user' in h.vars %}
+    User {{ h.vars.ansible_user }}
+{% endif %}
     HostName {{ h.ip_address }}
 {% endfor %}

@@ -20,3 +20,19 @@
     - route53_hosted_zone_id
   when:
     item in vars
+
+# Both ec2_ami_user and cluster_ssh_user are accepted as top-level
+# settings for backwards compatibility. We now prefer to set them in
+# instance_defaults.vars and override that in instances if required.
+
+- set_fact:
+    compat_defaults: "{{
+      compat_defaults|combine(
+        {'vars': {'ansible_user': vars[item]}}, recursive=True
+      )
+    }}"
+  with_items:
+    - ec2_ami_user
+    - cluster_ssh_user
+  when:
+    item in vars

@@ -79,6 +79,3 @@
   debug:
     msg: "{{ item }}"
   with_items: "{{ instance_vars }}"
-
-- set_fact:
-    cluster_ssh_user: "{{ cluster_vars.cluster_ssh_user|default('root') }}"

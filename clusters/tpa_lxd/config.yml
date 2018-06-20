@@ -1,14 +1,12 @@
 ---
 
 cluster_name: lxd_pg
-cluster_tags:
-  Owner: dbonne
 cluster_vars:
   cluster_network: 10.44.156.0/24   # according with lxdbr0 subnet
-  cluster_ssh_user: root
 
 instance_defaults:
   platform: lxd
+
 instances:
     - node: 1
       Name: pear

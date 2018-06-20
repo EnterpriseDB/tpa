@@ -1,7 +1,7 @@
 R=0
 CONF=/etc/ssh/sshd_config
 
-{% if ec2_ami_user|default('admin') == 'root' %}
+{% if ansible_user == 'root' %}
 R=1
 sed -i.bak 's/^PermitRootLogin no/PermitRootLogin yes/' $CONF
 {% endif %}
