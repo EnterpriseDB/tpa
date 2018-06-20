@@ -32,16 +32,6 @@ number in Redmine.
 You must specify ``--instances <number>`` corresponding to the number of
 instances required.
 
-You may optionally specify ``--distribution Debian`` (or RedHat, or
-Ubuntu). The default is Debian. The value is case-sensitive.
-
-You may optionally specify ``--minimal`` if you do not want to use the
-stock distribution images instead of TPA images that have Postgres and
-associated software preinstalled.
-
-You may optionally specify ``--platform aws``. This is the default, and
-no other platform is currently supported.
-
 You may optionally specify ``--region eu-west-1``. This is the default
 region, but you may use any existing AWS region that you have access to
 (and that will permit the required number of instances to be created).
@@ -49,6 +39,9 @@ region, but you may use any existing AWS region that you have access to
 You may optionally specify ``--subnet 10.33.115.0/24``. This is the
 default value, but you SHOULD change it if multiple clusters will be
 provisioned at the same time.
+
+You may also specify any of the options described by
+``tpaexec help configure-options``.
 
 Provisioning and deployment
 ---------------------------

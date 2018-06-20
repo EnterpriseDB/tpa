@@ -31,7 +31,7 @@ version () {
 }
 
 configure() {
-    if [[ "${1:-''}" != --arch* ]]; then
+    if [[ "${1:-''}" != --arch* && "${1:-''}" != "-a" ]]; then
         error "no architecture specified (use '--architecture xxx')"
     fi
 
@@ -128,15 +128,21 @@ Available info subcommands:
 INFO
             ;;
 
+        configure-options)
+            cat $TPA_DIR/architectures/lib/OPTIONS.md
+            ;;
+
         *config*)
             cat <<CONFIG
-Command: tpaexec generate-config clustername --architecture "archname"
+Command: tpaexec generate-config clustername --architecture archname …
 
 Creates a clustername directory containing config.yml and deploy.yml
 according to the selected architecture. After this step, you can run
 'tpaexec provision clustername'.
 
-It is not (yet) possible to re-configure an existing cluster.
+For more information, see:
+    tpaexec info architectures
+    tpaexec info architectures/archname
 CONFIG
             ;;
 

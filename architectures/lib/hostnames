@@ -16,7 +16,7 @@ set -eu
 libdir=$(dirname $0)
 wanted=${1:?Number of hostnames not specified}
 namesfile=${2:-$libdir/hostnames.txt}
-pattern=${3:-'^[a-zA-Z0-9-]*$'}
+pattern=${3:-'[a-zA-Z0-9-]*'}
 
 type realpath &>/dev/null && namesfile=$(realpath $namesfile)
 if [[ ! -f $namesfile ]]; then
@@ -24,7 +24,7 @@ if [[ ! -f $namesfile ]]; then
     exit 1
 fi
 
-names=($(grep -E "$pattern" $namesfile|sort --random-sort|head -$wanted))
+names=($(grep -xE "$pattern" $namesfile|sort --random-sort|head -$wanted))
 if [[ "${#names[@]}" -lt $wanted ]];
 then
     echo "ERROR: found only ${#names[@]}/$wanted names matching '$pattern' in $namesfile" >&2

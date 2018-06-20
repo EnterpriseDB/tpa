@@ -1,14 +1,6 @@
 #!/bin/bash
 
-IFS=$' \t\n'
-set -eu
-
-archdir=$(dirname $0)
-libdir=$(dirname $0)/../lib
-namesfile=()
-
-cluster=${1:?"No cluster directory specified (please run this script via 'tpaexec config clustername …')"}
-shift
+source $(dirname $0)/../lib/configure-common.sh
 
 while [[ $# -gt 0 ]]; do
     opt=$1
@@ -23,10 +15,6 @@ while [[ $# -gt 0 ]]; do
             instances=${1:?Number of instances not specified}
             shift
             ;;
-        --platform)
-            platform=${1:?Platform name not specified}
-            shift
-            ;;
         --region)
             region=${1:?Region name not specified}
             shift
@@ -35,41 +23,24 @@ while [[ $# -gt 0 ]]; do
             subnet=${1:?Subnet address/mask not specified}
             shift
             ;;
-        --distribution|--os)
-            distribution=${1:?Distribution name not specified}
-            shift
-            ;;
-        --minimal)
-            minimal=-minimal
-            ;;
-        --hostnames-from)
-            namesfile=(${1:?Hostname list file not specified})
-            shift
-            ;;
         *)
-            echo "ERROR: unrecognised parameter: $opt" >&2
-            exit 1
+            source $libdir/configure-options.sh
             ;;
     esac
 done
 
 if [[ ! "${issue:-}" || ! "${instances:-}" ]]; then
-    echo "ERROR: --redmine-id <num> and --instances <num> are both required" >&2
-    exit 1
+    error "--redmine-id <num> and --instances <num> are both required"
 fi
-
-platform=${platform:-aws}
-region=${region:-eu-west-1}
-subnet=${subnet:-10.33.115.0/24}
-distribution=${distribution:-Debian}
-minimal=${minimal:-''}
 
 if [[ "$platform" != "aws" ]]; then
-    echo "ERROR: currently unsupported platform: $platform (use '--platform aws')" >&2
-    exit 1
+    error "currently unsupported platform: $platform (use '--platform aws')"
 fi
 
-image=$($libdir/image "$distribution$minimal" $platform)
+region=${region:-eu-west-1}
+subnet=${subnet:-10.33.115.0/24}
+
+image=$($libdir/image $distribution $platform)
 eval $image
 
 mkdir $cluster
@@ -108,7 +79,7 @@ instance_defaults:
 instances:
 PREAMBLE
 
-hostnames=($($libdir/hostnames $instances "${namesfile[@]}"))
+hostnames=($($libdir/hostnames $instances "${hostnames_args[@]}"))
 for i in $(seq 1 $instances);
 do
     cat >> $cluster/config.yml <<INSTANCE
