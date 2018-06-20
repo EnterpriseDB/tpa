@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+# This is an ansible module that takes no arguments and returns only
+# some distribution-specific facts.
+
+declare -A families pkg_mgrs
+families=([Debian]=Debian [RedHat]=RedHat [Ubuntu]=Debian)
+pkg_mgrs=([Debian]=apt [RedHat]=yum)
+
+if [[ -f /etc/redhat-release ]]; then
+    distribution=RedHat
+elif type lsb_release &>/dev/null; then
+    lines=($(lsb_release -ics))
+    distribution=${lines[0]}
+    release=${lines[1]}
+fi
+
+os_family=${families[$distribution]}
+pkg_mgr=${pkg_mgrs[$os_family]}
+
+grep -Ev '": ""' <<RESULT
+{
+    "changed": false,
+    "ansible_facts": {
+        "ansible_distribution": "$distribution",
+        "ansible_distribution_release": "$release",
+        "ansible_os_family": "$os_family",
+        "ansible_pkg_mgr": "$pkg_mgr"
+    }
+}
+RESULT

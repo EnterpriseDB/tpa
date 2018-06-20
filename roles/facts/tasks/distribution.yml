@@ -7,33 +7,7 @@
 #
 # We can't rely on there being a usable Python installed yet.
 
-- block:
-    - name: Try to run lsb_release -ics
-      raw: lsb_release -ics
-      become: false
-      ignore_errors: yes
-      changed_when: False
-      register: lsb_check
-
-    - name: Set ansible_distribution based on lsb_release
-      set_fact:
-        ansible_distribution: "{{ lsb_check.stdout_lines[0] }}"
-        ansible_distribution_release: "{{ lsb_check.stdout_lines[1] }}"
-      when: lsb_check is successful
-
-    - block:
-        - name: Look for /etc/redhat-release
-          raw: test -f /etc/redhat-release && echo RedHat
-          ignore_errors: yes
-          changed_when: False
-          register: redhat_check
-
-        - name: Set ansible_distribution based on /etc/redhat-release
-          set_fact:
-            ansible_distribution: "{{ redhat_check.stdout_lines[0] }}"
-          when: redhat_check is successful
-      when: lsb_check is not successful
-  when: ansible_distribution is not defined
+- minimal_setup:
 
 - name: Ensure ansible_distribution is supported
   assert:
@@ -41,12 +15,3 @@
     that:
       - ansible_distribution is defined
       - ansible_distribution in ('Debian', 'RedHat', 'Ubuntu')
-
-- name: Set ansible_os_family based on ansible_distribution
-  set_fact:
-    ansible_os_family: "{{ ansible_os_family|default(os_families[ansible_distribution]) }}"
-  vars:
-    os_families:
-      Debian: Debian
-      RedHat: RedHat
-      Ubuntu: Debian
