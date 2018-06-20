@@ -13,13 +13,9 @@
     - import_tasks: validate.yml
       tags: always
 
-    - include_tasks: aws/deprovision.yml
-      when: >
-        'aws' in cluster_platforms
-    - include_tasks: bare/deprovision.yml
-      when: >
-        'bare' in cluster_platforms
-    - include_tasks: lxd/deprovision.yml
-      when: >
-        'lxd' in cluster_platforms
-    - include_tasks: common/deprovision.yml
+    - include_tasks: "{{ platform }}/deprovision.yml"
+      with_items:
+        - "{{ cluster_platforms }}"
+        - common
+      loop_control:
+        loop_var: platform
