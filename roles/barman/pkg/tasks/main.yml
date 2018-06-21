@@ -1,7 +1,9 @@
 ---
 
 - name: Install Barman package
-  package: name=barman state=latest
+  package:
+    name: barman
+    state: "{{ barman_package_version|default('latest') }}"
   tags: [barman, pkg]
 
 - name: Install Postgres client package

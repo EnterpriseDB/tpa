@@ -19,11 +19,21 @@
   package:
     name: >
       {{ query('flattened', package_lists) }}
-    state: latest
+    state: "{{ postgres_package_version|default('latest') }}"
   vars:
     package_lists:
       - "{{ postgres_packages[ansible_distribution] }}"
       - "{{ postgres_debug_packages[ansible_distribution] }}"
+  tags: [postgres, pkg]
+
+- name: Install additional Postgres packages
+  package:
+    name: >
+      {{ query('flattened', package_lists) }}
+    state: latest
+  vars:
+    package_lists:
+      - "{{ additional_postgres_packages[ansible_distribution] }}"
       - "{{ extra_postgres_packages[ansible_distribution] }}"
       - python-psycopg2
   tags: [postgres, pkg]

@@ -50,18 +50,18 @@ architecture: BDR-Always-ON
 
 cluster_name: $cluster_name
 
-cluster_vars:
-  cluster_network: $subnet
-
-cluster_rules:
-  - {proto: tcp, from_port: 0, to_port: 65535, cidr_ip: 0.0.0.0/0}
-
 ec2_ami:
   Name: $image_name
   Owner: $image_owner
 
 ec2_vpc:
   Name: Test
+
+cluster_rules:
+  - {proto: tcp, from_port: 0, to_port: 65535, cidr_ip: 0.0.0.0/0}
+
+cluster_vars: $($libdir/cluster-vars)
+  cluster_network: $subnet
 
 instance_defaults:
     type: t2.micro

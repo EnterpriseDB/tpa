@@ -14,6 +14,22 @@ case "$opt" in
     --minimal)
         minimal=-minimal
         ;;
+    --postgres-version)
+        export POSTGRES_VERSION=${1:?Postgres major version not specified}
+        shift
+        ;;
+    --postgres-package-version)
+        export POSTGRES_PACKAGE_VERSION=${1:?Postgres package version not specified}
+        shift
+        ;;
+    --repmgr-package-version)
+        export REPMGR_PACKAGE_VERSION=${1:?repmgr package version not specified}
+        shift
+        ;;
+    --barman-package-version)
+        export BARMAN_PACKAGE_VERSION=${1:?repmgr package version not specified}
+        shift
+        ;;
     --hostnames-from)
         hostnames_args+=(${1:?Hostname list file not specified})
         shift

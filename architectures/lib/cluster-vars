@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# This script is meant to be used as follows:
+#
+# cat <<CONFIG
+# cluster_vars: $($libdir/cluster-vars)
+#   any_other: settings
+#   to: follow here
+# …
+# CONFIG
+#
+# The output reflects the common options handled by configure-options.sh
+# (not everything that belongs in cluster_vars is configurable here).
+
+set -e
+
+echo
+
+if [[ -n "$POSTGRES_VERSION" ]]; then
+    echo "  postgres_version: $POSTGRES_VERSION"
+    echo "  postgres_installation_source: pkg"
+fi
+
+if [[ -n "$POSTGRES_PACKAGE_VERSION" ]]; then
+    echo "  postgres_package_version: $POSTGRES_PACKAGE_VERSION"
+fi
+
+if [[ -n "$REPMGR_PACKAGE_VERSION" ]]; then
+    echo "  repmgr_package_version: $REPMGR_PACKAGE_VERSION"
+fi
+
+if [[ -n "$BARMAN_PACKAGE_VERSION" ]]; then
+    echo "  barman_package_version: $BARMAN_PACKAGE_VERSION"
+fi

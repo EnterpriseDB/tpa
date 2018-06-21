@@ -1,8 +1,9 @@
 ---
 
-# The default package list installs community or 2ndQuadrant postgres.
-# The caller may override this list entirely, or just augment it by
-# adding to extra_postgres_packages below.
+# First, postgres_packages and postgres_debug_packages are the packages
+# for Postgres itself. These lists should contain only those packages to
+# which the same postgres_package_version setting applies. Anything else
+# should go into additional/extra_postgres_packages below.
 
 postgres_packages:
   Debian: &debian_packages
@@ -11,8 +12,6 @@ postgres_packages:
     - postgresql-contrib-{{postgres_version}}
     - postgresql-server-dev-{{postgres_version}}
     - postgresql-plperl-{{postgres_version}}
-    - postgresql-{{postgres_version}}-pglogical
-    - barman-cli
   RedHat:
     - postgresql{{postgres_versionNN}}
     - postgresql{{postgres_versionNN}}-contrib
@@ -20,8 +19,6 @@ postgres_packages:
     - postgresql{{postgres_versionNN}}-devel
     - postgresql{{postgres_versionNN}}-libs
     - postgresql{{postgres_versionNN}}-plperl
-    - postgresql{{postgres_versionNN}}-pglogical
-    - barman-cli
   Ubuntu: *debian_packages
 
 postgres_debug_packages:
@@ -30,6 +27,20 @@ postgres_debug_packages:
   RedHat:
     - postgresql{{postgres_versionNN}}-debuginfo
   Ubuntu: *debian_debug_packages
+
+# Next, additional_postgres_packages is a list of other Postgres-related
+# packages that we install by default, and extra_postgres_packages is an
+# empty list that the caller can define to install other packages. These
+# are all unrelated packages and may have different versions.
+
+additional_postgres_packages:
+  Debian: &debian_additional_packages
+    - postgresql-{{postgres_version}}-pglogical
+    - barman-cli
+  RedHat:
+    - postgresql{{postgres_versionNN}}-pglogical
+    - barman-cli
+  Ubuntu: *debian_additional_packages
 
 extra_postgres_packages:
   Debian: &debian_extra_packages []

@@ -31,6 +31,23 @@ For brevity, you can also use ``--os Debian-minimal``.
 The default is Debian. The value is case-sensitive, and must correspond
 to a supported distribution according to ``tpaexec info distributions``.
 
+Software versions
+-----------------
+
+You may optionally specify ``--postgres-version 10`` (the default) or
+any other major version of Postgres (e.g., 9.6). TPA supports Postgres
+9.4 and above. Postgres 9.4 and 9.5 were known to work at one time, but
+are no longer actively maintained.
+
+By default, we always install the latest version of every package. This
+is usually the desired behaviour, but in some testing scenarios, it may
+be necessary to select specific package versions using the following
+options:
+
+1. ``--postgres-package-version 10.4-2.pgdg90+1``
+2. ``--repmgr-package-version 4.0.5-1.pgdg90+1``
+3. ``--barman-package-version 2.4-1.pgdg90+1``
+
 Hostnames
 ---------
 
