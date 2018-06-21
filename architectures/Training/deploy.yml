@@ -15,8 +15,6 @@
       tags: always
 
     - role: postgres/vars
-      vars:
-        postgres_version: 10
       tags: always
 
     - role: common

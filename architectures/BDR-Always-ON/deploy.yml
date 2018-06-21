@@ -17,9 +17,6 @@
       tags: always
 
     - role: postgres/vars
-      vars:
-        postgres_version: 10
-        postgres_installation_source: pkg
       tags: always
 
 # Now the cluster hosts are reachable by ssh and have all the required
