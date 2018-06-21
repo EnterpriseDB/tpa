@@ -1,0 +1,5 @@
+---
+
+- name: Install haproxy package
+  package: name=haproxy state=latest
+  tags: pkg

@@ -1,0 +1,26 @@
+---
+
+- name: Create BDR group database
+  postgresql_db:
+    name: "{{ cluster_name }}"
+    owner: "{{ postgres_user }}"
+    state: present
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Create BDR nodes
+  postgresql_query:
+    conninfo: ''
+    query: >
+      SELECT bdr.create_node(
+        node_name := '{{ inventory_hostname }}',
+        local_dsn := '{{ local_dsn }}'
+      )
+  vars:
+    local_dsn: >-
+      host={{ inventory_hostname }}
+      port={{ postgres_port }}
+      dbname={{ cluster_name }}
+      user={{ postgres_user }}
+  become_user: "{{ postgres_user }}"
+  become: yes
