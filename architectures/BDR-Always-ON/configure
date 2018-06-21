@@ -42,7 +42,7 @@ cluster_name=$(basename $cluster)
 trap "rm -rf $cluster" ERR
 
 instances=12
-hostnames=($($libdir/hostnames $instances ${hostnames_args[@]+"${hostnames_args[@]}"}))
+hostnames=($($libdir/hostnames $instances))
 
 cat > $cluster/config.yml <<CONFIG
 ---

@@ -80,7 +80,7 @@ instance_defaults:
 instances:
 PREAMBLE
 
-hostnames=($($libdir/hostnames $instances "${hostnames_args[@]}"))
+hostnames=($($libdir/hostnames $instances))
 for i in $(seq 1 $instances);
 do
     cat >> $cluster/config.yml <<INSTANCE

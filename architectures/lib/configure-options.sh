@@ -31,14 +31,15 @@ case "$opt" in
         shift
         ;;
     --hostnames-from)
-        hostnames_args+=(${1:?Hostname list file not specified})
+        export HOSTNAMES_FROM=${1:?Hostname list file not specified}
         shift
         ;;
     --hostnames-pattern)
-        if [[ ${#hostnames_args[@]} != 1 ]]; then
-            error "--hostnames-pattern must come after --hostnames-from"
-        fi
-        hostnames_args+=(${1:?Hostname pattern not specified})
+        export HOSTNAMES_PATTERN=${1:?Hostname pattern not specified}
+        shift
+        ;;
+    --hostnames-sorted-by)
+        export HOSTNAMES_SORTED_BY=${1:?Hostname sort option not specified}
         shift
         ;;
     *)
