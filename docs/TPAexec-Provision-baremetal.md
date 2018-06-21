@@ -33,7 +33,6 @@ For baremetal deployment, we assume that the servers/VMs have already been creat
 
 - Private IP address of each server if different from public (private_ip)
 - Cluster network CIDR (cluster_network)
-- Cluster ssh user - the ssh user to administer cluster commands (cluster_ssh_user)
 - Ansible ssh user - the admin user used to ssh to each host by tpaexec (ansible_user)
 - If using repmgr, you will need to know logically which data centre hosts are in.
 
@@ -71,7 +70,6 @@ The file config.yml has been split into logical sections for the purposes of des
 
 cluster_name: baretest
 ssh_key_file: "../../sshkeys/id_night"
-cluster_ssh_user: admin
 cluster_vars:
   cluster_network: 192.168.0.0/16
 ```
@@ -79,7 +77,6 @@ cluster_vars:
 | :--------------- | ---------------------------------------- |
 | cluster_name:    | Name of the cluster |
 | ssh_key_file:    | Used to supply ssh keys to the cluster - expects 2 keys - <id_file> and <id_file.pub>    |
-| cluster_ssh_user: | Sets the cluster ssh user               |
 | cluster_vars:    | Used to set various cluster variables    |
 | cluster_network: | Sets the cluster network                 |
 
@@ -92,6 +89,8 @@ By default, the tpaexec provision utility will create new RSA keys for ssh conne
 
 instance_defaults:
   platform: bare
+  vars:
+    ansible_user: admin
 
 instances:
     - node: 1
@@ -102,7 +101,6 @@ instances:
           - primary
         backup: lab-backup
       vars:
-        ansible_user: admin
         repmgr_location: dc1
         work_mem: 20MB
         max_connections: 234
@@ -143,12 +141,13 @@ We can now run tpaexec deploy ~/tpa/clusters/baretest.  (See TPAexec-Deploy.md f
 
 cluster_name: bare
 ssh_key_file: "../../sshkeys/id_night"
-cluster_ssh_user: admin
 cluster_vars:
   cluster_network: 192.168.0.0/16
 
 instance_defaults:
   platform: bare
+  vars:
+    ansible_user: admin
 instances:
     - node: 1
       Name: lab-primary
@@ -159,7 +158,6 @@ instances:
           - primary
         backup: lab-backup
       vars:
-        ansible_user: admin
         repmgr_location: dc1
         work_mem: 20MB
         max_connections: 234
@@ -175,7 +173,6 @@ instances:
           - log-server
         upstream: lab-primary
       vars:
-        ansible_user: admin
         repmgr_location: dc1
     - node: 3
       Name: lab-replica
@@ -186,7 +183,6 @@ instances:
           - replica
         upstream: lab-primary
       vars:
-        ansible_user: admin
         repmgr_location: dc1
         work_mem: 21MB
         postgres_data_dir: /var/lib/postgresql/data
