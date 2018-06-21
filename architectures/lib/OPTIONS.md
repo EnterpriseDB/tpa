@@ -16,6 +16,13 @@ it will fail to configure the cluster.
 The default is aws. The value is case-sensitive, and must correspond to
 a supported platform according to ``tpaexec info platforms``.
 
+You may optionally specify ``--region eu-west-1``. This is the default
+region, but you may use any existing AWS region that you have access to
+(and that will permit the required number of instances to be created).
+
+You should specify ``--subnet 10.33.115.0/24`` to select the subnet used
+for the cluster.
+
 You may optionally specify ``--instance-type t2.micro`` (the default) or
 any other valid instance type for the selected platform.
 

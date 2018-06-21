@@ -7,14 +7,6 @@ while [[ $# -gt 0 ]]; do
     shift
 
     case "$opt" in
-        --region)
-            region=${1:?Region name not specified}
-            shift
-            ;;
-        --subnet)
-            subnet=${1:?Subnet address/mask not specified}
-            shift
-            ;;
         *)
             source $libdir/configure-options.sh
             ;;
@@ -25,7 +17,6 @@ if [[ "${platform:=aws}" != "aws" ]]; then
     error "currently unsupported platform: $platform (use '--platform aws')"
 fi
 
-region=${region:-eu-west-1}
 subnet=${subnet:-10.33.77.0/24}
 
 image=$($libdir/image ${distribution:=Debian} $platform)

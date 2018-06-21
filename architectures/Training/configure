@@ -15,14 +15,6 @@ while [[ $# -gt 0 ]]; do
             instances=${1:?Number of instances not specified}
             shift
             ;;
-        --region)
-            region=${1:?Region name not specified}
-            shift
-            ;;
-        --subnet)
-            subnet=${1:?Subnet address/mask not specified}
-            shift
-            ;;
         *)
             source $libdir/configure-options.sh
             ;;
@@ -37,7 +29,6 @@ if [[ "$platform" != "aws" ]]; then
     error "currently unsupported platform: $platform (use '--platform aws')"
 fi
 
-region=${region:-eu-west-1}
 subnet=${subnet:-10.33.115.0/24}
 
 image=$($libdir/image $distribution $platform)
@@ -55,7 +46,7 @@ cluster_name: training_$issue
 cluster_tags:
   Reference: https://redmine.2ndquadrant.it/issues/$issue
 
-cluster_vars:
+cluster_vars: $($libdir/cluster-vars)
   cluster_network: $subnet
 
 cluster_rules:
