@@ -5,8 +5,8 @@ When you run ``tpaexec configure c --architecture a …``, you may append
 any of the following options to the command (unless otherwise specified
 by the documentation for the selected architecture).
 
-Platform
---------
+Platform options
+----------------
 
 You may optionally specify ``--platform aws``. This is the default.
 
@@ -15,6 +15,9 @@ it will fail to configure the cluster.
 
 The default is aws. The value is case-sensitive, and must correspond to
 a supported platform according to ``tpaexec info platforms``.
+
+You may optionally specify ``--instance-type t2.micro`` (the default) or
+any other valid instance type for the selected platform.
 
 Distribution
 ------------

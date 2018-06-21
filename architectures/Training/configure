@@ -69,7 +69,7 @@ ec2_vpc:
   Name: Test
 
 instance_defaults:
-    type: t2.micro
+    type: $instance_type
     region: $region
     subnet: $subnet
     role:

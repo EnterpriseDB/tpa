@@ -7,6 +7,10 @@ case "$opt" in
         platform=${1:?Platform name not specified}
         shift
         ;;
+    --instance-type)
+        instance_type=${1:?Instance type not specified}
+        shift
+        ;;
     --distribution|--os)
         distribution=${1:?Distribution name not specified}
         shift
@@ -48,6 +52,7 @@ case "$opt" in
 esac
 
 platform=${platform:-aws}
+instance_type=${instance_type:-t2.micro}
 if [[ ${distribution:=Debian} != *-minimal ]]; then
     distribution="$distribution$minimal"
 fi

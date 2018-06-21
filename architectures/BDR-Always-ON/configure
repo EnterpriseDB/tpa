@@ -15,10 +15,6 @@ while [[ $# -gt 0 ]]; do
             subnet=${1:?Subnet address/mask not specified}
             shift
             ;;
-        --instance-type)
-            type=${1:?Instance type not specified}
-            shift
-            ;;
         *)
             source $libdir/configure-options.sh
             ;;
@@ -31,7 +27,6 @@ fi
 
 region=${region:-eu-west-1}
 subnet=${subnet:-10.33.77.0/24}
-type=${type:-t2.micro}
 
 image=$($libdir/image ${distribution:=Debian} $platform)
 eval $image
@@ -64,7 +59,7 @@ cluster_vars: $($libdir/cluster-vars)
   cluster_network: $subnet
 
 instance_defaults:
-    type: t2.micro
+    type: $instance_type
     region: $region
     subnet: $subnet
     role:

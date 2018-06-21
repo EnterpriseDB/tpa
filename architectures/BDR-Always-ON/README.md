@@ -25,8 +25,5 @@ You may optionally specify ``--subnet 10.33.115.0/24``. This is the
 default value, but you SHOULD change it if multiple clusters will be
 provisioned at the same time.
 
-You may optionally specify ``--instance-type t2.micro``. This is the
-default value, but you may use any other recognised instance type.
-
 You may also specify any of the options described by
 ``tpaexec help configure-options``.
