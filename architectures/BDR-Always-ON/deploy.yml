@@ -27,9 +27,6 @@
   max_fail_percentage: 0
   become_user: root
   become: true
-  vars:
-    postgres_extensions: "{{ default_postgres_extensions|union(['bdr']) }}"
-    track_commit_timestamp: on
 
   hosts: "{{ deploy_hosts|default('all') }}"
   roles:
@@ -85,7 +82,7 @@
 
     - role: postgres/bdr
       when: >
-        'bdr' in postgres_extensions
+        'bdr' in role and 'primary' in role
       tags: [postgres, bdr]
 
     - role: pgbouncer

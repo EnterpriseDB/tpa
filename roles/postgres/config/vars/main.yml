@@ -1,5 +1,3 @@
 ---
 
 _include_dir: "{{ include_dir|default(postgres_data_dir+'/conf.d') }}"
-
-_postgres_extensions: "{{ postgres_extensions|default(default_postgres_extensions) }}"

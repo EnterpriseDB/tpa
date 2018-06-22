@@ -19,3 +19,5 @@ default_postgres_extensions:
   - pageinspect
   - pgstattuple
   - pglogical
+
+extra_postgres_extensions: []
