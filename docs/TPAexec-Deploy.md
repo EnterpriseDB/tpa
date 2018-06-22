@@ -1,7 +1,7 @@
 ---
 title: TPA configuration guide - deploy
-version: 1.4
-date: 20/June/2018
+version: 1.5
+date: 22/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -52,9 +52,21 @@ Looking in the inventory directory, we can see that a file called **00-speedy** 
 
 
 
-Before we can run **tpaexec deploy ~/tpa/clusters/speedy** we first need to edit **deploy.yml**
+The deployment phase reads both **config.yml** and **deploy.yml** along with various config files created by tpaexec provision. It should be noted that **deploy.yml** ***is not designed to be edited by hand***, and should have been created before the provision phase by **tpaexec configure \<arguments>** .
 
-The file deploy.yml has been split into logical sections for the purposes of description
+Before we run **tpaexec deploy ~/tpa/clusters/speedy** it is worth checking **config.yml**, however be aware that any changes to config.yml will need to go through a provision stage before deployment.
+
+### Deploy
+
+Run **tpaexec deploy ~/tpa/clusters/speedy**
+
+(Note, the previous method of running **$TPA_DIR/bin/deploy ~/tpa/clusters/speedy** will still work, however this usage is deprecated)
+
+------
+
+# Appendix A - description of deploy.yml
+
+The file deploy.yml is described here for informational purposes, however is not designed to be edited by the user. It has been split into logical sections for the purposes of description
 
 ### Basic initialisation and fact discovery
 
@@ -78,10 +90,7 @@ The file deploy.yml has been split into logical sections for the purposes of des
       tags: always
 
     - role: postgres/vars
-      vars:
-        postgres_version: 10
       tags: always
-
 ```
 
 | Parameter:           | Description                                                  |
@@ -96,8 +105,6 @@ The file deploy.yml has been split into logical sections for the purposes of des
 | - role:              | **facts** - Performs "lightweight" distribution detection, by applying the roles defined in [$TPA_DIR/roles/facts](https://github.com/2ndQuadrant/TPA/tree/master/roles/facts), to see what OS is being deployed to. Supports Debian, RedHat, and Ubuntu. |
 | tags:                | **always** - always apply the associated role                |
 | - role:              | **postgres/vars** - Sets up the PostgreSQL version, by applying the roles defined in [$TPA_DIR/roles/postgres/vars](https://github.com/2ndQuadrant/TPA/tree/master/roles/postgres/vars). |
-| vars:                | Variables to be applied                                      |
-| postgres_version:    | **10** - The PostgreSQL version to be deployed               |
 | tags:                | **always** - always apply the associated role                |
 
 ### Install Postgres
@@ -118,10 +125,7 @@ The file deploy.yml has been split into logical sections for the purposes of des
 
     # Set up any additional filesystems required. The block device
     # layout is instance-specific.
-    - role: sys/fs
-      vars:
-        device: "{{ volumes[0].device }}"
-        mountpoint: "{{ postgres_home }}"
+    - role: sys/volumes
       tags: [sys, fs]
 
     # Computes memory size and other instance-specific computations for
@@ -145,6 +149,9 @@ The file deploy.yml has been split into logical sections for the purposes of des
 
     - role: sys/hosts
       tags: [sys, hosts]
+
+    - role: sys/cloudinit
+      tags: [sys, cloudinit]
 
     - role: sys/rsyslog
       tags: [sys, rsyslog]
@@ -186,58 +193,13 @@ The file deploy.yml has been split into logical sections for the purposes of des
 | - role:              | **sys/sysstat** - Configures and enables systat - see [$TPA_DIR/roles/sys/sysstat/tasks/os](https://github.com/2ndQuadrant/TPA/tree/master/roles/sys/sysstat/tasks/os) for Debian and RHEL info. |
 | - role:              | **sys/openvpn** - Configures and enables openvpn - see **sys/sysstat** - Configures and enables systat - see [$TPA_DIR/roles/sys/openvpn/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/sys/openvpn/tasks/main.yml) for more info. |
 | - role:              | **sys/hosts** - Generates the /etc/hosts and /etc/ssh/ssh_known_hosts files. See  [$TPA_DIR/roles/sys/hosts/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/sys/hosts/tasks/main.yml) for more info. |
+| - role:              | **sys/cloudinit** - Generates config file /etc/cloud/cloud.cfg.d/99_hosts.cfg. See  [$TPA_DIR/roles/sys/cloudinit/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/sys/cloudinit/tasks/main.yml) for more info. |
 | - role:              | **sys/rsyslog** - Create rsyslog.conf config file & ensure rsyslog service is enabled on boot. See [$TPA_DIR/roles/sys/rsyslog/server/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/sys/rsyslog/server/tasks/main.yml) for more info. |
 | - role:              | **postgres** - Configures postgres on every postgres instance with a valid PGDATA. Creates **pg_hba.conf** & **postgresql.conf** in PGDATA, and tries to create 0000-tpa.conf, 0001-tpa_restart.conf, 1111-extensions.conf, 8888-{{ variable_name }}*.conf, 9900-role-settings.conf, 9999-override.conf in **PGDATA/conf.d**. [$TPA_DIR/roles/postgres/config/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/postgres/config/tasks/main.yml) is recommended reading. |
 | - role:              | **barman** - Installs, configures & enable Barman on any server where tags.role includes 'barman'. On instances to be backed up (i.e., with tags.backup set to the name of a Barman server) it will perform client-side configuration. See [$TPA_DIR/roles/barman/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/barman/tasks/main.yml) for more info. |
 | - role:              | **repmgr**- Install, config & enable the repmgr service. See [$TPA_DIR/roles/repmgr/service/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/repmgr/service/tasks/main.yml) for more info. |
 | - role:              | **postgres/final** - Force immediate backup for any instances that do not have any backups at all. See [$TPA_DIR/roles/postgres/final/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/postgres/final/tasks/main.yml) for more info. |
 | - role:              | **monitoring** - Sets up monitoring; installs and configures icinga & NSCA-ng. See [$TPA_DIR/roles/monitoring/server/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/monitoring/server/tasks/main.yml) for more info. |
-
-Common alterations to deploy.yml are to setup site specific volumes and permissions - e.g. 
-
-```
- - role: sys/fs
-      vars:
-        device: /dev/xvdc
-        mountpoint: /var/lib/pgsql/nightdb_data01
-      when: >
-        'postgres' in role
-      tags: [sys, fs]
-
-    - role: sys/file
-      vars:
-        path: /var/lib/pgsql/nightdb_data01
-        owner: postgres
-        group: postgres
-        mode: 0700
-      when: >
-        'postgres' in role
-
-    - role: sys/fs
-      vars:
-        device: /dev/xvdd
-        mountpoint: /var/lib/pgsql/nightdb_index01
-      when: >
-        'postgres' in role
-      tags: [sys, fs]
-
-    - role: sys/file
-      vars:
-        path: /var/lib/pgsql/nightdb_index01
-        owner: postgres
-        group: postgres
-        mode: 0700
-      when: >
-        'postgres' in role
-```
-
-What this does is:
-
-For any volume `device_name: /dev/xvdc` defined in config.yml for servers with role `postgres` it creates a mountpoint of `/var/lib/pgsql/nightdb_data01`, and set owner & group to `postgres` with permissions owner rwx.
-
-For any volume `device_name: /dev/xvdb` defined in config.yml for servers with role `postgres`it creates a mountpoint of `/var/lib/pgsql/nightdb_index01`, and set owner & group to `postgres` with permissions owner rwx.
-
-In this way, it is possible to create standardised volumes and mount points for different types of server.
 
 ### Cleanup /etc/hosts
 
@@ -271,12 +233,9 @@ This code block is there to ensure that a re-deployment works even when limited 
 | roles:               | Roles to be applied                      |
 | - role:              | **sys/hosts** - Generates the /etc/hosts and /etc/ssh/ssh_known_hosts files. See  [$TPA_DIR/roles/sys/hosts/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/sys/hosts/tasks/main.yml) for more info. |
 
-### Deploy
 
-Run **tpaexec deploy ~/tpa/clusters/speedy**
-
-(Note, the previous method of running **$TPA_DIR/bin/deploy ~/tpa/clusters/speedy** will still work)
 
 
 
 [^Information Classification: Confidential]: [ISP008] Information Classification Policy
+
