@@ -45,6 +45,21 @@
     lookup('pipe', 'date +%s')|int > s3_hostkey_expiry|default(0)|int
   tags: [aws, s3, ssh, hostkeys]
 
+# We create an instance profile IAM role for the cluster and attach
+# an inline policy with any permissions that the instances need.
+#
+# To change the name of the role, set «cluster_profile: xxx».
+#
+# To use an existing role without making any changes to it, set
+# «instance_profile_name: yyy». The role must have all required
+# permissions assigned to it separately.
+
+- include_tasks: iam-instance-profile.yml
+  when:
+    - cluster_profile != ''
+    - instance_profile_name is not defined
+  tags: [aws, iam]
+
 # Every instance must be in a particular subnet.
 #
 # You can reference existing subnets directly by their subnet id if
@@ -315,21 +330,6 @@
   when:
     aws_instances|json_query('[*].volumes[]|[?attach_existing]')|count > 0
   tags: [aws, ebs]
-
-# We create an instance profile IAM role for the cluster and attach
-# an inline policy with any permissions that the instances need.
-#
-# To change the name of the role, set «cluster_profile: xxx».
-#
-# To use an existing role without making any changes to it, set
-# «instance_profile_name: yyy». The role must have all required
-# permissions assigned to it separately.
-
-- include_tasks: iam-instance-profile.yml
-  when:
-    - cluster_profile != ''
-    - instance_profile_name is not defined
-  tags: [aws, iam]
 
 # Preprocess instance definitions through various helpful filters to
 # set things that aren't set and check things that need checking.
