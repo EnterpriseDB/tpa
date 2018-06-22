@@ -52,8 +52,10 @@ configure() {
 }
 
 provision() {
+    if [[ "${1:-''}" == --cache* ]]; then cache=1; shift; fi
+
     $ansible-playbook $TPA_DIR/platforms/provision.yml \
-        -e cluster=$(pwd) "$@"
+        -e cluster=$(pwd) ${cache:+"-e use_cached_vars=$cache"} "$@"
 }
 
 deploy() {
