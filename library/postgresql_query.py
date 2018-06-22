@@ -96,6 +96,7 @@ results:
 '''
 
 from ansible.module_utils.six import string_types
+import traceback
 
 try:
     import psycopg2
@@ -126,7 +127,8 @@ def main():
     try:
         conn = psycopg2.connect(dsn=conninfo)
     except Exception, e:
-        module.fail_json(msg="Could not connect to database", err=str(e))
+        module.fail_json(msg="Could not connect to database",
+            err=str(e), exception=traceback.format_exc())
 
     autocommit = module.params["autocommit"]
     if autocommit:
@@ -171,8 +173,12 @@ def main():
             results.append(res)
             cur.close()
     except Exception, e:
-        conn.rollback()
-        module.fail_json(msg="Database query failed", err=str(e))
+        try:
+            conn.rollback()
+        except psycopg2.InterfaceError:
+            pass
+        module.fail_json(msg="Database query failed",
+            err=str(e), exception=traceback.format_exc())
     else:
         if module.check_mode:
             conn.rollback()
