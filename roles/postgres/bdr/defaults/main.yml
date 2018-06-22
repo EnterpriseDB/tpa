@@ -1,3 +1,0 @@
----
-
-bdr_database: "{{ bdr_database|default(cluster_name) }}"

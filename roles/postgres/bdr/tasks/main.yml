@@ -1,5 +1,8 @@
 ---
 
+- set_fact:
+    bdr_database: "{{ bdr_database|default(cluster_name) }}"
+
 - name: Set the DSN for each BDR instance
   set_fact:
     bdr_node_dsn: >-
