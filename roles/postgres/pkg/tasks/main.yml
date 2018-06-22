@@ -34,6 +34,7 @@
   vars:
     package_lists:
       - "{{ additional_postgres_packages[ansible_distribution] }}"
+      - "{{ ('bdr' in role)|ternary(bdr_packages[ansible_distribution], []) }}"
       - "{{ extra_postgres_packages[ansible_distribution] }}"
       - python-psycopg2
   tags: [postgres, pkg]

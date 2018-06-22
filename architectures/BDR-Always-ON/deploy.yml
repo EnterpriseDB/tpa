@@ -28,9 +28,6 @@
   become_user: root
   become: true
   vars:
-    extra_postgres_packages:
-      Debian:
-        postgresql-10-bdr-plugin
     postgres_extensions: "{{ default_postgres_extensions|union(['bdr']) }}"
     track_commit_timestamp: on
 

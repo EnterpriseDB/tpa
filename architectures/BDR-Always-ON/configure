@@ -143,6 +143,7 @@ instances:
           volume_for: postgres_data
     role:
       - replica
+      - bdr
 
   - node: 6
     Name: ${hostnames[5]}
@@ -158,6 +159,7 @@ instances:
           volume_for: postgres_data
     role:
       - replica
+      - bdr
 
   - node: 7
     Name: ${hostnames[6]}
@@ -173,6 +175,7 @@ instances:
           volume_for: postgres_data
     role:
       - replica
+      - bdr
 
   - node: 8
     Name: ${hostnames[7]}
@@ -188,6 +191,7 @@ instances:
           volume_for: postgres_data
     role:
       - replica
+      - bdr
 
   - node: 9
     Name: ${hostnames[8]}
