@@ -44,11 +44,11 @@ additional_postgres_packages:
 
 bdr_packages:
   Debian: &debian_bdr_packages
-    postgresql-{{postgres_version}}-bdr-plugin
-    postgresql-{{postgres_version}}-bdr-plugin-dbg
+    - postgresql-{{postgres_version}}-bdr-plugin
+    - postgresql-{{postgres_version}}-bdr-plugin-dbg
   RedHat:
-    postgresql{{postgres_versionNN}}-bdr
-    postgresql{{postgres_versionNN}}-bdr-debuginfo
+    - postgresql{{postgres_versionNN}}-bdr
+    - postgresql{{postgres_versionNN}}-bdr-debuginfo
   Ubuntu: *debian_bdr_packages
 
 extra_postgres_packages:
