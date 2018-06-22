@@ -58,10 +58,14 @@ provision() {
         -e cluster=$(pwd) ${cache:+"-e use_cached_vars=$cache"} "$@"
 }
 
-deploy() {
-    $ansible-playbook deploy.yml \
+playbook() {
+    $ansible-playbook \
         -i inventory --vault-password-file vault/vault_pass.txt \
         -e cluster=$(pwd) "$@"
+}
+
+deploy() {
+    playbook deploy.yml "$@"
 }
 
 deprovision() {
@@ -235,6 +239,27 @@ case "$command" in
         shift
         ;;
 
+    playbook)
+        arg=${1:?No cluster specified}
+        shift
+
+        # We accept either the name of a cluster directory (and assume
+        # that playbook.yml is somewhere among the remaining arguments)
+        # or a path to a playbook within a cluster directory.
+
+        if [[ -d $arg ]]; then
+            cluster=$arg
+        elif [[ -f $arg ]]; then
+            cluster=$(dirname $arg)
+            file=$(basename $arg)
+            set -- $file "$@"
+        else
+            error "argument is neither directory nor file: $arg"
+        fi
+
+        cd $cluster
+        ;;
+
     provision|deploy|deprovision|rehydrate)
         cluster=${1:?No cluster specified}
         shift
@@ -283,7 +308,7 @@ case "$command" in
         $command "$@"
         ;;
 
-    provision|deploy|deprovision|rehydrate)
+    provision|deploy|playbook|deprovision|rehydrate)
         time $command "$@"
         ;;
 
