@@ -5,7 +5,7 @@
   file:
     path: /var/run/pgbouncer
     owner: "{{ postgres_user }}"
-    owner: "{{ postgres_group }}"
+    group: "{{ postgres_group }}"
     mode: 0755
     state: directory
 
@@ -14,7 +14,7 @@
   file:
     path: /etc/pgbouncer
     owner: "{{ postgres_user }}"
-    owner: "{{ postgres_group }}"
+    group: "{{ postgres_group }}"
     mode: 0700
     state: directory
 
@@ -23,7 +23,7 @@
     src: pgbouncer.ini.j2
     dest: "/etc/pgbouncer/pgbouncer.ini"
     owner: "{{ postgres_user }}"
-    owner: "{{ postgres_group }}"
+    group: "{{ postgres_group }}"
     mode: 0640
   notify:
     - Note pgbouncer restart required
@@ -33,7 +33,7 @@
     src: userlist.txt.j2
     dest: "/etc/pgbouncer/userlist.txt"
     owner: "{{ postgres_user }}"
-    owner: "{{ postgres_group }}"
+    group: "{{ postgres_group }}"
     mode: 0600
   notify:
     - Note pgbouncer restart required
