@@ -87,9 +87,9 @@ def get_instance_status(module, client):
                         break
 
     except (botocore.exceptions.ClientError) as e:
-        module.fail_json(msg=e.response['Error']['Message'])
+        module.fail_json(msg=e.response['Error']['Message'], exception=traceback.format_exc())
     except Exception as e:
-        module.fail_json(msg=str(e))
+        module.fail_json(msg=str(e), exception=traceback.format_exc())
 
     return status
 
@@ -111,7 +111,7 @@ def main():
     except (botocore.exceptions.NoCredentialsError, botocore.exceptions.ProfileNotFound) as e:
         module.fail_json(msg=e.message, exception=traceback.format_exc(), **camel_dict_to_snake_dict(e.response))
     except Exception as e:
-        module.fail_json(msg=str(e))
+        module.fail_json(msg=str(e), exception=traceback.format_exc())
 
     module.exit_json(**get_instance_status(module, client))
 
