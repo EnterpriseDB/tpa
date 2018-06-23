@@ -1,5 +1,41 @@
 # TPA release notes
 
+## HEAD (not yet tagged)
+
+Major changes:
+
+- Added support for deployment architectures.
+  See ``tpaexec info architectures`` for details.
+
+- Added ``tpaexec generate-config`` command that takes an architecture
+  name and various options and generates config.yml and deploy.yml for
+  a new cluster.
+
+- Added BDR3 deployment support.
+
+Bugfixes:
+
+- Properly handle an AWS race condition that resulted in "Invalid IAM
+  Instance Profile name" errors during provisioning (f37de54)
+- Make deployment fail if ec2.py fails; depends on a patch available in
+  2ndQuadrant ansible (55a4fd3)
+- Correctly handle (ignore) empty lines in /proc/$pid/status
+- Correctly restart repmgrd after changing repmgr.conf
+
+Other notable changes:
+
+- Extensive documentation updates
+- Initial LXD platform support
+- Support postgres/repmgr/barman package version selection (6e904c8)
+  via ``tpaexec generate-config … --postgres-package version``
+- Deprecate ec2_ami_user and cluster_ssh_user in favour of setting
+  "vars: ansible_user: xxx" in instance_defaults (a9c30e1)
+- Make cluster_tags optional. Owner is now automatically set to the
+  current user's login name.
+- Allow instance settings to be exported as instance vars (2a6e060)
+- Include traceback information on module failure in various cases
+- Various changes related to TPAexec packaging
+
 ## v3.0 (2018-06-05)
 
 TPA has switched from vYYYY.MM.NN to vM.N version numbers.
