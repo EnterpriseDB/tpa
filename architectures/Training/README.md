@@ -20,8 +20,8 @@ Generate the cluster configuration by running the following command
 ```
 tpaexec configure ~/clusters/training_10973 --architecture training \
   --redmine-id 10973 --instances 15 \
-  --distribution Debian --minimal \
-  --platform aws --region eu-west-1 --subnet 10.33.115.0/24
+  --platform aws --region eu-west-1 \
+  --distribution Debian --minimal
 ```
 
 You must specify ``--architecture training``.

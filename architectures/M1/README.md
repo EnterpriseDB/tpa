@@ -10,8 +10,7 @@ Generate the cluster configuration by running the following command
 
 ```
 tpaexec configure ~/clusters/m1 --architecture M1 \
-  --platform aws --region eu-west-1 --subnet 10.33.115.0/24 \
-  --instance-type t2.micro \
+  --platform aws --region eu-west-1 --instance-type t2.micro \
   --distribution Debian --minimal
 ```
 

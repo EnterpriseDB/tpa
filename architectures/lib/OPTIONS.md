@@ -1,12 +1,10 @@
-Common configuration options
-============================
+# Common configuration options
 
 When you run ``tpaexec configure c --architecture a …``, you may append
 any of the following options to the command (unless otherwise specified
 by the documentation for the selected architecture).
 
-Platform options
-----------------
+## Platform options
 
 You may optionally specify ``--platform aws``. This is the default.
 
@@ -20,14 +18,22 @@ You may optionally specify ``--region eu-west-1``. This is the default
 region, but you may use any existing AWS region that you have access to
 (and that will permit the required number of instances to be created).
 
-You should specify ``--subnet 10.33.115.0/24`` to select the subnet used
-for the cluster.
-
 You may optionally specify ``--instance-type t2.micro`` (the default) or
 any other valid instance type for the selected platform.
 
-Distribution
-------------
+### Subnet selection
+
+By default, each cluster is assigned a random /28 subnet under 10.33/16,
+but depending on the architecture, there may be one or more subnets, and
+each subnet may be anywhere between a /24 and a /29.
+
+You may specify ``--subnet 192.0.2.128/27`` to use a particular subnet.
+
+You may instead specify ``--subnet-pattern 192.0.x.x`` to generate
+random subnets (as many as required by the architecture) matching the
+given pattern.
+
+## Distribution
 
 You may optionally specify ``--distribution Debian`` (or RedHat, or
 Ubuntu).
@@ -41,8 +47,7 @@ For brevity, you can also use ``--os Debian-minimal``.
 The default is Debian. The value is case-sensitive, and must correspond
 to a supported distribution according to ``tpaexec info distributions``.
 
-Software versions
------------------
+## Software versions
 
 You may optionally specify ``--postgres-version 10`` (the default) or
 any other major version of Postgres (e.g., 9.6). TPA supports Postgres
@@ -58,8 +63,7 @@ options:
 2. ``--repmgr-package-version 4.0.5-1.pgdg90+1``
 3. ``--barman-package-version 2.4-1.pgdg90+1``
 
-Hostnames
----------
+## Hostnames
 
 By default, ``tpaexec configure`` will randomly select as many hostnames
 as it needs from a pre-approved list of several dozen names. This should

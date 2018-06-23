@@ -19,7 +19,7 @@ if [[ "$platform" != "aws" ]]; then
     error "currently unsupported platform: $platform (use '--platform aws')"
 fi
 
-subnet=${subnet:-10.33.27.0/24}
+subnet=${subnet:-$($libdir/subnets 1)}
 
 image=$($libdir/image ${distribution:=Debian} $platform)
 eval $image

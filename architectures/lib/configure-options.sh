@@ -30,6 +30,14 @@ case "$opt" in
         ;;
 
     # These options export environment variables that are interpreted by
+    # architectures/lib/subnets.
+
+    --subnet-pattern)
+        export SUBNET_PATTERN=${1:?Subnet pattern not specified}
+        shift
+        ;;
+
+    # These options export environment variables that are interpreted by
     # architectures/lib/cluster-vars.
 
     --postgres-version)
