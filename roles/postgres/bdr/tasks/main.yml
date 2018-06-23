@@ -40,6 +40,10 @@
 # which versions of Postgres and BDR to install. We just detect what is
 # available and do our best to work with it. Things will break if the
 # installed combination is not sensible.
+#
+# Note: unfortunately, there do exist versions of BDR that do not have
+# bdr_version_num(), but we choose not to support them, as they are of
+# little or no practical importance (e.g., no customers use them).
 
 - name: Retrieve BDR version
   postgresql_query:
