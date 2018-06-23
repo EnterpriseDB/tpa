@@ -36,6 +36,8 @@ Other notable changes:
   current user's login name.
 - Allow instance settings to be exported as instance vars (2a6e060)
 - Include traceback information on module failure in various cases
+- Remove ansible-cluster and ansible-cluster-playbook in favour of
+  ``tpaexec cmd`` and ``tpaexec playbook``
 - Various changes related to packaging
 
 ## v3.0 (2018-06-05)
