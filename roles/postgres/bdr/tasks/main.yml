@@ -1,5 +1,13 @@
 ---
 
+# We are here because this instance has role bdr+primary (as opposed to
+# bdr+replica, which is a read-only streaming replica of a bdr+primary
+# node). BDR packages have been installed, shared_preload_libraries
+# contains 'bdr', BDR configuration has been installed, and the BDR
+# extension has been created (in template1).
+#
+# First, each node needs a BDR database.
+
 - set_fact:
     bdr_database: "{{ bdr_database|default(cluster_name) }}"
 
@@ -11,7 +19,7 @@
       dbname={{ bdr_database }}
       user={{ postgres_user }}
 
-- name: Create BDR group database
+- name: Create BDR database
   postgresql_db:
     name: "{{ bdr_database }}"
     owner: "{{ postgres_user }}"
@@ -19,11 +27,101 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
+# Next, we need to decide which flavour of BDR we're working with.
+#
+# BDR1: BDR-Postgres 9.4 only
+# BDR2: BDR-Postgres 9.4, plus
+#       {,2ndQ}Postgres 9.6
+# BDR3: {,2ndQ}Postgres 10 only
+#
+# https://access.2ndquadrant.com/kb/a/comparison-of-logical-replication-solutions/
+#
+# We don't try to second-guess the decision taken by postgres/pkg about
+# which versions of Postgres and BDR to install. We just detect what is
+# available and do our best to work with it. Things will break if the
+# installed combination is not sensible.
+
+- name: Retrieve BDR version
+  postgresql_query:
+    conninfo: '{{ bdr_node_dsn }}'
+    query: >-
+      SELECT bdr.bdr_version_num() AS num
+  register: bdr_version
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- action: set_fact
+  args: >
+    {{ ('{"bdr_version_num": ' ~ bdr_version.num ~ '}')|from_json }}
+
+# Now one node must create a BDR group, and the other nodes must join
+# the group. It doesn't matter which node creates the group, so long as
+# all the nodes make the same decision about which one should create it.
+#
+# We set the "bdr_node_group" host var for every node (in config.yml),
+# so we can use that value to create a new Ansible inventory group of
+# the nodes with the same value of bdr_node_group. Then we pick the
+# first node in the host group to create the BDR group.
+#
+# There are two points to note here:
+#
+# 1. The common case is that all of the bdr+primary nodes have the same
+#    value for bdr_node_group; we will create a single group containing
+#    all of these nodes.
+#
+#    However, if some nodes have different values of bdr_node_group, we
+#    will create multiple groups here, but each node looks at the group
+#    based on its own value of bdr_node_group, so we can set up disjoint
+#    BDR groups in parallel if necessary.
+#
+# 2. BDR1/BDR2 do not actually support group names, but we require that
+#    all nodes that are intended to belong to the same BDR group have
+#    the same value set for bdr_node_group (to enable the behaviour
+#    described above). The name just isn't used for anything else.
+
+- name: Create group(s) based on the value of bdr_node_group
+  group_by:
+    key: "{{ bdr_node_group }}"
+  when: bdr_node_group is defined
+
+# The commands to create and join the group are version-dependent.
+#
+## BDR1, BDR2
+#
+# First host:
+#     bdr.bdr_group_create(local_node_name := '…',
+#                          node_external_dsn := '…')
+#     bdr.node_join_wait_for_ready()
+#
+# Other hosts:
+#     bdr.bdr_group_join(local_node_name := '…',
+#                        node_external_dsn := '…',
+#                        join_using_dsn := '…')
+#     bdr.node_join_wait_for_ready()
+#
+## BDR3
+#
+# All hosts:
+#     bdr.create_node(node_name := '…', local_dsn := '…')
+#
+# First host:
+#     bdr.create_node_group(node_group_name := '…')
+#
+# Other hosts:
+#     bdr.join_node_group(join_target_dsn := '…')
+#     bdr.wait_for_join_completion()
+
+- assert:
+    msg: "XXX BDR3 is the only version we currently support"
+    that: bdr_version_num >= 30000
+
 - name: Check if the BDR node has been created already
   postgresql_query:
     conninfo: '{{ bdr_node_dsn }}'
-    query: >
-      SELECT node_id FROM bdr.node WHERE dbname = '{{ bdr_database }}'
+    queries:
+      - text: SELECT node_id FROM bdr.node WHERE dbname = %s
+        args:
+          - "{{ bdr_database }}"
   register: node_id
   become_user: "{{ postgres_user }}"
   become: yes
@@ -31,42 +129,49 @@
 - name: Create BDR node if necessary
   postgresql_query:
     conninfo: '{{ bdr_node_dsn }}'
-    query: >
-      SELECT bdr.create_node(
-        node_name := '{{ inventory_hostname }}',
-        local_dsn := '{{ bdr_node_dsn }}'
-      )
+    queries:
+      - text: SELECT bdr.create_node(node_name := %s, local_dsn := %s)
+        args:
+          - "{{ inventory_hostname }}"
+          - "{{ bdr_node_dsn }}"
   when:
     node_id.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
 
-- name: Create group(s) based on the value of bdr_node_group
-  group_by:
-    key: "{{ bdr_node_group }}"
-  when: bdr_node_group is defined
+# We check bdr.node_group on every node. If the entry doesn't exist, it
+# means that the node must either create or join the BDR group, based on
+# its position.
 
 - name: Check if the BDR groups have been created already
   postgresql_query:
     conninfo: '{{ bdr_node_dsn }}'
-    query: >
-      SELECT node_group_id FROM bdr.node_group WHERE node_group_name = '{{ bdr_node_group }}'
+    queries:
+      - text: SELECT node_group_id FROM bdr.node_group WHERE node_group_name = %s
+        args:
+          - "{{ bdr_node_group }}"
   register: node_group_id
   when:
     bdr_node_group is defined
   become_user: "{{ postgres_user }}"
   become: yes
 
+# Now the first node creates the group.
+
 - name: Create BDR node groups if necessary
   postgresql_query:
     conninfo: '{{ bdr_node_dsn }}'
-    query: >
-      SELECT bdr.create_node_group(node_group_name := '{{ bdr_node_group }}')
+    queries:
+      - text: SELECT bdr.create_node_group(node_group_name := %s)
+        args:
+          - "{{ bdr_node_group }}"
   when:
     groups[bdr_node_group]|first == inventory_hostname
     and node_group_id.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
+
+# And the remaining hosts join the group.
 
 - name: Join BDR node groups and wait for completion
   postgresql_query:
@@ -74,12 +179,15 @@
     queries:
       - text: SELECT bdr.join_node_group(join_target_dsn := %s)
         args:
-          - "{{ hostvars[first].get('bdr_node_dsn') }}"
+          - "{{ first_bdr_node_dsn }}"
       - text: SELECT bdr.wait_for_join_completion()
   when:
     groups[bdr_node_group]|first != inventory_hostname
     and node_group_id.rowcount == 0
   vars:
-    first: "{{ groups[bdr_node_group]|first }}"
+    first: >-
+      {{ groups[bdr_node_group]|first }}
+    first_bdr_node_dsn: >-
+      {{ hostvars[first].get('bdr_node_dsn') }}
   become_user: "{{ postgres_user }}"
   become: yes
