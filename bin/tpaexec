@@ -106,7 +106,8 @@ help() {
 Available help topics:
     info
     generate-config
-    provision, deploy, deprovision
+    provision, deprovision
+    playbook, deploy
     rehydrate
 
 Run 'tpaexec help topicname' for more details.
@@ -158,6 +159,15 @@ Command: tpaexec provision clustername
 
 Provisions a cluster according to clustername/config.yml
 PROVISION
+            ;;
+
+        playbook)
+            cat <<PLAYBOOK
+Command: tpaexec playbook clustername/playbook.yml
+Command: tpaexec playbook clustername /path/to/playbook.yml
+
+Runs a playbook in the context of a particular cluster
+PLAYBOOK
             ;;
 
         deploy)
