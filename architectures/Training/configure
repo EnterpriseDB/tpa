@@ -21,6 +21,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+source $libdir/configure-defaults.sh
+
 if [[ ! "${issue:-}" || ! "${instances:-}" ]]; then
     error "--redmine-id <num> and --instances <num> are both required"
 fi

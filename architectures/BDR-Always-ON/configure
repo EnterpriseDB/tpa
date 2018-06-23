@@ -13,7 +13,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ "${platform:=aws}" != "aws" ]]; then
+source $libdir/configure-defaults.sh
+
+if [[ "$platform" != "aws" ]]; then
     error "currently unsupported platform: $platform (use '--platform aws')"
 fi
 

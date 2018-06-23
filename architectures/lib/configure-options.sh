@@ -1,8 +1,10 @@
 set -eu
 
-minimal=
-
 case "$opt" in
+    # These options set variables that are used by the configure script
+    # directly (after architectures/lib/configure-defaults.sh sets the
+    # default values, if applicable).
+
     --platform)
         platform=${1:?Platform name not specified}
         shift
@@ -26,6 +28,10 @@ case "$opt" in
     --minimal)
         minimal=-minimal
         ;;
+
+    # These options export environment variables that are interpreted by
+    # architectures/lib/cluster-vars.
+
     --postgres-version)
         export POSTGRES_VERSION=${1:?Postgres major version not specified}
         shift
@@ -42,6 +48,10 @@ case "$opt" in
         export BARMAN_PACKAGE_VERSION=${1:?repmgr package version not specified}
         shift
         ;;
+
+    # These options export environment variables that are interpreted by
+    # architectures/lib/hostnames.
+
     --hostnames-from)
         export HOSTNAMES_FROM=${1:?Hostname list file not specified}
         shift
@@ -54,14 +64,8 @@ case "$opt" in
         export HOSTNAMES_SORTED_BY=${1:?Hostname sort option not specified}
         shift
         ;;
+
     *)
         error "unrecognised parameter: $opt"
         ;;
 esac
-
-platform=${platform:-aws}
-region=${region:-eu-west-1}
-instance_type=${instance_type:-t2.micro}
-if [[ ${distribution:=Debian} != *-minimal ]]; then
-    distribution="$distribution$minimal"
-fi
