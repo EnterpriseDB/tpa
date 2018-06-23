@@ -33,10 +33,10 @@
 
 - name: Add entries to shared_preload_libraries
   include_tasks: preload-library.yml
-  vars:
-    library: "{{ item }}"
-  when: item in postgres_extensions
+  when: library in postgres_extensions
   with_items:
     - pg_stat_statements
     - pglogical
     - bdr
+  loop_control:
+    loop_var: library
