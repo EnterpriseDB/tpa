@@ -1,7 +1,0 @@
----
-
-- include_tasks: create_db.yml
-- include_tasks: create_extension.yml
-- include_tasks: set_node_facts.yml
-- include_tasks: bdr_group_manage.yml
-- include_tasks: test_bdr.yml

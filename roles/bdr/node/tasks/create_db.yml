@@ -1,8 +1,0 @@
----
-
-- name: Create BDR database
-  postgresql_db:
-    state: present
-    name: "{{ bdr_db_name }}"
-  become_user: "{{ postgres_user }}"
-  become: yes
