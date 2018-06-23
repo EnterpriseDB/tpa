@@ -11,7 +11,9 @@ Major changes:
   name and various options and generates config.yml and deploy.yml for
   a new cluster.
 
-- Added BDR3 deployment support.
+- Added BDR3 deployment support
+
+- Automatic package builds
 
 Bugfixes:
 
@@ -34,7 +36,7 @@ Other notable changes:
   current user's login name.
 - Allow instance settings to be exported as instance vars (2a6e060)
 - Include traceback information on module failure in various cases
-- Various changes related to TPAexec packaging
+- Various changes related to packaging
 
 ## v3.0 (2018-06-05)
 
