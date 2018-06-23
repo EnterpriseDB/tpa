@@ -68,6 +68,13 @@ deploy() {
     playbook deploy.yml "$@"
 }
 
+test() {
+    if [[ ! -f ${test:=test.yml} ]]; then
+        test=$TPA_DIR/architectures/lib/test.yml
+    fi
+    playbook $test "$@"
+}
+
 deprovision() {
     $ansible-playbook $TPA_DIR/platforms/deprovision.yml \
         -i inventory \
@@ -107,7 +114,7 @@ Available help topics:
     info
     generate-config
     provision, deprovision
-    playbook, deploy
+    playbook, deploy, test
     rehydrate
 
 Run 'tpaexec help topicname' for more details.
@@ -176,6 +183,14 @@ Command: tpaexec deploy clustername
 
 Deploys a cluster according to clustername/deploy.yml
 DEPLOY
+            ;;
+
+        test)
+            cat <<TEST
+Command: tpaexec test clustername
+
+Runs tests for a cluster according to its architecture
+TEST
             ;;
 
         deprovision)
@@ -270,7 +285,7 @@ case "$command" in
         cd $cluster
         ;;
 
-    provision|deploy|deprovision|rehydrate)
+    provision|deploy|deprovision|rehydrate|test)
         cluster=${1:?No cluster specified}
         shift
 
@@ -318,7 +333,7 @@ case "$command" in
         $command "$@"
         ;;
 
-    provision|deploy|playbook|deprovision|rehydrate)
+    provision|deploy|playbook|deprovision|rehydrate|test)
         time $command "$@"
         ;;
 
