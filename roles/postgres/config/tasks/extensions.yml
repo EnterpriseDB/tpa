@@ -10,11 +10,9 @@
       postgres_extensions|default(
         default_postgres_extensions
         |union(extra_postgres_extensions)
-        |union(bdr_extensions)
+        |union(('bdr' in role)|ternary(bdr_extensions, []))
       )
     }}"
-  vars:
-    bdr_extensions: "{{ ('bdr' in role)|ternary(['bdr'], []) }}"
 
 # We install a default configuration for the extensions we care about.
 # We don't need to have conditional logic in this template, because the

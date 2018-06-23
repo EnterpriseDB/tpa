@@ -21,3 +21,7 @@ default_postgres_extensions:
   - pglogical
 
 extra_postgres_extensions: []
+
+bdr_extensions:
+  - btree_gist
+  - bdr
