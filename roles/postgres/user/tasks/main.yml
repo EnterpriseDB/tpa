@@ -25,6 +25,7 @@
   blockinfile:
     path: /etc/security/limits.conf
     block: |
+      {{ postgres_user }}  -      core     unlimited
       {{ postgres_user }}  soft   nofile   4096
       {{ postgres_user }}  hard   nofile   32768
 
