@@ -8,11 +8,14 @@
 
 use strict;
 use List::Util 'shuffle';
+use File::Find;
 
 my $wanted = shift @ARGV
     or die "ERROR: number of subnets not specified\n";
 
 my $pattern = shift @ARGV || $ENV{SUBNET_PATTERN} || "10.33.x.x";
+
+my $exclusions = $ENV{SUBNET_EXCLUSIONS};
 
 # The pattern may be a.b.c.d or a.b.c.d/nn, and we want to end up with
 # [a.b.c.d, nn], where both parts have default values.
@@ -55,7 +58,7 @@ if (@octets == 4) {
 # Depending on how many leading numbers we removed, we're left with one
 # of the following possibilities: x.num, x.x, and x.
 
-my @subnets = ();
+my @pieces = ();
 
 while (@components) {
     # We calculate how many bits of network address we have built up so
@@ -100,27 +103,80 @@ while (@components) {
     #
     # An a.b.x.x/29 pattern would generate 255*32 possibilities here.
 
-    if (@subnets) {
+    if (@pieces) {
         my @expanded;
-        foreach my $c (@subnets) {
+        foreach my $c (@pieces) {
             foreach my $d (@choices) {
                 push @expanded, "$c.$d";
             }
         }
         @choices = @expanded;
     }
-    @subnets = @choices;
+    @pieces = @choices;
 }
+
+# Map every a.b.c.d/x to [int(a.b.c.d), x]
+
+my $prefix = join(".", @octets);
+my %subnet_map =
+    map { ("$_/$size" => [unpack("N", pack("C4", split(/\./, $_))), $size]) }
+        map { "$prefix.$_" } @pieces;
+
+# If any subnet exclusions are specified, look for "subnet: a.b.c.d/n"
+# declarations with the right prefix within config.yml files in the
+# provided directories, and exclude them from our list.
+
+if ($exclusions) {
+    my $subnet = '^\s*subnet:\s*(' . join('\.', @octets) . '\.[0-9.]+)/([0-9]{2})\s*$';
+
+    # Now build a similar map for any existing subnet declarations, but
+    # make sure to store the subnets in canonical form (i.e., /x means
+    # the rightmost 32-x bits must be 0).
+
+    my %old_subnet_map;
+    my @dirs = split /\s*,\s*/, $exclusions;
+    find(sub {
+            if ($_ == "config.yml") {
+                if (open(my $fh, $File::Find::name)) {
+                    while (my $line = <$fh>) {
+                        if ($line =~ qr/$subnet/) {
+                            my $o_ip = unpack("N", pack("C4", split(/\./, $1)));
+                            my $o_bits = $2;
+                            $old_subnet_map{"$1/$2"} =
+                                [$o_ip & ~(2**(32-$o_bits)-1), $o_bits];
+                        }
+                    }
+                }
+            }
+        }, @dirs);
+
+    # Now we compare each generated a.b.c.d/x to each existing a.b.e.f/y
+    # to see if one contains the other. If so, we discard that generated
+    # subnet.
+    #
+    # If x <= y, and a.b.c.d/x == a.b.e.f/x, the subnets overlap.
+
+    foreach my $s (keys %subnet_map) {
+        my ($s_ip, $s_bits) = @{$subnet_map{$s}};
+        foreach my $o (keys %old_subnet_map) {
+            my ($o_ip, $o_bits) = @{$old_subnet_map{$o}};
+
+            if (($s_bits <= $o_bits && $s_ip == ($o_ip & ~(2**(32-$s_bits)-1))) ||
+                ($o_bits < $s_bits && $o_ip == ($s_ip & ~(2**(32-$o_bits)-1))))
+            {
+                delete $subnet_map{$s};
+            }
+        }
+    }
+}
+
+my @subnets = keys %subnet_map;
 
 if (@subnets < $wanted) {
     die "ERROR: only @{[scalar @subnets]}/$wanted free /$size subnets found matching $pattern\n";
 }
 
-# XXX Now's the time to filter out any entries in @subnets that conflict
-# with already-assigned subnets, however we can enumerate those.
-
 @subnets = shuffle(@subnets);
 @subnets = splice @subnets, 0, $wanted;
 
-my $prefix = join(".", @octets);
-print join(" ", map "$prefix.$_/$size", @subnets), "\n";
+print join(" ", @subnets), "\n";

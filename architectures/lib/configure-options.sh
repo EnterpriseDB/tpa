@@ -37,6 +37,12 @@ case "$opt" in
         shift
         ;;
 
+    --exclude-subnets-from)
+        export SUBNET_EXCLUSIONS=${1:?Subnet exclusion directory not specified}
+        type realpath &>/dev/null && SUBNET_EXCLUSIONS=$(realpath $SUBNET_EXCLUSIONS)
+        shift
+        ;;
+
     # These options export environment variables that are interpreted by
     # architectures/lib/cluster-vars.
 
@@ -62,6 +68,7 @@ case "$opt" in
 
     --hostnames-from)
         export HOSTNAMES_FROM=${1:?Hostname list file not specified}
+        type realpath &>/dev/null && HOSTNAMES_FROM=$(realpath $HOSTNAMES_FROM)
         shift
         ;;
     --hostnames-pattern)
