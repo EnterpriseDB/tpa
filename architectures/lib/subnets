@@ -115,12 +115,24 @@ while (@components) {
     @pieces = @choices;
 }
 
-# Map every a.b.c.d/x to [int(a.b.c.d), x]
+# Map every a.b.c.d/x to [int(a.b.c.d), x].
+#
+# Note that we generated @pieces to have the correct number of zero bits
+# at the end already.
 
 my $prefix = join(".", @octets);
 my %subnet_map =
     map { ("$_/$size" => [unpack("N", pack("C4", split(/\./, $_))), $size]) }
         map { "$prefix.$_" } @pieces;
+
+# Given [int(a.b.c.d), n], returns the IP number masked by n, i.e., with
+# the rightmost 32-n bits zero.
+
+sub mask {
+    my ($ip, $bits) = @_;
+
+    return $ip & ~(2**(32-$bits)-1);
+}
 
 # If any subnet exclusions are specified, look for "subnet: a.b.c.d/n"
 # declarations with the right prefix within config.yml files in the
@@ -130,8 +142,7 @@ if ($exclusions) {
     my $subnet = '^\s*subnet:\s*(' . join('\.', @octets) . '\.[0-9.]+)/([0-9]{2})\s*$';
 
     # Now build a similar map for any existing subnet declarations, but
-    # make sure to store the subnets in canonical form (i.e., /x means
-    # the rightmost 32-x bits must be 0).
+    # make sure to store the subnets in canonical form (i.e., masked).
 
     my %old_subnet_map;
     my @dirs = split /\s*,\s*/, $exclusions;
@@ -143,7 +154,7 @@ if ($exclusions) {
                             my $o_ip = unpack("N", pack("C4", split(/\./, $1)));
                             my $o_bits = $2;
                             $old_subnet_map{"$1/$2"} =
-                                [$o_ip & ~(2**(32-$o_bits)-1), $o_bits];
+                                [mask($o_ip, $o_bits), $o_bits];
                         }
                     }
                 }
@@ -161,8 +172,8 @@ if ($exclusions) {
         foreach my $o (keys %old_subnet_map) {
             my ($o_ip, $o_bits) = @{$old_subnet_map{$o}};
 
-            if (($s_bits <= $o_bits && $s_ip == ($o_ip & ~(2**(32-$s_bits)-1))) ||
-                ($o_bits < $s_bits && $o_ip == ($s_ip & ~(2**(32-$o_bits)-1))))
+            if (($s_bits <= $o_bits && $s_ip == mask($o_ip, $s_bits)) ||
+                ($o_bits < $s_bits && $o_ip == mask($s_ip, $o_bits)))
             {
                 delete $subnet_map{$s};
             }
