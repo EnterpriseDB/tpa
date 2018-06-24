@@ -9,10 +9,3 @@
   when: >
     backup is defined
   tags: firstbackup
-
-# Were we invoked with pgbench=run?
-
-- include_role: name=pgbench
-  when: >
-    pgbench|default('') == 'run'
-  tags: pgbench

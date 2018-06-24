@@ -2,11 +2,13 @@
 
 - name: Determine if pgbench -i was run already
   postgresql_query:
-    conninfo: "dbname=postgres user=postgres"
+    conninfo: "dbname=postgres"
     query: >
       select count(*) as exists from information_schema.tables
       where table_name='pgbench_history'
   register: pgbench_history
+  become_user: "{{ postgres_user }}"
+  become: yes
 
 - include_role: name=pgbench/init
   when:
