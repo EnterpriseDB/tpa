@@ -1,4 +1,12 @@
 ---
 
-- fail:
-    msg: No tests implemented yet
+- name: Ensure that test output directory exists locally
+  local_action:
+    module: file
+    path: "{{ cluster }}/test/{{ inventory_hostname }}"
+    state: directory
+
+- include_role: name=pgbench
+  when: >
+    'postgres' in role
+  tags: pgbench

@@ -17,4 +17,4 @@
     now: >-
       {{ lookup('pipe', 'date +%s') }}
     output: >-
-      pgbench/{{ inventory_hostname }}-init.{{ now }}.txt
+      test/{{ inventory_hostname }}/pgbench-init.{{ now }}.txt

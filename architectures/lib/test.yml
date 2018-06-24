@@ -21,7 +21,5 @@
 
   hosts: all
   tasks:
-    - include_role: name=pgbench
-      when: >
-        'postgres' in role
-      tags: pgbench
+    - include_role: name=test
+      tags: test
