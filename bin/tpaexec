@@ -64,6 +64,10 @@ cmd() {
         -e cluster=$(pwd) "$@"
 }
 
+ping() {
+    cmd all -m ping "$@"
+}
+
 playbook() {
     $ansible-playbook \
         -i inventory --vault-password-file vault/vault_pass.txt \
@@ -120,7 +124,8 @@ Available help topics:
     info
     generate-config
     provision, deprovision
-    playbook, deploy, test, cmd
+    playbook, deploy, test,
+    cmd, ping
     rehydrate
 
 Run 'tpaexec help topicname' for more details.
@@ -180,6 +185,14 @@ Command: tpaexec cmd clustername all -m debug -a var=inventory_hostname
 
 Runs an ansible command in the context of a cluster
 COMMAND
+            ;;
+
+        ping)
+            cat <<PING
+Command: tpaexec ping clustername
+
+Runs the ansible ping module against all hosts in a cluster
+PING
             ;;
 
         playbook)
@@ -302,7 +315,7 @@ case "$command" in
         cd $cluster
         ;;
 
-    cmd|provision|deploy|deprovision|rehydrate|test)
+    cmd|ping|provision|deploy|deprovision|rehydrate|test)
         cluster=${1:?No cluster specified}
         shift
 
@@ -350,7 +363,7 @@ case "$command" in
         $command "$@"
         ;;
 
-    cmd|provision|deploy|playbook|deprovision|rehydrate|test)
+    cmd|ping|provision|deploy|playbook|deprovision|rehydrate|test)
         time $command "$@"
         ;;
 
