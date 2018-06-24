@@ -19,6 +19,7 @@
     postgres_port: "{{ postgres_port|default(5432) }}"
     postgres_service_name: postgres
     postgres_installation_source: "{{ postgres_installation_source|default('pkg') }}"
+    barman_user: "{{ barman_user|default(default_barman_user) }}"
     backup_name: "{{ backup_name|default(inventory_hostname) }}"
   tags: always
 

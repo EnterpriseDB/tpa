@@ -1,0 +1,46 @@
+---
+
+- name: Run barman check
+  command: barman check all
+  register: barman_check
+  ignore_errors: yes
+  become_user: "{{ barman_user }}"
+  become: yes
+
+- name: Write barman check output to {{ output }}
+  local_action:
+    module: copy
+    dest: "{{ cluster }}/{{ output }}"
+    content: |
+      {{ barman_check.stdout }}
+  vars:
+    now: >-
+      {{ lookup('pipe', 'date +%s') }}
+    output: >-
+      test/{{ inventory_hostname }}/barman-check.{{ now }}.txt
+
+- name: Run barman diagnose
+  command: barman diagnose
+  register: barman_diagnose
+  ignore_errors: yes
+  become_user: "{{ barman_user }}"
+  become: yes
+
+- name: Write barman diagnose output to {{ output }}
+  local_action:
+    module: copy
+    dest: "{{ cluster }}/{{ output }}"
+    content: |
+      {{ barman_diagnose.stdout|from_json|to_nice_json }}
+  vars:
+    now: >-
+      {{ lookup('pipe', 'date +%s') }}
+    output: >-
+      test/{{ inventory_hostname }}/barman-diagnose.{{ now }}.txt
+
+- name: Fail if either of the above tasks failed
+  fail:
+    msg: "Barman check/diagnose failed (use --skip-tags fail to skip)"
+  when:
+    barman_check is not successful or barman_diagnose is not successful
+  tags: [barman, fail]

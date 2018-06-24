@@ -6,6 +6,11 @@
     path: "{{ cluster }}/test/{{ inventory_hostname }}"
     state: directory
 
+- include_tasks: barman.yml
+  when: >
+    'barman' in role
+  tags: barman
+
 - include_role: name=pgbench
   when: >
     'postgres' in role

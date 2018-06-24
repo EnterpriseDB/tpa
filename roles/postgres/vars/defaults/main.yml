@@ -3,6 +3,7 @@
 default_postgres_version: 10
 
 default_postgres_user: postgres
+default_barman_user: barman
 
 default_postgres_home_dirs:
   Debian: /var/lib/postgresql
