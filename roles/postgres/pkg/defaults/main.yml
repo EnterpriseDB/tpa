@@ -36,9 +36,11 @@ postgres_debug_packages:
 additional_postgres_packages:
   Debian: &debian_additional_packages
     - postgresql-{{postgres_version}}-pglogical
+    - postgresql-{{postgres_version}}-pglogical-dbg
     - barman-cli
   RedHat:
     - postgresql{{postgres_versionNN}}-pglogical
+    - postgresql{{postgres_versionNN}}-pglogical-debuginfo
     - barman-cli
   Ubuntu: *debian_additional_packages
 
