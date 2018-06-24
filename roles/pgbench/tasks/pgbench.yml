@@ -3,6 +3,18 @@
 - name: Run pgbench
   command: >
     pgbench {{ pgbench_opts }}
+  register: pgbench_output
   become_user: "{{ postgres_user }}"
   become: yes
-  tags: pgbench
+
+- name: Write pgbench output to {{ output }}
+  local_action:
+    module: copy
+    dest: "{{ cluster }}/{{ output }}"
+    content: |
+      {{ pgbench_output.stdout }}
+  vars:
+    now: >-
+      {{ lookup('pipe', 'date +%s') }}
+    output: >-
+      pgbench/{{ inventory_hostname }}.{{ now }}.txt

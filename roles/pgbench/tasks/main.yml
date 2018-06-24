@@ -1,5 +1,11 @@
 ---
 
+- name: Ensure that pgbench output directory exists locally
+  local_action:
+    module: file
+    path: "{{ cluster }}/pgbench"
+    state: directory
+
 - name: Determine if pgbench -i was run already
   postgresql_query:
     conninfo: "dbname=postgres"
