@@ -20,6 +20,10 @@ if [[ $platform != 'aws' ]]; then
     exit 1
 fi
 
+# We don't have TPA images for BDR3 yet, and we don't want to use the
+# existing images with pglogical 2, so we temporarily force the base
+# images to be used for BDR clusters.
+
 if [[ $architecture == BDR* && $distribution != *-minimal ]]; then
     distribution="$distribution-minimal"
 fi
