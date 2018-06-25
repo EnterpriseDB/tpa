@@ -21,7 +21,7 @@ fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
 
-image=$($libdir/image $distribution $platform $architecture)
+image=$($libdir/image $distribution $platform $ARCHITECTURE)
 eval $image
 
 mkdir $cluster
@@ -34,7 +34,7 @@ hostnames=($($libdir/hostnames $instances))
 
 cat > $cluster/config.yml <<CONFIG
 ---
-architecture: BDR-Always-ON
+architecture: $ARCHITECTURE
 
 cluster_name: $cluster_name
 
