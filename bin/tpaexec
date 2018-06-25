@@ -48,7 +48,7 @@ configure() {
         error "unknown deployment architecture: $arch"
     fi
 
-    ARCHITECTURE=$arch $archdir/configure $cluster "$@"
+    architecture=$arch $archdir/configure $cluster "$@"
 }
 
 provision() {

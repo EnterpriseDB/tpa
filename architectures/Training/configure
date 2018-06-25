@@ -33,7 +33,7 @@ fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
 
-image=$($libdir/image $distribution $platform $ARCHITECTURE)
+image=$($libdir/image $distribution $platform $architecture)
 eval $image
 
 mkdir $cluster
@@ -42,7 +42,7 @@ trap "rm -rf $cluster" ERR
 
 cat > $cluster/config.yml <<PREAMBLE
 ---
-architecture: $ARCHITECTURE
+architecture: $architecture
 
 cluster_name: training_$issue
 cluster_tags:
