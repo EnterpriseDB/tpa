@@ -13,10 +13,15 @@
 
 distribution=${1:?Distribution name not specified}
 platform=${2:-aws}
+architecture=${3:-${ARCHITECTURE:-''}}
 
 if [[ $platform != 'aws' ]]; then
     echo "ERROR: distribution images are not available for platform: $platform" >&2
     exit 1
+fi
+
+if [[ $architecture == BDR* && $distribution != *-minimal ]]; then
+    distribution="$distribution-minimal"
 fi
 
 case "$distribution" in

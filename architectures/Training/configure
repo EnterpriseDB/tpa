@@ -33,7 +33,7 @@ fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
 
-image=$($libdir/image $distribution $platform)
+image=$($libdir/image $distribution $platform $architecture)
 eval $image
 
 mkdir $cluster
