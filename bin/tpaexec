@@ -122,7 +122,7 @@ help() {
             cat <<TOPICS
 Available help topics:
     info
-    generate-config
+    generate-config, configure-options
     provision, deprovision
     playbook, deploy, test,
     cmd, ping
@@ -331,7 +331,7 @@ esac
 # function to call.
 
 case "$command" in
-    help)
+    *help)
         help "$*"
         ;;
 
