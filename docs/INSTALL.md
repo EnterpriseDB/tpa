@@ -1,13 +1,13 @@
 ---
-title: TPAexec - Detailed Installation guide
-version: 1.3
+title: TPAexec - Installation guide
+version: 1.4
 date: 26/June/2018
 author: Craig Alsop, Abhijit Menon-Sen
 copyright-holder: 2ndQuadrant Limited
 toc: true
 ---
 
-# TPAexec - Detailed installation guide
+# TPAexec - Installation guide
 
 © Copyright 2ndQuadrant. Confidential, not for public release.
 
@@ -68,21 +68,15 @@ Python modules you have installed, and ensures that you have the correct
 versions of the modules. (For the same reason, we also do not recommend
 using OS packages to install these modules.)
 
-First, create the virtualenv and install the packages.
+First, create the virtualenv, activate and install the packages using the install script.
 
-    # Create a virtualenv
-    [root]# virtualenv /opt/2ndQuadrant/TPA/tpa-virtualenv
+    # Create a virtualenv and install the pip modules (including ansible).
+    [root]# /opt/2ndQuadrant/TPA/misc/tpa-virtualenv-install.sh
 
-    # Activate it so that we can install pip modules
-    [root]# source /opt/2ndQuadrant/TPA/tpa-virtualenv/bin/activate
-
-    # Install the python dependencies into the virtualenv (including ansible)
-    [root]# /opt/2ndQuadrant/TPA/misc/tpa-pip-install.sh
-
-Now, as a non-root user, you can add the following to your .bashrc or
+Now, as a non-root user, add the following to your .bashrc or
 .profile (or equivalent shell startup configuration):
 
-    export PATH=$PATH:/opt/2ndQuadrant/TPA/bin
+    [tpa]$ export PATH=$PATH:/opt/2ndQuadrant/TPA/bin
 
 To use TPAexec, you must also activate the virtualenv you created above.
 You may run this command either by hand (when you need to use TPAexec),
@@ -96,7 +90,7 @@ or add the command to your .bashrc:
 Once you're done with all of the above steps, run the following command
 to verify your local installation:
 
-    tpaexec selftest
+    [tpa]$ tpaexec selftest
 
 If that command completes without any errors, your TPAexec installation
 is ready for use.
