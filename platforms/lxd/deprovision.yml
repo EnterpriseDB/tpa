@@ -5,3 +5,12 @@
     state: absent
   with_items:
     - "{{ instances }}"
+
+- name: Delete generated files for this cluster
+  file:
+    path: "{{ cluster_dir }}/{{ item }}"
+    state: absent
+    force: yes
+  with_items:
+    - inventory/lxd.py
+    - inventory/lxd.ini
