@@ -1,0 +1,12 @@
+---
+
+- name: Copy lxd.py to inventory directory
+  copy:
+    src: lxd.py
+    dest: "{{ cluster_dir }}/inventory/lxd.py"
+    mode: "0755"
+
+- name: Install customised lxd.ini
+  template:
+    src: lxd.ini.j2
+    dest: "{{ cluster_dir }}/inventory/lxd.ini"

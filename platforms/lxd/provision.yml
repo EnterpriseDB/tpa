@@ -1,5 +1,7 @@
 ---
 
+- include_tasks: inventory/write.yml
+
 # Provision LXD instances based on the cluster definition file.
 
 - name: Deploy Containers
