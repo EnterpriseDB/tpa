@@ -128,6 +128,20 @@ rehydrate() {
     deploy -e rehydrate=yes -e deploy_hosts="$instances" "$@"
 }
 
+info() {
+    version
+    echo TPA_DIR=$TPA_DIR
+    if [[ -n "$ANSIBLE_HOME" ]]; then
+        echo ANSIBLE_HOME=$ANSIBLE_HOME
+    fi
+}
+
+selftest() {
+    info
+    $ansible --version
+    $ansible-playbook $TPA_DIR/architectures/lib/testinst.yml -e tpa_dir=$TPA_DIR
+}
+
 help() {
     topic=${1:-""}
     case "$topic" in
@@ -135,6 +149,7 @@ help() {
             cat <<TOPICS
 Available help topics:
     info
+    selftest
     generate-config, configure-options
     provision, deprovision
     playbook, deploy, test,
@@ -149,8 +164,11 @@ TOPICS
             cat <<INFO
 Available info subcommands:
 
+    tpaexec info
+        Displays some information about this installation
+
     tpaexec info version
-        Displays current TPA version
+        Displays current TPAexec version
 
     tpaexec info platforms
         Displays currently-supported platforms
@@ -164,6 +182,14 @@ Available info subcommands:
     tpaexec info architectures/xxx
         Displays information about a particular deployment architecture
 INFO
+            ;;
+
+        selftest)
+            cat <<SELFTEST
+Command: tpaexec selftest
+
+Performs a sanity test on this installation of TPAexec
+SELFTEST
             ;;
 
         configure-options)
@@ -347,7 +373,7 @@ case "$command" in
         subcommand=${1:-""}
         case "$subcommand" in
             "")
-                help;
+                info;
                 ;;
             version)
                 version
@@ -367,7 +393,7 @@ case "$command" in
         esac
         ;;
 
-    version|configure)
+    version|configure|selftest)
         $command "$@"
         ;;
 
