@@ -28,6 +28,7 @@ Other notable changes:
 
 - Extensive documentation updates
 - Initial LXD platform support
+- Make sure coredumps are generated properly
 - Support postgres/repmgr/barman package version selection (6e904c8)
   via ``tpaexec generate-config … --postgres-package version``
 - Deprecate ec2_ami_user and cluster_ssh_user in favour of setting
