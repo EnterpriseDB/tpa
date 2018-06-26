@@ -98,7 +98,6 @@ instances:
 
   - node: 3
     Name: ${hostnames[3]}
-    backup: ${hostnames[11]}
     volumes:
       - device_name: root
         volume_type: gp2
