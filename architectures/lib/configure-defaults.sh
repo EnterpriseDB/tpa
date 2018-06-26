@@ -6,3 +6,6 @@ instance_type=${instance_type:-t2.micro}
 if [[ ${distribution:=Debian} != *-minimal ]]; then
     distribution="$distribution${minimal:-}"
 fi
+
+image=$($libdir/image $distribution $platform $architecture)
+eval $image
