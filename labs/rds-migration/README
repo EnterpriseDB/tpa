@@ -1,9 +1,0 @@
-
-These scripts demonstrate the steps required to replicate data out of
-RDS using Londiste and Bucardo.
-
-Currently Londiste using the plonly pgq triggers has a horribly high overhead.
-If we replace the generic logutrigga triggers with a cut down bespoke
-trigger function for each table the overhead is reduced a lot, but it's
-still a lot more than Bucardo is out of the box.
-
