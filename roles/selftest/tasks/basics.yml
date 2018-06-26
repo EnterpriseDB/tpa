@@ -9,7 +9,7 @@
   assert:
     msg: "Python 2.7.x is required"
     that:
-      - ansible_facts.python_version is version('2.7.9', '>=')
+      - ansible_facts.python_version is version('2.7', '>=')
   run_once: true
 
 - name: Check for Ansible 2.6
