@@ -106,4 +106,4 @@ instances:
       - monitoring-server
 CONFIG
 
-cp $archdir/deploy.yml $cluster
+ln -sf $archdir/deploy.yml $cluster

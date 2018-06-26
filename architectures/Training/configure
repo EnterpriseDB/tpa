@@ -82,4 +82,4 @@ do
 INSTANCE
 done
 
-cp $archdir/deploy.yml $cluster
+ln -sf $archdir/deploy.yml $cluster

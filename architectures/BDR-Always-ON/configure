@@ -245,4 +245,4 @@ instances:
       - barman
 CONFIG
 
-cp $archdir/deploy.yml $cluster
+ln -sf $archdir/deploy.yml $cluster
