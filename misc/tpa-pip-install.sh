@@ -19,11 +19,11 @@ if [ "$NO_PIP" = "0" ] ; then
     pip install --no-cache-dir --no-index --find-links=file:/opt/2ndQuadrant/TPA/pip-packages -r /opt/2ndQuadrant/TPA/pip-packages/ansible/requirements.txt
     pip install --no-cache-dir file:/opt/2ndQuadrant/TPA/pip-packages/ansible/
   else
-    echo "ERR-no-virt: could not find virtualenv"
+    echo "ERR-no-virt: could not find virtualenv" >&2
     exit 1
   fi
 else
-  echo "ERR-no-pips: pip not found, virtualenv not found"
+  echo "ERR-no-pips: pip not found, virtualenv not found" >&2
   exit 2
 fi
 exit 0
