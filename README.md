@@ -1,17 +1,23 @@
 2ndQuadrant TPA
 ===============
 
-© Copyright 2ndQuadrant, 2014-2018
+© Copyright 2ndQuadrant
 
 Confidential property of 2ndQuadrant; not for public release.
 
-This repository contains automation tools to provision, configure, and
-operate Postgres database clusters. They represent the best practices
-followed by 2ndQuadrant to set up Postgres, and are equally applicable
-to setting up quick one-off testbeds or production environments for
-customers.
+## Overview
 
-With TPA, you can:
+TPA (Trusted Postgres Architecture) is a set of recommendations from
+2ndQuadrant about how to set up a Postgres cluster in various scenarios.
+These represent the best practices followed by 2ndQuadrant, and are as
+applicable to quick testbed setups as to production environments.
+
+TPAexec is an orchestration tool that uses Ansible to build Postgres
+clusters according to 2ndQuadrant's recommendations.
+
+## What can TPAexec do?
+
+With TPAexec, you can:
 
 1. Provision hosts and other resources on AWS (and, in future, other
    platforms)
@@ -22,47 +28,42 @@ With TPA, you can:
 3. Deploy Postgres, Postgres-BDR, or Postgres-XL (from source or
    packages), Postgres extensions, repmgr and Barman, etc.
 
-In most cases, a few simple configuration files are all you will need,
-but you can easily customise the process to handle more complex setup
-tasks and configurations.
+4. Run automated tests on the cluster after deployment
 
-Pre-requisites
-==============
+TPAexec will generate an initial configuration for the type of cluster
+you want. You can use this default configuration straightaway, or edit
+it to suit your needs. In most cases, this simple text configuration
+file is all you will need to set up your cluster.
 
-1. You need Python, Ansible, and various Python modules.
-   [Read the INSTALL guide](INSTALL.md) for details.
+If you ever need to extend the functionality of TPAexec, the full range
+of Ansible functionality is at your disposal.
 
-2. You need an AWS access key id and secret access key for API access.
-   [Read platforms/aws/README](platforms/aws/README.md) for details.
+## How do I use it?
 
-3. You may need to set the repo password for the relevant 2ndQuadrant repo [rpm-internal.2ndquadrant.com](https://rpm-internal.2ndquadrant.com/site/content/) or [apt-internal.2ndquadrant.com](https://apt-internal.2ndquadrant.com/site/content/)
-   ```
-   export TPA_2Q_REPO_PASSWORD=putPASSWORDhere
-   ```
+[Select an architecture](architectures/README.md) for your cluster,
+e.g., M1 (a Postgres cluster with a single primary and multiple
+replicas), and do something like this:
 
-I just want a test cluster
-==========================
+```
+# Generate an initial configuration for the cluster. This command
+# accepts many options. See 'tpaexec info architectures/M1' and
+# 'tpaexec info configure-options' for more details.
+tpaexec generate-config clustername --architecture M1
 
-1. Pick a name for the cluster, and write a clustername/config.yml file
-   describing the required instances, and a clustername/deploy.yml file
-   to apply the desired roles to these instances.
-   [Read clusters/README](clusters/README.md) for details.
-    
-2. Provision the cluster instances and deploy software to them:
+# You can examine the generated clustername/config.yml here, and edit it
+# if you want to, or just stick with the defaults.
 
-   ```
-   tpaexec provision path-to-clusterdir
+# Now bring up the cluster
+tpaexec provision clustername
+tpaexec deploy clustername
+tpaexec test clustername
 
-   tpaexec deploy path-to-clusterdir
-   ```
+# (Remember to destroy the cluster when you're done with it.)
+tpaexec deprovision clustername
+```
 
-3. Once you're done with testing, deprovision the cluster:
-
-   ```
-   tpaexec deprovision path-to-clusterdir
-   ```
-
-Help
-====
+For more details, please consult the
+[installation instructions](docs/INSTALL.md) and
+[documentation](docs/README.md).
 
 Write to tpa@2ndQuadrant.com for help.
