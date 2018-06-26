@@ -50,6 +50,7 @@ cluster_rules:
 
 cluster_vars: $($libdir/cluster-vars)
   cluster_network: $subnet
+  tpa_2q_repo: internal-snapshot
 
 instance_defaults:
     type: $instance_type
