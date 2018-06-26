@@ -1,0 +1,4 @@
+---
+
+- include_tasks: basics.yml
+- include_tasks: commands.yml

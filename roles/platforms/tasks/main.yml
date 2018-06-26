@@ -4,7 +4,7 @@
   set_fact:
     tpa_dir: "{{ lookup('env', 'TPA_DIR') or (role_path|regex_replace('/roles/platforms/vars/*', '')) }}"
 
-- include_tasks: prereqs.yml
+- include_role: name=selftest tasks_from=deploy.yml
   tags: prereqs
 
 - include_tasks: ssh.yml

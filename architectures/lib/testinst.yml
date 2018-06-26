@@ -1,7 +1,0 @@
----
-
-- hosts: localhost
-  tasks:
-    - include_role:
-        name: platforms
-        tasks_from: prereqs.yml

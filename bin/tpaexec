@@ -139,7 +139,7 @@ info() {
 selftest() {
     info
     $ansible --version
-    $ansible-playbook $TPA_DIR/architectures/lib/testinst.yml -e tpa_dir=$TPA_DIR
+    $ansible-playbook $TPA_DIR/architectures/lib/selftest.yml -e tpa_dir=$TPA_DIR
 }
 
 help() {

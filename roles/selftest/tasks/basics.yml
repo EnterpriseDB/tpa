@@ -1,0 +1,21 @@
+---
+
+- name: Gather facts on localhost
+  setup: gather_subset=min
+  delegate_to: localhost
+  run_once: true
+
+- name: Check for Python 2.7
+  assert:
+    msg: "Python 2.7.x is required"
+    that:
+      - ansible_facts.python_version is version('2.7.9', '>=')
+  run_once: true
+
+- name: Check for Ansible 2.6
+  assert:
+    msg: "Ansible 2.6.x is required"
+    that:
+      - ansible_version.major == 2
+      - ansible_version.minor == 6
+  run_once: true

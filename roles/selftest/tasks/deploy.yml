@@ -1,0 +1,6 @@
+---
+
+# Do we have everything installed locally that we need to run deploy?
+
+- include_tasks: basics.yml
+- include_tasks: commands.yml
