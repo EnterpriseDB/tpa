@@ -5,15 +5,28 @@
 IFS=$' \t\n'
 set -eu
 
-# If $TPA_DIR is not already set, we use /opt/2ndQuadrant/TPA if it
-# exists, or guess TPA_DIR based on $0.
+error() {
+    echo "ERROR: $@" >&2
+    exit 1
+}
+
+# If $TPA_DIR is not already set, we guess TPA_DIR based on $0 (so that
+# a git checkout takes precedence over a package installation), or use
+# /opt/2ndQuadrant/TPA if it exists.
 
 TOP=/opt/2ndQuadrant/TPA
-if [[ ! -d $TOP ]]; then
-    TOP=$(dirname $0)/..
-    type realpath &>/dev/null && TOP=$(realpath $TOP)
+if [[ -z "${TPA_DIR:-}" ]]; then
+    SRC=$(dirname $0)/..
+    type realpath &>/dev/null && SRC=$(realpath $SRC)
+    if [[ -d $SRC/roles ]]; then
+        TOP=$SRC
+    fi
 fi
+
 export TPA_DIR=${TPA_DIR:-$TOP}
+if [[ ! -d $TPA_DIR/roles ]]; then
+    error "Can't find $TPA_DIR/roles; please set TPA_DIR correctly"
+fi
 
 ansible=$TPA_DIR/ansible/ansible
 
@@ -248,11 +261,6 @@ REHYDRATE
             exit 1
             ;;
     esac
-}
-
-error() {
-    echo "ERROR: $@" >&2
-    exit 1
 }
 
 ## Command handling
