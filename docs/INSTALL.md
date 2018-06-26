@@ -1,203 +1,109 @@
 ---
 title: TPAexec - Detailed Installation guide
-version: 1.2
-date: 14/June/2018
-author: Craig Alsop
+version: 1.3
+date: 26/June/2018
+author: Craig Alsop, Abhijit Menon-Sen
 copyright-holder: 2ndQuadrant Limited
-copyright-years: 2014-2018
 toc: true
 ---
 
-TPAexec - Detailed Installation guide
-===========================
+# TPAexec - Detailed installation guide
 
-© Copyright 2ndQuadrant, 2018. Confidential property of 2ndQuadrant; not for public release.
+© Copyright 2ndQuadrant. Confidential, not for public release.
 
+## Overview
 
+To use TPAexec, you will need:
 
-In addition to TPAexec, you will need to install Python 2.7 and some Python modules, Ansible
-from 2ndQuadrant's repository, and the AWS cli tools.
-It is suggested that the TPAexec should be configured and run from a non-root account
+1. The TPAexec source code itself
+
+2. Python 2.7 and some Python modules
+
+3. A few other programs that TPAexec uses
+
+This document explains how to set up these things and start using
+TPAexec.
 
 Commands run as root will be shown starting with a **[root]#** and commands run as tpa user will be shown starting with a **[tpa]$**
 
-Make sure your date & time are correct, as various things will fail if these are wrong
-```
-    [root]# ntpdate time.apple.com
-```
+## What time is it?
 
-## Packages
-### Required
+Please make absolutely sure that your system has the correct date and
+time set, because various things will fail otherwise. For example:
 
-#### Python and modules
-Install Python 2.7.x, pip, and virtualenv:
-
-```
-    # Debian or Ubuntu
-    [root]# apt-get install python2.7 python-pip python-virtualenv
-
-    # RedHat or CentOS
-    [root]# yum install python python-pip python-virtualenv
-```
-#### RedHat/CentOS specifics
-
-Additional required packages not in base RedHat/CentOS build:
-```
-    [root]# yum install git gcc ntp
-```
-### Recommended
-Install pwgen for better password generation (strongly recommended for production clusters).
-If you are planning to use the openvpn role, then you will need to install openvpn.
-```
-    # Debian or Ubuntu
-    [root]# apt-get install pwgen
-    [root]# apt-get install openvpn
-
-    # RedHat or CentOS
-    [root]# yum install pwgen
-    [root]# yum install epel-release openvpn
-    
-    # Mac
-    [brew or port] install pwgen
-    [brew or port] install openvpn
-```
+    [root]# ntpdate pool.ntp.org
 
 ## TPAexec
 
-### Option 1 - from package (recommended if possible)
+TPAexec packages are available from the 2ndQuadrant internal package
+repository. These instructions assume that you either have access to
+this repository, or have been given a copy of the package separately.
 
-This will install TPAexec into /opt/2ndQuadrant/TPA/
-```
+You can install the tpaexec package as follows:
+
     # Debian or Ubuntu
     [root]# apt-get install tpaexec-<version-number.os-type>_all.deb
 
     # RedHat or CentOS
     [root]# yum install tpaexec-<version-number>.noarch.rpm
-```
-As root, create and populate a virtualenv, to avoid installing Ansible's Python module dependencies system-wide (highly recommended):
 
-```
+This will install TPAexec into ``/opt/2ndQuadrant/TPA``.
+
+Installing the TPAexec package will also ensure that other required
+packages (such as Python 2.7) are installed.
+
+(If you have been given access to the TPA source code repository and
+specifically advised to use it, please see the
+[source installation instructions](INSTALL-repo.md) instead.)
+
+## Python environment
+
+At this point, Python 2.7, pip, and virtualenv should be available on
+your system. Now you need to setup a Python environment to install the
+Python modules that TPAexec needs.
+
+The procedure below installs these modules into an isolated virtualenv,
+which we strongly recommend. It avoids interference with any system-wide
+Python modules you have installed, and ensures that you have the correct
+versions of the modules. (For the same reason, we also do not recommend
+using OS packages to install these modules.)
+
+First, create the virtualenv and install the packages.
+
+    # Create a virtualenv
     [root]# virtualenv /opt/2ndQuadrant/TPA/tpa-virtualenv
+
     # Activate it so that we can install pip modules
     [root]# source /opt/2ndQuadrant/TPA/tpa-virtualenv/bin/activate
+
     # Install the python dependencies into the virtualenv (including ansible)
     [root]# /opt/2ndQuadrant/TPA/misc/tpa-pip-install.sh
-```
-For RedHat or Centos, workaround an SELinux bug
-```
-    # RedHat or CentOS
-    [root]# cp -rp /usr/lib64/python2.7/site-packages/selinux \
-    /opt/2ndQuadrant/TPA/tpa-virtualenv/lib/python2.7/site-packages
-```
-Set TPA_DIR and add the TPA bin directory to your path in the TPAexec user environment (and .bashrc / .profile):
-```
-    [tpa]$ export TPA_DIR=/opt/2ndQuadrant/TPA/
-    [tpa]$ export PATH=$PATH:$TPA_DIR/bin
-```
-It is suggested that a `~/tpa` is created, which can contain TPA related files and directories.
-```
-    [tpa]$ mkdir ~/tpa
-    # Copy the example clusters directory
-    [tpa]$ cp -r $TPA_DIR/clusters tpa
-```
 
-Activate a virtualenv that was already created in $TPA_DIR/tpa-virtualenv :
+Now, as a non-root user, you can add the following to your .bashrc or
+.profile (or equivalent shell startup configuration):
 
-```
-    # Activate ansible-python ( and add command to .bashrc/.profile)
+    export PATH=$PATH:/opt/2ndQuadrant/TPA/bin
+
+To use TPAexec, you must also activate the virtualenv you created above.
+You may run this command either by hand (when you need to use TPAexec),
+or add the command to your .bashrc:
+
+    # Activate virtualenv
     [tpa]$ source $TPA_DIR/tpa-virtualenv/bin/activate
-```
 
-Set ANSIBLE_DIR & ANSIBLE_LOG_PATH in your environment (and .bashrc / .profile):
-```
-    [tpa]$ export ANSIBLE_HOME=$TPA_DIR/tpa-virtualenv
-    [tpa]$ export ANSIBLE_LOG_PATH=~/ansible.log
-```
-Ansible creates retry files which can be used to retry commands when a playbook fails and retry_files_enabled is True (the default). This is configured in TPA_DIR/ansible.cfg and is set by default to `retry_files_save_path = ~/.ansible-retry`
+## Verification
 
-Now you should be able to run ./ansible/ansible from your local copy of the TPA repository. 
-The following simple tests should succeed if Ansible has been installed correctly:
+Once you're done with all of the above steps, run the following command
+to verify your local installation:
 
-```
-    [tpa]$ $TPA_DIR/ansible/ansible localhost -m ping
-    [tpa]$ $TPA_DIR/ansible/ansible localhost -c ssh -a "id"
-```
+    tpaexec selftest
 
-------
+If that command completes without any errors, your TPAexec installation
+is ready for use.
 
-### Option 2 - install from repositories
+## Help
 
-Clone the TPAexec repository
-
-```
-    [tpa]$ git clone --recursive https://github.com/2ndQuadrant/TPA
-```
-Set TPA_DIR and add the TPA bin directory to your path in the TPAexec user environment (and .bashrc / .profile):
-```
-    [tpa]$ export TPA_DIR=/path/to/TPA
-    [tpa]$ export PATH=$PATH:$TPA_DIR/bin
-```
-Create and activate a virtualenv, to avoid installing Ansible's Python
-module dependencies system-wide (highly recommended):
-
-```
-    [tpa]$ virtualenv ~/tpa-virtualenv
-
-    # Activate ansible-python ( and add command to .bashrc/.profile)
-    [tpa]$ source ~/tpa-virtualenv/bin/activate
-```
-
-Install the python dependencies into the virtualenv (including ansible:
-```
-    [tpa]$ pip install -r $TPA_DIR/python-requirements.txt
-```
-You will need Ansible 2.6 from the [2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ansible).
-
-Clone the Ansible repository:
-
-```
-    [tpa]$ git clone --recursive https://github.com/2ndQuadrant/ansible
-```
-
-Set ANSIBLE_HOME in your environment (and .bashrc / .profile):
-
-```
-    [tpa]$ export ANSIBLE_HOME=/path/to/ansibledir
-```
-
-Ansible creates retry files which can be used to retry commands when a playbook fails and retry_files_enabled is True (the default). This is configured in TPA_DIR/ansible.cfg and is set by default to `retry_files_save_path = ~/.ansible-retry`
-
-Now you should be able to run ./ansible/ansible from your local copy of the TPA repository. 
-The following simple tests should succeed if Ansible has been installed correctly:
-
-```
-    [tpa]$ $TPA_DIR/ansible/ansible localhost -m ping
-    [tpa]$ $TPA_DIR/ansible/ansible localhost -c ssh -a "id"
-```
-
-[The Ansible installation docs](http://docs.ansible.com/ansible/intro_installation.html)
-have more details about running from a source checkout, but the steps above should be all you need to get started.
-
-------
-
-
-
-SELinux known issue
--------------------
-
-A bug with virtualenv on some versions of a RHEL derivative host (RHEL and CentOS) can mean this error is generated from ansible:
-"Aborting, target uses selinux but python bindings (libselinux-python) aren't installed!"
-
-A workaround is to copy selinux package into the virtual environment: 
-
-```
-    [tpa]$ cp -rp /usr/lib64/python2.7/site-packages/selinux \
-    ~/ansible-python/lib/python2.7/site-packages
-```
-
-Help
-----
-Write to tpa@2ndQuadrant.com for help with Ansible.
+Write to tpa@2ndQuadrant.com for help.
 
 ------
 
