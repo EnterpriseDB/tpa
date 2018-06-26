@@ -29,8 +29,8 @@ cluster_name=$(basename $cluster)
 
 trap "rm -rf $cluster" ERR
 
-instances=12
-hostnames=($($libdir/hostnames $instances))
+instances=8
+hostnames=($($libdir/hostnames $((instances+1))))
 
 cat > $cluster/config.yml <<CONFIG
 ---
@@ -63,24 +63,6 @@ instance_defaults:
 
 instances:
   - node: 1
-    Name: ${hostnames[0]}
-    backup: ${hostnames[10]}
-    volumes:
-      - device_name: root
-        volume_type: gp2
-        volume_size: 32
-      - device_name: /dev/xvdb
-        volume_type: gp2
-        volume_size: 64
-        vars:
-          volume_for: postgres_data
-    role:
-      - primary
-      - bdr
-    vars:
-      bdr_node_group: $cluster_name
-
-  - node: 2
     Name: ${hostnames[1]}
     volumes:
       - device_name: root
@@ -97,8 +79,25 @@ instances:
     vars:
       bdr_node_group: $cluster_name
 
-  - node: 3
+  - node: 2
     Name: ${hostnames[2]}
+    volumes:
+      - device_name: root
+        volume_type: gp2
+        volume_size: 32
+      - device_name: /dev/xvdb
+        volume_type: gp2
+        volume_size: 64
+        vars:
+          volume_for: postgres_data
+    role:
+      - primary
+      - bdr
+    vars:
+      bdr_node_group: $cluster_name
+
+  - node: 3
+    Name: ${hostnames[3]}
     backup: ${hostnames[11]}
     volumes:
       - device_name: root
@@ -116,7 +115,7 @@ instances:
       bdr_node_group: $cluster_name
 
   - node: 4
-    Name: ${hostnames[3]}
+    Name: ${hostnames[4]}
     volumes:
       - device_name: root
         volume_type: gp2
@@ -133,8 +132,9 @@ instances:
       bdr_node_group: $cluster_name
 
   - node: 5
-    Name: ${hostnames[4]}
-    upstream: ${hostnames[0]}
+    Name: ${hostnames[5]}
+    upstream: ${hostnames[1]}
+    backup: ${hostnames[6]}
     volumes:
       - device_name: root
         volume_type: gp2
@@ -149,54 +149,30 @@ instances:
       - bdr
 
   - node: 6
-    Name: ${hostnames[5]}
-    upstream: ${hostnames[1]}
+    Name: ${hostnames[6]}
     volumes:
       - device_name: root
         volume_type: gp2
         volume_size: 32
       - device_name: /dev/xvdb
         volume_type: gp2
-        volume_size: 64
+        volume_size: 128
         vars:
-          volume_for: postgres_data
+          volume_for: barman_data
     role:
-      - replica
-      - bdr
+      - barman
 
   - node: 7
-    Name: ${hostnames[6]}
-    upstream: ${hostnames[2]}
+    Name: ${hostnames[7]}
     volumes:
       - device_name: root
         volume_type: gp2
         volume_size: 32
-      - device_name: /dev/xvdb
-        volume_type: gp2
-        volume_size: 64
-        vars:
-          volume_for: postgres_data
     role:
-      - replica
-      - bdr
+      - pgbouncer
+      - haproxy
 
   - node: 8
-    Name: ${hostnames[7]}
-    upstream: ${hostnames[3]}
-    volumes:
-      - device_name: root
-        volume_type: gp2
-        volume_size: 32
-      - device_name: /dev/xvdb
-        volume_type: gp2
-        volume_size: 64
-        vars:
-          volume_for: postgres_data
-    role:
-      - replica
-      - bdr
-
-  - node: 9
     Name: ${hostnames[8]}
     volumes:
       - device_name: root
@@ -205,44 +181,6 @@ instances:
     role:
       - pgbouncer
       - haproxy
-
-  - node: 10
-    Name: ${hostnames[9]}
-    volumes:
-      - device_name: root
-        volume_type: gp2
-        volume_size: 32
-    role:
-      - pgbouncer
-      - haproxy
-
-  - node: 11
-    Name: ${hostnames[10]}
-    volumes:
-      - device_name: root
-        volume_type: gp2
-        volume_size: 32
-      - device_name: /dev/xvdb
-        volume_type: gp2
-        volume_size: 128
-        vars:
-          volume_for: barman_data
-    role:
-      - barman
-
-  - node: 12
-    Name: ${hostnames[11]}
-    volumes:
-      - device_name: root
-        volume_type: gp2
-        volume_size: 32
-      - device_name: /dev/xvdb
-        volume_type: gp2
-        volume_size: 128
-        vars:
-          volume_for: barman_data
-    role:
-      - barman
 CONFIG
 
 ln -sf $archdir/deploy.yml $cluster
