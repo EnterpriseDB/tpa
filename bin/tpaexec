@@ -16,7 +16,7 @@ error() {
 
 TOP=/opt/2ndQuadrant/TPA
 if [[ -z "${TPA_DIR:-}" ]]; then
-    SRC=$(dirname $0)/..
+    SRC=$(dirname $(readlink $0))/..
     type realpath &>/dev/null && SRC=$(realpath $SRC)
     if [[ -d $SRC/roles ]]; then
         TOP=$SRC
