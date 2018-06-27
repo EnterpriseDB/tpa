@@ -1,9 +1,9 @@
+Jinja2
+PyYAML
+cryptography
+python-dateutil
+netaddr
+six
+awscli>=1.10.64
 boto3>=1.5.31
 boto>=2.48.0
-Jinja2>=2.8
-pycrypto>=2.6.1
-python-dateutil>=2.5.3
-PyYAML>=3.11
-six>=1.10.0
-awscli>=1.10.64
-netaddr>=0.7.18
