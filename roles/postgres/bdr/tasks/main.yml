@@ -190,7 +190,7 @@
 
 - name: Join BDR node groups and wait for completion
   postgresql_query:
-    conninfo: '{{ hostvars[node].bdr_node_dsn }}'
+    conninfo: '{{ hostvars[item].bdr_node_dsn }}'
     queries:
       - text: SELECT bdr.join_node_group(join_target_dsn := %s)
         args:
@@ -198,10 +198,8 @@
       - text: SELECT bdr.wait_for_join_completion()
   with_items: >
     {{ groups[bdr_node_group][1:] }}
-  loop_control:
-    loop_var: node
   when:
     inventory_hostname == groups[bdr_node_group][0] and
-    hostvars[node].node_group_id.rowcount == 0
+    hostvars[item].node_group_id.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
