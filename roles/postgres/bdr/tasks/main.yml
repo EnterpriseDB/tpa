@@ -113,7 +113,10 @@
 #
 # Other hosts:
 #     bdr.join_node_group(join_target_dsn := '…')
-#     bdr.wait_for_join_completion()
+#     -- bdr.wait_for_join_completion() is no longer required because
+#     -- bdr.join_node_group() will wait for completion by default, but
+#     -- it does no harm to leave it in (it will return immediately if
+#     -- the join has completed).
 
 - assert:
     msg: "XXX BDR3 is the only version we currently support"
