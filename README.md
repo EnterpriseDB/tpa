@@ -48,7 +48,7 @@ replicas), and do something like this:
 # Generate an initial configuration for the cluster. This command
 # accepts many options. See 'tpaexec info architectures/M1' and
 # 'tpaexec info configure-options' for more details.
-tpaexec generate-config clustername --architecture M1
+tpaexec configure clustername --architecture M1
 
 # You can examine the generated clustername/config.yml here, and edit it
 # if you want to, or just stick with the defaults.

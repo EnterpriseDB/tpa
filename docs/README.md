@@ -14,7 +14,7 @@ XXX
 
 ### Configuration
 
-XXX generate-config
+XXX tpaexec configure|generate-config
 
 [Customising the cluster configuration](TPAexec-Postgres_configuration_and_other_customisations.md)
 

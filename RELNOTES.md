@@ -7,7 +7,7 @@ Major changes:
 - Added support for deployment architectures.
   See ``tpaexec info architectures`` for details.
 
-- Added ``tpaexec generate-config`` command that takes an architecture
+- Added ``tpaexec configure`` command that takes an architecture
   name and various options and generates config.yml and deploy.yml for
   a new cluster.
 
@@ -30,7 +30,7 @@ Other notable changes:
 - Initial LXD platform support
 - Make sure coredumps are generated properly
 - Support postgres/repmgr/barman package version selection (6e904c8)
-  via ``tpaexec generate-config … --postgres-package version``
+  via ``tpaexec configure … --postgres-package version``
 - Deprecate ec2_ami_user and cluster_ssh_user in favour of setting
   "vars: ansible_user: xxx" in instance_defaults (a9c30e1)
 - Make cluster_tags optional. Owner is now automatically set to the

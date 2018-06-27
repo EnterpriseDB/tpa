@@ -162,7 +162,7 @@ help() {
 Available help topics:
     info
     selftest
-    generate-config, configure-options
+    configure, generate-config, configure-options
     provision, deprovision
     playbook, deploy, test,
     cmd, ping
@@ -210,7 +210,7 @@ SELFTEST
 
         *config*)
             cat <<CONFIG
-Command: tpaexec generate-config clustername --architecture archname …
+Command: tpaexec configure clustername --architecture archname …
 
 Creates a clustername directory containing config.yml and deploy.yml
 according to the selected architecture. After this step, you can run
@@ -218,7 +218,7 @@ according to the selected architecture. After this step, you can run
 
 For more information, see:
     tpaexec info architectures
-    tpaexec info architectures/archname
+    tpaexec info architectures/<archname>
 CONFIG
             ;;
 
