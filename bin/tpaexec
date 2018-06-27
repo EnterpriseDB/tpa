@@ -131,7 +131,7 @@ rehydrate() {
 info() {
     version
     echo TPA_DIR=$TPA_DIR
-    if [[ -n "$ANSIBLE_HOME" ]]; then
+    if [[ -n "${ANSIBLE_HOME:-}" ]]; then
         echo ANSIBLE_HOME=$ANSIBLE_HOME
     fi
 }
