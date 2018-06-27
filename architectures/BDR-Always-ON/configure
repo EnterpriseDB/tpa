@@ -45,6 +45,7 @@ ec2_vpc:
 cluster_vars: $($libdir/cluster-vars)
   cluster_network: $subnet
   tpa_2q_repo: internal-snapshot
+  postgres_coredump_filter: 0xff
 
 instance_defaults:
     type: $instance_type
