@@ -77,7 +77,6 @@ Now, as a non-root user, add the following to your .bashrc or
 .profile (or equivalent shell startup configuration):
 
     [tpa]$ export PATH=$PATH:/opt/2ndQuadrant/TPA/bin
-    [tpa]$ export ANSIBLE_HOME=/opt/2ndQuadrant/TPA/tpa-virtualenv
 
 To use TPAexec, you must also activate the virtualenv you created above.
 You may run this command either by hand (when you need to use TPAexec),
