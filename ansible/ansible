@@ -52,7 +52,7 @@ cmd=$(basename $0)
 if [[ -n "${ANSIBLE_HOME:-}" ]]; then
     ansidir=$ANSIBLE_HOME
     if [ ! -x "$ansidir/bin/ansible" ]; then
-        echo "Can't find $ansidir/bin/ansible" 1>&2
+        echo "ERROR: can't find $ansidir/bin/ansible" 1>&2
         exit 1
     fi
 
