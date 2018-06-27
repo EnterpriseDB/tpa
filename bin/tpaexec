@@ -40,7 +40,7 @@ version () {
     else
         VERSION=$(cd $TPA_DIR && git describe)
     fi
-    echo "TPA $VERSION"
+    echo "# TPA $VERSION"
 }
 
 configure() {
@@ -132,7 +132,16 @@ info() {
     version
     echo TPA_DIR=$TPA_DIR
     if [[ -n "${ANSIBLE_HOME:-}" ]]; then
-        echo ANSIBLE_HOME=$ANSIBLE_HOME
+        echo -n ANSIBLE_HOME=$ANSIBLE_HOME
+        if [[ -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
+            echo " (valid)"
+        else
+            echo " (invalid)"
+        fi
+    elif command -v ansible &>/dev/null; then
+        echo ANSIBLE=$(command -v ansible)
+    else
+        error "can't find ansible via ANSIBLE_HOME or in PATH"
     fi
 }
 
