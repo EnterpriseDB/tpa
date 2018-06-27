@@ -173,28 +173,35 @@
         args:
           - "{{ bdr_node_group }}"
   when:
-    groups[bdr_node_group]|first == inventory_hostname
-    and node_group_id.rowcount == 0
+    inventory_hostname == groups[bdr_node_group][0] and
+    node_group_id.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
 
-# And the remaining hosts join the group.
+# The remaining hosts join the group… but they must do so one at a time,
+# because BDR does not support concurrent group joins (not in version 3,
+# nor in any earlier versions).
+#
+# What we would like to do here is to set «serial: 1» on the query task,
+# so that we wait for the task to finish on one host before moving on to
+# the next host. But serial is not supported as a task attribute, so we
+# have to (write a strategy plugin or) use a loop to get the equivalent
+# serial behaviour.
 
 - name: Join BDR node groups and wait for completion
   postgresql_query:
-    conninfo: '{{ bdr_node_dsn }}'
+    conninfo: '{{ hostvars[node].bdr_node_dsn }}'
     queries:
       - text: SELECT bdr.join_node_group(join_target_dsn := %s)
         args:
-          - "{{ first_bdr_node_dsn }}"
+          - "{{ bdr_node_dsn }}"
       - text: SELECT bdr.wait_for_join_completion()
+  with_items: >
+    {{ groups[bdr_node_group][1:] }}
+  loop_control:
+    loop_var: node
   when:
-    groups[bdr_node_group]|first != inventory_hostname
-    and node_group_id.rowcount == 0
-  vars:
-    first: >-
-      {{ groups[bdr_node_group]|first }}
-    first_bdr_node_dsn: >-
-      {{ hostvars[first].get('bdr_node_dsn') }}
+    inventory_hostname == groups[bdr_node_group][0] and
+    hostvars[node].node_group_id.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
