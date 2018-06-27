@@ -53,7 +53,7 @@ if [[ -n "${ANSIBLE_HOME:-}" ]]; then
     ansidir=$ANSIBLE_HOME
     if [ ! -x "$ansidir/bin/ansible" ]; then
         echo "Can't find $ansidir/bin/ansible" 1>&2
-        exit
+        exit 1
     fi
 
     export PYTHONPATH=$ansidir/lib:${PYTHONPATH:-""}
