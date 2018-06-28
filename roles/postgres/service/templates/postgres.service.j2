@@ -13,6 +13,7 @@ StandardOutput=syslog
 ExecStart={{ postgres_bin_dir }}/postmaster -D ${PGDATA}
 {% if postgres_coredump_filter is defined %}
 ExecStartPost=/bin/bash -c 'echo {{ postgres_coredump_filter }} > /proc/$MAINPID/coredump_filter'
+PermissionsStartOnly=true
 {% endif %}
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=mixed
