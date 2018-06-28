@@ -323,7 +323,7 @@ esac
 # We support some command aliases as a convenience.
 
 case "$command" in
-    generate-config|config)
+    config)
         command=configure
         ;;
     command|adhoc|cmd)
