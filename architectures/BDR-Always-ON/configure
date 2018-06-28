@@ -49,11 +49,11 @@ cluster_vars: $($libdir/cluster-vars)
   repmgr_failover: manual
 
 instance_defaults:
-    type: $instance_type
-    region: $region
-    subnet: $subnet
-    vars:
-      ansible_user: $image_user
+  type: $instance_type
+  region: $region
+  subnet: $subnet
+  vars:
+    ansible_user: $image_user
 
 instances:
   - node: 1

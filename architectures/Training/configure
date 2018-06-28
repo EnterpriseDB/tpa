@@ -59,13 +59,13 @@ ec2_vpc:
   Name: Test
 
 instance_defaults:
-    type: $instance_type
-    region: $region
-    subnet: $subnet
-    role:
-      - primary
-    vars:
-      ansible_user: $image_user
+  type: $instance_type
+  region: $region
+  subnet: $subnet
+  role:
+    - primary
+  vars:
+    ansible_user: $image_user
 
 instances:
 PREAMBLE
