@@ -1,7 +1,7 @@
 ---
 title: TPAexec generate configuration guide
-version: 1.0
-date: 27/June/2018
+version: 1.1
+date: 28/June/2018
 author: Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 copyright-years: 2014-2018
@@ -15,7 +15,7 @@ TPAexec generate configuration guide
 
 ### tpaexec configure
 
-To be able to provision, deploy & rehydrate servers, **TPAexec** requires a pair of config files describing the instances to be present in a cluster directory. In order to create these, it is suggested that the **tpaexec configure** utility is used - it will create a **config.yml** which can then be edited, and a **deploy.yml** which is *not* designed to be edited.
+To be able to provision, deploy & rehydrate servers, **TPAexec** requires a pair of config files describing the instances to be present in a cluster directory. In order to create these, it is suggested that the **tpaexec configure** utility is used - it will create a **config.yml** which can then be edited, and a **deploy.yml** which is *not* designed to be edited. 
 
 Before using this, it is suggested that you create a "clusters" directory into which individual cluster config directories can be created. 
 
@@ -27,7 +27,13 @@ Before using this, it is suggested that you create a "clusters" directory into w
 ### All current configuration options:
 
 ```
-tpaexec configure <clustername> --architecture <arch> --platform <platform> --region <region> --[subnet <CIDR> | --subnet-pattern <pattern>] --instance-type <instance type> [--distribution [RedHat|Debian|Ubuntu] --minimal | --os [Debian-minimal|RedHat-minimal|Ubuntu-minimal]] --postgres-version [10|9.6] --postgres-package-version --repmgr-package-version --barman-package-version --hostnames-from <filename> --hostnames-pattern <pattern>
+tpaexec configure <clustername> --architecture <arch> --platform <platform> 
+--region <region> --[subnet <CIDR> | --subnet-pattern <pattern>] 
+--instance-type <instance type> [--distribution [RedHat|Debian|Ubuntu] 
+--minimal | --os [Debian-minimal|RedHat-minimal|Ubuntu-minimal]] 
+--postgres-version [10|9.6] --postgres-package-version 
+--repmgr-package-version --barman-package-version 
+--hostnames-from <filename> --hostnames-pattern <pattern>
 ```
 
 ```
@@ -41,35 +47,43 @@ tpaexec configure <clustername> --architecture <arch> --platform <platform> --re
 ```
 --architecture <arch> - M1|BDR-Always-ON|Training
 M1: Postgres with streaming replication (M1 is single master - one primary, n replicas).
-BDR-Always-ON: Bi Directional Replication in an Always-ON configuration (2ndQuadrant internal use only, still in development, and requires access to internal repositories)
-Training: Creates clusters for 2ndQuadrant training sessions (Designed for 2ndQuadrant use; unsupported)
+BDR-Always-ON: Bi Directional Replication in an Always-ON configuration 
+   (2ndQuadrant internal use only, still in development, and requires access 
+to internal repositories)
+Training: Creates clusters for 2ndQuadrant training sessions (Designed for
+   2ndQuadrant use; unsupported)
 ```
 ### Platform options
 
 ```
 --platform <platform> - bare|aws|lxd
-bare: Servers accessible via SSH (e.g., bare metal, or already-provisioned servers on any cloud provider).
+bare: Servers accessible via SSH (e.g., bare metal, or already-provisioned 
+   servers on any cloud provider).
 aws: AWS EC2 instances (This is the default, if --platform not present)
-lxd: lxd containers (Unsupported, still in development)
+lxd: lxd containers (Unsupported; still in development)
 ```
 
 ```
---region <region> - AWS region (Defaults to eu-west-1). * Specific to --platform aws
+--region <region> - AWS region (Defaults to eu-west-1). 
+* Specific to --platform aws
 ```
 
 ```
---instance-type <instance type> - AWS instance type (Defaults to t2.micro). * Specific to --platform aws
+--instance-type <instance type> - AWS instance type (Defaults to t2.micro). 
+* Specific to --platform aws
 ```
 ### Subnet selection
 
 ```
---subnet <CIDR> - By default, each cluster is assigned a random /28 subnet under 10.33/16,
-but depending on the architecture, there may be one or more subnets, and each subnet may be anywhere between a /24 and a /29.
+--subnet <CIDR> - By default, each cluster is assigned a random /28 subnet 
+   under 10.33/16, but depending on the architecture, there may be one or more 
+   subnets, and each subnet may be anywhere between a /24 and a /29.
 ```
 
 ```
---subnet-pattern <pattern> - You may instead specify ``--subnet-pattern 192.0.x.x`` to generate
-random subnets (as many as required by the architecture) matching the given pattern.
+--subnet-pattern <pattern> - You may instead specify --subnet-pattern 192.0.x.x 
+   to generate random subnets (as many as required by the architecture) matching 
+   the given pattern.
 ```
 ### Distribution
 
@@ -78,19 +92,23 @@ random subnets (as many as required by the architecture) matching the given patt
 ```
 
 ```
---minimal - Use the stock distribution images instead of TPA images that have Postgres and other
-software preinstalled.
+--minimal - Use the stock distribution images instead of TPA images that have 
+   Postgres and other software preinstalled.
 ```
 
 ```
---os [RedHat-minimal|Debian-minimal|Ubuntu-minimal] - this option can be used instead of the previous 2 options (--distribution and --minimal)
+--os [RedHat-minimal|Debian-minimal|Ubuntu-minimal] - this option can be used 
+   instead of the previous 2 options (--distribution and --minimal)
 ```
 ### Software versions.
 
-By default, we always install the latest version of every package. This is usually the desired behaviour, but in some testing scenarios, it may be necessary to select specific package versions.
+By default, we always install the latest version of every package. This is usually 
+the desired behaviour, but in some testing scenarios, it may be necessary to 
+select specific package versions.
 
 ```
---postgres-version [10|9.6] - 10 is the default, 9.6 is also supported. Versions 9.4 and 9.5 are no longer actively maintained.
+--postgres-version [10|9.6] - 10 is the default, 9.6 is also supported. 
+   Versions 9.4 and 9.5 are no longer actively maintained.
 ```
 
 ```
@@ -105,10 +123,15 @@ as it needs from a pre-approved list of several dozen names. This should
 be enough for most clusters.
 
 ```
---hostnames-from <filename> - select names from a different list (e.g., if you need more names than are available in the canned list). The file must contain one hostname per line.
+--hostnames-from <filename> - select names from a different list 
+   (e.g., if you need more names than are available in the canned list). 
+   The file must contain one hostname per line.
 ```
 ```
---hostnames-pattern <pattern> - restrict hostnames to those matching the egrep-syntax pattern. If you choose to do this, you must ensure that the pattern matches only valid hostnames (``[a-zA-Z0-9-]``) and that it finds a sufficient number thereof.
+--hostnames-pattern <pattern> - restrict hostnames to those matching 
+   the egrep-syntax pattern. If you choose to do this, you must ensure that 
+   the pattern matches only valid hostnames (``[a-zA-Z0-9-]``) and that it 
+   finds a sufficient number thereof.
 ```
 
 ------
@@ -163,3 +186,4 @@ instances:
 ```
 
 [^Information Classification: Confidential]: [ISP008] Information Classification Policy
+

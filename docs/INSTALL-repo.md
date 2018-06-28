@@ -1,7 +1,7 @@
 ---
-title: TPAexec - Detailed Installation guide
-version: 1.1
-date: 26/June/2018
+title: TPAexec - Installation guide from repo
+version: 1.2
+date: 28/June/2018
 author: Abhijit Menon-Sen, Craig Alsop
 copyright-holder: 2ndQuadrant Limited
 toc: true
@@ -114,3 +114,4 @@ Write to tpa@2ndQuadrant.com for help.
 ------
 
 [^Information Classification: Internal]: [ISP008] Information Classification Policy
+
