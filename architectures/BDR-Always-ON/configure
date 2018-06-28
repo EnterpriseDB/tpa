@@ -43,6 +43,7 @@ ec2_vpc:
   Name: Test
 
 cluster_rules:
+  - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
   - {proto: tcp, from_port: 5432, to_port: 5432, cidr_ip: $subnet}
 
 cluster_vars: $($libdir/cluster-vars)
