@@ -15,7 +15,7 @@ TPAexec generate configuration guide
 
 ### tpaexec configure
 
-To be able to provision, deploy & rehydrate servers, **TPAexec** requires a pair of config files describing the instances to be present in a cluster directory. In order to create these, it is suggested that the **tpaexec configure** utility is used - it will create a **config.yml** which can then be edited, and a **deploy.yml** which is *not* designed to be edited. ( The configure utility can be called via **tpaexec configure** *or* **tpaexec generate-config** )
+To be able to provision, deploy & rehydrate servers, **TPAexec** requires a pair of config files describing the instances to be present in a cluster directory. In order to create these, it is suggested that the **tpaexec configure** utility is used - it will create a **config.yml** which can then be edited, and a **deploy.yml** which is *not* designed to be edited.
 
 Before using this, it is suggested that you create a "clusters" directory into which individual cluster config directories can be created. 
 
