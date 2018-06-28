@@ -42,6 +42,9 @@ ec2_ami:
 ec2_vpc:
   Name: Test
 
+cluster_rules:
+  - {proto: tcp, from_port: 5432, to_port: 5432, cidr_ip: $subnet}
+
 cluster_vars: $($libdir/cluster-vars)
   cluster_network: $subnet
   tpa_2q_repo: internal-snapshot
