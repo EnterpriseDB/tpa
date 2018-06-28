@@ -162,7 +162,7 @@ help() {
 Available help topics:
     info
     selftest
-    configure, generate-config, configure-options
+    configure, configure-options
     provision, deprovision
     playbook, deploy, test,
     cmd, ping
