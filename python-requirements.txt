@@ -2,6 +2,7 @@ Jinja2
 PyYAML
 cryptography
 python-dateutil
+setuptools
 netaddr
 six
 awscli>=1.10.64
