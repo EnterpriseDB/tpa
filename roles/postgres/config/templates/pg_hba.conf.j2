@@ -4,14 +4,17 @@
 
 # TYPE  DATABASE        USER            ADDRESS                 METHOD
 local   all             postgres                                peer
-local   all             all                                     trust
-host    all             all             127.0.0.1/32            trust
-host    all             all             ::1/128                 trust
-{% for n in cluster_networks|default([]) %}
-host    postgres        barman          {{ n }}   md5
-host    repmgr          repmgr          {{ n }}   md5
-host    replication     all             {{ n }}   md5
-host    all             all             {{ n }}   md5
+local   all             all                                     peer
+local   replication     all                                     peer
+host    all             all             127.0.0.1/32            md5
+host    all             all             ::1/128                 md5
+host    replication     all             127.0.0.1/32            md5
+host    replication     all             ::1/128                 md5
+{% for net in cluster_networks|default([]) %}
+host    postgres        barman          {{ net }}   md5
+host    repmgr          repmgr          {{ net }}   md5
+host    replication     all             {{ net }}   md5
+host    all             all             {{ net }}   md5
 {% else %}
 {%   for h in groups[cluster_tag] %}
 {%     set role=hostvars[h].get('role', []) %}
@@ -27,10 +30,8 @@ host    all             all             {{ n }}   md5
 {{type}} replication streaming_barman {{ addr }} md5
 {%     endif %}
 {%     if 'postgres' in role %}
-{{type}} repmgr repmgr {{ addr }} md5
-{{type}} replication repmgr {{ addr }} md5
-{{type}} replication postgres {{ addr }} md5
 {{type}} all all {{ addr }} md5
+{{type}} replication all {{ addr }} md5
 {%     endif %}
 {%   endfor %}
 {% endfor %}
