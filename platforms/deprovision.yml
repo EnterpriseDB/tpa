@@ -19,3 +19,4 @@
         - common
       loop_control:
         loop_var: platform
+      tags: always
