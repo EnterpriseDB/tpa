@@ -14,23 +14,28 @@ host    replication     all             {{ n }}   md5
 host    all             all             {{ n }}   md5
 {% else %}
 {%   for h in groups[cluster_tag] %}
-# {{ h }}
-{%     if 'barman' in hostvars[h].get('role',[]) %}
-host    postgres        barman          {{ hostvars[h].ip_address }}/32 md5
-host    replication     streaming_barman {{ hostvars[h].ip_address }}/32 md5
+{%     set role=hostvars[h].get('role', []) %}
+{%     set addr=hostvars[h].ip_address %}
+{%     set type='hostssl' %}
+{%     if addr == hostvars[h].get('openvpn_ip', '') %}
+{%       set type='host' %}
 {%     endif %}
-{%     if 'postgres' in hostvars[h].get('role',[]) %}
-host    repmgr          repmgr          {{ hostvars[h].ip_address }}/32 md5
-host    replication     repmgr          {{ hostvars[h].ip_address }}/32 md5
-host    replication     postgres        {{ hostvars[h].ip_address }}/32 md5
-{%       if vpn_network is defined %}
-host    all             all             {{ hostvars[h].ip_address }}/32 md5
-{%       endif %}
+{%     set addr=addr+'/32' %}
+# {{ h }}
+{%     if 'barman' in role %}
+{{type}} postgres barman {{ addr }} md5
+{{type}} replication streaming_barman {{ addr }} md5
+{%     endif %}
+{%     if 'postgres' in role %}
+{{type}} repmgr repmgr {{ addr }} md5
+{{type}} replication repmgr {{ addr }} md5
+{{type}} replication postgres {{ addr }} md5
+{{type}} all all {{ addr }} md5
 {%     endif %}
 {%   endfor %}
 {% endfor %}
-hostssl all             all             0.0.0.0/0               md5
 
 {% for l in postgres_hba_settings %}
 {{l}}
 {% endfor %}
+hostssl all all 0.0.0.0/0 md5
