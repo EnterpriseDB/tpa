@@ -32,13 +32,6 @@
         list|count == 1
   with_items: "{{ upstream_references }}"
 
-- name: Ensure cluster_networks/cluster_network is set
-  assert:
-    msg: "Please define cluster_networks (list) or cluster_network (scalar)"
-    that:
-      - ('cluster_network' in cluster_vars or
-        'cluster_networks' in cluster_vars)
-
 - name: Convert cluster_network to cluster_networks
   set_fact:
     cluster_vars: "{{

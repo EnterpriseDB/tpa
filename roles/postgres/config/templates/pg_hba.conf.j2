@@ -7,11 +7,27 @@ local   all             postgres                                peer
 local   all             all                                     trust
 host    all             all             127.0.0.1/32            trust
 host    all             all             ::1/128                 trust
-{% for n in cluster_networks|default([cluster_network]) %}
+{% for n in cluster_networks|default([]) %}
 host    postgres        barman          {{ n }}   md5
 host    repmgr          repmgr          {{ n }}   md5
 host    replication     all             {{ n }}   md5
 host    all             all             {{ n }}   md5
+{% else %}
+{%   for h in groups[cluster_tag] %}
+# {{ h }}
+{%     if 'barman' in hostvars[h].get('role',[]) %}
+host    postgres        barman          {{ hostvars[h].ip_address }}/32 md5
+host    replication     streaming_barman {{ hostvars[h].ip_address }}/32 md5
+{%     endif %}
+{%     if 'postgres' in hostvars[h].get('role',[]) %}
+host    repmgr          repmgr          {{ hostvars[h].ip_address }}/32 md5
+host    replication     repmgr          {{ hostvars[h].ip_address }}/32 md5
+host    replication     postgres        {{ hostvars[h].ip_address }}/32 md5
+{%       if vpn_network is defined %}
+host    all             all             {{ hostvars[h].ip_address }}/32 md5
+{%       endif %}
+{%     endif %}
+{%   endfor %}
 {% endfor %}
 hostssl all             all             0.0.0.0/0               md5
 
