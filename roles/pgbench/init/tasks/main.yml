@@ -3,18 +3,12 @@
 - name: Run pgbench -i -s {{ pgbench_scale_factor }}
   command: >
     {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} -i -s {{ pgbench_scale_factor }} postgres
-  register: pgbench_init_output
+  register: pgbench_init
   become_user: "{{ postgres_user }}"
   become: true
  
-- name: Write pgbench init output to {{ output }}
-  local_action:
-    module: copy
-    dest: "{{ cluster }}/{{ output }}"
-    content: |
-      {{ pgbench_init_output.stdout }}
+- include_role: name=test tasks_from=output.yml
   vars:
-    now: >-
-      {{ lookup('pipe', 'date +%s') }}
-    output: >-
-      test/{{ inventory_hostname }}/pgbench-init.{{ now }}.txt
+    output_file: pgbench-init.txt
+    content: |
+      {{ pgbench_init.stdout }}

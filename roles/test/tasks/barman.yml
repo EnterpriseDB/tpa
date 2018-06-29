@@ -7,17 +7,11 @@
   become_user: "{{ barman_user }}"
   become: yes
 
-- name: Write barman check output to {{ output }}
-  local_action:
-    module: copy
-    dest: "{{ cluster }}/{{ output }}"
+- include_tasks: output.yml
+  vars:
+    output_file: barman-check.txt
     content: |
       {{ barman_check.stdout }}
-  vars:
-    now: >-
-      {{ lookup('pipe', 'date +%s') }}
-    output: >-
-      test/{{ inventory_hostname }}/barman-check.{{ now }}.txt
 
 - name: Run barman diagnose
   command: barman diagnose
@@ -26,17 +20,11 @@
   become_user: "{{ barman_user }}"
   become: yes
 
-- name: Write barman diagnose output to {{ output }}
-  local_action:
-    module: copy
-    dest: "{{ cluster }}/{{ output }}"
-    content: |
-      {{ barman_diagnose.stdout|from_json|to_nice_json }}
+- include_tasks: output.yml
   vars:
-    now: >-
-      {{ lookup('pipe', 'date +%s') }}
-    output: >-
-      test/{{ inventory_hostname }}/barman-diagnose.{{ now }}.txt
+    output_file: barman-diagnose.txt
+    content: |
+      {{ barman_diagnose.stdout }}
 
 - name: Fail if either of the above tasks failed
   fail:

@@ -8,6 +8,7 @@
   with_items:
     - tmp
     - keys
+    - test
     - certs
     - vault
     - hostkeys

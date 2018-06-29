@@ -1,10 +1,19 @@
 ---
 
-- name: Ensure that test output directory exists locally
+- assert:
+    msg: "output_dir must be defined"
+    that: output_dir is defined
+
+- name: Ensure that each instance has an output subdirectory
   local_action:
     module: file
-    path: "{{ cluster }}/test/{{ inventory_hostname }}"
+    path: "{{ output_dir }}/{{ inventory_hostname }}"
     state: directory
+
+- include_tasks: postgres.yml
+  when: >
+    'postgres' in role
+  tags: postgres
 
 - include_tasks: barman.yml
   when: >

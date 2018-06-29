@@ -1,0 +1,18 @@
+---
+
+# This file is meant to be included directly from outside the test role.
+# It expects to be passed the name of an output_file and the text to
+# write to it (and expects output_dir to have been defined, to exist,
+# and to have subdirectories for each instance that invokes this).
+
+- assert:
+    that:
+      - output_dir is defined
+      - output_file is defined
+      - content is defined
+
+- name: Write pg_controldata output to {{ output_file }}
+  local_action:
+    module: copy
+    dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ output_file }}"
+    content: "{{ content }}"
