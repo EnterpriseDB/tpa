@@ -6,22 +6,52 @@ conninfo = "host={{ parent_inventory_hostname|default(inventory_hostname) }} por
 streaming_conninfo = "host={{ parent_inventory_hostname|default(inventory_hostname) }} port={{ postgres_port }} user=streaming_barman"
 streaming_archiver = on
 slot_name = barman
-
-backup_method = {{ barman_backup_method }}
-
-parallel_jobs = {{ barman_parallel_jobs }}
-
-{% if barman_backup_method == 'rsync' %}
-compression = {{ barman_compression }}
-reuse_backup = {{ barman_reuse_backup }}
+{% if _barman_log_file != default_barman_log_file %}
+log_file = {{ _barman_log_file }}
+{% endif %}
+{% if _barman_backup_method != default_barman_backup_method %}
+backup_method = {{ _barman_backup_method }}
+{% endif %}
+{% if _barman_backup_method == 'rsync' %}
+{%   if _barman_compression != default_barman_compression %}
+compression = {{ _barman_compression }}
+{%   endif %}
+{%   if _barman_reuse_backup != default_barman_reuse_backup %}
+reuse_backup = {{ _barman_reuse_backup }}
+{%   endif %}
 {% else %}
 reuse_backup = off
 {% endif %}
-
+{% if _barman_parallel_jobs|int != default_barman_parallel_jobs %}
+parallel_jobs={{ _barman_parallel_jobs }}
+{% endif %}
+{% if _barman_backup_options != default_barman_backup_options %}
+backup_options = {{ _barman_backup_options }}
+{% endif %}
+{% if _barman_immediate_checkpoint != default_barman_immediate_checkpoint %}
+immediate_checkpoint = {{ _barman_immediate_checkpoint }}
+{% endif %}
+{% if _barman_network_compression != default_barman_network_compression %}
+network_compression = {{ _barman_network_compression }}
+{% endif %}
+{% if _barman_basebackup_retry_times|int != default_barman_basebackup_retry_times %}
+basebackup_retry_times = {{ _barman_basebackup_retry_times }}
+{% endif %}
+{% if _barman_basebackup_retry_sleep|int != default_barman_basebackup_retry_sleep %}
+basebackup_retry_sleep = {{ _barman_basebackup_retry_sleep }}
+{% endif %}
+{% if _barman_minimum_redundancy|int != default_barman_minimum_redundancy %}
+minimum_redundancy = {{ _barman_minimum_redundancy }}
+{% endif %}
+{% if _barman_retention_policy != default_barman_retention_policy %}
+retention_policy = {{ _barman_retention_policy }}
+{% endif %}
+{% if _barman_last_backup_maximum_age != default_barman_last_backup_maximum_age %}
+last_backup_maximum_age = {{ _barman_last_backup_maximum_age }}
+{% endif %}
 {% if barman_pre_archive_retry_script is defined %}
 pre_archive_retry_script = "{{ barman_pre_archive_retry_script }}"
 {% endif %}
-
 {% if barman_post_backup_retry_script is defined %}
 post_backup_retry_script = "{{ barman_post_backup_retry_script }}"
 {% endif %}

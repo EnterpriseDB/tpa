@@ -2,26 +2,23 @@
 
 ## Barman server-wide defaults (/etc/barman.conf)
 
-barman_log_file: /var/log/barman/barman.log
+default_barman_log_file: /var/log/barman/barman.log
 
-## Per-server configuration (/etc/barman.d/servername.conf)
+default_barman_backup_method: rsync
+default_barman_parallel_jobs: 1
+default_barman_reuse_backup: link
+default_barman_backup_options: concurrent_backup
+default_barman_immediate_checkpoint: false
 
-barman_backup_method: rsync
+default_barman_compression: pigz
+default_barman_network_compression: false
 
-barman_parallel_jobs: 1
+default_barman_basebackup_retry_times: 3
+default_barman_basebackup_retry_sleep: 30
 
-barman_compression: pigz
-barman_reuse_backup: link
-barman_backup_options: concurrent_backup
-
-barman_immediate_checkpoint: false
-barman_network_compression: false
-barman_basebackup_retry_times: 3
-barman_basebackup_retry_sleep: 30
-
-barman_minimum_redundancy: 3
-barman_retention_policy: RECOVERY WINDOW OF 4 WEEKS
-barman_last_backup_maximum_age: 1 WEEK
+default_barman_minimum_redundancy: 3
+default_barman_retention_policy: RECOVERY WINDOW OF 4 WEEKS
+default_barman_last_backup_maximum_age: 1 WEEK
 
 ## Automatic backup schedule
 

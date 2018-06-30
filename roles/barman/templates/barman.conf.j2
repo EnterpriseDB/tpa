@@ -2,38 +2,42 @@
 barman_home = {{ barman_home }}
 barman_user = {{ barman_user }}
 
-log_file = {{ barman_log_file }}
+log_file = {{ default_barman_log_file }}
 
-; Default compression level: possible values are None (default), bzip2, gzip, pigz, pygzip or pybzip2
-compression = {{ barman_compression }}
+; rsync or postgres
+backup_method = {{ default_barman_backup_method }}
+parallel_jobs = {{ default_barman_parallel_jobs }}
 
 ; Incremental backup support: possible values are off (default), link or copy
-reuse_backup = {{ barman_reuse_backup }}
+reuse_backup = {{ default_barman_reuse_backup }}
 
-; Minimum number of required backups (redundancy) - default 0
-minimum_redundancy = {{ barman_minimum_redundancy }}
+; Identify the standard behavior for backup operations: possible values are
+; exclusive_backup (default), concurrent_backup
+backup_options = {{ default_barman_backup_options }}
 
-; Global retention policy (REDUNDANCY or RECOVERY WINDOW) - default empty
-retention_policy = {{ barman_retention_policy }}
+; Immediate checkpoint for backup command - default false
+immediate_checkpoint = {{ default_barman_immediate_checkpoint }}
 
 ; Global bandwidth limit in KBPS - default 0 (meaning no limit)
 ;bandwidth_limit = 4000
 
-; Immediate checkpoint for backup command - default false
-immediate_checkpoint = {{ barman_immediate_checkpoint }}
+; Default compression level: possible values are None (default), bzip2, gzip, pigz, pygzip or pybzip2
+compression = {{ default_barman_compression }}
 
 ; Enable network compression for data transfers - default false
-network_compression = {{ barman_network_compression }}
-
-; Identify the standard behavior for backup operations: possible values are
-; exclusive_backup (default), concurrent_backup
-backup_options = {{ barman_backup_options }}
+network_compression = {{ default_barman_network_compression }}
 
 ; Number of retries of data copy during base backup after an error - default 0
-basebackup_retry_times = {{ barman_basebackup_retry_times }}
+basebackup_retry_times = {{ default_barman_basebackup_retry_times }}
 
 ; Number of seconds of wait after a failed copy, before retrying - default 30
-basebackup_retry_sleep = {{ barman_basebackup_retry_sleep }}
+basebackup_retry_sleep = {{ default_barman_basebackup_retry_sleep }}
+
+; Minimum number of required backups (redundancy) - default 0
+minimum_redundancy = {{ default_barman_minimum_redundancy }}
+
+; Global retention policy (REDUNDANCY or RECOVERY WINDOW) - default empty
+retention_policy = {{ default_barman_retention_policy }}
 
 ; Time frame that must contain the latest backup date.
 ; If the latest backup is older than the time frame, barman check
@@ -42,7 +46,7 @@ basebackup_retry_sleep = {{ barman_basebackup_retry_sleep }}
 ; Syntax for this option is: "i (DAYS | WEEKS | MONTHS)" where i is an
 ; integer > 0 which identifies the number of days | weeks | months of
 ; validity of the latest backup for this check. Also known as 'smelly backup'.
-last_backup_maximum_age = {{ barman_last_backup_maximum_age }}
+last_backup_maximum_age = {{ default_barman_last_backup_maximum_age }}
 
 configuration_files_directory = /etc/barman.d
 
