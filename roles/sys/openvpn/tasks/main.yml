@@ -4,7 +4,7 @@
   service:
     name: "openvpn@{{ _vpn_name }}"
     enabled: yes
-  tags: openvpn
+  tags: [sys, openvpn]
 
 # The server has already been started or restarted in openvpn/server, so
 # here we only apply the task to clients.
@@ -17,7 +17,7 @@
     state: "{{ openvpn_service_end_state|default('started') }}"
   when: >
     'openvpn-server' not in role
-  tags: openvpn
+  tags: [sys, openvpn]
 
 - name: Override primary IP address
   set_fact:
