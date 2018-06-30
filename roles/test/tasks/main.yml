@@ -22,5 +22,6 @@
 
 - include_role: name=pgbench
   when: >
-    'postgres' in role
+    'postgres' in role and
+    'bdr' not in role
   tags: pgbench
