@@ -11,7 +11,7 @@
       - output_file is defined
       - content is defined
 
-- name: Write pg_controldata output to {{ output_file }}
+- name: Write output to {{ output_file }}
   local_action:
     module: copy
     dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ output_file }}"
