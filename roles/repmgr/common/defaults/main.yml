@@ -1,7 +1,5 @@
 ---
 
-repmgr_conf_dir: "/etc/repmgr/{{ postgres_version }}"
-
 repmgr_failover: automatic
 
 repmgr_use_slots: 1

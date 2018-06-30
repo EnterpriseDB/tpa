@@ -2,8 +2,6 @@
 
 ## Barman server-wide defaults (/etc/barman.conf)
 
-barman_home: /var/lib/barman
-barman_group: barman
 barman_log_file: /var/log/barman/barman.log
 
 ## Per-server configuration (/etc/barman.d/servername.conf)

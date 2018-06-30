@@ -20,12 +20,13 @@
     postgres_service_name: postgres
     postgres_installation_source: "{{ postgres_installation_source|default('pkg') }}"
     barman_user: "{{ barman_user|default(default_barman_user) }}"
+    barman_group: "{{ barman_group|default(default_barman_group) }}"
+    barman_home: "{{ barman_home|default(default_barman_home) }}"
     backup_name: "{{ backup_name|default(inventory_hostname) }}"
+    repmgr_conf_dir: "{{ repmgr_conf_dir|default(default_repmgr_conf_dir) }}"
   tags: always
 
 - name: Set default postgres_conf_dir
   set_fact:
-    postgres_conf_dir: "{{ postgres_data_dir }}"
-  when: >
-    postgres_conf_dir|default('') == ''
+    postgres_conf_dir: "{{ postgres_conf_dir|default('') or postgres_data_dir }}"
   tags: always
