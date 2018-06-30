@@ -10,7 +10,21 @@
     path: "{{ output_dir }}/{{ inventory_hostname }}"
     state: directory
 
-- include_tasks: postgres.yml
+- name: Run postgres tests
+  block:
+    - name: Check if PGDATA has been initialised
+      stat:
+        path: "{{ postgres_data_dir }}/PG_VERSION"
+      register: pgdata
+      become_user: "{{ postgres_user }}"
+      become: yes
+
+    - name: Set pgdata_initialised
+      set_fact:
+        pgdata_initialised: "{{ pgdata.stat.exists }}"
+
+    - include_tasks: postgres.yml
+      when: pgdata_initialised
   when: >
     'postgres' in role
   tags: postgres
@@ -22,6 +36,6 @@
 
 - include_role: name=pgbench
   when: >
-    'postgres' in role and
+    ('primary' in role or 'replica' in role) and
     'bdr' not in role
   tags: pgbench
