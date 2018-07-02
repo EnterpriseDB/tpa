@@ -81,6 +81,15 @@
       . "$HOME/.bashrc"
   ignore_errors: true
 
+- name: Install .ssh/config file
+  copy:
+    dest: ~postgres/.ssh/config
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
+    content: |
+      ConnectTimeout 5s
+
 # We depend on /var/{log,run}/postgresql to exist.
 
 - name: Ensure postgres runtime directories exist
