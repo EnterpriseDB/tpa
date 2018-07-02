@@ -1,0 +1,51 @@
+---
+
+# Here we set defaults for some configuration options based on the size
+# of the cluster and other information gathered at runtime.
+
+# Many of our estimates are based on the number of postgres instances in
+# the cluster. We don't go out of our way to make these numbers accurate
+# (e.g., if a cluster defines disjoint sets of primary and replicas, the
+# numbers will all be overestimates). The important thing is to avoid
+# making them too small.
+
+- set_fact:
+    instance_roles: "{{
+      instance_roles|default([])|union([{
+        'name': item,
+        'role': hostvars[item].role
+      }])
+    }}"
+  with_items: "{{ groups['all'] }}"
+
+- action: set_fact
+  args: >
+    {{ ('{"num_postgres_instances": ' ~ postgres_instances ~ '}')|from_json }}
+  vars:
+    postgres_instances: "{{
+      instance_roles|selectattr('role','contains','postgres')|list|count
+    }}"
+
+- action: set_fact
+  args: >
+    {{ ('{"twice_postgres_instances": ' ~ num_postgres_instances*2 ~ '}')|from_json }}
+    
+- set_fact:
+    max_wal_senders: >-
+      {{ max_wal_senders|default(twice_postgres_instances) }}
+    max_replication_slots: >-
+      {{ max_replication_slots|default(twice_postgres_instances) }}
+
+# “The formula for the correct minimal number of workers is: one per
+# PostgreSQL instance + one per database on that instance + two per BDR
+# enabled database + two per peer in the BDR group for each database.”
+
+- set_fact:
+    max_worker_processes: "{{
+      max_worker_processes|default(
+        (('bdr' in role)|ternary(
+          num_postgres_instances + 1*8 + 2*2 + 2*(num_postgres_instances-1),
+          0
+        )) + twice_postgres_instances
+      )
+    }}"
