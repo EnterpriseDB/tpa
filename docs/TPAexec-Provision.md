@@ -66,7 +66,6 @@ cluster_tags:
   Owner: roadrunner
 cluster_vars:
   vpn_network: 192.168.33.0/24
-  # cluster_network: 10.33.38.0/24
 ```
 
 | Parameter:       | Description                                                  |
@@ -77,7 +76,6 @@ cluster_vars:
 | Owner:           | This is used to populate the AWS "Owner" Tag Key (defaults to the user name running tpaexec) |
 | cluster_vars:    | Used to set various cluster variables                        |
 | vpn_network:     | Sets the VPN network                                         |
-| cluster_network: | Sets the cluster network                                     |
 
 #### AWS EC2 parameters
 

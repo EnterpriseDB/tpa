@@ -32,7 +32,6 @@ For baremetal deployment, we assume that the servers/VMs have already been creat
 - Hostname and external ip address of each server (Name, public_ip)
 
 - Private IP address of each server if different from public (private_ip)
-- Cluster network CIDR (cluster_network)
 - Ansible ssh user - the admin user used to ssh to each host by tpaexec (ansible_user)
 - If using repmgr, you will need to know logically which data centre hosts are in.
 
@@ -70,15 +69,11 @@ The file config.yml has been split into logical sections for the purposes of des
 
 cluster_name: baretest
 ssh_key_file: "../../sshkeys/id_night"
-cluster_vars:
-  cluster_network: 192.168.0.0/16
 ```
 | Parameter:       | Description                              |
 | :--------------- | ---------------------------------------- |
 | cluster_name:    | Name of the cluster |
 | ssh_key_file:    | Used to supply ssh keys to the cluster - expects 2 keys - <id_file> and <id_file.pub>    |
-| cluster_vars:    | Used to set various cluster variables    |
-| cluster_network: | Sets the cluster network                 |
 
 By default, the tpaexec provision utility will create new RSA keys for ssh connection to the cluster hosts. Here we are reusing existing keys, so we have set the ssh_key_file variable in config.yml, giving it a relative path - for example with **id_night** and **id_night.pub** both sitting in the ~tpa/sshkeys directory:
 
@@ -141,8 +136,6 @@ We can now run tpaexec deploy ~/tpa/clusters/baretest.  (See TPAexec-Deploy.md f
 
 cluster_name: bare
 ssh_key_file: "../../sshkeys/id_night"
-cluster_vars:
-  cluster_network: 192.168.0.0/16
 
 instance_defaults:
   platform: bare
