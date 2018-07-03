@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# This script is meant to be used as follows:
+#
+# cat <<CONFIG
+# cluster_tags: $($libdir/cluster-tags)
+# …
+# CONFIG
+#
+# The output contains zero or more tag definitions, as set by options
+# passed to tpaexec configure (e.g., ``--owner Owner``).
+
+set -e
+
+echo
+
+if [[ -n "$CLUSTER_TAGS_OWNER" ]]; then
+    echo "  Owner: $CLUSTER_TAGS_OWNER"
+fi

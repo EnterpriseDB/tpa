@@ -34,6 +34,7 @@ cat > $cluster/config.yml <<CONFIG
 architecture: $architecture
 
 cluster_name: $cluster_name
+cluster_tags: $($libdir/cluster-tags)
 
 ec2_ami:
   Name: $image_name

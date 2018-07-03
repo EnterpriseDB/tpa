@@ -4,6 +4,19 @@ When you run ``tpaexec configure c --architecture a …``, you may append
 any of the following options to the command (unless otherwise specified
 by the documentation for the selected architecture).
 
+## Owner
+
+Every cluster must be directly traceable to a person responsible for the
+provisioned resources.
+
+By default, a cluster will be tagged as being owned by the login name of
+the user running ``tpaexec provision``. If this name does not identify a
+person (e.g., postgres, ec2-user), you must specify ``--owner SomeId``
+to set an identifiable owner.
+
+(You may use your initials, or ``"Firstname Lastname"``, or anything
+else that identifies you uniquely.)
+
 ## Platform options
 
 You may optionally specify ``--platform aws``. This is the default.

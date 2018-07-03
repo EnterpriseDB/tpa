@@ -64,6 +64,14 @@ case "$opt" in
         ;;
 
     # These options export environment variables that are interpreted by
+    # architectures/lib/cluster-tags.
+
+    --owner)
+        export CLUSTER_TAGS_OWNER=${1:?Owner not specified}
+        shift
+        ;;
+
+    # These options export environment variables that are interpreted by
     # architectures/lib/hostnames.
 
     --hostnames-from)
