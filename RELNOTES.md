@@ -34,7 +34,9 @@ Other notable changes:
 - Deprecate ec2_ami_user and cluster_ssh_user in favour of setting
   "vars: ansible_user: xxx" in instance_defaults (a9c30e1)
 - Make cluster_tags optional. Owner is now automatically set to the
-  current user's login name.
+  current user's login name, and can be overriden with --owner
+- Deprecate cluster_network{,s} (which was used only to generate
+  pg_hba.conf) while maintaining backwards compatibility
 - Allow instance settings to be exported as instance vars (2a6e060)
 - Include traceback information on module failure in various cases
 - Remove ansible-cluster and ansible-cluster-playbook in favour of
