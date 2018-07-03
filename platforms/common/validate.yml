@@ -25,7 +25,7 @@
   vars:
     default_tags:
       Owner: >-
-        {{ lookup('env', 'USER') or lookup('pipe', 'id -u -n || true') }}
+        {{ Owner|default(lookup('env', 'USER')) or lookup('pipe', 'id -u -n || true') }}
 
 - name: Ensure cluster_tags[Owner] is defined
   assert:
