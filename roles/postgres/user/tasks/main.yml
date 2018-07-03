@@ -81,6 +81,14 @@
       . "$HOME/.bashrc"
   ignore_errors: true
 
+- name: Ensure ~postgres/.ssh exists
+  file:
+    path: ~postgres/.ssh
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0755
+    state: directory
+
 - name: Install .ssh/config file
   copy:
     dest: ~postgres/.ssh/config
