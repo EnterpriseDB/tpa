@@ -93,12 +93,31 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults):
         # set some vars in instance_defaults and some on the instance, and get
         # all of them, with the instance settings overriding the defaults).
 
-        for kd in instance_defaults:
+        for kd in [k for k in instance_defaults if k != 'default_volumes']:
             j[kd] = j.get(kd, instance_defaults[kd])
             if isinstance(j[kd], dict) and isinstance(instance_defaults[kd], dict):
                 b = copy.deepcopy(instance_defaults[kd])
                 b.update(j[kd])
                 j[kd] = b
+
+        # If instance_defaults specifies 'default_volumes', we merge those
+        # entries with the instance's 'volumes', with entries in the latter
+        # taking precedence over default entries with the same device name.
+
+        default_volumes = instance_defaults.get('default_volumes', [])
+        if default_volumes:
+            volume_map = {}
+            for vol in default_volumes + j.get('volumes', []):
+                name = vol.get('raid_device', vol.get('device_name'))
+                if name.startswith('/dev/'):
+                    name = name[5:]
+                volume_map[name] = vol
+
+            volumes = []
+            for name in sorted(volume_map.keys()):
+                volumes.append(volume_map[name])
+
+            j['volumes'] = volumes
 
         # The upstream, backup, and role tags should be moved one level up if
         # they're specified at all.
