@@ -36,6 +36,5 @@
 
 - include_role: name=pgbench
   when: >
-    ('primary' in role or 'replica' in role) and
-    'bdr' not in role
+    pgdata_initialised
   tags: pgbench
