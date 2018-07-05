@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env perl
 #
 # This script is meant to be used as follows:
 #
@@ -10,10 +10,15 @@
 # The output contains zero or more tag definitions, as set by options
 # passed to tpaexec configure (e.g., ``--owner Owner``).
 
-set -e
+my @output;
 
-echo
+if ($ENV{CLUSTER_TAGS_OWNER}) {
+    push @output, "  Owner: $ENV{CLUSTER_TAGS_OWNER}";
+}
 
-if [[ -n "$CLUSTER_TAGS_OWNER" ]]; then
-    echo "  Owner: $CLUSTER_TAGS_OWNER"
-fi
+if (@output) {
+    print join("\n", "", @output), "\n";
+}
+else {
+    print "{}\n";
+}
