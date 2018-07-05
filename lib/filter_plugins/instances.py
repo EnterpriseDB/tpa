@@ -103,11 +103,14 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults):
         # If instance_defaults specifies 'default_volumes', we merge those
         # entries with the instance's 'volumes', with entries in the latter
         # taking precedence over default entries with the same device name.
+        # (Setting 'volumes' to [] explicitly in instances will remove the
+        # defaults altogether.)
 
+        volumes = j.get('volumes', [])
         default_volumes = instance_defaults.get('default_volumes', [])
-        if default_volumes:
+        if default_volumes and (len(volumes) > 0 or 'volumes' not in j):
             volume_map = {}
-            for vol in default_volumes + j.get('volumes', []):
+            for vol in default_volumes + volumes:
                 name = vol.get('raid_device', vol.get('device_name'))
                 if name.startswith('/dev/'):
                     name = name[5:]
@@ -183,6 +186,9 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
         for vol in j.get('volumes', []):
             v = copy.deepcopy(vol)
             vars = v.get('vars', {})
+
+            if v['volume_type'] == 'none':
+                continue
 
             if v['device_name'] == 'root':
                 v['device_name'] = ec2_ami_properties[j['image']]['root_device_name']
