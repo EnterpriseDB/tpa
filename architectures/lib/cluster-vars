@@ -32,3 +32,7 @@ fi
 if [[ -n "$BARMAN_PACKAGE_VERSION" ]]; then
     echo "  barman_package_version: $BARMAN_PACKAGE_VERSION"
 fi
+
+if [[ -n "$TPA_2Q_REPO" ]]; then
+    echo "  tpa_2q_repo: $TPA_2Q_REPO"
+fi

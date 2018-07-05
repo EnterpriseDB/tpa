@@ -58,6 +58,10 @@ case "$opt" in
     # These options export environment variables that are interpreted by
     # architectures/lib/cluster-vars.
 
+    --2q-repo)
+        export TPA_2Q_REPO=${1:?2ndQuadrant repository name not specified}
+        shift
+        ;;
     --postgres-version)
         export POSTGRES_VERSION=${1:?Postgres major version not specified}
         shift
