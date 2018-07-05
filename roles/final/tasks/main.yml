@@ -6,6 +6,7 @@
 
 - include_role: name=repmgr/final
   when:
+    'postgres' in role and
     initialise_replication is defined
 
 - include_role: name=barman/final
