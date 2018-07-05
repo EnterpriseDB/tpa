@@ -2,7 +2,7 @@
 
 - name: Run pgbench -i -s {{ pgbench_scale_factor }}
   command: >
-    {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} -i -s {{ pgbench_scale_factor }} postgres
+    {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} -i -s {{ pgbench_scale_factor }} {{ pgbench_dbname }}
   register: pgbench_init
   become_user: "{{ postgres_user }}"
   become: true

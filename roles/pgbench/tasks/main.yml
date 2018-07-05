@@ -1,8 +1,11 @@
 ---
 
+- set_fact:
+    pgbench_dbname: "{{ ('bdr' in role)|ternary('bdr', 'postgres') }}"
+
 - name: Determine if pgbench -i was run already
   postgresql_query:
-    conninfo: "dbname=postgres"
+    conninfo: "dbname={{ pgbench_dbname }}"
     query: >
       select count(*) as exists from information_schema.tables
       where table_name='pgbench_history'
@@ -11,19 +14,24 @@
   become: yes
 
 - include_role: name=pgbench/init
-  when:
-    pgbench_history.exists == 0 and 'replica' not in role
+  when: >
+    pgbench_history.exists == 0 and
+    'replica' not in role and
+    ('bdr' not in role or
+     inventory_hostname == groups[bdr_node_group][0])
 
 - name: Run read/write pgbench
   include_tasks: pgbench.yml
   vars:
-    pgbench_opts: -v -c 10 -j 5 -T 180
+    pgbench_opts: -v -c 10 -j 5 -T 180 {{ pgbench_dbname }}
   when: >
-    'replica' not in role
+    'replica' not in role and
+    ('bdr' not in role or
+     inventory_hostname == groups[bdr_node_group][0])
 
 - name: Run read-only pgbench on replicas
   include_tasks: pgbench.yml
   vars:
-    pgbench_opts: -n -c 10 -j 5 -T 180 -S
+    pgbench_opts: -n -c 10 -j 5 -T 180 -S {{ pgbench_dnmame }}
   when: >
     'replica' in role
