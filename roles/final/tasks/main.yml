@@ -9,13 +9,13 @@
     initialise_replication is defined
 
 - include_role: name=barman/final
-  when:
+  when: >
     'barman' in role or backup is defined
 
 - include_role: name=haproxy/final
-  when:
+  when: >
     'haproxy' in role
 
 - include_role: name=pgbouncer/final
-  when:
+  when: >
     'pgbouncer' in role
