@@ -4,5 +4,3 @@ allow_duplicates: no
 dependencies:
     - role: pgbouncer/pkg
     - role: pgbouncer/config
-      when: >
-        'pgbouncer' in role

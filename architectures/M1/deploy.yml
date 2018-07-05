@@ -75,10 +75,13 @@
     - role: repmgr
       tags: repmgr
 
-    - role: postgres/final
+    - role: pgbouncer
       when: >
-        'postgres' in role
-      tags: [postgres, final]
+        'pgbouncer' in role
+      tags: pgbouncer
+
+    - role: final
+      tags: [final]
 
     - role: monitoring
       when: >

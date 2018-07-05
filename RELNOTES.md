@@ -29,6 +29,8 @@ Other notable changes:
 - Extensive documentation updates
 - Initial LXD platform support
 - Make sure coredumps are generated properly
+- Instead of applying role 'postgres/final' when 'postgres' in role,
+  deploy.yml files should not apply role 'final' to all instances.
 - Support postgres/repmgr/barman package version selection (6e904c8)
   via ``tpaexec configure … --postgres-package version``
 - Deprecate ec2_ami_user and cluster_ssh_user in favour of setting

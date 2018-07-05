@@ -75,23 +75,23 @@
     - role: repmgr
       tags: repmgr
 
-    - role: postgres/final
+    - role: pgbouncer
       when: >
-        'postgres' in role
-      tags: [postgres, final]
+        'pgbouncer' in role
+      tags: pgbouncer
+
+    - role: haproxy
+      when: >
+        'haproxy' in role
+      tags: haproxy
+
+    - role: final
+      tags: [final]
 
     - role: postgres/bdr
       when: >
         'bdr' in role and 'primary' in role
       tags: [postgres, bdr]
-
-    - role: pgbouncer
-      when: >
-        'pgbouncer' in role
-
-    - role: haproxy
-      when: >
-        'haproxy' in role
 
 #    - role: monitoring
 #      when: >

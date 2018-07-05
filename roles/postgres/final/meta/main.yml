@@ -13,12 +13,3 @@ dependencies:
   - role: postgres/config/final
     when: >
       'replica' not in role
-  - role: repmgr/final
-    when: >
-      initialise_replication is defined
-  - role: barman/final
-    when: >
-      'barman' in role or backup is defined
-  - role: pgbouncer/final
-    when: >
-      initialise_pgbouncer is defined
