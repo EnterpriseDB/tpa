@@ -1,7 +1,7 @@
 ---
 
 - set_fact:
-    pgbench_dbname: "{{ ('bdr' in role)|ternary('bdr', 'postgres') }}"
+    pgbench_dbname: "{{ ('bdr' in role)|ternary(bdr_database, 'postgres') }}"
 
 - name: Determine if pgbench -i was run already
   postgresql_query:

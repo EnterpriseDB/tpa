@@ -24,6 +24,7 @@
     barman_home: "{{ barman_home|default(default_barman_home) }}"
     backup_name: "{{ backup_name|default(inventory_hostname) }}"
     repmgr_conf_dir: "{{ repmgr_conf_dir|default(default_repmgr_conf_dir) }}"
+    bdr_database: "{{ bdr_database|default(default_bdr_database) }}"
   tags: always
 
 - name: Set default postgres_conf_dir
