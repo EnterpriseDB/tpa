@@ -20,14 +20,23 @@
     ('bdr' not in role or
      inventory_hostname == groups[bdr_node_group][0])
 
+- name: Wait for pgbench -i to replicate to BDR nodes
+  postgresql_query:
+    conninfo: "dbname={{ pgbench_dbname }}"
+    query: >
+      select wait_slot_confirm_lsn(NULL, NULL)
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when: >
+    pgbench_history.exists == 0 and
+    'bdr' in role
+
 - name: Run read/write pgbench
   include_tasks: pgbench.yml
   vars:
     pgbench_opts: -v -c 10 -j 5 -T 180 {{ pgbench_dbname }}
   when: >
-    'replica' not in role and
-    ('bdr' not in role or
-     inventory_hostname == groups[bdr_node_group][0])
+    'replica' not in role
 
 - name: Run read-only pgbench on replicas
   include_tasks: pgbench.yml
