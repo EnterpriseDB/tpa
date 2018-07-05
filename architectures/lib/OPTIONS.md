@@ -46,6 +46,12 @@ You may instead specify ``--subnet-pattern 192.0.x.x`` to generate
 random subnets (as many as required by the architecture) matching the
 given pattern.
 
+## Disk space
+
+You may optionally specify ``--root-volume-size 64`` to set the size of
+the root volume in GB. The default is 16GB. (Depending on the image used
+to create instances, there may be a minimum size for the root volume.)
+
 ## Distribution
 
 You may optionally specify ``--distribution Debian`` (or RedHat, or

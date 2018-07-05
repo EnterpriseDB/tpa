@@ -25,6 +25,10 @@ case "$opt" in
         distribution=${1:?Distribution name not specified}
         shift
         ;;
+    --root-volume-size)
+        root_volume_size=${1:?Root volume size not specified}
+        shift
+        ;;
     --minimal)
         minimal=-minimal
         ;;

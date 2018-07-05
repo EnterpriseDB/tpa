@@ -7,5 +7,7 @@ if [[ ${distribution:=Debian} != *-minimal ]]; then
     distribution="$distribution${minimal:-}"
 fi
 
+root_volume_size=${root_volume_size:-16}
+
 image=$($libdir/image $distribution $platform $architecture)
 eval $image

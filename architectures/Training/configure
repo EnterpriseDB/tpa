@@ -61,6 +61,10 @@ instance_defaults:
   type: $instance_type
   region: $region
   subnet: $subnet
+  default_volumes:
+    - device_name: root
+      volume_type: gp2
+      volume_size: $root_volume_size
   role:
     - primary
   vars:
