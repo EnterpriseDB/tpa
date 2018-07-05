@@ -1,0 +1,10 @@
+---
+
+- meta: flush_handlers
+
+- name: Start or restart haproxy
+  service:
+    name: haproxy
+    state: "{{ haproxy_service_end_state|default('started') }}"
+  when: >
+    'haproxy' in role

@@ -1,0 +1,5 @@
+---
+
+- name: Note haproxy reload required
+  set_fact:
+    haproxy_service_end_state: reloaded

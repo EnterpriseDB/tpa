@@ -1,2 +1,13 @@
 ---
 
+- name: Install haproxy.cfg
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+  notify:
+    - Note haproxy reload required
+
+- name: Enable haproxy service
+  service:
+    name: haproxy
+    enabled: yes
