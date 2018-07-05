@@ -5,7 +5,7 @@
     'postgres' in role
 
 - include_role: name=repmgr/final
-  when:
+  when: >
     'postgres' in role and
     initialise_replication is defined
 
