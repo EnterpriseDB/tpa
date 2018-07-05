@@ -7,6 +7,10 @@ while [[ $# -gt 0 ]]; do
     shift
 
     case "$opt" in
+        --num-cascaded-replicas)
+            cascaded_replicas=${1:?Number of cascaded replicas not specified}
+            shift
+            ;;
         *)
             source $libdir/configure-options.sh
             ;;
@@ -26,8 +30,8 @@ cluster_name=$(basename $cluster)
 
 trap "rm -rf $cluster" ERR
 
-instances=4
-hostnames=($($libdir/hostnames $instances))
+instances=$((3+${cascaded_replicas:=1}))
+hostnames=($($libdir/hostnames $((instances+1))))
 
 cat > $cluster/config.yml <<CONFIG
 ---
@@ -64,22 +68,16 @@ instance_defaults:
 
 instances:
   - node: 1
-    Name: ${hostnames[0]}
+    Name: ${hostnames[1]}
     role: primary
 
   - node: 2
-    Name: ${hostnames[1]}
+    Name: ${hostnames[2]}
     role: replica
-    upstream: ${hostnames[0]}
+    upstream: ${hostnames[1]}
     backup: ${hostnames[3]}
 
   - node: 3
-    Name: ${hostnames[2]}
-    volumes:
-    role: replica
-    upstream: ${hostnames[1]}
-
-  - node: 4
     Name: ${hostnames[3]}
     volumes:
         - device_name: /dev/xvdb
@@ -92,6 +90,19 @@ instances:
       - log-server
       - openvpn-server
       - monitoring-server
+
 CONFIG
+
+for i in $(seq 1 $cascaded_replicas);
+do
+    i=$((i+3))
+    cat >> $cluster/config.yml <<CASCADE
+  - node: $i
+    Name: ${hostnames[$i]}
+    role: replica
+    upstream: ${hostnames[2]}
+
+CASCADE
+done
 
 ln -sf $archdir/deploy.yml $cluster
