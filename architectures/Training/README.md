@@ -35,6 +35,9 @@ instances required.
 You may also specify any of the options described by
 ``tpaexec help configure-options``.
 
+This architecture does not use separate postgres volumes, so you cannot
+use the ``--postgres-volume-size`` or ``--barman-volume-size`` options.
+
 Provisioning and deployment
 ---------------------------
 

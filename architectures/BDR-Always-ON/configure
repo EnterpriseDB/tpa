@@ -13,6 +13,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+postgres_volume_size=${postgres_volume_size:-64}
+barman_volume_size=${barman_volume_size:-128}
+
 source $libdir/configure-defaults.sh
 
 if [[ "$platform" != "aws" ]]; then
@@ -62,7 +65,7 @@ instance_defaults:
       volume_size: $root_volume_size
     - device_name: /dev/xvdb
       volume_type: gp2
-      volume_size: 64
+      volume_size: $postgres_volume_size
       vars:
         volume_for: postgres_data
   vars:
@@ -114,7 +117,7 @@ instances:
     volumes:
       - device_name: /dev/xvdb
         volume_type: gp2
-        volume_size: 128
+        volume_size: $barman_volume_size
         vars:
           volume_for: barman_data
     role:

@@ -29,6 +29,14 @@ case "$opt" in
         root_volume_size=${1:?Root volume size not specified}
         shift
         ;;
+    --postgres-volume-size)
+        postgres_volume_size=${1:?Postgres volume size not specified}
+        shift
+        ;;
+    --barman-volume-size)
+        barman_volume_size=${1:?Barman volume size not specified}
+        shift
+        ;;
     --minimal)
         minimal=-minimal
         ;;

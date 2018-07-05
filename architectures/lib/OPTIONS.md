@@ -52,6 +52,14 @@ You may optionally specify ``--root-volume-size 64`` to set the size of
 the root volume in GB. The default is 16GB. (Depending on the image used
 to create instances, there may be a minimum size for the root volume.)
 
+For architectures that support separate postgres and barman volumes:
+
+You may optionally specify ``--postgres-volume-size 64`` to set the size
+of the Postgres volume in GB. The default is 16GB.
+
+You may optionally specify ``--barman-volume-size 64`` to set the size
+of the Barman volume in GB. The default is 32GB.
+
 ## Distribution
 
 You may optionally specify ``--distribution Debian`` (or RedHat, or

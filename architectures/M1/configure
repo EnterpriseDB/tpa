@@ -54,30 +54,21 @@ instance_defaults:
     - device_name: root
       volume_type: gp2
       volume_size: $root_volume_size
+    - device_name: /dev/xvdb
+      volume_type: gp2
+      volume_size: $postgres_volume_size
+      vars:
+        volume_for: postgres_data
   vars:
     ansible_user: $image_user
 
 instances:
   - node: 1
     Name: ${hostnames[0]}
-    volumes:
-        - raid_device: /dev/md0
-          device_name: /dev/xvdb
-          volume_type: gp2
-          volume_size: 16
-          raid_units: 2
-          vars:
-            volume_for: postgres_data
     role: primary
 
   - node: 2
     Name: ${hostnames[1]}
-    volumes:
-        - device_name: /dev/xvdb
-          volume_type: gp2
-          volume_size: 16
-          vars:
-            volume_for: postgres_data
     role: replica
     upstream: ${hostnames[0]}
     backup: ${hostnames[3]}
@@ -85,11 +76,6 @@ instances:
   - node: 3
     Name: ${hostnames[2]}
     volumes:
-        - device_name: /dev/xvdb
-          volume_type: gp2
-          volume_size: 16
-          vars:
-            volume_for: postgres_data
     role: replica
     upstream: ${hostnames[1]}
 
@@ -98,7 +84,7 @@ instances:
     volumes:
         - device_name: /dev/xvdb
           volume_type: gp2
-          volume_size: 32
+          volume_size: $barman_volume_size
           vars:
             volume_for: barman_data
     role:
