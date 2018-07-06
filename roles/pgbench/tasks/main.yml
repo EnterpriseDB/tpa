@@ -40,6 +40,6 @@
 - name: Run read-only pgbench on replicas
   include_tasks: pgbench.yml
   vars:
-    pgbench_opts: -n -c 10 -j 5 -T 180 -S {{ pgbench_dnmame }}
+    pgbench_opts: -n -c 10 -j 5 -T 180 -S {{ pgbench_dbname }}
   when: >
     'replica' in role
