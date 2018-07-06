@@ -1,8 +1,11 @@
 ---
 
 dependencies:
-  - role: postgres/pkg
   - role: postgres/createuser
     username: pgbouncer
+    when: >
+      'postgres' in role or
+      'pgbouncer' in role
   - role: postgres/user
-
+    when: >
+      'pgbouncer' in role

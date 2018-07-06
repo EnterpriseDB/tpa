@@ -76,8 +76,6 @@
       tags: repmgr
 
     - role: pgbouncer
-      when: >
-        'pgbouncer' in role
       tags: pgbouncer
 
     - role: haproxy

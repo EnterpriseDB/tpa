@@ -1,0 +1,71 @@
+---
+
+# By default, pgbouncer will forward all connections to 127.0.0.1:5432
+# (which may be either postgres or haproxy that has been configured to
+# forward connections to postgres).
+#
+# To override this, set pgbouncer_backend to the inventory_hostname of
+# a different node.
+
+- name: Set pgbouncer_backend
+  set_fact:
+    pgbouncer_backend: >-
+      {{ pgbouncer_backend|default('127.0.0.1') }}
+
+- name: Set pgbouncer_backend_port
+  set_fact:
+    pgbouncer_backend_port: "{{
+      pgbouncer_backend_port|default(
+        (pgbouncer_backend in hostvars)|ternary(
+          hostvars[pgbouncer_backend].postgres_port|default(5432),
+          5432
+        )
+      )
+    }}"
+
+# By default, we create a single wildcard entry under [databases], which
+# forwards all connections to the pgbouncer_backend defined above. To
+# override this, set pgbouncer_databases to [{name: …, dsn: …}, …] to
+# install whatever entries you want.
+
+- name: Set pgbouncer_databases
+  set_fact:
+    pgbouncer_databases: "{{
+      pgbouncer_databases|default([{
+        'name': '*',
+        'dsn': 'host=%s port=%s' % (pgbouncer_backend, pgbouncer_backend_port)
+      }])
+    }}"
+
+- name: Ensure /etc/pgbouncer exists
+  file:
+    path: /etc/pgbouncer
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0700
+    state: directory
+
+- name: Install pgbouncer.ini
+  template:
+    src: pgbouncer.ini.j2
+    dest: "/etc/pgbouncer/pgbouncer.ini"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0640
+  notify:
+    - Note pgbouncer restart required
+
+- name: Install userlist.txt
+  template:
+    src: userlist.txt.j2
+    dest: "/etc/pgbouncer/userlist.txt"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0600
+  notify:
+    - Note pgbouncer restart required
+
+- name: Enable pgbouncer on boot
+  service:
+    name: pgbouncer
+    enabled: yes
