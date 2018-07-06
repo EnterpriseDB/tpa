@@ -1,7 +1,31 @@
 ---
 
-# For pidfile = /var/run/pgbouncer/pgbouncer.pid
-- name: Ensure /var/run/pgbouncer exists
+- name: Set pgbouncer_backend
+  set_fact:
+    pgbouncer_backend: >-
+      {{ pgbouncer_backend|default('127.0.0.1') }}
+
+- name: Set pgbouncer_backend_port
+  set_fact:
+    pgbouncer_backend_port: "{{
+      pgbouncer_backend_port|default(
+        (pgbouncer_backend in hostvars)|ternary(
+          hostvars[pgbouncer_backend].postgres_port|default(5432),
+          5432
+        )
+      )
+    }}"
+
+- name: Set pgbouncer_databases
+  set_fact:
+    pgbouncer_databases: "{{
+      pgbouncer_databases|default([{
+        'name': '*',
+        'dsn': 'host=%s port=%s' % (pgbouncer_backend, pgbouncer_backend_port)
+      }])
+    }}"
+
+- name: Ensure pidfile dir /var/run/pgbouncer exists
   file:
     path: /var/run/pgbouncer
     owner: "{{ postgres_user }}"
@@ -9,7 +33,6 @@
     mode: 0755
     state: directory
 
-# For configuration files
 - name: Ensure /etc/pgbouncer exists
   file:
     path: /etc/pgbouncer
@@ -18,7 +41,7 @@
     mode: 0700
     state: directory
 
-- name: Copy the main configuration file
+- name: Install pgbouncer.ini
   template:
     src: pgbouncer.ini.j2
     dest: "/etc/pgbouncer/pgbouncer.ini"
@@ -28,7 +51,7 @@
   notify:
     - Note pgbouncer restart required
 
-- name: Copy the userlist file
+- name: Install userlist.txt
   template:
     src: userlist.txt.j2
     dest: "/etc/pgbouncer/userlist.txt"
