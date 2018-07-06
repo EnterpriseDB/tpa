@@ -1,5 +1,4 @@
 global
-    # Log to syslog
     log 127.0.0.1 local0 notice
 
 defaults
@@ -8,53 +7,28 @@ defaults
     timeout connect 5s
 
 frontend pg_ha
-    # Bind on standard postgresql port
     bind 127.0.0.1:5432
 
-    # Set to at least maxconn of bdr_cluster servers.
-    # Haproxy will do session pooling (with the connect timeout) for us if
-    # this is set to more than what bdr_cluster servers have.
     maxconn 1000
-
-    # And send the requests to the bdr_cluster
-    default_backend bdr_cluster
-
-    # Don't close idle postgres connections that eagerly
-    # TODO: finetune
     timeout client 1h
 
+    default_backend bdr_cluster
+
 backend bdr_cluster
-    # Configure stickiness to be always on 1 server based on dst.
-    # This prevents failback when the main (non-backup) server
-    # comes back online (ie flapping).
+    mode tcp
+
     stick-table type ip size 1 nopurge
     stick on dst
 
-    # TCP mode is best for postgres.
-    mode tcp
-
-    # Don't close idle postgres connections that eagerly
-    # TODO: finetune
-    timeout server 1h
-
-    # Check the server using postgresql specific check.
     option pgsql-check user haproxy
 
-    # Confiure primary master and shadow (backup) master.
-    # We use 1.5s for timeout on the check and will consider server down
-    # after 3 failures, so after 4.5s of problems we'll failover.
-    # To prevent too much flapping and retires we do checks for server
-    # being up less often (evey 6 secs) and wait for at least 5 okays before
-    # we consider it back up so it takes at least 30s before server is
-    # consedered up after it has stopped responding.
-    server BDR1 127.0.0.1:7432 maxconn 100 check inter 1500 downinter 6s rise 5 fall 3
-    server BDR2 127.0.0.1:7433 maxconn 100 check inter 1500 downinter 6s rise 5 fall 3 backup
+    timeout server 1h
 
-listen stats
-    # Provide statistics/admin web interface
-    # XXX this should be password protected
-    bind 0.0.0.0:8080
-    mode http
-    stats enable
-    stats uri /
-    stats admin if LOCALHOST
+{% for b in [haproxy_backends[0]] %}
+{%   set v = hostvars[b] %}
+    server BDR {{ b }}:{{ v.postgres_port }} maxconn {{ v.haproxy_maxconn }} check inter 1500 downinter 6s rise 5 fall 3
+{% endfor %}
+{% for b in haproxy_backends[1:] %}
+{%   set v = hostvars[b] %}
+    server BDR {{ b }}:{{ v.postgres_port }} maxconn {{ v.haproxy_maxconn }} check inter 1500 downinter 6s rise 5 fall 3 backup
+{% endfor %}

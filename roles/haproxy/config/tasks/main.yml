@@ -1,5 +1,18 @@
 ---
 
+- assert:
+    msg: "Please define a list of haproxy_backends to use haproxy"
+    that:
+      - haproxy_backends is defined
+
+- set_fact:
+    haproxy_maxconn: "{{
+      hostvars[item].haproxy_maxconn|default((hostvars[item].max_connections|default(250))*0.90)|int
+    }}"
+  with_items: "{{ haproxy_backends }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+
 - name: Install haproxy.cfg
   template:
     src: haproxy.cfg.j2

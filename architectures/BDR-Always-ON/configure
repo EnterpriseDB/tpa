@@ -131,6 +131,10 @@ instances:
     role:
       - pgbouncer
       - haproxy
+    vars:
+      haproxy_backends:
+        - ${hostnames[1]}
+        - ${hostnames[2]}
 
   - node: 8
     Name: ${hostnames[8]}
@@ -140,6 +144,10 @@ instances:
     role:
       - pgbouncer
       - haproxy
+    vars:
+      haproxy_backends:
+        - ${hostnames[3]}
+        - ${hostnames[4]}
 CONFIG
 
 ln -sf $archdir/deploy.yml $cluster
