@@ -24,11 +24,8 @@ backend bdr_cluster
 
     timeout server 1h
 
-{% for b in [haproxy_backends[0]] %}
+{% for b in haproxy_backends %}
 {%   set v = hostvars[b] %}
-    server BDR {{ b }}:{{ v.postgres_port }} maxconn {{ v.haproxy_maxconn }} check inter 1500 downinter 6s rise 5 fall 3
-{% endfor %}
-{% for b in haproxy_backends[1:] %}
-{%   set v = hostvars[b] %}
-    server BDR {{ b }}:{{ v.postgres_port }} maxconn {{ v.haproxy_maxconn }} check inter 1500 downinter 6s rise 5 fall 3 backup
+{%   set backup = loop.first|ternary('', 'backup') %}
+    server BDR{{ loop.index }} {{ b }}:{{ v.postgres_port }} maxconn {{ v.haproxy_maxconn }} check inter 1500 downinter 6s rise 5 fall 3 {{ backup }}
 {% endfor %}
