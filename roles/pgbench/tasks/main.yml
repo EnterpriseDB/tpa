@@ -28,7 +28,6 @@
   become_user: "{{ postgres_user }}"
   become: yes
   when: >
-    pgbench_history.exists == 0 and
     'bdr' in role
 
 - name: Run read/write pgbench
