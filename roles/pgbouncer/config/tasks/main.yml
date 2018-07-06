@@ -25,14 +25,6 @@
       }])
     }}"
 
-- name: Ensure pidfile dir /var/run/pgbouncer exists
-  file:
-    path: /var/run/pgbouncer
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0755
-    state: directory
-
 - name: Ensure /etc/pgbouncer exists
   file:
     path: /etc/pgbouncer
