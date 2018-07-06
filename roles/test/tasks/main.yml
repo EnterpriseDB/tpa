@@ -36,5 +36,5 @@
 
 - include_role: name=pgbench
   when: >
-    pgdata_initialised
+    'postgres' in role and pgdata_initialised
   tags: pgbench
