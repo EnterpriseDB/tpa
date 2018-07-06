@@ -10,6 +10,11 @@
     path: "{{ output_dir }}/{{ inventory_hostname }}"
     state: directory
 
+- name: Create group(s) based on the value of bdr_node_group
+  group_by:
+    key: "{{ bdr_node_group }}"
+  when: bdr_node_group is defined
+
 - name: Run postgres tests
   block:
     - name: Check if PGDATA has been initialised
