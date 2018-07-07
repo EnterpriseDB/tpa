@@ -4,18 +4,20 @@
 # backups at all.
 
 - name: Count the number of backups for each instance
-  shell: >
-    barman list-backup {{ backup_name }} | grep -v FAILED | wc -l
-  args:
-    executable: /bin/bash
-  register: backups
+  command: >
+    barman diagnose
+  register: diagnosis
   delegate_to: "{{ backup }}"
   changed_when: False
   become_user: barman
   become: yes
-  when: >
-    backup is defined
+
+- set_fact:
+    backups: "{{
+      diagnosis.stdout|from_json
+      |json_query('servers.%s.backups' % backup_name)
+    }}"
 
 - include_tasks: first-backup.yml
   when: >
-    backup is defined and backups.stdout == '0'
+    backups|json_query("*.{status:status}|[?status=='DONE']")|length == 0
