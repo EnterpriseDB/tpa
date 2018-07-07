@@ -2,7 +2,7 @@
 
 ## HEAD (not yet tagged)
 
-Major changes:
+### Major changes
 
 - Added support for deployment architectures.
   See ``tpaexec info architectures`` for details.
@@ -13,9 +13,11 @@ Major changes:
 
 - Added BDR3 deployment support
 
+- New ``tpaexec test`` command
+
 - Automatic package builds
 
-Bugfixes:
+### Bugfixes
 
 - Properly handle an AWS race condition that resulted in "Invalid IAM
   Instance Profile name" errors during provisioning (f37de54)
@@ -23,14 +25,17 @@ Bugfixes:
   2ndQuadrant ansible (55a4fd3)
 - Correctly handle (ignore) empty lines in /proc/$pid/status
 - Correctly restart repmgrd after changing repmgr.conf
+- Make sure coredumps are generated properly
 
-Other notable changes:
+### Porting notes
+
+- Instead of applying role 'postgres/final' on postgres instances,
+  deploy.yml files should now apply role 'final' to all instances.
+
+### Other notable changes
 
 - Extensive documentation updates
 - Initial LXD platform support
-- Make sure coredumps are generated properly
-- Instead of applying role 'postgres/final' when 'postgres' in role,
-  deploy.yml files should not apply role 'final' to all instances.
 - Support postgres/repmgr/barman package version selection (6e904c8)
   via ``tpaexec configure … --postgres-package version``
 - Deprecate ec2_ami_user and cluster_ssh_user in favour of setting
@@ -40,6 +45,7 @@ Other notable changes:
 - Deprecate cluster_network{,s} (which was used only to generate
   pg_hba.conf) while maintaining backwards compatibility
 - Allow instance settings to be exported as instance vars (2a6e060)
+- Allow instance_defaults to specify default_volumes for all instances
 - Include traceback information on module failure in various cases
 - Remove ansible-cluster and ansible-cluster-playbook in favour of
   ``tpaexec cmd`` and ``tpaexec playbook``
