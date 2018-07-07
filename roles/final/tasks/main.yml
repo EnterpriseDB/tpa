@@ -20,3 +20,11 @@
 - include_role: name=pgbouncer/final
   when: >
     'pgbouncer' in role
+
+# We force an immediate backup for any instances that do not have any
+# backups at all.
+
+- include_role: name=barman/first-backup
+  when: >
+    backup is defined
+  tags: firstbackup

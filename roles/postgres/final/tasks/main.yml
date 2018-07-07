@@ -1,11 +1,16 @@
 ---
 
-# Postgres is now running.
-
-# We force an immediate backup for any instances that do not have any
-# backups at all.
-
-- include_role: name=barman/first-backup
+- include_role: name=postgres/service
+- include_role: name=postgres/restart
+- include_role: name=postgres/facts
+  tags: always
+- include_role: name=postgres/pgpass
+  tags: pgpass
+- include_role: name=postgres/createuser/final
   when: >
-    backup is defined
-  tags: firstbackup
+    'replica' not in role
+- include_role: name=postgres/config/final
+  when: >
+    'replica' not in role
+
+# Postgres is now running.
