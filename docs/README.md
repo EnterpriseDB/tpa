@@ -35,7 +35,8 @@ suit your needs.
 
 The ``tpaexec provision`` command takes config.yml and creates instances
 and other resources required by the cluster. The details of this process
-depend on the selected platform.
+depend on the architecture (e.g., M1, BDR-Always-ON) and platform (e.g.,
+AWS, lxd) that you selected while configuring the cluster.
 
 For example, on AWS, given access with the necessary privileges, TPAexec
 will provision EC2 instances and VPCs, subnets, routing tables, internet
@@ -51,18 +52,18 @@ You are not restricted to a single platform—you can spread your cluster
 out across some AWS instances (in multiple regions) and some on-premise
 servers, or servers in other data centres, as needed.
 
-At the end of the provisioning stage, we have the required number of
-instances with the basic operating system installed, and which we can
-access via ssh (with sudo to root).
+At the end of the provisioning stage, you will have the required number
+of instances with the basic operating system installed, which TPAexec
+can access via ssh (with sudo to root).
 
 ### Deployment
 
 The ``tpaexec deploy`` command takes the details of the provisioned
 servers (which may or may not have actually been created by ``tpaexec
-provision``; but it doesn't matter where they came from as long as we
-have ssh+sudo access to them) and installs Postgres and other software
-and sets them up in the requested configuration. This includes setting
-up replication, backups, and so on.
+provision``; but it doesn't matter who created them so long as ssh and
+sudo access is available) and installs Postgres and other software and
+sets them up in the requested configuration. This includes setting up
+replication, backups, and so on.
 
 At the end of the deployment stage, you will have a cluster with
 Postgres and other software running on it.
