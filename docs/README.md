@@ -120,10 +120,6 @@ XXX
 [Deploying software to a cluster](TPAexec-Deploy.md)
 [Rehydrating a cluster](TPAexec-Rehydrate.md)
 
-## Miscellaneous
-
-[PuTTY configuration instructions](TPAexec-PuTTY_Config.md)
-
 ## Help
 
 Write to tpa@2ndQuadrant.com for help.
