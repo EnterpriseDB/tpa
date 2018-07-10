@@ -34,7 +34,8 @@ suit your needs.
 
 ### Provisioning
 
-The ``tpaexec provision`` command takes config.yml and creates instances
+The [``tpaexec provision``](tpaexec-provision.md)
+command takes config.yml and creates instances
 and other resources required by the cluster. The details of this process
 depend on the architecture (e.g., M1, BDR-Always-ON) and platform (e.g.,
 AWS, lxd) that you selected while configuring the cluster.
@@ -59,7 +60,8 @@ can access via ssh (with sudo to root).
 
 ### Deployment
 
-The ``tpaexec deploy`` command takes the details of the provisioned
+The [``tpaexec deploy``](tpaexec-deploy.md)
+command takes the details of the provisioned
 servers (which may or may not have actually been created by ``tpaexec
 provision``; but it doesn't matter who created them so long as ssh and
 sudo access is available) and installs Postgres and other software and
@@ -105,18 +107,10 @@ XXX
 ### Architectures
 XXX
 
-### Configuration
+### Other references
 
 [Customising the cluster configuration](TPAexec-Postgres_configuration_and_other_customisations.md)
-
-### Provisioning
-
-[Provisioning a cluster](TPAexec-Provision.md)
-(see also [provisioning on bare-metal servers](TPAexec-Provision-baremetal.md))
-
-### Deployment
-
-[Deploying software to a cluster](TPAexec-Deploy.md)
+[Provisioning on bare-metal servers](TPAexec-Provision-baremetal.md)
 [Rehydrating a cluster](TPAexec-Rehydrate.md)
 
 ## Help
