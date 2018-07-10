@@ -5,7 +5,7 @@ TPAexec
 
 Confidential property of 2ndQuadrant; not for public release.
 
-## Overview
+## Introduction
 
 TPA (Trusted Postgres Architecture) is a set of recommendations from
 2ndQuadrant about how to set up a Postgres cluster in various scenarios.
@@ -14,6 +14,20 @@ applicable to quick testbed setups as to production environments.
 
 TPAexec is an orchestration tool that uses Ansible to build Postgres
 clusters according to 2ndQuadrant's recommendations.
+
+### Architectures
+
+An architecture is a recommended layout of servers and software to set
+up Postgres for a specific purpose.
+
+Examples include "M1" (Postgres with a primary and multiple streaming
+replicas) and "BDR-Always-ON" (Postgres with BDR in a configuration
+meant for HA).
+
+### Platforms
+
+A platform is a means to host the servers to deploy any architecture.
+Examples include AWS, lxd, and bare-metal servers.
 
 ## What can TPAexec do?
 
@@ -97,18 +111,9 @@ full range of Ansible functionality is at your disposal at every stage.
 
 [TPAexec installation instructions](INSTALL.md)
 
-## Clusters
+### References
 
-[Cluster design and implementation considerations](TPAexec-Cluster_Design_and_Implementation_Considerations.md)
-
-### Platforms
-XXX
-
-### Architectures
-XXX
-
-### Other references
-
+* [Cluster design and implementation considerations](TPAexec-Cluster_Design_and_Implementation_Considerations.md)
 * [Customising the cluster configuration](TPAexec-Postgres_configuration_and_other_customisations.md)
 * [Provisioning on bare-metal servers](TPAexec-Provision-baremetal.md)
 * [Rehydrating a cluster](TPAexec-Rehydrate.md)
