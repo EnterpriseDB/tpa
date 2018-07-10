@@ -8,8 +8,8 @@ copyright-years: 2014-2018
 toc: true
 ---
 
-TPAexec - Cluster Design and Implementation Considerations
-==================
+TPAexec - Cluster design and implementation considerations
+==========================================================
 
 © Copyright 2ndQuadrant, 2018. Confidential property of 2ndQuadrant; not for public release.
 ### TPAexec Overview

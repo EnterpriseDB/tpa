@@ -9,7 +9,7 @@ toc: true
 ---
 
 TPAexec - Postgres configuration and other customisations
-==================
+=========================================================
 
 © Copyright 2ndQuadrant, 2018. Confidential property of 2ndQuadrant; not for public release.
 

@@ -8,8 +8,8 @@ copyright-years: 2014-2018
 toc: true
 ---
 
-TPAexec generate configuration guide
-==================
+tpaexec configure
+=================
 
 © Copyright 2ndQuadrant, 2014-2018. Confidential property of 2ndQuadrant; not for public release.
 

@@ -7,7 +7,8 @@ copyright-holder: 2ndQuadrant Limited
 toc: true
 ---
 
-# TPAexec - installation from source repository
+TPAexec installation from source repository
+===========================================
 
 © Copyright 2ndQuadrant, 2014-2018. Confidential property of 2ndQuadrant; not for public release.
 

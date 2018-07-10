@@ -8,8 +8,8 @@ copyright-years: 2014-2018
 toc: true
 ---
 
-TPA configuration guide - deploy
-==================
+tpaexec deploy
+==============
 
 © Copyright 2ndQuadrant, 2018. Confidential property of 2ndQuadrant; not for public release.
 
