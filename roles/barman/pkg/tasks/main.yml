@@ -2,12 +2,25 @@
 
 - name: Install Barman package
   package:
-    name: barman
-    state: "{{ barman_package_version|default('latest') }}"
+    name: "{{
+      barman_packages|packages_for(ansible_os_family, barman_package_version)
+    }}"
+    state: "{{
+      (barman_package_version is defined)|ternary('present', 'latest')
+    }}"
+  vars:
+    barman_packages:
+      Debian: [barman]
+      RedHat: [barman]
+      Ubuntu: [barman]
   tags: [barman, pkg]
 
 - name: Install Postgres client package
   package:
-    name: "{{ postgres_client_packages[ansible_os_family] }}"
-    state: latest
-  tags: [barman, pkg]
+    name: "{{
+      postgres_client_packages|packages_for(ansible_os_family, postgres_package_version)
+    }}"
+    state: "{{
+      (postgres_package_version is defined)|ternary('present', 'latest')
+    }}"
+  tags: [barman, postgres, pkg]

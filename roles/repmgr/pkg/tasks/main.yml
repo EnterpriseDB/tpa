@@ -2,8 +2,12 @@
 
 - name: Install repmgr package
   package:
-    name: "{{ repmgr_packages[ansible_os_family] }}"
-    state: "{{ repmgr_package_version|default('latest') }}"
+    name: "{{
+      repmgr_packages|packages_for(ansible_os_family, repmgr_package_version)
+    }}"
+    state: "{{
+      (repmgr_package_version is defined)|ternary('present', 'latest')
+    }}"
   tags: [repmgr, pkg]
 
 # We install our own service units later, so we disable the packaged

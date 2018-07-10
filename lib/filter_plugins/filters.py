@@ -119,6 +119,23 @@ def identify_os(name):
 
     return 'Unknown'
 
+# Given a hash that maps os names to package lists, the name of an os, and an
+# optional version suffix, this function returns a list of packages for the
+# given os, with the version suffix applied (if provided).
+
+def packages_for(packages, os, version):
+    ret = []
+
+    for p in packages[os]:
+        if not isinstance(version, StrictUndefined):
+            sep = '='
+            if os == 'RedHat':
+                sep = '-'
+            p = '%s%s%s' % (p, sep, version)
+        ret.append(p)
+
+    return ret
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -130,4 +147,5 @@ class FilterModule(object):
             'remove_keys': remove_keys,
             'parse_conninfo': parse_conninfo,
             'identify_os': identify_os,
+            'packages_for': packages_for,
         }

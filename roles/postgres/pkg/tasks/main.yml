@@ -19,11 +19,13 @@
   package:
     name: >
       {{ query('flattened', package_lists) }}
-    state: "{{ postgres_package_version|default('latest') }}"
+    state: "{{
+      (postgres_package_version is defined)|ternary('present', 'latest')
+    }}"
   vars:
     package_lists:
-      - "{{ postgres_packages[ansible_distribution] }}"
-      - "{{ postgres_debug_packages[ansible_distribution] }}"
+      - "{{ postgres_packages|packages_for(ansible_distribution, postgres_package_version) }}"
+      - "{{ postgres_debug_packages|packages_for(ansible_distribution, postgres_package_version) }}"
   tags: [postgres, pkg]
 
 - name: Install additional Postgres packages
