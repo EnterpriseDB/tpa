@@ -19,6 +19,9 @@
 
 ### Bugfixes
 
+- Properly handle stopped instances in the inventory, so that re-running
+  provision does not create duplicates for instances that happen to not
+  be running at the time (f0cb0ea)
 - Properly handle an AWS race condition that resulted in "Invalid IAM
   Instance Profile name" errors during provisioning (f37de54)
 - Make deployment fail if ec2.py fails; depends on a patch available in
