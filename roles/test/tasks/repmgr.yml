@@ -1,0 +1,50 @@
+---
+
+- name: Run repmgr node status
+  command: >
+    repmgr node status -f {{ repmgr_conf_dir }}/repmgr.conf
+  register: repmgr_status
+  ignore_errors: yes
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- include_tasks: output.yml
+  vars:
+    output_file: repmgr-node-status.txt
+    content: |
+      {{ repmgr_status.stdout }}
+
+- name: Run repmgr node check
+  command: >
+    repmgr node check -f {{ repmgr_conf_dir }}/repmgr.conf
+  register: repmgr_check
+  ignore_errors: yes
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- include_tasks: output.yml
+  vars:
+    output_file: repmgr-node-check.txt
+    content: |
+      {{ repmgr_check.stdout }}
+
+- name: Fail if either of the above tasks failed
+  fail:
+    msg: "repmgr node status/check failed (use --skip-tags fail to skip)"
+  when:
+    repmgr_status is not successful or repmgr_check is not successful
+  tags: [repmgr, fail]
+
+- name: Run repmgr cluster show
+  command: >
+    repmgr cluster show -f {{ repmgr_conf_dir }}/repmgr.conf
+  register: repmgr_cluster
+  ignore_errors: yes
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- include_tasks: output.yml
+  vars:
+    output_file: repmgr-cluster-show.txt
+    content: |
+      {{ repmgr_cluster.stdout }}

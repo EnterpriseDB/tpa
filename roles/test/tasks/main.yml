@@ -28,8 +28,23 @@
       set_fact:
         pgdata_initialised: "{{ pgdata.stat.exists }}"
 
+    - name: Check if repmgr.conf exists
+      stat:
+        path: "{{ repmgr_conf_dir }}/repmgr.conf"
+      register: repmgrconf
+      become_user: "{{ postgres_user }}"
+      become: yes
+
+    - name: Set repmgr_initialised
+      set_fact:
+        repmgr_initialised: "{{ repmgrconf.stat.exists }}"
+
     - include_tasks: postgres.yml
       when: pgdata_initialised
+
+    - include_tasks: repmgr.yml
+      when: pgdata_initialised
+      tags: repmgr
   when: >
     'postgres' in role
   tags: postgres
