@@ -26,7 +26,8 @@ TPAexec operates in four distinct stages:
 
 ### Configuration
 
-The ``tpaexec configure`` command with a few command-line options will
+The ``[tpaexec configure](tpaexec-configure.md)``
+command with a few command-line options will
 generate a simple YAML configuration file to describe the cluster you
 want. It is ready for immediate use, and you can modify it to better
 suit your needs.
@@ -105,8 +106,6 @@ XXX
 XXX
 
 ### Configuration
-
-[tpaexec configure](TPAexec-Generate-configuration.md)
 
 [Customising the cluster configuration](TPAexec-Postgres_configuration_and_other_customisations.md)
 
