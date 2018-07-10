@@ -115,8 +115,8 @@ full range of Ansible functionality is at your disposal at every stage.
 
 * [Cluster design and implementation considerations](TPAexec-Cluster_Design_and_Implementation_Considerations.md)
 * [Customising the cluster configuration](TPAexec-Postgres_configuration_and_other_customisations.md)
-* [Provisioning on bare-metal servers](TPAexec-Provision-baremetal.md)
-* [Rehydrating a cluster](TPAexec-Rehydrate.md)
+* [Provisioning on bare-metal servers](tpaexec-provision-baremetal.md)
+* [Rehydrating a cluster](tpaexec-rehydrate.md)
 
 ## Help
 
