@@ -1,10 +1,11 @@
 ---
 
-- name: Copy ec2.py to inventory directory
-  copy:
-    src: ec2.py
+- name: Link to ec2.py from inventory directory
+  file:
+    src: "{{ tpa_dir }}/platforms/aws/inventory/ec2.py"
     dest: "{{ cluster_dir }}/inventory/ec2.py"
-    mode: "0755"
+    state: link
+    force: yes
 
 - name: Install customised ec2.ini
   template:
