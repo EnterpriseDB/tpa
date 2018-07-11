@@ -275,18 +275,22 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
 # - node: 1
 #   xyz: 123
 #   pqr: 234
+#   region: x
 #   export_as_vars:
 #     - xyz
 #     - pqr
 #   vars:
 #     abc: 345
 #
-# it would return {xyz: 123, pqr: 234}, which could then be combined with vars.
+# it would return {xyz: 123, pqr: 234, region: x}, which could then be combined
+# with vars. (Note that 'region' is always exported, regardless of whether it's
+# mentioned in export_as_vars or not.)
 
 def export_as_vars(instance):
     exports = {}
 
-    for k in instance.get('export_as_vars', []):
+    always_export = ['region']
+    for k in always_export + instance.get('export_as_vars', []):
         exports[k] = instance.get(k)
 
     return exports
