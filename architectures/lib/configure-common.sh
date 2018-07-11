@@ -9,7 +9,6 @@ shift
 
 mkdir $cluster
 trap "rm -rf $cluster" ERR
-cluster_name=$(basename $cluster)
 
 error() {
     echo "ERROR: $@" >&2

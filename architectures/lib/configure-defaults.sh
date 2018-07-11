@@ -1,5 +1,6 @@
 set -eu
 
+cluster_name=$(basename $cluster)
 platform=${platform:-aws}
 region=${region:-eu-west-1}
 instance_type=${instance_type:-t2.micro}
