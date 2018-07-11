@@ -18,14 +18,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 source $libdir/configure-defaults.sh
+vars+=([cascaded_replicas]=${cascaded_replicas:=1})
+vars+=([instances]=${instances:=$((3+$cascaded_replicas))})
 
 if [[ "$platform" != "aws" ]]; then
     error "currently unsupported platform: $platform (use '--platform aws')"
 fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
-
-instances=$((3+${cascaded_replicas:=1}))
 hostnames=(zero $($libdir/hostnames $instances))
 
 cat > $cluster/config.yml <<CONFIG
