@@ -1,6 +1,8 @@
 IFS=$' \t\n'
 set -eu
 
+declare -A vars
+
 archdir=$(dirname $0)
 libdir=$(dirname $0)/../lib
 
