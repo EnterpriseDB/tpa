@@ -25,7 +25,7 @@ fi
 subnet=${subnet:-$($libdir/subnets 1)}
 
 instances=8
-hostnames=($($libdir/hostnames $((instances+1))))
+hostnames=(zero $($libdir/hostnames $instances))
 
 cat > $cluster/config.yml <<CONFIG
 ---

@@ -32,6 +32,7 @@ if [[ "$platform" != "aws" ]]; then
 fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
+hostnames=(zero $($libdir/hostnames $instances))
 
 cat > $cluster/config.yml <<PREAMBLE
 ---
@@ -69,12 +70,11 @@ instance_defaults:
 instances:
 PREAMBLE
 
-hostnames=($($libdir/hostnames $instances))
 for i in $(seq 1 $instances);
 do
     cat >> $cluster/config.yml <<INSTANCE
   - node: $i
-    Name: ${hostnames[$i-1]}
+    Name: ${hostnames[$i]}
 INSTANCE
 done
 
