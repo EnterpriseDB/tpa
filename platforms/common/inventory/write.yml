@@ -35,7 +35,7 @@
 - name: Write group_vars/{{ cluster_tag }}/{{ file_name }}
   copy:
     content: |
-      {{ group_vars|to_nice_yaml }}
+      {{ group_vars|to_nice_yaml(indent=2) }}
     dest: "{{ group_dir }}/{{ file_name }}"
     force: yes
   vars:
@@ -46,7 +46,7 @@
 - name: Write group_vars/{{ cluster_tag }}/{{ file_name }}
   copy:
     content: |
-      {{ group_vars|to_nice_yaml }}
+      {{ group_vars|to_nice_yaml(indent=2) }}
     dest: "{{ group_dir }}/{{ file_name }}"
     force: yes
   vars:
@@ -64,7 +64,7 @@
 - name: Write general variables for hosts
   copy:
     content: |
-      {{ host_vars|to_nice_yaml }}
+      {{ host_vars|to_nice_yaml(indent=2) }}
     dest: "{{ host_dir }}/{{ file_name }}"
     force: yes
   vars:
@@ -81,7 +81,7 @@
 - name: Write topology variables for hosts
   copy:
     content: |
-      {{ host_vars|to_nice_yaml }}
+      {{ host_vars|to_nice_yaml(indent=2) }}
     dest: "{{ host_dir }}/{{ file_name }}"
     force: yes
   vars:
@@ -132,7 +132,7 @@
 - name: Write volume definitions for hosts
   copy:
     content: |
-      {{ host_vars|to_nice_yaml }}
+      {{ host_vars|to_nice_yaml(indent=2) }}
     dest: "{{ host_dir }}/{{ file_name }}"
     force: yes
   vars:
