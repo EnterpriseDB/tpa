@@ -7,6 +7,10 @@ libdir=$(dirname $0)/../lib
 cluster=${1:?"No cluster directory specified (please run 'tpaexec configure clustername …' instead)"}
 shift
 
+mkdir $cluster
+trap "rm -rf $cluster" ERR
+cluster_name=$(basename $cluster)
+
 error() {
     echo "ERROR: $@" >&2
     exit 1

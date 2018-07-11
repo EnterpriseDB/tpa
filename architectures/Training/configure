@@ -33,10 +33,6 @@ fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
 
-mkdir $cluster
-
-trap "rm -rf $cluster" ERR
-
 cat > $cluster/config.yml <<PREAMBLE
 ---
 architecture: $architecture

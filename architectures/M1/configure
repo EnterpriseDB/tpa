@@ -25,11 +25,6 @@ fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
 
-mkdir $cluster
-cluster_name=$(basename $cluster)
-
-trap "rm -rf $cluster" ERR
-
 instances=$((3+${cascaded_replicas:=1}))
 hostnames=($($libdir/hostnames $((instances+1))))
 

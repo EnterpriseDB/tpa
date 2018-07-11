@@ -24,11 +24,6 @@ fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
 
-mkdir $cluster
-cluster_name=$(basename $cluster)
-
-trap "rm -rf $cluster" ERR
-
 instances=8
 hostnames=($($libdir/hostnames $((instances+1))))
 
