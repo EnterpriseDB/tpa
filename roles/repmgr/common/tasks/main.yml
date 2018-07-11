@@ -8,13 +8,14 @@
     upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"
 
 # Find any backed-up instance that is, or is a replica of, said primary.
-# This isn't clever about trying to find a backup in the same region or
-# anything like that. It'll be happy with any backup it finds.
+# We would prefer to use a backup server in the same region, but we'll
+# take whatever we can find.
 
 - name: Record name of any upstream or sibling with backups
   set_fact:
     upstream_backedup: "{{
-      groups[cluster_tag]|instance_with_backup_of(upstream_primary, hostvars)
+      groups[cluster_tag]
+      |instance_with_backup_of(upstream_primary, inventory_hostname, hostvars)
     }}"
 
 - name: Set default repmgr_location

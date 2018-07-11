@@ -37,16 +37,27 @@ def upstream_root(h, hostvars):
         h = hostvars[h].get('upstream')
     return h
 
-# Given a list of hostnames and a primary name and hostvars, returns the name of
-# the first listed instance that is descended from the primary and has a backup
-# instance defined, or None if none of the given named instances meets those
-# criteria.
+# Given a list of hostnames and the names of a primary instance and some other
+# instance (and a copy of hostvars), returns the name of an instance that has
+# «backup: xxx» defined and is descended from the primary. It will prefer the
+# first backed-up instance in the same region as "somehost", otherwise return
+# the first backed-up instance. Returns None if no instances match.
 
-def instance_with_backup_of(hosts, primary, hostvars):
+def instance_with_backup_of(hosts, primary, somehost, hostvars):
+    candidates = []
+
     for h in hosts:
         if hostvars[h].get('backup', '') != '' and \
             upstream_root(h, hostvars) == primary:
-            return h
+            candidates.append(h)
+
+    for backedup in candidates:
+        if hostvars[backedup].get('region', 'left') == \
+            hostvars[somehost].get('region', 'right'):
+            return c
+    if candidates:
+        return candidates[0]
+
     return None
 
 # Takes a list of volumes and returns a new list where there is only one entry

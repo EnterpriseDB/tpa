@@ -41,6 +41,8 @@
 - Initial LXD platform support
 - Support postgres/repmgr/barman package version selection (6e904c8)
   via ``tpaexec configure … --postgres-package version``
+- When generating restore_command, prefer the closest Barman server
+  (i.e., one in the same region) if there's more than one available
 - Deprecate ec2_ami_user and cluster_ssh_user in favour of setting
   "vars: ansible_user: xxx" in instance_defaults (a9c30e1)
 - Make cluster_tags optional. Owner is now automatically set to the
