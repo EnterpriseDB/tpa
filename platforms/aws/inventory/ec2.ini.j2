@@ -16,7 +16,8 @@ destination_variable = public_dns_name
 vpc_destination_variable = ip_address
 {% endif %}
 
-all_instances = True
+all_instances = False
+instance_states = pending, running, stopping, stopped
 
 route53 = False
 rds = False
