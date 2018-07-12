@@ -31,6 +31,7 @@ fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
 hostnames=(zero $($libdir/hostnames $instances))
+vars+=([cluster_vars]="$($libdir/cluster-vars)")
 
 cat > $cluster/config.yml <<PREAMBLE
 ---
@@ -40,7 +41,7 @@ cluster_name: training_$issue
 cluster_tags:
   Reference: https://redmine.2ndquadrant.it/issues/$issue
 
-cluster_vars: $($libdir/cluster-vars)
+cluster_vars: ${vars[cluster_vars]}
 
 cluster_rules:
   - {proto: tcp, from_port: 0, to_port: 65535, cidr_ip: 0.0.0.0/0}

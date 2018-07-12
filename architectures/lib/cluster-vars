@@ -1,38 +1,35 @@
-#!/bin/bash
+#!/usr/bin/env perl
 #
 # This script is meant to be used as follows:
 #
-# cat <<CONFIG
-# cluster_vars: $($libdir/cluster-vars)
-#   any_other: settings
-#   to: follow here
-# …
-# CONFIG
+#   cluster_vars=$($libdir/cluster-vars key=value …)
+#   cat <<CONFIG
+#   cluster_vars: $cluster_vars
+#   …
+#   CONFIG
 #
-# The output reflects the common options handled by configure-options.sh
-# (not everything that belongs in cluster_vars is configurable here).
+# The single-line output in YAML hash format contains zero or more vars,
+# as set by key=value pairs specified on the command line and options
+# passed to tpaexec configure (e.g., ``--postgres-package-version``).
+# Not everything that belongs in cluster_vars is configurable here.
 
-set -e
+my @output;
 
-echo
+my %envvars = (
+    POSTGRES_VERSION => "postgres_version"
+    , POSTGRES_PACKAGE_VERSION => "postgres_package_version"
+    , REPMGR_PACKAGE_VERSION => "repmgr_package_version"
+    , BARMAN_PACKAGE_VERSION => "barman_package_version"
+    , TPA_2Q_REPO => "tpa_2q_repo"
+);
+foreach my $k (keys %envvars) {
+    if ($ENV{$k}) {
+        push @output, "$envvars{$k}: $ENV{$k}";
+    }
+}
+foreach my $s (@ARGV) {
+    my ($k, $v) = split /=/, $s, 2;
+    push @output, "$k: $v";
+}
 
-if [[ -n "$POSTGRES_VERSION" ]]; then
-    echo "  postgres_version: $POSTGRES_VERSION"
-    echo "  postgres_installation_source: pkg"
-fi
-
-if [[ -n "$POSTGRES_PACKAGE_VERSION" ]]; then
-    echo "  postgres_package_version: $POSTGRES_PACKAGE_VERSION"
-fi
-
-if [[ -n "$REPMGR_PACKAGE_VERSION" ]]; then
-    echo "  repmgr_package_version: $REPMGR_PACKAGE_VERSION"
-fi
-
-if [[ -n "$BARMAN_PACKAGE_VERSION" ]]; then
-    echo "  barman_package_version: $BARMAN_PACKAGE_VERSION"
-fi
-
-if [[ -n "$TPA_2Q_REPO" ]]; then
-    echo "  tpa_2q_repo: $TPA_2Q_REPO"
-fi
+print "{@{[join(', ', @output)]}}\n";

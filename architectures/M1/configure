@@ -27,13 +27,15 @@ fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
 hostnames=(zero $($libdir/hostnames $instances))
+vars+=([cluster_tags]="$($libdir/cluster-tags)")
+vars+=([cluster_vars]="$($libdir/cluster-vars vpn_network=192.168.33.0/24)")
 
 cat > $cluster/config.yml <<CONFIG
 ---
 architecture: $architecture
 
 cluster_name: $cluster_name
-cluster_tags: $($libdir/cluster-tags)
+cluster_tags: ${vars[cluster_tags]}
 
 ec2_ami:
   Name: $image_name
@@ -42,8 +44,7 @@ ec2_ami:
 ec2_vpc:
   Name: Test
 
-cluster_vars: $($libdir/cluster-vars)
-  vpn_network: 192.168.33.0/24
+cluster_vars: ${vars[cluster_vars]}
 
 instance_defaults:
   type: $instance_type

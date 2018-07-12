@@ -25,13 +25,16 @@ fi
 
 subnet=${subnet:-$($libdir/subnets 1)}
 hostnames=(zero $($libdir/hostnames $instances))
+vars+=([cluster_tags]="$($libdir/cluster-tags)")
+vars+=([cluster_vars]="$($libdir/cluster-vars \
+    tpa_2q_repo=internal-snapshot postgres_coredump_filter=0xff repmgr_failover=manual)")
 
 cat > $cluster/config.yml <<CONFIG
 ---
 architecture: $architecture
 
 cluster_name: $cluster_name
-cluster_tags: $($libdir/cluster-tags)
+cluster_tags: ${vars[cluster_tags]}
 
 ec2_ami:
   Name: $image_name
@@ -44,10 +47,7 @@ cluster_rules:
   - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
   - {proto: tcp, from_port: 5432, to_port: 5432, cidr_ip: $subnet}
 
-cluster_vars: $($libdir/cluster-vars)
-  tpa_2q_repo: internal-snapshot
-  postgres_coredump_filter: 0xff
-  repmgr_failover: manual
+cluster_vars: ${vars[cluster_vars]}
 
 instance_defaults:
   type: $instance_type
