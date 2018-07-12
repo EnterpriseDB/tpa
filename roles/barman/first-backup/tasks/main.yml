@@ -2,6 +2,13 @@
 
 # We force an immediate backup for any instances that do not have any
 # backups at all.
+#
+# We set minimum_redundancy to 3 by default, so we'll take up to three
+# backups (with a nearly empty database) to silence barman check (run
+# during tpaexec test). We won't try to take more than three backups,
+# and we do that only if there are no backups to begin with (i.e., we
+# won't always try to make up the difference between have_backups and
+# want_backups).
 
 - name: Count the number of backups for each instance
   command: >
@@ -13,11 +20,27 @@
   become: yes
 
 - set_fact:
-    backups: "{{
-      diagnosis.stdout|from_json
-      |json_query('servers.%s.backups' % backup_name)
+    diagnosis: "{{ diagnosis.stdout|from_json }}"
+
+- set_fact:
+    this_server: "{{
+      diagnosis|json_query('servers.%s' % backup_name)
     }}"
 
+- set_fact:
+    backups: "{{ this_server.backups }}"
+    minimum_redundancy: "{{
+      this_server.config.minimum_redundancy|default(1)
+    }}"
+
+- set_fact:
+    have_backups: >-
+      {{ backups|json_query("*.{status:status}|[?status=='DONE']")|length }}
+    want_backups: >-
+      {{ (0 < minimum_redundancy|int <= 3)|ternary(minimum_redundancy, 1) }}
+
 - include_tasks: first-backup.yml
+  vars:
+    num_backups: "{{ want_backups }}"
   when: >
-    backups|json_query("*.{status:status}|[?status=='DONE']")|length == 0
+    have_backups|int == 0

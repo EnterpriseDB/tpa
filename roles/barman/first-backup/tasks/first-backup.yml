@@ -94,6 +94,7 @@
 - name: Force an immediate backup
   command: >
     /usr/bin/barman backup "{{ backup_name }}"
+  with_sequence: start=1 end={{ num_backups|default(1) }}
   delegate_to: "{{ backup }}"
   become_user: barman
   become: yes
