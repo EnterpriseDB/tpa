@@ -15,6 +15,7 @@
     - vars.json
     - ssh_config
     - known_hosts
+    - ansible.log
     - id_{{ cluster_name|lower }}
     - id_{{ cluster_name|lower }}.pub
     - id_{{ cluster_name|lower }}.ppk
