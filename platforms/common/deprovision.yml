@@ -17,6 +17,7 @@
     - known_hosts
     - id_{{ cluster_name|lower }}
     - id_{{ cluster_name|lower }}.pub
+    - id_{{ cluster_name|lower }}.ppk
     - inventory/00-{{ cluster_name }}
     - inventory/group_vars/{{ cluster_tag }}/00-ansible.yml
     - inventory/group_vars/{{ cluster_tag }}/01-{{ cluster_name }}.yml
