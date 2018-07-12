@@ -23,12 +23,11 @@
 - include_tasks: output.yml
   vars:
     output_file: barman-diagnose.txt
-    content: |
-      {{ barman_diagnose.stdout|from_json|to_nice_json }}
+    content: "{{ barman_diagnose.stdout }}"
 
 - name: Fail if either of the above tasks failed
   fail:
-    msg: "Barman check/diagnose failed (use --skip-tags fail to skip)"
+    msg: "Barman check/diagnose failed"
   when:
     barman_check is not successful or barman_diagnose is not successful
   tags: [barman, fail]
