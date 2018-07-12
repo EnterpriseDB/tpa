@@ -24,7 +24,7 @@
   vars:
     output_file: barman-diagnose.txt
     content: |
-      {{ barman_diagnose.stdout }}
+      {{ barman_diagnose.stdout|from_json|to_nice_json }}
 
 - name: Fail if either of the above tasks failed
   fail:
