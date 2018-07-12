@@ -54,7 +54,7 @@ def instance_with_backup_of(hosts, primary, somehost, hostvars):
     for backedup in candidates:
         if hostvars[backedup].get('region', 'left') == \
             hostvars[somehost].get('region', 'right'):
-            return c
+            return backedup
     if candidates:
         return candidates[0]
 
