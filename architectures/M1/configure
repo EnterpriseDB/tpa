@@ -25,7 +25,8 @@ if [[ "$platform" != "aws" ]]; then
     error "currently unsupported platform: $platform (use '--platform aws')"
 fi
 
-vars+=([subnet]=${subnet:=$($libdir/subnets 1)})
+subnets=(${subnet:-$($libdir/subnets 2)})
+vars+=([subnets]=$(IFS=, && echo "[${subnets[*]}]"))
 hostnames=(zero $($libdir/hostnames $instances))
 vars+=([hostnames]=$(IFS=, && echo "[${hostnames[*]}]"))
 vars+=([cluster_tags]="$($libdir/cluster-tags)")

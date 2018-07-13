@@ -5,7 +5,9 @@
 instance_defaults:
   type: {{ instance_type }}
   region: {{ region }}
-  subnet: {{ subnet }}
+{% if subnets|length == 1 %}
+  subnet: {{ subnets[0] }}
+{% endif %}
   platform: {{ platform }}
   default_volumes:
     - device_name: root
@@ -22,16 +24,25 @@ instance_defaults:
 instances:
   - node: 1
     Name: {{ hostnames[1] }}
+{% if subnets|length != 1 %}
+    subnet: {{ subnets[0] }}
+{% endif %}
     role: primary
 
   - node: 2
     Name: {{ hostnames[2] }}
+{% if subnets|length != 1 %}
+    subnet: {{ subnets[0] }}
+{% endif %}
     role: replica
     upstream: {{ hostnames[1] }}
     backup: {{ hostnames[3] }}
 
   - node: 3
     Name: {{ hostnames[3] }}
+{% if subnets|length != 1 %}
+    subnet: {{ subnets[1] }}
+{% endif %}
     volumes:
         - device_name: /dev/xvdb
           volume_type: gp2
@@ -47,6 +58,9 @@ instances:
 {% for i in range(4,4+cascaded_replicas) %}
   - node: {{ i }}
     Name: {{ hostnames[i] }}
+{%   if subnets|length != 1 %}
+    subnet: {{ subnets[1] }}
+{%   endif %}
     role: replica
     upstream: {{ hostnames[2] }}
 {% endfor %}
