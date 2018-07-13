@@ -21,9 +21,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-source $libdir/configure-defaults.sh
 vars+=([issue]=${issue:?--redmine-id <num> is required})
 vars+=([instances]=${instances:?--instances <num> is required})
+source $libdir/configure-defaults.sh
 
 if [[ "$platform" != "aws" ]]; then
     error "currently unsupported platform: $platform (use '--platform aws')"
@@ -42,9 +42,6 @@ if [[ -z "${subnet:-}" && -z "${SUBNET_PATTERN:-}" ]]; then
 fi
 
 vars+=([subnet]=${subnet:=$($libdir/subnets 1)})
-hostnames=(zero $($libdir/hostnames $instances))
-vars+=([hostnames]=$(IFS=, && echo "[${hostnames[*]}]"))
-vars+=([cluster_vars]="$($libdir/cluster-vars)")
 
 cat > $cluster/config.yml <<PREAMBLE
 ---

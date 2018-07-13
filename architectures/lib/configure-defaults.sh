@@ -17,3 +17,8 @@ image=$($libdir/image $distribution $platform $architecture)
 eval $image
 
 vars+=([image_name]=$image_name [image_owner]=$image_owner [image_user]=$image_user)
+
+hostnames=(zero $($libdir/hostnames $instances))
+vars+=([hostnames]=$(IFS=, && echo "[${hostnames[*]}]"))
+vars+=([cluster_tags]="$($libdir/cluster-tags)")
+vars+=([cluster_vars]="$($libdir/cluster-vars)")
