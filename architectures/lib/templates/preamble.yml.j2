@@ -1,0 +1,11 @@
+architecture: {{ architecture }}
+
+cluster_name: {{ cluster_name }}
+{{ dict(cluster_tags=cluster_tags)|to_nice_yaml(indent=2) }}
+ec2_vpc:
+  Name: Test
+
+ec2_ami:
+  Name: {{ image_name }}
+  Owner: {{ image_owner }}
+

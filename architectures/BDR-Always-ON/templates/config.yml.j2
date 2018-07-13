@@ -1,0 +1,102 @@
+---
+{% include 'preamble.yml.j2' %}
+
+cluster_rules:
+  - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
+  - {proto: tcp, from_port: 5432, to_port: 5432, cidr_ip: {{ subnet }}}
+
+{{ dict(cluster_vars=cluster_vars)|to_nice_yaml(indent=2) }}
+instance_defaults:
+  type: {{ instance_type }}
+  region: {{ region }}
+  subnet: {{ subnet }}
+  platform: {{ platform }}
+  default_volumes:
+    - device_name: root
+      volume_type: gp2
+      volume_size: {{ root_volume_size }}
+    - device_name: /dev/xvdb
+      volume_type: gp2
+      volume_size: {{ postgres_volume_size }}
+      vars:
+        volume_for: postgres_data
+  vars:
+    ansible_user: {{ image_user }}
+
+instances:
+  - node: 1
+    Name: {{ hostnames[1] }}
+    role:
+      - primary
+      - bdr
+    vars:
+      bdr_node_group: {{ cluster_name }}
+
+  - node: 2
+    Name: {{ hostnames[2] }}
+    role:
+      - primary
+      - bdr
+    vars:
+      bdr_node_group: {{ cluster_name }}
+
+  - node: 3
+    Name: {{ hostnames[3] }}
+    role:
+      - primary
+      - bdr
+    vars:
+      bdr_node_group: {{ cluster_name }}
+
+  - node: 4
+    Name: {{ hostnames[4] }}
+    role:
+      - primary
+      - bdr
+    vars:
+      bdr_node_group: {{ cluster_name }}
+
+  - node: 5
+    Name: {{ hostnames[5] }}
+    upstream: {{ hostnames[1] }}
+    backup: {{ hostnames[6] }}
+    role:
+      - replica
+      - bdr
+
+  - node: 6
+    Name: {{ hostnames[6] }}
+    volumes:
+      - device_name: /dev/xvdb
+        volume_type: gp2
+        volume_size: {{ barman_volume_size }}
+        vars:
+          volume_for: barman_data
+    role:
+      - barman
+
+  - node: 7
+    Name: {{ hostnames[7] }}
+    volumes:
+      - device_name: /dev/xvdb
+        volume_type: none
+    role:
+      - pgbouncer
+      - haproxy
+    vars:
+      haproxy_backends:
+        - {{ hostnames[1] }}
+        - {{ hostnames[2] }}
+
+  - node: 8
+    Name: {{ hostnames[8] }}
+    volumes:
+      - device_name: /dev/xvdb
+        volume_type: none
+    role:
+      - pgbouncer
+      - haproxy
+    vars:
+      haproxy_backends:
+        - {{ hostnames[3] }}
+        - {{ hostnames[4] }}
