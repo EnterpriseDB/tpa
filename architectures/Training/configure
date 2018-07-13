@@ -25,10 +25,6 @@ vars+=([issue]=${issue:?--redmine-id <num> is required})
 vars+=([instances]=${instances:?--instances <num> is required})
 source $libdir/configure-defaults.sh
 
-if [[ "$platform" != "aws" ]]; then
-    error "currently unsupported platform: $platform (use '--platform aws')"
-fi
-
 if [[ -z "${subnet:-}" && -z "${SUBNET_PATTERN:-}" ]]; then
     mask=28
     if [[ $instances -gt 59 ]]; then

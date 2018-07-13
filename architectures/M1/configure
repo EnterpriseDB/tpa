@@ -20,11 +20,6 @@ done
 vars+=([cascaded_replicas]=${cascaded_replicas:=1})
 vars+=([instances]=${instances:=$((3+$cascaded_replicas))})
 source $libdir/configure-defaults.sh
-
-if [[ "$platform" != "aws" ]]; then
-    error "currently unsupported platform: $platform (use '--platform aws')"
-fi
-
 subnets=(${subnet:-$($libdir/subnets 2)})
 vars+=([subnets]=$(IFS=, && echo "[${subnets[*]}]"))
 vars+=([cluster_vars]="$($libdir/cluster-vars vpn_network=192.168.33.0/24)")

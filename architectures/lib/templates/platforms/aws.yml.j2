@@ -1,0 +1,13 @@
+ec2_vpc:
+  Name: Test
+
+ec2_ami:
+  Name: {{ image_name }}
+  Owner: {{ image_owner }}
+
+ec2_vpc_subnets:
+  {{ region }}:
+{% for s in subnets %}
+    {{ s }}:
+      az: {{ region }}{% if loop.first %}a{% else %}b{% endif %}{{ '\n' -}}
+{% endfor %}

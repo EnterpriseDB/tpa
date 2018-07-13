@@ -17,11 +17,6 @@ postgres_volume_size=${postgres_volume_size:-64}
 barman_volume_size=${barman_volume_size:-128}
 vars+=([instances]=${instances:=8})
 source $libdir/configure-defaults.sh
-
-if [[ "$platform" != "aws" ]]; then
-    error "currently unsupported platform: $platform (use '--platform aws')"
-fi
-
 subnets=(${subnet:-$($libdir/subnets 1)})
 vars+=([subnets]=$(IFS=, && echo "[${subnets[*]}]"))
 vars+=([cluster_vars]="$($libdir/cluster-vars \
