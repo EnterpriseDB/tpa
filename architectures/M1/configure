@@ -35,3 +35,4 @@ v=$(write_vars $cluster)
 template $archdir/templates/config.yml.j2 $v > $cluster/config.yml
 
 ln -sf $archdir/deploy.yml $cluster
+rm -f -- "$v"
