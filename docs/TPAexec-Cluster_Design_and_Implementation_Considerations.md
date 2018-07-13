@@ -78,14 +78,7 @@ The downside of configuring it this way, rather than having each standby replica
 
 An example **config.yml** to create the cascading example shown in Figure 1 can be seen below. 
 
-This example requires 3 VPC subnets, so in order to find 3 available subnets, the script **find-unused-subnets** was used as follows:
-
-**$TPA_DIR/misc/find-unused-subnets ~/tpa/clusters 3**
-
-**find-unused-subnets** *prints one or more random /24 subnets within the 10.33.0.0/16 Test VPC that are not already used by any cluster under the specified cluster parent directory*
-Note: this requires all cluster configs to be held under this directory structure.
-
-This example is split between 2 regions, so OpenVPN was used to allow communication - the standby server in AZ1 was chosen as the OpenVPN gateway server, by giving it the role "openvpn-server". Depending on network or CPU performance constraints, it may be preferable to choose a different gateway server.
+This example requires 3 VPC subnets, and is split between 2 regions, so OpenVPN was used to allow communication - the standby server in AZ1 was chosen as the OpenVPN gateway server, by giving it the role "openvpn-server". Depending on network or CPU performance constraints, it may be preferable to choose a different gateway server.
 
 In order to build the correct topology, the tag "**upstream:** \<Name>" is used, so that the node can be configured to replicate from the required host.
 

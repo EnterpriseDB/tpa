@@ -81,16 +81,6 @@ cluster_vars:
 
 This is a simple example with 2 subnets, 2 availability zones in one AWS region.
 
-In order to find 2 available subnets, the script **find-unused-subnets** was used as follows:
-
-```
-$ $TPA_DIR/misc/find-unused-subnets ~/tpa/clusters 2
-10.33.29.0/28
-10.33.27.16/28
-```
-
-substitute these subnets into **config.yml**
-
 ```
 ec2_vpc:
   Name: Test
