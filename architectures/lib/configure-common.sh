@@ -17,6 +17,14 @@ error() {
     exit 1
 }
 
+write_vars() {
+    v=$(mktemp -p $1 vars-XXX.yml)
+    for k in "${!vars[@]}"; do
+        echo "$k: ${vars[$k]}" >> $v
+    done
+    echo $v
+}
+
 template() {
     PYTHONPATH=${ANSIBLE_HOME:+$ANSIBLE_HOME/lib:}${PYTHONPATH:-""} \
     ANSIBLE_FILTER_PLUGINS=${ANSIBLE_FILTER_PLUGINS:+$ANSIBLE_FILTER_PLUGINS:}$TPA_DIR/lib/filter_plugins \

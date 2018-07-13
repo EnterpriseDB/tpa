@@ -29,8 +29,9 @@ if [[ "$platform" != "aws" ]]; then
     error "currently unsupported platform: $platform (use '--platform aws')"
 fi
 
-subnet=${subnet:-$($libdir/subnets 1)}
+vars+=([subnet]=${subnet:=$($libdir/subnets 1)})
 hostnames=(zero $($libdir/hostnames $instances))
+vars+=([hostnames]=$(IFS=, && echo "[${hostnames[*]}]"))
 vars+=([cluster_vars]="$($libdir/cluster-vars)")
 
 cat > $cluster/config.yml <<PREAMBLE
