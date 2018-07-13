@@ -30,11 +30,11 @@ if [[ "$platform" != "aws" ]]; then
 fi
 
 mask=28
-if [[ $instances -gt 62 ]]; then
+if [[ $instances -gt 59 ]]; then
     error "specify --subnet-pattern if you need so many instances"
-elif [[ $instances -gt 30 ]]; then
+elif [[ $instances -gt 27 ]]; then
     mask=26
-elif [[ $instances -gt 14 ]]; then
+elif [[ $instances -gt 9 ]]; then
     mask=27
 fi
 
