@@ -1,7 +1,8 @@
 M1
 ==
 
-A Postgres cluster with a single primary and n replicas.
+A Postgres cluster with a primary and a streaming replica, one Barman
+server, and any number of replicas cascaded from the first one.
 
 Cluster configuration
 ---------------------
