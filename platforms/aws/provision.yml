@@ -104,8 +104,7 @@
 #
 # [Note: You probably don't want to create a new VPC. There is a
 # small limit on the number of VPCs permitted per region; in most
-# cases, you should use the existing Test VPC instead, and run
-# misc/find-unused-subnets to avoid conflicts with other clusters.]
+# cases, you should use the existing Test VPC instead.]
 #
 # After this task:
 #
