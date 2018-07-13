@@ -29,7 +29,16 @@ if [[ "$platform" != "aws" ]]; then
     error "currently unsupported platform: $platform (use '--platform aws')"
 fi
 
-vars+=([subnet]=${subnet:=$($libdir/subnets 1)})
+mask=28
+if [[ $instances -gt 62 ]]; then
+    error "specify --subnet-pattern if you need so many instances"
+elif [[ $instances -gt 30 ]]; then
+    mask=26
+elif [[ $instances -gt 14 ]]; then
+    mask=27
+fi
+
+vars+=([subnet]=${subnet:=$($libdir/subnets 1 10.33.x.x/$mask)})
 hostnames=(zero $($libdir/hostnames $instances))
 vars+=([hostnames]=$(IFS=, && echo "[${hostnames[*]}]"))
 vars+=([cluster_vars]="$($libdir/cluster-vars)")
