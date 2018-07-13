@@ -3,13 +3,13 @@
 
 cluster_rules:
   - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
-  - {proto: tcp, from_port: 5432, to_port: 5432, cidr_ip: {{ subnet }}}
+  - {proto: tcp, from_port: 5432, to_port: 5432, cidr_ip: {{ subnets[0] }}}
 
 {{ dict(cluster_vars=cluster_vars)|to_nice_yaml(indent=2) }}
 instance_defaults:
   type: {{ instance_type }}
   region: {{ region }}
-  subnet: {{ subnet }}
+  subnet: {{ subnets[0] }}
   platform: {{ platform }}
   default_volumes:
     - device_name: root
