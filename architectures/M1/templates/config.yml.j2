@@ -1,0 +1,52 @@
+---
+{% include 'preamble.yml.j2' %}
+
+{{ dict(cluster_vars=cluster_vars)|to_nice_yaml(indent=2) }}
+instance_defaults:
+  type: {{ instance_type }}
+  region: {{ region }}
+  subnet: {{ subnet }}
+  platform: {{ platform }}
+  default_volumes:
+    - device_name: root
+      volume_type: gp2
+      volume_size: {{ root_volume_size }}
+    - device_name: /dev/xvdb
+      volume_type: gp2
+      volume_size: {{ postgres_volume_size }}
+      vars:
+        volume_for: postgres_data
+  vars:
+    ansible_user: {{ image_user }}
+
+instances:
+  - node: 1
+    Name: {{ hostnames[1] }}
+    role: primary
+
+  - node: 2
+    Name: {{ hostnames[2] }}
+    role: replica
+    upstream: {{ hostnames[1] }}
+    backup: {{ hostnames[3] }}
+
+  - node: 3
+    Name: {{ hostnames[3] }}
+    volumes:
+        - device_name: /dev/xvdb
+          volume_type: gp2
+          volume_size: {{ barman_volume_size }}
+          vars:
+            volume_for: barman_data
+    role:
+      - barman
+      - log-server
+      - openvpn-server
+      - monitoring-server
+
+{% for i in range(4,4+cascaded_replicas) %}
+  - node: {{ i }}
+    Name: {{ hostnames[i] }}
+    role: replica
+    upstream: {{ hostnames[2] }}
+{% endfor %}
