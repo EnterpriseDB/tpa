@@ -36,3 +36,6 @@
       tags: [sys, hosts]
 
     - role: postgres
+
+    - role: final
+      tags: final
