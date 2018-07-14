@@ -127,7 +127,7 @@
 # availability zone, set ec2_vpc_subnets:
 #
 #   ec2_vpc_subnets:
-#     eu-west-1:
+#     us-east-1:
 #       192.0.2.0/27:
 #         az: us-east-1b
 #         Name: example1
