@@ -79,5 +79,6 @@
   vars:
     device: "{{ item.device }}"
     mountpoint: "{{ item.mountpoint }}"
+    encryption: "{{ item.encryption|default('none') }}"
   with_items:
     "{{ _volumes }}"

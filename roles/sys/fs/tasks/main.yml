@@ -28,7 +28,7 @@
         mountopts: "noauto{% if mountopts %},{{mountopts}}{% endif -%}"
       when: >
         'noauto' not in mountopts
-  when: encryption is defined
+  when: encryption|default('none') != 'none'
 
 - name: Set readahead on {{ _device }} to {{ '%d' % ((readahead|int)/2048) }}MB
   shell: >
