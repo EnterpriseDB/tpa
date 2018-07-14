@@ -1,14 +1,6 @@
 ---
 
-- name: Create rsyslog.d configuration directory
-  file:
-    path: /etc/rsyslog.d
-    owner: root
-    group: root
-    mode: 0755
-    state: directory
-
-- name: Create rsyslog configuration file for nodes
+- name: Add rsyslog rules for remote logging
   template:
     src: 99-tpa-node.conf.j2
     dest: /etc/rsyslog.d/99-tpa-node.conf
@@ -17,3 +9,5 @@
     mode: 0644
   notify:
     - Restart rsyslog
+
+- meta: flush_handlers
