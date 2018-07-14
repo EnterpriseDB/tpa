@@ -34,6 +34,11 @@
 
 - Instead of applying role 'postgres/final' on postgres instances,
   deploy.yml files should now apply role 'final' to all instances.
+- If a volume in config.yml has vars "volume_for" and "mountpoint" both
+  set, the latter will now take precedence over the default translation
+  based on volume_for. Setting a mountpoint without setting volume_for
+  is strongly discouraged (for postgres_data and barman_data volumes).
+  Setting volume_for alone is still fine.
 
 ### Other notable changes
 
