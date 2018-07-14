@@ -1,0 +1,9 @@
+/var/log/postgres/postgres.log {
+	daily
+	missingok
+	compress
+	dateext
+	copytruncate
+	create 640 postgres postgres
+	maxage 28
+}

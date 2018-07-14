@@ -65,6 +65,8 @@
     - role: sys/rsyslog
       tags: [sys, rsyslog]
 
+    - role: sys/logrotate
+
     - role: postgres
       when: >
         'postgres' in role

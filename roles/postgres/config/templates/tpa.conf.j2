@@ -17,7 +17,7 @@ bgwriter_lru_multiplier = {{ bgwriter_lru_multiplier|default(2.0) }}
 effective_io_concurrency = {{ effective_io_concurrency|default(1) }}
 
 log_destination = {{ log_destination|default('syslog') }}
-syslog_facility = {{ syslog_facility|default('LOCAL7') }}
+syslog_facility = {{ syslog_facility|default('LOCAL6') }}
 syslog_ident = {{ syslog_ident|default('postgres') }}
 
 log_checkpoints = on

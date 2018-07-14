@@ -1,0 +1,6 @@
+---
+
+- name: Add logrotate configuration for /var/log/postgres/postgres.log
+  copy:
+    src: postgres
+    dest: /etc/logrotate.d/postgres
