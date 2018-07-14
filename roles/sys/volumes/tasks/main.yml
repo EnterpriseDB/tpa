@@ -57,7 +57,14 @@
       }}
   when: >
     'mountpoint' in item or 'volume_for' in item
-    
+
+- name: Remember whether the postgres/barman volumes are encrypted
+  set_fact:
+    postgres_volume_encrypted: >-
+      {{ _volumes|json_query("[?volume_for=='postgres_data' && encryption]")|length != 0 }}
+    barman_volume_encrypted: >-
+      {{ _volumes|json_query("[?volume_for=='barman_data' && encryption]")|length != 0 }}
+
 # We end up with a list that looks like this:
 #
 # _volumes:
