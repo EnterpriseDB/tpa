@@ -45,7 +45,7 @@
 - name: Collect a list of devices and mountpoints to act on
   set_fact:
     _volumes: >
-      {{ _volumes|union([item|combine(_translated_settings)]) }}
+      {{ _volumes|union([_translated_settings|combine(item)]) }}
   with_items: >
     {{ volumes }}
   vars:
