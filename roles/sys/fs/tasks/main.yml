@@ -17,12 +17,14 @@
 - name: Record device name
   set_fact:
     _device: "{{ device }}"
+  tags: always
 
 - block:
     - name: Set up encryption on {{ device }}
       include_tasks: "{{ encryption }}.yml"
       vars:
         luks_device: "{{ _device }}"
+      tags: always
     - name: Set noauto in mount options for {{ _device }}
       set_fact:
         mountopts: "noauto{% if mountopts %},{{mountopts}}{% endif -%}"

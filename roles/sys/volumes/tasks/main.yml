@@ -26,6 +26,7 @@
         mountpoint: /opt/postgres
       barman_data:
         mountpoint: /var/lib/barman
+  tags: always
 
 # Although expand_instance_volumes() rejects unrecognised values by
 # duplicating our _translations table, we double-check that we don't
@@ -38,6 +39,7 @@
       - item.volume_for in _translations
   with_items: >
     {{ volumes|json_query('[?volume_for]') }}
+  tags: always
 
 # We filter out volumes with neither mountpoint/volume_for set and merge
 # in any settings found based on volume_for, including the mountpoint.
@@ -57,13 +59,19 @@
       }}
   when: >
     'mountpoint' in item or 'volume_for' in item
+  tags: always
 
 - name: Remember whether the postgres/barman volumes are encrypted
   set_fact:
     postgres_volume_encrypted: >-
       {{ _volumes|json_query("[?volume_for=='postgres_data' && encryption]")|length != 0 }}
+    postgres_volume_mountable: >-
+      {{ _volumes|json_query("[?volume_for=='postgres_data']")|length != 0 }}
     barman_volume_encrypted: >-
       {{ _volumes|json_query("[?volume_for=='barman_data' && encryption]")|length != 0 }}
+    barman_volume_mountable: >-
+      {{ _volumes|json_query("[?volume_for=='barman_data']")|length != 0 }}
+  tags: always
 
 # We end up with a list that looks like this:
 #
@@ -89,3 +97,4 @@
     encryption: "{{ item.encryption|default('none') }}"
   with_items:
     "{{ _volumes }}"
+  tags: always
