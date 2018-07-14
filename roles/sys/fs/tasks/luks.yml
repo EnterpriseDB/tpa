@@ -42,8 +42,9 @@
       args:
         executable: /bin/bash
       no_log: true
-
-    - name: Record updated mapped device name
-      set_fact:
-        _device: "/dev/mapper/{{ luks_volume }}"
   when: isluks_check is not successful
+
+- name: Record updated mapped device name
+  set_fact:
+    _device: "/dev/mapper/{{ luks_volume }}"
+  tags: always
