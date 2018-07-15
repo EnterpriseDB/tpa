@@ -581,6 +581,26 @@ case "$command" in
         ;;
 
     *)
+        # If the first argument looks like a cluster directory and the
+        # second argument refers to a playbook under that directory or
+        # in architectures/lib, we try to execute it as a playbook.
+
+        if [[ "${1:-}" && -d $1 && -f $1/config.yml ]]; then
+            for p in $1/$command.yml $TPA_DIR/architectures/lib/$command.yml; do
+                if [[ -f $p ]]; then
+                    playbook=$p
+                    break
+                fi
+            done
+            if [[ -n "${playbook:-}" ]]; then
+                cluster=$1
+                shift
+                cd $cluster
+                playbook $playbook "$@"
+                exit
+            fi
+        fi
+
         error "unrecognised tpaexec command: $command"
         ;;
 esac
