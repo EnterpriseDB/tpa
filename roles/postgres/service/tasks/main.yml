@@ -25,7 +25,7 @@
 - name: Enable postgres services
   systemd:
     name: "{{ item }}"
-    enabled: yes
+    enabled: "{{ not postgres_volume_encrypted|bool }}"
   with_items:
     - "{{ postgres_service_name }}"
     - "{{ postgres_service_name }}-monitor"
