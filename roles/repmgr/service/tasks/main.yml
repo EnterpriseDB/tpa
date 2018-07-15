@@ -17,5 +17,5 @@
 - name: Enable repmgr service
   systemd:
     name: repmgr
-    enabled: yes
+    enabled: "{{ not postgres_volume_encrypted|bool }}"
   tags: [repmgr, service]
