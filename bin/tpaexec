@@ -100,6 +100,10 @@ _create_and_activate_virtualenv() {
 _install_pip_packages() {
     pip_args=(--upgrade --no-cache-dir)
 
+    # If pip packages are bundled (i.e., the tpaexec-deps package has
+    # been installed), we configure pip to use them instead of trying
+    # to download them from the network.
+
     PIP_DIR=$TPA_DIR/pip-packages
     if [[ -d $PIP_DIR ]]; then
         pip_args+=(--no-index)
@@ -108,6 +112,15 @@ _install_pip_packages() {
 
     pip install "${pip_args[@]}" "pip>=10.0.1"
     pip install "${pip_args[@]}" -r $TPA_DIR/python-requirements.txt
+
+    # If we have a local copy of the ansible repository, we want to use
+    # it in-situ rather than installing it into the virtualenv (so that
+    # any changes take effect immediately). We do still need to install
+    # Ansible's own dependencies into the virtualenv.
+    #
+    # Otherwise, we need to install it into the virtualenv either from
+    # the bundled copy of the repository, or directly from github. In
+    # this case, pip will install the dependencies automatically.
 
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
         pip install "${pip_args[@]}" -r $ANSIBLE_HOME/requirements.txt
