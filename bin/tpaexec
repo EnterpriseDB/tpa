@@ -523,9 +523,7 @@ esac
 
 if [[ -f $TPA_DIR/tpa-virtualenv/bin/activate ]]; then
     if [[ "$(_detect_virtualenv)" != "virtualenv" ]]; then
-        set +u
-        source $TPA_DIR/tpa-virtualenv/bin/activate
-        set -u
+        _activate_virtualenv $TPA_DIR/tpa-virtualenv
     fi
 fi
 
