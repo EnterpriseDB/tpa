@@ -15,6 +15,10 @@
 
 - New ``tpaexec test`` command
 
+- New ``tpaexec setup`` command to setup a virtualenv and install Python
+  dependencies automatically (the virtualenv will also be automatically
+  activated when using tpaexec)
+
 - Automatic package builds
 
 ### Bugfixes
