@@ -19,20 +19,15 @@ Please install TPAexec packages unless you have been given access to the
 TPA repository and specifically advised to use it by 2ndQuadrant. If in
 doubt, please contact tpa@2ndQuadrant.com.
 
-## Clone the TPA repository
+## Quickstart
 
-The TPAexec packages install TPAexec into ``/opt/2ndQuadrant/TPA``.
+    [tpa]$ git clone https://github.com/2ndQuadrant/TPA
+    [tpa]$ ./TPA/bin/tpaexec setup
+    [tpa]$ ./TPA/bin/tpaexec selftest
 
-As you have decided not to use the packages please pick a different location (to avoid conflicts with future package installations) and clone the git repository:
+## Step-by-step installation
 
-```
-[tpa]$ git clone https://github.com/2ndQuadrant/TPA
-```
-
-## Install system packages
-
-Whereas the TPAexec package installs a number of packages as
-dependencies by default, you must install these by hand as follows:
+First, install some required system packages:
 
     # Debian or Ubuntu
     [root]# apt-get install python2.7 python-pip python-virtualenv \
@@ -46,54 +41,55 @@ dependencies by default, you must install these by hand as follows:
         [brew or port] install pwgen
         [brew or port] install openvpn
 
-## Python environment
+Then clone the TPA repository:
 
-To use TPAexec, you will need to set up a Python environment with the
-correct modules installed.
+    [tpa]$ git clone https://github.com/2ndQuadrant/TPA
 
-Set TPA_DIR and add the TPA bin directory to your path in the TPAexec user environment (and .bashrc / .profile):
-```
-    [tpa]$ export TPA_DIR=/path/to/TPA
-    [tpa]$ export PATH=$PATH:$TPA_DIR/bin
-```
-Create and activate a virtualenv, to avoid installing Ansible's Python module dependencies system-wide (highly recommended):
+We strongly recommend not cloning into ``/opt/2ndQuadrant/TPA`` so as to
+avoid any conflicts if you install the TPAexec packages in future. Apart
+from that, the location doesn't matter.
 
-```
-    [tpa]$ virtualenv ~/tpa-virtualenv
+For TPAexec developers only: if you need to make or test changes to
+2ndQuadrant Ansible (not ordinarily required), clone the repository and
+set ``ANSIBLE_HOME`` in your environment (and .bashrc/.profile):
 
-    # Activate ansible-python ( and add command to .bashrc/.profile)
-    [tpa]$ source ~/tpa-virtualenv/bin/activate
-```
-
-Install the python dependencies into the virtualenv (including ansible:
-```
-    # upgrade pip
-    [tpa]$ pip install --upgrade pip
-    [tpa]$ pip install -r $TPA_DIR/python-requirements.txt
-```
-You will need Ansible 2.6 from the [2ndQuadrant/ansible repository](https://github.com/2ndQuadrant/ansible).
-
-Clone the Ansible repository:
-
-```
-    [tpa]$ git clone --recursive https://github.com/2ndQuadrant/ansible
-```
-
-Set ANSIBLE_HOME in your environment (and .bashrc / .profile):
-
-```
+    [tpa]$ git clone https://github.com/2ndQuadrant/ansible
     [tpa]$ export ANSIBLE_HOME=/path/to/ansibledir
-```
 
-## Verification
+Next, install the TPAexec dependencies into an isolated virtualenv:
 
-Once you're done with all of the above steps, run the following command
-to verify your local installation:
+    [tpa]$ ./TPA/bin/tpaexec setup
+
+For convenience, add tpaexec to your PATH:
+
+    # The following line can also go into ~/.bashrc or similar
+    [tpa]$ export PATH=$PATH:/path/to/TPA/bin
+
+Finally, test that everything is as it should be:
 
     [tpa]$ tpaexec selftest
 
 If that command completes without any errors, your TPAexec installation
 is ready for use.
+
+## virtualenv options
+
+By default, ``tpaexec setup`` will create a virtualenv under
+``$TPA_DIR/tpa-virtualenv``, and activate it automatically whenever
+``tpaexec`` is invoked.
+
+You can run ``tpaexec setup --virtualenv /other/location`` to specify a
+different location for the new virtualenv. You can also install packages
+into an existing virtualenv by activating it before you invoke ``tpaexec
+setup``.
+
+We strongly suggest sticking to the default virtualenv when possible. If
+you use a different location, ``tpaexec`` cannot automatically activate
+the virtualenv, so it is your responsibility to do so before invoking
+``tpaexec``. For example, you could add the following to your shell
+startup scripts (i.e., .bashrc/.profile):
+
+    source /some/virtualenv/bin/activate
 
 ## Help
 
