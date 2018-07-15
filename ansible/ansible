@@ -21,6 +21,19 @@ fi
 
 export TPA_DIR=${TPA_DIR:-$TOP}
 
+# If we can find a virtualenv located relative to TPA_DIR and there is
+# no virtualenv activated already, we activate it as a convenience.
+
+if [[ -f $TPA_DIR/tpa-virtualenv/bin/activate ]]; then
+    _detect_virtualenv=$(/usr/bin/env python \
+        -c "import sys; print 'virtualenv' if hasattr(sys, 'real_prefix') else 'bare'")
+    if [[ "$_detect_virtualenv" != "virtualenv" ]]; then
+        set +u
+        source $TPA_DIR/tpa-virtualenv/bin/activate
+        set -u
+    fi
+fi
+
 # If you invoke ansible directly (i.e. not through this script), you
 # must set ANSIBLE_CONFIG as below.
 #
