@@ -108,8 +108,16 @@ _install_pip_packages() {
 
     pip install "${pip_args[@]}" "pip>=10.0.1"
     pip install "${pip_args[@]}" -r $TPA_DIR/python-requirements.txt
-    pip install "${pip_args[@]}" -r $PIP_DIR/ansible/requirements.txt
-    pip install "${pip_args[@]}" file:$PIP_DIR/ansible/
+
+    if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
+        pip install "${pip_args[@]}" -r $ANSIBLE_HOME/requirements.txt
+    else
+        ANSIBLE_REPO=git+https://github.com/2ndQuadrant/ansible
+        if [[ -d $PIP_DIR/ansible ]]; then
+            ANSIBLE_REPO=file:$PIP_DIR/ansible
+        fi
+        pip install "${pip_args[@]}" $ANSIBLE_REPO
+    fi
 }
 
 setup() {
