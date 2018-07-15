@@ -72,19 +72,12 @@ using OS packages to install these modules.)
 First, create the virtualenv, activate and install the packages using the install script.
 
     # Create a virtualenv and install the pip modules (including ansible).
-    [root]# /opt/2ndQuadrant/TPA/misc/tpa-virtualenv-install.sh
+    [root]# /opt/2ndQuadrant/TPA/bin/tpaexec setup
 
 Now, as a non-root user, add the following to your .bashrc or
 .profile (or equivalent shell startup configuration):
 
     [tpa]$ export PATH=$PATH:/opt/2ndQuadrant/TPA/bin
-
-To use TPAexec, you must also activate the virtualenv you created above.
-You may run this command either by hand (when you need to use TPAexec),
-or add the command to your .bashrc:
-
-    # Activate virtualenv
-    [tpa]$ source $TPA_DIR/tpa-virtualenv/bin/activate
 
 ## Verification
 

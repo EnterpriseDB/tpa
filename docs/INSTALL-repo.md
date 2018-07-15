@@ -95,19 +95,6 @@ to verify your local installation:
 If that command completes without any errors, your TPAexec installation
 is ready for use.
 
-SELinux known issue
--------------------
-
-A bug with virtualenv on some versions of a RHEL derivative host (RHEL and CentOS) can mean this error is generated from ansible:
-"Aborting, target uses selinux but python bindings (libselinux-python) aren't installed!"
-
-A workaround is to copy selinux package into the virtual environment: 
-
-```
-    [tpa]$ cp -rp /usr/lib64/python2.7/site-packages/selinux \
-    ~/tpa-virtualenv/lib/python2.7/site-packages
-```
-
 ## Help
 
 Write to tpa@2ndQuadrant.com for help.
