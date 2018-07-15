@@ -27,6 +27,20 @@ TPAexec.
 
 Commands run as root will be shown starting with a **[root]#** and commands run as tpa user will be shown starting with a **[tpa]$**
 
+## Quickstart
+
+Here are the commands you must run:
+
+    # Pick one of the following based on your distribution
+    [root]# apt-get install tpaexec-*.deb
+    [root]# yum install tpaexec-*.rpm
+
+    # Post-installation setup
+    [root]# /opt/2ndQuadrant/TPA/bin/tpaexec setup
+    [root]# /opt/2ndQuadrant/TPA/bin/tpaexec selftest
+
+More detailed explanations below.
+
 ## What time is it?
 
 Please make absolutely sure that your system has the correct date and
