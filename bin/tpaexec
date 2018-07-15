@@ -97,6 +97,21 @@ _create_and_activate_virtualenv() {
     _activate_virtualenv $vpath
 }
 
+_install_pip_packages() {
+    pip_args=(--upgrade --no-cache-dir)
+
+    PIP_DIR=$TPA_DIR/pip-packages
+    if [[ -d $PIP_DIR ]]; then
+        pip_args+=(--no-index)
+        pip_args+=(--find-links=file:$PIP_DIR)
+    fi
+
+    pip install "${pip_args[@]}" "pip>=10.0.1"
+    pip install "${pip_args[@]}" -r $TPA_DIR/python-requirements.txt
+    pip install "${pip_args[@]}" -r $PIP_DIR/ansible/requirements.txt
+    pip install "${pip_args[@]}" file:$PIP_DIR/ansible/
+}
+
 setup() {
     while [[ $# -gt 0 ]]; do
         opt=$1
@@ -114,8 +129,7 @@ setup() {
     done
 
     _create_and_activate_virtualenv ${vpath:=$TPA_DIR/tpa-virtualenv}
-
-    $TPA_DIR/misc/tpa-pip-install.sh
+    _install_pip_packages
 }
 
 configure() {
