@@ -19,8 +19,8 @@ clusters according to 2ndQuadrant's recommendations.
 
 With TPAexec, you can:
 
-1. Provision hosts and other resources on AWS (and, in future, other
-   platforms)
+1. Provision hosts and other resources on AWS and other platforms,
+   including existing (already-provisioned or bare metal) servers.
 
 2. Configure the operating system (tweak kernel settings, install
    packages, create users, set up password-less ssh between hosts…)
