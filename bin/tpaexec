@@ -37,13 +37,68 @@ ansible=$TPA_DIR/ansible/ansible
 #
 # These functions handle the various tpaexec commands.
 
-version () {
+version() {
     if [[ -f $TPA_DIR/VERSION ]]; then
         VERSION=$(cat $TPA_DIR/VERSION)
     else
         VERSION=$(cd $TPA_DIR && git describe)
     fi
     echo "# TPA $VERSION"
+}
+
+_activate_virtualenv() {
+    set +u
+    if ! source $1/bin/activate; then
+        error "couldn't source $1/bin/activate (is $1 a virtualenv?)"
+    fi
+    set -u
+}
+
+_create_and_activate_virtualenv() {
+    # If we're inside an activated virtualenv already, we don't need to
+    # do anything here.
+
+    env=$(/usr/bin/env python -c "import sys; print 'virtualenv' if hasattr(sys, 'real_prefix') else 'bare'")
+    if [[ "$env" == "virtualenv" ]]; then
+        return
+    fi
+
+    # If no virtualenv exists, we have to create it before we try to
+    # activate it below.
+
+    if [[ ! -d $vpath ]]; then
+        if ! command -v virtualenv &>/dev/null; then
+            error "can't find virtualenv in PATH (please install python-virtualenv)"
+        fi
+        if ! mkdir -p $vpath; then
+            error "couldn't create $vpath (try ``--virtualenv /other/path`` or use sudo)"
+        fi
+        virtualenv $vpath
+    fi
+
+    _activate_virtualenv $vpath
+}
+
+setup() {
+    while [[ $# -gt 0 ]]; do
+        opt=$1
+        shift
+
+        case "$opt" in
+            --virtualenv)
+                vpath=${1:?virtualenv location not specified}
+                shift
+                ;;
+            *)
+                error "unrecognised option: $opt"
+                ;;
+        esac
+    done
+
+    _create_and_activate_virtualenv \
+        ${vpath:=/opt/2ndQuadrant/TPA/tpa-virtualenv}
+
+    $TPA_dir/misc/tpa-pip-install.sh
 }
 
 configure() {
@@ -185,7 +240,7 @@ help() {
             cat <<TOPICS
 Available help topics:
     info
-    selftest
+    setup, selftest
     configure, configure-options
     provision, deprovision
     playbook, deploy, test,
@@ -218,6 +273,20 @@ Available info subcommands:
     tpaexec info architectures/xxx
         Displays information about a particular deployment architecture
 INFO
+            ;;
+
+        setup)
+            cat <<SETUP
+Command: tpaexec setup [--virtualenv /path/to/virtualenv]
+
+Installs all Python dependencies (Ansible, modules) in an isolated
+virtual environment.
+
+You may optionally specify ``--virtualenv /path/to/virtualenv`` to
+either use an existing virtualenv, or create one at the specified
+location. The default path is /opt/2ndQuadrant/TPA/tpa-virtualenv
+(which requires root permissions to set up).
+SETUP
             ;;
 
         selftest)
@@ -438,7 +507,7 @@ case "$command" in
         esac
         ;;
 
-    version|configure|selftest)
+    version|setup|configure|selftest)
         $command "$@"
         ;;
 
