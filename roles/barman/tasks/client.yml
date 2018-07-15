@@ -39,6 +39,6 @@
     month: "{{ _barman_backup_interval[3] }}"
     weekday: "{{ _barman_backup_interval[4] }}"
     job: >
-      [ -x /usr/bin/barman ] && /usr/bin/barman backup {{ backup_name }}
+      /etc/tpa/barman-home-ok && /usr/bin/barman backup {{ backup_name }}
     state: present
   delegate_to: "{{ backup }}"

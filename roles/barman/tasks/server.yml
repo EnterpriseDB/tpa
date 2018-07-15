@@ -10,6 +10,21 @@
     group: root
     mode: 0644
 
+- name: Install /etc/tpa/barman-home-ok
+  template:
+    src: barman-home-ok.j2
+    dest: /etc/tpa/barman-home-ok
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Test barman-home-ok before invoking barman cron
+  lineinfile:
+    path: /etc/cron.d/barman
+    regexp: 'barman -q cron$'
+    line: >-
+      * * * * * barman /etc/tpa/barman-home-ok && /usr/bin/barman -q cron
+
 - name: Ensure /etc/barman.d exists
   file:
     path: /etc/barman.d
