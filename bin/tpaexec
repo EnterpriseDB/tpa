@@ -98,7 +98,7 @@ setup() {
     _create_and_activate_virtualenv \
         ${vpath:=/opt/2ndQuadrant/TPA/tpa-virtualenv}
 
-    $TPA_dir/misc/tpa-pip-install.sh
+    $TPA_DIR/misc/tpa-pip-install.sh
 }
 
 configure() {
