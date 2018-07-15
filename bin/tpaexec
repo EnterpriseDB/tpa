@@ -46,6 +46,10 @@ version() {
     echo "# TPA $VERSION"
 }
 
+_detect_virtualenv() {
+    /usr/bin/env python -c "import sys; print 'virtualenv' if hasattr(sys, 'real_prefix') else 'bare'"
+}
+
 _activate_virtualenv() {
     set +u
     if ! source $1/bin/activate; then
@@ -58,8 +62,7 @@ _create_and_activate_virtualenv() {
     # If we're inside an activated virtualenv already, we don't need to
     # do anything here.
 
-    env=$(/usr/bin/env python -c "import sys; print 'virtualenv' if hasattr(sys, 'real_prefix') else 'bare'")
-    if [[ "$env" == "virtualenv" ]]; then
+    if [[ "$(_detect_virtualenv)" == "virtualenv" ]]; then
         return
     fi
 
@@ -95,8 +98,7 @@ setup() {
         esac
     done
 
-    _create_and_activate_virtualenv \
-        ${vpath:=/opt/2ndQuadrant/TPA/tpa-virtualenv}
+    _create_and_activate_virtualenv ${vpath:=$TPA_DIR/tpa-virtualenv}
 
     $TPA_DIR/misc/tpa-pip-install.sh
 }
@@ -284,8 +286,12 @@ virtual environment.
 
 You may optionally specify ``--virtualenv /path/to/virtualenv`` to
 either use an existing virtualenv, or create one at the specified
-location. The default path is /opt/2ndQuadrant/TPA/tpa-virtualenv
-(which requires root permissions to set up).
+location.
+
+The default path is ${TPA_DIR}/tpa-virtualenv
+
+(If you create a virtualenv at the default location, the virtualenv will
+be activated automatically (if required) whenever you run tpaexec.)
 SETUP
             ;;
 
@@ -474,6 +480,17 @@ case "$command" in
         cd $cluster
         ;;
 esac
+
+# If we can find a virtualenv located relative to TPA_DIR and there is
+# no virtualenv activated already, we activate it as a convenience.
+
+if [[ -f $TPA_DIR/tpa-virtualenv/bin/activate ]]; then
+    if [[ "$(_detect_virtualenv)" != "virtualenv" ]]; then
+        set +u
+        source $TPA_DIR/tpa-virtualenv/bin/activate
+        set -u
+    fi
+fi
 
 # Now we can look at the command-line arguments and decide which
 # function to call.
