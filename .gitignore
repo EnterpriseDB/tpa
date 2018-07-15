@@ -2,3 +2,4 @@
 stash/*
 ansible.log
 *.retry
+tpa-virtualenv/*
