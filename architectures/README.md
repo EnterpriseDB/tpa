@@ -1,11 +1,14 @@
 Architectures
 =============
 
-architectures/M1
+M1
   Postgres with streaming replication (one primary, n replicas)
 
-architectures/BDR-Always-ON
+BDR-Always-ON
   BDR in an Always-ON configuration
 
-architectures/Training
+Training
   Clusters for 2ndQuadrant training sessions
+
+Run ``tpaexec info architectures/M1`` (or any of the architecture names
+listed above) for more information.

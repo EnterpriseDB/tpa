@@ -1,12 +1,15 @@
 Platforms
 =========
 
-platforms/bare
+bare
   Servers accessible via SSH (e.g., bare metal, or already-provisioned
   servers on any cloud provider).
 
-platforms/aws
+aws
   AWS EC2 instances
 
-platforms/lxd
+lxd
   lxd containers
+
+Run ``tpaexec info platforms/aws`` (or any of the platform names listed
+above) for more information.
