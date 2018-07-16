@@ -47,15 +47,20 @@
 - name: Collect a list of devices and mountpoints to act on
   set_fact:
     _volumes: >
-      {{ _volumes|union([_translated_settings|combine(item)]) }}
+      {{ _volumes|union([_volume_defaults|combine(item)]) }}
   with_items: >
     {{ volumes }}
   vars:
     _volume_for: >-
-      {{ item.get('volume_for', None) }}
-    _translated_settings: >
+      {{ item.get('volume_for', null) }}
+    _volume_name: >-
+      {{ _volume_for|regex_replace('_data$', '') }}
+    _volume_defaults: >
       {{
-        _translations.get(_volume_for, {'mountpoint': item.mountpoint})
+        (_volume_for is defined)|ternary(
+          {'luks_volume': _volume_name}|combine(_translations.get(_volume_for)),
+          {'mountpoint': item.mountpoint}
+        )
       }}
   when: >
     'mountpoint' in item or 'volume_for' in item
@@ -95,6 +100,7 @@
     device: "{{ item.device }}"
     mountpoint: "{{ item.mountpoint }}"
     encryption: "{{ item.encryption|default('none') }}"
+    luks_volume: "{{ item.luks_volume|default(item.device|basename) }}"
   with_items:
     "{{ _volumes }}"
   tags: always

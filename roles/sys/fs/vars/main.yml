@@ -1,1 +1,0 @@
-luks_volume: "{{ volume_name|default(device|basename) }}"
