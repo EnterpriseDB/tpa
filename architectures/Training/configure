@@ -24,6 +24,7 @@ done
 vars+=([issue]=${issue:?--redmine-id <num> is required})
 vars+=([instances]=${instances:?--instances <num> is required})
 source $libdir/configure-defaults.sh
+vars+=([cluster_vars]="$($libdir/cluster-vars)")
 
 if [[ -z "${subnet:-}" && -z "${SUBNET_PATTERN:-}" ]]; then
     mask=28

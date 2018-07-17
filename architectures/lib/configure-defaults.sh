@@ -20,5 +20,3 @@ vars+=([image_name]=$image_name [image_owner]=$image_owner [image_user]=$image_u
 
 hostnames=(zero $($libdir/hostnames $instances))
 vars+=([hostnames]=$(IFS=, && echo "[${hostnames[*]}]"))
-vars+=([cluster_tags]="$($libdir/cluster-tags)")
-vars+=([cluster_vars]="$($libdir/cluster-vars)")
