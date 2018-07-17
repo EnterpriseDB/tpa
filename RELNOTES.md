@@ -19,6 +19,8 @@
   dependencies automatically (the virtualenv will also be automatically
   activated when using tpaexec)
 
+- New ``tpaexec selftest`` command to check the TPAexec installation.
+
 - Automatic package builds
 
 ### Bugfixes
