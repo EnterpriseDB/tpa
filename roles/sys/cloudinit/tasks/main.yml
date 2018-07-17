@@ -14,6 +14,6 @@
     owner: root
     group: root
     mode: 0644
-    content: >-
+    content: >
       manage_etc_hosts: False
   when: cloudcfg.stat.exists
