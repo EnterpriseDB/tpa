@@ -233,9 +233,7 @@ test() {
 }
 
 deprovision() {
-    $ansible-playbook $TPA_DIR/platforms/deprovision.yml \
-        -i inventory \
-        -e cluster=$(pwd) "$@"
+    playbook $TPA_DIR/platforms/deprovision.yml "$@"
 }
 
 rehydrate() {
