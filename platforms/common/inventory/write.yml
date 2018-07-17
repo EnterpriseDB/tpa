@@ -15,7 +15,9 @@
 
 - name: Create group_vars and host_vars subdirectories
   shell: >
-    mkdir -p group_vars/{{ cluster_tag }}
+    mkdir -p
+    group_vars/{{ cluster_tag }}
+    group_vars/{{ cluster_tag }}/secrets
     host_vars/{{ dirnames }}
   args:
     chdir: "{{ cluster_dir }}/inventory"
