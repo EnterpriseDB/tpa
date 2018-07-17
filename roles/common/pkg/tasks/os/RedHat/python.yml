@@ -18,3 +18,4 @@
   changed_when: >
     backport_install is successful
     and 'already installed and latest version' not in backport_install.stdout
+    and backport_install.stdout.strip() != ''
