@@ -46,8 +46,12 @@ version() {
     echo "# TPA $VERSION"
 }
 
+_python_version() {
+    /usr/bin/env python -c 'import sys; print "%d.%d.%d" % (sys.version_info[0:3])'
+}
+
 _detect_virtualenv() {
-    /usr/bin/env python -c "import sys; print 'virtualenv' if hasattr(sys, 'real_prefix') else 'bare'"
+    /usr/bin/env python -c "import sys; print 'virtualenv' if hasattr(sys, 'real_prefix') else 'no virtualenv'"
 }
 
 _activate_virtualenv() {
@@ -263,6 +267,7 @@ rehydrate() {
 info() {
     version
     echo TPA_DIR=$TPA_DIR
+    echo "PYTHON=$(command -v python) (v$(_python_version), $(_detect_virtualenv))"
     if [[ -n "${ANSIBLE_HOME:-}" ]]; then
         echo -n ANSIBLE_HOME=$ANSIBLE_HOME
         if [[ -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
