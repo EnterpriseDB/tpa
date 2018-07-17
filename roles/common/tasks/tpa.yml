@@ -76,3 +76,4 @@
       -------------------------------------------
       TPA {{ tpa_version }}
       {{ deploy_timestamp }}
+  changed_when: false
