@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# Runs provision/deprovision/deploy etc.
+# The dispatcher for all TPAexec functionality, including initial setup,
+# and the configuration, provision, deployment, and testing of clusters.
 
 IFS=$' \t\n'
 set -eu
