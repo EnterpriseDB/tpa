@@ -78,22 +78,6 @@
       vars:
         device_termination: "{{ item.stdout|from_json }}"
 
-    # Make the user type 'yes' before we terminate the instance. This is
-    # a poor substitute for being able to undo an instance termination,
-    # in user interface terms.
-
-    - name: Prompt for confirmation
-      pause:
-        prompt: "Type «yes» to terminate {{ ansible_play_hosts|join(',') }}"
-      register: prompt
-
-    - name: Ensure that user confirmed termination
-      assert:
-        msg: "You didn't type «yes», aborting"
-        that:
-          - prompt.user_input == 'yes'
-      when: prompt is defined
-
     # Terminate the instance and wait until its state changes to
     # terminated (after shutting-down).
 
