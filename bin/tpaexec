@@ -262,7 +262,33 @@ rehydrate() {
     deploy -e rehydrate=yes -e deploy_hosts="$instances" "$@"
 }
 
-info() {
+try_as_playbook() {
+    # If the first argument looks like a cluster directory and the
+    # second argument refers to a playbook under that directory or
+    # in architectures/lib, we try to execute it as a playbook.
+
+    if [[ "${1:-}" && -d $1 && -f $1/config.yml ]]; then
+        cluster=$1
+        for playbook in $cluster/$command.yml $TPA_DIR/architectures/lib/$command.yml; do
+            if [[ -f $playbook ]]; then
+                shift
+                cd $cluster && playbook $playbook "$@"
+                return 0
+            fi
+        done
+    fi
+
+    return 1
+}
+
+selftest() {
+    info
+    $TPA_DIR/architectures/lib/selftest.py
+    $ansible --version
+    $ansible-playbook $TPA_DIR/architectures/lib/selftest.yml -e tpa_dir=$TPA_DIR
+}
+
+_tpaexec_info() {
     version
     echo TPA_DIR=$TPA_DIR
     echo "PYTHON=$(command -v python) (v$(_python_version), $(_detect_virtualenv))"
@@ -280,11 +306,28 @@ info() {
     fi
 }
 
-selftest() {
-    info
-    $TPA_DIR/architectures/lib/selftest.py
-    $ansible --version
-    $ansible-playbook $TPA_DIR/architectures/lib/selftest.yml -e tpa_dir=$TPA_DIR
+info() {
+    subcommand=${1:-""}
+    case "$subcommand" in
+        "")
+            _tpaexec_info
+            ;;
+        version)
+            version
+            ;;
+        platforms|architectures|platforms/*|architectures/*)
+            doc=$TPA_DIR/$subcommand/README.md
+            if [[ ! -f $doc ]]; then
+                echo "Sorry, no documentation available for $subcommand"
+                echo "Please contact tpa@2ndQuadrant.com for assistance"
+                exit 1
+            fi
+            cat $doc
+            ;;
+        *)
+            error "unrecognised info subcommand: $subcommand"
+            ;;
+    esac
 }
 
 help() {
@@ -550,31 +593,7 @@ case "$command" in
         help "$*"
         ;;
 
-    info)
-        subcommand=${1:-""}
-        case "$subcommand" in
-            "")
-                info;
-                ;;
-            version)
-                version
-                ;;
-            platforms|architectures|platforms/*|architectures/*)
-                doc=$TPA_DIR/$subcommand/README.md
-                if [[ ! -f $doc ]]; then
-                    echo "Sorry, no documentation available for $subcommand"
-                    echo "Please contact tpa@2ndQuadrant.com for assistance"
-                    exit 1
-                fi
-                cat $doc
-                ;;
-            *)
-                error "unrecognised info subcommand: $subcommand"
-                ;;
-        esac
-        ;;
-
-    version|setup|configure|selftest)
+    info|version|setup|configure|selftest)
         $command "$@"
         ;;
 
@@ -583,26 +602,7 @@ case "$command" in
         ;;
 
     *)
-        # If the first argument looks like a cluster directory and the
-        # second argument refers to a playbook under that directory or
-        # in architectures/lib, we try to execute it as a playbook.
-
-        if [[ "${1:-}" && -d $1 && -f $1/config.yml ]]; then
-            for p in $1/$command.yml $TPA_DIR/architectures/lib/$command.yml; do
-                if [[ -f $p ]]; then
-                    playbook=$p
-                    break
-                fi
-            done
-            if [[ -n "${playbook:-}" ]]; then
-                cluster=$1
-                shift
-                cd $cluster
-                playbook $playbook "$@"
-                exit
-            fi
-        fi
-
-        error "unrecognised tpaexec command: $command"
+        try_as_playbook "$@" ||
+            error "unrecognised tpaexec command: $command (try 'tpaexec help')"
         ;;
 esac
