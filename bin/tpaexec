@@ -281,13 +281,6 @@ try_as_playbook() {
     return 1
 }
 
-selftest() {
-    info
-    $TPA_DIR/architectures/lib/selftest.py
-    $ansible --version
-    $ansible-playbook $TPA_DIR/architectures/lib/selftest.yml -e tpa_dir=$TPA_DIR
-}
-
 _tpaexec_info() {
     version
     echo TPA_DIR=$TPA_DIR
@@ -304,6 +297,13 @@ _tpaexec_info() {
     else
         error "can't find ansible via ANSIBLE_HOME or in PATH"
     fi
+}
+
+selftest() {
+    _tpaexec_info
+    $TPA_DIR/architectures/lib/selftest.py
+    $ansible --version
+    $ansible-playbook $TPA_DIR/architectures/lib/selftest.yml -e tpa_dir=$TPA_DIR
 }
 
 info() {
