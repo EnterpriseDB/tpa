@@ -1,0 +1,16 @@
+#!/bin/bash
+
+source $(dirname $0)/../lib/configure-common.sh
+
+while [[ $# -gt 0 ]]; do
+    opt=$1
+    shift
+
+    case "$opt" in
+        *)
+            source $libdir/configure-options.sh
+            ;;
+    esac
+done
+
+error "this architecture is not yet functional"
