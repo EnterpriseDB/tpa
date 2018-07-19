@@ -10,5 +10,8 @@ BDR-Always-ON
 Training
   Clusters for 2ndQuadrant training sessions
 
+Images
+  Clusters to generate AMIs with preinstalled packages
+
 Run ``tpaexec info architectures/M1`` (or any of the architecture names
 listed above) for more information.
