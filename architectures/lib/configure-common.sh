@@ -9,16 +9,15 @@ libdir=$(dirname $0)/../lib
 cluster=${1:?"No cluster directory specified (please run 'tpaexec configure clustername …' instead)"}
 shift
 
-mkdir $cluster
-trap "rm -rf $cluster" ERR
-
 error() {
     echo "ERROR: $@" >&2
     exit 1
 }
 
 write_vars() {
-    v=$(mktemp -p $1 vars-XXX.yml)
+    mkdir ${cluster:=$1}
+    trap "rm -rf $cluster" ERR
+    v=$(mktemp -p $cluster vars-XXX.yml)
     for k in "${!vars[@]}"; do
         echo "$k: ${vars[$k]}" >> $v
     done
