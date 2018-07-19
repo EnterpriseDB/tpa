@@ -1,5 +1,27 @@
 ---
 
+# The secure way for us to install TLS certificates would be to generate
+# the keypair in situ and submit a CSR through some automated interface
+# to a CA (e.g., Letsencrypt), and install the resulting certificate.
+#
+# For now, if the cluster directory contains a keypair, we install it.
+
+- name: Install TLS certificates (if provided)
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/tpa/{{ item }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0600
+  with_items:
+    - "{{ cluster_name }}.key"
+    - "{{ cluster_name }}.crt"
+  register: copycert
+  when: >
+    lookup('fileglob',
+           '%s/%s.key' % (cluster, cluster_name),
+           '%s/%s.crt' % (cluster, cluster_name)).split(',')|length == 2
+
 - name: Generate self-signed TLS key and certificate
   shell: >
     umask 077 &&
@@ -11,6 +33,8 @@
     executable: /bin/bash
   notify:
     - Note Postgres restart required
+  when:
+    copycert is skipped
 
 - name: Set correct ownership and mode on key/certificate files
   file:
