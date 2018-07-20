@@ -288,6 +288,12 @@ try_as_playbook_or_script() {
                 return 0
             fi
         done
+        for exec in ./$command $TPA_DIR/architectures/lib/$command; do
+            if [[ -x $exec ]]; then
+                $exec "$@"
+                return 0
+            fi
+        done
     fi
 
     return 1
