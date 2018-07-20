@@ -18,9 +18,13 @@
     - "{{ cluster_name }}.crt"
   register: copycert
   when: >
-    lookup('fileglob',
-           '%s/%s.key' % (cluster, cluster_name),
-           '%s/%s.crt' % (cluster, cluster_name)).split(',')|length == 2
+    tlsfiles != [] and tlsfiles.split(',')|length == 2
+  vars:
+    tlsfiles: "{{
+      lookup('fileglob',
+             '%s/%s.key' % (cluster, cluster_name),
+             '%s/%s.crt' % (cluster, cluster_name))
+    }}"
 
 - name: Generate self-signed TLS key and certificate
   shell: >
@@ -33,8 +37,6 @@
     executable: /bin/bash
   notify:
     - Note Postgres restart required
-  when:
-    copycert is skipped
 
 - name: Set correct ownership and mode on key/certificate files
   file:
