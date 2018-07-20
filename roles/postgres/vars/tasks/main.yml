@@ -30,4 +30,5 @@
 - name: Set default postgres_conf_dir
   set_fact:
     postgres_conf_dir: "{{ postgres_conf_dir|default('') or postgres_data_dir }}"
+    repmgr_conf_file: "{{ repmgr_conf_dir }}/repmgr.conf"
   tags: always

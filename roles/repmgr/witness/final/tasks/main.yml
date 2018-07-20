@@ -33,7 +33,7 @@
 - name: Run 'repmgr witness register' on the witness
   command: >
     {{ postgres_bin_dir }}/repmgr witness register --verbose \
-      -f "{{ repmgr_conf_dir }}/repmgr.conf" \
+      -f "{{ repmgr_conf_file }}" \
       -h "{{ upstream_primary }}"
   become_user: "{{ postgres_user }}"
   become: yes

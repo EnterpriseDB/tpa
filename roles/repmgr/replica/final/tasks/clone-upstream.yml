@@ -45,7 +45,7 @@
           - 100
           - False
           - repmgr
-          - "{{ repmgr_conf_dir }}/repmgr.conf"
+          - "{{ repmgr_conf_file }}"
   vars:
     primary_conninfo: 'host={{ upstream_primary }} user=repmgr dbname=repmgr'
     upstream_conninfo: 'host={{ upstream }} user=repmgr dbname=repmgr'

@@ -2,7 +2,7 @@
 
 - name: Run repmgr node status
   command: >
-    repmgr node status -f {{ repmgr_conf_dir }}/repmgr.conf
+    repmgr node status -f {{ repmgr_conf_file }}
   register: repmgr_status
   ignore_errors: yes
   become_user: "{{ postgres_user }}"
@@ -16,7 +16,7 @@
 
 - name: Run repmgr node check
   command: >
-    repmgr node check -f {{ repmgr_conf_dir }}/repmgr.conf
+    repmgr node check -f {{ repmgr_conf_file }}
   register: repmgr_check
   ignore_errors: yes
   become_user: "{{ postgres_user }}"
@@ -37,7 +37,7 @@
 
 - name: Run repmgr cluster show
   command: >
-    repmgr cluster show -f {{ repmgr_conf_dir }}/repmgr.conf
+    repmgr cluster show -f {{ repmgr_conf_file }}
   register: repmgr_cluster
   ignore_errors: yes
   become_user: "{{ postgres_user }}"

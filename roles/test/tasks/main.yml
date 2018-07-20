@@ -30,7 +30,7 @@
 
     - name: Check if repmgr.conf exists
       stat:
-        path: "{{ repmgr_conf_dir }}/repmgr.conf"
+        path: "{{ repmgr_conf_file }}"
       register: repmgrconf
       become_user: "{{ postgres_user }}"
       become: yes

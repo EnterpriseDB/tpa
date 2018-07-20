@@ -11,7 +11,7 @@
 - name: Check if the primary is registered
   command: >
     {{ postgres_bin_dir }}/repmgr cluster show \
-      -f "{{ repmgr_conf_dir }}/repmgr.conf"
+      -f "{{ repmgr_conf_file }}"
   register: primary_check
   ignore_errors: True
   changed_when: False
@@ -21,7 +21,7 @@
 - name: Run 'repmgr primary register' on the primary
   command: >
     {{ postgres_bin_dir }}/repmgr primary register --verbose \
-      -f "{{ repmgr_conf_dir }}/repmgr.conf"
+      -f "{{ repmgr_conf_file }}"
   become_user: "{{ postgres_user }}"
   become: yes
   when: primary_check is not successful
