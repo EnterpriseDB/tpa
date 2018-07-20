@@ -1,0 +1,77 @@
+---
+
+- name: Basic initialisation and fact discovery
+  any_errors_fatal: True
+  max_fail_percentage: 0
+
+  hosts: all
+  roles:
+    - role: platforms
+      tags: always
+
+    - role: facts
+      tags: always
+
+    - role: postgres/vars
+      tags: always
+
+- name: Update postgres on cluster {{ cluster }}
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  hosts: all
+  vars:
+    update_commands:
+      Debian: >-
+        apt-get install -y postgresql-{{ postgres_version }}
+      RedHat: >-
+        yum install -y postgresql{{ postgres_versionNN }}
+  tasks:
+    - include_role: name=postgres/facts
+      vars:
+        pgdata_initialised: true
+      when: >
+        'postgres' in role
+
+    - group_by:
+        key: "{{ ('replica' in role)|ternary('replicas', 'others') }}"
+
+    - service:
+        name: repmgr
+        state: stopped
+      when: >
+        'replica' in role
+
+    - command: >
+        {{ update_commands[ansible_os_family] }}
+      when: >
+        'replica' in role
+
+    - command: >
+        repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
+      become_user: "{{ postgres_user }}"
+      become: yes
+      when: >
+        inventory_hostname == groups['replicas'][0]
+
+    # Note: this role was calculated earlier, so it's outdated after the
+    # switchover, but it correctly identifies the instance to use.
+
+    - command: >
+        {{ update_commands[ansible_os_family] }}
+      when: >
+        'primary' in role
+
+    - command: >
+        repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
+      become_user: "{{ postgres_user }}"
+      become: yes
+      when: >
+        'primary' in role
+
+    - service:
+        name: repmgr
+        state: started
+      when: >
+        'primary' in role or 'replica' in role
