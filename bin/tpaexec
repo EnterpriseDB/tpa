@@ -277,8 +277,8 @@ try_as_playbook_or_script() {
             script=$dir/$command.sh
             exec=$dir/$command
 
-            if [[ -f $playbook ]]; then
-                playbook $playbook "$@"
+            if [[ -x $exec ]]; then
+                $exec "$@"
                 return 0
             elif [[ -f $script ]]; then
                 source $script
@@ -287,8 +287,8 @@ try_as_playbook_or_script() {
                 fi
                 _tpaexec_command "$@"
                 return 0
-            elif [[ -x $exec ]]; then
-                $exec "$@"
+            elif [[ -f $playbook ]]; then
+                playbook $playbook "$@"
                 return 0
             fi
         done
