@@ -16,7 +16,8 @@
   with_items:
     - "{{ cluster_name }}.key"
     - "{{ cluster_name }}.crt"
-  register: copycert
+  notify:
+    - Note Postgres restart required
   when: >
     tlsfiles != [] and tlsfiles.split(',')|length == 2
   vars:
