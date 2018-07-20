@@ -263,17 +263,28 @@ rehydrate() {
     deploy -e rehydrate=yes -e deploy_hosts="$instances" "$@"
 }
 
-try_as_playbook() {
+try_as_playbook_or_script() {
     # If the first argument looks like a cluster directory and the
-    # second argument refers to a playbook under that directory or
-    # in architectures/lib, we try to execute it as a playbook.
+    # second argument refers to a playbook or script under the cluster
+    # directory or architectures/lib, we try to execute it as if were a
+    # built-in command.
 
     if [[ "${1:-}" && -d $1 && -f $1/config.yml ]]; then
-        cluster=$1
-        for playbook in $cluster/$command.yml $TPA_DIR/architectures/lib/$command.yml; do
+        cd ${cluster:=$1}
+        shift
+        for playbook in $command.yml $TPA_DIR/architectures/lib/$command.yml; do
             if [[ -f $playbook ]]; then
-                shift
-                cd $cluster && playbook $playbook "$@"
+                playbook $playbook "$@"
+                return 0
+            fi
+        done
+        for script in $command.sh $TPA_DIR/architectures/lib/$command.sh; do
+            if [[ -f $script ]]; then
+                source $script
+                if [[ $(type -t _tpaexec_command) != function ]]; then
+                    error "$script did not define _tpaexec_command"
+                fi
+                _tpaexec_command "$@"
                 return 0
             fi
         done
@@ -603,7 +614,7 @@ case "$command" in
         ;;
 
     *)
-        try_as_playbook "$@" ||
+        try_as_playbook_or_script "$@" ||
             error "unrecognised tpaexec command: $command (try 'tpaexec help')"
         ;;
 esac
