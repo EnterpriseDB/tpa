@@ -11,7 +11,7 @@
   name and various options and generates config.yml and deploy.yml for
   a new cluster.
 
-- Added BDR3 deployment support
+- New BDR3-Always-ON architecture
 
 - New ``tpaexec test`` command
 
@@ -65,6 +65,10 @@
 - Include traceback information on module failure in various cases
 - Remove ansible-cluster and ansible-cluster-playbook in favour of
   ``tpaexec cmd`` and ``tpaexec playbook``
+- New ``tpaexec start-postgres`` and ``tpaexec stop-postgres`` commands
+  for clusters that use LUKS-encrypted volumes
+- New ``tpaexec switchover clustername nodename`` command for M1
+  clusters
 - Various changes related to packaging
 
 ## v3.0 (2018-06-05)
