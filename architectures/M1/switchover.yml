@@ -1,0 +1,42 @@
+---
+
+- name: Basic initialisation and fact discovery
+  any_errors_fatal: True
+  max_fail_percentage: 0
+
+  hosts: all
+  roles:
+    - role: platforms
+      tags: always
+
+    - role: facts
+      tags: always
+
+    - role: postgres/vars
+      tags: always
+
+- name: Perform switchover to {{ target }} on cluster {{ cluster }}
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  hosts: all
+  tasks:
+    - service:
+        name: repmgr
+        state: stopped
+      when: >
+        'primary' in role or 'replica' in role
+
+    - command: >
+        repmgr standby switchover --verbose -f {{ repmgr_conf_dir }}/repmgr.conf --siblings-follow
+      become_user: "{{ postgres_user }}"
+      become: yes
+      when: >
+        'postgres' in role and inventory_hostname == target
+
+    - service:
+        name: repmgr
+        state: started
+      when: >
+        'primary' in role or 'replica' in role
