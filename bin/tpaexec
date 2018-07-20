@@ -17,10 +17,10 @@ error() {
 
 TOP=/opt/2ndQuadrant/TPA
 if [[ -z "${TPA_DIR:-}" ]]; then
-    if [[ -h "${script:=$0}" ]]; then
-        script=$(readlink $0)
+    if [[ -h "${self:=$0}" ]]; then
+        self=$(readlink $0)
     fi
-    SRC=$(dirname $script)/..
+    SRC=$(dirname $self)/..
     type realpath &>/dev/null && SRC=$(realpath $SRC)
     if [[ -d $SRC/roles ]]; then
         TOP=$SRC
@@ -272,24 +272,22 @@ try_as_playbook_or_script() {
     if [[ "${1:-}" && -d $1 && -f $1/config.yml ]]; then
         cd ${cluster:=$1}
         shift
-        for playbook in $command.yml $TPA_DIR/architectures/lib/$command.yml; do
+        for dir in . $TPA_DIR/architectures/lib/commands; do
+            playbook=$dir/$command.yml
+            script=$dir/$command.sh
+            exec=$dir/$command
+
             if [[ -f $playbook ]]; then
                 playbook $playbook "$@"
                 return 0
-            fi
-        done
-        for script in $command.sh $TPA_DIR/architectures/lib/$command.sh; do
-            if [[ -f $script ]]; then
+            elif [[ -f $script ]]; then
                 source $script
                 if [[ $(type -t _tpaexec_command) != function ]]; then
                     error "$script did not define _tpaexec_command"
                 fi
                 _tpaexec_command "$@"
                 return 0
-            fi
-        done
-        for exec in ./$command $TPA_DIR/architectures/lib/$command; do
-            if [[ -x $exec ]]; then
+            elif [[ -x $exec ]]; then
                 $exec "$@"
                 return 0
             fi
