@@ -1,0 +1,43 @@
+---
+
+# Supports only AMI generation for AWS EC2 at the moment.
+
+- name: Basic initialisation and fact discovery
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: true
+
+  hosts: all
+  roles:
+    - role: platforms
+      become: no
+
+    - role: facts
+
+    - role: postgres/vars
+
+- name: Generate AMIs
+  hosts: all
+  tasks:
+    - name: Generate new AMIs
+      ec2_ami:
+        name: "{{ _image_name }}"
+        description: "2ndQuadrant TPA {{ ansible_distribution }}/{{ image_label }}/{{ image_version }} image"
+        instance_id: "{{ ec2_id }}"
+        region: "{{ ec2_region }}"
+        tags:
+          os: "{{ ansible_distribution }}"
+          label: "{{ image_label }}"
+          version: "{{ image_version }}"
+        wait: yes
+      delegate_to: localhost
+      tags: ami
+      vars:
+        date: >-
+          {{ lookup('pipe', 'date +%Y%m%d') }}
+        _image_name: "{{ image_name.format(
+          distribution=ansible_distribution,
+          label=image_label, version=image_version,
+          date=date,
+        )}}"

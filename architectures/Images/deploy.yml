@@ -11,6 +11,8 @@
     - role: platforms
       become: no
 
+    - role: facts
+
     - role: postgres/vars
 
     - role: common/pkg

@@ -1,6 +1,0 @@
----
-
-ansible_user: admin
-ansible_distribution: Debian
-ansible_distribution_release: stretch
-ansible_os_family: Debian

@@ -9,4 +9,4 @@ For example:
     tpaexec configure images-20180718 -a Images \
       --postgres-version 9.6
 
-    images-20180718/build-images
+    tpaexec build-images images-20180718

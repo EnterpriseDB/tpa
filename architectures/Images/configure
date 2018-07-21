@@ -2,15 +2,79 @@
 
 source $(dirname $0)/../lib/configure-common.sh
 
+# We don't accept the majority of standard configure options, so we
+# don't use lib/configure-{options,defaults} here.
+
 while [[ $# -gt 0 ]]; do
     opt=$1
     shift
 
     case "$opt" in
+        --platform)
+            platform=${1:?no platform specified}
+            shift
+            ;;
+        --image-name)
+            image_name=${1:?no image name specified}
+            shift
+            ;;
+        --image-label)
+            image_label=${1:?no image label specified}
+            shift
+            ;;
+        --image-version)
+            image_version=${1:?no image version specified}
+            shift
+            ;;
+        --regions)
+            regions=()
+            while [[ "${1:-}" && $1 != --* ]]; do
+                regions+=($1)
+                shift
+            done
+            if [[ ${#regions[@]} -eq 0 ]]; then
+                error "no regions specified"
+            fi
+            ;;
+        --distributions)
+            distributions=()
+            while [[ "${1:-}" && $1 != --* ]]; do
+                distributions+=($1)
+                shift
+            done
+            if [[ ${#distributions[@]} -eq 0 ]]; then
+                error "no distributions specified"
+            fi
+            ;;
         *)
-            source $libdir/configure-options.sh
+            error "unrecognised option: $opt"
             ;;
     esac
 done
 
-error "this architecture is not yet functional"
+default_regions=(eu-west-{1,2,3} eu-central-1 us-{east,west}-{1,2})
+default_distributions=(Debian RedHat Ubuntu)
+
+vars[architecture]=$architecture
+vars[cluster_name]=${cluster_name:=$(basename $cluster)}
+vars[platform]=${platform:=aws}
+regions=(${regions[@]:-${default_regions[@]}})
+vars+=([regions]=$(IFS=, && echo "[${regions[*]}]"))
+distributions=(${distributions[@]:-${default_distributions[@]}})
+vars+=([distributions]=$(IFS=, && echo "[${distributions[*]}]"))
+vars+=([cluster_tags]="$($libdir/cluster-tags)")
+image_name=${image_name:="TPA-{distribution}-{label}-{version}-{date}"}
+image_label=${image_label:=Postgres}
+image_version=${image_version:=10}
+vars+=([cluster_vars]=$($libdir/cluster-vars \
+    image_name="'$image_name'" image_label="'$image_label'" \
+    image_version="'$image_version'"))
+
+v=$(write_vars $cluster)
+$TPA_DIR/ansible/ansible-playbook $archdir/generate-config.yml \
+    -e @$v -e output=$cluster/config.yml
+
+for f in deploy.yml commands; do
+    ln -sf $archdir/$f $cluster
+done
+rm -f -- "$v"

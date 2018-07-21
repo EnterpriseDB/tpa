@@ -1,0 +1,17 @@
+base_amis:
+  Debian:
+    Name: debian-stretch-hvm-x86_64-gp2-2018-04-09-292
+    Owner: 379101102735
+    ansible_user: admin
+  RedHat:
+    Name: RHEL-7.4_HVM_GA-20170808-x86_64-2-Hourly2-GP2
+    Owner: 309956199498
+    ansible_user: ec2-user
+  Ubuntu:
+    Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180228.1
+    Owner: 099720109477
+    ansible_user: ubuntu
+  # SuSE:
+  #   Name: suse-sles-12-sp3-v20180215-hvm-ssd-x86_64
+  #   Owner: 013907871322
+  #   ansible_user: ec2-user

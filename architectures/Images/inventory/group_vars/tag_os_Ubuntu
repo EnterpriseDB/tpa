@@ -1,6 +1,0 @@
----
-
-ansible_user: ubuntu
-ansible_distribution: Ubuntu
-ansible_distribution_release: xenial
-ansible_os_family: Debian

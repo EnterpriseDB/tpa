@@ -1,0 +1,36 @@
+---
+
+cluster_name: {{ cluster_name }}
+
+cluster_ssh_port: 222
+cluster_rules:
+    - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
+
+ec2_vpc:
+  Name: Test
+
+ec2_instance_reachability: public
+
+{{ dict(cluster_vars=cluster_vars)|to_nice_yaml(indent=2) }}
+instance_defaults:
+  type: t2.micro
+  subnet: 10.33.0.0/24
+  role: image
+  default_volumes:
+    - device_name: root
+      volume_type: gp2
+      volume_size: 16
+
+instances:
+{% for r in regions %}
+{%   set rloop = loop %}
+{%   for i in region_amis[r] %}
+    - node: {{ rloop.index0*loop.length + loop.index }}
+      Name: "{{ i.os|lower }}-{{ r }}"
+      image: {{ i.image_id }}
+      region: {{ r }}
+      vars:
+        ansible_user: {{ i.user }}
+
+{%   endfor %}
+{% endfor %}

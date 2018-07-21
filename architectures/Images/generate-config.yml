@@ -1,46 +1,20 @@
 ---
 
-# Given a list of regions and a list of AMIs, this playbook generates a
-# config.yml for a cluster with one instance per AMI per region based on
-# the config.yml.j2 template.
-
-- name: Generate config.yml for clusters/images
+- name: Generate config.yml
   hosts: localhost
-  vars:
-    # Which regions do we want to build new AMIs in?
-    regions:
-      - us-east-1
-      - us-east-2
-      - us-west-1
-      - us-west-2
-      - eu-west-1
-      - eu-central-1
-
-    # Which AMIs should we start with?
-    base_amis:
-      - Name: debian-stretch-hvm-x86_64-gp2-2018-04-09-292
-        Owner: 379101102735
-        os: Debian
-      - Name: RHEL-7.4_HVM_GA-20170808-x86_64-2-Hourly2-GP2
-        Owner: 309956199498
-        os: RedHat
-      - Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180228.1
-        Owner: 099720109477
-        os: Ubuntu
-      #- Name: suse-sles-12-sp3-v20180215-hvm-ssd-x86_64
-      #  Owner: 013907871322
-      #  os: SLES
-
   tasks:
+    - name: Load list of base AMIs
+      include_vars: base-amis.yml
+
     - name: Search for base AMIs in each region
       ec2_ami_facts:
         region: "{{ item.0 }}"
-        owner: "{{ item.1.Owner }}"
+        owner: "{{ base_amis[item.1].Owner }}"
         filters:
-          name: "{{ item.1.Name }}"
+          name: "{{ base_amis[item.1].Name }}"
       with_nested:
         - "{{ regions }}"
-        - "{{ base_amis }}"
+        - "{{ distributions }}"
       register: amis
 
     - assert:
@@ -57,10 +31,18 @@
       with_items: "{{ regions }}"
 
     - set_fact:
-        region_amis: "{{ region_amis|combine({item.item.0: region_amis[item.item.0]|union([{'image_id': item.images.0.image_id, 'os': item.item.1.os}])}) }}"
+        region_amis: "{{
+          region_amis|combine({
+            item.item.0: region_amis[item.item.0]|union([{
+              'image_id': item.images.0.image_id,
+              'user': base_amis[item.item.1].ansible_user,
+              'os': item.item.1
+            }])
+          })
+        }}"
       with_items: "{{ amis.results }}"
 
-    - name: Expand config.yml template
+    - name: Generate config.yml
       template:
-        src: config.yml.j2
-        dest: "{{ playbook_dir }}/config.yml"
+        src: templates/config.yml.j2
+        dest: "{{ output }}"
