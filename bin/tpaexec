@@ -395,19 +395,20 @@ INFO
 
         setup)
             cat <<SETUP
-Command: tpaexec setup [--virtualenv /path/to/virtualenv]
+Command: tpaexec setup
 
 Installs all Python dependencies (Ansible, modules) in an isolated
 virtual environment.
 
+The default location is ${TPA_DIR}/tpa-virtualenv
+
+If you use the default location, which we recommend, the virtualenv will
+be activated automatically whenever you run tpaexec.
+
 You may optionally specify ``--virtualenv /path/to/virtualenv`` to
 either use an existing virtualenv, or create one at the specified
-location.
-
-The default path is ${TPA_DIR}/tpa-virtualenv
-
-(If you create a virtualenv at the default location, the virtualenv will
-be activated automatically (if required) whenever you run tpaexec.)
+location. If you do this, you must ensure that the virtualenv is
+activated before you run tpaexec.
 SETUP
             ;;
 
