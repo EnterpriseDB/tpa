@@ -272,7 +272,7 @@ try_as_playbook_or_script() {
     if [[ "${1:-}" && -d $1 && -f $1/config.yml ]]; then
         cd ${cluster:=$1}
         shift
-        for dir in . $TPA_DIR/architectures/lib/commands; do
+        for dir in ./commands $TPA_DIR/architectures/lib/commands; do
             playbook=$dir/$command.yml
             script=$dir/$command.sh
             exec=$dir/$command
