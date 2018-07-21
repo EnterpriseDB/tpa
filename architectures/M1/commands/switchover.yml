@@ -22,21 +22,66 @@
   become: yes
   hosts: all
   tasks:
-    - service:
+    - include_role: name=postgres/facts
+      vars:
+        pgdata_initialised: true
+      when: >
+        'postgres' in role
+
+    - group_by:
+        key: "{{
+          ('primary' in role)|ternary('primary',
+            ('replica' in role)|ternary('replica',
+              'other'))
+        }}"
+
+    - assert:
+        msg: "Switchover target is not a postgres server: {{ target }}"
+        that:
+          - "'postgres' in role"
+      when: >
+        inventory_hostname == target
+
+    - assert:
+        msg: "Switchover target is already a primary: {{ target }}"
+        that:
+          - target not in groups['primary']
+      when: >
+        inventory_hostname == target
+
+    - assert:
+        msg: "Expected only one primary, but found: {{ groups['primary']|join(', ') }}"
+        that:
+          - groups['primary']|length == 1
+      when: >
+        inventory_hostname == target
+
+    - name: Stop repmgr
+      service:
         name: repmgr
         state: stopped
       when: >
         'primary' in role or 'replica' in role
 
-    - command: >
+    - name: Perform switchover to {{ target }}
+      command: >
         repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
       become_user: "{{ postgres_user }}"
       become: yes
       when: >
         'postgres' in role and inventory_hostname == target
 
-    - service:
+    - name: Restart repmgr
+      service:
         name: repmgr
         state: started
       when: >
         'primary' in role or 'replica' in role
+
+    - name: Display cluster status
+      command: >
+        repmgr cluster show --verbose -f {{ repmgr_conf_file }}
+      become_user: "{{ postgres_user }}"
+      become: yes
+      when: >
+        inventory_hostname == target

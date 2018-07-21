@@ -24,5 +24,5 @@ _tpaexec_command() {
     target=${1:?no switchover target specified}
     shift
 
-    playbook switchover.yml -e target=$target "$@"
+    time playbook commands/switchover.yml -e target=$target "$@"
 }
