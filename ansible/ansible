@@ -40,8 +40,8 @@ fi
 # Set ANSIBLE_CONFIG, ANSIBLE_LOG_PATH, and ANSIBLE_INVENTORY to our
 # versions if they are not already set.
 
-export ANSIBLE_CONFIG=${ANSIBLE_CONFIG:-$TPA_DIR/ansible.cfg}
 export ANSIBLE_LOG_PATH=${ANSIBLE_LOG_PATH:-./ansible.log}
+export ANSIBLE_CONFIG=${ANSIBLE_CONFIG:-$TPA_DIR/ansible/ansible.cfg}
 export ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-$TPA_DIR/ansible/hosts}
 
 # Append our directories to various search paths.
