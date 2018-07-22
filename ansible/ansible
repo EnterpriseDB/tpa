@@ -45,14 +45,17 @@ export ANSIBLE_CONFIG=${ANSIBLE_CONFIG:-$TPA_DIR/ansible/ansible.cfg}
 export ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-$TPA_DIR/ansible/hosts}
 
 # Append our directories to various search paths.
+#
+# In exceptional situations, this allows you to do things like set
+# ANSIBLE_ROLES_PATH to override a specific TPAexec-provided role.
 
 export ANSIBLE_LIBRARY=${ANSIBLE_LIBRARY:+$ANSIBLE_LIBRARY:}$TPA_DIR/library
 export ANSIBLE_ROLES_PATH=${ANSIBLE_ROLES_PATH:+$ANSIBLE_ROLES_PATH:}$TPA_DIR/roles
+export ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TPA_DIR/lib/test_plugins
 export ANSIBLE_ACTION_PLUGINS=${ANSIBLE_ACTION_PLUGINS:+$ANSIBLE_ACTION_PLUGINS:}$TPA_DIR/lib/action_plugins
 export ANSIBLE_FILTER_PLUGINS=${ANSIBLE_FILTER_PLUGINS:+$ANSIBLE_FILTER_PLUGINS:}$TPA_DIR/lib/filter_plugins
 export ANSIBLE_LOOKUP_PLUGINS=${ANSIBLE_LOOKUP_PLUGINS:+$ANSIBLE_LOOKUP_PLUGINS:}$TPA_DIR/lib/lookup_plugins
 export ANSIBLE_CALLBACK_PLUGINS=${ANSIBLE_CALLBACK_PLUGINS:+$ANSIBLE_CALLBACK_PLUGINS:}$TPA_DIR/lib/callback_plugins
-export ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TPA_DIR/lib/test_plugins
 
 # This script may be invoked through symlinks as ansible, ansible-vault,
 # or ansible-playbook. If ANSIBLE_HOME is set, we expect it to point to
