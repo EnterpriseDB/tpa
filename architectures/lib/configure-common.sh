@@ -15,7 +15,8 @@ error() {
 }
 
 write_vars() {
-    mkdir ${cluster:=$1}
+    mkdir ${cluster:=$1} ||
+        error "Couldn't create cluster directory: $cluster"
     trap "rm -rf $cluster" ERR
     v=$(mktemp -p $cluster vars-XXX.yml)
     for k in "${!vars[@]}"; do
