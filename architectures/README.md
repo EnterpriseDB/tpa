@@ -1,6 +1,12 @@
 Architectures
 =============
 
+An architecture is a recommended layout of servers and software to set
+up Postgres for a specific purpose.
+
+Select one of the following architectures, and ``tpaexec configure``
+will generate the cluster configuration for you.
+
 M1
   Postgres with streaming replication (one primary, n replicas)
 
