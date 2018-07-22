@@ -42,7 +42,7 @@ fi
 
 export ANSIBLE_CONFIG=${ANSIBLE_CONFIG:-$TPA_DIR/ansible.cfg}
 export ANSIBLE_LOG_PATH=${ANSIBLE_LOG_PATH:-./ansible.log}
-export ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-$TPA_DIR/inventory/static}
+export ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-$TPA_DIR/ansible/hosts}
 
 # Append our directories to various search paths.
 
