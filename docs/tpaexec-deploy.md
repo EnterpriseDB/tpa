@@ -60,7 +60,7 @@ Before we run **tpaexec deploy ~/tpa/clusters/speedy** it is worth checking **co
 
 Run **tpaexec deploy ~/tpa/clusters/speedy**
 
-(Note, the previous method of running **$TPA_DIR/bin/deploy ~/tpa/clusters/speedy** will still work, however this usage is deprecated)
+(Note, the previous method of running **$TPA_DIR/bin/deploy ~/tpa/clusters/speedy** is no longer supported.)
 
 ------
 

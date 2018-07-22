@@ -69,6 +69,8 @@
   for clusters that use LUKS-encrypted volumes
 - New ``tpaexec switchover clustername nodename`` command for M1
   clusters
+- The ``provision``, ``deploy``, ``deprovision``, and ``rehydrate``
+  commands are replaced by ``tpaexec provision`` etc.
 - Various changes related to packaging
 
 ## v3.0 (2018-06-05)
