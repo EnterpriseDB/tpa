@@ -107,6 +107,11 @@ editing the config.yml file and running the provision/deploy/test cycle.
 Should you need to go beyond what is already implemented in TPAexec, the
 full range of Ansible functionality is at your disposal at every stage.
 
+## Cluster management
+
+TPAexec also provides some cluster management functions, including safe
+switchover operations and zero-downtime minor-version upgrades.
+
 ## Installation
 
 [TPAexec installation instructions](INSTALL.md)
