@@ -21,9 +21,9 @@
 - name: Ensure that password generation works correctly
   become: no
   assert:
-    msg: "Please fix bin/password (e.g., install pwgen)"
+    msg: "Please fix lib/password (e.g., install pwgen)"
     that:
       - password != ''
   vars:
-    password: "{{ lookup('pipe', '{{ tpa_dir }}/bin/password || true') }}"
+    password: "{{ lookup('pipe', '{{ tpa_dir }}/architectures/lib/password || true') }}"
   run_once: yes
