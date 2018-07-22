@@ -1,7 +1,5 @@
 ---
 
-# Running «bin/provision clustername» brings us here.
-
 - name: Provision cluster
   hosts: localhost
   tasks:

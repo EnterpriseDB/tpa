@@ -2,7 +2,8 @@
 
 # We expect 'cluster' to point to a directory in which we can find
 # config.yml (or whatever 'config' is set to). If we are invoked through
-# bin/provision, we can count on cluster being set, but we check anyway.
+# tpaexec provision, we can count on cluster being set, but we check
+# anyway.
 
 - name: Require cluster directory to be specified
   assert:

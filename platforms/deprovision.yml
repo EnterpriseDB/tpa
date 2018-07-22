@@ -1,9 +1,5 @@
 ---
 
-# Decommission an already-provisioned cluster:
-#
-#     bin/deprovision clustername
-
 - name: Deprovision cluster
   hosts: localhost
   tasks:
