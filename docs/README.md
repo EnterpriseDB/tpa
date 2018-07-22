@@ -109,8 +109,9 @@ full range of Ansible functionality is at your disposal at every stage.
 
 ## Cluster management
 
-TPAexec also provides some cluster management functions, including safe
-switchover operations and zero-downtime minor-version upgrades.
+Once your cluster is up and running, TPAexec also provides some cluster
+management functions, including safe switchover operations and
+zero-downtime minor-version upgrades.
 
 ## Installation
 
