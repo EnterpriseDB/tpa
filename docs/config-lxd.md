@@ -1,8 +1,4 @@
----
-
-cluster_name: lxd_pg
-cluster_vars:
-  cluster_network: 10.44.156.0/24   # according with lxdbr0 subnet
+# LXD settings
 
 instance_defaults:
   platform: lxd
@@ -23,8 +19,7 @@ instances:
       ip_address: 10.44.156.2    # static IPv4 address according with lxdbr0 subnet
       profile: default
       status: started
-      tags:
-        role: primary
+      role: primary
       vars:
         work_mem: 16MB
         postgres_data_dir: /var/lib/postgresql/data
