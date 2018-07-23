@@ -27,12 +27,14 @@
       Owner: >-
         {{ Owner|default(lookup('env', 'USER')) or lookup('pipe', 'id -u -n || true') }}
 
-- name: Ensure cluster_tags[Owner] is defined
+- name: Ensure cluster_tags[Owner] is sensible
   assert:
-    msg: "Please define cluster_tags[Owner] in {{config_file}}"
+    msg: "Please set cluster_tags[Owner] or use '--owner Name' to identify the person responsible for this cluster"
     that:
       - cluster_tags['Owner'] is defined
-      - cluster_tags['Owner'] != ''
+      - cluster_tags['Owner'] not in [
+          '', 'root', 'postgres', 'ec2-user', 'admin', 'ubuntu'
+        ]
 
 # It is not currently meaningful to set cluster_tags['Name'] to anything
 # other than cluster_name. We only use the latter value, so it will only
