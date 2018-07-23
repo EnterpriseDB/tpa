@@ -5,6 +5,8 @@
 
 - name: Set the hostname
   hostname: name="{{ inventory_hostname }}"
+  when:
+    platform not in ['docker']
   tags: [common, hostname]
 
 - include_tasks: tpa.yml
