@@ -24,7 +24,7 @@
 
 - set_fact:
     this_server: "{{
-      diagnosis|json_query('servers.%s' % backup_name)
+      diagnosis|json_query('servers.\"%s\"' % backup_name)
     }}"
 
 - set_fact:
