@@ -30,8 +30,7 @@ and can also be used for
 
 ### Pre-requisites
 
-1. You need 2ndQuadrant Ansible. [Read the INSTALL guide](https://github.com/2ndQuadrant/TPA/blob/master/INSTALL.md) and [Detailed Install guide](https://github.com/2ndQuadrant/TPA/blob/master/docs/TPAexec-Detailed_Install.md) for more details.
-2. You need an AWS access key id and secret access key for API access.[Read platforms/aws/README](https://github.com/2ndQuadrant/TPA/blob/master/platforms/aws/README.md) for details.
+You need an AWS access key id and secret access key for API access.[Read platforms/aws/README](https://github.com/2ndQuadrant/TPA/blob/master/platforms/aws/README.md) for details.
 
 ### TPA cluster configuration
 
