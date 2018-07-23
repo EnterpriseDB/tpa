@@ -8,6 +8,8 @@
   tags: prereqs
 
 - include_tasks: ssh.yml
+  when:
+    ansible_connection == 'ssh'
 
 - include_role:
     name: "platforms/{{ platform }}"
