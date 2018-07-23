@@ -110,7 +110,7 @@ ec2_ami:
 | Name:            | AMI name (can include wildcard)                              |
 | Owner:           | (Optional) If set to self, then specifies a private AMI      |
 
-For more configuration details on AWS EC2 parameters, see  [AWS EC2 parameters - advanced](#AWS EC2 parameters - advanced)
+For more configuration details on AWS EC2 parameters, see  [AWS EC2 parameters - advanced](#aws-ec2-parameters---advanced)
 
 #### Instance definitions
 
@@ -251,7 +251,7 @@ After this stage has completed, you should be able to connect to any of the prov
 [~/tpa/clusters/speedy]$ ssh -F ssh_config -i id_speedy speedy-a
 ```
 
-See Appendix A for notes on how to re-use existing RSA keys for provisioning. 
+See [Appendix A](#appendix-a---using-existing-rsa-keys) for notes on how to re-use existing RSA keys for provisioning. 
 
 *Before starting the deployment phase, it is suggested that you log out of any provisioned hosts, as login sessions can interfere with the mounting of additional volumes.*
 
