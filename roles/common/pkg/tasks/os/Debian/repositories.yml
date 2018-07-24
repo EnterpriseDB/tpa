@@ -14,17 +14,6 @@
   with_items: "{{ apt_repository_list }}"
   tags: public_repos
 
-- name: Ensure that the repository password is specified if necessary
-  assert:
-    msg: "Please set TPA_2Q_REPO_PASSWORD=… when running deploy"
-    that: >
-      ':@' not in r.repo
-  with_items: "{{ apt_repository_list }}"
-  vars:
-    repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
-    r: "{{ repos[item] }}"
-  tags: public_repos
-
 # We need to support https://user:pass@host/… key and repository URLs,
 # which work only if we enable force_basic_auth for fetch_url(). Since
 # the default apt_key module does not allow this, we use a local copy

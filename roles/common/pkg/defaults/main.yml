@@ -2,25 +2,9 @@
 
 ## Repositories
 #
-# By default, we install the PGDG repository (all community packages),
-# the 2Q repository (all 2Q packages), and the 2ndQPostgres repository
-# (only 2ndQPostgres packages; not yet available).
-#
-# The package versions in these repositories are defined in such a way
-# that packages in the 2ndQPostgres repository override the other two,
-# and packages in the 2Q repository override the PGDG equivalents, but
-# missing dependencies may still be satisfied from other repositories
-# when required.
-#
-# The 2Q repository is available in four "flavours": public, internal,
-# internal-testing, internal-snapshot, in decreasing order of maturity.
-# You need only one flavour at a time, because internal-snapshot is a
-# superset of internal-testing, and so on. By default, we install the
-# 2Q internal repository. You can set tpa_2q_repo to override this.
+# By default, we install the PGDG repository (all community packages).
 #
 # All of the above applies to both apt and yum.
-
-tpa_2q_repo: "internal"
 
 apt_repositories: {}
 default_apt_repositories:
@@ -29,19 +13,6 @@ default_apt_repositories:
     key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
     repo: >-
       deb https://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
-
-  2Q:
-    key_id: D0B689ABB65CA2A0
-    key_url: >-
-      {{ _2q_apt_baseurl }}/site/keys/D0B689ABB65CA2A0.asc
-    repo: >-
-      deb {{ _2q_apt_baseurl }} {{ ansible_distribution_release }}-2ndquadrant main
-
-  #2ndQPostgres:
-  #  key_id: …
-  #  key_url: …
-  #  repo: >-
-  #    deb …
 
 apt_repository_list: "{{ default_apt_repositories.keys()|list }}"
 
@@ -55,35 +26,7 @@ default_yum_repositories:
     rpm_url: >-
       https://yum.postgresql.org/{{ postgres_version }}/redhat/rhel-7-x86_64/pgdg-redhat{{ postgres_versionNN }}-{{ postgres_version }}-{{ _pgdg_yum_repoversions[postgres_version|float] }}.noarch.rpm
 
-  2Q:
-    rpm_url: >-
-      {{ _2q_rpm_baseurl }}/site/content/2ndquadrant-repo-{{ postgres_version }}{{ _2q_repo_suffix }}-1-1.el7.noarch.rpm
-
-  #2ndQPostgres:
-  #  rpm_url: >-
-  #    …
-
 yum_repository_list: "{{ default_yum_repositories.keys()|list }}"
-
-## 2Q repository administrivia
-#
-# Some internal variables that only help to make the repository
-# definitions above shorter.
-
-_2q_repo_username: "{{ lookup('env', 'TPA_2Q_REPO_USERNAME') or 'internal' }}"
-_2q_repo_password: "{{ lookup('env', 'TPA_2Q_REPO_PASSWORD') }}"
-_2q_repo_userinfo: "{{
-  (tpa_2q_repo in ['', 'public'])|ternary(
-    '', '%s:%s@' % (_2q_repo_username, _2q_repo_password)
-  )
-}}"
-_2q_repo_suffix: >-
-  {{ (tpa_2q_repo in ['', 'public'])|ternary('', '-%s' % tpa_2q_repo) }}
-
-_2q_apt_baseurl: >-
-  https://{{ '%sapt%s' % (_2q_repo_userinfo, _2q_repo_suffix) }}.2ndquadrant.com
-_2q_rpm_baseurl: >-
-  https://{{ '%srpm%s' % (_2q_repo_userinfo, _2q_repo_suffix) }}.2ndquadrant.com
 
 _pgdg_yum_repoversions:
   9.4: 3
