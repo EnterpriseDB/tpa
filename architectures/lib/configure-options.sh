@@ -21,10 +21,6 @@ case "$opt" in
         instance_type=${1:?Instance type not specified}
         shift
         ;;
-    --distribution|--os)
-        distribution=${1:?Distribution name not specified}
-        shift
-        ;;
     --root-volume-size)
         root_volume_size=${1:?Root volume size not specified}
         shift
@@ -35,6 +31,10 @@ case "$opt" in
         ;;
     --barman-volume-size)
         barman_volume_size=${1:?Barman volume size not specified}
+        shift
+        ;;
+    --distribution|--os)
+        distribution=${1:?Distribution name not specified}
         shift
         ;;
     --minimal)
