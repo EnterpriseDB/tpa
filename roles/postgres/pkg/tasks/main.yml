@@ -36,12 +36,40 @@
   vars:
     package_lists:
       - "{{ pglogical_packages[ansible_distribution] }}"
-      - "{{ pglogical_debug_packages[ansible_distribution] }}"
       - "{{ ('bdr' in role)|ternary(bdr_packages[ansible_distribution], []) }}"
       - "{{ additional_postgres_packages[ansible_distribution] }}"
       - "{{ extra_postgres_packages[ansible_distribution] }}"
       - python-psycopg2
   tags: [postgres, pkg]
+
+# PGDG provides only postgresql-10-pglogical-dbgsym, whereas the 2ndQ
+# repositories provide only postgresql-10-pglogical-dbg, which is the
+# opposite of how it works for the main Postgres packages. So we try
+# to install the -dbg package, and fall back to -dbgsym if it fails.
+
+- name: Install pglogical debug packages
+  package:
+    name: >
+      {{ query('flattened', package_lists) }}
+    state: latest
+  register: pglogical_dbg_install
+  ignore_errors: "{{ ansible_distribution == 'Debian' }}"
+  vars:
+    package_lists:
+      - "{{ pglogical_debug_packages[ansible_distribution] }}"
+  tags: [postgres, pkg]
+
+- name: Try fallback pglogical debug package on Debian
+  package:
+    name: "{{
+      pglogical_debug_packages[ansible_distribution]
+      |map('replace', '-dbg', '-dbgsym')
+      |list
+    }}"
+    state: latest
+  when:
+    pglogical_dbg_install is not successful and
+    ansible_distribution == 'Debian'
 
 # On Postgres 9.5, pgespresso is required to support rsync-based backups
 # from a replica. (To do so, we also have to create the extension on the

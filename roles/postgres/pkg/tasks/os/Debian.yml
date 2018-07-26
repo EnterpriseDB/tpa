@@ -7,15 +7,9 @@
     postgres_debug_packages: "{{
       postgres_debug_packages|combine({'Debian': _debian_postgres_debug_packages})
     }}"
-    pglogical_debug_packages: "{{
-      pglogical_debug_packages|combine({'Debian': _debian_pglogical_debug_packages})
-    }}"
   vars:
     _debian_postgres_debug_packages: "{{
       postgres_debug_packages[ansible_distribution]|map('replace', '-dbg', '-dbgsym')|list
-    }}"
-    _debian_pglogical_debug_packages: "{{
-      pglogical_debug_packages[ansible_distribution]|map('replace', '-dbg', '-dbgsym')|list
     }}"
   when:
     ansible_distribution_release in ['stretch']
