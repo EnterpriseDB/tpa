@@ -35,12 +35,6 @@
     value: "postgresql* barman* repmgr*"
   tags: public_repos
 
-- assert:
-    msg: "Export TPA_2Q_SUBSCRIPTION_TOKEN to use twoq_repositories"
-    that:
-      twoq_repositories is not defined or lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') != ''
-  tags: public_repos
-
 - name: Install 2ndQuadrant repositories
   shell: >
     curl {{ url }} | bash

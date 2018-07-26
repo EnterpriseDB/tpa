@@ -7,6 +7,13 @@
       - postgres_version is defined
       - postgres_versionNN is defined
 
+- assert:
+    msg: "Export TPA_2Q_SUBSCRIPTION_TOKEN to use twoq_repositories"
+    that:
+      lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') != '' or
+      twoq_repositories|default([])|length == 0
+  tags: public_repos
+
 # We must ensure that a usable Python (2.7.x) is installed, along with
 # anything else we need to run Ansible modules such as "pkg" below.
 
