@@ -40,6 +40,18 @@ case "$opt" in
     --minimal)
         minimal=-minimal
         ;;
+    --2Q-repositories)
+        declare -a repos
+        while [[ "${1:-}" && $1 != --* ]]; do
+            repos+=($1)
+            shift
+        done
+        if [[ ${repos:-} && ${#repos[@]} -ne 0 ]]; then
+            twoq_repositories=$(IFS=, && echo "[${repos[*]}]")
+        else
+            error "no repositories specified"
+        fi
+        ;;
 
     # These options export environment variables that are interpreted by
     # architectures/lib/subnets.

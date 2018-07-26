@@ -74,6 +74,19 @@ For brevity, you can also use ``--os Debian-minimal``.
 The default is Debian. The value is case-sensitive, and must correspond
 to a supported distribution according to ``tpaexec info distributions``.
 
+## 2ndQuadrant repositories
+
+By default, we install the 2ndQuadrant public repository and add on any
+product repositories that the architecture requires.
+
+You may optionally specify ``--2Q-repositories source/name/maturity …``
+to specify the complete list of 2ndQuadrant repositories to install on
+each instance in addition to the 2ndQuadrant public repository.
+
+If you do this, you must first ``export TPA_2Q_SUBSCRIPTION_TOKEN=xxx``
+before you run tpaexec. You can get a subscription token from the
+2ndQuadrant Portal (Support → Software subscriptions → Add).
+
 ## Software versions
 
 You may optionally specify ``--postgres-version 10`` (the default) or
