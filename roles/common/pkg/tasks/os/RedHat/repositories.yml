@@ -34,3 +34,31 @@
     option: exclude
     value: "postgresql* barman* repmgr*"
   tags: public_repos
+
+- assert:
+    msg: "Export TPA_2Q_SUBSCRIPTION_TOKEN to use twoq_repositories"
+    that:
+      twoq_repositories is not defined or lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') != ''
+  tags: public_repos
+
+- name: Install 2ndQuadrant repositories
+  shell: >
+    curl {{ url }} | bash
+  args:
+    executable: /bin/bash
+    creates: "{{ file }}"
+  with_items:
+    - dl/default/release
+    - "{{ twoq_repositories|default([]) }}"
+  vars:
+    token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
+    urltemplate: "{{
+      (item == 'dl/default/release')|ternary(
+        'https://access.2ndquadrant.com/api/repository/{label}/{version}/rpm',
+        'https://access.2ndquadrant.com/api/repository/{token}/{label}/{version}/rpm'
+      )
+    }}"
+    url: >-
+      {{ urltemplate.format(token=token, label=item) }}
+    file: "/etc/yum.repos.d/2ndquadrant-{{ item|replace('/', '-') }}-pg{{ postgres_version }}.repo"
+  tags: public_repos
