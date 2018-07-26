@@ -53,6 +53,6 @@
       )
     }}"
     url: >-
-      {{ urltemplate.format(token=token, label=item) }}
+      {{ urltemplate.format(token=token, label=item, version=postgres_version) }}
     file: "/etc/yum.repos.d/2ndquadrant-{{ item|replace('/', '-') }}-pg{{ postgres_version }}.repo"
   tags: public_repos
