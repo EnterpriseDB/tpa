@@ -73,7 +73,7 @@
 
     - name: Perform switchover to {{ target }}
       command: >
-        repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
+        {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
       become_user: "{{ postgres_user }}"
       become: yes
       when: >
@@ -88,7 +88,7 @@
 
     - name: Display cluster status
       command: >
-        repmgr cluster show --verbose -f {{ repmgr_conf_file }}
+        {{ postgres_bin_dir }}/repmgr cluster show --verbose -f {{ repmgr_conf_file }}
       become_user: "{{ postgres_user }}"
       become: yes
       when: >
