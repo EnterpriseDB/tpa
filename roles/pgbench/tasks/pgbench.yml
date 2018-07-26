@@ -2,7 +2,7 @@
 
 - name: Run pgbench
   command: >
-    pgbench {{ pgbench_opts }}
+    {{ postgres_bin_dir }}/pgbench {{ pgbench_opts }}
   register: pgbench
   become_user: "{{ postgres_user }}"
   become: yes
