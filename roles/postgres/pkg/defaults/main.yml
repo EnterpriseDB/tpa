@@ -36,11 +36,11 @@ pglogical_packages:
   Ubuntu: *debian_pglogical_packages
 
 pglogical_debug_packages:
-  Debian: &debian_pglogical_packages
+  Debian: &debian_pglogical_debug_packages
     - postgresql-{{postgres_version}}-pglogical-dbg
   RedHat:
     - postgresql{{postgres_versionNN}}-pglogical-debuginfo
-  Ubuntu: *debian_pglogical_packages
+  Ubuntu: *debian_pglogical_debug_packages
 
 bdr_packages:
   Debian: &debian_bdr_packages
