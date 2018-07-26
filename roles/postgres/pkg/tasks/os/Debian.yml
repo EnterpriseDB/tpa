@@ -1,12 +1,17 @@
 ---
 
-# Debian stretch uses -dbgsym packages for Postgres 10+.
+# Debian stretch/PGDG uses -dbgsym packages for Postgres 10+.
 
 - name: Adjust postgres_debug_packages for dbg/dbgsym packages
   set_fact:
     postgres_debug_packages: "{{
       postgres_debug_packages|combine({
-        'Debian': ['postgresql-'~ postgres_version ~'-dbgsym']
+        'Debian': [postgres_debug_packages|map('replace', '-dbg', '-dbgsym')|list]
+      })
+    }}"
+    pglogical_debug_packages: "{{
+      pglogical_debug_packages|combine({
+        'Debian': [pglogical_debug_packages|map('replace', '-dbg', '-dbgsym')|list]
       })
     }}"
   when:

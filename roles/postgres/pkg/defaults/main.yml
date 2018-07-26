@@ -28,21 +28,19 @@ postgres_debug_packages:
     - postgresql{{postgres_versionNN}}-debuginfo
   Ubuntu: *debian_debug_packages
 
-# Next, additional_postgres_packages is a list of other Postgres-related
-# packages that we install by default, and extra_postgres_packages is an
-# empty list that the caller can define to install other packages. These
-# are all unrelated packages and may have different versions.
-
-additional_postgres_packages:
-  Debian: &debian_additional_packages
+pglogical_packages:
+  Debian: &debian_pglogical_packages
     - postgresql-{{postgres_version}}-pglogical
-    - postgresql-{{postgres_version}}-pglogical-dbg
-    - barman-cli
   RedHat:
     - postgresql{{postgres_versionNN}}-pglogical
+  Ubuntu: *debian_pglogical_packages
+
+pglogical_debug_packages:
+  Debian: &debian_pglogical_packages
+    - postgresql-{{postgres_version}}-pglogical-dbg
+  RedHat:
     - postgresql{{postgres_versionNN}}-pglogical-debuginfo
-    - barman-cli
-  Ubuntu: *debian_additional_packages
+  Ubuntu: *debian_pglogical_packages
 
 bdr_packages:
   Debian: &debian_bdr_packages
@@ -52,6 +50,18 @@ bdr_packages:
     - postgresql{{postgres_versionNN}}-bdr
     - postgresql{{postgres_versionNN}}-bdr-debuginfo
   Ubuntu: *debian_bdr_packages
+
+# Next, additional_postgres_packages is a list of other Postgres-related
+# packages that we install by default, and extra_postgres_packages is an
+# empty list that the caller can define to install other packages. These
+# are all unrelated packages and may have different versions.
+
+additional_postgres_packages:
+  Debian: &debian_additional_packages
+    - barman-cli
+  RedHat:
+    - barman-cli
+  Ubuntu: *debian_additional_packages
 
 extra_postgres_packages:
   Debian: &debian_extra_packages []

@@ -35,8 +35,10 @@
     state: latest
   vars:
     package_lists:
-      - "{{ additional_postgres_packages[ansible_distribution] }}"
+      - "{{ pglogical_packages[ansible_distribution] }}"
+      - "{{ pglogical_debug_packages[ansible_distribution] }}"
       - "{{ ('bdr' in role)|ternary(bdr_packages[ansible_distribution], []) }}"
+      - "{{ additional_postgres_packages[ansible_distribution] }}"
       - "{{ extra_postgres_packages[ansible_distribution] }}"
       - python-psycopg2
   tags: [postgres, pkg]
