@@ -1,0 +1,36 @@
+#!/bin/bash
+
+source $(dirname $0)/../lib/configure-common.sh
+
+while [[ $# -gt 0 ]]; do
+    opt=$1
+    shift
+
+    case "$opt" in
+        --instances)
+            instances=${1:?number of instances not specified}
+            shift
+            ;;
+        *)
+            source $libdir/configure-options.sh
+            ;;
+    esac
+done
+
+: ${twoq_repositories:='[products/bdr3/snapshot]'}
+
+vars+=([instances]=${instances:=3})
+source $libdir/configure-defaults.sh
+subnets=(${subnet:-$($libdir/subnets 1)})
+vars+=([subnets]=$(IFS=, && echo "[${subnets[*]}]"))
+vars+=([cluster_tags]="$($libdir/cluster-tags)")
+vars+=([cluster_vars]="$($libdir/cluster-vars \
+    postgres_coredump_filter=0xff repmgr_failover=manual \
+    twoq_repositories=$twoq_repositories \
+    extra_postgres_extensions='[pglogical]')")
+
+v=$(write_vars $cluster)
+template $archdir/templates/config.yml.j2 $v > $cluster/config.yml
+
+ln -sf $archdir/deploy.yml $cluster
+rm -f -- "$v"

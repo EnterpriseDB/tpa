@@ -10,6 +10,9 @@ will generate the cluster configuration for you.
 M1
   Postgres with streaming replication (one primary, n replicas)
 
+BDR-Simple
+  BDR with no frills on n nodes (good for experiments)
+
 BDR-Always-ON
   BDR in an Always-ON configuration
 
