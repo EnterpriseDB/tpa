@@ -25,12 +25,12 @@ instances:
 {% for r in regions %}
 {%   set rloop = loop %}
 {%   for i in region_amis[r] %}
-    - node: {{ rloop.index0*loop.length + loop.index }}
-      Name: "{{ i.os|lower }}-{{ r }}"
-      image: {{ i.image_id }}
-      region: {{ r }}
-      vars:
-        ansible_user: {{ i.user }}
+  - node: {{ rloop.index0*loop.length + loop.index }}
+    Name: "{{ i.os|lower }}-{{ r }}"
+    image: {{ i.image_id }}
+    region: {{ r }}
+    vars:
+      ansible_user: {{ i.user }}
 
 {%   endfor %}
 {% endfor %}
