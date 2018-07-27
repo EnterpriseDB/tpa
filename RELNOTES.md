@@ -11,7 +11,7 @@
   name and various options and generates config.yml and deploy.yml for
   a new cluster.
 
-- New BDR3-Always-ON architecture
+- New BDR3-Always-ON and BDR-Simple architectures
 
 - New ``tpaexec test`` command
 
