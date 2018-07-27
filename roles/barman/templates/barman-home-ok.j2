@@ -2,7 +2,7 @@
 
 test -x /usr/bin/barman || exit 1
 {% if barman_volume_mountable|default(false) %}
-findmnt -M {{ barman_home }} &>/dev/null || exit 1
+findmnt {{ barman_home }} &>/dev/null || exit 1
 {% else %}
 test -d {{ barman_home }} || exit 1
 {% endif %}
