@@ -18,7 +18,6 @@ default_postgres_extensions:
   - pg_visibility
   - pageinspect
   - pgstattuple
-  - pglogical
 
 extra_postgres_extensions: []
 

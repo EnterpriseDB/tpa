@@ -24,7 +24,8 @@ vars+=([subnets]=$(IFS=, && echo "[${subnets[*]}]"))
 vars+=([cluster_tags]="$($libdir/cluster-tags)")
 vars+=([cluster_vars]="$($libdir/cluster-vars \
     postgres_coredump_filter=0xff repmgr_failover=manual \
-    twoq_repositories=$twoq_repositories)")
+    twoq_repositories=$twoq_repositories \
+    extra_postgres_extensions='[pglogical]')")
 
 v=$(write_vars $cluster)
 template $archdir/templates/config.yml.j2 $v > $cluster/config.yml
