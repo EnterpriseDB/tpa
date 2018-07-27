@@ -20,6 +20,8 @@ my %envvars = (
     , POSTGRES_PACKAGE_VERSION => "postgres_package_version"
     , REPMGR_PACKAGE_VERSION => "repmgr_package_version"
     , BARMAN_PACKAGE_VERSION => "barman_package_version"
+    , PGLOGICAL_PACKAGE_VERSION => "pglogical_package_version"
+    , BDR_PACKAGE_VERSION => "bdr_package_version"
 );
 foreach my $k (keys %envvars) {
     if ($ENV{$k}) {

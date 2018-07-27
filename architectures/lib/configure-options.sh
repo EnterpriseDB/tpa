@@ -87,7 +87,15 @@ case "$opt" in
         shift
         ;;
     --barman-package-version)
-        export BARMAN_PACKAGE_VERSION=${1:?repmgr package version not specified}
+        export BARMAN_PACKAGE_VERSION=${1:?barman package version not specified}
+        shift
+        ;;
+    --pglogical-package-version)
+        export PGLOGICAL_PACKAGE_VERSION=${1:?pglogical package version not specified}
+        shift
+        ;;
+    --bdr-package-version)
+        export BDR_PACKAGE_VERSION=${1:?bdr package version not specified}
         shift
         ;;
 

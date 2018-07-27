@@ -35,8 +35,8 @@
     state: latest
   vars:
     package_lists:
-      - "{{ pglogical_packages[ansible_distribution] }}"
-      - "{{ ('bdr' in role)|ternary(bdr_packages[ansible_distribution], []) }}"
+      - "{{ pglogical_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
+      - "{{ ('bdr' in role)|ternary(bdr_packages|packages_for(ansible_distribution, bdr_package_version), []) }}"
       - "{{ additional_postgres_packages[ansible_distribution] }}"
       - "{{ extra_postgres_packages[ansible_distribution] }}"
       - python-psycopg2
@@ -56,14 +56,14 @@
   ignore_errors: "{{ ansible_distribution == 'Debian' }}"
   vars:
     package_lists:
-      - "{{ pglogical_debug_packages[ansible_distribution] }}"
+      - "{{ pglogical_debug_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
   tags: [postgres, pkg]
 
 - name: Try fallback pglogical debug package on Debian
   package:
     name: "{{
       pglogical_debug_packages[ansible_distribution]
-      |map('replace', '-dbg', '-dbgsym')
+      |map('replace', '-dbg', '-dbgsym=%s' % pglogical_package_version)
       |list
     }}"
     state: latest

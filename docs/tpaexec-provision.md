@@ -44,12 +44,14 @@ tpaexec configure ~/tpa/clusters/speedy --architecture M1 --platform aws --regio
 
 This will populate ~/tpa/clusters/speedy/config.yml with various parameters that can then be modified/added to.
 
-You may optionally specify ``--postgres-version 10`` (the default) or any other major version of Postgres (e.g. 9.6). TPA supports Postgres 9.4 and above (9.4 and 9.5 are no longer actively maintained). By default, the latest version of every package is installed, however for support or compliance purposes, it may be necessary to select specific package versions. This can be done by using the options `--postgres-package-version` `--repmgr-package-version` and `--barman-package-version` e.g.
+You may optionally specify ``--postgres-version 10`` (the default) or any other major version of Postgres (e.g. 9.6). TPA supports Postgres 9.4 and above (9.4 and 9.5 are no longer actively maintained). By default, the latest version of every package is installed, however for support or compliance purposes, it may be necessary to select specific package versions. This can be done, for example, by using the options `--postgres-package-version`, `--repmgr-package-version`, `--barman-package-version`, ``--pglogical-package-version``, and ``--bdr-package-version``.
 
 ```
 --postgres-package-version 10.4-2.pgdg90+1
 --repmgr-package-version 4.0.5-1.pgdg90+1
 --barman-package-version 2.4-1.pgdg90+1
+--pglogical-package-version '2.2.0*'
+--bdr-package-version '3.0.2*'
 ```
 
 The file config.yml has been split into logical sections for the purposes of description, and duplicate descriptions omitted from the tables where possible
