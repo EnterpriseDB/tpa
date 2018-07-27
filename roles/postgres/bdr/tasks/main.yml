@@ -46,14 +46,14 @@
   postgresql_query:
     conninfo: '{{ bdr_node_dsn }}'
     query: >-
-      SELECT bdr.bdr_version_num() AS num
+      SELECT bdr.bdr_version_num() AS num, bdr.bdr_version() AS version
   register: bdr_version
   become_user: "{{ postgres_user }}"
   become: yes
 
 - action: set_fact
   args: >
-    {{ ('{"bdr_version_num": ' ~ bdr_version.num ~ '}')|from_json }}
+    {{ ('{"bdr_version_num": ' ~ bdr_version.results[0].num ~ '}')|from_json }}
 
 # Now one node must create a BDR group, and the other nodes must join
 # the group. It doesn't matter which node creates the group, so long as
@@ -92,13 +92,13 @@
 # First host:
 #     bdr.bdr_group_create(local_node_name := '…',
 #                          node_external_dsn := '…')
-#     bdr.node_join_wait_for_ready()
+#     bdr.bdr_node_join_wait_for_ready()
 #
 # Other hosts:
 #     bdr.bdr_group_join(local_node_name := '…',
 #                        node_external_dsn := '…',
 #                        join_using_dsn := '…')
-#     bdr.node_join_wait_for_ready()
+#     bdr.bdr_node_join_wait_for_ready()
 #
 ## BDR3
 #
@@ -116,95 +116,16 @@
 #     -- the join has completed).
 
 - assert:
-    msg: "XXX BDR3 is the only version we currently support"
-    that: bdr_version_num >= 30000
+    msg: "Unsupported BDR version: {{ bdr_version.results[0].version }}"
+    that:
+      (bdr_version_num/10000)|int in [2, 3]
 
-- name: Check if the BDR node has been created already
-  postgresql_query:
-    conninfo: '{{ bdr_node_dsn }}'
-    queries:
-      - text: SELECT node_id FROM bdr.node WHERE dbname = %s
-        args:
-          - "{{ bdr_database }}"
-  register: node_id
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-- name: Include bdr-pre-node-creation hook
-  include_tasks: "{{ hook }}"
+- name: BDR2 setup
+  include_tasks: bdr2.yml
   when:
-    node_id.rowcount == 0 and
-    lookup('first_found', dict(files=hook, skip=True))
-  vars:
-    hook: "{{ cluster }}/hooks/bdr-pre-node-creation.yml"
+    20000 < bdr_version_num < 30000
 
-- name: Create BDR node if necessary
-  postgresql_query:
-    conninfo: '{{ bdr_node_dsn }}'
-    queries:
-      - text: SELECT bdr.create_node(node_name := %s, local_dsn := %s)
-        args:
-          - "{{ inventory_hostname }}"
-          - "{{ bdr_node_dsn }}"
+- name: BDR3 setup
+  include_tasks: bdr3.yml
   when:
-    node_id.rowcount == 0
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-# We check bdr.node_group on every node. If the entry doesn't exist, it
-# means that the node must either create or join the BDR group, based on
-# its position.
-
-- name: Check if the BDR groups have been created already
-  postgresql_query:
-    conninfo: '{{ bdr_node_dsn }}'
-    queries:
-      - text: SELECT node_group_id FROM bdr.node_group WHERE node_group_name = %s
-        args:
-          - "{{ bdr_node_group }}"
-  register: node_group_id
-  when:
-    bdr_node_group is defined
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-# Now the first node creates the group.
-
-- name: Create BDR node groups if necessary
-  postgresql_query:
-    conninfo: '{{ bdr_node_dsn }}'
-    queries:
-      - text: SELECT bdr.create_node_group(node_group_name := %s)
-        args:
-          - "{{ bdr_node_group }}"
-  when:
-    inventory_hostname == groups[bdr_node_group][0] and
-    node_group_id.rowcount == 0
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-# The remaining hosts join the group… but they must do so one at a time,
-# because BDR does not support concurrent group joins (not in version 3,
-# nor in any earlier versions).
-#
-# What we would like to do here is to set «serial: 1» on the query task,
-# so that we wait for the task to finish on one host before moving on to
-# the next host. But serial is not supported as a task attribute, so we
-# have to (write a strategy plugin or) use a loop to get the equivalent
-# serial behaviour.
-
-- name: Join BDR node groups and wait for completion
-  postgresql_query:
-    conninfo: '{{ hostvars[item].bdr_node_dsn }}'
-    queries:
-      - text: SELECT bdr.join_node_group(join_target_dsn := %s)
-        args:
-          - "{{ bdr_node_dsn }}"
-      - text: SELECT bdr.wait_for_join_completion()
-  with_items: >
-    {{ groups[bdr_node_group][1:] }}
-  when:
-    inventory_hostname == groups[bdr_node_group][0] and
-    hostvars[item].node_group_id.rowcount == 0
-  become_user: "{{ postgres_user }}"
-  become: yes
+    bdr_version_num >= 30000

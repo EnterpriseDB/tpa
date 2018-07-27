@@ -1,0 +1,49 @@
+---
+
+- name: Check if the BDR group has been created already
+  postgresql_query:
+    conninfo: '{{ bdr_node_dsn }}'
+    queries:
+      - text: SELECT node_name FROM bdr.bdr_nodes WHERE node_name = %s
+        args:
+          - "{{ inventory_hostname }}"
+  register: node
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Create the BDR group if necessary
+  postgresql_query:
+    conninfo: '{{ bdr_node_dsn }}'
+    queries:
+      - text: SELECT bdr.bdr_group_create(local_node_name := %s, node_external_dsn := %s)
+        args:
+          - "{{ inventory_hostname }}"
+          - "{{ bdr_node_dsn }}"
+      - text: SELECT bdr.bdr_node_join_wait_for_ready()
+  when:
+    inventory_hostname == groups[bdr_node_group][0] and
+    node.rowcount == 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# The remaining hosts join the group… but they must do so one at a time,
+# because BDR does not support concurrent group joins (not in version 3,
+# nor in any earlier versions).
+
+- name: Join BDR groups and wait for completion
+  postgresql_query:
+    conninfo: '{{ hostvars[item].bdr_node_dsn }}'
+    queries:
+      - text: SELECT bdr.bdr_group_join(local_node_name := %s, node_external_dsn := %s, join_using_dsn := %s)
+        args:
+          - "{{ inventory_hostname }}"
+          - "{{ hostvars[item].bdr_node_dsn }}"
+          - "{{ bdr_node_dsn }}"
+      - text: SELECT bdr.bdr_node_join_wait_for_ready()
+  with_items: >
+    {{ groups[bdr_node_group][1:] }}
+  when:
+    inventory_hostname == groups[bdr_node_group][0] and
+    hostvars[item].node.rowcount == 0
+  become_user: "{{ postgres_user }}"
+  become: yes
