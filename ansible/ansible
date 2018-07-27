@@ -1,7 +1,8 @@
 #!/bin/bash
 #
 # This is a wrapper for bin/ansible that sets various environment
-# variables before invoking the real executable.
+# variables before invoking the real executable (which must be under
+# ANSIBLE_HOME or in PATH).
 
 IFS=$' \t\n'
 set -eu
@@ -34,10 +35,7 @@ if [[ -f $TPA_DIR/tpa-virtualenv/bin/activate ]]; then
     fi
 fi
 
-# If you invoke ansible directly (i.e. not through this script), you
-# must set ANSIBLE_CONFIG as below.
-#
-# Set ANSIBLE_CONFIG, ANSIBLE_LOG_PATH, and ANSIBLE_INVENTORY to our
+# Set ANSIBLE_LOG_PATH, ANSIBLE_CONFIG, and ANSIBLE_INVENTORY to our
 # versions if they are not already set.
 
 export ANSIBLE_LOG_PATH=${ANSIBLE_LOG_PATH:-./ansible.log}
