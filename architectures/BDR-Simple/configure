@@ -19,6 +19,11 @@ done
 
 : ${twoq_repositories:='[products/bdr3/snapshot]'}
 
+extensions="[pglogical]"
+if [[ $twoq_repositories == */bdr2/* ]]; then
+    extensions="[]"
+fi
+
 vars+=([instances]=${instances:=3})
 source $libdir/configure-defaults.sh
 subnets=(${subnet:-$($libdir/subnets 1)})
@@ -27,7 +32,7 @@ vars+=([cluster_tags]="$($libdir/cluster-tags)")
 vars+=([cluster_vars]="$($libdir/cluster-vars \
     postgres_coredump_filter=0xff repmgr_failover=manual \
     twoq_repositories=$twoq_repositories \
-    extra_postgres_extensions='[pglogical]')")
+    extra_postgres_extensions=$extensions)")
 
 v=$(write_vars $cluster)
 template $archdir/templates/config.yml.j2 $v > $cluster/config.yml
