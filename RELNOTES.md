@@ -1,6 +1,6 @@
 # TPA release notes
 
-## HEAD (not yet tagged)
+## HEAD (not yet released)
 
 ### Major changes
 
