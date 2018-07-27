@@ -74,7 +74,4 @@ v=$(write_vars $cluster)
 $TPA_DIR/ansible/ansible-playbook $archdir/generate-config.yml \
     -e @$v -e output=$cluster/config.yml
 
-for f in deploy.yml commands; do
-    ln -sf $archdir/$f $cluster
-done
-rm -f -- "$v"
+source $libdir/configure-links.sh

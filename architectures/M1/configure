@@ -29,7 +29,4 @@ vars+=([cluster_vars]="$($libdir/cluster-vars vpn_network=192.168.33.0/24 \
 v=$(write_vars $cluster)
 template $archdir/templates/config.yml.j2 $v > $cluster/config.yml
 
-for f in deploy.yml commands; do
-    ln -sf $archdir/$f $cluster
-done
-rm -f -- "$v"
+source $libdir/configure-links.sh
