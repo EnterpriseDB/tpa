@@ -28,13 +28,6 @@
       when: >
         'postgres' in role
 
-    - group_by:
-        key: "{{
-          ('primary' in role)|ternary('primary',
-            ('replica' in role)|ternary('replica',
-              'other'))
-        }}"
-
     - assert:
         msg: "Switchover target is not a postgres server: {{ target }}"
         that:

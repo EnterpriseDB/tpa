@@ -45,3 +45,11 @@
   when:
     streaming_from is defined and
     (upstream is not defined or upstream != streaming_from)
+
+- name: Create role-based groups
+  group_by:
+    key: "{{
+      ('primary' in role)|ternary('primary',
+        ('replica' in role)|ternary('replica',
+          'other'))
+    }}"

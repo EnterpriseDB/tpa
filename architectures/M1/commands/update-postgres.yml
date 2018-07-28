@@ -34,9 +34,6 @@
       when: >
         'postgres' in role
 
-    - group_by:
-        key: "{{ ('replica' in role)|ternary('replicas', 'others') }}"
-
     - service:
         name: repmgr
         state: stopped
@@ -53,7 +50,7 @@
       become_user: "{{ postgres_user }}"
       become: yes
       when: >
-        inventory_hostname == groups['replicas'][0]
+        inventory_hostname == groups['replica'][0]
 
     # Note: this role was calculated earlier, so it's outdated after the
     # switchover, but it correctly identifies the instance to use.
