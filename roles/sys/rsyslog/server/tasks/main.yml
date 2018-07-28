@@ -8,6 +8,4 @@
     - 00-enable-tcp-reception.conf
     - 22-postgres.conf
   notify:
-    - Restart rsyslog
-
-- meta: flush_handlers
+    - Note rsyslog restart required

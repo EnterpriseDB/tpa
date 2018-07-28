@@ -5,11 +5,9 @@
     name: rsyslog
     enabled: yes
 
-- name: Add rsyslog rule for PostgreSQL logging
-  copy:
-    src: 22-postgres.conf
-    dest: /etc/rsyslog.d/22-postgres.conf
-  notify:
-    - Restart rsyslog
-
 - meta: flush_handlers
+
+- name: Restart rsyslog
+  service:
+    name: rsyslog
+    state: "{{ rsyslog_service_end_state|default('started') }}"
