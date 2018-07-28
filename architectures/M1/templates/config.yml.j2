@@ -1,66 +1,45 @@
 ---
 {% include 'preamble.yml.j2' %}
-
 {{ dict(cluster_vars=cluster_vars)|to_nice_yaml(indent=2) }}
 instance_defaults:
-  type: {{ instance_type }}
-  region: {{ region }}
-{% if subnets|length == 1 %}
-  subnet: {{ subnets[0] }}
-{% endif %}
-  platform: {{ platform }}
-  default_volumes:
-    - device_name: root
-      volume_type: gp2
-      volume_size: {{ root_volume_size }}
-    - device_name: /dev/xvdb
-      volume_type: gp2
-      volume_size: {{ postgres_volume_size }}
-      vars:
-        volume_for: postgres_data
+{% include 'instance_defaults.yml.j2' %}
   vars:
-    ansible_user: {{ image_user }}
+    ansible_user: {{ image_user|default('root') }}
 
 instances:
   - node: 1
     Name: {{ hostnames[1] }}
-{% if subnets|length != 1 %}
-    subnet: {{ subnets[0] }}
-{% endif %}
     role: primary
+{% include 'instance.yml.j2' %}
 
   - node: 2
     Name: {{ hostnames[2] }}
-{% if subnets|length != 1 %}
-    subnet: {{ subnets[0] }}
-{% endif %}
     role: replica
     upstream: {{ hostnames[1] }}
     backup: {{ hostnames[3] }}
+{% include 'instance.yml.j2' %}
 
   - node: 3
     Name: {{ hostnames[3] }}
-{% if subnets|length != 1 %}
-    subnet: {{ subnets[1] }}
-{% endif %}
+    role:
+      - barman
+      - log-server
+      - openvpn-server
+      - monitoring-server
+{% if platform not in ['bare'] %}
     volumes:
         - device_name: /dev/xvdb
           volume_type: gp2
           volume_size: {{ barman_volume_size }}
           vars:
             volume_for: barman_data
-    role:
-      - barman
-      - log-server
-      - openvpn-server
-      - monitoring-server
+{% endif %}
+{% include 'instance.yml.j2' %}
 
 {% for i in range(4,4+cascaded_replicas) %}
   - node: {{ i }}
     Name: {{ hostnames[i] }}
-{%   if subnets|length != 1 %}
-    subnet: {{ subnets[1] }}
-{%   endif %}
     role: replica
     upstream: {{ hostnames[2] }}
+{% include 'instance.yml.j2' %}
 {% endfor %}

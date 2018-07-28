@@ -1,6 +1,5 @@
 ---
 {% include 'preamble.yml.j2' %}
-
 cluster_rules:
   - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
   - {proto: tcp, from_port: 5432, to_port: 5432, cidr_ip: {{ subnets[0] }}}
@@ -21,7 +20,7 @@ instance_defaults:
       vars:
         volume_for: postgres_data
   vars:
-    ansible_user: {{ image_user }}
+    ansible_user: {{ image_user|default('root') }}
 
 instances:
   - node: 1
