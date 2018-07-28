@@ -49,14 +49,6 @@
       when: >
         inventory_hostname == target
 
-    - name: Perform a checkpoint on the primary
-      postgresql_query:
-        query: CHECKPOINT
-      become_user: "{{ postgres_user }}"
-      become: yes
-      when: >
-        inventory_hostname == groups['primary'][0]
-
     - name: Stop repmgr
       service:
         name: repmgr
