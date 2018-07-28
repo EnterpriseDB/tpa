@@ -13,10 +13,7 @@ if [[ ${distribution:=Debian} != *-minimal ]]; then
     distribution="$distribution${minimal:-}"
 fi
 
-image=$($libdir/image $distribution $platform $architecture)
-eval $image
-
-vars+=([image_name]=$image_name [image_owner]=$image_owner [image_user]=$image_user)
+eval "vars+=($($libdir/image $distribution $platform $architecture))"
 
 hostnames=(zero $($libdir/hostnames $instances))
 vars+=([hostnames]=$(IFS=, && echo "[${hostnames[*]}]"))

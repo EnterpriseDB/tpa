@@ -77,6 +77,4 @@ case "$distribution" in
         ;;
 esac
 
-echo image_name=$image_name
-echo image_owner=$image_owner
-echo image_user=$image_user
+echo "[image_name]=$image_name [image_owner]=$image_owner [image_user]=$image_user"
