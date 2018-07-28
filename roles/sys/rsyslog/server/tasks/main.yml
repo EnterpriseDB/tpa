@@ -1,5 +1,13 @@
 ---
 
+- name: Ensure /var/log/hosts exists
+  file:
+    path: /var/log/hosts
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
 - name: Install rsyslog configuration files
   copy:
     src: "{{ item }}"
