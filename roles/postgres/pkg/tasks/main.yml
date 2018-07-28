@@ -63,13 +63,16 @@
   package:
     name: "{{
       pglogical_debug_packages[ansible_distribution]
-      |map('replace', '-dbg', '-dbgsym=%s' % pglogical_package_version)
+      |map('replace', '-dbg', '-dbgsym%s' % _version_suffix)
       |list
     }}"
     state: latest
   when:
     pglogical_dbg_install is not successful and
     ansible_distribution == 'Debian'
+  vars:
+    _version_suffix: >-
+      {% if pglogical_package_version is defined %}={{ pglogical_package_version }}{% endif %}
 
 # On Postgres 9.5, pgespresso is required to support rsync-based backups
 # from a replica. (To do so, we also have to create the extension on the
