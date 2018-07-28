@@ -1,16 +1,12 @@
 ---
 
-- name: Enable TCP syslog reception
+- name: Install rsyslog configuration files
   copy:
-    src: 00-enable-tcp-reception.conf
-    dest: /etc/rsyslog.d/00-enable-tcp-reception.conf
-  notify:
-    - Restart rsyslog
-
-- name: Enable TCP syslog reception
-  copy:
-    src: 22-postgres.conf
-    dest: /etc/rsyslog.d/22-postgres.conf
+    src: "{{ item }}"
+    dest: "/etc/rsyslog.d/{{ item }}"
+  with_items:
+    - 00-enable-tcp-reception.conf
+    - 22-postgres.conf
   notify:
     - Restart rsyslog
 
