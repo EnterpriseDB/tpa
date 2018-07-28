@@ -29,5 +29,11 @@
 
   hosts: all
   tasks:
+    - include_role: name=postgres/facts
+      vars:
+        pgdata_initialised: true
+      when: >
+        'postgres' in role
+
     - include_role: name=test
       tags: test
