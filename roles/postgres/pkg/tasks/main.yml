@@ -19,22 +19,11 @@
   package:
     name: >
       {{ query('flattened', package_lists) }}
-    state: "{{
-      (postgres_package_version is defined)|ternary('present', 'latest')
-    }}"
+    state: present
   vars:
     package_lists:
       - "{{ postgres_packages|packages_for(ansible_distribution, postgres_package_version) }}"
       - "{{ postgres_debug_packages|packages_for(ansible_distribution, postgres_package_version) }}"
-  tags: [postgres, pkg]
-
-- name: Install additional Postgres packages
-  package:
-    name: >
-      {{ query('flattened', package_lists) }}
-    state: latest
-  vars:
-    package_lists:
       - "{{ pglogical_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
       - "{{ ('bdr' in role)|ternary(bdr_packages|packages_for(ansible_distribution, bdr_package_version), []) }}"
       - "{{ additional_postgres_packages[ansible_distribution] }}"
@@ -51,7 +40,7 @@
   package:
     name: >
       {{ query('flattened', package_lists) }}
-    state: latest
+    state: present
   register: pglogical_dbg_install
   ignore_errors: "{{ ansible_distribution == 'Debian' }}"
   vars:
@@ -66,7 +55,7 @@
       |map('replace', '-dbg', '-dbgsym%s' % _version_suffix)
       |list
     }}"
-    state: latest
+    state: present
   when:
     pglogical_dbg_install is not successful and
     ansible_distribution == 'Debian'
@@ -82,7 +71,7 @@
 - name: Install pgespresso packages for Postgres 9.5 and below
   package:
     name: "{{ pgespresso_packages[ansible_os_family] }}"
-    state: latest
+    state: present
   when: >
     postgres_version is version(9.5, '<=')
   vars:
