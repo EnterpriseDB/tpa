@@ -197,9 +197,6 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
             if not 'delete_on_termination' in v:
                 v['delete_on_termination'] = not v.get('attach_existing',False)
 
-            if 'mountpoint' in vars and 'volume_for' in vars:
-                raise AnsibleFilterError("volume %s should not have both mountpoint and volume_for set" % v['device_name'])
-
             volume_for = vars.get('volume_for', None)
             if volume_for and \
                 volume_for not in ['postgres_data', 'barman_data']:
