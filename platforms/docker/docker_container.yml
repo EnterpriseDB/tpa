@@ -1,0 +1,59 @@
+---
+
+# The docker_container module accepts an intimidating number of options
+# (most oriented towards lightweight container usage, rather than the
+# container-as-VM model we're following here).
+#
+# Unfortunately, it also returns a single "docker_container" fact, which
+# means we can't invoke it in a loop and process the results afterwards.
+# So we loop over include_tasks and add the fact after each invocation
+# to a separate list as a compromise.
+#
+# https://docs.ansible.com/ansible/latest/modules/docker_container_module.html
+
+- name: Provision docker containers
+  docker_container:
+    name: "{{ item.Name }}"
+    hostname: "{{ item.Name }}"
+    image: "{{ item.image }}"
+    state: started
+    pull: no
+    privileged: yes
+    interactive: yes
+    restart_policy: "{{ item.restart_policy|default('unless-stopped') }}"
+    memory: "{{ item.memory|default(omit) }}"
+    shm_size: "{{ item.shm_size|default(omit) }}"
+    env_file: "{{ item.env_file|default(omit) }}"
+    env: "{{ item.env|default(omit) }}"
+    labels: >
+      {{
+        cluster_tags|combine(item.tags)|combine({
+          'Cluster': cluster_name,
+          'node': item.node|string,
+          'Name': item.Name,
+        })
+      }}
+    log_driver: "{{ item.log_driver|default(omit) }}"
+    log_options: "{{ item.log_options|default(omit) }}"
+    exposed_ports: "{{ item.exposed_ports|default([22,5432,6432]) }}"
+    published_ports: "{{ item.published_ports|default(omit) }}"
+    devices: "{{ item.devices|default(omit) }}"
+    networks: "{{ item.networks|default(omit) }}"
+    volumes: "{{ query('flattened', volumes) }}"
+    sysctls: "{{ item.sysctls|default(omit) }}"
+    ulimits: "{{ item.ulimits|default(omit) }}"
+  vars:
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - "{{ item.volumes|default([]) }}"
+
+- set_fact:
+    docker_container_results: "{{
+      docker_container_results|default([])|union([
+        ansible_facts.docker_container|combine({
+          'item': item|combine({
+            'private_ip': ansible_facts.docker_container.NetworkSettings.IPAddress,
+          })
+        })
+      ])
+    }}"

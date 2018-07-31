@@ -33,7 +33,7 @@ class Platform(object):
     # Returns a list of all platform names
     @staticmethod
     def all_platforms():
-        return ['aws', 'bare', 'lxd']
+        return ['aws', 'bare', 'docker', 'lxd']
 
     # Adds platform-specific options to the (relevant group in the) parser
     # (subclasses are expected to override this).

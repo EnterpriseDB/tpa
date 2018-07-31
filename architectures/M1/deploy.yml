@@ -53,12 +53,14 @@
 
     - include_role: name=sys/openvpn
       when: >
-        'role_openvpn-server' in groups
+        'role_openvpn-server' in groups and
+        platform not in ['docker']
 
     - include_role: name=sys/hosts
       tags: [sys, hosts]
 
     - include_role: name=sys/cloudinit
+      when: platform not in ['docker']
       tags: [sys, cloudinit]
 
     - include_role: name=sys/rsyslog

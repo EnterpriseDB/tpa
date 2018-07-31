@@ -23,7 +23,8 @@
   args:
     executable: /bin/bash
   when:
-    postgres_data_dir != default_postgres_data_dirs[ansible_os_family]
+    postgres_data_dir != default_postgres_data_dirs[ansible_os_family] and
+    platform not in ['docker']
 
 - name: Check if PGDATA has been initialised
   stat:

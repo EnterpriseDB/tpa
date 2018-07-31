@@ -1,0 +1,31 @@
+---
+
+- name: Provision docker containers
+  include_tasks: docker_container.yml
+  with_items: "{{ docker_instances }}"
+  tags: docker
+
+- name: Set instance variables and IP
+  set_fact:
+    instance_vars: "{{
+      instance_vars|default([])|union([
+        addresses|combine({
+          'Name': item.item.Name,
+          'node': item.item.node,
+          'role': item.item|try_subkey('role', []),
+          'backup': item.item|try_subkey('backup'),
+          'upstream': item.item|try_subkey('upstream'),
+          'volumes': item.item|try_subkey('volumes', []),
+          'vars': addresses|combine(exports)|combine(item.item.vars),
+          'platform': 'docker',
+        })
+      ])
+    }}"
+  with_items:
+    "{{ docker_container_results }}"
+  loop_control:
+    label: >-
+      {{ item.item.Name }}
+  vars:
+    addresses: "{{ item.item|ip_addresses }}"
+    exports: "{{ item.item|export_as_vars }}"

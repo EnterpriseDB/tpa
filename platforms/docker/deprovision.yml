@@ -1,0 +1,8 @@
+---
+
+- name: Deprovision docker containers
+  docker_container:
+    name: "{{ item.Name }}"
+    state: absent
+  with_items: "{{ docker_instances }}"
+  tags: docker

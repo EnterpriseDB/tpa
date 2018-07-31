@@ -7,6 +7,20 @@
     ath_install is successful
     and 'already the newest version' not in ath_install.stdout
 
+- name: Install curl to fetch repository files
+  raw: apt-get -q -y install curl
+  register: curl_install
+  changed_when: >
+    curl_install is successful
+    and 'already the newest version' not in curl_install.stdout
+
+- name: Install gpg to install apt repository keys
+  raw: apt-get -q -y install gpg
+  register: gpg_install
+  changed_when: >
+    gpg_install is successful
+    and 'already the newest version' not in gpg_install.stdout
+
 - name: Ensure repository list is defined
   assert:
     msg: "Repository {{ item }} is not defined in apt_repositories"

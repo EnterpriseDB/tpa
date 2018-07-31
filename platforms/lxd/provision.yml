@@ -2,9 +2,7 @@
 
 - include_tasks: inventory/write.yml
 
-# Provision LXD instances based on the cluster definition file.
-
-- name: Deploy Containers
+- name: Provision lxd containers
   lxd_container:
     url: "{{ item.lxd_url | default('unix:/var/snap/lxd/common/lxd/unix.socket') }}"
     name: "{{ item.Name }}"
@@ -76,8 +74,3 @@
   vars:
     addresses: "{{ item.item.item|ip_addresses }}"
     exports: "{{ item.item.item|export_as_vars }}"
-
-- name: Debug
-  debug:
-    msg: "{{ item }}"
-  with_items: "{{ instance_vars }}"

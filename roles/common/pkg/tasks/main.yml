@@ -41,6 +41,8 @@
     state: present
     line: >-
       127.0.1.1	{{ inventory_hostname }}
+  when: >
+    platform not in ['docker']
 
 - include_tasks: "os/{{ ansible_os_family }}/repositories.yml"
 - include_tasks: packages.yml

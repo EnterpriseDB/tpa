@@ -73,20 +73,25 @@ default_packages:
     - mdadm
     - dstat
     - python-virtualenv
+    - sudo
+    - openssh-server
   Debian:
     - python-dev
     - linux-tools
     - dbus
     - gnutls-bin
+    - openssh-client
   RedHat:
     - python-devel
     - perf
     - gnutls-utils
     - policycoreutils-python
+    - openssh
   Ubuntu:
     - python-dev
     - linux-tools-generic
     - gnutls-bin
+    - openssh-client
 
 optional_packages: {}
 default_optional_packages:

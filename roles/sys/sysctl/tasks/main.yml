@@ -11,5 +11,9 @@
     sysctl_file: /etc/sysctl.conf
     reload: yes
   with_dict: "{{ sysctl_defaults|combine(sysctl_values) }}"
+  when: >
+    platform not in ['docker']
 
 - include_tasks: hugepages.yml
+  when: >
+    platform not in ['docker']

@@ -1,0 +1,5 @@
+- name: Ensure that every instance has a defined image
+  assert:
+    msg: "Please set 'image' on every instance"
+    that:
+      - docker_instances|selectattr('image','defined')|list|count == docker_instances|count
