@@ -17,7 +17,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-: ${twoq_repositories:='[products/bdr3/snapshot]'}
+default_bdr='products/bdr3/snapshot'
+if [[ ${POSTGRES_VERSION:-10} == 9.6 ]]; then
+    default_bdr='products/bdr2/snapshot'
+fi
+
+: ${twoq_repositories:="[$default_bdr]"}
 
 extensions="[pglogical]"
 if [[ $twoq_repositories == */bdr2/* ]]; then
