@@ -52,13 +52,13 @@
     {{ volumes }}
   vars:
     _volume_for: >-
-      {{ item.get('volume_for', null) }}
+      {{ item.get('volume_for') }}
     _volume_name: >-
       {{ _volume_for|regex_replace('_data$', '') }}
     _volume_defaults: >
       {{
-        (_volume_for is defined)|ternary(
-          {'luks_volume': _volume_name}|combine(_translations.get(_volume_for)),
+        ('volume_for' in item)|ternary(
+          {'luks_volume': _volume_name}|combine(_translations.get(_volume_for, {})),
           {'mountpoint': item.mountpoint}
         )
       }}
