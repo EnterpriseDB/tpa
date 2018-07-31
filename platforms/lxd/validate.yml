@@ -4,7 +4,7 @@
   assert:
     msg: "Please set 'alias' on every instance"
     that:
-      - instances|selectattr('alias','defined')|list|count == instances|count
+      - lxd_instances|selectattr('alias','defined')|list|count == lxd_instances|count
 
 - name: Ensure that an IP address is specified for the instance
   assert:
