@@ -22,6 +22,17 @@ done
 extensions="[pglogical]"
 if [[ $twoq_repositories == */bdr2/* ]]; then
     extensions="[]"
+    if [[ ! ${POSTGRES_VERSION:-} ]]; then
+        export POSTGRES_VERSION=9.6
+    fi
+    if [[ ${POSTGRES_VERSION:-10} != 9.[46] ]]; then
+        error "BDR2 does not support Postgres ${POSTGRES_VERSION:-10}"
+    fi
+fi
+if [[ $twoq_repositories == */bdr3/* ]]; then
+    if [[ ${POSTGRES_VERSION:-10} == 9.* ]]; then
+        error "BDR3 does not support Postgres ${POSTGRES_VERSION:-10}"
+    fi
 fi
 
 vars+=([instances]=${instances:=3})
