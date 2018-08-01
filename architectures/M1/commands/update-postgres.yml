@@ -29,7 +29,8 @@
   become: yes
   hosts: all
   tasks:
-    - service:
+    - name: Stop repmgr
+      service:
         name: repmgr
         state: stopped
       when: >
@@ -49,7 +50,8 @@
         yum install -y postgresql{{ postgres_versionNN }}
   serial: 1
   tasks:
-    - command: >
+    - name: Run update command on replicas
+      command: >
         {{ update_commands[ansible_os_family] }}
       when: >
         'replica' in role
@@ -67,7 +69,8 @@
       RedHat: >-
         yum install -y postgresql{{ postgres_versionNN }}
   tasks:
-    - command: >
+    - name: Switchover to a replica
+      command: >
         {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
       become_user: "{{ postgres_user }}"
       become: yes
@@ -77,12 +80,14 @@
     # Note: this role was calculated earlier, so it's outdated after the
     # switchover, but it correctly identifies the instance to use.
 
-    - command: >
+    - name: Run update command on the old primary
+      command: >
         {{ update_commands[ansible_os_family] }}
       when: >
         'primary' in role
 
-    - command: >
+    - name: Switch back to the old primary
+      command: >
         {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
       become_user: "{{ postgres_user }}"
       become: yes
@@ -96,7 +101,8 @@
   become: yes
   hosts: all
   tasks:
-    - service:
+    - name: Restart repmgr
+      service:
         name: repmgr
         state: started
       when: >
