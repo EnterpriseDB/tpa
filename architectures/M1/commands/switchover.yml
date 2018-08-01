@@ -38,14 +38,14 @@
     - assert:
         msg: "Switchover target is already a primary: {{ target }}"
         that:
-          - target not in groups['role_primary']
+          - target not in groups['primary']
       when: >
         inventory_hostname == target
 
     - assert:
-        msg: "Expected only one primary, but found: {{ groups['role_primary']|join(', ') }}"
+        msg: "Expected only one primary, but found: {{ groups['primary']|join(', ') }}"
         that:
-          - groups['role_primary']|length == 1
+          - groups['primary']|length == 1
       when: >
         inventory_hostname == target
 

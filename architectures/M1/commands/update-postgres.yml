@@ -75,7 +75,7 @@
       become_user: "{{ postgres_user }}"
       become: yes
       when: >
-        inventory_hostname == groups['role_replica'][0]
+        inventory_hostname == groups['replica'][0]
 
     # Note: this role was calculated earlier, so it's outdated after the
     # switchover, but it correctly identifies the instance to use.

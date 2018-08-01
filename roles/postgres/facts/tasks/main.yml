@@ -48,9 +48,8 @@
 
 - name: Create role-based groups
   group_by:
-    key: "role_{{ item }}"
-  with_items:
-    - primary
-    - replica
-  when:
-    item in role
+    key: "{{
+      ('primary' in role)|ternary('primary',
+        ('replica' in role)|ternary('replica',
+          'other'))
+    }}"
