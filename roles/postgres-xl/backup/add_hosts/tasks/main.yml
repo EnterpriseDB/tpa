@@ -15,7 +15,7 @@
     role: [ "barman" ]
     parent_inventory_hostname: "{{item}}"
     backup: ""
-  with_items: "{{ groups['tag_role_barman']|default([]) }}"
+  with_items: "{{ groups['role_barman']|default([]) }}"
 
 - name: Add coordinators to backup_nodes group
   add_host:
@@ -33,7 +33,7 @@
     role: [ "coordinator","postgres-xl" ]
     parent_inventory_hostname: "{{item.0}}"
   with_nested_dependents:
-        - groups['tag_role_coordinator']
+        - groups['role_coordinator']
         - hostvars[item.0].coordinators|default([])
   when: >
     hostvars[item.0].backup is defined and hostvars[item.0].backup != ''
@@ -54,7 +54,7 @@
     role: [ "datanode","postgres-xl" ]
     parent_inventory_hostname: "{{item.0}}"
   with_nested_dependents:
-        - groups['tag_role_datanode']
+        - groups['role_datanode']
         - hostvars[item.0].datanodes|default([])
   when: >
     hostvars[item.0].backup is defined and hostvars[item.0].backup != ''
@@ -66,7 +66,7 @@
     name: "{{item}}-gtm"
     ansible_host: "{{ hostvars[item].public_ip }}"
     ip_address: "{{ hostvars[item].ip_address }}"
-    coord_ip_address: "{{ hostvars[groups['tag_role_coordinator'][0]].ip_address }}"
+    coord_ip_address: "{{ hostvars[groups['role_coordinator'][0]].ip_address }}"
     coord_port: "20002"
     groups: [backup_nodes, "{{ hostvars[item].cluster_tag }}"]
     backup: ""
@@ -77,4 +77,4 @@
     cluster_name: "{{ hostvars[item].cluster_name }}"
     role: [ "gtm","postgres-xl" ]
     parent_inventory_hostname: "{{item}}"
-  with_items: "{{ groups['tag_role_gtm']|default([]) }}"
+  with_items: "{{ groups['role_gtm']|default([]) }}"

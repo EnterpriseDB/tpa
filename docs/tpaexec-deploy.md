@@ -144,8 +144,7 @@ The file deploy.yml is described here for informational purposes, however is not
 
     - role: sys/openvpn
       when: >
-        'tag_role_openvpn-server' in groups
-        and vpn_network is defined
+        'role_openvpn-server' in groups
 
     - role: sys/hosts
       tags: [sys, hosts]
@@ -173,7 +172,7 @@ The file deploy.yml is described here for informational purposes, however is not
 
     - role: monitoring
       when: >
-        'tag_role_monitoring-server' in groups
+        'role_monitoring-server' in groups
       tags: monitoring
 ```
 

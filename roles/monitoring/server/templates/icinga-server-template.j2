@@ -6,15 +6,15 @@
 define hostgroup {
     hostgroup_name {{item}}_postgres_servers
     alias          All {{client_name}} Postgres servers
-    members        {% for server_name in groups['tag_role_postgres'] %}{{server_name}}{% if not loop.last %}, {% endif %}{% endfor %}
+    members        {% for server_name in groups['role_postgres'] %}{{server_name}}{% if not loop.last %}, {% endif %}{% endfor %}
 
 }
 
-{% if 'tag_role_barman' in groups %}
+{% if 'role_barman' in groups %}
 define hostgroup {
     hostgroup_name {{item}}_barman_servers
     alias          All {{client_name}} Barman servers
-    members        {% for server_name in groups['tag_role_barman'] %}{{server_name}}{% if not loop.last %}, {% endif %}{% endfor %}
+    members        {% for server_name in groups['role_barman'] %}{{server_name}}{% if not loop.last %}, {% endif %}{% endfor %}
 
 }
 {% endif %}
@@ -38,7 +38,7 @@ define host {
 #-----------------------------------------------------------------------
 # Database servers
 #-----------------------------------------------------------------------
-{% for server_name in groups['tag_role_postgres'] if server_name not in groups['tag_role_barman'] %}
+{% for server_name in groups['role_postgres'] if server_name not in groups['role_barman'] %}
 define host {
     use             {{item}}_monitored_host
     host_name       {{server_name}}
@@ -47,7 +47,7 @@ define host {
 
 {% endfor %}
 
-{% if 'tag_role_barman' in groups %}
+{% if 'role_barman' in groups %}
 #-----------------------------------------------------------------------
 # Barman servers
 #-----------------------------------------------------------------------
@@ -64,7 +64,7 @@ define host {
     register        0
 }
 
-{% for server_name in groups['tag_role_barman'] %}
+{% for server_name in groups['role_barman'] %}
 define host {
     use             {{item}}_monitored_barman_host
     host_name       {{server_name}}
@@ -86,7 +86,7 @@ define service {
     register         0
 }
 
-{% if 'tag_role_barman' in groups %}
+{% if 'role_barman' in groups %}
 define service {
     use              rdba_monitored_service
     contact_groups   {% if contacts %}customer_{{item}}, {% endif %}support_engineers_notifications
@@ -112,7 +112,7 @@ define service {
 }
 
 # Dependencies, if there is no CONNECTION, don't check BACKENDS
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 define servicedependency {
     host_name                     {{server_name}}
     service_description           POSTGRES_CONNECTION
@@ -137,7 +137,7 @@ define service {
 }
 
 # BLOAT will depend on CONNECTION and BACKENDS
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 define servicedependency {
     host_name                     {{server_name}}
     service_description           POSTGRES_CONNECTION
@@ -171,7 +171,7 @@ define service {
 }
 
 # DISK_SPACE also depends on CONNECTION (don't know if BACKENDS)
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 define servicedependency {
     host_name                     {{server_name}}
     service_description           POSTGRES_CONNECTION
@@ -183,12 +183,12 @@ define servicedependency {
 
 {% endfor %}
 
-{% if 'tag_role_barman' in groups %}
+{% if 'role_barman' in groups %}
 #-----------------------------------------------------------------------
 # Check disk space (Barman servers)
 #-----------------------------------------------------------------------
 
-{% for server_name in groups['tag_role_barman'] %}
+{% for server_name in groups['role_barman'] %}
 define service {
     use                 {{item}}_monitored_barman_service
     host_name           {{server_name}}
@@ -212,7 +212,7 @@ define service {
 }
 
 # PREPARED_TXNS will depend on CONNECTION and BACKENDS
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 define servicedependency {
     host_name                     {{server_name}}
     service_description           POSTGRES_CONNECTION
@@ -245,7 +245,7 @@ define service {
 }
 
 # TXN_IDLE will depend on CONNECTION and BACKENDS
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 define servicedependency {
     host_name                     {{server_name}}
     service_description           POSTGRES_CONNECTION
@@ -278,7 +278,7 @@ define service {
 }
 
 # TXN_TIME will depend on CONNECTION and BACKENDS
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 define servicedependency {
     host_name                     {{server_name}}
     service_description           POSTGRES_CONNECTION
@@ -333,7 +333,7 @@ define servicedependency {
 }
 {% endif %}
 
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 {% if check_big_postgres in hostvars[server_name] and hostvars[server_name].check_big_postgres|bool == true %}
 define service {
     use                           {{item}}_monitored_service
@@ -350,7 +350,7 @@ define service {
 
 # There's no point checking a replica for autovac freeze age
 # so test only masters
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 
 {% if check_autovac_freeze|bool == true %}
 {% if 'primary' in hostvars[server_name].role  %}
@@ -383,7 +383,7 @@ define servicedependency {
 {% endfor %}
 
 # Wraparound is also only a consideration for the masters
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 {% if 'primary' in hostvars[server_name].role  %}
 define service {
     use                 {{item}}_monitored_service
@@ -418,7 +418,7 @@ define servicedependency {
 # Check sequences
 #-----------------------------------------------------------------------
 
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 {% if 'primary' in hostvars[server_name].role  %}
 define service {
     use                     {{item}}_monitored_service
@@ -456,7 +456,7 @@ define servicedependency {
 
 # Standby connection checks (run on primary)
 
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 {% if ('primary' in hostvars[server_name].role or 'cascading' in hostvars[server_name].role)
   and ((hostvars[server_name].check_replication|default(check_replication))|bool == true) %}
 define service {
@@ -486,7 +486,7 @@ define servicedependency {
 {% endfor %}
 
 # Standby lag checks (run on standby)
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 {% if ('replica' in hostvars[server_name].role or 'cascading' in hostvars[server_name].role)
   and ((hostvars[server_name].check_replication|default(check_replication))|bool == true) %}
 define service {
@@ -517,7 +517,7 @@ define servicedependency {
 {% endfor %}
 
 {% if check_replication_slots|bool == true %}
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 {% if ('primary' in hostvars[server_name].role) and ((hostvars[server_name].check_replication|default(check_replication))|bool == true) %}
 define service {
     use                     {{item}}_monitored_service
@@ -550,7 +550,7 @@ define servicedependency {
 {% endif %}
 
 
-{% for server_name in groups['tag_role_postgres'] %}
+{% for server_name in groups['role_postgres'] %}
 {% if check_repmgr_lag|bool == true and 'primary' in hostvars[server_name].role %}
 ########################################################################
 # Repmgr lag reported from {{server_name}}
@@ -562,7 +562,7 @@ define service {
     service_description REPMGR_LAG
 }
 
-{% for standby_name in groups['tag_role_postgres'] %}
+{% for standby_name in groups['role_postgres'] %}
 {% if 'replica' in hostvars[standby_name].role and hostvars[standby_name].repmgr_node_id|default(0) %}
 define servicedependency {
     host_name                           {{standby_name}}
@@ -580,12 +580,12 @@ define servicedependency {
 {% endfor %}
 
 
-{% if 'tag_role_barman' in groups %}
+{% if 'role_barman' in groups %}
 #-----------------------------------------------------------------------
 # Check barman
 #-----------------------------------------------------------------------
 
-{% for server_name in groups['tag_role_barman'] %}
+{% for server_name in groups['role_barman'] %}
 define service {
     use                 {{item}}_monitored_barman_service
     host_name           {{server_name}}

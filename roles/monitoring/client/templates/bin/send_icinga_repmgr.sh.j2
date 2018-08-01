@@ -3,7 +3,7 @@
 
 # 1. Run checks and collect output in $NSCA_MSG
 NSCA_MSG=$(
-{% for standby_name in groups['tag_role_replica'] %}
+{% for standby_name in groups['role_replica'] %}
 {% if 'replica' in hostvars[standby_name].role and hostvars[standby_name].repmgr_node_id|default(0) %}
     {{config.sudo}} ~/bin/check_repmgr.py -db {{repmgr_database|default(database_list|first)}} -C {{repmgr_cluster}} -n {{hostvars[standby_name].repmgr_node_id}} -w '5 minutes' -c '20 minutes'
 {% endif %}

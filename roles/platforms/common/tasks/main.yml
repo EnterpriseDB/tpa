@@ -25,7 +25,7 @@
     'coordinator' in role or 'datanode' in role or 'coordinator-replica' in role or 'datanode-replica' in role or 'gtm' in role or 'gtm-standby' in role
 
 - name: Create role-based groups
-  group_by: key="tag_role_{{ item }}"
+  group_by: key="role_{{ item }}"
   with_items: "{{ role }}"
 
 # If any instance is tagged with 'log-server', make every other instance
@@ -40,7 +40,7 @@
     ls in groups and groups[ls]|length > 0 and
     inventory_hostname != groups[ls][0]
   vars:
-    ls: 'tag_role_log-server'
+    ls: 'role_log-server'
 
 # If any instance is tagged with 'monitoring-server', make every other
 # instance use it as its monitoring server. This can be overriden by
@@ -54,7 +54,7 @@
     ms in groups and groups[ms]|length > 0 and
     inventory_hostname != groups[ms][0]
   vars:
-    ms: 'tag_role_monitoring-server'
+    ms: 'role_monitoring-server'
 
 # If any instance is tagged with 'openvpn-server', make every other
 # instance use it as its openvpn server. This can be overriden by
@@ -68,7 +68,7 @@
     os in groups and groups[os]|length > 0 and
     inventory_hostname != groups[os][0]
   vars:
-    os: 'tag_role_openvpn-server'
+    os: 'role_openvpn-server'
 
 # If there's anything tagged as an openvpn server, we have to make sure
 # vpn_network is defined.

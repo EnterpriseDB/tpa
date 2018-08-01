@@ -49,7 +49,7 @@
     'gtm-standby' in role
 
 - include_tasks: gtm_proxy_roles.yml gpindex="{{ 1+item.0 }}" gphost="{{item.1}}" dtype=gtm-proxy
-  with_indexed_items: "{{ groups['tag_role_datanode'] }}"
+  with_indexed_items: "{{ groups['role_datanode'] }}"
 
 - include_tasks: coord_roles.yml ctype=master cnode={{item}}
   with_items: "{{hostvars[inventory_hostname].coordinators|default([])}}"

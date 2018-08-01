@@ -53,8 +53,7 @@
 
     - role: sys/openvpn
       when: >
-        'tag_role_openvpn-server' in groups
-        and vpn_network is defined
+        'role_openvpn-server' in groups
 
     - role: sys/hosts
       tags: [sys, hosts]
@@ -93,7 +92,8 @@
 
 #    - role: monitoring
 #      when: >
-#        'tag_role_monitoring-server' in groups
+#        'role_monitoring-server' in groups and
+#        ansible_distribution == 'Debian'
 #      tags: monitoring
 
 # Finally, we must make sure we don't leave stale entries in /etc/hosts
