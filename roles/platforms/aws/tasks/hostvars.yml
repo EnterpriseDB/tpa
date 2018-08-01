@@ -21,14 +21,6 @@
 # The static inventory file that we generate will have ansible_host set
 # to an elastic IP, or if one does not exist, the public IP, or if that
 # doesn't exist either, the private IP.
-#
-# Here we enumerate the available ip_addresses (so that we can generate
-# an appropriate known_hosts, for example) and pick a default address to
-# use within the cluster.
-
-- name: Set ip_addresses to []
-  set_fact:
-    ip_addresses: []
 
 - name: Set private IP address
   set_fact:
@@ -42,19 +34,3 @@
   when:
     public_ip is not defined and
     ec2_ip_address is defined
-
-- name: Add private_ip to the address list
-  set_fact:
-    ip_addresses: "{{ ip_addresses|union(['private_ip']) }}"
-  when:
-    private_ip is defined
-
-- name: Add public_ip to the address list
-  set_fact:
-    ip_addresses: "{{ ip_addresses|union(['public_ip']) }}"
-  when:
-    public_ip is defined
-
-- name: Set primary IP address
-  set_fact:
-    ip_address: "{{ private_ip|default(public_ip) }}"
