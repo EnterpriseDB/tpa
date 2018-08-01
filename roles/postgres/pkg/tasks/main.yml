@@ -62,6 +62,7 @@
   vars:
     _version_suffix: >-
       {% if pglogical_package_version is defined %}={{ pglogical_package_version }}{% endif %}
+  tags: [postgres, pkg]
 
 # On Postgres 9.5, pgespresso is required to support rsync-based backups
 # from a replica. (To do so, we also have to create the extension on the
