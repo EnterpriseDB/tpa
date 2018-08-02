@@ -41,7 +41,7 @@
 - name: Run 'repmgr primary register' on the primary
   command: >
     {{ postgres_bin_dir }}/repmgr primary register --verbose \
-      -f "{{ repmgr_conf_file }}"
+      -f "{{ repmgr_conf_file }}" --superuser postgres
   become_user: "{{ postgres_user }}"
   become: yes
   when:
