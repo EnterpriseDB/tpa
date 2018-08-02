@@ -3,6 +3,8 @@ BDR-Always-ON
 
 BDR in an Always-ON configuration.
 
+This topology corresponds to v3.1 of the BDR architecture-docs.
+
 Cluster configuration
 ---------------------
 
