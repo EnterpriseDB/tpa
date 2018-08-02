@@ -98,6 +98,10 @@ case "$opt" in
         export BDR_PACKAGE_VERSION=${1:?bdr package version not specified}
         shift
         ;;
+    --pgbouncer-package-version)
+        export PGBOUNCER_PACKAGE_VERSION=${1:?pgbouncer package version not specified}
+        shift
+        ;;
 
     # These options export environment variables that are interpreted by
     # architectures/lib/cluster-tags.

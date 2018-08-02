@@ -104,6 +104,7 @@ options:
 3. ``--barman-package-version 2.4-1.pgdg90+1``
 4. ``--pglogical-package-version '2.2.0*'``
 5. ``--bdr-package-version '3.0.2*'``
+5. ``--pgbouncer-package-version '1.8*'``
 
 ## Hostnames
 

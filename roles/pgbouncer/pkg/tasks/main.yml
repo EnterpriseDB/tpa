@@ -1,7 +1,15 @@
 ---
 
 - name: Install pgbouncer package
-  package: name=pgbouncer state=latest
+  package:
+    name: >
+      {{ query('flattened', package_lists) }}
+    state: "{{
+      (pgbouncer_package_version is defined)|ternary('present', 'latest')
+    }}"
+  vars:
+    package_lists:
+      - "{{ pgbouncer_packages|packages_for(ansible_distribution, pgbouncer_package_version) }}"
   tags: [pgbouncer, pkg]
 
 - name: Install Postgres client package

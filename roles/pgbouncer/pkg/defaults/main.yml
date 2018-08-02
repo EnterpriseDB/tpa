@@ -1,0 +1,8 @@
+---
+
+pgbouncer_packages:
+  Debian: &debian_pgbouncer_packages
+    - pgbouncer
+  RedHat:
+    - pgbouncer
+  Ubuntu: *debian_pgbouncer_packages

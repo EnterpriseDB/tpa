@@ -34,6 +34,7 @@ tpaexec configure <clustername> --architecture <arch> --platform <platform>
 --postgres-version [10|9.6] --postgres-package-version <ver>
 --repmgr-package-version <ver> --barman-package-version <ver>
 --pglogical-package-version <ver> --bdr-package-version <ver>
+--pgbouncer-package-version <ver>
 --hostnames-from <filename> --hostnames-pattern <pattern>
 ```
 
@@ -116,6 +117,7 @@ select specific package versions.
 --postgres-package-version <pkg> - Specific postgres package, e.g. 10.4-2.pgdg90+1
 --repmgr-package-version <pkg> - Specific repmgr package, e.g. 4.0.5-1.pgdg90+1
 --barman-package-version <pkg> - Specific barman package, e.g. 2.4-1.pgdg90+1
+--pgbouncer-package-version <pkg> - Specific pgbouncer package, e.g. '1.8*'
 --pglogical-package-version <pkg> - Specific pglogical package, e.g. '2.2.0*'
 --bdr-package-version <pkg> - Specific bdr package, e.g. '3.0.2*'
 ```
