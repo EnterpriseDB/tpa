@@ -25,7 +25,7 @@
       --upstream-conninfo "{{ upstream_conninfo }}" \
       -h {{ upstream_to_clone|default(upstream_primary) }}
   vars:
-    upstream_conninfo: "host={{ upstream }} dbname=repmgr user=repmgr"
+    upstream_conninfo: "host={{ upstream }} dbname=repmgr user=repmgr application_name={{ inventory_hostname }}"
   become_user: "{{ postgres_user }}"
   become: true
   register: this
