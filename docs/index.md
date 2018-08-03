@@ -15,7 +15,7 @@ applicable to quick testbed setups as to production environments.
 TPAexec is an orchestration tool that uses Ansible to build Postgres
 clusters according to 2ndQuadrant's recommendations.
 
-### Architectures
+## Architectures
 
 An architecture is a recommended layout of servers and software to set
 up Postgres for a specific purpose.
@@ -24,7 +24,7 @@ Examples include "M1" (Postgres with a primary and multiple streaming
 replicas) and "BDR-Always-ON" (Postgres with BDR in a configuration
 meant for HA).
 
-### Platforms
+## Platforms
 
 A platform is a means to host the servers to deploy any architecture.
 Examples include AWS, lxd, and bare-metal servers.
@@ -107,8 +107,18 @@ editing the config.yml file and running the provision/deploy/test cycle.
 Should you need to go beyond what is already implemented in TPAexec, the
 full range of Ansible functionality is at your disposal at every stage.
 
-## Cluster management
+### Cluster management
 
 Once your cluster is up and running, TPAexec also provides some cluster
 management functions, including safe switchover operations and
 zero-downtime minor-version upgrades.
+
+## It's just Postgres
+
+TPAexec can create complex clusters with many features configured, but
+the result is just Postgres. The installation follows some conventions
+designed to make life simpler, but there is no hidden magic or anything
+standing in the way between you and the database. Using TPAexec to make
+configuration changes is likely simpler and safer than to make them by
+hand, but you can do everything on a TPA cluster that you could do on
+any other Postgres installation.
