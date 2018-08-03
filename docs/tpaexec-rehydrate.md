@@ -38,23 +38,30 @@ Check **attach_existing** in config.yml & set it to "yes" if it isn't set alread
 ec2_ami:
   Name: TPA-Debian-PGDG-10-2018*
   Owner: self
-ec2_ami_user: admin
+
+instance_defaults:
+  type: t2.micro
+  region: eu-west-1
+  platform: aws
+  vars:
+    ansible_user: ec2-user
 
 instances:
-    - node: 1
-      Name: zombie
-      type: t2.micro
-      region: eu-west-1
-      subnet: 10.33.14.0/24
-      volumes:
-            device_name: /dev/xvdb
-            volume_type: gp2
-            volume_size: 16
-            raid_units: 2
-            attach_existing: yes
-            delete_on_termination: false
-            vars:
-              mountpoint: /var/lib/postgresql
+  - node: 1
+    Name: vlad
+    subnet: 10.33.14.0/24
+    volumes:
+        - device_name: /dev/xvdb
+          volume_type: gp2
+          volume_size: 16
+          raid_units: 2
+          attach_existing: yes
+          delete_on_termination: false
+          vars:
+            volume_for: postgres_data
+            mountpoint: /var/lib/pgsql
+    role: primary
+
 ```
 
 
@@ -107,10 +114,15 @@ Rehydration is performed on a list of nodes that consists of:
 
 ##### Phase 2:
 
-Failover of current Master to instance in same region that has already been rehydrated
+Switchover of current Master to instance in same region that has already been rehydrated
+
 ##### Phase 3:
 
 Rehydration is performed on the list of remaining nodes.
+
+##### Phase 4:
+
+Switchover back to original Master
 
 ------
 
@@ -128,37 +140,12 @@ Rehydrate nodes
 
 ```
 
-Force a reregister as standby on each rehydrated Replica (only DB instances, not barman)
-
-```
-[tpa]$ ssh dba@zombie1
-[dba]$ sudo su - postgres
-[postgres]$ repmgr -f /etc/repmgr/<version>/repmgr.conf standby register -F
-
-[tpa]$ ssh dba@zombie3
-[dba]$ sudo su - postgres
-[postgres]$ repmgr -f /etc/repmgr/<version>/repmgr.conf standby register -F
-```
-
 ##### Phase 2:
 
-Failover of current Master to instance in same region that has already been rehydrated: 
+Switchover of current Master to instance in same region that has already been rehydrated: 
 
 ```
-[tpa]$ ssh dba@zombie1
-[dba]$ sudo su - postgres
-[postgres]$ repmgr -f /etc/repmgr/<version>/repmgr.conf standby switchover —siblings-follow
-```
-
-You will see the below error message, however this is normal (When the switchover happens, the old master has to be restarted in order for it to connect to the new master as a standby)
-
-```
-ERROR: connection to database failed:
-FATAL:  the database system is starting up
-FATAL:  the database system is starting up
-
-WARNING: switchover did not fully complete
-DETAIL: node "zombie1" is now primary but node "vlad" is not reachable
+[tpa]$ tpaexec switchover ./night zombie1
 ```
 
 ##### Phase 3:
@@ -166,21 +153,18 @@ DETAIL: node "zombie1" is now primary but node "vlad" is not reachable
 Rehydrate remaining nodes:
 
 ```
-[tpa]$ cd ~/tpa/clusters
 [tpa]$ tpaexec rehydrate ./night vlad,zombie2,zombie4,fritz,minion2
 ```
 
-Force a reregister as standby on each rehydrated Replica (only DB instances, not barman)
+##### Phase 4 (Optional):
+
+Switchover back to original Master
 
 ```
-[tpa]$ ssh dba@zombie2
-[dba]$ sudo su - postgres
-[postgres]$ repmgr -f /etc/repmgr/<version>/repmgr.conf standby register -F
-
-[tpa]$ ssh dba@zombie4
-[dba]$ sudo su - postgres
-[postgres]$ repmgr -f /etc/repmgr/<version>/repmgr.conf standby register -F
+[tpa]$ tpaexec switchover ./night vlad
 ```
+
+
 
 
 
