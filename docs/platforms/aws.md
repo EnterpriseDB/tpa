@@ -1,9 +1,40 @@
-# AWS settings
+AWS
+===
+
+## Access setup
+
+To use the AWS API, you need an access key id and a secret access key.
+
+Use **Create Access Key** in the **Security Credentials** tab for your
+AWS IAM user to generate an access key, as described by
+https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+
+Next, make the keypair available to the boto library, as described by
+https://boto.readthedocs.org/en/latest/boto_config_tut.html
+
+There are two easy ways to do this:
+
+1. Set environment variables:
+
+   ```
+   export AWS_ACCESS_KEY_ID='AKIAIOSFODNN7EXAMPLE'
+   export AWS_SECRET_ACCESS_KEY='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+   ```
+
+2. Create ~/.aws/credentials with the following contents:
+
+   ```
+   [default]
+   aws_access_key_id = AKIAIOSFODNN7EXAMPLE
+   aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+   ```
+
+## Configuration
 
 This is a list of the AWS-specific configuration settings that you can
 define in config.yml
 
-## VPC (required)
+### VPC (required)
 
 You must specify a VPC to use.
 
@@ -26,7 +57,7 @@ different regions, you can use the expanded form:
           …filter expressions…
       …
 
-## AMI (required)
+### AMI (required)
 
 You must specify an AMI to use.
 
@@ -46,7 +77,7 @@ You can add filter specifications for more precise matching:
 (By default, ``tpaexec configure`` will select a suitable ``ec2_ami``
 for you based on the ``--distribution`` argument.)
 
-## Subnets (optional)
+### Subnets (optional)
 
 Every instance must specify its subnet (in CIDR form, or as a subnet-xxx
 id). You may optionally specify the name and availability zone for each
@@ -62,7 +93,7 @@ subnet that we create:
           Name: example2
       …
 
-## Security groups (optional)
+### Security groups (optional)
 
 By default, we create a security group for the cluster. To use one or
 more existing security groups, set:
@@ -73,7 +104,7 @@ more existing security groups, set:
           - foo
       …
 
-## Internet gateways (optional)
+### Internet gateways (optional)
 
 By default, we create internet gateways for every VPC if
 
@@ -87,24 +118,30 @@ is set. For more fine-grained control, you can set
       us-east-1: no
       …
 
-## SSH keys (optional)
-#
+### SSH keys (optional)
+
+```
 # Set this to change the name under which we register our SSH key.
 # ec2_key_name: tpa_cluster_name
 #
 # Set this to use an already-registered key.
 # ec2_instance_key: xxx
+```
 
-## S3 bucket (optional)
-#
+### S3 bucket (optional)
+
+```
 # Set this to upload SSH host keys to a different S3 bucket.
 # cluster_bucket: xxx
+```
 
-## Instance profile (optional)
-#
+### Instance profile (optional)
+
+```
 # Set this to change the name of the instance profile role we create.
 # cluster_profile: cluster_name_profile
 #
 # Set this to use an existing instance profile (which must have all the
 # required permissions assigned to it).
 # instance_profile_name: xxx
+```

@@ -1,5 +1,9 @@
-# LXD settings
+LXD
+===
 
+## WIP
+
+```
 instance_defaults:
   platform: lxd
 
@@ -23,3 +27,4 @@ instances:
       vars:
         work_mem: 16MB
         postgres_data_dir: /var/lib/postgresql/data
+```
