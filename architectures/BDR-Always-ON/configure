@@ -13,7 +13,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-: ${twoq_repositories:='[products/bdr3/snapshot,products/pglogical3/snapshot,products/pgbouncer/snapshot]'}
+: ${twoq_repositories:='[products/bdr3/snapshot,products/pglogical3/snapshot,products/default/snapshot]'}
 
 postgres_volume_size=${postgres_volume_size:-64}
 barman_volume_size=${barman_volume_size:-128}
