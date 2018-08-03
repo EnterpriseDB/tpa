@@ -3,22 +3,7 @@ TPAexec - Cluster design and implementation considerations
 
 ## Overview
 
-**TPAexec** is an orchestration tool from 2ndQuadrant that enables the repeatable and automated deployment of highly available PostgreSQL clusters that conform to TPA (Trusted PostgreSQL Architecture). It sets up a fully working database cluster with multiple nodes, replication and backup - all integrated and fully tested for both performance and high availability.
-
-TPAexec setup works in Stages:
-
-- Provisioning
-- Deployment (includes Customization, Testing and Verification)
-
-and can also be used for
-
-- Rehydration [used for rapid deployment of patches or OS upgrades to Amazon Web Services (**AWS**) Elastic Compute Cloud (**EC2**) instances]
-
-In its current form, it is used to manage AWS EC2 instances via a command line interface, although managing other cloud technologies may be possible in future releases.
-
-TPAexec itself can run locally or remotely to the cloud being managed (e.g. from a laptop, linux VM, AWS instance).
-
-------
+This document discusses the design of clusters with TPAexec.
 
 ### AWS Fundamentals
 

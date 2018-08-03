@@ -3,17 +3,7 @@ tpaexec provision
 
 ## Overview
 
-**TPAexec** is an orchestration tool that enables the repeatable and automated deployment of highly available PostgreSQL clusters that conform to TPA (Trusted PostgreSQL Architecture). It sets up a fully working database cluster with multiple nodes, replication and backup - all integrated and fully tested for both performance and high availability.
-
-TPAexec setup works in Stages:
-
-- Provisioning
-
-- Deployment (includes Customization, Testing and Verification)
-
-and can also be used for
-
-- Rehydration (used for rapid deployment of patches or OS upgrades to AWS EC2 instances )
+This document describes how to provision a cluster with TPAexec.
 
 ### Pre-requisites
 

@@ -3,13 +3,7 @@ tpaexec provision - baremetal
 
 ## Overview
 
-**TPAexec** is an orchestration tool that enables the repeatable and automated deployment of highly available PostgreSQL clusters that conform to TPA (Trusted PostgreSQL Architecture). It sets up a fully working database cluster with multiple nodes, replication and backup - all integrated and fully tested for both performance and high availability. It can be used for different platforms, and this document looks at how to deploy to existing "baremetal" server instances.
-
-TPAexec setup works in Stages:
-
-- Provisioning
-
-- Deployment (includes Customization, Testing and Verification)
+This document discusses how to provision a cluster on bare-metal servers.
 
 ### OS cluster
 For baremetal deployment, we assume that the servers/VMs have already been created and booted to the OS, and that they are accessible via SSH.
