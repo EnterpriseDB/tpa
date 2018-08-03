@@ -1,34 +1,30 @@
 TPAexec installation
 ====================
 
-## Overview
+To use TPAexec, you need to install the tpaexec package and run the
+``tpaexec setup`` command.
 
-To use TPAexec, you will need:
-
-1. The TPAexec source code itself
-
-2. Python 2.7 and some Python modules
-
-3. A few other programs that TPAexec uses
-
-This document explains how to set up these things and start using
-TPAexec.
-
-Commands run as root will be shown starting with a **[root]#** and commands run as tpa user will be shown starting with a **[tpa]$**
+TPAexec packages are available to 2ndQuadrant customers by prior
+arrangement.
 
 ## Quickstart
 
-Here are the commands you must run:
+First, subscribe to the products/tpa/release repository through the
+2ndQuadrant Portal software subscription mechanism. Then run the
+following commands:
 
-    # Pick one of the following based on your distribution
-    [root]# apt-get install tpaexec-*.deb
-    [root]# yum install tpaexec-*.rpm
+    # Pick the command for your platform
+    [root]# apt-get install tpaexec
+    [root]# yum install tpaexec
 
     # Post-installation setup
     [root]# /opt/2ndQuadrant/TPA/bin/tpaexec setup
     [root]# /opt/2ndQuadrant/TPA/bin/tpaexec selftest
 
 More detailed explanations below.
+
+Commands run as root will be shown starting with a **[root]#**; commands
+shown starting with a **[tpa]$** may be run by an ordinary user.
 
 ## What time is it?
 
@@ -37,19 +33,20 @@ time set, because various things will fail otherwise. For example:
 
     [root]# ntpdate pool.ntp.org
 
-## TPAexec
+## Packages
 
-TPAexec packages are available from the 2ndQuadrant internal package
-repository. These instructions assume that you either have access to
-this repository, or have been given a copy of the package separately.
+Subscribe to the "products/tpa/release" repository to get the latest
+TPAexec packages. Login to the 2ndQuadrant Portal, add a subscription
+under Support/Software subscriptions, and follow the instructions to
+enable the repository on your system.
 
-You can install the tpaexec package as follows:
+Once that is done, you can install the tpaexec package as follows:
 
     # Debian or Ubuntu
-    [root]# apt-get install tpaexec-<version-number.os-type>_all.deb
+    [root]# apt-get install tpaexec
 
     # RedHat or CentOS
-    [root]# yum install tpaexec-<version-number>.noarch.rpm
+    [root]# yum install tpaexec
 
 This will install TPAexec into ``/opt/2ndQuadrant/TPA``.
 

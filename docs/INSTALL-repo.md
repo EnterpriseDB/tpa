@@ -29,8 +29,8 @@ First, install some required system packages:
             pwgen epel-release openvpn
             
     # Mac
-        [brew or port] install pwgen
-        [brew or port] install openvpn
+    [brew or port] install pwgen
+    [brew or port] install openvpn
 
 Then clone the TPA repository:
 
