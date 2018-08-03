@@ -15,7 +15,7 @@ applicable to quick testbed setups as to production environments.
 TPAexec is an orchestration tool that uses Ansible to build Postgres
 clusters according to 2ndQuadrant's recommendations.
 
-## Architectures
+### Architectures
 
 An architecture is a recommended layout of servers and software to set
 up Postgres for a specific purpose.
@@ -24,7 +24,7 @@ Examples include "M1" (Postgres with a primary and multiple streaming
 replicas) and "BDR-Always-ON" (Postgres with BDR in a configuration
 meant for HA).
 
-## Platforms
+### Platforms
 
 A platform is a means to host the servers to deploy any architecture.
 Examples include AWS, lxd, and bare-metal servers.
