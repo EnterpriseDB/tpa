@@ -26,6 +26,9 @@ instances:
       - log-server
       - openvpn-server
       - monitoring-server
+{% if (cascaded_replicas+2) % 2 == 0 %}
+      - witness
+{% endif %}
 {% if platform not in ['bare'] %}
     volumes:
         - device_name: /dev/xvdb
