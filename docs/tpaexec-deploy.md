@@ -1,20 +1,7 @@
----
-title: TPA configuration guide - deploy
-version: 1.5
-date: 22/June/2018
-author: Craig Alsop
-copyright-holder: 2ndQuadrant Limited
-copyright-years: 2014-2018
-toc: true
----
-
 tpaexec deploy
 ==============
 
-© Copyright 2ndQuadrant, 2018. Confidential property of 2ndQuadrant; not for public release.
-
-### Overview
-
+## Overview
 
 This guide is designed to follow on from the TPA configuration guide - provision, and covers the deployment stage, which is the part that sets up a fully working database cluster with multiple nodes, replication and backup - all integrated and fully tested for both performance and high availability.
 
@@ -231,10 +218,3 @@ This code block is there to ensure that a re-deployment works even when limited 
 | hosts:               | **all** - which hosts to apply the following roles to. |
 | roles:               | Roles to be applied                      |
 | - role:              | **sys/hosts** - Generates the /etc/hosts and /etc/ssh/ssh_known_hosts files. See  [$TPA_DIR/roles/sys/hosts/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/sys/hosts/tasks/main.yml) for more info. |
-
-
-
-
-
-[^Information Classification: Confidential]: [ISP008] Information Classification Policy
-

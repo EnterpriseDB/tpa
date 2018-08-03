@@ -1,19 +1,7 @@
----
-title: TPAexec guide - rehydrate
-version: 1.2
-date: 14/June/2018
-author: Craig Alsop
-copyright-holder: 2ndQuadrant Limited
-copyright-years: 2014-2018
-toc: true
----
-
 tpaexec rehydrate
 =================
 
-© Copyright 2ndQuadrant, 2018. Confidential property of 2ndQuadrant; not for public release.
-
-### What is Rehydration?
+## What is Rehydration?
 
 Rehydration is a process that allows for rapid deployment of patches or OS upgrades to AWS EC2 instances managed by **TPAexec** orchestration tool. This is done by moving the storage volumes from existing EC2 instances provisioned from an old AMI, to new EC2 instances that have been provisioned from a new AMI that has been built with the latest patches.
 
@@ -213,6 +201,3 @@ $ aws ec2 modify-instance-attribute --region eu-west-1 --instance-id i-0ca212ac1
 ```
 
 Check that this has worked  via the Amazon EC2 management console. Click on ‘Instances’, select instance (in this case zombie), under the ‘Description’ tab, scroll down to ‘Block devices’, and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag, which should now be false. It is worth waiting for 30 seconds before running rehydrate, as it can take time to propagate the settings.
-
-[^Information Classification: Confidential]: [ISP008] Information Classification Policy
-

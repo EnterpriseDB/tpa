@@ -87,8 +87,8 @@ Postgres and other software running on it.
 
 ### Testing
 
-The ``tpaexec test`` command executes various tests against the deployed
-cluster to ensure that it is working as expected.
+The [``tpaexec test``](tpaexec-test.md) command executes various tests
+against the deployed cluster to ensure that it is working as expected.
 
 At the end of this stage, you will have a fully-functioning cluster.
 
@@ -112,18 +112,3 @@ full range of Ansible functionality is at your disposal at every stage.
 Once your cluster is up and running, TPAexec also provides some cluster
 management functions, including safe switchover operations and
 zero-downtime minor-version upgrades.
-
-## Installation
-
-[TPAexec installation instructions](INSTALL.md)
-
-### References
-
-* [Cluster design and implementation considerations](TPAexec-Cluster_Design_and_Implementation_Considerations.md)
-* [Customising the cluster configuration](TPAexec-Postgres_configuration_and_other_customisations.md)
-* [Provisioning on bare-metal servers](tpaexec-provision-baremetal.md)
-* [Rehydrating a cluster](tpaexec-rehydrate.md)
-
-## Help
-
-Write to tpa@2ndQuadrant.com for help.

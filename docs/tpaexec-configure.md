@@ -1,19 +1,7 @@
----
-title: TPAexec generate configuration guide
-version: 1.1
-date: 28/June/2018
-author: Craig Alsop
-copyright-holder: 2ndQuadrant Limited
-copyright-years: 2014-2018
-toc: true
----
-
 tpaexec configure
 =================
 
-© Copyright 2ndQuadrant, 2014-2018. Confidential property of 2ndQuadrant; not for public release.
-
-### tpaexec configure
+## Overview
 
 To be able to provision, deploy & rehydrate servers, **TPAexec** requires a pair of config files describing the instances to be present in a cluster directory. In order to create these, it is suggested that the **tpaexec configure** utility is used - it will create a **config.yml** which can then be edited, and a **deploy.yml** which is *not* designed to be edited. 
 
@@ -189,6 +177,3 @@ instances:
     role: primary
 
 ```
-
-[^Information Classification: Confidential]: [ISP008] Information Classification Policy
-

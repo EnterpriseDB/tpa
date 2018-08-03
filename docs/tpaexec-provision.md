@@ -1,20 +1,7 @@
----
-title: TPAexec configuration guide - provision
-version: 1.5
-date: 22/June/2018
-author: Craig Alsop
-copyright-holder: 2ndQuadrant Limited
-copyright-years: 2014-2018
-toc: true
----
-
 tpaexec provision
 =================
 
-© Copyright 2ndQuadrant, 2014-2018. Confidential property of 2ndQuadrant; not for public release.
-
-### TPAexec Overview
-
+## Overview
 
 **TPAexec** is an orchestration tool that enables the repeatable and automated deployment of highly available PostgreSQL clusters that conform to TPA (Trusted PostgreSQL Architecture). It sets up a fully working database cluster with multiple nodes, replication and backup - all integrated and fully tested for both performance and high availability.
 
@@ -386,7 +373,3 @@ See [TPA/platforms/common/provision.yml](https://github.com/2ndQuadrant/TPA/plat
 2/ Alternatively, you can copy both public and private keys into the cluster directory (which contains config.yml and deploy.yml) before running tpaexec provision.
 
 They will need to be named **id\_\<clustername>.pub** and **id\_\<clustername>** respectively - in this example they would be named id\_speedy.pub and id\_speedy.
-
-[^Information Classification: Confidential]: [ISP008] Information Classification Policy
-
-

@@ -1,16 +1,5 @@
----
-title: TPAexec - Installation guide
-version: 1.5
-date: 26/June/2018
-author: Craig Alsop, Abhijit Menon-Sen
-copyright-holder: 2ndQuadrant Limited
-toc: true
----
-
-TPAexec installation guide
-==========================
-
-© Copyright 2ndQuadrant. Confidential, not for public release.
+TPAexec installation
+====================
 
 ## Overview
 
@@ -102,13 +91,3 @@ to verify your local installation:
 
 If that command completes without any errors, your TPAexec installation
 is ready for use.
-
-## Help
-
-Write to tpa@2ndQuadrant.com for help.
-
-------
-
-[^Information Classification: Internal]: [ISP008] Information Classification Policy
-
-

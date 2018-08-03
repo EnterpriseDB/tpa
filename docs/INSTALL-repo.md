@@ -1,23 +1,14 @@
----
-title: TPAexec - Installation guide from repo
-version: 1.2
-date: 28/June/2018
-author: Abhijit Menon-Sen, Craig Alsop
-copyright-holder: 2ndQuadrant Limited
-toc: true
----
-
 TPAexec installation from source repository
 ===========================================
 
-© Copyright 2ndQuadrant, 2014-2018. Confidential property of 2ndQuadrant; not for public release.
+## Overview
 
 This document covers using TPAexec from a copy of the source code
 repository instead of installing it from packages.
 
-Please install TPAexec packages unless you have been given access to the
-TPA repository and specifically advised to use it by 2ndQuadrant. If in
-doubt, please contact tpa@2ndQuadrant.com.
+Please install TPAexec from packages unless you have been given access
+to the TPA source code repository and specifically advised to use it by
+2ndQuadrant.
 
 ## Quickstart
 
@@ -90,12 +81,3 @@ the virtualenv, so it is your responsibility to do so before invoking
 startup scripts (i.e., .bashrc/.profile):
 
     source /some/virtualenv/bin/activate
-
-## Help
-
-Write to tpa@2ndQuadrant.com for help.
-
-------
-
-[^Information Classification: Internal]: [ISP008] Information Classification Policy
-

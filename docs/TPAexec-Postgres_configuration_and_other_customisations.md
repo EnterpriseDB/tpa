@@ -1,17 +1,10 @@
----
-title: TPAexec - Postgres configuration and other customisations
-version: 1.2
-date: 14/June/2018
-author: Craig Alsop
-copyright-holder: 2ndQuadrant Limited
-copyright-years: 2014-2018
-toc: true
----
-
 TPAexec - Postgres configuration and other customisations
 =========================================================
 
-© Copyright 2ndQuadrant, 2018. Confidential property of 2ndQuadrant; not for public release.
+## Overview
+
+This document explains how to customise the configuration of a cluster
+by editing config.yml
 
 ### Postgres postgresql.conf configuration variables
 
@@ -134,6 +127,3 @@ $6$cRmk8XVtYzS.52Hk$ISMY65gigtvdzeBs0nr7B66mx7BOLoWq7tjQ2hxOJ9r28fLkVo1RscMhW9t2
 ```
 
 In this manner, post_tasks can be used to configure and modify server files - see [user](http://docs.ansible.com/ansible/latest/modules/user_module.html#user-module) and [lineinfile](http://docs.ansible.com/ansible/latest/modules/lineinfile_module.html) for more information on how to use those particular modules. Information about all the current modules available for Ansible can be found [here](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html) or just the system modules [here](http://docs.ansible.com/ansible/latest/modules/list_of_system_modules.html). The [shell](http://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module) module can be used to run commands on the nodes.
-
-[^Information Classification: Confidential]: [ISP008] Information Classification Policy
-

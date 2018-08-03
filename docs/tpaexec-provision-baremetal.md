@@ -1,20 +1,7 @@
----
-title: TPAexec configuration guide - provision - baremetal
-version: 1.1
-date: 20/June/2018
-author: Craig Alsop
-copyright-holder: 2ndQuadrant Limited
-copyright-years: 2014-2018
-toc: true
----
-
 tpaexec provision - baremetal
 =============================
 
-© Copyright 2ndQuadrant, 2014-2018. Confidential property of 2ndQuadrant; not for public release.
-
-### TPAexec Overview
-
+## Overview
 
 **TPAexec** is an orchestration tool that enables the repeatable and automated deployment of highly available PostgreSQL clusters that conform to TPA (Trusted PostgreSQL Architecture). It sets up a fully working database cluster with multiple nodes, replication and backup - all integrated and fully tested for both performance and high availability. It can be used for different platforms, and this document looks at how to deploy to existing "baremetal" server instances.
 
@@ -241,6 +228,3 @@ id_night  id_night.pub
 ```
 Vagrant will first copy the public key to /tmp, then via a script, create a user `admin` copy the public key to `/home/admin/.ssh/authorized_keys` and set permissions on each VM so that this user and key can be used by TPA to deploy the cluster.
 The VirtualBox forwarded SSH ports have been set to 10122, 10222 & 10322 respectively.
-
-[^Information Classification: Confidential]: [ISP008] Information Classification Policy
-

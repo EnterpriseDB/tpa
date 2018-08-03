@@ -1,18 +1,7 @@
----
-title: TPAexec - Cluster Design and Implementation Considerations
-version: 1.1
-date: 14/June/2018
-author: Craig Alsop
-copyright-holder: 2ndQuadrant Limited
-copyright-years: 2014-2018
-toc: true
----
-
 TPAexec - Cluster design and implementation considerations
 ==========================================================
 
-© Copyright 2ndQuadrant, 2018. Confidential property of 2ndQuadrant; not for public release.
-### TPAexec Overview
+## Overview
 
 **TPAexec** is an orchestration tool from 2ndQuadrant that enables the repeatable and automated deployment of highly available PostgreSQL clusters that conform to TPA (Trusted PostgreSQL Architecture). It sets up a fully working database cluster with multiple nodes, replication and backup - all integrated and fully tested for both performance and high availability.
 
