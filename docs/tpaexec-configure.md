@@ -1,19 +1,28 @@
-tpaexec configure
-=================
+Cluster configuration
+=====================
 
 The ``tpaexec configure`` command generates a YAML cluster configuration
 file that is required by subsequent stages in the provision/deploy/test
 cycle.
 
-It's possible to write config.yml entirely by hand, but it's much easier
-to edit a generate file to fine-tune the configuration.
-
-Before using this, it is suggested that you create a "clusters" directory into which individual cluster config directories can be created. 
+## Quickstart
 
 ```
-[tpa]$ mkdir ~/tpa/clusters
+[tpa]$ tpaexec configure ~/clusters/speedy --architecture M1
 ```
-**tpaexec configure \<clustername>** **\<options>** can be used to generate configs for different platforms like AWS, baremetal, and different architectures, like Single Master (a.k.a. M1), along with a range of options, which may be platform or architecture specific. The currently supported options can be found by running `tpaexec help configure-options`, and the currently available architectures can be found by running `tpaexec info architectures`.
+
+This command will create a directory named ``~/clusters/speedy`` and
+generate a configuration file named ``config.yml`` that follows the
+layout of the architecture named M1 (single primary, N replicas).
+
+The command accepts a number of options (some common, some specific to
+the selected architecture or platform) to modify the generated
+configuration, but the defaults are sensible and intended to be usable
+for testing straightaway. You may edit the generated config.yml to
+fine-tune the configuration.
+
+(We recommend that you keep all your cluster configurations in a common
+directory, e.g., ``~/clusters`` in the example above.)
 
 ### Current configuration options
 
@@ -35,6 +44,8 @@ tpaexec configure <clustername> --architecture <arch> --platform <platform>
 ./speedy
 /home/tpa/tpa/clusters/speedy
 ```
+The currently supported options can be found by running `tpaexec help configure-options`.
+
 ### Architecture options
 
 ```
@@ -46,6 +57,7 @@ to internal repositories)
 Training: Creates clusters for 2ndQuadrant training sessions (Designed for
    2ndQuadrant use; unsupported)
 ```
+The currently available architectures can be found by running `tpaexec info architectures`.
 ### Platform options
 
 ```
@@ -180,3 +192,6 @@ instances:
     role: primary
 
 ```
+
+It's possible to write config.yml entirely by hand, but it's much
+easier to edit a generate file to fine-tune the configuration.
