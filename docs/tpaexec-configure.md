@@ -1,9 +1,12 @@
 tpaexec configure
 =================
 
-## Overview
+The ``tpaexec configure`` command generates a YAML cluster configuration
+file that is required by subsequent stages in the provision/deploy/test
+cycle.
 
-To be able to provision, deploy & rehydrate servers, **TPAexec** requires a pair of config files describing the instances to be present in a cluster directory. In order to create these, it is suggested that the **tpaexec configure** utility is used - it will create a **config.yml** which can then be edited, and a **deploy.yml** which is *not* designed to be edited. 
+It's possible to write config.yml entirely by hand, but it's much easier
+to edit a generate file to fine-tune the configuration.
 
 Before using this, it is suggested that you create a "clusters" directory into which individual cluster config directories can be created. 
 
@@ -12,7 +15,7 @@ Before using this, it is suggested that you create a "clusters" directory into w
 ```
 **tpaexec configure \<clustername>** **\<options>** can be used to generate configs for different platforms like AWS, baremetal, and different architectures, like Single Master (a.k.a. M1), along with a range of options, which may be platform or architecture specific. The currently supported options can be found by running `tpaexec help configure-options`, and the currently available architectures can be found by running `tpaexec info architectures`.
 
-### All current configuration options:
+### Current configuration options
 
 ```
 tpaexec configure <clustername> --architecture <arch> --platform <platform> 
@@ -90,7 +93,7 @@ lxd: lxd containers (Unsupported; still in development)
 --os [RedHat-minimal|Debian-minimal|Ubuntu-minimal] - this option can be used 
    instead of the previous 2 options (--distribution and --minimal)
 ```
-### Software versions.
+### Software versions
 
 By default, we always install the latest version of every package. This is usually 
 the desired behaviour, but in some testing scenarios, it may be necessary to 
@@ -109,7 +112,7 @@ select specific package versions.
 --pglogical-package-version <pkg> - Specific pglogical package, e.g. '2.2.0*'
 --bdr-package-version <pkg> - Specific bdr package, e.g. '3.0.2*'
 ```
-### Hostnames.
+### Hostnames
 
 By default, ``tpaexec configure`` will randomly select as many hostnames
 as it needs from a pre-approved list of several dozen names. This should
@@ -129,7 +132,7 @@ be enough for most clusters.
 
 ------
 
-### Simple example:
+### Example
 
 ```
 tpaexec configure ~/tpa/clusters/speedy --architecture M1
