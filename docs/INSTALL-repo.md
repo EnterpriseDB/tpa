@@ -1,10 +1,8 @@
-TPAexec installation from source repository
-===========================================
+Installing TPAexec from source
+==============================
 
-## Overview
-
-This document covers using TPAexec from a copy of the source code
-repository instead of installing it from packages.
+This document explains how to use a copy of the TPAexec source code
+repository instead of installing the tpaexec package.
 
 Please install TPAexec from packages unless you have been given access
 to the TPA source code repository and specifically advised to use it by
@@ -16,9 +14,11 @@ to the TPA source code repository and specifically advised to use it by
     [tpa]$ ./TPA/bin/tpaexec setup
     [tpa]$ ./TPA/bin/tpaexec selftest
 
-## Step-by-step installation
+## Step-by-step
 
-First, install some required system packages:
+First, you must install some required system packages. (These would have
+been installed automatically as dependencies if you were installing the
+tpaexec package.)
 
     # Debian or Ubuntu
     [root]# apt-get install python2.7 python-pip python-virtualenv \
@@ -32,7 +32,7 @@ First, install some required system packages:
     [brew or port] install pwgen
     [brew or port] install openvpn
 
-Then clone the TPA repository:
+Next, clone the TPA repository:
 
     [tpa]$ git clone https://github.com/2ndQuadrant/TPA
 
@@ -47,7 +47,10 @@ set ``ANSIBLE_HOME`` in your environment (and .bashrc/.profile):
     [tpa]$ git clone https://github.com/2ndQuadrant/ansible
     [tpa]$ export ANSIBLE_HOME=/path/to/ansibledir
 
-Next, install the TPAexec dependencies into an isolated virtualenv:
+The remaining steps from this point onwards are the same as if you had
+installed the tpaexec package.
+
+Install the TPAexec dependencies into an isolated virtualenv:
 
     [tpa]$ ./TPA/bin/tpaexec setup
 
