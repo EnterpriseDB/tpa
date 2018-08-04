@@ -52,7 +52,8 @@ sys     0m27.852s
 ```
 
 This command will produce lots of output (append ``-v``, ``-vv``, etc.
-to the command if you want even more verbose output).
+to the command if you want even more verbose output). The output is also
+logged to ``ansible.log`` in the cluster directory.
 
 If it completes without error, you may proceed to run
 [``tpaexec deploy``](tpaexec-deploy.md) to install and configure
@@ -122,10 +123,10 @@ Note that the host is named "quirk" in config.yml and ssh_config, but
 its hostname is not set to quirk yet. This will happen during the
 deployment phase.
 
-You can run ``tpaexec deploy`` immediately after provisioning. It will
-wait as long as required for the instances to come up. You do not need
-to wait for the instances to come up, or ssh in to them before you
-start deployment.
+You can run [``tpaexec deploy``](tpaexec-deploy.md) immediately after
+provisioning. It will wait as long as required for the instances to come
+up. You do not need to wait for the instances to come up, or ssh in to
+them before you start deployment.
 
 ## Generated files
 

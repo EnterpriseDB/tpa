@@ -38,6 +38,15 @@ TPAexec operates in four distinct stages to bring up a Postgres cluster:
 3. Deployment—install and configure the necessary software
 4. Testing—make sure everything is working as expected
 
+This is all you need to bring up a test cluster quickly:
+
+```
+[tpa]$ tpaexec configure clustername --architecture M1
+[tpa]$ tpaexec provision clustername
+[tpa]$ tpaexec deploy clustername
+[tpa]$ tpaexec test clustername
+```
+
 TPAexec itself can operate from your laptop, an EC2 instance, or any
 machine that can reach the cluster's servers over the network.
 
