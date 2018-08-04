@@ -77,6 +77,11 @@ respectively. Please refer to the platform documentation for more details.
 If you do not explicitly select a platform, the default is currently
 aws.
 
+**Note:** TPAexec fully supports creating clusters with instances on
+different platforms, but ``tpaexec configure`` cannot currently generate
+such a configuration. You must edit config.yml to specify multiple
+platforms.
+
 ### Owner
 
 Specify ``--owner <name>`` to associate the cluster (by some
@@ -210,16 +215,16 @@ You may use any version specifier that apt or yum would accept.
 
 ## Examples
 
-Let's see what happens when we run
+Let's see what happens when we run the following command
 
 ```
-$ tpaexec configure ~/clusters/speedy --architecture M1 \
-    --num-cascaded-replicas 2 \
-    --platform aws --region us-east-1 --subnet-pattern 10.33.x.x/28 \
-    --instance-type t2.medium --root-volume-size 32 \
-    --postgres-volume-size 64 --barman-volume-size 128 \
-    --postgres-version 9.6
-$
+[tpa]$ tpaexec configure ~/clusters/speedy --architecture M1 \
+        --num-cascaded-replicas 2 --distribution Debian-minimal \
+        --platform aws --region us-east-1 --subnet-pattern 10.33.x.x/28 \
+        --instance-type t2.medium --root-volume-size 32 \
+        --postgres-volume-size 64 --barman-volume-size 128 \
+        --postgres-version 9.6
+[tpa]$
 ```
 
 There is no output, so there were no errors. The cluster directory has
@@ -248,14 +253,14 @@ ec2_vpc:
   Name: Test
 
 ec2_ami:
-  Name: TPA-Debian-PGDG-10-2018*
-  Owner: self
+  Name: debian-stretch-hvm-x86_64-gp2-2018-04-09-292
+  Owner: 379101102735
 
 ec2_vpc_subnets:
   us-east-1:
-    10.33.69.208/28:
+    10.33.161.64/28:
       az: us-east-1a
-    10.33.62.144/28:
+    10.33.189.80/28:
       az: us-east-1b
 
 cluster_vars:
@@ -281,19 +286,19 @@ instance_defaults:
 
 instances:
   - node: 1
-    Name: quiet
+    Name: quirk
     role: primary
-    subnet: 10.33.69.208/28
+    subnet: 10.33.161.64/28
 
   - node: 2
-    Name: kebob
+    Name: keeper
     role: replica
-    upstream: quiet
-    backup: kingpin
-    subnet: 10.33.69.208/28
+    upstream: quirk
+    backup: zealot
+    subnet: 10.33.161.64/28
 
   - node: 3
-    Name: kingpin
+    Name: zealot
     role:
       - barman
       - log-server
@@ -306,19 +311,20 @@ instances:
           volume_size: 128
           vars:
             volume_for: barman_data
-    subnet: 10.33.69.208/28
+    subnet: 10.33.189.80/28
 
   - node: 4
-    Name: zygote
+    Name: quaver
     role: replica
-    upstream: kebob
-    subnet: 10.33.69.208/28
+    upstream: keeper
+    subnet: 10.33.189.80/28
 
   - node: 5
-    Name: quart
+    Name: quavery
     role: replica
-    upstream: kebob
-    subnet: 10.33.69.208/28
+    upstream: keeper
+    subnet: 10.33.189.80/28
+
 ```
 
 The next step is to run [``tpaexec provision``](tpaexec-provision.md)
