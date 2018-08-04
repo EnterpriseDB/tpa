@@ -313,6 +313,7 @@ instances:
     role: replica
     upstream: kebob
     subnet: 10.33.69.208/28
+
   - node: 5
     Name: quart
     role: replica
