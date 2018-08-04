@@ -17,8 +17,8 @@ tpaexec configure ~/clusters/bdr --architecture BDR-Simple
 
 You must specify ``--architecture BDR-Simple``.
 
-You may specify ``--instances 4`` to get a cluster with four instances.
-The default is three instances.
+You may specify ``--num-instances 4`` to get a cluster with four
+instances. The default is three instances.
 
 You may also specify any of the options described by
 ``tpaexec help configure-options``.

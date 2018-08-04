@@ -7,7 +7,7 @@ while [[ $# -gt 0 ]]; do
     shift
 
     case "$opt" in
-        --instances)
+        --num-instances)
             instances=${1:?number of instances not specified}
             shift
             ;;
