@@ -34,6 +34,17 @@ PLAY [Basic initialisation and fact discovery] *********************************
 PLAY [Set up TPA cluster nodes] ***************************************************************************************************************************************************************
 …
 
+PLAY RECAP ************************************************************************************************************************************************************************************
+zealot                     : ok=281  changed=116  unreachable=0    failed=0   
+keeper                     : ok=284  changed=96   unreachable=0    failed=0   
+quaver                     : ok=260  changed=89   unreachable=0    failed=0   
+quavery                    : ok=260  changed=88   unreachable=0    failed=0   
+quirk                      : ok=262  changed=100  unreachable=0    failed=0   
+
+
+real    7m1.907s
+user    3m2.492s
+sys     1m5.318s
 ```
 
 This command produces a great deal of output and may take a long time
@@ -41,6 +52,8 @@ This command produces a great deal of output and may take a long time
 the hosts in the cluster). We recommend that you use at least one ``-v``
 during deployment. The output is also logged to ``ansible.log`` in the
 cluster directory.
+
+The exact number of hosts, tasks, and changed tasks may of course vary.
 
 The deploy command takes no options itself—any options you provide after
 the cluster name are passed on unmodified to Ansible (e.g., ``-v``).
