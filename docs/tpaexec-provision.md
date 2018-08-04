@@ -126,3 +126,67 @@ You can run ``tpaexec deploy`` immediately after provisioning. It will
 wait as long as required for the instances to come up. You do not need
 to wait for the instances to come up, or ssh in to them before you
 start deployment.
+
+## Generated files
+
+During the provisioning process, a number of new files will be created
+in the cluster directory.
+
+```
+[tpa]$ ls ~/clusters/speedy
+total 240
+-rw-r--r-- 1 ams ams 193098 Aug  4 17:59 ansible.log
+drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 commands
+-rw-r--r-- 1 ams ams   1442 Aug  4 17:54 config.yml
+lrwxrwxrwx 1 ams ams     51 Aug  4 17:38 deploy.yml -> /home/ams/work/2ndq/TPA/architectures/M1/deploy.yml
+drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 hostkeys
+-rw------- 1 ams ams   1675 Aug  4 17:38 id_speedy
+-rw------- 1 ams ams   1438 Aug  4 17:38 id_speedy.ppk
+-rw-r--r-- 1 ams ams    393 Aug  4 17:38 id_speedy.pub
+drwxr-xr-x 4 ams ams   4096 Aug  4 17:50 inventory
+-rw-r--r-- 1 ams ams   2928 Aug  4 17:50 known_hosts
+-rw-r--r-- 1 ams ams    410 Aug  4 17:50 ssh_config
+-rw-r--r-- 1 ams ams   3395 Aug  4 17:59 vars.json
+drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 vault
+```
+
+We've already studied the ssh_config file, which refers to the ``id_*``
+files (an ssh keypair generated for the cluster) and ``known_hosts``
+(the signatures of the ``hostkeys/`` installed on the instances).
+
+The ``vars.json`` file may be used by ``tpaexec provision`` on
+subsequent invocations with ``--cached``.
+
+The ``inventory/`` directory contains static and dynamic inventory files
+as well as group and host variable definitions from config.yml.
+
+```
+[tpa]$ cat inventory/00-speedy
+[tag_Cluster_speedy]
+quirk ansible_host=54.227.207.189 node=1 platform=aws
+keeper ansible_host=34.229.111.196 node=2 platform=aws
+zealot ansible_host=18.207.108.211 node=3 platform=aws
+quaver ansible_host=54.236.36.251 node=4 platform=aws
+quavery ansible_host=34.200.214.150 node=5 platform=aws
+
+[tpa]$ cat inventory/group_vars/tag_Cluster_speedy/01-speedy.yml 
+cluster_name: speedy
+cluster_tag: tag_Cluster_speedy
+postgres_version: 9.6
+tpa_version: v3.0-451-g10647888
+twoq_repositories: []
+vpn_network: 192.168.33.0/24
+
+[tpa]$ cat inventory/host_vars/zealot/02-topology.yml
+role:
+- barman
+- log-server
+- openvpn-server
+- monitoring-server
+- witness
+```
+
+If you now change a variable in config.yml and rerun provision, these
+files will be updated. If you don't change the configuration, it won't
+do anything. If you add a new instance in config.yml and rerun, it will
+bring up the new instance without affecting the existing ones.
