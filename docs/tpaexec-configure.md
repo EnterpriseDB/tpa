@@ -15,183 +15,312 @@ This command will create a directory named ``~/clusters/speedy`` and
 generate a configuration file named ``config.yml`` that follows the
 layout of the architecture named M1 (single primary, N replicas).
 
-The command accepts a number of options (some common, some specific to
-the selected architecture or platform) to modify the generated
-configuration, but the defaults are sensible and intended to be usable
-for testing straightaway. You may edit the generated config.yml to
-fine-tune the configuration.
+The command also accepts various options (some specific to the selected
+architecture or platform) to modify the configuration, but the defaults
+are sensible and intended to be usable straightaway. You are encouraged
+to read the generated config.yml and fine-tune the configuration to suit
+your needs.
 
-(We recommend that you keep all your cluster configurations in a common
-directory, e.g., ``~/clusters`` in the example above.)
+It's possible to write config.yml entirely by hand, but it's much easier
+to edit the generated file.
 
-### Current configuration options
+## Configuration options
 
-```
-tpaexec configure <clustername> --architecture <arch> --platform <platform> 
---region <region> --[subnet <CIDR> | --subnet-pattern <pattern>] 
---instance-type <instance type> [--distribution [RedHat|Debian|Ubuntu] 
---minimal | --os [Debian-minimal|RedHat-minimal|Ubuntu-minimal]] 
---postgres-version [10|9.6] --postgres-package-version <ver>
---repmgr-package-version <ver> --barman-package-version <ver>
---pglogical-package-version <ver> --bdr-package-version <ver>
---pgbouncer-package-version <ver>
---hostnames-from <filename> --hostnames-pattern <pattern>
-```
+The first argument must be the cluster directory, e.g., ``speedy`` or
+``~/clusters/speedy`` (the cluster will be named speedy in both cases).
+We recommend that you keep all your clusters in a common directory,
+e.g., ``~/clusters`` in the example above.
 
-```
-<clustername> - directory name to be created for the cluster. Examples:
-~/tpa/clusters/speedy
-./speedy
-/home/tpa/tpa/clusters/speedy
-```
-The currently supported options can be found by running `tpaexec help configure-options`.
+The next argument must be ``--architecture <name>`` to select an
+architecture, e.g.,
+[M1](architectures/M1.md) or
+[BDR-Simple](architectures/BDR-Simple.md).
+For a complete list of architectures, run
+``tpaexec info architectures``.
 
-### Architecture options
+The arguments above are always mandatory. The rest of the options
+described here may be safely omitted, as in the example above; the
+defaults will lead to a usable result.
 
-```
---architecture <arch> - M1|BDR-Always-ON|Training
-M1: Postgres with streaming replication (M1 is single master - one primary, n replicas).
-BDR-Always-ON: Bi Directional Replication in an Always-ON configuration 
-   (2ndQuadrant internal use only, still in development, and requires access 
-to internal repositories)
-Training: Creates clusters for 2ndQuadrant training sessions (Designed for
-   2ndQuadrant use; unsupported)
-```
-The currently available architectures can be found by running `tpaexec info architectures`.
+Run ``tpaexec help configure-options`` for a list of common options.
+
+### Architecture-specific options
+
+The architecture you select determines what other options are accepted.
+Typically, each architecture accepts some unique options as well as the
+generic options described below.
+
+For example, with M1 you can use ``--num-cascaded-replicas 3`` to create
+a cluster with three cascaded replicas. With BDR-Simple, you can use
+``--num-instances 2`` for a two-instance BDR cluster. Please consult the
+documentation for an architecture for a list of options that it accepts
+(or, in some cases, requires).
+
 ### Platform options
 
-```
---platform <platform> - bare|aws|lxd
-bare: Servers accessible via SSH (e.g., bare metal, or already-provisioned 
-   servers on any cloud provider).
-aws: AWS EC2 instances (This is the default, if --platform not present)
-lxd: lxd containers (Unsupported; still in development)
-```
+Next, you may use ``--platform <name>`` to select a platform, e.g.,
+[aws](platforms/aws.md) or [bare](platforms/bare.md).
 
-```
---region <region> - AWS region (Defaults to eu-west-1). 
-* Specific to --platform aws
-```
+An architecture may or may not support a particular platform. If not, it
+will fail to configure the cluster.
 
-```
---instance-type <instance type> - AWS instance type (Defaults to t2.micro). 
-* Specific to --platform aws
-```
+The choice of platform affects the interpretation of certain options.
+For example, if you choose aws, the arguments to
+``--region <region>`` and
+``--instance-type <type>``
+must be a valid
+[AWS region name](https://docs.aws.amazon.com/general/latest/gr/rande.html)
+and
+[EC2 instance type](https://aws.amazon.com/ec2/instance-types/)
+respectively. Please refer to the platform documentation for more details.
+
+If you do not explicitly select a platform, the default is currently
+aws.
+
+### Owner
+
+Specify ``--owner <name>`` to associate the cluster (by some
+platform-specific means, e.g., AWS tags) with the name of a person
+responsible for it. This is especially important for cloud platforms. By
+default, the owner is set to the login name of the user running
+``tpaexec provision``.
+
+(You may use your initials, or "Firstname Lastname", or anything else
+that identifies you uniquely.)
+
+### Region
+
+Specify ``--region <region>`` to select a region.
+
+This option is meaningful only for cloud platforms. The default for AWS
+is eu-west-1.
+
+**Note:** TPAexec fully supports creating clusters that span multiple
+regions, but ``tpaexec configure`` cannot currently generate such a
+configuration. You must edit config.yml to specify multiple regions.
+
 ### Subnet selection
 
-```
---subnet <CIDR> - By default, each cluster is assigned a random /28 subnet 
-   under 10.33/16, but depending on the architecture, there may be one or more 
-   subnets, and each subnet may be anywhere between a /24 and a /29.
-```
+Specify ``--subnet 192.0.2.128/27`` to use a particular subnet, or
+``--subnet-pattern 192.0.x.x`` to generate random subnets (as many as
+required by the architecture) matching the given pattern.
 
-```
---subnet-pattern <pattern> - You may instead specify --subnet-pattern 192.0.x.x 
-   to generate random subnets (as many as required by the architecture) matching 
-   the given pattern.
-```
-### Distribution
+By default, each cluster is assigned a random /28 subnet under 10.33/16,
+but depending on the architecture, there may be one or more subnets, and
+each subnet may be anywhere between a /24 and a /29.
 
-```
---distribution [RedHat|Debian|Ubuntu] (Defaults to Debian)
-```
+This option is meaningful for the "bare" platform, where TPAexec will
+not alter the network configuration of existing servers.
 
-```
---minimal - Use the stock distribution images instead of TPA images that have 
-   Postgres and other software preinstalled.
-```
+### Instance type
 
-```
---os [RedHat-minimal|Debian-minimal|Ubuntu-minimal] - this option can be used 
-   instead of the previous 2 options (--distribution and --minimal)
-```
-### Software versions
+Specify ``--instance-type <type>`` to select an instance type.
 
-By default, we always install the latest version of every package. This is usually 
-the desired behaviour, but in some testing scenarios, it may be necessary to 
-select specific package versions.
+This option is meaningful only for cloud platforms. The default for AWS
+is t2.micro.
 
-```
---postgres-version [10|9.6] - 10 is the default, 9.6 is also supported. 
-   Versions 9.4 and 9.5 are no longer actively maintained.
-```
+### Disk space
 
-```
---postgres-package-version <pkg> - Specific postgres package, e.g. 10.4-2.pgdg90+1
---repmgr-package-version <pkg> - Specific repmgr package, e.g. 4.0.5-1.pgdg90+1
---barman-package-version <pkg> - Specific barman package, e.g. 2.4-1.pgdg90+1
---pgbouncer-package-version <pkg> - Specific pgbouncer package, e.g. '1.8*'
---pglogical-package-version <pkg> - Specific pglogical package, e.g. '2.2.0*'
---bdr-package-version <pkg> - Specific bdr package, e.g. '3.0.2*'
-```
+Specify ``--root-volume-size 64`` to set the size of the root volume in
+GB. (Depending on the platform, there may be a minimum size required for
+the root volume.)
+
+The ``--postgres-volume-size <size>`` and
+``--barman-volume-size <size>`` options are available to set the sizes
+of the Postgres and Barman volumes on those architectures and platforms
+that support separate volumes for Postgres and Barman.
+
+None of these options is meaningful for the "bare" platform, where
+TPAexec has no control over volume sizes.
+
 ### Hostnames
 
 By default, ``tpaexec configure`` will randomly select as many hostnames
 as it needs from a pre-approved list of several dozen names. This should
 be enough for most clusters.
 
+Specify ``--hostnames-from <filename>`` to select hostnames from a file
+with one name per line.
+
+Use ``--hostnames-pattern '…pattern…'`` to limit the selection to
+lines matching an egrep pattern.
+
+Use ``--hostnames-sorted-by --dictionary-order`` to select a sort(1)
+option other than ``--random-sort`` (which is the default).
+
+If you specify your own hostname source, you must ensure that it
+contains a sufficient number of valid hostnames (``[a-zA-Z0-9-]``) for
+your cluster.
+
+## Software selection
+
+### Distribution
+
+Specify ``--distribution <name>`` to select a distribution.
+
+The name may be Debian (the default), RedHat (for RHEL), or Ubuntu.
+TPAexec will use pre-generated images for a particular architecture and
+platform if any are available. To use stock distribution images instead,
+use ``Debian-minimal`` etc.
+
+This option is not meaningful for the "bare" platform, where TPAexec has
+no control over what distribution is installed.
+
+### 2ndQuadrant repositories
+
+TPAexec can enable any 2ndQuadrant software repository that you have
+access to through the 2ndQuadrant Portal subscription mechanism.
+
+By default, it will install the 2ndQuadrant public repository (which
+does not need a subscription) and add on any product repositories that
+the architecture may require (e.g., the BDR repository).
+
+Use ``--2Q-repositories source/name/maturity …``
+to specify the complete list of 2ndQuadrant repositories to install on
+each instance in addition to the 2ndQuadrant public repository. Use this
+option with care. TPAexec with configure the named repositories with no
+attempt to make sure the combination is appropriate.
+
+To use product repositories, you must first
+``export TPA_2Q_SUBSCRIPTION_TOKEN=xxx`` before you run tpaexec.
+You can get a subscription token from the 2ndQuadrant Portal
+(Support → Software subscriptions → Add). You do not need to create the
+subscription yourself, just extract the token from the subscription URL.
+
+### Software versions
+
+You may optionally specify ``--postgres-version 10`` (the default) or
+any other major version of Postgres (e.g., 9.6). TPA supports Postgres
+9.4 and above. Postgres 9.4 and 9.5 were known to work at one time, but
+are no longer actively maintained.
+
+By default, we always install the latest version of every package. This
+is usually the desired behaviour, but in some testing scenarios, it may
+be necessary to select specific package versions using any of the
+following options:
+
+1. ``--postgres-package-version 10.4-2.pgdg90+1``
+2. ``--repmgr-package-version 4.0.5-1.pgdg90+1``
+3. ``--barman-package-version 2.4-1.pgdg90+1``
+4. ``--pglogical-package-version '2.2.0*'``
+5. ``--bdr-package-version '3.0.2*'``
+5. ``--pgbouncer-package-version '1.8*'``
+
+You may use any version specifier that apt or yum would accept.
+
+## Examples
+
+Let's see what happens when we run
+
 ```
---hostnames-from <filename> - select names from a different list 
-   (e.g., if you need more names than are available in the canned list). 
-   The file must contain one hostname per line.
-```
-```
---hostnames-pattern <pattern> - restrict hostnames to those matching 
-   the egrep-syntax pattern. If you choose to do this, you must ensure that 
-   the pattern matches only valid hostnames (``[a-zA-Z0-9-]``) and that it 
-   finds a sufficient number thereof.
+$ tpaexec configure ~/clusters/speedy --architecture M1 \
+    --num-cascaded-replicas 2 \
+    --platform aws --region us-east-1 --subnet-pattern 10.33.x.x/28 \
+    --instance-type t2.medium --root-volume-size 32 \
+    --postgres-volume-size 64 --barman-volume-size 128 \
+    --postgres-version 9.6
+$
 ```
 
-------
-
-### Example
-
-```
-tpaexec configure ~/tpa/clusters/speedy --architecture M1
-```
-
-This will create config files that can be used to provision and deploy a 4 node M1 AWS cluster in AWS region `eu-west-1`, with each node of type `t2.micro`. The AMIs have defaulted to `TPA-Debian-PGDG-10-2018*`
+There is no output, so there were no errors. The cluster directory has
+been created and populated.
 
 ```
-[tpa]$ ls ~/tpa/clusters/speedy3
-config.yml  deploy.yml
-[tpa]$ head -35 ~/tpa/clusters/speedy3/config.yml
+$ ls ~/clusters/speedy
+total 8
+drwxr-xr-x 2 ams ams 4096 Aug  4 16:23 commands
+-rw-r--r-- 1 ams ams 1374 Aug  4 16:23 config.yml
+lrwxrwxrwx 1 ams ams   51 Aug  4 16:23 deploy.yml -> /home/ams/work/2ndq/TPA/architectures/M1/deploy.yml
+```
+
+The cluster configuration is in config.yml, and its neighbours are links
+to architecture-specific support files that you need not interact with
+directly. Here's what the configuration looks like:
+
+```yaml
 ---
 architecture: M1
 
-cluster_name: speedy3
+cluster_name: speedy
+cluster_tags: {}
+
+ec2_vpc:
+  Name: Test
 
 ec2_ami:
   Name: TPA-Debian-PGDG-10-2018*
   Owner: self
 
-ec2_vpc:
-  Name: Test
+ec2_vpc_subnets:
+  us-east-1:
+    10.33.69.208/28:
+      az: us-east-1a
+    10.33.62.144/28:
+      az: us-east-1b
 
 cluster_vars:
+  postgres_version: 9.6
+  twoq_repositories: []
   vpn_network: 192.168.33.0/24
 
 instance_defaults:
-    type: t2.micro
-    region: eu-west-1
-    subnet: 10.33.217.224/28
-    vars:
-      ansible_user: admin
+  platform: aws
+  type: t2.medium
+  region: us-east-1
+  default_volumes:
+    - device_name: root
+      volume_type: gp2
+      volume_size: 32
+    - device_name: /dev/xvdb
+      volume_type: gp2
+      volume_size: 64
+      vars:
+        volume_for: postgres_data
+  vars:
+    ansible_user: admin
 
 instances:
   - node: 1
-    Name: quanta
-    volumes:
-        - raid_device: /dev/md0
-          device_name: /dev/xvdb
-          volume_type: gp2
-          volume_size: 16
-          raid_units: 2
-          vars:
-            volume_for: postgres_data
+    Name: quiet
     role: primary
+    subnet: 10.33.69.208/28
 
+  - node: 2
+    Name: kebob
+    role: replica
+    upstream: quiet
+    backup: kingpin
+    subnet: 10.33.69.208/28
+
+  - node: 3
+    Name: kingpin
+    role:
+      - barman
+      - log-server
+      - openvpn-server
+      - monitoring-server
+      - witness
+    volumes:
+        - device_name: /dev/xvdb
+          volume_type: gp2
+          volume_size: 128
+          vars:
+            volume_for: barman_data
+    subnet: 10.33.69.208/28
+
+  - node: 4
+    Name: zygote
+    role: replica
+    upstream: kebob
+    subnet: 10.33.69.208/28
+  - node: 5
+    Name: quart
+    role: replica
+    upstream: kebob
+    subnet: 10.33.69.208/28
 ```
 
-It's possible to write config.yml entirely by hand, but it's much
-easier to edit a generate file to fine-tune the configuration.
+The next step is to run [``tpaexec provision``](tpaexec-provision.md)
+or learn more about how to customise the configuration of
+[the cluster as a whole](configure-cluster.md) or to configure an
+[individual instance](configure-instance.md).
