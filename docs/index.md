@@ -31,38 +31,40 @@ Examples include AWS, lxd, and bare-metal servers.
 
 ## What can TPAexec do?
 
-TPAexec operates in four distinct stages:
+TPAexec operates in four distinct stages to bring up a Postgres cluster:
 
-1. Configuration
-2. Provisioning
-3. Deployment
-4. Testing
+1. Configuration—decide what kind of cluster you want
+2. Provisioning—create the servers needed to host the cluster
+3. Deployment—install and configure the necessary software
+4. Testing—make sure everything is working as expected
+
+TPAexec itself can operate from your laptop, an EC2 instance, or any
+machine that can reach the cluster's servers over the network.
 
 ### Configuration
 
 The [``tpaexec configure``](tpaexec-configure.md)
-command with a few command-line options will
-generate a simple YAML configuration file to describe the cluster you
-want. It is ready for immediate use, and you can modify it to better
-suit your needs.
+command generates a simple YAML configuration file to describe the
+cluster you want. The configuration is ready for immediate use, and you
+can modify it to better suit your needs. Editing the configuration file
+is the usual way to make any configuration changes to your cluster,
+both before and after it's created.
 
 ### Provisioning
 
 The [``tpaexec provision``](tpaexec-provision.md)
-command takes config.yml and creates instances
-and other resources required by the cluster. The details of this process
-depend on the architecture (e.g., M1, BDR-Always-ON) and platform (e.g.,
-AWS, lxd) that you selected while configuring the cluster.
+command creates instances and other resources required by the cluster.
+The details of the process depend on the architecture (e.g., M1) and
+platform (e.g., AWS) that you selected while configuring the cluster.
 
-For example, on AWS, given access with the necessary privileges, TPAexec
-will provision EC2 instances and VPCs, subnets, routing tables, internet
-gateways, security groups, EBS volumes, elastic IPs, and so on.
+For example, given AWS access with the necessary privileges, TPAexec
+will provision EC2 instances, VPCs, subnets, routing tables, internet
+gateways, security groups, EBS volumes, elastic IPs, etc.
 
-You can also "provision" existing servers by using the "bare" platform.
-In this case, you provide ``tpaexec provision`` with details about your
-existing servers (which may be bare metal servers, or those provisioned
-earlier on some cloud platform), and they will be used in later stages
-just as if they had been created by TPAexec.
+You can also "provision" existing servers by selecting the "bare"
+platform and providing connection details. Whether these are bare metal
+servers or those provisioned separately on a cloud platform, they can be
+used just as if they had been created by TPAexec.
 
 You are not restricted to a single platform—you can spread your cluster
 out across some AWS instances (in multiple regions) and some on-premise
@@ -75,22 +77,21 @@ can access via ssh (with sudo to root).
 ### Deployment
 
 The [``tpaexec deploy``](tpaexec-deploy.md)
-command takes the details of the provisioned
-servers (which may or may not have actually been created by ``tpaexec
-provision``; but it doesn't matter who created them so long as ssh and
-sudo access is available) and installs Postgres and other software and
-sets them up in the requested configuration. This includes setting up
-replication, backups, and so on.
+command installs and configures Postgres and other software on the
+provisioned servers (which may or may not have been created by TPAexec;
+but it doesn't matter who created them so long as ssh and sudo access is
+available). This includes setting up replication, backups, and so on.
 
-At the end of the deployment stage, you will have a cluster with
-Postgres and other software running on it.
+At the end of the deployment stage, Postgres will be up and running.
 
 ### Testing
 
-The [``tpaexec test``](tpaexec-test.md) command executes various tests
-against the deployed cluster to ensure that it is working as expected.
+The [``tpaexec test``](tpaexec-test.md) command executes various
+architecture and platform-specific tests against the deployed cluster to
+ensure that it is working as expected.
 
-At the end of this stage, you will have a fully-functioning cluster.
+At the end of the testing stage, you will have a fully-functioning
+cluster.
 
 ### Incremental changes
 

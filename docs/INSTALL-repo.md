@@ -74,13 +74,12 @@ By default, ``tpaexec setup`` will create a virtualenv under
 
 You can run ``tpaexec setup --virtualenv /other/location`` to specify a
 different location for the new virtualenv. You can also install packages
-into an existing virtualenv by activating it before you invoke ``tpaexec
-setup``.
+into an existing virtualenv by activating it before you invoke
+``tpaexec setup``.
 
-We strongly suggest sticking to the default virtualenv when possible. If
-you use a different location, ``tpaexec`` cannot automatically activate
-the virtualenv, so it is your responsibility to do so before invoking
-``tpaexec``. For example, you could add the following to your shell
-startup scripts (i.e., .bashrc/.profile):
+We strongly suggest sticking to the default virtualenv location. If you
+use a different location, ``tpaexec`` cannot automatically activate the
+virtualenv; you must do so yourself, for example by adding the following
+line to your .bashrc (or other shell startup scripts):
 
     source /some/virtualenv/bin/activate
