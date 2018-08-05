@@ -33,17 +33,17 @@ Examples include AWS, lxd, and bare-metal servers.
 
 TPAexec operates in four distinct stages to bring up a Postgres cluster:
 
-1. Configuration—decide what kind of cluster you want
-2. Provisioning—create the servers needed to host the cluster
-3. Deployment—install and configure the necessary software
-4. Testing—make sure everything is working as expected
-
-This is all you need to bring up a test cluster quickly:
-
 ```
+# 1. Configuration—decide what kind of cluster you want
 [tpa]$ tpaexec configure clustername --architecture M1
+
+# 2. Provisioning—create the servers needed to host the cluster
 [tpa]$ tpaexec provision clustername
+
+# 3. Deployment—install and configure the necessary software
 [tpa]$ tpaexec deploy clustername
+
+# 4. Testing—make sure everything is working as expected
 [tpa]$ tpaexec test clustername
 ```
 
@@ -119,16 +119,15 @@ full range of Ansible functionality is at your disposal at every stage.
 
 ### Cluster management
 
-Once your cluster is up and running, TPAexec also provides some cluster
-management functions, including safe switchover operations and
-zero-downtime minor-version upgrades.
+Once your cluster is up and running, TPAexec provides convenient cluster
+management functions, including configuration changes, switchover, and
+zero-downtime minor-version upgrades. These features make it easier and
+safer to manage your cluster than making the changes by hand.
 
 ## It's just Postgres
 
 TPAexec can create complex clusters with many features configured, but
 the result is just Postgres. The installation follows some conventions
 designed to make life simpler, but there is no hidden magic or anything
-standing in the way between you and the database. Using TPAexec to make
-configuration changes is likely simpler and safer than to make them by
-hand, but you can do everything on a TPA cluster that you could do on
-any other Postgres installation.
+standing in the way between you and the database. You can do everything
+on a TPA cluster that you could do on any other Postgres installation.
