@@ -183,7 +183,7 @@ the architecture may require (e.g., the BDR repository).
 Use ``--2Q-repositories source/name/maturity …``
 to specify the complete list of 2ndQuadrant repositories to install on
 each instance in addition to the 2ndQuadrant public repository. Use this
-option with care. TPAexec with configure the named repositories with no
+option with care. TPAexec will configure the named repositories with no
 attempt to make sure the combination is appropriate.
 
 To use product repositories, you must first
@@ -329,5 +329,5 @@ instances:
 
 The next step is to run [``tpaexec provision``](tpaexec-provision.md)
 or learn more about how to customise the configuration of
-[the cluster as a whole](configure-cluster.md) or to configure an
+[the cluster as a whole](configure-cluster.md) or how to configure an
 [individual instance](configure-instance.md).
