@@ -4,8 +4,8 @@ tpaexec provision
 Provision creates instances and other resources required by the cluster.
 
 The exact details of this process depend both on
-the architecture (e.g., [M1](architectures/M1.md))
-and platform (e.g., [AWS](platforms/aws.md))
+the architecture (e.g. [M1](architectures/M1.md))
+and platform (e.g. [AWS](platforms/aws.md))
 that you selected while configuring the cluster.
 
 At the end of the provisioning stage, you will have the required number
@@ -53,7 +53,9 @@ sys     0m27.852s
 
 This command will produce lots of output (append ``-v``, ``-vv``, etc.
 to the command if you want even more verbose output). The output is also
-logged to ``ansible.log`` in the cluster directory.
+logged to ``ansible.log`` in the cluster directory. This can be overriden
+by setting environment variable `ANSIBLE_LOG_PATH` to the path and name of
+the desired logfile.
 
 If it completes without error, you may proceed to run
 [``tpaexec deploy``](tpaexec-deploy.md) to install and configure
