@@ -18,9 +18,9 @@ To be able to use rehydration, 2 volume attributes need to be set in config.yml:
 
 ### Simple Rehydrate example
 
-This example assumes that environment variable TPA_DIR has been set; that \$TPA_DIR/bin has been added to the tpauser's PATH. It also assumes that you have a running cluster called **night**, with the configuration files located in **~/tpa/clusters/night** and that the instance we want to rehydrate is called **zombie**.
+This example assumes that you have a running cluster called **night**, with the configuration files located in **~/tpa/clusters/night** and that the instance we want to rehydrate is called **zombie**.
 
-Use the AWS console to check that all the instances in the cluster are running, and that all checks have passed, not just the instance(s) being hydrated, especially the master node - if they are in “stopped” or “terminated” state, TPAexec will build a new instance, which isn't what we want.
+Use the AWS console to check that all the instances in the cluster are running, and that all checks have passed, not just the instance(s) being hydrated, especially the master node - if they are in a “stopped” or “terminated” state, older versions of TPAexec ( < 3.0 ) will build a new instance, which isn't what we want.
 
 
 
@@ -71,14 +71,16 @@ instances:
 
 ```
 <clusterdir>
-	The directory containing the cluster config - if no path is given, it assumes that the directory will be under the current directory.
+	The directory containing the cluster config - if no path is given, it assumes that the directory
+	will be under the current directory.
 
 <node1>
 	There must be at least one node specified for the rehydrate command to execute
 
-rehydrate will check whether delete_on_termination has been set to false for any relevant volumes, and if not set, will stop before any instance is terminated.
-
 ```
+rehydrate will check whether delete_on_termination has been set to false for any relevant volumes,
+and if not set, will stop before any instance is terminated.
+
 
 So, for our simple example:
 
@@ -102,7 +104,7 @@ A more realistic example needs to consider the cluster topology and co-ordinate 
 
   - 1 Barman+Standby Anchor pair (**fritz, minion2**)
 
-#### Overview
+#### Logical Overview
 
 Rehydration might consist of 3 logical phases:
 
@@ -184,4 +186,4 @@ $ aws ec2 modify-instance-attribute --region eu-west-1 --instance-id i-0ca212ac1
 --block-device-mappings "[{\"DeviceName\": \"/dev/xvdb\",\"Ebs\":{\"DeleteOnTermination\":false}}]"
 ```
 
-Check that this has worked  via the Amazon EC2 management console. Click on ‘Instances’, select instance (in this case zombie), under the ‘Description’ tab, scroll down to ‘Block devices’, and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag, which should now be false. It is worth waiting for 30 seconds before running rehydrate, as it can take time to propagate the settings.
+Check that this has worked via the Amazon EC2 management console. Click on ‘Instances’, select instance (in this case zombie), under the ‘Description’ tab, scroll down to ‘Block devices’, and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag, which should now be false. It is worth waiting for 30 seconds before running rehydrate, as it can take time to propagate the settings.
