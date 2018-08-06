@@ -1,0 +1,10 @@
+digraph BDR_Simple {
+    bdr_1 -> bdr_2;
+    bdr_1 -> bdr_3;
+    bdr_2 -> bdr_1;
+    bdr_2 -> bdr_3;
+    bdr_3 -> bdr_1;
+    bdr_3 -> bdr_2;
+
+    { rank=same; bdr_1 bdr_2 }
+}
