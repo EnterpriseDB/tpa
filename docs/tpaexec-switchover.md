@@ -8,11 +8,15 @@ It performs various repmgr sanity checks before switching over the node, and is 
 
 ### Pre-requisites
 
-This command relies on the relevant achitecture commands directory being linked from the cluster directory created as standard if `tpaexec configure` is used. If the link is not present, it will need to be linked manually e.g. if you are using an existing cluster directory. For example, for a Single Master (M1) architecture, with tpaexec installed in the default directory:
+This command relies on the relevant achitecture commands directory containing commands linked from the cluster directory created as standard if `tpaexec configure` is used. If the links are not present, they will need to be linked manually e.g. if you are using an existing cluster directory. For example, for a Single Master (M1) architecture, with tpaexec installed in the default directory:
 
 ```
 [tpa]$ cd <clusterdir>
-[tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands commands
+[tpa]$ mkdir commands
+[tpa]$ cd commands
+[tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands/switchover.sh switchover.sh
+[tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands/switchover.yml switchover.yml
+[tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands/update-postgres.yml update-postgres.yml
 ```
 
 ### Architecture options
