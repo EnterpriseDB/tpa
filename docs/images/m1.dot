@@ -1,0 +1,9 @@
+digraph M1 {
+    backup [shape=box];
+    primary -> replica -> backup;
+    replica -> replica_2;
+    replica -> replica_…;
+    replica -> replica_N;
+
+    { rank=same; replica backup }
+}
