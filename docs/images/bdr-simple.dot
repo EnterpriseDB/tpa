@@ -5,6 +5,4 @@ digraph BDR_Simple {
     bdr_b -> bdr_c;
     bdr_c -> bdr_a;
     bdr_c -> bdr_b;
-
-    { rank=same; bdr_a bdr_b }
 }
