@@ -12,6 +12,8 @@ echo "$(date): start"
 
 set -x
 
+echo {{ item.Name }} > /proc/sys/kernel/hostname
+
 {#
     Include early setup tasks, if any are specified.
 #}

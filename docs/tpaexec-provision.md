@@ -108,7 +108,7 @@ Host quavery
     User admin
     HostName 34.200.214.150
 [tpa]$ ssh -F ssh_config quirk
-Linux ip-10-33-161-73 4.9.0-6-amd64 #1 SMP Debian 4.9.82-1+deb9u3 (2018-03-02) x86_64
+Linux quirk 4.9.0-6-amd64 #1 SMP Debian 4.9.82-1+deb9u3 (2018-03-02) x86_64
 
 The programs included with the Debian GNU/Linux system are free software;
 the exact distribution terms for each program are described in the
@@ -117,13 +117,9 @@ individual files in /usr/share/doc/*/copyright.
 Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
 permitted by applicable law.
 Last login: Sat Aug  4 12:31:28 2018 from 136.243.148.74
-admin@ip-10-33-161-73:~$ sudo -i
-root@ip-10-33-161-73:~# 
+admin@quirk:~$ sudo -i
+root@quirk:~# 
 ```
-
-Note that the host is named "quirk" in config.yml and ssh_config, but
-its hostname is not set to quirk yet. This will happen during the
-deployment phase.
 
 You can run [``tpaexec deploy``](tpaexec-deploy.md) immediately after
 provisioning. It will wait as long as required for the instances to come
