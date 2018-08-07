@@ -1,58 +1,86 @@
 AWS
 ===
 
-## Access setup
+TPAexec fully supports provisioning production clusters on AWS EC2.
 
-To use the AWS API, you need an access key id and a secret access key.
+## API access
 
-Use **Create Access Key** in the **Security Credentials** tab for your
-AWS IAM user to generate an access key, as described by
-https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+To use the AWS API, you must first
+[obtain an access key](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
+for an IAM user under your AWS account, and
+[add it to your configuration](https://boto.readthedocs.org/en/latest/boto_config_tut.html).
+For example,
 
-Next, make the keypair available to the boto library, as described by
-https://boto.readthedocs.org/en/latest/boto_config_tut.html
+```bash
+[tpa]$ cat > ~/.aws/credentials
+[default]
+aws_access_key_id = AKIAIOSFODNN7EXAMPLE
+aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+```
 
-There are two easy ways to do this:
+## Introduction
 
-1. Set environment variables:
+The service is physically subdivided into
+[regions and availability zones](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html).
+An availability zone is represented by a region code followed by a
+single letter, e.g., eu-west-1a (but that name may refer to different
+locations for different AWS accounts, and there is no way to coordinate
+the interpretation between accounts).
 
-   ```
-   export AWS_ACCESS_KEY_ID='AKIAIOSFODNN7EXAMPLE'
-   export AWS_SECRET_ACCESS_KEY='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
-   ```
+AWS regions are completely isolated from each other and share no
+resources. Availability zones within a region are physically separated,
+and logically mostly isolated, but are connected by low-latency links
+and are able to share certain networking resources.
 
-2. Create ~/.aws/credentials with the following contents:
+### Networking
 
-   ```
-   [default]
-   aws_access_key_id = AKIAIOSFODNN7EXAMPLE
-   aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-   ```
+All networking configuration in AWS happens in the context of a
+[Virtual Private Cloud](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-vpc.html)
+within a region. Within a VPC, you can create
+[subnets](https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html)
+that is tied to a specific availability zone, along with internet
+gateways, routing tables, and so on. 
 
-### AWS Fundamentals
+You can create any number of
+[Security Groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html#vpc-security-groups)
+to configure rules for what inbound and outbound traffic is permitted to
+instances (in terms of protocol, a destination port range, and a source
+or destination IP address range).
 
-The AWS Elastic Compute Cloud (**EC2**) is physically subdivided first into [Regions](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html) and further into Availability Zones. Each Availability Zone is isolated, but the Availability Zones in a region are connected through low-latency links. An Availability Zone is represented by a region code followed by a letter identifier; e.g. `eu-east-1a`. Note that `eu-east-1a` might not be the same location as `eu-east-1a` for another account, and there is no way to coordinate Availability Zones between accounts.
+### Instances
 
-Within Availability Zones, you can create [**Instances**](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Instances.html) (Virtual Machines) and storage volumes.
+AWS EC2 offers a variety of
+[instance types](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html)
+with different hardware configurations at different
+price/performance points. Within a subnet in a particular availability
+zone, you can create
+[EC2 instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Instances.html)
+based on a distribution image known as an
+[AMI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html),
+and attach one or more
+[EBS volumes](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html)
+to provide persistent storage to the instance. You can ssh to the
+instances by registering an
+[SSH public key](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html).
 
-The instances are built using templates known as [Amazon Machine Images (**AMI**s](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html)), which can be preconfigured with OS and bespoke packages, allowing for fast deployment times. These AMIs are region specific, so when creating them, make sure that they are available in each region that you will be using.
+Instances are always assigned a private IP address within their subnet.
+Depending on the subnet configuration, they may also be assigned an
+[ephemeral public IP address](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html#concepts-public-addresses)
+(which is lost when the instance is shutdown, and a different ephemeral
+IP is assigned when it is started again). You can instead assign a
+static region-specific routable IP address known as an
+[Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html)
+to any instance.
 
-Amazon have various HW configs available, known as **[Instance Types](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html)**, with various price performance points. 
-
-The storage volumes that we use are called [Amazon Elastic Block Store (**EBS**)](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html) volumes, which provide persistent storage for the server instances.
-
-To specify the protocols, ports, and source IP ranges that can reach the server instances, you can define **[Security Groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html#vpc-security-groups)**, which are effectively a set of firewall rules.
-
-You can create Virtual networks which are logically isolated from the rest of the AWS cloud, and can optionally be connected to your own network - these are known as virtual private clouds ([**VPC**s](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-vpc.html))
-
-It is possible to assign Static IPv4 addresses to instances, known as **[Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html)** addresses, or to allow AWS to assign a public IP address from the EC2-VPC public IPv4 address pool. Elastic IPs are region specific, externally accessible IPv4 addresses that are associated with your AWS account, and can be quickly associated with any instance in that region. When you allow AWS to configure an [external IPv4 address](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html#concepts-public-addresses), it is configured at instance boot time. *Note this address is released at shutdown time, and it is not possible to retain the same address after reboot.*
-
-During instance build, [key pairs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html) are created/assigned to allow secure login to the instances. (It is possible to assign existing keys to the instances). If you lose your private key, you will irrevocably lose access to the instances - having access to the AWS console does not help.
+For an instance to be reachable from the outside world, it must not only
+have a routable IP address, but the VPC's networking configuration
+(internet gateway, routing tables, security groups) must also align to
+permit access.
 
 ## Configuration
 
-This is a list of the AWS-specific configuration settings that you can
-define in config.yml
+Here's a brief description of the AWS-specific settings that you can
+specify via ``tpaexec configure`` or define directly in config.yml.
 
 ### VPC (required)
 
