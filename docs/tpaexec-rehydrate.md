@@ -7,9 +7,7 @@ Rehydration is a process that allows for rapid deployment of patches or OS upgra
 
 The rehydration command requires the existing instance to be still present - i.e. don't terminate the instance via the AWS console. Logically rehydrate is nothing more than terminate followed by provision followed by deploy.
 
-------
-
-### Pre-requisites
+### Prerequisites
 
 To be able to use rehydration, 2 volume attributes need to be set in config.yml: 
 

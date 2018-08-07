@@ -6,7 +6,7 @@ It performs various repmgr sanity checks before switching over the node, and is 
 
 **`tpaexec switchover <clustername> <standby-nodename>`** can be used to promote a standby to become the master, and any standbys attached to the old primary will be configured to follow the new primary. 
 
-### Pre-requisites
+### Prerequisites
 
 This command relies on the relevant achitecture commands directory containing commands linked from the cluster directory created as standard if `tpaexec configure` is used. If the links are not present, they will need to be linked manually e.g. if you are using an existing cluster directory. For example, for a Single Master (M1) architecture, with tpaexec installed in the default directory:
 
