@@ -7,7 +7,7 @@ cycle.
 
 ## Quickstart
 
-```
+```bash
 [tpa]$ tpaexec configure ~/clusters/speedy --architecture M1
 ```
 
@@ -217,7 +217,7 @@ You may use any version specifier that apt or yum would accept.
 
 Let's see what happens when we run the following command
 
-```
+```bash
 [tpa]$ tpaexec configure ~/clusters/speedy --architecture M1 \
         --num-cascaded-replicas 2 --distribution Debian-minimal \
         --platform aws --region us-east-1 --subnet-pattern 10.33.x.x/28 \
@@ -230,7 +230,7 @@ Let's see what happens when we run the following command
 There is no output, so there were no errors. The cluster directory has
 been created and populated.
 
-```
+```bash
 $ ls ~/clusters/speedy
 total 8
 drwxr-xr-x 2 ams ams 4096 Aug  4 16:23 commands

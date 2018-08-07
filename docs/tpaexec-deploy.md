@@ -24,7 +24,7 @@ forget to do this, an error message will soon remind you.
 
 ## Quickstart
 
-```
+```bash
 [tpa]$ tpaexec deploy ~/clusters/speedy -v
 Using /opt/2ndQuadrant/TPA/ansible/ansible.cfg as config file
 

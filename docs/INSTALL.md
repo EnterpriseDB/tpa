@@ -13,13 +13,15 @@ First, subscribe to the products/tpa/release repository through the
 2ndQuadrant Portal software subscription mechanism. Then run the
 following commands:
 
-    # Pick the command for your platform
-    [root]# apt-get install tpaexec
-    [root]# yum install tpaexec
+```bash
+# Pick the command for your platform
+[root]# apt-get install tpaexec
+[root]# yum install tpaexec
 
-    # Post-installation setup
-    [root]# /opt/2ndQuadrant/TPA/bin/tpaexec setup
-    [root]# /opt/2ndQuadrant/TPA/bin/tpaexec selftest
+# Post-installation setup
+[root]# /opt/2ndQuadrant/TPA/bin/tpaexec setup
+[root]# /opt/2ndQuadrant/TPA/bin/tpaexec selftest
+```
 
 More detailed explanations below.
 
@@ -31,7 +33,9 @@ shown starting with a **[tpa]$** may be run by an ordinary user.
 Please make absolutely sure that your system has the correct date and
 time set, because various things will fail otherwise. For example:
 
-    [root]# ntpdate pool.ntp.org
+```bash
+[root]# ntpdate pool.ntp.org
+```
 
 ## Packages
 
@@ -42,11 +46,13 @@ enable the repository on your system.
 
 Once that is done, you can install the tpaexec package as follows:
 
-    # Debian or Ubuntu
-    [root]# apt-get install tpaexec
+```bash
+# Debian or Ubuntu
+[root]# apt-get install tpaexec
 
-    # RedHat or CentOS
-    [root]# yum install tpaexec
+# RedHat or CentOS
+[root]# yum install tpaexec
+```
 
 This will install TPAexec into ``/opt/2ndQuadrant/TPA``.
 
@@ -71,20 +77,26 @@ using OS packages to install these modules.)
 
 First, create the virtualenv, activate and install the packages using the install script.
 
-    # Create a virtualenv and install the pip modules (including ansible).
-    [root]# /opt/2ndQuadrant/TPA/bin/tpaexec setup
+```bash
+# Create a virtualenv and install the pip modules (including ansible).
+[root]# /opt/2ndQuadrant/TPA/bin/tpaexec setup
+```
 
 Now, as a non-root user, add the following to your .bashrc or
 .profile (or equivalent shell startup configuration):
 
-    [tpa]$ export PATH=$PATH:/opt/2ndQuadrant/TPA/bin
+```bash
+[tpa]$ export PATH=$PATH:/opt/2ndQuadrant/TPA/bin
+```
 
 ## Verification
 
 Once you're done with all of the above steps, run the following command
 to verify your local installation:
 
-    [tpa]$ tpaexec selftest
+```bash
+[tpa]$ tpaexec selftest
+```
 
 If that command completes without any errors, your TPAexec installation
 is ready for use.

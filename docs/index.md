@@ -33,7 +33,7 @@ Examples include AWS, lxd, and bare-metal servers.
 
 TPAexec operates in four distinct stages to bring up a Postgres cluster:
 
-```
+```bash
 # 1. Configuration—decide what kind of cluster you want
 [tpa]$ tpaexec configure clustername --architecture M1
 

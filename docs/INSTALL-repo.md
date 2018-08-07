@@ -10,9 +10,11 @@ to the TPA source code repository and specifically advised to use it by
 
 ## Quickstart
 
-    [tpa]$ git clone https://github.com/2ndQuadrant/TPA
-    [tpa]$ ./TPA/bin/tpaexec setup
-    [tpa]$ ./TPA/bin/tpaexec selftest
+```bash
+[tpa]$ git clone https://github.com/2ndQuadrant/TPA
+[tpa]$ ./TPA/bin/tpaexec setup
+[tpa]$ ./TPA/bin/tpaexec selftest
+```
 
 ## Step-by-step
 
@@ -20,21 +22,25 @@ First, you must install some required system packages. (These would have
 been installed automatically as dependencies if you were installing the
 tpaexec package.)
 
-    # Debian or Ubuntu
-    [root]# apt-get install python2.7 python-pip python-virtualenv \
-            pwgen openvpn
-    
-    # RedHat or CentOS
-    [root]# yum install python python-pip python-virtualenv \
-            pwgen epel-release openvpn
-            
-    # Mac
-    [brew or port] install pwgen
-    [brew or port] install openvpn
+```bash
+# Debian or Ubuntu
+[root]# apt-get install python2.7 python-pip python-virtualenv \
+        pwgen openvpn
+
+# RedHat or CentOS
+[root]# yum install python python-pip python-virtualenv \
+        pwgen epel-release openvpn
+        
+# Mac
+[brew or port] install pwgen
+[brew or port] install openvpn
+```
 
 Next, clone the TPA repository:
 
-    [tpa]$ git clone https://github.com/2ndQuadrant/TPA
+```bash
+[tpa]$ git clone https://github.com/2ndQuadrant/TPA
+```
 
 We strongly recommend not cloning into ``/opt/2ndQuadrant/TPA`` so as to
 avoid any conflicts if you install the TPAexec packages in future. Apart
@@ -44,24 +50,32 @@ For TPAexec developers only: if you need to make or test changes to
 2ndQuadrant Ansible (not ordinarily required), clone the repository and
 set ``ANSIBLE_HOME`` in your environment (and .bashrc/.profile):
 
-    [tpa]$ git clone https://github.com/2ndQuadrant/ansible
-    [tpa]$ export ANSIBLE_HOME=/path/to/ansibledir
+```bash
+[tpa]$ git clone https://github.com/2ndQuadrant/ansible
+[tpa]$ export ANSIBLE_HOME=/path/to/ansibledir
+```
 
 The remaining steps from this point onwards are the same as if you had
 installed the tpaexec package.
 
 Install the TPAexec dependencies into an isolated virtualenv:
 
-    [tpa]$ ./TPA/bin/tpaexec setup
+```bash
+[tpa]$ ./TPA/bin/tpaexec setup
+```
 
 For convenience, add tpaexec to your PATH:
 
-    # The following line can also go into ~/.bashrc or similar
-    [tpa]$ export PATH=$PATH:/path/to/TPA/bin
+```bash
+# The following line can also go into ~/.bashrc or similar
+[tpa]$ export PATH=$PATH:/path/to/TPA/bin
+```
 
 Finally, test that everything is as it should be:
 
-    [tpa]$ tpaexec selftest
+```bash
+[tpa]$ tpaexec selftest
+```
 
 If that command completes without any errors, your TPAexec installation
 is ready for use.
@@ -82,4 +96,6 @@ use a different location, ``tpaexec`` cannot automatically activate the
 virtualenv; you must do so yourself, for example by adding the following
 line to your .bashrc (or other shell startup scripts):
 
-    source /some/virtualenv/bin/activate
+```bash
+source /some/virtualenv/bin/activate
+```

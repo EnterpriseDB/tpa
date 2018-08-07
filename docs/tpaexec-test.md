@@ -10,7 +10,7 @@ and ``tpaexec deploy`` successfully before you can run ``tpaexec test``.
 
 ## Quickstart
 
-```
+```bash
 [tpa]$ tpaexec test ~/clusters/speedy -v
 ```
 

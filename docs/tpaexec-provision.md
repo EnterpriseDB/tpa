@@ -25,7 +25,7 @@ documentation for details.
 
 ## Quickstart
 
-```
+```bash
 [tpa]$ tpaexec provision ~/clusters/speedy
 
 PLAY [Provision cluster] **********************************************************************************************************************************************************************
@@ -82,7 +82,7 @@ After provisioning completes, you should be able to ssh to the instances
 ssh host keys). As shown in the output above, tpaexec will generate an
 ssh_config file for you to use.
 
-```
+```bash
 [tpa]$ cd ~/clusters/speedy
 [tpa]$ cat ssh_config
 Host *
@@ -135,7 +135,7 @@ them before you start deployment.
 During the provisioning process, a number of new files will be created
 in the cluster directory.
 
-```
+```bash
 [tpa]$ ls ~/clusters/speedy
 total 240
 -rw-r--r-- 1 ams ams 193098 Aug  4 17:59 ansible.log
@@ -163,7 +163,7 @@ subsequent invocations with ``--cached``.
 The ``inventory/`` directory contains static and dynamic inventory files
 as well as group and host variable definitions from config.yml.
 
-```
+```bash
 [tpa]$ cat inventory/00-speedy
 [tag_Cluster_speedy]
 quirk ansible_host=54.227.207.189 node=1 platform=aws
