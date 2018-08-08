@@ -4,6 +4,16 @@
 # least on Debian 8) that prevents us from overriding the unit that is
 # created by the late generator from /etc/init.d/repmgrd. Using a name
 # that doesn't conflict is the easiest workaround.
+#
+# repmgr 4.1.0 introduces daemonization by default and introduces a new
+# non-backwards compatible option to turn it off, so we have to work around it
+
+- name: Work out whether to use --daemonize=false in repmgr.service
+  shell: >
+    "{{ postgres_bin_dir }}"/repmgr --version | awk '{ print $2 }'
+  args:
+    executable: /bin/bash
+  register: x
 
 - name: Install custom repmgr service unit file
   template:
@@ -12,6 +22,8 @@
     owner: root
     group: root
     mode: 0644
+  vars:
+    no_daemonize: "{{ (x.stdout is version('4.1.0', '>='))|ternary('--daemonize=false', '') }}"
   tags: [repmgr, service]
 
 - name: Enable repmgr service

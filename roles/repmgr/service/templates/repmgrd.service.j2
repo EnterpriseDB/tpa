@@ -8,7 +8,7 @@ Type=simple
 User=postgres
 Group=postgres
 StandardOutput=syslog
-ExecStart={{ postgres_bin_dir }}/repmgrd -f {{ repmgr_conf_file }} --verbose --daemonize=false
+ExecStart={{ postgres_bin_dir }}/repmgrd -f {{ repmgr_conf_file }} --verbose {{ no_daemonize }}
 ExecStop=/bin/kill -TERM $MAINPID
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
