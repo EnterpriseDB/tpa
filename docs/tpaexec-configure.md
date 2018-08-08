@@ -187,10 +187,21 @@ option with care. TPAexec will configure the named repositories with no
 attempt to make sure the combination is appropriate.
 
 To use product repositories, you must first
-``export TPA_2Q_SUBSCRIPTION_TOKEN=xxx`` before you run tpaexec.
-You can get a subscription token from the 2ndQuadrant Portal
-(Support → Software subscriptions → Add). You do not need to create the
-subscription yourself, just extract the token from the subscription URL.
+``export TPA_2Q_SUBSCRIPTION_TOKEN=xxx`` before you run tpaexec. You can
+get your subscription token from the 2ndQuadrant Portal.
+
+Click on “Support” in the left menu, then “Software”, then
+“Subscriptions”, then the “Add a new subscription!” button, then click
+any one of the “Add … repository” buttons (it doesn't matter which one),
+then on the “Install on Debian/Ubuntu Linux” link (even if you are not
+using Debian or Ubuntu). On this page, you will see a command like:
+
+```
+curl https://access.2ndquadrant.com/api/repository/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/products/2ndqpostgres/release/deb | sudo bash
+```
+
+The ``xxx…`` part of the URL (32 characters) is your subscription token.
+You do not need to execute this command, just copy the token.
 
 ### Software versions
 
