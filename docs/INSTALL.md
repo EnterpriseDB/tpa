@@ -89,6 +89,15 @@ Now, as a non-root user, add the following to your .bashrc or
 [tpa]$ export PATH=$PATH:/opt/2ndQuadrant/TPA/bin
 ```
 
+### Installing without network access
+
+When you run ``tpaexec setup``, it will ordinarily download the Python
+packages from the network. The ``tpaexec-deps`` package (available from
+the same repository as tpaexec) bundles everything that would have been
+downloaded, so that they can be installed without network access. Just
+install the package before you run ``tpaexec setup`` and the bundled
+copies will be used automatically.
+
 ## Verification
 
 Once you're done with all of the above steps, run the following command
