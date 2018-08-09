@@ -10,7 +10,7 @@ copyright: |
   © Copyright 2018 2ndQuadrant Ltd.
   <p>Confidential property of 2ndQuadrant; not for public release.
   <p>[^Information Classification: Internal]: [ISP008] Information Classification Policy
-pages:
+nav:
   - TPAExec: index.md
   - Installation: INSTALL.md
   - Stages of operation:
