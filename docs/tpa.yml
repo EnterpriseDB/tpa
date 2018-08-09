@@ -29,6 +29,8 @@ nav:
   - Cluster management:
     - Rehydration: tpaexec-rehydrate.md
     - Switchover: tpaexec-switchover.md
+  - Miscellaneous:
+    - PuTTY configuration: misc/configure-putty.md
 markdown_extensions:
   - codehilite:
       css_class: highlight
