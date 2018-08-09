@@ -3,7 +3,7 @@ site_name: tpa
 # mkdocs with subdirectories ./build and ./tpa/docs (== TPA_DIR/docs),
 # so site_dir should point to the build directory from the docs one.
 docs_dir: .
-site_dir: ../build/tpa
+site_dir: ../../build/tpa
 theme:
   name: readthedocs
 copyright: |
