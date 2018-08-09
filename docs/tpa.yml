@@ -1,9 +1,9 @@
 site_name: tpa
-# We will run "mkdocs build -f tpa/docs/tpa.yml" from a directory named
-# mkdocs with subdirectories ./build and ./tpa/docs (== TPA_DIR/docs),
-# so site_dir should point to the build directory from the docs one.
+# We will run "mkdocs build -f docs/tpa.yml" from a directory with the
+# subdirectories ./build and ./docs (== TPA_DIR/docs), so our site_dir
+# should point to the build directory from the docs one.
 docs_dir: .
-site_dir: ../../build/tpa
+site_dir: ../build/tpa
 theme:
   name: readthedocs
 copyright: |
