@@ -477,6 +477,8 @@ Command: tpaexec playbook clustername/playbook.yml
 Command: tpaexec playbook clustername /path/to/playbook.yml
 
 Runs a playbook in the context of a particular cluster
+
+Any additional arguments will be passed to ansible-playbook unmodified.
 PLAYBOOK
             ;;
 
@@ -485,6 +487,8 @@ PLAYBOOK
 Command: tpaexec deploy clustername
 
 Deploys a cluster according to clustername/deploy.yml
+
+Any additional arguments will be passed to ansible-playbook unmodified.
 DEPLOY
             ;;
 
