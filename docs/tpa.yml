@@ -1,0 +1,40 @@
+site_name: tpa
+docs_dir: tpa/docs
+site_dir: build/tpa
+theme:
+  name: readthedocs
+copyright: |
+  © Copyright 2018 2ndQuadrant Ltd.
+  <p>Confidential property of 2ndQuadrant; not for public release.
+  <p>[^Information Classification: Internal]: [ISP008] Information Classification Policy
+pages:
+  - TPAExec: index.md
+  - Installation:
+    - From packages: INSTALL.md
+    - From source: INSTALL-repo.md
+  - Stages of operation:
+    - Configuration: tpaexec-configure.md
+    - Provisioning: tpaexec-provision.md
+    - Deployment: tpaexec-deploy.md
+    - Testing: tpaexec-test.md
+  - Architectures:
+    - M1: architectures/M1.md
+    - BDR-Always-ON: architectures/BDR-Always-ON.md
+    - BDR-Simple: architectures/BDR-Simple.md
+  - Platforms:
+    - AWS: platforms/aws.md
+    - Bare metal: platforms/bare.md
+    - Docker: platforms/docker.md
+    - LXD: platforms/lxd.md
+  - Customisations:
+    - Cluster configuration: configure-cluster.md
+    - Instance configuration: configure-instance.md
+  - Cluster management:
+    - Rehydration: tpaexec-rehydrate.md
+    - Switchover: tpaexec-switchover.md
+markdown_extensions:
+  - codehilite:
+      css_class: highlight
+      guess_lang: true
+plugins:
+  - search
