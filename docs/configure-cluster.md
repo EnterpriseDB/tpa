@@ -16,17 +16,46 @@ you will need to edit config.yml anyway.
 
 TPAexec translates the settings in config.yml to cluster-wide (group)
 and per-instance (host) variable settings in the Ansible inventory for
-the cluster as part of the provisioning process. These variables then
-control the deployment process. Anything defined in ``cluster_vars``
-becomes a group variable, and any variables defined in ``instances``
-(or ``instance_defaults``) becomes a host variable.
+the cluster as part of the provisioning process. Anything defined in
+``cluster_vars`` becomes a group variable, and any ``vars`` defined in
+``instances`` or ``instance_defaults`` (along with some other settings
+like the role or upstream) become host variables. These variables then
+control the deployment process. 
 
-Any variable can be set for the cluster, or an individual host, or both;
-host variables override group variables. Some settings make more sense
-as group variables—for example, setting ``postgres_version: 9.6`` for
-the cluster and ``postgres_version: 10`` for a single instance is not
-ordinarily a useful configuration, and deployment would fail if you
-tried to make the v10 server be a streaming replica of the v9.6 one.
+```yaml
+cluster_vars:
+  postgres_version: 9.6
+
+instance_defaults:
+  platform: aws
+  …
+  vars:
+    ansible_user: admin
+
+instances:
+  - node: 1
+    Name: one
+    …
+    role: primary
+    vars:
+      x: 42
+```
+
+Any variable can be set for the entire cluster, or an individual host,
+or both; host variables override group variables. Some settings make
+more sense as group variables—for example, it is valid to set
+``postgres_version: 9.6`` for the cluster and ``postgres_version: 10``
+for a single instance, but it is not ordinarily a useful configuration,
+and if you also declared the v10 server as a streaming replica of the
+v9.6 one, the deployment would eventually fail (though not without
+trying).
+
+TPAexec checks the consistency of the overall cluster topology (for
+example, if you declare an instance with the role "replica", you must
+also declare the name of its upstream instance, and that instance must
+exist), but it will not prevent you from setting any variable you like
+on the instances. You must exercise due caution, and try out changes in
+a test environment before rolling them out into production.
 
 ### Design Considerations
 
