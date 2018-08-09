@@ -1,5 +1,5 @@
 site_name: tpa
-docs_dir: tpa/docs
+docs_dir: .
 site_dir: build/tpa
 theme:
   name: readthedocs
