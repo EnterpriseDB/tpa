@@ -1,11 +1,32 @@
-TPAexec - Cluster design and implementation considerations
-==========================================================
+Cluster configuration
+=====================
 
-## Overview
+The way to make any configuration change to a cluster with TPAexec is to
+edit config.yml and run the provision/deploy/test cycle. This applies
+equally to new (unprovisioned) clusters and existing clusters. The
+process is carefully designed to be idempotent, and to make changes
+only in response to a change in the configuration or a change on the
+instances.
 
-This document discusses the design of clusters with TPAexec.
+You can specify some aspects of the cluster on the initial
+[``tpaexec configure``](tpaexec-configure.md) command line, but this
+covers only the most common topology and configuration options. To make
+any other changes, or to make changes after provisioning the cluster,
+you will need to edit config.yml anyway.
 
-------
+TPAexec translates the settings in config.yml to cluster-wide (group)
+and per-instance (host) variable settings in the Ansible inventory for
+the cluster as part of the provisioning process. These variables then
+control the deployment process. Anything defined in ``cluster_vars``
+becomes a group variable, and any variables defined in ``instances``
+(or ``instance_defaults``) becomes a host variable.
+
+Any variable can be set for the cluster, or an individual host, or both;
+host variables override group variables. Some settings make more sense
+as group variables—for example, setting ``postgres_version: 9.6`` for
+the cluster and ``postgres_version: 10`` for a single instance is not
+ordinarily a useful configuration, and deployment would fail if you
+tried to make the v10 server be a streaming replica of the v9.6 one.
 
 ### Design Considerations
 
