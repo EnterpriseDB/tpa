@@ -9,9 +9,7 @@ copyright: |
   <p>[^Information Classification: Internal]: [ISP008] Information Classification Policy
 pages:
   - TPAExec: index.md
-  - Installation:
-    - From packages: INSTALL.md
-    - From source: INSTALL-repo.md
+  - Installation: INSTALL.md
   - Stages of operation:
     - Configuration: tpaexec-configure.md
     - Provisioning: tpaexec-provision.md
