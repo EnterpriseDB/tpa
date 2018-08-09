@@ -1,4 +1,4 @@
-site_name: tpa
+site_name: TPA
 docs_dir: .
 theme:
   name: readthedocs
