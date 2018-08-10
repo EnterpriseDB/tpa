@@ -3,8 +3,8 @@ docs_dir: .
 theme:
   name: readthedocs
 copyright: |
-  © Copyright 2018 2ndQuadrant Ltd. <a href="/legal-notice/">Legal Notice</a>
-  <p>Confidential property of 2ndQuadrant; not for public release.
+  © Copyright 2018 2ndQuadrant Ltd. 
+  <p>Confidential property of 2ndQuadrant; not for public release. This software and related documentation are protected by intellectual property laws. Except as allowed by law, you may not use, copy, reproduce, translate, broadcast, modify, license, transmit, distribute, exhibit, perform, publish, or display any part, in any form, or by any means.
 nav:
   - TPAExec: index.md
   - Installation: INSTALL.md
