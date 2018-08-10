@@ -22,6 +22,10 @@
 # hostname -f fails if it can't find the hostname in /etc/hosts, and
 # installing the 2ndQuadrant repositories below might call hostname -f.
 # Note that sys/hosts will overwrite /etc/hosts later.
+#
+# We do this here rather than in user-data to avoid any possibility that
+# cloud-init will overwrite the line we add, because we have not turned
+# off manage_etc_hosts yet.
 
 - name: Add hostname to /etc/hosts temporarily
   lineinfile:
