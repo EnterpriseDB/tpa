@@ -104,8 +104,8 @@ def parse_conninfo(conninfo, key=None):
         v = None
         if len(parts) == 2:
             v = parts[1]
-            if v.startswith("'") and v.endswith("'") or \
-               v.startswith('"') and v.endswith('"'):
+            while (v.startswith("'") and v.endswith("'")) or \
+                    (v.startswith('"') and v.endswith('"')):
                 v = v[1:-1]
 
         settings[parts[0]] = v
