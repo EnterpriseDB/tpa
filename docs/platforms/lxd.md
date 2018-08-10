@@ -1,6 +1,13 @@
 LXD
 ===
 
+TPAexec has experimental support for LXD.
+
+Please consult the
+[LXD documentation](https://linuxcontainers.org/lxd/) if you need help
+to
+[install and get started with LXD](https://linuxcontainers.org/lxd/getting-started-cli/).
+
 ## WIP
 
 ```
