@@ -412,7 +412,11 @@
         })
       }}
     instance_profile_name: "{{ instance_profile_name|default(omit) }}"
-    private_ip: "{{ item.private_ip|default(omit) }}"
+    private_ip: "{{
+      item.private_ip|default(
+        vars['instance_%s_private_ip' % item.node]|default(omit)
+      )
+    }}"
     vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
     group_id: "{{ ec2_region_groups[item.region] }}"
     volumes: "{{ item.volumes|reject('has_subkey','volume_id')|list|default(omit) }}"

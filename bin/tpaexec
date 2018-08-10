@@ -259,7 +259,12 @@ rehydrate() {
         -e i_really_want_to_destroy_my_entire_cluster=$DESTROY \
         --limit "$instances" "$@"
 
-    provision -e require_reattachment=yes -e reattach_hosts="$instances" "$@"
+    provision_args=(-e require_reattachment=yes)
+    provision_args+=(-e reattach_hosts="$instances")
+    if [ -f prehydrate-vars.yml ]; then
+        provision_args+=(-e @prehydrate-vars.yml)
+    fi
+    provision "${provision_args[@]}" "$@"
     deploy -e rehydrate=yes -e deploy_hosts="$instances" "$@"
 }
 

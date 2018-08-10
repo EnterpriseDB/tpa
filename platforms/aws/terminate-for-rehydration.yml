@@ -100,6 +100,17 @@
       vars:
         device_termination: "{{ item.stdout|from_json }}"
 
+    # Write the private IP address of each instance into
+    # prehydrate-vars.yml, so that they can be reassigned when we
+    # reprovision the instances.
+
+    - name: Write private_ip for hosts for later use
+      template:
+        src: prehydrate-vars.yml.j2
+        dest: "{{ cluster }}/prehydrate-vars.yml"
+      delegate_to: localhost
+      run_once: true
+
     # Terminate the instance and wait until its state changes to
     # terminated (after shutting-down).
 

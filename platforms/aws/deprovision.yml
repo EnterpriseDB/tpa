@@ -158,3 +158,4 @@
   with_items:
     - inventory/ec2.py
     - inventory/ec2.ini
+    - prehydrate-vars.yml
