@@ -3,7 +3,7 @@ docs_dir: .
 theme:
   name: readthedocs
 copyright: |
-  © Copyright 2018 2ndQuadrant Ltd.
+  © Copyright 2018 2ndQuadrant Ltd. <a href="/legal-notice/">Legal Notice</a>
   <p>Confidential property of 2ndQuadrant; not for public release.
 nav:
   - TPAExec: index.md
