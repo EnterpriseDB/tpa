@@ -1,6 +1,5 @@
 127.0.0.1	localhost
 ::1		localhost ip6-localhost ip6-loopback
-127.0.1.1	{{ inventory_hostname }}
 
 {% set v = {} %}{% for h in groups[cluster_tag] -%}{{ v.update({h:hostvars[h].node|int}) }}{% endfor %}{% for h,n in v|dictsort(false,'value') %}
 {{ hostvars[h].ip_address + ' ' + hostvars[h].inventory_hostname }}
