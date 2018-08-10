@@ -9,7 +9,7 @@ copyright: |
 nav:
   - TPAExec: index.md
   - Installation: INSTALL.md
-  - Stages of operation:
+  - Creating a cluster:
     - Configuration: tpaexec-configure.md
     - Provisioning: tpaexec-provision.md
     - Deployment: tpaexec-deploy.md
