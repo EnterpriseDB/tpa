@@ -13,7 +13,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-: ${twoq_repositories:='[products/bdr3/snapshot,products/pglogical3/snapshot,products/default/snapshot]'}
+: ${tpa_2q_repositories:='[products/bdr3/snapshot,products/pglogical3/snapshot,products/default/snapshot]'}
 
 postgres_volume_size=${postgres_volume_size:-64}
 barman_volume_size=${barman_volume_size:-128}
@@ -24,7 +24,7 @@ vars+=([subnets]=$(IFS=, && echo "[${subnets[*]}]"))
 vars+=([cluster_tags]="$($libdir/cluster-tags)")
 vars+=([cluster_vars]="$($libdir/cluster-vars \
     postgres_coredump_filter=0xff repmgr_failover=manual \
-    twoq_repositories=$twoq_repositories \
+    tpa_2q_repositories=$tpa_2q_repositories \
     extra_postgres_extensions='[pglogical]')")
 
 v=$(write_vars $cluster)

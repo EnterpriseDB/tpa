@@ -47,7 +47,7 @@ case "$opt" in
             shift
         done
         if [[ ${repos:-} && ${#repos[@]} -ne 0 ]]; then
-            twoq_repositories=$(IFS=, && echo "[${repos[*]}]")
+            tpa_2q_repositories=$(IFS=, && echo "[${repos[*]}]")
         else
             error "no repositories specified"
         fi

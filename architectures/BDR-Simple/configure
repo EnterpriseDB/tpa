@@ -22,10 +22,10 @@ if [[ ${POSTGRES_VERSION:-10} == 9.6 ]]; then
     default_repos='products/bdr2/snapshot'
 fi
 
-: ${twoq_repositories:="[$default_repos]"}
+: ${tpa_2q_repositories:="[$default_repos]"}
 
 extensions="[pglogical]"
-if [[ $twoq_repositories == */bdr2/* ]]; then
+if [[ $tpa_2q_repositories == */bdr2/* ]]; then
     extensions="[]"
     if [[ ! ${POSTGRES_VERSION:-} ]]; then
         export POSTGRES_VERSION=9.6
@@ -34,7 +34,7 @@ if [[ $twoq_repositories == */bdr2/* ]]; then
         error "BDR2 does not support Postgres ${POSTGRES_VERSION:-10}"
     fi
 fi
-if [[ $twoq_repositories == */bdr3/* ]]; then
+if [[ $tpa_2q_repositories == */bdr3/* ]]; then
     if [[ ${POSTGRES_VERSION:-10} == 9.* ]]; then
         error "BDR3 does not support Postgres ${POSTGRES_VERSION:-10}"
     fi
@@ -47,7 +47,7 @@ vars+=([subnets]=$(IFS=, && echo "[${subnets[*]}]"))
 vars+=([cluster_tags]="$($libdir/cluster-tags)")
 vars+=([cluster_vars]="$($libdir/cluster-vars \
     postgres_coredump_filter=0xff repmgr_failover=manual \
-    twoq_repositories=$twoq_repositories \
+    tpa_2q_repositories=$tpa_2q_repositories \
     extra_postgres_extensions=$extensions)")
 
 v=$(write_vars $cluster)

@@ -264,7 +264,7 @@ ec2_vpc_subnets:
 
 cluster_vars:
   postgres_version: 9.6
-  twoq_repositories: []
+  tpa_2q_repositories: []
   vpn_network: 192.168.33.0/24
 
 instance_defaults:

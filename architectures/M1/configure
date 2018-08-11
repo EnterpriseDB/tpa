@@ -24,7 +24,7 @@ subnets=(${subnet:-$($libdir/subnets 2)})
 vars+=([subnets]=$(IFS=, && echo "[${subnets[*]}]"))
 vars+=([cluster_tags]="$($libdir/cluster-tags)")
 vars+=([cluster_vars]="$($libdir/cluster-vars vpn_network=192.168.33.0/24 \
-    twoq_repositories=${twoq_repositories:-[]})")
+    tpa_2q_repositories=${tpa_2q_repositories:-[]})")
 
 v=$(write_vars $cluster)
 template $archdir/templates/config.yml.j2 $v > $cluster/config.yml

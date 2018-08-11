@@ -54,7 +54,7 @@
     creates: "{{ file }}"
   with_items:
     - dl/default/release
-    - "{{ twoq_repositories|default([]) }}"
+    - "{{ tpa_2q_repositories|default([]) }}"
   vars:
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
     urltemplate: "{{
