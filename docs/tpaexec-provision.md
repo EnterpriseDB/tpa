@@ -173,7 +173,7 @@ cluster_name: speedy
 cluster_tag: tag_Cluster_speedy
 postgres_version: 9.6
 tpa_version: v3.0-451-g10647888
-twoq_repositories: []
+tpa_2q_repositories: []
 vpn_network: 192.168.33.0/24
 
 [tpa]$ cat inventory/host_vars/zealot/02-topology.yml
@@ -183,6 +183,7 @@ role:
 - openvpn-server
 - monitoring-server
 - witness
+upstream: quirk
 ```
 
 If you now change a variable in config.yml and rerun provision, these
