@@ -9,14 +9,25 @@
   become: yes
 
 - name: Check if the primary is registered
-  command: >
-    {{ postgres_bin_dir }}/repmgr cluster show \
-      -f "{{ repmgr_conf_file }}"
+  postgresql_query:
+    conninfo: "dbname=repmgr"
+    query: >
+      SELECT (case when type='standby' then 'replica' else type end) as type
+      FROM repmgr.nodes
+      WHERE node_name='{{ inventory_hostname }}' AND active
   register: primary_check
   ignore_errors: True
   changed_when: False
   become_user: "{{ postgres_user }}"
   become: yes
+
+- name: Ensure primary is not already registered as anything else
+  fail:
+    msg: "Primary is already registered as {{ primary_check.type }}"
+  when: >
+    primary_check is successful and
+    primary_check.rowcount != 0 and
+    primary_check.type != 'primary'
 
 - name: Run 'repmgr primary register' on the primary
   command: >
@@ -24,4 +35,5 @@
       -f "{{ repmgr_conf_file }}"
   become_user: "{{ postgres_user }}"
   become: yes
-  when: primary_check is not successful
+  when:
+    primary_check is not successful or primary_check.rowcount == 0
