@@ -32,6 +32,15 @@
         list|count == 1
   with_items: "{{ upstream_references }}"
 
+- name: Ensure every witness node declares an upstream
+  assert:
+    msg: "Please define an upstream node for witness {{ item.Name }}"
+    that:
+      - item.upstream is defined
+  with_items: "{{
+    instances|selectattr('role', 'defined')|selectattr('role','contains','witness')|list
+  }}"
+
 - name: Convert cluster_network to cluster_networks
   set_fact:
     cluster_vars: "{{
