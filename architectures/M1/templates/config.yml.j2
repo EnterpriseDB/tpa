@@ -28,6 +28,7 @@ instances:
       - monitoring-server
 {% if (cascaded_replicas+2) % 2 == 0 %}
       - witness
+    upstream: {{ hostnames[1] }}
 {% endif %}
 {% if platform not in ['bare'] %}
     volumes:
