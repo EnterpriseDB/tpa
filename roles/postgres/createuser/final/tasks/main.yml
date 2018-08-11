@@ -6,6 +6,6 @@
     encrypted: yes
     password: "md5{{ (vars[item.username+'_password'] + item.username)|hash('md5') }}"
     role_attr_flags: "{{ item.role_attr_flags }}"
-  with_items: "{{ postgres_superusers }}"
+  with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes

@@ -2,8 +2,8 @@
 
 - name: Record {{ username }} in the list of database users to create
   set_fact:
-    postgres_superusers: "{{
-      postgres_superusers|default([])|union([{
+    postgres_users: "{{
+      postgres_users|default([])|union([{
         'username': username,
         'role_attr_flags': role_attr_flags|default('superuser'),
       }])
