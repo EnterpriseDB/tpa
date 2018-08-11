@@ -21,6 +21,13 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
+# XXX Should we go ahead and run «repmgr primary register» with -F to
+# force re-registration? The only reason we should have a mismatch in
+# repmgr.nodes is if a node was promoted without going through repmgrd
+# (or in case of a repmgr bug, which is also not unlikely), but we're
+# registering as a primary in the first place on the basis of Postgres
+# not being in recovery, which is difficult to argue with.
+
 - name: Ensure primary is not already registered as anything else
   fail:
     msg: "Primary is already registered as {{ primary_check.type }}"
