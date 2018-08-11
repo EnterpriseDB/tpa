@@ -55,3 +55,4 @@ dependencies:
     username: barman
   - role: postgres/createuser
     username: streaming_barman
+    role_attr_flags: replication
