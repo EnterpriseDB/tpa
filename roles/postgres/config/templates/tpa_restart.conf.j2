@@ -23,7 +23,7 @@ archive_mode = on
 max_wal_senders = {{ max_wal_senders|default(16) }}
 max_replication_slots = {{ max_replication_slots|default(16) }}
 wal_keep_segments = {{ wal_keep_segments|default(0) }}
-{% if postgres_version is version('9.4', '>') %}
+{% if ('bdr' in role) or postgres_version is version('9.4', '>') %}
 track_commit_timestamp = {{ track_commit_timestamp|default(('bdr' in role)|ternary('on','off')) }}
 {% endif %}
 
