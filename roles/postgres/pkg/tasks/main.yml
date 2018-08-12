@@ -24,7 +24,7 @@
     package_lists:
       - "{{ postgres_packages|packages_for(ansible_distribution, postgres_package_version) }}"
       - "{{ postgres_debug_packages|packages_for(ansible_distribution, postgres_package_version) }}"
-      - "{{ pglogical_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
+      - "{{ (postgresql_flavour == 'postgresql')|ternary(pglogical_packages|packages_for(ansible_distribution, pglogical_package_version), []) }}"
       - "{{ ('bdr' in role)|ternary(bdr_packages|packages_for(ansible_distribution, bdr_package_version), []) }}"
       - "{{ additional_postgres_packages[ansible_distribution] }}"
       - "{{ extra_postgres_packages[ansible_distribution] }}"
@@ -45,7 +45,7 @@
   ignore_errors: "{{ ansible_distribution == 'Debian' }}"
   vars:
     package_lists:
-      - "{{ pglogical_debug_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
+      - "{{ (postgresql_flavour == 'postgresql')|ternary(pglogical_debug_packages|packages_for(ansible_distribution, pglogical_package_version), []) }}"
   tags: [postgres, pkg]
 
 - name: Try fallback pglogical debug package on Debian
@@ -74,7 +74,8 @@
     name: "{{ pgespresso_packages[ansible_os_family] }}"
     state: present
   when: >
-    postgres_version is version(9.5, '<=')
+    postgres_version is version(9.5, '<=') and
+    postgresql_flavour == 'postgresql'
   vars:
     pgespresso_packages:
       Debian:

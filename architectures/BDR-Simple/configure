@@ -7,6 +7,10 @@ while [[ $# -gt 0 ]]; do
     shift
 
     case "$opt" in
+        --bdr-version)
+            bdr_version=${1:?BDR major version not specified}
+            shift
+            ;;
         --num-instances)
             instances=${1:?number of instances not specified}
             shift
@@ -17,27 +21,70 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-default_repos='products/bdr3/snapshot,products/pglogical3/snapshot'
-if [[ ${POSTGRES_VERSION:-10} == 9.6 ]]; then
-    default_repos='products/bdr2/snapshot'
-fi
+# We must decide which version of Postgres to install, which version of
+# BDR to install, and which repositories and extensions the combination
+# requires.
+#
+# If --postgres-version is specified, we infer the correct BDR version.
+# If --bdr-version is specified, we infer the correct Postgres version.
+# If both are specified, we check that the combination makes sense.
+#
+# If any --2Q-repositories are specified, we do not interfere with that
+# setting at all.
 
-: ${tpa_2q_repositories:="[$default_repos]"}
+case "${POSTGRES_VERSION:-}" in
+    9.4)
+        if [[ ${bdr_version:=1} != [12] ]]; then
+            error "BDR-Postgres 9.4 supports only BDR versions 1 and 2"
+        fi
+        ;;
+    9.6)
+        if [[ ${bdr_version:=2} != 2 ]]; then
+            error "Postgres 9.6 supports only BDR version 2"
+        fi
+        ;;
+    10|11)
+        if [[ ${bdr_version:=3} != 3 ]]; then
+            error "Postgres 10+ supports only BDR version 3"
+        fi
+        ;;
+    "")
+        case "${bdr_version:-}" in
+            1)
+                POSTGRES_VERSION=9.4
+                ;;
+            2)
+                POSTGRES_VERSION=9.6
+                ;;
+            3)
+                POSTGRES_VERSION=10
+                ;;
+            "")
+                POSTGRES_VERSION=10
+                bdr_version=3
+                ;;
+            *)
+                error "BDR version $bdr_version not supported (try 1, 2, or 3)"
+                ;;
+        esac
+        export POSTGRES_VERSION
+        ;;
+    *)
+        error "Postgres version $POSTGRES_VERSION is not supported by BDR (try 9.4, 9.6, or 10)"
+        ;;
+esac
 
-extensions="[pglogical]"
-if [[ $tpa_2q_repositories == */bdr2/* ]]; then
-    extensions="[]"
-    if [[ ! ${POSTGRES_VERSION:-} ]]; then
-        export POSTGRES_VERSION=9.6
-    fi
-    if [[ ${POSTGRES_VERSION:-10} != 9.[46] ]]; then
-        error "BDR2 does not support Postgres ${POSTGRES_VERSION:-10}"
-    fi
-fi
-if [[ $tpa_2q_repositories == */bdr3/* ]]; then
-    if [[ ${POSTGRES_VERSION:-10} == 9.* ]]; then
-        error "BDR3 does not support Postgres ${POSTGRES_VERSION:-10}"
-    fi
+postgresql_flavour=postgresql
+extensions="[]"
+
+if [[ $bdr_version == 1 ]]; then
+    : ${tpa_2q_repositories:="[]"}
+    postgresql_flavour=postgresql-bdr
+elif [[ $bdr_version == 2 ]]; then
+    : ${tpa_2q_repositories:="[products/bdr2/release]"}
+elif [[ $bdr_version == 3 ]]; then
+    : ${tpa_2q_repositories:="[products/bdr3/release,products/pglogical3/release]"}
+    extensions="[pglogical]"
 fi
 
 vars+=([instances]=${instances:=3})
@@ -48,6 +95,7 @@ vars+=([cluster_tags]="$($libdir/cluster-tags)")
 vars+=([cluster_vars]="$($libdir/cluster-vars \
     postgres_coredump_filter=0xff repmgr_failover=manual \
     tpa_2q_repositories=$tpa_2q_repositories \
+    postgresql_flavour=$postgresql_flavour \
     extra_postgres_extensions=$extensions)")
 
 v=$(write_vars $cluster)

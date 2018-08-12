@@ -1,5 +1,7 @@
 ---
 
+postgresql_flavour: "postgresql"
+
 # First, postgres_packages and postgres_debug_packages are the packages
 # for Postgres itself. These lists should contain only those packages to
 # which the same postgres_package_version setting applies. Anything else
@@ -7,25 +9,25 @@
 
 postgres_packages:
   Debian: &debian_packages
-    - postgresql-{{postgres_version}}
-    - postgresql-client-{{postgres_version}}
-    - postgresql-contrib-{{postgres_version}}
-    - postgresql-server-dev-{{postgres_version}}
-    - postgresql-plperl-{{postgres_version}}
+    - "{{postgresql_flavour}}-{{postgres_version}}"
+    - "{{postgresql_flavour}}-client-{{postgres_version}}"
+    - "{{postgresql_flavour}}-contrib-{{postgres_version}}"
+    - "{{postgresql_flavour}}-server-dev-{{postgres_version}}"
+    - "{{postgresql_flavour}}-plperl-{{postgres_version}}"
   RedHat:
-    - postgresql{{postgres_versionNN}}
-    - postgresql{{postgres_versionNN}}-contrib
-    - postgresql{{postgres_versionNN}}-server
-    - postgresql{{postgres_versionNN}}-devel
-    - postgresql{{postgres_versionNN}}-libs
-    - postgresql{{postgres_versionNN}}-plperl
+    - "{{postgresql_flavour}}{{postgres_versionNN}}"
+    - "{{postgresql_flavour}}{{postgres_versionNN}}-contrib"
+    - "{{postgresql_flavour}}{{postgres_versionNN}}-server"
+    - "{{postgresql_flavour}}{{postgres_versionNN}}-devel"
+    - "{{postgresql_flavour}}{{postgres_versionNN}}-libs"
+    - "{{postgresql_flavour}}{{postgres_versionNN}}-plperl"
   Ubuntu: *debian_packages
 
 postgres_debug_packages:
   Debian: &debian_debug_packages
-    - postgresql-{{postgres_version}}-dbg
+    - "{{postgresql_flavour}}-{{postgres_version}}-dbg"
   RedHat:
-    - postgresql{{postgres_versionNN}}-debuginfo
+    - "{{postgresql_flavour}}{{postgres_versionNN}}-debuginfo"
   Ubuntu: *debian_debug_packages
 
 pglogical_packages:
@@ -44,11 +46,11 @@ pglogical_debug_packages:
 
 bdr_packages:
   Debian: &debian_bdr_packages
-    - postgresql-{{postgres_version}}-bdr-plugin
-    - postgresql-{{postgres_version}}-bdr-plugin-dbg
+    - "{{postgresql_flavour}}-{{postgres_version}}-bdr-plugin"
+    - "{{postgresql_flavour}}-{{postgres_version}}-bdr-plugin-dbg"
   RedHat:
-    - postgresql{{postgres_versionNN}}-bdr
-    - postgresql{{postgres_versionNN}}-bdr-debuginfo
+    - "{{postgresql_flavour}}{{postgres_versionNN}}-bdr"
+    - "{{postgresql_flavour}}{{postgres_versionNN}}-bdr-debuginfo"
   Ubuntu: *debian_bdr_packages
 
 # Next, additional_postgres_packages is a list of other Postgres-related

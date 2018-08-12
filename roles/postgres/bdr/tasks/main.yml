@@ -118,7 +118,12 @@
 - assert:
     msg: "Unsupported BDR version: {{ bdr_version.results[0].version }}"
     that:
-      (bdr_version_num/10000)|int in [2, 3]
+      (bdr_version_num/10000)|int in [1, 2, 3]
+
+- name: BDR1 setup
+  include_tasks: bdr1.yml
+  when:
+    10000 < bdr_version_num < 20000
 
 - name: BDR2 setup
   include_tasks: bdr2.yml
