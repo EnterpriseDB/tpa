@@ -46,7 +46,7 @@
     queries:
       - text: SELECT bdr.bdr_group_join(local_node_name := %s, node_external_dsn := %s, join_using_dsn := %s)
         args:
-          - "{{ inventory_hostname }}"
+          - "{{ item }}"
           - "{{ hostvars[item].bdr_node_dsn }}"
           - "{{ bdr_node_dsn }}"
   with_items: >
