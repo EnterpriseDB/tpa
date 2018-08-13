@@ -19,7 +19,17 @@
         args:
           - "{{ inventory_hostname }}"
           - "{{ bdr_node_dsn }}"
-      - text: SELECT bdr.bdr_node_join_wait_for_ready()
+  when:
+    inventory_hostname == groups[bdr_node_group][0] and
+    node.rowcount == 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Wait for the creating node to become ready
+  postgresql_query:
+    conninfo: '{{ bdr_node_dsn }}'
+    query: >-
+      SELECT bdr.bdr_node_join_wait_for_ready()
   when:
     inventory_hostname == groups[bdr_node_group][0] and
     node.rowcount == 0
@@ -30,7 +40,7 @@
 # because BDR does not support concurrent group joins (not in version 3,
 # nor in any earlier versions).
 
-- name: Join BDR groups and wait for completion
+- name: Join BDR groups on the other nodes
   postgresql_query:
     conninfo: '{{ hostvars[item].bdr_node_dsn }}'
     queries:
@@ -39,7 +49,19 @@
           - "{{ inventory_hostname }}"
           - "{{ hostvars[item].bdr_node_dsn }}"
           - "{{ bdr_node_dsn }}"
-      - text: SELECT bdr.bdr_node_join_wait_for_ready()
+  with_items: >
+    {{ groups[bdr_node_group][1:] }}
+  when:
+    inventory_hostname == groups[bdr_node_group][0] and
+    hostvars[item].node.rowcount == 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Wait for join completion
+  postgresql_query:
+    conninfo: '{{ hostvars[item].bdr_node_dsn }}'
+    query: >-
+      SELECT bdr.bdr_node_join_wait_for_ready()
   with_items: >
     {{ groups[bdr_node_group][1:] }}
   when:
