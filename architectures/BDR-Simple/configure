@@ -49,6 +49,13 @@ case "${POSTGRES_VERSION:-}" in
         fi
         ;;
     "")
+        if [[ ! ${bdr_version:-} && ${tpa_2q_repositories:-} ]]; then
+            if [[ $tpa_2q_repositories == */bdr2/* ]]; then
+                bdr_version=2
+            elif [[ $tpa_2q_repositories == */bdr3/* ]]; then
+                bdr_version=3
+            fi
+        fi
         case "${bdr_version:-}" in
             1)
                 POSTGRES_VERSION=9.4
