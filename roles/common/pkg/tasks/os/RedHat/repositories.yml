@@ -47,7 +47,7 @@
   vars:
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
     version_tag: >-
-      (postgresql_flavour|default('postgresql') == 'postgresql-bdr')|ternary('bdr9.4', postgres_version)
+      {{ (postgresql_flavour|default('postgresql') == 'postgresql-bdr')|ternary('bdr9.4', postgres_version) }}
     urltemplate: "{{
       (item == 'dl/default/release')|ternary(
         'https://access.2ndquadrant.com/api/repository/{label}/{version}/rpm',
