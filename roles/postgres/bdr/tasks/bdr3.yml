@@ -74,14 +74,26 @@
 # have to (write a strategy plugin or) use a loop to get the equivalent
 # serial behaviour.
 
-- name: Join BDR node groups and wait for completion
+- name: Join BDR node groups
   postgresql_query:
     conninfo: '{{ hostvars[item].bdr_node_dsn }}'
     queries:
       - text: SELECT bdr.join_node_group(join_target_dsn := %s)
         args:
           - "{{ bdr_node_dsn }}"
-      - text: SELECT bdr.wait_for_join_completion()
+  with_items: >
+    {{ groups[bdr_node_group][1:] }}
+  when:
+    inventory_hostname == groups[bdr_node_group][0] and
+    hostvars[item].node_group_id.rowcount == 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Wait for join completion
+  postgresql_query:
+    conninfo: '{{ hostvars[item].bdr_node_dsn }}'
+    query: >-
+      SELECT bdr.wait_for_join_completion()
   with_items: >
     {{ groups[bdr_node_group][1:] }}
   when:
