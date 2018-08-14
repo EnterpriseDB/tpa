@@ -24,3 +24,5 @@ extra_postgres_extensions: []
 bdr_extensions:
   - btree_gist
   - bdr
+
+hba_force_hostssl: no

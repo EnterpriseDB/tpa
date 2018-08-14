@@ -20,7 +20,7 @@ host    all             all             {{ net }}   md5
 {%     set role=hostvars[h].get('role', []) %}
 {%     set addr=hostvars[h].ip_address %}
 {%     set type='hostssl' %}
-{%     if addr == hostvars[h].get('openvpn_ip', '') %}
+{%     if addr == hostvars[h].get('openvpn_ip', '') and not hba_force_hostssl %}
 {%       set type='host' %}
 {%     endif %}
 {%     set addr=addr+'/32' %}
