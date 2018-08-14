@@ -32,6 +32,7 @@
   Instance Profile name" errors during provisioning (f37de54)
 - Make deployment fail if ec2.py fails; depends on a patch available in
   2ndQuadrant ansible (55a4fd3)
+- Properly reassemble EBS RAID arrays after rehydration.
 - Correctly handle (ignore) empty lines in /proc/$pid/status
 - Correctly restart repmgrd after changing repmgr.conf
 - Make sure coredumps are generated properly
