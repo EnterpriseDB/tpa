@@ -1,6 +1,0 @@
----
-
-allow_duplicates: no
-dependencies:
-    - role: haproxy/pkg
-    - role: haproxy/config

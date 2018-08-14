@@ -1,9 +1,0 @@
----
-
-dependencies:
-  - role: secret
-    vars:
-      secret_name: nsca_password
-  - role: secret
-    vars:
-      secret_name: icinga_password

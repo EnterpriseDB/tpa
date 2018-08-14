@@ -1,5 +1,9 @@
 ---
 
+- include_role: name=postgres/createuser
+  vars:
+    username: repmgr
+
 # Determine the upstream primary for this host, that is, the primary at
 # the root of the cascading replication setup.
 

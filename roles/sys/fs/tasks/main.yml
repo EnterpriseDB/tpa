@@ -1,5 +1,11 @@
 ---
 
+- include_role: name=secret
+  vars:
+    secret_name: "{{ encryption }}_passphrase"
+  when: >
+    encryption|default('none') != 'none'
+
 # Given a block device name and a mountpoint, does everything required
 # to make the volume available for use immediately and after subsequent
 # reboots.

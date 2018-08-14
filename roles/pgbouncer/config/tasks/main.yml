@@ -1,5 +1,16 @@
 ---
 
+- include_role: name=postgres/createuser
+  vars:
+    username: pgbouncer
+  when: >
+    'postgres' in role or
+    'pgbouncer' in role
+
+- include_role: name=postgres/user
+  when: >
+    'pgbouncer' in role
+
 - include_tasks: pgbouncer.yml
   when: >
     'pgbouncer' in role

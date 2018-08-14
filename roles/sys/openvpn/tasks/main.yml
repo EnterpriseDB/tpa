@@ -1,5 +1,20 @@
 ---
 
+- include_role: name=sys/openvpn/ip
+  tags: always
+- include_role: name=sys/openvpn/pkg
+  tags: [sys, openvpn]
+- include_role: name=sys/openvpn/common
+  tags: [sys, openvpn]
+- include_role: name=sys/openvpn/server
+  when: >
+    'openvpn-server' in role
+  tags: [sys, openvpn]
+- include_role: name=sys/openvpn/client
+  when: >
+    openvpn_server is defined and openvpn_server != ''
+  tags: [sys, openvpn]
+
 - name: Ensure openvpn is enabled on boot
   service:
     name: "openvpn@{{ _vpn_name }}"

@@ -1,9 +1,0 @@
----
-
-allow_duplicates: yes
-dependencies:
-  - role: secret
-    vars:
-      secret_name: "{{ encryption }}_passphrase"
-    when: >
-      encryption|default('none') != 'none'

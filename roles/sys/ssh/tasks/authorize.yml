@@ -1,0 +1,14 @@
+---
+
+# Uploads (playbook_dir/keys/)id_user.pub to ~user/.ssh/authorized_keys.
+#
+# - include_role: name=sys/ssh tasks_from=authorize.yml
+#   vars:
+#     ssh_username: xxx
+#     ssh_key_dir: '/some/other/dir'
+#     ssh_key_name: 'id_someotheruser'
+
+- name: Add {{ _ssh_key_name }}.pub to {{ ssh_username }}'s authorized_keys
+  authorized_key:
+    user: "{{ ssh_username }}"
+    key: "{{ lookup('file', _ssh_key_dir+'/'+_ssh_key_name+'.pub') }}"

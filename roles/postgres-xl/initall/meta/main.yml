@@ -1,6 +1,0 @@
----
-
-dependencies:
-  - role: sys/ssh
-    ssh_user: "{{ postgres_user }}"
-    tags: [postgres, ssh]

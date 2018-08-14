@@ -1,5 +1,0 @@
----
-
-dependencies:
-    - role: postgres/createuser
-      username: repmgr

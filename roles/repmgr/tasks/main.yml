@@ -1,3 +1,24 @@
 ---
 
+- include_role: name=repmgr/src
+  when: >
+    'postgres' in role
+    and postgres_installation_source == 'src'
+- include_role: name=repmgr/pkg
+  when: >
+    'postgres' in role
+    and postgres_installation_source == 'pkg'
+- include_role: name=repmgr/common
+  when: >
+    'postgres' in role
+- include_role: name=repmgr/primary
+  when: >
+    'primary' in role
+- include_role: name=repmgr/replica
+  when: >
+    'replica' in role
+- include_role: name=repmgr/witness
+  when: >
+    'witness' in role
+
 - set_fact: initialise_replication=True

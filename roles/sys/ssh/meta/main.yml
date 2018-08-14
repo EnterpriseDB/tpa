@@ -1,8 +1,0 @@
----
-
-allow_duplicates: yes
-
-dependencies:
-  - role: sys/ssh/keygen
-  - role: sys/ssh/authorize
-  - role: sys/ssh/install

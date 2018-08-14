@@ -1,3 +1,6 @@
 ---
 
+- include_role: name=haproxy/pkg
+- include_role: name=haproxy/config
+
 - set_fact: initialise_haproxy=True

@@ -1,10 +1,69 @@
 ---
 
 # This role can be safely applied to every instance.
+
+# First, we generate an ssh keypair for postgres (this has probably
+# already been done), and likewise for barman.
+
+- include_role: name=sys/ssh tasks_from=keygen.yml
+  vars:
+    ssh_username: "{{ postgres_user }}"
+
+- include_role: name=sys/ssh tasks_from=keygen.yml
+  vars:
+    ssh_username: barman
+
+# Install Barman packages.
+
+- include_role: name=barman/pkg
+  when: >
+    'barman' in role
+
+# Allow postgres@ on any Postgres server to ssh to barman@ on any
+# Barman server.
+
+- include_role: name=sys/ssh tasks_from=authorize.yml
+  vars:
+    ssh_username: barman
+    ssh_key_name: id_postgres
+  when: >
+    'barman' in role
+
+# Install barman's own keypair too.
+
+- include_role: name=sys/ssh tasks_from=install.yml
+  vars:
+    ssh_username: barman
+  when: >
+    'barman' in role
+
+# Allow barman to ssh to postgres on any Postgres server.
 #
-# We declare dependencies on a series of sys/ssh modules in order to set
-# up password-less ssh between postgres@ and barman@. See meta/main.yml
-# for details.
+# We could try to do this for only those servers that are specifically
+# designated as needing to be backed up, but we don't want to prevent
+# barman from ssh'ing to the corresponding replicas. (In any case,
+# barman could ssh to postgres on the primary and thence to the
+# replica, so there's no point trying to be more restrictive.)
+
+- include_role: name=sys/ssh tasks_from=authorize.yml
+  vars:
+    ssh_username: "{{ postgres_user }}"
+    ssh_key_name: id_barman
+  when: >
+    'postgres' in role or 'postgres-xl' in role
+
+# The barman and streaming_barman users must be created on any primary
+# that we want to backup (whether directly or through a replica), and
+# their passwords must be in ~barman/.pgpass on the backup server. We
+# create the users on *every* primary straightaway.
+
+- include_role: name=postgres/createuser
+  vars:
+    username: barman
+- include_role: name=postgres/createuser
+  vars:
+    username: streaming_barman
+    role_attr_flags: replication
 
 # On any instance tagged as a Barman server (i.e., where tags.role
 # includes 'barman'), it will install and configure Barman.

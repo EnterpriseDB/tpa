@@ -2,11 +2,12 @@
 
 # Locally creates a keypair named id_user in playbook_dir/keys.
 #
-# - role: sys/ssh/keygen
-#   ssh_user: xxx
-#   ssh_key_dir: '/some/other/dir'
-#   ssh_key_name: 'id_somefilename'
-#   ssh_key_comment: 'xxx@yyy'
+# - include_role: name=sys/ssh tasks_from=keygen.yml
+#   vars:
+#     ssh_username: xxx
+#     ssh_key_dir: '/some/other/dir'
+#     ssh_key_name: 'id_somefilename'
+#     ssh_key_comment: 'xxx@yyy'
 
 - name: Generate ssh keypair {{ _ssh_key_name }}
   local_action: >

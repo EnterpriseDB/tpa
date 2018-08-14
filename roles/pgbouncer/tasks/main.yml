@@ -1,3 +1,12 @@
 ---
 
+- include_role: name=pgbouncer/pkg
+  when: >
+    'pgbouncer' in role
+
+- include_role: name=pgbouncer/config
+  when: >
+    'postgres' in role or
+    'pgbouncer' in role
+
 - set_fact: initialise_pgbouncer=True

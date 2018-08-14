@@ -1,5 +1,10 @@
 ---
 
+- include_role: name=sys/ssh
+  vars:
+    ssh_username: "{{ postgres_user }}"
+  tags: [postgres, ssh]
+
 ## Ensure needed directories exist
 
 - name: Ensure that /pgxl/data exists

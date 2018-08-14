@@ -1,5 +1,16 @@
 ---
 
+- include_role: name=repmgr/service
+- include_role: name=repmgr/primary/final
+  when: >
+    'primary' in role
+- include_role: name=repmgr/replica/final
+  when: >
+    'replica' in role
+- include_role: name=repmgr/witness/final
+  when: >
+    'witness' in role
+
 - meta: flush_handlers
 
 - name: Start or restart repmgrd

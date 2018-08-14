@@ -1,0 +1,23 @@
+---
+
+- include_role: name=postgres/src
+  when:
+    postgres_installation_source == 'src'
+- include_role: name=postgres/pkg
+  when:
+    postgres_installation_source == 'pkg'
+- include_role: name=postgres/user
+  tags: [postgres, user]
+- include_role: name=postgres/initdb
+- include_role: name=postgres/createuser
+  vars:
+    username: postgres
+  tags: [postgres, user]
+- include_role: name=postgres/config
+  when: >
+    pgdata_initialised
+  tags: [postgres, config]
+- include_role: name=sys/ssh
+  vars:
+    ssh_username: "{{ postgres_user }}"
+  tags: [postgres, ssh]
