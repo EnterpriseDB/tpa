@@ -82,21 +82,7 @@ _create_and_activate_virtualenv() {
         if ! mkdir -p $vpath; then
             error "couldn't create $vpath (try ``--virtualenv /other/path`` or use sudo)"
         fi
-        virtualenv $vpath
-    fi
-
-    # For RedHat-derivatives, we need to work around a known virtualenv
-    # bug related to libselinux-python
-
-    if [[ -f /etc/redhat-release ]]; then
-        if [[ ! -d $vpath/lib/python2.7/site-packages/selinux ]]; then
-            echo "Copying /usr/lib64/python2.7/site-packages/selinux to virtualenv"
-            cp -rp /usr/lib64/python2.7/site-packages/selinux \
-                $vpath/lib/python2.7/site-packages
-            if [[ $? -ne 0 ]]; then
-                error "couldn't copy libselinux-python to virtualenv"
-            fi
-        fi
+        virtualenv --system-site-packages $vpath
     fi
 
     _activate_virtualenv $vpath
