@@ -9,14 +9,14 @@
   max_fail_percentage: 0
 
   hosts: all
-  roles:
-    - role: platforms
+  tasks:
+    - include_role: name=platforms
       tags: always
 
-    - role: facts
+    - include_role: name=facts
       tags: always
 
-    - role: postgres/vars
+    - include_role: name=postgres/vars
       tags: always
 
 # Now the cluster hosts are reachable by ssh and have all the required
@@ -29,68 +29,68 @@
   become: true
 
   hosts: "{{ deploy_hosts|default('all') }}"
-  roles:
-    - role: common
+  tasks:
+    - include_role: name=common
 
     # Set up any additional filesystems required. The block device
     # layout is instance-specific.
-    - role: sys/volumes
+    - include_role: name=sys/volumes
       tags: [sys, fs]
 
     # Computes memory size and other instance-specific computations for
     # use in later steps (e.g., setting shared_buffers).
-    - role: sys/tune
+    - include_role: name=sys/tune
       tags: always
 
-    - role: sys/sysctl
+    - include_role: name=sys/sysctl
       vars:
         sysctl_values:
           net.ipv4.ip_forward: 1
       tags: [sys, sysctl]
 
-    - role: sys/sysstat
+    - include_role: name=sys/sysstat
       tags: [sys, sysstat]
 
-    - role: sys/openvpn
+    - include_role: name=sys/openvpn
       when: >
         'role_openvpn-server' in groups
 
-    - role: sys/hosts
+    - include_role: name=sys/hosts
       tags: [sys, hosts]
 
-    - role: sys/cloudinit
+    - include_role: name=sys/cloudinit
       tags: [sys, cloudinit]
 
-    - role: sys/rsyslog
+    - include_role: name=sys/rsyslog
       tags: [sys, rsyslog]
 
-    - role: postgres
+    - include_role: name=postgres
       when: >
         'postgres' in role
 
-    - role: barman
+    - include_role: name=barman
       tags: barman
 
-    - role: repmgr
+    - include_role: name=repmgr
       tags: repmgr
 
-    - role: pgbouncer
+    - include_role: name=pgbouncer
       tags: pgbouncer
 
-    - role: haproxy
+    - include_role: name=haproxy
       when: >
         'haproxy' in role
       tags: haproxy
 
-    - role: final
+    - include_role: name=final
       tags: [final]
 
-    - role: postgres/bdr
+    - include_role: name=postgres/bdr
       when: >
         'bdr' in role and 'primary' in role
       tags: [postgres, bdr]
 
-#    - role: monitoring
+#    - include_role: name=monitoring
 #      when: >
 #        'role_monitoring-server' in groups and
 #        ansible_distribution == 'Debian'
@@ -107,6 +107,6 @@
   become_user: root
   become: yes
   hosts: all
-  roles:
-    - role: sys/hosts
+  tasks:
+    - include_role: name=sys/hosts
       tags: [sys, hosts]

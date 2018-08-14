@@ -9,13 +9,13 @@
   become: true
 
   hosts: all
-  roles:
-    - role: platforms
+  tasks:
+    - include_role: name=platforms
       become: no
 
-    - role: facts
+    - include_role: name=facts
 
-    - role: postgres/vars
+    - include_role: name=postgres/vars
 
 - name: Generate AMIs
   hosts: all

@@ -5,17 +5,17 @@
   max_fail_percentage: 0
 
   hosts: all
-  roles:
-    - role: platforms
+  tasks:
+    - include_role: name=platforms
       tags: always
 
-    - role: facts
+    - include_role: name=facts
       tags: always
 
-    - role: postgres/vars
+    - include_role: name=postgres/vars
       tags: always
 
-    - role: postgres/facts
+    - include_role: name=postgres/facts
       vars:
         pgdata_initialised: true
       when: >

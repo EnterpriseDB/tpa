@@ -7,20 +7,20 @@
   become: true
 
   hosts: all
-  roles:
-    - role: platforms
+  tasks:
+    - include_role: name=platforms
       become: no
 
-    - role: facts
+    - include_role: name=facts
 
-    - role: postgres/vars
+    - include_role: name=postgres/vars
 
-    - role: common/pkg
-    - role: postgres/pkg
-    - role: sys/openvpn/pkg
-    - role: pgbouncer/pkg
-    - role: barman/pkg
-    - role: repmgr/pkg
+    - include_role: name=common/pkg
+    - include_role: name=postgres/pkg
+    - include_role: name=sys/openvpn/pkg
+    - include_role: name=pgbouncer/pkg
+    - include_role: name=barman/pkg
+    - include_role: name=repmgr/pkg
 
-    - role: sys/upgrade
-    - role: sys/firstboot
+    - include_role: name=sys/upgrade
+    - include_role: name=sys/firstboot

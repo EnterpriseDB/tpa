@@ -7,35 +7,35 @@
   become: true
 
   hosts: all
-  roles:
-    - role: platforms
+  tasks:
+    - include_role: name=platforms
       tags: always
       become: no
 
-    - role: facts
+    - include_role: name=facts
       tags: always
 
-    - role: postgres/vars
+    - include_role: name=postgres/vars
       tags: always
 
-    - role: common
+    - include_role: name=common
 
-    - role: sys/volumes
+    - include_role: name=sys/volumes
       tags: [sys, fs]
 
-    - role: sys/tune
+    - include_role: name=sys/tune
       tags: always
 
-    - role: sys/sysctl
+    - include_role: name=sys/sysctl
       vars:
         sysctl_values:
           net.ipv4.ip_forward: 1
       tags: [sys, sysctl]
 
-    - role: sys/hosts
+    - include_role: name=sys/hosts
       tags: [sys, hosts]
 
-    - role: postgres
+    - include_role: name=postgres
 
-    - role: final
+    - include_role: name=final
       tags: final
