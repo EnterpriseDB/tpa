@@ -89,7 +89,7 @@ Host *
     Port 22
     IdentitiesOnly yes
     IdentityFile "id_speedy"
-    UserKnownHostsFile "known_hosts"
+    UserKnownHostsFile "known_hosts tpa_known_hosts"
     ServerAliveInterval 60
 
 Host quirk
@@ -143,14 +143,14 @@ drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 hostkeys
 -rw------- 1 ams ams   1438 Aug  4 17:38 id_speedy.ppk
 -rw-r--r-- 1 ams ams    393 Aug  4 17:38 id_speedy.pub
 drwxr-xr-x 4 ams ams   4096 Aug  4 17:50 inventory
--rw-r--r-- 1 ams ams   2928 Aug  4 17:50 known_hosts
+-rw-r--r-- 1 ams ams   2928 Aug  4 17:50 tpa_known_hosts
 -rw-r--r-- 1 ams ams    410 Aug  4 17:50 ssh_config
 -rw-r--r-- 1 ams ams   3395 Aug  4 17:59 vars.json
 drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 vault
 ```
 
 We've already studied the ssh_config file, which refers to the ``id_*``
-files (an ssh keypair generated for the cluster) and ``known_hosts``
+files (an ssh keypair generated for the cluster) and ``tpa_known_hosts``
 (the signatures of the ``hostkeys/`` installed on the instances).
 
 The ``vars.json`` file may be used by ``tpaexec provision`` on

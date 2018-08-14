@@ -2,7 +2,8 @@
 
 - name: Tell ssh to use this cluster's known_hosts file
   set_fact:
-    ansible_ssh_common_args: "-o UserKnownHostsFile='{{playbook_dir}}/known_hosts'"
+    ansible_ssh_common_args: >-
+      -o UserKnownHostsFile='{{cluster}}/known_hosts {{cluster}}/tpa_known_hosts'
   when: ansible_ssh_common_args == ""
 
 # We wait until we can connect to the SSH port on each instance.

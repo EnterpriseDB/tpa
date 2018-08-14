@@ -1,9 +1,11 @@
 {% for h in instance_vars %}
-{%   for k in ['rsa', 'ecdsa'] %}
-{%     set hostname = h.ip_address %}
-{%     if cluster_ssh_port|default(22) != 22 %}
-{%       set hostname = '[%s]:%s' % (hostname, cluster_ssh_port) %}
-{%     endif %}
+{%   if h.platform != 'bare' %}
+{%     for k in ['rsa', 'ecdsa'] %}
+{%       set hostname = h.ip_address %}
+{%       if cluster_ssh_port|default(22) != 22 %}
+{%         set hostname = '[%s]:%s' % (hostname, cluster_ssh_port) %}
+{%       endif %}
 {{ hostname }} {{ lookup('file', '%s/hostkeys/ssh_host_%s_key.pub' % (cluster_dir, k)) }}
-{%   endfor %}
+{%     endfor %}
+{%   endif %}
 {% endfor %}

@@ -14,8 +14,8 @@
     - hostkeys
     - vars.json
     - ssh_config
-    - known_hosts
     - ansible.log
+    - tpa_known_hosts
     - id_{{ cluster_name|lower }}
     - id_{{ cluster_name|lower }}.pub
     - id_{{ cluster_name|lower }}.ppk

@@ -2,7 +2,7 @@ Host *
     Port {{ ansible_port }}
     IdentitiesOnly yes
     IdentityFile "{{ ssh_key_file }}"
-    UserKnownHostsFile "known_hosts"
+    UserKnownHostsFile "known_hosts tpa_known_hosts"
     ServerAliveInterval 60
 
 {% for h in instance_vars %}
