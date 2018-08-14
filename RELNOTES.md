@@ -35,7 +35,13 @@
 - Properly reassemble EBS RAID arrays after rehydration.
 - Correctly handle (ignore) empty lines in /proc/$pid/status
 - Correctly restart repmgrd after changing repmgr.conf
-- Make sure coredumps are generated properly
+- Make sure coredumps are generated properly.
+- Fixed RHEL issue `"Aborting, target uses selinux but python bindings 
+  (libselinux-python) aren't installed!"` (f245e99)
+- Fixed tpaexec rehydrate failing with `"hostvars[''node-b'']\" is undefined`
+  (b74bfa2)
+- Fixed repmgrd failing to start for repmgr 4.1.0 on CentOS/RedHat (aee5862)
+- Fixed repmgr not quite attaching replica on RHEL systems.
 
 ### Porting notes
 
