@@ -1,0 +1,10 @@
+---
+architecture: {{ architecture }}
+cluster_name: {{ cluster_name }}
+{{ dict(cluster_tags=cluster_tags)|to_nice_yaml(indent=2) }}
+{% if platform_settings is defined %}
+{{ platform_settings|to_nice_yaml(indent=2) }}
+{% endif %}
+{{ dict(cluster_vars=cluster_vars)|to_nice_yaml(indent=2) }}
+{{ dict(instance_defaults=instance_defaults)|to_nice_yaml(indent=2) }}
+{{ dict(instances=instances)|to_nice_yaml(indent=2) }}

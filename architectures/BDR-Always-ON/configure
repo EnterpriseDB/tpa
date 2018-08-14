@@ -1,33 +1,38 @@
-#!/bin/bash
+#!/usr/bin/env python
 
-source $(dirname $0)/../lib/configure-common.sh
+from __future__ import print_function
 
-while [[ $# -gt 0 ]]; do
-    opt=$1
-    shift
+import sys
 
-    case "$opt" in
-        *)
-            source $libdir/configure-options.sh
-            ;;
-    esac
-done
+try:
+    from tpaexec.architecture import Architecture
+except:
+    print('Please invoke via: tpaexec configure <clustername> --architecture <archname>')
+    sys.exit(-1)
 
-: ${tpa_2q_repositories:='[products/bdr3/snapshot,products/pglogical3/snapshot,products/default/snapshot]'}
+class BDR_Always_ON(Architecture):
+    def argument_defaults(self):
+        return {
+            'barman_volume_size': 128,
+            'postgres_volume_size': 64,
+            'tpa_2q_repositories': [
+                'products/bdr3/release',
+                'products/pglogical3/release',
+            ]
+        }
 
-postgres_volume_size=${postgres_volume_size:-64}
-barman_volume_size=${barman_volume_size:-128}
-vars+=([instances]=${instances:=8})
-source $libdir/configure-defaults.sh
-subnets=(${subnet:-$($libdir/subnets 1)})
-vars+=([subnets]=$(IFS=, && echo "[${subnets[*]}]"))
-vars+=([cluster_tags]="$($libdir/cluster-tags)")
-vars+=([cluster_vars]="$($libdir/cluster-vars \
-    postgres_coredump_filter=0xff repmgr_failover=manual \
-    tpa_2q_repositories=$tpa_2q_repositories \
-    extra_postgres_extensions='[pglogical]')")
+    def num_instances(self):
+        return 8
 
-v=$(write_vars $cluster)
-template $archdir/templates/config.yml.j2 $v > $cluster/config.yml
+    def num_locations(self):
+        return 1
 
-source $libdir/configure-links.sh
+    def update_cluster_vars(self, cluster_vars):
+        cluster_vars.update({
+            'repmgr_failover': 'manual',
+            'postgres_coredump_filter': '0xff',
+            'extra_postgres_extensions': ['pglogical'],
+        })
+
+if __name__ == '__main__':
+    BDR_Always_ON().configure()

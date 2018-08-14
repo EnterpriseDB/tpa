@@ -1,32 +1,31 @@
-#!/bin/bash
+#!/usr/bin/env python
 
-source $(dirname $0)/../lib/configure-common.sh
+import sys
 
-while [[ $# -gt 0 ]]; do
-    opt=$1
-    shift
+try:
+    from tpaexec.architecture import Architecture
+except:
+    print('Please invoke via: tpaexec configure <clustername> --architecture <archname>')
+    sys.exit(-1)
 
-    case "$opt" in
-        --num-cascaded-replicas)
-            cascaded_replicas=${1:?Number of cascaded replicas not specified}
-            shift
-            ;;
-        *)
-            source $libdir/configure-options.sh
-            ;;
-    esac
-done
+class M1(Architecture):
+    def add_architecture_options(self, p, g):
+        g.add_argument(
+            '--num-cascaded-replicas', type=int, metavar='N',
+            help='number of replicas cascaded from first replica',
+            dest='cascaded_replicas', default=1
+        )
 
-vars+=([cascaded_replicas]=${cascaded_replicas:=1})
-vars+=([instances]=${instances:=$((3+$cascaded_replicas))})
-source $libdir/configure-defaults.sh
-subnets=(${subnet:-$($libdir/subnets 2)})
-vars+=([subnets]=$(IFS=, && echo "[${subnets[*]}]"))
-vars+=([cluster_tags]="$($libdir/cluster-tags)")
-vars+=([cluster_vars]="$($libdir/cluster-vars vpn_network=192.168.33.0/24 \
-    tpa_2q_repositories=${tpa_2q_repositories:-[]})")
+    def num_instances(self):
+        return 3+self.args.get('cascaded_replicas', 1)
 
-v=$(write_vars $cluster)
-template $archdir/templates/config.yml.j2 $v > $cluster/config.yml
+    def num_subnets(self):
+        return 2
 
-source $libdir/configure-links.sh
+    def update_cluster_vars(self, cluster_vars):
+        cluster_vars.update({
+            'vpn_network': '192.168.33.0/24',
+        })
+
+if __name__ == '__main__':
+    M1().configure()

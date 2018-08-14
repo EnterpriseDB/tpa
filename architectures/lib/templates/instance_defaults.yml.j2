@@ -1,5 +1,0 @@
-  platform: {{ platform }}
-{% if platform in ['aws'] %}
-{% include 'platforms/%s/instance_defaults.yml.j2' % platform -%}
-{{ '\n' -}}
-{% endif %}

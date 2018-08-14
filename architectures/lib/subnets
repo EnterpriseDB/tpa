@@ -15,7 +15,7 @@ my $wanted = shift @ARGV
 
 my $pattern = shift @ARGV || $ENV{SUBNET_PATTERN} || "10.33.x.x";
 
-my $exclusions = $ENV{SUBNET_EXCLUSIONS};
+my $exclusions = $ENV{EXCLUDE_SUBNETS_FROM};
 
 # The pattern may be a.b.c.d or a.b.c.d/nn, and we want to end up with
 # [a.b.c.d, nn], where both parts have default values.

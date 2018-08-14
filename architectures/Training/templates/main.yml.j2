@@ -1,0 +1,14 @@
+---
+
+cluster_rules:
+  - {proto: tcp, from_port: 0, to_port: 65535, cidr_ip: 0.0.0.0/0}
+
+instance_defaults:
+  role:
+    - primary
+
+instances:
+{% for i in range(1, num_instances+1) %}
+- node: {{ i }}
+  Name: {{ hostnames[i] }}
+{% endfor %}

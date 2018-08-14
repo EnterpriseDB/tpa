@@ -1,0 +1,35 @@
+---
+
+instances:
+- node: 1
+  Name: {{ hostnames[1] }}
+  location: 0
+  role: primary
+
+- node: 2
+  Name: {{ hostnames[2] }}
+  location: 0
+  role: replica
+  upstream: {{ hostnames[1] }}
+  backup: {{ hostnames[3] }}
+
+- node: 3
+  Name: {{ hostnames[3] }}
+  location: 1
+  role:
+    - barman
+    - log-server
+    - openvpn-server
+    - monitoring-server
+{% if (cascaded_replicas+2) % 2 == 0 %}
+    - witness
+  upstream: {{ hostnames[1] }}
+{% endif %}
+
+{% for i in range(4,4+cascaded_replicas) %}
+- node: {{ i }}
+  Name: {{ hostnames[i] }}
+  location: 1
+  role: replica
+  upstream: {{ hostnames[2] }}
+{% endfor %}

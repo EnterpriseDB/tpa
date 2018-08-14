@@ -1,8 +1,0 @@
-architecture: {{ architecture }}
-
-cluster_name: {{ cluster_name }}
-{{ dict(cluster_tags=cluster_tags)|to_nice_yaml(indent=2) }}
-{% if platform in ['aws'] %}
-{% include 'platforms/%s/preamble.yml.j2' % platform %}
-{{ '\n' -}}
-{% endif %}

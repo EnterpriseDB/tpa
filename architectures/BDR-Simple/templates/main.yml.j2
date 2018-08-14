@@ -1,0 +1,14 @@
+---
+
+instance_defaults:
+  role:
+    - primary
+    - bdr
+  vars:
+    bdr_node_group: {{ cluster_name }}
+
+instances:
+{% for n in range(1, num_instances+1) %}
+- node: {{ n }}
+  Name: {{ hostnames[n] }}
+{% endfor %}

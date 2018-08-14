@@ -145,24 +145,33 @@ setup() {
 }
 
 configure() {
-    if [[ "${1:-''}" != --arch* && "${1:-''}" != "-a" ]]; then
-        error "no architecture specified (use '--architecture xxx')"
-    fi
-
-    shift
-    arch=${1:?No argument specified to --architecture}
-    shift
-
     # Find the relevant architecture configuration script and let it do
     # whatever it wants to generate the cluster configuration into the
-    # target directory. Any remaining arguments belong to that script.
+    # target directory. All arguments belong to that script; we just
+    # peek at the command line to find out which architecture to use.
 
-    archdir=$TPA_DIR/architectures/$arch
-    if [[ ! -d $archdir || ! -x $archdir/configure ]]; then
-        error "unknown deployment architecture: $arch"
+    args=("$@")
+    for arg in "${!args[@]}"; do
+        if [[ $arg -gt 0 ]]; then
+            last=${args[$((arg-1))]}
+            if [[ $last == -a || $last == --architecture ]]; then
+                arch=${args[$arg]}
+                archdir=$TPA_DIR/architectures/$arch
+            fi
+        fi
+    done
+
+    if [[ ! ${arch:-} ]]; then
+        error "no architecture specified with -a/--architecture"
+    elif [[ ! -d $archdir || ! -x $archdir/configure ]]; then
+        error "unknown architecture: $arch"
     fi
 
-    architecture=$arch $archdir/configure $cluster "$@"
+    PYTHONPATH=${PYTHONPATH:+$PYTHONPATH:}${ANSIBLE_HOME:+$ANSIBLE_HOME/lib:}$TPA_DIR/architectures/lib \
+    ANSIBLE_FILTER_PLUGINS=${ANSIBLE_FILTER_PLUGINS:+$ANSIBLE_FILTER_PLUGINS:}$TPA_DIR/lib/filter_plugins \
+    ANSIBLE_LOOKUP_PLUGINS=${ANSIBLE_LOOKUP_PLUGINS:+$ANSIBLE_LOOKUP_PLUGINS:}$TPA_DIR/lib/lookup_plugins \
+    ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TPA_DIR/lib/test_plugins \
+    $archdir/configure "$@"
 }
 
 provision() {
@@ -555,11 +564,6 @@ esac
 # we may need to chdir to it beforehand.
 
 case "$command" in
-    configure)
-        cluster=${1:?No cluster specified}
-        shift
-        ;;
-
     playbook)
         arg=${1:?No cluster specified}
         shift

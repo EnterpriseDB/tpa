@@ -1,89 +1,55 @@
-#!/bin/bash
+#!/usr/bin/env python
 
-source $(dirname $0)/../lib/configure-common.sh
+from __future__ import print_function
 
-while [[ $# -gt 0 ]]; do
-    opt=$1
-    shift
+import sys
 
-    case "$opt" in
-        --redmine*|--ticket|--issue)
-            issue=${1:?Redmine issue id not specified}
-            shift
-            ;;
-        --instances)
-            instances=${1:?Number of instances not specified}
-            shift
-            ;;
-        *)
-            source $libdir/configure-options.sh
-            ;;
-    esac
-done
+try:
+    from tpaexec.architecture import Architecture
+except:
+    print('Please invoke via: tpaexec configure <clustername> --architecture <archname>')
+    sys.exit(-1)
 
-vars+=([issue]=${issue:?--redmine-id <num> is required})
-vars+=([instances]=${instances:?--instances <num> is required})
-source $libdir/configure-defaults.sh
-vars+=([cluster_vars]="$($libdir/cluster-vars \
-    tpa_2q_repositories=${tpa_2q_repositories:-[]})")
+class Training(Architecture):
+    def add_architecture_options(self, p, g):
+        g.add_argument(
+            '--num-instances', '--instances', type=int, metavar='N',
+            help='number of instances required',
+            dest='num_instances', required=True
+        )
+        g.add_argument(
+            '--redmine-id', '--ticket', '--issue', metavar='N',
+            help='Redmine id of issue for this cluster',
+            dest='issue', required=True
+        )
 
-if [[ -z "${subnet:-}" && -z "${SUBNET_PATTERN:-}" ]]; then
-    mask=28
-    if [[ $instances -gt 59 ]]; then
-        error "specify --subnet[-pattern] if you need a /25 or larger subnet"
-    elif [[ $instances -gt 27 ]]; then
-        mask=26
-    elif [[ $instances -gt 9 ]]; then
-        mask=27
-    fi
-    export SUBNET_PATTERN="10.33.x.x/$mask"
-fi
+    def num_locations(self):
+        return 1
 
-vars+=([subnet]=${subnet:=$($libdir/subnets 1)})
+    def cluster_name(self):
+        return 'training_%s' % self.args['issue']
 
-mkdir $cluster
-cat > $cluster/config.yml <<PREAMBLE
----
-architecture: $architecture
+    def subnets(self, num):
+        instances = self.num_instances()
 
-cluster_name: training_$issue
-cluster_tags:
-  Reference: https://redmine.2ndquadrant.it/issues/$issue
+        if not self.args.get('subnet') and \
+            not self.args.get('subnet_pattern'):
+            mask = 28
+            if instances > 59:
+                print('ERROR: specify --subnet[-pattern] if you need a /25 or larger subnet', file=sys.stderr)
+                sys.exit(-1)
+            elif instances > 27:
+                mask = 26
+            elif instances > 9:
+                mask = 27
+            self.args['subnet_pattern'] = '10.33.x.x/%s' % str(mask)
 
-cluster_vars: ${vars[cluster_vars]}
+        return super(Training, self).subnets(num)
 
-cluster_rules:
-  - {proto: tcp, from_port: 0, to_port: 65535, cidr_ip: 0.0.0.0/0}
+    def update_cluster_tags(self, cluster_tags):
+        cluster_tags.update({
+            'Reference': 'https://redmine.2ndquadrant.it/issues/%s' % self.args['issue']
+        })
 
-ec2_ami:
-  Name: ${vars[image_name]}
-  Owner: ${vars[image_owner]}
-
-ec2_vpc:
-  Name: Test
-
-instance_defaults:
-  type: $instance_type
-  region: $region
-  subnet: $subnet
-  default_volumes:
-    - device_name: root
-      volume_type: gp2
-      volume_size: $root_volume_size
-  role:
-    - primary
-  vars:
-    ansible_user: ${vars[image_user]}
-
-instances:
-PREAMBLE
-
-for i in $(seq 1 $instances);
-do
-    cat >> $cluster/config.yml <<INSTANCE
-  - node: $i
-    Name: ${hostnames[$i]}
-INSTANCE
-done
-
-ln -sf $archdir/deploy.yml $cluster
+if __name__ == '__main__':
+    Training().configure()
