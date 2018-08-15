@@ -6,5 +6,4 @@ dependencies:
     vars:
       secret_name: "{{ encryption }}_passphrase"
     when: >
-      encryption is defined
-
+      encryption|default('none') != 'none'
