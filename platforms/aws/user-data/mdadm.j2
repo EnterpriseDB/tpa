@@ -8,9 +8,22 @@ if ! command -v mdadm &>/dev/null; then
 ; fi
 {% endif %}
 
+if test -f /proc/mdstat; then
+  echo "Checking for RAID array being rebuilt"
+  if grep inactive /proc/mdstat; then
+    echo "waiting 15 seconds for RAID rebuild"
+    sleep 15
+    if grep inactive /proc/mdstat; then
+      echo "waiting another 15 seconds for RAID rebuild"
+      sleep 15
+    fi
+  fi
+fi
+
 udevadm control --stop-exec-queue
 {% for md, units in item.volumes|select('has_subkey','raid_device')|groupby('raid_device') %}
 test -b {{ md }} \
+  || mdadm --query {{ md }} \
   || mdadm --assemble --verbose {{ md }} {{ units|map(attribute='device_name')|join(" ") }} \
   || mdadm --create --verbose {{ md }} --level={{ units[0].raid_level|default(0) }} --raid-devices={{ units|count }} {{ units|map(attribute='device_name')|join(" ") }} \
   || echo "Couldn't assemble or create {{ md }}" > /var/log/tpa-firstboot-failures.log
