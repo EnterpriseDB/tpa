@@ -19,6 +19,13 @@
 
 - include_tasks: "os/{{ ansible_os_family }}/python.yml"
 
+- name: Include pre-deploy hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster }}/hooks/pre-deploy.yml"
+
 # hostname -f fails if it can't find the hostname in /etc/hosts, and
 # installing the 2ndQuadrant repositories below might call hostname -f.
 # Note that sys/hosts will overwrite /etc/hosts later.
