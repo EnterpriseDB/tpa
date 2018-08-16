@@ -18,6 +18,14 @@
 # anything else we need to run Ansible modules such as "pkg" below.
 
 - include_tasks: "os/{{ ansible_os_family }}/python.yml"
+
+- name: Include pre-deploy hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster }}/hooks/pre-deploy.yml"
+
 - include_tasks: "os/{{ ansible_os_family }}/repositories.yml"
 - include_tasks: packages.yml
 - include_tasks: python.yml
