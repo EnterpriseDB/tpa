@@ -13,4 +13,8 @@
     'barman' in role
 
 - include_tasks: client.yml
-  when: backup is defined
+  with_items: "{{ backup|default([]) }}"
+  loop_control:
+    loop_var: this_barman
+  vars:
+    slot_name: "backup_{{ this_barman|replace('-', '_') }}"

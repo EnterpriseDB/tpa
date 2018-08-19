@@ -9,7 +9,7 @@
 - name: Collect upstream and backup references
   set_fact:
     barman_references: >
-      {{ instances|selectattr('backup', 'defined')|map(attribute='backup')|unique|list }}
+      {{ query('flattened',instances|selectattr('backup', 'defined')|map(attribute='backup')|list)|unique }}
     upstream_references: >
       {{ instances|selectattr('upstream', 'defined')|map(attribute='upstream')|unique|list }}
 

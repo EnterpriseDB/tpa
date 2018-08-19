@@ -14,7 +14,7 @@
   command: >
     barman diagnose
   register: diagnosis
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"
   changed_when: False
   become_user: barman
   become: yes

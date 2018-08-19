@@ -5,7 +5,7 @@ ssh_command = "ssh -q postgres@{{ parent_inventory_hostname|default(inventory_ho
 conninfo = "host={{ parent_inventory_hostname|default(inventory_hostname) }} port={{ postgres_port }} dbname=postgres user=barman"
 streaming_conninfo = "host={{ parent_inventory_hostname|default(inventory_hostname) }} port={{ postgres_port }} user=streaming_barman"
 streaming_archiver = on
-slot_name = barman
+slot_name = "{{ slot_name }}"
 {% if _barman_log_file != default_barman_log_file %}
 log_file = {{ _barman_log_file }}
 {% endif %}

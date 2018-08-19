@@ -17,7 +17,7 @@
       select count(*)
       from pg_stat_replication r join pg_replication_slots s on (r.pid=s.active_pid)
       where application_name='barman_receive_wal' and
-      slot_name='barman' and state='streaming'
+      slot_name='{{ slot_name }}' and state='streaming'
   become_user: "{{ postgres_user }}"
   become: yes
   register: receivers
@@ -72,14 +72,14 @@
               LockFile(sys.argv[1]).acquire(raise_if_fail=True, wait=True)
           except:
               pass
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"
 
 - name: Wait for old WAL segment to be archived
   wait_for:
     path: "{{ barman_home }}/{{ backup_name }}/wals/{{ seg.filename[0:16] }}/{{ seg.filename }}"
     delay: 3
     timeout: 130
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"
 
 # We know now that «barman archive-wal» has been invoked and moved the
 # WAL segment into wals/, but we don't know if it has finished updating
@@ -89,12 +89,12 @@
 
 - name: Acquire and release Barman WAL archive lock
   command: /tmp/lock "{{ barman_home }}/.{{ backup_name }}-archive-wal.lock"
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"
 
 - name: Force an immediate backup
   command: >
     /usr/bin/barman backup "{{ backup_name }}"
   with_sequence: start=1 end={{ num_backups|default(1) }}
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"
   become_user: barman
   become: yes

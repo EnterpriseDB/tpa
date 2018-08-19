@@ -25,6 +25,9 @@
 # backups at all.
 
 - include_role: name=barman/first-backup
-  when: >
-    backup is defined
+  with_items: "{{ backup|default([]) }}"
+  loop_control:
+    loop_var: this_barman
+  vars:
+    slot_name: "backup_{{ this_barman|replace('-', '_') }}"
   tags: firstbackup

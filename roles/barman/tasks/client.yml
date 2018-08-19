@@ -14,7 +14,7 @@
 - name: Check if Barman backup directory exists
   stat:
     path: "{{ _barman_backup_directory }}"
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"
   register: backup_dir
 
 - name: Install Barman client configuration file
@@ -24,7 +24,7 @@
     owner: barman
     group: barman
     mode: 0600
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"
   vars:
     active: "{{ backup_dir.stat.exists }}"
 
@@ -41,4 +41,4 @@
     job: >
       /etc/tpa/barman-home-ok && /usr/bin/barman backup {{ backup_name }}
     state: present
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"

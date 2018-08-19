@@ -9,7 +9,7 @@
     section: "{{ backup_name }}"
     option: active
     value: "true"
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"
   register: conf
 
 # Now we create a replication slot for pg_receivexlog.
@@ -22,11 +22,11 @@
 - name: Create replication slot for Barman
   command: >
     /usr/bin/barman receive-wal --create-slot {{ backup_name }}
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"
   register: slot_creation
   failed_when: >
     slot_creation is not successful
-    and not "Replication slot 'barman' already exists" in slot_creation.stderr
+    and not "Replication slot '{{ slot_name }}' already exists" in slot_creation.stderr
   changed_when: >
     slot_creation is successful
   become_user: barman
@@ -39,7 +39,7 @@
 - name: Run barman cron
   command: >
     /usr/bin/barman cron
-  delegate_to: "{{ backup }}"
+  delegate_to: "{{ this_barman }}"
   when: >
     conf is changed
   become_user: barman
