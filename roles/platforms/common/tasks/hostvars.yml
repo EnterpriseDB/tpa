@@ -19,6 +19,8 @@
 - name: Set primary IP address
   set_fact:
     ip_address: "{{ private_ip|default(public_ip) }}"
+  when:
+    ip_address is not defined
 
 - name: Set tpa_2q_repositories from twoq_repositories (compat)
   set_fact:

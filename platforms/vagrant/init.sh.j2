@@ -1,0 +1,10 @@
+mv /tmp/ssh_host_*_key* /etc/ssh
+chmod 0600 /etc/ssh/ssh_host_*_key
+chmod 0644 /etc/ssh/ssh_host_*_key.pub
+useradd -m -s /bin/bash -U admin
+mkdir /home/admin/.ssh
+chmod 700 /home/admin/.ssh
+mv /tmp/authorized_keys /home/admin/.ssh
+chmod 644 /home/admin/.ssh/authorized_keys
+chown -R admin:admin /home/admin
+echo "%admin ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/admin

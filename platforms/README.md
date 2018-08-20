@@ -11,5 +11,8 @@ aws
 lxd
   lxd containers
 
+vagrant
+  Vagrant+VirtualBox VMs
+
 Run ``tpaexec info platforms/aws`` (or any of the platform names listed
 above) for more information.

@@ -1,0 +1,16 @@
+---
+
+- name: Destroy vagrant cluster
+  command: >
+    vagrant destroy -f
+  args:
+    chdir: "{{ cluster_dir }}"
+
+- name: Delete generated files for this cluster
+  file:
+    path: "{{ cluster_dir }}/{{ item }}"
+    state: absent
+    force: yes
+  with_items:
+    - Vagrantfile
+    - init.sh
