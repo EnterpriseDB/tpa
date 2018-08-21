@@ -15,7 +15,7 @@
     and 'already the newest version' not in curl_install.stdout
 
 - name: Install gpg to install apt repository keys
-  raw: apt-get -q -y install gpg
+  raw: apt-get -q -y install gnupg2
   register: gpg_install
   changed_when: >
     gpg_install is successful

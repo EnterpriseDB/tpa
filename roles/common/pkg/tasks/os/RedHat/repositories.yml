@@ -1,7 +1,7 @@
 ---
 
 - name: Install gpg
-  raw: yum -y install gpg
+  raw: yum -y install gnupg2
   register: gpg_install
   changed_when: >
     gpg_install is successful
