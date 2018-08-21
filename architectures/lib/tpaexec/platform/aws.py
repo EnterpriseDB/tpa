@@ -115,3 +115,5 @@ class aws(Platform):
                     dict(proto='tcp', from_port=0, to_port=65535, cidr_ip=sn)
                 )
         s['cluster_rules'] = cluster_rules
+
+        s['ec2_instance_reachability'] = 'public'
