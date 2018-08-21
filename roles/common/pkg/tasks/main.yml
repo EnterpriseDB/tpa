@@ -18,23 +18,6 @@
 # anything else we need to run Ansible modules such as "pkg" below.
 
 - include_tasks: "os/{{ ansible_os_family }}/python.yml"
-
-# hostname -f fails if it can't find the hostname in /etc/hosts, and
-# installing the 2ndQuadrant repositories below might call hostname -f.
-# Note that sys/hosts will overwrite /etc/hosts later.
-#
-# We do this here rather than in user-data to avoid any possibility that
-# cloud-init will overwrite the line we add, because we have not turned
-# off manage_etc_hosts yet.
-
-- name: Add hostname to /etc/hosts temporarily
-  lineinfile:
-    path: /etc/hosts
-    insertafter: EOF
-    state: present
-    line: >-
-      127.0.1.1	{{ inventory_hostname }}
-
 - include_tasks: "os/{{ ansible_os_family }}/repositories.yml"
 - include_tasks: packages.yml
 - include_tasks: python.yml

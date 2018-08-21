@@ -24,8 +24,8 @@ udevadm control --stop-exec-queue
 {% for md, units in item.volumes|select('has_subkey','raid_device')|groupby('raid_device') %}
 test -b {{ md }} \
   || mdadm --query {{ md }} \
-  || mdadm --assemble --verbose {{ md }} {{ units|map(attribute='device_name')|join(" ") }} \
-  || mdadm --create --verbose {{ md }} --level={{ units[0].raid_level|default(0) }} --raid-devices={{ units|count }} {{ units|map(attribute='device_name')|join(" ") }} \
+  || mdadm --assemble --verbose {{ md }} --homehost=any {{ units|map(attribute='device_name')|join(" ") }} \
+  || mdadm --create --verbose {{ md }} --homehost=any --level={{ units[0].raid_level|default(0) }} --raid-devices={{ units|count }} {{ units|map(attribute='device_name')|join(" ") }} \
   || echo "Couldn't assemble or create {{ md }}" > /var/log/tpa-firstboot-failures.log
 {% endfor %}
 udevadm control --start-exec-queue
