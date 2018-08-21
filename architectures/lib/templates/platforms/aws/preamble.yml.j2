@@ -11,3 +11,5 @@ ec2_vpc_subnets:
     {{ s }}:
       az: {{ region }}{% if loop.first %}a{% else %}b{% endif %}{{ '\n' -}}
 {% endfor %}
+
+ec2_instance_reachability: public
