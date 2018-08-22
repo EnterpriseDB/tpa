@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # If awscli isn't already installed (e.g., by the user-data script), we
 # install it now. In most cases, we would prefer to install things with
 # distribution packages, but boto/awscli are special cases, because we

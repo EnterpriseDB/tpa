@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We'll need to execute openvpn on the control (local) instance several
 # times, so we check that it's accessible through $PATH, which we add
 # some likely …/sbin locations to.

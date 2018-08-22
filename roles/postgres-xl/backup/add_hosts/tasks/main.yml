@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Generate a list of hosts with proper variables set up
 # to pass on to the barman role
 - name: Add backup server to backup_nodes group

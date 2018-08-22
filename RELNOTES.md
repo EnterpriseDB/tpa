@@ -1,5 +1,7 @@
 # TPA release notes
 
+Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 ## HEAD (not yet released)
 
 ### Major changes

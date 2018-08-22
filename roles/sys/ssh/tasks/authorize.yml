@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Uploads (playbook_dir/keys/)id_user.pub to ~user/.ssh/authorized_keys.
 #
 # - include_role: name=sys/ssh tasks_from=authorize.yml

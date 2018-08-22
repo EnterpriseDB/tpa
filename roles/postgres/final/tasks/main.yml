@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - include_role: name=postgres/service
 - include_role: name=postgres/restart
 - include_role: name=postgres/facts

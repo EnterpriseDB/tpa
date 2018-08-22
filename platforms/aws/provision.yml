@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Provisions EC2 instances and associated AWS resources (e.g., VPCs,
 # security groups, subnets, etc.) as configured.
 #

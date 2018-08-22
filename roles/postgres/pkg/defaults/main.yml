@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 postgresql_flavour: "postgresql"
 
 # First, postgres_packages and postgres_debug_packages are the packages

@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure that an IP address is specified for the instance
   assert:
     msg: "Vagrant instances must specify an ip_address"

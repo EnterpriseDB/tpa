@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Look for AMIs specified directly by id
   ec2_ami_facts:
     image_ids: "{{ item.image }}"

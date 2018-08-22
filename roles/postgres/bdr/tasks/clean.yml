@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure pgbouncer schema is removed
   postgresql_query:
     conninfo: "dbname={{ bdr_database }}"

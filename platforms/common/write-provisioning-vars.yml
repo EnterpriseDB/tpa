@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Dump the contents of provisioning_vars to vars.json. The values are
 # either the ones that were loaded by read-provisioning-vars.yml, or
 # those stored later by including set-provisioning-var.yml.

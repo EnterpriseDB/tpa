@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 #
 # The dispatcher for all TPAexec functionality, including initial setup,
 # and the configuration, provision, deployment, and testing of clusters.

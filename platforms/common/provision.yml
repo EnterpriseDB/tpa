@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure that the cluster's inventory directories exist
   file:
     path: "{{ cluster_dir }}/{{ item }}"

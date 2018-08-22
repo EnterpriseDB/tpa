@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # This is where we transform settings for backwards compatibility.
 
 # By default, 'platform' is 'aws' for instances.

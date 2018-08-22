@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Install haproxy package
   package: name=haproxy state=latest
   tags: pkg

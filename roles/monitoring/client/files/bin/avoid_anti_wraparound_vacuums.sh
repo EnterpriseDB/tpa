@@ -1,7 +1,6 @@
 #!/bin/bash
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 # 2ndQuadrant avoid_anti_wraparound_vacuums script,
-# Copyright 2ndQuadrant 2015, All rights reserved
-# Author Martín Marqués <martin@2ndquadrant.com>
 
 VERSION=2.1
 echo "avoid_anti_wraparound_vacuums version $VERSION"

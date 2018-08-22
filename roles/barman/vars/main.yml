@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 _config_file: "/etc/barman.d/{{ backup_name }}.conf"
 
 _barman_backup_directory: "/var/lib/barman/{{ backup_name }}"

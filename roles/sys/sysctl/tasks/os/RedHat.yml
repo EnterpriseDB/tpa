@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # RedHat has /etc/default/grub and grub-mkconfig, but the more common
 # way to change the boot configuration from scripts is to use grubby,
 # which does NOT use /etc/default/grub. So we should stick to using

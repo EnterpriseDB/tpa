@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Set postgres_version
   set_fact:
     postgres_version: "{{ version }}"

@@ -1,3 +1,5 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - apt: update_cache=yes upgrade=dist

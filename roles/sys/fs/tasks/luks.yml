@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure LUKS configuration is available
   assert:
     msg: "You must specify the luks_device to initialise"

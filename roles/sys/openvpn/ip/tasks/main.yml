@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Set the openvpn IP address for each host based on its node number. I
 # wish there were a more graceful way to do this. (Note that we cannot
 # assume that the openvpn server will be assigned the .1 address.)

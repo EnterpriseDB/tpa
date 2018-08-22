@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 pgbouncer_packages:
   Debian: &debian_pgbouncer_packages
     - pgbouncer

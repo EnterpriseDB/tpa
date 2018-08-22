@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Here we set defaults for some configuration options based on the size
 # of the cluster and other information gathered at runtime.
 

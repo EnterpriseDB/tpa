@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Set instance variables and IP
   set_fact:
     instance_vars: "{{

@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We've already installed configuration files for any extensions that we
 # care about; now it's time to issue CREATE EXTENSION commands.
 

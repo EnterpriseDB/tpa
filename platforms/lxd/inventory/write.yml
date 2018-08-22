@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Copy lxd.py to inventory directory
   copy:
     src: lxd.py

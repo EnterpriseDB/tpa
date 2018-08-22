@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Debian stretch/PGDG uses -dbgsym packages for Postgres 10+.
 
 - name: Adjust postgres_debug_packages for dbg/dbgsym packages

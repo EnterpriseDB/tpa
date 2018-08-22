@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # GTM does not need any special barman configuration file
 #
 # We do need a script which connects to a coordinator and

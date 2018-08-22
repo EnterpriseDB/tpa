@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We do the join and the wait in separate tasks so that we can see (from
 # the outside) the new rows in bdr.bdr_nodes and so on.
 

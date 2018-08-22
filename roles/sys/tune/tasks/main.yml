@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Calculate total system memory size
   command: >
     awk '/^MemTotal: / {print int($2/1024)}' /proc/meminfo

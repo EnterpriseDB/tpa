@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # ansible-playbook -i inventory/ec2.py state.yml \
 #     -e cluster=./clusters/x -e state=running
 

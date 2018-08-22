@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Run pg_controldata
   command: >
     {{ postgres_bin_dir }}/pg_controldata {{ postgres_data_dir }}

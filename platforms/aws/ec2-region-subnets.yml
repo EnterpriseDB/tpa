@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We invoke vpc-subnet.yml for each region with its VPC and a list of
 # subnet references in the region, and expect it to define
 # ec2_region_subnets[region][cidr] for each one.

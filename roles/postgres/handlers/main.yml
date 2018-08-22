@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Note Postgres reload required
   set_fact:
     postgres_service_end_state: reloaded

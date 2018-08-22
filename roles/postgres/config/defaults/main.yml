@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We have a default template, but the caller can override it to generate
 # their own (or set it to '' to leave the existing pg_hba.conf alone),
 # or just specify an array of lines to put in the file.

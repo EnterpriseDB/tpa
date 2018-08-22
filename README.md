@@ -1,7 +1,7 @@
 2ndQuadrant TPA
 ===============
 
-© Copyright 2ndQuadrant
+Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 Confidential property of 2ndQuadrant; not for public release.
 

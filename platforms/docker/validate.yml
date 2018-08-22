@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure that every instance has a defined image
   assert:
     msg: "Please set 'image' on every instance"

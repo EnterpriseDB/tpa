@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Install AWS-related Python modules.
 #
 # We could make this conditional, but it can't be as simple as checking

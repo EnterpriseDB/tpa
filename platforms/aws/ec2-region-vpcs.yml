@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # At this point, ec2_vpc is either {Name: …, cidr: …} (one specification
 # across regions) or {r1: {Name: …, cidr: …, filters: …}, r2: …}
 # (different specifications for different regions).

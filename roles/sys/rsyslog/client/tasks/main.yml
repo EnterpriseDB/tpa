@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Add rsyslog rule for PostgreSQL logging
   copy:
     src: 22-postgres.conf

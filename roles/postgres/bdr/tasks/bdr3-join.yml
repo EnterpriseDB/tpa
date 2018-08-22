@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Join BDR node groups
   postgresql_query:
     conninfo: '{{ hostvars[bdr_node].bdr_node_dsn }}'

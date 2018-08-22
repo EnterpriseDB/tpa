@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Given a region, vpc-id, and a list of subnet references, we find the
 # subnet-id of each existing subnet, and create the rest (and thereby
 # find their subnet-id too).

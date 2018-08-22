@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # The docker_container module accepts an intimidating number of options
 # (most oriented towards lightweight container usage, rather than the
 # container-as-VM model we're following here).

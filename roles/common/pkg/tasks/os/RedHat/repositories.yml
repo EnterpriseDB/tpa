@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Install gpg
   raw: yum -y install gnupg2
   register: gpg_install

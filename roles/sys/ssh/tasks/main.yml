@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Enable password-less SSH access between all nodes for a given user.
 #
 # - include_role: name=sys/ssh

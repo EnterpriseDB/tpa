@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Remove client server from monitoring
 #
 # Currently all we do is remove the crontab entry; other scripts

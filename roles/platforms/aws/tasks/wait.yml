@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We wait for each instance's reachability check to pass.
 #
 # This is normally quite fast, but some instances may take a long time

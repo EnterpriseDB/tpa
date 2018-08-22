@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 #
 # This is a wrapper for bin/ansible that sets various environment
 # variables before invoking the real executable (which must be under

@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 transparent_hugepage: never
 
 # The caller may supply sysctl_values, which will be merged with the

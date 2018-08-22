@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Note pgbouncer restart required
   set_fact:
     pgbouncer_service_end_state: restarted

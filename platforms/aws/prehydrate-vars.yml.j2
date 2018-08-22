@@ -1,3 +1,4 @@
+{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 {% for h in ansible_play_hosts %}
 {%   set v = hostvars[h] %}
 instance_{{ v['node'] }}_private_ip: {{ v['private_ip'] }}

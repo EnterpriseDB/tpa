@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
 
 # Now the cluster hosts are reachable by ssh and have all the required

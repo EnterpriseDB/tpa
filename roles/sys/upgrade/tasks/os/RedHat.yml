@@ -1,3 +1,5 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - yum: update_cache=yes name=* state=latest

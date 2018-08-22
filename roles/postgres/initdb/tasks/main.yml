@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure postgres directories exist and have the right permissions
   file:
     path: "{{ item }}"

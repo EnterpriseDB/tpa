@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Delete generated files for this cluster
   file:
     path: "{{ cluster_dir }}/{{ item }}"

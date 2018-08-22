@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We start, restart or reload Postgres depending on whether any tasks have
 # notified the 'Note Postgres restart required' or
 # 'Note Postgres reload required' handlers.

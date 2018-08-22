@@ -1,3 +1,5 @@
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 set -eu
 
 if [[ "$0" == "$BASH_SOURCE" ]]; then

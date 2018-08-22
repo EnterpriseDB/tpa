@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Given a region and a VPC specification (which may take various forms),
 # we return a vpc-id. If the desired VPC does not already exist, we try
 # to create it if a Name and cidr are specified.

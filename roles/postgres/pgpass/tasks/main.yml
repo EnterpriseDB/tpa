@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure that ~postgres/.pgpass exists
   file:
     path: ~postgres/.pgpass

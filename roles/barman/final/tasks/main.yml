@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # This would ordinarily happen in postgres/final, but it's repeated here
 # for Postgres-XL clusters that don't apply that role.
 

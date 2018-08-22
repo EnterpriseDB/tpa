@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # These tasks are executed on any Barman server instance.
 
 - name: Install global Barman configuration file

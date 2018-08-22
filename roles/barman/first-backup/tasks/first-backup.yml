@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We force an immediate backup of any instance for which we configured
 # backups on this run. Barman will not start a backup until the server
 # has archived at least one WAL segment, so we try to make sure that

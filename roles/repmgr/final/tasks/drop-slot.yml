@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We drop the slot only if all of the following conditions are met:
 #
 # (a) the slot is named "repmgr_slot_N",

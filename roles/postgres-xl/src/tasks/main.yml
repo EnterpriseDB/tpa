@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - include_role: name=postgres/src
   vars:
     postgres_git_url: "{{ pgxl_git_url }}"

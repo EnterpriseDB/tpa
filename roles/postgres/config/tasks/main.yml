@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # This role is applied to every postgres instance with a valid PGDATA.
 #
 # We aspire to the following configuration layout:
