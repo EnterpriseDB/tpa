@@ -252,7 +252,7 @@ ec2_vpc:
   Name: Test
 
 ec2_ami:
-  Name: debian-stretch-hvm-x86_64-gp2-2018-04-09-292
+  Name: debian-stretch-hvm-x86_64-gp2-2018-08-20-85640
   Owner: 379101102735
 
 ec2_vpc_subnets:

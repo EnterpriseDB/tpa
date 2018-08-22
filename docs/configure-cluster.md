@@ -491,7 +491,7 @@ ec2_vpc:
 This block is from a more complicated config.
 
     ec2_ami:
-      Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170803
+      Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180814
     ec2_vpc:
       Name: Test
     
