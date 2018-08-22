@@ -1,3 +1,5 @@
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 digraph BDR_Simple {
     bdr_a -> bdr_b;
     bdr_a -> bdr_c;

@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure ec2_vpc is configured
   assert:
     msg: "Please define ec2_vpc (a hash) in {{config_file}}"

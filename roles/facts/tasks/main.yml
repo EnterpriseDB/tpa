@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Set ansible_distribution if required.
 - include_tasks: distribution.yml
   tags: always

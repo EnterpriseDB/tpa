@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # This play must always be applied to all hosts in the cluster. Here we
 # do any platform-specific checks and initialisation, confirm that all
 # hosts are available, and perform basic fast discovery.

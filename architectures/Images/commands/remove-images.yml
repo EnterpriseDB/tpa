@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # This playbook searches for self-owned AMIs whose name matches a
 # particular pattern across regions, and removes them. Be careful.
 

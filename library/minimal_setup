@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 #
 # This is an ansible module that takes no arguments and returns only
 # some distribution-specific facts.

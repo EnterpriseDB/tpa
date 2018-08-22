@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # For each region and each instance in that region, we issue an
 # async ec2 task to deprovision the instance by its id, then wait
 # for all the jobs to complete.

@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # roles/client/tasks/remove-monitoring.yml
 #
 # Remove client server from monitoring

@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Record {{ username }} in the list of database users to create
   set_fact:
     postgres_users: "{{

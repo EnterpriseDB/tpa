@@ -1,3 +1,5 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 _include_dir: "{{ include_dir|default(postgres_data_dir+'/conf.d') }}"

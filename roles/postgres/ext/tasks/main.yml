@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure that extension repository is specified
   assert:
     that:

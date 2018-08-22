@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We need to retrieve the instance's availability zone, which (a) can
 # not always be inferred from config.yml (can be left unspecified), and
 # (b) isn't provided by the inventory plugin. It's available directly

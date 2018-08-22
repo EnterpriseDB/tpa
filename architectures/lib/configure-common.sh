@@ -1,3 +1,5 @@
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 IFS=$' \t\n'
 set -eu
 

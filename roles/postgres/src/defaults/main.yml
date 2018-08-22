@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 ## What should we build?
 #
 # We take a git repository URL to clone and a reference to checkout. An

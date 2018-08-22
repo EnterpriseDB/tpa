@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Create openvpn client configuration directory
   file:
     path: "{{ _vpn_dir }}/ccd"

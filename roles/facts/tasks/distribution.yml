@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # If ansible_distribution is not specified in the inventory, we perform
 # "lightweight" distribution detection. We support Debian, RedHat, and
 # Ubuntu—and we aren't worried about detecting older versions of these

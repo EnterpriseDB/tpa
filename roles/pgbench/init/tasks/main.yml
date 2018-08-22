@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Run pgbench -i -s {{ pgbench_scale_factor }}
   command: >
     {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} -i -s {{ pgbench_scale_factor }} {{ pgbench_dbname }}

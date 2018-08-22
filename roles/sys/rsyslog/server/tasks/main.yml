@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure /var/log/hosts exists
   file:
     path: /var/log/hosts

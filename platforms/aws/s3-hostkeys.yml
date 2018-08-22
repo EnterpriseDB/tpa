@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We upload hostkeys/ssh_host_xxx_key{,.pub} to cluster_bucket in S3.
 #
 # We cache a semi-arbitrary "expiry time" (less than the S3 expiration

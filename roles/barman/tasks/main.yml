@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # This role can be safely applied to every instance.
 #
 # We declare dependencies on a series of sys/ssh modules in order to set

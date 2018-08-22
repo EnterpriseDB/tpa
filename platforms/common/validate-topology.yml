@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # For every instance that has a "backup: xxx" tag, there should be
 # exactly one instance with "Name: xxx" and "role: …,barman,…" tags.
 #

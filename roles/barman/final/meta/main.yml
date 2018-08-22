@@ -1,4 +1,7 @@
 ---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # the barman/streaming_barman users need to be
 # around for sure, when this gets called. For
 # regular postgres role that will happen as

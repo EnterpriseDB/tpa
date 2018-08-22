@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We expect 'cluster' to point to a directory in which we can find
 # config.yml (or whatever 'config' is set to). If we are invoked through
 # tpaexec provision, we can count on cluster being set, but we check

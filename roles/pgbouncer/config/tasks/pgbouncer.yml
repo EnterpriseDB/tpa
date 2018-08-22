@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # By default, pgbouncer will forward all connections to 127.0.0.1:5432
 # (which may be either postgres or haproxy that has been configured to
 # forward connections to postgres).

@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We register ssh_key_file.pub as ec2_key_name in each region, and set
 # ec2_instance_key to the name of the registered key.
 #

@@ -1,3 +1,4 @@
+{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
   platform: {{ platform }}
 {% if platform in ['aws'] %}
 {% include 'platforms/%s/instance_defaults.yml.j2' % platform -%}

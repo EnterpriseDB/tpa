@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Check if the BDR node has been created already
   postgresql_query:
     conninfo: '{{ bdr_node_dsn }}'

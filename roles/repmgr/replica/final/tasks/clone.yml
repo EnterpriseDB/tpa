@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Fail if the data directory exists
   fail:
     msg: "Can't run 'repmgr standby clone' over existing PGDATA"

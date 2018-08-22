@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 from jinja2 import Undefined
 
 # This filter takes a container and a subkey ('x.y.z', or [x,y,z]) and returns

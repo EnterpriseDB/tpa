@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 allow_duplicates: no
 dependencies:
   - role: postgres/src

@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 ## Platform-independent validation
 #
 # Every config.yml needs to set cluster_name and follow certain other

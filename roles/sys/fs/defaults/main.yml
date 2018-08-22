@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 fstype: 'ext4'
 readahead: 32768
 mountopts: 'defaults,noatime'

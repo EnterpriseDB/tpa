@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Run apt-get update
   raw: test -d /etc/tpa || apt-get -q -y update
   register: update

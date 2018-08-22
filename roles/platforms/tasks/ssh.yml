@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Tell ssh to use this cluster's known_hosts file
   set_fact:
     ansible_ssh_common_args: >-

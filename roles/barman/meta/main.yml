@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 dependencies:
   # First, we generate an ssh keypair for postgres (this has probably
   # already been done), and likewise for barman.

@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 #
 # hostnames 33
 #   Returns 33 randomly-selected hostnames

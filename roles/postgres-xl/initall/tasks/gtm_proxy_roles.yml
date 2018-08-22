@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # check if the implicit GTM Proxies are running on datanodes
 # or not
 - block:

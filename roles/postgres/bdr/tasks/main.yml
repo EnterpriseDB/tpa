@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We are here because this instance has role bdr+primary (as opposed to
 # bdr+replica, which is a read-only streaming replica of a bdr+primary
 # node). BDR packages have been installed, shared_preload_libraries

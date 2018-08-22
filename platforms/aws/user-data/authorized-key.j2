@@ -1,3 +1,4 @@
+{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 cat >> /root/.ssh/authorized_keys <<KEY
 {{ lookup('file', '%s/%s.pub' % (cluster_dir, ssh_key_file)) }}
 KEY

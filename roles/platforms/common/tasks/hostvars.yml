@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Set ip_addresses to []
   set_fact:
     ip_addresses: []

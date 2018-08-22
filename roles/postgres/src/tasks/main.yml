@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Fetch Postgres source from git repository
   git:
     repo: "{{postgres_git_url}}"

@@ -1,3 +1,4 @@
+{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 {% for h in groups[cluster_tag] %}
 {%   for a in hostvars[h].ip_addresses+['inventory_hostname'] %}
 {%     for k in ['rsa', 'ecdsa'] %}

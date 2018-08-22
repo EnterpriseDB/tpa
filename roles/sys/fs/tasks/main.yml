@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Given a block device name and a mountpoint, does everything required
 # to make the volume available for use immediately and after subsequent
 # reboots.

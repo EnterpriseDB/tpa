@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - include_tasks: hostvars.yml
   tags: always
 - include_tasks: wait.yml

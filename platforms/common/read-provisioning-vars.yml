@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We load vars.json into provisioning_vars, and set its keys as
 # top-level variables (unless they are already set, i.e., we give
 # precedence to config.yml or explicit settings).

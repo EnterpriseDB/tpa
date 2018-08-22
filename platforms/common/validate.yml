@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - assert:
     msg: "Ansible 2.6.x is required"
     that:

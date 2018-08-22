@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Use with caution.
 #
 # This role runs "apt-get dist-upgrade" or "yum update" to upgrade all

@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # This role is applied to every postgres replica instance.
 #
 # A replica must have a valid PGDATA (cloned from the primary), must

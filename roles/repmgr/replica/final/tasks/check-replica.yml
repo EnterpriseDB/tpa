@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure that this instance is a replica
   assert:
     msg: "Postgres is not running as a replica"

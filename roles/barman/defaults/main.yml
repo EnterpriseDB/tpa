@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 ## Barman server-wide defaults (/etc/barman.conf)
 
 default_barman_log_file: /var/log/barman/barman.log

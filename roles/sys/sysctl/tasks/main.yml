@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Set any sysctl values specified by the caller, which may augment or
 # override the default values defined in by this role.
 

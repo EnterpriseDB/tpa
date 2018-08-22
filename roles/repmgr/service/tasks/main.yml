@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We want to call this repmgrd.service, but there's a systemd bug (at
 # least on Debian 8) that prevents us from overriding the unit that is
 # created by the late generator from /etc/init.d/repmgrd. Using a name

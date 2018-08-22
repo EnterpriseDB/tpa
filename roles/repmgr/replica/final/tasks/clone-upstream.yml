@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We want to clone a replica, i.e., set up cascading replication.
 #
 # In the best case, the replica we want to clone is up and running and

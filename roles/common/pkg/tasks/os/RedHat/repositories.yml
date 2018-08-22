@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure repository list is defined
   assert:
     msg: "Repository {{ item }} is not defined in yum_repositories"

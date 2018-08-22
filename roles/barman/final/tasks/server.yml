@@ -1,4 +1,6 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # There's nothing special to do on the server during this phase. Most of
 # the initialisation tasks are performed on behalf of the clients.

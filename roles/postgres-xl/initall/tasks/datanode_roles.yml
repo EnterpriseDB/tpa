@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # iterate over an instance's list of datanodes and datanode replicas
 # check if the directory already exists. If not, issue a pgxc_ctl
 # command to set the component up

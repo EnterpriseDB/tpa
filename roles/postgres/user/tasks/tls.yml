@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # The secure way for us to install TLS certificates would be to generate
 # the keypair in situ and submit a CSR through some automated interface
 # to a CA (e.g., Letsencrypt), and install the resulting certificate.

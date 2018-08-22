@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # These tasks are executed on any instance that needs to be backed up.
 #
 # Backups for an instance are configured in /etc/barman.d/name.conf on

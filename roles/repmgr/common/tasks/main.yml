@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Determine the upstream primary for this host, that is, the primary at
 # the root of the cascading replication setup.
 

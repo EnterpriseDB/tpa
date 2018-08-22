@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 postgres_client_packages:
   Debian:
     - postgresql-client-{{ postgres_version }}

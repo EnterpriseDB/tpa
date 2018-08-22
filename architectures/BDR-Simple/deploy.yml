@@ -1,3 +1,4 @@
+{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 ---
 
 # This play must always be applied to all hosts in the cluster. Here we

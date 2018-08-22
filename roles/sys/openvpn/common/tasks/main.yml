@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure openvpn configuration is present
   assert:
     msg: "Please define vpn_network in CIDR format"

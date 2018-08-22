@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # roles/icinga-host/tasks/main.yml
 
 - include_tasks: icinga.yml

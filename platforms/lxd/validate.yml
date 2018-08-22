@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # Make that every instance has an image explicitly specified by id.
 
 - name: Ensure that every instance has a defined alias image

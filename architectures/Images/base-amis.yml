@@ -1,3 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 base_amis:
   Debian:
     Name: debian-stretch-hvm-x86_64-gp2-2018-04-09-292

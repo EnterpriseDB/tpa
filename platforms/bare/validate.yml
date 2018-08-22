@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Ensure that an IP address is specified for the instance
   assert:
     msg: "Bare instances must specify at least one of ip_address/public_ip/private_ip"

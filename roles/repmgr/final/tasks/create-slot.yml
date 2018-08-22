@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # If any replica references a slot on this instance that does not exist,
 # we create it, even though we can't guarantee that the WAL required by
 # the replica still exists.

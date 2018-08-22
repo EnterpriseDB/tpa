@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - include_role: name=sys/fs
   vars:
     device: "{{ item.device }}"

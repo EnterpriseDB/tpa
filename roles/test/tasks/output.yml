@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # This file is meant to be included directly from outside the test role.
 # It expects to be passed the name of an output_file and the text to
 # write to it (and expects output_dir to have been defined, to exist,

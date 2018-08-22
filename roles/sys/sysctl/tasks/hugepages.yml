@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # By default, we want to use huge pages, but disable transparent huge
 # page support.
 #

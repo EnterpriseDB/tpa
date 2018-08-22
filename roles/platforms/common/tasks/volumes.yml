@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # In platforms/common/inventory/write.yml, we write a list of attached
 # volumes for each instance to host_vars/instance/03-volumes.yml:
 #

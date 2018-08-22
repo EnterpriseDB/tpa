@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - meta: flush_handlers
 
 - name: Start or restart pgbouncer

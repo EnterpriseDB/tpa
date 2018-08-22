@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # This file is meant to be included directly from outside the
 # postgres/config role. It expects to be passed the name and (properly
 # quoted) value of a postgresql.conf parameter, and will write a file

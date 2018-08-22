@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 - name: Link to ec2.py from inventory directory
   file:
     src: "{{ tpa_dir }}/platforms/aws/inventory/ec2.py"

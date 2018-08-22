@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We take it for granted that we can connect to localhost as postgres to
 # gather cluster facts.
 

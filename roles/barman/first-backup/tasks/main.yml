@@ -1,5 +1,7 @@
 ---
 
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
 # We force an immediate backup for any instances that do not have any
 # backups at all.
 #
