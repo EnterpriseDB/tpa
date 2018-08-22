@@ -10,7 +10,7 @@ from tpaexec.platform import Platform
 class aws(Platform):
     def add_platform_options(self, p, g):
         g.add_argument('--region', default='eu-west-1')
-        g.add_argument('--instance-type', default='t2.micro', metavar='TYPE')
+        g.add_argument('--instance-type', default='t3.micro', metavar='TYPE')
 
     def supported_distributions(self):
         return [

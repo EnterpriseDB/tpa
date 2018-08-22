@@ -38,7 +38,7 @@ ec2_ami:
   Owner: self
 
 instance_defaults:
-  type: t2.micro
+  type: t3.micro
   region: eu-west-1
   platform: aws
   vars:

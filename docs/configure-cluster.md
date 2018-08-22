@@ -119,7 +119,7 @@ ec2_ami_user: ec2-user
 instances:
     - node: 1
       Name: lab-primary
-      type: t2.micro
+      type: t3.micro
       region: eu-central-1
       subnet: 10.33.243.0/24
       volumes:
@@ -142,7 +142,7 @@ instances:
 
     - node: 2
       Name: lab-backup
-      type: t2.micro
+      type: t3.micro
       region: eu-central-1
       subnet: 10.33.122.0/24
       volumes:
@@ -162,7 +162,7 @@ instances:
 
     - node: 3
       Name: lab-replica
-      type: t2.micro
+      type: t3.micro
       region: eu-central-1
       subnet: 10.33.243.0/24
       volumes:
@@ -185,7 +185,7 @@ instances:
 
     - node: 4
       Name: lab-replica2
-      type: t2.micro
+      type: t3.micro
       region: eu-west-1
       subnet: 10.33.6.0/24
       volumes:
@@ -205,7 +205,7 @@ instances:
 
     - node: 5
       Name: lab-replica3
-      type: t2.micro
+      type: t3.micro
       region: eu-west-1
       subnet: 10.33.6.0/24
       volumes:
@@ -295,7 +295,7 @@ instance_defaults:
 instances:
   - node: 1
     Name: speedy-a
-    type: t2.micro
+    type: t3.micro
     region: eu-west-1
     subnet: 10.33.14.0/24
     volumes:
@@ -333,7 +333,7 @@ instances:
 ```
     - node: 2
       Name: speedy-b
-      type: t2.micro
+      type: t3.micro
       region: eu-west-1
       subnet: 10.33.14.0/24
       volumes:
@@ -362,7 +362,7 @@ instances:
 ```
    - node: 3
       Name: speedy-c
-      type: t2.micro
+      type: t3.micro
       region: eu-west-1
       subnet: 10.33.21.0/24
       volumes:
@@ -386,7 +386,7 @@ instances:
 ```
     - node: 4
       Name: speedy-d
-      type: t2.micro
+      type: t3.micro
       region: eu-west-1
       subnet: 10.33.21.0/24
       volumes:

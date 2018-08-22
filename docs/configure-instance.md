@@ -16,7 +16,7 @@ An excerpt:
 instances:
     - node: 1
       Name: lab-primary
-      type: t2.micro
+      type: t3.micro
       region: eu-central-1
       subnet: 10.33.243.0/24
       volumes:

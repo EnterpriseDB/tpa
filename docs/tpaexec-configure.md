@@ -122,7 +122,7 @@ not alter the network configuration of existing servers.
 Specify ``--instance-type <type>`` to select an instance type.
 
 This option is meaningful only for cloud platforms. The default for AWS
-is t2.micro.
+is t3.micro.
 
 ### Disk space
 

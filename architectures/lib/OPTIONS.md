@@ -31,7 +31,7 @@ You may optionally specify ``--region eu-west-1``. This is the default
 region, but you may use any existing AWS region that you have access to
 (and that will permit the required number of instances to be created).
 
-You may optionally specify ``--instance-type t2.micro`` (the default) or
+You may optionally specify ``--instance-type t3.micro`` (the default) or
 any other valid instance type for the selected platform.
 
 ### Subnet selection

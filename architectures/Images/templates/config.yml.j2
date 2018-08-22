@@ -13,7 +13,7 @@ ec2_instance_reachability: public
 
 {{ dict(cluster_vars=cluster_vars)|to_nice_yaml(indent=2) }}
 instance_defaults:
-  type: t2.micro
+  type: t3.micro
   subnet: 10.33.0.0/24
   role: image
   default_volumes:
