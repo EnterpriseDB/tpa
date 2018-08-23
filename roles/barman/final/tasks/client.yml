@@ -26,9 +26,11 @@
   register: slot_creation
   failed_when: >
     slot_creation is not successful
-    and not "Replication slot '{{ slot_name }}' already exists" in slot_creation.stderr
+    and not already_exists_message in slot_creation.stderr
   changed_when: >
     slot_creation is successful
+  vars:
+    already_exists_message: "Replication slot '{{ slot_name }}' already exists"
   become_user: barman
   become: yes
 
