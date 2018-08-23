@@ -1,0 +1,41 @@
+---
+
+- name: Create pgbouncer schema
+  postgresql_query:
+    conninfo: "dbname={{item}}"
+    queries:
+      - text: SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname = 'pgbouncer'
+      - text: CREATE SCHEMA IF NOT EXISTS pgbouncer AUTHORIZATION pgbouncer
+  register: create_schema
+  changed_when:
+    create_schema.rowcounts[0] == 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items:
+    - template1
+    - postgres
+
+- name: Create pgbouncer.get_auth function
+  postgresql_query:
+    conninfo: "dbname={{item}}"
+    queries:
+      - SELECT proname FROM pg_catalog.pg_proc p JOIN pg_namespace n ON (p.pronamespace=n.oid) WHERE nspname='pgbouncer' AND proname = 'get_auth'
+      - >
+        CREATE OR REPLACE FUNCTION pgbouncer.get_auth(p_usename TEXT)
+        RETURNS TABLE(username TEXT, password TEXT) AS $$
+        BEGIN
+          RETURN QUERY
+          SELECT usename::TEXT, passwd::TEXT FROM pg_catalog.pg_shadow
+          WHERE usename = p_usename;
+        END;
+        $$ LANGUAGE plpgsql SECURITY DEFINER
+      - REVOKE ALL ON FUNCTION pgbouncer.get_auth(p_usename TEXT) FROM PUBLIC
+      - GRANT EXECUTE ON FUNCTION pgbouncer.get_auth(p_usename TEXT) TO pgbouncer
+  register: create_function
+  changed_when:
+    create_function.rowcounts[0] == 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items:
+    - template1
+    - postgres

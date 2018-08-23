@@ -13,3 +13,7 @@
     - "{{ postgres_extensions|default([]) }}"
   become_user: "{{ postgres_user }}"
   become: true
+
+- include_tasks: pgbouncer.yml
+  when: >
+    postgres_users|json_query("[?username=='pgbouncer']") != []
