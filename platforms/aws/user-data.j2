@@ -27,6 +27,12 @@ export {{ k }}="{{ user_data_environment[k] }}"
 {% endfor %}
 
 {#
+    Install nvme-cli and a udev trigger to symlink /dev/nvme1n1 from the
+    name we requested.
+#}
+{% include 'user-data/nvmecli.j2' %}
+
+{#
     Install awscli if it's not available. We need it to attach/detach
     EBS volumes and to download things from S3.
 #}
