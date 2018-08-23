@@ -9,6 +9,6 @@
     postgres_users: "{{
       postgres_users|default([])|union([{
         'username': username,
-        'role_attr_flags': role_attr_flags|default('superuser'),
+        'role_attrs': role_attrs|default([]),
       }])
     }}"

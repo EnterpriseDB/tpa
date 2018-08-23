@@ -60,10 +60,11 @@
 - include_role: name=postgres/createuser
   vars:
     username: barman
+    role_attrs: [superuser]
 - include_role: name=postgres/createuser
   vars:
     username: streaming_barman
-    role_attr_flags: replication
+    role_attrs: [replication]
 
 # On any instance tagged as a Barman server (i.e., where tags.role
 # includes 'barman'), it will install and configure Barman.

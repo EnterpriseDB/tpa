@@ -1,11 +1,11 @@
 ---
 
-- name: Create Postgres superusers
+- name: Create Postgres users
   postgresql_user:
     name: "{{ item.username }}"
     encrypted: yes
     password: "md5{{ (vars[item.username+'_password'] + item.username)|hash('md5') }}"
-    role_attr_flags: "{{ item.role_attr_flags }}"
+    role_attr_flags: "{{ item.role_attrs|join(',') }}"
   with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes
