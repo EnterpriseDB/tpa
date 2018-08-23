@@ -32,42 +32,8 @@
   tasks:
     - include_role: name=common
 
-    # Set up any additional filesystems required. The block device
-    # layout is instance-specific.
-    - include_role: name=sys/volumes
-      tags: [sys, fs]
-
-    # Computes memory size and other instance-specific computations for
-    # use in later steps (e.g., setting shared_buffers).
-    - include_role: name=sys/tune
-      tags: always
-
-    - include_role: name=sys/sysctl
-      vars:
-        sysctl_values:
-          net.ipv4.ip_forward: 1
-      tags: [sys, sysctl]
-
-    - include_role: name=sys/sysstat
-      tags: [sys, sysstat]
-
-    - include_role: name=sys/openvpn
-      when: >
-        'role_openvpn-server' in groups and
-        platform not in ['docker']
-
-    - include_role: name=sys/hosts
-      tags: [sys, hosts]
-
-    - include_role: name=sys/cloudinit
-      when: platform not in ['docker']
-      tags: [sys, cloudinit]
-
-    - include_role: name=sys/rsyslog
-      tags: [sys, rsyslog]
-
-    - include_role: name=sys/logrotate
-      tags: [sys, rsyslog]
+    - include_role: name=sys
+      tags: sys
 
     - include_role: name=postgres
       when: >
