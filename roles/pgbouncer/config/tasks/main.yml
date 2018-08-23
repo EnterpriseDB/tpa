@@ -9,7 +9,8 @@
 
 - include_role: name=postgres/user
   when: >
-    'pgbouncer' in role
+    'pgbouncer' in role and
+    'postgres' not in role
 
 - include_tasks: pgbouncer.yml
   when: >
