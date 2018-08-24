@@ -8,6 +8,9 @@ bare
 aws
   AWS EC2 instances
 
+docker
+  Docker containers
+
 lxd
   lxd containers
 

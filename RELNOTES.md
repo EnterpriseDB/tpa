@@ -13,6 +13,8 @@
 
 - New BDR3-Always-ON and BDR-Simple architectures
 
+- Experimental support for Vagrant, Docker, and lxd platforms
+
 - New ``tpaexec test`` command
 
 - New ``tpaexec setup`` command to setup a virtualenv and install Python
@@ -56,7 +58,6 @@
 ### Other notable changes
 
 - Extensive documentation updates
-- Initial LXD platform support
 - Support postgres/repmgr/barman package version selection (6e904c8)
   via ``tpaexec configure … --postgres-package version``
 - When generating restore_command, prefer the closest Barman server
