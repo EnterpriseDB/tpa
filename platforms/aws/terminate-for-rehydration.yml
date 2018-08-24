@@ -4,11 +4,9 @@
   any_errors_fatal: True
   max_fail_percentage: 0
   tasks:
-    - include_role: name=platforms
-      tags: always
-    - include_role: name=facts
-      tags: always
-    - include_role: name=postgres/vars
+    - include_role: name=init
+      vars:
+        pgdata_initialised: "{{ 'postgres' in role }}"
       tags: always
 
     - assert:
@@ -24,12 +22,6 @@
         that:
           - ec2_id is defined
           - ec2_region is defined
-
-    - include_role: name=postgres/facts
-      vars:
-        pgdata_initialised: true
-      when: >
-        'postgres' in role
 
     - name: Ensure that the primary is not being rehydrated
       assert:

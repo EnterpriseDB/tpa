@@ -218,7 +218,7 @@ ping() {
 playbook() {
     $ansible-playbook \
         -i inventory --vault-password-file vault/vault_pass.txt \
-        -e cluster=$(pwd) "$@"
+        -e cluster=$(pwd) -e tpa_dir=$TPA_DIR "$@"
 }
 
 deploy() {
