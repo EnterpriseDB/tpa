@@ -53,7 +53,7 @@
   block:
   - name: Upload ssh host keys
     copy:
-      src: "{{ cluster }}/hostkeys/{{ file }}"
+      src: "{{ cluster_dir }}/hostkeys/{{ file }}"
       dest: "/etc/ssh/{{ file }}"
       owner: root
       group: root

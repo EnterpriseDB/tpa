@@ -24,7 +24,7 @@
   when:
     lookup('first_found', dict(files=hook, skip=True))
   vars:
-    hook: "{{ cluster }}/hooks/pre-deploy.yml"
+    hook: "{{ cluster_dir }}/hooks/pre-deploy.yml"
 
 - include_tasks: "os/{{ ansible_os_family }}/repositories.yml"
 - include_tasks: packages.yml

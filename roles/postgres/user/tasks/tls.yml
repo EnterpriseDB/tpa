@@ -23,8 +23,8 @@
   vars:
     tlsfiles: "{{
       lookup('fileglob',
-             '%s/%s.key' % (cluster, cluster_name),
-             '%s/%s.crt' % (cluster, cluster_name))
+             '%s/%s.key' % (cluster_dir, cluster_name),
+             '%s/%s.crt' % (cluster_dir, cluster_name))
     }}"
 
 - name: Generate self-signed TLS key and certificate

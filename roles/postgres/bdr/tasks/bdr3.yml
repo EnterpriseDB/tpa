@@ -17,7 +17,7 @@
     node_id.rowcount == 0 and
     lookup('first_found', dict(files=hook, skip=True))
   vars:
-    hook: "{{ cluster }}/hooks/bdr-pre-node-creation.yml"
+    hook: "{{ cluster_dir }}/hooks/bdr-pre-node-creation.yml"
 
 - name: Create BDR node if necessary
   postgresql_query:
