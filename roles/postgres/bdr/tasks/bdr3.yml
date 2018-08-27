@@ -75,29 +75,11 @@
 # serial behaviour.
 
 - name: Join BDR node groups
-  postgresql_query:
-    conninfo: '{{ hostvars[item].bdr_node_dsn }}'
-    queries:
-      - text: SELECT bdr.join_node_group(join_target_dsn := %s)
-        args:
-          - "{{ bdr_node_dsn }}"
+  include_tasks: bdr3-join.yml
   with_items: >
     {{ groups[bdr_node_group][1:] }}
+  loop_control:
+    loop_var: bdr_node
   when:
     inventory_hostname == groups[bdr_node_group][0] and
-    hostvars[item].node_group_id.rowcount == 0
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-- name: Wait for join completion
-  postgresql_query:
-    conninfo: '{{ hostvars[item].bdr_node_dsn }}'
-    query: >-
-      SELECT bdr.wait_for_join_completion()
-  with_items: >
-    {{ groups[bdr_node_group][1:] }}
-  when:
-    inventory_hostname == groups[bdr_node_group][0] and
-    hostvars[item].node_group_id.rowcount == 0
-  become_user: "{{ postgres_user }}"
-  become: yes
+    hostvars[bdr_node].node_group_id.rowcount == 0

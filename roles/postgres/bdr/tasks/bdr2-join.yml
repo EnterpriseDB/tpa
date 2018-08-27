@@ -1,0 +1,24 @@
+---
+
+# We do the join and the wait in separate tasks so that we can see (from
+# the outside) the new rows in bdr.bdr_nodes and so on.
+
+- name: Join the BDR group
+  postgresql_query:
+    conninfo: '{{ hostvars[bdr_node].bdr_node_dsn }}'
+    queries:
+      - text: SELECT bdr.bdr_group_join(local_node_name := %s, node_external_dsn := %s, join_using_dsn := %s)
+        args:
+          - "{{ bdr_node }}"
+          - "{{ hostvars[bdr_node].bdr_node_dsn }}"
+          - "{{ bdr_node_dsn }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Wait for join completion
+  postgresql_query:
+    conninfo: '{{ hostvars[bdr_node].bdr_node_dsn }}'
+    query: >-
+      SELECT bdr.bdr_node_join_wait_for_ready()
+  become_user: "{{ postgres_user }}"
+  become: yes

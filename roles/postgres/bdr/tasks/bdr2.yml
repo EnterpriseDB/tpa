@@ -41,31 +41,11 @@
 # nor in any earlier versions).
 
 - name: Join BDR groups on the other nodes
-  postgresql_query:
-    conninfo: '{{ hostvars[item].bdr_node_dsn }}'
-    queries:
-      - text: SELECT bdr.bdr_group_join(local_node_name := %s, node_external_dsn := %s, join_using_dsn := %s)
-        args:
-          - "{{ item }}"
-          - "{{ hostvars[item].bdr_node_dsn }}"
-          - "{{ bdr_node_dsn }}"
+  include_tasks: bdr2-join.yml
   with_items: >
     {{ groups[bdr_node_group][1:] }}
+  loop_control:
+    loop_var: bdr_node
   when:
     inventory_hostname == groups[bdr_node_group][0] and
-    hostvars[item].node.rowcount == 0
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-- name: Wait for join completion
-  postgresql_query:
-    conninfo: '{{ hostvars[item].bdr_node_dsn }}'
-    query: >-
-      SELECT bdr.bdr_node_join_wait_for_ready()
-  with_items: >
-    {{ groups[bdr_node_group][1:] }}
-  when:
-    inventory_hostname == groups[bdr_node_group][0] and
-    hostvars[item].node.rowcount == 0
-  become_user: "{{ postgres_user }}"
-  become: yes
+    hostvars[bdr_node].node.rowcount == 0

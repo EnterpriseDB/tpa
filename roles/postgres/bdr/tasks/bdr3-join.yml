@@ -1,0 +1,11 @@
+---
+
+- name: Join BDR node groups
+  postgresql_query:
+    conninfo: '{{ hostvars[bdr_node].bdr_node_dsn }}'
+    queries:
+      - text: SELECT bdr.join_node_group(join_target_dsn := %s)
+        args:
+          - "{{ bdr_node_dsn }}"
+  become_user: "{{ postgres_user }}"
+  become: yes

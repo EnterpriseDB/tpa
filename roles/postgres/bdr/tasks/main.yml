@@ -57,7 +57,7 @@
 
 - action: set_fact
   args: >
-    {{ ('{"bdr_major_version": ' ~ (bdr_version_num/10000|int) ~ '}')|from_json }}
+    {{ ('{"bdr_major_version": ' ~ (bdr_version_num/10000)|int ~ '}')|from_json }}
 
 # Now one node must create a BDR group, and the other nodes must join
 # the group. It doesn't matter which node creates the group, so long as
