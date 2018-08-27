@@ -22,17 +22,13 @@ fi
 
 export TPA_DIR=${TPA_DIR:-$TOP}
 
-# If we can find a virtualenv located relative to TPA_DIR and there is
-# no virtualenv activated already, we activate it as a convenience.
+# If we can find a virtualenv located relative to TPA_DIR, we activate
+# it as a convenience.
 
 if [[ -f $TPA_DIR/tpa-virtualenv/bin/activate ]]; then
-    _detect_virtualenv=$(/usr/bin/env python \
-        -c "import sys; print 'virtualenv' if hasattr(sys, 'real_prefix') else 'bare'")
-    if [[ "$_detect_virtualenv" != "virtualenv" ]]; then
-        set +u
-        source $TPA_DIR/tpa-virtualenv/bin/activate
-        set -u
-    fi
+    set +u
+    source $TPA_DIR/tpa-virtualenv/bin/activate
+    set -u
 fi
 
 # Set ANSIBLE_LOG_PATH, ANSIBLE_CONFIG, and ANSIBLE_INVENTORY to our

@@ -597,13 +597,11 @@ case "$command" in
         ;;
 esac
 
-# If we can find a virtualenv located relative to TPA_DIR and there is
-# no virtualenv activated already, we activate it as a convenience.
+# If we can find a virtualenv located relative to TPA_DIR, we activate
+# it as a convenience.
 
 if [[ -f $TPA_DIR/tpa-virtualenv/bin/activate ]]; then
-    if [[ "$(_detect_virtualenv)" != "virtualenv" ]]; then
-        _activate_virtualenv $TPA_DIR/tpa-virtualenv
-    fi
+    _activate_virtualenv $TPA_DIR/tpa-virtualenv
 fi
 
 # Now we can look at the command-line arguments and decide which
