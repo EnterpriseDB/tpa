@@ -60,9 +60,12 @@ class vagrant(Platform):
             instance['ip_address'] = str(addresses[i+1])
 
     def process_arguments(self, args):
-        s = args['platform_settings'] = {}
+        s = {}
 
         if args['proxyconf']:
             s['vagrant_proxyconf'] = args['proxyconf']
         if args['capath']:
             s['vagrant_ca_certificates'] = args['capath']
+
+        if s:
+            args['platform_settings'] = s
