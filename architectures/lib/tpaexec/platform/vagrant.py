@@ -14,7 +14,14 @@ class vagrant(Platform):
             help='virtualbox is currently the only supported provider',
         )
         g.add_argument('--memory', type=int, metavar='MB')
-        g.add_argument('--proxyconf', metavar='PROXY')
+        g.add_argument(
+            '--proxyconf', metavar='PROXY',
+            help='[vagrant-proxyconf] proxy URL to configure on VMs',
+        )
+        g.add_argument(
+            '--inject-ca-certificates', metavar='DIR', dest='capath',
+            help='[vagrant-ca-certificates] CA certificates to configure on VMs',
+        )
 
     def supported_distributions(self):
         return [
@@ -57,3 +64,5 @@ class vagrant(Platform):
 
         if args['proxyconf']:
             s['vagrant_proxyconf'] = args['proxyconf']
+        if args['capath']:
+            s['vagrant_ca_certificates'] = args['capath']
