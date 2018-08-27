@@ -2,7 +2,6 @@
 
 - include_role: name=sys/rsyslog/pkg
 - include_role: name=sys/rsyslog/client
-  when: log_server is defined and log_server != ''
 - include_role: name=sys/rsyslog/server
   when: >
     'log-server' in role
