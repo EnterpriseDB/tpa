@@ -1,4 +1,10 @@
 Vagrant.configure("2") do |config|
+{% if vagrant_proxyconf is defined %}
+  if Vagrant.has_plugin?("vagrant-proxyconf")
+    config.proxy.http = "{{ vagrant_proxyconf }}"
+    config.proxy.https = "{{ vagrant_proxyconf }}"
+  end
+{% endif %}
   config.vm.provision "file", source: "{{ ssh_key_file }}.pub", destination: "/tmp/authorized_keys"
 {% for alg in ['rsa', 'ecdsa'] %}
 {%   for ext in ['', '.pub'] %}

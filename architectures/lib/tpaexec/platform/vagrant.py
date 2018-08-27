@@ -14,6 +14,7 @@ class vagrant(Platform):
             help='virtualbox is currently the only supported provider',
         )
         g.add_argument('--memory', type=int, metavar='MB')
+        g.add_argument('--proxyconf', metavar='PROXY')
 
     def supported_distributions(self):
         return [
@@ -50,3 +51,9 @@ class vagrant(Platform):
 
         for i,instance in enumerate(instances):
             instance['ip_address'] = str(addresses[i+1])
+
+    def process_arguments(self, args):
+        s = args['platform_settings'] = {}
+
+        if args['proxyconf']:
+            s['vagrant_proxyconf'] = args['proxyconf']
