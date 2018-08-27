@@ -1,6 +1,9 @@
 ---
 
-- include_role: name=sys/rsyslog/pkg
+- name: Install rsyslog package
+  package: name=rsyslog state=latest
+  tags: pkg
+
 - include_role: name=sys/rsyslog/client
 - include_role: name=sys/rsyslog/server
   when: >
