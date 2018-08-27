@@ -1,0 +1,13 @@
+---
+
+- name: Ensure pgbouncer schema is removed
+  postgresql_query:
+    conninfo: "dbname={{ bdr_database }}"
+    queries:
+      - text: SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname = 'pgbouncer'
+      - text: DROP SCHEMA IF EXISTS pgbouncer CASCADE
+  register: drop_schema
+  changed_when:
+    drop_schema is successful and drop_schema.rowcounts[0] == 1
+  become_user: "{{ postgres_user }}"
+  become: yes
