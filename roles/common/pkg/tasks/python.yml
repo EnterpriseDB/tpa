@@ -7,5 +7,5 @@
 # instances may also need awscli.
 
 - include_tasks: python-aws.yml
-  when: platform not in ['docker']
+  when: platform not in ['docker', 'vagrant']
   tags: python-aws
