@@ -22,6 +22,7 @@ nav:
     - Bare metal: platforms/bare.md
     - Docker: platforms/docker.md
     - LXD: platforms/lxd.md
+    - Vagrant: platforms/vagrant.md
   - Customisations:
     - Cluster configuration: configure-cluster.md
     - Instance configuration: configure-instance.md
