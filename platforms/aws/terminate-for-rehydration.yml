@@ -99,7 +99,7 @@
     - name: Write private_ip for hosts for later use
       template:
         src: prehydrate-vars.yml.j2
-        dest: "{{ cluster }}/prehydrate-vars.yml"
+        dest: "{{ cluster_dir }}/prehydrate-vars.yml"
       delegate_to: localhost
       run_once: true
 

@@ -7,24 +7,19 @@
 
 - name: Require cluster directory to be specified
   assert:
-    msg: "No cluster directory specified; please rerun with «-e cluster=/path/to/cluster»"
+    msg: "No cluster directory specified"
     that:
-      - cluster is defined and cluster != ''
+      - cluster_dir is defined and cluster_dir != ''
 
 - name: Set tpa_dir
   set_fact:
-    tpa_dir: "{{
-      lookup('env', 'TPA_DIR') or (playbook_dir|regex_replace('/platforms/.*', ''))
-    }}"
+    tpa_dir: "{{ tpa_dir|default(lookup('env', 'TPA_DIR')) }}"
   tags: always
 
 - name: Set full path to cluster_dir and config_file
   set_fact:
-    cluster_dir: "{{ dir }}"
-    config_file: "{{ dir }}/{{ file }}"
+    config_file: "{{ cluster_dir }}/{{ file }}"
   vars:
-    dir: >-
-      {{ cluster|realpath }}
     file: >-
       {{ config|default('config.yml') }}
 

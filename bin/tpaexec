@@ -202,13 +202,13 @@ provision() {
     $ansible-playbook $TPA_DIR/platforms/provision.yml \
         ${cache:+-e use_cached_vars=$cache} \
         ${owner:+-e Owner=$owner} \
-        -e cluster=$(pwd) "$@"
+        -e cluster_dir=$(pwd) "$@"
 }
 
 cmd() {
     $ansible \
         -i inventory --vault-password-file vault/vault_pass.txt \
-        -e cluster=$(pwd) "$@"
+        -e cluster_dir=$(pwd) "$@"
 }
 
 ping() {
