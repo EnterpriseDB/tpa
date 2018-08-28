@@ -22,7 +22,7 @@
 - include_role: name=sys/openvpn
   when: >
     'role_openvpn-server' in groups and
-    platform not in ['docker']
+    platform not in ['docker', 'vagrant']
 
 - include_role: name=sys/hosts
   tags: [sys, hosts]
