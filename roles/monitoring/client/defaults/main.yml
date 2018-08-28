@@ -1,7 +1,5 @@
 ---
 
-# roles/client/vars/main.yml
-#
 # Default client settings
 
 # We want to monitor all clients

@@ -1,7 +1,5 @@
 ---
 
-# roles/client/tasks/add-monitoring.yml
-#
 # Set up monitoring scripts on client server
 
 

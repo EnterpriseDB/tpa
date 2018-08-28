@@ -1,7 +1,5 @@
 ---
 
-# roles/monitor/server/handlers/main.yml
-#
 # Generic service handler definitions
 
 # icinga

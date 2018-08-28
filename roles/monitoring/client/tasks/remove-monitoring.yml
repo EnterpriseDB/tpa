@@ -1,7 +1,5 @@
 ---
 
-# roles/client/tasks/remove-monitoring.yml
-#
 # Remove client server from monitoring
 #
 # Currently all we do is remove the crontab entry; other scripts

@@ -1,7 +1,5 @@
 ---
 
-# monitoring/client/tasks/main.yml
-#
 # Add a client server to monitoring.
 
 - include_role: name=secret

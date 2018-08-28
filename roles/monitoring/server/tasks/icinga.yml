@@ -1,7 +1,5 @@
 ---
 
-# roles/icinga-host/tasks/icinga.yml
-#
 # Install icinga packages and configuration files
 
 - name: Preset icinga/check_external_commands

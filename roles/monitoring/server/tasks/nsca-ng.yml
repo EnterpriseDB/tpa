@@ -1,7 +1,5 @@
 ---
 
-# roles/icinga-host/tasks/nsca-ng.yml
-#
 # Install nsca-ng packages and configuration files
 
 - name: Install nsca-ng server package

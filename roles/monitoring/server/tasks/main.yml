@@ -1,7 +1,5 @@
 ---
 
-# roles/icinga-host/tasks/main.yml
-
 - include_role: name=secret
   vars:
     secret_name: nsca_password

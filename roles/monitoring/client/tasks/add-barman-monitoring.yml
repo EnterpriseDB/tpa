@@ -1,7 +1,5 @@
 ---
 
-# roles/client/tasks/add-barman-monitoring.yml
-#
 # Set up monitoring for a barman server
 
 

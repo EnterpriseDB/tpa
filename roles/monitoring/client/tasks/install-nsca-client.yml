@@ -1,7 +1,5 @@
 ---
 
-# roles/client/tasks/install-nsca-client.yml
-#
 # Install (or compile) nsca-ng client
 
 
