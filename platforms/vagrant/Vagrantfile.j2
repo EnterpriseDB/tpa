@@ -19,7 +19,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "file", source: "hostkeys/{{ f }}", destination: "/tmp/{{ f }}"
 {%   endfor %}
 {% endfor %}
-  config.vm.provision "shell", path: "init.sh"
+  config.vm.provision "shell", path: "firstboot.sh"
 {% for h in instance_vars %}
   config.vm.define "{{ h.Name }}" do |{{ h.Name }}|
     {{ h.Name }}.vm.box = "{{ h.image }}"

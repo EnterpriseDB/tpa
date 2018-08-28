@@ -29,10 +29,10 @@
     addresses: "{{ item|ip_addresses }}"
     exports: "{{ item|export_as_vars }}"
 
-- name: Write Vagrantfile and init.sh
+- name: Write Vagrantfile and firstboot.sh
   template:
     src: "{{ item }}.j2"
     dest: "{{ cluster_dir }}/{{ item }}"
   with_items:
     - Vagrantfile
-    - init.sh
+    - firstboot.sh

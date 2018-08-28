@@ -15,4 +15,4 @@
     force: yes
   with_items:
     - Vagrantfile
-    - init.sh
+    - firstboot.sh
