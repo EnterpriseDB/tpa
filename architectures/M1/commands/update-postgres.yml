@@ -20,7 +20,7 @@
       when: >
         'postgres' in role
 
-- name: Update postgres on replicas in cluster {{ cluster }}
+- name: Update postgres on replicas in cluster {{ cluster_dir }}
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root
@@ -40,7 +40,7 @@
       when: >
         'replica' in role
 
-- name: Update postgres on primary in cluster {{ cluster }}
+- name: Update postgres on primary in cluster {{ cluster_dir }}
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root

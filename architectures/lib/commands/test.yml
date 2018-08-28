@@ -7,7 +7,7 @@
   tasks:
     - set_fact:
         output_dir: >-
-          {{ cluster }}/test/{{ lookup('pipe', 'date +%s') }}
+          {{ cluster_dir }}/test/{{ lookup('pipe', 'date +%s') }}
       run_once: yes
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"

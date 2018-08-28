@@ -7,7 +7,7 @@
 # We want to make sure postgres and repmgr are running on all applicable
 # instances in the cluster. First, we unlock any LUKS-encrypted volumes.
 
-- name: Start Postgres on cluster {{ cluster }}
+- name: Start Postgres on cluster {{ cluster_dir }}
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root

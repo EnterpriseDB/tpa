@@ -6,7 +6,7 @@
   vars:
     pgdata_initialised: "{{ 'postgres' in role }}"
 
-- name: Perform switchover to {{ target }} on cluster {{ cluster }}
+- name: Perform switchover to {{ target }} on cluster {{ cluster_dir }}
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root
