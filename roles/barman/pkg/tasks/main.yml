@@ -8,19 +8,6 @@
     state: "{{
       (barman_package_version is defined)|ternary('present', 'latest')
     }}"
-  vars:
-    barman_packages:
-      Debian: [barman]
-      RedHat: [barman]
-      Ubuntu: [barman]
   tags: [barman, pkg]
 
-- name: Install Postgres client package
-  package:
-    name: "{{
-      postgres_client_packages|packages_for(ansible_os_family, postgres_package_version)
-    }}"
-    state: "{{
-      (postgres_package_version is defined)|ternary('present', 'latest')
-    }}"
-  tags: [barman, postgres, pkg]
+- include_role: name=postgres/pkg tasks_from=client.yml

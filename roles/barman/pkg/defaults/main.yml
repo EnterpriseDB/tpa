@@ -1,7 +1,8 @@
 ---
 
-postgres_client_packages:
-  Debian:
-    - postgresql-client-{{ postgres_version }}
+barman_packages:
+  Debian: &debian_barman_packages
+    - barman
   RedHat:
-    - postgresql{{ postgres_versionNN }}
+    - barman
+  Ubuntu: *debian_barman_packages

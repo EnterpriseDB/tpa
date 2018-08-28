@@ -6,9 +6,3 @@ pgbouncer_packages:
   RedHat:
     - pgbouncer
   Ubuntu: *debian_pgbouncer_packages
-
-postgres_client_packages:
-  Debian:
-    - postgresql-client-{{ postgres_version }}
-  RedHat:
-    - postgresql{{ postgres_versionNN }}

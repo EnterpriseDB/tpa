@@ -10,18 +10,23 @@ postgresql_flavour: "postgresql"
 postgres_packages:
   Debian: &debian_packages
     - "{{postgresql_flavour}}-{{postgres_version}}"
-    - "{{postgresql_flavour}}-client-{{postgres_version}}"
     - "{{postgresql_flavour}}-contrib-{{postgres_version}}"
     - "{{postgresql_flavour}}-server-dev-{{postgres_version}}"
     - "{{postgresql_flavour}}-plperl-{{postgres_version}}"
   RedHat:
-    - "{{postgresql_flavour}}{{postgres_versionNN}}"
     - "{{postgresql_flavour}}{{postgres_versionNN}}-contrib"
     - "{{postgresql_flavour}}{{postgres_versionNN}}-server"
     - "{{postgresql_flavour}}{{postgres_versionNN}}-devel"
     - "{{postgresql_flavour}}{{postgres_versionNN}}-libs"
     - "{{postgresql_flavour}}{{postgres_versionNN}}-plperl"
   Ubuntu: *debian_packages
+
+postgres_client_packages:
+  Debian: &debian_client_packages
+    - "{{postgresql_flavour}}-client-{{postgres_version}}"
+  RedHat:
+    - "{{postgresql_flavour}}{{postgres_versionNN}}"
+  Ubuntu: *debian_client_packages
 
 postgres_debug_packages:
   Debian: &debian_debug_packages

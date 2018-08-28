@@ -1,0 +1,11 @@
+---
+
+- name: Install Postgres client package
+  package:
+    name: "{{
+      postgres_client_packages|packages_for(ansible_os_family, postgres_package_version)
+    }}"
+    state: "{{
+      (postgres_package_version is defined)|ternary('present', 'latest')
+    }}"
+  tags: [postgres, pkg]
