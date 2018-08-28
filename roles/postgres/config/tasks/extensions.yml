@@ -16,14 +16,14 @@
       )
     }}"
 
-- name: Remove any extensions not supported by Postgres 9.4
+- name: Remove pg_visibility for Postgres <9.6
   set_fact:
     postgres_extensions: "{{
       postgres_extensions
       |reject('equalto', 'pg_visibility')
       |list
     }}"
-  when: postgres_version is version('9.4', '=')
+  when: postgres_version is version('9.6', '<')
 
 # We install a default configuration for the extensions we care about.
 # We don't need to have conditional logic in this template, because the
