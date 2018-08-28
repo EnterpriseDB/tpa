@@ -5,10 +5,15 @@
 from __future__ import print_function
 
 import copy
+import boto3
 
 from tpaexec.platform import Platform
 
 class aws(Platform):
+    def __init__(self, name, arch):
+        super(aws, self).__init__(name, arch)
+        self.ec2 = {}
+
     def add_platform_options(self, p, g):
         g.add_argument('--region', default='eu-west-1')
         g.add_argument('--instance-type', default='t3.micro', metavar='TYPE')
@@ -43,7 +48,31 @@ class aws(Platform):
         else:
             image['name'] = label
 
+        if kwargs.get('lookup', False):
+            image.update(**self._lookup_ami(image, kwargs['region']))
+
         return image
+
+    def _lookup_ami(self, image, region):
+        if not region in self.ec2:
+            self.ec2[region] = boto3.client('ec2', region_name=region)
+        filters = [
+            {'Name': 'name', 'Values': [image['name']]},
+        ]
+        if 'owner' in image:
+            filters.append({
+                'Name': 'owner-id', 'Values': [image['owner']],
+            })
+        v = self.arch.args['verbosity']
+        if v > 0:
+            print('aws: Looking up AMI "%s" in "%s"' % (image['name'], region))
+        r = self.ec2[region].describe_images(Filters=filters)
+        if v > 1:
+            print('aws: Got lookup result: %s' % str(r))
+        n = len(r['Images'])
+        if n != 1:
+            raise Exception('Expected 1 match for %s, found %d' % (image['name'], n))
+        return {'image_id': r['Images'][0]['ImageId']}
 
     def update_cluster_tags(self, cluster_tags, args, **kwargs):
         if args['owner'] is not None:
@@ -95,15 +124,17 @@ class aws(Platform):
         s = args['platform_settings'] = {}
 
         s['ec2_vpc'] = {'Name': 'Test'}
-        s['ec2_ami'] = {'Name': args['image']['name']}
-        if 'owner' in args['image']:
-            s['ec2_ami']['Owner'] = args['image']['owner']
+        if args['image']:
+            s['ec2_ami'] = {'Name': args['image']['name']}
+            if 'owner' in args['image']:
+                s['ec2_ami']['Owner'] = args['image']['owner']
 
         region = args['region']
-        s['ec2_vpc_subnets'] = {region: {}}
-        for i, subnet in enumerate(args['subnets']):
-            az = region + ('a' if i == 0 else 'b')
-            s['ec2_vpc_subnets'][region][subnet]= {'az': az}
+        if region:
+            s['ec2_vpc_subnets'] = {region: {}}
+            for i, subnet in enumerate(args['subnets']):
+                az = region + ('a' if i == 0 else 'b')
+                s['ec2_vpc_subnets'][region][subnet]= {'az': az}
 
         cluster_rules = args.get('cluster_rules', [])
         if not cluster_rules and \

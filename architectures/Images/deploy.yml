@@ -2,6 +2,8 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+
 - name: Set up TPA image nodes
   any_errors_fatal: True
   max_fail_percentage: 0
@@ -10,13 +12,6 @@
 
   hosts: all
   tasks:
-    - include_role: name=platforms
-      become: no
-
-    - include_role: name=facts
-
-    - include_role: name=postgres/vars
-
     - include_role: name=common/pkg
     - include_role: name=postgres/pkg
     - include_role: name=sys/openvpn/pkg

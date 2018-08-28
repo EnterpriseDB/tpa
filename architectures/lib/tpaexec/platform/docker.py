@@ -11,7 +11,16 @@ class docker(Platform):
         return ['centos/systemd']
 
     def image(self, label, **kwargs):
-        return {'name': label}
+        image = {}
+
+        label = label.lower()
+
+        if label in ['redhat', 'redhat-minimal']:
+            image['name'] = 'centos/systemd'
+        else:
+            image['name'] = label
+
+        return image
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml('platforms/docker/instance_defaults.yml.j2', args)

@@ -56,6 +56,11 @@ class Architecture(object):
 
     # Adds any relevant options to the parser object
     def add_options(self, p):
+        p.add_argument(
+            '-v', '--verbose', dest='verbosity', action='count',
+            help='increase verbosity',
+        )
+
         g = p.add_argument_group('architecture and platform selection')
         g.add_argument(
             '--architecture', '-a', required=True, choices=[self.name],
@@ -165,16 +170,11 @@ class Architecture(object):
         # so that we can generate the correct number of hostnames.
         args['hostnames'] = self.hostnames(self.num_instances())
 
-        # The platform gets to decide what image parameters are required to get
-        # the desired distribution
-        args['image'] = self.platform.image(self.args['distribution'])
+        # Figure out how to get the desired distribution.
+        args['image'] = self.image()
 
-        # The architecture's templates/main.yml.j2 defines the overall topology
-        # of the cluster, and must be written so that we can expand it based on
-        # the correct number of hostnames and information from the command-line.
-        y = self.load_yaml('main.yml.j2', args)
-        if y is not None:
-            args.update(y)
+        # Figure out the basic structure of the cluster.
+        self.load_topology(args)
 
         # Now that main.yml.h2 has been loaded, and we have the initial set of
         # instances[] defined, num_locations() should work, and we can generate
@@ -244,6 +244,19 @@ class Architecture(object):
             sys.exit(-1)
 
         return ['zero'] + stdout.strip().split(' ')
+
+    # The platform gets to decide what image parameters are required to get the
+    # desired distribution
+    def image(self):
+        return self.platform.image(self.args['distribution'])
+
+    # The architecture's templates/main.yml.j2 defines the overall topology of
+    # the cluster, and must be written so that we can expand it based on the
+    # correct number of hostnames and information from the command-line.
+    def load_topology(self, args):
+        y = self.load_yaml('main.yml.j2', args)
+        if y is not None:
+            args.update(y)
 
     # Returns the requested number of subnets
     def subnets(self, num):

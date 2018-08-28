@@ -1,0 +1,12 @@
+{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
+
+type: {{ instance_type }}
+
+{% if subnets|length == 1 %}
+subnet: {{ subnets[0] }}
+{% endif %}
+
+default_volumes:
+- device_name: root
+  volume_type: gp2
+  volume_size: {{ root_volume_size }}

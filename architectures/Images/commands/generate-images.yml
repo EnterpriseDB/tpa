@@ -9,8 +9,21 @@
 - name: Generate AMIs
   hosts: all
   tasks:
-    - name: Generate new AMIs
-      ec2_ami:
+  - set_fact:
+      _image_name: "{{
+        image_name.format(
+          distribution=ansible_distribution,
+          label=image_label, version=image_version,
+          date=date,
+        )
+      }}"
+    vars:
+      date: >-
+        {{ lookup('pipe', 'date +%Y%m%d') }}
+
+  - name: Generate AMIs for AWS EC2
+    block:
+    - ec2_ami:
         name: "{{ _image_name }}"
         description: "2ndQuadrant TPA {{ ansible_distribution }}/{{ image_label }}/{{ image_version }} image"
         instance_id: "{{ ec2_id }}"
@@ -21,12 +34,11 @@
           version: "{{ image_version }}"
         wait: yes
       delegate_to: localhost
-      tags: ami
-      vars:
-        date: >-
-          {{ lookup('pipe', 'date +%Y%m%d') }}
-        _image_name: "{{ image_name.format(
-          distribution=ansible_distribution,
-          label=image_label, version=image_version,
-          date=date,
-        )}}"
+    when: platform == 'aws'
+
+  - name: Generate container images for Docker
+    block:
+    - command: >
+        docker commit {{ inventory_hostname }} {{ _image_name|lower }}
+      delegate_to: localhost
+    when: platform == 'docker'

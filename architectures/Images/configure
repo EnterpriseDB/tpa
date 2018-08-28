@@ -1,78 +1,110 @@
-#!/bin/bash
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-source $(dirname $0)/../lib/configure-common.sh
+from __future__ import print_function
 
-# We don't accept the majority of standard configure options, so we
-# don't use lib/configure-{options,defaults} here.
+import sys
 
-while [[ $# -gt 0 ]]; do
-    opt=$1
-    shift
+try:
+    from tpaexec.architecture import Architecture
+except:
+    print('Please invoke via: tpaexec configure <clustername> --architecture <archname>')
+    sys.exit(-1)
 
-    case "$opt" in
-        --platform)
-            platform=${1:?no platform specified}
-            shift
-            ;;
-        --image-name)
-            image_name=${1:?no image name specified}
-            shift
-            ;;
-        --image-label)
-            image_label=${1:?no image label specified}
-            shift
-            ;;
-        --image-version)
-            image_version=${1:?no image version specified}
-            shift
-            ;;
-        --regions)
-            regions=()
-            while [[ "${1:-}" && $1 != --* ]]; do
-                regions+=($1)
-                shift
-            done
-            if [[ ${#regions[@]} -eq 0 ]]; then
-                error "no regions specified"
-            fi
-            ;;
-        --distributions)
-            distributions=()
-            while [[ "${1:-}" && $1 != --* ]]; do
-                distributions+=($1)
-                shift
-            done
-            if [[ ${#distributions[@]} -eq 0 ]]; then
-                error "no distributions specified"
-            fi
-            ;;
-        *)
-            error "unrecognised option: $opt"
-            ;;
-    esac
-done
+class Images(Architecture):
+    def add_architecture_options(self, p, g):
+        g.add_argument(
+            '--image-name', metavar='NAME',
+        )
+        g.add_argument(
+            '--image-label', metavar='LABEL', default='Postgres',
+        )
+        g.add_argument(
+            '--image-version', metavar='VER', default='10',
+        )
+        g.add_argument(
+            '--distributions', metavar='LABEL', nargs='+',
+        )
+        if self.platform.name != 'docker':
+            g.add_argument(
+                '--regions', metavar='REGION', nargs='+',
+            )
 
-default_regions=(eu-west-{1,2,3} eu-central-1 us-{east,west}-{1,2})
-default_distributions=(Debian RedHat Ubuntu)
+    def supported_platforms(self):
+        return ['aws', 'docker']
 
-vars[architecture]=$architecture
-vars[cluster_name]=${cluster_name:=$(basename $cluster)}
-vars[platform]=${platform:=aws}
-regions=(${regions[@]:-${default_regions[@]}})
-vars+=([regions]=$(IFS=, && echo "[${regions[*]}]"))
-distributions=(${distributions[@]:-${default_distributions[@]}})
-vars+=([distributions]=$(IFS=, && echo "[${distributions[*]}]"))
-vars+=([cluster_tags]="$($libdir/cluster-tags)")
-image_name=${image_name:="TPA-{distribution}-{label}-{version}-{date}"}
-image_label=${image_label:=Postgres}
-image_version=${image_version:=10}
-vars+=([cluster_vars]=$($libdir/cluster-vars \
-    image_name="'$image_name'" image_label="'$image_label'" \
-    image_version="'$image_version'"))
+    def argument_defaults(self):
+        defaults = {'distribution': None}
 
-v=$(write_vars $cluster)
-$TPA_DIR/ansible/ansible-playbook $archdir/generate-config.yml \
-    -e @$v -e output=$cluster/config.yml
+        if self.platform.name == 'aws':
+            defaults.update({
+                'image_name': 'TPA-{distribution}-{label}-{version}-{date}',
+                'distributions': ['Debian', 'RedHat', 'Ubuntu'],
+                'regions': [
+                    'eu-west-1', 'eu-west-2', 'eu-west-3',
+                    'eu-central-1',
+                    'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2',
+                ],
+                'region': None,
+            })
+        elif self.platform.name == 'docker':
+            defaults.update({
+                'image_name': '2ndq-tpa/{distribution}-{label}-{version}:{date}',
+                'distributions': ['RedHat'],
+                'regions': ['irrelevant'],
+            })
 
-source $libdir/configure-links.sh
+        return defaults
+
+    # We don't need to generate random hostnames
+    def hostnames(self, num):
+        return []
+
+    # We don't have anything to set in self.args['image']
+    def image(self):
+        return {}
+
+    # We don't use main.yml.j2 either
+    def load_topology(self, args):
+        instances = []
+
+        regions = args['regions']
+        if not regions and args['region']:
+            regions = [args['region']]
+
+        distributions = args['distributions']
+        if not distributions and args['distribution']:
+            distributions = [args['distribution']]
+
+        for i, r in enumerate(regions):
+            for j, d in enumerate(distributions):
+                image = self.platform.image(d, lookup=True, region=r)
+                instance = {
+                    'node': i*len(distributions)+j+1,
+                    'Name': ('%s-%s' % (d, r)).lower(),
+                    'image': image.get('image_id', image['name']),
+                    'location': i,
+                    'region': r,
+                }
+                if 'user' in image:
+                    instance['vars'] = {'ansible_user': image['user']}
+                instances.append(instance)
+
+        args.update({'instances': instances})
+
+    def update_cluster_vars(self, cluster_vars):
+        cluster_vars.update({
+            'image_name': self.args['image_name'],
+            'image_label': self.args['image_label'],
+            'image_version': self.args['image_version'],
+        })
+
+    def num_instances(self):
+        return len(self.args['regions'])*len(self.args['distributions'])
+
+    def num_locations(self):
+        return len(self.args['regions'])
+
+if __name__ == '__main__':
+    Images().configure()
