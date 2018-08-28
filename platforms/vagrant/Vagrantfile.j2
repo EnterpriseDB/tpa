@@ -21,7 +21,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", path: "init.sh"
 {% for h in instance_vars %}
   config.vm.define "{{ h.Name }}" do |{{ h.Name }}|
-    config.vm.box = "{{ h.image }}"
+    {{ h.Name }}.vm.box = "{{ h.image }}"
     {{ h.Name }}.vm.hostname = '{{ h.Name }}'
     {{ h.Name }}.vm.network :private_network, ip: '{{ h.ip_address }}'
     {{ h.Name }}.vm.provider :virtualbox do |v|
