@@ -22,7 +22,7 @@ class BDR_Simple(Architecture):
         g.add_argument(
             '--bdr-version', metavar='VER',
             help='major version of BDR required',
-            dest='bdr_version', default='3',
+            dest='bdr_version',
             choices=['1', '2', '3'],
         )
 
@@ -48,11 +48,11 @@ class BDR_Simple(Architecture):
         bdr_version = None
 
         if postgres_version == '9.4':
-            bdr_version = self.args.get('bdr_version', '1')
+            bdr_version = self.args.get('bdr_version') or '1'
         elif postgres_version == '9.6':
-            bdr_version = self.args.get('bdr_version', '2')
+            bdr_version = self.args.get('bdr_version') or '2'
         elif postgres_version in ['10', '11']:
-            bdr_version = self.args.get('bdr_version', '3')
+            bdr_version = self.args.get('bdr_version') or '3'
         elif postgres_version is None:
             bdr_version = self.args.get('bdr_version')
 
