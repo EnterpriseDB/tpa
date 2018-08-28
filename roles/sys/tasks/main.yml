@@ -28,7 +28,7 @@
   tags: [sys, hosts]
 
 - include_role: name=sys/cloudinit
-  when: platform not in ['docker']
+  when: platform not in ['docker', 'vagrant']
   tags: [sys, cloudinit]
 
 - include_role: name=sys/rsyslog
