@@ -226,13 +226,6 @@ deploy() {
     playbook deploy.yml "$@"
 }
 
-test() {
-    if [[ ! -f ${test:=test.yml} ]]; then
-        test=$TPA_DIR/architectures/lib/test.yml
-    fi
-    playbook $test "$@"
-}
-
 deprovision() {
     playbook $TPA_DIR/platforms/deprovision.yml "$@"
 }
@@ -586,7 +579,7 @@ case "$command" in
         cd $cluster
         ;;
 
-    cmd|ping|provision|deploy|deprovision|rehydrate|test)
+    cmd|ping|provision|deploy|deprovision|rehydrate)
         cluster=${1:?No cluster specified}
         shift
 
@@ -617,7 +610,7 @@ case "$command" in
         $command "$@"
         ;;
 
-    cmd|ping|provision|deploy|playbook|deprovision|rehydrate|test)
+    cmd|ping|provision|deploy|playbook|deprovision|rehydrate)
         time $command "$@"
         ;;
 
