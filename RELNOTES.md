@@ -6,6 +6,32 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Major changes
 
+- Multi-platform support in ``tpaexec configure``
+
+- Experimental support for Vagrant, Docker, and lxd platforms
+
+- Allow instances to be backed up to multiple Barman servers in parallel
+
+### Bugfixes
+
+- Install correct rsyslog/logrotate rules for local logging
+
+### Porting notes
+
+- deploy.yml should now «include_role: name=sys» instead of including
+  the various sys/* roles one by one
+
+### Other notable changes
+
+- Enable repmgr monitoring_history
+- Allow uploading additional files to S3 during provisioning
+- Add 'hba_force_hostssl' to force hostssl lines in pg_hba.conf
+- Revoke superuser privileges from the pgbouncer user
+
+## v3.1 (not yet released)
+
+### Major changes
+
 - Added support for deployment architectures.
   See ``tpaexec info architectures`` for details.
 
@@ -14,8 +40,6 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
   a new cluster.
 
 - New BDR3-Always-ON and BDR-Simple architectures
-
-- Experimental support for Vagrant, Docker, and lxd platforms
 
 - New ``tpaexec test`` command
 
@@ -60,6 +84,7 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 ### Other notable changes
 
 - Extensive documentation updates
+- Initial LXD platform support
 - Support postgres/repmgr/barman package version selection (6e904c8)
   via ``tpaexec configure … --postgres-package version``
 - When generating restore_command, prefer the closest Barman server
