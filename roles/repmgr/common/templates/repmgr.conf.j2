@@ -20,6 +20,8 @@ ssh_options=-q
 
 log_level=INFO
 
+monitoring_history=true
+
 promote_command='{{ repmgr_conf_dir }}/promote_command.sh'
 follow_command='{{ repmgr_conf_dir }}/follow_command.sh'
 {% if upstream_backedup != '' %}

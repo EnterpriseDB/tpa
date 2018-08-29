@@ -1,0 +1,3 @@
+---
+
+_repmgr_cluster_cleanup_interval: "{{ (repmgr_cluster_cleanup_interval|default(default_repmgr_cluster_cleanup_interval)).split(' ')|list }}"
