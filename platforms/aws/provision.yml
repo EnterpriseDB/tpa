@@ -47,6 +47,11 @@
     lookup('pipe', 'date +%s')|int > s3_hostkey_expiry|default(0)|int
   tags: [aws, s3, ssh, hostkeys]
 
+- include_tasks: s3-uploads.yml
+  when:
+    s3_uploads|default([]) != []
+  tags: [aws, s3, uploads]
+
 # We create an instance profile IAM role for the cluster and attach
 # an inline policy with any permissions that the instances need.
 #

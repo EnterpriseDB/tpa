@@ -1,0 +1,14 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# We upload anything specified in s3_uploads to cluster_bucket in S3.
+
+- name: Upload additional files to S3
+  aws_s3:
+    bucket: "{{ cluster_bucket }}"
+    object: "{{ cluster_name }}/{{ item }}"
+    src: "{{ item }}"
+    overwrite: different
+    mode: put
+  with_items: "{{ s3_uploads }}"
