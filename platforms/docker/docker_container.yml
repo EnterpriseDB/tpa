@@ -13,7 +13,7 @@
 #
 # https://docs.ansible.com/ansible/latest/modules/docker_container_module.html
 
-- name: Provision docker containers
+- name: Provision docker container {{ item.Name }}
   docker_container:
     name: "{{ item.Name }}"
     hostname: "{{ item.Name }}"
