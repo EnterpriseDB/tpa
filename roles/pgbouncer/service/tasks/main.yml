@@ -1,0 +1,19 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Install custom pgbouncer service unit file
+  template:
+    src: pgbouncer.service.j2
+    dest: /etc/systemd/system/pgbouncer.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: [pgbouncer, service]
+
+- name: Enable pgbouncer service
+  systemd:
+    name: pgbouncer
+    enabled: yes
+    daemon_reload: yes
+  tags: [pgbouncer, service]

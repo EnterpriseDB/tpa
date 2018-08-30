@@ -1,0 +1,16 @@
+{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
+[Unit]
+Description=Postgres connection pooler
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+User=postgres
+Group=postgres
+ExecStart=/usr/bin/pgbouncer /etc/pgbouncer/pgbouncer.ini
+ExecStop=/bin/kill -TERM $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
