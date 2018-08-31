@@ -135,11 +135,11 @@ def identify_os(name):
 # optional version suffix, this function returns a list of packages for the
 # given os, with the version suffix applied (if provided).
 
-def packages_for(packages, os, version):
+def packages_for(packages, os, version=None):
     ret = []
 
     for p in packages[os]:
-        if not isinstance(version, StrictUndefined):
+        if not (version is None or isinstance(version, StrictUndefined)):
             sep = '='
             if os == 'RedHat':
                 sep = '-'
