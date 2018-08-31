@@ -2,15 +2,4 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=secret
-  vars:
-    secret_name: nsca_password
-- include_role: name=secret
-  vars:
-    secret_name: icinga_password
-
-- include_tasks: icinga.yml
-  tags: icinga
-
-- include_tasks: nsca-ng.yml
-  tags: nsca-ng
+# Nothing to do here (yet).

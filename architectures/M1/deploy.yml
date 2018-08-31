@@ -38,8 +38,7 @@
 
     - include_role: name=monitoring
       when: >
-        'role_monitoring-server' in groups and
-        ansible_distribution == 'Debian'
+        'role_monitoring-server' in groups
       tags: monitoring
 
 # Finally, we must make sure we don't leave stale entries in /etc/hosts

@@ -2,20 +2,4 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# Add a client server to monitoring.
-
-- include_role: name=secret
-  vars:
-    secret_name: nsca_password
-
-- name: Set up client server scripts for standard monitoring
-  include_tasks: add-monitoring.yml
-  when: (monitoring|bool == true) and (server_role == "database")
-
-- name: Set up client server scripts for barman monitoring
-  include_tasks: add-barman-monitoring.yml
-  when: (monitoring|bool == true) and (server_role == "barman")
-
-- name: Remove client server monitoring scripts
-  include_tasks: remove-monitoring.yml
-  when: (monitoring|bool == false) and (server_role == "database")
+# Nothing to do here (yet).

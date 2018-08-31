@@ -1,6 +1,0 @@
-{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-{# _send_icinga_config.j2 #}
-{% set sudo = '' %}
-{% if (have_postgres_sudo|bool == true) %}
-  {% set sudo = 'sudo -u postgres $PG_PATH' %}
-{% endif %}

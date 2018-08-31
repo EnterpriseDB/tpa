@@ -1,8 +1,0 @@
-{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-# {{ansible_managed}}
-
-authorize "{{nsca_identity}}" {
-        password = "{{nsca_password}}"
-        commands = "PROCESS_HOST_CHECK_RESULT;.+"
-        services = ".+"
-}
