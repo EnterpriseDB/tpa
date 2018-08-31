@@ -3,11 +3,11 @@ $umask 0000
 if $programname == 'postgres' then {
     action(
         type="omfile"
-        DirOwner="postgres"
-        DirGroup="postgres"
+        DirOwner="{{ postgres_user }}"
+        DirGroup="{{ postgres_group }}"
         DirCreateMode="0750"
-        FileOwner="postgres"
-        FileGroup="postgres"
+        FileOwner="{{ postgres_user }}"
+        FileGroup="{{ postgres_group }}"
         FileCreateMode="0640"
         File="/var/log/postgres/postgres.log"
     )

@@ -6,8 +6,41 @@
   package: name=rsyslog state=latest
   tags: pkg
 
-- include_role: name=sys/rsyslog/client
-- include_role: name=sys/rsyslog/server
+- name: Make sure 99-tpa-node.conf is removed
+  file:
+    path: /etc/rsyslog.d/99-tpa-node.conf
+    state: absent
+
+- name: Add rsyslog rules for remote logging
+  template:
+    src: 99-forward.conf.j2
+    dest: /etc/rsyslog.d/99-forward.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: log_server|default('') != ''
+  notify:
+    - Note rsyslog restart required
+
+- name: Configure rsyslog server
+  block:
+    - name: Ensure /var/log/hosts exists
+      file:
+        path: /var/log/hosts
+        owner: root
+        group: root
+        mode: 0755
+        state: directory
+
+    - name: Install rsyslog configuration files
+      copy:
+        src: "{{ item }}"
+        dest: "/etc/rsyslog.d/{{ item }}"
+      with_items:
+        - 00-enable-tcp-reception.conf
+        - 23-postgres.conf
+      notify:
+        - Note rsyslog restart required
   when: >
     'log-server' in role
 

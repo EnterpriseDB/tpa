@@ -1,0 +1,15 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Add rsyslog rule for PostgreSQL logging
+  template:
+    src: syslog-postgres.conf.j2
+    dest: /etc/rsyslog.d/22-postgres.conf
+  register: syslog_conf
+
+- name: Restart rsyslog if required
+  service:
+    name: rsyslog
+    state: restarted
+  when: syslog_conf is changed

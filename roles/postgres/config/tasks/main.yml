@@ -155,3 +155,6 @@
 
 - include_tasks: extensions.yml
   tags: [postgres, config, extensions]
+
+- include_tasks: syslog.yml
+  tags: [postgres, syslog]
