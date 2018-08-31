@@ -135,6 +135,7 @@ class Architecture(object):
             'root_volume_size': 16,
             'barman_volume_size': 32,
             'postgres_volume_size': 16,
+            'repmgr_package_version': '4.0.6*',
         }
 
     # Returns the default platform for this architecture (i.e., the platform
