@@ -4,6 +4,11 @@
 
 # This playbook searches for self-owned AMIs whose name matches a
 # particular pattern across regions, and removes them. Be careful.
+# Set the ami_name to a pattern matching whatever AMIs you want to
+# remove. The expression below is written this way so that the
+# 'TPA-' prefix can't be accidentally omitted.
+# Can specify ami_name on the command line e.g.
+#    tpaexec remove-images <clusterdir> -e ami_name="TPA-*RedHat*Postgres-10-*"
 
 - hosts: localhost
   vars:
@@ -13,19 +18,18 @@
       - us-west-1
       - us-west-2
       - eu-west-1
+      - eu-west-2
       - eu-central-1
+    ami_name: "{{ 'TPA-' ~ '*2ndQPostgres-9.6-*2016*' }}"
 
   tasks:
 
-    # Set the name to a pattern matching whatever AMIs you want to
-    # remove. The expression below is written this way so that the
-    # 'TPA-' prefix can't be accidentally omitted.
 
     - ec2_ami_facts:
         region: "{{ r }}"
         owner: self
         filters:
-          name: "{{ 'TPA-' ~ '*2ndQPostgres-9.6-*2016*' }}"
+          name: "{{ ami_name }}"
       with_items: "{{ regions }}"
       loop_control:
         loop_var: r
