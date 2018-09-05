@@ -22,4 +22,4 @@ default_barman_home: /var/lib/barman
 
 default_repmgr_conf_dir: "/etc/repmgr/{{ postgres_version }}"
 
-default_bdr_database: "{{ cluster_name }}"
+default_bdr_database: "{{ cluster_name|replace('-','_') }}"

@@ -15,13 +15,18 @@
   set_fact:
     cluster_vars: "{{ cluster_vars|default({}) }}"
 
-- name: Ensure cluster_name is correctly configured
+- name: Ensure cluster_name is specified
   assert:
-    msg: "Please define cluster_name (letters, numbers, underscores) in {{config_file}}"
+    msg: "Please define cluster_name in {{config_file}}"
     that:
       - cluster_name is defined
       - cluster_name != ''
-      - cluster_name|match('^[_a-zA-Z0-9]+$')
+
+- name: Ensure given cluster_name is valid
+  assert:
+    msg: "Invalid cluster_name='{{ cluster_name }}' defined in {{ config_file }} (may contain only letters, numbers, underscores, minus)"
+    that:
+      - cluster_name|match('^[_a-zA-Z0-9-]+$')
 
 - name: Set default cluster_tags (including Owner)
   set_fact:
