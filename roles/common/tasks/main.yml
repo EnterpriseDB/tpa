@@ -2,8 +2,10 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=common/pkg
-  tags: [common, pkg]
+- include_role:
+    name: common/pkg
+    apply:
+      tags: [common, pkg]
 
 - name: Set the hostname
   hostname: name="{{ inventory_hostname }}"
@@ -11,5 +13,7 @@
     platform not in ['docker']
   tags: [common, hostname]
 
-- include_tasks: tpa.yml
-  tags: common
+- include_tasks:
+    file: tpa.yml
+    apply:
+      tags: [common, tpa]

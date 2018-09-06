@@ -18,7 +18,6 @@
     - include_role: name=common
 
     - include_role: name=sys
-      tags: sys
 
     - include_role: name=postgres
       when: >

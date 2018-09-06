@@ -2,7 +2,10 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=sys/fs
+- include_role:
+    name: sys/fs
+    apply:
+      tags: [sys, fs]
   vars:
     device: "{{ item.device }}"
     mountpoint: "{{ item.mountpoint }}"

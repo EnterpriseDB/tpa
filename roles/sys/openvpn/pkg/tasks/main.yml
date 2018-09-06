@@ -6,4 +6,4 @@
   package:
     name: "{{ openvpn_packages[ansible_os_family] }}"
     state: latest
-  tags: [sys, openvpn, pkg]
+  tags: pkg
