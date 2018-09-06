@@ -2,10 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Install rsyslog package
-  package: name=rsyslog state=latest
-  tags: pkg
-
 - name: Make sure 99-tpa-node.conf is removed
   file:
     path: /etc/rsyslog.d/99-tpa-node.conf

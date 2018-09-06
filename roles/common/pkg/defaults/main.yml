@@ -77,6 +77,7 @@ default_packages:
     - python-virtualenv
     - sudo
     - openssh-server
+    - rsyslog
   Debian:
     - python-dev
     - linux-tools
