@@ -28,6 +28,10 @@
   vars:
     hook: "{{ cluster_dir }}/hooks/pre-deploy.yml"
 
-- include_tasks: "os/{{ ansible_os_family }}/repositories.yml"
+- include_tasks:
+    file: "os/{{ ansible_os_family }}/repositories.yml"
+    apply:
+      tags: public_repos
+
 - include_tasks: packages.yml
 - include_tasks: python.yml

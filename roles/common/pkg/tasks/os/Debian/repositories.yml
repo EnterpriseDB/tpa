@@ -28,7 +28,6 @@
     msg: "Repository {{ item }} is not defined in apt_repositories"
     that: item in default_apt_repositories|combine(apt_repositories)
   with_items: "{{ apt_repository_list }}"
-  tags: public_repos
 
 # We need to support https://user:pass@host/… key and repository URLs,
 # which work only if we enable force_basic_auth for fetch_url(). Since
@@ -45,7 +44,6 @@
   vars:
     repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
     r: "{{ repos[item] }}"
-  tags: public_repos
 
 - name: Install apt repositories
   apt_repository:
@@ -56,11 +54,9 @@
   vars:
     repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
     r: "{{ repos[item] }}"
-  tags: public_repos
 
 - name: Update apt cache
   apt: update_cache=yes
-  tags: public_repos
 
 - name: Install 2ndQuadrant repositories
   shell: >
@@ -82,4 +78,3 @@
     url: >-
       {{ urltemplate.format(token=token, label=item) }}
     file: "/etc/apt/sources.list.d/2ndquadrant-{{ item|replace('/', '-') }}.list"
-  tags: public_repos

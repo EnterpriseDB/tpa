@@ -21,7 +21,6 @@
     msg: "Repository {{ item }} is not defined in yum_repositories"
     that: item in default_yum_repositories|combine(yum_repositories)
   with_items: "{{ yum_repository_list }}"
-  tags: public_repos
 
 # We need to support https://user:pass@host/… key and repository URLs,
 # which work only if we enable force_basic_auth for fetch_url(). Since
@@ -37,7 +36,6 @@
   vars:
     repos: "{{ default_yum_repositories|combine(yum_repositories) }}"
     r: "{{ repos[item] }}"
-  tags: public_repos
 
 # Following the instructions in
 # https://wiki.postgresql.org/wiki/YUM_Installation, we exclude
@@ -49,7 +47,6 @@
     section: main
     option: exclude
     value: "postgresql* barman* repmgr*"
-  tags: public_repos
 
 - name: Install 2ndQuadrant repositories
   shell: >
@@ -73,4 +70,3 @@
     url: >-
       {{ urltemplate.format(token=token, label=item, version=version_tag) }}
     file: "/etc/yum.repos.d/2ndquadrant-{{ item|replace('/', '-') }}-pg{{ postgres_version }}.repo"
-  tags: public_repos
