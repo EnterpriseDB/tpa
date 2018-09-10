@@ -13,7 +13,7 @@ Generate the cluster configuration by running the following command
 ```
 tpaexec configure ~/clusters/bdr --architecture BDR-Always-ON \
   --platform aws --region eu-west-1 --instance-type t3.micro \
-  --distribution Debian --minimal
+  --distribution Debian-minimal
 ```
 
 You must specify ``--architecture BDR-Always-ON``.

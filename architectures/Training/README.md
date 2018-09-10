@@ -18,10 +18,10 @@ Cluster configuration
 Generate the cluster configuration by running the following command
 
 ```
-tpaexec configure ~/clusters/training_10973 --architecture training \
+tpaexec configure ~/clusters/training_10973 --architecture Training \
   --redmine-id 10973 --instances 15 \
   --platform aws --region eu-west-1 \
-  --distribution Debian --minimal
+  --distribution Debian-minimal
 ```
 
 You must specify ``--architecture training``.
@@ -50,8 +50,8 @@ tpaexec provision ~/clusters/training_10973
 (We assume that the necessary AWS credentials are available. See
 ``tpaexec help platforms/aws`` for more details.)
 
-If you specified ``--minimal`` when generating the cluster above, you do
-not need to run the deployment at all. Otherwise, run
+If you specified ``Debian-minimal`` when generating the cluster above,
+you do not need to run the deployment at all. Otherwise, run
 
 ```
 tpaexec deploy ~/clusters/training_10973
