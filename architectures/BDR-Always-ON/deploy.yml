@@ -64,3 +64,5 @@
   tasks:
     - include_role: name=sys/hosts
       tags: [sys, hosts]
+
+    - include_role: name=post-deploy

@@ -1,0 +1,8 @@
+---
+
+- name: Include post-deploy hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/post-deploy.yml"
