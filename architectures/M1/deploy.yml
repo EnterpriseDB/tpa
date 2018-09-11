@@ -45,7 +45,7 @@
 # role has already been applied above, but it will matter if we run a
 # re-deployment limited to certain hosts.)
 
-- name: Ensure /etc/hosts is correct cluster-wide
+- name: Run final cluster-wide tasks
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root
