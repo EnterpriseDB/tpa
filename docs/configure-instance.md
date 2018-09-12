@@ -35,7 +35,7 @@ instances:
         shared_buffers: '64MB'
 ```
 
-Here, we see **work_mem**, **max_connections** & **shared_buffers** are all being defined - note that these should be defined as **\<variable>: \<value>**. To see what Postgres variables are possible to set, either read the documentation for the relevant Postgres version, or look in **\$PGDATA/postgresql.conf** on a Postgres server. 
+Here, we see **work_mem**, **max_connections** & **shared_buffers** are all being defined - note that these should be defined as **\<variable>: \<value>**. To see what Postgres variables are possible to set, either read the documentation for the relevant Postgres version, or look in **\$PGDATA/postgresql.conf** on a Postgres server.
 
 During the deploy phase, TPAexec creates a directory on each Postgres node which contains files with settings which override those set in **\$PGDATA/postgresql.conf**. This directory conf.d is included as the last line in \$PGDATA/postgresql.conf by the setting:
 
@@ -45,7 +45,7 @@ include_dir = 'conf.d'
 
 and is created in the $PGDATA directory ( **/opt/postgres/data** by default).
 
-Multiple files within the include directory are processed in file name order (according to C locale rules, i.e. numbers before letters, and uppercase letters before lowercase ones) - this means that only the last setting encountered for a particular parameter while the server is reading configuration files will be used. 
+Multiple files within the include directory are processed in file name order (according to C locale rules, i.e. numbers before letters, and uppercase letters before lowercase ones) - this means that only the last setting encountered for a particular parameter while the server is reading configuration files will be used.
 
 ```
 [postgres-server]$ ls $PGDATA/conf.d
@@ -75,46 +75,51 @@ These are automatically generated during deploy phase by TPAexec and should not 
 
 ------
 
-### Other customisations
+### Other customisations - hooks
 
-It is possible to set up many other customisations during the build process by adding post_tasks and handlers to the final play in **~/tpa/clusters/\<clustername>/deploy.yml**.
+It is possible to set up many other customisations during the build process by creating post deployment tasks that are called via the Ansible hook system. 
 
-In this snippet, designed to be part of a training lab, we create a user "student", add them to admin group, set password, allow them to ssh with just password authentication, update /etc/sudoers, and restart ssh service. 
+First create a **hooks** directory under **\<clustername\>**, then create a file in it called **post-deploy.yml**. 
+
+```
+$ mkdir ~/tpa/clusters/<clustername>/hooks
+$ touch ~/tpa/clusters/<clustername>/hooks/
+
+```
+
+In this snippet, designed to be part of a training lab, we create a user "student", add them to admin group, set password, allow them to ssh with just password authentication, update /etc/sudoers, and restart ssh service.
 
 *Disclaimer - allowing ssh access to Internet facing instances with just password authentication is a security risk, and shouldn't be enabled on any production system*.
 
 ```
-- name: Ensure /etc/hosts is correct cluster-wide
-  any_errors_fatal: True
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  hosts: all
-  roles:
-    - role: sys/hosts
-      tags: [sys, hosts]
-  post_tasks:
-    - user:
-        state: present
-        name: student
-        shell: /bin/bash
-        group: admin
-# password and quoted hash are both on the same line
-        password: "$6$cRmk8XVtYzS.52Hk$ISMY65gigtvdzeBs0nr7B66mx7BOLoWq7tjQ2hxOJ9r28fLkVo1RscMhW9t2ortjwWSi5EUq7pLmoL84AEpUl/"
-    - name: Allow password auth
-      lineinfile:
-          path: /etc/ssh/sshd_config
-          regexp: "^PasswordAuthentication"
-          line: "PasswordAuthentication yes"
-          state: present
-      notify: Restart ssh
-    - name: Add student to sudoers
-# Fully quoted line because of the ': '. See the Gotchas in the YAML docs.
-      lineinfile: "dest=/etc/sudoers line='student        ALL=(ALL)       NOPASSWD: ALL'"
 
+---
+- name: Starting the custom code now
+  debug:
+      msg: "Starting creation of student account"
+- name: Create a login user
+  user:
+      state: present
+      name: student
+      shell: /bin/bash
+# Set admin group relevant to OS type & version
+      group: adm
+      createhome: yes
+# password and quoted hash are both on the same line
+      password: "$6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdELN07/Kpo7EjjWnm9zusFg/LLFv6oc.ynu/"
+- name: Add student to sudoers
+# Fully quoted line because of the ': '. See the Gotchas in the YAML docs.
+  lineinfile: "dest=/etc/sudoers line='student        ALL=(ALL)       NOPASSWD: ALL'"
+- name: Allow password auth
+  lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: "^PasswordAuthentication"
+      line: "PasswordAuthentication yes"
+      state: present
+  notify: Restart ssh
   handlers:
   - name: Restart ssh
-    service: name=ssh state=restarted
+      command: service ssh restart
 ```
 
 The hashed password is created by installing **passlib** and running the following commands: (at the password prompt enter the password to be hashed)
@@ -123,7 +128,8 @@ The hashed password is created by installing **passlib** and running the followi
 $ pip install passlib
 $ python -c "from passlib.hash import sha512_crypt; import getpass; print sha512_crypt.using(rounds=5000).hash(getpass.getpass())"
 Password:
-$6$cRmk8XVtYzS.52Hk$ISMY65gigtvdzeBs0nr7B66mx7BOLoWq7tjQ2hxOJ9r28fLkVo1RscMhW9t2ortjwWSi5EUq7pLmoL84AEpUl/
+$6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdELN07/Kpo7EjjWnm9zusFg/LLFv6oc.ynu/
 ```
 
-In this manner, post_tasks can be used to configure and modify server files - see [user](http://docs.ansible.com/ansible/latest/modules/user_module.html#user-module) and [lineinfile](http://docs.ansible.com/ansible/latest/modules/lineinfile_module.html) for more information on how to use those particular modules. Information about all the current modules available for Ansible can be found [here](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html) or just the system modules [here](http://docs.ansible.com/ansible/latest/modules/list_of_system_modules.html). The [shell](http://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module) module can be used to run commands on the nodes.
+In this manner, post deployment tasks can be used to configure and modify server files - see [user](http://docs.ansible.com/ansible/latest/modules/user_module.html#user-module) and [lineinfile](http://docs.ansible.com/ansible/latest/modules/lineinfile_module.html) for more information on how to use those particular modules. Information about all the current modules available for Ansible can be found [here](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html) or just the system modules [here](http://docs.ansible.com/ansible/latest/modules/list_of_system_modules.html). The [shell](http://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module) module can be used to run commands on the nodes.
+
