@@ -116,10 +116,10 @@ In this snippet, designed to be part of a training lab, we create a user "studen
       regexp: "^PasswordAuthentication"
       line: "PasswordAuthentication yes"
       state: present
-  notify: Restart ssh
-  handlers:
-  - name: Restart ssh
-      command: service ssh restart
+
+- name: Restart sshd
+  service: name=sshd state=restarted
+
 ```
 
 The hashed password is created by installing **passlib** and running the following commands: (at the password prompt enter the password to be hashed)
