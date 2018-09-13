@@ -2,6 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-pool_mode: session
-max_client_conn: 100
-default_pool_size: 20
+default_pgbouncer_pool_mode: session
+default_pgbouncer_max_client_conn: 100
+default_pgbouncer_default_pool_size: 20
