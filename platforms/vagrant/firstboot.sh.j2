@@ -2,7 +2,11 @@
 mv /tmp/ssh_host_*_key* /etc/ssh
 chmod 0600 /etc/ssh/ssh_host_*_key
 chmod 0644 /etc/ssh/ssh_host_*_key.pub
-useradd -m -s /bin/bash -U admin
+if [ $(getent group admin) ]; then
+  useradd -m -s /bin/bash -g admin admin
+else
+  useradd -m -s /bin/bash -U admin
+fi
 mkdir /home/admin/.ssh
 chmod 700 /home/admin/.ssh
 mv /tmp/authorized_keys /home/admin/.ssh
