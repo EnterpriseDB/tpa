@@ -4,25 +4,6 @@
 
 # These tasks are executed on any Barman server instance.
 
-- name: Restart cron first time round on docker containers
-  block:
-  - stat: path=/etc/tpa/barman-home-ok
-    register: barman_home_ok
-
-  - name: Restart cron on Centos/RHEL docker container
-    service: name=crond.service state=restarted
-    when:
-    - barman_home_ok.stat.exists == False
-    - ansible_distribution in ['CentOS', 'RedHat']
-    - ansible_distribution_major_version in ['7', '8']
-    
-  - name: Restart cron on Debian docker container
-    service: name=cron.service state=restarted
-    when:
-      - ansible_distribution in ['Debian']
-  when:
-    - platform in ['docker']
-
 - name: Install global Barman configuration file
   template:
     src: barman.conf.j2
@@ -38,6 +19,21 @@
     owner: root
     group: root
     mode: 0755
+  register: barman_home_ok
+
+- name: Restart cron once in docker containers
+  block:
+    - name: Restart cron
+      service:
+        name: "{{ cron_service_names[ansible_os_family] }}"
+        state: restarted
+      vars:
+        cron_service_names:
+          Debian: cron
+          RedHat: crond
+  when: >
+    barman_home_ok is changed and
+    platform in ['docker']
 
 - name: Test barman-home-ok before invoking barman cron
   lineinfile:
@@ -61,6 +57,7 @@
     owner: barman
     group: barman
     mode: 0600
+
 # We install a per-client configuration file in /etc/barman.d and create
 # a cron job to backup each client in client.yml by delegating to the
 # designated backup server.
