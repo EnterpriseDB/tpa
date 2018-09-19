@@ -2,6 +2,9 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  tags: always
+
 - name: Training cluster setup
   any_errors_fatal: True
   max_fail_percentage: 0
@@ -10,16 +13,6 @@
 
   hosts: all
   tasks:
-    - include_role: name=platforms
-      tags: always
-      become: no
-
-    - include_role: name=facts
-      tags: always
-
-    - include_role: name=postgres/vars
-      tags: always
-
     - include_role: name=common
 
     - include_role: name=sys/volumes

@@ -5,6 +5,7 @@
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   vars:
     pgdata_initialised: "{{ 'postgres' in role }}"
+  tags: always
 
 - name: Perform switchover to {{ target }} on cluster {{ cluster_dir }}
   any_errors_fatal: True

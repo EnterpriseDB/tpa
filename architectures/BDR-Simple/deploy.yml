@@ -3,9 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
-
-# Now the cluster hosts are reachable by ssh and have all the required
-# inventory variables set. We can get on with installing Postgres.
+  tags: always
 
 - name: Set up TPA cluster nodes
   any_errors_fatal: True
@@ -50,19 +48,5 @@
         'role_monitoring-server' in groups
       tags: monitoring
 
-# Finally, we must make sure we don't leave stale entries in /etc/hosts
-# anywhere. (This won't matter for an initial deployment, because the
-# role has already been applied above, but it will matter if we run a
-# re-deployment limited to certain hosts.)
-
-- name: Run final cluster-wide tasks
-  any_errors_fatal: True
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  hosts: all
-  tasks:
-    - include_role: name=sys/hosts
-      tags: [sys, hosts]
-
-    - include_role: name=post-deploy
+- import_playbook: "{{ tpa_dir }}/architectures/lib/fini.yml"
+  tags: always

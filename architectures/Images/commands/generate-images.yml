@@ -5,6 +5,7 @@
 # Supports only AMI generation for AWS EC2 at the moment.
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  tags: always
 
 - name: Generate AMIs
   hosts: all

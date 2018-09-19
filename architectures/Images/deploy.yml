@@ -3,13 +3,13 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  tags: always
 
 - name: Set up TPA image nodes
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root
   become: true
-
   hosts: all
   tasks:
     - include_role: name=common/pkg
@@ -18,6 +18,5 @@
     - include_role: name=pgbouncer/pkg
     - include_role: name=barman/pkg
     - include_role: name=repmgr/pkg
-
     - include_role: name=sys/upgrade
     - include_role: name=sys/firstboot
