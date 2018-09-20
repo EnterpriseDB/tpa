@@ -8,7 +8,7 @@
   aws_s3:
     bucket: "{{ cluster_bucket }}"
     object: "{{ cluster_name }}/{{ item }}"
-    src: "{{ item }}"
+    src: "{{ cluster_dir }}/{{ item }}"
     overwrite: different
     mode: put
   with_items: "{{ s3_uploads }}"
