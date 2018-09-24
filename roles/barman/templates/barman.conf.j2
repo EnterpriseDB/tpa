@@ -40,6 +40,9 @@ minimum_redundancy = {{ default_barman_minimum_redundancy }}
 ; Global retention policy (REDUNDANCY or RECOVERY WINDOW) - default empty
 retention_policy = {{ default_barman_retention_policy }}
 
+; Recovery options (influences recovery.conf written by barman recover)
+recovery_options = 'get-wal'
+
 ; Time frame that must contain the latest backup date.
 ; If the latest backup is older than the time frame, barman check
 ; command will report an error to the user.
