@@ -72,9 +72,14 @@
       state: restarted
     vars:
       ssh_service_name: "{{ (ansible_distribution == 'RedHat')|ternary('sshd', 'ssh') }}"
-  # https://github.com/CentOS/CentOS-Dockerfiles/issues/173
-  - name: Do magic stuff to make openssh work
-    shell: >
-      test -f /run/nologin && rm /run/nologin
-    ignore_errors: yes
   when: platform in ['docker']
+
+# https://github.com/CentOS/CentOS-Dockerfiles/issues/173
+#
+# Needed for (at least CentOS) Docker containers, harmless everywhere
+# else.
+
+- name: Ensure /run/nologin does not exist
+  file:
+    path: /run/nologin
+    state: absent
