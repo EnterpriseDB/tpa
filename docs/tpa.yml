@@ -35,6 +35,7 @@ nav:
     - Switchover: tpaexec-switchover.md
   - Miscellaneous:
     - PuTTY configuration: misc/configure-putty.md
+    - Troubleshooting: misc/troubleshooting.md
 markdown_extensions:
   - codehilite:
       css_class: highlight
