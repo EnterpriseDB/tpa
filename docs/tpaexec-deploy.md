@@ -28,13 +28,13 @@ forget to do this, an error message will soon remind you.
 [tpa]$ tpaexec deploy ~/clusters/speedy -v
 Using /opt/2ndQuadrant/TPA/ansible/ansible.cfg as config file
 
-PLAY [Basic initialisation and fact discovery] ************************************************************************************************************************************************
+PLAY [Basic initialisation and fact discovery] ***************************************
 …
 
-PLAY [Set up TPA cluster nodes] ***************************************************************************************************************************************************************
+PLAY [Set up TPA cluster nodes] ******************************************************
 …
 
-PLAY RECAP ************************************************************************************************************************************************************************************
+PLAY RECAP ***************************************************************************
 zealot                     : ok=281  changed=116  unreachable=0    failed=0   
 keeper                     : ok=284  changed=96   unreachable=0    failed=0   
 quaver                     : ok=260  changed=89   unreachable=0    failed=0   

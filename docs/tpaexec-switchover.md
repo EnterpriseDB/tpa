@@ -16,7 +16,8 @@ This command relies on the relevant achitecture commands directory containing co
 [tpa]$ cd commands
 [tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands/switchover.sh switchover.sh
 [tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands/switchover.yml switchover.yml
-[tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands/update-postgres.yml update-postgres.yml
+[tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands/update-postgres.yml \
+update-postgres.yml
 ```
 
 ### Architecture options

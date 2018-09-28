@@ -28,10 +28,10 @@ documentation for details.
 ```bash
 [tpa]$ tpaexec provision ~/clusters/speedy
 
-PLAY [Provision cluster] **********************************************************************************************************************************************************************
+PLAY [Provision cluster] **********************************************************
 …
 
-TASK [Set up EC2 instances] *******************************************************************************************************************************************************************
+TASK [Set up EC2 instances] *******************************************************
 changed: [localhost] => (item=us-east-1:quirk)
 changed: [localhost] => (item=us-east-1:keeper)
 changed: [localhost] => (item=us-east-1:zealot)
@@ -39,14 +39,14 @@ changed: [localhost] => (item=us-east-1:quaver)
 changed: [localhost] => (item=us-east-1:quavery)
 …
 
-TASK [Generate ssh_config file for the cluster] ***********************************************************************************************************************************************
+TASK [Generate ssh_config file for the cluster] ***********************************
 changed: [localhost]
 
-PLAY RECAP ************************************************************************************************************************************************************************************
+PLAY RECAP ************************************************************************
 localhost                  : ok=128  changed=20   unreachable=0    failed=0   
 
 
-real    5m19.386s
+real    2m19.386s
 user    0m51.819s
 sys     0m27.852s
 ```
@@ -137,7 +137,8 @@ total 240
 -rw-r--r-- 1 ams ams 193098 Aug  4 17:59 ansible.log
 drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 commands
 -rw-r--r-- 1 ams ams   1442 Aug  4 17:54 config.yml
-lrwxrwxrwx 1 ams ams     51 Aug  4 17:38 deploy.yml -> /home/ams/work/2ndq/TPA/architectures/M1/deploy.yml
+lrwxrwxrwx 1 ams ams     51 Aug  4 17:38 deploy.yml -> 
+                             /opt/2ndQuadrant/TPA/architectures/M1/deploy.yml
 drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 hostkeys
 -rw------- 1 ams ams   1675 Aug  4 17:38 id_speedy
 -rw------- 1 ams ams   1438 Aug  4 17:38 id_speedy.ppk

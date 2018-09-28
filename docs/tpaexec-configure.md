@@ -234,7 +234,8 @@ $ ls ~/clusters/speedy
 total 8
 drwxr-xr-x 2 ams ams 4096 Aug  4 16:23 commands
 -rw-r--r-- 1 ams ams 1374 Aug  4 16:23 config.yml
-lrwxrwxrwx 1 ams ams   51 Aug  4 16:23 deploy.yml -> /home/ams/work/2ndq/TPA/architectures/M1/deploy.yml
+lrwxrwxrwx 1 ams ams   51 Aug  4 16:23 deploy.yml -> 
+                         /home/ams/work/2ndq/TPA/architectures/M1/deploy.yml
 ```
 
 The cluster configuration is in config.yml, and its neighbours are links

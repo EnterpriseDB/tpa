@@ -105,8 +105,9 @@ In this snippet, designed to be part of a training lab, we create a user "studen
 # Set admin group relevant to OS type & version
       group: adm
       createhome: yes
-# password and quoted hash are both on the same line
-      password: "$6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdELN07/Kpo7EjjWnm9zusFg/LLFv6oc.ynu/"
+# password and quoted hash are both on the same line - hash has been truncated 
+# for documentation purposes
+      password: "$6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdEL"
 - name: Add student to sudoers
 # Fully quoted line because of the ': '. See the Gotchas in the YAML docs.
   lineinfile: "dest=/etc/sudoers line='student        ALL=(ALL)       NOPASSWD: ALL'"
@@ -126,9 +127,10 @@ The hashed password is created by installing **passlib** and running the followi
 
 ```
 $ pip install passlib
-$ python -c "from passlib.hash import sha512_crypt; import getpass; print sha512_crypt.using(rounds=5000).hash(getpass.getpass())"
+$ python -c "from passlib.hash import sha512_crypt; import getpass; \
+  print sha512_crypt.using(rounds=5000).hash(getpass.getpass())"
 Password:
-$6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdELN07/Kpo7EjjWnm9zusFg/LLFv6oc.ynu/
+$6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdEL
 ```
 
 In this manner, post deployment tasks can be used to configure and modify server files - see [user](http://docs.ansible.com/ansible/latest/modules/user_module.html#user-module) and [lineinfile](http://docs.ansible.com/ansible/latest/modules/lineinfile_module.html) for more information on how to use those particular modules. Information about all the current modules available for Ansible can be found [here](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html) or just the system modules [here](http://docs.ansible.com/ansible/latest/modules/list_of_system_modules.html). The [shell](http://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module) module can be used to run commands on the nodes.
