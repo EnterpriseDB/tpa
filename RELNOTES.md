@@ -28,7 +28,7 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Add 'hba_force_hostssl' to force hostssl lines in pg_hba.conf
 - Revoke superuser privileges from the pgbouncer user
 
-## v3.1 (not yet released)
+## v3.1 (2018-09-17)
 
 ### Major changes
 
