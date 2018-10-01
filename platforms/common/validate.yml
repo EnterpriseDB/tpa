@@ -42,7 +42,8 @@
     that:
       - cluster_tags['Owner'] is defined
       - cluster_tags['Owner'] not in [
-          '', 'root', 'postgres', 'ec2-user', 'admin', 'ubuntu'
+          '', 'root', 'postgres', 'ec2-user', 'admin', 'ubuntu',
+          'vagrant', 'tpa',
         ]
 
 # It is not currently meaningful to set cluster_tags['Name'] to anything
