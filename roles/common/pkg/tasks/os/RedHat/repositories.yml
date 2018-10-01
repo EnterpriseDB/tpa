@@ -53,20 +53,21 @@
     curl {{ url }} | bash
   args:
     executable: /bin/bash
-    creates: "{{ file }}"
+    creates: "{{ use_volatile_subscriptions|ternary(omit, file) }}"
   with_items:
     - dl/default/release
     - "{{ tpa_2q_repositories|default([]) }}"
   vars:
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
+    volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
     version_tag: >-
       {{ (postgresql_flavour|default('postgresql') == 'postgresql-bdr')|ternary('bdr9.4', postgres_version) }}
     urltemplate: "{{
       (item == 'dl/default/release')|ternary(
-        'https://access.2ndquadrant.com/api/repository/{label}/{version}/rpm',
-        'https://access.2ndquadrant.com/api/repository/{token}/{label}/{version}/rpm'
+        'https://access.2ndquadrant.com/api/repository/{label}/{version}/rpm{volatile}',
+        'https://access.2ndquadrant.com/api/repository/{token}/{label}/{version}/rpm{volatile}'
       )
     }}"
     url: >-
-      {{ urltemplate.format(token=token, label=item, version=version_tag) }}
+      {{ urltemplate.format(token=token, label=item, version=version_tag, volatile=volatile) }}
     file: "/etc/yum.repos.d/2ndquadrant-{{ item|replace('/', '-') }}-pg{{ postgres_version }}.repo"

@@ -100,6 +100,9 @@ class Architecture(object):
             '--postgres-version', choices=['9.4', '9.5', '9.6', '10', '11']
         )
         g.add_argument(
+            '--use-volatile-subscriptions', action='store_true',
+        )
+        g.add_argument(
             '--2Q-repositories', dest='tpa_2q_repositories', nargs='+',
             metavar='source/name/maturity',
         )
@@ -299,7 +302,9 @@ class Architecture(object):
     # under cluster_vars
     def cluster_vars_args(self):
         return [
-            'tpa_2q_repositories', 'postgres_version',
+            'postgres_version',
+            'tpa_2q_repositories',
+            'use_volatile_subscriptions'
         ] + [
             '%s_package_version' % x for x in self.versionable_packages()
         ]

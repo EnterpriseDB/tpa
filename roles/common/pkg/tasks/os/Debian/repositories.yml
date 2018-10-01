@@ -63,18 +63,19 @@
     curl {{ url }} | bash
   args:
     executable: /bin/bash
-    creates: "{{ file }}"
+    creates: "{{ use_volatile_subscriptions|ternary(omit, file) }}"
   with_items:
     - dl/default/release
     - "{{ tpa_2q_repositories|default([]) }}"
   vars:
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
+    volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
     urltemplate: "{{
       (item == 'dl/default/release')|ternary(
-        'https://access.2ndquadrant.com/api/repository/{label}/deb',
-        'https://access.2ndquadrant.com/api/repository/{token}/{label}/deb'
+        'https://access.2ndquadrant.com/api/repository/{label}/deb{volatile}',
+        'https://access.2ndquadrant.com/api/repository/{token}/{label}/deb{volatile}'
       )
     }}"
     url: >-
-      {{ urltemplate.format(token=token, label=item) }}
+      {{ urltemplate.format(token=token, label=item, volatile=volatile) }}
     file: "/etc/apt/sources.list.d/2ndquadrant-{{ item|replace('/', '-') }}.list"
