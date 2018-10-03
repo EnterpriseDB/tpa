@@ -9,6 +9,7 @@
         output_dir: >-
           {{ cluster_dir }}/test/{{ lookup('pipe', 'date +%s') }}
       run_once: yes
+      tags: always
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   vars:
@@ -18,8 +19,10 @@
 - name: Test instances
   any_errors_fatal: True
   max_fail_percentage: 0
-
   hosts: all
   tasks:
-    - include_role: name=test
-      tags: test
+    - include_role:
+        name: test
+        apply:
+          tags: test
+      tags: always

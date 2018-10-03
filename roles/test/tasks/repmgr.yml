@@ -15,6 +15,7 @@
     output_file: repmgr-node-status.txt
     content: |
       {{ repmgr_status.stdout }}
+  tags: always
 
 - name: Run repmgr node check
   command: >
@@ -29,6 +30,7 @@
     output_file: repmgr-node-check.txt
     content: |
       {{ repmgr_check.stdout }}
+  tags: always
 
 - name: Fail if either of the above tasks failed
   fail:
@@ -50,3 +52,4 @@
     output_file: repmgr-cluster-show.txt
     content: |
       {{ repmgr_cluster.stdout }}
+  tags: always

@@ -5,6 +5,7 @@
 - include_role: name=secret
   vars:
     secret_name: "{{ username }}_password"
+  tags: always
 
 - name: Record {{ username }} in the list of database users to create
   set_fact:

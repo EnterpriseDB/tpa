@@ -3,6 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_role: name=postgres/src/req
+  tags: always
 
 - name: Fetch Postgres source from git repository
   git:

@@ -8,6 +8,9 @@
 # if ec2_id is defined, because a non-EC2 member of a cluster with EC2
 # instances may also need awscli.
 
-- include_tasks: python-aws.yml
+- include_tasks:
+    file: python-aws.yml
+    apply:
+      tags: python-aws
   when: platform not in ['docker', 'vagrant']
-  tags: python-aws
+  tags: always

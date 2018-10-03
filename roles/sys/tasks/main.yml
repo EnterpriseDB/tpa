@@ -8,6 +8,7 @@
     name: sys/volumes
     apply:
       tags: [sys, volumes]
+  tags: always
 
 # Computes memory size and other instance-specific values needed by
 # later steps (e.g., setting shared_buffers).
@@ -15,6 +16,7 @@
     name: sys/tune
     apply:
       tags: [sys, always]
+  tags: always
 
 - include_role:
     name: sys/sysctl
@@ -23,11 +25,13 @@
   vars:
     sysctl_values:
       net.ipv4.ip_forward: 1
+  tags: always
 
 - include_role:
     name: sys/sysstat
     apply:
       tags: [sys, sysstat]
+  tags: always
 
 - include_role:
     name: sys/openvpn
@@ -36,11 +40,13 @@
   when: >
     platform not in ['docker', 'vagrant'] and
     'role_openvpn-server' in groups
+  tags: always
 
 - include_role:
     name: sys/hosts
     apply:
       tags: [sys, hosts]
+  tags: always
 
 - include_role:
     name: sys/cloudinit
@@ -48,13 +54,16 @@
       tags: [sys, cloudinit]
   when: >
     platform not in ['docker', 'vagrant']
+  tags: always
 
 - include_role:
     name: sys/rsyslog
     apply:
       tags: [sys, rsyslog]
+  tags: always
 
 - include_role:
     name: sys/logrotate
     apply:
       tags: [sys, rsyslog]
+  tags: always

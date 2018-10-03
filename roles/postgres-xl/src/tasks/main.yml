@@ -9,6 +9,7 @@
     postgres_src_dir: "{{ pgxl_src_dir }}"
     postgres_build_dir: "{{ pgxl_build_dir }}"
     postgres_install_dir: "{{ pgxl_install_dir }}"
+  tags: always
 
 - include_role: name=postgres/user
   vars:
@@ -16,6 +17,7 @@
     extra_bashrc_lines:
       - export LD_LIBRARY_PATH=/opt/pgxl/lib:$LD_LIBRARY_PATH
       - export PGPORT=20002
+  tags: always
 
 - name: Install additional Postgres-XL related packages
   package:

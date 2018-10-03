@@ -5,31 +5,39 @@
 - include_role: name=postgres/final
   when: >
     'postgres' in role
+  tags: always
 
 - include_role: name=repmgr/final
   when: >
     'postgres' in role and
     initialise_replication is defined
+  tags: always
 
 - include_role: name=barman/final
   when: >
     'barman' in role or backup is defined
+  tags: always
 
 - include_role: name=haproxy/final
   when: >
     'haproxy' in role
+  tags: always
 
 - include_role: name=pgbouncer/final
   when: >
     'pgbouncer' in role
+  tags: always
 
 # We force an immediate backup for any instances that do not have any
 # backups at all.
 
-- include_role: name=barman/first-backup
+- include_role:
+    name: barman/first-backup
+    apply:
+      tags: firstbackup
   with_items: "{{ backup|default([]) }}"
   loop_control:
     loop_var: this_barman
   vars:
     slot_name: "backup_{{ this_barman|replace('-', '_') }}"
-  tags: firstbackup
+  tags: always

@@ -14,23 +14,22 @@
   hosts: all
   tasks:
     - include_role: name=common
+      tags: always
 
     - include_role: name=sys/volumes
-      tags: [sys, fs]
+      tags: always
 
     - include_role: name=sys/tune
       tags: always
 
     - include_role: name=sys/sysctl
-      vars:
-        sysctl_values:
-          net.ipv4.ip_forward: 1
-      tags: [sys, sysctl]
+      tags: always
 
     - include_role: name=sys/hosts
-      tags: [sys, hosts]
+      tags: always
 
     - include_role: name=postgres
+      tags: always
 
     - include_role: name=final
-      tags: final
+      tags: always

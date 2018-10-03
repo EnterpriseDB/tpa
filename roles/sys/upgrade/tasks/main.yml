@@ -12,3 +12,4 @@
 # and is probably not a good idea to include in any "normal" playbook.
 
 - include_tasks: "os/{{ ansible_os_family }}.yml"
+  tags: always

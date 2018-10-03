@@ -19,3 +19,4 @@
 - include_tasks: hugepages.yml
   when: >
     platform not in ['docker']
+  tags: always

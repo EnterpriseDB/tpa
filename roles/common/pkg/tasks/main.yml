@@ -20,6 +20,7 @@
 # anything else we need to run Ansible modules such as "pkg" below.
 
 - include_tasks: "os/{{ ansible_os_family }}/python.yml"
+  tags: always
 
 - name: Include pre-deploy hook
   include_tasks: "{{ hook }}"
@@ -27,6 +28,7 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/pre-deploy.yml"
+  tags: always
 
 - set_fact:
     use_volatile_subscriptions: "{{ use_volatile_subscriptions|default(false)|bool }}"
@@ -35,6 +37,9 @@
     file: "os/{{ ansible_os_family }}/repositories.yml"
     apply:
       tags: public_repos
+  tags: always
 
 - include_tasks: packages.yml
+  tags: always
 - include_tasks: python.yml
+  tags: always

@@ -19,3 +19,4 @@
 - include_tasks: pgbouncer.yml
   when: >
     postgres_users|json_query("[?username=='pgbouncer']") != []
+  tags: always

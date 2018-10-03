@@ -27,6 +27,7 @@
 # operations, and should be avoided.
 
 - include_tasks: defaults.yml
+  tags: always
 
 # First, we generate pg_hba.conf. There are several options here:
 #
@@ -153,14 +154,23 @@
   notify:
     - Note Postgres restart required
 
-- include_tasks: extensions.yml
-  tags: [postgres, config, extensions]
+- include_tasks:
+    file: extensions.yml
+    apply:
+      tags: [postgres, config, extensions]
+  tags: always
 
-- include_tasks: syslog.yml
-  tags: [postgres, syslog]
+- include_tasks:
+    file: syslog.yml
+    apply:
+      tags: [postgres, syslog]
+  tags: always
 
-- include_role: name=postgres/createuser
+- include_role:
+    name: postgres/createuser
+    apply:
+      tags: [postgres, user]
   vars:
     username: postgres
     role_attrs: [superuser]
-  tags: [postgres, user]
+  tags: always

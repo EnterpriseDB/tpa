@@ -3,6 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_role: name=pgbouncer/service
+  tags: always
 
 - meta: flush_handlers
 

@@ -13,3 +13,4 @@
     luks_volume: "{{ item.luks_volume|default(item.device|basename) }}"
   with_items:
     "{{ volumes }}"
+  tags: always

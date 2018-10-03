@@ -3,6 +3,9 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_role: name=haproxy/pkg
+  tags: always
+
 - include_role: name=haproxy/config
+  tags: always
 
 - set_fact: initialise_haproxy=True

@@ -20,6 +20,7 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/bdr-pre-node-creation.yml"
+  tags: always
 
 - name: Create BDR node if necessary
   postgresql_query:
@@ -70,6 +71,7 @@
   when:
     inventory_hostname != groups[bdr_node_group][0] and
     node_group_id.rowcount == 0
+  tags: always
 
 # The remaining hosts join the group… but they must do so one at a time,
 # because BDR does not support concurrent group joins (not in version 3,
@@ -90,3 +92,4 @@
   when:
     inventory_hostname == groups[bdr_node_group][0] and
     hostvars[bdr_node].node_group_id.rowcount == 0
+  tags: always

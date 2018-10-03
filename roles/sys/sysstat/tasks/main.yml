@@ -3,3 +3,4 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_tasks: "os/{{ ansible_os_family }}.yml"
+  tags: always

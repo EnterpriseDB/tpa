@@ -5,17 +5,22 @@
 - include_role: name="repmgr/{{ postgres_installation_source }}"
   when: >
     'postgres' in role
+  tags: always
 - include_role: name=repmgr/common
   when: >
     'postgres' in role
+  tags: always
 - include_role: name=repmgr/primary
   when: >
     'primary' in role
+  tags: always
 - include_role: name=repmgr/replica
   when: >
     'replica' in role
+  tags: always
 - include_role: name=repmgr/witness
   when: >
     'witness' in role
+  tags: always
 
 - set_fact: initialise_replication=True

@@ -9,4 +9,3 @@
 - include_role: name=postgres/config
   when: >
     pgdata_initialised
-  tags: [postgres, config]

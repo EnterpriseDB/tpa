@@ -6,3 +6,4 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/post-deploy.yml"
+  tags: always

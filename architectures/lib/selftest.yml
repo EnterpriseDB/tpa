@@ -6,3 +6,4 @@
   tasks:
     - include_role:
         name: selftest
+      tags: always

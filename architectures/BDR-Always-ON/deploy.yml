@@ -14,39 +14,38 @@
   hosts: "{{ deploy_hosts|default('all') }}"
   tasks:
     - include_role: name=common
+      tags: always
 
     - include_role: name=sys
+      tags: always
 
     - include_role: name=postgres
       when: >
         'postgres' in role
+      tags: always
 
     - include_role: name=barman
-      tags: barman
+      tags: always
 
     - include_role: name=repmgr
-      tags: repmgr
+      tags: always
 
     - include_role: name=pgbouncer
-      tags: pgbouncer
+      tags: always
 
     - include_role: name=haproxy
-      when: >
-        'haproxy' in role
-      tags: haproxy
+      tags: always
 
     - include_role: name=final
-      tags: [final]
+      tags: always
 
     - include_role: name=postgres/bdr
       when: >
         'bdr' in role and 'primary' in role
-      tags: [postgres, bdr]
+      tags: always
 
     - include_role: name=monitoring
-      when: >
-        'role_monitoring-server' in groups
-      tags: monitoring
+      tags: always
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/fini.yml"
   tags: always

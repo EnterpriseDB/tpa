@@ -5,7 +5,7 @@
 - include_role: name=sys/ssh
   vars:
     ssh_username: "{{ postgres_user }}"
-  tags: [postgres, ssh]
+  tags: always
 
 ## Ensure needed directories exist
 
@@ -50,28 +50,34 @@
 - include_tasks: gtm_roles.yml gtype=gtm
   when: >
     'gtm' in role
+  tags: always
 
 - include_tasks: gtm_roles.yml gtype=gtm_standby
   when: >
     'gtm-standby' in role
+  tags: always
 
 - include_tasks: gtm_proxy_roles.yml gpindex="{{ 1+item.0 }}" gphost="{{item.1}}" dtype=gtm-proxy
   with_indexed_items: "{{ groups['role_datanode'] }}"
+  tags: always
 
 - include_tasks: coord_roles.yml ctype=master cnode={{item}}
   with_items: "{{hostvars[inventory_hostname].coordinators|default([])}}"
   when: >
     'coordinator' in role
+  tags: always
 
 - include_tasks: datanode_roles.yml dnode={{item}} dtype=master
   with_items: "{{hostvars[inventory_hostname].datanodes|default([])}}"
   when: >
     'datanode' in role
+  tags: always
 
 - include_tasks: datanode_roles.yml dnode={{item}} dtype=replica
   with_items: "{{hostvars[inventory_hostname].datanode_replicas|default([])}}"
   when: >
     'datanode-replica' in role
+  tags: always
 
 ## Quick test to make sure that the cluster is operational
 - set_fact:

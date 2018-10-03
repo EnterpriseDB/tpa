@@ -12,5 +12,8 @@
 # within the files below.
 
 - include_tasks: keygen.yml
+  tags: always
 - include_tasks: authorize.yml
+  tags: always
 - include_tasks: install.yml
+  tags: always

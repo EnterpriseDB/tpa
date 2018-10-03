@@ -12,4 +12,9 @@
     }}"
   tags: [barman, pkg]
 
-- include_role: name=postgres/pkg tasks_from=client.yml
+- include_role:
+    name: postgres/pkg
+    tasks_from: client.yml
+    apply:
+      tags: [postgres, pkg]
+  tags: always

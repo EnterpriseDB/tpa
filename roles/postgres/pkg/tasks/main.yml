@@ -6,7 +6,7 @@
 # enable repositories and install Postgres packages.
 
 - include_tasks: "os/{{ ansible_distribution }}.yml"
-  tags: [postgres, pkg]
+  tags: always
 
 # At the moment, however, package installation is not distribution
 # specific. This can be moved into os/ if that ever changes.
@@ -32,7 +32,6 @@
       - "{{ additional_postgres_packages[ansible_distribution] }}"
       - "{{ extra_postgres_packages[ansible_distribution] }}"
       - python-psycopg2
-  tags: [postgres, pkg]
 
 # PGDG provides only postgresql-10-pglogical-dbgsym, whereas the 2ndQ
 # repositories provide only postgresql-10-pglogical-dbg, which is the
@@ -49,7 +48,6 @@
   vars:
     package_lists:
       - "{{ (postgresql_flavour == 'postgresql')|ternary(pglogical_debug_packages|packages_for(ansible_distribution, pglogical_package_version), []) }}"
-  tags: [postgres, pkg]
 
 - name: Try fallback pglogical debug package on Debian
   package:
@@ -65,7 +63,6 @@
   vars:
     _version_suffix: >-
       {% if pglogical_package_version is defined %}={{ pglogical_package_version }}{% endif %}
-  tags: [postgres, pkg]
 
 # On Postgres 9.5, pgespresso is required to support rsync-based backups
 # from a replica. (To do so, we also have to create the extension on the
@@ -85,7 +82,6 @@
         - postgresql-{{postgres_version}}-pgespresso
       RedHat:
         - pgespresso{{postgres_versionNN}}
-  tags: [postgres, pkg]
 
 # We install our own service units later, so we disable the packaged
 # versions here.
@@ -95,3 +91,4 @@
     name: "{{ default_postgres_service_names[ansible_os_family] }}"
     state: stopped
     masked: yes
+  tags: service

@@ -13,6 +13,7 @@
 - include_tasks: clone.yml
   when:
     not pgdata_initialised
+  tags: always
 
 # Do we have a valid recovery.conf?
 #
@@ -32,6 +33,7 @@
   vars:
     recovery_settings: >
       {{ cluster_facts|try_subkey('replica.recovery_settings', {}) }}
+  tags: always
 
 # Next we must check if the replica is streaming properly, for which we
 # need Postgres to be running. If it's already running, the tasks below
@@ -55,11 +57,13 @@
 - include_role: name=postgres/facts
   when:
     cluster_facts|length == 0
+  tags: always
 
 # Now we can check that this instance is in fact a replica, and has a
 # reasonable configuration.
 
 - include_tasks: check-replica.yml
+  tags: always
 
 # Is this instance correctly registered with repmgr?
 #

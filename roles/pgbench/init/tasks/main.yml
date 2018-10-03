@@ -14,3 +14,4 @@
     output_file: pgbench-init.txt
     content: |
       {{ pgbench_init.stdout }}
+  tags: always

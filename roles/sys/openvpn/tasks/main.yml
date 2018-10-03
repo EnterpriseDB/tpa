@@ -9,13 +9,17 @@
   tags: always
 
 - include_role: name=sys/openvpn/pkg
+  tags: always
 - include_role: name=sys/openvpn/common
+  tags: always
 - include_role: name=sys/openvpn/server
   when: >
     'openvpn-server' in role
+  tags: always
 - include_role: name=sys/openvpn/client
   when: >
     openvpn_server is defined and openvpn_server != ''
+  tags: always
 
 - name: Ensure openvpn is enabled on boot
   service:

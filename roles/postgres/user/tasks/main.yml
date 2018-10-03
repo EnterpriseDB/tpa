@@ -149,10 +149,16 @@
 
 # Finally, we generate the TLS certificates needed by Postgres.
 
-- include_tasks: tls.yml
-  tags: [postgres, tls]
+- include_tasks:
+    file: tls.yml
+    apply:
+      tags: [postgres, tls]
+  tags: always
 
-- include_role: name=sys/ssh
+- include_role:
+    name: sys/ssh
+    apply:
+      tags: [postgres, ssh]
   vars:
     ssh_username: "{{ postgres_user }}"
-  tags: [postgres, ssh]
+  tags: always

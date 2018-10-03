@@ -11,6 +11,7 @@
 # Perform local initialisation tasks (generating keys and certificates).
 
 - include_tasks: local.yml
+  tags: always
 
 # Perform instance initialisation tasks.
 

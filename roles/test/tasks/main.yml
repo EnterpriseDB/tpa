@@ -43,20 +43,30 @@
 
     - include_tasks: postgres.yml
       when: pgdata_initialised
+      tags: always
 
-    - include_tasks: repmgr.yml
+    - include_tasks:
+        file: repmgr.yml
+        apply:
+          tags: repmgr
       when: pgdata_initialised
-      tags: repmgr
+      tags: always
   when: >
     'postgres' in role
   tags: postgres
 
-- include_tasks: barman.yml
+- include_tasks:
+    file: barman.yml
+    apply:
+      tags: barman
   when: >
     'barman' in role
-  tags: barman
+  tags: always
 
-- include_role: name=pgbench
+- include_role:
+    name: pgbench
+    apply:
+      tags: pgbench
   when: >
     'postgres' in role and pgdata_initialised
-  tags: pgbench
+  tags: always

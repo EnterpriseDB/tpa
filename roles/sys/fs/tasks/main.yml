@@ -7,6 +7,7 @@
     secret_name: "{{ encryption }}_passphrase"
   when: >
     encryption|default('none') != 'none'
+  tags: always
 
 # Given a block device name and a mountpoint, does everything required
 # to make the volume available for use immediately and after subsequent
