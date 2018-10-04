@@ -2,14 +2,9 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=repmgr/src
+- include_role: name="repmgr/{{ postgres_installation_source }}"
   when: >
     'postgres' in role
-    and postgres_installation_source == 'src'
-- include_role: name=repmgr/pkg
-  when: >
-    'postgres' in role
-    and postgres_installation_source == 'pkg'
 - include_role: name=repmgr/common
   when: >
     'postgres' in role

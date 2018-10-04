@@ -2,12 +2,7 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=postgres/src
-  when:
-    postgres_installation_source == 'src'
-- include_role: name=postgres/pkg
-  when:
-    postgres_installation_source == 'pkg'
+- include_role: name="postgres/{{ postgres_installation_source }}"
 - include_role: name=postgres/user
   tags: [postgres, user]
 - include_role: name=postgres/initdb
