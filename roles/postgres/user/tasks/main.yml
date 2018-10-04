@@ -151,3 +151,8 @@
 
 - include_tasks: tls.yml
   tags: [postgres, tls]
+
+- include_role: name=sys/ssh
+  vars:
+    ssh_username: "{{ postgres_user }}"
+  tags: [postgres, ssh]

@@ -15,7 +15,3 @@
   when: >
     pgdata_initialised
   tags: [postgres, config]
-- include_role: name=sys/ssh
-  vars:
-    ssh_username: "{{ postgres_user }}"
-  tags: [postgres, ssh]
