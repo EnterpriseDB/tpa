@@ -6,11 +6,6 @@
 - include_role: name=postgres/user
   tags: [postgres, user]
 - include_role: name=postgres/initdb
-- include_role: name=postgres/createuser
-  vars:
-    username: postgres
-    role_attrs: [superuser]
-  tags: [postgres, user]
 - include_role: name=postgres/config
   when: >
     pgdata_initialised

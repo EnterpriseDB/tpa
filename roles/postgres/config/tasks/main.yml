@@ -158,3 +158,9 @@
 
 - include_tasks: syslog.yml
   tags: [postgres, syslog]
+
+- include_role: name=postgres/createuser
+  vars:
+    username: postgres
+    role_attrs: [superuser]
+  tags: [postgres, user]
