@@ -8,7 +8,7 @@ instances:
       - primary
       - bdr
     vars:
-      bdr_node_group: {{ cluster_name }}
+      bdr_node_group: {{ cluster_name|replace('-','_') }}
 
   - node: 2
     Name: {{ hostnames[2] }}
@@ -16,7 +16,7 @@ instances:
       - primary
       - bdr
     vars:
-      bdr_node_group: {{ cluster_name }}
+      bdr_node_group: {{ cluster_name|replace('-','_') }}
 
   - node: 3
     Name: {{ hostnames[3] }}
@@ -24,7 +24,7 @@ instances:
       - primary
       - bdr
     vars:
-      bdr_node_group: {{ cluster_name }}
+      bdr_node_group: {{ cluster_name|replace('-','_') }}
 
   - node: 4
     Name: {{ hostnames[4] }}
@@ -32,7 +32,7 @@ instances:
       - primary
       - bdr
     vars:
-      bdr_node_group: {{ cluster_name }}
+      bdr_node_group: {{ cluster_name|replace('-','_') }}
 
   - node: 5
     Name: {{ hostnames[5] }}
