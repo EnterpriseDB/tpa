@@ -27,7 +27,7 @@
 
 - name: Set default repmgr_location
   set_fact:
-    repmgr_location: "{{ repmgr_location|default(ec2_availability_zone|default('')) }}"
+    repmgr_location: "{{ repmgr_location|default('') }}"
 
 - name: Ensure repmgr directories exist
   file:
