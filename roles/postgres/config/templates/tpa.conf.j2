@@ -39,7 +39,7 @@ random_page_cost = {{ random_page_cost|default(4.0) }}
 cpu_tuple_cost = {{ cpu_tuple_cost|default(0.01) }}
 cpu_index_tuple_cost = {{ cpu_index_tuple_cost|default(0.005) }}
 cpu_operator_cost = {{ cpu_operator_cost|default(0.0025) }}
-effective_cache_size = {{ effective_cache_size|default('4GB') }}
+effective_cache_size = {{ effective_cache_size|default(effective_cache_size_mb~'MB') }}
 default_statistics_target = {{ default_statistics_target|default(100) }}
 constraint_exclusion = {{ constraint_exclusion|default('partition') }}
 
