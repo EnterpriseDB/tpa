@@ -28,6 +28,9 @@
   vars:
     hook: "{{ cluster_dir }}/hooks/pre-deploy.yml"
 
+- set_fact:
+    use_volatile_subscriptions: "{{ use_volatile_subscriptions|default(false)|bool }}"
+
 - include_tasks:
     file: "os/{{ ansible_os_family }}/repositories.yml"
     apply:
