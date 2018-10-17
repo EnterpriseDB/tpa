@@ -53,13 +53,13 @@
     curl {{ url }} | bash
   args:
     executable: /bin/bash
-    creates: "{{ use_volatile_subscriptions|ternary(omit, file) }}"
+    creates: "{{ use_volatile_subscriptions|default('false')|ternary(omit, file) }}"
   with_items:
     - dl/default/release
     - "{{ tpa_2q_repositories|default([]) }}"
   vars:
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
-    volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
+    volatile: "{{ use_volatile_subscriptions|default('false')|ternary('/volatile', '') }}"
     version_tag: >-
       {{ (postgresql_flavour|default('postgresql') == 'postgresql-bdr')|ternary('bdr9.4', postgres_version) }}
     urltemplate: "{{
