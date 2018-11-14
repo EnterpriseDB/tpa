@@ -2,7 +2,11 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## HEAD (not yet released)
+## v7.0 (2018-11-14)
+
+In this release, TPAexec goes from v3.1 to v7.0 as a precaution to avoid
+creating any confusion with the similar version numbers for BDR and the
+BDR-Always-ON architecture. This release would otherwise have been v3.2.
 
 ### Major changes
 
@@ -12,9 +16,13 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Allow instances to be backed up to multiple Barman servers in parallel
 
+- Add hooks/pre-deploy.yml and hooks/post-deploy.yml (included during
+  deployment if they exist)
+
 ### Bugfixes
 
 - Install correct rsyslog/logrotate rules for local logging
+- Support EC2 instances with NVME devices
 
 ### Porting notes
 
@@ -27,6 +35,10 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Allow uploading additional files to S3 during provisioning
 - Add 'hba_force_hostssl' to force hostssl lines in pg_hba.conf
 - Revoke superuser privileges from the pgbouncer user
+- Set repmgr_location only if explicitly requested
+- Allow - in cluster names
+- Set default archive_timeout of 6h
+- Allow event_notification{s,_command} to be set in repmgr.conf
 
 ## v3.1 (2018-09-17)
 
