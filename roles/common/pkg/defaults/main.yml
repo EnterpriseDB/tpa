@@ -35,6 +35,7 @@ _pgdg_yum_repoversions:
   9.5: 3
   9.6: 3
   10: 2
+  11: 2
 
 ## Packages
 #
