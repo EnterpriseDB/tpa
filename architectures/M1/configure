@@ -18,6 +18,11 @@ class M1(Architecture):
             dest='cascaded_replicas', default=1
         )
 
+    def argument_defaults(self):
+        return {
+            'repmgr_package_version': '4.0.6*',
+        }
+
     def num_instances(self):
         return 3+self.args.get('cascaded_replicas', 1)
 
