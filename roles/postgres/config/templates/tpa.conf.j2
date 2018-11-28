@@ -21,6 +21,7 @@ log_destination = {{ log_destination|default('syslog') }}
 syslog_facility = {{ syslog_facility|default('LOCAL6') }}
 syslog_ident = {{ syslog_ident|default('postgres') }}
 
+log_timezone = 'UTC'
 log_checkpoints = on
 log_connections = {{ log_connections|default('off') }}
 log_disconnections = {{ log_disconnections|default('off') }}
