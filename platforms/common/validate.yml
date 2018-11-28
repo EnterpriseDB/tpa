@@ -45,6 +45,8 @@
           '', 'root', 'postgres', 'ec2-user', 'admin', 'ubuntu',
           'vagrant', 'tpa',
         ]
+  when:
+    platform in ['aws']
 
 # It is not currently meaningful to set cluster_tags['Name'] to anything
 # other than cluster_name. We only use the latter value, so it will only
