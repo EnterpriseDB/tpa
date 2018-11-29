@@ -42,6 +42,18 @@
         loop_var: platform
   tags: always
 
+- name: Ensure cluster_tags[Owner] is sensible for cloud instances
+  assert:
+    msg: "Please set cluster_tags[Owner] or use '--owner Name' to identify the person responsible for this cluster"
+    that:
+      - cluster_tags['Owner'] is defined
+      - cluster_tags['Owner'] not in [
+          '', 'root', 'postgres', 'ec2-user', 'admin', 'ubuntu',
+          'vagrant', 'tpa',
+        ]
+  when: >
+    'aws' in cluster_platforms
+
 ## Final topology validation
 #
 # Once all the platform-specific validations have been run and given an
