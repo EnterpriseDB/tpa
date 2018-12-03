@@ -11,9 +11,9 @@ to the TPA source code repository and specifically advised to use it by
 ## Quickstart
 
 ```bash
-[tpa]$ git clone https://github.com/2ndQuadrant/TPA
-[tpa]$ ./TPA/bin/tpaexec setup
-[tpa]$ ./TPA/bin/tpaexec selftest
+[tpa]$ git clone ssh://git@git.2ndquadrant.com/products/tpa/tpaexec.git
+[tpa]$ ./tpaexec/bin/tpaexec setup
+[tpa]$ ./tpaexec/bin/tpaexec selftest
 ```
 
 ## Step-by-step
@@ -36,10 +36,10 @@ tpaexec package.)
 [brew or port] install openvpn
 ```
 
-Next, clone the TPA repository:
+Next, clone the TPAexec repository:
 
 ```bash
-[tpa]$ git clone https://github.com/2ndQuadrant/TPA
+[tpa]$ git clone ssh://git@git.2ndquadrant.com/products/tpa/tpaexec.git
 ```
 
 We strongly recommend not cloning into ``/opt/2ndQuadrant/TPA`` so as to
@@ -61,14 +61,14 @@ installed the tpaexec package.
 Install the TPAexec dependencies into an isolated virtualenv:
 
 ```bash
-[tpa]$ ./TPA/bin/tpaexec setup
+[tpa]$ ./tpaexec/bin/tpaexec setup
 ```
 
 For convenience, add tpaexec to your PATH:
 
 ```bash
 # The following line can also go into ~/.bashrc or similar
-[tpa]$ export PATH=$PATH:/path/to/TPA/bin
+[tpa]$ export PATH=$PATH:/path/to/tpaexec/bin
 ```
 
 Finally, test that everything is as it should be:
