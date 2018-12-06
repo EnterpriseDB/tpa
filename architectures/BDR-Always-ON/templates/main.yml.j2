@@ -7,6 +7,7 @@ instances:
     role:
       - primary
       - bdr
+    backup: {{ hostnames[6] }}
     vars:
       bdr_node_group: {{ cluster_name|replace('-','_') }}
 
@@ -37,7 +38,6 @@ instances:
   - node: 5
     Name: {{ hostnames[5] }}
     upstream: {{ hostnames[1] }}
-    backup: {{ hostnames[6] }}
     role:
       - replica
       - bdr

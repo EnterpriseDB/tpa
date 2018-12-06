@@ -6,13 +6,13 @@ instances:
   Name: {{ hostnames[1] }}
   location: 0
   role: primary
+  backup: {{ hostnames[3] }}
 
 - node: 2
   Name: {{ hostnames[2] }}
   location: 0
   role: replica
   upstream: {{ hostnames[1] }}
-  backup: {{ hostnames[3] }}
 
 - node: 3
   Name: {{ hostnames[3] }}
