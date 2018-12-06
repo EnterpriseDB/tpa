@@ -28,70 +28,13 @@
   retries: 5
   delay: 3
 
-# Having convinced ourselves that we're streaming, we force a switch to
-# a new WAL segment to give the archiver something to do. We could use
-# «barman switch-xlog --archive», but that doesn't work on replicas, so
-# we run pg_switch_xlog() on the instance or its upstream.
+# Force a WAL segment switch and wait for the old segment to be archived
+# (on a primary, this is equivalent to barman switch-wal --archive; on a
+# replica, this is equivalent to running pg_switch_wal() on the primary
+# and then running barman switch-wal --archive with Barman >= 2.5).
 
-- name: Force switch to a new WAL segment
-  postgresql_query:
-    conninfo: "host={{postgres_host}} port={{postgres_port}}"
-    query: >
-      select pg_{{wal}}file_name(pg_switch_{{wal}}()) as filename
-  delegate_to: "{{ inventory_hostname|upstream_root(hostvars) }}"
-  become_user: "{{ postgres_user }}"
-  become: yes
-  register: seg
-  vars:
-    wal: >-
-      {%- if postgres_version is version('10', '>=') -%}wal
-      {%- else -%}xlog
-      {%- endif -%}
-    
-# Now we have the name of the WAL segment file corresponding to the LSN
-# returned by pg_switch_xlog(), and we must wait for it to be archived.
-# First, pg_receivexlog will rename streaming/$n.partial to …/$n. Then
-# «barman archive-wal» will move it from streaming/ to wals/. We could
-# wait for the file to show up in streaming/ and invoke archive-wal to
-# archive the segment immediately, but that would be in a race against
-# any archive-wal that is invoked by «barman cron». So the file may be
-# moved away from streaming/ before we notice it. Instead, we wait for
-# the file to appear in wals/. This isn't racy, but it does depend on
-# the unpredictable cron invocation of archive-wal.
-
-- name: Upload barman lockfile script
-  copy:
-    dest: /tmp/lock
-    mode: 0755
-    content: |
-      #!/usr/bin/env python
-
-      import sys
-      from barman.lockfile import LockFile
-
-      if __name__ == '__main__':
-          try:
-              LockFile(sys.argv[1]).acquire(raise_if_fail=True, wait=True)
-          except:
-              pass
-  delegate_to: "{{ this_barman }}"
-
-- name: Wait for old WAL segment to be archived
-  wait_for:
-    path: "{{ barman_home }}/{{ backup_name }}/wals/{{ seg.filename[0:16] }}/{{ seg.filename }}"
-    delay: 3
-    timeout: 130
-  delegate_to: "{{ this_barman }}"
-
-# We know now that «barman archive-wal» has been invoked and moved the
-# WAL segment into wals/, but we don't know if it has finished updating
-# the xlogdb. We know it must have acquired the WAL archive lock before
-# doing so, so we wait to acquire it (and release it) before we invoke
-# «barman backup» (which will fail if the segment isn't in xlogdb).
-
-- name: Acquire and release Barman WAL archive lock
-  command: /tmp/lock "{{ barman_home }}/.{{ backup_name }}-archive-wal.lock"
-  delegate_to: "{{ this_barman }}"
+- include_tasks: force-archive.yml
+  tags: always
 
 - name: Force an immediate backup
   command: >
@@ -100,3 +43,12 @@
   delegate_to: "{{ this_barman }}"
   become_user: barman
   become: yes
+
+# Barman will force a WAL segment switch itself when taking backups from
+# a primary. Otherwise we do it, so that the backup will (eventually) go
+# from WAITING_FOR_WALS to DONE (in Barman >= 2.5 terminology).
+
+- include_tasks: force-archive.yml
+  when: >
+    'replica' in role
+  tags: always
