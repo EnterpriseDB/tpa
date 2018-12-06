@@ -14,6 +14,14 @@
   delegate_to: "{{ this_barman }}"
   register: conf
 
+- name: Run barman check to create directory structure
+  command: >
+    /usr/bin/barman check all
+  delegate_to: "{{ this_barman }}"
+  ignore_errors: yes
+  become_user: barman
+  become: yes
+
 # Now we create a replication slot for pg_receivexlog.
 #
 # TODO: We don't create the slot when we are configured to use rsync for
