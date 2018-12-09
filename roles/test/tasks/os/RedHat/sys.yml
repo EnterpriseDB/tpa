@@ -1,0 +1,17 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Run yum list
+  command: yum list
+  register: package_list
+  ignore_errors: yes
+  become_user: root
+  become: yes
+
+- include_tasks: output.yml
+  vars:
+    output_file: package-list.txt
+    content: |
+      {{ package_list.stdout }}
+  tags: always

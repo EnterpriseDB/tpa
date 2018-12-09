@@ -17,6 +17,13 @@
     key: "{{ bdr_node_group }}"
   when: bdr_node_group is defined
 
+- name: Run system-level tasks
+  include_tasks:
+    file: sys.yml
+    apply:
+      tags: sys
+  tags: always
+
 - name: Run postgres tests
   block:
     - name: Check if PGDATA has been initialised

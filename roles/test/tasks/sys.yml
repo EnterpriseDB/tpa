@@ -1,0 +1,6 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- include_tasks: "os/{{ ansible_os_family }}/sys.yml"
+  tags: always

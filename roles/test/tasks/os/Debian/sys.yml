@@ -1,0 +1,15 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Run apt list
+  command: apt list
+  register: package_list
+  ignore_errors: yes
+
+- include_tasks: output.yml
+  vars:
+    output_file: package-list.txt
+    content: |
+      {{ package_list.stdout }}
+  tags: always
