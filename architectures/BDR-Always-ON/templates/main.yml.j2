@@ -4,6 +4,7 @@
 instances:
   - node: 1
     Name: {{ hostnames[1] }}
+    location: 0
     role:
       - primary
       - bdr
@@ -13,6 +14,7 @@ instances:
 
   - node: 2
     Name: {{ hostnames[2] }}
+    location: 0
     role:
       - primary
       - bdr
@@ -21,6 +23,7 @@ instances:
 
   - node: 3
     Name: {{ hostnames[3] }}
+    location: 1
     role:
       - primary
       - bdr
@@ -29,6 +32,7 @@ instances:
 
   - node: 4
     Name: {{ hostnames[4] }}
+    location: 1
     role:
       - primary
       - bdr
@@ -38,17 +42,20 @@ instances:
   - node: 5
     Name: {{ hostnames[5] }}
     upstream: {{ hostnames[1] }}
+    location: 0
     role:
       - replica
       - bdr
 
   - node: 6
     Name: {{ hostnames[6] }}
+    location: 0
     role:
       - barman
 
   - node: 7
     Name: {{ hostnames[7] }}
+    location: 0
     volumes:
       - device_name: /dev/xvdb
         volume_type: none
@@ -62,6 +69,7 @@ instances:
 
   - node: 8
     Name: {{ hostnames[8] }}
+    location: 1
     volumes:
       - device_name: /dev/xvdb
         volume_type: none

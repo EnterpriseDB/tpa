@@ -15,7 +15,8 @@ class aws(Platform):
         self.ec2 = {}
 
     def add_platform_options(self, p, g):
-        g.add_argument('--region', default='eu-west-1')
+        if self.arch.name != 'Images':
+            g.add_argument('--region', default='eu-west-1')
         g.add_argument('--instance-type', default='t3.micro', metavar='TYPE')
 
     def supported_distributions(self):
@@ -79,12 +80,13 @@ class aws(Platform):
             cluster_tags['Owner'] = args['owner']
 
     def update_locations(self, locations, args, **kwargs):
-        region = args['region']
+        region = args.get('region')
         subnets = args['subnets']
         for li, location in enumerate(locations):
-            location['region'] = region
             location['subnet'] = subnets[li]
-            location['az'] = region + ('a' if li%2 == 0 else 'b')
+            if region is not None:
+                location['region'] = region
+                location['az'] = region + ('a' if li%2 == 0 else 'b')
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml('platforms/aws/instance_defaults.yml.j2', args)
