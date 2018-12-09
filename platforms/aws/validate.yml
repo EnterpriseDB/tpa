@@ -31,6 +31,14 @@
       - aws_instances|selectattr('image','defined')|list|count == aws_instances|count or
         (ec2_ami is defined and ec2_ami is mapping and ec2_ami['Name'] is defined)
 
+- name: Ensure that every instance specifies a region and subnet
+  assert:
+    msg: "Please specify both region and subnet for instance {{ item.Name }}"
+    that:
+      - "'region' in item"
+      - "'subnet' in item"
+  with_items: "{{ aws_instances }}"
+
 - name: Derive list of unique regions from instances
   set_fact:
     aws_regions: "{{ aws_instances|map(attribute='region')|unique|list }}"
@@ -62,3 +70,39 @@
       - eu-west-2
       - eu-west-3
       - sa-east-1
+
+# Older config.yml files will specify ec2_vpc_subnets but not locations,
+# whereas newer ones will specify locations but not ec2_vpc_subnets. The
+# code in vpc-subnets.yml depends on the latter representation, which we
+# can generate from the information in aws_instances/locations.
+
+- name: Derive ec2_vpc_subnets if required
+  set_fact:
+    derived_ec2_vpc_subnets: "{{
+      derived_ec2_vpc_subnets|default({})|combine({
+        item.0: {
+          item.1: {
+            'Name': location|try_subkey([0,'subnet_name'], location[0].Name),
+            'az': location[0].az,
+          }
+        }
+      }, recursive=True)
+    }}"
+  with_nested_dependents:
+    - aws_regions
+    - aws_instances|selectattr('region', 'equalto', item.0)|map(attribute='subnet')|unique|list
+  vars:
+    location: "{{
+      locations
+      |selectattr('region', 'equalto', item.0)
+      |selectattr('subnet', 'equalto', item.1)
+      |list
+    }}"
+  when:
+    ec2_vpc_subnets is not defined
+    and location|length > 0
+    and location[0].az is defined
+
+- name: Ensure ec2_vpc_subnets is defined
+  set_fact:
+    ec2_vpc_subnets: "{{ ec2_vpc_subnets|default(derived_ec2_vpc_subnets|default({})) }}"

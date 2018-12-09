@@ -34,8 +34,8 @@ class Images(Architecture):
     def supported_platforms(self):
         return ['aws', 'docker']
 
-    def argument_defaults(self):
-        defaults = {'distribution': None}
+    def update_argument_defaults(self, defaults):
+        defaults.update({'distribution': None})
 
         if self.platform.name == 'aws':
             defaults.update({
@@ -54,8 +54,6 @@ class Images(Architecture):
                 'distributions': ['RedHat'],
                 'regions': ['irrelevant'],
             })
-
-        return defaults
 
     # We don't need to generate random hostnames
     def hostnames(self, num):

@@ -61,6 +61,10 @@ class Platform(object):
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
         pass
 
+    # Makes platform-specific changes to locations
+    def update_locations(self, locations, args, **kwargs):
+        pass
+
     # Makes platform-specific changes to instance_defaults
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         pass

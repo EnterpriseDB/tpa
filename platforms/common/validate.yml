@@ -11,8 +11,9 @@
 
 - import_tasks: validate-compat.yml
 
-- name: Set default empty cluster_vars
+- name: Set default empty locations and cluster_vars
   set_fact:
+    locations: "{{ locations|default([]) }}"
     cluster_vars: "{{ cluster_vars|default({}) }}"
 
 - name: Ensure cluster_name is specified
@@ -45,6 +46,12 @@
     cluster_tags: "{{ cluster_tags|combine(dict(Name=cluster_name)) }}"
     cluster_tag: "{{ cluster_tag|default('tag_Cluster_' + cluster_name) }}"
 
+- name: Ensure that every location specifies a unique name
+  assert:
+    msg: "Please set a unique 'Name' for every location"
+    that:
+      - locations|selectattr('Name','defined')|map(attribute='Name')|unique|list|count == locations|count
+
 - name: Ensure instances is correctly configured
   assert:
     msg: "Please define instances (an array of hashes, one per instance) in {{config_file}}"
@@ -57,7 +64,8 @@
   set_fact:
     instances: "{{
       instances|set_instance_defaults(cluster_name,
-        compat_defaults|combine(instance_defaults|default({}), recursive=True)
+        compat_defaults|combine(instance_defaults|default({}), recursive=True),
+        locations
       )
     }}"
 

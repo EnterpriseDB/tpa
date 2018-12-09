@@ -78,17 +78,21 @@ class aws(Platform):
         if args['owner'] is not None:
             cluster_tags['Owner'] = args['owner']
 
+    def update_locations(self, locations, args, **kwargs):
+        region = args['region']
+        subnets = args['subnets']
+        for li, location in enumerate(locations):
+            location['region'] = region
+            location['subnet'] = subnets[li]
+            location['az'] = region + ('a' if li%2 == 0 else 'b')
+
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml('platforms/aws/instance_defaults.yml.j2', args)
         if y:
             instance_defaults.update(y)
 
     def update_instances(self, instances, args, **kwargs):
-        subnets = args['subnets']
         for instance in instances:
-            if len(subnets) > 1:
-                instance['subnet'] = subnets[instance['location']]
-
             # For barman instances, convert the default postgres_data volume to
             # a correctly-sized barman_data one (if there isn't one already)
             role = instance.get('role') or []
@@ -128,13 +132,6 @@ class aws(Platform):
             s['ec2_ami'] = {'Name': args['image']['name']}
             if 'owner' in args['image']:
                 s['ec2_ami']['Owner'] = args['image']['owner']
-
-        region = args['region']
-        if region:
-            s['ec2_vpc_subnets'] = {region: {}}
-            for i, subnet in enumerate(args['subnets']):
-                az = region + ('a' if i == 0 else 'b')
-                s['ec2_vpc_subnets'][region][subnet]= {'az': az}
 
         cluster_rules = args.get('cluster_rules', [])
         if not cluster_rules and \

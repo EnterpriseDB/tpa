@@ -7,5 +7,6 @@ cluster_name: {{ cluster_name }}
 {{ platform_settings|to_nice_yaml(indent=2) }}
 {% endif %}
 {{ dict(cluster_vars=cluster_vars)|to_nice_yaml(indent=2) }}
+{{ dict(locations=locations)|to_nice_yaml(indent=2) }}
 {{ dict(instance_defaults=instance_defaults)|to_nice_yaml(indent=2) }}
 {{ dict(instances=instances)|to_nice_yaml(indent=2) }}

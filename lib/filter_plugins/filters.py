@@ -17,7 +17,10 @@ def try_subkey(container, keys, default=None):
         if isinstance(keys, basestring):
             keys = keys.split('.')
         for key in keys:
-            v = v.get(key, default)
+            if isinstance(v, list) and isinstance(key, int):
+                v = v[key]
+            else:
+                v = v.get(key, default)
         if isinstance(v, StrictUndefined):
             v = default
         return v

@@ -75,8 +75,29 @@ def ip_addresses(instance):
 
 # Every instance must have certain settings (e.g., tags) in a specific format.
 
-def set_instance_defaults(old_instances, cluster_name, instance_defaults):
+def set_instance_defaults(old_instances, cluster_name, instance_defaults, locations):
     instances = []
+
+    locations_map = {}
+    for l in locations:
+        locations_map[l['Name']] = l
+
+    # Returns a mapping with the keys in defaults (excluding those given in
+    # omit_keys) and the corresponding values from item (if specified) or from
+    # defaults otherwise. Any dict values are further merged for convenience, so
+    # that defaults can specify some keys and item can override or extend them.
+
+    def merged_defaults(item, defaults, omit_keys=[]):
+        result = {}
+
+        for key in [k for k in defaults if k not in omit_keys]:
+            result[key] = item.get(key, defaults[key])
+            if isinstance(result[key], dict) and isinstance(defaults[key], dict):
+                b = copy.deepcopy(defaults[key])
+                b.update(result[key])
+                result[key] = b
+
+        return result
 
     for i in old_instances:
         j = copy.deepcopy(i)
@@ -97,12 +118,7 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults):
         # set some vars in instance_defaults and some on the instance, and get
         # all of them, with the instance settings overriding the defaults).
 
-        for kd in [k for k in instance_defaults if k != 'default_volumes']:
-            j[kd] = j.get(kd, instance_defaults[kd])
-            if isinstance(j[kd], dict) and isinstance(instance_defaults[kd], dict):
-                b = copy.deepcopy(instance_defaults[kd])
-                b.update(j[kd])
-                j[kd] = b
+        j.update(merged_defaults(j, instance_defaults, omit_keys=['default_volumes']))
 
         # If instance_defaults specifies 'default_volumes', we merge those
         # entries with the instance's 'volumes', with entries in the latter
@@ -125,6 +141,22 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults):
                 volumes.append(volume_map[name])
 
             j['volumes'] = volumes
+
+        # If the instance specifies «location: x», where x is either a name or
+        # an array index (for backwards compatibility), we copy the settings
+        # from location x to the instance, in exactly the same way as we do
+        # above for instance_defaults.
+
+        location = j.get('location', None)
+        if len(locations) > 0 and location is not None:
+            if isinstance(location, int) and location < len(locations):
+                location = locations[location]
+            elif location in locations_map:
+                location = locations_map[location]
+            else:
+                raise AnsibleFilterError("Instance %s specifies unknown location %s" % (j['Name'], location))
+
+            j.update(merged_defaults(j, location, omit_keys=['Name']))
 
         # The upstream, backup, and role tags should be moved one level up if
         # they're specified at all.

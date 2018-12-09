@@ -112,9 +112,6 @@ class Architecture(object):
         g = p.add_argument_group('volume sizes in GB')
         for vol in ['root', 'barman', 'postgres']:
             g.add_argument('--%s-volume-size' % vol, type=int, metavar='N')
-        p.set_defaults(
-            root_volume_size=16, postgres_volume_size=16, barman_volume_size=32
-        )
 
         g = p.add_argument_group('subnet selection')
         g.add_argument('--subnet')
@@ -126,6 +123,9 @@ class Architecture(object):
         g.add_argument('--hostnames-pattern', metavar='PATTERN')
         g.add_argument('--hostnames-sorted-by', metavar='OPTION')
 
+        g = p.add_argument_group('locations')
+        g.add_argument('--location-names', metavar='LOCATION', nargs='+')
+
     # Adds architecture-specific options to the (relevant group in the) parser
     # (subclasses are expected to override this).
     def add_architecture_options(self, p, g):
@@ -133,17 +133,21 @@ class Architecture(object):
 
     # Set default values for command-line options
     def set_defaults(self, p):
-        argument_defaults = Architecture.argument_defaults(self)
-        argument_defaults.update(self.argument_defaults())
+        argument_defaults = self._argument_defaults()
+        self.update_argument_defaults(argument_defaults)
         p.set_defaults(**argument_defaults)
 
-    # Returns a dict of defaults for the applicable options
-    def argument_defaults(self):
+    # Returns a dict of defaults for the corresponding options
+    def _argument_defaults(self):
         return {
             'root_volume_size': 16,
             'barman_volume_size': 32,
             'postgres_volume_size': 16,
         }
+
+    # Makes architecture-specific changes to argument_defaults if required
+    def update_argument_defaults(self, argument_defaults):
+        pass
 
     # Returns the default platform for this architecture (i.e., the platform
     # that will be used if no «--platform x» is specified)
@@ -153,6 +157,10 @@ class Architecture(object):
     # Returns a list of platforms supported by this architecture
     def supported_platforms(self):
         return Platform.all_platforms()
+
+    # Returns a list of names for the locations used by the cluster
+    def default_location_names(self):
+        return ['first', 'second', 'third', 'fourth']
 
     ##
     ## Cluster configuration
@@ -183,24 +191,31 @@ class Architecture(object):
         # the necessary number of subnets.
         args['subnets'] = self.subnets(self.num_locations())
 
+        locations = []
+        self._init_locations(locations)
+        self.update_locations(locations)
+        self.platform.update_locations(locations, args)
+        args['locations'] = locations
+
         cluster_tags = args.get('cluster_tags', {})
         self.update_cluster_tags(cluster_tags)
         self.platform.update_cluster_tags(cluster_tags, args)
         args['cluster_tags'] = cluster_tags
 
         cluster_vars = args.get('cluster_vars', {})
-        Architecture.update_cluster_vars(self, cluster_vars)
+        self._init_cluster_vars(cluster_vars)
         self.update_cluster_vars(cluster_vars)
         self.platform.update_cluster_vars(cluster_vars, args)
         args['cluster_vars'] = cluster_vars
 
         instance_defaults = args.get('instance_defaults', {})
-        Architecture.update_instance_defaults(self, instance_defaults)
+        self._init_instance_defaults(instance_defaults)
         self.update_instance_defaults(instance_defaults)
         self.platform.update_instance_defaults(instance_defaults, args)
         args['instance_defaults'] = instance_defaults
 
         instances = args.get('instances', {})
+        self._init_instances(instances)
         self.update_instances(instances)
         self.platform.update_instances(instances, args)
         args['instances'] = instances
@@ -286,12 +301,22 @@ class Architecture(object):
 
         return stdout.strip().split(' ')
 
+    # Makes changes to locations applicable across architectures
+    def _init_locations(self, locations):
+        names = self.args.get('location_names') or self.default_location_names()
+        for li in range(0, self.num_locations()):
+            locations.append({'Name': names[li]})
+
+    # Makes architecture-specific changes to locations if required
+    def update_locations(self, locations):
+        pass
+
     # Makes architecture-specific changes to cluster_tags if required
     def update_cluster_tags(self, cluster_tags):
         pass
 
-    # Makes architecture-specific changes to cluster_vars if required
-    def update_cluster_vars(self, cluster_vars):
+    # Makes changes to cluster_vars applicable across architectures
+    def _init_cluster_vars(self, cluster_vars):
         for k in self.cluster_vars_args():
             val = self.args.get(k)
             if val is not None:
@@ -315,14 +340,29 @@ class Architecture(object):
             'postgres', 'repmgr', 'barman', 'pglogical', 'bdr', 'pgbouncer'
         ]
 
-    # Makes architecture-specific changes to instance_defaults if required
-    def update_instance_defaults(self, instance_defaults):
+    # Makes architecture-specific changes to cluster_vars if required
+    def update_cluster_vars(self, cluster_vars):
+        pass
+
+    # Makes changes to instance_defaults applicable across architectures
+    def _init_instance_defaults(self, instance_defaults):
         if instance_defaults.get('platform') is None:
             instance_defaults['platform'] = self.platform.name
         vars = instance_defaults.get('vars', {})
         if vars.get('ansible_user') is None:
             vars['ansible_user'] = self.args['image'].get('user', 'root')
             instance_defaults['vars'] = vars
+
+    # Makes architecture-specific changes to instance_defaults if required
+    def update_instance_defaults(self, instance_defaults):
+        pass
+
+    # Makes changes to instances applicable across architectures
+    def _init_instances(self, instances):
+        for instance in instances:
+            location = instance.get('location', None)
+            if isinstance(location, int) and location < len(self.args['locations']):
+                instance['location'] = self.args['locations'][location]['Name']
 
     # Makes architecture-specific changes to instances if required
     def update_instances(self, instances):

@@ -13,15 +13,15 @@ except:
     sys.exit(-1)
 
 class BDR_Always_ON(Architecture):
-    def argument_defaults(self):
-        return {
+    def update_argument_defaults(self, defaults):
+        defaults.update({
             'barman_volume_size': 128,
             'postgres_volume_size': 64,
             'tpa_2q_repositories': [
                 'products/bdr3/release',
                 'products/pglogical3/release',
             ]
-        }
+        })
 
     def num_instances(self):
         return 8
