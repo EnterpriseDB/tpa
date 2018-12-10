@@ -89,7 +89,6 @@
 - name: Create group(s) based on the value of bdr_node_group
   group_by:
     key: "{{ bdr_node_group }}"
-  when: bdr_node_group is defined
 
 # The commands to create and join the group are version-dependent.
 #

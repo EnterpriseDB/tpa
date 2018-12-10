@@ -8,7 +8,9 @@ instances:
     role:
       - primary
       - bdr
-    backup: {{ hostnames[6] }}
+    backup: {{ hostnames[7] }}
+    vars:
+        bdr_node_camo_partner: {{ hostnames[2] }}
 
   - node: 2
     Name: {{ hostnames[2] }}
@@ -16,6 +18,8 @@ instances:
     role:
       - primary
       - bdr
+    vars:
+        bdr_node_camo_partner: {{ hostnames[1] }}
 
   - node: 3
     Name: {{ hostnames[3] }}
@@ -23,6 +27,8 @@ instances:
     role:
       - primary
       - bdr
+    vars:
+        bdr_node_camo_partner: {{ hostnames[4] }}
 
   - node: 4
     Name: {{ hostnames[4] }}
@@ -30,23 +36,34 @@ instances:
     role:
       - primary
       - bdr
+    vars:
+        bdr_node_camo_partner: {{ hostnames[3] }}
 
   - node: 5
     Name: {{ hostnames[5] }}
+    location: 0
+    role:
+      - primary
+      - bdr
+    vars:
+      bdr_node_pause_in_standby: true
+
+  - node: 6
+    Name: {{ hostnames[6] }}
     upstream: {{ hostnames[1] }}
     location: 0
     role:
       - replica
       - bdr
 
-  - node: 6
-    Name: {{ hostnames[6] }}
+  - node: 7
+    Name: {{ hostnames[7] }}
     location: 0
     role:
       - barman
 
-  - node: 7
-    Name: {{ hostnames[7] }}
+  - node: 8
+    Name: {{ hostnames[8] }}
     location: 0
     volumes:
       - device_name: /dev/xvdb
@@ -59,8 +76,8 @@ instances:
         - {{ hostnames[1] }}
         - {{ hostnames[2] }}
 
-  - node: 8
-    Name: {{ hostnames[8] }}
+  - node: 9
+    Name: {{ hostnames[9] }}
     location: 1
     volumes:
       - device_name: /dev/xvdb

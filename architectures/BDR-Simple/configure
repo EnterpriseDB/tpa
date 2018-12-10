@@ -7,12 +7,12 @@ from __future__ import print_function
 import sys
 
 try:
-    from tpaexec.architecture import Architecture
+    from tpaexec.architectures.bdr import BDR
 except:
     print('Please invoke via: tpaexec configure <clustername> --architecture <archname>')
     sys.exit(-1)
 
-class BDR_Simple(Architecture):
+class BDR_Simple(BDR):
     def add_architecture_options(self, p, g):
         g.add_argument(
             '--num-instances', type=int, metavar='N',
@@ -25,6 +25,7 @@ class BDR_Simple(Architecture):
             dest='bdr_version',
             choices=['1', '2', '3'],
         )
+        super(BDR_Simple, self).add_architecture_options(p, g)
 
     def num_locations(self):
         return 1

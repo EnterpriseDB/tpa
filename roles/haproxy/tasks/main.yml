@@ -3,9 +3,15 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_role: name=haproxy/pkg
+  when: >
+    'haproxy' in role
   tags: always
 
 - include_role: name=haproxy/config
+  when: >
+    'haproxy' in role
   tags: always
 
 - set_fact: initialise_haproxy=True
+  when: >
+    'haproxy' in role

@@ -6,8 +6,9 @@
   postgresql_query:
     conninfo: '{{ hostvars[bdr_node].bdr_node_dsn }}'
     queries:
-      - text: SELECT bdr.join_node_group(join_target_dsn := %s)
+      - text: SELECT bdr.join_node_group(join_target_dsn := %s, pause_in_standby := %s)
         args:
           - "{{ bdr_node_dsn }}"
+          - "{{ bdr_node_pause_in_standby|default(false)|bool }}"
   become_user: "{{ postgres_user }}"
   become: yes

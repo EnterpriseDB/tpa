@@ -47,8 +47,6 @@
         args:
           - "{{ bdr_node_group }}"
   register: node_group_id
-  when:
-    bdr_node_group is defined
   become_user: "{{ postgres_user }}"
   become: yes
 

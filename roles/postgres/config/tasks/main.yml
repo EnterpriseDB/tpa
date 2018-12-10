@@ -13,6 +13,7 @@
 #     0000-tpa.conf
 #     0001-tpa_restart.conf
 #     1111-extensions.conf
+#     3333-bdr.conf
 #     8888-{{ variable_name }}*.conf
 #     9900-role-settings.conf
 #     9999-override.conf
@@ -122,6 +123,18 @@
     postgres_conf_template == ''
   notify:
     - Note Postgres restart required
+
+- name: Install BDR configuration file on BDR nodes
+  template:
+    src: bdr.conf.j2
+    dest: "{{ _include_dir }}/3333-bdr.conf"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
+  when: >
+    'bdr' in role
+  notify:
+    - Note Postgres reload required
 
 # If any settings were specified in postgres_conf_settings, we put that
 # into a separate configuration file. Note that we expect values in this
