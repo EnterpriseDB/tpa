@@ -58,6 +58,49 @@
     group: barman
     mode: 0600
 
+# Barman's version-parsing code can get into trouble with 2ndQPostgres
+# version strings. For example, if pg_receivewal --version returns the
+# following string:
+#
+# pg_receivewal (PostgreSQL) 11.1 (2ndQPG 11.1r1.4) (Debian 2:11.1r2ndq1.4~git150.g805a872-1.stretch+1)
+#
+# Barman will refuse to start pg_receivewal altogether:
+#
+#       pg_receivexlog compatible: FAILED (PostgreSQL version: 11.1, pg_receivexlog version: 2:11.1r2ndq1.4~git150.g805a872-1.stretch+1))
+#
+# The only workaround available is to install a command wrapper that
+# produces pared-down --version output.
+
+- set_fact:
+    _pg_receive_wal: "pg_receive{{ wal_or_xlog }}"
+
+- name: Determine pg_receivewal ownership and permissions
+  stat:
+    path: "{{ postgres_bin_dir }}/{{ _pg_receive_wal }}"
+  register: cmd
+
+- name: Move pg_receivewal aside to pg_receivewal.orig
+  command: >
+    mv {{ postgres_bin_dir }}/{{ _pg_receive_wal }} {{ postgres_bin_dir }}/{{ _pg_receive_wal }}.orig
+  args:
+    creates: "{{ postgres_bin_dir }}/{{ _pg_receive_wal }}.orig"
+
+- name: Install pg_receivewal command wrapper
+  copy:
+    dest: "{{ postgres_bin_dir }}/{{ _pg_receive_wal }}"
+    owner: "{{ cmd.stat.pw_name }}"
+    group: "{{ cmd.stat.gr_name }}"
+    mode: "{{ cmd.stat.mode }}"
+    content: |
+      #!/bin/bash
+      if [[ "$1" == "--version" ]];
+      then {{ real_binary }} --version|sed -e 's/\(([^)]*) *\)*$//';
+      else {{ real_binary }} "$@";
+      fi
+  vars:
+    real_binary: >-
+      {{ postgres_bin_dir }}/{{ _pg_receive_wal }}.orig
+
 # We install a per-client configuration file in /etc/barman.d and create
 # a cron job to backup each client in client.yml by delegating to the
 # designated backup server.

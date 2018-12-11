@@ -11,17 +11,12 @@
   postgresql_query:
     conninfo: "host={{postgres_host}} port={{postgres_port}}"
     query: >
-      select pg_{{wal}}file_name(pg_switch_{{wal}}()) as filename
+      select pg_{{wal_or_xlog}}file_name(pg_switch_{{wal_or_xlog}}()) as filename
   delegate_to: "{{ inventory_hostname|upstream_root(hostvars) }}"
   become_user: "{{ postgres_user }}"
   become: yes
   register: seg
-  vars:
-    wal: >-
-      {%- if postgres_version is version('10', '>=') -%}wal
-      {%- else -%}xlog
-      {%- endif -%}
-    
+
 # Now we have the name of the WAL segment file corresponding to the LSN
 # returned by pg_switch_xlog(), and we must wait for it to be archived.
 # First, pg_receivexlog will rename streaming/$n.partial to …/$n. Then
