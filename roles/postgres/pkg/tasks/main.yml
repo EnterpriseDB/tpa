@@ -30,7 +30,8 @@
       - "{{ (postgresql_flavour == 'postgresql')|ternary(pglogical_packages|packages_for(ansible_distribution, pglogical_package_version), []) }}"
       - "{{ ('bdr' in role)|ternary(bdr_packages|packages_for(ansible_distribution, bdr_package_version), []) }}"
       - "{{ additional_postgres_packages[ansible_distribution] }}"
-      - "{{ extra_postgres_packages[ansible_distribution] }}"
+      - "{{ extra_postgres_packages[ansible_distribution]|default([]) }}"
+      - "{{ extra_postgres_packages['common']|default([]) }}"
       - python-psycopg2
 
 # PGDG provides only postgresql-10-pglogical-dbgsym, whereas the 2ndQ
