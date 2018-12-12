@@ -71,6 +71,15 @@
     node_group_id.rowcount == 0
   tags: always
 
+- name: Include bdr-post-group-creation hook
+  include_tasks: "{{ hook }}"
+  when:
+    node_group_id.rowcount == 0 and
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/bdr-post-group-creation.yml"
+  tags: always
+
 # The remaining hosts join the group… but they must do so one at a time,
 # because BDR does not support concurrent group joins (not in version 3,
 # nor in any earlier versions).

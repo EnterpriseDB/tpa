@@ -1,0 +1,81 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# At this point, we've created the BDR nodes and the node group. Now we
+# can define replication sets.
+
+- name: Disable autoadd_tables for {{ bdr_node_group }} replication set
+  postgresql_query:
+    conninfo: '{{ bdr_node_dsn }}'
+    queries:
+      - text: select bdr.alter_replication_set(set_name := %s, autoadd_tables := false)
+        args:
+          - "{{ bdr_node_group }}"
+  when:
+    inventory_hostname == groups[bdr_node_group][0]
+    and replicate_deletes_locally|default(false)|bool
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Create cluster global replication set
+  postgresql_query:
+    conninfo: '{{ bdr_node_dsn }}'
+    queries:
+      - text: >
+          SELECT bdr.create_replication_set(
+            set_name := %s,
+            replicate_insert := true,
+            replicate_update := true,
+            replicate_delete := false,
+            replicate_truncate := false,
+            autoadd_tables := true
+          )
+        args:
+          - "cluster_global"
+  when:
+    inventory_hostname == groups[bdr_node_group][0]
+    and replicate_deletes_locally|default(False)|bool
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Create replication sets for local deletes
+  postgresql_query:
+    conninfo: '{{ bdr_node_dsn }}'
+    queries:
+      - text: >
+          SELECT bdr.create_replication_set(
+            set_name := %s,
+            replicate_insert := false,
+            replicate_update := false,
+            replicate_delete := true,
+            replicate_truncate := true,
+            autoadd_tables := true
+          )
+        args:
+          - "local_{{ item }}_deletes"
+  with_items:
+    "{{ groups[bdr_node_group]|map('extract', hostvars, 'location')|unique|list }}"
+  when:
+    inventory_hostname == groups[bdr_node_group][0]
+    and replicate_deletes_locally|default(False)|bool
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# Once the relevant replication sets are created, all of the nodes can
+# alter their own subscriptions before joining the group.
+
+- name: Alter subscription to include desired replication sets
+  postgresql_query:
+    conninfo: '{{ bdr_node_dsn }}'
+    queries:
+      - text: SELECT bdr.alter_node_replication_sets(node_name := %s, set_names := %s)
+        args:
+          - "{{ inventory_hostname }}"
+          - "{{ item.replication_sets }}"
+  with_items:
+    "{{ subscriptions }}"
+  when:
+    item.database == bdr_database
+  become_user: "{{ postgres_user }}"
+  become: yes

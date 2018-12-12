@@ -322,7 +322,7 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
 def export_as_vars(instance):
     exports = {}
 
-    always_export = ['region']
+    always_export = ['region', 'location']
     for k in always_export + instance.get('export_as_vars', []):
         exports[k] = instance.get(k)
 

@@ -13,6 +13,12 @@ except:
     sys.exit(-1)
 
 class CAMO2x2(BDR_Always_ON):
+    def add_architecture_options(self, p, g):
+        g.add_argument(
+            '--replicate-deletes-locally', action='store_true',
+        )
+        super(CAMO2x2, self).add_architecture_options(p, g)
+
     def update_argument_defaults(self, defaults):
         super(CAMO2x2, self).update_argument_defaults(defaults)
         defaults.update({
@@ -24,6 +30,30 @@ class CAMO2x2(BDR_Always_ON):
 
     def num_instances(self):
         return 9
+
+    def update_instances(self, instances):
+        if self.args['replicate_deletes_locally']:
+            for i in instances:
+                role = i.get('role', [])
+                if 'bdr' in role and 'primary' in role:
+                    i['vars']['subscriptions'] = [{
+                        'type': 'bdr',
+                        'database': self.args['bdr_database'],
+                        'replication_sets': [
+                            'cluster_global',
+                            'local_%s_deletes' % i.get('location')
+                        ]
+                    }]
+
+    def cluster_vars_args(self):
+        return super(CAMO2x2, self).cluster_vars_args() + [
+            'replicate_deletes_locally'
+        ]
+
+    def links_to_create(self):
+        return super(CAMO2x2, self).links_to_create() + [
+            'hooks'
+        ]
 
 if __name__ == '__main__':
     CAMO2x2().configure()
