@@ -2,6 +2,19 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v7.1 (2018-12-12)
+
+### Major changes
+
+- Support for CAMO2x2 architecture with BDR-EE 3.4.0 and 2ndQPostgres 11
+  (with local replication of deletes as an option).
+
+- Support for named locations in config.yml
+
+### Bugfixes
+
+- Fixes for some Barman and repmgr problems
+
 ## v7.0 (2018-11-14)
 
 In this release, TPAexec goes from v3.1 to v7.0 as a precaution to avoid
