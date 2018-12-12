@@ -16,6 +16,10 @@ BDR-Simple
 BDR-Always-ON
   BDR in an Always-ON configuration
 
+CAMO2x2
+  A BDR-Always-ON variant with two nodes configured as CAMO ("commit at
+  most once") partners in each of two separate locations
+
 Training
   Clusters for 2ndQuadrant training sessions
 
