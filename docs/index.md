@@ -117,6 +117,12 @@ editing the config.yml file and running the provision/deploy/test cycle.
 Should you need to go beyond what is already implemented in TPAexec, the
 full range of Ansible functionality is at your disposal at every stage.
 
+In general, you should be able to implement any changes you need through
+the include-hook mechanism in TPAexec. For example, if you create a file
+named ``hooks/pre-deploy.yml`` in your cluster directory, the tasks in
+it will be run before the normal deployment tasks; and likewise for the
+post-deploy.yml hook.
+
 ### Cluster management
 
 Once your cluster is up and running, TPAexec provides convenient cluster

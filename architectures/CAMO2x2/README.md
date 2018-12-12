@@ -19,5 +19,10 @@ tpaexec configure ~/clusters/bdr --architecture CAMO2x2 \
 
 You must specify ``--architecture CAMO2x2``.
 
+You may optionally specify ``--replicate-deletes-locally`` if you want
+the two CAMO partner pairs to be configured to replicate inserts and
+updates between all nodes, but to keep deletes and truncates limited
+to the originating pair.
+
 You may also specify any of the options described by
 ``tpaexec help configure-options``.
