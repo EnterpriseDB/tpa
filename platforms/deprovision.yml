@@ -9,6 +9,8 @@
       tags: always
 
     - import_tasks: validate.yml
+      vars:
+        deprovision: true
       tags: always
 
     - include_tasks: "{{ platform }}/deprovision.yml"

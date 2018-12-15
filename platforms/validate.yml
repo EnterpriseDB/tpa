@@ -53,6 +53,7 @@
         ]
   when: >
     'aws' in cluster_platforms
+    and not deprovision|default(false)|bool
 
 ## Final topology validation
 #
