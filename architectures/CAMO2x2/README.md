@@ -24,5 +24,11 @@ the two CAMO partner pairs to be configured to replicate inserts and
 updates between all nodes, but to keep deletes and truncates limited
 to the originating pair.
 
+You may specify ``--bdr-node-group groupname`` to set the name of the
+BDR node group (default: bdrgroup).
+
+You may specify ``--bdr-database dbname`` to set the name of the
+database with BDR enabled (default: bdrdb).
+
 You may also specify any of the options described by
 ``tpaexec help configure-options``.

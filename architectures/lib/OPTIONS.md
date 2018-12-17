@@ -106,6 +106,10 @@ options:
 5. ``--bdr-package-version '3.0.2*'``
 5. ``--pgbouncer-package-version '1.8*'``
 
+You may also specify ``--extra-postgres-packages p1 p2 …`` to install
+any additional packages along with Postgres. The arguments are passed
+on to the package manager for installation without any modifications.
+
 ## Hostnames
 
 By default, ``tpaexec configure`` will randomly select as many hostnames
@@ -120,3 +124,13 @@ You may optionally specify ``--hostnames-pattern '…pattern…'`` to
 restrict hostnames to those matching the egrep-syntax pattern. If you
 choose to do this, you must ensure that the pattern matches only valid
 hostnames (``[a-zA-Z0-9-]``) and finds a sufficient number thereof.
+
+## Locations
+
+By default, ``tpaexec configure`` will use the names ``first``,
+``second``, and so on for any locations used by the selected
+architecture. Some architectures may specify different defaults, e.g.,
+``main`` and ``dr`` for M1.
+
+You may optionally specify ``--location-names N1 N2 …`` to provide more
+meaningful names for each location.
