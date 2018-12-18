@@ -2,7 +2,7 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name="repmgr/{{ postgres_installation_source }}"
+- include_role: name="repmgr/{{ postgres_installation_method }}"
   when: >
     'postgres' in role
   tags: always

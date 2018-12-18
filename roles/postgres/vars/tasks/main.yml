@@ -20,7 +20,7 @@
     postgres_host: "{{ postgres_host|default('localhost') }}"
     postgres_port: "{{ postgres_port|default(5432) }}"
     postgres_service_name: postgres
-    postgres_installation_source: "{{ postgres_installation_source|default('pkg') }}"
+    postgres_installation_method: "{{ postgres_installation_method|defult(default_postgres_installation_method) }}"
     barman_user: "{{ barman_user|default(default_barman_user) }}"
     barman_group: "{{ barman_group|default(default_barman_group) }}"
     barman_home: "{{ barman_home|default(default_barman_home) }}"
@@ -30,6 +30,8 @@
     bdr_node_group: "{{ bdr_node_group|default(default_bdr_node_group) }}"
     wal_or_xlog: "{{ wal_string }}"
   vars:
+    default_postgres_installation_method: >-
+      {{ postgres_installation_source|default('pkg') }}
     wal_string: >-
       {%- if postgres_version is version('10', '>=') -%}wal
       {%- else -%}xlog
