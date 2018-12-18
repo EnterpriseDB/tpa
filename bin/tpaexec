@@ -6,6 +6,7 @@
 
 IFS=$' \t\n'
 set -eu
+: ${PAGER:=less}
 
 error() {
     echo "ERROR: $@" >&2
@@ -338,7 +339,7 @@ info() {
                 echo "Please contact tpa@2ndQuadrant.com for assistance"
                 exit 1
             fi
-            cat $doc
+            $PAGER $doc
             ;;
         *)
             error "unrecognised info subcommand: $subcommand"
@@ -416,7 +417,7 @@ SELFTEST
             ;;
 
         configure-options)
-            cat $TPA_DIR/architectures/lib/OPTIONS.md
+            $PAGER $TPA_DIR/architectures/lib/OPTIONS.md
             ;;
 
         *config*)
