@@ -1,22 +1,31 @@
 M1
 ==
 
-The M1 architecture comprises a Postgres primary server with a streaming
-replica, a backup server, and any number of additional cascaded
-replicas.
+A Postgres cluster with a primary and a streaming replica, one Barman
+server, and any number of additional replicas cascaded from the first
+one.
 
-By default, the primary has one read-only replica attached; the replica,
-in turn, has one cascaded replica attached. The backup server is
-configured to take backups from the node initially configured as primary.
-
-Use ``--num-cascaded-replicas N`` to set the number of cascaded replicas
-(including 0 for none).
+By default, the primary has one read-only replica attached in the same
+location; the replica, in turn, has one cascaded replica attached in a
+different location, where the Barman server is also configured to take
+backups from the primary.
 
 ![Cluster with cascading replication](images/m1.png)
 
+## Cluster configuration
+
 ```
-[tpa]$ tpaexec configure ~/clusters/speedy --architecture M1 --num-cascaded-replicas 3
+[tpa]$ tpaexec configure ~/clusters/m1 \
+         --architecture M1 \
+         --platform aws --region eu-west-1 --instance-type t3.micro \
+         --distribution Debian-minimal
 ```
 
-This architecture supports all of the additional options described on
-the [``tpaexec configure``](tpaexec-configure.md) page.
+You must specify ``--architecture M1``. (In the example above, this is
+the only option required to produce a working configuration.)
+
+You may optionally specify ``--num-cascaded-replicas N`` to request N
+cascaded replicas (including 0 for none; default: 1).
+
+You may also specify any of the options described by
+[``tpaexec help configure-options``](tpaexec-configure.md).

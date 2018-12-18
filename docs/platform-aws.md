@@ -1,14 +1,15 @@
-AWS
+aws
 ===
 
 TPAexec fully supports provisioning production clusters on AWS EC2.
 
-## API access
+## API access setup
 
-To use the AWS API, you must first
-[obtain an access key](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
-for an IAM user under your AWS account, and
-[add it to your configuration](https://boto.readthedocs.org/en/latest/boto_config_tut.html).
+To use the AWS API, you must:
+
+* [Obtain an access keypair](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
+* [Add it to your configuration](https://boto.readthedocs.org/en/latest/boto_config_tut.html)
+
 For example,
 
 ```bash

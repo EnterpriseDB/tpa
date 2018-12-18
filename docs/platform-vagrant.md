@@ -18,3 +18,7 @@ with it.
 [tpa]$ tpaexec provision && vagrant up
 [tpa]$ tpaexec deploy . -vv
 ```
+
+TPAexec will not automatically invoke "vagrant up", so that you can run
+it by hand and read the output in realtime and debug any problems that
+may happen.
