@@ -69,7 +69,7 @@ To achieve DR resilience, you should to place backup standby DB servers in a sec
 
 **Example of cascading replication**
 
-![Cluster with cascading replication](./images/Cluster1.jpg)
+![Cluster with cascading replication](images/Cluster1.jpg)
 
 **Figure 1**
 

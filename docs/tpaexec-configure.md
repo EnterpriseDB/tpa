@@ -33,8 +33,8 @@ e.g., ``~/clusters`` in the example above.
 
 The next argument must be ``--architecture <name>`` to select an
 architecture, e.g.,
-[M1](architectures/M1.md) or
-[BDR-Simple](architectures/BDR-Simple.md).
+[M1](architecture-M1.md) or
+[BDR-Simple](architecture-BDR-Simple.md).
 For a complete list of architectures, run
 ``tpaexec info architectures``.
 
@@ -59,7 +59,7 @@ documentation for an architecture for a list of options that it accepts
 ### Platform options
 
 Next, you may use ``--platform <name>`` to select a platform, e.g.,
-[aws](platforms/aws.md) or [bare](platforms/bare.md).
+[aws](platform-aws.md) or [bare](platform-bare.md).
 
 An architecture may or may not support a particular platform. If not, it
 will fail to configure the cluster.

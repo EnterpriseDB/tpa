@@ -4,8 +4,8 @@ tpaexec provision
 Provision creates instances and other resources required by the cluster.
 
 The exact details of this process depend both on
-the architecture (e.g. [M1](architectures/M1.md))
-and platform (e.g. [AWS](platforms/aws.md))
+the architecture (e.g. [M1](architecture-M1.md))
+and platform (e.g. [AWS](platform-aws.md))
 that you selected while configuring the cluster.
 
 At the end of the provisioning stage, you will have the required number
