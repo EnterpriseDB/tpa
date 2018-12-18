@@ -50,7 +50,7 @@ class Training(Architecture):
 
     def update_cluster_tags(self, cluster_tags):
         cluster_tags.update({
-            'Reference': 'https://redmine.2ndquadrant.it/issues/%s' % self.args['issue']
+            'Reference': 'https://redmine.2ndquadrant.com/issues/%s' % self.args['issue']
         })
 
 if __name__ == '__main__':

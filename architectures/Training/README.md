@@ -6,11 +6,11 @@ documentation references below are not accessible outside the company.
 
 The process to request VMs for training is documented here:
 
-    https://redmine.2ndquadrant.it/projects/courses/wiki/Virtual_Machines_for_training
+    https://redmine.2ndquadrant.com/projects/courses/wiki/Virtual_Machines_for_training
 
 This is the process to follow once a request has been received, e.g.,
 
-    https://redmine.2ndquadrant.it/issues/10973
+    https://redmine.2ndquadrant.com/issues/10973
 
 Cluster configuration
 ---------------------
