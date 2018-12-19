@@ -212,9 +212,18 @@ following options:
 
 You may use any version specifier that apt or yum would accept.
 
-You may also specify ``--extra-postgres-packages p1 p2 …`` to install
-any additional packages along with Postgres. The arguments are passed
-on to the package manager for installation without any modifications.
+You may also specify ``--extra-packages p1 p2 …`` or
+``--extra-postgres-packages p1 p2 …`` to install additional packages.
+The former lists packages to install along with system packages, while
+the latter lists packages to install later along with postgres packages.
+(If you mention packages that depend on Postgres in the former list, the
+installation will fail because Postgres will not yet be installed.) The
+arguments are passed on to the package manager for installation without
+any modifications.
+
+The ``--extra-optional-packages p1 p2 …`` option behaves like
+``--extra-packages``, but it is not an error if the named packages
+cannot be installed.
 
 ## Examples
 

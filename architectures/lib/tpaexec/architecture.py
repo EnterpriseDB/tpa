@@ -112,6 +112,8 @@ class Architecture(object):
             '--extra-postgres-packages', nargs='+',
             metavar='NAME',
         )
+        g.add_argument('--extra-packages', nargs='+', metavar='NAME')
+        g.add_argument('--extra-optional-packages', nargs='+', metavar='NAME')
 
         g = p.add_argument_group('volume sizes in GB')
         for vol in ['root', 'barman', 'postgres']:
@@ -325,11 +327,19 @@ class Architecture(object):
             val = self.args.get(k)
             if val is not None:
                 cluster_vars[k] = val
-        extra_packages = self.args.get('extra_postgres_packages')
-        if extra_packages is not None:
-            cluster_vars['extra_postgres_packages'] = {
-                'common': extra_packages,
-            }
+
+        package_option_vars = {
+            'extra_packages': 'packages',
+            'extra_optional_packages': 'optional_packages',
+            'extra_postgres_packages': 'extra_postgres_packages',
+        }
+
+        for e in package_option_vars.keys():
+            packages = self.args.get(e)
+            if packages is not None:
+                cluster_vars[package_option_vars[e]] = {
+                    'common': packages
+                }
 
     # Returns the names of any variables set by command-line options that belong
     # under cluster_vars
