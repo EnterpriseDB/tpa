@@ -23,6 +23,7 @@
     repo: "{{ git_repository_url }}"
     version: "{{ git_repository_ref }}"
     reference: "{{ git_reference_repository|default(omit) }}"
+    accept_hostkey: yes
   register: git
   environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
   vars:
