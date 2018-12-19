@@ -10,6 +10,7 @@ requirements:
     - libreadline-dev
     - zlib1g-dev
     - libssl-dev
+    - build-essential
   RedHat:
     - readline-devel
     - zlib-devel

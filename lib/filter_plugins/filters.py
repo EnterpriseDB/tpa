@@ -141,7 +141,7 @@ def identify_os(name):
 def packages_for(packages, os, version=None):
     ret = []
 
-    for p in packages[os]:
+    for p in packages.get(os, []):
         if not (version is None or isinstance(version, StrictUndefined)):
             sep = '='
             if os == 'RedHat':

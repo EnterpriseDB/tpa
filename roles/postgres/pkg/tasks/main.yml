@@ -17,18 +17,29 @@
 # reason—we'll need to "pip install psycopg2" after adding pgbindir to
 # PATH (because pg_config is not always in PATH).
 
+- name: Determine if pglogical and BDR packages should be installed
+  set_fact:
+    install_pglogical_packages: "{{
+      postgresql_flavour == 'postgresql' and 'pglogical' not in sources
+    }}"
+    install_bdr_packages: "{{ 'bdr' in role and 'bdr' not in sources }}"
+  vars:
+    sources: "{{ install_from_source|map(attribute='name')|unique|list }}"
+    
 - name: Install Postgres packages
   package:
     name: >
       {{ query('flattened', package_lists) }}
     state: present
   vars:
+    _maybe_pglogical_packages: "{{ install_pglogical_packages|ternary(pglogical_packages, {}) }}"
+    _maybe_bdr_packages: "{{ install_bdr_packages|ternary(bdr_packages, {}) }}"
     package_lists:
       - "{{ postgres_packages|packages_for(ansible_distribution, postgres_package_version) }}"
       - "{{ postgres_client_packages|packages_for(ansible_distribution, postgres_package_version) }}"
       - "{{ postgres_debug_packages|packages_for(ansible_distribution, postgres_package_version) }}"
-      - "{{ (postgresql_flavour == 'postgresql')|ternary(pglogical_packages|packages_for(ansible_distribution, pglogical_package_version), []) }}"
-      - "{{ ('bdr' in role)|ternary(bdr_packages|packages_for(ansible_distribution, bdr_package_version), []) }}"
+      - "{{ _maybe_pglogical_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
+      - "{{ _maybe_bdr_packages|packages_for(ansible_distribution, bdr_package_version) }}"
       - "{{ additional_postgres_packages[ansible_distribution] }}"
       - "{{ extra_postgres_packages[ansible_distribution]|default([]) }}"
       - "{{ extra_postgres_packages['common']|default([]) }}"
@@ -46,9 +57,10 @@
     state: present
   register: pglogical_dbg_install
   ignore_errors: "{{ ansible_distribution == 'Debian' }}"
+  when: install_pglogical_packages
   vars:
     package_lists:
-      - "{{ (postgresql_flavour == 'postgresql')|ternary(pglogical_debug_packages|packages_for(ansible_distribution, pglogical_package_version), []) }}"
+      - "{{ pglogical_debug_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
 
 - name: Try fallback pglogical debug package on Debian
   package:
@@ -59,6 +71,7 @@
     }}"
     state: present
   when:
+    install_pglogical_packages and
     pglogical_dbg_install is not successful and
     ansible_distribution == 'Debian'
   vars:

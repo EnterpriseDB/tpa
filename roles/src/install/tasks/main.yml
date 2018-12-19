@@ -1,0 +1,49 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# First, we must obtain the source code.
+#
+# At present, we support fetching a git repository to a local directory.
+#
+# We might want to clone repositories via ssh with agent forwarding, but
+# that won't work because we've sudo'ed to root (for the whole play). As
+# a courtesy, we copy SSH_AUTH_SOCK to the environment if it's set.
+
+- name: Check if ssh agent forwarding is enabled
+  shell: echo $SSH_AUTH_SOCK
+  args:
+    executable: /bin/bash
+  register: cmd
+  become: no
+
+- name: Fetch source code from git repository
+  git:
+    dest: "{{ source_directory }}"
+    repo: "{{ git_repository_url }}"
+    version: "{{ git_repository_ref }}"
+    reference: "{{ git_reference_repository|default(omit) }}"
+  register: git
+  environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
+  vars:
+    ssh_auth_sock: "{{ cmd.stdout.strip() }}"
+    ssh_env:
+      SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
+
+# Next, we must run a series of commands to build the sources and
+# install the results. The caller may specify a build_commands array and
+# a build_environment hash, or we'll just run "make install" by default.
+
+- name: Run build commands
+  shell: >
+    PATH={{ postgres_bin_dir }}:$PATH {{ item }} 2>&1 | tee -a {{ build_log }}
+  args:
+    chdir: "{{ source_directory }}"
+    executable: /bin/bash
+  environment: "{{ build_environment|default({}) }}"
+  with_items: "{{ build_commands|default([]) or default_build_commands }}"
+  vars:
+    build_log: "{{ build_log|default('/tmp/build.log') }}"
+    default_build_commands:
+    - make
+    - make install

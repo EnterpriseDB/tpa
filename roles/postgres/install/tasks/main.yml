@@ -1,0 +1,29 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# First, we install Postgres itself using the selected
+# postgres_installation_method (pkg or src).
+
+- include_role: name="postgres/{{ postgres_installation_method }}"
+  tags: always
+
+# Second, no matter how we installed Postgres, we may need to build and
+# install some (ostensibly) extensions from source.
+
+- include_role: name=postgres/src/req
+  when: install_from_source|length > 0
+  tags: always
+
+- include_role: name=src/install
+  vars:
+    source_directory: >-
+      {{ ifs.source_directory|default('/opt/postgres/src/%s' % ifs.name) }}
+    git_repository_url: "{{ ifs.git_repository_url }}"
+    git_repository_ref: "{{ ifs.git_repository_ref }}"
+    build_commands: "{{ ifs.build_commands|default([]) }}"
+    build_environment: "{{ ifs.build_environment|default({}) }}"
+    build_log: "/tmp/build-{{ ifs.name }}.log"
+  with_items: "{{ install_from_source }}"
+  loop_control:
+    loop_var: ifs
