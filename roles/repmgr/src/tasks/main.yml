@@ -22,7 +22,7 @@
   args:
     chdir: "{{ repmgr_src_dir }}"
     executable: /bin/bash
-  tags: [build-clean, repmgr-clean]
+  tags: [build-configure, repmgr-configure]
 
 - name: Build and install repmgr
   shell: >
