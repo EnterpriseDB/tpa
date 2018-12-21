@@ -332,7 +332,36 @@ info() {
         version)
             version
             ;;
-        platforms|architectures|platforms/*|architectures/*)
+        platforms|architectures)
+            echo "Available $subcommand:"
+            echo ""
+
+            for d in $(find $TPA_DIR/$subcommand -type f -name _metadata);
+            do
+                (
+                    source $d;
+                    if [[ "${STATUS:=experimental}" != "experimental" || ${2:-""} == "-a" ]]; then
+                        echo "${NAME:-$(basename $(dirname $d))} [$STATUS]"
+                        if [[ ${DESCRIPTION:-""} ]]; then
+                            echo "    $DESCRIPTION" | (type fmt &>/dev/null && fmt -c || cat)
+                        fi
+                        echo ""
+                    fi
+                )
+            done
+            echo 'Run ``'"tpaexec info $subcommand/<name>"'`` for more information.'
+            case "$subcommand" in
+                platforms)
+                    echo 'Run ``tpaexec configure --architecture <name> --platform <name> --help``'
+                    echo 'to see available options for an architecture and platform.'
+                    ;;
+                architectures)
+                    echo 'Run ``tpaexec configure --architecture <name> --help`` to see available'
+                    echo 'options for an architecture.'
+                    ;;
+            esac
+            ;;
+        platforms/*|architectures/*)
             doc=$TPA_DIR/$subcommand/README.md
             if [[ ! -f $doc ]]; then
                 echo "Sorry, no documentation available for $subcommand"
@@ -376,16 +405,16 @@ Available info subcommands:
         Displays current TPAexec version
 
     tpaexec info platforms
-        Displays currently-supported platforms
+        Displays available deployment platforms
 
     tpaexec info architectures
-        Displays currently-supported deployment architectures
+        Displays available deployment architectures
 
     tpaexec info platforms/xxx
         Displays information about a particular platform
 
     tpaexec info architectures/xxx
-        Displays information about a particular deployment architecture
+        Displays information about a particular architecture
 INFO
             ;;
 

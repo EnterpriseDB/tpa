@@ -1,0 +1,2 @@
+STATUS="testing"
+DESCRIPTION="A BDR-Always-ON variant with two nodes configured as CAMO (\"commit at most once\") partners in each of two separate locations"

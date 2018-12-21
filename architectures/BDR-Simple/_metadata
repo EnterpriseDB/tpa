@@ -1,0 +1,2 @@
+STATUS="testing"
+DESCRIPTION="BDR with no frills on n nodes (good for experiments)"

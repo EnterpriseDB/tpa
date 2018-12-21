@@ -1,0 +1,2 @@
+STATUS="production"
+DESCRIPTION="Postgres with streaming replication (one primary, n replicas)"

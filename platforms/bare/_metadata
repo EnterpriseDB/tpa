@@ -1,0 +1,2 @@
+STATUS="production"
+DESCRIPTION="Servers accessible via SSH (e.g., bare metal, or already-provisioned servers on any cloud provider)"
