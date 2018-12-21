@@ -19,3 +19,12 @@
     apply:
       tags: [common, tpa]
   tags: always
+
+- include_tasks:
+    file: artifact.yml
+    apply:
+      tags: [common, artifacts]
+  with_items: "{{ artifacts|default([]) }}"
+  loop_control:
+    loop_var: artifact
+  tags: always

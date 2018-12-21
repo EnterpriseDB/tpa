@@ -1,0 +1,15 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Install {{ _type }} artifact
+  action: "{{ _module }}"
+  args: "{{ _artifact }}"
+  vars:
+    artifact_types:
+      file: copy
+      archive: unarchive
+      directory: synchronize
+    _type: "{{ artifact.type|default('file') }}"
+    _module: "{{ artifact_types[_type] }}"
+    _artifact: "{{ artifact|remove_keys(['type']) }}"
