@@ -10,6 +10,9 @@ if you need help to
 [get started](https://www.vagrantup.com/intro/getting-started/index.html)
 with it.
 
+At the moment, this platform supports Debian 9 (stretch), CentOS 7, and
+Ubuntu 16.04 (Xenial).
+
 ## Example
 
 ```
