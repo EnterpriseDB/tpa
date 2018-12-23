@@ -2,6 +2,22 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v7.2 (unreleased)
+
+### Major changes
+
+- Allow additional artifacts (files, archives, directories) to be
+  installed on instances (via ``artifacts``)
+
+- Support building extensions from source (via ``install_from_source``)
+
+### Other notable changes
+
+- Add --extra{,-optional}-packages configure arguments
+
+- The ``tpaexec info {platforms,architectures}`` command now lists the
+  actual contents of the corresponding directories
+
 ## v7.1 (2018-12-12)
 
 ### Major changes
