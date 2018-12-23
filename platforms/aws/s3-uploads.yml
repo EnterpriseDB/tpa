@@ -3,12 +3,32 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 # We upload anything specified in s3_uploads to cluster_bucket in S3.
+# For example,
+#
+#   s3_uploads:
+#   - foo         # filenames relative to cluster_dir
+#   - id_*        # wildcards relative to cluster_dir
+#   - /etc/hosts  # absolute paths (including wildcards)
+#
+# It is not currently an error for one of the items in the list to not
+# exist; the other items that are found will be uploaded.
 
-- name: Upload additional files to S3
+- name: Determine files to be uploaded to S3
+  set_fact:
+    s3_uploads_files: "{{
+      s3_uploads_files|default([])|union([query('fileglob', term)])
+    }}"
+  with_items: "{{ s3_uploads }}"
+  vars:
+    term: "{{
+      item.startswith('/')|ternary(item, '%s/%s' % (cluster_dir, item))
+    }}"
+
+- name: Upload files to S3
   aws_s3:
     bucket: "{{ cluster_bucket }}"
-    object: "{{ cluster_name }}/{{ item }}"
-    src: "{{ cluster_dir }}/{{ item }}"
+    object: "{{ cluster_name }}/{{ item|basename }}"
+    src: "{{ item }}"
     overwrite: different
     mode: put
-  with_items: "{{ s3_uploads }}"
+  with_items: "{{ query('flattened', s3_uploads_files) }}"

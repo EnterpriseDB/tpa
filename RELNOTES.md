@@ -18,6 +18,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - The ``tpaexec info {platforms,architectures}`` command now lists the
   actual contents of the corresponding directories
 
+- Support wildcard entries directly in s3_uploads
+
 ## v7.1 (2018-12-12)
 
 ### Major changes
