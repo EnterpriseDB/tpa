@@ -8,49 +8,58 @@ from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
 
 # This table is distilled from the content at
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html#instance-store-volumes
 # https://aws.amazon.com/ec2/instance-types/
 
 ephemeral_storage = {
-    'm3.medium': 1, # 4GB
-    'm3.large': 1, # 32GB
-    'm3.xlarge': 2, # 40GB
-    'm3.2xlarge': 2, # 80GB
-
-    'c3.large': 2, # 16GB
-    'c3.xlarge': 2, # 40GB
-    'c3.2xlarge': 2, # 80GB
-    'c3.4xlarge': 2, # 160GB
-    'c3.8xlarge': 2, # 320GB
-
-    'x1e.32xlarge': 2, # 1920GB
-    'x1.32xlarge': 2, # 1920GB
-    'x1.16xlarge': 1, # 1920GB
-
-    'r3.large': 1, # 32GB
-    'r3.xlarge': 1, # 80GB
-    'r3.2xlarge': 1, # 160GB
-    'r3.4xlarge': 1, # 320GB
-    'r3.8xlarge': 2, # 320GB
-
-    'f1.2xlarge': 1, # 470GB
-    'f1.16xlarge': 4, # 940GB
-
-    'i2.xlarge': 1, # 800GB
-    'i2.2xlarge': 2, # 800GB
-    'i2.4xlarge': 4, # 800GB
-    'i2.8xlarge': 8, # 800GB
-
-    'i3.large': 1, # 475GB
-    'i3.xlarge': 1, # 950GB
-    'i3.2xlarge': 1, # 1900GB
-    'i3.4xlarge': 2, # 1900GB
-    'i3.8xlarge': 4, # 1900GB
-    'i3.16xlarge': 8, # 1900GB
-
-    'd2.xlarge': 3, # 2000GB
-    'd2.2xlarge': 6, # 2000GB
-    'd2.4xlarge': 12, # 2000GB
-    'd2.8xlarge': 24, # 2000GB
+    'c1.medium': 1, # 350 GB† HDD
+    'c1.xlarge': 4, # 420 GB (1.6 TB) HDD
+    'c3.large': 2, # 16 GB (32 GB) SSD
+    'c3.xlarge': 2, # 40 GB (80 GB) SSD
+    'c3.2xlarge': 2, # 80 GB (160 GB) SSD
+    'c3.4xlarge': 2, # 160 GB (320 GB) SSD
+    'c3.8xlarge': 2, # 320 GB (640 GB) SSD
+    'cc2.8xlarge': 4, # 840 GB (3.36 TB) HDD
+    'cr1.8xlarge': 2, # 120 GB (240 GB) SSD
+    'd2.xlarge': 3, # 2,000 GB (6 TB) HDD
+    'd2.2xlarge': 6, # 2,000 GB (12 TB) HDD
+    'd2.4xlarge': 12, # 2,000 GB (24 TB) HDD
+    'd2.8xlarge': 24, # 2,000 GB (48 TB) HDD
+    'g2.2xlarge': 1, # 60 GB SSD
+    'g2.8xlarge': 2, # 120 GB (240 GB) SSD
+    'h1.2xlarge': 1, # 2000 GB (2 TB) HDD
+    'h1.4xlarge': 2, # 2000 GB (4 TB) HDD
+    'h1.8xlarge': 4, # 2000 GB (8 TB) HDD
+    'h1.16xlarge': 8, # 2000 GB (16 TB) HDD
+    'hs1.8xlarge': 24, # 2,000 GB (48 TB) HDD
+    'i2.xlarge': 1, # 800 GB SSD
+    'i2.2xlarge': 2, # 800 GB (1.6 TB) SSD
+    'i2.4xlarge': 4, # 800 GB (3.2 TB) SSD
+    'i2.8xlarge': 8, # 800 GB (6.4 TB) SSD
+    'm1.small': 1, # 160 GB† HDD
+    'm1.medium': 1, # 410 GB HDD
+    'm1.large': 2, # 420 GB (840 GB) HDD
+    'm1.xlarge': 4, # 420 GB (1.6 TB) HDD
+    'm2.xlarge': 1, # 420 GB HDD
+    'm2.2xlarge': 1, # 850 GB HDD
+    'm2.4xlarge': 2, # 840 GB (1.68 TB) HDD
+    'm3.medium': 1, # 4 GB SSD
+    'm3.large': 1, # 32 GB SSD
+    'm3.xlarge': 2, # 40 GB (80 GB) SSD
+    'm3.2xlarge': 2, # 80 GB (160 GB) SSD
+    'r3.large': 1, # 32 GB SSD
+    'r3.xlarge': 1, # 80 GB SSD
+    'r3.2xlarge': 1, # 160 GB SSD
+    'r3.4xlarge': 1, # 320 GB SSD
+    'r3.8xlarge': 2, # 320 GB (640 GB) SSD
+    'x1.16xlarge': 1, # 1,920 GB SSD
+    'x1.32xlarge': 2, # 1,920 GB (3.84 TB) SSD
+    'x1e.xlarge': 1, # 120 GB SSD
+    'x1e.2xlarge': 1, # 240 GB SSD
+    'x1e.4xlarge': 1, # 480 GB SSD
+    'x1e.8xlarge': 1, # 960 GB SSD
+    'x1e.16xlarge': 1, # 1,920 GB SSD
+    'x1e.32xlarge': 2, # 1,920 GB (3.84 TB) SSD
 }
 
 ## Instance filters
