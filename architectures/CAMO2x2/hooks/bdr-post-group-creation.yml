@@ -74,7 +74,7 @@
           - "{{ inventory_hostname }}"
           - "{{ item.replication_sets }}"
   with_items:
-    "{{ subscriptions }}"
+    "{{ subscriptions|default([]) }}"
   when:
     item.database == bdr_database
   become_user: "{{ postgres_user }}"
