@@ -72,7 +72,8 @@ software preinstalled.
 For brevity, you can also use ``--os Debian-minimal``.
 
 The default is Debian. The value is case-sensitive, and must correspond
-to a supported distribution according to ``tpaexec info distributions``.
+to a supported distribution for the selected platform. See
+``tpaexec info platforms/<platformname>`` for details.
 
 ## 2ndQuadrant repositories
 
