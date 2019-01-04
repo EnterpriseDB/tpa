@@ -163,10 +163,13 @@ your cluster.
 
 Specify ``--distribution <name>`` to select a distribution.
 
-The name may be Debian (the default), RedHat (for RHEL), or Ubuntu.
-TPAexec will use pre-generated images for a particular architecture and
-platform if any are available. To use stock distribution images instead,
-use ``Debian-minimal`` etc.
+The selected platform determines which distributions are available, and
+which one is used by default.
+
+In general, you should be able to use "Debian", "RedHat", and "Ubuntu".
+to select TPA images that have Postgres and other software preinstalled
+(to reduce deployment times). To use stock distribution images instead,
+append "-minimal" to the label, e.g., "Debian-minimal".
 
 This option is not meaningful for the "bare" platform, where TPAexec has
 no control over what distribution is installed.

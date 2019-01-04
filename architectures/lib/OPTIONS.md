@@ -62,18 +62,22 @@ of the Barman volume in GB. The default is 32GB.
 
 ## Distribution
 
-You may optionally specify ``--distribution Debian`` (or RedHat, or
-Ubuntu).
+You may optionally specify ``--distribution <label>`` to specify the OS
+to be used on the cluster's instances. The value is case-sensitive.
 
-You may optionally specify ``--minimal`` if you want to use the stock
-distribution images instead of TPA images that have Postgres and other
-software preinstalled.
+The selected platform determines which distributions are available, and
+which one is used by default. For more details, see
+``tpaexec info platforms/<platformname>``.
 
-For brevity, you can also use ``--os Debian-minimal``.
+In general, you should be able to use "Debian", "RedHat", and "Ubuntu"
+to select TPA images that have Postgres and other software preinstalled
+(to reduce deployment times). To use stock distribution images instead,
+append "-minimal" to the label, e.g., "Debian-minimal".
 
-The default is Debian. The value is case-sensitive, and must correspond
-to a supported distribution for the selected platform. See
-``tpaexec info platforms/<platformname>`` for details.
+For brevity, you can also use ``--os`` instead of ``--distribution``.
+
+This option is not meaningful for the "bare" platform, where TPAexec has
+no control over what distribution is installed.
 
 ## 2ndQuadrant repositories
 
