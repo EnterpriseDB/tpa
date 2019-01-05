@@ -13,7 +13,7 @@
 
 - name: Generate ssh keypair {{ _ssh_key_name }}
   local_action: >
-    shell ( flock -w 0 -n 9 || exit 99;
+    shell ( flock -n 9 || exit 99;
     test -f {{ keyfile }} && exit 0;
     test -d {{ _ssh_key_dir }} || mkdir {{ _ssh_key_dir }};
     ssh-keygen -N "" -C "{{ _ssh_key_comment }}" -f "{{ keyfile }}";
