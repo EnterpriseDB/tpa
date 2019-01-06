@@ -11,6 +11,11 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Support building extensions from source (via ``install_from_source``)
 
+### Bugfixes
+
+- Fix flock(1) compatibility problems that resulted in complaints about
+  not being able to find files like xxx_password.yml or id_xxx.pub
+
 ### Other notable changes
 
 - Add --extra{,-optional}-packages configure arguments
