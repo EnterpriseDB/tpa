@@ -21,7 +21,7 @@ The topology corresponds to v4.0 of the Always-ON architecture.
          --location-names dc-one dc-two \
          --bdr-database bdrdb --bdr-node-group bdrgroup \
          --2Q-repositories products/2ndqpostgres/release products/default/release \
-         --extra-postgres-packages postgresql11-zson2q postgresql11-apptools-zson2q \
+         --extra-postgres-packages postgresql11-zson2q postgresql11-apptools-2ndq \
          postgresql11-antifreeze
 ```
 
