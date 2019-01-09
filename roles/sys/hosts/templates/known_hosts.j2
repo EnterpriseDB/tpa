@@ -6,7 +6,7 @@
 {%       if ansible_ssh_port|default(22) != 22 %}
 {%         set hostname = '[%s]:%s' % (hostname, ansible_ssh_port) %}
 {%       endif %}
-{{ hostname }} {{ lookup('file', '%s/hostkeys/ssh_host_%s_key.pub' % (playbook_dir, k)) }}
+{{ hostname }} {{ lookup('file', '%s/hostkeys/ssh_host_%s_key.pub' % (cluster_dir, k)) }}
 {%     endfor %}
 {%   endfor %}
 {% endfor %}

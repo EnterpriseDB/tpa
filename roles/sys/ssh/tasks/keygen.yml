@@ -2,7 +2,7 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# Locally creates a keypair named id_user in playbook_dir/keys.
+# Locally creates a keypair named id_user in cluster_dir/keys.
 #
 # - include_role: name=sys/ssh tasks_from=keygen.yml
 #   vars:

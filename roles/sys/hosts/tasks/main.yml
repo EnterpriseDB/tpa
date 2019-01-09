@@ -49,7 +49,7 @@
     lookup('pipe', hostkeys) == 'exists'
   vars:
     hostkeys: >
-      test -d {{ playbook_dir }}/hostkeys && echo exists; true
+      test -d {{ cluster_dir }}/hostkeys && echo exists; true
 
 - name: Update ssh host keys on docker instances
   block:

@@ -4,4 +4,4 @@
 
 _vpn_name: "{{ vpn_name|default(cluster_name)|lower }}"
 _vpn_dir: "/etc/openvpn/{{ _vpn_name }}"
-_local_cert_dir: "{{ playbook_dir }}/certs"
+_local_cert_dir: "{{ cluster_dir }}/certs"
