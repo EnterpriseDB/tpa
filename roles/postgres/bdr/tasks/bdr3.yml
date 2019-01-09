@@ -52,6 +52,20 @@
 
 # Now the first node creates the group.
 
+- name: Designate arbitrary r/w instance as primus inter pares
+  set_fact:
+    first_primary: "{{
+      groups[bdr_node_group]|difference(ro_instances)|first
+    }}"
+  vars:
+    ro_instances: "{{ groups['role_readonly']|default([]) }}"
+
+- name: Identify logical standby nodes
+  set_fact:
+    bdr_node_pause_in_standby: "{{
+      bdr_node_pause_in_standby|default('readonly' in role)
+    }}"
+
 - name: Create BDR node groups if necessary
   postgresql_query:
     conninfo: '{{ bdr_node_dsn }}'
@@ -60,14 +74,14 @@
         args:
           - "{{ bdr_node_group }}"
   when:
-    inventory_hostname == groups[bdr_node_group][0] and
+    inventory_hostname == first_primary and
     node_group_id.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
 
 - include_tasks: clean.yml
   when:
-    inventory_hostname != groups[bdr_node_group][0] and
+    inventory_hostname != first_primary and
     node_group_id.rowcount == 0
   tags: always
 
@@ -93,10 +107,10 @@
 - name: Join BDR node groups
   include_tasks: bdr3-join.yml
   with_items: >
-    {{ groups[bdr_node_group][1:] }}
+    {{ groups[bdr_node_group]|difference([first_primary]) }}
   loop_control:
     loop_var: bdr_node
   when:
-    inventory_hostname == groups[bdr_node_group][0] and
+    inventory_hostname == first_primary and
     hostvars[bdr_node].node_group_id.rowcount == 0
   tags: always

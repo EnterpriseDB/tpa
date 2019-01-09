@@ -26,6 +26,11 @@
   when: >
     'coordinator' in role or 'datanode' in role or 'coordinator-replica' in role or 'datanode-replica' in role or 'gtm' in role or 'gtm-standby' in role
 
+- set_fact:
+    role: "{{ role|union(['readonly']) }}"
+  when: >
+    bdr_node_pause_in_standby|default(false)|bool
+
 - name: Create role-based groups
   group_by: key="role_{{ item }}"
   with_items: "{{ role }}"

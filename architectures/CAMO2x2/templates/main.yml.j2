@@ -45,8 +45,7 @@ instances:
     role:
       - primary
       - bdr
-    vars:
-      bdr_node_pause_in_standby: true
+      - readonly
 
   - node: 6
     Name: {{ hostnames[6] }}
