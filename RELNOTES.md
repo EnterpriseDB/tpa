@@ -2,6 +2,12 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v7.3 (unreleased)
+
+### Bugfixes
+
+- Fix errors in initialisation of BDR logical standby instances
+
 ## v7.2 (2019-01-08)
 
 ### Major changes
