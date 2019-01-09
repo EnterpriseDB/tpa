@@ -17,7 +17,7 @@
     test -f {{ keyfile }} && exit 0;
     test -d {{ _ssh_key_dir }} || mkdir {{ _ssh_key_dir }};
     ssh-keygen -N "" -C "{{ _ssh_key_comment }}" -f "{{ keyfile }}";
-    exit 88 ) 9>/tmp/keygen
+    exit 88 ) 9<{{ inventory_file }}
   args:
     creates: "{{ keyfile }}"
     executable: /bin/bash
