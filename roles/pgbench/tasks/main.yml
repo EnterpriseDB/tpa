@@ -20,7 +20,7 @@
     pgbench_history.exists == 0 and
     'replica' not in role and
     ('bdr' not in role or
-     inventory_hostname == groups[bdr_node_group][0])
+     inventory_hostname == groups[bdr_node_group]|difference(groups['role_readonly']|default([]))|first)
   tags: always
 
 - name: Wait for pgbench -i to replicate to BDR nodes
@@ -39,6 +39,7 @@
     pgbench_opts: -v -c 10 -j 5 -T 180 {{ pgbench_dbname }}
   when: >
     'replica' not in role
+    and not ('bdr' in role and 'readonly' in role)
   tags: always
 
 - name: Run read-only pgbench on replicas
@@ -47,4 +48,5 @@
     pgbench_opts: -n -c 10 -j 5 -T 180 -S {{ pgbench_dbname }}
   when: >
     'replica' in role
+    or ('bdr' in role and 'readonly' in role)
   tags: always
