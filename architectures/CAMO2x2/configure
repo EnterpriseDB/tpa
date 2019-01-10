@@ -36,7 +36,8 @@ class CAMO2x2(BDR_Always_ON):
             for i in instances:
                 role = i.get('role', [])
                 if 'bdr' in role and 'primary' in role:
-                    i['vars']['subscriptions'] = [{
+                    vars = i.get('vars', {})
+                    vars['subscriptions'] = [{
                         'type': 'bdr',
                         'database': self.args['bdr_database'],
                         'replication_sets': [
@@ -44,6 +45,7 @@ class CAMO2x2(BDR_Always_ON):
                             'local_%s_deletes' % i.get('location')
                         ]
                     }]
+                    i['vars'] = vars
 
     def cluster_vars_args(self):
         return super(CAMO2x2, self).cluster_vars_args() + [
