@@ -41,7 +41,10 @@
     - include_role: name=final
       tags: always
 
-    - include_role: name=postgres/bdr
+    - include_role:
+        name: postgres/bdr
+        apply:
+          tags: bdr
       when: >
         'bdr' in role and 'primary' in role
       tags: always
