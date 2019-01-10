@@ -52,14 +52,6 @@
 
 # Now the first node creates the group.
 
-- name: Designate arbitrary r/w instance as primus inter pares
-  set_fact:
-    first_primary: "{{
-      groups[bdr_node_group]|difference(ro_instances)|first
-    }}"
-  vars:
-    ro_instances: "{{ groups['role_readonly']|default([]) }}"
-
 - name: Identify logical standby nodes
   set_fact:
     bdr_node_pause_in_standby: "{{

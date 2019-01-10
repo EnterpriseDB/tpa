@@ -90,6 +90,16 @@
   group_by:
     key: "{{ bdr_node_group }}"
 
+- name: Designate arbitrary r/w instance as primus inter pares
+  set_fact:
+    first_primary: "{{
+      groups|members_of(bdr_node_group, not_in=ro_groups)|first
+    }}"
+  vars:
+    ro_groups:
+    - role_replica
+    - role_readonly
+
 # The commands to create and join the group are version-dependent.
 #
 ## BDR1, BDR2
