@@ -151,6 +151,22 @@ def packages_for(packages, os, version=None):
 
     return ret
 
+# Given a hash that maps group names to lists of group members (such as the
+# global variable "groups"), a group name, and a list of groups to exclude, this
+# function returns the members of the named group that are not members of any of
+# the excluded groups. Empty and undefined groups are silently ignored.
+#
+# For example, groups|members_of('role_a', not_in=['role_b','role_c']) would
+# return hosts in the group role_a that were not in either groups role_b or
+# role_c (as if there were a group named 'role_a_but_not_b_or_c').
+
+def members_of(groups, group, not_in=[]):
+    members = set(groups.get(group, []))
+    excluded = set()
+    for g in not_in:
+        excluded |= set(groups.get(g, []))
+    return list(members - excluded)
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -163,4 +179,5 @@ class FilterModule(object):
             'parse_conninfo': parse_conninfo,
             'identify_os': identify_os,
             'packages_for': packages_for,
+            'members_of': members_of,
         }

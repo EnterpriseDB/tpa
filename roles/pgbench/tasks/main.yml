@@ -19,8 +19,11 @@
   when: >
     pgbench_history.exists == 0 and
     'replica' not in role and
-    ('bdr' not in role or
-     inventory_hostname == groups[bdr_node_group]|difference(groups['role_readonly']|default([]))|first)
+    ('bdr' not in role or inventory_hostname == first_primary)
+  vars:
+    first_primary: "{{
+      groups|members_of(bdr_node_group, not_in=['role_readonly','role_replica'])|first
+    }}"
   tags: always
 
 - name: Wait for pgbench -i to replicate to BDR nodes
