@@ -57,7 +57,7 @@
         file: repmgr.yml
         apply:
           tags: repmgr
-      when: pgdata_initialised
+      when: pgdata_initialised and 'bdr' not in role
       tags: always
   when: >
     'postgres' in role
