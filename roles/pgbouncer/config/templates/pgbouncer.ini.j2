@@ -46,8 +46,8 @@ auth_file = /etc/pgbouncer/userlist.txt
 auth_user = pgbouncer
 auth_query = SELECT * FROM pgbouncer.get_auth($1)
 
-;admin_users = user2, someadmin, otheradmin
-;stats_users = stats, root
+admin_users = pgbouncer
+stats_users = pgbouncer
 
 ;;;
 ;;; Pooler personality questions
