@@ -1,0 +1,5 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+haproxy_stats_socket: /var/lib/haproxy/stats

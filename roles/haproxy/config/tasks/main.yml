@@ -30,6 +30,16 @@
   notify:
     - Note haproxy reload required
 
+- name: Ensure {{ socket_dir }} exists
+  file:
+    path: "{{ socket_dir }}"
+    state: directory
+    owner: haproxy
+    group: haproxy
+    mode: 0755
+  vars:
+    socket_dir: "{{ haproxy_stats_socket|dirname }}"
+
 - name: Enable haproxy service
   service:
     name: haproxy
