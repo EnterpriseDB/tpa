@@ -16,6 +16,7 @@ defaults
     timeout server 30s
     timeout connect 5s
     option tcplog
+    log global
 
 frontend pg_ha
     bind 127.0.0.1:5432
