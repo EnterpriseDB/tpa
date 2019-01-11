@@ -15,6 +15,14 @@
   delegate_to: "{{ item }}"
   delegate_facts: true
 
+- name: Create ssl-dh-param-file
+  openssl_dhparam:
+    path: /etc/ssl/dhparams.pem
+    size: 2048
+    owner: root
+    group: root
+    mode: 0644
+
 - name: Install haproxy.cfg
   template:
     src: haproxy.cfg.j2

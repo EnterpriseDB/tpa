@@ -16,26 +16,26 @@ listen_port = 6432
 ;;;
 
 ;; disable, allow, require, verify-ca, verify-full
-client_tls_sslmode = {{ ssl_mode|default("disable") }}
+client_tls_sslmode = require
 
 ;client_tls_ca_file = '{{ ssl_ca_file|default("") }}'
 client_tls_key_file = {{ ssl_key_file|default("/etc/tpa/"+cluster_name+".key") }}
 client_tls_cert_file = {{ ssl_cert_file|default("/etc/tpa/"+cluster_name+".crt") }}
 
 ;client_tls_ciphers = fast ; normal, secure, legacy, <ciphersuite>
-;client_tls_protocols = all ; secure, tlsv1.0, tlsv1.1, tlsv1.2
+client_tls_protocols = secure
 ;client_tls_dheparams = auto
 ;client_tls_ecdhcurve = auto
 
 ;; disable, allow, require, verify-ca, verify-full
-;server_tls_sslmode = disable
+server_tls_sslmode = require
 
 ;server_tls_ca_file = <system default>
 ;server_tls_key_file =
 ;server_tls_cert_file =
 
 ;server_tls_ciphers = fast ; normal, secure, legacy, <ciphersuite>
-;server_tls_protocols = all ; secure, tlsv1.0, tlsv1.1, tlsv1.2
+server_tls_protocols = secure
 
 ;;;
 ;;; Authentication settings
