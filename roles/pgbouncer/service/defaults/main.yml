@@ -1,0 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+default_pgbouncer_paths:
+  Debian: /usr/sbin/pgbouncer
+  RedHat: /usr/bin/pgbouncer
