@@ -18,7 +18,10 @@
     'barman' in role or backup is defined
   tags: always
 
-- include_role: name=haproxy/final
+- include_role:
+    name: haproxy/final
+    apply:
+      tags: haproxy
   when: >
     'haproxy' in role
   tags: always
