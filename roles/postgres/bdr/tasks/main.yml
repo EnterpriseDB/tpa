@@ -137,15 +137,15 @@
 
 - name: BDR1 setup
   include_tasks: bdr1.yml
-  when: bdr_major_version == 1
+  when: bdr_major_version|default(0) == 1
   tags: always
 
 - name: BDR2 setup
   include_tasks: bdr2.yml
-  when: bdr_major_version == 2
+  when: bdr_major_version|default(0) == 2
   tags: always
 
 - name: BDR3 setup
   include_tasks: bdr3.yml
-  when: bdr_major_version == 3
+  when: bdr_major_version|default(0) == 3
   tags: always
