@@ -20,15 +20,15 @@ defaults
     option tcplog
     log global
 
-frontend pg_ha
+frontend fe
     bind 127.0.0.1:5432
 
     maxconn 1000
     timeout client 1h
 
-    default_backend bdr_cluster
+    default_backend be
 
-backend bdr_cluster
+backend be
     mode tcp
 
     stick-table type ip size 1 nopurge
@@ -41,5 +41,5 @@ backend bdr_cluster
 {% for b in haproxy_backends %}
 {%   set v = hostvars[b] %}
 {%   set backup = loop.first|ternary('', 'backup') %}
-    server BDR{{ loop.index }} {{ b }}:{{ v.postgres_port }} maxconn {{ v.haproxy_maxconn }} check inter 1500 downinter 6s rise 5 fall 3 {{ backup }}
+    server {{ b }} {{ b }}:{{ v.postgres_port }} maxconn {{ v.haproxy_maxconn }} check inter 1500 downinter 6s rise 5 fall 3 {{ backup }}
 {% endfor %}
