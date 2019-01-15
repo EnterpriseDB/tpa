@@ -79,6 +79,7 @@ default_packages:
     - sudo
     - openssh-server
     - rsyslog
+    - socat
   Debian:
     - python-dev
     - linux-tools
