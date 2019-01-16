@@ -40,6 +40,13 @@
   vars:
     socket_dir: "{{ haproxy_stats_socket|dirname }}"
 
+- name: Allow haproxy to connect to arbitrary backends
+  seboolean:
+    name: haproxy_connect_any
+    state: yes
+    persistent: yes
+  ignore_errors: yes
+
 - name: Enable haproxy service
   service:
     name: haproxy
