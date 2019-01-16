@@ -4,6 +4,10 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ## v7.3 (unreleased)
 
+### Notable changes
+
+- Enable TLS by default between pgbouncer ↔ haproxy ↔ postgres
+
 ### Bugfixes
 
 - Fix errors in initialisation of BDR logical standby instances
