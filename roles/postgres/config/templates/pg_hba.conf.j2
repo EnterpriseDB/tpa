@@ -35,7 +35,7 @@ host    all             all             {{ net }}   md5
 {{type}} replication all {{ addr }} md5
 {%     endif %}
 {%     if 'haproxy' in role %}
-host all all {{ addr }} md5
+host haproxy haproxy {{ addr }} md5
 hostssl all all {{ addr }} md5
 {%     endif %}
 {%   endfor %}
