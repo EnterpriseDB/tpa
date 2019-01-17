@@ -29,13 +29,35 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
-- include_role: name=pgbench/init
-  vars:
-    pgbench_output: pgbench-bdr-init.txt
+- block:
+  - name: Raise bdr.global_lock_timeout for pgbench -i
+    postgresql_query:
+      conninfo: "dbname={{ pgbench_dbname }}"
+      autocommit: yes
+      queries:
+      - text: ALTER SYSTEM SET bdr.global_lock_timeout TO '600s';
+      - text: SELECT pg_reload_conf();
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - include_role: name=pgbench/init
+    vars:
+      pgbench_output: pgbench-bdr-init.txt
+    tags: always
+
+  - name: Lower bdr.global_lock_timeout after pgbench -i
+    postgresql_query:
+      conninfo: "dbname={{ pgbench_dbname }}"
+      autocommit: yes
+      queries:
+      - text: ALTER SYSTEM SET bdr.global_lock_timeout TO default;
+      - text: SELECT pg_reload_conf();
+    become_user: "{{ postgres_user }}"
+    become: yes
+
   when: >
     pgbench_history.exists == 0 and
     inventory_hostname == first_primary
-  tags: always
 
 - name: Wait for pgbench -i to replicate to BDR instances
   postgresql_query:
