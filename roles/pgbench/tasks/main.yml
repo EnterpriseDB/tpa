@@ -2,54 +2,16 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- set_fact:
-    pgbench_dbname: "{{ ('bdr' in role)|ternary(bdr_database, 'postgres') }}"
-
-- name: Determine if pgbench -i was run already
-  postgresql_query:
-    conninfo: "dbname={{ pgbench_dbname }}"
-    query: >
-      select count(*) as exists from information_schema.tables
-      where table_name='pgbench_history'
-  register: pgbench_history
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-- include_role: name=pgbench/init
-  when: >
-    pgbench_history.exists == 0 and
-    'replica' not in role and
-    ('bdr' not in role or inventory_hostname == first_primary)
-  vars:
-    first_primary: "{{
-      groups|members_of(bdr_node_group, not_in=['role_readonly','role_replica'])|first
-    }}"
+- include_tasks:
+    file: pgbench-postgres.yml
+    apply:
+      tags: [pgbench, postgres]
   tags: always
 
-- name: Wait for pgbench -i to replicate to BDR nodes
-  postgresql_query:
-    conninfo: "dbname={{ pgbench_dbname }}"
-    query: >
-      select bdr.wait_slot_confirm_lsn(NULL, NULL)
-  become_user: "{{ postgres_user }}"
-  become: yes
+- include_tasks:
+    file: pgbench-bdr.yml
+    apply:
+      tags: [pgbench, bdr]
   when: >
     'bdr' in role
-
-- name: Run read/write pgbench
-  include_tasks: pgbench.yml
-  vars:
-    pgbench_opts: -v -c 10 -j 5 -T 180 {{ pgbench_dbname }}
-  when: >
-    'replica' not in role
-    and not ('bdr' in role and 'readonly' in role)
-  tags: always
-
-- name: Run read-only pgbench on replicas
-  include_tasks: pgbench.yml
-  vars:
-    pgbench_opts: -n -c 10 -j 5 -T 180 -S {{ pgbench_dbname }}
-  when: >
-    'replica' in role
-    or ('bdr' in role and 'readonly' in role)
   tags: always

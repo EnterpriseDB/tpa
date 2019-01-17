@@ -1,0 +1,45 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# First, we run pgbench -i if necessary on all primary instances in the
+# postgres database, then run an r/w pgbench workload on each primary in
+# parallel, followed by an r/o pgbench workload on replicas in parallel.
+# This gives us baseline performance numbers across the cluster.
+
+- set_fact: pgbench_dbname=postgres
+
+- name: Check if pgbench -i was run already
+  postgresql_query:
+    conninfo: "dbname={{ pgbench_dbname }}"
+    query: >
+      select count(*) as exists from information_schema.tables
+      where table_name='pgbench_history'
+  register: pgbench_history
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- include_role: name=pgbench/init
+  vars:
+    pgbench_output: pgbench-postgres-init.txt
+  when: >
+    pgbench_history.exists == 0 and 'replica' not in role
+  tags: always
+
+- name: Run parallel read/write workload on primaries
+  include_tasks: pgbench.yml
+  vars:
+    pgbench_opts: -v -c 10 -j 5 -T 180 {{ pgbench_dbname }}
+    pgbench_output: pgbench-postgres-rw.txt
+  when: >
+    'replica' not in role
+  tags: always
+
+- name: Run parallel read-only workload on replicas
+  include_tasks: pgbench.yml
+  vars:
+    pgbench_opts: -n -c 10 -j 5 -T 180 -S {{ pgbench_dbname }}
+    pgbench_output: pgbench-postgres-ro.txt
+  when: >
+    'replica' in role
+  tags: always

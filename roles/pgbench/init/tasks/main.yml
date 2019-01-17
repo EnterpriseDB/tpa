@@ -11,7 +11,7 @@
  
 - include_role: name=test tasks_from=output.yml
   vars:
-    output_file: pgbench-init.txt
+    output_file: "{{ pgbench_output }}"
     content: |
       {{ pgbench_init.stdout }}
   tags: always
