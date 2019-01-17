@@ -82,4 +82,4 @@
       tags: pgbench
   when: >
     'postgres' in role and pgdata_initialised
-  tags: always
+  tags: pgbench
