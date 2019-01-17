@@ -19,16 +19,6 @@
       groups|members_of(bdr_node_group, not_in=['role_readonly','role_replica'])
     }}"
 
-- name: Determine if pgbench -i was run already
-  postgresql_query:
-    conninfo: "dbname={{ pgbench_dbname }}"
-    query: >
-      select count(*) as exists from information_schema.tables
-      where table_name='pgbench_history'
-  register: pgbench_history
-  become_user: "{{ postgres_user }}"
-  become: yes
-
 - block:
   - name: Raise bdr.global_lock_timeout for pgbench -i
     postgresql_query:
@@ -56,8 +46,6 @@
     become: yes
 
   when: >
-    pgbench_history is defined and
-    pgbench_history.exists == 0 and
     inventory_hostname == first_primary
 
 - name: Wait for pgbench -i to replicate to BDR instances
