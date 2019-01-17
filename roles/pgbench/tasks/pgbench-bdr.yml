@@ -2,15 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# For BDR instances, we run pgbench -i on an arbitrary primary instance
-# in the bdr-enabled database, wait for the changes to replicate to the
-# other instances, and run an r/w workload on some other instance. This
-# avoids generating conflicts during the run (which aren't useful to us
-# anyway).
-
-- set_fact:
-    pgbench_dbname: "{{ bdr_database }}"
-
 - set_fact:
     first_primary: "{{ _rw_instances|first }}"
     last_primary: "{{ _rw_instances|last }}"

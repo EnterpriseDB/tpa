@@ -2,13 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# First, we run pgbench -i if necessary on all primary instances in the
-# postgres database, then run an r/w pgbench workload on each primary in
-# parallel, followed by an r/o pgbench workload on replicas in parallel.
-# This gives us baseline performance numbers across the cluster.
-
-- set_fact: pgbench_dbname=postgres
-
 - include_role: name=pgbench/init
   vars:
     pgbench_output: pgbench-postgres-init.txt

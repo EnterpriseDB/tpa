@@ -2,11 +2,33 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+# First, we run the following in the postgres database:
+#
+# 1. pgbench -i on every primary (in parallel)
+# 2. An r/w workload on every primary (in parallel)
+# 3. An r/o workload on every replica (in parallel)
+#
+# This gives us baseline numbers for per-instance performance with only
+# Postgres and streaming replication in the picture.
+
 - include_tasks:
     file: pgbench-postgres.yml
     apply:
       tags: [pgbench-postgres]
+  vars:
+    pgbench_dbname: postgres
   tags: always
+
+# Next, for BDR instances, we run the following in the BDR-enabled
+# database:
+#
+# 1. pgbench -i on one (arbitrary) primary
+# 2. bdr.wait_slot_confirm_lsn() on EVERY instance
+# 3. An r/w workload on one (preferably different) primary
+# 4. An r/o workload on every replica (in parallel)
+#
+# The above steps are done in parallel for every bdr_node_group in the
+# cluster (but there's usually only one of those).
 
 - include_tasks:
     file: pgbench-bdr.yml
@@ -14,4 +36,6 @@
       tags: [pgbench-bdr]
   when: >
     'bdr' in role
+  vars:
+    pgbench_dbname: "{{ bdr_database }}"
   tags: always
