@@ -5,18 +5,21 @@
 - assert:
     msg: "output_dir must be defined"
     that: output_dir is defined
+  tags: always
 
 - name: Ensure that each instance has an output subdirectory
   local_action:
     module: file
     path: "{{ output_dir }}/{{ inventory_hostname }}"
     state: directory
+  tags: always
 
 - name: Create group(s) based on the value of bdr_node_group
   group_by:
     key: "{{ bdr_node_group }}"
   when: >
     'bdr' in role
+  tags: always
 
 - name: Run system-level tasks
   include_tasks:
@@ -33,10 +36,12 @@
       register: pgdata
       become_user: "{{ postgres_user }}"
       become: yes
+      tags: always
 
     - name: Set pgdata_initialised
       set_fact:
         pgdata_initialised: "{{ pgdata.stat.exists }}"
+      tags: always
 
     - name: Check if repmgr.conf exists
       stat:

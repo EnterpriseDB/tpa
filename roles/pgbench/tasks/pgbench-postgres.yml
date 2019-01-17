@@ -23,6 +23,7 @@
   vars:
     pgbench_output: pgbench-postgres-init.txt
   when: >
+    pgbench_history is defined and
     pgbench_history.exists == 0 and 'replica' not in role
   tags: always
 
