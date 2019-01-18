@@ -6,11 +6,11 @@
 # or not
 - block:
   - name: Check if GTM Proxy exists 
-    stat: path=/pgxl/data/gtm_pxy{{gpindex}}
+    stat: path=/pgxl/data/gtm_pxy{{ gpindex }}
     register: dirstat
 
   - name: Add GTM Proxy if it does not exist
-    shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add gtm_proxy gtm_pxy{{gpindex}} {{inventory_hostname}} 20001 /pgxl/data/gtm_pxy{{gpindex}}
+    shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add gtm_proxy gtm_pxy{{ gpindex }} {{ inventory_hostname }} 20001 /pgxl/data/gtm_pxy{{ gpindex }}
     args:
       executable: /bin/bash
     environment:

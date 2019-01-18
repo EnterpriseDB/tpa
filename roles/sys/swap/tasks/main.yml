@@ -19,16 +19,16 @@
       - device is defined
 
 - name: Check if {{ device }} needs a "swap" filesystem
-  command: lsblk --noheadings --output FSTYPE "{{ device}}"
+  command: lsblk --noheadings --output FSTYPE "{{ device }}"
   register: fstype
 
 - block:
     - name: Create swap
-      command: "mkswap {{ device}}"
+      command: "mkswap {{ device }}"
 
     - name: Set swap
       mount:
-        src: "{{ device}}"
+        src: "{{ device }}"
         name: none
         fstype: swap
         dump: 0
@@ -36,5 +36,5 @@
         state: present
 
     - name: Activate swap
-      command: "swapon {{ device}}"
+      command: "swapon {{ device }}"
   when: fstype.stdout != 'swap'

@@ -14,7 +14,7 @@
 
 - name: Check that pg_receivexlog is running
   postgresql_query:
-    conninfo: "host={{postgres_host}} port={{postgres_port}}"
+    conninfo: "host={{ postgres_host }} port={{ postgres_port }}"
     query: >
       select count(*)
       from pg_stat_replication r join pg_replication_slots s on (r.pid=s.active_pid)

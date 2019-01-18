@@ -36,7 +36,7 @@
       tags: always
     - name: Set noauto in mount options for {{ _device }}
       set_fact:
-        mountopts: "noauto{% if mountopts %},{{mountopts}}{% endif -%}"
+        mountopts: "noauto{% if mountopts %},{{ mountopts }}{% endif -%}"
       when: >
         'noauto' not in mountopts
   when: encryption|default('none') != 'none'

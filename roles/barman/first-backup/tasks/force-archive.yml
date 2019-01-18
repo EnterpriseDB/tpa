@@ -9,9 +9,9 @@
 
 - name: Force switch to a new WAL segment
   postgresql_query:
-    conninfo: "host={{postgres_host}} port={{postgres_port}}"
+    conninfo: "host={{ postgres_host }} port={{ postgres_port }}"
     query: >
-      select pg_{{wal_or_xlog}}file_name(pg_switch_{{wal_or_xlog}}()) as filename
+      select pg_{{ wal_or_xlog }}file_name(pg_switch_{{ wal_or_xlog }}()) as filename
   delegate_to: "{{ inventory_hostname|upstream_root(hostvars) }}"
   become_user: "{{ postgres_user }}"
   become: yes

@@ -93,9 +93,9 @@
   vars:
     pgespresso_packages:
       Debian:
-        - postgresql-{{postgres_version}}-pgespresso
+        - postgresql-{{ postgres_version }}-pgespresso
       RedHat:
-        - pgespresso{{postgres_versionNN}}
+        - pgespresso{{ postgres_versionNN }}
 
 # We install our own service units later, so we disable the packaged
 # versions here.

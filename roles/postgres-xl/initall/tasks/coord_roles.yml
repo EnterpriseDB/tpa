@@ -7,11 +7,11 @@
 # command to set the component up
 
 - name: Check if Coordinator exists 
-  stat: path=/pgxl/data/coord{{cnode}}_{{ctype}}
+  stat: path=/pgxl/data/coord{{ cnode }}_{{ ctype }}
   register: dirstat
 
 - name: Add Coordinator Master if it does not exist 
-  shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add coordinator master coord{{cnode}} {{inventory_hostname}} 20002 20003 /pgxl/data/coord{{cnode}}_master none none 
+  shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add coordinator master coord{{ cnode }} {{ inventory_hostname }} 20002 20003 /pgxl/data/coord{{ cnode }}_master none none 
   args:
     executable: /bin/bash
   environment:

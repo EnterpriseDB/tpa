@@ -6,7 +6,7 @@
 # to pass on to the barman role
 - name: Add backup server to backup_nodes group
   add_host:
-    name: "{{item}}-barman"
+    name: "{{ item }}-barman"
     ansible_host: "{{ hostvars[item].public_ip }}"
     ip_address: "{{ hostvars[item].ip_address }}"
     groups: [backup_nodes, "{{ hostvars[item].cluster_tag }}"]
@@ -15,17 +15,17 @@
     cluster_name: "{{ hostvars[item].cluster_name }}"
 #   role: "{{ hostvars[item].role }}"
     role: [ "barman" ]
-    parent_inventory_hostname: "{{item}}"
+    parent_inventory_hostname: "{{ item }}"
     backup: ""
   with_items: "{{ groups['role_barman']|default([]) }}"
 
 - name: Add coordinators to backup_nodes group
   add_host:
-    name: "{{item.0}}-{{ item.1 }}"
-    ansible_host: "{{ hostvars[item.0].public_ip}}"
-    ip_address: "{{ hostvars[item.0].ip_address}}"
+    name: "{{ item.0 }}-{{ item.1 }}"
+    ansible_host: "{{ hostvars[item.0].public_ip }}"
+    ip_address: "{{ hostvars[item.0].ip_address }}"
     groups: [backup_nodes, "{{ hostvars[item.0].cluster_tag }}"]
-    backup_name: "{{item.0}}-coord-{{item.1}}"
+    backup_name: "{{ item.0 }}-coord-{{ item.1 }}"
     postgres_port: "20002"
     backup: "{{ hostvars[item.0].backup }}-barman"
     ansible_os_family: "{{ hostvars[item.0].ansible_os_family }}"
@@ -33,7 +33,7 @@
     cluster_name: "{{ hostvars[item.0].cluster_name }}"
 #   role: "{{ hostvars[item.0].role }}"
     role: [ "coordinator","postgres-xl" ]
-    parent_inventory_hostname: "{{item.0}}"
+    parent_inventory_hostname: "{{ item.0 }}"
   with_nested_dependents:
         - groups['role_coordinator']
         - hostvars[item.0].coordinators|default([])
@@ -42,19 +42,19 @@
 
 - name: Add datanodes to backup_nodes group
   add_host:
-    name: "{{item.0}}-{{ item.1 }}"
-    ansible_host: "{{ hostvars[item.0].public_ip}}"
-    ip_address: "{{ hostvars[item.0].ip_address}}"
+    name: "{{ item.0 }}-{{ item.1 }}"
+    ansible_host: "{{ hostvars[item.0].public_ip }}"
+    ip_address: "{{ hostvars[item.0].ip_address }}"
     groups: [backup_nodes, "{{ hostvars[item.0].cluster_tag }}"]
-    backup_name: "{{item.0}}-datanode-{{item.1}}"
-    postgres_port: "{{item.1|int+20003}}"
+    backup_name: "{{ item.0 }}-datanode-{{ item.1 }}"
+    postgres_port: "{{ item.1|int+20003 }}"
     backup: "{{ hostvars[item.0].backup }}-barman"
     ansible_os_family: "{{ hostvars[item.0].ansible_os_family }}"
     ansible_distribution_release: "{{ hostvars[item.0].ansible_distribution_release }}"
     cluster_name: "{{ hostvars[item.0].cluster_name }}"
 #   role: "{{ hostvars[item.0].role }}"
     role: [ "datanode","postgres-xl" ]
-    parent_inventory_hostname: "{{item.0}}"
+    parent_inventory_hostname: "{{ item.0 }}"
   with_nested_dependents:
         - groups['role_datanode']
         - hostvars[item.0].datanodes|default([])
@@ -65,7 +65,7 @@
 # against it.
 - name: Add GTM to backup_nodes group
   add_host:
-    name: "{{item}}-gtm"
+    name: "{{ item }}-gtm"
     ansible_host: "{{ hostvars[item].public_ip }}"
     ip_address: "{{ hostvars[item].ip_address }}"
     coord_ip_address: "{{ hostvars[groups['role_coordinator'][0]].ip_address }}"
@@ -73,10 +73,10 @@
     groups: [backup_nodes, "{{ hostvars[item].cluster_tag }}"]
     backup: ""
     gtm_backup: "{{ hostvars[item].backup }}-barman"
-    backup_name: "{{item}}-gtm"
+    backup_name: "{{ item }}-gtm"
     ansible_os_family: "{{ hostvars[item].ansible_os_family }}"
     ansible_distribution_release: "{{ hostvars[item].ansible_distribution_release }}"
     cluster_name: "{{ hostvars[item].cluster_name }}"
     role: [ "gtm","postgres-xl" ]
-    parent_inventory_hostname: "{{item}}"
+    parent_inventory_hostname: "{{ item }}"
   with_items: "{{ groups['role_gtm']|default([]) }}"

@@ -7,40 +7,40 @@
 
 - name: Fetch Postgres source from git repository
   git:
-    repo: "{{postgres_git_url}}"
-    dest: "{{postgres_src_dir}}"
-    version: "{{postgres_git_ref}}"
-    reference: "{{postgres_git_reference_repo}}"
+    repo: "{{ postgres_git_url }}"
+    dest: "{{ postgres_src_dir }}"
+    version: "{{ postgres_git_ref }}"
+    reference: "{{ postgres_git_reference_repo }}"
 
 - name: Remove old build directory
-  file: state=absent path="{{postgres_build_dir}}" force=yes
+  file: state=absent path="{{ postgres_build_dir }}" force=yes
   tags: [build-clean, postgres-clean]
 
 - name: Ensure build directory exists
-  file: state=directory path="{{postgres_build_dir}}"
+  file: state=directory path="{{ postgres_build_dir }}"
 
 - name: Configure Postgres
   shell: >
-    {{postgres_src_dir}}/configure \
-        --prefix={{postgres_install_dir|expanduser|quote}} \
-        {% for arg in postgres_configure_opts %}{{arg|quote}} {% endfor %}
+    {{ postgres_src_dir }}/configure \
+        --prefix={{ postgres_install_dir|expanduser|quote }} \
+        {% for arg in postgres_configure_opts %}{{ arg|quote }} {% endfor %}
   args:
-    chdir: "{{postgres_build_dir}}"
+    chdir: "{{ postgres_build_dir }}"
     executable: /bin/bash
-  environment: "{{postgres_configure_env}}"
+  environment: "{{ postgres_configure_env }}"
   tags: [build-clean, postgres-clean]
 
 - name: Build Postgres
-  shell: "{{postgres_make_command}} {{item}}"
+  shell: "{{ postgres_make_command }} {{ item }}"
   args:
-    chdir: "{{postgres_build_dir}}"
+    chdir: "{{ postgres_build_dir }}"
     executable: /bin/bash
   with_items: "{{ postgres_build_targets }}"
 
 - name: Install Postgres
-  shell: "{{postgres_make_command}} {{item}}"
+  shell: "{{ postgres_make_command }} {{ item }}"
   args:
-    chdir: "{{postgres_build_dir}}"
+    chdir: "{{ postgres_build_dir }}"
     executable: /bin/bash
   with_items: "{{ postgres_install_targets }}"
 

@@ -24,7 +24,7 @@
 
 - name: Install keypair {{ _ssh_key_name }} for user {{ ssh_username }}
   action: copy
-  args: "{{item}}"
+  args: "{{ item }}"
   with_items:
     - src: "{{ _ssh_key_dir }}/{{ _ssh_key_name }}"
       dest: "~{{ ssh_username }}/.ssh/id_rsa"
