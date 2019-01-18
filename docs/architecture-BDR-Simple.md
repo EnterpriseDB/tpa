@@ -45,5 +45,8 @@ name of the BDR node group (default: bdrgroup).
 You may optionally specify ``--bdr-database dbname`` to set the name of
 the database with BDR enabled (default: bdrdb).
 
+You may optionally specify ``--enable-camo`` to set pairs of BDR
+instances to be each other's CAMO partners.
+
 You may also specify any of the options described by
 [``tpaexec help configure-options``](tpaexec-configure.md).

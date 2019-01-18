@@ -8,6 +8,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Enable TLS by default between pgbouncer ↔ haproxy ↔ postgres
 
+- Add --enable-camo configure option for BDR-Simple and BDR-Always-ON
+
 ### Bugfixes
 
 - Fix errors in initialisation of BDR logical standby instances
