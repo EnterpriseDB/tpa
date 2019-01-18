@@ -177,7 +177,7 @@
 #     eu-central-1: yes
 #     us-east-1: no
 #     …
-#       
+#
 # If you do the latter, you must also make sure that the correct
 # subnets have a route to the igw.
 

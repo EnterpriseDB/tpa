@@ -4,7 +4,7 @@
 
 - name: Ensure ec2_vpc is configured
   assert:
-    msg: "Please define ec2_vpc (a hash) in {{config_file}}"
+    msg: "Please define ec2_vpc (a hash) in {{ config_file }}"
     that:
       - ec2_vpc is defined
       - ec2_vpc is mapping

@@ -18,7 +18,7 @@
 
 - name: Ensure cluster_name is specified
   assert:
-    msg: "Please define cluster_name in {{config_file}}"
+    msg: "Please define cluster_name in {{ config_file }}"
     that:
       - cluster_name is defined
       - cluster_name != ''
@@ -54,7 +54,7 @@
 
 - name: Ensure instances is correctly configured
   assert:
-    msg: "Please define instances (an array of hashes, one per instance) in {{config_file}}"
+    msg: "Please define instances (an array of hashes, one per instance) in {{ config_file }}"
     that:
       - instances is defined
       - instances is sequence and instances is not string and instances is not mapping

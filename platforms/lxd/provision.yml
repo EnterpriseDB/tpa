@@ -15,12 +15,12 @@
       server: "{{ item.server | default () }}"
       protocol: "{{ item.protocol | default ('lxd') }}"
       alias: "{{ item.alias }}"
-      architecture: "{{ item.architecture | default()}}"
+      architecture: "{{ item.architecture | default() }}"
     profiles: ["{{ item.profile | default ('default') }}"]
     config:
       limits.memory: "{{ item.memory | default () }}"
       security.nesting: "{{ item.nesting | default ('false') }}"
-      security.privileged: "{{ item.privileged | default ('false')}}"
+      security.privileged: "{{ item.privileged | default ('false') }}"
     devices:
       root:
         path: /

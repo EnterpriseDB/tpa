@@ -6,7 +6,8 @@
   any_errors_fatal: True
   max_fail_percentage: 0
   tasks:
-    - include_role: name=init
+    - include_role:
+        name: init
       vars:
         pgdata_initialised: "{{ 'postgres' in role }}"
       tags: always
@@ -77,7 +78,7 @@
 
     - name: Gather volume delete_on_termination status
       command: >
-        aws ec2 describe-volumes --region {{ item.region }} --volume-ids {{ item.id }} --query 
+        aws ec2 describe-volumes --region {{ item.region }} --volume-ids {{ item.id }} --query
         "Volumes[].Attachments[0].[Device,to_string(DeleteOnTermination)]|[0]"
       delegate_to: localhost
       with_items:

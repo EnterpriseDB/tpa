@@ -11,9 +11,9 @@
     - include_tasks: validate.yml
       tags: always
 
-    - name: Require inventory group {{cluster_tag}} to be defined
+    - name: Require inventory group {{ cluster_tag }} to be defined
       assert:
-        msg: "No hosts found in group {{cluster_tag}}"
+        msg: "No hosts found in group {{ cluster_tag }}"
         that:
           - cluster_tag in groups
           - groups[cluster_tag] | length > 0
