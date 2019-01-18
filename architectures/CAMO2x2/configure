@@ -32,6 +32,7 @@ class CAMO2x2(BDR_Always_ON):
         return 9
 
     def update_instances(self, instances):
+        super(CAMO2x2, self).update_instances(instances)
         if self.args['replicate_deletes_locally']:
             for i in instances:
                 role = i.get('role', [])

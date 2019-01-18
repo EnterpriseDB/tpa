@@ -18,6 +18,11 @@ class BDR(Architecture):
             help='name of BDR-enabled database',
             default='bdrdb',
         )
+        if self.name != 'CAMO2x2':
+            g.add_argument(
+                '--enable-camo', action='store_true',
+                help='assign instances pairwise as CAMO partners'
+            )
 
     def cluster_vars_args(self):
         return super(BDR, self).cluster_vars_args() + [
@@ -29,3 +34,35 @@ class BDR(Architecture):
             'repmgr_failover': 'manual',
             'postgres_coredump_filter': '0xff',
         })
+
+    def update_instances(self, instances):
+
+        # If --enable-camo is specified, we collect all the instances with role
+        # [bdr,primary] and no partner already set and set them pairwise to be
+        # each other's CAMO partners. This is crude, but it's good enough to
+        # experiment with CAMO on a two- or four-node BDR-Simple cluster.
+
+        if self.args.get('enable_camo', False):
+            bdr_primaries = []
+            id = self.args['instance_defaults']
+            for i in instances:
+                vars = i.get('vars', {})
+                role = i.get('role', id.get('role', []))
+                if 'bdr' in role and 'primary' in role:
+                    if not 'bdr_node_camo_partner' in vars:
+                        bdr_primaries.append(i)
+
+            idx = 0
+            while idx+1 < len(bdr_primaries):
+                a = bdr_primaries[idx]
+                b = bdr_primaries[idx+1]
+
+                a_vars = a.get('vars', {})
+                a_vars['bdr_node_camo_partner'] = b.get('Name')
+                a['vars'] = a_vars
+
+                b_vars = b.get('vars', {})
+                b_vars['bdr_node_camo_partner'] = a.get('Name')
+                b['vars'] = b_vars
+
+                idx += 2
