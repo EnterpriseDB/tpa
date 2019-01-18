@@ -55,9 +55,10 @@
 # public keys of everyone who needs access to the secret.
 
 - name: Generate the vault passphrase for this cluster
-  local_action: >
-    shell {{ tpa_dir }}/architectures/lib/password > vault_pass.txt
+  shell: >
+    {{ tpa_dir }}/architectures/lib/password > vault_pass.txt
   args:
     chdir: "{{ cluster_dir }}/vault"
     creates: vault_pass.txt
+  delegate_to: localhost
   tags: [common, vault]

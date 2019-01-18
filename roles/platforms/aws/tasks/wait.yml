@@ -16,8 +16,7 @@
 # caused enough debugging problems that it's worth waiting longer.)
 
 - name: Wait for instance reachability checks to pass
-  local_action:
-    module: ec2_instance_status
+  ec2_instance_status:
     instance_id: "{{ ec2_id }}"
     region: "{{ ec2_region }}"
   register: i
@@ -32,6 +31,7 @@
   retries: 60
   delay: 10
   become: no
+  delegate_to: localhost
 
 - name: Set availability zone as fact
   set_fact:

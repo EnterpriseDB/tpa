@@ -19,23 +19,22 @@
     that: openvpn_bin != ''
 
 - name: Ensure certs directory exists locally
-  local_action:
-    module: file
+  file:
     path: "{{ _local_cert_dir }}"
     state: directory
   run_once: yes
   become: no
+  delegate_to: localhost
 
 - name: Copy custom openssl configuration to certs directory
-  local_action:
-    module: template
+  template:
     src: openssl.cnf.j2
     dest: "{{ _local_cert_dir }}/openssl.cnf"
   become: no
+  delegate_to: localhost
 
 - name: Generate CA key and self-signed CA certificate
-  local_action: >
-    shell
+  shell: >
     umask 077 &&
     openssl req -new -nodes -newkey rsa:4096 -x509 -out ca.crt -keyout ca.key
     -subj '/C=GB/ST=Oxford/L=Oxford/O=2ndQuadrant/OU=2ndQuadrant TPA/CN={{ cluster_name }}'
@@ -45,10 +44,10 @@
     creates: "ca.key"
   run_once: yes
   become: no
+  delegate_to: localhost
 
 - name: Generate host key and CSR for each instance
-  local_action: >
-    shell
+  shell: >
     umask 077 &&
     openssl req -new -nodes -newkey rsa:4096
     -out "{{ inventory_hostname }}.csr" -keyout "{{ inventory_hostname }}.key"
@@ -58,6 +57,7 @@
     chdir: "{{ _local_cert_dir }}"
     creates: "{{ inventory_hostname }}.key"
   become: no
+  delegate_to: localhost
 
 - name: Select extension type for host certificate
   set_fact:
@@ -66,8 +66,7 @@
     }}"
 
 - name: Sign each CSR with the CA certificate
-  local_action: >
-    shell
+  shell: >
     umask 077 &&
     openssl x509 -req -CA ca.crt -CAkey ca.key -set_serial {{ node }}
     -in "{{ inventory_hostname }}.csr" -out "{{ inventory_hostname }}.crt"
@@ -77,10 +76,10 @@
     chdir: "{{ _local_cert_dir }}"
     creates: "{{ inventory_hostname }}.crt"
   become: no
+  delegate_to: localhost
 
 - name: Generate DH parameters
-  local_action: >
-    shell
+  shell: >
     umask 077 &&
     openssl dhparam -out "dh2048.pem" 2048
   args:
@@ -88,10 +87,10 @@
     creates: "dh2048.pem"
   run_once: yes
   become: no
+  delegate_to: localhost
 
 - name: Generate TLS authentication key
-  local_action: >
-    shell
+  shell: >
     umask 077 &&
     {{ openvpn_bin }} --genkey --secret "ta.key"
   args:
@@ -99,3 +98,4 @@
     creates: "ta.key"
   run_once: yes
   become: no
+  delegate_to: localhost

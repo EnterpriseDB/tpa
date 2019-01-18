@@ -14,7 +14,7 @@
       - content is defined
 
 - name: Write output to {{ output_file }}
-  local_action:
-    module: copy
+  copy:
     dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ output_file }}"
     content: "{{ content }}"
+  delegate_to: localhost

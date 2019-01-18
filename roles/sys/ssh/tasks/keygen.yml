@@ -12,8 +12,8 @@
 #     ssh_key_comment: 'xxx@yyy'
 
 - name: Generate ssh keypair {{ _ssh_key_name }}
-  local_action: >
-    shell ( flock -n 9 || exit 99;
+  shell: >
+    ( flock -n 9 || exit 99;
     test -f {{ keyfile }} && exit 0;
     test -d {{ _ssh_key_dir }} || mkdir {{ _ssh_key_dir }};
     ssh-keygen -N "" -C "{{ _ssh_key_comment }}" -f "{{ keyfile }}";
@@ -29,3 +29,4 @@
   become: no
   vars:
     keyfile: "{{ _ssh_key_dir }}/{{ _ssh_key_name }}"
+  delegate_to: localhost

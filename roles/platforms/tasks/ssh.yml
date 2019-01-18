@@ -25,9 +25,9 @@
 # use a ProxyCommand.
 
 - name: Wait for ssh to be available
-  local_action:
-    module: wait_for
+  wait_for:
     host: "{{ ansible_host }}"
     port: "{{ ansible_port|default(22) }}"
   when: platform != 'lxd'
+  delegate_to: localhost
   tags: wait_for

@@ -8,10 +8,10 @@
   tags: always
 
 - name: Ensure that each instance has an output subdirectory
-  local_action:
-    module: file
+  file:
     path: "{{ output_dir }}/{{ inventory_hostname }}"
     state: directory
+  delegate_to: localhost
   tags: always
 
 - name: Create group(s) based on the value of bdr_node_group
