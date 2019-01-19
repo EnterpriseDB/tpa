@@ -24,10 +24,14 @@ def has_subkey(container, keys):
 def notequalto(a, b):
     return a != b
 
-# Returns True if the given value is in the container, and False otherwise.
+# Returns True if all of the one or more given values are in the container, and
+# False otherwise.
 
-def contains(container, value):
-    return value in container
+def contains(container, *values):
+    for v in values:
+        if v not in container:
+            return False
+    return True
 
 # Returns True if the given container is empty, False otherwise.
 

@@ -46,7 +46,7 @@
         apply:
           tags: bdr
       when: >
-        'bdr' in role and 'primary' in role
+        role|contains('bdr', 'primary')
       tags: always
 
     - include_role: name=monitoring
