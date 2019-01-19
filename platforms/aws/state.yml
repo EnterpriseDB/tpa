@@ -16,7 +16,7 @@
         msg: "No hosts found in group {{ cluster_tag }}"
         that:
           - cluster_tag in groups
-          - groups[cluster_tag] | length > 0
+          - groups[cluster_tag] is not empty
       tags: always
 
     - name: Stop EC2 instances in each region

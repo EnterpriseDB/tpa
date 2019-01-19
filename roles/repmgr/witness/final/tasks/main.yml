@@ -30,7 +30,7 @@
       {{ inventory_hostname }} is tagged as witness for {{ upstream_primary }},
       but is registered as a {{ registration.type }} already
   when:
-    registration.results|length > 0 and registration.type != 'witness'
+    registration.results is not empty and registration.type != 'witness'
 
 - name: Run 'repmgr witness register' on the witness
   command: >
@@ -39,4 +39,4 @@
       -h "{{ upstream_primary }}"
   become_user: "{{ postgres_user }}"
   become: yes
-  when: registration.results|length == 0
+  when: registration.results is empty

@@ -29,10 +29,16 @@ def notequalto(a, b):
 def contains(container, value):
     return value in container
 
+# Returns True if the given container is empty, False otherwise.
+
+def empty(container):
+    return len(container) == 0
+
 class TestModule(object):
     def tests(self):
         return {
             'has_subkey': has_subkey,
             'notequalto': notequalto,
             'contains': contains,
+            'empty': empty,
         }

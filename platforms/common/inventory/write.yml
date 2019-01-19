@@ -81,7 +81,7 @@
     label: >-
       {{ item.Name }}
   when: >
-    item.vars|length > 0
+    item.vars is not empty
 
 - name: Write topology variables for hosts
   copy:

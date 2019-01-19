@@ -111,4 +111,4 @@
             region: v.vpc.id
           })
         }}"
-  when: found.vpcs|length == 0
+  when: found.vpcs is empty

@@ -13,7 +13,7 @@
     msg: "Export TPA_2Q_SUBSCRIPTION_TOKEN to use tpa_2q_repositories"
     that:
       lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') != '' or
-      tpa_2q_repositories|default([])|length == 0
+      tpa_2q_repositories|default([]) is empty
   tags: public_repos
 
 # We must ensure that a usable Python (2.7.x) is installed, along with

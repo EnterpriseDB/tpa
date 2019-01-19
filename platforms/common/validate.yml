@@ -58,7 +58,7 @@
     that:
       - instances is defined
       - instances is sequence and instances is not string and instances is not mapping
-      - instances | length > 0
+      - instances is not empty
 
 - name: Set defaults for instance definitions
   set_fact:

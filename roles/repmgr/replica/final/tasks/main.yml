@@ -29,7 +29,7 @@
 
 - include_tasks: recovery.yml
   when:
-    recovery_settings|length == 0
+    recovery_settings is empty
   vars:
     recovery_settings: >
       {{ cluster_facts|try_subkey('replica.recovery_settings', {}) }}
@@ -56,7 +56,7 @@
 
 - include_role: name=postgres/facts
   when:
-    cluster_facts|length == 0
+    cluster_facts is empty
   tags: always
 
 # Now we can check that this instance is in fact a replica, and has a

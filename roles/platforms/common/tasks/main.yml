@@ -15,7 +15,7 @@
   set_fact:
     role: "{{ role|union(['postgres']) }}"
   when: >
-    'primary' in role or 'replica' in role or 'witness' in role or 'bdr' in role
+    role|intersect(['primary', 'replica', 'witness', 'bdr']) is not empty
 
 # Add 'postgres-xl' to role when any of 'coordinator' or 'datanode'
 # or 'coordinator-replica' or 'datanode-replica' or 'gtm' or
@@ -24,7 +24,7 @@
 - set_fact:
     role: "{{ role|union(['postgres-xl']) }}"
   when: >
-    'coordinator' in role or 'datanode' in role or 'coordinator-replica' in role or 'datanode-replica' in role or 'gtm' in role or 'gtm-standby' in role
+    role|intersect(['coordinator', 'datanode', 'coordinator-replica', 'datanode-replica', 'gtm', 'gtm-standby']) is not empty
 
 - set_fact:
     role: "{{ role|union(['readonly']) }}"
@@ -44,7 +44,7 @@
     log_server: "{{ groups[ls][0] }}"
   when: >
     log_server is not defined and
-    ls in groups and groups[ls]|length > 0 and
+    ls in groups and groups[ls] is not empty and
     inventory_hostname != groups[ls][0]
   vars:
     ls: 'role_log-server'
@@ -58,7 +58,7 @@
     monitoring_server: "{{ groups[ms][0] }}"
   when: >
     monitoring_server is not defined and
-    ms in groups and groups[ms]|length > 0 and
+    ms in groups and groups[ms] is not empty and
     inventory_hostname != groups[ms][0]
   vars:
     ms: 'role_monitoring-server'
@@ -72,7 +72,7 @@
     openvpn_server: "{{ groups[os][0] }}"
   when: >
     openvpn_server is not defined and
-    os in groups and groups[os]|length > 0 and
+    os in groups and groups[os] is not empty and
     inventory_hostname != groups[os][0]
   vars:
     os: 'role_openvpn-server'

@@ -100,7 +100,7 @@
     }}"
   when:
     ec2_vpc_subnets is not defined
-    and location|length > 0
+    and location is not empty
     and location[0].az is defined
 
 - name: Ensure ec2_vpc_subnets is defined

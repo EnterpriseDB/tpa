@@ -49,7 +49,7 @@
 
 - include_tasks: s3-uploads.yml
   when:
-    s3_uploads|default([]) != []
+    s3_uploads|default([]) is not empty
   tags: [aws, s3, uploads]
 
 # We create an instance profile IAM role for the cluster and attach

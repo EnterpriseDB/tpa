@@ -12,7 +12,7 @@
 # install some (ostensibly) extensions from source.
 
 - include_role: name=postgres/src/req
-  when: install_from_source|length > 0
+  when: install_from_source is not empty
   tags: always
 
 - include_role: name=src/install

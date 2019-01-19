@@ -34,7 +34,7 @@
   set_fact:
     provisioning_vars: "{{ provisioning_vars|remove_keys(overriden_keys) }}"
   when:
-    overriden_keys|default({})|length > 0
+    overriden_keys|default({}) is not empty
   register: overriden
 
 - include_tasks: write-provisioning-vars.yml
