@@ -67,6 +67,8 @@
   with_items:
     - dl/default/release
     - "{{ tpa_2q_repositories|default([]) }}"
+  when:
+    tpa_2q_repositories|default('undefined') != []
   vars:
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
     volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
