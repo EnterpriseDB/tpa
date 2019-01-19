@@ -19,7 +19,7 @@
   when: >
     upstream|default(upstream_primary) != upstream_primary
   tags: always
-    
+
 - name: Run repmgr standby clone
   command: >
     {{ postgres_bin_dir }}/repmgr standby clone -F --verbose \

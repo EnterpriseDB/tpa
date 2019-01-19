@@ -28,7 +28,7 @@ For older versions of **PuTTYgen**, select **SSH-2 RSA**; for recent versions se
 
 *Do not select SSH-1 (RSA)*
 
-Now choose **Load** - in the box that says **PuTTY Private Key Files (*.ppk)** you will need to select **All Files (\*.\*)** 
+Now choose **Load** - in the box that says **PuTTY Private Key Files (*.ppk)** you will need to select **All Files (\*.\*)**
 
 Select your **.pem** file and choose **Open**, then click **OK**.
 
@@ -40,13 +40,13 @@ Select **Save private key** and click **Yes** to ignore the warning about saving
 
 Start **PuTTY**, select **Session** from the **Category** window - in the **Host Name** panel, enter `<user>@<IP address>` and in the Port Panel, enter **22**
 
-The `<user>` and `<IP address>` can be found in the `<clustername>/ssh_config` file which gets created by the **`tpaexec provision`** utility. 
+The `<user>` and `<IP address>` can be found in the `<clustername>/ssh_config` file which gets created by the **`tpaexec provision`** utility.
 
 In the Putty **Category** window, Select **Connection**, expand **SSH**, select **Auth**
 
 For the panel marked ***Private key file for authentication***, click **Browse** & select the .ppk file that was saved  above, then select **Open**
 
-In the Putty **Category** window, select **Session** again, enter a session name in **Saved Sessions**, and **Save**                                
+In the Putty **Category** window, select **Session** again, enter a session name in **Saved Sessions**, and **Save**
 
 You should now be able to connect to the AWS host via PuTTY by selecting this saved session.
 

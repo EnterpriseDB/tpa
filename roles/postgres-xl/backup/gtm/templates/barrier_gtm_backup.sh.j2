@@ -12,7 +12,7 @@ mkdir -p $backup_dir
 # issue a CREATE BARRIER against a coordinator. This will also sync up
 # GTM config contents
 
-{{ postgres_bin_dir }}/psql -d postgres -h {{ coord_ip_address }} -p {{ coord_port }} -qAtc "CREATE BARRIER '$barrier_id'" 
+{{ postgres_bin_dir }}/psql -d postgres -h {{ coord_ip_address }} -p {{ coord_port }} -qAtc "CREATE BARRIER '$barrier_id'"
 
 # scp the contents of GTM directory into $backup_dir
 

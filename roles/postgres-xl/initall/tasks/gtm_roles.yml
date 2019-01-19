@@ -7,8 +7,8 @@
   register: dirstat
   when: gtype == 'gtm'
 
-- name: Add GTM node if it does not exist 
-  shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add gtm master gtm {{ inventory_hostname }} 20000 /pgxl/data/gtm 
+- name: Add GTM node if it does not exist
+  shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add gtm master gtm {{ inventory_hostname }} 20000 /pgxl/data/gtm
   args:
     executable: /bin/bash
   environment:
@@ -24,8 +24,8 @@
   register: dirstat
   when: gtype == 'gtm_standby'
 
-- name: Add GTM Standby if it does not exist 
-  shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add gtm slave gtm_standby {{ inventory_hostname }} 20000 /pgxl/data/gtm_standby 
+- name: Add GTM Standby if it does not exist
+  shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add gtm slave gtm_standby {{ inventory_hostname }} 20000 /pgxl/data/gtm_standby
   args:
     executable: /bin/bash
   environment:

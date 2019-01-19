@@ -64,14 +64,14 @@
 # we will create it first and we always APPEND to the tpa.log file
 # to preserve earlier deployment history if any
 
-- name: Read the deploy timestamp 
+- name: Read the deploy timestamp
   set_fact:
     deploy_timestamp: "{{ lookup('pipe','date \"+%Y-%m-%d %T %Z %::z\"') }}"
 
 - name: Append to tpa.log file
   lineinfile:
     path: /etc/tpa/tpa.log
-    create: yes 
+    create: yes
     state: present
     insertafter: EOF
     line: |-

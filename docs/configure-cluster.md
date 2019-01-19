@@ -20,7 +20,7 @@ the cluster as part of the provisioning process. Anything defined in
 ``cluster_vars`` becomes a group variable, and any ``vars`` defined in
 ``instances`` or ``instance_defaults`` (along with some other settings
 like the role or upstream) become host variables. These variables then
-control the deployment process. 
+control the deployment process.
 
 ```yaml
 cluster_vars:
@@ -59,7 +59,7 @@ a test environment before rolling them out into production.
 
 ### Design Considerations
 
-When creating a PostgreSQL cluster using TPAexec, it is worth spending a little preparation time to work out  some of the details. You should decide whether the cluster requires resilience - if so, how much? What topology of replication will be used? 
+When creating a PostgreSQL cluster using TPAexec, it is worth spending a little preparation time to work out  some of the details. You should decide whether the cluster requires resilience - if so, how much? What topology of replication will be used?
 
 AWS regions have multiple Availability Zones connected via low-latency links, however Data Centres (**DC**s) hosting all the AZs in a region are hosted in the same geographic location, so consideration should be taken as to what Disaster Recovery (**DR**) resilience is appropriate, and whether DCs should be placed in different regions. An AWS VPC can span multiple AZs, however it does not span regions, so when creating multi-region clusters, something like OpenVPN can be used to provide connectivity.
 
@@ -80,7 +80,7 @@ The downside of configuring it this way, rather than having each standby replica
 
 ### Translating design into reality via config.yml
 
-An example **config.yml** to create the cascading example shown in Figure 1 can be seen below. 
+An example **config.yml** to create the cascading example shown in Figure 1 can be seen below.
 
 This example requires 3 VPC subnets, and is split between 2 regions, so OpenVPN was used to allow communication - the standby server in AZ1 was chosen as the OpenVPN gateway server, by giving it the role "openvpn-server". Depending on network or CPU performance constraints, it may be preferable to choose a different gateway server.
 
@@ -254,17 +254,17 @@ This is a simple example with 2 subnets, 2 availability zones in one AWS region.
 ```
 ec2_vpc:
   Name: Test
-  
+
 ec2_vpc_subnets:
   eu-west-1:
     10.33.29.0/28:
       az: eu-west-1a
     10.33.27.16/28:
       az: eu-west-1b
-      
+
 ec2_ami:
   Name: TPA-Debian-PGDG-10-2018*
-  Owner: self     
+  Owner: self
 ```
 
 | Parameter:       | Description                                                  |
@@ -494,7 +494,7 @@ This block is from a more complicated config.
       Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180814
     ec2_vpc:
       Name: Test
-    
+
     ec2_vpc_subnets:
       eu-west-1:
         10.33.125.16/28:

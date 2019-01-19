@@ -40,7 +40,7 @@ All networking configuration in AWS happens in the context of a
 within a region. Within a VPC, you can create
 [subnets](https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html)
 that is tied to a specific availability zone, along with internet
-gateways, routing tables, and so on. 
+gateways, routing tables, and so on.
 
 You can create any number of
 [Security Groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html#vpc-security-groups)

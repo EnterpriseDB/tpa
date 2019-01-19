@@ -117,9 +117,9 @@ coordSlaveDirs=()
 coordArchLogDirs=()
 
 #---- Configuration files---
-# Need these when you'd like setup specific non-default configuration 
+# Need these when you'd like setup specific non-default configuration
 # These files will go to corresponding files for the master.
-# You may supply your bash script to setup extra config lines and extra pg_hba.conf entries 
+# You may supply your bash script to setup extra config lines and extra pg_hba.conf entries
 # Or you may supply these files manually.
 coordExtraPgHba=coordExtraPgHba
 cat >$coordExtraPgHba << EOF
@@ -131,7 +131,7 @@ host postgres barman 10.33.63.0/24 trust
 host postgres streaming_barman 10.33.63.0/24 trust
 EOF
 
-coordExtraConfig=coordExtraConfig	# Extra configuration file for coordinators.  
+coordExtraConfig=coordExtraConfig	# Extra configuration file for coordinators.
 						# This file will be added to all the coordinators'
 						# postgresql.conf
 # Pleae note that the following sets up minimum parameters which you may want to change.
@@ -193,9 +193,9 @@ datanodePgHbaEntries=(10.33.63.0/24)	# Assumes that all the coordinator (master/
 datanodeMasterServers=()	# none means this master is not available.
 													# This means that there should be the master but is down.
 													# The cluster is not operational until the master is
-													# recovered and ready to run.	
+													# recovered and ready to run.
 datanodeMasterDirs=()
-datanodeMaxWalSender=5								# max_wal_senders: needed to configure slave. If zero value is 
+datanodeMaxWalSender=5								# max_wal_senders: needed to configure slave. If zero value is
 													# specified, it is expected this parameter is explicitly supplied
 													# by external configuration files.
 													# If you don't configure slaves, leave this value zero.
@@ -229,7 +229,7 @@ host postgres barman 10.33.63.0/24 trust
 host postgres streaming_barman 10.33.63.0/24 trust
 EOF
 
-datanodeExtraConfig=datanodeExtraConfig	
+datanodeExtraConfig=datanodeExtraConfig
 cat > $datanodeExtraConfig <<EOF
 #================================================
 # Added to all the datanode postgresql.conf

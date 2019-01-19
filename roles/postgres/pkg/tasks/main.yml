@@ -25,7 +25,7 @@
     install_bdr_packages: "{{ 'bdr' in role and 'bdr' not in sources }}"
   vars:
     sources: "{{ install_from_source|map(attribute='name')|unique|list }}"
-    
+
 - name: Install Postgres packages
   package:
     name: >

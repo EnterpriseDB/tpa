@@ -2,9 +2,9 @@ tpaexec switchover
 =================
 
 The ``tpaexec switchover`` command promotes a DB standby to be the primary in the cluster, and can be used in place of the `repmgr standby switchover --siblings-follow` command.
-It performs various repmgr sanity checks before switching over the node, and is designed to be run from the tpaexec server without having to shut down any repmgr services beforehand. 
+It performs various repmgr sanity checks before switching over the node, and is designed to be run from the tpaexec server without having to shut down any repmgr services beforehand.
 
-**`tpaexec switchover <clustername> <standby-nodename>`** can be used to promote a standby to become the master, and any standbys attached to the old primary will be configured to follow the new primary. 
+**`tpaexec switchover <clustername> <standby-nodename>`** can be used to promote a standby to become the master, and any standbys attached to the old primary will be configured to follow the new primary.
 
 ### Prerequisites
 
@@ -22,5 +22,5 @@ update-postgres.yml
 
 ### Architecture options
 
-At the moment this command is only relevant to the M1 architecture, and should not be attempted for any other architecture. 
+At the moment this command is only relevant to the M1 architecture, and should not be attempted for any other architecture.
 

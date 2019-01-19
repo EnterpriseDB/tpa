@@ -8,7 +8,7 @@
   register: pgbench_init
   become_user: "{{ postgres_user }}"
   become: true
- 
+
 - include_role: name=test tasks_from=output.yml
   vars:
     output_file: "{{ pgbench_output }}"

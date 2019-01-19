@@ -31,7 +31,7 @@
 - action: set_fact
   args: >
     {{ ('{"twice_postgres_instances": ' ~ num_postgres_instances*2 ~ '}')|from_json }}
-    
+
 - set_fact:
     max_wal_senders: >-
       {{ max_wal_senders|default(twice_postgres_instances) }}

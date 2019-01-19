@@ -30,7 +30,7 @@ tpaexec package.)
 # RedHat or CentOS
 [root]# yum install python python-pip python-virtualenv \
         pwgen epel-release openvpn
-        
+
 # Mac
 [brew or port] install pwgen
 [brew or port] install openvpn

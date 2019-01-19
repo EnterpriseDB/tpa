@@ -135,7 +135,7 @@ BDR-Always-ON architecture. This release would otherwise have been v3.2.
 - Correctly handle (ignore) empty lines in /proc/$pid/status
 - Correctly restart repmgrd after changing repmgr.conf
 - Make sure coredumps are generated properly.
-- Fixed RHEL issue `"Aborting, target uses selinux but python bindings 
+- Fixed RHEL issue `"Aborting, target uses selinux but python bindings
   (libselinux-python) aren't installed!"` (f245e99)
 - Fixed tpaexec rehydrate failing with `"hostvars[''node-b'']\" is undefined`
   (b74bfa2)
