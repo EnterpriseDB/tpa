@@ -10,9 +10,20 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Add --enable-camo configure option for BDR-Simple and BDR-Always-ON
 
+- Avoid installing dl/default/release if tpa_2q_repositories is set to
+  [] explicitly (aside from being able to set {apt,yum}_repository_list
+  to [] to suppress other external repositories)
+
+- Revised pgbench schedule for ``tpaexec test``, with separate
+  pgbench-postgres and pgbench-bdr stages (== tags)
+
 ### Bugfixes
 
+- Various haproxy/pgbouncer configuration tweaks
+
 - Fix errors in initialisation of BDR logical standby instances
+
+- Further changes to avoid version-specific flock(1) invocations
 
 ## v7.2 (2019-01-08)
 
