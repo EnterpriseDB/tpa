@@ -5,18 +5,18 @@
 - name: Deprovision cluster
   hosts: localhost
   tasks:
-    - import_tasks: load-config.yml
-      tags: always
+  - import_tasks: load-config.yml
+    tags: always
 
-    - import_tasks: validate.yml
-      vars:
-        deprovision: true
-      tags: always
+  - import_tasks: validate.yml
+    vars:
+      deprovision: true
+    tags: always
 
-    - include_tasks: "{{ platform }}/deprovision.yml"
-      with_items:
-        - "{{ cluster_platforms }}"
-        - common
-      loop_control:
-        loop_var: platform
-      tags: always
+  - include_tasks: "{{ platform }}/deprovision.yml"
+    with_items:
+      - "{{ cluster_platforms }}"
+      - common
+    loop_control:
+      loop_var: platform
+    tags: always

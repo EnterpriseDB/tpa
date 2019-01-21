@@ -15,51 +15,51 @@
   become: yes
   hosts: all
   tasks:
-    # The luksOpen/mount should arguably be done by sys/fs somehow; the
-    # most troubling part about this is the duplication of "src" below
-    # (i.e., the fact that translating x → /dev/mapper/x is duplicated
-    # between sys/fs/tasks/luks and here).
+  # The luksOpen/mount should arguably be done by sys/fs somehow; the
+  # most troubling part about this is the duplication of "src" below
+  # (i.e., the fact that translating x → /dev/mapper/x is duplicated
+  # between sys/fs/tasks/luks and here).
 
-    - shell: >
-        echo -n "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ item.device }}" "{{ _luks_volume }}"
-      args:
-        executable: /bin/bash
-      register: luksopen
-      failed_when: luksopen.rc not in [0, 5]
-      changed_when: luksopen.rc != 5
-      with_items: >
-        {{ volumes|json_query("[?encryption=='luks']") }}
-      vars:
-        _luks_volume: >-
-          {{ item.luks_volume|default(item.device|basename) }}
-      no_log: true
+  - shell: >
+      echo -n "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ item.device }}" "{{ _luks_volume }}"
+    args:
+      executable: /bin/bash
+    register: luksopen
+    failed_when: luksopen.rc not in [0, 5]
+    changed_when: luksopen.rc != 5
+    with_items: >
+      {{ volumes|json_query("[?encryption=='luks']") }}
+    vars:
+      _luks_volume: >-
+        {{ item.luks_volume|default(item.device|basename) }}
+    no_log: true
 
-    - mount:
-        src: "{{ _device }}"
-        name: "{{ item.mountpoint }}"
-        fstype: "{{ item.fstype|default('ext4') }}"
-        state: mounted
-      with_items: "{{ volumes }}"
-      vars:
-        _device: >-
-          {{ (item.encryption == 'luks')|ternary('/dev/mapper/%s' % (item.luks_volume|default(item.device|basename)), item.device) }}
+  - mount:
+      src: "{{ _device }}"
+      name: "{{ item.mountpoint }}"
+      fstype: "{{ item.fstype|default('ext4') }}"
+      state: mounted
+    with_items: "{{ volumes }}"
+    vars:
+      _device: >-
+        {{ (item.encryption == 'luks')|ternary('/dev/mapper/%s' % (item.luks_volume|default(item.device|basename)), item.device) }}
 
-    # Once all the volumes are mounted, we can start Postgres, and then
-    # start repmgr once Postgres is running.
+  # Once all the volumes are mounted, we can start Postgres, and then
+  # start repmgr once Postgres is running.
 
-    - block:
-        - service:
-            name: postgres
-            state: started
-        - command: /etc/tpa/postgres-monitor
-          changed_when: False
-          become_user: "{{ postgres_user }}"
-          become: yes
-      when: >
-        'postgres' in role
-
+  - block:
     - service:
-        name: repmgr
+        name: postgres
         state: started
-      when: >
-        'primary' in role or 'replica' in role
+    - command: /etc/tpa/postgres-monitor
+      changed_when: False
+      become_user: "{{ postgres_user }}"
+      become: yes
+    when: >
+      'postgres' in role
+
+  - service:
+      name: repmgr
+      state: started
+    when: >
+      'primary' in role or 'replica' in role

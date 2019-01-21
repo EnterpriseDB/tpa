@@ -5,11 +5,11 @@
 - name: Set test output directory
   hosts: all
   tasks:
-    - set_fact:
-        output_dir: >-
-          {{ cluster_dir }}/test/{{ lookup('pipe', 'date +%s') }}
-      run_once: yes
-      tags: always
+  - set_fact:
+      output_dir: >-
+        {{ cluster_dir }}/test/{{ lookup('pipe', 'date +%s') }}
+    run_once: yes
+    tags: always
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   vars:
@@ -21,8 +21,8 @@
   max_fail_percentage: 0
   hosts: all
   tasks:
-    - include_role:
-        name: test
-        apply:
-          tags: test
-      tags: always
+  - include_role:
+      name: test
+      apply:
+        tags: test
+    tags: always

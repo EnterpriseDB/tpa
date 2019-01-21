@@ -12,14 +12,14 @@
   become: yes
   hosts: all
   tasks:
-    - include_role:
-        name: sys/hosts
-        apply:
-          tags: [sys, hosts]
-      tags: always
+  - include_role:
+      name: sys/hosts
+      apply:
+        tags: [sys, hosts]
+    tags: always
 
-    - include_role:
-        name: post-deploy
-        apply:
-          tags: post-deploy
-      tags: always
+  - include_role:
+      name: post-deploy
+      apply:
+        tags: post-deploy
+    tags: always

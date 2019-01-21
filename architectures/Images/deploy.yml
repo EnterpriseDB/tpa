@@ -12,11 +12,11 @@
   become: true
   hosts: all
   tasks:
-    - include_role: name=common/pkg
-    - include_role: name=postgres/pkg
-    - include_role: name=sys/openvpn/pkg
-    - include_role: name=pgbouncer/pkg
-    - include_role: name=barman/pkg
-    - include_role: name=repmgr/pkg
-    - include_role: name=sys/upgrade
-    - include_role: name=sys/firstboot
+  - include_role: name=common/pkg
+  - include_role: name=postgres/pkg
+  - include_role: name=sys/openvpn/pkg
+  - include_role: name=pgbouncer/pkg
+  - include_role: name=barman/pkg
+  - include_role: name=repmgr/pkg
+  - include_role: name=sys/upgrade
+  - include_role: name=sys/firstboot

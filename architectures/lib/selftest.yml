@@ -4,6 +4,6 @@
 
 - hosts: localhost
   tasks:
-    - include_role:
-        name: selftest
-      tags: always
+  - include_role:
+      name: selftest
+    tags: always

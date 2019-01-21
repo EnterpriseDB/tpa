@@ -5,71 +5,71 @@
 - name: Provision cluster
   hosts: localhost
   tasks:
-    ## Configuration
-    #
-    # We will provision the cluster described by clustername/config.yml
-    # (run «provision … -e config=x.yml» to use a different filename).
-    #
-    # The configuration must define an array of instances along with
-    # other supporting top-level settings described elsewhere.
-    #
-    #   cluster_name: Example
-    #
-    #   instance_defaults:
-    #     platform: bare
-    #
-    #   instances:
-    #     - node: 1
-    #       Name: foo
-    #       …
-    #
-    #     - node: 2
-    #       Name: bar
-    #       platform: aws
-    #       …
-    #
-    # Each instance may declare the platform it is to be provisioned on.
-    # If the instance definition does not specify a platform, we use the
-    # default value given at the top level (or 'aws' if unspecified).
-    #
-    # First, we load the configuration file and validate it (which has
-    # both platform-independent and platform-specific parts).
+  ## Configuration
+  #
+  # We will provision the cluster described by clustername/config.yml
+  # (run «provision … -e config=x.yml» to use a different filename).
+  #
+  # The configuration must define an array of instances along with
+  # other supporting top-level settings described elsewhere.
+  #
+  #   cluster_name: Example
+  #
+  #   instance_defaults:
+  #     platform: bare
+  #
+  #   instances:
+  #     - node: 1
+  #       Name: foo
+  #       …
+  #
+  #     - node: 2
+  #       Name: bar
+  #       platform: aws
+  #       …
+  #
+  # Each instance may declare the platform it is to be provisioned on.
+  # If the instance definition does not specify a platform, we use the
+  # default value given at the top level (or 'aws' if unspecified).
+  #
+  # First, we load the configuration file and validate it (which has
+  # both platform-independent and platform-specific parts).
 
-    - import_tasks: load-config.yml
-      tags: always
+  - import_tasks: load-config.yml
+    tags: always
 
-    ## Validation
-    #
-    # Now we can perform some generic sanity checks of the configuration
-    # followed by platform-specific ones.
-    #
-    # For convenience, we separate instances[] into aws_instances[],
-    # bare_instances[], and so on, and each platform can operate on its
-    # set of instances without worrying about filtering out entries for
-    # other platforms. We also set some other derived facts here.
+  ## Validation
+  #
+  # Now we can perform some generic sanity checks of the configuration
+  # followed by platform-specific ones.
+  #
+  # For convenience, we separate instances[] into aws_instances[],
+  # bare_instances[], and so on, and each platform can operate on its
+  # set of instances without worrying about filtering out entries for
+  # other platforms. We also set some other derived facts here.
 
-    - import_tasks: validate.yml
-      tags: always
+  - import_tasks: validate.yml
+    tags: always
 
-    ## Provisioning
-    #
-    # Now we perform platform-independent provisioning tasks, then give
-    # each platform handler a chance to do whatever it wants with its
-    # subset of the defined instances.
+  ## Provisioning
+  #
+  # Now we perform platform-independent provisioning tasks, then give
+  # each platform handler a chance to do whatever it wants with its
+  # subset of the defined instances.
 
-    - include_tasks: "{{ platform }}/provision.yml"
-      with_items:
-        - common
-        - "{{ cluster_platforms }}"
-      loop_control:
-        loop_var: platform
+  - include_tasks: "{{ platform }}/provision.yml"
+    with_items:
+      - common
+      - "{{ cluster_platforms }}"
+    loop_control:
+      loop_var: platform
 
-    ## Writing the inventory
-    #
-    # Each platform has had a chance to operate on its xxx_instances[],
-    # and add the results to instance_vars[], which forms the basis for
-    # the combined inventory that we write out at the end.
+  ## Writing the inventory
+  #
+  # Each platform has had a chance to operate on its xxx_instances[],
+  # and add the results to instance_vars[], which forms the basis for
+  # the combined inventory that we write out at the end.
 
-    - include_tasks: common/inventory/write.yml
-      vars:
-        ansible_port: "{{ cluster_ssh_port|default(22) }}"
+  - include_tasks: common/inventory/write.yml
+    vars:
+      ansible_port: "{{ cluster_ssh_port|default(22) }}"

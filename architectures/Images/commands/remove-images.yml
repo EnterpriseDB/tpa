@@ -23,49 +23,47 @@
     ami_name: "{{ 'TPA-' ~ '*2ndQPostgres-9.6-*2016*' }}"
 
   tasks:
+  - ec2_ami_facts:
+      region: "{{ r }}"
+      owner: self
+      filters:
+        name: "{{ ami_name }}"
+    with_items: "{{ regions }}"
+    loop_control:
+      loop_var: r
+    register: ec2_amis
 
+  # Now ec2_amis.results looks like this:
+  #
+  # [{r: …, images: [{image_id: …}, …]},
+  #  {r: …, images: …}]
+  #
+  # The outer results array has as many entries as there are regions,
+  # and any of the inner results arrays may contain zero or more AMI
+  # descriptions (alas, not including the region).
+  #
+  # We need to invoke ec2_ami with (r, ami_id), so we transform the
+  # above into a more tractable structure that we can iterate over
+  # easily using with_nested_dependents.
+  #
+  # [{region: …, amis: [ami-xxx, ami-yyy, …]}, …]
 
-    - ec2_ami_facts:
-        region: "{{ r }}"
-        owner: self
-        filters:
-          name: "{{ ami_name }}"
-      with_items: "{{ regions }}"
-      loop_control:
-        loop_var: r
-      register: ec2_amis
+  - set_fact:
+      region_amis: "{{
+        ec2_amis.results|json_query('[*].{region:r,amis:[images[*].[image_id][]][]}')
+      }}"
 
-    # Now ec2_amis.results looks like this:
-    #
-    # [{r: …, images: [{image_id: …}, …]},
-    #  {r: …, images: …}]
-    #
-    # The outer results array has as many entries as there are regions,
-    # and any of the inner results arrays may contain zero or more AMI
-    # descriptions (alas, not including the region).
-    #
-    # We need to invoke ec2_ami with (r, ami_id), so we transform the
-    # above into a more tractable structure that we can iterate over
-    # easily using with_nested_dependents.
-    #
-    # [{region: …, amis: [ami-xxx, ami-yyy, …]}, …]
+  # Iterate over region_amis and remove each AMI that we found.
+  #
+  # (There's no reason we couldn't iterate over the original structure
+  # using with_nested_dependents. I just happened to be playing with
+  # JMESpath syntax and came up with the above transformation.)
 
-    - set_fact:
-        region_amis: "{{
-          ec2_amis.results|json_query('[*].{region:r,amis:[images[*].[image_id][]][]}')
-        }}"
-
-    # Iterate over region_amis and remove each AMI that we found.
-    #
-    # (There's no reason we couldn't iterate over the original structure
-    # using with_nested_dependents. I just happened to be playing with
-    # JMESpath syntax and came up with the above transformation.)
-
-    - ec2_ami:
-        region: "{{ item.0.region }}"
-        image_id: "{{ item.1 }}"
-        delete_snapshot: yes
-        state: absent
-      with_nested_dependents:
-        - region_amis
-        - item.0.amis
+  - ec2_ami:
+      region: "{{ item.0.region }}"
+      image_id: "{{ item.1 }}"
+      delete_snapshot: yes
+      state: absent
+    with_nested_dependents:
+      - region_amis
+      - item.0.amis

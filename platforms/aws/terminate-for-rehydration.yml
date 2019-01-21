@@ -6,121 +6,121 @@
   any_errors_fatal: True
   max_fail_percentage: 0
   tasks:
-    - include_role:
-        name: init
-      vars:
-        pgdata_initialised: "{{ 'postgres' in role }}"
-      tags: always
+  - include_role:
+      name: init
+    vars:
+      pgdata_initialised: "{{ 'postgres' in role }}"
+    tags: always
 
-    - assert:
-        msg: "Rehydrating every host at the same time is not recommended or supported"
-        that:
-          - ansible_play_hosts|count == 1 or
-            ansible_play_hosts|count < groups[cluster_tag]|count or
-            i_really_want_to_destroy_my_entire_cluster|default('no') == 'yes'
-      run_once: true
+  - assert:
+      msg: "Rehydrating every host at the same time is not recommended or supported"
+      that:
+        - ansible_play_hosts|count == 1 or
+          ansible_play_hosts|count < groups[cluster_tag]|count or
+          i_really_want_to_destroy_my_entire_cluster|default('no') == 'yes'
+    run_once: true
 
-    - assert:
-        msg: "This host was not found in the EC2 dynamic inventory output"
-        that:
-          - ec2_id is defined
-          - ec2_region is defined
+  - assert:
+      msg: "This host was not found in the EC2 dynamic inventory output"
+      that:
+        - ec2_id is defined
+        - ec2_region is defined
 
-    - name: Ensure that the primary is not being rehydrated
-      assert:
-        msg: "Refusing to rehydrate current primary instance: {{ inventory_hostname }}"
-        that: >
-          'primary' not in role
-      when: >
-        'postgres' in role
+  - name: Ensure that the primary is not being rehydrated
+    assert:
+      msg: "Refusing to rehydrate current primary instance: {{ inventory_hostname }}"
+      that: >
+        'primary' not in role
+    when: >
+      'postgres' in role
 
-    # Every volume attached to the instance is required to have
-    # "TPAAttachmentLabel" and "CreatingCluster" tags with the correct
-    # values, so that it will be found when provisioning a new instance.
-    # (We ignore the volume Name, even though it's probably set, because
-    # it's prone to changes outside our control.)
+  # Every volume attached to the instance is required to have
+  # "TPAAttachmentLabel" and "CreatingCluster" tags with the correct
+  # values, so that it will be found when provisioning a new instance.
+  # (We ignore the volume Name, even though it's probably set, because
+  # it's prone to changes outside our control.)
 
-    - name: Find all volumes attached to this instance.
-      ec2_vol_facts:
-        region: "{{ ec2_region }}"
-        filters:
-          "attachment.instance-id": "{{ ec2_id }}"
-      delegate_to: localhost
-      register: volumes
+  - name: Find all volumes attached to this instance.
+    ec2_vol_facts:
+      region: "{{ ec2_region }}"
+      filters:
+        "attachment.instance-id": "{{ ec2_id }}"
+    delegate_to: localhost
+    register: volumes
 
-    - name: Ensure volumes are correctly tagged
-      assert:
-        msg: >
-          Volume {{ item.id }} should be tagged:
-          {% if item.tags['CreatingCluster']|default('no tag') != cluster_name -%}
-          CreatingCluster={{ cluster_name }}
-          (has {{ item.tags['CreatingCluster']|default('no tag') }})
-          {% endif -%}
-          {% if item.tags['TPAAttachmentLabel']|default('no tag') != label -%}
-          TPAAttachmentLabel={{ label }}
-          (has {{ item.tags['TPAAttachmentLabel']|default('no tag') }})
-          {% endif -%}
-        that:
-          - item.tags|has_subkey('CreatingCluster')
-          - item.tags|has_subkey('TPAAttachmentLabel')
-          - item.tags.CreatingCluster == cluster_name
-          - item.tags.TPAAttachmentLabel == label
-      with_items:
-        "{{ volumes.volumes }}"
-      when:
-        item.attachment_set.device|regex_replace('^/dev/','') not in ['xvda', 'sda1']
-      vars:
-        label: "{{ cluster_name }}:{{ ec2_tag_node }}:{{ item.attachment_set.device }}"
+  - name: Ensure volumes are correctly tagged
+    assert:
+      msg: >
+        Volume {{ item.id }} should be tagged:
+        {% if item.tags['CreatingCluster']|default('no tag') != cluster_name -%}
+        CreatingCluster={{ cluster_name }}
+        (has {{ item.tags['CreatingCluster']|default('no tag') }})
+        {% endif -%}
+        {% if item.tags['TPAAttachmentLabel']|default('no tag') != label -%}
+        TPAAttachmentLabel={{ label }}
+        (has {{ item.tags['TPAAttachmentLabel']|default('no tag') }})
+        {% endif -%}
+      that:
+        - item.tags|has_subkey('CreatingCluster')
+        - item.tags|has_subkey('TPAAttachmentLabel')
+        - item.tags.CreatingCluster == cluster_name
+        - item.tags.TPAAttachmentLabel == label
+    with_items:
+      "{{ volumes.volumes }}"
+    when:
+      item.attachment_set.device|regex_replace('^/dev/','') not in ['xvda', 'sda1']
+    vars:
+      label: "{{ cluster_name }}:{{ ec2_tag_node }}:{{ item.attachment_set.device }}"
 
-    # The root volume should be deleted when the instance is terminated,
-    # but the remaining volumes must not be deleted, because we depend
-    # on their staying around to be attached to the new instance.
+  # The root volume should be deleted when the instance is terminated,
+  # but the remaining volumes must not be deleted, because we depend
+  # on their staying around to be attached to the new instance.
 
-    - name: Gather volume delete_on_termination status
-      command: >
-        aws ec2 describe-volumes --region {{ item.region }} --volume-ids {{ item.id }} --query
-        "Volumes[].Attachments[0].[Device,to_string(DeleteOnTermination)]|[0]"
-      delegate_to: localhost
-      with_items:
-        "{{ volumes.volumes }}"
-      register: status
+  - name: Gather volume delete_on_termination status
+    command: >
+      aws ec2 describe-volumes --region {{ item.region }} --volume-ids {{ item.id }} --query
+      "Volumes[].Attachments[0].[Device,to_string(DeleteOnTermination)]|[0]"
+    delegate_to: localhost
+    with_items:
+      "{{ volumes.volumes }}"
+    register: status
 
-    - name: Ensure delete_on_termination is set correctly
-      assert:
-        msg: "{{ device_termination[0] }} should not have delete_on_termination={{ device_termination[1] }}"
-        that:
-          - device_termination[1] == 'false' or
-            device_termination[0]|regex_replace('^/dev/', '') in ['xvda', 'sda1']
-      with_items: "{{ status.results }}"
-      vars:
-        device_termination: "{{ item.stdout|from_json }}"
+  - name: Ensure delete_on_termination is set correctly
+    assert:
+      msg: "{{ device_termination[0] }} should not have delete_on_termination={{ device_termination[1] }}"
+      that:
+        - device_termination[1] == 'false' or
+          device_termination[0]|regex_replace('^/dev/', '') in ['xvda', 'sda1']
+    with_items: "{{ status.results }}"
+    vars:
+      device_termination: "{{ item.stdout|from_json }}"
 
-    # Write the private IP address of each instance into
-    # prehydrate-vars.yml, so that they can be reassigned when we
-    # reprovision the instances.
+  # Write the private IP address of each instance into
+  # prehydrate-vars.yml, so that they can be reassigned when we
+  # reprovision the instances.
 
-    - name: Write private_ip for hosts for later use
-      template:
-        src: prehydrate-vars.yml.j2
-        dest: "{{ cluster_dir }}/prehydrate-vars.yml"
-      delegate_to: localhost
-      run_once: true
+  - name: Write private_ip for hosts for later use
+    template:
+      src: prehydrate-vars.yml.j2
+      dest: "{{ cluster_dir }}/prehydrate-vars.yml"
+    delegate_to: localhost
+    run_once: true
 
-    # Terminate the instance and wait until its state changes to
-    # terminated (after shutting-down).
+  # Terminate the instance and wait until its state changes to
+  # terminated (after shutting-down).
 
-    - name: Terminate the instance
-      command: >
-        aws ec2 terminate-instances --region {{ ec2_region }} --instance-ids {{ ec2_id }}
-      delegate_to: localhost
+  - name: Terminate the instance
+    command: >
+      aws ec2 terminate-instances --region {{ ec2_region }} --instance-ids {{ ec2_id }}
+    delegate_to: localhost
 
-    - name: Wait until the instance is terminated
-      command: >
-        aws ec2 describe-instances --region {{ ec2_region }} --instance-ids {{ ec2_id }}
-        --query 'Reservations[*].Instances[*].State.Name|[0]'
-      delegate_to: localhost
-      register: state
-      until:
-        (state.stdout|from_json)[0] == 'terminated'
-      retries: 10
-      delay: 30
+  - name: Wait until the instance is terminated
+    command: >
+      aws ec2 describe-instances --region {{ ec2_region }} --instance-ids {{ ec2_id }}
+      --query 'Reservations[*].Instances[*].State.Name|[0]'
+    delegate_to: localhost
+    register: state
+    until:
+      (state.stdout|from_json)[0] == 'terminated'
+    retries: 10
+    delay: 30

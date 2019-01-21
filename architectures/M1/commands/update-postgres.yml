@@ -14,12 +14,12 @@
   become: yes
   hosts: all
   tasks:
-    - name: Stop repmgr
-      service:
-        name: repmgr
-        state: stopped
-      when: >
-        'postgres' in role
+  - name: Stop repmgr
+    service:
+      name: repmgr
+      state: stopped
+    when: >
+      'postgres' in role
 
 - name: Update postgres on replicas in cluster {{ cluster_dir }}
   any_errors_fatal: True
@@ -35,11 +35,11 @@
         yum install -y postgresql{{ postgres_versionNN }}
   serial: 1
   tasks:
-    - name: Run update command on replicas
-      command: >
-        {{ update_commands[ansible_os_family] }}
-      when: >
-        'replica' in role
+  - name: Run update command on replicas
+    command: >
+      {{ update_commands[ansible_os_family] }}
+    when: >
+      'replica' in role
 
 - name: Update postgres on primary in cluster {{ cluster_dir }}
   any_errors_fatal: True
@@ -54,30 +54,30 @@
       RedHat: >-
         yum install -y postgresql{{ postgres_versionNN }}
   tasks:
-    - name: Switchover to a replica
-      command: >
-        {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
-      become_user: "{{ postgres_user }}"
-      become: yes
-      when: >
-        inventory_hostname == groups['replica'][0]
+  - name: Switchover to a replica
+    command: >
+      {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when: >
+      inventory_hostname == groups['replica'][0]
 
-    # Note: this role was calculated earlier, so it's outdated after the
-    # switchover, but it correctly identifies the instance to use.
+  # Note: this role was calculated earlier, so it's outdated after the
+  # switchover, but it correctly identifies the instance to use.
 
-    - name: Run update command on the old primary
-      command: >
-        {{ update_commands[ansible_os_family] }}
-      when: >
-        'primary' in role
+  - name: Run update command on the old primary
+    command: >
+      {{ update_commands[ansible_os_family] }}
+    when: >
+      'primary' in role
 
-    - name: Switch back to the old primary
-      command: >
-        {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
-      become_user: "{{ postgres_user }}"
-      become: yes
-      when: >
-        'primary' in role
+  - name: Switch back to the old primary
+    command: >
+      {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when: >
+      'primary' in role
 
 - name: Start repmgr again
   any_errors_fatal: True
@@ -86,9 +86,9 @@
   become: yes
   hosts: all
   tasks:
-    - name: Restart repmgr
-      service:
-        name: repmgr
-        state: started
-      when: >
-        'postgres' in role
+  - name: Restart repmgr
+    service:
+      name: repmgr
+      state: started
+    when: >
+      'postgres' in role

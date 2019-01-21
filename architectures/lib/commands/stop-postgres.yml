@@ -15,33 +15,33 @@
   become: yes
   hosts: all
   tasks:
-    - service:
-        name: repmgr
-        state: stopped
-      when: >
-        'primary' in role or 'replica' in role
+  - service:
+      name: repmgr
+      state: stopped
+    when: >
+      'primary' in role or 'replica' in role
 
-    - service:
-        name: postgres
-        state: stopped
-      when: >
-        'postgres' in role
+  - service:
+      name: postgres
+      state: stopped
+    when: >
+      'postgres' in role
 
-    - mount:
-        src: "{{ _device }}"
-        name: "{{ item.mountpoint }}"
-        state: unmounted
-      with_items: "{{ volumes }}"
-      vars:
-        _device: >-
-          {{ (item.encryption == 'luks')|ternary('/dev/mapper/%s' % (item.luks_volume|default(item.device|basename)), item.device) }}
+  - mount:
+      src: "{{ _device }}"
+      name: "{{ item.mountpoint }}"
+      state: unmounted
+    with_items: "{{ volumes }}"
+    vars:
+      _device: >-
+        {{ (item.encryption == 'luks')|ternary('/dev/mapper/%s' % (item.luks_volume|default(item.device|basename)), item.device) }}
 
-    - command: cryptsetup luksClose "{{ _luks_volume }}"
-      register: luksclose
-      failed_when: luksclose.rc not in [0, 4]
-      changed_when: luksclose.rc != 4
-      with_items: >
-        {{ volumes|json_query("[?encryption=='luks']") }}
-      vars:
-        _luks_volume: >-
-          {{ item.luks_volume|default(item.device|basename) }}
+  - command: cryptsetup luksClose "{{ _luks_volume }}"
+    register: luksclose
+    failed_when: luksclose.rc not in [0, 4]
+    changed_when: luksclose.rc != 4
+    with_items: >
+      {{ volumes|json_query("[?encryption=='luks']") }}
+    vars:
+      _luks_volume: >-
+        {{ item.luks_volume|default(item.device|basename) }}

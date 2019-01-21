@@ -8,22 +8,22 @@
 - name: Stop hosts in a cluster
   hosts: localhost
   tasks:
-    - include_tasks: validate.yml
-      tags: always
+  - include_tasks: validate.yml
+    tags: always
 
-    - name: Require inventory group {{ cluster_tag }} to be defined
-      assert:
-        msg: "No hosts found in group {{ cluster_tag }}"
-        that:
-          - cluster_tag in groups
-          - groups[cluster_tag] is not empty
-      tags: always
+  - name: Require inventory group {{ cluster_tag }} to be defined
+    assert:
+      msg: "No hosts found in group {{ cluster_tag }}"
+      that:
+        - cluster_tag in groups
+        - groups[cluster_tag] is not empty
+    tags: always
 
-    - name: Stop EC2 instances in each region
-      ec2:
-        state: "{{ state|default('running') }}"
-        region: "{{ item }}"
-        instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('extract', hostvars, 'ec2_id')|list }}"
-        wait: yes
-      with_items: "{{ aws_regions }}"
-      tags: ec2
+  - name: Stop EC2 instances in each region
+    ec2:
+      state: "{{ state|default('running') }}"
+      region: "{{ item }}"
+      instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('extract', hostvars, 'ec2_id')|list }}"
+      wait: yes
+    with_items: "{{ aws_regions }}"
+    tags: ec2
