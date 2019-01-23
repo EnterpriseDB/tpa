@@ -34,6 +34,9 @@ tpaexec package.)
 # Mac
 [brew or port] install pwgen
 [brew or port] install openvpn
+
+[brew or port] tap discoteq/discoteq
+[brew or port] install flock
 ```
 
 Next, clone the TPAexec repository:
