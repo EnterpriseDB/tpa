@@ -11,12 +11,13 @@
     }}"
 
 - block:
-  - name: Raise bdr.global_lock_timeout for pgbench -i
+  - name: Raise both BDR global lock timeouts for pgbench -i
     postgresql_query:
       conninfo: "dbname={{ pgbench_dbname }}"
       autocommit: yes
       queries:
       - text: ALTER SYSTEM SET bdr.global_lock_timeout TO '600s';
+      - text: ALTER SYSTEM SET bdr.global_lock_statement_timeout TO '3600s';
       - text: SELECT pg_reload_conf();
     become_user: "{{ postgres_user }}"
     become: yes
@@ -26,11 +27,12 @@
       pgbench_output: pgbench-bdr-init.txt
     tags: always
 
-  - name: Lower bdr.global_lock_timeout after pgbench -i
+  - name: Reset BDR global lock timeouts to defaults after pgbench -i
     postgresql_query:
       conninfo: "dbname={{ pgbench_dbname }}"
       autocommit: yes
       queries:
+      - text: ALTER SYSTEM SET bdr.global_lock_statement_timeout TO default;
       - text: ALTER SYSTEM SET bdr.global_lock_timeout TO default;
       - text: SELECT pg_reload_conf();
     become_user: "{{ postgres_user }}"
