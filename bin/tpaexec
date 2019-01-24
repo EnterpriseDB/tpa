@@ -91,7 +91,14 @@ _create_and_activate_virtualenv() {
 }
 
 _install_pip_packages() {
-    pip_args=(--upgrade --no-cache-dir)
+    pip_args=(--upgrade)
+
+    if [ -n "${pip_cache_dir:-}" ]; then
+        pip_args+=(--cache-dir)
+        pip_args+=("${pip_cache_dir}")
+    else
+        pip_args+=(--no-cache-dir)
+    fi
 
     # If pip packages are bundled (i.e., the tpaexec-deps package has
     # been installed), we configure pip to use them instead of trying
@@ -134,6 +141,10 @@ setup() {
         case "$opt" in
             --virtualenv)
                 vpath=${1:?virtualenv location not specified}
+                shift
+                ;;
+            --pip-cache-dir)
+                pip_cache_dir=${1:?pip cache directory not specified}
                 shift
                 ;;
             *)
