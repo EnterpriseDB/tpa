@@ -83,19 +83,20 @@
   when: >
     item.vars is not empty
 
-- name: Remove obsolete inventory files
-  file:
-    dest: "{{ host_dir }}/{{ file_name }}"
-    state: absent
+- name: Remove obsolete files from host_vars
+  shell: >
+    if [[ $({{ find_cmd }}| wc -l) != 0 ]]; then
+    {{ find_cmd }} -exec rm {} ';'; exit 99;
+    fi
+  args:
+    executable: /bin/bash
   vars:
-    file_name: "{{ item.1 }}"
-    host_dir: "{{ cluster_dir }}/inventory/host_vars/{{ item.0.Name }}"
-  with_nested:
-    - "{{ instance_vars }}"
-    - ['02-topology.yml', '03-volumes.yml']
-  loop_control:
-    label: >-
-      {{ item.0.Name }}
+    find_cmd: >-
+      find {{ cluster_dir }}/inventory/host_vars 
+      '(' -name 02-topology.yml -o -name 03-volumes.yml ')'
+  register: rm
+  changed_when: rm.rc == 99
+  failed_when: rm.rc not in [0, 99]
 
 - name: Generate known_hosts file for the cluster
   template:

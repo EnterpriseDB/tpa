@@ -60,5 +60,6 @@
   args:
     chdir: "{{ cluster_dir }}/vault"
     creates: vault_pass.txt
+    executable: /bin/bash
   delegate_to: localhost
   tags: [common, vault]

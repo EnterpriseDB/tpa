@@ -33,13 +33,18 @@
 
 - name: Delete host_vars files generated for this cluster
   shell: >
-    find {{ cluster_dir }}/inventory/host_vars
-    '(' -name 01-instance_vars.yml -o -name 02-topology.yml -o -name 03-volumes.yml ')'
-    -exec rm {} ';'
+    if [[ $({{ find_cmd }}| wc -l) != 0 ]]; then
+    {{ find_cmd }} -exec rm {} ';'; exit 99;
+    fi
+  args:
+    executable: /bin/bash
+  vars:
+    find_cmd: >-
+      find {{ cluster_dir }}/inventory/host_vars 
+      '(' -name 01-instance_vars.yml -o -name 02-topology.yml -o -name 03-volumes.yml ')'
   register: rm
-  ignore_errors: yes
-  changed_when: >
-    'No such file or directory' not in rm.stderr
+  changed_when: rm.rc == 99
+  failed_when: rm.rc not in [0, 99]
 
 # Now we try to remove as many empty directories as we can, up to
 # and including the top-level inventory directory.
@@ -47,6 +52,8 @@
 - name: Delete any empty inventory directories
   shell: >
     find {{ cluster_dir }}/inventory -depth -type d -exec rmdir {} ';'
+  args:
+    executable: /bin/bash
   register: rm
   ignore_errors: yes
   changed_when: >
