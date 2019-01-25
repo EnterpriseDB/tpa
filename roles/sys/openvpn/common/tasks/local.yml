@@ -42,6 +42,7 @@
   args:
     chdir: "{{ _local_cert_dir }}"
     creates: "ca.key"
+    executable: /bin/bash
   run_once: yes
   become: no
   delegate_to: localhost
@@ -56,6 +57,7 @@
   args:
     chdir: "{{ _local_cert_dir }}"
     creates: "{{ inventory_hostname }}.key"
+    executable: /bin/bash
   become: no
   delegate_to: localhost
 
@@ -75,6 +77,7 @@
   args:
     chdir: "{{ _local_cert_dir }}"
     creates: "{{ inventory_hostname }}.crt"
+    executable: /bin/bash
   become: no
   delegate_to: localhost
 
@@ -85,6 +88,7 @@
   args:
     chdir: "{{ _local_cert_dir }}"
     creates: "dh2048.pem"
+    executable: /bin/bash
   run_once: yes
   become: no
   delegate_to: localhost
@@ -96,6 +100,7 @@
   args:
     chdir: "{{ _local_cert_dir }}"
     creates: "ta.key"
+    executable: /bin/bash
   run_once: yes
   become: no
   delegate_to: localhost
