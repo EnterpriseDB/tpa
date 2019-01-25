@@ -59,11 +59,7 @@
         addresses|combine({
           'Name': item.item.item.Name,
           'node': item.item.item.node,
-          'role': item.item.item|try_subkey('role', []),
-          'backup': item.item.item|try_subkey('backup'),
-          'upstream': item.item.item|try_subkey('upstream'),
-          'volumes': item.item.item|try_subkey('volumes', []),
-          'vars': addresses|combine(exports)|combine(item.item.item.vars),
+          'vars': addresses|combine(item.item.item|export_vars),
           'platform': 'lxd',
         })
       ])
@@ -75,4 +71,3 @@
       {{ item.item.item.Name }}
   vars:
     addresses: "{{ item.item.item|ip_addresses }}"
-    exports: "{{ item.item.item|export_as_vars }}"

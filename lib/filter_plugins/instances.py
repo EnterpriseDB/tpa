@@ -310,30 +310,87 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
 
     return instances
 
-# Given an instance definition, returns a dict mapping any keys mentioned in
-# export_as_vars to the values set for the instance. For example, for an
-# instance defined like this
+# Takes a list of volumes and returns a new list where there is only one entry
+# per device name (raid_device if defined, else device_name), consisting of the
+# device name and any variables defined for it.
+#
+# The expanded list we start with looks like this:
+#
+# volumes:
+#   - raid_device: /dev/md0
+#     device_name: /dev/xvdb
+#     vars:
+#       mountpoint: /var/lib/postgresql
+#     …
+#   - raid_device: /dev/md0
+#     device_name: /dev/xvdc
+#     vars:
+#       mountpoint: /var/lib/postgresql
+#     …
+#   - device_name: /dev/xvdd
+#     vars:
+#       mountpoint: /var/lib/barman
+#     …
+#
+# And we end up with something like this:
+#
+# volumes:
+#   - device: /dev/md0
+#     mountpoint: /var/lib/postgresql
+#   - device: /dev/xvdd
+#     mountpoint: /var/lib/barman
+
+def get_device_variables(volumes):
+    seen = set()
+    results = []
+    for v in volumes:
+        dev = v.get('raid_device', v.get('device_name'))
+        if dev not in seen:
+            seen.add(dev)
+            vars = v.get('vars', {})
+            results.append(dict(device=dev, **vars))
+    return results
+
+# Given an instance definition, returns a dict of instance variables for the
+# instance, comprising some instance settings (e.g., location, role, volumes),
+# any settings mentioned in export_as_vars, and anything defined in vars (which
+# takes precedence over everything else).
+#
+# For example, with the following instance definition:
 #
 # - node: 1
 #   xyz: 123
 #   pqr: 234
-#   region: x
+#   location: x
+#   role: [a, b]
 #   export_as_vars:
 #     - xyz
 #     - pqr
 #   vars:
 #     abc: 345
 #
-# it would return {xyz: 123, pqr: 234, region: x}, which could then be combined
-# with vars. (Note that 'region' is always exported, regardless of whether it's
-# mentioned in export_as_vars or not.)
+# it would return (a superset of):
+#
+# {abc: 345, xyz: 123, pqr: 234, location: x, role: [a, b], …}
 
-def export_as_vars(instance):
+def export_vars(instance):
     exports = {}
 
-    always_export = ['region', 'location']
+    always_export = ['location']
     for k in always_export + instance.get('export_as_vars', []):
         exports[k] = instance.get(k)
+
+    export_if_set = ['backup', 'upstream']
+    for k in export_if_set:
+        v = instance.get(k)
+        if v is not None:
+            exports[k] = v
+
+    exports['role'] = [x for x in instance.get('role', []) if x != 'postgres']
+
+    exports['volumes'] = get_device_variables(instance.get('volumes', []))
+
+    exports.update(instance.get('vars', {}))
 
     return exports
 
@@ -345,5 +402,5 @@ class FilterModule(object):
             'expand_instance_image': expand_instance_image,
             'expand_instance_volumes': expand_instance_volumes,
             'match_existing_volumes': match_existing_volumes,
-            'export_as_vars': export_as_vars,
+            'export_vars': export_vars,
         }

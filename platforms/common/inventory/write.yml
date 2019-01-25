@@ -66,7 +66,7 @@
         })
       }}
 
-- name: Write general variables for hosts
+- name: Write instance variables for hosts
   copy:
     content: |
       {{ host_vars|to_nice_yaml(indent=2) }}
@@ -83,72 +83,19 @@
   when: >
     item.vars is not empty
 
-- name: Write topology variables for hosts
-  copy:
-    content: |
-      {{ host_vars|to_nice_yaml(indent=2) }}
+- name: Remove obsolete inventory files
+  file:
     dest: "{{ host_dir }}/{{ file_name }}"
-    force: yes
+    state: absent
   vars:
-    file_name: "02-topology.yml"
-    host_dir: "{{ cluster_dir }}/inventory/host_vars/{{ item.Name }}"
-    host_vars: >
-      {{
-        {}
-        |combine((item.role|ternary({'role': item.role|select('notequalto', 'postgres')|list}, {})))
-        |combine((item.backup|ternary({'backup': item.backup}, {})))
-        |combine((item.upstream|ternary({'upstream': item.upstream}, {})))
-      }}
-  with_items: "{{ instance_vars }}"
+    file_name: "{{ item.1 }}"
+    host_dir: "{{ cluster_dir }}/inventory/host_vars/{{ item.0.Name }}"
+  with_nested:
+    - "{{ instance_vars }}"
+    - ['02-topology.yml', '03-volumes.yml']
   loop_control:
     label: >-
-      {{ item.Name }}
-
-# We start with an expanded list of volumes per instance (i.e., RAID
-# devices will have multiple entries), which looks like this:
-#
-# volumes:
-#   - raid_device: /dev/md0
-#     device_name: /dev/xvdb
-#     vars:
-#       mountpoint: /var/lib/postgresql
-#     …
-#   - raid_device: /dev/md0
-#     device_name: /dev/xvdc
-#     vars:
-#       mountpoint: /var/lib/postgresql
-#     …
-#   - device_name: /dev/xvdd
-#     vars:
-#       mountpoint: /var/lib/barman
-#     …
-#
-# We run this through a custom filter to extract the device name that
-# matters (raid_device if set, device_name otherwise) and remove any
-# duplicates based on the device name. We end up with something like
-# this:
-#
-# volumes:
-#   - device: /dev/md0
-#     mountpoint: /var/lib/postgresql
-#   - device: /dev/xvdd
-#     mountpoint: /var/lib/barman
-
-- name: Write volume definitions for hosts
-  copy:
-    content: |
-      {{ host_vars|to_nice_yaml(indent=2) }}
-    dest: "{{ host_dir }}/{{ file_name }}"
-    force: yes
-  vars:
-    file_name: "03-volumes.yml"
-    host_dir: "{{ cluster_dir }}/inventory/host_vars/{{ item.Name }}"
-    host_vars:
-      volumes: "{{ item.volumes|get_device_variables }}"
-  with_items: "{{ instance_vars }}"
-  loop_control:
-    label: >-
-      {{ item.Name }}
+      {{ item.0.Name }}
 
 - name: Generate known_hosts file for the cluster
   template:

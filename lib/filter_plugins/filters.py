@@ -64,21 +64,6 @@ def instance_with_backup_of(hosts, primary, somehost, hostvars):
 
     return None
 
-# Takes a list of volumes and returns a new list where there is only one entry
-# per device name (raid_device if defined, else device_name), consisting of the
-# device name and any variables defined for it.
-
-def get_device_variables(volumes):
-    seen = set()
-    results = []
-    for v in volumes:
-        dev = v.get('raid_device', v.get('device_name'))
-        if dev not in seen:
-            seen.add(dev)
-            vars = v.get('vars', {})
-            results.append(dict(device=dev, **vars))
-    return results
-
 # Takes a dict and a list of keys and returns a new dict which has none of the
 # keys in the list.
 
@@ -174,7 +159,6 @@ class FilterModule(object):
             'doublequote': doublequote,
             'upstream_root': upstream_root,
             'instance_with_backup_of': instance_with_backup_of,
-            'get_device_variables': get_device_variables,
             'remove_keys': remove_keys,
             'parse_conninfo': parse_conninfo,
             'identify_os': identify_os,

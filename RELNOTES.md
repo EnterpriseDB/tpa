@@ -25,6 +25,13 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Further changes to avoid version-specific flock(1) invocations
 
+### Porting notes
+
+- We write instance variables only to host_vars/*/01-instance_vars.yml,
+  and remove 02-topology.yml and 03-volumes.yml during provisioning
+
+- Individual platforms can use simpler code to set instance_vars now
+
 ## v7.2 (2019-01-08)
 
 ### Major changes

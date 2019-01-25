@@ -507,17 +507,13 @@
     instance_vars: "{{
       instance_vars|default([])|union([
         item.0.tagged_instances[0]|combine({
+          'Name': item.0.item.item.Name,
+          'node': item.0.item.item.node,
+          'vars': (item.0.item.item|export_vars),
+          'platform': 'aws',
           'ip_address': item.1.public_ip|default(item.0.tagged_instances[0].public_ip)
             or item.0.tagged_instances[0].private_ip,
           'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip),
-          'Name': item.0.item.item.Name,
-          'node': item.0.item.item.node,
-          'role': item.0.item.item|try_subkey('role', []),
-          'backup': item.0.item.item|try_subkey('backup'),
-          'upstream': item.0.item.item|try_subkey('upstream'),
-          'volumes': item.0.item.item|try_subkey('volumes', []),
-          'vars': (item.0.item.item|export_as_vars)|combine(item.0.item.item.vars),
-          'platform': 'aws',
         })
       ])
     }}"

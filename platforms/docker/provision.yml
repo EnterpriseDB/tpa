@@ -14,11 +14,7 @@
         addresses|combine({
           'Name': item.item.Name,
           'node': item.item.node,
-          'role': item.item|try_subkey('role', []),
-          'backup': item.item|try_subkey('backup'),
-          'upstream': item.item|try_subkey('upstream'),
-          'volumes': item.item|try_subkey('volumes', []),
-          'vars': addresses|combine(exports)|combine(item.item.vars),
+          'vars': addresses|combine(item.item|export_vars),
           'platform': 'docker',
         })
       ])
@@ -30,4 +26,3 @@
       {{ item.item.Name }}
   vars:
     addresses: "{{ item.item|ip_addresses }}"
-    exports: "{{ item.item|export_as_vars }}"

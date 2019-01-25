@@ -9,11 +9,7 @@
         addresses|combine({
           'Name': item.Name,
           'node': item.node,
-          'role': item|try_subkey('role', []),
-          'backup': item|try_subkey('backup'),
-          'upstream': item|try_subkey('upstream'),
-          'volumes': item|try_subkey('volumes', []),
-          'vars': addresses|combine(exports)|combine(item.vars),
+          'vars': addresses|combine(item|export_vars),
           'platform': 'bare',
         })
       ])
@@ -25,4 +21,3 @@
       {{ item.Name }}
   vars:
     addresses: "{{ item|ip_addresses }}"
-    exports: "{{ item|export_as_vars }}"
