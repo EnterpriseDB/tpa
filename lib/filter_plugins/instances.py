@@ -380,7 +380,7 @@ def export_vars(instance):
     for k in always_export + instance.get('export_as_vars', []):
         exports[k] = instance.get(k)
 
-    export_if_set = ['backup', 'upstream']
+    export_if_set = ['region', 'backup', 'upstream']
     for k in export_if_set:
         v = instance.get(k)
         if v is not None:
