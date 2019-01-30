@@ -1,5 +1,4 @@
-tpaexec rehydrate
-=================
+# tpaexec rehydrate
 
 ## What is Rehydration?
 
@@ -26,7 +25,7 @@ Before we can run **tpaexec rehydrate ~/tpa/clusters/night zombie** we first nee
 
 Update the **ec2_ami** name with the AMI that you want the new instance to be built with (in this example we will be setting it to "TPA-Debian-PGDG-10-2018*" )
 
-Check that **delete_on_termination** is already set false in the config.yml file. If the parameter isn't present, then you can check its setting via the Amazon EC2 management console. Click on ‘Instances’, select instance (in this case zombie), under the ‘Description’ tab, scroll down to ‘Block devices’, and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag - if it is set to true, then it can be changed via aws command line (see [Appendix](#appendix) )
+Check that **delete_on_termination** is already set false in the config.yml file. If the parameter isn't present, then you can check its setting via the Amazon EC2 management console. Click on 'Instances', select instance (in this case zombie), under the 'Description' tab, scroll down to 'Block devices', and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag - if it is set to true, then it can be changed via aws command line (see [Appendix](#appendix) )
 
 Check **attach_existing** in config.yml & set it to "yes" if it isn't set already.
 
@@ -184,4 +183,4 @@ $ aws ec2 modify-instance-attribute --region eu-west-1 --instance-id i-0ca212ac1
 --block-device-mappings "[{\"DeviceName\": \"/dev/xvdb\",\"Ebs\":{\"DeleteOnTermination\":false}}]"
 ```
 
-Check that this has worked via the Amazon EC2 management console. Click on ‘Instances’, select instance (in this case zombie), under the ‘Description’ tab, scroll down to ‘Block devices’, and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag, which should now be false. It is worth waiting for 30 seconds before running rehydrate, as it can take time to propagate the settings.
+Check that this has worked via the Amazon EC2 management console. Click on 'Instances', select instance (in this case zombie), under the 'Description' tab, scroll down to 'Block devices', and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag, which should now be false. It is worth waiting for 30 seconds before running rehydrate, as it can take time to propagate the settings.

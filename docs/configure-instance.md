@@ -1,5 +1,4 @@
-TPAexec - Postgres configuration and other customisations
-=========================================================
+# TPAexec - Postgres configuration and other customisations
 
 ## Overview
 

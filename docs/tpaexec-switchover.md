@@ -1,5 +1,4 @@
-tpaexec switchover
-=================
+# tpaexec switchover
 
 The ``tpaexec switchover`` command promotes a DB standby to be the primary in the cluster, and can be used in place of the `repmgr standby switchover --siblings-follow` command.
 It performs various repmgr sanity checks before switching over the node, and is designed to be run from the tpaexec server without having to shut down any repmgr services beforehand.

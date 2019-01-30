@@ -1,5 +1,4 @@
-Installing TPAexec from source
-==============================
+# Installing TPAexec from source
 
 This document explains how to use a copy of the TPAexec source code
 repository instead of installing the tpaexec package.

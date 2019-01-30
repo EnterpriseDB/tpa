@@ -1,5 +1,4 @@
-tpaexec provision
-=================
+# tpaexec provision
 
 Provision creates instances and other resources required by the cluster.
 
@@ -29,7 +28,7 @@ documentation for details.
 [tpa]$ tpaexec provision ~/clusters/speedy
 
 PLAY [Provision cluster] **********************************************************
-…
+...
 
 TASK [Set up EC2 instances] *******************************************************
 changed: [localhost] => (item=us-east-1:quirk)
@@ -37,7 +36,7 @@ changed: [localhost] => (item=us-east-1:keeper)
 changed: [localhost] => (item=us-east-1:zealot)
 changed: [localhost] => (item=us-east-1:quaver)
 changed: [localhost] => (item=us-east-1:quavery)
-…
+...
 
 TASK [Generate ssh_config file for the cluster] ***********************************
 changed: [localhost]

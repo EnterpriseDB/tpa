@@ -1,5 +1,4 @@
-Docker
-======
+# Docker
 
 TPAexec has support for Docker.
 

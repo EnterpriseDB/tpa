@@ -1,5 +1,4 @@
-Cluster configuration
-=====================
+# Cluster configuration
 
 The way to make any configuration change to a cluster with TPAexec is to
 edit config.yml and run the provision/deploy/test cycle. This applies
@@ -28,14 +27,12 @@ cluster_vars:
 
 instance_defaults:
   platform: aws
-  …
   vars:
     ansible_user: admin
 
 instances:
   - node: 1
     Name: one
-    …
     role: primary
     vars:
       x: 42
@@ -269,7 +266,7 @@ ec2_ami:
 
 | Parameter:       | Description                                                  |
 | ---------------- | ------------------------------------------------------------ |
-| ec2_vpc:         | Used to configure AWS EC2 virtual private cloud - look at [TPA/platforms/aws/provision.yml](https://github.com/2ndQuadrant/TPA/tree/master/platforms/aws/provision.yml). for more information |
+| ec2_vpc:         | Used to configure AWS EC2 virtual private cloud              |
 | Name:            | Name of VPC - if this is set, then every region must have a VPC called this. VPC must already exist unless **cidr:** parameter is specified. |
 | ec2_vpc_subnets: | Used to configure the VPC subnets                            |
 | eu-west-1:       | AWS region                                                   |
@@ -323,7 +320,7 @@ instances:
 | region:          | AWS region for the host to be created in                     |
 | subnet:          | Subnet for this host                                         |
 | volumes:         | (Optional) OS specific parameters for creating volumes - in this case a gp2 32GB striped volume, mounted on the default PGDATA location /opt/postgres/data |
-| role:            | **primary** - Used to define the server role (may be multiple) - in this case the db primary. Role names include: **primary, replica, barman, witness, log-server, openvpn-server, bdr, postgres-xl, coordinator, datanode, coordinator-replica, datanode-replica, gtm, gtm-standby, pgbouncer, postgres**. See [TPA/roles/platforms/common/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/platforms/common/tasks/main.yml) for more information. |
+| role:            | **primary** - Used to define the server role (may be multiple) - in this case the db primary. Role names include: **primary, replica, barman, witness, log-server, openvpn-server, bdr, postgres-xl, coordinator, datanode, coordinator-replica, datanode-replica, gtm, gtm-standby, pgbouncer, postgres**. |
 | vars:            | Used to override postgresql.conf variables. Note, these are actually set in **0001-tpa_restart.conf** (In Debian under /opt/postgres/data/conf.d/ ) |
 | max_connections: | Maximum connections to database                              |
 | shared_buffers:  | Memory dedicated to PostgreSQL to use for caching data       |
@@ -353,7 +350,7 @@ instances:
 | - node:    | **2** - Node number for this host. Used by Ansible to configure parameters for hosts. |
 | volumes:   | (Optional) OS specific parameters for creating volumes - in this case a gp2 16GB volume, mounted on /var/lib/postgresql, the install directory for postgres. |
 | tags:      | Used to specify tags for the server                          |
-| role:      | **replica** - Used to define the server role - in this case it is a replica. If role is **replica**, then tag **upstream** needs to be defined. See [TPA/roles/platforms/common/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/platforms/common/tasks/main.yml) for more information. |
+| role:      | **replica** - Used to define the server role - in this case it is a replica. If role is **replica**, then tag **upstream** needs to be defined. |
 | upstream:  | (Optional) Hostname of server that is upstream from this one - **upstream: \<Name>** is used to connect  replicas to upstream servers. In this case speedy-a is replicating to speedy-b |
 | backup:    | (Optional) Hostname of backup server                         |
 
@@ -378,7 +375,7 @@ instances:
 | Parameter: | Description                              |
 | ---------- | ---------------------------------------- |
 | - node:    | **3** - Node number for this host        |
-| role:      | **replica** - Used to define the server role - in this case it is a replica. If role is **replica**, then tag **upstream** needs to be defined. See [TPA/roles/platforms/common/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/platforms/common/tasks/main.yml) for more information. |
+| role:      | **replica** - Used to define the server role - in this case it is a replica. If role is **replica**, then tag **upstream** needs to be defined. |
 | upstream:  | (Optional) Hostname of server that is upstream from this one - in this case speedy-b is replicating to speedy-c |
 
 ###### ***Node 4***
@@ -406,11 +403,11 @@ instances:
 | Parameter:       | Description                              |
 | ---------------- | ---------------------------------------- |
 | - node:          | **4** - Node number for this host        |
-| role:            | Used to define the server role (may be multiple). Role names include: **primary, replica, barman, witness, log-server, openvpn-server, bdr, postgres-xl, coordinator, datanode, coordinator-replica, datanode-replica, gtm, gtm-standby, pgbouncer, postgres**. See [TPA/roles/platforms/common/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/platforms/common/tasks/main.yml) for more information. |
-| - barman         | Installs and configures Barman. See [TPA/roles/barman](https://github.com/2ndQuadrant/TPA/tree/master/roles/barman) for more information. |
-| - witness        | Registers this node as a witness. See [TPA/roles/repmgr/witness/final/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/repmgr/witness/final/tasks/main.yml) for more information. |
-| - log-server     | Defines this server as a log server, and makes every other server log to it. See [TPA/roles/platforms/common/tasks/main.yml](https://github.com/2ndQuadrant/TPA/tree/master/roles/platforms/common/tasks/main.yml) for more information. |
-| - openvpn-server | Configures this node as an openvpn server. See [TPA/roles/sys/openvpn](https://github.com/2ndQuadrant/TPA/tree/master/roles/sys/openvpn) for more information. |
+| role:            | Used to define the server role (may be multiple). Role names include: **primary, replica, barman, witness, log-server, openvpn-server, bdr, postgres-xl, coordinator, datanode, coordinator-replica, datanode-replica, gtm, gtm-standby, pgbouncer, postgres**. |
+| - barman         | Installs and configures Barman.          |
+| - witness        | Registers this node as a witness.        |
+| - log-server     | Defines this server as a log server, and makes every other server log to it. |
+| - openvpn-server | Configures this node as an openvpn server. |
 | upstream:        | (Optional) Hostname of server that is upstream from this one - in this case speedy-a is backing up to speedy-d |
 
 ### Volume parameters - advanced

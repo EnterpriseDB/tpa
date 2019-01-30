@@ -1,5 +1,4 @@
-TPAexec installation
-====================
+# TPAexec installation
 
 To use TPAexec, you need to install the tpaexec package and run the
 ``tpaexec setup`` command.

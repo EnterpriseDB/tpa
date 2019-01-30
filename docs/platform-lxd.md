@@ -1,5 +1,4 @@
-LXD
-===
+# LXD
 
 TPAexec has experimental support for LXD.
 

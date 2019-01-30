@@ -1,5 +1,4 @@
-BDR-Always-ON
-=============
+# BDR-Always-ON
 
 BDR in an Always-ON configuration, intended for use in production.
 (BDR-Simple is an alternative that is more geared towards

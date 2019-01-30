@@ -1,5 +1,4 @@
-Vagrant
-=======
+# Vagrant
 
 TPAexec supports Vagrant with the VirtualBox provisioner.
 

@@ -1,5 +1,4 @@
-M1
-==
+# M1
 
 A Postgres cluster with a primary and a streaming replica, one Barman
 server, and any number of additional replicas cascaded from the first

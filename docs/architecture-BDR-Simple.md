@@ -1,5 +1,4 @@
-BDR-Simple
-==========
+# BDR-Simple
 
 BDR with no frills on N instances, meant primarily for experimentation.
 (BDR-Always-ON is an alternative that is more geared towards

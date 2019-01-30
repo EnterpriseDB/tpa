@@ -1,5 +1,4 @@
-tpaexec deploy
-==============
+# tpaexec deploy
 
 Deployment is the process of installing and configuring Postgres and
 other software on the cluster's servers. This includes setting up
@@ -29,10 +28,10 @@ forget to do this, an error message will soon remind you.
 Using /opt/2ndQuadrant/TPA/ansible/ansible.cfg as config file
 
 PLAY [Basic initialisation and fact discovery] ***************************************
-…
+...
 
 PLAY [Set up TPA cluster nodes] ******************************************************
-…
+...
 
 PLAY RECAP ***************************************************************************
 zealot                     : ok=281  changed=116  unreachable=0    failed=0   

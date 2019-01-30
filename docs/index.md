@@ -1,5 +1,4 @@
-TPAexec
-=======
+# TPAexec
 
 © Copyright 2ndQuadrant
 
@@ -34,16 +33,16 @@ Examples include AWS, lxd, and bare-metal servers.
 TPAexec operates in four distinct stages to bring up a Postgres cluster:
 
 ```bash
-# 1. Configuration—decide what kind of cluster you want
+# 1. Configuration: decide what kind of cluster you want
 [tpa]$ tpaexec configure clustername --architecture M1
 
-# 2. Provisioning—create the servers needed to host the cluster
+# 2. Provisioning: create the servers needed to host the cluster
 [tpa]$ tpaexec provision clustername
 
-# 3. Deployment—install and configure the necessary software
+# 3. Deployment: install and configure the necessary software
 [tpa]$ tpaexec deploy clustername
 
-# 4. Testing—make sure everything is working as expected
+# 4. Testing: make sure everything is working as expected
 [tpa]$ tpaexec test clustername
 ```
 

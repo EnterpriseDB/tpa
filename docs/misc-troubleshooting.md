@@ -1,5 +1,4 @@
-Troubleshooting
-=====================
+# Troubleshooting
 
 ### Recreate python virtualenv
 

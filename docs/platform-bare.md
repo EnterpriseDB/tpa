@@ -1,7 +1,6 @@
-bare(-metal servers)
-====================
+# bare(-metal servers)
 
-Set «platform: bare» in config.yml
+Set ``platform: bare`` in config.yml
 
 This platform is meant to support any server that is accessible via SSH,
 including bare-metal servers as well as already-provisioned servers on

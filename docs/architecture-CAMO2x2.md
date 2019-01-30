@@ -1,5 +1,4 @@
-CAMO2x2
-=======
+# CAMO2x2
 
 A variant of [BDR-Always-ON](architecture-BDR-Always-ON.md) that
 configures two pairs of CAMO ("commit at most once") partners in

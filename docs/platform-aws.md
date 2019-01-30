@@ -1,5 +1,4 @@
-aws
-===
+# aws
 
 TPAexec fully supports provisioning production clusters on AWS EC2.
 
@@ -103,8 +102,7 @@ different regions, you can use the expanded form:
       us-east-2:
         Name: Example
         filters:
-          …filter expressions…
-      …
+          [filter expressions]
 
 ### AMI (required)
 
@@ -121,7 +119,7 @@ You can add filter specifications for more precise matching:
       Owner: self
       filters:
         architecture: x86_64
-        …more «key: value» filters…
+        [more key/value filters]
 
 (By default, ``tpaexec configure`` will select a suitable ``ec2_ami``
 for you based on the ``--distribution`` argument.)
@@ -143,7 +141,6 @@ subnet that we create:
         192.0.2.100/27:
           az: us-east-1b
           Name: example2
-      …
 
 ### Security groups (optional)
 
@@ -154,7 +151,6 @@ more existing security groups, set:
       us-east-1:
         group-name:
           - foo
-      …
 
 ### Internet gateways (optional)
 
@@ -168,7 +164,6 @@ is set. For more fine-grained control, you can set
       eu-west-1: yes
       eu-central-1: yes
       us-east-1: no
-      …
 
 ### SSH keys (optional)
 

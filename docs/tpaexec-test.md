@@ -1,5 +1,4 @@
-tpaexec test
-============
+# tpaexec test
 
 Now we run architecture-specific tests against a deployed cluster to
 verify the installation. At the end of this stage, we have a

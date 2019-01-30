@@ -1,5 +1,4 @@
-Cluster configuration
-=====================
+# Cluster configuration
 
 The ``tpaexec configure`` command generates a YAML cluster configuration
 file that is required by subsequent stages in the provision/deploy/test
