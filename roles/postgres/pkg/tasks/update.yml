@@ -16,3 +16,5 @@
   package:
     name: "{{ all_postgres_packages }}"
     state: latest
+  notify:
+    - Note Postgres restart required
