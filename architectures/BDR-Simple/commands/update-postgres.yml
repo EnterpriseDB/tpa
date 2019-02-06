@@ -1,0 +1,49 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  vars:
+    pgdata_initialised: "{{ 'postgres' in role }}"
+  tags: always
+
+- name: Stop repmgr
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  hosts: all
+  tasks:
+  - name: Stop repmgr
+    service:
+      name: repmgr
+      state: stopped
+    when: >
+      'postgres' in role
+
+- name: Update postgres on instances in cluster {{ cluster_dir }}
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  hosts: all
+  serial: 1
+  tasks:
+  - include_role: name=postgres/update
+    when: >
+      'postgres' in role
+    tags: always
+
+- name: Start repmgr again
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  hosts: all
+  tasks:
+  - name: Restart repmgr
+    service:
+      name: repmgr
+      state: started
+    when: >
+      'postgres' in role

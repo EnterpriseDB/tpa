@@ -1,0 +1,10 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- include_tasks: "{{ postgres_installation_method }}.yml"
+  tags: always
+
+- fail: msg="Please redeploy to update extensions built from source"
+  when: >
+    install_from_source is not empty

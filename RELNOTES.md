@@ -6,6 +6,10 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Notable changes
 
+- Improve the ``tpaexec update-postgres`` command to update all
+  Postgres-related packages, and make it available on BDR-based
+  architectures
+
 - Enable TLS by default between pgbouncer ↔ haproxy ↔ postgres
 
 - Add --enable-camo configure option for BDR-Simple and BDR-Always-ON

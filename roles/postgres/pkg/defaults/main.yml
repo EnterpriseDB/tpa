@@ -60,6 +60,13 @@ bdr_packages:
     - "{{ postgresql_flavour }}{{ postgres_versionNN }}-bdr-debuginfo"
   Ubuntu: *debian_bdr_packages
 
+pgespresso_packages:
+  Debian: &debian_pgespresso_packages
+    - "{{ postgresql_flavour }}-{{ postgres_version }}-pgespresso"
+  RedHat:
+    - "pgespresso{{ postgres_versionNN }}"
+  Ubuntu: *debian_pgespresso_packages
+
 # Next, additional_postgres_packages is a list of other Postgres-related
 # packages that we install by default, and extra_postgres_packages is an
 # empty list that the caller can define to install other packages. These

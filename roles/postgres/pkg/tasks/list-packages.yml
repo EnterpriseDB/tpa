@@ -1,0 +1,44 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# On Postgres 9.5, pgespresso is required to support rsync-based backups
+# from a replica. (To do so, we also have to create the extension on the
+# corresponding primary, which we don't do by default yet, because the
+# extension has known crash-the-server problems.)
+#
+# We always install pglogical (if it's not being installed from source),
+# and on BDR instances, we also install BDR packages (again, if it's not
+# being installed from source).
+
+- name: Determine which optional packages should be installed
+  set_fact:
+    install_pgespresso_packages: "{{
+      postgresql_flavour == 'postgresql' and postgres_version is version(9.5, '<=')
+    }}"
+    install_pglogical_packages: "{{
+      postgresql_flavour == 'postgresql' and 'pglogical' not in sources
+    }}"
+    install_bdr_packages: "{{ 'bdr' in role and 'bdr' not in sources }}"
+  vars:
+    sources: "{{ install_from_source|map(attribute='name')|unique|list }}"
+
+- name: Enumerate all postgres packages
+  set_fact:
+    all_postgres_packages: >
+      {{ query('flattened', package_lists) }}
+  vars:
+    _maybe_pgespresso_packages: "{{ install_pgespresso_packages|ternary(pgespresso_packages, {}) }}"
+    _maybe_pglogical_packages: "{{ install_pglogical_packages|ternary(pglogical_packages, {}) }}"
+    _maybe_bdr_packages: "{{ install_bdr_packages|ternary(bdr_packages, {}) }}"
+    package_lists:
+    - "{{ postgres_packages|packages_for(ansible_distribution, postgres_package_version) }}"
+    - "{{ postgres_client_packages|packages_for(ansible_distribution, postgres_package_version) }}"
+    - "{{ postgres_debug_packages|packages_for(ansible_distribution, postgres_package_version) }}"
+    - "{{ _maybe_pgespresso_packages|packages_for(ansible_distribution) }}"
+    - "{{ _maybe_pglogical_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
+    - "{{ _maybe_bdr_packages|packages_for(ansible_distribution, bdr_package_version) }}"
+    - "{{ additional_postgres_packages[ansible_distribution] }}"
+    - "{{ extra_postgres_packages[ansible_distribution]|default([]) }}"
+    - "{{ extra_postgres_packages['common']|default([]) }}"
+    - python-psycopg2
