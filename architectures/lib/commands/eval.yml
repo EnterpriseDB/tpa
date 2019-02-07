@@ -1,0 +1,17 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  when: init|default('yes') == 'yes'
+  tags: always
+
+- name: Evaluate expression
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  hosts: "{{ eval_hosts|default('all') }}"
+  tasks:
+  - action: debug
+    args:
+      msg: >-
+        {{ expr }}
