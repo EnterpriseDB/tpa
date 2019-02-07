@@ -229,9 +229,18 @@ ping() {
 }
 
 playbook() {
-    $ansible-playbook \
-        -i inventory --vault-password-file vault/vault_pass.txt \
-        -e cluster_dir=$(pwd) -e tpa_dir=$TPA_DIR "$@"
+    args=(-e tpa_dir=$TPA_DIR)
+    args+=(-e cluster_dir=$(pwd))
+
+    if [ -d inventory ]; then
+        args+=(-i inventory)
+    fi
+
+    if [ -f vault/vault_pass.txt ]; then
+        args+=(--vault-password-file vault/vault_pass.txt)
+    fi
+
+    $ansible-playbook "${args[@]}" "$@"
 }
 
 deploy() {
