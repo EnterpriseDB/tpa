@@ -4,6 +4,8 @@
 
 Confidential property of 2ndQuadrant; not for public release.
 
+[Link to PDF version of this documentation](tpaexec.pdf)
+
 ## Introduction
 
 TPA (Trusted Postgres Architecture) is a set of recommendations from
