@@ -2,6 +2,12 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v7.4 (unreleased)
+
+## Bugfixes
+
+- Don't require --distribution with --platform bare
+
 ## v7.3 (2019-02-07)
 
 ### Notable changes

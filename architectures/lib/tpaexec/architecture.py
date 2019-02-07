@@ -90,8 +90,6 @@ class Architecture(object):
             label_opts['default'] = default_label
         elif labels and len(labels) == 1:
             label_opts['default'] = labels[0]
-        else:
-            label_opts['required'] = True
         g.add_argument(
             '--distribution', '--os', dest='distribution',
             metavar='LABEL', **label_opts
