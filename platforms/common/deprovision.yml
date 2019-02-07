@@ -51,10 +51,17 @@
 
 - name: Delete any empty inventory directories
   shell: >
-    find {{ cluster_dir }}/inventory -depth -type d -exec rmdir {} ';'
+    if [[ $({{ find_cmd }}| wc -l) != 0 ]]; then
+    {{ find_cmd }} -exec rmdir {} ';'; exit 99;
+    fi
   args:
     executable: /bin/bash
-  register: rm
+  vars:
+    find_cmd: >-
+      find {{ cluster_dir }}/inventory -depth -type d
+  register: rmdir
   ignore_errors: yes
   changed_when: >
-    'Directory not empty' not in rm.stderr
+    rmdir.rc == 99 and 'Directory not empty' not in rmdir.stderr
+  failed_when: rmdir.rc not in [0, 99]
+
