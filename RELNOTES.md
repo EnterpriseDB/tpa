@@ -8,6 +8,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Don't require --distribution with --platform bare
 
+- Allow synchronous_commit to be overriden for CAMO instances (instead
+  of always forcing it to remote_apply)
+
 ## v7.3 (2019-02-07)
 
 ### Notable changes
