@@ -227,6 +227,49 @@ The ``--extra-optional-packages p1 p2 …`` option behaves like
 ``--extra-packages``, but it is not an error if the named packages
 cannot be installed.
 
+## Overrides
+
+You may optionally specify ``--overrides-from a.yml …`` to load one or
+more YAML files with settings to merge into the generated config.yml.
+
+Any file specified here is first expanded as a Jinja2 template, and the
+result is loaded as a YAML data structure, and merged recursively into
+the arguments used to generate config.yml (comprising architecture and
+platform defaults and arguments from the command-line). This process is
+repeated for each additional override file specified; this means that
+settings defined by one file will be visible to any subsequent files.
+
+For example, your override file might contain
+
+```
+cluster_tags:
+  some_tag: "{{ lookup('env', 'SOME_ENV_VAR') }}"
+
+cluster_vars:
+  synchronous_commit: remote_write
+  postgres_conf_settings:
+    effective_cache_size: 4GB
+```
+
+These settings will augment ``cluster_tags`` and ``cluster_vars`` that
+would otherwise be in config.yml. Settings are merged recursively, so
+``cluster_tags`` will end up containing both the default Owner tag as
+well as ``some_tag``. Similarly, the ``effective_cache_size`` setting
+will override that variable, leaving other ``postgres_conf_settings``
+(if any) unaffected. In other words, you can set or override specific
+subkeys in config.yml, but you can't empty or replace ``cluster_tags``
+or any other hash altogether.
+
+The merging only applies to hash structures, so you cannot use this
+mechanism to change the list of ``instances`` within config.yml. It is
+most useful to augment ``cluster_vars`` and ``instance_defaults`` with
+common settings for your environment.
+
+That said, the mechanism does not enforce any restrictions, so please
+exercise due caution. It is a good idea to generate two configurations
+with and without the overrides and diff the two config.yml files to make
+sure you understand the effect of all the overrides.
+
 ## Examples
 
 Let's see what happens when we run the following command

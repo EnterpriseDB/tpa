@@ -4,6 +4,11 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ## v7.4 (unreleased)
 
+### Notable changes
+
+- Add ``--overrides-from a.yml …`` configure option to set variables
+  like cluster_tags and cluster_vars in the generated config.yml
+
 ## Bugfixes
 
 - Don't require --distribution with --platform bare

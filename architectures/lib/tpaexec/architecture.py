@@ -11,6 +11,8 @@ import dircache
 import yaml
 
 from ansible.template import Templar
+from ansible.utils.vars import merge_hash
+from ansible.module_utils.six.moves import reduce
 from tpaexec.platform import Platform
 
 class Architecture(object):
@@ -79,8 +81,9 @@ class Architecture(object):
         g = p.add_argument_group('%s platform options' % self.platform.name)
         self.platform.add_platform_options(p, g)
 
-        g = p.add_argument_group('cluster tags')
+        g = p.add_argument_group('cluster options')
         g.add_argument('--owner')
+        g.add_argument('--overrides-from', nargs='+', metavar='FILE')
 
         g = p.add_argument_group('software selection')
         labels = self.platform.supported_distributions()
@@ -180,6 +183,16 @@ class Architecture(object):
 
         self.cluster = args['cluster']
         args['cluster_name'] = self.cluster_name()
+
+        # If --overrides-from is specified, we load files one by one (treating
+        # them as templates) and merge them recursively into args. This can be
+        # used to set cluster_tags, add stuff to instance_vars etc. We don't do
+        # anything to restrict which keys this can be applied to, so it's quite
+        # possible to misuse this to do things that don't make sense.
+        overrides = args.get('overrides_from') or []
+        for f in overrides:
+            extra_vars = self.load_yaml(f, args, loader=self.loader([os.getcwd()]))
+            args.update(reduce(merge_hash, [args, extra_vars]))
 
         # The architecture's num_instances() method should work by this point,
         # so that we can generate the correct number of hostnames.
@@ -432,29 +445,21 @@ class Architecture(object):
     ## Template processing
     ##
 
+    # Takes a template filename and some vars, expands the template, parses the
+    # output as YAML, and returns the resulting data structure
+    def load_yaml(self, filename, vars, loader=None):
+        return yaml.load(self.expand_template(filename, vars, loader))
+
     # Takes a template filename and some args and returns the template output
-    def expand_template(self, filename, vars):
-        return self.templar(vars).do_template(self.template(filename))
-
-    # Takes a template filename and some args, expands the template, parses the
-    # output as YAML and returns the resulting data structure
-    def load_yaml(self, filename, args):
-        return yaml.load(self.expand_template(filename, args))
-
-    # Returns the contents of the given template file from the architecture's
-    # templates/ directory (if it exists there) or the lib/templates directory,
-    # or an empty string if the given template is not found in either place.
-    def template(self, filename):
-        return self.loader()._tpaexec_get_template(filename)
-
-    # Returns an Ansible Templar object (the use of our filter/lookup/test
-    # plugins depends on ANSIBLE_FILTER_PLUGINS etc. being set)
-    def templar(self, vars):
-        return Templar(loader=self.loader(), variables=vars)
+    def expand_template(self, filename, vars, loader=None):
+        loader = loader or self.loader()
+        templar = Templar(loader=loader, variables=vars)
+        template = loader._tpaexec_get_template(filename)
+        return templar.do_template(template)
 
     # Returns a template loader object that looks for templates in the
     # architecture's templates/ directory as well as lib/templates
-    def loader(self):
+    def loader(self, basedirs=None):
         class MinimalLoader(object):
             _basedir = []
             def __init__(self, basedir):
@@ -466,5 +471,8 @@ class Architecture(object):
                     t = '%s/%s' % (d, filename)
                     if os.path.exists(t):
                         return io.open(t, 'r').read()
-                return ''
-        return MinimalLoader(['%s/templates' % x for x in [self.dir, self.lib]])
+                return '{}'
+
+        if not basedirs:
+            basedirs = ['%s/templates' % x for x in [self.dir, self.lib]]
+        return MinimalLoader(basedirs)
