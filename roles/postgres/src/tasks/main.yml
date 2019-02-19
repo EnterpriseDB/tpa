@@ -5,12 +5,24 @@
 - include_role: name=postgres/src/req
   tags: always
 
+- name: Check if ssh agent forwarding is enabled
+  shell: echo $SSH_AUTH_SOCK
+  args:
+    executable: /bin/bash
+  register: cmd
+  become: no
+
 - name: Fetch Postgres source from git repository
   git:
     repo: "{{ postgres_git_url }}"
     dest: "{{ postgres_src_dir }}"
     version: "{{ postgres_git_ref }}"
     reference: "{{ postgres_git_reference_repo }}"
+  environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
+  vars:
+    ssh_auth_sock: "{{ cmd.stdout.strip() }}"
+    ssh_env:
+      SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
 
 - name: Remove old build directory
   file: state=absent path="{{ postgres_build_dir }}" force=yes
