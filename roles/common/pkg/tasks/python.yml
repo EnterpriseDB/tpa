@@ -12,5 +12,6 @@
     file: python-aws.yml
     apply:
       tags: python-aws
-  when: platform not in ['docker', 'vagrant']
+  when: 
+    groups[cluster_tag]|map('extract', hostvars, 'platform')|select('equalto', 'aws')|list is not empty
   tags: always
