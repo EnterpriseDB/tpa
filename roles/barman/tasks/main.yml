@@ -80,7 +80,10 @@
 # On any instance tagged as a Barman server (i.e., where tags.role
 # includes 'barman'), it will install and configure Barman.
 
-- include_tasks: server.yml
+- include_tasks:
+    file: server.yml
+    apply:
+      tags: barman
   when: >
     'barman' in role
   tags: always
@@ -89,7 +92,10 @@
 # the name of a Barman server), it will perform the necessary
 # client-side configuration.
 
-- include_tasks: client.yml
+- include_tasks:
+    file: client.yml
+    apply:
+      tags: barman
   with_items: "{{ backup|default([]) }}"
   loop_control:
     loop_var: this_barman
