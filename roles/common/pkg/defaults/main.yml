@@ -76,7 +76,6 @@ default_packages:
     - mdadm
     - dstat
     - python-virtualenv
-    - sudo
     - openssh-server
     - rsyslog
     - socat

@@ -2,6 +2,11 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- name: Check if sudo is available
+  shell: >
+    if ! command -v sudo >/dev/null 2>&1; then echo yes; fi
+  register: needs_sudo
+
 - name: Install required packages
   package:
     name: >
@@ -13,6 +18,7 @@
       - "{{ packages['common']|default([]) }}"
       - "{{ default_packages[ansible_distribution] }}"
       - "{{ packages[ansible_distribution]|default([]) }}"
+      - "{{ (needs_sudo.stdout.strip() == 'yes')|ternary(['sudo'], []) }}"
 
 - name: Install optional packages
   package:
