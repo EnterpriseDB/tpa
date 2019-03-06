@@ -2,6 +2,15 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v7.5 (unreleased)
+
+### Bugfixes
+
+- Don't install the sudo package if a sudo binary is available
+
+- Fall back to bzip2 or gzip for Barman compression if pigz is not
+  available
+
 ## v7.4 (2019-02-20)
 
 ### Notable changes
