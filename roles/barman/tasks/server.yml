@@ -4,6 +4,17 @@
 
 # These tasks are executed on any Barman server instance.
 
+- name: Check which compression program is available
+  shell: >
+    for p in pigz bzip2 gzip; do
+    if command -v $p >/dev/null 2>&1; then echo $p; break; fi;
+    done
+  register: compressor
+
+- name: Set default_barman_compression
+  set_fact:
+    default_barman_compression: "{{ compressor.stdout.strip() or 'none' }}"
+
 - name: Install global Barman configuration file
   template:
     src: barman.conf.j2
