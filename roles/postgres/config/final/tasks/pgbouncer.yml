@@ -2,6 +2,16 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- name: Enumerate existing databases
+  postgresql_query:
+    query: >
+      select array_agg(datname) as existing_databases from pg_database
+      where datname not in ('template0')
+  register: d
+  become_user: "{{ postgres_user }}"
+  become: yes
+  changed_when: False
+
 - name: Create pgbouncer schema
   postgresql_query:
     conninfo: "dbname={{ item }}"
@@ -13,9 +23,7 @@
     create_schema.rowcounts[0] == 0
   become_user: "{{ postgres_user }}"
   become: yes
-  with_items:
-    - template1
-    - postgres
+  with_items: "{{ d.existing_databases }}"
 
 - name: Create pgbouncer.get_auth function
   postgresql_query:
@@ -38,6 +46,4 @@
     create_function.rowcounts[0] == 0
   become_user: "{{ postgres_user }}"
   become: yes
-  with_items:
-    - template1
-    - postgres
+  with_items: "{{ d.existing_databases }}"

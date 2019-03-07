@@ -13,6 +13,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Allow pgbouncer_port to be set to override the default
 
+- Create pgbouncer.get_auth() function in existing databases
+
 ## v7.4 (2019-02-20)
 
 ### Notable changes
