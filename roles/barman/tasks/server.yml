@@ -10,6 +10,7 @@
     if command -v $p >/dev/null 2>&1; then echo $p; break; fi;
     done
   register: compressor
+  changed_when: False
 
 - name: Set default_barman_compression
   set_fact:

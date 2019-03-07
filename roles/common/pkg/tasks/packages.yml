@@ -6,6 +6,7 @@
   shell: >
     if ! command -v sudo >/dev/null 2>&1; then echo yes; fi
   register: needs_sudo
+  changed_when: False
 
 - name: Install required packages
   package:
