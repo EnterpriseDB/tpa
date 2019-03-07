@@ -16,7 +16,10 @@
   become_user: "{{ postgres_user }}"
   become: true
 
-- include_tasks: pgbouncer.yml
+- include_tasks:
+    file: pgbouncer.yml
+    apply:
+      tags: pgbouncer
   when: >
     postgres_users|json_query("[?username=='pgbouncer']") != []
   tags: always
