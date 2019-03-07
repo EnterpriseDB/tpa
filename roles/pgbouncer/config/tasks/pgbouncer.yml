@@ -39,6 +39,10 @@
       }])
     }}"
 
+- name: Set pgbouncer_port
+  set_fact:
+    pgbouncer_port: "{{ pgbouncer_port|default(6432) }}"
+
 - name: Ensure /etc/pgbouncer exists
   file:
     path: /etc/pgbouncer

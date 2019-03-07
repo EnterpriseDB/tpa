@@ -9,7 +9,7 @@
 pidfile = /var/run/postgresql/pgbouncer.pid
 
 listen_addr = *
-listen_port = 6432
+listen_port = {{ pgbouncer_port }}
 
 ;;;
 ;;; Client and server TLS settings
