@@ -101,7 +101,7 @@ settings.
 
 BDR nodes are always online, and thus switches can be
 immediate. However, to avoid unnecessary and undesired switches, we
-recommend using careful judgement when selecting timeouts.
+recommend using careful judgment when selecting timeouts.
 
 Currently our TPA reference design uses this configuration, which we
 have found to ignore most temporary network blips or service restarts:
@@ -114,7 +114,7 @@ backend be
     server node2 node2:5432 maxconn 225 check inter 1500 downinter 6s rise 5 fall 3 backup
 ```
 
-The meaning of these option is as follows:
+The meaning of these options is as follows:
 
 - The check is performed every 1500 ms
 - The node is considered "down" if it is down for more than 6
@@ -176,7 +176,7 @@ sudo haproxyctl disable server be/node1
 psql -U pgbouncer -p 6432 -h localhost pgbouncer -c 'RECONNECT'
 ```
 
-THe above commands results in the following behavior:
+The above commands result in the following behavior:
 
 1. HAProxy starts sending new connections to `node2`
 2. All existing connections are marked as needing reconnection by PgBouncer
