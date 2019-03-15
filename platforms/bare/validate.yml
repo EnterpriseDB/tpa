@@ -8,3 +8,10 @@
     that:
       item.get('ip_address', item.get('public_ip', item.get('private_ip')))
   with_items: "{{ bare_instances }}"
+
+- set_fact:
+    hostname_patterns: "{{
+      hostname_patterns|default({})|combine({
+        'bare': '^[a-z0-9-]+(\\.[a-z0-9-]+)*$'
+      })
+    }}"

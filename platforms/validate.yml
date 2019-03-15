@@ -42,6 +42,16 @@
         loop_var: platform
   tags: always
 
+- name: Validate hostnames (lowercase, no underscores)
+  assert:
+    msg: "Please ensure instance Name '{{ item.Name }}' matches '{{ p }}'"
+    that:
+      - item.Name|match(p)
+  with_items: "{{ instances }}"
+  vars:
+    patterns: "{{ hostname_patterns|default({}) }}"
+    p: "{{ patterns[item.platform]|default('^[a-z0-9-]+$') }}"
+
 - name: Ensure cluster_tags[Owner] is sensible for cloud instances
   assert:
     msg: "Please set cluster_tags[Owner] or use '--owner Name' to identify the person responsible for this cluster"

@@ -75,10 +75,3 @@
     that:
       - instances|selectattr('node','defined')|list|count == instances|count
       - instances|selectattr('Name','defined')|list|count == instances|count
-
-- name: Validate hostnames (lowercase, no underscores)
-  assert:
-    msg: "Please ensure 'Name' contains only [a-z0-9-]"
-    that:
-      - item.Name|match('^[a-z0-9-]+$')
-  with_items: "{{ instances }}"
