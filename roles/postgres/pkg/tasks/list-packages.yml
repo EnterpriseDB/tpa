@@ -34,7 +34,6 @@
     package_lists:
     - "{{ postgres_packages|packages_for(ansible_distribution, postgres_package_version) }}"
     - "{{ postgres_client_packages|packages_for(ansible_distribution, postgres_package_version) }}"
-    - "{{ postgres_debug_packages|packages_for(ansible_distribution, postgres_package_version) }}"
     - "{{ _maybe_pgespresso_packages|packages_for(ansible_distribution) }}"
     - "{{ _maybe_pglogical_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
     - "{{ _maybe_bdr_packages|packages_for(ansible_distribution, bdr_package_version) }}"

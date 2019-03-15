@@ -1,0 +1,82 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Enumerate postgres debuginfo packages
+  set_fact:
+    postgres_debuginfo_packages: >
+      {{ query('flattened', package_lists) }}
+  vars:
+    package_lists:
+    - "{{ postgres_debug_packages|packages_for(ansible_distribution, postgres_package_version) }}"
+
+# Debian stretch/PGDG uses -dbgsym packages for Postgres 10+
+# Ubuntu bionic/PGDG uses -dbgsym packages for Postgres 10+
+
+- name: Adjust postgres_debuginfo_packages for dbg/dbgsym packages
+  set_fact:
+    postgres_debuginfo_packages: "{{
+      postgres_debuginfo_packages|map('replace', '-dbg', '-dbgsym')|list
+    }}"
+  when:
+    postgres_version is version('10', '>=') and (
+      (ansible_distribution == 'Debian' and ansible_distribution_release in ['stretch']) or
+      (ansible_distribution == 'Ubuntu' and ansible_distribution_release in ['bionic'])
+    )
+
+- name: Install Postgres debuginfo packages
+  package:
+    name: "{{ postgres_debuginfo_packages }}"
+    state: present
+
+# PGDG provides only postgresql-10-pglogical-dbgsym, whereas the 2ndQ
+# repositories provide only postgresql-10-pglogical-dbg, which is the
+# opposite of how it works for the main Postgres packages. So we try
+# to install the -dbg package, and fall back to -dbgsym if it fails.
+
+- set_fact:
+    _fallback_to_dbgsym: "{{ ansible_distribution in ['Debian', 'Ubuntu'] }}"
+
+- block:
+    - name: Install pglogical debug packages
+      package:
+        name: "{{ packages }}"
+        state: present
+      register: dbg_install
+      ignore_errors: "{{ _fallback_to_dbgsym }}"
+
+    - name: Fallback to dbgsym packages for debuginfo
+      package:
+        name: "{{
+          packages|map('replace', '-dbg', '-dbgsym%s' % _version_suffix)|list
+        }}"
+        state: present
+      when:
+        _fallback_to_dbgsym and dbg_install is not successful
+  when: install_pglogical_packages
+  vars:
+    packages: "{{ pglogical_debug_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
+    _version_suffix: >-
+      {% if pglogical_package_version is defined %}={{ pglogical_package_version }}{% endif %}
+
+- block:
+    - name: Install bdr debug packages
+      package:
+        name: "{{ packages }}"
+        state: present
+      register: dbg_install
+      ignore_errors: "{{ _fallback_to_dbgsym }}"
+
+    - name: Fallback to dbgsym packages for debuginfo
+      package:
+        name: "{{
+          packages|map('replace', '-dbg', '-dbgsym%s' % _version_suffix)|list
+        }}"
+        state: present
+      when:
+        _fallback_to_dbgsym and dbg_install is not successful
+  when: install_bdr_packages
+  vars:
+    packages: "{{ bdr_debug_packages|packages_for(ansible_distribution, bdr_package_version) }}"
+    _version_suffix: >-
+      {% if bdr_package_version is defined %}={{ bdr_package_version }}{% endif %}

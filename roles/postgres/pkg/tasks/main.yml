@@ -5,9 +5,6 @@
 # Given a Postgres version, we perform distribution-specific tasks to
 # enable repositories and install Postgres packages.
 
-- include_tasks: "os/{{ ansible_distribution }}.yml"
-  tags: always
-
 - include_tasks: list-packages.yml
   tags: always
 
@@ -16,38 +13,11 @@
     name: "{{ all_postgres_packages }}"
     state: present
 
-# PGDG provides only postgresql-10-pglogical-dbgsym, whereas the 2ndQ
-# repositories provide only postgresql-10-pglogical-dbg, which is the
-# opposite of how it works for the main Postgres packages. So we try
-# to install the -dbg package, and fall back to -dbgsym if it fails.
-
-- name: Install pglogical debug packages
-  package:
-    name: >
-      {{ query('flattened', package_lists) }}
-    state: present
-  register: pglogical_dbg_install
-  ignore_errors: "{{ ansible_distribution == 'Debian' }}"
-  when: install_pglogical_packages
-  vars:
-    package_lists:
-      - "{{ pglogical_debug_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
-
-- name: Try fallback pglogical debug package on Debian
-  package:
-    name: "{{
-      pglogical_debug_packages[ansible_distribution]
-      |map('replace', '-dbg', '-dbgsym%s' % _version_suffix)
-      |list
-    }}"
-    state: present
-  when:
-    install_pglogical_packages and
-    pglogical_dbg_install is not successful and
-    ansible_distribution == 'Debian'
-  vars:
-    _version_suffix: >-
-      {% if pglogical_package_version is defined %}={{ pglogical_package_version }}{% endif %}
+- include_tasks:
+    file: debuginfo.yml
+    apply:
+      tags: [postgres, pkg, debuginfo]
+  tags: always
 
 # We install our own service units later, so we disable the packaged
 # versions here.

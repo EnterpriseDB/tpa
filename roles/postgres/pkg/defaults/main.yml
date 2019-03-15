@@ -54,11 +54,16 @@ pglogical_debug_packages:
 bdr_packages:
   Debian: &debian_bdr_packages
     - "{{ postgresql_flavour }}-{{ postgres_version }}-bdr-plugin"
-    - "{{ postgresql_flavour }}-{{ postgres_version }}-bdr-plugin-dbg"
   RedHat:
     - "{{ postgresql_flavour }}{{ postgres_versionNN }}-bdr"
-    - "{{ postgresql_flavour }}{{ postgres_versionNN }}-bdr-debuginfo"
   Ubuntu: *debian_bdr_packages
+
+bdr_debug_packages:
+  Debian: &debian_bdr_debug_packages
+    - "{{ postgresql_flavour }}-{{ postgres_version }}-bdr-plugin-dbg"
+  RedHat:
+    - "{{ postgresql_flavour }}{{ postgres_versionNN }}-bdr-debuginfo"
+  Ubuntu: *debian_bdr_debug_packages
 
 pgespresso_packages:
   Debian: &debian_pgespresso_packages
