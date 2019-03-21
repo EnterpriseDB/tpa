@@ -448,7 +448,8 @@ class Architecture(object):
     # Takes a template filename and some vars, expands the template, parses the
     # output as YAML, and returns the resulting data structure
     def load_yaml(self, filename, vars, loader=None):
-        return yaml.load(self.expand_template(filename, vars, loader))
+        text = self.expand_template(filename, vars, loader)
+        return yaml.load(text, Loader=yaml.FullLoader)
 
     # Takes a template filename and some args and returns the template output
     def expand_template(self, filename, vars, loader=None):
