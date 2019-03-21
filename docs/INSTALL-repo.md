@@ -30,12 +30,10 @@ tpaexec package.)
 [root]# yum install python python-pip python-virtualenv \
         pwgen epel-release openvpn
 
-# Mac
-[brew or port] install pwgen
-[brew or port] install openvpn
-
-[brew or port] tap discoteq/discoteq
-[brew or port] install flock
+# MacOS X
+[root]# brew tap discoteq/discoteq
+[root]# brew install python@2 pwgen openvpn flock
+[root]# pip install virtualenv
 ```
 
 Next, clone the TPAexec repository:
