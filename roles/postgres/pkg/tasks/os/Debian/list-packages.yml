@@ -1,0 +1,17 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# For Postgres 10+ on Debian and Ubuntu, the main postgresql package
+# "provides" a virtual postgresql-contrib, and there is no longer a
+# separate package for the latter. We could continue to install it,
+# but it doesn't work if postgres_package_version is set explicitly.
+
+- name: Omit contrib package for Postgres 10+
+  set_fact:
+    postgres_packages: "{{
+      postgres_packages|combine({
+        ansible_distribution: postgres_packages[ansible_distribution]|reject('contains', '-contrib-')|list
+      })
+    }}"
+  when: postgres_version is version('10', '>=')
