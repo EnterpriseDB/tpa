@@ -4,6 +4,11 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ## v7.5 (unreleased)
 
+### Notable changes
+
+- Support NVMe instance store volumes on AWS EC2 (in addition to EBS
+  volumes, which were already supported)
+
 ### Bugfixes
 
 - Don't install the sudo package if a sudo binary is available

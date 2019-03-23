@@ -7,29 +7,23 @@ if ! command -v nvme &>/dev/null; then
 {% include 'user-data/os/'+OS+'/nvmecli.j2' %}
 ; fi
 
-cat > /usr/local/bin/ebs-nvme-mapping <<'SCRIPT'
+cat > /usr/local/bin/nvme-ebs-name <<'SCRIPT'
 #!/bin/bash
-#
-# Copyright (c) 2018 Omachonu Ogali
-# MIT License:
-# https://github.com/oogali/ebs-automatic-nvme-mapping/blob/master/LICENSE
-
 PATH="${PATH}:/usr/sbin"
-
-for blkdev in $( nvme list | awk '/^\/dev/ { print $1 }' ) ; do
-  d=$(nvme id-ctrl --raw-binary "${blkdev}" | cut -c3073-3104 | tr -s ' ' | sed 's/ $//g')
-  if [[ $d && ( $d == /dev/* || $d == xvd? || $d == sd? ) ]]; then
-    if [[ "$d" != /dev/* ]]; then
-      d=/dev/$d
-    fi
-    ( test -b $blkdev && test -L $d ) || ln -s $blkdev $d
-  fi
-done
+nvme id-ctrl --raw-binary "$1"|cut -c3073-3104|sed -e 's,^/dev/,,' -e 's/ *$//'
 SCRIPT
-chmod +x /usr/local/bin/ebs-nvme-mapping
 
-cat > /etc/udev/rules.d/999-aws-ebs-nvme.rules <<'UDEV'
-ACTION=="add", SUBSYSTEM=="block", KERNEL=="nvme[1-26]n1", ATTRS{model}=="Amazon Elastic Block Store              ", RUN+="/usr/local/bin/ebs-nvme-mapping"
+cat > /usr/local/bin/nvme-is-name <<'SCRIPT'
+#!/bin/bash
+PATH="${PATH}:/usr/sbin"
+nvme list|awk '/Amazon EC2 NVMe Instance Storage/ {print $1}'|grep -nx "$1"|sed 's/:.*//'|tr '[1-4]' '[b-e]'|sed 's/^/xvd/'
+SCRIPT
+
+chmod +x /usr/local/bin/nvme-{ebs,is}-name
+
+cat > /etc/udev/rules.d/10-aws-nvme.rules <<'UDEV'
+SUBSYSTEM=="block", KERNEL=="nvme[0-9]*n1", ATTRS{model}=="Amazon Elastic Block Store              ", PROGRAM="/usr/local/bin/nvme-ebs-name /dev/%k", SYMLINK+="%c{1+}"
+SUBSYSTEM=="block", KERNEL=="nvme[0-9]*n1", ATTRS{model}=="Amazon EC2 NVMe Instance Storage        ", PROGRAM="/usr/local/bin/nvme-is-name /dev/%k", SYMLINK+="%c{1+}"
 UDEV
 
-/bin/bash -x /usr/local/bin/ebs-nvme-mapping
+udevadm control -R && udevadm trigger
