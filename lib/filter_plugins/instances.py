@@ -19,12 +19,21 @@ ephemeral_storage = {
     'c3.2xlarge': 2, # 80 GB (160 GB) SSD
     'c3.4xlarge': 2, # 160 GB (320 GB) SSD
     'c3.8xlarge': 2, # 320 GB (640 GB) SSD
+    'c5d.large': 1, # 50 GB NVMe SSD
+    'c5d.xlarge': 1, # 100 GB NVMe SSD
+    'c5d.2xlarge': 1, # 200 GB NVMe SSD
+    'c5d.4xlarge': 1, # 400 GB NVMe SSD
+    'c5d.9xlarge': 1, # 900 GB NVMe SSD
+    'c5d.18xlarge': 2, # 900 GB (1.8 TB) NVMe SSD
     'cc2.8xlarge': 4, # 840 GB (3.36 TB) HDD
     'cr1.8xlarge': 2, # 120 GB (240 GB) SSD
     'd2.xlarge': 3, # 2,000 GB (6 TB) HDD
     'd2.2xlarge': 6, # 2,000 GB (12 TB) HDD
     'd2.4xlarge': 12, # 2,000 GB (24 TB) HDD
     'd2.8xlarge': 24, # 2,000 GB (48 TB) HDD
+    'f1.2xlarge': 1, # 470 GB NVMe SSD
+    'f1.4xlarge': 1, # 940 GB NVMe SSD
+    'f1.16xlarge': 4, # 940 GB (3.76 TB) NVMe SSD
     'g2.2xlarge': 1, # 60 GB SSD
     'g2.8xlarge': 2, # 120 GB (240 GB) SSD
     'h1.2xlarge': 1, # 2000 GB (2 TB) HDD
@@ -36,6 +45,13 @@ ephemeral_storage = {
     'i2.2xlarge': 2, # 800 GB (1.6 TB) SSD
     'i2.4xlarge': 4, # 800 GB (3.2 TB) SSD
     'i2.8xlarge': 8, # 800 GB (6.4 TB) SSD
+    'i3.large': 1, # 475 GB NVMe SSD
+    'i3.xlarge': 1, # 950 GB NVMe SSD
+    'i3.2xlarge': 1, # 1,900 GB NVMe SSD
+    'i3.4xlarge': 2, # 1,900 GB (3.8 TB) NVMe SSD
+    'i3.8xlarge': 4, # 1,900 GB (7.6 TB) NVMe SSD
+    'i3.16xlarge': 8, # 1,900 GB (15.2 TB) NVMe SSD
+    'i3.metal': 8, # 1,900 GB (15.2 TB) NVMe SSD
     'm1.small': 1, # 160 GB† HDD
     'm1.medium': 1, # 410 GB HDD
     'm1.large': 2, # 420 GB (840 GB) HDD
@@ -47,11 +63,26 @@ ephemeral_storage = {
     'm3.large': 1, # 32 GB SSD
     'm3.xlarge': 2, # 40 GB (80 GB) SSD
     'm3.2xlarge': 2, # 80 GB (160 GB) SSD
+    'm5d.large': 1, # 75 GB NVMe SSD
+    'm5d.xlarge': 1, # 150 GB NVMe SSD
+    'm5d.2xlarge': 1, # 300 GB NVMe SSD
+    'm5d.4xlarge': 2, # 300 GB (600 GB) NVMe SSD
+    'm5d.12xlarge': 2, # 900 GB (1.8 TB) NVMe SSD
+    'm5d.24xlarge': 4, # 900 GB (3.6 TB) NVMe SSD
+    'm5d.metal': 4, # 900 GB (3.6 TB) NVMe SSD
+    'p3dn.24xlarge': 2, # 900 GB (1.8 TB) NVMe SSD
     'r3.large': 1, # 32 GB SSD
     'r3.xlarge': 1, # 80 GB SSD
     'r3.2xlarge': 1, # 160 GB SSD
     'r3.4xlarge': 1, # 320 GB SSD
     'r3.8xlarge': 2, # 320 GB (640 GB) SSD
+    'r5d.large': 1, # 75 GB NVMe SSD
+    'r5d.xlarge': 1, # 150 GB NVMe SSD
+    'r5d.2xlarge': 1, # 300 GB NVMe SSD
+    'r5d.4xlarge': 2, # 300 GB (600 GB) NVMe SSD
+    'r5d.12xlarge': 2, # 900 GB (1.8 TB) NVMe SSD
+    'r5d.24xlarge': 4, # 900 GB (3.6 TB) NVMe SSD
+    'r5d.metal': 4, # 900 GB (3.6 TB) NVMe SSD
     'x1.16xlarge': 1, # 1,920 GB SSD
     'x1.32xlarge': 2, # 1,920 GB (3.84 TB) SSD
     'x1e.xlarge': 1, # 120 GB SSD
@@ -60,6 +91,13 @@ ephemeral_storage = {
     'x1e.8xlarge': 1, # 960 GB SSD
     'x1e.16xlarge': 1, # 1,920 GB SSD
     'x1e.32xlarge': 2, # 1,920 GB (3.84 TB) SSD
+    'z1d.large': 1, # 75 GB NVMe SSD
+    'z1d.xlarge': 1, # 150 GB NVMe SSD
+    'z1d.2xlarge': 1, # 300 GB NVMe SSD
+    'z1d.3xlarge': 1, # 450 GB NVMe SSD
+    'z1d.6xlarge': 1, # 900 GB NVMe SSD
+    'z1d.12xlarge': 2, # 900 GB (1.8 TB) NVMe SSD
+    'z1d.metal': 2, # 900 GB (1.8 TB) NVMe SSD
 }
 
 ## Instance filters
