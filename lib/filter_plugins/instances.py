@@ -232,8 +232,12 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
             v = copy.deepcopy(vol)
             vars = v.get('vars', {})
 
-            if v['volume_type'] == 'none':
+            volume_type = v.get('volume_type')
+            if volume_type == 'none':
                 continue
+
+            if not (volume_type or 'ephemeral' in v):
+                raise AnsibleFilterError("volume_type/ephemeral not specified for volume %s" % (v['device_name']))
 
             if v['device_name'] == 'root':
                 v['device_name'] = ec2_ami_properties[j['image']]['root_device_name']
