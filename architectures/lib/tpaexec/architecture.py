@@ -30,6 +30,7 @@ class Architecture(object):
     # configuration information, and generates a cluster configuration.
     def configure(self):
         self.args = self.arguments()
+        self.validate_arguments(self.args)
         self.process_arguments(self.args)
         configuration = self.generate_configuration()
         self.write_configuration(configuration)
@@ -173,6 +174,25 @@ class Architecture(object):
     ##
     ## Cluster configuration
     ##
+
+    # Look at the arguments collected from the command-line and complain if
+    # anything seems wrong.
+    def validate_arguments(self, args):
+        repos = args.get('tpa_2q_repositories', [])
+        for r in repos:
+            errors = []
+            (source, name, maturity) = r.split('/')
+            if source not in ['ci-spool', 'products', 'dl']:
+                errors.append("unknown source '%s' (try 'dl', 'products', or 'ci-spool')" % source)
+            if name not in ['default', '2ndqpostgres', 'bdr2', 'bdr3', 'pglogical3']:
+                errors.append("unknown product name '%s'" % name)
+            if maturity not in ['snapshot', 'testing', 'release']:
+                errors.append("unknown maturity '%s' (try 'release', 'testing', or 'snapshot')" % maturity)
+
+            if errors:
+                for e in errors:
+                    print("ERROR: repository '%s' has %s" % (r, e), file=sys.stderr)
+                sys.exit(-1)
 
     # Augment arguments from the command-line with enough additional information
     # (based on the selected architecture and platform) to generate config.yml
