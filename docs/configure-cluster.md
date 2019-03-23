@@ -121,7 +121,7 @@ instances:
       subnet: 10.33.243.0/24
       volumes:
           - raid_device: /dev/md0
-            device_name: /dev/xvdb
+            device_name: /dev/xvdf
             volume_type: gp2
             volume_size: 16
             raid_units: 2
@@ -143,7 +143,7 @@ instances:
       region: eu-central-1
       subnet: 10.33.122.0/24
       volumes:
-          - device_name: /dev/xvdb
+          - device_name: /dev/xvdf
             volume_type: gp2
             volume_size: 32
             attach_existing: yes
@@ -163,7 +163,7 @@ instances:
       region: eu-central-1
       subnet: 10.33.243.0/24
       volumes:
-          - device_name: /dev/xvdb
+          - device_name: /dev/xvdf
             volume_type: gp2
             volume_size: 16
             attach_existing: yes
@@ -186,7 +186,7 @@ instances:
       region: eu-west-1
       subnet: 10.33.6.0/24
       volumes:
-          - device_name: /dev/xvdb
+          - device_name: /dev/xvdf
             volume_type: gp2
             volume_size: 16
             attach_existing: yes
@@ -206,7 +206,7 @@ instances:
       region: eu-west-1
       subnet: 10.33.6.0/24
       volumes:
-          - device_name: /dev/xvdb
+          - device_name: /dev/xvdf
             volume_type: gp2
             volume_size: 16
             attach_existing: yes
@@ -297,7 +297,7 @@ instances:
     subnet: 10.33.14.0/24
     volumes:
         - raid_device: /dev/md0
-          device_name: /dev/xvdb
+          device_name: /dev/xvdf
           volume_type: gp2
           volume_size: 16
           raid_units: 2
@@ -334,7 +334,7 @@ instances:
       region: eu-west-1
       subnet: 10.33.14.0/24
       volumes:
-          - device_name: /dev/xvdb
+          - device_name: /dev/xvdf
             volume_type: gp2
             volume_size: 16
             attach_existing: yes
@@ -363,7 +363,7 @@ instances:
       region: eu-west-1
       subnet: 10.33.21.0/24
       volumes:
-          - device_name: /dev/xvdb
+          - device_name: /dev/xvdf
             volume_type: gp2
             volume_size: 16
             vars:
@@ -387,7 +387,7 @@ instances:
       region: eu-west-1
       subnet: 10.33.21.0/24
       volumes:
-          - device_name: /dev/xvdb
+          - device_name: /dev/xvdf
             volume_type: gp2
             volume_size: 32
             vars:
@@ -419,14 +419,14 @@ In many installations, it is likely that there are existing company specific sta
         - device_name: root
           volume_type: gp2
           volume_size: 16
-        - device_name: /dev/xvdb
+        - device_name: /dev/xvdf
           volume_type: gp2
           volume_size: 24
           attach_existing: yes
           delete_on_termination: false
           vars:
             mountpoint: /var/lib/pgsql
-        - device_name: /dev/xvdc
+        - device_name: /dev/xvdg
           volume_type: gp2
           volume_size: 100
           attach_existing: yes
@@ -434,7 +434,7 @@ In many installations, it is likely that there are existing company specific sta
           vars:
             mountpoint: /var/lib/pgsql/tblspc_data01
         - raid_device: /dev/md0
-          device_name: /dev/xvdd
+          device_name: /dev/xvdh
           volume_type: gp2
           volume_size: 12
           raid_units: 2

@@ -9,9 +9,9 @@
 #   - device: /dev/sda1
 #   - device: /dev/md0
 #     volume_for: postgres_data
-#   - device: /dev/xvdd
+#   - device: /dev/xvdf
 #     mountpoint: /var/lib/barman
-#   - device: /dev/xvde
+#   - device: /dev/xvdg
 #     mountpoint: /foo
 #     foo: 42
 #   - device: /dev/xvdf
@@ -76,14 +76,14 @@
 # _volumes:
 #   - device: /dev/md0
 #     mountpoint: /opt/postgres
-#   - device: /dev/xvdd
+#   - device: /dev/xvdf
 #     mountpoint: /var/lib/barman
-#   - device: /dev/xvde
+#   - device: /dev/xvdg
 #     mountpoint: /foo
 #     foo: 42
 #
 # Note that any extra settings (either from host_vars, or from the table
-# of translations above) are retained in this list, as for /dev/xvde. We
+# of translations above) are retained in this list, as for /dev/xvdg. We
 # could eventually use this to pass in uid/gid/SELinux context.
 
 - name: Remember whether the postgres/barman volumes are encrypted

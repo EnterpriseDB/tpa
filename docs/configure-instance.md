@@ -19,7 +19,7 @@ instances:
       region: eu-central-1
       subnet: 10.33.243.0/24
       volumes:
-            device_name: /dev/xvdb
+            device_name: /dev/xvdf
             volume_type: gp2
             volume_size: 32
             vars:

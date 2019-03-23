@@ -318,16 +318,16 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
 #
 # volumes:
 #   - raid_device: /dev/md0
-#     device_name: /dev/xvdb
+#     device_name: /dev/xvdf
 #     vars:
 #       mountpoint: /var/lib/postgresql
 #     …
 #   - raid_device: /dev/md0
-#     device_name: /dev/xvdc
+#     device_name: /dev/xvdg
 #     vars:
 #       mountpoint: /var/lib/postgresql
 #     …
-#   - device_name: /dev/xvdd
+#   - device_name: /dev/xvdh
 #     vars:
 #       mountpoint: /var/lib/barman
 #     …
@@ -337,7 +337,7 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
 # volumes:
 #   - device: /dev/md0
 #     mountpoint: /var/lib/postgresql
-#   - device: /dev/xvdd
+#   - device: /dev/xvdf
 #     mountpoint: /var/lib/barman
 
 def get_device_variables(volumes):

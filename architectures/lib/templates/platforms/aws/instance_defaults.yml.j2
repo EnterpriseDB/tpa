@@ -6,7 +6,7 @@ default_volumes:
 - device_name: root
   volume_type: gp2
   volume_size: {{ root_volume_size }}
-- device_name: /dev/xvdb
+- device_name: /dev/xvdf
   volume_type: gp2
   volume_size: {{ postgres_volume_size }}
   vars:

@@ -334,7 +334,7 @@ instance_defaults:
     - device_name: root
       volume_type: gp2
       volume_size: 32
-    - device_name: /dev/xvdb
+    - device_name: /dev/xvdf
       volume_type: gp2
       volume_size: 64
       vars:
@@ -364,7 +364,7 @@ instances:
       - monitoring-server
       - witness
     volumes:
-        - device_name: /dev/xvdb
+        - device_name: /dev/xvdf
           volume_type: gp2
           volume_size: 128
           vars:

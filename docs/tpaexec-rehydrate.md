@@ -48,7 +48,7 @@ instances:
     Name: vlad
     subnet: 10.33.14.0/24
     volumes:
-        - device_name: /dev/xvdb
+        - device_name: /dev/xvdf
           volume_type: gp2
           volume_size: 16
           raid_units: 2
@@ -180,7 +180,7 @@ example 1:
 
 ```
 $ aws ec2 modify-instance-attribute --region eu-west-1 --instance-id i-0ca212ac1b0a5e7ff \
---block-device-mappings "[{\"DeviceName\": \"/dev/xvdb\",\"Ebs\":{\"DeleteOnTermination\":false}}]"
+--block-device-mappings "[{\"DeviceName\": \"/dev/xvdf\",\"Ebs\":{\"DeleteOnTermination\":false}}]"
 ```
 
 Check that this has worked via the Amazon EC2 management console. Click on 'Instances', select instance (in this case zombie), under the 'Description' tab, scroll down to 'Block devices', and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag, which should now be false. It is worth waiting for 30 seconds before running rehydrate, as it can take time to propagate the settings.
