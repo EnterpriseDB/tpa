@@ -178,7 +178,7 @@ class Architecture(object):
     # Look at the arguments collected from the command-line and complain if
     # anything seems wrong.
     def validate_arguments(self, args):
-        repos = args.get('tpa_2q_repositories', [])
+        repos = args.get('tpa_2q_repositories') or []
         for r in repos:
             errors = []
             (source, name, maturity) = r.split('/')
