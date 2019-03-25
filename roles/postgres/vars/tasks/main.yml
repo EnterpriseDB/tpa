@@ -39,8 +39,20 @@
       {%- endif -%}
   tags: always
 
-- name: Set default postgres_conf_dir
+- name: Set default config paths
   set_fact:
     postgres_conf_dir: "{{ postgres_conf_dir|default('') or postgres_data_dir }}"
     repmgr_conf_file: "{{ repmgr_conf_dir }}/repmgr.conf"
+  tags: always
+
+- name: Set default DSNs
+  set_fact:
+    dsn: "port={{ postgres_port }}"
+    postgres_dsn: "port={{ postgres_port }} dbname=postgres"
+    node_dsn: >-
+      host={{ inventory_hostname }} port={{ postgres_port }}
+    repmgr_node_dsn: >-
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname=repmgr user=repmgr
+    bdr_node_dsn: >-
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }}
   tags: always

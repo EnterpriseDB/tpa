@@ -4,6 +4,7 @@
 
 - name: Enumerate existing databases
   postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
     query: >
       select array_agg(datname) as existing_databases from pg_database
       where datname not in ('template0')
@@ -14,7 +15,7 @@
 
 - name: Create pgbouncer schema
   postgresql_query:
-    conninfo: "dbname={{ item }}"
+    conninfo: "{{ dsn|dbname(item) }}"
     queries:
       - text: SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname = 'pgbouncer'
       - text: CREATE SCHEMA IF NOT EXISTS pgbouncer AUTHORIZATION pgbouncer
@@ -27,7 +28,7 @@
 
 - name: Create pgbouncer.get_auth function
   postgresql_query:
-    conninfo: "dbname={{ item }}"
+    conninfo: "{{ dsn|dbname(item) }}"
     queries:
       - SELECT proname FROM pg_catalog.pg_proc p JOIN pg_namespace n ON (p.pronamespace=n.oid) WHERE nspname='pgbouncer' AND proname = 'get_auth'
       - >

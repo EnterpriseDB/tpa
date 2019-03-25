@@ -8,7 +8,7 @@ Requires=postgres.service
 Type=oneshot
 User={{ postgres_user }}
 Group={{ postgres_group }}
-ExecStart=/etc/tpa/postgres-monitor
+ExecStart=/etc/tpa/postgres-monitor "{{ postgres_dsn }}"
 RemainAfterExit=yes
 
 [Install]

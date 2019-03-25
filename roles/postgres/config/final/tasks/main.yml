@@ -7,6 +7,7 @@
 
 - name: Install default Postgres extensions
   postgresql_ext:
+    port: "{{ postgres_port }}"
     state: present
     db: "{{ item.0 }}"
     name: "{{ item.1 }}"

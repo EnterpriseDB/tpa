@@ -4,7 +4,7 @@
 
 - name: Ensure pgbouncer schema is removed
   postgresql_query:
-    conninfo: "dbname={{ bdr_database }}"
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
     queries:
       - text: SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname = 'pgbouncer'
       - text: DROP SCHEMA IF EXISTS pgbouncer CASCADE

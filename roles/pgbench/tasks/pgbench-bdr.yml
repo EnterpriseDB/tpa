@@ -13,7 +13,7 @@
 - block:
   - name: Raise both BDR global lock timeouts for pgbench -i
     postgresql_query:
-      conninfo: "dbname={{ pgbench_dbname }}"
+      conninfo: "{{ dsn|dbname(pgbench_dbname) }}"
       autocommit: yes
       queries:
       - text: ALTER SYSTEM SET bdr.global_lock_timeout TO '600s';
@@ -29,7 +29,7 @@
 
   - name: Reset BDR global lock timeouts to defaults after pgbench -i
     postgresql_query:
-      conninfo: "dbname={{ pgbench_dbname }}"
+      conninfo: "{{ dsn|dbname(pgbench_dbname) }}"
       autocommit: yes
       queries:
       - text: ALTER SYSTEM SET bdr.global_lock_statement_timeout TO default;
@@ -43,7 +43,7 @@
 
 - name: Wait for pgbench -i to replicate to BDR instances
   postgresql_query:
-    conninfo: "dbname={{ pgbench_dbname }}"
+    conninfo: "{{ dsn|dbname(pgbench_dbname) }}"
     query: >
       select bdr.wait_slot_confirm_lsn(NULL, NULL)
   become_user: "{{ postgres_user }}"

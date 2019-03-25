@@ -4,6 +4,7 @@
 
 - name: Create repmgr database
   postgresql_db:
+    port: "{{ postgres_port }}"
     name: repmgr
     owner: repmgr
     state: present
@@ -12,7 +13,7 @@
 
 - name: Check if the primary is registered
   postgresql_query:
-    conninfo: "dbname=repmgr"
+    conninfo: "{{ dsn|dbname('repmgr') }}"
     query: >
       SELECT (case when type='standby' then 'replica' else type end) as type
       FROM repmgr.nodes

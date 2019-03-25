@@ -8,7 +8,7 @@
 
 - name: Create replication slot
   postgresql_query:
-    conninfo: ""
+    conninfo: "{{ postgres_dsn }}"
     queries:
       - text: "{{ create_slot_query }}"
         args:

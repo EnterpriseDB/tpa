@@ -4,6 +4,7 @@
 
 - name: Create repmgr database
   postgresql_db:
+    port: "{{ postgres_port }}"
     name: repmgr
     owner: repmgr
     state: present
@@ -16,7 +17,7 @@
 
 - name: Check if the witness is registered
   postgresql_query:
-    conninfo: "host={{ upstream_primary }} dbname=repmgr user=repmgr"
+    conninfo: "{{ hostvars[upstream_primary].repmgr_node_dsn }}"
     query: >
       SELECT (case when type='standby' then 'replica' else type end) as type
       FROM repmgr.nodes

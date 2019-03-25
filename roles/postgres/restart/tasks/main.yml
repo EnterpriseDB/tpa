@@ -18,7 +18,7 @@
   tags: [postgres, service, restart]
 
 - name: Wait for Postgres to become available
-  command: /etc/tpa/postgres-monitor
+  command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
   changed_when: False
   become_user: "{{ postgres_user }}"
   become: yes

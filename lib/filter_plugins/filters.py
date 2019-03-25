@@ -152,6 +152,17 @@ def members_of(groups, group, not_in=[]):
         excluded |= set(groups.get(g, []))
     return list(members - excluded)
 
+# Given a conninfo string, a dbname, and optional additional key=value settings,
+# returns a new conninfo string that includes the dbname and other settings.
+# Does not try to remove existing settings from the conninfo, since later
+# entries override earlier ones anyway.
+
+def dbname(conninfo, dbname='postgres', **kwargs):
+    extra = ['dbname=%s' % dbname]
+    for k in kwargs:
+        extra.append('%s=%s' % (k, kwargs[k]))
+    return conninfo + ' ' + ' '.join(extra)
+    
 class FilterModule(object):
     def filters(self):
         return {
@@ -164,4 +175,5 @@ class FilterModule(object):
             'identify_os': identify_os,
             'packages_for': packages_for,
             'members_of': members_of,
+            'dbname': dbname,
         }

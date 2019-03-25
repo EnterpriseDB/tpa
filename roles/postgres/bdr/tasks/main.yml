@@ -10,16 +10,9 @@
 #
 # First, each node needs a BDR database.
 
-- name: Set the DSN for each BDR instance
-  set_fact:
-    bdr_node_dsn: >-
-      host={{ inventory_hostname }}
-      port={{ postgres_port }}
-      dbname={{ bdr_database }}
-      user={{ postgres_user }}
-
 - name: Create BDR database
   postgresql_db:
+    port: "{{ postgres_port }}"
     name: "{{ bdr_database }}"
     owner: "{{ postgres_user }}"
     state: present

@@ -45,7 +45,7 @@
     state: started
 
 - name: Wait for Postgres to become available
-  command: /etc/tpa/postgres-monitor
+  command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
   changed_when: False
   become_user: "{{ postgres_user }}"
   become: yes
@@ -75,7 +75,7 @@
 
 - name: Check if this instance is registered as a replica
   postgresql_query:
-    conninfo: "host={{ upstream_primary }} dbname=repmgr user=repmgr"
+    conninfo: "{{ hostvars[upstream_primary].repmgr_node_dsn }}"
     query: >
       SELECT (case when type='standby' then 'replica' else type end) as type
       FROM repmgr.nodes

@@ -4,6 +4,7 @@
 
 - name: Create Postgres users
   postgresql_user:
+    port: "{{ postgres_port }}"
     name: "{{ item.username }}"
     encrypted: yes
     password: "md5{{ (vars[item.username+'_password'] + item.username)|hash('md5') }}"

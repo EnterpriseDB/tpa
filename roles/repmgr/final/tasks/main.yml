@@ -30,7 +30,7 @@
 
 - name: Collect facts about the Postgres cluster
   cluster_discovery:
-    conninfo: ""
+    conninfo: "{{ postgres_dsn }}"
   become_user: "{{ postgres_user }}"
   become: yes
 

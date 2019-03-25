@@ -51,7 +51,7 @@
     - service:
         name: postgres
         state: started
-    - command: /etc/tpa/postgres-monitor
+    - command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
       changed_when: False
       become_user: "{{ postgres_user }}"
       become: yes
