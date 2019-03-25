@@ -20,6 +20,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Create pgbouncer.get_auth() function in existing databases
 
+- Correctly setup cascading replication with repmgr 4.2
+
 ## v7.4 (2019-02-20)
 
 ### Notable changes

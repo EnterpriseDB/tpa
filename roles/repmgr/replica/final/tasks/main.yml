@@ -88,7 +88,7 @@
   command: >
     {{ postgres_bin_dir }}/repmgr standby register --verbose \
       --upstream-node-id "{{ hostvars[upstream].node }}" \
-      -f "{{ repmgr_conf_file }}" --force --wait-sync
+      -f "{{ repmgr_conf_file }}" --force --wait-sync=0
   become_user: "{{ postgres_user }}"
   become: true
   when:
