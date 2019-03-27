@@ -1,0 +1,9 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Install BDR configuration file on BDR nodes
+  include_role: name=postgres/config tasks_from=camo.yml
+
+- include_role: name=postgres/restart
+  tags: always

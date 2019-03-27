@@ -142,3 +142,11 @@
   include_tasks: bdr3.yml
   when: bdr_major_version|default(0) == 3
   tags: always
+
+- name: Perform CAMO setup if required
+  include_tasks:
+    file: camo.yml
+    apply:
+      tags: camo
+  when: bdr_node_camo_partner is defined
+  tags: always

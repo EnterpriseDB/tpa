@@ -13,7 +13,6 @@
 #     0000-tpa.conf
 #     0001-tpa_restart.conf
 #     1111-extensions.conf
-#     3333-bdr.conf
 #     8888-{{ variable_name }}*.conf
 #     9900-role-settings.conf
 #     9999-override.conf
@@ -124,17 +123,23 @@
   notify:
     - Note Postgres restart required
 
-- name: Install BDR configuration file on BDR nodes
-  template:
-    src: bdr.conf.j2
-    dest: "{{ _include_dir }}/3333-bdr.conf"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0644
-  when: >
-    'bdr' in role
-  notify:
-    - Note Postgres reload required
+# If 3333-bdr.conf exists and contains settings for CAMOv1 (based on
+# synchronous replication), we move it to 3334-camo.yml without either
+# reload or restart, and leave it to postgres/bdr to sort it out later.
+# This is to maintain backwards compatibility.
+
+- name: Move CAMO settings to 3334-camo.conf if required
+  shell: >
+    test -f {{ old }} || exit 0;
+    test -f {{ new }} && exit 1;
+    if grep -q synchronous_replication_availability {{ old }} &>/dev/null; then
+      mv {{ old }} {{ new }} && exit 99;
+    fi
+  register: move
+  changed_when: move.rc == 99
+  vars:
+    old: "{{ _include_dir }}/3333-bdr.conf"
+    new: "{{ _include_dir }}/3334-camo.conf"
 
 # If any settings were specified in postgres_conf_settings, we put that
 # into a separate configuration file. Note that we expect values in this

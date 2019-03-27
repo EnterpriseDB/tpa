@@ -5,8 +5,14 @@
 {# https://documentation.2ndquadrant.com/bdr3-enterprise/release/latest/camo/ #}
 {% if bdr_node_camo_partner is defined %}
 report_transaction_id = true
-synchronous_commit = {{ synchronous_commit|default('remote_apply') }}
 synchronous_replication_availability = {{ synchronous_replication_availability|default('async') }}
 synchronous_replication_timing = {{ synchronous_replication_timing|default('remote_first') }}
+{% if bdr_version_num >= 30504 %}
+synchronous_commit = {{ synchronous_commit|default('on') }}
+bdr.camo_origin_for = '{{ bdr_database }}:{{ bdr_node_camo_partner }}'
+bdr.camo_partner_of = '{{ bdr_database }}:{{ bdr_node_camo_partner }}'
+{% else %}
+synchronous_commit = {{ synchronous_commit|default('remote_apply') }}
 synchronous_standby_names = 'bdr_{{ bdr_database }}_{{ bdr_node_group }}_{{ inventory_hostname }}_{{ bdr_node_camo_partner }}'
+{% endif %}
 {% endif %}
