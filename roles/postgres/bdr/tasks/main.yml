@@ -37,22 +37,8 @@
 # bdr_version_num(), but we choose not to support them, as they are of
 # little or no practical importance (e.g., no customers use them).
 
-- name: Retrieve BDR version
-  postgresql_query:
-    conninfo: '{{ bdr_node_dsn }}'
-    query: >-
-      SELECT bdr.bdr_version_num() AS num, bdr.bdr_version() AS version
-  register: bdr_version
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-- action: set_fact
-  args: >
-    {{ ('{"bdr_version_num": ' ~ bdr_version.results[0].num ~ '}')|from_json }}
-
-- action: set_fact
-  args: >
-    {{ ('{"bdr_major_version": ' ~ (bdr_version_num/10000)|int ~ '}')|from_json }}
+- include_tasks: version.yml
+  tags: always
 
 # Now one node must create a BDR group, and the other nodes must join
 # the group. It doesn't matter which node creates the group, so long as
@@ -123,24 +109,8 @@
 #     -- it does no harm to leave it in (it will return immediately if
 #     -- the join has completed).
 
-- assert:
-    msg: "Unsupported BDR version: {{ bdr_version.results[0].version }}"
-    that:
-      bdr_major_version in [1, 2, 3]
-
-- name: BDR1 setup
-  include_tasks: bdr1.yml
-  when: bdr_major_version|default(0) == 1
-  tags: always
-
-- name: BDR2 setup
-  include_tasks: bdr2.yml
-  when: bdr_major_version|default(0) == 2
-  tags: always
-
-- name: BDR3 setup
-  include_tasks: bdr3.yml
-  when: bdr_major_version|default(0) == 3
+- name: BDR setup
+  include_tasks: "bdr{{ bdr_major_version }}.yml"
   tags: always
 
 - name: Perform CAMO setup if required
