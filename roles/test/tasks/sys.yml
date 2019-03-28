@@ -2,5 +2,7 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_tasks: "os/{{ ansible_os_family }}/sys.yml"
+- include_tasks: sys/package-list.yml
+  vars:
+    package_pattern: 'postgres*'
   tags: always

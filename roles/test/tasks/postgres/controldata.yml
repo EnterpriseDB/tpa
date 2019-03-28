@@ -1,0 +1,17 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Run pg_controldata
+  command: >
+    {{ postgres_bin_dir }}/pg_controldata {{ postgres_data_dir }}
+  register: controldata
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- include_tasks: output.yml
+  vars:
+    output_file: pg_controldata.txt
+    content: |
+      {{ controldata.stdout }}
+  tags: always

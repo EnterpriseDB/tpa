@@ -2,26 +2,16 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- assert:
-    msg: "output_dir must be defined"
-    that: output_dir is defined
+# This is a collection of non-destructive tests that are generally
+# applicable to any cluster.
+
+- include_tasks: prereqs.yml
   tags: always
 
-- name: Ensure that each instance has an output subdirectory
-  file:
-    path: "{{ output_dir }}/{{ inventory_hostname }}"
-    state: directory
-  delegate_to: localhost
+- include_tasks: test-facts.yml
   tags: always
 
-- name: Create group(s) based on the value of bdr_node_group
-  group_by:
-    key: "{{ bdr_node_group }}"
-  when: >
-    'bdr' in role
-  tags: always
-
-- name: Run system-level tasks
+- name: Run system-level tests
   include_tasks:
     file: sys.yml
     apply:
@@ -29,57 +19,19 @@
   tags: always
 
 - name: Run postgres tests
-  block:
-    - name: Check if PGDATA has been initialised
-      stat:
-        path: "{{ postgres_data_dir }}/PG_VERSION"
-      register: pgdata
-      become_user: "{{ postgres_user }}"
-      become: yes
-      tags: always
-
-    - name: Set pgdata_initialised
-      set_fact:
-        pgdata_initialised: "{{ pgdata.stat.exists }}"
-      tags: always
-
-    - name: Check if repmgr.conf exists
-      stat:
-        path: "{{ repmgr_conf_file }}"
-      register: repmgrconf
-      become_user: "{{ postgres_user }}"
-      become: yes
-
-    - name: Set repmgr_initialised
-      set_fact:
-        repmgr_initialised: "{{ repmgrconf.stat.exists }}"
-
-    - include_tasks: postgres.yml
-      when: pgdata_initialised
-      tags: always
-
-    - include_tasks:
-        file: repmgr.yml
-        apply:
-          tags: repmgr
-      when: pgdata_initialised and 'bdr' not in role
-      tags: always
+  include_tasks:
+    file: postgres.yml
+    apply:
+      tags: postgres
   when: >
-    'postgres' in role
-  tags: postgres
+    'postgres' in role and pgdata_initialised
+  tags: always
 
-- include_tasks:
+- name: Run barman tests
+  include_tasks:
     file: barman.yml
     apply:
       tags: barman
   when: >
     'barman' in role
   tags: always
-
-- include_role:
-    name: pgbench
-    apply:
-      tags: pgbench
-  when: >
-    'postgres' in role and pgdata_initialised
-  tags: pgbench

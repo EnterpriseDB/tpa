@@ -14,7 +14,7 @@
 - include_tasks:
     file: pgbench-postgres.yml
     apply:
-      tags: [pgbench-postgres]
+      tags: [pgbench, postgres]
   vars:
     pgbench_dbname: postgres
   tags: always
@@ -33,7 +33,7 @@
 - include_tasks:
     file: pgbench-bdr.yml
     apply:
-      tags: [pgbench-bdr]
+      tags: [pgbench, bdr]
   when: >
     'bdr' in role
   vars:

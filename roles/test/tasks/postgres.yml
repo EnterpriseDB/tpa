@@ -2,16 +2,33 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Run pg_controldata
-  command: >
-    {{ postgres_bin_dir }}/pg_controldata {{ postgres_data_dir }}
-  register: controldata
-  become_user: "{{ postgres_user }}"
-  become: yes
+- assert:
+    msg: "This test may be applied only to initialised postgres instances"
+    that:
+    - role|contains('postgres')
+    - pgdata_initialised
 
-- include_tasks: output.yml
-  vars:
-    output_file: pg_controldata.txt
-    content: |
-      {{ controldata.stdout }}
+- include_tasks: postgres/controldata.yml
   tags: always
+
+- include_tasks:
+    file: bdr.yml
+    apply:
+      tags: bdr
+  when: >
+    'bdr' in role
+  tags: always
+
+- include_tasks:
+    file: repmgr.yml
+    apply:
+      tags: repmgr
+  when: >
+    'bdr' not in role
+  tags: repmgr
+
+- include_role:
+    name: pgbench
+    apply:
+      tags: pgbench
+  tags: pgbench

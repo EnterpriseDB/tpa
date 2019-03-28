@@ -2,6 +2,11 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- assert:
+    msg: "This test may be applied only to Barman instances"
+    that:
+    - role|contains('barman')
+
 - name: Run barman check
   command: barman check all
   register: barman_check

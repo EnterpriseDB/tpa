@@ -1,0 +1,15 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- assert:
+    msg: "output_dir must be defined"
+    that: output_dir is defined
+  tags: always
+
+- name: Ensure that each instance has an output subdirectory
+  file:
+    path: "{{ output_dir }}/{{ inventory_hostname }}"
+    state: directory
+  delegate_to: localhost
+  tags: always
