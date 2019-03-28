@@ -3,7 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - name: Run apt list
-  command: apt list
+  command: apt list --installed 'postgres*'
   register: package_list
   ignore_errors: yes
 

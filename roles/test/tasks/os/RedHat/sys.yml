@@ -3,7 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - name: Run yum list
-  command: yum list
+  command: yum list 'postgres*'
   register: package_list
   ignore_errors: yes
   become_user: root
