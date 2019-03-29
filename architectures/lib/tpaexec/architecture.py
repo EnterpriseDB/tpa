@@ -178,13 +178,17 @@ class Architecture(object):
     # Look at the arguments collected from the command-line and complain if
     # anything seems wrong.
     def validate_arguments(self, args):
+        products = [
+            'default', '2ndqpostgres', 'bdr2', 'bdr3', 'pglogical3',
+            'server-ssl-passphrase-callback',
+        ]
         repos = args.get('tpa_2q_repositories') or []
         for r in repos:
             errors = []
             (source, name, maturity) = r.split('/')
             if source not in ['ci-spool', 'products', 'dl']:
                 errors.append("unknown source '%s' (try 'dl', 'products', or 'ci-spool')" % source)
-            if name not in ['default', '2ndqpostgres', 'bdr2', 'bdr3', 'pglogical3']:
+            if name not in products:
                 errors.append("unknown product name '%s'" % name)
             if maturity not in ['snapshot', 'testing', 'release']:
                 errors.append("unknown maturity '%s' (try 'release', 'testing', or 'snapshot')" % maturity)
