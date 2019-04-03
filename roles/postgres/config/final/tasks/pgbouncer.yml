@@ -21,7 +21,7 @@
       - text: CREATE SCHEMA IF NOT EXISTS pgbouncer AUTHORIZATION pgbouncer
   register: create_schema
   changed_when:
-    create_schema.rowcounts[0] == 0
+    create_schema is successful and create_schema.rowcounts[0] == 0
   become_user: "{{ postgres_user }}"
   become: yes
   with_items: "{{ d.existing_databases }}"
@@ -44,7 +44,7 @@
       - GRANT EXECUTE ON FUNCTION pgbouncer.get_auth(p_usename TEXT) TO pgbouncer
   register: create_function
   changed_when:
-    create_function.rowcounts[0] == 0
+    create_function is successful and create_function.rowcounts[0] == 0
   become_user: "{{ postgres_user }}"
   become: yes
   with_items: "{{ d.existing_databases }}"
