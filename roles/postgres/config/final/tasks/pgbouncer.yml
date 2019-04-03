@@ -7,7 +7,7 @@
     conninfo: "{{ postgres_dsn }}"
     query: >
       select array_agg(datname) as existing_databases from pg_database
-      where datname not in ('template0')
+      where datname not in ('template0', 'bdr_supervisordb')
   register: d
   become_user: "{{ postgres_user }}"
   become: yes
