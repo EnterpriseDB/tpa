@@ -2,7 +2,7 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v7.5 (unreleased)
+## v7.5 (2019-04-04)
 
 You must run ``tpaexec setup`` after installing the release packages.
 
