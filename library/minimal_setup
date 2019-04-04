@@ -26,7 +26,8 @@ grep -Ev '": ""' <<RESULT
         "ansible_distribution": "$distribution",
         "ansible_distribution_release": "$release",
         "ansible_os_family": "$os_family",
-        "ansible_pkg_mgr": "$pkg_mgr"
+        "ansible_pkg_mgr": "$pkg_mgr",
+        "ansible_service_mgr": "systemd"
     }
 }
 RESULT
