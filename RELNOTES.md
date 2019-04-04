@@ -4,12 +4,22 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ## v7.5 (unreleased)
 
+You must run ``tpaexec setup`` after installing the release packages.
+
 ### Notable changes
 
 - Support NVMe instance store volumes on AWS EC2 (in addition to EBS
   volumes, which were already supported)
 
+- Allow 'bare' instances to have FQDNs
+
+- CAMO configuration updates
+
 ### Bugfixes
+
+- Correctly setup cascading replication with repmgr 4.2
+
+- Correctly handle non-standard postgres_port settings
 
 - Don't install the sudo package if a sudo binary is available
 
@@ -20,9 +30,7 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Create pgbouncer.get_auth() function in existing databases
 
-- Correctly setup cascading replication with repmgr 4.2
-
-- Correctly handle non-standard postgres_port settings
+- Improved handling of debuginfo packages on Debian
 
 ## v7.4 (2019-02-20)
 
