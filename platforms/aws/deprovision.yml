@@ -96,6 +96,34 @@
       {{ item.0.region }}:{{ item.1.group_id }}
   tags: ec2_groups
 
+# Remove any route tables created for this cluster.
+
+- name: Search for this cluster's route tables in each region
+  ec2_vpc_route_table_facts:
+    region: "{{ region }}"
+    filters:
+      "tag:CreatingCluster": "{{ cluster_name }}"
+  with_items: "{{ aws_regions }}"
+  loop_control:
+    loop_var: region
+  register: route_tables
+  tags: ec2_vpcs
+
+- name: Remove this cluster's route tables in each region
+  ec2_vpc_route_table:
+    state: absent
+    region: "{{ item.0.region }}"
+    vpc_id: "{{ item.1.vpc_id }}"
+    route_table_id: "{{ item.1.id }}"
+    lookup: id
+  with_nested_dependents:
+    - "{{ route_tables.results }}"
+    - item.0.route_tables
+  loop_control:
+    label: >-
+      {{ item.0.region }}:{{ item.1.tags.Name }}
+  tags: ec2_vpcs
+
 # Next, we delete the subnets that we created within each VPC, i.e.,
 # those subnets for which the CreatingCluster is set to this one.
 
