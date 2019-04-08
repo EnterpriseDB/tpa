@@ -227,6 +227,24 @@ The ``--extra-optional-packages p1 p2 …`` option behaves like
 ``--extra-packages``, but it is not an error if the named packages
 cannot be installed.
 
+### Building and installing from source
+
+If you specify ``--install-from-source postgres``, Postgres will be
+built and installed from a git repository instead of installed from
+packages. Use ``2ndqpostgres`` instead of ``postgres`` to build and
+install 2ndQPostgres.
+
+You may use ``--install-from-source 2ndqpostgres pglogical3 bdr3`` to
+build and install all three components from source, or just use
+``--install-from-source pglogical3 bdr3`` to use packages for
+2ndQPostgres, but build and install pglogical v3 and BDR v3 from source.
+
+You may not be able to install packages that depend on a package that
+you chose to replace with a source installation instead. For example,
+BDR v3 packages depend on pglogical v3 packages, so you can't install
+pglogical from its source repository and BDR from packages. Likewise,
+you can't install Postgres from source and pglogical from packages.
+
 ## Overrides
 
 You may optionally specify ``--overrides-from a.yml …`` to load one or

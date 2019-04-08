@@ -2,6 +2,13 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v7.6 (unreleased)
+
+### Notable changes
+
+- Accept ``--install-from-source 2ndqpostgres pglogical3 bdr3`` as a
+  configure option to set up a cluster built from source
+
 ## v7.5 (2019-04-04)
 
 You must run ``tpaexec setup`` after installing the release packages.

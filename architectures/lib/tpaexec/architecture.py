@@ -118,6 +118,8 @@ class Architecture(object):
         g.add_argument('--extra-packages', nargs='+', metavar='NAME')
         g.add_argument('--extra-optional-packages', nargs='+', metavar='NAME')
 
+        g.add_argument('--install-from-source', nargs='+', metavar='NAME')
+
         g = p.add_argument_group('volume sizes in GB')
         for vol in ['root', 'barman', 'postgres']:
             g.add_argument('--%s-volume-size' % vol, type=int, metavar='N')
@@ -194,6 +196,21 @@ class Architecture(object):
                 for e in errors:
                     print("ERROR: repository '%s' has %s" % (r, e), file=sys.stderr)
                 sys.exit(-1)
+
+        # Validate arguments to --install-from-source
+        errors = []
+        sources = args.get('install_from_source') or []
+        installable = self.installable_sources().keys()
+        for s in sources:
+            if s.lower() not in installable:
+                errors.append("doesn't know how to install '%s' from source" % s)
+        if 'postgres' in sources and '2ndqpostgres' in sources:
+            errors.append("cannot install both Postgres and 2ndQPostgres")
+
+        if errors:
+            for e in errors:
+                print("ERROR: --install-from-source %s" % (e), file=sys.stderr)
+            sys.exit(-1)
 
     # Augment arguments from the command-line with enough additional information
     # (based on the selected architecture and platform) to generate config.yml
@@ -375,6 +392,20 @@ class Architecture(object):
                     'common': packages
                 }
 
+        sources = self.args.get('install_from_source') or []
+        installable_sources = self.installable_sources()
+        install_from_source = []
+        for s in sources:
+            s = s.lower()
+            entry = installable_sources[s]
+            if s in ['postgres', '2ndqpostgres']:
+                cluster_vars.update(entry)
+            else:
+                install_from_source.append(entry)
+
+        if install_from_source:
+            cluster_vars['install_from_source'] = install_from_source
+
     # Returns the names of any variables set by command-line options that belong
     # under cluster_vars
     def cluster_vars_args(self):
@@ -400,6 +431,34 @@ class Architecture(object):
             'default', '2ndqpostgres', 'bdr2', 'bdr3', 'pglogical3',
             'server-ssl-passphrase-callback',
         ]
+
+    # Returns a map of things that should be accepted as arguments to
+    # --install-from-source to their corresponding build configuration
+    def installable_sources(self):
+        return {
+            'postgres': {
+                'postgres_installation_method': 'src',
+                'postgres_git_url': 'https://github.com/postgres/postgres.git',
+            },
+            '2ndqpostgres': {
+                'postgres_installation_method': 'src',
+                'postgres_git_url': 'git@github.com:2ndQuadrant/2ndQPostgres.git',
+            },
+            'pglogical3': {
+                'name': 'pglogical',
+                'git_repository_url': 'git@github.com:2ndQuadrant/pglogical_internal.git',
+                'git_repository_ref': 'master',
+            },
+            'bdr3': {
+                'name': 'bdr',
+                'git_repository_url': 'git@github.com:2ndQuadrant/bdr-private.git',
+                'git_repository_ref': 'master',
+                'build_commands': [
+                    'make -s install',
+                    'make -C camo_client -s install',
+                ],
+            },
+        }
 
     # Makes architecture-specific changes to cluster_vars if required
     def update_cluster_vars(self, cluster_vars):
