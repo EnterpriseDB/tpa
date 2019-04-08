@@ -406,6 +406,11 @@ class Architecture(object):
         if install_from_source:
             cluster_vars['install_from_source'] = install_from_source
 
+        if sources:
+            top = self.args.get('top_level_settings') or {}
+            top.update({'forward_ssh_agent': 'yes'})
+            self.args['top_level_settings'] = top
+
     # Returns the names of any variables set by command-line options that belong
     # under cluster_vars
     def cluster_vars_args(self):
