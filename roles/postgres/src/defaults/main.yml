@@ -16,7 +16,7 @@ postgres_git_reference_repo: ""
 #
 # We clone the repository specified above into the src_dir given here,
 # do a VPATH build (configure+make) in the build_dir, and install to
-# the install_dir.
+# the postgres_install_dir (defined in postgres/vars).
 #
 # By default, an empty build directory is created each time, but using
 # "--skip-tags postgres-clean" will use an existing build_dir (and not
@@ -24,7 +24,6 @@ postgres_git_reference_repo: ""
 
 postgres_src_dir: /opt/postgres/src/postgres
 postgres_build_dir: /opt/postgres/build/postgres
-postgres_install_dir: /opt/postgres/{{ postgres_version }}
 
 ## Build customisation
 #

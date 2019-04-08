@@ -21,6 +21,7 @@
     postgres_port: "{{ postgres_port|default(5432) }}"
     postgres_service_name: postgres
     postgres_installation_method: "{{ postgres_installation_method|default(default_postgres_installation_method) }}"
+    postgres_install_dir: "{{ postgres_install_dir|default(default_postgres_install_dir) }}"
     install_from_source: "{{ install_from_source|default([]) }}"
     barman_user: "{{ barman_user|default(default_barman_user) }}"
     barman_group: "{{ barman_group|default(default_barman_group) }}"
@@ -43,6 +44,13 @@
   set_fact:
     postgres_conf_dir: "{{ postgres_conf_dir|default('') or postgres_data_dir }}"
     repmgr_conf_file: "{{ repmgr_conf_dir }}/repmgr.conf"
+  tags: always
+
+- name: Override postgres_bin_dir for source builds
+  set_fact:
+    postgres_bin_dir: "{{ postgres_install_dir }}/bin"
+  when:
+    postgres_installation_method == 'src'
   tags: always
 
 - name: Set default DSNs

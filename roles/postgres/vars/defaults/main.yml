@@ -24,3 +24,5 @@ default_repmgr_conf_dir: "/etc/repmgr/{{ postgres_version }}"
 
 default_bdr_database: bdrdb
 default_bdr_node_group: bdrgroup
+
+default_postgres_install_dir: "/opt/postgres/{{ postgres_version }}"

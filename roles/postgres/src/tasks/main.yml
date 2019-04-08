@@ -57,13 +57,6 @@
     executable: /bin/bash
   with_items: "{{ postgres_install_targets }}"
 
-- name: Override postgres_bin_dir
-  set_fact:
-    postgres_bin_dir: "{{ postgres_install_dir }}/bin"
-  when:
-    postgres_installation_method == 'src'
-  tags: always
-
 - name: Install psycopg2 and barman-cli
   package:
     name:
