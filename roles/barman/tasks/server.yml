@@ -106,8 +106,8 @@
     content: |
       #!/bin/bash
       if [[ "$1" == "--version" ]];
-      then {{ real_binary }} --version|sed -e 's/\(([^)]*) *\)*$//';
-      else {{ real_binary }} "$@";
+      then exec {{ real_binary }} --version|sed -e 's/\(([^)]*) *\)*$//';
+      else exec {{ real_binary }} "$@";
       fi
   vars:
     real_binary: >-
