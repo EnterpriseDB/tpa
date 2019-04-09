@@ -49,7 +49,8 @@
 - name: Override postgres_bin_dir for source builds
   set_fact:
     postgres_bin_dir: "{{ postgres_install_dir }}/bin"
-  when:
+  when: >
+    'postgres' in role and
     postgres_installation_method == 'src'
   tags: always
 
