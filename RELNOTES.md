@@ -2,9 +2,11 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v7.6 (unreleased)
+## v7.6 (2019-04-12)
 
 ### Notable changes
+
+- Use new PGDG repository RPM location after breaking change upstream
 
 - Accept ``--install-from-source 2ndqpostgres pglogical3 bdr3`` as a
   configure option to set up a cluster built from source
@@ -12,6 +14,11 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 ### Bugfixes
 
 - Correctly remove provisioned AWS route tables during deprovision
+
+- Correctly override postgres_bin_dir for clusters built from source
+
+- Change pg_receivwal invocation to make
+  ``barman receive-wal --stop servername`` work reliably
 
 ## v7.5 (2019-04-04)
 
