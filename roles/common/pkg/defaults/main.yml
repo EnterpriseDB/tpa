@@ -26,16 +26,9 @@ default_yum_repositories:
 
   PGDG:
     rpm_url: >-
-      https://yum.postgresql.org/{{ postgres_version }}/redhat/rhel-7-x86_64/pgdg-redhat{{ postgres_versionNN }}-{{ postgres_version }}-{{ _pgdg_yum_repoversions[postgres_version|float] }}.noarch.rpm
+      https://download.postgresql.org/pub/repos/yum/{{ postgres_version }}/redhat/rhel-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
 yum_repository_list: "{{ default_yum_repositories.keys()|list }}"
-
-_pgdg_yum_repoversions:
-  9.4: 3
-  9.5: 3
-  9.6: 3
-  10: 2
-  11: 2
 
 ## Packages
 #
