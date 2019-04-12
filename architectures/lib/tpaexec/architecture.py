@@ -532,7 +532,7 @@ class Architecture(object):
 
     # Returns a list of targets to create_links() for
     def links_to_create(self):
-        return ['deploy.yml', 'commands']
+        return ['deploy.yml', 'commands', 'tests']
 
     ##
     ## Template processing

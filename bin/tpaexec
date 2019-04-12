@@ -539,9 +539,21 @@ DEPLOY
 
         test)
             cat <<TEST
-Command: tpaexec test clustername
+Command: tpaexec test clustername [testname] [options]
 
-Runs tests for a cluster according to its architecture
+Runs tests for a cluster according to its architecture.
+
+You may specify the name of a test to run as the first argument instead
+of the built-in test named 'default'. (Depending on the test, you may
+need to provide additional options on the command line.)
+
+The ``tpaexec test clustername test`` command will search for test.yml
+in the cluster's tests subdirectory first, then fall back to built-in
+tests. You may create new tests (as Ansible playbooks) under the
+cluster's tests subdirectory.
+
+To run tests from a different location, you may specify
+``--include-tests-from /other/path``.
 TEST
             ;;
 

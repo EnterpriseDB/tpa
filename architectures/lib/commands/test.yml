@@ -16,13 +16,5 @@
     pgdata_initialised: "{{ 'postgres' in role }}"
   tags: always
 
-- name: Test instances
-  any_errors_fatal: True
-  max_fail_percentage: 0
-  hosts: all
-  tasks:
-  - include_role:
-      name: test
-      apply:
-        tags: test
-    tags: always
+- import_playbook: "{{ testpath }}"
+  tags: always
