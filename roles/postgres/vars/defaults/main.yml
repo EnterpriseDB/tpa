@@ -2,7 +2,7 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-default_postgres_version: 10
+default_postgres_version: 11
 
 default_postgres_user: postgres
 default_barman_user: barman
