@@ -26,4 +26,4 @@
   become: yes
   when:
     pgdata_initialised and
-    postgres_service_end_state != 'stopped'
+    postgres_service_end_state|default('started') != 'stopped'
