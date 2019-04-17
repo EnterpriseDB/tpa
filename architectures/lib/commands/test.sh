@@ -24,6 +24,10 @@ _tpaexec_command() {
                 shift
                 ;;
 
+            --destroy-this-cluster)
+                REMAINDER+=(-e destroy_cluster=yes)
+                ;;
+
             *)
                 REMAINDER+=($opt)
                 ;;

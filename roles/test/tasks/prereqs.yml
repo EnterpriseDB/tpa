@@ -13,3 +13,12 @@
     state: directory
   delegate_to: localhost
   tags: always
+
+- name: Check if destructive tests should be run
+  assert:
+    msg: "You must specify --destroy-this-cluster to run destructive tests"
+    that:
+    - destroy_cluster|default(False)
+  when: destructive|default(False)
+  run_once: true
+  tags: always
