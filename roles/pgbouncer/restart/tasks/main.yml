@@ -1,0 +1,14 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- meta: flush_handlers
+
+- name: Start or restart pgbouncer
+  service:
+    name: pgbouncer
+    state: "{{ pgbouncer_service_end_state|default('started') }}"
+  become_user: root
+  become: yes
+  when: >
+    'pgbouncer' in role

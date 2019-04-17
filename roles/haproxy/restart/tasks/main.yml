@@ -1,0 +1,14 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- meta: flush_handlers
+
+- name: Start or restart haproxy
+  service:
+    name: haproxy
+    state: "{{ haproxy_service_end_state|default('started') }}"
+  become_user: root
+  become: yes
+  when: >
+    'haproxy' in role

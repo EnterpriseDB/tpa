@@ -5,11 +5,5 @@
 - include_role: name=pgbouncer/service
   tags: always
 
-- meta: flush_handlers
-
-- name: Start or restart pgbouncer
-  service:
-    name: pgbouncer
-    state: "{{ pgbouncer_service_end_state|default('started') }}"
-  when: >
-    'pgbouncer' in role
+- include_role: name=pgbouncer/restart
+  tags: always

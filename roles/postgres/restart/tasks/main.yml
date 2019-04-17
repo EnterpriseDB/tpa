@@ -9,10 +9,12 @@
 
 - meta: flush_handlers
 
-- name: Start, restart or reload Postgres
+- name: Start or restart Postgres
   service:
     name: "{{ postgres_service_name }}"
     state: "{{ postgres_service_end_state|default('started') }}"
+  become_user: root
+  become: yes
   when:
     pgdata_initialised
   tags: [postgres, service, restart]
@@ -23,4 +25,5 @@
   become_user: "{{ postgres_user }}"
   become: yes
   when:
-    pgdata_initialised
+    pgdata_initialised and
+    postgres_service_end_state != 'stopped'
