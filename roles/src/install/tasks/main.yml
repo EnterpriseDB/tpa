@@ -37,7 +37,7 @@
 
 - name: Run build commands
   shell: >
-    PATH={{ postgres_bin_dir }}:$PATH {{ item }} 2>&1 | tee -a {{ build_log }}
+    PATH={{ postgres_bin_dir }}:$PATH {{ item }} >> {{ build_log }} 2>&1
   args:
     chdir: "{{ source_directory }}"
     executable: /bin/bash
