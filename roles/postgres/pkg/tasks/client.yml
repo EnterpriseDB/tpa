@@ -4,10 +4,13 @@
 
 - name: Install Postgres client package
   package:
-    name: "{{
-      postgres_client_packages|packages_for(ansible_os_family, postgres_package_version)
-    }}"
+    name: >
+      {{ query('flattened', package_lists) }}
     state: "{{
       (postgres_package_version is defined)|ternary('present', 'latest')
     }}"
+  vars:
+    package_lists:
+    - "{{ postgres_client_packages|packages_for(ansible_os_family, postgres_package_version) }}"
+    - python-psycopg2
   tags: [postgres, pkg]
