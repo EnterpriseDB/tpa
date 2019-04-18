@@ -1,0 +1,8 @@
+#!/bin/bash
+
+test -f /sys/kernel/mm/transparent_hugepage/enabled &&
+    echo {{ enabled }} > /sys/kernel/mm/transparent_hugepage/enabled
+test -f /sys/kernel/mm/transparent_hugepage/defrag &&
+    echo {{ defrag }} > /sys/kernel/mm/transparent_hugepage/defrag
+test -f /sys/kernel/mm/transparent_hugepage/khugepaged/defrag &&
+    echo {{ kdefrag }} > /sys/kernel/mm/transparent_hugepage/khugepaged/defrag

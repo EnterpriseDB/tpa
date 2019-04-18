@@ -20,6 +20,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Change pg_receivwal invocation to make
   ``barman receive-wal --stop servername`` work reliably
 
+- Try to apply desired transparent hugepage settings immediately, not
+  only after a reboot
+
 ## v7.5 (2019-04-04)
 
 You must run ``tpaexec setup`` after installing the release packages.

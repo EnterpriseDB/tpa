@@ -13,18 +13,14 @@
 # configurability, but it's there as an example of how we can handle a
 # series of dependent tunables (e.g., when setting up test scenarios).
 
-- name: Set transparent_hugepage/enabled in /etc/tpa/rc.local
-  blockinfile:
-    path: /etc/tpa/rc.local
-    marker: "## {mark} Transparent huge pages"
-    block: |
-      test -f /sys/kernel/mm/transparent_hugepage/enabled &&
-        echo {{ enabled }} > /sys/kernel/mm/transparent_hugepage/enabled
-      test -f /sys/kernel/mm/transparent_hugepage/defrag &&
-        echo {{ defrag }} > /sys/kernel/mm/transparent_hugepage/defrag
-      test -f /sys/kernel/mm/transparent_hugepage/khugepaged/defrag &&
-        echo {{ kdefrag }} > /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
-    state: present
+- name: Set transparent_hugepage/enabled in /etc/tpa/hugepages
+  template:
+    src: hugepages.j2
+    dest: /etc/tpa/hugepages
+    owner: root
+    group: root
+    mode: 0755
+  register: hugepages
   vars:
     enabled: >-
       {{ transparent_hugepage }}
@@ -32,6 +28,18 @@
       {{ transparent_hugepage_defrag|default(transparent_hugepage) }}
     kdefrag: >-
       {{ transparent_hugepage_khugepaged_defrag|default((defrag == 'always')|ternary(1, 0)) }}
+
+- name: Ensure /etc/tpa/hugepages is called from /etc/tpa/rc.local
+  blockinfile:
+    path: /etc/tpa/rc.local
+    marker: "## {mark} Transparent huge pages"
+    block: |
+      /etc/tpa/hugepages
+    state: present
+
+- name: Execute /etc/tpa/hugepages to change desired settings immediately
+  command: /etc/tpa/hugepages
+  when: hugepages is changed
 
 # Overkill or not, controlling transparent huge pages via /sys is not as
 # reliable as doing so by appending "transparent_hugepage=never" to the
