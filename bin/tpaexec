@@ -528,9 +528,24 @@ PROVISION
 
         command|adhoc|cmd)
             cat <<COMMAND
-Command: tpaexec cmd clustername all -m debug -a var=inventory_hostname
+Command: tpaexec cmd clustername all -m module -a "arguments"
 
 Runs an ansible command in the context of a cluster
+
+Examples:
+
+    # Print the value of an ansible variable
+    tpaexec cmd clustername all -m debug -a var=inventory_hostname
+
+    # Install a package
+    tpaexec cmd clustername all -sm package -a 'name=pkgname state=latest'
+
+    # Run arbitrary shell commands
+    tpaexec cmd clustername host1,host2 -m shell -a 'ps -ef|grep repmgr'
+
+    # Ensure key is present in ~admin/.ssh/authorized_keys
+    tpaexec cmd clustername all -m authorized_key -a \\
+        "user=admin key=\"{{ lookup('file', 'id_someone.pub') }}\""
 COMMAND
             ;;
 
