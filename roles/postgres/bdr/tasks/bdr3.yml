@@ -87,15 +87,21 @@
     hook: "{{ cluster_dir }}/hooks/bdr-post-group-creation.yml"
   tags: always
 
-# The remaining hosts join the group… but they must do so one at a time,
-# because BDR does not support concurrent group joins (not in version 3,
-# nor in any earlier versions).
+# The first_primary has now created the group, and the remaining members
+# of the same bdr_node_group must join the group.
 #
-# What we would like to do here is to set «serial: 1» on the query task,
-# so that we wait for the task to finish on one host before moving on to
-# the next host. But serial is not supported as a task attribute, so we
-# have to (write a strategy plugin or) use a loop to get the equivalent
-# serial behaviour.
+# BDR does not support concurrent group joins, so we can't run this task
+# in parallel on all the members of the group. Failing that, it would be
+# nice to set «serial: 1» on this task, but serial is not supported as a
+# task attribute. We use a loop to get the equivalent serial behaviour,
+# executing the task on first_primary, but connecting to each instance
+# in turn to issue the bdr.join_node_group() query.
+#
+# Instances join the group with join_target_dsn as first_primary unless
+# they have a different upstream defined. In that case, they must wait
+# until the upstream has joined the group itself, so we perform group
+# joins in two phases: first for instances without any upstream, and
+# then for the remainder.
 
 - name: Join BDR node groups
   include_tasks: bdr3-join.yml
@@ -105,5 +111,21 @@
     loop_var: bdr_node
   when:
     inventory_hostname == first_primary and
+    hostvars[bdr_node].upstream is not defined and
+    hostvars[bdr_node].node_group_id.rowcount == 0
+  tags: always
+
+- name: Join BDR node groups with specified upstream
+  include_tasks: bdr3-join.yml
+  vars:
+    bdr_upstream: "{{ hostvars[bdr_node].upstream }}"
+    bdr_upstream_dsn: "{{ hostvars[bdr_upstream].bdr_node_dsn }}"
+  with_items: >
+    {{ groups[bdr_node_group]|difference([first_primary]) }}
+  loop_control:
+    loop_var: bdr_node
+  when:
+    inventory_hostname == first_primary and
+    hostvars[bdr_node].upstream is defined and
     hostvars[bdr_node].node_group_id.rowcount == 0
   tags: always
