@@ -201,8 +201,11 @@ class Architecture(object):
         errors = []
         sources = args.get('install_from_source') or []
         installable = self.installable_sources().keys()
-        for s in sources:
-            (name, ref) = s.split(':', 1)
+        for name in sources:
+            # We accept either something like 2ndqpostgres or
+            # 2ndqpostgres:2QREL_11_STABLE_dev
+            if ':' in name:
+                (name, ref) = name.split(':', 1)
             if name.lower() not in installable:
                 errors.append("doesn't know how to install '%s' from source" % name)
         if 'postgres' in sources and '2ndqpostgres' in sources:
@@ -396,8 +399,10 @@ class Architecture(object):
         sources = self.args.get('install_from_source') or []
         installable_sources = self.installable_sources()
         install_from_source = []
-        for s in sources:
-            (name, ref) = s.split(':', 1)
+        for name in sources:
+            ref = None
+            if ':' in name:
+                (name, ref) = name.split(':', 1)
             name = name.lower()
             entry = installable_sources[name]
             if name in ['postgres', '2ndqpostgres']:
