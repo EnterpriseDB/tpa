@@ -11,6 +11,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Minor changes
 
+- Allow optional branch names (git refs) to be specified with
+  ``--install-from-source 2ndqpostgres:2QREL_11_STABLE_dev …``
+
 - Accept a list of options in ``postgres_extra_configure_opts`` to
   append to the Postgres configure invocation (backwards-compatible
   with existing usage of ``postgres_configure_opts``)

@@ -202,8 +202,9 @@ class Architecture(object):
         sources = args.get('install_from_source') or []
         installable = self.installable_sources().keys()
         for s in sources:
-            if s.lower() not in installable:
-                errors.append("doesn't know how to install '%s' from source" % s)
+            (name, ref) = s.split(':', 1)
+            if name.lower() not in installable:
+                errors.append("doesn't know how to install '%s' from source" % name)
         if 'postgres' in sources and '2ndqpostgres' in sources:
             errors.append("cannot install both Postgres and 2ndQPostgres")
 
@@ -396,11 +397,16 @@ class Architecture(object):
         installable_sources = self.installable_sources()
         install_from_source = []
         for s in sources:
-            s = s.lower()
-            entry = installable_sources[s]
-            if s in ['postgres', '2ndqpostgres']:
+            (name, ref) = s.split(':', 1)
+            name = name.lower()
+            entry = installable_sources[name]
+            if name in ['postgres', '2ndqpostgres']:
+                if ref:
+                    entry.update({'postgres_git_ref': ref})
                 cluster_vars.update(entry)
             else:
+                if ref:
+                    entry.update({'git_repository_ref': ref})
                 install_from_source.append(entry)
 
         if install_from_source:
