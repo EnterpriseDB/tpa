@@ -22,12 +22,14 @@
     - [postgres, postgres-monitor]
     - ['{{ postgres_service_name }}',
        '{{ postgres_service_name }}-monitor']
+  register: unit
   tags: [postgres, service]
 
 - name: Enable postgres services
   systemd:
     name: "{{ item }}"
     enabled: "{{ not postgres_volume_encrypted|bool }}"
+    daemon_reload: "{{ unit is changed }}"
   with_items:
     - "{{ postgres_service_name }}"
     - "{{ postgres_service_name }}-monitor"
