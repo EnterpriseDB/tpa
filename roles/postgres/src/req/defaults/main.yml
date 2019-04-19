@@ -11,8 +11,10 @@ requirements:
     - zlib1g-dev
     - libssl-dev
     - build-essential
+    - libipc-run-perl
   RedHat:
     - readline-devel
     - zlib-devel
     - openssl-devel
+    - perl-Test-Simple
     - "@Development tools"
