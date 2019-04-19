@@ -1,0 +1,14 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Install extra packages for Postgres source installations
+  package:
+    name: >
+      {{ query('flattened', package_lists) }}
+    state: latest
+  vars:
+    package_lists:
+    - "{{ src_extra_packages|packages_for(ansible_os_family) }}"
+    - "{{ psycopg2_packages|packages_for(ansible_os_family) }}"
+  tags: [postgres, pkg]

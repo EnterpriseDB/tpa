@@ -57,9 +57,9 @@
     executable: /bin/bash
   with_items: "{{ postgres_install_targets }}"
 
-- name: Install psycopg2 and barman-cli
-  package:
-    name:
-      - python-psycopg2
-      - barman-cli
-    state: latest
+- include_role:
+    name: postgres/pkg
+    tasks_from: src.yml
+    apply:
+      tags: [postgres, pkg]
+  tags: always
