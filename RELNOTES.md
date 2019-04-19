@@ -9,6 +9,12 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Make the ``tpaexec test`` command take an optional test name, and
   provide infrastructure for custom tests
 
+### Minor changes
+
+- Accept a list of options in ``postgres_extra_configure_opts`` to
+  append to the Postgres configure invocation (backwards-compatible
+  with existing usage of ``postgres_configure_opts``)
+
 ### Bugfixes
 
 - Try to apply desired transparent hugepage settings immediately, not

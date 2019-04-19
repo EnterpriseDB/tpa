@@ -34,6 +34,8 @@ postgres_configure_env: {}
 postgres_configure_opts:
   - -q
   - --with-openssl
+  - --enable-tap-tests
+postgres_extra_configure_opts: []
 postgres_make_command: "make -s"
 postgres_build_targets:
   - "all"
