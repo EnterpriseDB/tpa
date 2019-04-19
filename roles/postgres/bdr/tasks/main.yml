@@ -68,6 +68,7 @@
 - name: Create group(s) based on the value of bdr_node_group
   group_by:
     key: "{{ bdr_node_group }}"
+  tags: always
 
 - name: Designate arbitrary r/w instance as primus inter pares
   set_fact:
@@ -78,6 +79,7 @@
     ro_groups:
     - role_replica
     - role_readonly
+  tags: always
 
 # The commands to create and join the group are version-dependent.
 #
@@ -110,8 +112,10 @@
 #     -- the join has completed).
 
 - name: BDR setup
-  include_tasks: "bdr{{ bdr_major_version }}.yml"
-  tags: always
+  include_tasks:
+    file: "bdr{{ bdr_major_version }}.yml"
+    apply:
+      tags: bdr
 
 - name: Perform CAMO setup if required
   include_tasks:
@@ -119,4 +123,3 @@
     apply:
       tags: camo
   when: bdr_node_camo_partner is defined
-  tags: always

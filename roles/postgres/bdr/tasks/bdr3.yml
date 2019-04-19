@@ -71,7 +71,8 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
-- include_tasks: clean.yml
+- name: Clean up bdr database before group join
+  include_tasks: clean.yml
   when:
     inventory_hostname != first_primary and
     node_group_id.rowcount == 0
