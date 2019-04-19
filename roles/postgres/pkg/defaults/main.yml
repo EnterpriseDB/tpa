@@ -72,6 +72,13 @@ pgespresso_packages:
     - "pgespresso{{ postgres_versionNN }}"
   Ubuntu: *debian_pgespresso_packages
 
+psycopg2_packages:
+  Debian: &debian_psycopg2_packages
+    - python-psycopg2
+  RedHat:
+    - python2-psycopg2
+  Ubuntu: *debian_psycopg2_packages
+
 # Next, additional_postgres_packages is a list of other Postgres-related
 # packages that we install by default, and extra_postgres_packages is an
 # empty list that the caller can define to install other packages. These
