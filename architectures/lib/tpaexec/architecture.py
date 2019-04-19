@@ -471,7 +471,7 @@ class Architecture(object):
                 'git_repository_ref': 'master',
                 'build_commands': [
                     'make -s install',
-                    'make -C camo_client -s install',
+                    'make -C camo_client/c -s install',
                 ],
             },
         }
