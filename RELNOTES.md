@@ -2,6 +2,20 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v7.7 (unreleased)
+
+### Notable changes
+
+- Make the ``tpaexec test`` command take an optional test name, and
+  provide infrastructure for custom tests
+
+### Bugfixes
+
+- Try to apply desired transparent hugepage settings immediately, not
+  only after a reboot
+
+- Correctly show build failures when installing extensions from source
+
 ## v7.6 (2019-04-12)
 
 ### Notable changes
@@ -19,9 +33,6 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Change pg_receivwal invocation to make
   ``barman receive-wal --stop servername`` work reliably
-
-- Try to apply desired transparent hugepage settings immediately, not
-  only after a reboot
 
 ## v7.5 (2019-04-04)
 
