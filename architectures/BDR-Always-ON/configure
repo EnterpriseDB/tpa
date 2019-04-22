@@ -25,7 +25,7 @@ class BDR_Always_ON(BDR):
         })
 
     def num_instances(self):
-        return 8
+        return 10
 
     def num_locations(self):
         return 2

@@ -29,7 +29,7 @@ class CAMO2x2(BDR_Always_ON):
         })
 
     def num_instances(self):
-        return 9
+        return 10
 
     def update_instances(self, instances):
         super(CAMO2x2, self).update_instances(instances)
