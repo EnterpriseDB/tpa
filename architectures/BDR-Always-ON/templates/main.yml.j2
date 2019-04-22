@@ -8,7 +8,7 @@ instances:
     role:
       - primary
       - bdr
-    backup: {{ hostnames[6] }}
+    backup: {{ hostnames[7] }}
 
   - node: 2
     Name: {{ hostnames[2] }}
@@ -23,6 +23,7 @@ instances:
     role:
       - primary
       - bdr
+    backup: {{ hostnames[8] }}
 
   - node: 4
     Name: {{ hostnames[4] }}
@@ -33,20 +34,36 @@ instances:
 
   - node: 5
     Name: {{ hostnames[5] }}
-    upstream: {{ hostnames[1] }}
     location: 0
     role:
-      - replica
+      - primary
       - bdr
+      - readonly
+    upstream: {{ hostnames[2] }}
 
   - node: 6
     Name: {{ hostnames[6] }}
+    location: 1
+    role:
+      - primary
+      - bdr
+      - readonly
+    upstream: {{ hostnames[4] }}
+
+  - node: 7
+    Name: {{ hostnames[7] }}
     location: 0
     role:
       - barman
 
-  - node: 7
-    Name: {{ hostnames[7] }}
+  - node: 8
+    Name: {{ hostnames[8] }}
+    location: 1
+    role:
+      - barman
+
+  - node: 9
+    Name: {{ hostnames[9] }}
     location: 0
     volumes:
       - device_name: /dev/xvdf
@@ -59,8 +76,8 @@ instances:
         - {{ hostnames[1] }}
         - {{ hostnames[2] }}
 
-  - node: 8
-    Name: {{ hostnames[8] }}
+  - node: 10
+    Name: {{ hostnames[10] }}
     location: 1
     volumes:
       - device_name: /dev/xvdf

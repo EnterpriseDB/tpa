@@ -9,6 +9,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Make the ``tpaexec test`` command take an optional test name, and
   provide infrastructure for custom tests
 
+- Adapt to BDR-Always-ON v5 architecture changes
+
 ### Minor changes
 
 - Allow optional branch names (git refs) to be specified with

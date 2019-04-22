@@ -27,6 +27,7 @@ instances:
     role:
       - primary
       - bdr
+    backup: {{ hostnames[8] }}
     vars:
         bdr_node_camo_partner: {{ hostnames[4] }}
 
@@ -46,14 +47,16 @@ instances:
       - primary
       - bdr
       - readonly
+    upstream: {{ hostnames[2] }}
 
   - node: 6
     Name: {{ hostnames[6] }}
-    upstream: {{ hostnames[1] }}
-    location: 0
+    location: 1
     role:
-      - replica
+      - primary
       - bdr
+      - readonly
+    upstream: {{ hostnames[4] }}
 
   - node: 7
     Name: {{ hostnames[7] }}
@@ -63,6 +66,12 @@ instances:
 
   - node: 8
     Name: {{ hostnames[8] }}
+    location: 1
+    role:
+      - barman
+
+  - node: 9
+    Name: {{ hostnames[9] }}
     location: 0
     volumes:
       - device_name: /dev/xvdf
@@ -75,8 +84,8 @@ instances:
         - {{ hostnames[1] }}
         - {{ hostnames[2] }}
 
-  - node: 9
-    Name: {{ hostnames[9] }}
+  - node: 10
+    Name: {{ hostnames[10] }}
     location: 1
     volumes:
       - device_name: /dev/xvdf
