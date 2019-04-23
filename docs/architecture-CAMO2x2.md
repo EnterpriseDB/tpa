@@ -9,7 +9,8 @@ It also allows replication to be configured so as to replicate inserts
 and updates between locations, but keep deletes and truncates confined
 to the originating pair.
 
-The topology corresponds to v4.0 of the Always-ON architecture.
+This configuration corresponds to version 5 of the BDR-Always-ON
+architecture.
 
 ## Cluster configuration
 

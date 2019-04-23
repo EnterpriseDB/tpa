@@ -4,9 +4,10 @@ BDR in an Always-ON configuration, intended for use in production.
 (BDR-Simple is an alternative that is more geared towards
 experimentation.)
 
-The topology corresponds to v3.1 of the Always-ON architecture.
+This configuration corresponds to version 5 of the BDR-Always-ON
+architecture.
 
-![BDR-Always-ON cluster](images/bdr-altha31.png)
+![BDR-Always-ON cluster](images/bdr-always-on.png)
 
 ## Cluster configuration
 
