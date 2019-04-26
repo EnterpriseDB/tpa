@@ -22,7 +22,7 @@
           - "{{ inventory_hostname }}"
           - "{{ bdr_node_dsn }}"
   when:
-    inventory_hostname == first_primary and
+    inventory_hostname == first_bdr_primary and
     node.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
@@ -33,14 +33,14 @@
     query: >-
       SELECT bdr.bdr_node_join_wait_for_ready()
   when:
-    inventory_hostname == first_primary and
+    inventory_hostname == first_bdr_primary and
     node.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
 
 - include_tasks: clean.yml
   when:
-    inventory_hostname != first_primary and
+    inventory_hostname != first_bdr_primary and
     node.rowcount == 0
   tags: always
 
@@ -51,10 +51,10 @@
 - name: Join BDR groups on the other nodes
   include_tasks: bdr2-join.yml
   with_items: >
-    {{ groups[bdr_node_group]|difference([first_primary]) }}
+    {{ groups[bdr_node_group]|difference([first_bdr_primary]) }}
   loop_control:
     loop_var: bdr_node
   when:
-    inventory_hostname == first_primary and
+    inventory_hostname == first_bdr_primary and
     hostvars[bdr_node].node.rowcount == 0
   tags: always

@@ -65,22 +65,6 @@
 #    the same value set for bdr_node_group (to enable the behaviour
 #    described above). The name just isn't used for anything else.
 
-- name: Create group(s) based on the value of bdr_node_group
-  group_by:
-    key: "{{ bdr_node_group }}"
-  tags: always
-
-- name: Designate arbitrary r/w instance as primus inter pares
-  set_fact:
-    first_primary: "{{
-      groups|members_of(bdr_node_group, not_in=ro_groups)|first
-    }}"
-  vars:
-    ro_groups:
-    - role_replica
-    - role_readonly
-  tags: always
-
 # The commands to create and join the group are version-dependent.
 #
 ## BDR1, BDR2

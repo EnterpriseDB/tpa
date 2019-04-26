@@ -3,7 +3,6 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - set_fact:
-    first_primary: "{{ _rw_instances|first }}"
     last_primary: "{{ _rw_instances|last }}"
   vars:
     _rw_instances: "{{
@@ -39,7 +38,7 @@
     become: yes
 
   when: >
-    inventory_hostname == first_primary
+    inventory_hostname == first_bdr_primary
 
 - name: Wait for pgbench -i to replicate to BDR instances
   postgresql_query:

@@ -2,7 +2,7 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Join group {{ bdr_node_group }} on {{ bdr_node }} via {{ bdr_upstream|default(first_primary) }}
+- name: Join group {{ bdr_node_group }} on {{ bdr_node }} via {{ bdr_upstream|default(first_bdr_primary) }}
   postgresql_query:
     conninfo: '{{ hostvars[bdr_node].bdr_node_dsn }}'
     queries:

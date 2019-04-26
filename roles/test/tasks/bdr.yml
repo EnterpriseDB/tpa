@@ -5,19 +5,4 @@
 - include_role: name=postgres/bdr tasks_from=version.yml
   tags: always
 
-- name: Create group(s) based on the value of bdr_node_group
-  group_by:
-    key: "{{ bdr_node_group }}"
-  tags: always
-
-- name: Designate arbitrary r/w instance as first_primary
-  set_fact:
-    first_primary: "{{
-      groups|members_of(bdr_node_group, not_in=ro_groups)|first
-    }}"
-  vars:
-    ro_groups:
-    - role_replica
-    - role_readonly
-
 # [Include tests for basic BDR functionality here]

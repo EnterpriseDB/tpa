@@ -13,7 +13,7 @@
         args:
           - "{{ bdr_node_group }}"
   when:
-    inventory_hostname == first_primary
+    inventory_hostname == first_bdr_primary
     and replicate_deletes_locally|default(false)|bool
   become_user: "{{ postgres_user }}"
   become: yes
@@ -34,7 +34,7 @@
         args:
           - "cluster_global"
   when:
-    inventory_hostname == first_primary
+    inventory_hostname == first_bdr_primary
     and replicate_deletes_locally|default(False)|bool
   become_user: "{{ postgres_user }}"
   become: yes
@@ -57,7 +57,7 @@
   with_items:
     "{{ groups[bdr_node_group]|map('extract', hostvars, 'location')|unique|list }}"
   when:
-    inventory_hostname == first_primary
+    inventory_hostname == first_bdr_primary
     and replicate_deletes_locally|default(False)|bool
   become_user: "{{ postgres_user }}"
   become: yes
