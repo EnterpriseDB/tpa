@@ -1,0 +1,14 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Join group {{ bdr_node_group }} on {{ bdr_node }} via {{ bdr_upstream|default(first_bdr_primary) }}
+  postgresql_query:
+    conninfo: '{{ hostvars[bdr_node].bdr_node_dsn }}'
+    queries:
+      - text: SELECT bdr.join_node_group(join_target_dsn := %s, pause_in_standby := %s)
+        args:
+          - "{{ bdr_upstream_dsn|default(bdr_node_dsn) }}"
+          - "{{ hostvars[bdr_node].bdr_node_pause_in_standby }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
