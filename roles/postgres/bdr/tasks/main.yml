@@ -2,11 +2,15 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# We are here because this instance has role bdr+primary (as opposed to
-# bdr+replica, which is a read-only streaming replica of a bdr+primary
-# node). BDR packages have been installed, shared_preload_libraries
-# contains 'bdr', BDR configuration has been installed, and the BDR
+# We are here because this instance has bdr+primary in its role. BDR
+# packages have been installed, shared_preload_libraries contains 'bdr',
+# BDR configuration has been installed, Postgres is running, and the BDR
 # extension has been created (in template1).
+#
+# We don't need to handle bdr+replica instances here (they are ordinary
+# streaming replicas and don't need BDR-specific initialisation anyway),
+# but we do handle "logical standby" instances with bdr+primary+readonly
+# in role.
 #
 # First, each node needs a BDR database.
 
@@ -24,7 +28,7 @@
 # BDR1: BDR-Postgres 9.4 only
 # BDR2: BDR-Postgres 9.4, plus
 #       {,2ndQ}Postgres 9.6
-# BDR3: {,2ndQ}Postgres 10 only
+# BDR3: {,2ndQ}Postgres 10+ only
 #
 # https://access.2ndquadrant.com/kb/a/comparison-of-logical-replication-solutions/
 #
@@ -44,27 +48,23 @@
 # the group. It doesn't matter which node creates the group, so long as
 # all the nodes make the same decision about which one should create it.
 #
-# We set the "bdr_node_group" host var for every node (in config.yml),
-# so we can use that value to create a new Ansible inventory group of
-# the nodes with the same value of bdr_node_group. Then we pick the
-# first node in the host group to create the BDR group.
+# Every BDR instance has "bdr_node_group" set in config.yml to indicate
+# which BDR group it should be a member of. In roles/platform/common, we
+# created Ansible inventory groups based on the value of bdr_node_group
+# for each instance, and designated the first host in each group as the
+# "first_bdr_primary".
 #
-# There are two points to note here:
+# On each BDR instance, groups[bdr_node_group] now evaluates to a list
+# of the members of the BDR node group, and first_bdr_primary evaluates
+# to the arbitrarily chosen "leader" of that group. (Since each instance
+# uses its own value of bdr_node_group to compute this information, this
+# scheme works even when config.yml specifies disjoint BDR groups, i.e.,
+# when all the instances do not have the same value for bdr_node_group.)
 #
-# 1. The common case is that all of the bdr+primary nodes have the same
-#    value for bdr_node_group; we will create a single group containing
-#    all of these nodes.
+# BDR1/BDR2 do not support group names, but we set bdr_node_group anyway
+# to enable the behaviour described above. The name just isn't used for
+# anything else.
 #
-#    However, if some nodes have different values of bdr_node_group, we
-#    will create multiple groups here, but each node looks at the group
-#    based on its own value of bdr_node_group, so we can set up disjoint
-#    BDR groups in parallel if necessary.
-#
-# 2. BDR1/BDR2 do not actually support group names, but we require that
-#    all nodes that are intended to belong to the same BDR group have
-#    the same value set for bdr_node_group (to enable the behaviour
-#    described above). The name just isn't used for anything else.
-
 # The commands to create and join the group are version-dependent.
 #
 ## BDR1, BDR2
