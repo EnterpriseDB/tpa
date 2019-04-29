@@ -1,0 +1,39 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# We cause the instance to "drop off the network" for a while (from the
+# perspective of the rest of the cluster), and then go back to normal.
+# We need to retain ssh access to the instance during the partition so
+# that we can issue other testing tasks. For now, we cheat by allowing
+# all ssh traffic; we can revisit that while testing scenarios where
+# inter-node ssh traffic actually matters.
+
+- name: Upload partition ruleset
+  copy:
+    dest: /tmp/partition.rules
+    content: |
+      *filter
+      :INPUT DROP [0:0]
+      :OUTPUT DROP [0:0]
+      :FORWARD DROP [0:0]
+      -A INPUT -i lo -j ACCEPT
+      -A OUTPUT -o lo -j ACCEPT
+      -A INPUT -p tcp --dport 22 -j ACCEPT
+      -A OUTPUT -p tcp --sport 22 -j ACCEPT
+      COMMIT
+
+# We want the iptables rules to be in effect when this task completes,
+# but the task completion should not interfere with the sleep and undo
+# step that ends the partition.
+
+- name: Create temporary network partition
+  shell: >
+    iptables-save > /tmp/existing.rules &&
+    iptables-restore /tmp/partition.rules &&
+    (sleep {{ partition_timeout|default('600') }};
+    iptables-restore /tmp/existing.rules) &
+  args:
+    executable: /bin/bash
+  become_user: root
+  become: yes

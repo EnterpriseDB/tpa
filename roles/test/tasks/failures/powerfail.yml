@@ -1,0 +1,25 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# We request an immediate reboot (without syncing buffers or unmounting
+# disks or anything) via sysrq. The slightly convoluted invocation makes
+# it less likely that this task will fail.
+
+- name: Request immediate reboot
+  shell: >
+    nohup (sleep 1; echo b > /proc/sysrq-trigger) &
+  become_user: root
+  become: yes
+  async: 1
+  poll: 0
+
+# We have no control over the process after submitting the request, so
+# we just wait for a while for the instance to come back up afterwards.
+
+- name: Wait for instance to return
+  wait_for_connection:
+    delay: 10
+    connect_timeout: 30
+    sleep: 15
+    timeout: 120
