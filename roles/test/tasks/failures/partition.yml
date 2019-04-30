@@ -30,10 +30,19 @@
 - name: Create temporary network partition
   shell: >
     iptables-save > /tmp/existing.rules &&
-    iptables-restore /tmp/partition.rules &&
-    (sleep {{ partition_timeout|default('600') }};
-    iptables-restore /tmp/existing.rules) &
+    iptables-restore /tmp/partition.rules
   args:
     executable: /bin/bash
   become_user: root
   become: yes
+
+- name: Set timeout for network partition
+  shell: >
+    sleep {{ partition_timeout|default('600') }};
+    iptables-restore /tmp/existing.rules
+  args:
+    executable: /bin/bash
+  become_user: root
+  become: yes
+  async: 7200
+  poll: 0

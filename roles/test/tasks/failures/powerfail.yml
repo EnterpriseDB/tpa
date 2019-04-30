@@ -8,7 +8,7 @@
 
 - name: Request immediate reboot
   shell: >
-    nohup (sleep 1; echo b > /proc/sysrq-trigger) &
+    sleep 1 && echo b > /proc/sysrq-trigger
   become_user: root
   become: yes
   async: 42
