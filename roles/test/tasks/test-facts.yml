@@ -10,6 +10,7 @@
   become: yes
   when: >
     'postgres' in role
+  tags: always
 
 - name: Check if repmgr has been initialised
   stat:
@@ -19,8 +20,10 @@
   become: yes
   when: >
     'postgres' in role
+  tags: always
 
 - name: Set tested facts
   set_fact:
     pgdata_initialised: "{{ pgdata is not skipped and pgdata.stat.exists }}"
     repmgr_initialised: "{{ repmgr is not skipped and repmgr.stat.exists }}"
+  tags: always
