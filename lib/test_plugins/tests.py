@@ -33,6 +33,11 @@ def contains(container, *values):
             return False
     return True
 
+# Returns True if the given str starts with the given prefix, False otherwise.
+
+def startswith(str, prefix):
+    return str.startswith(prefix)
+
 # Returns True if the given container is empty, False otherwise.
 
 def empty(container):
@@ -44,5 +49,6 @@ class TestModule(object):
             'has_subkey': has_subkey,
             'notequalto': notequalto,
             'contains': contains,
+            'startswith': startswith,
             'empty': empty,
         }

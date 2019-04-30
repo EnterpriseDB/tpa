@@ -1,0 +1,97 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- set_fact:
+    ping: "{{ groups[camo_test_group]|first }}"
+    pong: "{{ groups[camo_test_group]|last }}"
+    camo_transactions: "{{ camo_transactions|default(1000) }}"
+    camo_clients: "{{ camo_threads|default(200) }}"
+  tags: always
+
+- block:
+  - name: Create bdr_camo_client test table
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      queries:
+        - text: DROP TABLE IF EXISTS camo_test
+        - text: >
+            CREATE TABLE camo_test
+            (key bigint NOT NULL
+            , attempt_no bigint NOT NULL
+            , PRIMARY KEY (key, attempt_no))
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - name: Wait for DDL to replicate to BDR instances
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      query: >
+        select bdr.wait_slot_confirm_lsn(NULL, NULL)
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - name: Run bdr_camo_client
+    shell: >
+      {{ postgres_bin_dir }}/bdr_camo_client
+      -h {{ ping }},{{ pong }}
+      -c 'INSERT INTO camo_test VALUES ($1, $2);'
+      -i {{ camo_transactions }} -j {{ camo_clients }} {{ bdr_database }} 2>&1
+    register: bdr_camo_client
+    become_user: "{{ postgres_user }}"
+    become: yes
+    async: 7200
+    poll: 0
+  vars:
+    ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+  when:
+    inventory_hostname == tester_instance
+
+- name: Cause failure {{ failure }} on CAMO partner {{ ping }}
+  block:
+  - include_role: name=test tasks_from="failures/{{ failure }}.yml"
+  when:
+    inventory_hostname == ping
+
+- block:
+  - name: Wait for bdr_camo_client to complete
+    async_status: jid="{{ bdr_camo_client.ansible_job_id }}"
+    register: client
+    until: client.finished
+    retries: 600
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - include_tasks: output.yml
+    vars:
+      output_file: bdr-camo-client-{{ failure }}.txt
+      content: |
+        {{ client.stdout }}
+    tags: always
+
+  - name: Check that there are no duplicates or omissions
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      query: >
+        SELECT s, camo_test.key, COUNT(attempt_no)
+          FROM generate_series(0, {{ camo_transactions }}*{{ camo_clients }}-1) AS s
+          LEFT JOIN camo_test
+            ON camo_test.key = s
+          GROUP BY s, camo_test.key
+          HAVING COUNT(attempt_no) <> 1
+    register: dups
+    become_user: "{{ postgres_user }}"
+    become: yes
+    failed_when:
+      dups is not successful or dups.rowcount > 0
+
+  - name: Drop bdr_camo_client test table
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      query: DROP TABLE camo_test
+    become_user: "{{ postgres_user }}"
+    become: yes
+  vars:
+    ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+  when: >
+    inventory_hostname == tester_instance

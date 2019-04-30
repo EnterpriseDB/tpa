@@ -6,3 +6,9 @@
   tags: always
 
 # [Include tests for basic BDR functionality here]
+
+- include_tasks:
+    file: camo.yml
+    apply:
+       tags: camo
+  tags: always
