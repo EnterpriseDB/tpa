@@ -47,9 +47,9 @@
   when:
     inventory_hostname == tester_instance
 
-- name: Cause failure {{ failure }} on CAMO partner {{ ping }}
-  block:
-  - include_role: name=test tasks_from="failures/{{ failure }}.yml"
+- block:
+  - name: Cause failure {{ failure }} on CAMO partner {{ ping }}
+    include_role: name=test tasks_from="failures/{{ failure }}.yml"
   when:
     inventory_hostname == ping
 
