@@ -29,6 +29,7 @@
     backup_name: "{{ backup_name|default(inventory_hostname) }}"
     repmgr_conf_dir: "{{ repmgr_conf_dir|default(default_repmgr_conf_dir) }}"
     bdr_database: "{{ bdr_database|default(default_bdr_database) }}"
+    bdr_node_name: "{{ bdr_node_name|default(inventory_hostname) }}"
     bdr_node_group: "{{ bdr_node_group|default(default_bdr_node_group) }}"
     wal_or_xlog: "{{ wal_string }}"
   vars:
