@@ -11,3 +11,9 @@
     package_lists:
       - "{{ requirements['common'] }}"
       - "{{ requirements[ansible_os_family] }}"
+
+- name: Install IPC::Run
+  cpanm:
+    name: IPC::Run
+  when:
+    ansible_os_family == 'RedHat'
