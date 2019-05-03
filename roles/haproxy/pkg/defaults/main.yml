@@ -1,0 +1,12 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+haproxy_packages:
+  Debian: &debian_haproxy_packages
+    - haproxy
+  RedHat:
+    - haproxy
+  Ubuntu: *debian_haproxy_packages
+
+haproxy_package_version: 1.9.7*

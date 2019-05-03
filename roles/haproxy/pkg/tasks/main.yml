@@ -3,7 +3,13 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - name: Install haproxy package
-  package: name=haproxy state=latest
+  package:
+    name: "{{
+      haproxy_packages|packages_for(ansible_os_family, haproxy_package_version)
+    }}"
+    state: "{{
+      (haproxy_package_version is defined)|ternary('present', 'latest')
+    }}"
   tags: pkg
 
 - name: Ensure haproxy group exists
