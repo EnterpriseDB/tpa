@@ -5,3 +5,14 @@
 - name: Install haproxy package
   package: name=haproxy state=latest
   tags: pkg
+
+- name: Ensure haproxy group exists
+  group:
+    state: present
+    name: haproxy
+
+- name: Ensure haproxy user exists
+  user:
+    state: present
+    name: haproxy
+    group: haproxy
