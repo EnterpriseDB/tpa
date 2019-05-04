@@ -43,7 +43,7 @@ class aws(Platform):
             image['owner'] = '309956199498'
             image['user'] = 'ec2-user'
         elif label in ['ubuntu', 'ubuntu-minimal']:
-            image['name'] = 'ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180814'
+            image['name'] = 'ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20190403'
             image['owner'] = '099720109477'
             image['user'] = 'ubuntu'
         else:
