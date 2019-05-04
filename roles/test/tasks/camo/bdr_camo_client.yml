@@ -68,10 +68,23 @@
       content: |
         {{ client.stdout }}
     tags: always
+  vars:
+    ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+  when: >
+    inventory_hostname == tester_instance
+
+- block:
+  - name: Wait for DDL to replicate to BDR instances
+    postgresql_query:
+      conninfo: "{{ bdr_node_dsn }}"
+      query: >
+        select bdr.wait_slot_confirm_lsn(NULL, NULL)
+    become_user: "{{ postgres_user }}"
+    become: yes
 
   - name: Check that there are no duplicates or omissions
     postgresql_query:
-      conninfo: "{{ ping_conninfo }}"
+      conninfo: "{{ bdr_node_dsn }}"
       query: >
         SELECT s, camo_test.key, COUNT(attempt_no)
           FROM generate_series(0, {{ camo_transactions }}*{{ camo_clients }}-1) AS s
@@ -84,7 +97,10 @@
     become: yes
     failed_when:
       dups is not successful or dups.rowcount > 0
+  when:
+    inventory_hostname in groups[bdr_node_group]
 
+- block:
   - name: Drop bdr_camo_client test table
     postgresql_query:
       conninfo: "{{ ping_conninfo }}"

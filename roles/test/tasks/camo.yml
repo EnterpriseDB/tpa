@@ -38,32 +38,31 @@
     that: all_camo_groups is empty or possible_testers is not empty
   tags: always
 
-- set_fact:
-    camo_test_group: "{{ all_camo_groups|first }}"
-    tester_instance: "{{ possible_testers|first }}"
-  when:
-    all_camo_groups is not empty
-  tags: always
-
 # We now run bdr_camo_client on the tester_instance against the CAMO
 # partners, and cause the first partner to undergo various failures
 # during the run.
 
-- include_tasks: camo/bdr_camo_client.yml
-  with_items: "{{ failures }}"
-  loop_control:
-    loop_var: failure
+- name: Run bdr_camo_client tests
+  block:
+    - include_tasks: camo/bdr_camo_client.yml
+      with_items: "{{ failures }}"
+      loop_control:
+        loop_var: failure
+      vars:
+        camo_test_group: "{{ all_camo_groups|first }}"
+        tester_instance: "{{ possible_testers|first }}"
+        nondestructive_failures:
+          - none
+        destructive_failures:
+          - none
+          - powerfail
+          - partition
+        failures: "{{
+          destroy_cluster|default(False)|ternary(destructive_failures, nondestructive_failures)
+        }}"
+      when:
+        inventory_hostname in groups[bdr_node_group] or
+        inventory_hostname == tester_instance
   when:
-    (camo_test_group is defined and inventory_hostname in groups[camo_test_group]) or
-    (tester_instance is defined and inventory_hostname == tester_instance)
-  vars:
-    nondestructive_failures:
-    - none
-    destructive_failures:
-    - none
-    - powerfail
-    - partition
-    failures: "{{
-      destroy_cluster|default(False)|ternary(destructive_failures, nondestructive_failures)
-    }}"
+    all_camo_groups is not empty
   tags: always
