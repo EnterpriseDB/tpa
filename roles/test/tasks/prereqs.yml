@@ -16,7 +16,7 @@
 
 - name: Check if destructive tests should be run
   assert:
-    msg: "You must specify --destroy-this-cluster to run destructive tests"
+    msg: "You must run ``tpaexec test … --destroy-this-cluster`` to run destructive tests"
     that:
     - destroy_cluster|default(False)
   when: destructive|default(False)
