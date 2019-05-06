@@ -55,8 +55,8 @@
           - none
         destructive_failures:
           - none
-          - powerfail
           - partition
+          - powerfail
         failures: "{{
           destroy_cluster|default(False)|ternary(destructive_failures, nondestructive_failures)
         }}"
