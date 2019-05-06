@@ -68,7 +68,7 @@ class BDR_Simple(BDR):
             elif bdr_version == '2':
                 postgres_version = '9.6'
             elif bdr_version in ['3', None]:
-                postgres_version = '10'
+                postgres_version = '11'
                 bdr_version = '3'
 
         supported_combinations = [
