@@ -7,7 +7,6 @@
     pong: "{{ groups[camo_test_group]|last }}"
     camo_transactions: "{{ camo_transactions|default(1000) }}"
     camo_clients: "{{ camo_threads|default(200) }}"
-  tags: always
 
 - block:
   - name: Create bdr_camo_client test table

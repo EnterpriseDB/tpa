@@ -11,4 +11,4 @@
     file: camo.yml
     apply:
        tags: camo
-  tags: always
+  tags: camo
