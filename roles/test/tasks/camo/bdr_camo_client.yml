@@ -31,12 +31,16 @@
     become_user: "{{ postgres_user }}"
     become: yes
 
+  - set_fact:
+      bdr_camo_client_output: /tmp/bdr-camo-client-{{ failure }}.txt
+
   - name: Run bdr_camo_client
     shell: >
       {{ postgres_bin_dir }}/bdr_camo_client
       -h {{ ping }},{{ pong }}
       -c 'INSERT INTO camo_test VALUES ($1, $2);'
-      -i {{ camo_transactions }} -j {{ camo_clients }} {{ bdr_database }} 2>&1
+      -i {{ camo_transactions }} -j {{ camo_clients }}
+      {{ bdr_database }} > {{ bdr_camo_client_output }} 2>&1
     register: bdr_camo_client
     become_user: "{{ postgres_user }}"
     become: yes
@@ -62,12 +66,11 @@
     become_user: "{{ postgres_user }}"
     become: yes
 
-  - include_tasks: output.yml
-    vars:
-      output_file: bdr-camo-client-{{ failure }}.txt
-      content: |
-        {{ client.stdout }}
-    tags: always
+  - name: Save bdr_camo_client output
+    fetch:
+      src: "{{ bdr_camo_client_output }}"
+      dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ bdr_camo_client_output|basename }}"
+      flat: yes
   vars:
     ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
   when: >
