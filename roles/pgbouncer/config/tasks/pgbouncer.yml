@@ -2,47 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# By default, pgbouncer will forward all connections to 127.0.0.1:5432
-# (which may be either postgres or haproxy that has been configured to
-# forward connections to postgres).
-#
-# To override this, set pgbouncer_backend to the inventory_hostname of
-# a different node.
-
-- name: Set pgbouncer_backend
-  set_fact:
-    pgbouncer_backend: >-
-      {{ pgbouncer_backend|default('127.0.0.1') }}
-
-- name: Set pgbouncer_backend_port
-  set_fact:
-    pgbouncer_backend_port: "{{
-      pgbouncer_backend_port|default(
-        (pgbouncer_backend in hostvars)|ternary(
-          hostvars[pgbouncer_backend].postgres_port|default(5432),
-          5432
-        )
-      )
-    }}"
-
-# By default, we create a single wildcard entry under [databases], which
-# forwards all connections to the pgbouncer_backend defined above. To
-# override this, set pgbouncer_databases to [{name: …, dsn: …}, …] to
-# install whatever entries you want.
-
-- name: Set pgbouncer_databases
-  set_fact:
-    pgbouncer_databases: "{{
-      pgbouncer_databases|default([{
-        'name': '*',
-        'dsn': 'host=%s port=%s' % (pgbouncer_backend, pgbouncer_backend_port)
-      }])
-    }}"
-
-- name: Set pgbouncer_port
-  set_fact:
-    pgbouncer_port: "{{ pgbouncer_port|default(6432) }}"
-
 - name: Ensure /etc/pgbouncer exists
   file:
     path: /etc/pgbouncer
