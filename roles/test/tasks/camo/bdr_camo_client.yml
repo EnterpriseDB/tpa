@@ -9,6 +9,15 @@
     camo_clients: "{{ camo_threads|default(200) }}"
 
 - block:
+  - name: Check for bdr_camo_client
+    stat:
+      path: "{{ bdr_camo_client }}"
+    register: client
+
+  - assert:
+      msg: "Couldn't find {{ bdr_camo_client }}"
+      that: client.stat.exists
+
   - name: Create bdr_camo_client test table
     postgresql_query:
       conninfo: "{{ ping_conninfo }}"
@@ -35,7 +44,7 @@
 
   - name: Run bdr_camo_client
     shell: >
-      {{ postgres_bin_dir }}/bdr_camo_client
+      {{ bdr_camo_client }}
       -h {{ ping }},{{ pong }}
       -c 'INSERT INTO camo_test VALUES ($1, $2);'
       -i {{ camo_transactions }} -j {{ camo_clients }}
@@ -47,6 +56,7 @@
     poll: 0
   vars:
     ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+    bdr_camo_client: "{{ postgres_bin_dir }}/bdr_camo_client"
   when:
     inventory_hostname == tester_instance
 
@@ -62,6 +72,7 @@
     register: client
     until: client.finished
     retries: 600
+    ignore_errors: yes
     become_user: "{{ postgres_user }}"
     become: yes
 
@@ -70,6 +81,12 @@
       src: "{{ bdr_camo_client_output }}"
       dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ bdr_camo_client_output|basename }}"
       flat: yes
+
+  - name: Fail if bdr_camo_client failed
+    fail:
+      msg: "bdr_camo_client failed"
+    when: client is not successful
+    tags: [camo, fail]
   vars:
     ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
   when: >
