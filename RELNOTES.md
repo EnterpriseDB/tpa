@@ -2,6 +2,23 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v7.8 (2019-05-08)
+
+### Notable changes
+
+- Allow setting ``bdr_node_name`` in an instance's vars to change the
+  name of the BDR node (the default remains to use the instance's name)
+
+- Require haproxy 1.9.7 (for which packages are available from the
+  2ndQuadrant package repository)
+
+- Create an haproxy role (with NOLOGIN) to eliminate haproxy check
+  messages from the Postgres log
+
+- Change default postgres_version to 11 for new clusters
+
+- Numerous internal testing improvements
+
 ## v7.7 (2019-04-22)
 
 ### Notable changes
