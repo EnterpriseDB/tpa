@@ -2,6 +2,13 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v7.9 (2019-05-09)
+
+### Bugfixes
+
+- Revert an unintended change to the default pgbouncer_backend
+  configuration
+
 ## v7.8 (2019-05-08)
 
 ### Notable changes
