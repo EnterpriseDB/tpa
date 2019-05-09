@@ -59,7 +59,7 @@
       - cluster_tags['Owner'] is defined
       - cluster_tags['Owner'] not in [
           '', 'root', 'postgres', 'ec2-user', 'admin', 'ubuntu',
-          'vagrant', 'tpa',
+          'vagrant', 'tpa', 'user',
         ]
   when: >
     'aws' in cluster_platforms
