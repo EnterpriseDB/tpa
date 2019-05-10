@@ -1,0 +1,95 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- assert:
+    msg: "This test may be applied only to haproxy instances"
+    that:
+    - role|contains('haproxy')
+
+# First, we check that connections through haproxy to the backend
+# database are TLS-protected from end-to-end (as a side effect, we
+# ensure that we can connect and issue queries too).
+
+- name: Ensure that connections through haproxy are TLS-protected
+  postgresql_query:
+    conninfo: "{{ dsn|dbname('postgres', user='postgres', host='127.0.0.1') }}"
+    query: >
+      SELECT ssl
+      FROM pg_stat_activity sa JOIN pg_stat_ssl ss USING (pid)
+      WHERE pid = pg_backend_pid()
+  register: q
+  failed_when:
+    q is not successful or not q.ssl
+  environment:
+    PGPASSWORD: "{{ postgres_password }}"
+
+# We issue "show stat" to the haproxy stats socket, and expect to get
+# back results like the following:
+#
+#     # pxname,svname,…
+#     fe,FRONTEND,…
+#     be,hostname,…
+#     be,hostname,…
+#     be,BACKEND,…
+#
+# The first (commented) line is a list of column names, most of which we
+# don't care about (see contrib/prometheus-exporter/service-prometheus.c
+# in the haproxy source for an explanation of the column names). But we
+# build a table of results in order to perform some basic sanity checks.
+
+- name: Fetch haproxy statistics
+  shell: >
+    echo 'show stat'|socat /var/lib/haproxy/stats stdio
+  register: hstat
+  become_user: root
+  become: yes
+
+- name: Build haproxy_stats results array
+  set_fact:
+    haproxy_stats: "{{
+      haproxy_stats|default([])|union([
+        item|from_csv(column_names)
+      ])
+    }}"
+  with_items: "{{ hstat.stdout_lines }}"
+  when:
+    not item.startswith('#')
+  vars:
+    column_names: "{{ hstat.stdout_lines[0][2:].split(',') }}"
+
+- name: Ensure haproxy frontend is up
+  assert:
+    msg: "Expected one working haproxy frontend"
+    that:
+    - frontends|length == 1
+    - frontends|map(attribute='status')|first == 'OPEN'
+  vars:
+    frontends: >-
+      {{ haproxy_stats|selectattr('pxname', 'equalto', 'fe')|selectattr('svname', 'equalto', 'FRONTEND')|list }}
+
+- name: Ensure haproxy backend is up
+  assert:
+    msg: "Expected one working haproxy backend with {{ num_servers_wanted }} servers"
+    that:
+    - backends|length == 1
+    - backends|map(attribute='status')|first == 'UP'
+    - servers|length == num_servers_wanted|int
+  vars:
+    backends: >-
+      {{ haproxy_stats|selectattr('pxname', 'equalto', 'be')|selectattr('svname', 'equalto', 'BACKEND')|list }}
+    servers: >-
+      {{ haproxy_stats|selectattr('pxname', 'equalto', 'be')|rejectattr('svname', 'equalto', 'BACKEND')|list }}
+    num_servers_wanted: "{{ haproxy_backends|length }}"
+
+- name: Ensure each server in haproxy_backends is up
+  assert:
+    msg: >-
+      Expected haproxy_backends={{ ','.join(haproxy_backends) }} to be UP,
+      got {% for s in servers %}{{ s.svname }}={{ s.status }}{{ loop.last|ternary('', ', ') }}{% endfor %}
+    that:
+    - servers|map(attribute='svname')|sort == haproxy_backends|sort
+    - servers|map(attribute='status')|reject('equalto', 'UP')|list is empty
+  vars:
+    servers: >-
+      {{ haproxy_stats|selectattr('pxname', 'equalto', 'be')|rejectattr('svname', 'equalto', 'BACKEND')|list }}

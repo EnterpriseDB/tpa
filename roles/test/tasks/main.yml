@@ -44,3 +44,12 @@
   when: >
     'pgbouncer' in role
   tags: pgbouncer
+
+- name: Run haproxy tests
+  include_tasks:
+    file: haproxy.yml
+    apply:
+      tags: haproxy
+  when: >
+    'haproxy' in role
+  tags: haproxy

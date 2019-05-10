@@ -3,6 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 import copy
+import csv
 from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
@@ -162,7 +163,15 @@ def dbname(conninfo, dbname='postgres', **kwargs):
     for k in kwargs:
         extra.append('%s=%s' % (k, kwargs[k]))
     return conninfo + ' ' + ' '.join(extra)
-    
+
+# Given a line containing comma-separated values and a list of column names,
+# this filter returns a hash that maps from column names to the corresponding
+# values from the input line.
+
+def from_csv(line, column_names):
+    for values in csv.reader([line]):
+        return dict(zip(column_names, values))
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -176,4 +185,5 @@ class FilterModule(object):
             'packages_for': packages_for,
             'members_of': members_of,
             'dbname': dbname,
+            'from_csv': from_csv,
         }
