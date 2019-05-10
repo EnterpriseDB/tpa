@@ -8,8 +8,8 @@
     - role|contains('pgbouncer')
 
 # First, we check that connections through pgbouncer to the backend
-# database connections are TLS-protected from end-to-end (as a side
-# effect, we also know that we can connect and issue queries).
+# database are TLS-protected from end-to-end (as a side effect, we
+# ensure that we can connect and issue queries too).
 
 - name: Ensure that connections through pgbouncer are TLS-protected
   postgresql_query:
