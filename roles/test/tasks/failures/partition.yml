@@ -14,32 +14,47 @@
     dest: /tmp/partition.rules
     content: |
       *filter
-      :INPUT DROP [0:0]
-      :OUTPUT DROP [0:0]
-      :FORWARD DROP [0:0]
+      :INPUT DROP
+      :OUTPUT DROP
+      :FORWARD DROP
       -A INPUT -i lo -j ACCEPT
       -A OUTPUT -o lo -j ACCEPT
       -A INPUT -p tcp --dport 22 -j ACCEPT
       -A OUTPUT -p tcp --sport 22 -j ACCEPT
       COMMIT
 
-# We want the iptables rules to be in effect when this task completes,
-# but the task completion should not interfere with the sleep and undo
-# step that ends the partition.
+# We save the current iptables rules so that we can restore them after
+# the partition_timeout. If /tmp/existing.rules already exists, it may
+# mean that an earlier restore failed, or has not yet happened, so we
+# skip this task (to avoid restoring the partition rules later).
 
-- name: Create temporary network partition
+- name: Save existing iptables rules, if any
   shell: >
-    iptables-save > /tmp/existing.rules &&
-    iptables-restore /tmp/partition.rules
+    /sbin/iptables-save > /tmp/existing.rules
   args:
     executable: /bin/bash
+    creates: /tmp/existing.rules
   become_user: root
   become: yes
+
+- name: Create network partition
+  command: /sbin/iptables-restore /tmp/partition.rules
+  become_user: root
+  become: yes
+
+# We want to undo the partition ruleset after partition_timeout seconds.
+# If /tmp/existing.rules does not exist, it means a pending restore from
+# an earlier invocation must have completed and removed the file, so we
+# do nothing. If it exists, we must have created it, or it's a leftover
+# from a failed earlier restore, so we restore it and remove the file.
 
 - name: Set timeout for network partition
   shell: >
     sleep {{ partition_timeout|default('600') }};
-    iptables-restore /tmp/existing.rules
+    if [[ -f /tmp/existing.rules ]]; then
+      /sbin/iptables-restore /tmp/existing.rules;
+      rm /tmp/existing.rules;
+    fi
   args:
     executable: /bin/bash
   become_user: root
