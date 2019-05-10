@@ -1,0 +1,69 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- assert:
+    msg: "This test may be applied only to pgbouncer instances"
+    that:
+    - role|contains('pgbouncer')
+
+# First, we check that connections through pgbouncer to the backend
+# database connections are TLS-protected from end-to-end (as a side
+# effect, we also know that we can connect and issue queries).
+
+- name: Ensure that connections through pgbouncer are TLS-protected
+  postgresql_query:
+    conninfo: "{{ pgbouncer_node_dsn|dbname('postgres', user='postgres') }}"
+    query: >
+      SELECT ssl
+      FROM pg_stat_activity sa JOIN pg_stat_ssl ss USING (pid)
+      WHERE pid = pg_backend_pid()
+  register: q
+  failed_when:
+    q is not successful or not q.ssl
+  environment:
+    PGPASSWORD: "{{ postgres_password }}"
+
+# Next, we connect to the pgbouncer admin database and check that "SHOW
+# DATABASES" returns entries for postgres (which we connected to above)
+# and pgbouncer (which we're connecting to now) with the expected host
+# and port configuration.
+
+- name: Ensure we can connect to the pgbouncer administrative database
+  postgresql_query:
+    conninfo: "{{ pgbouncer_node_dsn|dbname('pgbouncer', user='pgbouncer') }}"
+    query: SHOW DATABASES
+    autocommit: yes
+  register: q
+  environment:
+    PGPASSWORD: "{{ pgbouncer_password }}"
+
+- name: Verify SHOW DATABASES output
+  assert:
+    msg: "Expected SHOW DATABASES to return at least two rows (pgbouncer, postgres)"
+    that:
+    - q.results|length >= 2
+    - q.results|selectattr('database', 'equalto', 'postgres')|list|length == 1
+    - q.results|selectattr('database', 'equalto', 'pgbouncer')|list|length == 1
+
+- name: Verify pgbouncer_port configuration
+  assert:
+    msg: >-
+      Expected pgbouncer_port={{ pgbouncer_port }}, got {{ db_pgbouncer.port }}
+    that:
+    - db_pgbouncer.port == pgbouncer_port|int
+  vars:
+    db_pgbouncer: >-
+      {{ q.results|selectattr('database', 'equalto', 'pgbouncer')|list|first }}
+
+- name: Verify pgbouncer_backend configuration
+  assert:
+    msg: >-
+      Expected pgbouncer_backend={{ pgbouncer_backend }}:{{ pgbouncer_backend_port }},
+      got {{ db_postgres.host }}:{{ db_postgres.port }}
+    that:
+    - db_postgres.host == pgbouncer_backend
+    - db_postgres.port == pgbouncer_backend_port|int
+  vars:
+    db_postgres: >-
+      {{ q.results|selectattr('database', 'equalto', 'postgres')|list|first }}

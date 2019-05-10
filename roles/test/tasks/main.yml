@@ -35,3 +35,12 @@
   when: >
     'barman' in role
   tags: always
+
+- name: Run pgbouncer tests
+  include_tasks:
+    file: pgbouncer.yml
+    apply:
+      tags: pgbouncer
+  when: >
+    'pgbouncer' in role
+  tags: pgbouncer

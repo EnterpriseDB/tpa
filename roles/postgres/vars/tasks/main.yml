@@ -81,4 +81,6 @@
       host={{ inventory_hostname }} port={{ postgres_port }} dbname=repmgr user=repmgr
     bdr_node_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user=postgres
+    pgbouncer_node_dsn: >-
+      host={{ inventory_hostname }} port={{ pgbouncer_port }}
   tags: always
