@@ -25,17 +25,24 @@
 - set_fact:
     possible_testers: "{{ groups|members_of('role_bdr', not_in=all_camo_groups)|list }}"
 
-# If there are no CAMO groups, then we don't have to run any tests here.
-# If there are CAMO groups, there must be at least one instance to run
-# the tests from.
+- name: Check if bdr_camo_client is available
+  stat:
+    path: "{{ postgres_bin_dir }}/bdr_camo_client"
+  register: client
+  when:
+    inventory_hostname in possible_testers
 
-- assert:
-    msg: "CAMO groups found, but no instances to run tests from"
-    that: all_camo_groups is empty or possible_testers is not empty
+- name: Exclude possible_testers without bdr_camo_client installed
+  set_fact:
+    testers_with_client: "{{ testers_with_client|default([])|union([item]) }}"
+  with_items: "{{ possible_testers }}"
+  when:
+    hostvars[item].client.stat.exists
 
-# We now run bdr_camo_client on the tester_instance against the CAMO
-# partners, and cause the first partner to undergo various failures
-# during the run.
+# If we have a suitable camo group and tester instance, we now run
+# bdr_camo_client against the CAMO partners from the tester_instance,
+# and cause the first partner to undergo various failures during the
+# run. Otherwise we skip this test.
 
 - name: Run bdr_camo_client tests
   block:
@@ -45,7 +52,7 @@
         loop_var: failure
       vars:
         camo_test_group: "{{ all_camo_groups|first }}"
-        tester_instance: "{{ possible_testers|first }}"
+        tester_instance: "{{ testers_with_client|first }}"
         nondestructive_failures:
           - none
         destructive_failures:
@@ -59,4 +66,5 @@
         inventory_hostname in groups[bdr_node_group] or
         inventory_hostname == tester_instance
   when:
-    all_camo_groups is not empty
+    all_camo_groups is not empty and
+    testers_with_client|default([]) is not empty

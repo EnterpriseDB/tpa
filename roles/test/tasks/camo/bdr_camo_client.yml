@@ -9,15 +9,6 @@
     camo_clients: "{{ camo_threads|default(200) }}"
 
 - block:
-  - name: Check for bdr_camo_client
-    stat:
-      path: "{{ bdr_camo_client }}"
-    register: client
-
-  - assert:
-      msg: "Couldn't find {{ bdr_camo_client }}"
-      that: client.stat.exists
-
   - name: Create bdr_camo_client test table
     postgresql_query:
       conninfo: "{{ ping_conninfo }}"
