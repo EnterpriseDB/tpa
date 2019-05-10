@@ -38,13 +38,18 @@
   environment:
     PGPASSWORD: "{{ pgbouncer_password }}"
 
-- name: Verify SHOW DATABASES output
+- name: Verify SHOW DATABASES returns expected databases
   assert:
-    msg: "Expected SHOW DATABASES to return at least two rows (pgbouncer, postgres)"
+    msg: >-
+      Expected SHOW DATABASES to return at least
+      {{ expected_dbs|length }} rows ({{ ','.join(expected_dbs) }})"
     that:
-    - q.results|length >= 2
-    - q.results|selectattr('database', 'equalto', 'postgres')|list|length == 1
-    - q.results|selectattr('database', 'equalto', 'pgbouncer')|list|length == 1
+    - q.results|length >= expected_dbs|length
+    - q.results|selectattr('database', 'in', expected_dbs)|list|length == expected_dbs|length
+  vars:
+    expected_dbs:
+    - postgres
+    - pgbouncer
 
 - name: Verify pgbouncer_port configuration
   assert:
