@@ -34,7 +34,7 @@
       tags: barman
   when: >
     'barman' in role
-  tags: always
+  tags: barman
 
 - name: Run pgbouncer tests
   include_tasks:
