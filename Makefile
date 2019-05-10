@@ -1,10 +1,10 @@
-TARGET=bdr3ao.pdf m1.pdf
+TARGET=bdr3ao-manual.pdf bdr3ao-spec.pdf m1.pdf
 
 all: $(TARGET)
 
-bdr3ao.pdf:
+bdr3ao-%.pdf:
 	$(MAKE) -C BDR-Always-ON
-	cp BDR-Always-ON/bdr3ao.pdf $@
+	cp BDR-Always-ON/bdr3ao-$*.pdf $@
 
 m1.pdf:
 	$(MAKE) -C M1
