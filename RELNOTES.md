@@ -10,6 +10,10 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Numerous testing improvements
 
+### Bugfixes
+
+- Remove unused 2ndQuadrant repository configuration files
+
 ## v7.9 (2019-05-09)
 
 ### Bugfixes

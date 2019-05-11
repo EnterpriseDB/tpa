@@ -55,9 +55,6 @@
     repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
     r: "{{ repos[item] }}"
 
-- name: Update apt cache
-  apt: update_cache=yes
-
 - name: Install 2ndQuadrant repositories
   shell: >
     curl {{ url }} | bash
@@ -81,3 +78,13 @@
     url: >-
       {{ urltemplate.format(token=token, label=item, volatile=volatile) }}
     file: "/etc/apt/sources.list.d/2ndquadrant-{{ item|replace('/', '-') }}.list"
+  register: installed_repositories
+
+- include_tasks: repository-cleanup.yml
+  vars:
+    repository_path: /etc/apt/sources.list.d
+    repository_files: "{{ installed_repositories.results|json_query('[*].invocation.module_args.creates|[]') }}"
+  tags: always
+
+- name: Update apt cache
+  apt: update_cache=yes

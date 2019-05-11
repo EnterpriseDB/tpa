@@ -73,3 +73,10 @@
     url: >-
       {{ urltemplate.format(token=token, label=item, version=version_tag, volatile=volatile) }}
     file: "/etc/yum.repos.d/2ndquadrant-{{ item|replace('/', '-') }}-pg{{ postgres_version }}.repo"
+  register: installed_repositories
+
+- include_tasks: repository-cleanup.yml
+  vars:
+    repository_path: /etc/yum.repos.d
+    repository_files: "{{ installed_repositories.results|json_query('[*].invocation.module_args.creates|[]') }}"
+  tags: always

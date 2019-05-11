@@ -1,0 +1,21 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Remove unused 2Q repository definitions
+  shell: >
+    if [[ $({{ find_cmd }}| wc -l) != 0 ]]; then
+    {{ find_cmd }} -exec rm {} ';'; exit 99;
+    fi
+  args:
+    executable: /bin/bash
+  vars:
+    find_cmd: >-
+      find {{ repository_path }}
+      {% if repository_files is not empty %}
+      {% for f in repository_files %}-path '{{ f }}'{% if not loop.last %} -o {% endif %}{% endfor %} -prune -o
+      {% endif %}
+      -name '2ndquadrant-*' -print
+  register: rm
+  changed_when: rm.rc == 99
+  failed_when: rm.rc not in [0, 99]
