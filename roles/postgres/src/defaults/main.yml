@@ -29,11 +29,28 @@ postgres_build_dir: /opt/postgres/build/postgres
 #
 # We install Postgres along with all contrib modules by default. These
 # settings can be used to customise the configure/build/install process.
+#
+# By default, we build using the settings in postgres_configure_env and
+# postgres_configure_opts.
+#
+# You can specify environment variables in postgres_extra_configure_env
+# to override (or augment) the default environment.
+#
+# You can specify a list of additional options to pass to configure in
+# postgres_extra_configure_opts. To nullify one of the default configure
+# options, include the corresponding --disable-xxx/--without-xxx option
+# here (in preference to overriding postgres_configure_opts altogether).
+#
+# Building ``--without-openssl`` is not supported by default.
 
-postgres_configure_env: {}
+postgres_configure_env:
+  CFLAGS: "-O0 -fno-omit-frame-pointer"
+postgres_extra_configure_env: {}
 postgres_configure_opts:
   - -q
   - --with-openssl
+  - --enable-debug
+  - --enable-cassert
   - --enable-tap-tests
 postgres_extra_configure_opts: []
 postgres_make_command: "make -s"

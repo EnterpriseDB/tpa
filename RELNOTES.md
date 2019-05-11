@@ -2,6 +2,14 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v8.0 (unreleased)
+
+### Notable changes
+
+- Enable debugging by default when building Postgres from source
+
+- Numerous testing improvements
+
 ## v7.9 (2019-05-09)
 
 ### Bugfixes

@@ -40,7 +40,7 @@
   args:
     chdir: "{{ postgres_build_dir }}"
     executable: /bin/bash
-  environment: "{{ postgres_configure_env }}"
+  environment: "{{ postgres_configure_env|combine(postgres_extra_configure_env) }}"
   vars:
     all_configure_opts: "{{
       postgres_configure_opts|union(postgres_extra_configure_opts)
