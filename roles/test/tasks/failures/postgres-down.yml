@@ -1,0 +1,29 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# First, we stop postgres (the default being to use -m fast; set
+# stop_mode to specify a different mode).
+
+- name: Stop postgres
+  command: >
+    {{ postgres_bin_dir }}/pg_ctl -D {{ postgres_data_dir }}
+    stop -m {{ stop_mode|default('fast') }}
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# Optionally, if restart_after is set, we arrange to start Postgres
+# after the timeout expires. (It's up to Postgres how much more time
+# it will take to start up and be available. We make no guarantees.)
+
+- name: Set timeout to start postgres
+  shell: >
+    sleep {{ restart_after }}; systemctl start postgres
+  args:
+    executable: /bin/bash
+  become_user: root
+  become: yes
+  when:
+    restart_after is defined
+  async: 7200
+  poll: 0
