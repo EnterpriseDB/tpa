@@ -40,7 +40,7 @@
       -c 'INSERT INTO camo_test VALUES ($1, $2);'
       -i {{ camo_transactions }} -j {{ camo_clients }}
       {{ bdr_database }} > {{ bdr_camo_client_output }} 2>&1
-    register: bdr_camo_client
+    register: client_run
     become_user: "{{ postgres_user }}"
     become: yes
     async: 7200
@@ -59,7 +59,7 @@
 
 - block:
   - name: Wait for bdr_camo_client to complete
-    async_status: jid="{{ bdr_camo_client.ansible_job_id }}"
+    async_status: jid="{{ client_run.ansible_job_id }}"
     register: client
     until: client.finished
     retries: 600
