@@ -48,17 +48,24 @@
     option: exclude
     value: "postgresql* barman* repmgr*"
 
-- name: Install 2ndQuadrant repositories
-  shell: >
-    curl {{ url }} | bash
-  args:
-    executable: /bin/bash
-    creates: "{{ use_volatile_subscriptions|ternary(omit, file) }}"
+- set_fact:
+    _2q_repositories: []
+
+- name: Enumerate 2ndQuadrant repositories
+  set_fact:
+    _2q_repositories: "{{
+      _2q_repositories|union([{
+        'url': url,
+        'file': file,
+        'repo': item
+      }])
+    }}"
   with_items:
     - dl/default/release
     - "{{ tpa_2q_repositories|default([]) }}"
   when:
-    tpa_2q_repositories|default('undefined') != []
+    tpa_2q_repositories is defined and
+    tpa_2q_repositories is not empty
   vars:
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
     volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
@@ -73,10 +80,17 @@
     url: >-
       {{ urltemplate.format(token=token, label=item, version=version_tag, volatile=volatile) }}
     file: "/etc/yum.repos.d/2ndquadrant-{{ item|replace('/', '-') }}-pg{{ postgres_version }}.repo"
-  register: installed_repositories
+
+- name: Install 2ndQuadrant repositories
+  shell: >
+    curl {{ item.url }} | bash
+  args:
+    executable: /bin/bash
+    creates: "{{ use_volatile_subscriptions|ternary(omit, item.file) }}"
+  with_items: "{{ _2q_repositories }}"
 
 - include_tasks: repository-cleanup.yml
   vars:
     repository_path: /etc/yum.repos.d
-    repository_files: "{{ installed_repositories.results|json_query('[*].invocation.module_args.creates|[]') }}"
+    repository_files: "{{ _2q_repositories|map(attribute='file')|list }}"
   tags: always
