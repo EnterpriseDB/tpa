@@ -37,7 +37,7 @@
 - include_role:
     name: barman/first-backup
     apply:
-      tags: firstbackup
+      tags: first-backup
   with_items: "{{ backup|default([]) }}"
   loop_control:
     loop_var: this_barman
