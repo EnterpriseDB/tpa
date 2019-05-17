@@ -30,7 +30,7 @@
 
 - name: Upload barman lockfile script
   copy:
-    dest: /tmp/lock
+    dest: /tmp/lock.py
     mode: 0755
     content: |
       #!/usr/bin/env python
@@ -44,6 +44,8 @@
           except:
               pass
   delegate_to: "{{ this_barman }}"
+  become_user: barman
+  become: yes
 
 - name: Wait for old WAL segment to be archived
   wait_for:
@@ -51,6 +53,8 @@
     delay: 3
     timeout: 130
   delegate_to: "{{ this_barman }}"
+  become_user: barman
+  become: yes
 
 # We know now that «barman archive-wal» has been invoked and moved the
 # WAL segment into wals/, but we don't know if it has finished updating
@@ -60,9 +64,11 @@
 
 - name: Acquire and release Barman WAL archive lock
   shell: >
-    $(head -1 $(which barman)|sed 's/^#!//') /tmp/lock "{{ lockfile }}"
+    $(head -1 $(which barman)|sed 's/^#!//') /tmp/lock.py "{{ lockfile }}"
   args:
     executable: /bin/bash
   vars:
     lockfile: "{{ barman_home }}/.{{ backup_name }}-archive-wal.lock"
   delegate_to: "{{ this_barman }}"
+  become_user: barman
+  become: yes
