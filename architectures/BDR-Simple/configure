@@ -98,9 +98,13 @@ class BDR_Simple(BDR):
             'postgres_coredump_filter': '0xff',
             'postgres_version': postgres_version,
             'postgresql_flavour': postgresql_flavour,
-            'tpa_2q_repositories': tpa_2q_repositories,
             'extra_postgres_extensions': extensions,
         })
+
+        if tpa_2q_repositories:
+            cluster_vars.update({
+                'tpa_2q_repositories': tpa_2q_repositories,
+            })
 
 if __name__ == '__main__':
     BDR_Simple().configure()
