@@ -59,5 +59,10 @@
 # «barman backup» (which will fail if the segment isn't in xlogdb).
 
 - name: Acquire and release Barman WAL archive lock
-  command: /tmp/lock "{{ barman_home }}/.{{ backup_name }}-archive-wal.lock"
+  shell: >
+    /tmp/lock "{{ lockfile }}" || python3 /tmp/lock "{{ lockfile }}"
+  args:
+    executable: /bin/bash
+  vars:
+    lockfile: "{{ barman_home }}/.{{ backup_name }}-archive-wal.lock"
   delegate_to: "{{ this_barman }}"
