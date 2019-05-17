@@ -13,7 +13,7 @@
   shell: >
     source /etc/default/grub;
     if ! [[ "$GRUB_CMDLINE_LINUX" =~ 'transparent_hugepage=' && "$GRUB_CMDLINE_LINUX" =~ 'hugepage=' ]];
-    then echo 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX hugepages={{ hugepages }} transparent_hugepage={{ transparent_hugepage }}"' >> /etc/default/grub;
+    then echo 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX hugepages={{ nr_hugepages }} transparent_hugepage={{ transparent_hugepage }}"' >> /etc/default/grub;
     else echo unchanged;
     fi
   args:
@@ -22,7 +22,7 @@
   changed_when: cmdline.stdout != 'unchanged'
   vars:
     sysctls: "{{ sysctl_defaults|combine(sysctl_values) }}"
-    hugepages: "{{ sysctls['vm.nr_hugepages'] }}"
+    nr_hugepages: "{{ sysctls['vm.nr_hugepages'] }}"
 
 - name: Run update-grub
   command: update-grub
