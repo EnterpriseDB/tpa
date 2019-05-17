@@ -64,7 +64,7 @@
     - dl/default/release
     - "{{ tpa_2q_repositories|default([]) }}"
   when:
-    tpa_2q_repositories is defined and
+    tpa_2q_repositories is not defined or
     tpa_2q_repositories is not empty
   vars:
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
