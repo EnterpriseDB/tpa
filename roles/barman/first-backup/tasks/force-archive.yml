@@ -64,7 +64,7 @@
 
 - name: Acquire and release Barman WAL archive lock
   shell: >
-    $(head -1 $(which barman)|sed 's/^#!//') /tmp/lock.py "{{ lockfile }}"
+    $(head -1 $(command -v barman)|sed 's/^#!//') /tmp/lock.py "{{ lockfile }}"
   args:
     executable: /bin/bash
   vars:
