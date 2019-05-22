@@ -106,3 +106,11 @@
     file: postgres-reconfig.yml
     apply:
       tags: [postgres, config, bdr]
+
+- name: Perform postgres_fdw setup
+  include_tasks:
+    file: postgres_fdw.yml
+    apply:
+      tags: fdw
+  when: inventory_hostname == first_bdr_primary
+  tags: fdw

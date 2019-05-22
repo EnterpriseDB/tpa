@@ -30,6 +30,7 @@
   with_items:
     - platypus
     - pg_stat_statements
+    - postgres_fdw
     - pglogical
     - bdr
   loop_control:

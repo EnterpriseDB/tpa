@@ -1,0 +1,75 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Enumerate foreign servers required
+  set_fact:
+    foreign_servers: "{{
+      foreign_servers|default([])|union([{
+        'name': srvname,
+        'host': item,
+      }])
+    }}"
+  with_items:
+    "{{ groups[bdr_node_group] }}"
+  vars:
+    srvname: "bdr_{{ bdr_node_group }}_{{ item }}"
+
+- name: Find existing foreign servers
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >
+        SELECT coalesce(array_agg(srvname),'{}'::text[]) as existing_servers
+        FROM pg_catalog.pg_foreign_server pfs
+        JOIN pg_catalog.pg_foreign_data_wrapper pfdw ON (pfs.srvfdw=pfdw.oid)
+        WHERE fdwname='postgres_fdw' AND srvname = ANY(%s)
+      args:
+      - "{{ foreign_servers|map(attribute='name')|list }}"
+  register: pfs
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Create foreign servers if required
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >
+        CREATE SERVER {{ item.name }} FOREIGN DATA WRAPPER postgres_fdw
+        OPTIONS (host %s, port %s, dbname %s)
+      args:
+      - "{{ hostvars[item.host].inventory_hostname }}"
+      - "{{ hostvars[item.host].postgres_port }}"
+      - "{{ hostvars[item.host].bdr_database }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ foreign_servers }}"
+  when:
+    item.name not in pfs.existing_servers
+
+- name: Find existing foreign server user mappings
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >
+        SELECT coalesce(array_agg(srvname),'{}'::text[]) as existing_mappings
+        FROM pg_catalog.pg_user_mapping pum 
+        JOIN pg_catalog.pg_foreign_server pfs ON (pum.umserver=pfs.oid)
+        JOIN pg_catalog.pg_foreign_data_wrapper pfdw ON (pfs.srvfdw=pfdw.oid)
+        WHERE fdwname='postgres_fdw' AND srvname = ANY(%s)
+      args:
+      - "{{ foreign_servers|map(attribute='name')|list }}"
+  register: pum
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Create user mappings if required
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    query: >
+      CREATE USER MAPPING FOR PUBLIC SERVER {{ item.name }}
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ foreign_servers }}"
+  when:
+    item.name not in pum.existing_mappings
