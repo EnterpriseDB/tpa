@@ -34,7 +34,7 @@
     with_items: "{{ volumes }}"
     vars:
       _device: >-
-        {{ (item.encryption == 'luks')|ternary('/dev/mapper/%s' % (item.luks_volume|default(item.device|basename)), item.device) }}
+        {{ ('encryption' in item and item.encryption == 'luks')|ternary('/dev/mapper/%s' % (item.luks_volume|default(item.device|basename)), item.device) }}
 
   - command: cryptsetup luksClose "{{ _luks_volume }}"
     register: luksclose
