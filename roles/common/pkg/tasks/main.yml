@@ -4,7 +4,7 @@
 
 - name: Ensure Postgres configuration is present
   assert:
-    msg: "Please include the postgres/vars role to define postgres_version"
+    msg: "Please define postgres_version (usually done by roles/facts)"
     that:
       - postgres_version is defined
       - postgres_versionNN is defined

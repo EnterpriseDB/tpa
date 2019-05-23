@@ -14,6 +14,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Remove unused 2ndQuadrant repository configuration files
 
+- When redeploying on an existing cluster, use PG_VERSION to derive
+  postgres_version if the latter is not explicitly set in config.yml
+
 ## v7.9 (2019-05-09)
 
 ### Bugfixes

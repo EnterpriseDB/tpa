@@ -8,8 +8,6 @@
   tasks:
   - include_role:
       name: init
-    vars:
-      pgdata_initialised: "{{ 'postgres' in role }}"
     tags: always
 
   - assert:

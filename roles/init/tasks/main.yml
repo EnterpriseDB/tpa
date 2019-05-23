@@ -8,9 +8,6 @@
 - include_role: name=facts
   tags: always
 
-- include_role: name=postgres/vars
-  tags: always
-
 - include_role: name=postgres/facts
   when: >
     'postgres' in role and

@@ -10,6 +10,4 @@
     install_from_source is not empty
 
 - include_role: name=postgres/restart
-  vars:
-    pgdata_initialised: "{{ 'postgres' in role }}"
   tags: always

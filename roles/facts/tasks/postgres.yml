@@ -2,21 +2,42 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- name: Set postgres_data_dir
+  set_fact:
+    postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
+  tags: always
+
+- name: Perform basic postgres fact discovery
+  minimal_postgres_setup:
+    pgdata: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
+  become_user: root
+  become: yes
+  tags: always
+
+- name: Ensure postgres_version matches pgdata_version, if defined
+  assert:
+    msg: >-
+      postgres_version is set to {{ postgres_version }}, but
+      {{ postgres_data_dir }} was initialised with {{ pgdata_version }}
+    that: postgres_version|float == pgdata_version|float
+  when:
+    postgres_version is defined and pgdata_version is defined
+  tags: always
+
 - name: Set postgres_version
   set_fact:
     postgres_version: "{{ version }}"
     postgres_versionNN: "{{ version|replace('.','') }}"
   vars:
-    version: "{{ postgres_version|default(default_postgres_version) }}"
+    version: "{{ postgres_version|default(pgdata_version|default(default_postgres_version)) }}"
   tags: always
 
-- name: Set postgres_{user,home,port} etc.
+- name: Set various postgres facts
   set_fact:
     postgres_user: "{{ postgres_user|default(default_postgres_user) }}"
     postgres_group: "{{ postgres_group|default(default_postgres_user) }}"
     postgres_home: "{{ postgres_home|default(default_postgres_home_dirs[ansible_os_family]) }}"
     postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
-    postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
     postgres_host: "{{ postgres_host|default('localhost') }}"
     postgres_port: "{{ postgres_port|default(5432) }}"
     postgres_service_name: postgres

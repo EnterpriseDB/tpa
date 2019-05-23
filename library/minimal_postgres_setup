@@ -1,0 +1,24 @@
+#!/bin/bash
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+source $1
+
+pgdata=${pgdata:-/opt/postgres/data}
+pgdata_initialised=false
+
+VERSION=$pgdata/PG_VERSION
+if [[ -f $VERSION ]]; then
+    pgdata_initialised=true
+    pgdata_version=$(cat $VERSION)
+fi
+
+grep -Ev '": "*,*$' <<RESULT
+{
+    "changed": false,
+    "ansible_facts": {
+        "pgdata": "$pgdata",
+        "pgdata_version": $pgdata_version,
+        "pgdata_initialised": $pgdata_initialised
+    }
+}
+RESULT

@@ -8,9 +8,6 @@
 - include_tasks: prereqs.yml
   tags: always
 
-- include_tasks: test-facts.yml
-  tags: always
-
 - name: Run system-level tests
   include_tasks:
     file: sys.yml

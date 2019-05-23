@@ -12,8 +12,6 @@
     tags: always
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
-  vars:
-    pgdata_initialised: "{{ 'postgres' in role }}"
   tags: always
 
 - import_playbook: "{{ testpath }}"
