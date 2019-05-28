@@ -10,6 +10,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Numerous testing improvements
 
+- Support for Barman 2.8
+
 ### Bugfixes
 
 - Remove unused 2ndQuadrant repository configuration files
