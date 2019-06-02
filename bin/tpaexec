@@ -50,11 +50,11 @@ version() {
 }
 
 _python_version() {
-    /usr/bin/env python -c 'import sys; print "%d.%d.%d" % (sys.version_info[0:3])'
+    /usr/bin/env python -c 'import sys; print("%d.%d.%d" % (sys.version_info[0:3]))'
 }
 
 _detect_virtualenv() {
-    /usr/bin/env python -c "import sys; print 'virtualenv' if hasattr(sys, 'real_prefix') else 'no virtualenv'"
+    /usr/bin/env python -c "import sys; print('virtualenv' if hasattr(sys, 'real_prefix') else 'no virtualenv')"
 }
 
 _activate_virtualenv() {
