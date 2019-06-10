@@ -1,0 +1,10 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Force an immediate backup
+  command: >
+    /usr/bin/barman backup "{{ backup_name }}"
+  delegate_to: "{{ this_barman }}"
+  become_user: barman
+  become: yes
