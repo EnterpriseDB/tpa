@@ -72,7 +72,7 @@
       - text: SELECT bdr.alter_node_replication_sets(node_name := %s, set_names := %s)
         args:
           - "{{ bdr_node_name }}"
-          - "{{ item.replication_sets }}"
+          - "{{ item.replication_sets|union([bdr_node_group]) }}"
   with_items:
     "{{ subscriptions|default([]) }}"
   when:
