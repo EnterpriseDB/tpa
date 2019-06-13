@@ -31,32 +31,56 @@ class CAMO2x2(BDR_Always_ON):
     def num_instances(self):
         return 10
 
-    def update_instances(self, instances):
-        super(CAMO2x2, self).update_instances(instances)
+    def update_locations(self, locations):
+        super(CAMO2x2, self).update_locations(locations)
         if self.args['replicate_deletes_locally']:
-            for i in instances:
-                role = i.get('role', [])
-                if 'bdr' in role and 'primary' in role:
-                    vars = i.get('vars', {})
-                    vars['subscriptions'] = [{
-                        'type': 'bdr',
-                        'database': self.args['bdr_database'],
-                        'replication_sets': [
-                            'cluster_global',
-                            'local_%s_deletes' % i.get('location')
-                        ]
-                    }]
-                    i['vars'] = vars
+            for l in locations:
+                vars = l.get('vars', {})
+                vars['subscriptions'] = [{
+                    'type': 'bdr',
+                    'database': self.args['bdr_database'],
+                    'replication_sets': [
+                        'cluster_global',
+                        'local_%s_deletes' % l.get('Name')
+                    ]
+                }]
+                l['vars'] = vars
 
     def cluster_vars_args(self):
         return super(CAMO2x2, self).cluster_vars_args() + [
             'replicate_deletes_locally'
         ]
 
-    def links_to_create(self):
-        return super(CAMO2x2, self).links_to_create() + [
-            'hooks'
-        ]
+    def update_cluster_vars(self, cluster_vars):
+        super(CAMO2x2, self).update_cluster_vars(cluster_vars)
+        if self.args['replicate_deletes_locally']:
+            cluster_vars.update({
+                'publications': [{
+                    'type': 'bdr',
+                    'database': self.args['bdr_database'],
+                    'replication_sets': [
+                        {
+                            'name': self.args['bdr_node_group'],
+                            'autoadd_tables': False,
+                        },
+                        {
+                            'name': 'cluster_global',
+                            'replicate_delete': False,
+                            'replicate_truncate': False,
+                            'autoadd_tables': True,
+                        },
+                    ]
+                }]
+            })
+            for l in self.args['locations']:
+                cluster_vars['publications'][0]['replication_sets'].append({
+                    'name': 'local_%s_deletes' % l.get('Name'),
+                    'replicate_insert': False,
+                    'replicate_update': False,
+                    'replicate_delete': True,
+                    'replicate_truncate': True,
+                    'autoadd_tables': True,
+                })
 
 if __name__ == '__main__':
     CAMO2x2().configure()
