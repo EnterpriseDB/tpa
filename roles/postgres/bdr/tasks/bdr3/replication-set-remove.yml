@@ -1,0 +1,20 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Remove unnecessary replication sets
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: SELECT bdr.drop_replication_set(set_name := %s)
+      args:
+      - "{{ item.set_name }}"
+  with_items: "{{ existing_sets }}"
+  vars:
+    published_sets: >-
+      {{ publication_sets|json_query('[*].name') }}
+  when:
+    item.set_name not in published_sets|union([bdr_node_group])
+  changed_when: True
+  become_user: "{{ postgres_user }}"
+  become: yes

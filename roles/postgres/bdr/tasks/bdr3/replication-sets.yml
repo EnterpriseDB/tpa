@@ -1,0 +1,61 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# Replication set configuration:
+#
+# - publication_sets defines the replication sets that must exist (these
+# are configured on the first_bdr_primary and replicated to other nodes)
+# - subscription_sets defines the replication sets that each node wants
+# to subscribe to
+#
+# (We handle these together because we want to alter node subscriptions
+# before dropping unsed replication sets from publications.)
+#
+# The first_bdr_primary will now fetch existing replication sets and
+# create or alter replication sets to match publication_sets.
+
+- include_tasks: bdr3/replication-set-define.yml
+  when:
+    inventory_hostname == first_bdr_primary
+
+# Now each node can check and alter, if required, which replication sets
+# it subscribes to. We must always subscribe to the default replication
+# set for the group, because DDL replication won't work otherwise. Note
+# that the first time this happens is before the group join.
+
+- name: Fetch current subscription details
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    query: >
+      SELECT coalesce(replication_sets, '{}'::text[]) as replication_sets
+      FROM bdr.local_node_summary JOIN bdr.node_local_info USING (node_id)
+  register: subscribed
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Alter subscription to include desired replication sets
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+      - text: SELECT bdr.alter_node_replication_sets(node_name := %s, set_names := %s)
+        args:
+          - "{{ bdr_node_name }}"
+          - "{{ wanted_sets }}"
+  vars:
+    wanted_sets: >-
+      {{ subscription_sets|union([bdr_node_group]) }}
+    subscribed_sets: >-
+      {{ subscribed.replication_sets|default([])|union([bdr_node_group]) }}
+  when:
+    subscribed_sets|symmetric_difference(wanted_sets) is not empty
+  changed_when: True
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# Finally, we can now remove any replication sets that exist but are not
+# mentioned in publication_sets (except the default replication set).
+
+- include_tasks: bdr3/replication-set-remove.yml
+  when:
+    inventory_hostname == first_bdr_primary

@@ -6,6 +6,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Notable changes
 
+- Improvements to the BDR replication set configuration process
+
 - Enable debugging by default when building Postgres from source
 
 - Numerous testing improvements
@@ -18,6 +20,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - When redeploying on an existing cluster, use PG_VERSION to derive
   postgres_version if the latter is not explicitly set in config.yml
+
+- Don't remove the default replication set from the BDR subscription
+  (this breaks DDL replication)
 
 ## v7.9 (2019-05-09)
 

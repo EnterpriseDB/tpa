@@ -78,6 +78,20 @@
     node_group_id.rowcount == 0
   tags: always
 
+- name: Configure replication sets
+  include_tasks:
+    file: bdr3/replication-sets.yml
+    apply:
+      tags: [bdr, replication-sets]
+  vars:
+    q: >-
+      [?type=='bdr' && database=='%s'].replication_sets|[]
+    publication_sets: >-
+      {{ publications|default([])|json_query(q % bdr_database) }}
+    subscription_sets: >-
+      {{ subscriptions|default([])|json_query(q % bdr_database) }}
+  tags: [bdr, replication-sets]
+
 - name: Include bdr-post-group-creation hook
   include_tasks: "{{ hook }}"
   when:
@@ -97,7 +111,7 @@
 # executing the task on first_bdr_primary, but connecting to each instance
 # in turn to issue the bdr.join_node_group() query.
 
-- include_tasks: bdr3-join.yml
+- include_tasks: bdr3/join.yml
   when:
     inventory_hostname == first_bdr_primary
   tags: always

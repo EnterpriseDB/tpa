@@ -1,0 +1,91 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Enumerate existing replication sets
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    query: SELECT * FROM bdr.replication_sets
+  register: sets
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- set_fact:
+    existing_sets: "{{ sets.results }}"
+
+# If a set is named in publication_sets but not found in existing_sets,
+# we must create it now.
+
+- name: Create replication sets if required
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >
+        SELECT bdr.create_replication_set(
+          set_name := %s,
+          replicate_insert := %s, replicate_update := %s,
+          replicate_delete := %s, replicate_truncate := %s,
+          autoadd_tables := %s, autoadd_existing := %s
+        )
+      args:
+      - "{{ set.name }}"
+      - "{{ set.replicate_insert|default(true) }}"
+      - "{{ set.replicate_update|default(true) }}"
+      - "{{ set.replicate_delete|default(true) }}"
+      - "{{ set.replicate_truncate|default(true) }}"
+      - "{{ set.autoadd_tables|default(false) }}"
+      - "{{ set.autoadd_existing|default(true) }}"
+  with_items: "{{ publication_sets }}"
+  loop_control:
+    loop_var: set
+  vars:
+    _matches: >-
+      {{ existing_sets|json_query("[?set_name=='%s']" % set.name) }}
+    existing_set: >-
+      {{ _matches[0]|default({}) }}
+  when:
+    existing_set is empty
+  changed_when: True
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# For other existing_sets, we may need to alter the configuration to
+# match what is specified in publication_sets.
+
+- name: Alter replication sets if required
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >
+        SELECT bdr.alter_replication_set(
+          set_name := %s,
+          replicate_insert := %s, replicate_update := %s,
+          replicate_delete := %s, replicate_truncate := %s,
+          autoadd_tables := %s
+        )
+      args:
+      - "{{ set.name }}"
+      - "{{ set.replicate_insert|default(true) }}"
+      - "{{ set.replicate_update|default(true) }}"
+      - "{{ set.replicate_delete|default(true) }}"
+      - "{{ set.replicate_truncate|default(true) }}"
+      - "{{ set.autoadd_tables|default(false) }}"
+  with_items: "{{ publication_sets }}"
+  loop_control:
+    loop_var: set
+  vars:
+    _matches: >-
+      {{ existing_sets|json_query("[?set_name=='%s']" % set.name) }}
+    existing_set: >-
+      {{ _matches[0]|default({}) }}
+  when:
+    existing_set is not empty
+    and [existing_set.replicate_insert, existing_set.replicate_update,
+         existing_set.replicate_delete, existing_set.replicate_truncate,
+         existing_set.set_autoadd_tables] !=
+        [set.replicate_insert|default(true), set.replicate_update|default(true),
+         set.replicate_delete|default(true), set.replicate_truncate|default(true),
+         set.autoadd_tables|default(false)]
+  changed_when: True
+  become_user: "{{ postgres_user }}"
+  become: yes

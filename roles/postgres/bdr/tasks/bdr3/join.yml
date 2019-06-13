@@ -9,7 +9,7 @@
 # then for the remainder.
 
 - name: Join BDR node groups
-  include_tasks: bdr3-join-inner.yml
+  include_tasks: bdr3/join-inner.yml
   with_items: >
     {{ groups[bdr_node_group]|difference([first_bdr_primary]) }}
   loop_control:
@@ -20,7 +20,7 @@
   tags: always
 
 - name: Join BDR node groups with specified upstream
-  include_tasks: bdr3-join-inner.yml
+  include_tasks: bdr3/join-inner.yml
   vars:
     bdr_upstream: "{{ hostvars[bdr_node].upstream }}"
     bdr_upstream_dsn: "{{ hostvars[bdr_upstream].bdr_node_dsn }}"
