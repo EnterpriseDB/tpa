@@ -133,6 +133,7 @@ class Architecture(object):
         g.add_argument('--hostnames-from', metavar='FILE')
         g.add_argument('--hostnames-pattern', metavar='PATTERN')
         g.add_argument('--hostnames-sorted-by', metavar='OPTION')
+        g.add_argument('--hostnames-unsorted', action='store_true')
 
         g = p.add_argument_group('locations')
         g.add_argument('--location-names', metavar='LOCATION', nargs='+')
@@ -305,9 +306,9 @@ class Architecture(object):
     # regard to the fact that we number nodes starting from 1
     def hostnames(self, num):
         env = {}
-        for arg in ['hostnames_from', 'hostnames_pattern', 'hostnames_sorted_by']:
+        for arg in ['hostnames_from', 'hostnames_pattern', 'hostnames_sorted_by', 'hostnames_unsorted']:
             if self.args[arg] is not None:
-                env[arg.upper()] = self.args[arg]
+                env[arg.upper()] = str(self.args[arg])
 
         p = subprocess.Popen(
             ['%s/hostnames' % self.lib, str(num)], stdin=None,

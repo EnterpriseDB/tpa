@@ -26,7 +26,11 @@ if [[ ! -f $namesfile ]]; then
     exit 1
 fi
 
-names=($(grep -xE "$pattern" $namesfile|sort $order|head -$wanted))
+if [[ ${HOSTNAMES_UNSORTED:-'False'} == 'True' ]]; then
+    names=($(grep -xE "$pattern" $namesfile|head -$wanted))
+else
+    names=($(grep -xE "$pattern" $namesfile|sort $order|head -$wanted))
+fi
 if [[ "${#names[@]}" -lt $wanted ]];
 then
     echo "ERROR: found only ${#names[@]}/$wanted names matching '$pattern' in $namesfile" >&2

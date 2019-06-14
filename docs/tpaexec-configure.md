@@ -149,8 +149,11 @@ with one name per line.
 Use ``--hostnames-pattern '…pattern…'`` to limit the selection to
 lines matching an egrep pattern.
 
-Use ``--hostnames-sorted-by --dictionary-order`` to select a sort(1)
+Use ``--hostnames-sorted-by="--dictionary-order"`` to select a sort(1)
 option other than ``--random-sort`` (which is the default).
+
+Use ``--hostnames-unsorted`` to not sort hostnames at all. In this case,
+they will be assigned in the order they are found in the hostnames file.
 
 If you specify your own hostname source, you must ensure that it
 contains a sufficient number of valid hostnames (``[a-zA-Z0-9-]``) for
