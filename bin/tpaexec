@@ -615,6 +615,9 @@ case "$command" in
     command|adhoc|cmd)
         command=cmd
         ;;
+    --version)
+        command=version
+        ;;
 esac
 
 # Some commands take the path to a cluster directory as an argument, and
