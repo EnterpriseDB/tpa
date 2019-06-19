@@ -45,6 +45,20 @@
     become: yes
     async: 7200
     poll: 0
+
+  - name: Check that each thread has inserted at least one row
+    postgresql_query:
+      conninfo: "{{ bdr_node_dsn }}"
+      queries:
+      - text: >
+          SELECT COUNT(1) FROM camo_test WHERE key < %s
+        args:
+        - "{{ camo_transactions }}"
+    register: done
+    until: done.count >= camo_clients|int
+    retries: 3
+    become_user: "{{ postgres_user }}"
+    become: yes
   vars:
     ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
     bdr_camo_client: "{{ postgres_bin_dir }}/bdr_camo_client"
