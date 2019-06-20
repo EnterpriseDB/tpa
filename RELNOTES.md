@@ -2,17 +2,20 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v8.0 (unreleased)
+## v8.0 (2019-06-20)
 
 ### Notable changes
 
-- Improvements to the BDR replication set configuration process
+- Improve the BDR replication set configuration process
 
 - Enable debugging by default when building Postgres from source
 
 - Numerous testing improvements
 
 - Support for Barman 2.8
+
+- New ``--hostnames-unsorted`` configure option to avoid sorting
+  hostnames when assigning them to instances
 
 ### Bugfixes
 
