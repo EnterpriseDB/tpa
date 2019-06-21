@@ -571,7 +571,7 @@ class Architecture(object):
             def __init__(self, basedir):
                 self._basedir = basedir
             def get_basedir(self):
-                return self._basedir
+                return self._basedir[0]
             def _tpaexec_get_template(self, filename):
                 for d in self._basedir:
                     t = '%s/%s' % (d, filename)
