@@ -30,6 +30,7 @@
 
 - name: Save existing iptables rules, if any
   shell: >
+    /sbin/modprobe iptable_filter;
     /sbin/iptables-save > /tmp/existing.rules
   args:
     executable: /bin/bash
