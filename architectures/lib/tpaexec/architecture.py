@@ -7,7 +7,6 @@ from __future__ import print_function
 import sys, os, io
 import subprocess
 import argparse
-import dircache
 import yaml
 
 from ansible.template import Templar
@@ -539,7 +538,7 @@ class Architecture(object):
                 os.symlink(src, dest)
             else:
                 os.mkdir(dest)
-                for l in dircache.listdir(src):
+                for l in os.listdir(src):
                     os.symlink('%s/%s' % (src, l), '%s/%s' % (dest, l))
 
     # Returns a list of targets to create_links() for
