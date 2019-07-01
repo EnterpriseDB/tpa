@@ -309,10 +309,15 @@ class Architecture(object):
             if self.args[arg] is not None:
                 env[arg.upper()] = str(self.args[arg])
 
+        popen_params = {}
+
+        if int(str(sys.version_info.major)+str(sys.version_info.minor))>= 36:
+            popen_params['encoding'] = sys.getdefaultencoding()
+
         p = subprocess.Popen(
             ['%s/hostnames' % self.lib, str(num)], stdin=None,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            env=env
+            env=env, **popen_params
         )
         (stdout, stderr) = p.communicate()
 
@@ -349,10 +354,15 @@ class Architecture(object):
             if self.args[arg] is not None:
                 env[arg.upper()] = self.args[arg]
 
+        popen_params = {}
+
+        if int(str(sys.version_info.major)+str(sys.version_info.minor))>= 36:
+            popen_params['encoding'] = sys.getdefaultencoding()
+
         p = subprocess.Popen(
             ['%s/subnets' % self.lib, str(num)], stdin=None,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            env=env
+            env=env, **popen_params
         )
         (stdout, stderr) = p.communicate()
 
