@@ -172,6 +172,26 @@ def from_csv(line, column_names):
     for values in csv.reader([line]):
         return dict(zip(column_names, values))
 
+# Formats the given value using Python's .format() function, passing on any
+# additional arguments, e.g., ``'{a} and {b}'|format(a=42, b='xyzzy')``.
+#
+# The built-in jinja2 |format filter does _not_ use Python's .format() function
+# and only supports % escapes, not {name} interpolation.
+
+def pyformat(value, **kwargs):
+    return value.format(**kwargs)
+
+# Given a container and an attribute, returns a container with the attribute's
+# value replaced with the result of calling .format() on the value along with
+# any additional arguments provided.
+
+def pyformat_attr(container, attr, **kwargs):
+    c = copy.deepcopy(container)
+    a = c.get(attr)
+    if a:
+        c[attr] = a.format(**kwargs)
+    return c
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -186,4 +206,6 @@ class FilterModule(object):
             'members_of': members_of,
             'dbname': dbname,
             'from_csv': from_csv,
+            'pyformat': pyformat,
+            'pyformat_attr': pyformat_attr,
         }
