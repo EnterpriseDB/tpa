@@ -115,6 +115,16 @@
     bdr_node_group_tuples.rowcount == 0
   tags: always
 
+- set_fact:
+    bdr_node_ids: "{{
+      bdr_node_ids|default({})|combine({
+        hostvars[item].node: hostvars[item].bdr_node_id
+      })
+    }}"
+  with_items: "{{ groups[bdr_node_group] }}"
+  when:
+    hostvars[item].bdr_node_id is defined
+
 - name: Configure replication sets
   include_tasks:
     file: bdr3/replication-sets.yml
@@ -123,10 +133,14 @@
   vars:
     q: >-
       [?type=='bdr' && database=='%s'].replication_sets|[]
-    publication_sets: >-
+    _publication_sets: >-
       {{ publications|default([])|json_query(q % bdr_database) }}
-    subscription_sets: >-
+    _subscription_sets: >-
       {{ subscriptions|default([])|json_query(q % bdr_database) }}
+    publication_sets: >-
+      {{ _publication_sets|map('pyformat_attr', 'name', bdr_node_ids=bdr_node_ids)|list }}
+    subscription_sets: >-
+      {{ _subscription_sets|map('pyformat', bdr_node_ids=bdr_node_ids)|list }}
   tags: [bdr, replication-sets]
 
 # The first_bdr_primary has now created the group, and the remaining members
