@@ -5,11 +5,19 @@ source $1
 
 pgdata=${pgdata:-/opt/postgres/data}
 pgdata_initialised=false
+postgres_running=false
 
 VERSION=$pgdata/PG_VERSION
 if [[ -f $VERSION ]]; then
     pgdata_initialised=true
     pgdata_version=$(cat $VERSION)
+    pgdata_user=$(stat -c %U $VERSION)
+    pidfile=$pgdata/postmaster.pid
+    if [[ -f $pidfile ]]; then
+        if kill -0 $(head -1 $pidfile) &>/dev/null; then
+            postgres_running=true
+        fi
+    fi
 fi
 
 grep -Ev '": "*,*$' <<RESULT
@@ -17,8 +25,10 @@ grep -Ev '": "*,*$' <<RESULT
     "changed": false,
     "ansible_facts": {
         "pgdata": "$pgdata",
+        "pgdata_user": "$pgdata_user",
         "pgdata_version": $pgdata_version,
-        "pgdata_initialised": $pgdata_initialised
+        "pgdata_initialised": $pgdata_initialised,
+        "postgres_running": $postgres_running
     }
 }
 RESULT

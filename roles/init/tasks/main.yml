@@ -8,8 +8,17 @@
 - include_role: name=facts
   tags: always
 
+# We attempt to gather postgres facts only if there is a valid PGDATA
+# directory, the postgres user exists, and postgres is running; or in
+# other words, only if we have a reasonable chance of being able to
+# connect to Postgres. At this early stage of deployment, it is not an
+# error if these conditions are not met (e.g., when we are attaching an
+# existing PGDATA to a new instance).
+
 - include_role: name=postgres/facts
   when: >
     'postgres' in role and
-    pgdata_initialised|default('false') == True
+    pgdata_initialised|default('false') == True and
+    pgdata_user|default('UNKNOWN') != 'UNKNOWN' and
+    postgres_running|default('false') == True
   tags: always
