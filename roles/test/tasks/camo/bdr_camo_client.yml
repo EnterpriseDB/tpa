@@ -39,6 +39,7 @@
       -h {{ ping }},{{ pong }}
       -c 'INSERT INTO camo_test VALUES ($1, $2);'
       -i {{ camo_transactions }} -j {{ camo_clients }}
+      {{ bdr_camo_client_args|default('') }}
       {{ bdr_database }} > {{ bdr_camo_client_output }} 2>&1
     register: client_run
     become_user: "{{ postgres_user }}"
