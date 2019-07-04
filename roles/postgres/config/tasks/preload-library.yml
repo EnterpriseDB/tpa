@@ -24,12 +24,39 @@
     conf: "{{ _include_dir }}/0000-tpa.conf"
     override: "{{ _include_dir }}/8888-shared_preload_libraries.conf"
 
-# But when it comes to writing out the file again, we don't make any
-# attempt to retain whatever was in it before; as the warning clearly
-# says, this file—like any other in _include_dir—is subject to being
-# overwritten.
+- name: Include {{ library }} in shared_preload_libraries list
+  set_fact:
+    _preload_list: "{{ _old_list|union([library]) }}"
+  vars:
+    _old_list: >
+      {{ libs.stdout and libs.stdout.split(',')|map('trim')|list or [] }}
 
-- name: Append {{ library }} to shared_preload_libraries
+# We can fix certain ordering problems in shared_preload_libraries,
+# but we don't expect to encounter these problems in production (we
+# would not generate the incorrect order to begin with).
+#
+# Right now, the only such problem is to ensure that bdr must come after
+# both postgres_fdw and pglogical—otherwise we remove both pglogical and
+# bdr and add them back at the end of the list.
+
+- name: Adjust ordering of shared_preload_libraries if required
+  set_fact:
+    _preload_list: "{{
+      _preload_list|reject('in', p_and_b)|list|union(p_and_b)
+    }}"
+  when: >
+    ('bdr' in _preload_list and 'pglogical' in _preload_list and
+    _preload_list.index('bdr')|int < _preload_list.index('pglogical')|int) or
+    ('bdr' in _preload_list and 'postgres_fdw' in _preload_list and
+    _preload_list.index('bdr')|int < _preload_list.index('postgres_fdw')|int)
+  vars:
+    p_and_b: ['pglogical', 'bdr']
+
+# When it comes to writing out the file again, we don't make any attempt
+# to retain whatever was in it before; as the warning clearly says, this
+# file—like any other in _include_dir—is subject to being overwritten.
+
+- name: Write new value for shared_preload_libraries
   template:
     src: variable.j2
     dest: "{{ spl_config }}"
@@ -40,6 +67,6 @@
     spl_config: "{{ _include_dir }}/8888-shared_preload_libraries.conf"
     variable: shared_preload_libraries
     value: >
-      '{{ libs.stdout and libs.stdout.split(',')|map('trim')|list|union([library])|join(', ') or library }}'
+      '{{ _preload_list|join(', ') }}'
   notify:
     - Note Postgres restart required
