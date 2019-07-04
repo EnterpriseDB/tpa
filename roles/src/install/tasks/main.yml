@@ -48,3 +48,5 @@
     default_build_commands:
     - make
     - make install
+  notify:
+    - Note Postgres restart required

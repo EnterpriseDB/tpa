@@ -60,6 +60,8 @@
     chdir: "{{ postgres_build_dir }}"
     executable: /bin/bash
   with_items: "{{ postgres_install_targets }}"
+  notify:
+    - Note Postgres restart required
 
 - include_role:
     name: postgres/pkg
