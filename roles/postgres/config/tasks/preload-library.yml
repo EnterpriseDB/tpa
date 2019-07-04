@@ -2,14 +2,8 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# This file is meant to be included directly from outside the
-# postgres/config role. It expects to be passed the name and (properly
-# quoted) value of a postgresql.conf parameter, and will write a file
-# into the Postgres include_dir.
-#
-# We wouldn't have to repeat the definition of _include_dir here if we
-# could use include_role/tasks_from to invoke this, but that will have
-# to wait until include_role is no longer so broken.
+# This include file expects to be passed the name of a library to add to
+# the list in shared_preload_libraries.
 
 - assert:
     that:
@@ -27,8 +21,8 @@
   changed_when: False
   register: libs
   vars:
-    conf: "{{ postgres_data_dir+'/conf.d' }}/0000-tpa.conf"
-    override: "{{ postgres_data_dir+'/conf.d' }}/8888-shared_preload_libraries.conf"
+    conf: "{{ _include_dir }}/0000-tpa.conf"
+    override: "{{ _include_dir }}/8888-shared_preload_libraries.conf"
 
 # But when it comes to writing out the file again, we don't make any
 # attempt to retain whatever was in it before; as the warning clearly
@@ -43,7 +37,7 @@
     group: "{{ postgres_group }}"
     mode: 0644
   vars:
-    spl_config: "{{ postgres_data_dir+'/conf.d' }}/8888-shared_preload_libraries.conf"
+    spl_config: "{{ _include_dir }}/8888-shared_preload_libraries.conf"
     variable: shared_preload_libraries
     value: >
       '{{ libs.stdout and libs.stdout.split(',')|map('trim')|list|union([library])|join(', ') or library }}'
