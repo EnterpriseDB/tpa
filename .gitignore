@@ -3,4 +3,5 @@
 */*.pdf
 */cache/*
 !*/cache/.placeholder
+*.DS_Store
 
