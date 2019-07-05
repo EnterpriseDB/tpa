@@ -4,16 +4,13 @@
 
 - name: Enumerate foreign servers required
   set_fact:
-    foreign_servers: "{{
-      foreign_servers|default([])|union([{
-        'name': srvname,
-        'host': item,
-      }])
-    }}"
-  with_items:
-    "{{ groups[bdr_node_group] }}"
-  vars:
-    srvname: "bdr_{{ bdr_node_group }}_{{ item }}"
+    foreign_servers:
+    - name: bdr_server
+      type: bdr
+      fdw: postgres_fdw
+
+# For now, we don't bother to look at any server that aren't using
+# postgres_fdw.
 
 - name: Find existing foreign servers
   postgresql_query:
@@ -35,12 +32,10 @@
     conninfo: "{{ dsn|dbname(bdr_database) }}"
     queries:
     - text: >
-        CREATE SERVER {{ item.name }} FOREIGN DATA WRAPPER postgres_fdw
-        OPTIONS (host %s, port %s, dbname %s)
-      args:
-      - "{{ hostvars[item.host].inventory_hostname }}"
-      - "{{ hostvars[item.host].postgres_port }}"
-      - "{{ hostvars[item.host].bdr_database }}"
+        CREATE SERVER {{ item.name }}
+        {% if item.type is defined %}TYPE '{{ item.type }}'{% endif %}
+        FOREIGN DATA WRAPPER {{ item.fdw }}
+        {% if item.options is defined %}OPTIONS ('{{ item.options }}'){% endif %}
   become_user: "{{ postgres_user }}"
   become: yes
   with_items: "{{ foreign_servers }}"
