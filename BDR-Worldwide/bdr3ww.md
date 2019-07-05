@@ -75,7 +75,7 @@ This architecture presents the following characteristics:
           `dcdrn2`. Optionally, this barman server can be split into 2 barman
           servers.
 - It is based on the following software:
-    - PostgreSQL 11.4
+    - ifdef{BDR_EE}2ndQuadrant PostgreSQL 11.4 r1.6\elsePostgreSQL 11.4\endif
     - pglogical 3.6.4
     - BDR 3.6.4
     - Barman 2.8
@@ -130,7 +130,10 @@ of a BDR node can be used, and precisely:
 - If the backup is **physically compatible** with one of the current
   BDR nodes in the cluster:
     - It is **possible** to use the backup to add a physical standby
-	  to that BDR node;
+	  to that BDR node\ifdef{BDR_EE};
+    - It is **possible** to use the backup to add a new BDR node to
+	  the cluster, using the `bdr_init_physical` utility pointed to
+	  the physically compatible BDR node\endif.
 - Otherwise:
 	- It is **not possible** to use the backup to add a physical
 	  standby to the BDR node which is physically compatible;
