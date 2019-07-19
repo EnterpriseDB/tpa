@@ -7,6 +7,7 @@
   args: "{{ _artifact }}"
   vars:
     artifact_types:
+      path: file
       file: copy
       archive: unarchive
       directory: synchronize
