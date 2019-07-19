@@ -24,3 +24,11 @@
   when: >
     postgres_users|json_query("[?username=='pgbouncer']") != []
   tags: always
+
+- name: Include postgres-config-final hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/postgres-config-final.yml"
+  tags: always

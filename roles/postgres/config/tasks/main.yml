@@ -192,3 +192,11 @@
     username: postgres
     role_attrs: [superuser]
   tags: always
+
+- name: Include postgres-config hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/postgres-config.yml"
+  tags: always
