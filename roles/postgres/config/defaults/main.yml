@@ -29,4 +29,12 @@ bdr_extensions:
   - btree_gist
   - bdr
 
+# The following settings (on the Postgres server) will cause pg_hba.conf
+# to be generated with "hostssl" instead of "host" lines, and to require
+# "cert" authentication instead of "md5". If certificate authentication
+# is required, hba_cert_authentication_map may be set to the name of a
+# mapping defined in pg_ident.conf.
+
 hba_force_hostssl: no
+hba_force_certificate_auth: no
+hba_cert_authentication_map: ""

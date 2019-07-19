@@ -25,14 +25,21 @@ host    all             all             {{ net }}   md5
 {%       set type='host' %}
 {%     endif %}
 {%     set addr=addr+'/32' %}
+{%     set method='md5' %}
+{%     if hba_force_certificate_auth %}
+{%       set method='cert' %}
+{%       if hba_cert_authentication_map %}
+{%         set method=method+' map='+hba_cert_authentication_map %}
+{%       endif %}
+{%     endif %}
 # {{ h }}
 {%     if 'barman' in role %}
-{{type}} postgres barman {{ addr }} md5
-{{type}} replication streaming_barman {{ addr }} md5
+{{type}} postgres barman {{ addr }} {{ method }}
+{{type}} replication streaming_barman {{ addr }} {{ method }}
 {%     endif %}
 {%     if 'postgres' in role %}
-{{type}} all all {{ addr }} md5
-{{type}} replication all {{ addr }} md5
+{{type}} all all {{ addr }} {{ method }}
+{{type}} replication all {{ addr }} {{ method }}
 {%     endif %}
 {%     if 'haproxy' in role %}
 host haproxy haproxy {{ addr }} md5
