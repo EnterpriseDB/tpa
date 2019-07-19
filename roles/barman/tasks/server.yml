@@ -70,6 +70,27 @@
     group: barman
     mode: 0600
 
+- name: Set correct ownership and mode on ~/.postgresql
+  file:
+    path: ~barman/.postgresql
+    owner: barman
+    group: barman
+    state: directory
+    mode: 0700
+
+- name: Retrieve list of key/certificate files
+  command: >
+    find ~barman/.postgresql -name '*.crt' -o -name '*.key'
+  register: keycertfiles
+
+- name: Set correct ownership and mode on key/certificate files
+  file:
+    path: "{{ item }}"
+    owner: barman
+    group: barman
+    mode: 0600
+  with_items: "{{ keycertfiles.stdout_lines }}"
+
 # Barman's version-parsing code can get into trouble with 2ndQPostgres
 # version strings. For example, if pg_receivewal --version returns the
 # following string:

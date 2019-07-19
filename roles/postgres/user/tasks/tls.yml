@@ -41,12 +41,26 @@
   notify:
     - Note Postgres restart required
 
+- name: Set correct ownership and mode on ~/.postgresql
+  file:
+    path: ~postgres/.postgresql
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    state: directory
+    mode: 0700
+
+- name: Retrieve list of key/certificate files
+  shell: >
+    find /etc/tpa -name '*.crt' -o -name '*.key' &&
+    find ~postgres/.postgresql -name '*.crt' -o -name '*.key'
+  args:
+    executable: /bin/bash
+  register: keycertfiles
+
 - name: Set correct ownership and mode on key/certificate files
   file:
     path: "{{ item }}"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0600
-  with_items:
-    - "/etc/tpa/{{ cluster_name }}.key"
-    - "/etc/tpa/{{ cluster_name }}.crt"
+  with_items: "{{ keycertfiles.stdout_lines }}"
