@@ -194,7 +194,7 @@ attempt to make sure the combination is appropriate.
 To use product repositories, you must first
 ``export TPA_2Q_SUBSCRIPTION_TOKEN=xxx`` before you run tpaexec. You can
 get your subscription token from the 2ndQuadrant Portal, under "Account
-information" (click "Information" in the left menu, then "Company").
+information" (click "Company info" in the left menu, then "Company").
 
 ### Software versions
 
