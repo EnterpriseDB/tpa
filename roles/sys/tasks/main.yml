@@ -10,6 +10,17 @@
       tags: [sys, volumes]
   tags: always
 
+# Now that the any additional volumes have been mounted, we can copy in
+# any additional artifacts specified in config.yml
+- include_tasks:
+    file: artifact.yml
+    apply:
+      tags: [sys, artifacts]
+  with_items: "{{ artifacts|default([]) }}"
+  loop_control:
+    loop_var: artifact
+  tags: always
+
 # Computes memory size and other instance-specific values needed by
 # later steps (e.g., setting shared_buffers).
 - include_role:
