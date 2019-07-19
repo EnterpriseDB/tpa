@@ -27,6 +27,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Don't remove the default replication set from the BDR subscription
   (this breaks DDL replication)
 
+- Fix incorrect generation of /etc/default/grub
+
 ## v7.9 (2019-05-09)
 
 ### Bugfixes
