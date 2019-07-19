@@ -2,6 +2,32 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v8.1 (2019-07-20)
+
+### Notable changes
+
+- Support user-supplied TLS client certificates for authentication
+  (RT65159)
+
+- Allow setting ``hba_force_certificate_auth: yes`` on any Postgres
+  server instance to force TLS certificate authentication for clients
+  instead of password authentication
+
+- Allow setting ``postgres_service_environment`` to set environment
+  variables in the postgres service unit file
+
+- Support new postgres-config and postgres-config-final hooks
+
+- Improvements for source builds
+
+- Testing improvements
+
+### Bugfixes
+
+- Invoke postgres/facts from init only if postgres is running
+
+- Ensure correct ordering of shared_preload_libraries
+
 ## v8.0 (2019-06-20)
 
 ### Notable changes
