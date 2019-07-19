@@ -29,6 +29,7 @@
   delegate_to: "{{ this_barman }}"
   vars:
     active: "{{ backup_dir.stat.exists }}"
+    target: "{{ parent_inventory_hostname|default(inventory_hostname) }}"
 
 - name: Set up a cron job to take regular backups
   cron:

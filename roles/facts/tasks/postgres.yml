@@ -92,6 +92,14 @@
     postgres_installation_method == 'src'
   tags: always
 
+- name: Set client DSN attributes
+  set_fact:
+    postgres_client_dsn_attributes: "{{ postgres_client_dsn_attributes|default('') }}"
+    barman_client_dsn_attributes: "{{ barman_client_dsn_attributes|default('') }}"
+    repmgr_client_dsn_attributes: "{{ repmgr_client_dsn_attributes|default('') }}"
+    bdr_client_dsn_attributes: "{{ bdr_client_dsn_attributes|default('') }}"
+  tags: always
+
 - name: Set default DSNs
   set_fact:
     dsn: "port={{ postgres_port }}"
@@ -99,9 +107,9 @@
     node_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }}
     repmgr_node_dsn: >-
-      host={{ inventory_hostname }} port={{ postgres_port }} dbname=repmgr user=repmgr
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname=repmgr user=repmgr {{ repmgr_client_dsn_attributes }}
     bdr_node_dsn: >-
-      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user=postgres
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user=postgres {{ bdr_client_dsn_attributes }}
     pgbouncer_node_dsn: >-
       host={{ inventory_hostname }} port={{ pgbouncer_port }}
   tags: always

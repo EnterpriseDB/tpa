@@ -1,10 +1,10 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 [{{ backup_name }}]
-description = "Backups from {{ parent_inventory_hostname|default(inventory_hostname) }}"
+description = "Backups from {{ target }}"
 
-ssh_command = "ssh -q postgres@{{ parent_inventory_hostname|default(inventory_hostname) }}"
-conninfo = "host={{ parent_inventory_hostname|default(inventory_hostname) }} port={{ postgres_port }} dbname=postgres user=barman"
-streaming_conninfo = "host={{ parent_inventory_hostname|default(inventory_hostname) }} port={{ postgres_port }} user=streaming_barman"
+ssh_command = "ssh -q postgres@{{ target }}"
+conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='barman') }} {{ barman_client_dsn_attributes }}"
+streaming_conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='streaming_barman') }} {{ barman_client_dsn_attributes }}"
 streaming_archiver = on
 slot_name = "{{ slot_name }}"
 {% if _barman_log_file != default_barman_log_file %}
