@@ -49,7 +49,7 @@
 
   - name: Check that each thread has inserted at least one row
     postgresql_query:
-      conninfo: "{{ bdr_node_dsn }}"
+      conninfo: "{{ ping_conninfo }}"
       queries:
       - text: >
           SELECT COUNT(1) FROM camo_test WHERE key < %s
@@ -93,17 +93,35 @@
       msg: "bdr_camo_client failed"
     when: client is not successful
     tags: [camo, fail]
+
+  - name: get LSN after bdr_camo_client run
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      queries:
+      - text: >
+          SELECT pg_current_wal_lsn() as lsn
+    register: target
+    become_user: "{{ postgres_user }}"
+    become: yes
+
   vars:
     ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
   when: >
     inventory_hostname == tester_instance
 
 - block:
-  - name: Wait for DDL to replicate to BDR instances
+  - name: wait for BDR instances to apply changes
     postgresql_query:
       conninfo: "{{ bdr_node_dsn }}"
-      query: >
-        select bdr.wait_slot_confirm_lsn(NULL, NULL)
+      queries:
+      - text: >
+          SELECT pg_replication_origin_progress(%s, true) >= %s AS completed
+        args:
+        - "bdr_bdrdb_bdrgroup_{{ hostvars[ping].bdr_node_name }}"
+        - "{{ hostvars[tester_instance].target.lsn }}"
+    register: done
+    until: done.completed
+    retries: 60
     become_user: "{{ postgres_user }}"
     become: yes
 
@@ -123,7 +141,7 @@
     failed_when:
       dups is not successful or dups.rowcount > 0
   when:
-    inventory_hostname in groups[bdr_node_group]
+    inventory_hostname in groups[bdr_node_group] and inventory_hostname != ping
 
 - block:
   - name: Drop bdr_camo_client test table
