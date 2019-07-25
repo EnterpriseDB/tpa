@@ -82,6 +82,7 @@
   command: >
     find ~barman/.postgresql -name '*.crt' -o -name '*.key'
   register: keycertfiles
+  changed_when: False
 
 - name: Set correct ownership and mode on key/certificate files
   file:
