@@ -4,6 +4,7 @@
 
 import copy
 import csv
+import re
 from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
@@ -192,6 +193,12 @@ def pyformat_attr(container, attr, **kwargs):
         c[attr] = a.format(**kwargs)
     return c
 
+# Given the name of a barman host, returns a string suitable for use as the name
+# of a replication slot used for backups by the barman host.
+
+def backup_slot_name(barman_hostname):
+    return 'backup_%s' % re.sub('-', '_', re.sub('\..*', '', barman_hostname))
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -208,4 +215,5 @@ class FilterModule(object):
             'from_csv': from_csv,
             'pyformat': pyformat,
             'pyformat_attr': pyformat_attr,
+            'backup_slot_name': backup_slot_name,
         }

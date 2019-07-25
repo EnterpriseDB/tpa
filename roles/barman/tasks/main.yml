@@ -100,7 +100,7 @@
   loop_control:
     loop_var: this_barman
   vars:
-    slot_name: "backup_{{ this_barman|replace('-', '_') }}"
+    slot_name: "{{ this_barman|backup_slot_name }}"
   tags: always
 
 # On any other kind of instance, we do nothing.
