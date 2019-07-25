@@ -15,7 +15,7 @@ listen_port = {{ pgbouncer_port }}
 ;; disable, allow, require, verify-ca, verify-full
 client_tls_sslmode = require
 
-client_tls_ca_file = {{ ssl_ca_file|default("/etc/tpa/"+cluster_name+".crt") }}
+client_tls_ca_file = {{ ssl_ca_file|default(ssl_cert_file|default("/etc/tpa/"+cluster_name+".crt")) }}
 client_tls_key_file = {{ ssl_key_file|default("/etc/tpa/"+cluster_name+".key") }}
 client_tls_cert_file = {{ ssl_cert_file|default("/etc/tpa/"+cluster_name+".crt") }}
 
