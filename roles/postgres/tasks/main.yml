@@ -7,7 +7,10 @@
   tags: [postgres, user]
 - include_role: name=postgres/initdb
   tags: always
-- include_role: name=postgres/config
+- include_role:
+    name: postgres/config
+    apply:
+      tags: [postgres, config]
   when: >
     pgdata_initialised
   tags: always

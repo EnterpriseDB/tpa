@@ -2,12 +2,18 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=pgbouncer/pkg
+- include_role:
+    name: pgbouncer/pkg
+    apply:
+      tags: [pgbouncer, pkg]
   when: >
     'pgbouncer' in role
   tags: always
 
-- include_role: name=pgbouncer/config
+- include_role:
+    name: pgbouncer/config
+    apply:
+      tags: [pgbouncer, config]
   when: >
     'postgres' in role or
     'pgbouncer' in role
