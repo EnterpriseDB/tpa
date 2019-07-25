@@ -1,8 +1,5 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-[databases]
-{% for d in pgbouncer_databases %}
-{{ d['name'] }} = {{ d['dsn'] }} auth_user=pgbouncer
-{% endfor %}
+%include /etc/pgbouncer/pgbouncer.databases.ini
 
 [pgbouncer]
 

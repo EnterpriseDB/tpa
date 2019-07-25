@@ -20,6 +20,16 @@
   notify:
     - Note pgbouncer restart required
 
+- name: Install pgbouncer.databases.ini
+  template:
+    src: pgbouncer.databases.ini.j2
+    dest: "/etc/pgbouncer/pgbouncer.databases.ini"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0640
+  notify:
+    - Note pgbouncer restart required
+
 - name: Install userlist.txt
   template:
     src: userlist.txt.j2
