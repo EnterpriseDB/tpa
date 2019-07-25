@@ -56,4 +56,7 @@ pre_archive_retry_script = "{{ barman_pre_archive_retry_script }}"
 {% if barman_post_backup_retry_script is defined %}
 post_backup_retry_script = "{{ barman_post_backup_retry_script }}"
 {% endif %}
+{% if barman_post_backup_script is defined %}
+post_backup_script = "{{ barman_post_backup_script }}"
+{% endif %}
 active = {{ active|lower }}
