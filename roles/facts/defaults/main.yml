@@ -32,7 +32,7 @@ default_pgbouncer_port: 6432
 # By default, pgbouncer will forward all connections to 127.0.0.1:5432
 # (which may be either postgres or haproxy that has been configured to
 # forward connections to postgres); if pgbouncer_backend is set to the
-# name of some instances, its postgres_post setting will be respected.
+# name of some instances, its postgres_port setting will be respected.
 
 default_pgbouncer_backend: 127.0.0.1
 default_pgbouncer_backend_port: 5432
