@@ -18,6 +18,7 @@
   command: >
     /usr/bin/barman check all
   delegate_to: "{{ this_barman }}"
+  changed_when: false
   ignore_errors: yes
   become_user: barman
   become: yes
