@@ -10,6 +10,7 @@
     group: root
     mode: 0644
   when: platform not in ['docker']
+  tags: hostsfile
 
 - name: Update /etc/hosts on docker
   block:
@@ -28,6 +29,7 @@
       executable: /bin/bash
     when: hostfile is changed
   when: platform in ['docker']
+  tags: hostsfile
 
 # We pre-generate /etc/ssh/ssh_known_hosts to allow ssh between cluster
 # instances without host key verification prompts. We must skip this if
@@ -50,6 +52,7 @@
   vars:
     hostkeys: >
       test -d {{ cluster_dir }}/hostkeys && echo exists; true
+  tags: known_hosts
 
 - name: Update ssh host keys on docker instances
   block:
@@ -73,6 +76,7 @@
     vars:
       ssh_service_name: "{{ (ansible_distribution == 'RedHat')|ternary('sshd', 'ssh') }}"
   when: platform in ['docker']
+  tags: hostkeys
 
 # https://github.com/CentOS/CentOS-Dockerfiles/issues/173
 #
