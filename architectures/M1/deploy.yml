@@ -42,4 +42,3 @@
     tags: always
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/fini.yml"
-  tags: always
