@@ -53,6 +53,7 @@
   vars:
     _aliases: "{{ hostvars[item].hostname_aliases|default({}) }}"
   when:
+    streaming_from is defined and
     streaming_from not in hostvars and
     streaming_from in _aliases.keys()
 
@@ -60,6 +61,8 @@
     msg: "Unrecognised host={{ streaming_from }} in primary_conninfo"
     that:
     - streaming_from in hostvars
+  when:
+    streaming_from is defined
 
 - name: Override upstream if required
   set_fact:
