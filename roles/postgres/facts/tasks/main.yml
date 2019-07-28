@@ -24,8 +24,7 @@
   set_fact:
     role: "{{
       role
-      |reject('equalto', 'primary')
-      |reject('equalto', 'replica')
+      |reject('in', ['primary', 'replica'])
       |list|union([cluster_facts.role])
     }}"
   when: >
