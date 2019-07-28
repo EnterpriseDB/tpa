@@ -3,12 +3,13 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - name: Ensure that ~postgres/.pgpass exists
-  file:
-    path: ~postgres/.pgpass
+  copy:
+    content: ""
+    dest: ~postgres/.pgpass
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0600
-    state: touch
+    force: no
 
 - name: Add postgres password to .pgpass
   lineinfile:
