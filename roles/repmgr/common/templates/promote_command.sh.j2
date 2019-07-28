@@ -1,4 +1,12 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-#!/bin/sh
+#!/bin/bash
+
+set -e -u -x
 
 {{ postgres_bin_dir }}/repmgr standby promote -f "{{ repmgr_conf_file }}"
+
+{% if repmgr_redirect_pgbouncer|default(false) %}
+{%   for instance in groups['role_pgbouncer'] %}
+/usr/bin/ssh {{ instance }} "sed -e 's,host=[^ ]* port=[^ ]*,{{ node_dsn }},' -i /etc/pgbouncer/pgbouncer.databases.ini && killall -HUP pgbouncer"
+{%   endfor %}
+{% endif %}
