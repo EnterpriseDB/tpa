@@ -13,8 +13,8 @@ location={{ repmgr_location }}
 replication_type=physical
 use_replication_slots={{ repmgr_use_slots }}
 async_query_timeout=60
-reconnect_attempts=6
-reconnect_interval=10
+reconnect_attempts={{ repmgr_reconnect_attempts|default(6) }}
+reconnect_interval={{ repmgr_reconnect_interval|default(10) }}
 failover={{ repmgr_failover }}
 ssh_options=-q
 
