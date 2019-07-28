@@ -41,6 +41,26 @@
   vars:
     primary_conninfo: "{{ cluster_facts|try_subkey('replica.primary_conninfo', '') }}"
 
+# We expect primary_conninfo to refer to the upstream host by a name we
+# recognise, but recovery.conf may have been changed to specify another
+# hostname (e.g., to use a faster link for replication). We can try to
+# translate based on hostname_aliases.
+
+- name: Translate unrecognised primary_conninfo host to instance name
+  set_fact:
+    streaming_from: "{{ item }}"
+  with_items: "{{ groups['role_postgres'] }}"
+  vars:
+    _aliases: "{{ hostvars[item].hostname_aliases|default({}) }}"
+  when:
+    streaming_from not in hostvars and
+    streaming_from in _aliases.keys()
+
+- assert:
+    msg: "Unrecognised host={{ streaming_from }} in primary_conninfo"
+    that:
+    - streaming_from in hostvars
+
 - name: Override upstream if required
   set_fact:
     upstream: "{{ streaming_from }}"
