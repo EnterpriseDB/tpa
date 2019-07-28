@@ -2,6 +2,7 @@
 127.0.0.1	localhost
 ::1		localhost ip6-localhost ip6-loopback
 
-{% set v = {} %}{% for h in groups[cluster_tag] -%}{{ v.update({h:hostvars[h].node|int}) }}{% endfor %}{% for h,n in v|dictsort(false,'value') %}
-{{ hostvars[h].ip_address + ' ' + hostvars[h].inventory_hostname }}
+{% set v = {} %}{% for h in groups[cluster_tag] -%}{{ v.update({h:hostvars[h].node|int}) }}{% endfor %}{% for h,n in v|dictsort(false,'value') -%}
+{{ hostvars[h].ip_address + ' ' + h }}{% if h != hostvars[h].inventory_hostname_short %} {{ hostvars[h].inventory_hostname_short }}{% endif %}{{ '\n' -}}
+{% for alias,ip in (hostvars[h].hostname_aliases|default({})).iteritems() -%}{{ '%s %s\n' % (ip, alias) }}{% endfor %}
 {% endfor %}
