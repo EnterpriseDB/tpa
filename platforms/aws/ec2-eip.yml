@@ -7,7 +7,7 @@
     state: present
     region: "{{ item.1.tagged_instances[0].region }}"
     device_id: "{{ item.1.tagged_instances[0].id }}"
-    reuse_existing_ip_allowed: true
+    reuse_existing_ip_allowed: false
     in_vpc: true
   when:
     item.0.assign_elastic_ip is defined
