@@ -39,6 +39,9 @@ log_hostname = off
 log_lock_waits = on
 log_statement = {{ log_statement|default('ddl') }}
 log_temp_files = {{ log_temp_files|default(8192) }}
+{% if log_min_messages is defined %}
+log_min_messages = {{ log_min_messages }}
+{% endif %}
 
 log_min_duration_statement = {{ log_min_duration_statement|default('5s') }}
 
