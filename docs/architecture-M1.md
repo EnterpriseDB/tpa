@@ -11,6 +11,11 @@ backups from the primary.
 
 ![Cluster with cascading replication](images/m1.png)
 
+If there is an even number of PostgreSQL nodes, the Barman node is
+additionally configured as a repmgr witness. This ensures that the
+number of repmgr nodes is always odd, which is convenient when
+enabling automatic failover.
+
 ## Cluster configuration
 
 ```
