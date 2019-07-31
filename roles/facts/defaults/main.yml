@@ -18,6 +18,8 @@ default_postgres_bin_dirs:
   Debian: "/usr/lib/postgresql/{{ postgres_version }}/bin"
   RedHat: "/usr/pgsql-{{ postgres_version }}/bin"
 
+default_log_destination: syslog
+
 default_barman_home: /var/lib/barman
 
 default_repmgr_conf_dir: "/etc/repmgr/{{ postgres_version }}"

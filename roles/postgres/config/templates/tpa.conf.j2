@@ -17,11 +17,11 @@ bgwriter_lru_multiplier = {{ bgwriter_lru_multiplier|default(2.0) }}
 
 effective_io_concurrency = {{ effective_io_concurrency|default(1) }}
 
-log_destination = {{ log_destination|default('syslog') }}
+log_destination = {{ log_destination }}
 syslog_facility = {{ syslog_facility|default('LOCAL6') }}
 syslog_ident = {{ syslog_ident|default('postgres') }}
 
-{% if log_destination|default('syslog') == 'stderr' %}
+{% if log_destination == 'stderr' %}
 log_directory = '/var/log/postgresql'
 log_filename = 'postgres.log'
 log_file_mode = 0640

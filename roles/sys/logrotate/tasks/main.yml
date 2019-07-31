@@ -2,7 +2,16 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Add logrotate configuration for /var/log/postgres/postgres.log
-  copy:
-    src: postgres
+- name: Add logrotate configuration for Postgres logfile
+  template:
+    src: postgres.j2
     dest: /etc/logrotate.d/postgres
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    postgres_logfile: "{{
+      (log_destination == 'syslog')|ternary(
+        '/var/log/postgres/postgres.log', '/var/log/postgresql/postgres.log'
+      )
+    }}"
