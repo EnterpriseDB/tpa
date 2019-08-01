@@ -8,7 +8,9 @@ set -e -u -x
 set +e
 
 {% if repmgr_redirect_pgbouncer|default(false) %}
+{%   if inventory_hostname in groups['role_pgbouncer'] %}
 bash -c "sed -e 's,host=[^ ]* port=[^ ]*,{{ node_dsn }},' -i /etc/pgbouncer/pgbouncer.databases.ini && killall -HUP pgbouncer"
+{%   endif %}
 {%   for instance in groups['role_pgbouncer']|reject('equalto', inventory_hostname)|list %}
 /usr/bin/ssh {{ instance }} "sed -e 's,host=[^ ]* port=[^ ]*,{{ node_dsn }},' -i /etc/pgbouncer/pgbouncer.databases.ini && killall -HUP pgbouncer" &
 {%   endfor %}
