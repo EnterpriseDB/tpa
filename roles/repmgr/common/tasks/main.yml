@@ -26,10 +26,6 @@
       |instance_with_backup_of(upstream_primary, inventory_hostname, hostvars)
     }}"
 
-- name: Set default repmgr_location
-  set_fact:
-    repmgr_location: "{{ repmgr_location|default('') }}"
-
 - name: Ensure repmgr directories exist
   file:
     path: "{{ item }}"

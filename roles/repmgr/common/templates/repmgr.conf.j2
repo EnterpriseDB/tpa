@@ -7,7 +7,7 @@ pg_bindir={{ postgres_bin_dir }}
 {% if repmgr_priority is defined %}
 priority={{ repmgr_priority }}
 {% endif %}
-{% if repmgr_location is defined and repmgr_location != '' %}
+{% if repmgr_location is defined %}
 location={{ repmgr_location }}
 {% endif %}
 replication_type=physical
