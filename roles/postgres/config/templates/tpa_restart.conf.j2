@@ -13,7 +13,7 @@ max_prepared_transactions = {{ max_prepared_transactions|default(0) }}
 
 max_worker_processes = {{ max_worker_processes|default(16) }}
 
-logging_collector = {% if logging_collector is defined %}{{ logging_collector }}{% elif log_destination == 'stderr' %}on{% endif %}
+logging_collector = {{ logging_collector|default((log_destination == 'stderr')|ternary('on', 'off')) }}
 
 {% if postgres_version is version('9.4', '>') %}
 cluster_name = '{{ inventory_hostname }}'
