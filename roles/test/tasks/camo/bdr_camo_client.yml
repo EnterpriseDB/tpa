@@ -57,7 +57,7 @@
         - "{{ camo_transactions }}"
     register: done
     until: done.count >= camo_clients|int
-    retries: 3
+    retries: 10
     become_user: "{{ postgres_user }}"
     become: yes
   vars:
@@ -70,7 +70,25 @@
   - name: Cause failure {{ failure }} on CAMO partner {{ ping }}
     include_role: name=test tasks_from="failures/{{ failure }}.yml"
   when:
-    inventory_hostname == ping
+      inventory_hostname == ping and "upgrade" not in ansible_run_tags
+
+- name: Run upgrade
+  block:
+  - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
+
+  - include_role: name=postgres/pkg tasks_from=list-packages.yml
+    vars:
+      postgres_package_version: null
+
+  - name: Install latest Postgres packages
+    package:
+      name: "{{ all_postgres_packages }}"
+      state: latest
+
+  - include_role: name=postgres/restart
+    vars:
+      postgres_service_end_state: restarted
+  when: (inventory_hostname != tester_instance) and  "upgrade" in ansible_run_tags
 
 - block:
   - name: Wait for bdr_camo_client to complete
@@ -92,7 +110,7 @@
     fail:
       msg: "bdr_camo_client failed"
     when: client is not successful
-    tags: [camo, fail]
+    tags: [camo, fail, upgrade]
 
   - name: get LSN after bdr_camo_client run
     postgresql_query:
