@@ -1,4 +1,4 @@
-DIA=ha 1b 2bl ppf-1 ppf-2 ppf-3 epf dcf dcf2 dcf3 upgrade
+DIA=ha 1b 1b-3dcs 2bl ppf-1 ppf-2 ppf-3 epf dcf dcf2 dcf3 upgrade
 TARGET=m1.pdf
 
 .PRECIOUS: $(patsubst %, cache/%.png, $(DIA))
