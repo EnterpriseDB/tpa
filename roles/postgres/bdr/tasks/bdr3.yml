@@ -58,18 +58,27 @@
       bdr_node_pause_in_standby|default('readonly' in role)
     }}"
 
+# We always call create_node_group() with "node_group_name := %s" and
+# the name of the node group; if bdr_node_group_options specifies any
+# other parameters, we pass them through as well.
+
 - name: Create BDR node groups if necessary
   postgresql_query:
-    conninfo: '{{ bdr_node_dsn }}'
+    conninfo: "{{ bdr_node_dsn }}"
     queries:
-      - text: SELECT bdr.create_node_group(node_group_name := %s)
-        args:
-          - "{{ bdr_node_group }}"
+      - text: "SELECT bdr.create_node_group({{ _option_string }})"
+        args: "{{ _values }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
   when:
     inventory_hostname == first_bdr_primary and
     node_group_id.rowcount == 0
-  become_user: "{{ postgres_user }}"
-  become: yes
+  vars:
+    _options: "{{ bdr_node_group_options|default({}) }}"
+    _keys: "{{ query('flattened', ['node_group_name', _options.keys()]) }}"
+    _values: "{{ query('flattened', [bdr_node_group, _options.values()]) }}"
+    _option_string: >
+      {{ _keys|map('apply_format', '{0} := %s')|list|join(', ') }}
 
 - name: Clean up bdr database before group join
   include_tasks: clean.yml

@@ -193,6 +193,19 @@ def pyformat_attr(container, attr, **kwargs):
         c[attr] = a.format(**kwargs)
     return c
 
+# Given a format string and some input values, returns the result of applying
+# format() to the string with the given values. For example,
+#
+# x.keys()|map('apply_format', '{0} := %s')|list
+
+def apply_format(input, format_string, *more):
+    args = [input]
+    if isinstance(input, list):
+        args = input
+    if more:
+        args.append(*more)
+    return format_string.format(*args)
+
 # Given the name of a barman host, returns a string suitable for use as the name
 # of a replication slot used for backups by the barman host.
 
@@ -215,5 +228,6 @@ class FilterModule(object):
             'from_csv': from_csv,
             'pyformat': pyformat,
             'pyformat_attr': pyformat_attr,
+            'apply_format': apply_format,
             'backup_slot_name': backup_slot_name,
         }
