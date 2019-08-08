@@ -74,7 +74,7 @@ default_packages:
     - socat
   Debian:
     - python-dev
-    - linux-tools
+    - linux-perf
     - dbus
     - gnutls-bin
     - openssh-client
