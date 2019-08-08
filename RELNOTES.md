@@ -2,6 +2,43 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v8.2 (2019-08-08)
+
+### Notable changes
+
+- Accept bdr_node_group_options hash to set bdr.create_node_group()
+  options
+
+- Accept ``log_destination: stderr`` setting to log directly to
+  /var/log/postgresql/postgres.log (without going through rsyslog)
+
+- Accept ``repmgr_redirect_pgbouncer`` setting to reconfigure pgbouncer
+  on repmgr failover events
+
+- Testing improvements
+
+### Minor changes
+
+- Accept post_backup_script setting for barman
+
+- Accept log_min_messages setting for Postgres conf.d
+
+- Accept top-level use_ssh_agent setting (omit IdentitiesOnly)
+
+- Accept repmgr_reconnect_{attempts,interval} settings for repmgr.conf
+
+### Bugfixes
+
+- Don't set ssl_ca_file to the default self-signed certificate if
+  ssl_cert_file is explicitly set
+
+- Don't generate /etc/cron.d/some.fq.dn because cron will ignore files
+  under /etc/cron.d that have dots in the name
+
+- Never try to reuse elastic IPs on AWS (for security reasons)
+
+- Suppress unnecessary changed notifications for various tasks
+
 ## v8.1 (2019-07-20)
 
 ### Notable changes
