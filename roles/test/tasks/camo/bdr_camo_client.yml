@@ -89,6 +89,7 @@
   - include_role: name=postgres/restart
     vars:
       postgres_service_end_state: restarted
+  become: yes
   when: (inventory_hostname != tester_instance) and  "upgrade" in ansible_run_tags
 
 - block:
