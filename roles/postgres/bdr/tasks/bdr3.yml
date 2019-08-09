@@ -99,6 +99,15 @@
     _option_string: >
       {{ _keys|map('apply_format', '{0} := %s')|list|join(', ') }}
 
+- name: Include bdr-post-group-creation hook
+  include_tasks: "{{ hook }}"
+  when:
+    bdr_node_group_tuples.rowcount == 0 and
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/bdr-post-group-creation.yml"
+  tags: always
+
 - name: Clean up bdr database before group join
   include_tasks: clean.yml
   when:
@@ -119,15 +128,6 @@
     subscription_sets: >-
       {{ subscriptions|default([])|json_query(q % bdr_database) }}
   tags: [bdr, replication-sets]
-
-- name: Include bdr-post-group-creation hook
-  include_tasks: "{{ hook }}"
-  when:
-    bdr_node_group_tuples.rowcount == 0 and
-    lookup('first_found', dict(files=hook, skip=True))
-  vars:
-    hook: "{{ cluster_dir }}/hooks/bdr-post-group-creation.yml"
-  tags: always
 
 # The first_bdr_primary has now created the group, and the remaining members
 # of the same bdr_node_group must join the group.
