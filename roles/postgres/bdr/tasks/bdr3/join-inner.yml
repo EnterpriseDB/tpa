@@ -4,7 +4,7 @@
 
 - name: Join group {{ bdr_node_group }} on {{ bdr_node }} via {{ bdr_upstream|default(first_bdr_primary) }}
   postgresql_query:
-    conninfo: '{{ hostvars[bdr_node].bdr_node_dsn }}'
+    conninfo: "{{ hostvars[bdr_node].bdr_node_dsn }}"
     queries:
       - text: SELECT bdr.join_node_group(join_target_dsn := %s, pause_in_standby := %s)
         args:

@@ -16,7 +16,7 @@
     loop_var: bdr_node
   when:
     hostvars[bdr_node].upstream is not defined and
-    hostvars[bdr_node].node_group_id.rowcount == 0
+    hostvars[bdr_node].bdr_node_group_tuples.rowcount == 0
   tags: always
 
 - name: Join BDR node groups with specified upstream
@@ -30,5 +30,5 @@
     loop_var: bdr_node
   when:
     hostvars[bdr_node].upstream is defined and
-    hostvars[bdr_node].node_group_id.rowcount == 0
+    hostvars[bdr_node].bdr_node_group_tuples.rowcount == 0
   tags: always
