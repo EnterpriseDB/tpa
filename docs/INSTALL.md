@@ -19,7 +19,7 @@ following commands:
 
 # Post-installation setup
 [root]# /opt/2ndQuadrant/TPA/bin/tpaexec setup
-[root]# /opt/2ndQuadrant/TPA/bin/tpaexec selftest
+[tpa]$ /opt/2ndQuadrant/TPA/bin/tpaexec selftest
 ```
 
 More detailed explanations below.
