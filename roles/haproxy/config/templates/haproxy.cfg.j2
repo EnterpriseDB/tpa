@@ -26,10 +26,17 @@ frontend fe
 
     default_backend be
 
+peers {{ location }}
+{% for h in groups['role_haproxy'] %}
+{%   if hostvars[h].location == location %}
+    peer {{ h }} {{ hostvars[h].ip_address }}:10000
+{%   endif %}
+{% endfor %}
+
 backend be
     mode tcp
 
-    stick-table type ip size 1 nopurge
+    stick-table type ip size 1 nopurge peers {{ location }}
     stick on dst
 
     option pgsql-check user haproxy
