@@ -36,7 +36,7 @@ peers {{ location }}
 backend be
     mode tcp
 
-    stick-table type ip size 1 nopurge peers {{ location }}
+    stick-table type ip size 1 peers {{ location }}
     stick on dst
 
     option pgsql-check user haproxy
