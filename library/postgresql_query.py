@@ -157,8 +157,8 @@ def main():
             if isinstance(q, dict):
                 text = q['text']
                 args = q.get('args', [])
-                if '%' in text and not args:
-                    module.fail_json(msg="query includes % but args is empty")
+                if '%s' in text and not args:
+                    module.fail_json(msg="query includes %s but args is empty")
 
             cur.execute(text, args)
 
