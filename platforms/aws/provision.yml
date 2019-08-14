@@ -213,7 +213,7 @@
   ec2_vpc_route_table:
     region: "{{ r }}"
     vpc_id: "{{ ec2_region_vpcs[r] }}"
-    subnets: "{{ ec2_region_subnets[r].values()|list }}"
+    subnets: "{{ ec2_subnets[r]|map('extract',ec2_region_subnets[r])|list }}"
     routes:
       - dest: 0.0.0.0/0
         gateway_id: igw

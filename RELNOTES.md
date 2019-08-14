@@ -10,6 +10,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Bugfixes
 
+- Correctly limit explicit subnet associations of AWS route tables to
+  those subnets used by the cluster within a region
+
 - Accept argument-less SQL queries with embedded literal % characters
   (internal)
 
