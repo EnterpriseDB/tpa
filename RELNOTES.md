@@ -2,6 +2,17 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v8.3 (unreleased)
+
+### Notable changes
+
+- Configure HAproxy peering within a location by default
+
+### Bugfixes
+
+- Accept argument-less SQL queries with embedded literal % characters
+  (internal)
+
 ## v8.2 (2019-08-08)
 
 ### Notable changes
