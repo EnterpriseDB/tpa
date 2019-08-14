@@ -13,6 +13,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Correctly limit explicit subnet associations of AWS route tables to
   those subnets used by the cluster within a region
 
+- Correctly remove AWS security groups for the cluster during
+  deprovisioning
+
 - Accept argument-less SQL queries with embedded literal % characters
   (internal)
 

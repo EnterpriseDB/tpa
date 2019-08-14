@@ -87,7 +87,7 @@
   ec2_group:
     state: absent
     region: "{{ item.0.region }}"
-    name: "{{ item.1.group_id }}"
+    group_id: "{{ item.1.group_id }}"
   with_nested_dependents:
     - "{{ ec2_groups.results }}"
     - item.0.security_groups
