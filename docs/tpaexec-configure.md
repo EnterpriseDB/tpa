@@ -235,12 +235,18 @@ cannot be installed.
 If you specify ``--install-from-source postgres``, Postgres will be
 built and installed from a git repository instead of installed from
 packages. Use ``2ndqpostgres`` instead of ``postgres`` to build and
-install 2ndQPostgres.
+install 2ndQPostgres. By default, this will build the appropriate
+``REL_nnn_STABLE`` branch.
 
 You may use ``--install-from-source 2ndqpostgres pglogical3 bdr3`` to
 build and install all three components from source, or just use
 ``--install-from-source pglogical3 bdr3`` to use packages for
 2ndQPostgres, but build and install pglogical v3 and BDR v3 from source.
+By default, this will build the ``master`` branch of pglogical and bdr.
+
+To build a different branch, append ``:branchname`` to the corresponding
+argument. For example ``--install-from-source 2ndqpostgres:dev/xxx``, or
+``pglogical:bug/nnnn``.
 
 You may not be able to install packages that depend on a package that
 you chose to replace with a source installation instead. For example,
