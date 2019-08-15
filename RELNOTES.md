@@ -8,6 +8,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Configure HAproxy peering within a location by default
 
+- Enable EBS volume encryption at rest by default for new clusters
+
 ### Bugfixes
 
 - Correctly limit explicit subnet associations of AWS route tables to
