@@ -35,15 +35,15 @@ class aws(Platform):
         label = label.lower()
 
         if label in ['debian', 'debian-minimal']:
-            image['name'] = 'debian-stretch-hvm-x86_64-gp2-2018-08-20-85640'
+            image['name'] = 'debian-stretch-hvm-x86_64-gp2-2019-08-13-59243'
             image['owner'] = '379101102735'
             image['user'] = 'admin'
         elif label in ['redhat', 'redhat-minimal']:
-            image['name'] = 'RHEL-7.5_HVM_GA-20180322-x86_64-1-Hourly2-GP2'
+            image['name'] = 'RHEL-7.7_HVM_GA-20190723-x86_64-1-Hourly2-GP2'
             image['owner'] = '309956199498'
             image['user'] = 'ec2-user'
         elif label in ['ubuntu', 'ubuntu-minimal']:
-            image['name'] = 'ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20190403'
+            image['name'] = 'ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20190722.1'
             image['owner'] = '099720109477'
             image['user'] = 'ubuntu'
         else:
