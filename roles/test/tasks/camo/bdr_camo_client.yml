@@ -78,8 +78,9 @@
   - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
 
   - include_role: name=postgres/pkg tasks_from=list-packages.yml
-    vars:
-      postgres_package_version: null
+
+  - debug:
+      msg: "{{ all_postgres_packages }}"
 
   - name: Install latest Postgres packages
     package:
