@@ -1,0 +1,26 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: "Installing user-defined userparameters"
+  template:
+    src: "userparameters/{{ item.name }}.j2"
+    dest: "{{ zabbix_agent_include }}/userparameter_{{ item.name }}.conf"
+    owner: zabbix
+    group: zabbix
+    mode: 0644
+  notify: restart zabbix-agent
+  become: yes
+  with_items: "{{ zabbix_agent_userparameters }}"
+
+- name: "Installing user-defined scripts"
+  copy:
+    src: "scripts/{{ item.scripts_dir }}"
+    dest: "/etc/zabbix/scripts/"
+    owner: zabbix
+    group: zabbix
+    mode: 0755
+  notify: restart zabbix-agent
+  become: yes
+  with_items: "{{ zabbix_agent_userparameters }}"
+  when: item.scripts_dir is defined

@@ -1,0 +1,12 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: "Include OS-specific variables"
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags: [zabbix-agent, vars]
+
+- name: "Install the correct repository"
+  include_tasks: "os/{{ ansible_distribution }}.yml" 
+  tags: [zabbix-agent, init, config, service]
+

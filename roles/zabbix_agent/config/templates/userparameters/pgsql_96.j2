@@ -1,0 +1,137 @@
+{% raw %}
+# On Postgres terminal, create the "pg_buffercache" extension:
+# postgres=# CREATE EXTENSION pg_buffercache;
+# CREATE EXTENSION
+# Note: You should create the extension for you own database. Example:
+# postgres=# \c zabbix
+# You are now connected to database "zabbix" as user "postgres".
+# zabbix=# create extension pg_buffercache;
+# CREATE EXTENSION
+# zabbix=# 
+
+# EXTERNAL EXTENSIONS #
+UserParameter=pgsql.buffercache.clear[*],psql -qAtX $1 -c "select count(*) from pg_buffercache where not isdirty"
+UserParameter=pgsql.buffercache.dirty[*],psql -qAtX $1 -c "select count(*) from pg_buffercache where isdirty"
+UserParameter=pgsql.buffercache.used[*],psql -qAtX $1 -c "select count(*) from pg_buffercache where reldatabase is not null"
+UserParameter=pgsql.buffercache.total[*],psql -qAtX $1 -c "select count(*) from pg_buffercache"
+
+# SIMPLE DISCOVERY #
+UserParameter=pgsql.db.discovery[*],/bin/echo -n '{"data":['; for db in $(psql -qAtX $1 -c "select datname from pg_database where not datistemplate and datallowconn and datname!='postgres'"); do /bin/echo -n "{\"{#DBNAME}\": \"$db\"},"; done |sed -e 's:,$::'; /bin/echo -n ']}'
+UserParameter=pgsql.table.discovery[*],/bin/echo -n '{"data":['; for db in $(psql -qAtX $1 -c "select datname from pg_database where not datistemplate and datallowconn and datname!='postgres'"); do   for table in $(psql -qAtX -F. $1 -d $db -c "select n.nspname,c.relname from pg_catalog.pg_class c left join pg_catalog.pg_namespace n on n.oid = c.relnamespace where c.relkind in ('r','s','') and n.nspname not in ('^pg_toast','information_schema','pg_catalog')"); do /bin/echo -n "{\"{#DBNAME}\": \"$db\", \"{#TABLENAME}\": \"$table\"},";  done; done | sed -e 's:\},$:\}:'; /bin/echo -n ']}'
+UserParameter=pgsql.streaming.discovery[*],/bin/echo -n '{"data":['; for replica in $(psql -qAtX $1 -c "select client_addr from pg_stat_replication"); do /bin/echo -n "{\"{#HOTSTANDBY}\": \"$replica\"},"; done |sed -e 's:,$::'; /bin/echo -n ']}'
+
+UserParameter=pgsql.db.autovac_freeze[*],psql -qAtX $1 -c "SELECT txns, ROUND(100*(txns/freez::float)) AS perc FROM (SELECT foo.freez::int, age(datfrozenxid) AS txns FROM pg_database d JOIN (SELECT setting AS freez FROM pg_settings WHERE name = 'autovacuum_freeze_max_age') AS foo ON (true) WHERE d.datallowconn AND datname = '$2') AS foo2;" | awk -F\| '{printf("{\"{#DBNAME}\":\"$2\", \"TXNS\":\"%d\", \"TXNS_PERCENT\":\"%d\"}", $$1, $$2)}'
+
+# GENERAL INFORMATION #
+UserParameter=pgsql.ping[*],/bin/echo -e "\\\timing \n select 1" | psql -qAtX $1 | tail -n 1 |cut -d' ' -f2
+UserParameter=pgsql.uptime[*],psql -qAtX $1 -c "select date_part('epoch', now() - pg_postmaster_start_time())::int"
+UserParameter=pgsql.cache.hit[*],psql -qAtX $1 -c "select round(sum(blks_hit)*100/sum(blks_hit+blks_read), 2) from pg_stat_database"
+UserParameter=pgsql.version[*],psql -qAtX $1 -c "SELECT version() AS pg_version"
+
+# OTHER INFORMATION #
+UserParameter=pgsql.table.tuples[*],psql -qAtX $1 -d $2 -c "select count(*) from $3"
+UserParameter=pgsql.setting[*],psql -qAtX $1 -c "select current_setting('$2')"
+UserParameter=pgsql.trigger[*],psql -qAtX $1 -c "select count(*) from pg_trigger where tgenabled='O' and tgname='$2'"
+UserParameter=pgsql.wal.write[*],psql -qAtX $1 -c "select pg_xlog_location_diff(pg_current_xlog_location(),'0/00000000')"
+UserParameter=pgsql.wal.count[*],psql -qAtX $1 -c "select count(*) from pg_ls_dir('pg_xlog')"
+
+# BACKGROUND WRITER STATS #
+UserParameter=pgsql.bgwriter.checkpoints_timed[*],psql -qAtX $1 -c "select checkpoints_timed from pg_stat_bgwriter"
+UserParameter=pgsql.bgwriter.checkpoints_req[*],psql -qAtX $1 -c "select checkpoints_req from pg_stat_bgwriter"
+UserParameter=pgsql.bgwriter.checkpoint_write_time[*],psql -qAtX $1 -c "select checkpoint_write_time from pg_stat_bgwriter"
+UserParameter=pgsql.bgwriter.checkpoint_sync_time[*],psql -qAtX $1 -c "select checkpoint_sync_time from pg_stat_bgwriter"
+UserParameter=pgsql.bgwriter.buffers_checkpoint[*],psql -qAtX $1 -c "select buffers_checkpoint from pg_stat_bgwriter"
+UserParameter=pgsql.bgwriter.buffers_clean[*],psql -qAtX $1 -c "select buffers_clean from pg_stat_bgwriter"
+UserParameter=pgsql.bgwriter.maxwritten_clean[*],psql -qAtX $1 -c "select maxwritten_clean from pg_stat_bgwriter"
+UserParameter=pgsql.bgwriter.buffers_backend[*],psql -qAtX $1 -c "select buffers_backend from pg_stat_bgwriter"
+UserParameter=pgsql.bgwriter.buffers_backend_fsync[*],psql -qAtX $1 -c "select buffers_backend_fsync from pg_stat_bgwriter"
+UserParameter=pgsql.bgwriter.buffers_alloc[*],psql -qAtX $1 -c "select buffers_alloc from pg_stat_bgwriter"
+
+# CONNECTIONS #
+UserParameter=pgsql.connections.active[*],psql -qAtX $1 -c "select count(*) from pg_stat_activity where state = 'active'"
+UserParameter=pgsql.connections.idle[*],psql -qAtX $1 -c "select count(*) from pg_stat_activity where state = 'idle'"
+UserParameter=pgsql.connections.idle_in_transaction[*],psql -qAtX $1 -c "select count(*) from pg_stat_activity where state = 'idle in transaction'"
+UserParameter=pgsql.connections.total[*],psql -qAtX $1 -c "select count(*) from pg_stat_activity"
+UserParameter=pgsql.connections.total_pct[*],psql -qAtX $1 -c "select count(*)*100/(select current_setting('max_connections')::int) from pg_stat_activity"
+UserParameter=pgsql.connections.waiting[*],psql -qAtX $1 -c "select count(*) from pg_stat_activity WHERE state != 'idle' AND wait_event IS NOT NULL;"
+UserParameter=pgsql.connections.prepared[*],psql -qAtX $1 -c "select count(*) from pg_prepared_xacts"
+
+# TRANSACTIONS #
+UserParameter=pgsql.transactions.idle[*],psql -qAtX $1 -c "select coalesce(extract(epoch from max(age(now(), query_start))), 0) from pg_stat_activity where state='idle in transaction'"
+UserParameter=pgsql.transactions.active[*],psql -qAtX $1 -c "select coalesce(extract(epoch from max(age(now(), query_start))), 0) from pg_stat_activity where state <> 'idle in transaction' and state <> 'idle'"
+UserParameter=pgsql.transactions.waiting[*],psql -qAtX $1 -c "select coalesce(extract(epoch from max(age(now(), query_start))), 0) from pg_stat_activity WHERE state != 'idle' AND wait_event IS NOT NULL"
+UserParameter=pgsql.transactions.prepared[*],psql -qAtX $1 -c "select coalesce(extract(epoch from max(age(now(), prepared))), 0) from pg_prepared_xacts"
+UserParameter=pgsql.pgstatstatements.avg_query_time[*],psql -qAtX $1 -c "select avg(mean_time) from pg_stat_statements"
+
+# SUMMARY DATABASE STATS #
+UserParameter=pgsql.dbstat.sum.numbackends[*],psql -qAtX $1 -c "select sum(numbackends) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.xact_commit[*],psql -qAtX $1 -c "select sum(xact_commit) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.xact_rollback[*],psql -qAtX $1 -c "select sum(xact_rollback) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.blks_read[*],psql -qAtX $1 -c "select sum(blks_read) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.blks_hit[*],psql -qAtX $1 -c "select sum(blks_hit) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.tup_returned[*],psql -qAtX $1 -c "select sum(tup_returned) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.tup_fetched[*],psql -qAtX $1 -c "select sum(tup_fetched) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.tup_inserted[*],psql -qAtX $1 -c "select sum(tup_inserted) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.tup_updated[*],psql -qAtX $1 -c "select sum(tup_updated) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.tup_deleted[*],psql -qAtX $1 -c "select sum(tup_deleted) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.conflicts[*],psql -qAtX $1 -c "select sum(conflicts) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.temp_files[*],psql -qAtX $1 -c "select sum(temp_files) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.temp_bytes[*],psql -qAtX $1 -c "select sum(temp_bytes) from pg_stat_database"
+UserParameter=pgsql.dbstat.sum.deadlocks[*],psql -qAtX $1 -c "select sum(deadlocks) from pg_stat_database"
+
+# SPECIFIED DATABASE STATS - TODO: CREATE LLD #
+UserParameter=pgsql.dbstat.numbackends[*],psql -qAtX $1 -c "select numbackends from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.xact_commit[*],psql -qAtX $1 -c "select xact_commit from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.xact_rollback[*],psql -qAtX $1 -c "select xact_rollback from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.blks_read[*],psql -qAtX $1 -c "select blks_read from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.blks_hit[*],psql -qAtX $1 -c "select blks_hit from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.tup_returned[*],psql -qAtX $1 -c "select tup_returned from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.tup_fetched[*],psql -qAtX $1 -c "select tup_fetched from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.tup_inserted[*],psql -qAtX $1 -c "select tup_inserted from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.tup_updated[*],psql -qAtX $1 -c "select tup_updated from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.tup_deleted[*],psql -qAtX $1 -c "select tup_deleted from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.conflicts[*],psql -qAtX $1 -c "select conflicts from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.temp_files[*],psql -qAtX $1 -c "select temp_files from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.temp_bytes[*],psql -qAtX $1 -c "select temp_bytes from pg_stat_database where datname = '$2'"
+UserParameter=pgsql.dbstat.deadlocks[*],psql -qAtX $1 -c "select deadlocks from pg_stat_database where datname = '$2'"
+
+# DATABASE/TABLE/INDEXES SIZE - TODO: CREATE LLD #
+UserParameter=pgsql.db.size[*],psql -qAtX $1 -c "select pg_database_size('$2')"
+UserParameter=pgsql.table.size[*],psql -qAtX $1 -d $2 -c "select pg_relation_size('$3')"
+UserParameter=pgsql.index.size[*],psql -qAtX $1 -d $2 -c "select pg_total_relation_size('$3') - pg_relation_size('$3')"
+
+# TABLE STATS #
+UserParameter=pgsql.table.stat.heap_blks_read[*],psql -qAtX $1 -d $2 -c "select coalesce(heap_blks_read,0) from pg_statio_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.heap_blks_hit[*],psql -qAtX $1 -d $2 -c "select coalesce(heap_blks_hit,0) from pg_statio_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.idx_blks_read[*],psql -qAtX $1 -d $2 -c "select coalesce(idx_blks_read,0) from pg_statio_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.idx_blks_hit[*],psql -qAtX $1 -d $2 -c "select coalesce(idx_blks_hit,0) from pg_statio_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.toast_blks_read[*],psql -qAtX $1 -d $2 -c "select coalesce(toast_blks_read,0) from pg_statio_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.toast_blks_hit[*],psql -qAtX $1 -d $2 -c "select coalesce(toast_blks_hit,0) from pg_statio_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.tidx_blks_read[*],psql -qAtX $1 -d $2 -c "select coalesce(tidx_blks_read,0) from pg_statio_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.tidx_blks_hit[*],psql -qAtX $1 -d $2 -c "select coalesce(tidx_blks_hit,0) from pg_statio_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.seq_scan[*],psql -qAtX $1 -d $2 -c "select coalesce(seq_scan,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.seq_tup_read[*],psql -qAtX $1 -d $2 -c "select coalesce(seq_tup_read,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.idx_scan[*],psql -qAtX $1 -d $2 -c "select coalesce(idx_scan,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.idx_tup_fetch[*],psql -qAtX $1 -d $2 -c "select coalesce(idx_tup_fetch,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.n_tup_ins[*],psql -qAtX $1 -d $2 -c "select coalesce(n_tup_ins,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.n_tup_del[*],psql -qAtX $1 -d $2 -c "select coalesce(n_tup_del,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.n_tup_upd[*],psql -qAtX $1 -d $2 -c "select coalesce(n_tup_upd,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.n_tup_hot_upd[*],psql -qAtX $1 -d $2 -c "select coalesce(n_tup_hot_upd,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.n_live_tup[*],psql -qAtX $1 -d $2 -c "select coalesce(n_live_tup,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.n_dead_tup[*],psql -qAtX $1 -d $2 -c "select coalesce(n_dead_tup,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.vacuum_count[*],psql -qAtX $1 -d $2 -c "select coalesce(vacuum_count,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.autovacuum_count[*],psql -qAtX $1 -d $2 -c "select coalesce(autovacuum_count,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.analyze_count[*],psql -qAtX $1 -d $2 -c "select coalesce(analyze_count,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+UserParameter=pgsql.table.stat.autoanalyze_count[*],psql -qAtX $1 -d $2 -c "select coalesce(autoanalyze_count,0) from pg_stat_user_tables where (schemaname || '.' || relname) = '$3'"
+
+# STREAMING REPLICATION #
+UserParameter=pgsql.packet_loss[*],ping -W 2 -q -n -c 10 $1 | grep "packet loss" | cut -d " " -f 6 | cut -d "%" -f1
+UserParameter=pgsql.streaming.count[*],psql -qAtX $1 -c "select count(*) from pg_stat_replication"
+UserParameter=pgsql.streaming.state[*],psql -qAtX $1 -c "select pg_is_in_recovery()"
+UserParameter=pgsql.streaming.lag.bytes[*],psql -qAtX $1 -c "select greatest(0,pg_xlog_location_diff(pg_current_xlog_location(), replay_location)) from pg_stat_replication where client_addr = '$2'"
+UserParameter=pgsql.streaming.lag.seconds[*],psql -qAtX -h $2 $1 -c "SELECT CASE WHEN pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())::INTEGER END AS replication_lag;"
+
+# Bloat: Top 10 Tables
+UserParameter=pgsql.table.bloat.discovery[*],/bin/echo -n '{"data":['; for table in $(psql -qAtX $1 -d $2 -c "SELECT nspname || '.' || relname FROM pg_class c LEFT JOIN pg_namespace n ON n.oid = c.relnamespace LEFT JOIN LATERAL pgstattuple_approx(nspname || '.' || relname ) b ON true WHERE relkind IN ( 'r' ) AND ( approx_free_space >= $3 AND approx_free_percent >= $4 ) AND NOT pg_is_in_recovery();" ); do /bin/echo -n "{\"{#DBNAME}\": \"$2\", \"{#TABLENAME}\": \"$table\"},"; done | sed -e 's:\},$:\}:'; /bin/echo -n ']}'
+UserParameter=pgsql.table.bloat.values[*],psql -qAtX $1 -d $2 -c "SELECT * FROM pgstattuple_approx('$3');" | awk -F\| '{printf("{\"{#TABLENAME}\":\"$3\", \"APPROX_FREE_PERCENT\":\"%.2f\", \"APPROX_DEAD_TUPLE_PERCENT\":\"%.2f\", \"TABLE_LEN\":\"%d\", \"APPROX_FREE_SPACE\":\"%d\", \"SCANNED_PERCENT\":\"%.2f\"}",$$10, $$8, $$1, $$9, $$2)}'
+{% endraw %}

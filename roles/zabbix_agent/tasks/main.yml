@@ -1,0 +1,20 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- include_role:
+    name: zabbix_agent/pkg
+    apply:
+      tags: [zabbix_agent, pkg]
+  when: >
+    'zabbix_agent' in role
+  tags: always
+
+- include_role:
+    name: zabbix_agent/config
+    apply:
+      tags: [zabbix_agent, config]
+  when: >
+    'zabbix_agent' in role
+  tags: always
+

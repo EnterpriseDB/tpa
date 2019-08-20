@@ -1,0 +1,8 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: "Including userparameters"
+  include: "userparameter.yml"
+  when: zabbix_agent_userparameters|length > 0
+  tags: [zabbix-agent, config]

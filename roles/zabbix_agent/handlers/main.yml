@@ -1,0 +1,10 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: restart zabbix-agent
+  service:
+    name: "{{ zabbix_agent_service }}"
+    state: restarted
+    enabled: yes
+  become: yes
