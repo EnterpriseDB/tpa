@@ -158,9 +158,6 @@ def main():
                 text = q['text']
                 args = q.get('args', [])
 
-            if '%s' in text and not args:
-                module.fail_json(msg="query includes %s but args is empty")
-
             cur.execute(text, args)
 
             res=[]
