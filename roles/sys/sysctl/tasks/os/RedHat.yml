@@ -10,7 +10,7 @@
 - name: Run grubby to update kernel command line
   shell: >
     if ! grep -q transparent_hugepage= /boot/grub2/grub.cfg || ! grep -q hugepages= /boot/grub2/grub.cfg;
-    then grubby --update-kernel=ALL --args="hugepages={{ hugepages }} transparent_hugepage=never";
+    then grubby --update-kernel=ALL --args="hugepages={{ nr_hugepages }} transparent_hugepage=never";
     else echo unchanged;
     fi
   args:
@@ -19,4 +19,4 @@
   changed_when: grubby.stdout != 'unchanged'
   vars:
     sysctls: "{{ sysctl_defaults|combine(sysctl_values) }}"
-    hugepages: "{{ sysctls['vm.nr_hugepages'] }}"
+    nr_hugepages: "{{ sysctls['vm.nr_hugepages'] }}"

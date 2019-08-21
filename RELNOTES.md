@@ -21,6 +21,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Accept argument-less SQL queries with embedded literal % characters
   (internal)
 
+- Fix incorrect generation of /boot/grub2/grub.cfg on RedHat systems
+
 ## v8.2 (2019-08-08)
 
 ### Notable changes
