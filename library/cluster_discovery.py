@@ -308,7 +308,7 @@ def read_repmgr_conf(m0):
     repmgr_conf = os.path.join('/etc/repmgr/%s/repmgr.conf' % m0['postgres_version'])
     try:
         m = parse_kv_lines(repmgr_conf)
-    except IOError, OSError:
+    except (IOError, OSError):
         pass
 
     return m

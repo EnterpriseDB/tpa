@@ -127,7 +127,7 @@ def main():
     conninfo = module.params["conninfo"]
     try:
         conn = psycopg2.connect(dsn=conninfo)
-    except Exception, e:
+    except Exception as e:
         module.fail_json(msg="Could not connect to database",
             err=str(e), exception=traceback.format_exc())
 
@@ -171,7 +171,7 @@ def main():
             rowcounts.append(cur.rowcount)
             results.append(res)
             cur.close()
-    except Exception, e:
+    except Exception as e:
         try:
             conn.rollback()
         except psycopg2.InterfaceError:
