@@ -187,8 +187,7 @@ def main():
     if len(results) == 1:
         results = results[0]
     if len(results) == 1 and len(results[0]) == 1:
-        for k,v in results[0].iteritems():
-            m[k] = v
+        m.update(results[0])
 
     m['rowcounts'] = rowcounts
     if len(rowcounts) == 1:
