@@ -55,7 +55,7 @@ class vagrant(Platform):
         })
 
     def update_instances(self, instances, args, **kwargs):
-        addresses = list(ipaddress.ip_network(unicode(args['subnets'][0])).hosts())
+        addresses = list(ipaddress.ip_network(args['subnets'][0]).hosts())
 
         for i,instance in enumerate(instances):
             instance['ip_address'] = str(addresses[i+1])
