@@ -455,7 +455,7 @@ class Architecture(object):
     def product_repositories(self):
         return [
             'default', '2ndqpostgres', 'bdr2', 'bdr3', 'pglogical3',
-            'server-ssl-passphrase-callback',
+            'server-ssl-passphrase-callback', 'postgresql',
         ]
 
     # Returns a map of things that should be accepted as arguments to
