@@ -18,7 +18,7 @@
 
 - name: Set correct SELinux context for {{ postgres_data_dir }}
   shell: >
-    if $(type -p selinuxenabled &>/dev/null); then
+    if $(type -p selinuxenabled); then
     semanage fcontext -a -t postgresql_db_t "{{ postgres_data_dir }}(/.*)?" &&
     restorecon -R -v "{{ postgres_data_dir }}";
     fi
