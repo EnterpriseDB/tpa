@@ -88,7 +88,7 @@
 
 - name: Install 2ndQuadrant repositories
   shell: >
-    curl {{ item.url }} | bash
+    curl -sS {{ item.url }} | bash
   args:
     executable: /bin/bash
     creates: "{{ use_volatile_subscriptions|ternary(omit, item.file) }}"
