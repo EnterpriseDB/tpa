@@ -11,8 +11,8 @@ Group={{ postgres_group }}
 OOMScoreAdjust=-1000
 Environment=PGDATA={{ postgres_data_dir }}
 {% if postgres_service_environment is defined and postgres_service_environment is mapping %}
-{%   for k in postgres_service_environment.keys() %}
-Environment={{ k }}={{ postgres_service_environment[k] }}
+{%   for k,v in postgres_service_environment.items() %}
+Environment={{ k }}={{ v }}
 {%   endfor %}
 {% endif %}
 StandardOutput=syslog
