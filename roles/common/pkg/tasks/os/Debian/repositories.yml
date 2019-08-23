@@ -92,6 +92,9 @@
   args:
     executable: /bin/bash
     creates: "{{ use_volatile_subscriptions|ternary(omit, item.file) }}"
+  register: reposub
+  failed_when: >
+    reposub.rc != 0 or 'error: ' in reposub.stdout.lower()
   with_items: "{{ _2q_repositories }}"
 
 - include_tasks: repository-cleanup.yml
