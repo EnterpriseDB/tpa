@@ -19,6 +19,8 @@ following commands:
 
 # Post-installation setup
 [root]# /opt/2ndQuadrant/TPA/bin/tpaexec setup
+
+# Verify the installation
 [tpa]$ /opt/2ndQuadrant/TPA/bin/tpaexec selftest
 ```
 
