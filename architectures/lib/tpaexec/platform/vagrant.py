@@ -4,6 +4,9 @@
 
 from __future__ import print_function
 
+# Required for backwards compatibility with Python2
+from six import u as unicode
+
 import ipaddress
 
 from tpaexec.platform import Platform
@@ -55,7 +58,7 @@ class vagrant(Platform):
         })
 
     def update_instances(self, instances, args, **kwargs):
-        addresses = list(ipaddress.ip_network(args['subnets'][0]).hosts())
+        addresses = list(ipaddress.ip_network(unicode(args['subnets'][0])).hosts())
 
         for i,instance in enumerate(instances):
             instance['ip_address'] = str(addresses[i+1])
