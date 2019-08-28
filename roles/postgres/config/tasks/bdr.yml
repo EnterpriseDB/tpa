@@ -1,0 +1,13 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Install BDR-specific configuration file
+  template:
+    src: bdr.conf.j2
+    dest: "{{ _include_dir }}/3333-bdr.conf"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
+  notify:
+    - Note Postgres reload required

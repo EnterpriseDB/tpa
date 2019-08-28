@@ -82,7 +82,9 @@ vacuum_cost_delay = {{ vacuum_cost_delay|default(0) }}
 vacuum_cost_limit = {{ vacuum_cost_limit|default(200) }}
 
 fsync = on
+{% if ('bdr' not in role) %}
 synchronous_commit = {{ synchronous_commit|default('on') }}
+{% endif %}
 
 full_page_writes = {{ full_page_writes|default('on') }}
 commit_delay = {{ commit_delay|default(0) }}

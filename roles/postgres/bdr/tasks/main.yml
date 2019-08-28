@@ -101,9 +101,8 @@
     apply:
       tags: bdr
 
-- name: Perform CAMO setup if required
+- name: Change Postgres configuration if required
   include_tasks:
-    file: camo.yml
+    file: postgres-reconfig.yml
     apply:
-      tags: camo
-  when: bdr_node_camo_partner is defined
+      tags: [postgres, config, bdr]
