@@ -4,3 +4,4 @@ ansible.log
 *.retry
 tpa-virtualenv/*
 pip-packages/*
+.python-version
