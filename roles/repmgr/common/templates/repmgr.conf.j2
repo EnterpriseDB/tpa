@@ -1,39 +1,39 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-node_id={{ node }}
-node_name={{ inventory_hostname }}
-conninfo='{{ repmgr_node_dsn }} application_name={{ inventory_hostname }} connect_timeout=2'
-data_directory={{ postgres_data_dir }}
-pg_bindir={{ postgres_bin_dir }}
+node_id = {{ node }}
+node_name = {{ inventory_hostname }}
+conninfo = "{{ repmgr_node_dsn }} application_name={{ inventory_hostname }} connect_timeout=2"
+data_directory = "{{ postgres_data_dir }}"
+pg_bindir = "{{ postgres_bin_dir }}"
 {% if repmgr_priority is defined %}
-priority={{ repmgr_priority }}
+priority = "{{ repmgr_priority }}"
 {% endif %}
 {% if repmgr_location is defined %}
-location={{ repmgr_location }}
+location = "{{ repmgr_location }}"
 {% endif %}
-replication_type=physical
-use_replication_slots={{ repmgr_use_slots }}
-async_query_timeout=60
-reconnect_attempts={{ repmgr_reconnect_attempts|default(6) }}
-reconnect_interval={{ repmgr_reconnect_interval|default(10) }}
-failover={{ repmgr_failover }}
-ssh_options=-q
+replication_type = "physical"
+use_replication_slots = "{{ repmgr_use_slots }}"
+async_query_timeout = 60
+reconnect_attempts = {{ repmgr_reconnect_attempts|default(6) }}
+reconnect_interval = {{ repmgr_reconnect_interval|default(10) }}
+failover = "{{ repmgr_failover }}"
+ssh_options = "-q"
 
-log_level=INFO
+log_level = INFO
 
-monitoring_history=true
+monitoring_history = true
 
-promote_command='{{ repmgr_conf_dir }}/promote_command.sh'
-follow_command='{{ repmgr_conf_dir }}/follow_command.sh'
+promote_command = "{{ repmgr_conf_dir }}/promote_command.sh"
+follow_command = "{{ repmgr_conf_dir }}/follow_command.sh"
 {% if upstream_backedup != '' %}
-restore_command='/usr/bin/barman-wal-restore -U barman -z -p 8 {{ hostvars[upstream_backedup].backup }} {{ hostvars[upstream_backedup].backup_name }} %f %p'
+restore_command = "/usr/bin/barman-wal-restore -U barman -z -p 8 {{ hostvars[upstream_backedup].backup }} {{ hostvars[upstream_backedup].backup_name }} %f %p"
 {% endif %}
 
-service_start_command = sudo systemctl start {{ postgres_service_name }}
-service_stop_command = sudo systemctl stop {{ postgres_service_name }}
-service_restart_command = sudo systemctl restart {{ postgres_service_name }}
-service_reload_command = sudo systemctl reload {{ postgres_service_name }}
+service_start_command = "sudo systemctl start {{ postgres_service_name }}"
+service_stop_command = "sudo systemctl stop {{ postgres_service_name }}"
+service_restart_command = "sudo systemctl restart {{ postgres_service_name }}"
+service_reload_command = "sudo systemctl reload {{ postgres_service_name }}"
 
 {% if event_notifications is defined %}
-event_notifications = {{ event_notifications }}
-event_notification_command = {{ event_notification_command }}
+event_notifications = "{{ event_notifications }}"
+event_notification_command = "{{ event_notification_command }}"
 {% endif %}
