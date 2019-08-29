@@ -23,6 +23,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Fix incorrect generation of /boot/grub2/grub.cfg on RedHat systems
 
+- Respect ProxyCommand (and any other ssh options) set in the inventory
+  when waiting for hosts to be reachable via ssh
+
 ## v8.2 (2019-08-08)
 
 ### Notable changes
