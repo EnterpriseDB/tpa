@@ -2,15 +2,32 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v8.3 (unreleased)
+## v8.3 (2019-08-29)
+
+This release requires ``tpaexec setup`` to be rerun after installation.
 
 ### Notable changes
 
-- Configure HAproxy peering within a location by default
+- Set max_prepared_transactions to 16 by default for BDR clusters
+  (requires Postgres restart); 2PC is required by CAMO and eager
+  all-node replication
+
+- Set synchronous_commit after BDR initialisation for BDR clusters
 
 - Enable EBS volume encryption at rest by default for new clusters
 
+- Configure HAproxy peering within a location by default
+
+### Minor changes
+
+- Accept ``etc_hosts_lines`` list variable setting to completely control
+  /etc/hosts contents
+
+- Retrieve and set bdr_node_id during BDR initialisation
+
 ### Bugfixes
+
+- Fix incorrect generation of /boot/grub2/grub.cfg on RedHat systems
 
 - Correctly limit explicit subnet associations of AWS route tables to
   those subnets used by the cluster within a region
@@ -18,13 +35,13 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Correctly remove AWS security groups for the cluster during
   deprovisioning
 
-- Accept argument-less SQL queries with embedded literal % characters
-  (internal)
-
-- Fix incorrect generation of /boot/grub2/grub.cfg on RedHat systems
-
 - Respect ProxyCommand (and any other ssh options) set in the inventory
   when waiting for hosts to be reachable via ssh
+
+- Correctly quote string arguments in repmgr.conf
+
+- Accept argument-less SQL queries with embedded literal % characters
+  (internal)
 
 ## v8.2 (2019-08-08)
 
