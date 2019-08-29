@@ -116,3 +116,9 @@
   vars:
     _repmgr_hostname: "{{ repmgr_hostname|default(inventory_hostname) }}"
   tags: always
+
+- name: Set default max_prepared_transactions
+  set_fact:
+    max_prepared_transactions: 16
+  when: >
+    'bdr' in role and max_prepared_transactions is not defined
