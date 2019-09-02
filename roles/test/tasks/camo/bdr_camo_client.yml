@@ -58,7 +58,7 @@
         - "{{ camo_transactions }}"
     register: done
     until: done.count >= camo_clients|int
-    retries: 10
+    retries: 30
     become_user: "{{ postgres_user }}"
     become: yes
   vars:
@@ -66,6 +66,9 @@
     bdr_camo_client: "{{ postgres_bin_dir }}/bdr_camo_client"
   when:
     inventory_hostname == tester_instance
+
+- debug:
+    msg: "ping {{ ping }}"
 
 - block:
   - name: Cause failure {{ failure }} on CAMO partner {{ pong }}
@@ -86,12 +89,16 @@
     package:
       name: "{{ all_postgres_packages }}"
       state: latest
-
-  - include_role: name=postgres/restart
-    vars:
-      postgres_service_end_state: restarted
+  when: "'upgrade' in ansible_run_tags"
+  
+- include_role: name=postgres/restart
+  vars:
+    postgres_service_end_state: restarted
   become: yes
-  when: (inventory_hostname != tester_instance) and  "upgrade" in ansible_run_tags
+  with_items:
+   - "{{ groups[bdr_node_group] }}"
+  when: inventory_hostname == item and "upgrade" in ansible_run_tags 
+
 
 - block:
   - name: Wait for bdr_camo_client to complete
