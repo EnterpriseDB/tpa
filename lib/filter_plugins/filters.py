@@ -212,6 +212,15 @@ def apply_format(input, format_string, *more):
 def backup_slot_name(barman_hostname):
     return 'backup_%s' % re.sub('-', '_', re.sub('\..*', '', barman_hostname))
 
+# Returns True if all of the one or more given values are in the container, and
+# False otherwise.
+
+def contains(container, *values):
+    for v in values:
+        if v not in container:
+            return False
+    return True
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -230,4 +239,5 @@ class FilterModule(object):
             'pyformat_attr': pyformat_attr,
             'apply_format': apply_format,
             'backup_slot_name': backup_slot_name,
+            'contains': contains,
         }
