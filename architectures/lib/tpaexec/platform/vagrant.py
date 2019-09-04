@@ -40,7 +40,7 @@ class vagrant(Platform):
         images = {
             'debian': 'debian/stretch64',
             'redhat': 'centos/7',
-            'ubuntu': 'ubuntu/xenial64',
+            'ubuntu': 'ubuntu/bionic64',
         }
 
         label = label.lower()
