@@ -13,7 +13,7 @@
     that:
       - ansible_facts.python_version is version('2.7', '>=')
       - ansible_version.major == 2
-      - ansible_version.minor == 6
+      - ansible_version.minor == 6 or ansible_version.minor == 8
   run_once: true
 
 - name: Ensure that local dependencies are installed

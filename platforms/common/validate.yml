@@ -6,7 +6,7 @@
     msg: "Ansible 2.6.x is required"
     that:
       - ansible_version.major == 2
-      - ansible_version.minor == 6
+      - ansible_version.minor == 6 or ansible_version.minor == 8
   tags: prereqs
 
 - import_tasks: validate-compat.yml
