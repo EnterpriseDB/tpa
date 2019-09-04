@@ -6,7 +6,7 @@
     ping: "{{ groups[camo_test_group]|first }}"
     pong: "{{ groups[camo_test_group]|last }}"
     camo_transactions: "{{ camo_transactions|default(1000) }}"
-    camo_clients: "{{ camo_threads|default(200) }}"
+    camo_clients: "{{ camo_clients|default(200) }}"
     bdr_camo_client_args: "{{ bdr_camo_client_args|default('') }}"
 
 - block:
