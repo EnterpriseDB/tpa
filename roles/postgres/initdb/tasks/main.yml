@@ -2,6 +2,14 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- name: Include pre-initdb hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/pre-initdb.yml"
+  tags: always
+
 - name: Ensure postgres directories exist and have the right permissions
   file:
     path: "{{ item }}"
