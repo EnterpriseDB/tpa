@@ -42,6 +42,9 @@ options:
     default: 'no'
 notes:
    - This module requires the I(psycopg2) Python library to be installed.
+   - This module can execute any sort of query, but you may need to cast some
+     result values (e.g., float) to text to retrieve them, because of code in
+     Ansible that has limited support for the data types it can handle.
 requirements: [ psycopg2 ]
 author: "Abhijit Menon-Sen <ams@2ndQuadrant.com>"
 '''
