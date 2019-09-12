@@ -48,6 +48,9 @@
 # an earlier invocation must have completed and removed the file, so we
 # do nothing. If it exists, we must have created it, or it's a leftover
 # from a failed earlier restore, so we restore it and remove the file.
+- name: restore time
+  debug:
+    msg: "{{ partition_timeout|default('600') }}"
 
 - name: Set timeout for network partition
   shell: >
