@@ -44,6 +44,13 @@
 # and cause the first partner to undergo various failures during the
 # run. Otherwise we skip this test.
 
+- debug:
+    msg: "{{ groups[bdr_node_group] }}"
+- debug:
+    msg: "{{ all_camo_groups }}"
+- debug:
+    msg: "{{ testers_with_client }}"
+
 - name: Run bdr_camo_client tests
   block:
     - include_tasks: camo/bdr_camo_client.yml
@@ -58,7 +65,6 @@
         destructive_failures:
           - none
           - partition
-          - powerfail
         failures: "{{
           destroy_cluster|default(False)|ternary(destructive_failures, nondestructive_failures)
         }}"
