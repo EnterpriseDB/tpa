@@ -34,9 +34,9 @@ instances:
         shared_buffers: '64MB'
 ```
 
-Here, we see **work_mem**, **max_connections** & **shared_buffers** are all being defined - note that these should be defined as **\<variable>: \<value>**. To see what Postgres variables are possible to set, either read the documentation for the relevant Postgres version, or look in **\$PGDATA/postgresql.conf** on a Postgres server.
+Here, we see **work_mem**, **max_connections** & **shared_buffers** are all being defined - note that these should be defined as `<variable>: <value>`. To see what Postgres variables are possible to set, either read the documentation for the relevant Postgres version, or look in **$PGDATA/postgresql.conf** on a Postgres server.
 
-During the deploy phase, TPAexec creates a directory on each Postgres node which contains files with settings which override those set in **\$PGDATA/postgresql.conf**. This directory conf.d is included as the last line in \$PGDATA/postgresql.conf by the setting:
+During the deploy phase, TPAexec creates a directory on each Postgres node which contains files with settings which override those set in **$PGDATA/postgresql.conf**. This directory conf.d is included as the last line in $PGDATA/postgresql.conf by the setting:
 
 ```
 include_dir = 'conf.d'
@@ -64,7 +64,7 @@ override.conf.j2    pg_hba.lines.j2  tpa.conf.j2       variable.j2
 
 #### Manual updates
 
-Bearing these in mind, any manual updates after TPAexec deployment for settings that override **\$PGDATA/postgresql.conf** on any node should be made only to **\$PGDATA/conf.d/9999-override.conf** because any other file may get overwritten or overridden by subsequent settings at service start time. This is where you should configure any setting that requires persistence after reboot.
+Bearing these in mind, any manual updates after TPAexec deployment for settings that override **$PGDATA/postgresql.conf** on any node should be made only to **$PGDATA/conf.d/9999-override.conf** because any other file may get overwritten or overridden by subsequent settings at service start time. This is where you should configure any setting that requires persistence after reboot.
 
 Any settings added to **9999-override.conf** should also be added to the relevant **config.yml** on the TPAexec server so that any rehydrate or subsequent build of the node will contain the most up-to-date setting.
 
