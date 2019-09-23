@@ -2,6 +2,18 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v8.4 (2019-09-23)
+
+### Minor changes
+
+- Add new pre-initdb hook
+
+- Ignore extra_float_digits by default in pgbouncer
+
+### Bugfixes
+
+- Fix BDRv1 repository installation problem
+
 ## v8.3 (2019-08-29)
 
 This release requires ``tpaexec setup`` to be rerun after installation.
