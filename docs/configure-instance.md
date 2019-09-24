@@ -76,17 +76,17 @@ These are automatically generated during deploy phase by TPAexec and should not 
 
 ### Other customisations - hooks
 
-It is possible to set up many other customisations during the build process by creating post deployment tasks that are called via the Ansible hook system. 
+It is possible to set up many other customisations during the build process by creating post deployment tasks that are called via the Ansible hook system.
 
-First create a **hooks** directory under **\<clustername\>**, then create a file in it called **post-deploy.yml**. 
+First create a **hooks** directory under `<clustername>`, then create a file in it called **post-deploy.yml**.
 
 ```
 $ mkdir ~/tpa/clusters/<clustername>/hooks
-$ touch ~/tpa/clusters/<clustername>/hooks/
+$ touch ~/tpa/clusters/<clustername>/hooks/post-deploy.yml
 
 ```
 
-In this snippet, designed to be part of a training lab, we create a user "student", add them to admin group, set password, allow them to ssh with just password authentication, update /etc/sudoers, and restart ssh service.
+In this snippet, designed to be part of a training lab, we create a user `student`, add them to the `admin` group, set the password, allow them to ssh with just password authentication, update `/etc/sudoers`, and restart the ssh service.
 
 *Disclaimer - allowing ssh access to Internet facing instances with just password authentication is a security risk, and shouldn't be enabled on any production system*.
 
@@ -104,7 +104,7 @@ In this snippet, designed to be part of a training lab, we create a user "studen
 # Set admin group relevant to OS type & version
       group: adm
       createhome: yes
-# password and quoted hash are both on the same line - hash has been truncated 
+# password and quoted hash are both on the same line - hash has been truncated
 # for documentation purposes
       password: "$6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdEL"
 - name: Add student to sudoers
@@ -133,4 +133,3 @@ $6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdEL
 ```
 
 In this manner, post deployment tasks can be used to configure and modify server files - see [user](http://docs.ansible.com/ansible/latest/modules/user_module.html#user-module) and [lineinfile](http://docs.ansible.com/ansible/latest/modules/lineinfile_module.html) for more information on how to use those particular modules. Information about all the current modules available for Ansible can be found [here](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html) or just the system modules [here](http://docs.ansible.com/ansible/latest/modules/list_of_system_modules.html). The [shell](http://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module) module can be used to run commands on the nodes.
-
