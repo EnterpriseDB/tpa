@@ -464,7 +464,7 @@ class Architecture(object):
         return {
             'postgres': {
                 'postgres_installation_method': 'src',
-                'postgres_git_url': 'https://github.com/postgres/postgres.git',
+                'postgres_git_url': 'https://git.postgresql.org/git/postgresql.git',
             },
             '2ndqpostgres': {
                 'postgres_installation_method': 'src',
