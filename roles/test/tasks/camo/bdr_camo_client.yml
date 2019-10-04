@@ -3,11 +3,18 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - set_fact:
-    ping: "{{ groups[camo_test_group]|first }}"
-    pong: "{{ groups[camo_test_group]|last }}"
+    ping: "{{ pair[0] }}"
+    pong: "{{ pair[1] }}"
     camo_transactions: "{{ camo_transactions|default(1000) }}"
     camo_clients: "{{ camo_clients|default(200) }}"
     bdr_camo_client_args: "{{ bdr_camo_client_args|default('') }}"
+
+- set_fact:
+    bdr_dsn: "{{ ping }},{{ pong }}"
+    haproxy_dsn: "{{ haproxy_node|default('') }} -p {{ haproxy_port|default(6432) }}"
+
+- set_fact:
+    bdr_camo_client_host_arg: "{{ via_haproxy|ternary(haproxy_dsn,bdr_dsn) }}"
 
 - block:
   - name: Create bdr_camo_client test table
@@ -37,7 +44,7 @@
   - name: Run bdr_camo_client
     shell: >
       {{ bdr_camo_client }}
-      -h {{ ping }},{{ pong }}
+      -h {{ bdr_camo_client_host_arg }}
       -c 'INSERT INTO camo_test VALUES ($1, $2);'
       -i {{ camo_transactions }} -j {{ camo_clients }}
       {{ bdr_camo_client_args }}

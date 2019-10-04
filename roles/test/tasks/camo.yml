@@ -25,6 +25,43 @@
 - set_fact:
     possible_testers: "{{ groups|members_of('role_bdr', not_in=all_camo_groups)|list }}"
 
+- set_fact:
+    pair:
+      - "{{ groups[all_camo_groups|first]|first }}"
+      - "{{ groups[all_camo_groups|first]|last }}"
+
+- set_fact:
+     via_haproxy: "{{ via_haproxy|default(False) }}"
+
+- block:
+  - name: Check test validity
+    fail:
+      msg: "Test cluster is unsupported. Requires haproxy node"
+    when: groups['role_haproxy'] is undefined or groups['role_haproxy']|length == 0
+
+  - name: Build haproxy backend list
+    set_fact:
+      haproxy_backend_list: "{{
+        haproxy_backend_list|default([])|union([{
+          'name': item,
+          'backends': hostvars[item].haproxy_backends,
+        }])
+      }}"
+    with_items: "{{ groups['role_haproxy'] }}"
+
+  - set_fact:
+      pair:
+       - "{{ item['backends'][0] }}"
+       - "{{ item['backends'][1] }}"
+      haproxy_node: "{{ item['name'] }}"
+    with_items:  "{{ haproxy_backend_list }}"
+    when: hostvars[item.backends[0]]['bdr_node_camo_partner'] == item.backends[1] 
+
+  - fail:
+     msg: "Test cluster is unsupported. Requires haproxy backends to be camo pairs"
+    when: haproxy_node is undefined
+  when: via_haproxy
+
 - name: Check if bdr_camo_client is available
   stat:
     path: "{{ postgres_bin_dir }}/bdr_camo_client"
@@ -58,13 +95,13 @@
       loop_control:
         loop_var: failure
       vars:
-        camo_test_group: "{{ all_camo_groups|first }}"
         tester_instance: "{{ testers_with_client|first }}"
         nondestructive_failures:
           - none
         destructive_failures:
           - none
           - partition
+          - powerfail
         failures: "{{
           destroy_cluster|default(False)|ternary(destructive_failures, nondestructive_failures)
         }}"

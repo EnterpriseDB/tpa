@@ -6,20 +6,57 @@
 # disks or anything) via sysrq. The slightly convoluted invocation makes
 # it less likely that this task will fail.
 
-- name: Request immediate reboot
-  shell: >
-    sleep 1 && echo b > /proc/sysrq-trigger
-  become_user: root
-  become: yes
-  async: 42
-  poll: 0
+- name: powerfail for AWS
+  block:
+  - name: Request immediate reboot
+    shell: >
+      sleep 1 && echo b > /proc/sysrq-trigger
+    become_user: root
+    become: yes
+    async: 42
+    poll: 0
 
-# We have no control over the process after submitting the request, so
-# we just wait for a while for the instance to come back up afterwards.
+  # We have no control over the process after submitting the request, so
+  # we just wait for a while for the instance to come back up afterwards.
 
-- name: Wait for instance to return
-  wait_for_connection:
-    delay: 10
-    connect_timeout: 30
-    sleep: 15
-    timeout: 120
+  - name: Wait for instance to return
+    wait_for_connection:
+      delay: 10
+      connect_timeout: 30
+      sleep: 15
+      timeout: 120
+  when: platform != 'docker'
+
+- name: powerfail for docker
+  block:
+  # save /etc/hosts to restore later
+  - name: Update /etc/hosts
+    command: cp /etc/hosts /tmp/hosts_existing
+
+  - name: kill docker container
+    shell: >
+      docker kill {{ inventory_hostname }}
+    delegate_to: localhost
+
+  - name: restore time
+    set_fact:
+      powerfail_timeout: "{{ powerfail_timeout|default('100') }}"
+
+  - name: start docker container
+    shell: >
+      sleep {{ powerfail_timeout }};
+      docker start {{ inventory_hostname }};
+    args:
+      executable: /bin/bash
+    delegate_to: localhost
+
+  # restore /etc/hosts
+  - name: Update /etc/hosts
+    shell: >
+     if [[ -f /tmp/hosts_existing ]]; then
+       cat /tmp/hosts_existing >  /etc/hosts;
+       rm /tmp/hosts_existing;
+     fi
+    args:
+      executable: /bin/bash
+  when: platform == 'docker'
