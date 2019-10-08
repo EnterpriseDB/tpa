@@ -56,26 +56,74 @@
   set_fact:
     bdr_node_id: "{{ bdr_node_tuple.node_id }}"
 
-# Each instance checks if bdr.node_group contains an entry for its own
-# bdr_node_group. If not, the first_bdr_primary must create the group
-# and the other instances must join it.
+- name: Map node numbers to bdr_node_ids
+  set_fact:
+    bdr_node_ids: "{{
+      bdr_node_ids|default({})|combine({
+        hostvars[item].node: hostvars[item].bdr_node_id
+      })
+    }}"
+  with_items: "{{ groups[bdr_node_group] }}"
+  when:
+    hostvars[item].bdr_node_id is defined
+
+# Now we must ensure that the required BDR node groups exist.
+#
+# The first_bdr_primary will create every group in bdr_node_groups; or
+# if that is not set, it will create the group named by bdr_node_group
+# (along with bdr_node_group_options, if any are specified).
+
+- name: Set default bdr_node_groups if needed
+  set_fact:
+    bdr_node_groups: ["{{ _default_group }}"]
+  when:
+    bdr_node_groups is not defined
+  vars:
+    _name: "{{ {'name': bdr_node_group} }}"
+    _options: "{{ bdr_node_group_options|default({}) }}"
+    _default_group: "{{ _name|combine(_options) }}"
+
+- name: Enumerate BDR group names
+  set_fact:
+    _bdr_group_names: "{{ bdr_node_groups|map(attribute='name')|list }}"
+
+- name: Map BDR group names to options
+  set_fact:
+    _bdr_group_options: "{{
+      _bdr_group_options|default({})|combine({group: options})
+    }}"
+  with_items: "{{ bdr_node_groups }}"
+  vars:
+    group: "{{ item.name }}"
+    options: "{{ item|remove_keys(['name']) }}"
+
+# Now we check if bdr.node_group has entries for all the groups named in
+# _bdr_group_names. If not, the first_bdr_primary must create each group
+# and the other instances must join their respective group.
 
 - name: Check if the BDR groups have been created already
   postgresql_query:
     conninfo: "{{ bdr_node_dsn }}"
     queries:
-      - text: SELECT node_group_id FROM bdr.node_group WHERE node_group_name = %s
+      - text: SELECT node_group_name, node_group_id FROM bdr.node_group WHERE node_group_name = ANY(%s)
         args:
-          - "{{ bdr_node_group }}"
+          - "{{ _bdr_group_names|list }}"
   register: bdr_node_group_tuples
   become_user: "{{ postgres_user }}"
   become: yes
 
-- name: Identify logical standby nodes
+- name: Set default bdr_group_ids
   set_fact:
-    bdr_node_pause_in_standby: "{{
-      bdr_node_pause_in_standby|default('readonly' in role)
+    bdr_group_ids: {}
+
+- name: Map BDR group names to existing node_group_ids
+  set_fact:
+    bdr_group_ids: "{{
+      bdr_group_ids|combine({
+        item.node_group_name: item.node_group_id
+      })
     }}"
+  with_items: "{{ bdr_node_group_tuples.results }}"
 
 # We always call create_node_group() with "node_group_name := %s" and
 # the name of the node group; if bdr_node_group_options specifies any
@@ -89,41 +137,43 @@
         args: "{{ _values }}"
   become_user: "{{ postgres_user }}"
   become: yes
-  when:
-    inventory_hostname == first_bdr_primary and
-    bdr_node_group_tuples.rowcount == 0
+  with_items: "{{ _bdr_group_names }}"
   vars:
-    _options: "{{ bdr_node_group_options|default({}) }}"
+    _group: "{{ item }}"
+    _group_options: "{{ _bdr_group_options[_group] }}"
+    _join_options: "{{
+      (_group == bdr_node_group or
+       (bdr_child_group is defined and
+        _group == bdr_child_group) or
+       'parent_group_name' not in _group_options)
+      |ternary({}, {'join_node_group': 'f'})
+    }}"
+    _options: "{{ _group_options|combine(_join_options) }}"
     _keys: "{{ query('flattened', ['node_group_name', _options.keys()|list]) }}"
-    _values: "{{ query('flattened', [bdr_node_group, _options.values()|list]) }}"
+    _values: "{{ query('flattened', [_group, _options.values()|list]) }}"
     _option_string: >
       {{ _keys|map('apply_format', '{0} := %s')|list|join(', ') }}
+  when:
+    inventory_hostname == first_bdr_primary and
+    _group not in bdr_group_ids
+
+- name: Identify logical standby nodes
+  set_fact:
+    bdr_node_pause_in_standby: "{{
+      bdr_node_pause_in_standby|default('readonly' in role)
+    }}"
 
 - name: Include bdr-post-group-creation hook
   include_tasks: "{{ hook }}"
   when:
-    bdr_node_group_tuples.rowcount == 0 and
+    bdr_group_ids.keys()|length < _bdr_group_names|length and
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/bdr-post-group-creation.yml"
   tags: always
 
-- name: Clean up bdr database before group join
-  include_tasks: clean.yml
-  when:
-    inventory_hostname != first_bdr_primary and
-    bdr_node_group_tuples.rowcount == 0
-  tags: always
-
-- set_fact:
-    bdr_node_ids: "{{
-      bdr_node_ids|default({})|combine({
-        hostvars[item].node: hostvars[item].bdr_node_id
-      })
-    }}"
-  with_items: "{{ groups[bdr_node_group] }}"
-  when:
-    hostvars[item].bdr_node_id is defined
+# Set up replication sets according to the publications/subscriptions
+# settings before group join.
 
 - name: Configure replication sets
   include_tasks:
@@ -152,6 +202,13 @@
 # task attribute. We use a loop to get the equivalent serial behaviour,
 # executing the task on first_bdr_primary, but connecting to each instance
 # in turn to issue the bdr.join_node_group() query.
+
+- name: Clean up bdr database before group join
+  include_tasks: clean.yml
+  when:
+    inventory_hostname != first_bdr_primary and
+    bdr_node_group_tuples.rowcount == 0
+  tags: always
 
 - include_tasks: bdr3/join.yml
   when:

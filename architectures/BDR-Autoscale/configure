@@ -16,9 +16,14 @@ except:
 class Autoscale(BDR_Always_ON):
     def add_architecture_options(self, p, g):
         g.add_argument(
-            '--num-bdr-instances', type=int, metavar='N',
-            help='number of BDR instances required',
-            dest='num_bdr_instances', default=4
+            '--num-shard-groups', type=int, metavar='N',
+            help='number of BDR shard groups required',
+            dest='num_shard_groups', default=2
+        )
+        g.add_argument(
+            '--instances-per-shard', type=int, metavar='N',
+            help='number of BDR instances per shard group',
+            dest='instances_per_shard', default=3
         )
         super(Autoscale, self).add_architecture_options(p, g)
 
@@ -31,8 +36,14 @@ class Autoscale(BDR_Always_ON):
             ]
         })
 
+    # We have num_shard_groups*instances_per_shard instances.
+    #
+    # The first_bdr_primary will create a top-level BDR node group and one child
+    # group per shard. One instance per shard will join the top-level group, and
+    # the remaining instances in the shard will join that shard's child group.
+
     def num_instances(self):
-        return 10+self.args['num_bdr_instances']
+        return self.args['num_shard_groups']*self.args['instances_per_shard']
 
     # We enumerate the BDR primary instances in our cluster that will
     # participate in sharding.
@@ -45,53 +56,37 @@ class Autoscale(BDR_Always_ON):
                 primaries.append(i.get('node'))
         return primaries
 
-    def pairwise_nodes(self):
-        shards = self._bdr_primaries()
-        return list(itertools.combinations(shards, 2))
-
-    # The replication set for a given pair of instances is named shardset_a_b
-    # where a and b are the BDR node ids of the instances. These ids are not
-    # known at configure time, so we expect postgres/bdr to fill them in via
-    # .format() during deployment.
-
-    def replication_set_name(self, pair):
-        return 'shardset_{bdr_node_ids[%s]}_{bdr_node_ids[%s]}' % pair
-
     def update_cluster_vars(self, cluster_vars):
         super(Autoscale, self).update_cluster_vars(cluster_vars)
 
-        replication_sets = [
-            self.replication_set_name(p)
-            for p in self.pairwise_nodes()
-        ]
+        top = self.args['bdr_node_group']
+        bdr_node_groups = [{'name': top}]
+        for i in range(1, self.args['num_shard_groups']+1):
+            bdr_node_groups.append({
+                'name': 'shard_group_%s' % i,
+                'node_group_type': 'datanode',
+                'parent_group_name': top,
+            })
 
         cluster_vars.update({
             'postgres_conf_settings': {
                 'log_min_messages': 'debug1',
             },
             'log_line_prefix': '%m [pid: %p] [xid:%x]',
-            'publications': [{
-                'type': 'bdr',
-                'database': self.args['bdr_database'],
-                'replication_sets': [{'name': s} for s in replication_sets],
-            }]
+            'bdr_node_groups': bdr_node_groups,
         })
+
+    def _shard_group_name(self, node):
+        return 'shard_group_%s' % int(1+(node-1)/self.args['instances_per_shard'])
 
     def update_instances(self, instances):
         super(Autoscale, self).update_instances(instances)
-        pairs = self.pairwise_nodes()
         for instance in instances:
             n = instance.get('node')
-            replication_sets = []
-            for p in pairs:
-                if n in p:
-                    replication_sets.append(self.replication_set_name(p))
             vars = instance.get('vars', {})
-            vars['subscriptions'] = [{
-                'type': 'bdr',
-                'database': self.args['bdr_database'],
-                'replication_sets': replication_sets,
-            }]
+            vars.update({
+                'bdr_child_group': self._shard_group_name(n),
+            })
             instance['vars'] = vars
 
 if __name__ == '__main__':
