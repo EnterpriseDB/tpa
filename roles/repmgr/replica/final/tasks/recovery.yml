@@ -11,4 +11,5 @@
   fail:
     msg: "Couldn't find {{ postgres_data_dir }}/recovery.conf"
   when:
-    not recoveryconf.stat.exists
+    not recoveryconf.stat.exists and
+    not postgres_version is version('12', '>=')

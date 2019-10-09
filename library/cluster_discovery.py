@@ -234,19 +234,16 @@ def replica_discovery(module, conn, m0):
                 'primary_slot_name': res[0]['slot_name'],
             })
 
-    if 'primary_conninfo' not in m and 'primary_conninfo' in m['recovery_settings']:
-        m.update({
-            'primary_conninfo': m['recovery_settings']['primary_conninfo']
-        })
+    for k in ['primary_conninfo', 'primary_slot_name']:
+        if k not in m and (k in m['recovery_settings'] or k in m0['pg_settings']):
+            m.update({
+                k: m['recovery_settings'].get(k, m0['pg_settings'].get(k))
+            })
 
-    if 'primary_slot_name' not in m and 'primary_slot_name' in m['recovery_settings']:
+    if 'primary_conninfo' in m:
         m.update({
-            'primary_slot_name': m['recovery_settings']['primary_slot_name']
+            'primary_conninfo_parts': parse_conninfo(m['primary_conninfo'])
         })
-
-    m.update({
-        'primary_conninfo_parts': parse_conninfo(m['primary_conninfo'])
-    })
 
     return m
 
@@ -300,7 +297,9 @@ def parse_kv_lines(filename):
 
 def read_recovery_conf(m0):
     recovery_conf = os.path.join(m0['postgres_data_dir'], 'recovery.conf')
-    return parse_kv_lines(recovery_conf)
+    if os.path.isfile(recovery_conf):
+        return parse_kv_lines(recovery_conf)
+    return {}
 
 def read_repmgr_conf(m0):
     m = None
