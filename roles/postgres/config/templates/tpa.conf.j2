@@ -55,7 +55,7 @@ effective_cache_size = {{ effective_cache_size|default(effective_cache_size_mb~'
 default_statistics_target = {{ default_statistics_target|default(100) }}
 constraint_exclusion = {{ constraint_exclusion|default('partition') }}
 
-archive_command = '/bin/true'
+archive_command = {{ archive_command|default('/bin/true') }}
 archive_timeout = {{ archive_timeout|default('6h') }}
 
 wal_sender_timeout = {{ wal_sender_timeout|default('60s') }}
