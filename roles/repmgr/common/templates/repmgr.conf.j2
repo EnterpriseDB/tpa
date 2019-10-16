@@ -5,10 +5,10 @@ conninfo = '{{ repmgr_node_dsn }} application_name={{ inventory_hostname }} conn
 data_directory = '{{ postgres_data_dir }}'
 pg_bindir = '{{ postgres_bin_dir }}'
 {% if repmgr_priority is defined %}
-priority = "{{ repmgr_priority }}"
+priority = '{{ repmgr_priority }}'
 {% endif %}
 {% if repmgr_location is defined %}
-location = "{{ repmgr_location }}"
+location = '{{ repmgr_location }}'
 {% endif %}
 replication_type = physical
 use_replication_slots = {{ repmgr_use_slots }}
@@ -34,6 +34,6 @@ service_restart_command = 'sudo systemctl restart {{ postgres_service_name }}'
 service_reload_command = 'sudo systemctl reload {{ postgres_service_name }}'
 
 {% if event_notifications is defined %}
-event_notifications = "{{ event_notifications }}"
-event_notification_command = "{{ event_notification_command }}"
+event_notifications = '{{ event_notifications }}'
+event_notification_command = '{{ event_notification_command }}'
 {% endif %}
