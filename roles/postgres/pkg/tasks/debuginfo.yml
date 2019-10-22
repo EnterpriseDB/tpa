@@ -10,7 +10,7 @@
     package_lists:
     - "{{ postgres_debug_packages|packages_for(ansible_distribution, postgres_package_version) }}"
 
-# Debian stretch/PGDG uses -dbgsym packages for Postgres 10+
+# Debian {stretch,buster}/PGDG uses -dbgsym packages for Postgres 10+
 # Ubuntu bionic/PGDG uses -dbgsym packages for Postgres 10+
 
 - name: Adjust postgres_debuginfo_packages for dbg/dbgsym packages
@@ -20,7 +20,7 @@
     }}"
   when:
     postgres_version is version('10', '>=') and (
-      (ansible_distribution == 'Debian' and ansible_distribution_release in ['stretch']) or
+      (ansible_distribution == 'Debian' and ansible_distribution_release in ['stretch','buster']) or
       (ansible_distribution == 'Ubuntu' and ansible_distribution_release in ['bionic'])
     )
 
