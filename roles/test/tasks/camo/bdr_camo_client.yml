@@ -83,7 +83,7 @@
   when:
       inventory_hostname == pong and "upgrade" not in ansible_run_tags
 
-- name: Run upgrade
+- name: Upgrade host ping of the CAMO pair
   block:
   - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
 
@@ -96,16 +96,70 @@
     package:
       name: "{{ all_postgres_packages }}"
       state: latest
-  when: "'upgrade' in ansible_run_tags"
-  
-- include_role: name=postgres/restart
-  vars:
-    postgres_service_end_state: restarted
-  become: yes
-  with_items:
-   - "{{ groups[bdr_node_group] }}"
-  when: inventory_hostname == item and "upgrade" in ansible_run_tags 
 
+  - include_role: name=postgres/restart
+    vars:
+      postgres_service_end_state: restarted
+    become: yes
+
+  - name: Wait for the CAMO partner to be connected and ready after restart
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      queries:
+      - text: >
+          SELECT bdr.is_camo_partner_connected() AS connected, bdr.is_camo_partner_ready() AS ready
+    register: status
+    until: "status.results[0].connected and status.results[0].ready"
+    retries: 180
+    become_user: "{{ postgres_user }}"
+    become: yes
+    vars:
+      ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+  when: "'upgrade' in ansible_run_tags and inventory_hostname == ping"
+
+- name: Upgrade host pong of the CAMO pair
+  block:
+  - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
+
+  - include_role: name=postgres/pkg tasks_from=list-packages.yml
+
+  - debug:
+      msg: "{{ all_postgres_packages }}"
+
+  - name: Install latest Postgres packages
+    package:
+      name: "{{ all_postgres_packages }}"
+      state: latest
+
+  - include_role: name=postgres/restart
+    vars:
+      postgres_service_end_state: restarted
+    become: yes
+  when: "'upgrade' in ansible_run_tags and inventory_hostname == pong"
+
+
+- name: Upgrade all other nodes
+  block:
+  - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
+
+  - include_role: name=postgres/pkg tasks_from=list-packages.yml
+
+  - debug:
+      msg: "{{ all_postgres_packages }}"
+
+  - name: Install latest Postgres packages
+    package:
+      name: "{{ all_postgres_packages }}"
+      state: latest
+
+  - include_role: name=postgres/restart
+    vars:
+      postgres_service_end_state: restarted
+    become: yes
+    with_items:
+     - "{{ groups[bdr_node_group] }}"
+    when: inventory_hostname == item and "upgrade" in ansible_run_tags
+  when: "'upgrade' in ansible_run_tags and inventory_hostname != ping and inventory_hostname != pong"
 
 - block:
   - name: Wait for bdr_camo_client to complete
