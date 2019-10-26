@@ -62,7 +62,7 @@
       - text: >
           SELECT COUNT(1) FROM camo_test WHERE key < %s
         args:
-        - "{{ camo_transactions }}"
+        - "{{ camo_clients }}"
     register: done
     until: done.count >= camo_clients|int
     retries: 30
