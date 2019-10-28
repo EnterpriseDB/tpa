@@ -36,28 +36,14 @@
 
 - name: "Ubuntu | Installing deb-src repository Ubuntu"
   apt_repository:
-    repo: "deb-src http://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu/ {{ zabbix_agent_distribution_release }} main"
+    repo: "deb-src http://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu {{ zabbix_agent_distribution_release }} main"
     state: present
   become: yes
   tags: [zabbix-agent, init]
 
 - name: "Ubuntu | Installing deb repository Ubuntu"
   apt_repository:
-    repo: "deb http://repo.zabbix.com/zabbix/{{ zabbix_version }}/debian/ {{ zabbix_agent_distribution_release }} main"
-    state: present
-  become: yes
-  tags: [zabbix-agent, init]
-
-- name: "Ubuntu | Installing deb-src repository Ubuntu"
-  apt_repository:
-    repo: "deb-src http://repo.zabbix.com/zabbix/{{ zabbix_version }}/debian/ {{ zabbix_agent_distribution_release }} main"
-    state: present
-  become: yes
-  tags: [zabbix-agent, init]
-
-- name: "Ubuntu | Installing deb repository Ubuntu"
-  apt_repository:
-    repo: "deb http://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu/ {{ zabbix_agent_distribution_release }} main"
+    repo: "deb http://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu {{ zabbix_agent_distribution_release }} main"
     state: present
   become: yes
   tags: [zabbix-agent, init]

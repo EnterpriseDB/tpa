@@ -19,14 +19,14 @@
 
 - name: "Debian | Installing deb repository Debian"
   apt_repository:
-    repo: "deb http://repo.zabbix.com/zabbix/{{ zabbix_version }}/debian/ {{ zabbix_agent_distribution_release }} main"
+    repo: "deb http://repo.zabbix.com/zabbix/{{ zabbix_version }}/debian {{ zabbix_agent_distribution_release }} main"
     state: present
   become: yes
   tags: [zabbix-agent, init]
 
 - name: "Debian | Installing deb-src repository Debian"
   apt_repository:
-    repo: "deb-src http://repo.zabbix.com/zabbix/{{ zabbix_version }}/debian/ {{ zabbix_agent_distribution_release }} main"
+    repo: "deb-src http://repo.zabbix.com/zabbix/{{ zabbix_version }}/debian {{ zabbix_agent_distribution_release }} main"
     state: present
   become: yes
   tags: [zabbix-agent, init]
