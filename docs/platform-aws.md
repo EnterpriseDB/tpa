@@ -59,14 +59,14 @@ based on a distribution image known as an
 [AMI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html),
 and attach one or more
 [EBS volumes](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html)
-to provide persistent storage to the instance. You can ssh to the
+to provide persistent storage to the instance. You can SSH to the
 instances by registering an
 [SSH public key](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html).
 
 Instances are always assigned a private IP address within their subnet.
 Depending on the subnet configuration, they may also be assigned an
 [ephemeral public IP address](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html#concepts-public-addresses)
-(which is lost when the instance is shutdown, and a different ephemeral
+(which is lost when the instance is shut down, and a different ephemeral
 IP is assigned when it is started again). You can instead assign a
 static region-specific routable IP address known as an
 [Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html)
@@ -84,7 +84,7 @@ specify via ``tpaexec configure`` or define directly in config.yml.
 
 ### VPC (required)
 
-You must specify a VPC to use.
+You must specify a VPC to use:
 
     ec2_vpc:
       Name: Test
@@ -106,7 +106,7 @@ different regions, you can use the expanded form:
 
 ### AMI (required)
 
-You must specify an AMI to use.
+You must specify an AMI to use:
 
     ec2_ami:
       Name: xxx
@@ -154,11 +154,11 @@ more existing security groups, set:
 
 ### Internet gateways (optional)
 
-By default, we create internet gateways for every VPC if
+By default, we create internet gateways for every VPC if you set:
 
     ec2_instance_reachability: public
 
-is set. For more fine-grained control, you can set
+For more fine-grained control, you can set:
 
     ec2_vpc_igw:
       eu-west-1: yes

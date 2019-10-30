@@ -25,7 +25,7 @@ failed: [localhost] (item=eu-central-1) => {"boto3_version": "1.8.8", "botocore_
 
 ```
 
-Solution - set the time and date correctly
+Solution - set the time and date correctly.
 
 ```
 [tpa]$ sudo ntpdate pool.ntp.org
@@ -69,7 +69,8 @@ This will do a functional test of the cluster components, followed by a performa
 
 Tags in the test role are `repmgr,postgres,barman,pgbench`
 
-Note - when specifying multiple tags, they should be comma delimited, with no spaces - e.g.
+Note that when specifying multiple tags, they should be comma delimited, with
+no spaces; for example: 
 
 ```
 [tpa]$ tpaexec test <clustername> --skip-tags barman,pgbench
@@ -77,7 +78,7 @@ Note - when specifying multiple tags, they should be comma delimited, with no sp
 
 ### TPAexec server test
 
-To check the installation of the TPAexec server itself, run
+To check the installation of the TPAexec server itself, run:
 
 ```
 [tpa]$ tpaexec selftest
@@ -85,19 +86,23 @@ To check the installation of the TPAexec server itself, run
 
 ### Skipping or including specific tags
 
-When re-running a tpaexec provision or deploy after a failure, in the interests of time, it can sometimes be useful to miss out tasks by skipping specific tags, e.g. to miss out the repmgr tasks:
+When re-running a tpaexec provision or deploy after a failure, in the interests
+of time, it can sometimes be useful to miss out tasks by skipping specific tags.
+For example to miss out the repmgr tasks:
 
 ```
 [tpa]$ tpaexec deploy <clustername> --skip-tags repmgr
 ```
 
-To jump straight to re-run a particular task by specifying a tag - e.g. to immediately run bdr tasks:
+To jump straight to re-run a particular task by specifying a tag--for example,
+to immediately run BDR tasks:
 
 ```
 [tpa]$ tpaexec deploy <bdr-clustername> --tags bdr
 ```
 
-*Note - this assumes that the previous tasks all completed successfully.*
+*Note that this assumes that the previous tasks all completed successfully.*
+
 
 To find all the tags for the relevant architecture that might be useful, run:
 

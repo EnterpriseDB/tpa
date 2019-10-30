@@ -2,30 +2,30 @@
 
 ## What is Rehydration?
 
-Rehydration is a process that allows for rapid deployment of patches or OS upgrades to AWS EC2 instances managed by **TPAexec** orchestration tool. This is done by moving the storage volumes from existing EC2 instances provisioned from an old AMI, to new EC2 instances that have been provisioned from a new AMI that has been built with the latest patches.
+Rehydration is a process that allows for the rapid deployment of patches or OS upgrades to AWS EC2 instances managed by **TPAexec** orchestration tool. This is done by moving the storage volumes from existing EC2 instances provisioned from an old AMI, to new EC2 instances that have been provisioned from a new AMI that has been built with the latest patches.
 
-The rehydration command requires the existing instance to be still present - i.e. don't terminate the instance via the AWS console. Logically rehydrate is nothing more than terminate followed by provision followed by deploy.
+The rehydration command requires the existing instance to still be present - i.e. don't terminate the instance via the AWS console. Logically, rehydrate is nothing more than terminate followed by provision followed by deploy.
 
 ### Prerequisites
 
-To be able to use rehydration, 2 volume attributes need to be set in config.yml: 
+To be able to use rehydration, two volume attributes need to be set in config.yml: 
 
-- **delete_on_termination** needs to be set to "false", which will allow the volume to survive the termination of the instance it was attached to. (TPAexec sets this is set by default for gp2 volumes, but it is recommended that it is set explicitly to avoid confusion)
-- **attach_existing** needs to be set to "yes", so that the volume will be searched for, and if found, will be passed to the instance in user-data which will run "aws ec2 attach-volume" commands to attach them after the new instance is started up. (Note - it is done like this, because AWS only allows attachment of existing volumes after the instance has already been started).
+- **delete_on_termination** needs to be set to "false", which will allow the volume to survive the termination of the instance it was attached to. (TPAexec sets this is set by default for gp2 volumes, but it is recommended that it is set explicitly to avoid confusion.)
+- **attach_existing** needs to be set to "yes", so that the volume will be searched for, and if found, will be passed to the instance in user-data which will run "aws ec2 attach-volume" commands to attach them after the new instance is started up. (Note: it is done like this, because AWS only allows the attachment of existing volumes after the instance has already been started.)
 
 ### Simple Rehydrate example
 
 This example assumes that you have a running cluster called **night**, with the configuration files located in **~/tpa/clusters/night** and that the instance we want to rehydrate is called **zombie**.
 
-Use the AWS console to check that all the instances in the cluster are running, and that all checks have passed, not just the instance(s) being hydrated, especially the master node - if they are in a “stopped” or “terminated” state, older versions of TPAexec ( < 3.0 ) will build a new instance, which isn't what we want.
+Use the AWS console to check that all the instances in the cluster are running, and that all checks have passed, not just the instance(s) being hydrated, especially the master node; if they are in a “stopped” or “terminated” state, older versions of TPAexec ( < 3.0 ) will build a new instance, which isn't what we want.
 
 
 
 Before we can run **tpaexec rehydrate ~/tpa/clusters/night zombie** we first need to check and edit **config.yml**
 
-Update the **ec2_ami** name with the AMI that you want the new instance to be built with (in this example we will be setting it to "TPA-Debian-PGDG-10-2018*" )
+Update the **ec2_ami** name with the AMI that you want the new instance to be built with. In this example we will be setting it to "TPA-Debian-PGDG-10-2018*". 
 
-Check that **delete_on_termination** is already set false in the config.yml file. If the parameter isn't present, then you can check its setting via the Amazon EC2 management console. Click on 'Instances', select instance (in this case zombie), under the 'Description' tab, scroll down to 'Block devices', and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag - if it is set to true, then it can be changed via aws command line (see [Appendix](#appendix) )
+Check that **delete_on_termination** is already set false in the config.yml file. If the parameter isn't present, then you can check its setting via the Amazon EC2 management console. Click on 'Instances', select instance (in this case zombie), under the 'Description' tab, scroll down to 'Block devices', and click on the appropriate EBS volume. This will give a box which shows the status of the Delete on Termination flag--if it is set to true, then it can be changed via aws command line (see the [Appendix](#appendix) )
 
 Check **attach_existing** in config.yml & set it to "yes" if it isn't set already.
 
@@ -75,7 +75,7 @@ instances:
 	There must be at least one node specified for the rehydrate command to execute
 
 ```
-rehydrate will check whether delete_on_termination has been set to false for any relevant volumes,
+The rehydrate command will check whether delete_on_termination has been set to false for any relevant volumes,
 and if not set, will stop before any instance is terminated.
 
 
@@ -86,7 +86,6 @@ So, for our simple example:
 [tpa]$ tpaexec rehydrate ./night zombie
 ```
 
-------
 
 ### More Complex Example:
 
@@ -113,7 +112,7 @@ Rehydration is performed on a list of nodes that consists of:
 
 ##### Phase 2:
 
-Switchover of current Master to instance in same region that has already been rehydrated
+Switchover of the current Master to an instance in the same region that has already been rehydrated.
 
 ##### Phase 3:
 
@@ -121,17 +120,17 @@ Rehydration is performed on the list of remaining nodes.
 
 ##### Phase 4:
 
-Switchover back to original Master
+Switchover back to the original Master.
 
-------
+
 
 #### Detail 
 
-Edit ~/tpa/clusters/config.yml and change the ec2_ami Name to required AMI value
+Edit ~/tpa/clusters/config.yml and change the ec2_ami Name to the required AMI value
 
 ##### Phase 1:
 
-Rehydrate nodes
+Rehydrate nodes:
 
 ```
 [tpa]$ cd ~/tpa/clusters
@@ -141,7 +140,7 @@ Rehydrate nodes
 
 ##### Phase 2:
 
-Switchover of current Master to instance in same region that has already been rehydrated: 
+Switchover of the current Master to an instance in the same region that has already been rehydrated: 
 
 ```
 [tpa]$ tpaexec switchover ./night zombie1
@@ -157,7 +156,7 @@ Rehydrate remaining nodes:
 
 ##### Phase 4 (Optional):
 
-Switchover back to original Master
+Switchover back to the original Master:
 
 ```
 [tpa]$ tpaexec switchover ./night vlad
@@ -174,13 +173,13 @@ Switchover back to original Master
 
 #### Using aws commandline to change volume attributes
 
-You will need the Instance ID, region that the instance is in, as well as the block device name. (You can use AWS console to get Instance ID; region is just Availability Zone without the final letter).
+You will need the Instance ID, region that the instance is in, as well as the block device name. (You can use AWS console to get Instance ID; region is just Availability Zone without the final letter.)
 
-example 1:
+Example 1:
 
 ```
 $ aws ec2 modify-instance-attribute --region eu-west-1 --instance-id i-0ca212ac1b0a5e7ff \
 --block-device-mappings "[{\"DeviceName\": \"/dev/xvdf\",\"Ebs\":{\"DeleteOnTermination\":false}}]"
 ```
 
-Check that this has worked via the Amazon EC2 management console. Click on 'Instances', select instance (in this case zombie), under the 'Description' tab, scroll down to 'Block devices', and click on the appropriate EBS volume. This will give a box which show the status of the Delete on Termination flag, which should now be false. It is worth waiting for 30 seconds before running rehydrate, as it can take time to propagate the settings.
+Check that this has worked via the Amazon EC2 management console. Click on 'Instances', select the instance (in this case, 'zombie'); under the 'Description' tab, scroll down to 'Block devices', and click on the appropriate EBS volume. This will give a box which shows the status of the Delete on Termination flag, which should now be false. It is worth waiting for 30 seconds before running rehydrate, as it can take time to propagate the settings.

@@ -56,13 +56,32 @@ a test environment before rolling them out into production.
 
 ### Design Considerations
 
-When creating a PostgreSQL cluster using TPAexec, it is worth spending a little preparation time to work out  some of the details. You should decide whether the cluster requires resilience - if so, how much? What topology of replication will be used?
+When creating a PostgreSQL cluster using TPAexec, it is worth spending a little
+preparation time to work out  some of the details. You should decide whether
+the cluster requires resilience--if so, how much? What topology of replication
+will be used?
 
-AWS regions have multiple Availability Zones connected via low-latency links, however Data Centres (**DC**s) hosting all the AZs in a region are hosted in the same geographic location, so consideration should be taken as to what Disaster Recovery (**DR**) resilience is appropriate, and whether DCs should be placed in different regions. An AWS VPC can span multiple AZs, however it does not span regions, so when creating multi-region clusters, something like OpenVPN can be used to provide connectivity.
+AWS regions have multiple Availability Zones connected via low-latency links;
+however, Data Centres (**DC**s) hosting all the AZs in a region are hosted in
+the same geographic location, so consideration should be taken as to what
+Disaster Recovery (**DR**) resilience is appropriate, and whether DCs should be
+placed in different regions. An AWS VPC can span multiple AZs; however, it does
+not span regions, so when creating multi-region clusters, something like OpenVPN
+can be used to provide connectivity.
 
-For a Highly Available (HA) cluster, you will need to place at least 3 DB servers in the main DC (DC 1), so that in the event of the current master failing and a standby being promoted, the new master still has one standby available locally as a failover target.
+For a Highly Available (HA) cluster, you will need to place at least 3 DB servers
+in the main DC (DC 1), so that in the event of the current master failing and a
+standby being promoted, the new master still has one standby available locally
+as a failover target.
 
-To achieve DR resilience, you should place backup standby DB servers in a second DC (DC 2), replicating them directly or by using cascading replication. If using **repmgr** to manage automatic failover, then care needs to be taken to avoid a split-brain scenario. Split-brain can happen when there is a network failure between both DCs, where a DB server in the DC 2 is promoted to master, so that there are masters in both DCs. To avoid this, it's possible to set up a "*witness server*" in DC 1 - if repmgr can't see either the witness or the primary server, it decides that there is a network failure and doesn't promote itself as master.
+To achieve DR resilience, you should place backup standby DB servers in a second
+DC (DC 2), replicating them directly or by using cascading replication. If using
+**repmgr** to manage automatic failover, then take care to avoid a split-brain
+scenario. Split-brain can happen when there is a network failure between both
+DCs, where a DB server in the DC 2 is promoted to master, so that there are
+masters in both DCs. To avoid this, it's possible to set up a "*witness server*"
+in DC 1--if repmgr can't see either the witness or the primary server, it decides
+that there is a network failure and doesn't promote itself as master.
 
 **Example of cascading replication**
 
@@ -70,20 +89,35 @@ To achieve DR resilience, you should place backup standby DB servers in a second
 
 **Figure 1**
 
-In this example, in the event of failure of the master and main standby in Region 1 being promoted to master, no action is necessary for the downstream standbys in Region 2, as they will remain attached to the same host in Region 1, which is now the new master.
-The downside of configuring it this way, rather than having each standby replicated from the master, is that the downstream standbys in Region 2 will receive changes more slowly, although this difference might not be significant. We have also designated the barman server as a witness server.
+In this example, in the event of failure of the master and main standby in
+Region 1 being promoted to master, no action is necessary for the downstream
+standbys in Region 2, as they will remain attached to the same host in Region
+1, which is now the new master. The downside of configuring it this way, rather
+than having each standby replicated from the master, is that the downstream
+standbys in Region 2 will receive changes more slowly, although this difference
+might not be significant. We have also designated the barman server as a witness
+server.
 
 ------
 
 ### Translating design into reality via config.yml
 
-An example **config.yml** to create the cascading example shown in Figure 1 can be seen below.
+An example **config.yml** to create the cascading example shown in Figure 1 can
+be seen below.
 
-This example requires 3 VPC subnets, and is split between 2 regions, so OpenVPN was used to allow communication - the standby server in AZ1 was chosen as the OpenVPN gateway server, by giving it the role "openvpn-server". Depending on network or CPU performance constraints, it may be preferable to choose a different gateway server.
+This example requires 3 VPC subnets, and is split between 2 regions, so OpenVPN
+was used to allow communication - the standby server in AZ1 was chosen as the
+OpenVPN gateway server, by giving it the role "openvpn-server". Depending on
+network or CPU performance constraints, it may be preferable to choose a
+different gateway server.
 
-In order to build the correct topology, the tag "**upstream:** \<Name>" is used, so that the node can be configured to replicate from the required host.
+In order to build the correct topology, the tag "**upstream:** \<Name>" is used,
+so that the node can be configured to replicate from the required host.
 
-If you are already using AWS in production, it is likely that you will need to use existing ssh keys to connect to the hosts - if this is the case, they can be set using "**ssh_key_file:** \<path to key file>", otherwise you can remove this line and new keys will be generated.
+If you are already using AWS in production, it is likely that you will need to
+use existing SSH keys to connect to the hosts - if this is the case, they can
+be set using "**ssh_key_file:** \<path to key file>", otherwise you can remove
+this line and new keys will be generated.
 
 ```
 ---
@@ -319,8 +353,8 @@ instances:
 | type:            | AMI type - changing this can have price and performance implications |
 | region:          | AWS region for the host to be created in                     |
 | subnet:          | Subnet for this host                                         |
-| volumes:         | (Optional) OS specific parameters for creating volumes - in this case a gp2 32GB striped volume, mounted on the default PGDATA location /opt/postgres/data |
-| role:            | **primary** - Used to define the server role (may be multiple) - in this case the db primary. Role names include: **primary, replica, barman, witness, log-server, openvpn-server, bdr, postgres-xl, coordinator, datanode, coordinator-replica, datanode-replica, gtm, gtm-standby, pgbouncer, postgres**. |
+| volumes:         | (Optional) OS specific parameters for creating volumes--in this case a gp2 32GB striped volume, mounted on the default PGDATA location /opt/postgres/data |
+| role:            | **primary** - Used to define the server role (may be multiple)--in this case the db primary. Role names include: **primary, replica, barman, witness, log-server, openvpn-server, bdr, postgres-xl, coordinator, datanode, coordinator-replica, datanode-replica, gtm, gtm-standby, pgbouncer, postgres**. |
 | vars:            | Used to override postgresql.conf variables. Note, these are actually set in **0001-tpa_restart.conf** (In Debian under /opt/postgres/data/conf.d/ ) |
 | max_connections: | Maximum connections to database                              |
 | shared_buffers:  | Memory dedicated to PostgreSQL to use for caching data       |
@@ -348,10 +382,10 @@ instances:
 | Parameter: | Description                                                  |
 | ---------- | ------------------------------------------------------------ |
 | - node:    | **2** - Node number for this host. Used by Ansible to configure parameters for hosts. |
-| volumes:   | (Optional) OS specific parameters for creating volumes - in this case a gp2 16GB volume, mounted on /var/lib/postgresql, the install directory for postgres. |
+| volumes:   | (Optional) OS specific parameters for creating volumes--in this case a gp2 16GB volume, mounted on /var/lib/postgresql, the install directory for postgres. |
 | tags:      | Used to specify tags for the server                          |
-| role:      | **replica** - Used to define the server role - in this case it is a replica. If role is **replica**, then tag **upstream** needs to be defined. |
-| upstream:  | (Optional) Hostname of server that is upstream from this one - **upstream: \<Name>** is used to connect  replicas to upstream servers. In this case speedy-a is replicating to speedy-b |
+| role:      | **replica** - Used to define the server role--in this case it is a replica. If role is **replica**, then tag **upstream** needs to be defined. |
+| upstream:  | (Optional) Hostname of server that is upstream from this one: **upstream: \<Name>** is used to connect  replicas to upstream servers. In this case speedy-a is replicating to speedy-b |
 | backup:    | (Optional) Hostname of backup server                         |
 
 ###### ***Node 3***
@@ -375,8 +409,8 @@ instances:
 | Parameter: | Description                              |
 | ---------- | ---------------------------------------- |
 | - node:    | **3** - Node number for this host        |
-| role:      | **replica** - Used to define the server role - in this case it is a replica. If role is **replica**, then tag **upstream** needs to be defined. |
-| upstream:  | (Optional) Hostname of server that is upstream from this one - in this case speedy-b is replicating to speedy-c |
+| role:      | **replica** - Used to define the server role--in this case it is a replica. If role is **replica**, then tag **upstream** needs to be defined. |
+| upstream:  | (Optional) Hostname of server that is upstream from this one--in this case speedy-b is replicating to speedy-c |
 
 ###### ***Node 4***
 
@@ -412,7 +446,7 @@ instances:
 
 ### Volume parameters - advanced
 
-In many installations, it is likely that there are existing company specific standards as to filesystem layouts - an example code snippet is shown below:
+In many installations, it is likely that there are existing company-specific standards as to filesystem layouts--an example code snippet is shown below:
 
 ```
    volumes:
@@ -456,15 +490,19 @@ This creates 4 different volumes:
 
 The postgres data dir is set to /var/lib/pgsql/tblspc_data01/data
 
-In this way it is possible to create extra volumes & associated mount points for each instance.
+In this way it is possible to create extra volumes and  associated mount points
+for each instance.
 
 ------
 
 ### AWS EC2 parameters - advanced
 
-It is possible to use different VPCs in each region, e.g. specifying VPCs by id, this expanded form maps from region names to a VPC filter specification. If the VPC does not exist, and both Name, cidr are given ( *and* vpc-id is not in filters), it will be created.
+It is possible to use different VPCs in each region, e.g. specifying VPCs by id,
+this expanded form maps from region names to a VPC filter specification. If the
+VPC does not exist, and both Name, cidr are given ( *and* vpc-id is not in
+filters), it will be created.
 
-###### Example - ec2_vpc with vpc-id specified
+###### Example: ec2_vpc with vpc-id specified
 
 ```
 ec2_vpc:
@@ -485,7 +523,7 @@ ec2_vpc:
 
 ###### Example - ec2_vpc_subnets - complex
 
-This block is from a more complicated config.
+This block is from a more complicated configuration:
 
     ec2_ami:
       Name: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180814
@@ -514,7 +552,9 @@ This block is from a more complicated config.
         10.33.125.144/28:
           az: eu-central-1b
 
-In this we can see that 9 subnets have been set up - these are to allow one BDR master instance, two physical replicas, and a corresponding Barman instance in each of the local clusters on two regions, plus a control node.
+In this we can see that 9 subnets have been set up--these are to allow one BDR
+master instance, two physical replicas, and a corresponding Barman instance in
+each of the local clusters on two regions, plus a control node.
 
 
 

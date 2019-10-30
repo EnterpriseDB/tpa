@@ -27,7 +27,7 @@ $ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
 $ /opt/2ndQuadrant/TPA/bin/tpaexec selftest
 ```
 
-More detailed explanations below.
+More detailed explanations are given below.
 
 ## What time is it?
 
@@ -67,7 +67,7 @@ specifically advised to use it, please see the
 ## Python environment
 
 At this point, Python 2.7, pip, and virtualenv should be available on
-your system. Now you need to setup a Python environment to install the
+your system. Now you need to set up a Python environment to install the
 Python modules that TPAexec needs.
 
 ```bash
@@ -77,7 +77,7 @@ $ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
 
 This will install the modules into an isolated environment, which we
 strongly recommend. It avoids interference with any system-wide Python
-modules (including Ansible) that may be installed, and ensures that you
+modules (including Ansible) that are given may be installed, and ensures that you
 have the correct versions of all modules. (For the same reason, we also
 do not recommend using OS packages to install these modules.)
 

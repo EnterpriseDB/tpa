@@ -53,7 +53,7 @@ sys     0m27.852s
 This command will produce lots of output (append ``-v``, ``-vv``, etc.
 to the command if you want even more verbose output). The output is also
 logged to ``ansible.log`` in the cluster directory. This can be overriden
-by setting environment variable `ANSIBLE_LOG_PATH` to the path and name of
+by setting the environment variable `ANSIBLE_LOG_PATH` to the path and name of
 the desired logfile.
 
 If it completes without error, you may proceed to run
@@ -72,13 +72,13 @@ happens to be something generic, like postgres or ec2-user). You may use
 initials, or "Firstname Lastname", or anything else to uniquely identify
 a person.
 
-Any other options you specify are passed on to ansible.
+Any other options you specify are passed on to Ansible.
 
 ## Accessing the instances
 
-After provisioning completes, you should be able to ssh to the instances
+After provisioning completes, you should be able to SSH to the instances
 (after a brief delay to allow the instances to boot up and install their
-ssh host keys). As shown in the output above, tpaexec will generate an
+SSH host keys). As shown in the output above, tpaexec will generate an
 ssh_config file for you to use.
 
 ```bash
@@ -128,7 +128,7 @@ them before you start deployment.
 ## Generated files
 
 During the provisioning process, a number of new files will be created
-in the cluster directory.
+in the cluster directory:
 
 ```bash
 [tpa]$ ls ~/clusters/speedy
@@ -150,7 +150,7 @@ drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 vault
 ```
 
 We've already studied the ssh_config file, which refers to the ``id_*``
-files (an ssh keypair generated for the cluster) and ``tpa_known_hosts``
+files (an SSH keypair generated for the cluster) and ``tpa_known_hosts``
 (the signatures of the ``hostkeys/`` installed on the instances).
 
 The ``vars.json`` file may be used by ``tpaexec provision`` on

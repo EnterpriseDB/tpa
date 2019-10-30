@@ -7,7 +7,9 @@ by editing config.yml
 
 ### Postgres postgresql.conf configuration variables
 
-These can be configured by TPAexec at build time by setting the relevant parameters as node vars in the **~/tpa/clusters/\<clustername>/config.yml** file.
+These can be configured by TPAexec at build time by setting the relevant
+parameters as node vars in the **~/tpa/clusters/\<clustername>/config.yml**
+file.
 
 An excerpt:
 
@@ -34,17 +36,28 @@ instances:
         shared_buffers: '64MB'
 ```
 
-Here, we see **work_mem**, **max_connections** & **shared_buffers** are all being defined - note that these should be defined as `<variable>: <value>`. To see what Postgres variables are possible to set, either read the documentation for the relevant Postgres version, or look in **$PGDATA/postgresql.conf** on a Postgres server.
+Here, we see **work_mem**, **max_connections** & **shared_buffers** are all
+being defined - note that these should be defined as `<variable>: <value>`. To
+see what Postgres variables are possible to set, either read the documentation
+for the relevant Postgres version, or look in **$PGDATA/postgresql.conf** on a
+Postgres server.
 
-During the deploy phase, TPAexec creates a directory on each Postgres node which contains files with settings which override those set in **$PGDATA/postgresql.conf**. This directory conf.d is included as the last line in $PGDATA/postgresql.conf by the setting:
+During the deploy phase, TPAexec creates a directory on each Postgres node which
+contains files with settings which override those set in
+**$PGDATA/postgresql.conf**. This directory conf.d is included as the last line
+in $PGDATA/postgresql.conf by the setting:
 
 ```
 include_dir = 'conf.d'
 ```
 
-and is created in the $PGDATA directory ( **/opt/postgres/data** by default).
+...and is created in the $PGDATA directory ( **/opt/postgres/data** by default).
 
-Multiple files within the include directory are processed in file name order (according to C locale rules, i.e. numbers before letters, and uppercase letters before lowercase ones) - this means that only the last setting encountered for a particular parameter while the server is reading configuration files will be used.
+Multiple files within the include directory are processed in file name order
+(according to C locale rules, i.e. numbers before letters, and uppercase
+letters before lowercase ones). This means that while the server is reading
+configuration files, it will only use the last setting encountered for a
+particular parameter.
 
 ```
 [postgres-server]$ ls $PGDATA/conf.d
@@ -52,9 +65,13 @@ Multiple files within the include directory are processed in file name order (ac
 0001-tpa_restart.conf  8888-shared_preload_libraries.conf
 ```
 
-Settings which can be dynamically set are written during the TPAexec deploy phase to **0000-tpa.conf** and settings which require a db restart are written to **0001-tpa_restart.conf**.
+Settings which can be dynamically set are written during the TPAexec deploy
+phase to **0000-tpa.conf** and settings which require a db restart are written
+to **0001-tpa_restart.conf**.
 
-More information regarding default settings that TPAexec will use during deployment can be found under **$TPA_DIR/roles/postgres/config/templates** in files **tpa.conf.j2** & **tpa_restart.conf.j2**
+More information regarding default settings that TPAexec will use during
+deployment can be found under **$TPA_DIR/roles/postgres/config/templates**
+in files **tpa.conf.j2** & **tpa_restart.conf.j2**
 
 ```
 [tpa-server]$ ls $TPA_DIR/roles/postgres/config/templates
@@ -64,21 +81,29 @@ override.conf.j2    pg_hba.lines.j2  tpa.conf.j2       variable.j2
 
 #### Manual updates
 
-Bearing these in mind, any manual updates after TPAexec deployment for settings that override **$PGDATA/postgresql.conf** on any node should be made only to **$PGDATA/conf.d/9999-override.conf** because any other file may get overwritten or overridden by subsequent settings at service start time. This is where you should configure any setting that requires persistence after reboot.
+Bearing these 'in mind, after TPAexec deployment, any manual updates for settings
+that override **$PGDATA/postgresql.conf** on any node should be made only to
+**$PGDATA/conf.d/9999-override.conf**, because any other file may get overwritten
+or overridden by subsequent settings at service start time. This is where you
+should configure any setting that requires persistence after reboot.
 
-Any settings added to **9999-override.conf** should also be added to the relevant **config.yml** on the TPAexec server so that any rehydrate or subsequent build of the node will contain the most up-to-date setting.
+Any settings added to **9999-override.conf** should also be added to the
+relevant **config.yml** on the TPAexec server so that any rehydrate or
+subsequent build of the node will contain the most up-to-date setting.
 
 ### Postgres pg_hba.conf configuration variables
 
-These are automatically generated during deploy phase by TPAexec and should not manually edited, as they are likely to get overridden.
+These are automatically generated during deploy phase by TPAexec and should
+not manually edited, as they are likely to get overridden.
 
-------
 
 ### Other customisations - hooks
 
-It is possible to set up many other customisations during the build process by creating post deployment tasks that are called via the Ansible hook system.
+It is possible to set up many other customisations during the build process by
+creating post deployment tasks that are called via the Ansible hook system.
 
-First create a **hooks** directory under `<clustername>`, then create a file in it called **post-deploy.yml**.
+First create a **hooks** directory under `<clustername>`, then create a file in
+it called **post-deploy.yml**.
 
 ```
 $ mkdir ~/tpa/clusters/<clustername>/hooks
@@ -86,9 +111,14 @@ $ touch ~/tpa/clusters/<clustername>/hooks/post-deploy.yml
 
 ```
 
-In this snippet, designed to be part of a training lab, we create a user `student`, add them to the `admin` group, set the password, allow them to ssh with just password authentication, update `/etc/sudoers`, and restart the ssh service.
+In this snippet, designed to be part of a training lab, we create a user
+`student`, add them to the `admin` group, set a password, allow them to SSH
+with just password authentication, update `/etc/sudoers`, and restart the SSH
+service.
 
-*Disclaimer - allowing ssh access to Internet facing instances with just password authentication is a security risk, and shouldn't be enabled on any production system*.
+*Disclaimer - allowing SSH access to Internet facing instances with just
+password authentication is a security risk, and shouldn't be enabled on any
+production system*.
 
 ```
 
@@ -122,7 +152,8 @@ In this snippet, designed to be part of a training lab, we create a user `studen
 
 ```
 
-The hashed password is created by installing **passlib** and running the following commands: (at the password prompt enter the password to be hashed)
+The hashed password is created by installing **passlib** and running the
+following commands (at the password prompt enter the password to be hashed)
 
 ```
 $ pip install passlib
@@ -132,4 +163,5 @@ Password:
 $6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdEL
 ```
 
-In this manner, post deployment tasks can be used to configure and modify server files - see [user](http://docs.ansible.com/ansible/latest/modules/user_module.html#user-module) and [lineinfile](http://docs.ansible.com/ansible/latest/modules/lineinfile_module.html) for more information on how to use those particular modules. Information about all the current modules available for Ansible can be found [here](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html) or just the system modules [here](http://docs.ansible.com/ansible/latest/modules/list_of_system_modules.html). The [shell](http://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module) module can be used to run commands on the nodes.
+In this manner, post-deployment tasks can be used to configure and modify server
+files--see [user](http://docs.ansible.com/ansible/latest/modules/user_module.html#user-module) and [lineinfile](http://docs.ansible.com/ansible/latest/modules/lineinfile_module.html) for more information on how to use those particular modules. Information about all the current modules available for Ansible can be found [here](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html) or just the system modules [here](http://docs.ansible.com/ansible/latest/modules/list_of_system_modules.html). The [shell](http://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module) module can be used to run commands on the nodes.

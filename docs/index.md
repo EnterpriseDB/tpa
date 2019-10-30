@@ -82,14 +82,14 @@ servers, or servers in other data centres, as needed.
 
 At the end of the provisioning stage, you will have the required number
 of instances with the basic operating system installed, which TPAexec
-can access via ssh (with sudo to root).
+can access via SSH (with sudo to root).
 
 ### Deployment
 
 The [``tpaexec deploy``](tpaexec-deploy.md)
 command installs and configures Postgres and other software on the
 provisioned servers (which may or may not have been created by TPAexec;
-but it doesn't matter who created them so long as ssh and sudo access is
+but it doesn't matter who created them so long as SSH and sudo access is
 available). This includes setting up replication, backups, and so on.
 
 At the end of the deployment stage, Postgres will be up and running.

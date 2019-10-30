@@ -168,13 +168,13 @@ Specify ``--distribution <name>`` to select a distribution.
 The selected platform determines which distributions are available, and
 which one is used by default.
 
-In general, you should be able to use "Debian", "RedHat", and "Ubuntu".
+In general, you should be able to use "Debian", "RedHat", and "Ubuntu"
 to select TPA images that have Postgres and other software preinstalled
 (to reduce deployment times). To use stock distribution images instead,
 append "-minimal" to the label, e.g., "Debian-minimal".
 
 This option is not meaningful for the "bare" platform, where TPAexec has
-no control over what distribution is installed.
+no control over which distribution is installed.
 
 ### 2ndQuadrant repositories
 
@@ -242,7 +242,7 @@ You may use ``--install-from-source 2ndqpostgres pglogical3 bdr3`` to
 build and install all three components from source, or just use
 ``--install-from-source pglogical3 bdr3`` to use packages for
 2ndQPostgres, but build and install pglogical v3 and BDR v3 from source.
-By default, this will build the ``master`` branch of pglogical and bdr.
+By default, this will build the ``master`` branch of pglogical and BDR.
 
 To build a different branch, append ``:branchname`` to the corresponding
 argument. For example ``--install-from-source 2ndqpostgres:dev/xxx``, or
@@ -266,7 +266,7 @@ platform defaults and arguments from the command-line). This process is
 repeated for each additional override file specified; this means that
 settings defined by one file will be visible to any subsequent files.
 
-For example, your override file might contain
+For example, your override file might contain:
 
 ```
 cluster_tags:
@@ -299,7 +299,7 @@ sure you understand the effect of all the overrides.
 
 ## Examples
 
-Let's see what happens when we run the following command
+Let's see what happens when we run the following command:
 
 ```bash
 [tpa]$ tpaexec configure ~/clusters/speedy --architecture M1 \

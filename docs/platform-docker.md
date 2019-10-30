@@ -5,7 +5,7 @@ TPAexec has support for Docker.
 ## Basic usage
 
 It is generally sufficient to ensure that the user running `tpaexec` has access
-to the docker daemon. Then pass `--platform docker` to `tpaexec configure`.
+to the Docker daemon. Then pass `--platform docker` to `tpaexec configure`.
 All later TPAexec operations on the created cluster will use Docker instead of
 the default platform.
 
@@ -29,22 +29,22 @@ Please consult the
 [install Docker](https://docs.docker.com/install) and
 [get started](https://docs.docker.com/get-started/) with it.
 
-The [ansible module documentation](https://docs.ansible.com/ansible/latest/modules/docker_container_module.html)
+The [Ansible module documentation](https://docs.ansible.com/ansible/latest/modules/docker_container_module.html)
 may also be helpful.
 
 ### Docker storage configuration
 
-**WARNING**: The default Docker configuration on many hosts uses `lvm-loop`
+**Caution**: The default Docker configuration on many hosts uses `lvm-loop`
 block storage and is not suitable for production deployments. Check `docker
-info` to see what storage drivers you are using. If you see
+info` to see what storage drivers you are using. If you see:
 
     Storage Driver: devicemapper
       ...
       Data file: /dev/loop0
       ...
 
-or similar, you're using the loopback scheme. See the Docker documentation for
-more information on storage configuration:
+...or similar, you're using the loopback scheme. See the Docker documentation
+for more information on storage configuration:
 
 * [Storage Drivers](https://docs.docker.com/storage/storagedriver/)
 * [Configuring lvm-direct for production](https://docs.docker.com/storage/storagedriver/device-mapper-driver/#configure-direct-lvm-mode-for-production)
@@ -52,7 +52,7 @@ more information on storage configuration:
 ### Docker access privileges
 
 TPAexec requires that it be able to communicate with the Docker daemon without
-any privlege-elevating command like `sudo`.
+any privilege-elevating command like `sudo`.
 
 Check that a user can access the Docker daemon by running:
 
@@ -75,7 +75,7 @@ pre-built base image preloaded with site-specific repositories, pre-installed
 dependencies, etc.
 
 Care must be taken to ensure that anything preinstalled does not conflict with
-setup TPAexec does during provisioning and deployment. In particular, you
-should not preinstall PostgreSQL on your base images - but installing
-PostgreSQL's dependencies can be useful. So can pre-populating the yum cache
+whatever setup TPAexec does during provisioning and deployment. In particular,
+you should not preinstall PostgreSQL on your base images - but installing
+PostgreSQL's dependencies can be useful. So pre-populating the yum cache
 with PostgreSQL packages can be useful.
