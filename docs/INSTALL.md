@@ -77,7 +77,7 @@ $ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
 
 This will install the modules into an isolated environment, which we
 strongly recommend. It avoids interference with any system-wide Python
-modules (including Ansible) that are given may be installed, and ensures that you
+modules (including Ansible) that may be installed, and ensures that you
 have the correct versions of all modules. (For the same reason, we also
 do not recommend using OS packages to install these modules.)
 
