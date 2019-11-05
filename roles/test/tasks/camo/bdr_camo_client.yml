@@ -8,6 +8,7 @@
     camo_transactions: "{{ camo_transactions|default(1000) }}"
     camo_clients: "{{ camo_clients|default(200) }}"
     bdr_camo_client_args: "{{ bdr_camo_client_args|default('') }}"
+    scope: "{{ scope|default('local') }}"
 
 - set_fact:
     bdr_dsn: "{{ ping }},{{ pong }}"
@@ -47,6 +48,7 @@
       -h {{ bdr_camo_client_host_arg }}
       -c 'INSERT INTO camo_test VALUES ($1, $2);'
       -i {{ camo_transactions }} -j {{ camo_clients }}
+      -s {{ scope }}
       {{ bdr_camo_client_args }}
       {{ bdr_database }} > {{ bdr_camo_client_output }} 2>&1
     register: client_run
