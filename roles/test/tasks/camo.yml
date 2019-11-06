@@ -88,9 +88,10 @@
 - debug:
     msg: "{{ testers_with_client }}"
 
-- name: Run bdr_camo_client tests
+- name: Run  tests
   block:
-    - include_tasks: camo/bdr_camo_client.yml
+    - name: Run bdr_camo_client crash tests
+      include_tasks: camo/crash_test.yml
       with_items: "{{ failures }}"
       loop_control:
         loop_var: failure
@@ -106,8 +107,22 @@
           destroy_cluster|default(False)|ternary(destructive_failures, nondestructive_failures)
         }}"
       when:
-        inventory_hostname in groups[bdr_node_group] or
-        inventory_hostname == tester_instance
+        ( inventory_hostname in groups[bdr_node_group] or inventory_hostname == tester_instance )
+         and 'crash' in ansible_run_tags
+    - name: Run bdr rolling upgrade tests
+      include_tasks: camo/upgrade_test.yml
+      vars:
+        tester_instance: "{{ testers_with_client|first }}"
+        failure: "upgrade"
+        tpa_2q_repositories: "{{ update_from_repo }}"
+        pglogical_package_version: "{{ pgl_new_version }}"
+        bdr_package_version: "{{ bdr_new_version }}"
+        extra_postgres_packages:
+          common:
+          - "postgresql11-bdr-test-{{ bdr_new_version }}"
+      when:
+        ( inventory_hostname in groups[bdr_node_group] or inventory_hostname == tester_instance )
+         and 'upgrade' in ansible_run_tags
   when:
     all_camo_groups is not empty and
     testers_with_client|default([]) is not empty

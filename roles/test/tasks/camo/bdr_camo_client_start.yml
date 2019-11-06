@@ -1,0 +1,97 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- set_fact:
+    ping: "{{ pair[0] }}"
+    pong: "{{ pair[1] }}"
+    camo_transactions: "{{ camo_transactions|default(1000) }}"
+    camo_clients: "{{ camo_clients|default(200) }}"
+    bdr_camo_client_args: "{{ bdr_camo_client_args|default('') }}"
+    scope: "{{ scope|default('local') }}"
+    sync_rep: "{{ sync_rep|default('async') }}"
+
+- set_fact:
+    bdr_dsn: "{{ ping }},{{ pong }}"
+    haproxy_dsn: "{{ haproxy_node|default('') }} -p {{ haproxy_port|default(6432) }}"
+
+- set_fact:
+    bdr_camo_client_host_arg: "{{ via_haproxy|ternary(haproxy_dsn,bdr_dsn) }}"
+
+
+- name: Set sync rep availability
+  postgresql_query:
+    conninfo: "{{ hostvars[item].bdr_node_dsn }}"
+    queries:
+      - text: ALTER SYSTEM SET synchronous_replication_availability=%s;
+        args: 
+          - "{{ sync_rep }}"
+      - text: SELECT pg_reload_conf();
+    autocommit: yes
+  with_items: 
+      - "{{ ping }}"
+      - "{{ pong }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- block:
+  - name: Create bdr_camo_client test table
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      queries:
+        - text: DROP TABLE IF EXISTS camo_test
+        - text: >
+            CREATE TABLE camo_test
+            (key bigint NOT NULL
+            , attempt_no bigint NOT NULL
+            , PRIMARY KEY (key, attempt_no))
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - name: Wait for DDL to replicate to BDR instances
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      query: >
+        select bdr.wait_slot_confirm_lsn(NULL, NULL)
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - set_fact:
+      bdr_camo_client_output: /tmp/bdr-camo-client-{{ failure }}.txt
+
+  - name: Run bdr_camo_client
+    shell: >
+      {{ bdr_camo_client }}
+      -h {{ bdr_camo_client_host_arg }}
+      -c 'INSERT INTO camo_test VALUES ($1, $2);'
+      -i {{ camo_transactions }} -j {{ camo_clients }}
+      -s {{ scope }}
+      {{ bdr_camo_client_args }}
+      {{ bdr_database }} > {{ bdr_camo_client_output }} 2>&1
+    register: client_run
+    become_user: "{{ postgres_user }}"
+    become: yes
+    async: 7200
+    poll: 0
+
+  - name: Check that each thread has inserted at least one row
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      queries:
+      - text: >
+          SELECT COUNT(1) FROM camo_test WHERE key < %s
+        args:
+        - "{{ camo_clients }}"
+    register: done
+    until: done.count >= camo_clients|int
+    retries: 100
+    become_user: "{{ postgres_user }}"
+    become: yes
+  vars:
+    ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+    bdr_camo_client: "{{ postgres_bin_dir }}/bdr_camo_client"
+  when:
+    inventory_hostname == tester_instance
+
+- debug:
+    msg: "ping {{ ping }}"

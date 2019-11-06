@@ -1,0 +1,16 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- include_tasks: camo/bdr_camo_client_start.yml
+
+- name: Cause failure {{ failure }} on CAMO partner {{ pong }}
+  include_role: name=test tasks_from="failures/{{ failure }}.yml"
+  when: >
+    inventory_hostname == pong
+
+- include_tasks: camo/bdr_camo_client_finish.yml
+
+- include_tasks: consistency_checks.yml
+
+- include_tasks: camo/bdr_camo_client_teardown.yml

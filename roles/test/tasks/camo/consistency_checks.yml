@@ -1,0 +1,69 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- block:
+  - name: Check that there are no duplicates or omissions of camo txns
+    postgresql_query:
+      conninfo: "{{ bdr_node_dsn }}"
+      query: >
+        SELECT s, camo_test.key, COUNT(attempt_no)
+          FROM generate_series(0, {{ camo_transactions }}*{{ camo_clients }}-1) AS s
+          LEFT JOIN camo_test
+            ON camo_test.key = s
+          GROUP BY s, camo_test.key
+          HAVING COUNT(attempt_no) <> 1
+    register: dups
+    become_user: "{{ postgres_user }}"
+    become: yes
+    failed_when:
+      dups is not successful or dups.rowcount > 0
+  when:
+     scope == 'local'
+
+# Eager txns get aborted if any of the node is unreachable.
+# So considering omissions its required to do a consistency check.
+- block:
+  - name: Check that there are no duplicates of eager txns
+    postgresql_query:
+      conninfo: "{{ bdr_node_dsn }}"
+      query: >
+        SELECT s, camo_test.key, COUNT(attempt_no)
+          FROM generate_series(0, {{ camo_transactions }}*{{ camo_clients }}-1) AS s
+          LEFT JOIN camo_test
+            ON camo_test.key = s
+          GROUP BY s, camo_test.key
+          HAVING COUNT(attempt_no) > 1
+    register: dups
+    become_user: "{{ postgres_user }}"
+    become: yes
+    failed_when:
+      dups is not successful or dups.rowcount > 0
+
+  - name: Get total successful eager txns on ping for consistency check
+    postgresql_query:
+      conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+      query: >
+        SELECT count(*) FROM camo_test
+    register: txns_on_ping
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - name: Check consistency on all nodes for eager txns
+    postgresql_query:
+      conninfo: "{{ bdr_node_dsn }}"
+      query: >
+        SELECT count(*) FROM camo_test
+    register: local_txns
+    become_user: "{{ postgres_user }}"
+    become: yes
+    failed_when:
+      local_txns is not successful
+
+  - assert:
+      that:
+         - "local_txns.count == txns_on_ping.count"
+      msg: "This node has {{ local_txns.count }} while ping has {{ txns_on_ping.count }} successful txns"
+    when: inventory_hostname != ping
+  when:
+     scope == 'global'
