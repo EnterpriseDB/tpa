@@ -45,7 +45,9 @@
     become_user: "{{ postgres_user }}"
     become: yes
 
-  - name: prepared transactions should never exceed the number of concurrent connections on the CAMO origin
+  - name: prepared transactions should remain 0 on the CAMO partner
     assert:
       that: pre_txns.results[0].count|int == 0
       msg: "partner: {{pre_txns.results[0].count }}"
+    when: scope == 'local'
+    

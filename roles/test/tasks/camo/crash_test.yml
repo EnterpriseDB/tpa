@@ -36,7 +36,7 @@
     inventory_hostname == crash_node
 
 - include_tasks: camo/node_recover_wait.yml
-  when: inventory_hostname == tester_instance
+  when: inventory_hostname == tester_instance and failure != 'none'
 
 - include_tasks: camo/run_time_checks.yml
   loop: [1, 2, 3]
