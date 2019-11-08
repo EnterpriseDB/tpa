@@ -19,7 +19,7 @@
     assert:
       that: total_txns.results[0].count|int <= total_txns.results[1].count|int
       msg: "origin:{{ total_txns.results[0].count}} partner:{{total_txns.results[1].count}}"
-  when: sync_rep == 'wait'
+  when: sync_rep == 'wait' or failure == 'none'
   
 - block:
   - name: get prepared txns on origin
