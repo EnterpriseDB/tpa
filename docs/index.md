@@ -4,7 +4,7 @@
 
 Confidential property of 2ndQuadrant; not for public release.
 
-[Link to PDF version of this documentation](tpaexec.pdf)
+[Link to TPAexec documentation in PDF format](tpaexec.pdf)
 
 ## Introduction
 
