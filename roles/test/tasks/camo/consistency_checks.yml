@@ -40,16 +40,16 @@
     failed_when:
       dups is not successful or dups.rowcount > 0
 
-  - name: Get total successful eager txns on ping for consistency check
+  - name: Get total successful eager txns on origin for consistency check
     postgresql_query:
-      conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+      conninfo: "{{ running_node_dsn|default(hostvars[ping].bdr_node_dsn) }}"
       query: >
         SELECT count(*) FROM camo_test
-    register: txns_on_ping
+    register: txns_on_origin
     become_user: "{{ postgres_user }}"
     become: yes
 
-  - name: Check consistency on all nodes for eager txns
+  - name: Get total txns on all nodes for eager txns
     postgresql_query:
       conninfo: "{{ bdr_node_dsn }}"
       query: >
@@ -60,10 +60,11 @@
     failed_when:
       local_txns is not successful
 
-  - assert:
+  - name: Consistency check for eager txns
+    assert:
       that:
-         - "local_txns.count == txns_on_ping.count"
-      msg: "This node has {{ local_txns.count }} while ping has {{ txns_on_ping.count }} successful txns"
-    when: inventory_hostname != ping
+         - "local_txns.count == txns_on_origin.count"
+      msg: "This node has {{ local_txns.count }} while origin has {{ txns_on_origin.count }} successful txns"
+    when: inventory_hostname != running_node
   when:
      scope == 'global'

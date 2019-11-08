@@ -19,22 +19,21 @@
     bdr_camo_client_host_arg: "{{ via_haproxy|ternary(haproxy_dsn,bdr_dsn) }}"
 
 
-- name: Set sync rep availability
-  postgresql_query:
-    conninfo: "{{ hostvars[item].bdr_node_dsn }}"
-    queries:
-      - text: ALTER SYSTEM SET synchronous_replication_availability=%s;
-        args: 
-          - "{{ sync_rep }}"
-      - text: SELECT pg_reload_conf();
-    autocommit: yes
-  with_items: 
-      - "{{ ping }}"
-      - "{{ pong }}"
-  become_user: "{{ postgres_user }}"
-  become: yes
-
 - block:
+  - name: Set sync rep availability
+    postgresql_query:
+      conninfo: "{{ hostvars[item].bdr_node_dsn }}"
+      queries:
+        - text: ALTER SYSTEM SET synchronous_replication_availability=%s;
+          args:
+            - "{{ sync_rep }}"
+        - text: SELECT pg_reload_conf();
+      autocommit: yes
+    with_items:
+        - "{{ ping }}"
+        - "{{ pong }}"
+    become_user: "{{ postgres_user }}"
+    become: yes
   - name: Create bdr_camo_client test table
     postgresql_query:
       conninfo: "{{ ping_conninfo }}"
@@ -92,6 +91,3 @@
     bdr_camo_client: "{{ postgres_bin_dir }}/bdr_camo_client"
   when:
     inventory_hostname == tester_instance
-
-- debug:
-    msg: "ping {{ ping }}"

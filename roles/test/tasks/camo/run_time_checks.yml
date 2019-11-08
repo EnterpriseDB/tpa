@@ -1,0 +1,51 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- block:
+  - name: Get txn count on CAMO pairs
+    postgresql_query:
+      conninfo: "{{ item }}"
+      queries:
+        - text: SELECT COUNT(1) FROM camo_test;  
+    register: total_txns
+    with_items:
+      - "{{ running_node_dsn }}"
+      - "{{ crash_node_dsn }}"
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - name: total txns on orgin should not exceed that on partner
+    assert:
+      that: total_txns.results[0].count|int <= total_txns.results[1].count|int
+      msg: "origin:{{ total_txns.results[0].count}} partner:{{total_txns.results[1].count}}"
+  when: sync_rep == 'wait'
+  
+- block:
+  - name: get prepared txns on origin
+    postgresql_query:
+      conninfo: "{{ running_node_dsn }}"
+      queries:
+        - text: "SELECT COUNT(gid) FROM pg_prepared_xacts WHERE gid LIKE '__bdr_%%'"  
+    register: pre_txns
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - name: prepared transactions should never exceed the number of concurrent connections on the CAMO origin
+    assert:
+      that: pre_txns.results[0].count|int <= camo_clients|int
+      msg: "origin: {{pre_txns.results[0].count }}"
+
+  - name: get prepared txns on partner
+    postgresql_query:
+      conninfo: "{{ crash_node_dsn }}"
+      queries:
+        - text: "SELECT COUNT(gid) FROM pg_prepared_xacts WHERE gid LIKE '__bdr_%%'"  
+    register: pre_txns
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - name: prepared transactions should never exceed the number of concurrent connections on the CAMO origin
+    assert:
+      that: pre_txns.results[0].count|int == 0
+      msg: "partner: {{pre_txns.results[0].count }}"
