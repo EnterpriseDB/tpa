@@ -50,16 +50,32 @@
     with_items: "{{ groups['role_haproxy'] }}"
 
   - set_fact:
-      pair:
-       - "{{ item['backends'][0] }}"
-       - "{{ item['backends'][1] }}"
       haproxy_node: "{{ item['name'] }}"
+      haproxy_port: "{{ haproxy_port|default('6432') }}"
     with_items:  "{{ haproxy_backend_list }}"
     when: hostvars[item.backends[0]]['bdr_node_camo_partner'] == item.backends[1] 
 
   - fail:
      msg: "Test cluster is unsupported. Requires haproxy backends to be camo pairs"
     when: haproxy_node is undefined
+  
+  - name: get haproxy haproxy_backend
+    postgresql_query:
+      conninfo: "host={{ haproxy_node }} port={{ haproxy_port }}  dbname={{bdr_database}} user={{postgres_user}}"
+      queries:
+        - text: select interface_name from bdr.local_node_summary;
+    register: interface
+    become_user: "{{ postgres_user }}"
+    become: yes
+  - debug:
+      var: interface.interface_name
+
+  - set_fact:
+      pair:
+       - "{{ interface.interface_name }}"
+       - "{{ hostvars[interface.interface_name]['bdr_node_camo_partner'] }}"
+  - debug:
+      var: pair
   when: via_haproxy
 
 - name: Check if bdr_camo_client is available

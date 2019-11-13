@@ -22,32 +22,46 @@
   when: sync_rep == 'wait' or failure == 'none'
   
 - block:
+  - name: haproxy_backend after recovery
+    postgresql_query:
+      conninfo: "host={{haproxy_node}} port={{haproxy_port}} dbname={{bdr_database}} user={{postgres_user}}"
+      queries:
+        - text: select interface_name from bdr.local_node_summary;
+    register: interface_post
+    become_user: "{{ postgres_user }}"
+    become: yes
+  - name: haproxy_backend
+    debug:
+      msg:
+       - "Expected new: origin {{ running_node_dsn }}"
+       - "Actual new: origin {{interface_post.interface_name }}"
   - name: get prepared txns on origin
     postgresql_query:
       conninfo: "{{ running_node_dsn }}"
       queries:
         - text: "SELECT COUNT(gid) FROM pg_prepared_xacts WHERE gid LIKE '__bdr_%%'"  
-    register: pre_txns
+    register: pre_txns_origin
     become_user: "{{ postgres_user }}"
     become: yes
 
   - name: prepared transactions should never exceed the number of concurrent connections on the CAMO origin
     assert:
-      that: pre_txns.results[0].count|int <= camo_clients|int
-      msg: "origin: {{pre_txns.results[0].count }}"
+      that: pre_txns_origin.results[0].count|int <= camo_clients|int
+      msg: "origin: {{pre_txns_origin.results[0].count }}"
 
   - name: get prepared txns on partner
     postgresql_query:
       conninfo: "{{ crash_node_dsn }}"
       queries:
         - text: "SELECT COUNT(gid) FROM pg_prepared_xacts WHERE gid LIKE '__bdr_%%'"  
-    register: pre_txns
+    register: pre_txns_partner
     become_user: "{{ postgres_user }}"
     become: yes
 
   - name: prepared transactions should remain 0 on the CAMO partner
     assert:
-      that: pre_txns.results[0].count|int == 0
-      msg: "partner: {{pre_txns.results[0].count }}"
+      that: pre_txns_partner.results[0].count|int == 0
+      msg: "partner: {{pre_txns_partner.results[0].count }}"
+    ignore_errors: true
     when: scope == 'local'
     

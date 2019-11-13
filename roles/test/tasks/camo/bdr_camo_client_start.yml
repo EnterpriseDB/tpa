@@ -46,7 +46,7 @@
             , PRIMARY KEY (key, attempt_no))
     become_user: "{{ postgres_user }}"
     become: yes
-
+  
   - name: Wait for DDL to replicate to BDR instances
     postgresql_query:
       conninfo: "{{ ping_conninfo }}"
@@ -72,7 +72,6 @@
     become: yes
     async: 7200
     poll: 0
-
   - name: Check that each thread has inserted at least one row
     postgresql_query:
       conninfo: "{{ ping_conninfo }}"
