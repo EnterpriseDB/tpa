@@ -1,0 +1,10 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Install psycopg2
+  command: pip install psycopg2-binary
+  register: psycopg
+  changed_when: >
+    psycopg|succeeded and 'Requirement already satisfied' not in psycopg.stdout
+  tags: [postgres, pkg]

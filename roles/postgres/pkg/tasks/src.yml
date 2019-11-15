@@ -10,5 +10,7 @@
   vars:
     package_lists:
     - "{{ src_extra_packages|packages_for(ansible_os_family) }}"
-    - "{{ psycopg2_packages|packages_for(ansible_os_family) }}"
+  tags: [postgres, pkg]
+
+- include_tasks: psycopg2.yml
   tags: [postgres, pkg]
