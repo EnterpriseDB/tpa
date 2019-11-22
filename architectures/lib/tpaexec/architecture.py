@@ -586,6 +586,8 @@ class Architecture(object):
                     t = '%s/%s' % (d, filename)
                     if os.path.exists(t):
                         return io.open(t, 'r').read()
+                if filename.startswith('/') and os.path.exists(filename):
+                    return io.open(filename, 'r').read()
                 return '{}'
 
         if not basedirs:
