@@ -294,17 +294,17 @@ try_as_playbook_or_script() {
 
             if [[ -x $exec ]]; then
                 $exec "$@"
-                return 0
+                return $?
             elif [[ -f $script ]]; then
                 source $script
                 if [[ $(type -t _tpaexec_command) != function ]]; then
                     error "$script did not define _tpaexec_command"
                 fi
                 _tpaexec_command "$@"
-                return 0
+                return $?
             elif [[ -f $playbook ]]; then
                 playbook $playbook "$@"
-                return 0
+                return $?
             fi
         done
     fi
