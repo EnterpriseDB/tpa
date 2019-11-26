@@ -57,6 +57,7 @@
 
   - set_fact:
       bdr_camo_client_output: /tmp/bdr-camo-client-{{ failure }}.txt
+      run_time_output: /tmp/camo_statistics.csv
 
   - name: Run bdr_camo_client
     shell: >
@@ -72,6 +73,32 @@
     become: yes
     async: 7200
     poll: 0
+
+
+  - name: Copy files
+    copy:
+      src: run_time_check.py
+      dest: /tmp/
+    become_user: postgres
+    become: yes
+
+  - name: Start run_time_check script
+    shell: >
+      python run_check.py 
+      "{{ hostvars[ping].bdr_node_dsn }}"
+      "{{ hostvars[pong].bdr_node_dsn }}"
+      "{{ bdr_node_dsn }}"
+      "{{ run_time_output }}"
+      'camo_test'
+    args:
+      chdir: /tmp
+    register: check_run
+    become_user: "{{ postgres_user }}"
+    become: yes
+    async: 7200
+    poll: 0
+
+
   - name: Check that each thread has inserted at least one row
     postgresql_query:
       conninfo: "{{ ping_conninfo }}"

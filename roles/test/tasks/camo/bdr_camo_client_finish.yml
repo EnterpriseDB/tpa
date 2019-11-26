@@ -18,6 +18,12 @@
       dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ bdr_camo_client_output|basename }}"
       flat: yes
 
+  - name: Save run_time_check output
+    fetch:
+      src: "{{ run_time_output }}"
+      dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ run_time_output|basename }}"
+      flat: yes
+
   - name: Fail if bdr_camo_client failed
     fail:
       msg: "bdr_camo_client failed"

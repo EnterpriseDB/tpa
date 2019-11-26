@@ -14,36 +14,15 @@
     crash: "{{ crash|default('partner') }}"
 - set_fact:
     crash_node: "{{ ping }}"
-    running_node: "{{ pong }}"
-    crash_node_dsn: "{{ hostvars[ping].bdr_node_dsn }}"
-    running_node_dsn: "{{ hostvars[pong].bdr_node_dsn }}"
   when: crash == 'origin'
-
 - set_fact:
     crash_node: "{{ pong }}"
-    running_node: "{{ ping }}"
-    crash_node_dsn: "{{ hostvars[pong].bdr_node_dsn }}"
-    running_node_dsn: "{{ hostvars[ping].bdr_node_dsn }}"
   when: crash == 'partner'
-- debug: 
-    var: crash_node
-
 
 - name: Cause failure {{ failure }} on CAMO {{crash}} {{ crash_node }}
   include_role: name=test tasks_from="failures/{{ failure }}.yml"
   when: >
     inventory_hostname == crash_node
-
-- include_tasks: camo/node_recover_wait.yml
-  when: inventory_hostname == tester_instance and failure != 'none'
-
-
-- include_tasks: camo/run_time_checks.yml
-  loop: [1, 2, 3]
-  loop_control:
-     loop_var: check_count
-     pause: 5
-  when: inventory_hostname == tester_instance
 
 - include_tasks: camo/bdr_camo_client_finish.yml
 
