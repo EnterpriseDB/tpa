@@ -11,6 +11,7 @@ Group=postgres
 ExecStart={{ default_pgbouncer_paths[ansible_os_family] }} /etc/pgbouncer/pgbouncer.ini
 ExecStop=/bin/kill -TERM $MAINPID
 ExecReload=/bin/kill -HUP $MAINPID
+LimitNOFILE=infinity
 
 [Install]
 WantedBy=multi-user.target

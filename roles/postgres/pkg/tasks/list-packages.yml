@@ -43,3 +43,4 @@
     - "{{ additional_postgres_packages[ansible_distribution] }}"
     - "{{ extra_postgres_packages[ansible_distribution]|default([]) }}"
     - "{{ extra_postgres_packages['common']|default([]) }}"
+    - "{{ psycopg2_packages|packages_for(ansible_os_family) }}"
