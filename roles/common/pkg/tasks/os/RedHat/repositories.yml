@@ -48,6 +48,25 @@
     option: exclude
     value: "postgresql* barman* repmgr*"
 
+- name: Disable PGDG repos for versions other than {{ postgres_version }}
+  ini_file:
+    dest: /etc/yum.repos.d/pgdg-redhat-all.repo
+    section: "{{ item }}"
+    option: enabled
+    value: "{{ (item == wanted_pgdg_repo)|ternary('1', '0') }}"
+  with_items: "{{ all_pgdg_repos }}"
+  when: >
+    'PGDG' in yum_repository_list
+  vars:
+    all_pgdg_repos:
+    - pgdg94
+    - pgdg95
+    - pgdg96
+    - pgdg10
+    - pgdg11
+    - pgdg12
+    wanted_pgdg_repo: "pgdg{{ postgres_versionNN }}"
+
 - set_fact:
     _2q_repositories: []
 
