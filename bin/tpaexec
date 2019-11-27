@@ -57,6 +57,10 @@ _detect_virtualenv() {
     /usr/bin/env python -c "import sys; print('virtualenv' if hasattr(sys, 'real_prefix') else 'no virtualenv')"
 }
 
+_ansible_version() {
+    /usr/bin/env python -c 'import ansible.release; print(ansible.release.__version__)'
+}
+
 _activate_virtualenv() {
     set +u
     if ! source $1/bin/activate; then
@@ -325,12 +329,13 @@ _tpaexec_info() {
     if [[ -n "${ANSIBLE_HOME:-}" ]]; then
         echo -n ANSIBLE_HOME=$ANSIBLE_HOME
         if [[ -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
-            echo " (valid)"
+            echo " (v$(PYTHONPATH=$ANSIBLE_HOME/lib _ansible_version))"
         else
             echo " (invalid)"
         fi
     elif command -v ansible &>/dev/null; then
-        echo ANSIBLE=$(command -v ansible)
+        echo -n ANSIBLE=$(command -v ansible)
+        echo " (v$(_ansible_version))"
     else
         error "can't find ansible via PATH/ANSIBLE_HOME (did you run 'tpaexec setup'?)"
     fi
