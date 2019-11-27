@@ -19,12 +19,6 @@
       tags: [postgres, pkg, debuginfo]
   tags: always
 
-- include_tasks:
-    file: psycopg2.yml
-    apply:
-      tags: [postgres, pkg, psycopg2]
-  tags: always
-
 # We install our own service units later, so we disable the packaged
 # versions here.
 

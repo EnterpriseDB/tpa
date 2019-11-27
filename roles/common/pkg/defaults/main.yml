@@ -68,7 +68,6 @@ default_packages:
     - rsync
     - mdadm
     - dstat
-    - python-pip
     - python-virtualenv
     - openssh-server
     - rsyslog
