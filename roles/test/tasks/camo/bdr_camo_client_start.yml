@@ -10,6 +10,7 @@
     bdr_camo_client_args: "{{ bdr_camo_client_args|default('') }}"
     scope: "{{ scope|default('local') }}"
     sync_rep: "{{ sync_rep|default('async') }}"
+    camo_mode: "{{ sync_rep|default('remote_commit_flush') }}"
 
 - set_fact:
     bdr_dsn: "{{ ping }},{{ pong }}"
@@ -27,6 +28,20 @@
         - text: ALTER SYSTEM SET synchronous_replication_availability=%s;
           args:
             - "{{ sync_rep }}"
+        - text: SELECT pg_reload_conf();
+      autocommit: yes
+    with_items:
+        - "{{ ping }}"
+        - "{{ pong }}"
+    become_user: "{{ postgres_user }}"
+    become: yes
+  - name: Set camo mode
+    postgresql_query:
+      conninfo: "{{ hostvars[item].bdr_node_dsn }}"
+      queries:
+        - text: ALTER SYSTEM SET pg2q.enable_camo=%s;
+          args:
+            - "{{ camo_mode }}"
         - text: SELECT pg_reload_conf();
       autocommit: yes
     with_items:
@@ -57,7 +72,7 @@
 
   - set_fact:
       bdr_camo_client_output: /tmp/bdr-camo-client-{{ failure }}.txt
-      run_time_output: /tmp/camo_statistics.csv
+      run_time_output: /tmp/camo_statistics-{{ failure }}.csv
 
   - name: Run bdr_camo_client
     shell: >
@@ -84,12 +99,12 @@
 
   - name: Start run_time_check script
     shell: >
-      python run_check.py 
+      python run_time_check.py 
       "{{ hostvars[ping].bdr_node_dsn }}"
       "{{ hostvars[pong].bdr_node_dsn }}"
       "{{ bdr_node_dsn }}"
       "{{ run_time_output }}"
-      'camo_test'
+      'camo_test'  "{{ camo_transactions|int * camo_clients|int }}" > output.txt 2>&1
     args:
       chdir: /tmp
     register: check_run

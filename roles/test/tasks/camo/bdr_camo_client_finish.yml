@@ -18,12 +18,6 @@
       dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ bdr_camo_client_output|basename }}"
       flat: yes
 
-  - name: Save run_time_check output
-    fetch:
-      src: "{{ run_time_output }}"
-      dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ run_time_output|basename }}"
-      flat: yes
-
   - name: Fail if bdr_camo_client failed
     fail:
       msg: "bdr_camo_client failed"
@@ -61,3 +55,15 @@
     become: yes
   when:
     inventory_hostname in groups[bdr_node_group] and  inventory_hostname != ping
+  
+- name: Wait for a few entries in run_time_output after sync complete
+  pause: seconds=5
+
+- name: Save run_time_check output
+  fetch:
+    src: "{{ run_time_output }}"
+    dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ run_time_output|basename }}"
+    flat: yes
+  when: >
+    inventory_hostname == tester_instance
+
