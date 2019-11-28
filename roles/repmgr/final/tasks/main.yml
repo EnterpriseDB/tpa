@@ -19,6 +19,12 @@
 
 - meta: flush_handlers
 
+- name: Disable repmgr for BDR instances
+  set_fact:
+    repmgr_service_end_state: stopped
+  when: >
+    'bdr' in role
+
 - name: Start or restart repmgrd
   service:
     name: repmgr
