@@ -29,6 +29,7 @@ default_bdr_node_group: bdrgroup
 
 default_postgres_install_dir: "/opt/postgres/{{ postgres_version }}"
 
+default_haproxy_port: 5432
 default_pgbouncer_port: 6432
 
 # By default, pgbouncer will forward all connections to 127.0.0.1:5432

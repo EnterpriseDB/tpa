@@ -19,7 +19,7 @@ defaults
     log global
 
 frontend fe
-    bind 127.0.0.1:5432
+    bind 127.0.0.1:{{ haproxy_port }}
 
     maxconn 1000
     timeout client 1h
