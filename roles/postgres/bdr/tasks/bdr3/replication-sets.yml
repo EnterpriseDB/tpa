@@ -29,14 +29,18 @@
     conninfo: "{{ dsn|dbname(bdr_database) }}"
     queries:
     - text: >
-        SELECT coalesce(replication_sets, '{}'::text[]) as replication_sets
-        FROM bdr.local_node_summary JOIN bdr.node_local_info USING (node_id)
+        SELECT coalesce({{ _repsets }}, '{}'::text[]) as replication_sets
+        FROM bdr.local_node_summary N JOIN bdr.node_local_info I USING (node_id)
         WHERE node_name = %s
       args:
       - "{{ bdr_node_name }}"
   register: subscribed
   become_user: "{{ postgres_user }}"
   become: yes
+  vars:
+    _repsets: "{{
+      (bdr_version_num >= 30700)|ternary('N.sub_repsets', 'replication_sets')
+    }}"
 
 - name: Alter subscription to include desired replication sets
   postgresql_query:
