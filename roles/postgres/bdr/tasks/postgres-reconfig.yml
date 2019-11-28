@@ -2,6 +2,10 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- name: Reset Postgres service end state
+  set_fact:
+    postgres_service_end_state: started
+
 - name: Install BDR-specific configuration file
   include_role: name=postgres/config tasks_from=bdr.yml
   when:
