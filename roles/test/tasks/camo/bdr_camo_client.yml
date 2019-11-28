@@ -44,7 +44,7 @@
 
   - name: Run bdr_camo_client
     shell: >
-      {{ bdr_camo_client }}
+      {{ bdr_camo_client_path }}
       -h {{ bdr_camo_client_host_arg }}
       -c 'INSERT INTO camo_test VALUES ($1, $2);'
       -i {{ camo_transactions }} -j {{ camo_clients }}

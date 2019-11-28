@@ -79,8 +79,15 @@
   when: via_haproxy
 
 - name: Check if bdr_camo_client is available
-  stat:
-    path: "{{ postgres_bin_dir }}/bdr_camo_client"
+  find:
+    paths:
+      - /usr/bin
+      # includes old paths used by rpm and deb packages
+      - "{{ postgres_bin_dir }}"
+      - /usr/pgsql-11/bin
+      - /usr/lib/postgresql/11/bin
+    recurse: no
+    patterns: bdr_camo_client
   register: client
   when:
     inventory_hostname in possible_testers
@@ -90,7 +97,7 @@
     testers_with_client: "{{ testers_with_client|default([])|union([item]) }}"
   with_items: "{{ possible_testers }}"
   when:
-    hostvars[item].client.stat.exists
+    hostvars[item].client.files|default([]) is not empty
 
 # If we have a suitable camo group and tester instance, we now run
 # bdr_camo_client against the CAMO partners from the tester_instance,
@@ -103,6 +110,9 @@
     msg: "{{ all_camo_groups }}"
 - debug:
     msg: "{{ testers_with_client }}"
+  with_items: "{{ possible_testers }}"
+  when:
+    hostvars[item].client.files|default([]) is not empty
 
 - name: Run  tests
   block:
@@ -112,6 +122,7 @@
       loop_control:
         loop_var: failure
       vars:
+        bdr_camo_client_path: "{{ (hostvars[item].client.files|first).path }}"
         tester_instance: "{{ testers_with_client|first }}"
         nondestructive_failures:
           - none

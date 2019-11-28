@@ -35,6 +35,6 @@
 - name: Enable repmgr service
   systemd:
     name: repmgr
-    enabled: "{{ not postgres_volume_encrypted|bool }}"
+    enabled: "{{ not postgres_volume_encrypted|bool and not 'bdr' in role }}"
     daemon_reload: "{{ unit is changed }}"
   tags: [repmgr, service]
