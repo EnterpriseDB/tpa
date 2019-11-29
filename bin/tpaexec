@@ -313,7 +313,7 @@ try_as_playbook_or_script() {
         done
     fi
 
-    return 1
+    error "unrecognised tpaexec command: $command (try 'tpaexec help')"
 }
 
 _tpaexec_info() {
@@ -686,7 +686,6 @@ case "$command" in
         ;;
 
     *)
-        try_as_playbook_or_script "$@" ||
-            error "unrecognised tpaexec command: $command (try 'tpaexec help')"
+        try_as_playbook_or_script "$@"
         ;;
 esac
