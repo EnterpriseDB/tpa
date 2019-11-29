@@ -92,6 +92,11 @@
   when:
     inventory_hostname in possible_testers
 
+- set_fact: 
+    bdr_camo_client_path: "{{ client.files[0]['path'] }}"
+  when:
+    inventory_hostname in possible_testers
+
 - name: Exclude possible_testers without bdr_camo_client installed
   set_fact:
     testers_with_client: "{{ testers_with_client|default([])|union([item]) }}"
@@ -122,7 +127,6 @@
       loop_control:
         loop_var: failure
       vars:
-        bdr_camo_client_path: "{{ (hostvars[item].client.files|first).path }}"
         tester_instance: "{{ testers_with_client|first }}"
         nondestructive_failures:
           - none
@@ -143,6 +147,7 @@
         failure: "upgrade"
         tpa_2q_repositories: "{{ update_from_repo }}"
         pglogical_package_version: "{{ pgl_new_version }}"
+        postgres_package_version: "{{ pg_new_version}}"
         bdr_package_version: "{{ bdr_new_version }}"
         extra_postgres_packages:
           common:
