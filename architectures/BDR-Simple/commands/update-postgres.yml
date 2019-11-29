@@ -93,7 +93,8 @@
 
   - name: Put backend {{ inventory_hostname }} in drain mode
     shell: >
-      echo "set server be/{{ inventory_hostname }} state drain" | socat stdio {{ haproxy_stats_socket }}
+      echo "set server be/{{ inventory_hostname }} state drain; clear table be key 127.0.0.1" |
+      socat stdio {{ haproxy_stats_socket }}
     args:
       executable: /bin/bash
     delegate_to: "{{ my_proxy }}"
