@@ -29,6 +29,8 @@
     pair:
       - "{{ groups[all_camo_groups|first]|first }}"
       - "{{ groups[all_camo_groups|first]|last }}"
+  when:
+    all_camo_groups is not empty
 
 - set_fact:
      via_haproxy: "{{ via_haproxy|default(False) }}"
