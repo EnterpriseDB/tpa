@@ -20,6 +20,8 @@ UserParameter=pgsql.db.discovery[*],/bin/echo -n '{"data":['; for db in $(psql -
 UserParameter=pgsql.table.discovery[*],/bin/echo -n '{"data":['; for table in $(psql -qAtX -F. $1 -c "select n.nspname,c.relname from pg_catalog.pg_class c left join pg_catalog.pg_namespace n on n.oid = c.relnamespace where c.relkind in ('r','s','') and n.nspname not in ('^pg_toast','information_schema','pg_catalog')"); do /bin/echo -n "{\"{#TABLENAME}\": \"$table\"},"; done |sed -e 's:\},$:\}:'; /bin/echo -n ']}'
 UserParameter=pgsql.streaming.discovery[*],/bin/echo -n '{"data":['; for replica in $(psql -qAtX $1 -c "select client_addr from pg_stat_replication"); do /bin/echo -n "{\"{#HOTSTANDBY}\": \"$replica\"},"; done |sed -e 's:,$::'; /bin/echo -n ']}'
 
+UserParameter=pgsql.db.autovac_freeze[*],psql -qAtX $1 -c "SELECT txns, ROUND(100*(txns/freez::float)) AS perc FROM (SELECT foo.freez::int, age(datfrozenxid) AS txns FROM pg_database d JOIN (SELECT setting AS freez FROM pg_settings WHERE name = 'autovacuum_freeze_max_age') AS foo ON (true) WHERE d.datallowconn AND datname = '$2') AS foo2;" | awk -F\| '{printf("{\"{#DBNAME}\":\"$2\", \"TXNS\":\"%d\", \"TXNS_PERCENT\":\"%d\"}", $$1, $$2)}'
+
 # GENERAL INFORMATION #
 UserParameter=pgsql.ping[*],/bin/echo -e "\\\timing \n select 1" | psql -qAtX $1 | tail -n 1 |cut -d' ' -f2
 UserParameter=pgsql.uptime[*],psql -qAtX $1 -c "select date_part('epoch', now() - pg_postmaster_start_time())::int"
