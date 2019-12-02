@@ -23,12 +23,14 @@
 # we would prefer the downtime to be predictable rather than dependent
 # on the whims of the network.)
 
-- name: Collect upgrade facts for cluster {{ cluster_dir }}
+- name: Collect update facts for cluster {{ cluster_dir }}
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root
   become: yes
   hosts: all
+  vars:
+    all_haproxy_backends: []
   tasks:
 
   # From the haproxy_backends settings on haproxy instances, we assemble
@@ -60,7 +62,7 @@
         })
       }}"
     with_nested_dependents:
-    - groups['role_haproxy']
+    - groups['role_haproxy']|default([])
     - hostvars[item.0].haproxy_backends
 
   - name: Record haproxy partner backends
@@ -72,6 +74,34 @@
     when:
       inventory_hostname in all_haproxy_backends
 
+  # As a precaution, we start the update only if the servers are healthy
+  # and match the expected configuration. It's convenient to do this by
+  # just rerunning the basic pgbouncer and haproxy tests.
+  #
+  # This does mean that if a failed package install leaves a particular
+  # backend server in "maint" state, it will have to be fixed by hand
+  # before retrying the update with a fixed configuration.
+
+  - name: Check pgbouncer configuration and status
+    include_role:
+      name: test
+      tasks_from: pgbouncer.yml
+    when: >
+      'pgbouncer' in role
+
+  - name: Check haproxy configuration and status
+    include_role:
+      name: test
+      tasks_from: haproxy.yml
+    when: >
+      'haproxy' in role
+
+# Now that we're convinced the cluster is in a reasonable initial state,
+# we start the update process one by one on the instances. You can run
+# the command with ``-e update_hosts=a,b,c,…`` to control the order in
+# which we attempt the updates (for example, to make sure that primary
+# instances are updated last in the cycle).
+
 - name: Update postgres on instances in cluster {{ cluster_dir }}
   any_errors_fatal: True
   max_fail_percentage: 0
@@ -81,69 +111,150 @@
   serial: 1
   vars:
     haproxy_stats_socket: /var/lib/haproxy/stats
+    all_haproxy_backends: []
+    proxy_for_backend: {}
   tasks:
+
+  # First, we check if the current instance is named in haproxy_backends
+  # for one of the haproxy instances. Thereafter, if is_proxied is true,
+  # my_proxy is the name of the relevant haproxy instance.
+
   - set_fact:
-      is_proxied: >
+      is_proxied: >-
         {{ inventory_hostname in all_haproxy_backends }}
       my_proxy: >-
         {{ proxy_for_backend[inventory_hostname]|default('none') }}
 
-  # First, we must set this backend into drain mode in haproxy so that
-  # no new connections are directed to it.
+  # We want to set this server into the MAINT state in haproxy, which
+  # disables health checks and prevents new connections to the server
+  # (it does not terminate existing connections, as the documentation
+  # indirectly suggests). This is equivalent to "disable server".
+  #
+  # We would also like to know if the server was active, so that we can
+  # take some additional steps below. Unfortunately, there is no way to
+  # do this in a single step.
+  #
+  # We can tell if haproxy is directing traffic to a server by looking
+  # for an entry with server_id=NNN in the stick table for the backend
+  # ("show table be"). To make sense of the server_ids, we need to look
+  # at the server state ("show servers state be"). If we then switch to
+  # MAINT, we can parse the output to figure out if the server had been
+  # receiving traffic before the switch.
+  #
+  # We assume that pgbouncer is connecting to haproxy on the same host,
+  # and send "show table be key 127.0.0.1" to show only the relevant
+  # entry in the stick table.
+  #
+  # This is not resilient against changes to the traffic routing because
+  # of failed health checks during the process. The best we can do is to
+  # minimise the window of opportunity for problems by issuing all three
+  # commands in one go.
+  #
+  # Note: I have not been able to find any advantage to using the DRAIN
+  # state in haproxy, or even understand what exactly it does. However,
+  # it does not remove the stick table entry for the server, so we have
+  # to issue an additional "clear table be key 127.0.0.1".
 
-  - name: Put backend {{ inventory_hostname }} in drain mode
+  - name: Put backend {{ inventory_hostname }} in MAINT mode
     shell: >
-      echo "set server be/{{ inventory_hostname }} state drain; clear table be key 127.0.0.1" |
+      echo "show table be key 127.0.0.1;
+      show servers state be;
+      set server be/{{ inventory_hostname }} state maint" |
       socat stdio {{ haproxy_stats_socket }}
     args:
       executable: /bin/bash
+    register: servers
     delegate_to: "{{ my_proxy }}"
     when: is_proxied
 
-  # We must ask pgbouncer to migrate connections away from this backend
-  # and wait for that process to complete before we shut it down.
+  - set_fact:
+      status_lines: "{{ servers.stdout_lines|default([]) }}"
 
-  - name: Issue RECONNECT to pgbouncer
+  # We must now extract some meaning from the output of the commands we
+  # sent above. The "show table …" output will be an empty line (if the
+  # stick table has no entry for pgbouncer) or will look something like
+  # the following:
+  #
+  # # table: be, type: ip, size:1, used:1
+  # 0xNNNNNNNNNNNN: key=127.0.0.1 use=0 exp=0 server_id=1
+  #
+  # For details, see src/stick_table.c:table_dump_head_to_buffer and
+  # table_dump_entry_to_buffer.
+  #
+  # We extract the server_id, if available, and remove any parsed output
+  # from status_lines.
+
+  - block:
+    - name: Set former_server_id based on stick table contents
+      set_fact:
+        former_active_id: "{{
+          status_lines[1]|regex_replace('^.*server_id=', '')
+        }}"
+        status_lines: "{{ status_lines[2:] }}"
+    when: >
+      status_lines and
+      status_lines[0].startswith("# table: be,")
+
+  - set_fact:
+      status_lines: "{{ status_lines[1:] }}"
+
+  # Next up, the "show servers …" output will look like this:
+  #
+  # 1
+  # # be_id be_name srv_id srv_name srv_addr srv_op_state srv_admin_state …
+  # 3 be 1 quart 10.33.244.222 2 0 1 1 5376 15 3 7 6 0 0 0 quart 5432 -
+  # 3 be 2 zephyr 10.33.244.215 2 0 1 1 5376 15 3 7 6 0 0 0 zephyr 5432 -
+  #
+  # See doc/management.txt in the haproxy source for details about the
+  # meaning of these values.
+  #
+  # If we found a former_active_id above, we translate that to a server
+  # name here. (Otherwise we know there's no active server yet, so there
+  # is no need to treat this instance specially.)
+
+  - name: Set former_server_name based on server state
+    set_fact:
+      former_active_server: "{{ _fields[3] }}"
+    with_items:
+      "{{ status_lines[2:] }}"
+    vars:
+      _fields: "{{ item.split(' ') }}"
+    when: >
+      status_lines and
+      status_lines[0] == "1" and
+      status_lines[1].startswith("# be_id be_name ") and
+      former_active_id is defined and
+      former_active_id == _fields[2]
+
+  - set_fact:
+      was_active: "{{
+        inventory_hostname == former_active_server|default('none')
+      }}"
+    when: is_proxied
+
+  # If this was an active backend, we must ask pgbouncer to migrate
+  # connections away from it and wait for that process to complete
+  # before we shut it down.
+
+  - name: Issue RECONNECT and WAIT_CLOSE to pgbouncer
     postgresql_query:
       conninfo: "{{ _dsn|dbname('pgbouncer', user='pgbouncer') }}"
-      query: RECONNECT
       autocommit: yes
+      queries:
+      - text: RECONNECT
+      - text: WAIT_CLOSE
     vars:
       _dsn: "{{ hostvars[my_proxy].pgbouncer_node_dsn }}"
     delegate_to: "{{ my_proxy }}"
     environment:
       PGPASSWORD: "{{ pgbouncer_password }}"
     when:
-      is_proxied
-
-  - name: Issue WAIT_CLOSE to pgbouncer
-    postgresql_query:
-      conninfo: "{{ _dsn|dbname('pgbouncer', user='pgbouncer') }}"
-      query: WAIT_CLOSE
-      autocommit: yes
-    vars:
-      _dsn: "{{ hostvars[my_proxy].pgbouncer_node_dsn }}"
-    delegate_to: "{{ my_proxy }}"
-    environment:
-      PGPASSWORD: "{{ pgbouncer_password }}"
-    when:
-      is_proxied
-
-  # Now we put the backend into maint mode (probably unnecessary because
-  # we know that pgbouncer has migrated connections away, and haproxy
-  # won't direct any new traffic to it anyway).
-
-  - name: Put backend {{ inventory_hostname }} in maint mode
-    shell: >
-      echo "set server be/{{ inventory_hostname }} state maint" | socat stdio {{ haproxy_stats_socket }}
-    args:
-      executable: /bin/bash
-    delegate_to: "{{ my_proxy }}"
-    when: is_proxied
+      is_proxied and was_active
 
   # Once the server is guaranteed to have no active traffic, we can wait
   # to ensure that any writes it originated have finished replicating to
-  # the other backends.
+  # the other backends. This is just a convenience, because the instance
+  # would replicate after the restart anyway.
 
   - name: Wait for replication to complete
     postgresql_query:
@@ -155,9 +266,11 @@
     when:
       is_proxied
 
-  # Now we can stop/update/restart Postgres safely.
+  # Now we can perform the update on Postgres instances, whether proxied
+  # (e.g., primary instances) or not (e.g., logical standby instances).
+  # We don't do anything for non-Postgres instances at the moment.
 
-  - name: Update Postgres
+  - name: Stop/update/restart Postgres on {{ inventory_hostname }}
     block:
     - include_role: name=postgres/restart
       vars:
@@ -169,12 +282,30 @@
     when: >
       'postgres' in role
 
-  # Once that's done, we can inform haproxy that the backend is once
+  # After we update one instance in a CAMO pair, we must wait for its
+  # partner to catch up. If we stop the partner before it is ready, we
+  # will lose the status of transactions committed on the origin.
+
+  - name: Wait for CAMO partner to be ready before proceeding
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      query: >
+        SELECT bdr.is_camo_partner_connected() AND
+          bdr.is_camo_partner_ready() AS ready
+    register: camo_status
+    until: camo_status.ready
+    retries: 180
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when: bdr_node_camo_partner is defined
+
+  # Once that's done, we can inform haproxy that this backend is once
   # again ready to accept connections.
 
   - name: Declare backend {{ inventory_hostname }} as ready
     shell: >
-      echo "set server be/{{ inventory_hostname }} state ready" | socat stdio {{ haproxy_stats_socket }}
+      echo "set server be/{{ inventory_hostname }} state ready" |
+      socat stdio {{ haproxy_stats_socket }}
     args:
       executable: /bin/bash
     delegate_to: "{{ my_proxy }}"
