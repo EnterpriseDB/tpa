@@ -19,6 +19,7 @@ conn_partner=0
 now = datetime.now()
 csvRow = [now, expected_xacts]
 emptyRow = ["",  "", ""]
+all_committed = False
 myquery = "SELECT 1 FROM pg_catalog.pg_class c INNER JOIN pg_catalog.pg_namespace n ON (c.relnamespace = n.oid) WHERE relname ='{}'".format(test_table)
 if os.path.exists(csvfile):
   os.remove(csvfile)
@@ -122,8 +123,9 @@ while test_valid:
     cur_local=conn_local.cursor()
     cur_local.execute(myquery)
     table_exists=cur_local.fetchone()
-    print csvRow[3]
-    if table_exists:
+    if table_exists and not all_committed:
+	if csvRow[1] == csvRow[3] == csvRow[6]: 
+	    all_committed = True
         test_valid = 1
         time.sleep(3)
         now = datetime.now()
