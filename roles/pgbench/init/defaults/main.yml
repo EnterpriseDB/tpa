@@ -2,4 +2,4 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-pgbench_scale_factor: 10
+pgbench_scale_factor: 5
