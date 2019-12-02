@@ -195,6 +195,7 @@ def main():
     m['rowcounts'] = rowcounts
     if len(rowcounts) == 1:
         m['rowcount'] = rowcounts[0]
+    m['queries'] = queries
 
     module.exit_json(changed=changed, results=results, **m)
 
