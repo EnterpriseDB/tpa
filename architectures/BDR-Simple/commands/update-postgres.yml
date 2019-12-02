@@ -168,9 +168,11 @@
   - name: Set former_server_id based on stick table contents
     set_fact:
       former_active_id: "{{
-        status_lines[1]|regex_replace('^.*server_id=', '')
+        _fields[-1]|regex_replace('server_id=', '')
       }}"
       status_lines: "{{ status_lines[2:] }}"
+    vars:
+      _fields: "{{ status_lines[1].split(' ') }}"
     when: >
       status_lines and
       status_lines[0].startswith("# table: be,")
