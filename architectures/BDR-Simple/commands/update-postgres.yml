@@ -78,9 +78,9 @@
   # and match the expected configuration. It's convenient to do this by
   # just rerunning the basic pgbouncer and haproxy tests.
   #
-  # This does mean that if a failed package install leaves a particular
-  # backend server in "maint" state, it will have to be fixed by hand
-  # before retrying the update with a fixed configuration.
+  # This does mean that if the update leaves a backend server in "maint"
+  # state because a package installation fails, it will have to be fixed
+  # by hand before retrying the update with a fixed configuration.
 
   - name: Check pgbouncer configuration and status
     include_role:
@@ -142,7 +142,7 @@
   # receiving traffic before the switch.
   #
   # We assume that pgbouncer is connecting to haproxy on the same host,
-  # and send "show table be key 127.0.0.1" to show only the relevant
+  # so we send "show table be key 127.0.0.1" to find only the relevant
   # entry in the stick table.
   #
   # This is not resilient against changes to the traffic routing because
@@ -151,7 +151,7 @@
   # commands in one go.
   #
   # Note: I have not been able to find any advantage to using the DRAIN
-  # state in haproxy, or even understand what exactly it does. However,
+  # state in haproxy, or even understand exactly what it does. However,
   # it does not remove the stick table entry for the server, so we have
   # to issue an additional "clear table be key 127.0.0.1".
 
