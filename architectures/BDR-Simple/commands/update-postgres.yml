@@ -39,11 +39,6 @@
   # 1. A list of all haproxy backends (all_haproxy_backends)
   # 2. A map associating each backend instance with its corresponding
   #    haproxy instance (proxy_for_backend)
-  # 3. A map associating each haproxy instance with a list of its
-  #    backends (backends_for_proxy)
-  # 4. A map associating each backend instance with a list of the other
-  #    backends mentioned in haproxy_backends for that backend's haproxy
-  #    instance (partner_backends)
   #
   # We assume for now that the haproxy instance also runs a pgbouncer
   # pointing to the haproxy (which is true of BDR-Always-ON by default).
@@ -56,23 +51,9 @@
       proxy_for_backend: "{{
         proxy_for_backend|default({})|combine({ item.1: item.0 })
       }}"
-      backends_for_proxy: "{{
-        backends_for_proxy|default({})|combine({
-          item.0: backends_for_proxy[item.0]|default([])|union([item.1])
-        })
-      }}"
     with_nested_dependents:
     - groups['role_haproxy']|default([])
     - hostvars[item.0].haproxy_backends
-
-  - name: Record haproxy partner backends
-    set_fact:
-      partner_backends: "{{
-        backends_for_proxy[proxy_for_backend[inventory_hostname]]
-        |reject('equalto', inventory_hostname)|list
-      }}"
-    when:
-      inventory_hostname in all_haproxy_backends
 
   # As a precaution, we start the update only if the servers are healthy
   # and match the expected configuration. It's convenient to do this by
