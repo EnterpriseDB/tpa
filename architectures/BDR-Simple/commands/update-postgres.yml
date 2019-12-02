@@ -165,13 +165,12 @@
   # We extract the server_id, if available, and remove any parsed output
   # from status_lines.
 
-  - block:
-    - name: Set former_server_id based on stick table contents
-      set_fact:
-        former_active_id: "{{
-          status_lines[1]|regex_replace('^.*server_id=', '')
-        }}"
-        status_lines: "{{ status_lines[2:] }}"
+  - name: Set former_server_id based on stick table contents
+    set_fact:
+      former_active_id: "{{
+        status_lines[1]|regex_replace('^.*server_id=', '')
+      }}"
+      status_lines: "{{ status_lines[2:] }}"
     when: >
       status_lines and
       status_lines[0].startswith("# table: be,")
