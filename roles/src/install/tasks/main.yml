@@ -46,7 +46,6 @@
   vars:
     build_log: "{{ build_log|default('/tmp/build.log') }}"
     default_build_commands:
-    - make
     - make install
   notify:
     - Note Postgres restart required

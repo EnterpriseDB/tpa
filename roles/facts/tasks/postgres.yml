@@ -53,6 +53,7 @@
     bdr_database: "{{ bdr_database|default(default_bdr_database) }}"
     bdr_node_name: "{{ bdr_node_name|default(inventory_hostname) }}"
     bdr_node_group: "{{ bdr_node_group|default(default_bdr_node_group) }}"
+    haproxy_port: "{{ haproxy_port|default(default_haproxy_port) }}"
     pgbouncer_port: "{{ pgbouncer_port|default(default_pgbouncer_port) }}"
     pgbouncer_backend: "{{ pgbouncer_backend|default(default_pgbouncer_backend) }}"
     pgbouncer_backend_port: "{{ pgbouncer_backend_port|default(default_pgbouncer_backend_port) }}"
@@ -66,12 +67,23 @@
       {%- endif -%}
   tags: always
 
+# If pgbouncer_backend points to a particular instance, we respect any
+# custom haproxy_port or postgres_port setting for that instance. Note
+# that changing haproxy_port without changing pgbouncer_backend won't
+# automatically work as expected.
+
 - name: Override pgbouncer_backend_port if required
   set_fact:
-    pgbouncer_backend_port: "{{ hostvars[pgbouncer_backend].postgres_port }}"
+    pgbouncer_backend_port: "{{ _backend_port }}"
   when:
     pgbouncer_backend in hostvars and
-    hostvars[pgbouncer_backend].postgres_port is defined
+    (hostvars[pgbouncer_backend].haproxy_port is defined or
+     hostvars[pgbouncer_backend].postgres_port is defined)
+  vars:
+    _backend_vars: "{{ hostvars[pgbouncer_backend] }}"
+    _backend_port: "{{
+      _backend_vars['haproxy_port']|default(_backend_vars['postgres_port'])
+    }}"
   tags: always
 
 - name: Set pgbouncer_databases

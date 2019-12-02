@@ -2,6 +2,13 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- include_role:
+    name: postgres/pkg
+    tasks_from: client.yml
+    apply:
+      tags: [postgres, pkg]
+  tags: always
+
 - name: Install Barman package
   package:
     name: "{{
@@ -11,10 +18,3 @@
       (barman_package_version is defined)|ternary('present', 'latest')
     }}"
   tags: [barman, pkg]
-
-- include_role:
-    name: postgres/pkg
-    tasks_from: client.yml
-    apply:
-      tags: [postgres, pkg]
-  tags: always

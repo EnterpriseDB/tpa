@@ -5,43 +5,177 @@
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   tags: always
 
-- name: Stop repmgr
+# We must perform a minor-version update of Postgres and BDR on a
+# running cluster while maintaining overall cluster availability.
+#
+# The cluster may comprise BDR primary, logical standby, and physical
+# streaming replica instances; and pgbouncer+haproxy instances besides.
+# Logical standby and physical replica instances can be updated without
+# any special precautions. Just stop, update, start.
+#
+# For BDR primaries, we must first check if haproxy is routing traffic
+# to them, and if so, redirect to another primary before stopping and
+# upgrading this one.
+#
+# (We don't try to minimise the downtime on each instance by downloading
+# the packages before stopping the server, but we should explore that in
+# future as an optimisation. Although the architecture tolerates delays,
+# we would prefer the downtime to be predictable rather than dependent
+# on the whims of the network.)
+
+- name: Collect upgrade facts for cluster {{ cluster_dir }}
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root
   become: yes
   hosts: all
   tasks:
-  - name: Stop repmgr
-    service:
-      name: repmgr
-      state: stopped
-    when: >
-      'postgres' in role
+
+  # From the haproxy_backends settings on haproxy instances, we assemble
+  # the following:
+  #
+  # 1. A list of all haproxy backends (all_haproxy_backends)
+  # 2. A map associating each backend instance with its corresponding
+  #    haproxy instance (proxy_for_backend)
+  # 3. A map associating each haproxy instance with a list of its
+  #    backends (backends_for_proxy)
+  # 4. A map associating each backend instance with a list of the other
+  #    backends mentioned in haproxy_backends for that backend's haproxy
+  #    instance (partner_backends)
+  #
+  # We assume for now that the haproxy instance also runs a pgbouncer
+  # pointing to the haproxy (which is true of BDR-Always-ON by default).
+
+  - name: Record haproxy/backend relationships
+    set_fact:
+      all_haproxy_backends: "{{
+        all_haproxy_backends|default([])|union([item.1])
+      }}"
+      proxy_for_backend: "{{
+        proxy_for_backend|default({})|combine({ item.1: item.0 })
+      }}"
+      backends_for_proxy: "{{
+        backends_for_proxy|default({})|combine({
+          item.0: backends_for_proxy[item.0]|default([])|union([item.1])
+        })
+      }}"
+    with_nested_dependents:
+    - groups['role_haproxy']
+    - hostvars[item.0].haproxy_backends
+
+  - name: Record haproxy partner backends
+    set_fact:
+      partner_backends: "{{
+        backends_for_proxy[proxy_for_backend[inventory_hostname]]
+        |reject('equalto', inventory_hostname)|list
+      }}"
+    when:
+      inventory_hostname in all_haproxy_backends
 
 - name: Update postgres on instances in cluster {{ cluster_dir }}
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root
   become: yes
-  hosts: all
+  hosts: "{{ update_hosts|default('all') }}"
   serial: 1
+  vars:
+    haproxy_stats_socket: /var/lib/haproxy/stats
   tasks:
-  - include_role: name=postgres/update
-    when: >
-      'postgres' in role
-    tags: always
+  - set_fact:
+      is_proxied: >
+        {{ inventory_hostname in all_haproxy_backends }}
+      my_proxy: >-
+        {{ proxy_for_backend[inventory_hostname]|default('none') }}
 
-- name: Start repmgr again
-  any_errors_fatal: True
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  hosts: all
-  tasks:
-  - name: Restart repmgr
-    service:
-      name: repmgr
-      state: started
+  # First, we must set this backend into drain mode in haproxy so that
+  # no new connections are directed to it.
+
+  - name: Put backend {{ inventory_hostname }} in drain mode
+    shell: >
+      echo "set server be/{{ inventory_hostname }} state drain; clear table be key 127.0.0.1" |
+      socat stdio {{ haproxy_stats_socket }}
+    args:
+      executable: /bin/bash
+    delegate_to: "{{ my_proxy }}"
+    when: is_proxied
+
+  # We must ask pgbouncer to migrate connections away from this backend
+  # and wait for that process to complete before we shut it down.
+
+  - name: Issue RECONNECT to pgbouncer
+    postgresql_query:
+      conninfo: "{{ _dsn|dbname('pgbouncer', user='pgbouncer') }}"
+      query: RECONNECT
+      autocommit: yes
+    vars:
+      _dsn: "{{ hostvars[my_proxy].pgbouncer_node_dsn }}"
+    delegate_to: "{{ my_proxy }}"
+    environment:
+      PGPASSWORD: "{{ pgbouncer_password }}"
+    when:
+      is_proxied
+
+  - name: Issue WAIT_CLOSE to pgbouncer
+    postgresql_query:
+      conninfo: "{{ _dsn|dbname('pgbouncer', user='pgbouncer') }}"
+      query: WAIT_CLOSE
+      autocommit: yes
+    vars:
+      _dsn: "{{ hostvars[my_proxy].pgbouncer_node_dsn }}"
+    delegate_to: "{{ my_proxy }}"
+    environment:
+      PGPASSWORD: "{{ pgbouncer_password }}"
+    when:
+      is_proxied
+
+  # Now we put the backend into maint mode (probably unnecessary because
+  # we know that pgbouncer has migrated connections away, and haproxy
+  # won't direct any new traffic to it anyway).
+
+  - name: Put backend {{ inventory_hostname }} in maint mode
+    shell: >
+      echo "set server be/{{ inventory_hostname }} state maint" | socat stdio {{ haproxy_stats_socket }}
+    args:
+      executable: /bin/bash
+    delegate_to: "{{ my_proxy }}"
+    when: is_proxied
+
+  # Once the server is guaranteed to have no active traffic, we can wait
+  # to ensure that any writes it originated have finished replicating to
+  # the other backends.
+
+  - name: Wait for replication to complete
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      query: >
+        select bdr.wait_slot_confirm_lsn(NULL, NULL)
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when:
+      is_proxied
+
+  # Now we can stop/update/restart Postgres safely.
+
+  - name: Update Postgres
+    block:
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: stopped
+    - include_role: name=postgres/update
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: started
     when: >
       'postgres' in role
+
+  # Once that's done, we can inform haproxy that the backend is once
+  # again ready to accept connections.
+
+  - name: Declare backend {{ inventory_hostname }} as ready
+    shell: >
+      echo "set server be/{{ inventory_hostname }} state ready" | socat stdio {{ haproxy_stats_socket }}
+    args:
+      executable: /bin/bash
+    delegate_to: "{{ my_proxy }}"
+    when: is_proxied

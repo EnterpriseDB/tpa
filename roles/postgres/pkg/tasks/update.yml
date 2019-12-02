@@ -3,15 +3,18 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_tasks: list-packages.yml
-  vars:
-    postgres_package_version: null
-    pglogical_package_version: null
-    bdr_package_version: null
   tags: always
 
 - name: Install latest Postgres packages
   package:
     name: "{{ all_postgres_packages }}"
-    state: latest
+    state: "{{ _state }}"
+  vars:
+    _state: "{{
+      (postgres_package_version is not defined and
+       pglogical_package_version is not defined and
+       bdr_package_version is not defined)
+      |ternary('latest', 'present')
+    }}"
   notify:
     - Note Postgres restart required
