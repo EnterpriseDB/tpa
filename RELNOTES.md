@@ -2,6 +2,36 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v9.0 (2019-12-03)
+
+### Notable changes
+
+- Support rolling update procedure for BDR-Always-ON
+
+- Add new postgres-pre-update and postgres-post-update hooks
+
+### Minor changes
+
+- Allow custom ``haproxy_port`` to be set
+
+- Allow custom ``archive_command`` to be set
+
+- Remove file descriptor limit for pgbouncer
+
+- Disable repmgrd by default on BDR instances
+
+### Bugfixes
+
+- Remove an unnecessary postgres restart after first deploy
+
+- Disable pgdgNN repository entries in yum.repos.d that do not
+  correspond to the desired postgres_version
+
+- Install postgresql client libraries before installing Barman and
+  pgbouncer (to avoid version mismatches)
+
+- Fix quoting in repmgr.conf for repmgr v5
+
 ## v8.4 (2019-09-23)
 
 ### Minor changes
