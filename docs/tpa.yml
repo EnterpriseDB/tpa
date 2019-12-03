@@ -31,6 +31,7 @@ nav:
   - Customisations:
     - Cluster configuration: configure-cluster.md
     - Instance configuration: configure-instance.md
+    - Deployment hooks: tpaexec-hooks.md
   - Cluster management:
     - Rehydration: tpaexec-rehydrate.md
     - Switchover: tpaexec-switchover.md
