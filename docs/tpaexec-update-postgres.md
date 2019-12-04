@@ -64,12 +64,10 @@ If you did select specific versions, for example by using any of the
 nothing because the installed packages already satisfy the requested
 versions.
 
-In this case, you must edit config.yml and remove or change the settings
-to reflect what you want to update to (a specific version, or the latest
-available if no versions are explicitly requested), and rerun
-``tpaexec provision`` before running ``tpaexec update-postgres``.
-
-As a shortcut, you can specify the desired versions on the command line:
+In this case, you must edit config.yml, remove the version settings, and
+re-run ``tpaexec provision``. The update will then install the latest
+available packages. You can still update to a specific version by
+specifying versions on the command line as shown below:
 
 ```
 $ tpaexec update-postgres ~/clusters/speedy -vv         \
