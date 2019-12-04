@@ -31,9 +31,11 @@ nav:
   - Customisations:
     - Cluster configuration: configure-cluster.md
     - Instance configuration: configure-instance.md
+    - Deployment hooks: tpaexec-hooks.md
   - Cluster management:
-    - Rehydration: tpaexec-rehydrate.md
+    - Rolling updates: tpaexec-update-postgres.md
     - Switchover: tpaexec-switchover.md
+    - Rehydration: tpaexec-rehydrate.md
   - Miscellaneous:
     - PuTTY configuration: misc-configure-putty.md
     - Troubleshooting: misc-troubleshooting.md
