@@ -292,3 +292,14 @@
       executable: /bin/bash
     delegate_to: "{{ my_proxy }}"
     when: is_proxied
+
+  # Ansible won't stop execution if a host becomes unreachable, despite
+  # the any_errors_fatal setting. We must detect that situation and fail
+  # so that we don't proceed to the next host if something went wrong in
+  # upgrading this one.
+
+  - name: Fail if any host became unreachable
+    assert:
+      msg: "One or more hosts are no longer reachable"
+      that:
+        ansible_play_hosts == ansible_play_hosts_all
