@@ -133,3 +133,4 @@ UserParameter=pgsql.table_bloat[*],/bin/echo -n '{"data":['; for dbname in $(psq
 
 # Freeze Age
 UserParameter=pgsql.freeze_age[*],/bin/echo -n '{"data":['; for row in $(psql -qAtX $1 -c "SELECT datname, txns, ROUND(100*(txns/freez::float)) AS perc FROM (SELECT datname, foo.freez::int, age(datfrozenxid) AS txns FROM pg_database d JOIN (SELECT setting AS freez FROM pg_settings WHERE name = 'autovacuum_freeze_max_age') AS foo ON (true) WHERE d.datallowconn ) AS foo2;" ); do /bin/echo $row | awk -F\| '{printf("{\"DBNAME\":\"%s\", \"TXNS\":\"%d\", \"TXNS_PERCENT\":\"%d\"},", $$1, $$2, $$3)}'; done | sed -e 's:\},$:\}:'; /bin/echo -n ']}'
+{% endraw %}
