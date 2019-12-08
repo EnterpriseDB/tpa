@@ -53,4 +53,5 @@ FROM (
   WHERE cc.relkind = 'r'
 ) AS sml
 WHERE relpages >  otta 
-  AND ( 100 * ( sml.relpages - otta ) / sml.relpages )::numeric > :minBloat;
+  AND ( 100 * ( sml.relpages - otta ) / sml.relpages )::numeric > :minBloat
+  AND NOT pg_is_in_recovery();
