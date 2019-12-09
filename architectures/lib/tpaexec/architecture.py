@@ -210,6 +210,8 @@ class Architecture(object):
                 errors.append("doesn't know how to install '%s' from source" % name)
         if 'postgres' in sources and '2ndqpostgres' in sources:
             errors.append("cannot install both Postgres and 2ndQPostgres")
+        if 'bdr3' in sources and 'pglogical3' not in sources:
+            errors.append("cannot build bdr3 without pglogical3")
         try:
             if sources.index('pglogical3') > sources.index('bdr3'):
                 errors.append("should build pglogical3 before bdr3")
