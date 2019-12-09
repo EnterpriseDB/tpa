@@ -46,7 +46,7 @@ version() {
     else
         VERSION=$(cd $TPA_DIR && git describe)
     fi
-    echo "# TPA $VERSION"
+    echo "# TPAexec $VERSION"
 }
 
 _python_version() {
