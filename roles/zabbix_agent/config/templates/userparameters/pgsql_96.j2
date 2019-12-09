@@ -20,8 +20,6 @@ UserParameter=pgsql.db.discovery[*],/bin/echo -n '{"data":['; for db in $(psql -
 UserParameter=pgsql.table.discovery[*],/bin/echo -n '{"data":['; for db in $(psql -qAtX $1 -c "select datname from pg_database where not datistemplate and datallowconn and datname!='postgres'"); do   for table in $(psql -qAtX -F. $1 -d $db -c "select n.nspname,c.relname from pg_catalog.pg_class c left join pg_catalog.pg_namespace n on n.oid = c.relnamespace where c.relkind in ('r','s','') and n.nspname not in ('^pg_toast','information_schema','pg_catalog')"); do /bin/echo -n "{\"{#DBNAME}\": \"$db\", \"{#TABLENAME}\": \"$table\"},";  done; done | sed -e 's:\},$:\}:'; /bin/echo -n ']}'
 UserParameter=pgsql.streaming.discovery[*],/bin/echo -n '{"data":['; for replica in $(psql -qAtX $1 -c "select client_addr from pg_stat_replication"); do /bin/echo -n "{\"{#HOTSTANDBY}\": \"$replica\"},"; done |sed -e 's:,$::'; /bin/echo -n ']}'
 
-UserParameter=pgsql.db.autovac_freeze[*],psql -qAtX $1 -c "SELECT txns, ROUND(100*(txns/freez::float)) AS perc FROM (SELECT foo.freez::int, age(datfrozenxid) AS txns FROM pg_database d JOIN (SELECT setting AS freez FROM pg_settings WHERE name = 'autovacuum_freeze_max_age') AS foo ON (true) WHERE d.datallowconn AND datname = '$2') AS foo2;" | awk -F\| '{printf("{\"{#DBNAME}\":\"$2\", \"TXNS\":\"%d\", \"TXNS_PERCENT\":\"%d\"}", $$1, $$2)}'
-
 # GENERAL INFORMATION #
 UserParameter=pgsql.ping[*],/bin/echo -e "\\\timing \n select 1" | psql -qAtX $1 | tail -n 1 |cut -d' ' -f2
 UserParameter=pgsql.uptime[*],psql -qAtX $1 -c "select date_part('epoch', now() - pg_postmaster_start_time())::int"
@@ -61,7 +59,7 @@ UserParameter=pgsql.transactions.idle[*],psql -qAtX $1 -c "select coalesce(extra
 UserParameter=pgsql.transactions.active[*],psql -qAtX $1 -c "select coalesce(extract(epoch from max(age(now(), query_start))), 0) from pg_stat_activity where state <> 'idle in transaction' and state <> 'idle'"
 UserParameter=pgsql.transactions.waiting[*],psql -qAtX $1 -c "select coalesce(extract(epoch from max(age(now(), query_start))), 0) from pg_stat_activity WHERE state != 'idle' AND wait_event IS NOT NULL"
 UserParameter=pgsql.transactions.prepared[*],psql -qAtX $1 -c "select coalesce(extract(epoch from max(age(now(), prepared))), 0) from pg_prepared_xacts"
-UserParameter=pgsql.pgstatstatements.avg_query_time[*],psql -qAtX $1 -c "SELECT sum(total_time) AS total_time, sum(calls) AS total_calls FROM pg_stat_statements;" | awk -F\| '{printf("{\"TOTAL_TIME\":\"%d\", \"TOTAL_CALLS\":\"%d\"}", $$1, $$2)}"
+UserParameter=pgsql.pgstatstatements.avg_query_time[*],psql -qAtX $1 -c "SELECT sum(total_time) AS total_time, sum(calls) AS total_calls FROM pg_stat_statements;" | awk -F\| '{printf("{\"TOTAL_TIME\":\"%d\", \"TOTAL_CALLS\":\"%d\"}", $$1, $$2)}'
 
 # SUMMARY DATABASE STATS #
 UserParameter=pgsql.dbstat.sum.numbackends[*],psql -qAtX $1 -c "select sum(numbackends) from pg_stat_database"
@@ -131,7 +129,10 @@ UserParameter=pgsql.streaming.state[*],psql -qAtX $1 -c "select pg_is_in_recover
 UserParameter=pgsql.streaming.lag.bytes[*],psql -qAtX $1 -c "select greatest(0,pg_xlog_location_diff(pg_current_xlog_location(), replay_location)) from pg_stat_replication where client_addr = '$2'"
 UserParameter=pgsql.streaming.lag.seconds[*],psql -qAtX -h $2 $1 -c "SELECT CASE WHEN pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())::INTEGER END AS replication_lag;"
 
-# Bloat: Top 10 Tables
-UserParameter=pgsql.table.bloat.discovery[*],/bin/echo -n '{"data":['; for table in $(psql -qAtX $1 -d $2 -c "SELECT nspname || '.' || relname FROM pg_class c LEFT JOIN pg_namespace n ON n.oid = c.relnamespace LEFT JOIN LATERAL pgstattuple_approx(nspname || '.' || relname ) b ON true WHERE relkind IN ( 'r' ) AND ( approx_free_space >= $3 AND approx_free_percent >= $4 ) AND NOT pg_is_in_recovery();" ); do /bin/echo -n "{\"{#DBNAME}\": \"$2\", \"{#TABLENAME}\": \"$table\"},"; done | sed -e 's:\},$:\}:'; /bin/echo -n ']}'
-UserParameter=pgsql.table.bloat.values[*],psql -qAtX $1 -d $2 -c "SELECT * FROM pgstattuple_approx('$3');" | awk -F\| '{printf("{\"{#TABLENAME}\":\"$3\", \"APPROX_FREE_PERCENT\":\"%.2f\", \"APPROX_DEAD_TUPLE_PERCENT\":\"%.2f\", \"TABLE_LEN\":\"%d\", \"APPROX_FREE_SPACE\":\"%d\", \"SCANNED_PERCENT\":\"%.2f\"}",$$10, $$8, $$1, $$9, $$2)}'
+# Table Bloat
+UserParameter=pgsql.table_bloat[*],/bin/echo -n '{"data":['; for dbname in $(psql -qAtX -h 127.0.0.1 -U postgres -c "SELECT datname FROM pg_database WHERE datname NOT IN ( 'template0', 'template1' )" ); do for row in $(psql -qAtX $1 -d $dbname -f /etc/zabbix/scripts/pgsql/table_bloat.sql --set minBloat=$2 ); do /bin/echo $row | awk -F\| '{printf("{\"DBNAME\":\"%s\", \"TABLENAME\":\"%s\", \"BLOAT_PERCENT\":\"%d\", \"BLOAT_BYTES\":\"%d\"},", $$1, $$2, $$3, $$4)}'; done; done | sed -e 's:\},$:\}:'; /bin/echo -n ']}'
+
+# Freeze Age
+UserParameter=pgsql.freeze_age[*],/bin/echo -n '{"data":['; for row in $(psql -qAtX $1 -c "SELECT datname, txns, ROUND(100*(txns/freez::float)) AS perc FROM (SELECT datname, foo.freez::int, age(datfrozenxid) AS txns FROM pg_database d JOIN (SELECT setting AS freez FROM pg_settings WHERE name = 'autovacuum_freeze_max_age') AS foo ON (true) WHERE d.datallowconn ) AS foo2;" ); do /bin/echo $row | awk -F\| '{printf("{\"DBNAME\":\"%s\", \"TXNS\":\"%d\", \"TXNS_PERCENT\":\"%d\"},", $$1, $$2, $$3)}'; done | sed -e 's:\},$:\}:'; /bin/echo -n ']}'
 {% endraw %}
+
