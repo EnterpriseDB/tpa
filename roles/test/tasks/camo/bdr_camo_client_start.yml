@@ -14,7 +14,7 @@
 
 - set_fact:
     bdr_dsn: "{{ ping }},{{ pong }}"
-    haproxy_dsn: "{{ haproxy_node|default('') }} -p {{ haproxy_port|default(6432) }}"
+    haproxy_dsn: "{{ haproxy_node|default('') }} -p {{ pgbouncer_port|default(6432) }}"
 
 - set_fact:
     bdr_camo_client_host_arg: "{{ via_haproxy|ternary(haproxy_dsn,bdr_dsn) }}"
