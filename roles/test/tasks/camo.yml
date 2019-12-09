@@ -136,6 +136,7 @@
           - none
           - partition
           - powerfail
+          - postgres-down
         failures: "{{
           destroy_cluster|default(False)|ternary(destructive_failures, nondestructive_failures)
         }}"

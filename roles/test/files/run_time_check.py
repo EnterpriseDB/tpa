@@ -18,7 +18,7 @@ conn_partner=0
 # datetime object containing current date and time
 now = datetime.now()
 csvRow = [now, expected_xacts]
-emptyRow = ["",  "", ""]
+emptyRow = ["",  "", "",""]
 all_committed = False
 myquery = "SELECT 1 FROM pg_catalog.pg_class c INNER JOIN pg_catalog.pg_namespace n ON (c.relnamespace = n.oid) WHERE relname ='{}'".format(test_table)
 if os.path.exists(csvfile):
@@ -31,7 +31,7 @@ quoting=csv.QUOTE_NONE,
 skipinitialspace=True)
 with open(csvfile, "a") as fp:
     wr = csv.writer(fp, dialect='mydialect')
-    wr.writerow(["timestamp","expected_xacts","origin","origin_xact","origin_prepared_xact","partner","partner_xact","partner_prepared_xact"])   
+    wr.writerow(["timestamp","expected_xacts","origin","origin_xact","origin_prepared_xact","partner_status","partner","partner_xact","partner_prepared_xact","partner_status"])
 fp.close()
 
 # Generate a csv report of statistics collected
@@ -50,7 +50,9 @@ def get_stats(conn):
         xacts = cur.fetchone()[0]
         cur.execute('SELECT COUNT(*) FROM pg_prepared_xacts')
         prepared_xacts = cur.fetchone()[0]
-        newRow = [node_name, xacts, prepared_xacts]
+        cur.execute('SELECT bdr.is_camo_partner_connected() and bdr.is_camo_partner_ready()')
+        partner_status = cur.fetchone()[0]
+        newRow = [node_name, xacts, prepared_xacts,partner_status]
         csvRow.extend(newRow)
         #closing database connnection.
         cur.close()
@@ -124,7 +126,7 @@ while test_valid:
     cur_local.execute(myquery)
     table_exists=cur_local.fetchone()
     if table_exists and not all_committed:
-	if csvRow[1] == csvRow[3] == csvRow[6]: 
+	if long(csvRow[1]) == csvRow[3] == csvRow[7]:
 	    all_committed = True
         test_valid = 1
         time.sleep(3)
