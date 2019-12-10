@@ -1,0 +1,15 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- block:
+  - name: Drop bdr_camo_client test table
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      query: DROP TABLE camo_test
+    become_user: "{{ postgres_user }}"
+    become: yes
+  vars:
+    ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+  when: >
+    inventory_hostname == tester_instance

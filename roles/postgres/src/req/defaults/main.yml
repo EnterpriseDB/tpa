@@ -12,10 +12,19 @@ requirements:
     - libssl-dev
     - build-essential
     - libipc-run-perl
+    - libselinux1-dev
+    - libxslt1-dev
+    - libxml2-dev
+    - libedit-dev
+    - libpam0g-dev
+    - krb5-multidev
   RedHat:
     - readline-devel
     - zlib-devel
     - openssl-devel
+    - pam-devel
+    - libxml2-devel
+    - libxslt-devel
     - perl-Test-Simple
     - perl-App-cpanminus
     - "@Development tools"

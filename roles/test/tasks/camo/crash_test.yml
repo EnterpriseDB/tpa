@@ -1,0 +1,31 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- include_tasks: camo/bdr_camo_client_start.yml
+
+- set_fact:
+    active_time: "{{ partition_timeout }}"
+  when: failure == 'partition'
+- set_fact:
+    active_time: "{{ powerfail_timeout }}"
+  when: failure == 'powerfail'
+- set_fact:
+    crash: "{{ crash|default('partner') }}"
+- set_fact:
+    crash_node: "{{ ping }}"
+  when: crash == 'origin'
+- set_fact:
+    crash_node: "{{ pong }}"
+  when: crash == 'partner'
+
+- name: Cause failure {{ failure }} on CAMO {{crash}} {{ crash_node }}
+  include_role: name=test tasks_from="failures/{{ failure }}.yml"
+  when: >
+    inventory_hostname == crash_node
+
+- include_tasks: camo/bdr_camo_client_finish.yml
+
+- include_tasks: consistency_checks.yml
+
+- include_tasks: camo/bdr_camo_client_teardown.yml
