@@ -33,7 +33,7 @@
     all_camo_groups is not empty
 
 - set_fact:
-     via_haproxy: "{{ via_haproxy|default(False) }}"
+     via_haproxy: "{{ via_haproxy|default(True) }}"
 
 - block:
   - name: Check test validity
@@ -52,16 +52,32 @@
     with_items: "{{ groups['role_haproxy'] }}"
 
   - set_fact:
-      pair:
-       - "{{ item['backends'][0] }}"
-       - "{{ item['backends'][1] }}"
       haproxy_node: "{{ item['name'] }}"
+      pgbouncer_port: "{{ pgbouncer_port|default('6432') }}"
     with_items:  "{{ haproxy_backend_list }}"
     when: hostvars[item.backends[0]]['bdr_node_camo_partner'] == item.backends[1] 
 
   - fail:
      msg: "Test cluster is unsupported. Requires haproxy backends to be camo pairs"
     when: haproxy_node is undefined
+  
+  - name: get haproxy haproxy_backend
+    postgresql_query:
+      conninfo: "host={{ haproxy_node }} port={{ pgbouncer_port }}  dbname={{bdr_database}} user={{postgres_user}}"
+      queries:
+        - text: select interface_name from bdr.local_node_summary;
+    register: interface
+    become_user: "{{ postgres_user }}"
+    become: yes
+  - debug:
+      var: interface.interface_name
+
+  - set_fact:
+      pair:
+       - "{{ interface.interface_name }}"
+       - "{{ hostvars[interface.interface_name]['bdr_node_camo_partner'] }}"
+  - debug:
+      var: pair
   when: via_haproxy
 
 - name: Check if bdr_camo_client is available
@@ -75,6 +91,11 @@
     recurse: no
     patterns: bdr_camo_client
   register: client
+  when:
+    inventory_hostname in possible_testers
+
+- set_fact: 
+    bdr_camo_client_path: "{{ client.files[0]['path'] }}"
   when:
     inventory_hostname in possible_testers
 
@@ -100,14 +121,14 @@
   when:
     hostvars[item].client.files|default([]) is not empty
 
-- name: Run bdr_camo_client tests
+- name: Run  tests
   block:
-    - include_tasks: camo/bdr_camo_client.yml
+    - name: Run bdr_camo_client crash tests
+      include_tasks: camo/crash_test.yml
       with_items: "{{ failures }}"
       loop_control:
         loop_var: failure
       vars:
-        bdr_camo_client_path: "{{ (hostvars[item].client.files|first).path }}"
         tester_instance: "{{ testers_with_client|first }}"
         nondestructive_failures:
           - none
@@ -115,12 +136,28 @@
           - none
           - partition
           - powerfail
+          - postgres-down
         failures: "{{
           destroy_cluster|default(False)|ternary(destructive_failures, nondestructive_failures)
         }}"
       when:
-        inventory_hostname in groups[bdr_node_group] or
-        inventory_hostname == tester_instance
+        ( inventory_hostname in groups[bdr_node_group] or inventory_hostname == tester_instance )
+         and 'crash_test' in ansible_run_tags
+    - name: Run bdr rolling upgrade tests
+      include_tasks: camo/upgrade_test.yml
+      vars:
+        tester_instance: "{{ testers_with_client|first }}"
+        failure: "upgrade"
+        tpa_2q_repositories: "{{ update_from_repo }}"
+        pglogical_package_version: "{{ pgl_new_version }}"
+        postgres_package_version: "{{ pg_new_version}}"
+        bdr_package_version: "{{ bdr_new_version }}"
+        extra_postgres_packages:
+          common:
+          - "postgresql11-bdr-test-{{ bdr_new_version }}"
+      when:
+        ( inventory_hostname in groups[bdr_node_group] or inventory_hostname == tester_instance )
+         and 'upgrade_test' in ansible_run_tags
   when:
     all_camo_groups is not empty and
     testers_with_client|default([]) is not empty

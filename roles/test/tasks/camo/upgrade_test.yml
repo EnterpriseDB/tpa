@@ -1,0 +1,88 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- include_tasks: camo/bdr_camo_client_start.yml
+
+- name: Upgrade host ping of the CAMO pair
+  block:
+  - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
+
+  - include_role: name=postgres/pkg tasks_from=list-packages.yml
+
+  - debug:
+      msg: "{{ all_postgres_packages }}"
+
+  - name: Install latest Postgres packages
+    package:
+      name: "{{ all_postgres_packages }}"
+      state: latest
+
+  - include_role: name=postgres/restart
+    vars:
+      postgres_service_end_state: restarted
+    become: yes
+
+  - name: Wait for the CAMO partner to be connected and ready after restart
+    postgresql_query:
+      conninfo: "{{ ping_conninfo }}"
+      queries:
+      - text: >
+          SELECT bdr.is_camo_partner_connected() AS connected, bdr.is_camo_partner_ready() AS ready
+    register: status
+    until: "status.results[0].connected and status.results[0].ready"
+    retries: 180
+    become_user: "{{ postgres_user }}"
+    become: yes
+    vars:
+      ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+  when: inventory_hostname == ping
+
+- name: Upgrade host pong of the CAMO pair
+  block:
+  - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
+
+  - include_role: name=postgres/pkg tasks_from=list-packages.yml
+
+  - debug:
+      msg: "{{ all_postgres_packages }}"
+
+  - name: Install latest Postgres packages
+    package:
+      name: "{{ all_postgres_packages }}"
+      state: latest
+
+  - include_role: name=postgres/restart
+    vars:
+      postgres_service_end_state: restarted
+    become: yes
+  when: inventory_hostname == pong
+
+- name: Upgrade all other nodes
+  block:
+  - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
+
+  - include_role: name=postgres/pkg tasks_from=list-packages.yml
+
+  - debug:
+      msg: "{{ all_postgres_packages }}"
+
+  - name: Install latest Postgres packages
+    package:
+      name: "{{ all_postgres_packages }}"
+      state: latest
+
+  - include_role: name=postgres/restart
+    vars:
+      postgres_service_end_state: restarted
+    become: yes
+    with_items:
+     - "{{ groups[bdr_node_group] }}"
+    when: inventory_hostname == item and "upgrade" in ansible_run_tags
+  when: inventory_hostname != ping and inventory_hostname != pong
+
+- include_tasks: camo/bdr_camo_client_finish.yml
+
+- include_tasks: consistency_checks.yml
+
+- include_tasks: camo/bdr_camo_client_teardown.yml
