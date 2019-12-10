@@ -1,6 +1,6 @@
 SELECT
   current_database(), schemaname || '.' || tablename AS full_table_name, 
-  ROUND(CASE WHEN otta=0 OR sml.relpages=0 OR sml.relpages=otta 
+  ROUND(CASE WHEN otta=0 OR sml.relpages=0 OR sml.relpages=otta OR sml.relpages<otta
 	     THEN 0.0 
              ELSE ( 100 * ( sml.relpages - otta ) / sml.relpages )::numeric 
          END,1) AS perc_table_bloat,
@@ -52,6 +52,4 @@ FROM (
   ON cc.relname = rs.relname AND nn.nspname = rs.nspname
   WHERE cc.relkind = 'r'
 ) AS sml
-WHERE relpages >  otta 
-  AND ( 100 * ( sml.relpages - otta ) / sml.relpages )::numeric > :minBloat
-  AND NOT pg_is_in_recovery();
+WHERE NOT pg_is_in_recovery();
