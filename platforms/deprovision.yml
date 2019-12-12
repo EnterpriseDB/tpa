@@ -4,6 +4,7 @@
 
 - name: Deprovision cluster
   hosts: localhost
+  strategy: linear
   tasks:
   - import_tasks: load-config.yml
     tags: always
