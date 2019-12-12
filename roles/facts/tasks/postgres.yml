@@ -134,3 +134,26 @@
     max_prepared_transactions: 16
   when: >
     'bdr' in role and max_prepared_transactions is not defined
+
+# Determine the upstream primary for this host, that is, the primary at
+# the root of the cascading replication setup. This may be the instance
+# itself, if it's a primary.
+
+- name: Record name of the upstream primary
+  set_fact:
+    upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"
+  when: >
+    'postgres' in role
+
+# Find any backed-up instance that is the upstream_primary, or a replica
+# thereof. We would prefer to use a backup server in the same region,
+# but we'll take whatever we can find.
+
+- name: Record name of any upstream or sibling with backups
+  set_fact:
+    upstream_backedup: "{{
+      groups[cluster_tag]
+      |instance_with_backup_of(upstream_primary, inventory_hostname, hostvars)
+    }}"
+  when: >
+    'postgres' in role
