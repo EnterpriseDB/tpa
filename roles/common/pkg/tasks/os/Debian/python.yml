@@ -18,11 +18,11 @@
 
 - name: Install backports.ssl_match_hostname
   raw: >
-    if [[ $(python -c 'import sys; print("old" if sys.version_info < (2,7,9) else "ok")') != "ok" ]];
+    if [ $(python -c 'import sys; print("old" if sys.version_info < (2,7,9) else "ok")') != "ok" ];
     then apt-get -q -y install python-backports.ssl-match-hostname;
     fi
   args:
-    executable: /bin/bash
+    executable: /bin/sh
   register: backport_install
   changed_when: >
     backport_install is successful
