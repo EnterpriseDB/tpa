@@ -9,6 +9,7 @@
 - name: Basic initialisation and fact discovery
   any_errors_fatal: True
   max_fail_percentage: 0
+  strategy: linear
   hosts: all
   tasks:
   - include_role: name=init
