@@ -33,9 +33,6 @@
     name: sys/sysctl
     apply:
       tags: [sys, sysctl]
-  vars:
-    sysctl_values:
-      net.ipv4.ip_forward: 1
   tags: always
 
 - include_role:
