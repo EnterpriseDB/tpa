@@ -68,7 +68,6 @@ default_packages:
     - rsync
     - mdadm
     - dstat
-    - python-virtualenv
     - openssh-server
     - rsyslog
     - socat
@@ -79,17 +78,20 @@ default_packages:
     - dbus
     - gnutls-bin
     - openssh-client
+    - python-virtualenv
   RedHat:
     - python-devel
     - perf
     - gnutls-utils
     - policycoreutils-python
+    - python2-virtualenv
     - openssh
   Ubuntu:
     - python-dev
     - linux-tools-generic
     - gnutls-bin
     - openssh-client
+    - python-virtualenv
 
 optional_packages: {}
 default_optional_packages:
