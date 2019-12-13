@@ -2,25 +2,9 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# We set "camo_node_group" (like "bdr_node_group") based on the sorted
-# hostnames of CAMO partners, and create inventory groups based on the
-# value, such that partners a and b will be in a group named camo_a_b.
-
-- set_fact:
-    camo_node_group: "camo_{{ [inventory_hostname,bdr_node_camo_partner]|sort|join('_') }}"
-  when: bdr_node_camo_partner is defined
-
-- name: Create group(s) based on the value of camo_node_group
-  group_by:
-    key: "{{ camo_node_group }}"
-  when: camo_node_group is defined
-
 # For now, we want to run tests only against one CAMO pair from another
 # BDR instance (we want a BDR instance so that it has bdr_camo_client
 # installed; other than that, any instance would do).
-
-- set_fact:
-    all_camo_groups: "{{ groups.keys()|select('startswith', 'camo_')|list }}"
 
 - set_fact:
     possible_testers: "{{ groups|members_of('role_bdr', not_in=all_camo_groups)|list }}"
