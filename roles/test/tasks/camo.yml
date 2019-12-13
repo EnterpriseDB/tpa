@@ -55,7 +55,9 @@
       haproxy_node: "{{ item['name'] }}"
       pgbouncer_port: "{{ pgbouncer_port|default('6432') }}"
     with_items: "{{ haproxy_backend_list }}"
-    when: hostvars[item.backends[0]]['bdr_node_camo_partner'] == item.backends[1]
+    when:
+      hostvars[item.backends[0]]['bdr_node_camo_partner'] is defined and
+      hostvars[item.backends[0]]['bdr_node_camo_partner'] == item.backends[1]
 
   - fail:
       msg: "Test cluster is unsupported. Requires haproxy backends to be camo pairs"
