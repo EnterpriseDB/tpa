@@ -100,6 +100,7 @@
     bdr_camo_client_path: "{{ client.files[0]['path'] }}"
   when:
     inventory_hostname in possible_testers
+    and client.files is not empty
 
 - name: Exclude possible_testers without bdr_camo_client installed
   set_fact:
