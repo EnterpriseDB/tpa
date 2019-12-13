@@ -32,7 +32,3 @@
   delay: 10
   become: no
   delegate_to: localhost
-
-- name: Set availability zone as fact
-  set_fact:
-    ec2_availability_zone: "{{ i.availability_zone }}"

@@ -2,6 +2,10 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+# We don't need to parse the instance metadata at the moment, but if we
+# ever do, there's an example in the git history of how to go about it
+# (look for platforms/aws/tasks/metadata.yml).
+
 - include_tasks: hostvars.yml
   tags: always
 - include_tasks: wait.yml
