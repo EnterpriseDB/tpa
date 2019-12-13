@@ -66,14 +66,14 @@
   - name: Check pgbouncer configuration and status
     include_role:
       name: test
-      tasks_from: pgbouncer.yml
+      tasks_from: pgbouncer/basic.yml
     when: >
       'pgbouncer' in role
 
   - name: Check haproxy configuration and status
     include_role:
       name: test
-      tasks_from: haproxy.yml
+      tasks_from: haproxy/basic.yml
     when: >
       'haproxy' in role
 
