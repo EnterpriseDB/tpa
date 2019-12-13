@@ -3,6 +3,8 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  vars:
+    wait_for_instances: yes
   tags: always
 
 - name: Set up TPA image nodes

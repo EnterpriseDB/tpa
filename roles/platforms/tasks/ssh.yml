@@ -17,5 +17,5 @@
 
 - name: Wait for ssh to be available
   wait_for_ssh:
-  when: platform != 'lxd'
-  tags: wait_for
+  when:
+    wait_for_instances|default(False)

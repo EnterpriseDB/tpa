@@ -8,21 +8,13 @@
 
 - include_tasks: hostvars.yml
   tags: always
+
 - include_tasks: wait.yml
+  when:
+    wait_for_instances|default(False)
   tags: always
 
-- name: Retrieve user-data failure log entries
-  raw: >
-    test -s {{ faillog }} && cat {{ faillog }}
-  register: failures
-  failed_when: False
-  changed_when: >
-    'stdout' in failures and failures.stdout.strip() != ''
-  vars:
-    faillog: /var/log/tpa-firstboot-failures.log
-
-- name: Fail if user-data execution failed
-  fail:
-    msg: "{{ failures.stdout }}"
-  when: >
-    'stdout' in failures and failures.stdout.strip() != ''
+- include_tasks: firstboot.yml
+  when:
+    wait_for_instances|default(False)
+  tags: always

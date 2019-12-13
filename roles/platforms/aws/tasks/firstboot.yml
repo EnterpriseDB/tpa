@@ -1,0 +1,19 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Retrieve user-data failure log entries
+  raw: >
+    test -s {{ faillog }} && cat {{ faillog }}
+  register: failures
+  failed_when: False
+  changed_when: >
+    'stdout' in failures and failures.stdout.strip() != ''
+  vars:
+    faillog: /var/log/tpa-firstboot-failures.log
+
+- name: Fail if user-data execution failed
+  fail:
+    msg: "{{ failures.stdout }}"
+  when: >
+    'stdout' in failures and failures.stdout.strip() != ''
