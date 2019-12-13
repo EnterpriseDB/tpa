@@ -33,7 +33,7 @@
     all_camo_groups is not empty
 
 - set_fact:
-     via_haproxy: "{{ via_haproxy|default(True) }}"
+     via_haproxy: "{{ via_haproxy|default(False) }}"
 
 - block:
   - name: Check test validity
