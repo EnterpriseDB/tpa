@@ -54,13 +54,13 @@
   - set_fact:
       haproxy_node: "{{ item['name'] }}"
       pgbouncer_port: "{{ pgbouncer_port|default('6432') }}"
-    with_items:  "{{ haproxy_backend_list }}"
-    when: hostvars[item.backends[0]]['bdr_node_camo_partner'] == item.backends[1] 
+    with_items: "{{ haproxy_backend_list }}"
+    when: hostvars[item.backends[0]]['bdr_node_camo_partner'] == item.backends[1]
 
   - fail:
-     msg: "Test cluster is unsupported. Requires haproxy backends to be camo pairs"
+      msg: "Test cluster is unsupported. Requires haproxy backends to be camo pairs"
     when: haproxy_node is undefined
-  
+ 
   - name: get haproxy haproxy_backend
     postgresql_query:
       conninfo: "host={{ haproxy_node }} port={{ pgbouncer_port }}  dbname={{bdr_database}} user={{postgres_user}}"
@@ -94,7 +94,7 @@
   when:
     inventory_hostname in possible_testers
 
-- set_fact: 
+- set_fact:
     bdr_camo_client_path: "{{ client.files[0]['path'] }}"
   when:
     inventory_hostname in possible_testers
@@ -121,7 +121,7 @@
   when:
     hostvars[item].client.files|default([]) is not empty
 
-- name: Run  tests
+- name: Run tests
   block:
     - name: Run bdr_camo_client crash tests
       include_tasks: camo/crash_test.yml
