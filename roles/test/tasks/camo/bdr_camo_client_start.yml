@@ -58,6 +58,9 @@
             CREATE TABLE camo_test
             (key bigint NOT NULL
             , attempt_no bigint NOT NULL
+            , ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            , node text
+            , xact_id bigint
             , PRIMARY KEY (key, attempt_no))
     become_user: "{{ postgres_user }}"
     become: yes
@@ -78,7 +81,7 @@
     shell: >
       {{ bdr_camo_client_path }}
       -h {{ bdr_camo_client_host_arg }}
-      -c 'INSERT INTO camo_test VALUES ($1, $2);'
+      -c 'INSERT INTO camo_test(key,attempt_no,node,xact_id) VALUES ($1, $2, (select node_name from bdr.local_node_summary), (select txid_current()));'
       -i {{ camo_transactions }} -j {{ camo_clients }}
       -s {{ scope }}
       {{ bdr_camo_client_args }}
