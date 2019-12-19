@@ -15,22 +15,23 @@
 # hostnames of CAMO partners, and create inventory groups based on the
 # value, such that partners a and b will be in a group named camo_a_b.
 
-- set_fact:
-    camo_node_group: "camo_{{ [inventory_hostname,bdr_node_camo_partner]|sort|join('_') }}"
-  when: bdr_node_camo_partner is defined
-
-- name: Create group(s) based on the value of camo_node_group
-  group_by:
-    key: "{{ camo_node_group }}"
-  when: camo_node_group is defined
-
-- set_fact:
-    all_camo_groups: "{{ groups.keys()|select('startswith', 'camo_')|list }}"
-
-- include_tasks:
-    file: camo.yml
-    apply:
-       tags: camo
-  when:
-    all_camo_groups is not empty
+- block:
+  - set_fact:
+      camo_node_group: "camo_{{ [inventory_hostname,bdr_node_camo_partner]|sort|join('_') }}"
+    when: bdr_node_camo_partner is defined
+  
+  - name: Create group(s) based on the value of camo_node_group
+    group_by:
+      key: "{{ camo_node_group }}"
+    when: camo_node_group is defined
+  
+  - set_fact:
+      all_camo_groups: "{{ groups.keys()|select('startswith', 'camo_')|list }}"
+  
+  - include_tasks:
+      file: camo.yml
+      apply:
+         tags: camo
+    when:
+      all_camo_groups is not empty
   tags: camo
