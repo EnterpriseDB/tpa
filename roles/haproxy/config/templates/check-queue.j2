@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+from __future__ import absolute_import, division, print_function
+
+import os, sys, time
+import psycopg2
+
+check_query = '''
+  SELECT
+    (SELECT interface_name FROM bdr.local_node_summary) AS this_node,
+    bdr.get_configured_camo_partner_of() AS source_node,
+    (bdr.get_node_sub_receive_lsn(bdr.get_configured_camo_partner_of()) -
+     bdr.get_node_sub_apply_lsn(bdr.get_configured_camo_partner_of())) AS apply_queue_size,
+    (bdr.get_node_sub_receive_lsn(bdr.get_configured_camo_partner_of()) >
+     bdr.get_node_sub_apply_lsn(bdr.get_configured_camo_partner_of())) AS apply_queue_exists
+'''
+
+def main():
+    _, _, ip_addr, port = sys.argv[1:5]
+
+    os.environ['PGPASSFILE'] = "{{ postgres_home }}/.pgpass"
+    conninfo = 'host=%s port=%s dbname={{ bdr_database }} user=postgres' % (ip_addr, port)
+    res = None
+
+    try:
+        conn = psycopg2.connect(dsn=conninfo)
+        cur = conn.cursor()
+        cur.execute(check_query)
+
+        column_names = [desc[0] for desc in cur.description]
+        for row in cur:
+            res = dict(zip(column_names, row))
+
+        cur.close()
+        conn.close()
+
+    except Exception as error:
+        print('ERROR: %s' % str(error).strip())
+        sys.exit(1)
+
+    if res['apply_queue_exists'] in [1, '1', 't', True]:
+        print('%s (%s:%s) has %s bytes of queued changes from %s\n' % (res['this_node'], ip_addr, port, res['apply_queue_size'], res['source_node']))
+        sys.exit(1)
+
+    sys.exit(0)
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,174 @@
+-- Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+--
+-- Given the name of a server, this service responds with a status to
+-- override the pgsql-check results for the given server if required.
+--
+-- We determine the overall status based on
+--
+-- (a) The pgsql-check results for the server under backend 'be'
+-- (b) The state of the currently active server, as determined by the
+--     stick table associated with 'be'
+-- (c) Whether the server has built up a BDR apply queue, as reported by
+--     the external check configured under backend 'be_check_queue'
+--
+-- In particular, we want to prevent the server from becoming the active
+-- server until it has dealt with its pending apply queue. We don't care
+-- if the apply queue builds up on an already-active server, or one that
+-- is not at imminent risk of becoming active.
+--
+-- When everything is working normally, we expect:
+--
+-- (1) Backend 'be' has one active server and one or more servers marked
+--     'backup' (which declares only the initial disposition of servers)
+-- (2) All servers have status == 'UP', based on the pgsql-check results
+--     (not yet contradicted by the agent-check result we generate here)
+-- (3) The active server (to which haproxy is currently routing traffic)
+--     is shown by the server_id in the stick-table associated with be
+-- (4) Backend 'be_check_queue' has the same servers configured to run
+--     the external queue size check. Because there is no frontend that
+--     directs traffic to this backend, the status of these servers is
+--     ignored (except by us)
+--
+-- We are interested in the process of failover, where haproxy finds the
+-- active server unusable and begins to route traffic to another server.
+--
+-- If a server fails, the check_status changes from L7OK to an error and
+-- the overall status changes from UP to DOWN after "fall" (3) failures,
+-- during which check_health is reduced to 0 in steps. If the server is
+-- forced into maint state, its status changes from UP to MAINT and its
+-- health checks are disabled (so the check_status and check_health are
+-- not reported).
+--
+-- These changes do not affect the stick table directly, but if haproxy
+-- finds that it can no longer use the stuck server, it chooses another
+-- server to handle the connection and updates the stick table to point
+-- to the new server near the end of the request cycle. For a server in
+-- MAINT state that is still available to handle persistent connections,
+-- haproxy sees no reason to update the stick table until it gets a new
+-- connection.
+--
+-- Because the stick table will be updated only after a connection has
+-- been dispatched to a new server, we cannot watch for that change and
+-- hope to still prevent the new server from accepting connections until
+-- it has dealt with its apply queue. Instead, we must look at the state
+-- of the stuck server and figure out if it's at risk of coming unglued.
+--
+-- The stuck server takes 3*1.5s (fall*inter) by default to transition
+-- from UP to DOWN (changing to 'UP 2/3' and 'UP 1/3' after each check
+-- failure), so that's our opportunity to detect an imminent failover.
+
+core.register_service("agent", "tcp", function(applet)
+    local result
+
+    -- We expect to receive the name of a server followed by a newline,
+    -- i.e., configured with ``agent-send "server_name\n"``
+    local s = applet:getline():match('^([a-zA-Z0-9_-]+)')
+
+    local be = core.backends['be']
+    local srv = be.servers[s]
+
+    -- Which is the active server according to the stick table?
+    --
+    -- If s is already the active sever, it's too late to try to prevent
+    -- connections to it. Otherwise, if the active server looks healthy,
+    -- s is not at immediate risk of becoming active. In both cases, we
+    -- don't need to worry about the queue on s, and we want its status
+    -- to be determined by pgsql-check results.
+
+    local stuck = stuck_server(be)
+    if stuck and (s == stuck or server_is_healthy(be.servers[stuck])) then
+        local stats = srv:get_stats()
+
+        -- We can return "100%" here to leave the server alone (the
+        -- percentage represents the server's weight, which we do not
+        -- change), but we must also check if we can reset the overall
+        -- status of s if we had previously marked as down.
+
+        result = "100%"
+        if stats.status == 'DOWN (agent)' and get_check_status(stats) == 'L7OK' then
+            result = "up"
+        end
+
+    -- We now know that s is at risk of becoming the active server, so
+    -- we need to determine if it is a viable candidate.
+    --
+    -- If it's not healthy according to pgsql-check, we immediately mark
+    -- it as DOWN (not waiting for all "fall" failed checks to alter its
+    -- status). If it's unhealthy according to the external queue check,
+    -- we mark it as DOWN with a different reason. Only if it's healthy
+    -- according to both measures do we mark it as UP.
+
+    else
+        local srv_q = core.backends['be_check_queue'].servers[s]
+
+        if not server_is_healthy(srv) then
+            result = "down # unhealthy candidate"
+        elseif not server_is_healthy(srv_q) then
+            result = "down # unprepared candidate"
+        else
+            result = "up"
+        end
+    end
+
+    applet:send(result .. "\n")
+end)
+
+-- Returns the name of the server that the stick table entry for the
+-- given backend points to, or nil if the stick table has no entry.
+
+function stuck_server(be)
+    local stuck = nil
+    local ent = be.stktable:dump()['127.0.0.1']
+    if ent and ent['server_id'] then
+        for s,srv in pairs(be.servers) do
+            if ent['server_id'] == tonumber(srv.puid) then
+                stuck = s
+                break
+            end
+        end
+    end
+
+    return stuck
+end
+
+-- Returns true if the given server is UP (not "UP 2/3", DOWN, MAINT, or
+-- anything else) and the last check succeeded with status PROCOK (for
+-- external checks) or L7OK (for pgsql-check), false otherwise.
+
+function server_is_healthy(srv)
+    local stats = srv:get_stats()
+    local check_status = get_check_status(stats)
+
+    return stats.status == 'UP' and
+        (check_status == 'PROCOK' or check_status == 'L7OK')
+end
+
+-- Given a stats table, returns the check_status from it after removing
+-- any leading '* ' that indicates that the check is being concurrently
+-- rerun.
+
+function get_check_status(stats)
+    return stats['check_status']:match('([^ ]+)$')
+end
+
+-- Prints a summary of important server state for the given server to
+-- the haproxy Debug log.
+
+function dump_server_stats(srv)
+    local s = core.concat()
+    local stats = srv:get_stats()
+    local fields = {
+        'svname', 'sid', 'status', 'chkfail', 'chkdown', 'lastchg', 'downtime',
+        'agent_status', 'agent_health', 'agent_code', 'agent_duration', 'last_agt', 'agent_desc',
+        'check_status', 'check_health', 'check_code', 'check_duration', 'last_chk', 'check_desc',
+        'hanafail',
+    }
+    s:add(srv.name)
+    s:add(': ')
+    for _,k in pairs(fields) do
+        if stats[k] then
+            s:add(tostring("%s='%s', "):format(k, stats[k]))
+        end
+    end
+    core.Debug(s:dump())
+end

@@ -8,6 +8,15 @@
       - haproxy_backends is defined
 
 - set_fact:
+    haproxy_backends_are_camo: "{{
+      haproxy_backends|length == camo_backends|length
+    }}"
+  vars:
+    camo_backends: "{{
+      haproxy_backends|map('extract', hostvars, 'bdr_node_camo_partner')|select('defined')|list
+    }}"
+
+- set_fact:
     haproxy_maxconn: "{{
       hostvars[item].haproxy_maxconn|default((hostvars[item].max_connections|default(250))*0.90)|int
     }}"
@@ -30,6 +39,30 @@
   notify:
     - Note haproxy reload required
 
+- block:
+  - name: Install agent.lua
+    template:
+      src: agent.lua.j2
+      dest: /etc/haproxy/agent.lua
+    notify:
+      - Note haproxy reload required
+
+  - name: Install check-queue
+    template:
+      src: check-queue.j2
+      dest: /etc/haproxy/check-queue
+      mode: 0755
+    notify:
+      - Note haproxy reload required
+
+  - name: Install sudo-check-queue
+    template:
+      src: sudo-check-queue.j2
+      dest: /etc/haproxy/sudo-check-queue
+      mode: 0755
+  when:
+    haproxy_backends_are_camo
+
 - name: Ensure {{ socket_dir }} exists
   file:
     path: "{{ socket_dir }}"
@@ -51,3 +84,7 @@
   service:
     name: haproxy
     enabled: yes
+
+- include_role:
+    name: postgres/pgpass
+  tags: always
