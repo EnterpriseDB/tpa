@@ -95,6 +95,7 @@ class Architecture(object):
             '--distribution', '--os', dest='distribution',
             metavar='LABEL', **label_opts
         )
+        g.add_argument('--os-version', metavar='VERSION')
         g.add_argument('--os-image', metavar='LABEL')
         g.add_argument(
             '--postgres-version', choices=['9.4', '9.5', '9.6', '10', '11', '12', '13']
@@ -340,7 +341,8 @@ class Architecture(object):
     # desired distribution
     def image(self):
         label = self.args.get('os_image') or self.args['distribution']
-        return self.platform.image(label)
+        version = self.args.get('os_version')
+        return self.platform.image(label, version=version)
 
     # The architecture's templates/main.yml.j2 defines the overall topology of
     # the cluster, and must be written so that we can expand it based on the

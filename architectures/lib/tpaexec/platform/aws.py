@@ -4,6 +4,7 @@
 
 import copy
 import boto3
+import sys
 
 from tpaexec.platform import Platform
 
@@ -28,22 +29,76 @@ class aws(Platform):
         return 'Debian'
 
     def image(self, label, **kwargs):
+        images = {
+            'debian': {
+                'debian-jessie-amd64-hvm-2017-01-15-1221-ebs': {
+                    'versions': ['8', 'jessie'],
+                    'owner': '379101102735',
+                    'user': 'admin',
+                },
+                'debian-stretch-hvm-x86_64-gp2-2020-06-11-59901': {
+                    'versions': ['9', 'stretch'],
+                    'owner': '136693071363',
+                    'user': 'admin',
+                },
+                'debian-10-amd64-20200610-293': {
+                    'versions': ['10', 'buster', 'default'],
+                    'owner': '136693071363',
+                    'user': 'admin',
+                },
+            },
+            'redhat': {
+                'RHEL-7.8_HVM_GA-20200225-x86_64-1-Hourly2-GP2': {
+                    'versions': ['7'],
+                    'owner': '309956199498',
+                    'user': 'ec2-user',
+                },
+                'RHEL-8.2.0_HVM-20200423-x86_64-0-Hourly2-GP2': {
+                    'versions': ['8'],
+                    'owner': '309956199498',
+                    'user': 'ec2-user',
+                },
+            },
+            'ubuntu': {
+                'ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20200610': {
+                    'versions': ['16.04', 'xenial'],
+                    'owner': '099720109477',
+                    'user': 'ubuntu',
+                },
+                'ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200611': {
+                    'versions': ['18.04', 'bionic', 'default'],
+                    'owner': '099720109477',
+                    'user': 'ubuntu',
+                },
+                'ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20200609': {
+                    'versions': ['20.04', 'focal'],
+                    'owner': '099720109477',
+                    'user': 'ubuntu',
+                },
+            },
+        }
+
+        # Transform the table of known images into a form that allows for direct
+        # lookup based on label and version.
+
+        amis = {}
+        for d in images:
+            amis[d] = {}
+            for n in images[d]:
+                entry = images[d][n]
+                for v in entry['versions']:
+                    amis[d][v] = { 'name': n, **entry }
+                    del amis[d][v]['versions']
+
         image = {}
 
-        label = label.lower()
-
-        if label in ['debian', 'debian-minimal']:
-            image['name'] = 'debian-10-amd64-20191117-80'
-            image['owner'] = '136693071363'
-            image['user'] = 'admin'
-        elif label in ['redhat', 'redhat-minimal']:
-            image['name'] = 'RHEL-7.7_HVM_GA-20190723-x86_64-1-Hourly2-GP2'
-            image['owner'] = '309956199498'
-            image['user'] = 'ec2-user'
-        elif label in ['ubuntu', 'ubuntu-minimal']:
-            image['name'] = 'ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20191113'
-            image['owner'] = '099720109477'
-            image['user'] = 'ubuntu'
+        if label in self.supported_distributions():
+            label = label.replace('-minimal', '').lower()
+            version = kwargs.get('version') or 'default'
+            image = amis.get(label).get(version)
+            if not image:
+                print('ERROR: cannot determine AMI name for %s/%s' % (label, version), file=sys.stderr)
+                sys.exit(-1)
         else:
             image['name'] = label
 

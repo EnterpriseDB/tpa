@@ -3,6 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 import ipaddress
+import sys
 
 from tpaexec.platform import Platform
 
@@ -31,15 +32,42 @@ class vagrant(Platform):
         return 'Debian'
 
     def image(self, label, **kwargs):
-        image = {}
         images = {
-            'debian': 'debian/stretch64',
-            'redhat': 'centos/7',
-            'ubuntu': 'ubuntu/bionic64',
+            'debian': {
+                '8': 'debian/jessie64',
+                'jessie': 'debian/jessie64',
+                '9': 'debian/stretch64',
+                'stretch': 'debian/stretch64',
+                '10': 'debian/buster64',
+                'buster': 'debian/buster64',
+                'default': 'debian/buster64',
+            },
+            'redhat': {
+                '7': 'centos/7',
+                '8': 'centos/8',
+                'default': 'centos/8',
+            },
+            'ubuntu': {
+                '16.04': 'ubuntu/xenial64',
+                'xenial': 'ubuntu/xenial64',
+                '18.04': 'ubuntu/bionic64',
+                'bionic': 'ubuntu/bionic64',
+                'default': 'ubuntu/bionic64',
+                '20.04': 'ubuntu/focal64',
+                'focal': 'ubuntu/focal64',
+            },
         }
 
+        image = {}
         label = label.lower()
-        image['name'] = images.get(label, label)
+        version = kwargs.get('version') or 'default'
+        image['name'] = images.get(label, {'default': label}).get(version)
+
+        if not image['name']:
+            print("ERROR: cannot determine vagrant box name for %s/%s" % (label, version), file=sys.stderr)
+            print("(Use ``--os-image box/name`` to specify one explicitly)", file=sys.stderr)
+            sys.exit(-1)
+
         image['user'] = 'admin'
         return image
 
