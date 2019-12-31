@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+import os, sys
+import traceback
+import argparse
+
+from tpaexec.test_compiler import TestCompiler
+
+def main():
+    '''
+    Given an input file and an output directory, this program tries to compile
+    the input and write the compiled output to files under the output directory
+    starting with index.yml, otherwise prints an error message and exits with a
+    non-zero status.
+    '''
+
+    prog = os.path.basename(sys.argv[0])
+    p = argparse.ArgumentParser(
+        prog=prog,
+        usage='%s infile.t.yml /output/dir [options…]' % prog,
+    )
+
+    p.add_argument(
+        '-v', '--verbose', dest='verbosity', action='count',
+        help='increase verbosity', default=0,
+    )
+
+    p.add_argument(
+        '--steps-from', dest='step_directories', nargs='+', metavar='DIR',
+        help='location of custom step definitions', default=[],
+    )
+
+    p.add_argument('infile', help='path to input file')
+    p.add_argument('outdir', help='path to output dir (which must exist)')
+
+    args = p.parse_args()
+
+    try:
+        c = TestCompiler(options=vars(args))
+        c.read_input(args.infile)
+        c.write_output(args.outdir)
+
+    except Exception as e:
+        error = str(e)
+        if "'%s'" % args.infile not in error:
+            error = '%s: %s' % (args.infile, error)
+        print('ERROR: %s' % error, file=sys.stderr)
+        if args.verbosity:
+            type, obj, tb = sys.exc_info()
+            tb = traceback.extract_tb(tb)[-1]
+            print('From %s:%s (in %s)' % (tb[0], tb[1], tb[2]))
+            print('\t%s' % tb[3])
+        sys.exit(-1)
+
+if __name__ == '__main__':
+    main()

@@ -55,20 +55,28 @@ _tpaexec_command() {
 
     testpath=""
     for dir in "${DIRECTORIES[@]}"; do
-        path=$dir/$test.yml
-        if [[ -f $path ]]; then
+        path=$dir/$test
+        if [[ -f $path.yml || -f $path.t.yml ]]; then
             testpath=$path
             break
         fi
     done
 
     if [[ -z "$testpath" ]]; then
-        echo "Couldn't find $test.yml in any of the following directories:"
+        echo "ERROR: couldn't find a test named $test in any of the following directories:"
         for dir in "${DIRECTORIES[@]}"; do
             echo "    $dir"
         done
         exit 1
     fi
 
-    time playbook "$TPA_DIR/architectures/lib/commands/test.yml" -e testpath="$testpath" "$@"
+    if [[ -f "$testpath.t.yml" ]]; then
+        output=$(mktemp -d "/tmp/$(basename "$testpath")-XXXXXXXXXX")
+        "$TPA_DIR"/architectures/lib/compile-test "$testpath.t.yml" "$output" \
+            --steps-from "$TPA_DIR"/architectures/lib/test-steps \
+            --steps-from "$(pwd)"/test-steps
+        testpath="$output/index.yml"
+    fi
+
+    time playbook "$TPA_DIR"/architectures/lib/commands/test.yml -e testpath="$testpath" "$@"
 }
