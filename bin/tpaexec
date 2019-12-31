@@ -601,7 +601,7 @@ REHYDRATE
 exec=$(basename $0)
 case "$exec" in
     tpaexec)
-        command=${1:?No command specified}
+        command=${1:?No command specified (try 'tpaexec help')}
         shift
         ;;
     provision|deprovision|deploy|rehydrate)
