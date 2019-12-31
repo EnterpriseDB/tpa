@@ -283,10 +283,11 @@ rehydrate() {
 }
 
 try_as_playbook_or_script() {
-    # If the first argument looks like a cluster directory and the
-    # second argument refers to a playbook or script under the cluster
-    # directory or architectures/lib, we try to execute it as if were a
-    # built-in command.
+    # If you run ``tpaexec xyzzy …``, you end up here to check if there
+    # is a matching custom command under architectures/lib/commands or
+    # $cluster/commands. If so, we execute it as if it were a built-in
+    # command. As a safety measure, we require that custom commands be
+    # executed with a cluster directory as the first argument.
 
     if [[ "${1:-}" && -d $1 && -f $1/config.yml ]]; then
         cd ${cluster:=$1}
