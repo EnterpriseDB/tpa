@@ -314,6 +314,19 @@ try_as_playbook_or_script() {
         done
     fi
 
+    # If there's a matching command in architectures/lib and we didn't
+    # run it above, a cluster directory must not have been specified
+    # (e.g., ``tpaexec test``). Let's try to be helpful.
+
+    C=$TPA_DIR/architectures/lib/commands
+    if [[ -x $C/$command || -f $C/$command.sh || -f $C/$command.yml ]]; then
+        dir="clusterdir"
+        if [[ -f config.yml ]]; then
+            dir="."
+        fi
+        error "tpaexec $command needs a cluster directory (try 'tpaexec $command $dir')"
+    fi
+
     error "unrecognised tpaexec command: $command (try 'tpaexec help')"
 }
 
