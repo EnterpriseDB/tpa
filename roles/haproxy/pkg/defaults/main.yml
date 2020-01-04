@@ -9,4 +9,4 @@ haproxy_packages:
     - haproxy
   Ubuntu: *debian_haproxy_packages
 
-haproxy_package_version: 1.9.7*
+haproxy_package_version: 1.9.13*
