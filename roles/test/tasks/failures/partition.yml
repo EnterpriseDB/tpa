@@ -50,11 +50,11 @@
 # from a failed earlier restore, so we restore it and remove the file.
 - name: restore time
   debug:
-    msg: "{{ partition_timeout|default('600') }}"
+    msg: "{{ partition_timeout|default('100') }}"
 
 - name: Set timeout for network partition
   shell: >
-    sleep {{ partition_timeout|default('600') }};
+    sleep {{ partition_timeout|default('100') }};
     if [[ -f /tmp/existing.rules ]]; then
       /sbin/iptables-restore /tmp/existing.rules;
       rm /tmp/existing.rules;

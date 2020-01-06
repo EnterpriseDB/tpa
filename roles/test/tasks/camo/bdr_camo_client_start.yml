@@ -5,8 +5,8 @@
 - set_fact:
     ping: "{{ pair[0] }}"
     pong: "{{ pair[1] }}"
-    camo_transactions: "{{ camo_transactions|default(1000) }}"
-    camo_clients: "{{ camo_clients|default(100) }}"
+    camo_transactions: "{{ camo_transactions|default(4000) }}"
+    camo_clients: "{{ camo_clients|default(20) }}"
     bdr_camo_client_args: "{{ bdr_camo_client_args|default('') }}"
     scope: "{{ scope|default('local') }}"
     sync_rep: "{{ sync_rep|default('async') }}"

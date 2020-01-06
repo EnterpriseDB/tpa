@@ -5,12 +5,6 @@
 - include_tasks: camo/bdr_camo_client_start.yml
 
 - set_fact:
-    active_time: "{{ partition_timeout }}"
-  when: failure == 'partition'
-- set_fact:
-    active_time: "{{ powerfail_timeout }}"
-  when: failure == 'powerfail'
-- set_fact:
     crash: "{{ crash|default('partner') }}"
 - set_fact:
     crash_node: "{{ ping }}"

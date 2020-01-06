@@ -16,6 +16,9 @@
 # after the timeout expires. (It's up to Postgres how much more time
 # it will take to start up and be available. We make no guarantees.)
 
+- name: restore time
+  set_fact:
+    restart_after: "{{ restart_after|default('100') }}"
 - name: Set timeout to start postgres
   shell: >
     sleep {{ restart_after }}; systemctl start postgres
