@@ -139,6 +139,14 @@ function server_is_healthy(srv)
     local stats = srv:get_stats()
     local check_status = get_check_status(stats)
 
+    if check_status == 'INI' then
+         return true
+    end
+
+    if stats.status == 'DOWN (agent)' and check_status == 'L7OK' then
+        return true
+    end
+
     return stats.status == 'UP' and
         (check_status == 'PROCOK' or check_status == 'L7OK')
 end
