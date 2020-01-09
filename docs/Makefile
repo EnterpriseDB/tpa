@@ -8,7 +8,7 @@ images/m1.png: images/m1.dot
 
 TARGET = tpaexec.pdf
 
-SRC = index.md INSTALL.md INSTALL-repo.md tpaexec-configure.md tpaexec-provision.md tpaexec-deploy.md tpaexec-test.md architecture-M1.md architecture-CAMO2x2.md architecture-BDR-Always-ON.md architecture-BDR-Simple.md platform-aws.md platform-bare.md platform-docker.md platform-lxd.md platform-vagrant.md configure-cluster.md configure-instance.md tpaexec-rehydrate.md tpaexec-switchover.md misc-configure-putty.md misc-troubleshooting.md
+SRC = index.md INSTALL.md INSTALL-repo.md tpaexec-configure.md tpaexec-provision.md tpaexec-deploy.md tpaexec-test.md architecture-M1.md architecture-CAMO2x2.md architecture-BDR-Always-ON.md architecture-BDR-Simple.md platform-aws.md platform-bare.md platform-docker.md platform-lxd.md platform-vagrant.md configure-cluster.md configure-instance.md tpaexec-hooks.md tpaexec-rehydrate.md tpaexec-updates.md tpaexec-switchover.md misc-configure-putty.md misc-troubleshooting.md
 
 header.md: $(IMG)
 	bash tools/make-header.sh >$@
