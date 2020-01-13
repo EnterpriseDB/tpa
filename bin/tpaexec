@@ -156,6 +156,14 @@ setup() {
     _install_pip_packages
 }
 
+_with_ansible_env() {
+    PYTHONPATH=${PYTHONPATH:+$PYTHONPATH:}${ANSIBLE_HOME:+$ANSIBLE_HOME/lib:}$TPA_DIR/architectures/lib \
+    ANSIBLE_FILTER_PLUGINS=${ANSIBLE_FILTER_PLUGINS:+$ANSIBLE_FILTER_PLUGINS:}$TPA_DIR/lib/filter_plugins \
+    ANSIBLE_LOOKUP_PLUGINS=${ANSIBLE_LOOKUP_PLUGINS:+$ANSIBLE_LOOKUP_PLUGINS:}$TPA_DIR/lib/lookup_plugins \
+    ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TPA_DIR/lib/test_plugins \
+    "$@"
+}
+
 configure() {
     # Find the relevant architecture configuration script and let it do
     # whatever it wants to generate the cluster configuration into the
@@ -179,11 +187,7 @@ configure() {
         error "unknown architecture: $arch"
     fi
 
-    PYTHONPATH=${PYTHONPATH:+$PYTHONPATH:}${ANSIBLE_HOME:+$ANSIBLE_HOME/lib:}$TPA_DIR/architectures/lib \
-    ANSIBLE_FILTER_PLUGINS=${ANSIBLE_FILTER_PLUGINS:+$ANSIBLE_FILTER_PLUGINS:}$TPA_DIR/lib/filter_plugins \
-    ANSIBLE_LOOKUP_PLUGINS=${ANSIBLE_LOOKUP_PLUGINS:+$ANSIBLE_LOOKUP_PLUGINS:}$TPA_DIR/lib/lookup_plugins \
-    ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TPA_DIR/lib/test_plugins \
-    "$archdir/configure" "$@"
+    _with_ansible_env "$archdir"/configure "$@"
 }
 
 provision() {
@@ -293,14 +297,14 @@ try_as_playbook_or_script() {
             exec=$dir/$command
 
             if [[ -x $exec ]]; then
-                $exec "$@"
+                _with_ansible_env $exec "$@"
                 return $?
             elif [[ -f $script ]]; then
                 source "$script"
                 if [[ $(type -t _tpaexec_command) != function ]]; then
                     error "$script did not define _tpaexec_command"
                 fi
-                _tpaexec_command "$@"
+                _with_ansible_env _tpaexec_command "$@"
                 return $?
             elif [[ -f $playbook ]]; then
                 playbook "$playbook" "$@"
