@@ -56,14 +56,24 @@
   when:
     inventory_hostname in groups[bdr_node_group] and  inventory_hostname != ping
   
-- name: Wait for a few entries in run_time_output after sync complete
-  pause: seconds=5
-
-- name: Save run_time_check output
-  fetch:
-    src: "{{ run_time_output }}"
-    dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ run_time_output|basename }}"
-    flat: yes
+- block:
+  - name: Wait for run_time_check script to finish
+    shell: |
+      ps -ef | grep run_time_check | cut -d ' ' -f 2
+    register: script_running
+    until: script_running is defined
+    retries: 20
+    ignore_errors: yes 
+  - name: kill run_time_check script if not already finished. Possible data divergence.
+    shell: |
+      kill -9 `ps -ef | grep run_time_check | cut -d ' ' -f 2`
+    when: script_running is defined
+    ignore_errors: yes 
+  - name: Save run_time_check output
+    fetch:
+      src: "{{ run_time_output }}"
+      dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ run_time_output|basename }}"
+      flat: yes
   when: >
     inventory_hostname == tester_instance
 
