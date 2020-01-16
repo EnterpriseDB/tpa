@@ -61,12 +61,12 @@
     shell: |
       ps -ef | grep run_time_check | cut -d ' ' -f 2
     register: script_running
-    until: script_running is defined
+    until: script_running is undefined
     retries: 20
     ignore_errors: yes 
   - name: kill run_time_check script if not already finished. Possible data divergence.
     shell: |
-      kill -9 `ps -ef | grep run_time_check | cut -d ' ' -f 2`
+       ps -ef | grep run_time_check | cut -d ' ' -f 2 || kill -9
     when: script_running is defined
     ignore_errors: yes 
   - name: Save run_time_check output
