@@ -10,8 +10,10 @@ global
     ssl-default-server-options  no-sslv3 no-tlsv10 no-tls-tickets
     ssl-dh-param-file  /etc/ssl/dhparams.pem
     tune.ssl.default-dh-param  2048
+{% if haproxy_backends_are_camo %}
     lua-load /etc/haproxy/agent.lua
     external-check
+{% endif %}
 
 defaults
     timeout client 30s
