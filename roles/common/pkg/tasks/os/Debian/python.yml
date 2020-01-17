@@ -4,6 +4,7 @@
 
 - name: Run apt-get update
   raw: test -d /etc/tpa || apt-get -q -y update
+  environment: {}
   register: update
   changed_when: >
     update is successful
@@ -11,6 +12,7 @@
 
 - name: Install python 2.7
   raw: apt-get -q -y install python2.7
+  environment: {}
   register: python_install
   changed_when: >
     python_install is successful
@@ -23,6 +25,7 @@
     fi
   args:
     executable: /bin/sh
+  environment: {}
   register: backport_install
   changed_when: >
     backport_install is successful

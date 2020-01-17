@@ -4,6 +4,7 @@
 
 - name: Install apt-transport-https to support https repositories
   raw: apt-get -q -y install apt-transport-https
+  environment: {}
   register: ath_install
   changed_when: >
     ath_install is successful
@@ -11,6 +12,7 @@
 
 - name: Install curl to fetch repository files
   raw: apt-get -q -y install curl
+  environment: {}
   register: curl_install
   changed_when: >
     curl_install is successful
@@ -18,6 +20,7 @@
 
 - name: Install gpg to install apt repository keys
   raw: apt-get -q -y install gnupg2
+  environment: {}
   register: gpg_install
   changed_when: >
     gpg_install is successful

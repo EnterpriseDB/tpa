@@ -4,6 +4,7 @@
 
 - name: Install Python 2.7
   raw: yum -y install python2
+  environment: {}
   register: python_install
   changed_when: >
     python_install is successful
@@ -16,6 +17,7 @@
     fi
   args:
     executable: /bin/sh
+  environment: {}
   register: backport_install
   changed_when: >
     backport_install is successful

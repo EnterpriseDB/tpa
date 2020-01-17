@@ -5,6 +5,7 @@
 - name: Retrieve user-data failure log entries
   raw: >
     test -s {{ faillog }} && cat {{ faillog }}
+  environment: {}
   register: failures
   failed_when: False
   changed_when: >
