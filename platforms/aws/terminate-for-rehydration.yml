@@ -5,6 +5,7 @@
 - hosts: all
   any_errors_fatal: True
   max_fail_percentage: 0
+  environment: "{{ target_environment|default({}) }}"
   tasks:
   - include_role:
       name: init

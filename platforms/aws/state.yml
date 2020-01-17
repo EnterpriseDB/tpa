@@ -6,6 +6,7 @@
 #     -e cluster=./clusters/x -e state=running
 
 - name: Stop hosts in a cluster
+  environment: "{{ target_environment|default({}) }}"
   hosts: localhost
   tasks:
   - include_tasks: validate.yml

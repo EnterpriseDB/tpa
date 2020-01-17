@@ -25,8 +25,10 @@
   register: q
   failed_when:
     q is not successful or not q.ssl
-  environment:
-    PGPASSWORD: "{{ postgres_password }}"
+  vars:
+    _task_environment:
+      PGPASSWORD: "{{ postgres_password }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
 
 # Next, we connect to the pgbouncer admin database and check that "SHOW
 # DATABASES" returns entries for postgres (which we connected to above)
@@ -39,8 +41,10 @@
     query: SHOW DATABASES
     autocommit: yes
   register: q
-  environment:
-    PGPASSWORD: "{{ pgbouncer_password }}"
+  vars:
+    _task_environment:
+      PGPASSWORD: "{{ pgbouncer_password }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
 
 - name: Verify SHOW DATABASES returns expected databases
   assert:

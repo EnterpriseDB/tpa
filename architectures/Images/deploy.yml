@@ -12,6 +12,7 @@
   max_fail_percentage: 0
   become_user: root
   become: true
+  environment: "{{ target_environment }}"
   hosts: all
   tasks:
   - include_role: name=common/pkg

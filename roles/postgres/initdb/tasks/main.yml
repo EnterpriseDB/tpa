@@ -44,8 +44,10 @@
       command: >
         {{ postgres_bin_dir }}/initdb -D {{ postgres_data_dir }} \
           {% for x in postgres_initdb_opts %}{{ x|quote }} {% endfor %}
-      environment:
-        TZ: UTC
+      vars:
+        _task_environment:
+          TZ: UTC
+      environment: "{{ target_environment|combine(_task_environment) }}"
       become_user: "{{ postgres_user }}"
       become: yes
     - set_fact: pgdata_initialised=True

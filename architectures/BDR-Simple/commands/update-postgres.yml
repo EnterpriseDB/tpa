@@ -28,6 +28,7 @@
   max_fail_percentage: 0
   become_user: root
   become: yes
+  environment: "{{ target_environment }}"
   hosts: all
   vars:
     all_haproxy_backends: []
@@ -227,9 +228,10 @@
       - text: WAIT_CLOSE
     vars:
       _dsn: "{{ hostvars[my_proxy].pgbouncer_node_dsn }}"
+      _task_environment:
+        PGPASSWORD: "{{ pgbouncer_password }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
     delegate_to: "{{ my_proxy }}"
-    environment:
-      PGPASSWORD: "{{ pgbouncer_password }}"
     when:
       is_proxied and was_active
 

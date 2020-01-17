@@ -26,13 +26,14 @@
     depth: 1
     accept_hostkey: yes
   register: git
-  environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
   vars:
     ansible_connection: ssh
     ansible_ssh_host: "{{ (platform == 'docker')|ternary(ip_address, ansible_host) }}"
     ssh_auth_sock: "{{ cmd.stdout.strip() }}"
     ssh_env:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
+    _task_environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
 
 # Next, we must run a series of commands to build the sources and
 # install the results. The caller may specify a build_commands array and
@@ -44,11 +45,12 @@
   args:
     chdir: "{{ source_directory }}"
     executable: /bin/bash
-  environment: "{{ build_environment|default({}) }}"
   with_items: "{{ build_commands|default([]) or default_build_commands }}"
   vars:
     build_log: "{{ build_log|default('/tmp/build.log') }}"
     default_build_commands:
     - make install
+    _task_environment: "{{ build_environment|default({}) }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
   notify:
     - Note Postgres restart required

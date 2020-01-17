@@ -15,6 +15,7 @@
   max_fail_percentage: 0
   become_user: root
   become: yes
+  environment: "{{ target_environment }}"
   hosts: all
   tasks:
   # The luksOpen/mount should arguably be done by sys/fs somehow; the

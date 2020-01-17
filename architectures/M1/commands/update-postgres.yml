@@ -10,6 +10,7 @@
   max_fail_percentage: 0
   become_user: root
   become: yes
+  environment: "{{ target_environment }}"
   hosts: all
   tasks:
   - name: Stop repmgr
@@ -24,6 +25,7 @@
   max_fail_percentage: 0
   become_user: root
   become: yes
+  environment: "{{ target_environment }}"
   hosts: all
   serial: 1
   tasks:
@@ -37,6 +39,7 @@
   max_fail_percentage: 0
   become_user: root
   become: yes
+  environment: "{{ target_environment }}"
   hosts: all
   tasks:
   - name: Switchover to a replica
@@ -68,6 +71,7 @@
   max_fail_percentage: 0
   become_user: root
   become: yes
+  environment: "{{ target_environment }}"
   hosts: all
   tasks:
   - name: Restart repmgr

@@ -11,9 +11,11 @@
   shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add gtm master gtm {{ inventory_hostname }} 20000 /pgxl/data/gtm
   args:
     executable: /bin/bash
-  environment:
-    LC_ALL: en_US.UTF-8
-    PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
+  vars:
+    _task_environment:
+      LC_ALL: en_US.UTF-8
+      PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
+  environment: "{{ target_environment|combine(_task_environment) }}"
   when: gtype == 'gtm' and not dirstat.stat.exists
   become_user: "{{ postgres_user }}"
   become: true
@@ -28,9 +30,11 @@
   shell: pgxc_ctl -c ~postgres/pgxc_ctl.conf add gtm slave gtm_standby {{ inventory_hostname }} 20000 /pgxl/data/gtm_standby
   args:
     executable: /bin/bash
-  environment:
-    LC_ALL: en_US.UTF-8
-    PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
+  vars:
+    _task_environment:
+      LC_ALL: en_US.UTF-8
+      PATH: /opt/pgxl/bin:/usr/local/bin:/usr/bin:/bin
+  environment: "{{ target_environment|combine(_task_environment) }}"
   when: gtype == 'gtm_standby' and not dirstat.stat.exists
   become_user: "{{ postgres_user }}"
   become: true

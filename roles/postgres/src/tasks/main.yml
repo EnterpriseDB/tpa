@@ -20,13 +20,14 @@
     reference: "{{ postgres_git_reference_repo }}"
     depth: 1
     accept_hostkey: yes
-  environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
   vars:
     ansible_connection: ssh
     ansible_ssh_host: "{{ (platform == 'docker')|ternary(ip_address, ansible_host) }}"
     ssh_auth_sock: "{{ cmd.stdout.strip() }}"
     ssh_env:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
+    _task_environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
 
 - name: Remove old build directory
   file: state=absent path="{{ postgres_build_dir }}" force=yes
@@ -43,11 +44,12 @@
   args:
     chdir: "{{ postgres_build_dir }}"
     executable: /bin/bash
-  environment: "{{ postgres_configure_env|combine(postgres_extra_configure_env) }}"
   vars:
     all_configure_opts: "{{
       postgres_configure_opts|union(postgres_extra_configure_opts)
     }}"
+    _task_environment: "{{ postgres_configure_env|combine(postgres_extra_configure_env) }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
   tags: [build-clean, postgres-clean]
 
 - name: Build Postgres

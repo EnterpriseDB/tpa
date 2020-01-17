@@ -10,6 +10,7 @@
   any_errors_fatal: True
   max_fail_percentage: 0
   strategy: linear
+  environment: "{{ target_environment|default({}) }}"
   hosts: all
   tasks:
   - include_role: name=init

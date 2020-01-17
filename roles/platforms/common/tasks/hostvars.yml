@@ -2,6 +2,10 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- name: Set default environment
+  set_fact:
+    target_environment: "{{ target_environment|default({}) }}"
+
 - name: Set ip_addresses to []
   set_fact:
     ip_addresses: []
