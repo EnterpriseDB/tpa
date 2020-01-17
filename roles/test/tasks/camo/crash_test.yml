@@ -12,6 +12,13 @@
 - set_fact:
     crash_node: "{{ pong }}"
   when: crash == 'partner'
+- set_fact:
+    origin: "{{ pong }}"
+  when: crash == 'origin' and (failure == "postgres-down" or failure == "powerfail")
+- set_fact:
+    origin: "{{ ping }}"
+  when: crash == 'partner' or failure == "none" or failure == "partition"
+ 
 
 - name: Cause failure {{ failure }} on CAMO {{crash}} {{ crash_node }}
   include_role: name=test tasks_from="failures/{{ failure }}.yml"

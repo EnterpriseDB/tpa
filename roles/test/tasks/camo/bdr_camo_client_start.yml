@@ -5,8 +5,8 @@
 - set_fact:
     ping: "{{ pair[0] }}"
     pong: "{{ pair[1] }}"
-    camo_transactions: "{{ camo_transactions|default(4000) }}"
-    camo_clients: "{{ camo_clients|default(20) }}"
+    camo_transactions: "{{ camo_transactions|default(10000) }}"
+    camo_clients: "{{ camo_clients|default(50) }}"
     bdr_camo_client_args: "{{ bdr_camo_client_args|default('') }}"
     scope: "{{ scope|default('local') }}"
     sync_rep: "{{ sync_rep|default('async') }}"
@@ -28,6 +28,7 @@
         - text: ALTER SYSTEM SET synchronous_replication_availability=%s;
           args:
             - "{{ sync_rep }}"
+        - text: ALTER SYSTEM SET bdr.camo_local_mode_delay='100ms';
         - text: SELECT pg_reload_conf();
       autocommit: yes
     with_items:

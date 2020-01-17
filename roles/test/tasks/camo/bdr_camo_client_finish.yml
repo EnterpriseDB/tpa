@@ -26,7 +26,7 @@
 
   - name: get LSN after bdr_camo_client run
     postgresql_query:
-      conninfo: "{{ ping_conninfo }}"
+      conninfo: "{{ origin_conninfo }}"
       queries:
       - text: >
           SELECT pg_current_wal_lsn() as lsn
@@ -34,7 +34,7 @@
     become_user: "{{ postgres_user }}"
     become: yes
   vars:
-    ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
+    origin_conninfo: "{{ hostvars[origin].bdr_node_dsn }}"
   when: >
     inventory_hostname == tester_instance
 
@@ -46,15 +46,16 @@
       - text: >
           SELECT pg_replication_origin_progress(%s, true) >= %s AS completed
         args:
-        - "bdr_bdrdb_bdrgroup_{{ hostvars[ping].bdr_node_name }}"
+        - "bdr_bdrdb_bdrgroup_{{ hostvars[origin].bdr_node_name }}"
         - "{{ hostvars[tester_instance].target.lsn }}"
     register: done
     until: done.completed
     retries: 60
+    ignore_errors: yes
     become_user: "{{ postgres_user }}"
     become: yes
   when:
-    inventory_hostname in groups[bdr_node_group] and  inventory_hostname != ping
+    inventory_hostname in groups[bdr_node_group] and  inventory_hostname != origin
   
 - block:
   - name: Wait for run_time_check script to finish
