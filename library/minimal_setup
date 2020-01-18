@@ -11,7 +11,7 @@ pkg_mgrs=([Debian]=apt [RedHat]=yum)
 if [[ -f /etc/redhat-release ]]; then
     distribution=RedHat
 elif type lsb_release &>/dev/null; then
-    lines=($(lsb_release -ics))
+    mapfile -t lines < <(lsb_release -ics)
     distribution=${lines[0]}
     release=${lines[1]}
 fi

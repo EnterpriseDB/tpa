@@ -14,8 +14,8 @@ set -eu
 
 TOP=/opt/2ndQuadrant/TPA
 if [[ -z "${TPA_DIR:-}" ]]; then
-    SRC=$(dirname $0)/..
-    type realpath &>/dev/null && SRC=$(realpath $SRC)
+    SRC=$(dirname "$0")/..
+    type realpath &>/dev/null && SRC=$(realpath "$SRC")
     if [[ -d $SRC/roles ]]; then
         TOP=$SRC
     fi
@@ -28,7 +28,7 @@ export TPA_DIR=${TPA_DIR:-$TOP}
 
 if [[ -f $TPA_DIR/tpa-virtualenv/bin/activate ]]; then
     set +u
-    source $TPA_DIR/tpa-virtualenv/bin/activate
+    source "$TPA_DIR/tpa-virtualenv/bin/activate"
     set -u
 fi
 
@@ -58,7 +58,7 @@ export ANSIBLE_CALLBACK_PLUGINS=${ANSIBLE_CALLBACK_PLUGINS:+$ANSIBLE_CALLBACK_PL
 # Otherwise, we just try to run ansible.
 
 NEWPATH=$PATH
-cmd=$(basename $0)
+cmd=$(basename "$0")
 
 if [[ -n "${ANSIBLE_HOME:-}" ]]; then
     ansidir=$ANSIBLE_HOME

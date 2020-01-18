@@ -3,7 +3,7 @@
 set -eu
 
 if [[ "$0" == "$BASH_SOURCE" ]]; then
-    script=$(basename $0)
+    script=$(basename "$0")
     echo "ERROR: this script is meant to be executed with 'tpaexec ${script%.sh} …'" >&2
     exit 1
 fi
@@ -26,5 +26,5 @@ _tpaexec_command() {
     target=${1:?no switchover target specified}
     shift
 
-    time playbook commands/switchover.yml -e target=$target "$@"
+    time playbook commands/switchover.yml -e target="$target" "$@"
 }

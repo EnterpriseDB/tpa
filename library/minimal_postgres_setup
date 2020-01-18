@@ -1,7 +1,7 @@
 #!/bin/bash
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-source $1
+source "$1"
 
 pgdata=${pgdata:-/opt/postgres/data}
 pgdata_initialised=false
@@ -10,11 +10,11 @@ postgres_running=false
 VERSION=$pgdata/PG_VERSION
 if [[ -f $VERSION ]]; then
     pgdata_initialised=true
-    pgdata_version=$(cat $VERSION)
-    pgdata_user=$(stat -c %U $VERSION)
+    pgdata_version=$(cat "$VERSION")
+    pgdata_user=$(stat -c %U "$VERSION")
     pidfile=$pgdata/postmaster.pid
     if [[ -f $pidfile ]]; then
-        if kill -0 $(head -1 $pidfile) &>/dev/null; then
+        if kill -0 "$(head -1 "$pidfile")" &>/dev/null; then
             postgres_running=true
         fi
     fi

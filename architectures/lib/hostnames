@@ -14,22 +14,22 @@
 IFS=$' \t\n'
 set -eu
 
-libdir=$(dirname $0)
+libdir=$(dirname "$0")
 wanted=${1:?Number of hostnames not specified}
 namesfile=${2:-${HOSTNAMES_FROM:=$libdir/hostnames.txt}}
 pattern=${3:-${HOSTNAMES_PATTERN:='[a-zA-Z0-9-]*'}}
 order=${HOSTNAMES_SORTED_BY:---random-sort}
 
-type realpath &>/dev/null && namesfile=$(realpath $namesfile)
+type realpath &>/dev/null && namesfile=$(realpath "$namesfile")
 if [[ ! -f $namesfile ]]; then
     echo "ERROR: could not open hostname list: $namesfile" >&2
     exit 1
 fi
 
 if [[ ${HOSTNAMES_UNSORTED:-'False'} == 'True' ]]; then
-    names=($(grep -xE "$pattern" $namesfile|head -$wanted))
+    mapfile -t names < <(grep -xE "$pattern" "$namesfile"|head -"$wanted")
 else
-    names=($(grep -xE "$pattern" $namesfile|sort $order|head -$wanted))
+    mapfile -t names < <(grep -xE "$pattern" "$namesfile"|sort "$order"|head -"$wanted")
 fi
 if [[ "${#names[@]}" -lt $wanted ]];
 then

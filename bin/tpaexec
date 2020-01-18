@@ -6,10 +6,10 @@
 
 IFS=$' \t\n'
 set -eu
-: ${PAGER:=less}
+: "${PAGER:=less}"
 
 error() {
-    echo "ERROR: $@" >&2
+    echo "ERROR: $*" >&2
     exit 1
 }
 
@@ -20,10 +20,10 @@ error() {
 TOP=/opt/2ndQuadrant/TPA
 if [[ -z "${TPA_DIR:-}" ]]; then
     if [[ -h "${self:=$0}" ]]; then
-        self=$(readlink $0)
+        self=$(readlink "$0")
     fi
-    SRC=$(dirname $self)/..
-    type realpath &>/dev/null && SRC=$(realpath $SRC)
+    SRC=$(dirname "$self")/..
+    type realpath &>/dev/null && SRC=$(realpath "$SRC")
     if [[ -d $SRC/roles ]]; then
         TOP=$SRC
     fi
@@ -42,9 +42,9 @@ ansible=$TPA_DIR/ansible/ansible
 
 version() {
     if [[ -f $TPA_DIR/VERSION ]]; then
-        VERSION=$(cat $TPA_DIR/VERSION)
+        VERSION=$(cat "$TPA_DIR/VERSION")
     else
-        VERSION=$(cd $TPA_DIR && git describe)
+        VERSION=$(cd "$TPA_DIR" && git describe)
     fi
     echo "# TPAexec $VERSION"
 }
@@ -63,7 +63,7 @@ _ansible_version() {
 
 _activate_virtualenv() {
     set +u
-    if ! source $1/bin/activate; then
+    if ! source "$1/bin/activate"; then
         error "couldn't source $1/bin/activate (is $1 a virtualenv?)"
     fi
     set -u
@@ -85,13 +85,13 @@ _create_and_activate_virtualenv() {
         if ! command -v virtualenv &>/dev/null; then
             error "can't find virtualenv in PATH (please install python-virtualenv)"
         fi
-        if ! mkdir -p $vpath; then
+        if ! mkdir -p "$vpath"; then
             error "couldn't create $vpath (try ``--virtualenv /other/path`` or use sudo)"
         fi
-        virtualenv --system-site-packages $vpath
+        virtualenv --system-site-packages "$vpath"
     fi
 
-    _activate_virtualenv $vpath
+    _activate_virtualenv "$vpath"
 }
 
 _install_pip_packages() {
@@ -111,11 +111,11 @@ _install_pip_packages() {
     PIP_DIR=$TPA_DIR/pip-packages
     if [[ -d $PIP_DIR ]]; then
         pip_args+=(--no-index)
-        pip_args+=(--find-links=file:$PIP_DIR)
+        pip_args+=("--find-links=file:$PIP_DIR")
     fi
 
     pip install "${pip_args[@]}" "pip>=10.0.1"
-    pip install "${pip_args[@]}" -r $TPA_DIR/python-requirements.txt
+    pip install "${pip_args[@]}" -r "$TPA_DIR/python-requirements.txt"
 
     # If we have a local copy of the ansible repository, we want to use
     # it in-situ rather than installing it into the virtualenv (so that
@@ -127,13 +127,13 @@ _install_pip_packages() {
     # this case, pip will install the dependencies automatically.
 
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
-        pip install "${pip_args[@]}" -r $ANSIBLE_HOME/requirements.txt
+        pip install "${pip_args[@]}" -r "$ANSIBLE_HOME/requirements.txt"
     else
         ANSIBLE_REPO=git+https://github.com/2ndQuadrant/ansible
         if [[ -d $PIP_DIR/ansible ]]; then
             ANSIBLE_REPO=file:$PIP_DIR/ansible
         fi
-        pip install "${pip_args[@]}" $ANSIBLE_REPO
+        pip install "${pip_args[@]}" "$ANSIBLE_REPO"
     fi
 }
 
@@ -157,7 +157,7 @@ setup() {
         esac
     done
 
-    _create_and_activate_virtualenv ${vpath:=$TPA_DIR/tpa-virtualenv}
+    _create_and_activate_virtualenv "${vpath:=$TPA_DIR/tpa-virtualenv}"
     _install_pip_packages
 }
 
@@ -188,7 +188,7 @@ configure() {
     ANSIBLE_FILTER_PLUGINS=${ANSIBLE_FILTER_PLUGINS:+$ANSIBLE_FILTER_PLUGINS:}$TPA_DIR/lib/filter_plugins \
     ANSIBLE_LOOKUP_PLUGINS=${ANSIBLE_LOOKUP_PLUGINS:+$ANSIBLE_LOOKUP_PLUGINS:}$TPA_DIR/lib/lookup_plugins \
     ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TPA_DIR/lib/test_plugins \
-    $archdir/configure "$@"
+    "$archdir/configure" "$@"
 }
 
 provision() {
@@ -216,16 +216,16 @@ provision() {
 
     set -- "${REMAINDER[@]:+${REMAINDER[@]}}" "$@"
 
-    $ansible-playbook $TPA_DIR/platforms/provision.yml \
+    "$ansible"-playbook "$TPA_DIR/platforms/provision.yml" \
         ${cache:+-e use_cached_vars=$cache} \
         ${owner:+-e Owner=$owner} \
-        -e cluster_dir=$(pwd) "$@"
+        -e cluster_dir="$(pwd)" "$@"
 }
 
 cmd() {
     $ansible \
         -i inventory --vault-password-file vault/vault_pass.txt \
-        -e cluster_dir=$(pwd) "$@"
+        -e cluster_dir="$(pwd)" "$@"
 }
 
 ping() {
@@ -233,8 +233,8 @@ ping() {
 }
 
 playbook() {
-    args=(-e tpa_dir=$TPA_DIR)
-    args+=(-e cluster_dir=$(pwd))
+    args=(-e "tpa_dir=$TPA_DIR")
+    args+=(-e "cluster_dir=$(pwd)")
 
     if [ -d inventory ]; then
         args+=(-i inventory)
@@ -244,7 +244,7 @@ playbook() {
         args+=(--vault-password-file vault/vault_pass.txt)
     fi
 
-    $ansible-playbook "${args[@]}" "$@"
+    "$ansible"-playbook "${args[@]}" "$@"
 }
 
 deploy() {
@@ -252,7 +252,7 @@ deploy() {
 }
 
 deprovision() {
-    playbook $TPA_DIR/platforms/deprovision.yml "$@"
+    playbook "$TPA_DIR/platforms/deprovision.yml" "$@"
 }
 
 rehydrate() {
@@ -269,12 +269,12 @@ rehydrate() {
     # checks, provision replacements for them, and deploy to the
     # newly-provisioned instances.
 
-    playbook $TPA_DIR/platforms/aws/terminate-for-rehydration.yml \
+    playbook "$TPA_DIR/platforms/aws/terminate-for-rehydration.yml" \
         -e i_really_want_to_destroy_my_entire_cluster=$DESTROY \
         --limit "$instances" "$@"
 
-    provision_args=(-e require_reattachment=yes)
-    provision_args+=(-e reattach_hosts="$instances")
+    provision_args=(-e "require_reattachment=yes")
+    provision_args+=(-e "reattach_hosts=$instances")
     if [ -f prehydrate-vars.yml ]; then
         provision_args+=(-e @prehydrate-vars.yml)
     fi
@@ -290,7 +290,7 @@ try_as_playbook_or_script() {
     # executed with a cluster directory as the first argument.
 
     if [[ "${1:-}" && -d $1 && -f $1/config.yml ]]; then
-        cd ${cluster:=$1}
+        cd "${cluster:=$1}"
         shift
         for dir in ./commands $TPA_DIR/architectures/lib/commands; do
             playbook=$dir/$command.yml
@@ -301,14 +301,14 @@ try_as_playbook_or_script() {
                 $exec "$@"
                 return $?
             elif [[ -f $script ]]; then
-                source $script
+                source "$script"
                 if [[ $(type -t _tpaexec_command) != function ]]; then
                     error "$script did not define _tpaexec_command"
                 fi
                 _tpaexec_command "$@"
                 return $?
             elif [[ -f $playbook ]]; then
-                playbook $playbook "$@"
+                playbook "$playbook" "$@"
                 return $?
             fi
         done
@@ -332,23 +332,23 @@ try_as_playbook_or_script() {
 
 _tpaexec_info() {
     version
-    echo tpaexec=$0
-    echo TPA_DIR=$TPA_DIR
+    echo tpaexec="$0"
+    echo TPA_DIR="$TPA_DIR"
     echo "PYTHON=$(command -v python) (v$(_python_version), $(_detect_virtualenv))"
     if [[ -d $TPA_DIR/tpa-virtualenv ]]; then
-        echo TPA_VIRTUALENV=$TPA_DIR/tpa-virtualenv
+        echo TPA_VIRTUALENV="$TPA_DIR/tpa-virtualenv"
     else
         echo TPA_VIRTUALENV=none
     fi
     if [[ -n "${ANSIBLE_HOME:-}" ]]; then
-        echo -n ANSIBLE_HOME=$ANSIBLE_HOME
+        echo -n ANSIBLE_HOME="$ANSIBLE_HOME"
         if [[ -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
             echo " (v$(PYTHONPATH=$ANSIBLE_HOME/lib _ansible_version))"
         else
             echo " (invalid)"
         fi
     elif command -v ansible &>/dev/null; then
-        echo -n ANSIBLE=$(command -v ansible)
+        echo -n ANSIBLE="$(command -v ansible)"
         echo " (v$(_ansible_version))"
     else
         error "can't find ansible via PATH/ANSIBLE_HOME (did you run 'tpaexec setup'?)"
@@ -357,9 +357,9 @@ _tpaexec_info() {
 
 selftest() {
     _tpaexec_info
-    $TPA_DIR/architectures/lib/selftest.py
+    "$TPA_DIR/architectures/lib/selftest.py"
     $ansible --version
-    $ansible-playbook $TPA_DIR/architectures/lib/selftest.yml -e tpa_dir=$TPA_DIR
+    "$ansible"-playbook "$TPA_DIR/architectures/lib/selftest.yml" -e tpa_dir="$TPA_DIR"
 }
 
 info() {
@@ -375,14 +375,19 @@ info() {
             echo "Available $subcommand:"
             echo ""
 
-            for d in $(find $TPA_DIR/$subcommand -type f -name _metadata);
+            shopt -s globstar nullglob
+            for d in "$TPA_DIR/$subcommand"/**/_metadata;
             do
                 (
-                    source $d;
+                    source "$d";
                     if [[ "${STATUS:=experimental}" != "experimental" || ${2:-""} == "-a" ]]; then
-                        echo "${NAME:-$(basename $(dirname $d))} [$STATUS]"
+                        echo "${NAME:-$(basename "$(dirname "$d")")} [$STATUS]"
                         if [[ ${DESCRIPTION:-""} ]]; then
-                            echo "    $DESCRIPTION" | (type fmt &>/dev/null && fmt -c || cat)
+                            if type fmt &>/dev/null; then
+                                echo "    $DESCRIPTION" | fmt -c
+                            else
+                                echo "    $DESCRIPTION"
+                            fi
                         fi
                         echo ""
                     fi
@@ -391,10 +396,12 @@ info() {
             echo 'Run ``'"tpaexec info $subcommand/<name>"'`` for more information.'
             case "$subcommand" in
                 platforms)
+                    echo
                     echo 'Run ``tpaexec configure --architecture <name> --platform <name> --help``'
                     echo 'to see available options for an architecture and platform.'
                     ;;
                 architectures)
+                    echo
                     echo 'Run ``tpaexec configure --architecture <name> --help`` to see available'
                     echo 'options for an architecture.'
                     ;;
@@ -407,7 +414,7 @@ info() {
                 echo "Please contact tpa@2ndQuadrant.com for assistance"
                 exit 1
             fi
-            $PAGER $doc
+            $PAGER "$doc"
             ;;
         *)
             error "unrecognised info subcommand: $subcommand"
@@ -485,7 +492,7 @@ SELFTEST
             ;;
 
         configure-options)
-            $PAGER $TPA_DIR/architectures/lib/OPTIONS.md
+            $PAGER "$TPA_DIR/architectures/lib/OPTIONS.md"
             ;;
 
         *config*)
@@ -611,7 +618,7 @@ REHYDRATE
 # We may be invoked as "tpaexec command …", or through a symbolic link
 # from command → tpaexec (for backwards compatibility).
 
-exec=$(basename $0)
+exec=$(basename "$0")
 case "$exec" in
     tpaexec)
         command=${1:?No command specified (try 'tpaexec help')}
@@ -654,14 +661,14 @@ case "$command" in
         if [[ -d $arg ]]; then
             cluster=$arg
         elif [[ -f $arg ]]; then
-            cluster=$(dirname $arg)
-            file=$(basename $arg)
-            set -- $file "$@"
+            cluster=$(dirname "$arg")
+            file=$(basename "$arg")
+            set -- "$file" "$@"
         else
             error "argument is neither directory nor file: $arg"
         fi
 
-        cd $cluster
+        cd "$cluster"
         ;;
 
     cmd|ping|provision|deploy|deprovision|rehydrate)
@@ -672,7 +679,7 @@ case "$command" in
             error "cluster directory does not exist: $cluster"
         fi
 
-        cd $cluster
+        cd "$cluster"
         ;;
 esac
 
@@ -680,7 +687,7 @@ esac
 # it as a convenience.
 
 if [[ -f $TPA_DIR/tpa-virtualenv/bin/activate ]]; then
-    _activate_virtualenv $TPA_DIR/tpa-virtualenv
+    _activate_virtualenv "$TPA_DIR/tpa-virtualenv"
 fi
 
 # Now we can look at the command-line arguments and decide which

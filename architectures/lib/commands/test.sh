@@ -3,7 +3,7 @@
 set -eu
 
 if [[ "$0" == "$BASH_SOURCE" ]]; then
-    script=$(basename $0)
+    script=$(basename "$0")
     echo "ERROR: this script is meant to be executed with 'tpaexec ${script%.sh} …'" >&2
     exit 1
 fi
@@ -25,7 +25,7 @@ _tpaexec_command() {
                 ;;
 
             --destroy-this-cluster)
-                REMAINDER+=(-e destroy_cluster=yes)
+                REMAINDER+=(-e "destroy_cluster=yes")
                 ;;
 
             *)
@@ -51,7 +51,7 @@ _tpaexec_command() {
     # tests may be defined by the architecture (and symlinked in by the
     # configure command) or be created by hand.
 
-    DIRECTORIES+=($(pwd)/tests $TPA_DIR/architectures/lib/tests)
+    DIRECTORIES+=("$(pwd)/tests" "$TPA_DIR/architectures/lib/tests")
 
     testpath=""
     for dir in "${DIRECTORIES[@]}"; do
@@ -70,5 +70,5 @@ _tpaexec_command() {
         exit 1
     fi
 
-    time playbook $TPA_DIR/architectures/lib/commands/test.yml -e testpath=$testpath "$@"
+    time playbook "$TPA_DIR/architectures/lib/commands/test.yml" -e testpath="$testpath" "$@"
 }
