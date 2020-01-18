@@ -13,10 +13,8 @@ if [[ -f $VERSION ]]; then
     pgdata_version=$(cat "$VERSION")
     pgdata_user=$(stat -c %U "$VERSION")
     pidfile=$pgdata/postmaster.pid
-    if [[ -f $pidfile ]]; then
-        if kill -0 "$(head -1 "$pidfile")" &>/dev/null; then
-            postgres_running=true
-        fi
+    if [[ -f $pidfile && -d /proc/$(head -1 "$pidfile") ]]; then
+        postgres_running=true
     fi
 fi
 
