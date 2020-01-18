@@ -16,7 +16,7 @@ _tpaexec_command() {
 
         case "$opt" in
             *)
-                REMAINDER+=($opt)
+                REMAINDER+=("$opt")
                 ;;
         esac
     done

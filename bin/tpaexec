@@ -209,7 +209,7 @@ provision() {
                 break
                 ;;
             *)
-                REMAINDER+=($opt)
+                REMAINDER+=("$opt")
                 ;;
         esac
     done

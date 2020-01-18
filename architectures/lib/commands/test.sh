@@ -20,7 +20,7 @@ _tpaexec_command() {
                 if [[ -z ${1:-''} ]]; then
                     error "$opt: No test directory specified"
                 fi
-                DIRECTORIES+=($1)
+                DIRECTORIES+=("$1")
                 shift
                 ;;
 
@@ -29,7 +29,7 @@ _tpaexec_command() {
                 ;;
 
             *)
-                REMAINDER+=($opt)
+                REMAINDER+=("$opt")
                 ;;
         esac
     done
