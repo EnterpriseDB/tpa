@@ -12,13 +12,28 @@
 - set_fact:
     crash_node: "{{ pong }}"
   when: crash == 'partner'
+# In case of origin crash, CAMO xacts failover to its partner.
+# So set new origin as pong. Note, this failover happens only when client runs via haproxy.
+# Also in case of network partitioning this failover is not observed, so origin remains the same.
 - set_fact:
     origin: "{{ pong }}"
-  when: crash == 'origin' and (failure == "postgres-down" or failure == "powerfail")
+    partner: "{{ ping }}"
+  when: crash == 'origin' and (failure == "postgres-down" or failure == "powerfail") and via_haproxy
 - set_fact:
     origin: "{{ ping }}"
-  when: crash == 'partner' or failure == "none" or failure == "partition"
- 
+    partner: "{{ pong }}"
+  when: (crash == 'partner' or failure == "none" or failure == "partition") and via_haproxy == false
+
+# Lets expect partner to recover after defined timeout + 30s
+- set_fact:
+    wait_for_partner: "{{ powerfail_timeout|int + 30 }}"
+  when: powerfail_timeout is defined 
+- set_fact:
+    wait_for_partner: "{{ partition_timeout|int + 30 }}"
+  when: partition_timeout is defined 
+- set_fact:
+    wait_for_partner: "{{ restart_after|int + 30 }}"
+  when: restart_after is defined 
 
 - name: Cause failure {{ failure }} on CAMO {{crash}} {{ crash_node }}
   include_role: name=test tasks_from="failures/{{ failure }}.yml"

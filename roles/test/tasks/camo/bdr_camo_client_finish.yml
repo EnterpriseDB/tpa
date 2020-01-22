@@ -3,6 +3,33 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - block:
+  - name: Wait for node to recover
+    wait_for:
+      host: "{{ partner_conninfo }}"
+      timeout: "{{ wait_for_partner }}"  
+  - name: Get workload status
+    postgresql_query:
+      conninfo: "{{ origin_conninfo }}"
+      queries:
+      - text: >
+          SELECT COUNT(1) FROM camo_test
+    register: xacts_on_origin
+    become_user: "{{ postgres_user }}"
+    become: yes
+  - set_fact:
+       expected_limit: "{{camo_clients|int*camo_transactions|int*0.7}}"
+  - name: Check 30% workload still remains after partner recovery
+    assert:
+      that: xacts_on_origin.count|int  < expected_limit|int|abs
+      msg: "More than 70% of workload is finished before partner recovery. Actual: {{ xacts_on_origin.count}} Expected < {{ expected_limit }}"
+  vars:
+    origin_conninfo: "{{ hostvars[origin].bdr_node_dsn }}"
+    partner_conninfo: "{{ hostvars[partner].bdr_node_dsn }}"
+  when: >
+    inventory_hostname == tester_instance
+     
+
+- block:
   - name: Wait for bdr_camo_client to complete
     async_status: jid="{{ client_run.ansible_job_id }}"
     register: client
@@ -62,7 +89,7 @@
     shell: |
       ps -ef | grep run_time_check | cut -d ' ' -f 2
     register: script_running
-    until: script_running is undefined
+    until: script_running.stdout == ''
     retries: 20
     ignore_errors: yes 
   - name: kill run_time_check script if not already finished. Possible data divergence.
