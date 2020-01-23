@@ -37,7 +37,7 @@
       }}
     log_driver: "{{ item.log_driver|default(omit) }}"
     log_options: "{{ item.log_options|default(omit) }}"
-    exposed_ports: "{{ item.exposed_ports|default([22,5432,6432]) }}"
+    exposed_ports: "{{ item.exposed_ports|default(['22','5432','6432']) }}"
     published_ports: "{{ item.published_ports|default(omit) }}"
     devices: "{{ item.devices|default(omit) }}"
     networks: "{{ item.networks|default(omit) }}"
