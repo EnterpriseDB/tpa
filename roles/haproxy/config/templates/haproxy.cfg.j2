@@ -16,8 +16,6 @@ global
 {% endif %}
 
 defaults
-    timeout client 30s
-    timeout server 30s
     timeout connect 5s
     option tcplog
     log global
@@ -26,7 +24,6 @@ frontend fe
     bind 127.0.0.1:{{ haproxy_port }}
 
     maxconn 1000
-    timeout client 1h
 
     default_backend be
 
@@ -51,8 +48,6 @@ backend be
 
     option pgsql-check user haproxy
 
-    timeout server 1h
-
 {% for b in haproxy_backends %}
 {%   set v = hostvars[b] %}
 {%   set backup = loop.first|ternary('', 'backup') %}
@@ -66,8 +61,6 @@ backend be_check_queue
     option external-check
     external-check path "/usr/bin:/bin"
     external-check command "/etc/haproxy/sudo-check-queue"
-
-    timeout server 1h
 
 {% for b in haproxy_backends %}
 {%   set v = hostvars[b] %}
