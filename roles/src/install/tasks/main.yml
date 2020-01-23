@@ -27,6 +27,8 @@
   register: git
   environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
   vars:
+    ansible_connection: ssh
+    ansible_ssh_host: "{{ (platform == 'docker')|ternary(ip_address, ansible_host) }}"
     ssh_auth_sock: "{{ cmd.stdout.strip() }}"
     ssh_env:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
