@@ -14,6 +14,11 @@
     platform not in ['docker']
   tags: [common, hostname]
 
+- name: Ensure authorized_keys allows admin access
+  authorized_key:
+    user: "{{ ansible_user|default('root') }}"
+    key: "{{ lookup('file', '%s/%s.pub' % (cluster_dir, ssh_key_file)) }}"
+
 - include_tasks:
     file: tpa.yml
     apply:
