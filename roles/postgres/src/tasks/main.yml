@@ -18,6 +18,7 @@
     dest: "{{ postgres_src_dir }}"
     version: "{{ postgres_git_ref }}"
     reference: "{{ postgres_git_reference_repo }}"
+    depth: 1
     accept_hostkey: yes
   environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
   vars:
