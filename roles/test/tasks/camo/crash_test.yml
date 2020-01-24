@@ -16,13 +16,12 @@
 # So set new origin as pong. Note, this failover happens only when client runs via haproxy.
 # Also in case of network partitioning this failover is not observed, so origin remains the same.
 - set_fact:
+    origin: "{{ ping }}"
+    partner: "{{ pong }}"
+- set_fact:
     origin: "{{ pong }}"
     partner: "{{ ping }}"
   when: crash == 'origin' and (failure == "postgres-down" or failure == "powerfail") and via_haproxy
-- set_fact:
-    origin: "{{ ping }}"
-    partner: "{{ pong }}"
-  when: (crash == 'partner' or failure == "none" or failure == "partition") and via_haproxy == false
 
 # Lets expect partner to recover after defined timeout + 30s
 - set_fact:
