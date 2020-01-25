@@ -113,16 +113,15 @@ rerunning the entire process will not change anything either.
 
 ### Extensible through Ansible
 
-In most cases, you can make the necessary changes to your cluster by
-editing the config.yml file and running the provision/deploy/test cycle.
-Should you need to go beyond what is already implemented in TPAexec, the
-full range of Ansible functionality is at your disposal at every stage.
+TPAexec supports a variety of configuration options, so you can do a lot
+just by editing config.yml and re-running the provision/deploy/test
+cycle. Should you need to go beyond what is already implemented, you can
+write [hook scripts](tpaexec-hooks.md) to extend the deployment process. 
 
-In general, you should be able to implement any changes you need through
-the include-hook mechanism in TPAexec. For example, if you create a file
-named ``hooks/pre-deploy.yml`` in your cluster directory, the tasks in
-it will be run before the normal deployment tasks; and likewise for the
-post-deploy.yml hook.
+This mechanism places the full range of Ansible functionality at your
+disposal during every stage of the deployment. For example, any tasks in
+``hooks/pre-deploy.yml`` will be executed before the main deployment;
+and there are also post-deploy and many other hooks.
 
 ### Cluster management
 
