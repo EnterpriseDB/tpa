@@ -49,8 +49,8 @@
 # do nothing. If it exists, we must have created it, or it's a leftover
 # from a failed earlier restore, so we restore it and remove the file.
 - name: restore time
-  debug:
-    msg: "{{ partition_timeout|default('100') }}"
+  set_fact:
+    partition_timeout: "{{ partition_timeout|default('100') }}"
 
 - name: Set timeout for network partition
   shell: >
