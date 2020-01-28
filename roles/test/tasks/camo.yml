@@ -117,6 +117,7 @@
         loop_var: failure
       vars:
         tester_instance: "{{ testers_with_client|first }}"
+        stop_mode: "immediate"
         nondestructive_failures:
           - none
         destructive_failures:
