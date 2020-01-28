@@ -3,6 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 from jinja2 import Undefined
+from six import string_types
 
 # This filter takes a container and a subkey ('x.y.z', or [x,y,z]) and returns
 # true if the subkey exists in the container, or false if any of the levels is
@@ -11,7 +12,7 @@ from jinja2 import Undefined
 def has_subkey(container, keys):
     try:
         v = container
-        if isinstance(keys, basestring):
+        if isinstance(keys, string_types):
             keys = keys.split('.')
         for key in keys:
             v = v.get(key)

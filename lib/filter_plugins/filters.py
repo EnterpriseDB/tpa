@@ -8,6 +8,7 @@ import re
 from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
+from six import string_types
 
 # Based on PR ansible/ansible#11083, this filter takes a container and a subkey
 # ('x.y.z', or [x,y,z]) and a default value, and returns container.x.y.z or the
@@ -16,7 +17,7 @@ from ansible.errors import AnsibleFilterError
 def try_subkey(container, keys, default=None):
     try:
         v = container
-        if isinstance(keys, basestring):
+        if isinstance(keys, string_types):
             keys = keys.split('.')
         for key in keys:
             if isinstance(v, list) and isinstance(key, int):
