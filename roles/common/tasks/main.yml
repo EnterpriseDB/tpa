@@ -17,7 +17,7 @@
 - name: Ensure authorized_keys allows admin access
   authorized_key:
     user: "{{ ansible_user|default('root') }}"
-    key: "{{ lookup('file', '%s/%s.pub' % (cluster_dir, ssh_key_file)) }}"
+    key: "{{ lookup('file', cluster_dir|abspath_to(ssh_key_file + '.pub')) }}"
   when: ssh_key_file is defined
 
 - include_tasks:

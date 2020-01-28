@@ -5,6 +5,7 @@
 import copy
 import csv
 import re
+import os.path
 from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
@@ -222,6 +223,12 @@ def contains(container, *values):
             return False
     return True
 
+# Returns the given path if it is absolute, otherwise returns the path prefixed
+# with the given directory path (assumed to be absolute).
+
+def abspath_to(directory, path):
+    return os.path.join(directory, path)
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -241,4 +248,5 @@ class FilterModule(object):
             'apply_format': apply_format,
             'backup_slot_name': backup_slot_name,
             'contains': contains,
+            'abspath_to': abspath_to,
         }
