@@ -17,6 +17,21 @@
   become_user: "{{ postgres_user }}"
   become: true
 
+# Now that extensions have been initialised, we can do the last part of
+# postgres/createuser/final's work here.
+
+- name: Grant roles to Postgres users if required
+  postgresql_membership:
+    port: "{{ postgres_port }}"
+    groups: "{{ item.granted_roles }}"
+    target_role: "{{ item.username }}"
+    state: present
+  with_items: "{{ postgres_users }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    item.granted_roles is not empty
+
 - include_tasks:
     file: pgbouncer.yml
     apply:
