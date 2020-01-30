@@ -2,6 +2,43 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v9.1 (2020-01-20)
+
+This release requires ``tpaexec setup`` to be rerun after installation.
+
+### Notable changes
+
+- Update 2ndQuadrant Ansible to v2.8 (``tpaexec setup`` will upgrade)
+
+- Introduce additional checks through haproxy to avoid stale reads after
+  failover for CAMO instances (RM11664); this does not work with SELinux
+  enabled on the haproxy server (will be fixed in the next release)
+
+### Minor changes
+
+- Wait for reachability checks to pass only during deploy, not custom
+  commands (which become a little faster with this change)
+
+- Various improvements to source builds, including the ability to build
+  from source on Docker containers
+
+- Don't set net.ipv4.ip_forward by default, only when required
+
+- Require haproxy 1.9.13 instead of 1.9.7 (security fixes)
+
+- Various Python 3 compatibility changes (the next release will be fully
+  Python 3 compatible)
+
+- Various testing improvements
+
+### Bugfixes
+
+- Ensure that a replica does not have max_worker_processes < the primary
+
+- Ignore repmgr_redirect_pgbouncer if there are no pgbouncer instances
+
+- Don't set bdr_node_camo_partner for logical standby instances
+
 ## v9.0 (2019-12-03)
 
 ### Notable changes
