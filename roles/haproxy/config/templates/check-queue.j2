@@ -13,8 +13,8 @@ check_query = '''
     bdr.get_configured_camo_partner_of() AS source_node,
     (bdr.get_node_sub_receive_lsn(bdr.get_configured_camo_partner_of()) -
      bdr.get_node_sub_apply_lsn(bdr.get_configured_camo_partner_of())) AS apply_queue_size,
-    (bdr.get_node_sub_receive_lsn(bdr.get_configured_camo_partner_of()) >
-     bdr.get_node_sub_apply_lsn(bdr.get_configured_camo_partner_of())) AS apply_queue_exists
+    (bdr.get_node_sub_receive_lsn(bdr.get_configured_camo_partner_of()) -
+     bdr.get_node_sub_apply_lsn(bdr.get_configured_camo_partner_of())) > 56 AS apply_queue_exists
 '''
 
 def main():
