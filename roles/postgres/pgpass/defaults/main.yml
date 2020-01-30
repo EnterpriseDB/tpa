@@ -1,0 +1,7 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+default_pgpass_users:
+- postgres
+- repmgr
