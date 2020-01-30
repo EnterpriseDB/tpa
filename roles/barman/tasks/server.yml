@@ -62,13 +62,14 @@
     mode: 0755
     state: directory
 
-- name: Install .pgpass file for Barman
-  template:
-    src: pgpass.j2
-    dest: ~barman/.pgpass
-    owner: barman
-    group: barman
-    mode: 0600
+- include_role: name=postgres/pgpass
+  vars:
+    pgpassfile: ~barman/.pgpass
+    pgpass_owner: barman
+    pgpass_group: barman
+    pgpass_users:
+    - barman
+    - streaming_barman
 
 - name: Set correct ownership and mode on ~/.postgresql
   file:
