@@ -26,10 +26,13 @@ if [[ ! -f $namesfile ]]; then
     exit 1
 fi
 
+names=()
 if [[ ${HOSTNAMES_UNSORTED:-'False'} == 'True' ]]; then
-    mapfile -t names < <(grep -xE "$pattern" "$namesfile"|head -"$wanted")
+    while IFS='' read -r line; do names+=("$line"); done < \
+        <(grep -xE "$pattern" "$namesfile"|head -"$wanted")
 else
-    mapfile -t names < <(grep -xE "$pattern" "$namesfile"|sort "$order"|head -"$wanted")
+    while IFS='' read -r line; do names+=("$line"); done < \
+        <(grep -xE "$pattern" "$namesfile"|sort "$order"|head -"$wanted")
 fi
 if [[ "${#names[@]}" -lt $wanted ]];
 then
