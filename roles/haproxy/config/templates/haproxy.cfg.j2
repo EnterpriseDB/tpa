@@ -10,7 +10,7 @@ global
     ssl-default-server-options  no-sslv3 no-tlsv10 no-tls-tickets
     ssl-dh-param-file  /etc/ssl/dhparams.pem
     tune.ssl.default-dh-param  2048
-{% if haproxy_backends_are_camo %}
+{% if haproxy_backends_need_queue_checks %}
     lua-load /etc/haproxy/agent.lua
     external-check
 {% endif %}
@@ -27,7 +27,7 @@ frontend fe
 
     default_backend be
 
-{% if haproxy_backends_are_camo %}
+{% if haproxy_backends_need_queue_checks %}
 frontend lua_agent
     bind 127.0.0.1:15432
     tcp-request content use-service lua.agent
@@ -51,16 +51,16 @@ backend be
 {% for b in haproxy_backends %}
 {%   set v = hostvars[b] %}
 {%   set backup = loop.first|ternary('', 'backup') %}
-    server {{ b }} {{ b }}:{{ v.postgres_port }} maxconn {{ v.haproxy_maxconn }} check inter 1500 downinter 6s rise 5 fall 3 {% if haproxy_backends_are_camo %}agent-check agent-inter 2000 agent-addr 127.0.0.1 agent-port 15432 agent-send "{{ b }}\n"{% endif %} {{ backup }}
+    server {{ b }} {{ b }}:{{ v.postgres_port }} maxconn {{ v.haproxy_maxconn }} check inter 1500 downinter 6s rise 5 fall 3 {% if haproxy_backends_need_queue_checks %}agent-check agent-inter 2000 agent-addr 127.0.0.1 agent-port 15432 agent-send "{{ b }}\n"{% endif %} {{ backup }}
 {% endfor %}
 
-{% if haproxy_backends_are_camo %}
+{% if haproxy_backends_need_queue_checks %}
 backend be_check_queue
     mode tcp
 
     option external-check
     external-check path "/usr/bin:/bin"
-    external-check command "/etc/haproxy/sudo-check-queue"
+    external-check command "/etc/haproxy/check-queue"
 
 {% for b in haproxy_backends %}
 {%   set v = hostvars[b] %}

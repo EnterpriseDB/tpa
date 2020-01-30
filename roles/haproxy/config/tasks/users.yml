@@ -1,0 +1,35 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# If we need to invoke postgres/createuser to create users for haproxy,
+# we must do so on both the haproxy instances (so that the password is
+# defined) and the corresponding postgres instances (so that they can
+# create the users).
+
+- include_role: name=postgres/createuser
+  vars:
+    username: haproxy
+    role_attrs: [nologin]
+  when: >
+    'postgres' in role or
+    'haproxy' in role
+  tags: always
+
+# This determines if any haproxy backends need additional queue checks,
+# and therefore an additional user.
+
+- include_tasks: checks.yml
+  when: >
+    'haproxy' in role
+
+- include_role: name=postgres/createuser
+  vars:
+    username: check_queue
+    granted_roles:
+    - bdr_application
+  when: >
+    ('postgres' in role or 'haproxy' in role) and
+    groups['role_haproxy']
+    |map('extract', hostvars, 'haproxy_backends_need_queue_checks')
+    |select('equalto', true)|list is not empty

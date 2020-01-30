@@ -10,10 +10,11 @@
     'haproxy' in role
   tags: always
 
-- include_role: name=postgres/createuser
-  vars:
-    username: haproxy
-    role_attrs: [nologin]
+- include_role:
+    name: haproxy/config
+    tasks_from: users.yml
+    apply:
+      tags: haproxy
   when: >
     'postgres' in role or
     'haproxy' in role

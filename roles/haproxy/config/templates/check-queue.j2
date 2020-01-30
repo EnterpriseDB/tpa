@@ -6,10 +6,10 @@ from __future__ import absolute_import, division, print_function
 
 import os, sys, time
 import psycopg2
+import socket
 
 check_query = '''
   SELECT
-    (SELECT interface_name FROM bdr.local_node_summary) AS this_node,
     bdr.get_configured_camo_partner_of() AS source_node,
     (bdr.get_node_sub_receive_lsn(bdr.get_configured_camo_partner_of()) -
      bdr.get_node_sub_apply_lsn(bdr.get_configured_camo_partner_of())) AS apply_queue_size,
@@ -18,10 +18,10 @@ check_query = '''
 '''
 
 def main():
-    _, _, ip_addr, port = sys.argv[1:5]
+    _, _, ip_address, port = sys.argv[1:5]
 
-    os.environ['PGPASSFILE'] = "{{ postgres_home }}/.pgpass"
-    conninfo = 'host=%s port=%s dbname={{ bdr_database }} user=postgres' % (ip_addr, port)
+    os.environ['PGPASSFILE'] = "/etc/haproxy/.pgpass"
+    conninfo = 'host=%s port=%s dbname={{ bdr_database }} user=check_queue' % (ip_address, port)
     res = None
 
     try:
@@ -40,8 +40,9 @@ def main():
         print('ERROR: %s' % str(error).strip())
         sys.exit(1)
 
+    this_node = socket.gethostbyaddr(ip_address)[0]
     if res['apply_queue_exists'] in [1, '1', 't', True]:
-        print('%s (%s:%s) has %s bytes of queued changes from %s\n' % (res['this_node'], ip_addr, port, res['apply_queue_size'], res['source_node']))
+        print('%s (%s:%s) has %s bytes of queued changes from %s\n' % (this_node, ip_address, port, res['apply_queue_size'], res['source_node']))
         sys.exit(1)
 
     sys.exit(0)
