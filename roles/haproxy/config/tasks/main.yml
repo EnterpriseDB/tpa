@@ -49,7 +49,6 @@
       pgpass_group: root
       pgpass_users:
       - check_queue
-    tags: always
   when:
     haproxy_backends_need_queue_checks
 
