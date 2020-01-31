@@ -55,7 +55,8 @@ $ sudo yum install tpaexec
 ```
 
 This will install TPAexec into ``/opt/2ndQuadrant/TPA``. It will also
-ensure that other required packages (e.g., Python 2.7) are installed.
+ensure that other required packages (e.g., Python 3.6 or later) are
+installed.
 
 We mention ``sudo`` here only to indicate which commands need root
 privileges. You may use any other means to run the commands as root.
@@ -66,8 +67,8 @@ specifically advised to use it, please see the
 
 ## Python environment
 
-At this point, Python 2.7, pip, and virtualenv should be available on
-your system. Now you need to set up a Python environment to install the
+At this point, Python, pip, and virtualenv should be available on your
+system. Now you need to set up a Python environment to install the
 Python modules that TPAexec needs.
 
 ```bash

@@ -23,16 +23,16 @@ tpaexec package.)
 
 ```bash
 # Debian or Ubuntu
-$ sudo apt-get install python2.7 python-pip python-virtualenv \
+$ sudo apt-get install python3.7 python3-pip python3-virtualenv \
       pwgen openvpn
 
-# RedHat or CentOS
-$ sudo yum install python python-pip python-virtualenv \
+# RedHat or CentOS (python3 for RHEL7, python36 for RHEL8)
+$ sudo yum install python36 python3-pip python3-virtualenv \
       pwgen epel-release openvpn
 
 # MacOS X
 $ sudo brew tap discoteq/discoteq
-$ sudo brew install python@2 pwgen openvpn flock
+$ sudo brew install python@3 pwgen openvpn flock
 $ sudo pip install virtualenv
 ```
 
