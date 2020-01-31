@@ -26,14 +26,16 @@ if [[ ! -f $namesfile ]]; then
     exit 1
 fi
 
-names=()
+sortcmd="sort"
 if [[ ${HOSTNAMES_UNSORTED:-'False'} == 'True' ]]; then
-    while IFS='' read -r line; do names+=("$line"); done < \
-        <(grep -xE "$pattern" "$namesfile"|head -"$wanted")
-else
-    while IFS='' read -r line; do names+=("$line"); done < \
-        <(grep -xE "$pattern" "$namesfile"|sort "$order"|head -"$wanted")
+    sortcmd="cat"
+    order=-
 fi
+
+names=()
+while IFS='' read -r line; do names+=("$line"); done < \
+    <(grep -xE "$pattern" "$namesfile"|"$sortcmd" "$order"|head -"$wanted")
+
 if [[ "${#names[@]}" -lt $wanted ]];
 then
     echo "ERROR: found only ${#names[@]}/$wanted names matching '$pattern' in $namesfile" >&2
