@@ -1,4 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
+from __future__ import print_function
 
 import psycopg2
 import csv
@@ -61,7 +63,7 @@ def get_stats(conn):
         conn.close()
          
     except:
-        print "Something wrong with the connection or queries"
+        print("Something wrong with the connection or queries")
         csvRow.extend(emptyRow)
 
 
@@ -84,13 +86,13 @@ while test_valid:
     try:
         conn_origin=psycopg2.connect(origin_dsn, connect_timeout=5)
     except:
-        print "I am unable to connnect to the ." ,origin_dsn
+        print("I am unable to connnect to the origin: '%s'" % origin_dsn)
         
     # Try to get connection to partner
     try:
         conn_partner=psycopg2.connect(partner_dsn,connect_timeout=5)
     except:
-        print "I am unable to connnect to the ." ,partner_dsn
+        print("I am unable to connnect to the partner: '%s'" % partner_dsn)
         
     # If connection ito origin is established
     # get statistics from the node else enter empty values
@@ -117,19 +119,19 @@ while test_valid:
             conn_local=psycopg2.connect(local_dsn)
             break
         except:
-	    print "Retry establishing local connection"
+            print("Retry establishing local connection")
             time.sleep(5)
-	    retry_counter = retry_counter - 1
+            retry_counter = retry_counter - 1
         if(retry_counter == 0):
-	    print "Could not establish local connection. Exiting"
-	    sys.exit()
+            print("Could not establish local connection. Exiting")
+            sys.exit()
         
     cur_local=conn_local.cursor()
     cur_local.execute(myquery)
     table_exists=cur_local.fetchone()
     if table_exists and not all_committed:
-	if long(csvRow[1]) == csvRow[3] == csvRow[8]:
-	    all_committed = True
+        if long(csvRow[1]) == csvRow[3] == csvRow[8]:
+            all_committed = True
         test_valid = 1
         time.sleep(3)
         now = datetime.now()
