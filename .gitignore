@@ -3,5 +3,6 @@ stash/*
 ansible.log
 *.retry
 tpa-virtualenv/*
+tpa-venv/*
 pip-packages/*
 .python-version

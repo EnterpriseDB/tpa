@@ -35,6 +35,7 @@ if [[ ! -d $TPA_DIR/roles ]]; then
 fi
 
 ansible=$TPA_DIR/ansible/ansible
+TPA_VENV=$TPA_DIR/tpa-venv
 
 ## Command functions
 #
@@ -50,48 +51,45 @@ version() {
 }
 
 _python_version() {
-    /usr/bin/env python3 -c 'import sys; print("%d.%d.%d" % (sys.version_info[0:3]))'
+    python3 -c 'import sys; print("%d.%d.%d" % (sys.version_info[0:3]))'
 }
 
-_detect_virtualenv() {
-    /usr/bin/env python3 -c "import sys; print('virtualenv' if hasattr(sys, 'real_prefix') else 'no virtualenv')"
+_detect_venv() {
+    python3 -c "import sys; print('venv' if hasattr(sys, 'real_prefix') or sys.base_prefix != sys.prefix else 'no venv')"
 }
 
 _ansible_version() {
-    /usr/bin/env python3 -c 'import ansible.release; print(ansible.release.__version__)'
+    python3 -c 'import ansible.release; print(ansible.release.__version__)'
 }
 
-_activate_virtualenv() {
+_activate_venv() {
     set +u
     if ! source "$1/bin/activate"; then
-        error "couldn't source $1/bin/activate (is $1 a virtualenv?)"
+        error "couldn't source $1/bin/activate (is $1 a venv?)"
     fi
     set -u
 }
 
-_create_and_activate_virtualenv() {
-    # If we're inside an activated virtualenv already, we don't need to
+_create_and_activate_venv() {
+    # If we're inside an activated venv already, we don't need to
     # do anything here.
 
-    if [[ "$(_detect_virtualenv)" == "virtualenv" ]]; then
+    if [[ "$(_detect_venv)" == "venv" ]]; then
         return
     fi
 
-    # If no virtualenv exists, we have to create it before we try to
+    # If no venv exists, we have to create it before we try to
     # activate it below.
 
     if [[ ! -d $vpath ]]; then
-        echo "Creating virtualenv $vpath"
-        if ! command -v virtualenv &>/dev/null; then
-            error "can't find virtualenv in PATH (please install python-virtualenv)"
-        fi
+        echo "Creating venv $vpath"
         if ! mkdir -p "$vpath"; then
-            error "couldn't create $vpath (try ``--virtualenv /other/path`` or use sudo)"
+            error "couldn't create $vpath (try ``--venv /other/path`` or use sudo)"
         fi
-        virtualenv --system-site-packages "$vpath"
+        python3 -m venv --system-site-packages "$vpath"
     fi
 
-    _activate_virtualenv "$vpath"
+    _activate_venv "$vpath"
 }
 
 _install_pip_packages() {
@@ -114,26 +112,25 @@ _install_pip_packages() {
         pip_args+=("--find-links=file:$PIP_DIR")
     fi
 
-    pip install "${pip_args[@]}" "pip>=10.0.1"
-    pip install "${pip_args[@]}" -r "$TPA_DIR/python-requirements.txt"
+    pip3 install "${pip_args[@]}" -r "$TPA_DIR/python-requirements.txt"
 
     # If we have a local copy of the ansible repository, we want to use
-    # it in-situ rather than installing it into the virtualenv (so that
-    # any changes take effect immediately). We do still need to install
-    # Ansible's own dependencies into the virtualenv.
+    # it in-situ rather than installing it into the venv (so that any
+    # changes take effect immediately). We do still need to install
+    # Ansible's own dependencies into the venv.
     #
-    # Otherwise, we need to install it into the virtualenv either from
-    # the bundled copy of the repository, or directly from github. In
-    # this case, pip will install the dependencies automatically.
+    # Otherwise, we need to install it into the venv either from the
+    # bundled copy of the repository, or directly from github. In this
+    # case, pip will install the dependencies automatically.
 
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
-        pip install "${pip_args[@]}" -r "$ANSIBLE_HOME/requirements.txt"
+        pip3 install "${pip_args[@]}" -r "$ANSIBLE_HOME/requirements.txt"
     else
         ANSIBLE_REPO=git+https://github.com/2ndQuadrant/ansible
         if [[ -d $PIP_DIR/ansible ]]; then
             ANSIBLE_REPO=file:$PIP_DIR/ansible
         fi
-        pip install "${pip_args[@]}" "$ANSIBLE_REPO"
+        pip3 install "${pip_args[@]}" "$ANSIBLE_REPO"
     fi
 }
 
@@ -143,8 +140,8 @@ setup() {
         shift
 
         case "$opt" in
-            --virtualenv)
-                vpath=${1:?virtualenv location not specified}
+            --venv)
+                vpath=${1:?venv location not specified}
                 shift
                 ;;
             --pip-cache-dir)
@@ -157,7 +154,7 @@ setup() {
         esac
     done
 
-    _create_and_activate_virtualenv "${vpath:=$TPA_DIR/tpa-virtualenv}"
+    _create_and_activate_venv "${vpath:=$TPA_VENV}"
     _install_pip_packages
 }
 
@@ -334,11 +331,11 @@ _tpaexec_info() {
     version
     echo tpaexec="$0"
     echo TPA_DIR="$TPA_DIR"
-    echo "PYTHON=$(command -v python) (v$(_python_version), $(_detect_virtualenv))"
-    if [[ -d $TPA_DIR/tpa-virtualenv ]]; then
-        echo TPA_VIRTUALENV="$TPA_DIR/tpa-virtualenv"
+    echo "PYTHON=$(command -v python) (v$(_python_version), $(_detect_venv))"
+    if [[ -d $TPA_VENV ]]; then
+        echo TPA_VENV="$TPA_VENV"
     else
-        echo TPA_VIRTUALENV=none
+        echo TPA_VENV=none
     fi
     if [[ -n "${ANSIBLE_HOME:-}" ]]; then
         echo -n ANSIBLE_HOME="$ANSIBLE_HOME"
@@ -469,17 +466,16 @@ INFO
 Command: tpaexec setup
 
 Installs all Python dependencies (Ansible, modules) in an isolated
-virtual environment.
+virtual environment (using the Python 3 builtin ``-m venv``).
 
-The default location is ${TPA_DIR}/tpa-virtualenv
+The default location is $TPA_VENV
 
-If you use the default location, which we recommend, the virtualenv will
+If you use the default location, which we recommend, the venv will
 be activated automatically whenever you run tpaexec.
 
-You may optionally specify ``--virtualenv /path/to/virtualenv`` to
-either use an existing virtualenv, or create one at the specified
-location. If you do this, you must ensure that the virtualenv is
-activated before you run tpaexec.
+You may optionally specify ``--venv /path/to/venv`` to either use an
+existing venv, or create one at the specified location. If you do this,
+you must ensure that the venv is activated before you run tpaexec.
 SETUP
             ;;
 
@@ -698,11 +694,11 @@ case "$command" in
         ;;
 esac
 
-# If we can find a virtualenv located relative to TPA_DIR, we activate
-# it as a convenience.
+# If we can find a venv located relative to TPA_DIR, we activate it as a
+# convenience.
 
-if [[ -f $TPA_DIR/tpa-virtualenv/bin/activate ]]; then
-    _activate_virtualenv "$TPA_DIR/tpa-virtualenv"
+if [[ -f $TPA_VENV/bin/activate ]]; then
+    _activate_venv "$TPA_VENV"
 fi
 
 # Now we can look at the command-line arguments and decide which

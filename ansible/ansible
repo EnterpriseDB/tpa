@@ -26,9 +26,9 @@ export TPA_DIR=${TPA_DIR:-$TOP}
 # If we can find a virtualenv located relative to TPA_DIR, we activate
 # it as a convenience.
 
-if [[ -f $TPA_DIR/tpa-virtualenv/bin/activate ]]; then
+if [[ -f $TPA_DIR/tpa-venv/bin/activate ]]; then
     set +u
-    source "$TPA_DIR/tpa-virtualenv/bin/activate"
+    source "$TPA_DIR/tpa-venv/bin/activate"
     set -u
 fi
 

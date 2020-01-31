@@ -2,9 +2,7 @@ Jinja2
 PyYAML>=5.1
 cryptography
 python-dateutil
-setuptools<=44.0.0
 netaddr
-six
 awscli>=1.10.64
 boto3>=1.5.31
 boto>=2.48.0

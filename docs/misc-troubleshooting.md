@@ -12,7 +12,7 @@ failed: [localhost] (item=Vagrantfile) => {"changed": false, "checksum": "bf1403
 To create a new virtualenv (assuming tpaexec was installed into the default location):
 
 ```
-[tpa]$ sudo rm -rf /opt/2ndQuadrant/TPA/tpa-virtualenv
+[tpa]$ sudo rm -rf /opt/2ndQuadrant/TPA/tpa-venv
 [tpa]$ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
 ```
 

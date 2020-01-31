@@ -23,17 +23,16 @@ tpaexec package.)
 
 ```bash
 # Debian or Ubuntu
-$ sudo apt-get install python3.7 python3-pip python3-virtualenv \
+$ sudo apt-get install python3.7 python3-pip python3-venv \
       pwgen openvpn
 
 # RedHat or CentOS (python3 for RHEL7, python36 for RHEL8)
-$ sudo yum install python36 python3-pip python3-virtualenv \
+$ sudo yum install python36 python3-pip \
       pwgen epel-release openvpn
 
 # MacOS X
 $ sudo brew tap discoteq/discoteq
 $ sudo brew install python@3 pwgen openvpn flock
-$ sudo pip install virtualenv
 ```
 
 (We mention ``sudo`` here only to indicate which commands need root
@@ -84,22 +83,22 @@ $ tpaexec selftest
 If that command completes without any errors, your TPAexec installation
 is ready for use.
 
-## virtualenv options
+## Virtual environment options
 
-By default, ``tpaexec setup`` will create a virtualenv under
-``$TPA_DIR/tpa-virtualenv``, and activate it automatically whenever
-``tpaexec`` is invoked.
+By default, ``tpaexec setup`` will use the builtin Python 3 ``-m venv``
+to create a venv under ``$TPA_DIR/tpa-venv``, and activate it
+automatically whenever ``tpaexec`` is invoked.
 
-You can run ``tpaexec setup --virtualenv /other/location`` to specify a
-different location for the new virtualenv. You can also install packages
-into an existing virtualenv by activating it before you invoke
+You can run ``tpaexec setup --venv /other/location`` to specify a
+different location for the new venv. You can also install packages
+into an existing venv by activating it before you invoke
 ``tpaexec setup``.
 
-We strongly suggest sticking to the default virtualenv location. If you
-use a different location, ``tpaexec`` cannot automatically activate the
-virtualenv; you must do so yourself, for example by adding the following
-line to your .bashrc (or other shell startup scripts):
+We strongly suggest sticking to the default venv location. If you use a
+different location, ``tpaexec`` cannot automatically activate the venv;
+you must do so yourself, for example by adding the following line to
+your .bashrc (or other shell startup scripts):
 
 ```bash
-source /some/virtualenv/bin/activate
+source /some/venv/bin/activate
 ```
