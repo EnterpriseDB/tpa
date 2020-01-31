@@ -61,7 +61,8 @@ $ export ANSIBLE_HOME=/path/to/ansibledir
 The remaining steps from this point onwards are the same as if you had
 installed the tpaexec package.
 
-Install the TPAexec dependencies into an isolated virtualenv:
+The following command will create an isolated Python environment and
+install the TPAexec dependencies:
 
 ```bash
 $ ./tpaexec/bin/tpaexec setup
