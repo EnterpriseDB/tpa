@@ -2,6 +2,14 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v9.2 (unreleased)
+
+This release requires ``tpaexec setup`` to be rerun after installation.
+
+### Major changes
+
+- Require Python 3 on the machine running tpaexec
+
 ## v9.1 (2020-01-20)
 
 This release requires ``tpaexec setup`` to be rerun after installation.
