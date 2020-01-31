@@ -50,15 +50,15 @@ version() {
 }
 
 _python_version() {
-    /usr/bin/env python -c 'import sys; print("%d.%d.%d" % (sys.version_info[0:3]))'
+    /usr/bin/env python3 -c 'import sys; print("%d.%d.%d" % (sys.version_info[0:3]))'
 }
 
 _detect_virtualenv() {
-    /usr/bin/env python -c "import sys; print('virtualenv' if hasattr(sys, 'real_prefix') else 'no virtualenv')"
+    /usr/bin/env python3 -c "import sys; print('virtualenv' if hasattr(sys, 'real_prefix') else 'no virtualenv')"
 }
 
 _ansible_version() {
-    /usr/bin/env python -c 'import ansible.release; print(ansible.release.__version__)'
+    /usr/bin/env python3 -c 'import ansible.release; print(ansible.release.__version__)'
 }
 
 _activate_virtualenv() {

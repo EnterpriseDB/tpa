@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # (c) 2013, Michael Scherer <misc@zarb.org>
 # (c) 2014, Hiroaki Nakamura <hnakamur@gmail.com>
