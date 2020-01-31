@@ -7,13 +7,13 @@
   delegate_to: localhost
   run_once: true
 
-- name: Check for Python 2.7.x and Ansible 2.6.x
+- name: Check for Python 2.7.x and Ansible 2.8.x
   assert:
-    msg: "Python 2.7.x and Ansible 2.6.x are required"
+    msg: "Python 2.7.x and Ansible 2.8.x are required"
     that:
       - ansible_facts.python_version is version('2.7', '>=')
       - ansible_version.major == 2
-      - ansible_version.minor == 6 or ansible_version.minor == 8
+      - ansible_version.minor == 8
   run_once: true
 
 - name: Ensure that local dependencies are installed

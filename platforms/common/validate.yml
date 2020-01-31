@@ -3,10 +3,10 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - assert:
-    msg: "Ansible 2.6.x is required"
+    msg: "Ansible 2.8.x is required"
     that:
       - ansible_version.major == 2
-      - ansible_version.minor == 6 or ansible_version.minor == 8
+      - ansible_version.minor == 8
   tags: prereqs
 
 - import_tasks: validate-compat.yml
