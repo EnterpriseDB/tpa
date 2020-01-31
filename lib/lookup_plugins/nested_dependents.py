@@ -26,9 +26,6 @@
 # item.0 evaluates to the name of each region in turn, and therefore the task
 # iterates over [r1, vpc-r1-1], [r1, vpc-r1-2], [r-2, vpc-r2-1], etc.
 
-from __future__ import (absolute_import, division, print_function)
-__metaclass__ = type
-
 from jinja2.exceptions import UndefinedError
 
 from collections import Iterable

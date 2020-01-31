@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-from __future__ import print_function
-
 import copy
 import boto3
 
