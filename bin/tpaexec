@@ -86,7 +86,7 @@ _create_and_activate_venv() {
         if ! mkdir -p "$vpath"; then
             error "couldn't create $vpath (try ``--venv /other/path`` or use sudo)"
         fi
-        python3 -m venv --system-site-packages "$vpath"
+        python3 -m venv "$vpath"
     fi
 
     _activate_venv "$vpath"
