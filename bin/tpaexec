@@ -126,9 +126,11 @@ _install_pip_packages() {
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
         pip3 install "${pip_args[@]}" -r "$ANSIBLE_HOME/requirements.txt"
     else
-        ANSIBLE_REPO=git+https://github.com/2ndQuadrant/ansible
         if [[ -d $PIP_DIR/ansible ]]; then
             ANSIBLE_REPO=file:$PIP_DIR/ansible
+        else
+            ANSIBLE_REPO=$(mktemp -d /tmp/ansible-XXXXXXXXXX)
+            git clone --depth 1 https://github.com/2ndQuadrant/ansible "$ANSIBLE_REPO"
         fi
         pip3 install "${pip_args[@]}" "$ANSIBLE_REPO"
     fi
