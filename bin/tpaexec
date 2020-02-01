@@ -350,6 +350,7 @@ _tpaexec_info() {
     else
         error "can't find ansible via PATH/ANSIBLE_HOME (did you run 'tpaexec setup'?)"
     fi
+    echo PATH="$PATH"
 }
 
 selftest() {
