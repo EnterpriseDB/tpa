@@ -333,7 +333,7 @@ _tpaexec_info() {
     version
     echo tpaexec="$0"
     echo TPA_DIR="$TPA_DIR"
-    echo "PYTHON=$(command -v python) (v$(_python_version), $(_detect_venv))"
+    echo "PYTHON=$(command -v python3) (v$(_python_version), $(_detect_venv))"
     if [[ -d $TPA_VENV ]]; then
         echo TPA_VENV="$TPA_VENV"
     else
