@@ -333,12 +333,20 @@ _tpaexec_info() {
     version
     echo tpaexec="$0"
     echo TPA_DIR="$TPA_DIR"
-    echo "PYTHON=$(command -v python3) (v$(_python_version), $(_detect_venv))"
+
+    if command -v python3 &>/dev/null; then
+        echo -n PYTHON="$(command -v python3)"
+        echo " (v$(_python_version), $(_detect_venv))"
+    else
+        echo PYTHON=none
+    fi
+
     if [[ -d $TPA_VENV ]]; then
         echo TPA_VENV="$TPA_VENV"
     else
-        echo TPA_VENV=none
+        echo TPA_VENV=none "(did you run tpaexec setup?)"
     fi
+
     if [[ -n "${ANSIBLE_HOME:-}" ]]; then
         echo -n ANSIBLE_HOME="$ANSIBLE_HOME"
         if [[ -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
@@ -350,7 +358,7 @@ _tpaexec_info() {
         echo -n ANSIBLE="$(command -v ansible)"
         echo " (v$(_ansible_version))"
     else
-        error "can't find ansible via PATH/ANSIBLE_HOME (did you run 'tpaexec setup'?)"
+        echo ANSIBLE=none "(did you run tpaexec setup?)"
     fi
 }
 
