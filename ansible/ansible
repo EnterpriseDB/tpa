@@ -23,8 +23,9 @@ fi
 
 export TPA_DIR=${TPA_DIR:-$TOP}
 
-# If we can find a virtualenv located relative to TPA_DIR, we activate
-# it as a convenience.
+# If we can find a venv located relative to TPA_DIR, we activate it as a
+# convenience. (If bin/tpaexec invokes ansible/ansible, it will already
+# be active, but it doesn't matter if we activate it again.)
 
 if [[ -f $TPA_DIR/tpa-venv/bin/activate ]]; then
     set +u
