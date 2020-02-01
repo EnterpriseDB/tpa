@@ -22,7 +22,7 @@ been installed automatically as dependencies if you were installing the
 tpaexec package.)
 
 ```bash
-# Debian or Ubuntu
+# Debian (python3.7) or Ubuntu (python3.6)
 $ sudo apt-get install python3.7 python3-pip python3-venv \
       pwgen openvpn
 

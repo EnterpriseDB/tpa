@@ -8,7 +8,10 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 ### Major changes
 
-- Require Python 3 on the machine running tpaexec
+- Require Python 3.6+ on the machine running tpaexec
+
+- Running ``tpaexec setup`` will now create $TPA_DIR/tpa-venv (it is
+  safe to remove the old tpa-virtualenv directory)
 
 ## v9.1 (2020-01-20)
 

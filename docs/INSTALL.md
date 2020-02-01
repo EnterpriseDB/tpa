@@ -67,12 +67,12 @@ specifically advised to use it, please see the
 
 ## Python environment
 
-At this point, Python, pip, and virtualenv should be available on your
-system. Now you need to set up a Python environment to install the
-Python modules that TPAexec needs.
+At this point, Python and pip should be available on your system. Now
+you need to run ``tpaexec setup`` to create a Python environment and
+install the required Python modules.
 
 ```bash
-# Create a virtualenv and install Python modules (including ansible)
+# Create a venv and install Python modules (including ansible)
 $ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
 ```
 
