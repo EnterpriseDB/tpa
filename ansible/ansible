@@ -27,9 +27,10 @@ export TPA_DIR=${TPA_DIR:-$TOP}
 # convenience. (If bin/tpaexec invokes ansible/ansible, it will already
 # be active, but it doesn't matter if we activate it again.)
 
-if [[ -f $TPA_DIR/tpa-venv/bin/activate ]]; then
+VENV_BIN="$TPA_DIR/tpa-venv/bin"
+if [[ -f $VENV_BIN/activate ]]; then
     set +u
-    source "$TPA_DIR/tpa-venv/bin/activate"
+    source "$VENV_BIN/activate"
     set -u
 fi
 
@@ -56,9 +57,8 @@ export ANSIBLE_CALLBACK_PLUGINS=${ANSIBLE_CALLBACK_PLUGINS:+$ANSIBLE_CALLBACK_PL
 # This script may be invoked through symlinks as ansible, ansible-vault,
 # or ansible-playbook. If ANSIBLE_HOME is set, we expect it to point to
 # a git checkout, and do approximately what hacking/env-setup would do.
-# Otherwise, we just try to run ansible.
+# Otherwise, we just try to run ansible from our venv.
 
-NEWPATH=$PATH
 cmd=$(basename "$0")
 
 if [[ -n "${ANSIBLE_HOME:-}" ]]; then
@@ -72,6 +72,17 @@ if [[ -n "${ANSIBLE_HOME:-}" ]]; then
 
     NEWPATH="$ansidir/bin:$PATH"
     cmd="$ansidir/bin/$cmd"
+elif [[ -x $VENV_BIN/ansible ]]; then
+    NEWPATH="$VENV_BIN:$PATH"
+    cmd="$VENV_BIN/$cmd"
+else
+    echo -n "ERROR: ansible not found" >&2
+    if command -v ansible &>/dev/null; then
+        echo " (won't use $(command -v ansible); did you run tpaexec setup?)" >&2
+    else
+        echo " (did you run tpaexec setup?)" >&2
+    fi
+    exit 1
 fi
 
 PATH="$NEWPATH" $cmd "$@"

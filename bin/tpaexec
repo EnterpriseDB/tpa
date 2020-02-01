@@ -354,11 +354,16 @@ _tpaexec_info() {
         else
             echo " (invalid)"
         fi
-    elif command -v ansible &>/dev/null; then
+    elif [[ "$(command -v ansible)" == $TPA_VENV/bin/ansible ]]; then
         echo -n ANSIBLE="$(command -v ansible)"
         echo " (v$(_ansible_version))"
     else
-        echo ANSIBLE=none "(did you run tpaexec setup?)"
+        echo -n ANSIBLE=none
+        if command -v ansible &>/dev/null; then
+            echo " (won't use $(command -v ansible); run tpaexec setup)"
+        else
+            echo " (did you run tpaexec setup?)"
+        fi
     fi
 }
 
