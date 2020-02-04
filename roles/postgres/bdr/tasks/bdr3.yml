@@ -94,8 +94,8 @@
     bdr_node_group_tuples.rowcount == 0
   vars:
     _options: "{{ bdr_node_group_options|default({}) }}"
-    _keys: "{{ query('flattened', ['node_group_name', _options.keys()]) }}"
-    _values: "{{ query('flattened', [bdr_node_group, _options.values()]) }}"
+    _keys: "{{ query('flattened', ['node_group_name', _options.keys()|list]) }}"
+    _values: "{{ query('flattened', [bdr_node_group, _options.values()|list]) }}"
     _option_string: >
       {{ _keys|map('apply_format', '{0} := %s')|list|join(', ') }}
 
