@@ -218,7 +218,7 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults, locati
 
         role = j.get('role', [])
         if not isinstance(role, list):
-            role = map(lambda x: x.strip(), role.split(","))
+            role = list(map(lambda x: x.strip(), role.split(",")))
 
         # primary/replica instances must also be tagged 'postgres'.
 
