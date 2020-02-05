@@ -30,6 +30,6 @@
     - bdr_application
   when: >
     ('postgres' in role or 'haproxy' in role) and
-    groups['role_haproxy']
+    groups['role_haproxy']|default([])
     |map('extract', hostvars, 'haproxy_backends_need_queue_checks')
     |select('equalto', true)|list is not empty
