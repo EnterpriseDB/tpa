@@ -60,7 +60,7 @@
     'replica' in role
   vars:
     all_hostvars:
-      h: "{{ hostvars.values() }}"
+      h: "{{ hostvars.values()|list }}"
     all_cluster_facts: >
       {{ all_hostvars|json_query('h[*].cluster_facts') }}
     inactive_slots: >
