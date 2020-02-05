@@ -130,7 +130,7 @@ while test_valid:
     cur_local.execute(myquery)
     table_exists=cur_local.fetchone()
     if table_exists and not all_committed:
-        if long(csvRow[1]) == csvRow[3] == csvRow[8]:
+        if int(csvRow[1]) == csvRow[3] == csvRow[8]:
             all_committed = True
         test_valid = 1
         time.sleep(3)

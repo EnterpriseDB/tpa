@@ -172,7 +172,7 @@ def dbname(conninfo, dbname='postgres', **kwargs):
 
 def from_csv(line, column_names):
     for values in csv.reader([line]):
-        return dict(zip(column_names, values))
+        return dict(list(zip(column_names, values)))
 
 # Formats the given value using Python's .format() function, passing on any
 # additional arguments, e.g., ``'{a} and {b}'|format(a=42, b='xyzzy')``.

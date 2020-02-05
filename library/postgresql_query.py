@@ -167,7 +167,7 @@ def main():
             if cur.description is not None:
                 column_names = [desc[0] for desc in cur.description]
                 for row in cur:
-                    res.append(dict(zip(column_names, row)))
+                    res.append(dict(list(zip(column_names, row))))
             elif cur.rowcount:
                 changed=True
 

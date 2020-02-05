@@ -342,7 +342,7 @@ def query_results(conn, query):
     cur.execute(query)
     column_names = [desc[0] for desc in cur.description]
     for row in cur:
-        res.append(dict(zip(column_names, row)))
+        res.append(dict(list(zip(column_names, row))))
     return res
 
 def cast_interval(value, cur):
