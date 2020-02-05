@@ -87,14 +87,14 @@
       h: "{{ hostvars.values() }}"
     all_cluster_facts: >
       {{ all_hostvars|json_query('h[*].cluster_facts') }}
-    existing_slots: >
+    existing_slots: >-
       {{
         cluster_facts|json_query('pg_replication_slots[*].slot_name')
       }}
-    expected_slots: >
+    expected_slots: >-
       {{
         all_cluster_facts|json_query(
           "[?replica.primary_conninfo_parts.host=='" + inventory_hostname + "']"
           + ".replica.primary_slot_name"
-        )
+        ) or []
       }}
