@@ -4,30 +4,55 @@
 # This is an ansible module that takes no arguments and returns only
 # some distribution-specific facts.
 
+set -u
+
 declare -A families pkg_mgrs
 families=([Debian]=Debian [RedHat]=RedHat [Ubuntu]=Debian)
-pkg_mgrs=([Debian]=apt [RedHat]=yum)
+pkg_mgrs=([Debian]=apt [RedHat]=dnf)
 
-if [[ -f /etc/redhat-release ]]; then
-    distribution=RedHat
-elif type lsb_release &>/dev/null; then
-    mapfile -t lines < <(lsb_release -ics)
-    distribution=${lines[0]}
-    release=${lines[1]}
-fi
+. /etc/os-release
 
-os_family=${families[$distribution]}
-pkg_mgr=${pkg_mgrs[$os_family]}
+version=$VERSION_ID
+major_version=${VERSION_ID%.*}
+
+case "$ID" in
+    debian)
+        distribution=Debian
+        release=${VERSION_CODENAME:-''}
+        if [[ -z $release && $VERSION_ID == 8 ]]; then
+            release=jessie
+        fi
+        ;;
+    ubuntu)
+        distribution=Ubuntu
+        release=$VERSION_CODENAME
+        ;;
+    rhel|centos)
+        distribution=RedHat
+        release=$VERSION_ID
+        if [[ $major_version == 7 ]]; then
+            pkg_mgr=yum
+        fi
+        ;;
+    *)
+        distribution=Unknown
+        ;;
+esac
+
+os_family=${os_family:-${families[$distribution]}}
+pkg_mgr=${pkg_mgr:-${pkg_mgrs[$os_family]}}
 
 grep -Ev '": ""' <<RESULT
 {
     "changed": false,
     "ansible_facts": {
+        "ansible_os_family": "$os_family",
         "ansible_distribution": "$distribution",
         "ansible_distribution_release": "$release",
-        "ansible_os_family": "$os_family",
-        "ansible_pkg_mgr": "$pkg_mgr",
-        "ansible_service_mgr": "systemd"
+        "ansible_distribution_version": "$version",
+        "ansible_distribution_major_version": "$major_version",
+        "ansible_service_mgr": "${service_mgr:-systemd}",
+        "ansible_pkg_mgr": "$pkg_mgr"
     }
 }
 RESULT
