@@ -182,13 +182,17 @@ class Architecture(object):
         repos = args.get('tpa_2q_repositories') or []
         for r in repos:
             errors = []
-            (source, name, maturity) = r.split('/')
-            if source not in ['ci-spool', 'products', 'dl']:
-                errors.append("unknown source '%s' (try 'dl', 'products', or 'ci-spool')" % source)
-            if name not in self.product_repositories():
-                errors.append("unknown product name '%s'" % name)
-            if maturity not in ['snapshot', 'testing', 'release']:
-                errors.append("unknown maturity '%s' (try 'release', 'testing', or 'snapshot')" % maturity)
+            parts = r.split('/')
+            if len(parts) == 3:
+                (source, name, maturity) = parts
+                if source not in ['ci-spool', 'products', 'dl']:
+                    errors.append("unknown source '%s' (try 'dl', 'products', or 'ci-spool')" % source)
+                if name not in self.product_repositories():
+                    errors.append("unknown product name '%s'" % name)
+                if maturity not in ['snapshot', 'testing', 'release']:
+                    errors.append("unknown maturity '%s' (try 'release', 'testing', or 'snapshot')" % maturity)
+            else:
+                errors.append("invalid name (expected source/product/maturity)")
 
             if errors:
                 for e in errors:
