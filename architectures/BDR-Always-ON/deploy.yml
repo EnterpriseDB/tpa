@@ -30,9 +30,6 @@
   - include_role: name=barman
     tags: always
 
-  - include_role: name=repmgr
-    tags: always
-
   - include_role: name=pgbouncer
     tags: always
 

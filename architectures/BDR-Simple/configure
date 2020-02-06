@@ -93,7 +93,6 @@ class BDR_Simple(BDR):
                 tpa_2q_repositories.append('products/pglogical3/release')
 
         cluster_vars.update({
-            'repmgr_failover': 'manual',
             'postgres_coredump_filter': '0xff',
             'postgres_version': postgres_version,
             'postgresql_flavour': postgresql_flavour,
