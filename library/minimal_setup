@@ -4,8 +4,6 @@
 # This is an ansible module that takes no arguments and returns only
 # some distribution-specific facts.
 
-set -u
-
 declare -A families pkg_mgrs
 families=([Debian]=Debian [RedHat]=RedHat [Ubuntu]=Debian)
 pkg_mgrs=([Debian]=apt [RedHat]=dnf)
@@ -15,44 +13,56 @@ pkg_mgrs=([Debian]=apt [RedHat]=dnf)
 version=$VERSION_ID
 major_version=${VERSION_ID%.*}
 
-case "$ID" in
-    debian)
-        distribution=Debian
-        release=${VERSION_CODENAME:-''}
-        if [[ -z $release && $VERSION_ID == 8 ]]; then
-            release=jessie
-        fi
-        ;;
-    ubuntu)
-        distribution=Ubuntu
-        release=$VERSION_CODENAME
-        ;;
-    rhel|centos)
+case "${ID}:${VERSION_ID%.*}" in
+    rhel:7|centos:7)
         distribution=RedHat
         release=$VERSION_ID
-        if [[ $major_version == 7 ]]; then
-            pkg_mgr=yum
-        fi
+        python=python2
+        pkg_mgr=yum
+        ;;
+    debian:8)
+        distribution=Debian
+        release=jessie
+        python=python2
+        ;;
+    debian:9|debian:10)
+        distribution=Debian
+        release=$VERSION_CODENAME
+        python=python3
+        ;;
+    ubuntu:16|ubuntu:18)
+        distribution=Ubuntu
+        release=$VERSION_CODENAME
+        python=python3
+        ;;
+    rhel:8|centos:8)
+        distribution=RedHat
+        release=$VERSION_ID
+        python=python3
         ;;
     *)
-        distribution=Unknown
+        cat <<RESULT
+        {"failed": true, "msg": "Unsupported distribution: ${ID}:${VERSION_ID}"}
+RESULT
+        exit 0
         ;;
 esac
 
 os_family=${os_family:-${families[$distribution]}}
 pkg_mgr=${pkg_mgr:-${pkg_mgrs[$os_family]}}
+service_mgr=${service_mgr:-systemd}
 
 grep -Ev '": ""' <<RESULT
 {
-    "changed": false,
     "ansible_facts": {
         "ansible_os_family": "$os_family",
         "ansible_distribution": "$distribution",
         "ansible_distribution_release": "$release",
         "ansible_distribution_version": "$version",
         "ansible_distribution_major_version": "$major_version",
-        "ansible_service_mgr": "${service_mgr:-systemd}",
-        "ansible_pkg_mgr": "$pkg_mgr"
+        "ansible_service_mgr": "$service_mgr",
+        "ansible_pkg_mgr": "$pkg_mgr",
+        "python": "$python"
     }
 }
 RESULT
