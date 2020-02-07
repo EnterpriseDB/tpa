@@ -57,6 +57,7 @@ grep -Ev '": ""' <<RESULT
     "ansible_facts": {
         "ansible_os_family": "$os_family",
         "ansible_distribution": "$distribution",
+        "ansible_distribution_id": "$ID",
         "ansible_distribution_release": "$release",
         "ansible_distribution_version": "$version",
         "ansible_distribution_major_version": "$major_version",
