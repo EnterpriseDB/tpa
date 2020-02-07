@@ -22,7 +22,12 @@ yum_repositories: {}
 default_yum_repositories:
   EPEL:
     rpm_url: >-
-      {{ (ansible_distribution_id == 'centos')|ternary('epel-release', 'https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm') }}
+      {{
+        (ansible_distribution_id == 'centos')|ternary(
+          'epel-release',
+          'https://dl.fedoraproject.org/pub/epel/epel-release-latest-%s.noarch.rpm' % ansible_distribution_major_version
+        )
+      }}
 
   PGDG:
     rpm_url: >-
