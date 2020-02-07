@@ -2,24 +2,26 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Install Python 2.7
-  raw: yum -y install python2
+- name: Install Python
+  raw: command -v {{ python }} >/dev/null 2>&1 || yum -y install {{ (python == 'python2')|ternary('python', 'python3') }}; true
   environment: {}
   register: python_install
   changed_when: >
     python_install is successful
-    and 'already installed and latest version' not in python_install.stdout
+    and python_install.stdout.strip() != ''
+    and 'already installed' not in python_install.stdout
 
 - name: Install backports.ssl_match_hostname
   raw: >
-    if [ $(python -c 'import sys; print("old" if sys.version_info < (2,7,9) else "ok")') != "ok" ];
-    then yum -y install python-backports-ssl_match_hostname;
+    if [ $({{ python }} -c 'import sys; print("old" if sys.version_info < (2,7,9) else "ok")') != "ok" ];
+    then {{ python }} -c 'import backports.ssl_match_hostname' >/dev/null 2>&1 || yum -y install python-backports-ssl_match_hostname; true;
     fi
   args:
     executable: /bin/sh
   environment: {}
   register: backport_install
+  when: python == 'python2'
   changed_when: >
     backport_install is successful
-    and 'already installed and latest version' not in backport_install.stdout
     and backport_install.stdout.strip() != ''
+    and 'already installed' not in backport_install.stdout
