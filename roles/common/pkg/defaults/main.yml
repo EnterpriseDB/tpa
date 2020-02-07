@@ -77,26 +77,24 @@ default_packages:
     - rsyslog
     - socat
     - lsof
+    - "{{ python_pkg_prefix }}-virtualenv"
   Debian:
-    - "{{ (ansible_distribution_release == 'jessie')|ternary('python', python) }}-dev"
+    - "{{ python_pkg_prefix }}-dev"
     - "{{ (ansible_distribution_release == 'jessie')|ternary('linux-tools', 'linux-perf') }}"
     - dbus
     - gnutls-bin
     - openssh-client
-    - "{{ (ansible_distribution_release == 'jessie')|ternary('python', python) }}-virtualenv"
   RedHat:
-    - "{{ python }}-devel"
+    - "{{ python_pkg_prefix }}-devel"
     - perf
     - gnutls-utils
     - "policycoreutils-python{% if ansible_distribution_major_version == '8' %}-utils{% endif %}"
-    - "{{ python }}-virtualenv"
     - openssh
   Ubuntu:
-    - "{{ python }}-dev"
+    - "{{ python_pkg_prefix }}-dev"
     - linux-tools-generic
     - gnutls-bin
     - openssh-client
-    - "{{ python }}-virtualenv"
 
 optional_packages: {}
 default_optional_packages:

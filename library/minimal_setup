@@ -24,6 +24,7 @@ case "${ID}:${VERSION_ID%.*}" in
         distribution=Debian
         release=jessie
         python=python2
+        python_pkg_prefix=python
         ;;
     debian:9|debian:10)
         distribution=Debian
@@ -49,6 +50,7 @@ RESULT
 esac
 
 os_family=${os_family:-${families[$distribution]}}
+python_pkg_prefix=${python_pkg_prefix:-$python}
 pkg_mgr=${pkg_mgr:-${pkg_mgrs[$os_family]}}
 service_mgr=${service_mgr:-systemd}
 
@@ -63,6 +65,7 @@ grep -Ev '": ""' <<RESULT
         "ansible_distribution_major_version": "$major_version",
         "ansible_service_mgr": "$service_mgr",
         "ansible_pkg_mgr": "$pkg_mgr",
+        "python_pkg_prefix": "$python_pkg_prefix",
         "python": "$python"
     }
 }

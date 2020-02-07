@@ -42,7 +42,7 @@ pgxl_install_targets:
   - "-C contrib install"
 
 #
-# We install the python-psycopg2 package (because we need it to use
+# We install the psycopg2 package (because we need it to use
 # Ansible's postgresql_* modules). This is a duplication from the
 # postgres/pkg module, but that module does a lot more unnecessary
 # stuff which does not make sense for postgres-xl
@@ -51,6 +51,6 @@ pgxl_install_targets:
 # package name differs in the future
 pgxl_extra_packages:
   Debian: &debian_packages
-    - python-psycopg2
+    - "{{ python_pkg_prefix }}-psycopg2"
   RedHat: *debian_packages
   Ubuntu: *debian_packages
