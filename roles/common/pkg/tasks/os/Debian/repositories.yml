@@ -34,17 +34,11 @@
     that: item in default_apt_repositories|combine(apt_repositories)
   with_items: "{{ apt_repository_list }}"
 
-# We need to support https://user:pass@host/… key and repository URLs,
-# which work only if we enable force_basic_auth for fetch_url(). Since
-# the default apt_key module does not allow this, we use a local copy
-# that forwards the parameter.
-
 - name: Install apt repository signing keys
   apt_key:
     id: "{{ r.key_id }}"
     url: "{{ r.key_url }}"
     state: present
-    force_basic_auth: yes
   with_items: "{{ apt_repository_list }}"
   vars:
     repos: "{{ default_apt_repositories|combine(apt_repositories) }}"

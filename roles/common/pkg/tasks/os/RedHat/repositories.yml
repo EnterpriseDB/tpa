@@ -26,16 +26,10 @@
     that: item in default_yum_repositories|combine(yum_repositories)
   with_items: "{{ yum_repository_list }}"
 
-# We need to support https://user:pass@host/… key and repository URLs,
-# which work only if we enable force_basic_auth for fetch_url(). Since
-# the default yum module does not allow this, we use a local copy that
-# forwards the parameter.
-
 - name: Install YUM repository packages
   yum:
     name: "{{ r.rpm_url }}"
     state: present
-    force_basic_auth: yes
   with_items: "{{ yum_repository_list }}"
   vars:
     repos: "{{ default_yum_repositories|combine(yum_repositories) }}"
