@@ -28,7 +28,7 @@ case "${ID}:${VERSION_ID%.*}" in
         ;;
     debian:9|debian:10)
         distribution=Debian
-        release=$VERSION_CODENAME
+        release=${VERSION_CODENAME:-stretch}
         python=python3
         ;;
     ubuntu:16|ubuntu:18)
