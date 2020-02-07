@@ -94,16 +94,19 @@
     poll: 0
 
 
-  - name: Copy files
-    copy:
-      src: run_time_check.py
-      dest: /tmp/
+  - name: Install run_time_check.py
+    template:
+      src: run_time_check.py.j2
+      dest: /tmp/run_time_check.py
+      owner: postgres
+      group: postgres
+      mode: 0755
     become_user: postgres
     become: yes
 
   - name: Start run_time_check script
     shell: >
-      python run_time_check.py 
+      /tmp/run_time_check.py 
       "{{ hostvars[ping].bdr_node_dsn }}"
       "{{ hostvars[pong].bdr_node_dsn }}"
       "{{ bdr_node_dsn }}"
