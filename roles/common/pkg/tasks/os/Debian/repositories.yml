@@ -11,19 +11,21 @@
     and 'already the newest version' not in ath_install.stdout
 
 - name: Install curl to fetch repository files
-  raw: apt-get -q -y install curl
+  raw: command -v curl >/dev/null 2>&1 || apt-get -q -y install curl; true
   environment: {}
   register: curl_install
   changed_when: >
     curl_install is successful
+    and curl_install.stdout.strip() != ''
     and 'already the newest version' not in curl_install.stdout
 
 - name: Install gpg to install apt repository keys
-  raw: apt-get -q -y install gnupg2
+  raw: command -v gpg >/dev/null 2>&1 || apt-get -q -y install gnupg2; true
   environment: {}
   register: gpg_install
   changed_when: >
     gpg_install is successful
+    and gpg_install.stdout.strip() != ''
     and 'already the newest version' not in gpg_install.stdout
 
 - name: Ensure repository list is defined

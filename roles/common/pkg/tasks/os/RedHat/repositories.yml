@@ -3,20 +3,22 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - name: Install gpg
-  raw: yum -y install gnupg2
+  raw: command -v gpg >/dev/null 2>&1 || yum -y install gnupg2; true
   environment: {}
   register: gpg_install
   changed_when: >
     gpg_install is successful
-    and 'already installed and latest version' not in gpg_install.stdout
+    and gpg_install.stdout.strip() != ''
+    and 'already installed' not in gpg_install.stdout
 
 - name: Install curl
-  raw: yum -y install curl
+  raw: command -v curl >/dev/null 2>&1 || yum -y install curl; true
   environment: {}
   register: curl_install
   changed_when: >
     curl_install is successful
-    and 'already installed and latest version' not in curl_install.stdout
+    and curl_install.stdout.strip() != ''
+    and 'already installed' not in curl_install.stdout
 
 - name: Ensure repository list is defined
   assert:
