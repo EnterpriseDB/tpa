@@ -58,6 +58,22 @@
   - updates
   when: ansible_distribution_id == "centos"
 
+- name: Disable builtin postgresql module for DNF
+  shell: >
+    if [[ -f {{ _module }} ]]; then
+      if ! grep -qx state=disabled {{ _module }}; then
+        dnf -qy module disable postgresql;
+        echo ok;
+      fi;
+    fi
+  args:
+    executable: /bin/bash
+  vars:
+    _module: /etc/dnf/modules.d/postgresql.module
+  register: dnfmod
+  changed_when: >
+    dnfmod.stdout.strip() == 'ok'
+
 - name: Disable PGDG repos for versions other than {{ postgres_version }}
   ini_file:
     dest: /etc/yum.repos.d/pgdg-redhat-all.repo
