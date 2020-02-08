@@ -41,5 +41,3 @@
 
 - include_tasks: packages.yml
   tags: always
-- include_tasks: python.yml
-  tags: always
