@@ -45,6 +45,18 @@
     section: main
     option: exclude
     value: "postgresql* barman* repmgr*"
+  when: ansible_distribution_id == "rhel"
+
+- name: Exclude postgresql packages from the base repository
+  ini_file:
+    dest: /etc/yum.repos.d/CentOS-Base.repo
+    section: "{{ item }}"
+    option: exclude
+    value: "postgresql* barman* repmgr*"
+  with_items:
+  - base
+  - updates
+  when: ansible_distribution_id == "centos"
 
 - name: Disable PGDG repos for versions other than {{ postgres_version }}
   ini_file:
