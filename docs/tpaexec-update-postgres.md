@@ -41,7 +41,7 @@ If your environment requires additional actions, the
 allow you to execute custom Ansible tasks before and after the package
 installation step.
 
-(The above also applies to CAMO2x2 and BDR-Simple architectures.)
+(The above also applies to the BDR-Simple architecture.)
 
 ## M1
 

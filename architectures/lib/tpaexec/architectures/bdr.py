@@ -16,11 +16,10 @@ class BDR(Architecture):
             help='name of BDR-enabled database',
             default='bdrdb',
         )
-        if self.name != 'CAMO2x2':
-            g.add_argument(
-                '--enable-camo', action='store_true',
-                help='assign instances pairwise as CAMO partners'
-            )
+        g.add_argument(
+            '--enable-camo', action='store_true',
+            help='assign instances pairwise as CAMO partners'
+        )
 
     def cluster_vars_args(self):
         return super(BDR, self).cluster_vars_args() + [

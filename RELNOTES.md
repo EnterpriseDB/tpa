@@ -2,6 +2,12 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v20.5 (unreleased)
+
+### Notable changes
+
+- Remove the CAMO2x2 architecture (use BDR-Always-ON instead)
+
 ## v20.4 (2020-04-30)
 
 This release of TPAexec would have been v9.4, but has been renumbered in

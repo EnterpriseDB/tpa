@@ -13,7 +13,6 @@ nav:
     - Testing: tpaexec-test.md
   - Architectures:
     - M1: architecture-M1.md
-    - CAMO2x2: architecture-CAMO2x2.md
     - BDR-Always-ON: architecture-BDR-Always-ON.md
     - BDR-Simple: architecture-BDR-Simple.md
   - Platforms:

@@ -1,1 +1,0 @@
-../../docs/architecture-CAMO2x2.md
