@@ -4,6 +4,8 @@
 # This is an ansible module that takes no arguments and returns only
 # some distribution-specific facts.
 
+source "$1"
+
 declare -A families pkg_mgrs
 families=([Debian]=Debian [RedHat]=RedHat [Ubuntu]=Debian)
 pkg_mgrs=([Debian]=apt [RedHat]=dnf)
@@ -29,12 +31,18 @@ case "${ID}:${VERSION_ID%.*}" in
     debian:9|debian:10)
         distribution=Debian
         release=${VERSION_CODENAME:-stretch}
-        python=python3
+        python=${preferred_python_version:-python3}
+        if [[ $python == "python2" ]]; then
+            python_pkg_prefix=python
+        fi
         ;;
     ubuntu:16|ubuntu:18)
         distribution=Ubuntu
         release=$VERSION_CODENAME
-        python=python3
+        python=${preferred_python_version:-python3}
+        if [[ $python == "python2" ]]; then
+            python_pkg_prefix=python
+        fi
         ;;
     rhel:8|centos:8)
         distribution=RedHat

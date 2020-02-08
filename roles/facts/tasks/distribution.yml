@@ -10,6 +10,7 @@
 # We can't rely on there being a usable Python installed yet.
 
 - minimal_setup:
+    preferred_python_version: "{{ preferred_python_version|default('python2') }}"
 
 - name: Ensure ansible_distribution is supported
   assert:

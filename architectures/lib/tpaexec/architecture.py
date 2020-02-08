@@ -397,6 +397,8 @@ class Architecture(object):
 
     # Makes changes to cluster_vars applicable across architectures
     def _init_cluster_vars(self, cluster_vars):
+        cluster_vars['preferred_python_version'] = 'python3'
+
         for k in self.cluster_vars_args():
             val = self.args.get(k)
             if val is not None:
