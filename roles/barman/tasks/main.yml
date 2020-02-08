@@ -57,7 +57,7 @@
     ssh_username: "{{ postgres_user }}"
     ssh_key_name: id_barman
   when: >
-    'postgres' in role or 'postgres-xl' in role
+    'postgres' in role
   tags: always
 
 # The barman and streaming_barman users must be created on any primary

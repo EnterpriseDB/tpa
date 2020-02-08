@@ -354,7 +354,7 @@ instances:
 | region:          | AWS region for the host to be created in                     |
 | subnet:          | Subnet for this host                                         |
 | volumes:         | (Optional) OS specific parameters for creating volumes--in this case a gp2 32GB striped volume, mounted on the default PGDATA location /opt/postgres/data |
-| role:            | **primary** - Used to define the server role (may be multiple)--in this case the db primary. Role names include: **primary, replica, barman, witness, log-server, openvpn-server, bdr, postgres-xl, coordinator, datanode, coordinator-replica, datanode-replica, gtm, gtm-standby, pgbouncer, postgres**. |
+| role:            | **primary** - Used to define the server role (may be multiple)--in this case the db primary. Role names include: **primary, replica, barman, witness, log-server, openvpn-server, bdr, pgbouncer, postgres**. |
 | vars:            | Used to override postgresql.conf variables. Note, these are actually set in **0001-tpa_restart.conf** (In Debian under /opt/postgres/data/conf.d/ ) |
 | max_connections: | Maximum connections to database                              |
 | shared_buffers:  | Memory dedicated to PostgreSQL to use for caching data       |
@@ -437,7 +437,7 @@ instances:
 | Parameter:       | Description                              |
 | ---------------- | ---------------------------------------- |
 | - node:          | **4** - Node number for this host        |
-| role:            | Used to define the server role (may be multiple). Role names include: **primary, replica, barman, witness, log-server, openvpn-server, bdr, postgres-xl, coordinator, datanode, coordinator-replica, datanode-replica, gtm, gtm-standby, pgbouncer, postgres**. |
+| role:            | Used to define the server role (may be multiple). Role names include: **primary, replica, barman, witness, log-server, openvpn-server, bdr, pgbouncer, postgres**. |
 | - barman         | Installs and configures Barman.          |
 | - witness        | Registers this node as a witness.        |
 | - log-server     | Defines this server as a log server, and makes every other server log to it. |

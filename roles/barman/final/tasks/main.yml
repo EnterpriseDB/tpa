@@ -2,15 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# This would ordinarily happen in postgres/final, but it's repeated here
-# for Postgres-XL clusters that don't apply that role.
-
-- include_role: name=postgres/createuser/final
-  when: >
-    backup is defined and
-    ('coordinator' in role or 'postgres' in role) and'replica' not in role
-  tags: always
-
 - include_tasks: server.yml
   when: >
     'barman' in role

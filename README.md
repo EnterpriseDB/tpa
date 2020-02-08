@@ -25,8 +25,8 @@ With TPAexec, you can:
 2. Configure the operating system (tweak kernel settings, install
    packages, create users, set up password-less ssh between hosts…)
 
-3. Deploy Postgres, Postgres-BDR, or Postgres-XL (from source or
-   packages), Postgres extensions, repmgr and Barman, etc.
+3. Deploy Postgres, BDR, pglogical, Postgres extensions (from source or
+   packages), repmgr and Barman, etc.
 
 4. Run automated tests on the cluster after deployment
 

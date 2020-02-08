@@ -17,15 +17,6 @@
   when: >
     role|intersect(['primary', 'replica', 'witness', 'bdr']) is not empty
 
-# Add 'postgres-xl' to role when any of 'coordinator' or 'datanode'
-# or 'coordinator-replica' or 'datanode-replica' or 'gtm' or
-# 'gtm-standby' is given
-
-- set_fact:
-    role: "{{ role|union(['postgres-xl']) }}"
-  when: >
-    role|intersect(['coordinator', 'datanode', 'coordinator-replica', 'datanode-replica', 'gtm', 'gtm-standby']) is not empty
-
 - set_fact:
     role: "{{ role|union(['readonly']) }}"
   when: >
