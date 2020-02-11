@@ -60,7 +60,7 @@
 
 - name: Disable builtin postgresql module for DNF
   shell: >
-    if [[ -f {{ _module }} ]]; then
+    if [[ -d /etc/dnf/modules.d ]]; then
       if ! grep -qx state=disabled {{ _module }}; then
         dnf -qy module disable postgresql;
         echo ok;
