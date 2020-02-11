@@ -10,8 +10,21 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 - Require Python 3.6+ on the machine running tpaexec
 
+- Optionally support Python 3 (``preferred_python_version: python3``) on
+  target instances that run one of the following distributions:
+
+  * Debian 9 (stretch)
+  * Debian 10 (buster)
+  * Ubuntu 16.04 (xenial)
+  * Ubuntu 18.04 (bionic)
+
+- Existing servers continue to work unmodified with Python 2.7
+
 - Running ``tpaexec setup`` will now create $TPA_DIR/tpa-venv (it is
   safe to remove the old tpa-virtualenv directory)
+
+- Require 2ndQuadrant ansible to be installed via ``tpaexec setup``, and
+  ignore any other Ansible installation in $PATH
 
 ## v9.1 (2020-01-20)
 
