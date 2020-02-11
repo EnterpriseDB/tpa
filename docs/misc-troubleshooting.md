@@ -1,15 +1,15 @@
 # Troubleshooting
 
-### Recreate python virtualenv
+### Recreate python virtual environment
 
-Occasionally the python virtualenv can get in an inconsistent state, in which case the easiest solution is to delete and recreate it. Symptoms of a broken virtualenv can include errors during provisioning like:
+Occasionally the python venv can get in an inconsistent state, in which case the easiest solution is to delete and recreate it. Symptoms of a broken venv can include errors during provisioning like:
 
 ```
 TASK [Write Vagrantfile and firstboot.sh] ******************************************************************************************************************************
 failed: [localhost] (item=Vagrantfile) => {"changed": false, "checksum": "bf1403a17d897b68fa8137784d298d4da36fb7f9", "item": "Vagrantfile", "msg": "Aborting, target uses selinux but python bindings (libselinux-python) aren't installed!"}
 ```
 
-To create a new virtualenv (assuming tpaexec was installed into the default location):
+To create a new virtual environment (assuming tpaexec was installed into the default location):
 
 ```
 [tpa]$ sudo rm -rf /opt/2ndQuadrant/TPA/tpa-venv
