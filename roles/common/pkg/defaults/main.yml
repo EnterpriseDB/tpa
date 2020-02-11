@@ -77,7 +77,6 @@ default_packages:
     - rsyslog
     - socat
     - lsof
-    - "{{ python_pkg_prefix }}-virtualenv"
   Debian:
     - "{{ python_pkg_prefix }}-dev"
     - "{{ (ansible_distribution_release == 'jessie')|ternary('linux-tools', 'linux-perf') }}"
