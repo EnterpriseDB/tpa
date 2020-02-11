@@ -27,7 +27,7 @@ if len(have) < len(want):
     missing = [x for x in want if x not in have]
     print('ERROR: missing Python modules: ' + ', '.join(missing))
     if not hasattr(sys, 'real_prefix'):
-        print('NOTE: %s is not running under a virtualenv' % sys.executable)
+        print('NOTE: %s is not running under a venv' % sys.executable)
     sys.exit(-1)
 
 sys.exit(0)
