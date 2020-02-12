@@ -19,6 +19,7 @@
     mode: 0640
   notify:
     - Note pgbouncer restart required
+  tags: [ini]
 
 - name: Install pgbouncer.databases.ini
   template:
@@ -29,6 +30,7 @@
     mode: 0640
   notify:
     - Note pgbouncer restart required
+  tags: [ini, databases.ini]
 
 - name: Install userlist.txt
   template:
