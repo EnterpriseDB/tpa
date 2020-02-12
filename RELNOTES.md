@@ -18,7 +18,10 @@ This release requires ``tpaexec setup`` to be rerun after installation.
   * Ubuntu 16.04 (xenial)
   * Ubuntu 18.04 (bionic)
 
-- Existing servers continue to work unmodified with Python 2.7
+- Existing clusters continue to work unmodified with Python 2.7
+
+- Newly-configured clusters use Python 3 by default wherever available;
+  set ``preferred_python_version: python2`` to undo this
 
 - Running ``tpaexec setup`` will now create $TPA_DIR/tpa-venv (it is
   safe to remove the old tpa-virtualenv directory)
