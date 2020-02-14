@@ -12,20 +12,19 @@
 
 - include_role:
     name: haproxy/config
-    tasks_from: users.yml
     apply:
-      tags: haproxy
+      tags: [haproxy, config]
   when: >
-    'postgres' in role or
     'haproxy' in role
   tags: always
 
 - include_role:
     name: haproxy/config
+    tasks_from: users.yml
     apply:
-      tags: haproxy
+      tags: [haproxy, config, users]
   when: >
-    'haproxy' in role
+    'postgres' in role
   tags: always
 
 - set_fact: initialise_haproxy=True
