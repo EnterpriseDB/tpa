@@ -46,6 +46,7 @@
   include_tasks: preload-library.yml
   when: library in postgres_extensions|default([])
   with_items:
+    - platypus
     - pg_stat_statements
     - pglogical
     - bdr

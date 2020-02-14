@@ -157,3 +157,12 @@
     }}"
   when: >
     'postgres' in role
+
+- name: Define platypus configuration settings
+  set_fact:
+    platypus_port: "{{ platypus_port|default(6400) }}"
+    platypus_database: "{{
+      platypus_database|default(
+        ('bdr' in role)|ternary(bdr_database, 'postgres')
+      )
+    }}"

@@ -19,6 +19,19 @@ pg_stat_statements.track = all
 pg_stat_statements.track_utility = on
 pg_stat_statements.save = on
 
+{% if 'platypus' in postgres_extensions %}
+## platypus
+
+platypus.port = {{ platypus_port }}
+platypus.database = {{ platypus_database }}
+{% if platypus_bind is defined %}
+platypus.bind = {{ platypus_bind }}
+{% endif %}
+{% if platypus_idle_timeout is defined %}
+platypus.idle_timeout = '{{ platypus_idle_timeout }}ms'
+{% endif %}
+{% endif %}
+
 ## pglogical
 ## bdr
 #
