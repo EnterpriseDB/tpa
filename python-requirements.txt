@@ -1,5 +1,5 @@
 Jinja2
-PyYAML>=5.1
+PyYAML<5.3,>=5.1
 cryptography
 python-dateutil
 netaddr
