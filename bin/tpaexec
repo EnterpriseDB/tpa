@@ -58,6 +58,12 @@ _detect_venv() {
     python3 -c "import sys; print('venv' if hasattr(sys, 'real_prefix') or sys.base_prefix != sys.prefix else 'no venv')"
 }
 
+_detect_pyenv() {
+    if command -v pyenv &>/dev/null && [[ "$(command -v python)" == "$(pyenv root)/shims/python" ]]; then
+        echo "pyenv"
+    fi
+}
+
 _ansible_version() {
     python3 -c 'import ansible.release; print(ansible.release.__version__)'
 }
@@ -71,11 +77,12 @@ _activate_venv() {
 }
 
 _create_and_activate_venv() {
-    # If we're inside an activated venv already, we don't need to
-    # do anything here.
+    # If we're inside an activated venv already, we don't need to do
+    # anything here. However, if we're running inside pyenv, we create
+    # our own venv anyway.
 
-    if [[ "$(_detect_venv)" == "venv" ]]; then
-        return
+    if [[ "$(_detect_venv)" == "venv" && "$(_detect_pyenv)" == "" ]]; then
+        return;
     fi
 
     # If no venv exists, we have to create it before we try to
