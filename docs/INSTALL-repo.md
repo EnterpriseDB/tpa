@@ -90,9 +90,7 @@ to create a venv under ``$TPA_DIR/tpa-venv``, and activate it
 automatically whenever ``tpaexec`` is invoked.
 
 You can run ``tpaexec setup --venv /other/location`` to specify a
-different location for the new venv. You can also install packages
-into an existing venv by activating it before you invoke
-``tpaexec setup``.
+different location for the new venv.
 
 We strongly suggest sticking to the default venv location. If you use a
 different location, ``tpaexec`` cannot automatically activate the venv;

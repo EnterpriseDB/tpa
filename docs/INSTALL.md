@@ -67,20 +67,15 @@ specifically advised to use it, please see the
 
 ## Python environment
 
-At this point, Python and pip should be available on your system. Now
-you need to run ``tpaexec setup`` to create a Python environment and
-install the required Python modules.
+Next, run ``tpaexec setup`` to create an isolated Python environment and
+install the correct versions of all required modules.
 
 ```bash
-# Create a venv and install Python modules (including ansible)
 $ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
 ```
 
-This will install the modules into an isolated environment, which we
-strongly recommend. It avoids interference with any system-wide Python
-modules (including Ansible) that may be installed, and ensures that you
-have the correct versions of all modules. (For the same reason, we also
-do not recommend using OS packages to install these modules.)
+This process will not affect any system-wide Python modules you may have
+installed (including Ansible).
 
 Add ``/opt/2ndQuadrant/TPA/bin`` to the ``PATH`` of the user who will
 normally run ``tpaexec`` commands. For example, you could add this to
