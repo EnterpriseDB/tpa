@@ -74,8 +74,9 @@ install the correct versions of all required modules.
 $ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
 ```
 
-This process will not affect any system-wide Python modules you may have
-installed (including Ansible).
+You must run this as root because it writes to ``/opt/2ndQuadrant/TPA``,
+but the process will not affect any system-wide Python modules you may
+have installed (including Ansible).
 
 Add ``/opt/2ndQuadrant/TPA/bin`` to the ``PATH`` of the user who will
 normally run ``tpaexec`` commands. For example, you could add this to
