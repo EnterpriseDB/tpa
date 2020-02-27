@@ -6,3 +6,7 @@
   include: "userparameter.yml"
   when: zabbix_agent_userparameters|length > 0
   tags: [zabbix-agent, config]
+
+- name: "Install zabbix_agentd config file"
+  include: "Linux.yml"
+  tags: [zabbix-agent, config]
