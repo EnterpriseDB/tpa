@@ -153,20 +153,6 @@
     - config
     - userdir
 
-- name: Install .pgpass file in /home/zabbix
-  template:
-    src: pgpass.j2
-    dest: /var/lib/zabbix/.pgpass
-    owner: zabbix
-    group: zabbix
-    mode: 0600
-  tags:
-    - config
-    - userdir
-  tags:
-    - config
-    - userdir
-
 - name: "Make sure the zabbix-agent service is running"
   service:
     name: "{{ zabbix_agent_service }}"
