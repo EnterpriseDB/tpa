@@ -4,26 +4,8 @@
 
 # Here we install any configuration required for the extensions to be
 # installed. The "CREATE EXTENSION" commands will be issued later, via
-# postgres/config/final.
-
-- name: Set list of Postgres extensions
-  set_fact:
-    postgres_extensions: "{{
-      postgres_extensions|default(
-        default_postgres_extensions
-        |union(extra_postgres_extensions)
-        |union(('bdr' in role)|ternary(bdr_extensions, []))
-      )
-    }}"
-
-- name: Remove pg_visibility for Postgres <9.6
-  set_fact:
-    postgres_extensions: "{{
-      postgres_extensions
-      |reject('equalto', 'pg_visibility')
-      |list
-    }}"
-  when: postgres_version is version('9.6', '<')
+# postgres/config/final. The list of postgres_extensions was determined
+# earlier in roles/facts.
 
 # We install a default configuration for the extensions we care about.
 # We don't need to have conditional logic in this template, because the

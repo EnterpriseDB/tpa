@@ -158,6 +158,25 @@
   when: >
     'postgres' in role
 
+- name: Set list of Postgres extensions
+  set_fact:
+    postgres_extensions: "{{
+      postgres_extensions|default(
+        default_postgres_extensions
+        |union(extra_postgres_extensions)
+        |union(('bdr' in role)|ternary(bdr_extensions, []))
+      )
+    }}"
+
+- name: Remove pg_visibility for Postgres <9.6
+  set_fact:
+    postgres_extensions: "{{
+      postgres_extensions
+      |reject('equalto', 'pg_visibility')
+      |list
+    }}"
+  when: postgres_version is version('9.6', '<')
+
 - name: Define platypus configuration settings
   set_fact:
     platypus_port: "{{ platypus_port|default(6400) }}"

@@ -18,6 +18,17 @@ default_postgres_bin_dirs:
   Debian: "/usr/lib/postgresql/{{ postgres_version }}/bin"
   RedHat: "/usr/pgsql-{{ postgres_version }}/bin"
 
+default_postgres_extensions:
+  - pg_stat_statements
+  - pg_freespacemap
+  - pg_visibility
+  - pageinspect
+  - pgstattuple
+
+bdr_extensions:
+  - btree_gist
+  - bdr
+
 default_log_destination: syslog
 
 default_barman_home: /var/lib/barman
