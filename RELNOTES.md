@@ -2,6 +2,10 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v9.3 (unreleased)
+
+[In prep.]
+
 ## v9.2 (2020-03-05)
 
 This release requires ``tpaexec setup`` to be rerun after installation.
