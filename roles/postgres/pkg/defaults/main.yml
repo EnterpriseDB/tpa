@@ -18,7 +18,6 @@ postgres_packages:
   RedHat:
     - "{{ postgresql_flavour }}{{ postgres_versionNN }}-contrib"
     - "{{ postgresql_flavour }}{{ postgres_versionNN }}-server"
-    - "{{ postgresql_flavour }}{{ postgres_versionNN }}-devel"
     - "{{ postgresql_flavour }}{{ postgres_versionNN }}-libs"
     - "{{ postgresql_flavour }}{{ postgres_versionNN }}-plperl"
   Ubuntu: *debian_packages
