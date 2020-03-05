@@ -33,6 +33,22 @@ This release requires ``tpaexec setup`` to be rerun after installation.
   is available on the backend Postgres servers (this fixes the SELinux
   limitation mentioned in the v9.1 release notes)
 
+### Upgrade note
+
+If you are using tpaexec v9.2 to upgrade an existing cluster running
+BDR-EE 3.6.14 or earlier with 2ndQPostgres, you must first remove the
+``postgresql11-devel`` package from target instances before you run
+``tpaexec update-postgres``. This is because the 3.6.15/3.6.16 stack
+releases add an LLVM-related dependency (llvm-toolset-7-clang) that
+cannot be satisifed by the default package repositories.
+
+Instead of removing the package, ``yum install centos-release-scl`` (on
+CentOS) or ``yum-config-manager --enable rhel-server-rhscl-7-rpms`` (on
+RHEL) may be enough to make the update succeed even with
+postgresql11-devel installed.
+
+We expect to fix this problem in a future release of the BDR stack.
+
 ## v9.1 (2020-01-20)
 
 This release requires ``tpaexec setup`` to be rerun after installation.
