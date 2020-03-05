@@ -2,7 +2,7 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v9.2 (unreleased)
+## v9.2 (2020-03-05)
 
 This release requires ``tpaexec setup`` to be rerun after installation.
 
@@ -28,6 +28,10 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 - Require 2ndQuadrant ansible to be installed via ``tpaexec setup``, and
   ignore any other Ansible installation in $PATH
+
+- Enable HTTP-based queue checks for haproxy if the Platypus extension
+  is available on the backend Postgres servers (this fixes the SELinux
+  limitation mentioned in the v9.1 release notes)
 
 ## v9.1 (2020-01-20)
 
