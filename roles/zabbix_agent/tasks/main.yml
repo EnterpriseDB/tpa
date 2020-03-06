@@ -17,12 +17,3 @@
   when: >
     'zabbix_agent' in role
   tags: always
-
-- include_role:
-    name: zabbix_agent/pgpass
-    apply:
-      tags: [zabbix_agent, config]
-  when: >
-    'zabbix_agent' in role
-  tags: always
-

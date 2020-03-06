@@ -10,3 +10,10 @@
 - name: "Install zabbix_agentd config file"
   include: "Linux.yml"
   tags: [zabbix-agent, config]
+
+- include_role: name=postgres/pgpass
+  vars:
+    pgpassfile: ~zabbix/.pgpass
+    pgpass_owner: zabbix
+    pgpass_group: zabbix
+    pgpass_users: "{{ zabbix_pgpass_users|default('postgres') }}"

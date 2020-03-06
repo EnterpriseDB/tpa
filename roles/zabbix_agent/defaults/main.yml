@@ -2,7 +2,7 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-zabbix_version: 3.4
+zabbix_version: 4.4
 zabbix_version_patch: 0
 zabbix_repo: zabbix
 zabbix_agent_package: zabbix-agent

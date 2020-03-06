@@ -1,8 +1,0 @@
----
-
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
-
-_pgpassfile: "{{ zabbix_pgpassfile|default('~zabbix/.pgpass') }}"
-_pgpass_owner: "{{ zabbix_pgpass_owner|default('zabbix') }}"
-_pgpass_group: "{{ zabbix_pgpass_group|default('zabbix') }}"
-_pgpass_users: "{{ zabbix_pgpass_users|default(default_zabbix_pgpass_users) }}"
