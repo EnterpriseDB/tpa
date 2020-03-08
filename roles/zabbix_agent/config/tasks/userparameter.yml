@@ -4,8 +4,8 @@
 
 - name: "Installing user-defined userparameters"
   template:
-    src: "userparameters/{{ item.name }}.j2"
-    dest: "{{ zabbix_agent_include }}/userparameter_{{ item.name }}.conf"
+    src: "userparameters/{{ item }}.j2"
+    dest: "{{ zabbix_agent_include }}/userparameter_{{ item }}.conf"
     owner: zabbix
     group: zabbix
     mode: 0644
