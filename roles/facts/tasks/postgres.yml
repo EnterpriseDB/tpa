@@ -191,7 +191,7 @@
     postgres_extensions: "{{
       postgres_extensions|default(
         default_postgres_extensions
-        |union(extra_postgres_extensions)
+        |union(extra_postgres_extensions|default([]))
         |union(('bdr' in role)|ternary(bdr_extensions, []))
       )
     }}"
