@@ -107,6 +107,20 @@ def parse_conninfo(conninfo, key=None):
 
     return settings
 
+# Returns a conninfo string assembled from the keys and values in the dict d.
+# Values are single-quoted if needed. Order of elements is not guaranteed.
+
+def conninfo_string(d):
+    def _quote(s):
+        if not (' ' in s or '\\' in s or "'" in s or s == ""):
+            return s
+        return "'%s'" % str(s).replace('\\', '\\\\').replace("'", "\\'")
+
+    s = []
+    for (k,v) in d.items():
+        s.append('%s=%s' % (k, _quote(str(v))))
+    return ' '.join(s)
+
 # Takes the name of an image and returns a string corresponding to
 # ansible_distribution values.
 
@@ -237,6 +251,7 @@ class FilterModule(object):
             'instance_with_backup_of': instance_with_backup_of,
             'remove_keys': remove_keys,
             'parse_conninfo': parse_conninfo,
+            'conninfo_string': conninfo_string,
             'identify_os': identify_os,
             'packages_for': packages_for,
             'members_of': members_of,
