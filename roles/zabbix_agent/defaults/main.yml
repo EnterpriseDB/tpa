@@ -118,3 +118,4 @@ zabbix_agent_tls_config:
   psk: '2'
   cert: '4'
 
+zabbix_pgpass_users: []

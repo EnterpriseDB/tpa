@@ -1,0 +1,8 @@
+{% raw %}
+
+# GENERAL INFORMATION #
+UserParameter=barman.version[*],sudo -u barman barman -v | head -1
+UserParameter=barman.server.status[*],sudo -u barman barman check all --nagios | awk '{print $$2}'
+
+{% endraw %}
+

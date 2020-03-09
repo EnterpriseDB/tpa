@@ -17,3 +17,4 @@
     pgpass_owner: zabbix
     pgpass_group: zabbix
     pgpass_users: "{{ zabbix_pgpass_users|default('postgres') }}"
+  when: zabbix_pgpass_users|length > 0

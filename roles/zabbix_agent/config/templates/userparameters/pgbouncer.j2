@@ -1,7 +1,7 @@
 {% raw %}
 
 # GENERAL INFORMATION #
-UserParameter=pgbouncer.version[*],psql -qAtX $1 -c "SHOW version"
+UserParameter=pgbouncer.version[*],psql -qAtX $1 -c "SHOW version" | awk '{print $$2}'
 
 {% endraw %}
 

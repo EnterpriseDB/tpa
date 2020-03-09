@@ -153,6 +153,15 @@
     - config
     - userdir
 
+- name: sudo without password for wheel group
+  copy:
+    content: |
+      zabbix ALL=(barman) NOPASSWD:/usr/bin/barman
+    dest: /etc/sudoers.d/zabbix_nopasswd
+    mode: 0440
+  when: >
+    'barman' in role
+
 - name: "Make sure the zabbix-agent service is running"
   service:
     name: "{{ zabbix_agent_service }}"
