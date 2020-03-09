@@ -29,7 +29,7 @@ instances (default: 3).
 
 You may optionally specify ``--postgres-version X`` or
 ``--bdr-version <1|2|3>`` to select the desired Postgres or BDR major
-version (defaults: Postgres 10, BDRv3). If you specify only one of the
+version (defaults: Postgres 11, BDRv3). If you specify only one of the
 two, the correct version will be automatically inferred for the other.
 
 Use ``--2Q-repositories products/bdr2/snapshot`` for snapshot packages
