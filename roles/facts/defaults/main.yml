@@ -52,10 +52,11 @@ default_pgbouncer_backend: 127.0.0.1
 default_pgbouncer_backend_port: 5432
 
 # By default, we create a single wildcard entry under [databases], which
-# forwards all connections to the pgbouncer_backend defined above. To
-# override this, set pgbouncer_databases to [{name: …, dsn: …}, …] to
-# install whatever entries you want.
+# forwards all connections to the pgbouncer_backend defined above. Set
+# pgbouncer_databases to [{name: …, options: {…}}, …] to override this
+# and install whatever entries you want. If left unspecified, host and
+# port will be filled in with pgbouncer_backend/pgbouncer_backend_port
+# under each entry's "options".
 
 default_pgbouncer_databases:
   - name: "*"
-    dsn: "host={{ pgbouncer_backend }} port={{ pgbouncer_backend_port }}"

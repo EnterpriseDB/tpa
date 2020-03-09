@@ -1,4 +1,4 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 {% for d in pgbouncer_databases %}
-{{ d['name'] }} = {{ d['dsn'] }} auth_user=pgbouncer
+{{ d['name'] }} = {{ d.get('dsn', d.get('options')|conninfo_string) }}
 {% endfor %}

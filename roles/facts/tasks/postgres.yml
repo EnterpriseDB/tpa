@@ -86,9 +86,37 @@
     }}"
   tags: always
 
+# Transform pgbouncer_databases into a new list where each item's
+# 'options' is guaranteed to have host/port/auth_user set. Also, for
+# backwards-compatibility, if 'dsn' is specified, we pass it through
+# after appending auth_user to it.
+#
+# In every case, we want to set auth_user=pgbouncer.
+
+- name: Fill in pgbouncer_databases options
+  set_fact:
+    _pgbouncer_databases: "{{
+      _pgbouncer_databases|default([])|union([
+        {
+          'name': item.name,
+          'options': {
+            'host': pgbouncer_backend,
+            'port': pgbouncer_backend_port,
+          }|combine(item.options|default({}))|combine({'auth_user': 'pgbouncer'})
+        }|combine(
+          ('dsn' in item)|ternary(
+            {'dsn': '%s auth_user=pgbouncer' % item.get('dsn')},
+            {}
+          )
+        )
+      ])
+    }}"
+  with_items: "{{ pgbouncer_databases|default(default_pgbouncer_databases) }}"
+  tags: always
+
 - name: Set pgbouncer_databases
   set_fact:
-    pgbouncer_databases: "{{ pgbouncer_databases|default(default_pgbouncer_databases) }}"
+    pgbouncer_databases: "{{ _pgbouncer_databases }}"
   tags: always
 
 - name: Set default config paths
