@@ -32,7 +32,7 @@ $ sudo yum install python36 python3-pip \
 
 # MacOS X
 $ sudo brew tap discoteq/discoteq
-$ sudo brew install python@3 pwgen openvpn flock
+$ sudo brew install python@3 pwgen openvpn flock coreutils
 ```
 
 (We mention ``sudo`` here only to indicate which commands need root
