@@ -7,14 +7,6 @@
     that:
       - haproxy_backend_servers is defined
 
-- set_fact:
-    haproxy_maxconn: "{{
-      hostvars[item].haproxy_maxconn|default((hostvars[item].max_connections|default(250))*0.90)|int
-    }}"
-  with_items: "{{ haproxy_backend_servers }}"
-  delegate_to: "{{ item }}"
-  delegate_facts: true
-
 - name: Create ssl-dh-param-file
   openssl_dhparam:
     path: /etc/ssl/dhparams.pem
@@ -30,7 +22,8 @@
 # Set ``haproxy_backend_queue_check: none`` to not configure queue
 # checks even if they are needed.
 
-- set_fact:
+- name: Determine haproxy_backend_queue_check type
+  set_fact:
     haproxy_backend_queue_check: "{{
       haproxy_backend_queue_check|default(
         backends_need_queue_check|ternary(
@@ -52,6 +45,113 @@
     all_backends_have_platypus: "{{
       haproxy_backend_servers|length == backends_with_platypus|length
     }}"
+
+- name: Add agent check settings to haproxy_default_server_options
+  set_fact:
+    haproxy_default_server_options: "{{
+      haproxy_default_server_options|union(_agent_options)
+    }}"
+  when:
+    haproxy_backend_queue_check != 'none'
+  vars:
+    _agent_options:
+      - agent-addr 127.0.0.1
+      - agent-port 15432
+
+# Now we build haproxy_backend_settings to map between haproxy backend
+# names and the "default-server" options for each backend. We want to
+# end up with something like this:
+#
+# haproxy_backend_settings:
+#   be:             { default_server_options: […] }
+#   be_check_queue: { default_server_options: […] }
+#
+# If haproxy_backend_settings[*].default_server_options is not defined,
+# we set it to the union of haproxy_default_server_options (the minimum
+# required settings) and haproxy_default_server_extra_options (where you
+# can include any additional options).
+
+- name: Assemble haproxy backend settings
+  set_fact:
+    haproxy_backend_settings: "{{
+      haproxy_backend_settings|default({})|combine({
+        item: _fallback_settings|combine(_explicit_settings)
+      })
+    }}"
+  with_items: "{{ haproxy_backend_names }}"
+  vars:
+    _fallback_settings:
+      default_server_options: "{{
+        haproxy_default_server_options|union(haproxy_default_server_extra_options)
+      }}"
+    _explicit_settings:
+      "{{ haproxy_backend_settings[item]|default({}) }}"
+
+# The Postgres instances in haproxy_backend_servers may define an
+# haproxy_server_options list to set options on the corresponding
+# "server …" lines for all backends in haproxy.cfg. These settings
+# override the default-server settings above.
+#
+# As a convenience, we add "maxconn $haproxy_maxconn" and either "check"
+# or "check port $platypus_port" to haproxy_server_options if they are
+# missing (because these options must always be set for every server).
+
+- name: Ensure haproxy_maxconn is set
+  set_fact:
+    haproxy_maxconn: "{{
+      hostvars[item].haproxy_maxconn|default((hostvars[item].max_connections|default(250))*0.90)|int
+    }}"
+  with_items: "{{ haproxy_backend_servers }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+
+- name: Ensure maxconn is set in haproxy_server_options
+  set_fact:
+    haproxy_server_options: "{{
+      hostvars[item].haproxy_server_options|union([
+        'maxconn %s' % hostvars[item].haproxy_maxconn
+      ])
+    }}"
+  with_items: "{{ haproxy_backend_servers }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  when: >
+    'maxconn ' not in hostvars[item].haproxy_server_options|join(' ')
+
+- name: Ensure check is set in haproxy_server_options
+  set_fact:
+    haproxy_server_options: "{{
+      hostvars[item].haproxy_server_options|union(
+        query('flattened', ['check', _check_options])
+      )
+    }}"
+  with_items: "{{ haproxy_backend_servers }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  when: >
+    'check ' not in hostvars[item].haproxy_server_options|join(' ')
+  vars:
+    _check_options: "{{
+      (haproxy_backend_queue_check == 'platypus')|ternary(
+        'port %s' % hostvars[item].platypus_port, []
+      )
+    }}"
+
+- name: Add agent-check settings to haproxy_server_options if required
+  set_fact:
+    haproxy_server_options: "{{
+      hostvars[item].haproxy_server_options|union(_agent_options)
+    }}"
+  with_items: "{{ haproxy_backend_servers }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  when: >
+    'agent-check ' not in hostvars[item].haproxy_server_options|join(' ')
+    and haproxy_backend_queue_check != 'none'
+  vars:
+    _agent_options:
+      - agent-check
+      - agent-send "{{ item }}\n"
 
 - name: Install haproxy.cfg
   template:

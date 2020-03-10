@@ -3,3 +3,13 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 haproxy_stats_socket: /var/lib/haproxy/stats
+
+haproxy_backend_names:
+- be
+- be_check_queue
+
+haproxy_default_server_options:
+- inter 1500 downinter 6s rise 5 fall 3
+- agent-inter 2000
+
+haproxy_default_server_extra_options: []
