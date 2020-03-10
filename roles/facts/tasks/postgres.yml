@@ -54,6 +54,7 @@
     bdr_node_name: "{{ bdr_node_name|default(inventory_hostname) }}"
     bdr_node_group: "{{ bdr_node_group|default(default_bdr_node_group) }}"
     haproxy_port: "{{ haproxy_port|default(default_haproxy_port) }}"
+    haproxy_bind_address: "{{ haproxy_bind_address|default(default_haproxy_bind_address) }}"
     pgbouncer_port: "{{ pgbouncer_port|default(default_pgbouncer_port) }}"
     pgbouncer_backend: "{{ pgbouncer_backend|default(default_pgbouncer_backend) }}"
     pgbouncer_backend_port: "{{ pgbouncer_backend_port|default(default_pgbouncer_backend_port) }}"

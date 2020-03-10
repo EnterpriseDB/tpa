@@ -23,7 +23,7 @@ defaults
     log global
 
 frontend fe
-    bind 127.0.0.1:{{ haproxy_port }}
+    bind {{ haproxy_bind_address }}:{{ haproxy_port }}
 
     maxconn 1000
 
