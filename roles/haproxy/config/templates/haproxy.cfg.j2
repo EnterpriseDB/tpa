@@ -56,7 +56,7 @@ backend be
     http-check expect string OK
 {% endif %}
 
-{% for b in haproxy_backends %}
+{% for b in haproxy_backend_servers %}
 {%   set v = hostvars[b] %}
 {%   set backup = loop.first|ternary('', 'backup') %}
 {%   set agent = (haproxy_backend_queue_check != 'none') %}
@@ -78,7 +78,7 @@ backend be_check_queue
     external-check command "/etc/haproxy/check-queue"
 {% endif %}
 
-{% for b in haproxy_backends %}
+{% for b in haproxy_backend_servers %}
 {%   set v = hostvars[b] %}
 {%   set backup = loop.first|ternary('', 'backup') %}
 {%   set platypus = (haproxy_backend_queue_check == 'platypus') %}

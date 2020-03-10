@@ -213,3 +213,10 @@
         ('bdr' in role)|ternary(bdr_database, 'postgres')
       )
     }}"
+
+- name: Ensure haproxy_backend_servers is defined
+  set_fact:
+    haproxy_backend_servers: "{{ haproxy_backends }}"
+  when:
+    haproxy_backends is defined and
+    haproxy_backend_servers is not defined

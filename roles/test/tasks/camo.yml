@@ -30,7 +30,7 @@
       haproxy_backend_list: "{{
         haproxy_backend_list|default([])|union([{
           'name': item,
-          'backends': hostvars[item].haproxy_backends,
+          'backends': hostvars[item].haproxy_backend_servers,
         }])
       }}"
     with_items: "{{ groups['role_haproxy'] }}"

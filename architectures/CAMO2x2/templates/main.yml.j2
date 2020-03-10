@@ -80,7 +80,7 @@ instances:
       - pgbouncer
       - haproxy
     vars:
-      haproxy_backends:
+      haproxy_backend_servers:
         - {{ hostnames[1] }}
         - {{ hostnames[2] }}
 
@@ -94,6 +94,6 @@ instances:
       - pgbouncer
       - haproxy
     vars:
-      haproxy_backends:
+      haproxy_backend_servers:
         - {{ hostnames[3] }}
         - {{ hostnames[4] }}

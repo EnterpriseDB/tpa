@@ -47,7 +47,7 @@
 # The "pxname" (proxy name) should be either "fe" or "be", corresponding
 # to the definitions in haproxy.cfg. The fe proxy should have one entry
 # with svname FRONTEND; the be proxy should have an overall entry with
-# svname BACKEND, plus one entry per server in haproxy_backends.
+# svname BACKEND, plus one entry per server in haproxy_backend_servers.
 
 - name: Fetch haproxy statistics
   shell: >
@@ -91,15 +91,15 @@
       {{ haproxy_stats|selectattr('pxname', 'equalto', 'be')|selectattr('svname', 'equalto', 'BACKEND')|list }}
     servers: >-
       {{ haproxy_stats|selectattr('pxname', 'equalto', 'be')|rejectattr('svname', 'equalto', 'BACKEND')|list }}
-    num_servers_wanted: "{{ haproxy_backends|length }}"
+    num_servers_wanted: "{{ haproxy_backend_servers|length }}"
 
-- name: Ensure each server in haproxy_backends is up
+- name: Ensure each server in haproxy_backend_servers is up
   assert:
     msg: >-
-      Expected haproxy_backends={{ ','.join(haproxy_backends) }} to be UP,
+      Expected haproxy_backend_servers={{ ','.join(haproxy_backend_servers) }} to be UP,
       got {% for s in servers %}{{ s.svname }}={{ s.status }}{{ loop.last|ternary('', ', ') }}{% endfor %}
     that:
-    - servers|map(attribute='svname')|sort == haproxy_backends|sort
+    - servers|map(attribute='svname')|sort == haproxy_backend_servers|sort
     - servers|map(attribute='status')|reject('equalto', 'UP')|list is empty
   vars:
     servers: >-

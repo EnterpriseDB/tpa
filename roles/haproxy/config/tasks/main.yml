@@ -3,15 +3,15 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - assert:
-    msg: "Please define a list of haproxy_backends to use haproxy"
+    msg: "Please define a list of haproxy_backend_servers to use haproxy"
     that:
-      - haproxy_backends is defined
+      - haproxy_backend_servers is defined
 
 - set_fact:
     haproxy_maxconn: "{{
       hostvars[item].haproxy_maxconn|default((hostvars[item].max_connections|default(250))*0.90)|int
     }}"
-  with_items: "{{ haproxy_backends }}"
+  with_items: "{{ haproxy_backend_servers }}"
   delegate_to: "{{ item }}"
   delegate_facts: true
 
@@ -23,8 +23,8 @@
     group: root
     mode: 0644
 
-# If the configured haproxy_backends all have CAMO partners, then we
-# must enable queue checks for them. If platypus is available on the
+# If the configured haproxy_backend_servers all have CAMO partners, then
+# we must enable queue checks for them. If platypus is available on the
 # backends, we can use that, otherwise we configure external checks.
 #
 # Set ``haproxy_backend_queue_check: none`` to not configure queue
@@ -41,16 +41,16 @@
     }}"
   vars:
     backends_with_camo: "{{
-      haproxy_backends|map('extract', hostvars, 'bdr_node_camo_partner')|select('defined')|list
+      haproxy_backend_servers|map('extract', hostvars, 'bdr_node_camo_partner')|select('defined')|list
     }}"
     backends_need_queue_check: "{{
-      haproxy_backends|length == backends_with_camo|length
+      haproxy_backend_servers|length == backends_with_camo|length
     }}"
     backends_with_platypus: "{{
-      haproxy_backends|map('extract', hostvars, 'postgres_extensions')|select('contains', 'platypus')|list
+      haproxy_backend_servers|map('extract', hostvars, 'postgres_extensions')|select('contains', 'platypus')|list
     }}"
     all_backends_have_platypus: "{{
-      haproxy_backends|length == backends_with_platypus|length
+      haproxy_backend_servers|length == backends_with_platypus|length
     }}"
 
 - name: Install haproxy.cfg

@@ -31,30 +31,30 @@
   environment: "{{ target_environment }}"
   hosts: all
   vars:
-    all_haproxy_backends: []
+    all_haproxy_backend_servers: []
   tasks:
 
-  # From the haproxy_backends settings on haproxy instances, we assemble
-  # the following:
+  # From the haproxy_backend_servers settings on haproxy instances, we
+  # assemble the following:
   #
-  # 1. A list of all haproxy backends (all_haproxy_backends)
-  # 2. A map associating each backend instance with its corresponding
-  #    haproxy instance (proxy_for_backend)
+  # 1. A list of all backend servers (all_haproxy_backend_servers)
+  # 2. A map associating each Postgres instance with its corresponding
+  #    haproxy instance (proxy_for_backend_server)
   #
   # We assume for now that the haproxy instance also runs a pgbouncer
   # pointing to the haproxy (which is true of BDR-Always-ON by default).
 
   - name: Record haproxy/backend relationships
     set_fact:
-      all_haproxy_backends: "{{
-        all_haproxy_backends|default([])|union([item.1])
+      all_haproxy_backend_servers: "{{
+        all_haproxy_backend_servers|default([])|union([item.1])
       }}"
-      proxy_for_backend: "{{
-        proxy_for_backend|default({})|combine({ item.1: item.0 })
+      proxy_for_backend_server: "{{
+        proxy_for_backend_server|default({})|combine({ item.1: item.0 })
       }}"
     with_nested_dependents:
     - groups['role_haproxy']|default([])
-    - hostvars[item.0].haproxy_backends
+    - hostvars[item.0].haproxy_backend_servers
 
   # As a precaution, we start the update only if the servers are healthy
   # and match the expected configuration. It's convenient to do this by
@@ -93,19 +93,20 @@
   serial: 1
   vars:
     haproxy_stats_socket: /var/lib/haproxy/stats
-    all_haproxy_backends: []
-    proxy_for_backend: {}
+    all_haproxy_backend_servers: []
+    proxy_for_backend_server: {}
   tasks:
 
-  # First, we check if the current instance is named in haproxy_backends
-  # for one of the haproxy instances. Thereafter, if is_proxied is true,
-  # my_proxy is the name of the relevant haproxy instance.
+  # First, we check if the current instance is named in
+  # haproxy_backend_servers for one of the haproxy instances.
+  # Thereafter, if is_proxied is true, my_proxy is the name of the
+  # relevant haproxy instance.
 
   - set_fact:
       is_proxied: >-
-        {{ inventory_hostname in all_haproxy_backends }}
+        {{ inventory_hostname in all_haproxy_backend_servers }}
       my_proxy: >-
-        {{ proxy_for_backend[inventory_hostname]|default('none') }}
+        {{ proxy_for_backend_server[inventory_hostname]|default('none') }}
 
   # We want to set this server into the MAINT state in haproxy, which
   # disables health checks and prevents new connections to the server
