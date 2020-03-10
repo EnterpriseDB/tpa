@@ -163,6 +163,7 @@
     max_prepared_transactions: 16
   when: >
     'bdr' in role and max_prepared_transactions is not defined
+  tags: always
 
 # Determine the upstream primary for this host, that is, the primary at
 # the root of the cascading replication setup. This may be the instance
@@ -173,6 +174,7 @@
     upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"
   when: >
     'postgres' in role
+  tags: always
 
 # Find any backed-up instance that is the upstream_primary, or a replica
 # thereof. We would prefer to use a backup server in the same region,
@@ -186,6 +188,7 @@
     }}"
   when: >
     'postgres' in role
+  tags: always
 
 - name: Set list of Postgres extensions
   set_fact:
@@ -196,6 +199,7 @@
         |union(('bdr' in role)|ternary(bdr_extensions, []))
       )
     }}"
+  tags: always
 
 - name: Remove pg_visibility for Postgres <9.6
   set_fact:
@@ -205,6 +209,7 @@
       |list
     }}"
   when: postgres_version is version('9.6', '<')
+  tags: always
 
 - name: Define platypus configuration settings
   set_fact:
@@ -214,6 +219,7 @@
         ('bdr' in role)|ternary(bdr_database, 'postgres')
       )
     }}"
+  tags: always
 
 - name: Ensure haproxy_backend_servers is defined
   set_fact:
@@ -221,3 +227,4 @@
   when:
     haproxy_backends is defined and
     haproxy_backend_servers is not defined
+  tags: always
