@@ -45,6 +45,14 @@ installation or any other actions.
 This hook may be used to set up custom repository configuration, beyond
 what the ``apt_repositories`` or ``yum_repositories`` settings can do.
 
+### post-repo
+
+The post-repo hook (``hooks/post-repo.yml``) is invoked after package
+repositories have been configured.
+
+This hook may be used to make corrections to the normal repository
+configuration before commencing package installation.
+
 ### pre-initdb
 
 The pre-initdb hook (``hooks/pre-initdb.yml``) is invoked before testing

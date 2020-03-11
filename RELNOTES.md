@@ -2,9 +2,28 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v9.3 (unreleased)
+## v9.3 (2020-03-10)
 
-[In prep.]
+### Minor changes
+
+- Allow haproxy.cfg default-server/server options to be customised via
+  new variables: haproxy_default_server_extra_options (for an haproxy
+  instance) and haproxy_server_options (for a Postgres instance)
+
+- Allow pgbouncer_databases setting to include pool_size and other
+  options without specifying a complete DSN
+
+- Rename haproxy_backends to haproxy_backend_servers (but the former
+  name continues to be accepted for backwards compatibility)
+
+- Allow haproxy_bind_address to be changed
+
+- Add a new post-repo hook that is executed after package repositories
+  are configured, but before packages are installed
+
+### Bugfixes
+
+- Fix problem in v9.2 with extra_postgres_extensions being undefined
 
 ## v9.2 (2020-03-05)
 
