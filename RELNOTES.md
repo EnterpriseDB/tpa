@@ -2,6 +2,12 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v9.4 (unreleased)
+
+### Bugfixes
+
+- Use repeatable hash for ec2 inventory cache
+
 ## v9.3 (2020-03-10)
 
 ### Minor changes
