@@ -18,6 +18,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Allow haproxy_bind_address to be changed
 
+- Add a new post-repo hook that is executed after package repositories
+  are configured, but before packages are installed
+
 ### Bugfixes
 
 - Fix problem in v9.2 with extra_postgres_extensions being undefined

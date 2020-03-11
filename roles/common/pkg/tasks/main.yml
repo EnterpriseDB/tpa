@@ -39,5 +39,13 @@
       tags: public_repos
   tags: always
 
+- name: Include post-repo hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/post-repo.yml"
+  tags: always
+
 - include_tasks: packages.yml
   tags: always
