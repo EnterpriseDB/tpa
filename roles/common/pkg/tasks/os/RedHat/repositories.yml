@@ -74,24 +74,49 @@
   changed_when: >
     dnfmod.stdout.strip() == 'ok'
 
+# The PGDG repo RPM installs a pgdg-redhat-all.repo file that contains
+# entries for all available repositories for every version of Postgres,
+# with multiple repositories enabled by default.
+#
+# This is, unsurprisingly, a bad idea. We want to enable the entries
+# relevant to our desired Postgres version, and disable other entries,
+# without knowing in advance which entries there are or which ones are
+# enabled already, and preferably without doing too much redudant work
+# (because loops are expensive).
+#
+# We fetch a list of all entries that are enabled (some of which we may
+# want to disable) as well as all pgdgNN repositories for the version we
+# want to enable.
+
+- name: Retrieve list of PGDG repository entries
+  shell: >
+    test -f {{ _repo }} &&
+    awk 'match($0, /^\[(.*)\]$/, t) { repo = t[1] }
+    match($0, /^\[({{ _wanted }}.*)\]$/, t) { print t[1] }
+    /^enabled *= *1$/ { print repo }' {{ _repo }}|sort -u
+  args:
+    executable: /bin/bash
+  register: interesting_pgdg_repos
+  when: >
+    'PGDG' in yum_repository_list
+  vars:
+    _repo: /etc/yum.repos.d/pgdg-redhat-all.repo
+    _wanted: "pgdg{{ postgres_versionNN }}"
+
 - name: Disable PGDG repos for versions other than {{ postgres_version }}
   ini_file:
     dest: /etc/yum.repos.d/pgdg-redhat-all.repo
     section: "{{ item }}"
     option: enabled
-    value: "{{ (item == wanted_pgdg_repo)|ternary('1', '0') }}"
-  with_items: "{{ all_pgdg_repos }}"
+    value: "{{ (item in all_wanted_pgdg_repos)|ternary('1', '0') }}"
+  with_items: "{{ interesting_pgdg_repos.stdout_lines }}"
   when: >
     'PGDG' in yum_repository_list
   vars:
-    all_pgdg_repos:
-    - pgdg94
-    - pgdg95
-    - pgdg96
-    - pgdg10
-    - pgdg11
-    - pgdg12
     wanted_pgdg_repo: "pgdg{{ postgres_versionNN }}"
+    all_wanted_pgdg_repos:
+      - "{{ wanted_pgdg_repo }}"
+      - "{{ wanted_pgdg_repo }}-updates-debuginfo"
 
 - set_fact:
     _2q_repositories: []
