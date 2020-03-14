@@ -22,17 +22,7 @@ if [[ -z "${TPA_DIR:-}" ]]; then
 fi
 
 export TPA_DIR=${TPA_DIR:-$TOP}
-
-# If we can find a venv located relative to TPA_DIR, we activate it as a
-# convenience. (If bin/tpaexec invokes ansible/ansible, it will already
-# be active, but it doesn't matter if we activate it again.)
-
 VENV_BIN="$TPA_DIR/tpa-venv/bin"
-if [[ -f $VENV_BIN/activate ]]; then
-    set +u
-    source "$VENV_BIN/activate"
-    set -u
-fi
 
 # Set ANSIBLE_LOG_PATH, ANSIBLE_CONFIG, and ANSIBLE_INVENTORY to our
 # versions if they are not already set.
