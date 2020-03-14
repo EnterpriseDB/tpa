@@ -3,7 +3,7 @@
 #
 # This is a wrapper for bin/ansible that sets various environment
 # variables before invoking the real executable (which must be under
-# ANSIBLE_HOME or in PATH).
+# ANSIBLE_HOME or in our venv).
 
 IFS=$' \t\n'
 set -eu
