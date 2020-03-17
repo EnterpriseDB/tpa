@@ -27,8 +27,8 @@ extra_postgres_extensions: []
 
 bdr_extensions:
   - btree_gist
-  - postgres_fdw
   - bdr
+  - autoscale
 
 # The following settings (on the Postgres server) will cause pg_hba.conf
 # to be generated with "hostssl" instead of "host" lines, and to require

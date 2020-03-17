@@ -59,6 +59,28 @@ class Autoscale(BDR_Always_ON):
     def update_cluster_vars(self, cluster_vars):
         super(Autoscale, self).update_cluster_vars(cluster_vars)
 
+        extensions = cluster_vars.get('bdr_extensions', [])
+        extensions.append('btree_gist')
+        extensions.append('postgres_fdw')
+        extensions.append('bdr')
+        extensions.append('autoscale')
+
+        packages = cluster_vars.get('extra_postgres_packages', {})
+        packages.update({
+            'Debian': [
+                'postgresql-11-autoscale-plugin',
+                'postgresql-11-autoscale-plugin-dbg',
+            ],
+            'RedHat': [
+                'postgresql11-autoscale',
+                'postgresql11-autoscale-debuginfo',
+            ],
+            'Ubuntu': [
+                'postgresql-11-autoscale-plugin',
+                'postgresql-11-autoscale-plugin-dbg',
+            ],
+        })
+
         top = self.args['bdr_node_group']
         bdr_node_groups = [{'name': top}]
         for i in range(1, self.args['num_shard_groups']+1):
@@ -74,6 +96,8 @@ class Autoscale(BDR_Always_ON):
             },
             'log_line_prefix': '%m [pid: %p] [xid:%x]',
             'bdr_node_groups': bdr_node_groups,
+            'bdr_extensions': extensions,
+            'extra_postgres_packages': packages,
         })
 
     def _shard_group_name(self, node):

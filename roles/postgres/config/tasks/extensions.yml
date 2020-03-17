@@ -33,6 +33,7 @@
     - postgres_fdw
     - pglogical
     - bdr
+    - autoscale
   loop_control:
     loop_var: library
   tags: always
