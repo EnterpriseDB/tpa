@@ -58,6 +58,7 @@ if [[ -n "${ANSIBLE_HOME:-}" ]]; then
         exit 1
     fi
 
+    test -f "$VENV_BIN/activate" && source "$VENV_BIN/activate"
     export PYTHONPATH=$ansidir/lib:${PYTHONPATH:-""}
 
     NEWPATH="$ansidir/bin:$PATH"
