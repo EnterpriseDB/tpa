@@ -20,6 +20,10 @@ class docker(Platform):
 
         return image
 
+    def update_cluster_vars(self, cluster_vars, args, **kwargs):
+        if self.arch.args['image'] == 'centos/systemd':
+            cluster_vars['preferred_python_version'] = 'python2'
+
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml('platforms/docker/instance_defaults.yml.j2', args)
         if y:
