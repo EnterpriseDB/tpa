@@ -73,7 +73,6 @@ class Autoscale(BDR_Always_ON):
             ],
             'RedHat': [
                 'postgresql11-autoscale',
-                'postgresql11-autoscale-debuginfo',
             ],
             'Ubuntu': [
                 'postgresql-11-autoscale-plugin',
