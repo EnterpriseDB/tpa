@@ -8,3 +8,10 @@
     state: absent
   with_items: "{{ docker_instances }}"
   tags: docker
+
+- name: Delete docker networks
+  docker_network:
+    name: "{{ item.name }}"
+    state: absent
+  with_items: "{{ docker_networks|default([]) }}"
+  tags: docker

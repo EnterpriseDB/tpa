@@ -44,6 +44,7 @@
     volumes: "{{ query('flattened', volumes) }}"
     sysctls: "{{ item.sysctls|default(omit) }}"
     ulimits: "{{ item.ulimits|default(omit) }}"
+    networks_cli_compatible: yes
   vars:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
@@ -54,8 +55,10 @@
       docker_container_results|default([])|union([
         ansible_facts.docker_container|combine({
           'item': item|combine({
-            'private_ip': ansible_facts.docker_container.NetworkSettings.IPAddress,
+            'private_ip': n.IPAddress or n.Networks[item.networks[0].name]['IPAddress']
           })
         })
       ])
     }}"
+  vars:
+    n: "{{ ansible_facts.docker_container.NetworkSettings }}"

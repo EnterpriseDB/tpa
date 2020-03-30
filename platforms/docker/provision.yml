@@ -2,6 +2,17 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- name: Create docker networks
+  docker_network:
+    name: "{{ item.name }}"
+    scope: "{{ item.labels|default(omit) }}"
+    labels: "{{ item.labels|default(omit) }}"
+    enable_ipv6: "{{ item.enable_ipv6|default(omit) }}"
+    ipam_config: "{{ item.ipam_config|default(omit) }}"
+  with_items:
+    - "{{ docker_networks|default([]) }}"
+  tags: docker
+
 - name: Provision docker containers
   include_tasks: docker_container.yml
   with_items: "{{ docker_instances }}"
