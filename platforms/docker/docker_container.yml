@@ -21,6 +21,7 @@
     state: started
     pull: no
     privileged: yes
+    stop_signal: 'RTMIN+3'
     interactive: yes
     restart_policy: "{{ item.restart_policy|default('unless-stopped') }}"
     memory: "{{ item.memory|default(omit) }}"
