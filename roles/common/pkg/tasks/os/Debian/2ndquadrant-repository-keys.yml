@@ -1,0 +1,34 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# 2ndQuadrant sent out a Tech alert on 2020-03-11 that informed users of
+# an "Update to 2ndQuadrant Debian/Ubuntu Repositories Required".
+#
+# The GPG keys used to authenticate packages from the 2ndQuadrant Debian
+# and apt repositories were about to expire. We recommended installing
+# the 2ndquadrant-repository-keys package to keep the keys up-to-date.
+#
+# The keys have now expired, so for existing clusters without the new
+# keys, the first apt-get update would fail because of unauthenticated
+# repositories (so this can't be fixed in a pre-deploy hook). So if we
+# find that 2ndquadrant-repository-keys is not installed and there are
+# any 2ndQuadrant repositories configured, we install the new package.
+
+- name: Install 2ndquadrant-repository-keys
+  raw:
+    if [[ ! -d /usr/share/2ndquadrant-repository-keys ]]; then
+      for f in /etc/apt/sources.list.d/2ndquadrant-*; do
+        if [[ -e "$f" ]]; then
+          curl https://dl.2ndquadrant.com/gpg-key.asc | apt-key add - &&
+          (apt-get update || true) &&
+          apt-get install -y 2ndquadrant-repository-keys;
+          break;
+        fi;
+      done;
+    fi
+  args:
+    executable: /bin/bash
+  environment: {}
+  register: repository_keys_installed
+  changed_when: repository_keys_installed.stdout.strip() != ''

@@ -16,6 +16,11 @@
       tpa_2q_repositories|default([]) is empty
   tags: public_repos
 
+- include_tasks: "os/{{ ansible_os_family }}/2ndquadrant-repository-keys.yml"
+  when:
+    ansible_os_family == "Debian"
+  tags: always
+
 # We must ensure that a usable Python (2.7.x) is installed, along with
 # anything else we need to run Ansible modules such as "pkg" below.
 
