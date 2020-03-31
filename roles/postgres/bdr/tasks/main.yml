@@ -112,5 +112,7 @@
     file: postgres_fdw.yml
     apply:
       tags: fdw
-  when: inventory_hostname == first_bdr_primary
+  when: >
+    'autoscale' in postgres_extensions
+    and inventory_hostname == first_bdr_primary
   tags: fdw
