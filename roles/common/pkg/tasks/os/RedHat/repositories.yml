@@ -97,6 +97,7 @@
   args:
     executable: /bin/bash
   register: interesting_pgdg_repos
+  changed_when: false
   when: >
     'PGDG' in yum_repository_list
   vars:
@@ -117,6 +118,39 @@
     all_wanted_pgdg_repos:
       - "{{ wanted_pgdg_repo }}"
       - "{{ wanted_pgdg_repo }}-updates-debuginfo"
+
+# The PGDG pgdgNN-updates-debuginfo repositories are configured to use
+# $releasever, but the repository does not contain directories for RHEL
+# like rhel-7Server-x86_64, only rhel-7.7-x86_64 (which works only with
+# CentOS). We can fix up the baseurl to use the correct version.
+
+- name: Retrieve baseurl for PGDG debuginfo repository
+  shell: >
+    test -f {{ _repo }} &&
+    awk 'match($0, /^\[({{ wanted_debuginfo_repo }})\]$/, t) { wanted = 1 }
+    match($0, /^baseurl *= *(.*)/, t) { if (wanted && t[1] ~ /\$releasever/) { print t[1] } wanted=0 }'
+    {{ _repo }}
+  args:
+    executable: /bin/bash
+  register: debuginfo_baseurl
+  changed_when: debuginfo_baseurl.stdout.strip() != ''
+  when: >
+    'PGDG' in yum_repository_list
+  vars:
+    _repo: /etc/yum.repos.d/pgdg-redhat-all.repo
+    wanted_debuginfo_repo: "pgdg{{ postgres_versionNN }}-updates-debuginfo"
+
+- name: Adjust baseurl for PGDG debuginfo repository
+  ini_file:
+    dest: /etc/yum.repos.d/pgdg-redhat-all.repo
+    section: "{{ wanted_debuginfo_repo }}"
+    option: baseurl
+    value: "{{ debuginfo_baseurl.stdout.replace('$releasever', ansible_distribution_version) }}"
+  when: >
+    'PGDG' in yum_repository_list
+    and debuginfo_baseurl.stdout.strip() != ''
+  vars:
+    wanted_debuginfo_repo: "pgdg{{ postgres_versionNN }}-updates-debuginfo"
 
 - set_fact:
     _2q_repositories: []
