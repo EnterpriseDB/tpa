@@ -45,6 +45,10 @@
     sysctls: "{{ item.sysctls|default(omit) }}"
     ulimits: "{{ item.ulimits|default(omit) }}"
     networks_cli_compatible: yes
+    tmpfs:
+      - "/tmp"
+      - "/run"
+      - "/run/lock"
   vars:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
