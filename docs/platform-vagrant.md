@@ -17,7 +17,7 @@ Ubuntu 16.04 (Xenial).
 ```
 [tpa]$ tpaexec configure foo --architecture M1 --platform vagrant
 [tpa]$ cd foo
-[tpa]$ tpaexec provision && vagrant up
+[tpa]$ tpaexec provision . && vagrant up
 [tpa]$ tpaexec deploy . -vv
 ```
 
