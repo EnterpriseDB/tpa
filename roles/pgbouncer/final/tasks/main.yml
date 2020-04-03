@@ -2,8 +2,14 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=pgbouncer/service
+- include_role:
+    name: pgbouncer/service
+    apply:
+      tags: [pgbouncer, service]
   tags: always
 
-- include_role: name=pgbouncer/restart
+- include_role:
+    name: pgbouncer/restart
+    apply:
+      tags: [pgbouncer, restart]
   tags: always
