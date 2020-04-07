@@ -96,15 +96,6 @@
 # or "check port $platypus_port" to haproxy_server_options if they are
 # missing (because these options must always be set for every server).
 
-- name: Ensure haproxy_maxconn is set
-  set_fact:
-    haproxy_maxconn: "{{
-      hostvars[item].haproxy_maxconn|default((hostvars[item].max_connections|default(250))*0.90)|int
-    }}"
-  with_items: "{{ haproxy_backend_servers }}"
-  delegate_to: "{{ item }}"
-  delegate_facts: true
-
 - name: Ensure maxconn is set in haproxy_server_options
   set_fact:
     haproxy_server_options: "{{

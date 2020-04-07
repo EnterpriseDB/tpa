@@ -70,7 +70,7 @@ server_fast_close = {{ server_fast_close|default(1) }}
 ;;; Connection limits
 ;;;
 
-max_client_conn = {{ pgbouncer_max_client_conn|default(default_pgbouncer_max_client_conn) }}
+max_client_conn = {{ pgbouncer_max_client_conn }}
 default_pool_size = {{ pgbouncer_default_pool_size|default(default_pgbouncer_default_pool_size) }}
 ;min_pool_size = 0
 ;reserve_pool_size = 5

@@ -60,6 +60,7 @@
     pgbouncer_backend_port: "{{ pgbouncer_backend_port|default(default_pgbouncer_backend_port) }}"
     haproxy_server_options: "{{ haproxy_server_options|default([]) }}"
     wal_or_xlog: "{{ wal_string }}"
+    max_connections: "{{ max_connections|default(default_max_connections) }}"
   vars:
     default_postgres_installation_method: >-
       {{ postgres_installation_source|default('pkg') }}
@@ -67,6 +68,21 @@
       {%- if postgres_version is version('10', '>=') -%}wal
       {%- else -%}xlog
       {%- endif -%}
+  tags: always
+
+- name: Ensure haproxy_maxconn is set
+  set_fact:
+    haproxy_maxconn: "{{
+      haproxy_maxconn|default(((max_connections|int)*0.90)|int)
+    }}"
+  tags: always
+
+- name: Ensure haproxy_backend_servers is defined
+  set_fact:
+    haproxy_backend_servers: "{{ haproxy_backends }}"
+  when:
+    haproxy_backends is defined and
+    haproxy_backend_servers is not defined
   tags: always
 
 # If pgbouncer_backend points to a particular instance, we respect any
@@ -85,6 +101,47 @@
     _backend_vars: "{{ hostvars[pgbouncer_backend] }}"
     _backend_port: "{{
       _backend_vars['haproxy_port']|default(_backend_vars['postgres_port'])
+    }}"
+  tags: always
+
+# We set pgbouncer_max_client_conn to 90% of max_connections for the
+# backend Postgres server by default. In the special case of haproxy
+# running on the pgbouncer host and pgbouncer pointing to it, we use
+# the minimum haproxy_maxconn value from the haproxy_backend_servers
+# instead.
+
+- name: Set pgbouncer_max_client_conn from max_connections
+  set_fact:
+    pgbouncer_max_client_conn: "{{
+      pgbouncer_max_client_conn|default(_maxconn)
+    }}"
+  when: >
+    'pgbouncer' in role
+  vars:
+    _backend: "{{
+      pgbouncer_backend
+        if pgbouncer_backend not in
+          ['127.0.0.1', 'localhost', inventory_hostname]
+        else inventory_hostname
+    }}"
+    _backend_maxconn: "{{
+      hostvars.get(_backend, {}).get('max_connections')
+    }}"
+    _backend_is_haproxy: "{{
+      'haproxy' in role
+      and _backend == inventory_hostname
+      and pgbouncer_backend_port == haproxy_port
+    }}"
+    _haproxy_backend_maxconn: "{{
+      'haproxy' in role and
+      haproxy_backend_servers|map('extract', hostvars, 'haproxy_maxconn')|list|min
+    }}"
+    _maxconn: "{{
+      _backend_is_haproxy and
+        _haproxy_backend_maxconn or
+        (_backend_maxconn is defined and
+          ((_backend_maxconn|int)*0.90)|int or
+          default_pgbouncer_max_client_conn)
     }}"
   tags: always
 
@@ -220,12 +277,4 @@
         ('bdr' in role)|ternary(bdr_database, 'postgres')
       )
     }}"
-  tags: always
-
-- name: Ensure haproxy_backend_servers is defined
-  set_fact:
-    haproxy_backend_servers: "{{ haproxy_backends }}"
-  when:
-    haproxy_backends is defined and
-    haproxy_backend_servers is not defined
   tags: always

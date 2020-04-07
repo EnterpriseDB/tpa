@@ -3,5 +3,4 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 default_pgbouncer_pool_mode: session
-default_pgbouncer_max_client_conn: 100
 default_pgbouncer_default_pool_size: 20

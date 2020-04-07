@@ -6,7 +6,7 @@ listen_addresses = '*'
 port = {{ postgres_port }}
 unix_socket_directories = '/var/run/postgresql, /tmp'
 
-max_connections = {{ max_connections|default(250) }}
+max_connections = {{ max_connections }}
 
 shared_buffers = {{ shared_buffers|default(shared_buffers_mb~'MB') }}
 max_prepared_transactions = {{ max_prepared_transactions|default(0) }}
