@@ -25,6 +25,7 @@
       tags: [haproxy, config, users]
   when: >
     'postgres' in role
+    and groups['role_haproxy']|default([]) is not empty
   tags: always
 
 - set_fact: initialise_haproxy=True
