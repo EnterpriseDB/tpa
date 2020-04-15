@@ -110,7 +110,9 @@
     section: "{{ item }}"
     option: enabled
     value: "{{ (item in all_wanted_pgdg_repos)|ternary('1', '0') }}"
-  with_items: "{{ interesting_pgdg_repos.stdout_lines }}"
+  with_items:
+    - "{{ interesting_pgdg_repos.stdout_lines }}"
+    - pgdg-common
   when: >
     'PGDG' in yum_repository_list
   vars:
@@ -118,6 +120,7 @@
     all_wanted_pgdg_repos:
       - "{{ wanted_pgdg_repo }}"
       - "{{ wanted_pgdg_repo }}-updates-debuginfo"
+      - pgdg-common
 
 # The PGDG pgdgNN-updates-debuginfo repositories are configured to use
 # $releasever, but the repository does not contain directories for RHEL
