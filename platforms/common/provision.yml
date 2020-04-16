@@ -19,8 +19,12 @@
 
 - name: Set ssh_key_file
   set_fact:
+    default_ssh_key_file: >-
+      {{ _default }}
     ssh_key_file: >-
-      {{ ssh_key_file|default('id_' + cluster_name|lower) }}
+      {{ ssh_key_file|default(_default) }}
+  vars:
+    _default: "id_{{ cluster_name|lower }}"
   tags: always
 
 - name: Run ssh-keygen
@@ -36,8 +40,10 @@
   args:
     chdir: "{{ cluster_dir }}"
     creates: "{{ ssh_key_file }}.ppk"
+  ignore_errors: yes
   when: >
     lookup('pipe', 'command -v puttygen || true') != ''
+    and ssh_key_file == default_ssh_key_file
   tags: [common, ssh, keygen]
 
 - name: Generate RSA and ECDSA host keys
