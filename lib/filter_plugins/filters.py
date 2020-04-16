@@ -240,7 +240,7 @@ def contains(container, *values):
 # with the given directory path (assumed to be absolute).
 
 def abspath_to(directory, path):
-    return os.path.join(directory, path)
+    return os.path.join(directory, os.path.expanduser(path))
 
 class FilterModule(object):
     def filters(self):
