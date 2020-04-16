@@ -1,6 +1,6 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 cat >> /root/.ssh/authorized_keys <<KEY
-{{ lookup('file', '%s/%s.pub' % (cluster_dir, ssh_key_file)) }}
+{{ lookup('file', cluster_dir|abspath_to(ssh_key_file + '.pub')) }}
 KEY
 
 chmod 600 /root/.ssh/authorized_keys

@@ -16,7 +16,7 @@
     state: present
     region: "{{ item }}"
     name: "{{ ec2_key_name }}"
-    key_material: "{{ lookup('file', '%s/%s.pub' % (cluster_dir, ssh_key_file)) }}"
+    key_material: "{{ lookup('file', cluster_dir|abspath_to(ssh_key_file + '.pub')) }}"
     wait: yes
   with_items: "{{ aws_regions }}"
 
