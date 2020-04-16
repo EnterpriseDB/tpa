@@ -87,14 +87,14 @@ additional_postgres_packages:
   Debian: &debian_additional_packages
     - barman-cli
   RedHat:
-    - barman-cli-2.9
+    - barman-cli
   Ubuntu: *debian_additional_packages
 
 src_extra_packages:
   Debian: &debian_src_extra_packages
     - barman-cli
   RedHat:
-    - barman-cli-2.9
+    - barman-cli
   Ubuntu: *debian_src_extra_packages
 
 extra_postgres_packages:
