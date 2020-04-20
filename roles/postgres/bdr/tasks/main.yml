@@ -22,6 +22,7 @@
     state: present
   become_user: "{{ postgres_user }}"
   become: yes
+  tags: bdr
 
 # Next, we need to decide which flavour of BDR we're working with.
 #
@@ -42,7 +43,7 @@
 # little or no practical importance (e.g., no customers use them).
 
 - include_tasks: version.yml
-  tags: always
+  tags: bdr
 
 # Now one node must create a BDR group, and the other nodes must join
 # the group. It doesn't matter which node creates the group, so long as
