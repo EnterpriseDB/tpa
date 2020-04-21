@@ -32,7 +32,6 @@ from collections import Iterable
 from ansible.errors import AnsibleError, AnsibleUndefinedVariable
 from ansible.utils.listify import listify_lookup_plugin_terms
 from ansible.plugins.lookup import LookupBase
-from ansible.module_utils.six import string_types
 
 class LookupModule(LookupBase):
 
@@ -65,14 +64,14 @@ class LookupModule(LookupBase):
             expr = current_term
             convert_bare = False
 
-            if isinstance(current_term, string_types):
+            if isinstance(current_term, str):
                 expr = expr.strip()
                 convert_bare = True
 
             list = self._templar.template(expr, cache=False,
                 fail_on_undefined=False, convert_bare=convert_bare)
 
-            if isinstance(list, string_types) or not isinstance(list, Iterable):
+            if isinstance(list, str) or not isinstance(list, Iterable):
                 list = [list]
         except UndefinedError as e:
             raise AnsibleUndefinedVariable("Couldn't evaluate loop expression: %s" % e)

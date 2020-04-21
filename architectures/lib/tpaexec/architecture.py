@@ -9,7 +9,7 @@ import yaml
 
 from ansible.template import Templar
 from ansible.utils.vars import merge_hash
-from ansible.module_utils.six.moves import reduce
+from functools import reduce
 from tpaexec.platform import Platform
 
 class Architecture(object):
