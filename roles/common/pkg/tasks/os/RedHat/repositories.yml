@@ -122,6 +122,15 @@
       - "{{ wanted_pgdg_repo }}-updates-debuginfo"
       - pgdg-common
 
+- name: Exclude barman packages from PGDG repos
+  ini_file:
+    dest: /etc/yum.repos.d/pgdg-redhat-all.repo
+    section: pgdg-common
+    option: exclude
+    value: barman*
+  when: >
+    'PGDG' in yum_repository_list
+
 # The PGDG pgdgNN-updates-debuginfo repositories are configured to use
 # $releasever, but the repository does not contain directories for RHEL
 # like rhel-7Server-x86_64, only rhel-7.7-x86_64 (which works only with
