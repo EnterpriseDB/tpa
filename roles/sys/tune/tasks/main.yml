@@ -7,6 +7,7 @@
     awk '/^MemTotal: / {print int($2/1024)}' /proc/meminfo
   changed_when: False
   register: mem
+  check_mode: no
 
 # The following is really just:
 #

@@ -57,6 +57,7 @@
     executable: /bin/bash
   register: keycertfiles
   changed_when: False
+  check_mode: no
 
 - name: Set correct ownership and mode on key/certificate files
   file:

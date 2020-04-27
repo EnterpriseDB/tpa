@@ -23,6 +23,7 @@
   vars:
     conf: "{{ _include_dir }}/0000-tpa.conf"
     override: "{{ _include_dir }}/8888-shared_preload_libraries.conf"
+  check_mode: no
 
 - name: Include {{ library }} in shared_preload_libraries list
   set_fact:

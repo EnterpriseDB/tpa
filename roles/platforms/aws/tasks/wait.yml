@@ -32,3 +32,4 @@
   delay: 10
   become: no
   delegate_to: localhost
+  check_mode: no

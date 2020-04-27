@@ -103,6 +103,7 @@
   vars:
     _repo: /etc/yum.repos.d/pgdg-redhat-all.repo
     _wanted: "pgdg{{ postgres_versionNN }}"
+  check_mode: no
 
 - name: Disable PGDG repos for versions other than {{ postgres_version }}
   ini_file:
@@ -151,6 +152,7 @@
   vars:
     _repo: /etc/yum.repos.d/pgdg-redhat-all.repo
     wanted_debuginfo_repo: "pgdg{{ postgres_versionNN }}-updates-debuginfo"
+  check_mode: no
 
 - name: Adjust baseurl for PGDG debuginfo repository
   ini_file:

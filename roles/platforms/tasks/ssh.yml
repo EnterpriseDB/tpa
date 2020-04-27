@@ -19,3 +19,4 @@
   wait_for_ssh:
   when:
     wait_for_instances|default(False)
+  check_mode: no

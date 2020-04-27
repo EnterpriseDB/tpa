@@ -20,6 +20,7 @@
   changed_when: False
   become_user: barman
   become: yes
+  check_mode: no
 
 - set_fact:
     diagnosis: "{{ diagnosis.stdout|from_json }}"

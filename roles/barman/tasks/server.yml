@@ -11,6 +11,7 @@
     done
   register: compressor
   changed_when: False
+  check_mode: no
 
 - name: Set default_barman_compression
   set_fact:
@@ -84,6 +85,7 @@
     find ~barman/.postgresql -name '*.crt' -o -name '*.key'
   register: keycertfiles
   changed_when: False
+  check_mode: no
 
 - name: Set correct ownership and mode on key/certificate files
   file:
