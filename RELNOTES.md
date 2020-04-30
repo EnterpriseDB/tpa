@@ -44,6 +44,9 @@ order to avoid any confusion with Postgres version numbers.
 
 - Fix ec2 inventory caching problem
 
+- Correctly bundle version-specific Python dependencies (e.g.,
+  MarkupSafe) in tpaexec-deps
+
 ## v9.3 (2020-03-10)
 
 ### Minor changes
