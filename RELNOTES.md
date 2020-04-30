@@ -2,11 +2,50 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v9.4 (unreleased)
+## v20.4 (2020-04-30)
+
+This release of TPAexec would have been v9.4, but has been renumbered in
+order to avoid any confusion with Postgres version numbers.
+
+### Notable changes
+
+- Adapt to various PGDG YUM repository layout changes and enable
+  pgdg-common repository by default
+
+- Update expired 2ndQuadrant APT repository signing keys on existing
+  Debian/Ubuntu clusters
+
+- Create unprivileged docker containers by default (but you can still
+  set ``privileged: yes`` on the instance in config.yml)
+
+- Add basic support for creating user-defined Docker networks and
+  attaching containers to them
+
+- Calculate pgbouncer_max_client_conn based on max_connections
 
 ### Bugfixes
 
-- Use repeatable hash for ec2 inventory cache
+- Fix python-psycopg2 vs python2-psycopg2 package conflict when
+  installing barman-cli
+
+- Fix selinux dependency problems ("Failed to detect selinux python
+  bindings")
+
+- Correctly handle ``ssh_key_file: /path/to/id_xxx`` as well as
+  ``ssh_key_file: ~/.ssh/id_rsa`` settings in config.yml
+
+- Ensure that pgbouncer.ini changes cause a restart when using
+  ``--tags pgbouncer``
+
+- Avoid trying to create haproxy users when there are no haproxy
+  instances in a cluster
+
+- Silence some inapplicable Ansible warnings
+
+- Fix ec2 inventory caching problem
+
+- Correctly bundle version-specific Python dependencies (e.g.,
+  MarkupSafe) in tpaexec-deps
 
 ## v9.3 (2020-03-10)
 
