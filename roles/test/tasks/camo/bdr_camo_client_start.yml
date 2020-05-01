@@ -75,8 +75,8 @@
     become: yes
 
   - set_fact:
-      bdr_camo_client_output: /tmp/bdr-camo-client-{{ failure }}.txt
-      run_time_output: /tmp/camo_statistics-{{ failure }}.csv
+      bdr_camo_client_output: "{{ postgres_home }}/bdr-camo-client-{{ failure }}.txt"
+      run_time_output: "{{ postgres_home }}/camo_statistics-{{ failure }}.csv"
 
   - name: Run bdr_camo_client
     shell: >
@@ -97,7 +97,7 @@
   - name: Install run_time_check.py
     template:
       src: run_time_check.py.j2
-      dest: /tmp/run_time_check.py
+      dest: "{{ postgres_home }}/run_time_check.py"
       owner: postgres
       group: postgres
       mode: 0755
@@ -106,14 +106,14 @@
 
   - name: Start run_time_check script
     shell: >
-      /tmp/run_time_check.py 
+      run_time_check.py 
       "{{ hostvars[ping].bdr_node_dsn }}"
       "{{ hostvars[pong].bdr_node_dsn }}"
       "{{ bdr_node_dsn }}"
       "{{ run_time_output }}"
       'camo_test'  "{{ camo_transactions|int * camo_clients|int }}" > output.txt 2>&1
     args:
-      chdir: /tmp
+      chdir: "{{ postgres_home }}"
     register: check_run
     become_user: "{{ postgres_user }}"
     become: yes
