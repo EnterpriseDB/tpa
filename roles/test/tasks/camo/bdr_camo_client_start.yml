@@ -106,7 +106,7 @@
 
   - name: Start run_time_check script
     shell: >
-      run_time_check.py 
+      ./run_time_check.py 
       "{{ hostvars[ping].bdr_node_dsn }}"
       "{{ hostvars[pong].bdr_node_dsn }}"
       "{{ bdr_node_dsn }}"
