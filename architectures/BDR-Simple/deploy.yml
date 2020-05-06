@@ -30,6 +30,11 @@
   - include_role: name=barman
     tags: always
 
+  - include_role: name=repmgr
+    when:
+      groups|members('role_replica', not_in=['role_readonly']) is not empty
+    tags: always
+
   - include_role: name=pgbouncer
     tags: always
 
