@@ -39,8 +39,6 @@
     tags: always
 
   - include_role: name=haproxy
-    when: >
-      'haproxy' in role
     tags: always
 
   - include_role: name=final
@@ -55,8 +53,6 @@
     tags: always
 
   - include_role: name=monitoring
-    when: >
-      'role_monitoring-server' in groups
     tags: always
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/fini.yml"
