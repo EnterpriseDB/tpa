@@ -17,6 +17,12 @@
   set_fact:
     default_barman_compression: "{{ compressor.stdout.strip() or 'none' }}"
 
+- name: Ensure that barman_home has the right ownership
+  file:
+    path: "{{ barman_home }}"
+    owner: barman
+    group: barman
+
 - name: Install global Barman configuration file
   template:
     src: barman.conf.j2
