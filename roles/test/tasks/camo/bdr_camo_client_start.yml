@@ -82,7 +82,7 @@
     shell: >
       {{ bdr_camo_client_path }}
       -h {{ bdr_camo_client_host_arg }}
-      -c 'INSERT INTO camo_test(key,attempt_no,node,xact_id) VALUES ($1, $2, (select node_name from bdr.local_node_summary), (select txid_current()));'
+      -c 'INSERT INTO public.camo_test(key,attempt_no,node,xact_id) VALUES ($1, $2, (select node_name from bdr.local_node_summary), (select txid_current()));'
       -i {{ camo_transactions }} -j {{ camo_clients }}
       -s {{ scope }}
       {{ bdr_camo_client_args }}
