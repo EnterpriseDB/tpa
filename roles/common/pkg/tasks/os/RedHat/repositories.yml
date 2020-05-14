@@ -132,6 +132,15 @@
   when: >
     'PGDG' in yum_repository_list
 
+- name: Exclude psycopg2 packages from PGDG repos
+  ini_file:
+    dest: /etc/yum.repos.d/pgdg-redhat-all.repo
+    section: "pgdg{{ postgres_versionNN }}"
+    option: exclude
+    value: python-psycopg2 python2-psycopg2 python3-psycopg2
+  when: >
+    'PGDG' in yum_repository_list
+
 # The PGDG pgdgNN-updates-debuginfo repositories are configured to use
 # $releasever, but the repository does not contain directories for RHEL
 # like rhel-7Server-x86_64, only rhel-7.7-x86_64 (which works only with
