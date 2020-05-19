@@ -97,7 +97,7 @@ class Architecture(object):
         )
         g.add_argument('--os-image', metavar='LABEL')
         g.add_argument(
-            '--postgres-version', choices=['9.4', '9.5', '9.6', '10', '11', '12']
+            '--postgres-version', choices=['9.4', '9.5', '9.6', '10', '11', '12', '13']
         )
         g.add_argument(
             '--use-volatile-subscriptions', action='store_true',
