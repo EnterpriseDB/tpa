@@ -16,9 +16,6 @@
 
   hosts: "{{ deploy_hosts|default('all') }}"
   tasks:
-  - include_role: name=common
-    tags: always
-
   - include_role: name=sys
     tags: always
 

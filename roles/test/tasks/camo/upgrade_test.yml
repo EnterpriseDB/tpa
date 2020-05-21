@@ -6,7 +6,7 @@
 
 - name: Upgrade host ping of the CAMO pair
   block:
-  - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
+  - include_role: name=sys/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
 
   - include_role: name=postgres/pkg tasks_from=list-packages.yml
 
@@ -40,7 +40,7 @@
 
 - name: Upgrade host pong of the CAMO pair
   block:
-  - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
+  - include_role: name=sys/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
 
   - include_role: name=postgres/pkg tasks_from=list-packages.yml
 
@@ -60,7 +60,7 @@
 
 - name: Upgrade all other nodes
   block:
-  - include_role: name=common/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
+  - include_role: name=sys/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
 
   - include_role: name=postgres/pkg tasks_from=list-packages.yml
 

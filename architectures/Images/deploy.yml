@@ -15,7 +15,7 @@
   environment: "{{ target_environment }}"
   hosts: all
   tasks:
-  - include_role: name=common/pkg
+  - include_role: name=sys/pkg
   - include_role: name=postgres/pkg
   - include_role: name=sys/openvpn/pkg
   - include_role: name=pgbouncer/pkg

@@ -2,6 +2,30 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- include_role:
+    name: sys/pkg
+    apply:
+      tags: [sys, pkg]
+  tags: always
+
+- name: Set the hostname
+  hostname: name="{{ inventory_hostname }}"
+  when:
+    platform not in ['docker']
+  tags: [sys, hostname]
+
+- name: Ensure authorized_keys allows admin access
+  authorized_key:
+    user: "{{ ansible_user|default('root') }}"
+    key: "{{ lookup('file', cluster_dir|abspath_to(ssh_key_file + '.pub')) }}"
+  when: ssh_key_file is defined
+
+- include_tasks:
+    file: tpa.yml
+    apply:
+      tags: [sys, tpa]
+  tags: always
+
 # Creates and mounts any additional filesystems required, e.g., any
 # postgres_data/barman_data volumes specified for the instance.
 - include_role:
@@ -19,14 +43,6 @@
   with_items: "{{ artifacts|default([]) }}"
   loop_control:
     loop_var: artifact
-  tags: always
-
-# Computes memory size and other instance-specific values needed by
-# later steps (e.g., setting shared_buffers).
-- include_role:
-    name: sys/tune
-    apply:
-      tags: [sys, always]
   tags: always
 
 - include_role:

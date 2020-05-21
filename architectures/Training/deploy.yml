@@ -16,16 +16,7 @@
 
   hosts: all
   tasks:
-  - include_role: name=common
-    tags: always
-
-  - include_role: name=sys/volumes
-    tags: always
-
-  - include_role: name=sys/sysctl
-    tags: always
-
-  - include_role: name=sys/hosts
+  - include_role: name=sys
     tags: always
 
   - include_role: name=postgres
