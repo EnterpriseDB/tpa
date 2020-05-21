@@ -22,9 +22,6 @@
   - include_role: name=sys/volumes
     tags: always
 
-  - include_role: name=sys/tune
-    tags: always
-
   - include_role: name=sys/sysctl
     tags: always
 

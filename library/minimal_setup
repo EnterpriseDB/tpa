@@ -62,6 +62,8 @@ python_pkg_prefix=${python_pkg_prefix:-$python}
 pkg_mgr=${pkg_mgr:-${pkg_mgrs[$os_family]}}
 service_mgr=${service_mgr:-systemd}
 
+memtotal=$(awk '/^MemTotal: / {print int($2/1024)}' /proc/meminfo)
+
 grep -Ev '": ""' <<RESULT
 {
     "ansible_facts": {
@@ -74,7 +76,8 @@ grep -Ev '": ""' <<RESULT
         "ansible_service_mgr": "$service_mgr",
         "ansible_pkg_mgr": "$pkg_mgr",
         "python_pkg_prefix": "$python_pkg_prefix",
-        "python": "$python"
+        "python": "$python",
+        "ansible_memtotal_mb": $memtotal
     }
 }
 RESULT
