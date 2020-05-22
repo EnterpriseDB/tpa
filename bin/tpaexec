@@ -676,12 +676,14 @@ case "$command" in
         arg=${1:?No cluster specified}
         shift
 
-        # We accept either the name of a cluster directory (and assume
-        # that playbook.yml is somewhere among the remaining arguments)
+        # We accept either a cluster directory followed by a playbook,
         # or a path to a playbook within a cluster directory.
 
         if [[ -d $arg ]]; then
             cluster=$arg
+            if [[ ! ( ( -f $1 || -f $arg/$1 ) && $1 =~ .yml$ ) ]]; then
+                error "argument is not a playbook: $1"
+            fi
         elif [[ -f $arg ]]; then
             cluster=$(dirname "$arg")
             file=$(basename "$arg")
