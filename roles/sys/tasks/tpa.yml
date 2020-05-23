@@ -59,23 +59,9 @@
     name: rc-local
     enabled: yes
 
-# Read the version string and append it to the /etc/tpa/tpa.log file
-# on the instance. If this '/etc/tpa' directory does not exist, then
-# we will create it first and we always APPEND to the tpa.log file
-# to preserve earlier deployment history if any
-
-- name: Read the deploy timestamp
-  set_fact:
-    deploy_timestamp: "{{ lookup('pipe','date \"+%Y-%m-%d %T %Z %::z\"') }}"
-
-- name: Append to tpa.log file
-  lineinfile:
-    path: /etc/tpa/tpa.log
-    create: yes
-    state: present
-    insertafter: EOF
-    line: |-
-      -------------------------------------------
-      TPA {{ tpa_version }}
-      {{ deploy_timestamp }}
-  changed_when: false
+- name: Set permissions and ownership for tpaexec.log
+  file:
+    path: /var/log/tpaexec.log
+    mode: 0644
+    owner: root
+    group: root

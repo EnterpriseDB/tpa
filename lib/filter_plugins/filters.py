@@ -5,6 +5,8 @@
 import copy
 import csv
 import re
+import sys
+import shlex
 import os.path
 from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
@@ -242,6 +244,50 @@ def contains(container, *values):
 def abspath_to(directory, path):
     return os.path.join(directory, os.path.expanduser(path))
 
+# Returns a string that represents sys.argv[] with some unnecessary noise
+# omitted. Takes the playbook_dir as an argument.
+
+def cmdline(playbook_dir):
+    args = sys.argv
+
+    # bin/tpaexec:playbook() executes ansible-playbook with a predictable
+    # sequence of arguments, which we can reduce to the bare essentials.
+
+    if os.path.basename(args[0]) == 'ansible-playbook' \
+        and args[1] == '-e' and args[2].startswith('tpa_dir=') \
+        and args[3] == '-e' and args[4].startswith('cluster_dir=') \
+        and args[5] == '-i' and args[6] == 'inventory' \
+        and args[7] == '--vault-password-file' \
+        and args[8] == 'vault/vault_pass.txt':
+
+        tpaexec = 'tpaexec'
+
+        tpa_dir = args[2].replace('tpa_dir=', '')
+        if tpa_dir != '/opt/2ndQuadrant/TPA':
+            tpaexec = os.path.join(tpa_dir, 'bin/tpaexec')
+
+        cluster_dir = args[4].replace('cluster_dir=', '')
+
+        playbook = args[9]
+        if playbook.startswith(cluster_dir):
+            playbook = os.path.relpath(playbook, start=cluster_dir)
+        elif playbook.startswith(tpa_dir):
+            playbook = os.path.relpath(playbook, start=tpa_dir)
+
+        args = [tpaexec, 'playbook', cluster_dir, playbook] + args[10:]
+
+    # It's better to output "''" than ''"'"''"'"''
+    def _shortest_quote(x):
+        sq = shlex.quote(x)
+
+        if x != sq:
+            dq = '"' + x.replace('"', '\"') + '"'
+            x = dq if len(dq) < len(sq) else sq
+
+        return x
+
+    return ' '.join([_shortest_quote(x) for x in args])
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -263,4 +309,5 @@ class FilterModule(object):
             'backup_slot_name': backup_slot_name,
             'contains': contains,
             'abspath_to': abspath_to,
+            'cmdline': cmdline,
         }
