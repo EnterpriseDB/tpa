@@ -2,13 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Ensure Postgres configuration is present
-  assert:
-    msg: "Please define postgres_version (usually done by roles/facts)"
-    that:
-      - postgres_version is defined
-      - postgres_versionNN is defined
-
 - assert:
     msg: "Export TPA_2Q_SUBSCRIPTION_TOKEN to use tpa_2q_repositories"
     that:
