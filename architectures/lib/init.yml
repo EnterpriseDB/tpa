@@ -17,7 +17,7 @@
     tags: always
   - name: Record execution
     raw: |
-      cat >> {{ _log_file }} <<EOF
+      cat >> {{ _log_file }} <<"EOF"
       {{ _log_line }}
       EOF
     args:
