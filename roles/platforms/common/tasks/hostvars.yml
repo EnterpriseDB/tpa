@@ -34,3 +34,13 @@
   when:
     tpa_2q_repositories is not defined and
     twoq_repositories is defined
+
+- assert:
+    msg: "Export TPA_2Q_SUBSCRIPTION_TOKEN to use tpa_2q_repositories"
+    that:
+      lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') != '' or
+      tpa_2q_repositories|default([]) is empty
+  tags: public_repos
+
+- set_fact:
+    use_volatile_subscriptions: "{{ use_volatile_subscriptions|default(false)|bool }}"

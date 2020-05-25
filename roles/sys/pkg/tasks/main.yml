@@ -2,12 +2,7 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- assert:
-    msg: "Export TPA_2Q_SUBSCRIPTION_TOKEN to use tpa_2q_repositories"
-    that:
-      lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') != '' or
-      tpa_2q_repositories|default([]) is empty
-  tags: public_repos
+# Workaround for expired 2ndQuadrant apt repository keys.
 
 - include_tasks: "os/{{ ansible_os_family }}/2ndquadrant-repository-keys.yml"
   when:
@@ -27,9 +22,6 @@
   vars:
     hook: "{{ cluster_dir }}/hooks/pre-deploy.yml"
   tags: always
-
-- set_fact:
-    use_volatile_subscriptions: "{{ use_volatile_subscriptions|default(false)|bool }}"
 
 - include_tasks:
     file: "os/{{ ansible_os_family }}/repositories.yml"
