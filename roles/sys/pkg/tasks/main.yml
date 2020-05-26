@@ -2,15 +2,15 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# Workaround for expired 2ndQuadrant apt repository keys.
+# Replace expired 2ndQuadrant apt repository keys, if needed.
 
 - include_tasks: "os/{{ ansible_os_family }}/2ndquadrant-repository-keys.yml"
   when:
     ansible_os_family == "Debian"
   tags: always
 
-# We must ensure that a usable Python (2.7.x) is installed, along with
-# anything else we need to run Ansible modules such as "pkg" below.
+# Ensure that a usable Python is installed, along with anything else we
+# need to run Ansible modules such as "pkg" below.
 
 - include_tasks: "os/{{ ansible_os_family }}/python.yml"
   tags: always
@@ -22,6 +22,9 @@
   vars:
     hook: "{{ cluster_dir }}/hooks/pre-deploy.yml"
   tags: always
+
+# Configure package repositories ({apt,yum}_repositories,
+# tpa_2q_repositories).
 
 - include_tasks:
     file: "os/{{ ansible_os_family }}/repositories.yml"
@@ -36,6 +39,8 @@
   vars:
     hook: "{{ cluster_dir }}/hooks/post-repo.yml"
   tags: always
+
+# Install (non-Postgres-related) packages.
 
 - include_tasks: packages.yml
   tags: always
