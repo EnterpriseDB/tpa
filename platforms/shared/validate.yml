@@ -1,0 +1,23 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Ensure that every shared instance specifies hosted_by
+  assert:
+    msg: "Shared instance {{ item.Name }} must specify valid ``hosted_by: nonSharedInstance``"
+    that:
+    - item.get('hosted_by') is defined
+    - hosted_by|length == 1
+    - (hosted_by|first).get('platform') != 'shared'
+  with_items: "{{ shared_instances }}"
+  vars:
+    hosted_by: "{{
+      instances|selectattr('Name', 'equalto', item.get('hosted_by'))|list
+    }}"
+
+- set_fact:
+    hostname_patterns: "{{
+      hostname_patterns|default({})|combine({
+        'bare': '^[a-z0-9-]+(\\.[a-z0-9-]+)*$'
+      })
+    }}"

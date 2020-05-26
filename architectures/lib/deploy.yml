@@ -17,6 +17,8 @@
   hosts: "{{ deploy_hosts|default('all') }}"
   tasks:
   - include_role: name=sys
+    when:
+      platform not in ['shared']
     tags: always
 
   - include_role: name=postgres

@@ -56,11 +56,15 @@
   # Now we perform platform-independent provisioning tasks, then give
   # each platform handler a chance to do whatever it wants with its
   # subset of the defined instances.
+  #
+  # If there are any shared instances, they are processed last, so that
+  # the instance they are "hosted_by" has already been provisioned.
 
   - include_tasks: "{{ platform }}/provision.yml"
     with_items:
       - common
-      - "{{ cluster_platforms }}"
+      - "{{ cluster_platforms|difference(['shared']) }}"
+      - "{{ ('shared' in cluster_platforms)|ternary(['shared'], []) }}"
     loop_control:
       loop_var: platform
 
