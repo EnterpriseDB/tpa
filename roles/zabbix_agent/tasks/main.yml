@@ -8,6 +8,7 @@
       tags: [zabbix_agent, pkg]
   when: >
     'zabbix_agent' in role
+    and platform not in ['shared']
   tags: always
 
 - include_role:

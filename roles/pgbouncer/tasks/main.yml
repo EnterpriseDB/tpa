@@ -8,6 +8,7 @@
       tags: [pgbouncer, pkg]
   when: >
     'pgbouncer' in role
+    and platform not in ['shared']
   tags: always
 
 - include_role:

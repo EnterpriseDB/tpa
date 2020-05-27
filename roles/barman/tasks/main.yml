@@ -22,6 +22,7 @@
 - include_role: name=barman/pkg
   when: >
     'barman' in role
+    and platform not in ['shared']
   tags: always
 
 # Allow postgres@ on any Postgres server to ssh to barman@ on any

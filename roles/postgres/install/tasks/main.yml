@@ -6,6 +6,8 @@
 # postgres_installation_method (pkg or src).
 
 - include_role: name="postgres/{{ postgres_installation_method }}"
+  when:
+    platform not in ['shared']
   tags: always
 
 # Second, no matter how we installed Postgres, we may need to build and

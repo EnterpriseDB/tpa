@@ -8,6 +8,7 @@
       tags: haproxy
   when: >
     'haproxy' in role
+    and platform not in ['shared']
   tags: always
 
 - include_role:

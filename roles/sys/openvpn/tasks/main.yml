@@ -9,6 +9,8 @@
   tags: always
 
 - include_role: name=sys/openvpn/pkg
+  when:
+    platform not in ['shared']
   tags: always
 - include_role: name=sys/openvpn/common
   tags: always
