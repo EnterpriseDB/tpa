@@ -123,6 +123,16 @@
       - "{{ wanted_pgdg_repo }}-updates-debuginfo"
       - pgdg-common
 
+- name: Temporarily disable pgdg11-updates-debuginfo for RHEL8 (missing repodata)
+  ini_file:
+    dest: /etc/yum.repos.d/pgdg-redhat-all.repo
+    section: pgdg11-updates-debuginfo
+    option: enabled
+    value: "0"
+  when: >
+    'PGDG' in yum_repository_list
+    and ansible_distribution_major_version|int == 8
+
 - name: Exclude barman packages from PGDG repos
   ini_file:
     dest: /etc/yum.repos.d/pgdg-redhat-all.repo
