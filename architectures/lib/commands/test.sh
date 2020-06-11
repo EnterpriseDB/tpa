@@ -56,7 +56,10 @@ _tpaexec_command() {
     testpath=""
     for dir in "${DIRECTORIES[@]}"; do
         path=$dir/$test
-        if [[ -f $path.yml || -f $path.t.yml ]]; then
+        if [[ -f $path.yml ]]; then
+            testpath=$path.yml
+            break
+        elif [[ -f $path.t.yml ]]; then
             testpath=$path
             break
         fi
