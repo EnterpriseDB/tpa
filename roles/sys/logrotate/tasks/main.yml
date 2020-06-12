@@ -15,3 +15,17 @@
         '/var/log/postgres/postgres.log', '/var/log/postgresql/postgres.log'
       )
     }}"
+
+- name: Set up a cron job to run logrotate every 10 minutes
+  cron:
+    user: root
+    cron_file: /etc/cron.d/tpa_logrotate
+    name: Run logrotate every 10 minutes
+    minute: "*/10"
+    hour: "*"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: >
+      /usr/sbin/logrotate /etc/logrotate.conf
+    state: present
