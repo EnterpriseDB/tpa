@@ -59,4 +59,9 @@ post_backup_retry_script = "{{ barman_post_backup_retry_script }}"
 {% if barman_post_backup_script is defined %}
 post_backup_script = "{{ barman_post_backup_script }}"
 {% endif %}
+
 active = {{ active|lower }}
+
+{% if barman_streaming_wals_directory is defined %}
+streaming_wals_directory = "{{ barman_streaming_wals_directory }}"
+{% endif %}
