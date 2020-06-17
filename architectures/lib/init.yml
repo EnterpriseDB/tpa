@@ -26,7 +26,7 @@
     become: yes
     vars:
       _deploy_timestamp: >-
-        {{ lookup('pipe', 'date -u -Iseconds') }}
+        {{ lookup('pipe', 'date -u +"%Y-%m-%dT%H:%M:%SZ"') }}
       _log_line: >-
         [{{ _deploy_timestamp }}] TPAexec {{ tpa_version }}: {{ playbook_dir|cmdline }}
       _log_file: /var/log/tpaexec.log
