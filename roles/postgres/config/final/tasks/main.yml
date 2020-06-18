@@ -38,6 +38,7 @@
       tags: pgbouncer
   when: >
     postgres_users|json_query("[?username=='pgbouncer']") != []
+    and ('bdr' not in role or inventory_hostname == first_bdr_primary)
   tags: always
 
 - name: Include postgres-config-final hook
