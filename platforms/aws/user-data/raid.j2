@@ -1,13 +1,4 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-{#
-    If mdadm is not available, install it.
-#}
-
-{% if not image['name'].startswith('TPA-') %}
-if ! command -v mdadm &>/dev/null; then
-{% include 'user-data/os/'+OS+'/mdadm.j2' %}
-; fi
-{% endif %}
 
 if test -f /proc/mdstat; then
   echo "Checking for RAID array being rebuilt"

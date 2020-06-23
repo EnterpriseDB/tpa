@@ -1,11 +1,4 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-{#
-    If nvme-cli is not available, install it.
-#}
-
-if ! command -v nvme &>/dev/null; then
-{% include 'user-data/os/'+OS+'/nvmecli.j2' %}
-; fi
 
 cat > /usr/local/bin/nvme-ebs-name <<'SCRIPT'
 #!/bin/bash

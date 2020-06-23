@@ -1,7 +1,0 @@
-{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-apt-get -q -y update &&
-apt-get -q -y --no-install-recommends install python python-virtualenv \
-		virtualenv &&
-virtualenv --system-site-packages /usr/local/share/tpa/python-virtualenv &&
-source /usr/local/share/tpa/python-virtualenv/bin/activate &&
-pip install awscli

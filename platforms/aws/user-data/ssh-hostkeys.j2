@@ -1,6 +1,6 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 {#
-    First, download and install the pre-generated SSH host keys.
+   First, download and install the pre-generated SSH host keys.
 #}
 
 for k in rsa ecdsa; do
@@ -12,13 +12,11 @@ for k in rsa ecdsa; do
 done
 
 {#
-    On RHEL AMIs, we also need to make sure that sshd doesn't generate
+    On RHEL/CentOS, we also need to make sure that sshd doesn't generate
     more host keys to replace the ones we remove below.
 #}
-{% if OS == 'RedHat' %}
 F=/etc/sysconfig/sshd
 LINE="AUTOCREATE_SERVER_KEYS=''"
-grep -qx "$LINE" $F || echo "$LINE" >> $F
-{% endif %}
+test -f $F && ( grep -qx "$LINE" $F || echo "$LINE" >> $F )
 
 find /etc/ssh -iname ssh_host_\*_key\* '!' -iname ssh_host_rsa_key\* '!' -iname ssh_host_ecdsa_key\* -exec rm {} \;

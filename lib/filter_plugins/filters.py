@@ -123,21 +123,6 @@ def conninfo_string(d):
         s.append('%s=%s' % (k, _quote(str(v))))
     return ' '.join(s)
 
-# Takes the name of an image and returns a string corresponding to
-# ansible_distribution values.
-
-def identify_os(name):
-    name = name.lower()
-
-    if 'rhel' in name or 'redhat' in name:
-        return 'RedHat'
-    elif 'debian' in name:
-        return 'Debian'
-    elif 'ubuntu' in name:
-        return 'Ubuntu'
-
-    return 'Unknown'
-
 # Given a hash that maps os names to package lists, the name of an os, and an
 # optional version suffix, this function returns a list of packages for the
 # given os, with the version suffix applied (if provided).
@@ -298,7 +283,6 @@ class FilterModule(object):
             'remove_keys': remove_keys,
             'parse_conninfo': parse_conninfo,
             'conninfo_string': conninfo_string,
-            'identify_os': identify_os,
             'packages_for': packages_for,
             'members_of': members_of,
             'dbname': dbname,

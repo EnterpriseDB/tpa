@@ -1,0 +1,34 @@
+{# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
+{#
+    We must ensure that nvmecli, awscli, and mdadm are installed.
+
+    We now use /etc/os-release to decide what to do on the target, so we
+    need compact code that supports all relevant distributions. We can't
+    depend on conditional templates based on image['name'] to reduce the
+    size of user-data (that was a pretty fragile approach anyway). The
+    code below favours some obscure shortcuts just for brevity.
+
+    XXX We should check not only if awscli is available, but also that
+    it is recent enough (Debian and Ubuntu have an awscli package that
+    is even installed by default in the EC2 AMIs, but it's older than
+    some of the features we depend on).
+#}
+
+P=(nvme-cli mdadm)
+V=(python3 -m venv)
+U=(apt-get -q -y update)
+I=(apt-get -q -y --no-install-recommends install)
+DV=/usr/local/share/tpa/python-virtualenv
+
+export DEBIAN_FRONTEND=noninteractive
+if ! command -v aws &>/dev/null || ! command -v nvmecli &>/dev/null || ! command -v mdadm &>/dev/null; then
+    case "${ID}:${VERSION_ID%.*}" in
+        debian:8) P+=(python python-virtualenv); V=(virtualenv) ;;
+        debian:9|debian:10|ubuntu:18|ubuntu:20) P+=(python3 python3-venv) ;;
+        ubuntu:16) P+=(python python-virtualenv virtualenv); V=(virtualenv) ;;
+        centos:7|rhel:7) U=(); I=(yum -y install); P+=(python2 python2-virtualenv); V=(virtualenv-2) ;;
+        centos:8|rhel:8) U=(); I=(yum -y install); P+=(python3) ;;
+        *) echo "Missing dependencies on ${ID}:${VERSION_ID}"; exit 1 ;;
+    esac
+    ${U[@]} && ${I[@]} ${P[@]} && ${V[@]} --system-site-packages $DV && source $DV/bin/activate && pip install awscli
+fi

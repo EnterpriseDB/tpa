@@ -5,13 +5,13 @@
     as a user-data script to execute on first boot.
 #}
 
-{% set OS = image['name']|identify_os %}
-
 exec >> /var/log/tpa-firstboot.log 2>&1
 
 echo "$(date): start"
 
 set -x
+
+. /etc/os-release
 
 {#
     Include early setup tasks, if any are specified.
@@ -28,16 +28,15 @@ export {{ k }}="{{ user_data_environment[k] }}"
 {% endfor %}
 
 {#
-    Install nvme-cli and a udev trigger to symlink /dev/nvme1n1 from the
-    name we requested.
+    Install awscli, nvmecli, and mdadm if required.
 #}
-{% include 'user-data/nvmecli.j2' %}
+{% include 'user-data/pkg.j2' %}
 
 {#
-    Install awscli if it's not available. We need it to attach/detach
-    EBS volumes and to download things from S3.
+    Install a udev trigger to symlink /dev/nvme1n1 from the name we
+    requested.
 #}
-{% include 'user-data/awscli.j2' %}
+{% include 'user-data/nvme.j2' %}
 
 {#
     Attach existing EBS volumes to the instance if requested.
@@ -50,7 +49,7 @@ export {{ k }}="{{ user_data_environment[k] }}"
     Next, create any RAID arrays that are required on this system.
 #}
 {% if item.volumes|select('has_subkey', 'raid_device')|list|count > 0 %}
-{% include 'user-data/mdadm.j2' %}
+{% include 'user-data/raid.j2' %}
 {% endif %}
 
 {#
