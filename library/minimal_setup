@@ -44,6 +44,11 @@ case "${ID}:${VERSION_ID%.*}" in
             python_pkg_prefix=python
         fi
         ;;
+    ubuntu:20)
+        distribution=Ubuntu
+        release=$VERSION_CODENAME
+        python=python3
+        ;;
     rhel:8|centos:8)
         distribution=RedHat
         release=$VERSION_ID
