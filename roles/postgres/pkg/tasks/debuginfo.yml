@@ -21,7 +21,7 @@
   when:
     postgres_version is version('10', '>=') and (
       (ansible_distribution == 'Debian' and ansible_distribution_release in ['stretch','buster']) or
-      (ansible_distribution == 'Ubuntu' and ansible_distribution_release in ['bionic'])
+      (ansible_distribution == 'Ubuntu' and ansible_distribution_release in ['bionic','focal'])
     )
 
 - name: Install Postgres debuginfo packages
