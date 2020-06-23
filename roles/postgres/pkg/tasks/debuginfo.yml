@@ -19,10 +19,9 @@
       postgres_debuginfo_packages|map('replace', '-dbg', '-dbgsym')|list
     }}"
   when:
-    postgres_version is version('10', '>=') and (
-      (ansible_distribution == 'Debian' and ansible_distribution_release in ['stretch','buster']) or
-      (ansible_distribution == 'Ubuntu' and ansible_distribution_release in ['bionic','focal'])
-    )
+    postgres_version is version('10', '>=')
+    and ansible_distribution in ['Debian', 'Ubuntu']
+    and ansible_distribution_release in ['stretch', 'buster', 'bionic', 'focal']
 
 - name: Install Postgres debuginfo packages
   package:
