@@ -38,7 +38,7 @@ class aws(Platform):
                 },
                 'debian-stretch-hvm-x86_64-gp2-2020-06-11-59901': {
                     'versions': ['9', 'stretch'],
-                    'owner': '136693071363',
+                    'owner': '379101102735',
                     'user': 'admin',
                 },
                 'debian-10-amd64-20200610-293': {
