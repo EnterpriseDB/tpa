@@ -204,6 +204,8 @@ def cluster_discovery(module, conn):
     if 'replica' in m:
         m['role'] = 'replica'
 
+    m.update(database_discovery(module, conn, m))
+
     return m
 
 def major_version(version_num):
@@ -263,6 +265,49 @@ def repmgr_discovery(module, conn, m0):
             m['nodes'] = query_results(
                 repmgr_conn, "SELECT * FROM \"%s\".nodes" % repmgr_schema
             )
+
+    return m or None
+
+def database_discovery(module, conn, m0):
+    m = dict()
+    m['databases'] = dict()
+    m['bdr_databases'] = []
+
+    cur = conn.cursor()
+    cur.execute("""SELECT datname
+        FROM pg_catalog.pg_database WHERE datname NOT IN ('template0')""")
+
+    for row in cur:
+        datname = row[0]
+        results = dict()
+
+        db_conn = psycopg2.connect(module.params['conninfo'] + ' dbname=%s' % datname)
+
+        bdr = bdr_discovery(module, db_conn, m0)
+        if bdr is not None:
+            results['bdr'] = bdr
+            if bdr['node_group']:
+                m['bdr_databases'].append(datname)
+
+        m['databases'].update({
+            datname: results,
+        })
+
+    return m
+
+def bdr_discovery(module, conn, m0):
+    m = dict()
+
+    cur = conn.cursor()
+    cur.execute("""SELECT relname
+        FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON (c.relnamespace=n.oid)
+        WHERE n.nspname = 'bdr' AND c.relname = 'node'""")
+
+    if cur.rowcount > 0:
+        m.update({
+            'node': query_results(conn, "SELECT * from bdr.node"),
+            'node_group': query_results(conn, "SELECT * from bdr.node_group")
+        })
 
     return m or None
 

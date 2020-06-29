@@ -32,15 +32,25 @@
   when:
     role|contains('bdr', 'primary')
 
-- name: Designate arbitrary r/w instance as first_bdr_primary
+- name: Enumerate instances eligible to become first_bdr_primary
   set_fact:
-    first_bdr_primary: "{{
-      first_bdr_primary|default(groups|members_of(bdr_node_group, not_in=ro_groups)|first)
+    first_bdr_primary_candidates: "{{
+      first_bdr_primary_candidates|default(_primary_candidates)
     }}"
   vars:
     ro_groups:
     - role_replica
     - role_readonly
+    _primary_candidates: >
+      {{ groups|members_of(bdr_node_group, not_in=ro_groups) }}
+  when: >
+    'bdr' in role
+
+- name: Designate arbitrary r/w instance as first_bdr_primary
+  set_fact:
+    first_bdr_primary: "{{
+      preferred_first_bdr_primary|default(first_bdr_primary_candidates|first)
+    }}"
   when: >
     'bdr' in role
 

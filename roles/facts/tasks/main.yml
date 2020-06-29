@@ -7,3 +7,41 @@
 
 - include_tasks: postgres.yml
   tags: always
+
+# We attempt to gather postgres facts only if there is a valid PGDATA
+# directory, the postgres user exists, and postgres is running; or in
+# other words, only if we have a reasonable chance of being able to
+# connect to Postgres. At this early stage of deployment, it is not an
+# error if these conditions are not met (e.g., when we are attaching an
+# existing PGDATA to a new instance).
+
+- include_role: name=postgres/facts
+  when: >
+    'postgres' in role and
+    pgdata_initialised|default('false') == True and
+    pgdata_user|default('UNKNOWN') != 'UNKNOWN' and
+    postgres_running|default('false') == True
+  tags: always
+
+# We have already assigned first_bdr_primary in roles/platform, but in
+# case a newly-added instance was selected, we must fall back to some
+# older instance that knows about existing the node group(s).
+
+- name: Override first_bdr_primary if required
+  set_fact:
+    first_bdr_primary: "{{
+      first_bdr_primary_candidates|intersect(_current_bdr_candidates)|first
+    }}"
+  when: >
+    'bdr' in role
+    and _current_bdr_candidates is not empty
+    and first_bdr_primary not in _current_bdr_candidates
+  vars:
+    _current_bdr_candidates: "{{
+      hostvars.values()|list
+      |selectattr('cluster_facts.bdr_databases', 'defined')
+      |selectattr('cluster_facts.bdr_databases', 'contains', bdr_database)
+      |map(attribute='inventory_hostname')
+      |list
+    }}"
+  tags: always
