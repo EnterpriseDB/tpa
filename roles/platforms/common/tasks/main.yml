@@ -35,7 +35,7 @@
 - name: Designate arbitrary r/w instance as first_bdr_primary
   set_fact:
     first_bdr_primary: "{{
-      groups|members_of(bdr_node_group, not_in=ro_groups)|first
+      first_bdr_primary|default(groups|members_of(bdr_node_group, not_in=ro_groups)|first)
     }}"
   vars:
     ro_groups:
