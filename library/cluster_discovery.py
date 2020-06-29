@@ -147,7 +147,7 @@ def cluster_discovery(module, conn):
     # what it was set to.)
 
     m['pg_settings'] = settings = {}
-    cur.execute("SELECT name,setting FROM pg_settings")
+    cur.execute("SELECT name,setting FROM pg_catalog.pg_settings")
     for s in cur.fetchall():
         settings.update({s[0]: s[1]})
 
@@ -188,12 +188,12 @@ def cluster_discovery(module, conn):
 
     m.update({
         'pg_stat_replication':
-        query_results(conn, "SELECT * from pg_stat_replication")
+        query_results(conn, "SELECT * from pg_catalog.pg_stat_replication")
     })
 
     m.update({
         'pg_replication_slots':
-        query_results(conn, "SELECT * from pg_replication_slots")
+        query_results(conn, "SELECT * from pg_catalog.pg_replication_slots")
     })
 
     repmgr = repmgr_discovery(module, conn, m)
@@ -226,7 +226,7 @@ def replica_discovery(module, conn, m0):
     })
 
     if have_pg_stat_wal_receiver(conn):
-        res = query_results(conn, "SELECT * from pg_stat_wal_receiver")
+        res = query_results(conn, "SELECT * from pg_catalog.pg_stat_wal_receiver")
         if len(res) == 1:
             m.update({
                 'pg_stat_wal_receiver': res[0],
@@ -315,19 +315,19 @@ def read_repmgr_conf(m0):
 def have_pg_stat_wal_receiver(conn):
     cur = conn.cursor()
     cur.execute("""SELECT relname
-        FROM pg_class c JOIN pg_namespace n ON (c.relnamespace=n.oid)
+        FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON (c.relnamespace=n.oid)
         WHERE n.nspname = 'pg_catalog' AND c.relname = 'pg_stat_wal_receiver'""")
     return cur.rowcount > 0
 
 def have_repmgr_db(conn):
     cur = conn.cursor()
-    cur.execute("SELECT datname FROM pg_database WHERE datname='repmgr'")
+    cur.execute("SELECT datname FROM pg_catalog.pg_database WHERE datname='repmgr'")
     return cur.rowcount > 0
 
 def repmgr_schema_name(conn):
     cur = conn.cursor()
     cur.execute("""SELECT nspname
-        FROM pg_class c JOIN pg_namespace n ON (c.relnamespace=n.oid)
+        FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON (c.relnamespace=n.oid)
         WHERE n.nspname LIKE 'repmgr%' AND c.relname = 'nodes'""")
 
     repmgr_schema = None
