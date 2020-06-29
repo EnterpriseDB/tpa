@@ -13,6 +13,12 @@
     crash_node: "{{ pong }}"
   when: crash == 'partner'
 
+- name: Set default failure timeouts for all tests
+  set_fact:
+    restart_after: "{{ restart_after|default('100') }}"
+    powerfail_timeout: "{{ powerfail_timeout|default('100') }}"
+    partition_timeout: "{{ partition_timeout|default('100') }}"
+
 - name: Cause failure {{ failure }} on CAMO {{crash}} {{ crash_node }}
   include_role: name=test tasks_from="failures/{{ failure }}.yml"
   when: >

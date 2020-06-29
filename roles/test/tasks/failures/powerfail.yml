@@ -38,13 +38,9 @@
       docker kill {{ inventory_hostname }}
     delegate_to: localhost
 
-  - name: restore time
-    set_fact:
-      powerfail_timeout: "{{ powerfail_timeout|default('100') }}"
-
   - name: start docker container
     shell: >
-      sleep {{ powerfail_timeout }};
+      sleep {{ powerfail_timeout|default('60') }};
       docker start {{ inventory_hostname }};
     args:
       executable: /bin/bash
