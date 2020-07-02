@@ -4,7 +4,7 @@
 
 {# https://documentation.2ndquadrant.com/bdr3-enterprise/release/latest/camo/ #}
 {% if bdr_node_camo_partner is defined %}
-{%   if bdr_version_num <= 30703 %}
+{%   if bdr_version_num < 30703 %}
 report_transaction_id = true
 {%   endif %}
 synchronous_replication_availability = {{ synchronous_replication_availability|default('async') }}
