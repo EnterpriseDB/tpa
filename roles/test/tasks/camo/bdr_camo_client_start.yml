@@ -40,7 +40,7 @@
     postgresql_query:
       conninfo: "{{ hostvars[item].bdr_node_dsn }}"
       queries:
-        - text: ALTER SYSTEM SET pg2q.enable_camo=%s;
+        - text: ALTER SYSTEM SET {{ _guc_prefix }}.enable_camo=%s;
           args:
             - "{{ camo_mode }}"
         - text: SELECT pg_reload_conf();
@@ -50,6 +50,11 @@
         - "{{ pong }}"
     become_user: "{{ postgres_user }}"
     become: yes
+    vars:
+      _guc_prefix: >-
+        {%- if bdr_version_num >= 30703 -%}bdr
+        {%- else -%}pg2q
+        {%- endif -%}
   - name: Create bdr_camo_client test table
     postgresql_query:
       conninfo: "{{ ping_conninfo }}"
