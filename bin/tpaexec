@@ -123,13 +123,15 @@ _install_pip_packages() {
         pip3 install "${pip_args[@]}" -r "$ANSIBLE_HOME/requirements.txt"
     else
         if [[ -d $PIP_DIR/ansible ]]; then
-            ANSIBLE_REPO=file:$PIP_DIR/ansible
+            ANSIBLE_HOME=$PIP_DIR/ansible
         else
-            ANSIBLE_REPO=$(mktemp -d /tmp/ansible-XXXXXXXXXX)
-            git clone --depth 1 https://github.com/2ndQuadrant/ansible "$ANSIBLE_REPO"
+            ANSIBLE_HOME=$(mktemp -d /tmp/ansible-XXXXXXXXXX)
+            git clone --depth 1 https://github.com/2ndQuadrant/ansible "$ANSIBLE_HOME"
         fi
-        pip3 install "${pip_args[@]}" "$ANSIBLE_REPO"
+        pip3 install "${pip_args[@]}" file:"$ANSIBLE_HOME"
     fi
+    cp "$ANSIBLE_HOME"/contrib/inventory/ec2.py "$TPA_DIR"/platforms/aws/inventory
+    cp "$ANSIBLE_HOME"/contrib/inventory/lxd.py "$TPA_DIR"/platforms/lxd/inventory
 }
 
 setup() {

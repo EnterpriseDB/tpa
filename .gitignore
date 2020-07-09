@@ -6,3 +6,5 @@ tpa-virtualenv/*
 tpa-venv/*
 pip-packages/*
 .python-version
+platforms/aws/inventory/ec2.py
+platforms/lxd/inventory/lxd.py
