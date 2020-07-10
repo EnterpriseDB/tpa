@@ -4,6 +4,13 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ## v20.5 (2020-07-10)
 
+### Bugfixes
+
+- Fix "No commands may be run on the BDR supervisor database" during
+  fact discovery
+
+## v20.5 (2020-07-10)
+
 ### Notable changes
 
 - Remove the CAMO2x2 architecture (use BDR-Always-ON instead)
