@@ -2,11 +2,42 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v20.5 (unreleased)
+## v20.5 (2020-07-10)
 
 ### Notable changes
 
 - Remove the CAMO2x2 architecture (use BDR-Always-ON instead)
+
+- Numerous internal improvements
+
+### Minor changes
+
+- Update default haproxy_package_version to 1.9.15
+
+- Disable invalid pgdg11-updates-debuginfo repository for RHEL8; deploy
+  with ``-e '{"postgres_debug_packages":{"RedHat":[]}}'`` if required
+  until the problem is fixed upstream
+
+- Restore support for repmgr to create physical replicas in BDR clusters
+
+- Exclude psycopg2 packages from PGDG yum repositories
+
+### Bugfixes
+
+- When adding a new instance to a BDR cluster, ensure that some other
+  existing instance is marked as the first_bdr_primary; otherwise the
+  new instance would not join the existing cluster (RT67887)
+
+- Create the pgbouncer schema on only one BDR instance, to avoid a DDL
+  lock acquisition timeout during deployment
+
+- Generate a valid restore_command when multiple backup servers are
+  specified for an instance
+
+### Porting notes
+
+- The 'common' role has been removed, and its functionality absorbed
+  into the 'sys' role
 
 ## v20.4 (2020-04-30)
 
