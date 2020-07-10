@@ -2,12 +2,12 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v20.5 (2020-07-10)
+## v20.6 (2020-07-10)
 
 ### Bugfixes
 
 - Fix "No commands may be run on the BDR supervisor database" during
-  fact discovery
+  fact discovery on BDR v1/v2 clusters
 
 ## v20.5 (2020-07-10)
 
