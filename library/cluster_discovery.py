@@ -275,7 +275,7 @@ def database_discovery(module, conn, m0):
 
     cur = conn.cursor()
     cur.execute("""SELECT datname
-        FROM pg_catalog.pg_database WHERE datname NOT IN ('template0')""")
+        FROM pg_catalog.pg_database WHERE datname NOT IN ('template0', 'bdr_supervisordb')""")
 
     for row in cur:
         datname = row[0]
