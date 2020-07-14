@@ -2,6 +2,17 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v20.7 (unreleased)
+
+### Notable changes
+
+- Allow setting ``postgres_conf_dir`` to separate configuration files
+  from PGDATA
+
+### Bugfixes
+
+- Avoid running out of memory while setting SELinux context for PGDATA
+
 ## v20.6 (2020-07-10)
 
 ### Bugfixes
