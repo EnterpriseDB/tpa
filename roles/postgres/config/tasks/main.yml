@@ -6,7 +6,7 @@
 #
 # We aspire to the following configuration layout:
 #
-# postgres_data_dir/
+# postgres_conf_dir/  (== postgres_data_dir by default)
 #   pg_hba.conf
 #   postgresql.conf
 #   conf.d/
@@ -28,6 +28,14 @@
 
 - include_tasks: defaults.yml
   tags: always
+
+- name: Ensure postgres_conf_dir has the right ownership and permissions
+  file:
+    path: "{{ postgres_conf_dir }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0755
+    state: directory
 
 # First, we generate pg_hba.conf. There are several options here:
 #
