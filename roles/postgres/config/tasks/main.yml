@@ -90,7 +90,7 @@
     path: "{{ _include_dir }}"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0755
+    mode: 0700
     state: directory
 
 - name: Enable include_dir in postgresql.conf
