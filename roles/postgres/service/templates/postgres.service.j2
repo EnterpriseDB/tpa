@@ -16,7 +16,7 @@ Environment={{ k }}={{ v }}
 {%   endfor %}
 {% endif %}
 StandardOutput=syslog
-ExecStart={{ postgres_bin_dir }}/postmaster -D ${PGDATA} -c config_file="{{ postgres_conf_dir }}/postgresql.conf"
+ExecStart={{ postgres_bin_dir }}/postmaster -D ${PGDATA} -c config_file={{ postgres_conf_dir }}/postgresql.conf
 {% if postgres_coredump_filter is defined %}
 ExecStartPost=/bin/bash -c 'echo {{ postgres_coredump_filter }} > /proc/$MAINPID/coredump_filter'
 PermissionsStartOnly=true
