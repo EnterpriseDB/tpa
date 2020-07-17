@@ -15,13 +15,13 @@ port 1194
 dev tun
 proto udp
 
-dh {{ _vpn_dir }}/dh2048.pem
-ca {{ _vpn_dir }}/ca.crt
-key {{ _vpn_dir }}/{{ inventory_hostname }}.key
-cert {{ _vpn_dir }}/{{ inventory_hostname }}.crt
-tls-auth {{ _vpn_dir }}/ta.key 0
+dh {{ openvpn_config }}/dh2048.pem
+ca {{ openvpn_config }}/ca.crt
+key {{ openvpn_config }}/{{ inventory_hostname }}.key
+cert {{ openvpn_config }}/{{ inventory_hostname }}.crt
+tls-auth {{ openvpn_config }}/ta.key 0
 
-client-config-dir {{ _vpn_dir }}/ccd
+client-config-dir {{ openvpn_config }}/ccd
 
 comp-lzo
 user nobody

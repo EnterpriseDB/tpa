@@ -17,7 +17,7 @@
 
 - name: Create openvpn configuration directory
   file:
-    path: "{{ _vpn_dir }}"
+    path: "{{ openvpn_config }}"
     owner: root
     group: root
     mode: 0755
@@ -26,7 +26,7 @@
 - name: Install key and certificate files on each instance
   copy:
     src: "{{ _local_cert_dir }}/{{ item.name }}"
-    dest: "{{ _vpn_dir }}/"
+    dest: "{{ openvpn_config }}/"
     owner: root
     group: root
     mode: "{{ item.mode }}"

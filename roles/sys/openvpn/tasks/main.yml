@@ -12,12 +12,44 @@
   when:
     platform not in ['shared']
   tags: always
+
+# We configure a service named openvpn-server@xyz on the openvpn server,
+# and a service named openvpn-client@xyz on each of the openvpn clients.
+# But existing clusters will have a service named openvpn@xyz on both
+# server and clients, and it's not worth changing the configuration
+# layout (which would require a restart) in that case.
+
+- name: Determine if there is an existing openvpn configuration
+  stat:
+    path: "/etc/openvpn/{{ _vpn_name }}.conf"
+  register: _openvpn_old_config
+
+- set_fact:
+    openvpn_config: "{{
+      _openvpn_old_config.stat.exists|ternary(
+        '/etc/openvpn/%s' % _vpn_name,
+        '/etc/openvpn/%s/%s' % (_vpn_type, _vpn_name)
+      )
+    }}"
+    openvpn_service_name: "{{
+      _openvpn_old_config.stat.exists|ternary(
+        'openvpn@%s' % _vpn_name,
+        'openvpn-%s@%s' % (_vpn_type, _vpn_name),
+      )
+    }}"
+  vars:
+    _vpn_type: "{{
+      ('openvpn-server' in role)|ternary('server', 'client')
+    }}"
+
 - include_role: name=sys/openvpn/common
   tags: always
+
 - include_role: name=sys/openvpn/server
   when: >
     'openvpn-server' in role
   tags: always
+
 - include_role: name=sys/openvpn/client
   when: >
     openvpn_server is defined and openvpn_server != ''
@@ -25,7 +57,7 @@
 
 - name: Ensure openvpn is enabled on boot
   service:
-    name: "openvpn@{{ _vpn_name }}"
+    name: "{{ openvpn_service_name }}"
     enabled: yes
 
 # The server has already been started or restarted in openvpn/server, so
@@ -35,7 +67,7 @@
 
 - name: Start or restart openvpn on the clients
   service:
-    name: "openvpn@{{ _vpn_name }}"
+    name: "{{ openvpn_service_name }}"
     state: "{{ openvpn_service_end_state|default('started') }}"
   when: >
     'openvpn-server' not in role

@@ -5,7 +5,7 @@
 - name: Install main client configuration file
   template:
     src: client.conf.j2
-    dest: "/etc/openvpn/{{ _vpn_name }}.conf"
+    dest: "{{ openvpn_config }}.conf"
     owner: root
     group: root
     mode: 0644

@@ -6,10 +6,10 @@ remote {{ hostvars[openvpn_server].public_ip }} 1194
 dev tun
 proto udp
 
-ca {{ _vpn_dir }}/ca.crt
-key {{ _vpn_dir }}/{{ inventory_hostname }}.key
-cert {{ _vpn_dir }}/{{ inventory_hostname }}.crt
-tls-auth {{ _vpn_dir }}/ta.key 1
+ca {{ openvpn_config }}/ca.crt
+key {{ openvpn_config }}/{{ inventory_hostname }}.key
+cert {{ openvpn_config }}/{{ inventory_hostname }}.crt
+tls-auth {{ openvpn_config }}/ta.key 1
 
 nobind
 comp-lzo

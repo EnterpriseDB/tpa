@@ -3,5 +3,4 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 _vpn_name: "{{ vpn_name|default(cluster_name)|lower }}"
-_vpn_dir: "/etc/openvpn/{{ _vpn_name }}"
 _local_cert_dir: "{{ cluster_dir }}/certs"

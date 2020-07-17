@@ -4,7 +4,7 @@
 
 - name: Create openvpn client configuration directory
   file:
-    path: "{{ _vpn_dir }}/ccd"
+    path: "{{ openvpn_config }}/ccd"
     owner: root
     group: root
     mode: 0755
@@ -15,7 +15,7 @@
 - name: Install client-configuration-database files
   template:
     src: ccd.j2
-    dest: "{{ _vpn_dir }}/ccd/{{ item }}"
+    dest: "{{ openvpn_config }}/ccd/{{ item }}"
     owner: root
     group: root
     mode: 0644
@@ -24,7 +24,7 @@
 - name: Install the DH parameters
   copy:
     src: "{{ _local_cert_dir }}/dh2048.pem"
-    dest: "{{ _vpn_dir }}/dh2048.pem"
+    dest: "{{ openvpn_config }}/dh2048.pem"
     owner: root
     group: root
     mode: 0644
@@ -34,7 +34,7 @@
 - name: Install main server configuration file
   template:
     src: server.conf.j2
-    dest: "/etc/openvpn/{{ _vpn_name }}.conf"
+    dest: "{{ openvpn_config }}.conf"
     owner: root
     group: root
     mode: 0644
@@ -45,5 +45,5 @@
 
 - name: Start or restart openvpn on the server
   service:
-    name: "openvpn@{{ _vpn_name }}"
+    name: "{{ openvpn_service_name }}"
     state: "{{ openvpn_service_end_state|default('started') }}"
