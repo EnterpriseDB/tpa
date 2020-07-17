@@ -3,7 +3,6 @@ mode server
 
 tls-server
 topology subnet
-push "topology [topology]"
 
 ifconfig {{ openvpn_ip }} {{ vpn_network|ipaddr("netmask") }}
 push "route {{ vpn_network|ipaddr("network") }} {{ vpn_network|ipaddr("netmask") }}"
