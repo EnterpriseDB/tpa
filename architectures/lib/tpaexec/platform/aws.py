@@ -12,6 +12,7 @@ class aws(Platform):
     def __init__(self, name, arch):
         super(aws, self).__init__(name, arch)
         self.ec2 = {}
+        self.preferred_python_version = 'python3'
 
     def add_platform_options(self, p, g):
         if self.arch.name != 'Images':
@@ -33,6 +34,7 @@ class aws(Platform):
             'debian': {
                 'debian-jessie-amd64-hvm-2017-01-15-1221-ebs': {
                     'versions': ['8', 'jessie'],
+                    'preferred_python_version': 'python2',
                     'owner': '379101102735',
                     'user': 'admin',
                 },
@@ -50,6 +52,7 @@ class aws(Platform):
             'redhat': {
                 'RHEL-7.8_HVM_GA-20200225-x86_64-1-Hourly2-GP2': {
                     'versions': ['7'],
+                    'preferred_python_version': 'python2',
                     'owner': '309956199498',
                     'user': 'ec2-user',
                 },
@@ -88,7 +91,6 @@ class aws(Platform):
                 entry = images[d][n]
                 for v in entry['versions']:
                     amis[d][v] = { 'name': n, **entry }
-                    del amis[d][v]['versions']
 
         image = {}
 
@@ -99,6 +101,10 @@ class aws(Platform):
             if not image:
                 print('ERROR: cannot determine AMI name for %s/%s' % (label, version), file=sys.stderr)
                 sys.exit(-1)
+            del image['versions']
+            if 'preferred_python_version' in image:
+                self.preferred_python_version = image['preferred_python_version']
+                del image['preferred_python_version']
         else:
             image['name'] = label
 
@@ -140,6 +146,9 @@ class aws(Platform):
             if region is not None:
                 location['region'] = region
                 location['az'] = region + ('a' if li%2 == 0 else 'b')
+
+    def update_cluster_vars(self, cluster_vars, args, **kwargs):
+        cluster_vars['preferred_python_version'] = self.preferred_python_version
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml('platforms/aws/instance_defaults.yml.j2', args)
