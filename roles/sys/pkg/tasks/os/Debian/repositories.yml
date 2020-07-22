@@ -54,6 +54,14 @@
     repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
     r: "{{ repos[item] }}"
 
+- name: Raise pin priority for 2ndQuadrant packages
+  template:
+    src: 2ndquadrant-pins.j2
+    dest: /etc/apt/preferences.d/2ndquadrant-pins
+    owner: root
+    group: root
+    mode: 0644
+
 - set_fact:
     _2q_repositories: []
 
