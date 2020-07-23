@@ -10,7 +10,7 @@ from tpaexec.platform import Platform
 
 class aws(Platform):
     def __init__(self, name, arch):
-        super(aws, self).__init__(name, arch)
+        super().__init__(name, arch)
         self.ec2 = {}
         self.preferred_python_version = 'python3'
 

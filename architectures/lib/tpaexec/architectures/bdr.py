@@ -22,7 +22,7 @@ class BDR(Architecture):
         )
 
     def cluster_vars_args(self):
-        return super(BDR, self).cluster_vars_args() + [
+        return super().cluster_vars_args() + [
             'bdr_node_group', 'bdr_database'
         ]
 

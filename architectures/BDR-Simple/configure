@@ -23,7 +23,7 @@ class BDR_Simple(BDR):
             dest='bdr_version',
             choices=['1', '2', '3'],
         )
-        super(BDR_Simple, self).add_architecture_options(p, g)
+        super().add_architecture_options(p, g)
 
     def num_locations(self):
         return 1

@@ -25,10 +25,10 @@ class Autoscale(BDR_Always_ON):
             help='number of BDR instances per shard group',
             dest='instances_per_shard', default=3
         )
-        super(Autoscale, self).add_architecture_options(p, g)
+        super().add_architecture_options(p, g)
 
     def update_argument_defaults(self, defaults):
-        super(Autoscale, self).update_argument_defaults(defaults)
+        super().update_argument_defaults(defaults)
         defaults.update({
             'postgres_version': 11,
             'tpa_2q_repositories': [
@@ -57,7 +57,7 @@ class Autoscale(BDR_Always_ON):
         return primaries
 
     def update_cluster_vars(self, cluster_vars):
-        super(Autoscale, self).update_cluster_vars(cluster_vars)
+        super().update_cluster_vars(cluster_vars)
 
         extensions = cluster_vars.get('bdr_extensions', [])
         extensions.append('btree_gist')
@@ -103,7 +103,7 @@ class Autoscale(BDR_Always_ON):
         return 'shard_group_%s' % int(1+(node-1)/self.args['instances_per_shard'])
 
     def update_instances(self, instances):
-        super(Autoscale, self).update_instances(instances)
+        super().update_instances(instances)
         for instance in instances:
             n = instance.get('node')
             vars = instance.get('vars', {})

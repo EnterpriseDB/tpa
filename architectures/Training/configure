@@ -44,7 +44,7 @@ class Training(Architecture):
                 mask = 27
             self.args['subnet_pattern'] = '10.33.x.x/%s' % str(mask)
 
-        return super(Training, self).subnets(num)
+        return super().subnets(num)
 
     def update_cluster_tags(self, cluster_tags):
         cluster_tags.update({
