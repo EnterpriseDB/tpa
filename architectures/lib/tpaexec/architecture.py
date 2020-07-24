@@ -261,8 +261,9 @@ class Architecture(object):
         # the necessary number of subnets.
         args['subnets'] = self.subnets(self.num_locations())
 
-        locations = []
-        self._init_locations(locations)
+        locations = args.get('locations', [])
+        if not locations:
+            self._init_locations(locations)
         self.update_locations(locations)
         self.platform.update_locations(locations, args)
         args['locations'] = locations
@@ -399,12 +400,13 @@ class Architecture(object):
 
     # Makes changes to cluster_vars applicable across architectures
     def _init_cluster_vars(self, cluster_vars):
-        cluster_vars['preferred_python_version'] = 'python3'
+        cluster_vars['preferred_python_version'] = \
+            cluster_vars.get('preferred_python_version', 'python3')
 
         for k in self.cluster_vars_args():
             val = self.args.get(k)
             if val is not None:
-                cluster_vars[k] = val
+                cluster_vars[k] = cluster_vars.get(k, val)
 
         package_option_vars = {
             'extra_packages': 'packages',
@@ -415,9 +417,9 @@ class Architecture(object):
         for e in package_option_vars.keys():
             packages = self.args.get(e)
             if packages is not None:
-                cluster_vars[package_option_vars[e]] = {
-                    'common': packages
-                }
+                var = package_option_vars[e]
+                val = {'common': packages}
+                cluster_vars[var] = cluster_vars.get(var, val)
 
         sources = self.args.get('install_from_source') or []
         installable_sources = self.installable_sources()
@@ -438,7 +440,8 @@ class Architecture(object):
                 install_from_source.append(entry)
 
         if install_from_source:
-            cluster_vars['install_from_source'] = install_from_source
+            cluster_vars['install_from_source'] = \
+                cluster_vars.get('install_from_source', install_from_source)
 
         if sources:
             top = self.args.get('top_level_settings') or {}

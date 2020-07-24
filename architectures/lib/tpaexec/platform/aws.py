@@ -136,19 +136,24 @@ class aws(Platform):
 
     def update_cluster_tags(self, cluster_tags, args, **kwargs):
         if args['owner'] is not None:
-            cluster_tags['Owner'] = args['owner']
+            cluster_tags['Owner'] = \
+                cluster_tags.get('Owner', args['owner'])
 
     def update_locations(self, locations, args, **kwargs):
         region = args.get('region')
         subnets = args['subnets']
         for li, location in enumerate(locations):
-            location['subnet'] = subnets[li]
-            if region is not None:
+            location['subnet'] = \
+                location.get('subnet', subnets[li])
+            region = location.get('region', region)
+            if region:
                 location['region'] = region
-                location['az'] = region + ('a' if li%2 == 0 else 'b')
+                az = region + ('a' if li%2 == 0 else 'b')
+                location['az'] = location.get('az', az)
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
-        cluster_vars['preferred_python_version'] = self.preferred_python_version
+        cluster_vars['preferred_python_version'] = \
+            cluster_vars.get('preferred_python_version', self.preferred_python_version)
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml('platforms/aws/instance_defaults.yml.j2', args)
@@ -189,13 +194,18 @@ class aws(Platform):
                     instance['volumes'] = volumes + [v]
 
     def process_arguments(self, args):
-        s = args['platform_settings'] = {}
+        s = args.get('platform_settings') or {}
 
-        s['ec2_vpc'] = {'Name': 'Test'}
+        ec2_vpc = {'Name': 'Test'}
+        ec2_vpc.update(args.get('ec2_vpc', {}))
+        s['ec2_vpc'] = ec2_vpc
+
         if args['image']:
-            s['ec2_ami'] = {'Name': args['image']['name']}
+            ec2_ami = {'Name': args['image']['name']}
             if 'owner' in args['image']:
-                s['ec2_ami']['Owner'] = args['image']['owner']
+                ec2_ami['Owner'] = args['image']['owner']
+            ec2_ami.update(args.get('ec2_ami', {}))
+            s['ec2_ami'] = ec2_ami
 
         cluster_rules = args.get('cluster_rules', [])
         if not cluster_rules and \
@@ -210,4 +220,10 @@ class aws(Platform):
         if cluster_rules:
             s['cluster_rules'] = cluster_rules
 
+        cluster_bucket = args.get('cluster_bucket')
+        if cluster_bucket:
+            s['cluster_bucket'] = cluster_bucket
+
         s['ec2_instance_reachability'] = 'public'
+
+        args['platform_settings'] = s
