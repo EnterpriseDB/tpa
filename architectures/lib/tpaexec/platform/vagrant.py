@@ -75,7 +75,8 @@ class vagrant(Platform):
         preferred_python_version = 'python3'
         if args['image']['name'] in ['debian/jessie64', 'centos/7']:
             preferred_python_version = 'python2'
-        cluster_vars['preferred_python_version'] = preferred_python_version
+        cluster_vars['preferred_python_version'] = \
+            cluster_vars.get('preferred_python_version', preferred_python_version)
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         if args['memory']:
