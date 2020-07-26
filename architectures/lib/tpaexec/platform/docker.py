@@ -6,23 +6,29 @@ from tpaexec.platform import Platform
 
 class docker(Platform):
     def supported_distributions(self):
-        return ['centos/systemd']
+        return [
+            'Debian', 'RedHat', 'Ubuntu',
+        ]
+
+    def default_distribution(self):
+        return 'RedHat'
 
     def image(self, label, **kwargs):
         image = {}
 
-        label = label.lower()
+        if label in self.supported_distributions():
+            label = 'tpa/%s' % label.lower()
+            version = kwargs.get('version')
+            if version:
+                label = label + ':' + version
 
-        if label in ['redhat', 'redhat-minimal']:
-            image['name'] = 'centos/systemd'
-        else:
-            image['name'] = label
+        image['name'] = label
 
         return image
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
         preferred_python_version = 'python3'
-        if args['image']['name'] in ['centos/systemd']:
+        if args['image']['name'] in ['centos/systemd', 'tpa/debian:8', 'tpa/redhat:7']:
             preferred_python_version = 'python2'
         cluster_vars['preferred_python_version'] = \
             cluster_vars.get('preferred_python_version', preferred_python_version)
@@ -43,3 +49,12 @@ class docker(Platform):
                     newvolumes.append(v)
             if volumes:
                 i['volumes'] = newvolumes
+
+    def process_arguments(self, args):
+        s = args.get('platform_settings') or {}
+
+        docker_images = args.get('docker_images')
+        if docker_images:
+            s['docker_images'] = docker_images
+
+        args['platform_settings'] = s

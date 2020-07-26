@@ -7,3 +7,10 @@
     msg: "Please set 'image' on every instance"
     that:
       - docker_instances|selectattr('image','defined')|list|count == docker_instances|count
+
+- name: Ensure that docker_images, if defined, is a hash
+  assert:
+    msg: "Expected docker_images to map image names to build instructions"
+    that:
+      - docker_images is not defined or
+        docker_images is mapping

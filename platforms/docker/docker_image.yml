@@ -1,0 +1,101 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# Given ``image``, the name of an image referenced by instances[] that
+# does not exist locally, we must now do whatever is required to provide
+# it, or fail with an error.
+#
+# At present, TPAexec expects containers to run systemd. Most upstream
+# images are not set up to do this, so we need to build systemd-enabled
+# Docker images for supported distributions.
+#
+# By default, if the required image is named ``tpa/label:version``, we
+# use ./images/label-version/Dockerfile to build a base image that adds
+# systemd and its dependencies to a distribution image (say, centos:8).
+# Then we build the final image using common-systemd/Dockerfile, which
+# applies distribution-independent systemd configuration.
+#
+# You can set ``docker_images`` to customise the build process:
+#
+#     docker_images:
+#       "some/image:ver":
+#         context_path: images/image-final
+#
+# In this example, we run ``docker build`` in images/image-final to
+# build an image named 'some/image:ver'.
+#
+# Optionally, you can provide another build context to use the two-stage
+# build process:
+#
+#     docker_images:
+#       "some/other:ver":
+#         base_context_path: images/other-base
+#         context_path: images/other-final
+#
+# Here, we run ``docker build`` first in images/other-base, and again in
+# images/other-final to build an image named 'some/other:ver'. The final
+# build will be invoked with ``--build-arg BASE_IMAGE=${image_id}`` so
+# that it can extend the base image.
+#
+# (Set ``dockerfile: Somefile`` or ``base_dockerfile: Otherfile`` if
+# your Dockerfile is named something other than Dockerfile.)
+
+- name: Set default build configuration
+  set_fact:
+    docker_images: "{{
+      {image: _entry}|combine(docker_images|default({}))
+    }}"
+  vars:
+    _parts: "{{ image.split(':') }}"
+    _label: "{{ _parts[0]|regex_replace('^tpa/', '') }}"
+    _version: "{{ _parts[1]|default('latest') }}"
+    _entry:
+      base_image_name: "tpa/{{ _label }}-base:{{ _version }}"
+      base_context_path: "docker/images/{{ _label }}-{{ _version }}"
+      context_path: docker/images/common-systemd
+  when:
+    image.startswith('tpa/')
+
+- assert:
+    msg: "Please specify build instructions for {{ image }} in docker_images"
+    that: image in docker_images
+
+- name: Build base image for {{ image }}
+  docker_image:
+    name: "{{ _base_image_name }}"
+    state: present
+    source: build
+    build:
+      path: "{{ _entry.base_context_path }}"
+      dockerfile: "{{ _entry.base_dockerfile|default(omit) }}"
+      pull: no
+  register: base_image
+  vars:
+    _entry: "{{ docker_images[image] }}"
+    _parts: "{{ image.split(':') }}"
+    _base_image_name: "{{
+      _entry.base_image_name|default('%s-base:%s' % (_parts[0], _parts[1]|default('latest')))
+    }}"
+  when:
+    _entry.base_context_path is defined
+
+- name: Build final docker image {{ image }}
+  docker_image:
+    name: "{{ image }}"
+    state: present
+    source: build
+    build:
+      path: "{{ _entry.context_path }}"
+      dockerfile: "{{ _entry.dockerfile|default(omit) }}"
+      args:
+        # Specify the base image using the container-id of the parent, so we
+        # ensure we build on top of exactly what we produced in the event of
+        # concurrent rebuilds/re-tags, etc.
+        BASE_IMAGE: "{{ base_image.image.Id }}"
+      nocache: "{{ _entry.nocache|default('no') }}"
+      force_build: "{{ _entry.force_build|default('no') }}"
+      force_tag: "{{ _entry.force_tag|default('no') }}"
+      pull: no
+  vars:
+    _entry: "{{ docker_images[image] }}"

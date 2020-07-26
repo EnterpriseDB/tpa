@@ -2,6 +2,13 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- include_tasks: docker_images.yml
+  vars:
+    docker_image_list: "{{
+      docker_instances|map(attribute='image')|unique|list
+    }}"
+  tags: docker
+
 - name: Create docker networks
   docker_network:
     name: "{{ item.name }}"

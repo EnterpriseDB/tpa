@@ -1,0 +1,25 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Check if the required images exist already
+  docker_image_info:
+    name: "{{ docker_image_list }}"
+  register: _available
+
+- set_fact:
+    _missing_images: "{{
+      _missing_images|default([])|union([item])
+    }}"
+  with_items: "{{ docker_image_list }}"
+  vars:
+    _known_tags: >
+      {{ query('flattened', _available.images|map(attribute='RepoTags')|list) }}
+  when: >
+    item not in _known_tags
+    and item + ":latest" not in _known_tags
+
+- include_tasks: docker_image.yml
+  with_items: "{{ _missing_images|default([]) }}"
+  loop_control:
+    loop_var: image
