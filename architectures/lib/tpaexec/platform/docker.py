@@ -4,6 +4,8 @@
 
 from tpaexec.platform import Platform
 
+import sys
+
 class docker(Platform):
     def supported_distributions(self):
         return [
@@ -19,7 +21,17 @@ class docker(Platform):
         if label in self.supported_distributions():
             label = 'tpa/%s' % label.lower()
             version = kwargs.get('version')
-            if version:
+            if version and version != 'latest':
+                known_versions = {
+                    'tpa/debian': ['8', '9', '10', 'jessie', 'stretch', 'buster'],
+                    'tpa/ubuntu': ['16.04', '18.04', '20.04', 'xenial', 'bionic', 'focal'],
+                    'tpa/redhat': ['7', '8'],
+                }
+
+                if version not in known_versions[label]:
+                    print('ERROR: %s:%s is not supported' % (label, version), file=sys.stderr)
+                    sys.exit(-1)
+
                 label = label + ':' + version
 
         image['name'] = label
