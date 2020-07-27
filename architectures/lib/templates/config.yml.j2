@@ -3,10 +3,10 @@
 architecture: {{ architecture }}
 cluster_name: {{ cluster_name }}
 {{ dict(cluster_tags=cluster_tags)|to_nice_yaml(indent=2) }}
-{% if top_level_settings is defined %}
+{% if top_level_settings|default({}) is not empty %}
 {{ top_level_settings|to_nice_yaml(indent=2) }}
 {% endif %}
-{% if platform_settings is defined %}
+{% if platform_settings|default({}) is not empty %}
 {{ platform_settings|to_nice_yaml(indent=2) }}
 {% endif %}
 {{ dict(cluster_vars=cluster_vars)|to_nice_yaml(indent=2) }}
