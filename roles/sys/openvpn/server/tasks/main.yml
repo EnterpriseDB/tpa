@@ -10,6 +10,12 @@
     mode: 0755
     state: directory
 
+- name: Set permissions on openvpn configuration directory
+  file:
+    path: "{{ openvpn_config }}/.."
+    state: directory
+    mode: o+x
+
 # XXX We shouldn't use play_hosts here.
 
 - name: Install client-configuration-database files
