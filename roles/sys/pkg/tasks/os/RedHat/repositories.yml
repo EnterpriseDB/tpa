@@ -47,16 +47,30 @@
     value: "postgresql* barman* repmgr*"
   when: ansible_distribution_id == "rhel"
 
-- name: Exclude postgresql packages from the base repository
+- name: Exclude postgresql packages from CentOS base repositories
   ini_file:
-    dest: /etc/yum.repos.d/CentOS-Base.repo
-    section: "{{ item }}"
+    dest: "/etc/yum.repos.d/{{ item.0.file }}"
+    section: "{{ item.1 }}"
     option: exclude
     value: "postgresql* barman* repmgr*"
-  with_items:
-  - base
-  - updates
+  with_nested_dependents:
+  - base_repos[ansible_distribution_major_version|int]
+  - item.0.sections
   when: ansible_distribution_id == "centos"
+  vars:
+    base_repos:
+      7:
+      - file: CentOS-Base.repo
+        sections:
+        - base
+        - updates
+      8:
+      - file: CentOS-Base.repo
+        sections:
+        - BaseOS
+      - file: CentOS-AppStream.repo
+        sections:
+        - AppStream
 
 - name: Disable builtin postgresql module for DNF
   shell: >
