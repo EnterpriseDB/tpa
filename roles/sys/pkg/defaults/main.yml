@@ -89,6 +89,7 @@ default_packages:
     - gnutls-utils
     - "policycoreutils-python{% if ansible_distribution_major_version == '8' %}-utils{% endif %}"
     - openssh
+    - cronie
   Ubuntu:
     - "{{ python_pkg_prefix }}-dev"
     - linux-tools-generic
