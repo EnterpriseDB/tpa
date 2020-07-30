@@ -3,19 +3,15 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_role: name=repmgr/service
-  tags: always
 - include_role: name=repmgr/primary/final
   when: >
     'primary' in role
-  tags: always
 - include_role: name=repmgr/replica/final
   when: >
     'replica' in role
-  tags: always
 - include_role: name=repmgr/witness/final
   when: >
     'witness' in role
-  tags: always
 
 - meta: flush_handlers
 
@@ -54,7 +50,6 @@
         slot: "{{ item }}"
       with_items:
         "{{ inactive_slots }}"
-      tags: always
   when: >
     'primary' in role or
     'replica' in role
@@ -78,7 +73,6 @@
         slot_name: "{{ item }}"
       with_items:
         "{{ expected_slots }}"
-      tags: always
   when: >
     'primary' in role or
     'replica' in role
