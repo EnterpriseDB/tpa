@@ -6,4 +6,3 @@
   include_role: name=postgres/config tasks_from=preload-library.yml
   vars:
     library: repmgr
-  tags: always

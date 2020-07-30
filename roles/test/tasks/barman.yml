@@ -19,7 +19,6 @@
     output_file: barman-check.txt
     content: |
       {{ barman_check.stdout }}
-  tags: always
 
 - name: Run barman diagnose
   command: barman diagnose
@@ -32,7 +31,6 @@
   vars:
     output_file: barman-diagnose.txt
     content: "{{ barman_diagnose.stdout }}"
-  tags: always
 
 - name: Fail if either of the above tasks failed
   fail:

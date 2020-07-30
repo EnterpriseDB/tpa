@@ -4,7 +4,5 @@
 
 - set_fact:
     package_pattern: "{{ package_pattern|default('postgres*') }}"
-  tags: always
 
 - include_tasks: "os/{{ ansible_os_family }}/package-list.yml"
-  tags: always

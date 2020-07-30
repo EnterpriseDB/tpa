@@ -14,4 +14,3 @@
     output_file: pg_controldata.txt
     content: |
       {{ controldata.stdout }}
-  tags: always

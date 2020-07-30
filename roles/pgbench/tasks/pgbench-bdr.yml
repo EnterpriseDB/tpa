@@ -24,7 +24,6 @@
   - include_role: name=pgbench/init
     vars:
       pgbench_output: pgbench-bdr-init.txt
-    tags: always
 
   - name: Reset BDR global lock timeouts to defaults after pgbench -i
     postgresql_query:
@@ -55,7 +54,6 @@
     pgbench_output: pgbench-bdr-rw.txt
   when: >
     inventory_hostname == last_primary
-  tags: always
 
 - name: Run read-only workload
   include_tasks: pgbench.yml
@@ -64,4 +62,3 @@
     pgbench_output: pgbench-bdr-ro.txt
   when: >
     'replica' in role
-  tags: always

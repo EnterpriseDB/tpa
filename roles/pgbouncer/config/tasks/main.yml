@@ -14,9 +14,7 @@
   when: >
     'pgbouncer' in role and
     'postgres' not in role
-  tags: always
 
 - include_tasks: pgbouncer.yml
   when: >
     'pgbouncer' in role
-  tags: always

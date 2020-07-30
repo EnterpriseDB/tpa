@@ -5,7 +5,6 @@
 - include_tasks: server.yml
   when: >
     'barman' in role
-  tags: always
 
 - include_tasks: client.yml
   with_items: "{{ backup|default([]) }}"
@@ -13,4 +12,3 @@
     loop_var: this_barman
   vars:
     slot_name: "{{ this_barman|backup_slot_name }}"
-  tags: always

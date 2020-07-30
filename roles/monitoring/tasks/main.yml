@@ -5,9 +5,7 @@
 - include_role: name=monitoring/server
   when: >
     'monitoring-server' in role
-  tags: always
 
 - include_role: name=monitoring/client
   when: >
     monitoring_server is defined and monitoring_server != ''
-  tags: always

@@ -6,10 +6,8 @@
     name: pgbouncer/service
     apply:
       tags: [pgbouncer, service]
-  tags: always
 
 - include_role:
     name: pgbouncer/restart
     apply:
       tags: [pgbouncer, restart]
-  tags: always

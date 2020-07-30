@@ -14,4 +14,3 @@
     output_file: "{{ pgbench_output }}"
     content: |
       {{ pgbench_init.stderr }}
-  tags: always

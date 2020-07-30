@@ -8,14 +8,12 @@
 - include_role: name="postgres/{{ postgres_installation_method }}"
   when:
     platform not in ['shared']
-  tags: always
 
 # Second, no matter how we installed Postgres, we may need to build and
 # install some (ostensibly) extensions from source.
 
 - include_role: name=postgres/src/req
   when: install_from_source is not empty
-  tags: always
 
 - include_role: name=src/install
   vars:

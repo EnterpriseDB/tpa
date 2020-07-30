@@ -14,4 +14,3 @@
     output_file: package-list.txt
     content: |
       {{ package_list.stdout }}
-  tags: always

@@ -6,7 +6,6 @@
 # enable repositories and install Postgres packages.
 
 - include_tasks: list-packages.yml
-  tags: always
 
 - name: Install Postgres packages
   package:
@@ -17,7 +16,6 @@
     file: debuginfo.yml
     apply:
       tags: [postgres, pkg, debuginfo]
-  tags: always
 
 # We install our own service units later, so we disable the packaged
 # versions here.

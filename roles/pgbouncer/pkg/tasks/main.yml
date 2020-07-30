@@ -7,7 +7,6 @@
     tasks_from: client.yml
     apply:
       tags: [postgres, pkg]
-  tags: always
 
 - name: Install pgbouncer package
   package:

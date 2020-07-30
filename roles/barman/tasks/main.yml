@@ -10,12 +10,10 @@
 - include_role: name=sys/ssh tasks_from=keygen.yml
   vars:
     ssh_username: "{{ postgres_user }}"
-  tags: always
 
 - include_role: name=sys/ssh tasks_from=keygen.yml
   vars:
     ssh_username: barman
-  tags: always
 
 # Install Barman packages.
 
@@ -23,7 +21,6 @@
   when: >
     'barman' in role
     and platform not in ['shared']
-  tags: always
 
 # Allow postgres@ on any Postgres server to ssh to barman@ on any
 # Barman server.
@@ -34,7 +31,6 @@
     ssh_key_name: id_postgres
   when: >
     'barman' in role
-  tags: always
 
 # Install barman's own keypair too.
 
@@ -43,7 +39,6 @@
     ssh_username: barman
   when: >
     'barman' in role
-  tags: always
 
 # Allow barman to ssh to postgres on any Postgres server.
 #
@@ -59,7 +54,6 @@
     ssh_key_name: id_barman
   when: >
     'postgres' in role
-  tags: always
 
 # The barman and streaming_barman users must be created on any primary
 # that we want to backup (whether directly or through a replica), and
@@ -87,7 +81,6 @@
       tags: barman
   when: >
     'barman' in role
-  tags: always
 
 # On any instance that must be backed up (i.e., with tags.backup set to
 # the name of a Barman server), it will perform the necessary
@@ -102,6 +95,5 @@
     loop_var: this_barman
   vars:
     slot_name: "{{ this_barman|backup_slot_name }}"
-  tags: always
 
 # On any other kind of instance, we do nothing.

@@ -153,7 +153,6 @@
     file: tls.yml
     apply:
       tags: [postgres, tls]
-  tags: always
 
 - include_role:
     name: sys/ssh
@@ -161,4 +160,3 @@
       tags: [postgres, ssh]
   vars:
     ssh_username: "{{ postgres_user }}"
-  tags: always

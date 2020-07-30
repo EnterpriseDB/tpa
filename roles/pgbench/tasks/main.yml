@@ -17,7 +17,6 @@
       tags: [pgbench, postgres]
   vars:
     pgbench_dbname: postgres
-  tags: always
 
 # Next, for BDR instances, we run the following in the BDR-enabled
 # database:
@@ -38,4 +37,3 @@
     'bdr' in role
   vars:
     pgbench_dbname: "{{ bdr_database }}"
-  tags: always

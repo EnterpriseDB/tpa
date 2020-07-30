@@ -18,7 +18,6 @@
 - include_tasks: clone-upstream.yml
   when: >
     upstream|default(upstream_primary) != upstream_primary
-  tags: always
 
 - name: Run repmgr standby clone
   command: >
@@ -42,6 +41,5 @@
 # the other instances.
 
 - include_role: name=postgres/config
-  tags: always
 
 - set_fact: pgdata_initialised=True

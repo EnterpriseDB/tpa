@@ -24,7 +24,6 @@
     sources: "{{ install_from_source|map(attribute='name')|unique|list }}"
 
 - include_tasks: "os/{{ ansible_distribution }}/list-packages.yml"
-  tags: always
 
 - name: Enumerate all postgres packages
   set_fact:

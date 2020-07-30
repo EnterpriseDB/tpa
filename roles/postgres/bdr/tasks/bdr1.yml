@@ -5,4 +5,3 @@
 # At the moment, BDRv1 setup is identical to BDRv2.
 
 - include_tasks: bdr2.yml
-  tags: always

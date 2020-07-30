@@ -12,11 +12,8 @@
 - include_tasks: ssh.yml
   when:
     ansible_connection == 'ssh'
-  tags: always
 
 - include_role:
     name: "platforms/{{ platform }}"
-  tags: always
 
 - include_role: name=platforms/common
-  tags: always

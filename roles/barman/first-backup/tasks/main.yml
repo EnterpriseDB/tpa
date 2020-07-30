@@ -47,4 +47,3 @@
     num_backups: "{{ want_backups }}"
   when: >
     have_backups is defined and have_backups|int == 0
-  tags: always

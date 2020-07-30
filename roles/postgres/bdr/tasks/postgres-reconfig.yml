@@ -17,4 +17,3 @@
   when: bdr_node_camo_partner is defined
 
 - include_role: name=postgres/restart
-  tags: always

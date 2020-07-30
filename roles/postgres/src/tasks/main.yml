@@ -3,7 +3,6 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_role: name=postgres/src/req
-  tags: always
 
 - name: Check if ssh agent forwarding is enabled
   shell: echo $SSH_AUTH_SOCK
@@ -73,4 +72,3 @@
     tasks_from: src.yml
     apply:
       tags: [postgres, pkg]
-  tags: always

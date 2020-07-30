@@ -27,7 +27,6 @@
 # operations, and should be avoided.
 
 - include_tasks: defaults.yml
-  tags: always
 
 - name: Ensure postgres_conf_dir has the right ownership and permissions
   file:
@@ -186,13 +185,11 @@
     file: extensions.yml
     apply:
       tags: [postgres, config, extensions]
-  tags: always
 
 - include_tasks:
     file: syslog.yml
     apply:
       tags: [postgres, syslog]
-  tags: always
 
 - include_role:
     name: postgres/createuser

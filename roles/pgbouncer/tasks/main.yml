@@ -9,7 +9,6 @@
   when: >
     'pgbouncer' in role
     and platform not in ['shared']
-  tags: always
 
 - include_role:
     name: pgbouncer/config
@@ -18,7 +17,6 @@
   when: >
     'postgres' in role or
     'pgbouncer' in role
-  tags: always
 
 - set_fact: initialise_pgbouncer=True
   when: >

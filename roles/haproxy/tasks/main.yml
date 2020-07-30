@@ -9,7 +9,6 @@
   when: >
     'haproxy' in role
     and platform not in ['shared']
-  tags: always
 
 - include_role:
     name: haproxy/config
@@ -17,7 +16,6 @@
       tags: [haproxy, config]
   when: >
     'haproxy' in role
-  tags: always
 
 - include_role:
     name: haproxy/config
@@ -27,7 +25,6 @@
   when: >
     'postgres' in role
     and groups['role_haproxy']|default([]) is not empty
-  tags: always
 
 - set_fact: initialise_haproxy=True
   when: >

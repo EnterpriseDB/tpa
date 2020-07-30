@@ -5,4 +5,3 @@
 - include_tasks: sys/package-list.yml
   vars:
     package_pattern: 'postgres*'
-  tags: always

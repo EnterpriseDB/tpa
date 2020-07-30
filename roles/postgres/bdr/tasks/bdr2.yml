@@ -42,7 +42,6 @@
   when:
     inventory_hostname != first_bdr_primary and
     node.rowcount == 0
-  tags: always
 
 # The remaining hosts join the group… but they must do so one at a time,
 # because BDR does not support concurrent group joins (not in version 3,
@@ -57,4 +56,3 @@
   when:
     inventory_hostname == first_bdr_primary and
     hostvars[bdr_node].node.rowcount == 0
-  tags: always

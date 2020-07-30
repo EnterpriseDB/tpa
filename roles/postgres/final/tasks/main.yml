@@ -3,23 +3,17 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_role: name=postgres/service
-  tags: always
 - include_role: name=postgres/restart
-  tags: always
 - include_role: name=postgres/facts
-  tags: always
 - include_role:
     name: postgres/pgpass
     apply:
       tags: [postgres, pgpass]
-  tags: always
 - include_role: name=postgres/createuser/final
   when: >
     'replica' not in role
-  tags: always
 - include_role: name=postgres/config/final
   when: >
     'replica' not in role
-  tags: always
 
 # Postgres is now running.

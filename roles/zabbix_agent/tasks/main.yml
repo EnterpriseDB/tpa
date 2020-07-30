@@ -9,7 +9,6 @@
   when: >
     'zabbix_agent' in role
     and platform not in ['shared']
-  tags: always
 
 - include_role:
     name: zabbix_agent/config
@@ -17,4 +16,3 @@
       tags: [zabbix_agent, config]
   when: >
     'zabbix_agent' in role
-  tags: always

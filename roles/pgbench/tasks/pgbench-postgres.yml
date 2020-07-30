@@ -7,7 +7,6 @@
     pgbench_output: pgbench-postgres-init.txt
   when: >
     'replica' not in role
-  tags: always
 
 - name: Run parallel read/write workload on primaries
   include_tasks: pgbench.yml
@@ -16,7 +15,6 @@
     pgbench_output: pgbench-postgres-rw.txt
   when: >
     'replica' not in role
-  tags: always
 
 - name: Run parallel read-only workload on replicas
   include_tasks: pgbench.yml
@@ -25,4 +23,3 @@
     pgbench_output: pgbench-postgres-ro.txt
   when: >
     'replica' in role
-  tags: always
