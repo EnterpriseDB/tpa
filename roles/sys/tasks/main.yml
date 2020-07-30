@@ -6,7 +6,6 @@
     name: sys/pkg
     apply:
       tags: [sys, pkg]
-  tags: always
 
 - name: Set the hostname
   hostname: name="{{ inventory_hostname }}"
@@ -24,7 +23,6 @@
     file: tpa.yml
     apply:
       tags: [sys, tpa]
-  tags: always
 
 # Creates and mounts any additional filesystems required, e.g., any
 # postgres_data/barman_data volumes specified for the instance.
@@ -43,19 +41,16 @@
   with_items: "{{ artifacts|default([]) }}"
   loop_control:
     loop_var: artifact
-  tags: always
 
 - include_role:
     name: sys/sysctl
     apply:
       tags: [sys, sysctl]
-  tags: always
 
 - include_role:
     name: sys/sysstat
     apply:
       tags: [sys, sysstat]
-  tags: always
 
 - include_role:
     name: sys/openvpn
@@ -70,7 +65,6 @@
     name: sys/hosts
     apply:
       tags: [sys, hosts]
-  tags: always
 
 - include_role:
     name: sys/cloudinit
@@ -78,16 +72,13 @@
       tags: [sys, cloudinit]
   when: >
     platform not in ['docker', 'vagrant']
-  tags: always
 
 - include_role:
     name: sys/rsyslog
     apply:
       tags: [sys, rsyslog]
-  tags: always
 
 - include_role:
     name: sys/logrotate
     apply:
       tags: [sys, rsyslog]
-  tags: always

@@ -108,7 +108,6 @@
   vars:
     repository_path: /etc/apt/sources.list.d
     repository_files: "{{ _2q_repositories|map(attribute='file')|list }}"
-  tags: always
 
 - name: Update apt cache
   apt: update_cache=yes

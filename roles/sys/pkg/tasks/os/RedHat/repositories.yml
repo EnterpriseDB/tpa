@@ -205,4 +205,3 @@
   vars:
     repository_path: /etc/yum.repos.d
     repository_files: "{{ _2q_repositories|map(attribute='file')|list }}"
-  tags: always

@@ -11,7 +11,6 @@
 - include_role: name=sys/openvpn/pkg
   when:
     platform not in ['shared']
-  tags: always
 
 # We configure a service named openvpn-server@xyz on the openvpn server,
 # and a service named openvpn-client@xyz on each of the openvpn clients.
@@ -43,17 +42,14 @@
     }}"
 
 - include_role: name=sys/openvpn/common
-  tags: always
 
 - include_role: name=sys/openvpn/server
   when: >
     'openvpn-server' in role
-  tags: always
 
 - include_role: name=sys/openvpn/client
   when: >
     openvpn_server is defined and openvpn_server != ''
-  tags: always
 
 - name: Ensure openvpn is enabled on boot
   service:
