@@ -6,12 +6,25 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Notable changes
 
+- Complete support for RHEL/CentOS 8 across architectures
+
+- Add support for multiple distributions on Docker via
+  ``tpaexec configure … --os Debian/Ubuntu/RedHat``
+
 - Allow setting ``postgres_conf_dir`` to separate configuration files
   from PGDATA
 
 ### Bugfixes
 
 - Avoid running out of memory while setting SELinux context for PGDATA
+
+- Always prefer to install 2ndQuadrant barman packages on Debian/Ubuntu
+
+- Revert workarounds for problems with the PGDG yum repository that have
+  been fixed upstream
+
+- Fix some inconsistencies with --overrides-from that prevented certain
+  generated settings from being overriden at configure time
 
 ## v20.6 (2020-07-10)
 
