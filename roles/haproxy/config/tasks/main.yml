@@ -193,13 +193,21 @@
   when:
     haproxy_backend_queue_check == 'check-queue'
 
-- name: Ensure {{ socket_dir }} exists
+- name: Check whether {{ socket_dir }} exists
+  stat:
+    path: "{{ socket_dir }}"
+  register: haproxy_stats_socket_dir
+  vars:
+    socket_dir: "{{ haproxy_stats_socket|dirname }}"
+
+- name: Create {{ socket_dir }}
   file:
     path: "{{ socket_dir }}"
     state: directory
     owner: haproxy
     group: haproxy
     mode: 0755
+  when: not haproxy_stats_socket_dir.stat.exists
   vars:
     socket_dir: "{{ haproxy_stats_socket|dirname }}"
 

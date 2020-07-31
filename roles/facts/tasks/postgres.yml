@@ -85,6 +85,15 @@
     haproxy_backend_servers is not defined
   tags: always
 
+- name: Ensure haproxy_stats_socket is set
+  set_fact:
+    haproxy_stats_socket:
+      "{{ (ansible_distribution == 'RedHat' and ansible_distribution_major_version|int == 8)
+        |ternary('/var/run/haproxy.sock', default_haproxy_stats_socket) }}"
+  when:
+    haproxy_stats_socket is not defined
+  tags: always
+
 # If pgbouncer_backend points to a particular instance, we respect any
 # custom haproxy_port or postgres_port setting for that instance. Note
 # that changing haproxy_port without changing pgbouncer_backend won't

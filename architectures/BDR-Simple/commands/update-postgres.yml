@@ -92,7 +92,6 @@
   hosts: "{{ update_hosts|default('all') }}"
   serial: 1
   vars:
-    haproxy_stats_socket: /var/lib/haproxy/stats
     all_haproxy_backend_servers: []
     proxy_for_backend_server: {}
   tasks:

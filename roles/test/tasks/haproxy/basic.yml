@@ -51,7 +51,7 @@
 
 - name: Fetch haproxy statistics
   shell: >
-    echo 'show stat'|socat /var/lib/haproxy/stats stdio
+    echo 'show stat'|socat {{ haproxy_stats_socket }} stdio
   register: hstat
   become_user: root
   become: yes
