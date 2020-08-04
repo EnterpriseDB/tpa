@@ -22,6 +22,12 @@
 # Set ``haproxy_backend_queue_check: none`` to not configure queue
 # checks even if they are needed.
 
+- name: Disable backend queue checks if HARP is enabled
+  set_fact:
+    haproxy_backend_queue_check: none
+  when:
+    enable_harp
+
 - name: Determine haproxy_backend_queue_check type
   set_fact:
     haproxy_backend_queue_check: "{{
@@ -45,6 +51,13 @@
     all_backends_have_platypus: "{{
       haproxy_backend_servers|length == backends_with_platypus|length
     }}"
+
+- name: Set haproxy_default_server_options for HARP
+  set_fact:
+    haproxy_default_server_options: "{{
+      haproxy_harp_default_server_options
+    }}"
+  when: enable_harp
 
 - name: Add agent check settings to haproxy_default_server_options
   set_fact:
@@ -122,10 +135,16 @@
   when: >
     'check ' not in hostvars[item].haproxy_server_options|join(' ')
   vars:
-    _check_options: "{{
-      (haproxy_backend_queue_check == 'platypus')|ternary(
-        'port %s' % hostvars[item].platypus_port, []
+    _check_port: "{{
+      enable_harp|ternary(
+        hostvars[item].harp_listen_port,
+        (haproxy_backend_queue_check == 'platypus')|ternary(
+          hostvars[item].platypus_port, 0
+        )
       )
+    }}"
+    _check_options: "{{
+      (_check_port != 0)|ternary('port %s' % _check_port, [])
     }}"
 
 - name: Add agent-check settings to haproxy_server_options if required

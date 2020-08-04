@@ -1,0 +1,17 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Ensure /etc/bdr3 exists
+  file:
+    path: /etc/bdr3
+    state: directory
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+
+- name: Install harp.ini
+  template:
+    src: harp.ini.j2
+    dest: /etc/bdr3/harp.ini
+  notify:
+    Note HARP restart required

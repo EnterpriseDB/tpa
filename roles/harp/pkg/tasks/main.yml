@@ -1,0 +1,8 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Install harp package
+  package:
+    name: harp
+    state: latest

@@ -10,4 +10,9 @@ haproxy_default_server_options:
 - inter 1500 downinter 6s rise 5 fall 3
 - agent-inter 2000
 
+haproxy_harp_default_server_options:
+- inter 100ms downinter 1s rise 5 fall 3
+- on-error mark-down
+- on-marked-down shutdown-sessions
+
 haproxy_default_server_extra_options: []

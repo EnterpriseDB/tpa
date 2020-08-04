@@ -64,3 +64,11 @@
   when: >
     role|contains('bdr', 'primary')
   tags: [postgres, bdr]
+
+- include_role:
+    name: harp
+    apply:
+      tags: harp
+  when: >
+    role|contains('bdr', 'primary') and enable_harp
+  tags: harp

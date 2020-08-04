@@ -1,0 +1,34 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- include_role:
+    name: harp/pkg
+    apply:
+      tags: pkg
+  when:
+    platform not in ['shared']
+  tags: pkg
+
+- include_role:
+    name: harp/config
+    apply:
+      tags: config
+  tags: config
+
+- include_role:
+    name: harp/service
+    apply:
+      tags: service
+  tags: service
+
+- meta: flush_handlers
+
+- name: Start or restart harp services
+  service:
+    name: "{{ item }}"
+    state: "{{ harp_service_end_state|default('started') }}"
+  with_items:
+    - harp_router
+    - harp_manager
+  tags: [service, restart]

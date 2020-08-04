@@ -117,6 +117,7 @@ class Architecture(object):
         g.add_argument('--extra-optional-packages', nargs='+', metavar='NAME')
 
         g.add_argument('--install-from-source', nargs='+', metavar='NAME')
+        g.add_argument('--enable-harp', action='store_true')
 
         g = p.add_argument_group('volume sizes in GB')
         for vol in ['root', 'barman', 'postgres']:
@@ -454,7 +455,8 @@ class Architecture(object):
         return [
             'postgres_version',
             'tpa_2q_repositories',
-            'use_volatile_subscriptions'
+            'use_volatile_subscriptions',
+            'enable_harp',
         ] + [
             '%s_package_version' % x for x in self.versionable_packages()
         ]

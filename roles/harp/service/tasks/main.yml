@@ -1,0 +1,13 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Enable harp_router service
+  systemd:
+    name: harp_router
+    enabled: yes
+
+- name: Enable harp_manager service
+  systemd:
+    name: harp_manager
+    enabled: yes

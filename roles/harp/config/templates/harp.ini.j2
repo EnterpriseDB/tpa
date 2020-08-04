@@ -1,0 +1,62 @@
+# IMPORTANT
+#
+# This is an .ini-style configuration file; values should *not* be enclosed in
+# single or double quotes, as those will be treated as literal characters.
+
+[harp]
+
+# path within the consensus store where HARP stores information
+# Default "/harp"
+#namespace = /harp
+
+# Name of the location (DC) where this node is located
+location = {{ location }}
+
+# DSN of managed BDR Node
+postgres_dsn = {{ bdr_node_dsn }}
+
+# Name of the managed BDR node (as used when executing bdr.create_node(node_name, ...))
+node_name = {{ inventory_hostname }}
+
+# 1 or 0 to indicate whether this node is allowed to take the Lead Master lock.
+# Default 1.
+allow_lead = {{ harp_allow_lead|default(1 if role|contains('bdr', 'primary') else 0) }}
+
+# Time in milliseconds to require before routing to a newly promoted Lead Master is allowed.
+# 0 to disable.
+safety_interval = {{ harp_safety_interval|default(100) }}
+
+consensus_protocol = bdr
+
+# If not set, writes to STDOUT
+#log_location = 
+
+# One of the levels defined here:
+#   https://docs.python.org/3/library/logging.html#levels
+# Default is INFO
+#log_level = INFO
+
+[manager]
+
+# Highest allowable variance between last recorded LSN of previous Lead Master and this node,
+# in bytes.
+maximum_lag = {{ harp_maximum_lag|default(1048576) }}
+
+# Highest allowable variance between last received LSN and applied LSN between this node and its CAMO
+# partner(s), in bytes.
+maximum_camo_lag = {{ harp_maximum_camo_lag|default(1048576) }}
+
+# How many seconds the Lead Master lock will persist if not refreshed.
+lock_duration = {{ harp_lock_duration|default(15) }}
+
+# Seconds between refreshes of the Lead Master lock.
+lock_interval = {{ harp_lock_interval|default(5) }}
+
+# Seconds between refreshes of Lead Master locks for locations other than our own.
+# Can be used for inter-location failover. 0 to disable.
+external_lock_interval = {{ harp_external_lock_interval|default(0) }}
+
+[router]
+
+listen_addr = 0.0.0.0
+listen_port = {{ harp_listen_port }}
