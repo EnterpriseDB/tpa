@@ -43,15 +43,4 @@
   - include_role: name=final
     tags: always
 
-  - include_role:
-      name: postgres/bdr
-      apply:
-        tags: bdr
-    when: >
-      role|contains('bdr', 'primary')
-    tags: always
-
-  - include_role: name=monitoring
-    tags: always
-
 - import_playbook: "{{ tpa_dir }}/architectures/lib/fini.yml"

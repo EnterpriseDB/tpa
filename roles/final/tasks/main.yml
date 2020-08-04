@@ -38,3 +38,11 @@
     loop_var: this_barman
   vars:
     slot_name: "{{ this_barman|backup_slot_name }}"
+
+- include_role:
+    name: postgres/bdr
+    apply:
+      tags: bdr
+  when: >
+    role|contains('bdr', 'primary')
+  tags: always
