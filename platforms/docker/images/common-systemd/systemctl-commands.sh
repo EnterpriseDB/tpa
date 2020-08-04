@@ -39,10 +39,9 @@ systemctl disable systemd-ask-password-console.path
 systemctl disable systemd-ask-password-wall.path
 
 source /etc/os-release
-# Ubuntu specific
 if [ $ID = "ubuntu" ]
 then
-	systemctl disable apt-daily-upgrade.timer
-	systemctl disable motd-news.timer
-	ln -s /bin/systemd /sbin/init
+    systemctl disable apt-daily-upgrade.timer
+    systemctl disable motd-news.timer
+    ln -s /bin/systemd /sbin/init
 fi
