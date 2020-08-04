@@ -37,9 +37,12 @@ systemctl disable sys-kernel-config.mount
 systemctl disable sys-kernel-debug.mount
 systemctl disable systemd-ask-password-console.path
 systemctl disable systemd-ask-password-wall.path
+
+source /etc/os-release
 # Ubuntu specific
-if [ -e /etc/ubuntu-release ]
+if [ $ID = "ubuntu" ]
 then
 	systemctl disable apt-daily-upgrade.timer
 	systemctl disable motd-news.timer
+	ln -s /bin/systemd /sbin/init
 fi
