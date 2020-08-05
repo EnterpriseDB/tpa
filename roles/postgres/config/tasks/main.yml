@@ -187,17 +187,17 @@
       tags: [postgres, config, extensions]
 
 - include_tasks:
-  file: syslog.yml
-  apply:
-    tags: [postgres, syslog]
+    file: syslog.yml
+    apply:
+      tags: [postgres, syslog]
   when:
     log_destination == 'syslog'
   tags: always
 
 - include_tasks:
-  file: log_stderr.yml
-  apply:
-    tags: [postgres, log_stderr]
+    file: log_stderr.yml
+    apply:
+      tags: [postgres, log_stderr]
   when:
     log_destination == 'stderr'
   tags: always
