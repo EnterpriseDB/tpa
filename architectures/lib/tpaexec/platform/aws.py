@@ -57,7 +57,7 @@ class aws(Platform):
                     'user': 'ec2-user',
                 },
                 'RHEL-8.2.0_HVM-20200423-x86_64-0-Hourly2-GP2': {
-                    'versions': ['8'],
+                    'versions': ['8', 'default'],
                     'owner': '309956199498',
                     'user': 'ec2-user',
                 },
