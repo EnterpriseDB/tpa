@@ -10,11 +10,7 @@
     group: root
     mode: 0644
   vars:
-    postgres_logfile: "{{
-      (log_destination == 'syslog')|ternary(
-        '/var/log/postgres/postgres.log', '/var/log/postgresql/postgres.log'
-      )
-    }}"
+    postgres_logfile: "/var/log/postgres/postgres.log"
 
 - name: Set up a cron job to run logrotate every 10 minutes
   cron:

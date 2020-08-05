@@ -22,7 +22,7 @@ syslog_facility = {{ syslog_facility|default('LOCAL6') }}
 syslog_ident = {{ syslog_ident|default('postgres') }}
 
 {% if log_destination == 'stderr' %}
-log_directory = '/var/log/postgresql'
+log_directory = '/var/log/postgres'
 log_filename = 'postgres.log'
 log_file_mode = 0640
 log_rotation_age = 0
