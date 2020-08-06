@@ -9,9 +9,7 @@
     name: postgres/pgpass
     apply:
       tags: [postgres, pgpass]
-- include_role: name=postgres/createuser/final
-  when: >
-    'replica' not in role
+
 - include_role: name=postgres/config/final
   when: >
     'replica' not in role
