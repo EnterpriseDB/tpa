@@ -2,9 +2,9 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_tasks: server.yml
-  when: >
-    'barman' in role
+# Once Postgres is running, we have to perform certain tasks on the
+# barman server on behalf of each client, like creating replication
+# slots if required.
 
 - include_tasks: client.yml
   with_items: "{{ backup|default([]) }}"
