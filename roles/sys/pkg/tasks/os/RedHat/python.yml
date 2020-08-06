@@ -3,7 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - name: Install Python
-  raw: command -v {{ python }} >/dev/null 2>&1 || yum -y install {{ (python == 'python2')|ternary('python', 'python3') }}; true
+  raw: command -v {{ python }} >/dev/null 2>&1 || yum -y install {{ python.startswith('python2')|ternary('python', 'python3') }}; true
   environment: {}
   register: python_install
   changed_when: >
@@ -20,7 +20,7 @@
     executable: /bin/sh
   environment: {}
   register: backport_install
-  when: python == 'python2'
+  when: python in ['python2', 'python2.7']
   changed_when: >
     backport_install is successful
     and backport_install.stdout.strip() != ''

@@ -25,7 +25,7 @@ case "${ID}:${VERSION_ID%.*}" in
     debian:8)
         distribution=Debian
         release=jessie
-        python=python2
+        python=python2.7
         python_pkg_prefix=python
         ;;
     debian:9|debian:10)
