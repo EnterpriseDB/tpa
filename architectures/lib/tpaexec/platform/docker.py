@@ -23,8 +23,8 @@ class docker(Platform):
             version = kwargs.get('version')
             if version and version != 'latest':
                 known_versions = {
-                    'tpa/debian': ['8', '9', '10', 'jessie', 'stretch', 'buster'],
-                    'tpa/ubuntu': ['16.04', '18.04', '20.04', 'xenial', 'bionic', 'focal'],
+                    'tpa/debian': ['9', '10', 'stretch', 'buster'],
+                    'tpa/ubuntu': ['18.04', '20.04', 'bionic', 'focal'],
                     'tpa/redhat': ['7', '8'],
                 }
 
@@ -40,7 +40,7 @@ class docker(Platform):
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
         preferred_python_version = 'python3'
-        if args['image']['name'] in ['centos/systemd', 'tpa/debian:8', 'tpa/redhat:7']:
+        if args['image']['name'] in ['centos/systemd', 'tpa/redhat:7']:
             preferred_python_version = 'python2'
         cluster_vars['preferred_python_version'] = \
             cluster_vars.get('preferred_python_version', preferred_python_version)

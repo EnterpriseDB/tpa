@@ -6,11 +6,7 @@ source /etc/os-release
 # Don't try to run a full system in the container
 systemctl enable basic.target
 systemctl set-default basic
-if [ $ID != "ubuntu" -o $VERSION_ID != "16.04" ]
-# preset-all can't cope with masked services in systemd 229
-then
-	systemctl preset-all
-fi
+systemctl preset-all
 
 installedunits=$( systemctl list-unit-files | head -n -1 | tail -n -1 | cut -f1 -d ' ')
 
