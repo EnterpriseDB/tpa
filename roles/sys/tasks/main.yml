@@ -26,10 +26,18 @@
 
 # Creates and mounts any additional filesystems required, e.g., any
 # postgres_data/barman_data volumes specified for the instance.
+
 - include_role:
-    name: sys/volumes
+    name: sys/fs
     apply:
-      tags: [sys, volumes]
+      tags: [sys, fs]
+  vars:
+    device: "{{ item.device }}"
+    mountpoint: "{{ item.mountpoint }}"
+    encryption: "{{ item.encryption|default('none') }}"
+    luks_volume: "{{ item.luks_volume|default(item.device|basename) }}"
+  with_items:
+    "{{ volumes }}"
 
 # Now that the any additional volumes have been mounted, we can copy in
 # any additional artifacts specified in config.yml
