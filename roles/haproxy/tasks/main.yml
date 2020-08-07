@@ -5,10 +5,11 @@
 - include_role:
     name: haproxy/pkg
     apply:
-      tags: haproxy
+      tags: [haproxy, pkg]
   when: >
     'haproxy' in role
     and platform not in ['shared']
+  tags: pkg
 
 - include_role:
     name: haproxy/config

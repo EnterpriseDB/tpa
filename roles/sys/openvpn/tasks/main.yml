@@ -8,9 +8,13 @@
       tags: always
   tags: always
 
-- include_role: name=sys/openvpn/pkg
+- include_role:
+    name: sys/openvpn/pkg
+    apply:
+      tags: [openvpn, pkg]
   when:
     platform not in ['shared']
+  tags: pkg
 
 # We configure a service named openvpn-server@xyz on the openvpn server,
 # and a service named openvpn-client@xyz on each of the openvpn clients.

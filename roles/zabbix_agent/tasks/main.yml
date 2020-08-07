@@ -9,6 +9,7 @@
   when: >
     'zabbix_agent' in role
     and platform not in ['shared']
+  tags: pkg
 
 - include_role:
     name: zabbix_agent/config

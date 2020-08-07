@@ -2,10 +2,14 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name="repmgr/{{ postgres_installation_method }}"
+- include_role:
+    name: "repmgr/{{ postgres_installation_method }}"
+    apply:
+      tags: [repmgr, pkg]
   when: >
     'postgres' in role
     and platform not in ['shared']
+  tags: pkg
 
 - include_role: name=repmgr/common
   when: >

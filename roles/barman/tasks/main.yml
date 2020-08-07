@@ -17,10 +17,14 @@
 
 # Install Barman packages.
 
-- include_role: name=barman/pkg
+- include_role:
+    name: barman/pkg
+    apply:
+      tags: [barman, pkg]
   when: >
     'barman' in role
     and platform not in ['shared']
+  tags: pkg
 
 # Allow postgres@ on any Postgres server to ssh to barman@ on any
 # Barman server.

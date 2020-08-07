@@ -6,6 +6,7 @@
     name: sys/pkg
     apply:
       tags: [sys, pkg]
+  tags: pkg
 
 - name: Set the hostname
   hostname: name="{{ inventory_hostname }}"

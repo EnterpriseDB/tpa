@@ -9,6 +9,7 @@
   when: >
     'pgbouncer' in role
     and platform not in ['shared']
+  tags: pkg
 
 - include_role:
     name: pgbouncer/config
