@@ -49,4 +49,3 @@
 - name: Record updated mapped device name
   set_fact:
     _device: "/dev/mapper/{{ luks_volume }}"
-  tags: always

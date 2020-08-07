@@ -30,7 +30,6 @@
     name: sys/volumes
     apply:
       tags: [sys, volumes]
-  tags: always
 
 # Now that the any additional volumes have been mounted, we can copy in
 # any additional artifacts specified in config.yml
