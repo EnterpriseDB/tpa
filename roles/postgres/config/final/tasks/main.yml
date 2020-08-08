@@ -2,13 +2,55 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+# Now that Postgres is up and running, we can perform additional tasks
+# like creating users, databases, and extensions.
+
+# First, we ensure that the users in postgres_users exist and have the
+# desired attributes.
+#
+# The entries in postgres_users may be specified in config.yml, or come
+# from invocations of postgres/createuser by other roles in TPAexec (to
+# create, for example, the users required by repmgr or barman). We now
+# generate passwords for any entries where postgres/createuser has not
+# already generated one.
+#
+# postgres_users:
+# - username: xyzzy
+#   generate_password: true
+#   role_attrs:
+#   - superuser
+#   - replication
+#
+# If an entry in postgres_users specifies ``generate_password: false``,
+# we neither generate nor set a password for that user.
+
+- name: Generate missing passwords
+  include_role: name=secret
+  vars:
+    secret_name: "{{ item.username }}_password"
+  with_items: "{{ postgres_users }}"
+  when:
+    secret_name not in vars
+    and item.generate_password|default(true)
+
 - name: Create Postgres users
   postgresql_user:
     port: "{{ postgres_port }}"
     name: "{{ item.username }}"
+    password: "{{
+      encrypted_password if generated_password is defined else omit
+    }}"
     encrypted: yes
-    password: "md5{{ (vars[item.username+'_password'] + item.username)|hash('md5') }}"
-    role_attr_flags: "{{ item.role_attrs|join(',') }}"
+    role_attr_flags: "{{
+      item.role_attrs|default([])|join(',') or omit
+    }}"
+  vars:
+    secret_name: >-
+      {{ item.username }}_password
+    generated_password: >-
+      {{ vars.get(secret_name) }}
+    encrypted_password: >-
+      md5{{ (generated_password + item.username)|hash('md5') }}
   with_items: "{{ postgres_users|default([]) }}"
   become_user: "{{ postgres_user }}"
   become: yes
@@ -45,7 +87,7 @@
   become_user: "{{ postgres_user }}"
   become: yes
   when:
-    item.granted_roles is not empty
+    item.granted_roles|default([]) is not empty
 
 - include_tasks:
     file: pgbouncer.yml
