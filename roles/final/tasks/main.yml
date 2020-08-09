@@ -2,18 +2,30 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=postgres/final
+- include_role:
+    name: postgres/final
+    apply:
+      tags: [postgres, final]
   when: >
     'postgres' in role
+  tags: postgres
 
-- include_role: name=repmgr/final
+- include_role:
+    name: repmgr/final
+    apply:
+      tags: [repmgr, final]
   when: >
     'postgres' in role and
     initialise_replication is defined
+  tags: repmgr
 
-- include_role: name=barman/final
+- include_role:
+    name: barman/final
+    apply:
+      tags: [barman, final]
   when: >
     'barman' in role or backup is defined
+  tags: barman
 
 - include_role:
     name: haproxy/final
@@ -21,10 +33,15 @@
       tags: haproxy
   when: >
     'haproxy' in role
+  tags: haproxy
 
-- include_role: name=pgbouncer/final
+- include_role:
+    name: pgbouncer/final
+    apply:
+      tags: [pgbouncer, final]
   when: >
     'pgbouncer' in role
+  tags: pgbouncer
 
 # We force an immediate backup for any instances that do not have any
 # backups at all.
@@ -38,6 +55,7 @@
     loop_var: this_barman
   vars:
     slot_name: "{{ this_barman|backup_slot_name }}"
+  tags: first-backup
 
 - include_role:
     name: postgres/bdr

@@ -16,17 +16,28 @@
 
   hosts: "{{ deploy_hosts|default('all') }}"
   tasks:
-  - include_role: name=sys
+  - include_role:
+      name: sys
+      apply:
+        tags: sys
     when:
       platform not in ['shared']
     tags: always
 
-  - include_role: name=postgres
+  - include_role:
+      name: postgres
+      apply:
+        tags: postgres
     when: >
       'postgres' in role
     tags: always
 
-  - include_role: name=barman
+  - include_role:
+      name: barman
+      apply:
+        tags: barman
+    when:
+      groups['role_barman'] is not empty
     tags: always
 
   - include_role: name=repmgr
@@ -34,13 +45,26 @@
       groups|members_of('role_replica', not_in=['role_readonly']) is not empty
     tags: always
 
-  - include_role: name=pgbouncer
+  - include_role:
+      name: pgbouncer
+      apply:
+        tags: pgbouncer
+    when:
+      groups['role_pgbouncer'] is not empty
     tags: always
 
-  - include_role: name=haproxy
+  - include_role:
+      name: haproxy
+      apply:
+        tags: haproxy
+    when:
+      groups['role_haproxy'] is not empty
     tags: always
 
-  - include_role: name=final
+  - include_role:
+      name: final
+      apply:
+        tags: final
     tags: always
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/fini.yml"
