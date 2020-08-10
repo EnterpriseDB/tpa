@@ -5,7 +5,7 @@
 - include_role:
     name: postgres/final
     apply:
-      tags: [postgres, final]
+      tags: postgres
   when: >
     'postgres' in role
   tags: postgres
@@ -13,7 +13,7 @@
 - include_role:
     name: repmgr/final
     apply:
-      tags: [repmgr, final]
+      tags: repmgr
   when: >
     'postgres' in role and
     initialise_replication is defined
@@ -22,7 +22,7 @@
 - include_role:
     name: barman/final
     apply:
-      tags: [barman, final]
+      tags: barman
   when: >
     'barman' in role or backup is defined
   tags: barman
@@ -38,7 +38,7 @@
 - include_role:
     name: pgbouncer/final
     apply:
-      tags: [pgbouncer, final]
+      tags: pgbouncer
   when: >
     'pgbouncer' in role
   tags: pgbouncer
@@ -60,7 +60,7 @@
 - include_role:
     name: postgres/bdr
     apply:
-      tags: bdr
+      tags: [postgres, bdr]
   when: >
     role|contains('bdr', 'primary')
-  tags: always
+  tags: [postgres, bdr]
