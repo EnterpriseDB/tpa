@@ -25,7 +25,7 @@
   service:
     name: repmgr
     state: "{{ repmgr_service_end_state|default('started') }}"
-  tags: [repmgr, service, restart]
+  tags: [service, restart]
 
 # Since the topology of the cluster may have changed during the repmgr
 # setup process, we collect cluster_facts again.

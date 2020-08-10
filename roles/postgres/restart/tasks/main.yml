@@ -17,7 +17,7 @@
   become: yes
   when:
     pgdata_initialised
-  tags: [postgres, service, restart]
+  tags: [service, restart]
 
 - name: Wait for Postgres to become available
   command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"

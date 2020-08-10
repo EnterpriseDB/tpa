@@ -12,3 +12,4 @@
   become: yes
   when: >
     'haproxy' in role
+  tags: [service, restart]
