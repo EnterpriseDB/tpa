@@ -1,0 +1,72 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Retrieve sequences currently in replication set {{ set.name }}
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    queries:
+    - text: >
+        SELECT set_seqoid FROM pglogical.replication_set_seq rss
+          JOIN pglogical.replication_set rs USING (set_id)
+          WHERE rs.set_name = %s
+      args:
+      - "{{ set.name }}"
+  register: sequence_tuples
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# Any sequence mentioned in set.sequences that is not in sequence_tuples
+# needs to be added to the replication set.
+
+- name: Add sequences to replication set {{ set.name }}
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    queries:
+    - text: >
+        SELECT pglogical.replication_set_add_sequence(
+          set_name := %s, relation := %s, synchronize_data := %s
+        )
+      args:
+      - "{{ set.name }}"
+      - "{{ seq.name }}"
+      - "{{ seq.synchronize_data|default(false) }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  vars:
+    existing_sequences: "{{
+      sequence_tuples.results|json_query('[*].set_seqoid')
+    }}"
+  with_items: "{{ set.sequences }}"
+  loop_control:
+    loop_var: seq
+    label: >-
+      {{ seq.name }}
+  when:
+    seq.name not in existing_sequences
+  changed_when: True
+
+# Anything that's in sequence_tuples but not in set.sequences needs to
+# be removed from the replication set.
+
+- name: Remove unwanted sequences from replication set {{ set.name }}
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    queries:
+    - text: >
+        SELECT pglogical.replication_set_remove_sequence(
+          set_name := %s, relation := %s
+        )
+      args:
+      - "{{ set.name }}"
+      - "{{ seq.set_seqoid }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ sequence_tuples.results }}"
+  loop_control:
+    loop_var: seq
+    label: >-
+      {{ seq.set_seqoid }}
+  when:
+    seq.set_seqoid not in set.sequences|json_query('[*].name')
+  changed_when: True

@@ -65,6 +65,8 @@
     max_connections: "{{ max_connections|default(default_max_connections) }}"
     enable_harp: "{{ enable_harp|default(False) }}"
     harp_listen_port: "{{ harp_listen_port|default(5442) }}"
+    publications: "{{ publications|default([]) }}"
+    subscriptions: "{{ subscriptions|default([]) }}"
   vars:
     default_postgres_installation_method: >-
       {{ postgres_installation_source|default('pkg') }}

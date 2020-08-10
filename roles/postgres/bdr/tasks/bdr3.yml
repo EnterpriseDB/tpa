@@ -184,9 +184,9 @@
     q: >-
       [?type=='bdr' && database=='%s'].replication_sets|[]
     _publication_sets: >-
-      {{ publications|default([])|json_query(q % bdr_database) }}
+      {{ publications|json_query(q % bdr_database) }}
     _subscription_sets: >-
-      {{ subscriptions|default([])|json_query(q % bdr_database) }}
+      {{ subscriptions|json_query(q % bdr_database) }}
     publication_sets: >-
       {{ _publication_sets|map('pyformat_attr', 'name', bdr_node_ids=bdr_node_ids)|list }}
     subscription_sets: >-

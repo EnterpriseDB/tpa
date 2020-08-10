@@ -1,0 +1,35 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# First, we iterate through pglogical_publications and create or modify
+# each publication as needed, then we do the same for subscriptions. It
+# is the user's responsibility to specify a sensible configuration.
+
+- name: Set up pglogical publications
+  include_tasks:
+    file: publish.yml
+  vars:
+    pub: "{{ publication_defaults|combine(publication) }}"
+  with_items: "{{ pglogical_publications }}"
+  loop_control:
+    loop_var: publication
+    label: >-
+      {{ publication.name|default(publication_defaults.name) }}
+
+- name: Set up pglogical subscriptionns
+  include_tasks:
+    file: subscribe.yml
+  vars:
+    sub: "{{ subscription_defaults|combine(subscription) }}"
+  with_items: "{{ pglogical_subscriptions }}"
+  loop_control:
+    loop_var: subscription
+    label: >-
+      {{ sub.name }}
+
+# TODO: A given database may have multiple pglogical subscriptions
+# (unlike publications, of which there can be only one per database).
+# We've processed the subscription entries one by one above, but now
+# we could consider removing any subscriptions that are not mentioned
+# explicitly. But in which databases should we do this?

@@ -58,6 +58,20 @@
   tags: first-backup
 
 - include_role:
+    name: postgres/pglogical
+    apply:
+      tags: pglogical
+  vars:
+    pglogical_publications: >-
+      {{ publications|json_query("[?type=='pglogical']") }}
+    pglogical_subscriptions: >-
+      {{ subscriptions|json_query("[?type=='pglogical']") }}
+  when:
+    pglogical_publications is not empty
+    or pglogical_subscriptions is not empty
+  tags: pglogical
+
+- include_role:
     name: postgres/bdr
     apply:
       tags: [postgres, bdr]

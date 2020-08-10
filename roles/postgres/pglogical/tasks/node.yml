@@ -1,0 +1,38 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# Given a target database and a pglogical node_name, we check if the
+# database already has the desired node, create it if not, and set
+# pglogical_node_id in either case.
+
+- name: Retrieve pglogical.node record for {{ node_name }} in {{ database }}
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(database) }}"
+    queries:
+    - text: SELECT node_id FROM pglogical.node WHERE node_name = %s
+      args:
+        - "{{ node_name }}"
+  register: _pgl_node
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Create pglogical node {{ node_name }} in database {{ database }}
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(database) }}"
+    queries:
+    - text: SELECT pglogical.create_node(%s, %s) AS node_id
+      args:
+        - "{{ node_name }}"
+        - "{{ node_dsn|dbname(database) }}"
+  register: _pgl_new_node
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    _pgl_node.rowcount == 0
+  changed_when: True
+
+- set_fact:
+    pglogical_node_id: "{{
+      _pgl_node.node_id|default(_pgl_new_node.node_id)
+    }}"

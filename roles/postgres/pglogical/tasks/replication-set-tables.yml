@@ -1,0 +1,83 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Retrieve tables currently in replication set {{ set.name }}
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    queries:
+    - text: >
+        SELECT set_reloid, set_att_list,
+            pglogical.get_row_filter_expr(set_row_filter, set_reloid) as set_row_filter
+          FROM pglogical.replication_set_table rst
+          JOIN pglogical.replication_set rs USING (set_id)
+          WHERE rs.set_name = %s
+      args:
+      - "{{ set.name }}"
+  register: table_tuples
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# Any table mentioned in set.tables that is not already in table_tuples
+# needs to be added to the replication set.
+
+- name: Add tables to replication set {{ set.name }}
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    queries:
+    - text: >
+        SELECT pglogical.replication_set_add_table(
+          set_name := %s, relation := %s, synchronize_data := %s,
+          columns := %s, row_filter := %s
+        )
+      args:
+      - "{{ set.name }}"
+      - "{{ rel.name }}"
+      - "{{ rel.synchronize_data|default(false) }}"
+      - "{{ rel.columns|default(omit) }}"
+      - "{{ rel.row_filter|default(omit) }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  vars:
+    existing_tables: "{{
+      table_tuples.results|json_query('[*].set_reloid')
+    }}"
+  with_items: "{{ set.tables }}"
+  loop_control:
+    loop_var: rel
+    label: >-
+      {{ rel.name }}
+  when:
+    rel.name not in existing_tables
+  changed_when: True
+
+# For now, we ignore the possibility that the table is already a member
+# of the replication set, but with a different configuration. In theory,
+# we could remove the table and re-add it with the new configuration in
+# the same transaction, but it's not clear if this is always a sensible
+# thing to do.
+
+# Any table that's in table_tuples but not in set.tables needs to be
+# removed from the replication set.
+
+- name: Remove unwanted tables from replication set {{ set.name }}
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    queries:
+    - text: >
+        SELECT pglogical.replication_set_remove_table(
+          set_name := %s, relation := %s
+        )
+      args:
+      - "{{ set.name }}"
+      - "{{ rel.set_reloid }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ table_tuples.results }}"
+  loop_control:
+    loop_var: rel
+    label: >-
+      {{ rel.set_reloid }}
+  when:
+    rel.set_reloid not in set.tables|json_query('[*].name')
+  changed_when: True

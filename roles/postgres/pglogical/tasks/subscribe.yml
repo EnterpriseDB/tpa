@@ -1,0 +1,219 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# We process an entry from ``subscriptions`` with ``type: pglogical``,
+# and either create a new pglogical subscription or alter an existing
+# one.  Here's an example of how to define a pglogical subscription:
+# 
+# subscriptions:
+# - type: pglogical
+#   database: mydb
+#   name: mysub
+#   node_name: somenode
+#   # Specify a publication by hostname/publication name or provide a
+#   # full provider_dsn string explicitly
+#   publication:
+#     name: publication_name
+#     publisher: hostname
+#   provider_dsn: "host=… dbname=…"
+#   # Next are optional arguments to pglogical.create_subscription()
+#   replication-sets:
+#     - foo
+#   synchronize_structure: true
+#   synchronize_data: true
+#   forward_origins: ['all']
+#   strip_origins: false
+#   apply_delay: '1 second'
+#   writer: 'heap'
+#   writer_options:
+#     - 'magic'
+#     - 'key=value'
+#     - 'just-a-string'
+#   # Next are attributes that can be set or changed only for an
+#   # existing subscription
+#   enabled: true
+#
+# The type, database, and subscription name are required. The pglogical
+# node_name is optional. Note that there may be only one pglogical node
+# in any given database. If you define multiple subscriptions within the
+# same database, either they should all specify the same node_name, or
+# all leave it unspecified to use the default value, hostname-dbname.
+#
+# You may either specify the full provider_dsn explicitly, or let one be
+# calculated by providing an instance name and the name of an entry in
+# the ``publications`` defined for that instance.
+#
+# Everything else in the entry is treated as an optional argument to the
+# pglogical.create_subscription() function. If you specify a value here,
+# it will be included as an argument to the function, if not, it will be
+# left out altogether (and the default value used).
+
+- assert:
+    msg: "Subscription must specify name and database"
+    that:
+    - sub.name is defined
+    - sub.database is defined
+
+- block:
+  - assert:
+      msg: "Subscription must specify provider_dsn or publication.instance+name"
+      that:
+      - sub.publication is defined
+      - sub.publication is mapping
+      - sub.publication.name is defined
+
+  - assert:
+      msg: "Subscription must specify valid publication.instance"
+      that:
+      - publisher is defined
+      - publisher in hostvars
+
+  - assert:
+      msg: "Instance {{ publisher }} must have a single publication named {{ sub.publication.name }}"
+      that:
+      - published is not empty
+      - publication|length == 1
+
+  - assert:
+      msg: "Publication {{ sub.publication.name }} on instance {{ publisher }} must specify 'database'"
+      that: >
+        'database' in publication|first
+  vars:
+    publisher: >-
+      {{ sub.publication.instance|default(inventory_hostname) }}
+    published: >-
+      {{ hostvars[publisher].publications|default([]) }}
+    publication: >-
+      {{ published|json_query("[?name=='%s']" % sub.publication.name) }}
+  when:
+    sub.provider_dsn is not defined
+
+- name: Ensure pglogical node exists
+  include_tasks: node.yml
+  vars:
+    database: "{{ sub.database }}"
+    node_name: "{{ sub.node_name }}"
+
+- name: Retrieve pglogical.subscription record
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(sub.database) }}"
+    queries:
+    - text: >
+        SELECT *, sub_apply_delay::text as sub_apply_delay
+          FROM pglogical.subscription WHERE sub_name = %s
+      args:
+        - "{{ sub.name }}"
+  register: subscription_tuples
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# Now we must convert the keys and values under "sub" into an invocation
+# of pglogical.create_subscription().
+#
+# For ease of debugging, we always specify the subscription_name and the
+# provider_dsn (either explicit or computed) as the first arguments to
+# the function. Hence required_keys/required_values below.
+#
+# Some of the keys under sub do not correspond to function arguments, so
+# we must remove them (sub.keys() = optional_arguments + extra_keys).
+#
+# Any remaining keys/values under sub are treated as optional arguments
+# to the function. If you specify them, they are included in the call,
+# otherwise they are left out and the default values end up being used.
+
+- name: Create pglogical subscription {{ sub.name }} in database {{ sub.database }}
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(sub.database) }}"
+    queries:
+    - text: "SELECT pglogical.create_subscription({{ argument_string }})"
+      args: "{{ argument_values }}"
+  vars:
+    publisher: "{{ sub.publication.instance|default(inventory_hostname) }}"
+    publication: >-
+      {{ hostvars[publisher].publications|json_query("[?name=='%s']|[0]" % sub.publication.name) }}
+    publication_dsn: "{{
+      hostvars[publisher].node_dsn|dbname(publication.database)
+        if sub.publication is defined
+    }}"
+    required_keys:
+      - subscription_name
+      - provider_dsn
+    required_values:
+      - "{{ sub.name }}"
+      - "{{ sub.provider_dsn|default(publication_dsn) }}"
+    optional_arguments: >-
+      {{ sub|remove_keys(extra_keys) }}
+    argument_keys: >-
+      {{ required_keys + optional_arguments.keys()|list }}
+    argument_values: >-
+      {{ required_values + optional_arguments.values()|list }}
+    argument_string: >-
+      {{ argument_keys|map('apply_format', '{0} := %s')|list|join(', ') }}
+    extra_keys:
+      - type
+      - name
+      - database
+      - node_name
+      - publication
+      - provider_dsn
+      - enabled
+  register: pglogical_new_subscription
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    subscription_tuples.rowcount == 0
+  changed_when: True
+
+# TODO: If pglogical.subscription has an entry corresponding to sub.name
+# already, we must compare its attributes with the configuration and run
+# the various pglogical.alter_subscription_*() functions to reconcile
+# the database with the configuration.
+
+- name: Enable or disable subscription {{ sub.name }} if required
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(sub.database) }}"
+    queries:
+    - text: "SELECT pglogical.alter_subscription_{{action}}(subscription_name := %s)"
+      args:
+      - "{{ sub.name }}"
+  vars:
+    sub_enabled: "{{ subscription_tuples.results[0].sub_enabled }}"
+    action: "{{
+      sub_enabled|ternary('disable', 'enable')
+    }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    subscription_tuples.rowcount == 1
+    and sub.enabled|default(true)|bool != sub_enabled|bool
+  changed_when: True
+
+- name: Add or remove replication sets for subscription {{ sub.name }}
+  postgresql_query:
+    conninfo: "{{ node_dsn|dbname(sub.database) }}"
+    queries:
+    - text: >
+        SELECT pglogical.alter_subscription_{{action}}_replication_set(
+          subscription_name := %s, replication_set := %s
+        )
+      args:
+      - "{{ sub.name }}"
+      - "{{ set_name }}"
+  vars:
+    sub_replication_sets: "{{
+      subscription_tuples.results[0].sub_replication_sets
+    }}"
+    action: "{{
+      (set_name in sub_replication_sets)|ternary('remove', 'add')
+    }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ sub.replication_sets|symmetric_difference(sub_replication_sets) }}"
+  loop_control:
+    loop_var: set_name
+  when:
+    subscription_tuples.rowcount == 1
+    and ((set_name in sub.replication_sets and set_name not in sub_replication_sets)
+      or (set_name not in sub.replication_sets and set_name in sub_replication_sets))
+  changed_when: True

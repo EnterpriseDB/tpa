@@ -1,0 +1,22 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+publication_defaults:
+  name: "{{
+    publication.node_name|default(
+      '%s-%s' % (inventory_hostname, publication.database)
+    )
+  }}"
+
+subscription_defaults:
+  node_name: "{{ inventory_hostname }}-{{ subscription.database }}"
+
+replication_set_defaults:
+  replicate_insert: true
+  replicate_delete: true
+  replicate_update: true
+  replicate_truncate: true
+  autoadd_tables: false
+  autoadd_sequences: false
+  autoadd_existing: true
