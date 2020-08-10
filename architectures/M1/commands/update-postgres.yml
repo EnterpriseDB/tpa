@@ -32,7 +32,6 @@
   - include_role: name=postgres/update
     when: >
       'replica' in role
-    tags: always
 
 - name: Update postgres on primary in cluster {{ cluster_dir }}
   any_errors_fatal: True
@@ -56,7 +55,6 @@
   - include_role: name=postgres/update
     when: >
       'primary' in role
-    tags: always
 
   - name: Switch back to the old primary
     command: >
