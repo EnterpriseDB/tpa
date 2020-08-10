@@ -5,14 +5,14 @@
 - include_role:
     name: sys/pkg
     apply:
-      tags: [sys, pkg]
+      tags: pkg
   tags: pkg
 
 - name: Set the hostname
   hostname: name="{{ inventory_hostname }}"
   when:
     platform not in ['docker']
-  tags: [sys, hostname]
+  tags: hostname
 
 - name: Ensure authorized_keys allows admin access
   authorized_key:
@@ -23,7 +23,8 @@
 - include_tasks:
     file: tpa.yml
     apply:
-      tags: [sys, tpa]
+      tags: tpa
+  tags: tpa
 
 # Creates and mounts any additional filesystems required, e.g., any
 # postgres_data/barman_data volumes specified for the instance.
@@ -31,7 +32,7 @@
 - include_role:
     name: sys/fs
     apply:
-      tags: [sys, fs]
+      tags: fs
   vars:
     device: "{{ item.device }}"
     mountpoint: "{{ item.mountpoint }}"
@@ -39,31 +40,35 @@
     luks_volume: "{{ item.luks_volume|default(item.device|basename) }}"
   with_items:
     "{{ volumes }}"
+  tags: fs
 
 # Now that the any additional volumes have been mounted, we can copy in
 # any additional artifacts specified in config.yml
 - include_tasks:
     file: artifact.yml
     apply:
-      tags: [sys, artifacts]
+      tags: artifacts
   with_items: "{{ artifacts|default([]) }}"
   loop_control:
     loop_var: artifact
+  tags: artifacts
 
 - include_role:
     name: sys/sysctl
     apply:
-      tags: [sys, sysctl]
+      tags: sysctl
+  tags: sysctl
 
 - include_role:
     name: sys/sysstat
     apply:
-      tags: [sys, sysstat]
+      tags: sysstat
+  tags: sysstat
 
 - include_role:
     name: sys/openvpn
     apply:
-      tags: [sys, openvpn]
+      tags: openvpn
   when: >
     platform not in ['docker', 'vagrant'] and
     'role_openvpn-server' in groups
@@ -72,21 +77,25 @@
 - include_role:
     name: sys/hosts
     apply:
-      tags: [sys, hosts]
+      tags: hosts
+  tags: hosts
 
 - include_role:
     name: sys/cloudinit
     apply:
-      tags: [sys, cloudinit]
+      tags: cloudinit
   when: >
-    platform not in ['docker', 'vagrant']
+    platform not in ['docker', 'lxd', 'vagrant']
+  tags: cloudinit
 
 - include_role:
     name: sys/rsyslog
     apply:
-      tags: [sys, rsyslog]
+      tags: rsyslog
+  tags: rsyslog
 
 - include_role:
     name: sys/logrotate
     apply:
-      tags: [sys, rsyslog]
+      tags: rsyslog
+  tags: rsyslog
