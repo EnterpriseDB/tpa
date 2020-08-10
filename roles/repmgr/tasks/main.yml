@@ -5,11 +5,11 @@
 - include_role:
     name: "repmgr/{{ postgres_installation_method }}"
     apply:
-      tags: [repmgr, pkg]
+      tags: [pkg, src]
   when: >
     'postgres' in role
     and platform not in ['shared']
-  tags: pkg
+  tags: [pkg, src]
 
 - include_role: name=repmgr/common
   when: >

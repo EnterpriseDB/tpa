@@ -31,11 +31,9 @@
       (repmgr_version.stdout is version('4.1.0', '>='))|ternary('--daemonize=false', '')
     }}"
   register: unit
-  tags: [repmgr, service]
 
 - name: Enable repmgr service
   systemd:
     name: repmgr
     enabled: "{{ not postgres_volume_encrypted|bool and not 'bdr' in role }}"
     daemon_reload: "{{ unit is changed }}"
-  tags: [repmgr, service]

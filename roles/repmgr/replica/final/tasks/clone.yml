@@ -33,7 +33,6 @@
   register: this
   failed_when:
     this.rc != 0 or 'error' in this.stderr
-  tags: clone
 
 # PGDATA didn't exist until we just created it, so postgres/config would
 # have skipped this instance earlier. We install the configuration files
