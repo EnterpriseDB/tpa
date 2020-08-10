@@ -18,4 +18,3 @@
   vars:
     package_lists:
       - "{{ pgbouncer_packages|packages_for(ansible_distribution, pgbouncer_package_version) }}"
-  tags: [pgbouncer, pkg]

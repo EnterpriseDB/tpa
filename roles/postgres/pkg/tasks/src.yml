@@ -11,4 +11,4 @@
     package_lists:
     - "{{ src_extra_packages|packages_for(ansible_os_family) }}"
     - "{{ psycopg2_packages|packages_for(ansible_os_family) }}"
-  tags: [postgres, pkg]
+  tags: pkg

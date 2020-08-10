@@ -179,7 +179,7 @@
   include_tasks:
     file: bdr3/replication-sets.yml
     apply:
-      tags: [bdr, replication-sets]
+      tags: replication-sets
   vars:
     q: >-
       [?type=='bdr' && database=='%s'].replication_sets|[]
@@ -191,7 +191,7 @@
       {{ _publication_sets|map('pyformat_attr', 'name', bdr_node_ids=bdr_node_ids)|list }}
     subscription_sets: >-
       {{ _subscription_sets|map('pyformat', bdr_node_ids=bdr_node_ids)|list }}
-  tags: [bdr, replication-sets]
+  tags: replication-sets
 
 # The first_bdr_primary has now created the group, and the remaining members
 # of the same bdr_node_group must join the group.

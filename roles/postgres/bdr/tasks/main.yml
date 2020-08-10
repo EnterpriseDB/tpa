@@ -22,7 +22,6 @@
     state: present
   become_user: "{{ postgres_user }}"
   become: yes
-  tags: bdr
 
 # Next, we need to decide which flavour of BDR we're working with.
 #
@@ -43,7 +42,6 @@
 # little or no practical importance (e.g., no customers use them).
 
 - include_tasks: version.yml
-  tags: bdr
 
 # Now one node must create a BDR group, and the other nodes must join
 # the group. It doesn't matter which node creates the group, so long as
@@ -99,14 +97,13 @@
 - name: BDR setup
   include_tasks:
     file: "bdr{{ bdr_major_version }}.yml"
-    apply:
-      tags: bdr
 
 - name: Change Postgres configuration if required
   include_tasks:
     file: postgres-reconfig.yml
     apply:
-      tags: [postgres, config, bdr]
+      tags: config
+  tags: config
 
 - name: Perform postgres_fdw setup
   include_tasks:

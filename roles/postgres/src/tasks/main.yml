@@ -71,4 +71,5 @@
     name: postgres/pkg
     tasks_from: src.yml
     apply:
-      tags: [postgres, pkg]
+      tags: pkg
+  tags: pkg

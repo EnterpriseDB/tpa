@@ -3,7 +3,8 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 # Given a Postgres version, we perform distribution-specific tasks to
-# enable repositories and install Postgres packages.
+# install the required Postgres packages. (The required repositories
+# were already configured by sys/pkg.)
 
 - include_tasks: list-packages.yml
 
@@ -12,10 +13,15 @@
     name: "{{ all_postgres_packages }}"
     state: present
 
+# Due to the differences in the handling of debuginfo/dbgsym/dbg
+# packages between distributions and repositories, we handle them
+# separately.
+
 - include_tasks:
     file: debuginfo.yml
     apply:
-      tags: [postgres, pkg, debuginfo]
+      tags: debuginfo
+  tags: debuginfo
 
 # We install our own service units later, so we disable the packaged
 # versions here.

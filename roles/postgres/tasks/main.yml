@@ -2,13 +2,40 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=postgres/install
-- include_role: name=postgres/user
-  tags: [postgres, user]
-- include_role: name=postgres/initdb
+# First, we install Postgres according to postgres_installation_method
+# (pkg by default, src on request).
+
+- include_role:
+    name: postgres/install
+    apply:
+      tags: [pkg, src]
+  tags: [pkg, src]
+
+# Initialise ~postgres (.bashrc, ulimits, SSH key, etc.)
+
+- include_role:
+    name: postgres/user
+    apply:
+      tags: user
+  tags: user
+
+# If required, run initdb to initialise PGDATA and ensure it has the
+# right ownership/permissions/SELinux context.
+
+- include_role:
+    name: postgres/initdb
+    apply:
+      tags: initdb
+  tags: initdb
+
+# Now that we can be sure PGDATA exists, we perform any configuration
+# tasks that do not require Postgres to be running (those are done in
+# config/final).
+
 - include_role:
     name: postgres/config
     apply:
-      tags: [postgres, config]
+      tags: config
   when: >
     pgdata_initialised
+  tags: config

@@ -20,7 +20,6 @@
   with_items:
     - "{{ postgres_home }}"
     - "{{ postgres_data_dir }}"
-  tags: [postgres, initdb]
 
 # https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/SELinux_Users_and_Administrators_Guide/sect-Managing_Confined_Services-PostgreSQL-Configuration_Examples.html
 
@@ -56,4 +55,3 @@
     - set_fact: pgdata_initialised=True
   when:
     not pgdata_initialised and 'replica' not in role
-  tags: [postgres, initdb]

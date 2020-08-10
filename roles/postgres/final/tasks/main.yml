@@ -2,16 +2,44 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=postgres/service
-- include_role: name=postgres/restart
+# Configure systemd unit files for Postgres services.
+
+- include_role:
+    name: postgres/service
+    apply:
+      tags: service
+  tags: service
+
+# Start, reload, or restart Postgres services based on
+# postgres_service_end_state.
+
+- include_role:
+    name: postgres/restart
+    apply:
+      tags: service
+  tags: service
+
+# Postgres is now running.
+#
+# Since we may have changed the Postgres configuration, we repeat the
+# cluster discovery process that was done at the beginning (roles/init).
+
 - include_role: name=postgres/facts
+
 - include_role:
     name: postgres/pgpass
     apply:
-      tags: [postgres, pgpass]
+      tags: pgpass
+  tags: pgpass
 
-- include_role: name=postgres/config/final
+# Now we can perform configuration tasks that require Postgres to be
+# running (unlike the configuration-file changes in postgres/config),
+# such as creating users, databases, and extensions.
+
+- include_role:
+    name: postgres/config/final
+    apply:
+      tags: config
   when: >
     'replica' not in role
-
-# Postgres is now running.
+  tags: config

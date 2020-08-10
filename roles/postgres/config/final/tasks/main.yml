@@ -96,6 +96,7 @@
   when: >
     postgres_users|json_query("[?username=='pgbouncer']") != []
     and ('bdr' not in role or inventory_hostname == first_bdr_primary)
+  tags: pgbouncer
 
 - name: Include postgres-config-final hook
   include_tasks: "{{ hook }}"

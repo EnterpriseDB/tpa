@@ -9,7 +9,6 @@
     owner: root
     group: root
     mode: 0755
-  tags: [postgres, service]
 
 - name: Install Postgres service unit files
   template:
@@ -23,7 +22,6 @@
     - ['{{ postgres_service_name }}',
        '{{ postgres_service_name }}-monitor']
   register: unit
-  tags: [postgres, service]
 
 - name: Enable postgres services
   systemd:
@@ -33,4 +31,3 @@
   with_items:
     - "{{ postgres_service_name }}"
     - "{{ postgres_service_name }}-monitor"
-  tags: [postgres, service]

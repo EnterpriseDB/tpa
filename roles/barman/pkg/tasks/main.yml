@@ -16,4 +16,3 @@
     state: "{{
       (barman_package_version is defined)|ternary('present', 'latest')
     }}"
-  tags: [barman, pkg]
