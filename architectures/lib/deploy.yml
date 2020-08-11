@@ -37,7 +37,7 @@
       apply:
         tags: barman
     when:
-      groups['role_barman'] is not empty
+      groups['role_barman']|default([]) is not empty
     tags: always
 
   - include_role: name=repmgr
@@ -50,7 +50,7 @@
       apply:
         tags: pgbouncer
     when:
-      groups['role_pgbouncer'] is not empty
+      groups['role_pgbouncer']|default([]) is not empty
     tags: always
 
   - include_role:
@@ -58,7 +58,7 @@
       apply:
         tags: haproxy
     when:
-      groups['role_haproxy'] is not empty
+      groups['role_haproxy']|default([]) is not empty
     tags: always
 
   - include_role:
