@@ -160,6 +160,10 @@ def main():
             if isinstance(q, dict):
                 text = q['text']
                 args = q.get('args', [])
+                if args:
+                    args = list(map(lambda s: s if not (isinstance(s, str) and
+                        s.startswith('__omit_place_holder__')) else None, args))
+                    q['args'] = args
 
             cur.execute(text, args)
 
