@@ -72,6 +72,16 @@
         sections:
         - AppStream
 
+# The pgbouncer package from EPEL depends on python-psycopg2, which
+# conflicts with our python2-psycopg2 package.
+
+- name: Exclude pgbouncer package from the EPEL repository
+  ini_file:
+    dest: /etc/yum.repos.d/epel.repo
+    section: epel
+    option: exclude
+    value: "pgbouncer*"
+
 - name: Disable builtin postgresql module for DNF
   shell: >
     if [[ -d /etc/dnf/modules.d ]]; then
