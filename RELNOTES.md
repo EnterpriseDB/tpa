@@ -14,6 +14,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Allow setting ``postgres_conf_dir`` to separate configuration files
   from PGDATA
 
+- Add a ``tpaexec relink`` command to repair dangling symlinks into
+  TPA_DIR from within a cluster directory
+
 ### Bugfixes
 
 - Avoid running out of memory while setting SELinux context for PGDATA

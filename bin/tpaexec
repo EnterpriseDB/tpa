@@ -633,6 +633,19 @@ Takes a comma-separated list of hostnames and "rehydrates" each host:
 REHYDRATE
             ;;
 
+        relink)
+            cat <<RELINK
+Command: tpaexec relink clustername
+
+Tries to repair any dangling symbolic links within a cluster directory
+(e.g., deploy.yml) by making them point to the correct \$TPA_DIR when
+appropriate. (TPA_DIR=$TPA_DIR)
+
+This command is useful if a cluster was configured on one machine and
+then moved to another with TPAexec installed in a different location.
+RELINK
+            ;;
+
         *)
             echo "Sorry, no help available for $topic"
             echo "Please contact tpa@2ndQuadrant.com for assistance"

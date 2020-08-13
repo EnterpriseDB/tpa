@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+import os, re, sys
+
+v = 0
+if len(sys.argv) > 1 and sys.argv[1].startswith('-v'):
+    v = 1
+
+# First, we establish that we were invoked as ``tpaexec relink clusterdir`` on a
+# valid cluster directory.
+
+if 'TPA_DIR' not in os.environ or not os.path.exists('./config.yml'):
+    print("ERROR: please invoke as 'tpaexec relink /path/to/cluster/dir'", file=sys.stderr)
+    sys.exit(-1)
+
+# Given the name of a symbolic link and the missing target of the link, this
+# function tries to point it to $TPA_DIR.
+
+def repair_dangling_symlink(link, target):
+    new_target = re.sub('^.*/TPA/', '', target)
+
+    if new_target.startswith('architectures/CAMO2x2/'):
+        new_target = re.sub('CAMO2x2', 'BDR-Always-ON', new_target)
+
+    new_target = os.path.join(os.environ['TPA_DIR'], new_target)
+    if os.path.exists(new_target):
+        os.unlink(link)
+        os.symlink(new_target, link)
+        if v:
+            print("%s: %s => %s" % (link, target, new_target))
+    else:
+        print("%s: Can't find new target for %s" % (link, target), file=sys.stderr)
+
+# Now we can look for dangling symlinks somewhere under the current directory
+# and try to repair them.
+
+for subdir, dirs, files in os.walk('.'):
+    for f in files:
+        file = os.path.join(subdir, f)
+        if os.path.islink(file):
+            target = os.readlink(file)
+            if not os.path.exists(target):
+                if '/TPA/' in target:
+                    repair_dangling_symlink(file, target)
