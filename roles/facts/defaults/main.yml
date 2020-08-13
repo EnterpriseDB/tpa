@@ -29,6 +29,8 @@ bdr_extensions:
   - btree_gist
   - bdr
 
+default_postgres_users: []
+
 # These parameters are scaled according to ansible_memtotal_mb. You can
 # override either the ratio or the value explicitly.
 

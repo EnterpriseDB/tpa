@@ -51,7 +51,7 @@
       {{ vars.get(secret_name) }}
     encrypted_password: >-
       md5{{ (generated_password + item.username)|hash('md5') }}
-  with_items: "{{ postgres_users|default([]) }}"
+  with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes
 
@@ -83,7 +83,7 @@
     groups: "{{ item.granted_roles }}"
     target_role: "{{ item.username }}"
     state: present
-  with_items: "{{ postgres_users|default([]) }}"
+  with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes
   when:

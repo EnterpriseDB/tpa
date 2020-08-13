@@ -10,7 +10,7 @@
 - name: Record {{ username }} in the list of database users to create
   set_fact:
     postgres_users: "{{
-      postgres_users|default([])|union([{
+      postgres_users|union([{
         'username': username,
         'role_attrs': role_attrs|default([]),
         'granted_roles': granted_roles|default([]),

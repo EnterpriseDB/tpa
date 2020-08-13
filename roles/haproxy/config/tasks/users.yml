@@ -18,6 +18,6 @@
     granted_roles: "{{ item.1.granted_roles }}"
   with_nested_dependents:
   - groups['role_haproxy']
-  - hostvars[item.0].postgres_users|default([])
+  - hostvars[item.0].postgres_users
   when:
     item.1.username in ['haproxy', 'check_queue']
