@@ -9,6 +9,7 @@
     - pgdata_initialised
 
 - include_tasks: postgres/controldata.yml
+  tags: always
 
 - include_tasks:
     file: bdr.yml
@@ -16,6 +17,7 @@
       tags: bdr
   when: >
     'bdr' in role
+  tags: always
 
 - include_tasks:
     file: repmgr.yml

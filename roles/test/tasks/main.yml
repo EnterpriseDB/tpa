@@ -6,12 +6,14 @@
 # applicable to any cluster.
 
 - include_tasks: prereqs.yml
+  tags: always
 
 - name: Run system-level tests
   include_tasks:
     file: sys.yml
     apply:
       tags: sys
+  tags: always
 
 - name: Run postgres tests
   include_tasks:
@@ -20,6 +22,7 @@
       tags: postgres
   when: >
     'postgres' in role and pgdata_initialised
+  tags: always
 
 - name: Run barman tests
   include_tasks:
