@@ -89,6 +89,30 @@
   when:
     item.granted_roles|default([]) is not empty
 
+# Now that all required roles exist, we can create databases specified
+# in postgres_databases with the correct owners. If you do not specify
+# any template, it uses template1 and inherits all the extensions that
+# were created above. If you don't want that, use template0 explicitly
+# and create extensions in the postgres-config-final hook.
+
+- name: Create Postgres databases
+  postgresql_db:
+    port: "{{ postgres_port }}"
+    name: "{{ db.name }}"
+    owner: "{{ db.owner|default(omit) }}"
+    encoding: "{{ db.encoding|default(omit) }}"
+    lc_collate: "{{ db.lc_collate|default(omit) }}"
+    lc_ctype: "{{ db.lc_ctype|default(omit) }}"
+    template: "{{ db.template|default(omit) }}"
+    state: present
+  with_items: "{{ postgres_databases }}"
+  loop_control:
+    loop_var: db
+    label: >-
+      {{ db.name }}
+  become_user: "{{ postgres_user }}"
+  become: yes
+
 - include_tasks:
     file: pgbouncer.yml
     apply:

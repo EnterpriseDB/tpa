@@ -30,6 +30,7 @@ bdr_extensions:
   - bdr
 
 default_postgres_users: []
+default_postgres_databases: []
 
 # These parameters are scaled according to ansible_memtotal_mb. You can
 # override either the ratio or the value explicitly.

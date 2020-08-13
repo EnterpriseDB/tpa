@@ -12,16 +12,8 @@
 # but we do handle "logical standby" instances with bdr+primary+readonly
 # in role.
 #
-# First, each node needs a BDR database.
-
-- name: Create BDR database
-  postgresql_db:
-    port: "{{ postgres_port }}"
-    name: "{{ bdr_database }}"
-    owner: "{{ postgres_user }}"
-    state: present
-  become_user: "{{ postgres_user }}"
-  become: yes
+# By now, the bdr_database is already created by config/final on every
+# BDR instance according to the configuration in postgres_databases.
 
 # Next, we need to decide which flavour of BDR we're working with.
 #

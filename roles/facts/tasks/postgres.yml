@@ -44,6 +44,7 @@
     postgres_installation_method: "{{ postgres_installation_method|default(default_postgres_installation_method) }}"
     postgres_install_dir: "{{ postgres_install_dir|default(default_postgres_install_dir) }}"
     postgres_users: "{{ postgres_users|default(default_postgres_users) }}"
+    postgres_databases: "{{ postgres_databases|default(default_postgres_databases) }}"
     log_destination: "{{ log_destination|default(default_log_destination) }}"
     install_from_source: "{{ install_from_source|default([]) }}"
     barman_user: "{{ barman_user|default(default_barman_user) }}"
@@ -70,6 +71,20 @@
       {%- else -%}xlog
       {%- endif -%}
   tags: always
+
+- name: Add {{ bdr_database }} to postgres_databases
+  set_fact:
+    postgres_databases: "{{
+      postgres_databases|union([default_bdr_database_entry])
+    }}"
+  vars:
+    default_bdr_database_entry:
+      name: "{{ bdr_database }}"
+      owner: "{{ postgres_user }}"
+    bdr_database_entry: >-
+      {{ postgres_databases|json_query("[?name=='%s']" % bdr_database) }}
+  when: >
+    'bdr' in role and bdr_database_entry is empty
 
 - name: Ensure haproxy_maxconn is set
   set_fact:
