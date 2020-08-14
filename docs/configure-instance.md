@@ -81,9 +81,9 @@ override.conf.j2    pg_hba.lines.j2  tpa.conf.j2       variable.j2
 
 #### Manual updates
 
-Bearing these 'in mind, after TPAexec deployment, any manual updates for settings
-that override **$PGDATA/postgresql.conf** on any node should be made only to
-**$PGDATA/conf.d/9999-override.conf**, because any other file may get overwritten
+Bearing these in mind, after TPAexec deployment, any manual updates for settings
+that override ``$PGDATA/postgresql.conf`` on any node should be made only to
+``$PGDATA/conf.d/9999-override.conf``, because any other file may get overwritten
 or overridden by subsequent settings at service start time. This is where you
 should configure any setting that requires persistence after reboot.
 
