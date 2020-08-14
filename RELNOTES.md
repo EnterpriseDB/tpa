@@ -6,16 +6,26 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Notable changes
 
-- Complete support for RHEL/CentOS 8 across architectures
-
 - Add support for multiple distributions on Docker via
   ``tpaexec configure … --os Debian/Ubuntu/RedHat``
+
+- Complete support for RHEL/CentOS 8 across architectures
 
 - Allow setting ``postgres_conf_dir`` to separate configuration files
   from PGDATA
 
+- Add support for HARP with BDR as the consensus mechanism
+
+- Add new ``postgres_users`` and ``postgres_databases`` settings to
+  create users and databases during deployment
+
+- Add declarative configuration for pglogical replication through
+  ``publications`` and ``subscriptions`` of ``type: pglogical``
+
 - Add a ``tpaexec relink`` command to repair dangling symlinks into
   TPA_DIR from within a cluster directory
+
+- Add many new and exciting default hostnames beginning with 'u'
 
 ### Bugfixes
 
@@ -25,6 +35,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Revert workarounds for problems with the PGDG yum repository that have
   been fixed upstream
+
+- Avoid installing pgbouncer from the EPEL repo because of a broken
+  dependency on python-psycopg2
 
 - Fix some inconsistencies with --overrides-from that prevented certain
   generated settings from being overriden at configure time
