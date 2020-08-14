@@ -5,7 +5,6 @@ kapok
 kaput
 karakul
 karaoke
-karat
 karate
 karma
 katydid
@@ -69,7 +68,6 @@ kneader
 kneecap
 kneel
 knell
-knelt
 knife
 knight
 knitter
@@ -79,11 +77,8 @@ knotty
 known
 knuckle
 koala
-kookie
-kookier
 kooky
 kopeck
-kopek
 kosher
 kowtow
 krone
@@ -94,8 +89,6 @@ kudzu
 kumquat
 quack
 quaff
-quahaug
-quahog
 quail
 quaint
 quake
@@ -108,14 +101,12 @@ quarrel
 quarry
 quart
 quarter
-quartet
 quarto
 quartz
 quasar
 quash
 quasi
 quaver
-quavery
 queasy
 queen
 queenly
@@ -142,7 +133,6 @@ quinine
 quintet
 quire
 quirk
-quirky
 quite
 quitter
 quiver
