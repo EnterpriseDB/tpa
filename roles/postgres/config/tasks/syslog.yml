@@ -6,6 +6,7 @@
   template:
     src: syslog-postgres.conf.j2
     dest: /etc/rsyslog.d/22-postgres.conf
+    mode: 0644
   register: syslog_conf
 
 - name: Restart rsyslog if required

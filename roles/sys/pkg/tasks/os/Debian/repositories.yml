@@ -47,6 +47,7 @@
 - name: Install apt repositories
   apt_repository:
     repo: "{{ r.repo }}"
+    mode: 0644
     state: present
     update_cache: no
   with_items: "{{ apt_repository_list }}"

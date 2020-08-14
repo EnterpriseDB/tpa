@@ -32,6 +32,7 @@
       copy:
         src: "{{ item }}"
         dest: "/etc/rsyslog.d/{{ item }}"
+        mode: 0644
       with_items:
         - 00-enable-tcp-reception.conf
         - 23-postgres.conf

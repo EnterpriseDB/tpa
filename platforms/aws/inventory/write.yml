@@ -13,6 +13,7 @@
   template:
     src: ec2.ini.j2
     dest: "{{ cluster_dir }}/inventory/ec2.ini"
+    mode: 0644
 
 - name: Remove old inventory cache
   file:
