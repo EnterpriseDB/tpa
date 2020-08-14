@@ -20,7 +20,7 @@ node_name = {{ inventory_hostname }}
 
 # 1 or 0 to indicate whether this node is allowed to take the Lead Master lock.
 # Default 1.
-allow_lead = {{ harp_allow_lead|default(1 if role|contains('bdr', 'primary') else 0) }}
+allow_lead = {{ harp_allow_lead|default(1 if inventory_hostname in first_bdr_primary_candidates else 0) }}
 
 # Time in milliseconds to require before routing to a newly promoted Lead Master is allowed.
 # 0 to disable.
