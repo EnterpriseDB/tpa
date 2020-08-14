@@ -184,13 +184,8 @@
 
 - include_tasks:
     file: syslog.yml
-  when:
-    log_destination == 'syslog'
-
-- include_tasks:
-    file: log_stderr.yml
-  when:
-    log_destination == 'stderr'
+    apply:
+      tags: syslog
 
 - include_role:
     name: postgres/createuser
