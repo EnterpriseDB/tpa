@@ -20,6 +20,7 @@
   with_items:
     - "{{ postgres_home }}"
     - "{{ postgres_data_dir }}"
+    - "{{ postgres_conf_dir if postgres_conf_dir != postgres_data_dir else [] }}"
 
 # https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/SELinux_Users_and_Administrators_Guide/sect-Managing_Confined_Services-PostgreSQL-Configuration_Examples.html
 

@@ -28,16 +28,6 @@
 
 - include_tasks: defaults.yml
 
-- name: Ensure postgres_conf_dir has the right ownership and permissions
-  file:
-    path: "{{ postgres_conf_dir }}"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0700
-    state: directory
-  when:
-    postgres_conf_dir != postgres_data_dir
-
 # First, we generate pg_hba.conf. There are several options here:
 #
 # 1. You can leave the existing pg_hba.conf alone. To do this, just set
