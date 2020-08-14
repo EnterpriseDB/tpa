@@ -608,6 +608,15 @@ cluster's tests subdirectory.
 
 To run tests from a different location, you may specify
 ``--include-tests-from /other/path``.
+
+The different kinds of tests executed by default have different tags,
+e.g., postgres, repmgr, barman, pgbench. Use ``--tags x,y`` to select
+tests to execute, or ``--skip-tags p,q`` to exclude certain tests.
+
+Examples:
+
+    tpaexec test mycluster --tags barman
+    tpaexec test mycluster --skip-tags repmgr,pgbench
 TEST
             ;;
 
