@@ -34,6 +34,28 @@
   failed_when:
     this.rc != 0 or 'error' in this.stderr
 
+# If we are cloning an instance with postgres_conf_dir separated from
+# postgres_data_dir, we copy its configuration files to the replica's
+# postgres_conf_dir (which may or may not be the same as PGDATA, and
+# that's why we can't use --copy-extenrnal-config-files above).
+
+- name: Copy configuration files separately if required
+  command: >
+    scp "{{ source }}:{{ source_path }}"
+        "{{ postgres_conf_dir }}/{{ item.value }}"
+  args:
+    creates: "{{ postgres_conf_dir }}/{{ item.value }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  vars:
+    source: "{{ upstream_to_clone|default(upstream_primary) }}"
+    source_facts: "{{ hostvars[source].cluster_facts }}"
+    source_path: "{{
+      source_facts.pg_settings.get(item.key)
+        if source_facts.pg_settings is defined
+    }}"
+  with_dict: "{{ postgres_conf_files }}"
+
 # PGDATA didn't exist until we just created it, so postgres/config would
 # have skipped this instance earlier. We install the configuration files
 # here; on subsequent deployments, postgres/config will manage them with

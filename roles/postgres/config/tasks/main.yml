@@ -85,8 +85,37 @@
   notify:
     - Note Postgres restart required
 
-# No matter where the config file lives (and where it came from), we
-# make it include a config dir in PGDATA.
+# Next, we must make postgres_conf_dir/postgresql.conf include the
+# postgres_conf_dir/conf.d directory.
+#
+# If postgres_conf_dir is the same as postgres_data_dir, or if we copied
+# postgresql.conf to postgres_conf_dir after initdb, or if we generated
+# postgresql.conf based on postgres_conf_template above, then the file
+# will exist in the expected location, and we can edit it.
+#
+# If, however, we are re-deploying with the value of postgres_conf_dir
+# changed, postgresql.conf and the other configuration files may not
+# exist. If Postgres is still running with the old value, we can copy
+# the files (but we don't try to remove them from their old locations).
+
+- name: Copy configuration files to new location if required
+  command: >
+    cp "{{ current_path }}" "{{ new_path }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  args:
+    creates: "{{ new_path }}"
+  vars:
+    current_path: "{{
+      cluster_facts.pg_settings.get(item.key)
+        if cluster_facts.pg_settings is defined
+    }}"
+    new_path: >-
+      {{ postgres_conf_dir }}/{{ item.value }}
+  with_dict: "{{ postgres_conf_files }}"
+  when:
+    current_path is defined
+    and current_path != new_path
 
 - name: Create include_dir for extra configuration settings
   file:

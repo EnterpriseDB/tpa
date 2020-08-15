@@ -41,6 +41,23 @@
     postgres_data_dir != default_postgres_data_dirs[ansible_os_family] and
     platform not in ['docker']
 
+- name: Set correct SELinux context for {{ postgres_conf_dir }}
+  shell: >
+    if $(type -p selinuxenabled); then
+    semanage fcontext -a -t postgresql_db_t "{{ postgres_conf_dir }}(/.*)?" &>/dev/null;
+    restorecon -R -v "{{ postgres_conf_dir }}"|wc -l;
+    fi
+  args:
+    executable: /bin/bash
+  register: restorecon
+  failed_when:
+    restorecon is not successful
+  changed_when: >
+    restorecon.stdout.strip() != '0'
+  when:
+    postgres_conf_dir != postgres_data_dir
+    and platform not in ['docker']
+
 - name: Initialise PGDATA={{ postgres_data_dir }}
   block:
     - name: Run initdb to initialise data directory
@@ -53,6 +70,18 @@
       environment: "{{ target_environment|combine(_task_environment) }}"
       become_user: "{{ postgres_user }}"
       become: yes
+
+    - name: Move configuration files to {{ postgres_conf_dir }}
+      command: >
+        mv "{{ postgres_data_dir }}/{{ item.value }}"
+           "{{ postgres_conf_dir }}/{{ item.value }}"
+      args:
+        creates: "{{ postgres_conf_dir }}/{{ item.value }}"
+      with_dict: "{{ postgres_conf_files }}"
+      when:
+        postgres_conf_dir != postgres_data_dir
+      changed_when: True
+
     - set_fact: pgdata_initialised=True
   when:
     not pgdata_initialised and 'replica' not in role

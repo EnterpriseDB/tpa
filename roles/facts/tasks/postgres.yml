@@ -45,6 +45,7 @@
     postgres_install_dir: "{{ postgres_install_dir|default(default_postgres_install_dir) }}"
     postgres_users: "{{ postgres_users|default(default_postgres_users) }}"
     postgres_databases: "{{ postgres_databases|default(default_postgres_databases) }}"
+    postgres_conf_files: "{{ postgres_conf_files|default(default_postgres_conf_files) }}"
     log_destination: "{{ log_destination|default(default_log_destination) }}"
     install_from_source: "{{ install_from_source|default([]) }}"
     barman_user: "{{ barman_user|default(default_barman_user) }}"
