@@ -56,6 +56,21 @@
     tmpl: pg_hba.conf.j2
     hba: "{{ postgres_hba_template|default(tmpl) }}"
 
+# If postgres_ident_template is set, we use it to install pg_ident.conf.
+# Otherwise we leave the file alone.
+
+- name: Install pg_ident.conf
+  template:
+    src: "{{ postgres_ident_template }}"
+    dest: "{{ postgres_conf_dir }}/pg_ident.conf"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
+  notify:
+    - Note Postgres reload required
+  when:
+    postgres_ident_template|default('') != ''
+
 # Next, we generate postgresql.conf if the caller specifies a template.
 # Otherwise, we leave the default postgresql.conf alone. Any changes to
 # this file require a Postgres restart, because we don't know what might
