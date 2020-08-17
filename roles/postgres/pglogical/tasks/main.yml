@@ -15,7 +15,7 @@
   loop_control:
     loop_var: publication
     label: >-
-      {{ publication.name|default(publication_defaults.name) }}
+      {{ pub.name }}
 
 - name: Set up pglogical subscriptionns
   include_tasks:

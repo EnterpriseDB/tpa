@@ -273,6 +273,53 @@ def cmdline(playbook_dir):
 
     return ' '.join([_shortest_quote(x) for x in args])
 
+# Given a subscription (and access to hostvars), this function returns a
+# provider_dsn for the subscription, which may be an explicitly specified
+# provider_dsn, or derived from the name of a publication (and an optional
+# instance name, if required for disambiguation).
+#
+# sub:
+#   provider_dsn: "host=… dbname=…"
+#   # OR:
+#   publication:
+#     name: publication_name
+#     instance: instance_name
+#
+# See postgres/pglogical/tasks/subscribe.yml for context.
+
+def provider_dsn(sub, hostvars):
+    provider_dsn = sub.get('provider_dsn')
+    if provider_dsn:
+        return provider_dsn
+
+    publication = sub.get('publication')
+    if not publication:
+        raise AnsibleFilterError("Subscription %s does not specify .publication.name(+instance)" % sub.get('name'))
+ 
+    name = publication.get('name')
+    if not name:
+        raise AnsibleFilterError("Subscription %s does not specify .publication.name" % sub.get('name'))
+
+    providers = list(hostvars.keys())
+    instance = publication.get('instance')
+    if instance:
+        providers = [instance]
+
+    matches = []
+    for h in providers:
+        vars = hostvars.get(h, {})
+        publications = vars.get('publications', [])
+        for p in publications:
+            if p.get('type') == 'pglogical' and p.get('name') == name:
+                matches.append(dbname(vars.get('node_dsn'), p.get('database')))
+
+    if not matches:
+        raise AnsibleFilterError("Publication %s (subscription=%s) not found" % (name, sub.get('name')))
+    if len(matches) != 1:
+        raise AnsibleFilterError("Publication %s (subscription=%s) not unique; specify instance" % (name, sub.get('name')))
+
+    return matches[0]
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -294,4 +341,5 @@ class FilterModule(object):
             'contains': contains,
             'abspath_to': abspath_to,
             'cmdline': cmdline,
+            'provider_dsn': provider_dsn,
         }

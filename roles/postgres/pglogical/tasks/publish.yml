@@ -38,8 +38,9 @@
 # (There can be only one pglogical node in any given database.)
 
 - assert:
-    msg: "Publication must specify database name"
+    msg: "Publication must specify name and database"
     that:
+    - pub.name is defined
     - pub.database is defined
 
 - name: Ensure pglogical node exists
@@ -90,7 +91,7 @@
   become: yes
   vars:
     set: "{{ replication_set_defaults|combine(item) }}"
-    existing_sets: >-
+    existing_sets: >
       {{ pglogical_set_tuples.results|json_query('[*].set_name') }}
   with_items: "{{ pub.replication_sets }}"
   loop_control:
@@ -127,9 +128,9 @@
   become: yes
   vars:
     set: "{{ replication_set_defaults|combine(item) }}"
-    matches: >-
+    matches: >
       {{ pglogical_set_tuples.results|json_query("[?set_name=='%s']" % item.name) }}
-    match: >-
+    match: >
       {{ matches[0]|default({}) }}
   with_items: "{{ pub.replication_sets }}"
   loop_control:
@@ -163,7 +164,7 @@
     label: >-
       {{ item.set_name }}
   when:
-    item.set_name not in pub.replication_sets|default([])|json_query('[*].name')
+    item.set_name not in pub.replication_sets|json_query('[*].name')
     and item.set_name not in ['default', 'default_insert_only', 'ddl_sql']
   changed_when: True
 

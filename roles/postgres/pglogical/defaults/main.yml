@@ -3,11 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 publication_defaults:
-  name: "{{
-    publication.node_name|default(
-      '%s-%s' % (inventory_hostname, publication.database)
-    )
-  }}"
+  replication_sets: []
 
 subscription_defaults:
   node_name: "{{ inventory_hostname }}-{{ subscription.database }}"

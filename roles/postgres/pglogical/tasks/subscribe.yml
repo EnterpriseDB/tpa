@@ -11,12 +11,12 @@
 #   database: mydb
 #   name: mysub
 #   node_name: somenode
-#   # Specify a publication by hostname/publication name or provide a
-#   # full provider_dsn string explicitly
+#   # Specify the provider_dsn explicitly, or reference a publication by
+#   # its name (with optional instance name, if needed to disambiguate)
+#   provider_dsn: "host=… dbname=…"
 #   publication:
 #     name: publication_name
-#     publisher: hostname
-#   provider_dsn: "host=… dbname=…"
+#     instance: instance_name
 #   # Next are optional arguments to pglogical.create_subscription()
 #   replication-sets:
 #     - foo
@@ -57,35 +57,45 @@
 
 - block:
   - assert:
-      msg: "Subscription must specify provider_dsn or publication.instance+name"
+      msg: "Subscription {{ sub.name }} must specify .provider_dsn or .publication.name(+instance)"
       that:
       - sub.publication is defined
       - sub.publication is mapping
       - sub.publication.name is defined
 
   - assert:
-      msg: "Subscription must specify valid publication.instance"
+      msg: >-
+        Instance {{ sub.publication.instance }} (referenced by subscription {{ sub.name }})
+        must have exactly one valid pglogical publication named {{ sub.publication.name }}
       that:
-      - publisher is defined
-      - publisher in hostvars
+      - sub.publication.instance in hostvars
+      - matching_publications|length == 1
+    vars:
+      matching_publications: "{{
+        hostvars[sub.publication.instance].publications
+        |default([])|json_query(_match_q % sub.publication.name)
+      }}"
+    when:
+      sub.publication.instance is defined
 
   - assert:
-      msg: "Instance {{ publisher }} must have a single publication named {{ sub.publication.name }}"
+      msg: >-
+        There must be exactly one publication named {{ sub.publication.name }}
+        (referenced by subscription {{ sub.name }})
       that:
-      - published is not empty
-      - publication|length == 1
-
-  - assert:
-      msg: "Publication {{ sub.publication.name }} on instance {{ publisher }} must specify 'database'"
-      that: >
-        'database' in publication|first
+      - all_matching_publications|default([])|length == 1
+    vars:
+      all_hostvars:
+        h: "{{ hostvars.values()|list }}"
+      all_publications: >
+        {{ all_hostvars|json_query('h[*].publications|[]') }}
+      all_matching_publications: >
+        {{ all_publications|json_query(_match_q % sub.publication.name) }}
+    when:
+      sub.publication.instance is not defined
   vars:
-    publisher: >-
-      {{ sub.publication.instance|default(inventory_hostname) }}
-    published: >-
-      {{ hostvars[publisher].publications|default([]) }}
-    publication: >-
-      {{ published|json_query("[?name=='%s']" % sub.publication.name) }}
+    _match_q: >-
+      [?type=='pglogical' && name=='%s']
   when:
     sub.provider_dsn is not defined
 
@@ -129,34 +139,27 @@
     - text: "SELECT pglogical.create_subscription({{ argument_string }})"
       args: "{{ argument_values }}"
   vars:
-    publisher: "{{ sub.publication.instance|default(inventory_hostname) }}"
-    publication: >-
-      {{ hostvars[publisher].publications|json_query("[?name=='%s']|[0]" % sub.publication.name) }}
-    publication_dsn: "{{
-      hostvars[publisher].node_dsn|dbname(publication.database)
-        if sub.publication is defined
-    }}"
     required_keys:
       - subscription_name
       - provider_dsn
     required_values:
       - "{{ sub.name }}"
-      - "{{ sub.provider_dsn|default(publication_dsn) }}"
-    optional_arguments: >-
+      - "{{ sub|provider_dsn(hostvars) }}"
+    optional_arguments: >
       {{ sub|remove_keys(extra_keys) }}
-    argument_keys: >-
+    argument_keys: >
       {{ required_keys + optional_arguments.keys()|list }}
-    argument_values: >-
+    argument_values: >
       {{ required_values + optional_arguments.values()|list }}
-    argument_string: >-
+    argument_string: >
       {{ argument_keys|map('apply_format', '{0} := %s')|list|join(', ') }}
     extra_keys:
       - type
       - name
       - database
       - node_name
-      - publication
       - provider_dsn
+      - publication
       - enabled
   register: pglogical_new_subscription
   become_user: "{{ postgres_user }}"
@@ -185,8 +188,8 @@
   become_user: "{{ postgres_user }}"
   become: yes
   when:
-    subscription_tuples.rowcount == 1
-    and sub.enabled|default(true)|bool != sub_enabled|bool
+    - subscription_tuples.rowcount == 1
+    - sub.enabled|default(true)|bool != sub_enabled|bool
   changed_when: True
 
 - name: Add or remove replication sets for subscription {{ sub.name }}
@@ -201,19 +204,20 @@
       - "{{ sub.name }}"
       - "{{ set_name }}"
   vars:
+    cfg_replication_sets: "{{ sub.replication_sets|default([]) }}"
     sub_replication_sets: "{{
-      subscription_tuples.results[0].sub_replication_sets
+      subscription_tuples.results[0].sub_replication_sets or []
     }}"
     action: "{{
       (set_name in sub_replication_sets)|ternary('remove', 'add')
     }}"
   become_user: "{{ postgres_user }}"
   become: yes
-  with_items: "{{ sub.replication_sets|symmetric_difference(sub_replication_sets) }}"
+  with_items: "{{ cfg_replication_sets|symmetric_difference(sub_replication_sets) }}"
   loop_control:
     loop_var: set_name
   when:
-    subscription_tuples.rowcount == 1
-    and ((set_name in sub.replication_sets and set_name not in sub_replication_sets)
-      or (set_name not in sub.replication_sets and set_name in sub_replication_sets))
+    - subscription_tuples.rowcount == 1
+    - ((set_name in cfg_replication_sets and set_name not in sub_replication_sets)
+       or (set_name not in cfg_replication_sets and set_name in sub_replication_sets))
   changed_when: True
