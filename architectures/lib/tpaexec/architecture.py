@@ -487,16 +487,16 @@ class Architecture(object):
             },
             '2ndqpostgres': {
                 'postgres_installation_method': 'src',
-                'postgres_git_url': 'git@github.com:2ndQuadrant/2ndQPostgres.git',
+                'postgres_git_url': 'ssh://git@gitlab.2ndquadrant.com:2222/bdr-stack/2ndQPostgres.git',
             },
             'pglogical3': {
                 'name': 'pglogical',
-                'git_repository_url': 'git@github.com:2ndQuadrant/pglogical_internal.git',
+                'git_repository_url': 'ssh://git@gitlab.2ndquadrant.com:2222/bdr-stack/pglogical.git',
                 'git_repository_ref': 'master',
             },
             'bdr3': {
                 'name': 'bdr',
-                'git_repository_url': 'git@github.com:2ndQuadrant/bdr-private.git',
+                'git_repository_url': 'ssh://git@gitlab.2ndquadrant.com:2222/bdr-stack/BDR.git',
                 'git_repository_ref': 'master',
                 'build_commands': [
                     'make -s install',
