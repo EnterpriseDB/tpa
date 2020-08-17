@@ -2,13 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# This include file expects to be passed the name of a library to add to
-# the list in shared_preload_libraries.
-
-- assert:
-    that:
-      - library is defined
-
 # We're willing to be a bit flexible about what we read in here. We
 # accept multiple lines setting shared_preload_libraries (last one
 # wins), and commented-out assignments are ignored.
@@ -25,9 +18,9 @@
     override: "{{ _include_dir }}/8888-shared_preload_libraries.conf"
   check_mode: no
 
-- name: Include {{ library }} in shared_preload_libraries list
+- name: Update shared_preload_libraries list
   set_fact:
-    _preload_list: "{{ _old_list|union([library]) }}"
+    _preload_list: "{{ _old_list|union(shared_preload_libraries) }}"
   vars:
     _old_list: >
       {{ libs.stdout and libs.stdout.split(',')|map('trim')|list or [] }}

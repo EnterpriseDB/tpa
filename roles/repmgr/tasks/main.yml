@@ -15,16 +15,4 @@
   when: >
     'postgres' in role
 
-- include_role: name=repmgr/primary
-  when: >
-    'primary' in role
-
-- include_role: name=repmgr/replica
-  when: >
-    'replica' in role
-
-- include_role: name=repmgr/witness
-  when: >
-    'witness' in role
-
 - set_fact: initialise_replication=True

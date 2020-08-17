@@ -24,9 +24,11 @@
 
 # Some extensions need entries in shared_preload_libraries.
 
-- name: Add entries to shared_preload_libraries
-  include_tasks: preload-library.yml
-  when: library in postgres_extensions|default([])
+- name: Add shared_preload_libraries entries for postgres_extensions
+  set_fact:
+    shared_preload_libraries: "{{
+      shared_preload_libraries|default([])|union([item])
+    }}"
   with_items:
     - platypus
     - pg_stat_statements
@@ -34,5 +36,16 @@
     - pglogical
     - bdr
     - autoscale
-  loop_control:
-    loop_var: library
+  when: item in postgres_extensions
+
+- name: Add repmgr to shared_preload_libraries if required
+  set_fact:
+    shared_preload_libraries: "{{
+      shared_preload_libraries|union(['repmgr'])
+    }}"
+  when: >
+    'bdr' not in role and
+    groups|members_of('role_replica') is not empty
+
+- name: Add entries to shared_preload_libraries
+  include_tasks: preload-library.yml

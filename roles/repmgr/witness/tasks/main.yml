@@ -1,8 +1,0 @@
----
-
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
-
-- name: Add repmgr to shared_preload_libraries
-  include_role: name=postgres/config tasks_from=preload-library.yml
-  vars:
-    library: repmgr

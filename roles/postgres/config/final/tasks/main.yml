@@ -70,7 +70,7 @@
     name: "{{ item.1 }}"
   with_nested:
     - [postgres, template1]
-    - "{{ postgres_extensions|default([]) }}"
+    - "{{ postgres_extensions }}"
   become_user: "{{ postgres_user }}"
   become: true
 

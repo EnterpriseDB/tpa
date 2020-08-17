@@ -1,6 +1,0 @@
----
-
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
-
-# There's no special configuration to install on a replica, everything
-# is done in repmgr/replica/final.
