@@ -149,6 +149,8 @@ def main():
     m = dict()
     changed = False
 
+    m['queries'] = queries
+
     results = []
     rowcounts = []
     try:
@@ -184,7 +186,7 @@ def main():
         except psycopg2.InterfaceError:
             pass
         module.fail_json(msg="Database query failed",
-            err=str(e), exception=traceback.format_exc())
+            err=str(e), exception=traceback.format_exc(), **m)
     else:
         if module.check_mode:
             conn.rollback()
@@ -199,7 +201,6 @@ def main():
     m['rowcounts'] = rowcounts
     if len(rowcounts) == 1:
         m['rowcount'] = rowcounts[0]
-    m['queries'] = queries
 
     module.exit_json(changed=changed, results=results, **m)
 
