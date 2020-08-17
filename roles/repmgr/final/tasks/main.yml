@@ -2,7 +2,11 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=repmgr/service
+# Now we do whatever is necessary to run ``repmgr xxx register`` on the
+# instances in the cluster. That means some sanity checking for primary
+# and witness instances, but for replicas, it might involve cloning the
+# primary first.
+
 - include_role: name=repmgr/primary/final
   when: >
     'primary' in role
@@ -12,20 +16,6 @@
 - include_role: name=repmgr/witness/final
   when: >
     'witness' in role
-
-- meta: flush_handlers
-
-- name: Disable repmgr for BDR instances
-  set_fact:
-    repmgr_service_end_state: stopped
-  when: >
-    'bdr' in role
-
-- name: Start or restart repmgrd
-  service:
-    name: repmgr
-    state: "{{ repmgr_service_end_state|default('started') }}"
-  tags: [service, restart]
 
 # Since the topology of the cluster may have changed during the repmgr
 # setup process, we collect cluster_facts again.
@@ -92,3 +82,22 @@
           + ".replica.primary_slot_name"
         )
       }}
+
+# Now that everything should be replicating as configured, we can
+# configure and start repmgrd.
+
+- meta: flush_handlers
+
+- include_role: name=repmgr/service
+
+- name: Disable repmgr for BDR instances
+  set_fact:
+    repmgr_service_end_state: stopped
+  when: >
+    'bdr' in role
+
+- name: Start or restart repmgrd
+  service:
+    name: repmgr
+    state: "{{ repmgr_service_end_state|default('started') }}"
+  tags: [service, restart]
