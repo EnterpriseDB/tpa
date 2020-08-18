@@ -6,6 +6,7 @@
   postgresql_query:
     conninfo: "{{ node_dsn|dbname(pub.database) }}"
     queries:
+    - text: SET search_path TO ''
     - text: >
         SELECT set_seqoid FROM pglogical.replication_set_seq rss
           JOIN pglogical.replication_set rs USING (set_id)
@@ -34,8 +35,12 @@
   become_user: "{{ postgres_user }}"
   become: yes
   vars:
+    seq_name: "{{
+      'public.%s' % seq.name
+        if '.' not in seq.name else seq.name
+    }}"
     existing_sequences: "{{
-      sequence_tuples.results|json_query('[*].set_seqoid')
+      sequence_tuples.results[1]|json_query('[*].set_seqoid')
     }}"
   with_items: "{{ set.sequences }}"
   loop_control:
@@ -43,7 +48,7 @@
     label: >-
       {{ seq.name }}
   when:
-    seq.name not in existing_sequences
+    seq_name not in existing_sequences
   changed_when: True
 
 # Anything that's in sequence_tuples but not in set.sequences needs to
@@ -62,11 +67,15 @@
       - "{{ seq.set_seqoid }}"
   become_user: "{{ postgres_user }}"
   become: yes
-  with_items: "{{ sequence_tuples.results }}"
+  with_items: "{{ sequence_tuples.results[1] }}"
   loop_control:
     loop_var: seq
     label: >-
       {{ seq.set_seqoid }}
+  vars:
+    set_sequences: >
+      {{ set.sequences|json_query('[*].name') }}
   when:
-    seq.set_seqoid not in set.sequences|json_query('[*].name')
+    seq.set_seqoid not in set_sequences
+    and seq.set_seqoid|regex_replace('^public\.', '') not in set_sequences
   changed_when: True

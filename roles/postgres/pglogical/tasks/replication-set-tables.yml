@@ -6,6 +6,7 @@
   postgresql_query:
     conninfo: "{{ node_dsn|dbname(pub.database) }}"
     queries:
+    - text: SET search_path TO ''
     - text: >
         SELECT set_reloid, set_att_list,
             pglogical.get_row_filter_expr(set_row_filter, set_reloid) as set_row_filter
@@ -39,8 +40,12 @@
   become_user: "{{ postgres_user }}"
   become: yes
   vars:
+    rel_name: "{{
+      'public.%s' % rel.name
+        if '.' not in rel.name else rel.name
+    }}"
     existing_tables: "{{
-      table_tuples.results|json_query('[*].set_reloid')
+      table_tuples.results[1]|json_query('[*].set_reloid')
     }}"
   with_items: "{{ set.tables }}"
   loop_control:
@@ -48,7 +53,7 @@
     label: >-
       {{ rel.name }}
   when:
-    rel.name not in existing_tables
+    rel_name not in existing_tables
   changed_when: True
 
 # For now, we ignore the possibility that the table is already a member
@@ -73,11 +78,15 @@
       - "{{ rel.set_reloid }}"
   become_user: "{{ postgres_user }}"
   become: yes
-  with_items: "{{ table_tuples.results }}"
+  with_items: "{{ table_tuples.results[1] }}"
   loop_control:
     loop_var: rel
     label: >-
       {{ rel.set_reloid }}
+  vars:
+    set_tables: >
+      {{ set.tables|json_query('[*].name') }}
   when:
-    rel.set_reloid not in set.tables|json_query('[*].name')
+    rel.set_reloid not in set_tables
+    and rel.set_reloid|regex_replace('^public\.', '') not in set_tables
   changed_when: True
