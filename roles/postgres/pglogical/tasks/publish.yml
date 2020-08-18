@@ -43,6 +43,16 @@
     - pub.name is defined
     - pub.database is defined
 
+- assert:
+    msg: >-
+      Publication {{ pub.name }}: expected valid keys,
+      got: {{ unrecognised_keys|join(',') }}
+    that:
+      unrecognised_keys is empty
+  vars:
+    unrecognised_keys: >
+      {{ pub.keys()|list|difference(publication_keys) }}
+
 - name: Ensure pglogical node exists
   include_tasks: node.yml
   vars:

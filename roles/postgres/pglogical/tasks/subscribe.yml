@@ -55,6 +55,19 @@
     - sub.name is defined
     - sub.database is defined
 
+- assert:
+    msg: >-
+      Subscription {{ sub.name }}: expected valid keys,
+      got: {{ unrecognised_keys|join(', ') }}
+    that:
+      unrecognised_keys is empty
+  vars:
+    recognised_keys: "{{
+      subscription_keys|union(create_subscription_optional_arguments)
+    }}"
+    unrecognised_keys: >
+      {{ sub.keys()|list|difference(recognised_keys) }}
+
 - block:
   - assert:
       msg: "Subscription {{ sub.name }} must specify .provider_dsn or .publication.name(+instance)"
@@ -126,11 +139,12 @@
 # the function. Hence required_keys/required_values below.
 #
 # Some of the keys under sub do not correspond to function arguments, so
-# we must remove them (sub.keys() = optional_arguments + extra_keys).
+# we remove them (sub.keys() = subscription_keys + optional_arguments).
 #
-# Any remaining keys/values under sub are treated as optional arguments
-# to the function. If you specify them, they are included in the call,
-# otherwise they are left out and the default values end up being used.
+# We treat any remaining keys under sub as optional function arguments
+# (they were cross-checked against a list of valid arguments above). If
+# they are specified, they are passed to the function; otherwise, they
+# are left out of the call, and the default values end up being used.
 
 - name: Create pglogical subscription {{ sub.name }} in database {{ sub.database }}
   postgresql_query:
@@ -146,21 +160,13 @@
       - "{{ sub.name }}"
       - "{{ sub|provider_dsn(hostvars) }}"
     optional_arguments: >
-      {{ sub|remove_keys(extra_keys) }}
+      {{ sub|remove_keys(subscription_keys) }}
     argument_keys: >
       {{ required_keys + optional_arguments.keys()|list }}
     argument_values: >
       {{ required_values + optional_arguments.values()|list }}
     argument_string: >
       {{ argument_keys|map('apply_format', '{0} := %s')|list|join(', ') }}
-    extra_keys:
-      - type
-      - name
-      - database
-      - node_name
-      - provider_dsn
-      - publication
-      - enabled
   register: pglogical_new_subscription
   become_user: "{{ postgres_user }}"
   become: yes
