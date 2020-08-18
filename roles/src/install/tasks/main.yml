@@ -12,12 +12,13 @@
     executable: /bin/bash
   register: cmd
   become: no
+  changed_when: False
 
 - name: Fetch source code from git repository
   git:
     dest: "{{ source_directory }}"
     repo: "{{ git_repository_url }}"
-    version: "{{ git_repository_ref }}"
+    version: "{{ git_repository_ref or 'master' }}"
     reference: "{{ git_reference_repository|default(omit) }}"
     depth: 1
     accept_hostkey: yes
@@ -36,7 +37,14 @@
       git_credentials|ternary(git_env, {})
       |combine(ssh_auth_sock|ternary(ssh_env, {}))
     }}"
+  when:
+    source_directory not in mounted_sources
   environment: "{{ target_environment|combine(_task_environment) }}"
+
+- include_role: name=src/install tasks_from=verify-branch.yml
+  when:
+    source_directory in mounted_sources
+    and git_repository_ref|default('') != ''
 
 # Next, we must run a series of commands to build the sources and
 # install the results. The caller may specify a build_commands array and

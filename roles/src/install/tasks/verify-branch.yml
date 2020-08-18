@@ -1,0 +1,21 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# We'd like to use ``git branch --show-current``, but centos:8 has a git
+# that's too old to support that.
+
+- name: Fetch currently checked-out branch in {{ source_directory }}
+  shell: git branch | sed -n 's/^\* //p'
+  args:
+    chdir: "{{ source_directory }}"
+    executable: /bin/bash
+  register: git_branch
+
+- name: Check if expected branch {{ git_repository_ref }} is current
+  assert:
+    msg: "Expected branch {{ git_repository_ref }}, got {{ current_ref }}"
+    that:
+      git_repository_ref == current_ref
+  vars:
+    current_ref: "{{ git_branch.stdout.strip() }}"

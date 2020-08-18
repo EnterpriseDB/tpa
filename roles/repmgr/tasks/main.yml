@@ -6,6 +6,8 @@
     name: "repmgr/{{ postgres_installation_method }}"
     apply:
       tags: [pkg, src]
+  vars:
+    mounted_sources: "{{ mounted_sources_cmd.stdout_lines|default([]) }}"
   when: >
     'postgres' in role
     and platform not in ['shared']

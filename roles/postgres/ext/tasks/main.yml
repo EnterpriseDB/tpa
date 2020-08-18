@@ -17,6 +17,8 @@
     dest: "{{ postgres_ext_dir }}"
     version: "{{ postgres_ext_git_ref }}"
     reference: "{{ postgres_ext_git_reference_repo }}"
+  when:
+    postgres_ext_dir not in mounted_sources|default([])
 
 - name: Build and install Postgres extension
   shell: "{{ postgres_ext_make_command }} {% for arg in postgres_ext_make_opts %}{{ arg|quote }}{% endfor %} {{ item }}"

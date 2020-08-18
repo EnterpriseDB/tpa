@@ -39,6 +39,10 @@ class Platform(object):
     def add_platform_options(self, p, g):
         pass
 
+    # Performs any platform-specific argument validation required.
+    def validate_arguments(self, args):
+        pass
+
     # Returns a list of distributions supported by a platform, which may be
     # empty if the choices are (i.e., --distribution will accept anything)
     def supported_distributions(self):

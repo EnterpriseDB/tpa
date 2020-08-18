@@ -10,12 +10,13 @@
     executable: /bin/bash
   register: cmd
   become: no
+  changed_when: False
 
 - name: Fetch Postgres source from git repository
   git:
     repo: "{{ postgres_git_url }}"
     dest: "{{ postgres_src_dir }}"
-    version: "{{ postgres_git_ref }}"
+    version: "{{ postgres_git_ref|default(default_postgres_git_ref) }}"
     reference: "{{ postgres_git_reference_repo }}"
     depth: 1
     accept_hostkey: yes
@@ -33,7 +34,17 @@
       git_credentials|ternary(git_env, {})
       |combine(ssh_auth_sock|ternary(ssh_env, {}))
     }}"
+  when:
+    postgres_src_dir not in mounted_sources
   environment: "{{ target_environment|combine(_task_environment) }}"
+
+- include_role: name=src/install tasks_from=verify-branch.yml
+  vars:
+    source_directory: "{{ postgres_src_dir }}"
+    git_repository_ref: "{{ postgres_dir_ref }}"
+  when:
+    postgres_src_dir in mounted_sources
+    and postgres_git_ref is defined
 
 - name: Remove old build directory
   file: state=absent path="{{ postgres_build_dir }}" force=yes

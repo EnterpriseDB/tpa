@@ -2,11 +2,25 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+# If any of the source directories are mounted, we want to skip trying
+# to update them in postgres/src and src/install.
+
+- name: Retrieve active mounts under /opt/postgres/src
+  command: >
+    awk '{if ($2 ~ /\/opt\/postgres\/src/) {print $2}}' /proc/mounts
+  register: mounted_sources_cmd
+  when:
+    postgres_installation_method == 'src'
+    or install_from_source is not empty
+  changed_when: False
+
 # First, we install Postgres itself using the selected
 # postgres_installation_method (pkg or src).
 
 - include_role:
     name: "postgres/{{ postgres_installation_method }}"
+  vars:
+    mounted_sources: "{{ mounted_sources_cmd.stdout_lines|default([]) }}"
   when:
     platform not in ['shared']
 
@@ -21,10 +35,11 @@
     source_directory: >-
       {{ ifs.source_directory|default('/opt/postgres/src/%s' % ifs.name) }}
     git_repository_url: "{{ ifs.git_repository_url }}"
-    git_repository_ref: "{{ ifs.git_repository_ref }}"
+    git_repository_ref: "{{ ifs.get('git_repository_ref') }}"
     build_commands: "{{ ifs.build_commands|default([]) }}"
     build_environment: "{{ ifs.build_environment|default({}) }}"
     build_log: "/tmp/build-{{ ifs.name }}.log"
+    mounted_sources: "{{ mounted_sources_cmd.stdout_lines }}"
   with_items: "{{ install_from_source }}"
   loop_control:
     loop_var: ifs

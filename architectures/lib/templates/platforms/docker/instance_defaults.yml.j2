@@ -1,3 +1,6 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 
 image: {{ image['name'] }}
+{% if local_sources %}
+local_source_directories: {{ local_sources.values()|list }}
+{% endif %}

@@ -4,9 +4,62 @@
 
 from tpaexec.platform import Platform
 
-import sys
+import os, sys
 
 class docker(Platform):
+    def add_platform_options(self, p, g):
+        g.add_argument('--local-source-directories', nargs='+', metavar='NAME:PATH')
+
+    def validate_arguments(self, args):
+        errors = []
+        sources = args.get('local_source_directories') or []
+        installable = self.arch.installable_sources()
+        local_sources = {}
+
+        # We accept a list of "name:/host/dir/[:/container/dir[:flags]]"
+        # arguments here, and transform it into a list of docker volume
+        # definitions. The name must correspond to a product that
+        # --install-from-source recognises.
+
+        for s in sources:
+            if ':' not in s:
+                errors.append("expected name:/path/to/source, got %s" % s)
+                continue
+
+            (name, vol) = s.split(':', 1)
+
+            if name.lower() not in installable.keys():
+                errors.append("doesn't know what to do with sources for '%s'" % name)
+                continue
+
+            parts = vol.split(':', 2)
+
+            host_path = os.path.abspath(os.path.expanduser(parts[0]))
+            if not os.path.isdir(host_path):
+                errors.append("can't find source directory for '%s': %s" % (name, host_path))
+                continue
+
+            dirname = name
+            if 'name' in installable[name]:
+                dirname = installable[name]['name']
+
+            container_path = '/opt/postgres/src/%s' % dirname
+            if len(parts) > 1:
+                container_path = parts[1]
+
+            flags = 'ro'
+            if len(parts) > 2:
+                container_path = parts[2]
+
+            local_sources[name] = '%s:%s:%s' % (host_path, container_path, flags)
+
+        if errors:
+            for e in errors:
+                print("ERROR: --local-source-directories %s" % (e), file=sys.stderr)
+            sys.exit(-1)
+
+        args['local_sources'] = local_sources
+
     def supported_distributions(self):
         return [
             'Debian', 'RedHat', 'Ubuntu',

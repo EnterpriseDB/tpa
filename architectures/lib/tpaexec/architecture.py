@@ -227,6 +227,8 @@ class Architecture(object):
                 print("ERROR: --install-from-source %s" % (e), file=sys.stderr)
             sys.exit(-1)
 
+        self.platform.validate_arguments(args)
+
     # Augment arguments from the command-line with enough additional information
     # (based on the selected architecture and platform) to generate config.yml
     def process_arguments(self, args):
@@ -423,6 +425,7 @@ class Architecture(object):
                 cluster_vars[var] = cluster_vars.get(var, val)
 
         sources = self.args.get('install_from_source') or []
+        local_sources = self.args.get('local_sources') or {}
         installable_sources = self.installable_sources()
         install_from_source = []
         for name in sources:
@@ -431,6 +434,15 @@ class Architecture(object):
                 (name, ref) = name.split(':', 1)
             name = name.lower()
             entry = installable_sources[name]
+
+            if ref and name in local_sources:
+                print(
+                    "ERROR: --install-from-source can't guarantee %s:%s while using local source directory %s" %
+                    (name, ref, local_sources[name].split(':')[0]),
+                    file=sys.stderr
+                )
+                sys.exit(-1)
+
             if name in ['postgres', '2ndqpostgres']:
                 if ref:
                     entry.update({'postgres_git_ref': ref})
@@ -492,12 +504,10 @@ class Architecture(object):
             'pglogical3': {
                 'name': 'pglogical',
                 'git_repository_url': 'https://gitlab.2ndquadrant.com/bdr-stack/pglogical.git',
-                'git_repository_ref': 'master',
             },
             'bdr3': {
                 'name': 'bdr',
                 'git_repository_url': 'https://gitlab.2ndquadrant.com/bdr-stack/BDR.git',
-                'git_repository_ref': 'master',
                 'build_commands': [
                     'make -s install',
                     'make -C camo_client/c -s install',
