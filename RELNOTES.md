@@ -2,7 +2,7 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v20.7 (unreleased)
+## v20.7 (2020-08-20)
 
 ### Notable changes
 
