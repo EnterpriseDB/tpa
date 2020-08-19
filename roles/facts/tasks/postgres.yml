@@ -5,14 +5,12 @@
 - name: Set postgres_data_dir
   set_fact:
     postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
-  tags: always
 
 - name: Perform basic postgres fact discovery
   minimal_postgres_setup:
     pgdata: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
   become_user: root
   become: yes
-  tags: always
 
 - name: Ensure postgres_version matches pgdata_version, if defined
   assert:
@@ -22,7 +20,6 @@
     that: postgres_version|float == pgdata_version|float
   when:
     postgres_version is defined and pgdata_version is defined
-  tags: always
 
 - name: Set postgres_version
   set_fact:
@@ -30,7 +27,6 @@
     postgres_versionNN: "{{ version|replace('.','') }}"
   vars:
     version: "{{ postgres_version|default(pgdata_version|default(default_postgres_version)) }}"
-  tags: always
 
 - name: Set various postgres facts
   set_fact:
@@ -75,7 +71,6 @@
       {%- if postgres_version is version('10', '>=') -%}wal
       {%- else -%}xlog
       {%- endif -%}
-  tags: always
 
 - name: Add {{ bdr_database }} to postgres_databases
   set_fact:
@@ -96,7 +91,6 @@
     haproxy_maxconn: "{{
       haproxy_maxconn|default(((max_connections|int)*0.90)|int)
     }}"
-  tags: always
 
 - name: Ensure haproxy_backend_servers is defined
   set_fact:
@@ -104,7 +98,6 @@
   when:
     haproxy_backends is defined and
     haproxy_backend_servers is not defined
-  tags: always
 
 - name: Ensure haproxy_stats_socket is set
   set_fact:
@@ -113,7 +106,6 @@
         |ternary('/var/run/haproxy.sock', default_haproxy_stats_socket) }}"
   when:
     haproxy_stats_socket is not defined
-  tags: always
 
 # If pgbouncer_backend points to a particular instance, we respect any
 # custom haproxy_port or postgres_port setting for that instance. Note
@@ -132,7 +124,6 @@
     _backend_port: "{{
       _backend_vars['haproxy_port']|default(_backend_vars['postgres_port'])
     }}"
-  tags: always
 
 # We set pgbouncer_max_client_conn to 90% of max_connections for the
 # backend Postgres server by default. In the special case of haproxy
@@ -173,7 +164,6 @@
           ((_backend_maxconn|int)*0.90)|int or
           default_pgbouncer_max_client_conn)
     }}"
-  tags: always
 
 # Transform pgbouncer_databases into a new list where each item's
 # 'options' is guaranteed to have host/port/auth_user set. Also, for
@@ -201,18 +191,15 @@
       ])
     }}"
   with_items: "{{ pgbouncer_databases|default(default_pgbouncer_databases) }}"
-  tags: always
 
 - name: Set pgbouncer_databases
   set_fact:
     pgbouncer_databases: "{{ _pgbouncer_databases }}"
-  tags: always
 
 - name: Set default config paths
   set_fact:
     postgres_conf_dir: "{{ postgres_conf_dir|default('') or postgres_data_dir }}"
     repmgr_conf_file: "{{ repmgr_conf_dir }}/repmgr.conf"
-  tags: always
 
 - name: Override postgres_bin_dir for source builds
   set_fact:
@@ -220,7 +207,6 @@
   when: >
     'postgres' in role and
     postgres_installation_method == 'src'
-  tags: always
 
 - name: Set client DSN attributes
   set_fact:
@@ -228,7 +214,6 @@
     barman_client_dsn_attributes: "{{ barman_client_dsn_attributes|default('') }}"
     repmgr_client_dsn_attributes: "{{ repmgr_client_dsn_attributes|default('') }}"
     bdr_client_dsn_attributes: "{{ bdr_client_dsn_attributes|default('') }}"
-  tags: always
 
 - name: Set default DSNs
   set_fact:
@@ -244,14 +229,12 @@
       host={{ inventory_hostname }} port={{ pgbouncer_port }}
   vars:
     _repmgr_hostname: "{{ repmgr_hostname|default(inventory_hostname) }}"
-  tags: always
 
 - name: Set default max_prepared_transactions
   set_fact:
     max_prepared_transactions: 16
   when: >
     'bdr' in role and max_prepared_transactions is not defined
-  tags: always
 
 # Determine the upstream primary for this host, that is, the primary at
 # the root of the cascading replication setup. This may be the instance
@@ -262,7 +245,6 @@
     upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"
   when: >
     'postgres' in role
-  tags: always
 
 # Find any backed-up instance that is the upstream_primary, or a replica
 # thereof. We would prefer to use a backup server in the same region,
@@ -276,7 +258,6 @@
     }}"
   when: >
     'postgres' in role
-  tags: always
 
 - name: Set list of Postgres extensions
   set_fact:
@@ -287,7 +268,6 @@
         |union(('bdr' in role)|ternary(bdr_extensions, []))
       )
     }}"
-  tags: always
 
 - name: Remove pg_visibility for Postgres <9.6
   set_fact:
@@ -297,7 +277,6 @@
       |list
     }}"
   when: postgres_version is version('9.6', '<')
-  tags: always
 
 - name: Define platypus configuration settings
   set_fact:
@@ -307,7 +286,6 @@
         ('bdr' in role)|ternary(bdr_database, 'postgres')
       )
     }}"
-  tags: always
 
 - name: Derive a value for shared_buffers_mb
   action: set_fact

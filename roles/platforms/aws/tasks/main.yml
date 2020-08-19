@@ -7,14 +7,11 @@
 # (look for platforms/aws/tasks/metadata.yml).
 
 - include_tasks: hostvars.yml
-  tags: always
 
 - include_tasks: wait.yml
   when:
     wait_for_instances|default(False)
-  tags: always
 
 - include_tasks: firstboot.yml
   when:
     wait_for_instances|default(False)
-  tags: always

@@ -107,6 +107,5 @@
     'openvpn-server' in role
 
 - include_tasks: hostvars.yml
-  tags: always
+
 - include_tasks: volumes.yml
-  tags: always

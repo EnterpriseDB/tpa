@@ -3,10 +3,8 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_tasks: distribution.yml
-  tags: always
 
 - include_tasks: postgres.yml
-  tags: always
 
 # We attempt to gather postgres facts only if there is a valid PGDATA
 # directory, the postgres user exists, and postgres is running; or in
@@ -21,7 +19,6 @@
     pgdata_initialised|default('false') == True and
     pgdata_user|default('UNKNOWN') != 'UNKNOWN' and
     postgres_running|default('false') == True
-  tags: always
 
 # We have already assigned first_bdr_primary in roles/platform, but in
 # case a newly-added instance was selected, we must fall back to some
@@ -44,4 +41,3 @@
       |map(attribute='inventory_hostname')
       |list
     }}"
-  tags: always
