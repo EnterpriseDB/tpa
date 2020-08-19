@@ -18,6 +18,7 @@
   register: table_tuples
   become_user: "{{ postgres_user }}"
   become: yes
+  changed_when: False
 
 # Any table mentioned in set.tables that is not already in table_tuples
 # needs to be added to the replication set.
