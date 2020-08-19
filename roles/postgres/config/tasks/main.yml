@@ -25,9 +25,7 @@
 # Although it is possible to set up pg_hba.conf differently on different
 # instances, any such differences may interfere with switchover/failover
 # operations, and should be avoided.
-
-- include_tasks: defaults.yml
-
+#
 # First, we generate pg_hba.conf. There are several options here:
 #
 # 1. You can leave the existing pg_hba.conf alone. To do this, just set
