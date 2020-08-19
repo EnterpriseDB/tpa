@@ -203,12 +203,6 @@
 # executing the task on first_bdr_primary, but connecting to each instance
 # in turn to issue the bdr.join_node_group() query.
 
-- name: Clean up bdr database before group join
-  include_tasks: clean.yml
-  when:
-    inventory_hostname != first_bdr_primary and
-    bdr_node_group_tuples.rowcount == 0
-
 - include_tasks: bdr3/join.yml
   when:
     inventory_hostname == first_bdr_primary

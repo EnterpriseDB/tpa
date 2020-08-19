@@ -38,11 +38,6 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
-- include_tasks: clean.yml
-  when:
-    inventory_hostname != first_bdr_primary and
-    node.rowcount == 0
-
 # The remaining hosts join the group… but they must do so one at a time,
 # because BDR does not support concurrent group joins (not in version 3,
 # nor in any earlier versions).

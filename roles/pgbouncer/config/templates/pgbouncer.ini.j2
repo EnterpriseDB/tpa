@@ -42,7 +42,7 @@ server_tls_protocols = secure
 auth_type = md5
 auth_file = /etc/pgbouncer/userlist.txt
 auth_user = pgbouncer
-auth_query = SELECT * FROM pgbouncer.get_auth($1)
+auth_query = SELECT * FROM pg_catalog.pgbouncer_get_auth($1)
 
 admin_users = pgbouncer
 stats_users = pgbouncer

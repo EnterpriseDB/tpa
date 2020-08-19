@@ -8,31 +8,18 @@
     query: >
       select array_agg(datname) as existing_databases from pg_database
       where datname not in ('template0', 'bdr_supervisordb')
-  register: d
+  register: db_query
   become_user: "{{ postgres_user }}"
   become: yes
   changed_when: False
 
-- name: Create pgbouncer schema
+- name: Create pg_catalog.pgbouncer_get_auth function
   postgresql_query:
     conninfo: "{{ dsn|dbname(item) }}"
     queries:
-      - text: SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname = 'pgbouncer'
-      - text: CREATE SCHEMA IF NOT EXISTS pgbouncer AUTHORIZATION pgbouncer
-  register: create_schema
-  changed_when:
-    create_schema is successful and create_schema.rowcounts[0] == 0
-  become_user: "{{ postgres_user }}"
-  become: yes
-  with_items: "{{ d.existing_databases }}"
-
-- name: Create pgbouncer.get_auth function
-  postgresql_query:
-    conninfo: "{{ dsn|dbname(item) }}"
-    queries:
-      - SELECT proname FROM pg_catalog.pg_proc p JOIN pg_namespace n ON (p.pronamespace=n.oid) WHERE nspname='pgbouncer' AND proname = 'get_auth'
+      - SELECT proname FROM pg_catalog.pg_proc p JOIN pg_namespace n ON (p.pronamespace=n.oid) WHERE nspname='pg_catalog' AND proname = 'pgbouncer_get_auth'
       - >
-        CREATE OR REPLACE FUNCTION pgbouncer.get_auth(p_usename TEXT)
+        CREATE OR REPLACE FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT)
         RETURNS TABLE(username TEXT, password TEXT) AS $$
         BEGIN
           RETURN QUERY
@@ -40,11 +27,11 @@
           WHERE usename = p_usename;
         END;
         $$ LANGUAGE plpgsql SECURITY DEFINER
-      - REVOKE ALL ON FUNCTION pgbouncer.get_auth(p_usename TEXT) FROM PUBLIC
-      - GRANT EXECUTE ON FUNCTION pgbouncer.get_auth(p_usename TEXT) TO pgbouncer
+      - REVOKE ALL ON FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT) FROM PUBLIC
+      - GRANT EXECUTE ON FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT) TO pgbouncer
   register: create_function
   changed_when:
     create_function is successful and create_function.rowcounts[0] == 0
   become_user: "{{ postgres_user }}"
   become: yes
-  with_items: "{{ d.existing_databases }}"
+  with_items: "{{ db_query.existing_databases }}"
