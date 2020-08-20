@@ -44,6 +44,7 @@ class docker(Platform):
             preferred_python_version = 'python2'
         cluster_vars['preferred_python_version'] = \
             cluster_vars.get('preferred_python_version', preferred_python_version)
+        cluster_vars['use_volatile_subscriptions'] = True
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml('platforms/docker/instance_defaults.yml.j2', args)
