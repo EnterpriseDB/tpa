@@ -49,6 +49,7 @@
       tags: postgres
   when: >
     'postgres' in role
+    and 'replica' not in role
   tags: postgres
 
 # We force an immediate backup for any instances that do not have any
