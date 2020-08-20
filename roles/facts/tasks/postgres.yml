@@ -362,10 +362,10 @@
     max_worker_processes: "{{ upstream_max_worker_processes }}"
   vars:
     upstream_max_worker_processes: "{{
-      hostvars[upstream_primary].max_worker_processes
+      hostvars[upstream_primary].get('max_worker_processes')
     }}"
-  when: >
-    'replica' in role
-    and upstream_primary is defined
-    and upstream_max_worker_processes is defined
-    and upstream_max_worker_processes|int > max_worker_processes|int
+  when:
+    - "'replica' in role"
+    - upstream_primary is defined
+    - upstream_max_worker_processes is defined
+    - upstream_max_worker_processes|int > max_worker_processes|int
