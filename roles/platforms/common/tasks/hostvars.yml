@@ -44,3 +44,15 @@
 
 - set_fact:
     use_volatile_subscriptions: "{{ use_volatile_subscriptions|default(false)|bool }}"
+
+- assert:
+    msg: "Export TPA_GIT_CREDENTIAL{S,_STORE} to use https:// source repositories"
+    that: >
+      lookup('env', 'TPA_GIT_CREDENTIALS') != '' or
+      lookup('env', 'TPA_GIT_CREDENTIAL_STORE') != '' or
+      'https://gitlab.2ndquadrant.com' not in all_repo_urls.lower()
+  vars:
+    source_repo_urls: >
+      {{ install_from_source|json_query('[*].git_repository_url') or [] }}
+    all_repo_urls: >
+      {{ source_repo_urls|union([postgres_git_url|default('')])|join(' ') }}
