@@ -2,6 +2,20 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v20.8 (2020-08-20)
+
+### Bugfixes
+
+- Fix "ReadOnlySqlTransaction" error on replicas from postgres/cleanup
+
+- Fix "max_worker_processes" error during rehydration of replicas
+
+### Other changes
+
+- Accept ``TPA_GIT_CREDENTIALS=username:access_token`` in the local
+  environment to clone https:// repository URLs when building from
+  source (+ ``TPA_GIT_CREDENTIAL_STORE=/path/to/.gitcredentials``)
+
 ## v20.7 (2020-08-20)
 
 ### Notable changes
