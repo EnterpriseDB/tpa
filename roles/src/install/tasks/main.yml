@@ -5,10 +5,6 @@
 # First, we must obtain the source code.
 #
 # At present, we support fetching a git repository to a local directory.
-#
-# We might want to clone repositories via ssh with agent forwarding, but
-# that won't work because we've sudo'ed to root (for the whole play). As
-# a courtesy, we copy SSH_AUTH_SOCK to the environment if it's set.
 
 - name: Check if ssh agent forwarding is enabled
   shell: echo $SSH_AUTH_SOCK
@@ -32,7 +28,14 @@
     ssh_auth_sock: "{{ cmd.stdout.strip() }}"
     ssh_env:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
-    _task_environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
+    git_credentials: "{{ lookup('env', 'TPA_GIT_CREDENTIALS') }}"
+    git_env:
+      GIT_USERNAME: "{{ git_credentials.split(':')[0] }}"
+      GIT_PASSWORD: "{{ git_credentials.split(':')[1] }}"
+    _task_environment: "{{
+      git_credentials|ternary(git_env, {})
+      |combine(ssh_auth_sock|ternary(ssh_env, {}))
+    }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
 
 # Next, we must run a series of commands to build the sources and

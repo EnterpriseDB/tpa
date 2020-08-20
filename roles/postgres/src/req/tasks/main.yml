@@ -17,3 +17,75 @@
     name: IPC::Run
   when:
     ansible_os_family == 'RedHat'
+
+# We need credentials to clone repositories if we are to build things
+# from source:
+#
+# 1. For repositories with ssh:// URLs, add the relevant keys to your
+#    ssh-agent and use agent forwarding. ``--install-from-source`` will
+#    set ``forward_ssh_agent: yes`` by default in config.yml, which will
+#    add ``-o ForwardAgent=yes`` to ansible_ssh_common_args, and the SSH
+#    agent socket will be made available to git-clone.
+#
+# 2. If your source repositories all use https:// URLs pointing to the
+#    same server (e.g., gitlab.2ndQuadrant.com), you can set
+#    ``TPA_GIT_CREDENTIALS=username:access_token`` in your environment
+#    before executing tpaexec. The credentials will be made available to
+#    git-clone only (they will never be written to disk, but will be set
+#    in the environment on target instances).
+#
+#    See https://gitlab.2ndquadrant.com/profile/personal_access_tokens
+#
+# 3. If you set ``TPA_GIT_CREDENTIAL_STORE=/path/to/.gitcredentials`` in
+#    your environment before executing tpaexec, it will copy the given
+#    git-credential-store(1) file to the target instances. This allows
+#    you to use different credentials for different https:// repository
+#    URLs, at the expense of writing the credentials to disk. We make an
+#    attempt to remove the file after cloning the repositories, but this
+#    will succeed only if none of the intervening tasks fail.
+#
+# If none of the above options will work for you, use a pre-deploy hook
+# to configure some other credential retrieval mechanism.
+
+# If TPA_GIT_CREDENTIALS_STORE is set, it takes precedence over setting
+# TPA_GIT_CREDENTIALS (handled below).
+
+- block:
+  - name: Copy git credential store
+    copy:
+      src: "{{ TPA_GIT_CREDENTIAL_STORE }}"
+      dest: /etc/tpa/gitcredentials
+      owner: root
+      group: root
+      mode: 0600
+  - name: Configure git credential store
+    command: >
+      git config --global credential.helper
+      'store --file=/etc/tpa/gitcredentials'
+  vars:
+    TPA_GIT_CREDENTIAL_STORE: >-
+      {{ lookup('env', 'TPA_GIT_CREDENTIAL_STORE') }}
+  when:
+    TPA_GIT_CREDENTIAL_STORE != ''
+
+# If TPA_GIT_CREDENTIALS is set, we configure a credential helper that
+# retrieves the username and password from the environment, where they
+# are set only by the git tasks in src/install and postgres/src.
+
+- block:
+  - assert:
+      msg: "Expected ``TPA_GIT_CREDENTIALS=username:access_token``"
+      that: >
+        ':' in TPA_GIT_CREDENTIALS
+  - name: Configure environment-based git credential helper
+    command: >
+      git config --global credential.helper
+      '!f() { echo username=$GIT_USERNAME; echo password=$GIT_PASSWORD; }; f'
+  vars:
+    TPA_GIT_CREDENTIALS: >-
+      {{ lookup('env', 'TPA_GIT_CREDENTIALS') }}
+    TPA_GIT_CREDENTIAL_STORE: >-
+      {{ lookup('env', 'TPA_GIT_CREDENTIAL_STORE') }}
+  when:
+    TPA_GIT_CREDENTIALS != ''
+    and TPA_GIT_CREDENTIAL_STORE == ''

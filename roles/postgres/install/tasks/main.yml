@@ -28,3 +28,8 @@
   with_items: "{{ install_from_source }}"
   loop_control:
     loop_var: ifs
+
+- name: Ensure git credential store is removed
+  file:
+    path: /etc/tpa/gitcredentials
+    state: absent

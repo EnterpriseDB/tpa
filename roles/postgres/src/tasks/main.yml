@@ -25,7 +25,14 @@
     ssh_auth_sock: "{{ cmd.stdout.strip() }}"
     ssh_env:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
-    _task_environment: "{{ ssh_auth_sock|ternary(ssh_env, {}) }}"
+    git_credentials: "{{ lookup('env', 'TPA_GIT_CREDENTIALS') }}"
+    git_env:
+      GIT_USERNAME: "{{ git_credentials.split(':')[0] }}"
+      GIT_PASSWORD: "{{ git_credentials.split(':')[1] }}"
+    _task_environment: "{{
+      git_credentials|ternary(git_env, {})
+      |combine(ssh_auth_sock|ternary(ssh_env, {}))
+    }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
 
 - name: Remove old build directory
