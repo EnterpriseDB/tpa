@@ -203,6 +203,7 @@ class Architecture(object):
 
         # Validate arguments to --install-from-source
         errors = []
+        source_names = []
         sources = args.get('install_from_source') or []
         installable = self.installable_sources().keys()
         for name in sources:
@@ -212,12 +213,13 @@ class Architecture(object):
                 (name, ref) = name.split(':', 1)
             if name.lower() not in installable:
                 errors.append("doesn't know how to install '%s' from source" % name)
-        if 'postgres' in sources and '2ndqpostgres' in sources:
+            source_names.append(name.lower())
+        if 'postgres' in source_names and '2ndqpostgres' in source_names:
             errors.append("cannot install both Postgres and 2ndQPostgres")
-        if 'bdr3' in sources and 'pglogical3' not in sources:
+        if 'bdr3' in source_names and 'pglogical3' not in source_names:
             errors.append("cannot build bdr3 without pglogical3")
         try:
-            if sources.index('pglogical3') > sources.index('bdr3'):
+            if source_names.index('pglogical3') > source_names.index('bdr3'):
                 errors.append("should build pglogical3 before bdr3")
         except ValueError:
             pass
