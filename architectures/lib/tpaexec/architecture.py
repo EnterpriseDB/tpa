@@ -512,7 +512,6 @@ class Architecture(object):
                 'git_repository_url': 'https://gitlab.2ndquadrant.com/bdr-stack/BDR.git',
                 'build_commands': [
                     'make -f ../../src/bdr/Makefile -s install',
-                    'make -f ../../src/bdr/camo_client/c/Makefile -s install',
                 ],
             },
         }
