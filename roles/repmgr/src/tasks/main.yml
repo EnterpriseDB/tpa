@@ -20,7 +20,7 @@
 - name: Configure repmgr if necessary
   shell: >
     test -x ./configure &&
-    PATH={{ postgres_bin_dir }}:$PATH ./configure
+    PATH={{ build_path }} ./configure
   args:
     chdir: "{{ repmgr_src_dir }}"
     executable: /bin/bash
@@ -28,7 +28,7 @@
 
 - name: Build and install repmgr
   shell: >
-    PATH={{ postgres_bin_dir }}:$PATH make -s USE_PGXS=1 install
+    PATH={{ build_path }} make -s USE_PGXS=1 install
   args:
     chdir: "{{ repmgr_src_dir }}"
     executable: /bin/bash

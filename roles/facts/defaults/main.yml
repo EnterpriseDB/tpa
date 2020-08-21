@@ -81,3 +81,9 @@ default_pgbouncer_max_client_conn: 100
 
 default_pgbouncer_databases:
   - name: "*"
+
+default_build_path:
+  - "{{ postgres_bin_dir }}"
+  - /usr/lib64/ccache
+  - /usr/lib/ccache
+  - $PATH

@@ -55,6 +55,7 @@
 
 - name: Configure Postgres
   shell: >
+    PATH={{ build_path }} \
     {{ postgres_src_dir }}/configure \
         --prefix={{ postgres_install_dir|expanduser|quote }} \
         {% for arg in all_configure_opts %}{{ arg|quote }} {% endfor %}
@@ -70,14 +71,14 @@
   tags: [build-clean, postgres-clean]
 
 - name: Build Postgres
-  shell: "{{ postgres_make_command }} {{ item }}"
+  shell: "PATH={{ build_path }} {{ postgres_make_command }} {{ item }}"
   args:
     chdir: "{{ postgres_build_dir }}"
     executable: /bin/bash
   with_items: "{{ postgres_build_targets }}"
 
 - name: Install Postgres
-  shell: "{{ postgres_make_command }} {{ item }}"
+  shell: "PATH={{ build_path }} {{ postgres_make_command }} {{ item }}"
   args:
     chdir: "{{ postgres_build_dir }}"
     executable: /bin/bash

@@ -6,6 +6,7 @@ requirements:
   common:
     - flex
     - bison
+    - ccache
   Debian:
     - libreadline-dev
     - zlib1g-dev

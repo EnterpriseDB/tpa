@@ -21,7 +21,7 @@
     postgres_ext_dir not in mounted_sources|default([])
 
 - name: Build and install Postgres extension
-  shell: "{{ postgres_ext_make_command }} {% for arg in postgres_ext_make_opts %}{{ arg|quote }}{% endfor %} {{ item }}"
+  shell: "PATH={{ build_path }} {{ postgres_ext_make_command }} {% for arg in postgres_ext_make_opts %}{{ arg|quote }}{% endfor %} {{ item }}"
   args:
     chdir: "{{ postgres_ext_dir }}"
     executable: /bin/bash

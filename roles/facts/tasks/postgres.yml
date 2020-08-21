@@ -208,6 +208,10 @@
     'postgres' in role and
     postgres_installation_method == 'src'
 
+- name: Set default build_path
+  set_fact:
+    build_path: "{{ build_path|default(default_build_path)|join(':') }}"
+
 - name: Set client DSN attributes
   set_fact:
     postgres_client_dsn_attributes: "{{ postgres_client_dsn_attributes|default('') }}"

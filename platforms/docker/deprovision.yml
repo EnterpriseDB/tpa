@@ -7,6 +7,29 @@
     name: "{{ item.Name }}"
     state: absent
   with_items: "{{ docker_instances }}"
+  loop_control:
+    label: >-
+      {{ item.Name }}
+  tags: docker
+
+- name: Remove docker ccache volume(s)
+  docker_volume:
+    name: "{{ item.split(':')[0] }}"
+    state: absent
+  with_items: "{{ ccache_volumes }}"
+  vars:
+    ccache_volumes: "{{
+      query(
+        'flattened',
+        docker_instances|map(attribute='local_source_directories')
+        |select('defined')|list
+      )
+      |select('startswith', 'ccache-')|list
+      |unique
+    }}"
+  loop_control:
+    label: >-
+      {{ item.split(':')[0] }}
   tags: docker
 
 - name: Delete docker networks

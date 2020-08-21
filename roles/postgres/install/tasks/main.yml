@@ -28,7 +28,9 @@
 # install some (ostensibly) extensions from source.
 
 - include_role: name=postgres/src/req
-  when: install_from_source is not empty
+  when:
+    install_from_source is not empty
+    and postgres_installation_method != 'src'
 
 - include_role: name=src/install
   vars:
