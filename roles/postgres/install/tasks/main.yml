@@ -36,6 +36,8 @@
   vars:
     source_directory: >-
       {{ ifs.source_directory|default('/opt/postgres/src/%s' % ifs.name) }}
+    build_directory: >-
+      {{ ifs.build_directory|default('/opt/postgres/build/%s' % ifs.name) }}
     git_repository_url: "{{ ifs.git_repository_url }}"
     git_repository_ref: "{{ ifs.get('git_repository_ref') }}"
     build_commands: "{{ ifs.build_commands|default([]) }}"

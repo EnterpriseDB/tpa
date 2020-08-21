@@ -14,7 +14,7 @@
   become: no
   changed_when: False
 
-- name: Fetch source code from git repository
+- name: Fetch {{ ifs.name }} from {{ git_repository_url }}, {{ git_repository_ref }}
   git:
     dest: "{{ source_directory }}"
     repo: "{{ git_repository_url }}"
@@ -46,21 +46,31 @@
     source_directory in mounted_sources
     and git_repository_ref|default('') != ''
 
+- block:
+  - name: Remove old build directory
+    file: state=absent path="{{ build_directory }}" force=yes
+    tags: build-clean
+
+  - name: Ensure build directory exists
+    file: state=directory path="{{ build_directory }}"
+  when:
+    build_directory|default(source_directory) != source_directory
+
 # Next, we must run a series of commands to build the sources and
 # install the results. The caller may specify a build_commands array and
 # a build_environment hash, or we'll just run "make install" by default.
 
-- name: Run build commands
+- name: Build {{ ifs.name }}
   shell: >
     PATH={{ build_path }} {{ item }} >> {{ build_log }} 2>&1
   args:
-    chdir: "{{ source_directory }}"
+    chdir: "{{ build_directory }}"
     executable: /bin/bash
   with_items: "{{ build_commands|default([]) or default_build_commands }}"
   vars:
     build_log: "{{ build_log|default('/tmp/build.log') }}"
     default_build_commands:
-    - make install
+    - "make -f {{ source_directory }}/Makefile install"
     _task_environment: "{{ build_environment|default({}) }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
   notify:
