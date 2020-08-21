@@ -211,6 +211,16 @@
     reposub.rc != 0 or 'error: ' in reposub.stdout.lower()
   with_items: "{{ _2q_repositories }}"
 
+- name: Exclude lua packages from 2ndQuadrant products/bdr3/release repo
+  ini_file:
+    dest: "/etc/yum.repos.d/2ndquadrant-products-bdr3-release-pg{{ postgres_versionNN }}.repo"
+    section: "2ndquadrant-products-bdr3-release-pg{{ postgres_versionNN }}"
+    option: exclude
+    value: lua*
+  when: >
+    'products/bdr3/release' in tpa_2q_repositories|default([])
+    and ansible_distribution_major_version|int == 8
+
 - include_tasks: repository-cleanup.yml
   vars:
     repository_path: /etc/yum.repos.d
