@@ -2,6 +2,13 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v20.9 (unreleased)
+
+### Notable changes
+
+- Support for building Docker clusters from source using bind-mounted
+  local source directories and a shared ccache
+
 ## v20.8 (2020-08-20)
 
 ### Bugfixes
