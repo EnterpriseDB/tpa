@@ -50,20 +50,21 @@
 # left out altogether (and the default value used).
 
 - assert:
-    msg: "Subscription must specify name and database"
+    msg: Subscription must specify name, database, and type pglogical
     that:
     - sub.name is defined
     - sub.database is defined
+    - sub.type|default('') == 'pglogical'
 
 - assert:
     msg: >-
-      Subscription {{ sub.name }}: expected valid keys,
-      got: {{ unrecognised_keys|join(', ') }}
+      Subscription {{ sub.name }} must specify valid keys
+      (got: {{ unrecognised_keys|join(', ') }})
     that:
       unrecognised_keys is empty
   vars:
     recognised_keys: "{{
-      subscription_keys|union(create_subscription_optional_arguments)
+      subscription_keys|union(subscription_optional_arguments)
     }}"
     unrecognised_keys: >
       {{ sub.keys()|list|difference(recognised_keys) }}
@@ -120,7 +121,7 @@
 
 - name: Retrieve pglogical.subscription record
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(sub.database) }}"
+    conninfo: "{{ dsn|dbname(sub.database) }}"
     queries:
     - text: >
         SELECT *, sub_apply_delay::text as sub_apply_delay
@@ -148,7 +149,7 @@
 
 - name: Create pglogical subscription {{ sub.name }} in database {{ sub.database }}
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(sub.database) }}"
+    conninfo: "{{ dsn|dbname(sub.database) }}"
     queries:
     - text: "SELECT pglogical.create_subscription({{ argument_string }})"
       args: "{{ argument_values }}"
@@ -181,7 +182,7 @@
 
 - name: Enable or disable subscription {{ sub.name }} if required
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(sub.database) }}"
+    conninfo: "{{ dsn|dbname(sub.database) }}"
     queries:
     - text: "SELECT pglogical.alter_subscription_{{action}}(subscription_name := %s)"
       args:
@@ -200,7 +201,7 @@
 
 - name: Add or remove replication sets for subscription {{ sub.name }}
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(sub.database) }}"
+    conninfo: "{{ dsn|dbname(sub.database) }}"
     queries:
     - text: >
         SELECT pglogical.alter_subscription_{{action}}_replication_set(

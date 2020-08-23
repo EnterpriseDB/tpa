@@ -2,8 +2,15 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+# These defaults apply to every entry in publications or subscriptions.
+
 publication_defaults:
   replication_sets: []
+
+subscription_defaults:
+  node_name: "{{ inventory_hostname }}-{{ subscription.database }}"
+
+# An entry under publications may have the following keys.
 
 publication_keys:
   - type
@@ -11,8 +18,25 @@ publication_keys:
   - database
   - replication_sets
 
-subscription_defaults:
-  node_name: "{{ inventory_hostname }}-{{ subscription.database }}"
+# An entry in publications[*].replication_sets may have the following
+# keys, or any of the optional arguments defined below. 
+
+replication_set_keys:
+  - name
+  - tables
+  - sequences
+
+replication_set_optional_arguments:
+  - replicate_insert
+  - replicate_delete
+  - replicate_update
+  - replicate_truncate
+  - autoadd_tables
+  - autoadd_sequences
+  - autoadd_existing
+
+# Likewise, an entry under subscriptions may have the following keys, or
+# any of the optional arguments defined below.
 
 subscription_keys:
   - type
@@ -23,18 +47,9 @@ subscription_keys:
   - publication
   - enabled
 
-create_subscription_optional_arguments:
+subscription_optional_arguments:
   - replication_sets
   - synchronize_structure
   - synchronize_data
   - forward_origins
   - apply_delay
-
-replication_set_defaults:
-  replicate_insert: true
-  replicate_delete: true
-  replicate_update: true
-  replicate_truncate: true
-  autoadd_tables: false
-  autoadd_sequences: false
-  autoadd_existing: true

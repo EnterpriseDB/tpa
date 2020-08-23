@@ -4,7 +4,7 @@
 
 - name: Retrieve tables currently in replication set {{ set.name }}
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    conninfo: "{{ dsn|dbname(pub.database) }}"
     queries:
     - text: SET search_path TO ''
     - text: >
@@ -25,7 +25,7 @@
 
 - name: Add tables to replication set {{ set.name }}
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    conninfo: "{{ dsn|dbname(pub.database) }}"
     queries:
     - text: >
         SELECT pglogical.replication_set_add_table(
@@ -68,7 +68,7 @@
 
 - name: Remove unwanted tables from replication set {{ set.name }}
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    conninfo: "{{ dsn|dbname(pub.database) }}"
     queries:
     - text: >
         SELECT pglogical.replication_set_remove_table(

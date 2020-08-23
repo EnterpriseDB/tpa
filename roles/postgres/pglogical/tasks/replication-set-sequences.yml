@@ -4,7 +4,7 @@
 
 - name: Retrieve sequences currently in replication set {{ set.name }}
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    conninfo: "{{ dsn|dbname(pub.database) }}"
     queries:
     - text: SET search_path TO ''
     - text: >
@@ -23,7 +23,7 @@
 
 - name: Add sequences to replication set {{ set.name }}
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    conninfo: "{{ dsn|dbname(pub.database) }}"
     queries:
     - text: >
         SELECT pglogical.replication_set_add_sequence(
@@ -57,7 +57,7 @@
 
 - name: Remove unwanted sequences from replication set {{ set.name }}
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    conninfo: "{{ dsn|dbname(pub.database) }}"
     queries:
     - text: >
         SELECT pglogical.replication_set_remove_sequence(

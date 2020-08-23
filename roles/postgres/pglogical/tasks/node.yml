@@ -8,7 +8,7 @@
 
 - name: Retrieve pglogical.node record for {{ node_name }} in {{ database }}
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(database) }}"
+    conninfo: "{{ dsn|dbname(database) }}"
     queries:
     - text: SELECT node_id FROM pglogical.node WHERE node_name = %s
       args:
@@ -19,7 +19,7 @@
 
 - name: Create pglogical node {{ node_name }} in database {{ database }}
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(database) }}"
+    conninfo: "{{ dsn|dbname(database) }}"
     queries:
     - text: SELECT pglogical.create_node(%s, %s) AS node_id
       args:

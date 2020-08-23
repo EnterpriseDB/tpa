@@ -33,25 +33,54 @@
 # optional, and defaults to hostname-dbname. The list of replication
 # sets is optional, and within the replication set configuration,
 # everything but the replication set name is optional.
-#
-# If the node does not exist in the given database, we create it now.
-# (There can be only one pglogical node in any given database.)
 
 - assert:
-    msg: "Publication must specify name and database"
+    msg: Publication must specify name, database, and type pglogical
     that:
     - pub.name is defined
     - pub.database is defined
+    - pub.type|default('') == 'pglogical'
 
 - assert:
     msg: >-
-      Publication {{ pub.name }}: expected valid keys,
-      got: {{ unrecognised_keys|join(',') }}
+      Publication {{ pub.name }} must specify valid keys
+      (got: {{ unrecognised_keys|join(',') }})
     that:
       unrecognised_keys is empty
   vars:
     unrecognised_keys: >
       {{ pub.keys()|list|difference(publication_keys) }}
+
+- assert:
+    msg: >-
+      Publication {{ pub.name }} must specify a name for every
+      entry in replication_sets
+    that:
+      pub.replication_sets is empty
+      or unnamed_replication_sets is empty
+  vars:
+    unnamed_replication_sets: >
+      {{ pub.replication_sets|map(attribute='name')|reject('defined')|list }}
+
+- assert:
+    msg: >-
+      Replication set {{ set.name }} in publication {{ pub.name }}
+      must specify valid keys (got: {{ unrecognised_keys|join(',') }})
+    that:
+      unrecognised_keys is empty
+  vars:
+    recognised_keys: >
+      {{ replication_set_keys|union(replication_set_optional_arguments) }}
+    unrecognised_keys: >
+      {{ set.keys()|list|difference(recognised_keys) }}
+  with_items: "{{ pub.replication_sets }}"
+  loop_control:
+    loop_var: set
+    label: >-
+      {{ set.name }}
+
+# If the node does not exist in the given database, we create it now.
+# (There can be only one pglogical node in any given database.)
 
 - name: Ensure pglogical node exists
   include_tasks: node.yml
@@ -59,101 +88,90 @@
     database: "{{ pub.database }}"
     node_name: "{{ pub.name }}"
 
-# We fetch all existing replication sets in the database, so that we can
-# create, alter, or remove them according to the configuration.
+# We fetch the names and attributes of all existing replication sets in
+# the database in order to compare them with the desired configuration.
 
 - name: Retrieve existing replication sets
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    conninfo: "{{ dsn|dbname(pub.database) }}"
     queries:
     - text: SELECT * FROM pglogical.replication_set WHERE set_nodeid = %s
       args:
         - "{{ pglogical_node_id }}"
-  register: pglogical_set_tuples
+  register: pub_repset_tuples
   become_user: "{{ postgres_user }}"
   become: yes
 
-# Now we create any replication set that is mentioned in the publication
-# but does not exist in the database.
+# We create any replication set that is named in pub.replication_sets
+# but does not occur in pub_repset_tuples.results.
+#
+# We alter any replication set that is named in pub.replication_sets and
+# is also in pub_repset_tuples, but whose attributes in the database are
+# different from the configuration.
+#
+# Both create_replication_set() and alter_replication_set() accept the
+# same arguments, except that ``autoadd_existing`` can be set only when
+# the replication set is created.
+#
+# So we iterate over pub.replication_sets, check if the set name occurs
+# in pub_repset_tuples, decide whether to create or alter the set, and
+# assemble a string like "set_name := %s, p1 := %s, p2 := %s, …" and a
+# corresponding list of values to pass to the function.
+#
+# The autoadd_* parameters are supported only in pglogical3. Don't
+# specify them if you are using pglogical2, or the query will fail.
 
-- name: Create new replication sets
+- name: Create or alter replication sets
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    conninfo: "{{ dsn|dbname(pub.database) }}"
     queries:
-    - text: >
-        SELECT pglogical.create_replication_set(
-          set_name := %s,
-          replicate_insert := %s, replicate_delete := %s,
-          replicate_update := %s, replicate_truncate := %s,
-          autoadd_tables := %s, autoadd_sequences := %s,
-          autoadd_existing := %s
-        )
-      args:
-      - "{{ set.name }}"
-      - "{{ set.replicate_insert }}"
-      - "{{ set.replicate_delete }}"
-      - "{{ set.replicate_update }}"
-      - "{{ set.replicate_truncate }}"
-      - "{{ set.autoadd_tables }}"
-      - "{{ set.autoadd_sequences }}"
-      - "{{ set.autoadd_existing }}"
+    - text: >-
+        SELECT pglogical.{{ op }}_replication_set({{ argument_string }})
+      args: "{{ argument_values }}"
   become_user: "{{ postgres_user }}"
   become: yes
   vars:
-    set: "{{ replication_set_defaults|combine(item) }}"
-    existing_sets: >
-      {{ pglogical_set_tuples.results|json_query('[*].set_name') }}
-  with_items: "{{ pub.replication_sets }}"
-  loop_control:
-    label: >-
-      {{ item.name }}
-  when:
-    set.name not in existing_sets
-  changed_when: True
-
-# We modify any existing replication sets whose parameters are different
-# from the configuration. (Note: autoadd_existing cannot be altered, it
-# applies only when the replication set is created.)
-
-- name: Alter existing replication sets if required
-  postgresql_query:
-    conninfo: "{{ node_dsn|dbname(pub.database) }}"
-    queries:
-    - text: >
-        SELECT pglogical.alter_replication_set(
-          set_name := %s,
-          replicate_insert := %s, replicate_delete := %s,
-          replicate_update := %s, replicate_truncate := %s,
-          autoadd_tables := %s, autoadd_sequences := %s
-        )
-      args:
-      - "{{ set.name }}"
-      - "{{ set.replicate_insert }}"
-      - "{{ set.replicate_delete }}"
-      - "{{ set.replicate_update }}"
-      - "{{ set.replicate_truncate }}"
-      - "{{ set.autoadd_tables }}"
-      - "{{ set.autoadd_sequences }}"
-  become_user: "{{ postgres_user }}"
-  become: yes
-  vars:
-    set: "{{ replication_set_defaults|combine(item) }}"
-    matches: >
-      {{ pglogical_set_tuples.results|json_query("[?set_name=='%s']" % item.name) }}
     match: >
-      {{ matches[0]|default({}) }}
+      {{
+        pub_repset_tuples.results
+        |json_query("[?set_name=='%s']" % set.name)
+        |first|default({})
+      }}
+    op: >-
+      {{ (match is empty)|ternary('create', 'alter') }}
+    required_keys:
+      - set_name
+    required_values:
+      - "{{ set.name }}"
+    optional_arguments: "{{
+      set|remove_keys(replication_set_keys)
+      |remove_keys(['autoadd_existing'] if op == 'alter' else [])
+    }}"
+    argument_keys: >
+      {{ required_keys + optional_arguments.keys()|list }}
+    argument_values: >
+      {{ required_values + optional_arguments.values()|list }}
+    argument_string: >
+      {{ argument_keys|map('apply_format', '{0} := %s')|list|join(', ') }}
   with_items: "{{ pub.replication_sets }}"
   loop_control:
+    loop_var: set
     label: >-
-      {{ item.name }}
-  when:
-    match is not empty
-    and [match.replicate_insert, match.replicate_delete,
-         match.replicate_update, match.replicate_truncate,
-         match.set_autoadd_tables, match.set_autoadd_seqs] !=
-        [set.replicate_insert, set.replicate_delete,
-         set.replicate_update, set.replicate_truncate,
-         set.autoadd_tables, set.autoadd_sequences]
+      {{ set.name }}
+  when: >
+    match is empty
+    or set.replicate_insert|default(match.replicate_insert) != match.replicate_insert
+    or set.replicate_delete|default(match.replicate_delete) != match.replicate_delete
+    or set.replicate_update|default(match.replicate_update) != match.replicate_update
+    or set.replicate_truncate|default(match.replicate_truncate) != match.replicate_truncate
+    or (
+      'set_autoadd_tables' in match
+      and set.autoadd_tables|default(match.set_autoadd_tables) != match.set_autoadd_tables
+    )
+    or (
+      'set_autoadd_seqs' in match
+      and set.autoadd_sequences|default(match.set_autoadd_seqs) != match.set_autoadd_seqs
+    )
   changed_when: True
 
 # We remove any existing replication sets that are not mentioned in the
@@ -162,14 +180,14 @@
 
 - name: Remove unwanted replication_sets
   postgresql_query:
-    conninfo: "{{ node_dsn|dbname(pub.database) }}"
+    conninfo: "{{ dsn|dbname(pub.database) }}"
     queries:
     - text: SELECT pglogical.drop_replication_set(set_name := %s)
       args:
       - "{{ item.set_name }}"
   become_user: "{{ postgres_user }}"
   become: yes
-  with_items: "{{ pglogical_set_tuples.results }}"
+  with_items: "{{ pub_repset_tuples.results }}"
   loop_control:
     label: >-
       {{ item.set_name }}
