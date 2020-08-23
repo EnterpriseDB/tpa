@@ -33,13 +33,11 @@
     name: sys/fs
     apply:
       tags: fs
-  vars:
-    device: "{{ item.device }}"
-    mountpoint: "{{ item.mountpoint }}"
-    encryption: "{{ item.encryption|default('none') }}"
-    luks_volume: "{{ item.luks_volume|default(item.device|basename) }}"
-  with_items:
-    "{{ volumes }}"
+  with_items: "{{ volumes }}"
+  loop_control:
+    loop_var: volume
+    label: >-
+      {{ volume.device }}
   tags: fs
 
 # Now that the any additional volumes have been mounted, we can copy in

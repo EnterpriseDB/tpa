@@ -2,12 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- include_role: name=secret
-  vars:
-    secret_name: "{{ encryption }}_passphrase"
-  when: >
-    encryption|default('none') != 'none'
-
 # Given a block device name and a mountpoint, does everything required
 # to make the volume available for use immediately and after subsequent
 # reboots.
@@ -16,56 +10,67 @@
   assert:
     msg: "Please specify at least the device name and mountpoint"
     that:
-      - device is defined
-      - mountpoint is defined
-
-# device is what the caller specified; _device is what we use
-# internally, and is subject to being modified by luks.yml.
-
-- name: Record device name
-  set_fact:
-    _device: "{{ device }}"
+      - volume is defined
+      - volume.device is defined
+      - volume.mountpoint is defined
 
 - block:
-    - name: Set up encryption on {{ device }}
-      include_tasks: "{{ encryption }}.yml"
-      vars:
-        luks_device: "{{ _device }}"
-    - name: Set noauto in mount options for {{ _device }}
-      set_fact:
-        mountopts: "noauto{% if mountopts %},{{ mountopts }}{% endif -%}"
-      when: >
-        'noauto' not in mountopts
-  when: encryption|default('none') != 'none'
+  - include_role: name=secret
+    vars:
+      secret_name: "{{ encryption }}_passphrase"
 
-- name: Set readahead on {{ _device }} to {{ '%d' % ((readahead|int)/2048) }}MB
+  - name: Set up encryption on {{ _device }}
+    include_tasks: "{{ encryption }}.yml"
+    vars:
+      luks_device: "{{ _device }}"
+      luks_volume: "{{ volume.luks_volume|default(_device|basename) }}"
+
+  - name: Set noauto in mount options for {{ _device }}
+    set_fact:
+      _mountopts: "noauto{% if _mountopts %},{{ _mountopts }}{% endif -%}"
+    when: >
+      'noauto' not in _mountopts
+  when: volume.encryption|default('none') != 'none'
+
+- name: Set readahead on {{ _device }} to {{ '%d' % ((_readahead|int)/2048) }}MB
   shell: >
     blockdev --getra "{{ _device }}" &&
-    blockdev --setra "{{ readahead }}" "{{ _device }}"
+    blockdev --setra "{{ _readahead }}" "{{ _device }}"
   args:
     executable: /bin/bash
   register: setra
   changed_when: >
-    setra is successful and setra.stdout != readahead|string
+    setra is successful and setra.stdout != _readahead|string
 
 - name: Set readahead on {{ _device }} at startup
   lineinfile:
     path: /etc/tpa/rc.local
     line: >-
-      blockdev --setra "{{ readahead }}" "{{ _device }}"
+      blockdev --setra "{{ _readahead }}" "{{ _device }}"
     state: present
     insertafter: EOF
 
 - name: Create filesystem on {{ _device }}
   filesystem:
     dev: "{{ _device }}"
-    fstype: "{{ fstype }}"
-    opts: "{{ fsopts|default(omit) }}"
+    fstype: "{{ _fstype }}"
+    opts: "{{ volume.fsopts|default(omit) }}"
 
-- name: Mount {{ _device }} under {{ mountpoint }}
+- name: Mount {{ _device }} under {{ volume.mountpoint }}
   mount:
     src: "{{ _device }}"
-    name: "{{ mountpoint }}"
-    fstype: "{{ fstype }}"
-    opts: "{{ mountopts }}"
+    name: "{{ volume.mountpoint }}"
+    fstype: "{{ _fstype }}"
+    opts: "{{ _mountopts }}"
     state: mounted
+
+- name: Ensure {{ volume.mountpoint }} has the correct ownership and mode
+  file:
+    path: "{{ volume.mountpoint }}"
+    owner: "{{ volume.owner|default(omit) }}"
+    group: "{{ volume.group|default(omit) }}"
+    mode: "{{ volume.mode|default(omit) }}"
+    state: directory
+  when:
+    volume.owner is defined or volume.group is defined
+    or volume.mode is defined

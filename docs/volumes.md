@@ -266,9 +266,45 @@ The LUKS passphrase is generated locally and stored in the vault.
 If any `device` does not contain a valid filesystem, it will be
 initialised with `mkfs`.
 
+```yaml
+instances:
+- Name: one
+  …
+  volumes:
+  - device_name: /dev/xyz
+    vars:
+      volume_for: …
+      fstype: ext4
+      fsopts:
+        - -cc
+        - -m 2
+      mountopts: 'defaults,relatime,nosuid'
+      readahead: 65536
+      owner: root
+      group: root
+      mode: 0755
+```
+
+You can specify the `fstype` (default: ext4), `fsopts` to be passed to
+mkfs (default: none), and `mountopts` to be passed to mount and written
+to fstab (see below).
+
+TPAexec will set the readahead for the device to 16MB by default (and
+make the value persist across reboots), but you can specify a different
+value for the volume as shown above.
+
 There are two ways to determine where a volume is mounted. You can
 either specify a `mountpoint` explicitly, or you can set `volume_for` to
 `postgres_data` or `barman_data`, and TPAexec will translate the setting
 into an appropriate mountpoint for the system.
 
-Once the `mountpoint` is determined, the `device` will be mounted there.
+Once the `mountpoint` is determined, the `device` will be mounted there
+with the given `mountopts` (default: `defaults,noatime`). An entry will
+also be created for the filesystem in `/etc/fstab`.
+
+You may optionally specify `owner`, `group`, or `mode` for the volume,
+and these attributes will be set on the `mountpoint`. Remember that at
+this very early stage of deployment, you cannot count on the `postgres`
+user to exist. In any case, TPAexec will (separately) ensure that any
+directories needed by Postgres have the right ownership and permissions,
+so you don't have to do it yourself.

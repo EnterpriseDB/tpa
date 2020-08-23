@@ -1,0 +1,8 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+_device: "{{ volume.device }}"
+_fstype: "{{ volume.fstype|default(default_fstype) }}"
+_readahead: "{{ volume.readahead|default(default_readahead) }}"
+_mountopts: "{{ volume.mountopts|default(default_mountopts) }}"
