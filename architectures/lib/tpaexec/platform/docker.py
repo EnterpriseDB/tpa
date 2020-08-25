@@ -121,7 +121,8 @@ class docker(Platform):
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
         preferred_python_version = 'python3'
-        if args['image']['name'] in ['centos/systemd', 'tpa/redhat:7']:
+        image = args['image']
+        if image and image['name'] in ['centos/systemd', 'tpa/redhat:7']:
             preferred_python_version = 'python2'
         cluster_vars['preferred_python_version'] = \
             cluster_vars.get('preferred_python_version', preferred_python_version)
