@@ -54,7 +54,7 @@
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - "{{ item.volumes|default([]) }}"
-      - "{{ item.local_source_directories|default() }}"
+      - "{{ item.local_source_directories|default([]) }}"
 
 - set_fact:
     docker_container_results: "{{
