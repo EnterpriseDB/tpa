@@ -48,7 +48,7 @@ class Images(Architecture):
             })
         elif self.platform.name == 'docker':
             defaults.update({
-                'image_name': '2ndq-tpa/{distribution}-{label}-{version}:{date}',
+                'image_name': 'tpa/{distribution}-{label}:{version}-{date}',
                 'distributions': ['RedHat'],
                 'regions': ['irrelevant'],
             })
