@@ -75,7 +75,7 @@ class Images(Architecture):
                 image = self.platform.image(d, lookup=True, region=r)
                 instance = {
                     'node': i*len(distributions)+j+1,
-                    'Name': ('%s-%s' % (re.sub('[^a-z0-9-]', '-', d), r)).lower(),
+                    'Name': ('%s-%s' % (re.sub('[^a-zA-Z0-9-]', '-', d), r)).lower(),
                     'image': image.get('image_id', image['name']),
                     'location': i,
                 }
