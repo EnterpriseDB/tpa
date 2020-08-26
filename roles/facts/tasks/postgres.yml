@@ -39,6 +39,7 @@
     postgres_service_name: postgres
     postgres_installation_method: "{{ postgres_installation_method|default(default_postgres_installation_method) }}"
     postgres_install_dir: "{{ postgres_install_dir|default(default_postgres_install_dir) }}"
+    postgres_locale: "{{ postgres_locale|default(system_locale|default(default_postgres_locale)) }}"
     postgres_users: "{{ postgres_users|default(default_postgres_users) }}"
     postgres_databases: "{{ postgres_databases|default(default_postgres_databases) }}"
     postgres_conf_files: "{{ postgres_conf_files|default(default_postgres_conf_files) }}"

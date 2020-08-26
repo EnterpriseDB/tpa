@@ -69,6 +69,11 @@ service_mgr=${service_mgr:-systemd}
 
 memtotal=$(awk '/^MemTotal: / {print int($2/1024)}' /proc/meminfo)
 
+if command -v locale &>/dev/null; then
+    eval "$(locale)"
+    system_locale=${LC_ALL:-$LANG}
+fi
+
 grep -Ev '": ""' <<RESULT
 {
     "ansible_facts": {
@@ -82,6 +87,7 @@ grep -Ev '": ""' <<RESULT
         "ansible_pkg_mgr": "$pkg_mgr",
         "python_pkg_prefix": "$python_pkg_prefix",
         "python": "$python",
+        "system_locale": "${system_locale:-}",
         "ansible_memtotal_mb": $memtotal
     }
 }

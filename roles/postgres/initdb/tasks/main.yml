@@ -67,6 +67,7 @@
       vars:
         _task_environment:
           TZ: UTC
+          LC_ALL: "{{ postgres_locale }}"
       environment: "{{ target_environment|combine(_task_environment) }}"
       become_user: "{{ postgres_user }}"
       become: yes
