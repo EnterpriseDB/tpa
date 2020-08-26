@@ -259,7 +259,8 @@ def database_discovery(module, conn, m0):
     m['databases'] = dict()
     m['bdr_databases'] = []
 
-    dbs = query_results(conn, "SELECT * from pg_catalog.pg_database")
+    dbs = query_results(conn, """SELECT *, pg_encoding_to_char(encoding) as encoding
+        FROM pg_catalog.pg_database""")
     for db in dbs:
         results = dict(db)
         datname = db['datname']
