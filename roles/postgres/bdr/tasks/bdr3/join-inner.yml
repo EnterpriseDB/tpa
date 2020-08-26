@@ -18,3 +18,4 @@
       hostvars[bdr_node].bdr_child_group|default(
       hostvars[bdr_node].bdr_node_group)
     }}"
+  changed_when: True

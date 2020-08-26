@@ -40,6 +40,7 @@
     bdr_node_tuples.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
+  changed_when: True
 
 # We use local_node_info() here instead of querying bdr.node, because we
 # want each instance to retrieve only its own local node_id.
@@ -156,6 +157,7 @@
   when:
     inventory_hostname == first_bdr_primary and
     _group not in bdr_group_ids
+  changed_when: True
 
 - name: Identify logical standby nodes
   set_fact:
