@@ -269,9 +269,16 @@
       postgres_extensions|default(
         default_postgres_extensions
         |union(extra_postgres_extensions|default([]))
+        |union(needs_pglogical|ternary(['pglogical'], []))
         |union(('bdr' in role)|ternary(bdr_extensions, []))
       )
     }}"
+  vars:
+    needs_pglogical: >-
+      {{
+        publications|selectattr('type', 'equalto', 'pglogical') is not empty
+        or subscriptions|selectattr('type', 'equalto', 'pglogical') is not empty
+      }}
 
 - name: Remove pg_visibility for Postgres <9.6
   set_fact:
