@@ -35,6 +35,36 @@
 
 - include_tasks: version.yml
 
+# We check that all of the BDR databases belonging to a cluster have the
+# same LC_COLLATE setting, because doing otherwise risks data loss.
+#
+# If you have a cluster where bdr_database has different collations
+# across instances, and you want to keep it that way for some reason,
+# deploy with ``-e enforce_bdr_collation=no``.
+
+- set_fact:
+    bdr_database_collations: "{{
+      bdr_database_collations|default([])
+      |union([h_databases[h_bdr_database].datcollate])
+    }}"
+  vars:
+    h_databases: >
+      {{ hostvars[h].cluster_facts.databases }}
+    h_bdr_database: >-
+      {{ hostvars[h].bdr_database }}
+  with_items: "{{ groups[bdr_node_group] }}"
+  loop_control:
+    loop_var: h
+
+- assert:
+    msg: >-
+      All instances must have the same LC_COLLATE setting for bdr_database
+      (got: {{ bdr_database_collations|join(', ') }})
+    that:
+      bdr_database_collations|length == 1
+  when:
+    enforce_bdr_collation|default(true)|bool
+
 # Now one node must create a BDR group, and the other nodes must join
 # the group. It doesn't matter which node creates the group, so long as
 # all the nodes make the same decision about which one should create it.

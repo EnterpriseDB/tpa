@@ -9,6 +9,13 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Support for building Docker clusters from source using bind-mounted
   local source directories and a shared ccache
 
+- Add a ``postgres_locale`` setting, defaulting to the target instance's
+  LC_ALL/LANG setting (or en_US.UTF-8 otherwise), which is used to set
+  the initdb-time default for the cluster
+
+- Require that the BDR database have the same collation (LC_COLLATE)
+  across all instances in the same bdr_node_group
+
 ## v20.8 (2020-08-20)
 
 ### Bugfixes
