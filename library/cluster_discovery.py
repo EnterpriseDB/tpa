@@ -181,30 +181,10 @@ def cluster_discovery(module, conn):
     # We're done with the basic system facts, so we move on to querying the
     # server to get an idea of its place in the world^Wcluster.
 
-    cur.execute("SELECT pg_is_in_recovery()")
-    if cur.fetchone()[0]:
-        m['pg_is_in_recovery'] = True
-        m['replica'] = replica_discovery(module, conn, m)
-
-    m.update({
-        'pg_stat_replication':
-        query_results(conn, "SELECT * from pg_catalog.pg_stat_replication")
-    })
-
-    m.update({
-        'pg_replication_slots':
-        query_results(conn, "SELECT * from pg_catalog.pg_replication_slots")
-    })
-
-    repmgr = repmgr_discovery(module, conn, m)
-    if repmgr is not None:
-        m['repmgr'] = repmgr
-
-    m['role'] = 'primary'
-    if 'replica' in m:
-        m['role'] = 'replica'
-
+    m.update(catalog_discovery(module, conn, m))
+    m.update(replica_discovery(module, conn, m))
     m.update(database_discovery(module, conn, m))
+    m.update(repmgr_discovery(module, conn, m))
 
     return m
 
@@ -215,26 +195,47 @@ def major_version(version_num):
 
     return v
 
-def replica_discovery(module, conn, m0):
-    # On a replica, we need primary_conninfo and primary_slot_name. If we
-    # are running on 9.6+, we can query pg_stat_wal_receiver, and fall back
-    # to reading from recovery.conf on older versions.
+def catalog_discovery(module, conn, m0):
+    m = dict()
 
+    required_catalogs = ['pg_stat_replication', 'pg_replication_slots']
+    optional_catalogs = ['pg_stat_wal_receiver']
+
+    for cr in required_catalogs:
+        m.update({
+            cr: query_results(conn, "SELECT * FROM pg_catalog.%s" % cr)
+        })
+
+    for cr in optional_catalogs:
+        res = []
+        if relation_exists(conn, 'pg_catalog.%s' % cr):
+            res = query_results(conn, "SELECT * FROM pg_catalog.%s" % cr)
+        m.update({cr: res})
+
+    return m
+
+def replica_discovery(module, conn, m0):
     m = dict()
     cur = conn.cursor()
+
+    cur.execute("SELECT pg_is_in_recovery()")
+    if not cur.fetchone()[0]:
+        return {'role': 'primary'}
 
     m.update({
         'recovery_settings': read_recovery_conf(m0)
     })
 
-    if have_pg_stat_wal_receiver(conn):
-        res = query_results(conn, "SELECT * from pg_catalog.pg_stat_wal_receiver")
-        if len(res) == 1:
-            m.update({
-                'pg_stat_wal_receiver': res[0],
-                'primary_conninfo': res[0]['conninfo'],
-                'primary_slot_name': res[0]['slot_name'],
-            })
+    # On a replica, we need primary_conninfo and primary_slot_name. If we
+    # are running on 9.6+, we can query pg_stat_wal_receiver, and fall back
+    # to reading from recovery.conf on older versions.
+
+    pg_stat_wal_receiver = m0['pg_stat_wal_receiver']
+    if len(pg_stat_wal_receiver) == 1:
+        m.update({
+            'primary_conninfo': pg_stat_wal_receiver[0]['conninfo'],
+            'primary_slot_name': pg_stat_wal_receiver[0]['slot_name'],
+        })
 
     for k in ['primary_conninfo', 'primary_slot_name']:
         if k not in m and (k in m['recovery_settings'] or k in m0['pg_settings']):
@@ -247,7 +248,60 @@ def replica_discovery(module, conn, m0):
             'primary_conninfo_parts': parse_conninfo(m['primary_conninfo'])
         })
 
+    return {
+        'role': 'replica',
+        'pg_is_in_recovery': True,
+        'replica': m,
+    }
+
+def database_discovery(module, conn, m0):
+    m = dict()
+    m['databases'] = dict()
+    m['bdr_databases'] = []
+
+    dbs = query_results(conn, "SELECT * from pg_catalog.pg_database")
+    for db in dbs:
+        results = dict(db)
+        datname = db['datname']
+
+        m['databases'].update({datname: results})
+
+        if datname in ('template0', 'bdr_supervisordb'):
+            continue
+
+        db_conn = psycopg2.connect(module.params['conninfo'] + ' dbname=%s' % datname)
+
+        results.update(pglogical_discovery(module, db_conn, m0))
+        results.update(bdr_discovery(module, db_conn, m0))
+
+        if results.get('bdr', {}).get('node_group'):
+            m['bdr_databases'].append(datname)
+
     return m
+
+def pglogical_discovery(module, conn, m0):
+    m = dict()
+
+    if relation_exists(conn, 'pglogical.node'):
+        v = query_results(conn, """SELECT pglogical.pglogical_version(),
+            pglogical.pglogical_version_num()""")
+        m.update(v[0])
+
+    return {'pglogical': m} if m else {}
+
+def bdr_discovery(module, conn, m0):
+    m = dict()
+
+    if relation_exists(conn, 'bdr.node'):
+        v = query_results(conn, """SELECT bdr.bdr_version(),
+            bdr.bdr_version_num()""")
+        m.update(v[0])
+        m.update({
+            'node': query_results(conn, "SELECT * from bdr.node"),
+            'node_group': query_results(conn, "SELECT * from bdr.node_group")
+        })
+
+    return {'bdr': m} if m else {}
 
 def repmgr_discovery(module, conn, m0):
     m = dict()
@@ -256,7 +310,7 @@ def repmgr_discovery(module, conn, m0):
     if repmgr_conf is not None:
         m['repmgr_conf'] = repmgr_conf
 
-    if have_repmgr_db(conn):
+    if 'repmgr' in m0['databases']:
         repmgr_conn = psycopg2.connect(module.params['conninfo'] + ' dbname=repmgr')
 
         repmgr_schema = repmgr_schema_name(repmgr_conn)
@@ -266,50 +320,7 @@ def repmgr_discovery(module, conn, m0):
                 repmgr_conn, "SELECT * FROM \"%s\".nodes" % repmgr_schema
             )
 
-    return m or None
-
-def database_discovery(module, conn, m0):
-    m = dict()
-    m['databases'] = dict()
-    m['bdr_databases'] = []
-
-    cur = conn.cursor()
-    cur.execute("""SELECT datname
-        FROM pg_catalog.pg_database WHERE datname NOT IN ('template0', 'bdr_supervisordb')""")
-
-    for row in cur:
-        datname = row[0]
-        results = dict()
-
-        db_conn = psycopg2.connect(module.params['conninfo'] + ' dbname=%s' % datname)
-
-        bdr = bdr_discovery(module, db_conn, m0)
-        if bdr is not None:
-            results['bdr'] = bdr
-            if bdr['node_group']:
-                m['bdr_databases'].append(datname)
-
-        m['databases'].update({
-            datname: results,
-        })
-
-    return m
-
-def bdr_discovery(module, conn, m0):
-    m = dict()
-
-    cur = conn.cursor()
-    cur.execute("""SELECT relname
-        FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON (c.relnamespace=n.oid)
-        WHERE n.nspname = 'bdr' AND c.relname = 'node'""")
-
-    if cur.rowcount > 0:
-        m.update({
-            'node': query_results(conn, "SELECT * from bdr.node"),
-            'node_group': query_results(conn, "SELECT * from bdr.node_group")
-        })
-
-    return m or None
+    return {'repmgr': m} if m else {}
 
 def parse_kv(str):
     parts = [x.strip() for x in str.split('=', 1)]
@@ -357,16 +368,16 @@ def read_repmgr_conf(m0):
 
     return m
 
-def have_pg_stat_wal_receiver(conn):
+def relation_exists(conn, relname):
+    nspname = 'public'
+    if '.' in relname:
+        (nspname, relname) = relname.split('.', 1)
+
     cur = conn.cursor()
     cur.execute("""SELECT relname
         FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON (c.relnamespace=n.oid)
-        WHERE n.nspname = 'pg_catalog' AND c.relname = 'pg_stat_wal_receiver'""")
-    return cur.rowcount > 0
+        WHERE n.nspname=%s AND c.relname=%s""", (nspname, relname))
 
-def have_repmgr_db(conn):
-    cur = conn.cursor()
-    cur.execute("SELECT datname FROM pg_catalog.pg_database WHERE datname='repmgr'")
     return cur.rowcount > 0
 
 def repmgr_schema_name(conn):
