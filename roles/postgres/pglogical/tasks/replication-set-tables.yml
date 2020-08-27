@@ -8,8 +8,7 @@
     queries:
     - text: SET search_path TO ''
     - text: >
-        SELECT set_reloid, set_att_list,
-            pglogical.get_row_filter_expr(set_row_filter, set_reloid) as set_row_filter
+        SELECT set_reloid, set_att_list
           FROM pglogical.replication_set_table rst
           JOIN pglogical.replication_set rs USING (set_id)
           WHERE rs.set_name = %s
