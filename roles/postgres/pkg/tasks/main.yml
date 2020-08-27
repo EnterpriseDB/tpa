@@ -12,6 +12,8 @@
   package:
     name: "{{ all_postgres_packages }}"
     state: present
+  notify:
+  - Note Postgres restart required
 
 # Due to the differences in the handling of debuginfo/dbgsym/dbg
 # packages between distributions and repositories, we handle them
