@@ -272,11 +272,25 @@ def database_discovery(module, conn, m0):
 
         db_conn = psycopg2.connect(module.params['conninfo'] + ' dbname=%s' % datname)
 
+        results.update(extension_discovery(module, db_conn, m0))
         results.update(pglogical_discovery(module, db_conn, m0))
         results.update(bdr_discovery(module, db_conn, m0))
 
         if results.get('bdr', {}).get('node_group'):
             m['bdr_databases'].append(datname)
+
+    return m
+
+def extension_discovery(module, conn, m0):
+    m = dict()
+    m['extensions'] = dict()
+
+    extensions = query_results(conn, "SELECT * FROM pg_catalog.pg_extension")
+    for e in extensions:
+        results = dict(e)
+        extname = e['extname']
+
+        m['extensions'].update({extname: results})
 
     return m
 

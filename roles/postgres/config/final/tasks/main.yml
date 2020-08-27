@@ -73,6 +73,8 @@
     - "{{ postgres_extensions }}"
   become_user: "{{ postgres_user }}"
   become: true
+  when:
+    item.1 not in cluster_facts.databases[item.0].extensions|default({})
 
 # Now that extensions have been initialised, we can complete the task of
 # granting roles to the appropriate users.
