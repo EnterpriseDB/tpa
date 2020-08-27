@@ -134,6 +134,15 @@ _install_pip_packages() {
     cp "$ANSIBLE_HOME"/contrib/inventory/lxd.py "$TPA_DIR"/platforms/lxd/inventory
 }
 
+_apply_patches() {
+    file=$("$TPA_VENV"/bin/python3 -c 'import boto.connection; print(boto.connection.__file__)' 2>/dev/null)
+    if [[ -n "$file" ]]; then
+        if command -v patch &>/dev/null; then
+            patch -sp1 "$file" < "$TPA_DIR"/patches/RM16946.diff
+        fi
+    fi
+}
+
 setup() {
     while [[ $# -gt 0 ]]; do
         opt=$1
@@ -156,6 +165,7 @@ setup() {
 
     _create_and_activate_venv "${vpath:=$TPA_VENV}"
     _install_pip_packages
+    _apply_patches
 }
 
 _with_ansible_env() {
