@@ -5,8 +5,9 @@ the deployment, then all Postgres-related packages together, and then
 packages for optional components separately. This page is about
 installing packages like pglogical that depend on Postgres itself.
 
-There's a separate page about
-[installing non-Postgres-related packages](packages.md).
+There are separate pages about how to
+[configure package repositories](repositories.md) and
+[install non-Postgres-related packages](packages.md).
 
 To install extra packages that depend on Postgres (e.g., Postgis), list
 them under ``extra_postgres_packages`` in ``cluster_vars`` or a

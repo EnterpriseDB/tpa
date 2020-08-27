@@ -6,8 +6,9 @@ packages for optional components separately. This page is about
 installing packages like sysstat or strace, which have no dependency on
 Postgres packages.
 
-There's a separate page about
-[installing Postgres and Postgres-related packages](postgres_packages.md).
+There are separate pages about how to
+[configure package repositories](repositories.md) and
+[install Postgres and Postgres-related packages](postgres_packages.md).
 
 You can add entries to ``packages`` under ``cluster_vars`` or a
 particular instance's ``vars`` in config.yml:
