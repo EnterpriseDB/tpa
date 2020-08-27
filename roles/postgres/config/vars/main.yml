@@ -3,3 +3,5 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 _include_dir: "{{ include_dir|default(postgres_conf_dir+'/conf.d') }}"
+
+_preload_extensions: "{{ preload_extensions|default([])|union(default_preload_extensions) }}"

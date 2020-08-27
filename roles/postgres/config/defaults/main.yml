@@ -30,6 +30,19 @@ bdr_extensions:
   - bdr
   - autoscale
 
+# If any of these extensions is present in postgres_extensions (or
+# extra_postgres_extensions, etc.), it will also need an entry in
+# shared_preload_libraries.
+
+default_preload_extensions:
+  - pgaudit
+  - platypus
+  - pg_stat_statements
+  - postgres_fdw
+  - pglogical
+  - bdr
+  - autoscale
+
 # The following settings (on the Postgres server) will cause pg_hba.conf
 # to be generated with "hostssl" instead of "host" lines, and to require
 # "cert" authentication instead of "md5". If certificate authentication

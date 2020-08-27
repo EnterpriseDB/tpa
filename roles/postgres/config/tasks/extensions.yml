@@ -29,13 +29,7 @@
     shared_preload_libraries: "{{
       shared_preload_libraries|default([])|union([item])
     }}"
-  with_items:
-    - platypus
-    - pg_stat_statements
-    - postgres_fdw
-    - pglogical
-    - bdr
-    - autoscale
+  with_items: "{{ _preload_extensions }}"
   when: item in postgres_extensions
 
 - name: Add repmgr to shared_preload_libraries if required
