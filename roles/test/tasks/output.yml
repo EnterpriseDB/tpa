@@ -17,4 +17,5 @@
   copy:
     dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ output_file }}"
     content: "{{ content }}"
+    mode: 0644
   delegate_to: localhost
