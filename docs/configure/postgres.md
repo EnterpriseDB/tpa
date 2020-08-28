@@ -11,8 +11,14 @@ configurations of Postgres across instances.
 
 Set ``postgres_version`` in config.yml or use the
 [``--postgres-version`` configure option](../tpaexec-configure.md#software-versions)
-to specify which Postgres major version you want to install (e.g., 12,
-11, 9.6).
+to specify which Postgres major version you want to install. The default
+version is currently 11, but you can select 9.4, 9.5, 9.6, 10, 12, or 13
+instead.
+
+Everything else on this page is optional. Whether you choose package or
+source installation, the defaults are carefully selected to give you a
+working cluster. You can control every aspect of the installation if you
+want to, but you do not need to change anything.
 
 ## Package installation
 
