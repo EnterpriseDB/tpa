@@ -31,3 +31,6 @@ cluster_vars:
 The packages listed under ``packages.common`` will be installed on every
 instance, together with the default list of Postgres packages, and any
 distribution-specific packages you specify.
+
+There's a separate page about
+[compiling and installing Postgres from source](postgres.md#source-installation).
