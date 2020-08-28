@@ -79,8 +79,10 @@
 
   - assert:
       msg: >-
-        Instance {{ sub.publication.instance }} (referenced by subscription {{ sub.name }})
-        must have exactly one valid pglogical publication named {{ sub.publication.name }}
+        Instance {{ sub.publication.instance }} must have exactly one
+        pglogical publication with [name={{ sub.publication.name }}]
+        (referenced by subscription with [name={{ sub.name }}] on
+        instance {{ inventory_hostname }})
       that:
       - sub.publication.instance in hostvars
       - matching_publications|length == 1
@@ -95,7 +97,8 @@
   - assert:
       msg: >-
         There must be exactly one publication named {{ sub.publication.name }}
-        (referenced by subscription {{ sub.name }})
+        (referenced by subscription with [name={{ sub.name }}] on instance
+        {{ inventory_hostname }})
       that:
       - all_matching_publications|default([])|length == 1
     vars:
