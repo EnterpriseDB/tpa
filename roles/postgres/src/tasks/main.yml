@@ -41,7 +41,7 @@
 - include_role: name=src/install tasks_from=verify-branch.yml
   vars:
     source_directory: "{{ postgres_src_dir }}"
-    git_repository_ref: "{{ postgres_dir_ref }}"
+    git_repository_ref: "{{ postgres_git_ref }}"
   when:
     postgres_src_dir in mounted_sources
     and postgres_git_ref is defined
