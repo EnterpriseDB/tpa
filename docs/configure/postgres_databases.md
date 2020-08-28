@@ -18,8 +18,7 @@ cluster_vars:
 ```
 
 The example above would create two databases (apart from any databases
-that TPAexec itself decides to create, such as the bdr_database or
-repmgr).
+that TPAexec itself decides to create, such as ``bdr_database``.
 
 Each entry must specify the ``name`` of the database to create. All
 other attributes are optional.
