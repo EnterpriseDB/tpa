@@ -320,6 +320,16 @@ def provider_dsn(sub, hostvars):
 
     return matches[0]
 
+# Returns the given list of hostnames, sorted by the numeric value of their
+# node id
+
+def sort_by_node(hosts, hostvars):
+    def node_for_host(host):
+        return hostvars[host].get('node')
+
+    sorted_hosts = sorted(hosts, key = node_for_host)
+    return sorted_hosts
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -342,4 +352,5 @@ class FilterModule(object):
             'abspath_to': abspath_to,
             'cmdline': cmdline,
             'provider_dsn': provider_dsn,
+            'sort_by_node': sort_by_node,
         }

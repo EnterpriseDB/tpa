@@ -28,6 +28,10 @@
   when:
     ip_address is not defined
 
+- name: Set default hostname_aliases
+  set_fact:
+    hostname_aliases: "{{ hostname_aliases|default({}) }}"
+
 - name: Set tpa_2q_repositories from twoq_repositories (compat)
   set_fact:
     tpa_2q_repositories: "{{ twoq_repositories }}"

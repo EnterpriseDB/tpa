@@ -50,7 +50,7 @@
     streaming_from: "{{ item }}"
   with_items: "{{ groups['role_postgres'] }}"
   vars:
-    _aliases: "{{ hostvars[item].hostname_aliases|default({}) }}"
+    _aliases: "{{ hostvars[item].hostname_aliases }}"
   when:
     streaming_from is defined and
     streaming_from not in hostvars and
