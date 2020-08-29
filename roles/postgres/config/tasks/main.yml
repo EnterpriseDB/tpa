@@ -218,6 +218,7 @@
     file: syslog.yml
     apply:
       tags: syslog
+  tags: rsyslog
 
 - include_role:
     name: postgres/createuser
