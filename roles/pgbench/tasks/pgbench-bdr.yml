@@ -10,31 +10,43 @@
     }}"
 
 - block:
-  - name: Raise both BDR global lock timeouts for pgbench -i
+  - name: Raise BDR lock timeouts for pgbench -i
     postgresql_query:
       conninfo: "{{ dsn|dbname(pgbench_dbname) }}"
       autocommit: yes
-      queries:
-      - text: ALTER SYSTEM SET bdr.global_lock_timeout TO '600s';
-      - text: ALTER SYSTEM SET bdr.global_lock_statement_timeout TO '3600s';
-      - text: SELECT pg_reload_conf();
+      queries: "{{ query('flattened', timeout_queries) }}"
     become_user: "{{ postgres_user }}"
     become: yes
+    vars:
+      lock_name: >-
+        {{ ['bdr_ddl', 'ddl', 'global'][bdr_major_version-1] }}_lock_timeout
+      statement_timeout:
+        text: "ALTER SYSTEM SET bdr.global_lock_statement_timeout TO '3600s'"
+      timeout_queries:
+        - text: "ALTER SYSTEM SET bdr.{{ lock_name }} TO '600s'"
+        - "{{ (bdr_major_version == 3)|ternary(statement_timeout, []) }}"
+        - text: SELECT pg_reload_conf()
 
   - include_role: name=pgbench/init
     vars:
       pgbench_output: pgbench-bdr-init.txt
 
-  - name: Reset BDR global lock timeouts to defaults after pgbench -i
+  - name: Reset BDR lock timeouts to defaults after pgbench -i
     postgresql_query:
       conninfo: "{{ dsn|dbname(pgbench_dbname) }}"
       autocommit: yes
-      queries:
-      - text: ALTER SYSTEM SET bdr.global_lock_statement_timeout TO default;
-      - text: ALTER SYSTEM SET bdr.global_lock_timeout TO default;
-      - text: SELECT pg_reload_conf();
+      queries: "{{ query('flattened', reset_queries) }}"
     become_user: "{{ postgres_user }}"
     become: yes
+    vars:
+      lock_name: >-
+        {{ ['bdr_ddl', 'ddl', 'global'][bdr_major_version-1] }}_lock_timeout
+      statement_timeout:
+        text: "ALTER SYSTEM SET bdr.global_lock_statement_timeout TO default"
+      reset_queries:
+        - "{{ (bdr_major_version == 3)|ternary(statement_timeout, []) }}"
+        - text: "ALTER SYSTEM SET bdr.{{ lock_name }} TO default"
+        - text: SELECT pg_reload_conf()
 
   when: >
     inventory_hostname == first_bdr_primary
