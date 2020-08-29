@@ -5,8 +5,10 @@
 haproxy_packages:
   Debian: &debian_haproxy_packages
     - haproxy
+    - socat
   RedHat:
     - haproxy
+    - socat
   Ubuntu: *debian_haproxy_packages
 
 haproxy_package_version: 1.9.15*

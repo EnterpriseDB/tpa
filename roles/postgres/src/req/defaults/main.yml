@@ -4,6 +4,7 @@
 
 requirements:
   common:
+    - git
     - flex
     - bison
     - ccache

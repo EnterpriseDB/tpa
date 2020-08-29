@@ -56,44 +56,35 @@ yum_repository_list: "{{ default_yum_repositories.keys()|list }}"
 packages: {}
 default_packages:
   common:
+    # Required to support ``become: unprivileged_user``
+    - acl
     - tcpdump
     - vim
-    - git
     - rsync
     - sysstat
-    - acl
-    - cryptsetup
     - time
     - strace
     - gdb
-    - unzip
-    - curl
     - iotop
     - screen
-    - rsync
-    - mdadm
     - dstat
     - openssh-server
     - rsyslog
-    - socat
+    - "{{ ['cryptsetup'] if (volumes|json_query(\"[?encryption && encryption == 'luks']\") is not empty) else [] }}"
     - lsof
   Debian:
-    - "{{ python_pkg_prefix }}-dev"
     - "{{ (ansible_distribution_release == 'jessie')|ternary('linux-tools', 'linux-perf') }}"
-    - dbus
-    - gnutls-bin
+    # Required for hostnamectl, used in sys
+    - "{{ ['dbus'] if platform not in ['docker', 'lxd', 'vagrant'] else [] }}"
     - openssh-client
   RedHat:
-    - "{{ python_pkg_prefix }}-devel"
     - perf
-    - gnutls-utils
+    # Required for semanage, used in postgres/initdb
     - "policycoreutils-python{% if ansible_distribution_major_version == '8' %}-utils{% endif %}"
     - openssh
     - cronie
   Ubuntu:
-    - "{{ python_pkg_prefix }}-dev"
     - linux-tools-generic
-    - gnutls-bin
     - openssh-client
 
 optional_packages: {}
