@@ -109,11 +109,6 @@ default_optional_packages:
 
 unwanted_packages: {}
 default_unwanted_packages:
-  Debian: &debian_unpackages
-    - popularity-contest
-    - vim-tiny
-    - vim-nox
-    - mlocate
-    - nano
+  Debian: &debian_unpackages []
   RedHat: []
   Ubuntu: *debian_unpackages
