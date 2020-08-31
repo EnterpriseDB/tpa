@@ -14,6 +14,7 @@
     main_hosts_line: >-
       {{ ip_address }}
       {{ [inventory_hostname, inventory_hostname_short]|unique|join(' ') }}
+  tags: hostsfile
 
 - name: Add extra /etc/hosts lines for aliases
   set_fact:
@@ -24,6 +25,7 @@
   vars:
     alias_line: >-
       {{ item.value }} {{ item.key }}
+  tags: hostsfile
 
 - name: Aggregate /etc/hosts lines across hosts
   set_fact:
@@ -33,6 +35,7 @@
   with_items: "{{ groups[cluster_tag]|sort_by_node(hostvars) }}"
   vars:
     default_etc_hosts_lines: []
+  tags: hostsfile
 
 - name: Add entries to /etc/hosts
   linesinfile:
