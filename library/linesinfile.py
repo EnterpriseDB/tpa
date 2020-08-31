@@ -45,8 +45,14 @@ def linesinfile(module):
     m = {}
 
     path = module.params.get('path')
+    diff = {'before': '',
+            'after': '',
+            'before_header': '%s (content)' % path,
+            'after_header': '%s (content)' % path}
 
     lines = {}
+    b_lines = []
+    a_lines = []
     for l in module.params.get('lines'):
         lines[l] = 1
 
@@ -54,6 +60,8 @@ def linesinfile(module):
         with open(path, "a+") as f:
             f.seek(0)
             for line in f:
+                b_lines.append(line)
+                a_lines.append(line)
                 line = line.rstrip('\r\n')
                 if line in lines:
                     del(lines[line])
@@ -61,9 +69,15 @@ def linesinfile(module):
             if lines:
                 m['changed'] = True
                 for l in lines:
-                    f.write(l + '\n')
+                    if not module.check_mode:
+                        f.write(l + '\n')
+                    a_lines.append(l + '\n')
     except Exception as e:
         module.fail_json(msg=str(e), exception=traceback.format_exc())
+
+    diff['before'] = ''.join(b_lines)
+    diff['after'] = ''.join(a_lines)
+    m['diff'] = [ diff, [] ]
 
     return m
 
