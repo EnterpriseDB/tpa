@@ -39,23 +39,14 @@ cluster_vars:
   postgres_git_ref: REL_12_STABLE
 ```
 
+The default git.postgresql.org repository does not require
+authentication, but if necessary, you can use
+[SSH agent forwarding or an HTTPS username/password](git-credentials.md)
+to authenticate to other repositories.
+
 The repository will be cloned into ``postgres_src_dir`` (default:
 ``/opt/postgres/src/postgres``), or updated with ``git pull`` if the
 directory already exists (e.g., if you are re-deploying).
-
-### Git credentials
-
-If the repository you want to clone requires authentication, you have
-two options to authenticate without writing the credentials to disk on
-the target instance:
-
-* For an ``ssh://`` repository, you can add an SSH key to your local
-  ssh-agent. Agent forwarding is enabled by default if you use
-  ``--install-from-source`` (``forward_ssh_agent: yes`` in config.yml).
-
-* For an ``https://`` repository, you can
-  ``export TPA_GIT_CREDENTIALS=username:password`` in your environment
-  before running ``tpaexec deploy``.
 
 ### Build customisation
 
