@@ -69,6 +69,7 @@ default_packages:
     - screen
     - dstat
     - openssh-server
+    - openssl
     - rsyslog
     - "{{ ['socat'] if 'haproxy' in role else [] }}"
     - "{{ ['cryptsetup'] if (volumes|json_query(\"[?encryption && encryption == 'luks']\") is not empty) else [] }}"
