@@ -84,6 +84,7 @@ default_packages:
     # Required for semanage, used in postgres/initdb
     - "policycoreutils-python{% if ansible_distribution_major_version == '8' %}-utils{% endif %}"
     - openssh
+    - openssh-clients
     - cronie
   Ubuntu:
     - linux-tools-generic
