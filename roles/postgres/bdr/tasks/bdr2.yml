@@ -9,7 +9,7 @@
       - text: SELECT node_name FROM bdr.bdr_nodes WHERE node_name = %s
         args:
           - "{{ bdr_node_name }}"
-  register: node
+  register: bdr2_node_tuples
   become_user: "{{ postgres_user }}"
   become: yes
 
@@ -23,7 +23,7 @@
           - "{{ bdr_node_dsn }}"
   when:
     inventory_hostname == first_bdr_primary and
-    node.rowcount == 0
+    bdr2_node_tuples.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
 
@@ -34,7 +34,7 @@
       SELECT bdr.bdr_node_join_wait_for_ready()
   when:
     inventory_hostname == first_bdr_primary and
-    node.rowcount == 0
+    bdr2_node_tuples.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
 
@@ -50,4 +50,4 @@
     loop_var: bdr_node
   when:
     inventory_hostname == first_bdr_primary and
-    hostvars[bdr_node].node.rowcount == 0
+    hostvars[bdr_node].bdr2_node_tuples.rowcount == 0
