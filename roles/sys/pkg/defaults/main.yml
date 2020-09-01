@@ -70,6 +70,7 @@ default_packages:
     - dstat
     - openssh-server
     - rsyslog
+    - "{{ ['socat'] if 'haproxy' in role else [] }}"
     - "{{ ['cryptsetup'] if (volumes|json_query(\"[?encryption && encryption == 'luks']\") is not empty) else [] }}"
     - lsof
   Debian:
