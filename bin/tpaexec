@@ -136,10 +136,8 @@ _install_pip_packages() {
 
 _apply_patches() {
     file=$("$TPA_VENV"/bin/python3 -c 'import boto.connection; print(boto.connection.__file__)' 2>/dev/null)
-    if [[ -n "$file" ]]; then
-        if command -v patch &>/dev/null; then
-            patch -sp1 "$file" < "$TPA_DIR"/patches/RM16946.diff
-        fi
+    if [[ -n "$file" ]] && command -v patch &>/dev/null; then
+        patch --forward -r - -sp1 "$file" < "$TPA_DIR"/patches/RM16946.diff
     fi
 }
 
