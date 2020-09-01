@@ -1,6 +1,6 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 global
-    log 127.0.0.1 local0 notice
+    log /var/lib/haproxy/dev/log local0 notice
     stats socket {{ haproxy_stats_socket }} level admin
     ca-base  /etc/ssl/certs
     crt-base  /etc/ssl/private

@@ -170,6 +170,20 @@
   notify:
     - Note haproxy reload required
 
+# on Debian or Ubuntu, the haproxy package may already have installed
+# this file, but we will overwrite it
+- name: Install rsyslog configuration for haproxy
+  copy:
+    src: 49-haproxy.conf
+    dest: /etc/rsyslog.d/
+  register: haproxy_syslog_conf
+
+- name: Restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted
+  when: haproxy_syslog_conf is changed
+
 - name: Install agent.lua
   template:
     src: agent.lua.j2
