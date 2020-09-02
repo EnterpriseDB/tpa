@@ -176,6 +176,9 @@
   copy:
     src: 49-haproxy.conf
     dest: /etc/rsyslog.d/
+    owner: root
+    group: root
+    mode: 0644
   register: haproxy_syslog_conf
 
 - name: Restart rsyslog
