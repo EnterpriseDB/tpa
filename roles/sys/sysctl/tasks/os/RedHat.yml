@@ -6,10 +6,18 @@
 # way to change the boot configuration from scripts is to use grubby,
 # which does NOT use /etc/default/grub. So we should stick to using
 # grubby to avoid trouble.
+#
+# The kernelopts we specify may end up in either /boot/grub2/grub.cfg or
+# /boot/grub2/grubenv, so we must check for them in both places before
+# we decide to run the command.
 
 - name: Run grubby to update kernel command line
   shell: >
-    if ! grep -q transparent_hugepage= /boot/grub2/grub.cfg || ! grep -q hugepages= /boot/grub2/grub.cfg;
+    if ! ( grep -q kernelopts=.*transparent_hugepage= /boot/grub2/grub.cfg && \
+           grep -q kernelopts=.*hugepages= /boot/grub2/grub.cfg ) && \
+       ! ( test -f /boot/grub2/grubenv && \
+           grep -q kernelopts=.*transparent_hugepage= /boot/grub2/grubenv && \
+           grep -q kernelopts=.*hugepages= /boot/grub2/grubenv ); \
     then grubby --update-kernel=ALL --args="hugepages={{ nr_hugepages }} transparent_hugepage=never";
     else echo unchanged;
     fi
