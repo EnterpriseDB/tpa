@@ -6,8 +6,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Notable changes
 
-- Support for building Docker clusters from source using bind-mounted
-  local source directories and a shared ccache
+- Add support for building Docker clusters from source using
+  bind-mounted --local-source-directories and a shared ccache
 
 - Add a ``postgres_locale`` setting, defaulting to the target instance's
   LC_ALL/LANG setting (or en_US.UTF-8 otherwise), which is used to set
@@ -15,6 +15,40 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Require that the BDR database have the same collation (LC_COLLATE)
   across all instances in the same bdr_node_group
+
+- Add new ``tpaexec show-password /path/to/cluster username`` and
+  ``tpaexec store-password /path/to/cluster username [--random]``
+  commands to manage passwords for postgres_users
+
+- Improve deployment speed in various ways
+
+### Minor changes
+
+- Support pglogical v2 publication/subscription configuration
+
+- Use volatile subscriptions by default on docker containers
+
+- Add eu-north-1 to aws_known_regions
+
+- Add a ``preload_extensions`` list to declare extensions that need an
+  entry in shared_preload_libraries if included in postgres_extensions
+
+- Don't uninstall any packages by default (default_unwanted_packages)
+
+- Account for grubby storing kernelopts in /boot/grub2/grubenv
+
+- Ensure Postgres is restarted when new packages are installed
+
+### Bugfixes
+
+- Generate a valid Vagrantfile even for hostnames with hyphens
+
+- Patch ``TypeError: a bytes-like object is required, not 'str'`` errors
+  when using Boto with an https_proxy set
+
+- Fix lock timeout settings in the pgbench test for BDR v1/v2 clusters
+
+- Fix haproxy syslog logging configuration
 
 ## v20.8 (2020-08-20)
 
