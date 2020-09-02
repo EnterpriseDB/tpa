@@ -2,17 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Enumerate existing databases
-  postgresql_query:
-    conninfo: "{{ postgres_dsn }}"
-    query: >
-      select array_agg(datname) as existing_databases from pg_database
-      where datname not in ('template0', 'bdr_supervisordb')
-  register: db_query
-  become_user: "{{ postgres_user }}"
-  become: yes
-  changed_when: False
-
 - name: Create pg_catalog.pgbouncer_get_auth function
   postgresql_query:
     conninfo: "{{ dsn|dbname(item) }}"
@@ -34,4 +23,6 @@
     create_function is successful and create_function.rowcounts[0] == 0
   become_user: "{{ postgres_user }}"
   become: yes
-  with_items: "{{ db_query.existing_databases }}"
+  with_items: "{{ cluster_facts.databases.keys()|list }}"
+  when: >
+    item not in ['template0', 'bdr_supervisordb']
