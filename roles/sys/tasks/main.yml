@@ -57,6 +57,8 @@
     name: sys/sysctl
     apply:
       tags: sysctl
+  when:
+    platform not in ['docker', 'lxd']
   tags: sysctl
 
 - include_role:

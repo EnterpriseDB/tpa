@@ -330,6 +330,17 @@ def sort_by_node(hosts, hostvars):
     sorted_hosts = sorted(hosts, key = node_for_host)
     return sorted_hosts
 
+# Returns a list consisting of lines resulting from formatting the format_string
+# with each key and corresponding value from the given dict. The format string
+# may include {key}, {value}, and any other names given as optional keyword
+# arguments.
+
+def dict_format(d, format_string, **kwargs):
+    results = []
+    for k in d:
+        results.append(format_string.format(key=k, value=d[k], **kwargs))
+    return results
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -353,4 +364,5 @@ class FilterModule(object):
             'cmdline': cmdline,
             'provider_dsn': provider_dsn,
             'sort_by_node': sort_by_node,
+            'dict_format': dict_format,
         }
