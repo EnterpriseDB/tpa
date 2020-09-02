@@ -39,17 +39,23 @@ store it in a vault-encrypted variable named ``<username>_password`` in
 the cluster's inventory. You can retrieve the value later:
 
 ```bash
-$ tpaexec cmd ~/clusters/speedy quirk -m debug -a var=example_password
-quirk | SUCCESS => {
-    "example_password": "beePh~iez6lie4thi5KaiG%eghaeT]ai"
-}
+$ tpaexec show-password ~/clusters/speedy example
+beePh~iez6lie4thi5KaiG%eghaeT]ai
 ```
 
-(Note: the password may contain characters that are \\-escaped in the
-output above. Remember to un-escape them before using the password.)
-
 You cannot explicitly specify a password in config.yml, but you can
-define ``<username>_password`` in the inventory yourself instead.
+store a different ``<username>_password`` in the inventory instead:
+
+```bash
+$ tpaexec store-password ~/clusters/speedy example --random
+$ tpaexec show-password ~/clusters/speedy example
+)>tkc}}k1y4&epaJ?;NJ:l'uT{C7D*<p
+$ tpaexec store-password ~/clusters/speedy example
+Password:
+$ tpaexec show-password ~/clusters/speedy example
+terrible insecure password
+$
+```
 
 If you don't want the user to have a password at all, you can set
 ``generate_password: false``.

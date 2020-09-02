@@ -291,6 +291,54 @@ rehydrate() {
     deploy -e rehydrate=yes -e deploy_hosts="$instances" "$@"
 }
 
+store_password() {
+    args=()
+    while [[ $# -gt 0 ]]; do
+        opt=$1
+        shift
+
+        case "$opt" in
+            --random)
+                args+=(-c "$TPA_DIR"/architectures/lib/password)
+                ;;
+            --)
+                break
+                ;;
+            *)
+                REMAINDER+=("$opt")
+                ;;
+        esac
+    done
+
+    set -- "${REMAINDER[@]:+${REMAINDER[@]}}" "$@"
+
+    username=${1:?No username specified}
+    shift
+
+    if [ -f vault/vault_pass.txt ]; then
+        args+=(--vault-password-file vault/vault_pass.txt)
+    fi
+
+    file=$(echo ./inventory/group_vars/*/secrets/"$username"_password.yml)
+
+    "$ansible"-vaultpw "${args[@]}" store "$file" "$@"
+}
+
+show_password() {
+    args=()
+
+    username=${1:?No username specified}
+    shift
+
+    if [ -f vault/vault_pass.txt ]; then
+        args+=(--vault-password-file vault/vault_pass.txt)
+    fi
+
+    file=$(echo ./inventory/group_vars/*/secrets/"$username"_password.yml)
+
+    "$ansible"-vaultpw "${args[@]}" show "$file" "$@"
+}
+
 try_as_playbook_or_script() {
     # If you run ``tpaexec xyzzy …``, you end up here to check if there
     # is a matching custom command under architectures/lib/commands or
@@ -307,7 +355,7 @@ try_as_playbook_or_script() {
             exec=$dir/$command
 
             if [[ -x $exec ]]; then
-                _with_ansible_env $exec "$@"
+                _with_ansible_env "$exec" "$@"
                 return $?
             elif [[ -f $script ]]; then
                 source "$script"
@@ -457,6 +505,7 @@ Available help topics:
     playbook, deploy, test,
     cmd, ping
     rehydrate
+    store-password, show-password
 
 Run 'tpaexec help topicname' for more details.
 TOPICS
@@ -663,6 +712,28 @@ then moved to another with TPAexec installed in a different location.
 RELINK
             ;;
 
+        store-password)
+            cat <<STOREPWD
+Command: tpaexec store-password clustername username [--random]
+
+Stores an encrypted new password for the given user in the inventory.
+
+Prompts you to enter a new password by default, but will generate and
+use a random password instead if you specify --random.
+
+Note: the new password is only stored in the local inventory. It will be
+changed on the target instances (if needed) only during the next deploy.
+STOREPWD
+            ;;
+
+        show-password)
+            cat <<SHOWPWD
+Command: tpaexec show-password clustername username
+
+Shows the password stored in the local inventory for the given user.
+SHOWPWD
+            ;;
+
         *)
             echo "Sorry, no help available for $topic"
             echo "Please contact tpa@2ndQuadrant.com for assistance"
@@ -731,7 +802,7 @@ case "$command" in
         cd "$cluster"
         ;;
 
-    cmd|ping|provision|deploy|deprovision|rehydrate)
+    cmd|ping|provision|deploy|deprovision|rehydrate|store-password|show-password)
         cluster=${1:?No cluster specified}
         shift
 
@@ -758,8 +829,8 @@ case "$command" in
         help "$*"
         ;;
 
-    info|version|setup|configure|selftest)
-        $command "$@"
+    info|version|setup|configure|selftest|store-password|show-password)
+        ${command/-/_} "$@"
         ;;
 
     cmd|ping|provision|deploy|playbook|deprovision|rehydrate)
