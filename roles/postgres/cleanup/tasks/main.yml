@@ -19,3 +19,6 @@
   when: >
     item not in ['template0', 'bdr_supervisordb']
     and 'pgbouncer' in cluster_facts.databases[item].schemas
+    and (item not in cluster_facts.bdr_databases
+      or inventory_hostname == first_bdr_primary
+      or 'bdr' not in role)
