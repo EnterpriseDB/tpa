@@ -81,6 +81,8 @@
     section: epel
     option: exclude
     value: "pgbouncer*"
+  when: >
+    'EPEL' in yum_repository_list
 
 - name: Disable builtin postgresql module for DNF
   shell: >
