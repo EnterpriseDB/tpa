@@ -35,5 +35,6 @@
       tags: [pgbench, bdr]
   when: >
     'bdr' in role
+    and bdr_major_version == 3
   vars:
     pgbench_dbname: "{{ bdr_database }}"
