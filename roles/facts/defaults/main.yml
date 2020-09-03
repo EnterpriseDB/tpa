@@ -50,6 +50,10 @@ effective_cache_size_mb: null
 default_log_destination: syslog
 default_max_connections: 250
 
+default_password_encryption: "{{
+  postgres_version is version('10','>=')|ternary('scram-sha-256', 'md5')
+}}"
+
 default_barman_home: /var/lib/barman
 
 default_repmgr_conf_dir: "/etc/repmgr/{{ postgres_version }}"

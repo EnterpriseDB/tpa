@@ -39,7 +39,7 @@ server_tls_protocols = secure
 ;;; Authentication settings
 ;;;
 
-auth_type = md5
+auth_type = {{ password_encryption }}
 auth_file = /etc/pgbouncer/userlist.txt
 auth_user = pgbouncer
 auth_query = SELECT * FROM pg_catalog.pgbouncer_get_auth($1)

@@ -1,0 +1,38 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# We have already assigned first_bdr_primary in roles/platform, but in
+# case a newly-added instance was selected, we must fall back to some
+# older instance that knows about existing the node group(s).
+
+- name: Override first_bdr_primary if required
+  set_fact:
+    first_bdr_primary: "{{
+      first_bdr_primary_candidates|intersect(_current_bdr_candidates)|first
+    }}"
+  when: >
+    'bdr' in role
+    and _current_bdr_candidates is not empty
+    and first_bdr_primary not in _current_bdr_candidates
+  vars:
+    _current_bdr_candidates: "{{
+      hostvars.values()|list
+      |selectattr('cluster_facts.bdr_databases', 'defined')
+      |selectattr('cluster_facts.bdr_databases', 'contains', bdr_database)
+      |map(attribute='inventory_hostname')
+      |list
+    }}"
+
+# If password_encryption is defined, we use that value. If not, and the
+# cluster is running, we use the present value of password_encryption as
+# the default, or the built-in default_password_encryption otherwise,
+# which is md5 for 9.6 and lower, and scram-sha-256 for 10 and above.
+
+- name: Set password_encryption
+  set_fact:
+    password_encryption: "{{
+      password_encryption|default(
+        cluster_facts.pg_settings.password_encryption|default(default_password_encryption)
+      )
+    }}"

@@ -115,3 +115,6 @@ lo_compat_privileges = {{ lo_compat_privileges|default('off') }}
 quote_all_identifiers = {{ quote_all_identifiers|default('off') }}
 standard_conforming_strings = {{ standard_conforming_strings|default('on') }}
 synchronize_seqscans = {{ synchronize_seqscans|default('on') }}
+{% if password_encryption != 'md5' %}
+password_encryption = {{ password_encryption }}
+{% endif %}

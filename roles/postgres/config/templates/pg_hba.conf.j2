@@ -7,15 +7,15 @@
 local   all             postgres                                peer
 local   all             all                                     peer
 local   replication     all                                     peer
-host    all             all             127.0.0.1/32            md5
-host    all             all             ::1/128                 md5
-host    replication     all             127.0.0.1/32            md5
-host    replication     all             ::1/128                 md5
+host    all             all             127.0.0.1/32            {{ password_encryption }}
+host    all             all             ::1/128                 {{ password_encryption }}
+host    replication     all             127.0.0.1/32            {{ password_encryption }}
+host    replication     all             ::1/128                 {{ password_encryption }}
 {% for net in cluster_networks|default([]) %}
-host    postgres        barman          {{ net }}   md5
-host    repmgr          repmgr          {{ net }}   md5
-host    replication     all             {{ net }}   md5
-host    all             all             {{ net }}   md5
+host    postgres        barman          {{ net }}   {{ password_encryption }}
+host    repmgr          repmgr          {{ net }}   {{ password_encryption }}
+host    replication     all             {{ net }}   {{ password_encryption }}
+host    all             all             {{ net }}   {{ password_encryption }}
 {% else %}
 {%   for h in groups[cluster_tag] %}
 {%     set role=hostvars[h].get('role', []) %}
@@ -25,7 +25,7 @@ host    all             all             {{ net }}   md5
 {%       set type='host' %}
 {%     endif %}
 {%     set addr=addr+'/32' %}
-{%     set method='md5' %}
+{%     set method=password_encryption %}
 {%     if hba_force_certificate_auth %}
 {%       set method='cert' %}
 {%       if hba_cert_authentication_map %}
@@ -42,8 +42,8 @@ host    all             all             {{ net }}   md5
 {{type}} replication all {{ addr }} {{ method }}
 {%     endif %}
 {%     if 'haproxy' in role %}
-host haproxy haproxy {{ addr }} md5
-hostssl all all {{ addr }} md5
+host haproxy haproxy {{ addr }} {{ password_encryption }}
+hostssl all all {{ addr }} {{ password_encryption }}
 {%     endif %}
 {%   endfor %}
 {% endfor %}
@@ -51,4 +51,4 @@ hostssl all all {{ addr }} md5
 {% for l in postgres_hba_settings %}
 {{l}}
 {% endfor %}
-hostssl all all 0.0.0.0/0 md5
+hostssl all all 0.0.0.0/0 {{ password_encryption }}

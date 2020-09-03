@@ -50,7 +50,7 @@
     generated_password: >-
       {{ vars.get(secret_name) }}
     encrypted_password: >-
-      md5{{ (generated_password + item.username)|hash('md5') }}
+      {{ password_encryption|encrypted_password(generated_password, item.username) }}
   with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes

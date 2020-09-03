@@ -20,24 +20,9 @@
     pgdata_user|default('UNKNOWN') != 'UNKNOWN' and
     postgres_running|default('false') == True
 
-# We have already assigned first_bdr_primary in roles/platform, but in
-# case a newly-added instance was selected, we must fall back to some
-# older instance that knows about existing the node group(s).
+# We may change default values over time, but the changes are not always
+# worth forcing a reload or restart on existing clusters. Now that we've
+# finished running minimal_postgres_setup and cluster_discovery, we can
+# alter default values, if needed, based on the values in cluster_facts.
 
-- name: Override first_bdr_primary if required
-  set_fact:
-    first_bdr_primary: "{{
-      first_bdr_primary_candidates|intersect(_current_bdr_candidates)|first
-    }}"
-  when: >
-    'bdr' in role
-    and _current_bdr_candidates is not empty
-    and first_bdr_primary not in _current_bdr_candidates
-  vars:
-    _current_bdr_candidates: "{{
-      hostvars.values()|list
-      |selectattr('cluster_facts.bdr_databases', 'defined')
-      |selectattr('cluster_facts.bdr_databases', 'contains', bdr_database)
-      |map(attribute='inventory_hostname')
-      |list
-    }}"
+- include_tasks: update-defaults.yml

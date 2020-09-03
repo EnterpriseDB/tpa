@@ -1,2 +1,2 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-"pgbouncer" "md5{{ (vars['pgbouncer_password'] + 'pgbouncer')|hash('md5') }}"
+"pgbouncer" "{{ password_encryption|encrypted_password(vars['pgbouncer_password'], 'pgbouncer') }}"
