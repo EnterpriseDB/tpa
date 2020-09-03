@@ -38,3 +38,12 @@
   when: >
     'replica' not in role
   tags: config
+
+# Since we may have changed the Postgres configuration, we repeat the
+# cluster discovery process that was done at the beginning (roles/init)
+# for replicas (because postgres/config/final above will have done it
+# for primary instances already).
+
+- include_role: name=postgres/facts
+  when: >
+    'replica' in role
