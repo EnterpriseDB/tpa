@@ -32,6 +32,31 @@
     - Note pgbouncer restart required
   tags: [ini, databases.ini]
 
+# We must find a backend instance that pgbouncer points to, so that we
+# can check if vars['pgbouncer_password'] is up-to-date as compared to
+# hostvars[backend].cluster_facts.roles['pgbouncer'].rolpassword.
+#
+# If pgbouncer_backend is 127.0.0.1, we substitute inventory_hostname.
+# If the result is in hostvars and is a Postgres instance, we're done.
+# Otherwise, if it's an haproxy instance, we can use the first of its
+# haproxy_backend_servers. That's as far as we can reasonably go.
+
+- set_fact:
+    pgbouncer_backend_instance: "{{
+      (pgbouncer_backend == '127.0.0.1')|ternary(
+        inventory_hostname, pgbouncer_backend
+      )
+    }}"
+
+- set_fact:
+    pgbouncer_backend_instance: "{{
+      hostvars[pgbouncer_backend_instance].haproxy_backend_servers[0]
+    }}"
+  when:
+    - pgbouncer_backend_instance in hostvars
+    - "'haproxy' in hostvars[pgbouncer_backend_instance].role"
+    - "'postgres' not in hostvars[pgbouncer_backend_instance].role"
+
 - name: Install userlist.txt
   template:
     src: userlist.txt.j2
@@ -39,6 +64,10 @@
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0600
+  vars:
+    existing_password: "{{
+      hostvars[pgbouncer_backend_instance].cluster_facts.roles['pgbouncer'].rolpassword|default('unknown')
+    }}"
   notify:
     - Note pgbouncer restart required
 

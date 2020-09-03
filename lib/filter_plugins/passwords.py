@@ -17,8 +17,8 @@ def md5_password(password, username):
 # Returns ``SCRAM-SHA-256$<iteration count>:<salt>$<StoredKey>:<ServerKey>`` as
 # computed by scram_build_verifier() in src/common/scram-common.c
 
-def scram_password(password):
-    s = scram.using(rounds=4096, algs="sha-1,sha-256").hash(password)
+def scram_password(password, salt=None, rounds=4096):
+    s = scram.using(rounds=rounds, salt=salt, algs="sha-1,sha-256").hash(password)
 
     (salt, rounds, SaltedPassword) = scram.extract_digest_info(s, "sha-256")
 
@@ -37,11 +37,20 @@ def scram_password(password):
 # if password_encryption == 'md5') and returns a string that is suitable for use
 # as the PASSWORD in CREATE USER commands.
 
-def encrypted_password(password_encryption, password, username=None):
-    if password_encryption == 'scram-sha-256':
-        return scram_password(password)
-    elif password_encryption == 'md5':
+def encrypted_password(password_encryption, password, username=None, existing_password=None):
+    if password_encryption == 'md5':
         return md5_password(password, username)
+    elif password_encryption == 'scram-sha-256':
+        salt = None
+        rounds = None
+
+        if existing_password and existing_password.startswith('SCRAM-SHA-256$'):
+            (_, info, _) = existing_password.split('$', 2)
+            (rounds, b64salt) = info.split(':', 1)
+            salt = base64.b64decode(b64salt)
+            rounds = int(rounds)
+
+        return scram_password(password, salt=salt, rounds=rounds)
 
     raise AnsibleFilterError("|encrypted_password does not recognise password_encryption scheme %s" % password_encryption)
 

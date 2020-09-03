@@ -185,6 +185,7 @@ def cluster_discovery(module, conn):
     m.update(replica_discovery(module, conn, m))
     m.update(database_discovery(module, conn, m))
     m.update(repmgr_discovery(module, conn, m))
+    m.update(role_discovery(module, conn, m))
 
     return m
 
@@ -350,6 +351,25 @@ def repmgr_discovery(module, conn, m0):
             )
 
     return {'repmgr': m} if m else {}
+
+def role_discovery(module, conn, m0):
+    m = dict()
+    m['roles'] = dict()
+
+    roles = query_results(conn, """
+        SELECT *, s.setconfig as rolconfig, ARRAY(SELECT b.rolname
+                FROM pg_catalog.pg_auth_members m
+                JOIN pg_catalog.pg_roles b ON (m.roleid = b.oid)
+                WHERE m.member = a.oid) as memberof
+            FROM pg_catalog.pg_authid a
+                LEFT JOIN pg_catalog.pg_db_role_setting s
+                    ON (a.oid = s.setrole AND s.setdatabase = 0::oid)
+            WHERE rolname !~ '^pg_'
+        """)
+    for r in roles:
+        m['roles'].update({r['rolname']: r})
+
+    return m
 
 def parse_kv(str):
     parts = [x.strip() for x in str.split('=', 1)]

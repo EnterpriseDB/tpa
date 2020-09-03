@@ -1,2 +1,2 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-"pgbouncer" "{{ password_encryption|encrypted_password(vars['pgbouncer_password'], 'pgbouncer') }}"
+"pgbouncer" "{{ password_encryption|encrypted_password(vars['pgbouncer_password'], username='pgbouncer', existing_password=existing_password) }}"

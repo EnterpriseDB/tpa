@@ -49,8 +49,13 @@
       {{ item.username }}_password
     generated_password: >-
       {{ vars.get(secret_name) }}
-    encrypted_password: >-
-      {{ password_encryption|encrypted_password(generated_password, item.username) }}
+    existing_password: >-
+      {{ cluster_facts.roles[item.username].rolpassword|default('unknown') }}
+    encrypted_password: "{{
+      password_encryption|encrypted_password(
+        generated_password, item.username, existing_password=existing_password
+      )
+    }}"
   with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes
