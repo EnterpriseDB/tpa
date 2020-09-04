@@ -30,6 +30,7 @@ nav:
     - Switchover: tpaexec-switchover.md
     - Rehydration: tpaexec-rehydrate.md
   - Miscellaneous:
+    - TPAexec, Ansible, and sudo: misc-ansible-sudo.md
     - PuTTY configuration: misc-configure-putty.md
     - Troubleshooting: misc-troubleshooting.md
 
