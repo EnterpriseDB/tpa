@@ -236,6 +236,11 @@ defaults that apply to only half your instances, and different values
 for the other half (as with the platform-specific settings in the
 example above).
 
+Locations represent a collection of settings that instances can “opt in”
+to. You can use them to stand for different data centres, AWS regions,
+Docker hosts, or something else entirely. TPAexec does not expect or
+enforce any particular interpretation.
+
 ### Design Considerations
 
 When creating a PostgreSQL cluster using TPAexec, it is worth spending a little
