@@ -24,6 +24,7 @@ nav:
   - Customisations:
     - Cluster configuration: configure-cluster.md
     - Instance configuration: configure-instance.md
+    - Building from source: configure-source.md
     - Deployment hooks: tpaexec-hooks.md
   - Cluster management:
     - Rolling updates: tpaexec-update-postgres.md

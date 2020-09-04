@@ -86,7 +86,9 @@ cluster_vars:
 
 Run ``tpaexec deploy … --skip-tags build-clean`` in order to reuse the
 build directory when doing repeated deploys. (Otherwise the old build
-directory is emptied before starting the build.)
+directory is emptied before starting the build.) You can also configure
+[local source directories](../configure-source.md#local-source-directories)
+to speed up your development builds.
 
 Whenever you run a source build, Postgres will be restarted.
 
