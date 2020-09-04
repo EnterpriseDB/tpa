@@ -4,6 +4,12 @@ TPAexec can set up fully-functional clusters with custom configuration
 by itself, but it allows you to write hook scripts to execute arbitrary
 Ansible tasks during the deployment.
 
+TPAexec already provides a broad variety of settings to control your
+cluster configuration, including custom repositories, custom packages,
+custom Postgres configuration (both pg_hba.conf and postgresql.conf),
+and so on. You can use hooks to address specific needs that are not met
+by the various configuration settings.
+
 If you create files with specific names under the ``hooks`` subdirectory
 of your cluster directory, TPAexec will invoke them at various stages of
 the deployment process.
@@ -17,12 +23,6 @@ $ cat > cluster_dir/hooks/pre-deploy.yml
 
 This is the ultimate extension mechanism for TPAexec. There is no limit
 to what you can do with hooks. Please use them with caution.
-
-TPAexec already provides a broad variety of settings to control your
-cluster configuration, including custom repositories, custom packages,
-custom Postgres configuration (both pg_hba.conf and postgresql.conf),
-and so on. Only if the existing mechanisms are insufficient should you
-consider writing hooks.
 
 Please keep in mind the additional maintenance burden of custom hooks.
 The TPAexec developers have no insight into your hook code, and cannot
