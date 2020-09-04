@@ -5,13 +5,9 @@ the deployment, then all Postgres-related packages together, and then
 packages for optional components separately. This page is about
 installing packages like pglogical that depend on Postgres itself.
 
-There are separate pages about how to
-[configure package repositories](repositories.md) and
-[install non-Postgres-related packages](packages.md).
-
 To install extra packages that depend on Postgres (e.g., Postgis), list
-them under ``extra_postgres_packages`` in ``cluster_vars`` or a
-particular instance's ``vars`` in config.yml:
+them under `extra_postgres_packages` in `cluster_vars` or a
+particular instance's `vars` in config.yml:
 
 ```yaml
 cluster_vars:
@@ -28,9 +24,9 @@ cluster_vars:
       - ubpkg1
 ```
 
-The packages listed under ``packages.common`` will be installed on every
+The packages listed under `packages.common` will be installed on every
 instance, together with the default list of Postgres packages, and any
 distribution-specific packages you specify.
 
 There's a separate page about
-[compiling and installing Postgres from source](postgres.md#source-installation).
+[compiling and installing Postgres from source](src.md).

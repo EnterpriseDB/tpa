@@ -1,167 +1,155 @@
-# TPAexec - Postgres configuration and other customisations
+# Instance configuration
 
-## Overview
+This page presents an overview of the various controls that TPAexec
+offers to customise the deployment process on cluster instances, with
+links to more detailed documentation.
 
-This document explains how to customise the configuration of a cluster
-by editing config.yml
+Before you dive into the details of deployment, it may be helpful to
+read [an overview of configuring a cluster](configure-cluster.md) to
+understand how cluster and instance variables and the other mechanisms
+in config.yml work together to allow you to write a concise,
+easy-to-review configuration.
 
-### Postgres postgresql.conf configuration variables
+## System-level configuration
 
-These can be configured by TPAexec at build time by setting the relevant
-parameters as node vars in the **~/tpa/clusters/\<clustername>/config.yml**
-file.
+The first thing TPAexec does is to ensure that Python is bootstrapped
+and ready to execute Ansible modules. Then it completes various
+system-level configuration tasks before moving on to
+[Postgres configuration](#postgres) below.
 
-An excerpt:
+### Package repositories
 
-```
-instances:
-    - node: 1
-      Name: lab-primary
-      type: t3.micro
-      region: eu-central-1
-      subnet: 10.33.243.0/24
-      volumes:
-            device_name: /dev/xvdf
-            volume_type: gp2
-            volume_size: 32
-            vars:
-              volume_for: postgres_data
-      tags:
-        role:
-          - primary
-        backup: lab-backup
-      vars:
-        work_mem: 18MB
-        max_connections: 222
-        shared_buffers: '64MB'
-```
+You can use the
+[pre-deploy hook](tpaexec-hooks.md#pre-deploy)
+to execute tasks before any package repositories are configured.
 
-Here, we see **work_mem**, **max_connections** & **shared_buffers** are all
-being defined - note that these should be defined as `<variable>: <value>`. To
-see what Postgres variables are possible to set, either read the documentation
-for the relevant Postgres version, or look in **$PGDATA/postgresql.conf** on a
-Postgres server.
+* [Configure YUM repositories](configure/yum_repositories.md)
+  (for RHEL and CentOS)
 
-During the deploy phase, TPAexec creates a directory on each Postgres node which
-contains files with settings which override those set in
-**$PGDATA/postgresql.conf**. This directory conf.d is included as the last line
-in $PGDATA/postgresql.conf by the setting:
+* [Configure APT repositories](configure/apt_repositories.md)
+  (for Debian and Ubuntu)
 
-```
-include_dir = 'conf.d'
-```
+* [Configure 2ndQuadrant repositories](configure/tpa_2q_repositories.md)
+  (on any system)
 
-...and is created in the $PGDATA directory ( **/opt/postgres/data** by default).
+You can use the
+[post-repo hook](tpaexec-hooks.md#post-repo)
+to execute tasks after package repositories have been configured (e.g.,
+to correct a problem with the repository configuration before installing
+any packages).
 
-Multiple files within the include directory are processed in file name order
-(according to C locale rules, i.e. numbers before letters, and uppercase
-letters before lowercase ones). This means that while the server is reading
-configuration files, it will only use the last setting encountered for a
-particular parameter.
+### Package installation
 
-```
-[postgres-server]$ ls $PGDATA/conf.d
-0000-tpa.conf          1111-extensions.conf                9999-override.conf
-0001-tpa_restart.conf  8888-shared_preload_libraries.conf
-```
+Once the repositories are configured, packages are installed at various
+stages throughout the deployment, beginning with a batch of system
+packages:
 
-Settings which can be dynamically set are written during the TPAexec deploy
-phase to **0000-tpa.conf** and settings which require a db restart are written
-to **0001-tpa_restart.conf**.
+* [Install non-Postgres packages](configure/packages.md)
+  (e.g., acl, openssl, sysstat)
 
-More information regarding default settings that TPAexec will use during
-deployment can be found under **$TPA_DIR/roles/postgres/config/templates**
-in files **tpa.conf.j2** & **tpa_restart.conf.j2**
+Postgres and other components (e.g., Barman, repmgr, pgbouncer) will be
+installed separately according to the cluster configuration; these are
+documented in their own sections below.
 
-```
-[tpa-server]$ ls $TPA_DIR/roles/postgres/config/templates
-extensions.conf.j2  pg_hba.conf.j2   settings.conf.j2  tpa_restart.conf.j2
-override.conf.j2    pg_hba.lines.j2  tpa.conf.j2       variable.j2
-```
+### Other system-level tasks
 
-#### Manual updates
+* [Create and mount filesystems](configure/volumes.md) (including RAID,
+  LUKS setup)
+* [Upload artifacts](configure/artifacts.md) (files, directories,
+  tar archives)
+* [Set sysctl values](configure/sysctl_values.md)
 
-Bearing these in mind, after TPAexec deployment, any manual updates for settings
-that override ``$PGDATA/postgresql.conf`` on any node should be made only to
-``$PGDATA/conf.d/9999-override.conf``, because any other file may get overwritten
-or overridden by subsequent settings at service start time. This is where you
-should configure any setting that requires persistence after reboot.
+<!-- WIP
 
-Any settings added to **9999-override.conf** should also be added to the
-relevant **config.yml** on the TPAexec server so that any rehydrate or
-subsequent build of the node will contain the most up-to-date setting.
+* [Configure OpenVPN](configure/openvpn.md)
+* [Configure hosts files](configure/hosts.md)
+* [Configure syslog](configure/syslog.md)
 
-### Postgres pg_hba.conf configuration variables
+-->
 
-These are automatically generated during deploy phase by TPAexec and should
-not manually edited, as they are likely to get overridden.
+## Postgres
 
+Postgres configuration is an extended process that goes hand-in-hand
+with setting up other components like repmgr and pgbouncer. It begins
+with installing Postgres itself.
 
-### Other customisations - hooks
+### Version selection
 
-It is possible to set up many other customisations during the build process by
-creating post deployment tasks that are called via the Ansible hook system.
+Use the
+[`--postgres-version`](tpaexec-configure.md#software-versions)
+configure option or set `postgres_version` in config.yml to specify
+which Postgres major version you want to install. The default version is
+currently 11, but you can select 9.4, 9.5, 9.6, 10, 12, or 13 instead.
 
-First create a **hooks** directory under `<clustername>`, then create a file in
-it called **post-deploy.yml**.
+That's all you really need to do to set up a working cluster. Everything
+else on this page is optional. You can control every aspect of the
+deployment if you want to, but the defaults are carefully tuned to give
+you a sensible cluster as a starting point.
 
-```
-$ mkdir ~/tpa/clusters/<clustername>/hooks
-$ touch ~/tpa/clusters/<clustername>/hooks/post-deploy.yml
+### Installation
 
-```
+The default `postgres_installation_method` is to install packages for
+the version of Postgres you selected, along with various extensions,
+according to the architecture's needs:
 
-In this snippet, designed to be part of a training lab, we create a user
-`student`, add them to the `admin` group, set a password, allow them to SSH
-with just password authentication, update `/etc/sudoers`, and restart the SSH
-service.
+* [Install Postgres and Postgres-related packages](configure/postgres_installation_method/pkg.md)
+  (e.g., pglogical, BDR, etc.)
 
-*Disclaimer - allowing SSH access to Internet facing instances with just
-password authentication is a security risk, and shouldn't be enabled on any
-production system*.
+* [Build and install Postgres and extensions from source](configure/postgres_installation_method/src.md)
+  (for development and testing)
 
-```
+Whichever installation method you choose, TPAexec can give you the same
+cluster configuration with a minimum of effort.
 
----
-- name: Starting the custom code now
-  debug:
-      msg: "Starting creation of student account"
-- name: Create a login user
-  user:
-      state: present
-      name: student
-      shell: /bin/bash
-# Set admin group relevant to OS type & version
-      group: adm
-      createhome: yes
-# password and quoted hash are both on the same line - hash has been truncated
-# for documentation purposes
-      password: "$6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdEL"
-- name: Add student to sudoers
-# Fully quoted line because of the ': '. See the Gotchas in the YAML docs.
-  lineinfile: "dest=/etc/sudoers line='student        ALL=(ALL)       NOPASSWD: ALL'"
-- name: Allow password auth
-  lineinfile:
-      path: /etc/ssh/sshd_config
-      regexp: "^PasswordAuthentication"
-      line: "PasswordAuthentication yes"
-      state: present
+### Configuration
 
-- name: Restart sshd
-  service: name=sshd state=restarted
+* [Configure the postgres Unix user](configure/postgres_user.md)
 
-```
+* [Run initdb to create the PGDATA directory](configure/initdb.md)
 
-The hashed password is created by installing **passlib** and running the
-following commands (at the password prompt enter the password to be hashed)
+* [Configure pg_hba.conf](configure/pg_hba.conf.md)
+* [Configure pg_ident.conf](configure/pg_ident.conf.md)
+* [Configure postgresql.conf](configure/postgresql.conf.md)
 
-```
-$ pip install passlib
-$ python -c "from passlib.hash import sha512_crypt; import getpass; \
-  print sha512_crypt.using(rounds=5000).hash(getpass.getpass())"
-Password:
-$6$F4NWXRFtSdCi8$DsB5vvMJYusQhSbvGXrYDXL6Xj37MUuqFCd4dGXdKd6NyxT3lpdEL
-```
+Once the Postgres configuration is in place, TPAexec will go on to
+install and configure other components such as Barman, repmgr,
+pgbouncer, and haproxy, according to the details of the architecture.
 
-In this manner, post-deployment tasks can be used to configure and modify server
-files--see [user](http://docs.ansible.com/ansible/latest/modules/user_module.html#user-module) and [lineinfile](http://docs.ansible.com/ansible/latest/modules/lineinfile_module.html) for more information on how to use those particular modules. Information about all the current modules available for Ansible can be found [here](http://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html) or just the system modules [here](http://docs.ansible.com/ansible/latest/modules/list_of_system_modules.html). The [shell](http://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module) module can be used to run commands on the nodes.
+<!-- WIP
+
+## Barman
+## repmgr
+## pgbouncer
+## haproxy
+
+-->
+
+### Configuring and starting services
+
+TPAexec will now install systemd service unit files for each service.
+The service for Postgres is named `postgres.service`, and can be started
+or stopped with `systemctl start postgres`.
+
+In the first deployment, the Postgres service will now be started. If
+you are running `tpaexec deploy` again, the service may be reloaded or
+restarted depending on what configuration changes you may have made. Of
+course, if the service is already running and there are no changes, then
+it's left alone.
+
+In any case, Postgres will be running at the end of this step.
+
+## After starting Postgres
+
+* [Create Postgres users](configure/postgres_users.md)
+
+* [Create Postgres databases](configure/postgres_databases.md)
+
+* [Configure pglogical replication](configure/pglogical.md)
+
+* [Configure .pgpass](configure/pgpass.md)
+
+<!-- WIP
+
+* [Configure BDR](configure/bdr.md)
+
+-->

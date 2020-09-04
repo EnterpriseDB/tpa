@@ -1,11 +1,10 @@
 # Configuring APT repositories
 
 This page explains how to configure APT package repositories on Debian
-and Ubuntu systems. There's also an
-[overview of configuring package repositories](repositories.md).
+and Ubuntu systems.
 
-You can define named repositories in ``apt_repositories``, and decide
-which ones to use by listing the names in ``apt_repository_list``:
+You can define named repositories in `apt_repositories`, and decide
+which ones to use by listing the names in `apt_repository_list`:
 
 ```yaml
 cluster_vars:
@@ -21,13 +20,13 @@ cluster_vars:
     - Example
 ```
 
-This configuration would install the GPG key (with id ``key_id``,
-obtained from ``key_url``) and a new entry under
-``/etc/apt/sources.list.d`` with the given ``repo`` line (or lines)
+This configuration would install the GPG key (with id `key_id`,
+obtained from `key_url`) and a new entry under
+`/etc/apt/sources.list.d` with the given `repo` line (or lines)
 for the PGDG repository (which is already defined by default) and the
 new Example repository.
 
 When you configure additional repositories, remember to include PGDG in
-``apt_repository_list`` if you still want to install PGDG packages.
+`apt_repository_list` if you still want to install PGDG packages.
 
-You can set ``apt_repository_list: []`` to not install any repositories.
+You can set `apt_repository_list: []` to not install any repositories.
