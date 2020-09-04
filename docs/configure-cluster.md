@@ -161,6 +161,9 @@ The settings outside `vars` may describe the properties of the instance
 cannot be defined under `vars`, it is rarely necessary to distinguish
 between these instance “settings” and instance “variables”.
 
+In this case, ``tpaexec provision`` will write a number of host
+variables to the inventory in ``host_vars/unwind/01-instance_vars.yml``.
+
 ## instance_defaults
 
 This is an optional mechanism to further reduce repetition in
@@ -298,12 +301,12 @@ OpenVPN gateway server, by giving it the role "openvpn-server". Depending on
 network or CPU performance constraints, it may be preferable to choose a
 different gateway server.
 
-In order to build the correct topology, the tag "**upstream:** \<Name>" is used,
+In order to build the correct topology, the tag "**upstream:** <Name>" is used,
 so that the node can be configured to replicate from the required host.
 
 If you are already using AWS in production, it is likely that you will need to
 use existing SSH keys to connect to the hosts - if this is the case, they can
-be set using "**ssh_key_file:** \<path to key file>", otherwise you can remove
+be set using "**ssh_key_file:** <path to key file>", otherwise you can remove
 this line and new keys will be generated.
 
 ```
@@ -572,7 +575,7 @@ instances:
 | volumes:   | (Optional) OS specific parameters for creating volumes--in this case a gp2 16GB volume, mounted on /var/lib/postgresql, the install directory for postgres. |
 | tags:      | Used to specify tags for the server                          |
 | role:      | **replica** - Used to define the server role--in this case it is a replica. If role is **replica**, then tag **upstream** needs to be defined. |
-| upstream:  | (Optional) Hostname of server that is upstream from this one: **upstream: \<Name>** is used to connect  replicas to upstream servers. In this case speedy-a is replicating to speedy-b |
+| upstream:  | (Optional) Hostname of server that is upstream from this one: **upstream: <Name>** is used to connect  replicas to upstream servers. In this case speedy-a is replicating to speedy-b |
 | backup:    | (Optional) Hostname of backup server                         |
 
 ###### ***Node 3***
