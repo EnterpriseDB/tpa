@@ -29,7 +29,7 @@
     git_credentials: "{{ lookup('env', 'TPA_GIT_CREDENTIALS') }}"
     git_env:
       GIT_USERNAME: "{{ git_credentials.split(':')[0] }}"
-      GIT_PASSWORD: "{{ git_credentials.split(':')[1] }}"
+      GIT_PASSWORD: "{{ git_credentials.split(':')[1] if git_credentials else '' }}"
     _task_environment: "{{
       git_credentials|ternary(git_env, {})
       |combine(ssh_auth_sock|ternary(ssh_env, {}))
