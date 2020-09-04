@@ -23,7 +23,7 @@ instances:
     subscriptions:
     - type: pglogical
       database: example
-      name: subscriber
+      name: some_subscription_name
       publication:
         name: some_publication_name
       replication_sets:
@@ -139,7 +139,7 @@ attributes of the subscription.
 subscriptions:
 - type: pglogical
   database: example
-  name: subscriber
+  name: some_subscription_name
   node_name: optional_pglogical_node_name
   publication:
     name: some_publication_name
