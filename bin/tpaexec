@@ -319,7 +319,14 @@ store_password() {
         args+=(--vault-password-file vault/vault_pass.txt)
     fi
 
-    file=$(echo ./inventory/group_vars/*/secrets/"$username"_password.yml)
+    dir=""
+    if [[ -d ./inventory ]]; then
+        dir=$(find ./inventory -path '*/group_vars/*/secrets' -type d)
+    fi
+    if [[ -z "$dir" ]]; then
+        error "inventory directory does not exist (did you run tpaexec provision?)"
+    fi
+    file="$dir"/"$username"_password.yml
 
     "$ansible"-vaultpw "${args[@]}" store "$file" "$@"
 }
@@ -334,7 +341,14 @@ show_password() {
         args+=(--vault-password-file vault/vault_pass.txt)
     fi
 
-    file=$(echo ./inventory/group_vars/*/secrets/"$username"_password.yml)
+    dir=""
+    if [[ -d ./inventory ]]; then
+        dir=$(find ./inventory -path '*/group_vars/*/secrets' -type d)
+    fi
+    if [[ -z "$dir" ]]; then
+        error "inventory directory does not exist (did you run tpaexec provision?)"
+    fi
+    file="$dir"/"$username"_password.yml
 
     "$ansible"-vaultpw "${args[@]}" show "$file" "$@"
 }
