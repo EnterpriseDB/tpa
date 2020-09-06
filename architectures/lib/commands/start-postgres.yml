@@ -16,53 +16,32 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: all
+  hosts: role_postgres
   tasks:
-  # The luksOpen/mount should arguably be done by sys/fs somehow; the
-  # most troubling part about this is the duplication of "src" below
-  # (i.e., the fact that translating x → /dev/mapper/x is duplicated
-  # between sys/fs/tasks/luks and here).
-
-  - shell: >
-      echo -n "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ item.device }}" "{{ _luks_volume }}"
-    args:
-      executable: /bin/bash
-    register: luksopen
-    failed_when: luksopen.rc not in [0, 5]
-    changed_when: luksopen.rc != 5
-    with_items: >
-      {{ volumes|json_query("[?encryption=='luks']") }}
-    vars:
-      _luks_volume: >-
-        {{ item.luks_volume|default(item.device|basename) }}
-    no_log: true
-
-  - mount:
-      src: "{{ _device }}"
-      name: "{{ item.mountpoint }}"
-      fstype: "{{ item.fstype|default('ext4') }}"
-      state: mounted
+  - include_role:
+      name: sys/fs
+      tasks_from: mount.yml
     with_items: "{{ volumes }}"
-    vars:
-      _device: >-
-        {{ ('encryption' in item and item.encryption == 'luks')|ternary('/dev/mapper/%s' % (item.luks_volume|default(item.device|basename)), item.device) }}
+    loop_control:
+      loop_var: volume
+      label: >-
+        {{ volume.device }}
 
   # Once all the volumes are mounted, we can start Postgres, and then
   # start repmgr once Postgres is running.
 
-  - block:
-    - service:
-        name: postgres
-        state: started
-    - command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
-      changed_when: False
-      become_user: "{{ postgres_user }}"
-      become: yes
-    when: >
-      'postgres' in role
+  - service:
+      name: postgres
+      state: started
+
+  - command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
+    changed_when: False
+    become_user: "{{ postgres_user }}"
+    become: yes
 
   - service:
       name: repmgr
       state: started
     when: >
-      'primary' in role or 'replica' in role
+      ('primary' in role or 'replica' in role)
+      and 'bdr' not in role

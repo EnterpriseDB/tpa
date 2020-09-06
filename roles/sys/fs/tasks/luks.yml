@@ -2,50 +2,36 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Ensure LUKS configuration is available
-  assert:
-    msg: "You must specify the luks_device to initialise"
-    that:
-      - luks_device is defined
+# If volume.device is not already initialised as a LUKS volume, we must
+# initialise it and map it to _luks_volume. (Note: _device is the final
+# mapped name of the volume, so we must use volume.device here.)
 
-# If luks_device is already a LUKS device, we do nothing.
+- include_role: name=secret
+  vars:
+    secret_name: luks_passphrase
 
-- name: Is the encrypted volume already initialised?
-  command: cryptsetup isLuks "{{ luks_device }}"
-  ignore_errors: true
-  changed_when: False
-  register: isluks_check
+- name: Ensure {{ volume.device }} does not contain a valid filesystem
+  command: /sbin/blkid -o value -s TYPE {{ volume.device }}
+  register: blkid
+  changed_when: false
+  failed_when:
+    blkid.stdout not in ['', 'crypto_LUKS']
 
-# Otherwise, we initialise the device as a LUKS volume and map it to the
-# given luks_volume name, and override _device to the name of the mapped
-# device.
+- name: Initialise LUKS volume on {{ volume.device }}
+  command:
+    cryptsetup -q luksFormat --key-file - "{{ volume.device }}"
+  args:
+    stdin: "{{ luks_passphrase }}"
+    stdin_add_newline: no
+  when:
+    blkid.stdout == ''
 
-- block:
-
-    # Load the LUKS passphrase from a vault-encrypted file. This assumes
-    # that ansible-playbook was invoked with the right --vault-password
-    # or --vault-password-file argument.
-    #
-    # TODO: This is a cluster-global file, which means that every host
-    # will share a LUKS passphrase. That is acceptable for the moment,
-    # but in future, we should generate individual passphrases for each
-    # host and store them in inventory/host_vars/…
-
-    - name: Initialise LUKS volume on {{ luks_device }}
-      shell: >
-        echo -n "{{ luks_passphrase }}" | cryptsetup -q luksFormat --key-file - "{{ luks_device }}"
-      args:
-        executable: /bin/bash
-      no_log: true
-
-    - name: Map LUKS volume to /dev/mapper/{{ luks_volume }}
-      shell: >
-        echo -n "{{ luks_passphrase }}" | cryptsetup luksOpen --key-file - "{{ luks_device }}" "{{ luks_volume }}"
-      args:
-        executable: /bin/bash
-      no_log: true
-  when: isluks_check is not successful
-
-- name: Record updated mapped device name
-  set_fact:
-    _device: "/dev/mapper/{{ luks_volume }}"
+- name: Map LUKS volume on {{ volume.device }} to {{ _luks_volume }}
+  command:
+    cryptsetup luksOpen --key-file - "{{ volume.device }}" "{{ _luks_volume }}"
+  args:
+    stdin: "{{ luks_passphrase }}"
+    stdin_add_newline: no
+  register: luksopen
+  failed_when: luksopen.rc not in [0, 5]
+  changed_when: luksopen.rc != 5

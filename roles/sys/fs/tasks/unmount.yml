@@ -1,0 +1,27 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# Unmounts the given volume, and unmaps it if appropriate.
+
+- name: Ensure filesystem configuration is specified
+  assert:
+    msg: "Please specify at least the device name and mountpoint"
+    that:
+      - volume is defined
+      - volume.device is defined
+      - volume.mountpoint is defined
+
+- name: Unmount {{ _device }} from {{ volume.mountpoint }}
+  mount:
+    src: "{{ _device }}"
+    name: "{{ volume.mountpoint }}"
+    state: unmounted
+
+- name: Unmap LUKS volume from /dev/mapper/{{ _luks_volume }}
+  command: cryptsetup luksClose "{{ _luks_volume }}"
+  register: luksclose
+  failed_when: luksclose.rc not in [0, 4]
+  changed_when: luksclose.rc != 4
+  when:
+    _encryption == 'luks'

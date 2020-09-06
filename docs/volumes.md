@@ -245,7 +245,7 @@ instances:
   - device_name: /dev/xyz
     vars:
       encryption: luks
-      luks_device: mappedname
+      luks_volume: mappedname
       volume_for: …
 ```
 
@@ -253,6 +253,9 @@ If a volume with `encryption: luks` set is not already initialised,
 TPAexec will use `cryptsetup` to first `luksFormat` and then `luksOpen`
 it to map it under `/dev/mapper/mappedname` before handling filesystem
 creation as with any other device.
+
+(To avoid any possibility of data loss, TPAexec will refuse to set up
+LUKS encryption on a device that contains a valid filesystem already.)
 
 If you create a LUKS-encrypted `volume_for: postgres_data`, TPAexec will
 configure Postgres to not start automatically at boot. You can use

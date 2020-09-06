@@ -14,23 +14,9 @@
       - volume.device is defined
       - volume.mountpoint is defined
 
-- block:
-  - include_role: name=secret
-    vars:
-      secret_name: "{{ encryption }}_passphrase"
-
-  - name: Set up encryption on {{ _device }}
-    include_tasks: "{{ encryption }}.yml"
-    vars:
-      luks_device: "{{ _device }}"
-      luks_volume: "{{ volume.luks_volume|default(_device|basename) }}"
-
-  - name: Set noauto in mount options for {{ _device }}
-    set_fact:
-      _mountopts: "noauto{% if _mountopts %},{{ _mountopts }}{% endif -%}"
-    when: >
-      'noauto' not in _mountopts
-  when: volume.encryption|default('none') != 'none'
+- include_tasks: "{{ _encryption }}.yml"
+  when:
+    _encryption in ['luks']
 
 - name: Set readahead on {{ _device }} to {{ '%d' % ((_readahead|int)/2048) }}MB
   shell: >
@@ -56,13 +42,11 @@
     fstype: "{{ _fstype }}"
     opts: "{{ volume.fsopts|default(omit) }}"
 
-- name: Mount {{ _device }} under {{ volume.mountpoint }}
-  mount:
-    src: "{{ _device }}"
-    name: "{{ volume.mountpoint }}"
-    fstype: "{{ _fstype }}"
-    opts: "{{ _mountopts }}"
-    state: mounted
+- include_tasks: mount.yml
+
+# Setting the ownership and permissions on the mountpoint after mounting
+# the filesystem will store the settings in the filesystem metadata, and
+# will therefore persist across mounts.
 
 - name: Ensure {{ volume.mountpoint }} has the correct ownership and mode
   file:

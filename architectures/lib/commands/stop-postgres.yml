@@ -7,8 +7,7 @@
     pgdata_initialised: false
   tags: always
 
-# We want to make sure postgres and repmgr are running on all applicable
-# instances in the cluster. First, we unlock any LUKS-encrypted volumes.
+# We stop services and unmount and close any LUKS-encrypted volumes.
 
 - name: Start Postgres on cluster {{ cluster_dir }}
   any_errors_fatal: True
@@ -16,35 +15,25 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: all
+  hosts: role_postgres
   tasks:
   - service:
       name: repmgr
       state: stopped
     when: >
-      'primary' in role or 'replica' in role
+      ('primary' in role or 'replica' in role)
+      and 'bdr' not in role
 
   - service:
       name: postgres
       state: stopped
-    when: >
-      'postgres' in role
 
-  - mount:
-      src: "{{ _device }}"
-      name: "{{ item.mountpoint }}"
-      state: unmounted
-    with_items: "{{ volumes }}"
-    vars:
-      _device: >-
-        {{ ('encryption' in item and item.encryption == 'luks')|ternary('/dev/mapper/%s' % (item.luks_volume|default(item.device|basename)), item.device) }}
-
-  - command: cryptsetup luksClose "{{ _luks_volume }}"
-    register: luksclose
-    failed_when: luksclose.rc not in [0, 4]
-    changed_when: luksclose.rc != 4
+  - include_role:
+      name: sys/fs
+      tasks_from: unmount.yml
     with_items: >
       {{ volumes|json_query("[?encryption=='luks']") }}
-    vars:
-      _luks_volume: >-
-        {{ item.luks_volume|default(item.device|basename) }}
+    loop_control:
+      loop_var: volume
+      label: >-
+        {{ volume.device }}

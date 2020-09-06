@@ -1,0 +1,40 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# Ensures that a volume is mapped (if necessary) and mounted on the
+# appropriate mountpoint.
+
+- name: Ensure filesystem configuration is specified
+  assert:
+    msg: "Please specify at least the device name and mountpoint"
+    that:
+      - volume is defined
+      - volume.device is defined
+      - volume.mountpoint is defined
+
+- name: Map LUKS volume on {{ volume.device }} to {{ _luks_volume }}
+  command:
+    cryptsetup luksOpen --key-file - "{{ volume.device }}" "{{ _luks_volume }}"
+  args:
+    stdin: "{{ luks_passphrase }}"
+    stdin_add_newline: no
+  register: luksopen
+  failed_when: luksopen.rc not in [0, 5]
+  changed_when: luksopen.rc != 5
+  when:
+    _encryption == 'luks'
+
+- name: Mount {{ _device }} under {{ volume.mountpoint }}
+  mount:
+    src: "{{ _device }}"
+    name: "{{ volume.mountpoint }}"
+    fstype: "{{ _fstype }}"
+    opts: "{{ _mount_options }}"
+    state: mounted
+  vars:
+    _mountopts: "{{ volume.mountopts|default(default_mountopts) }}"
+    _noauto: "{{ (_encryption == 'luks')|ternary(['noauto'], []) }}"
+    _mount_options: "{{
+      _mountopts.split(',')|map('trim')|list|union(_noauto)|join(',')
+    }}"
