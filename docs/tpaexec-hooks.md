@@ -67,7 +67,8 @@ after TPAexec has generated Postgres configuration files, including
 pg_hba.conf and the files in conf.d, but before the server has been
 started.
 
-This hook can be used, for example, to create a pg_ident.conf file.
+This hook can be used, for example, to create additional configuration
+files under `conf.d`.
 
 ### postgres-config-final
 

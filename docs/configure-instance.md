@@ -111,6 +111,11 @@ cluster configuration with a minimum of effort.
 * [Configure pg_ident.conf](configure/pg_ident.conf.md)
 * [Configure postgresql.conf](configure/postgresql.conf.md)
 
+You can use the
+[postgres-config hook](tpaexec-hooks.md#postgres-config)
+to execute tasks after the Postgres configuration files have been
+installed (e.g., to install additional configuration files).
+
 Once the Postgres configuration is in place, TPAexec will go on to
 install and configure other components such as Barman, repmgr,
 pgbouncer, and haproxy, according to the details of the architecture.
@@ -147,6 +152,11 @@ In any case, Postgres will be running at the end of this step.
 * [Configure pglogical replication](configure/pglogical.md)
 
 * [Configure .pgpass](configure/pgpass.md)
+
+You can use the
+[postgres-config-final hook](tpaexec-hooks.md#postgres-config-final)
+to execute tasks after the post-startup Postgres configuration has been
+completed (e.g., to perform SQL queries to create objects or load data).
 
 <!-- WIP
 
