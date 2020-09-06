@@ -386,6 +386,8 @@ def get_device_variables(volumes):
     seen = set()
     results = []
     for v in volumes:
+        if not isinstance(v, dict):
+            continue
         dev = v.get('raid_device', v.get('device_name'))
         if dev not in seen:
             seen.add(dev)
