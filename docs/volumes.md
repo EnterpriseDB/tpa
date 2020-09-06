@@ -58,7 +58,7 @@ Volumes are properties of an instance. You cannot set them in
 `cluster_vars`, because they contain platform-specific settings.
 
 The
-[`instance_defaults`](../configure-cluster.md#instance_defaults)
+[`instance_defaults`](configure-cluster.md#instance_defaults)
 mechanism makes special allowances for volume definitions. Since volume
 definitions in a large cluster may be quite repetitive (especially since
 we recommend that instances in a cluster be configured as close to each

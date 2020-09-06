@@ -33,7 +33,7 @@ You can set `yum_repository_list: []` to not install any repositories
 (but things will break without an alternative source of EPEL packages).
 
 To configure a repository which does not have a repo RPM, you can use a
-[pre-deploy hook](../tpaexec-hooks.md) to install the relevant files
+[pre-deploy hook](tpaexec-hooks.md) to install the relevant files
 yourself:
 
 ```yaml

@@ -79,7 +79,7 @@ databases, but before any BDR configuration. You can set
 [`postgres_users`](postgres_users.md) and
 [`postgres_databases`](postgres_databases.md) to create databases
 for replication, and use the
-[`postgres-config-final`](../tpaexec-hooks.md#postgres-config-final)
+[`postgres-config-final`](tpaexec-hooks.md#postgres-config-final)
 hook to populate the databases before pglogical is configured.
 
 ## Publications

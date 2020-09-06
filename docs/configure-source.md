@@ -68,9 +68,9 @@ can, therefore, build things other than Postgres, pglogical, and BDR.
 
 The available options are documented here:
 
-* [Building Postgres from source](configure/postgres_installation_method/src.md)
+* [Building Postgres from source](postgres_installation_method_src.md)
 
-* [Building extensions with ``install_from_source``](configure/install_from_source.md)
+* [Building extensions with ``install_from_source``](install_from_source.md)
 
 ## Local source directories
 

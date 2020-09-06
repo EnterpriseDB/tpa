@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import mimetypes
 import subprocess
-import re
 import os
 import sys
 from pandocfilters import toJSONFilters, RawBlock, Header, Image
@@ -21,8 +20,7 @@ def headers(key, value, fmt, meta):
 def links_to_local(key, value, fmt, meta):
     if key == 'Link':
         if value[2][0][-3:] == '.md':
-            f = re.sub('^(\.\./)*', '', value[2][0])
-            with open(f, 'r') as f:
+            with open(value[2][0], 'r') as f:
                 first_line = f.readline()
                 if first_line[0] == '#':
                     value[2][0] = '#' + first_line[2:].lower().replace(' ', '-').strip()

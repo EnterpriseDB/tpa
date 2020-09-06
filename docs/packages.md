@@ -31,7 +31,7 @@ based on which distribution the instance is running. If any of these
 packages is not available, the deployment will fail.
 
 Don't list any packages that depend on Postgres; use
-[`extra_postgres_packages`](postgres_installation_method/pkg.md)
+[`extra_postgres_packages`](postgres_installation_method_pkg.md)
 instead.
 
 ## Optional packages

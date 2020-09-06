@@ -4,7 +4,7 @@ This page explains how to clone Git repositories that require
 authentication.
 
 This may be required when you change `postgres_git_url`
-to [install Postgres from source](postgres_installation_method/src.md) or
+to [install Postgres from source](postgres_installation_method_src.md) or
 [use `install_from_source`](install_from_source.md) to compile and
 install extensions.
 

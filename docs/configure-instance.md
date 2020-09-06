@@ -23,13 +23,13 @@ You can use the
 [pre-deploy hook](tpaexec-hooks.md#pre-deploy)
 to execute tasks before any package repositories are configured.
 
-* [Configure YUM repositories](configure/yum_repositories.md)
+* [Configure YUM repositories](yum_repositories.md)
   (for RHEL and CentOS)
 
-* [Configure APT repositories](configure/apt_repositories.md)
+* [Configure APT repositories](apt_repositories.md)
   (for Debian and Ubuntu)
 
-* [Configure 2ndQuadrant repositories](configure/tpa_2q_repositories.md)
+* [Configure 2ndQuadrant repositories](tpa_2q_repositories.md)
   (on any system)
 
 You can use the
@@ -44,7 +44,7 @@ Once the repositories are configured, packages are installed at various
 stages throughout the deployment, beginning with a batch of system
 packages:
 
-* [Install non-Postgres packages](configure/packages.md)
+* [Install non-Postgres packages](packages.md)
   (e.g., acl, openssl, sysstat)
 
 Postgres and other components (e.g., Barman, repmgr, pgbouncer) will be
@@ -53,17 +53,17 @@ documented in their own sections below.
 
 ### Other system-level tasks
 
-* [Create and mount filesystems](configure/volumes.md) (including RAID,
+* [Create and mount filesystems](volumes.md) (including RAID,
   LUKS setup)
-* [Upload artifacts](configure/artifacts.md) (files, directories,
+* [Upload artifacts](artifacts.md) (files, directories,
   tar archives)
-* [Set sysctl values](configure/sysctl_values.md)
+* [Set sysctl values](sysctl_values.md)
 
 <!-- WIP
 
-* [Configure OpenVPN](configure/openvpn.md)
-* [Configure hosts files](configure/hosts.md)
-* [Configure syslog](configure/syslog.md)
+* [Configure OpenVPN](openvpn.md)
+* [Configure hosts files](hosts.md)
+* [Configure syslog](syslog.md)
 
 -->
 
@@ -92,10 +92,10 @@ The default `postgres_installation_method` is to install packages for
 the version of Postgres you selected, along with various extensions,
 according to the architecture's needs:
 
-* [Install Postgres and Postgres-related packages](configure/postgres_installation_method/pkg.md)
+* [Install Postgres and Postgres-related packages](postgres_installation_method_pkg.md)
   (e.g., pglogical, BDR, etc.)
 
-* [Build and install Postgres and extensions from source](configure/postgres_installation_method/src.md)
+* [Build and install Postgres and extensions from source](postgres_installation_method_src.md)
   (for development and testing)
 
 Whichever installation method you choose, TPAexec can give you the same
@@ -103,13 +103,13 @@ cluster configuration with a minimum of effort.
 
 ### Configuration
 
-* [Configure the postgres Unix user](configure/postgres_user.md)
+* [Configure the postgres Unix user](postgres_user.md)
 
-* [Run initdb to create the PGDATA directory](configure/initdb.md)
+* [Run initdb to create the PGDATA directory](initdb.md)
 
-* [Configure pg_hba.conf](configure/pg_hba.conf.md)
-* [Configure pg_ident.conf](configure/pg_ident.conf.md)
-* [Configure postgresql.conf](configure/postgresql.conf.md)
+* [Configure pg_hba.conf](pg_hba.conf.md)
+* [Configure pg_ident.conf](pg_ident.conf.md)
+* [Configure postgresql.conf](postgresql.conf.md)
 
 You can use the
 [postgres-config hook](tpaexec-hooks.md#postgres-config)
@@ -145,13 +145,13 @@ In any case, Postgres will be running at the end of this step.
 
 ## After starting Postgres
 
-* [Create Postgres users](configure/postgres_users.md)
+* [Create Postgres users](postgres_users.md)
 
-* [Create Postgres databases](configure/postgres_databases.md)
+* [Create Postgres databases](postgres_databases.md)
 
-* [Configure pglogical replication](configure/pglogical.md)
+* [Configure pglogical replication](pglogical.md)
 
-* [Configure .pgpass](configure/pgpass.md)
+* [Configure .pgpass](pgpass.md)
 
 You can use the
 [postgres-config-final hook](tpaexec-hooks.md#postgres-config-final)
@@ -160,7 +160,7 @@ completed (e.g., to perform SQL queries to create objects or load data).
 
 <!-- WIP
 
-* [Configure BDR](configure/bdr.md)
+* [Configure BDR](bdr.md)
 
 -->
 

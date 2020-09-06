@@ -46,4 +46,4 @@ module accepts.
 
 Copying files and directories to target instances is a common-enough
 need that this feature provides a convenient shortcut you can use
-instead of writing a [custom hook](../tpaexec-hooks.md).
+instead of writing a [custom hook](tpaexec-hooks.md).

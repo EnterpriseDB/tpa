@@ -29,4 +29,4 @@ instance, together with the default list of Postgres packages, and any
 distribution-specific packages you specify.
 
 There's a separate page about
-[compiling and installing Postgres from source](src.md).
+[compiling and installing Postgres from source](postgres_installation_method_src.md).

@@ -23,7 +23,7 @@ cluster_vars:
 
 The default git.postgresql.org repository does not require
 authentication, but if necessary, you can use
-[SSH agent forwarding or an HTTPS username/password](../git-credentials.md)
+[SSH agent forwarding or an HTTPS username/password](git-credentials.md)
 to authenticate to other repositories.
 
 The repository will be cloned into `postgres_src_dir` (default:
@@ -69,7 +69,7 @@ cluster_vars:
 Run `tpaexec deploy … --skip-tags build-clean` in order to reuse the
 build directory when doing repeated deploys. (Otherwise the old build
 directory is emptied before starting the build.) You can also configure
-[local source directories](../../configure-source.md#local-source-directories)
+[local source directories](configure-source.md#local-source-directories)
 to speed up your development builds.
 
 Whenever you run a source build, Postgres will be restarted.
@@ -78,7 +78,7 @@ Whenever you run a source build, Postgres will be restarted.
 
 Even if you install Postgres from packages, you can compile and install
 extensions from source. There's a separate page about how to configure
-[`install_from_source`](../install_from_source.md).
+[`install_from_source`](install_from_source.md).
 
 If you install Postgres from source, however, you will need to install
 extensions from source as well, because the extension packages typically
@@ -87,5 +87,5 @@ depend on the Postgres package(s) being installed.
 ## Package installation
 
 There's a separate page about
-[installing Postgres and Postgres-related packages](pkg.md)
+[installing Postgres and Postgres-related packages](postgres_installation_method_pkg.md)
 with `postgres_installation_method: pkg` (the default).
