@@ -163,3 +163,7 @@ completed (e.g., to perform SQL queries to create objects or load data).
 * [Configure BDR](configure/bdr.md)
 
 -->
+
+You can use the
+[post-deploy hook](tpaexec-hooks.md#post-deploy)
+to execute tasks after the deployment process has completed.
