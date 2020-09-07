@@ -298,6 +298,10 @@ store_password() {
         shift
 
         case "$opt" in
+            --secret-name)
+                secret_name=${1:?secret name not specified}
+                shift
+                ;;
             --random)
                 args+=(-c "$TPA_DIR"/architectures/lib/password)
                 ;;
@@ -312,8 +316,11 @@ store_password() {
 
     set -- "${REMAINDER[@]:+${REMAINDER[@]}}" "$@"
 
-    username=${1:?No username specified}
-    shift
+    if [[ ${secret_name:-''} == "" ]]; then
+        username=${1:?No username specified}
+        secret_name="$username"_password
+        shift
+    fi
 
     if [ -f vault/vault_pass.txt ]; then
         args+=(--vault-password-file vault/vault_pass.txt)
@@ -326,7 +333,7 @@ store_password() {
     if [[ -z "$dir" ]]; then
         error "inventory directory does not exist (did you run tpaexec provision?)"
     fi
-    file="$dir"/"$username"_password.yml
+    file="$dir"/"$secret_name".yml
 
     "$ansible"-vaultpw "${args[@]}" store "$file" "$@"
 }
@@ -349,6 +356,9 @@ show_password() {
         error "inventory directory does not exist (did you run tpaexec provision?)"
     fi
     file="$dir"/"$username"_password.yml
+    if [[ ! -f $file && -f "$dir/$username".yml ]]; then
+        file="$dir"/"$username".yml
+    fi
 
     "$ansible"-vaultpw "${args[@]}" show "$file" "$@"
 }
