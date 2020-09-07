@@ -33,6 +33,10 @@
   set_fact:
     password_encryption: "{{
       password_encryption|default(
-        cluster_facts.pg_settings.password_encryption|default(default_password_encryption)
+        (current_setting == 'on')|ternary('md5', current_setting)
       )
+    }}"
+  vars:
+    current_setting: "{{
+      cluster_facts.pg_settings.password_encryption|default(default_password_encryption)
     }}"
