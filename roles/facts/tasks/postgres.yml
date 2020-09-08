@@ -58,6 +58,7 @@
     pgbouncer_port: "{{ pgbouncer_port|default(default_pgbouncer_port) }}"
     pgbouncer_backend: "{{ pgbouncer_backend|default(default_pgbouncer_backend) }}"
     pgbouncer_backend_port: "{{ pgbouncer_backend_port|default(default_pgbouncer_backend_port) }}"
+    pgbouncer_auth_user: "{{ pgbouncer_auth_user|default(default_pgbouncer_auth_user) }}"
     haproxy_server_options: "{{ haproxy_server_options|default([]) }}"
     wal_or_xlog: "{{ wal_string }}"
     max_connections: "{{ max_connections|default(default_max_connections) }}"
@@ -171,7 +172,7 @@
 # backwards-compatibility, if 'dsn' is specified, we pass it through
 # after appending auth_user to it.
 #
-# In every case, we want to set auth_user=pgbouncer.
+# In every case, we want to set auth_user=pgbouncer_auth_user.
 
 - name: Fill in pgbouncer_databases options
   set_fact:
@@ -182,10 +183,10 @@
           'options': {
             'host': pgbouncer_backend,
             'port': pgbouncer_backend_port,
-          }|combine(item.options|default({}))|combine({'auth_user': 'pgbouncer'})
+          }|combine(item.options|default({}))|combine({'auth_user': pgbouncer_auth_user})
         }|combine(
           ('dsn' in item)|ternary(
-            {'dsn': '%s auth_user=pgbouncer' % item.get('dsn')},
+            {'dsn': '%s auth_user=%s' % (item.get('dsn'), pgbouncer_auth_user)},
             {}
           )
         )

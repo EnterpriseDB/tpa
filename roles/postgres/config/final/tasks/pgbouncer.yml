@@ -2,27 +2,66 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Create pg_catalog.pgbouncer_get_auth function
+# We configure pgbouncer's auth_query to execute a function named
+# pgbouncer_get_auth() to retrieve the password for a user. We must now
+# create this function in every database, and grant execute permissions
+# to pgbouncer_auth_user.
+
+- name: Check if function pgbouncer_get_auth() exists and is executable
   postgresql_query:
     conninfo: "{{ dsn|dbname(item) }}"
     queries:
-      - SELECT proname FROM pg_catalog.pg_proc p JOIN pg_namespace n ON (p.pronamespace=n.oid) WHERE nspname='pg_catalog' AND proname = 'pgbouncer_get_auth'
-      - >
-        CREATE OR REPLACE FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT)
-        RETURNS TABLE(username TEXT, password TEXT) AS $$
-        BEGIN
-          RETURN QUERY
-          SELECT usename::TEXT, passwd::TEXT FROM pg_catalog.pg_shadow
-          WHERE usename = p_usename;
-        END;
-        $$ LANGUAGE plpgsql SECURITY DEFINER
-      - REVOKE ALL ON FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT) FROM PUBLIC
-      - GRANT EXECUTE ON FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT) TO pgbouncer
-  register: create_function
-  changed_when:
-    create_function is successful and create_function.rowcounts[0] == 0
+    - text: >
+        SELECT current_database() as datname, proname,
+            has_function_privilege(%s, 'pg_catalog.pgbouncer_get_auth(text)', 'EXECUTE')
+              AS pgbouncer_can_execute
+          FROM pg_catalog.pg_proc p
+            JOIN pg_catalog.pg_namespace n ON (p.pronamespace=n.oid)
+          WHERE nspname='pg_catalog' AND proname='pgbouncer_get_auth'
+      args:
+      - "{{ pgbouncer_auth_user }}"
+  register: auth_function
   become_user: "{{ postgres_user }}"
   become: yes
   with_items: "{{ cluster_facts.databases.keys()|list }}"
   when: >
     item not in ['template0', 'bdr_supervisordb']
+  changed_when: false
+
+- set_fact:
+    auth_function_dbs: "{{
+      auth_function_dbs|default({})|combine({
+        item.results[0].datname: item.results[0]
+      })
+    }}"
+  with_items: "{{ auth_function.results }}"
+  loop_control:
+    label: >-
+      {{ item.item }}
+  when: >
+    'results' in item and item.rowcount == 1
+
+- name: Create function pgbouncer_get_auth() and grant execute permissions
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(item) }}"
+    queries:
+      - text: >
+          CREATE OR REPLACE FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT)
+          RETURNS TABLE(username TEXT, password TEXT) AS $$
+          BEGIN
+            RETURN QUERY
+            SELECT usename::TEXT, passwd::TEXT FROM pg_catalog.pg_shadow
+            WHERE usename = p_usename;
+          END;
+          $$ LANGUAGE plpgsql SECURITY DEFINER
+      - text: REVOKE ALL ON FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT) FROM PUBLIC
+      - text: GRANT EXECUTE ON FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT) TO "{{ pgbouncer_auth_user }}"
+  changed_when: True
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ cluster_facts.databases.keys()|list }}"
+  vars:
+    dbs: "{{ auth_function_dbs|default({}) }}"
+  when:
+    - item not in ['template0', 'bdr_supervisordb']
+    - item not in dbs or dbs[item].pgbouncer_can_execute == false

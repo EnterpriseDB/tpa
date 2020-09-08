@@ -4,3 +4,5 @@
 
 default_pgbouncer_pool_mode: session
 default_pgbouncer_default_pool_size: 20
+
+_userlist: /etc/pgbouncer/userlist.txt

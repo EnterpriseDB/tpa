@@ -4,16 +4,21 @@
 
 - include_role: name=postgres/createuser
   vars:
-    username: pgbouncer
+    username: "{{ pgbouncer_auth_user }}"
+    password_encryption: md5
   when: >
     'postgres' in role or
     'pgbouncer' in role
   tags: always
 
-- include_role: name=postgres/user
+- include_role:
+    name: postgres/user
+    apply:
+      tags: user
   when: >
     'pgbouncer' in role and
     'postgres' not in role
+  tags: user
 
 - include_tasks: pgbouncer.yml
   when: >

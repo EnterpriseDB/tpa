@@ -1,2 +1,7 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-"pgbouncer" "{{ password_encryption|encrypted_password(vars['pgbouncer_password'], username='pgbouncer', existing_password=existing_password) }}"
+"pgbouncer" "{{ password_encryption|encrypted_password(
+    vars['pgbouncer_password'], username='pgbouncer', existing_password=existing_pgbouncer_password)
+}}"
+"{{ pgbouncer_auth_user }}" "{{ 'md5'|encrypted_password(
+    vars['%s_password' % pgbouncer_auth_user], username=pgbouncer_auth_user, existing_password=existing_auth_user_password)
+}}"

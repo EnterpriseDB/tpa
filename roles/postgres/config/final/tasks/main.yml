@@ -52,7 +52,7 @@
     existing_password: >-
       {{ cluster_facts.roles[item.username].rolpassword|default('unknown') }}
     encrypted_password: "{{
-      password_encryption|encrypted_password(
+      item.password_encryption|default(password_encryption)|encrypted_password(
         generated_password, item.username, existing_password=existing_password
       )
     }}"
@@ -125,14 +125,16 @@
 
 - include_role: name=postgres/facts
 
-# Create pgbouncer_get_auth() function.
+# If there's an entry for pgbouncer_auth_user in postgres_users (which
+# means the pgbouncer role was applied earlier), we must ensure that a
+# pgbouncer_get_auth() function is available in every database.
 
 - include_tasks:
     file: pgbouncer.yml
     apply:
       tags: pgbouncer
   when: >
-    postgres_users|json_query("[?username=='pgbouncer']") != []
+    postgres_users|json_query("[?username=='%s']" % pgbouncer_auth_user) != []
   tags: pgbouncer
 
 - name: Include postgres-config-final hook

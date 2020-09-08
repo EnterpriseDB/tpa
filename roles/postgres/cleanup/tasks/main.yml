@@ -12,7 +12,7 @@
     queries:
       - text: DROP FUNCTION IF EXISTS pgbouncer.get_auth(text)
       - text: DROP SCHEMA IF EXISTS pgbouncer
-  register: drop_schema
+  register: drop_schema_pgbouncer
   become_user: "{{ postgres_user }}"
   become: yes
   with_items: "{{ cluster_facts.databases.keys()|list }}"
@@ -22,3 +22,35 @@
     and (item not in cluster_facts.bdr_databases
       or inventory_hostname == first_bdr_primary
       or 'bdr' not in role)
+
+# We no longer want to create a pgbouncer user in the database; we let
+# it be internal to pgbouncer, and use the pgbouncer_auth_user role to
+# do the auth_query instead.
+
+- block:
+  - name: Ensure pgbouncer EXECUTE permissions are revoked
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(item) }}"
+      queries:
+        - text: REVOKE EXECUTE ON FUNCTION pg_catalog.pgbouncer_get_auth(TEXT) FROM pgbouncer
+    register: revoke_pgbouncer
+    become_user: "{{ postgres_user }}"
+    become: yes
+    with_items: "{{ cluster_facts.databases.keys()|list }}"
+    when: >
+      item not in ['template0', 'bdr_supervisordb']
+      and (item not in cluster_facts.bdr_databases
+        or inventory_hostname == first_bdr_primary
+        or 'bdr' not in role)
+
+  - name: Ensure pgbouncer user is removed
+    postgresql_query:
+      conninfo: "{{ dsn|dbname('postgres') }}"
+      queries:
+        - text: DROP USER IF EXISTS pgbouncer
+    register: drop_user_pgbouncer
+    become_user: "{{ postgres_user }}"
+    become: yes
+  when: >
+    'pgbouncer' in cluster_facts.roles
+    and postgres_users|json_query("[?username=='pgbouncer']") is empty

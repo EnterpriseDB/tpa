@@ -14,5 +14,6 @@
         'username': username,
         'role_attrs': role_attrs|default([]),
         'granted_roles': granted_roles|default([]),
+        'password_encryption': password_encryption|default(null),
       }])
     }}"

@@ -77,6 +77,7 @@ default_pgbouncer_port: 6432
 default_pgbouncer_backend: 127.0.0.1
 default_pgbouncer_backend_port: 5432
 default_pgbouncer_max_client_conn: 100
+default_pgbouncer_auth_user: pgbouncer_auth_user
 
 # By default, we create a single wildcard entry under [databases], which
 # forwards all connections to the pgbouncer_backend defined above. Set
