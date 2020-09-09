@@ -6,8 +6,15 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Notable changes
 
-- Add support for building Docker clusters from source using
-  bind-mounted --local-source-directories and a shared ccache
+- Improve documentation
+
+- Support setting `password_encryption: scram-sha-256` (default for new
+  clusters, but existing clusters will remain unchanged unless you set
+  the variable expliclity)
+
+- Add new ``tpaexec show-password /path/to/cluster username`` and
+  ``tpaexec store-password /path/to/cluster username [--random]``
+  commands to manage passwords for postgres_users
 
 - Add a ``postgres_locale`` setting, defaulting to the target instance's
   LC_ALL/LANG setting (or en_US.UTF-8 otherwise), which is used to set
@@ -16,9 +23,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Require that the BDR database have the same collation (LC_COLLATE)
   across all instances in the same bdr_node_group
 
-- Add new ``tpaexec show-password /path/to/cluster username`` and
-  ``tpaexec store-password /path/to/cluster username [--random]``
-  commands to manage passwords for postgres_users
+- Add support for building Docker clusters from source using
+  bind-mounted --local-source-directories and a shared ccache
 
 - Improve deployment speed in various ways
 
@@ -39,6 +45,11 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Ensure Postgres is restarted when new packages are installed
 
+- Accept optional per-volume `fstype`, `fsopts`, `mountopts`,
+  `readahead`, `owner`, `group`, `mode` vars for volumes
+
+- Improve handling of LUKS-encrypted volumes
+
 ### Bugfixes
 
 - Generate a valid Vagrantfile even for hostnames with hyphens
@@ -46,7 +57,7 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Patch ``TypeError: a bytes-like object is required, not 'str'`` errors
   when using Boto with an https_proxy set
 
-- Fix lock timeout settings in the pgbench test for BDR v1/v2 clusters
+- Disable pgbench test for BDR v1/v2 clusters
 
 - Fix haproxy syslog logging configuration
 
