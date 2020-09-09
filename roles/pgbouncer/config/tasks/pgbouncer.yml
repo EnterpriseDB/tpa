@@ -60,7 +60,7 @@
 
 - include_role: name=secret
   vars:
-    secret_name: pgbouncer
+    secret_name: pgbouncer_password
 
 - name: Fetch existing pgbouncer password from userlist.txt
   shell: >
