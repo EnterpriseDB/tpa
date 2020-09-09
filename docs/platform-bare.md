@@ -46,7 +46,8 @@ cluster directory, or install the TPAexec-generated host keys from
 the instance (the generated `tpa_known_hosts` file contains entries for
 these keys).
 
-For example:
+For example, to ssh in with the generated user key, but keep the
+existing host keys, you can do:
 
 ```bash
 $ cd ~/clusters/speedy
@@ -54,8 +55,12 @@ $ ssh-copy-id -i id_speedy xyzzy@192.0.2.1
 $ ssh-keyscan -H 192.0.2.1 >> tpa_known_hosts
 ```
 
-While debugging connection problems, run `tpaexec ping ~/clusters/speedy -vvv`
-to look at the complete SSH commands executed.
+Run `tpaexec ping ~/clusters/speedy` to check if it's working. If not,
+append `-vvv` to the command to look at the complete ssh command-line.
+(Note: Ansible will invoke ssh to execute a command like
+`bash -c 'python3 && sleep 0'` on the instance. If you run ssh commands
+by hand while debugging, replace this with a command that produces some
+output and then exits instead, e.g., `'id'`.)
 
 ## Distribution support
 
