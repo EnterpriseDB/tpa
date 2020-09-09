@@ -70,6 +70,7 @@
     executable: /bin/bash
   register: userlist_cmd
   changed_when: False
+  ignore_errors: True
 
 - name: Install userlist.txt
   template:
