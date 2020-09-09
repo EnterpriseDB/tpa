@@ -2,17 +2,12 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# Now that Postgres is up and running, we can perform additional tasks
-# like creating users, databases, and extensions.
-
 # First, we ensure that the users in postgres_users exist and have the
-# desired attributes.
+# desired attributes and passwords.
 #
 # The entries in postgres_users may be specified in config.yml, or come
 # from invocations of postgres/createuser by other roles in TPAexec (to
-# create, for example, the users required by repmgr or barman). We now
-# generate passwords for any entries where postgres/createuser has not
-# already generated one.
+# create, for example, the users required by repmgr or barman).
 #
 # postgres_users:
 # - username: xyzzy
@@ -21,8 +16,10 @@
 #   - superuser
 #   - replication
 #
-# If an entry in postgres_users specifies ``generate_password: false``,
-# we neither generate nor set a password for that user.
+# If an entry in postgres_users specifies `generate_password: false`, we
+# neither generate nor set a password for that user. Otherwise, we must
+# generate passwords for any entries for which postgres/createuser has
+# not already generated one.
 
 - name: Generate missing passwords
   include_role: name=secret
@@ -32,6 +29,14 @@
   when:
     secret_name not in vars
     and item.generate_password|default(true)
+
+# After the required passwords are generated, we can create users with a
+# password encrypted according to the entry's `password_encryption`, or
+# the Postgres default setting.
+#
+# We act on `granted_roles` for each user only after creating extensions
+# below, because some of the roles we want to grant may not exist until
+# then (e.g., bdr_application).
 
 - name: Create Postgres users
   postgresql_user:
@@ -60,12 +65,8 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
-# We act on "granted_roles" after the extensions are created, because
-# some of the roles we want to grant may not exist until then (e.g.,
-# bdr_application).
-
-# We've already installed configuration files for any extensions that we
-# care about; now it's time to issue CREATE EXTENSION commands.
+# Now we issue a CREATE EXTENSION command for each extension in
+# `postgres_extensions`, in the postgres and template1 databases.
 
 - name: Install default Postgres extensions
   postgresql_ext:
@@ -81,8 +82,7 @@
   when:
     item.1 not in cluster_facts.databases[item.0].extensions|default({})
 
-# Now that extensions have been initialised, we can complete the task of
-# granting roles to the appropriate users.
+# Now we can complete the task of granting roles to `postgres_users`.
 
 - name: Grant roles to Postgres users if required
   postgresql_membership:
