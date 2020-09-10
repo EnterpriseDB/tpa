@@ -11,7 +11,7 @@
 - name: Run parallel read/write workload on primaries
   include_tasks: pgbench.yml
   vars:
-    pgbench_opts: -v -c 10 -j 5 -T 180 {{ pgbench_dbname }}
+    pgbench_opts: "{{ pgbench_rw_opts|default(default_pgbench_rw_opts) }}"
     pgbench_output: pgbench-postgres-rw.txt
   when: >
     'replica' not in role
@@ -19,7 +19,7 @@
 - name: Run parallel read-only workload on replicas
   include_tasks: pgbench.yml
   vars:
-    pgbench_opts: -n -c 10 -j 5 -T 180 -S {{ pgbench_dbname }}
+    pgbench_opts: "{{ pgbench_ro_opts|default(default_pgbench_ro_opts) }}"
     pgbench_output: pgbench-postgres-ro.txt
   when: >
     'replica' in role

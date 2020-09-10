@@ -1,0 +1,9 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+default_pgbench_rw_opts: "-v -c 10 -j 5 -T 180"
+default_pgbench_ro_opts: "-n -c 10 -j 5 -T 180 -S"
+
+default_pgbench_bdr_rw_opts: "-v -c 10 -j 5 -T 180"
+default_pgbench_bdr_ro_opts: "-n -c 10 -j 5 -T 180 -S"

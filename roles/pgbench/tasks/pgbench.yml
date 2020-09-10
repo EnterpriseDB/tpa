@@ -2,9 +2,9 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Run pgbench
+- name: Run pgbench on database {{ pgbench_dbname }}
   command: >
-    {{ postgres_bin_dir }}/pgbench {{ pgbench_opts }}
+    {{ postgres_bin_dir }}/pgbench {{ pgbench_opts }} {{ pgbench_dbname }}
   register: pgbench
   become_user: "{{ postgres_user }}"
   become: yes
@@ -14,3 +14,4 @@
     output_file: "{{ pgbench_output }}"
     content: |
       {{ pgbench.stdout }}
+  when: pgbench_output|default('') != ''
