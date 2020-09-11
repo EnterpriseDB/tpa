@@ -15,6 +15,10 @@
 # By now, the bdr_database is already created by config/final on every
 # BDR instance according to the configuration in postgres_databases.
 
+- assert:
+    msg: "BDR must be available in database {{ bdr_database }}"
+    that: cluster_facts.databases[bdr_database].bdr is defined
+
 # Next, we need to decide which flavour of BDR we're working with.
 #
 # BDR1: BDR-Postgres 9.4 only
@@ -119,6 +123,8 @@
 - name: BDR setup
   include_tasks:
     file: "bdr{{ bdr_major_version }}.yml"
+  vars:
+    bdr_database_facts: "{{ cluster_facts.databases[bdr_database] }}"
 
 - name: Change Postgres configuration if required
   include_tasks:

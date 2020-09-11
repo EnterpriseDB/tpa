@@ -2,28 +2,18 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Retrieve BDR version
-  postgresql_query:
-    conninfo: "{{ dsn|dbname(bdr_database) }}"
-    query: >-
-      SELECT bdr.bdr_version_num() AS num, bdr.bdr_version() AS version
-  register: bdr_version
-  become_user: "{{ postgres_user }}"
-  become: yes
-  tags: always
-
 - action: set_fact
   args: >
-    {{ ('{"bdr_version_num": ' ~ bdr_version.results[0].num ~ '}')|from_json }}
-  tags: always
-
-- action: set_fact
-  args: >
-    {{ ('{"bdr_major_version": ' ~ (bdr_version_num/10000)|int ~ '}')|from_json }}
+    {{
+      ('{"bdr_version_num": %s, "bdr_major_version": %s}' % (
+        cluster_facts.databases[bdr_database].bdr.bdr_version_num,
+        cluster_facts.databases[bdr_database].bdr.bdr_major_version,
+      ))|from_json
+    }}
   tags: always
 
 - assert:
-    msg: "Unsupported BDR version: {{ bdr_version.results[0].version }}"
+    msg: "Unsupported BDR version: {{ cluster_facts.databases[bdr_database].bdr.bdr_version }}"
     that:
       bdr_major_version in [1, 2, 3]
   tags: always

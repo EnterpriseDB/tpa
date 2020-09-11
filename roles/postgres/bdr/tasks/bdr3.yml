@@ -8,22 +8,11 @@
 # (if it hasn't joined the BDR group yet) or rows for each node in the
 # group. In either case, we know that the local node must exist already.
 
-- name: Check if the BDR node has been created already
-  postgresql_query:
-    conninfo: "{{ bdr_node_dsn }}"
-    queries:
-      - text: SELECT node_id FROM bdr.node WHERE dbname = %s
-        args:
-          - "{{ bdr_database }}"
-  register: bdr_node_tuples
-  become_user: "{{ postgres_user }}"
-  become: yes
-
 - name: Include bdr-pre-node-creation hook
   include_tasks: "{{ hook }}"
   when:
-    bdr_node_tuples.rowcount == 0 and
-    lookup('first_found', dict(files=hook, skip=True))
+    bdr_database_facts.bdr.node is empty
+    and lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/bdr-pre-node-creation.yml"
   tags: always
@@ -32,30 +21,23 @@
   postgresql_query:
     conninfo: "{{ bdr_node_dsn }}"
     queries:
-      - text: SELECT bdr.create_node(node_name := %s, local_dsn := %s)
+      - text: SELECT bdr.create_node(node_name := %s, local_dsn := %s) AS node_id
         args:
           - "{{ bdr_node_name }}"
           - "{{ bdr_node_dsn }}"
-  when:
-    bdr_node_tuples.rowcount == 0
   become_user: "{{ postgres_user }}"
   become: yes
+  register: new_bdr_node
   changed_when: True
+  when:
+    bdr_database_facts.bdr.node is empty
 
-# We use local_node_info() here instead of querying bdr.node, because we
-# want each instance to retrieve only its own local node_id.
-
-- name: Retrieve bdr_node_id for each instance
-  postgresql_query:
-    conninfo: "{{ bdr_node_dsn }}"
-    query: SELECT node_id FROM bdr.local_node_info()
-  register: bdr_node_tuple
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-- name: Set bdr_node_id
+- name: Set bdr_node_id for each node
   set_fact:
-    bdr_node_id: "{{ bdr_node_tuple.node_id }}"
+    bdr_node_id: "{{ known_id or new_bdr_node.node_id }}"
+  vars:
+    known_id:
+      "{{ bdr_database_facts.bdr.local_node.node_id|default('') }}"
 
 - name: Map node numbers to bdr_node_ids
   set_fact:

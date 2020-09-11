@@ -322,13 +322,22 @@ def pglogical_discovery(module, conn, m0):
 def bdr_discovery(module, conn, m0):
     m = dict()
 
-    if relation_exists(conn, 'bdr.node'):
-        v = query_results(conn, """SELECT bdr.bdr_version(),
-            bdr.bdr_version_num()""")
+    bdr_major_version = 0
+
+    if function_exists(conn, 'bdr.bdr_version_num'):
+        v = query_results(conn, """
+            SELECT bdr.bdr_version(), bdr.bdr_version_num(),
+            (bdr.bdr_version_num()/10000)::int as bdr_major_version
+        """)
         m.update(v[0])
+        bdr_major_version = m['bdr_major_version']
+
+    if bdr_major_version == 3:
+        local_node = query_results(conn, "SELECT * FROM bdr.local_node_info()")
+        m.update({'local_node': local_node and local_node[0] or {}})
         m.update({
-            'node': query_results(conn, "SELECT * from bdr.node"),
-            'node_group': query_results(conn, "SELECT * from bdr.node_group")
+            'node': query_results(conn, "SELECT * FROM bdr.node"),
+            'node_group': query_results(conn, "SELECT * FROM bdr.node_group"),
         })
 
     return {'bdr': m} if m else {}
@@ -426,6 +435,18 @@ def relation_exists(conn, relname):
     cur.execute("""SELECT relname
         FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON (c.relnamespace=n.oid)
         WHERE n.nspname=%s AND c.relname=%s""", (nspname, relname))
+
+    return cur.rowcount > 0
+
+def function_exists(conn, proname):
+    nspname = 'public'
+    if '.' in proname:
+        (nspname, proname) = proname.split('.', 1)
+
+    cur = conn.cursor()
+    cur.execute("""SELECT proname
+        FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON (p.pronamespace=n.oid)
+        WHERE n.nspname=%s AND p.proname=%s""", (nspname, proname))
 
     return cur.rowcount > 0
 
