@@ -13,17 +13,23 @@
   environment: "{{ target_environment }}"
   hosts: all
   tasks:
-  - include_role:
-      name: sys/hosts
-      apply:
-        tags: [sys, hosts]
-    tags: always
-
-  - include_role:
-      name: sys/hostkeys
-      apply:
-        tags: [sys, hostkeys]
-    tags: always
+  # If we deployed on a subset of the hosts in the cluster (e.g., during
+  # `tpaexec rehydrate`), the deployed instances' addresses or host keys
+  # may have changed; the other instances must update their /etc/hosts
+  # and /etc/ssh/ssh_known_hosts to account for that possibility.
+  - block:
+    - include_role:
+        name: sys/hosts
+        apply:
+          tags: [sys, hosts]
+    - include_role:
+        name: sys/hostkeys
+        apply:
+          tags: [sys, hostkeys]
+    when:
+    - deploy_hosts|default('all') != 'all'
+    - deploy_hosts.split(',')|symmetric_difference(groups[cluster_tag])
+      is not empty
 
   - include_role:
       name: post-deploy
