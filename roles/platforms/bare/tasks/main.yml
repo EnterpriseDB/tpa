@@ -2,4 +2,8 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# Nothing to do here (yet).
+- name: Disable manage_ssh_hostkeys by default
+  set_fact:
+    manage_ssh_hostkeys: "{{
+      manage_ssh_hostkeys|default(False)
+    }}"

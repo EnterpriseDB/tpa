@@ -1,12 +1,10 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
-{% for h in instance_vars %}
-{%   if h.platform != 'bare' %}
-{%     for k in ['rsa', 'ecdsa'] %}
-{%       set hostname = h.ip_address %}
-{%       if cluster_ssh_port|default(22) != 22 %}
-{%         set hostname = '[%s]:%s' % (hostname, cluster_ssh_port) %}
-{%       endif %}
+{% for h in instance_vars if (h.platform != 'bare' or h.vars.get('manage_ssh_hostkeys', False)|bool) %}
+{%   for k in ['rsa', 'ecdsa'] %}
+{%     set hostname = h.ip_address %}
+{%     if cluster_ssh_port|default(22) != 22 %}
+{%       set hostname = '[%s]:%s' % (hostname, cluster_ssh_port) %}
+{%     endif %}
 {{ hostname }} {{ lookup('file', '%s/hostkeys/ssh_host_%s_key.pub' % (cluster_dir, k)) }}
-{%     endfor %}
-{%   endif %}
+{%   endfor %}
 {% endfor %}

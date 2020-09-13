@@ -62,6 +62,11 @@ append `-vvv` to the command to look at the complete ssh command-line.
 by hand while debugging, replace this with a command that produces some
 output and then exits instead, e.g., `'id'`.)
 
+For more details:
+
+* [Use a different ssh key](ssh_key_file.md)
+* [Manage ssh host keys for bare instances](manage_ssh_hostkeys.md)
+
 ## Distribution support
 
 TPAexec will try to detect the distribution running on target instances,

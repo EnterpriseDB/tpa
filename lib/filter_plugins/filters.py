@@ -11,6 +11,7 @@ import os.path
 from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
+from collections.abc import Mapping
 
 # Based on PR ansible/ansible#11083, this filter takes a container and a subkey
 # ('x.y.z', or [x,y,z]) and a default value, and returns container.x.y.z or the
@@ -74,15 +75,32 @@ def instance_with_backup_of(hosts, primary, somehost, hostvars):
 
 def remove_keys(d, keys):
     if not isinstance(d, dict):
-        raise AnsibleFilterError("|remove_keys takes a dict as its first argument, got " + repr(d))
+        raise AnsibleFilterError("|remove_keys takes a dict as its first argument, got " + type(d))
 
     if not isinstance(keys, list):
-        raise AnsibleFilterError("|remove_keys takes a list as its second argument, got " + repr(keys))
+        raise AnsibleFilterError("|remove_keys takes a list as its second argument, got " + type(keys))
 
     d2 = copy.deepcopy(d)
     for k in keys:
         if k in d2:
             del d2[k]
+
+    return d2
+
+# Takes a dict and a list of keys and returns a new dict which has only the keys
+# in the list that have defined values.
+
+def extract_keys(d, keys):
+    if not isinstance(d, Mapping):
+        raise AnsibleFilterError("|extract_keys takes a dict as its first argument, got " + type(d))
+
+    if not isinstance(keys, list):
+        raise AnsibleFilterError("|extract_keys takes a list as its second argument, got " + type(keys))
+
+    d2 = {}
+    for k in keys:
+        if d.get(k):
+            d2[k] = d.get(k)
 
     return d2
 
@@ -341,6 +359,21 @@ def dict_format(d, format_string, **kwargs):
         results.append(format_string.format(key=k, value=d[k], **kwargs))
     return results
 
+# Given a value, an expression, a true string, a false string, and optional
+# kwargs, returns the result of formatting the true string or false string,
+# depending on whether the expression is true or false, with the value and
+# kwargs.
+#
+# somelist|map('ternary_format', x == y,
+#   'x is y and {value} is {colour}',
+#   'x is not y and {value} is {colour}',
+#   colour='purple'
+# )
+
+def ternary_format(val, expr, true_string, false_string, **kwargs):
+    s = true_string if expr else false_string
+    return s.format(value=val, **kwargs)
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -349,6 +382,7 @@ class FilterModule(object):
             'upstream_root': upstream_root,
             'instance_with_backup_of': instance_with_backup_of,
             'remove_keys': remove_keys,
+            'extract_keys': extract_keys,
             'parse_conninfo': parse_conninfo,
             'conninfo_string': conninfo_string,
             'packages_for': packages_for,
@@ -365,4 +399,5 @@ class FilterModule(object):
             'provider_dsn': provider_dsn,
             'sort_by_node': sort_by_node,
             'dict_format': dict_format,
+            'ternary_format': ternary_format,
         }

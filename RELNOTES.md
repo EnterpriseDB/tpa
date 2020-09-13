@@ -26,6 +26,10 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Add support for building Docker clusters from source using
   bind-mounted --local-source-directories and a shared ccache
 
+- Add a `manage_ssh_hostkeys` variable for bare instances (default: no)
+  that controls the installation of generated host keys and known_hosts
+  entries on the cluster (see docs/platform-bare.md for details)
+
 - Improve deployment speed in various ways
 
 ### Minor changes

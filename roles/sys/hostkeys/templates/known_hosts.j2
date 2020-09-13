@@ -1,0 +1,8 @@
+{% for h in known_hosts_and_keys %}
+{%   for host in known_hosts_and_keys[h].hosts %}
+{%     set hostkeys = known_hosts_and_keys[h].hostkeys or managed_hostkeys %}
+{%     for key in hostkeys %}
+{{ host }} {{ key }}
+{%     endfor %}
+{%   endfor %}
+{% endfor %}

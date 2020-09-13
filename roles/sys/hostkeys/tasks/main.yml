@@ -1,0 +1,143 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+# We generate a set of SSH host keypairs into cluster_dir/hostkeys
+# during provision.
+#
+# On AWS, we upload the host keys to S3, and EC2 instances download and
+# install them from their user-data script. For Docker containers (that
+# need ssh) and bare instances that have `manage_ssh_hostkeys` enabled,
+# we install the host keys here.
+
+- name: Install generated ssh host keys
+  copy:
+    src: "{{ cluster_dir }}/hostkeys/{{ file }}"
+    dest: "/etc/ssh/{{ file }}"
+    owner: root
+    group: root
+    mode: "{{ mode }}"
+  vars:
+    file: "ssh_host_{{ item.0 }}_key{{ item.1 }}"
+    mode: "{{ (item.1 == '')|ternary('0600', '0644') }}"
+  with_nested:
+  - ["rsa", "ecdsa"]
+  - ["", ".pub"]
+  when:
+    platform in ['docker'] or (
+      platform == 'bare'
+      and manage_ssh_hostkeys|default(false)|bool
+    )
+  register: hostkeys_installed
+
+- name: Restart ssh server
+  service:
+    name: "{{ ssh_service_name }}"
+    state: restarted
+  vars:
+    ssh_service_name: "{{
+      (ansible_distribution == 'RedHat')|ternary('sshd', 'ssh')
+    }}"
+  when: hostkeys_installed is changed
+
+# Next, we must ensure that every instance knows the host keys of all
+# other instances, so that they don't prompt for host key verification
+# when accessing each other via ssh (should the need arise, as it could
+# for barman or repmgr). We add entries to the global ssh_known_hosts
+# file, so first we must ensure it exists.
+
+- name: Ensure that /etc/ssh/ssh_known_hosts exists
+  copy:
+    content: ""
+    dest: /etc/ssh/ssh_known_hosts
+    owner: root
+    group: root
+    mode: 0644
+    force: no
+
+# We generate known_hosts entries for two kinds of instances here: those
+# with our generated ("managed") hostkeys installed, and those without.
+#
+# For the former, we generate the tpa_known_hosts file during provision,
+# but it contains entries only for the public IP (ansible_host) of each
+# instance, so we can't use it directly because the instances may access
+# each other using a different hostname or address than tpaexec does.
+#
+# For the latter, we have access to them only because of manually-added
+# entries in cluster_dir/known_hosts, but again, we cannot rely on this
+# file to contain entries for anything but ansible_host. But we do have
+# access to the instances, so we can fetch their host keys.
+#
+# The obvious answer of building ssh_known_hosts on each instance using
+# ssh-keyscan against all other instances is far too slow, as the first
+# significant XL clusters made painfully clear. The only approach with
+# acceptable performance is to generate the file locally and upload it
+# to all instances.
+#
+# Another problem with ssh-keyscan is that it can't scan different hosts
+# in the same batch if they use different SSH port numbers. It also does
+# not consider it an error if it fails to retrieve keys for some hosts,
+# whether because of a timeout or a connection error.
+#
+# First, we fetch the unmanaged public hostkeys from instances that have
+# them, then we build up a list of all hostnames/aliases/addresses for
+# each host and the corresponding list of public keys (either the ones
+# we just fetched, or [] for managed hostkeys, to be filled in later).
+# Then we use a template to perform an in-memory join between the hosts
+# and their keys to generate the known_hosts entries.
+#
+# (If we're using a non-standard SSH port, we have to express hostnames
+# and addresses in `[xxx]:nn` form.)
+
+- name: Retrieve unmanaged SSH public hostkeys
+  shell: cat /etc/ssh/ssh_host_*_key.pub
+  args:
+    executable: /bin/bash
+  register: unmanaged_keys
+  when:
+    platform == 'bare'
+    and not manage_ssh_hostkeys|default(false)|bool
+  changed_when: False
+  check_mode: no
+
+- name: Accumulate hostnames, addresses, and public hostkeys
+  set_fact:
+    known_hosts_and_keys: "{{
+      known_hosts_and_keys|default({})|combine({
+        h: {
+          'hosts': query('flattened', [
+            h, hostvars[h].inventory_hostname_short,
+            (hostvars[h].hostname_aliases).keys()|list,
+            (hostvars[h]|extract_keys(hostvars[h].ip_addresses)).values()|list,
+          ]) | unique | map('ternary_format',
+            hostvars[h].ansible_port|int == 22, '{value}',
+            '[{value}]:{port}', port=hostvars[h].ansible_port,
+          ) | list,
+          'hostkeys': hostvars[h].unmanaged_keys.stdout_lines|default([]),
+        }
+      })
+    }}"
+  with_items: "{{ groups[cluster_tag] }}"
+  loop_control:
+    loop_var: h
+
+# Finally, we install the accumulated entries into the global
+# known_hosts file on the instances.
+
+- name: Install ssh_known_hosts entries
+  linesinfile:
+    path: /etc/ssh/ssh_known_hosts
+    lines: "{{ known_hosts_lines }}"
+  vars:
+    cat_hostkeys: >-
+      test -d {{ cluster_dir }}/hostkeys && cat {{ cluster_dir }}/hostkeys/ssh_host_*_key.pub; true
+    managed_hostkeys: >
+      {{ lookup('pipe', cat_hostkeys).splitlines() }}
+    known_hosts_lines: "{{
+      lookup('template', 'known_hosts.j2',
+        template_vars=dict(
+          known_hosts_and_keys=known_hosts_and_keys,
+          managed_hostkeys=managed_hostkeys,
+        )
+      ).splitlines()
+    }}"

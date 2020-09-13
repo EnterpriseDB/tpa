@@ -81,6 +81,12 @@
   tags: hosts
 
 - include_role:
+    name: sys/hostkeys
+    apply:
+      tags: hostkeys
+  tags: hostkeys
+
+- include_role:
     name: sys/cloudinit
     apply:
       tags: cloudinit
@@ -99,3 +105,14 @@
     apply:
       tags: rsyslog
   tags: rsyslog
+
+# https://github.com/CentOS/CentOS-Dockerfiles/issues/173
+#
+# Retained for compatibility with centos/systemd docker containers;
+# harmless everywhere else.
+
+- name: Ensure /run/nologin does not exist
+  file:
+    path: /run/nologin
+    state: absent
+  when: platform in ['docker']

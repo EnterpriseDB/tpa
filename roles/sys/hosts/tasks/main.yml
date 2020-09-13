@@ -14,7 +14,6 @@
     main_hosts_line: >-
       {{ ip_address }}
       {{ [inventory_hostname, inventory_hostname_short]|unique|join(' ') }}
-  tags: hostsfile
 
 - name: Add extra /etc/hosts lines for aliases
   set_fact:
@@ -25,7 +24,6 @@
   vars:
     alias_line: >-
       {{ item.value }} {{ item.key }}
-  tags: hostsfile
 
 - name: Aggregate /etc/hosts lines across hosts
   set_fact:
@@ -35,7 +33,6 @@
   with_items: "{{ groups[cluster_tag]|sort_by_node(hostvars) }}"
   vars:
     default_etc_hosts_lines: []
-  tags: hostsfile
 
 - name: Add entries to /etc/hosts
   linesinfile:
@@ -45,61 +42,3 @@
       |default(default_etc_hosts_lines)
       |union(extra_etc_hosts_lines|default([]))
     }}"
-  tags: hostsfile
-
-# We pre-generate /etc/ssh/ssh_known_hosts to allow ssh between cluster
-# instances without host key verification prompts. We must skip this if
-# for some reason we do not have known host keys for the instances.
-#
-# (We used to build up known-hosts on each instance using ssh-keyscan,
-# but the first significant XL deployments showed that this was far too
-# slow. Generating the file locally is the only approach with acceptable
-# performance for more than a couple of instances.)
-
-- name: Install global ssh known hosts file
-  template:
-    src: known_hosts.j2
-    dest: /etc/ssh/ssh_known_hosts
-    owner: root
-    group: root
-    mode: 0644
-  when:
-    lookup('pipe', hostkeys) == 'exists'
-  vars:
-    hostkeys: >
-      test -d {{ cluster_dir }}/hostkeys && echo exists; true
-  tags: known_hosts
-
-- name: Update ssh host keys on docker instances
-  block:
-  - name: Upload ssh host keys
-    copy:
-      src: "{{ cluster_dir }}/hostkeys/{{ file }}"
-      dest: "/etc/ssh/{{ file }}"
-      owner: root
-      group: root
-      mode: "{{ mode }}"
-    with_nested:
-    - ["rsa", "ecdsa"]
-    - ["", ".pub"]
-    vars:
-      file: "ssh_host_{{ item.0 }}_key{{ item.1 }}"
-      mode: "{{ (item.1 == '')|ternary('0600', '0644') }}"
-  - name: Restart openssh
-    service:
-      name: "{{ ssh_service_name }}"
-      state: restarted
-    vars:
-      ssh_service_name: "{{ (ansible_distribution == 'RedHat')|ternary('sshd', 'ssh') }}"
-  when: platform in ['docker']
-  tags: hostkeys
-
-# https://github.com/CentOS/CentOS-Dockerfiles/issues/173
-#
-# Needed for (at least CentOS) Docker containers, harmless everywhere
-# else.
-
-- name: Ensure /run/nologin does not exist
-  file:
-    path: /run/nologin
-    state: absent

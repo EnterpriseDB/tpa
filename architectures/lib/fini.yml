@@ -20,6 +20,12 @@
     tags: always
 
   - include_role:
+      name: sys/hostkeys
+      apply:
+        tags: [sys, hostkeys]
+    tags: always
+
+  - include_role:
       name: post-deploy
       apply:
         tags: post-deploy
