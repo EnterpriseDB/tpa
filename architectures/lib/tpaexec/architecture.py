@@ -514,6 +514,13 @@ class Architecture(object):
                     'make -f ../../src/bdr/Makefile -s install',
                 ],
             },
+            'autoscale': {
+                'name': 'autoscale',
+                'git_repository_url': 'https://gitlab.2ndquadrant.com/bdr-stack/autoscale.git',
+                'build_commands': [
+                    'make -f ../../src/autoscale/Makefile -s install',
+                ],
+            },
         }
 
     # Makes architecture-specific changes to cluster_vars if required
