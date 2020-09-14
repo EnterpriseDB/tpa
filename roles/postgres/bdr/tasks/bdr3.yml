@@ -66,10 +66,6 @@
     _options: "{{ bdr_node_group_options|default({}) }}"
     _default_group: "{{ _name|combine(_options) }}"
 
-- name: Enumerate BDR group names
-  set_fact:
-    _bdr_group_names: "{{ bdr_node_groups|map(attribute='name')|list }}"
-
 - name: Map BDR group names to options
   set_fact:
     _bdr_group_options: "{{
@@ -81,32 +77,13 @@
     options: "{{ item|remove_keys(['name']) }}"
 
 # Now we check if bdr.node_group has entries for all the groups named in
-# _bdr_group_names. If not, the first_bdr_primary must create each group
+# bdr_node_groups. If not, the first_bdr_primary must create each group
 # and the other instances must join their respective group.
 
-- name: Check if the BDR groups have been created already
-  postgresql_query:
-    conninfo: "{{ bdr_node_dsn }}"
-    queries:
-      - text: SELECT node_group_name, node_group_id FROM bdr.node_group WHERE node_group_name = ANY(%s)
-        args:
-          - "{{ _bdr_group_names|list }}"
-  register: bdr_node_group_tuples
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-- name: Set default bdr_group_ids
+- name: Enumerate BDR group names
   set_fact:
-    bdr_group_ids: {}
-
-- name: Map BDR group names to existing node_group_ids
-  set_fact:
-    bdr_group_ids: "{{
-      bdr_group_ids|combine({
-        item.node_group_name: item.node_group_id
-      })
-    }}"
-  with_items: "{{ bdr_node_group_tuples.results }}"
+    have_bdr_group_names: "{{ bdr_database_facts.bdr.node_group|map(attribute='node_group_name')|list }}"
+    want_bdr_group_names: "{{ bdr_node_groups|map(attribute='name')|list }}"
 
 # We always call create_node_group() with "node_group_name := %s" and
 # the name of the node group; if bdr_node_group_options specifies any
@@ -116,13 +93,15 @@
   postgresql_query:
     conninfo: "{{ bdr_node_dsn }}"
     queries:
-      - text: "SELECT bdr.create_node_group({{ _option_string }})"
+      - text: "SELECT bdr.create_node_group({{ _option_string }}) AS node_group_id"
         args: "{{ _values }}"
   become_user: "{{ postgres_user }}"
   become: yes
-  with_items: "{{ _bdr_group_names }}"
+  register: new_bdr_group
+  with_items: "{{ want_bdr_group_names }}"
+  loop_control:
+    loop_var: _group
   vars:
-    _group: "{{ item }}"
     _group_options: "{{ _bdr_group_options[_group] }}"
     _join_options: "{{
       (_group == bdr_node_group or
@@ -137,8 +116,8 @@
     _option_string: >
       {{ _keys|map('apply_format', '{0} := %s')|list|join(', ') }}
   when:
-    inventory_hostname == first_bdr_primary and
-    _group not in bdr_group_ids
+    inventory_hostname == first_bdr_primary
+    and _group not in have_bdr_group_names
   changed_when: True
 
 - name: Identify logical standby nodes
@@ -150,7 +129,7 @@
 - name: Include bdr-post-group-creation hook
   include_tasks: "{{ hook }}"
   when:
-    bdr_group_ids.keys()|length < _bdr_group_names|length and
+    have_bdr_group_names|length < want_bdr_group_names|length and
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/bdr-post-group-creation.yml"
