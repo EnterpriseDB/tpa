@@ -49,6 +49,11 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Ensure Postgres is restarted when new packages are installed
 
+- Move BDR-specific initialisation code into pgbench/init; callers can
+  now include pgbench/init directly from their own hooks/commands/tests
+  for BDR clusters, without having to duplicate lock timeout management
+  from pgbench-bdr.yml
+
 - Accept optional per-volume `fstype`, `fsopts`, `mountopts`,
   `readahead`, `owner`, `group`, `mode` vars for volumes
 

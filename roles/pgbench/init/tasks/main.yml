@@ -30,10 +30,9 @@
   become_user: "{{ postgres_user }}"
   become: true
   when: >
-    'bdr' not in role or (
-      pgbench_dbname == bdr_database
-      and inventory_hostname == pgbench_bdr_init_instance|default(first_bdr_primary)
-    )
+    'bdr' not in role
+    or pgbench_dbname != bdr_database
+    or inventory_hostname == pgbench_bdr_init_instance|default(first_bdr_primary)
 
 - include_role: name=test tasks_from=output.yml
   vars:
