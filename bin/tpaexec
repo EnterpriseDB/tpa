@@ -6,12 +6,28 @@
 
 IFS=$' \t\n'
 set -eu
+# Pass exit code through pipelines
+set -o pipefail
+# Fire ERR trap inside functions
+set -E
+# Set pager if unset
 : "${PAGER:=less}"
 
 error() {
+    trap ERR
     echo "ERROR: $*" >&2
     exit 1
 }
+
+function unexpected_error_handler() {
+   if [ -n "${errfunc}" ]; then
+      error "unexpected error ${errcode} at ${errfile}:${errline} in function ${errfunc}"
+   else
+      error "unexpected error ${errcode} at ${errfile}:${errline}"
+   fi
+}
+
+trap 'errcode=$?; errline=$LINENO; errfile=$0; errfunc=${FUNCNAME:-}; unexpected_error_handler' ERR
 
 # If $TPA_DIR is not already set, we guess TPA_DIR based on $0 (so that
 # a git checkout takes precedence over a package installation), or use
