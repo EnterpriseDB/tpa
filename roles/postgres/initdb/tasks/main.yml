@@ -36,7 +36,7 @@
   failed_when:
     restorecon is not successful
   changed_when: >
-    restorecon.stdout.strip() != '0'
+    restorecon.stdout.strip() not in ['', '0']
   when:
     postgres_data_dir != default_postgres_data_dirs[ansible_os_family] and
     platform not in ['docker']
@@ -53,7 +53,7 @@
   failed_when:
     restorecon is not successful
   changed_when: >
-    restorecon.stdout.strip() != '0'
+    restorecon.stdout.strip() not in ['', '0']
   when:
     postgres_conf_dir != postgres_data_dir
     and platform not in ['docker']
