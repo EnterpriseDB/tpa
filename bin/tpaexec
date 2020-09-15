@@ -123,8 +123,7 @@ _install_pip_packages() {
         pip_args+=("--find-links=file:$PIP_DIR")
     fi
 
-    pip3 install "${pip_args[@]}" "pip>=10.0.1"
-    pip3 install "${pip_args[@]}" -r "$TPA_DIR/python-requirements.txt"
+    pip3 install "${pip_args[@]}" "pip>=10.0.1" wheel
 
     # If we have a local copy of the ansible repository, we want to use
     # it in-situ rather than installing it into the venv (so that any
@@ -136,7 +135,9 @@ _install_pip_packages() {
     # case, pip will install the dependencies automatically.
 
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
-        pip3 install "${pip_args[@]}" -r "$ANSIBLE_HOME/requirements.txt"
+        pip3 install "${pip_args[@]}" \
+            -r "$ANSIBLE_HOME/requirements.txt" \
+            -r "$TPA_DIR/python-requirements.txt"
     else
         if [[ -d $PIP_DIR/ansible ]]; then
             ANSIBLE_HOME=$PIP_DIR/ansible
@@ -144,7 +145,8 @@ _install_pip_packages() {
             ANSIBLE_HOME=$(mktemp -d /tmp/ansible-XXXXXXXXXX)
             git clone --depth 1 https://github.com/2ndQuadrant/ansible "$ANSIBLE_HOME"
         fi
-        pip3 install "${pip_args[@]}" file:"$ANSIBLE_HOME"
+        pip3 install "${pip_args[@]}" file:"$ANSIBLE_HOME" \
+            -r "$TPA_DIR/python-requirements.txt"
     fi
     cp "$ANSIBLE_HOME"/contrib/inventory/ec2.py "$TPA_DIR"/platforms/aws/inventory
     cp "$ANSIBLE_HOME"/contrib/inventory/lxd.py "$TPA_DIR"/platforms/lxd/inventory
