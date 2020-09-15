@@ -26,13 +26,12 @@
   vars:
     bdr_upstream: "{{ hostvars[bdr_node].upstream }}"
     bdr_upstream_dsn: "{{ hostvars[bdr_upstream].bdr_node_dsn }}"
+    node_bdr_database_facts: >
+      {{ hostvars[bdr_node].cluster_facts.databases[hostvars[bdr_node].bdr_database] }}
   with_items: >
     {{ groups[bdr_node_group]|difference([first_bdr_primary]) }}
   loop_control:
     loop_var: bdr_node
-  vars:
-    node_bdr_database_facts: >
-      {{ hostvars[bdr_node].cluster_facts.databases[hostvars[bdr_node].bdr_database] }}
   when:
     hostvars[bdr_node].upstream is defined
     and node_bdr_database_facts.bdr.node_group is empty
