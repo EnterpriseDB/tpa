@@ -134,10 +134,44 @@ _install_pip_packages() {
     cp "$ANSIBLE_HOME"/contrib/inventory/lxd.py "$TPA_DIR"/platforms/lxd/inventory
 }
 
+_apply_patch_if_not_applied() {
+    local file=$1
+    local patch=$2
+
+    # We want to apply $patch to $file and display the output from
+    # patch(1) if it either successfully applies or fails to apply the
+    # patch. If the patch has already been applied, we don't want any
+    # output (certainly not the confusingly error-like message patch
+    # sees fit to issue in this case).
+    #
+    # Unfortunately, we cannot rely on the exit code, because patch will
+    # return 1 if it detects a patch that has already been applied, but
+    # also if it fails to apply a patch with a single hunk. Exit code 2
+    # or above is always an error.
+    #
+    # Here we run patch in a subshell that translates exit code 1 to 0
+    # and disables translation/localisation so that we can examine the
+    # output afterwards to determine if the patch was already applied.
+
+    (
+        set +eE;
+        trap '' ERR;
+        LC_ALL=C LANG=C patch --forward -r - -sp1 "$file" < "$patch" 2>&1;
+        if [[ $? -ge 2 ]]; then
+            exit 2;
+        fi
+        exit 0;
+    ) | awk '
+        /FAILED/                { print "'"$(basename "$patch")"': " $0; exit 2; }
+        /Reversed.*Skipping/    { exit 0; }
+        //                      { print; }
+    '
+}
+
 _apply_patches() {
     file=$("$TPA_VENV"/bin/python3 -c 'import boto.connection; print(boto.connection.__file__)' 2>/dev/null)
-    if [[ -n "$file" ]] && command -v patch &>/dev/null; then
-        patch --forward -r - -sp1 "$file" < "$TPA_DIR"/patches/RM16946.diff
+    if [[ -n $file ]] && command -v patch &>/dev/null; then
+        _apply_patch_if_not_applied "$file" "$TPA_DIR"/patches/RM16946.diff
     fi
 }
 
