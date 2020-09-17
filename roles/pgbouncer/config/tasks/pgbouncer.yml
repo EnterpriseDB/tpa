@@ -71,6 +71,7 @@
   register: userlist_cmd
   changed_when: False
   ignore_errors: True
+  check_mode: no
 
 - name: Install userlist.txt
   template:
