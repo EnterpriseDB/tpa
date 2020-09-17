@@ -7,7 +7,7 @@
     msg: "No ec2_id defined for AWS EC2 instance (did ec2.py fail?)"
     that: ec2_id is defined
 
-- name: Translate platform-specific variables names
+- name: Translate platform-specific variable names
   action: set_fact
   args:
     "{{ item.var }}": "{{ vars[item.source] }}"
