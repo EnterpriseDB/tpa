@@ -6,7 +6,9 @@
   assert:
     msg: "Bare instances must specify at least one of ip_address/public_ip/private_ip"
     that:
-      item.get('ip_address', item.get('public_ip', item.get('private_ip')))
+      item.ip_address is defined
+      or item.public_ip is defined
+      or item.private_ip is defined
   with_items: "{{ bare_instances }}"
 
 - set_fact:

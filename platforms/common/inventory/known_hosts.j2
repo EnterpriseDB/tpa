@@ -1,7 +1,7 @@
 {# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com> #}
 {% for h in instance_vars if (h.platform != 'bare' or h.vars.get('manage_ssh_hostkeys', False)|bool) %}
 {%   for k in ['rsa', 'ecdsa'] %}
-{%     set hostname = h.ip_address %}
+{%     set hostname = h|deploy_ip_address %}
 {%     if cluster_ssh_port|default(22) != 22 %}
 {%       set hostname = '[%s]:%s' % (hostname, cluster_ssh_port) %}
 {%     endif %}

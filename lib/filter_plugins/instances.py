@@ -116,9 +116,14 @@ def ip_addresses(instance):
         if ip is not None:
             addresses[a] = ip
 
-    addresses['ip_address'] = instance.get('ip_address', instance.get('public_ip', instance.get('private_ip')))
-
     return addresses
+
+# Returns the IP address that TPAexec should use to ssh to an instance. The
+# public_ip, ip_address, and private_ip are used in order of decreasing
+# preference.
+
+def deploy_ip_address(instance):
+    return instance.get('public_ip', instance.get('ip_address', instance.get('private_ip')))
 
 # Every instance must have certain settings (e.g., tags) in a specific format.
 
@@ -442,6 +447,7 @@ class FilterModule(object):
     def filters(self):
         return {
             'ip_addresses': ip_addresses,
+            'deploy_ip_address': deploy_ip_address,
             'set_instance_defaults': set_instance_defaults,
             'expand_instance_image': expand_instance_image,
             'expand_instance_volumes': expand_instance_volumes,

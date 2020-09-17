@@ -11,5 +11,5 @@ Host {{ h.Name }}
 {% if 'ansible_user' in h.vars %}
     User {{ h.vars.ansible_user }}
 {% endif %}
-    HostName {{ h.ip_address }}
+    HostName {{ h|deploy_ip_address }}
 {% endfor %}

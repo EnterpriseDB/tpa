@@ -73,3 +73,24 @@ TPAexec will try to detect the distribution running on target instances,
 and fail if it is not supported. TPAexec currently supports Debian
 (8/9/10; or jessie/stretch/buster), Ubuntu (16.04/18.04/20.04; or
 xenial/bionic/focal), and RHEL/CentOS (7.x/8.x) on `bare` instances.
+
+## IP addresses
+
+You can specify the `public_ip`, `private_ip`, or both for any instance.
+
+TPAexec uses these IP addresses in two ways: first, to ssh to the
+instance to execute commands during deployment; and second, to set up
+communications within the cluster, e.g., for `/etc/hosts` or to set
+`primary_conninfo` for Postgres.
+
+If you specify a `public_ip`, it will be used to ssh to the instances
+during deployment. If you specify a `private_ip`, it will be used to set
+up communications within the cluster. If you specify both, the
+`public_ip` will be used during deployment, and the `private_ip` for
+cluster communications.
+
+If you specify only one or the other, the address will be used for both
+purposes. For example, you could set only `public_ip` for servers on
+different networks, or only `private_ip` if you're running TPAexec
+inside a closed network. (Instead of using public/private, you can set
+`ip_address` if you need to specify only one IP address.)
