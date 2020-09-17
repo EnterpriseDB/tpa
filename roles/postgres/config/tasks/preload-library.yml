@@ -20,7 +20,12 @@
 
 - name: Update shared_preload_libraries list
   set_fact:
-    _preload_list: "{{ _old_list|union(shared_preload_libraries) }}"
+    _preload_list: "{{
+      query('flattened',
+        _old_list|union([library|default([])])
+        |union(shared_preload_libraries|default([]))
+      )
+    }}"
   vars:
     _old_list: >
       {{ libs.stdout and libs.stdout.split(',')|map('trim')|list or [] }}
