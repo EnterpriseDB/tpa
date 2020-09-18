@@ -30,6 +30,11 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
   that controls the installation of generated host keys and known_hosts
   entries on the cluster (see docs/platform-bare.md for details)
 
+- Default to using `private_ip` for communication between instances in
+  the cluster (e.g., for Postgres replication and backups) while using
+  the `public_ip` to access the instances during deployment, for bare
+  instances with both `private_ip` and `public_ip` set
+
 - Improve deployment speed in various ways
 
 ### Minor changes
