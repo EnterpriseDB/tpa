@@ -43,7 +43,7 @@ $ tpaexec configure ~/clusters/speedy                           \
 ```
 
 After deploying your cluster, you can use
-``tpaexec deploy … --skip-tags build-clean`` on subsequent runs to
+`tpaexec deploy … --skip-tags build-clean` on subsequent runs to
 reuse build directories. (Otherwise the build directory is emptied
 before starting the build.)
 
@@ -55,7 +55,7 @@ BDR, and other components with custom locations and build parameters.
 There are two aspects to configuring source builds.
 
 If you just want a cluster running a particular combination of sources,
-run ``tpaexec configure`` to generate a configuration with sensible
+run `tpaexec configure` to generate a configuration with sensible
 defaults to download, compile, and install the components you select.
 You can build Postgres or 2ndQPostgres, pglogical, and BDR, and specify
 branch names to build from, as shown in the examples above.
@@ -70,7 +70,7 @@ The available options are documented here:
 
 * [Building Postgres from source](postgres_installation_method_src.md)
 
-* [Building extensions with ``install_from_source``](install_from_source.md)
+* [Building extensions with `install_from_source`](install_from_source.md)
 
 ## Local source directories
 
@@ -78,7 +78,7 @@ You can use TPAexec to provision Docker containers that build Postgres
 and/or extensions from your local source directories instead of from a
 Git repository.
 
-Suppose you're using ``--install-from-source`` to declare what you want
+Suppose you're using `--install-from-source` to declare what you want
 to build:
 
 ```bash
@@ -91,7 +91,7 @@ $ tpaexec configure ~/clusters/speedy                           \
 
 By default, this will clone the known repositories for 2ndqPostgres,
 pglogical3, and bdr3, check out the given branches, and build them. But
-you can add ``--local-source-directories`` to specify that you want the
+you can add `--local-source-directories` to specify that you want the
 sources to be taken directly from your host machine instead:
 
 ```bash
@@ -111,14 +111,14 @@ containers at the same locations where the git repository would have
 been cloned to, and the default (out-of-tree) build proceeds as usual.
 
 If you specify a local source directory for a component, you cannot
-specify a branch to build (cf. ``pglogical3:REL3_6_STABLE`` vs.
-``pglogical3`` for ``--install-from-source`` in the examples above). The
+specify a branch to build (cf. `pglogical3:REL3_6_STABLE` vs.
+`pglogical3` for `--install-from-source` in the examples above). The
 source directory is mounted read-only in the containers, so TPAexec
-cannot do anything to change it—neither ``git pull``, nor
-``git checkout``. You get whichever branch you have checked out locally,
+cannot do anything to change it—neither `git pull`, nor
+`git checkout`. You get whichever branch you have checked out locally,
 uncommitted changes and all.
 
-Using ``--local-source-directories`` includes a list of Docker volume
+Using `--local-source-directories` includes a list of Docker volume
 definitions in config.yml:
 
 ```yaml
@@ -136,7 +136,7 @@ a new Docker volume is attached to the cluster's containers to serve as
 a shared ccache directory. This volume is completely isolated from the
 host, and is removed when the cluster is deprovisioned.
 
-Use the ``--shared-ccache /path/to/host/ccache`` configure option to
+Use the `--shared-ccache /path/to/host/ccache` configure option to
 specify a longer-lived shared ccache directory. This directory will be
 bind-mounted r/w into the containers, and its contents will be shared
 between the host and the containers.

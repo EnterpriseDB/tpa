@@ -1,7 +1,7 @@
 # TPAexec installation
 
 To use TPAexec, you need to install the tpaexec package and run the
-``tpaexec setup`` command.
+`tpaexec setup` command.
 
 TPAexec packages are available to 2ndQuadrant customers by prior
 arrangement.
@@ -54,11 +54,11 @@ $ sudo apt-get install tpaexec
 $ sudo yum install tpaexec
 ```
 
-This will install TPAexec into ``/opt/2ndQuadrant/TPA``. It will also
+This will install TPAexec into `/opt/2ndQuadrant/TPA`. It will also
 ensure that other required packages (e.g., Python 3.6 or later) are
 installed.
 
-We mention ``sudo`` here only to indicate which commands need root
+We mention `sudo` here only to indicate which commands need root
 privileges. You may use any other means to run the commands as root.
 
 (If you have been given access to the TPA source code repository and
@@ -67,19 +67,19 @@ specifically advised to use it, please see the
 
 ## Python environment
 
-Next, run ``tpaexec setup`` to create an isolated Python environment and
+Next, run `tpaexec setup` to create an isolated Python environment and
 install the correct versions of all required modules.
 
 ```bash
 $ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
 ```
 
-You must run this as root because it writes to ``/opt/2ndQuadrant/TPA``,
+You must run this as root because it writes to `/opt/2ndQuadrant/TPA`,
 but the process will not affect any system-wide Python modules you may
 have installed (including Ansible).
 
-Add ``/opt/2ndQuadrant/TPA/bin`` to the ``PATH`` of the user who will
-normally run ``tpaexec`` commands. For example, you could add this to
+Add `/opt/2ndQuadrant/TPA/bin` to the `PATH` of the user who will
+normally run `tpaexec` commands. For example, you could add this to
 your .bashrc or equivalent shell configuration file:
 
 ```bash
@@ -88,11 +88,11 @@ export PATH=$PATH:/opt/2ndQuadrant/TPA/bin
 
 ### Installing without network access
 
-When you run ``tpaexec setup``, it will ordinarily download the Python
-packages from the network. The ``tpaexec-deps`` package (available from
+When you run `tpaexec setup`, it will ordinarily download the Python
+packages from the network. The `tpaexec-deps` package (available from
 the same repository as tpaexec) bundles everything that would have been
 downloaded, so that they can be installed without network access. Just
-install the package before you run ``tpaexec setup`` and the bundled
+install the package before you run `tpaexec setup` and the bundled
 copies will be used automatically.
 
 ## Verification
@@ -111,15 +111,15 @@ is ready for use.
 
 To upgrade to a later release of TPAexec, you must:
 
-1. Install the latest ``tpaexec`` package
-2. Install the latest ``tpaexec-deps`` package (if required; see above)
-3. Run ``tpaexec setup`` again
+1. Install the latest `tpaexec` package
+2. Install the latest `tpaexec-deps` package (if required; see above)
+3. Run `tpaexec setup` again
 
 If you have subscribed to the TPAexec package repository as described
-above, running ``apt-get update && apt-get upgrade`` or ``yum update``
+above, running `apt-get update && apt-get upgrade` or `yum update`
 should install the latest available versions of these packages. If not,
 you can install the packages by any means available.
 
-We recommend that you run ``tpaexec setup`` again whenever a new version
-of ``tpaexec`` is installed. Some new releases may not strictly require
+We recommend that you run `tpaexec setup` again whenever a new version
+of `tpaexec` is installed. Some new releases may not strictly require
 this, but others will not work without it.

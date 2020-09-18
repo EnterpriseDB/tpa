@@ -80,7 +80,7 @@ permit access.
 ## Configuration
 
 Here's a brief description of the AWS-specific settings that you can
-specify via ``tpaexec configure`` or define directly in config.yml.
+specify via `tpaexec configure` or define directly in config.yml.
 
 ### VPC (required)
 
@@ -121,8 +121,8 @@ You can add filter specifications for more precise matching:
         architecture: x86_64
         [more key/value filters]
 
-(By default, ``tpaexec configure`` will select a suitable ``ec2_ami``
-for you based on the ``--distribution`` argument.)
+(By default, `tpaexec configure` will select a suitable `ec2_ami`
+for you based on the `--distribution` argument.)
 
 This platform supports Debian 9 (stretch), RedHat Enterprise Linux 7,
 and Ubuntu 16.04 (Xenial).

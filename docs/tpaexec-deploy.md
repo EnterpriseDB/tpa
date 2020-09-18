@@ -10,13 +10,13 @@ along with other components like repmgr, Barman, pgbouncer, etc.
 
 ## Prerequisites
 
-Before you can run ``tpaexec deploy``, you must have already run
-[``tpaexec configure``](tpaexec-configure.md) to generate the cluster
+Before you can run `tpaexec deploy`, you must have already run
+[`tpaexec configure`](tpaexec-configure.md) to generate the cluster
 configuration and then provisioned the servers with
-[``tpaexec provision``](tpaexec-provision.md).
+[`tpaexec provision`](tpaexec-provision.md).
 
 Before deployment, you must
-``export TPA_2Q_SUBSCRIPTION_TOKEN=xxx`` to enable any 2ndQuadrant
+`export TPA_2Q_SUBSCRIPTION_TOKEN=xxx` to enable any 2ndQuadrant
 repositories that require subscription. You can use the subscription
 token that you used to [install TPAexec](INSTALL.md) itself. If you
 forget to do this, an error message will soon remind you.
@@ -48,14 +48,15 @@ sys     1m5.318s
 
 This command produces a great deal of output and may take a long time
 (depending primarily on the latency between the host running tpaexec and
-the hosts in the cluster). We recommend that you use at least one ``-v``
-during deployment. The output is also logged to ``ansible.log`` in the
-cluster directory.
+the hosts in the cluster, as well as how long it takes the instances to
+download the packages they need to install). We recommend that you use
+at least one `-v` during deployment. The output is also logged to
+`ansible.log` in the cluster directory.
 
 The exact number of hosts, tasks, and changed tasks may of course vary.
 
 The deploy command takes no options itself—any options you provide after
-the cluster name are passed on unmodified to Ansible (e.g., ``-v``).
+the cluster name are passed on unmodified to Ansible (e.g., `-v`).
 
 Those who are familiar with Ansible may be concerned by the occasional
 red "failed" task output scrolling by. Rest assured that if the process
@@ -63,17 +64,18 @@ does not stop soon afterwards, the error is of no consequence, and the
 code will recover from it automatically.
 
 When the deployment is complete, you can run
-[``tpaexec test``](tpaexec-test.md) to verify the installation.
+[`tpaexec test`](tpaexec-test.md) to verify the installation.
 
 ## deploy.yml
 
-The deployment process is architecture-specific, and is directed by the
-cluster's deploy.yml. If you are familiar with Ansible playbooks, you
-can follow along as tpaexec applies various roles to the cluster's
-instances.
+The deployment process is architecture-specific. Here's an overview of
+the various
+[configuration settings that affect the deployment](configure-instance.md).
+If you are familiar with Ansible playbooks, you can follow along as
+tpaexec applies various roles to the cluster's instances.
 
 Unlike config.yml, deploy.yml is not designed to be edited (and is
 usually a link into the architectures directory). Even if you want to
 extend the deployment process to run your own Ansible tasks, you should
-do so by creating include files under the hooks directory. This protects
-you from future implementation changes within a particular architecture.
+do so by [creating hooks](tpaexec-hooks.md). This protects you from
+future implementation changes within a particular architecture.

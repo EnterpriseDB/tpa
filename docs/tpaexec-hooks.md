@@ -1,111 +1,118 @@
 # TPAexec hooks
 
-TPAexec can set up fully-functional clusters with custom configuration
-by itself, but it allows you to write hook scripts to execute arbitrary
-Ansible tasks during the deployment.
+TPAexec can set up fully-functional clusters with no user intervention,
+and already provides a broad variety of
+[settings to control your cluster configuration](configure-instance.md),
+including custom repositories and packages, custom Postgres
+configuration (both pg_hba.conf and postgresql.conf), and so on.
 
-TPAexec already provides a broad variety of settings to control your
-cluster configuration, including custom repositories, custom packages,
-custom Postgres configuration (both pg_hba.conf and postgresql.conf),
-and so on. You can use hooks to address specific needs that are not met
-by the various configuration settings.
+You can write hook scripts to address specific needs that are not met by
+the available configuration settings. Hooks allow you to execute
+arbitrary Ansible tasks during the deployment.
 
-If you create files with specific names under the ``hooks`` subdirectory
+Hooks are the ultimate extension mechanism for TPAexec, and there is no
+limit to what you can do with them. Please use them with caution, and
+keep in mind the additional maintenance burden you are taking on. The
+TPAexec developers have no insight into your hook code, and cannot
+guarantee compatibility between releases beyond invoking hooks at the
+expected stage.
+
+## Summary
+
+If you create files with specific names under the `hooks` subdirectory
 of your cluster directory, TPAexec will invoke them at various stages of
-the deployment process.
+the deployment process, as described below.
 
-```
-$ mkdir cluster_dir/hooks
-$ cat > cluster_dir/hooks/pre-deploy.yml
+```bash
+$ mkdir ~/clusters/speedy/hooks
+$ cat > ~/clusters/speedy/hooks/pre-deploy.yml
 ---
 - debug: msg="hello world!"
 ```
 
-This is the ultimate extension mechanism for TPAexec. There is no limit
-to what you can do with hooks. Please use them with caution.
-
-Please keep in mind the additional maintenance burden of custom hooks.
-The TPAexec developers have no insight into your hook code, and cannot
-guarantee compatibility between releases beyond invoking hooks at the
-expected stage.
-
-Hook scripts are invoked with ``include_tasks``, so they are expected to
+Hook scripts are invoked with `include_tasks`, so they are expected to
 be YAML files containing a list of Ansible tasks (not a playbook, which
 contains a list of plays). Unless otherwise documented below, hooks are
 unconditionally executed for all hosts in the deployment.
 
-## Currently supported hooks
+## General-purpose hooks
 
 ### pre-deploy
 
-The pre-deploy hook (``hooks/pre-deploy.yml``) is invoked early during
-the deployment, after Python has been bootstrapped, but before package
-installation or any other actions.
+TPAexec invokes `hooks/pre-deploy.yml` immediately after bootstrapping
+Python—but before doing anything else like configuring repositories and
+installing packages. This is the earliest stage at which you can execute
+your own code.
 
-This hook may be used to set up custom repository configuration, beyond
-what the ``apt_repositories`` or ``yum_repositories`` settings can do.
+You can use this hook to set up custom repository configuration, beyond
+what you can do with
+[`apt_repositories`](apt_repositories.md) or
+[`yum_repositories`](yum_repositories.md).
 
 ### post-repo
 
-The post-repo hook (``hooks/post-repo.yml``) is invoked after package
-repositories have been configured.
-
-This hook may be used to make corrections to the normal repository
-configuration before commencing package installation.
+TPAexec invokes `hooks/post-repo.yml` after configuring package
+repositories. You can use it to make corrections to the repository
+configuration before beginning to install packages.
 
 ### pre-initdb
 
-The pre-initdb hook (``hooks/pre-initdb.yml``) is invoked before testing
-if PGDATA exists and running initdb to create it.
-
-You should not ordinarily need to use this hook.
+TPAexec invokes `hooks/pre-initdb.yml` before deciding whether or not to
+[run initdb to create PGDATA](initdb.md) if it does not exist. You
+should not ordinarily need to use this hook (but if you use it to create
+`PGDATA` yourself, then TPAexec will skip `initdb`).
 
 ### postgres-config
 
-The postgres-config hook (``hooks/postgres-config.yml``) is invoked
-after TPAexec has generated Postgres configuration files, including
-pg_hba.conf and the files in conf.d, but before the server has been
-started.
+TPAexec invokes `hooks/postgres-config.yml` after generating Postgres
+configuration files, including pg_hba.conf and the files in conf.d, but
+before the server has been started.
 
-This hook can be used, for example, to create additional configuration
+You can use this hook, for example, to create additional configuration
 files under `conf.d`.
 
 ### postgres-config-final
 
-The postgres-config-final hook (``hooks/postgres-config-final.yml``) is
-invoked after Postgres has been started and the required extensions have
-been created.
-
-This hook can be used to perform custom extension configuration.
-
-### postgres-pre-update
-
-The postgres-pre-update hook (``hooks/postgres-pre-update.yml``) is
-invoked by the ``tpaexec update-postgres`` command before it installs
-any new Postgres packages.
-
-### postgres-post-update
-
-The postgres-post-update hook (``hooks/postgres-post-update.yml``) is
-invoked by the ``tpaexec update-postgres`` command after the package
-installation has been completed.
-
-### bdr-pre-node-creation
-
-The bdr-pre-node-creation hook (``hooks/bdr-pre-node-creation.yml``) is
-invoked before creating a BDRv3 node for the first time. It will not be
-invoked if the node already exists.
-
-### bdr-post-group-creation
-
-The bdr-post-group-creation hook (``hooks/bdr-post-group-creation.yml``)
-is invoked after creating a BDRv3 node group on the
-``first_bdr_primary`` instance.
+TPAexec invokes `hooks/postgres-config-final.yml` after starting
+Postgres and creating users, databases, and extensions. You can use this
+hook to execute SQL commands, for example, to perform custom extension
+configuration or create database objects.
 
 ### post-deploy
 
-The post-deploy hook (``hooks/post-deploy.yml``) is invoked at the end
-of the deployment process.
+TPAexec invokes `hooks/post-deploy.yml` at the end the deployment.
+
+You can go on to do whatever you want after this stage.
+
+## BDR3 hooks
+
+These hooks are specific to BDRv3 deployments.
+
+### bdr-pre-node-creation
+
+TPAexec invokes `hooks/bdr-pre-node-creation.yml` on all instances
+before creating a BDR node on any instance for the first time. The hook
+will not be invoked if all required BDR nodes already exist.
+
+### bdr-post-group-creation
+
+TPAexec invokes `hooks/bdr-post-group-creation.yml` on all instances
+after creating any BDR node group on the `first_bdr_primary` instance.
+The hook will not be invoked if the required BDR groups already exist.
+
+## Other hooks
+
+### postgres-pre-update, postgres-post-update
+
+The [`update-postgres`](tpaexec-update-postgres.md) command invokes
+`hooks/postgres-pre-update.yml` on a particular instance before it
+installs any packages, and invokes `hooks/postgres-post-update.yml`
+after the package installation is complete. Both hooks are invoked only
+on the instance being updated.
+
+You can use these hooks to customise the update process for your
+environment (e.g., to install other packages and stop and restart
+services that TPAexec does not manage).
 
 ## New hooks
 

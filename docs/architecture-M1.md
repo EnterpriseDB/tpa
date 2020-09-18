@@ -25,11 +25,11 @@ enabling automatic failover.
          --distribution Debian-minimal
 ```
 
-You must specify ``--architecture M1``. (In the example above, this is
+You must specify `--architecture M1`. (In the example above, this is
 the only option required to produce a working configuration.)
 
-You may optionally specify ``--num-cascaded-replicas N`` to request N
+You may optionally specify `--num-cascaded-replicas N` to request N
 cascaded replicas (including 0 for none; default: 1).
 
 You may also specify any of the options described by
-[``tpaexec help configure-options``](tpaexec-configure.md).
+[`tpaexec help configure-options`](tpaexec-configure.md).

@@ -13,15 +13,18 @@ configures BDR autoscaling.
          --2Q-repositories products/2ndqpostgres/release products/default/release
 ```
 
-You must specify ``--architecture BDR-Autoscale``. (In the example
+You must specify `--architecture BDR-Autoscale`. (In the example
 above, this is the only option required to produce a working
 configuration.)
 
-You may optionally specify ``--bdr-node-group groupname`` to set the
+You may specify `--num-shard-groups` and `--instances-per-shard` to
+determine the number of instances to deploy.
+
+You may optionally specify `--bdr-node-group groupname` to set the
 name of the BDR node group (default: bdrgroup).
 
-You may optionally specify ``--bdr-database dbname`` to set the name of
+You may optionally specify `--bdr-database dbname` to set the name of
 the database with BDR enabled (default: bdrdb).
 
 You may also specify any of the options described by
-[``tpaexec help configure-options``](tpaexec-configure.md).
+[`tpaexec help configure-options`](tpaexec-configure.md).

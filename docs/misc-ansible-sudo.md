@@ -8,7 +8,7 @@ with TPAexec.
 TPAexec needs root privileges to install packages, stop and restart
 services, and a variety of other tasks. TPAexec also needs to be able to
 use sudo. You can make it ssh in as root directly by setting
-``ansible_user: root``, but it will still use sudo to execute tasks as
+`ansible_user: root`, but it will still use sudo to execute tasks as
 other users (e.g., postgres).
 
 ## Ansible sudo invocations
@@ -22,10 +22,10 @@ target instance that looks something like this:
   /usr/bin/python2'"'"' && sleep 0'
 ```
 
-People who were expecting something like ``sudo yum install -y xyzpkg``
+People who were expecting something like `sudo yum install -y xyzpkg`
 are often surprised by this. By and large, most tasks in Ansible will
 invoke a Python interpreter to execute Python code, rather than
-executing recognisable shell commands. (Playbooks may execute ``raw``
+executing recognisable shell commands. (Playbooks may execute `raw`
 shell commands, but TPAexec uses such tasks only to bootstrap a Python
 interpreter.)
 
@@ -54,7 +54,7 @@ would apply equally to any other Ansible playbook.
 * Restrict access by time, rather than by command.
 
 TPAexec needs access only when you are first setting up your cluster or
-running ``tpaexec deploy`` again to make configuration changes, e.g.,
+running `tpaexec deploy` again to make configuration changes, e.g.,
 during a maintenance window. Until then, you can disable its access
 entirely (a one-line change for both ssh and sudo).
 
@@ -73,7 +73,7 @@ by time rather than by scope.
 We *strongly* recommend setting up password-less SSH key authentication
 and password-less sudo access, but it is possible to use passwords too.
 
-If you set ``ANSIBLE_ASK_PASS=yes`` and ``ANSIBLE_BECOME_ASK_PASS=yes``
+If you set `ANSIBLE_ASK_PASS=yes` and `ANSIBLE_BECOME_ASK_PASS=yes`
 in your environment before running tpaexec, Ansible will prompt you to
 enter a login password and a sudo password for the remote servers. It
 will then negotiate the login/sudo password prompt on the remote server
@@ -92,22 +92,22 @@ do not add any extra security during your maintenance window.
 
 ## sudo options
 
-To use Ansible with sudo, you must not ``requiretty`` in sudoers.conf.
+To use Ansible with sudo, you must not `requiretty` in sudoers.conf.
 
 If needed, you can change the sudo options that Ansible uses
-(``-H -S -n``) by setting ``become_flags`` in the
-``[privilege_escalation]`` section of ansible.cfg, or
-``ANSIBLE_BECOME_FLAGS`` in the environment, or ``ansible_become_flags``
+(`-H -S -n`) by setting `become_flags` in the
+`[privilege_escalation]` section of ansible.cfg, or
+`ANSIBLE_BECOME_FLAGS` in the environment, or `ansible_become_flags`
 in the inventory. All three methods are equivalent, but please change
 the sudo options only if there is a specific need to do so. The defaults
-were chosen for good reasons. For example, removing ``-S -n`` will cause
+were chosen for good reasons. For example, removing `-S -n` will cause
 tasks to timeout if password-less sudo is incorrectly configured.
 
 ## Logging
 
 For playbook executions, the sudo logs will show mostly invocations of
 Python (just as it will show only an invocation of bash when someone
-uses ``sudo -i``).
+uses `sudo -i`).
 
 For more detail, the syslog will show the exact arguments to each module
 invocation on the target instance. For a higher-level view of why that
@@ -127,7 +127,7 @@ increasing overhead with increased logging.
 The
 [installation instructions for TPAexec](INSTALL.md)
 mention sudo only as shorthand for “run these commands as root somehow”.
-Once TPAexec is installed and you have run ``tpaexec setup``, TPAexec
+Once TPAexec is installed and you have run `tpaexec setup`, TPAexec
 itself does not require elevated privileges on the local machine. (But
 if you use Docker, you must run tpaexec as a user that belongs to a
 group that is permitted to connect to the Docker daemon.)

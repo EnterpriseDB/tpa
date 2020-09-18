@@ -53,7 +53,7 @@ machine that can reach the cluster's servers over the network.
 
 ### Configuration
 
-The [``tpaexec configure``](tpaexec-configure.md)
+The [`tpaexec configure`](tpaexec-configure.md)
 command generates a simple YAML configuration file to describe the
 cluster you want. The configuration is ready for immediate use, and you
 can modify it to better suit your needs. Editing the configuration file
@@ -62,7 +62,7 @@ both before and after it's created.
 
 ### Provisioning
 
-The [``tpaexec provision``](tpaexec-provision.md)
+The [`tpaexec provision`](tpaexec-provision.md)
 command creates instances and other resources required by the cluster.
 The details of the process depend on the architecture (e.g., M1) and
 platform (e.g., AWS) that you selected while configuring the cluster.
@@ -86,7 +86,7 @@ can access via SSH (with sudo to root).
 
 ### Deployment
 
-The [``tpaexec deploy``](tpaexec-deploy.md)
+The [`tpaexec deploy`](tpaexec-deploy.md)
 command installs and configures Postgres and other software on the
 provisioned servers (which may or may not have been created by TPAexec;
 but it doesn't matter who created them so long as SSH and sudo access is
@@ -96,7 +96,7 @@ At the end of the deployment stage, Postgres will be up and running.
 
 ### Testing
 
-The [``tpaexec test``](tpaexec-test.md) command executes various
+The [`tpaexec test`](tpaexec-test.md) command executes various
 architecture and platform-specific tests against the deployed cluster to
 ensure that it is working as expected.
 
@@ -120,7 +120,7 @@ write [hook scripts](tpaexec-hooks.md) to extend the deployment process.
 
 This mechanism places the full range of Ansible functionality at your
 disposal during every stage of the deployment. For example, any tasks in
-``hooks/pre-deploy.yml`` will be executed before the main deployment;
+`hooks/pre-deploy.yml` will be executed before the main deployment;
 and there are also post-deploy and many other hooks.
 
 ### Cluster management

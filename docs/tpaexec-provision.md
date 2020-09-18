@@ -14,7 +14,7 @@ can access via ssh (with sudo to root).
 ## Prerequisites
 
 Before you can provision a cluster, you must generate the cluster
-configuration with [``tpaexec configure``](tpaexec-configure.md)
+configuration with [`tpaexec configure`](tpaexec-configure.md)
 (and edit config.yml to fine-tune the configuration if needed).
 
 You may need additional platform-dependent steps. For example, you need
@@ -50,14 +50,14 @@ user    0m51.819s
 sys     0m27.852s
 ```
 
-This command will produce lots of output (append ``-v``, ``-vv``, etc.
+This command will produce lots of output (append `-v`, `-vv`, etc.
 to the command if you want even more verbose output). The output is also
-logged to ``ansible.log`` in the cluster directory. This can be overriden
+logged to `ansible.log` in the cluster directory. This can be overriden
 by setting the environment variable `ANSIBLE_LOG_PATH` to the path and name of
 the desired logfile.
 
 If it completes without error, you may proceed to run
-[``tpaexec deploy``](tpaexec-deploy.md) to install and configure
+[`tpaexec deploy`](tpaexec-deploy.md) to install and configure
 software.
 
 ## Options
@@ -65,9 +65,9 @@ software.
 When provisioning cloud instances, it is especially important to make
 sure instances are directly traceable to a human responsible for them.
 By default, TPAexec will tag EC2 instances as being owned by the login
-name of the user running ``tpaexec provision``.
+name of the user running `tpaexec provision`.
 
-Specify ``--owner <name>`` to change the name (e.g., if your username
+Specify `--owner <name>` to change the name (e.g., if your username
 happens to be something generic, like postgres or ec2-user). You may use
 initials, or "Firstname Lastname", or anything else to uniquely identify
 a person.
@@ -120,7 +120,7 @@ admin@quirk:~$ sudo -i
 root@quirk:~# 
 ```
 
-You can run [``tpaexec deploy``](tpaexec-deploy.md) immediately after
+You can run [`tpaexec deploy`](tpaexec-deploy.md) immediately after
 provisioning. It will wait as long as required for the instances to come
 up. You do not need to wait for the instances to come up, or ssh in to
 them before you start deployment.
@@ -149,14 +149,14 @@ drwxr-xr-x 4 ams ams   4096 Aug  4 17:50 inventory
 drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 vault
 ```
 
-We've already studied the ssh_config file, which refers to the ``id_*``
-files (an SSH keypair generated for the cluster) and ``tpa_known_hosts``
-(the signatures of the ``hostkeys/`` installed on the instances).
+We've already studied the ssh_config file, which refers to the `id_*`
+files (an SSH keypair generated for the cluster) and `tpa_known_hosts`
+(the signatures of the `hostkeys/` installed on the instances).
 
-The ``vars.json`` file may be used by ``tpaexec provision`` on
-subsequent invocations with ``--cached``.
+The `vars.json` file may be used by `tpaexec provision` on
+subsequent invocations with `--cached`.
 
-The ``inventory/`` directory contains static and dynamic inventory files
+The `inventory/` directory contains static and dynamic inventory files
 as well as group and host variable definitions from config.yml.
 
 ```bash

@@ -16,12 +16,12 @@ Just select the platform at configure-time:
 
 ## Operating system selection
 
-Use the standard ``--os Debian/Ubuntu/RedHat`` configure option to
+Use the standard `--os Debian/Ubuntu/RedHat` configure option to
 select which distribution to use for the containers. TPAexec will build
 its own systemd-enabled images for this distribution. These images will
-be named with a ``tpa/`` prefix, e.g., ``tpa/redhat:8``.
+be named with a `tpa/` prefix, e.g., `tpa/redhat:8`.
 
-Use ``--os-image some/image:name`` to specify an existing
+Use `--os-image some/image:name` to specify an existing
 systemd-enabled image instead. For example, the
 [centos/systemd](https://hub.docker.com/r/centos/systemd/)
 image (based on CentOS 7) can be used in this way.
@@ -42,8 +42,8 @@ Please consult the
 ### Permissions
 
 TPAexec expects the user running it to have permission to access to the
-Docker daemon (typically by being a member of the ``docker`` group that
-owns ``/var/run/docker.sock``). Run a command like this to check if you
+Docker daemon (typically by being a member of the `docker` group that
+owns `/var/run/docker.sock`). Run a command like this to check if you
 have access:
 
 ```bash
@@ -58,8 +58,8 @@ should have access to the Docker daemon.
 ### Docker storage configuration
 
 **Caution**: The default Docker configuration on many hosts uses
-``lvm-loop`` block storage and is not suitable for production
-deployments. Run ``docker info`` to check which storage driver you are
+`lvm-loop` block storage and is not suitable for production
+deployments. Run `docker info` to check which storage driver you are
 using. If you are using the loopback scheme, you will see something
 like this:
 

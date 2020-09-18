@@ -78,7 +78,7 @@ extensions in `postgres_extensions`, it will automatically update
 `shared_preload_libraries` for you.
 
 If you are using unrecognised extensions that require preloading, you
-can add them to ``preload_extensions``:
+can add them to `preload_extensions`:
 
 ```yaml
 cluster_vars:
