@@ -30,6 +30,7 @@
   yum:
     name: "{{ r.rpm_url }}"
     state: present
+    disable_gpg_check: yes
   with_items: "{{ yum_repository_list }}"
   vars:
     repos: "{{ default_yum_repositories|combine(yum_repositories) }}"
