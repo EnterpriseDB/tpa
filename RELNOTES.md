@@ -6,25 +6,23 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Notable changes
 
-- Improve documentation
+- Improve documentation (see "Cluster configuration" and "Instance
+  configuration" under "Customisations")
 
 - Support setting `password_encryption: scram-sha-256` (default for new
   clusters, but existing clusters will remain unchanged unless you set
   the variable expliclity)
 
-- Add new ``tpaexec show-password /path/to/cluster username`` and
-  ``tpaexec store-password /path/to/cluster username [--random]``
+- Add new `tpaexec show-password /path/to/cluster username` and
+  `tpaexec store-password /path/to/cluster username [--random]`
   commands to manage passwords for postgres_users
 
-- Add a ``postgres_locale`` setting, defaulting to the target instance's
+- Add a `postgres_locale` setting, defaulting to the target instance's
   LC_ALL/LANG setting (or en_US.UTF-8 otherwise), which is used to set
   the initdb-time default for the cluster
 
 - Require that the BDR database have the same collation (LC_COLLATE)
   across all instances in the same bdr_node_group
-
-- Add support for building Docker clusters from source using
-  bind-mounted --local-source-directories and a shared ccache
 
 - Add a `manage_ssh_hostkeys` variable for bare instances (default: no)
   that controls the installation of generated host keys and known_hosts
@@ -34,6 +32,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
   the cluster (e.g., for Postgres replication and backups) while using
   the `public_ip` to access the instances during deployment, for bare
   instances with both `private_ip` and `public_ip` set
+
+- Add support for building Docker clusters from source using
+  bind-mounted --local-source-directories and a shared ccache
 
 - Improve deployment speed in various ways
 
@@ -45,7 +46,7 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Add eu-north-1 to aws_known_regions
 
-- Add a ``preload_extensions`` list to declare extensions that need an
+- Add a `preload_extensions` list to declare extensions that need an
   entry in shared_preload_libraries if included in postgres_extensions
 
 - Don't uninstall any packages by default (default_unwanted_packages)
@@ -59,6 +60,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
   for BDR clusters, without having to duplicate lock timeout management
   from pgbench-bdr.yml
 
+- Only add required lines to /etc/hosts, rather than generating the file
+  from scratch
+
 - Accept optional per-volume `fstype`, `fsopts`, `mountopts`,
   `readahead`, `owner`, `group`, `mode` vars for volumes
 
@@ -68,8 +72,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Generate a valid Vagrantfile even for hostnames with hyphens
 
-- Patch ``TypeError: a bytes-like object is required, not 'str'`` errors
-  when using Boto with an https_proxy set
+- Patch `TypeError: a bytes-like object is required, not 'str'` errors
+  when using Boto with an https_proxy set (run `tpaexec setup`)
 
 - Disable pgbench test for BDR v1/v2 clusters
 
@@ -85,31 +89,31 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 ### Other changes
 
-- Accept ``TPA_GIT_CREDENTIALS=username:access_token`` in the local
+- Accept `TPA_GIT_CREDENTIALS=username:access_token` in the local
   environment to clone https:// repository URLs when building from
-  source (+ ``TPA_GIT_CREDENTIAL_STORE=/path/to/.gitcredentials``)
+  source (+ `TPA_GIT_CREDENTIAL_STORE=/path/to/.gitcredentials`)
 
 ## v20.7 (2020-08-20)
 
 ### Notable changes
 
 - Add support for multiple distributions on Docker via
-  ``tpaexec configure … --os Debian/Ubuntu/RedHat``
+  `tpaexec configure … --os Debian/Ubuntu/RedHat`
 
 - Complete support for RHEL/CentOS 8 across architectures
 
-- Allow setting ``postgres_conf_dir`` to separate configuration files
+- Allow setting `postgres_conf_dir` to separate configuration files
   from PGDATA
 
 - Add support for HARP with BDR as the consensus mechanism
 
-- Add new ``postgres_users`` and ``postgres_databases`` settings to
+- Add new `postgres_users` and `postgres_databases` settings to
   create users and databases during deployment
 
 - Add declarative configuration for pglogical replication through
-  ``publications`` and ``subscriptions`` of ``type: pglogical``
+  `publications` and `subscriptions` of `type: pglogical`
 
-- Add a ``tpaexec relink`` command to repair dangling symlinks into
+- Add a `tpaexec relink` command to repair dangling symlinks into
   TPA_DIR from within a cluster directory
 
 - Add many new and exciting default hostnames beginning with 'u'
@@ -149,7 +153,7 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Update default haproxy_package_version to 1.9.15
 
 - Disable invalid pgdg11-updates-debuginfo repository for RHEL8; deploy
-  with ``-e '{"postgres_debug_packages":{"RedHat":[]}}'`` if required
+  with `-e '{"postgres_debug_packages":{"RedHat":[]}}'` if required
   until the problem is fixed upstream
 
 - Restore support for repmgr to create physical replicas in BDR clusters
@@ -187,7 +191,7 @@ order to avoid any confusion with Postgres version numbers.
   Debian/Ubuntu clusters
 
 - Create unprivileged docker containers by default (but you can still
-  set ``privileged: yes`` on the instance in config.yml)
+  set `privileged: yes` on the instance in config.yml)
 
 - Add basic support for creating user-defined Docker networks and
   attaching containers to them
@@ -202,11 +206,11 @@ order to avoid any confusion with Postgres version numbers.
 - Fix selinux dependency problems ("Failed to detect selinux python
   bindings")
 
-- Correctly handle ``ssh_key_file: /path/to/id_xxx`` as well as
-  ``ssh_key_file: ~/.ssh/id_rsa`` settings in config.yml
+- Correctly handle `ssh_key_file: /path/to/id_xxx` as well as
+  `ssh_key_file: ~/.ssh/id_rsa` settings in config.yml
 
 - Ensure that pgbouncer.ini changes cause a restart when using
-  ``--tags pgbouncer``
+  `--tags pgbouncer`
 
 - Avoid trying to create haproxy users when there are no haproxy
   instances in a cluster
@@ -243,13 +247,13 @@ order to avoid any confusion with Postgres version numbers.
 
 ## v9.2 (2020-03-05)
 
-This release requires ``tpaexec setup`` to be rerun after installation.
+This release requires `tpaexec setup` to be rerun after installation.
 
 ### Major changes
 
 - Require Python 3.6+ on the machine running tpaexec
 
-- Optionally support Python 3 (``preferred_python_version: python3``) on
+- Optionally support Python 3 (`preferred_python_version: python3`) on
   target instances that run one of the following distributions:
 
   * Debian 9 (stretch)
@@ -260,12 +264,12 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 - Existing clusters continue to work unmodified with Python 2.7
 
 - Newly-configured clusters use Python 3 by default wherever available;
-  set ``preferred_python_version: python2`` to undo this
+  set `preferred_python_version: python2` to undo this
 
-- Running ``tpaexec setup`` will now create $TPA_DIR/tpa-venv (it is
+- Running `tpaexec setup` will now create $TPA_DIR/tpa-venv (it is
   safe to remove the old tpa-virtualenv directory)
 
-- Require 2ndQuadrant ansible to be installed via ``tpaexec setup``, and
+- Require 2ndQuadrant ansible to be installed via `tpaexec setup`, and
   ignore any other Ansible installation in $PATH
 
 - Enable HTTP-based queue checks for haproxy if the Platypus extension
@@ -276,13 +280,13 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 If you are using tpaexec v9.2 to upgrade an existing cluster running
 BDR-EE 3.6.14 or earlier with 2ndQPostgres, you must first remove the
-``postgresql11-devel`` package from target instances before you run
-``tpaexec update-postgres``. This is because the 3.6.15/3.6.16 stack
+`postgresql11-devel` package from target instances before you run
+`tpaexec update-postgres`. This is because the 3.6.15/3.6.16 stack
 releases add an LLVM-related dependency (llvm-toolset-7-clang) that
 cannot be satisifed by the default package repositories.
 
-Instead of removing the package, ``yum install centos-release-scl`` (on
-CentOS) or ``yum-config-manager --enable rhel-server-rhscl-7-rpms`` (on
+Instead of removing the package, `yum install centos-release-scl` (on
+CentOS) or `yum-config-manager --enable rhel-server-rhscl-7-rpms` (on
 RHEL) may be enough to make the update succeed even with
 postgresql11-devel installed.
 
@@ -290,11 +294,11 @@ We expect to fix this problem in a future release of the BDR stack.
 
 ## v9.1 (2020-01-20)
 
-This release requires ``tpaexec setup`` to be rerun after installation.
+This release requires `tpaexec setup` to be rerun after installation.
 
 ### Notable changes
 
-- Update 2ndQuadrant Ansible to v2.8 (``tpaexec setup`` will upgrade)
+- Update 2ndQuadrant Ansible to v2.8 (`tpaexec setup` will upgrade)
 
 - Introduce additional checks through haproxy to avoid stale reads after
   failover for CAMO instances (RM11664); this does not work with SELinux
@@ -335,9 +339,9 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 ### Minor changes
 
-- Allow custom ``haproxy_port`` to be set
+- Allow custom `haproxy_port` to be set
 
-- Allow custom ``archive_command`` to be set
+- Allow custom `archive_command` to be set
 
 - Remove file descriptor limit for pgbouncer
 
@@ -369,7 +373,7 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 ## v8.3 (2019-08-29)
 
-This release requires ``tpaexec setup`` to be rerun after installation.
+This release requires `tpaexec setup` to be rerun after installation.
 
 ### Notable changes
 
@@ -385,7 +389,7 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 ### Minor changes
 
-- Accept ``etc_hosts_lines`` list variable setting to completely control
+- Accept `etc_hosts_lines` list variable setting to completely control
   /etc/hosts contents
 
 - Retrieve and set bdr_node_id during BDR initialisation
@@ -415,10 +419,10 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 - Accept bdr_node_group_options hash to set bdr.create_node_group()
   options
 
-- Accept ``log_destination: stderr`` setting to log directly to
+- Accept `log_destination: stderr` setting to log directly to
   /var/log/postgresql/postgres.log (without going through rsyslog)
 
-- Accept ``repmgr_redirect_pgbouncer`` setting to reconfigure pgbouncer
+- Accept `repmgr_redirect_pgbouncer` setting to reconfigure pgbouncer
   on repmgr failover events
 
 - Testing improvements
@@ -452,11 +456,11 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 - Support user-supplied TLS client certificates for authentication
   (RT65159)
 
-- Allow setting ``hba_force_certificate_auth: yes`` on any Postgres
+- Allow setting `hba_force_certificate_auth: yes` on any Postgres
   server instance to force TLS certificate authentication for clients
   instead of password authentication
 
-- Allow setting ``postgres_service_environment`` to set environment
+- Allow setting `postgres_service_environment` to set environment
   variables in the postgres service unit file
 
 - Support new postgres-config and postgres-config-final hooks
@@ -483,7 +487,7 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 - Support for Barman 2.8
 
-- New ``--hostnames-unsorted`` configure option to avoid sorting
+- New `--hostnames-unsorted` configure option to avoid sorting
   hostnames when assigning them to instances
 
 ### Bugfixes
@@ -509,7 +513,7 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 ### Notable changes
 
-- Allow setting ``bdr_node_name`` in an instance's vars to change the
+- Allow setting `bdr_node_name` in an instance's vars to change the
   name of the BDR node (the default remains to use the instance's name)
 
 - Require haproxy 1.9.7 (for which packages are available from the
@@ -526,7 +530,7 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 ### Notable changes
 
-- Make the ``tpaexec test`` command take an optional test name, and
+- Make the `tpaexec test` command take an optional test name, and
   provide infrastructure for custom tests
 
 - Adapt to BDR-Always-ON v5 architecture changes
@@ -534,11 +538,11 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 ### Minor changes
 
 - Allow optional branch names (git refs) to be specified with
-  ``--install-from-source 2ndqpostgres:2QREL_11_STABLE_dev …``
+  `--install-from-source 2ndqpostgres:2QREL_11_STABLE_dev …`
 
-- Accept a list of options in ``postgres_extra_configure_opts`` to
+- Accept a list of options in `postgres_extra_configure_opts` to
   append to the Postgres configure invocation (backwards-compatible
-  with existing usage of ``postgres_configure_opts``)
+  with existing usage of `postgres_configure_opts`)
 
 ### Bugfixes
 
@@ -553,7 +557,7 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 
 - Use new PGDG repository RPM location after breaking change upstream
 
-- Accept ``--install-from-source 2ndqpostgres pglogical3 bdr3`` as a
+- Accept `--install-from-source 2ndqpostgres pglogical3 bdr3` as a
   configure option to set up a cluster built from source
 
 ### Bugfixes
@@ -563,11 +567,11 @@ This release requires ``tpaexec setup`` to be rerun after installation.
 - Correctly override postgres_bin_dir for clusters built from source
 
 - Change pg_receivwal invocation to make
-  ``barman receive-wal --stop servername`` work reliably
+  `barman receive-wal --stop servername` work reliably
 
 ## v7.5 (2019-04-04)
 
-You must run ``tpaexec setup`` after installing the release packages.
+You must run `tpaexec setup` after installing the release packages.
 
 ### Notable changes
 
@@ -599,7 +603,7 @@ You must run ``tpaexec setup`` after installing the release packages.
 
 ### Notable changes
 
-- Add ``--overrides-from a.yml …`` configure option to set variables
+- Add `--overrides-from a.yml …` configure option to set variables
   like cluster_tags and cluster_vars in the generated config.yml
 
 ### Bugfixes
@@ -615,7 +619,7 @@ You must run ``tpaexec setup`` after installing the release packages.
 
 ### Notable changes
 
-- Improve the ``tpaexec update-postgres`` command to update all
+- Improve the `tpaexec update-postgres` command to update all
   Postgres-related packages, and make it available on BDR-based
   architectures
 
@@ -627,7 +631,7 @@ You must run ``tpaexec setup`` after installing the release packages.
   [] explicitly (aside from being able to set {apt,yum}_repository_list
   to [] to suppress other external repositories)
 
-- Revised pgbench schedule for ``tpaexec test``, with separate
+- Revised pgbench schedule for `tpaexec test`, with separate
   pgbench-postgres and pgbench-bdr stages (== tags)
 
 ### Bugfixes
@@ -650,9 +654,9 @@ You must run ``tpaexec setup`` after installing the release packages.
 ### Major changes
 
 - Allow additional artifacts (files, archives, directories) to be
-  installed on instances (via ``artifacts``)
+  installed on instances (via `artifacts`)
 
-- Support building extensions from source (via ``install_from_source``)
+- Support building extensions from source (via `install_from_source`)
 
 ### Bugfixes
 
@@ -663,7 +667,7 @@ You must run ``tpaexec setup`` after installing the release packages.
 
 - Add --extra{,-optional}-packages configure arguments
 
-- The ``tpaexec info {platforms,architectures}`` command now lists the
+- The `tpaexec info {platforms,architectures}` command now lists the
   actual contents of the corresponding directories
 
 - Support wildcard entries directly in s3_uploads
@@ -689,7 +693,7 @@ BDR-Always-ON architecture. This release would otherwise have been v3.2.
 
 ### Major changes
 
-- Multi-platform support in ``tpaexec configure``
+- Multi-platform support in `tpaexec configure`
 
 - Experimental support for Vagrant, Docker, and lxd platforms
 
@@ -724,21 +728,21 @@ BDR-Always-ON architecture. This release would otherwise have been v3.2.
 ### Major changes
 
 - Added support for deployment architectures.
-  See ``tpaexec info architectures`` for details.
+  See `tpaexec info architectures` for details.
 
-- Added ``tpaexec configure`` command that takes an architecture
+- Added `tpaexec configure` command that takes an architecture
   name and various options and generates config.yml and deploy.yml for
   a new cluster.
 
 - New BDR3-Always-ON and BDR-Simple architectures
 
-- New ``tpaexec test`` command
+- New `tpaexec test` command
 
-- New ``tpaexec setup`` command to setup a virtualenv and install Python
+- New `tpaexec setup` command to setup a virtualenv and install Python
   dependencies automatically (the virtualenv will also be automatically
   activated when using tpaexec)
 
-- New ``tpaexec selftest`` command to check the TPAexec installation.
+- New `tpaexec selftest` command to check the TPAexec installation.
 
 - Automatic package builds
 
@@ -777,7 +781,7 @@ BDR-Always-ON architecture. This release would otherwise have been v3.2.
 - Extensive documentation updates
 - Initial LXD platform support
 - Support postgres/repmgr/barman package version selection (6e904c8)
-  via ``tpaexec configure … --postgres-package version``
+  via `tpaexec configure … --postgres-package version`
 - When generating restore_command, prefer the closest Barman server
   (i.e., one in the same region) if there's more than one available
 - Deprecate ec2_ami_user and cluster_ssh_user in favour of setting
@@ -790,13 +794,13 @@ BDR-Always-ON architecture. This release would otherwise have been v3.2.
 - Allow instance_defaults to specify default_volumes for all instances
 - Include traceback information on module failure in various cases
 - Remove ansible-cluster and ansible-cluster-playbook in favour of
-  ``tpaexec cmd`` and ``tpaexec playbook``
-- New ``tpaexec start-postgres`` and ``tpaexec stop-postgres`` commands
+  `tpaexec cmd` and `tpaexec playbook`
+- New `tpaexec start-postgres` and `tpaexec stop-postgres` commands
   for clusters that use LUKS-encrypted volumes
-- New ``tpaexec switchover clustername nodename`` command for M1
+- New `tpaexec switchover clustername nodename` command for M1
   clusters
-- The ``provision``, ``deploy``, ``deprovision``, and ``rehydrate``
-  commands are replaced by ``tpaexec provision`` etc.
+- The `provision`, `deploy`, `deprovision`, and `rehydrate`
+  commands are replaced by `tpaexec provision` etc.
 - Various changes related to packaging
 
 ## v3.0 (2018-06-05)
