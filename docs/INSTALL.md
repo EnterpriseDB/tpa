@@ -123,3 +123,13 @@ you can install the packages by any means available.
 We recommend that you run `tpaexec setup` again whenever a new version
 of `tpaexec` is installed. Some new releases may not strictly require
 this, but others will not work without it.
+
+## Distribution support
+
+2ndQuadrant publishes TPAexec packages for Debian 10 (buster), Ubuntu
+20.04 (focal), Ubuntu 18.04 (bionic), and RHEL/CentOS 7.x and 8.x. These
+distributions provide a usable Python 3.6+ environment out of the box,
+which TPAexec requires.
+
+However, TPAexec supports a wider range of [distributions on target
+instances](distributions.md).

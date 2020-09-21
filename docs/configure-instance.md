@@ -13,9 +13,12 @@ easy-to-review configuration.
 ## System-level configuration
 
 The first thing TPAexec does is to ensure that Python is bootstrapped
-and ready to execute Ansible modules. Then it completes various
-system-level configuration tasks before moving on to
-[Postgres configuration](#postgres) below.
+and ready to execute Ansible modules (a distribution-specific process).
+Then it completes various system-level configuration tasks before moving
+on to [Postgres configuration](#postgres) below.
+
+* [Distribution support](distributions.md)
+* [Python environment](python.md) (`preferred_python_version`)
 
 ### Package repositories
 
