@@ -58,11 +58,11 @@ documented in their own sections below.
 * [Upload artifacts](artifacts.md) (files, directories,
   tar archives)
 * [Set sysctl values](sysctl_values.md)
+* [Configure /etc/hosts](hosts.md)
 
 <!-- WIP
 
 * [Configure OpenVPN](openvpn.md)
-* [Configure hosts files](hosts.md)
 * [Configure syslog](syslog.md)
 
 -->
