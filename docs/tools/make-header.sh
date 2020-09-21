@@ -13,6 +13,8 @@ else
     d=$(date +"%e %B %G")
 fi
 
+# https://tex.stackexchange.com/questions/280714/how-to-get-unicode-characters-u2713-and-u2717-to-display-in-pdflatex
+
 cat <<EOF
 ---
 classification: internal
