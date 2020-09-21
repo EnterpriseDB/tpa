@@ -2,11 +2,16 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-import hmac
 import base64
 import hashlib
-from passlib.hash import scram
+from hmac import HMAC
 from ansible.errors import AnsibleFilterError
+
+try:
+    from passlib.hash import scram
+    HAVE_PASSLIB=True
+except ImportError:
+    HAVE_PASSLIB=False
 
 # Returns ``'md5' || md5_hex( password || username ))`` as computed by
 # pg_md5_encrypt() in src/common/md5.c
@@ -22,8 +27,8 @@ def scram_password(password, salt=None, rounds=4096):
 
     (salt, rounds, SaltedPassword) = scram.extract_digest_info(s, "sha-256")
 
-    ClientKey = hmac.digest(SaltedPassword, "Client Key".encode('ascii'), hashlib.sha256)
-    ServerKey = hmac.digest(SaltedPassword, "Server Key".encode('ascii'), hashlib.sha256)
+    ClientKey = HMAC(SaltedPassword, "Client Key".encode('ascii'), hashlib.sha256).digest()
+    ServerKey = HMAC(SaltedPassword, "Server Key".encode('ascii'), hashlib.sha256).digest()
     StoredKey = hashlib.sha256(ClientKey).digest()
 
     return '%s$%s:%s$%s:%s' % (
@@ -43,6 +48,9 @@ def encrypted_password(password_encryption, password, username=None, existing_pa
     elif password_encryption == 'scram-sha-256':
         salt = None
         rounds = None
+
+        if not HAVE_PASSLIB:
+            raise AnsibleFilterError("|encrypted_password requires passlib (did you run `tpaexec setup`?)")
 
         if existing_password and existing_password.startswith('SCRAM-SHA-256$'):
             (_, info, _) = existing_password.split('$', 2)
