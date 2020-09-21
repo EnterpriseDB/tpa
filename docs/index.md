@@ -54,11 +54,12 @@ machine that can reach the cluster's servers over the network.
 ### Configuration
 
 The [`tpaexec configure`](tpaexec-configure.md)
-command generates a simple YAML configuration file to describe the
-cluster you want. The configuration is ready for immediate use, and you
-can modify it to better suit your needs. Editing the configuration file
-is the usual way to make any configuration changes to your cluster,
-both before and after it's created.
+command generates a simple YAML configuration file to describe a
+cluster, based on the options you select. The configuration is ready for
+immediate use, and you can modify it to better suit your needs. Editing
+the configuration file is the usual way to [make any configuration
+changes to your cluster](configure-cluster.md), both before and after
+it's created.
 
 ### Provisioning
 
@@ -105,23 +106,23 @@ cluster.
 
 ### Incremental changes
 
-TPAexec is carefully designed so that the provisioning, deployment, and
-testing stages are idempotent. You can run through them, make a change
-to config.yml, and run through the process again to deploy the change.
-If nothing has changed in the configuration or on the instances, then
+TPAexec is carefully designed so that provisioning, deployment, and
+testing are idempotent. You can run through them, make a change to
+config.yml, and run through the process again to deploy the change. If
+nothing has changed in the configuration or on the instances, then
 rerunning the entire process will not change anything either.
 
 ### Extensible through Ansible
 
 TPAexec supports a variety of configuration options, so you can do a lot
-just by editing config.yml and re-running the provision/deploy/test
-cycle. Should you need to go beyond what is already implemented, you can
-write [hook scripts](tpaexec-hooks.md) to extend the deployment process. 
+just by editing config.yml and re-running provision/deploy/test. Should
+you need to go beyond what is already implemented, you can write [hook
+scripts](tpaexec-hooks.md) to extend the deployment process. 
 
 This mechanism places the full range of Ansible functionality at your
 disposal during every stage of the deployment. For example, any tasks in
 `hooks/pre-deploy.yml` will be executed before the main deployment;
-and there are also post-deploy and many other hooks.
+and there are also `post-deploy` and many other hooks.
 
 ### Cluster management
 

@@ -18,7 +18,8 @@ The command also accepts various options (some specific to the selected
 architecture or platform) to modify the configuration, but the defaults
 are sensible and intended to be usable straightaway. You are encouraged
 to read the generated config.yml and fine-tune the configuration to suit
-your needs.
+your needs. (Here's an overview of [configuration settings that affect
+the deployment](configure-instance.md).)
 
 It's possible to write config.yml entirely by hand, but it's much easier
 to edit the generated file.

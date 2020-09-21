@@ -62,6 +62,7 @@ documented in their own sections below.
   tar archives)
 * [Set sysctl values](sysctl_values.md)
 * [Configure /etc/hosts](hosts.md)
+* [Manage ssh_known_hosts entries](manage_ssh_hostkeys.md)
 
 <!-- WIP
 
