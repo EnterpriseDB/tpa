@@ -26,6 +26,11 @@ header-includes:
 - \floatplacement{figure}{H}
 - \newcommand{\passthrough}[1]{#1}
 - \lstset{backgroundcolor=\color{lightgray!30},basicstyle=\fontfamily{txtt}\fontsize{11}{13.2}\selectfont,basewidth=0.53em}
+- \usepackage[utf8]{inputenc}
+- \usepackage{pifont}
+- \usepackage{newunicodechar}
+- \newunicodechar{✓}{\ding{51}}
+- \newunicodechar{✗}{\ding{55}}
 ---
 
 EOF
