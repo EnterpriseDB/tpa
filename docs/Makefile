@@ -17,7 +17,7 @@ tpaexec.md: header.md $(SRC)
 	sed -e '$$s/$$/\n/' -e 's/—/\\textemdash{}/g' -e 's/©/\\copyright/g' -e 's/…/\\dots/g' -s $^ >$@
 
 $(TARGET): tpaexec.md
-	2ndq-pandoc tpaexec.md --filter=tools/single-pdf.py --listings -- --pdf-engine=xelatex
+	2ndq-pandoc tpaexec.md --filter=tools/single-pdf.py --listings
 
 clean:
 	rm -rf header.md tpaexec.md $(TARGET)
