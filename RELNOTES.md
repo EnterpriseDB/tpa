@@ -2,16 +2,16 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v20.9 (unreleased)
+## v20.9 (2020-09-22)
 
 ### Notable changes
 
-- Improve documentation (see "Cluster configuration" and "Instance
-  configuration" under "Customisations")
+- Improve documentation (under "Customisations", start with "Cluster
+  configuration" and "Instance configuration")
 
 - Support setting `password_encryption: scram-sha-256` (default for new
   clusters, but existing clusters will remain unchanged unless you set
-  the variable expliclity)
+  the variable explicitly)
 
 - Add new `tpaexec show-password /path/to/cluster username` and
   `tpaexec store-password /path/to/cluster username [--random]`
@@ -65,6 +65,8 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - Accept optional per-volume `fstype`, `fsopts`, `mountopts`,
   `readahead`, `owner`, `group`, `mode` vars for volumes
+
+- Adapt to grubby storing kernelopts in /boot/grub2/grubenv on RHEL8
 
 - Improve handling of LUKS-encrypted volumes
 
