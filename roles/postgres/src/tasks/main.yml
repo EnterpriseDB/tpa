@@ -30,6 +30,7 @@
     git_env:
       GIT_USERNAME: "{{ git_credentials.split(':')[0] }}"
       GIT_PASSWORD: "{{ git_credentials.split(':')[1] if git_credentials else '' }}"
+      TMPDIR: /var/tmp
     _task_environment: "{{
       git_credentials|ternary(git_env, {})
       |combine(ssh_auth_sock|ternary(ssh_env, {}))
