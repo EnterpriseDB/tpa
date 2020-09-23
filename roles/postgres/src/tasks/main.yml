@@ -4,40 +4,15 @@
 
 - include_role: name=postgres/src/req
 
-- name: Check if ssh agent forwarding is enabled
-  shell: echo $SSH_AUTH_SOCK
-  args:
-    executable: /bin/bash
-  register: cmd
-  become: no
-  changed_when: False
-
-- name: Fetch Postgres source from git repository
-  git:
+- include_role: name=src/install tasks_from=clone.yml
+  vars:
+    name: Postgres
     repo: "{{ postgres_git_url }}"
     dest: "{{ postgres_src_dir }}"
     version: "{{ postgres_git_ref|default(default_postgres_git_ref) }}"
     reference: "{{ postgres_git_reference_repo }}"
-    depth: 1
-    accept_hostkey: yes
-  vars:
-    ansible_connection: ssh
-    ansible_ssh_host: "{{ (platform == 'docker')|ternary(ip_address, ansible_host) }}"
-    ssh_auth_sock: "{{ cmd.stdout.strip() }}"
-    ssh_env:
-      SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
-    git_credentials: "{{ lookup('env', 'TPA_GIT_CREDENTIALS') }}"
-    git_env:
-      GIT_USERNAME: "{{ git_credentials.split(':')[0] }}"
-      GIT_PASSWORD: "{{ git_credentials.split(':')[1] if git_credentials else '' }}"
-      TMPDIR: /var/tmp
-    _task_environment: "{{
-      git_credentials|ternary(git_env, {})
-      |combine(ssh_auth_sock|ternary(ssh_env, {}))
-    }}"
   when:
     postgres_src_dir not in mounted_sources
-  environment: "{{ target_environment|combine(_task_environment) }}"
 
 - include_role: name=src/install tasks_from=verify-branch.yml
   vars:

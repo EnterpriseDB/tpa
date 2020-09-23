@@ -1,0 +1,36 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Check if ssh agent forwarding is enabled
+  shell: echo $SSH_AUTH_SOCK
+  args:
+    executable: /bin/bash
+  register: auth_sock_cmd
+  become: no
+  changed_when: False
+
+- name: Fetch {{ name }} from {{ repo }}, {{ version }}
+  git:
+    repo: "{{ repo }}"
+    dest: "{{ dest }}"
+    version: "{{ version }}"
+    reference: "{{ reference }}"
+    depth: 1
+    accept_hostkey: yes
+  vars:
+    ansible_connection: ssh
+    ansible_ssh_host: "{{ (platform == 'docker')|ternary(ip_address, ansible_host) }}"
+    ssh_auth_sock: "{{ auth_sock_cmd.stdout.strip() }}"
+    ssh_env:
+      SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
+    git_credentials: "{{ lookup('env', 'TPA_GIT_CREDENTIALS') }}"
+    git_env:
+      GIT_USERNAME: "{{ git_credentials.split(':')[0] }}"
+      GIT_PASSWORD: "{{ git_credentials.split(':')[1] if git_credentials else '' }}"
+      TMPDIR: /var/tmp
+    _task_environment: "{{
+      git_credentials|ternary(git_env, {})
+      |combine(ssh_auth_sock|ternary(ssh_env, {}))
+    }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"

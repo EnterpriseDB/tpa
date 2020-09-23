@@ -2,8 +2,9 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-- name: Fetch repmgr source from git repository
-  git:
+- include_role: name=src/install tasks_from=clone.yml
+  vars:
+    name: repmgr
     repo: "{{ repmgr_git_url }}"
     dest: "{{ repmgr_src_dir }}"
     version: "{{ repmgr_git_ref }}"

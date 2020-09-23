@@ -3,44 +3,16 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 # First, we must obtain the source code.
-#
-# At present, we support fetching a git repository to a local directory.
 
-- name: Check if ssh agent forwarding is enabled
-  shell: echo $SSH_AUTH_SOCK
-  args:
-    executable: /bin/bash
-  register: cmd
-  become: no
-  changed_when: False
-
-- name: Fetch {{ ifs.name }} from {{ git_repository_url }}, {{ git_repository_ref }}
-  git:
-    dest: "{{ source_directory }}"
+- include_role: name=src/install tasks_from=clone.yml
+  vars:
+    name: "{{ ifs.name }}"
     repo: "{{ git_repository_url }}"
+    dest: "{{ source_directory }}"
     version: "{{ git_repository_ref or 'master' }}"
     reference: "{{ git_reference_repository|default(omit) }}"
-    depth: 1
-    accept_hostkey: yes
-  register: git
-  vars:
-    ansible_connection: ssh
-    ansible_ssh_host: "{{ (platform == 'docker')|ternary(ip_address, ansible_host) }}"
-    ssh_auth_sock: "{{ cmd.stdout.strip() }}"
-    ssh_env:
-      SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
-    git_credentials: "{{ lookup('env', 'TPA_GIT_CREDENTIALS') }}"
-    git_env:
-      GIT_USERNAME: "{{ git_credentials.split(':')[0] }}"
-      GIT_PASSWORD: "{{ git_credentials.split(':')[1] if git_credentials else '' }}"
-      TMPDIR: /var/tmp
-    _task_environment: "{{
-      git_credentials|ternary(git_env, {})
-      |combine(ssh_auth_sock|ternary(ssh_env, {}))
-    }}"
   when:
     source_directory not in mounted_sources
-  environment: "{{ target_environment|combine(_task_environment) }}"
 
 - include_role: name=src/install tasks_from=verify-branch.yml
   when:
