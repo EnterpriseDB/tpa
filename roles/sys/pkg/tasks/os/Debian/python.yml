@@ -11,7 +11,7 @@
     and 'Reading package lists' in update.stdout
 
 - name: Install python
-  raw: command -v {{ python }} >/dev/null 2>&1 || apt-get -q -y install {{ python.startswith('python2.7')|ternary('python2.7', 'python3') }}; true
+  raw: command -v {{ python }} >/dev/null 2>&1 || apt-get -q -y install {{ python.startswith('python2')|ternary('python2.7', 'python3') }}; true
   environment: {}
   register: python_install
   changed_when: >
