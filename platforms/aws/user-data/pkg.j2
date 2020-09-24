@@ -31,4 +31,5 @@ if ! command -v aws &>/dev/null || ! command -v nvmecli &>/dev/null || ! command
         *) echo "Missing dependencies on ${ID}:${VERSION_ID}"; exit 1 ;;
     esac
     ${U[@]} && ${I[@]} ${P[@]} && ${V[@]} --system-site-packages $DV && source $DV/bin/activate && pip install awscli
+    ln -sf $DV/bin/aws /usr/local/bin/aws
 fi
