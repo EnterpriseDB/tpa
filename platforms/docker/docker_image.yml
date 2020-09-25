@@ -2,7 +2,7 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# Given ``image``, the name of an image referenced by instances[] that
+# Given `image`, the name of an image referenced by instances[] that
 # does not exist locally, we must now do whatever is required to provide
 # it, or fail with an error.
 #
@@ -10,33 +10,31 @@
 # images are not set up to do this, so we need to build systemd-enabled
 # Docker images for supported distributions.
 #
-# By default, if the required image is named ``tpa/label:version``, we
-# use ./images/label-version/Dockerfile to build a base image that adds
-# systemd and its dependencies to a distribution image (say, centos:8).
-# Then we build the final image using common-systemd/Dockerfile, which
-# applies distribution-independent systemd configuration.
+# By default, if the required image is named `tpa/label:version`, we
+# use ./images/Dockerfile to build an image that adds systemd and its
+# dependencies to a distribution image (say, centos:8) and runs some
+# systemctl commands to set up the required configuration.
 #
-# You can set ``docker_images`` to customise the build process:
+# You can set `docker_images` to customise the build process:
 #
 #     docker_images:
 #       "some/image:ver":
 #         context_path: images/image-final
 #
-# In this example, we run ``docker build`` in images/image-final to
-# build an image named 'some/image:ver'.
+# In this example, we run `docker build` in images/image-final to build
+# an image named 'some/image:ver'.
 #
-# Optionally, you can provide another build context to use the two-stage
-# build process:
+# You can also build your own image and have TPAexec add in the required
+# systemd-specific parts. For example:
 #
 #     docker_images:
 #       "some/other:ver":
 #         base_context_path: images/other-base
-#         context_path: images/other-final
+#         context_path: images/common-systemd
 #
-# Here, we run ``docker build`` first in images/other-base, and again in
-# images/other-final to build an image named 'some/other:ver'. The final
-# build will be invoked with ``--build-arg BASE_IMAGE=${image_id}`` so
-# that it can extend the base image.
+# Here, we run `docker build` first in images/other-base to build a base
+# image, and then again in images/common-systemd to build a final image,
+# passing in `BASE_IMAGE=${base_image_id}` as a build argument.
 #
 # (Set ``dockerfile: Somefile`` or ``base_dockerfile: Otherfile`` if
 # your Dockerfile is named something other than Dockerfile.)
@@ -50,18 +48,33 @@
     _parts: "{{ image.split(':') }}"
     _label: "{{ _parts[0]|regex_replace('^tpa/', '') }}"
     _version: "{{ _parts[1]|default('latest') }}"
+    _image_key: "{{ '%s-%s' % (_label, _version) }}"
     _entry:
-      base_image_name: "tpa/{{ _label }}-base:{{ _version }}"
-      base_context_path: "docker/images/{{ _label }}-{{ _version }}"
-      context_path: docker/images/common-systemd
+      base_image: "{{ _tpa_images[_image_key] }}"
+      context_path: docker/images
+    _tpa_images:
+      debian:9:       debian:9
+      debian-stretch: debian:9
+      debian-10:      debian:10
+      debian-buster:  debian:10
+      debian-latest:  debian:10
+      ubuntu-18.04:   ubuntu:bionic
+      ubuntu-bionic:  ubuntu:bionic
+      ubuntu-20.04:   ubuntu:focal
+      ubuntu-focal:   ubuntu:focal
+      ubuntu-latest:  ubuntu:focal
+      redhat-7:       centos:7
+      redhat-8:       centos:8
+      redhat-latest:  centos:8
   when:
     image.startswith('tpa/')
+    and _image_key in _tpa_images
 
 - assert:
     msg: "Please specify build instructions for {{ image }} in docker_images"
     that: image in docker_images
 
-- name: Build base image for {{ image }}
+- name: Build base image for {{ image }} if needed
   docker_image:
     name: "{{ _base_image_name }}"
     state: present
@@ -92,10 +105,13 @@
         # Specify the base image using the container-id of the parent, so we
         # ensure we build on top of exactly what we produced in the event of
         # concurrent rebuilds/re-tags, etc.
-        BASE_IMAGE: "{{ base_image.image.Id }}"
+        BASE_IMAGE: "{{ base_image.image.Id|default(_entry.base_image|default('none')) }}"
       nocache: "{{ _entry.nocache|default('no') }}"
       force_build: "{{ _entry.force_build|default('no') }}"
       force_tag: "{{ _entry.force_tag|default('no') }}"
-      pull: no
+      pull: "{{ _entry['pull']|default(_pull) }}"
   vars:
     _entry: "{{ docker_images[image] }}"
+    _pull: "{{
+      lookup('env', 'TPA_DOCKER_PULL_BASE_IMAGE') or 'yes'
+    }}"
