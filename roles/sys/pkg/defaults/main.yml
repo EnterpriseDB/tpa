@@ -31,7 +31,7 @@ default_yum_repositories:
 
   PGDG:
     rpm_url: >-
-      https://download.postgresql.org/pub/repos/yum/{{ postgres_version }}/redhat/rhel-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+      https://download.postgresql.org/pub/repos/yum/reporpms/EL-{{ ansible_distribution_major_version }}-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
 yum_repository_list: "{{ default_yum_repositories.keys()|list }}"
 
