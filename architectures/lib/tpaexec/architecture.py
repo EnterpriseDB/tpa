@@ -6,6 +6,7 @@ import sys, os, io
 import subprocess
 import argparse
 import yaml
+import re
 
 from ansible.template import Templar
 from ansible.utils.vars import merge_hash
@@ -238,7 +239,7 @@ class Architecture(object):
         # combination of values specified on the command-line and defaults set
         # by the architecture. Now we start augmenting that information.
 
-        self.cluster = args['cluster']
+        self.cluster = re.sub('/*$', '', args['cluster'])
         args['cluster_name'] = self.cluster_name()
 
         # If --overrides-from is specified, we load files one by one (treating
