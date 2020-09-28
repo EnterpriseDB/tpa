@@ -213,6 +213,9 @@
   failed_when: >
     reposub.rc != 0 or 'error: ' in reposub.stdout.lower()
   with_items: "{{ _2q_repositories }}"
+  loop_control:
+    label: >-
+      {{ item.repo }}
 
 - name: Exclude lua packages from 2ndQuadrant products/bdr3/release repo
   ini_file:

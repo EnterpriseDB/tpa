@@ -104,6 +104,9 @@
   failed_when: >
     reposub.rc != 0 or 'error: ' in reposub.stdout.lower()
   with_items: "{{ _2q_repositories }}"
+  loop_control:
+    label: >-
+      {{ item.repo }}
 
 - include_tasks: repository-cleanup.yml
   vars:
