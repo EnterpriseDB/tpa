@@ -24,15 +24,15 @@ tpaexec package.)
 ```bash
 # Debian (python3.7) or Ubuntu (python3.6)
 $ sudo apt-get install python3.7 python3-pip python3-venv \
-      pwgen openvpn
+      pwgen openvpn patch
 
 # RedHat or CentOS (python3 for RHEL7, python36 for RHEL8)
 $ sudo yum install python36 python3-pip \
-      pwgen epel-release openvpn
+      pwgen epel-release openvpn patch
 
 # MacOS X
 $ sudo brew tap discoteq/discoteq
-$ sudo brew install python@3 pwgen openvpn flock coreutils
+$ sudo brew install python@3 pwgen openvpn flock coreutils gpatch
 ```
 
 (We mention `sudo` here only to indicate which commands need root
