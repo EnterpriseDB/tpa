@@ -2,6 +2,30 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v20.10 (unreleased)
+
+### Minor changes
+
+- On AWS EC2 instances, create a symbolic link from /usr/local/bin/aws
+  to the installed awscli executable (for use in scripts)
+
+- Create the builtin tpa/xxx docker images in a single step, rather than
+  building a -base image first (but custom two-stage builds are still
+  supported)
+
+### Bugfixes
+
+- Fix a problem with cloning an HTTPS repository with ssh submodules
+  that caused `fatal: cannot exec '/tmp/tmpXXXXXXXX': Permission denied`
+  errors on Docker containers (e.g., when updating pglogical_dump)
+  
+- Fix python2.7 interpreter discovery on Ubuntu 18.04/bionic: if
+  preferred_python_interpreter was unset, the earlier code would
+  install Python 3 but try to use Python 2
+
+- Ensure `tpaexec configure xyz/` does not create config.yml with an
+  empty cluster_name
+
 ## v20.9 (2020-09-22)
 
 ### Notable changes
