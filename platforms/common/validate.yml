@@ -69,9 +69,9 @@
       )
     }}"
 
-- name: Ensure that every instance specifies a node id and name
+- name: Ensure that every instance specifies a unique node id and Name
   assert:
-    msg: "Please set 'node' and 'Name' on every instance"
+    msg: "Please set a unique 'node' and 'Name' on every instance"
     that:
-      - instances|selectattr('node','defined')|list|count == instances|count
-      - instances|selectattr('Name','defined')|list|count == instances|count
+      - instances|selectattr('node','defined')|map(attribute='node')|unique|list|count == instances|count
+      - instances|selectattr('Name','defined')|map(attribute='Name')|unique|list|count == instances|count
