@@ -7,6 +7,9 @@
 local   all             postgres                                peer
 local   all             all                                     peer
 local   replication     all                                     peer
+{% if 'pgbouncer' in role %}
+hostssl all {{ pgbouncer_auth_user }} 127.0.0.1/32 md5
+{% endif %}
 host    all             all             127.0.0.1/32            {{ password_encryption }}
 host    all             all             ::1/128                 {{ password_encryption }}
 host    replication     all             127.0.0.1/32            {{ password_encryption }}
