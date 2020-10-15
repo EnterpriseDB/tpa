@@ -103,6 +103,6 @@ default_optional_packages:
 
 unwanted_packages: {}
 default_unwanted_packages:
-  Debian: &debian_unpackages []
+  Debian: &debian_unpackages [ unattended-upgrades ]
   RedHat: []
   Ubuntu: *debian_unpackages
