@@ -69,16 +69,19 @@ When the deployment is complete, you can run
 
 ## Selective deployment
 
-You can deploy on a subset of your hosts using the `deploy_hosts` option
-to ansible:
+You can limit the deployment to a subset of your hosts by setting
+`deploy_hosts` to a comma-separated list of instance names:
 
 ```bash
 [tpa]$ tpaexec deploy ~/clusters/speedy -v -e deploy_hosts=keeper,quaver
 ```
-This will run the first stage of the deployment, which gathers information
-about your hosts, everywhere, and the rest of the deployment only on the
-given hosts.
 
+This will run the deployment on the given instances, though it will also
+initially execute some tasks on other hosts to collect information about
+the state of the cluster.
+
+(Setting `deploy_hosts` is the recommended alternative to using
+Ansible's `--limit` option, which TPAexec does not support.)
 
 ## deploy.yml
 
