@@ -66,6 +66,20 @@ code will recover from it automatically.
 When the deployment is complete, you can run
 [`tpaexec test`](tpaexec-test.md) to verify the installation.
 
+
+## Selective deployment
+
+You can deploy on a subset of your hosts using the `deploy_hosts` option
+to ansible:
+
+```bash
+[tpa]$ tpaexec deploy ~/clusters/speedy -v -e deploy_hosts=keeper,quaver
+```
+This will run the first stage of the deployment, which gathers information
+about your hosts, everywhere, and the rest of the deployment only on the
+given hosts.
+
+
 ## deploy.yml
 
 The deployment process is architecture-specific. Here's an overview of
