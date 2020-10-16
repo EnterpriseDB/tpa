@@ -16,3 +16,31 @@
     that:
       item.get('ip_address')
   with_items: "{{ lxd_instances }}"
+
+- name: Set valid instance keys
+  set_fact:
+    valid_instance_keys: "{{
+      valid_instance_keys|default({})|combine({
+        'lxd': instance_keys
+      })
+    }}"
+  vars:
+    instance_keys:
+    - alias
+    - ip_address
+    - lxd_url
+    - mode
+    - server
+    - protocol
+    - architecture
+    - profile
+    - memory
+    - nesting
+    - privileged
+    - storage_pool
+    - disk_space
+    - disk_type
+    - nictype
+    - network
+    - interface_type
+    - wait_for_ipv4_addresses

@@ -75,3 +75,23 @@
     that:
       - instances|selectattr('node','defined')|map(attribute='node')|unique|list|count == instances|count
       - instances|selectattr('Name','defined')|map(attribute='Name')|unique|list|count == instances|count
+
+- name: Set valid instance keys
+  set_fact:
+    valid_instance_keys: "{{
+      valid_instance_keys|default({})|combine({
+        'common': instance_keys
+      })
+    }}"
+  vars:
+    instance_keys:
+    - Name
+    - node
+    - role
+    - platform
+    - location
+    - upstream
+    - backup
+    - tags
+    - vars
+    - volumes

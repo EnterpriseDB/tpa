@@ -107,3 +107,29 @@
 - name: Ensure ec2_vpc_subnets is defined
   set_fact:
     ec2_vpc_subnets: "{{ ec2_vpc_subnets|default(derived_ec2_vpc_subnets|default({})) }}"
+
+- name: Set valid instance keys
+  set_fact:
+    valid_instance_keys: "{{
+      valid_instance_keys|default({})|combine({
+        'aws': instance_keys
+      })
+    }}"
+  vars:
+    instance_keys:
+    - image
+    - region
+    - type
+    - private_ip
+    - subnet
+    - ec2_ami_user
+    - az
+    - cluster_ssh_user
+    - spot_price
+    - spot_wait_timeout
+    - spot_launch_group
+    - termination_protection
+    - assign_public_ip
+    - route53_hosted_zone_id
+    - route53_private_zone
+    - route53_zone

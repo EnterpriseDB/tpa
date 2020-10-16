@@ -65,6 +65,28 @@
     'aws' in cluster_platforms
     and not deprovision|default(false)|bool
 
+- name: Ensure that every instance has only valid keys
+  assert:
+    msg: >-
+      Unrecognised keys in the definition of instance
+      {{ item.Name }}: {{ invalid_keys|join(', ') }}
+    that:
+      invalid_keys is empty
+  with_items:
+    "{{ instances }}"
+  loop_control:
+    label: >-
+      {{ item.Name }}
+  vars:
+    valid_keys: >
+      {{ valid_instance_keys['common']|union(valid_instance_keys[item.platform]) }}
+    invalid_keys: >
+      {{ item.keys()|difference(valid_keys) }}
+  register: valid_keys_result
+  when:
+    valid_keys_result is not defined
+    or valid_keys_result is not failed
+
 ## Final topology validation
 #
 # Once all the platform-specific validations have been run and given an

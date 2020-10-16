@@ -8,3 +8,16 @@
     that:
       item.get('ip_address')
   with_items: "{{ vagrant_instances }}"
+
+- name: Set valid instance keys
+  set_fact:
+    valid_instance_keys: "{{
+      valid_instance_keys|default({})|combine({
+        'vagrant': instance_keys
+      })
+    }}"
+  vars:
+    instance_keys:
+    - ip_address
+    - image
+    - memory

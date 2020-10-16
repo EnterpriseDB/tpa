@@ -14,3 +14,28 @@
     that:
       - docker_images is not defined or
         docker_images is mapping
+
+- name: Set valid instance keys
+  set_fact:
+    valid_instance_keys: "{{
+      valid_instance_keys|default({})|combine({
+        'docker': instance_keys
+      })
+    }}"
+  vars:
+    instance_keys:
+    - image
+    - privileged
+    - restart_policy
+    - memory
+    - shm_size
+    - env_file
+    - env
+    - log_driver
+    - log_options
+    - exposed_ports
+    - published_ports
+    - devices
+    - networks
+    - sysctls
+    - ulimits

@@ -17,3 +17,16 @@
         'bare': '^[a-z0-9-]+(\\.[a-z0-9-]+)*$'
       })
     }}"
+
+- name: Set valid instance keys
+  set_fact:
+    valid_instance_keys: "{{
+      valid_instance_keys|default({})|combine({
+        'bare': instance_keys
+      })
+    }}"
+  vars:
+    instance_keys:
+    - ip_address
+    - public_ip
+    - private_ip
