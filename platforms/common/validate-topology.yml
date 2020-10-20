@@ -4,35 +4,51 @@
 
 # For every instance that has a "backup: xxx" tag, there should be
 # exactly one instance with "Name: xxx" and "role: …,barman,…" tags.
-#
-# Likewise, for every instance that has an "upstream: xxx" tag, there
-# should be exactly one instance with a "Name: xxx" tag.
-
-- name: Collect upstream and backup references
-  set_fact:
-    barman_references: >
-      {{ query('flattened',instances|selectattr('backup', 'defined')|map(attribute='backup')|list)|unique }}
-    upstream_references: >
-      {{ instances|selectattr('upstream', 'defined')|map(attribute='upstream')|unique|list }}
 
 - name: Validate backup references
   assert:
-    msg: "Please define a single barman instance with Name={{ item }}"
+    msg: >
+      An instance with Name={{ item }} and 'barman' in role must exist,
+      because of the 'backup: {{ item }}' setting on
+      instance{{ (referring_instances|length == 1)|ternary('', 's') }}
+      {{ referring_instances|join(', ') }}
     that:
-      - instances|
-        selectattr('Name','defined')|selectattr('Name','equalto',item)|
+      - instances|selectattr('Name','equalto',item)|
         selectattr('role','defined')|selectattr('role','contains','barman')|
         list|count == 1
-  with_items: "{{ barman_references }}"
+  with_items:
+    "{{ query('flattened',instances|selectattr('backup', 'defined')|map(attribute='backup')|list)|unique }}"
+  register: barman_references_result
+  when:
+    barman_references_result is not defined
+    or barman_references_result is not failed
+  vars:
+    referring_instances: "{{
+      instances|selectattr('backup','defined')|selectattr('backup','contains',item)|map(attribute='Name')|list
+    }}"
+
+# Likewise, for every instance that has an "upstream: xxx" tag, there
+# should be exactly one instance with a "Name: xxx" tag.
 
 - name: Validate upstream references
   assert:
-    msg: "Please define a single upstream server with Name={{ item }}"
+    msg: >
+      An instance with Name={{ item }} must exist,
+      because of the 'upstream: {{ item }}' setting on
+      instance{{ (referring_instances|length == 1)|ternary('', 's') }}
+      {{ referring_instances|join(', ') }}
     that:
-      - instances|
-        selectattr('Name','defined')|selectattr('Name','equalto',item)|
-        list|count == 1
-  with_items: "{{ upstream_references }}"
+      - instances|selectattr('Name','equalto',item)|list|count == 1
+  with_items:
+    "{{ instances|selectattr('upstream', 'defined')|map(attribute='upstream')|unique|list }}"
+  register: upstream_references_result
+  when:
+    upstream_references_result is not defined
+    or upstream_references_result is not failed
+  vars:
+    referring_instances: "{{
+      instances|selectattr('upstream','defined')|selectattr('upstream','equalto',item)|map(attribute='Name')|list
+    }}"
 
 - name: Ensure every witness node declares an upstream
   assert:
