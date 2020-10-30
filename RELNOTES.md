@@ -13,6 +13,9 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
   building a -base image first (but custom two-stage builds are still
   supported)
 
+- Accept `postgres_hba_local_auth_method: md5` setting to replace the
+  default `local all all peer` line in pg_hba.conf
+
 ### Bugfixes
 
 - Fix a problem with cloning an HTTPS repository with ssh submodules

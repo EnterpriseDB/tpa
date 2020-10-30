@@ -17,6 +17,9 @@ cluster_vars:
   - hostssl all all 0.0.0.0/0 scram-sha-256
 ```
 
+You can override the default `local all all peer` line in pg_hba.conf by
+setting `postgres_hba_local_auth_method: md5`.
+
 If you don't want any of the default entries, you can change
 `postgres_hba_template`:
 
