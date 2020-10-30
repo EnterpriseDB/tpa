@@ -10,7 +10,6 @@ priority = '{{ repmgr_priority }}'
 {% if repmgr_location is defined %}
 location = '{{ repmgr_location }}'
 {% endif %}
-replication_type = physical
 use_replication_slots = {{ repmgr_use_slots }}
 async_query_timeout = 60
 reconnect_attempts = {{ repmgr_reconnect_attempts|default(6) }}
