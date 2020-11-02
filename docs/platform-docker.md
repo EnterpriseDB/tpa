@@ -26,6 +26,10 @@ systemd-enabled image instead. For example, the
 [centos/systemd](https://hub.docker.com/r/centos/systemd/)
 image (based on CentOS 7) can be used in this way.
 
+TPAexec does not support Debian 8 (jessie) or Ubuntu 16.04 (xenial) for
+Docker containers, because of bugs in the old version of systemd shipped
+on those distributions.
+
 ## Installing Docker
 
 We test TPAexec with the latest stable Docker-CE packages.
