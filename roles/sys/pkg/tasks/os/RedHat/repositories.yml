@@ -150,12 +150,12 @@
       - "{{ wanted_pgdg_repo }}-updates-debuginfo"
       - pgdg-common
 
-- name: Exclude barman packages from PGDG repos
+- name: Exclude barman-related packages from PGDG repos
   ini_file:
     dest: /etc/yum.repos.d/pgdg-redhat-all.repo
     section: pgdg-common
     option: exclude
-    value: barman*
+    value: "barman* python3-barman"
   when: >
     'PGDG' in yum_repository_list
 
