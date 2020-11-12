@@ -25,7 +25,7 @@
   register: receivers
   until: >
     receivers.count == 1
-  retries: 5
+  retries: 10
   delay: 3
 
 # Force a WAL segment switch and wait for the old segment to be archived
