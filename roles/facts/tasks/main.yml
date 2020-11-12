@@ -4,6 +4,8 @@
 
 - include_tasks: distribution.yml
 
+- include_tasks: sys.yml
+
 - include_tasks: postgres.yml
 
 # We attempt to gather postgres facts only if there is a valid PGDATA

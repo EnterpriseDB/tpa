@@ -2,38 +2,6 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-# First, we set the /etc/hosts lines for each host: one for the main IP
-# address and hostname, plus one for each hostname_aliases entry. Then
-# we aggregate them so that each host has its own lines as well as the
-# lines for all the other hosts in the cluster.
-
-- name: Set main /etc/hosts entry
-  set_fact:
-    my_hosts_lines: "{{ [main_hosts_line] }}"
-  vars:
-    main_hosts_line: >-
-      {{ ip_address }}
-      {{ [inventory_hostname, inventory_hostname_short]|unique|join(' ') }}
-
-- name: Add extra /etc/hosts lines for aliases
-  set_fact:
-    my_hosts_lines: "{{
-      my_hosts_lines|union([alias_line])
-    }}"
-  with_dict: "{{ hostname_aliases|dictsort }}"
-  vars:
-    alias_line: >-
-      {{ item.value }} {{ item.key }}
-
-- name: Aggregate /etc/hosts lines across hosts
-  set_fact:
-    default_etc_hosts_lines: "{{
-      default_etc_hosts_lines|union(hostvars[item].my_hosts_lines)
-    }}"
-  with_items: "{{ groups[cluster_tag]|sort_by_node(hostvars) }}"
-  vars:
-    default_etc_hosts_lines: []
-
 - name: Add entries to /etc/hosts
   linesinfile:
     path: /etc/hosts
