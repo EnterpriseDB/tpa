@@ -2,7 +2,7 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-## v20.10 (unreleased)
+## v20.10 (2020-11-13)
 
 ### Minor changes
 
@@ -16,6 +16,15 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 - Accept `postgres_hba_local_auth_method: md5` setting to replace the
   default `local all all peer` line in pg_hba.conf
 
+- Use latest PGDG YUM repo RPMs from /pub/repos/yum/reporpms
+
+- Remove deprecated replication_type setting from repmgr.conf
+
+- Exclude python3-barman package from PGDG repository (we should always
+  use the version from the 2Q repositories)
+
+- Improve config.yml validation
+
 ### Bugfixes
 
 - Fix a problem with cloning an HTTPS repository with ssh submodules
@@ -26,8 +35,15 @@ Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
   preferred_python_interpreter was unset, the earlier code would
   install Python 3 but try to use Python 2
 
+- Fix a problem with running pgbouncer and Postgres on the same host,
+  where pgbouncer was not able to authenticate via md5
+
 - Ensure `tpaexec configure xyz/` does not create config.yml with an
   empty cluster_name
+
+- Set wal_keep_size instead of wal_keep_segments for Postgres 13+
+
+- Disable unattended-upgrades on Debian and Ubuntu
 
 ## v20.9 (2020-09-22)
 
