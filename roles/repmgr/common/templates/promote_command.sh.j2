@@ -9,9 +9,9 @@ set +e
 
 {% if repmgr_redirect_pgbouncer|default(false) and 'role_pgbouncer' in groups %}
 {%   if inventory_hostname in groups['role_pgbouncer'] %}
-bash -c "sed -e 's,host=[^ ]* port=[^ ]*,{{ node_dsn }},' -i /etc/pgbouncer/pgbouncer.databases.ini && killall -HUP pgbouncer"
+bash -c "sed -e 's,host=[^ ]* port=[^ ]*,{{ node_dsn }},' -i /etc/pgbouncer/pgbouncer.databases.ini && pkill -HUP -x pgbouncer"
 {%   endif %}
 {%   for instance in groups['role_pgbouncer']|reject('equalto', inventory_hostname)|list %}
-/usr/bin/ssh {{ instance }} "sed -e 's,host=[^ ]* port=[^ ]*,{{ node_dsn }},' -i /etc/pgbouncer/pgbouncer.databases.ini && killall -HUP pgbouncer" &
+/usr/bin/ssh {{ instance }} "sed -e 's,host=[^ ]* port=[^ ]*,{{ node_dsn }},' -i /etc/pgbouncer/pgbouncer.databases.ini && pkill -HUP -x pgbouncer" &
 {%   endfor %}
 {% endif %}
