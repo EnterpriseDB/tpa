@@ -53,7 +53,7 @@
       base_image: "{{ _tpa_images[_image_key] }}"
       context_path: docker/images
     _tpa_images:
-      debian:9:       debian:9
+      debian-9:       debian:9
       debian-stretch: debian:9
       debian-10:      debian:10
       debian-buster:  debian:10
