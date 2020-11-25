@@ -5,6 +5,14 @@
 - name: Deprovision docker containers
   docker_container:
     name: "{{ item.Name }}"
+    labels: >
+      {{
+        cluster_tags|combine(item.tags)|combine({
+          'Cluster': cluster_name,
+          'node': item.node|string,
+          'Name': item.Name,
+        })
+      }}
     state: absent
   with_items: "{{ docker_instances }}"
   loop_control:
