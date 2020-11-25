@@ -40,3 +40,7 @@ service_reload_command = 'sudo systemctl reload {{ postgres_service_name }}'
 event_notifications = '{{ event_notifications }}'
 event_notification_command = '{{ event_notification_command }}'
 {% endif %}
+
+{% for l in repmgr_conf_settings %}
+{{ l }}
+{% endfor %}
