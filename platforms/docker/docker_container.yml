@@ -32,8 +32,6 @@
       {{
         cluster_tags|combine(item.tags)|combine({
           'Cluster': cluster_name,
-          'node': item.node|string,
-          'Name': item.Name,
         })
       }}
     log_driver: "{{ item.log_driver|default(omit) }}"
