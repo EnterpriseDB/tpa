@@ -263,7 +263,7 @@ uranium
 urbane
 urchin
 urgent
-usable
+unusable
 useful
 ushers
 usurper
