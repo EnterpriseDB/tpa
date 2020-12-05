@@ -123,7 +123,7 @@ def ip_addresses(instance):
 # preference.
 
 def deploy_ip_address(instance):
-    return instance.get('public_ip', instance.get('ip_address', instance.get('private_ip')))
+    return instance.get('public_ip') or instance.get('ip_address') or instance.get('private_ip')
 
 # Every instance must have certain settings (e.g., tags) in a specific format.
 
