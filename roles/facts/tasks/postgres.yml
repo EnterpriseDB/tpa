@@ -30,6 +30,7 @@
 
 - name: Set various postgres facts
   set_fact:
+    postgresql_flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
     postgres_user: "{{ postgres_user|default(default_postgres_user) }}"
     postgres_group: "{{ postgres_group|default(default_postgres_user) }}"
     postgres_home: "{{ postgres_home|default(default_postgres_home_dirs[ansible_os_family]) }}"

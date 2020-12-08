@@ -28,6 +28,13 @@
     and gpg_install.stdout.strip() != ''
     and 'already the newest version' not in gpg_install.stdout
 
+- set_fact:
+    apt_repository_list: "{{
+      apt_repository_list|default([])|union(['EDB'])
+    }}"
+  when:
+    postgresql_flavour == 'epas'
+
 - name: Ensure repository list is defined
   assert:
     msg: "Repository {{ item }} is not defined in apt_repositories"
@@ -54,6 +61,21 @@
   vars:
     repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
     r: "{{ repos[item] }}"
+
+- name: Configure authentication for EDB repository
+  copy:
+    content: >
+      machine apt.enterprisedb.com login {{ _credentials[0] }} password {{ _credentials[1] }}
+    dest: /etc/apt/auth.conf.d/edb.conf
+    owner: root
+    group: root
+    mode: 0600
+  vars:
+    _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
+    _credentials: "{{ lookup('file', _file).split(':') }}"
+  when: >
+    'EDB' in apt_repository_list
+    and _credentials|length == 2
 
 - name: Raise pin priority for 2ndQuadrant packages
   template:

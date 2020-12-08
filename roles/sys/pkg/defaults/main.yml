@@ -16,7 +16,13 @@ default_apt_repositories:
     repo: >-
       deb https://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
 
-apt_repository_list: "{{ default_apt_repositories.keys()|list }}"
+  EDB:
+    key_id: 4EC55148FE026ECC
+    key_url: https://apt.enterprisedb.com/edb-deb.gpg.key
+    repo: >-
+      deb [arch=amd64] https://apt.enterprisedb.com/{{ ansible_distribution_release }}-edb/ {{ ansible_distribution_release }} main
+
+apt_repository_list: "{{ default_apt_repositories.keys()|reject('equalto', 'EDB')|list }}"
 
 yum_repositories: {}
 default_yum_repositories:
@@ -33,7 +39,11 @@ default_yum_repositories:
     rpm_url: >-
       https://download.postgresql.org/pub/repos/yum/reporpms/EL-{{ ansible_distribution_major_version }}-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
-yum_repository_list: "{{ default_yum_repositories.keys()|list }}"
+  EDB:
+    rpm_url: >-
+      https://yum.enterprisedb.com/edbrepos/edb-repo-latest.noarch.rpm
+
+yum_repository_list: "{{ default_yum_repositories.keys()|reject('equalto', 'EDB')|list }}"
 
 ## Packages
 #

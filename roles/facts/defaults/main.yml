@@ -2,6 +2,8 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+default_postgresql_flavour: postgresql
+
 default_postgres_version: 11
 
 default_postgres_user: postgres
@@ -22,8 +24,18 @@ default_postgres_conf_files:
   hba_file: pg_hba.conf
 
 default_postgres_bin_dirs:
-  Debian: "/usr/lib/postgresql/{{ postgres_version }}/bin"
-  RedHat: "/usr/pgsql-{{ postgres_version }}/bin"
+  Debian: "{{
+    (postgresql_flavour != 'epas')|ternary(
+      '/usr/lib/postgresql/%s/bin',
+      '/usr/lib/edb-as/%s/bin'
+    ) % postgres_version
+  }}"
+  RedHat: "{{
+    (postgresql_flavour != 'epas')|ternary(
+      '/usr/pgsql-%s/bin',
+      '/usr/edb/as%s/bin'
+    ) % postgres_version
+  }}"
 
 default_postgres_extensions:
   - pg_stat_statements

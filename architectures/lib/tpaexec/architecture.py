@@ -99,6 +99,11 @@ class Architecture(object):
         g.add_argument('--os-version', metavar='VERSION')
         g.add_argument('--os-image', metavar='LABEL')
         g.add_argument(
+            '--epas', action='store_const', const='epas',
+            dest='postgresql_flavour',
+            help='Install EDB Postgres Advanced Server (EPAS)',
+        )
+        g.add_argument(
             '--postgres-version', choices=['9.4', '9.5', '9.6', '10', '11', '12', '13']
         )
         g.add_argument(
@@ -468,6 +473,7 @@ class Architecture(object):
     # under cluster_vars
     def cluster_vars_args(self):
         return [
+            'postgresql_flavour',
             'postgres_version',
             'tpa_2q_repositories',
             'use_volatile_subscriptions',
@@ -503,6 +509,10 @@ class Architecture(object):
             '2ndqpostgres': {
                 'postgres_installation_method': 'src',
                 'postgres_git_url': 'https://gitlab.2ndquadrant.com/bdr-stack/2ndQPostgres.git',
+            },
+            'epas': {
+                'postgres_installation_method': 'src',
+                'postgres_git_url': 'https://github.com/EnterpriseDB/edbas.git',
             },
             'pglogical3': {
                 'name': 'pglogical',

@@ -7,8 +7,10 @@
     postgres_debuginfo_packages: >
       {{ query('flattened', package_lists) }}
   vars:
+    _is_postgres: "{{ postgresql_flavour != 'epas' }}"
+    _debug_packages: "{{ _is_postgres|ternary(postgres_debug_packages, epas_debug_packages) }}"
     package_lists:
-    - "{{ postgres_debug_packages|packages_for(ansible_distribution, postgres_package_version) }}"
+    - "{{ _debug_packages|packages_for(ansible_distribution, postgres_package_version) }}"
 
 # Debian {stretch,buster}/PGDG uses -dbgsym packages for Postgres 10+
 # Ubuntu bionic/PGDG uses -dbgsym packages for Postgres 10+
@@ -54,7 +56,9 @@
         _fallback_to_dbgsym and dbg_install is not successful
   when: install_pglogical_packages
   vars:
-    packages: "{{ pglogical_debug_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
+    _is_postgres: "{{ postgresql_flavour != 'epas' }}"
+    _debug_packages: "{{ _is_postgres|ternary(pglogical_debug_packages, epas_pglogical_debug_packages) }}"
+    packages: "{{ _debug_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
     _version_suffix: >-
       {% if pglogical_package_version is defined %}={{ pglogical_package_version }}{% endif %}
 
@@ -76,6 +80,8 @@
         _fallback_to_dbgsym and dbg_install is not successful
   when: install_bdr_packages
   vars:
-    packages: "{{ bdr_debug_packages|packages_for(ansible_distribution, bdr_package_version) }}"
+    _is_postgres: "{{ postgresql_flavour != 'epas' }}"
+    _debug_packages: "{{ _is_postgres|ternary(bdr_debug_packages, epas_bdr_debug_packages) }}"
+    packages: "{{ _debug_packages|packages_for(ansible_distribution, bdr_package_version) }}"
     _version_suffix: >-
       {% if bdr_package_version is defined %}={{ bdr_package_version }}{% endif %}

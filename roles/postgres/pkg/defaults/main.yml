@@ -2,12 +2,21 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-postgresql_flavour: "postgresql"
-
 # First, postgres_packages and postgres_debug_packages are the packages
 # for Postgres itself. These lists should contain only those packages to
 # which the same postgres_package_version setting applies. Anything else
 # should go into additional/extra_postgres_packages below.
+
+epas_packages:
+  Debian: &debian_epas_packages
+    - edb-as{{ postgres_versionNN }}-server
+    - edb-as{{ postgres_versionNN }}-server-dev
+    - edb-as{{ postgres_versionNN }}-server-plperl
+  RedHat:
+    - edb-as{{ postgres_versionNN }}-server
+    - edb-as{{ postgres_versionNN }}-server-devel
+    - edb-as{{ postgres_versionNN }}-server-plperl
+  Ubuntu: *debian_epas_packages
 
 postgres_packages:
   Debian: &debian_packages
@@ -29,12 +38,23 @@ postgres_client_packages:
     - "{{ postgresql_flavour }}{{ postgres_versionNN }}"
   Ubuntu: *debian_client_packages
 
+epas_client_packages:
+  debian: &all_epas_client_packages
+    - edb-as{{ postgres_versionNN }}-server-client
+  redhat: *all_epas_client_packages
+  ubuntu: *all_epas_client_packages
+
 postgres_debug_packages:
   Debian: &debian_debug_packages
     - "{{ postgresql_flavour }}-{{ postgres_version }}-dbg"
   RedHat:
     - "{{ postgresql_flavour }}{{ postgres_versionNN }}-debuginfo"
   Ubuntu: *debian_debug_packages
+
+epas_debug_packages:
+  Debian: &all_epas_debug_packages []
+  RedHat: *all_epas_debug_packages
+  Ubuntu: *all_epas_debug_packages
 
 pglogical_packages:
   Debian: &debian_pglogical_packages
@@ -50,6 +70,20 @@ pglogical_debug_packages:
     - postgresql{{ postgres_versionNN }}-pglogical-debuginfo
   Ubuntu: *debian_pglogical_debug_packages
 
+epas_pglogical_packages:
+  Debian: &debian_epas_pglogical_packages
+    - "edb-as{{ postgres_version }}-pglogical"
+  RedHat:
+    - "edb-as{{ postgres_versionNN }}-pglogical"
+  Ubuntu: *debian_epas_pglogical_packages
+
+epas_pglogical_debug_packages:
+  Debian: &debian_epas_pglogical_debug_packages
+    - "edb-as{{ postgres_version }}-pglogical-dbg"
+  RedHat:
+    - "edb-as{{ postgres_versionNN }}-pglogical-debuginfo"
+  Ubuntu: *debian_epas_pglogical_debug_packages
+
 bdr_packages:
   Debian: &debian_bdr_packages
     - "{{ postgresql_flavour }}-{{ postgres_version }}-bdr-plugin"
@@ -63,6 +97,20 @@ bdr_debug_packages:
   RedHat:
     - "{{ postgresql_flavour }}{{ postgres_versionNN }}-bdr-debuginfo"
   Ubuntu: *debian_bdr_debug_packages
+
+epas_bdr_packages:
+  Debian: &debian_epas_bdr_packages
+    - "edb-as{{ postgres_version }}-bdr-plugin"
+  RedHat:
+    - "edb-as{{ postgres_versionNN }}-bdr"
+  Ubuntu: *debian_epas_bdr_packages
+
+epas_bdr_debug_packages:
+  Debian: &debian_epas_bdr_debug_packages
+    - "edb-as{{ postgres_version }}-bdr-plugin-dbg"
+  RedHat:
+    - "edb-as{{ postgres_versionNN }}-bdr-debuginfo"
+  Ubuntu: *debian_epas_bdr_debug_packages
 
 pgespresso_packages:
   Debian: &debian_pgespresso_packages
@@ -103,5 +151,13 @@ extra_postgres_packages:
   Ubuntu: *debian_extra_packages
 
 default_postgres_service_names:
-  Debian: "postgresql"
-  RedHat: "postgresql-{{ postgres_version }}"
+  Debian: "{{
+    (postgresql_flavour != 'epas')|ternary(
+      'postgresql', 'edb-as'
+    )
+  }}"
+  RedHat: "{{
+    (postgresql_flavour != 'epas')|ternary(
+      'postgresql-%s', 'edb-as-%s'
+    ) % postgres_version
+  }}"

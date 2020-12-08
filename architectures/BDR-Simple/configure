@@ -92,6 +92,9 @@ class BDR_Simple(BDR):
                 tpa_2q_repositories.append('products/bdr3/release')
                 tpa_2q_repositories.append('products/pglogical3/release')
 
+        postgresql_flavour = \
+            self.args.get('postgresql_flavour') or postgresql_flavour
+
         cluster_vars.update({
             'postgres_coredump_filter': '0xff',
             'postgres_version': postgres_version,

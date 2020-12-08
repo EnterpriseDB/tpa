@@ -20,6 +20,13 @@
     and curl_install.stdout.strip() != ''
     and 'already installed' not in curl_install.stdout
 
+- set_fact:
+    yum_repository_list: "{{
+      yum_repository_list|default([])|union(['EDB'])
+    }}"
+  when:
+    postgresql_flavour == 'epas'
+
 - name: Ensure repository list is defined
   assert:
     msg: "Repository {{ item }} is not defined in yum_repositories"
@@ -35,6 +42,30 @@
   vars:
     repos: "{{ default_yum_repositories|combine(yum_repositories) }}"
     r: "{{ repos[item] }}"
+
+- name: Ensure edb.repo is not world-readable
+  file:
+    path: /etc/yum.repos.d/edb.repo
+    mode: 0600
+  when: >
+    'EDB' in yum_repository_list
+
+# We edit only the [edb] repo entry, because lineinfile will change only
+# one line matching the regexp. The edb-testing repo is disabled anyway.
+
+- name: Configure authentication for EDB repository
+  lineinfile:
+    path: /etc/yum.repos.d/edb.repo
+    regexp: '^baseurl=https://([^:]*):([^@]*)@yum.enterprisedb.com(/edb/.*)$'
+    line: >-
+      baseurl=https://{{ _credentials }}@yum.enterprisedb.com\3
+    backrefs: yes
+    state: present
+  vars:
+    _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
+    _credentials: "{{ lookup('file', _file) }}"
+  when: >
+    'EDB' in yum_repository_list
 
 # Following the instructions in
 # https://wiki.postgresql.org/wiki/YUM_Installation, we exclude

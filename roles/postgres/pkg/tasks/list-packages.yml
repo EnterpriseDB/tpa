@@ -30,12 +30,17 @@
     all_postgres_packages: >
       {{ query('flattened', package_lists) }}
   vars:
+    _is_postgres: "{{ postgresql_flavour != 'epas' }}"
+    _postgres_packages: "{{ _is_postgres|ternary(postgres_packages, epas_packages) }}"
+    _postgres_client_packages: "{{ _is_postgres|ternary(postgres_client_packages, epas_client_packages) }}"
+    _pglogical_packages: "{{ _is_postgres|ternary(pglogical_packages, epas_pglogical_packages) }}"
+    _bdr_packages: "{{ _is_postgres|ternary(bdr_packages, epas_bdr_packages) }}"
     _maybe_pgespresso_packages: "{{ install_pgespresso_packages|ternary(pgespresso_packages, {}) }}"
-    _maybe_pglogical_packages: "{{ install_pglogical_packages|ternary(pglogical_packages, {}) }}"
-    _maybe_bdr_packages: "{{ install_bdr_packages|ternary(bdr_packages, {}) }}"
+    _maybe_pglogical_packages: "{{ install_pglogical_packages|ternary(_pglogical_packages, {}) }}"
+    _maybe_bdr_packages: "{{ install_bdr_packages|ternary(_bdr_packages, {}) }}"
     package_lists:
-    - "{{ postgres_packages|packages_for(ansible_distribution, postgres_package_version) }}"
-    - "{{ postgres_client_packages|packages_for(ansible_distribution, postgres_package_version) }}"
+    - "{{ _postgres_packages|packages_for(ansible_distribution, postgres_package_version) }}"
+    - "{{ _postgres_client_packages|packages_for(ansible_distribution, postgres_package_version) }}"
     - "{{ _maybe_pgespresso_packages|packages_for(ansible_distribution) }}"
     - "{{ _maybe_pglogical_packages|packages_for(ansible_distribution, pglogical_package_version) }}"
     - "{{ _maybe_bdr_packages|packages_for(ansible_distribution, bdr_package_version) }}"
