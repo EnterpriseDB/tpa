@@ -23,7 +23,18 @@ if [[ -z "${TPA_DIR:-}" ]]; then
         self=$(readlink "$0")
     fi
     SRC=$(dirname "$self")/..
-    type realpath &>/dev/null && SRC=$(realpath "$SRC")
+    if command -v realpath &>/dev/null; then
+        SRC=$(realpath "$SRC")
+    else
+        # If we can't use realpath, we probably can't depend on using
+        # readlink -f either, so we just remove "/bin/.." from the end
+        # of the path and see if that leaves us with something sensible
+        # (which may be the current directory).
+        SRC=${SRC/%\/bin\/../}
+        if [[ $SRC == "bin/.." || $SRC == "." ]]; then
+            SRC=$(pwd)
+        fi
+    fi
     if [[ -d $SRC/roles ]]; then
         TOP=$SRC
     fi
