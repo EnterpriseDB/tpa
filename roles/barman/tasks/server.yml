@@ -17,11 +17,13 @@
   set_fact:
     default_barman_compression: "{{ compressor.stdout.strip() or 'none' }}"
 
-- name: Ensure that barman_home has the right ownership
+- name: Ensure that barman_home exists with the right ownership and permissions
   file:
     path: "{{ barman_home }}"
     owner: barman
     group: barman
+    mode: 0750
+    state: directory
 
 - name: Install global Barman configuration file
   template:
