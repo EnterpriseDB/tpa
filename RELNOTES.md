@@ -2,6 +2,28 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v20.11 (2020-12-15)
+
+### Minor changes
+
+- Pin barman-cli/python3-barman to 2ndQuadrant repositories
+
+- Accept `repmgr_conf_settings` to append extra lines to repmgr.conf
+
+- Improve TPA_DIR detection when realpath(1) is not installed
+
+### Bugfixes
+
+- Use pkill instead of killall, which is deprecated
+
+- Allow for `public_ip` to be set to `null` rather than undefined (to
+  accommodate default ec2.py output for instances with no public IP)
+
+- Always set TMPDIR when calling git clone (to avoid "permission denied"
+  errors when cloning git submodules)
+
+- Ensure barman_home exists if it is set to a non-standard location
+
 ## v20.10 (2020-11-13)
 
 ### Minor changes
