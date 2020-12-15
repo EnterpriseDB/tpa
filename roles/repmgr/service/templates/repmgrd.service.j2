@@ -6,8 +6,8 @@ Wants={{ postgres_service_name }}-monitor.service
 
 [Service]
 Type=simple
-User=postgres
-Group=postgres
+User={{ postgres_user }}
+Group={{ postgres_group }}
 StandardOutput=syslog
 ExecStart={{ postgres_bin_dir }}/repmgrd -f {{ repmgr_conf_file }} --verbose {{ no_daemonize }}
 ExecStop=/bin/kill -TERM $MAINPID

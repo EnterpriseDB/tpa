@@ -126,9 +126,9 @@
       mode: 0644
       content: |
         {% for rundir in run_directories %}
-        d {{ rundir }} 2775 {{ postgres_user }} {{ postgres_user }} - -
+        d {{ rundir }} 2775 {{ postgres_user }} {{ postgres_group }} - -
         {% endfor %}
-        d /var/log/postgresql 0775 {{ postgres_user }} {{ postgres_user }} - -
+        d /var/log/postgresql 0775 {{ postgres_user }} {{ postgres_group }} - -
   vars:
     run_directories: "{{
       unix_socket_directories|reject('equalto', '/tmp')|list

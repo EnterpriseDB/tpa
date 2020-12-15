@@ -6,8 +6,8 @@
 	compress
 	dateext
 	copytruncate
-	create 640 postgres postgres
+	create 640 {{ postgres_user }} {{ postgres_group }}
 	maxage 28
 
-        su postgres postgres
+        su {{ postgres_user }} {{ postgres_group }}
 }

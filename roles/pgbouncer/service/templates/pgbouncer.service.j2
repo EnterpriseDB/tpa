@@ -6,8 +6,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=postgres
-Group=postgres
+User={{ postgres_user }}
+Group={{ postgres_group }}
 ExecStart={{ default_pgbouncer_paths[ansible_os_family] }} /etc/pgbouncer/pgbouncer.ini
 ExecStop=/bin/kill -TERM $MAINPID
 ExecReload=/bin/kill -HUP $MAINPID

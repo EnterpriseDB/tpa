@@ -17,7 +17,7 @@
 
 - name: Ensure that connections through haproxy are TLS-protected
   postgresql_query:
-    conninfo: "{{ dsn|dbname('postgres', user='postgres', host='127.0.0.1') }}"
+    conninfo: "{{ dsn|dbname('postgres', user=postgres_user, host='127.0.0.1') }}"
     query: >
       SELECT ssl
       FROM pg_stat_activity sa JOIN pg_stat_ssl ss USING (pid)
