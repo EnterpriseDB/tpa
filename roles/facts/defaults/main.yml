@@ -6,13 +6,21 @@ default_postgresql_flavour: postgresql
 
 default_postgres_version: 11
 
-default_postgres_user: postgres
-default_barman_user: barman
-default_barman_group: barman
+default_postgres_user:
+  postgresql: postgres
+  epas: enterprisedb
 
-default_postgres_home_dirs:
-  Debian: /var/lib/postgresql
-  RedHat: /var/lib/pgsql
+default_postgres_home_dir:
+  postgresql:
+    Debian: /var/lib/postgresql
+    RedHat: /var/lib/pgsql
+  epas:
+    Debian: /var/lib/edb-as
+    RedHat: /var/lib/edb
+
+default_postgres_port:
+  postgresql: 5432
+  epas: 5444
 
 default_postgres_data_dir: /opt/postgres/data
 
@@ -23,19 +31,13 @@ default_postgres_conf_files:
   ident_file: pg_ident.conf
   hba_file: pg_hba.conf
 
-default_postgres_bin_dirs:
-  Debian: "{{
-    (postgresql_flavour != 'epas')|ternary(
-      '/usr/lib/postgresql/%s/bin',
-      '/usr/lib/edb-as/%s/bin'
-    ) % postgres_version
-  }}"
-  RedHat: "{{
-    (postgresql_flavour != 'epas')|ternary(
-      '/usr/pgsql-%s/bin',
-      '/usr/edb/as%s/bin'
-    ) % postgres_version
-  }}"
+default_postgres_bin_dir:
+  postgresql:
+    Debian: "/usr/lib/postgresql/{{ postgres_version }}/bin"
+    RedHat: "/usr/pgsql-{{ postgres_version }}/bin"
+  epas:
+    Debian: "/usr/lib/edb-as/{{ postgres_version }}/bin"
+    RedHat: "/usr/edb/as{{ postgres_version }}/bin"
 
 default_postgres_extensions:
   - pg_stat_statements
@@ -67,6 +69,8 @@ default_password_encryption: "{{
 }}"
 default_postgres_hba_local_auth_method: peer
 
+default_barman_user: barman
+default_barman_group: barman
 default_barman_home: /var/lib/barman
 
 default_repmgr_conf_dir: "/etc/repmgr/{{ postgres_version }}"

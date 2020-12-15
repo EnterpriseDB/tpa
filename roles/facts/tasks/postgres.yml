@@ -2,6 +2,13 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+- name: Set postgresql_flavour and postgres_family
+  set_fact:
+    postgresql_flavour: "{{ _flavour }}"
+    postgres_family: "{{ (_flavour == 'epas')|ternary('epas', 'postgresql') }}"
+  vars:
+    _flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
+
 - name: Set postgres_data_dir
   set_fact:
     postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
@@ -28,18 +35,14 @@
   vars:
     version: "{{ postgres_version|default(pgdata_version|default(default_postgres_version)) }}"
 
-- name: Ensure that postgresql_flavour is defined
-  set_fact:
-    postgresql_flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
-
 - name: Set various postgres facts
   set_fact:
-    postgres_user: "{{ postgres_user|default(default_postgres_user) }}"
-    postgres_group: "{{ postgres_group|default(default_postgres_user) }}"
-    postgres_home: "{{ postgres_home|default(default_postgres_home_dirs[ansible_os_family]) }}"
-    postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dirs[ansible_os_family]) }}"
+    postgres_user: "{{ postgres_user|default(default_postgres_user[postgres_family]) }}"
+    postgres_group: "{{ postgres_group|default(default_postgres_user[postgres_family]) }}"
+    postgres_home: "{{ postgres_home|default(default_postgres_home_dir[postgres_family][ansible_os_family]) }}"
+    postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dir[postgres_family][ansible_os_family]) }}"
     postgres_host: "{{ postgres_host|default('localhost') }}"
-    postgres_port: "{{ postgres_port|default(5432) }}"
+    postgres_port: "{{ postgres_port|default(default_postgres_port[postgres_family]) }}"
     postgres_service_name: postgres
     postgres_installation_method: "{{ postgres_installation_method|default(default_postgres_installation_method) }}"
     postgres_install_dir: "{{ postgres_install_dir|default(default_postgres_install_dir) }}"

@@ -11,7 +11,12 @@
   set_fact:
     postgres_packages: "{{
       postgres_packages|combine({
-        ansible_distribution: postgres_packages[ansible_distribution]|reject('contains', '-contrib-')|list
+        postgres_family: {
+          ansible_distribution:
+            postgres_packages[postgres_family][ansible_distribution]
+            |reject('contains', '-contrib-')
+            |list
+          }
       })
     }}"
   when: postgres_version is version('10', '>=')
