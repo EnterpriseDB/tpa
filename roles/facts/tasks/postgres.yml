@@ -28,6 +28,15 @@
   when:
     postgres_version is defined and pgdata_version is defined
 
+- name: Ensure postgres_user matches pgdata_user, if defined
+  assert:
+    msg: >-
+      postgres_user is set to {{ postgres_user }}, but
+      {{ postgres_data_dir }} was initialised by {{ pgdata_user }}
+    that: postgres_user == pgdata_user
+  when:
+    postgres_user is defined and pgdata_user is defined
+
 - name: Set postgres_version
   set_fact:
     postgres_version: "{{ version }}"
