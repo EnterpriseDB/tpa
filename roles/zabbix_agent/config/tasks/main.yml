@@ -16,5 +16,5 @@
     pgpassfile: ~zabbix/.pgpass
     pgpass_owner: zabbix
     pgpass_group: zabbix
-    pgpass_users: "{{ zabbix_pgpass_users|default('postgres') }}"
-  when: zabbix_pgpass_users|length > 0
+    pgpass_users: "{{ zabbix_pgpass_users }}"
+  when: zabbix_pgpass_users|default([]) is not empty
