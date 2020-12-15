@@ -103,10 +103,10 @@
     template:
       src: run_time_check.py.j2
       dest: "{{ postgres_home }}/run_time_check.py"
-      owner: postgres
-      group: postgres
+      owner: "{{ postgres_user }}"
+      group: "{{ postgres }}"
       mode: 0755
-    become_user: postgres
+    become_user: "{{ postgres_user }}"
     become: yes
 
   - name: Start run_time_check script
