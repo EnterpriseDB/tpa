@@ -4,7 +4,7 @@
 # Any changes made to this file may be overwritten.
 
 # TYPE  DATABASE        USER            ADDRESS                 METHOD
-local   all             postgres                                peer
+local   all             {{ postgres_user }}                     peer
 local   replication     all                                     peer
 local   all             all                                     {{ postgres_hba_local_auth_method }}
 {% if 'pgbouncer' in role %}
