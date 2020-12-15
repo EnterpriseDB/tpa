@@ -74,7 +74,6 @@
   postgresql_ext:
     port: "{{ postgres_port }}"
     login_user: "{{ postgres_user }}"
-    login_db: postgres
     state: present
     db: "{{ item.0 }}"
     name: "{{ item.1 }}"
