@@ -85,11 +85,12 @@ pglogical_debug_packages:
     Ubuntu: *debian_epas_pglogical_debug_packages
 
 bdr_packages:
-  Debian: &debian_bdr_packages
-    - "{{ postgresql_flavour }}-{{ postgres_version }}-bdr-plugin"
-  RedHat:
-    - "{{ postgresql_flavour }}{{ postgres_versionNN }}-bdr"
-  Ubuntu: *debian_bdr_packages
+  postgresql:
+    Debian: &debian_bdr_packages
+      - "{{ postgresql_flavour }}-{{ postgres_version }}-bdr-plugin"
+    RedHat:
+      - "{{ postgresql_flavour }}{{ postgres_versionNN }}-bdr"
+    Ubuntu: *debian_bdr_packages
   epas:
     Debian: &debian_epas_bdr_packages
       - "edb-as{{ postgres_version }}-bdr-plugin"
