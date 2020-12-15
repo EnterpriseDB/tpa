@@ -41,6 +41,8 @@
 - name: Create Postgres users
   postgresql_user:
     port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    login_db: postgres
     name: "{{ item.username }}"
     password: "{{
       encrypted_password if generated_password is defined else omit
@@ -71,6 +73,8 @@
 - name: Install default Postgres extensions
   postgresql_ext:
     port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    login_db: postgres
     state: present
     db: "{{ item.0 }}"
     name: "{{ item.1 }}"
@@ -87,6 +91,8 @@
 - name: Grant roles to Postgres users if required
   postgresql_membership:
     port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    login_db: postgres
     groups: "{{ item.granted_roles }}"
     target_role: "{{ item.username }}"
     state: present
@@ -105,6 +111,8 @@
 - name: Create Postgres databases
   postgresql_db:
     port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    maintenance_db: postgres
     name: "{{ db.name }}"
     owner: "{{ db.owner|default(omit) }}"
     encoding: "{{ db.encoding|default(omit) }}"

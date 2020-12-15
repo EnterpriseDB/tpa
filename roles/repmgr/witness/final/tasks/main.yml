@@ -5,6 +5,8 @@
 - name: Create repmgr database
   postgresql_db:
     port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    maintenance_db: postgres
     name: repmgr
     owner: repmgr
     state: present
