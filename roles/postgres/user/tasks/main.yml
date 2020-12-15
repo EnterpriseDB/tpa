@@ -100,28 +100,40 @@
     content: |
       ConnectTimeout 5s
 
-# We depend on /var/{log,run}/postgresql to exist.
+- block:
+  - set_fact:
+      _run_directory_items: "{{
+        _run_directory_items|union([{'path': item, 'mode': '02775'}])
+      }}"
+    with_items: "{{ run_directories }}"
 
-- name: Ensure postgres runtime directories exist
-  file:
-    path: "{{ item.path }}"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: "{{ item.mode }}"
-    state: directory
-  with_items:
-    - {path: /var/log/postgresql, mode: '0775'}
-    - {path: /var/run/postgresql, mode: '02775'}
+  - name: Ensure postgres runtime directories exist
+    file:
+      path: "{{ item.path }}"
+      owner: "{{ postgres_user }}"
+      group: "{{ postgres_group }}"
+      mode: "{{ item.mode }}"
+      state: directory
+    with_items:
+      - {path: /var/log/postgresql, mode: '0775'}
+      - "{{ _run_directory_items }}"
 
-- name: Install tmpfiles.d entries for postgres runtime directories
-  copy:
-    dest: /etc/tmpfiles.d/postgresql.conf
-    owner: root
-    group: root
-    mode: 0644
-    content: |
-      d /var/run/postgresql 2775 postgres postgres - -
-      d /var/log/postgresql 0775 postgres postgres - -
+  - name: Install tmpfiles.d entries for postgres runtime directories
+    copy:
+      dest: /etc/tmpfiles.d/postgresql.conf
+      owner: root
+      group: root
+      mode: 0644
+      content: |
+        {% for rundir in run_directories %}
+        d {{ rundir }} 2775 {{ postgres_user }} {{ postgres_user }} - -
+        {% endfor %}
+        d /var/log/postgresql 0775 {{ postgres_user }} {{ postgres_user }} - -
+  vars:
+    run_directories: "{{
+      unix_socket_directories|reject('equalto', '/tmp')|list
+    }}"
+    _run_directory_items: []
 
 # Allow postgres_user to run various Postgres-related systemctl commands
 # as root using sudo.

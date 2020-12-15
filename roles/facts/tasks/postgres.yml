@@ -52,6 +52,9 @@
     postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dir[postgres_family][ansible_os_family]) }}"
     postgres_host: "{{ postgres_host|default('localhost') }}"
     postgres_port: "{{ postgres_port|default(default_postgres_port[postgres_family]) }}"
+    unix_socket_directories: "{{
+      unix_socket_directories|default(default_unix_socket_directories[postgres_family][ansible_os_family])
+    }}"
     postgres_service_name: postgres
     postgres_installation_method: "{{ postgres_installation_method|default(default_postgres_installation_method) }}"
     postgres_install_dir: "{{ postgres_install_dir|default(default_postgres_install_dir) }}"

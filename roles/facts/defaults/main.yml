@@ -22,6 +22,18 @@ default_postgres_port:
   postgresql: 5432
   epas: 5444
 
+default_unix_socket_directories:
+  postgresql:
+    Debian: &all_socket_directories
+      - /var/run/postgresql
+      - /tmp
+    RedHat: *all_socket_directories
+  epas:
+    Debian:
+      - /var/run/edb-as
+    RedHat:
+      - /tmp
+
 default_postgres_data_dir: /opt/postgres/data
 
 default_postgres_locale: en_US.UTF-8

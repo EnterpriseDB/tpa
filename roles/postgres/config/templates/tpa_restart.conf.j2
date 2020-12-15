@@ -9,7 +9,7 @@ ident_file = '{{ postgres_conf_dir }}/pg_ident.conf'
 
 listen_addresses = '*'
 port = {{ postgres_port }}
-unix_socket_directories = '/var/run/postgresql, /tmp'
+unix_socket_directories = '{{ unix_socket_directories|join(", ") }}'
 
 max_connections = {{ max_connections }}
 
