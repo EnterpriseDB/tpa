@@ -72,10 +72,9 @@
     mode: 0600
   vars:
     _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
-    _credentials: "{{ lookup('file', _file).split(':') }}"
+    _credentials: "{{ lookup('file', _file).split(':', 1) }}"
   when: >
     'EDB' in apt_repository_list
-    and _credentials|length == 2
 
 - name: Raise pin priority for 2ndQuadrant packages
   template:
