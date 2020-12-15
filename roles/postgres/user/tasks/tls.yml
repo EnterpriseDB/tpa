@@ -43,7 +43,7 @@
 
 - name: Set correct ownership and mode on ~/.postgresql
   file:
-    path: ~postgres/.postgresql
+    path: "~{{ postgres_user }}/.postgresql"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     state: directory
@@ -52,7 +52,7 @@
 - name: Retrieve list of key/certificate files
   shell: >
     find /etc/tpa -name '*.crt' -o -name '*.key' &&
-    find ~postgres/.postgresql -name '*.crt' -o -name '*.key'
+    find ~{{ postgres_user }}/.postgresql -name '*.crt' -o -name '*.key'
   args:
     executable: /bin/bash
   register: keycertfiles

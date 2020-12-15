@@ -2,7 +2,7 @@
 
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-_pgpassfile: "{{ pgpassfile|default('~postgres/.pgpass') }}"
+_pgpassfile: "{{ pgpassfile|default('~%s/.pgpass' % postgres_user) }}"
 _pgpass_owner: "{{ pgpass_owner|default(postgres_user) }}"
 _pgpass_group: "{{ pgpass_group|default(postgres_group) }}"
 _pgpass_users: "{{ pgpass_users|default(default_pgpass_users) }}"
