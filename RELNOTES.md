@@ -2,6 +2,18 @@
 
 Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
+## v21.1 (unreleased)
+
+### Minor changes
+
+- Adapt to new repository filenames/section names CentOS 8 (fixes
+  "Cannot find a valid baseurl for repo: AppStream" errors)
+
+### Bugfixes
+
+- Stop postgres messages from falling through to be logged to
+  /var/log/syslog
+
 ## v20.11 (2020-12-15)
 
 ### Minor changes
