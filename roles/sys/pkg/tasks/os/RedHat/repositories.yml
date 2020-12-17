@@ -82,6 +82,7 @@
 - name: Exclude postgresql packages from CentOS base repositories
   ini_file:
     dest: "/etc/yum.repos.d/{{ item.0.file }}"
+    create: no
     section: "{{ item.1 }}"
     option: exclude
     value: "postgresql* barman* repmgr*"
@@ -89,6 +90,9 @@
   - base_repos[ansible_distribution_major_version|int]
   - item.0.sections
   when: ansible_distribution_id == "centos"
+  register: exclude
+  failed_when:
+    exclude is not successful and exclude.rc != 257
   vars:
     base_repos:
       7:
@@ -103,6 +107,12 @@
       - file: CentOS-AppStream.repo
         sections:
         - AppStream
+      - file: CentOS-Linux-BaseOS.repo
+        sections:
+        - baseos
+      - file: CentOS-Linux-AppStream.repo
+        sections:
+        - appstream
 
 # The pgbouncer package from EPEL depends on python-psycopg2, which
 # conflicts with our python2-psycopg2 package.
