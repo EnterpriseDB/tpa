@@ -4,7 +4,7 @@
 
 - name: Run pgbench on database {{ pgbench_dbname }}
   command: >
-    {{ postgres_bin_dir }}/pgbench {{ pgbench_opts }} {{ pgbench_dbname }}
+    {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} {{ pgbench_opts }} {{ pgbench_dbname }}
   register: pgbench
   become_user: "{{ postgres_user }}"
   become: yes
