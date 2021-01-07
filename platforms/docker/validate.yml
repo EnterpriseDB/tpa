@@ -39,3 +39,4 @@
     - networks
     - sysctls
     - ulimits
+    - local_source_directories
