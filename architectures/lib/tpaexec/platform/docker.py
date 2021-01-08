@@ -133,7 +133,10 @@ class docker(Platform):
         if y:
             if self.ccache:
                 sources = y.get('local_source_directories', [])
-                sources.append(self.ccache % args['cluster_name'])
+                if '%s' in self.ccache:
+                    sources.append(self.ccache % args['cluster_name'])
+                else:
+                    sources.append(self.ccache)
                 y['local_source_directories'] = sources
             instance_defaults.update(y)
 
