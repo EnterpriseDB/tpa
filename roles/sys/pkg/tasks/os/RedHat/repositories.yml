@@ -26,6 +26,7 @@
     }}"
   when:
     postgresql_flavour == 'epas'
+    and postgres_installation_method == 'pkg'
 
 - name: Ensure repository list is defined
   assert:
