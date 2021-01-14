@@ -78,7 +78,7 @@ in your environment before running tpaexec, Ansible will prompt you to
 enter a login password and a sudo password for the remote servers. It
 will then negotiate the login/sudo password prompt on the remote server
 and send the password you specify (which will make your playbooks take
-longer to run).
+noticeably longer to run).
 
 We do not recommend this mode of operation because we feel it is a more
 effective security control to completely disable access through a
@@ -92,7 +92,7 @@ do not add any extra security during your maintenance window.
 
 ## sudo options
 
-To use Ansible with sudo, you must not `requiretty` in sudoers.conf.
+To use Ansible with sudo, you must not set `requiretty` in sudoers.conf.
 
 If needed, you can change the sudo options that Ansible uses
 (`-H -S -n`) by setting `become_flags` in the
