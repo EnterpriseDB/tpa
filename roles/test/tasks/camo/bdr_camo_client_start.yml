@@ -104,7 +104,7 @@
       src: run_time_check.py.j2
       dest: "{{ postgres_home }}/run_time_check.py"
       owner: "{{ postgres_user }}"
-      group: "{{ postgres }}"
+      group: "{{ postgres_group }}"
       mode: 0755
     become_user: "{{ postgres_user }}"
     become: yes
