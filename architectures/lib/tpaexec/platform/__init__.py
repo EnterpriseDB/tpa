@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
-import sys
+import sys, importlib
 
 class Platform(object):
     def __init__(self, name, arch):
@@ -13,11 +13,12 @@ class Platform(object):
     @staticmethod
     def load(args, arch):
         name = Platform.guess_platform(args) or arch.default_platform()
-        try:
-            p = getattr(__import__('tpaexec.platform.%s' % name, fromlist=[name]), name)
-        except ImportError as e:
+        module = 'tpaexec.platform.%s' % name
+        if not importlib.util.find_spec(module):
             print('ERROR: unknown platform: %s' % name, file=sys.stderr)
             sys.exit(-1)
+
+        p = getattr(__import__(module, fromlist=[name]), name)
         return p(name, arch)
 
     # Returns the name of a platform based on any «--platform x» arguments found
