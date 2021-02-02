@@ -32,7 +32,7 @@
 - include_role: name=sys/ssh tasks_from=authorize.yml
   vars:
     ssh_username: barman
-    ssh_key_name: id_postgres
+    ssh_key_name: "id_{{ postgres_user }}"
   when: >
     'barman' in role
 
