@@ -80,7 +80,7 @@ configuration or create database objects.
 
 ### post-deploy
 
-TPAexec invokes `hooks/post-deploy.yml` at the end the deployment.
+TPAexec invokes `hooks/post-deploy.yml` at the end of the deployment.
 
 You can go on to do whatever you want after this stage.
 
