@@ -8,27 +8,15 @@ Confidential property of 2ndQuadrant; not for public release.
 
 ## Introduction
 
-TPA (Trusted Postgres Architecture) is a set of recommendations from
-2ndQuadrant about how to set up a Postgres cluster in various scenarios.
-These represent the best practices followed by 2ndQuadrant, and are as
+TPAexec is an orchestration tool that uses Ansible to build Postgres
+clusters as specified by TPA (Trusted Postgres Architecture), a set of
+reference architectures that document how to set up and operate Postgres
+in various scenarios. TPA represents the best practices followed by
+EnterpriseDB (and formerly, 2ndQuadrant), and its recommendations are as
 applicable to quick testbed setups as to production environments.
 
-TPAexec is an orchestration tool that uses Ansible to build Postgres
-clusters according to 2ndQuadrant's recommendations.
-
-### Architectures
-
-An architecture is a recommended layout of servers and software to set
-up Postgres for a specific purpose.
-
-Examples include "M1" (Postgres with a primary and multiple streaming
-replicas) and "BDR-Always-ON" (Postgres with BDR in a configuration
-meant for HA).
-
-### Platforms
-
-A platform is a means to host the servers to deploy any architecture.
-Examples include AWS, lxd, and bare-metal servers.
+(You can skip straight to the [TPAexec installation
+instructions](INSTALL.md) if you want to get started.)
 
 ## What can TPAexec do?
 
@@ -36,7 +24,7 @@ TPAexec operates in four distinct stages to bring up a Postgres cluster:
 
 ```bash
 # 1. Configuration: decide what kind of cluster you want
-[tpa]$ tpaexec configure clustername --architecture M1
+[tpa]$ tpaexec configure clustername --architecture M1 --platform aws
 
 # 2. Provisioning: create the servers needed to host the cluster
 [tpa]$ tpaexec provision clustername
@@ -48,8 +36,8 @@ TPAexec operates in four distinct stages to bring up a Postgres cluster:
 [tpa]$ tpaexec test clustername
 ```
 
-TPAexec itself can operate from your laptop, an EC2 instance, or any
-machine that can reach the cluster's servers over the network.
+You can run TPAexec from your laptop, an EC2 instance, or any machine
+that can reach the cluster's servers over the network.
 
 ### Configuration
 
@@ -60,6 +48,14 @@ immediate use, and you can modify it to better suit your needs. Editing
 the configuration file is the usual way to [make any configuration
 changes to your cluster](configure-cluster.md), both before and after
 it's created.
+
+At this stage, you must select an architecture and a platform for the
+cluster. An **architecture** is a recommended layout of servers and
+software to set up Postgres for a specific purpose. Examples include
+"M1" (Postgres with a primary and streaming replicas) and
+"BDR-Always-ON" (Postgres with BDR in an HA configuration). A
+**platform** is a means to host the servers to deploy any architecture,
+e.g., AWS, Docker, or bare-metal servers.
 
 ### Provisioning
 
@@ -138,3 +134,8 @@ the result is just Postgres. The installation follows some conventions
 designed to make life simpler, but there is no hidden magic or anything
 standing in the way between you and the database. You can do everything
 on a TPA cluster that you could do on any other Postgres installation.
+
+## Getting started
+
+Follow the [TPAexec installation instructions](INSTALL.md) for your
+system, then [configure your first cluster](tpaexec-configure.md).

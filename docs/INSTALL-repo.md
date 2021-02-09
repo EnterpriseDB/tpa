@@ -1,25 +1,33 @@
 # Installing TPAexec from source
 
-This document explains how to use a copy of the TPAexec source code
-repository instead of installing the tpaexec package.
+This document explains how to use TPAexec from a copy of the source code
+repository.
 
-Please install TPAexec from packages unless you have been given access
-to the TPA source code repository and specifically advised to use it by
-2ndQuadrant.
+Please [install TPAexec from packages](INSTALL.md) if you can; install
+from source only if no packages are available for your system (e.g., on
+MacOS X), or if you are collaborating with the TPAexec developers to
+test unreleased code.
+
+To run TPAexec from source, you must install all of the dependencies
+(e.g., Python 3.6+) that the packages would handle for you, or download
+the source and [run TPAexec in a Docker container](INSTALL-docker.md).
+(Either way will work fine on Linux and MacOS X.)
 
 ## Quickstart
 
 ```bash
-$ git clone ssh://git@git.2ndquadrant.com/products/tpa/tpaexec.git
+$ git clone https://github.com/EnterpriseDB/tpaexec.git
 $ ./tpaexec/bin/tpaexec setup
 $ ./tpaexec/bin/tpaexec selftest
 ```
 
 ## Step-by-step
 
-First, you must install some required system packages. (These would have
-been installed automatically as dependencies if you were installing the
-tpaexec package.)
+First, you must install the various dependencies that would have been
+installed automatically along with the TPAexec packages. (You can use
+something other than `sudo` to run these commands as root, if you
+prefer.)
+
 
 ```bash
 # Debian (python3.7) or Ubuntu (python3.6)
@@ -35,53 +43,63 @@ $ sudo brew tap discoteq/discoteq
 $ sudo brew install python@3 pwgen openvpn flock coreutils gpatch
 ```
 
-(We mention `sudo` here only to indicate which commands need root
-privileges. You may use any other means to run the commands as root.)
+If your system does not have Python 3.6+ packages, you can use `pyenv`
+to install a more recent Python in your home directory (see below), or
+you can [run TPAexec in a Docker container](INSTALL-docker.md).
 
-Next, clone the TPAexec repository:
+Next, clone the TPAexec repository into, say, `~/tpaexec`. (It doesn't
+matter where you put it, but don't use `/opt/2ndQuadrant/TPA`, to avoid
+conflicts if you install the TPAexec packages in future.)
 
 ```bash
-$ git clone ssh://git@git.2ndquadrant.com/products/tpa/tpaexec.git
+$ git clone https://github.com/EnterpriseDB/tpaexec.git ~/tpaexec
 ```
 
-We strongly recommend not cloning into `/opt/2ndQuadrant/TPA` so as to
-avoid any conflicts if you install the TPAexec packages in future. Apart
-from that, the location doesn't matter.
-
-For TPAexec developers only: if you need to make or test changes to
-2ndQuadrant Ansible (not ordinarily required), clone the repository and
-set `ANSIBLE_HOME` in your environment (and .bashrc/.profile):
+The remaining steps are the same as if you had installed the package.
 
 ```bash
-$ git clone https://github.com/2ndQuadrant/ansible
-$ export ANSIBLE_HOME=/path/to/ansibledir
-```
+# Add tpaexec to your PATH for convenience
+# (Put this in your ~/.bashrc too)
+$ export PATH=$PATH:$HOME/tpaexec/bin
 
-The remaining steps from this point onwards are the same as if you had
-installed the tpaexec package.
-
-The following command will create an isolated Python environment and
-install the TPAexec dependencies:
-
-```bash
-$ ./tpaexec/bin/tpaexec setup
-```
-
-For convenience, add tpaexec to your PATH:
-
-```bash
-# The following line can also go into ~/.bashrc or similar
-$ export PATH=$PATH:/path/to/tpaexec/bin
-```
-
-Finally, test that everything is as it should be:
-
-```bash
+$ tpaexec setup
 $ tpaexec selftest
 ```
 
-If that command completes without any errors, your TPAexec installation
+If the self-test completes without any errors, your TPAexec installation
 is ready for use.
+
+## Python 3.6+
+
+TPAexec requires Python 3.6 or later, available on most
+modern distributions. If you don't have it, you can use
+[pyenv](https://github.com/pyenv/pyenv) to install any version of Python
+you like without affecting the system packages.
+
+```bash
+# First, install pyenv and activate it in ~/.bashrc
+# See https://github.com/pyenv/pyenv#installation
+# (e.g., `brew install pyenv` on MacOS X)
+
+$ pyenv install 3.9.0
+Downloading Python-3.9.0.tar.xz...
+-> https://www.python.org/ftp/python/3.9.0/Python-3.9.0.tar.xz
+Installing Python-3.9.0...
+Installed Python-3.9.0 to /home/ams/.pyenv/versions/3.9.0
+
+$ pyenv local 3.9.0
+$ pyenv version
+3.9.0 (set by /home/ams/pyenv/.python-version)
+
+$ pyenv which python3
+/home/ams/.pyenv/versions/3.9.0/bin/python3
+$ python3 --version
+3.9.0
+```
+
+If you were not already using pyenv, please remember to add `pyenv` to
+your PATH in .bashrc and call `eval "$(pyenv init -)"` as described in
+the [pyenv documentation](https://github.com/pyenv/pyenv#installation).
 
 ## Virtual environment options
 
@@ -98,5 +116,17 @@ you must do so yourself, for example by adding the following line to
 your .bashrc (or other shell startup scripts):
 
 ```bash
-source /some/venv/bin/activate
+source /other/location/bin/activate
+```
+
+## Using a modified Ansible (for TPAexec developers)
+
+By default, `tpaexec setup` will install the required version of Ansible
+into `tpa-venv`. If you need to make or test changes to 2ndQuadrant
+Ansible (not ordinarily required), clone the repository and set
+`ANSIBLE_HOME` in your environment (and .bashrc/.profile):
+
+```bash
+$ git clone https://github.com/2ndQuadrant/ansible
+$ export ANSIBLE_HOME=/path/to/ansibledir
 ```

@@ -1,10 +1,22 @@
 # TPAexec installation
 
-To use TPAexec, you need to install the tpaexec package and run the
-`tpaexec setup` command.
+To use TPAexec, you need to install tpaexec and run the `tpaexec setup`
+command. This document explains how to install TPAexec packages.
 
-TPAexec packages are available to 2ndQuadrant customers by prior
-arrangement.
+TPAexec packages are available to EnterpriseDB/2ndQuadrant customers by
+prior arrangement. Please contact your account manager to request
+access.
+
+We publish TPAexec packages for Debian 10 (buster), Ubuntu 20.04
+(focal), Ubuntu 18.04 (bionic), and RHEL/CentOS 7.x and 8.x. These
+distributions provide a usable Python 3.6+ environment out of the box,
+which TPAexec requires. (However, TPAexec supports a wider range of
+[distributions on target instances](distributions.md).)
+
+If you want to use TPAexec on MacOS X or another platform for which
+packages are not available, you can [install it from
+source](INSTALL-repo.md) or [run it inside a Docker
+container](INSTALL-docker.md).
 
 ## Quickstart
 
@@ -41,7 +53,7 @@ $ sudo ntpdate pool.ntp.org
 ## Packages
 
 [Subscribe to the "products/tpa/release" repository](https://access.2ndquadrant.com/software_subscriptions/add/products/tpa/)
-to be able to install the latest TPAexec packages.
+to install the latest TPAexec packages.
 (Login to the 2ndQuadrant Portal, add a subscription under
 Support/Software/Subscriptions, and follow the instructions to enable
 the repository on your system.)
@@ -123,13 +135,3 @@ you can install the packages by any means available.
 We recommend that you run `tpaexec setup` again whenever a new version
 of `tpaexec` is installed. Some new releases may not strictly require
 this, but others will not work without it.
-
-## Distribution support
-
-2ndQuadrant publishes TPAexec packages for Debian 10 (buster), Ubuntu
-20.04 (focal), Ubuntu 18.04 (bionic), and RHEL/CentOS 7.x and 8.x. These
-distributions provide a usable Python 3.6+ environment out of the box,
-which TPAexec requires.
-
-However, TPAexec supports a wider range of [distributions on target
-instances](distributions.md).

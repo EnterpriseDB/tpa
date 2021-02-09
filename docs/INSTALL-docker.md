@@ -1,4 +1,4 @@
-# Installing TPAexec from source using Docker on MacOS
+# Running TPAexec in a Docker container
 
 This document explains how to use a copy of the TPAexec source code
 repository to create a docker image/container and use tpaexec instead
