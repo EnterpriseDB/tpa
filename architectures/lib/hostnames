@@ -17,7 +17,7 @@ set -eu
 libdir=$(dirname "$0")
 wanted=${1:?Number of hostnames not specified}
 namesfile=${2:-${HOSTNAMES_FROM:=$libdir/hostnames.txt}}
-pattern=${3:-${HOSTNAMES_PATTERN:='[a-zA-Z0-9-]*'}}
+pattern=${3:-${HOSTNAMES_PATTERN:='[a-zA-Z0-9-]+'}}
 order=${HOSTNAMES_SORTED_BY:---random-sort}
 
 type realpath &>/dev/null && namesfile=$(realpath "$namesfile")
