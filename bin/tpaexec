@@ -516,8 +516,7 @@ info() {
             echo "Available $subcommand:"
             echo ""
 
-            shopt -s globstar nullglob
-            for d in "$TPA_DIR/$subcommand"/**/_metadata;
+            while IFS= read -r d
             do
                 (
                     source "$d";
@@ -533,7 +532,8 @@ info() {
                         echo ""
                     fi
                 )
-            done
+            done < <(find "$TPA_DIR/$subcommand" -name _metadata -print)
+
             echo 'Run ``'"tpaexec info $subcommand/<name>"'`` for more information.'
             case "$subcommand" in
                 platforms)
