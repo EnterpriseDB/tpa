@@ -56,7 +56,7 @@ version() {
     if [[ -f $TPA_DIR/VERSION ]]; then
         VERSION=$(cat "$TPA_DIR/VERSION")
     else
-        VERSION=$(cd "$TPA_DIR" && git describe)
+        VERSION=$(cd "$TPA_DIR" && echo "$(git describe) (branch: $(git branch | sed -n 's/^\* //p'))")
     fi
     echo "# TPAexec $VERSION"
 }
