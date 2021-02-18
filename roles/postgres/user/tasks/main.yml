@@ -23,7 +23,7 @@
     group: "{{ postgres_group }}"
     shell: /bin/bash
 
-- name: Enhance soft/hard system limits for user postgres
+- name: Enhance soft/hard system limits for user {{ postgres_user }}
   blockinfile:
     path: /etc/security/limits.conf
     block: |
