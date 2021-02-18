@@ -3,7 +3,7 @@
 # Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
 
 - include_role:
-    name: "repmgr/{{ postgres_installation_method }}"
+    name: "repmgr/{{ repmgr_installation_method|default(postgres_installation_method) }}"
     apply:
       tags: [pkg, src]
   vars:
