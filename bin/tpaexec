@@ -327,7 +327,7 @@ rehydrate() {
 
     playbook "$TPA_DIR/platforms/aws/terminate-for-rehydration.yml" \
         -e i_really_want_to_destroy_my_entire_cluster=$DESTROY \
-        --limit "$instances" "$@"
+        -e '{"my_hosts_lines": []}' --limit "$instances" "$@"
 
     provision_args=(-e "require_reattachment=yes")
     provision_args+=(-e "reattach_hosts=$instances")
