@@ -12,7 +12,7 @@
 # and pg_replication_slots. We know we ran barman cron, so we don't wait
 # for the full minute that cron could potentially take to run it.
 
-- name: Check that pg_receivexlog is running
+- name: Check that pg_receive{{ wal_or_xlog }} is running
   postgresql_query:
     conninfo: "{{ postgres_dsn }}"
     query: >
