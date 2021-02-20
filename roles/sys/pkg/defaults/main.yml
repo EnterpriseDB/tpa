@@ -19,6 +19,8 @@ default_apt_repositories:
   EDB:
     key_id: 4EC55148FE026ECC
     key_url: https://apt.enterprisedb.com/edb-deb.gpg.key
+    filename: >-
+      edb-{{ ansible_distribution_release }}
     repo: >-
       deb [arch=amd64] https://apt.enterprisedb.com/{{ ansible_distribution_release }}-edb/ {{ ansible_distribution_release }} main
 

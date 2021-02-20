@@ -67,6 +67,7 @@
     _credentials: "{{ lookup('file', _file) }}"
   when: >
     'EDB' in yum_repository_list
+  no_log: true
 
 # Following the instructions in
 # https://wiki.postgresql.org/wiki/YUM_Installation, we exclude

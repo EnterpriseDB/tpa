@@ -53,14 +53,31 @@
 
 - name: Install apt repositories
   apt_repository:
-    repo: "{{ r.repo }}"
-    mode: 0644
+    repo: "{{ repo_entry }}"
+    filename: "{{ r.filename|default(omit) }}"
+    mode: "{{ needs_auth|ternary(0600, 0644) }}"
     state: present
     update_cache: no
   with_items: "{{ apt_repository_list }}"
   vars:
+    _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
+    _credentials: "{{ lookup('file', _file) }}"
     repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
     r: "{{ repos[item] }}"
+    needs_auth: "{{
+      item == 'EDB' and ansible_distribution_release in ['jessie', 'stretch']
+    }}"
+    repo_entry: "{{
+      needs_auth|ternary(
+        r.repo|regex_replace('https://', 'https://%s@' % _credentials), r.repo
+      )
+    }}"
+  no_log: "{{ needs_auth }}"
+
+- name: Ensure old EDB sources.list.d entry is absent
+  file:
+    path: "/etc/apt/sources.list.d/apt_enterprisedb_com_{{ ansible_distribution_release }}_edb.list"
+    state: absent
 
 - name: Configure authentication for EDB repository
   copy:
@@ -75,6 +92,8 @@
     _credentials: "{{ lookup('file', _file).split(':', 1) }}"
   when: >
     'EDB' in apt_repository_list
+    and ansible_distribution_major_version is version('10', '>=')
+  no_log: true
 
 - name: Raise pin priority for 2ndQuadrant packages
   template:
