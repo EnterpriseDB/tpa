@@ -145,7 +145,8 @@ as it needs from a pre-approved list of several dozen names. This should
 be enough for most clusters.
 
 Specify `--hostnames-from <filename>` to select hostnames from a file
-with one name per line.
+with one name per line. The file must contain at least as many valid
+hostnames as there are instances in your cluster.
 
 Use `--hostnames-pattern '…pattern…'` to limit the selection to
 lines matching an egrep pattern.
@@ -155,10 +156,6 @@ option other than `--random-sort` (which is the default).
 
 Use `--hostnames-unsorted` to not sort hostnames at all. In this case,
 they will be assigned in the order they are found in the hostnames file.
-
-If you specify your own hostname source, you must ensure that it
-contains a sufficient number of valid hostnames (`[a-zA-Z0-9-]`) for
-your cluster.
 
 ## Software selection
 
