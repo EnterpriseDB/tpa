@@ -60,8 +60,8 @@
     update_cache: no
   with_items: "{{ apt_repository_list }}"
   vars:
-    _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
-    _credentials: "{{ lookup('file', _file) }}"
+    _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') or '' }}"
+    _credentials: "{{ _file and lookup('file', _file) or '' }}"
     repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
     r: "{{ repos[item] }}"
     needs_auth: "{{
