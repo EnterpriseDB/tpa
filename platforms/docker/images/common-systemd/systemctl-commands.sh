@@ -9,7 +9,7 @@ fi
 
 # Don't try to run a full system in the container
 systemctl enable basic.target
-systemctl set-default basic
+systemctl set-default multi-user
 systemctl preset-all
 
 installedunits=$( systemctl list-unit-files | head -n -1 | tail -n -1 | cut -f1 -d ' ')
