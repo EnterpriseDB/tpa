@@ -1,0 +1,19 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+efm_package_version: "{{ efm_version }}"
+
+efm_dependency_packages:
+  Debian: &debian_efm_dependency_packages
+    - openjdk-8-jre
+  RedHat:
+    - java-1.8.0-openjdk
+  Ubuntu: *debian_efm_dependency_packages
+
+efm_packages:
+  Debian: &debian_efm_packages
+    - "edb-efm{{ efm_versionNN }}"
+  RedHat:
+    - "edb-efm{{ efm_versionNN }}"
+  Ubuntu: *debian_efm_packages

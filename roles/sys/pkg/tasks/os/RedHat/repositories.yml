@@ -25,8 +25,10 @@
       yum_repository_list|default([])|union(['EDB'])
     }}"
   when:
-    postgresql_flavour == 'epas'
-    and postgres_installation_method == 'pkg'
+    postgres_installation_method == 'pkg' and (
+      postgresql_flavour == 'epas'
+      or failover_manager == 'efm'
+    )
 
 - name: Ensure repository list is defined
   assert:

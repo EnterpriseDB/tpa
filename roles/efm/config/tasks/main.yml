@@ -1,0 +1,71 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+- name: Ensure efm configuration directory exists
+  file:
+    path: "{{ efm_conf_dir }}"
+    owner: efm
+    group: efm
+    mode: 0755
+    state: directory
+
+- include_role: name=postgres/createuser
+  vars:
+    username: efm
+    role_attrs:
+    - superuser
+    password_encryption: md5
+
+# EFM requires MD5 authentication, but instead of storing an MD5 secret,
+# it uses a homebrew "encryption" scheme that feeds the cluster name to
+# PBKDF2 to derive a key to encrypt the password. Also, there is no way
+# to run `efm encrypt` and provide the password non-interactively on
+# stdin; you have to pass it in through the environment.
+
+- name: Encrypt efm password
+  shell: "{{ efm_bin_dir }}/efm encrypt {{ cluster_name }} --from-env"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+  vars:
+    _task_environment:
+      EFMPASS: "{{ efm_password }}"
+  register: efm_encrypted_pass_output
+  changed_when: false
+  no_log: true
+
+- name: Install efm.properties for {{ cluster_name }}
+  template:
+    src: efm.properties.j2
+    dest: "{{ efm_conf_dir }}/{{ cluster_name }}.properties"
+    owner: efm
+    group: efm
+    mode: 0640
+  vars:
+    efm_encrypted_pass: "{{ efm_encrypted_pass_output.stdout }}"
+  notify:
+    - Note efm restart required
+
+- name: Install efm.nodes
+  template:
+    src: efm.nodes.j2
+    dest: "{{ efm_conf_dir }}/{{ cluster_name }}.nodes"
+    owner: efm
+    group: efm
+    mode: 0640
+  vars:
+    node_ips: "{{
+      groups[cluster_tag] | map('extract', hostvars, ['ip_address']) | product([efm_bind_port]) | map('join', ':') | join('\n')
+    }}"
+  notify:
+    - Note efm restart required
+
+# EFM requires us to either configure email alerts or provide a custom
+# notification script. For now, we install a no-op notification script.
+
+- name: Install efm notification script
+  template:
+    src: efm.notification.sh.j2
+    dest: "{{ efm_conf_dir }}/{{ cluster_name }}-efm.notification.sh"
+    owner: efm
+    group: efm
+    mode: 0750

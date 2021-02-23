@@ -44,6 +44,13 @@
   vars:
     version: "{{ postgres_version|default(pgdata_version|default(default_postgres_version)) }}"
 
+- name: Set efm_version
+  set_fact:
+    efm_version: "{{ version }}"
+    efm_versionNN: "{{ version|replace('.','') }}"
+  vars:
+    version: "{{ efm_version|default(default_efm_version) }}"
+
 - name: Set various postgres facts
   set_fact:
     postgres_package_name: "{{
@@ -91,6 +98,9 @@
     publications: "{{ publications|default([]) }}"
     subscriptions: "{{ subscriptions|default([]) }}"
     failover_manager: "{{ failover_manager|default(default_failover_manager) }}"
+    efm_conf_dir: "{{ efm_conf_dir|default(default_efm_conf_dir) }}"
+    efm_bin_dir: "{{ efm_bin_dir|default(default_efm_bin_dir) }}"
+    efm_bind_port: "{{ efm_bind_port|default(default_efm_bind_port) }}"
   vars:
     default_postgres_installation_method: >-
       {{ postgres_installation_source|default('pkg') }}
@@ -99,7 +109,7 @@
       {%- else -%}xlog
       {%- endif -%}
 
-- name: Disable repmgr for BDR instances
+- name: Disable repmgr/EFM for BDR instances
   set_fact:
     failover_manager: none
   when: >

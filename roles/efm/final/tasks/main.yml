@@ -1,0 +1,19 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+# Now that everything should be replicating as configured, we can
+# start efm.
+
+- meta: flush_handlers
+
+- include_role:
+    name: efm/service
+    apply:
+      tags: [efm, service]
+
+- include_role:
+    name: efm/restart
+    apply:
+      tags: [efm, restart]
+

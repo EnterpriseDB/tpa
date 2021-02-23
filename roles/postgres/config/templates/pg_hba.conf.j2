@@ -45,6 +45,9 @@ host    all             all             {{ net }}   {{ password_encryption }}
 {%     if 'pgbouncer' in role %}
 hostssl all {{ pgbouncer_auth_user }} {{ addr }} md5
 {%     endif %}
+{%     if 'efm-witness' in role or ('postgres' in role and failover_manager == 'efm')  %}
+host all efm {{ addr }} md5
+{%     endif %}
 {%     if 'barman' in role %}
 {{type}} postgres barman {{ addr }} {{ method }}
 {{type}} replication streaming_barman {{ addr }} {{ method }}

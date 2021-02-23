@@ -1,0 +1,13 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+- include_role:
+    name: efm/pkg
+    apply:
+      tags: [efm, pkg]
+
+- include_role:
+    name: efm/config
+    apply:
+      tags: [efm, config]

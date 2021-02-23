@@ -1,0 +1,22 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+# We need to install Java before we install EFM itself (because the EFM
+# packages do not declare Java as a dependency).
+
+- name: Install EFM dependencies
+  package:
+    name: "{{
+      efm_dependency_packages|packages_for(ansible_os_family)
+    }}"
+    state: latest
+
+- name: Install EFM
+  package:
+    name: "{{
+      efm_packages|packages_for(ansible_os_family, efm_package_version)
+    }}"
+    state: "{{
+      (efm_package_version is defined)|ternary('present', 'latest')
+    }}"

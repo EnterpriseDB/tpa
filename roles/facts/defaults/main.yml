@@ -125,3 +125,8 @@ default_build_path:
   - /usr/lib64/ccache
   - /usr/lib/ccache
   - $PATH
+
+default_efm_version: 4.1
+default_efm_conf_dir: "/etc/edb/efm-{{ efm_version }}"
+default_efm_bin_dir: "/usr/edb/efm-{{ efm_version }}/bin"
+default_efm_bind_port: 7800

@@ -132,6 +132,10 @@ class Architecture(object):
             '--enable-harp', action='store_const',
             const='harp', dest='failover_manager'
         )
+        g.add_argument(
+            '--enable-efm', action='store_const',
+            const='efm', dest='failover_manager'
+        )
 
         g = p.add_argument_group('volume sizes in GB')
         for vol in ['root', 'barman', 'postgres']:

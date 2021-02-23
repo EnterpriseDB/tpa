@@ -1,0 +1,22 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+- name: Install custom efm service unit file
+  template:
+    src: efm.service.j2
+    dest: "/etc/systemd/system/edb-efm-{{ efm_version }}.service"
+    owner: root
+    group: root
+    mode: 0644
+  register: unit
+
+- name: Enable efm service
+  systemd:
+    name: "edb-efm-{{ efm_version }}"
+    enabled: "{{
+      failover_manager == 'efm'
+      and not postgres_volume_encrypted|bool
+    }}"
+    daemon_reload: "{{ unit is changed }}"
+  tags: [efm, service]

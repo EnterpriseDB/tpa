@@ -96,3 +96,12 @@
     failover_manager == 'harp'
     and role|contains('bdr', 'primary')
   tags: harp
+
+- include_role:
+    name: efm/final
+    apply:
+      tags: efm
+  when:
+    failover_manager == 'efm'
+    and ('postgres' in role or 'efm-witness' in role)
+  tags: efm

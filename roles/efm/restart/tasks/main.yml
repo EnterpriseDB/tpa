@@ -1,0 +1,17 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+- name: Ensure EFM is stopped if not in use
+  set_fact:
+    efm_service_end_state: stopped
+  when:
+    failover_manager != 'efm'
+
+- name: Start or restart efm
+  service:
+    name: "edb-efm-{{ efm_version }}"
+    state: "{{ efm_service_end_state|default('started') }}"
+  become_user: root
+  become: yes
+  tags: [service, restart]

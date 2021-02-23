@@ -1,0 +1,20 @@
+{# Copyright © EnterpriseDB Corporation #}
+[Unit]
+Description=EnterpriseDB Failover Manager {{ efm_version }}
+Wants=network-online.target
+After=network.target network-online.target
+
+[Service]
+Type=forking
+TimeoutSec=120
+Environment=CLUSTER={{ cluster_name }}
+User=efm
+PIDFile=/var/run/efm-{{ efm_version }}/{{ cluster_name }}.pid
+
+ExecStart=/bin/bash -c "/usr/edb/efm-{{ efm_version }}/bin/runefm.sh start ${CLUSTER}"
+ExecStop=/bin/bash -c "/usr/edb/efm-{{ efm_version }}/bin/runefm.sh stop ${CLUSTER}"
+
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

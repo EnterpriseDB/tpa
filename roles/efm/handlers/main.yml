@@ -1,0 +1,7 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+- name: Note efm restart required
+  set_fact:
+    efm_service_end_state: restarted

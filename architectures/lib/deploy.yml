@@ -40,7 +40,12 @@
       groups['role_barman']|default([]) is not empty
     tags: always
 
-  - include_role: name=repmgr
+  - block:
+      - include_role: name=repmgr
+      - include_role: name=efm
+        when:
+          failover_manager == 'efm'
+          and ('postgres' in role or 'efm-witness' in role)
     when:
       groups|members_of('role_replica', not_in=['role_readonly']) is not empty
     tags: always
