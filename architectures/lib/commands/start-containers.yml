@@ -1,0 +1,15 @@
+---
+
+# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+
+- name: Start containers
+  hosts: all
+  tasks:
+  - docker_container:
+      name: "{{ inventory_hostname }}"
+      state: started
+      comparisons:
+        '*': ignore
+    delegate_to: localhost
+    when:
+      platform in ['docker']
