@@ -9,8 +9,10 @@
 #     ssh_username: xxx
 #     ssh_key_dir: '/some/other/dir'
 #     ssh_key_name: 'id_someotheruser'
+#     ssh_key_options: command="/bin/true"
 
 - name: Add {{ _ssh_key_name }}.pub to {{ ssh_username }}'s authorized_keys
   authorized_key:
     user: "{{ ssh_username }}"
     key: "{{ lookup('file', _ssh_key_dir+'/'+_ssh_key_name+'.pub') }}"
+    key_options: "{{ ssh_key_options|default('')}}"
