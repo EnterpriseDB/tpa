@@ -46,6 +46,11 @@
 
 - name: Set various postgres facts
   set_fact:
+    postgres_package_name: "{{
+      'postgresql' if postgresql_flavour in ['postgresql', '2q'] else
+      'postgresql-bdr' if postgresql_flavour == 'postgresql-bdr' else
+      'edb-as' if postgres_family == 'epas' else ''
+    }}"
     postgres_user: "{{ postgres_user|default(default_postgres_user[postgres_family]) }}"
     postgres_group: "{{ postgres_group|default(default_postgres_user[postgres_family]) }}"
     postgres_home: "{{ postgres_home|default(default_postgres_home_dir[postgres_family][ansible_os_family]) }}"

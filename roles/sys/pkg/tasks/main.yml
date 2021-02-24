@@ -23,6 +23,13 @@
 # Configure package repositories ({apt,yum}_repositories,
 # tpa_2q_repositories).
 
+- set_fact:
+    tpa_2q_repositories:
+      - products/2ndqpostgres/release
+  when:
+    postgresql_flavour == '2q'
+    and tpa_2q_repositories is not defined
+
 - include_tasks:
     file: "os/{{ ansible_os_family }}/repositories.yml"
     apply:

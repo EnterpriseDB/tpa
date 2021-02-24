@@ -99,9 +99,14 @@ class Architecture(object):
         g.add_argument('--os-version', metavar='VERSION')
         g.add_argument('--os-image', metavar='LABEL')
         g.add_argument(
-            '--epas', action='store_const', const='epas',
-            dest='postgresql_flavour',
+            '--epas', action='store_const',
+            const='epas', dest='postgresql_flavour',
             help='Install EDB Postgres Advanced Server (EPAS)',
+        )
+        g.add_argument(
+            '--2q', '--2ndq', '--2ndqpostgres',
+            action='store_const', const='2q', dest='postgresql_flavour',
+            help='Install 2ndQuadrant Postgres for BDR EE (2ndQPostgres)',
         )
         g.add_argument(
             '--postgres-version', choices=['9.4', '9.5', '9.6', '10', '11', '12', '13']

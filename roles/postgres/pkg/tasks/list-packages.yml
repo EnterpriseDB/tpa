@@ -14,12 +14,12 @@
 - name: Determine which optional packages should be installed
   set_fact:
     install_pgespresso_packages: "{{
-      postgresql_flavour == 'postgresql' and postgres_version is version(9.5, '<=')
+      postgres_family == 'postgresql' and postgres_version is version(9.5, '<=')
     }}"
     install_pglogical_packages: "{{
       'pglogical' not in sources and (
-        postgresql_flavour == 'postgresql' or
-        (postgresql_flavour == 'epas' and 'bdr' in role)
+        postgres_family == 'postgresql' or
+        (postgres_family == 'epas' and 'bdr' in role)
       )
     }}"
     install_bdr_packages: "{{ 'bdr' in role and 'bdr' not in sources }}"

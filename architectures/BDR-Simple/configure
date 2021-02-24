@@ -89,8 +89,12 @@ class BDR_Simple(BDR):
         elif bdr_version == '3':
             extensions = ['pglogical']
             if not tpa_2q_repositories:
-                tpa_2q_repositories.append('products/bdr3/release')
-                tpa_2q_repositories.append('products/pglogical3/release')
+                flavour = self.args.get('postgresql_flavour') or 'postgresql'
+                if flavour == '2q':
+                    tpa_2q_repositories.append('products/2ndqpostgres/release')
+                else:
+                    tpa_2q_repositories.append('products/bdr3/release')
+                    tpa_2q_repositories.append('products/pglogical3/release')
 
         postgresql_flavour = \
             self.args.get('postgresql_flavour') or postgresql_flavour
