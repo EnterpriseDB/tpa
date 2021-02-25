@@ -44,7 +44,7 @@ def scram_password(password, salt=None, rounds=4096):
 
 def encrypted_password(password_encryption, password, username=None, existing_password=None):
     if password_encryption == 'md5':
-        return md5_password(password, username)
+        return md5_password(str(password), username)
     elif password_encryption == 'scram-sha-256':
         salt = None
         rounds = None
@@ -58,7 +58,7 @@ def encrypted_password(password_encryption, password, username=None, existing_pa
             salt = base64.b64decode(b64salt)
             rounds = int(rounds)
 
-        return scram_password(password, salt=salt, rounds=rounds)
+        return scram_password(str(password), salt=salt, rounds=rounds)
 
     raise AnsibleFilterError("|encrypted_password does not recognise password_encryption scheme %s" % password_encryption)
 
