@@ -4,15 +4,36 @@ Copyright © EnterpriseDB Corporation
 
 ## v21.1 (unreleased)
 
+This release has experimental support for deploying EPAS (EDB Postgres
+Advanced Server) for internal use, and the next release will make this
+feature generally available.
+
 ### Minor changes
 
 - Adapt to new repository filenames/section names CentOS 8 (fixes
   "Cannot find a valid baseurl for repo: AppStream" errors)
 
+- Set `ssl_min_protocol_version = 'TLSv1.2'` wherever supported
+  (Postgres 12 and above, or 2ndQPostgres 11 and above)
+
+- Improve installation instructions, especially for MacOS X users
+
 ### Bugfixes
 
 - Stop postgres messages from falling through to be logged to
   /var/log/syslog
+
+- Fix errors about `my_hosts_lines` being undefined when running
+  `tpaexec rehydrate`
+
+- Specify postgres_host and postgres_port when running pgbench
+
+- Reject empty lines in `--hostnames-from` input file (which would
+  result in "list object has no element 2" exceptions from `tpaexec
+  configure`)
+
+- Fix default systemd target for docker containers, so that restarting
+  the container correctly restarts all of its services
 
 ## v20.11 (2020-12-15)
 
