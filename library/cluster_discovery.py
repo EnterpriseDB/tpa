@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 #
 # This module gathers information about a Postgres instance.
 #

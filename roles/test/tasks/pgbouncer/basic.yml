@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 # NOTE: This test is special, because update-postgres uses it directly
 # as a sanity check. It should test only the fundamental properties we

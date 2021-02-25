@@ -1,6 +1,6 @@
 # TPA release notes
 
-Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+Copyright © EnterpriseDB Corporation
 
 ## v21.1 (unreleased)
 

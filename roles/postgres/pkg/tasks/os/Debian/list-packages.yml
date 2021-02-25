@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 # For Postgres 10+ on Debian and Ubuntu, the main postgresql package
 # "provides" a virtual postgresql-contrib, and there is no longer a

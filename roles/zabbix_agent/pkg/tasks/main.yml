@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 - name: "Include OS-specific variables"
   include_vars: "{{ ansible_os_family }}.yml"

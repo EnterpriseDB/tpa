@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 - block:
   - name: Wait for node to recover

@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 - name: Retrieve tables currently in replication set {{ set.name }}
   postgresql_query:

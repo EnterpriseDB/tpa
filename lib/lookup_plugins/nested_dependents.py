@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 #
 # This lookup plugin is similar to with_nested, but allows loop expressions to
 # refer to earlier expressions as item.0, item.1, etc. Using it, you can write

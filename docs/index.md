@@ -1,8 +1,8 @@
 # TPAexec
 
-© Copyright 2ndQuadrant
+Copyright © EnterpriseDB Corporation
 
-Confidential property of 2ndQuadrant; not for public release.
+Confidential property of EDB; not for public release.
 
 [Link to TPAexec documentation in PDF format](tpaexec.pdf)
 

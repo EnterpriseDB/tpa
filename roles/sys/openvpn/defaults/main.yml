@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 _vpn_name: "{{ vpn_name|default(cluster_name)|lower }}"
 _local_cert_dir: "{{ cluster_dir }}/certs"

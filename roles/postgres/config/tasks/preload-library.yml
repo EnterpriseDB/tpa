@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 # We're willing to be a bit flexible about what we read in here. We
 # accept multiple lines setting shared_preload_libraries (last one

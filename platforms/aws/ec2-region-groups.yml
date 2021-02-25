@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 # Starting with ec2_groups (optional) and cluster_rules, we need to set
 # up ec2_region_groups to map every region to the security groups to use

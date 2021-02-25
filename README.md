@@ -1,19 +1,19 @@
-2ndQuadrant TPA
-===============
+EDB TPAexec
+===========
 
-Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+Copyright © EnterpriseDB Corporation
 
-Confidential property of 2ndQuadrant; not for public release.
+Confidential property of EDB; not for public release.
 
 ## Overview
 
 TPA (Trusted Postgres Architecture) is a set of recommendations from
-2ndQuadrant about how to set up a Postgres cluster in various scenarios.
-These represent the best practices followed by 2ndQuadrant, and are as
-applicable to quick testbed setups as to production environments.
+EnterpriseDB (and formerly 2ndQuadrant) about how to set up a Postgres cluster
+in various scenarios. These represent the best practices followed by EDB, and
+are as applicable to quick testbed setups as to production environments.
 
 TPAexec is an orchestration tool that uses Ansible to build Postgres
-clusters according to 2ndQuadrant's recommendations.
+clusters according to EDB's recommendations.
 
 ## What can TPAexec do?
 

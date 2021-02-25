@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 # Given a Postgres version, we perform distribution-specific tasks to
 # install the required Postgres packages. (The required repositories

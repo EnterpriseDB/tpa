@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 # We upload hostkeys/ssh_host_xxx_key{,.pub} to cluster_bucket in S3.
 #

@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 # We add the given dict of variable names and values to
 # provisioning_vars, and write the result out to vars.json.

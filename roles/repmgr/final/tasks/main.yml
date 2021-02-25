@@ -1,6 +1,6 @@
 ---
 
-# Copyright © 2ndQuadrant Limited <info@2ndquadrant.com>
+# Copyright © EnterpriseDB Corporation
 
 # Now we do whatever is necessary to run ``repmgr xxx register`` on the
 # instances in the cluster. That means some sanity checking for primary
