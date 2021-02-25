@@ -30,31 +30,14 @@
   become: yes
   environment: "{{ target_environment }}"
   hosts: all
-  vars:
-    all_haproxy_backend_servers: []
   tasks:
 
-  # From the haproxy_backend_servers settings on haproxy instances, we
-  # assemble the following:
-  #
-  # 1. A list of all backend servers (all_haproxy_backend_servers)
-  # 2. A map associating each Postgres instance with its corresponding
-  #    haproxy instance (proxy_for_backend_server)
-  #
-  # We assume for now that the haproxy instance also runs a pgbouncer
-  # pointing to the haproxy (which is true of BDR-Always-ON by default).
+  # Set all_haproxy_backend_servers and proxies_for_backend_server, as
+  # well as my_haproxies.
 
-  - name: Record haproxy/backend relationships
-    set_fact:
-      all_haproxy_backend_servers: "{{
-        all_haproxy_backend_servers|default([])|union([item.1])
-      }}"
-      proxy_for_backend_server: "{{
-        proxy_for_backend_server|default({})|combine({ item.1: item.0 })
-      }}"
-    with_nested_dependents:
-    - groups['role_haproxy']|default([])
-    - hostvars[item.0].haproxy_backend_servers
+  - include_role:
+      name: haproxy
+      tasks_from: map-backend-proxies.yml
 
   # As a precaution, we start the update only if the servers are healthy
   # and match the expected configuration. It's convenient to do this by
@@ -91,164 +74,17 @@
   become: yes
   hosts: "{{ update_hosts|default('all') }}"
   serial: 1
-  vars:
-    all_haproxy_backend_servers: []
-    proxy_for_backend_server: {}
   tasks:
 
-  # First, we check if the current instance is named in
-  # haproxy_backend_servers for one of the haproxy instances.
-  # Thereafter, if is_proxied is true, my_proxy is the name of the
-  # relevant haproxy instance.
+  # We mark this backend as disabled in haproxy and tell pgbouncer to
+  # reconnect to haproxy and wait for active connections to be closed.
 
-  - set_fact:
-      is_proxied: >-
-        {{ inventory_hostname in all_haproxy_backend_servers }}
-      my_proxy: >-
-        {{ proxy_for_backend_server[inventory_hostname]|default('none') }}
-
-  # We want to set this server into the MAINT state in haproxy, which
-  # disables health checks and prevents new connections to the server
-  # (it does not terminate existing connections, as the documentation
-  # indirectly suggests). This is equivalent to "disable server".
-  #
-  # We would also like to know if the server was active, so that we can
-  # take some additional steps below. Unfortunately, there is no way to
-  # do this in a single step.
-  #
-  # We can tell if haproxy is directing traffic to a server by looking
-  # for an entry with server_id=NNN in the stick table for the backend
-  # ("show table be"). To make sense of the server_ids, we need to look
-  # at the server state ("show servers state be"). If we then switch to
-  # MAINT, we can parse the output to figure out if the server had been
-  # receiving traffic before the switch.
-  #
-  # We assume that pgbouncer is connecting to haproxy on the same host,
-  # so we send "show table be key 127.0.0.1" to find only the relevant
-  # entry in the stick table.
-  #
-  # This is not resilient against changes to the traffic routing because
-  # of failed health checks during the process. The best we can do is to
-  # minimise the window of opportunity for problems by issuing all three
-  # commands in one go.
-  #
-  # Note: I have not been able to find any advantage to using the DRAIN
-  # state in haproxy, or even understand exactly what it does. However,
-  # it does not remove the stick table entry for the server, so we have
-  # to issue an additional "clear table be key 127.0.0.1".
-
-  - name: Put backend {{ inventory_hostname }} in MAINT mode
-    shell: >
-      echo "show table be key 127.0.0.1;
-      show servers state be;
-      set server be/{{ inventory_hostname }} state maint" |
-      socat stdio {{ haproxy_stats_socket }}
-    args:
-      executable: /bin/bash
-    register: servers
-    delegate_to: "{{ my_proxy }}"
-    when: is_proxied
-
-  - set_fact:
-      status_lines: "{{ servers.stdout_lines|default([]) }}"
-
-  # We must now extract some meaning from the output of the commands we
-  # sent above. The "show table …" output will be an empty line (if the
-  # stick table has no entry for pgbouncer) or will look something like
-  # the following:
-  #
-  # # table: be, type: ip, size:1, used:1
-  # 0xNNNNNNNNNNNN: key=127.0.0.1 use=0 exp=0 server_id=1
-  #
-  # For details, see src/stick_table.c:table_dump_head_to_buffer and
-  # table_dump_entry_to_buffer.
-  #
-  # We extract the server_id, if available, and remove any parsed output
-  # from status_lines.
-
-  - name: Set former_server_id based on stick table contents
-    set_fact:
-      former_active_id: "{{
-        _fields[-1]|regex_replace('server_id=', '')
-      }}"
-      status_lines: "{{ status_lines[2:] }}"
-    vars:
-      _fields: "{{ status_lines[1].split(' ') }}"
-    when: >
-      status_lines and
-      status_lines[0].startswith("# table: be,")
-
-  - set_fact:
-      status_lines: "{{ status_lines[1:] }}"
-
-  # Next up, the "show servers …" output will look like this:
-  #
-  # 1
-  # # be_id be_name srv_id srv_name srv_addr srv_op_state srv_admin_state …
-  # 3 be 1 quart 10.33.244.222 2 0 1 1 5376 15 3 7 6 0 0 0 quart 5432 -
-  # 3 be 2 zephyr 10.33.244.215 2 0 1 1 5376 15 3 7 6 0 0 0 zephyr 5432 -
-  #
-  # See doc/management.txt in the haproxy source for details about the
-  # meaning of these values.
-  #
-  # If we found a former_active_id above, we translate that to a server
-  # name here. (Otherwise we know there's no active server yet, so there
-  # is no need to treat this instance specially.)
-
-  - name: Set former_server_name based on server state
-    set_fact:
-      former_active_server: "{{ _fields[3] }}"
-    with_items:
-      "{{ status_lines[2:] }}"
-    vars:
-      _fields: "{{ item.split(' ') }}"
-    when: >
-      status_lines and
-      status_lines[0] == "1" and
-      status_lines[1].startswith("# be_id be_name ") and
-      former_active_id is defined and
-      former_active_id == _fields[2]
-
-  - set_fact:
-      was_active: "{{
-        inventory_hostname == former_active_server|default('none')
-      }}"
-    when: is_proxied
-
-  # If this was an active backend, we must ask pgbouncer to migrate
-  # connections away from it and wait for that process to complete
-  # before we shut it down.
-
-  - name: Issue RECONNECT and WAIT_CLOSE to pgbouncer
-    postgresql_query:
-      conninfo: "{{ _dsn|dbname('pgbouncer', user='pgbouncer') }}"
-      autocommit: yes
-      queries:
-      - text: RECONNECT
-      - text: WAIT_CLOSE
-    vars:
-      _dsn: "{{ hostvars[my_proxy].pgbouncer_node_dsn }}"
-      _task_environment:
-        PGPASSWORD: "{{ pgbouncer_password }}"
-    environment: "{{ target_environment|combine(_task_environment) }}"
-    delegate_to: "{{ my_proxy }}"
-    when:
-      is_proxied and was_active
-
-  # Once the server is guaranteed to have no active traffic, we can wait
-  # to ensure that any writes it originated have finished replicating to
-  # the other backends. This is just a convenience, because the instance
-  # would replicate after the restart anyway.
-
-  - name: Wait for replication to complete
-    postgresql_query:
-      conninfo: "{{ dsn|dbname(bdr_database) }}"
-      query: >
-        select bdr.wait_slot_confirm_lsn(NULL, NULL)
-    become_user: "{{ postgres_user }}"
-    become: yes
-    when:
-      is_proxied
+  - include_role:
+      name: haproxy
+      tasks_from: disable-backend.yml
+    with_items: "{{ my_haproxies }}"
+    loop_control:
+      loop_var: my_haproxy
 
   # Now we can perform the update on Postgres instances, whether proxied
   # (e.g., primary instances) or not (e.g., logical standby instances).
@@ -292,8 +128,8 @@
       socat stdio {{ haproxy_stats_socket }}
     args:
       executable: /bin/bash
-    delegate_to: "{{ my_proxy }}"
-    when: is_proxied
+    with_items: "{{ my_haproxies }}"
+    delegate_to: "{{ item }}"
 
   # Ansible won't stop execution if a host becomes unreachable, despite
   # the any_errors_fatal setting. We must detect that situation and fail

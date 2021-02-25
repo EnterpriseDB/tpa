@@ -1,0 +1,34 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+# From the haproxy_backend_servers settings on haproxy instances, we
+# assemble the following:
+#
+# 1. A list of all backend servers (all_haproxy_backend_servers)
+# 2. A map associating each Postgres instance with its corresponding
+#    haproxy instances (proxies_for_backend_server)
+
+- name: Record haproxy/backend relationships
+  set_fact:
+    all_haproxy_backend_servers: "{{
+      all_haproxy_backend_servers|default([])|union([item.1])
+    }}"
+    proxies_for_backend_server: "{{
+      proxies_for_backend_server|default({})|combine({
+        item.1: proxies_for_backend_server[item.1]|default([])|union([item.0])
+      })
+    }}"
+  with_nested_dependents:
+  - groups['role_haproxy']|default([])
+  - hostvars[item.0].haproxy_backend_servers
+
+# We check if the current instance is named in haproxy_backend_servers
+# for one of the haproxy instances. Thereafter, if is_haproxied is true,
+# my_haproxies is a list of the relevant haproxy instances.
+
+- set_fact:
+    is_haproxied: >-
+      {{ inventory_hostname in all_haproxy_backend_servers }}
+    my_haproxies: >-
+      {{ proxies_for_backend_server[inventory_hostname]|default([]) }}

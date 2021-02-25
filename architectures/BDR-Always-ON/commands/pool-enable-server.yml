@@ -14,63 +14,24 @@
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   tags: always
 
-- name: Collect haproxy facts for cluster {{ cluster_dir }}
+- name: Add instance {{ enable_instance }} to haproxy servers for cluster {{ cluster_dir }}
   any_errors_fatal: True
   max_fail_percentage: 0
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: all
-  vars:
-    all_haproxy_backend_servers: []
-  tasks:
-
-  # From the haproxy_backend_servers settings on haproxy instances, we
-  # assemble the following:
-  #
-  # 1. A list of all backend servers (all_haproxy_backend_servers)
-  # 2. A map associating each Postgres instance with its corresponding
-  #    haproxy instance (proxy_for_backend_server)
-  #
-  # We assume for now that the haproxy instance also runs a pgbouncer
-  # pointing to the haproxy (which is true of BDR-Always-ON by default).
-
-  - name: Record haproxy/backend relationships
-    set_fact:
-      all_haproxy_backend_servers: "{{
-        all_haproxy_backend_servers|default([])|union([item.1])
-      }}"
-      proxy_for_backend_server: "{{
-        proxy_for_backend_server|default({})|combine({ item.1: item.0 })
-      }}"
-    with_nested_dependents:
-    - groups['role_haproxy']|default([])
-    - hostvars[item.0].haproxy_backend_servers
-
-- name: Add instance to haproxy pool
-  any_errors_fatal: True
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
   hosts: "{{ enable_instance }}"
-  vars:
-    all_haproxy_backend_servers: []
-    proxy_for_backend_server: {}
   tasks:
 
-  # First, we check if the current instance is named in
-  # haproxy_backend_servers for one of the haproxy instances.
-  # Thereafter, if is_proxied is true, my_proxy is the name of the
-  # relevant haproxy instance.
+  # Set all_haproxy_backend_servers and proxies_for_backend_server, as
+  # well as my_haproxies.
 
-  - set_fact:
-      is_proxied: >-
-        {{ inventory_hostname in all_haproxy_backend_servers }}
-      my_proxy: >-
-        {{ proxy_for_backend_server[inventory_hostname]|default('none') }}
+  - include_role:
+      name: haproxy
+      tasks_from: map-backend-proxies.yml
 
-  # We can now inform the relevant haproxy that this backend is ready to
-  # accept connections.
+  # We can now inform the relevant haproxy instances that this backend
+  # is ready to accept connections.
 
   - name: Declare backend {{ inventory_hostname }} as ready
     shell: >
@@ -78,5 +39,5 @@
       socat stdio {{ haproxy_stats_socket }}
     args:
       executable: /bin/bash
-    delegate_to: "{{ my_proxy }}"
-    when: is_proxied
+    with_items: "{{ my_haproxies }}"
+    delegate_to: "{{ item }}"
