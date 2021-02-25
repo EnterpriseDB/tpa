@@ -118,3 +118,7 @@ synchronize_seqscans = {{ synchronize_seqscans|default('on') }}
 {% if password_encryption != 'md5' %}
 password_encryption = {{ password_encryption }}
 {% endif %}
+
+{% if postgres_version is version('12', '>=') or (postgresql_flavour == '2q' and postgres_version is version ('11', '>=')) %}
+ssl_min_protocol_version = 'TLSv1.2'
+{% endif %}
