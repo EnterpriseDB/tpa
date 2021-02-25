@@ -43,6 +43,10 @@ Please consult the
 [install Docker](https://docs.docker.com/install) and
 [get started](https://docs.docker.com/get-started/) with it.
 
+On MacOS X, you can [install "Docker Desktop for
+Mac"](https://hub.docker.com/editions/community/docker-ce-desktop-mac/)
+and launch Docker from the application menu.
+
 ### Permissions
 
 TPAexec expects the user running it to have permission to access to the

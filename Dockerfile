@@ -4,39 +4,23 @@ FROM debian:buster
 
 MAINTAINER 2ndQuadrant <info@2ndQuadrant.com>
 
-# TPA_DIR points to the path that will host tpaexec source code
-# inside the image that we build.
+# Set up repositories and install packages, including the Docker CE CLI
+# (https://docs.docker.com/engine/install/debian/).
 
-ENV TPA_DIR=/root/tpaexec
+RUN apt-get -y update && \
+    apt-get -y install curl gnupg software-properties-common \
+        python3.7 python3-pip python3-venv pwgen openvpn patch git && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" && \
+    apt-get -y update && apt-get -y install docker-ce-cli
 
-# First, you must install some required system packages. (These would have
-# been installed automatically as dependencies if you were installing the
-# tpaexec package except git.)
+# Copy tpaexec sources from the current directory into the image, and
+# run `tpaexec setup` to complete the installation, and then `tpaexec
+# selftest` to verify it.
 
-RUN apt-get update && apt-get -y install python3.7 python3-pip python3-venv pwgen openvpn patch git
-
-RUN mkdir ${TPA_DIR}
-
-# Copy tpaexec sources inside the image
+ENV TPA_DIR=/opt/2ndQuadrant/TPA
 
 COPY . ${TPA_DIR}
 
-# Invoke `tpaexec setup` so that it takes care of the basic tpaexec setup. By default,
-# `tpaexec setup` will use the builtin Python 3 `-m venv` to create a venv under
-# `$TPA_DIR/tpa-venv`, and activate it automatically whenever `tpaexec` is invoked.
-
-RUN ${TPA_DIR}/bin/tpaexec setup
-
-# Finally, test that everything is as it should be:
-RUN ${TPA_DIR}/bin/tpaexec selftest
-
-# Setup user env so that `tpaexec` is in user's default path everytime they log into
-# the container
-
-RUN echo "export PATH=$PATH:${TPA_DIR}/bin" > ~/.bashrc
-ENV PATH="${TPA_DIR}/bin:${PATH}"
-
-# Finally, test that everything is as it should be after `tpaexec` is invoked from
-# default path:
-
-RUN tpaexec selftest
+RUN ln -sf ${TPA_DIR}/bin/tpaexec /usr/local/bin && \
+    tpaexec setup && tpaexec selftest

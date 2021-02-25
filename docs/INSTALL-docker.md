@@ -1,60 +1,73 @@
 # Running TPAexec in a Docker container
 
-This document explains how to use a copy of the TPAexec source code
-repository to create a docker image/container and use tpaexec instead
-of installing the tpaexec package.
+If you are using a system for which there are no [TPAexec
+packages](INSTALL.md) available, and it's difficult to run TPAexec after
+[installing from source](INSTALL-repo.md) (for example, because it's not
+easy to obtain a working Python 3.6+ interpreter), your last resort may
+be to build a Docker image and run TPAexec inside a Docker container.
 
-Please install TPAexec from packages unless you have been given access
-to the TPA source code repository or you have been given a copy of the
-source code and specifically advised to use it by 2ndQuadrant.
-
-## Install Docker
-If you already have docker installed on your machine, you can skip this
-part and simply go to Quickstart.
-
-##
-On Mac, download `Docker Desktop for Mac app` and install it. You can 
-downoad the latest version from [here](https://desktop.docker.com/mac/stable/Docker.dmg)
-
-Detailed download and installation instructions available on following
-link [here](https://hub.docker.com/editions/community/docker-ce-desktop-mac/)
-
-Once installed, simply launch docker from application menu.
+Please note that you do not need to run TPAexec in a Docker container in
+order to [deploy to Docker containers](platform-docker.md). It's always
+preferable to run TPAexec directly if you can (even on MacOS X).
 
 ## Quickstart
 
+You must have Docker installed and working on your system already.
+
+Run the following commands to clone the tpaexec source repository from Github
+and build a new Docker image named `tpa/tpaexec`:
+
 ```bash
-$ cd /path/to/copy/of/tpaexec
+$ git clone https://github.com/EnterpriseDB/tpaexec.git
+$ cd tpaexec
 $ docker build -t tpa/tpaexec .
 ```
 
-To make sure you can provision and control docker containers from within a docker
-container i.e. --plaform docker; we create a controller container for tpaexec
-that includes functional tpaexec. It basically shares your host docker daemon on
-your Mac with tpaexec controller container. This way any docker containers provisioned
-from within tpaexec controller container are actually created on your docker host.
-
-```
-$ docker run -tid --name="tpaexec-controller" --hostname "tpaexec-controller" -v /var/run/docker.sock:/var/run/docker.sock -v /usr/local/bin/docker:/usr/bin/docker tpa/tpaexec:latest /bin/bash
-```
-
-Attach to the container and once connected, you should be able to invoke tpaexec
-by simply running `tpaexec` from your terminal.
+Double-check the created image:
 
 ```bash
-$ docker container attach tpaexec-controller
-```
-Once inside the container, invoke `tpaexec` to verify
-```
-$ tpaexec selftest
+$ docker image ls tpa/tpaexec
+REPOSITORY    TAG       IMAGE ID       CREATED         SIZE
+tpa/tpaexec   latest    e145cf8276fb   8 seconds ago   1.73GB
+$ docker rm --rm tpa/tpaexec tpaexec info
+# TPAexec v20.11-59-g85a62fe3 (branch: master)
+tpaexec=/usr/local/bin/tpaexec
+TPA_DIR=/opt/2ndQuadrant/TPA
+PYTHON=/opt/2ndQuadrant/TPA/tpa-venv/bin/python3 (v3.7.3, venv)
+TPA_VENV=/opt/2ndQuadrant/TPA/tpa-venv
+ANSIBLE=/opt/2ndQuadrant/TPA/tpa-venv/bin/ansible (v2.8.15)
 ```
 
-If that command completes without any errors, your TPAexec installation
-is ready for use.
+Create a TPAexec container and make your cluster configuration directories
+available inside the container:
 
-``
-docker run -t hello-world
-``
+```bash
+$ docker run --rm -v ~/clusters:/clusters \
+    -it tpa/tpaexec:latest
+```
 
-And if that command completes without any errors, your tpaexec-controller container
-is correctly setup and ready to provision and control other containers.
+You can now run commands like `tpaexec provision /clusters/speedy` at the
+container prompt. (When you exit the shell, the container will be removed.)
+
+If you want to provision Docker containers using TPAexec, you must also allow
+the container to access the Docker control socket on the host:
+
+```
+$ docker run --rm -v ~/clusters:/clusters \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -it tpa/tpaexec:latest
+```
+
+Run `docker ps` within the container to make sure that your connection to the
+host Docker daemon is working.
+
+## Installing Docker
+
+Please consult the
+[Docker documentation](https://docs.docker.com) if you need help to
+[install Docker](https://docs.docker.com/install) and
+[get started](https://docs.docker.com/get-started/) with it.
+
+On MacOS X, you can [install "Docker Desktop for
+Mac"](https://hub.docker.com/editions/community/docker-ce-desktop-mac/)
+and launch Docker from the application menu.
