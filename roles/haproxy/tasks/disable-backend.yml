@@ -31,6 +31,8 @@
 # state in haproxy, or even understand exactly what it does. However,
 # it does not remove the stick table entry for the server, so we have
 # to issue an additional "clear table be key 127.0.0.1".
+#
+# Of course, we have to do this for every proxy in my_haproxies.
 
 - name: Put backend {{ inventory_hostname }} in MAINT mode
   shell: >
@@ -40,98 +42,57 @@
     socat stdio {{ haproxy_stats_socket }}
   args:
     executable: /bin/bash
-  register: servers
-  delegate_to: "{{ my_haproxy }}"
+  register: haproxy_stats
+  with_items: "{{ my_haproxies }}"
+  delegate_to: "{{ item }}"
 
-- set_fact:
-    status_lines: "{{ servers.stdout_lines|default([]) }}"
+# Now we parse the status lines from each haproxy to set
+# `last_active_backend_for_proxy[haproxy_instance]`.
 
-# We must now extract some meaning from the output of the commands we
-# sent above. The "show table …" output will be an empty line (if the
-# stick table has no entry for pgbouncer) or will look something like
-# the following:
-#
-# # table: be, type: ip, size:1, used:1
-# 0xNNNNNNNNNNNN: key=127.0.0.1 use=0 exp=0 server_id=1
-#
-# For details, see src/stick_table.c:table_dump_head_to_buffer and
-# table_dump_entry_to_buffer.
-#
-# We extract the server_id, if available, and remove any parsed output
-# from status_lines.
-
-- name: Set former_server_id based on stick table contents
-  set_fact:
-    former_active_id: "{{
-      _fields[-1]|regex_replace('server_id=', '')
-    }}"
-    status_lines: "{{ status_lines[2:] }}"
+- include_tasks: parse-haproxy-status.yml
   vars:
-    _fields: "{{ status_lines[1].split(' ') }}"
-  when: >
-    status_lines and
-    status_lines[0].startswith("# table: be,")
-
-- set_fact:
-    status_lines: "{{ status_lines[1:] }}"
-
-# Next up, the "show servers …" output will look like this:
-#
-# 1
-# # be_id be_name srv_id srv_name srv_addr srv_op_state srv_admin_state …
-# 3 be 1 quart 10.33.244.222 2 0 1 1 5376 15 3 7 6 0 0 0 quart 5432 -
-# 3 be 2 zephyr 10.33.244.215 2 0 1 1 5376 15 3 7 6 0 0 0 zephyr 5432 -
-#
-# See doc/management.txt in the haproxy source for details about the
-# meaning of these values.
-#
-# If we found a former_active_id above, we translate that to a server
-# name here. (Otherwise we know there's no active server yet, so there
-# is no need to treat this instance specially.)
-
-- name: Set former_server_name based on server state
-  set_fact:
-    former_active_server: "{{ _fields[3] }}"
-  with_items:
-    "{{ status_lines[2:] }}"
-  vars:
-    _fields: "{{ item.split(' ') }}"
-  when: >
-    status_lines and
-    status_lines[0] == "1" and
-    status_lines[1].startswith("# be_id be_name ") and
-    former_active_id is defined and
-    former_active_id == _fields[2]
-
-- set_fact:
-    was_active: "{{
-      inventory_hostname == former_active_server|default('none')
+    haproxy_instance: "{{ item.0 }}"
+    haproxy_status: "{{
+      item.1.stdout_lines|default([])
     }}"
+  with_together:
+  - "{{ my_haproxies }}"
+  - "{{ haproxy_stats.results }}"
 
 # If this was an active backend, we must ask pgbouncer to reconnect to
 # haproxy (which will now direct it to a different backend server) and
 # wait for all active client connections to be closed.
+#
+# We assume that every haproxy instance also runs a pgbouncer pointing
+# to the haproxy (which is true of BDR-Always-ON by default).
 
-- name: Issue RECONNECT and WAIT_CLOSE to pgbouncer
+- name: Issue RECONNECT{{ wait_close|default('yes')|bool|ternary(' and WAIT_CLOSE ', ' ') }}to pgbouncer
   postgresql_query:
     conninfo: "{{ _dsn|dbname('pgbouncer', user='pgbouncer') }}"
     autocommit: yes
-    queries:
-    - text: RECONNECT
-    - text: WAIT_CLOSE
+    queries: "{{
+      [_commands[0]]|union(
+        wait_close|default('yes')|bool|ternary([_commands[1]], [])
+      )
+    }}"
   vars:
-    _dsn: "{{ hostvars[my_haproxy].pgbouncer_node_dsn }}"
+    _dsn: "{{ hostvars[haproxy_instance].pgbouncer_node_dsn }}"
     _task_environment:
       PGPASSWORD: "{{ pgbouncer_password }}"
+    _commands:
+      - text: RECONNECT
+      - text: WAIT_CLOSE
   environment: "{{ target_environment|combine(_task_environment) }}"
-  delegate_to: "{{ my_haproxy }}"
+  with_items: "{{ my_haproxies }}"
+  loop_control:
+    loop_var: haproxy_instance
+  delegate_to: "{{ haproxy_instance }}"
   when:
-    was_active
+    inventory_hostname == last_active_backend_for_proxy[haproxy_instance]
 
 # Once the server is guaranteed to have no active traffic, we can wait
 # to ensure that any writes it originated have finished replicating to
-# the other backends. This is just a convenience, because the instance
-# would replicate after the restart anyway.
+# the other backends.
 
 - name: Wait for replication to complete
   postgresql_query:

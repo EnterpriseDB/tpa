@@ -18,6 +18,10 @@ _tpaexec_command() {
         shift
 
         case "$opt" in
+            --nowait)
+                REMAINDER+=(-e "wait_close=no")
+                ;;
+
             *)
                 REMAINDER+=("$opt")
                 ;;

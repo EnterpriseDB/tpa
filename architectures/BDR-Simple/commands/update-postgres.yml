@@ -82,9 +82,6 @@
   - include_role:
       name: haproxy
       tasks_from: disable-backend.yml
-    with_items: "{{ my_haproxies }}"
-    loop_control:
-      loop_var: my_haproxy
 
   # Now we can perform the update on Postgres instances, whether proxied
   # (e.g., primary instances) or not (e.g., logical standby instances).

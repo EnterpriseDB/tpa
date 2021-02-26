@@ -1,0 +1,73 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+- set_fact:
+    status_lines: "{{ haproxy_status }}"
+
+# We must now extract some meaning from the output of the commands we
+# sent above. The "show table …" output will be an empty line (if the
+# stick table has no entry for pgbouncer) or will look something like
+# the following:
+#
+# # table: be, type: ip, size:1, used:1
+# 0xNNNNNNNNNNNN: key=127.0.0.1 use=0 exp=0 server_id=1
+#
+# For details, see src/stick_table.c:table_dump_head_to_buffer and
+# table_dump_entry_to_buffer.
+#
+# We extract the server_id, if available, and remove any parsed output
+# from status_lines.
+
+- name: Set former_server_id based on stick table contents
+  set_fact:
+    former_active_id: "{{
+      _fields[-1]|regex_replace('server_id=', '')
+    }}"
+    status_lines: "{{ status_lines[2:] }}"
+  vars:
+    _fields: "{{ status_lines[1].split(' ') }}"
+  when: >
+    status_lines and
+    status_lines[0].startswith("# table: be,")
+
+- set_fact:
+    status_lines: "{{ status_lines[1:] }}"
+
+# Next up, the "show servers …" output will look like this:
+#
+# 1
+# # be_id be_name srv_id srv_name srv_addr srv_op_state srv_admin_state …
+# 3 be 1 quart 10.33.244.222 2 0 1 1 5376 15 3 7 6 0 0 0 quart 5432 -
+# 3 be 2 zephyr 10.33.244.215 2 0 1 1 5376 15 3 7 6 0 0 0 zephyr 5432 -
+#
+# See doc/management.txt in the haproxy source for details about the
+# meaning of these values.
+#
+# If we found a former_active_id above, we translate that to a server
+# name here. (Otherwise we know there's no active server yet, so there
+# is no need to treat this instance specially.)
+
+- name: Set former_active_server based on server state
+  set_fact:
+    former_active_server: "{{ _fields[3] }}"
+  with_items:
+    "{{ status_lines[2:] }}"
+  loop_control:
+    loop_var: line
+  vars:
+    _fields: "{{ line.split(' ') }}"
+  when: >
+    status_lines and
+    status_lines[0] == "1" and
+    status_lines[1].startswith("# be_id be_name ") and
+    former_active_id is defined and
+    former_active_id == _fields[2]
+
+- set_fact:
+    last_active_backend_for_proxy: "{{
+      last_active_backend_for_proxy|default({})|combine({
+        haproxy_instance:
+          former_active_server|default('none')
+      })
+    }}"

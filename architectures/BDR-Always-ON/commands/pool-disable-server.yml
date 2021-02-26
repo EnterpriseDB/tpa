@@ -67,6 +67,3 @@
   - include_role:
       name: haproxy
       tasks_from: disable-backend.yml
-    with_items: "{{ my_haproxies }}"
-    loop_control:
-      loop_var: my_haproxy
