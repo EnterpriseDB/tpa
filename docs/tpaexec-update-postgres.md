@@ -14,8 +14,8 @@ For BDR clusters, the update process goes through the cluster instances
 one by one and does the following:
 
 1. Tell haproxy the server is under maintenance.
-2. If the instance was the active server, request pgbouncer to migrate
-   its connections away to another server.
+2. If the instance was the active server, request pgbouncer to reconnect
+   and wait for active sessions to be closed.
 3. Stop Postgres, update packages, and restart Postgres.
 5. Finally, mark the server as "ready" again to receive requests through
    haproxy.

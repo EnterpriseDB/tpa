@@ -1,25 +1,34 @@
 # tpaexec switchover
 
-The `tpaexec switchover` command promotes a DB standby to be the primary in the cluster, and can be used in place of the `repmgr standby switchover --siblings-follow` command.
-It performs various repmgr sanity checks before switching over the node, and is designed to be run from the tpaexec server without having to shut down any repmgr services beforehand.
+The `tpaexec switchover` command performs a controlled switchover
+between a primary and a replica in a [cluster that uses streaming
+replication](architecture-M1.md). After you run this command, the
+selected replica is promoted to be the new primary, the former primary
+becomes a new replica, and any other replicas in the cluster will be
+reconfigured to follow the new primary.
 
-**`tpaexec switchover <clustername> <standby-nodename>`** can be used to promote a standby to become the master, and any standbys attached to the old primary will be configured to follow the new primary.
+The command performs various sanity checks before switching roles, and
+is designed to be run without having to shut down any repmgr services
+beforehand.
 
-### Prerequisites
+(This is equivalent to running `repmgr standby switchover` with the
+`--siblings-follow` option.)
 
-This command relies on the relevant achitecture commands directory containing commands linked from the cluster directory created as standard if `tpaexec configure` is used. If the links are not present, they will need to be linked manually e.g. if you are using an existing cluster directory. For example, for a Single Master (M1) architecture, with tpaexec installed in the default directory:
+## Example
 
+This command will make `replicaname` be the new primary in
+`~/clusters/speedy`:
+
+```bash
+$ tpaexec switchover ~/clusters/speedy replicaname
 ```
-[tpa]$ cd <clusterdir>
-[tpa]$ mkdir commands
-[tpa]$ cd commands
-[tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands/switchover.sh switchover.sh
-[tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands/switchover.yml switchover.yml
-[tpa]$ ln -s /opt/2ndQuadrant/TPA/architectures/M1/commands/update-postgres.yml \
-update-postgres.yml
-```
 
-### Architecture options
+## Architecture options
 
-At the moment this command is only relevant to the M1 architecture, and should not be attempted for any other architecture.
+This command is applicable only to [M1 clusters](architecture-M1.md)
+that have a single writable primary instance and one or more read-only
+replicas.
 
+For BDR-Always-ON clusters, use the
+[HAProxy server pool management commands](tpaexec-server-pool.md) to
+perform maintenance on BDR instances.

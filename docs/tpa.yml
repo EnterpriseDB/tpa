@@ -29,6 +29,7 @@ nav:
   - Cluster management:
     - Rolling updates: tpaexec-update-postgres.md
     - Switchover: tpaexec-switchover.md
+    - Server pool management: tpaexec-server-pool.md
     - Rehydration: tpaexec-rehydrate.md
   - Miscellaneous:
     - TPAexec, Ansible, and sudo: misc-ansible-sudo.md

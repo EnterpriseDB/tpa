@@ -23,9 +23,9 @@ downtime for individual servers as they are terminated and replaced. On
 a [streaming replication cluster](architecture-M1.md), you can rehydrate
 the replicas first, then use [`tpaexec switchover`](tpaexec-switchover.md)
 to convert the primary to a replica before rehydrating it. On
-[BDR-Always-ON clusters](architecture-BDR-Always-ON.md), you can remove
-each server from the haproxy server pool before rehydrating it, then add
-it back afterwards.
+[BDR-Always-ON clusters](architecture-BDR-Always-ON.md), you can [remove
+each server from the haproxy server pool](tpaexec-server-pool.md) before
+rehydrating it, then add it back afterwards.
 
 If you just want to install minor-version updates to Postgres and
 associated components, you can use the

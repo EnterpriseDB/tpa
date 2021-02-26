@@ -8,6 +8,16 @@ This release has experimental support for deploying EPAS (EDB Postgres
 Advanced Server) for internal use, and the next release will make this
 feature generally available.
 
+### Notable changes
+
+- The new `tpaexec pool-disable-server` and `pool-enable-server`
+  commands can be used to temporarily remove a BDR server from the
+  HAProxy server pool for maintenance (e.g., rehydration) and add it
+  back afterwards (see docs/tpaexec-server-pool.md for details). This
+  process works like rolling updates by default, and will wait for any
+  active sessions to end and new connections to be routed to another
+  server by pgbouncer and haproxy.
+
 ### Minor changes
 
 - Adapt to new repository filenames/section names CentOS 8 (fixes
@@ -23,10 +33,8 @@ feature generally available.
 - Stop postgres messages from falling through to be logged to
   /var/log/syslog
 
-- Fix errors about `my_hosts_lines` being undefined when running
-  `tpaexec rehydrate`
-
-- Specify postgres_host and postgres_port when running pgbench
+- Fix errors about `my_hosts_lines` and other variables being undefined
+  when running `tpaexec rehydrate`
 
 - Reject empty lines in `--hostnames-from` input file (which would
   result in "list object has no element 2" exceptions from `tpaexec
@@ -34,6 +42,8 @@ feature generally available.
 
 - Fix default systemd target for docker containers, so that restarting
   the container correctly restarts all of its services
+
+- Specify postgres_host and postgres_port when running pgbench
 
 ## v20.11 (2020-12-15)
 
