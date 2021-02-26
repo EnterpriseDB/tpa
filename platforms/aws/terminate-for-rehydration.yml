@@ -31,7 +31,7 @@
       that: >
         'primary' not in role
     when: >
-      'postgres' in role
+      'postgres' in role and 'bdr' not in role
 
   # Every volume attached to the instance is required to have
   # "TPAAttachmentLabel" and "CreatingCluster" tags with the correct
