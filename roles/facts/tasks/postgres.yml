@@ -180,9 +180,14 @@
       and _backend == inventory_hostname
       and pgbouncer_backend_port == haproxy_port
     }}"
+    _haproxy_backend_maxconns: "{{
+      haproxy_backend_servers
+      |map('extract', hostvars, 'haproxy_maxconn')
+      |select('defined')|list
+    }}"
     _haproxy_backend_maxconn: "{{
-      'haproxy' in role and
-      haproxy_backend_servers|map('extract', hostvars, 'haproxy_maxconn')|list|min
+      _haproxy_backend_maxconns is not empty
+      and _haproxy_backend_maxconns|min
     }}"
     _maxconn: "{{
       _backend_is_haproxy and
