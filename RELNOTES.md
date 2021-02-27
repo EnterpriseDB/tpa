@@ -28,6 +28,9 @@ feature generally available.
 
 - Improve installation instructions, especially for MacOS X users
 
+- Make `tpaexec relink` add links from an existing cluster to any new
+  commands and tests that are applicable to its architecture
+
 ### Bugfixes
 
 - Stop postgres messages from falling through to be logged to
