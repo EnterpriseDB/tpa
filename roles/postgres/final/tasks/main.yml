@@ -19,6 +19,14 @@
       tags: service
   tags: service
 
+# If we just started Postgres, and it was not running during the initial
+# fact collection, we need to run cluster_discovery now to discover the
+# state of the running instance.
+
+- include_role: name=postgres/facts
+  when:
+    not postgres_running
+
 # Postgres is now running.
 
 - include_role:
