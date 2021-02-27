@@ -58,6 +58,15 @@
     postgres_conf_dir != postgres_data_dir
     and platform not in ['docker']
 
+# Even if PGDATA was not initialised when we ran minimal_postgres_setup
+# from init, we may now have a valid PGDATA now after mounting a volume
+# or doing something in the pre-initdb hook. Therefore we must re-check
+# whether pgdata_initialised should be set.
+
+- name: Recheck pgdata_initialised
+  minimal_postgres_setup:
+    pgdata: "{{ postgres_data_dir }}"
+
 - name: Initialise PGDATA={{ postgres_data_dir }}
   block:
     - name: Run initdb to initialise data directory

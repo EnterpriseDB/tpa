@@ -36,6 +36,10 @@ feature generally available.
 - Stop postgres messages from falling through to be logged to
   /var/log/syslog
 
+- Fix incorrect detection of PGDATA during rehydration, leading to
+  failures running `initdb` or `repmgr standby clone` (spurious
+  failures, in that re-running deploy would fix the problem)
+
 - Fix errors about `my_hosts_lines` and other variables being undefined
   when running `tpaexec rehydrate`
 
