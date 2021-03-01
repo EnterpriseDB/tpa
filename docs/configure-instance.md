@@ -130,10 +130,10 @@ pgbouncer, and haproxy, according to the details of the architecture.
 
 ## Barman
 ## repmgr
-## pgbouncer
 
 -->
 
+* [Configure pgbouncer](pgbouncer.md)
 * [Configure haproxy](haproxy.md)
 
 ### Configuring and starting services
