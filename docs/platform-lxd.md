@@ -7,7 +7,7 @@ Please consult the
 to
 [install and get started with LXD](https://linuxcontainers.org/lxd/getting-started-cli/).
 
-The [ansible module documentation](https://docs.ansible.com/ansible/latest/collections/community/general/lxc_container_module.html)
+The [ansible module documentation](https://docs.ansible.com/ansible/2.8/modules/lxd_container_module.html)
 may also be helpful.
 
 ## WIP

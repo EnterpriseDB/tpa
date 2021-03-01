@@ -11,7 +11,7 @@
 # So we loop over include_tasks and add the fact after each invocation
 # to a separate list as a compromise.
 #
-# https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html
+# https://docs.ansible.com/ansible/2.8/modules/docker_container_module.html
 
 - name: Provision docker container {{ item.Name }}
   docker_container:
