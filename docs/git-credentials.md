@@ -56,16 +56,3 @@ authentication token or password, just
 `tpaexec deploy`. During deployment, these credentials will be made
 available to any `git clone` or `git pull` tasks (only). They will
 not be written to disk on the target instances.
-
-## Advice for 2ndQuadrant engineers
-
-If you are cloning repositories from gitlab.2ndQuadrant.com:
-
-1. Generate a read-only access token at
-   [https://gitlab.2ndquadrant.com/profile/personal_access_tokens](https://gitlab.2ndquadrant.com/profile/personal_access_tokens)
-
-2. Use this access token in `TPA_GIT_CREDENTIALS`. Do not use your
-   2ndQuadrant username and password, nor any read/write access token
-   that you use for your development work.
-
-3. Treat the read-only access token as confidential information.

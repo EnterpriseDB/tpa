@@ -513,26 +513,26 @@ class Architecture(object):
             },
             '2ndqpostgres': {
                 'postgres_installation_method': 'src',
-                'postgres_git_url': 'https://gitlab.2ndquadrant.com/bdr-stack/2ndQPostgres.git',
+                'postgres_git_url': 'git@github.com:EnterpriseDB/2ndqpostgres.git',
             },
             'epas': {
                 'postgres_installation_method': 'src',
-                'postgres_git_url': 'https://github.com/EnterpriseDB/edbas.git',
+                'postgres_git_url': 'git@github.com:EnterpriseDB/edbas.git',
             },
             'pglogical3': {
                 'name': 'pglogical',
-                'git_repository_url': 'https://gitlab.2ndquadrant.com/bdr-stack/pglogical.git',
+                'git_repository_url': 'git@github.com:EnterpriseDB/pglogical.git',
             },
             'bdr3': {
                 'name': 'bdr',
-                'git_repository_url': 'https://gitlab.2ndquadrant.com/bdr-stack/BDR.git',
+                'git_repository_url': 'git@github.com:EnterpriseDB/bdr.git',
                 'build_commands': [
                     'make -f ../../src/bdr/Makefile -s install',
                 ],
             },
             'autoscale': {
                 'name': 'autoscale',
-                'git_repository_url': 'https://gitlab.2ndquadrant.com/bdr-stack/autoscale.git',
+                'git_repository_url': 'git@github.com:EnterpriseDB/autoscale.git',
                 'build_commands': [
                     'make -f ../../src/autoscale/Makefile -s install',
                 ],

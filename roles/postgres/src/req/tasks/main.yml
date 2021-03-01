@@ -28,13 +28,11 @@
 #    agent socket will be made available to git-clone.
 #
 # 2. If your source repositories all use https:// URLs pointing to the
-#    same server (e.g., gitlab.2ndQuadrant.com), you can set
+#    same server (e.g., github.com), you can set
 #    ``TPA_GIT_CREDENTIALS=username:access_token`` in your environment
 #    before executing tpaexec. The credentials will be made available to
 #    git-clone only (they will never be written to disk, but will be set
 #    in the environment on target instances).
-#
-#    See https://gitlab.2ndquadrant.com/profile/personal_access_tokens
 #
 # 3. If you set ``TPA_GIT_CREDENTIAL_STORE=/path/to/.gitcredentials`` in
 #    your environment before executing tpaexec, it will copy the given
