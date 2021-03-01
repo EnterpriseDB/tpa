@@ -124,14 +124,17 @@ Once the Postgres configuration is in place, TPAexec will go on to
 install and configure other components such as Barman, repmgr,
 pgbouncer, and haproxy, according to the details of the architecture.
 
+## Other components
+
 <!-- WIP
 
 ## Barman
 ## repmgr
 ## pgbouncer
-## haproxy
 
 -->
+
+* [Configure haproxy](haproxy.md)
 
 ### Configuring and starting services
 
