@@ -2,7 +2,7 @@
 
 Copyright © EnterpriseDB Corporation
 
-## v21.1 (unreleased)
+## v21.1 (2021-03-01)
 
 This release has experimental support for deploying EPAS (EDB Postgres
 Advanced Server) for internal use, and the next release will make this
