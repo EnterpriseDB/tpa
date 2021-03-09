@@ -8,7 +8,8 @@ After=network.target
 Type=simple
 User={{ postgres_user }}
 Group={{ postgres_group }}
-OOMScoreAdjust=-1000
+OOMScoreAdjust={{ postmaster_oom_score_adj|default(-1000) }}
+Environment=PG_OOM_ADJUST_VALUE={{ postgres_oom_score_adj|default(0) }}
 Environment=PGDATA={{ postgres_data_dir }}
 {% if postgres_service_environment is defined and postgres_service_environment is mapping %}
 {%   for k,v in postgres_service_environment.items() %}
