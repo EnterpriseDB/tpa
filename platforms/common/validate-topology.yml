@@ -59,6 +59,25 @@
     instances|selectattr('role', 'defined')|selectattr('role','contains','witness')|list
   }}"
 
+- name: Validate "bdr_node_camo_partner" references
+  assert:
+    msg: >
+      {% if item.Name == camo_partner %}
+      'bdr_node_camo_partner: {{ camo_partner }}'
+      setting on "{{ item.Name }}" cannot point to the same node
+      {% else %}
+      An instance with Name={{ camo_partner }} must exist,
+      because of the 'bdr_node_camo_partner: {{ camo_partner }}'
+      setting on "{{ item.Name }}"
+      {% endif %}
+    that:
+      - instances|selectattr('Name', 'equalto', camo_partner)|list|count == 1
+      - item.Name != camo_partner
+  when: camo_partner != ''
+  with_items: "{{ instances }}"
+  vars:
+    camo_partner: "{{ item.get('vars', {}).get('bdr_node_camo_partner', '') }}"
+
 - name: Convert cluster_network to cluster_networks
   set_fact:
     cluster_vars: "{{
