@@ -181,7 +181,7 @@
       and pgbouncer_backend_port == haproxy_port
     }}"
     _haproxy_backend_maxconns: "{{
-      haproxy_backend_servers
+      haproxy_backend_servers|default([])
       |map('extract', hostvars, 'haproxy_maxconn')
       |select('defined')|list
     }}"
