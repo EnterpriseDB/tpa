@@ -55,6 +55,9 @@ conflicts if you install the TPAexec packages in future.)
 $ git clone https://github.com/EnterpriseDB/tpaexec.git ~/tpaexec
 ```
 
+(If you're installing from source, please clone the repository instead
+of downloading an archive of the source.)
+
 The remaining steps are the same as if you had installed the package.
 
 ```bash
