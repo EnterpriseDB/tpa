@@ -55,8 +55,14 @@ TPA_VENV=$TPA_DIR/tpa-venv
 version() {
     if [[ -f $TPA_DIR/VERSION ]]; then
         VERSION=$(cat "$TPA_DIR/VERSION")
+    elif [[ -d $TPA_DIR/.git ]]; then
+        if command -v git &>/dev/null; then
+            VERSION=$(cd "$TPA_DIR" && echo "$(git describe) (branch: $(git branch | sed -n 's/^\* //p'))")
+        else
+            VERSION="(unknown version; git not installed)"
+        fi
     else
-        VERSION=$(cd "$TPA_DIR" && echo "$(git describe) (branch: $(git branch | sed -n 's/^\* //p'))")
+        VERSION="(unknown version; no $TPA_DIR/VERSION or .git)"
     fi
     echo "# TPAexec $VERSION"
 }
