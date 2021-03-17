@@ -29,7 +29,7 @@
 
 - name: Build and install repmgr
   shell: >
-    PATH={{ build_path }} make -s USE_PGXS=1 install
+    PATH={{ build_path }} make -s USE_PGXS=1 with_llvm=no install
   args:
     chdir: "{{ repmgr_src_dir }}"
     executable: /bin/bash
