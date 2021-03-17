@@ -15,14 +15,6 @@ the source and [run TPAexec in a Docker container](INSTALL-docker.md).
 
 ## Quickstart
 
-```bash
-$ git clone https://github.com/EnterpriseDB/tpaexec.git
-$ ./tpaexec/bin/tpaexec setup
-$ ./tpaexec/bin/tpaexec selftest
-```
-
-## Step-by-step
-
 First, you must install the various dependencies that would have been
 installed automatically along with the TPAexec packages. (You can use
 something other than `sudo` to run these commands as root, if you
@@ -32,16 +24,28 @@ prefer.)
 ```bash
 # Debian (python3.7) or Ubuntu (python3.6)
 $ sudo apt-get install python3.7 python3-pip python3-venv \
-      pwgen openvpn patch
+      pwgen git openvpn patch
 
 # RedHat or CentOS (python3 for RHEL7, python36 for RHEL8)
 $ sudo yum install python36 python3-pip \
-      pwgen epel-release openvpn patch
+      pwgen epel-release git openvpn patch
 
 # MacOS X
 $ sudo brew tap discoteq/discoteq
-$ sudo brew install python@3 pwgen openvpn flock coreutils gpatch
+$ sudo brew install python@3 pwgen openvpn flock coreutils gpatch git
 ```
+
+Next, install TPAexec itself:
+
+```bash
+$ git clone https://github.com/EnterpriseDB/tpaexec.git
+$ ./tpaexec/bin/tpaexec setup
+$ ./tpaexec/bin/tpaexec selftest
+```
+
+## Step-by-step
+
+Install the various dependencies as described above.
 
 If your system does not have Python 3.6+ packages, you can use `pyenv`
 to install a more recent Python in your home directory (see below), or
