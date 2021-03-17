@@ -2,6 +2,14 @@
 
 # Copyright © EnterpriseDB Corporation
 
+# Handle setting synchronous_standby_names for non-BDR instances (see
+# postgres/bdr/tasks/postgres-reconfig.yml for BDR instances).
+
+- include_tasks: sync-replicas.yml
+  when:
+    synchronous_standby_names is defined
+    and 'bdr' not in role
+
 # We can remove the pgbouncer.get_auth() function and the pgbouncer
 # schema in every database, because by now we've switched to using
 # pg_catalog.pgbouncer_get_auth() instead.

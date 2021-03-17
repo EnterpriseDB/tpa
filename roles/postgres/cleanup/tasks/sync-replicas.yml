@@ -1,0 +1,24 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+# If synchronous_standby_names is specified, we must generate a separate
+# config file that contains only this setting (and reload Postgres when
+# the setting changes).
+#
+# This isn't exactly a "cleanup", but we can't do it in postgres/config
+# because the setting may depend on the existence of replicas that have
+# not yet been cloned during the initial deployment; but we can be sure
+# the replicas are working by the time we reach the cleanup stage.
+#
+# (This does not apply to BDR instances; see postgres-reconfig.yml for
+# their special-case handling of synchronous_standby_names.)
+
+- name: Reset Postgres service end state
+  set_fact:
+    postgres_service_end_state: started
+
+- name: Set synchronous_standby_names
+  include_role: name=postgres/config tasks_from=ssn.yml
+
+- include_role: name=postgres/restart

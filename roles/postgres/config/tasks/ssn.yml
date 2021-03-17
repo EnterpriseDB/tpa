@@ -1,0 +1,16 @@
+---
+
+# Copyright © EnterpriseDB Corporation
+
+- name: Write new value for synchronous_standby_names
+  template:
+    src: variable.j2
+    dest: "{{ _include_dir }}/8888-synchronous_standby_names.conf"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
+  vars:
+    variable: synchronous_standby_names
+    value: "{{ synchronous_standby_names }}"
+  notify:
+    - Note Postgres reload required
