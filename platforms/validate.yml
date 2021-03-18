@@ -70,6 +70,7 @@
     msg: >-
       Unrecognised keys in the definition of instance
       {{ item.Name }}: {{ invalid_keys|join(', ') }}
+      (should they be under `vars:`?)
     that:
       invalid_keys is empty
   with_items:
