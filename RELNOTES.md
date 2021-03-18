@@ -2,6 +2,12 @@
 
 Copyright © EnterpriseDB Corporation
 
+## v21.2 (unreleased)
+
+### Notable changes
+
+- Support basic EFM deployment
+
 ## v21.1 (2021-03-01)
 
 This release has experimental support for deploying EPAS (EDB Postgres
