@@ -8,6 +8,25 @@
     apply:
       tags: [postgres, pkg]
 
+# We expect pg_receivewal to be installed, but the EPAS client rpm does
+# not include it (although the deb package does), so we have to install
+# the server package as a temporary workaround.
+
+- block:
+    - name: Check if pg_receive{{ wal_or_xlog }} exists
+      stat:
+        path: "{{ postgres_bin_dir }}/pg_receive{{ wal_or_xlog }}"
+      register: pg_receivewal_check
+
+    - name: Install EPAS server RPM for pg_receivewal
+      package:
+        name: "edb-as{{ postgres_versionNN }}-server"
+        state: latest
+      when: not pg_receivewal_check.stat.exists
+  when:
+    postgresql_flavour == 'epas'
+    and ansible_os_family == 'RedHat'
+
 - name: Install Barman package
   package:
     name: "{{
