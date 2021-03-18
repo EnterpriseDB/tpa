@@ -20,8 +20,14 @@
   user:
     state: present
     name: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
+    groups: "{{ postgres_groups }}"
     shell: /bin/bash
+  vars:
+    postgres_groups: "{{
+      [postgres_group]|union(
+        (failover_manager == 'efm')|ternary(['efm'], [])
+      )
+    }}"
 
 - name: Enhance soft/hard system limits for user {{ postgres_user }}
   blockinfile:
