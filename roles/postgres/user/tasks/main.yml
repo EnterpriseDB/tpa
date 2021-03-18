@@ -16,17 +16,33 @@
     state: present
     name: "{{ postgres_group }}"
 
+- name: Ensure efm group/user exist if required
+  block:
+    - name: Create efm group
+      group:
+        name: efm
+        state: present
+
+    - name: Create efm user
+      user:
+        name: efm
+        group: efm
+        shell: /bin/bash
+        home: /var/efm
+        state: present
+  when:
+    failover_manager == 'efm'
+
 - name: Create Postgres user {{ postgres_user }}
   user:
     state: present
     name: "{{ postgres_user }}"
-    groups: "{{ postgres_groups }}"
+    group: "{{ postgres_group }}"
+    groups: "{{ extra_groups }}"
     shell: /bin/bash
   vars:
-    postgres_groups: "{{
-      [postgres_group]|union(
-        (failover_manager == 'efm')|ternary(['efm'], [])
-      )
+    extra_groups: "{{
+      (failover_manager == 'efm')|ternary(['efm'], [])
     }}"
 
 - name: Enhance soft/hard system limits for user {{ postgres_user }}
