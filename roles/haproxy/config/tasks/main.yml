@@ -26,7 +26,7 @@
   set_fact:
     haproxy_backend_queue_check: none
   when:
-    enable_harp
+    failover_manager == 'harp'
 
 - name: Determine haproxy_backend_queue_check type
   set_fact:
@@ -57,7 +57,7 @@
     haproxy_default_server_options: "{{
       haproxy_harp_default_server_options
     }}"
-  when: enable_harp
+  when: failover_manager == 'harp'
 
 - name: Add agent check settings to haproxy_default_server_options
   set_fact:
@@ -136,7 +136,7 @@
     'check ' not in hostvars[item].haproxy_server_options|join(' ')
   vars:
     _check_port: "{{
-      enable_harp|ternary(
+      (failover_manager == 'harp')|ternary(
         hostvars[item].harp_listen_port,
         (haproxy_backend_queue_check == 'platypus')|ternary(
           hostvars[item].platypus_port, 0
@@ -167,6 +167,8 @@
   template:
     src: haproxy.cfg.j2
     dest: /etc/haproxy/haproxy.cfg
+  vars:
+    enable_harp: "{{ (failover_manager == 'harp')|bool }}"
   notify:
     - Note haproxy reload required
 

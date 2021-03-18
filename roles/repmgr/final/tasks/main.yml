@@ -90,11 +90,11 @@
 
 - include_role: name=repmgr/service
 
-- name: Disable repmgr for BDR instances
+- name: Ensure repmgrd is stopped if not in use
   set_fact:
     repmgr_service_end_state: stopped
-  when: >
-    'bdr' in role
+  when:
+    failover_manager != 'repmgr'
 
 - name: Start or restart repmgrd
   service:

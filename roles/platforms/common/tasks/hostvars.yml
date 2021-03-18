@@ -81,3 +81,9 @@
 
 - set_fact:
     use_volatile_subscriptions: "{{ use_volatile_subscriptions|default(false)|bool }}"
+
+- set_fact:
+    failover_manager: harp
+  when:
+    failover_manager is not defined
+    and enable_harp|default(false)|bool

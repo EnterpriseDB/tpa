@@ -92,6 +92,7 @@
     name: harp
     apply:
       tags: harp
-  when: >
-    role|contains('bdr', 'primary') and enable_harp
+  when:
+    failover_manager == 'harp'
+    and role|contains('bdr', 'primary')
   tags: harp

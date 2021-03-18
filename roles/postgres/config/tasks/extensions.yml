@@ -38,8 +38,8 @@
       shared_preload_libraries|union(['repmgr'])
     }}"
   when: >
-    'bdr' not in role and
-    groups|members_of('role_replica') is not empty
+    failover_manager == 'repmgr'
+    and groups|members_of('role_replica') is not empty
 
 - name: Add entries to shared_preload_libraries
   include_tasks: preload-library.yml

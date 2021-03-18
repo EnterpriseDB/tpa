@@ -35,5 +35,8 @@
 - name: Enable repmgr service
   systemd:
     name: repmgr
-    enabled: "{{ not postgres_volume_encrypted|bool and not 'bdr' in role }}"
+    enabled: "{{
+      failover_manager == 'repmgr'
+      and not postgres_volume_encrypted|bool
+    }}"
     daemon_reload: "{{ unit is changed }}"
