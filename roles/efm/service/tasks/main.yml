@@ -14,9 +14,6 @@
 - name: Enable efm service
   systemd:
     name: "edb-efm-{{ efm_version }}"
-    enabled: "{{
-      failover_manager == 'efm'
-      and not postgres_volume_encrypted|bool
-    }}"
+    enabled: "{{ failover_manager == 'efm' }}"
     daemon_reload: "{{ unit is changed }}"
   tags: [efm, service]
