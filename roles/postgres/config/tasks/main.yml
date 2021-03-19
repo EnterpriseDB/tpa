@@ -163,8 +163,22 @@
   notify:
     - Note Postgres restart required
 
+# If synchronous_standby_names is not set, we must ensure that any old
+# 8888-synchronous_standby_names.conf file is removed. (If it is set,
+# even if the value has changed, postgres/cleanup will deal with it
+# appropriately.)
+
+- name: Remove synchronous_standby_names setting if unused
+  file:
+    path: "{{ _include_dir }}/8888-synchronous_standby_names.conf"
+    state: absent
+  when:
+    synchronous_standby_names is not defined
+  notify:
+    - Note Postgres reload required
+
 # If 3333-bdr.conf exists and contains settings for CAMOv1 (based on
-# synchronous replication), we move it to 3334-camo.yml without either
+# synchronous replication), we move it to 3334-camo.conf without either
 # reload or restart, and leave it to postgres/bdr to sort it out later.
 # This is to maintain backwards compatibility.
 
