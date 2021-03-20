@@ -35,9 +35,13 @@ UNITS_TO_MASK=(
 # which ones exist and only disable those. (But we can mask all the
 # units we like, whether they exist or not.)
 
-matches=$(systemctl list-unit-files "${UNITS_TO_DISABLE[@]}"|sed -n '1d;/^$/d;$d;p'|awk '{print $1}')
-if [[ -n $matches ]]; then
-    systemctl disable $matches
+IFS=$'\n' read -r -a installedunits < \
+    <(systemctl list-unit-files "${UNITS_TO_DISABLE[@]}"| \
+        sed -n '1d;/^$/d;$d;p'| \
+        awk '{print $1}')
+
+if [[ ${#installedunits[@]} != 0 ]]; then
+    systemctl disable "${installedunits[@]}"
 fi
 
 systemctl mask "${UNITS_TO_MASK[@]}"
