@@ -94,7 +94,7 @@ _create_and_activate_venv() {
     if [[ ! -d $vpath ]]; then
         echo "Creating venv $vpath"
         if ! mkdir -p "$vpath"; then
-            error "couldn't create $vpath (try ``--venv /other/path`` or use sudo)"
+            error "couldn't create $vpath (try '--venv /other/path' or use sudo)"
         fi
         if ! python3 -m venv "$vpath"; then
             rm -rf "$vpath"
@@ -417,7 +417,7 @@ show_password() {
 }
 
 try_as_playbook_or_script() {
-    # If you run ``tpaexec xyzzy …``, you end up here to check if there
+    # If you run `tpaexec xyzzy …`, you end up here to check if there
     # is a matching custom command under architectures/lib/commands or
     # $cluster/commands. If so, we execute it as if it were a built-in
     # command. As a safety measure, we require that custom commands be
@@ -450,7 +450,7 @@ try_as_playbook_or_script() {
 
     # If there's a matching command in architectures/lib and we didn't
     # run it above, a cluster directory must not have been specified
-    # (e.g., ``tpaexec test``). Let's try to be helpful.
+    # (e.g., `tpaexec test`). Let's try to be helpful.
 
     C=$TPA_DIR/architectures/lib/commands
     if [[ -x $C/$command || -f $C/$command.sh || -f $C/$command.yml ]]; then
@@ -540,17 +540,17 @@ info() {
                 )
             done < <(find "$TPA_DIR/$subcommand" -name _metadata -print)
 
-            echo 'Run ``'"tpaexec info $subcommand/<name>"'`` for more information.'
+            echo "Run 'tpaexec info $subcommand/<name>' for more information."
             case "$subcommand" in
                 platforms)
                     echo
-                    echo 'Run ``tpaexec configure --architecture <name> --platform <name> --help``'
-                    echo 'to see available options for an architecture and platform.'
+                    echo "Run 'tpaexec configure --architecture <name> --platform <name> --help'"
+                    echo "to see available options for an architecture and platform."
                     ;;
                 architectures)
                     echo
-                    echo 'Run ``tpaexec configure --architecture <name> --help`` to see available'
-                    echo 'options for an architecture.'
+                    echo "Run 'tpaexec configure --architecture <name> --help' to see available"
+                    echo "options for an architecture."
                     ;;
             esac
             ;;
@@ -617,14 +617,14 @@ INFO
 Command: tpaexec setup
 
 Installs all Python dependencies (Ansible, modules) in an isolated
-virtual environment (using the Python 3 builtin ``-m venv``).
+virtual environment (using the Python 3 builtin venv module).
 
 The default location is $TPA_VENV
 
 If you use the default location, which we recommend, the venv will
 be activated automatically whenever you run tpaexec.
 
-You may optionally specify ``--venv /path/to/venv`` to either use an
+You may optionally specify '--venv /path/to/venv' to either use an
 existing venv, or create one at the specified location. If you do this,
 you must ensure that the venv is activated before you run tpaexec.
 SETUP
@@ -662,10 +662,10 @@ Command: tpaexec provision clustername [--owner Owner] [--cached] …
 
 Provisions a cluster according to clustername/config.yml
 
-You may specify ``--owner OwnerName`` to override the default cluster
+You may specify '--owner OwnerName' to override the default cluster
 owner (which is the login name of the current user: ${USER:-$(id -u -n)}).
 
-You may specify ``--cached`` to speed up repeated provision runs in
+You may specify '--cached' to speed up repeated provision runs in
 development by relying on cached information and skipping retests of
 resources like VPCs and subnets.
 
@@ -735,17 +735,17 @@ You may specify the name of a test to run as the first argument instead
 of the built-in test named 'default'. (Depending on the test, you may
 need to provide additional options on the command line.)
 
-The ``tpaexec test clustername test`` command will search for test.yml
+The 'tpaexec test clustername test' command will search for test.yml
 in the cluster's tests subdirectory first, then fall back to built-in
 tests. You may create new tests (as Ansible playbooks) under the
 cluster's tests subdirectory.
 
 To run tests from a different location, you may specify
-``--include-tests-from /other/path``.
+'--include-tests-from /other/path'.
 
 The different kinds of tests executed by default have different tags,
-e.g., postgres, repmgr, barman, pgbench. Use ``--tags x,y`` to select
-tests to execute, or ``--skip-tags p,q`` to exclude certain tests.
+e.g., postgres, repmgr, barman, pgbench. Use '--tags x,y' to select
+tests to execute, or '--skip-tags p,q' to exclude certain tests.
 
 Examples:
 
