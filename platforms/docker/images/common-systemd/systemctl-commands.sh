@@ -21,6 +21,7 @@ UNITS_TO_DISABLE=(
     proc-sys-fs-binfmt_misc.mount sys-kernel-config.mount
     sys-kernel-debug.mount
     systemd-ask-password-console.path systemd-ask-password-wall.path
+    apt-daily-upgrade.timer motd-news.timer
 )
 
 UNITS_TO_MASK=(
@@ -45,10 +46,5 @@ if [[ ${#installedunits[@]} != 0 ]]; then
 fi
 
 systemctl mask "${UNITS_TO_MASK[@]}"
-
-if [[ $ID = "ubuntu" ]]; then
-    systemctl disable apt-daily-upgrade.timer
-    systemctl disable motd-news.timer
-fi
 
 [ -e /sbin/init ] || ln -s /bin/systemd /sbin/init
