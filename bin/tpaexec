@@ -776,19 +776,6 @@ Takes a comma-separated list of hostnames and "rehydrates" each host:
 REHYDRATE
             ;;
 
-        relink)
-            cat <<RELINK
-Command: tpaexec relink clustername
-
-Tries to repair any dangling symbolic links within a cluster directory
-(e.g., deploy.yml) by making them point to the correct \$TPA_DIR when
-appropriate. (TPA_DIR=$TPA_DIR)
-
-This command is useful if a cluster was configured on one machine and
-then moved to another with TPAexec installed in a different location.
-RELINK
-            ;;
-
         store-password)
             cat <<STOREPWD
 Command: tpaexec store-password clustername username [--random]
@@ -812,6 +799,35 @@ SHOWPWD
             ;;
 
         *)
+            # We can treat the argument as the name of a custom command.
+            # If we can find a matching executable, we can run it with
+            # --help; or if there's a shell script, it might define a
+            # _tpaexec_help function that we can call.
+
+            declare -a dirs
+
+            dirs=()
+            if [[ -f ./config.yml && -d ./commands ]]; then
+                dirs+=(./commands)
+            fi
+            dirs+=("$TPA_DIR"/architectures/lib/commands)
+
+            for dir in "${dirs[@]}"; do
+                script=$dir/$topic.sh
+                exec=$dir/$topic
+
+                if [[ -x $exec ]]; then
+                    _with_ansible_env "$exec" --help
+                    return $?
+                elif [[ -f $script ]]; then
+                    source "$script"
+                    if [[ $(type -t _tpaexec_help) == function ]]; then
+                        _with_ansible_env _tpaexec_help
+                        return $?
+                    fi
+                fi
+            done
+
             echo "Sorry, no help available for $topic"
             echo "Please contact tpa@2ndQuadrant.com for assistance"
             exit 1

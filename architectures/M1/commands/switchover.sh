@@ -28,3 +28,13 @@ _tpaexec_command() {
 
     time playbook commands/switchover.yml -e target="$target" "$@"
 }
+
+_tpaexec_help() {
+    cat <<HELP
+Command: tpaexec switchover clustername newprimary
+
+Takes the name of an instance and performs an orderly switchover that
+promotes the given instance to be the new primary and makes the other
+instances (including the old primary) follow it.
+HELP
+}

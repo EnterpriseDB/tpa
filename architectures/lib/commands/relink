@@ -2,6 +2,20 @@
 
 import os, re, sys, yaml
 
+if len(sys.argv) > 1 and sys.argv[1] == '--help':
+    print(
+        """Command: tpaexec relink clustername
+
+Tries to repair any dangling symbolic links within a cluster directory
+(e.g., deploy.yml) by making them point to the correct $TPA_DIR when
+appropriate. (TPA_DIR=%s)
+
+This command is useful if a cluster was configured on one machine and
+then moved to another with TPAexec installed in a different location,
+or to add links for new commands.""" % os.environ.get('TPA_DIR', '<unset>')
+    )
+    sys.exit(0)
+
 v = 0
 if len(sys.argv) > 1 and sys.argv[1].startswith('-v'):
     v = 1
