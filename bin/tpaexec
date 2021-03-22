@@ -828,8 +828,10 @@ SHOWPWD
                 fi
             done
 
-            echo "Sorry, no help available for $topic"
-            echo "Please contact tpa@2ndQuadrant.com for assistance"
+            echo "Sorry, no help available for '$topic'"
+            if [[ ! -d ./commands ]]; then
+                echo "(Try running this command inside a cluster directory)"
+            fi
             exit 1
             ;;
     esac
