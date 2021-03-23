@@ -137,7 +137,7 @@ total 240
 drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 commands
 -rw-r--r-- 1 ams ams   1442 Aug  4 17:54 config.yml
 lrwxrwxrwx 1 ams ams     51 Aug  4 17:38 deploy.yml -> 
-                             /opt/2ndQuadrant/TPA/architectures/M1/deploy.yml
+                             /opt/EDB/TPA/architectures/M1/deploy.yml
 drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 hostkeys
 -rw------- 1 ams ams   1675 Aug  4 17:38 id_speedy
 -rw------- 1 ams ams   1438 Aug  4 17:38 id_speedy.ppk

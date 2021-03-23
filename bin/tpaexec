@@ -15,9 +15,9 @@ error() {
 
 # If $TPA_DIR is not already set, we guess TPA_DIR based on $0 (so that
 # a git checkout takes precedence over a package installation), or use
-# /opt/2ndQuadrant/TPA if it exists.
+# /opt/EDB/TPA if it exists.
 
-TOP=/opt/2ndQuadrant/TPA
+TOP=/opt/EDB/TPA
 if [[ -z "${TPA_DIR:-}" ]]; then
     if [[ -h "${self:=$0}" ]]; then
         self=$(readlink "$0")

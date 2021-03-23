@@ -18,9 +18,10 @@ RUN apt-get -y update && \
 # run `tpaexec setup` to complete the installation, and then `tpaexec
 # selftest` to verify it.
 
-ENV TPA_DIR=/opt/2ndQuadrant/TPA
+ENV TPA_DIR=/opt/EDB/TPA
 
 COPY . ${TPA_DIR}
 
 RUN ln -sf ${TPA_DIR}/bin/tpaexec /usr/local/bin && \
+    ln -sf ${TPA_DIR} /opt/2ndQuadrant/TPA && \
     tpaexec setup && tpaexec selftest

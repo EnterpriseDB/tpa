@@ -12,8 +12,8 @@ failed: [localhost] (item=Vagrantfile) => {"changed": false, "checksum": "bf1403
 To create a new virtual environment (assuming tpaexec was installed into the default location):
 
 ```
-[tpa]$ sudo rm -rf /opt/2ndQuadrant/TPA/tpa-venv
-[tpa]$ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
+[tpa]$ sudo rm -rf /opt/EDB/TPA/tpa-venv
+[tpa]$ sudo /opt/EDB/TPA/bin/tpaexec setup
 ```
 
 ###Strange AWS errors regarding credentials
@@ -107,5 +107,5 @@ to immediately run BDR tasks:
 To find all the tags for the relevant architecture that might be useful, run:
 
 ```
-[tpa]$ grep -rs "tags:" /opt/2ndQuadrant/TPA/architectures
+[tpa]$ grep -rs "tags:" /opt/EDB/TPA/architectures
 ```

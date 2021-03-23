@@ -266,7 +266,7 @@ def cmdline(playbook_dir):
         tpaexec = 'tpaexec'
 
         tpa_dir = args[2].replace('tpa_dir=', '')
-        if tpa_dir != '/opt/2ndQuadrant/TPA':
+        if tpa_dir not in ['/opt/EDB/TPA', '/opt/2ndQuadrant/TPA']:
             tpaexec = os.path.join(tpa_dir, 'bin/tpaexec')
 
         cluster_dir = args[4].replace('cluster_dir=', '')

@@ -52,8 +52,9 @@ to install a more recent Python in your home directory (see below), or
 you can [run TPAexec in a Docker container](INSTALL-docker.md).
 
 Next, clone the TPAexec repository into, say, `~/tpaexec`. (It doesn't
-matter where you put it, but don't use `/opt/2ndQuadrant/TPA`, to avoid
-conflicts if you install the TPAexec packages in future.)
+matter where you put it, but don't use `/opt/EDB/TPA` or
+`/opt/2ndQuadrant/TPA`, to avoid conflicts if you install the TPAexec
+packages in future.)
 
 ```bash
 $ git clone https://github.com/EnterpriseDB/tpaexec.git ~/tpaexec

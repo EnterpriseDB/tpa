@@ -33,10 +33,10 @@ $ sudo apt-get install tpaexec
 $ sudo yum install tpaexec
 
 # Install additional dependencies
-$ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
+$ sudo /opt/EDB/TPA/bin/tpaexec setup
 
 # Verify installation (run as a normal user)
-$ /opt/2ndQuadrant/TPA/bin/tpaexec selftest
+$ /opt/EDB/TPA/bin/tpaexec selftest
 ```
 
 More detailed explanations are given below.
@@ -66,7 +66,7 @@ $ sudo apt-get install tpaexec
 $ sudo yum install tpaexec
 ```
 
-This will install TPAexec into `/opt/2ndQuadrant/TPA`. It will also
+This will install TPAexec into `/opt/EDB/TPA`. It will also
 ensure that other required packages (e.g., Python 3.6 or later) are
 installed.
 
@@ -83,19 +83,19 @@ Next, run `tpaexec setup` to create an isolated Python environment and
 install the correct versions of all required modules.
 
 ```bash
-$ sudo /opt/2ndQuadrant/TPA/bin/tpaexec setup
+$ sudo /opt/EDB/TPA/bin/tpaexec setup
 ```
 
-You must run this as root because it writes to `/opt/2ndQuadrant/TPA`,
+You must run this as root because it writes to `/opt/EDB/TPA`,
 but the process will not affect any system-wide Python modules you may
 have installed (including Ansible).
 
-Add `/opt/2ndQuadrant/TPA/bin` to the `PATH` of the user who will
+Add `/opt/EDB/TPA/bin` to the `PATH` of the user who will
 normally run `tpaexec` commands. For example, you could add this to
 your .bashrc or equivalent shell configuration file:
 
 ```bash
-export PATH=$PATH:/opt/2ndQuadrant/TPA/bin
+export PATH=$PATH:/opt/EDB/TPA/bin
 ```
 
 ### Installing without network access

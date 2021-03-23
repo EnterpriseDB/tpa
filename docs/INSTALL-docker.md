@@ -32,10 +32,10 @@ tpa/tpaexec   latest    e145cf8276fb   8 seconds ago   1.73GB
 $ docker rm --rm tpa/tpaexec tpaexec info
 # TPAexec v20.11-59-g85a62fe3 (branch: master)
 tpaexec=/usr/local/bin/tpaexec
-TPA_DIR=/opt/2ndQuadrant/TPA
-PYTHON=/opt/2ndQuadrant/TPA/tpa-venv/bin/python3 (v3.7.3, venv)
-TPA_VENV=/opt/2ndQuadrant/TPA/tpa-venv
-ANSIBLE=/opt/2ndQuadrant/TPA/tpa-venv/bin/ansible (v2.8.15)
+TPA_DIR=/opt/EDB/TPA
+PYTHON=/opt/EDB/TPA/tpa-venv/bin/python3 (v3.7.3, venv)
+TPA_VENV=/opt/EDB/TPA/tpa-venv
+ANSIBLE=/opt/EDB/TPA/tpa-venv/bin/ansible (v2.8.15)
 ```
 
 Create a TPAexec container and make your cluster configuration directories

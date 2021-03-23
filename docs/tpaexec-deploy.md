@@ -25,7 +25,7 @@ forget to do this, an error message will soon remind you.
 
 ```bash
 [tpa]$ tpaexec deploy ~/clusters/speedy -v
-Using /opt/2ndQuadrant/TPA/ansible/ansible.cfg as config file
+Using /opt/EDB/TPA/ansible/ansible.cfg as config file
 
 PLAY [Basic initialisation and fact discovery] ***************************************
 ...
