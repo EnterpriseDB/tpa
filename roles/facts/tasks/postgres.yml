@@ -9,6 +9,13 @@
   vars:
     _flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
 
+- assert:
+    msg: >-
+      Unrecognised postgresql_flavour setting: '{{ postgresql_flavour }}'
+      (try postgresql, 2q, or epas)
+    that:
+      - postgresql_flavour in ['postgresql', '2q', 'epas', 'postgresql-bdr']
+
 - name: Set postgres_data_dir
   set_fact:
     postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
