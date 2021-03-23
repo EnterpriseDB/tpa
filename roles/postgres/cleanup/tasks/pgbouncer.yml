@@ -42,6 +42,7 @@
       and (item not in cluster_facts.bdr_databases
         or inventory_hostname == first_bdr_primary
         or 'bdr' not in role)
+    ignore_errors: yes
 
   - name: Ensure pgbouncer user is removed
     postgresql_query:
