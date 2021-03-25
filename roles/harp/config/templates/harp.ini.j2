@@ -10,7 +10,7 @@
 #namespace = /harp
 
 # Name of the location (DC) where this node is located
-location = {{ location }}
+location = {{ harp_location|default(location) }}
 
 # DSN of managed BDR Node
 postgres_dsn = {{ bdr_node_dsn }}
