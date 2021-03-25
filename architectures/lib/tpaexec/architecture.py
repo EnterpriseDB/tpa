@@ -489,6 +489,7 @@ class Architecture(object):
             'postgres_version',
             'tpa_2q_repositories',
             'use_volatile_subscriptions',
+            'failover_manager',
         ] + [
             '%s_package_version' % x for x in self.versionable_packages()
         ]
