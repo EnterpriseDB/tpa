@@ -31,14 +31,16 @@ encrypt.agent.messages={{ efm_conf_settings['encrypt.agent.messages']|default(fa
 stop.isolated.primary={{ efm_conf_settings['stop.isolated.primary']|default(true) | bool }}
 stop.failed.primary={{ efm_conf_settings['stop.failed.primary']|default(true) | bool }}
 primary.shutdown.as.failure={{ efm_conf_settings['primary.shutdown.as.failure']|default(false) | bool }}
+{% if postgres_version is version('12', '>=') %}
 update.physical.slots.period={{ efm_conf_settings['update.physical.slots.period']|default(10) }}
+{% endif %}
 ping.server.ip={{ efm_conf_settings['ping.server.ip']|default('8.8.8.8') }}
 ping.server.command={{ efm_conf_settings['ping.server.command']|default('/bin/ping -q -c3 -w5') }}
 auto.allow.hosts={{ efm_conf_settings['auto.allow.hosts']|default(true) |bool }}
 stable.nodes.file={{ efm_conf_settings['stable.nodes.file']|default(true) | bool }}
 db.reuse.connection.count={{ efm_conf_settings['db.reuse.connection.count']|default(0) }}
 auto.failover={{ efm_conf_settings['auto.failover']|default(true) | bool }}
-{% if upstream is defined and upstream_primary != upstream %}
+{% if postgres_version is version('11', '<=') or (upstream is defined and upstream_primary != upstream) %}
 auto.reconfigure=false
 {% else %}
 auto.reconfigure=true
