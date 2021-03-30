@@ -29,6 +29,6 @@
 
 - set_fact:
     is_haproxied: >-
-      {{ inventory_hostname in all_haproxy_backend_servers }}
+      {{ inventory_hostname in all_haproxy_backend_servers|default([]) }}
     my_haproxies: >-
       {{ proxies_for_backend_server[inventory_hostname]|default([]) }}
