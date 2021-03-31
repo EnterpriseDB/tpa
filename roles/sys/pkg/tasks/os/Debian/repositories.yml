@@ -29,11 +29,19 @@
     and 'already the newest version' not in gpg_install.stdout
 
 - set_fact:
-    apt_repository_list: "{{
-      apt_repository_list|default([])|union(['EDB'])
+    default_apt_repository_list: "{{
+      default_apt_repository_list|union(['EDB'])
     }}"
   when:
-    postgresql_flavour == 'epas'
+    postgres_installation_method == 'pkg' and (
+      postgresql_flavour == 'epas'
+      or failover_manager == 'efm'
+    )
+
+- set_fact:
+    apt_repository_list: "{{
+      apt_repository_list|default(default_apt_repository_list)
+    }}"
 
 - name: Ensure repository list is defined
   assert:

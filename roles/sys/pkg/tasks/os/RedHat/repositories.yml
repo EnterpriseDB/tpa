@@ -21,14 +21,19 @@
     and 'already installed' not in curl_install.stdout
 
 - set_fact:
-    yum_repository_list: "{{
-      yum_repository_list|default([])|union(['EDB'])
+    default_yum_repository_list: "{{
+      default_yum_repository_list|union(['EDB'])
     }}"
   when:
     postgres_installation_method == 'pkg' and (
       postgresql_flavour == 'epas'
       or failover_manager == 'efm'
     )
+
+- set_fact:
+    yum_repository_list: "{{
+      yum_repository_list|default(default_yum_repository_list)
+    }}"
 
 - name: Ensure repository list is defined
   assert:

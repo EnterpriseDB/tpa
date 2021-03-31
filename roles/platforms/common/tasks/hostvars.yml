@@ -51,7 +51,7 @@
     that:
       lookup('env', 'EDB_REPO_CREDENTIALS_FILE') != '' or
       ((postgresql_flavour|default('') != 'epas' or
-       postgres_installation_method == 'src')
+       postgres_installation_method|default('') == 'src')
       and 'EDB' not in (apt_repository_list|default([]))
       and 'EDB' not in (yum_repository_list|default([])))
   tags: public_repos

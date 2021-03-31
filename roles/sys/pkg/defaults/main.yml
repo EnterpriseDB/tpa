@@ -24,7 +24,7 @@ default_apt_repositories:
     repo: >-
       deb [arch=amd64] https://apt.enterprisedb.com/{{ ansible_distribution_release }}-edb/ {{ ansible_distribution_release }} main
 
-apt_repository_list: "{{ default_apt_repositories.keys()|reject('equalto', 'EDB')|list }}"
+default_apt_repository_list: "{{ default_apt_repositories.keys()|reject('equalto', 'EDB')|list }}"
 
 yum_repositories: {}
 default_yum_repositories:
@@ -45,7 +45,7 @@ default_yum_repositories:
     rpm_url: >-
       https://yum.enterprisedb.com/edbrepos/edb-repo-latest.noarch.rpm
 
-yum_repository_list: "{{ default_yum_repositories.keys()|reject('equalto', 'EDB')|list }}"
+default_yum_repository_list: "{{ default_yum_repositories.keys()|reject('equalto', 'EDB')|list }}"
 
 ## Packages
 #
