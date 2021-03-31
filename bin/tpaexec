@@ -317,78 +317,6 @@ deprovision() {
     playbook "$TPA_DIR/platforms/deprovision.yml" "$@"
 }
 
-store_password() {
-    args=()
-    while [[ $# -gt 0 ]]; do
-        opt=$1
-        shift
-
-        case "$opt" in
-            --secret-name)
-                secret_name=${1:?secret name not specified}
-                shift
-                ;;
-            --random)
-                args+=(-c "$TPA_DIR"/architectures/lib/password)
-                ;;
-            --)
-                break
-                ;;
-            *)
-                REMAINDER+=("$opt")
-                ;;
-        esac
-    done
-
-    set -- "${REMAINDER[@]:+${REMAINDER[@]}}" "$@"
-
-    if [[ ${secret_name:-''} == "" ]]; then
-        username=${1:?No username specified}
-        secret_name="$username"_password
-        shift
-    fi
-
-    if [ -f vault/vault_pass.txt ]; then
-        args+=(--vault-password-file vault/vault_pass.txt)
-    fi
-
-    dir=""
-    if [[ -d ./inventory ]]; then
-        dir=$(find ./inventory -path '*/group_vars/*/secrets' -type d)
-    fi
-    if [[ -z "$dir" ]]; then
-        error "inventory directory does not exist (did you run tpaexec provision?)"
-    fi
-    file="$dir"/"$secret_name".yml
-
-    "$ansible"-vaultpw "${args[@]}" store "$file" "$@"
-}
-
-show_password() {
-    args=()
-
-    username=${1:?No username specified}
-    shift
-
-    if [ -f vault/vault_pass.txt ]; then
-        args+=(--vault-password-file vault/vault_pass.txt)
-    fi
-
-    dir=""
-    if [[ -d ./inventory ]]; then
-        dir=$(find ./inventory -path '*/group_vars/*/secrets' -type d)
-    fi
-    if [[ -z "$dir" ]]; then
-        error "inventory directory does not exist (did you run tpaexec provision?)"
-    fi
-    file="$dir"/"$username"_password.yml
-    if [[ ! -f $file && -f "$dir/$username".yml ]]; then
-        file="$dir"/"$username".yml
-    fi
-
-    "$ansible"-vaultpw "${args[@]}" show "$file" "$@"
-}
-
 try_as_playbook_or_script() {
     # If you run `tpaexec xyzzy …`, you end up here to check if there
     # is a matching custom command under architectures/lib/commands or
@@ -735,28 +663,6 @@ Completely destroys a clustername and all associated resources
 DEPROVISION
             ;;
 
-        store-password)
-            cat <<STOREPWD
-Command: tpaexec store-password clustername username [--random]
-
-Stores an encrypted new password for the given user in the inventory.
-
-Prompts you to enter a new password by default, but will generate and
-use a random password instead if you specify --random.
-
-Note: the new password is only stored in the local inventory. It will be
-changed on the target instances (if needed) only during the next deploy.
-STOREPWD
-            ;;
-
-        show-password)
-            cat <<SHOWPWD
-Command: tpaexec show-password clustername username
-
-Shows the password stored in the local inventory for the given user.
-SHOWPWD
-            ;;
-
         *)
             # We can treat the argument as the name of a custom command.
             # If we can find a matching executable, we can run it with
@@ -856,7 +762,7 @@ case "$command" in
         cd "$cluster"
         ;;
 
-    cmd|ping|provision|deploy|deprovision|store-password|show-password)
+    cmd|ping|provision|deploy|deprovision)
         cluster=${1:?No cluster specified}
         shift
 
@@ -883,8 +789,8 @@ case "$command" in
         help "$*"
         ;;
 
-    info|version|setup|configure|selftest|store-password|show-password)
-        ${command/-/_} "$@"
+    info|version|setup|configure|selftest)
+        $command "$@"
         ;;
 
     cmd|ping|provision|deploy|playbook|deprovision)
