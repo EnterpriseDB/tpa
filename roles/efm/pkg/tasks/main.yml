@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # We need to install Java before we install EFM itself (because the EFM
 # packages do not declare Java as a dependency).

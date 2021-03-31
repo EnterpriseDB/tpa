@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # Starting with ec2_groups (optional) and cluster_rules, we need to set
 # up ec2_region_groups to map every region to the security groups to use

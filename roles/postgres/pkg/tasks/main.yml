@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # Given a Postgres version, we perform distribution-specific tasks to
 # install the required Postgres packages. (The required repositories

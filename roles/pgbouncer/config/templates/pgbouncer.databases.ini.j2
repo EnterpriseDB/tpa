@@ -1,4 +1,4 @@
-{# Copyright © EnterpriseDB Corporation #}
+{# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved. #}
 {% for d in pgbouncer_databases %}
 {{ d['name'] }} = {{ d.get('dsn', d.get('options')|conninfo_string) }}
 {% endfor %}

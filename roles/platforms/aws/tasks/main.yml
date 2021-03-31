@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # We don't need to parse the instance metadata at the moment, but if we
 # ever do, there's an example in the git history of how to go about it

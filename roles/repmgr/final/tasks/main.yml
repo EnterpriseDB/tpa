@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # Now we do whatever is necessary to run ``repmgr xxx register`` on the
 # instances in the cluster. That means some sanity checking for primary

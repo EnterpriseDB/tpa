@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 _vpn_name: "{{ vpn_name|default(cluster_name)|lower }}"
 _local_cert_dir: "{{ cluster_dir }}/certs"

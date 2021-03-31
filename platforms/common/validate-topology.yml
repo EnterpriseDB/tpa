@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # For every instance that has a "backup: xxx" tag, there should be
 # exactly one instance with "Name: xxx" and "role: …,barman,…" tags.

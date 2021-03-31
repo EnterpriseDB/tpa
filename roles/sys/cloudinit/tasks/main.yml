@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # If we're in the unenviable position of being on a host that's managed
 # by cloud-init, we have some configuration tweaks to apply.

@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 default_pgbench_rw_opts: "-v -c 10 -j 5 -T 180"
 default_pgbench_ro_opts: "-n -c 10 -j 5 -T 180 -S"

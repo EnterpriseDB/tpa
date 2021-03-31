@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # We expect 'cluster' to point to a directory in which we can find
 # config.yml (or whatever 'config' is set to). If we are invoked through

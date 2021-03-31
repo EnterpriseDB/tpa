@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # Once Postgres is running, we have to perform certain tasks on the
 # barman server on behalf of each client, like creating replication

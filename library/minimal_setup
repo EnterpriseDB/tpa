@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 #
 # This is an ansible module that takes no arguments and returns only
 # some distribution-specific facts.

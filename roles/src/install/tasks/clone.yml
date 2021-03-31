@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 - name: Check if ssh agent forwarding is enabled
   shell: echo $SSH_AUTH_SOCK

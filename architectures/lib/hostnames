@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 #
 # hostnames 33
 #   Returns 33 randomly-selected hostnames

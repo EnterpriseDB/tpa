@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 #
 # This is a wrapper for bin/ansible that sets various environment
 # variables before invoking the real executable (which must be under

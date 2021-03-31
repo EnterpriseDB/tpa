@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 - name: Run apt-get update
   raw: test -d /etc/tpa || apt-get -q -y update

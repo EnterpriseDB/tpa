@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # We'd like to use ``git branch --show-current``, but centos:8 has a git
 # that's too old to support that.

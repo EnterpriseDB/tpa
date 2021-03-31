@@ -1,4 +1,4 @@
-{# Copyright © EnterpriseDB Corporation #}
+{# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved. #}
 cat >> /root/.ssh/authorized_keys <<KEY
 {{ lookup('file', cluster_dir|abspath_to(ssh_key_file + '.pub')) }}
 KEY

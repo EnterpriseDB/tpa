@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 - name: Join group {{ bdr_node_child_group }} on {{ bdr_node }} via {{ bdr_upstream|default(first_bdr_primary) }}
   postgresql_query:

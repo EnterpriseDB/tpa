@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # Given `image`, the name of an image referenced by instances[] that
 # does not exist locally, we must now do whatever is required to provide

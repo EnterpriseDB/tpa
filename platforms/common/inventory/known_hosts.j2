@@ -1,4 +1,4 @@
-{# Copyright © EnterpriseDB Corporation #}
+{# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved. #}
 {% for h in instance_vars if (h.platform != 'bare' or h.vars.get('manage_ssh_hostkeys', False)|bool) %}
 {%   for k in ['rsa', 'ecdsa'] %}
 {%     set hostname = h|deploy_ip_address %}

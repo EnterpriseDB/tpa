@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # Given a region, vpc-id, and a list of subnet references, we find the
 # subnet-id of each existing subnet, and create the rest (and thereby

@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # We want to call this repmgrd.service, but there's a systemd bug (at
 # least on Debian 8) that prevents us from overriding the unit that is

@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 _ssh_key_dir: "{{ ssh_key_dir|default(cluster_dir+'/keys') }}"
 _ssh_key_name: "{{ ssh_key_name|default('id_'+ssh_username) }}"

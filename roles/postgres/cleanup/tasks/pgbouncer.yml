@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # We can remove the pgbouncer.get_auth() function and the pgbouncer
 # schema in every database, because by now we've switched to using

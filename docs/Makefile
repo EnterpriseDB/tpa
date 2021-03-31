@@ -1,4 +1,4 @@
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 images/bdr-simple.png: images/bdr-simple.dot
 	circo -Tpng $< -o $@

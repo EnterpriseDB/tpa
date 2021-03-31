@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 #
 # subnets 3
 #   Returns 3 randomly-selected /28 subnets under 10.33.x.x

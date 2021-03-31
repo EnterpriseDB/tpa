@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # We're willing to be a bit flexible about what we read in here. We
 # accept multiple lines setting shared_preload_libraries (last one

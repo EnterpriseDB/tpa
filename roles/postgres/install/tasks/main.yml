@@ -1,6 +1,6 @@
 ---
 
-# Copyright © EnterpriseDB Corporation
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # If any of the source directories are mounted, we want to skip trying
 # to update them in postgres/src and src/install.
