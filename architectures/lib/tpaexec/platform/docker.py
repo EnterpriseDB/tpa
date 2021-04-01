@@ -122,8 +122,15 @@ class docker(Platform):
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
         preferred_python_version = 'python3'
         image = args['image']
-        if image and image['name'] in ['centos/systemd', 'tpa/redhat:7']:
-            preferred_python_version = 'python2'
+        if image:
+            # Use tpa/redhat:7 by default for BDRv1 on RH, because we do not
+            # publish packages for newer distributions. Specify `--os-version`
+            # explicitly to override this decision.
+            if image['name'] == 'tpa/redhat' \
+                and cluster_vars['postgresql_flavour'] == 'postgresql-bdr':
+                image['name'] = 'tpa/redhat:7'
+            if image['name'] in ['centos/systemd', 'tpa/redhat:7']:
+                preferred_python_version = 'python2'
         cluster_vars['preferred_python_version'] = \
             cluster_vars.get('preferred_python_version', preferred_python_version)
         cluster_vars['use_volatile_subscriptions'] = True
