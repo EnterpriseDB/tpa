@@ -217,6 +217,7 @@
     value: python-psycopg2 python2-psycopg2 python3-psycopg2
   when: >
     'PGDG' in yum_repository_list
+    and postgres_version is version('9.4', '>')
 
 - set_fact:
     _2q_repositories: []
