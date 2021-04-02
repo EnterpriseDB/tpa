@@ -374,6 +374,57 @@ def ternary_format(val, expr, true_string, false_string, **kwargs):
     s = true_string if expr else false_string
     return s.format(value=val, **kwargs)
 
+# Given the name of an instance (and hostvars), returns a list of names of
+# instances that are related by physical replication, starting with the primary
+# (cf. upstream_root above), followed by replicas/descendants (and including the
+# instance itself) based on their upstream setting. Returns an empty list if the
+# instance is not part of such a replication group.
+
+def physical_replication_group(h, hostvars):
+    # First, we collect the names, upstream, and direct descendants (according
+    # to the upstream setting) of all primary and replica instances.
+
+    instances = {}
+    for k in hostvars:
+        v = hostvars[k]
+
+        role = v.get('role') or []
+        if not ('primary' in role or 'replica' in role):
+            continue
+
+        if k not in instances:
+            instances[k] = {}
+        if 'descendants' not in instances[k]:
+            instances[k]['descendants'] = []
+
+        upstream = v.get('upstream')
+        if upstream:
+            if upstream not in instances:
+                instances[upstream] = {}
+            if 'descendants' not in instances[upstream]:
+                instances[upstream]['descendants'] = []
+            instances[upstream]['descendants'].append(k)
+
+        instances[k]['upstream'] = upstream
+
+    # Starting with the given instance, find the most-upstream instance and
+    # return it and all its descendants.
+
+    while h in instances and instances[h]['upstream']:
+        h = instances[h]['upstream']
+
+    def instance_and_all_descendants(i):
+        if i not in instances:
+            return []
+
+        family = [i]
+        for d in instances[i]['descendants']:
+            family += instance_and_all_descendants(d)
+
+        return family
+
+    return instance_and_all_descendants(h)
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -400,4 +451,5 @@ class FilterModule(object):
             'sort_by_node': sort_by_node,
             'dict_format': dict_format,
             'ternary_format': ternary_format,
+            'physical_replication_group': physical_replication_group,
         }
