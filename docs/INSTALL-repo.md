@@ -38,7 +38,7 @@ $ sudo brew install python@3 pwgen openvpn flock coreutils gpatch git
 Next, install TPAexec itself:
 
 ```bash
-$ git clone https://github.com/EnterpriseDB/tpaexec.git
+$ git clone ssh://git@github.com/EnterpriseDB/tpaexec.git
 $ ./tpaexec/bin/tpaexec setup
 $ ./tpaexec/bin/tpaexec selftest
 ```
@@ -57,7 +57,7 @@ matter where you put it, but don't use `/opt/EDB/TPA` or
 packages in future.)
 
 ```bash
-$ git clone https://github.com/EnterpriseDB/tpaexec.git ~/tpaexec
+$ git clone ssh://git@github.com/EnterpriseDB/tpaexec.git ~/tpaexec
 ```
 
 (If you're installing from source, please clone the repository instead
