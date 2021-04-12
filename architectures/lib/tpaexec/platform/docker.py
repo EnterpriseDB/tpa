@@ -127,7 +127,7 @@ class docker(Platform):
             # publish packages for newer distributions. Specify `--os-version`
             # explicitly to override this decision.
             if image['name'] == 'tpa/redhat' \
-                and cluster_vars['postgresql_flavour'] == 'postgresql-bdr':
+                and cluster_vars.get('postgresql_flavour') == 'postgresql-bdr':
                 image['name'] = 'tpa/redhat:7'
             if image['name'] in ['centos/systemd', 'tpa/redhat:7']:
                 preferred_python_version = 'python2'
