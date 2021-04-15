@@ -43,6 +43,16 @@
       apt_repository_list|default(default_apt_repository_list)
     }}"
 
+- assert:
+    msg: >
+      Export EDB_REPO_CREDENTIALS_FILE to use the EDB repository
+      (see https://www.enterprisedb.com/user/ for credentials)
+    that:
+      lookup('env', 'EDB_REPO_CREDENTIALS_FILE') != ''
+  when: >
+    'EDB' in apt_repository_list
+  tags: public_repos
+
 - name: Ensure repository list is defined
   assert:
     msg: "Repository {{ item }} is not defined in apt_repositories"

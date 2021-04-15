@@ -46,16 +46,6 @@
       tpa_2q_repositories|default([]) is empty
   tags: public_repos
 
-- assert:
-    msg: "Export EDB_REPO_CREDENTIALS_FILE to use the EDB repository"
-    that:
-      lookup('env', 'EDB_REPO_CREDENTIALS_FILE') != '' or
-      ((postgresql_flavour|default('') != 'epas' or
-       postgres_installation_method|default('') == 'src')
-      and 'EDB' not in (apt_repository_list|default([]))
-      and 'EDB' not in (yum_repository_list|default([])))
-  tags: public_repos
-
 - block:
   - stat:
       path: "{{ _file }}"
