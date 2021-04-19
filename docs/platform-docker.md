@@ -63,6 +63,27 @@ have access:
 lets them trivially gain root on the Docker host. Only trusted users
 should have access to the Docker daemon.
 
+### Docker container privileges
+
+By default TPAexec provisions Docker containers in unprivileged mode, with no
+added Linux capabilities flags. Such containers cannot manage host firewall
+rules, file systems, block devices, or most other tasks that require true root
+privileges on the host.
+
+If you require your containers to run in privileged mode, set the `privileged`
+boolean variable for the instance(s) that need it, or globally in
+`instance_defaults`, e.g.:
+
+    instance_defaults:
+      privileged: true
+
+**WARNING**: Running containers in privileged mode allows the root user or any
+process that can gain root to load kernel modules, modify host firewall rules,
+escape the container namespace, or otherwise act much as the real host "root"
+user would. Do not run containers in priviliged mode unless you really need to.
+
+See `man capabilities` for details on Linux capabilities flags.
+
 ### Docker storage configuration
 
 **Caution**: The default Docker configuration on many hosts uses
