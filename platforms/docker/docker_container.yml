@@ -21,6 +21,8 @@
     state: started
     pull: no
     privileged: "{{ item.privileged|default('no') }}"
+    capabilities: "{{ item.docker_cap_add|default(omit) }}"
+    cap_drop: "{{ item.docker_cap_drop|default(omit) }}"
     stop_signal: 'RTMIN+3'
     interactive: yes
     restart_policy: "{{ item.restart_policy|default('unless-stopped') }}"

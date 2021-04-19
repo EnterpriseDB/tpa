@@ -100,6 +100,26 @@ tpaexec with the `instance_defaults` or per-container variable
 Other arguments to `docker run`'s `--security-opts` are also accepted, e.g.
 SELinux user and role.
 
+#### Linux capabilities flags
+
+tpaexec exposes Docker's control over Linux capabilities flags with the
+`docker_cap_add` list variable, which may be set per-container or in
+`instance_defaults`. See `man capabilities`, the `docker run` documentation and
+the documentation for the Ansible `docker_containers` module for details on
+capabilities flags.
+
+Docker's `--cap-drop` is also supported via the `docker_cap_drop` list.
+
+For example, to run a container as unprivileged, but give it the ability to
+modify the system clock, you might write:
+
+    instance_defaults:
+      privileged: false
+      docker_cap_add:
+        - sys_time
+      docker_cap_drop:
+        - all
+
 ### Docker storage configuration
 
 **Caution**: The default Docker configuration on many hosts uses

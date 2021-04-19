@@ -42,3 +42,5 @@
     - ulimits
     - local_source_directories
     - docker_security_opts
+    - docker_cap_add
+    - docker_cap_drop
