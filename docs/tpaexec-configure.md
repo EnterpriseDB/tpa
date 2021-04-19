@@ -215,6 +215,10 @@ following options:
 
 You may use any version specifier that apt or yum would accept.
 
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
+
 You may also specify `--extra-packages p1 p2 …` or
 `--extra-postgres-packages p1 p2 …` to install additional packages.
 The former lists packages to install along with system packages, while
