@@ -28,6 +28,7 @@
     - privileged
     - restart_policy
     - memory
+    - memory_reservation
     - shm_size
     - env_file
     - env
