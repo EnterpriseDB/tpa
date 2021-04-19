@@ -43,7 +43,7 @@
 # above). We connect to Postgres and execute queries that can be used to find
 # out the state of replication and decide if anything needs to be done.
 #
-# We might need to find—rather that assume—answers to earlier questions if we
+# We might need to find—rather than assume—answers to earlier questions if we
 # needed to run on systems where Postgres was not set up by TPA. That is not the
 # case at present, and we already handle the initial setup (even with custom
 # packages, user/group, and data directory location). We are also not interested
