@@ -49,6 +49,7 @@
       - "/tmp"
       - "/run"
       - "/run/lock"
+    security_opts: "{{ item.docker_security_opts|default(omit) }}"
   vars:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro

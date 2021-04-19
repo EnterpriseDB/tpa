@@ -65,6 +65,8 @@ should have access to the Docker daemon.
 
 ### Docker container privileges
 
+#### Privileged containers
+
 By default TPAexec provisions Docker containers in unprivileged mode, with no
 added Linux capabilities flags. Such containers cannot manage host firewall
 rules, file systems, block devices, or most other tasks that require true root
@@ -83,6 +85,20 @@ escape the container namespace, or otherwise act much as the real host "root"
 user would. Do not run containers in priviliged mode unless you really need to.
 
 See `man capabilities` for details on Linux capabilities flags.
+
+#### `security_opts` and the `no-new-privileges` flag
+
+tpaexec can start docker containers in a restricted mode where processes cannot
+increase their privileges. setuid binaries are restricted, etc. Enable this in
+tpaexec with the `instance_defaults` or per-container variable
+`docker_security_opts`:
+
+    instance_defaults:
+      docker_security_opts:
+        - no-new-privileges
+
+Other arguments to `docker run`'s `--security-opts` are also accepted, e.g.
+SELinux user and role.
 
 ### Docker storage configuration
 

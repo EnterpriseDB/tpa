@@ -41,3 +41,4 @@
     - sysctls
     - ulimits
     - local_source_directories
+    - docker_security_opts
