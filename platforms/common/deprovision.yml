@@ -39,7 +39,7 @@
     executable: /bin/bash
   vars:
     find_cmd: >-
-      find {{ cluster_dir }}/inventory/host_vars 
+      find "{{ cluster_dir }}"/inventory/host_vars
       '(' -name 01-instance_vars.yml -o -name 02-topology.yml -o -name 03-volumes.yml ')'
   register: rm
   changed_when: rm.rc == 99
@@ -57,7 +57,7 @@
     executable: /bin/bash
   vars:
     find_cmd: >-
-      find {{ cluster_dir }}/inventory -depth -type d
+      find "{{ cluster_dir }}"/inventory -depth -type d
   register: rmdir
   ignore_errors: yes
   changed_when: >

@@ -184,10 +184,10 @@
 
 - name: Move CAMO settings to 3334-camo.conf if required
   shell: >
-    test -f {{ old }} || exit 0;
-    test -f {{ new }} && exit 1;
-    if grep -q synchronous_replication_availability {{ old }} &>/dev/null; then
-      mv {{ old }} {{ new }} && exit 99;
+    test -f "{{ old }}" || exit 0;
+    test -f "{{ new }}" && exit 1;
+    if grep -q synchronous_replication_availability "{{ old }}" &>/dev/null; then
+      mv "{{ old }}" "{{ new }}" && exit 99;
     fi
   register: move
   changed_when: move.rc == 99

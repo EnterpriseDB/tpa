@@ -99,7 +99,7 @@
     executable: /bin/bash
   vars:
     find_cmd: >-
-      find {{ cluster_dir }}/inventory/host_vars 
+      find "{{ cluster_dir }}"/inventory/host_vars
       '(' -name 02-topology.yml -o -name 03-volumes.yml ')'
   register: rm
   changed_when: rm.rc == 99

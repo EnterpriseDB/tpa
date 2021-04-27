@@ -8,7 +8,7 @@
 
 - name: Read current value of shared_preload_libraries
   shell: >
-    eval "libs=$(cat 2>/dev/null {{ conf }} {{ override }}|sed -n 's/^shared_preload_libraries *= *//p'|tail -1)" && echo $libs
+    eval "libs=$(cat 2>/dev/null \"{{ conf }}\" \"{{ override }}\"|sed -n 's/^shared_preload_libraries *= *//p'|tail -1)" && echo $libs
   args:
     executable: /bin/bash
   changed_when: False

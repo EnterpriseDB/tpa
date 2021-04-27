@@ -62,7 +62,7 @@
 
 - name: Generate the vault passphrase for this cluster
   shell: >
-    {{ tpa_dir }}/architectures/lib/password > vault_pass.txt
+    "{{ tpa_dir }}"/architectures/lib/password > vault_pass.txt
   args:
     chdir: "{{ cluster_dir }}/vault"
     creates: vault_pass.txt

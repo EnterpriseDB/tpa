@@ -24,7 +24,8 @@
 # stdin; you have to pass it in through the environment.
 
 - name: Encrypt efm password
-  shell: "{{ efm_bin_dir }}/efm encrypt {{ cluster_name }} --from-env"
+  shell: >
+    "{{ efm_bin_dir }}"/efm encrypt "{{ cluster_name }}" --from-env
   environment: "{{ target_environment|combine(_task_environment) }}"
   vars:
     _task_environment:

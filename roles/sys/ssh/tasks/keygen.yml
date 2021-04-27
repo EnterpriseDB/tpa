@@ -14,10 +14,10 @@
 - name: Generate ssh keypair {{ _ssh_key_name }}
   shell: >
     ( flock -n 9 || exit 99;
-    test -f {{ keyfile }} && exit 0;
-    test -d {{ _ssh_key_dir }} || mkdir {{ _ssh_key_dir }};
+    test -f "{{ keyfile }}" && exit 0;
+    test -d "{{ _ssh_key_dir }}" || mkdir "{{ _ssh_key_dir }}";
     ssh-keygen -N "" -C "{{ _ssh_key_comment }}" -f "{{ keyfile }}";
-    exit 88 ) 9<{{ inventory_file }}
+    exit 88 ) 9<"{{ inventory_file }}"
   args:
     creates: "{{ keyfile }}"
     executable: /bin/bash

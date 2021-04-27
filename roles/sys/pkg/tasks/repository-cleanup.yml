@@ -11,7 +11,7 @@
     executable: /bin/bash
   vars:
     find_cmd: >-
-      find {{ repository_path }}
+      find "{{ repository_path }}"
       {% if repository_files is not empty %}
       {% for f in repository_files %}-path '{{ f }}'{% if not loop.last %} -o {% endif %}{% endfor %} -prune -o
       {% endif %}

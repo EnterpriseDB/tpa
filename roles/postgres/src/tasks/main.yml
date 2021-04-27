@@ -32,7 +32,7 @@
 - name: Configure Postgres
   shell: >
     PATH={{ build_path }} \
-    {{ postgres_src_dir }}/configure \
+    "{{ postgres_src_dir }}"/configure \
         --prefix={{ postgres_install_dir|expanduser|quote }} \
         {% for arg in all_configure_opts %}{{ arg|quote }} {% endfor %}
   args:

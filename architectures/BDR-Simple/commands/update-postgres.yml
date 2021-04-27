@@ -122,7 +122,7 @@
   - name: Declare backend {{ inventory_hostname }} as ready
     shell: >
       echo "set server be/{{ inventory_hostname }} state ready" |
-      socat stdio {{ haproxy_stats_socket }}
+      socat stdio "{{ haproxy_stats_socket }}"
     args:
       executable: /bin/bash
     with_items: "{{ my_haproxies }}"
