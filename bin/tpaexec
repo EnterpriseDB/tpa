@@ -13,6 +13,12 @@ error() {
     exit 1
 }
 
+# Enable user-specified $TMPDIR
+export TMPDIR=${TMPDIR:-/tmp}
+if [[ ! -d $TMPDIR ]]; then
+    error "Can't find $TMPDIR; please set TMPDIR correctly"
+fi
+
 # If $TPA_DIR is not already set, we guess TPA_DIR based on $0 (so that
 # a git checkout takes precedence over a package installation), or use
 # /opt/EDB/TPA if it exists.
@@ -143,7 +149,7 @@ _install_pip_packages() {
         if [[ -d $PIP_DIR/ansible ]]; then
             ANSIBLE_HOME=$PIP_DIR/ansible
         else
-            ANSIBLE_HOME=$(mktemp -d /tmp/ansible-XXXXXXXXXX)
+            ANSIBLE_HOME=$(mktemp -d $TMPDIR/ansible-XXXXXXXXXX)
             git clone --depth 1 https://github.com/2ndQuadrant/ansible "$ANSIBLE_HOME"
         fi
         pip3 install "${pip_args[@]}" file:"$ANSIBLE_HOME" \
