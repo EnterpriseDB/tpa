@@ -1,0 +1,27 @@
+/*
+ * for PDF Printing
+ *
+ */
+
+@page {
+  @top-left {
+    font-size: 8pt;
+    content: "Information Classification: INTERNAL";
+    text-align: left;
+  }
+
+}
+
+code, pre code {
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace !important;
+    font-size: 0.9rem !important;
+}
+
+@media print {
+    hr {
+        display: none;
+    }
+    p {
+	font-size: inherit;
+    }
+}

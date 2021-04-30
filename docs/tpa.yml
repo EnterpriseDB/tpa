@@ -45,7 +45,13 @@ markdown_extensions:
       guess_lang: true
 plugins:
   - search
-
+  - with-pdf:
+       author: EnterpriseDB UK Limited
+       cover_title: TPAexec
+       cover_subtitle: ""
+       toc_level: 3
+       copyright: © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+       enabled_if_env: ENABLE_PDF_EXPORT
 copyright: |
   © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
   <p>Confidential property of EDB; not for public release. This software and related documentation are protected by intellectual property laws. Except as allowed by law, you may not use, copy, reproduce, translate, broadcast, modify, license, transmit, distribute, exhibit, perform, publish, or display any part, in any form, or by any means.
