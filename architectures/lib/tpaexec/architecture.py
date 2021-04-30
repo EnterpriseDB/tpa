@@ -508,7 +508,7 @@ class Architecture(object):
             'default', '2ndqpostgres', 'bdr2', 'bdr3', 'pglogical3',
             'server-ssl-passphrase-callback', 'postgresql', 'bdr_enterprise_3_6',
             'livecompare', 'bdr3_7', 'pglogical3_7', 'bdr_enterprise_3_7', 'harp',
-            'bdr3_7-epas'
+            'bdr3_7-epas', 'bdr_enterprise_3_7-epas',
         ]
 
     # Returns a map of things that should be accepted as arguments to
