@@ -3,7 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 - name: Add entries to /etc/hosts
-  hosts_lines:
+  linesinfile:
     path: /etc/hosts
     lines: "{{
       etc_hosts_lines
