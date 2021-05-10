@@ -3,8 +3,9 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 - name: Add entries to /etc/hosts
-  linesinfile:
+  hosts_lines:
     path: /etc/hosts
+    platform: "{{ platform }}"
     lines: "{{
       etc_hosts_lines
       |default(default_etc_hosts_lines)
