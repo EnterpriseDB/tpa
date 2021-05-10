@@ -50,6 +50,7 @@ plugins:
        cover_title: TPAexec
        cover_subtitle: ""
        toc_level: 3
+       output_path: tpaexec.pdf
        copyright: © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
        enabled_if_env: ENABLE_PDF_EXPORT
 copyright: |
