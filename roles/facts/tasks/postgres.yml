@@ -98,6 +98,7 @@
     pgbouncer_backend: "{{ pgbouncer_backend|default(default_pgbouncer_backend) }}"
     pgbouncer_backend_port: "{{ pgbouncer_backend_port|default(default_pgbouncer_backend_port) }}"
     pgbouncer_auth_user: "{{ pgbouncer_auth_user|default(default_pgbouncer_auth_user) }}"
+    pgbouncer_server_login_retry: "{{ pgbouncer_server_login_retry|default(default_pgbouncer_server_login_retry) }}"
     haproxy_server_options: "{{ haproxy_server_options|default([]) }}"
     wal_or_xlog: "{{ wal_string }}"
     max_connections: "{{ max_connections|default(default_max_connections) }}"
