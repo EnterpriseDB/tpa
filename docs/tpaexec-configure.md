@@ -114,8 +114,8 @@ By default, each cluster is assigned a random /28 subnet under 10.33/16,
 but depending on the architecture, there may be one or more subnets, and
 each subnet may be anywhere between a /24 and a /29.
 
-This option is meaningful for the "bare" platform, where TPAexec will
-not alter the network configuration of existing servers.
+This option is not meaningful for the "bare" platform, where TPAexec
+will not alter the network configuration of existing servers.
 
 ### Instance type
 
