@@ -73,7 +73,7 @@ def hosts_lines(module):
 
     before_lines = []
     after_lines = []
-    changed = False
+    changes = []
 
     try:
         b_path = to_bytes(path, errors='surrogate_or_strict')
@@ -94,40 +94,49 @@ def hosts_lines(module):
             elif not l.lstrip().startswith('#'):
                 words = l.split()
                 if set(words) & to_replace:
-                    changed = True
+                    changes.append('skip')
                     continue
 
             after_lines.append(line)
 
         if lines:
-            changed = True
+            changes.append('append')
             for l in lines:
                 after_lines.append(l + '\n')
 
-        if changed and not module.check_mode:
+        # If we didn't need to skip any existing lines, we can just append the
+        # new lines to /etc/hosts. Otherwise we must replace the file, which we
+        # prefer to do by writing to a temporary file and using atomic_move; but
+        # that doesn't work on Docker containers, so we must overwrite in-place.
+
+        if changes and not module.check_mode:
             contents = to_bytes(''.join(after_lines))
 
-            # On docker containers, we must overwrite the contents of /etc/hosts
-            # in place; everywhere else, it's better to write out the contents
-            # to a temporary file and replace /etc/hosts atomically.
-
-            if module.params['platform'] == 'docker':
+            if 'skip' in changes and module.params['platform'] == 'docker':
+                m['operation'] = 'overwrite'
                 with open(b_path, "wb") as f:
                     f.write(contents)
-            else:
-                tmpfd, tmpfile = tempfile.mkstemp()
-                with os.fdopen(tmpfd, 'wb') as f:
-                    f.write(contents)
 
+            elif 'skip' in changes:
+                m['operation'] = 'replace'
+                tmpfd, tmpfile = tempfile.mkstemp()
+                with os.fdopen(tmpfd, "wb") as f:
+                    f.write(contents)
                 module.atomic_move(tmpfile, to_native(b_path),
                                    unsafe_writes=module.params['unsafe_writes'])
+
+            else:
+                m['operation'] = 'append'
+                contents = to_bytes(''.join(map(lambda l: l+'\n', lines)))
+                with open(b_path, "ab") as f:
+                    f.write(contents)
     except Exception as e:
         module.fail_json(msg=str(e), exception=traceback.format_exc())
 
     diff['before'] = ''.join(before_lines)
     diff['after'] = ''.join(after_lines)
     m['diff'] = [ diff, [] ]
-    m['changed'] = changed
+    m['changed'] = bool(changes)
 
     return m
 
