@@ -27,7 +27,7 @@
     q is not successful or not q.ssl
   vars:
     _task_environment:
-      PGPASSWORD: "{{ postgres_password }}"
+      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
 
 # Next, we connect to the pgbouncer admin database and check that "SHOW
