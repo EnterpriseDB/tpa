@@ -7,8 +7,9 @@ Note that HARP currently only supports BDR instances.
 
 ## HARP configuration
 
-TPAexec will generate `/etc/bdr3/harp.ini` with the appropriate instance-
-specific settings, with other settings set to the respective default value.
+TPAexec will generate `/etc/bdr3/harp.ini` with the appropriate
+instance-specific settings, with other settings set to the respective
+default values.
 
 See the [HARP documentation](https://documentation.2ndquadrant.com/harp/release/latest/configuration/)
 for more details on HARP configuration.
@@ -25,12 +26,12 @@ Variable | Default value | Description
 `harp_maximum_camo_lag` | `1048576` | Highest allowable variance between last received LSN and applied LSN between this node and its CAMO partner(s), in bytes
 `harp_lock_duration` | `15` | How many seconds the Lead Master lock will persist if not refreshed.
 `harp_lock_interval` | `5` | Seconds between refreshes of the Lead Master lock.
-`harp_external_lock_interval` | `0` | Seconds between refreshes of Lead Master locks for locations other than our own; `0`  disables
+`harp_external_lock_interval` | `0` | Seconds between refreshes of Lead Master locks for locations other than our own; `0` disables
 `harp_listen_port` | `5442` | Port for HARP router to listen on
 
 ## Consensus layer configuration
 
-HARP requires a consensus layer (sometimes known as `DCS layer`) to function.
+HARP requires a consensus layer (sometimes known as DCS layer) to function.
 This is set via `harp_consensus_protocol`, which currently can be one of `bdr`
 (default) or `etcd`.
 
