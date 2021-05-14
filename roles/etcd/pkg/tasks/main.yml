@@ -1,0 +1,13 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Install etcd packages
+  package:
+    name: "{{
+      etcd_packages|packages_for(ansible_os_family, etcd_package_version)
+    }}"
+    state: "{{
+      (etcd_package_version is defined)|ternary('present', 'latest')
+    }}"
+  tags: pkg

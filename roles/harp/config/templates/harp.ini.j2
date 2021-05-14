@@ -24,9 +24,18 @@ allow_lead = {{ harp_allow_lead|default(1 if inventory_hostname in first_bdr_pri
 
 # Time in milliseconds to require before routing to a newly promoted Lead Master is allowed.
 # 0 to disable.
-safety_interval = {{ harp_safety_interval|default(100) }}
+safety_interval = {{ harp_safety_interval|default(default_harp_safety_interval) }}
 
-consensus_protocol = bdr
+consensus_protocol = {{ harp_consensus_protocol|default('bdr') }}
+{% if harp_consensus_protocol == 'etcd' %}
+# Comma-delimited host:port location(s) of consensus pool entrypoints
+consensus_hostnames = {%- for h in groups['role_etcd'] -%}
+{%- set node_loc = hostvars[h].harp_location|default(hostvars[h].location) -%}
+{%- if node_loc == harp_location|default(hostvars[h].location) -%}
+{{h}}:2379,
+{%- endif -%}
+{% endfor %}
+{% endif %}
 
 # If not set, writes to STDOUT
 #log_location = 
@@ -40,21 +49,21 @@ consensus_protocol = bdr
 
 # Highest allowable variance between last recorded LSN of previous Lead Master and this node,
 # in bytes.
-maximum_lag = {{ harp_maximum_lag|default(1048576) }}
+maximum_lag = {{ harp_maximum_lag|default(default_harp_maximum_lag) }}
 
 # Highest allowable variance between last received LSN and applied LSN between this node and its CAMO
 # partner(s), in bytes.
-maximum_camo_lag = {{ harp_maximum_camo_lag|default(1048576) }}
+maximum_camo_lag = {{ harp_maximum_camo_lag|default(default_harp_maximum_camo_lag) }}
 
 # How many seconds the Lead Master lock will persist if not refreshed.
-lock_duration = {{ harp_lock_duration|default(15) }}
+lock_duration = {{ harp_lock_duration|default(default_harp_lock_duration) }}
 
 # Seconds between refreshes of the Lead Master lock.
-lock_interval = {{ harp_lock_interval|default(5) }}
+lock_interval = {{ harp_lock_interval|default(default_harp_lock_interval) }}
 
 # Seconds between refreshes of Lead Master locks for locations other than our own.
 # Can be used for inter-location failover. 0 to disable.
-external_lock_interval = {{ harp_external_lock_interval|default(0) }}
+external_lock_interval = {{ harp_external_lock_interval|default(default_harp_external_lock_interval) }}
 
 [router]
 

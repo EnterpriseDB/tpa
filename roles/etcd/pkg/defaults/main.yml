@@ -1,0 +1,7 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+etcd_packages:
+  RedHat:
+    - etcd

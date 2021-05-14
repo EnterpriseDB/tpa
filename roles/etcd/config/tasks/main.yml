@@ -1,0 +1,24 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Ensure /etc/etcd exists
+  file:
+    path: /etc/etcd
+    state: directory
+    owner: root
+    group: root
+  when: >
+    'etcd' in role
+
+- name: Install etcd.conf
+  template:
+    src: etcd.conf.j2
+    dest: /etc/etcd/etcd.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    Note etcd restart required
+  when: >
+    'etcd' in role

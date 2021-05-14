@@ -28,6 +28,14 @@
   tags: barman
 
 - include_role:
+    name: etcd/final
+    apply:
+      tags: etcd
+  when: >
+    'etcd' in role
+  tags: etcd
+
+- include_role:
     name: haproxy/final
     apply:
       tags: haproxy

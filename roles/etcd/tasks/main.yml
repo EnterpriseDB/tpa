@@ -1,0 +1,20 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- include_role:
+    name: etcd/pkg
+    apply:
+      tags: [etcd, pkg]
+  when: >
+    'etcd' in role
+    and platform not in ['shared']
+  tags: pkg
+
+- include_role:
+    name: etcd/config
+    apply:
+      tags: [etcd, config]
+  when: >
+    'etcd' in role
+

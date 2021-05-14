@@ -135,6 +135,7 @@ pgbouncer, and haproxy, according to the details of the architecture.
 
 * [Configure pgbouncer](pgbouncer.md)
 * [Configure haproxy](haproxy.md)
+* [Configure HARP](harp.md)
 
 ### Configuring and starting services
 

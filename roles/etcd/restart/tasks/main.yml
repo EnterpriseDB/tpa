@@ -1,0 +1,15 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- meta: flush_handlers
+
+- name: Start or restart etcd service
+  service:
+    name: etcd
+    state: "{{ etcd_service_end_state|default('started') }}"
+  become_user: root
+  become: yes
+  when: >
+    'etcd' in role
+  tags: [service, restart]

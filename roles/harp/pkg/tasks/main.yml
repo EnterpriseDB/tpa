@@ -6,3 +6,10 @@
   package:
     name: harp
     state: latest
+
+- name: Install Python etcd package
+  package:
+    name: python3-etcd
+    state: latest
+  when: >
+    harp_consensus_protocol == 'etcd'

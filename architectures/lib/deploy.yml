@@ -67,6 +67,14 @@
     tags: always
 
   - include_role:
+      name: etcd
+      apply:
+        tags: etcd
+    when:
+      groups['role_etcd']|default([]) is not empty
+    tags: always
+
+  - include_role:
       name: final
       apply:
         tags: final
