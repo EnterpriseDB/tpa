@@ -73,7 +73,7 @@
   apt_repository:
     repo: "{{ repo_entry }}"
     filename: "{{ r.filename|default(omit) }}"
-    mode: "{{ needs_auth|ternary(0600, 0644) }}"
+    mode: "{{ needs_auth|ternary('0600', '0644') }}"
     state: present
     update_cache: no
   with_items: "{{ apt_repository_list }}"
