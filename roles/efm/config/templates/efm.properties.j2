@@ -33,6 +33,8 @@ stop.failed.primary={{ efm_conf_settings['stop.failed.primary']|default(true) | 
 primary.shutdown.as.failure={{ efm_conf_settings['primary.shutdown.as.failure']|default(false) | bool }}
 {% if postgres_version is version('12', '>=') %}
 update.physical.slots.period={{ efm_conf_settings['update.physical.slots.period']|default(10) }}
+{% else %}
+update.physical.slots.period={{ efm_conf_settings['update.physical.slots.period']|default(0) }}
 {% endif %}
 ping.server.ip={{ efm_conf_settings['ping.server.ip']|default('8.8.8.8') }}
 ping.server.command={{ efm_conf_settings['ping.server.command']|default('/bin/ping -q -c3 -w5') }}
