@@ -6,7 +6,47 @@
 
 ### Notable changes
 
-- Support basic EFM deployment
+- Install under /opt/EDB/TPA (with a symlink from /opt/2ndQuadrant/TPA
+  for backwards compatibility)
+
+- Delay the activation of the `synchronous_standby_names` setting until
+  all expected replicas are running (but this applies only if you set it
+  directly under `vars`, and not under `postgres_conf_settings`)
+
+### Minor changes
+
+- Improve handling of custom commands by `tpaexec help`
+
+- Improve the build process for `tpa/xxx` docker images
+
+- Improve installation instructions, especially for MacOS X users
+
+- Enable etcd consensus layer support for HARP on RHEL/CentOS 7, with
+  support for other platforms in development
+
+- Avoid generating duplicate entries in /etc/hosts when changing the IP
+  addresses for existing instances
+
+- Set `server_login_retry` to 0 by default for pgbouncer to avoid a 15s
+  delay during failover
+
+### Bugfixes
+
+- Fix "Cannot find a valid baseurl for repo: pgdg94" errors after the
+  upstream removal of the pgdg94 repository
+
+- Install edb-asNN-server package to obtain pg_receivewal when using
+  Barman with EPAS (this is a workaround until pg_receivewal is made
+  available with the client package, as with Postgres)
+
+- Fix errors about haproxy_backend_servers not being defined on clusters
+  without haproxy instances
+
+- Fix some errors during deployment when TPAexec is installed in a path
+  that contains spaces
+
+- Fix "template error while templating string" error when installing
+  EPAS on Debian
 
 ## v21.1 (2021-03-01)
 
