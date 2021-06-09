@@ -99,7 +99,9 @@ default_bdr_node_group: bdrgroup
 default_postgres_install_dir: "/opt/postgres/{{ postgres_version }}"
 
 default_haproxy_bind_address: 127.0.0.1
-default_haproxy_port: 5432
+default_haproxy_port:
+  postgresql: 5432
+  epas: 5444
 default_haproxy_stats_socket: /var/lib/haproxy/stats
 default_pgbouncer_port: 6432
 default_pgbouncer_server_login_retry: 0
@@ -111,7 +113,9 @@ default_pgbouncer_server_login_retry: 0
 # as will max_connections to set pgbouncer_max_client_conn.
 
 default_pgbouncer_backend: 127.0.0.1
-default_pgbouncer_backend_port: 5432
+default_pgbouncer_backend_port:
+  postgresql: 5432
+  epas: 5444
 default_pgbouncer_max_client_conn: 100
 default_pgbouncer_auth_user: pgbouncer_auth_user
 

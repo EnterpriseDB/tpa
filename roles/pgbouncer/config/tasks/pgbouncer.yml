@@ -10,6 +10,26 @@
     mode: 0700
     state: directory
 
+- name: Ensure pgbouncer runtime directories exist
+  file:
+      path: "{{ item.path }}"
+      owner: "{{ postgres_user }}"
+      group: "{{ postgres_group }}"
+      mode: "{{ item.mode }}"
+      state: directory
+  with_items:
+      - {path: /var/log/pgbouncer, mode: '0775'}
+      - {path: /var/run/pgbouncer, mode: '0775'}
+
+- name: Install tmpfiles.d entries for pgbouncer runtime directories
+  copy:
+   dest: /usr/lib/tmpfiles.d/pgbouncer.conf
+   owner: root
+   group: root
+   mode: 0644
+   content: |
+       d /var/run/pgbouncer 0775 {{ postgres_user }} {{ postgres_group }} - -
+
 - name: Install pgbouncer.ini
   template:
     src: pgbouncer.ini.j2
