@@ -14,7 +14,7 @@
 #     0001-tpa_restart.conf
 #     1111-extensions.conf
 #     8888-{{ variable_name }}*.conf
-#     9900-role-settings.conf
+#     9900-tpa-postgres-conf-settings.conf
 #     9999-override.conf
 #
 # On every instance, we create pg_hba.conf and postgresql.conf, make the
@@ -195,6 +195,21 @@
     old: "{{ _include_dir }}/3333-bdr.conf"
     new: "{{ _include_dir }}/3334-camo.conf"
 
+# If 9900-role-settings.conf (old config file for storing settings specified via
+# postgres_conf_settings, new name 9900-tpa-postgres-conf-settings.conf) exists,
+# we move it to 9900-role-settings.bk without either a reload or a restart before
+# writing 9900-tpa-postgres-conf-settings.conf in the next task.
+- name: Move 9900-role-settings.conf to 9900-role-settings.bk if required
+  shell: >
+    test -f "{{ old }}" || exit 0;
+    test -f "{{ new }}" && exit 1;
+    mv "{{ old }}" "{{ new }}" && exit 99;
+  register: move
+  changed_when: move.rc == 99
+  vars:
+    old: "{{ _include_dir }}/9900-role-settings.conf"
+    new: "{{ _include_dir }}/9900-role-settings.bk"
+
 # If any settings were specified in postgres_conf_settings, we put that
 # into a separate configuration file. Note that we expect values in this
 # hash to be quoted properly; we don't try to quote them when writing
@@ -203,7 +218,7 @@
 - name: Generate configuration based on postgres_conf_settings (optional)
   template:
     src: settings.conf.j2
-    dest: "{{ _include_dir }}/9900-role-settings.conf"
+    dest: "{{ _include_dir }}/9900-tpa-postgres-conf-settings.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0644
