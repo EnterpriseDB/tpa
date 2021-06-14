@@ -200,6 +200,7 @@
 # postgres_conf_settings, new name 9900-tpa-postgres-conf-settings.conf) exists,
 # we move it to 9900-role-settings.bk without either a reload or a restart before
 # writing 9900-tpa-postgres-conf-settings.conf in the next task.
+
 - name: Move 9900-role-settings.conf to 9900-role-settings.bk if required
   shell: >
     test -f "{{ old }}" || exit 0;
