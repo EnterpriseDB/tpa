@@ -206,6 +206,7 @@
     mv "{{ old }}" "{{ new }}" && exit 99;
   register: move
   changed_when: move.rc == 99
+  failed_when: move.rc != 99 and move.rc != 1 and move.rc != 0
   vars:
     old: "{{ _include_dir }}/9900-role-settings.conf"
     new: "{{ _include_dir }}/9900-role-settings.bk"
