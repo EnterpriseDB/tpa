@@ -198,10 +198,10 @@
 
 # If 9900-role-settings.conf (old config file for storing settings specified via
 # postgres_conf_settings, new name 9900-tpa-postgres-conf-settings.conf) exists,
-# we move it to 9900-role-settings.bk without either a reload or a restart before
-# writing 9900-tpa-postgres-conf-settings.conf in the next task.
+# we move it to 9900-tpa-postgres-conf-settings.conf without either a reload or a
+# restart before writing 9900-tpa-postgres-conf-settings.conf in the next task.
 
-- name: Move 9900-role-settings.conf to 9900-role-settings.bk if required
+- name: Move 9900-role-settings.conf to 9900-tpa-postgres-conf-settings.conf if required
   shell: >
     test -f "{{ old }}" || exit 0;
     test -f "{{ new }}" && exit 1;
@@ -211,7 +211,7 @@
   failed_when: move.rc != 99 and move.rc != 1 and move.rc != 0
   vars:
     old: "{{ _include_dir }}/9900-role-settings.conf"
-    new: "{{ _include_dir }}/9900-role-settings.bk"
+    new: "{{ _include_dir }}/9900-tpa-postgres-conf-settings.conf"
 
 # If any settings were specified in postgres_conf_settings, we put that
 # into a separate configuration file. Note that we expect values in this
