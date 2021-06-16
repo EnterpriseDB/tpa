@@ -44,6 +44,9 @@ markdown_extensions:
       css_class: highlight
       guess_lang: true
 plugins:
+  - exclude:
+      glob:
+        - architectures/*
   - search
   - with-pdf:
       author: EnterpriseDB UK Limited
