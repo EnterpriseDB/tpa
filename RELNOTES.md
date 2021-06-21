@@ -8,15 +8,7 @@
 
 - Improve pgbouncer and HAProxy deployment to support EPAS flavor.
 
-- Update documentation to use latest BDR Always-ON architecure diagram
-
-- Rename role-settings.conf to tpa_postgres_conf_settings.conf. File is
-  used for overriding postgresql.conf settings.
-
-### Bugfixes
-
-- Fix 'non-zero return code' error when moving CAMOv1 settings to a
-  different file.
+- Update documentation to use latest BDR Always-ON architecture diagram
 
 ## v21.2 (2021-06-02)
 
