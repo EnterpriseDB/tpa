@@ -2,6 +2,14 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+## v21.3 (2021-06-21)
+
+### Minor changes
+
+- Improve pgbouncer and HAProxy deployment to support EPAS flavor.
+
+- Update documentation to use latest BDR Always-ON architecture diagram
+
 ## v21.2 (2021-06-02)
 
 ### Notable changes
