@@ -40,9 +40,9 @@ of Ansible functionality is at your disposal.
 
 ## How do I use it?
 
-[Select an architecture](architectures/README.md) for your cluster,
-e.g., M1 (a Postgres cluster with a single primary and multiple
-replicas), and do something like this:
+Select an architecture for your cluster,
+e.g., [M1](docs/architecture-M1.md) (a Postgres cluster with a single
+primary and multiple replicas), and do something like this:
 
 ```
 # Generate an initial configuration for the cluster. This command
