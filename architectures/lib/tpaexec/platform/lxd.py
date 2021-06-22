@@ -4,5 +4,6 @@
 
 from tpaexec.platform import Platform
 
+
 class lxd(Platform):
     pass

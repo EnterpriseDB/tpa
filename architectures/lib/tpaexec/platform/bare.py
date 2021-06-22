@@ -4,5 +4,6 @@
 
 from tpaexec.platform import Platform
 
+
 class bare(Platform):
     pass

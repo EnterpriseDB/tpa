@@ -33,8 +33,8 @@ from ansible.errors import AnsibleError, AnsibleUndefinedVariable
 from ansible.utils.listify import listify_lookup_plugin_terms
 from ansible.plugins.lookup import LookupBase
 
-class LookupModule(LookupBase):
 
+class LookupModule(LookupBase):
     def run(self, terms, variables=None, **kwargs):
 
         v = variables.copy()
@@ -44,7 +44,9 @@ class LookupModule(LookupBase):
         # array or a single value when evaluated.
 
         if len(terms) == 0:
-            raise AnsibleError("with_nested_dependents requires at least one element in the nested list")
+            raise AnsibleError(
+                "with_nested_dependents requires at least one element in the nested list"
+            )
 
         # We set the variable 'item' to an empty array and evaluate the first
         # term and recurse down the tree, re-evaluating sublists based on the
@@ -55,7 +57,7 @@ class LookupModule(LookupBase):
 
     def accumulate(self, v, items, current_term, terms):
 
-        v.update({'item': items})
+        v.update({"item": items})
 
         list = []
         results = []
@@ -68,8 +70,9 @@ class LookupModule(LookupBase):
                 expr = expr.strip()
                 convert_bare = True
 
-            list = self._templar.template(expr, cache=False,
-                fail_on_undefined=False, convert_bare=convert_bare)
+            list = self._templar.template(
+                expr, cache=False, fail_on_undefined=False, convert_bare=convert_bare
+            )
 
             if isinstance(list, str) or not isinstance(list, Iterable):
                 list = [list]
@@ -81,6 +84,6 @@ class LookupModule(LookupBase):
         else:
             for item in list:
                 sublist = self.accumulate(v, items + [item], terms[0], terms[1:])
-                results += [[item]+t for t in sublist]
+                results += [[item] + t for t in sublist]
 
         return results

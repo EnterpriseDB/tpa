@@ -4,6 +4,7 @@
 
 import sys, importlib
 
+
 class Platform(object):
     def __init__(self, name, arch):
         self.name = name
@@ -13,9 +14,9 @@ class Platform(object):
     @staticmethod
     def load(args, arch):
         name = Platform.guess_platform(args) or arch.default_platform()
-        module = 'tpaexec.platform.%s' % name
+        module = "tpaexec.platform.%s" % name
         if not importlib.util.find_spec(module):
-            print('ERROR: unknown platform: %s' % name, file=sys.stderr)
+            print("ERROR: unknown platform: %s" % name, file=sys.stderr)
             sys.exit(-1)
 
         p = getattr(__import__(module, fromlist=[name]), name)
@@ -26,14 +27,14 @@ class Platform(object):
     @staticmethod
     def guess_platform(args):
         for i, arg in enumerate(args):
-            if i > 0 and args[i-1] == '--platform':
+            if i > 0 and args[i - 1] == "--platform":
                 return arg
         return None
 
     # Returns a list of all platform names
     @staticmethod
     def all_platforms():
-        return ['aws', 'bare', 'docker', 'lxd', 'vagrant']
+        return ["aws", "bare", "docker", "lxd", "vagrant"]
 
     # Adds platform-specific options to the (relevant group in the) parser
     # (subclasses are expected to override this).

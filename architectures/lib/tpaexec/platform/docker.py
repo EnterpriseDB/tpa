@@ -6,18 +6,19 @@ from tpaexec.platform import Platform
 
 import os, sys, time
 
+
 class docker(Platform):
     def __init__(self, name, arch):
         super().__init__(name, arch)
         self.ccache = None
 
     def add_platform_options(self, p, g):
-        g.add_argument('--shared-ccache', metavar='PATH')
-        g.add_argument('--local-source-directories', nargs='+', metavar='NAME:PATH')
+        g.add_argument("--shared-ccache", metavar="PATH")
+        g.add_argument("--local-source-directories", nargs="+", metavar="NAME:PATH")
 
     def validate_arguments(self, args):
         errors = []
-        sources = args.get('local_source_directories') or []
+        sources = args.get("local_source_directories") or []
         installable = self.arch.installable_sources()
         local_sources = {}
 
@@ -27,36 +28,38 @@ class docker(Platform):
         # --install-from-source recognises.
 
         for s in sources:
-            if ':' not in s:
+            if ":" not in s:
                 errors.append("expected name:/path/to/source, got %s" % s)
                 continue
 
-            (name, vol) = s.split(':', 1)
+            (name, vol) = s.split(":", 1)
 
             if name.lower() not in installable.keys():
                 errors.append("doesn't know what to do with sources for '%s'" % name)
                 continue
 
-            parts = vol.split(':', 2)
+            parts = vol.split(":", 2)
 
             host_path = os.path.abspath(os.path.expanduser(parts[0]))
             if not os.path.isdir(host_path):
-                errors.append("can't find source directory for '%s': %s" % (name, host_path))
+                errors.append(
+                    "can't find source directory for '%s': %s" % (name, host_path)
+                )
                 continue
 
             dirname = name
-            if 'name' in installable[name]:
-                dirname = installable[name]['name']
+            if "name" in installable[name]:
+                dirname = installable[name]["name"]
 
-            container_path = '/opt/postgres/src/%s' % dirname
+            container_path = "/opt/postgres/src/%s" % dirname
             if len(parts) > 1:
                 container_path = parts[1]
 
-            flags = 'ro'
+            flags = "ro"
             if len(parts) > 2:
                 container_path = parts[2]
 
-            local_sources[name] = '%s:%s:%s' % (host_path, container_path, flags)
+            local_sources[name] = "%s:%s:%s" % (host_path, container_path, flags)
 
         if errors:
             for e in errors:
@@ -68,10 +71,10 @@ class docker(Platform):
         # containers in the cluster, so that it doesn't affect anything on the
         # host. Specify --shared-ccache to use a host directory instead.
 
-        if args.get('install_from_source'):
-            ccache = args.get('shared_ccache')
+        if args.get("install_from_source"):
+            ccache = args.get("shared_ccache")
             if ccache:
-                ccache = os.path.abspath(os.path.expanduser(args.get('shared_ccache')))
+                ccache = os.path.abspath(os.path.expanduser(args.get("shared_ccache")))
                 if not os.path.isdir(ccache):
                     try:
                         os.mkdir(ccache)
@@ -82,88 +85,98 @@ class docker(Platform):
                 # We don't have access to the cluster name here (it's set only
                 # in process_arguments), so we leave a '%s' to be filled in by
                 # update_instance_defaults() below.
-                ccache = 'ccache-%%s-%s' % time.strftime("%Y%m%d%H%M%S", time.localtime())
+                ccache = "ccache-%%s-%s" % time.strftime(
+                    "%Y%m%d%H%M%S", time.localtime()
+                )
 
-            self.ccache = '%s:/root/.ccache:rw' % ccache
+            self.ccache = "%s:/root/.ccache:rw" % ccache
 
-        args['local_sources'] = local_sources
+        args["local_sources"] = local_sources
 
     def supported_distributions(self):
         return [
-            'Debian', 'RedHat', 'Ubuntu',
+            "Debian",
+            "RedHat",
+            "Ubuntu",
         ]
 
     def default_distribution(self):
-        return 'RedHat'
+        return "RedHat"
 
     def image(self, label, **kwargs):
         image = {}
 
         if label in self.supported_distributions():
-            label = 'tpa/%s' % label.lower()
-            version = kwargs.get('version')
-            if version and version != 'latest':
+            label = "tpa/%s" % label.lower()
+            version = kwargs.get("version")
+            if version and version != "latest":
                 known_versions = {
-                    'tpa/debian': ['9', '10', 'stretch', 'buster'],
-                    'tpa/ubuntu': ['18.04', '20.04', 'bionic', 'focal'],
-                    'tpa/redhat': ['7', '8'],
+                    "tpa/debian": ["9", "10", "stretch", "buster"],
+                    "tpa/ubuntu": ["18.04", "20.04", "bionic", "focal"],
+                    "tpa/redhat": ["7", "8"],
                 }
 
                 if version not in known_versions[label]:
-                    print('ERROR: %s:%s is not supported' % (label, version), file=sys.stderr)
+                    print(
+                        "ERROR: %s:%s is not supported" % (label, version),
+                        file=sys.stderr,
+                    )
                     sys.exit(-1)
 
-                label = label + ':' + version
+                label = label + ":" + version
 
-        image['name'] = label
+        image["name"] = label
 
         return image
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
-        preferred_python_version = 'python3'
-        image = args['image']
+        preferred_python_version = "python3"
+        image = args["image"]
         if image:
             # Use tpa/redhat:7 by default for BDRv1 on RH, because we do not
             # publish packages for newer distributions. Specify `--os-version`
             # explicitly to override this decision.
-            if image['name'] == 'tpa/redhat' \
-                and cluster_vars.get('postgresql_flavour') == 'postgresql-bdr':
-                image['name'] = 'tpa/redhat:7'
-            if image['name'] in ['centos/systemd', 'tpa/redhat:7']:
-                preferred_python_version = 'python2'
-        cluster_vars['preferred_python_version'] = \
-            cluster_vars.get('preferred_python_version', preferred_python_version)
-        cluster_vars['use_volatile_subscriptions'] = True
+            if (
+                image["name"] == "tpa/redhat"
+                and cluster_vars.get("postgresql_flavour") == "postgresql-bdr"
+            ):
+                image["name"] = "tpa/redhat:7"
+            if image["name"] in ["centos/systemd", "tpa/redhat:7"]:
+                preferred_python_version = "python2"
+        cluster_vars["preferred_python_version"] = cluster_vars.get(
+            "preferred_python_version", preferred_python_version
+        )
+        cluster_vars["use_volatile_subscriptions"] = True
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
-        y = self.arch.load_yaml('platforms/docker/instance_defaults.yml.j2', args)
+        y = self.arch.load_yaml("platforms/docker/instance_defaults.yml.j2", args)
         if y:
             if self.ccache:
-                sources = y.get('local_source_directories', [])
-                if '%s' in self.ccache:
-                    sources.append(self.ccache % args['cluster_name'])
+                sources = y.get("local_source_directories", [])
+                if "%s" in self.ccache:
+                    sources.append(self.ccache % args["cluster_name"])
                 else:
                     sources.append(self.ccache)
-                y['local_source_directories'] = sources
+                y["local_source_directories"] = sources
             instance_defaults.update(y)
 
     def update_instances(self, instances, args, **kwargs):
         for i in instances:
             newvolumes = []
-            volumes = i.get('volumes', [])
+            volumes = i.get("volumes", [])
             for v in volumes:
-                if 'volume_type' in v and v['volume_type'] == 'none':
+                if "volume_type" in v and v["volume_type"] == "none":
                     pass
                 else:
                     newvolumes.append(v)
             if volumes:
-                i['volumes'] = newvolumes
+                i["volumes"] = newvolumes
 
     def process_arguments(self, args):
-        s = args.get('platform_settings') or {}
+        s = args.get("platform_settings") or {}
 
-        docker_images = args.get('docker_images')
+        docker_images = args.get("docker_images")
         if docker_images:
-            s['docker_images'] = docker_images
+            s["docker_images"] = docker_images
 
-        args['platform_settings'] = s
+        args["platform_settings"] = s

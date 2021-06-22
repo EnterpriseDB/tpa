@@ -3,9 +3,10 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: postgresql_query
 short_description: Query a Postgres server
@@ -47,9 +48,9 @@ notes:
      Ansible that has limited support for the data types it can handle.
 requirements: [ psycopg2 ]
 author: "Abhijit Menon-Sen <ams@2ndQuadrant.com>"
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - postgresql_query:
     query: SELECT 42 as a
     conninfo: "dbname=postgres"
@@ -69,9 +70,9 @@ EXAMPLES = '''
 - debug: msg="also {{ query.rowcount }} rows"
   when:
     query.rowcounts|length == 1
-'''
+"""
 
-RETURN = '''
+RETURN = """
 rowcounts:
     description: An array of rowcounts from each query executed.
     type: list
@@ -97,7 +98,7 @@ results:
             "b": 31
         }
     ]
-'''
+"""
 
 from ansible.module_utils.six import string_types
 import traceback
@@ -111,17 +112,18 @@ except ImportError:
 else:
     psycopg2_found = True
 
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
             conninfo=dict(default=""),
-            queries=dict(type='list'),
-            query=dict(type='str'),
-            autocommit=dict(type='bool', default=False),
+            queries=dict(type="list"),
+            query=dict(type="str"),
+            autocommit=dict(type="bool", default=False),
         ),
-        required_one_of=[['query','queries']],
-        mutually_exclusive=[['query','queries']],
-        supports_check_mode = True
+        required_one_of=[["query", "queries"]],
+        mutually_exclusive=[["query", "queries"]],
+        supports_check_mode=True,
     )
 
     if not psycopg2_found:
@@ -131,25 +133,32 @@ def main():
     try:
         conn = psycopg2.connect(dsn=conninfo)
     except Exception as e:
-        module.fail_json(msg="Could not connect to database",
-            err=str(e), exception=traceback.format_exc())
+        module.fail_json(
+            msg="Could not connect to database",
+            err=str(e),
+            exception=traceback.format_exc(),
+        )
 
     autocommit = module.params["autocommit"]
     if autocommit:
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
-    queries = module.params['queries'] or module.params['query']
+    queries = module.params["queries"] or module.params["query"]
     if isinstance(queries, string_types):
         queries = [queries.strip()]
-        if queries[0].startswith('['):
-            module.fail_json(msg="you probably didn't mean to pass this query as a list")
-        if queries[0].startswith('{'):
-            module.fail_json(msg="you probably didn't mean to pass this query as a dict")
+        if queries[0].startswith("["):
+            module.fail_json(
+                msg="you probably didn't mean to pass this query as a list"
+            )
+        if queries[0].startswith("{"):
+            module.fail_json(
+                msg="you probably didn't mean to pass this query as a dict"
+            )
 
     m = dict()
     changed = False
 
-    m['queries'] = queries
+    m["queries"] = queries
 
     results = []
     rowcounts = []
@@ -160,22 +169,31 @@ def main():
             text = q
             args = []
             if isinstance(q, dict):
-                text = q['text']
-                args = q.get('args', [])
+                text = q["text"]
+                args = q.get("args", [])
                 if args:
-                    args = list(map(lambda s: s if not (isinstance(s, str) and
-                        s.startswith('__omit_place_holder__')) else None, args))
-                    q['args'] = args
+                    args = list(
+                        map(
+                            lambda s: s
+                            if not (
+                                isinstance(s, str)
+                                and s.startswith("__omit_place_holder__")
+                            )
+                            else None,
+                            args,
+                        )
+                    )
+                    q["args"] = args
 
             cur.execute(text, args)
 
-            res=[]
+            res = []
             if cur.description is not None:
                 column_names = [desc[0] for desc in cur.description]
                 for row in cur:
                     res.append(dict(list(zip(column_names, row))))
             elif cur.rowcount:
-                changed=True
+                changed = True
 
             rowcounts.append(cur.rowcount)
             results.append(res)
@@ -185,8 +203,12 @@ def main():
             conn.rollback()
         except psycopg2.InterfaceError:
             pass
-        module.fail_json(msg="Database query failed",
-            err=str(e), exception=traceback.format_exc(), **m)
+        module.fail_json(
+            msg="Database query failed",
+            err=str(e),
+            exception=traceback.format_exc(),
+            **m
+        )
     else:
         if module.check_mode:
             conn.rollback()
@@ -198,14 +220,15 @@ def main():
     if len(results) == 1 and len(results[0]) == 1:
         m.update(results[0])
 
-    m['rowcounts'] = rowcounts
+    m["rowcounts"] = rowcounts
     if len(rowcounts) == 1:
-        m['rowcount'] = rowcounts[0]
+        m["rowcount"] = rowcounts[0]
 
     module.exit_json(changed=changed, results=results, **m)
+
 
 from ansible.module_utils.basic import *
 from ansible.module_utils.database import *
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
