@@ -38,6 +38,18 @@ file is all you will need to set up your cluster.
 If you ever need to extend the functionality of TPAexec, the full range
 of Ansible functionality is at your disposal.
 
+## Installation
+
+To use TPAexec, you need to install tpaexec and run the `tpaexec setup`
+command. Please use the [TPAexec packages](docs/INSTALL.md) if they are
+available for your platform.
+
+If you have an EDB Github account that gives you access to the TPAexec
+repository, and you want to use TPAexec on MacOS X or another platform
+for which packages are not available, you can [install it from
+source](INSTALL-repo.md) or [run it inside a Docker
+container](INSTALL-docker.md).
+
 ## How do I use it?
 
 Select an architecture for your cluster,

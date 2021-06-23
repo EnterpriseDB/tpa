@@ -13,11 +13,6 @@ distributions provide a usable Python 3.6+ environment out of the box,
 which TPAexec requires. (However, TPAexec supports a wider range of
 [distributions on target instances](distributions.md).)
 
-If you want to use TPAexec on MacOS X or another platform for which
-packages are not available, you can [install it from
-source](INSTALL-repo.md) or [run it inside a Docker
-container](INSTALL-docker.md).
-
 ## Quickstart
 
 First, [subscribe to the TPAexec package repository](https://access.2ndquadrant.com/software_subscriptions/add/products/tpa/)
@@ -72,10 +67,6 @@ installed.
 
 We mention `sudo` here only to indicate which commands need root
 privileges. You may use any other means to run the commands as root.
-
-(If you have been given access to the TPA source code repository and
-specifically advised to use it, please see the
-[source installation instructions](INSTALL-repo.md) instead.)
 
 ## Python environment
 
