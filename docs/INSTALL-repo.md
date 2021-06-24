@@ -31,8 +31,8 @@ $ sudo yum install python36 python3-pip \
       pwgen epel-release git openvpn patch
 
 # MacOS X
-$ sudo brew tap discoteq/discoteq
-$ sudo brew install python@3 pwgen openvpn flock coreutils gpatch git
+$ brew tap discoteq/discoteq
+$ brew install python@3 pwgen openvpn flock coreutils gpatch git
 ```
 
 Next, install TPAexec itself:
