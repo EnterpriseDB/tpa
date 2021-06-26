@@ -35,6 +35,22 @@
       yum_repository_list|default(default_yum_repository_list)
     }}"
 
+# If we install the EDB repository RPM, all subsequent yum operations
+# will fail until we add authentication information to the baseurl in
+# edb.repo. So if EDB is in the list, we move it to the end, so that
+# other repositories can be installed, and the authentication can be
+# configured by subsequent tasks.
+
+- set_fact:
+    yum_repository_list: "{{
+      yum_repository_list
+      |reject('equalto', 'EDB')
+      |list|union(['EDB'])
+    }}"
+  when:
+    - "'EDB' in yum_repository_list"
+    - yum_repository_list|last != 'EDB'
+
 - assert:
     msg: >
       Export EDB_REPO_CREDENTIALS_FILE to use the EDB repository
