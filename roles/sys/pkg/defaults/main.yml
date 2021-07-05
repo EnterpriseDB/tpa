@@ -78,7 +78,8 @@ default_packages:
     - strace
     - gdb
     - iotop
-    - screen
+    # screen is no longer available on RHEL 8
+    - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int >= 8)|ternary('tmux', 'screen') }}"
     - dstat
     - openssh-server
     - openssl
