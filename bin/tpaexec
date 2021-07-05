@@ -104,6 +104,7 @@ _create_and_activate_venv() {
         fi
         if ! python3 -m venv "$vpath"; then
             rm -rf "$vpath"
+            error "couldn't initialise $vpath using 'python3 -m venv'"
         fi
     fi
 
