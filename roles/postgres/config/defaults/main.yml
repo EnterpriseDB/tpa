@@ -16,20 +16,6 @@ postgres_hba_settings: []
 postgres_conf_template: ''
 postgres_conf_settings: {}
 
-default_postgres_extensions:
-  - pg_stat_statements
-  - pg_freespacemap
-  - pg_visibility
-  - pageinspect
-  - pgstattuple
-
-extra_postgres_extensions: []
-
-bdr_extensions:
-  - btree_gist
-  - bdr
-  - autoscale
-
 # If any of these extensions is present in postgres_extensions (or
 # extra_postgres_extensions, etc.), it will also need an entry in
 # shared_preload_libraries.
