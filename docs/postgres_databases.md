@@ -15,6 +15,12 @@ cluster_vars:
     lc_collate: de_DE.UTF-8
     lc_ctype: de_DE.UTF-8
     template: template0
+    extensions:
+    - name: hstore
+    - name: dblink
+    languages:
+    - name: plperl
+    - name: plpython
 ```
 
 The example above would create two databases (apart from any databases
@@ -32,3 +38,10 @@ The `encoding`, `lc_collate`, and `lc_ctype` values default to the
 use the target system's LC_ALL or LANG setting). If you are creating a
 database with non-default locale settings, you will also need to specify
 `template: template0`.
+
+You can specify optional lists of `extensions` and `languages` to create
+within each database (in addition to any extensions or languages
+inherited from the template database). Any packages required must be
+installed already, for example by including them in
+[`extra_postgres_packages`](postgres_installation_method_pkg.md).
+

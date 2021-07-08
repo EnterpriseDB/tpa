@@ -118,7 +118,7 @@
     lc_collate: "{{ db.lc_collate|default(omit) }}"
     lc_ctype: "{{ db.lc_ctype|default(omit) }}"
     template: "{{ db.template|default(omit) }}"
-    state: present
+    state: "{{ db.state|default('present') }}"
   with_items: "{{ postgres_databases }}"
   loop_control:
     loop_var: db
@@ -126,6 +126,53 @@
       {{ db.name }}
   become_user: "{{ postgres_user }}"
   become: yes
+
+# Apart from the extensions we create in template1 (which are inherited
+# by every other database), each entry in postgres_databases can also
+# specify a list of extensions to create in only that database.
+
+- name: Create extensions in each database
+  postgresql_ext:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    db: "{{ item.0.name }}"
+    name: "{{ item.1.name }}"
+    state: "{{ item.1.state|default('present') }}"
+    schema: "{{ item.1.schema|default(omit) }}"
+    cascade: "{{ item.1.cascade|default(omit) }}"
+    session_role: "{{ item.1.session_role|default(omit) }}"
+  with_nested_dependents:
+    - postgres_databases
+    - item.0.get("extensions", [])
+  loop_control:
+    label: >-
+      {{ item.0.name }}/{{ item.1.name }}
+  become_user: "{{ postgres_user }}"
+  become: true
+
+# We do likewise for any languages listed in postgres_databases. This
+# just issues "CREATE LANGUAGE" commands; if any packages are required,
+# they must already be installed, e.g., through extra_postgres_packages.
+
+- name: Create languages in each database
+  postgresql_lang:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    db: "{{ item.0.name }}"
+    name: "{{ item.1.name }}"
+    trust: "{{ item.1.trust|default(omit) }}"
+    state: "{{ item.1.state|default('present') }}"
+    cascade: "{{ item.1.cascade|default(omit) }}"
+    session_role: "{{ item.1.session_role|default(omit) }}"
+    fail_on_drop: "{{ item.1.fail_on_drop|default(omit) }}"
+  with_nested_dependents:
+    - postgres_databases
+    - item.0.get("languages", [])
+  loop_control:
+    label: >-
+      {{ item.0.name }}/{{ item.1.name }}
+  become_user: "{{ postgres_user }}"
+  become: true
 
 # Since we may have changed the Postgres configuration, we repeat the
 # cluster discovery process that was done at the beginning (roles/init).
