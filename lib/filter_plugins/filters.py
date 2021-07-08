@@ -500,6 +500,15 @@ def physical_replication_group(h, hostvars):
     return instance_and_all_descendants(h)
 
 
+# Given an item and a key, returns a dict that maps from the key to the item.
+# Meant to be used as ['x','y','z']|map('dictify', 'name')|list to obtain
+# [{'name': 'x'}, {'name': 'y'}, {'name': 'z'}].
+
+
+def dictify(item, key="name"):
+    return {key: item}
+
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -527,4 +536,5 @@ class FilterModule(object):
             "dict_format": dict_format,
             "ternary_format": ternary_format,
             "physical_replication_group": physical_replication_group,
+            "dictify": dictify,
         }

@@ -30,7 +30,9 @@
       shared_preload_libraries|default([])|union([item])
     }}"
   with_items: "{{ _preload_extensions }}"
-  when: item in postgres_extensions
+  when:
+    item in postgres_extensions
+    or (item == 'bdr' and 'bdr' in role)
 
 - name: Add repmgr to shared_preload_libraries if required
   set_fact:
