@@ -15,3 +15,20 @@
 - include_tasks: pgbouncer.yml
   when: >
     'replica' not in role
+
+# If the bdr extension has been created in template1 and inherited by
+# other databases (which is how we used to set it up), we should drop
+# the extension in all but bdr_database.
+
+- include_tasks: bdr-extension.yml
+  vars:
+    dbs_with_unused_bdr_extension: "{{
+      cluster_facts.databases.values()
+      |selectattr('bdr', 'defined')
+      |selectattr('bdr.node', 'empty')
+      |list
+    }}"
+  when: >
+    'bdr' in role
+    and 'primary' in role
+    and dbs_with_unused_bdr_extension is not empty

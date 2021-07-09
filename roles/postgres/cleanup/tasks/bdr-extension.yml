@@ -1,0 +1,22 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Remove unused bdr extension
+  postgresql_ext:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    db: "{{ item.key }}"
+    name: bdr
+    state: absent
+    cascade: yes
+  with_dict: "{{ cluster_facts.databases }}"
+  loop_control:
+    label: >-
+      {{ item.key }}
+  when:
+  - item.key != bdr_database
+  - item.value.bdr is defined
+  - item.value.bdr.node is empty
+  become_user: "{{ postgres_user }}"
+  become: yes
