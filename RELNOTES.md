@@ -2,6 +2,25 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+## v21.4 (2021-07-09)
+
+### Minor changes
+
+- Remove bdr extension from databases other than bdr_database where it
+  is unused (it used to be created in template1 and inherited by other
+  databases earlier, but the BDR developers advised against this)
+
+- Allow `postgres_databases` to specify extensions and languages to
+  create within a single database (and this mechanism is now used to
+  create the bdr extension only in bdr_database)
+
+- Improve installation instructions
+
+### Bugfixes
+
+- Install tmux instead of the deprecated screen on RHEL8 (though the
+  screen package is available in EPEL, as before)
+
 ## v21.3 (2021-06-21)
 
 ### Minor changes
