@@ -35,10 +35,19 @@ frontend lua_agent
     tcp-request content use-service lua.agent
 {% endif %}
 
+{% if not enable_harp %}
+peers {{ location }}
+{% for h in groups['role_haproxy'] %}
+{%   if hostvars[h].location == location %}
+    peer {{ h }} {{ hostvars[h].ip_address }}:10000
+{%   endif %}
+{% endfor %}
+{% endif %}
+
 backend be
     mode tcp
 
-    stick-table type ip size 1
+    stick-table type ip size 1 {% if not enable_harp %}peers {{ location }}{% endif %}
 
     stick on dst
 
