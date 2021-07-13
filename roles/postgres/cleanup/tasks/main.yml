@@ -24,7 +24,7 @@
   vars:
     dbs_with_unused_bdr_extension: "{{
       cluster_facts.databases.values()
-      |selectattr('bdr', 'defined')
+      |selectattr('bdr.node', 'defined')
       |selectattr('bdr.node', 'empty')
       |list
     }}"
