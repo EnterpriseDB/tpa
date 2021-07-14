@@ -11,7 +11,7 @@ TPAexec will generate `/etc/bdr3/harp.ini` with the appropriate
 instance-specific settings, with other settings set to the respective
 default values.
 
-See the [HARP documentation](https://documentation.2ndquadrant.com/harp/release/latest/configuration/)
+See the [HARP documentation](https://documentation.enterprisedb.com/harp/release/latest/configuration/)
 for more details on HARP configuration.
 
 The following variables can be set for any HARP instance:

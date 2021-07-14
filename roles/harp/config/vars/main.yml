@@ -4,7 +4,7 @@
 
 # HARP default configuration values
 #
-# See: https://documentation.2ndquadrant.com/harp/release/latest/configuration/
+# See: https://documentation.enterprisedb.com/harp/release/latest/configuration/
 default_harp_safety_interval: 100
 default_harp_maximum_lag: 1048576
 default_harp_maximum_camo_lag: 1048576
