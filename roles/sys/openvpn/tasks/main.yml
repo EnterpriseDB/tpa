@@ -72,8 +72,15 @@
   when: >
     'openvpn-server' not in role
 
+# Now that openvpn is up and running, we override the main IP address
+# for the instances so that the correct IP shows up in /etc/hosts.
+
 - name: Override primary IP address
   set_fact:
     ip_address: "{{ openvpn_ip }}"
     ip_addresses: ['public_ip', 'private_ip', 'openvpn_ip']
   tags: always
+
+- include_role:
+    name: facts
+    tasks_from: sys.yml

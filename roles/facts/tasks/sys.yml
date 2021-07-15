@@ -7,6 +7,10 @@
 # we aggregate them so that each host has its own lines as well as the
 # lines for all the other hosts in the cluster.
 
+- set_fact:
+    my_hosts_lines: []
+    default_etc_hosts_lines: []
+
 - name: Set main /etc/hosts entry
   set_fact:
     my_hosts_lines: "{{ [main_hosts_line] }}"
@@ -31,5 +35,3 @@
       default_etc_hosts_lines|union(hostvars[item].my_hosts_lines)
     }}"
   with_items: "{{ groups[cluster_tag]|sort_by_node(hostvars) }}"
-  vars:
-    default_etc_hosts_lines: []
