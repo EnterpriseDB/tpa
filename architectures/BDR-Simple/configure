@@ -50,7 +50,7 @@ class BDR_Simple(BDR):
             bdr_version = self.args.get('bdr_version') or '1'
         elif postgres_version == '9.6':
             bdr_version = self.args.get('bdr_version') or '2'
-        elif postgres_version in ['10', '11', '12']:
+        elif postgres_version in ['10', '11', '12', '13']:
             bdr_version = self.args.get('bdr_version') or '3'
         elif postgres_version is None:
             bdr_version = self.args.get('bdr_version')
@@ -71,7 +71,7 @@ class BDR_Simple(BDR):
 
         supported_combinations = [
             ('9.4', '1'), ('9.4', '2'), ('9.6', '2'), ('10', '3'), ('11', '3'),
-            ('12', '3'),
+            ('12', '3'), ('13', '3'),
         ]
 
         if (postgres_version, bdr_version) not in supported_combinations:
