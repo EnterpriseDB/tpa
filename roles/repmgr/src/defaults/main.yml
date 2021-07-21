@@ -2,7 +2,7 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-repmgr_git_url: git://github.com/2ndQuadrant/repmgr.git
+repmgr_git_url: git://github.com/EnterpriseDB/repmgr.git
 repmgr_git_ref: "REL5_2_STABLE"
 repmgr_git_reference_repo: ""
 
