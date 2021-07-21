@@ -20,7 +20,7 @@
     if [[ ! -d /usr/share/2ndquadrant-repository-keys ]]; then
       for f in /etc/apt/sources.list.d/2ndquadrant-*; do
         if [[ -e "$f" ]]; then
-          curl https://dl.2ndquadrant.com/gpg-key.asc | apt-key add - &&
+          curl https://dl.enterprisedb.com/gpg-key.asc | apt-key add - &&
           (apt-get update || true) &&
           apt-get install -y 2ndquadrant-repository-keys;
           break;

@@ -144,8 +144,8 @@
     volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
     urltemplate: "{{
       (item == 'dl/default/release')|ternary(
-        'https://access.2ndquadrant.com/api/repository/{label}/deb{volatile}',
-        'https://access.2ndquadrant.com/api/repository/{token}/{label}/deb{volatile}'
+        'https://techsupport.enterprisedb.com/api/repository/{label}/deb{volatile}',
+        'https://techsupport.enterprisedb.com/api/repository/{token}/{label}/deb{volatile}'
       )
     }}"
     url: >-

@@ -26,7 +26,7 @@
 #       {,2ndQ}Postgres 9.6
 # BDR3: {,2ndQ}Postgres 10+ only
 #
-# https://access.2ndquadrant.com/kb/a/comparison-of-logical-replication-solutions/
+# https://techsupport.enterprisedb.com/kb/a/comparison-of-logical-replication-solutions/
 #
 # We don't try to second-guess the decision taken by postgres/pkg about
 # which versions of Postgres and BDR to install. We just detect what is
