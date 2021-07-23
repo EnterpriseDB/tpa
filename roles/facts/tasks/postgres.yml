@@ -136,9 +136,10 @@
     default_bdr_database_entry:
       name: "{{ bdr_database }}"
       owner: "{{ postgres_user }}"
-      extensions: "{{
-        bdr_extensions|map('dictify', 'name')|list
-      }}"
+      extensions:
+      - name: btree_gist
+      - name: bdr
+        cascade: true
     bdr_database_entry: >-
       {{ postgres_databases|json_query("[?name=='%s']" % bdr_database) }}
   when: >

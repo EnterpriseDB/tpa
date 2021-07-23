@@ -58,10 +58,6 @@ default_postgres_extensions:
   - pageinspect
   - pgstattuple
 
-bdr_extensions:
-  - btree_gist
-  - bdr
-
 default_postgres_users: []
 default_postgres_databases: []
 
