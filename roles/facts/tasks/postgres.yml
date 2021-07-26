@@ -6,7 +6,7 @@
   set_fact:
     default_postgresql_flavour: 2q
   when: >
-    _repos is search('bdr_enterprise') or _repos is search('2ndqpostgres'))
+    _repos is search('bdr_enterprise') or _repos is search('2ndqpostgres')
   vars:
     _repos: "{{ tpa_2q_repositories|default([])|map('lower')|join(',') }}"
 
