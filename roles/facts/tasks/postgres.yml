@@ -2,9 +2,17 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-- name: Set postgresql_flavour and postgres_family
+- name: Infer default_postgresql_flavour from configured repositories
   set_fact:
-    postgresql_flavour: "{{ _flavour }}"
+    default_postgresql_flavour: 2q
+  when: >
+    _repos is search('bdr_enterprise') or _repos is search('2ndqpostgres'))
+  vars:
+    _repos: "{{ tpa_2q_repositories|default([])|map('lower')|join(',') }}"
+
+- name: Set postgres_family and postgresql_flavour
+  set_fact:
+    postgresql_flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
     postgres_family: "{{ (_flavour == 'epas')|ternary('epas', 'postgresql') }}"
   vars:
     _flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
