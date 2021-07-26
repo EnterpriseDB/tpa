@@ -78,4 +78,4 @@ For more details, please consult the
 [installation instructions](docs/INSTALL.md) and
 [documentation](docs/index.md).
 
-Write to tpa@2ndQuadrant.com for help.
+Write to tpa@enterprisedb.com for help.

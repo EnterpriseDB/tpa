@@ -2,7 +2,7 @@
 
 FROM debian:buster
 
-MAINTAINER 2ndQuadrant <info@2ndQuadrant.com>
+MAINTAINER EnterpriseDB <tpa@enterprisedb.com>
 
 # Set up repositories and install packages, including the Docker CE CLI
 # (https://docs.docker.com/engine/install/debian/).

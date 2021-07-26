@@ -466,7 +466,7 @@ info() {
             doc=$TPA_DIR/$subcommand/README.md
             if [[ ! -f $doc ]]; then
                 echo "Sorry, no documentation available for $subcommand"
-                echo "Please contact tpa@2ndQuadrant.com for assistance"
+                echo "Please contact tpa@enterprisedb.com for assistance"
                 exit 1
             fi
             $PAGER "$doc"
