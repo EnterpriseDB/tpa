@@ -17,7 +17,7 @@ On Debian and Ubuntu systems, it will use the APT repository, and on
 RedHat systems, it will use the YUM repository.
 
 To use
-[2ndQuadrant repositories](https://access.2ndquadrant.com/customer_portal/sw/),
+[2ndQuadrant repositories](https://techsupport.enterprisedb.com/customer_portal/sw/),
 you must `export TPA_2Q_SUBSCRIPTION_TOKEN=xxx` before you run
 tpaexec. You can get your subscription token from the 2ndQuadrant
 Portal, under "Company info" in the left menu, then "Company". Some

@@ -15,7 +15,7 @@ which TPAexec requires. (However, TPAexec supports a wider range of
 
 ## Quickstart
 
-First, [subscribe to the TPAexec package repository](https://access.2ndquadrant.com/software_subscriptions/add/products/tpa/)
+First, [subscribe to the TPAexec package repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
 through the 2ndQuadrant Portal.
 
 Then run the following commands:
@@ -47,7 +47,7 @@ $ sudo ntpdate pool.ntp.org
 
 ## Packages
 
-[Subscribe to the "products/tpa/release" repository](https://access.2ndquadrant.com/software_subscriptions/add/products/tpa/)
+[Subscribe to the "products/tpa/release" repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
 to install the latest TPAexec packages.
 (Login to the 2ndQuadrant Portal, add a subscription under
 Support/Software/Subscriptions, and follow the instructions to enable
