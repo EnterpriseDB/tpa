@@ -2,6 +2,20 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+## v21.5 (2021-07-26)
+
+### Minor changes
+
+- Allow Postgres 13 and BDR3 as a supported combination
+
+### Bugfixes
+
+- Correctly create the bdr extension in the default 'edb' database on EPAS
+
+- Set up /etc/hosts to use openvpn IPs for cluster instances when openvpn
+  is used in the cluster. This used to work correctly, but was a recent
+  regression.
+
 ## v21.4 (2021-07-09)
 
 ### Minor changes
