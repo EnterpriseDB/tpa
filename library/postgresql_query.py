@@ -98,10 +98,24 @@ results:
             "b": 31
         }
     ]
+runtimes:
+    description: An array of runtimes (in seconds) from each query executed.
+    type: list
+    sample: [
+        0.003,
+        1.232,
+        0.015
+    ]
+runtime:
+    description: If only one query was executed, the runtime is set separately
+    as a single floating-point number (in addition to the 'runtimes' array).
+    type: float
+    sample: 42.321
 """
 
 from ansible.module_utils.six import string_types
 import traceback
+import time
 
 try:
     import psycopg2
@@ -161,6 +175,7 @@ def main():
     m["queries"] = queries
 
     results = []
+    runtimes = []
     rowcounts = []
     try:
         for q in queries:
@@ -185,7 +200,9 @@ def main():
                     )
                     q["args"] = args
 
+            starttime = time.time()
             cur.execute(text, args)
+            runtime = round(time.time() - starttime, 3)
 
             res = []
             if cur.description is not None:
@@ -197,6 +214,7 @@ def main():
 
             rowcounts.append(cur.rowcount)
             results.append(res)
+            runtimes.append(runtime)
             cur.close()
     except Exception as e:
         try:
@@ -220,6 +238,9 @@ def main():
     if len(results) == 1 and len(results[0]) == 1:
         m.update(results[0])
 
+    m["runtimes"] = runtimes
+    if len(runtimes) == 1:
+        m["runtime"] = runtimes[0]
     m["rowcounts"] = rowcounts
     if len(rowcounts) == 1:
         m["rowcount"] = rowcounts[0]
