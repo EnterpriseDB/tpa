@@ -29,7 +29,7 @@ Double-check the created image:
 $ docker image ls tpa/tpaexec
 REPOSITORY    TAG       IMAGE ID       CREATED         SIZE
 tpa/tpaexec   latest    e145cf8276fb   8 seconds ago   1.73GB
-$ docker rm --rm tpa/tpaexec tpaexec info
+$ docker run --rm tpa/tpaexec tpaexec info
 # TPAexec v20.11-59-g85a62fe3 (branch: master)
 tpaexec=/usr/local/bin/tpaexec
 TPA_DIR=/opt/EDB/TPA
