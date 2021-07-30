@@ -47,8 +47,8 @@ available for your platform.
 If you have an EDB Github account that gives you access to the TPAexec
 repository, and you want to use TPAexec on MacOS X or another platform
 for which packages are not available, you can [install it from
-source](INSTALL-repo.md) or [run it inside a Docker
-container](INSTALL-docker.md).
+source](docs/INSTALL-repo.md) or [run it inside a Docker
+container](docs/INSTALL-docker.md).
 
 ## How do I use it?
 
