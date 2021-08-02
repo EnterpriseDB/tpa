@@ -7,97 +7,221 @@ from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
 
-# This table is distilled from the content at
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html#instance-store-volumes
-# https://aws.amazon.com/ec2/instance-types/
+#
+# This table maps instance types to the number of instance store volumes
+# (formerly known as ephemeral volumes) they have.
+#
+# Run the following command to update the contents of this table:
+#
+# aws ec2 describe-instance-types --output text \
+#     --filters Name=instance-storage-supported,Values=true \
+#     --query 'InstanceTypes[*].[InstanceType,InstanceStorageInfo.Disks[*].Count]' \
+# | while read instance && read numvols; do echo "\"$instance\": $numvols,"; done
+# | sed 's/^/    /'
+# | sort
 
 ephemeral_storage = {
-    "c1.medium": 1,  # 350 GB† HDD
-    "c1.xlarge": 4,  # 420 GB (1.6 TB) HDD
-    "c3.large": 2,  # 16 GB (32 GB) SSD
-    "c3.xlarge": 2,  # 40 GB (80 GB) SSD
-    "c3.2xlarge": 2,  # 80 GB (160 GB) SSD
-    "c3.4xlarge": 2,  # 160 GB (320 GB) SSD
-    "c3.8xlarge": 2,  # 320 GB (640 GB) SSD
-    "c5d.large": 1,  # 50 GB NVMe SSD
-    "c5d.xlarge": 1,  # 100 GB NVMe SSD
-    "c5d.2xlarge": 1,  # 200 GB NVMe SSD
-    "c5d.4xlarge": 1,  # 400 GB NVMe SSD
-    "c5d.9xlarge": 1,  # 900 GB NVMe SSD
-    "c5d.18xlarge": 2,  # 900 GB (1.8 TB) NVMe SSD
-    "cc2.8xlarge": 4,  # 840 GB (3.36 TB) HDD
-    "cr1.8xlarge": 2,  # 120 GB (240 GB) SSD
-    "d2.xlarge": 3,  # 2,000 GB (6 TB) HDD
-    "d2.2xlarge": 6,  # 2,000 GB (12 TB) HDD
-    "d2.4xlarge": 12,  # 2,000 GB (24 TB) HDD
-    "d2.8xlarge": 24,  # 2,000 GB (48 TB) HDD
-    "f1.2xlarge": 1,  # 470 GB NVMe SSD
-    "f1.4xlarge": 1,  # 940 GB NVMe SSD
-    "f1.16xlarge": 4,  # 940 GB (3.76 TB) NVMe SSD
-    "g2.2xlarge": 1,  # 60 GB SSD
-    "g2.8xlarge": 2,  # 120 GB (240 GB) SSD
-    "h1.2xlarge": 1,  # 2000 GB (2 TB) HDD
-    "h1.4xlarge": 2,  # 2000 GB (4 TB) HDD
-    "h1.8xlarge": 4,  # 2000 GB (8 TB) HDD
-    "h1.16xlarge": 8,  # 2000 GB (16 TB) HDD
-    "hs1.8xlarge": 24,  # 2,000 GB (48 TB) HDD
-    "i2.xlarge": 1,  # 800 GB SSD
-    "i2.2xlarge": 2,  # 800 GB (1.6 TB) SSD
-    "i2.4xlarge": 4,  # 800 GB (3.2 TB) SSD
-    "i2.8xlarge": 8,  # 800 GB (6.4 TB) SSD
-    "i3.large": 1,  # 475 GB NVMe SSD
-    "i3.xlarge": 1,  # 950 GB NVMe SSD
-    "i3.2xlarge": 1,  # 1,900 GB NVMe SSD
-    "i3.4xlarge": 2,  # 1,900 GB (3.8 TB) NVMe SSD
-    "i3.8xlarge": 4,  # 1,900 GB (7.6 TB) NVMe SSD
-    "i3.16xlarge": 8,  # 1,900 GB (15.2 TB) NVMe SSD
-    "i3.metal": 8,  # 1,900 GB (15.2 TB) NVMe SSD
-    "m1.small": 1,  # 160 GB† HDD
-    "m1.medium": 1,  # 410 GB HDD
-    "m1.large": 2,  # 420 GB (840 GB) HDD
-    "m1.xlarge": 4,  # 420 GB (1.6 TB) HDD
-    "m2.xlarge": 1,  # 420 GB HDD
-    "m2.2xlarge": 1,  # 850 GB HDD
-    "m2.4xlarge": 2,  # 840 GB (1.68 TB) HDD
-    "m3.medium": 1,  # 4 GB SSD
-    "m3.large": 1,  # 32 GB SSD
-    "m3.xlarge": 2,  # 40 GB (80 GB) SSD
-    "m3.2xlarge": 2,  # 80 GB (160 GB) SSD
-    "m5d.large": 1,  # 75 GB NVMe SSD
-    "m5d.xlarge": 1,  # 150 GB NVMe SSD
-    "m5d.2xlarge": 1,  # 300 GB NVMe SSD
-    "m5d.4xlarge": 2,  # 300 GB (600 GB) NVMe SSD
-    "m5d.12xlarge": 2,  # 900 GB (1.8 TB) NVMe SSD
-    "m5d.24xlarge": 4,  # 900 GB (3.6 TB) NVMe SSD
-    "m5d.metal": 4,  # 900 GB (3.6 TB) NVMe SSD
-    "p3dn.24xlarge": 2,  # 900 GB (1.8 TB) NVMe SSD
-    "r3.large": 1,  # 32 GB SSD
-    "r3.xlarge": 1,  # 80 GB SSD
-    "r3.2xlarge": 1,  # 160 GB SSD
-    "r3.4xlarge": 1,  # 320 GB SSD
-    "r3.8xlarge": 2,  # 320 GB (640 GB) SSD
-    "r5d.large": 1,  # 75 GB NVMe SSD
-    "r5d.xlarge": 1,  # 150 GB NVMe SSD
-    "r5d.2xlarge": 1,  # 300 GB NVMe SSD
-    "r5d.4xlarge": 2,  # 300 GB (600 GB) NVMe SSD
-    "r5d.12xlarge": 2,  # 900 GB (1.8 TB) NVMe SSD
-    "r5d.24xlarge": 4,  # 900 GB (3.6 TB) NVMe SSD
-    "r5d.metal": 4,  # 900 GB (3.6 TB) NVMe SSD
-    "x1.16xlarge": 1,  # 1,920 GB SSD
-    "x1.32xlarge": 2,  # 1,920 GB (3.84 TB) SSD
-    "x1e.xlarge": 1,  # 120 GB SSD
-    "x1e.2xlarge": 1,  # 240 GB SSD
-    "x1e.4xlarge": 1,  # 480 GB SSD
-    "x1e.8xlarge": 1,  # 960 GB SSD
-    "x1e.16xlarge": 1,  # 1,920 GB SSD
-    "x1e.32xlarge": 2,  # 1,920 GB (3.84 TB) SSD
-    "z1d.large": 1,  # 75 GB NVMe SSD
-    "z1d.xlarge": 1,  # 150 GB NVMe SSD
-    "z1d.2xlarge": 1,  # 300 GB NVMe SSD
-    "z1d.3xlarge": 1,  # 450 GB NVMe SSD
-    "z1d.6xlarge": 1,  # 900 GB NVMe SSD
-    "z1d.12xlarge": 2,  # 900 GB (1.8 TB) NVMe SSD
-    "z1d.metal": 2,  # 900 GB (1.8 TB) NVMe SSD
+    "c1.medium": 1,
+    "c1.xlarge": 4,
+    "c3.2xlarge": 2,
+    "c3.4xlarge": 2,
+    "c3.8xlarge": 2,
+    "c3.large": 2,
+    "c3.xlarge": 2,
+    "c5ad.12xlarge": 2,
+    "c5ad.16xlarge": 2,
+    "c5ad.24xlarge": 2,
+    "c5ad.2xlarge": 1,
+    "c5ad.4xlarge": 2,
+    "c5ad.8xlarge": 2,
+    "c5ad.large": 1,
+    "c5ad.xlarge": 1,
+    "c5d.12xlarge": 2,
+    "c5d.18xlarge": 2,
+    "c5d.24xlarge": 4,
+    "c5d.2xlarge": 1,
+    "c5d.4xlarge": 1,
+    "c5d.9xlarge": 1,
+    "c5d.large": 1,
+    "c5d.metal": 4,
+    "c5d.xlarge": 1,
+    "c6gd.12xlarge": 2,
+    "c6gd.16xlarge": 2,
+    "c6gd.2xlarge": 1,
+    "c6gd.4xlarge": 1,
+    "c6gd.8xlarge": 1,
+    "c6gd.large": 1,
+    "c6gd.medium": 1,
+    "c6gd.metal": 2,
+    "c6gd.xlarge": 1,
+    "cc2.8xlarge": 4,
+    "d2.2xlarge": 6,
+    "d2.4xlarge": 12,
+    "d2.8xlarge": 24,
+    "d2.xlarge": 3,
+    "d3.2xlarge": 6,
+    "d3.4xlarge": 12,
+    "d3.8xlarge": 24,
+    "d3en.12xlarge": 24,
+    "d3en.2xlarge": 4,
+    "d3en.4xlarge": 8,
+    "d3en.6xlarge": 12,
+    "d3en.8xlarge": 16,
+    "d3en.xlarge": 2,
+    "d3.xlarge": 3,
+    "f1.16xlarge": 4,
+    "f1.2xlarge": 1,
+    "f1.4xlarge": 1,
+    "g2.2xlarge": 1,
+    "g2.8xlarge": 2,
+    "g4ad.16xlarge": 2,
+    "g4ad.2xlarge": 1,
+    "g4ad.4xlarge": 1,
+    "g4ad.8xlarge": 1,
+    "g4ad.xlarge": 1,
+    "g4dn.12xlarge": 1,
+    "g4dn.16xlarge": 1,
+    "g4dn.2xlarge": 1,
+    "g4dn.4xlarge": 1,
+    "g4dn.8xlarge": 1,
+    "g4dn.metal": 2,
+    "g4dn.xlarge": 1,
+    "h1.16xlarge": 8,
+    "h1.2xlarge": 1,
+    "h1.4xlarge": 2,
+    "h1.8xlarge": 4,
+    "i2.2xlarge": 2,
+    "i2.4xlarge": 4,
+    "i2.8xlarge": 8,
+    "i2.xlarge": 1,
+    "i3.16xlarge": 8,
+    "i3.2xlarge": 1,
+    "i3.4xlarge": 2,
+    "i3.8xlarge": 4,
+    "i3en.12xlarge": 4,
+    "i3en.24xlarge": 8,
+    "i3en.2xlarge": 2,
+    "i3en.3xlarge": 1,
+    "i3en.6xlarge": 2,
+    "i3en.large": 1,
+    "i3en.metal": 8,
+    "i3en.xlarge": 1,
+    "i3.large": 1,
+    "i3.metal": 8,
+    "i3.xlarge": 1,
+    "m1.large": 2,
+    "m1.medium": 1,
+    "m1.small": 1,
+    "m1.xlarge": 4,
+    "m2.2xlarge": 1,
+    "m2.4xlarge": 2,
+    "m2.xlarge": 1,
+    "m3.2xlarge": 2,
+    "m3.large": 1,
+    "m3.medium": 1,
+    "m3.xlarge": 2,
+    "m5ad.12xlarge": 2,
+    "m5ad.16xlarge": 4,
+    "m5ad.24xlarge": 4,
+    "m5ad.2xlarge": 1,
+    "m5ad.4xlarge": 2,
+    "m5ad.8xlarge": 2,
+    "m5ad.large": 1,
+    "m5ad.xlarge": 1,
+    "m5d.12xlarge": 2,
+    "m5d.16xlarge": 4,
+    "m5d.24xlarge": 4,
+    "m5d.2xlarge": 1,
+    "m5d.4xlarge": 2,
+    "m5d.8xlarge": 2,
+    "m5d.large": 1,
+    "m5d.metal": 4,
+    "m5dn.12xlarge": 2,
+    "m5dn.16xlarge": 4,
+    "m5dn.24xlarge": 4,
+    "m5dn.2xlarge": 1,
+    "m5dn.4xlarge": 2,
+    "m5dn.8xlarge": 2,
+    "m5dn.large": 1,
+    "m5dn.metal": 4,
+    "m5dn.xlarge": 1,
+    "m5d.xlarge": 1,
+    "m6gd.12xlarge": 2,
+    "m6gd.16xlarge": 2,
+    "m6gd.2xlarge": 1,
+    "m6gd.4xlarge": 1,
+    "m6gd.8xlarge": 1,
+    "m6gd.large": 1,
+    "m6gd.medium": 1,
+    "m6gd.metal": 2,
+    "m6gd.xlarge": 1,
+    "p3dn.24xlarge": 2,
+    "p4d.24xlarge": 8,
+    "r3.2xlarge": 1,
+    "r3.4xlarge": 1,
+    "r3.8xlarge": 2,
+    "r3.large": 1,
+    "r3.xlarge": 1,
+    "r5ad.12xlarge": 2,
+    "r5ad.16xlarge": 4,
+    "r5ad.24xlarge": 4,
+    "r5ad.2xlarge": 1,
+    "r5ad.4xlarge": 2,
+    "r5ad.8xlarge": 2,
+    "r5ad.large": 1,
+    "r5ad.xlarge": 1,
+    "r5d.12xlarge": 2,
+    "r5d.16xlarge": 4,
+    "r5d.24xlarge": 4,
+    "r5d.2xlarge": 1,
+    "r5d.4xlarge": 2,
+    "r5d.8xlarge": 2,
+    "r5d.large": 1,
+    "r5d.metal": 4,
+    "r5dn.12xlarge": 2,
+    "r5dn.16xlarge": 4,
+    "r5dn.24xlarge": 4,
+    "r5dn.2xlarge": 1,
+    "r5dn.4xlarge": 2,
+    "r5dn.8xlarge": 2,
+    "r5dn.large": 1,
+    "r5dn.metal": 4,
+    "r5dn.xlarge": 1,
+    "r5d.xlarge": 1,
+    "r6gd.12xlarge": 2,
+    "r6gd.16xlarge": 2,
+    "r6gd.2xlarge": 1,
+    "r6gd.4xlarge": 1,
+    "r6gd.8xlarge": 1,
+    "r6gd.large": 1,
+    "r6gd.medium": 1,
+    "r6gd.metal": 2,
+    "r6gd.xlarge": 1,
+    "x1.16xlarge": 1,
+    "x1.32xlarge": 2,
+    "x1e.16xlarge": 1,
+    "x1e.2xlarge": 1,
+    "x1e.32xlarge": 2,
+    "x1e.4xlarge": 1,
+    "x1e.8xlarge": 1,
+    "x1e.xlarge": 1,
+    "x2gd.12xlarge": 2,
+    "x2gd.16xlarge": 2,
+    "x2gd.2xlarge": 1,
+    "x2gd.4xlarge": 1,
+    "x2gd.8xlarge": 1,
+    "x2gd.large": 1,
+    "x2gd.medium": 1,
+    "x2gd.metal": 2,
+    "x2gd.xlarge": 1,
+    "z1d.12xlarge": 2,
+    "z1d.2xlarge": 1,
+    "z1d.3xlarge": 1,
+    "z1d.6xlarge": 1,
+    "z1d.large": 1,
+    "z1d.metal": 2,
+    "z1d.xlarge": 1,
 }
 
 ## Instance filters
