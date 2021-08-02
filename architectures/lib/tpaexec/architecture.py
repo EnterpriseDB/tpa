@@ -252,7 +252,7 @@ class Architecture(object):
             # We accept either something like 2ndqpostgres or
             # 2ndqpostgres:2QREL_11_STABLE_dev
             if ":" in name:
-                (name, ref) = name.split(":", 1)
+                (name, _) = name.split(":", 1)
             if name.lower() not in installable:
                 errors.append("doesn't know how to install '%s' from source" % name)
             source_names.append(name.lower())
