@@ -147,7 +147,7 @@
       extensions:
       - name: btree_gist
       - name: bdr
-        cascade: true
+        cascade: "{{ postgres_version is version('9.6', '>=') }}"
     bdr_database_entry: >-
       {{ postgres_databases|json_query("[?name=='%s']" % bdr_database) }}
   when: >
