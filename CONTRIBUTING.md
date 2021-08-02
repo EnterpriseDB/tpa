@@ -41,3 +41,10 @@ a "Closes #nnn" line for each issue at the end of your commit message.
 ```
 Closes #123
 ```
+
+## Pull requests
+
+Push your commits to a branch named `dev/short-description`; or if there
+is an associated issue, `dev/nnn-short-description`. (One should be able
+to get some idea of what the branch is about without needing to look up
+the issue number.)
