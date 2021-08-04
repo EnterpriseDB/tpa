@@ -273,7 +273,7 @@ def apply_format(input, format_string, *more):
 
 
 def backup_slot_name(barman_hostname):
-    return "backup_%s" % re.sub("-", "_", re.sub("\..*", "", barman_hostname))
+    return "backup_%s" % re.sub("-", "_", re.sub("\\..*", "", barman_hostname))
 
 
 # Returns True if all of the one or more given values are in the container, and
