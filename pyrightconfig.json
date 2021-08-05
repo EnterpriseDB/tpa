@@ -1,0 +1,15 @@
+{
+    "strict": [],
+    "include": [
+        "lib",
+        "library",
+        "architectures"
+    ],
+    "exclude": [
+        "tpa-venv",
+        "platforms/aws/inventory",
+        "platforms/lxd/inventory"
+    ],
+    "venvPath": ".",
+    "venv": "tpa-venv"
+}
