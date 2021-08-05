@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-import sys, importlib
+import sys, importlib.util
 
 
 class Platform(object):

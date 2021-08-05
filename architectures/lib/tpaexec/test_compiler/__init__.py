@@ -72,6 +72,10 @@ class Test(object):
         self.id = None
         self.plays = []
         self.includes = {}
+        self.options = {}
+        self.spec = {}
+        self.test_group = ""
+        self.test_options = {}
 
     @staticmethod
     def compile(spec, options):
@@ -123,7 +127,7 @@ class Test(object):
         if not isinstance(steps, list):
             raise Exception("%s: steps: not a list" % t.id)
         for s in steps:
-            if not isinstance(h, dict):
+            if not isinstance(s, dict):
                 raise Exception("%s: steps: each entry must be a dict" % t.id)
 
         t.append_play(
@@ -200,7 +204,7 @@ class Test(object):
                         if isinstance(v, str):
                             conditions.append("hostvars[item]['%s'] is defined" % v)
                         elif isinstance(v, dict) and len(v) == 1:
-                            name = v.keys()[0]
+                            name = list(v.keys())[0]
                             conditions.append("hostvars[item]['%s'] is defined" % name)
                             conditions.append(
                                 "hostvars[item]['%s'] == %s" % (name, v[name])
@@ -447,4 +451,4 @@ def random_string(length):
     """
     Returns a random string of the given length
     """
-    return "".join(random.choice(string.letters + string.digits) for i in range(length))
+    return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length))

@@ -101,7 +101,7 @@ class aws(Platform):
         if label in self.supported_distributions():
             label = label.replace("-minimal", "").lower()
             version = kwargs.get("version") or "default"
-            image = amis.get(label).get(version)
+            image = amis.get(label, {}).get(version)
             if not image:
                 print(
                     "ERROR: cannot determine AMI name for %s/%s" % (label, version),

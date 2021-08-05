@@ -8,7 +8,6 @@ import re
 import sys
 import shlex
 import os.path
-from jinja2 import Undefined
 from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
 from collections.abc import Mapping
@@ -24,8 +23,13 @@ def try_subkey(container, keys, default=None):
         if isinstance(keys, str):
             keys = keys.split(".")
         for key in keys:
-            if isinstance(v, list) and isinstance(key, int):
-                v = v[key]
+            if isinstance(v, list):
+                if isinstance(key, int):
+                    v = v[key]
+                else:
+                    # Can't index a list by a non-integer, and can't call .get
+                    # on lists below either.
+                    raise
             else:
                 v = v.get(key, default)
         if isinstance(v, StrictUndefined):

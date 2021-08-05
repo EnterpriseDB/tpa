@@ -53,15 +53,15 @@
 
 from __future__ import absolute_import, division, print_function
 
-import os, io, sys, pwd, grp
+import os, io, pwd, grp
 import traceback
 
-from ansible.module_utils.basic import *
-from ansible.module_utils.database import *
+from ansible.module_utils.basic import AnsibleModule
 
 try:
     import psycopg2
     import psycopg2.extras
+    import psycopg2.extensions
 except ImportError:
     psycopg2_found = False
 else:
@@ -114,7 +114,8 @@ def main():
 
     register_casts()
 
-    m = dict(changed=False)
+    m = {}
+    m["changed"] = False
 
     conn = None
     try:
