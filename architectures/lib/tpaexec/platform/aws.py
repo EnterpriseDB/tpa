@@ -6,7 +6,7 @@ import copy
 import boto3
 import sys
 
-from tpaexec.platform import Platform
+from . import Platform
 
 
 class aws(Platform):

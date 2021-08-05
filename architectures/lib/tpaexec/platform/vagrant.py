@@ -5,7 +5,7 @@
 import ipaddress
 import sys
 
-from tpaexec.platform import Platform
+from . import Platform
 
 
 class vagrant(Platform):

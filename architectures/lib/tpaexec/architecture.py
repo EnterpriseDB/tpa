@@ -11,7 +11,7 @@ import re
 from ansible.template import Templar
 from ansible.utils.vars import merge_hash
 from functools import reduce
-from tpaexec.platform import Platform
+from .platform import Platform
 
 
 class Architecture(object):

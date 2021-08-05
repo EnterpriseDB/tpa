@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-from tpaexec.architecture import Architecture
+from ..architecture import Architecture
 
 
 class BDR(Architecture):
