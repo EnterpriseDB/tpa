@@ -114,6 +114,8 @@ runtime:
 """
 
 from ansible.module_utils.six import string_types
+from ansible.module_utils.basic import AnsibleModule
+
 import traceback
 import time
 
@@ -147,7 +149,7 @@ def main():
     try:
         conn = psycopg2.connect(dsn=conninfo)
     except Exception as e:
-        module.fail_json(
+        return module.fail_json(
             msg="Could not connect to database",
             err=str(e),
             exception=traceback.format_exc(),
@@ -247,9 +249,6 @@ def main():
 
     module.exit_json(changed=changed, results=results, **m)
 
-
-from ansible.module_utils.basic import *
-from ansible.module_utils.database import *
 
 if __name__ == "__main__":
     main()
