@@ -85,22 +85,6 @@
   when:
     item.1 not in cluster_facts.databases[item.0].extensions|default({})
 
-# Now we can complete the task of granting roles to `postgres_users`.
-
-- name: Grant roles to Postgres users if required
-  postgresql_membership:
-    port: "{{ postgres_port }}"
-    login_user: "{{ postgres_user }}"
-    login_db: postgres
-    groups: "{{ item.granted_roles }}"
-    target_role: "{{ item.username }}"
-    state: present
-  with_items: "{{ postgres_users }}"
-  become_user: "{{ postgres_user }}"
-  become: yes
-  when:
-    item.granted_roles|default([]) is not empty
-
 # Now that all required roles exist, we can create databases specified
 # in postgres_databases with the correct owners. If you do not specify
 # any template, it uses template1 and inherits all the extensions that
@@ -173,6 +157,22 @@
       {{ item.0.name }}/{{ item.1.name }}
   become_user: "{{ postgres_user }}"
   become: true
+
+# Now we can complete the task of granting roles to `postgres_users`.
+
+- name: Grant roles to Postgres users if required
+  postgresql_membership:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    login_db: postgres
+    groups: "{{ item.granted_roles }}"
+    target_role: "{{ item.username }}"
+    state: present
+  with_items: "{{ postgres_users }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    item.granted_roles|default([]) is not empty
 
 # Since we may have changed the Postgres configuration, we repeat the
 # cluster discovery process that was done at the beginning (roles/init).
