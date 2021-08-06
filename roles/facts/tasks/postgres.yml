@@ -59,6 +59,15 @@
   vars:
     version: "{{ postgres_version|default(pgdata_version|default(default_postgres_version)) }}"
 
+- name: Ensure pgdata_wal_dir matches postgres_wal_dir, if defined
+  assert:
+    msg: >-
+      Refusing to change pg_wal location from {{ pgdata_wal_dir }} to
+      {{ postgres_wal_dir }} for an initialised cluster
+    that: pgdata_wal_dir == postgres_wal_dir
+  when:
+    pgdata_wal_dir is defined and postgres_wal_dir is defined
+
 - name: Set efm_version
   set_fact:
     efm_version: "{{ version }}"

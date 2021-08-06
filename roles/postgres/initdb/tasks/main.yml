@@ -20,6 +20,7 @@
   with_items:
     - "{{ postgres_home }}"
     - "{{ postgres_data_dir }}"
+    - "{{ postgres_wal_dir if postgres_wal_dir is defined else [] }}"
     - "{{ postgres_conf_dir if postgres_conf_dir != postgres_data_dir else [] }}"
 
 # https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/SELinux_Users_and_Administrators_Guide/sect-Managing_Confined_Services-PostgreSQL-Configuration_Examples.html
@@ -58,6 +59,23 @@
     postgres_conf_dir != postgres_data_dir
     and platform not in ['docker']
 
+- name: Set correct SELinux context for pg_wal directory
+  shell: >
+    if $(type -p selinuxenabled); then
+    semanage fcontext -a -t postgresql_db_t "{{ postgres_wal_dir }}(/.*)?" &>/dev/null;
+    restorecon -R -v "{{ postgres_wal_dir }}"|wc -l;
+    fi
+  args:
+    executable: /bin/bash
+  register: restorecon
+  failed_when:
+    restorecon is not successful
+  changed_when: >
+    restorecon.stdout.strip() not in ['', '0']
+  when:
+    postgres_wal_dir is defined
+    and platform not in ['docker']
+
 # Even if PGDATA was not initialised when we ran minimal_postgres_setup
 # from init, we may now have a valid PGDATA now after mounting a volume
 # or doing something in the pre-initdb hook. Therefore we must re-check
@@ -66,6 +84,11 @@
 - name: Recheck pgdata_initialised
   minimal_postgres_setup:
     pgdata: "{{ postgres_data_dir }}"
+
+- name: Add postgres_wal_dir to initdb options if set
+  set_fact:
+    postgres_initdb_opts: "{{ postgres_initdb_opts + ['--waldir=' + postgres_wal_dir] }}"
+  when: postgres_wal_dir is defined
 
 - name: Initialise PGDATA={{ postgres_data_dir }}
   block:

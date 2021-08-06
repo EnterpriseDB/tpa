@@ -12,6 +12,7 @@ if [[ -f $VERSION ]]; then
     pgdata_initialised=true
     pgdata_version=$(cat "$VERSION")
     pgdata_user=$(stat -c %U "$VERSION")
+    pgdata_wal_dir=$(readlink -f "$pgdata/pg_wal")
     pidfile=$pgdata/postmaster.pid
     if [[ -f $pidfile && -d /proc/$(head -1 "$pidfile") ]]; then
         postgres_running=true
@@ -23,6 +24,7 @@ grep -Ev '": "*,*$' <<RESULT
     "changed": false,
     "ansible_facts": {
         "pgdata": "$pgdata",
+        "pgdata_wal_dir": "$pgdata_wal_dir",
         "pgdata_user": "$pgdata_user",
         "pgdata_version": $pgdata_version,
         "pgdata_initialised": $pgdata_initialised,
