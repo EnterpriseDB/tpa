@@ -8,6 +8,8 @@ import argparse
 import yaml
 import re
 
+from typing import List
+
 from ansible.template import Templar
 from ansible.utils.vars import merge_hash
 from functools import reduce
@@ -15,19 +17,30 @@ from .platform import Platform
 
 
 class Architecture(object):
-    # We expect this constructor to be invoked via a subclass defined in
-    # architectures/Xyzzy/configure; self.name then becomes 'Xyzzy'. It creates
-    # a Platform object corresponding to any «--platform x» on the command-line.
+    """
+    This is the base class for TPA architectures, and it knows how to generate a
+    configuration based on architecture-specific defaults defined by subclasses,
+    as well as user input in the form of command-line options.
+    """
+
     def __init__(self):
+        """
+        We expect this constructor to be invoked via a subclass defined in
+        architectures/Xyzzy/configure; self.name then becomes 'Xyzzy'. It
+        creates a Platform object corresponding to any «--platform x» on the
+        command-line.
+        """
         self.dir = os.path.dirname(os.path.realpath(sys.argv[0]))
         self.lib = os.path.realpath("%s/../lib" % self.dir)
         self.name = os.path.basename(self.dir)
         self.platform = Platform.load(sys.argv[1:], arch=self)
 
-    # Obtains command-line arguments based on the selected architecture and
-    # platform, gives the architecture and platform a chance to process the
-    # configuration information, and generates a cluster configuration.
     def configure(self):
+        """
+        Obtains command-line arguments based on the selected architecture and
+        platform, gives the architecture and platform a chance to process the
+        configuration information, and generates a cluster configuration.
+        """
         self.args = self.arguments()
         self.validate_arguments(self.args)
         self.process_arguments(self.args)
@@ -39,13 +52,17 @@ class Architecture(object):
     ## Command-line parsing
     ##
 
-    # Returns data obtained from command-line arguments
     def arguments(self):
+        """
+        Returns data obtained from command-line arguments
+        """
         return vars(self.argument_parser().parse_args())
 
-    # Returns an ArgumentParser object configured to accept the options relevant
-    # to the selected architecture and platform
     def argument_parser(self):
+        """
+        Returns an ArgumentParser object configured to accept the options
+        relevant to the selected architecture and platform
+        """
         prog = "tpaexec configure"
         p = argparse.ArgumentParser(
             prog=prog,
@@ -57,8 +74,10 @@ class Architecture(object):
         self.set_defaults(p)
         return p
 
-    # Adds any relevant options to the parser object
     def add_options(self, p):
+        """
+        Adds any relevant options to the parser object
+        """
         p.add_argument(
             "-v",
             "--verbose",
@@ -173,49 +192,65 @@ class Architecture(object):
         g = p.add_argument_group("locations")
         g.add_argument("--location-names", metavar="LOCATION", nargs="+")
 
-    # Adds architecture-specific options to the (relevant group in the) parser
-    # (subclasses are expected to override this).
     def add_architecture_options(self, p, g):
+        """
+        Adds architecture-specific options to the (relevant group in the) parser
+        (subclasses are expected to override this).
+        """
         pass
 
-    # Set default values for command-line options
     def set_defaults(self, p):
+        """
+        Set default values for command-line options
+        """
         argument_defaults = self._argument_defaults()
         self.update_argument_defaults(argument_defaults)
         p.set_defaults(**argument_defaults)
 
-    # Returns a dict of defaults for the corresponding options
     def _argument_defaults(self):
+        """
+        Returns a dict of defaults for the corresponding options
+        """
         return {
             "root_volume_size": 16,
             "barman_volume_size": 32,
             "postgres_volume_size": 16,
         }
 
-    # Makes architecture-specific changes to argument_defaults if required
     def update_argument_defaults(self, argument_defaults):
+        """
+        Makes architecture-specific changes to argument_defaults if required
+        """
         pass
 
-    # Returns the default platform for this architecture (i.e., the platform
-    # that will be used if no «--platform x» is specified)
     def default_platform(self):
+        """
+        Returns the default platform for this architecture (i.e., the platform
+        that will be used if no «--platform x» is specified)
+        """
         return "aws"
 
-    # Returns a list of platforms supported by this architecture
     def supported_platforms(self):
+        """
+        Returns a list of platforms supported by this architecture
+        """
         return Platform.all_platforms()
 
-    # Returns a list of names for the locations used by the cluster
     def default_location_names(self):
+        """
+        Returns a list of names for the locations used by the cluster
+        """
         return ["first", "second", "third", "fourth"]
 
     ##
     ## Cluster configuration
     ##
 
-    # Look at the arguments collected from the command-line and complain if
-    # anything seems wrong.
     def validate_arguments(self, args):
+        """
+        Look at the arguments collected from the command-line and complain if
+        anything seems wrong.
+        """
         # Validate arguments to --2Q-repositories
         repos = args.get("tpa_2q_repositories") or []
         for r in repos:
@@ -273,9 +308,13 @@ class Architecture(object):
 
         self.platform.validate_arguments(args)
 
-    # Augment arguments from the command-line with enough additional information
-    # (based on the selected architecture and platform) to generate config.yml
     def process_arguments(self, args):
+        """
+        Augment arguments from the command-line with enough additional
+        information (based on the selected architecture and platform) to
+        generate config.yml
+        """
+
         # At this point, args is what the command-line parser gave us, i.e., a
         # combination of values specified on the command-line and defaults set
         # by the architecture. Now we start augmenting that information.
@@ -340,17 +379,23 @@ class Architecture(object):
 
         self.platform.process_arguments(args)
 
-    # Returns a name for the cluster
     def cluster_name(self):
+        """
+        Returns a name for the cluster
+        """
         return os.path.basename(self.cluster)
 
-    # Returns the number of instances required (which may be known beforehand,
-    # or based on a --num-instances option, etc.)
     def num_instances(self):
+        """
+        Returns the number of instances required (which may be known beforehand,
+        or based on a --num-instances option, etc.)
+        """
         return self.args["num_instances"]
 
-    # Returns the number of locations required by this architecture
     def num_locations(self):
+        """
+        Returns the number of locations required by this architecture
+        """
         locations = {}
         for i in self.args["instances"]:
             l = i.get("location")
@@ -358,10 +403,12 @@ class Architecture(object):
                 locations[l] = 1
         return len(locations)
 
-    # Returns an array containing 'zero' followed by the requested number of
-    # hostnames, so that templates can assign hostnames[i] to node[i] without
-    # regard to the fact that we number nodes starting from 1
     def hostnames(self, num):
+        """
+        Returns an array containing 'zero' followed by the requested number of
+        hostnames, so that templates can assign hostnames[i] to node[i] without
+        regard to the fact that we number nodes starting from 1
+        """
         env = {}
         for arg in [
             "hostnames_from",
@@ -393,23 +440,31 @@ class Architecture(object):
 
         return ["zero"] + stdout.strip().split(" ")
 
-    # The platform gets to decide what image parameters are required to get the
-    # desired distribution
     def image(self):
+        """
+        Returns the selected platform's choice of image for this cluster, based
+        on the user's preferences.
+        """
         label = self.args.get("os_image") or self.args["distribution"]
         version = self.args.get("os_version")
         return self.platform.image(label, version=version)
 
-    # The architecture's templates/main.yml.j2 defines the overall topology of
-    # the cluster, and must be written so that we can expand it based on the
-    # correct number of hostnames and information from the command-line.
     def load_topology(self, args):
+        """
+        Returns the parsed contents of the architecture's templates/main.yml.j2,
+        which defines the overall topology of the cluster. (It must be written
+        so that we can expand it based on the correct number of hostnames and
+        information from the command-line).
+        """
         y = self.load_yaml("main.yml.j2", args)
         if y is not None:
             args.update(y)
 
-    # Returns the requested number of subnets
     def subnets(self, num):
+        """
+        Returns the requested number of subnets
+        """
+
         # If --subnet forced a single subnet, we return an array with that one
         # subnet in it, regardless of the number of subnets that were requested
         subnet = self.args.get("subnet")
@@ -442,22 +497,30 @@ class Architecture(object):
 
         return stdout.strip().split(" ")
 
-    # Makes changes to locations applicable across architectures
     def _init_locations(self, locations):
+        """
+        Makes changes to locations applicable across architectures
+        """
         names = self.args.get("location_names") or self.default_location_names()
         for li in range(0, self.num_locations()):
             locations.append({"Name": names[li]})
 
-    # Makes architecture-specific changes to locations if required
     def update_locations(self, locations):
+        """
+        Makes architecture-specific changes to locations if required
+        """
         pass
 
-    # Makes architecture-specific changes to cluster_tags if required
     def update_cluster_tags(self, cluster_tags):
+        """
+        Makes architecture-specific changes to cluster_tags if required
+        """
         pass
 
-    # Makes changes to cluster_vars applicable across architectures
     def _init_cluster_vars(self, cluster_vars):
+        """
+        Makes changes to cluster_vars applicable across architectures
+        """
         cluster_vars["preferred_python_version"] = cluster_vars.get(
             "preferred_python_version", "python3"
         )
@@ -518,9 +581,11 @@ class Architecture(object):
             top.update({"forward_ssh_agent": "yes"})
             self.args["top_level_settings"] = top
 
-    # Returns the names of any variables set by command-line options that belong
-    # under cluster_vars
     def cluster_vars_args(self):
+        """
+        Returns the names of any variables set by command-line options that
+        belong under cluster_vars
+        """
         return [
             "postgresql_flavour",
             "postgres_version",
@@ -529,14 +594,18 @@ class Architecture(object):
             "failover_manager",
         ] + ["%s_package_version" % x for x in self.versionable_packages()]
 
-    # Returns a list of packages for which --xxx-package-version options should
-    # be accepted
     def versionable_packages(self):
+        """
+        Returns a list of packages for which --xxx-package-version options
+        should be accepted
+        """
         return ["postgres", "repmgr", "barman", "pglogical", "bdr", "pgbouncer"]
 
-    # Returns a list of product names that should be accepted as (part of) the
-    # arguments to --2Q-repositories
     def product_repositories(self):
+        """
+        Returns a list of product names that should be accepted as (part of) the
+        arguments to --2Q-repositories
+        """
         return [
             "default",
             "2ndqpostgres",
@@ -555,9 +624,11 @@ class Architecture(object):
             "bdr_enterprise_3_7-epas",
         ]
 
-    # Returns a map of things that should be accepted as arguments to
-    # --install-from-source to their corresponding build configuration
     def installable_sources(self):
+        """
+        Returns a map of things that should be accepted as arguments to
+        --install-from-source to their corresponding build configuration
+        """
         return {
             "postgres": {
                 "postgres_installation_method": "src",
@@ -591,12 +662,16 @@ class Architecture(object):
             },
         }
 
-    # Makes architecture-specific changes to cluster_vars if required
     def update_cluster_vars(self, cluster_vars):
+        """
+        Makes architecture-specific changes to cluster_vars if required
+        """
         pass
 
-    # Makes changes to instance_defaults applicable across architectures
     def _init_instance_defaults(self, instance_defaults):
+        """
+        Makes changes to instance_defaults applicable across architectures
+        """
         if instance_defaults.get("platform") is None:
             instance_defaults["platform"] = self.platform.name
         vars = instance_defaults.get("vars", {})
@@ -604,31 +679,41 @@ class Architecture(object):
             vars["ansible_user"] = self.args["image"].get("user", "root")
             instance_defaults["vars"] = vars
 
-    # Makes architecture-specific changes to instance_defaults if required
     def update_instance_defaults(self, instance_defaults):
+        """
+        Makes architecture-specific changes to instance_defaults if required
+        """
         pass
 
-    # Makes changes to instances applicable across architectures
     def _init_instances(self, instances):
+        """
+        Makes changes to instances applicable across architectures
+        """
         for instance in instances:
             location = instance.get("location", None)
             if isinstance(location, int) and location < len(self.args["locations"]):
                 instance["location"] = self.args["locations"][location]["Name"]
 
-    # Makes architecture-specific changes to instances if required
     def update_instances(self, instances):
+        """
+        Makes architecture-specific changes to instances if required
+        """
         pass
 
     ##
     ## Cluster directory creation
     ##
 
-    # Returns the final contents of config.yml
-    def generate_configuration(self):
+    def generate_configuration(self) -> str:
+        """
+        Returns the final contents of config.yml
+        """
         return self.expand_template("config.yml.j2", self.args)
 
-    # Creates the cluster directory and writes config.yml
-    def write_configuration(self, configuration):
+    def write_configuration(self, configuration: str) -> None:
+        """
+        Creates the cluster directory and writes config.yml
+        """
         try:
             os.mkdir(self.cluster)
             with open("%s/config.yml" % self.cluster, "w") as cfg:
@@ -637,13 +722,17 @@ class Architecture(object):
             print("Could not write cluster directory: %s" % str(e), file=sys.stderr)
             sys.exit(-1)
 
-    # Performs additional actions after config.yml has been written
-    def after_configuration(self):
+    def after_configuration(self) -> None:
+        """
+        Performs additional actions after config.yml has been written
+        """
         self.create_links()
 
-    # Creates links from the cluster directory to the architecture directory
-    # (e.g., for deploy.yml and commands; see links_to_create below)
-    def create_links(self):
+    def create_links(self) -> None:
+        """
+        Creates links from the cluster directory to the architecture directory
+        (e.g., for deploy.yml and commands; see links_to_create below)
+        """
         for l in self.links_to_create():
             src = "%s/%s" % (self.dir, l)
             dest = "%s/%s" % (self.cluster, l)
@@ -656,30 +745,39 @@ class Architecture(object):
                 for l in os.listdir(src):
                     os.symlink("%s/%s" % (src, l), "%s/%s" % (dest, l))
 
-    # Returns a list of targets to create_links() for
-    def links_to_create(self):
+    def links_to_create(self) -> List[str]:
+        """
+        Returns a list of targets to create_links() for
+        """
         return ["deploy.yml", "commands", "tests"]
 
     ##
     ## Template processing
     ##
 
-    # Takes a template filename and some vars, expands the template, parses the
-    # output as YAML, and returns the resulting data structure
     def load_yaml(self, filename, vars, loader=None):
+        """
+        Takes a template filename and some vars, expands the template, parses
+        the output as YAML, and returns the resulting data structure
+        """
         text = self.expand_template(filename, vars, loader)
         return yaml.load(text, Loader=yaml.FullLoader)
 
-    # Takes a template filename and some args and returns the template output
     def expand_template(self, filename, vars, loader=None):
+        """
+        Takes a template filename and some args and returns the template output
+        """
         loader = loader or self.loader()
         templar = Templar(loader=loader, variables=vars)
         template = loader._tpaexec_get_template(filename)
         return templar.do_template(template)
 
-    # Returns a template loader object that looks for templates in the
-    # architecture's templates/ directory as well as lib/templates
     def loader(self, basedirs=None):
+        """
+        Returns a template loader object that looks for templates in the
+        architecture's templates/ directory as well as lib/templates
+        """
+
         class MinimalLoader(object):
             _basedir = []
 

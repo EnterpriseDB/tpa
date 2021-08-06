@@ -6,13 +6,20 @@ import sys, importlib.util
 
 
 class Platform(object):
+    """
+    Represents a single platform that can be used to deploy an architecture, and
+    knows how to generate the correct configuration for it.
+    """
+
     def __init__(self, name, arch):
         self.name = name
         self.arch = arch
 
-    # Returns an object of the desired Platform subclass
     @staticmethod
     def load(args, arch):
+        """
+        Returns an object of the desired Platform subclass
+        """
         name = Platform.guess_platform(args) or arch.default_platform()
         module = "tpaexec.platform.%s" % name
         if not importlib.util.find_spec(module):
@@ -22,61 +29,88 @@ class Platform(object):
         p = getattr(__import__(module, fromlist=[name]), name)
         return p(name, arch)
 
-    # Returns the name of a platform based on any «--platform x» arguments found
-    # in the given args, or None if no platform specification was found
     @staticmethod
     def guess_platform(args):
+        """
+        Returns the name of a platform based on any «--platform x» arguments
+        found in the given args, or None if no platform was specified
+        """
         for i, arg in enumerate(args):
             if i > 0 and args[i - 1] == "--platform":
                 return arg
         return None
 
-    # Returns a list of all platform names
     @staticmethod
     def all_platforms():
+        """
+        Returns a list of all platform names
+        """
         return ["aws", "bare", "docker", "lxd", "vagrant"]
 
-    # Adds platform-specific options to the (relevant group in the) parser
-    # (subclasses are expected to override this).
     def add_platform_options(self, p, g):
+        """
+        Adds platform-specific options to the (relevant group in the) parser
+        (subclasses are expected to override this).
+        """
         pass
 
-    # Performs any platform-specific argument validation required.
     def validate_arguments(self, args):
+        """
+        Performs any platform-specific argument validation required.
+        """
         pass
 
-    # Returns a list of distributions supported by a platform, which may be
-    # empty if the choices are (i.e., --distribution will accept anything)
     def supported_distributions(self):
+        """
+        Returns a list of distributions supported by a platform, which may be
+        empty if the choices are (i.e., --distribution will accept anything)
+        """
         return None
 
     def default_distribution(self):
+        """
+        Returns the platform's default distribution, if any.
+        """
         return None
 
-    # Returns image parameters corresponding to the given label for a platform
     def image(self, label, **kwargs):
+        """
+        Returns image parameters corresponding to the given label for a platform
+        """
         return {}
 
-    # Makes platform-specific changes to cluster_tags
     def update_cluster_tags(self, cluster_tags, args, **kwargs):
+        """
+        Makes platform-specific changes to cluster_tags
+        """
         pass
 
-    # Makes platform-specific changes to cluster_vars
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
+        """
+        Makes platform-specific changes to cluster_vars
+        """
         pass
 
-    # Makes platform-specific changes to locations
     def update_locations(self, locations, args, **kwargs):
+        """
+        Makes platform-specific changes to locations
+        """
         pass
 
-    # Makes platform-specific changes to instance_defaults
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
+        """
+        Makes platform-specific changes to instance_defaults
+        """
         pass
 
-    # Makes platform-specific changes to instances
     def update_instances(self, instances, args, **kwargs):
+        """
+        Makes platform-specific changes to instances
+        """
         pass
 
-    # Makes platform-specific changes to args
     def process_arguments(self, args):
+        """
+        Makes platform-specific changes to args
+        """
         pass
