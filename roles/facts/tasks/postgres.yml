@@ -59,6 +59,16 @@
   vars:
     version: "{{ postgres_version|default(pgdata_version|default(default_postgres_version)) }}"
 
+- name: Set postgres_wal_dir if there is a volume_for postgres_wal
+  set_fact:
+    postgres_wal_dir: "{{ wal_volumes[0].mountpoint }}/pg_wal"
+  vars:
+    wal_volumes: >-
+      {{ volumes|json_query("[?volume_for=='postgres_wal']") }}
+  when:
+    - postgres_wal_dir is not defined
+    - wal_volumes is not empty
+
 - name: Ensure pgdata_wal_dir matches postgres_wal_dir, if defined
   assert:
     msg: >-

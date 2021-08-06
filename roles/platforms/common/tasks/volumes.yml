@@ -26,6 +26,8 @@
     _translations:
       postgres_data:
         mountpoint: /opt/postgres
+      postgres_wal:
+        mountpoint: /opt/postgres/wal
       barman_data:
         mountpoint: /var/lib/barman
 
@@ -65,8 +67,12 @@
   when: >
     'mountpoint' in item or 'volume_for' in item
 
+# We sort volumes based on their mountpoints, so that /opt/postgres is
+# always mounted before /opt/postgres/wal, regardless of their relative
+# positions in volumes[].
+
 - set_fact:
-    volumes: "{{ _volumes }}"
+    volumes: "{{ _volumes|sort(attribute='mountpoint') }}"
 
 # We end up with a list that looks like this:
 #
@@ -89,7 +95,21 @@
       {{ volumes|json_query("[?volume_for=='barman_data']")|length != 0 }}
     postgres_volume_mountable: >-
       {{ volumes|json_query("[?volume_for=='postgres_data']")|length != 0 }}
+    postgres_wal_volume_mountable: >-
+      {{ volumes|json_query("[?volume_for=='postgres_wal']")|length != 0 }}
     barman_volume_encrypted: >-
       {{ volumes|json_query("[?volume_for=='barman_data' && encryption]")|length != 0 }}
     postgres_volume_encrypted: >-
       {{ volumes|json_query("[?volume_for=='postgres_data' && encryption]")|length != 0 }}
+    postgres_wal_volume_encrypted: >-
+      {{ volumes|json_query("[?volume_for=='postgres_wal' && encryption]")|length != 0 }}
+
+- name: Ensure postgres_data/wal volumes have the same encryption setting
+  assert:
+    msg: >-
+      The postgres_data and postgres_wal volumes must have the same encryption setting
+    that: >
+      postgres_volume_encrypted ==
+      postgres_wal_volume_encrypted
+  when:
+    postgres_volume_mountable and postgres_wal_volume_mountable

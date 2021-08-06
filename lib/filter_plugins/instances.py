@@ -434,7 +434,7 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
                 v["delete_on_termination"] = not v.get("attach_existing", False)
 
             volume_for = vars.get("volume_for", None)
-            if volume_for and volume_for not in ["postgres_data", "barman_data"]:
+            if volume_for and volume_for not in ["postgres_data", "postgres_wal", "barman_data"]:
                 raise AnsibleFilterError(
                     "volume_for=%s is not recognised for volume %s"
                     % (volume_for, v["device_name"])
