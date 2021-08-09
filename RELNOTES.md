@@ -2,6 +2,18 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+## v21.6 (2021-08-09)
+
+### Minor changes
+
+- Minor documentation improvements
+
+### Bugfixes
+
+- Delay granting roles to users until after extensions are created so
+  all the dependencies for role assignments are met. This was a recent
+  regression.
+
 ## v21.5 (2021-07-26)
 
 ### Minor changes
