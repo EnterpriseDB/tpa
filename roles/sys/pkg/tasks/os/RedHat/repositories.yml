@@ -109,6 +109,7 @@
 - name: Exclude postgresql packages from the base repository
   ini_file:
     dest: /etc/yum/pluginconf.d/rhnplugin.conf
+    create: no
     section: main
     option: exclude
     value: "postgresql* barman* repmgr*"
@@ -155,6 +156,7 @@
 - name: Exclude pgbouncer package from the EPEL repository
   ini_file:
     dest: /etc/yum.repos.d/epel.repo
+    create: no
     section: epel
     option: exclude
     value: "pgbouncer*"
@@ -211,6 +213,7 @@
 - name: Disable PGDG repos for versions other than {{ postgres_version }}
   ini_file:
     dest: /etc/yum.repos.d/pgdg-redhat-all.repo
+    create: no
     section: "{{ item }}"
     option: enabled
     value: "{{ (item in all_wanted_pgdg_repos)|ternary('1', '0') }}"
@@ -229,6 +232,7 @@
 - name: Exclude barman-related packages from PGDG repos
   ini_file:
     dest: /etc/yum.repos.d/pgdg-redhat-all.repo
+    create: no
     section: pgdg-common
     option: exclude
     value: "barman* python3-barman"
@@ -238,6 +242,7 @@
 - name: Exclude psycopg2 packages from PGDG repos
   ini_file:
     dest: /etc/yum.repos.d/pgdg-redhat-all.repo
+    create: no
     section: "pgdg{{ postgres_versionNN }}"
     option: exclude
     value: python-psycopg2 python2-psycopg2 python3-psycopg2
@@ -297,6 +302,7 @@
 - name: Exclude lua packages from 2ndQuadrant products/bdr3/release repo
   ini_file:
     dest: "/etc/yum.repos.d/2ndquadrant-products-bdr3-release-pg{{ postgres_versionNN }}.repo"
+    create: no
     section: "2ndquadrant-products-bdr3-release-pg{{ postgres_versionNN }}"
     option: exclude
     value: lua*
