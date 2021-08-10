@@ -588,6 +588,10 @@ class Architecture(object):
                 if ref:
                     entry.update({"postgres_git_ref": ref})
                 cluster_vars.update(entry)
+            elif name == "barman":
+                if ref:
+                    entry.update({"barman_git_ref": ref})
+                cluster_vars.update(entry)
             else:
                 if ref:
                     entry.update({"git_repository_ref": ref})
@@ -692,6 +696,10 @@ class Architecture(object):
                 "build_commands": [
                     "make -f ../../src/autoscale/Makefile -s install",
                 ],
+            },
+            "barman": {
+                "barman_installation_method": "src",
+                "barman_git_url": "git@github.com:EnterpriseDB/barman.git",
             },
         }
 

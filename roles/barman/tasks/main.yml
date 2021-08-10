@@ -2,7 +2,8 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-# This role can be safely applied to every instance.
+# This role can be safely applied to every instance. It will set up the
+# Barman instances and any Postgres instances that need to be backed up.
 
 # First, we generate an ssh keypair for postgres (this has probably
 # already been done), and likewise for barman.
@@ -15,9 +16,8 @@
   vars:
     ssh_username: barman
 
-# Install Barman packages.
-
-- include_role:
+- name: Install Barman
+  include_role:
     name: barman/pkg
     apply:
       tags: [barman, pkg]

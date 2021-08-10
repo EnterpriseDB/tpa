@@ -10,3 +10,7 @@ barman_packages:
     - barman
     - "{{ python_pkg_prefix }}-barman"
   Ubuntu: *debian_barman_packages
+
+barman_installation_method: pkg
+barman_src_dir: /opt/postgres/src/barman
+barman_build_dir: /opt/postgres/build/barman

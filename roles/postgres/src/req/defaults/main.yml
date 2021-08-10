@@ -8,6 +8,7 @@ requirements:
     - flex
     - bison
     - ccache
+    - "{{ python_pkg_prefix }}-setuptools"
   Debian:
     - libreadline-dev
     - zlib1g-dev

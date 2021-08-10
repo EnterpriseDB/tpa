@@ -38,3 +38,8 @@
     state: "{{
       (barman_package_version is defined)|ternary('present', 'latest')
     }}"
+  when:
+    barman_installation_method == 'pkg'
+
+- include_tasks: src.yml
+  when: barman_installation_method == 'src'

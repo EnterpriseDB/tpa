@@ -1,0 +1,97 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Retrieve active mounts under /opt/postgres/src
+  command: >
+    awk '{if ($2 ~ /\/opt\/postgres\/src/) {print $2}}' /proc/mounts
+  register: mounted_sources_cmd
+  changed_when: False
+
+- include_role: name=src/install tasks_from=clone.yml
+  vars:
+    name: Barman
+    repo: "{{ barman_git_url }}"
+    dest: "{{ barman_src_dir }}"
+    version: "{{ barman_git_ref|default('master') }}"
+    reference: "{{ barman_git_reference_repo|default(omit) }}"
+
+- include_role: name=src/install tasks_from=verify-branch.yml
+  vars:
+    source_directory: "{{ barman_src_dir }}"
+    git_repository_ref: "{{ barman_git_ref }}"
+    mounted_sources: "{{ mounted_sources_cmd.stdout_lines|default([]) }}"
+  when:
+    barman_src_dir in mounted_sources
+    and barman_git_ref is defined
+
+- name: Remove old build directory
+  file: state=absent path="{{ barman_build_dir }}" force=yes
+  tags: [build-clean, barman-clean]
+
+- name: Ensure build directory exists
+  file: state=directory path="{{ barman_build_dir }}"
+
+# The source directory may be read-only, and setup.py does not make it
+# convenient to do an out-of-tree build the way we do for other things,
+# so we copy the source to a writable build directory as a workaround.
+
+- name: Copy source to writeable build directory
+  shell: "cp -a {{ barman_src_dir }}/* {{ barman_build_dir }}"
+
+- name: Install Barman from source
+  command: >
+    {{ python }} setup.py install {{ extra_args[ansible_os_family]|join(" ") }}
+  args:
+    chdir: "{{ barman_build_dir }}"
+  vars:
+    extra_args:
+      Debian:
+      - "--install-layout=deb"
+      RedHat:
+      - "--prefix=/usr"
+
+# Normally, installing the package creates the group and user and home
+# and log directories, but we may need to create them ourselves for a
+# source installation.
+
+- name: Ensure barman group exists
+  group:
+    name: barman
+    state: present
+
+- name: Ensure barman user exists
+  user:
+    name: barman
+    group: barman
+    shell: /bin/bash
+    home: "{{ barman_home }}"
+    create_home: no
+    system: yes
+    state: present
+
+- name: Ensure barman directories exist with the right ownership and permissions
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: barman
+    group: barman
+    mode: 0750
+  with_items:
+    - "{{ barman_home }}"
+    - /var/log/barman
+
+# We don't bother to recreate /etc/cron.d/barman exactly, since the deb
+# and rpm packages install slightly different (equivalent) files anyway.
+# As long as the line ends with "barman -q cron", the lineinfile task in
+# server.yml will work correctly.
+
+- name: Set up /etc/cron.d/barman
+  copy:
+    dest: /etc/cron.d/barman
+    owner: root
+    group: root
+    mode: 0644
+    force: no
+    content: |
+      * * * * * barman /etc/tpa/barman-home-ok && /usr/bin/barman -q cron

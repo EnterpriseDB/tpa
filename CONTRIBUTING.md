@@ -53,3 +53,20 @@ Push your commits to a branch named `dev/short-description`; or if there
 is an associated issue, `dev/nnn-short-description`. (One should be able
 to get some idea of what the branch is about without needing to look up
 the issue number.)
+
+## New files
+
+If you create any new files, please check existing files of the same
+type to see if there's a header you need to copy. For example, a new
+YAML file should start with the following text:
+
+```
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+```
+
+(On the other hand, `.j2` templates that we expand and install on the
+target do not contain a copyright message, but may need a warning to
+avoid editing them by hand.)
