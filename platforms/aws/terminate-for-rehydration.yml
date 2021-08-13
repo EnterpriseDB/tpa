@@ -60,8 +60,8 @@
         (has {{ item.tags['TPAAttachmentLabel']|default('no tag') }})
         {% endif -%}
       that:
-        - item.tags|has_subkey('CreatingCluster')
-        - item.tags|has_subkey('TPAAttachmentLabel')
+        - "'CreatingCluster' in item.tags"
+        - "'TPAAttachmentLabel' in item.tags"
         - item.tags.CreatingCluster == cluster_name
         - item.tags.TPAAttachmentLabel == label
     with_items:
