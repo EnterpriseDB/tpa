@@ -2,32 +2,18 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-# If any of the source directories are mounted, we want to skip trying
-# to update them in postgres/src and src/install.
-
-- name: Retrieve active mounts under /opt/postgres/src
-  command: >
-    awk '{if ($2 ~ /\/opt\/postgres\/src/) {print $2}}' /proc/mounts
-  register: mounted_sources_cmd
-  when:
-    postgres_installation_method == 'src'
-    or install_from_source is not empty
-  changed_when: False
-
 # First, we install Postgres itself using the selected
 # postgres_installation_method (pkg or src).
 
 - include_role:
     name: "postgres/{{ postgres_installation_method }}"
-  vars:
-    mounted_sources: "{{ mounted_sources_cmd.stdout_lines|default([]) }}"
   when:
     platform not in ['shared']
 
 # Second, no matter how we installed Postgres, we may need to build and
 # install some (ostensibly) extensions from source.
 
-- include_role: name=postgres/src/req
+- include_role: name=src/req
   when:
     install_from_source is not empty
     and postgres_installation_method != 'src'
@@ -43,7 +29,6 @@
     build_commands: "{{ ifs.build_commands|default([]) }}"
     build_environment: "{{ ifs.build_environment|default({}) }}"
     build_log: "/tmp/build-{{ ifs.name }}.log"
-    mounted_sources: "{{ mounted_sources_cmd.stdout_lines }}"
   with_items: "{{ install_from_source }}"
   loop_control:
     loop_var: ifs

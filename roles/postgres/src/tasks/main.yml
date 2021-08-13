@@ -2,8 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-- include_role: name=postgres/src/req
-
 - include_role: name=src/install tasks_from=clone.yml
   vars:
     name: Postgres
@@ -11,16 +9,13 @@
     dest: "{{ postgres_src_dir }}"
     version: "{{ postgres_git_ref|default(default_postgres_git_ref) }}"
     reference: "{{ postgres_git_reference_repo }}"
-  when:
-    postgres_src_dir not in mounted_sources
 
 - include_role: name=src/install tasks_from=verify-branch.yml
   vars:
     source_directory: "{{ postgres_src_dir }}"
     git_repository_ref: "{{ postgres_git_ref }}"
   when:
-    postgres_src_dir in mounted_sources
-    and postgres_git_ref is defined
+    postgres_git_ref is defined
 
 - name: Remove old build directory
   file: state=absent path="{{ postgres_build_dir }}" force=yes

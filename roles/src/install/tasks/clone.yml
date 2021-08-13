@@ -2,6 +2,10 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+- include_role: name=src/req
+  when:
+    mounted_sources is not defined
+
 - name: Check if ssh agent forwarding is enabled
   shell: echo $SSH_AUTH_SOCK
   args:
@@ -36,3 +40,5 @@
       |combine(task_env)
     }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
+  when:
+    dest not in mounted_sources

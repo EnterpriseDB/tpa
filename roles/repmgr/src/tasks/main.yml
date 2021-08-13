@@ -9,8 +9,6 @@
     dest: "{{ repmgr_src_dir }}"
     version: "{{ repmgr_git_ref }}"
     reference: "{{ repmgr_git_reference_repo }}"
-  when:
-    repmgr_src_dir not in mounted_sources
 
 - name: Remove old build artifacts
   command: git clean -dxf

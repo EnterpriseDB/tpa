@@ -2,6 +2,10 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+- include_role: name=src/req
+  when:
+    mounted_sources is not defined
+
 # We'd like to use ``git branch --show-current``, but centos:8 has a git
 # that's too old to support that.
 
@@ -19,3 +23,5 @@
       git_repository_ref == current_ref
   vars:
     current_ref: "{{ git_branch.stdout.strip() }}"
+  when:
+    source_directory not in mounted_sources

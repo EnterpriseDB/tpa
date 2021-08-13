@@ -87,3 +87,18 @@
   when:
     TPA_GIT_CREDENTIALS != ''
     and TPA_GIT_CREDENTIAL_STORE == ''
+
+# If any of the source directories are mounted, as they might be if you
+# use `--local-source-directories`, we should skip trying to clone and
+# update them in all of the roles that build from source.
+
+- name: Retrieve active mounts under /opt/postgres/src
+  command: >
+    awk '{if ($2 ~ /\/opt\/postgres\/src/) {print $2}}' /proc/mounts
+  register: mounted_sources_cmd
+  changed_when: False
+  check_mode: no
+
+- name: Set mounted_sources
+  set_fact:
+    mounted_sources: "{{ mounted_sources_cmd.stdout_lines|default([]) }}"

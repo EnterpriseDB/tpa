@@ -2,12 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-- name: Retrieve active mounts under /opt/postgres/src
-  command: >
-    awk '{if ($2 ~ /\/opt\/postgres\/src/) {print $2}}' /proc/mounts
-  register: mounted_sources_cmd
-  changed_when: False
-
 - include_role: name=src/install tasks_from=clone.yml
   vars:
     name: Barman
@@ -20,10 +14,8 @@
   vars:
     source_directory: "{{ barman_src_dir }}"
     git_repository_ref: "{{ barman_git_ref }}"
-    mounted_sources: "{{ mounted_sources_cmd.stdout_lines|default([]) }}"
   when:
-    barman_src_dir in mounted_sources
-    and barman_git_ref is defined
+    barman_git_ref is defined
 
 - name: Remove old build directory
   file: state=absent path="{{ barman_build_dir }}" force=yes
