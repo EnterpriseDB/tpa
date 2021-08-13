@@ -3,6 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 from jinja2 import Undefined
+from ansible.plugins.test.core import match
 
 # This filter takes a container and a subkey ('x.y.z', or [x,y,z]) and returns
 # true if the subkey exists in the container, or false if any of the levels is
@@ -61,4 +62,5 @@ class TestModule(object):
             "contains": contains,
             "startswith": startswith,
             "empty": empty,
+            "matched_by": match,
         }

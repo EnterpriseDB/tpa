@@ -46,7 +46,7 @@
   assert:
     msg: "Please ensure instance Name '{{ item.Name }}' matches '{{ p }}'"
     that:
-      - item.Name|match(p)
+      - item.Name is matched_by(p)
   with_items: "{{ instances }}"
   vars:
     patterns: "{{ hostname_patterns|default({}) }}"

@@ -27,7 +27,7 @@
   assert:
     msg: "Invalid cluster_name='{{ cluster_name }}' defined in {{ config_file }} (may contain only letters, numbers, underscores, minus)"
     that:
-      - cluster_name|match('^[_a-zA-Z0-9-]+$')
+      - cluster_name is matched_by('^[_a-zA-Z0-9-]+$')
 
 - name: Set default cluster_tags (including Owner)
   set_fact:

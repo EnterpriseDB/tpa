@@ -23,7 +23,7 @@
   become_user: "{{ postgres_user }}"
   become: yes
   when:
-    - slot.slot_name|match('repmgr_slot_[0-9]+')
+    - slot.slot_name is matched_by('repmgr_slot_[0-9]+')
     - replica_with_slot|count == 1
     - replica_streams_from not in ['', inventory_hostname]
   vars:
