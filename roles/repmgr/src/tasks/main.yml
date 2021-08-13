@@ -10,6 +10,17 @@
     version: "{{ repmgr_git_ref }}"
     reference: "{{ repmgr_git_reference_repo }}"
 
+- include_role: name=src/install tasks_from=verify-branch.yml
+  vars:
+    source_directory: "{{ repmgr_src_dir }}"
+    git_repository_ref: "{{ repmgr_git_ref }}"
+  when:
+    repmgr_git_ref is defined
+
+# XXX Although a --local-source-directories attempt to build repmgr
+# would be handled "for free" by the tasks above, the following code
+# does an in-tree build, and would therefore fail in this scenario.
+
 - name: Remove old build artifacts
   command: git clean -dxf
   args:
