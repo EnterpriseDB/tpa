@@ -113,6 +113,8 @@
     section: main
     option: exclude
     value: "postgresql* barman* repmgr*"
+  register: _task
+  failed_when: _task is not successful and _task.rc != 257
   when: ansible_distribution_id == "rhel"
 
 - name: Exclude postgresql packages from CentOS base repositories
