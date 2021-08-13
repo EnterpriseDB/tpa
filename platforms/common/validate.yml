@@ -6,7 +6,7 @@
     msg: "Ansible 2.8.x is required"
     that:
       - ansible_version.major == 2
-      - ansible_version.minor == 8
+      - ansible_version.minor in [8, 9]
   tags: prereqs
 
 - import_tasks: validate-compat.yml
