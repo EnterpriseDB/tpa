@@ -21,6 +21,7 @@ cluster_vars:
     languages:
     - name: plperl
     - name: plpython
+    tablespace: exampletablespace
 ```
 
 The example above would create two databases (apart from any databases
@@ -39,9 +40,12 @@ use the target system's LC_ALL or LANG setting). If you are creating a
 database with non-default locale settings, you will also need to specify
 `template: template0`.
 
+You can optionally specify the default `tablespace` for a database; the
+tablespace must already exist
+(see [`postgres_tablespaces`](postgres_tablespaces.md)).
+
 You can specify optional lists of `extensions` and `languages` to create
 within each database (in addition to any extensions or languages
 inherited from the template database). Any packages required must be
 installed already, for example by including them in
 [`extra_postgres_packages`](postgres_installation_method_pkg.md).
-

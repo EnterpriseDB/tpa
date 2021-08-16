@@ -298,8 +298,9 @@ value for the volume as shown above.
 
 There are two ways to determine where a volume is mounted. You can
 either specify a `mountpoint` explicitly, or you can set `volume_for` to
-`postgres_data`, `postgres_wal` or `barman_data`, and TPAexec will translate
-the setting into an appropriate mountpoint for the system.
+`postgres_data`, `postgres_wal`, `postgres_tablespace` or `barman_data`,
+and TPAexec will translate the setting into an appropriate mountpoint
+for the system.
 
 Once the `mountpoint` is determined, the `device` will be mounted there
 with the given `mountopts` (default: `defaults,noatime`). An entry will

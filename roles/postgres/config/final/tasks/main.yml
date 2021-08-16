@@ -81,15 +81,37 @@
     - [postgres, template1]
     - "{{ postgres_extensions }}"
   become_user: "{{ postgres_user }}"
-  become: true
+  become: yes
   when:
     item.1 not in cluster_facts.databases[item.0].extensions|default({})
 
-# Now that all required roles exist, we can create databases specified
-# in postgres_databases with the correct owners. If you do not specify
-# any template, it uses template1 and inherits all the extensions that
-# were created above. If you don't want that, use template0 explicitly
-# and create extensions in the postgres-config-final hook.
+# Now we issue CREATE TABLESPACE for each entry in postgres_tablespaces.
+# (We create tablespaces before databases because postgres_databases may
+# specify a default tablespace for a database.)
+
+- name: Create Postgres tablespaces
+  postgresql_tablespace:
+    name: "{{ item.key }}"
+    owner: "{{ postgres_user }}"
+    location: "{{ item.value.location }}"
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    state: "{{ item.value.state|default('present') }}"
+    db: postgres
+  with_dict: "{{ postgres_tablespaces|default({}) }}"
+  loop_control:
+    label: >-
+      {{ item.key }}
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# Now that all required roles and tablespaces exist, we can create the
+# databases specified in postgres_databases with the correct owners and
+# default tablespaces.
+#
+# If you do not want to inherit postgres_extensions from template1 (the
+# default template database), set `template: template0` explicitly and
+# set extensions in postgres_databases (to be created below).
 
 - name: Create Postgres databases
   postgresql_db:
@@ -102,6 +124,7 @@
     lc_collate: "{{ db.lc_collate|default(omit) }}"
     lc_ctype: "{{ db.lc_ctype|default(omit) }}"
     template: "{{ db.template|default(omit) }}"
+    tablespace: "{{ db.tablespace|default(omit) }}"
     state: "{{ db.state|default('present') }}"
   with_items: "{{ postgres_databases }}"
   loop_control:
@@ -132,7 +155,7 @@
     label: >-
       {{ item.0.name }}/{{ item.1.name }}
   become_user: "{{ postgres_user }}"
-  become: true
+  become: yes
 
 # We do likewise for any languages listed in postgres_databases. This
 # just issues "CREATE LANGUAGE" commands; if any packages are required,
@@ -156,7 +179,7 @@
     label: >-
       {{ item.0.name }}/{{ item.1.name }}
   become_user: "{{ postgres_user }}"
-  become: true
+  become: yes
 
 # Now we can complete the task of granting roles to `postgres_users`.
 

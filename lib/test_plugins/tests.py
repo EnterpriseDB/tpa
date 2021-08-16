@@ -29,15 +29,26 @@ def notequalto(a, b):
     return a != b
 
 
-# Returns True if all of the one or more given values are in the container, and
-# False otherwise.
-
-
 def contains(container, *values):
+    """
+    Returns True if all of the one or more given values are in the container,
+    and False otherwise.
+    """
     for v in values:
         if v not in container:
             return False
     return True
+
+
+def contains_any(container, *values):
+    """
+    Returns True if any of the one or more given values are in the container,
+    and False otherwise.
+    """
+    for v in values:
+        if v in container:
+            return True
+    return False
 
 
 # Returns True if the given str starts with the given prefix, False otherwise.
@@ -60,6 +71,8 @@ class TestModule(object):
             "has_subkey": has_subkey,
             "notequalto": notequalto,
             "contains": contains,
+            "contains_all": contains,
+            "contains_any": contains_any,
             "startswith": startswith,
             "empty": empty,
             "matched_by": match,

@@ -10,6 +10,10 @@
   pg_wal during initial deployment; if there is a volume marked with
   `volume_for: postgres_wal`, it will be used by default.
 
+- Support declarative configuration of `postgres_tablespaces`; also, any
+  volumes marked with `volume_for: postgres_tablespace` will be used to
+  set up tablespaces by default.
+
 - Support declarative configuration of BDR subscriber-only groups: any
   BDR instance with 'subscriber-only' in its role will join a default
   cluster-wide subscriber-only node group (but more complex topologies
@@ -229,7 +233,7 @@ feature generally available.
 - Fix a problem with cloning an HTTPS repository with ssh submodules
   that caused `fatal: cannot exec '/tmp/tmpXXXXXXXX': Permission denied`
   errors on Docker containers (e.g., when updating pglogical_dump)
-  
+
 - Fix python2.7 interpreter discovery on Ubuntu 18.04/bionic: if
   preferred_python_interpreter was unset, the earlier code would
   install Python 3 but try to use Python 2

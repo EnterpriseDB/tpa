@@ -3,9 +3,9 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 import copy
-from jinja2 import Undefined
-from jinja2.runtime import StrictUndefined
+import re
 from ansible.errors import AnsibleFilterError
+from typing import List, Dict, Tuple
 
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html#instance-store-volumes
 #
@@ -433,12 +433,7 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
             if not "delete_on_termination" in v:
                 v["delete_on_termination"] = not v.get("attach_existing", False)
 
-            volume_for = vars.get("volume_for", None)
-            if volume_for and volume_for not in ["postgres_data", "postgres_wal", "barman_data"]:
-                raise AnsibleFilterError(
-                    "volume_for=%s is not recognised for volume %s"
-                    % (volume_for, v["device_name"])
-                )
+            validate_volume_for(v["device_name"], vars)
 
             volumes.append(v)
 
@@ -480,6 +475,114 @@ def expand_instance_volumes(old_instances, ec2_ami_properties):
         instances.append(j)
 
     return instances
+
+
+volume_translations = {
+    "barman_data": {"mountpoint": "/var/lib/barman"},
+    "postgres_data": {"mountpoint": "/opt/postgres"},
+    "postgres_wal": {"mountpoint": "/opt/postgres/wal"},
+    "postgres_tablespace": {
+        "mountpoint": "/opt/postgres/tablespaces/{v[tablespace_name]}"
+    },
+}
+
+
+def validate_volume_for(device_name, vars) -> None:
+    """
+    Given a device name and a container with settings for that device, raises an
+    exception if the volume has an invalid volume_for annotation or is missing
+    any other required configuration; returns silently otherwise.
+
+    Called during both provisioning and deployment, when `volumes` means two
+    different things; expand_instance_volumes() passes in `volumes[*].vars` from
+    config.yml, which is translated into an entry in `volumes` in the inventory,
+    which is what translate_volume_deployment_defaults() later passes in. This
+    is why the function takes "vars", and not "vol".
+
+    See roles/platforms/common/tasks/volumes.yml for more details.
+    """
+    volume_for = vars.get("volume_for")
+    if volume_for and volume_for not in volume_translations:
+        raise AnsibleFilterError(
+            "volume %s has unrecognised volume_for=%s" % (device_name, volume_for)
+        )
+
+    if volume_for == "postgres_tablespace" and not vars.get("tablespace_name"):
+        raise AnsibleFilterError(
+            "volume %s is %s; must define tablespace_name" % (device_name, volume_for)
+        )
+
+
+def translate_volume_deployment_defaults(vol):
+    """
+    Modifies the given entry from `volumes` in the inventory to translate its
+    volume_for into a mountpoint and other volume defaults if needed. Meant to
+    be used only as a |map function.
+
+    See roles/platforms/common/tasks/volumes.yml for more details.
+    """
+    validate_volume_for(vol["device"], vol)
+
+    # If we have a valid volume_for, we can translate that into a default
+    # mountpoint (unless one is explicitly set).
+    volume_for = vol.get("volume_for")
+    if volume_for:
+        if not vol.get("mountpoint"):
+            vol.update(volume_translations[volume_for])
+
+        # Set a default LUKS volume name based on volume_for, if required.
+        if vol.get("encryption") == "luks" and not vol.get("luks_volume"):
+            volume_name = re.sub("_data$", "", volume_for)
+            if volume_for == "postgres_tablespace":
+                volume_name = vol.get("tablespace_name")
+            vol["luks_volume"] = volume_name
+
+    # We format the mountpoint so that variables like tablespace_name can be
+    # incorporated into the path (see volume_translations above).
+    if vol.get("mountpoint"):
+        vol["mountpoint"] = vol["mountpoint"].format(v=vol)
+
+    return vol
+
+
+def find_replica_tablespace_mismatches(instances):
+    """
+    Given a list of all instances, returns a list of replicas whose
+    postgres_tablespace volume definitions do not match the volume definitions
+    on their upstream instance.
+    """
+
+    # First, we map instance names to a hash that tells us whether the instance
+    # is a replica, who its upstream is, and what tablespace volumes it defines.
+    instance_tablespaces = {}
+    for i in instances:
+        # We need only volume_for/tablespace_name, both of which are in
+        # volumes[*].vars, so we transform the list of volumes into the
+        # following list of vars.
+        volume_vars = map(lambda vol: vol.get("vars", {}), i.get("volumes", []))
+
+        instance_tablespaces[i["Name"]] = {
+            "replica": ("replica" in i.get("role", [])),
+            "upstream": i.get("upstream"),
+            "tablespace_names": [
+                v.get("tablespace_name")
+                for v in volume_vars
+                if v.get("volume_for") == "postgres_tablespace"
+            ],
+        }
+
+    # For each replica, we compare its tablespace_names with its upstream's list
+    # and indicate a mismatch if they are not equal.
+    mismatched_replicas = []
+    for Name, inst in instance_tablespaces.items():
+        if not inst["replica"]:
+            continue
+
+        upstream = instance_tablespaces[inst["upstream"]]
+        if sorted(inst["tablespace_names"]) != sorted(upstream["tablespace_names"]):
+            mismatched_replicas.append(Name)
+
+    return mismatched_replicas
 
 
 # This filter sets the volume_id for any volumes that match existing attachable
@@ -612,6 +715,8 @@ class FilterModule(object):
             "set_instance_defaults": set_instance_defaults,
             "expand_instance_image": expand_instance_image,
             "expand_instance_volumes": expand_instance_volumes,
+            "translate_volume_deployment_defaults": translate_volume_deployment_defaults,
+            "find_replica_tablespace_mismatches": find_replica_tablespace_mismatches,
             "match_existing_volumes": match_existing_volumes,
             "export_vars": export_vars,
         }

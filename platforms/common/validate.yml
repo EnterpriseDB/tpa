@@ -95,3 +95,14 @@
     - tags
     - vars
     - volumes
+
+- assert:
+    msg: >-
+      Replicas must specify the same postgres_tablespace volumes as
+      their upstream instance: {{ mismatched_replicas|join(", ") }}
+    that:
+      mismatched_replicas is empty
+  vars:
+    mismatched_replicas: "{{
+      instances|find_replica_tablespace_mismatches
+    }}"

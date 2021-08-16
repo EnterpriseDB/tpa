@@ -74,6 +74,20 @@
   when:
     pgdata_wal_dir is defined and postgres_wal_dir is defined
 
+# We don't use the mountpoint directly as the tablespace location
+# because lost+found confuses pg_basebackup into thinking the target
+# directory is not empty.
+
+- name: Set default_postgres_tablespaces based on postgres_tablespace volumes
+  set_fact:
+    default_postgres_tablespaces: "{{
+      default_postgres_tablespaces|combine({
+        item.tablespace_name: {'location': item.mountpoint + '/tablespace_data'}
+      })
+    }}"
+  with_items: >-
+    {{ volumes|json_query("[?volume_for=='postgres_tablespace']") }}
+
 - name: Set postgres_version
   set_fact:
     postgres_version: "{{ version }}"
@@ -109,6 +123,8 @@
     postgres_install_dir: "{{ postgres_install_dir|default(default_postgres_install_dir) }}"
     postgres_locale: "{{ postgres_locale|default(system_locale|default(default_postgres_locale)) }}"
     postgres_users: "{{ postgres_users|default(default_postgres_users) }}"
+    postgres_tablespaces: >-
+      {{ default_postgres_tablespaces|combine(postgres_tablespaces|default({}), recursive=True) }}
     postgres_databases: "{{ postgres_databases|default(default_postgres_databases) }}"
     postgres_conf_files: "{{ postgres_conf_files|default(default_postgres_conf_files) }}"
     postgres_hba_local_auth_method: "{{ postgres_hba_local_auth_method|default(default_postgres_hba_local_auth_method) }}"
@@ -149,6 +165,14 @@
       {%- if postgres_version is version('10', '>=') -%}wal
       {%- else -%}xlog
       {%- endif -%}
+
+- name: Ensure all postgres_tablespaces entries have location defined
+  assert:
+    msg: >-
+      Tablespace {{ item.key }} must have location defined
+    that: item.value.location is not empty
+  with_dict: >-
+    {{ postgres_tablespaces|default({}) }}
 
 - name: Disable repmgr/EFM for BDR instances
   set_fact:
@@ -474,3 +498,18 @@
     - upstream_primary is defined
     - upstream_max_worker_processes is defined
     - upstream_max_worker_processes|int > max_worker_processes|int
+
+- name: Ensure replicas have the same postgres_tablespaces as primary
+  assert:
+    msg: >
+      Replicas must have the same postgres_tablespaces settings
+      as primary
+    that: upstream_postgres_tablespaces == postgres_tablespaces
+  vars:
+    upstream_postgres_tablespaces: "{{
+      hostvars[upstream_primary].get('postgres_tablespaces')
+    }}"
+  when:
+    - "'replica' in role"
+    - upstream_primary is defined
+    - upstream_postgres_tablespaces is defined or postgres_tablespaces is defined

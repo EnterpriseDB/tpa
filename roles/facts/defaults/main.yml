@@ -52,6 +52,8 @@ default_postgres_bin_dir:
     Debian: "/usr/lib/edb-as/{{ postgres_version }}/bin"
     RedHat: "/usr/edb/as{{ postgres_version }}/bin"
 
+default_postgres_tablespaces: {}
+
 default_postgres_extensions:
   - pg_stat_statements
   - pg_freespacemap

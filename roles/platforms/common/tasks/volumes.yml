@@ -16,67 +16,26 @@
 #     foo: 42
 #   - device: /dev/xvdf
 #
-# We filter out volumes without annotations (the first and last above),
-# translate 'volume_for' into a mountpoint, and finally invoke sys/fs on
-# each (device,mountpoint) thus derived.
-
-- name: Initialise _volumes and _translations lists
-  set_fact:
-    _volumes: []
-    _translations:
-      postgres_data:
-        mountpoint: /opt/postgres
-      postgres_wal:
-        mountpoint: /opt/postgres/wal
-      barman_data:
-        mountpoint: /var/lib/barman
-
-# Although expand_instance_volumes() rejects unrecognised values by
-# duplicating our _translations table, we double-check that we don't
-# have an untranslate-able volume_for anyway.
-
-- name: Verify volume_for annotations
-  assert:
-    msg: "Cannot translate volume_for={{ item.volume_for }} to a mountpoint"
-    that:
-      - item.volume_for in _translations
-  with_items: >
-    {{ volumes|json_query('[?volume_for]') }}
-
-# We filter out volumes with neither mountpoint/volume_for set and merge
-# in any settings found based on volume_for, including the mountpoint.
-
-- name: Collect a list of devices and mountpoints to act on
-  set_fact:
-    _volumes: >
-      {{ _volumes|union([_volume_defaults|combine(item)]) }}
-  with_items: >
-    {{ volumes }}
-  vars:
-    _volume_for: >-
-      {{ item.get('volume_for') }}
-    _volume_name: >-
-      {{ _volume_for|regex_replace('_data$', '') }}
-    _volume_defaults: >
-      {{
-        ('volume_for' in item)|ternary(
-          {'luks_volume': _volume_name}|combine(_translations.get(_volume_for, {})),
-          {'mountpoint': item.mountpoint}
-        )
-      }}
-  when: >
-    'mountpoint' in item or 'volume_for' in item
-
-# We sort volumes based on their mountpoints, so that /opt/postgres is
-# always mounted before /opt/postgres/wal, regardless of their relative
-# positions in volumes[].
+# We translate volume_for into a mountpoint, sort volumes based on their
+# mountpoint (so that /opt/postgres is mounted before /opt/postgres/wal
+# regardless of their relative positions), and invoke sys/fs on each
+# (device,mountpoint) thus derived.
+#
+# (We ignore volumes without volume_for or a mountpoint, like the first
+# and last entries above, because there's nothing we can do for them.)
 
 - set_fact:
-    volumes: "{{ _volumes|sort(attribute='mountpoint') }}"
+    volumes: >
+      {{
+        volumes
+        |select('contains_any', 'mountpoint', 'volume_for')
+        |map('translate_volume_deployment_defaults')
+        |sort(attribute='mountpoint')
+      }}
 
 # We end up with a list that looks like this:
 #
-# _volumes:
+# volumes:
 #   - device: /dev/md0
 #     mountpoint: /opt/postgres
 #   - device: /dev/xvdf
@@ -95,21 +54,31 @@
       {{ volumes|json_query("[?volume_for=='barman_data']")|length != 0 }}
     postgres_volume_mountable: >-
       {{ volumes|json_query("[?volume_for=='postgres_data']")|length != 0 }}
-    postgres_wal_volume_mountable: >-
-      {{ volumes|json_query("[?volume_for=='postgres_wal']")|length != 0 }}
     barman_volume_encrypted: >-
       {{ volumes|json_query("[?volume_for=='barman_data' && encryption]")|length != 0 }}
     postgres_volume_encrypted: >-
       {{ volumes|json_query("[?volume_for=='postgres_data' && encryption]")|length != 0 }}
-    postgres_wal_volume_encrypted: >-
-      {{ volumes|json_query("[?volume_for=='postgres_wal' && encryption]")|length != 0 }}
 
-- name: Ensure postgres_data/wal volumes have the same encryption setting
+# If you enable device-level encryption for any volume (which has
+# volume_for set, i.e., whose purpose we know), you must also enable
+# encryption for all the rest. It's not sensible to mix encrypted and
+# unencrypted volumes.
+#
+# XXX This check doesn't warn against having an encrypted postgres_data
+# volume but an unencrypted barman_data one, because the two volumes are
+# likely to be on different instances.
+
+- name: Ensure that all known volumes have the same encryption setting
   assert:
     msg: >-
-      The postgres_data and postgres_wal volumes must have the same encryption setting
-    that: >
-      postgres_volume_encrypted ==
-      postgres_wal_volume_encrypted
+      All volumes (data, wal, tablespaces, barman) must have the same
+      encryption setting
+    that:
+      known_volumes|length == encrypted_volumes|length
+  vars:
+    known_volumes: >-
+      {{ volumes|json_query("[?volume_for]") }}
+    encrypted_volumes: >-
+      {{ known_volumes|json_query("[?encrypted]") }}
   when:
-    postgres_volume_mountable and postgres_wal_volume_mountable
+    encrypted_volumes is not empty

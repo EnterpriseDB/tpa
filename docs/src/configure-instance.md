@@ -155,6 +155,8 @@ In any case, Postgres will be running at the end of this step.
 
 * [Create Postgres users](postgres_users.md)
 
+* [Create Postgres tablespaces](postgres_tablespaces.md)
+
 * [Create Postgres databases](postgres_databases.md)
 
 * [Configure pglogical replication](pglogical.md)
