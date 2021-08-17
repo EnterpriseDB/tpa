@@ -42,12 +42,12 @@ auto.allow.hosts={{ efm_conf_settings['auto.allow.hosts']|default(true) |bool }}
 stable.nodes.file={{ efm_conf_settings['stable.nodes.file']|default(true) | bool }}
 db.reuse.connection.count={{ efm_conf_settings['db.reuse.connection.count']|default(0) }}
 auto.failover={{ efm_conf_settings['auto.failover']|default(true) | bool }}
-{% if postgres_version is version('11', '<=') or (upstream is defined and upstream_primary != upstream) %}
+{% if postgres_version is version('11', '<=') or (upstream is defined and upstream_primary|default(upstream) != upstream) %}
 auto.reconfigure=false
 {% else %}
 auto.reconfigure=true
 {% endif %}
-{% if 'efm-witness' in role or 'efm-not-promotable' in role or ( upstream is defined and upstream_primary != upstream) %}
+{% if 'efm-witness' in role or 'efm-not-promotable' in role or (upstream is defined and upstream_primary != upstream) %}
 promotable=false
 {% else %}
 promotable=true
