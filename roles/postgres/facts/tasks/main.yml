@@ -43,18 +43,20 @@
 # We expect primary_conninfo to refer to the upstream host by a name we
 # recognise, but recovery.conf may have been changed to specify another
 # hostname (e.g., to use a faster link for replication). We can try to
-# translate based on hostname_aliases.
+# translate based on hostname_aliases or IP addresses.
 
 - name: Translate unrecognised primary_conninfo host to instance name
   set_fact:
     streaming_from: "{{ item }}"
   with_items: "{{ groups['role_postgres'] }}"
   vars:
-    _aliases: "{{ hostvars[item].hostname_aliases }}"
+    _h: "{{ hostvars[item] }}"
+    _aliases: "{{ _h.hostname_aliases.keys() }}"
+    _addresses: "{{ (_h|extract_keys(_h.ip_addresses)).values()|list }}"
   when:
-    streaming_from is defined and
-    streaming_from not in hostvars and
-    streaming_from in _aliases.keys()
+    streaming_from is defined
+    and streaming_from not in hostvars
+    and (streaming_from in _aliases or streaming_from in _addresses)
 
 - assert:
     msg: "Unrecognised host={{ streaming_from }} in primary_conninfo"
