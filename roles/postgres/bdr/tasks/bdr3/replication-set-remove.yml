@@ -10,9 +10,12 @@
       args:
       - "{{ item.set_name }}"
   with_items: "{{ existing_sets }}"
+  vars:
+    _set_names: "{{ publication_sets|json_query('[*].name') }}"
+    _group_names: "{{ bdr_node_groups|json_query('[*].name') }}"
   when:
     publications is defined
-    and item.set_name not in publication_sets|json_query('[*].name')|union([bdr_node_group])
+    and item.set_name not in _set_names|union(_group_names)
   changed_when: True
   become_user: "{{ postgres_user }}"
   become: yes
