@@ -41,6 +41,7 @@
     ro_groups:
     - role_replica
     - role_readonly
+    - role_subscriber-only
     _primary_candidates: >
       {{ groups|members_of(bdr_node_group, not_in=ro_groups) }}
   when: >

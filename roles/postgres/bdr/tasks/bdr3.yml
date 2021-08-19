@@ -66,6 +66,52 @@
     _options: "{{ bdr_node_group_options|default({}) }}"
     _default_group: "{{ _name|combine(_options) }}"
 
+# Subscriber-only instances may optionally specify the bdr_child_group
+# they should join; if they do not do so explicitly, and there are no
+# subscriber-only groups in bdr_node_groups, we add a default one.
+
+- name: Add subscriber-only group, if required
+  set_fact:
+    bdr_node_groups: "{{ bdr_node_groups + [default_so_group] }}"
+  vars:
+    default_so_group:
+      name: subscriber-only
+      node_group_type: subscriber-only
+      parent_group_name: "{{ bdr_node_group }}"
+    so_instances: "{{ groups['role_subscriber-only'] }}"
+  when:
+    - so_instances is not empty
+    - so_instances|map('extract', hostvars, 'bdr_child_group')|reject('defined')|list is not empty
+    - bdr_node_groups|json_query("[?node_group_type=='subscriber-only']") is empty
+
+# If there is exactly one subscriber-only group in bdr_node_groups, we
+# can set it as the default bdr_child_group for any subscriber-only
+# instances that don't specify one explicitly.
+
+- name: Set default bdr_child_group for subscriber-only nodes, if required
+  set_fact:
+    bdr_child_group: "{{ bdr_child_group|default(so_group_name) }}"
+  vars:
+    so_group: >-
+      {{ bdr_node_groups|json_query("[?node_group_type=='subscriber-only']") }}
+    so_group_name: >-
+      {{ so_group[0].name }}
+  when:
+    - "'subscriber-only' in role"
+    - so_group|length == 1
+
+- assert:
+    msg: >-
+      A subscriber-only instance must have bdr_child_group set to the
+      name of a subscriber-only group in bdr_node_groups
+    that:
+      - bdr_child_group is defined
+      - bdr_node_groups
+        |selectattr('name', 'equalto', bdr_child_group)
+        |map(attribute='node_group_type')|list|first == 'subscriber-only'
+  when: >
+    'subscriber-only' in role
+
 - name: Map BDR group names to options
   set_fact:
     _bdr_group_options: "{{

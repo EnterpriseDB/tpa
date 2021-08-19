@@ -49,7 +49,12 @@ class BDR(Architecture):
             for i in instances:
                 vars = i.get("vars", {})
                 role = i.get("role", id.get("role", []))
-                if "bdr" in role and "primary" in role and "readonly" not in role:
+                if (
+                    "bdr" in role
+                    and "primary" in role
+                    and "readonly" not in role
+                    and "subscriber-only" not in role
+                ):
                     if not "bdr_node_camo_partner" in vars:
                         bdr_primaries.append(i)
 

@@ -55,7 +55,12 @@ class BDR_Autoscale(BDR_Always_ON):
         primaries = []
         for i in self.args["instances"]:
             r = i.get("role")
-            if "bdr" in r and "primary" in r and "readonly" not in r:
+            if (
+                "bdr" in r
+                and "primary" in r
+                and "readonly" not in r
+                and "subscriber-only" not in r
+            ):
                 primaries.append(i.get("node"))
         return primaries
 
