@@ -17,7 +17,15 @@
   when: >
     role|intersect(['primary', 'replica', 'witness', 'bdr']) is not empty
 
-- set_fact:
+- name: Add implicit primary role to BDR instances
+  set_fact:
+    role: "{{ role|union(['primary']) }}"
+  when: >
+    'bdr' in role
+    and 'replica' not in role
+
+- name: Add implicit readonly role to BDR pause_in_standby instances
+  set_fact:
     role: "{{ role|union(['readonly']) }}"
   when: >
     bdr_node_pause_in_standby|default(false)|bool

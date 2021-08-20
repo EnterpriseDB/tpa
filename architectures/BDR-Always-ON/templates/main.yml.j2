@@ -6,7 +6,6 @@ instances:
     Name: {{ hostnames[1] }}
     location: 0
     role:
-      - primary
       - bdr
     backup: {{ hostnames[7] }}
 
@@ -14,14 +13,12 @@ instances:
     Name: {{ hostnames[2] }}
     location: 0
     role:
-      - primary
       - bdr
 
   - node: 3
     Name: {{ hostnames[3] }}
     location: 1
     role:
-      - primary
       - bdr
     backup: {{ hostnames[8] }}
 
@@ -29,14 +26,12 @@ instances:
     Name: {{ hostnames[4] }}
     location: 1
     role:
-      - primary
       - bdr
 
   - node: 5
     Name: {{ hostnames[5] }}
     location: 0
     role:
-      - primary
       - bdr
       - readonly
     upstream: {{ hostnames[2] }}
@@ -45,7 +40,6 @@ instances:
     Name: {{ hostnames[6] }}
     location: 1
     role:
-      - primary
       - bdr
       - readonly
     upstream: {{ hostnames[4] }}

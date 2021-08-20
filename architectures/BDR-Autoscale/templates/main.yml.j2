@@ -7,6 +7,5 @@ instances:
     Name: {{ hostnames[n] }}
     location: {{ (n is even)|ternary(1, 0) }}
     role:
-      - primary
       - bdr
 {% endfor %}
