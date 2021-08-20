@@ -78,7 +78,7 @@
       name: subscriber-only
       node_group_type: subscriber-only
       parent_group_name: "{{ bdr_node_group }}"
-    so_instances: "{{ groups['role_subscriber-only'] }}"
+    so_instances: "{{ groups['role_subscriber-only']|default([]) }}"
   when:
     - so_instances is not empty
     - so_instances|map('extract', hostvars, 'bdr_child_group')|reject('defined')|list is not empty
