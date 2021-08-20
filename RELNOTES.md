@@ -2,6 +2,33 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+## v21.7 (unreleased)
+
+### New features
+
+- Accept optional `postgres_wal_dir` setting to determine location of
+  pg_wal during initial deployment; if there is a volume marked with
+  `volume_for: postgres_wal`, it will be used by default.
+
+- Support declarative configuration of BDR subscriber-only groups: any
+  BDR instance with 'subscriber-only' in its role will join a default
+  cluster-wide subscriber-only node group (but more complex topologies
+  are possible by explicitly setting `bdr_child_group` to point to any
+  subscriber-only node group declared in `bdr_node_groups`).
+
+### Bugfixes
+
+- Fix errors like "Repository 'epel' is missing name in configuration"
+  by ensuring we only edit existing files to add `exclude` entries, and
+  not create empty .repo and other YUM-related configuration files
+
+- Fix error about upstream_primary being undefined during template
+  expansion of efm.properties on EFM witnesses
+
+- Fix "Unrecognised host=x in primary_conninfo" error during deployment
+  after running `efm promote` (by accepting and translating IP addresses
+  in addition to hostnames)
+
 ## v21.6 (2021-08-09)
 
 ### Minor changes
