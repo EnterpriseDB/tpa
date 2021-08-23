@@ -77,3 +77,24 @@
   when:
     failover_manager is not defined
     and enable_harp|default(false)|bool
+
+# If the cluster_dir contained cluster_name.{key,crt} files, we used to
+# install them instead of the self-signed certificates on the Postgres
+# instances. This behaviour is no longer supported, so we error out if
+# the files exist.
+#
+# TODO: document the recommended alternative certificate mechanism.
+
+- name: Ensure the legacy certificate installation mechanism is not used
+  assert:
+    msg: >
+      Installing the {{ cluster_name }}.key and .crt files is no longer
+      supported (but they will not be removed from instances where they
+      are already installed); please remove the files to continue.
+    that: legacy_certs is empty
+  vars:
+    legacy_certs: "{{
+      lookup('fileglob',
+             '%s/%s.key' % (cluster_dir, cluster_name),
+             '%s/%s.crt' % (cluster_dir, cluster_name))
+    }}"

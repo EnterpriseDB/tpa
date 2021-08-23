@@ -2,33 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-# The secure way for us to install TLS certificates would be to generate
-# the keypair in situ and submit a CSR through some automated interface
-# to a CA (e.g., Letsencrypt), and install the resulting certificate.
-#
-# For now, if the cluster directory contains a keypair, we install it.
-
-- name: Install TLS certificates (if provided)
-  copy:
-    src: "{{ item }}"
-    dest: "/etc/tpa/{{ item }}"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0600
-  with_items:
-    - "{{ cluster_name }}.key"
-    - "{{ cluster_name }}.crt"
-  notify:
-    - Note Postgres restart required
-  when: >
-    tlsfiles != [] and tlsfiles.split(',')|length == 2
-  vars:
-    tlsfiles: "{{
-      lookup('fileglob',
-             '%s/%s.key' % (cluster_dir, cluster_name),
-             '%s/%s.crt' % (cluster_dir, cluster_name))
-    }}"
-
 - name: Generate self-signed TLS key and certificate
   shell: >
     umask 077 &&
