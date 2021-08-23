@@ -28,6 +28,19 @@
   set_fact:
     postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
 
+- name: Update default_postgres_wal_dir if there is a volume_for postgres_wal
+  set_fact:
+    default_postgres_wal_dir: "{{ wal_volumes[0].mountpoint }}/pg_wal"
+  vars:
+    wal_volumes: >-
+      {{ volumes|json_query("[?volume_for=='postgres_wal']") }}
+  when:
+    wal_volumes is not empty
+
+- name: Set postgres_wal_dir
+  set_fact:
+    postgres_wal_dir: "{{ postgres_wal_dir|default(default_postgres_wal_dir) }}"
+
 - name: Perform basic postgres fact discovery
   minimal_postgres_setup:
     pgdata: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
@@ -52,23 +65,6 @@
   when:
     postgres_user is defined and pgdata_user is defined
 
-- name: Set postgres_version
-  set_fact:
-    postgres_version: "{{ version }}"
-    postgres_versionNN: "{{ version|replace('.','') }}"
-  vars:
-    version: "{{ postgres_version|default(pgdata_version|default(default_postgres_version)) }}"
-
-- name: Set postgres_wal_dir if there is a volume_for postgres_wal
-  set_fact:
-    postgres_wal_dir: "{{ wal_volumes[0].mountpoint }}/pg_wal"
-  vars:
-    wal_volumes: >-
-      {{ volumes|json_query("[?volume_for=='postgres_wal']") }}
-  when:
-    - postgres_wal_dir is not defined
-    - wal_volumes is not empty
-
 - name: Ensure pgdata_wal_dir matches postgres_wal_dir, if defined
   assert:
     msg: >-
@@ -77,6 +73,13 @@
     that: pgdata_wal_dir == postgres_wal_dir
   when:
     pgdata_wal_dir is defined and postgres_wal_dir is defined
+
+- name: Set postgres_version
+  set_fact:
+    postgres_version: "{{ version }}"
+    postgres_versionNN: "{{ version|replace('.','') }}"
+  vars:
+    version: "{{ postgres_version|default(pgdata_version|default(default_postgres_version)) }}"
 
 - name: Set efm_version
   set_fact:
