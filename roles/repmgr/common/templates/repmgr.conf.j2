@@ -16,6 +16,9 @@ reconnect_attempts = {{ repmgr_reconnect_attempts|default(6) }}
 reconnect_interval = {{ repmgr_reconnect_interval|default(10) }}
 failover = {{ repmgr_failover }}
 ssh_options = '-q'
+{% if postgres_wal_dir is defined and postgres_wal_dir != postgres_data_dir+"/pg_wal" %}
+pg_basebackup_options='--waldir {{ postgres_wal_dir }}'
+{% endif %}
 
 log_level = INFO
 
