@@ -20,7 +20,7 @@
   with_items:
     - "{{ postgres_home }}"
     - "{{ postgres_data_dir }}"
-    - "{{ postgres_wal_dir if postgres_wal_dir is defined else [] }}"
+    - "{{ postgres_wal_dir if (postgres_wal_dir is defined and postgres_wal_dir|dirname != postgres_data_dir) else [] }}"
     - "{{ postgres_conf_dir if postgres_conf_dir != postgres_data_dir else [] }}"
 
 # https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/SELinux_Users_and_Administrators_Guide/sect-Managing_Confined_Services-PostgreSQL-Configuration_Examples.html
@@ -73,8 +73,9 @@
   changed_when: >
     restorecon.stdout.strip() not in ['', '0']
   when:
-    postgres_wal_dir is defined
-    and platform not in ['docker']
+    - postgres_wal_dir is defined
+    - postgres_wal_dir|dirname != postgres_data_dir
+    - platform not in ['docker']
 
 # Even if PGDATA was not initialised when we ran minimal_postgres_setup
 # from init, we may now have a valid PGDATA now after mounting a volume
@@ -88,7 +89,9 @@
 - name: Add postgres_wal_dir to initdb options if set
   set_fact:
     postgres_initdb_opts: "{{ postgres_initdb_opts + ['--waldir=' + postgres_wal_dir] }}"
-  when: postgres_wal_dir is defined
+  when:
+    - postgres_wal_dir is defined
+    - postgres_wal_dir|dirname != postgres_data_dir
 
 - name: Initialise PGDATA={{ postgres_data_dir }}
   block:
