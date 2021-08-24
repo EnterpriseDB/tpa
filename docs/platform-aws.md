@@ -18,6 +18,70 @@ aws_access_key_id = AKIAIOSFODNN7EXAMPLE
 aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
 
+The AMI user should at least have following set of permissions so tpaexec
+can use it to provision ec2 resources.
+```
+ec2:AssociateRouteTable
+ec2:AttachInternetGateway
+ec2:AuthorizeSecurityGroupIngress
+ec2:CreateInternetGateway
+ec2:CreateRoute
+ec2:CreateRouteTable
+ec2:CreateSecurityGroup
+ec2:CreateSubnet
+ec2:CreateTags
+ec2:CreateVpc
+ec2:DeleteKeyPair
+ec2:DeleteRouteTable
+ec2:DeleteSecurityGroup
+ec2:DeleteSubnet
+ec2:DeleteVpc
+ec2:DescribeImages
+ec2:DescribeInstanceStatus
+ec2:DescribeInstances
+ec2:DescribeInternetGateways
+ec2:DescribeKeyPairs
+ec2:DescribeRouteTables
+ec2:DescribeSecurityGroups
+ec2:DescribeSubnets
+ec2:DescribeTags
+ec2:DescribeVolumes
+ec2:DescribeVpcAttribute
+ec2:DescribeVpcClassicLink
+ec2:DescribeVpcClassicLinkDnsSupport
+ec2:DescribeVpcs
+ec2:DisassociateRouteTable
+ec2:ImportKeyPair
+ec2:ModifyVpcAttribute
+ec2:RunInstances
+ec2:TerminateInstances
+iam:AddRoleToInstanceProfile
+iam:CreateInstanceProfile
+iam:CreateRole
+iam:DeleteInstanceProfile
+iam:DeleteRole
+iam:DeleteRolePolicy
+iam:GetInstanceProfile
+iam:GetRole
+iam:GetRolePolicy:
+iam:ListGroups
+iam:ListInstanceProfiles
+iam:ListInstanceProfilesForRole
+iam:ListRolePolicies
+iam:ListRoles
+iam:ListUsers
+iam:PassRole
+iam:PutRolePolicy
+iam:RemoveRoleFromInstanceProfile
+kms:CreateGrant
+kms:GenerateDataKeyWithoutPlaintext
+s3:GetObject
+s3:ListAllMyBuckets
+s3:ListBucket
+s3:PutObject
+s3:PutObjectAcl
+```
+
 ## Introduction
 
 The service is physically subdivided into
