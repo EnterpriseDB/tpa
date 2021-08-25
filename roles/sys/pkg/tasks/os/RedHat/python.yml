@@ -3,7 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 - name: Install Python
-  raw: command -v {{ python }} >/dev/null 2>&1 || yum -y install {{ python.startswith('python2')|ternary('python', 'python3') }}; true
+  raw: if ! command -v {{ python }} >/dev/null 2>&1; then yum -y install {{ python.startswith('python2')|ternary('python', 'python3') }}; fi
   environment: {}
   register: python_install
   changed_when: >
