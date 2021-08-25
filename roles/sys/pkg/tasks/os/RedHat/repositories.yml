@@ -97,7 +97,9 @@
     state: present
   vars:
     _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
-    _credentials: "{{ lookup('file', _file) }}"
+    _contents: "{{ lookup('file', _file) }}"
+    _parts: "{{ _contents.split(':', 1) }}"
+    _credentials: "{{ _parts[0]|urlencode }}:{{ _parts[1]|urlencode }}"
   when: >
     'EDB' in yum_repository_list
   no_log: true
