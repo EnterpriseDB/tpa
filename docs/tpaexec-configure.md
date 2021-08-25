@@ -194,6 +194,15 @@ To use product repositories, you must first
 get your subscription token from the 2ndQuadrant Portal, under "Company
 info" in the left menu, then "Company".
 
+### EnterpriseDB repositories
+
+In order to install software from EnterpriseDB's APT and YUM repositories
+you must first `export EDB_REPO_CREDENTIALS_FILE=/path/to/credentials/file`
+before you run tpaexec. Credentials file is a text file that contains your
+access credentials in the `username:password` format. If you don't have them
+already, you can get your access credentials by registering for access at
+https://www.enterprisedb.com/user/register?destination=/repository-access-request
+
 ### Software versions
 
 You may optionally specify `--postgres-version 10` (the default) or
@@ -218,6 +227,11 @@ You may use any version specifier that apt or yum would accept.
 If your version does not match, try appending a `*` wildcard. This
 is often necessary when the package version has an epoch qualifier
 like `2:...`.
+
+You may optionally specify `--epas` which sets `postgresql_flavour` to
+`epas` in the generated config.yml. This means that tpaexec will install
+EnterpriseDB Postgres Advanced Server (requires EDB repository access)
+instead of community Postgres (the default).
 
 You may also specify `--extra-packages p1 p2 …` or
 `--extra-postgres-packages p1 p2 …` to install additional packages.
