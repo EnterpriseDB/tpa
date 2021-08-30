@@ -39,3 +39,16 @@ directory is emptied before starting the build.) You can also configure
 to speed up your development builds.
 
 Whenever you run a source build, Postgres will be restarted.
+
+## Build dependencies
+
+If you're building from source, TPAexec will ensure that the basic
+Postgres build dependencies are installed. If you need any additional
+packages, mention them in [`packages`](packages.md). For example
+
+```yaml
+cluster_vars:
+  packages:
+    common:
+    - golang-1.16
+```
