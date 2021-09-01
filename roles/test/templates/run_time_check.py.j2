@@ -9,18 +9,18 @@ import time
 from datetime import datetime
 import os
 
-origin_dsn = sys.argv[1]
-partner_dsn = sys.argv[2]
+node1_dsn = sys.argv[1]
+node2_dsn = sys.argv[2]
 local_dsn = sys.argv[3]
 csvfile = sys.argv[4]
 test_table = sys.argv[5]
 expected_xacts = sys.argv[6]
-conn_origin=0
-conn_partner=0
+conn_node1=0
+conn_node2=0
 # datetime object containing current date and time
 now = datetime.now()
 csvRow = [now, expected_xacts]
-emptyRow = ["","","","",""]
+emptyRow = ["","","","","","","",""]
 all_committed = False
 myquery = "SELECT 1 FROM pg_catalog.pg_class c INNER JOIN pg_catalog.pg_namespace n ON (c.relnamespace = n.oid) WHERE relname ='{}'".format(test_table)
 if os.path.exists(csvfile):
@@ -33,7 +33,7 @@ quoting=csv.QUOTE_NONE,
 skipinitialspace=True)
 with open(csvfile, "a") as fp:
     wr = csv.writer(fp, dialect='mydialect')
-    wr.writerow(["timestamp","expected_xacts","origin","origin_xact","origin_prepared_xact","partner_connected", "partner_ready","partner","partner_xact","partner_prepared_xact","partner_connected", "partner_ready"])
+    wr.writerow(["timestamp","expected_xacts","node1","node1_xact","node1_prepared_xact","node2_connected", "node2_ready","replay_lag_bytes", "apply_rate", "catchup_interval","node2","node2_xact","node2_prepared_xact","node1_connected", "node1_ready", "replay_lag_bytes", "apply_rate", "catchup_interval"])
 fp.close()
 
 # Generate a csv report of statistics collected
@@ -43,20 +43,23 @@ def generate_report():
         wr.writerow(csvRow)
     fp.close()
 
-def get_stats(conn):
+def get_stats(conn,partner):
     try:
         cur = conn.cursor()
+        newRow = []
         cur.execute('SELECT interface_name from bdr.local_node_summary')
-        node_name = cur.fetchone()[0]
+        newRow.append(cur.fetchone()[0])
         cur.execute('SELECT count(*) FROM camo_test')
-        xacts = cur.fetchone()[0]
+        newRow.append(cur.fetchone()[0])
         cur.execute('SELECT COUNT(*) FROM pg_prepared_xacts')
-        prepared_xacts = cur.fetchone()[0]
+        newRow.append(cur.fetchone()[0])
         cur.execute('SELECT bdr.is_camo_partner_connected()')
-        partner_connected = cur.fetchone()[0]
+        newRow.append(cur.fetchone()[0])
         cur.execute('SELECT  bdr.is_camo_partner_ready()')
-        partner_ready = cur.fetchone()[0]
-        newRow = [node_name, xacts, prepared_xacts,partner_connected,partner_ready]
+        newRow.append(cur.fetchone()[0])
+        cur.execute("SELECT replay_lag_bytes,apply_rate,catchup_interval FROM bdr.node_replication_rates  WHERE target_name ='{}'".format(partner))
+        record = cur.fetchone()
+        newRow.extend(record)
         csvRow.extend(newRow)
         #closing database connnection.
         cur.close()
@@ -67,6 +70,31 @@ def get_stats(conn):
         csvRow.extend(emptyRow)
 
 
+# Takes a conninfo string and returns a dict of the settings it represents, or
+# if given a key, returns the value if the key is specified, or None.
+def parse_conninfo(conninfo, key=None):
+
+    settings = {}
+    for str in conninfo.split(" "):
+        parts = [x.strip() for x in str.strip().split("=", 1)]
+
+        v = None
+        if len(parts) == 2:
+            v = parts[1]
+            while (v.startswith("'") and v.endswith("'")) or (
+                v.startswith('"') and v.endswith('"')
+            ):
+                v = v[1:-1]
+
+        settings[parts[0]] = v
+
+    if key:
+        return settings.get(key, None)
+
+    return settings
+
+node1_name = parse_conninfo(node1_dsn,'host')
+node2_name = parse_conninfo(node2_dsn,'host')
 
 # Get local connection
 # Continue to get statistics until tets table exists
@@ -82,30 +110,30 @@ except:
 
 while test_valid:
    
-    # Try to get connection to origin
+    # Try to get connection to node1
     try:
-        conn_origin=psycopg2.connect(origin_dsn, connect_timeout=5)
+        conn_node1=psycopg2.connect(node1_dsn, connect_timeout=5)
     except:
-        print("I am unable to connnect to the origin: '%s'" % origin_dsn)
+        print("I am unable to connnect to the node1: '%s'" % node1_dsn)
         
-    # Try to get connection to partner
+    # Try to get connection to node2
     try:
-        conn_partner=psycopg2.connect(partner_dsn,connect_timeout=5)
+        conn_node2=psycopg2.connect(node2_dsn,connect_timeout=5)
     except:
-        print("I am unable to connnect to the partner: '%s'" % partner_dsn)
+        print("I am unable to connnect to the node2: '%s'" % node2_dsn)
         
-    # If connection ito origin is established
+    # If connection ito node1 is established
     # get statistics from the node else enter empty values
-    if(conn_origin):
-        get_stats(conn_origin)
+    if(conn_node1):
+        get_stats(conn_node1,node2_name)
     else:
         csvRow.extend(emptyRow)
         
     
-    # If connection to partner is established
+    # If connection to node2 is established
     # get statistics from the node else enter empty values
-    if(conn_partner):
-        get_stats(conn_partner)
+    if(conn_node2):
+        get_stats(conn_node2,node1_name)
     else:
         csvRow.extend(emptyRow)
     
@@ -130,7 +158,7 @@ while test_valid:
     cur_local.execute(myquery)
     table_exists=cur_local.fetchone()
     if table_exists and not all_committed:
-        if int(csvRow[1]) == csvRow[3] == csvRow[8]:
+        if int(csvRow[1]) == csvRow[3] == csvRow[11]:
             all_committed = True
         test_valid = 1
         time.sleep(3)
