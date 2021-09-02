@@ -317,6 +317,18 @@ playbook() {
 }
 
 deploy() {
+    # It is pointless to run `tpaexec deploy ...` on a cluster with no
+    # inventory directory.
+    # This could potentially happen for a couple of reasons:
+    # a) when `tpaexec deploy` is invoked without having run
+    #    `tpaexec provision`
+    # b) when `tpaexec provision` got interrupted for some reason
+    #    and failed to write a valid inventory
+
+    if [ ! -d inventory ]; then
+       error "No inventory found. Did you run 'tpaexec provision $(pwd)'?"
+    fi
+
     playbook deploy.yml "$@"
 }
 
