@@ -1,0 +1,5 @@
+# Ignore everything in this directory
+*
+# Except this file. This directory is used
+# when generating a PDF via `make tpaexec.pdf`
+!.gitignore

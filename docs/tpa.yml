@@ -36,7 +36,7 @@ nav:
     - PuTTY configuration: misc-configure-putty.md
     - Troubleshooting: misc-troubleshooting.md
 
-docs_dir: .
+docs_dir: src
 theme:
   name: readthedocs
 markdown_extensions:
