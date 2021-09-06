@@ -11,12 +11,12 @@
   become: yes
   vars:
     lock_name: >-
-      {{ ['bdr_ddl', 'bdr_ddl', 'global'][bdr_major_version-1] }}_lock_timeout
+      {{ ['bdr_ddl', 'bdr_ddl', 'global', 'global'][bdr_major_version-1] }}_lock_timeout
     statement_timeout:
       text: "ALTER SYSTEM SET bdr.global_lock_statement_timeout TO '3600s'"
     timeout_queries:
       - text: "ALTER SYSTEM SET bdr.{{ lock_name }} TO '600s'"
-      - "{{ (bdr_major_version == 3)|ternary(statement_timeout, []) }}"
+      - "{{ (bdr_major_version >= 3)|ternary(statement_timeout, []) }}"
       - text: SELECT pg_reload_conf()
   when: >
     'bdr' in role
@@ -52,11 +52,11 @@
   become: yes
   vars:
     lock_name: >-
-      {{ ['bdr_ddl', 'bdr_ddl', 'global'][bdr_major_version-1] }}_lock_timeout
+      {{ ['bdr_ddl', 'bdr_ddl', 'global', 'global'][bdr_major_version-1] }}_lock_timeout
     statement_timeout:
       text: "ALTER SYSTEM SET bdr.global_lock_statement_timeout TO default"
     reset_queries:
-      - "{{ (bdr_major_version == 3)|ternary(statement_timeout, []) }}"
+      - "{{ (bdr_major_version >= 3)|ternary(statement_timeout, []) }}"
       - text: "ALTER SYSTEM SET bdr.{{ lock_name }} TO default"
       - text: SELECT pg_reload_conf()
   when: >

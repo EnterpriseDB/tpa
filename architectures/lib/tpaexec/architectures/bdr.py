@@ -3,10 +3,33 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 from ..architecture import Architecture
+from typing import List, Tuple
+
+import sys
 
 
 class BDR(Architecture):
+    def supported_versions(self) -> List[Tuple[str, str]]:
+        """
+        Returns a list of (postgres_version, bdr_version) tuples that this
+        architecture supports. Meant to be implemented by subclasses.
+        """
+        return []
+
+    def bdr_major_versions(self) -> List[str]:
+        """
+        Returns a list of BDR major versions supported by this architecture.
+        """
+        return list(set(map(lambda t: t[1], self.supported_versions())))
+
     def add_architecture_options(self, p, g):
+        g.add_argument(
+            "--bdr-version",
+            metavar="VER",
+            help="major version of BDR required",
+            dest="bdr_version",
+            choices=self.bdr_major_versions(),
+        )
         g.add_argument(
             "--bdr-node-group",
             metavar="NAME",
@@ -29,12 +52,109 @@ class BDR(Architecture):
         return super().cluster_vars_args() + ["bdr_node_group", "bdr_database"]
 
     def update_cluster_vars(self, cluster_vars):
+        # We must decide which version of Postgres to install, which version
+        # of BDR to install, and which repositories and extensions must be
+        # enabled for the combination to work.
+        #
+        # If --postgres-version is specified, we infer the correct BDR
+        # version. If --bdr-version is specified, we infer the correct
+        # Postgres version. If both are specified, we check that the
+        # combination makes sense.
+        #
+        # If any --2Q-repositories are specified, we do not interfere with
+        # that setting at all.
+
+        tpa_2q_repositories = self.args.get("tpa_2q_repositories") or []
+        postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
+        postgres_version = self.args.get("postgres_version")
+        bdr_version = None
+
+        given_repositories = " ".join(tpa_2q_repositories)
+
+        if postgres_version == "9.4":
+            bdr_version = self.args.get("bdr_version") or "1"
+        elif postgres_version == "9.6":
+            bdr_version = self.args.get("bdr_version") or "2"
+        elif postgres_version in ["10", "11", "12", "13"]:
+            bdr_version = self.args.get("bdr_version") or "3"
+        elif postgres_version == "14":
+            bdr_version = self.args.get("bdr_version") or "4"
+        elif postgres_version is None:
+            bdr_version = self.args.get("bdr_version")
+
+            if bdr_version is None and tpa_2q_repositories:
+                if "/bdr2" in given_repositories:
+                    bdr_version = "2"
+                elif "/bdr3" in given_repositories:
+                    bdr_version = "3"
+                elif "/bdr4" in given_repositories:
+                    bdr_version = "4"
+
+            if bdr_version == "1":
+                postgres_version = "9.4"
+            elif bdr_version == "2":
+                postgres_version = "9.6"
+            elif bdr_version == "4":
+                postgres_version = "13"
+            elif bdr_version in ["3", None]:
+                postgres_version = "13"
+                bdr_version = "3"
+
+        if (postgres_version, bdr_version) not in self.supported_versions():
+            print(
+                "ERROR: Postgres %s with BDR %s is not supported"
+                % (postgres_version, bdr_version),
+                file=sys.stderr,
+            )
+            sys.exit(-1)
+
+        extensions = []
+
+        if bdr_version == "1":
+            postgresql_flavour = "postgresql-bdr"
+        elif bdr_version == "2":
+            if not tpa_2q_repositories or "/bdr2/" not in given_repositories:
+                tpa_2q_repositories.append("products/bdr2/release")
+        elif bdr_version == "3":
+            extensions = ["pglogical"]
+            if not tpa_2q_repositories:
+                if postgresql_flavour == "2q":
+                    tpa_2q_repositories.append("products/2ndqpostgres/release")
+                elif postgresql_flavour == "epas":
+                    tpa_2q_repositories.append(
+                        "products/bdr_enterprise_3_7-epas/release"
+                    )
+                else:
+                    tpa_2q_repositories.append("products/bdr3_7/release")
+                    tpa_2q_repositories.append("products/pglogical3_7/release")
+        elif bdr_version == "4":
+            if not tpa_2q_repositories:
+                if postgresql_flavour == "2q":
+                    tpa_2q_repositories.append("products/bdr_enterprise_4/release")
+                elif postgresql_flavour == "epas":
+                    tpa_2q_repositories.append("products/bdr_enterprise_4-epas/release")
+                else:
+                    tpa_2q_repositories.append("products/bdr4/release")
+
         cluster_vars.update(
             {
                 "repmgr_failover": "manual",
                 "postgres_coredump_filter": "0xff",
+                "postgres_coredump_filter": "0xff",
+                "postgres_version": postgres_version,
+                "postgresql_flavour": postgresql_flavour,
             }
         )
+
+        if tpa_2q_repositories:
+            cluster_vars.update(
+                {
+                    "tpa_2q_repositories": tpa_2q_repositories,
+                }
+            )
+
+        if extensions:
+            cluster_vars.update({"extra_postgres_extensions": extensions})
 
     def update_instances(self, instances):
 

@@ -151,7 +151,8 @@ class Architecture(object):
             help="Install 2ndQuadrant Postgres for BDR EE (2ndQPostgres)",
         )
         g.add_argument(
-            "--postgres-version", choices=["9.4", "9.5", "9.6", "10", "11", "12", "13"]
+            "--postgres-version",
+            choices=["9.4", "9.5", "9.6", "10", "11", "12", "13", "14"],
         )
         g.add_argument(
             "--use-volatile-subscriptions",
@@ -317,7 +318,10 @@ class Architecture(object):
             args.get("epas_redwood_compat") == False
             and args.get("postgresql_flavour") != "epas"
         ):
-            print("ERROR: You can specify --no-redwood only when using --epas", file=sys.stderr)
+            print(
+                "ERROR: You can specify --no-redwood only when using --epas",
+                file=sys.stderr,
+            )
             sys.exit(-1)
 
         self.platform.validate_arguments(args)
@@ -640,6 +644,9 @@ class Architecture(object):
             "harp",
             "bdr3_7-epas",
             "bdr_enterprise_3_7-epas",
+            "bdr4",
+            "bdr_enterprise_4",
+            "bdr_enterprise_4-epas",
         ]
 
     def installable_sources(self):
@@ -665,6 +672,14 @@ class Architecture(object):
                 "git_repository_url": "git@github.com:EnterpriseDB/pglogical.git",
             },
             "bdr3": {
+                "name": "bdr",
+                "git_repository_url": "git@github.com:EnterpriseDB/bdr.git",
+                "git_repository_ref": "REL3_7_STABLE",
+                "build_commands": [
+                    "make -f ../../src/bdr/Makefile -s install",
+                ],
+            },
+            "bdr4": {
                 "name": "bdr",
                 "git_repository_url": "git@github.com:EnterpriseDB/bdr.git",
                 "build_commands": [

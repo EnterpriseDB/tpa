@@ -15,5 +15,5 @@
 - assert:
     msg: "Unsupported BDR version: {{ cluster_facts.databases[bdr_database].bdr.bdr_version }}"
     that:
-      bdr_major_version in [1, 2, 3]
+      bdr_major_version in [1, 2, 3, 4]
   tags: always

@@ -342,7 +342,7 @@ def bdr_discovery(module, conn, m0):
         m.update(v[0])
         bdr_major_version = m["bdr_major_version"]
 
-    if bdr_major_version == 3:
+    if bdr_major_version >= 3:
         local_node = query_results(conn, "SELECT * FROM bdr.local_node_info()")
         m.update({"local_node": local_node and local_node[0] or {}})
         m.update(
