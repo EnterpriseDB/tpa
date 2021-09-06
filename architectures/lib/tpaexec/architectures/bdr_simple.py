@@ -67,7 +67,7 @@ class BDR_Simple(BDR):
             elif bdr_version == "2":
                 postgres_version = "9.6"
             elif bdr_version in ["3", None]:
-                postgres_version = "11"
+                postgres_version = "13"
                 bdr_version = "3"
 
         supported_combinations = [
@@ -103,8 +103,8 @@ class BDR_Simple(BDR):
                 if flavour == "2q":
                     tpa_2q_repositories.append("products/2ndqpostgres/release")
                 else:
-                    tpa_2q_repositories.append("products/bdr3/release")
-                    tpa_2q_repositories.append("products/pglogical3/release")
+                    tpa_2q_repositories.append("products/bdr3_7/release")
+                    tpa_2q_repositories.append("products/pglogical3_7/release")
 
         postgresql_flavour = self.args.get("postgresql_flavour") or postgresql_flavour
 

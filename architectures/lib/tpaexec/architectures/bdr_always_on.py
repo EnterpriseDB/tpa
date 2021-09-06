@@ -11,8 +11,8 @@ class BDR_Always_ON(BDR):
             'barman_volume_size': 128,
             'postgres_volume_size': 64,
             'tpa_2q_repositories': [
-                'products/bdr3/release',
-                'products/pglogical3/release',
+                'products/bdr3_7/release',
+                'products/pglogical3_7/release',
             ]
         })
 
