@@ -233,6 +233,12 @@ You may optionally specify `--epas` which sets `postgresql_flavour` to
 EnterpriseDB Postgres Advanced Server (requires EDB repository access)
 instead of community Postgres (the default).
 
+Since EPAS supports both Oracle and postgres compatiblity features,
+by default, EPAS initializes the cluster in `redwood` i.e. Oracle
+compatibility mode. In order to initialize the cluster in postgres
+mode, you may optionally specify `--no-redwood` which sets
+`epas_redwood_compat` to False in the generated config.yml.
+
 You may also specify `--extra-packages p1 p2 …` or
 `--extra-postgres-packages p1 p2 …` to install additional packages.
 The former lists packages to install along with system packages, while

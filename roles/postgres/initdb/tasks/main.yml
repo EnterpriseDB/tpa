@@ -91,6 +91,12 @@
   when:
     postgres_wal_dir|dirname != postgres_data_dir
 
+- name: Disable redwood compatibility mode for EPAS if requested
+  set_fact:
+    postgres_initdb_opts: "{{ postgres_initdb_opts + ['--no-redwood-compat'] }}"
+  when:
+    postgresql_flavour == 'epas' and not (epas_redwood_compat|default(true))
+
 - name: Initialise PGDATA={{ postgres_data_dir }}
   block:
     - name: Run initdb to initialise data directory

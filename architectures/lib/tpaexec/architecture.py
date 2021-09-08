@@ -135,6 +135,13 @@ class Architecture(object):
             help="Install EDB Postgres Advanced Server (EPAS)",
         )
         g.add_argument(
+            "--no-redwood",
+            "--no-redwood-compat",
+            action="store_false",
+            dest="epas_redwood_compat",
+            help="Install EDB Postgres Advanced Server (EPAS) without Oracle compatibility features",
+        )
+        g.add_argument(
             "--2q",
             "--2ndq",
             "--2ndqpostgres",
@@ -304,6 +311,13 @@ class Architecture(object):
         if errors:
             for e in errors:
                 print("ERROR: --install-from-source %s" % (e), file=sys.stderr)
+            sys.exit(-1)
+
+        if (
+            args.get("epas_redwood_compat") == False
+            and args.get("postgresql_flavour") != "epas"
+        ):
+            print("ERROR: You can specify --no-redwood only when using --epas", file=sys.stderr)
             sys.exit(-1)
 
         self.platform.validate_arguments(args)
@@ -529,6 +543,10 @@ class Architecture(object):
             val = self.args.get(k)
             if val is not None:
                 cluster_vars[k] = cluster_vars.get(k, val)
+
+        if self.args.get("postgresql_flavour") == "epas":
+            k = "epas_redwood_compat"
+            cluster_vars[k] = cluster_vars.get(k, self.args.get(k))
 
         package_option_vars = {
             "extra_packages": "packages",
