@@ -24,7 +24,7 @@ export DEBIAN_FRONTEND=noninteractive
 if ! command -v aws &>/dev/null || ! command -v nvmecli &>/dev/null || ! command -v mdadm &>/dev/null; then
     case "${ID}:${VERSION_ID%.*}" in
         debian:8) P+=(python python-virtualenv); V=(virtualenv) ;;
-        debian:9|debian:10|ubuntu:18|ubuntu:20) P+=(python3 python3-venv) ;;
+        debian:9|debian:10|debian:11|ubuntu:18|ubuntu:20) P+=(python3 python3-venv) ;;
         ubuntu:16) P+=(python python-virtualenv virtualenv); V=(virtualenv) ;;
         centos:7|rhel:7) U=(); I=(yum -y install); P+=(python2 python2-virtualenv); V=(virtualenv-2) ;;
         centos:8|rhel:8) U=(); I=(yum -y install); P+=(python3) ;;
