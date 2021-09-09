@@ -48,7 +48,9 @@ class vagrant(Platform):
                 "stretch": "debian/stretch64",
                 "10": "debian/buster64",
                 "buster": "debian/buster64",
-                "default": "debian/buster64",
+                "11": "debian/bullseye64",
+                "bullseye": "debian/bullseye64",
+                "default": "debian/bullseye64",
             },
             "redhat": {
                 "7": "centos/7",

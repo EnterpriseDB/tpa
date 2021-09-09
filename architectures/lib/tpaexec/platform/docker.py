@@ -111,7 +111,7 @@ class docker(Platform):
             version = kwargs.get("version")
             if version and version != "latest":
                 known_versions = {
-                    "tpa/debian": ["9", "10", "stretch", "buster"],
+                    "tpa/debian": ["9", "10", "11", "stretch", "buster", "bullseye"],
                     "tpa/ubuntu": ["18.04", "20.04", "bionic", "focal"],
                     "tpa/redhat": ["7", "8"],
                 }

@@ -57,7 +57,8 @@
       debian-stretch: debian:9
       debian-10:      debian:10
       debian-buster:  debian:10
-      debian-latest:  debian:10
+      debian-bullseye:debian:11
+      debian-latest:  debian:11
       ubuntu-18.04:   ubuntu:bionic
       ubuntu-bionic:  ubuntu:bionic
       ubuntu-20.04:   ubuntu:focal
