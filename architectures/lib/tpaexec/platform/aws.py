@@ -42,42 +42,47 @@ class aws(Platform):
                     "owner": "379101102735",
                     "user": "admin",
                 },
-                "debian-stretch-hvm-x86_64-gp2-2020-06-11-59901": {
+                "debian-stretch-hvm-x86_64-gp2-2021-07-21-65742": {
                     "versions": ["9", "stretch"],
                     "owner": "379101102735",
                     "user": "admin",
                 },
-                "debian-10-amd64-20200610-293": {
+                "debian-10-amd64-20210721-710": {
                     "versions": ["10", "buster", "default"],
+                    "owner": "136693071363",
+                    "user": "admin",
+                },
+                "debian-11-amd64-20210814-734": {
+                    "versions": ["11", "bullseye"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
             },
             "redhat": {
-                "RHEL-7.8_HVM_GA-20200225-x86_64-1-Hourly2-GP2": {
+                "RHEL-7.9_HVM-20210208-x86_64-0-Hourly2-GP2": {
                     "versions": ["7"],
                     "preferred_python_version": "python2",
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-8.2.0_HVM-20200423-x86_64-0-Hourly2-GP2": {
+                "RHEL-8.4.0_HVM-20210825-x86_64-0-Hourly2-GP2": {
                     "versions": ["8", "default"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
             },
             "ubuntu": {
-                "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20200610": {
+                "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20210721": {
                     "versions": ["16.04", "xenial"],
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200611": {
+                "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20210907": {
                     "versions": ["18.04", "bionic", "default"],
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20200609": {
+                "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20210907": {
                     "versions": ["20.04", "focal"],
                     "owner": "099720109477",
                     "user": "ubuntu",
