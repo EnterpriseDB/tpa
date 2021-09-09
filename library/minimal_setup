@@ -28,7 +28,7 @@ case "${ID}:${VERSION_ID%.*}" in
         python=python2.7
         python_pkg_prefix=python
         ;;
-    debian:9|debian:10)
+    debian:9|debian:10|debian:11)
         distribution=Debian
         release=${VERSION_CODENAME:-stretch}
         python=${preferred_python_version:-python3}
