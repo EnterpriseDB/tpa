@@ -29,6 +29,11 @@ A leading tag may sometimes be helpful to clearly communicate the scope
 of a particular change, e.g., "zabbix: Fix .pgpass generation" or
 "Testing: Increase default failure timeouts". Use your judgement.
 
+## Python formatting
+
+All Python code must be formatted using
+[Black](https://github.com/psf/black).
+
 ### Github metadata
 
 Please do **not** @mention any users in commit messages (to avoid having
