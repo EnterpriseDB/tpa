@@ -78,12 +78,12 @@ class aws(Platform):
                     "user": "ubuntu",
                 },
                 "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20210907": {
-                    "versions": ["18.04", "bionic", "default"],
+                    "versions": ["18.04", "bionic"],
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
                 "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20210907": {
-                    "versions": ["20.04", "focal"],
+                    "versions": ["20.04", "focal", "default"],
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
