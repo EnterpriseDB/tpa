@@ -24,9 +24,10 @@
 
 - Install Postgres v13 and BDR v3.7 by default on new clusters
 
-- Update EC2 AMIs to the latest available versions
+- Add preliminary support for Oracle Linux 7 and 8 by treating it
+  exactly the same as RHEL 7 or 8
 
-- Treat Oracle Linux the same as RHEL
+- Update EC2 AMIs to the latest available versions
 
 ### Bugfixes
 

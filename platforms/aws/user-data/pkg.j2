@@ -26,8 +26,8 @@ if ! command -v aws &>/dev/null || ! command -v nvmecli &>/dev/null || ! command
         debian:8) P+=(python python-virtualenv); V=(virtualenv) ;;
         debian:9|debian:10|debian:11|ubuntu:18|ubuntu:20) P+=(python3 python3-venv) ;;
         ubuntu:16) P+=(python python-virtualenv virtualenv); V=(virtualenv) ;;
-        centos:7|rhel:7) U=(); I=(yum -y install); P+=(python2 python2-virtualenv); V=(virtualenv-2) ;;
-        centos:8|rhel:8) U=(); I=(yum -y install); P+=(python3) ;;
+        centos:7|rhel:7|ol:7) U=(); I=(yum -y install); P+=(python2 python2-virtualenv); V=(virtualenv-2) ;;
+        centos:8|rhel:8|ol:8) U=(); I=(yum -y install); P+=(python3) ;;
         *) echo "Missing dependencies on ${ID}:${VERSION_ID}"; exit 1 ;;
     esac
     ${U[@]} && ${I[@]} ${P[@]} && ${V[@]} --system-site-packages $DV && source $DV/bin/activate && pip install awscli
