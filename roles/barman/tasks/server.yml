@@ -4,6 +4,15 @@
 
 # These tasks are executed on any Barman server instance.
 
+- name: Ensure cron daemon is running
+  service:
+    name: "{{ service_name[ansible_os_family] }}"
+    state: started
+  vars:
+    service_name:
+      Debian: cron
+      RedHat: crond
+
 - name: Check which compression program is available
   shell: >
     for p in pigz bzip2 gzip; do
