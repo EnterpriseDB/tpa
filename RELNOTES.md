@@ -20,6 +20,14 @@
   are possible by explicitly setting `bdr_child_group` to point to any
   subscriber-only node group declared in `bdr_node_groups`).
 
+### Minor changes
+
+- Install Postgres v13 and BDR v3.7 by default on new clusters
+
+- Update EC2 AMIs to the latest available versions
+
+- Treat Oracle Linux the same as RHEL
+
 ### Bugfixes
 
 - Fix errors like "Repository 'epel' is missing name in configuration"
@@ -32,6 +40,11 @@
 - Fix "Unrecognised host=x in primary_conninfo" error during deployment
   after running `efm promote` (by accepting and translating IP addresses
   in addition to hostnames)
+
+- Fail early if you run `tpaexec deploy` without running `tpaexec
+  provision` first
+
+- Fail with a sensible error message if Python installation fails
 
 ## v21.6 (2021-08-09)
 
