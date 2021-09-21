@@ -145,7 +145,7 @@ _install_pip_packages() {
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
         pip3 install "${pip_args[@]}" \
             -r "$ANSIBLE_HOME/requirements.txt" \
-            -r "$TPA_DIR/python-requirements.txt"
+            -r "$TPA_DIR/requirements.txt"
     else
         if [[ -d $PIP_DIR/ansible ]]; then
             ANSIBLE_HOME=$PIP_DIR/ansible
@@ -154,7 +154,7 @@ _install_pip_packages() {
             git clone --depth 1 https://github.com/2ndQuadrant/ansible "$ANSIBLE_HOME"
         fi
         pip3 install "${pip_args[@]}" file:"$ANSIBLE_HOME" \
-            -r "$TPA_DIR/python-requirements.txt"
+            -r "$TPA_DIR/requirements.txt"
     fi
     cp "$ANSIBLE_HOME"/contrib/inventory/ec2.py "$TPA_DIR"/platforms/aws/inventory
     cp "$ANSIBLE_HOME"/contrib/inventory/lxd.py "$TPA_DIR"/platforms/lxd/inventory
