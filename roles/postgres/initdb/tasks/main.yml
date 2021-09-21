@@ -25,73 +25,49 @@
     - "{{ postgres_tablespaces.values()|map(attribute='location')|list }}"
 
 # https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/SELinux_Users_and_Administrators_Guide/sect-Managing_Confined_Services-PostgreSQL-Configuration_Examples.html
+#
+# If SELinux is enabled and we want to put Postgres files into any
+# location that isn't the distribution's default, we must ensure that
+# Postgres can access them by marking the directories and their contents
+# with the postgresql_db_t security context.
+#
+# There are two parts to this: declaring the desired context for certain
+# paths (with semanage fcontext), and actually applying the context to
+# those paths (with restorecon). We build a list of directories to set
+# the context for, and the corresponding fcontext commands.
+#
+# We feed these fcontext commands to semanage via stdin (the only way to
+# declare the context for multiple paths in a single invocation), but we
+# pass the directory list to restorecon on the command line. We pipe the
+# restorecon output (one line per file) into `wc -l` because we need to
+# know only whether restorecon did something or not, and the full -v
+# output might cause ansible to run out of memory and crash.
 
-- name: Set correct SELinux context for {{ postgres_data_dir }}
+- name: Set correct SELinux context for custom Postgres directories
   shell: >
-    if $(type -p selinuxenabled); then
-    semanage fcontext -a -t postgresql_db_t "{{ postgres_data_dir }}(/.*)?" &>/dev/null;
-    restorecon -R -v "{{ postgres_data_dir }}"|wc -l;
+    if $(type -p selinuxenabled); then semanage -i - &>/dev/null;
+    restorecon -R -v {{ secontext_dirs|map('quote')|join(" ") }}|wc -l;
     fi
   args:
     executable: /bin/bash
+    stdin: "{{ fcontext_commands|join('\n') }}"
+    stdin_add_newline: yes
+  vars:
+    _dirs:
+    - "{{ postgres_data_dir if postgres_data_dir != default_postgres_data_dirs[ansible_os_family] else [] }}"
+    - "{{ postgres_conf_dir if postgres_data_dir != postgres_conf_dir else [] }}"
+    - "{{ postgres_wal_dir if postgres_data_dir != postgres_wal_dir|dirname else [] }}"
+    - "{{ postgres_tablespaces.values()|map(attribute='location')|list }}"
+    secontext_dirs: "{{ query('flattened', _dirs) }}"
+    fcontext_commands: >
+      {{ secontext_dirs|map('apply_format', 'fcontext -a -t postgresql_db_t "{0}(/.*)?"')|list }}
   register: restorecon
   failed_when:
     restorecon is not successful
   changed_when: >
     restorecon.stdout.strip() not in ['', '0']
   when:
-    postgres_data_dir != default_postgres_data_dirs[ansible_os_family] and
-    platform not in ['docker']
-
-- name: Set correct SELinux context for {{ postgres_conf_dir }}
-  shell: >
-    if $(type -p selinuxenabled); then
-    semanage fcontext -a -t postgresql_db_t "{{ postgres_conf_dir }}(/.*)?" &>/dev/null;
-    restorecon -R -v "{{ postgres_conf_dir }}"|wc -l;
-    fi
-  args:
-    executable: /bin/bash
-  register: restorecon
-  failed_when:
-    restorecon is not successful
-  changed_when: >
-    restorecon.stdout.strip() not in ['', '0']
-  when:
-    postgres_conf_dir != postgres_data_dir
-    and platform not in ['docker']
-
-- name: Set correct SELinux context for postgres_wal_dir, if set
-  shell: >
-    if $(type -p selinuxenabled); then
-    semanage fcontext -a -t postgresql_db_t "{{ postgres_wal_dir }}(/.*)?" &>/dev/null;
-    restorecon -R -v "{{ postgres_wal_dir }}"|wc -l;
-    fi
-  args:
-    executable: /bin/bash
-  register: restorecon
-  failed_when:
-    restorecon is not successful
-  changed_when: >
-    restorecon.stdout.strip() not in ['', '0']
-  when:
-    - postgres_wal_dir|dirname != postgres_data_dir
-    - platform not in ['docker']
-
-- name: Set correct SELinux context for postgres_tablespaces, if set
-  shell: >
-    if $(type -p selinuxenabled); then
-    semanage fcontext -a -t postgresql_db_t "{{ postgres_tablespaces }}(/.*)?" &>/dev/null;
-    restorecon -R -v "{{ postgres_tablespaces }}"|wc -l;
-    fi
-  args:
-    executable: /bin/bash
-  register: restorecon
-  failed_when:
-    restorecon is not successful
-  changed_when: >
-    restorecon.stdout.strip() not in ['', '0']
-  when:
-    postgres_tablespaces is defined
+    secontext_dirs is not empty
     and platform not in ['docker']
 
 # Even if PGDATA was not initialised when we ran minimal_postgres_setup
