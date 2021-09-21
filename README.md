@@ -41,19 +41,19 @@ of Ansible functionality is at your disposal.
 ## Installation
 
 To use TPAexec, you need to install tpaexec and run the `tpaexec setup`
-command. Please use the [TPAexec packages](docs/INSTALL.md) if they are
+command. Please use the [TPAexec packages](docs/src/INSTALL.md) if they are
 available for your platform.
 
 If you have an EDB Github account that gives you access to the TPAexec
 repository, and you want to use TPAexec on MacOS X or another platform
 for which packages are not available, you can [install it from
-source](docs/INSTALL-repo.md) or [run it inside a Docker
-container](docs/INSTALL-docker.md).
+source](docs/src/INSTALL-repo.md) or [run it inside a Docker
+container](docs/src/INSTALL-docker.md).
 
 ## How do I use it?
 
 Select an architecture for your cluster,
-e.g., [M1](docs/architecture-M1.md) (a Postgres cluster with a single
+e.g., [M1](docs/src/architecture-M1.md) (a Postgres cluster with a single
 primary and multiple replicas), and do something like this:
 
 ```
@@ -75,7 +75,7 @@ tpaexec deprovision clustername
 ```
 
 For more details, please consult the
-[installation instructions](docs/INSTALL.md) and
-[documentation](docs/index.md).
+[installation instructions](docs/src/INSTALL.md) and
+[documentation](docs/src/index.md).
 
 Write to tpa@enterprisedb.com for help.
