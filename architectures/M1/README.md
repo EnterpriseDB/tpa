@@ -1,1 +1,1 @@
-../../docs/architecture-M1.md
+../../docs/src/architecture-M1.md

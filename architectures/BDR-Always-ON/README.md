@@ -1,1 +1,1 @@
-../../docs/architecture-BDR-Always-ON.md
+../../docs/src/architecture-BDR-Always-ON.md

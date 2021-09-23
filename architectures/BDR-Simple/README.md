@@ -1,1 +1,1 @@
-../../docs/architecture-BDR-Simple.md
+../../docs/src/architecture-BDR-Simple.md

@@ -1,1 +1,1 @@
-../../docs/architecture-BDR-Autoscale.md
+../../docs/src/architecture-BDR-Autoscale.md
