@@ -1,1 +1,1 @@
-../../docs/platform-vagrant.md
+../../docs/src/platform-vagrant.md

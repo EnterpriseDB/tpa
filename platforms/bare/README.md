@@ -1,1 +1,1 @@
-../../docs/platform-bare.md
+../../docs/src/platform-bare.md

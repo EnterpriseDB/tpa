@@ -1,1 +1,1 @@
-../../docs/platform-lxd.md
+../../docs/src/platform-lxd.md

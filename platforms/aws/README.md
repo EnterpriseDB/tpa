@@ -1,1 +1,1 @@
-../../docs/platform-aws.md
+../../docs/src/platform-aws.md

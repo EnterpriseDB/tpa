@@ -1,1 +1,1 @@
-../../docs/platform-docker.md
+../../docs/src/platform-docker.md
