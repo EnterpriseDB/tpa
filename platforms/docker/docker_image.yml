@@ -99,6 +99,8 @@
     name: "{{ image }}"
     state: present
     source: build
+    force_source: "{{ _entry.force_build|default('no') }}"
+    force_tag: "{{ _entry.force_tag|default('no') }}"
     build:
       path: "{{ _entry.context_path }}"
       dockerfile: "{{ _entry.dockerfile|default(omit) }}"
@@ -108,8 +110,6 @@
         # concurrent rebuilds/re-tags, etc.
         BASE_IMAGE: "{{ base_image.image.Id|default(_entry.base_image|default('none')) }}"
       nocache: "{{ _entry.nocache|default('no') }}"
-      force_build: "{{ _entry.force_build|default('no') }}"
-      force_tag: "{{ _entry.force_tag|default('no') }}"
       pull: "{{ _entry['pull']|default(_pull) }}"
   vars:
     _entry: "{{ docker_images[image] }}"
