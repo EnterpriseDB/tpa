@@ -170,7 +170,7 @@ variables to the inventory in `host_vars/unwind/01-instance_vars.yml`.
 
 ## instance_defaults
 
-This is an optional mechanism to further reduce repetition in
+This is a mechanism to further reduce repetition in
 config.yml. It is most useful for instance settings that cannot be
 defined as `cluster_vars`. For example, you could write the following:
 
