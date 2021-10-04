@@ -103,7 +103,9 @@ checkpoint_segments = {{ checkpoint_segments|default(128) }}
 
 {% if postgres_version is version('9.4', '>') %}
 wal_compression = {{ wal_compression|default('off') }}
+{% if postgres_version is version('14', '<') %}
 operator_precedence_warning = {{ operator_precedence_warning|default('off') }}
+{% endif %}
 {% endif %}
 
 transform_null_equals = {{ transform_null_equals|default('off') }}
