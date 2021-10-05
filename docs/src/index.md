@@ -39,6 +39,8 @@ TPAexec operates in four distinct stages to bring up a Postgres cluster:
 You can run TPAexec from your laptop, an EC2 instance, or any machine
 that can reach the cluster's servers over the network.
 
+Here's a [list of capabilities and supported software](tpaexec-support.md).
+
 ### Configuration
 
 The [`tpaexec configure`](tpaexec-configure.md)
