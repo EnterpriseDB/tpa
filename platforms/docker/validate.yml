@@ -44,3 +44,4 @@
     - docker_security_opts
     - docker_cap_add
     - docker_cap_drop
+    - region
