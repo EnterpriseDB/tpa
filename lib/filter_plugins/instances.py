@@ -559,7 +559,10 @@ def find_replica_tablespace_mismatches(instances):
         # We need only volume_for/tablespace_name, both of which are in
         # volumes[*].vars, so we transform the list of volumes into the
         # following list of vars.
-        volume_vars = map(lambda vol: vol.get("vars", {}), i.get("volumes", []))
+        volume_vars = map(
+            lambda vol: vol.get("vars", {}) if isinstance(vol, dict) else {},
+            i.get("volumes", []),
+        )
 
         instance_tablespaces[i["Name"]] = {
             "replica": ("replica" in i.get("role", [])),
