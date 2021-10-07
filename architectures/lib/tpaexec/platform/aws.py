@@ -153,6 +153,26 @@ class aws(Platform):
         if args["owner"] is not None:
             cluster_tags["Owner"] = cluster_tags.get("Owner", args["owner"])
 
+    zones_per_region = {
+        "ap-northeast-1": ["a", "b", "c", "d"],
+        "ap-northeast-2": ["a", "b", "c", "d"],
+        "ap-northeast-3": ["a", "b", "c"],
+        "ap-south-1": ["a", "b", "c"],
+        "ap-southeast-1": ["a", "b", "c"],
+        "ap-southeast-2": ["a", "b", "c"],
+        "ca-central-1": ["a", "b", "d"],  # !!!
+        "eu-central-1": ["a", "b", "c"],
+        "eu-north-1": ["a", "b", "c"],
+        "eu-west-1": ["a", "b", "c"],
+        "eu-west-2": ["a", "b", "c"],
+        "eu-west-3": ["a", "b", "c"],
+        "sa-east-1": ["a", "b", "c"],
+        "us-east-1": ["a", "b", "c", "d", "e", "f"],
+        "us-east-2": ["a", "b", "c"],
+        "us-west-1": ["a", "b", "c"],
+        "us-west-2": ["a", "b", "c", "d"],
+    }
+
     def update_locations(self, locations, args, **kwargs):
         region = args.get("region")
         subnets = args["subnets"]
@@ -161,7 +181,8 @@ class aws(Platform):
             region = location.get("region", region)
             if region:
                 location["region"] = region
-                az = region + ("a" if li % 2 == 0 else "b")
+                azs = self.zones_per_region[region]
+                az = region + azs[li % len(azs)]
                 location["az"] = location.get("az", az)
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
