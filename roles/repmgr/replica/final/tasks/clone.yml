@@ -37,7 +37,7 @@
 # If we are cloning an instance with postgres_conf_dir separated from
 # postgres_data_dir, we copy its configuration files to the replica's
 # postgres_conf_dir (which may or may not be the same as PGDATA, and
-# that's why we can't use --copy-extenrnal-config-files above).
+# that's why we can't use --copy-external-config-files above).
 
 - name: Copy configuration files separately if required
   command: >
