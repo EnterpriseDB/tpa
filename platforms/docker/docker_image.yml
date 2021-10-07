@@ -73,7 +73,7 @@
 
 - assert:
     msg: "Please specify build instructions for {{ image }} in docker_images"
-    that: image in docker_images
+    that: image in docker_images|default({})
 
 - name: Build base image for {{ image }} if needed
   docker_image:
