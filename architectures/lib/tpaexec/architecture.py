@@ -6,6 +6,7 @@ import sys, os, io
 import subprocess
 import argparse
 import yaml
+import glob
 import re
 
 from typing import List
@@ -94,6 +95,14 @@ class Architecture(object):
             choices=[self.name],
             help="currently selected architecture",
         )
+        layouts = self.layout_names()
+        if layouts:
+            g.add_argument(
+                "--layout",
+                choices=self.layout_names(),
+                default=self.default_layout_name(),
+                help="optional architecture-specific layout selection",
+            )
         g.add_argument(
             "--platform",
             default="aws",
@@ -448,7 +457,7 @@ class Architecture(object):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=env,
-            **popen_params
+            **popen_params,
         )
         (stdout, stderr) = p.communicate()
 
@@ -469,14 +478,25 @@ class Architecture(object):
 
     def load_topology(self, args):
         """
-        Returns the parsed contents of the architecture's templates/main.yml.j2,
-        which defines the overall topology of the cluster. (It must be written
-        so that we can expand it based on the correct number of hostnames and
-        information from the command-line).
+        Returns the parsed contents of the template which defines the overall
+        topology of the cluster. (It must be written so that we can expand it
+        based on the correct number of hostnames and information from the
+        command-line).
         """
-        y = self.load_yaml("main.yml.j2", args)
+        y = self.load_yaml(self.layout_template(args), args)
         if y is not None:
             args.update(y)
+
+    def layout_template(self, args):
+        """
+        Returns the path to a template that defines the topology of the cluster,
+        main.yml.j2 by default, or whatever --layout the user selected, if the
+        architecture supports it.
+        """
+        layout = args.get("layout")
+        if layout:
+            layout = f"layouts/{layout}.yml.j2"
+        return layout or "main.yml.j2"
 
     def subnets(self, num):
         """
@@ -505,7 +525,7 @@ class Architecture(object):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=env,
-            **popen_params
+            **popen_params,
         )
         (stdout, stderr) = p.communicate()
 
@@ -796,6 +816,43 @@ class Architecture(object):
     ## Template processing
     ##
 
+    def template_directories(self):
+        """
+        Returns a list of directories in which templates may be found for the
+        current architecture: Architecture-Name/templates and lib/templates by
+        default.
+        """
+        return ["%s/templates" % x for x in [self.dir, self.lib]]
+
+    def layout_names(self):
+        """
+        Returns a list of template names that can be selected with the --layout
+        option (apart from the default main.yml.j2). May be empty if the
+        architecture provides no selectable layouts.
+        """
+        # glob.glob()'s root_dir parameter was introduced only in 3.10
+        oldcwd = os.getcwd()
+        os.chdir(self.template_directories()[0])
+        layouts = list(
+            map(
+                lambda t: os.path.basename(t.replace(".yml.j2", "")),
+                glob.glob("layouts/*.yml.j2"),
+            )
+        )
+        os.chdir(oldcwd)
+        return layouts
+
+    def default_layout_name(self):
+        """
+        Returns the (base)name of the default layout for this architecture, or
+        None if the architecture does not support layouts or the default is not
+        known (main.yml.j2 should be symlinked to layouts/default.yml.j2).
+        """
+        template_dir = self.template_directories()[0]
+        main_template = f"{template_dir}/main.yml.j2"
+        if os.path.islink(main_template):
+            return os.path.basename(os.readlink(main_template)).replace(".yml.j2", "")
+
     def load_yaml(self, filename, vars, loader=None):
         """
         Takes a template filename and some vars, expands the template, parses
@@ -816,20 +873,22 @@ class Architecture(object):
     def loader(self, basedirs=None):
         """
         Returns a template loader object that looks for templates in the
-        architecture's templates/ directory as well as lib/templates
+        architecture's template_directories(). If no matching template is found
+        in those directories and an absolute path to an existing file is given,
+        the loader will return the contents of that template directly.
         """
 
         class MinimalLoader(object):
-            _basedir = []
+            _basedirs = []
 
-            def __init__(self, basedir):
-                self._basedir = basedir
+            def __init__(self, basedirs):
+                self._basedirs = basedirs
 
             def get_basedir(self):
-                return self._basedir[0]
+                return self._basedirs[0]
 
             def _tpaexec_get_template(self, filename):
-                for d in self._basedir:
+                for d in self._basedirs:
                     t = "%s/%s" % (d, filename)
                     if os.path.exists(t):
                         return io.open(t, "r", encoding="utf-8").read()
@@ -837,6 +896,4 @@ class Architecture(object):
                     return io.open(filename, "r", encoding="utf-8").read()
                 return "{}"
 
-        if not basedirs:
-            basedirs = ["%s/templates" % x for x in [self.dir, self.lib]]
-        return MinimalLoader(basedirs)
+        return MinimalLoader(basedirs or self.template_directories())
