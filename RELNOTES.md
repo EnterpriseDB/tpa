@@ -2,6 +2,32 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+## v21.8 (unreleased)
+
+### New features
+
+- Add new bronze/silver/gold/platinum layouts for BDR-Always-ON,
+  selectable using the `--layout gold` configure option
+
+- Add declarative configuration for BDR witnesses (just set the
+  instance's role to bdr+witness)
+
+### Minor changes
+
+- Avoid repeated expensive invocations of semanage/restorecon for custom
+  Postgres directory locations (e.g., tablespaces)
+
+### Bugfixes
+
+- Fix some minor breakage related to the change in the location of the
+  documentation, notably `tpaexec info architectures` and `tpaexec info
+  platforms`
+
+- Fix a provision-time error from `find_replica_tablespace_mismatches`
+  for Docker instances with user-defined `volumes` entries
+
+- Don't set `operator_precedence_warning` for Postgres v14+
+
 ## v21.7 (2021-09-20)
 
 ### New features
