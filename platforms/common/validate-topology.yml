@@ -56,7 +56,9 @@
     that:
       - item.upstream is defined
   with_items: "{{
-    instances|selectattr('role', 'defined')|selectattr('role','contains','witness')|list
+    instances|selectattr('role', 'defined')
+    |selectattr('role','contains','witness')|rejectattr('role','contains','bdr')
+    |list
   }}"
 
 - name: Validate "bdr_node_camo_partner" references

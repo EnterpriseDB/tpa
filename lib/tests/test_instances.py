@@ -9,6 +9,7 @@ from ..filter_plugins.instances import (
     validate_volume_for,
     translate_volume_deployment_defaults,
     find_replica_tablespace_mismatches,
+    ensure_publication,
 )
 
 # Each entry in this array represents input that validate_volume_for should
@@ -363,3 +364,103 @@ def test_find_replica_tablespace_mismatches():
     """
     for c in tablespace_mismatch_tests:
         assert find_replica_tablespace_mismatches(c[0]) == c[1]
+
+
+ensure_publication_tests = [
+    # Empty publications, should append given entry
+    (
+        [],
+        {
+            "type": "bdr",
+            "database": "bdr_database",
+            "replication_sets": [{"name": "witness-only", "replicate_insert": False}],
+        },
+        [
+            {
+                "type": "bdr",
+                "database": "bdr_database",
+                "replication_sets": [
+                    {"name": "witness-only", "replicate_insert": False}
+                ],
+            }
+        ],
+    ),
+    # Two publications, one matching entry, should append missing repset.
+    (
+        [
+            {
+                "type": "bdr",
+                "database": "bdr_database",
+                "replication_sets": [{"name": "other", "replicate_insert": True}],
+            },
+            {
+                "type": "bdr",
+                "database": "other_database",
+                "replication_sets": [{"name": "some_repset"}],
+            },
+        ],
+        {
+            "type": "bdr",
+            "database": "bdr_database",
+            "replication_sets": [{"name": "witness-only", "replicate_insert": False}],
+        },
+        [
+            {
+                "type": "bdr",
+                "database": "bdr_database",
+                "replication_sets": [
+                    {"name": "other", "replicate_insert": True},
+                    {"name": "witness-only", "replicate_insert": False},
+                ],
+            },
+            {
+                "type": "bdr",
+                "database": "other_database",
+                "replication_sets": [{"name": "some_repset"}],
+            },
+        ],
+    ),
+    # Two publications, one complete matching entry, should do nothing.
+    (
+        [
+            {
+                "type": "bdr",
+                "database": "bdr_database",
+                "replication_sets": [{"name": "witness-only", "replicate_delete": True}],
+            },
+            {
+                "type": "bdr",
+                "database": "other_database",
+                "replication_sets": [{"name": "some_repset"}],
+            },
+        ],
+        {
+            "type": "bdr",
+            "database": "bdr_database",
+            "replication_sets": [{"name": "witness-only", "replicate_insert": False}],
+        },
+        [
+            {
+                "type": "bdr",
+                "database": "bdr_database",
+                "replication_sets": [
+                    {"name": "witness-only", "replicate_delete": True},
+                ],
+            },
+            {
+                "type": "bdr",
+                "database": "other_database",
+                "replication_sets": [{"name": "some_repset"}],
+            },
+        ],
+    )
+]
+
+
+def test_ensure_publication():
+    """
+    Test that ensure_publication correctly adds a publication, or modifies an
+    existing publication, or leaves a complete configuration alone.
+    """
+    for c in ensure_publication_tests:
+        assert ensure_publication(c[0], c[1]) == c[2]

@@ -51,10 +51,12 @@
           - "{{ bdr_node_name }}"
           - "{{ wanted_sets }}"
   vars:
+    maybe_default_repset: >-
+      {{ ('witness' in role)|ternary([], [bdr_node_group]) }}
     wanted_sets: >-
-      {{ subscription_sets|union([bdr_node_group]) }}
+      {{ subscription_sets|union(maybe_default_repset) }}
     subscribed_sets: >-
-      {{ subscribed.replication_sets|default([])|union([bdr_node_group]) }}
+      {{ subscribed.replication_sets|default([])|union(maybe_default_repset) }}
   when:
     subscribed_sets|symmetric_difference(wanted_sets) is not empty
   changed_when: True

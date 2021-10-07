@@ -181,6 +181,58 @@
     hook: "{{ cluster_dir }}/hooks/bdr-post-group-creation.yml"
   tags: always
 
+# If there are any BDR witnesses, there must be a witness-only
+# replication set for them to subscribe to. We can either add a
+# publication (if there isn't a matching one), or add the missing
+# witness-only repset to a matching BDR publication.
+
+- name: Add witness-only replication set to publications if required
+  set_fact:
+    publications: "{{
+      publications|ensure_publication(default_witness_publication)
+    }}"
+  vars:
+    bdr_witnesses: >-
+      {{ groups['role_bdr']|intersect(groups['role_witness']|default([])) }}
+    default_witness_publication:
+      type: bdr
+      database: "{{ bdr_database }}"
+      replication_sets:
+        - name: witness-only
+          autoadd_tables: false
+          replicate_insert: false
+          replicate_delete: false
+          replicate_update: false
+          replicate_truncate: false
+  when:
+    inventory_hostname == first_bdr_primary
+    and bdr_witnesses is not empty
+  tags: replication-sets
+
+# We add a default subscription to the witness-only replication set on
+# witnesses, unless the instance already explicitly defines a BDR
+# subscription to bdr_database.
+
+- name: Subscribe to witness-only replication set on witnesses
+  set_fact:
+    subscriptions: "{{
+      subscriptions|union([default_witness_subscription])
+    }}"
+  vars:
+    q: >-
+      [?type=='bdr' && database=='%s']
+    bdr_subscription: >
+      {{ subscriptions|json_query(q % bdr_database) }}
+    default_witness_subscription:
+      type: bdr
+      database: "{{ bdr_database }}"
+      replication_sets:
+        - witness-only
+  when: >
+    'witness' in role
+    and bdr_subscription is empty
+  tags: replication-sets
+
 # Set up replication sets according to the publications/subscriptions
 # settings before group join.
 

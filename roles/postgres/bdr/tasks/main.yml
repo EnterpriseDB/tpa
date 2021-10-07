@@ -105,7 +105,7 @@
 #                        join_using_dsn := '…')
 #     bdr.bdr_node_join_wait_for_ready()
 #
-## BDR3
+## BDR3, BDR4
 #
 # All hosts:
 #     bdr.create_node(node_name := '…', local_dsn := '…')

@@ -710,6 +710,29 @@ def export_vars(instance):
     return exports
 
 
+def ensure_publication(publications, entry):
+    """
+    Modifies the given list of publications (if necessary) to ensure that the
+    given publication entry occurs in it, by appending the entry if the list
+    does not contain a match, or by modifying the matching entry to contain
+    the desired replication sets otherwise.
+    """
+    match = None
+    for p in publications:
+        if p["type"] == entry["type"] and p["database"] == entry["database"]:
+            match = p
+
+    if match:
+        defined_repsets = [r["name"] for r in match["replication_sets"]]
+        for r in entry["replication_sets"]:
+            if r["name"] not in defined_repsets:
+                match["replication_sets"].append(r)
+    else:
+        publications.append(entry)
+
+    return publications
+
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -722,4 +745,5 @@ class FilterModule(object):
             "find_replica_tablespace_mismatches": find_replica_tablespace_mismatches,
             "match_existing_volumes": match_existing_volumes,
             "export_vars": export_vars,
+            "ensure_publication": ensure_publication,
         }
