@@ -28,10 +28,17 @@ class BDR_Always_ON(BDR):
         )
 
     def num_instances(self):
-        return 10
-
-    def num_locations(self):
-        return 2
+        # This method must be able to return correct results before the layout
+        # templates are loaded, so we hardcode the number of instances defined
+        # in the various layouts.
+        instances_per_layout = {
+            "default": 13,
+            "platinum": 13,
+            "gold": 11,
+            "silver": 6,
+            "bronze": 6,
+        }
+        return instances_per_layout[self.args["layout"] or "default"]
 
     def default_location_names(self):
-        return ["a", "b"]
+        return [chr(ord("a") + i) for i in range(self.num_locations())]

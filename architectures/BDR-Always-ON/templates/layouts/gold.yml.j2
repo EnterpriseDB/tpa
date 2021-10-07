@@ -7,7 +7,7 @@ instances:
     location: 0
     role:
       - bdr
-    backup: {{ hostnames[8] }}
+    backup: {{ hostnames[6] }}
 
   - node: 2
     Name: {{ hostnames[2] }}
@@ -26,71 +26,57 @@ instances:
     location: 1
     role:
       - bdr
-    backup: {{ hostnames[9] }}
+    backup: {{ hostnames[7] }}
 
   - node: 5
     Name: {{ hostnames[5] }}
-    location: 0
-    role:
-      - bdr
-      - readonly
-
-  - node: 6
-    Name: {{ hostnames[6] }}
-    location: 1
-    role:
-      - bdr
-      - readonly
-
-  - node: 7
-    Name: {{ hostnames[7] }}
     location: 2
     role:
       - bdr
       - witness
 
-  - node: 8
-    Name: {{ hostnames[8] }}
+  - node: 6
+    Name: {{ hostnames[6] }}
     location: 0
     role:
       - barman
 
-  - node: 9
-    Name: {{ hostnames[9] }}
+  - node: 7
+    Name: {{ hostnames[7] }}
     location: 1
     role:
       - barman
 
+  - node: 8
+    Name: {{ hostnames[8] }}
+    location: 0
+    volumes:
+      - device_name: /dev/xvdf
+        volume_type: none
+    role:
+      - pgbouncer
+      - haproxy
+    vars:
+      haproxy_backend_servers:
+        - {{ hostnames[1] }}
+        - {{ hostnames[2] }}
+
+  - node: 9
+    Name: {{ hostnames[9] }}
+    location: 0
+    volumes:
+      - device_name: /dev/xvdf
+        volume_type: none
+    role:
+      - pgbouncer
+      - haproxy
+    vars:
+      haproxy_backend_servers:
+        - {{ hostnames[1] }}
+        - {{ hostnames[2] }}
+
   - node: 10
     Name: {{ hostnames[10] }}
-    location: 0
-    volumes:
-      - device_name: /dev/xvdf
-        volume_type: none
-    role:
-      - pgbouncer
-      - haproxy
-    vars:
-      haproxy_backend_servers:
-        - {{ hostnames[1] }}
-        - {{ hostnames[2] }}
-
-  - node: 11
-    Name: {{ hostnames[11] }}
-    location: 0
-    volumes:
-      - device_name: /dev/xvdf
-        volume_type: none
-    role:
-      - pgbouncer
-      - haproxy
-    vars:
-      haproxy_backend_servers:
-        - {{ hostnames[1] }}
-        - {{ hostnames[2] }}
-
-  - node: 12
-    Name: {{ hostnames[12] }}
     location: 1
     volumes:
       - device_name: /dev/xvdf
@@ -103,8 +89,8 @@ instances:
         - {{ hostnames[3] }}
         - {{ hostnames[4] }}
 
-  - node: 13
-    Name: {{ hostnames[13] }}
+  - node: 11
+    Name: {{ hostnames[11] }}
     location: 1
     volumes:
       - device_name: /dev/xvdf

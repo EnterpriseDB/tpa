@@ -1,0 +1,57 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved. #}
+---
+
+instances:
+  - node: 1
+    Name: {{ hostnames[1] }}
+    location: 0
+    role:
+      - bdr
+    backup: {{ hostnames[4] }}
+
+  - node: 2
+    Name: {{ hostnames[2] }}
+    location: 0
+    role:
+      - bdr
+
+  - node: 3
+    Name: {{ hostnames[3] }}
+    location: 1
+    role:
+      - bdr
+      - witness
+
+  - node: 4
+    Name: {{ hostnames[4] }}
+    location: 0
+    role:
+      - barman
+
+  - node: 5
+    Name: {{ hostnames[5] }}
+    location: 0
+    volumes:
+      - device_name: /dev/xvdf
+        volume_type: none
+    role:
+      - pgbouncer
+      - haproxy
+    vars:
+      haproxy_backend_servers:
+        - {{ hostnames[1] }}
+        - {{ hostnames[2] }}
+
+  - node: 6
+    Name: {{ hostnames[6] }}
+    location: 0
+    volumes:
+      - device_name: /dev/xvdf
+        volume_type: none
+    role:
+      - pgbouncer
+      - haproxy
+    vars:
+      haproxy_backend_servers:
+        - {{ hostnames[1] }}
+        - {{ hostnames[2] }}
