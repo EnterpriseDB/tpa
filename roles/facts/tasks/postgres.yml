@@ -166,6 +166,12 @@
       {%- else -%}xlog
       {%- endif -%}
 
+- assert:
+    msg: >-
+      Setting shared_preload_libraries directly is not supported;
+      if required, please set it under postgres_conf_settings instead
+    that: shared_preload_libraries is not defined
+
 - name: Ensure all postgres_tablespaces entries have location defined
   assert:
     msg: >-

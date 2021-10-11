@@ -90,12 +90,14 @@ cluster_vars:
 Now if you add `myext` to `postgres_extensions`,
 `shared_preload_libraries` will include `myext`.
 
-You could also set `shared_preload_libraries` under
-`postgres_conf_settings`, but this should not ordinarily be required,
-and should be avoided if possible.
-
-The `shared_preload_libraries` setting lives in
+By default, `shared_preload_libraries` is set in
 `conf.d/8888-shared_preload_libraries.conf`.
+
+Setting `shared_preload_libraries` directly as a variable is not
+supported. You should not normally need to set it, but if unavoidable,
+you can set a fully-quoted value under
+[`postgres_conf_settings`](#postgres_conf_settings). In this case, the
+value is set in `conf.d/9900-tpa_postgres_conf_settings.conf`.
 
 ## Making changes by hand
 

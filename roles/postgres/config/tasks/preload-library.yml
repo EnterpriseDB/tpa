@@ -2,28 +2,40 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-# We're willing to be a bit flexible about what we read in here. We
-# accept multiple lines setting shared_preload_libraries (last one
-# wins), and commented-out assignments are ignored.
+# There are multiple places where shared_preload_libraries may be set.
+# The first time we run this code on a new cluster, only the default
+# initdb-generated postgresql.conf will exist, and it may or may not
+# have any shared_preload_libraries defined (EPAS does, but Postgres
+# doesn't). We retrieve the default value, merge in any settings we
+# want, and store the result in 8888-shared_preload_libraries.conf.
+# On subsequent runs, we can retrieve the value from this file.
+#
+# If the user sets shared_preload_libraries in postgres_conf_settings or
+# uses ALTER SYSTEM, those settings will inevitably override anything we
+# do here, so we don't need to worry about them.
+#
+# We need to be flexible in this code: the file(s) may or may not exist,
+# and there may be multiple settings (last one wins), and we must ignore
+# commented-out assignments.
 
 - name: Read current value of shared_preload_libraries
   shell: >
-    eval "libs=$(cat 2>/dev/null \"{{ conf }}\" \"{{ override }}\"|sed -n 's/^shared_preload_libraries *= *//p'|tail -1)" && echo $libs
+    eval "libs=$(cat 2>/dev/null {{ config_files|map('quote')|join(" ") }} | sed -n 's/^shared_preload_libraries *= *//p'|tail -1)" && echo $libs
   args:
     executable: /bin/bash
   changed_when: False
   register: libs
   vars:
-    conf: "{{ _include_dir }}/0000-tpa.conf"
-    override: "{{ _include_dir }}/8888-shared_preload_libraries.conf"
+    config_files:
+    - "{{ postgres_data_dir }}/postgresql.conf"
+    - "{{ _include_dir }}/8888-shared_preload_libraries.conf"
   check_mode: no
 
 - name: Update shared_preload_libraries list
   set_fact:
     _preload_list: "{{
       query('flattened',
-        _old_list|union([library|default([])])
-        |union(shared_preload_libraries|default([]))
+        _old_list|union(shared_preload_libraries|default([]))
       )
     }}"
   vars:
