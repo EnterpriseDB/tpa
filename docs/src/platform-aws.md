@@ -153,6 +153,12 @@ You must specify a VPC to use:
     ec2_vpc:
       Name: Test
 
+In this case, the VPC must exist; if you also specify a `cidr`, TPAexec
+will create the VPC if it does not exist. If TPAexec creates a VPC,
+`tpaexec deprovision` will attempt to remove it, but will leave any
+pre-existing VPC alone. (Think twice before creating new VPCs, because
+AWS has a single-digit default limit on the number of VPCs per account.)
+
 If you need more fine-grained matching, or to specify different VPCs in
 different regions, you can use the expanded form:
 
