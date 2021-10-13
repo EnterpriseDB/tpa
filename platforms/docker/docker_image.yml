@@ -53,20 +53,20 @@
       base_image: "{{ _tpa_images[_image_key] }}"
       context_path: docker/images
     _tpa_images:
-      debian-9:       debian:9
+      debian-9: debian:9
       debian-stretch: debian:9
-      debian-10:      debian:10
-      debian-buster:  debian:10
+      debian-10: debian:10
+      debian-buster: debian:10
       debian-bullseye: debian:11
-      debian-latest:  debian:11
-      ubuntu-18.04:   ubuntu:bionic
-      ubuntu-bionic:  ubuntu:bionic
-      ubuntu-20.04:   ubuntu:focal
-      ubuntu-focal:   ubuntu:focal
-      ubuntu-latest:  ubuntu:focal
-      redhat-7:       centos:7
-      redhat-8:       centos:8
-      redhat-latest:  centos:8
+      debian-latest: debian:11
+      ubuntu-18.04: ubuntu:bionic
+      ubuntu-bionic: ubuntu:bionic
+      ubuntu-20.04: ubuntu:focal
+      ubuntu-focal: ubuntu:focal
+      ubuntu-latest: ubuntu:focal
+      redhat-7: centos:7
+      redhat-8: centos:8
+      redhat-latest: centos:8
   when:
     image.startswith('tpa/')
     and _image_key in _tpa_images
