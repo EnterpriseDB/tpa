@@ -8,6 +8,9 @@
 #
 # All of the above applies to both apt and yum.
 
+edb_repo_hostname_suffix: "{{ edb_testing_repo|default(false)|bool|ternary('-staging', '') }}.enterprisedb.com"
+edb_repo_name_suffix: "{{ edb_testing_repo|default(false)|bool|ternary('-testing', '') }}"
+
 apt_repositories: {}
 default_apt_repositories:
   PGDG:
@@ -22,7 +25,7 @@ default_apt_repositories:
     filename: >-
       edb-{{ ansible_distribution_release }}
     repo: >-
-      deb [arch=amd64] https://apt.enterprisedb.com/{{ ansible_distribution_release }}-edb/ {{ ansible_distribution_release }} main
+      deb [arch=amd64] https://apt{{ edb_repo_hostname_suffix }}/{{ ansible_distribution_release }}-edb{{ edb_repo_name_suffix }}/ {{ ansible_distribution_release }} main
 
 default_apt_repository_list: "{{ default_apt_repositories.keys()|reject('equalto', 'EDB')|list }}"
 
@@ -43,7 +46,7 @@ default_yum_repositories:
 
   EDB:
     rpm_url: >-
-      https://yum.enterprisedb.com/edbrepos/edb-repo-latest.noarch.rpm
+      https://yum{{ edb_repo_hostname_suffix }}/edbrepos/edb-repo-latest.noarch.rpm
 
 default_yum_repository_list: "{{ default_yum_repositories.keys()|reject('equalto', 'EDB')|list }}"
 

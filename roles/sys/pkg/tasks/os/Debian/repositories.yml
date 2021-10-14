@@ -100,7 +100,7 @@
 - name: Configure authentication for EDB repository
   copy:
     content: >
-      machine apt.enterprisedb.com login {{ _credentials[0] }} password {{ _credentials[1] }}
+      machine apt{{ edb_repo_hostname_suffix }} login {{ _credentials[0] }} password {{ _credentials[1] }}
     dest: /etc/apt/auth.conf.d/edb.conf
     owner: root
     group: root
