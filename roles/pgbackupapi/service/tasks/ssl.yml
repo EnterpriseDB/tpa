@@ -1,0 +1,67 @@
+- name: Ensure {{ pg_backup_api_ssl_dir }} exists
+  file:
+    name: "{{ pg_backup_api_ssl_dir }}"
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+# Generate certificates
+
+# generate client CA if we don't use one yet for server certs
+- name: Generate CA.crt for client cert if using selfsigned server certs
+  include_role:
+    name: sys/ssl/ca
+  when:
+    not use_ssl_cert_authentication
+
+# push global CA.crt or dedicated one created in previous task
+- name: Push CA cert to the node
+  copy:
+    src: "{{ ssl_ca_file }}"
+    remote_src: yes
+    dest: "{{ pg_backup_api_ssl_dir }}/CA.cert"
+    mode: 0644
+    owner: "{{ pg_backup_api_ssl_user }}"
+    group: "{{ pg_backup_api_ssl_group }}"
+
+# Server certificate for apache web server
+- name: Generate webserver SSL artifacts
+  include_role:
+    name: sys/ssl/server
+  vars:
+    ssl_user: "{{ pg_backup_api_ssl_user }}"
+    ssl_group: "{{ pg_backup_api_ssl_group }}"
+    ssl_dir: "{{ pg_backup_api_ssl_dir }}"
+    ssl_service: "{{ pg_backup_api_ssl_service }}"
+    check_result_varname: "pgbapi"
+
+# Generate a client certificate
+- name: Generate client SSL artifacts by default
+  include_role:
+    name: sys/ssl/client
+  vars:
+    CN: "{{ pg_backup_api_CN }}"
+    username: "{{ pg_backup_api_CN }}"
+    clientcert_owner: "{{ pg_backup_api_clientcert_owner }}"
+    clientcert_group: "{{ pg_backup_api_clientcert_group }}"
+    clientcert_service: "{{ pg_backup_api_clientcert_service }}"
+    ssl_dir: "{{ pg_backup_api_ssl_dir }}"
+    csr_path: "{{ pg_backup_api_csr_path }}"
+    privatekey_path: "{{ pg_backup_api_privatekey_path }}"
+    certificate_path: "{{ pg_backup_api_certificate_path }}"
+    check_result_varname: "pgbapi"
+
+# Update trusted CA cert to include our CA
+- name: copy CA to shared trusted CA
+  copy:
+    src: "{{ ssl_ca_file }}"
+    remote_src: yes
+    dest: "{{ apache_conf[ansible_os_family]['ca_trust_dir'] }}/CA.cert"
+
+- name: Update CA certificate trust
+  command: "{{ apache_conf[ansible_os_family]['ca_trust_cmd'] }}"
+
+# Set fact to use in pemagent configuration later.
+- set_fact:
+    pgbapi_ssl_dir: "{{ pg_backup_api_ssl_dir }}"

@@ -4,3 +4,14 @@
 
 pem_agent_config_path: "{{ pem_agent_base_dir }}/etc/agent.cfg"
 pem_agent_certificate_directory: /root/.pem
+
+# pg-backup-api client cert vars
+pemagent_CN: pemagent_{{ inventory_hostname }}
+  # permission on node
+pemagent_clientcert_owner: "{{ pem_group|default('root') }}"
+pemagent_clientcert_group: "{{ pem_group|default('root') }}"
+pemagent_clientcert_service: "{{ pemagent_CN }}"
+  # node artifacts path
+pemagent_csr_path: "{{ pgbapi_ssl_dir }}/{{ pemagent_clientcert_service }}.csr"
+pemagent_privatekey_path: "{{ pgbapi_ssl_dir }}/{{ pemagent_clientcert_service }}.key"
+pemagent_certificate_path: "{{ pgbapi_ssl_dir }}/{{ pemagent_clientcert_service }}.crt"

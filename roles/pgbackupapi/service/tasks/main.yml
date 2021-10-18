@@ -1,0 +1,44 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- include_tasks: ssl.yml
+
+- name: Create proxy conf
+  template:
+      src: pg-backup-api.conf.j2
+      dest: "/etc/{{ _apache_svc }}/{{ _apache_dir }}/pg-backup-api.conf"
+      owner: barman
+      group: barman
+      mode: 0644
+  vars:
+    _apache_svc: "{{ apache_conf[ansible_os_family]['service'] }}"
+    _apache_dir: "{{ apache_conf[ansible_os_family]['conf_dir'] }}"
+  notify:
+    - Restart apache pgbapi
+
+- block:
+    - name: Enable ssl
+      apache2_module:
+        name: ssl
+        state: present
+      notify:
+        - Restart apache pgbapi
+    - name: Enable proxy
+      apache2_module:
+        name: proxy_http
+        state: present
+      notify:
+        - Restart apache pgbapi
+    - name: Enable pgbapi app
+      command: a2ensite pg-backup-api
+  when:
+    ansible_os_family == 'Debian'
+
+- name: Switch off port 80
+  lineinfile:
+    path: "{{ apache_conf[ansible_os_family]['default_conf'] }}"
+    state: absent
+    regexp: '^Listen 80'
+  notify:
+    - Restart apache pgbapi

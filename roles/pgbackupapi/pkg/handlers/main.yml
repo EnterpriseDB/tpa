@@ -1,0 +1,36 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Restart pg-backup-api service (delegated)
+  service:
+    name: pg-backup-api
+    state: restarted
+  delegate_to: "{{ item }}"
+  listen: Barman configuration changed
+  loop: "{{ groups['role_barman'] }}"
+  when: >
+    enable_pg_backup_api
+
+- name: Restart pg-backup-api service
+  service:
+    name: pg-backup-api
+    state: restarted
+  listen: Restart pgbapi
+  when: >
+    'barman' in role
+    and enable_pg_backup_api
+
+- name: Enable pg-backup-api
+  service:
+    name: pg-backup-api
+    enabled: true
+  listen: Enable pgbapi
+  when: >
+    'barman' in role
+    and enable_pg_backup_api
+
+- name: Daemon-Reload
+  systemd:
+    daemon_reload: yes
+  listen: Daemon-reload

@@ -1,0 +1,9 @@
+---
+
+# This handler is an effective noop but adds a listener that other roles
+# (namely pgbackupapi) can also listen to.
+
+- name: Handle notifications from barman final tasks
+  debug:
+    msg: Barman setup complete
+  listen: Barman configuration changed

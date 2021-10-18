@@ -33,6 +33,16 @@
     'barman' in role
   tags: barman
 
+- name: Run pg-backup-api tests
+  include_tasks:
+    file: pg-backup-api.yml
+    apply:
+      tags: pg-backup-api
+  when: >
+    'barman' in role and
+    enable_pg_backup_api|default(False)|bool
+  tags: pg-backup-api
+
 - name: Run pgbouncer tests
   include_tasks:
     file: pgbouncer.yml

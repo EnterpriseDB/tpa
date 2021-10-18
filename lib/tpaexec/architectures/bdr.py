@@ -243,16 +243,20 @@ class BDR(Architecture):
 
     def _update_instance_pem(self, instances):
         """
+        Add pem-agent to instance roles where applicable.
+
         If --enable-pem is specified, we collect all the instances with role
         [primary, bdr, replica, readonly, witness, subscriber-only] and append
         'pem-agent' role to the existing set of roles assigned to them. We later
         add a dedicated 'pemserver' instance to host our PEM server.
         """
-
         if self.args.get("enable_pem", False):
 
             for instance in instances:
                 if self._pemagent_candidate_roles & self._instance_roles(instance):
+                    instance["role"].append("pem-agent")
+
+                if "barman" in self._instance_roles(instance) and self.args.get("enable_pg_backup_api", False):
                     instance["role"].append("pem-agent")
 
             n = instances[-1].get("node")

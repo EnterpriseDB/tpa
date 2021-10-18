@@ -26,3 +26,6 @@ default_barman_last_backup_maximum_age: 1 WEEK
 ## Automatic backup schedule
 
 default_barman_backup_interval: '0 4 * * wed,sat'
+
+# by default, don't install pg-backup-api
+enable_pg_backup_api: false

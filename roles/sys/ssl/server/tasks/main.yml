@@ -29,6 +29,8 @@
   copy:
     src: "{{ local_ca_certificate_path }}"
     dest: "{{ ca_path }}"
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
     mode: 0644
     force: no
   register: cert_copy

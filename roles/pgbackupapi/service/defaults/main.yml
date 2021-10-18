@@ -1,0 +1,50 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+use_ssl_cert_authentication: no
+
+apache_conf:
+  Debian:
+    service: apache2
+    user: www-data
+    group: www-data
+
+    conf_dir: sites-available
+    ca_trust_dir: /usr/local/share/ca-certificates
+    ca_trust_cmd: update-ca-certificates
+    default_conf: /etc/apache2/ports.conf
+  RedHat:
+    service: httpd
+    user: apache
+    group: apache
+    conf_dir: conf.d
+    ca_trust_dir: /etc/pki/ca-trust/source/anchors
+    ca_trust_cmd: update-ca-trust
+    default_conf: /etc/httpd/conf/httpd.conf_dir
+
+# server cert vars
+pg_backup_api_ssl_user: "{{ apache_conf[ansible_os_family]['user'] }}"
+pg_backup_api_ssl_group: "{{ apache_conf[ansible_os_family]['group'] }}"
+pg_backup_api_ssl_service: "pg-backup-api"
+
+# general ssl var
+pg_backup_api_ssl_dir: "/etc/tpa/{{ pg_backup_api_ssl_service }}"
+
+# either use existing CA we generated earlier or place the one we create specifically for pg_backup_api
+# inside a dedicated folder on the ansible node.
+pg_backup_api_local_ssl_dir: "{{
+  use_ssl_cert_authentication
+  |ternary(cluster_dir ~ '/ssl', cluster_dir ~ '/ssl/pg-backup-api') }}"
+
+# Client cert vars
+pg_backup_api_CN: pg-backup-user
+
+# permission on node pemagent runs as root
+pg_backup_api_clientcert_owner: "{{ pem_user|default('root') }}"
+pg_backup_api_clientcert_group: "{{ pem_group|default('root') }}"
+pg_backup_api_clientcert_service: "{{ pg_backup_api_CN }}"
+
+# node artifacts path
+pg_backup_api_csr_path: "{{ pg_backup_api_ssl_dir }}/{{ pg_backup_api_clientcert_service }}.csr"
+pg_backup_api_privatekey_path: "{{ pg_backup_api_ssl_dir }}/{{ pg_backup_api_clientcert_service }}.key"
+pg_backup_api_certificate_path: "{{ pg_backup_api_ssl_dir }}/{{ pg_backup_api_clientcert_service }}.crt"

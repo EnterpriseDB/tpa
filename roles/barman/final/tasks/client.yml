@@ -44,6 +44,8 @@
     already_exists_message: "Replication slot '{{ slot_name }}' already exists"
   become_user: barman
   become: yes
+  notify:
+    - Barman configuration changed
 
 # If we have just activated the backup configuration, we also run barman
 # cron in order to start pg_receivexlog immediately (rather than waiting
@@ -53,10 +55,13 @@
   command: >
     /usr/bin/barman cron
   delegate_to: "{{ this_barman }}"
+  register: barman_cron
   when: >
     conf is changed
   become_user: barman
   become: yes
+  notify:
+    - Barman configuration changed
 
 # We must now wait for an unpredictable amount of time for one WAL
 # segment to be archived before we can start a backup. Join us in

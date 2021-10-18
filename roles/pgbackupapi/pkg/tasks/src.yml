@@ -1,0 +1,75 @@
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- include_role:
+    name: src/install
+    tasks_from: clone.yml
+  vars:
+    name: Postgres Backup API
+    repo: "{{ pg_backup_api_git_url }}"
+    dest: "{{ pg_backup_api_src_dir }}"
+    version: "{{ pg_backup_api_git_ref|default('main') }}"
+    reference: "{{ pg_backup_api_git_reference_repo|default(omit) }}"
+
+- include_role:
+    name: src/install
+    tasks_from: verify-branch.yml
+  vars:
+    source_directory: "{{ pg_backup_api_src_dir }}"
+    git_repository_ref: "{{ pg_backup_api_git_ref }}"
+  when:
+    pg_backup_api_git_ref is defined
+
+- name: Remove old build directory
+  file:
+    state: absent
+    path: "{{ pg_backup_api_build_dir }}"
+    force: yes
+  tags: [build-clean, pg-backup-api-clean]
+
+- name: Ensure build directory exists
+  file:
+    state: directory
+    path: "{{ pg_backup_api_build_dir }}"
+
+# The source directory may be read-only, and setup.py does not make it
+# convenient to do an out-of-tree build the way we do for other things,
+# so we copy the source to a writable build directory as a workaround.
+
+- name: Copy source to writeable build directory
+  shell: "cp -a {{ pg_backup_api_src_dir }}/* {{ pg_backup_api_build_dir }}"
+
+- name: Install Postgres Backup API from source
+  command: >
+    {{ python }} setup.py install {{ extra_args[ansible_os_family]|join(" ") }}
+  args:
+    chdir: "{{ pg_backup_api_build_dir }}/pg_backup_api"
+  vars:
+    extra_args:
+      Debian:
+      - "--install-layout=deb"
+      RedHat:
+      - "--prefix=/usr"
+
+# when installing from pkg, these are handled by the rpm or deb automatically
+- name: Ensure log file created under barman user
+  file:
+    path: "/var/log/barman/barman-api.log"  # TODO configurable
+    state: touch
+    owner: barman
+    group: barman
+    mode: 0750
+
+- name: Install custom Postgres Backup API service unit file
+  copy:
+    src: pg-backup-api.service
+    dest: /etc/systemd/system/pg-backup-api.service
+    owner: root
+    group: root
+    mode: 0644
+  register: unit
+  notify:
+    - Enable pgbapi
+    - Daemon-reload
+    - Restart pgbapi
+  tags: [pg-backup-api, service]

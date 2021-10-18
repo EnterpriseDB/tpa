@@ -1,0 +1,22 @@
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- block:
+  - include_tasks: list-packages.yml
+    vars:
+      list_varname: _all_pgbapi_packages
+
+  - include_role: name=pkg/install
+    vars:
+      package_list_name: "pgbapi packages"
+      package_list: "{{ _all_pgbapi_packages }}"
+
+  - name: Enable pg-backup-api
+    service:
+      name: pg-backup-api
+      state: started
+      enabled: true
+
+  when: pg_backup_api_installation_method == 'pkg'
+
+- include_tasks: src.yml
+  when: pg_backup_api_installation_method == 'src'

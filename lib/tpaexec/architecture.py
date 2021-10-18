@@ -220,6 +220,11 @@ class Architecture(object):
             action="store_true",
             help="Add a PEM monitoring server to the cluster",
         )
+        g.add_argument(
+            "--enable-pg-backup-api",
+            action="store_true",
+            help="Install pg-backup-api on barman server and register to pem server if enabled"
+            )
 
         g = p.add_mutually_exclusive_group()
         g.add_argument(
@@ -707,6 +712,10 @@ class Architecture(object):
                 if ref:
                     entry.update({"barman_git_ref": ref})
                 cluster_vars.update(entry)
+            elif name == "pg-backup-api":
+                if ref:
+                    entry.update({"pg_backup_api_git_ref": ref})
+                cluster_vars.update(entry)
             else:
                 if ref:
                     entry.update({"git_repository_ref": ref})
@@ -773,6 +782,7 @@ class Architecture(object):
             "tpa_2q_repositories",
             "use_volatile_subscriptions",
             "failover_manager",
+            "enable_pg_backup_api",
         ] + ["%s_package_version" % x for x in self.versionable_packages()]
 
     def versionable_packages(self):
@@ -858,6 +868,10 @@ class Architecture(object):
                 "barman_installation_method": "src",
                 "barman_git_url": "git@github.com:EnterpriseDB/barman.git",
             },
+            "pg-backup-api": {
+                "pg_backup_api_installation_method": "src",
+                "pg_backup_api_git_url": "git@github.com:EnterpriseDB/pg-backup-api.git"
+            }
         }
 
     def update_cluster_vars(self, cluster_vars):

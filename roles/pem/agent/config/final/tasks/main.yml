@@ -151,6 +151,17 @@
     mode: 0644
   register: agent_cfg
 
+# Register barman server through pemworker on barman node when pg-backup-api
+# is being used. doing it after the agent.cfg file has been tuned, otherwise
+# barman cert conf gets removed by templating.
+
+- name: Register Barman server monitoring
+  include_tasks: register-barman.yml
+  when: >
+    not agent_cfg_check.stat.exists and
+    'barman' in role
+    and enable_pg_backup_api|default(False)
+
 # Only now that agent.cfg is the way we want it can we start or restart
 # the service.
 

@@ -1,0 +1,36 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# generate client cert for pemagent to hit pg-backup-api
+- name: Generate client SSL artifacts for pemagent to pg-backup-api communication
+  include_role:
+    name: sys/ssl/client
+  vars:
+    check_result_varname: "pemagent_barman"
+    CN: "{{ pemagent_CN }}"
+    username: "{{ pemagent_CN }}"
+    clientcert_owner: "{{ pemagent_clientcert_owner }}"
+    clientcert_group: "{{ pemagent_clientcert_group }}"
+    clientcert_service: "{{ pemagent_clientcert_service }}"
+    ssl_dir: "{{ pgbapi_ssl_dir }}"
+    csr_path: "{{ pemagent_csr_path }}"
+    privatekey_path: "{{ pemagent_privatekey_path }}"
+    certificate_path: "{{ pemagent_certificate_path }}"
+
+- name: Register Barman server via pemworker
+  command: |
+    /usr/edb/pem/agent/bin/pemworker \
+    --register-barman \
+    --api-url https://{{ inventory_hostname }} \
+    --description 'Barman {{ inventory_hostname }}' \
+    --ssl-crt {{ pemagent_barman_ssl_client_cert_file }} \
+    --ssl-key {{ pemagent_barman_ssl_client_key_file }} \
+    --ssl-ca-crt {{ pemagent_barman_ssl_ca_file }} \
+    --owner {{ hostvars[pem_server].postgres_user }} \
+    -c {{ pem_agent_config_path }}
+
+  notify: 'Restart pemagent'
+
+- name: Force all notified handlers to run now
+  meta: flush_handlers

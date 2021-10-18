@@ -1,0 +1,14 @@
+<VirtualHost *:443>
+    ServerName {{ inventory_hostname }}
+    SSLEngine on
+
+    SSLCertificateFile {{ pgbapi_ssl_cert_file }}
+    SSLCertificateKeyFile {{ pgbapi_ssl_key_file }}
+
+    SSLVerifyClient require
+    SSLVerifyDepth 10
+    SSLCACertificateFile {{ pgbapi_ssl_ca_file }}
+
+    ProxyPass / http://localhost:7480/
+    ProxyPassReverse / http://localhost:7480/
+</VirtualHost>

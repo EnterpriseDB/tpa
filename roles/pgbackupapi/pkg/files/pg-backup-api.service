@@ -1,0 +1,13 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved. #}
+[Unit]
+Description=Postgres Backup API
+
+[Service]
+Type=simple
+User=barman
+Group=barman
+ExecStart=/usr/bin/pg-backup-api serve
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

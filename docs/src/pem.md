@@ -1,30 +1,33 @@
 # Configuring Postgres Enterprise Manager (PEM)
 
-TPAexec will install and configure PEM when `tpaexec configure` command
-is run with `--enable-pem` command line option.
+TPAexec will install and configure PEM when `tpaexec configure` command is run
+with `--enable-pem` command line option.
 
-The default behavior with `--enable-pem` is to enable `pem-agent` role
-for all `postgres` instances in the cluster. It would also add a dedicated
-instance named `pemserver` to the cluster. Since PEM server uses postgres
-backend; pemserver instance implicitly uses `postgres` role as well which
-ensures that pemserver gets a valid postgres cluster configured for use
-as PEM backend. All configuration options available for a normal postgres
-instance are valid for PEM's backend postgres instance as well. See
-following for details:
+The default behavior with `--enable-pem` is to enable `pem-agent` role for all
+`postgres` instances in the cluster. `pem-agent` role will also be added to
+barman nodes when `--enable-pg-backup-api` command line option is used
+alongside `--enable-pem`.
+
+A dedicated instance named `pemserver` will also be added to the cluster.
+
+Since PEM server uses postgres backend; pemserver instance implicitly uses
+`postgres` role as well which ensures that pemserver gets a valid postgres
+cluster configured for use as PEM backend. All configuration options available
+for a normal postgres instance are valid for PEM's backend postgres instance
+as well. See following for details:
 
 * [Configure pg_hba.conf](pg_hba.conf.md)
 * [Configure postgresql.conf](postgresql.conf.md)
 
-Note that PEM is only available via EDB's package repositories
-and therefore requires a valid subscription.
+Note that PEM is only available via EDB's package repositories and therefore
+requires a valid subscription.
 
 ## Supported architectures
 
-PEM is supported with M1 and BDR-Always-ON architectures via
-`--enable-pem` configuration command line option. You could optionally edit
-the generated cluster config (config.yml) and assign or remove `pem-agent`
-role from any postgres instance in the cluster in order to enable or
-disable PEM there.
+PEM is supported with M1 and BDR-Always-ON architectures via `--enable-pem`
+configuration command line option. You could optionally edit the generated
+cluster config (config.yml) and assign or remove `pem-agent` role from any
+postgres instance in the cluster in order to enable or disable PEM there.
 
 Note that PEM server does not support pgextended for a backend yet.
 

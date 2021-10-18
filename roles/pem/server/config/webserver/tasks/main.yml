@@ -34,7 +34,7 @@
     src: config_setup.py.j2
     dest: "{{ pem_base_dir }}/web/config_setup.py"
 
-- name: Check if web-server ceritificate already exists
+- name: Check if web-server certificate already exists
   stat:
     path: "{{ pem_base_dir }}/resources/server-pem.crt"
   register: pem_web_server_certificate
@@ -86,7 +86,7 @@
 - name: Configure SELinux security policy for PEM
   shell: "{{ pem_base_dir }}/bin/configure-selinux.sh"
 
-# XXX: What triggers this restart? Is it the SELinux config? 
+# XXX: What triggers this restart? Is it the SELinux config?
 - name: "Restart httpd service - {{ pem_web_server_service_name[ansible_os_family] }}"
   service:
     name: "{{ pem_web_server_service_name[ansible_os_family] }}"

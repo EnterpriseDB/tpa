@@ -1,0 +1,23 @@
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# This role can be safely applied to every instance.
+# It will set up on the Barman instances.
+
+- name: Install Postgres Backup API
+  include_role:
+    name: pgbackupapi/pkg
+    apply:
+      tags: [pg-backup-api, pkg]
+  when: >
+    'barman' in role
+    and platform not in ['shared']
+  tags: pkg
+
+- include_role:
+    name: pgbackupapi/service
+    apply:
+      tags: service
+  when: >
+    'barman' in role
+    and platform not in ['shared']
+  tags: service

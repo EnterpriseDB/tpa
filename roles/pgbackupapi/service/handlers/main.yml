@@ -1,0 +1,11 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Restart Apache for pg-backup-api
+  service:
+    name: "{{ apache_conf[ansible_os_family]['service'] }}"
+    state: restarted
+  listen:
+    - Restart apache pgbapi
+    - Note SSL configuration changed
