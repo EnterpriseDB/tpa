@@ -2,6 +2,9 @@
 [{{ backup_name }}]
 description = "Backups from {{ target }}"
 
+{% if _barman_archiver != default_barman_archiver %}
+archiver = "{{ _barman_archiver }}"
+{% endif %}
 ssh_command = "ssh -q {{ postgres_user }}@{{ target }}"
 conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='barman') }} {{ barman_client_dsn_attributes }}"
 streaming_conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='streaming_barman') }} {{ barman_client_dsn_attributes }}"

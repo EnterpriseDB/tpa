@@ -492,6 +492,16 @@
       )
     }}"
 
+- name: Set barman archive command if required
+  set_fact:
+    archive_command: "{{ default_barman_archive_command }}"
+  when:
+    - backup is defined
+    - backup in groups['role_barman']|default([])
+    - archive_command is not defined
+    - barman_archiver is defined
+    - barman_archiver|bool is true
+
 - name: Raise max_worker_processes on replicas if required
   set_fact:
     max_worker_processes: "{{ upstream_max_worker_processes }}"

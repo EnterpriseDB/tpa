@@ -6,6 +6,7 @@ _config_file: "/etc/barman.d/{{ backup_name }}.conf"
 
 _barman_backup_directory: "/var/lib/barman/{{ backup_name }}"
 
+_barman_archiver: "{{ barman_archiver|default(default_barman_archiver)|bool }}"
 _barman_log_file: "{{ barman_log_file|default(default_barman_log_file) }}"
 _barman_backup_method: "{{ barman_backup_method|default(default_barman_backup_method) }}"
 _barman_parallel_jobs: "{{ barman_parallel_jobs|default(default_barman_parallel_jobs) }}"

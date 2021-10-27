@@ -83,6 +83,7 @@ default_postgres_hba_local_auth_method: peer
 default_barman_user: barman
 default_barman_group: barman
 default_barman_home: /var/lib/barman
+default_barman_archive_command: "'barman-wal-archive {{ backup }} {{ inventory_hostname }} %p'"
 
 default_failover_manager: repmgr
 

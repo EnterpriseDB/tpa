@@ -6,6 +6,7 @@
 
 default_barman_log_file: /var/log/barman/barman.log
 
+default_barman_archiver: false
 default_barman_backup_method: rsync
 default_barman_parallel_jobs: 1
 default_barman_reuse_backup: link
