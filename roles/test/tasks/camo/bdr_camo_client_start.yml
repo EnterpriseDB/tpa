@@ -28,7 +28,6 @@
         - text: ALTER SYSTEM SET synchronous_replication_availability=%s;
           args:
             - "{{ sync_rep }}"
-        - text: ALTER SYSTEM SET bdr.camo_local_mode_delay='100ms';
         - text: SELECT pg_reload_conf();
       autocommit: yes
     with_items:
