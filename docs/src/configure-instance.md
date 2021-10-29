@@ -129,11 +129,11 @@ pgbouncer, and haproxy, according to the details of the architecture.
 
 <!-- WIP
 
-## Barman
 ## repmgr
 
 -->
 
+* [Configure Barman](barman.md)
 * [Configure pgbouncer](pgbouncer.md)
 * [Configure haproxy](haproxy.md)
 * [Configure HARP](harp.md)
