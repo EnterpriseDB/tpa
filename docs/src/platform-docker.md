@@ -154,3 +154,10 @@ These commands don't provision or deprovision containers, or even
 connect to them; they are intended to save resources when you're
 temporarily not using a docker cluster that you need to keep
 available for future use.
+
+For a summary of the provisioned docker containers in a cluster,
+whether started or stopped, use the `list-containers` command:
+
+```bash
+[tpa]$ tpaexec list-containers clustername
+```
