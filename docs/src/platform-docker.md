@@ -139,3 +139,18 @@ configuration:
 
 * [Storage Drivers](https://docs.docker.com/storage/storagedriver/)
 * [Configuring lvm-direct for production](https://docs.docker.com/storage/storagedriver/device-mapper-driver/#configure-direct-lvm-mode-for-production)
+
+## Docker container management
+
+All of the docker containers in a cluster can be started and stopped
+together using the `start-containers` and `stop-containers` commands:
+
+```bash
+[tpa]$ tpaexec start-containers clustername
+[tpa]$ tpaexec stop-containers clustername
+```
+
+These commands don't provision or deprovision containers, or even
+connect to them; they are intended to save resources when you're
+temporarily not using a docker cluster that you need to keep
+available for future use.
