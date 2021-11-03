@@ -23,6 +23,7 @@
         (postgres_family == 'epas' and 'bdr' in role)
       )
       and postgresql_flavour != 'postgresql-bdr'
+      and postgres_version is version(14, '<')
     }}"
     install_bdr_packages: "{{ 'bdr' in role and 'bdr' not in sources }}"
   vars:
