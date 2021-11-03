@@ -22,7 +22,8 @@ if [[ -z "${TPA_DIR:-}" ]]; then
 fi
 
 export TPA_DIR=${TPA_DIR:-$TOP}
-VENV_BIN="$TPA_DIR/tpa-venv/bin"
+TPA_VENV=${TPA_VENV:-$TPA_DIR/tpa-venv}
+VENV_BIN="$TPA_VENV/bin"
 
 # Set ANSIBLE_LOG_PATH, ANSIBLE_CONFIG, and ANSIBLE_INVENTORY to our
 # versions if they are not already set.

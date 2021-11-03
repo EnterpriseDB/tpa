@@ -52,7 +52,7 @@ if [[ ! -d $TPA_DIR/roles ]]; then
 fi
 
 ansible=$TPA_DIR/ansible/ansible
-TPA_VENV=$TPA_DIR/tpa-venv
+TPA_VENV=${TPA_VENV:-$TPA_DIR/tpa-venv}
 
 ## Command functions
 #
@@ -544,9 +544,10 @@ The default location is $TPA_VENV
 If you use the default location, which we recommend, the venv will
 be activated automatically whenever you run tpaexec.
 
-You may optionally specify '--venv /path/to/venv' to either use an
-existing venv, or create one at the specified location. If you do this,
-you must ensure that the venv is activated before you run tpaexec.
+You can optionally use '--venv /other/location' to specify a
+different location for the venv. If you do this, you must also
+'export TPA_VENV=/other/location' so that tpaexec can find the
+custom environment.
 SETUP
             ;;
 

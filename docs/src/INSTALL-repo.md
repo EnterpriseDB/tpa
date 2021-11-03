@@ -119,12 +119,12 @@ You can run `tpaexec setup --venv /other/location` to specify a
 different location for the new venv.
 
 We strongly suggest sticking to the default venv location. If you use a
-different location, `tpaexec` cannot automatically activate the venv;
-you must do so yourself, for example by adding the following line to
-your .bashrc (or other shell startup scripts):
+different location, you must also set the environment variable TPA_VENV
+to its location, for example by adding the following line to your
+.bashrc (or other shell startup scripts):
 
 ```bash
-source /other/location/bin/activate
+export TPA_VENV="/other/location"
 ```
 
 ## Using a modified Ansible (for TPAexec developers)
