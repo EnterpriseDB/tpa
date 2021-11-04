@@ -1,0 +1,73 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- include_role: name=postgres/bdr tasks_from=bdr3.yml
+
+- assert:
+    msg: All CAMO pairs must be symmetric in BDR4
+    that:
+      - hostvars[bdr_node_camo_partner].bdr_node_camo_partner is defined
+      - hostvars[bdr_node_camo_partner].bdr_node_camo_partner == inventory_hostname
+  when:
+    bdr_node_camo_partner is defined
+
+# This function returns the name of the current CAMO partner when
+# executed on a node that has a CAMO partner, i.e., a node that was
+# mentioned in a previous .add_camo_pair() call. If there is no CAMO
+# partner, it returns NULL.
+
+- name: Fetch current CAMO partner, if any
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    query: >
+      SELECT bdr.get_configured_camo_partner() as partner
+  register: _camo_query
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# If we currently have a CAMO partner, but expect to have no partner or
+# a different partner, we must call bdr.remove_camo_pair() to remove the
+# association. We must call this function only once per CAMO pair, so we
+# must ensure that only one partner in the symmetric pair executes it.
+
+- name: Remove unwanted CAMO pair
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+      - text: >
+          SELECT bdr.remove_camo_pair(node_group := %s, left_node := %s, right_node := %s)
+        args:
+          - "{{ bdr_node_group }}"
+          - "{{ inventory_hostname }}"
+          - "{{ _camo_query.partner }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    _camo_query.partner != None
+    and (bdr_node_camo_partner is not defined
+      or bdr_node_camo_partner != _camo_query.partner)
+    and inventory_hostname == [inventory_hostname, _camo_query.partner]|sort|first
+
+# If bdr_node_camo_partner is set, we expect to have a CAMO partner; but
+# if we have no partner or a different partner (which the previous task
+# would have removed), we must call bdr.add_camo_pair() to create the
+# association—but again, only once per CAMO pair.
+
+- name: Add configured CAMO pair
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+      - text: >
+          SELECT bdr.add_camo_pair(node_group := %s, left_node := %s, right_node := %s)
+        args:
+          - "{{ bdr_node_group }}"
+          - "{{ inventory_hostname }}"
+          - "{{ bdr_node_camo_partner }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    bdr_node_camo_partner is defined
+    and (_camo_query.partner == None
+      or _camo_query.partner != bdr_node_camo_partner)
+    and inventory_hostname == [inventory_hostname, bdr_node_camo_partner]|sort|first
