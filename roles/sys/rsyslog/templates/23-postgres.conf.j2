@@ -1,5 +1,5 @@
-$FileOwner {{ postgres_user }}
-$FileGroup {{ postgres_group }}
+$FileOwner root
+$FileGroup root
 if $programname == 'postgres' then ?LOGPERHOST
 if $programname == 'pgbouncer' then ?LOGPERHOST
 if $programname == 'repmgr' then ?LOGPERHOST

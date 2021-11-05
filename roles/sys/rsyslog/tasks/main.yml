@@ -6,6 +6,8 @@
   file:
     path: /etc/rsyslog.d/99-tpa-node.conf
     state: absent
+  notify:
+    - Note rsyslog restart required
 
 - name: Add rsyslog rules for remote logging
   template:
