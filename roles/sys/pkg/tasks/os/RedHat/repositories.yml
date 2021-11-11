@@ -35,6 +35,16 @@
       yum_repository_list|default(default_yum_repository_list)
     }}"
 
+# XXX Duplicated in Debian/repositories.yml
+
+- assert:
+    msg: "Set EDB_REPO_TOKENS=/path/to/file to use Cloudsmith repositories"
+    that:
+      edb_repo_tokens is defined
+  when: >
+    'harp' in apt_repository_list
+    or 'harp-etcd' in apt_repository_list
+
 # If we install the EDB repository RPM, all subsequent yum operations
 # will fail until we add authentication information to the baseurl in
 # edb.repo. So if EDB is in the list, we move it to the end, so that

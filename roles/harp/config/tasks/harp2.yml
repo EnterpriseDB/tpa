@@ -1,0 +1,45 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Install HARP configuration files
+  template:
+    src: "{{ item.src  }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
+  with_items:
+    - src: harp2.cluster.init.j2
+      dest: "{{ harp_directory }}/harp.cluster.init.yml"
+    - src: harp2.config.j2
+      dest: "{{ harp_directory }}/config.yml"
+  vars:
+    bdr_ro_groups:
+    - role_replica
+    - role_readonly
+    - role_subscriber-only
+    - role_witness
+    pgbouncer_bin_dirs:
+      Debian: /usr/sbin
+      RedHat: /usr/bin
+    pgbouncer_bin_dir: "{{ pgbouncer_bin_dirs[ansible_os_family] }}"
+
+# Instances with harp-proxy in role will install pgbouncer (via package
+# dependencies), but harp_proxy will manage the pgbouncer configuration.
+# So we don't use the pgbouncer role, but we still need to provide the
+# pgbouncer_auth_user and generate /etc/harp/userlist.txt.
+
+- include_role: name=postgres/createuser
+  vars:
+    username: "{{ pgbouncer_auth_user }}"
+    password_encryption: md5
+  when: >
+    'harp-proxy' in role
+    or ('postgres' in role
+      and groups['role_harp-proxy']|default([]) is not empty)
+  tags: always
+
+- include_tasks: harp2-proxy.yml
+  when: >
+    'harp-proxy' in role

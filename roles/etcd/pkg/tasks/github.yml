@@ -1,0 +1,50 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Download etcd release tarball
+  get_url:
+    url: "{{ etcd_release_url }}"
+    checksum: "{{ etcd_release_url_checksum }}"
+    dest: "/tmp/etcd.tar.gz"
+    owner: root
+    group: root
+    mode: 0644
+  register: etcd_release_download
+
+- name: Install etcd from release tarball
+  block:
+    - name: Ensure etcd directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+      with_items:
+        - /usr/local/etcd
+        - /var/lib/etcd
+
+    - name: Extract etcd tarball
+      unarchive:
+        src: /tmp/etcd.tar.gz
+        dest: /usr/local/etcd
+        remote_src: yes
+        extra_opts:
+          - "--strip-components=1"
+
+    - name: Link to etcd binaries from /usr/bin
+      file:
+        src: "/usr/local/etcd/{{ item }}"
+        dest: "/usr/bin/{{ item }}"
+        state: link
+      with_items:
+        - etcd
+        - etcdctl
+
+    - name: Install etcd service file
+      template:
+        src: etcd.service.j2
+        dest: /etc/systemd/system/etcd.service
+  when:
+    etcd_release_download is changed

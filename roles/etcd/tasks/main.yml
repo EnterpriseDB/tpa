@@ -17,4 +17,3 @@
       tags: [etcd, config]
   when: >
     'etcd' in role
-

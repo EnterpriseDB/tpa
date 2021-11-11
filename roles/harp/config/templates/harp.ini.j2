@@ -10,7 +10,7 @@
 #namespace = /harp
 
 # Name of the location (DC) where this node is located
-location = {{ harp_location|default(location) }}
+location = {{ harp_location }}
 
 # DSN of managed BDR Node
 postgres_dsn = {{ bdr_node_dsn }}
@@ -30,8 +30,8 @@ consensus_protocol = {{ harp_consensus_protocol|default('bdr') }}
 {% if harp_consensus_protocol == 'etcd' %}
 # Comma-delimited host:port location(s) of consensus pool entrypoints
 consensus_hostnames = {%- for h in groups['role_etcd'] -%}
-{%- set node_loc = hostvars[h].harp_location|default(hostvars[h].location) -%}
-{%- if node_loc == harp_location|default(hostvars[h].location) -%}
+{%- set node_loc = hostvars[h].harp_location -%}
+{%- if node_loc == harp_location -%}
 {{h}}:2379,
 {%- endif -%}
 {% endfor %}

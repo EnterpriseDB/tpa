@@ -2,19 +2,29 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-- name: Ensure /etc/bdr3 exists
+# Both versions of harp want their harp_directory to be owned by
+# postgres_user; we must make sure it exists even on harp-proxy
+# instances.
+
+- include_role:
+    name: postgres/user
+    apply:
+      tags: user
+  when: >
+    'postgres' not in role
+  tags: user
+
+- name: Ensure harp directory exists
   file:
-    path: /etc/bdr3
+    path: "{{ harp_directory }}"
     state: directory
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
+  tags: config
 
-- name: Install harp.ini
-  template:
-    src: harp.ini.j2
-    dest: /etc/bdr3/harp.ini
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0644
-  notify:
-    Note HARP restart required
+- name: Install HARP configuration
+  include_tasks:
+    file: "harp{{ harp_version }}.yml"
+    apply:
+      tags: config
+  tags: config

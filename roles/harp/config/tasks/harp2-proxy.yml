@@ -1,0 +1,46 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# We must generate the usual (minimal) userlist.txt for pgbouncer, so
+# that it can authenticate administrative connections and connect to
+# Postgres to run the auth_query.
+#
+# Since harp_proxy will switch between the various backend servers, they
+# had better all have the same pgbouncer password(s) in userlist.txt, so
+# we require that bdr_node_group be set on harp-proxy instances (even if
+# they are not BDR instances), and use that to find a BDR primary to use
+# as the pgbouncer_backend_instance.
+#
+# Normally, we would restart pgbouncer if userlist.txt changes, but with
+# the managed pgbouncer instance, we can't do that safely, so we install
+# a restart handler that does nothing.
+
+- include_role:
+    name: pgbouncer/config
+    tasks_from: userlist.yml
+  vars:
+    userlist: /etc/harp/userlist.txt
+    pgbouncer_backend_instance: "{{ groups|members_of(bdr_node_group, not_in=bdr_ro_groups)|first }}"
+    bdr_ro_groups:
+      - role_replica
+      - role_readonly
+      - role_subscriber-only
+      - role_witness
+
+# We must also add the pgbouncer password to .pgpass, so that harp_proxy
+# can use it to connect to pgbouncer and issue administrative commands.
+#
+# TODO: When using `harp_consensus_protocol: bdr`, harp-proxy needs the
+# postgres password to connect to BDR. We should provide the password
+# conditionally, and use an unprivileged or less-privileged user if
+# possible.
+
+- include_role: name=postgres/pgpass
+  vars:
+    pgpassfile: "~{{ postgres_user }}/.pgpass"
+    pgpass_owner: "{{ postgres_user }}"
+    pgpass_group: "{{ postgres_group }}"
+    pgpass_users:
+      - pgbouncer
+      - postgres

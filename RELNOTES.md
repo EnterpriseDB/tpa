@@ -9,6 +9,8 @@
 - Add new bronze/silver/gold/platinum layouts for BDR-Always-ON,
   selectable using the `--layout gold` configure option
 
+- Add experimental HARP v2 support with any BDR-Always-ON layout
+
 - Add declarative configuration for BDR witnesses (just set the
   instance's role to bdr+witness)
 

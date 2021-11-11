@@ -78,35 +78,7 @@
     - "'haproxy' in hostvars[pgbouncer_backend_instance].role"
     - "'postgres' not in hostvars[pgbouncer_backend_instance].role"
 
-- include_role: name=secret
-  vars:
-    secret_name: pgbouncer_password
-
-- name: Fetch existing pgbouncer password from userlist.txt
-  shell: >
-    test -f "{{ _userlist }}" && \
-    awk '/^"pgbouncer" "[^"]*"$/ {print substr($2,2,length($2)-2)}' "{{ _userlist }}"
-  args:
-    executable: /bin/bash
-  register: userlist_cmd
-  changed_when: False
-  ignore_errors: True
-  check_mode: no
-
-- name: Install userlist.txt
-  template:
-    src: userlist.txt.j2
-    dest: "{{ _userlist }}"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0600
-  vars:
-    existing_pgbouncer_password: "{{ userlist_cmd.stdout or 'none' }}"
-    existing_auth_user_password: "{{
-      hostvars[pgbouncer_backend_instance].cluster_facts.roles[pgbouncer_auth_user].rolpassword|default('unknown')
-    }}"
-  notify:
-    - Note pgbouncer restart required
+- include_tasks: userlist.yml
 
 - name: Enable pgbouncer on boot
   service:

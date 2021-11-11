@@ -2,6 +2,19 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+# There aren't recent-enough etcd packages available in the default
+# repositories for Debian, and none at all for RedHat. The following
+# custom packages (etcd and etcdctl packaged separately) are available
+# from an EDB repository; if you want to install from a Github release
+# instead, explicitly set `etcd_packages: {Debian: [], RedHat: []}`.
+
 etcd_packages:
+  Debian:
+    - harp_etcd
+    - harp_etcdctl
   RedHat:
-    - etcd
+    - harp_etcd
+    - harp_etcdctl
+
+etcd_release_url: https://github.com/etcd-io/etcd/releases/download/v3.5.0/etcd-v3.5.0-linux-amd64.tar.gz
+etcd_release_url_checksum: sha256:864baa0437f8368e0713d44b83afe21dce1fb4ee7dae4ca0f9dd5f0df22d01c4

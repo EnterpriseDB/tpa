@@ -96,12 +96,12 @@
   tags: [postgres, bdr]
 
 - include_role:
-    name: harp
+    name: harp/final
     apply:
       tags: harp
   when:
     failover_manager == 'harp'
-    and role|contains('bdr', 'primary')
+    and ('postgres' in role or 'harp-proxy' in role)
   tags: harp
 
 - include_role:

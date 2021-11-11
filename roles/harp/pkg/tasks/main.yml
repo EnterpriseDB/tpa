@@ -2,14 +2,34 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-- name: Install harp package
+- name: Install harp packages
   package:
-    name: harp
-    state: latest
+    name: "{{
+      _packages[harp_version]|packages_for(ansible_os_family, harp_package_version)
+    }}"
+    state: "{{
+      (harp_package_version is defined)|ternary('present', 'latest')
+    }}"
+  vars:
+    _packages: "{{
+      ('harp-proxy' not in role)|ternary(harp_packages, harp_proxy_packages)
+    }}"
+  tags: pkg
 
-- name: Install Python etcd package
+- name: Install Python etcd package if required
   package:
     name: python3-etcd
     state: latest
   when: >
-    harp_consensus_protocol == 'etcd'
+    harp_version|int == 1
+    and harp_consensus_protocol == 'etcd'
+  tags: pkg
+
+- name: Disable pgbouncer service on harp-proxy instances
+  systemd:
+    name: pgbouncer
+    state: stopped
+    masked: true
+    enabled: no
+  when: >
+    'harp-proxy' in role

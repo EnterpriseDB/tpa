@@ -5,3 +5,12 @@
 - name: Note HARP restart required
   set_fact:
     harp_service_end_state: restarted
+
+# Copied from pgbouncer/handlers to satisfy pgbouncer/config's
+# userlist.yml, which we invoke from harp/config. (But we do not include
+# the pgbouncer role, so the value set below will not normally be acted
+# on by pgbouncer/restart).
+
+- name: Note pgbouncer restart required
+  set_fact:
+    pgbouncer_service_end_state: restarted

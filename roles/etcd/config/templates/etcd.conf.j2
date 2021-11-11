@@ -7,8 +7,8 @@ ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:{{ etcd_client_port }}"
 ETCD_ADVERTISE_CLIENT_URLS="http://{{ inventory_hostname }}:{{ etcd_client_port }}"
 ETCD_INITIAL_CLUSTER_STATE="new"
 ETCD_INITIAL_CLUSTER="{%- for h in groups['role_etcd'] -%}
-{%- set node_loc = hostvars[h].harp_location|default(hostvars[h].location) -%}
-{%- if node_loc == harp_location|default(location) -%}
+{%- set node_loc = hostvars[h].harp_location -%}
+{%- if node_loc == harp_location -%}
 {{ h }}=http://{{ h }}:{{ etcd_peer_port }},
 {%- endif -%}
 {%- endfor -%}"

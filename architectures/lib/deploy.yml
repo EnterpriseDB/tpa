@@ -75,6 +75,15 @@
     tags: always
 
   - include_role:
+      name: harp
+      apply:
+        tags: harp
+    when:
+      failover_manager == 'harp'
+      and ('postgres' in role or 'harp-proxy' in role)
+    tags: always
+
+  - include_role:
       name: final
       apply:
         tags: final

@@ -2,12 +2,33 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-- name: Install etcd packages
+# If etcd packages are available for this system, we install them by
+# default.
+
+- name: Install etcd from packages if available
   package:
-    name: "{{
-      etcd_packages|packages_for(ansible_os_family, etcd_package_version)
-    }}"
+    name: "{{ _etcd_packages }}"
     state: "{{
       (etcd_package_version is defined)|ternary('present', 'latest')
     }}"
-  tags: pkg
+  vars:
+    _etcd_packages: "{{
+      etcd_packages|packages_for(ansible_os_family, etcd_package_version)
+    }}"
+  when:
+    etcd_installation_method|default('pkg') == 'pkg'
+    and _etcd_packages is not empty
+
+# If there are no packages available, we have to install a release
+# tarball from Github and set up some things to meet our expectations
+# from the packaged installation.
+
+- name: Install etcd from github if required
+  include_tasks: github.yml
+  vars:
+    _etcd_packages: "{{
+      etcd_packages|packages_for(ansible_os_family, etcd_package_version)
+    }}"
+  when:
+    etcd_installation_method|default('pkg') == 'github'
+    or _etcd_packages is empty

@@ -1,0 +1,40 @@
+cluster:
+  name: {{ cluster_name }}
+
+dcs:
+  driver: "{{ harp_consensus_protocol }}"
+  request_timeout: 250
+  ssl: "off"
+  ssl_ca_file: ""
+  ssl_cert_file: ""
+  ssl_key_file: ""
+  endpoints:
+{% if harp_consensus_protocol == 'etcd' %}
+{%   for h in groups['role_etcd'] %}
+{%     set v = hostvars[h] %}
+{%     if v.harp_location == harp_location %}
+  - {{ h }}:{{ v.etcd_client_port|default(2379) }}
+{%     endif %}
+{%   endfor %}
+{% elif harp_consensus_protocol == 'bdr' %}
+{%   for h in groups[bdr_node_group] %}
+{%     set v = hostvars[h] %}
+  - "{{ v.bdr_node_dsn }}"
+{%   endfor %}
+{% endif %}
+
+{% if 'postgres' in role %}
+manager:
+  name: "{{ inventory_hostname }}"
+  log_level: debug
+{% endif %}
+{% if 'harp-proxy' in role %}
+proxy:
+  name: "{{ inventory_hostname }}-proxy"
+  location: {{ harp_location }}
+  type: "{{ harp_proxy_mode|default("pgbouncer") }}"
+  listen_address: {{ inventory_hostname }}
+  listen_port: {{ pgbouncer_port }}
+  log_level: debug
+  pgbouncer_bin_dir: {{ pgbouncer_bin_dir }}
+{% endif %}

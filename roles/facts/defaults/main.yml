@@ -87,7 +87,6 @@ default_barman_archive_command: "'barman-wal-archive {{ backup }} {{ inventory_h
 
 default_failover_manager: repmgr
 
-default_harp_consensus_protocol: bdr
 default_etcd_peer_port: 2380
 default_etcd_client_port: 2379
 
@@ -130,8 +129,14 @@ default_pgbouncer_auth_user: pgbouncer_auth_user
 default_pgbouncer_databases:
   - name: "*"
 
-# Default HARP configuration values
+default_harp_version: 2
 default_harp_listen_port: 5442
+default_harp_consensus_protocols:
+  "1": bdr
+  "2": etcd
+default_harp_directories:
+  "1": /etc/bdr3
+  "2": /etc/harp
 
 default_build_path:
   - "{{ postgres_bin_dir }}"

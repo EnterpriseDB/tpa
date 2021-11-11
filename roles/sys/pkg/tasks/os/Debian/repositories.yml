@@ -43,6 +43,16 @@
       apt_repository_list|default(default_apt_repository_list)
     }}"
 
+# XXX Duplicated in RedHat/repositories.yml
+
+- assert:
+    msg: "Set EDB_REPO_TOKENS=/path/to/file to use Cloudsmith repositories"
+    that:
+      edb_repo_tokens is defined
+  when: >
+    'harp' in apt_repository_list
+    or 'harp-etcd' in apt_repository_list
+
 - assert:
     msg: >
       Export EDB_REPO_CREDENTIALS_FILE to use the EDB repository

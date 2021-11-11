@@ -96,10 +96,11 @@
   vars:
     version: "{{ postgres_version|default(pgdata_version|default(default_postgres_version)) }}"
 
-- name: Set efm_version
+- name: Set efm_version etc.
   set_fact:
     efm_version: "{{ version }}"
     efm_versionNN: "{{ version|replace('.','') }}"
+    harp_version: "{{ harp_version|default(default_harp_version) }}"
   vars:
     version: "{{ efm_version|default(default_efm_version) }}"
 
@@ -154,7 +155,9 @@
     publications: "{{ publications|default([]) }}"
     subscriptions: "{{ subscriptions|default([]) }}"
     failover_manager: "{{ failover_manager|default(default_failover_manager) }}"
-    harp_consensus_protocol: "{{ harp_consensus_protocol|default(default_harp_consensus_protocol) }}"
+    harp_consensus_protocol: "{{ harp_consensus_protocol|default(default_harp_consensus_protocols[harp_version]) }}"
+    harp_location: "{{ harp_location|default(location) }}"
+    harp_directory: "{{ harp_directory|default(default_harp_directories[harp_version]) }}"
     etcd_peer_port: "{{ etcd_peer_port|default(default_etcd_peer_port) }}"
     etcd_client_port: "{{ etcd_client_port|default(default_etcd_client_port) }}"
     efm_conf_dir: "{{ efm_conf_dir|default(default_efm_conf_dir) }}"
@@ -188,6 +191,27 @@
   when: >
     'bdr' in role
     and failover_manager not in ['harp']
+
+# If we are using HARP v2 with etcd as the consensus layer, and there
+# are no instances explicitly labelled with `role: etcd`, we add the
+# etcd role to all BDR primary candidates and witnesses.
+
+- name: Add etcd role to BDR instances if required
+  set_fact:
+    role: "{{ role|union(['etcd']) }}"
+  when: >
+    'bdr' in role
+    and failover_manager == 'harp'
+    and harp_consensus_protocol == 'etcd'
+    and groups['role_etcd']|default([]) is empty
+    and (inventory_hostname in first_bdr_primary_candidates
+      or 'witness' in role)
+
+- name: Recreate role_etcd group after role changes
+  group_by:
+    key: "role_etcd"
+  when: >
+    'etcd' in role
 
 - name: Add {{ bdr_database }} to postgres_databases
   set_fact:

@@ -1,0 +1,37 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# Generates /etc/pgbouncer/userlist.txt with entries for pgbouncer (the
+# admin user) and pgbouncer_auth_user (used to connect to postgres to
+# execute the auth_query to authenticate other users).
+
+- include_role: name=secret
+  vars:
+    secret_name: pgbouncer_password
+
+- name: Fetch existing pgbouncer password from userlist.txt
+  shell: >
+    test -f "{{ userlist }}" && \
+    awk '/^"pgbouncer" "[^"]*"$/ {print substr($2,2,length($2)-2)}' "{{ userlist }}"
+  args:
+    executable: /bin/bash
+  register: userlist_cmd
+  changed_when: False
+  ignore_errors: True
+  check_mode: no
+
+- name: Install userlist.txt
+  template:
+    src: userlist.txt.j2
+    dest: "{{ userlist }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0600
+  vars:
+    existing_pgbouncer_password: "{{ userlist_cmd.stdout or 'none' }}"
+    existing_auth_user_password: "{{
+      hostvars[pgbouncer_backend_instance].cluster_facts.roles[pgbouncer_auth_user].rolpassword|default('unknown')
+    }}"
+  notify:
+    - Note pgbouncer restart required

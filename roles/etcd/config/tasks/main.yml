@@ -19,6 +19,6 @@
     group: root
     mode: 0644
   notify:
-    Note etcd restart required
+    - Note etcd restart required
   when: >
     'etcd' in role

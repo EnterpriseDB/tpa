@@ -1,0 +1,47 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# Before we start harp2, we must run "harpctl apply" once per unique
+# harp_location (because we have set up one etcd per harp_location).
+# With BDR, we've already made sure there is only one harp_location
+# across the cluster, so the same code will do the right thing.
+#
+# XXX We should try to detect when the cluster is already initialised,
+# and not keep doing this during each deploy.
+
+- block:
+    - set_fact:
+        harp_location_group: "harp_location_{{ harp_location }}"
+
+    - group_by:
+        key: "{{ harp_location_group }}"
+
+    - name: Initialise cluster with harpctl apply
+      command: "harpctl apply {{ harp_directory }}/harp.cluster.init.yml"
+      become_user: "{{ postgres_user }}"
+      become: yes
+      when:
+        inventory_hostname == groups[harp_location_group]|sort|first
+  when: >
+    'bdr' in role
+    and harp_version is version('2', '==')
+    and inventory_hostname in first_bdr_primary_candidates
+
+- meta: flush_handlers
+
+- name: Start or restart harp services
+  service:
+    name: "{{ item }}"
+    state: "{{ harp_service_end_state|default('started') }}"
+    enabled: yes
+  with_items: "{{ harp_services[harp_version] }}"
+  vars:
+    harp_services:
+      "1":
+        - harp_router
+        - harp_manager
+      "2":
+        - "{{ ('postgres' in role)|ternary('harp_manager', []) }}"
+        - "{{ ('harp-proxy' in role)|ternary('harp_proxy', []) }}"
+  tags: [service, restart]

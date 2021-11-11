@@ -1,0 +1,16 @@
+[Unit]
+Description=Etcd distributed store
+After=syslog.target
+After=network.target
+
+[Service]
+Type=notify
+User=root
+StandardOutput=syslog
+WorkingDirectory=/var/lib/etcd/
+EnvironmentFile=-/etc/etcd/etcd.conf
+ExecStart=/usr/bin/etcd
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target

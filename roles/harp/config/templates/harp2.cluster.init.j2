@@ -1,0 +1,64 @@
+cluster:
+  name: {{ cluster_name }}
+  lock_duration: 100
+  is_managed: true
+
+locations:
+{% if harp_consensus_protocol == 'etcd' %}
+- location: {{ harp_location }}
+{% else %}
+{%   for l in groups|members_of(bdr_node_group, not_in=bdr_ro_groups)|map('extract', hostvars, 'harp_location')|unique|list %}
+- location: {{ l }}
+{%   endfor %}
+{% endif %}
+
+nodes:
+{% for h in groups|members_of(bdr_node_group, not_in=bdr_ro_groups) %}
+{%   set v = hostvars[h] %}
+{%   if harp_consensus_protocol != 'etcd' or v.harp_location == harp_location %}
+- name: {{ h }}
+  location: {{ v.harp_location }}
+  node_type: bdr
+  node_role: {{ v.node_role|default('primary') }}
+  dsn: "{{ v.bdr_node_dsn }}"
+  db_bin_dir: {{ postgres_bin_dir }}
+  db_data_dir: {{ postgres_data_dir }}
+  db_conf_dir: {{ postgres_conf_dir }}
+  db_log_file: "/tmp/pg_ctl.log"
+  ready_status_duration: 10
+  leader_lease_duration: 30
+  lease_refresh_interval: 5000
+  dcs_reconnect_interval: 1000  
+  priority: 500
+  camo_enforcement: lag_only
+  stop_database_when_fenced: false
+  fenced_node_on_dcs_failure: false
+  max_dcs_failures: 10
+{%   endif %}
+{% endfor %}
+
+proxies:
+  log_level: verbose
+  monitor_interval: 10
+  auth_type: md5
+  auth_user: {{ pgbouncer_auth_user }}
+  default_pool_size: 25
+  max_client_conn: 75
+  logfile: {{ harp_directory }}/pgbouncer.log
+  pidfile: {{ harp_directory }}/pgbouncer.pid
+  auth_file: /etc/harp/userlist.txt
+  client_tls_sslmode: require
+  client_tls_ca_file: /etc/tpa/{{ cluster_name }}.crt
+  client_tls_key_file: /etc/tpa/{{ cluster_name }}.key
+  client_tls_cert_file: /etc/tpa/{{ cluster_name }}.crt
+  client_tls_protocols: secure
+  server_tls_sslmode:  require
+  server_tls_protocols: secure
+  auth_query: "SELECT * FROM pg_catalog.pgbouncer_get_auth($1)"
+  database_name: {{ bdr_database }}
+  instances:
+{% for p in groups['role_harp-proxy']|default([]) %}
+{%   if harp_consensus_protocol != 'etcd' or hostvars[p].harp_location == harp_location %}
+    - name: "{{ p }}-proxy"
+{%   endif %}
+{% endfor %}

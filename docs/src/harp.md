@@ -1,62 +1,56 @@
 # Configuring HARP
 
-TPAexec will install and configure HARP when `failover_manager` is set to
-`harp`.
+TPAexec will install and configure HARP when `failover_manager` is set
+to `harp`. Use `tpaexec configure … --enable-harp` to generate the
+default configuration.
 
-Note that HARP currently only supports BDR instances.
+By default, TPAexec will install HARP v2, but you can still
+[install and configure HARP v1](harp1.md) (deprecated)
+by setting `harp_version: 1` explicitly.
 
-## HARP configuration
+## Installing HARP
 
-TPAexec will generate `/etc/bdr3/harp.ini` with the appropriate
-instance-specific settings, with other settings set to the respective
-default values.
+You must provide the `harp_manager` and `harp_proxy` packages. Please
+contact EDB to obtain access to these packages.
+
+## Configuring HARP 
 
 See the [HARP documentation](https://documentation.enterprisedb.com/harp/release/latest/configuration/)
-for more details on HARP configuration.
-
-The following variables can be set for any HARP instance:
+for more details on HARP configuration. At present, TPAexec does not
+expose the majority of HARP configuration parameters as variables, but
+this will change in future releases.
 
 Variable | Default value | Description
----- | ---- | ----
-`harp_consensus_protocol` | `bdr` | The consensus layer to use (`bdr` or `etcd`)
+---- | ---- | ---
+`harp_consensus_protocol` | `etcd` | The consensus layer to use (`etcd` or `bdr`)
 `harp_location` | `location` | The location of this instance (defaults to the `location` parameter)
-`harp_allow_lead` | [1] | Indicates whether the node can take the Lead Master lock
-`harp_safety_interval` | `100` | Time in milliseconds to require before routing to a newly promoted Lead Master is allowed
-`harp_maximum_lag` | `1048576` | Highest allowable variance between last recorded LSN of previous Lead Master and this node, in bytes
-`harp_maximum_camo_lag` | `1048576` | Highest allowable variance between last received LSN and applied LSN between this node and its CAMO partner(s), in bytes
-`harp_lock_duration` | `15` | How many seconds the Lead Master lock will persist if not refreshed.
-`harp_lock_interval` | `5` | Seconds between refreshes of the Lead Master lock.
-`harp_external_lock_interval` | `0` | Seconds between refreshes of Lead Master locks for locations other than our own; `0` disables
-`harp_listen_port` | `5442` | Port for HARP router to listen on
 
-## Consensus layer configuration
+## Consensus layer
 
-HARP requires a consensus layer (sometimes known as DCS layer) to function.
-This is set via `harp_consensus_protocol`, which currently can be one of `bdr`
-(default) or `etcd`.
+By default, TPAexec will set `harp_consensus_protocol: etcd`, and
+install and configure etcd on the BDR instances.
 
-### BDR
+HARP v2 requires etcd v3.5.0 or above, which is not available in the
+default package repositories for any distribution. You must provide the
+`harp_etcd` and `harp_etcdctl` packages; otherwise, TPAexec can download
+and install etcd v3.5.0 from the Github release tarball if you specify
 
-No additional configuration is required if `harp_consensus_protocol` is set to `bdr`.
-However a minimum of 3 (three) BDR nodes must be present for the BDR consensus
-layer to be quorate.
+```
+cluster_vars:
+  etcd_packages:
+    Debian: []
+    RedHat: []
+```
 
-### etcd
+By default, …
 
-TPAexec will install and configure `etcd` on instances whose `role` contains
-`etcd`.
+You can configure the following parameters for etcd:
 
-Note that currently no `etcd` packages are available for CentOS 8.
+Variable	| Default value	| Description
+---|---|---
+etcd_peer_port	| 2380	| The port used by etcd for peer communication
+etcd_client_port	| 2379	| The port used by clients to connect to etcd
 
-The following variables can be set for any `etcd` instance:
-
-Variable | Default value | Description
----- | ---- | ----
-`etcd_peer_port` | 2380 | The port used by etcd for peer communication
-`etcd_client_port` | 2379 | The port used by clients to connect to etcd
-
-The `etcd` instance name (configuration item `ETCD_NAME`) is set to the
-same value as the instance node name.
-
-The `etcd` cluster will be initialised for nodes in the same location
-(either `harp_location`, if set, otherwise `location`).
+You can set `harp_consensus_protocol: bdr` instead, in which case the
+existing BDR instances will be used for consensus, and no further
+configuration is required.

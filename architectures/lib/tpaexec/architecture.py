@@ -185,9 +185,6 @@ class Architecture(object):
 
         g.add_argument("--install-from-source", nargs="+", metavar="NAME")
         g.add_argument(
-            "--enable-harp", action="store_const", const="harp", dest="failover_manager"
-        )
-        g.add_argument(
             "--enable-efm", action="store_const", const="efm", dest="failover_manager"
         )
 

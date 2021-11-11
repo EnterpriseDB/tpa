@@ -2,6 +2,17 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+- assert:
+    msg: HARP v2 must be installed on a BDR cluster
+    that: >
+      'bdr' in role or 'harp-proxy' in role
+
+- assert:
+    msg: HARP v2 must use single harp_location when harp_consensus_protocol is 'BDR'
+    that: >
+      groups[bdr_node_group]|map('extract', hostvars, 'harp_location')|unique|length == 1
+  when: harp_consensus_protocol == 'bdr'
+
 - include_role:
     name: harp/pkg
     apply:
@@ -15,20 +26,3 @@
     apply:
       tags: config
   tags: config
-
-- include_role:
-    name: harp/service
-    apply:
-      tags: service
-  tags: service
-
-- meta: flush_handlers
-
-- name: Start or restart harp services
-  service:
-    name: "{{ item }}"
-    state: "{{ harp_service_end_state|default('started') }}"
-  with_items:
-    - harp_router
-    - harp_manager
-  tags: [service, restart]
