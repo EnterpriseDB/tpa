@@ -79,7 +79,10 @@
   when: install_bdr_packages
   vars:
     packages: "{{
-      bdr_debug_packages[postgres_family]|packages_for(ansible_distribution, bdr_package_version)
+      (bdr_version is version('4', '<'))|ternary(
+        bdr_debug_packages[postgres_family],
+        bdr4_debug_packages[postgres_family_extended]
+      )|packages_for(ansible_distribution, bdr_package_version)
     }}"
     _version_suffix: >-
       {% if bdr_package_version is defined %}={{ bdr_package_version }}{% endif %}

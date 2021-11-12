@@ -14,6 +14,7 @@
   set_fact:
     postgresql_flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
     postgres_family: "{{ (_flavour == 'epas')|ternary('epas', 'postgresql') }}"
+    postgres_family_extended: "{{ (_flavour == '2q')|ternary('pgextended', _flavour) }}"
   vars:
     _flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
 

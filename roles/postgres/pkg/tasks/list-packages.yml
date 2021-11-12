@@ -7,9 +7,10 @@
 # corresponding primary, which we don't do by default yet, because the
 # extension has known crash-the-server problems.)
 #
-# We always install pglogical (if it's not being installed from source),
-# and on BDR instances, we also install BDR packages (again, if it's not
-# being installed from source).
+# By default, we always install pglogical packages (if it's not being
+# installed from source), unless it's not supported (e.g., with BDRv4).
+# On BDR instances, we must also install BDR packages (again, if it's
+# not being installed from source).
 
 - name: Determine which optional packages should be installed
   set_fact:
@@ -23,7 +24,7 @@
         (postgres_family == 'epas' and 'bdr' in role)
       )
       and postgresql_flavour != 'postgresql-bdr'
-      and postgres_version is version(14, '<')
+      and bdr_version is version(4, '<')
     }}"
     install_bdr_packages: "{{ 'bdr' in role and 'bdr' not in sources }}"
   vars:
@@ -39,7 +40,11 @@
     _postgres_packages: "{{ postgres_packages[postgres_family] }}"
     _postgres_client_packages: "{{ postgres_client_packages[postgres_family] }}"
     _pglogical_packages: "{{ pglogical_packages[postgres_family] }}"
-    _bdr_packages: "{{ bdr_packages[postgres_family] }}"
+    _bdr_packages: "{{
+      (bdr_version is version('4', '<'))|ternary(
+        bdr_packages[postgres_family],
+        bdr4_packages[postgres_family_extended])
+    }}"
     _maybe_pgespresso_packages: "{{ install_pgespresso_packages|ternary(pgespresso_packages, {}) }}"
     _maybe_pglogical_packages: "{{ install_pglogical_packages|ternary(_pglogical_packages, {}) }}"
     _maybe_bdr_packages: "{{ install_bdr_packages|ternary(_bdr_packages, {}) }}"

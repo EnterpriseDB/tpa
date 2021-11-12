@@ -98,6 +98,23 @@ bdr_packages:
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-bdr"
     Ubuntu: *debian_epas_bdr_packages
 
+bdr4_packages:
+  postgresql:
+    Debian: &bdr4_pg_packages
+      - edb-bdr{{ bdr_version }}-pg{{ postgres_versionNN }}
+    RedHat: *bdr4_pg_packages
+    Ubuntu: *bdr4_pg_packages
+  pgextended:
+    Debian: &bdr4_pge_packages
+      - edb-bdr{{ bdr_version }}-pgextended{{ postgres_versionNN }}
+    RedHat: *bdr4_pge_packages
+    Ubuntu: *bdr4_pge_packages
+  epas:
+    Debian: &bdr4_epas_packages
+      - edb-bdr{{ bdr_version }}-epas{{ postgres_versionNN }}
+    RedHat: *bdr4_epas_packages
+    Ubuntu: *bdr4_epas_packages
+
 bdr_debug_packages:
   postgresql:
     Debian: &debian_bdr_debug_packages
@@ -111,6 +128,26 @@ bdr_debug_packages:
     RedHat:
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-bdr-debuginfo"
     Ubuntu: *debian_epas_bdr_debug_packages
+
+bdr4_debug_packages:
+  postgresql:
+    Debian: &bdr4_debug_pg_packages
+      - edb-bdr{{ bdr_version }}-pg{{ postgres_versionNN }}-dbg
+    RedHat:
+      - edb-bdr{{ bdr_version }}-pg{{ postgres_versionNN }}-debuginfo
+    Ubuntu: *bdr4_debug_pg_packages
+  pgextended:
+    Debian: &bdr4_debug_pge_packages
+      - edb-bdr{{ bdr_version }}-pgextended{{ postgres_versionNN }}-dbg
+    RedHat:
+      - edb-bdr{{ bdr_version }}-pgextended{{ postgres_versionNN }}-debuginfo
+    Ubuntu: *bdr4_debug_pge_packages
+  epas:
+    Debian: &bdr4_debug_epas_packages
+      - edb-bdr{{ bdr_version }}-epas{{ postgres_versionNN }}-dbg
+    RedHat:
+      - edb-bdr{{ bdr_version }}-epas{{ postgres_versionNN }}-debuginfo
+    Ubuntu: *bdr4_debug_epas_packages
 
 pgespresso_packages:
   Debian: &debian_pgespresso_packages

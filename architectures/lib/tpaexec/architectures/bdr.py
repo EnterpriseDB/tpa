@@ -49,7 +49,7 @@ class BDR(Architecture):
         )
 
     def cluster_vars_args(self):
-        return super().cluster_vars_args() + ["bdr_node_group", "bdr_database"]
+        return super().cluster_vars_args() + ["bdr_version", "bdr_node_group", "bdr_database"]
 
     def update_cluster_vars(self, cluster_vars):
         # We must decide which version of Postgres to install, which version
@@ -67,38 +67,32 @@ class BDR(Architecture):
         tpa_2q_repositories = self.args.get("tpa_2q_repositories") or []
         postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
         postgres_version = self.args.get("postgres_version")
-        bdr_version = None
+        bdr_version = self.args.get("bdr_version")
 
         given_repositories = " ".join(tpa_2q_repositories)
 
-        if postgres_version == "9.4":
-            bdr_version = self.args.get("bdr_version") or "1"
-        elif postgres_version == "9.6":
-            bdr_version = self.args.get("bdr_version") or "2"
-        elif postgres_version in ["10", "11", "12", "13"]:
-            bdr_version = self.args.get("bdr_version") or "3"
-        elif postgres_version == "14":
-            bdr_version = self.args.get("bdr_version") or "4"
-        elif postgres_version is None:
-            bdr_version = self.args.get("bdr_version")
+        default_bdr_versions = {
+            "9.4": "1",
+            "9.6": "2",
+            "10": "3",
+            "11": "3",
+            "12": "3",
+            "13": "3",
+            "14": "4",
+            None: "3"
+        }
 
-            if bdr_version is None and tpa_2q_repositories:
-                if "/bdr2" in given_repositories:
-                    bdr_version = "2"
-                elif "/bdr3" in given_repositories:
-                    bdr_version = "3"
-                elif "/bdr4" in given_repositories:
-                    bdr_version = "4"
+        default_pg_versions = {
+            "1": "9.4",
+            "2": "9.6",
+            "3": "13",
+            "4": "14",
+        }
 
-            if bdr_version == "1":
-                postgres_version = "9.4"
-            elif bdr_version == "2":
-                postgres_version = "9.6"
-            elif bdr_version == "4":
-                postgres_version = "13"
-            elif bdr_version in ["3", None]:
-                postgres_version = "13"
-                bdr_version = "3"
+        if bdr_version == None:
+            bdr_version = default_bdr_versions.get(postgres_version)
+        if postgres_version == None:
+            postgres_version = default_pg_versions.get(bdr_version)
 
         if (postgres_version, bdr_version) not in self.supported_versions():
             print(
@@ -128,19 +122,15 @@ class BDR(Architecture):
                     tpa_2q_repositories.append("products/bdr3_7/release")
                     tpa_2q_repositories.append("products/pglogical3_7/release")
         elif bdr_version == "4":
-            if not tpa_2q_repositories:
-                if postgresql_flavour == "2q":
-                    tpa_2q_repositories.append("products/bdr_enterprise_4/release")
-                elif postgresql_flavour == "epas":
-                    tpa_2q_repositories.append("products/bdr_enterprise_4-epas/release")
-                else:
-                    tpa_2q_repositories.append("products/bdr4/release")
+            if not tpa_2q_repositories or "/bdr4/" not in given_repositories:
+                tpa_2q_repositories.append("products/bdr4/release")
 
         cluster_vars.update(
             {
                 "repmgr_failover": "manual",
                 "postgres_coredump_filter": "0xff",
                 "postgres_coredump_filter": "0xff",
+                "bdr_version": bdr_version,
                 "postgres_version": postgres_version,
                 "postgresql_flavour": postgresql_flavour,
             }
