@@ -24,8 +24,10 @@
     and inventory_hostname == pgbench_bdr_init_instance|default(first_bdr_primary)
 
 - name: Run pgbench -i -s {{ pgbench_scale_factor }} on database {{ pgbench_dbname }}
-  command: >
-    {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} -i -s {{ pgbench_scale_factor }} {{ pgbench_dbname }}
+  shell: >
+    {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} -i -I dtg -s {{ pgbench_scale_factor }} {{ pgbench_dbname }};
+    {{ postgres_bin_dir }}/psql -h {{ postgres_host }} -p {{ postgres_port }} -d {{ pgbench_dbname }} -c "select bdr.wait_slot_confirm_lsn(NULL, NULL)";
+    {{ postgres_bin_dir }}/pgbench -h {{ postgres_host }} -p {{ postgres_port }} -i -I vp -s {{ pgbench_scale_factor }} {{ pgbench_dbname }};
   register: pgbench_init
   become_user: "{{ postgres_user }}"
   become: true
