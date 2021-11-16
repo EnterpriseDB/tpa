@@ -93,6 +93,7 @@ default_etcd_client_port: 2379
 
 default_repmgr_conf_dir: "/etc/repmgr/{{ postgres_version }}"
 
+default_bdr_version: 3
 default_bdr_database: bdrdb
 default_bdr_node_group: bdrgroup
 
