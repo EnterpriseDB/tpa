@@ -28,7 +28,7 @@
 
 from jinja2.exceptions import UndefinedError
 
-from collections import Iterable
+from collections.abc import Iterable
 from ansible.errors import AnsibleError, AnsibleUndefinedVariable
 from ansible.utils.listify import listify_lookup_plugin_terms
 from ansible.plugins.lookup import LookupBase
