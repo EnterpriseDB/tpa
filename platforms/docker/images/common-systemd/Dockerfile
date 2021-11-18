@@ -18,6 +18,7 @@ ENV SYSTEMD_COLORS=0
 COPY systemctl-commands.sh /root/systemctl-commands.sh
 RUN bash /root/systemctl-commands.sh && rm -f /root/systemctl-commands.sh
 RUN echo "NAutoVTs=0" >> /etc/systemd/logind.conf
+RUN echo "ForwardToConsole=yes" >> /etc/systemd/logind.conf
 
 #
 # Run systemd.
