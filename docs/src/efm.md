@@ -47,17 +47,3 @@ EFM works as a failover manager and therefore TPAexec will still install
 repmgr for setting up postgresql replicas. `repmgrd` i.e. repmgr's daemon
 remains disabled in this case and repmgr's only job is to provided replication
 setup functionality.
-
-Note that repmgr packages for EPAS are not yet available via EnterpriseDB's
-package repositories, therefore repmgr currently requires a source build when
-`postgresql_flavour` is set to `epas`.
-You can invoke repmgr source build by setting `repmgr_installation_method: src`
-
-```yaml
-cluster_vars:
-  repmgr_installation_method: src
-```
-
-Note that `repmgr` source build when `postgresql_flavour` is set to `epas` is a
-makeshift arrangement until we have repmgr packages for EPAS available via
-EnterpriseDB package repositories.
