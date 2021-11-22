@@ -3,7 +3,12 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 repmgr_packages:
-  Debian:
-    - postgresql-{{ postgres_version }}-repmgr
-  RedHat:
-    - repmgr{{ postgres_versionNN }}
+  postgresql:
+    Debian:
+      - postgresql-{{ postgres_version }}-repmgr
+    RedHat:
+      - repmgr{{ postgres_versionNN }}
+  epas:
+    Debian: &epas_repmgr_packages
+      - edb-as{{ postgres_versionNN }}-repmgr
+    RedHat: *epas_repmgr_packages

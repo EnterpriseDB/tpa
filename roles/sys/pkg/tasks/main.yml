@@ -30,6 +30,16 @@
     postgresql_flavour == '2q'
     and tpa_2q_repositories is not defined
 
+- set_fact:
+    tpa_2q_repositories: "{{
+      tpa_2q_repositories|default([])|union([
+        'products/default/release'
+      ])
+    }}"
+  when:
+    postgresql_flavour == 'epas'
+    and 'products/default/release' not in tpa_2q_repositories|default([])
+
 - include_tasks:
     file: "os/{{ ansible_os_family }}/repositories.yml"
     apply:
