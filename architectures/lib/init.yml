@@ -2,6 +2,12 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+- name: Check basic prerequisites
+  hosts: localhost
+  tasks:
+  - include_role: name=selftest
+    tags: prereqs
+
 # This play must always be applied to all hosts in the cluster. Here we
 # do any platform-specific checks and initialisation, confirm that all
 # hosts are available, and perform basic fact discovery.

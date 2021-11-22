@@ -6,9 +6,6 @@
   set_fact:
     tpa_dir: "{{ tpa_dir|default(lookup('env', 'TPA_DIR')) }}"
 
-- include_role: name=selftest
-  tags: prereqs
-
 - include_tasks: ssh.yml
   when:
     ansible_connection == 'ssh'
