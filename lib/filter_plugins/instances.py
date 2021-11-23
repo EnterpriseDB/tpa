@@ -733,6 +733,31 @@ def ensure_publication(publications, entry):
     return publications
 
 
+def ensure_subscription(subscriptions, entry):
+    """
+    Modifies the given list of subscriptions (if necessary) to ensure that the
+    given subscription entry occurs in it, by appending the entry if the list
+    does not contain a match, or by modifying the matching entry to contain the
+    desired replication sets otherwise.
+    """
+    match = None
+    for s in subscriptions:
+        if s["type"] == entry["type"] and s["database"] == entry["database"]:
+            match = s
+
+    if match:
+        # Note: For a subscription, match["replication_sets"] is just a list of
+        # replication set names, not a list of structures as for publications in
+        # the function above.
+        for name in entry["replication_sets"]:
+            if name not in match["replication_sets"]:
+                match["replication_sets"].append(name)
+    else:
+        subscriptions.append(entry)
+
+    return subscriptions
+
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -746,4 +771,5 @@ class FilterModule(object):
             "match_existing_volumes": match_existing_volumes,
             "export_vars": export_vars,
             "ensure_publication": ensure_publication,
+            "ensure_subscription": ensure_subscription,
         }

@@ -10,6 +10,7 @@ from ..filter_plugins.instances import (
     translate_volume_deployment_defaults,
     find_replica_tablespace_mismatches,
     ensure_publication,
+    ensure_subscription,
 )
 
 # Each entry in this array represents input that validate_volume_for should
@@ -426,7 +427,9 @@ ensure_publication_tests = [
             {
                 "type": "bdr",
                 "database": "bdr_database",
-                "replication_sets": [{"name": "witness-only", "replicate_delete": True}],
+                "replication_sets": [
+                    {"name": "witness-only", "replicate_delete": True}
+                ],
             },
             {
                 "type": "bdr",
@@ -453,7 +456,7 @@ ensure_publication_tests = [
                 "replication_sets": [{"name": "some_repset"}],
             },
         ],
-    )
+    ),
 ]
 
 
@@ -464,3 +467,96 @@ def test_ensure_publication():
     """
     for c in ensure_publication_tests:
         assert ensure_publication(c[0], c[1]) == c[2]
+
+
+ensure_subscription_tests = [
+    # Empty subscriptions, should append given entry
+    (
+        [],
+        {
+            "type": "bdr",
+            "database": "bdr_database",
+            "replication_sets": ["witness-only"],
+        },
+        [
+            {
+                "type": "bdr",
+                "database": "bdr_database",
+                "replication_sets": ["witness-only"],
+            }
+        ],
+    ),
+    # Two subscriptions, one matching entry, should append missing repset.
+    (
+        [
+            {
+                "type": "bdr",
+                "database": "bdr_database",
+                "replication_sets": ["other"],
+            },
+            {
+                "type": "bdr",
+                "database": "other_database",
+                "replication_sets": ["some_repset"],
+            },
+        ],
+        {
+            "type": "bdr",
+            "database": "bdr_database",
+            "replication_sets": ["witness-only"],
+        },
+        [
+            {
+                "type": "bdr",
+                "database": "bdr_database",
+                "replication_sets": ["other", "witness-only"],
+            },
+            {
+                "type": "bdr",
+                "database": "other_database",
+                "replication_sets": ["some_repset"],
+            },
+        ],
+    ),
+    # Two subscriptions, one complete matching entry, should do nothing.
+    (
+        [
+            {
+                "type": "bdr",
+                "database": "bdr_database",
+                "replication_sets": ["witness-only", "other-repset"],
+            },
+            {
+                "type": "bdr",
+                "database": "other_database",
+                "replication_sets": ["some_repset"],
+            },
+        ],
+        {
+            "type": "bdr",
+            "database": "bdr_database",
+            "replication_sets": ["witness-only"],
+        },
+        [
+            {
+                "type": "bdr",
+                "database": "bdr_database",
+                "replication_sets": ["witness-only", "other-repset"],
+            },
+            {
+                "type": "bdr",
+                "database": "other_database",
+                "replication_sets": ["some_repset"],
+            },
+        ],
+    ),
+]
+
+
+def test_ensure_subscription():
+    """
+    Test that ensure_subscription correctly adds a publication, or modifies an
+    existing publication, or leaves a complete configuration alone.
+    """
+    for c in ensure_subscription_tests:
+        assert ensure_subscription(c[0], c[1]) == c[2]
