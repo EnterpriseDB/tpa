@@ -89,9 +89,9 @@ class BDR(Architecture):
             "4": "14",
         }
 
-        if bdr_version == None:
+        if bdr_version is None:
             bdr_version = default_bdr_versions.get(postgres_version)
-        if postgres_version == None:
+        if postgres_version is None:
             postgres_version = default_pg_versions.get(bdr_version)
 
         if (postgres_version, bdr_version) not in self.supported_versions():
@@ -129,7 +129,6 @@ class BDR(Architecture):
             {
                 "repmgr_failover": "manual",
                 "postgres_coredump_filter": "0xff",
-                "postgres_coredump_filter": "0xff",
                 "bdr_version": bdr_version,
                 "postgres_version": postgres_version,
                 "postgresql_flavour": postgresql_flavour,
@@ -155,10 +154,10 @@ class BDR(Architecture):
 
         if self.args.get("enable_camo", False):
             bdr_primaries = []
-            id = self.args["instance_defaults"]
+            ins_defs = self.args["instance_defaults"]
             for i in instances:
-                vars = i.get("vars", {})
-                role = i.get("role", id.get("role", []))
+                _vars = i.get("vars", {})
+                role = i.get("role", ins_defs.get("role", []))
                 if (
                     "bdr" in role
                     and "replica" not in role
@@ -166,7 +165,7 @@ class BDR(Architecture):
                     and "subscriber-only" not in role
                     and "witness" not in role
                 ):
-                    if not "bdr_node_camo_partner" in vars:
+                    if "bdr_node_camo_partner" not in _vars:
                         bdr_primaries.append(i)
 
             idx = 0
