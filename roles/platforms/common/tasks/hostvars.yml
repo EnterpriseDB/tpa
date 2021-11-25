@@ -39,12 +39,21 @@
     tpa_2q_repositories is not defined and
     twoq_repositories is defined
 
+# To use 2ndQuadrant repositories (e.g., for 2ndQPostgres), get a
+# subscription token from the Customer Portal and export
+# TPA_2Q_SUBSCRIPTION_TOKEN in the environment.
+
 - assert:
     msg: "Export TPA_2Q_SUBSCRIPTION_TOKEN to use tpa_2q_repositories"
     that:
       lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') != '' or
       tpa_2q_repositories|default([]) is empty
   tags: public_repos
+
+# To use EDB repositories (e.g., for EPAS), get a username/password from
+# https://www.enterprisedb.com/user/register?destination=/repository-access-request
+# and export EDB_REPO_CREDENTIALS_FILE=/path/to/file in the environment,
+# where the file contains a single line with "username:password".
 
 - block:
   - stat:
@@ -67,6 +76,48 @@
     _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
   when:
     _file != ''
+  tags: public_repos
+
+# To use new EDB cloudsmith repositories (experimental), obtain an
+# entitlement token for each repository you need to use and export
+# EDB_REPO_TOKENS=/path/to/file in the environment, where the file
+# contains a "repo:entitlement-token" line for each repository.
+
+- block:
+  - stat:
+      path: "{{ _tfile }}"
+    register: _tokensfile
+    delegate_to: localhost
+  - assert:
+      msg: "EDB_REPO_TOKENS={{ _tfile }} must exist and have mode 0600"
+      that:
+      - _tokensfile.stat.exists
+      - _tokensfile.stat.mode == '0600'
+  - assert:
+      msg: "EDB_REPO_TOKENS={{ _tfile }} must contain only 'repo:token' lines"
+      that:
+      - tokenline != ''
+      - tokenline.split(':')|length == 2
+      - tokenline.split(':')|last|length == 16
+    with_items: "{{ _tfile_lines }}"
+    loop_control:
+      loop_var: tokenline
+  - set_fact:
+      edb_repo_tokens: "{{
+        edb_repo_tokens|default({})|combine({
+          _parts[0]: _parts[1]
+        })
+      }}"
+    vars:
+      _parts: "{{ tokenline.split(':') }}"
+    with_items: "{{ _tfile_lines }}"
+    loop_control:
+      loop_var: tokenline
+  vars:
+    _tfile: "{{ lookup('env', 'EDB_REPO_TOKENS') }}"
+    _tfile_lines: "{{ lookup('file', _tfile).split('\n') if _tfile else [] }}"
+  when:
+    _tfile != ''
   tags: public_repos
 
 - set_fact:

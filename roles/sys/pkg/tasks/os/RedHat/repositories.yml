@@ -67,15 +67,21 @@
     that: item in default_yum_repositories|combine(yum_repositories)
   with_items: "{{ yum_repository_list }}"
 
-- name: Install YUM repository packages
-  yum:
-    name: "{{ r.rpm_url }}"
-    state: present
-    disable_gpg_check: yes
+# We loop over yum_repositories and install each repository definition.
+# If the entry specifies an rpm_url, add-repository-rpm will install it;
+# otherwise add-repository will create a .repo file using the given
+# baseurl/gpgkey entries.
+
+- name: Install YUM repositories
+  include_tasks:
+    file: "add-repository{{ '-rpm' if repo.rpm_url is defined else '' }}.yml"
   with_items: "{{ yum_repository_list }}"
+  loop_control:
+    loop_var: r
   vars:
     repos: "{{ default_yum_repositories|combine(yum_repositories) }}"
-    r: "{{ repos[item] }}"
+    repo_name: "{{ r }}"
+    repo: "{{ repos[r] }}"
 
 - name: Ensure edb.repo is not world-readable
   file:

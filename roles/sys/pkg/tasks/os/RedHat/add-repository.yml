@@ -1,0 +1,13 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Add YUM repository for {{ repo_name }}
+  yum_repository:
+    name: "{{ repo_name }}"
+    description: "{{ repo.description|default(omit) }}"
+    file: "{{ repo.file|default('enterprisedb-%.repo' % repo_name) }}"
+    baseurl: "{{ repo.baseurl }}"
+    gpgkey: "{{ repo.gpgkey }}"
+    repo_gpgcheck: yes
+    enabled: yes 

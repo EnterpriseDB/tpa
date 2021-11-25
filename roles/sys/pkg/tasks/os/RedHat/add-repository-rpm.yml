@@ -1,0 +1,9 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Install YUM repository package for {{ repo_name }}
+  yum:
+    name: "{{ repo.rpm_url }}"
+    state: present
+    disable_gpg_check: yes
