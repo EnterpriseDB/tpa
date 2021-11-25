@@ -196,6 +196,18 @@
     old: "{{ _include_dir }}/3333-bdr.conf"
     new: "{{ _include_dir }}/3334-camo.conf"
 
+# With BDR3, we need to install a CAMO configuration file and restart
+# the server in postgres/bdr/tasks/postgres-reconfig.yml. BDR4 doesn't
+# need the restart, so we can just install the configuration file here
+# and avoid restarting later.
+
+- include_tasks:
+    file: camo.yml
+  when: >
+    'bdr' in role
+    and bdr_version is version('4', '>=')
+    and bdr_node_camo_partner is defined
+
 # If 9900-role-settings.conf (old config file for storing settings specified via
 # postgres_conf_settings, new name 9900-tpa_postgres_conf_settings.conf) exists,
 # we move it to 9900-tpa_postgres_conf_settings.conf without either a reload or a

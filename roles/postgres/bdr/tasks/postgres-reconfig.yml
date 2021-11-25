@@ -15,12 +15,12 @@
 # BDR3 requires us to complete the BDR group configuration, then restart
 # Postgres after installing a new configuration file with CAMO-specific
 # settings. With BDR4, CAMO is configured through functions rather than
-# configuration settings, so we could avoid this restart here.
+# configuration settings, so we don't need this any more.
 
 - name: Install CAMO-specific configuration file
   include_role: name=postgres/config tasks_from=camo.yml
   when:
-    bdr_major_version|int >= 3
+    bdr_major_version is version('3', '==')
     and bdr_node_camo_partner is defined
 
 - include_role: name=postgres/restart
