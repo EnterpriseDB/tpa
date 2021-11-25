@@ -40,3 +40,33 @@
     current_setting: "{{
       cluster_facts.pg_settings.password_encryption|default(default_password_encryption)
     }}"
+
+# If enable_camo is not explicitly set, we set it based on the current
+# value of bdr.enable_camo (or pg2q.enable_camo for older versions of
+# BDR), if available; or use the default of "on".
+#
+# This allows us to introduce an optional setting that maintains
+# compatibility with existing clusters (where we would have always set
+# it to 'on', but someone may have changed the value with an override).
+#
+# Note that if you set enable_camo to "on", pg_settings will report the
+# current value as "remote_commit_flush". We must avoid changing the
+# configuration file (and triggering a restart) unnecessarily.
+
+- name: Set default value for enable_camo if required
+  set_fact:
+    enable_camo: "{{ enable_camo|default(_value) }}"
+  vars:
+    pg_settings: "{{ cluster_facts.pg_settings|default({}) }}"
+    _current_or_default: "{{
+      pg_settings.get('bdr.enable_camo')|default(
+        pg_settings.get('pg2q.enable_camo')|default('on')
+      )
+    }}"
+    _value: "{{
+      (_current_or_default == 'remote_commit_flush')|ternary(
+        'on', _current_or_default
+      )
+    }}"
+  when: >
+    'bdr' in role
