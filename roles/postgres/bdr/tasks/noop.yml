@@ -1,0 +1,8 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# Nothing to do here.
+#
+# Any bdrN/<stage>.yml files that aren't needed are symlinked to this
+# file, so that they can be unconditionally included by main.yml.

@@ -2,8 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-- include_role: name=postgres/bdr tasks_from=bdr3.yml
-
 - assert:
     msg: All CAMO pairs must be symmetric in BDR4
     that:

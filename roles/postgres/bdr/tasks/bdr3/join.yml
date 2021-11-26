@@ -2,6 +2,16 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+# The first_bdr_primary has now created the group, and the remaining
+# members of the same bdr_node_group must join the group.
+#
+# BDR does not support concurrent group joins, so we can't run this task
+# in parallel on all the members of the group. Failing that, it would be
+# nice to set «serial: 1» on this task, but serial is not supported as a
+# task attribute. We use a loop to get the equivalent serial behaviour,
+# executing the task on first_bdr_primary, but connecting to each
+# instance in turn to issue the bdr.join_node_group() query.
+#
 # Instances join the group with join_target_dsn set to first_bdr_primary
 # unless they have a different upstream defined. If so, they must wait
 # until the upstream has joined the group itself, so we perform group

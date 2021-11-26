@@ -120,9 +120,12 @@
 #     -- it does no harm to leave it in (it will return immediately if
 #     -- the join has completed).
 
-- name: BDR setup
-  include_tasks:
-    file: "bdr{{ bdr_major_version }}.yml"
+- block:
+    - include_tasks: "bdr{{ bdr_major_version }}/init.yml"
+    - include_tasks: "bdr{{ bdr_major_version }}/join.yml"
+      when:
+        inventory_hostname == first_bdr_primary
+    - include_tasks: "bdr{{ bdr_major_version }}/post-join.yml"
   vars:
     bdr_database_facts: "{{ cluster_facts.databases[bdr_database] }}"
 

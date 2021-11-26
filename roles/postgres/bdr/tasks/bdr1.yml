@@ -1,7 +1,0 @@
----
-
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
-
-# At the moment, BDRv1 setup is identical to BDRv2.
-
-- include_tasks: bdr2.yml

@@ -1,0 +1,17 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# The remaining hosts join the group… but they must do so one at a time,
+# because BDR does not support concurrent group joins (not in version 3,
+# nor in any earlier versions).
+
+- name: Join BDR groups on the other nodes
+  include_tasks: join-inner.yml
+  with_items: >
+    {{ groups[bdr_node_group]|difference([first_bdr_primary]) }}
+  loop_control:
+    loop_var: bdr_node
+  when:
+    inventory_hostname == first_bdr_primary and
+    hostvars[bdr_node].bdr2_node_tuples.rowcount == 0
