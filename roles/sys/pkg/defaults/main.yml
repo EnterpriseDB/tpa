@@ -27,22 +27,6 @@ default_apt_repositories:
     repo: >-
       deb [arch=amd64] https://apt{{ edb_repo_hostname_suffix }}/{{ ansible_distribution_release }}-edb{{ edb_repo_name_suffix }}/ {{ ansible_distribution_release }} main
 
-  harp:
-    key_id: CF36E8D6E505E2D4
-    key_url: https://dl.cloudsmith.io/{{ edb_repo_tokens['harp'] }}/enterprisedb/harp/gpg.CF36E8D6E505E2D4.key
-    filename: >-
-      enterprisedb-harp.list
-    repo: >-
-      deb https://dl.cloudsmith.io/{{ edb_repo_tokens['harp'] }}/enterprisedb/harp/deb/debian {{ ansible_distribution_release }} main
-
-  harp-etcd:
-    key_id: D7C0AC451C704020
-    key_url: https://dl.cloudsmith.io/{{ edb_repo_tokens['harp-etcd'] }}/enterprisedb/harp-etcd/gpg.D7C0AC451C704020.key
-    filename: >-
-      enterprisedb-harp-etcd.list
-    repo: >-
-      deb https://dl.cloudsmith.io/{{ edb_repo_tokens['harp-etcd'] }}/enterprisedb/harp-etcd/deb/debian {{ ansible_distribution_release }} main
-
 default_apt_repository_list: [PGDG]
 
 yum_repositories: {}
@@ -63,16 +47,6 @@ default_yum_repositories:
   EDB:
     rpm_url: >-
       https://yum{{ edb_repo_hostname_suffix }}/edbrepos/edb-repo-latest.noarch.rpm
-
-  harp:
-    description: EnterpriseDB HARP v2 package repository (experimental)
-    baseurl: https://dl.cloudsmith.io/{{ edb_repo_tokens['harp'] }}/enterprisedb/harp/rpm/el/{{ ansible_distribution_major_version }}/$basearch
-    gpgkey: https://dl.cloudsmith.io/{{ edb_repo_tokens['harp'] }}/enterprisedb/harp/gpg.CF36E8D6E505E2D4.key
-
-  harp-etcd:
-    description: EnterpriseDB HARP/etcd package repository (experimental)
-    baseurl: https://dl.cloudsmith.io/{{ edb_repo_tokens['harp-etcd'] }}/enterprisedb/harp-etcd/rpm/el/{{ ansible_distribution_major_version }}/$basearch
-    gpgkey: https://dl.cloudsmith.io/{{ edb_repo_tokens['harp-etcd'] }}/enterprisedb/harp-etcd/gpg.D7C0AC451C704020.key
 
 default_yum_repository_list: [EPEL, PGDG]
 
