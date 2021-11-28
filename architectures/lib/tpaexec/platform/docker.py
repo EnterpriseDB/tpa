@@ -171,6 +171,8 @@ class docker(Platform):
                     newvolumes.append(v)
             if volumes:
                 i["volumes"] = newvolumes
+                if not i["volumes"]:
+                    del(i["volumes"])
 
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}
