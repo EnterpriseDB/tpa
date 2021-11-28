@@ -19,7 +19,22 @@
 - Avoid repeated expensive invocations of semanage/restorecon for custom
   Postgres directory locations (e.g., tablespaces)
 
+- Support newly-published repmgr packages for EPAS; this means you no
+  longer have to deploy with `repmgr_installation_method: src`
+
+- Allow setting `barman_archiver: on` for an instance to enable WAL
+  archiving to Barman with a suitable default `archive_command`
+
+- Support deployment of BDR v4 (still experimental), including
+  on-the-fly (symmetric) CAMO configuration changes
+
+- Allow `enable_camo` to be set (earlier, it was always "on" by default
+  if CAMO was enabled)
+
 ### Bugfixes
+
+- Fix handling of the default value of shared_preload_libraries on EPAS
+  installations
 
 - Fix some minor breakage related to the change in the location of the
   documentation, notably `tpaexec info architectures` and `tpaexec info
@@ -27,6 +42,12 @@
 
 - Fix a provision-time error from `find_replica_tablespace_mismatches`
   for Docker instances with user-defined `volumes` entries
+
+- Fix the `--enable-camo` option to correctly generate CAMO partner
+  annotations on BDR instances
+
+- Fix rsyslog configuration to set logfile ownership to root/root (and
+  not the postgres user, which may not exist on the log server)
 
 - Don't set `operator_precedence_warning` for Postgres v14+
 
