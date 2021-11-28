@@ -42,8 +42,8 @@
     that:
       edb_repo_tokens is defined
   when: >
-    'harp' in apt_repository_list
-    or 'harp-etcd' in apt_repository_list
+    'harp' in yum_repository_list
+    or 'harp-etcd' in yum_repository_list
 
 # If we install the EDB repository RPM, all subsequent yum operations
 # will fail until we add authentication information to the baseurl in
