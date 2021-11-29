@@ -25,7 +25,7 @@ dcs:
 
 {% if 'postgres' in role %}
 manager:
-  name: "{{ inventory_hostname }}"
+  name: "{{ bdr_node_name|default(inventory_hostname) }}"
   log_level: debug
 {% endif %}
 {% if 'harp-proxy' in role %}

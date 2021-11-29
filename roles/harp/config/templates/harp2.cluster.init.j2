@@ -16,7 +16,7 @@ nodes:
 {% for h in groups|members_of(bdr_node_group, not_in=bdr_ro_groups) %}
 {%   set v = hostvars[h] %}
 {%   if harp_consensus_protocol != 'etcd' or v.harp_location == harp_location %}
-- name: {{ h }}
+- name: {{ v.bdr_node_name|default(h) }}
   location: {{ v.harp_location }}
   node_type: bdr
   node_role: {{ v.node_role|default('primary') }}
