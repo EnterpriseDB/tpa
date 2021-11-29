@@ -63,6 +63,15 @@
   vars:
     p_and_b: ['pglogical', 'bdr']
 
+- name: Remove pglogical if BDR v4 is in use
+  set_fact:
+    _preload_list: "{{
+      _preload_list|reject('equalto', 'pglogical')|list
+    }}"
+  when: >
+    'bdr' in role
+    and bdr_version is version('4', '>=')
+
 # When it comes to writing out the file again, we don't make any attempt
 # to retain whatever was in it before; as the warning clearly says, this
 # file—like any other in _include_dir—is subject to being overwritten.
