@@ -2,6 +2,10 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+## v21.9 (2021-12-01)
+
+- Fix incorrect default value for `enable_camo`
+
 ## v21.8 (2021-11-30)
 
 ### New features

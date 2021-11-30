@@ -59,8 +59,8 @@
   vars:
     pg_settings: "{{ cluster_facts.pg_settings|default({}) }}"
     _current_or_default: "{{
-      pg_settings.get('bdr.enable_camo')|default(
-        pg_settings.get('pg2q.enable_camo')|default('on')
+      pg_settings.get('bdr.enable_camo', undefined)|default(
+        pg_settings.get('pg2q.enable_camo', undefined)|default('on')
       )
     }}"
     _value: "{{
