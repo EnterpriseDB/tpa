@@ -20,6 +20,16 @@
     and curl_install.stdout.strip() != ''
     and 'already installed' not in curl_install.stdout
 
+- name: Ensure update for RHBA-2021:3649 is applied (DST Root CA X3 expiry)
+  package:
+    name:
+      - ca-certificates
+    state: latest
+    disablerepo: *
+    enablerepo:
+      - base*
+      - updates
+
 - set_fact:
     default_yum_repository_list: "{{
       default_yum_repository_list|union(['EDB'])
