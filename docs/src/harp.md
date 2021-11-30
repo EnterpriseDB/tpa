@@ -42,8 +42,6 @@ cluster_vars:
     RedHat: []
 ```
 
-By default, …
-
 You can configure the following parameters for etcd:
 
 Variable	| Default value	| Description
