@@ -3,12 +3,20 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 - name: Run apt-get update
-  raw: test -d /etc/tpa || apt-get -q -y --allow-releaseinfo-change update
+  raw: >-
+    test -d /etc/tpa || apt-get -q -y {{ allow_releaseinfo_change }} update
   environment: {}
   register: update
   changed_when: >
     update is successful
     and 'Reading package lists' in update.stdout
+  vars:
+    allow_releaseinfo_change: "{{
+      '--allow-releaseinfo-change' if
+        (ansible_distribution == 'Debian' and ansible_distribution_major_version|int >= 10)
+        or (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 18)
+        else ''
+    }}"
 
 - name: Install python
   raw: if ! command -v {{ python }} >/dev/null 2>&1; then apt-get -q -y install {{ python.startswith('python2')|ternary('python2.7', 'python3') }}; fi
