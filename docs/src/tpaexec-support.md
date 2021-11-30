@@ -11,21 +11,21 @@ TPAexec can install and configure the following major components.
 
 * EPAS (EnterpriseDB PostgreSQL Advanced Server) 14, 13, 12
 
-* BDR
+* BDR v4 (experimental), v3.x, and earlier versions (deprecated)
 
-* pglogical
+* pglogical v3.x, v2.x (open source)
+
+* HARP v2 (experimental), v1 (deprecated)
 
 * repmgr
 
 * Barman
 
-* EFM
-
-* HARP
+* pgbouncer
 
 * haproxy
 
-* pgbouncer
+* EFM
 
 Support for the following components is in development.
 
