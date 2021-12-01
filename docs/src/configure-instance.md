@@ -19,6 +19,7 @@ on to [Postgres configuration](#postgres) below.
 
 * [Distribution support](distributions.md)
 * [Python environment](python.md) (`preferred_python_version`)
+* [Environment variables](target_environment.md) (e.g., `https_proxy`)
 
 ### Package repositories
 
