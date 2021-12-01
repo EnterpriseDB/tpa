@@ -51,7 +51,7 @@ plugins:
   - with-pdf:
       author: EnterpriseDB UK Limited
       cover_title: TPAexec
-      cover_subtitle: "Version 21.8 (2021-11-30)"
+      cover_subtitle: "Version 21.9 (2021-12-01)"
       toc_level: 3
       output_path: tpaexec.pdf
       copyright: © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
