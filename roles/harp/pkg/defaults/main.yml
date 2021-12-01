@@ -11,9 +11,9 @@ harp_packages:
     Ubuntu: *debian_harp1_packages
   "2":
     Debian: &debian_harp2_packages
-      - harp_manager
+      - harp-manager
     RedHat:
-      - harp_manager
+      - harp-manager
     Ubuntu: *debian_harp2_packages
 
 harp_proxy_packages:
@@ -23,7 +23,7 @@ harp_proxy_packages:
     Ubuntu: []
   "2":
     Debian: &debian_harp2_proxy_packages
-      - harp_proxy
+      - harp-proxy
     RedHat:
-      - harp_proxy
+      - harp-proxy
     Ubuntu: *debian_harp2_proxy_packages

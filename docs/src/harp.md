@@ -10,7 +10,7 @@ by setting `harp_version: 1` explicitly.
 
 ## Installing HARP
 
-You must provide the `harp_manager` and `harp_proxy` packages. Please
+You must provide the `harp-manager` and `harp-proxy` packages. Please
 contact EDB to obtain access to these packages.
 
 ## Configuring HARP 
@@ -32,7 +32,7 @@ install and configure etcd on the BDR instances.
 
 HARP v2 requires etcd v3.5.0 or above, which is not available in the
 default package repositories for any distribution. You must provide the
-`harp_etcd` and `harp_etcdctl` packages; otherwise, TPAexec can download
+`harp-etcd` and `harp-etcdctl` packages; otherwise, TPAexec can download
 and install etcd v3.5.0 from the Github release tarball if you specify
 
 ```

@@ -35,7 +35,7 @@
   when:
     postgres_installation_method == 'pkg' and (
       postgresql_flavour == 'epas'
-      or failover_manager == 'efm'
+      or failover_manager in ['efm', 'harp']
     )
 
 - set_fact:

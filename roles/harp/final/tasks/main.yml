@@ -42,6 +42,6 @@
         - harp_router
         - harp_manager
       "2":
-        - "{{ ('postgres' in role)|ternary('harp_manager', []) }}"
-        - "{{ ('harp-proxy' in role)|ternary('harp_proxy', []) }}"
+        - "{{ ('postgres' in role)|ternary('harp-manager', []) }}"
+        - "{{ ('harp-proxy' in role)|ternary('harp-proxy', []) }}"
   tags: [service, restart]
