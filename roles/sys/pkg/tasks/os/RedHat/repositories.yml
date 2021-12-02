@@ -27,7 +27,7 @@
     state: latest
     disablerepo: "*"
     enablerepo:
-      - base*
+      - "*base*"
       - updates
 
 - set_fact:
