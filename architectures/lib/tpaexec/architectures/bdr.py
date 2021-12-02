@@ -134,7 +134,6 @@ class BDR(Architecture):
 
         cluster_vars.update(
             {
-                "repmgr_failover": "manual",
                 "postgres_coredump_filter": "0xff",
                 "bdr_version": bdr_version,
                 "postgres_version": postgres_version,
