@@ -23,6 +23,7 @@ class BDR_Always_ON(BDR):
             {
                 "barman_volume_size": 128,
                 "postgres_volume_size": 64,
+                "failover_manager": "harp"
             }
         )
 
