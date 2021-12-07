@@ -34,6 +34,9 @@ nodes:
   stop_database_when_fenced: false
   fenced_node_on_dcs_failure: false
   max_dcs_failures: 10
+  maximum_lag: {{ v.harp_maximum_lag | default(1048576)}}
+  maximum_camo_lag: {{ v.harp_maximum_camo_lag | default(1048576)}}
+  camo_enforcement: {{ v.harp_camo_enforcement | default('lag_only')}}
 {%   endif %}
 {% endfor %}
 
