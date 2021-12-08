@@ -253,7 +253,7 @@
     wanted_pgdg_repo: "pgdg{{ postgres_versionNN }}"
     all_wanted_pgdg_repos:
       - "{{ wanted_pgdg_repo }}"
-      - "{{ wanted_pgdg_repo }}-updates-debuginfo"
+      - "{{ wanted_pgdg_repo }}-debuginfo"
       - pgdg-common
 
 - name: Exclude barman-related packages from PGDG repos
