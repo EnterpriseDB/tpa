@@ -468,8 +468,8 @@ feature generally available.
 - Update default haproxy_package_version to 1.9.15
 
 - Disable invalid pgdg11-updates-debuginfo repository for RHEL8; deploy
-  with `-e '{"postgres_debug_packages":{"RedHat":[]}}'` if required
-  until the problem is fixed upstream
+  with `-e '{"postgres_debug_packages":{"postgresql":{"RedHat":[]}}}'`
+  if required until the problem is fixed upstream
 
 - Restore support for repmgr to create physical replicas in BDR clusters
 
