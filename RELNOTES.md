@@ -2,6 +2,16 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+## v21.10 (unreleased)
+
+### Minor changes
+
+- Update the names of harp-related packages (now available in the EDB
+  repository, i.e., {apt,yum}.enterprisedb.com)
+
+- Use the new `pgdgNN-debuginfo` repositories (fixes errors with missing
+  debuginfo packages for Postgres)
+
 ## v21.9 (2021-12-01)
 
 - Fix incorrect default value for `enable_camo`
