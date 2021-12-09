@@ -495,14 +495,30 @@ help() {
         "")
             cat <<TOPICS
 Available help topics:
-    info
-    setup, selftest
-    configure, configure-options
-    provision, deprovision
-    playbook, deploy, test,
-    cmd, ping
-    rehydrate
-    store-password, show-password
+
+    info        Show information about this installation
+    setup       Install tpaexec dependencies
+    selftest    Test that tpaexec is installed properly
+
+    configure   Generate a cluster configuration
+    configure-options
+                Options available for 'tpaexec configure'
+
+    provision   Provision instances to host a cluster
+    deploy      Install and configure software on a cluster
+    test        Test the deployed cluster
+
+    ping        Ping instances in a cluster
+    playbook    Execute an arbitrary playbook on instances
+    cmd         Execute arbitrary commands on instances
+
+    rehydrate   Terminate and replace instances (AWS)
+    deprovision Destroy the resources used by a cluster
+
+    show-password
+    store-password
+                Commands to manage passwords for cluster users
+                (e.g., postgres_password, pgbouncer_password)
 
 Run 'tpaexec help topicname' for more details.
 TOPICS
