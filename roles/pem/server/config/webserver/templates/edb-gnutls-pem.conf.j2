@@ -1,0 +1,29 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
+<IfModule mod_gnutls.c>
+
+  {% if pem_server_ssl_port|int != 443 %}
+  Listen {{ pem_server_ssl_port }}
+  {% endif %}
+
+  <VirtualHost _default_:{{ pem_server_ssl_port }}>
+
+    # General setup for the virtual host
+    DocumentRoot "{{ pem_base_dir }}/web"
+    ServerName {{ inventory_hostname }}:{{ pem_server_ssl_port }}
+    ServerAdmin you@example.com
+    ErrorLog "/var/log/{{ pem_web_server_name[ansible_os_family] }}/error.log"
+    TransferLog "/var/log/{{ pem_web_server_name[ansible_os_family] }}/access.log"
+
+    GnuTLSEnable on
+    GnuTLSPriorities NORMAL
+
+    GnuTLSCertificateFile "{{ pem_base_dir }}/resources/server-pem.crt"
+    GnuTLSKeyFile "{{ pem_base_dir }}/resources/server-pem.key"
+
+    <Directory "/var/www/cgi-bin">
+        Require all granted
+    </Directory>
+
+  </VirtualHost>
+
+</IfModule>

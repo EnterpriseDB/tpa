@@ -1,0 +1,8 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+pem_agent_packages:
+  Debian: &debian_pem_agent_packages
+    - edb-pem-agent
+  RedHat: *debian_pem_agent_packages

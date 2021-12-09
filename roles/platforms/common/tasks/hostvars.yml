@@ -149,3 +149,31 @@
              '%s/%s.key' % (cluster_dir, cluster_name),
              '%s/%s.crt' % (cluster_dir, cluster_name))
     }}"
+
+# To use shared PEM server in a given cluster get a username/password for
+# the PEM backend database that agents can use to register themselves, put
+# them in a file and export EDB_PEM_CREDENTIALS_FILE=/path/to/file in the
+# environment. The file contains a single line with "username:password".
+
+- block:
+  - stat:
+      path: "{{ _file }}"
+    register: _credsfile
+    delegate_to: localhost
+  - assert:
+      msg: "EDB_PEM_CREDENTIALS_FILE={{ _file }} must exist and have mode 0600"
+      that:
+      - _credsfile.stat.exists
+      - _credsfile.stat.mode == '0600'
+  - assert:
+      msg: "EDB_PEM_CREDENTIALS_FILE={{ _file }} must contain username:password"
+      that:
+      - _credentials != ''
+      - _credentials.split(':')|length == 2
+    vars:
+      _credentials: "{{ lookup('file', _file) }}"
+  vars:
+    _file: "{{ lookup('env', 'EDB_PEM_CREDENTIALS_FILE') }}"
+  when:
+    pem_server is defined
+    and (hostvars[pem_server].pem_shared|default(false)) is true

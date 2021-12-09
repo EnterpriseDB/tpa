@@ -22,6 +22,7 @@
         tags: sys
     when:
       platform not in ['shared']
+      and (pem_shared|default(false)) is false
     tags: always
 
   - include_role:
@@ -30,6 +31,7 @@
         tags: postgres
     when: >
       'postgres' in role
+      and (pem_shared|default(false)) is false
     tags: always
 
   - include_role:
@@ -48,6 +50,7 @@
           and ('postgres' in role or 'efm-witness' in role)
     when:
       groups|members_of('role_replica', not_in=['role_readonly']) is not empty
+      and (pem_shared|default(false)) is false
     tags: always
 
   - include_role:
@@ -56,6 +59,7 @@
         tags: pgbouncer
     when:
       groups['role_pgbouncer']|default([]) is not empty
+      and (pem_shared|default(false)) is false
     tags: always
 
   - include_role:
@@ -64,6 +68,7 @@
         tags: haproxy
     when:
       groups['role_haproxy']|default([]) is not empty
+      and (pem_shared|default(false)) is false
     tags: always
 
   - include_role:
@@ -72,6 +77,7 @@
         tags: etcd
     when:
       groups['role_etcd']|default([]) is not empty
+      and (pem_shared|default(false)) is false
     tags: always
 
   - include_role:
@@ -81,12 +87,27 @@
     when:
       failover_manager == 'harp'
       and ('postgres' in role or 'harp-proxy' in role)
+      and 'pem-server' not in role
+    tags: always
+
+  - include_role:
+      name: pem
+      apply:
+        tags: pem
+    when:
+      (
+       groups['role_pem-server']|default([]) is not empty
+       or groups['role_pem-agent']|default([]) is not empty
+      )
+      and (pem_shared|default(false)) is false
     tags: always
 
   - include_role:
       name: final
       apply:
         tags: final
+    when:
+      (pem_shared|default(false)) is false
     tags: always
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/fini.yml"

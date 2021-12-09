@@ -1,0 +1,36 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+pem_branding_edb_wl: edb
+pem_branding_company_name_wl: "EnterpriseDB Corporation"
+pem_support_email: support@enterprisedb.com
+
+pem_base_dir: /usr/edb/pem
+pem_web_server_process_name: "{{ pem_branding_edb_wl }}pem"
+pem_web_server_name:
+  RedHat: httpd
+  Debian: apache2
+pem_web_server_config_path:
+  RedHat: /etc/httpd/conf.d
+  Debian: /etc/apache2
+pem_web_server_service_name:
+  RedHat: httpd
+  Debian: apache2
+pem_web_config_file:
+  RedHat: "{{ pem_web_server_config_path[ansible_os_family] }}/{{ pem_branding_edb_wl }}-pem.conf"
+  Debian: "{{ pem_web_server_config_path[ansible_os_family] }}/sites-enabled/{{ pem_branding_edb_wl }}-pem.conf"
+pem_web_ssl_config_template_file: edb-ssl-pem.conf.j2
+pem_web_ssl_config_file:
+  RedHat: "{{ pem_web_server_config_path[ansible_os_family] }}/{{ pem_branding_edb_wl }}-ssl-pem.conf"
+  Debian: "{{ pem_web_server_config_path[ansible_os_family] }}/sites-available/{{ pem_branding_edb_wl }}-ssl-pem.conf"
+pem_web_gnutls_config_template_file: edb-gnutls-pem.conf.j2
+pem_web_gnutls_config_file: "{{ pem_web_server_config_path[ansible_os_family] }}/sites-available/{{ pem_branding_edb_wl }}-gnutls-pem.conf"
+
+pem_server_ssl_port: 443
+
+pem_db_port: "{{ postgres_port }}"
+pem_db_host: 127.0.0.1
+pem_db_user: "{{ postgres_user }}"
+
+pem_agent_service_name: pemagent

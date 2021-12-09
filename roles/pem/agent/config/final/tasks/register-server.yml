@@ -1,0 +1,34 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# Register the database server with the PEM Server for monitoring
+
+- name: Register database server for monitoring and configuration
+  command: >
+    {{ pem_agent_base_dir }}/bin/pemworker --register-server           \
+      --pem-user "{{ hostvars[pem_server].postgres_user }}"            \
+      --display-name "{{ inventory_hostname }}"                        \
+      --server-addr "{{ inventory_hostname }}"                         \
+      --server-port "{{ postgres_port }}"                              \
+      --server-user "{{ postgres_user }}"                              \
+      --server-database "postgres"                                     \
+      --pem-server "{{ pem_server }}"                                  \
+      --pem-port "{{ hostvars[pem_server].postgres_port }}"            \
+      --pem-user "{{ pem_postgres_user }}"                             \
+      --remote-monitoring "{{ remote_monitoring|default('no') }}"      \
+      --group "{{ monitoring_group|default('PEM Server Directory') }}" \
+      --team "{{ monitoring_team |default('') }}"                      \
+      --owner "{{ monitoring_server_owner |default('') }}"             \
+      --config-dir "{{ pem_agent_config_path|dirname }}"               \
+      --cert-path "{{ pem_agent_certificate_directory }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+  vars:
+    _task_environment:
+      PEM_SERVER_PASSWORD: "{{ pem_postgres_password }}"
+      PEM_MONITORED_SERVER_PASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+  register: register_server_cmd
+  ignore_errors: true
+  when:
+    not agent_cfg_check.stat.exists
+  no_log: false

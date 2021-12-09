@@ -1,0 +1,59 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# If we haven't already done so, we must run some SQL scripts to set up
+# the contents of the pem_database.
+
+- name: Check the supported schema version
+  shell:
+    "{{ pem_agent_base_dir }}/bin/pemagent --version | awk -F: '/Schema Supported:/ {print $2+0}'"
+  register: supported_schema_version_check
+
+- name: Set the supported PEM schema-version
+  set_fact:
+    pem_supported_schema_version: "{{ supported_schema_version_check.stdout }}"
+
+- name: Execute pemserver.sql and postgresexpert.sql
+  command: >
+    {{ postgres_bin_dir }}/psql \
+      -p {{ postgres_port }} \
+      -U {{ postgres_user }} \
+      -d {{ pem_database }} \
+      -X -t -A -q \
+      -c "SELECT pem.schema_version();"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  register: pem_schema_version_check
+
+- name: Set the current PEM schema-version
+  set_fact:
+    current_pem_schema_version: "{{ pem_schema_version_check.stdout }}"
+
+- name: Upgrade the PEM schema
+  block:
+    - name: Copy the list-pem-schema.py on pem-server
+      template:
+        src: list_upgrade_schema.py.j2
+        dest: "{{ pem_base_dir }}/resources/list_upgrade_schema.py"
+
+    - name: List the schema to be upgraded
+      command: >
+        /usr/bin/python3 "{{ pem_base_dir }}/resources/list_upgrade_schema.py" -s "{{ current_pem_schema_version }}"
+      register: list_upgrades
+
+    - name: Upgrading the schema
+      command: >
+        {{ postgres_bin_dir }}/psql -a \
+          -v ON_ERROR_STOP=1 \
+          -p {{ postgres_port }} \
+          -U {{ postgres_user }} \
+          -d {{ pem_database }} \
+          -f {{ item }}
+      become_user: "{{ postgres_user }}"
+      become: yes
+      with_items: "{{ list_upgrades.stdout_lines|list }}"
+
+  when: >
+    current_pem_schema_version != pem_supported_schema_version
+

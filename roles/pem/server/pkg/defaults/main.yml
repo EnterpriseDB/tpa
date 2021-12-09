@@ -1,0 +1,24 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+pem_server_packages:
+  RedHat: &pem_server_package
+    - edb-pem
+  Debian: *pem_server_package
+  Ubuntu: *pem_server_package
+
+pem_server_sslutils_packages:
+  postgresql:
+    RedHat:
+      - sslutils_{{ postgres_versionNN }}
+    Debian:
+      - postgresql-{{ postgres_versionNN }}-sslutils
+  pgextended:
+    RedHat: &pgextended_sslutils_package
+      - pgextended{{ postgres_versionNN }}-server-sslutils
+    Debian: *pgextended_sslutils_package
+  epas:
+    RedHat: &pgextended_sslutils_package
+      - edb-as{{ postgres_versionNN }}-server-sslutils
+    Debian: *pgextended_sslutils_package

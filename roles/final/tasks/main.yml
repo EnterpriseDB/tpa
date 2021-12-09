@@ -103,6 +103,7 @@
     failover_manager == 'harp'
     and ('harp-proxy' in role
       or inventory_hostname in first_bdr_primary_candidates|default([]))
+    and not 'pem-server' in role
   tags: harp
 
 - include_role:
@@ -113,3 +114,10 @@
     failover_manager == 'efm'
     and ('postgres' in role or 'efm-witness' in role)
   tags: efm
+
+- include_role:
+    name: pem/final
+  when: >
+    'pem-server' in role
+    or 'pem-agent' in role
+  tags: pem

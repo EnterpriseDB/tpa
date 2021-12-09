@@ -1,0 +1,164 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# We ask pemagent to report its version number, so that we can generate
+# an appropriate configuration. (The pem_agent_package_version setting
+# determines which package is installed, but we can't use that because
+# it is meant to match a *package* version, not just a PEM version.)
+
+- name: Determine pemagent --version
+  shell: >
+    "{{ pem_agent_base_dir }}"/bin/pemagent --version | awk '/^Version: / { print $2 }'
+  args:
+    executable: /bin/bash
+  register: pemagent_version_check
+  changed_when: False
+  check_mode: no
+
+- name: Set pem_agent_version
+  set_fact:
+    pem_agent_version: "{{ pemagent_version_check.stdout }}"
+
+# We must register this agent with the PEM server. Running the following
+# command creates a stub agent.cfg (which we must modify to suit), so if
+# agent.cfg exists, we assume the agent is already registered.
+#
+# The packaged pemagent.service runs pemagent as root and uses agent.cfg
+# from /usr/edb/pem (contrary to all recommended practice). We should be
+# using something outside /usr, perhaps even /root/.pem (where pemworker
+# stores the agent's client certificate). We avoid installing a custom
+# service definition in the interests of minimising changes for now.
+
+- name: Check if agent.cfg already exists
+  stat:
+    path: "{{ pem_agent_config_path }}"
+  register: agent_cfg_check
+  check_mode: no
+
+- name: Record PEM server credentials
+  set_fact:
+    pem_postgres_password: "{{vars['%s_password' % postgres_user]}}"
+    pem_postgres_user: "{{hostvars[pem_server].postgres_user}}"
+  no_log: true
+
+# If pemserver is a shared pemserver instance, pick pemserver's backend
+# credentials from EDB_PEM_CREDENTIALS_FILE file instead.
+
+- block:
+  - assert:
+      msg: >
+        Export EDB_PEM_CREDENTIALS_FILE to use shared PEM server
+      that:
+        lookup('env', 'EDB_PEM_CREDENTIALS_FILE') != ''
+
+  - set_fact:
+      pem_postgres_password: "{{_pass}}"
+      pem_postgres_user: "{{_user}}"
+    vars:
+      _file: "{{ lookup('env', 'EDB_PEM_CREDENTIALS_FILE') }}"
+      _contents: "{{ lookup('file', _file) }}"
+      _parts: "{{ _contents.split(':', 1) }}"
+      _user: "{{ _parts[0] }}"
+      _pass: "{{ _parts[1] }}"
+    no_log: true
+  when: >
+    hostvars[pem_server].pem_shared|default(false)
+
+- name: Register PEM agent
+  command: >
+    {{ pem_agent_base_dir }}/bin/pemworker --register-agent     \
+      --pem-server "{{ pem_server }}"                           \
+      --pem-port "{{ hostvars[pem_server].postgres_port }}"     \
+      --pem-user "{{ pem_postgres_user }}"                      \
+      --config-dir "{{ pem_agent_config_path|dirname }}"        \
+      --cert-path "{{ pem_agent_certificate_directory }}"
+  args:
+    creates: "{{ pem_agent_config_path }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+  vars:
+    _task_environment:
+      PEM_SERVER_PASSWORD: "{{ pem_postgres_password }}"
+  register: register_cmd
+  ignore_errors: true
+  when:
+    not agent_cfg_check.stat.exists
+  no_log: true
+
+- name: Display stderr from failed agent registration
+  assert:
+    msg: "{{ register_cmd.get('stderr') }}"
+    that:
+      register_cmd is successful
+
+- name: Get server-generated agent_id from agent.cfg
+  command: >
+    awk -F= '/^agent_id=/ { print $2 }' "{{ pem_agent_config_path }}"
+  register: agentid_check
+  changed_when: False
+  check_mode: no
+
+- name: Set pem_agent_id
+  set_fact:
+    pem_agent_id: "{{ agentid_check.stdout }}"
+
+# If we just registered the agent, we also need to register the server
+# that this agent is monitoring for the pem-server.
+
+- include_tasks: register-pem-server.yml
+  when:
+    not agent_cfg_check.stat.exists and
+    'pem-server' in role
+
+# If we just registered the agent, we also need to register the server
+# that this agent is monitoring. (At the moment, we assume that each
+# agent runs on the single instance that it's configured to monitor,
+# even though in theory a single agent could monitor many servers.)
+
+- include_tasks: register-server.yml
+  when:
+    not agent_cfg_check.stat.exists and
+    'pem-server' not in role and ('primary' in role or 'replica' in role)
+
+# tpaexec allows for users to update passwords for database users via
+# `tpaexec store-password` command (see `tpaexec help store-password`).
+# For any such password change, a following `tpaexec deploy` makes sure
+# to update database password. Since we have no way to see if a password
+# change has occured, if agent config already exists, we always update
+# PEM dbuser password for the user that pem agents use to connect with
+# the monitoring server. It makes sure the password is always in sync
+# with the config.
+
+- include_tasks: update-monitoring-server-password.yml
+  when:
+    agent_cfg_check.stat.exists and (
+      'pem-server' in role or 'primary' in role or 'replica' in role
+    )
+
+# We now have an agent.cfg created by pemworker which contains the agent
+# id retrieved from the PEM server, plus many other .ini-style settings.
+# Instead of changing the file line-by-line to install the configuration
+# we want, we just template over the existing file with the pem_agent_id
+# retrieved above (so if the settings have not changed, we won't change
+# the file either).
+
+- name: Update default agent.cfg
+  template:
+    src: agent.cfg.j2
+    dest: "{{ pem_agent_config_path }}"
+    owner: root
+    group: root
+    mode: 0644
+  register: agent_cfg
+
+# Only now that agent.cfg is the way we want it can we start or restart
+# the service.
+
+- name: Enable and start pemagent service
+  systemd:
+    name: "{{ pem_agent_service_name }}"
+    state: "{{
+      (agent_cfg is not changed)|ternary('started', 'restarted')
+    }}"
+    enabled: yes
+    daemon_reload: yes

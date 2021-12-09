@@ -90,6 +90,7 @@ default_packages:
     - "{{ ['socat'] if 'haproxy' in role else [] }}"
     - "{{ ['cryptsetup'] if (volumes|json_query(\"[?encryption && encryption == 'luks']\") is not empty) else [] }}"
     - lsof
+    - "{{ python_pkg_prefix }}-cryptography"
   Debian:
     - "{{ (ansible_distribution_release == 'jessie')|ternary('linux-tools', 'linux-perf') }}"
     # Required for hostnamectl, used in sys

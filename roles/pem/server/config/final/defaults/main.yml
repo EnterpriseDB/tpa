@@ -1,0 +1,12 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+pem_support_email: support@enterprisedb.com
+
+pem_cert_common_name: PEM
+pem_cert_country: US
+pem_cert_state: MA
+pem_cert_city: Bedford
+pem_cert_org_unit: "EDB Postgres Enterprise Manager"
+pem_cert_email: "{{ pem_support_email }}"
+

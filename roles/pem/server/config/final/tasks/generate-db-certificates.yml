@@ -1,0 +1,96 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Check if ca_key.key is present
+  stat:
+    path: "{{ postgres_data_dir }}/ca_key.key"
+  register: is_pem_server_ca_key_exists
+
+- name: Check if ca_certificate.crt is present
+  stat:
+    path: "{{ postgres_data_dir }}/ca_certificate.crt"
+  register: is_pem_server_ca_cert_exists
+
+- name: Generate certificates
+  block:
+    - name: Generate ca key
+      postgresql_query:
+        conninfo: "{{ dsn|dbname(pem_database) }}"
+        query: >
+          SELECT public.openssl_rsa_generate_key(4096)
+      register: ca_key_result
+      become_user: "{{ postgres_user }}"
+      no_log: true
+
+    - name: Add generated key to ca_key.key file
+      copy:
+        content: "{{ ca_key_result.openssl_rsa_generate_key }}"
+        dest: "{{ postgres_data_dir }}/ca_key.key"
+        mode: "0600"
+      become_user: "{{ postgres_user }}"
+      no_log: true
+
+    - name: Generate ca certificate
+      postgresql_query:
+        conninfo: "{{ dsn|dbname(pem_database) }}"
+        query: >
+          SELECT openssl_csr_to_crt(openssl_rsa_key_to_csr('{{ ca_key_result.openssl_rsa_generate_key }}', '{{ pem_cert_common_name }}', '{{ pem_cert_country }}', '{{ pem_cert_state }}', '{{ pem_cert_city }}', '{{ pem_cert_org_unit }}', '{{ pem_cert_email }}'), NULL, '{{ postgres_data_dir }}/ca_key.key')
+      register: ca_cert_result
+      become_user: "{{ postgres_user }}"
+      no_log: true
+
+    - name: Add generated key to ca_certificate.crt file
+      copy:
+        content: "{{ ca_cert_result.openssl_csr_to_crt }}"
+        dest: "{{ postgres_data_dir }}/ca_certificate.crt"
+        mode: "0600"
+      become_user: "{{ postgres_user }}"
+      no_log: true
+
+    - name: Copy to root certificate
+      copy:
+        src: "{{ postgres_data_dir }}/ca_certificate.crt"
+        dest: "{{ postgres_data_dir }}/root.crt"
+        remote_src: yes
+        mode: "0600"
+      become_user: "{{ postgres_user }}"
+      no_log: true
+
+    - name: Generate root crl
+      postgresql_query:
+        conninfo: "{{ dsn|dbname(pem_database) }}"
+        query: >
+          SELECT openssl_rsa_generate_crl('{{ postgres_data_dir }}/ca_certificate.crt', '{{ postgres_data_dir }}/ca_key.key')
+      register: root_cerl_result
+      become_user: "{{ postgres_user }}"
+      no_log: true
+
+    - name: Add generated key to root.crl file
+      copy:
+        content: "{{ root_cerl_result.openssl_rsa_generate_crl }}"
+        dest: "{{ postgres_data_dir }}/root.crl"
+        mode: "0600"
+      become_user: "{{ postgres_user }}"
+      no_log: true
+
+    - name: Set root.crt for the PEM Server
+      include_role: name=postgres/config tasks_from=set-variable.yml
+      vars:
+        variable: "ssl_ca_file"
+        value: "'root.crt'"
+        name: "tpa-pem-ca_file"
+
+    - name: Set root.crl for the PEM Server
+      include_role: name=postgres/config tasks_from=set-variable.yml
+      vars:
+        variable: "ssl_crl_file"
+        value: "'root.crl'"
+        name: "tpa-pem-crl_file"
+
+    - name: Restart the postgresql
+      include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: restarted
+
+  when: is_pem_server_ca_key_exists.stat.exists == False and is_pem_server_ca_cert_exists.stat.exists == False

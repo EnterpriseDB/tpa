@@ -1,0 +1,32 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# We must install the PEM packages and generate some configuration files
+# on any instance that includes 'pem-server' in its role. (Any such PEM
+# server must also be a Postgres instance; but the Postgres config will
+# be handled separately as for any other instance.)
+
+- include_role:
+    name: pem/server
+    apply:
+      tags: pem-server
+  when: >
+    'pem-server' in role
+  tags: always
+
+# An instance with `pem_server` set to the name of a pem-server instance
+# will be monitored by that PEM server. We added 'pem-agent' to the role
+# for such instances earlier (in platforms/common). Now we must install
+# the PEM agent on these instances.
+
+- include_role:
+    name: pem/agent
+    apply:
+      tags: pem-agent
+  when: >
+    'pem-agent' in role
+  tags: always
+
+# The rest of the configuration for both PEM server and its agent(s) can
+# be done only after Postgres is running (see pem/final).

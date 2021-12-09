@@ -167,6 +167,12 @@
     etcd_compaction_retention: "{{ etcd_compaction_retention|default(default_etcd_compaction_retention) }}"
     efm_conf_dir: "{{ efm_conf_dir|default(default_efm_conf_dir) }}"
     efm_bin_dir: "{{ efm_bin_dir|default(default_efm_bin_dir) }}"
+    pem_base_dir: "{{ pem_base_dir|default(default_pem_base_dir) }}"
+    pem_agent_base_dir: "{{ pem_agent_base_dir|default(default_pem_agent_base_dir) }}"
+    pem_agent_service_name: "{{ pem_agent_service_name|default(default_pem_agent_service_name) }}"
+    pem_database: "{{ pem_database|default(default_pem_database) }}"
+    pem_server_description: "{{ pem_server_description|default(inventory_hostname) }}"
+    pem_server_group: "{{ pem_server_group|default(default_pem_server_group) }}"
     efm_bind_port: "{{ efm_bind_port|default(default_efm_bind_port) }}"
   vars:
     default_postgres_installation_method: >-
@@ -431,6 +437,26 @@
     }}"
   when: >
     'postgres' in role
+
+# If this is a PEM server instance, we need a database dedicated to PEM.
+
+- name: Add {{ pem_database }} to postgres_databases
+  set_fact:
+    postgres_databases: "{{
+      postgres_databases|union([default_pem_database_entry])
+    }}"
+  vars:
+    default_pem_database_entry:
+      name: "{{ pem_database }}"
+      owner: "{{ postgres_user }}"
+      extensions:
+      - name: sslutils
+      languages:
+      - name: plpgsql
+    pem_database_entry: >-
+      {{ postgres_databases|json_query("[?name=='%s']" % pem_database) }}
+  when: >
+    'pem-server' in role and pem_database_entry is empty
 
 - name: Set list of Postgres extensions
   set_fact:

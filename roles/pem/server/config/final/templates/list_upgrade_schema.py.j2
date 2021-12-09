@@ -1,0 +1,51 @@
+#!/usr/bin/python3
+
+#######################################################################
+#
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved
+#
+#######################################################################
+
+""" List down all the schema list that needs upgrade. """
+
+import argparse
+from os import path, pardir, listdir
+import re
+
+def main():
+    # Set the arguemts as '-s/--current-schema <SCHEMA>'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--current-schema', required=True, type=int)
+
+    args = parser.parse_args()
+    schema_version = vars(args)['current_schema']
+
+    # List all the upgrade scripts in the upgrade directory
+    upgrade_schema_dir = path.abspath(path.join(
+        path.dirname(path.realpath(__file__)),
+        pardir, 'share', 'upgrades'
+    ))
+
+    res = []
+
+    for f in listdir(upgrade_schema_dir):
+        if path.isfile(path.join(upgrade_schema_dir, f)):
+            # File must be matching like [YYYY][MM][DD][SCHEMA_NUMBER]"
+            g = re.match('(\d+).sql', f)
+
+            if g:
+                g = g.groups()
+                # If this schema is greater than given schema than we need to
+                # upgrade that schema.
+                if int(g[0]) > schema_version:
+                    res.append(g[0])
+
+    # Sort this list in the ascending order
+    res.sort()
+
+    for f in res:
+        # Print this script name
+        print(path.join(upgrade_schema_dir, f + ".sql"))
+
+if __name__ == '__main__':
+    main()

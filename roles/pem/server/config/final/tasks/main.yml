@@ -1,0 +1,25 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# If we haven't already done so, we must run some SQL scripts to set up
+# the contents of the pem_database.
+
+# If 'pem' schema already exists, we try to upgrade in case a newer
+# version of pem packages got installed as part of the current run
+# of `tpaexec deploy`
+ 
+- name: Update the PEM database schema (if already exists)
+  include_tasks: update-schema.yml
+  when: >
+    pem_database in cluster_facts.databases and 'pem' in cluster_facts.databases[pem_database].schemas
+
+- name: Create the PEM database schema (if required)
+  include_tasks: create-schema.yml
+  when: >
+    not pem_database in cluster_facts.databases or not 'pem' in cluster_facts.databases[pem_database].schemas
+
+- include_tasks: generate-db-certificates.yml
+
+- include_role:
+    name: pem/agent/config/final

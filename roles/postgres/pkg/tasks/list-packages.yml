@@ -22,6 +22,7 @@
       'pglogical' not in sources and (
         postgres_family == 'postgresql' or
         (postgres_family == 'epas' and 'bdr' in role)
+        or 'pglogical' in postgres_extensions
       )
       and postgresql_flavour != 'postgresql-bdr'
       and bdr_version is version(4, '<')

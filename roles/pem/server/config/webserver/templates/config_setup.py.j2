@@ -1,0 +1,9 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
+import logging
+DEBUG = False
+CONSOLE_LOG_LEVEL = logging.CRITICAL
+LOG_FILE = None
+PEM_DB_HOST = '{{ inventory_hostname }}'
+PEM_DB_NAME = 'pem'
+PEM_DB_PORT = {{ pem_db_port }}
+SESSION_COOKIE_NAME = 'pem7_session_{{ "0123456789ABCDEF"|list|shuffle(seed=inventory_hostname)|batch(6)|first|join("") }}'

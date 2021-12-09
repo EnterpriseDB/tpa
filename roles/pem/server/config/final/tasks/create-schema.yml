@@ -1,0 +1,25 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# If we haven't already done so, we must run some SQL scripts to set up
+# the contents of the pem_database.
+
+- name: Execute pemserver.sql and postgresexpert.sql
+  command: >
+    {{ postgres_bin_dir }}/psql -a \
+      -p {{ postgres_port }} \
+      -U {{ postgres_user }} \
+      -d {{ pem_database }} \
+      -f {{ pem_base_dir }}/share/pemserver.sql \
+      -f {{ pem_base_dir }}/share/postgresexpert.sql
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Grant role pem_admin to current user
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(pem_database) }}"
+    query: GRANT pem_admin TO current_user
+  become_user: "{{ postgres_user }}"
+  become: yes
+

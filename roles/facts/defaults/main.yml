@@ -160,3 +160,9 @@ default_efm_version: 4.4
 default_efm_conf_dir: "/etc/edb/efm-{{ efm_version }}"
 default_efm_bin_dir: "/usr/edb/efm-{{ efm_version }}/bin"
 default_efm_bind_port: 7800
+
+default_pem_base_dir: /usr/edb/pem
+default_pem_agent_base_dir: /usr/edb/pem/agent
+default_pem_agent_service_name: pemagent
+default_pem_database: pem
+default_pem_server_group: "PEM Server Directory"

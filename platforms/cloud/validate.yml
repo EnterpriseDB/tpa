@@ -26,6 +26,23 @@
   when:
     ssh_port|int != 22
 
+# The use of `instances` below is potentially not specific enough. For
+# example, in a mixed cluster with AWS and Azure and bare instances, the
+# PEM server may be on a bare instance, and we don't need to expose port
+# 443 on the cloud instances at all. But it seems quite likely that you
+# would need to specify explicit rules in such complex scenarios, so
+# this suffices as a default for now.
+
+- name: Add https port to security group for PEM
+  set_fact:
+    cluster_rules: "{{
+      cluster_rules|union([
+        dict(proto='tcp', from_port=443, to_port=443, cidr_ip='0.0.0.0/0')
+      ])
+    }}"
+  when:
+    instances|json_query('[*].role[]')|contains('pem-server')
+
 - name: Ensure cluster_tags[Owner] is sensible for cloud instances
   assert:
     msg: "Please set cluster_tags[Owner] or use '--owner Name' to identify the person responsible for this cluster"

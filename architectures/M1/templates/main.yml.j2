@@ -5,13 +5,15 @@ instances:
 - node: 1
   Name: {{ hostnames[1] }}
   location: 0
-  role: primary
+  role:
+    - primary
   backup: {{ hostnames[3] }}
 
 - node: 2
   Name: {{ hostnames[2] }}
   location: 0
-  role: replica
+  role:
+    - replica
   upstream: {{ hostnames[1] }}
 
 - node: 3
@@ -31,6 +33,7 @@ instances:
 - node: {{ i }}
   Name: {{ hostnames[i] }}
   location: 1
-  role: replica
+  role:
+    - replica
   upstream: {{ hostnames[2] }}
 {% endfor %}

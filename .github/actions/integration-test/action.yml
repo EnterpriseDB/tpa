@@ -50,6 +50,7 @@ runs:
         --platform ${{ inputs.tpa_platform }}
         --postgres-flavour ${{ inputs.tpa_postgres_flavour }}
         --os-image ${{ inputs.tpa_os_image }}
+        --enable-pem
       shell: bash {0}
 
     - name: Provision the cluster

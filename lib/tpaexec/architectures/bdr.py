@@ -191,3 +191,32 @@ class BDR(Architecture):
                 b["vars"] = b_vars
 
                 idx += 2
+
+        # If --enable-pem is specified, we collect all the instances with role
+        # [primary, bdr, replica, readonly, witness, subscriber-only] and append
+        # 'pem-agent' role to the existing set of roles assigned to them. We later
+        # add a dedicated 'pemserver' instance to host our PEM server.
+
+        if self.args.get("enable_pem", False):
+            ins_defs = self.args["instance_defaults"]
+            for instance in instances:
+                role = instance.get("role", ins_defs.get("role", []))
+                if (
+                    "primary" in role
+                    or "bdr" in role
+                    or "replica" in role
+                    or "readonly" in role
+                    or "subscriber-only" in role
+                    or "witness" in role
+                ):
+                    instance["role"].append("pem-agent")
+
+            n = instances[-1].get("node")
+            instances.append(
+                {
+                    "node": n + 1,
+                    "Name": "pemserver",
+                    "role": ["pem-server"],
+                    "location": self.args["locations"][0]["Name"],
+                }
+            )

@@ -1,0 +1,13 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- include_role:
+    name: pem/server/pkg
+    apply:
+      tags: [pem-server, pkg]
+
+- include_role:
+    name: pem/server/config/webserver
+    apply:
+      tags: [pem-server, pem-config, pem-webserver]

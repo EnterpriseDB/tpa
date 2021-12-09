@@ -1,0 +1,106 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- include_tasks: configure_httpd_module.yml
+
+- include_role: name=postgres/createuser
+  vars:
+    username: "{{ pem_db_user }}"
+    role_attrs: [superuser]
+  tags: always
+
+- include_role: name=postgres/pgpass
+  vars:
+    pgpassfile: ~root/.pgpass
+    pgpass_owner: root
+    pgpass_group: root
+    pgpass_users:
+      - "{{ pem_db_user }}"
+
+- name: Copy pem.wsgi.in to pem.wsgi
+  copy:
+    src: "{{ pem_base_dir }}/web/pem.wsgi.in"
+    dest: "{{ pem_base_dir }}/web/pem.wsgi"
+    backup: yes
+    remote_src: yes
+
+- name: Generating PEM Cookie Name
+  shell: hexdump -n 4 -e '4/4 "%08X" 1 "\n"' /dev/random | head -c 6
+  register: session_cookie_hexstring
+
+- name: Generate config_setup.py
+  template:
+    src: config_setup.py.j2
+    dest: "{{ pem_base_dir }}/web/config_setup.py"
+
+- name: Check if web-server ceritificate already exists
+  stat:
+    path: "{{ pem_base_dir }}/resources/server-pem.crt"
+  register: pem_web_server_certificate
+
+# We don't want to generate a new set of TLS key/certificate pair
+# for each run of deploy, so therefore we check if the certificate
+# already exists to determine whether or not a new one is needed.
+# In addition, we also provide 'pem_web_server_renew_tls_certificates'
+# configuration setting that allows users to override the default
+# behavior and force regeneration of certificates primarily for the
+# purposes of renewal should the certificates expire and for forcing
+# a renewal when deemed appropriate. Config setting can be placed
+# under cluster_vars or instance vars.
+- name: Generate self-signed TLS key and certificate
+  shell: >
+    umask 077 &&
+    /bin/echo -e "US\nMA\nBedford\n{{ pem_branding_company_name_wl }}\n{{ pem_branding_edb_wl|upper }} Postgres Manager - HTTPD Server\n{{ pem_server }}\n{{ pem_support_email }}\n" |
+    /usr/bin/openssl req -newkey rsa:4096 -keyout "server-pem.key" -nodes -x509 -days 365 -out "server-pem.crt"
+  args:
+    chdir: "{{ pem_base_dir }}/resources"
+    creates: "pem-server.crt"
+    executable: /bin/bash
+  when: >
+    (pem_web_server_renew_tls_certificates|default(false)) or (not pem_web_server_certificate.stat.exists)
+
+- name: "Install {{ pem_branding_edb_wl }}-pem.conf"
+  template:
+    src: edb-pem.conf.j2
+    dest: "{{ pem_web_config_file[ansible_os_family] }}"
+    owner: root
+    group: root
+    mode: 0644
+  tags: [pem-server, pem-webserver]
+
+- include_tasks: pem_sites.yml
+
+- name: Run setup.py to create pem.db
+  shell: /usr/bin/python3 /usr/edb/pem/web/setup.py
+  become_user: pem
+  become: yes
+  when: ansible_distribution != 'Debian' or ansible_distribution_major_version != "9"
+
+- name: Run setup.py to create pem.db (Debian 9)
+  shell: /usr/libexec/edb-python3/bin/python3 /usr/edb/pem/web/setup.py
+  become_user: pem
+  become: yes
+  when: ansible_distribution == 'Debian' and ansible_distribution_major_version == "9"
+
+- name: Configure SELinux security policy for PEM
+  shell: "{{ pem_base_dir }}/bin/configure-selinux.sh"
+
+# XXX: What triggers this restart? Is it the SELinux config? 
+- name: "Restart httpd service - {{ pem_web_server_service_name[ansible_os_family] }}"
+  service:
+    name: "{{ pem_web_server_service_name[ansible_os_family] }}"
+    state: restarted
+
+- name: Webserever configured
+  debug:
+    msg: >
+      Configured the webservice for "{{ pem_branding_edb_wl }}" Postgres
+      Enterprise Manager (PEM) Server on port "{{ pem_server_ssl_port }}"
+
+- name: PEM server access info
+  debug:
+    msg: >
+      PEM server can be accessed at
+      https://"{{ pem_db_host }}":"{{ pem_server_ssl_port }}" pem at your
+      browser

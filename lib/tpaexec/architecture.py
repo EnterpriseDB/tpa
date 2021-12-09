@@ -204,6 +204,11 @@ class Architecture(object):
         g.add_argument(
             "--enable-efm", action="store_const", const="efm", dest="failover_manager"
         )
+        g.add_argument(
+            "--enable-pem",
+            action="store_true",
+            help="Add a PEM monitoring server to the cluster",
+        )
 
         g = p.add_argument_group("volume sizes in GB")
         for vol in ["root", "barman", "postgres"]:

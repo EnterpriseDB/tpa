@@ -3,11 +3,11 @@
 
 instance_defaults:
   location: 0
-  role:
-    - bdr
 
 instances:
 {% for n in range(1, num_instances+1) %}
 - node: {{ n }}
   Name: {{ hostnames[n] }}
+  role:
+    - bdr
 {% endfor %}

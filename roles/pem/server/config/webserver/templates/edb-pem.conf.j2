@@ -1,0 +1,28 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
+WSGIScriptAlias /pem {{ pem_base_dir }}/web/pem.wsgi
+WSGIDaemonProcess {{ pem_web_server_process_name }} processes=1 threads=25 display-name={{ pem_web_server_process_name|upper }} user=pem group=daemon
+WSGIProcessGroup {{ pem_web_server_process_name }}
+<Directory {{ pem_base_dir}}/web>
+        SetHandler wsgi-script
+        Options +ExecCGI
+        WSGIApplicationGroup %{GLOBAL}
+        WSGIRestrictProcess {{ pem_web_server_process_name }}
+        Order deny,allow
+        Require all granted
+</Directory>
+
+# ReWrite rule for disable the request
+<IfModule mod_rewrite.c>
+        RewriteEngine on
+        RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK|OPTIONS)
+        RewriteRule .* - [F]
+</IfModule>
+<IfModule mod_headers.c>
+        Header unset X-Forwarded-Host
+        Header edit Location "(^http[s]?://)([a-zA-Z0-9\.\-]+)(:\d+)?/" "/"
+</IfModule>
+<Directory "/usr/share/{{pem_web_server_name }}/icons">
+    Options -Indexes
+</Directory>
+ServerSignature Off
+ServerTokens Prod

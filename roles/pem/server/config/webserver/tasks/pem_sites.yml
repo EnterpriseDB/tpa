@@ -1,0 +1,35 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Install ssl-pem configuration
+  block:
+    - name: "Install {{ pem_branding_edb_wl }}-ssl-pem.conf"
+      template:
+        src: edb-ssl-pem.conf.j2
+        dest: "{{ pem_web_ssl_config_file[ansible_os_family] }}"
+        owner: root
+        group: root
+        mode: 0644
+  become: yes
+  tags: [pem-server, pem-webserver]
+
+- name: ssl-pem configuration (Debian/Ubuntu)
+  block:
+    - name: "Enable the apache2 site: {{ pem_branding_edb_wl }}-ssl-pem.conf"
+      shell: "/usr/sbin/a2ensite -m {{ pem_branding_edb_wl }}-ssl-pem"
+
+    - name: "Install {{ pem_branding_edb_wl }}-gnutls-pem.conf"
+      template:
+        src: "{{ pem_web_gnutls_config_template_file }}"
+        dest: "{{ pem_web_gnutls_config_file }}"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: "Enable the apache2 site: {{ pem_branding_edb_wl }}-gnutls-pem.conf"
+      shell: "/usr/sbin/a2ensite -m {{ pem_branding_edb_wl }}-gnutls-pem"
+
+  when: ansible_os_family == 'Debian'
+  become: yes
+  tags: [pem-server, pem-webserver]

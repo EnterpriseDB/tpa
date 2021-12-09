@@ -1,0 +1,61 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
+{% if ansible_os_family == 'Debian' %}
+<IfModule ssl_module>
+{% endif %}
+    SSLRandomSeed startup builtin
+    SSLRandomSeed connect builtin
+
+    {% if pem_server_ssl_port|int != 443 %}
+    Listen {{ pem_server_ssl_port }}
+    {% endif %}
+
+    SSLHonorCipherOrder on
+    SSLPassPhraseDialog  builtin
+    SSLSessionCache        "shmcb:/var/log/{{ pem_web_server_name[ansible_os_family] }}/ssl_scache(512000)"
+    SSLSessionCacheTimeout  300
+
+    <VirtualHost _default_:80>
+        <Location "/pem">
+            RewriteEngine On
+            RewriteCond %{SERVER_PORT} 80
+            RewriteRule ^(.*)$ https://%{HTTP_HOST}:{{ pem_server_ssl_port }}%{REQUEST_URI} [L,R=301]
+        </Location>
+    </VirtualHost>
+
+    <VirtualHost _default_:{{ pem_server_ssl_port }}>
+        #   General setup for the virtual host
+        DocumentRoot "{{ pem_base_dir }}/web"
+        ServerName {{ inventory_hostname }}:{{ pem_server_ssl_port }}
+        ServerAdmin you@example.com
+        ErrorLog "/var/log/{{ pem_web_server_name[ansible_os_family] }}/error_log"
+        TransferLog "/var/log/{{ pem_web_server_name[ansible_os_family] }}/access_log"
+
+        SSLEngine on
+        SSLCertificateFile "{{ pem_base_dir }}/resources/server-pem.crt"
+        SSLCertificateKeyFile "{{ pem_base_dir }}/resources/server-pem.key"
+
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+
+        <Directory "/var/www/cgi-bin">
+            SSLOptions +StdEnvVars
+        </Directory>
+
+        BrowserMatch "MSIE [2-5]" \
+            nokeepalive ssl-unclean-shutdown \
+            downgrade-1.0 force-response-1.0
+
+        CustomLog "/var/log/{{ pem_web_server_name[ansible_os_family] }}/ssl_request_log" \
+            "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \\\"%r\\\" %b"
+    </VirtualHost>
+
+    # Only allow TLS v1.2 for security reasons
+    SSLProtocol -All TLSv1.2
+    SSLProxyProtocol -All TLSv1.2
+    SSLCipherSuite HIGH:!aNULL:!MD5
+    SSLProxyCipherSuite HIGH:!aNULL:!MD5
+
+{% if ansible_os_family == 'Debian' %}
+</IfModule>
+{% endif %}

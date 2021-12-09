@@ -38,3 +38,11 @@ default_preload_extensions:
 hba_force_hostssl: no
 hba_force_certificate_auth: no
 hba_cert_authentication_map: ""
+
+# We generate a sensible pg_hba.conf by default for the pem backend,
+# but caller can specify additional lines for pg_hba.conf to go in
+# the block where we set up authentication for pem agents. Especially
+# true in shared pem server scenario where multiple clusters use a
+# shared pem server for monitoring.
+
+pem_postgres_extra_hba_settings: []

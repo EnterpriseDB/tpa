@@ -8,6 +8,119 @@
   when:
     role is not defined
 
+# Certain roles, when assigned to any instance, may change the roles of
+# other instances. For example, if there is a pem-server instance, the
+# Postgres instances all become pem-agent instances too. So we create
+# role_xxx groups for those roles first, and then recreate all groups
+# after we're done modifying instance roles.
+
+- name: Create role-based groups for 
+  group_by: key="role_{{ item }}"
+  when: item in role
+  with_items:
+  - log-server
+  - pem-server
+  - openvpn-server
+  - monitoring-server
+
+# If an instance has 'log-server' in its role, we set it as the default
+# log_server for every other instance.
+
+- name: Set common log_server for the entire cluster
+  set_fact:
+    log_server: "{{ groups[ls][0] }}"
+  when: >
+    log_server is not defined
+    and groups[ls]|default([]) is not empty
+    and inventory_hostname != groups[ls][0]
+  vars:
+    ls: 'role_log-server'
+
+# If an instance has 'monitoring-server' in its role, we set it as the
+# default monitoring_server for every other instance.
+
+- name: Set common monitoring_server for the entire cluster
+  set_fact:
+    monitoring_server: "{{ groups[ms][0] }}"
+  when: >
+    monitoring_server is not defined
+    and groups[ms]|default([]) is not empty
+    and inventory_hostname != groups[ms][0]
+  vars:
+    ms: 'role_monitoring-server'
+
+# If an instance has 'openvpn-server' in its role, we set it as the
+# default openvpn_server for every other instance.
+
+- name: Set common openvpn_server for the entire cluster
+  set_fact:
+    openvpn_server: "{{ groups[os][0] }}"
+  when: >
+    openvpn_server is not defined
+    and groups[os]|default([]) is not empty
+    and inventory_hostname != groups[os][0]
+  vars:
+    os: 'role_openvpn-server'
+
+- assert:
+    msg: "Please define vpn_network to use sys/openvpn"
+    that:
+      - vpn_network is defined
+  when: >
+    'openvpn-server' in role
+
+- set_fact:
+    pem_enabled: false
+
+- name: Record if we have PEM instance(s) in the cluster
+  set_fact:
+    pem_enabled: true
+  when: >
+    groups['role_pem-server']|default([]) is not empty
+    or groups['role_pem-agent']|default([]) is not empty
+
+# Likewise, if an instance has 'pem-server' in its role, we set it as
+# the default pem_server for every other instance.
+
+- name: Set common pem_server for the entire cluster
+  set_fact:
+    pem_server: "{{ groups[ps][0] }}"
+  when: >
+    pem_server is not defined
+    and groups[ps]|default([]) is not empty
+  vars:
+    ps: 'role_pem-server'
+
+# PEM servers also need to run Postgres.
+
+- name: Add implicit primary role to pem-server instances
+  set_fact:
+    role: "{{ role|union(['primary']) }}"
+  when: >
+    'pem-server' in role
+    and 'replica' not in role
+
+# All BDR instances are primaries unless they are replicas. (This is
+# just to reduce the number of roles to explicitly assign to each BDR
+# instance.)
+
+- name: Add implicit primary role to BDR instances
+  set_fact:
+    role: "{{ role|union(['primary']) }}"
+  when: >
+    'bdr' in role
+    and 'replica' not in role
+
+# BDR "logical standby" instances are represented by bdr+readonly (the
+# choice of 'readonly' is a bit misleading, because these instances are
+# also primaries, but it's not worth changing).
+
+- name: Add implicit readonly role to BDR pause_in_standby instances
+  set_fact:
+    role: "{{ role|union(['readonly']) }}"
+  when: >
+    bdr_node_pause_in_standby|default(false)|bool
+
 # Add 'postgres' to role when any of 'primary' or 'replica' or 'witness'
 # is given, just as a convenience.
 
@@ -17,18 +130,16 @@
   when: >
     role|intersect(['primary', 'replica', 'witness', 'bdr']) is not empty
 
-- name: Add implicit primary role to BDR instances
-  set_fact:
-    role: "{{ role|union(['primary']) }}"
-  when: >
-    'bdr' in role
-    and 'replica' not in role
+# If there's a PEM server in the cluster, all Postgres (for now)
+# instances should run the pem-agent.
 
-- name: Add implicit readonly role to BDR pause_in_standby instances
+- name: Add implicit pem-agent role to postgres instances
   set_fact:
-    role: "{{ role|union(['readonly']) }}"
+    role: "{{ role|union(['pem-agent']) }}"
   when: >
-    bdr_node_pause_in_standby|default(false)|bool
+    pem_server is defined
+    and 'postgres' in role
+    and 'pem-server' not in role
 
 - name: Create role-based groups
   group_by: key="role_{{ item }}"
@@ -63,58 +174,6 @@
     }}"
   when: >
     'bdr' in role
-
-# If any instance is tagged with 'log-server', make every other instance
-# log to it. This can be overriden by setting 'log_server' for any
-# instance.
-
-- name: Set common log_server for the entire cluster
-  set_fact:
-    log_server: "{{ groups[ls][0] }}"
-  when: >
-    log_server is not defined and
-    ls in groups and groups[ls] is not empty and
-    inventory_hostname != groups[ls][0]
-  vars:
-    ls: 'role_log-server'
-
-# If any instance is tagged with 'monitoring-server', make every other
-# instance use it as its monitoring server. This can be overriden by
-# setting 'monitoring_server' for any instance.
-
-- name: Set common monitoring_server for the entire cluster
-  set_fact:
-    monitoring_server: "{{ groups[ms][0] }}"
-  when: >
-    monitoring_server is not defined and
-    ms in groups and groups[ms] is not empty and
-    inventory_hostname != groups[ms][0]
-  vars:
-    ms: 'role_monitoring-server'
-
-# If any instance is tagged with 'openvpn-server', make every other
-# instance use it as its openvpn server. This can be overriden by
-# setting 'openvpn_server' for any instance.
-
-- name: Set common openvpn_server for the entire cluster
-  set_fact:
-    openvpn_server: "{{ groups[os][0] }}"
-  when: >
-    openvpn_server is not defined and
-    os in groups and groups[os] is not empty and
-    inventory_hostname != groups[os][0]
-  vars:
-    os: 'role_openvpn-server'
-
-# If there's anything tagged as an openvpn server, we have to make sure
-# vpn_network is defined.
-
-- assert:
-    msg: "Please define vpn_network to use sys/openvpn"
-    that:
-      - vpn_network is defined
-  when: >
-    'openvpn-server' in role
 
 - include_tasks: hostvars.yml
 

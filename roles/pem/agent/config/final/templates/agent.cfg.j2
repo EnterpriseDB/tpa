@@ -1,0 +1,29 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
+[PEM/agent]
+pem_host={{ pem_server }}
+pem_port={{ hostvars[pem_server].postgres_port }}
+agent_id={{ pem_agent_id }}
+agent_ssl_key={{ pem_agent_certificate_directory }}/agent{{ pem_agent_id }}.key
+agent_ssl_crt={{ pem_agent_certificate_directory }}/agent{{ pem_agent_id }}.crt
+{% if ssl_ca_file is defined %}
+ca_file={{ ssl_ca_file }}
+{% endif %}
+log_level=warning
+log_location={{ pem_worker_logfile|default('/var/log/pem/worker.log') }}
+agent_log_location={{ pem_agent_logfile|default('/var/log/pem/agent.log') }}
+long_wait=30
+short_wait=10
+alert_threads={{ pem_agent_alert_threads|default(1) }}
+enable_smtp={{ pem_agent_enable_smtp|default('true') }}
+enable_snmp={{ pem_agent_enable_snmp|default('true') }}
+{% if pem_agent_version is version('8', '>=') %}
+enable_webhook=true
+max_webhook_retries=3
+{% endif %}
+allow_server_restart=true
+max_connections=0
+connect_timeout=10
+connection_lifetime=0
+allow_batch_probes=false
+heartbeat_connection=false
+enable_nagios=false

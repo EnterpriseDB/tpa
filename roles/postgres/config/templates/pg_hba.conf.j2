@@ -19,6 +19,22 @@ hostssl all {{ pgbouncer_auth_user }} 127.0.0.1/32 md5
 {% if 'harp-proxy' in role and harp_dcs_user is defined %}
 hostssl all {{ harp_dcs_user }} 127.0.0.1/32 {{ password_encryption }}
 {% endif %}
+{% if 'pem-server' in role %}
+### pem-server: Start
+# Allow connection for 'pem_user' to the pem database
+hostssl pem +pem_user {{ hostvars[pem_server].ip_address }}/32 {{ password_encryption }}
+# Allow the '{{ postgres_user }}' user to connect for pem monitoring
+host    all {{ postgres_user }} {{ hostvars[pem_server].ip_address }}/32 {{ password_encryption }}
+# Allow connection on 'pem' database for pem_agents
+{% for key in hostvars %}
+{% if 'pem-server' in hostvars[key]['role'] or 'pem-agent' in hostvars[key]['role'] %}
+hostssl pem +pem_agent {{ hostvars[key].ip_address }}/32 cert
+{% endif %}{% endfor %}
+{% for line in pem_postgres_extra_hba_settings %}
+{{line}}
+{% endfor %}
+### pem-server: End
+{% endif %}
 host    all             all             127.0.0.1/32            {{ password_encryption }}
 host    all             all             ::1/128                 {{ password_encryption }}
 host    replication     all             127.0.0.1/32            {{ password_encryption }}
@@ -44,6 +60,9 @@ host    all             all             {{ net }}   {{ password_encryption }}
 {%         set method=method+' map='+hba_cert_authentication_map %}
 {%       endif %}
 {%     endif %}
+{% for net in cluster_networks|default([]) %}
+hostssl pem +pem_agent {{ addr }} cert
+{%   endfor %}
 # {{ h }}
 {%     if 'pgbouncer' in role or 'harp-proxy' in role %}
 hostssl all {{ pgbouncer_auth_user }} {{ addr }} md5

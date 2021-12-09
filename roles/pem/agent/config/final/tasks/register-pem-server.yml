@@ -1,0 +1,86 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# We must encrypt the agent's password for storage in the pem database,
+# but the pemEncryptor binary that we use to do so is included only in
+# the pem server package, not the agent package.
+
+- name: Get encrypted postgres password
+  command: "{{ pem_base_dir }}/encryptor/bin/pemEncryptor"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+  vars:
+    _task_environment:
+      PEM_ENC_PAYLOAD: "{{ vars['%s_password' % postgres_user] }}"
+  delegate_to: "{{ pem_server }}"
+  register: enc_password
+  no_log: true
+
+- name: Register PEM backend database server for monitoring and configuration
+  postgresql_query:
+    conninfo: "{{ ps.node_dsn|dbname(ps.pem_database) }}"
+    queries:
+    - text: >
+        SELECT pem.startup(server_desc := %s, server_name := %s,
+          server_host := %s, server_port := %s, server_database := %s,
+          server_ssl := %s, user_name := %s, passwd := %s, ser_group := %s,
+          agentid := %s, agent_database := %s)
+      args:
+      - "{{ pem_server_description }}"  # server_desc
+      - "{{ inventory_hostname }}"      # server_name
+      - "{{ inventory_hostname }}"      # server_host
+      - "{{ postgres_port }}"           # server_port
+      - "{{ pem_database }}"            # server_database
+      - 2                               # server_ssl
+      - "{{ postgres_user }}"           # user_name
+      - "{{ enc_password.stdout }}"     # passwd
+      - "{{ pem_server_group }}"        # ser_group
+      - "{{ pem_agent_id }}"            # agentid
+      - "pem"                           # agent_database
+  vars:
+    ps: "{{ hostvars[pem_server] }}"
+  become_user: "{{ postgres_user }}"
+  delegate_to: "{{ pem_server }}"
+  become: yes
+
+# After calling pem.startup(), we must execute some SQL directly on the
+# PEM server to complete server registration. (We use a unique filename
+# because multiple agent instances may execute this task in parallel on
+# the same PEM server.)
+
+- name: Complete PEM server registration with PEM
+  block:
+  - name: Copy pem-server-random.sql
+    copy:
+      src: "{{ pem_base_dir }}/resources/pem-server-random.sql.in"
+      dest: "{{ sql_path }}"
+      remote_src: yes
+
+  - name: Replace placeholders in pem-server-random.sql
+    replace:
+      path: "{{ sql_path }}"
+      regexp: "{{ item.str }}"
+      replace: "{{ item.to_replace }}"
+    loop:
+      - { str: 'ENC_PASSWORD', to_replace: "{{ enc_password.stdout }}" }
+      - { str: 'AGENT_ID', to_replace: "{{ pem_agent_id }}" }
+      - { str: 'PGPORT', to_replace: "{{ postgres_port }}" }
+
+  - name: Execute pem-server-random.sql
+    command: >
+      {{ postgres_bin_dir }}/psql -a \
+        -h "{{ pem_server }}" -p "{{ ps.postgres_port }}" \
+        -U "{{ ps.postgres_user }}" -d "{{ ps.pem_database }}" \
+        -f "{{ sql_path }}"
+    vars:
+      ps: "{{ hostvars[pem_server] }}"
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - name: Remove pem-server-random.sql
+    file:
+      path: "{{ sql_path }}"
+      state: absent
+  delegate_to: "{{ pem_server }}"
+  vars:
+    sql_path: "/tmp/pem-server-random-{{ inventory_hostname }}.sql"

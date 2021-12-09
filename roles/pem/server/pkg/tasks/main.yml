@@ -1,0 +1,23 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Install PEM package
+  package:
+    name: "{{
+      pem_server_packages|packages_for(ansible_os_family, pem_server_package_version)
+    }}"
+    state: "{{
+      (pem_server_package_version is defined)|ternary('present', 'latest')
+    }}"
+  tags: [pem-server, pkg]
+
+- name: Install sslutils for Postgres Enterprise Manager (PEM) Server
+  package:
+    name: "{{
+      pem_server_sslutils_packages[postgres_family_extended]|packages_for(ansible_os_family, pem_server_sslutils_package_version)
+    }}"
+    state: "{{
+      (pem_server_sslutils_package_version is defined)|ternary('present', 'latest')
+    }}"
+  tags: [pem-server, pkg]
