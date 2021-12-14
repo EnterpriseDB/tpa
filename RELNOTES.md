@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-## v21.10 (unreleased)
+## v21.10 (2021-12-15)
 
 ### Minor changes
 
@@ -11,6 +11,10 @@
 
 - Use the new `pgdgNN-debuginfo` repositories (fixes errors with missing
   debuginfo packages for Postgres)
+
+- Use HARP as default failover manager for BDR-Always-ON architecture
+
+- Documentation improvements, notably for BDR Always-ON and Barman
 
 ## v21.9 (2021-12-01)
 
