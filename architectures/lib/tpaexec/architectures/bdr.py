@@ -68,6 +68,7 @@ class BDR(Architecture):
         postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
         postgres_version = self.args.get("postgres_version")
         bdr_version = self.args.get("bdr_version")
+        harp_enabled = self.args.get("failover_manager") == "harp"
 
         given_repositories = " ".join(tpa_2q_repositories)
 
@@ -124,6 +125,11 @@ class BDR(Architecture):
         elif bdr_version == "4":
             if not tpa_2q_repositories or "/bdr4/" not in given_repositories:
                 tpa_2q_repositories.append("products/bdr4/release")
+
+        if harp_enabled and (
+            not tpa_2q_repositories or "/harp/" not in given_repositories
+        ):
+            tpa_2q_repositories.append("products/harp/release")
 
         cluster_vars.update(
             {

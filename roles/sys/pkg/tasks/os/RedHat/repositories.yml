@@ -34,7 +34,7 @@
   when:
     postgres_installation_method == 'pkg' and (
       postgresql_flavour == 'epas'
-      or failover_manager in ['efm', 'harp']
+      or failover_manager == 'efm'
     )
 
 - set_fact:
@@ -43,14 +43,6 @@
     }}"
 
 # XXX Duplicated in Debian/repositories.yml
-
-- assert:
-    msg: "Set EDB_REPO_TOKENS=/path/to/file to use Cloudsmith repositories"
-    that:
-      edb_repo_tokens is defined
-  when: >
-    'harp' in yum_repository_list
-    or 'harp-etcd' in yum_repository_list
 
 # If we install the EDB repository RPM, all subsequent yum operations
 # will fail until we add authentication information to the baseurl in
