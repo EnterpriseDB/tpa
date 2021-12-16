@@ -42,21 +42,3 @@ class BDR_Always_ON(BDR):
 
     def default_location_names(self):
         return [chr(ord("a") + i) for i in range(self.num_locations())]
-
-    def update_instances(self, instances):
-        """
-        Change pgbouncer+haproxy instances in the default layout templates to
-        use the 'harp-proxy' role instead when HARP is enabled.
-        """
-        super().update_instances(instances)
-        harp_enabled = self.args.get("failover_manager") == "harp"
-        for ins in instances:
-            role = ins.get("role")
-            if harp_enabled and "pgbouncer" in role and "haproxy" in role:
-                ins["role"].append("harp-proxy")
-                ins["role"].remove("pgbouncer")
-                ins["role"].remove("haproxy")
-                if "haproxy_backend_servers" in ins.get("vars", {}):
-                    del(ins["vars"]["haproxy_backend_servers"])
-                    if not ins["vars"]:
-                        del(ins["vars"])

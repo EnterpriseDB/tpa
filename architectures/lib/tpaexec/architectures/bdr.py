@@ -47,13 +47,6 @@ class BDR(Architecture):
             action="store_true",
             help="assign instances pairwise as CAMO partners",
         )
-        g.add_argument(
-            "--enable-harp",
-            action="store_const",
-            const="harp",
-            dest="failover_manager",
-            help="Enable High Availability Routing for Postgres"
-        )
 
     def cluster_vars_args(self):
         return super().cluster_vars_args() + ["bdr_version", "bdr_node_group", "bdr_database"]

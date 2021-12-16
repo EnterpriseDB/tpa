@@ -68,12 +68,7 @@ instances:
       - device_name: /dev/xvdf
         volume_type: none
     role:
-      - pgbouncer
-      - haproxy
-    vars:
-      haproxy_backend_servers:
-        - {{ hostnames[1] }}
-        - {{ hostnames[2] }}
+      - harp-proxy
 
   - node: 11
     Name: {{ hostnames[11] }}
@@ -82,12 +77,7 @@ instances:
       - device_name: /dev/xvdf
         volume_type: none
     role:
-      - pgbouncer
-      - haproxy
-    vars:
-      haproxy_backend_servers:
-        - {{ hostnames[1] }}
-        - {{ hostnames[2] }}
+      - harp-proxy
 
   - node: 12
     Name: {{ hostnames[12] }}
@@ -96,12 +86,7 @@ instances:
       - device_name: /dev/xvdf
         volume_type: none
     role:
-      - pgbouncer
-      - haproxy
-    vars:
-      haproxy_backend_servers:
-        - {{ hostnames[3] }}
-        - {{ hostnames[4] }}
+      - harp-proxy
 
   - node: 13
     Name: {{ hostnames[13] }}
@@ -110,9 +95,4 @@ instances:
       - device_name: /dev/xvdf
         volume_type: none
     role:
-      - pgbouncer
-      - haproxy
-    vars:
-      haproxy_backend_servers:
-        - {{ hostnames[3] }}
-        - {{ hostnames[4] }}
+      - harp-proxy

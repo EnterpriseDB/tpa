@@ -34,12 +34,7 @@ instances:
       - device_name: /dev/xvdf
         volume_type: none
     role:
-      - pgbouncer
-      - haproxy
-    vars:
-      haproxy_backend_servers:
-        - {{ hostnames[1] }}
-        - {{ hostnames[2] }}
+      - harp-proxy
 
   - node: 6
     Name: {{ hostnames[6] }}
@@ -48,9 +43,4 @@ instances:
       - device_name: /dev/xvdf
         volume_type: none
     role:
-      - pgbouncer
-      - haproxy
-    vars:
-      haproxy_backend_servers:
-        - {{ hostnames[1] }}
-        - {{ hostnames[2] }}
+      - harp-proxy

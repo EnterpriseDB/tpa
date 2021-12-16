@@ -1,8 +1,7 @@
 # Configuring HARP
 
 TPAexec will install and configure HARP when `failover_manager` is set
-to `harp`. Use `tpaexec configure … --enable-harp` to generate the
-default configuration.
+to `harp`, which is the default for BDR-Always-ON clusters.
 
 By default, TPAexec will install HARP v2, but you can still
 [install and configure HARP v1](harp1.md) (deprecated)
