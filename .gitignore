@@ -11,3 +11,5 @@ platforms/lxd/inventory/lxd.py
 *tags*
 cscope*
 pdf/*
+test-output/
+.coverage

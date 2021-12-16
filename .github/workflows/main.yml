@@ -15,30 +15,22 @@ env:
   TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
 
 jobs:
-  install-requirements:
-    name: Install TPAexec requirements
-    runs-on: self-hosted
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: ./.github/actions/install-requirements
 
   unit-test:
     name: Unit Test
     runs-on: self-hosted
-    needs: install-requirements
 
     steps:
       - uses: actions/checkout@v2
 
       - uses: ./.github/actions/install-requirements
 
-      - name: Run tests with pytests
+      - name: Install tox
+        run: pip install tox
+
+      - name: Run tests with tox
         run: |
-          source tpa-venv/bin/activate
-          pytest ./lib/tests/ -vv
-          deactivate
+          TOX_PARALLEL_NO_SPINNER=1 tox -e py36-test,dep -p auto
 
   deployment-test:
     name: Deployment Test
@@ -48,12 +40,13 @@ jobs:
         tpa-architecture: ["BDR-Simple", "M1"]
         tpa-platform: ["docker"]
     runs-on: self-hosted
-    needs: install-requirements
 
     steps:
       - uses: actions/checkout@v2
 
       - uses: ./.github/actions/install-requirements
+
+      - uses: ./.github/actions/tpaexec-setup
 
       - name: Generate an initial configuration for a simple cluster
         run: ./bin/tpaexec configure basic-cluster --architecture ${{ matrix.tpa-architecture }} --platform ${{ matrix.tpa-platform }} --os-image tpa/ubuntu
