@@ -15,7 +15,7 @@
 
 - name: Ensure openvpn is in $PATH
   assert:
-    msg: "Please add the location of openvpn to your PATH"
+    msg: "Please ensure that openvpn is installed on the control node (where tpaexec runs) and the location is in $PATH"
     that: openvpn_bin != ''
 
 - name: Ensure certs directory exists locally
