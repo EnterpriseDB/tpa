@@ -59,6 +59,35 @@
       - "{{ item.volumes|default([]) }}"
       - "{{ item.local_source_directories|default([]) }}"
 
+- name: Collect information about {{ item.Name }} container
+  docker_container_info:
+    name: "{{ item.Name }}"
+  register: container_info
+
+- name: Make sure {{ item.Name }} exists
+  assert:
+    that: container_info.exists
+    msg: "Docker failed to provision {{ item.Name }}. Check docker logs for more details"
+
+# At times docker engine will succeed in creating a new container
+# and starting it but it fails to assign proper network settings.
+# So here we do a quick check to confirm if the requested container
+# exists with proper network configs.
+- name: Make sure container {{ item.Name }} received useful network settings
+  assert:
+    that:
+      - ansible_facts.docker_container.NetworkSettings is defined
+      - ( ansible_facts.docker_container.NetworkSettings.IPAddress is defined
+          and ansible_facts.docker_container.NetworkSettings.IPAddress is not empty
+        )
+        or (
+            ansible_facts.docker_container.NetworkSettings.Networks is defined
+            and item.networks is defined
+            and ansible_facts.docker_container.NetworkSettings.Networks[item.networks[0].name]['IPAddress'] is defined
+            and ansible_facts.docker_container.NetworkSettings.Networks[item.networks[0].name]['IPAddress'] is not empty
+        )
+    msg: "Docker failed to create {{ item.Name }} with sensible network settings. Check docker logs for details"
+
 - set_fact:
     docker_container_results: "{{
       docker_container_results|default([])|union([
