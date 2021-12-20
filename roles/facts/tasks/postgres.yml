@@ -479,25 +479,12 @@
 # numbers will all be overestimates). The important thing is to avoid
 # making them too small.
 
-- set_fact:
-    instance_roles: "{{
-      instance_roles|default([])|union([{
-        'name': item,
-        'role': hostvars[item].role
-      }])
-    }}"
-  with_items: "{{ groups['all'] }}"
-
 # This coerces the type of num_postgres_instances to an int
 
 - name: Count the number of postgres instances
   action: set_fact
   args: >
-    {{ ('{"num_postgres_instances": ' ~ postgres_instances ~ '}')|from_json }}
-  vars:
-    postgres_instances: "{{
-      instance_roles|selectattr('role','contains','postgres')|list|count
-    }}"
+    {{ ('{"num_postgres_instances": ' ~ groups['role_postgres']|count ~ '}')|from_json }}
 
 # This coerces the type of twice_postgres_instances to an int
 
@@ -517,13 +504,27 @@
 # PostgreSQL instance + one per database on that instance + two per BDR
 # enabled database + two per peer in the BDR group for each database.”
 
-- set_fact:
+- name: Calculate a base value for max_worker_processes
+  set_fact:
+    base_max_worker_processes: "{{
+      max_worker_processes|default(
+        (
+          ('bdr' in role)|ternary(
+            num_postgres_instances + 1*8 + 2*2 + 2*(num_postgres_instances-1),
+            0
+          )
+        ) + twice_postgres_instances
+      )
+    }}"
+
+# If max_worker_processes is not explicitly set, we use the value
+# calculated above or the default, whichever is larger.
+
+- name: Set default value for max_worker_processes
+  set_fact:
     max_worker_processes: "{{
       max_worker_processes|default(
-        (('bdr' in role)|ternary(
-          num_postgres_instances + 1*8 + 2*2 + 2*(num_postgres_instances-1),
-          0
-        )) + twice_postgres_instances
+        [base_max_worker_processes|int, default_max_worker_processes]|max
       )
     }}"
 

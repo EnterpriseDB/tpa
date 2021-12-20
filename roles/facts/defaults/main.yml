@@ -74,6 +74,7 @@ effective_cache_size_mb: null
 
 default_log_destination: syslog
 default_max_connections: 250
+default_max_worker_processes: 16
 
 default_password_encryption: "{{
   postgres_version is version('10','>=')|ternary('scram-sha-256', 'md5')

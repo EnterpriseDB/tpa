@@ -16,7 +16,7 @@ max_connections = {{ max_connections }}
 shared_buffers = {{ shared_buffers|default(shared_buffers_mb~'MB') }}
 max_prepared_transactions = {{ max_prepared_transactions|default(0) }}
 
-max_worker_processes = {{ max_worker_processes|default(16) }}
+max_worker_processes = {{ max_worker_processes }}
 
 logging_collector = {{ logging_collector|default((log_destination == 'stderr')|ternary('on', 'off')) }}
 
