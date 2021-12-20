@@ -18,7 +18,8 @@
   vars:
     _flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
 
-- assert:
+- name: Validate postgresql_flavour according those which are supported
+  assert:
     msg: >-
       Unrecognised postgresql_flavour setting: '{{ postgresql_flavour }}'
       (try postgresql, 2q, or epas)
@@ -171,7 +172,8 @@
       {%- else -%}xlog
       {%- endif -%}
 
-- assert:
+- name: Disallow setting shared_preload_libraries directly
+  assert:
     msg: >-
       Setting shared_preload_libraries directly is not supported;
       if required, please set it under postgres_conf_settings instead
@@ -486,7 +488,10 @@
     }}"
   with_items: "{{ groups['all'] }}"
 
-- action: set_fact
+# This coerces the type of num_postgres_instances to an int
+
+- name: Count the number of postgres instances
+  action: set_fact
   args: >
     {{ ('{"num_postgres_instances": ' ~ postgres_instances ~ '}')|from_json }}
   vars:
@@ -494,11 +499,15 @@
       instance_roles|selectattr('role','contains','postgres')|list|count
     }}"
 
-- action: set_fact
+# This coerces the type of twice_postgres_instances to an int
+
+- name: Set convenience value for num_postgres_instances*2
+  action: set_fact
   args: >
     {{ ('{"twice_postgres_instances": ' ~ num_postgres_instances*2 ~ '}')|from_json }}
 
-- set_fact:
+- name: Set default values for max_wal_senders and max_replication_slots
+  set_fact:
     max_wal_senders: >-
       {{ max_wal_senders|default(twice_postgres_instances) }}
     max_replication_slots: >-
