@@ -7,6 +7,10 @@ By default, haproxy listens on `127.0.0.1:5432` for requests forwarded
 by [`pgbouncer`](pgbouncer.md) running on the same instance. You must
 specify a list of `haproxy_backend_servers` to forward requests to.
 
+TPAexec will install the latest available version of haproxy by default.
+You can install a specific version instead by setting
+`haproxy_package_version: 1.9.15*` (for example).
+
 You can set the following variables on any `haproxy` instance.
 
 Variable | Default value | Description

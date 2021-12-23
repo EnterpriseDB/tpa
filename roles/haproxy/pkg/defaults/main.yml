@@ -8,5 +8,3 @@ haproxy_packages:
   RedHat:
     - haproxy
   Ubuntu: *debian_haproxy_packages
-
-haproxy_package_version: 1.9.15*
