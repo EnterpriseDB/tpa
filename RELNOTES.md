@@ -2,6 +2,26 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+## v21.11 (unreleased)
+
+## Minor changes
+
+- Install HARP v2 packages from the products/harp/release repository (so
+  that it no longer a separate EDB_REPO_CREDENTIALS_FILE to install)
+
+- Install the latest available haproxy version by default (set
+  haproxy_package_version explicitly to override)
+
+- Use harp-proxy instances instead of haproxy instances in the default
+  BDR-Always-ON configuration; existing configurations are unaffected
+
+- Increase default EFM version to v4.2
+
+## Bugfixes
+
+- Set max_worker_processes to a minimum of 16 (fixes an error that
+  caused EPAS to not start with the default dbms_aq.max_workers)
+
 ## v21.10 (2021-12-15)
 
 ### Minor changes
