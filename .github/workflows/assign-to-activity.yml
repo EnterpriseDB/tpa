@@ -22,4 +22,5 @@ jobs:
       if: github.event.action == 'opened'
       with:
         project: "https://github.com/EnterpriseDB/tpaexec/projects/1"
+        column_name: 'Backlog'
 
