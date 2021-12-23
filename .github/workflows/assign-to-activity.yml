@@ -1,0 +1,25 @@
+---
+# https://github.com/marketplace/actions/assign-to-one-project
+name: Auto Assign to Activity Project
+
+on:
+  issues:
+    types: [opened, labeled]
+  pull_request:
+    types: [opened, labeled]
+  issue_comment:
+    types: [created]
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUBSECURITYTOKEN }}
+
+jobs:
+  assign_one_project:
+    runs-on: ubuntu-latest
+    name: Assign to One Project
+    steps:
+    - name: Assign NEW issues and NEW pull requests to project 1
+      uses: srggrs/assign-one-project-github-action@1.3.1
+      if: github.event.action == 'opened'
+      with:
+        project: "https://github.com/EnterpriseDB/tpaexec/projects/1"
+
