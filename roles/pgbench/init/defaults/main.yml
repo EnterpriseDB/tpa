@@ -3,3 +3,5 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 pgbench_scale_factor: 5
+default_global_lock_timeout: '600s'
+default_global_lock_statement_timeout: '3600s'
