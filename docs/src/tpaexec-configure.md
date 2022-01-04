@@ -104,21 +104,31 @@ is eu-west-1.
 regions, but `tpaexec configure` cannot currently generate such a
 configuration. You must edit config.yml to specify multiple regions.
 
-### Subnet selection
+### Network configuration
 
-Specify `--subnet 192.0.2.128/27` to use a particular subnet, or
-`--subnet-pattern 192.0.x.x` to generate random subnets (as many as
-required by the architecture) matching the given pattern.
+By default, each cluster will be configured with a number of randomly selected
+`/28` subnets from the CIDR range `10.33.0.0/16`, depending on the selected
+architecture.
 
-By default, each cluster is assigned a random /28 subnet under 10.33/16,
-but depending on the architecture, there may be one or more subnets, and
-each subnet may be anywhere between a /24 and a /29.
+Specify `--network 192.168.0.0/16` to assign subnets from a different network.
 
-This option is not meaningful for the "bare" platform, where TPAexec
-will not alter the network configuration of existing servers.
+**Note:** On AWS clusters, this corresponds to the CIDR configured on the
+VPC. By default, TPAexec assumes a VPC named `Test` has already
+been created. See [aws](platform-aws.md#vpc-required) documentation
 
-**Note:** by default platform AWS assumes a VPC named `Test` has already
-been created, see the [aws](platform-aws.md#vpc-required) documentation.
+Specify `--subnet-prefix 26` to assign subnets of a different size, /26 instead
+of /28 in this case.
+
+Specify `--no-shuffle-subnets` to allocate subnets from the start of the
+network CIDR range, without randomisation, e.g. `10.33.0.0/28`, then
+`10.33.0.16/28` and so on.
+
+Specify `--exclude-subnets-from <directory>` to exclude subnets that are
+already used in existing cluster config.yml files. You can specify this
+argument multiple times for each directory.
+
+**Note:** These options are not meaningful for the "bare" platform, where
+TPAexec will not alter the network configuration of existing servers.
 
 ### Instance type
 

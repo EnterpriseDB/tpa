@@ -1,0 +1,76 @@
+---
+architecture: M1
+cluster_name: 32-net-test
+cluster_tags: {}
+
+ec2_ami:
+  Name: debian-10-amd64-20210721-710
+  Owner: '136693071363'
+ec2_instance_reachability: public
+ec2_vpc:
+  Name: Test
+
+cluster_vars:
+  preferred_python_version: python3
+  use_volatile_subscriptions: false
+  vpn_network: 192.168.33.0/24
+
+locations:
+- Name: main
+  az: eu-west-1a
+  region: eu-west-1
+  subnet: 10.33.237.96/28
+- Name: dr
+  az: eu-west-1b
+  region: eu-west-1
+  subnet: 10.33.190.32/28
+
+instance_defaults:
+  default_volumes:
+  - device_name: root
+    encrypted: true
+    volume_size: 16
+    volume_type: gp2
+  - device_name: /dev/xvdf
+    encrypted: true
+    vars:
+      volume_for: postgres_data
+    volume_size: 16
+    volume_type: gp2
+  platform: aws
+  type: t3.micro
+  subnet: 10.33.19.0/28
+  vars:
+    ansible_user: admin
+
+instances:
+- Name: kayak
+  backup: uncover
+  location: main
+  node: 1
+  role: primary
+- Name: quieter
+  location: main
+  node: 2
+  role: replica
+  upstream: kayak
+- Name: uncover
+  location: main
+  node: 3
+  role:
+  - barman
+  - log-server
+  - openvpn-server
+  - monitoring-server
+  volumes:
+  - device_name: /dev/xvdf
+    encrypted: true
+    vars:
+      volume_for: barman_data
+    volume_size: 32
+    volume_type: gp2
+- Name: unpaid
+  location: dr
+  node: 4
+  role: replica
+  upstream: quieter

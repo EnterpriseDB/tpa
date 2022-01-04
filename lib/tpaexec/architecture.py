@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
-
-import sys, os, io
+import sys
+import os
+import io
 import subprocess
 import argparse
 import yaml
@@ -14,6 +15,8 @@ from typing import List
 from ansible.template import Templar
 from ansible.utils.vars import merge_hash
 from functools import reduce
+
+from .net import Network, DEFAULT_SUBNET_PREFIX_LENGTH, DEFAULT_NETWORK_CIDR
 from .platform import Platform
 
 
@@ -31,6 +34,7 @@ class Architecture(object):
         creates a Platform object corresponding to any «--platform x» on the
         command-line.
         """
+        self._net = None
         self.dir = os.path.dirname(os.path.realpath(sys.argv[0]))
         self.lib = os.path.realpath("%s/../lib" % self.dir)
         self.name = os.path.basename(self.dir)
@@ -197,10 +201,22 @@ class Architecture(object):
         for vol in ["root", "barman", "postgres"]:
             g.add_argument("--%s-volume-size" % vol, type=int, metavar="N")
 
-        g = p.add_argument_group("subnet selection")
-        g.add_argument("--subnet")
-        g.add_argument("--subnet-pattern", metavar="PATTERN")
-        g.add_argument("--exclude-subnets-from", metavar="DIR")
+        g = p.add_argument_group("network and subnet selection")
+        g.add_argument("--network", metavar="NET")
+        g.add_argument(
+            "--exclude-subnets-from",
+            metavar="DIR",
+            action="append",
+            dest="exclude_subnet_dirs",
+            default=[],
+        )
+        g.add_argument("--no-shuffle-subnets", action="store_true")
+        g.add_argument(
+            "--subnet-prefix",
+            default=DEFAULT_SUBNET_PREFIX_LENGTH,
+            type=int,
+            help="number of bits to use to define subnets, e.g. to create subnets as /26 use 26",
+        )
 
         g = p.add_argument_group("hostname selection")
         g.add_argument("--hostnames-from", metavar="FILE")
@@ -500,42 +516,87 @@ class Architecture(object):
             layout = f"layouts/{layout}.yml.j2"
         return layout or "main.yml.j2"
 
+    @property
+    def net(self):
+        """Return the top level network CIDR object."""
+        if self._net is None:
+            if self.args.get("network"):
+                cidr = self.args["network"]
+            else:
+                cidr = self.args.get("subnet", DEFAULT_NETWORK_CIDR)
+
+            self.args.setdefault("subnet_prefix", DEFAULT_SUBNET_PREFIX_LENGTH)
+            net = Network(cidr, self.args["subnet_prefix"])
+            self._net = net
+        return self._net
+
     def subnets(self, num):
         """
-        Returns the requested number of subnets
+        Returns the requested number of subnets.
+
+        Perform exclusion checks on provided cluster directories and capacity checks against required location
+        requirements.
+
         """
-
-        # If --subnet forced a single subnet, we return an array with that one
-        # subnet in it, regardless of the number of subnets that were requested
-        subnet = self.args.get("subnet")
-        if subnet is not None:
-            return [subnet]
-
-        env = {}
-        for arg in ["exclude_subnets_from", "subnet_pattern"]:
-            if self.args[arg] is not None:
-                env[arg.upper()] = self.args[arg]
-
-        popen_params = {}
-
-        if int(str(sys.version_info.major) + str(sys.version_info.minor)) >= 36:
-            popen_params["encoding"] = sys.getdefaultencoding()
-
-        p = subprocess.Popen(
-            ["%s/subnets" % self.lib, str(num)],
-            stdin=None,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=env,
-            **popen_params,
+        subnets = self.net.subnets(limit=num)
+        subnets.exclude(
+            excludes=self._get_subnets_from(
+                exclude_dirs=self.args.get("exclude_subnet_dirs", [])
+            )
         )
-        (stdout, stderr) = p.communicate()
 
-        if p.returncode != 0:
-            print(stderr.strip(), file=sys.stderr)
+        if len(list(subnets)) < num:
+            print(
+                f"ERROR: Network {subnets.cidr.with_prefixlen} cannot contain {num} /{subnets.new_prefix} subnets.\n"
+                f"ERROR: You might want to try providing a larger network with --network or smaller subnets with"
+                f" --subnet-prefix {subnets.new_prefix+1}",
+                file=sys.stderr,
+            )
             sys.exit(-1)
 
-        return stdout.strip().split(" ")
+        # This dramatically reduces conflicts between people who are deploying their clusters into the same VPC
+        # otherwise we pick the same subnets in the network range every time
+        if not self.args.get("no_shuffle_subnets"):
+            subnets.shuffle()
+
+        # Select a number of subnets according to the limit set (and convert from an iterator to a list of strings)
+        return [str(s) for s in subnets]
+
+    @staticmethod
+    def _get_subnets_from(exclude_dirs):
+        """
+        Look for subnet ranges defined in the cluster config directory list provided.
+
+        If any subnet exclusion directories are specified, look for "subnet: a.b.c.d/n" declarations in
+        config.yml files within the given directories and exclude those subnets from the list.
+
+        Args:
+            exclude_dirs: List of directories to look in
+
+        Returns: List of subnet ranges found
+
+        """
+        values = []
+        for dir_name in exclude_dirs:
+            try:
+                with open(f"{dir_name}/config.yml") as exclude_config_yml:
+                    config_data = yaml.safe_load(exclude_config_yml)
+                    for key in ("instances", "locations"):
+                        values.extend(
+                            s["subnet"] for s in config_data.get(key) if s.get("subnet")
+                        )
+                    instance_default_subnet = config_data.get(
+                        "instance_defaults", {}
+                    ).get("subnet")
+                    if instance_default_subnet:
+                        values.append(instance_default_subnet)
+            except FileNotFoundError:
+                print(
+                    f"Could not open a config.yml file in the provided path: {dir_name}",
+                    file=sys.stderr,
+                )
+                sys.exit(-1)
+        return list(set(values))
 
     def _init_locations(self, locations):
         """
