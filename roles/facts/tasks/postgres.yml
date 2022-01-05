@@ -484,7 +484,7 @@
 - name: Count the number of postgres instances
   action: set_fact
   args: >
-    {{ ('{"num_postgres_instances": ' ~ groups['role_postgres']|count ~ '}')|from_json }}
+    {{ ('{"num_postgres_instances": ' ~ groups['role_postgres']|default([])|count ~ '}')|from_json }}
 
 # This coerces the type of twice_postgres_instances to an int
 
