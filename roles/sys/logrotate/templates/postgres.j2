@@ -1,13 +1,12 @@
 {{ postgres_logfile }} {
-	daily
-        maxsize {{ logrotate_maxsize|default('1G') }}
-        rotate {{ logrotate_rotate|default('7') }}
-	missingok
-	compress
-	dateext
-	copytruncate
-	create 640 {{ postgres_user }} {{ postgres_group }}
-	maxage {{ logrotate_maxage|default('28') }}
-
-        su {{ postgres_user }} {{ postgres_group }}
+    daily
+    maxsize {{ logrotate_maxsize|default('1G') }}
+    rotate {{ logrotate_rotate|default('7') }}
+    missingok
+    compress
+    dateext
+    copytruncate
+    create 640 {{ postgres_user }} {{ postgres_group }}
+    maxage {{ logrotate_maxage|default('28') }}
+    su {{ postgres_user }} {{ postgres_group }}
 }
