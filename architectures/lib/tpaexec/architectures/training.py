@@ -6,7 +6,11 @@ from ..architecture import Architecture
 
 import sys
 
+ISSUE_URL = "https://github.com/EnterpriseDB/tpaexec/issues/"
+
+
 class Training(Architecture):
+
     def add_architecture_options(self, p, g):
         g.add_argument(
             "--num-instances",
@@ -55,7 +59,6 @@ class Training(Architecture):
     def update_cluster_tags(self, cluster_tags):
         cluster_tags.update(
             {
-                "Reference": "https://redmine.2ndquadrant.com/issues/%s"
-                % self.args["issue"]
+                "Reference": f"{ISSUE_URL}{self.args['issue']}"
             }
         )

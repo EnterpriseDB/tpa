@@ -19,7 +19,12 @@
   - include_role: name=sys
     tags: always
 
-  - include_role: name=postgres
+  - include_role:
+    name: postgres
+    apply:
+      tags: postgres
+    when: >
+      'postgres' in role
     tags: always
 
   - include_role: name=final
