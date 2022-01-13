@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # We start with ec2_ami and set up ec2_region_amis to map every region
 # to the AMI id to use when provisioning instances in that region.

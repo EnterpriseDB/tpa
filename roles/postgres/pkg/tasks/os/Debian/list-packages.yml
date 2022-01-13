@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # For Postgres 10+ on Debian and Ubuntu, the main postgresql package
 # "provides" a virtual postgresql-contrib, and there is no longer a

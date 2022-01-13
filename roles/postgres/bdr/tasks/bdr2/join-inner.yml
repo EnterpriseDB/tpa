@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # We do the join and the wait in separate tasks so that we can see (from
 # the outside) the new rows in bdr.bdr_nodes and so on.

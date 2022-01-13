@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # We configure pgbouncer's auth_query to execute a function named
 # pgbouncer_get_auth() to retrieve the password for a user. We must now

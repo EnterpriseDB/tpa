@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # Given a region and a VPC specification (which may take various forms),
 # we return a vpc-id. If the desired VPC does not already exist, we try

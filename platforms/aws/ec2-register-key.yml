@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # We register ssh_key_file.pub as ec2_key_name in each region, and set
 # ec2_instance_key to the name of the registered key.

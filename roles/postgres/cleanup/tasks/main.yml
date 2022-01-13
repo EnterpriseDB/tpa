@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # Handle setting synchronous_standby_names for non-BDR instances (see
 # postgres/bdr/tasks/postgres-reconfig.yml for BDR instances).

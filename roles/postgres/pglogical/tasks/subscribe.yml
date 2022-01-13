@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # We process an entry from ``subscriptions`` with ``type: pglogical``,
 # and either create a new pglogical subscription or alter an existing

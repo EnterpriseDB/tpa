@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # When we first create /etc/barman.d/backup_name.conf, we set it to
 # inactive (in barman/tasks/client.yml), and re-enable it here.

@@ -1,4 +1,4 @@
-© Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+© Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 Confidential and private property of 2ndQuadrant Limited. All rights
 reserved.

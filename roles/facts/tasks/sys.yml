@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # First, we set the /etc/hosts lines for each host: one for the main IP
 # address and hostname, plus one for each hostname_aliases entry. Then

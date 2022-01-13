@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # We'll need to execute openvpn on the control (local) instance several
 # times, so we check that it's accessible through $PATH, which we add

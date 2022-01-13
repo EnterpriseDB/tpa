@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # Both versions of harp want their harp_directory to be owned by
 # postgres_user; we must make sure it exists even on harp-proxy

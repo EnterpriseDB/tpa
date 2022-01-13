@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # Having convinced ourselves that we're streaming, we force a switch to
 # a new WAL segment to give the archiver something to do. We could use

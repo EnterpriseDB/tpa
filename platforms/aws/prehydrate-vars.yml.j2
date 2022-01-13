@@ -1,4 +1,4 @@
-{# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved. #}
+{# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
 {% for h in ansible_play_hosts %}
 {%   set v = hostvars[h] %}
 instance_{{ v['node'] }}_private_ip: {{ v['private_ip'] }}

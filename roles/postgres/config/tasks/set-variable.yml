@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # This include file expects to be passed the name and (properly quoted)
 # value of a postgresql.conf parameter, and will write a file into the

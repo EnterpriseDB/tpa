@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # For now, we want to run tests only against one CAMO pair from another
 # BDR instance (we want a BDR instance so that it has bdr_camo_client

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # Set the openvpn IP address for each host based on its node number. I
 # wish there were a more graceful way to do this. (Note that we cannot

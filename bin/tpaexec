@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 #
 # The dispatcher for all TPAexec functionality, including initial setup,
 # and the configuration, provision, deployment, and testing of clusters.

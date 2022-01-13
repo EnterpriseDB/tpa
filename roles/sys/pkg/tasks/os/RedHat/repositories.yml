@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - name: Install gpg
   raw: command -v gpg >/dev/null 2>&1 || yum -y install gnupg2; true
