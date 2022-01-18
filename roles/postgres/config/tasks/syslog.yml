@@ -2,6 +2,23 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+- name: Check the current owner of the postgres log under /var/log/postgres
+  stat:
+    path: /var/log/postgres/postgres.log
+  register: postgres_log_file
+
+- name: Ensure all log files under /var/log/postgresql are owned by the postgres user and group
+  file:
+    path: /var/log/postgres
+    state: directory
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    recurse: yes
+  when:
+    - postgres_log_file.stat.exists
+    - postgres_log_file.stat.pw_name != postgres_user
+    - postgres_log_file.stat.gr_name != postgres_group
+
 - name: Add rsyslog rule for PostgreSQL logging
   template:
     src: syslog-postgres.conf.j2
