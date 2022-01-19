@@ -12,3 +12,8 @@ repmgr_packages:
     Debian: &epas_repmgr_packages
       - edb-as{{ postgres_versionNN }}-repmgr
     RedHat: *epas_repmgr_packages
+  pgextended:
+    Debian:
+      - postgresql-{{ postgres_version }}-repmgr
+    RedHat:
+      - postgresql{{ postgres_versionNN }}-repmgr
