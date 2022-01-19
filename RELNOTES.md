@@ -2,6 +2,37 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.1 (2022-01-19)
+
+## Minor changes
+
+- Revise max_worker_processes and set a reasonable floor value
+  of 16. Normally this value is calculated using the number of
+  postgres instances as a base value, the new base default is now
+  used if this results in a lower value than the floor.
+
+- Update Training architecture to current conventions
+
+- Make global lock timeouts configurable for pgbench init
+
+- Expose additional config for harp template files, so they can
+  be customised by the user
+
+## Bugfixes
+
+- Ensure permissions for rsyslog managed postgres log is correct. On 
+  existing clusters built with Ubuntu OS rsyslog is set to drop root
+  privileges after start up. This makes it impossible for log files
+  to be owned by another user. In TPAexec postgres log files are owned
+  by the user `postgres`. This change will ensure existing log files are
+  owned by this user as well as disabling the privilege drop configuration
+  in rsyslog.
+
+- Fix case where zero postgres instances exist. If no instances in a
+  cluster have a role which would mean postgres wouldn't be installed
+  a "deploy" action will complete successfully. This was not the case
+  previously.
+
 ## v21.11 (2021-12-23)
 
 ## Minor changes
