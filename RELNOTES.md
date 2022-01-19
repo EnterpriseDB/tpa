@@ -6,6 +6,16 @@
 
 ## Minor changes
 
+- Ensure correct package name for repmgr on RedHat from BDR Enterprise
+  2q repositories is used. This caters for a fairly small corner case
+  therefore previously configured clusters where this is seen should
+  be refreshed manually if a package conflict is seen. This can be done
+  by removing any packages matching "*repmgr*" before rerunning deploy.
+
+## v22.1 (2022-01-19)
+
+## Minor changes
+
 - Revise max_worker_processes and set a reasonable floor value
   of 16. Normally this value is calculated using the number of
   postgres instances as a base value, the new base default is now
