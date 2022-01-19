@@ -61,6 +61,9 @@ proxies:
   server_tls_protocols: secure
   auth_query: "SELECT * FROM pg_catalog.pgbouncer_get_auth($1)"
   database_name: {{ bdr_database }}
+  listen_address: {{ inventory_hostname }}
+  listen_port: {{ pgbouncer_port }}
+  client_tls_sslmode: require
   instances:
 {% for p in groups['role_harp-proxy']|default([]) %}
 {%   if harp_consensus_protocol != 'etcd' or hostvars[p].harp_location == harp_location %}
