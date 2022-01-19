@@ -25,18 +25,18 @@ nodes:
   db_data_dir: {{ postgres_data_dir }}
   db_conf_dir: {{ postgres_conf_dir }}
   db_log_file: "/tmp/pg_ctl.log"
-  ready_status_duration: 10
-  leader_lease_duration: 30
-  lease_refresh_interval: 5000
-  dcs_reconnect_interval: 1000  
+  ready_status_duration: {{v.harp_ready_status_duration | default(10)}}
+  leader_lease_duration: {{v.harp_leader_lease_duration | default(30)}}
+  lease_refresh_interval: {{v.harp_lease_refresh_interval | default(5000)}}
+  dcs_reconnect_interval: {{v.harp_dcs_reconnect_interval | default(1000)}}  
   priority: 500
-  camo_enforcement: lag_only
-  stop_database_when_fenced: false
-  fenced_node_on_dcs_failure: false
+  stop_database_when_fenced: {{v.harp_stop_database_when_fenced | default(false)}}
+  fenced_node_on_dcs_failure: {{v.harp_fenced_node_on_dcs_failure | default(false)}}
   max_dcs_failures: 10
   maximum_lag: {{ v.harp_maximum_lag | default(1048576)}}
   maximum_camo_lag: {{ v.harp_maximum_camo_lag | default(1048576)}}
   camo_enforcement: {{ v.harp_camo_enforcement | default('lag_only')}}
+  use_unix_sock: {{v.harp_use_unix_sock | default(false)}}
 {%   endif %}
 {% endfor %}
 
@@ -47,6 +47,8 @@ proxies:
   auth_user: {{ pgbouncer_auth_user }}
   default_pool_size: 25
   max_client_conn: 75
+  timeout: {{ harp_proxy_timeout | default(1) }}
+  keepalive: {{ harp_proxy_keepalive | default(5)}}
   logfile: {{ harp_directory }}/pgbouncer.log
   pidfile: {{ harp_directory }}/pgbouncer.pid
   auth_file: /etc/harp/userlist.txt
