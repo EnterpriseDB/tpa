@@ -3,7 +3,8 @@ cluster:
 
 dcs:
   driver: "{{ harp_consensus_protocol }}"
-  request_timeout: 250
+  request_timeout: "{{ harp_request_timeout | default(250) }}"
+  poll_timeout: "{{ harp_watch_poll_pause | default(500) }}"
   ssl: "off"
   ssl_ca_file: ""
   ssl_cert_file: ""
