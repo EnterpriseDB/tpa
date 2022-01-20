@@ -29,7 +29,7 @@ nodes:
   leader_lease_duration: {{v.harp_leader_lease_duration | default(30)}}
   lease_refresh_interval: {{v.harp_lease_refresh_interval | default(5000)}}
   dcs_reconnect_interval: {{v.harp_dcs_reconnect_interval | default(1000)}}  
-  priority: 500
+  priority: {{ v.harp_dcs_priority | default(500) }}
   stop_database_when_fenced: {{v.harp_stop_database_when_fenced | default(false)}}
   fenced_node_on_dcs_failure: {{v.harp_fenced_node_on_dcs_failure | default(false)}}
   max_dcs_failures: 10
@@ -61,6 +61,8 @@ proxies:
   server_tls_protocols: secure
   auth_query: "SELECT * FROM pg_catalog.pgbouncer_get_auth($1)"
   database_name: {{ bdr_database }}
+  listen_address: {{ inventory_hostname }}
+  listen_port: {{ pgbouncer_port }}
   instances:
 {% for p in groups['role_harp-proxy']|default([]) %}
 {%   if harp_consensus_protocol != 'etcd' or hostvars[p].harp_location == harp_location %}

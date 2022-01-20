@@ -3,7 +3,8 @@ cluster:
 
 dcs:
   driver: "{{ harp_consensus_protocol }}"
-  request_timeout: 250
+  request_timeout: "{{ harp_request_timeout | default(250) }}"
+  watch_poll_interval: "{{ harp_watch_poll_interval | default(500) }}"
   ssl: "off"
   ssl_ca_file: ""
   ssl_cert_file: ""
@@ -33,8 +34,6 @@ proxy:
   name: "{{ inventory_hostname }}-proxy"
   location: {{ harp_location }}
   type: "{{ harp_proxy_mode|default("pgbouncer") }}"
-  listen_address: {{ inventory_hostname }}
-  listen_port: {{ pgbouncer_port }}
   log_level: debug
   pgbouncer_bin_dir: {{ pgbouncer_bin_dir }}
 {% endif %}
