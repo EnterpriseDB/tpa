@@ -11,5 +11,7 @@ if $programname == 'postgres' then {
         FileCreateMode="0640"
         File="/var/log/postgres/postgres.log"
     )
+{% if log_server is not defined %}
     stop
+{% endif -%}
 }
