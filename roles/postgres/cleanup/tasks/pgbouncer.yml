@@ -55,3 +55,4 @@
   when: >
     'pgbouncer' in cluster_facts.roles
     and postgres_users|json_query("[?username=='pgbouncer']") is empty
+    and (cleanup_pgbouncer_user|default(true))
