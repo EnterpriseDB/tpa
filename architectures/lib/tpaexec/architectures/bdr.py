@@ -114,7 +114,7 @@ class BDR(Architecture):
             extensions = ["pglogical"]
             if not tpa_2q_repositories:
                 if postgresql_flavour == "2q":
-                    tpa_2q_repositories.append("products/2ndqpostgres/release")
+                    tpa_2q_repositories.append("products/bdr_enterprise_3_7/release")
                 elif postgresql_flavour == "epas":
                     tpa_2q_repositories.append(
                         "products/bdr_enterprise_3_7-epas/release"
