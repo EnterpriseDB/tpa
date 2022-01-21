@@ -2,6 +2,18 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.3 (2022-01-20)
+
+## Minor changes
+
+- Moved listen_addr and listen_port in harp2 configuration files
+
+- Add hook to prevent removal of pgbouncer user from database
+
+## Bugfixes
+
+- Rsyslog log-server not sending/storing postgres logs as intended
+
 ## v22.2 (2022-01-19)
 
 ## Minor changes
