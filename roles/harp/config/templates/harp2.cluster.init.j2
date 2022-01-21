@@ -12,6 +12,15 @@ locations:
 {%   endfor %}
 {% endif %}
 
+{% set local_vars = { 'proxy_hostname': ''} %}
+{% for l in groups['role_harp-proxy']|default([])  %}
+{%   set v = hostvars[l] %}
+{%   if 'harp-proxy' in v.role %}
+{%      if local_vars.update({'proxy_hostname': v.inventory_hostname}) %} {% endif %}
+{%   endif %}
+{% endfor %}
+
+
 nodes:
 {% for h in groups|members_of(bdr_node_group, not_in=bdr_ro_groups) %}
 {%   set v = hostvars[h] %}
@@ -61,7 +70,7 @@ proxies:
   server_tls_protocols: secure
   auth_query: "SELECT * FROM pg_catalog.pgbouncer_get_auth($1)"
   database_name: {{ bdr_database }}
-  listen_address: {{ inventory_hostname }}
+  listen_address: {{ local_vars['proxy_hostname'] }}
   listen_port: {{ pgbouncer_port }}
   instances:
 {% for p in groups['role_harp-proxy']|default([]) %}
