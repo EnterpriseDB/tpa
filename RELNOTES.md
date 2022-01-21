@@ -2,6 +2,13 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.4 (2022-01-21)
+
+## Bugfixes
+
+- Fixed a harp config defect where listen_address is not always set
+  to the proxy hostname.
+
 ## v22.3 (2022-01-20)
 
 ## Minor changes
