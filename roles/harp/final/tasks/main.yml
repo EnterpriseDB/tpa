@@ -30,6 +30,11 @@
 
 - meta: flush_handlers
 
+- include_role:
+    name: harp/service
+    apply:
+      tags: [harp, service]
+
 - name: Start or restart harp services
   service:
     name: "{{ item }}"
