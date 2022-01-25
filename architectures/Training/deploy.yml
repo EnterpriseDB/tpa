@@ -20,9 +20,9 @@
     tags: always
 
   - include_role:
-    name: postgres
-    apply:
-      tags: postgres
+      name: postgres
+      apply:
+        tags: postgres
     when: >
       'postgres' in role
     tags: always
