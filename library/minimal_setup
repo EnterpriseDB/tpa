@@ -50,7 +50,7 @@ case "${ID}:${VERSION_ID%.*}" in
         release=$VERSION_CODENAME
         python=python3
         ;;
-    rhel:8|centos:8|ol:8)
+    rhel:8|centos:8|ol:8|rocky:8)
         distribution=RedHat
         release=$VERSION_ID
         python=python3

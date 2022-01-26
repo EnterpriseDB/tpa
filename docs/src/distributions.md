@@ -22,7 +22,7 @@ more on the latter.)
 
 ## RedHat
 
-* RHEL/CentOS 8.x is fully supported (python3 only)
+* RHEL/CentOS/Rocky 8.x is fully supported (python3 only)
 * RHEL/CentOS 7.x is fully supported (python2 only)
 
 ## Package availability

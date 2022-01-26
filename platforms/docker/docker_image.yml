@@ -67,6 +67,8 @@
       redhat-7: centos:7
       redhat-8: centos:8
       redhat-latest: centos:8
+      rocky-8: rockylinux:8
+      rocky-latest: rockylinux:8
   when:
     image.startswith('tpa/')
     and _image_key in _tpa_images
