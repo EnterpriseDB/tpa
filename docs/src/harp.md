@@ -41,17 +41,8 @@ Variable | Default value | Description
 By default, TPAexec will set `harp_consensus_protocol: etcd`, and
 install and configure etcd on the BDR instances.
 
-HARP v2 requires etcd v3.5.0 or above, which is not available in the
-default package repositories for any distribution. You must provide the
-`harp-etcd` and `harp-etcdctl` packages; otherwise, TPAexec can download
-and install etcd v3.5.0 from the Github release tarball if you specify
-
-```
-cluster_vars:
-  etcd_packages:
-    Debian: []
-    RedHat: []
-```
+HARP v2 requires etcd v3.5.0 or above, which is available in the
+products/harp/release package repositories provided by EDB.
 
 You can configure the following parameters for etcd:
 

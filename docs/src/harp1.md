@@ -59,13 +59,7 @@ cluster_vars:
   etcd_packages:
     Debian:
     - etcd
-    RedHat: []
 ```
-
-Note that currently no `etcd` packages are available for CentOS 8. If
-you leave the package list empty, as above, TPAexec will install etcd
-v3.5.0 from the latest Github release tarball. (This works on Debian
-too, which has an older etcd package in the default repositories.)
 
 The following variables can be set for any `etcd` instance:
 
