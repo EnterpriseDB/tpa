@@ -2,6 +2,23 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.5 (unreleased)
+
+## Minor changes
+
+- Run HARP v2 as `enterprisedb` user when deployed with EPAS
+
+- Per instance use of `listen_address` and `listen_port` in HARP v2
+  to cater to multi-proxy setup
+
+## Bugfixes
+
+- Default values for `request_timeout` and `watch_poll_interval`
+  in HARP v2 config should not use quotes
+
+- Default to products/bdr_enterprise_3_7/release repository when
+  `postgresql_flavour` is '2q' for BDR architectures.
+
 ## v22.4 (2022-01-21)
 
 ## Bugfixes
