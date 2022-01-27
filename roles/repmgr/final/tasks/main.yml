@@ -15,7 +15,9 @@
     'replica' in role
 - include_role: name=repmgr/witness/final
   when: >
-    'witness' in role
+    'witness' in role and
+    'postgres' in role and
+    not ('bdr' in role)
 
 # Since the topology of the cluster may have changed during the repmgr
 # setup process, we collect cluster_facts again.
