@@ -160,6 +160,11 @@ class Architecture(object):
             help="Install 2ndQuadrant Postgres for BDR EE (2ndQPostgres)",
         )
         g.add_argument(
+            "--postgres-flavour",
+            dest="postgresql_flavour",
+            choices=["2q", "epas", "postgresql"],
+        )
+        g.add_argument(
             "--postgres-version",
             choices=["9.4", "9.5", "9.6", "10", "11", "12", "13", "14"],
         )

@@ -13,6 +13,8 @@ on:
 env:
   LANG: "C.UTF-8"
   TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
 
 jobs:
 
@@ -37,8 +39,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tpa-architecture: ["BDR-Simple", "M1"]
+        tpa-architecture: ["M1", "BDR-Always-ON"]
         tpa-platform: ["docker"]
+        postgres-flavour: ["postgresql", "2q", "epas"]
+        exclude:
+          - tpa-architecture: "M1"
+            postgres-flavour: "2q"
     runs-on: self-hosted
 
     steps:
@@ -48,8 +54,13 @@ jobs:
 
       - uses: ./.github/actions/tpaexec-setup
 
+      - name: Export EDB_REPO_CREDENTIALS_FILE to use EDB repositories
+        run: |
+          umask 066 && echo $EDB_REPO_CREDENTIALS > $EDB_REPO_CREDENTIALS_FILE
+        shell: bash
+
       - name: Generate an initial configuration for a simple cluster
-        run: ./bin/tpaexec configure basic-cluster --architecture ${{ matrix.tpa-architecture }} --platform ${{ matrix.tpa-platform }} --os-image tpa/ubuntu
+        run: ./bin/tpaexec configure basic-cluster --architecture ${{ matrix.tpa-architecture }} --platform ${{ matrix.tpa-platform }} --postgres-flavour ${{ matrix.postgres-flavour }} --os-image tpa/ubuntu
 
       - name: Provision the cluster
         run: ./bin/tpaexec provision basic-cluster
