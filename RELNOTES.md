@@ -2,6 +2,27 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.6 (2022-01-31)
+
+### Major changes
+
+- Change the default image on Docker and Vagrant to rockylinux:8 (since
+  centos:8 is now EOL). Please remove your existing tpa/redhat images to
+  rebuild using the new base image
+
+### Minor changes
+
+- Allow harp-proxy to use a separate `harp_dcs_user` to connect to BDR
+  when using `harp_consensus_protocol: bdr`
+
+### Bugfixes
+
+- Fix an "nodename is tagged as witness for nodename, but is registered
+  as a primary already" error from repmgr on BDR witness instances
+
+- Install and start harp only on primary candidates and proxy instances,
+  and exclude subscriber-only nodes from the DCS endpoint list
+
 ## v22.5 (2022-01-27)
 
 ## Minor changes
