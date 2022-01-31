@@ -225,3 +225,6 @@ platforms/lxd/inventory/lxd.py
 cscope*
 pdf/*
 test-output/
+
+# VS Code
+.vscode
