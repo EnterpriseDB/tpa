@@ -21,7 +21,11 @@ dcs:
 {%   for h in groups[bdr_node_group] %}
 {%     set v = hostvars[h] %}
 {%     if 'subscriber-only' not in v.role %}
+{%       if 'harp-proxy' in role and harp_dcs_user is defined %}
+  - "{{ v.bdr_node_dsn|dbname(v.bdr_database, user=harp_dcs_user) }}"
+{%       else %}
   - "{{ v.bdr_node_dsn }}"
+{%       endif %}
 {%     endif %}
 {%   endfor %}
 {% endif %}

@@ -40,6 +40,19 @@
       and groups['role_harp-proxy']|default([]) is not empty)
   tags: always
 
+# If we want harp-proxy to use a separate readonly user, we need to
+# create it too (and specify the username in the DCS configuration).
+
+- include_role: name=postgres/createuser
+  vars:
+    username: "{{ harp_dcs_user }}"
+  when: >
+    harp_dcs_user is defined
+    and ('harp-proxy' in role
+      or ('postgres' in role
+        and groups['role_harp-proxy']|default([]) is not empty))
+  tags: always
+
 - include_tasks: harp2-proxy.yml
   when: >
     'harp-proxy' in role

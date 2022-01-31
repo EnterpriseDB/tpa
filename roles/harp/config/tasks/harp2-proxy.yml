@@ -28,13 +28,11 @@
       - role_subscriber-only
       - role_witness
 
-# We must also add the pgbouncer password to .pgpass, so that harp_proxy
+# We must also add the pgbouncer password to .pgpass, so that harp-proxy
 # can use it to connect to pgbouncer and issue administrative commands.
 #
-# TODO: When using `harp_consensus_protocol: bdr`, harp-proxy needs the
-# postgres password to connect to BDR. We should provide the password
-# conditionally, and use an unprivileged or less-privileged user if
-# possible.
+# When using `harp_consensus_protocol: bdr`, harp-proxy also needs the
+# password of the user used to connect to BDR.
 
 - include_role: name=postgres/pgpass
   vars:
@@ -43,4 +41,4 @@
     pgpass_group: "{{ postgres_group }}"
     pgpass_users:
       - pgbouncer
-      - postgres
+      - "{{ harp_dcs_user|default(postgres_user) }}"

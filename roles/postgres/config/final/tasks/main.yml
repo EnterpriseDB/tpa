@@ -214,6 +214,18 @@
     postgres_users|json_query("[?username=='%s']" % pgbouncer_auth_user) != []
   tags: pgbouncer
 
+# If there's an entry for a harp_dcs_user in postgres_users, we must
+# grant it the required privileges.
+
+- include_tasks:
+    file: harp.yml
+    apply:
+      tags: harp
+  when:
+    - harp_dcs_user is defined
+    - postgres_users|json_query("[?username=='%s']" % harp_dcs_user) != []
+  tags: harp
+
 - name: Include postgres-config-final hook
   include_tasks: "{{ hook }}"
   when:

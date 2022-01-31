@@ -16,6 +16,9 @@ local   all             all                                     {{ postgres_hba_
 {% if 'pgbouncer' in role or 'harp-proxy' in role %}
 hostssl all {{ pgbouncer_auth_user }} 127.0.0.1/32 md5
 {% endif %}
+{% if 'harp-proxy' in role and harp_dcs_user is defined %}
+hostssl all {{ harp_dcs_user }} 127.0.0.1/32 {{ password_encryption }}
+{% endif %}
 host    all             all             127.0.0.1/32            {{ password_encryption }}
 host    all             all             ::1/128                 {{ password_encryption }}
 host    replication     all             127.0.0.1/32            {{ password_encryption }}
@@ -44,6 +47,9 @@ host    all             all             {{ net }}   {{ password_encryption }}
 # {{ h }}
 {%     if 'pgbouncer' in role or 'harp-proxy' in role %}
 hostssl all {{ pgbouncer_auth_user }} {{ addr }} md5
+{%     endif %}
+{%     if 'harp-proxy' in role and harp_dcs_user is defined %}
+hostssl all {{ harp_dcs_user }} {{ addr }} {{ password_encryption }}
 {%     endif %}
 {%     if 'efm-witness' in role or ('postgres' in role and failover_manager == 'efm')  %}
 host all efm {{ addr }} md5

@@ -1,0 +1,31 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Grant required privileges to {{ harp_dcs_user }}
+  postgresql_privs:
+    database: "{{ bdr_database }}"
+    privs: "{{ item.privs }}"
+    type: "{{ item.type }}"
+    objs: "{{ item.objs }}"
+    schema: "{{ item.schema }}"
+    roles: "{{ harp_dcs_user }}"
+    grant_option: yes
+    state: present
+  with_items:
+    - type: table
+      privs: SELECT
+      schema: bdr
+      objs: consensus_kv_data
+    - type: function
+      privs: EXECUTE
+      schema: bdr
+      objs: "consensus_kv_fetch(text)"
+    - type: function
+      privs: EXECUTE
+      schema: bdr
+      objs: "consensus_kv_store(text:jsonb:jsonb:int)"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    inventory_hostname == first_bdr_primary
