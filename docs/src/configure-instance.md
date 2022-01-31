@@ -28,7 +28,7 @@ You can use the
 to execute tasks before any package repositories are configured.
 
 * [Configure YUM repositories](yum_repositories.md)
-  (for RHEL and Rocky)
+  (for RHEL, Rocky and AlmaLinux)
 
 * [Configure APT repositories](apt_repositories.md)
   (for Debian and Ubuntu)

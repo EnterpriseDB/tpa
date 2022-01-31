@@ -8,7 +8,7 @@ prior arrangement. Please contact your account manager to request
 access.
 
 We publish TPAexec packages for Debian 10 (buster), Ubuntu 20.04
-(focal), Ubuntu 18.04 (bionic) RHEL/CentOS 7.x and 8.x and Rocky 8.x. These
+(focal), Ubuntu 18.04 (bionic), RHEL/CentOS 7.x and 8.x, Rocky 8.x and AlmaLinux 8.x. These
 distributions provide a usable Python 3.6+ environment out of the box,
 which TPAexec requires. (However, TPAexec supports a wider range of
 [distributions on target instances](distributions.md).)
@@ -57,7 +57,7 @@ the repository on your system.)
 # Debian or Ubuntu
 $ sudo apt-get install tpaexec
 
-# RedHat or Rocky
+# RedHat, Rocky or AlmaLinux
 $ sudo yum install tpaexec
 ```
 

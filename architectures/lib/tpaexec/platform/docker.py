@@ -94,12 +94,7 @@ class docker(Platform):
         args["local_sources"] = local_sources
 
     def supported_distributions(self):
-        return [
-            "Debian",
-            "RedHat",
-            "Ubuntu",
-            "Rocky"
-        ]
+        return ["Debian", "RedHat", "Ubuntu", "Rocky", "AlmaLinux"]
 
     def default_distribution(self):
         return "Rocky"
@@ -115,7 +110,8 @@ class docker(Platform):
                     "tpa/debian": ["9", "10", "11", "stretch", "buster", "bullseye"],
                     "tpa/ubuntu": ["18.04", "20.04", "bionic", "focal"],
                     "tpa/redhat": ["7", "8"],
-                    "tpa/rocky": ["8"]
+                    "tpa/rocky": ["8"],
+                    "tpa/almalinux": ["8"],
                 }
 
                 if version not in known_versions[label]:
