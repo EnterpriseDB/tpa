@@ -26,7 +26,7 @@ prefer.)
 $ sudo apt-get install python3.7 python3-pip python3-venv \
       pwgen git openvpn patch
 
-# RedHat or CentOS (python3 for RHEL7, python36 for RHEL8)
+# RedHat or Rocky (python3 for RHEL7, python36 for RHEL8)
 $ sudo yum install python36 python3-pip \
       pwgen epel-release git openvpn patch
 

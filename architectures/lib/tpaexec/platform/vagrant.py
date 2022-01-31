@@ -53,9 +53,9 @@ class vagrant(Platform):
                 "default": "debian/bullseye64",
             },
             "redhat": {
-                "7": "centos/7",
-                "8": "centos/8",
-                "default": "centos/8",
+                "7": "rockylinux/7",
+                "8": "rockylinux/8",
+                "default": "rockylinux/8",
             },
             "ubuntu": {
                 "16.04": "ubuntu/xenial64",

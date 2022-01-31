@@ -98,10 +98,11 @@ class docker(Platform):
             "Debian",
             "RedHat",
             "Ubuntu",
+            "Rocky"
         ]
 
     def default_distribution(self):
-        return "RedHat"
+        return "Rocky"
 
     def image(self, label, **kwargs):
         image = {}
@@ -114,6 +115,7 @@ class docker(Platform):
                     "tpa/debian": ["9", "10", "11", "stretch", "buster", "bullseye"],
                     "tpa/ubuntu": ["18.04", "20.04", "bionic", "focal"],
                     "tpa/redhat": ["7", "8"],
+                    "tpa/rocky": ["8"]
                 }
 
                 if version not in known_versions[label]:
