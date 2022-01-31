@@ -19,6 +19,8 @@
       tags: pkg
   when:
     platform not in ['shared']
+    and ('harp-proxy' in role
+      or inventory_hostname in first_bdr_primary_candidates|default([]))
   tags: pkg
 
 - include_role:

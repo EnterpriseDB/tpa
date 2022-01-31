@@ -101,7 +101,8 @@
       tags: harp
   when:
     failover_manager == 'harp'
-    and ('postgres' in role or 'harp-proxy' in role)
+    and ('harp-proxy' in role
+      or inventory_hostname in first_bdr_primary_candidates|default([]))
   tags: harp
 
 - include_role:

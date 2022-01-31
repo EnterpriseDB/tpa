@@ -20,7 +20,9 @@ dcs:
 {% elif harp_consensus_protocol == 'bdr' %}
 {%   for h in groups[bdr_node_group] %}
 {%     set v = hostvars[h] %}
+{%     if 'subscriber-only' not in v.role %}
   - "{{ v.bdr_node_dsn }}"
+{%     endif %}
 {%   endfor %}
 {% endif %}
 
