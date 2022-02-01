@@ -25,14 +25,14 @@
 
 ## v22.5 (2022-01-27)
 
-## Minor changes
+### Minor changes
 
 - Run HARP v2 as `enterprisedb` user when deployed with EPAS
 
 - Per instance use of `listen_address` and `listen_port` in HARP v2
   to cater to multi-proxy setup
 
-## Bugfixes
+### Bugfixes
 
 - Default values for `request_timeout` and `watch_poll_interval`
   in HARP v2 config should not use quotes
@@ -42,26 +42,26 @@
 
 ## v22.4 (2022-01-21)
 
-## Bugfixes
+### Bugfixes
 
 - Fixed a harp config defect where listen_address is not always set
   to the proxy hostname.
 
 ## v22.3 (2022-01-20)
 
-## Minor changes
+### Minor changes
 
 - Moved listen_addr and listen_port in harp2 configuration files
 
 - Add hook to prevent removal of pgbouncer user from database
 
-## Bugfixes
+### Bugfixes
 
 - Rsyslog log-server not sending/storing postgres logs as intended
 
 ## v22.2 (2022-01-19)
 
-## Minor changes
+### Minor changes
 
 - Ensure correct package name for repmgr on RedHat from BDR Enterprise
   2q repositories is used. This caters for a fairly small corner case
@@ -71,7 +71,7 @@
 
 ## v22.1 (2022-01-19)
 
-## Minor changes
+### Minor changes
 
 - Revise max_worker_processes and set a reasonable floor value
   of 16. Normally this value is calculated using the number of
@@ -85,7 +85,7 @@
 - Expose additional config for harp template files, so they can
   be customised by the user
 
-## Bugfixes
+### Bugfixes
 
 - Ensure permissions for rsyslog managed postgres log is correct. On 
   existing clusters built with Ubuntu OS rsyslog is set to drop root
@@ -102,7 +102,7 @@
 
 ## v21.11 (2021-12-23)
 
-## Minor changes
+### Minor changes
 
 - Install HARP v2 packages from the products/harp/release repository (so
   that it no longer a separate EDB_REPO_CREDENTIALS_FILE to install)
@@ -115,7 +115,7 @@
 
 - Increase default EFM version to v4.2
 
-## Bugfixes
+### Bugfixes
 
 - Set max_worker_processes to a minimum of 16 (fixes an error that
   caused EPAS to not start with the default dbms_aq.max_workers)
