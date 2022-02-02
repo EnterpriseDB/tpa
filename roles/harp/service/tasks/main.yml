@@ -2,49 +2,42 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-# Harp packages for EPAS require to have `enterprisedb` user but default
-# .service files have `postgres` user instead. As a workaround TPAexec
-# generates a service override file to configure user and group properly
-# when `postgres_flavour` is `epas`.
+- block:
+  - name: Ensure harp-manager service directory exists
+    file:
+      path: "/etc/systemd/system/harp-manager.service.d"
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
 
-- name: Ensure harp-proxy service directory exists
-  file:
-    path: "/etc/systemd/system/harp-proxy.service.d"
-    state: directory
-    owner: root
-    group: root
-  when: >
-    'harp-proxy' in role
-    and postgresql_flavour == 'epas'
-
-- name: Install custom harp service override file
-  template:
-    src: harp.service.j2
-    dest: "/etc/systemd/system/harp-proxy.service.d/override.conf"
-    owner: root
-    group: root
-    mode: 0644
-  when: >
-    'harp-proxy' in role
-    and postgresql_flavour == 'epas'
-
-- name: Ensure harp-manager service directory exists
-  file:
-    path: "/etc/systemd/system/harp-manager.service.d"
-    state: directory
-    owner: root
-    group: root
+  - name: Install harp-manager service override file
+    template:
+      src: harp.service.j2
+      dest: "/etc/systemd/system/harp-manager.service.d/override.conf"
+      owner: root
+      group: root
+      mode: 0644
+    register: manager_unit
   when: >
     'postgres' in role
-    and postgresql_flavour == 'epas'
 
-- name: Install custom harp service override file
-  template:
-    src: harp.service.j2
-    dest: "/etc/systemd/system/harp-manager.service.d/override.conf"
-    owner: root
-    group: root
-    mode: 0644
+- block:
+  - name: Ensure harp-proxy service directory exists
+    file:
+      path: "/etc/systemd/system/harp-proxy.service.d"
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: Install harp-proxy service override file
+    template:
+      src: harp.service.j2
+      dest: "/etc/systemd/system/harp-proxy.service.d/override.conf"
+      owner: root
+      group: root
+      mode: 0644
+    register: proxy_unit
   when: >
-    'postgres' in role
-    and postgresql_flavour == 'epas'
+    'harp-proxy' in role
