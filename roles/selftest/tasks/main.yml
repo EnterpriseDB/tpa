@@ -22,12 +22,3 @@
     - flock
   vars:
     path: "{{ lookup('pipe', 'command -v {{ item }} || true') }}"
-
-- name: Ensure that password generation works correctly
-  become: no
-  assert:
-    msg: "Please fix lib/password (e.g., install pwgen)"
-    that:
-      - password != ''
-  vars:
-    password: "{{ lookup('pipe', '{{ tpa_dir }}/architectures/lib/password || true') }}"

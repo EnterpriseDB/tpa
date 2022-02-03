@@ -9,7 +9,7 @@ MAINTAINER EnterpriseDB <tpa@enterprisedb.com>
 
 RUN apt-get -y update && \
     apt-get -y install curl gnupg software-properties-common \
-        python3.7 python3-pip python3-venv pwgen openvpn patch git && \
+    python3.7 python3-pip python3-venv openvpn patch git && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" && \
     apt-get -y update && apt-get -y install docker-ce-cli

@@ -24,15 +24,15 @@ prefer.)
 ```bash
 # Debian (python3.7) or Ubuntu (python3.6)
 $ sudo apt-get install python3.7 python3-pip python3-venv \
-      pwgen git openvpn patch
+      git openvpn patch
 
 # RedHat, Rocky or AlmaLinux (python3 for RHEL7, python36 for RHEL8)
 $ sudo yum install python36 python3-pip \
-      pwgen epel-release git openvpn patch
+      epel-release git openvpn patch
 
 # MacOS X
 $ brew tap discoteq/discoteq
-$ brew install python@3 pwgen openvpn flock coreutils gpatch git
+$ brew install python@3 openvpn flock coreutils gpatch git
 ```
 
 Next, install TPAexec itself:
