@@ -52,7 +52,7 @@ _tpaexec_command() {
     fi
     file="$dir"/"$secret_name".yml
 
-    "$ansible"-vaultpw "${args[@]}" store "$file" "$@"
+    "$ansible"-vaultpw store "$file" "${args[@]}" "$@"
 
 }
 

@@ -30,7 +30,7 @@ _tpaexec_command() {
         file="$dir"/"$username".yml
     fi
 
-    "$ansible"-vaultpw "${args[@]}" show "$file" "$@"
+    "$ansible"-vaultpw show "$file" "${args[@]}" "$@"
 }
 
 _tpaexec_help() {
