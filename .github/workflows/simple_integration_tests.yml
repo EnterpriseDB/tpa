@@ -1,0 +1,65 @@
+name: Simple Integration Tests
+
+on:
+  # Trigger on dev branches
+  push:
+    branches-ignore:
+      - master
+      - 'rc/**'
+  # Run when a user requests a review on a PR targeting master
+  pull_request:
+    types:
+      - review_requested
+    branches:
+      - master
+  # Runs when a user submits a review (see if statement in the jobs section below)
+  pull_request_review:
+    types:
+      - submitted
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  ANSIBLE_SKIP_TAGS: pgbench
+
+jobs:
+
+  integration-test:
+    # In addition to the event triggers above, this job only runs when any of these conditions are met:
+    #  * a PR review is requested from the tpaexec-team
+    #  * a PR review is marked as approved
+    #  * a manual run is executed
+    if: >
+      (github.event.requested_team && github.event.requested_team.name == 'tpaexec-team')
+      || (github.event.review
+          && github.event.review.state == 'approved'
+          && startsWith(github.event.pull_request.base.ref, 'master'))
+      || github.event_name == 'workflow_dispatch'
+    # env not supported here
+    # || env.ACT
+    name: Integration test
+
+    strategy:
+      fail-fast: false
+      matrix:
+        tpa_architecture:
+          - "M1"
+          - "BDR-Always-ON"
+        tpa_postgres_flavour:
+          - "postgresql"
+          - "epas"
+
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ./.github/actions/integration-test
+        with:
+          cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}
+          tpa_architecture: ${{ matrix.tpa_architecture }}
+          tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}

@@ -1,0 +1,94 @@
+name: Integration Test
+description: Run an integration test for the given architecture and platform
+
+inputs:
+  tpa_platform: # id of input
+    description: "TPA platform"
+    required: false
+    default: docker
+  tpa_architecture:
+    required: false
+    description: "TPA architecture"
+    default: BDR-Always-ON
+  tpa_os_image:
+    required: false
+    description: "Image to use with TPA platform"
+    default: "tpa/ubuntu"
+  tpa_postgres_flavour:
+    required: false
+    description: "TPA postgres type selection"
+    default: "postgresql"
+  cluster:
+    required: false
+    description: "Name of the cluster directory"
+    default: "cluster"
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - uses: ./.github/actions/install-requirements
+
+    - uses: ./.github/actions/tpaexec-setup
+
+    - name: Export EDB_REPO_CREDENTIALS_FILE to use EDB repositories
+      run: |
+        umask 066 && echo $EDB_REPO_CREDENTIALS > $EDB_REPO_CREDENTIALS_FILE
+      shell: bash
+
+    - name: Filter characters from cluster variable
+      run: |
+        CLUSTER=${{ inputs.cluster }}
+        echo CLUSTER=${CLUSTER//[:\/]/_} >>$GITHUB_ENV
+      shell: bash
+
+    - name: Generate an initial configuration for a simple cluster
+      run: >
+        ./bin/tpaexec configure "$CLUSTER"
+        --architecture ${{ inputs.tpa_architecture }}
+        --platform ${{ inputs.tpa_platform }}
+        --postgres-flavour ${{ inputs.tpa_postgres_flavour }}
+        --os-image ${{ inputs.tpa_os_image }}
+      shell: bash {0}
+
+    - name: Provision the cluster
+      run: ./bin/tpaexec provision "$CLUSTER" -vv
+      shell: bash {0}
+
+    - name: Deploy the cluster
+      run: ./bin/tpaexec deploy "$CLUSTER" -vv
+      shell: bash {0}
+
+    - name: Test the cluster
+      run: ./bin/tpaexec test "$CLUSTER" -vv
+      shell: bash {0}
+
+    - name: Archive the cluster logs
+      run: ./bin/tpaexec archive-logs "$CLUSTER" -vv
+      shell: bash
+      if: always()
+
+    - name: Archive the cluster directory
+      run: tar cvzf "cluster-$CLUSTER.tar.gz" "$CLUSTER"
+      shell: bash
+      if: always()
+
+    - name: Save cluster artifacts before deletion
+      uses: actions/upload-artifact@v2
+      with:
+        name: cluster-${{ github.run_number }}-${{ github.run_attempts }}
+        path: "cluster-*.tar.gz"
+      if: always()
+
+    - name: Deprovision the cluster
+      run: ./bin/tpaexec deprovision "$CLUSTER" -vv
+      shell: bash {0}
+      if: always()
+
+    - name: Remove cluster directory
+      run: rm -rf "$CLUSTER"
+      shell: bash
+      if: always()
+
+outputs: { }

@@ -1,10 +1,12 @@
 name: "TPAexec setup"
 description: "Setup TPAexec virtual environment and package cache"
 
-runs: 
+runs:
   using: "composite"
   steps:
     - uses: actions/cache@v2
+      if: >
+        !env.ACT
       id: cache-python-packages
       with:
         path: tpa-venv
