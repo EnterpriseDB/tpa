@@ -16,14 +16,15 @@
 
 - Modify systemd service files for postgres on Harp enabled hosts that
   require alternative user accounts.
-  Make services run as `postgres_user` instead of hard coded `enterprisedb` user.
+  Always run Harp services as the same user as Postgres, regargless of
+  the flavour in use.
 
 ### Bugfixes
 
-- Allow AWS EC2 instance access via their private IP address when public IP
-  addresses are not assigned.
-
-- Fix compatibility issue with ansible-vaultpw command to work with Ansible 2.9
+- Fix a problem that caused the ec2 inventory to return "none" instead of a
+  private IP address for EC2 instances with `assign_public_ip: no`;
+  note that you must also have `ec2_instance_reachability: private`
+  set for such clusters
 
 - Fix OS detection for Rocky Linux when used on non-docker platforms. This
   previously affected the host name change during deployment.
