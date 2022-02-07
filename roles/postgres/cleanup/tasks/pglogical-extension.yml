@@ -1,0 +1,20 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Drop zombie pglogical extension
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(item.key) }}"
+    queries:
+    - DROP EXTENSION IF EXISTS pglogical CASCADE
+    - DROP SCHEMA IF EXISTS pglogical CASCADE
+  with_dict: "{{ cluster_facts.databases }}"
+  loop_control:
+    label: >-
+      {{ item.key }}
+  when:
+  - item.key != bdr_database
+  - item.value.pglogical is defined
+  - item.value.pglogical is empty
+  become_user: "{{ postgres_user }}"
+  become: yes

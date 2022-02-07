@@ -32,3 +32,20 @@
     'bdr' in role
     and 'primary' in role
     and dbs_with_unused_bdr_extension is not empty
+
+# We should drop the pglogical extension and schema from any database
+# where it exists, but we were unable to retrieve the version, which
+# suggests that pglogical must not be in shared_preload_libraries any
+# more (i.e., we're trying to get rid of it).
+
+- include_tasks: pglogical-extension.yml
+  vars:
+    dbs_with_zombie_pglogical: "{{
+      cluster_facts.databases.values()
+      |selectattr('pglogical', 'defined')
+      |selectattr('pglogical', 'empty')
+      |list
+    }}"
+  when: >
+    'primary' in role
+    and dbs_with_zombie_pglogical is not empty
