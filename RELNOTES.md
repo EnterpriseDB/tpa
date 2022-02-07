@@ -2,6 +2,33 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.7-rc1 (2022-02-07)
+
+### Major changes
+
+- Upgrade ansible to v2.9
+
+### New Features
+
+- Added support for the Alma Linux distribution
+
+### Minor Changes
+
+- Modify systemd service files for postgres on Harp enabled hosts that
+  require alternative user accounts.
+  Make services run as `postgres_user` instead of hard coded `enterprisedb` user.
+
+### Bugfixes
+
+- Allow AWS EC2 instance access via their private IP address when public IP
+  addresses are not assigned.
+
+- Fix compatibility issue with ansible-vaultpw command to work with Ansible 2.9
+
+- Fix OS detection for Rocky Linux when used on non-docker platforms. This
+  previously affected the host name change during deployment.
+  We now enforce the use of systemd to change host names.
+
 ## v22.6 (2022-01-31)
 
 ### Major changes
