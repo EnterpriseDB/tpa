@@ -16,7 +16,7 @@
 
 - Modify systemd service files for postgres on Harp enabled hosts that
   require alternative user accounts.
-  Always run Harp services as the same user as Postgres, regargless of
+  Always run Harp services as the same user as Postgres, regardless of
   the flavour in use.
 
 ### Bugfixes
@@ -115,7 +115,7 @@
 
 ### Bugfixes
 
-- Ensure permissions for rsyslog managed postgres log is correct. On 
+- Ensure permissions for rsyslog managed postgres log is correct. On
   existing clusters built with Ubuntu OS rsyslog is set to drop root
   privileges after start up. This makes it impossible for log files
   to be owned by another user. In TPAexec postgres log files are owned
