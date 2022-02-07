@@ -316,11 +316,19 @@ def pglogical_discovery(module, conn, m0):
     m = dict()
 
     if relation_exists(conn, "pglogical.node"):
-        v = query_results(
-            conn,
-            """SELECT pglogical.pglogical_version(),
-            pglogical.pglogical_version_num()""",
-        )
+        try:
+            v = query_results(
+                conn,
+                """SELECT pglogical.pglogical_version(),
+                pglogical.pglogical_version_num()""",
+            )
+        except psycopg2.Error as _:
+            # Since pglogical.node exists, the version query should fail only if
+            # the pglogical extension does not exist. This could happen if we've
+            # removed it from shared_preload_libraries during an upgrade to BDR4
+            # (for example). We'll drop the zombie extension later.
+            conn.rollback()
+            return {"pglogical": {}}
         m.update(v[0])
 
     return {"pglogical": m} if m else {}
