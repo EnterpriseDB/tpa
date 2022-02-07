@@ -9,7 +9,9 @@
   tags: pkg
 
 - name: Set the hostname
-  hostname: name="{{ inventory_hostname }}"
+  hostname:
+    name: "{{ inventory_hostname }}"
+    use: systemd
   when:
     platform not in ['docker']
   tags: hostname
