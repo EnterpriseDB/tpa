@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-## v22.7 (2022-02-07)
+## v22.8-rc1 (2022-02-08)
 
 ### Major changes
 
@@ -29,6 +29,10 @@
 - Fix OS detection for Rocky Linux when used on non-docker platforms. This
   previously affected the host name change during deployment.
   We now enforce the use of systemd to change host names.
+
+## v22.7 (2022-02-07)
+
+- Unpublished version
 
 ## v22.6 (2022-01-31)
 
