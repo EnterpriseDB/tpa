@@ -2,6 +2,34 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.7 (2022-02-07)
+
+### Major changes
+
+- Upgrade ansible to v2.9
+
+### New Features
+
+- Added support for the Alma Linux distribution
+
+### Minor Changes
+
+- Modify systemd service files for postgres on Harp enabled hosts that
+  require alternative user accounts.
+  Always run Harp services as the same user as Postgres, regardless of
+  the flavour in use.
+
+### Bugfixes
+
+- Fix a problem that caused the ec2 inventory to return "none" instead of a
+  private IP address for EC2 instances with `assign_public_ip: no`;
+  note that you must also have `ec2_instance_reachability: private`
+  set for such clusters
+
+- Fix OS detection for Rocky Linux when used on non-docker platforms. This
+  previously affected the host name change during deployment.
+  We now enforce the use of systemd to change host names.
+
 ## v22.6 (2022-01-31)
 
 ### Major changes
@@ -87,7 +115,7 @@
 
 ### Bugfixes
 
-- Ensure permissions for rsyslog managed postgres log is correct. On 
+- Ensure permissions for rsyslog managed postgres log is correct. On
   existing clusters built with Ubuntu OS rsyslog is set to drop root
   privileges after start up. This makes it impossible for log files
   to be owned by another user. In TPAexec postgres log files are owned
