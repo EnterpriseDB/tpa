@@ -4,6 +4,8 @@
 
 - name: Grant required privileges to {{ harp_dcs_user }}
   postgresql_privs:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
     database: "{{ bdr_database }}"
     privs: "{{ item.privs }}"
     type: "{{ item.type }}"
