@@ -4,25 +4,26 @@
 
 # We have already assigned first_bdr_primary in roles/platform, but in
 # case a newly-added instance was selected, we must fall back to some
-# older instance that knows about existing the node group(s).
+# older instance that knows about the existing node group(s).
 
 - name: Override first_bdr_primary if required
   set_fact:
     first_bdr_primary: "{{
       first_bdr_primary_candidates|intersect(_current_bdr_candidates)|first
     }}"
-  when: >
-    'bdr' in role
-    and _current_bdr_candidates is not empty
-    and first_bdr_primary not in _current_bdr_candidates
+  when:
+    - "'bdr' in role"
+    - _current_bdr_candidates is not empty
+    - first_bdr_primary not in _current_bdr_candidates
   vars:
     _current_bdr_candidates: "{{
-      hostvars.values()|list
-      |selectattr('cluster_facts.bdr_databases', 'defined')
-      |selectattr('cluster_facts.bdr_databases', 'contains', bdr_database)
-      |map(attribute='inventory_hostname')
-      |list
-    }}"
+        groups[bdr_node_group]
+        |map('extract', hostvars)
+        |selectattr('cluster_facts.bdr_databases', 'defined')
+        |rejectattr('cluster_facts.bdr_databases', 'empty')
+        |map(attribute='inventory_hostname')
+        |list
+      }}"
 
 # If password_encryption is defined, we use that value. If not, and the
 # cluster is running, we use the present value of password_encryption as
