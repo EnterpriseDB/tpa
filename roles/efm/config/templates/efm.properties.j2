@@ -14,7 +14,7 @@ from.email={{ efm_conf_settings['from.email']|default('') }}
 notification.level={{ efm_conf_settings['notification.level']|default('INFO') }}
 notification.text.prefix={{ efm_conf_settings['notification.text.prefix']|default('') }}
 script.notification={{ efm_conf_dir }}/{{ cluster_name }}-efm.notification.sh
-bind.address={{ private_ip }}:{{ efm_bind_port }}
+bind.address={{ ip_address }}:{{ efm_bind_port }}
 external.address=
 admin.port={{ efm_conf_settings['admin.port']|default(7809) }}
 {% if 'efm-witness' in role %}
