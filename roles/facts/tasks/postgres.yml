@@ -116,6 +116,7 @@
     postgres_group: "{{ postgres_group|default(default_postgres_user[postgres_family]) }}"
     postgres_home: "{{ postgres_home|default(default_postgres_home_dir[postgres_family][ansible_os_family]) }}"
     postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dir[postgres_family][ansible_os_family]) }}"
+    postgres_lib_dir: "{{ postgres_lib_dir|default(default_postgres_lib_dir[postgres_family][ansible_os_family]) }}"
     postgres_host: "{{ postgres_host|default('localhost') }}"
     postgres_port: "{{ postgres_port|default(default_postgres_port[postgres_family]) }}"
     unix_socket_directories: "{{
@@ -171,6 +172,16 @@
       {%- if postgres_version is version('10', '>=') -%}wal
       {%- else -%}xlog
       {%- endif -%}
+
+- name: Add postgres libs and PGHOST to target_environment
+  set_fact:
+    target_environment: "{{ target_environment|combine(_task_environment) }}"
+  vars:
+    _task_environment:
+       LD_LIBRARY_PATH: "{{ postgres_lib_dir }}"
+       PGHOST: '{{ unix_socket_directories|join(",") }}'
+  when: >
+     'postgres' in role
 
 - name: Disallow setting shared_preload_libraries directly
   assert:
