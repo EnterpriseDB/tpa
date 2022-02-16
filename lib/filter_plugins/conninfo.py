@@ -3,15 +3,17 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 from ansible.errors import AnsibleFilterError
-
-# Takes a conninfo string and returns a dict of the settings it represents, or
-# if given a key, returns the value if the key is specified, or None.
+from typing import Dict
 
 
-def parse_conninfo(conninfo, key=None):
+def parse_conninfo(conninfo: str, key: str = None) -> Dict[str, str]:
+    """
+    Takes a conninfo string and returns a dict of the settings it represents; or
+    if given a key, returns the value if the key is specified, or None.
+    """
 
     settings = {}
-    for str in conninfo.split(" "):
+    for str in conninfo.strip().split(" "):
         parts = [x.strip() for x in str.strip().split("=", 1)]
 
         v = None
@@ -30,11 +32,12 @@ def parse_conninfo(conninfo, key=None):
     return settings
 
 
-# Returns a conninfo string assembled from the keys and values in the dict d.
-# Values are single-quoted if needed. Order of elements is not guaranteed.
+def conninfo_string(d: Dict[str, str]) -> str:
+    """
+    Returns a conninfo string assembled from the keys and values in the dict d.
+    Values are single-quoted if needed.
+    """
 
-
-def conninfo_string(d):
     def _quote(s):
         if not (" " in s or "\\" in s or "'" in s or s == ""):
             return s
@@ -46,17 +49,17 @@ def conninfo_string(d):
     return " ".join(s)
 
 
-# Given a conninfo string, a dbname, and optional additional key=value settings,
-# returns a new conninfo string that includes the dbname and other settings.
-# Does not try to remove existing settings from the conninfo, since later
-# entries override earlier ones anyway.
-
-
-def dbname(conninfo, dbname="postgres", **kwargs):
-    extra = ["dbname=%s" % dbname]
+def dbname(conninfo: str, dbname: str = "postgres", **kwargs) -> str:
+    """
+    Given a conninfo string, a dbname, and optional additional key=value
+    settings, returns a new conninfo string that includes the dbname and other
+    settings.
+    """
+    parts = parse_conninfo(conninfo)
+    parts["dbname"] = dbname
     for k in kwargs:
-        extra.append("%s=%s" % (k, kwargs[k]))
-    return conninfo + " " + " ".join(extra)
+        parts[k] = kwargs[k]
+    return conninfo_string(parts)
 
 
 # Given a subscription (and access to hostvars), this function returns a
