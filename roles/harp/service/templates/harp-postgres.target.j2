@@ -1,0 +1,8 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
+[Unit]
+Description=Postgres managed by HARP
+Wants=harp-manager.service postgres.service postgres-monitor.service
+After=harp-manager.service postgres.service postgres-monitor.service
+
+[Install]
+WantedBy=multi-user.target

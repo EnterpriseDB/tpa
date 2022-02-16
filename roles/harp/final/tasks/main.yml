@@ -30,17 +30,10 @@
 
 - meta: flush_handlers
 
-# The harp packages hardcode postgres/postgres, so we must override the
-# default unit definitions if we want to run harp services as another
-# user or group.
-
 - include_role:
     name: harp/service
     apply:
       tags: [harp, service]
-  when: >
-    postgres_user != 'postgres'
-    or postgres_group != 'postgres'
 
 - name: Start or restart harp services
   systemd:

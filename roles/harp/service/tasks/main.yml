@@ -2,6 +2,14 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+# We set up a new harp-postgres.target that comprises postgres.service
+# and harp-manager.service, so that we can start or stop both services
+# together.
+#
+# The harp packages hardcode postgres/postgres, so we must override the
+# default unit definitions if we want to run harp services as another
+# user or group.
+
 - block:
   - name: Ensure harp-manager service directory exists
     file:
@@ -19,6 +27,27 @@
       group: root
       mode: 0644
     register: manager_unit
+
+  - name: Install harp-postgres.target definition
+    template:
+      src: harp-postgres.target.j2
+      dest: /etc/systemd/system/harp-postgres.target
+      owner: root
+      group: root
+      mode: 0644
+    register: managed_unit
+
+  - set_fact:
+      postgres_service_name: harp-postgres.target
+
+  - name:
+    systemd:
+      name: "{{ postgres_service_name }}"
+      enabled: yes
+      daemon_reload: "{{
+        managed_unit is defined
+        and managed_unit is changed
+      }}"
   when: >
     'postgres' in role
 

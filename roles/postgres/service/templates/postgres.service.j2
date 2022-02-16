@@ -3,6 +3,9 @@
 Description=Postgres {{ postgres_version }} (TPA)
 After=syslog.target
 After=network.target
+{% if failover_manager == 'harp' %}
+PartOf=harp-postgres.target
+{% endif %}
 
 [Service]
 Type=simple

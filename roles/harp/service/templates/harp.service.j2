@@ -1,4 +1,12 @@
 {# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
+{% if 'postgres' in role %}
+[Unit]
+PartOf=harp-postgres.target
+After={{ postgres_service_name }}-monitor.service
+
+{% endif %}
+{% if postgres_user != 'postgres' or postgres_group != 'postgres' %}
 [Service]
 User={{ postgres_user }}
 Group={{ postgres_user }}
+{% endif %}
