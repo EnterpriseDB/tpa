@@ -1,0 +1,49 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Prepare local host archive
+  hosts: localhost
+  tasks:
+
+    - name: Collect facts
+      setup:
+        filter: ansible_date_time
+
+    - name: Set time stamp
+      set_fact:
+        timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
+
+    - name: Create log archive directory
+      file:
+        state: directory
+        path: "{{ cluster_dir }}/logs/{{ timestamp }}"
+
+- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  tags: always
+
+- name: Archive log files from target instances
+  hosts: all
+
+  tasks:
+
+    - block:
+      # tar's exit code is 1 if files change whilst the archive is being created,
+      # logs are likely to change, so we ignore this exit code
+      - name: Create archive of log files
+        command:
+          cmd: "tar cvzf {{ archive }} --transform 's/log/{{ inventory_hostname }}-logs/' log"
+          chdir: "/var"
+        register: tar_command
+        failed_when: tar_command.rc > 1
+      - name: Fetch archive
+        fetch:
+          src: "{{ archive }}"
+          dest: "{{ cluster_dir }}/logs/{{ hostvars.localhost.timestamp }}/"
+          flat: yes
+      - name: Remove archive
+        file:
+          path: "{{ archive }}"
+          state: absent
+      vars:
+        archive: "/tmp/{{ inventory_hostname }}-logs-{{ hostvars.localhost.timestamp }}.tar.gz"
