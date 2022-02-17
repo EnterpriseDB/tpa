@@ -160,6 +160,7 @@
     harp_consensus_protocol: "{{ harp_consensus_protocol|default(default_harp_consensus_protocols[harp_version]) }}"
     harp_location: "{{ harp_location|default(location) }}"
     harp_directory: "{{ harp_directory|default(default_harp_directories[harp_version]) }}"
+    harp_proxy_mode: "{{ harp_proxy_mode|default(default_harp_proxy_mode) }}"
     etcd_peer_port: "{{ etcd_peer_port|default(default_etcd_peer_port) }}"
     etcd_client_port: "{{ etcd_client_port|default(default_etcd_client_port) }}"
     efm_conf_dir: "{{ efm_conf_dir|default(default_efm_conf_dir) }}"

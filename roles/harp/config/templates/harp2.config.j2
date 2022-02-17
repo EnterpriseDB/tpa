@@ -3,12 +3,14 @@ cluster:
 
 dcs:
   driver: "{{ harp_consensus_protocol }}"
-  request_timeout: {{ harp_request_timeout | default(250) }}
-  watch_poll_interval: {{ harp_watch_poll_interval | default(500) }}
+  request_timeout: {{ harp_request_timeout|default(250) }}
+  watch_poll_interval: {{ harp_watch_poll_interval|default(500) }}
+{% if harp_consensus_protocol == 'etcd' %}
   ssl: "off"
   ssl_ca_file: ""
   ssl_cert_file: ""
   ssl_key_file: ""
+{% endif %}
   endpoints:
 {% if harp_consensus_protocol == 'etcd' %}
 {%   for h in groups['role_etcd'] %}
@@ -23,6 +25,8 @@ dcs:
 {%     if 'subscriber-only' not in v.role %}
 {%       if 'harp-proxy' in role and harp_dcs_user is defined %}
   - "{{ v.bdr_node_dsn|dbname(v.bdr_database, user=harp_dcs_user) }}"
+{%       elif 'harp-proxy' not in role and inventory_hostname == h %}
+  - "host={{ unix_socket_directories|first }} dbname={{ v.bdr_database }}"
 {%       else %}
   - "{{ v.bdr_node_dsn }}"
 {%       endif %}
@@ -33,13 +37,14 @@ dcs:
 {% if 'postgres' in role %}
 manager:
   name: "{{ bdr_node_name|default(inventory_hostname) }}"
-  log_level: debug
+  log_level: info
 {% endif %}
 {% if 'harp-proxy' in role %}
 proxy:
+  log_level: info
   name: "{{ inventory_hostname }}-proxy"
   location: {{ harp_location }}
-  type: "{{ harp_proxy_mode|default("pgbouncer") }}"
-  log_level: debug
+{% if harp_proxy_mode == "pgbouncer" %}
   pgbouncer_bin_dir: {{ pgbouncer_bin_dir }}
+{% endif %}
 {% endif %}

@@ -19,11 +19,13 @@ for more details on HARP configuration.
 
 Variable | Default value | Description
 ---- | ---- | ---
+`cluster_name` | `` | The name of the cluster.
+
 `harp_consensus_protocol` | `etcd` | The consensus layer to use (`etcd` or `bdr`)
 `harp_location` | `location` | The location of this instance (defaults to the `location` parameter)
 `harp_ready_status_duration` | `10` | Amount of time in seconds the node's readiness status will persist if not refreshed.
-`harp_leader_lease_duration` | `30` | Amount of time in seconds the Lead Master lease will persist if not refreshed.
-`harp_lease_refresh_interval` | `5000` | Amount of time in milliseconds between refreshes of the Lead Master lease.
+`harp_leader_lease_duration` | `6` | Amount of time in seconds the Lead Master lease will persist if not refreshed.
+`harp_lease_refresh_interval` | `2000` | Amount of time in milliseconds between refreshes of the Lead Master lease.
 `harp_dcs_reconnect_interval` | `1000` | The interval, measured in ms, between attempts that a disconnected node tries to reconnect to the DCS.
 `harp_dcs_priority` | `500` | In the case two nodes have an equal amount of lag and other qualified criteria to take the Lead Master lease, this acts as an additional ranking value to prioritize one node over another. 
 `harp_stop_database_when_fenced` | `false` | Rather than simply removing a node from all possible routing, stop the database on a node when it is fenced.

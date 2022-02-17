@@ -25,6 +25,17 @@
     and harp_consensus_protocol == 'etcd'
   tags: pkg
 
+- name: Install pgbouncer if required
+  include_role:
+    name: pgbouncer/pkg
+    apply:
+      tags: [pgbouncer, pkg]
+  when: >
+    'harp-proxy' in role
+    and harp_proxy_mode == "pgbouncer"
+    and platform not in ['shared']
+  tags: pkg
+
 - name: Disable pgbouncer service on harp-proxy instances
   systemd:
     name: pgbouncer
@@ -33,3 +44,4 @@
     enabled: no
   when: >
     'harp-proxy' in role
+    and harp_proxy_mode == "pgbouncer"
