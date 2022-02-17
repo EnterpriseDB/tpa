@@ -21,10 +21,6 @@ nodes:
   node_type: bdr
   node_role: {{ v.node_role|default('primary') }}
   dsn: "{{ v.bdr_node_dsn }}"
-  db_bin_dir: {{ postgres_bin_dir }}
-  db_data_dir: {{ postgres_data_dir }}
-  db_conf_dir: {{ postgres_conf_dir }}
-  db_log_file: "/tmp/pg_ctl.log"
   ready_status_duration: {{ v.harp_ready_status_duration|default(10) }}
   leader_lease_duration: {{ v.harp_leader_lease_duration|default(6) }}
   lease_refresh_interval: {{ v.harp_lease_refresh_interval|default(2000) }}

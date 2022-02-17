@@ -38,6 +38,9 @@ dcs:
 manager:
   name: "{{ bdr_node_name|default(inventory_hostname) }}"
   log_level: info
+  start_command: {{ harp_postgres_start_command | default('sudo systemctl start postgres') }}
+  stop_command: {{ harp_postgres_stop_command | default('sudo systemctl stop postgres') }}
+  status_command: {{ harp_postgres_status_command | default('sudo systemctl status postgres') }}
 {% endif %}
 {% if 'harp-proxy' in role %}
 proxy:
