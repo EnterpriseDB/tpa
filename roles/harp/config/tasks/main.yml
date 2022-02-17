@@ -20,6 +20,8 @@
     state: directory
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
+  when:
+    initialise_harp|bool
   tags: config
 
 - name: Install HARP configuration

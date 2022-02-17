@@ -13,14 +13,24 @@
       groups[bdr_node_group]|map('extract', hostvars, 'harp_location')|unique|length == 1
   when: harp_consensus_protocol == 'bdr'
 
+# We must install and configure harp on proxies and postgres instances
+# that are eligible to be first_bdr_primary (i.e., not subscriber-only
+# nodes or replicas or anything). However, there are other tasks that
+# need to run on other instances, so we set a flag here.
+
+- set_fact:
+    initialise_harp: "{{
+      'harp-proxy' in role
+      or inventory_hostname in first_bdr_primary_candidates|default([])
+    }}"
+
 - include_role:
     name: harp/pkg
     apply:
       tags: pkg
   when:
-    platform not in ['shared']
-    and ('harp-proxy' in role
-      or inventory_hostname in first_bdr_primary_candidates|default([]))
+    initialise_harp|bool
+    and platform not in ['shared']
   tags: pkg
 
 - include_role:

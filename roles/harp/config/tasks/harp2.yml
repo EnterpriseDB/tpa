@@ -24,6 +24,8 @@
       Debian: /usr/sbin
       RedHat: /usr/bin
     pgbouncer_bin_dir: "{{ pgbouncer_bin_dirs[ansible_os_family] }}"
+  when:
+    initialise_harp|bool
 
 # Instances with harp-proxy in role will install pgbouncer (via package
 # dependencies), but harp_proxy will manage the pgbouncer configuration.
