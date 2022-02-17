@@ -2,6 +2,19 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.9 (unreleased)
+
+### Notable changes
+
+- Deploy harp-proxy with the "builtin" proxy instead of pgbouncer
+
+  This change applies to existing clusters, which will be transparently
+  reconfigured to use the new proxy mode when you run `tpaexec deploy`.
+
+  Future versions of harp will no longer support embedded pgbouncer, but for now,
+  you can set `harp_proxy_mode: pgbouncer` explicitly to keep using it.
+
+
 ## v22.8 (2022-02-08)
 
 ### Major changes

@@ -146,7 +146,7 @@ default_harp_consensus_protocols:
 default_harp_directories:
   "1": /etc/bdr3
   "2": /etc/harp
-default_harp_proxy_mode: pgbouncer
+default_harp_proxy_mode: builtin
 
 default_build_path:
   - "{{ postgres_bin_dir }}"
