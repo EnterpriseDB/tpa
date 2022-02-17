@@ -2,9 +2,38 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+
+# We run barman backup --wait to complete a base backup and wait until
+# all required WAL segments have been archived and the backup status is
+# set to DONE. (We run this command in the background so that we can
+# force a WAL segment switch if needed.)
+
 - name: Force an immediate backup
   command: >
-    /usr/bin/barman backup "{{ backup_name }}"
+    /usr/bin/barman backup "{{ backup_name }}" --wait --wait-timeout {{ backup_wait_timeout }}
   delegate_to: "{{ this_barman }}"
   become_user: barman
   become: yes
+  async: 900
+  poll: 0
+  register: barman_backup_run
+
+# Barman will force a WAL segment switch itself when taking backups from
+# a primary. Otherwise we do it, so that the backup will (eventually) go
+# from WAITING_FOR_WALS to DONE (in Barman >= 2.5 terminology).
+
+- include_tasks: force-archive.yml
+  when: >
+    'replica' in role
+
+# Make sure the backup request exits and completes successfully.
+
+- name: Wait until backup is completed
+  async_status:
+    jid: "{{ barman_backup_run.ansible_job_id }}"
+  delegate_to: "{{ this_barman }}"
+  become_user: barman
+  become: yes
+  register: barman_backup_result
+  until: barman_backup_result.finished
+  retries: "{{ backup_wait_timeout|int + 10 }}"

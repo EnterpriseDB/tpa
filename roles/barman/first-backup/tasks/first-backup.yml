@@ -36,31 +36,7 @@
 - include_tasks: force-archive.yml
 
 - include_tasks: backup.yml
-
-# Barman 2.8 removes any WAL older than the first backup, so right after
-# we take the first backup, there's a window during which "barman check"
-# fails because there is no archived WAL, and we have to wait for a new
-# segment to be archived before we can take another backup. We can work
-# around this by forcing a segment switch after the first backup. Then
-# we can take more backups without worrying about race conditions.
-#
-# Note that "have_backups" is still the value we originally computed,
-# and it's now off-by-one because we've completed one backup.
-
-- include_tasks: force-archive.yml
-  when:
-    have_backups|int == 0
-
-- include_tasks: backup.yml
   with_items:
-    "{{ range(nb|int-1)|list }}"
+    "{{ range(nb|int)|list }}"
   vars:
     nb: "{{ num_backups|default(1) }}"
-
-# Barman will force a WAL segment switch itself when taking backups from
-# a primary. Otherwise we do it, so that the backup will (eventually) go
-# from WAITING_FOR_WALS to DONE (in Barman >= 2.5 terminology).
-
-- include_tasks: force-archive.yml
-  when: >
-    'replica' in role
