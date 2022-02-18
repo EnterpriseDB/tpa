@@ -10,9 +10,8 @@ runs:
       id: cache-python-packages
       with:
         path: tpa-venv
-        key: ${{ runner.os }}-v3-${{ hashFiles('requirements.txt') }}-${{ env.pythonLocation }}-tpa-venv
-        restore-keys: |
-             ${{ runner.os }}-v3-${{ hashFiles('requirements.txt') }}-${{ env.pythonLocation }}-tpa-venv
+        key: tpa-venv-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('requirements**') }}
+        restore-keys: tpa-venv-${{ runner.os }}-${{ env.pythonLocation }}-
 
     - name: Run tpaexec setup
       shell: bash

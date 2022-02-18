@@ -27,9 +27,8 @@ runs:
         !env.ACT
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-tpaexec-pip-${{ hashFiles('requirements**') }}
-        restore-keys: |
-          ${{ runner.os }}-tpaexec-pip-
+        key: pip-cache-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('requirements**') }}
+        restore-keys: pip-cache-${{ runner.os }}-${{ env.pythonLocation }}-
 
     - name: Install dependencies
       shell: bash
