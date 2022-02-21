@@ -117,6 +117,9 @@ each subnet may be anywhere between a /24 and a /29.
 This option is not meaningful for the "bare" platform, where TPAexec
 will not alter the network configuration of existing servers.
 
+**Note:** by default platform AWS assumes a VPC named `Test` has already
+been created, see the [aws](platform-aws.md#vpc-required) documentation.
+
 ### Instance type
 
 Specify `--instance-type <type>` to select an instance type.
@@ -156,6 +159,11 @@ option other than `--random-sort` (which is the default).
 
 Use `--hostnames-unsorted` to not sort hostnames at all. In this case,
 they will be assigned in the order they are found in the hostnames file.
+
+**Note:** with the default platform AWS, SSH keys are stored in an
+internal S3 bucket named `2ndquadrant-tpa`. If you do not have access,
+you must set [cluster_bucket](platform-aws.md#s3-bucket-optional) to a
+different bucket instead.
 
 ## Software selection
 
@@ -220,7 +228,7 @@ following options:
 3. `--barman-package-version 2.4-1.pgdg90+1`
 4. `--pglogical-package-version '2.2.0*'`
 5. `--bdr-package-version '3.0.2*'`
-5. `--pgbouncer-package-version '1.8*'`
+6. `--pgbouncer-package-version '1.8*'`
 
 You may use any version specifier that apt or yum would accept.
 
@@ -341,7 +349,7 @@ $ ls ~/clusters/speedy
 total 8
 drwxr-xr-x 2 ams ams 4096 Aug  4 16:23 commands
 -rw-r--r-- 1 ams ams 1374 Aug  4 16:23 config.yml
-lrwxrwxrwx 1 ams ams   51 Aug  4 16:23 deploy.yml -> 
+lrwxrwxrwx 1 ams ams   51 Aug  4 16:23 deploy.yml ->
                          /home/ams/work/2ndq/TPA/architectures/M1/deploy.yml
 ```
 
