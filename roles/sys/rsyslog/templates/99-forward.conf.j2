@@ -11,3 +11,5 @@ $ActionResumeRetryCount -1    # infinite retries if host is down
 if $programname == 'postgres' then @@{{hostvars[log_server].ip_address}}:601
 if $programname == 'pgbouncer' then @@{{hostvars[log_server].ip_address}}:601
 if $programname == 'repmgr' then @@{{hostvars[log_server].ip_address}}:601
+if $programname == 'harp_manager' then @@{{hostvars[log_server].ip_address}}:601
+if $programname == 'harp_proxy' then @@{{hostvars[log_server].ip_address}}:601
