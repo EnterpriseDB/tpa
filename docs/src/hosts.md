@@ -26,9 +26,10 @@ instances:
 - Name: one
   …
   vars:
-    extra_etc_hosts_lines:
+    etc_hosts_lines:
     - 192.0.2.1 acid.example.com
     - 192.0.2.2 water.example.com
+    - 192.0.2.3 base.example.com
 ```
 
 If your /etc/hosts doesn't contain the default entries for instances in
