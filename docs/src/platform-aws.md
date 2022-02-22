@@ -252,11 +252,11 @@ For more fine-grained control, you can set:
 # cluster_bucket: xxx
 ```
 
-By default, this uses the 2ndquadrant_tpa bucket, which already exists
+By default, this uses the 2ndquadrant-tpa bucket, which already exists
 and has the right permissions. If you are provisioning instances under
 some other (i.e., non-2ndQuadrant) AWS account, you should create an S3
 bucket and set cluster_bucket to its name in config.yml. (The S3 bucket
-namespace is global, so you can't create a 2ndquadrant_tpa bucket under
+namespace is global, so you can't create a 2ndquadrant-tpa bucket under
 a different AWS account.)
 
 The IAM user you are using to provision the instances must have read and
