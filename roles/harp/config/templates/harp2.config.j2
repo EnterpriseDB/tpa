@@ -20,18 +20,20 @@ dcs:
 {%     endif %}
 {%   endfor %}
 {% elif harp_consensus_protocol == 'bdr' %}
-{%   for h in groups[bdr_node_group] %}
-{%     set v = hostvars[h] %}
-{%     if 'subscriber-only' not in v.role %}
-{%       if 'harp-proxy' in role and harp_dcs_user is defined %}
+{%   if 'harp-proxy' not in role %}
+  - "{{ bdr_node_dsn|dbname(bdr_database, host=unix_socket_directories|first) }}"
+{%   else %}
+{%     for h in groups[bdr_node_group] %}
+{%       set v = hostvars[h] %}
+{%       if 'subscriber-only' not in v.role %}
+{%         if harp_dcs_user is defined %}
   - "{{ v.bdr_node_dsn|dbname(v.bdr_database, user=harp_dcs_user) }}"
-{%       elif 'harp-proxy' not in role and inventory_hostname == h %}
-  - "host={{ unix_socket_directories|first }} dbname={{ v.bdr_database }}"
-{%       else %}
+{%         else %}
   - "{{ v.bdr_node_dsn }}"
+{%         endif %}
 {%       endif %}
-{%     endif %}
-{%   endfor %}
+{%     endfor %}
+{%   endif %}
 {% endif %}
 
 {% if 'postgres' in role %}
