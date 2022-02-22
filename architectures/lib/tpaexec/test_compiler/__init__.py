@@ -5,7 +5,8 @@
 from __future__ import print_function
 
 import yaml
-import os, re
+import os
+import re
 import random
 import string
 
@@ -17,9 +18,9 @@ class TestCompiler(object):
     tests.
     """
 
-    def __init__(self, options={}):
+    def __init__(self, options=None):
         self.tests = []
-        self.options = options
+        self.options = options or {}
 
     def read_input(self, infile):
         """
@@ -197,10 +198,10 @@ class Test(object):
                 # - must_be_defined
                 # - must_equal: foo
                 elif "has_vars" in e:
-                    vars = e["has_vars"]
-                    if not isinstance(vars, list):
+                    _vars = e["has_vars"]
+                    if not isinstance(_vars, list):
                         raise Exception("has_vars must specify a list")
-                    for v in vars:
+                    for v in _vars:
                         if isinstance(v, str):
                             conditions.append("hostvars[item]['%s'] is defined" % v)
                         elif isinstance(v, dict) and len(v) == 1:
@@ -408,19 +409,19 @@ class Test(object):
 
         s = None
         for k in potential_step_names:
-            for dir in step_directories:
-                f = os.path.join(dir, "%s.yml" % k)
+            for directory in step_directories:
+                f = os.path.join(directory, "%s.yml" % k)
                 if os.path.exists(f):
-                    vars = {}
-                    vars.update(step)
-                    if "args" not in vars:
+                    _vars = {}
+                    _vars.update(step)
+                    if "args" not in _vars:
                         step_args = {}
                         if k in step and isinstance(step[k], dict):
                             step_args = step[k]
-                        vars["args"] = step_args
+                        _vars["args"] = step_args
                     s = {
                         "include_tasks": {"file": f},
-                        "vars": vars,
+                        "vars": _vars,
                     }
                     break
 
@@ -432,8 +433,8 @@ def read_yaml(infile):
     Parses the contents of the given input file as YAML and returns the
     resulting data structure.
     """
-    with open(infile, "r") as input:
-        return yaml.load(input, Loader=yaml.FullLoader)
+    with open(infile, "r") as input_fh:
+        return yaml.load(input_fh, Loader=yaml.FullLoader)
 
 
 def write_yaml(outdir, filename, data):
