@@ -19,12 +19,9 @@
         state: directory
         path: "{{ cluster_dir }}/logs/{{ timestamp }}"
 
-- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
-  tags: always
-
 - name: Archive log files from target instances
   hosts: all
-
+  become: yes
   tasks:
 
     - block:
