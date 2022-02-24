@@ -14,7 +14,7 @@
       set_fact:
         timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
 
-    - name: Create log archive directory
+    - name: Create local log archive directory
       file:
         state: directory
         path: "{{ cluster_dir }}/logs/{{ timestamp }}"
@@ -22,25 +22,25 @@
 - name: Archive log files from target instances
   hosts: all
   become: yes
+  vars:
+    log_timestamp: "{{ hostvars.localhost.timestamp }}"
+    archive: "/tmp/{{ inventory_hostname }}-logs-{{ log_timestamp }}.tar.gz"
   tasks:
 
-    - block:
-      # tar's exit code is 1 if files change whilst the archive is being created,
-      # logs are likely to change, so we ignore this exit code
-      - name: Create archive of log files
-        command:
-          cmd: "tar cvzf {{ archive }} --transform 's/log/{{ inventory_hostname }}-logs/' log"
-          chdir: "/var"
-        register: tar_command
-        failed_when: tar_command.rc > 1
-      - name: Fetch archive
-        fetch:
-          src: "{{ archive }}"
-          dest: "{{ cluster_dir }}/logs/{{ hostvars.localhost.timestamp }}/"
-          flat: yes
-      - name: Remove archive
-        file:
-          path: "{{ archive }}"
-          state: absent
-      vars:
-        archive: "/tmp/{{ inventory_hostname }}-logs-{{ hostvars.localhost.timestamp }}.tar.gz"
+    # tar's exit code is 1 if files change whilst the archive is being created,
+    # logs are likely to change, so we ignore this exit code
+    - name: Create archive of log files
+      command:
+        cmd: "tar cvzf {{ archive }} --transform 's/log/{{ inventory_hostname }}-logs/' log"
+        chdir: "/var"
+      register: tar_command
+      failed_when: tar_command.rc > 1
+    - name: Fetch archives into logs/{{ log_timestamp }}
+      fetch:
+        src: "{{ archive }}"
+        dest: "{{ cluster_dir }}/logs/{{ log_timestamp }}/"
+        flat: yes
+    - name: Remove remote archives
+      file:
+        path: "{{ archive }}"
+        state: absent
