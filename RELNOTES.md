@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-## v22.9 (unreleased)
+## v22.9 (2022-02-24)
 
 ### Notable changes
 
@@ -14,6 +14,39 @@
   Future versions of harp will no longer support embedded pgbouncer, but for now,
   you can set `harp_proxy_mode: pgbouncer` explicitly to keep using it.
 
+- Create a new harp-postgres.target that stops/starts both Postgres and
+  harp-manager together (i.e., `systemctl restart harp-postgres.target`
+  will correctly stop harp-manager, restart postgres, and then start
+  harp-manager)
+
+### Minor changes
+
+- Remove "pwgen" as a dependency for the tpaexec package
+
+- Add archive-logs command to fetch logs from cluster instances
+
+### Bugfixes
+
+- Set `postgres_port` correctly when granting permissions to the
+  harp_dcs_user
+
+- Use the correct Unix socket path to connect to EPAS even when using
+  a non-EPAS libpq or vice versa
+
+- Fix a problem with adding new BDR instances in a different node group,
+  which would cause the "Override first_bdr_primary if required" task to
+  fail with an "undefined variable" error
+
+- Fix conninfo generation to not duplicate dbname/user parameters (a
+  cosmetic problem, but potentially confusing)
+
+- Fix an error about `private_ip` not being defined when generating
+  efm.properties
+
+- Generate harp configuration only on instances where we install harp
+
+- Ensure that backups taken during the initial deploy are fully
+  consistent by using `barman backup --wait`
 
 ## v22.8 (2022-02-08)
 
