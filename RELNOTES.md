@@ -9,7 +9,7 @@
 - Deploy harp-proxy with the "builtin" proxy instead of pgbouncer
 
   This change applies to existing clusters, which will be transparently
-  reconfigured to use the new proxy mode when you run `tpaexec deploy`.
+  reconfigured to use the new proxy mode when you run `tpaexec deploy.
 
   Future versions of harp will no longer support embedded pgbouncer, but for now,
   you can set `harp_proxy_mode: pgbouncer` explicitly to keep using it.
