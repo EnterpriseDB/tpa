@@ -19,11 +19,5 @@
     pgdata_initialised
   tags: [service, restart]
 
-- name: Wait for Postgres to become available
-  command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
-  changed_when: False
-  become_user: "{{ postgres_user }}"
-  become: yes
-  when:
-    pgdata_initialised and
-    postgres_service_end_state|default('started') != 'stopped'
+- name: Wait for Postgres to start
+  include_tasks: check-postgres-available.yml

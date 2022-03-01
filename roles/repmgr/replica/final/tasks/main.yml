@@ -42,11 +42,10 @@
     name: "{{ postgres_service_name }}"
     state: started
 
-- name: Wait for Postgres to become available
-  command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
-  changed_when: False
-  become_user: "{{ postgres_user }}"
-  become: yes
+- name: Wait for Postgres to start
+  include_role:
+    name: postgres/restart
+    tasks_from: check-postgres-available.yml
 
 # Now we can collect cluster_facts for this instance if they are not yet
 # available; subsequent tests depend on the presence of these facts.
