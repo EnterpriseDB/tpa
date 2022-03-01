@@ -82,7 +82,7 @@ class aws(Platform):
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20210907": {
+                "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20220131": {
                     "versions": ["20.04", "focal", "default"],
                     "owner": "099720109477",
                     "user": "ubuntu",
