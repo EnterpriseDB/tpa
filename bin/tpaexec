@@ -148,18 +148,29 @@ _install_pip_packages() {
         pip3 install "${pip_args[@]}" \
             -r "$ANSIBLE_HOME/requirements.txt" \
             -r "$TPA_DIR/requirements.txt"
+        cp "$ANSIBLE_HOME"/contrib/inventory/ec2.py \
+        "$TPA_DIR"/platforms/aws/inventory
+        cp "$ANSIBLE_HOME"/contrib/inventory/lxd.py \
+        "$TPA_DIR"/platforms/lxd/inventory
     else
         if [[ -d $PIP_DIR/ansible ]]; then
             ANSIBLE_HOME=$PIP_DIR/ansible
-        else
-            ANSIBLE_HOME=$(mktemp -d $TMPDIR/ansible-XXXXXXXXXX)
-            git clone --depth 1 https://github.com/2ndQuadrant/ansible "$ANSIBLE_HOME"
-        fi
-        pip3 install "${pip_args[@]}" file:"$ANSIBLE_HOME" \
+            pip3 install "${pip_args[@]}" file:"$ANSIBLE_HOME" \
             -r "$TPA_DIR/requirements.txt"
+            cp "$ANSIBLE_HOME"/contrib/inventory/ec2.py \
+            "$TPA_DIR"/platforms/aws/inventory
+            cp "$ANSIBLE_HOME"/contrib/inventory/lxd.py \
+            "$TPA_DIR"/platforms/lxd/inventory
+        else
+            pip3 install "${pip_args[@]}" \
+            -r "$TPA_DIR/ansible.txt" \
+            -r "$TPA_DIR/requirements.txt"
+            cp -v "$TPA_VENV"/contrib/inventory/ec2.py \
+            "$TPA_DIR"/platforms/aws/inventory/ec2.py
+            cp -v "$TPA_VENV"/contrib/inventory/lxd.py \
+            "$TPA_DIR"/platforms/lxd/inventory/lxd.py
+        fi
     fi
-    cp "$ANSIBLE_HOME"/contrib/inventory/ec2.py "$TPA_DIR"/platforms/aws/inventory
-    cp "$ANSIBLE_HOME"/contrib/inventory/lxd.py "$TPA_DIR"/platforms/lxd/inventory
 }
 
 _apply_patch_if_not_applied() {

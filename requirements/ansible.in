@@ -1,0 +1,3 @@
+# ansible requirement file for tox test environments.
+pyyaml==5.4.1
+https://github.com/2ndQuadrant/ansible/releases/latest/download/ansible-2.9.27+tpa.1.0.2-py3-none-any.whl

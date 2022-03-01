@@ -1,0 +1,53 @@
+---
+# this action runs pip-compile on the one that changed on latest push making
+# changes in one of the requirements .in files paths.
+
+name: "Commit and push update"
+description: " use .in file to regenerate the associated .txt"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/install-requirements
+
+    - name: Install python dependencies
+      shell: bash
+      run: |
+        pip install pip-tools
+
+    - name: Run pip-compile on requirements.in
+      shell: bash
+      run: |
+        pip-compile --generate-hashes requirements.in -o requirements.txt
+
+    - name: Run pip-compile on ansible.in
+      shell: bash
+      run: |
+        pip-compile --generate-hashes ansible.in -o ansible.txt
+
+    - name: Run pip-compile on test dependency requirements/ansible.in
+      shell: bash
+      run: |
+        pip-compile --generate-hashes requirements/ansible.in -o requirements/ansible.txt
+
+    - name: Run pip-compile on test dependency requirements/dep.in
+      shell: bash
+      run: |
+        pip-compile --generate-hashes requirements/dep.in -o requirements/dep.txt
+
+    - name: Run pip-compile on test dependency requirements/lint.in
+      shell: bash
+      run: |
+        pip-compile --generate-hashes requirements/lint.in -o requirements/lint.txt
+
+    - name: Run pip-compile on test dependency requirements/testing.in
+      shell: bash
+      run: |
+        pip-compile --generate-hashes requirements/testing.in -o requirements/testing.txt
+
+    # commit and push changes (if any) on the same branch than the current commit.
+    - name: Commit and push changes
+      uses: devops-infra/action-commit-push@v0.5
+      with:
+        github_token: ${{ env.GITHUB_TOKEN }}
+        commit_message: "Update python requirements files"

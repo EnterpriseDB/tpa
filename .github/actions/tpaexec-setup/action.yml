@@ -4,15 +4,6 @@ description: "Setup TPAexec virtual environment and package cache"
 runs:
   using: "composite"
   steps:
-    - uses: actions/cache@v2
-      if: >
-        !env.ACT
-      id: cache-python-packages
-      with:
-        path: tpa-venv
-        key: tpa-venv-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('requirements**') }}
-        restore-keys: tpa-venv-${{ runner.os }}-${{ env.pythonLocation }}-
-
     - name: Run tpaexec setup
       shell: bash
       run: ./bin/tpaexec setup

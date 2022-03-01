@@ -1,0 +1,10 @@
+Jinja2
+PyYAML~=5.2
+cryptography
+python-dateutil
+netaddr
+awscli>=1.10.64
+boto3>=1.5.31
+boto>=2.48.0
+docker
+passlib
