@@ -9,9 +9,35 @@
       - ec2_vpc is defined
       - ec2_vpc is mapping
 
+- name: Record whether cluster_bucket was defined
+  set_fact:
+    cluster_bucket_was_defined: "{{ cluster_bucket is defined and cluster_bucket != 'auto' }}"
+
+# If cluster_bucket is undefined or is "auto", generate a name for the bucket based on the user
+# ID configured for AWS authentication. Save a boolean value based on if it set to auto which
+# can later used to determine whether the user should be prompted to create the bucket if it
+# does not exist.
+
+- name: Set a default value for cluster_bucket, if required
+  block:
+  - name: Lookup aws user
+    aws_caller_info:
+    register: caller_info
+
+  - name: Record whether cluster_bucket was set to auto
+    set_fact:
+      cluster_bucket_auto: "{{ cluster_bucket|default('') == 'auto' }}"
+
+  - name: Set default value for cluster_bucket
+    set_fact:
+      cluster_bucket: "{{ ('edb-tpa' + suffix)[:62] }}"
+    vars:
+      suffix: "{{ caller_info.user_id|regex_replace('[:/@\\.]','-')|lower }}"
+  when:
+    - cluster_bucket is undefined or cluster_bucket == 'auto'
+
 - name: Derive subsidiary resource names for the cluster
   set_fact:
-    cluster_bucket: "{{ cluster_bucket|default('2ndquadrant-tpa') }}"
     cluster_profile: "{{ cluster_profile|default(cluster_name+'_profile') }}"
     ec2_key_name: "{{ ec2_key_name|default('tpa_' + cluster_name|lower) }}"
 

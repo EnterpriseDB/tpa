@@ -8,7 +8,73 @@
 # time of one hour) after which provision.yml will reinvoke us. This is
 # easier and cheaper than trying to decide if (a) any of the objects in
 # S3 have expired, and/or (b) any of the keys has changed on disk (which
-# they shouldn't do often anyway).
+# they shouldn't often do anyway).
+
+- name: Check if cluster_bucket exists
+  aws_s3:
+    bucket: "{{ cluster_bucket }}"
+    region: "{{ aws_regions[0] }}"
+    mode: list
+  register: cluster_bucket_check
+  ignore_errors: true
+
+- name: Refuse to create user defined cluster_bucket
+  fail:
+    fail_msg: "The user defined cluster_bucket does not exist: {{ cluster_bucket }}"
+  when:
+    - cluster_bucket_check is not successful
+    - cluster_bucket_was_defined
+
+- name: Confirm creation of bucket
+  pause:
+    prompt: |-
+
+      TPAexec needs access to an S3 bucket to provision this cluster.
+
+      TPAexec can create a bucket named {{ cluster_bucket }} for you now.
+
+      To use an existing bucket, set `cluster_bucket: name-of-bucket` in config.yml
+      (or configure your cluster with `--cluster-bucket name-of-bucket`). If you want
+      to create a new bucket yourself, you can do so with a command like:
+
+          aws s3 mb s3://name-of-bucket --region {{ aws_regions[0] }}
+
+      TPAexec will never remove any S3 buckets when you deprovision the cluster. To remove
+      the bucket yourself, run: `aws s3 rb s3://name-of-bucket --force`
+
+      To create an S3 bucket named {{ cluster_bucket }} now, type "yes"
+  register: cluster_bucket_create
+  vars:
+    bucket: "{{ cluster_bucket }}"
+    region: "{{ aws_regions[0] }}"
+  when:
+    - cluster_bucket_check is not successful
+    - cluster_bucket_auto is false
+  failed_when: cluster_bucket_create.user_input != "yes"
+
+- name: Create an S3 bucket for this cluster, if required
+  block:
+    - name: Create S3 bucket
+      s3_bucket:
+        name: "{{ cluster_bucket }}"
+        region: "{{ aws_regions[0] }}"
+        state: present
+        tags: |
+          {{
+            cluster_tags|combine({
+              'CreatingCluster': cluster_name
+            })
+          }}
+    - name: Set S3 bucket contents to expire in a day
+      s3_lifecycle:
+        name: "{{ cluster_bucket }}"
+        expiration_days: 1
+        status: enabled
+        state: present
+  when:
+    - cluster_bucket_check is not successful
+    - cluster_bucket_auto is true
+      or cluster_bucket_create.user_input|default('') == "yes"
 
 - name: Upload SSH host key files
   aws_s3:
@@ -16,7 +82,6 @@
     object: "{{ cluster_name }}/hostkeys/{{ item.0 }}{{ item.1 }}.txt"
     src: "{{ cluster_dir }}/hostkeys/ssh_host_{{ item.0 }}_key{{ item.1 }}"
     overwrite: different
-    expiration: 3600
     mode: put
   with_nested:
     - ["rsa", "ecdsa"]
@@ -24,9 +89,8 @@
   loop_control:
     label: >-
       ssh_host_{{ item.0 }}_key{{ item.1 }}
-  register: keyurls
 
 - include_tasks: ../common/set-provisioning-var.yml
   vars:
-    name: s3_hostkey_expiry
-    value: "{{ lookup('pipe', 'date +%s')|int + 2700 }}"
+    name: s3_last_modified
+    value: "{{ lookup('pipe', 'date +%s')|int }}"

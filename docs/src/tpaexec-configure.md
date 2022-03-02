@@ -169,11 +169,6 @@ option other than `--random-sort` (which is the default).
 Use `--hostnames-unsorted` to not sort hostnames at all. In this case,
 they will be assigned in the order they are found in the hostnames file.
 
-**Note:** with the default platform AWS, SSH keys are stored in an
-internal S3 bucket named `2ndquadrant-tpa`. If you do not have access,
-you must set [cluster_bucket](platform-aws.md#s3-bucket-optional) to a
-different bucket instead.
-
 ## Software selection
 
 ### Distribution

@@ -28,6 +28,7 @@ class aws(CloudPlatform):
         g.add_argument(
             "--instance-type", default=AWS_DEFAULT_INSTANCE_TYPE, metavar="TYPE"
         )
+        g.add_argument("--cluster-bucket")
 
     def supported_distributions(self):
         return [

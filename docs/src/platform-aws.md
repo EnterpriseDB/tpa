@@ -278,17 +278,25 @@ For more fine-grained control, you can set:
 
 ### S3 bucket (optional)
 
-```
-# Set this to upload SSH host keys to a different S3 bucket.
-# cluster_bucket: xxx
-```
+TPAexec requires access to an S3 bucket to provision an AWS cluster. This bucket
+is used to temporarily store files such as SSH host keys, but may also be used for
+other cluster data (such as backups).
 
-By default, this uses the 2ndquadrant-tpa bucket, which already exists
-and has the right permissions. If you are provisioning instances under
-some other (i.e., non-2ndQuadrant) AWS account, you should create an S3
-bucket and set cluster_bucket to its name in config.yml. (The S3 bucket
-namespace is global, so you can't create a 2ndquadrant-tpa bucket under
-a different AWS account.)
+By default, TPAexec will use an S3 bucket named `edb-tpa-<aws-account-user-id>`
+for any clusters you provision. (If the bucket does not exist, you will be asked to
+confirm that you want TPAexec  to create it for you.)
+
+To use an existing S3 bucket instead, set
+
+    cluster_bucket: name-of-bucket
+
+(You can also set `cluster_bucket: auto` to accept the default bucket name without
+the confirmation prompt.)
+
+TPAexec will never remove any S3 buckets when you deprovision the cluster. To remove
+the bucket yourself, run:
+
+    aws s3 rb s3://<bucket> --force
 
 The IAM user you are using to provision the instances must have read and
 write access to this bucket. During provisioning, tpaexec will provide

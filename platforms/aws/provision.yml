@@ -44,7 +44,7 @@
 
 - include_tasks: s3-hostkeys.yml
   when:
-    lookup('pipe', 'date +%s')|int > s3_hostkey_expiry|default(0)|int
+    lookup('pipe', 'date +%s')|int > s3_last_modified|default(0)|int + 3600
   tags: [aws, s3, ssh, hostkeys]
 
 - include_tasks: s3-uploads.yml
