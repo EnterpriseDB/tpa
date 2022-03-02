@@ -4,9 +4,9 @@
 #
 #    pip-compile --generate-hashes --output-file=requirements.txt requirements.in
 #
-awscli==1.22.55 \
-    --hash=sha256:dbd843896df6c230841774d3a400a59fef2744390cb9f1156a357c94a2156a17 \
-    --hash=sha256:ec4ae488fdcc0ee9e528e95a5a355b5a2800e35fab88d78c052cc13f69f3f719
+awscli==1.22.64 \
+    --hash=sha256:1d84fea773ce21dbbf1bcbc1fc634b740c863786aa9135e782b890d6e221ec20 \
+    --hash=sha256:8158a8b8f40591f63d1fee70959eb55c97c24bbe6593c6d41b2a18ef7dcf30e3
     # via -r requirements.in
 boto==2.49.0 \
     --hash=sha256:147758d41ae7240dc989f0039f27da8ca0d53734be0eb869ef16e3adcfa462e8 \
@@ -16,9 +16,9 @@ boto3==1.21.0 \
     --hash=sha256:25a76b7b530a124d9e526c62ff2b7da5782315195badb9a6273714898d689820 \
     --hash=sha256:cc40566dec3f48611a82ace07b29489848e9bd35a51e3e992d1902a3c037e9fc
     # via -r requirements.in
-botocore==1.24.0 \
-    --hash=sha256:2bf4463513bd89817aa5d7341ed81c7c76d906e6c70672c8762d64ecf3275771 \
-    --hash=sha256:47723cef6112f451630bf2446cfd6be2782cc1d6b1b92acb12ff00797588c5f3
+botocore==1.24.9 \
+    --hash=sha256:8d41deb25e585b0d7b6ee8547990d5e95562f1dc5d3127af58459450b25c13c7 \
+    --hash=sha256:c44758c487df7a357c4a103d959962d78e225d1ab6c9eeda4c77f79a410ccd19
     # via
     #   awscli
     #   boto3
@@ -122,10 +122,6 @@ idna==3.3 \
     --hash=sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff \
     --hash=sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d
     # via requests
-importlib-resources==5.4.0 \
-    --hash=sha256:33a95faed5fc19b4bc16b29a6eeae248a3fe69dd55d4d229d2b480e23eeaad45 \
-    --hash=sha256:d756e2f85dd4de2ba89be0b21dba2a3bbec2e871a42a3a16719258a11f87506b
-    # via netaddr
 jinja2==3.0.3 \
     --hash=sha256:077ce6014f7b40d03b47d1f1ca4b0fc8328a692bd284016f806ed0eaca390ad8 \
     --hash=sha256:611bb273cd68f3b993fabdc4064fc858c5b47a973cb5aa7999ec1ba405c87cd7
@@ -290,7 +286,3 @@ websocket-client==1.2.3 \
     --hash=sha256:1315816c0acc508997eb3ae03b9d3ff619c9d12d544c9a9b553704b1cc4f6af5 \
     --hash=sha256:2eed4cc58e4d65613ed6114af2f380f7910ff416fc8c46947f6e76b6815f56c0
     # via docker
-zipp==3.6.0 \
-    --hash=sha256:71c644c5369f4a6e07636f0aa966270449561fcea2e3d6747b8d23efaa9d7832 \
-    --hash=sha256:9fe5ea21568a0a70e50f273397638d39b03353731e6cbbb3fd8502a33fec40bc
-    # via importlib-resources
