@@ -42,7 +42,7 @@ class aws(Platform):
                     "owner": "379101102735",
                     "user": "admin",
                 },
-                "debian-stretch-hvm-x86_64-gp2-2021-07-21-65742": {
+                "debian-stretch-hvm-x86_64-gp2-2021-12-30-21724": {
                     "versions": ["9", "stretch"],
                     "owner": "379101102735",
                     "user": "admin",
