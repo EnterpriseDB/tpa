@@ -26,6 +26,8 @@ class aws(Platform):
             "Debian-minimal",
             "RedHat",
             "RedHat-minimal",
+            "Rocky",
+            "Rocky-minimal",
             "Ubuntu",
             "Ubuntu-minimal",
         ]
@@ -70,6 +72,15 @@ class aws(Platform):
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
+
+            },
+            "rocky": {
+              "Rocky-8-ec2-8.5-20211114.2.x86_64": {
+                  "versions": ["8", "default"],
+                  "preferred_python_version": "python3",
+                  "owner": "792107900819",
+                  "user": "rocky"
+              }
             },
             "ubuntu": {
                 "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20210721": {
