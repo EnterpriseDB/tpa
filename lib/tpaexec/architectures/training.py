@@ -10,7 +10,6 @@ ISSUE_URL = "https://github.com/EnterpriseDB/tpaexec/issues/"
 
 
 class Training(Architecture):
-
     def add_architecture_options(self, p, g):
         g.add_argument(
             "--num-instances",
@@ -38,8 +37,4 @@ class Training(Architecture):
         return "training_%s" % self.args["issue"]
 
     def update_cluster_tags(self, cluster_tags):
-        cluster_tags.update(
-            {
-                "Reference": f"{ISSUE_URL}{self.args['issue']}"
-            }
-        )
+        cluster_tags.update({"Reference": f"{ISSUE_URL}{self.args['issue']}"})

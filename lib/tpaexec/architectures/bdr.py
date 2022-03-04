@@ -49,7 +49,11 @@ class BDR(Architecture):
         )
 
     def cluster_vars_args(self):
-        return super().cluster_vars_args() + ["bdr_version", "bdr_node_group", "bdr_database"]
+        return super().cluster_vars_args() + [
+            "bdr_version",
+            "bdr_node_group",
+            "bdr_database",
+        ]
 
     def update_cluster_vars(self, cluster_vars):
         # We must decide which version of Postgres to install, which version
@@ -80,7 +84,7 @@ class BDR(Architecture):
             "12": "3",
             "13": "3",
             "14": "4",
-            None: "3"
+            None: "3",
         }
 
         default_pg_versions = {
