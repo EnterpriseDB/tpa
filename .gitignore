@@ -229,3 +229,5 @@ test-output/
 # VS Code
 .vscode
 workflow/
+
+coverage-reports/
