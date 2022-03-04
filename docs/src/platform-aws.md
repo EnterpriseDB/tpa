@@ -228,6 +228,31 @@ more existing security groups, set:
         group-name:
           - foo
 
+If you want to customise the rules in the default security group, set
+`cluster_rules`:
+
+    cluster_rules:
+    - cidr_ip: 0.0.0.0/0
+      from_port: 22
+      proto: tcp
+      to_port: 22
+    - cidr_ip: 192.0.2.0/27
+      from_port: 0
+      proto: tcp
+      to_port: 65535
+    - cidr_ip: 192.0.2.100/27
+      from_port: 0
+      proto: tcp
+      to_port: 65535
+
+This example permits ssh (port 22) from any address, and TCP connections on any
+port from specific IP ranges. (Note: from_port and to_port define a numeric
+range of ports, not a source and destination.)
+
+If you set up custom rules or use existing security groups, you must ensure
+that instances in the cluster are allowed to communicate with each other as
+required (e.g., allow tcp/5432 for Postgres).
+
 ### Internet gateways (optional)
 
 By default, we create internet gateways for every VPC if you set:
