@@ -244,7 +244,7 @@ class aws(Platform):
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}
 
-        ec2_vpc = {"Name": "Test"}
+        ec2_vpc = {"Name": "Test", "cidr": "10.33.0.0/16"}
         ec2_vpc.update(args.get("ec2_vpc", {}))
         s["ec2_vpc"] = ec2_vpc
 

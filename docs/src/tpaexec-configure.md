@@ -112,9 +112,8 @@ architecture.
 
 Specify `--network 192.168.0.0/16` to assign subnets from a different network.
 
-**Note:** On AWS clusters, this corresponds to the CIDR configured on the
-VPC. By default, TPAexec assumes a VPC named `Test` has already
-been created. See [aws](platform-aws.md#vpc-required) documentation
+**Note:** On AWS clusters, this corresponds to the VPC CIDR.
+See [aws](platform-aws.md#vpc-required) documentation for details.
 
 Specify `--subnet-prefix 26` to assign subnets of a different size, /26 instead
 of /28 in this case.
@@ -376,6 +375,7 @@ cluster_tags: {}
 
 ec2_vpc:
   Name: Test
+  cidr: 10.33.0.0/16
 
 ec2_ami:
   Name: debian-stretch-hvm-x86_64-gp2-2018-08-20-85640
