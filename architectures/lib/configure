@@ -5,10 +5,11 @@
 import sys
 
 try:
-    from tpaexec.architectures.images import Images
+    from tpaexec import configure
 except:
     print('Please invoke via: tpaexec configure <clustername> --architecture <archname>')
     sys.exit(-1)
 
+
 if __name__ == '__main__':
-    Images().configure()
+    configure(sys.argv[1:])

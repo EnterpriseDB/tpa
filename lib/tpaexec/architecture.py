@@ -6,8 +6,9 @@ import os
 import io
 import subprocess
 import argparse
+from pathlib import Path
+
 import yaml
-import glob
 import re
 
 from typing import List
@@ -27,41 +28,48 @@ class Architecture(object):
     as well as user input in the form of command-line options.
     """
 
-    def __init__(self):
+    def __init__(self, directory, lib, argv=None):
         """
         We expect this constructor to be invoked via a subclass defined in
         architectures/Xyzzy/configure; self.name then becomes 'Xyzzy'. It
         creates a Platform object corresponding to any «--platform x» on the
         command-line.
-        """
-        self._net = None
-        self.dir = os.path.dirname(os.path.realpath(sys.argv[0]))
-        self.lib = os.path.realpath("%s/../lib" % self.dir)
-        self.name = os.path.basename(self.dir)
-        self.platform = Platform.load(sys.argv[1:], arch=self)
 
-    def configure(self):
+        Args:
+            directory: Path to directory containing architecture metadata, commands, templates, etc
+            lib: Path to directory containing tpaexec commands, templates, etc
+            argv: list of strings to be passed to the argument parser
+
         """
-        Obtains command-line arguments based on the selected architecture and
-        platform, gives the architecture and platform a chance to process the
-        configuration information, and generates a cluster configuration.
-        """
-        self.args = self.arguments()
-        self.validate_arguments(self.args)
-        self.process_arguments(self.args)
-        configuration = self.generate_configuration()
-        self.write_configuration(configuration)
-        self.after_configuration()
+        self.dir = directory
+        self.lib = lib
+        self.name = os.path.basename(self.dir)
+        self._argv = argv or []
+        self.platform = Platform.load(self._argv, arch=self)
+        self._args = None
+        self._net = None
 
     ##
     ## Command-line parsing
     ##
 
-    def arguments(self):
+    @property
+    def args(self):
+        if self._args is None:
+            self._args = vars(self.argument_parser().parse_args(args=self._argv))
+        return self._args
+
+    def configure(self, force=False):
         """
-        Returns data obtained from command-line arguments
+        Obtains command-line arguments based on the selected architecture and
+        platform, gives the architecture and platform a chance to process the
+        configuration information, and generates a cluster configuration.
         """
-        return vars(self.argument_parser().parse_args())
+        self.validate_arguments(self.args)
+        self.process_arguments(self.args)
+        configuration = self.generate_configuration()
+        self.write_configuration(configuration, force=force)
+        self.after_configuration(force=force)
 
     def argument_parser(self):
         """
@@ -834,40 +842,35 @@ class Architecture(object):
         """
         return self.expand_template("config.yml.j2", self.args)
 
-    def write_configuration(self, configuration: str) -> None:
+    def write_configuration(self, configuration: str, force: bool = False) -> None:
         """
         Creates the cluster directory and writes config.yml
         """
         try:
-            os.mkdir(self.cluster)
-            with open("%s/config.yml" % self.cluster, "w") as cfg:
-                cfg.write(configuration)
+            os.makedirs(self.cluster, exist_ok=force)
+            config_path = f"{self.cluster}/config.yml"
+            if not os.path.exists(config_path) or force:
+                with open(config_path, "w") as cfg:
+                    cfg.write(configuration)
         except OSError as e:
             print("Could not write cluster directory: %s" % str(e), file=sys.stderr)
             sys.exit(-1)
 
-    def after_configuration(self) -> None:
+    def after_configuration(self, force: bool = False) -> None:
         """
         Performs additional actions after config.yml has been written
         """
-        self.create_links()
+        self.create_links(force=force)
 
-    def create_links(self) -> None:
+    def create_links(self, force: bool = False) -> None:
         """
         Creates links from the cluster directory to the architecture directory
         (e.g., for deploy.yml and commands; see links_to_create below)
         """
-        for l in self.links_to_create():
-            src = "%s/%s" % (self.dir, l)
-            dest = "%s/%s" % (self.cluster, l)
-            if not os.path.exists(src):
-                continue
-            elif not os.path.isdir(src):
-                os.symlink(src, dest)
-            else:
-                os.mkdir(dest)
-                for l in os.listdir(src):
-                    os.symlink("%s/%s" % (src, l), "%s/%s" % (dest, l))
+        for link in self.links_to_create():
+            update_symlinks_recursively(
+                os.path.join(self.dir, link), os.path.join(self.cluster, link), force
+            )
 
     def links_to_create(self) -> List[str]:
         """
@@ -893,17 +896,13 @@ class Architecture(object):
         option (apart from the default main.yml.j2). May be empty if the
         architecture provides no selectable layouts.
         """
-        # glob.glob()'s root_dir parameter was introduced only in 3.10
-        oldcwd = os.getcwd()
-        os.chdir(self.template_directories()[0])
-        layouts = list(
-            map(
-                lambda t: os.path.basename(t.replace(".yml.j2", "")),
-                glob.glob("layouts/*.yml.j2"),
+        with Path(self.template_directories()[0]) as path:
+            return list(
+                map(
+                    lambda t: os.path.basename(t.name.replace(".yml.j2", "")),
+                    path.glob("layouts/*.yml.j2"),
+                )
             )
-        )
-        os.chdir(oldcwd)
-        return layouts
 
     def default_layout_name(self):
         """
@@ -960,3 +959,30 @@ class Architecture(object):
                 return "{}"
 
         return MinimalLoader(basedirs or self.template_directories())
+
+
+def update_symlinks_recursively(source, destination, force):
+    """
+    Update symlinks from source to destination path recursively.
+
+    Args:
+        source: Directory path containing files/directories you want to link
+        destination: Path where the symlinks need to be created
+        force: Overwrite existing links if true
+
+    Returns: None if source does not exist
+
+    """
+    if not os.path.exists(source):
+        return
+    elif os.path.isdir(source):
+        if not os.path.exists(destination):
+            os.mkdir(destination)
+        for ls_link in os.listdir(source):
+            update_symlinks_recursively(
+                os.path.join(source, ls_link), os.path.join(destination, ls_link), force
+            )
+    else:
+        if os.path.exists(destination) and force:
+            os.unlink(destination)
+        os.symlink(source, destination)

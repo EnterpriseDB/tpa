@@ -248,29 +248,9 @@ _with_ansible_env() {
 }
 
 configure() {
-    # Find the relevant architecture configuration script and let it do
-    # whatever it wants to generate the cluster configuration into the
-    # target directory. All arguments belong to that script; we just
-    # peek at the command line to find out which architecture to use.
-
-    args=("$@")
-    for arg in "${!args[@]}"; do
-        if [[ $arg -gt 0 ]]; then
-            last=${args[$((arg-1))]}
-            if [[ $last == -a || $last == --architecture ]]; then
-                arch=${args[$arg]}
-                archdir=$TPA_DIR/architectures/$arch
-            fi
-        fi
-    done
-
-    if [[ ! ${arch:-} ]]; then
-        error "no architecture specified with -a/--architecture"
-    elif [[ ! -d $archdir || ! -x $archdir/configure ]]; then
-        error "unknown architecture: $arch"
-    fi
-
-    _with_ansible_env "$archdir"/configure "$@"
+    # Let lib/configure parse the arguments, determine which architecture and platform to use,
+    # and generate the cluster configuration into the target directory.
+    _with_ansible_env architectures/lib/configure "$@"
 }
 
 provision() {
