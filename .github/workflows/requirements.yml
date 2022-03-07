@@ -22,7 +22,7 @@ jobs:
     name: Requirements update
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: ./.github/actions/update-requirements
 
