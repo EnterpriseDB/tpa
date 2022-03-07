@@ -31,7 +31,9 @@ jobs:
       - name: Synopsys Detect
         uses: blackducksoftware/github-action@v2.2
         with:
-          args: '--blackduck.url="${{ secrets.BLACKDUCK_URL}}" --blackduck.api.token="${{ secrets.BLACKDUCK_API_TOKEN}}" --detect.project.name="TPAexec" --detect.project.version.name="CI/CD" --detect.risk.report.pdf=true --detect.excluded.detector.types="npm,cpan,nuget,git,maven,lerna"'
+          blackduck.url: "${{ secrets.BLACKDUCK_URL}}"
+          blackduck.api.token: "${{ secrets.BLACKDUCK_API_TOKEN}}" 
+          args: '--detect.project.name="TPAexec" --detect.project.version.name="CI/CD" --detect.risk.report.pdf=true --detect.excluded.detector.types="npm,cpan,nuget,git,maven,lerna"'
       
       - name: Check WD  
         run: pwd      
