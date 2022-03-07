@@ -1,0 +1,47 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Install 2ndQuadrant repo and tail log if it fails
+  block:
+
+  - name: Install 2ndQuadrant repository {{ repo.repo }}
+    shell: >
+      set -o pipefail && curl -sS "{{ repo.url }}" | bash
+    args:
+      executable: /bin/bash
+      creates: "{{ use_volatile_subscriptions|ternary(omit, repo.file) }}"
+    register: reposub
+    failed_when: >
+      reposub.rc != 0 or 'error: ' in reposub.stdout.lower()
+
+  rescue:
+
+  - name: Show last few lines of installation log file, if it exists
+    block:
+    - name: Fetch lines from installation log
+      shell: >
+        set -o pipefail &&
+        ls -tr /tmp/2ndq_packages_installation.log.*
+        | tail -n1
+        | xargs tail -n5
+      args:
+        executable: /bin/bash
+      register: inst_log_tail
+      changed_when: False
+
+    - name: Display lines from failed installation log
+      fail:
+        msg: "{{ inst_log_tail.stdout }}"
+      when:
+        inst_log_tail is not skipped
+
+    vars:
+      inst_log: /tmp/2ndq_packages_installation.log
+    when:
+      inst_log in ansible_failed_result.stdout
+      or inst_log in ansible_failed_result.stderr
+
+  - name: "Failed task '{{ ansible_failed_task.name }}'"
+    fail:
+      msg: "{{ ansible_failed_result }}"
