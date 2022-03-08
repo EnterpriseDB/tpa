@@ -250,7 +250,7 @@ _with_ansible_env() {
 configure() {
     # Let lib/configure parse the arguments, determine which architecture and platform to use,
     # and generate the cluster configuration into the target directory.
-    _with_ansible_env architectures/lib/configure "$@"
+    _with_ansible_env "${TPA_DIR}/architectures/lib/configure" "$@"
 }
 
 provision() {
