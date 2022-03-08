@@ -11,10 +11,11 @@
       or item.private_ip is defined
   with_items: "{{ bare_instances }}"
 
-- set_fact:
+- name: Allow single-word or FQDN hostnames for bare instances
+  set_fact:
     hostname_patterns: "{{
       hostname_patterns|default({})|combine({
-        'bare': '^[a-z0-9-]+(\\.[a-z0-9-]+)*$'
+        'bare': '^[a-z0-9][a-z0-9-]*[a-z0-9](\\.[a-z0-9][a-z0-9-]*[a-z0-9])*$'
       })
     }}"
 

@@ -15,11 +15,11 @@
       - docker_images is not defined or
         docker_images is mapping
 
-- name: Define the hostname pattern for docker containers
+- name: Allow single-word or FQDN hostnames for docker containers
   set_fact:
     hostname_patterns: "{{
       hostname_patterns|default({})|combine({
-        'docker': '^[a-z0-9-]+(\\.[a-z0-9-]+)*$'
+        'docker': '^[a-z0-9][a-z0-9-]*[a-z0-9](\\.[a-z0-9][a-z0-9-]*[a-z0-9])*$'
       })
     }}"
 

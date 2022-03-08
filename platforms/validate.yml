@@ -50,7 +50,7 @@
   with_items: "{{ instances }}"
   vars:
     patterns: "{{ hostname_patterns|default({}) }}"
-    p: "{{ patterns[item.platform]|default('^[a-z0-9-]+$') }}"
+    p: "{{ patterns[item.platform]|default('^[a-z0-9][a-z0-9-]*[a-z0-9]$') }}"
 
 - name: Ensure cluster_tags[Owner] is sensible for cloud instances
   assert:
