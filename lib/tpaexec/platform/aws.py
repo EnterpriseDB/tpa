@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-import copy
 import boto3
 import sys
 
-from . import Platform
+from . import CloudPlatform
 
 
-class aws(Platform):
+class aws(CloudPlatform):
+
     def __init__(self, name, arch):
         super().__init__(name, arch)
         self.ec2 = {}
@@ -207,39 +207,8 @@ class aws(Platform):
 
     def update_instances(self, instances, args, **kwargs):
         for instance in instances:
-            # For barman instances, convert the default postgres_data volume to
-            # a correctly-sized barman_data one (if there isn't one already)
-            role = instance.get("role") or []
-            if "barman" in role:
-                instance_defaults = args.get("instance_defaults", {})
-                default_volumes = instance_defaults.get("default_volumes", [])
-                volumes = instance.get("volumes", [])
 
-                barman_volume = {}
-                for v in volumes:
-                    volume_for = v.get("vars", {}).get("volume_for", "")
-                    if volume_for == "barman_data":
-                        barman_volume = v
-
-                default_barman_volume = {}
-                default_postgres_volume = {}
-                for v in default_volumes:
-                    volume_for = v.get("vars", {}).get("volume_for", "")
-                    if volume_for == "postgres_data":
-                        default_postgres_volume = v
-                    elif volume_for == "barman_data":
-                        default_barman_volume = v
-
-                if (
-                    not (barman_volume or default_barman_volume)
-                    and default_postgres_volume
-                ):
-                    v = copy.deepcopy(default_postgres_volume)
-                    v["vars"]["volume_for"] = "barman_data"
-                    size = self.arch.args.get("barman_volume_size")
-                    if size is not None:
-                        v["volume_size"] = size
-                    instance["volumes"] = volumes + [v]
+            self.update_barman_instance_volume(self.arch, args, instance)
 
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}
@@ -255,17 +224,7 @@ class aws(Platform):
             ec2_ami.update(args.get("ec2_ami", {}))
             s["ec2_ami"] = ec2_ami
 
-        cluster_rules = args.get("cluster_rules", [])
-        if not cluster_rules and "vpn_network" not in args["cluster_vars"]:
-            cluster_rules.append(
-                dict(proto="tcp", from_port=22, to_port=22, cidr_ip="0.0.0.0/0")
-            )
-            for sn in args.get("subnets", []):
-                cluster_rules.append(
-                    dict(proto="tcp", from_port=0, to_port=65535, cidr_ip=sn)
-                )
-        if cluster_rules:
-            s["cluster_rules"] = cluster_rules
+        self.set_cluster_rules(args, settings=s)
 
         cluster_bucket = args.get("cluster_bucket")
         if cluster_bucket:
