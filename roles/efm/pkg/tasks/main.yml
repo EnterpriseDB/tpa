@@ -5,18 +5,23 @@
 # We need to install Java before we install EFM itself (because the EFM
 # packages do not declare Java as a dependency).
 
+- name: Load variable for {{ ansible_distribution }}-{{ ansible_distribution_version }} {{ ansible_distribution }}-{{ ansible_distribution_major_version }}
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+
 - name: Install EFM dependencies
   package:
-    name: "{{
-      efm_dependency_packages|packages_for(ansible_os_family)
-    }}"
+    name: "{{ efm_dependency_packages }}"
     state: latest
 
 - name: Install EFM
   package:
     name: "{{
-      efm_packages|packages_for(ansible_os_family, efm_package_version)
-    }}"
+        efm_packages|packages_for(ansible_os_family, efm_package_version)
+      }}"
     state: "{{
-      (efm_package_version is defined)|ternary('present', 'latest')
-    }}"
+        (efm_package_version is defined)|ternary('present', 'latest')
+      }}"
