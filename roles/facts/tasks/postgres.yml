@@ -382,6 +382,7 @@
     barman_client_dsn_attributes: "{{ barman_client_dsn_attributes|default('') }}"
     repmgr_client_dsn_attributes: "{{ repmgr_client_dsn_attributes|default('') }}"
     bdr_client_dsn_attributes: "{{ bdr_client_dsn_attributes|default('') }}"
+    harp_dcs_client_dsn_attributes: "{{ harp_dcs_client_dsn_attributes|default('') }}"
 
 - name: Set default DSNs
   set_fact:
@@ -395,6 +396,8 @@
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ bdr_client_dsn_attributes }}
     pgbouncer_node_dsn: >-
       host={{ inventory_hostname }} port={{ pgbouncer_port }}
+    harp_dcs_node_dsn: >-
+      host={{ inventory_hostname }} port={{ postgres_port }} user={{ postgres_user }} {{ harp_dcs_client_dsn_attributes }}
   vars:
     _repmgr_hostname: "{{ repmgr_hostname|default(inventory_hostname) }}"
 

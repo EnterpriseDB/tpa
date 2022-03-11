@@ -27,7 +27,7 @@ dcs:
 {%       set v = hostvars[h] %}
 {%       if 'subscriber-only' not in v.role %}
 {%         if harp_dcs_user is defined %}
-  - "{{ v.bdr_node_dsn|dbname(v.bdr_database, user=harp_dcs_user) }}"
+  - "{{ v.harp_dcs_node_dsn|dbname(v.bdr_database, user=harp_dcs_user) }}"
 {%         else %}
   - "{{ v.bdr_node_dsn }}"
 {%         endif %}
