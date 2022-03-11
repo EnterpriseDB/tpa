@@ -27,6 +27,10 @@
       privs: EXECUTE
       schema: bdr
       objs: "consensus_kv_store(text:jsonb:jsonb:int)"
+    - type: function
+      privs: EXECUTE
+      schema: bdr
+      objs: "bdr_version_num()"
   become_user: "{{ postgres_user }}"
   become: yes
   when:
