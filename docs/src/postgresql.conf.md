@@ -70,6 +70,19 @@ changes, or if a restart is required. Therefore it will always restart
 the server to activate the changes. This is why it's always preferable
 to use variables directly whenever possible.
 
+## shared_buffers
+
+By default, `shared_buffers` is set to 25% of the available RAM in megabytes;
+to use a different proportion of memory, set `shared_buffers_ratio: 0.35`, for
+example. You can also supply an exact value directly, e.g.,
+`shared_buffers: "2GB"`.
+
+## effective_cache_size
+
+By default, `effective_cache_size` is set to 50% of the available RAM. To use a
+different proportion of memory, set `effective_cache_size_ratio: 0.35`. You can
+also supply an exact value directly, e.g., `effective_cache_size: "8GB"`.
+
 ## shared_preload_libraries
 
 TPAexec maintains an internal list of extensions that require entries in
