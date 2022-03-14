@@ -72,16 +72,19 @@ to use variables directly whenever possible.
 
 ## shared_buffers
 
-By default, `shared_buffers` is set to 25% of the available RAM in megabytes;
-to use a different proportion of memory, set `shared_buffers_ratio: 0.35`, for
-example. You can also supply an exact value directly, e.g.,
-`shared_buffers: "2GB"`.
+By default, TPAexec will set `shared_buffers` to 25% of the available memory
+(this is just a rule of thumb, not a recommendation). You can override this
+default by setting `shared_buffers_ratio: 0.35` to use a different proportion,
+or by setting `shared_buffers_mb: 796` to a specific number of MB, or by
+specifying an exact value directly, e.g., `shared_buffers: "2GB"`.
 
 ## effective_cache_size
 
-By default, `effective_cache_size` is set to 50% of the available RAM. To use a
-different proportion of memory, set `effective_cache_size_ratio: 0.35`. You can
-also supply an exact value directly, e.g., `effective_cache_size: "8GB"`.
+By default, TPAexec will set `effective_cache_size` to 50% of the available
+memory. You can override this default by setting
+`effective_cache_size_ratio: 0.35` to use a different proportion, or by setting
+`effective_cache_size_mb: 796` to a specific number of MB, or by specifying an
+exact value directly, e.g., `effective_cache_size: "8GB"`.
 
 ## shared_preload_libraries
 
