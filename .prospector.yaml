@@ -1,0 +1,9 @@
+pep257:
+  disable:
+    - D202
+    - D203
+    - D212
+    - D406
+    - D407
+ignore-patterns:
+  - platforms/.*/inventory/.*.py

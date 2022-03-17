@@ -31,4 +31,4 @@ jobs:
 
       - name: Run dependence tree with tox
         run: |
-          TOX_PARALLEL_NO_SPINNER=1 tox -e dep -p auto
+          TOX_PARALLEL_NO_SPINNER=1 tox -e dep

@@ -1,0 +1,2 @@
+-P self-hosted=nektos/act-environments-ubuntu:18.04
+--eventpath .github/act-events/default.json
