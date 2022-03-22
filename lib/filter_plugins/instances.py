@@ -5,224 +5,7 @@
 import copy
 import re
 from ansible.errors import AnsibleFilterError
-from typing import List, Dict, Tuple
 
-# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html#instance-store-volumes
-#
-# This table maps instance types to the number of instance store volumes
-# (formerly known as ephemeral volumes) they have.
-#
-# Run the following command to update the contents of this table:
-#
-# aws ec2 describe-instance-types --output text \
-#     --filters Name=instance-storage-supported,Values=true \
-#     --query 'InstanceTypes[*].[InstanceType,InstanceStorageInfo.Disks[*].Count]' \
-# | while read instance && read numvols; do echo "\"$instance\": $numvols,"; done
-# | sed 's/^/    /'
-# | sort
-
-ephemeral_storage = {
-    "c1.medium": 1,
-    "c1.xlarge": 4,
-    "c3.2xlarge": 2,
-    "c3.4xlarge": 2,
-    "c3.8xlarge": 2,
-    "c3.large": 2,
-    "c3.xlarge": 2,
-    "c5ad.12xlarge": 2,
-    "c5ad.16xlarge": 2,
-    "c5ad.24xlarge": 2,
-    "c5ad.2xlarge": 1,
-    "c5ad.4xlarge": 2,
-    "c5ad.8xlarge": 2,
-    "c5ad.large": 1,
-    "c5ad.xlarge": 1,
-    "c5d.12xlarge": 2,
-    "c5d.18xlarge": 2,
-    "c5d.24xlarge": 4,
-    "c5d.2xlarge": 1,
-    "c5d.4xlarge": 1,
-    "c5d.9xlarge": 1,
-    "c5d.large": 1,
-    "c5d.metal": 4,
-    "c5d.xlarge": 1,
-    "c6gd.12xlarge": 2,
-    "c6gd.16xlarge": 2,
-    "c6gd.2xlarge": 1,
-    "c6gd.4xlarge": 1,
-    "c6gd.8xlarge": 1,
-    "c6gd.large": 1,
-    "c6gd.medium": 1,
-    "c6gd.metal": 2,
-    "c6gd.xlarge": 1,
-    "cc2.8xlarge": 4,
-    "d2.2xlarge": 6,
-    "d2.4xlarge": 12,
-    "d2.8xlarge": 24,
-    "d2.xlarge": 3,
-    "d3.2xlarge": 6,
-    "d3.4xlarge": 12,
-    "d3.8xlarge": 24,
-    "d3en.12xlarge": 24,
-    "d3en.2xlarge": 4,
-    "d3en.4xlarge": 8,
-    "d3en.6xlarge": 12,
-    "d3en.8xlarge": 16,
-    "d3en.xlarge": 2,
-    "d3.xlarge": 3,
-    "f1.16xlarge": 4,
-    "f1.2xlarge": 1,
-    "f1.4xlarge": 1,
-    "g2.2xlarge": 1,
-    "g2.8xlarge": 2,
-    "g4ad.16xlarge": 2,
-    "g4ad.2xlarge": 1,
-    "g4ad.4xlarge": 1,
-    "g4ad.8xlarge": 1,
-    "g4ad.xlarge": 1,
-    "g4dn.12xlarge": 1,
-    "g4dn.16xlarge": 1,
-    "g4dn.2xlarge": 1,
-    "g4dn.4xlarge": 1,
-    "g4dn.8xlarge": 1,
-    "g4dn.metal": 2,
-    "g4dn.xlarge": 1,
-    "h1.16xlarge": 8,
-    "h1.2xlarge": 1,
-    "h1.4xlarge": 2,
-    "h1.8xlarge": 4,
-    "i2.2xlarge": 2,
-    "i2.4xlarge": 4,
-    "i2.8xlarge": 8,
-    "i2.xlarge": 1,
-    "i3.16xlarge": 8,
-    "i3.2xlarge": 1,
-    "i3.4xlarge": 2,
-    "i3.8xlarge": 4,
-    "i3en.12xlarge": 4,
-    "i3en.24xlarge": 8,
-    "i3en.2xlarge": 2,
-    "i3en.3xlarge": 1,
-    "i3en.6xlarge": 2,
-    "i3en.large": 1,
-    "i3en.metal": 8,
-    "i3en.xlarge": 1,
-    "i3.large": 1,
-    "i3.metal": 8,
-    "i3.xlarge": 1,
-    "m1.large": 2,
-    "m1.medium": 1,
-    "m1.small": 1,
-    "m1.xlarge": 4,
-    "m2.2xlarge": 1,
-    "m2.4xlarge": 2,
-    "m2.xlarge": 1,
-    "m3.2xlarge": 2,
-    "m3.large": 1,
-    "m3.medium": 1,
-    "m3.xlarge": 2,
-    "m5ad.12xlarge": 2,
-    "m5ad.16xlarge": 4,
-    "m5ad.24xlarge": 4,
-    "m5ad.2xlarge": 1,
-    "m5ad.4xlarge": 2,
-    "m5ad.8xlarge": 2,
-    "m5ad.large": 1,
-    "m5ad.xlarge": 1,
-    "m5d.12xlarge": 2,
-    "m5d.16xlarge": 4,
-    "m5d.24xlarge": 4,
-    "m5d.2xlarge": 1,
-    "m5d.4xlarge": 2,
-    "m5d.8xlarge": 2,
-    "m5d.large": 1,
-    "m5d.metal": 4,
-    "m5dn.12xlarge": 2,
-    "m5dn.16xlarge": 4,
-    "m5dn.24xlarge": 4,
-    "m5dn.2xlarge": 1,
-    "m5dn.4xlarge": 2,
-    "m5dn.8xlarge": 2,
-    "m5dn.large": 1,
-    "m5dn.metal": 4,
-    "m5dn.xlarge": 1,
-    "m5d.xlarge": 1,
-    "m6gd.12xlarge": 2,
-    "m6gd.16xlarge": 2,
-    "m6gd.2xlarge": 1,
-    "m6gd.4xlarge": 1,
-    "m6gd.8xlarge": 1,
-    "m6gd.large": 1,
-    "m6gd.medium": 1,
-    "m6gd.metal": 2,
-    "m6gd.xlarge": 1,
-    "p3dn.24xlarge": 2,
-    "p4d.24xlarge": 8,
-    "r3.2xlarge": 1,
-    "r3.4xlarge": 1,
-    "r3.8xlarge": 2,
-    "r3.large": 1,
-    "r3.xlarge": 1,
-    "r5ad.12xlarge": 2,
-    "r5ad.16xlarge": 4,
-    "r5ad.24xlarge": 4,
-    "r5ad.2xlarge": 1,
-    "r5ad.4xlarge": 2,
-    "r5ad.8xlarge": 2,
-    "r5ad.large": 1,
-    "r5ad.xlarge": 1,
-    "r5d.12xlarge": 2,
-    "r5d.16xlarge": 4,
-    "r5d.24xlarge": 4,
-    "r5d.2xlarge": 1,
-    "r5d.4xlarge": 2,
-    "r5d.8xlarge": 2,
-    "r5d.large": 1,
-    "r5d.metal": 4,
-    "r5dn.12xlarge": 2,
-    "r5dn.16xlarge": 4,
-    "r5dn.24xlarge": 4,
-    "r5dn.2xlarge": 1,
-    "r5dn.4xlarge": 2,
-    "r5dn.8xlarge": 2,
-    "r5dn.large": 1,
-    "r5dn.metal": 4,
-    "r5dn.xlarge": 1,
-    "r5d.xlarge": 1,
-    "r6gd.12xlarge": 2,
-    "r6gd.16xlarge": 2,
-    "r6gd.2xlarge": 1,
-    "r6gd.4xlarge": 1,
-    "r6gd.8xlarge": 1,
-    "r6gd.large": 1,
-    "r6gd.medium": 1,
-    "r6gd.metal": 2,
-    "r6gd.xlarge": 1,
-    "x1.16xlarge": 1,
-    "x1.32xlarge": 2,
-    "x1e.16xlarge": 1,
-    "x1e.2xlarge": 1,
-    "x1e.32xlarge": 2,
-    "x1e.4xlarge": 1,
-    "x1e.8xlarge": 1,
-    "x1e.xlarge": 1,
-    "x2gd.12xlarge": 2,
-    "x2gd.16xlarge": 2,
-    "x2gd.2xlarge": 1,
-    "x2gd.4xlarge": 1,
-    "x2gd.8xlarge": 1,
-    "x2gd.large": 1,
-    "x2gd.medium": 1,
-    "x2gd.metal": 2,
-    "x2gd.xlarge": 1,
-    "z1d.12xlarge": 2,
-    "z1d.2xlarge": 1,
-    "z1d.3xlarge": 1,
-    "z1d.6xlarge": 1,
-    "z1d.large": 1,
-    "z1d.metal": 2,
-    "z1d.xlarge": 1,
-}
 
 ## Instance filters
 #
@@ -272,7 +55,8 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults, locati
     # defaults otherwise. Any dict values are further merged for convenience, so
     # that defaults can specify some keys and item can override or extend them.
 
-    def merged_defaults(item, defaults, omit_keys=[]):
+    def merged_defaults(item, defaults, omit_keys=None):
+        omit_keys = omit_keys or []
         result = {}
 
         for key in [k for k in defaults if k not in omit_keys]:
@@ -335,15 +119,16 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults, locati
         location = j.get("location", None)
         if len(locations) > 0 and location is not None:
             if isinstance(location, int) and location < len(locations):
-                location = locations[location]
+                location_defaults = locations[location]
+                j['location'] = locations[location]['Name']
             elif location in locations_map:
-                location = locations_map[location]
+                location_defaults = locations_map[location]
             else:
                 raise AnsibleFilterError(
                     "Instance %s specifies unknown location %s" % (j["Name"], location)
                 )
 
-            j.update(merged_defaults(j, location, omit_keys=["Name"]))
+            j.update(merged_defaults(j, location_defaults, omit_keys=["Name"]))
 
         # The upstream, backup, and role tags should be moved one level up if
         # they're specified at all.
@@ -381,98 +166,35 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults, locati
     return instances
 
 
-# This filter sets the image for each instance, if not already specified.
+def expand_instance_volumes(old_instances):
+    """
+    Perform generic instance volume transformation.
 
+    This includes:
+    * Strip volumes with the type "none"
 
-def expand_instance_image(old_instances, ec2_region_amis):
+    See aws specific transformations in filter_plugins/aws.py
+
+    """
     instances = []
-
-    for i in old_instances:
-        j = copy.deepcopy(i)
-
-        if "image" not in j:
-            j["image"] = ec2_region_amis[j["region"]]
-
-        instances.append(j)
-
-    return instances
-
-
-# This filter translates a device name of 'root' to the given root
-# device name, and sets delete_on_termination to true if it's not
-# implied by attach_existing or explicitly set to be false.
-
-
-def expand_instance_volumes(old_instances, ec2_ami_properties):
-    instances = []
-
-    for i in old_instances:
-        j = copy.deepcopy(i)
+    for instance in old_instances:
+        transform = copy.deepcopy(instance)
 
         volumes = []
-        for vol in j.get("volumes", []):
-            v = copy.deepcopy(vol)
-            vars = v.get("vars", {})
+        for vol in transform.get("volumes", []):
+            volume = copy.deepcopy(vol)
+            _vars = volume.get("vars", {})
 
-            volume_type = v.get("volume_type")
+            volume_type = volume.get("volume_type")
             if volume_type == "none":
                 continue
 
-            if not (volume_type or "ephemeral" in v):
-                raise AnsibleFilterError(
-                    "volume_type/ephemeral not specified for volume %s"
-                    % (v["device_name"])
-                )
+            validate_volume_for(volume["device_name"], _vars)
 
-            if v["device_name"] == "root":
-                v["device_name"] = ec2_ami_properties[j["image"]]["root_device_name"]
-                if "mountpoint" in vars or "volume_for" in vars:
-                    raise AnsibleFilterError(
-                        "root volume cannot have mountpoint/volume_for set"
-                    )
-            if not "delete_on_termination" in v:
-                v["delete_on_termination"] = not v.get("attach_existing", False)
+            volumes.append(volume)
 
-            validate_volume_for(v["device_name"], vars)
-
-            volumes.append(v)
-
-            # If the entry specifies raid_device, then we repeat this volume
-            # raid_units-1 times.
-
-            if "raid_device" in v:
-                n = v["raid_units"]
-
-                if n == "all":
-                    if "ephemeral" in v:
-                        if i["type"] in ephemeral_storage:
-                            n = ephemeral_storage[i["type"]]
-                        else:
-                            raise AnsibleFilterError(
-                                "ephemeral storage unavailable for %s" % i["type"]
-                            )
-                    else:
-                        raise AnsibleFilterError(
-                            "raid_units=all can be used only with ephemeral storage"
-                        )
-                n -= 1
-
-                vn = v
-                while n > 0:
-                    vn = copy.deepcopy(vn)
-
-                    name = vn["device_name"]
-                    vn["device_name"] = name[0:-1] + chr(ord(name[-1]) + 1)
-
-                    if "ephemeral" in vn:
-                        ename = vn["ephemeral"]
-                        vn["ephemeral"] = ename[0:-1] + chr(ord(ename[-1]) + 1)
-
-                    volumes.append(vn)
-                    n -= 1
-
-        j["volumes"] = volumes
-        instances.append(j)
+        transform["volumes"] = volumes
+        instances.append(transform)
 
     return instances
 
@@ -487,7 +209,7 @@ volume_translations = {
 }
 
 
-def validate_volume_for(device_name, vars) -> None:
+def validate_volume_for(device_name, _vars) -> None:
     """
     Given a device name and a container with settings for that device, raises an
     exception if the volume has an invalid volume_for annotation or is missing
@@ -501,13 +223,13 @@ def validate_volume_for(device_name, vars) -> None:
 
     See roles/platforms/common/tasks/volumes.yml for more details.
     """
-    volume_for = vars.get("volume_for")
+    volume_for = _vars.get("volume_for")
     if volume_for and volume_for not in volume_translations:
         raise AnsibleFilterError(
             "volume %s has unrecognised volume_for=%s" % (device_name, volume_for)
         )
 
-    if volume_for == "postgres_tablespace" and not vars.get("tablespace_name"):
+    if volume_for == "postgres_tablespace" and not _vars.get("tablespace_name"):
         raise AnsibleFilterError(
             "volume %s is %s; must define tablespace_name" % (device_name, volume_for)
         )
@@ -660,8 +382,7 @@ def get_device_variables(volumes):
         dev = v.get("raid_device", v.get("device_name"))
         if dev not in seen:
             seen.add(dev)
-            vars = v.get("vars", {})
-            results.append(dict(device=dev, **vars))
+            results.append(dict(device=dev, **v.get("vars", {})))
     return results
 
 
@@ -764,7 +485,6 @@ class FilterModule(object):
             "ip_addresses": ip_addresses,
             "deploy_ip_address": deploy_ip_address,
             "set_instance_defaults": set_instance_defaults,
-            "expand_instance_image": expand_instance_image,
             "expand_instance_volumes": expand_instance_volumes,
             "translate_volume_deployment_defaults": translate_volume_deployment_defaults,
             "find_replica_tablespace_mismatches": find_replica_tablespace_mismatches,

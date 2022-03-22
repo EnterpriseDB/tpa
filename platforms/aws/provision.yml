@@ -344,8 +344,8 @@
   set_fact:
     aws_instances: "{{
       aws_instances
-      |expand_instance_image(ec2_region_amis)
-      |expand_instance_volumes(ec2_ami_properties)
+      |expand_ec2_instance_image(ec2_region_amis)
+      |expand_ec2_instance_volumes(ec2_ami_properties)
       |match_existing_volumes(cluster_name, ec2_attachable_volumes)
     }}"
 

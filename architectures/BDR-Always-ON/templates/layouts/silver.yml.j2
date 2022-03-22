@@ -31,7 +31,7 @@ instances:
     Name: {{ hostnames[5] }}
     location: 0
     volumes:
-      - device_name: /dev/xvdf
+      - device_name: {{ volume_device_name }}f
         volume_type: none
     role:
       - harp-proxy
@@ -40,7 +40,7 @@ instances:
     Name: {{ hostnames[6] }}
     location: 0
     volumes:
-      - device_name: /dev/xvdf
+      - device_name: {{ volume_device_name }}f
         volume_type: none
     role:
       - harp-proxy

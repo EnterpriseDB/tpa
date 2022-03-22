@@ -7,6 +7,10 @@ import sys
 
 from . import CloudPlatform
 
+AWS_DEFAULT_INSTANCE_TYPE = "t3.micro"
+AWS_DEFAULT_REGION = "eu-west-1"
+AWS_DEFAULT_VOLUME_DEVICE_NAME = "/dev/xvd"
+
 
 class aws(CloudPlatform):
 
@@ -17,8 +21,9 @@ class aws(CloudPlatform):
 
     def add_platform_options(self, p, g):
         if self.arch.name != "Images":
-            g.add_argument("--region", default="eu-west-1")
-        g.add_argument("--instance-type", default="t3.micro", metavar="TYPE")
+            g.add_argument("--region", default=AWS_DEFAULT_REGION)
+        g.add_argument("--instance-type", default=AWS_DEFAULT_INSTANCE_TYPE, metavar="TYPE")
+        g.add_argument("--volume-device-name", default=AWS_DEFAULT_VOLUME_DEVICE_NAME, metavar="DEV")
 
     def supported_distributions(self):
         return [
