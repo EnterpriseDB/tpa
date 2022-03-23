@@ -1,0 +1,18 @@
+---
+
+- set_fact:
+    enable_logrotate: yes
+
+- name: Add logrotate configuration for Postgres logfile
+  template:
+    src: postgres.j2
+    dest: /etc/logrotate.d/postgres
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    postgres_logfile: "{{
+      (log_destination == 'syslog')|ternary(
+        '/var/log/postgres/postgres.log', '/var/log/postgresql/postgres.log'
+      )
+    }}"
