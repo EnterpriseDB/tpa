@@ -35,6 +35,9 @@
 # We use a block here to propagate «tags: always» to the included tasks.
 
 - block:
+    - import_tasks: cloud/validate.yml
+      when: >
+        cluster_platforms|intersect(["aws", "azure"])
     - include_tasks: "{{ platform }}/validate.yml"
       with_items:
         "{{ cluster_platforms }}"
@@ -51,19 +54,6 @@
   vars:
     patterns: "{{ hostname_patterns|default({}) }}"
     p: "{{ patterns[item.platform]|default('^[a-z0-9][a-z0-9-]*[a-z0-9]$') }}"
-
-- name: Ensure cluster_tags[Owner] is sensible for cloud instances
-  assert:
-    msg: "Please set cluster_tags[Owner] or use '--owner Name' to identify the person responsible for this cluster"
-    that:
-      - cluster_tags['Owner'] is defined
-      - cluster_tags['Owner'] not in [
-          '', 'root', 'postgres', 'ec2-user', 'admin', 'ubuntu',
-          'vagrant', 'tpa', 'user',
-        ]
-  when: >
-    'aws' in cluster_platforms
-    and not deprovision|default(false)|bool
 
 - name: Ensure that every instance has only valid keys
   assert:

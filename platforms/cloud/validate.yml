@@ -1,0 +1,40 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# Validation rules and fact setting for platforms that have common cloud properties
+
+# If we need to create any security groups ourselves, they should have
+# the following rules.
+
+- name: Set default security group rules for the cluster
+  set_fact:
+    ssh_port: "{{ cluster_ssh_port|default(22)|int }}"
+    cluster_rules: "{{ cluster_rules|default(default_cluster_rules) }}"
+  vars:
+    default_cluster_rules:
+      - {proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0}
+      - {proto: udp, from_port: 1194, to_port: 1194, cidr_ip: 0.0.0.0/0}
+
+- name: Add custom ssh port to security group
+  set_fact:
+    cluster_rules: "{{
+      cluster_rules|union([
+        dict(proto='tcp', from_port=ssh_port, to_port=ssh_port, cidr_ip='0.0.0.0/0')
+      ])
+    }}"
+  when:
+    ssh_port|int != 22
+
+- name: Ensure cluster_tags[Owner] is sensible for cloud instances
+  assert:
+    msg: "Please set cluster_tags[Owner] or use '--owner Name' to identify the person responsible for this cluster"
+    that:
+      - cluster_tags['Owner'] is defined
+      - cluster_tags['Owner'] not in [
+          '', 'root', 'postgres', 'ec2-user', 'admin', 'ubuntu',
+          'vagrant', 'tpa', 'user',
+        ]
+  when: >
+    'aws' in cluster_platforms
+    and not deprovision|default(false)|bool
