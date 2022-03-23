@@ -2,19 +2,9 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-- name: Add logrotate configuration for Postgres logfile
-  template:
-    src: postgres.j2
-    dest: /etc/logrotate.d/postgres
-    owner: root
-    group: root
-    mode: 0644
-  vars:
-    postgres_logfile: "{{
-      (log_destination == 'syslog')|ternary(
-        '/var/log/postgres/postgres.log', '/var/log/postgresql/postgres.log'
-      )
-    }}"
+- include_tasks: postgres.yml
+  when: >
+    'postgres' in role
 
 - name: Set up a cron job to run logrotate every 10 minutes
   cron:
@@ -29,3 +19,5 @@
     job: >
       /usr/sbin/logrotate /etc/logrotate.conf
     state: present
+  when:
+    enable_logrotate|default('no')|bool is true
