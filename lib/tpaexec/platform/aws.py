@@ -18,16 +18,15 @@ class aws(CloudPlatform):
         self.ec2 = {}
         self.preferred_python_version = "python3"
 
+    @property
+    def default_volume_device_group(self):
+        return AWS_DEFAULT_VOLUME_DEVICE_NAME
+
     def add_platform_options(self, p, g):
         if self.arch.name != "Images":
             g.add_argument("--region", default=AWS_DEFAULT_REGION)
         g.add_argument(
             "--instance-type", default=AWS_DEFAULT_INSTANCE_TYPE, metavar="TYPE"
-        )
-        g.add_argument(
-            "--volume-device-name",
-            default=AWS_DEFAULT_VOLUME_DEVICE_NAME,
-            metavar="DEV",
         )
 
     def supported_distributions(self):

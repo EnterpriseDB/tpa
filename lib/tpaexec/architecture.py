@@ -235,6 +235,13 @@ class Architecture(object):
         g = p.add_argument_group("locations")
         g.add_argument("--location-names", metavar="LOCATION", nargs="+")
 
+        g = p.add_argument_group("host configuration")
+        g.add_argument(
+            "--volume-device-name",
+            default=self.platform.default_volume_device_name,
+            metavar="DEV",
+        )
+
     def add_architecture_options(self, p, g):
         """
         Adds architecture-specific options to the (relevant group in the) parser

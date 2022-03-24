@@ -6,6 +6,8 @@ import copy
 import sys
 import importlib.util
 
+DEFAULT_VOLUME_DEVICE_NAME = '/dev/sd'
+
 
 class Platform:
     """
@@ -48,6 +50,10 @@ class Platform:
         Returns a list of all platform names
         """
         return ["aws", "bare", "docker", "lxd", "vagrant"]
+
+    @property
+    def default_volume_device_name(self):
+        return DEFAULT_VOLUME_DEVICE_NAME
 
     def add_platform_options(self, p, g):
         """
