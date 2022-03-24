@@ -8,6 +8,8 @@ import re
 import sys
 import shlex
 import os.path
+from collections import Iterable, MutableMapping
+
 from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
 from collections.abc import Mapping
@@ -399,6 +401,45 @@ def dictify(item, key="name"):
     return {key: item}
 
 
+def index_list_of_dicts(obj, key=None, recursive=False):
+    """
+    Takes a list of dicts and creates a dictionary with keys using the given key name in the dict.
+
+    For example:
+        >>> obj = [{'Name': 'foo', 'attr': 123}, {'Name': 'bar', 'attr': 456}]
+        >>> index_list_of_dicts(obj, 'Name')
+        {'foo': {'Name': 'foo', 'attr': 123}, 'bar': {'Name': 'bar', 'attr': 456}}
+
+    If key name is not defined the index of the list is used as the key name:
+        >>> obj = [{'Name': 'foo', 'attr': 123}, {'Name': 'bar', 'attr': 456}]
+        >>> index_list_of_dicts(obj)
+        {0: {'Name': 'foo', 'attr': 123}, 1: {'Name': 'bar', 'attr': 456}}
+
+    """
+    ret_dict = {}
+    if recursive:
+        def func(a):
+            return index_list_of_dicts(a, key, recursive)
+    else:
+        def func(a):
+            return a
+    if isinstance(obj, list):
+        for index, item, in enumerate(obj):
+            if isinstance(item, MutableMapping):
+                if key is not None:
+                    ret_dict[item[key]] = func(item)
+                else:
+                    ret_dict[index] = func(item)
+            else:
+                ret_dict[index] = func(item)
+    elif isinstance(obj, MutableMapping):
+        ret_dict.update({k: func(v) for k, v in obj.items()})
+    else:
+        return obj
+
+    return ret_dict
+
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -423,4 +464,5 @@ class FilterModule(object):
             "ternary_format": ternary_format,
             "physical_replication_group": physical_replication_group,
             "dictify": dictify,
+            "list2idxdict": index_list_of_dicts,
         }
