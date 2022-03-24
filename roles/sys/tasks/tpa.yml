@@ -57,3 +57,20 @@
     mode: 0644
     owner: root
     group: root
+
+- block:
+  - name: Create /etc/tpa/rebuild-scripts
+    file:
+      path: /etc/tpa/rebuild-scripts
+      owner: root
+      group: root
+      state: directory
+      mode: 0755
+  - name: Create /etc/tpa/rebuild-sources.sh
+    copy:
+      src: rebuild-sources.sh
+      dest: /etc/tpa/rebuild-sources.sh
+      mode: 0755
+  when:
+    postgres_installation_method == 'src'
+    or install_from_source is not empty

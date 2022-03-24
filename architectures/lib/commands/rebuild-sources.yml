@@ -1,0 +1,15 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Rebuild postgres on cluster {{ cluster_dir }}
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  hosts: all
+  tasks:
+  - shell: test -x /etc/tpa/rebuild-sources.sh && /etc/tpa/rebuild-sources.sh
+    changed_when: False
+    become_user: root
+    become: yes

@@ -151,3 +151,11 @@ between the host and the containers.
 
 (By design, there is no way to install binaries compiled on the host
 directly into the containers.)
+
+## Rebuilding
+
+After deploying a cluster with components built from source, you can
+rebuild those components quickly without having to rerun `tpaexec
+deploy` by using the `tpaexec rebuild-sources` command. This will run
+`git pull` for any components built from git repositories on the
+containers, and rebuild all components.

@@ -48,3 +48,16 @@
   environment: "{{ target_environment|combine(_task_environment) }}"
   notify:
     - Note Postgres restart required
+
+- name: Write rebuild script for {{ ifs.name }}
+  template:
+    src: general_rebuild_script.sh.j2
+    dest: /etc/tpa/rebuild-scripts/rebuild-{{ ifs.name }}.sh
+    mode: '0755'
+  vars:
+    build_log: "{{ build_log|default('/tmp/build.log') }}"
+    build_script_environment: "{{ target_environment|combine(_task_environment) }}"
+    _task_environment: "{{ build_environment|default({}) }}"
+    rebuild_commands: "{{ build_commands|default([]) or default_build_commands }}"
+    default_build_commands:
+    - "make -f {{ source_directory }}/Makefile install"

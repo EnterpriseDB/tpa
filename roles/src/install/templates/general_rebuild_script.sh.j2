@@ -1,0 +1,17 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
+#!/bin/sh
+
+# set up environment
+{% for k,v in build_script_environment.items() %}
+export {{ k }}={{ v }}
+{% endfor %}
+
+# git pull if we're not mounted from a container host
+cd {{ source_directory }}
+findmnt . > /dev/null || git pull
+
+# run build commands
+cd {{ build_directory }}
+{% for command in rebuild_commands %}
+PATH={{ build_path }} {{ command }} >> {{ build_log }} 2>&1
+{% endfor %}

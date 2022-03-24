@@ -536,6 +536,9 @@ Available help topics:
                 Commands to manage passwords for cluster users
                 (e.g., postgres_password, pgbouncer_password)
 
+    rebuild-sources
+                Rebuild components configured to build from source
+
     rehydrate   Terminate and replace instances (AWS)
     deprovision Destroy the resources used by a cluster
 
@@ -716,6 +719,23 @@ Command: tpaexec deprovision clustername
 
 Completely destroys a clustername and all associated resources
 DEPROVISION
+            ;;
+
+        rebuild-sources)
+            cat <<REBUILD-SOURCES
+Command: tpaexec rebuild-sources clustername
+
+Rebuilds components that were built from source on the instances in a
+cluster. If you're using source from git repositories on the instances
+themselves, this will do 'git pull' before rebuilding; if your instances
+are Docker containers and you're using source directories mounted from
+the host, those directories will be read-only on the containers and so
+it will build from whatever state of the source it can see.
+
+Restarts postgres after rebuilds are complete.
+
+REBUILD-SOURCES
+
             ;;
 
         *)

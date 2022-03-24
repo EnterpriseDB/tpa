@@ -71,6 +71,12 @@
     platform not in ['docker']
     and ansible_selinux.status == 'enabled'
 
+- name: Install postgres rebuild script
+  template:
+    src: rebuild-sources.sh.j2
+    dest: "/etc/tpa/rebuild-scripts/rebuild-postgres.sh"
+    mode: 0755
+
 - include_role:
     name: postgres/pkg
     tasks_from: src.yml
