@@ -1,24 +1,38 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+"""
+Instance filters.
+
+The filters defined here take the array of instances (from config.yml)
+and other inputs and return a new array of instances with parameters
+suitably adjusted.
+
+"""
 
 import copy
 import re
 from ansible.errors import AnsibleFilterError
 
-
-## Instance filters
-#
-# The filters defined here take the array of instances (from config.yml)
-# and other inputs and return a new array of instances with parameters
-# suitably adjusted.
-
-# Returns a hash of the IP addresses specified for a given instance.
+VOLUME_TRANSLATIONS = {
+    "barman_data": {"mountpoint": "/var/lib/barman"},
+    "postgres_data": {"mountpoint": "/opt/postgres"},
+    "postgres_wal": {"mountpoint": "/opt/postgres/wal"},
+    "postgres_tablespace": {
+        "mountpoint": "/opt/postgres/tablespaces/{v[tablespace_name]}"
+    },
+}
 
 
 def ip_addresses(instance):
-    addresses = {}
+    """
+    Returns a hash of the IP addresses specified for a given instance.
 
+    Args:
+        instance: Instance dict
+
+    """
+    addresses = {}
     for a in ["ip_address", "public_ip", "private_ip"]:
         ip = instance.get(a)
         if ip is not None:
@@ -27,12 +41,16 @@ def ip_addresses(instance):
     return addresses
 
 
-# Returns the IP address that TPAexec should use to ssh to an instance. The
-# public_ip, ip_address, and private_ip are used in order of decreasing
-# preference.
-
-
 def deploy_ip_address(instance):
+    """
+    Returns the IP address that TPAexec should use to ssh to an instance.
+
+    The public_ip, ip_address, and private_ip are used in order of decreasing preference.
+
+    Args:
+        instance: Instance dict
+
+    """
     return (
         instance.get("public_ip")
         or instance.get("ip_address")
@@ -40,46 +58,28 @@ def deploy_ip_address(instance):
     )
 
 
-# Every instance must have certain settings (e.g., tags) in a specific format.
-
-
 def set_instance_defaults(old_instances, cluster_name, instance_defaults, locations):
+    """
+    Every instance must have certain settings (e.g., tags) in a specific format.
+
+    Args:
+        old_instances: List of instances containing dictionaries with instance information.
+        cluster_name: Name of the cluster.
+        instance_defaults: Dictionary containing defaults
+        locations: List of cluster locations
+
+    """
     instances = []
 
     locations_map = {}
-    for l in locations:
-        locations_map[l["Name"]] = l
+    for location in locations:
+        locations_map[location["Name"]] = location
 
-    # Returns a mapping with the keys in defaults (excluding those given in
-    # omit_keys) and the corresponding values from item (if specified) or from
-    # defaults otherwise. Any dict values are further merged for convenience, so
-    # that defaults can specify some keys and item can override or extend them.
+    for old_instance in old_instances:
+        new_instance = copy.deepcopy(old_instance)
+        tags = new_instance.get("tags", {})
 
-    def merged_defaults(item, defaults, omit_keys=None):
-        omit_keys = omit_keys or []
-        result = {}
-
-        for key in [k for k in defaults if k not in omit_keys]:
-            result[key] = item.get(key, defaults[key])
-            if isinstance(result[key], dict) and isinstance(defaults[key], dict):
-                b = copy.deepcopy(defaults[key])
-                b.update(result[key])
-                result[key] = b
-
-        return result
-
-    for i in old_instances:
-        j = copy.deepcopy(i)
-        tags = j.get("tags", {})
-
-        # Every instance must have a sensible name (lowercase, without
-        # underscores). If it's set under .tags, we'll move it up.
-
-        name = j.get("Name", tags.get("Name", None))
-        if name is None:
-            name = cluster_name + "-" + str(j["node"])
-        j["Name"] = name.replace("_", "-").lower()
-        j["vars"] = j.get("vars", {})
+        update_instance_name(new_instance, cluster_name, tags)
 
         # Anything set in instance_defaults should be copied to the instance,
         # unless the instance has a setting that overrides the default. As a
@@ -87,61 +87,28 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults, locati
         # set some vars in instance_defaults and some on the instance, and get
         # all of them, with the instance settings overriding the defaults).
 
-        j.update(merged_defaults(j, instance_defaults, omit_keys=["default_volumes"]))
+        new_instance.update(
+            merged_defaults(
+                new_instance, instance_defaults, omit_keys=["default_volumes"]
+            )
+        )
 
-        # If instance_defaults specifies 'default_volumes', we merge those
-        # entries with the instance's 'volumes', with entries in the latter
-        # taking precedence over default entries with the same device name.
-        # (Setting 'volumes' to [] explicitly in instances will remove the
-        # defaults altogether.)
+        update_instance_volume_defaults(new_instance, instance_defaults)
 
-        volumes = j.get("volumes", [])
-        default_volumes = instance_defaults.get("default_volumes", [])
-        if default_volumes and (len(volumes) > 0 or "volumes" not in j):
-            volume_map = {}
-            for vol in default_volumes + volumes:
-                name = vol.get("raid_device", vol.get("device_name"))
-                if name.startswith("/dev/"):
-                    name = name[5:]
-                volume_map[name] = vol
-
-            volumes = []
-            for name in sorted(volume_map.keys()):
-                volumes.append(volume_map[name])
-
-            j["volumes"] = volumes
-
-        # If the instance specifies «location: x», where x is either a name or
-        # an array index (for backwards compatibility), we copy the settings
-        # from location x to the instance, in exactly the same way as we do
-        # above for instance_defaults.
-
-        location = j.get("location", None)
-        if len(locations) > 0 and location is not None:
-            if isinstance(location, int) and location < len(locations):
-                location_defaults = locations[location]
-                j['location'] = locations[location]['Name']
-            elif location in locations_map:
-                location_defaults = locations_map[location]
-            else:
-                raise AnsibleFilterError(
-                    "Instance %s specifies unknown location %s" % (j["Name"], location)
-                )
-
-            j.update(merged_defaults(j, location_defaults, omit_keys=["Name"]))
+        update_instance_location(new_instance, locations, locations_map)
 
         # The upstream, backup, and role tags should be moved one level up if
         # they're specified at all.
 
         for t in ["upstream", "backup", "role"]:
             if t in tags:
-                j[t] = tags[t]
+                new_instance[t] = tags[t]
                 del tags[t]
 
         # The role tag should be a list, so we convert comma-separated
         # strings if that's what we're given.
 
-        role = j.get("role", [])
+        role = new_instance.get("role", [])
         if not isinstance(role, list):
             role = [x.strip() for x in role.split(",")]
 
@@ -151,8 +118,8 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults, locati
             if "postgres" not in role:
                 role = role + ["postgres"]
 
-        j["role"] = role
-        j["tags"] = tags
+        new_instance["role"] = role
+        new_instance["tags"] = tags
 
         # Name and node should be in tags, but we'll add them in when we're
         # actually creating the tags, not before.
@@ -161,9 +128,122 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults, locati
             if t in tags:
                 del tags[t]
 
-        instances.append(j)
+        instances.append(new_instance)
 
     return instances
+
+
+def update_instance_location(instance, locations, locations_map=None):
+    """
+    Update instance dict location attribute.
+
+    If the instance specifies «location: x», where x is either a name or
+    an array index (for backwards compatibility), we copy the settings
+    from location x to the instance, in exactly the same way as we do
+    above for instance_defaults.
+
+    Args:
+        instance: Instance dictionary
+        locations: Location list of dicts
+        locations_map: Location list as a map with Name attr as key name
+
+    """
+    locations = locations or []
+    locations_map = locations_map or {}
+    location = instance.get("location", None)
+    if len(locations) > 0 and location is not None:
+        if isinstance(location, int) and location < len(locations):
+            location_defaults = locations[location]
+            instance["location"] = locations[location]["Name"]
+        elif location in locations_map:
+            location_defaults = locations_map[location]
+        else:
+            raise AnsibleFilterError(
+                f"Instance {instance['Name']} specifies unknown location {location}"
+            )
+
+        instance.update(
+            merged_defaults(instance, location_defaults, omit_keys=["Name"])
+        )
+
+
+def update_instance_volume_defaults(instance, defaults):
+    """
+    Update instance dict volumes attribute.
+
+    If instance_defaults specifies 'default_volumes', we merge those
+    entries with the instance's 'volumes', with entries in the latter
+    taking precedence over default entries with the same device name.
+    (Setting 'volumes' to [] explicitly in instances will remove the
+    defaults altogether.)
+
+    Args:
+        instance: Dict containing instance data
+        defaults: Dict containing defaults
+
+    """
+    volumes = instance.get("volumes", [])
+    default_volumes = defaults.get("default_volumes", [])
+    if default_volumes and (len(volumes) > 0 or "volumes" not in instance):
+        volume_map = {}
+        for vol in default_volumes + volumes:
+            name = vol.get("raid_device", vol.get("device_name"))
+            if name.startswith("/dev/"):
+                name = name[5:]
+            volume_map[name] = vol
+
+        volumes = []
+        for name in sorted(volume_map.keys()):
+            volumes.append(volume_map[name])
+
+        instance["volumes"] = volumes
+
+
+def update_instance_name(instance, cluster_name, tags):
+    """
+    Update the instance dictionary name attribute.
+
+    Every instance must have a sensible name (lowercase, without underscores).
+    If it's set under .tags, we'll move it up.
+
+    Args:
+        cluster_name: Name of the cluster
+        instance: Instance dict to operate on
+        tags: Tags assigned to cluster
+
+    """
+    name = instance.get("Name", tags.get("Name", None))
+    if name is None:
+        name = cluster_name + "-" + str(instance["node"])
+    instance["Name"] = name.replace("_", "-").lower()
+    instance["vars"] = instance.get("vars", {})
+
+
+def merged_defaults(item, defaults, omit_keys=None):
+    """
+    Returns a mapping with merged the keys form defaults.
+
+    Excluding those given in omit_keys, and the corresponding values from item (if specified) or from
+    defaults otherwise. Any dict values are further merged for convenience, so that defaults can specify
+    some keys and item can override or extend them.
+
+    Args:
+        item: Original dict
+        defaults: Defaults dict
+        omit_keys: Keys to skip during merging
+
+    """
+    omit_keys = omit_keys or []
+    result = {}
+
+    for key in [k for k in defaults if k not in omit_keys]:
+        result[key] = item.get(key, defaults[key])
+        if isinstance(result[key], dict) and isinstance(defaults[key], dict):
+            b = copy.deepcopy(defaults[key])
+            b.update(result[key])
+            result[key] = b
+
+    return result
 
 
 def expand_instance_volumes(old_instances):
@@ -199,18 +279,10 @@ def expand_instance_volumes(old_instances):
     return instances
 
 
-volume_translations = {
-    "barman_data": {"mountpoint": "/var/lib/barman"},
-    "postgres_data": {"mountpoint": "/opt/postgres"},
-    "postgres_wal": {"mountpoint": "/opt/postgres/wal"},
-    "postgres_tablespace": {
-        "mountpoint": "/opt/postgres/tablespaces/{v[tablespace_name]}"
-    },
-}
-
-
 def validate_volume_for(device_name, _vars) -> None:
     """
+    Validate volume device name with `volume_for` attribute against volume_translations map.
+
     Given a device name and a container with settings for that device, raises an
     exception if the volume has an invalid volume_for annotation or is missing
     any other required configuration; returns silently otherwise.
@@ -224,24 +296,30 @@ def validate_volume_for(device_name, _vars) -> None:
     See roles/platforms/common/tasks/volumes.yml for more details.
     """
     volume_for = _vars.get("volume_for")
-    if volume_for and volume_for not in volume_translations:
+    if volume_for and volume_for not in VOLUME_TRANSLATIONS:
         raise AnsibleFilterError(
-            "volume %s has unrecognised volume_for=%s" % (device_name, volume_for)
+            f"volume {device_name} has unrecognised volume_for={volume_for}"
         )
 
     if volume_for == "postgres_tablespace" and not _vars.get("tablespace_name"):
         raise AnsibleFilterError(
-            "volume %s is %s; must define tablespace_name" % (device_name, volume_for)
+            f"volume {device_name} is {volume_for}; must define tablespace_name"
         )
 
 
 def translate_volume_deployment_defaults(vol):
     """
+    Update volume dict attr defaults.
+
     Modifies the given entry from `volumes` in the inventory to translate its
     volume_for into a mountpoint and other volume defaults if needed. Meant to
     be used only as a |map function.
 
     See roles/platforms/common/tasks/volumes.yml for more details.
+
+    Args:
+        vol: Dict containing volume data, including to `volume_for`, `mountpoint` types and `encryption`
+
     """
     validate_volume_for(vol["device"], vol)
 
@@ -250,7 +328,7 @@ def translate_volume_deployment_defaults(vol):
     volume_for = vol.get("volume_for")
     if volume_for:
         if not vol.get("mountpoint"):
-            vol.update(volume_translations[volume_for])
+            vol.update(VOLUME_TRANSLATIONS[volume_for])
 
         # Set a default LUKS volume name based on volume_for, if required.
         if vol.get("encryption") == "luks" and not vol.get("luks_volume"):
@@ -269,9 +347,11 @@ def translate_volume_deployment_defaults(vol):
 
 def find_replica_tablespace_mismatches(instances):
     """
-    Given a list of all instances, returns a list of replicas whose
-    postgres_tablespace volume definitions do not match the volume definitions
-    on their upstream instance.
+    Returns a list of replicas whose postgres_tablespace volume definitions do not match their upstream instance.
+
+    Args:
+        instances: List of dicts for all instances in the cluster.
+
     """
 
     # First, we map instance names to a hash that tells us whether the instance
@@ -299,130 +379,108 @@ def find_replica_tablespace_mismatches(instances):
     # For each replica, we compare its tablespace_names with its upstream's list
     # and indicate a mismatch if they are not equal.
     mismatched_replicas = []
-    for Name, inst in instance_tablespaces.items():
+    for name, inst in instance_tablespaces.items():
         if not inst["replica"]:
             continue
 
         upstream = instance_tablespaces[inst["upstream"]]
         if sorted(inst["tablespace_names"]) != sorted(upstream["tablespace_names"]):
-            mismatched_replicas.append(Name)
+            mismatched_replicas.append(name)
 
     return mismatched_replicas
 
 
-# This filter sets the volume_id for any volumes that match existing attachable
-# volumes as discovered by a tag search.
-
-
-def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
-    instances = []
-
-    for i in old_instances:
-        for v in i.get("volumes", []):
-            if not v.get("attach_existing", False):
-                continue
-
-            name = ":".join(
-                [i["region"], cluster_name, str(i["node"]), v["device_name"]]
-            )
-            if name in ec2_volumes:
-                ev = ec2_volumes[name]
-
-                if (
-                    v["volume_size"] != ev["size"]
-                    or v.get("iops", ev["iops"]) != ev["iops"]
-                    or v.get("volume_type", ev["type"]) != ev["type"]
-                ):
-                    continue
-
-                v["volume_id"] = ev["id"]
-
-        instances.append(i)
-
-    return instances
-
-
-# Takes a list of volumes and returns a new list where there is only one entry
-# per device name (raid_device if defined, else device_name), consisting of the
-# device name and any variables defined for it.
-#
-# The expanded list we start with looks like this:
-#
-# volumes:
-#   - raid_device: /dev/md0
-#     device_name: /dev/xvdf
-#     vars:
-#       mountpoint: /var/lib/postgresql
-#     …
-#   - raid_device: /dev/md0
-#     device_name: /dev/xvdg
-#     vars:
-#       mountpoint: /var/lib/postgresql
-#     …
-#   - device_name: /dev/xvdh
-#     vars:
-#       mountpoint: /var/lib/barman
-#     …
-#
-# And we end up with something like this:
-#
-# volumes:
-#   - device: /dev/md0
-#     mountpoint: /var/lib/postgresql
-#   - device: /dev/xvdf
-#     mountpoint: /var/lib/barman
-
-
 def get_device_variables(volumes):
+    """
+    Return unique list of device variables.
+
+    Takes a list of volumes and returns a new list where there is only one entry
+    per device name (raid_device if defined, else device_name), consisting of the
+    device name and any variables defined for it.
+
+    The expanded list we start with looks like this:
+
+    volumes:
+      - raid_device: /dev/md0
+        device_name: /dev/xvdf
+        vars:
+          mountpoint: /var/lib/postgresql
+        …
+      - raid_device: /dev/md0
+        device_name: /dev/xvdg
+        vars:
+          mountpoint: /var/lib/postgresql
+        …
+      - device_name: /dev/xvdh
+        vars:
+          mountpoint: /var/lib/barman
+        …
+
+    And we end up with something like this:
+
+    volumes:
+      - device: /dev/md0
+        mountpoint: /var/lib/postgresql
+      - device: /dev/xvdf
+        mountpoint: /var/lib/barman
+
+    Args:
+        volumes: List of volumes containing device information
+
+    """
     seen = set()
     results = []
-    for v in volumes:
-        if not isinstance(v, dict):
+    for volume in volumes:
+        if not isinstance(volume, dict):
             continue
-        dev = v.get("raid_device", v.get("device_name"))
+        dev = volume.get("raid_device", volume.get("device_name"))
         if dev not in seen:
             seen.add(dev)
-            results.append(dict(device=dev, **v.get("vars", {})))
+            results.append(dict(device=dev, **volume.get("vars", {})))
     return results
 
 
-# Given an instance definition, returns a dict of instance variables for the
-# instance, comprising some instance settings (e.g., location, role, volumes),
-# any settings mentioned in export_as_vars, and anything defined in vars (which
-# takes precedence over everything else).
-#
-# For example, with the following instance definition:
-#
-# - node: 1
-#   xyz: 123
-#   pqr: 234
-#   location: x
-#   role: [a, b]
-#   export_as_vars:
-#     - xyz
-#     - pqr
-#   vars:
-#     abc: 345
-#
-# it would return (a superset of):
-#
-# {abc: 345, xyz: 123, pqr: 234, location: x, role: [a, b], …}
-
-
 def export_vars(instance):
+    """
+    Given an instance definition, returns a dict of instance variables for the instance.
+
+    Comprises of some instance settings (e.g., location, role, volumes), any settings mentioned in export_as_vars,
+    and anything defined in vars (which takes precedence over everything else).
+
+    For example, with the following instance definition:
+
+    - node: 1
+      xyz: 123
+      pqr: 234
+      location: x
+      role: [a, b]
+      export_as_vars:
+        - xyz
+        - pqr
+      vars:
+        abc: 345
+
+    it would return (a superset of):
+
+    {abc: 345, xyz: 123, pqr: 234, location: x, role: [a, b], …}
+
+    Args:
+        instance: Instance dictionary
+
+    """
     exports = {}
 
     always_export = ["location"]
-    for k in always_export + instance.get("export_as_vars", []):
-        exports[k] = instance.get(k)
+    for key in always_export + instance.get("export_as_vars", []):
+        exports[key] = instance.get(key)
 
     export_if_set = ["region", "backup", "upstream"]
-    for k in export_if_set:
-        v = instance.get(k)
-        if v is not None:
-            exports[k] = v
+    for key in export_if_set:
+        value = instance.get(key)
+        if value is not None:
+            exports[key] = value
 
-    exports["role"] = [x for x in instance.get("role", []) if x != "postgres"]
+    exports["role"] = [role for role in instance.get("role", []) if role != "postgres"]
 
     exports["volumes"] = get_device_variables(instance.get("volumes", []))
 
@@ -433,21 +491,28 @@ def export_vars(instance):
 
 def ensure_publication(publications, entry):
     """
+    Update publications list to ensure it contains defined entry or matching replication sets.
+
     Modifies the given list of publications (if necessary) to ensure that the
     given publication entry occurs in it, by appending the entry if the list
     does not contain a match, or by modifying the matching entry to contain
     the desired replication sets otherwise.
+
+    Args:
+        publications: List of publications.
+        entry: Entry dictionary with `type`, `database` and `replication_sets` attributes.
+
     """
     match = None
-    for p in publications:
-        if p["type"] == entry["type"] and p["database"] == entry["database"]:
-            match = p
+    for pub in publications:
+        if pub["type"] == entry["type"] and pub["database"] == entry["database"]:
+            match = pub
 
     if match:
         defined_repsets = [r["name"] for r in match["replication_sets"]]
-        for r in entry["replication_sets"]:
-            if r["name"] not in defined_repsets:
-                match["replication_sets"].append(r)
+        for repset in entry["replication_sets"]:
+            if repset["name"] not in defined_repsets:
+                match["replication_sets"].append(repset)
     else:
         publications.append(entry)
 
@@ -456,10 +521,17 @@ def ensure_publication(publications, entry):
 
 def ensure_subscription(subscriptions, entry):
     """
+    Update subscription list to ensure entry consistency.
+
     Modifies the given list of subscriptions (if necessary) to ensure that the
     given subscription entry occurs in it, by appending the entry if the list
     does not contain a match, or by modifying the matching entry to contain the
     desired replication sets otherwise.
+
+    Args:
+        subscriptions: List of subscriptions with `type` and `database` attributes
+        entry: Entry dictionary with `type`, `database` and `replication_sets` attributes.
+
     """
     match = None
     for s in subscriptions:
@@ -479,7 +551,7 @@ def ensure_subscription(subscriptions, entry):
     return subscriptions
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "ip_addresses": ip_addresses,
@@ -488,7 +560,6 @@ class FilterModule(object):
             "expand_instance_volumes": expand_instance_volumes,
             "translate_volume_deployment_defaults": translate_volume_deployment_defaults,
             "find_replica_tablespace_mismatches": find_replica_tablespace_mismatches,
-            "match_existing_volumes": match_existing_volumes,
             "export_vars": export_vars,
             "ensure_publication": ensure_publication,
             "ensure_subscription": ensure_subscription,

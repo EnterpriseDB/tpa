@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #  © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 #
-"""AWS platform specific filters"""
+"""AWS platform specific filters."""
 
 import copy
 
@@ -292,8 +292,7 @@ def expand_ec2_instance_volumes(old_instances, ec2_ami_properties):
 
             if not (volume_type or "ephemeral" in volume):
                 raise AnsibleFilterError(
-                    "volume_type/ephemeral not specified for volume %s"
-                    % (volume["device_name"])
+                    f"volume_type/ephemeral not specified for volume {volume['device_name']}"
                 )
 
             if volume["device_name"] == "root":
@@ -311,40 +310,7 @@ def expand_ec2_instance_volumes(old_instances, ec2_ami_properties):
 
             volumes.append(volume)
 
-            # If the entry specifies raid_device, then we repeat this volume
-            # raid_units-1 times.
-
-            if "raid_device" in volume:
-                raid_units = volume["raid_units"]
-
-                if raid_units == "all":
-                    if "ephemeral" in volume:
-                        if instance["type"] in EPHEMERAL_STORAGE:
-                            raid_units = EPHEMERAL_STORAGE[instance["type"]]
-                        else:
-                            raise AnsibleFilterError(
-                                "ephemeral storage unavailable for %s"
-                                % instance["type"]
-                            )
-                    else:
-                        raise AnsibleFilterError(
-                            "raid_units=all can be used only with ephemeral storage"
-                        )
-                raid_units -= 1
-
-                raid_volume = volume
-                while raid_units > 0:
-                    raid_volume = copy.deepcopy(raid_volume)
-
-                    name = raid_volume["device_name"]
-                    raid_volume["device_name"] = name[0:-1] + chr(ord(name[-1]) + 1)
-
-                    if "ephemeral" in raid_volume:
-                        ename = raid_volume["ephemeral"]
-                        raid_volume["ephemeral"] = ename[0:-1] + chr(ord(ename[-1]) + 1)
-
-                    volumes.append(raid_volume)
-                    raid_units -= 1
+            update_raid_volumes(volume, volumes, instance)
 
         transform["volumes"] = volumes
         instances.append(transform)
@@ -352,9 +318,89 @@ def expand_ec2_instance_volumes(old_instances, ec2_ami_properties):
     return instances
 
 
-class FilterModule(object):
+def update_raid_volumes(volume, volumes, instance=None):
+    """
+    If the entry specifies raid_device, then we repeat this volume raid_units-1 times.
+
+    Args:
+        volume: Volume dict containing raid_device information (skipped if missing)
+        volumes: List of existing volumes
+        instance: instance dict for checking ephemeral storage type.
+
+    """
+    if "raid_device" in volume:
+        raid_units = volume["raid_units"]
+
+        if raid_units == "all":
+            if "ephemeral" in volume:
+                if instance and instance.get("type") in EPHEMERAL_STORAGE:
+                    raid_units = EPHEMERAL_STORAGE[instance["type"]]
+                else:
+                    raise AnsibleFilterError(
+                        f"ephemeral storage unavailable for {instance['type']}"
+                    )
+            else:
+                raise AnsibleFilterError(
+                    "raid_units=all can be used only with ephemeral storage"
+                )
+        raid_units -= 1
+
+        raid_volume = volume
+        while raid_units > 0:
+            raid_volume = copy.deepcopy(raid_volume)
+
+            name = raid_volume["device_name"]
+            raid_volume["device_name"] = name[0:-1] + chr(ord(name[-1]) + 1)
+
+            if "ephemeral" in raid_volume:
+                ename = raid_volume["ephemeral"]
+                raid_volume["ephemeral"] = ename[0:-1] + chr(ord(ename[-1]) + 1)
+
+            volumes.append(raid_volume)
+            raid_units -= 1
+
+
+def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
+    """
+    Filter to set the volume_id for any volumes that match existing attachable volumes as discovered by a tag search.
+
+    Args:
+        old_instances: List of instances containing volumes lists to update to existing volumes
+        cluster_name: Name of the cluster
+        ec2_volumes: List of existing ec2 volumes found
+
+    """
+    instances = []
+    ec2_volumes = ec2_volumes or {}
+    for instance in old_instances:
+        for volume in instance.get("volumes", []):
+            if not volume.get("attach_existing", False):
+                continue
+
+            name = ":".join(
+                [instance["region"], cluster_name, str(instance["node"]), volume["device_name"]]
+            )
+            if name in ec2_volumes:
+                ec2_volume = ec2_volumes[name]
+
+                if (
+                    volume["volume_size"] != ec2_volume["size"]
+                    or volume.get("iops", ec2_volume["iops"]) != ec2_volume["iops"]
+                    or volume.get("volume_type", ec2_volume["type"]) != ec2_volume["type"]
+                ):
+                    continue
+
+                volume["volume_id"] = ec2_volume["id"]
+
+        instances.append(instance)
+
+    return instances
+
+
+class FilterModule:
     def filters(self):
         return {
             "expand_ec2_instance_image": expand_ec2_instance_image,
             "expand_ec2_instance_volumes": expand_ec2_instance_volumes,
+            "match_existing_volumes": match_existing_volumes,
         }

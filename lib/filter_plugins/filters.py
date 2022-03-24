@@ -418,13 +418,20 @@ def index_list_of_dicts(obj, key=None, recursive=False):
     """
     ret_dict = {}
     if recursive:
+
         def func(a):
             return index_list_of_dicts(a, key, recursive)
+
     else:
+
         def func(a):
             return a
+
     if isinstance(obj, list):
-        for index, item, in enumerate(obj):
+        for (
+            index,
+            item,
+        ) in enumerate(obj):
             if isinstance(item, MutableMapping):
                 if key is not None:
                     ret_dict[item[key]] = func(item)

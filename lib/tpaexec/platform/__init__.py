@@ -145,11 +145,18 @@ class CloudPlatform(Platform):
             volumes = instance.get("volumes", [])
 
             def _get_volume_for(data, key):
-                return next((vol for vol in data if vol.get("vars", {}).get("volume_for", "") == key), {})
+                return next(
+                    (
+                        vol
+                        for vol in data
+                        if vol.get("vars", {}).get("volume_for", "") == key
+                    ),
+                    {},
+                )
 
-            barman_volume = _get_volume_for(volumes, 'barman_data')
-            default_barman_volume = _get_volume_for(default_volumes, 'barman_data')
-            default_postgres_volume = _get_volume_for(default_volumes, 'postgres_data')
+            barman_volume = _get_volume_for(volumes, "barman_data")
+            default_barman_volume = _get_volume_for(default_volumes, "barman_data")
+            default_postgres_volume = _get_volume_for(default_volumes, "postgres_data")
 
             if not (barman_volume or default_barman_volume) and default_postgres_volume:
                 v = copy.deepcopy(default_postgres_volume)

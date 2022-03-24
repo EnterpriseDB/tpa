@@ -13,7 +13,6 @@ AWS_DEFAULT_VOLUME_DEVICE_NAME = "/dev/xvd"
 
 
 class aws(CloudPlatform):
-
     def __init__(self, name, arch):
         super().__init__(name, arch)
         self.ec2 = {}
@@ -22,8 +21,14 @@ class aws(CloudPlatform):
     def add_platform_options(self, p, g):
         if self.arch.name != "Images":
             g.add_argument("--region", default=AWS_DEFAULT_REGION)
-        g.add_argument("--instance-type", default=AWS_DEFAULT_INSTANCE_TYPE, metavar="TYPE")
-        g.add_argument("--volume-device-name", default=AWS_DEFAULT_VOLUME_DEVICE_NAME, metavar="DEV")
+        g.add_argument(
+            "--instance-type", default=AWS_DEFAULT_INSTANCE_TYPE, metavar="TYPE"
+        )
+        g.add_argument(
+            "--volume-device-name",
+            default=AWS_DEFAULT_VOLUME_DEVICE_NAME,
+            metavar="DEV",
+        )
 
     def supported_distributions(self):
         return [
