@@ -234,6 +234,7 @@
     value: "barman* python3-barman"
   when: >
     'PGDG' in yum_repository_list
+    and postgres_version is version('9.6', '>')
 
 - name: Exclude psycopg2 packages from PGDG repos
   ini_file:
@@ -244,7 +245,19 @@
     value: python-psycopg2 python2-psycopg2 python3-psycopg2
   when: >
     'PGDG' in yum_repository_list
-    and postgres_version is version('9.4', '>')
+    and postgres_version is version('9.6', '>')
+
+
+- name: Exclude psycopg2 packages from PGDG repos
+  ini_file:
+    dest: /etc/yum.repos.d/pgdg-redhat-all.repo
+    create: no
+    section: "pgdg-common"
+    option: exclude
+    value: "python-psycopg2 python2-psycopg2 python3-psycopg2 barman* python3-barman"
+  when: >
+    'PGDG' in yum_repository_list
+    and postgres_version is version('9.6', '<=')
 
 - set_fact:
     _2q_repositories: []

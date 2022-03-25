@@ -191,6 +191,7 @@
        PGHOST: '{{ unix_socket_directories|join(",") }}'
   when: >
      'postgres' in role
+     and postgres_version is version('10','>=')
 
 - name: Disallow setting shared_preload_libraries directly
   assert:

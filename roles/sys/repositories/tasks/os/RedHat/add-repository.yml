@@ -10,4 +10,5 @@
     baseurl: "{{ repo.baseurl }}"
     gpgkey: "{{ repo.gpgkey }}"
     repo_gpgcheck: yes
-    enabled: yes 
+    enabled: yes
+    exclude: "{{ repo.exclude|default('') }}"
