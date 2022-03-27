@@ -165,12 +165,44 @@
       ec2_subnets != ec2_cached_subnets|default(None)
   tags: [aws, vpc, subnet]
 
-# If required, we create an igw (internet gateway) in each region.
-# To create one in every region, you can set
+# We need an igw (interget gateway) to route traffic from the outside
+# world to instances within a VPC (ec2_instance_reachability: public).
+# We search for igws within each VPC we will use for this cluster (one
+# per region), and create them in any VPC where they do not exist. If
+# the igw exists, we leave it alone (each VPC can have only one igw).
+
+- name: Search for existing internet gateways in each region/VPC
+  ec2_vpc_igw_info:
+    region: "{{ region }}"
+    filters:
+      attachment.vpc-id: "{{ ec2_region_vpcs[region] }}"
+      attachment.state: available
+  with_items: "{{ aws_regions }}"
+  loop_control:
+    loop_var: region
+  register: internet_gateways
+  tags: ec2_vpcs
+
+# Convert internet_gateways.results from a list of lists to a map from
+# existing_igws[region] → true|false (true if there is an igw attached
+# to the cluster's VPC in that region).
+
+- name: Map region names to the existence of an igw for the region/VPC
+  set_fact:
+    existing_igws: "{{
+      existing_igws|default({})|combine({
+        item.region: item.internet_gateways|length > 0
+      })
+    }}"
+  with_items: "{{ internet_gateways.results }}"
+
+# Now for each region, we create an igw if we didn't find one above for
+# that region's VPC, and we need one. To create an igw in every region,
+# you can set
 #
 #   ec2_instance_reachability: public
 #
-# For more fine-grained control, you can set
+# or, for more fine-grained control, you can set
 #
 #   ec2_vpc_igw:
 #     eu-west-1: yes
@@ -181,28 +213,33 @@
 # If you do the latter, you must also make sure that the correct
 # subnets have a route to the igw.
 
-- name: Create internet gateways in each region
+- name: Create internet gateways in each region/VPC if required
   ec2_vpc_igw:
-    region: "{{ r }}"
-    vpc_id: "{{ ec2_region_vpcs[r] }}"
+    region: "{{ region }}"
+    vpc_id: "{{ ec2_region_vpcs[region] }}"
     state: "{{ state }}"
+    tags:
+      Name: "{{ region }}-igw"
+      CreatingCluster: "{{ cluster_name }}"
   vars:
     igws: "{{ ec2_vpc_igw|default({}) }}"
     state: >-
-      {%- if r in igws and igws[r] == 'no' -%} absent
+      {%- if region in igws and igws[region] == 'no' -%} absent
       {%- else -%} present
       {%- endif -%}
   with_items: "{{ aws_regions }}"
   loop_control:
-    loop_var: r
+    loop_var: region
   when:
+    - existing_igws[region] is false
     - ec2_instance_reachability|default('private') == 'public' or
-      r in igws
+      region in igws
     - ec2_region_vpcs is not defined or
       ec2_vpc != ec2_cached_vpc|default(None)
   tags: [aws, vpc, igw]
 
-# We require internet access for all of the subnets in the cluster.
+# We require internet access for all of the subnets in the cluster,
+# which means we need a route table pointing to the VPC's igw.
 #
 # One way to avoid this requirement might be to mark one instance as
 # the gateway for the rest of the cluster, and set up an SSH tunnel
@@ -211,15 +248,15 @@
 
 - name: Create routing tables in each region
   ec2_vpc_route_table:
-    region: "{{ r }}"
-    vpc_id: "{{ ec2_region_vpcs[r] }}"
-    subnets: "{{ ec2_subnets[r]|map('extract',ec2_region_subnets[r])|list }}"
+    region: "{{ region }}"
+    vpc_id: "{{ ec2_region_vpcs[region] }}"
+    subnets: "{{ ec2_subnets[region]|map('extract',ec2_region_subnets[region])|list }}"
     routes:
       - dest: 0.0.0.0/0
         gateway_id: igw
     tags:
-      Name: "{{ cluster_name }}/{{ r }}/routes"
-      Description: "Automatically created for {{ cluster_name }} in {{ r }}"
+      Name: "{{ cluster_name }}/{{ region }}/routes"
+      Description: "Automatically created for {{ cluster_name }} in {{ region }}"
       CreatingCluster: "{{ cluster_name }}"
   with_items: "{{ aws_regions }}"
   when:
@@ -227,7 +264,7 @@
     - ec2_region_subnets is not defined or
       ec2_subnets != ec2_cached_subnets|default(None)
   loop_control:
-    loop_var: r
+    loop_var: region
   tags: [aws, vpc, route]
 
 # Each instance may be associated with one or more security groups

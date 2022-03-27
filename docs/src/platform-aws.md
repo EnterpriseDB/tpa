@@ -255,9 +255,9 @@ required (e.g., allow tcp/5432 for Postgres).
 
 ### Internet gateways (optional)
 
-By default, we create internet gateways for every VPC if you set:
+By default, we create internet gateways for every VPC, unless you set:
 
-    ec2_instance_reachability: public
+    ec2_instance_reachability: private
 
 For more fine-grained control, you can set:
 

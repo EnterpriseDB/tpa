@@ -70,9 +70,9 @@
   when: found.vpcs|length == 1
 
 # Once we're sure the VPC doesn't exist, we can create it any way we
-# like. We create a VPC and internet gateway; subnets and a routing
-# table will come later. (We could create them here, but we want to
-# be able to create new subnets in an existing VPC.)
+# like. We create only the VPC here; internet gateway, subnets, and a
+# routing table will come later (because we want to be able to create
+# these resources inside an existing VPC if needed).
 
 - block:
     - name: Ensure that Name and cidr are given for this VPC

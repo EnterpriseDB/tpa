@@ -152,6 +152,32 @@
       {{ item.0.region }}:{{ item.1.cidr_block }}
   tags: ec2_vpcs
 
+# Next, delete any igws that we created in each VPC for the cluster.
+
+- name: Search for this cluster's internet gateways in each region
+  ec2_vpc_igw_info:
+    region: "{{ region }}"
+    filters:
+      "tag:CreatingCluster": "{{ cluster_name }}"
+  with_items: "{{ aws_regions }}"
+  loop_control:
+    loop_var: region
+  register: igws
+  tags: ec2_vpcs
+
+- name: Remove this cluster's internet gateway in each region
+  ec2_vpc_igw:
+    state: absent
+    region: "{{ item.0.region }}"
+    vpc_id: "{{ item.1.attachments[0].vpc_id }}"
+  with_nested_dependents:
+    - "{{ igws.results }}"
+    - item.0.internet_gateways
+  loop_control:
+    label: >-
+      {{ item.0.region }}
+  tags: ec2_vpcs
+
 # Now we can finally delete any VPCs that we created for this
 # cluster, i.e., whose CreatingCluster is set to this one.
 
@@ -179,6 +205,9 @@
     label: >-
       {{ item.0.region }}:{{ item.1.cidr_block }}
   tags: ec2_vpcs
+
+# That's it for any AWS resources we created for the cluster, all that's
+# left is to clean up the cluster directory.
 
 - name: Delete generated files for this cluster
   file:
