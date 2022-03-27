@@ -23,7 +23,7 @@
     ami_name: "{{ 'TPA-' ~ '*2ndQPostgres-9.6-*2016*' }}"
 
   tasks:
-  - ec2_ami_facts:
+  - ec2_ami_info:
       region: "{{ r }}"
       owner: self
       filters:

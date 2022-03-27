@@ -17,7 +17,7 @@
 # in ec2_region_subnets.
 
 - name: Find all subnets for {{ vpc }} in {{ region }}
-  ec2_vpc_subnet_facts:
+  ec2_vpc_subnet_info:
     region: "{{ region }}"
     filters:
       vpc-id: "{{ vpc }}"

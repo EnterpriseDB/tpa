@@ -13,7 +13,7 @@
 # Enumerate all existing security groups matching ec2_groups.
 
 - name: Search for existing security groups
-  ec2_group_facts:
+  ec2_group_info:
     region: "{{ item.key }}"
     filters: "{{ item.value }}"
   with_dict: "{{ ec2_groups|default({}) }}"

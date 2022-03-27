@@ -40,7 +40,7 @@
   # it's prone to changes outside our control.)
 
   - name: Find all volumes attached to this instance.
-    ec2_vol_facts:
+    ec2_vol_info:
       region: "{{ ec2_region }}"
       filters:
         "attachment.instance-id": "{{ ec2_id }}"

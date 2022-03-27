@@ -49,7 +49,7 @@
 # created for the cluster.
 
 - name: Enumerate EBS volumes provisioned in each region
-  ec2_vol_facts:
+  ec2_vol_info:
     region: "{{ item }}"
     filters:
       "tag:CreatingCluster": "{{ cluster_name }}"
@@ -73,7 +73,7 @@
 # Next, remove any security groups created for this cluster.
 
 - name: Search for this cluster's security groups in each region
-  ec2_group_facts:
+  ec2_group_info:
     region: "{{ region }}"
     filters:
       "tag:CreatingCluster": "{{ cluster_name }}"
@@ -99,7 +99,7 @@
 # Remove any route tables created for this cluster.
 
 - name: Search for this cluster's route tables in each region
-  ec2_vpc_route_table_facts:
+  ec2_vpc_route_table_info:
     region: "{{ region }}"
     filters:
       "tag:CreatingCluster": "{{ cluster_name }}"
@@ -128,7 +128,7 @@
 # those subnets for which the CreatingCluster is set to this one.
 
 - name: Search for this cluster's VPC subnets in each region
-  ec2_vpc_subnet_facts:
+  ec2_vpc_subnet_info:
     region: "{{ region }}"
     filters:
       "tag:CreatingCluster": "{{ cluster_name }}"
@@ -156,7 +156,7 @@
 # cluster, i.e., whose CreatingCluster is set to this one.
 
 - name: Search for this cluster's VPC in each region
-  ec2_vpc_net_facts:
+  ec2_vpc_net_info:
     region: "{{ region }}"
     filters:
       "tag:CreatingCluster": "{{ cluster_name }}"

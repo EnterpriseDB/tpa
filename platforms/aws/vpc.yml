@@ -49,7 +49,7 @@
   with_items: ['Name', 'cidr']
 
 - name: Search for VPC {{ _vpc_name }} in {{ region }}
-  ec2_vpc_net_facts:
+  ec2_vpc_net_info:
     region: "{{ region }}"
     filters: "{{ ec2_vpc_filters }}"
   register: found
