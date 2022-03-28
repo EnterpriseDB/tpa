@@ -14,7 +14,11 @@ WORKON_HOME ?= ~/.virtualenvs
 NAME = $(shell basename $(PWD))
 OPEN = $(shell command -v open || command -v xdg-open)
 
+ifdef DEB_BUILD_ARCH
+all:
+else
 all: prep dep_test test document
+endif
 .PHONY: all prep update
 
 # Note venv will not interfere with tpaexec tpa-venv if created so we can be clean in these operations
@@ -31,11 +35,15 @@ tox: venv
 lint: tox
 	$(WORKON_HOME)/$(NAME)/bin/tox -e py36-lint
 
+ifdef DEB_BUILD_ARCH
+test:
+else
 test: tox
 	$(WORKON_HOME)/$(NAME)/bin/tox -e py36-test
 	$(OPEN) test-output/tests.html
 	sleep 1
 	$(OPEN) test-output/coverage/index.html
+endif
 
 dep_test: tox
 	$(WORKON_HOME)/$(NAME)/bin/tox -e dep
@@ -70,8 +78,12 @@ black:
 
 prep: update_reqs black
 
+ifdef DEB_BUILD_ARCH
+clean:
+else
 clean:
 	rm -rf $(WORKON_HOME)/$(NAME) .tox .pytest_cache .coverage \
 	test-output coverage-reports workflow docs/pdf/*.pdf ansible.log
 	find . -name \*.pyc -delete
 	find . -depth -name __pycache__ -delete
+endif
