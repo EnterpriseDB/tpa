@@ -236,11 +236,6 @@ class Architecture(object):
         g.add_argument("--location-names", metavar="LOCATION", nargs="+")
 
         g = p.add_argument_group("host configuration")
-        g.add_argument(
-            "--volume-device-name",
-            default=self.platform.default_volume_device_name,
-            metavar="DEV",
-        )
 
     def add_architecture_options(self, p, g):
         """
@@ -398,6 +393,9 @@ class Architecture(object):
 
         # Figure out how to get the desired distribution.
         args["image"] = self.image()
+
+        # Set per platform volume device name prefix
+        args["volume_device_name"] = self.platform.default_volume_device_name
 
         # Figure out the basic structure of the cluster.
         self.load_topology(args)

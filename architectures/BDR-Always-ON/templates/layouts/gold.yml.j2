@@ -51,7 +51,7 @@ instances:
     Name: {{ hostnames[8] }}
     location: 0
     volumes:
-      - device_name: {{ volume_device_name }}f
+      - device_name: {{ volume_device_name + 'f' }}
         volume_type: none
     role:
       - harp-proxy
@@ -60,7 +60,7 @@ instances:
     Name: {{ hostnames[9] }}
     location: 0
     volumes:
-      - device_name: {{ volume_device_name }}f
+      - device_name: {{ volume_device_name + 'f' }}
         volume_type: none
     role:
       - harp-proxy
@@ -69,7 +69,7 @@ instances:
     Name: {{ hostnames[10] }}
     location: 1
     volumes:
-      - device_name: {{ volume_device_name }}f
+      - device_name: {{ volume_device_name + 'f' }}
         volume_type: none
     role:
       - harp-proxy
@@ -78,7 +78,7 @@ instances:
     Name: {{ hostnames[11] }}
     location: 1
     volumes:
-      - device_name: {{ volume_device_name }}f
+      - device_name: {{ volume_device_name + 'f' }}
         volume_type: none
     role:
       - harp-proxy
