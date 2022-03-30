@@ -154,7 +154,7 @@
     create: no
     section: epel
     option: exclude
-    value: "pgbouncer*"
+    value: "pgbouncer* barman* python2-barman python3-barman"
   when: >
     'EPEL' in yum_repository_list
 
@@ -225,7 +225,7 @@
       - "{{ wanted_pgdg_repo }}-debuginfo"
       - pgdg-common
 
-- name: Exclude barman-related packages from PGDG repos
+- name: Exclude barman-related packages from PGDG-common repos
   ini_file:
     dest: /etc/yum.repos.d/pgdg-redhat-all.repo
     create: no
@@ -247,14 +247,13 @@
     'PGDG' in yum_repository_list
     and postgres_version is version('9.6', '>')
 
-
-- name: Exclude psycopg2 packages from PGDG repos
+- name: Exclude psycopg2 packages from PGDG-common repos
   ini_file:
     dest: /etc/yum.repos.d/pgdg-redhat-all.repo
     create: no
     section: "pgdg-common"
     option: exclude
-    value: "python-psycopg2 python2-psycopg2 python3-psycopg2 barman* python3-barman"
+    value: "python-psycopg2 python2-psycopg2 python3-psycopg2 barman* python2-barman python3-barman"
   when: >
     'PGDG' in yum_repository_list
     and postgres_version is version('9.6', '<=')

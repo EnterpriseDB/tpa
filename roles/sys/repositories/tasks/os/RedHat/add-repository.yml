@@ -9,6 +9,6 @@
     file: "{{ repo.file|default('enterprisedb-%.repo' % repo_name) }}"
     baseurl: "{{ repo.baseurl }}"
     gpgkey: "{{ repo.gpgkey }}"
-    repo_gpgcheck: yes
+    repo_gpgcheck: "{{ repo.repo_gpgcheck|default('yes') }}"
     enabled: yes
     exclude: "{{ repo.exclude|default('') }}"

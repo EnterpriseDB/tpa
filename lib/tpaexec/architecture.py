@@ -444,6 +444,7 @@ class Architecture(object):
         cluster_vars = args.get("cluster_vars", {})
         self._init_cluster_vars(cluster_vars)
         self.update_cluster_vars(cluster_vars)
+        self.postgres_eol_repos(cluster_vars)
         self.platform.update_cluster_vars(cluster_vars, args)
         args["cluster_vars"] = cluster_vars
 
@@ -722,6 +723,44 @@ class Architecture(object):
 
         if self.args.get("use_local_repo_only"):
             cluster_vars["use_local_repo_only"] = True
+
+    def postgres_eol_repos(self, cluster_vars):
+
+        if (self.args.get("postgres_version") in ["9.4", "9.5", "9.6",]
+                and self.args.get("distribution") == 'RedHat'):
+
+            if "yum_repositories" not in cluster_vars.keys():
+                cluster_vars["yum_repositories"] = {}
+
+            repo_name = "PGDG" + re.sub("\.", "", self.args.get("postgres_version"))
+            cluster_vars["yum_repository_list"] = [
+                "PGDG",
+                "EPEL",
+                repo_name,
+            ]
+            cluster_vars["yum_repositories"][repo_name] = {
+                    "description": "Archive Postgres {} Repo".format(self.args.get("postgres_version")),
+                    "baseurl": "https://yum-archive.postgresql.org/{}/redhat/rhel-$releasever-$basearch".format(self.args.get("postgres_version")),
+                    "file": repo_name,
+                    "gpgkey": "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG",
+                    "exclude": "python-psycopg2 python2-psycopg2 python3-psycopg2",
+                    "repo_gpgcheck": "no",
+                }
+
+
+            if self.args.get("postgres_version") == "9.4":
+                cluster_vars["yum_repository_list"].append("EDB")
+
+            if self.args.get("postgres_version") == "9.6":
+
+                cluster_vars["yum_repositories"]["{}-debuginfo".format(repo_name)] = {
+                        "description": "Postgres Debug Info {} Repo".format(self.args.get("postgres_version")),
+                        "baseurl": "https://download.postgresql.org/pub/repos/yum/debug/{}/redhat/rhel-$releasever-$basearch".format(self.args.get("postgres_version")),
+                        "file": "{}-debuginfo".format(repo_name),
+                        "gpgkey": "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG",
+                        "repo_gpgcheck": "yes",
+                }
+                cluster_vars["yum_repository_list"].append("{}-debuginfo".format(repo_name))
 
     def cluster_vars_args(self):
         """
