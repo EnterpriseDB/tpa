@@ -22,8 +22,8 @@
   - assert:
       msg: "This host was not found in the EC2 dynamic inventory output"
       that:
-        - ec2_id is defined
-        - ec2_region is defined
+        - instance_id is defined
+        - placement.region is defined
 
   - name: Ensure that the primary is not being rehydrated
     assert:
@@ -40,10 +40,10 @@
   # it's prone to changes outside our control.)
 
   - name: Find all volumes attached to this instance.
-    ec2_vol_info:
-      region: "{{ ec2_region }}"
+    amazon.aws.ec2_vol_info:
+      region: "{{ placement.region }}"
       filters:
-        "attachment.instance-id": "{{ ec2_id }}"
+        "attachment.instance-id": "{{ instance_id }}"
     delegate_to: localhost
     register: volumes
 
@@ -110,12 +110,12 @@
 
   - name: Terminate the instance
     command: >
-      aws ec2 terminate-instances --region {{ ec2_region }} --instance-ids {{ ec2_id }}
+      aws ec2 terminate-instances --region {{ placement.region }} --instance-ids {{ instance_id }}
     delegate_to: localhost
 
   - name: Wait until the instance is terminated
     command: >
-      aws ec2 describe-instances --region {{ ec2_region }} --instance-ids {{ ec2_id }}
+      aws ec2 describe-instances --region {{ placement.region }} --instance-ids {{ instance_id }}
       --query 'Reservations[*].Instances[*].State.Name|[0]'
     delegate_to: localhost
     register: state

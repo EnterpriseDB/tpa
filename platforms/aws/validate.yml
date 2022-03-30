@@ -21,7 +21,7 @@
 - name: Set a default value for cluster_bucket, if required
   block:
   - name: Lookup aws user
-    aws_caller_info:
+    amazon.aws.aws_caller_info:
     register: caller_info
 
   - name: Record whether cluster_bucket was set to auto
@@ -64,6 +64,9 @@
       - "'region' in item"
       - "'subnet' in item"
   with_items: "{{ aws_instances }}"
+  loop_control:
+    label: >-
+      {{ item.Name }}
 
 - name: Derive list of unique regions from instances
   set_fact:
@@ -106,25 +109,25 @@
 - name: Derive ec2_vpc_subnets if required
   set_fact:
     derived_ec2_vpc_subnets: "{{
-      derived_ec2_vpc_subnets|default({})|combine({
-        item.0: {
-          item.1: {
-            'Name': location|try_subkey([0,'subnet_name'], location[0].Name),
-            'az': location[0].az,
+        derived_ec2_vpc_subnets|default({})|combine({
+          item.0: {
+            item.1: {
+              'Name': location|try_subkey([0,'subnet_name'], location[0].Name),
+              'az': location[0].az,
+            }
           }
-        }
-      }, recursive=True)
-    }}"
+        }, recursive=True)
+      }}"
   with_nested_dependents:
     - aws_regions
     - aws_instances|selectattr('region', 'equalto', item.0)|map(attribute='subnet')|unique|list
   vars:
     location: "{{
-      locations
-      |selectattr('region', 'equalto', item.0)
-      |selectattr('subnet', 'equalto', item.1)
-      |list
-    }}"
+        locations
+        |selectattr('region', 'equalto', item.0)
+        |selectattr('subnet', 'equalto', item.1)
+        |list
+      }}"
   when:
     ec2_vpc_subnets is not defined
     and location is not empty
@@ -137,10 +140,10 @@
 - name: Set valid instance keys
   set_fact:
     valid_instance_keys: "{{
-      valid_instance_keys|default({})|combine({
-        'aws': instance_keys
-      })
-    }}"
+        valid_instance_keys|default({})|combine({
+          'aws': instance_keys
+        })
+      }}"
   vars:
     instance_keys:
     - image

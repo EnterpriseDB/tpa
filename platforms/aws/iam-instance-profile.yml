@@ -3,15 +3,27 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - name: Create an instance profile for the cluster
-  iam:
-    iam_type: role
+  community.aws.iam_role:
     name: "{{ cluster_profile }}"
+    assume_role_policy_document: |
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": "sts:AssumeRole",
+            "Principal": {
+              "Service": "ec2.amazonaws.com"
+            },
+            "Effect": "Allow"
+          }
+        ]
+      }
     state: present
 
 # XXX We should be able to override these permissions in config.yml
 
 - name: Attach a policy to the instance profile
-  iam_policy:
+  community.aws.iam_policy:
     iam_type: role
     iam_name: "{{ cluster_profile }}"
     policy_name: "{{ cluster_name }}_instance_permissions"

@@ -17,7 +17,7 @@
 # in ec2_region_subnets.
 
 - name: Find all subnets for {{ vpc }} in {{ region }}
-  ec2_vpc_subnet_info:
+  amazon.aws.ec2_vpc_subnet_info:
     region: "{{ region }}"
     filters:
       vpc-id: "{{ vpc }}"
@@ -43,7 +43,7 @@
 # the canonical version in the first place.
 
 - name: Create new subnets in {{ region }}
-  ec2_vpc_subnet:
+  amazon.aws.ec2_vpc_subnet:
     wait: yes
     state: present
     cidr: "{{ item }}"

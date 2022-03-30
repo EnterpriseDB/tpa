@@ -2,17 +2,10 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-- name: Link to ec2.py from inventory directory
-  file:
-    src: "{{ tpa_dir }}/platforms/aws/inventory/ec2.py"
-    dest: "{{ cluster_dir }}/inventory/ec2.py"
-    state: link
-    force: yes
-
-- name: Install customised ec2.ini
+- name: Install customised aws_ec2.yml
   template:
-    src: ec2.ini.j2
-    dest: "{{ cluster_dir }}/inventory/ec2.ini"
+    src: aws_ec2.yml.j2
+    dest: "{{ cluster_dir }}/inventory/aws_ec2.yml"
     mode: 0644
 
 - name: Remove old inventory cache

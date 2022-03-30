@@ -27,8 +27,8 @@
     - ec2_ami:
         name: "{{ _image_name }}"
         description: "2ndQuadrant TPA {{ ansible_distribution }}/{{ image_label }}/{{ image_version }} image"
-        instance_id: "{{ ec2_id }}"
-        region: "{{ ec2_region }}"
+        instance_id: "{{ instance_id }}"
+        region: "{{ placement.region }}"
         tags:
           os: "{{ ansible_distribution }}"
           label: "{{ image_label }}"

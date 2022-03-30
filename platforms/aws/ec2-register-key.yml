@@ -12,12 +12,11 @@
 # seem worth the effort, because the key shouldn't change.)
 
 - name: Register key {{ ec2_key_name }} in each region
-  ec2_key:
+  amazon.aws.ec2_key:
     state: present
     region: "{{ item }}"
     name: "{{ ec2_key_name }}"
     key_material: "{{ lookup('file', cluster_dir|abspath_to(ssh_key_file + '.pub')) }}"
-    wait: yes
   with_items: "{{ aws_regions }}"
 
 - set_fact:

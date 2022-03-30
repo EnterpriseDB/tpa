@@ -169,7 +169,7 @@
 # the igw exists, we leave it alone (each VPC can have only one igw).
 
 - name: Search for existing internet gateways in each region/VPC
-  ec2_vpc_igw_info:
+  amazon.aws.ec2_vpc_igw_info:
     region: "{{ region }}"
     filters:
       attachment.vpc-id: "{{ ec2_region_vpcs[region] }}"
@@ -187,10 +187,10 @@
 - name: Map region names to the existence of an igw for the region/VPC
   set_fact:
     existing_igws: "{{
-      existing_igws|default({})|combine({
-        item.region: item.internet_gateways|length > 0
-      })
-    }}"
+        existing_igws|default({})|combine({
+          item.region: item.internet_gateways|length > 0
+        })
+      }}"
   with_items: "{{ internet_gateways.results }}"
 
 # Now for each region, we create an igw if we didn't find one above for
@@ -211,7 +211,7 @@
 # subnets have a route to the igw.
 
 - name: Create internet gateways in each region/VPC if required
-  ec2_vpc_igw:
+  amazon.aws.ec2_vpc_igw:
     region: "{{ region }}"
     vpc_id: "{{ ec2_region_vpcs[region] }}"
     state: "{{ state }}"
@@ -244,7 +244,7 @@
 # don't currently support this, however.
 
 - name: Create routing tables in each region
-  ec2_vpc_route_table:
+  amazon.aws.ec2_vpc_route_table:
     region: "{{ region }}"
     vpc_id: "{{ ec2_region_vpcs[region] }}"
     subnets: "{{ ec2_subnets[region]|map('extract',ec2_region_subnets[region])|list }}"
@@ -375,11 +375,11 @@
 - name: Expand instance definitions based on discovered information
   set_fact:
     aws_instances: "{{
-      aws_instances
-      |expand_ec2_instance_image(ec2_region_amis)
-      |expand_ec2_instance_volumes(ec2_ami_properties)
-      |match_existing_volumes(cluster_name, ec2_attachable_volumes)
-    }}"
+        aws_instances
+        |expand_ec2_instance_image(ec2_region_amis)
+        |expand_ec2_instance_volumes(ec2_ami_properties)
+        |match_existing_volumes(cluster_name, ec2_attachable_volumes|default({}))
+      }}"
 
 - name: Ensure that we know security group ids in every region
   assert:
@@ -419,8 +419,8 @@
         item.Name in hosts_to_check
       vars:
         unid_volumes: "{{
-          item|json_query('volumes[?attach_existing&&!volume_id].device_name')
-        }}"
+            item|json_query('volumes[?attach_existing&&!volume_id].device_name')
+          }}"
   when:
     require_reattachment|default('no') == 'yes' and reattach_hosts is defined
   vars:
@@ -433,16 +433,14 @@
 # the responses registered above.
 
 - name: Set up EC2 instances
-  ec2:
-    exact_count: 1
-    count_tag:
-      Cluster: "{{ cluster_name }}"
-      node: "{{ item.node }}"
-    image: "{{ item.image }}"
+  amazon.aws.ec2_instance:
+    name: "{{ item.Name }}"
+    image:
+      'id': "{{ item.image }}"
     region: "{{ item.region }}"
     key_name: "{{ ec2_instance_key|default(omit) }}"
     instance_type: "{{ item.type }}"
-    instance_tags: >
+    tags: >
       {{
         cluster_tags|combine(item.tags)|combine({
           'Cluster': cluster_name,
@@ -450,33 +448,39 @@
           'Name': item.Name,
         })
       }}
-    instance_profile_name: "{{ instance_profile_name|default(omit) }}"
-    private_ip: "{{
-      item.private_ip|default(
-        vars['instance_%s_private_ip' % item.node]|default(omit)
-      )
-    }}"
+    instance_role: "{{ instance_profile_name|default(omit) }}"
+    network:
+      assign_public_ip: "{{ item.assign_public_ip|default(true)|bool }}"
+      private_ip_address: "{{
+          item.private_ip|default(
+            vars['instance_%s_private_ip' % item.node]|default(omit)
+          )
+        }}"
     vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
-    group_id: "{{ ec2_region_groups[item.region] }}"
-    volumes: "{{ item.volumes|reject('has_subkey','volume_id')|list|default(omit) }}"
-    spot_price: "{{ item.spot_price|default(omit) }}"
-    spot_wait_timeout: "{{ item.spot_wait_timeout|default(omit) }}"
-    spot_launch_group: "{{ item.spot_launch_group|default(omit) }}"
+    security_group: "{{ ec2_region_groups[item.region] }}"
+    volumes: "{{ item.volumes|map('remove_keys', keys_to_remove)|reject('has_subkey','volume_id')|list|default(omit) }}"
     user_data: "{{
-      lookup('template', 'user-data.j2',
-        template_vars=dict(
-          image=ec2_ami_properties[item.image],
-          ansible_user=item.vars|try_subkey('ansible_user', 'admin')
+        lookup('template', 'user-data.j2',
+          template_vars=dict(
+            image=ec2_ami_properties[item.image],
+            ansible_user=item.vars|try_subkey('ansible_user', 'admin')
+          )
         )
-      )
-    }}"
+      }}"
     termination_protection: "{{ item.termination_protection|default('no') }}"
-    assign_public_ip: "{{ item.assign_public_ip|default('yes') }}"
     wait: yes
+    state: started
   with_items: "{{ aws_instances }}"
   loop_control:
     label: >-
       {{ item.region }}:{{ item.Name }}
+  vars:
+    keys_to_remove:
+      - "vars"
+      - "raid_device"
+      - "raid_level"
+      - "raid_units"
+
   register: ec2_instances
   async: 7200
   poll: 0
@@ -498,8 +502,8 @@
     ec2_attached_volumes: >
       {{
         ec2_attached_volumes|default([])|union([{
-          'region': item.1.region,
-          'resource': item.1.block_device_mapping[item.2].volume_id,
+          'region': item.0.invocation.module_args["region"],
+          'resource': item.3,
           'tags': cluster_tags|combine({
             'Name': attachment_label,
             'TPAAttachmentLabel': attachment_label,
@@ -509,14 +513,15 @@
       }}
   with_nested_dependents:
     - ec2_jobs.results
-    - item.0.tagged_instances
-    - item.1.block_device_mapping.keys()|list
+    - item.0.instances
+    - item.1.block_device_mappings
+    - item.2.ebs["volume_id"]
   loop_control:
     label: >-
-      {{ item.1.region }}:{{ item.1.block_device_mapping[item.2].volume_id }}
+      {{ item.0.invocation.module_args["region"] ~ ":" ~ item.1.tags["node"] ~ ":" ~ item.2["device_name"]}}
   vars:
     attachment_label: >-
-      {{ cluster_name ~':'~ item.1.tags.node ~':'~ item.2 }}
+      {{ cluster_name ~':'~ item.1.tags.node ~':'~ item.2["device_name"] }}
   tags: [aws, ebs]
 
 - include_tasks: ec2-tag-volumes.yml
@@ -537,18 +542,18 @@
 - name: Set instance variables and elastic IP overrides
   set_fact:
     instance_vars: "{{
-      instance_vars|default([])|union([
-        item.0.tagged_instances[0]|combine({
-          'Name': item.0.item.item.Name,
-          'node': item.0.item.item.node,
-          'vars': (item.0.item.item|export_vars),
-          'platform': 'aws',
-          'ip_address': item.1.public_ip|default(item.0.tagged_instances[0].public_ip)
-            or item.0.tagged_instances[0].private_ip,
-          'public_ip': item.1.public_ip|default(item.0.tagged_instances[0].public_ip),
-        })
-      ])
-    }}"
+        instance_vars|default([])|union([
+          item.0.instances[0]|combine({
+            'Name': item.0.item.item.Name,
+            'node': item.0.item.item.node,
+            'vars': (item.0.item.item|export_vars),
+            'platform': 'aws',
+            'ip_address': item.1.public_ip|default(item.0.instances[0].network_interfaces[0].association.public_ip)
+              |default(item.0.network_interfaces[0].private_ip_address),
+            'public_ip': item.1.public_ip|default(item.0.instances[0].network_interfaces[0].association.public_ip),
+          })
+        ])
+      }}"
   with_together:
     - "{{ ec2_jobs.results }}"
     - "{{ ec2_eips.results }}"

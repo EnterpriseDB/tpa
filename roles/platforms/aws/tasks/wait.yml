@@ -17,8 +17,8 @@
 
 - name: Wait for instance reachability checks to pass
   ec2_instance_status:
-    instance_id: "{{ ec2_id }}"
-    region: "{{ ec2_region }}"
+    instance_id: "{{ instance_id }}"
+    region: "{{ placement.region }}"
   register: i
   until: >
     i is not successful

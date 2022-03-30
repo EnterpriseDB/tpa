@@ -1,3 +1,5 @@
 collections:
 - name: community.crypto
   version: 2.3.1
+- name: community.aws
+  version: 3.4.0

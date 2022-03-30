@@ -145,11 +145,9 @@ _install_pip_packages() {
 
     ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible.txt
     TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
-    CONTRIB_DIR="$TPA_VENV/contrib"
 
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
         ANSIBLE_REQUIREMENTS="$ANSIBLE_HOME/requirements.txt"
-        CONTRIB_DIR="$ANSIBLE_HOME/contrib"
     elif [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible.txt ]]; then
         ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible.txt"
         TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
@@ -159,8 +157,12 @@ _install_pip_packages() {
     pip_args+=(-r "$TPA_REQUIREMENTS")
     pip3 install "${pip_args[@]}"
 
-    cp -v "$CONTRIB_DIR"/inventory/ec2.py \
-        "$TPA_DIR"/platforms/aws/inventory/ec2.py
+    # TPA-21: added to clean leftover from previous tpaexec version
+    # remove old ec2.py script.
+    if [[ -f "$TPA_DIR"/platforms/aws/inventory/ec2.py ]]; then
+        rm "$TPA_DIR"/platforms/aws/inventory/ec2.py
+    fi
+
 }
 
 _apply_patch_if_not_applied() {
@@ -197,19 +199,12 @@ _apply_patch_if_not_applied() {
     '
 }
 
-_apply_patches() {
-    file=$("$TPA_VENV"/bin/python3 -c 'import boto.connection; print(boto.connection.__file__)' 2>/dev/null)
-    if [[ -n $file ]] && command -v patch &>/dev/null; then
-        _apply_patch_if_not_applied "$file" "$TPA_DIR"/patches/RM16946.diff
-    fi
-}
-
 _install_ansible_collections() {
 
     # If ansible collections are bundled (i.e. the tpaexec-deps package has
     # been installed), we configure ansible-galaxy to use them instead of trying
     # to download them from the network.
-
+    echo "Installing ansible collections"
     if [ -d "${TPA_DIR}/collections-static" ] ;then
         ANSIBLE_COLLECTIONS="${TPA_DIR}/collections-static"
     else
@@ -243,7 +238,6 @@ setup() {
 
     _create_and_activate_venv "${vpath:=$TPA_VENV}"
     _install_pip_packages
-    _apply_patches
     _install_ansible_collections
 }
 
@@ -284,6 +278,15 @@ provision() {
                 ;;
         esac
     done
+
+    # TPA-21: added to clean leftover from previous tpaexec version
+    # remove old ec2.py script configuration file
+    if [[ -f "$(pwd)"/inventory/ec2.ini ]];then
+        rm "$(pwd)"/inventory/ec2.ini
+    fi
+    if [[ -f "$(pwd)"/inventory/ec2.py ]];then
+        rm "$(pwd)"/inventory/ec2.py
+    fi
 
     set -- "${REMAINDER[@]:+${REMAINDER[@]}}" "$@"
 

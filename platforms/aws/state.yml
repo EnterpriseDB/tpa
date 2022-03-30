@@ -21,10 +21,10 @@
     tags: always
 
   - name: Stop EC2 instances in each region
-    ec2:
+    amazon.aws.ec2_instance:
       state: "{{ state|default('running') }}"
       region: "{{ item }}"
-      instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('extract', hostvars, 'ec2_id')|list }}"
+      instance_ids: "{{ groups[cluster_tag]|intersect(groups[item])|map('extract', hostvars, 'instance_id')|list }}"
       wait: yes
     with_items: "{{ aws_regions }}"
     tags: ec2

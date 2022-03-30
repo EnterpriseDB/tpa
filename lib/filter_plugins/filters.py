@@ -454,6 +454,19 @@ def pyformat_hostvars(hostname, format_str, hostvars):
     """
     return format_str.format(**hostvars.get(hostname, {}))
 
+def expected_replication_slots(replica_list, inventory_hostname):
+    """
+    Deep copy a variable inside a clean dict to ensure the variable is correctly
+    formatted as dict. This filter is added due to an issue while switching to
+    aws_ec2 inventory plugin. hostvars were not returned corectly. this would
+    result in expected replication slots to be returned as "" or "\n".
+    """
+    expected_slots = []
+    for replica in replica_list:
+        pcp = replica.get('primary_conninfo_parts',{})
+        if inventory_hostname == pcp.get('host'):
+            expected_slots.append(replica.get('primary_slot_name'))
+    return expected_slots
 
 def select_by_hostvar(hostnames, hostvars, varname, value):
     """
@@ -499,4 +512,5 @@ class FilterModule(object):
             "split": text_type.split,
             "select_by_hostvar": select_by_hostvar,
             "joinpath": os.path.join,
+            "expected_replication_slots": expected_replication_slots,
         }

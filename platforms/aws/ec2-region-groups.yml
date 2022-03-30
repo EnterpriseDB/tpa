@@ -13,7 +13,7 @@
 # Enumerate all existing security groups matching ec2_groups.
 
 - name: Search for existing security groups
-  ec2_group_info:
+  amazon.aws.ec2_group_info:
     region: "{{ item.key }}"
     filters: "{{ item.value }}"
   with_dict: "{{ ec2_groups|default({}) }}"
@@ -34,7 +34,7 @@
 # If there are any regions without security groups, create them.
 
 - name: Create security groups for each VPC
-  ec2_group:
+  amazon.aws.ec2_group:
     state: present
     region: "{{ item.key }}"
     vpc_id: "{{ item.value }}"

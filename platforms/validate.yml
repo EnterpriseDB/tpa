@@ -16,8 +16,8 @@
 - name: Collect list of platforms
   set_fact:
     cluster_platforms: "{{
-      cluster_platforms|default([])|union([item.platform])
-    }}"
+        cluster_platforms|default([])|union([item.platform])
+      }}"
   with_items: "{{ instances }}"
   loop_control:
     label: >-
@@ -51,6 +51,9 @@
     that:
       - item.Name is matched_by(p)
   with_items: "{{ instances }}"
+  loop_control:
+    label: >-
+      {{ item.Name }}
   vars:
     patterns: "{{ hostname_patterns|default({}) }}"
     p: "{{ patterns[item.platform]|default('^[a-z0-9][a-z0-9-]*[a-z0-9]$') }}"

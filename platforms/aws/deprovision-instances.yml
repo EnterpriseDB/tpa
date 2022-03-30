@@ -7,14 +7,14 @@
 # for all the jobs to complete.
 
 - name: Terminate EC2 instances in each region
-  ec2:
+  amazon.aws.ec2_instance:
     state: absent
     region: "{{ item.0 }}"
-    instance_id: "{{ item.1 }}"
+    instance_ids: "{{ item.1 }}"
     wait: yes
   with_nested_dependents:
     - aws_regions
-    - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'ec2_id')|unique|list
+    - groups[cluster_tag]|intersect(groups[item.0])|map('extract', hostvars, 'instance_id')|unique|list
   loop_control:
     label: >-
       {{ item.0 }}:{{ item.1 }}

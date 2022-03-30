@@ -3,10 +3,10 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - name: Associate elastic IPs with instances
-  ec2_eip:
+  community.aws.ec2_eip:
     state: present
-    region: "{{ item.1.tagged_instances[0].region }}"
-    device_id: "{{ item.1.tagged_instances[0].id }}"
+    region: "{{ item.1.invocation.module_args.region }}"
+    device_id: "{{ item.1.instances[0].instance_id }}"
     reuse_existing_ip_allowed: false
     in_vpc: true
   when:
@@ -17,5 +17,5 @@
     - "{{ ec2_jobs.results }}"
   loop_control:
     label: >-
-      {{ item.1.tagged_instances[0].region }}:{{ item.1.tagged_instances[0].id }}
+      {{ item.1.invocation.module_args.region }}:{{ item.1.instances[0].instance_id }}
   register: ec2_eips

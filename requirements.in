@@ -4,6 +4,5 @@ cryptography
 python-dateutil
 netaddr
 boto3>=1.5.31
-boto>=2.48.0
 docker
 passlib

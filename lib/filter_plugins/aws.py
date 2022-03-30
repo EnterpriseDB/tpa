@@ -257,13 +257,13 @@ def expand_ec2_instance_image(old_instances, ec2_region_amis):
     """Filter to set the image for each instance, if not already specified."""
     instances = []
 
-    for i in old_instances:
-        j = copy.deepcopy(i)
+    for old_instance in old_instances:
+        instance = copy.deepcopy(old_instance)
 
-        if "image" not in j:
-            j["image"] = ec2_region_amis[j["region"]]
+        if "image" not in instance:
+            instance["image"] = ec2_region_amis[instance["region"]]
 
-        instances.append(j)
+        instances.append(instance)
 
     return instances
 
@@ -273,47 +273,72 @@ def expand_ec2_instance_volumes(old_instances, ec2_ami_properties):
     Expand the instance volume list according to a set of AWS specific transformations.
 
     Operations performed:
+    * format volume to use required format for ec2_instance module
     * translates a device name of 'root' to the given root device name
     * sets delete_on_termination to true if it's not implied by attach_existing or explicitly set to be false.
     * Configures RAID devices
 
     """
     instances = []
+    EBS_KEYS = [
+        "ebs",
+        "encrypted",
+        "volume_type",
+        "volume_size",
+        "delete_on_termination",
+        "iops",
+        "kms_key_id",
+    ]
 
-    for instance in old_instances:
-        transform = copy.deepcopy(instance)
-
+    for old_instance in old_instances:
+        instance = copy.deepcopy(old_instance)
         volumes = []
-        for vol in transform.get("volumes", []):
+        for vol in instance.get("volumes", []):
             volume = copy.deepcopy(vol)
             _vars = volume.get("vars", {})
+            # we want to format our volume to match the new module
+            # ec2_instance. We either want an ebs volume or a store volume
+            # priorize ebs over ephemeral volume
+            if any(ebs_key in volume for ebs_key in EBS_KEYS):
+                ebs = volume.get("ebs", {})
+                volume_type = volume.pop("volume_type", "gp2")
+                ebs["encrypted"] = volume.pop("encrypted", False)
+                ebs["volume_type"] = volume_type
+                ebs["volume_size"] = volume.pop("volume_size")
+                ebs["delete_on_termination"] = volume.pop(
+                    "delete_on_termination", not volume.get("attach_existing", False)
+                )
+                if "iops" in volume and "iops" not in ebs:
+                    ebs["iops"] = volume.pop("iops")
+                if "kms_key_id" in volume and "kms_key_id" not in ebs:
+                    ebs["kms_key_id"] = volume.pop("kms_key_id")
+                volume.update({"ebs": ebs})
+                # remove ephemeral since this would not be taken into account
+                # by module since ebs options are defined.
+                if "ephemeral" in volume:
+                    volume.pop("ephemeral")
+            elif "ephemeral" in volume:
+                volume["virtual_name"] = volume.pop("ephemeral")
 
-            volume_type = volume.get("volume_type")
-
-            if not (volume_type or "ephemeral" in volume):
+            if not (volume_type or "virtual_name" in volume):
                 raise AnsibleFilterError(
                     f"volume_type/ephemeral not specified for volume {volume['device_name']}"
                 )
 
             if volume["device_name"] == "root":
-                volume["device_name"] = ec2_ami_properties[transform["image"]][
+                volume["device_name"] = ec2_ami_properties[instance["image"]][
                     "root_device_name"
                 ]
                 if "mountpoint" in _vars or "volume_for" in _vars:
                     raise AnsibleFilterError(
                         "root volume cannot have mountpoint/volume_for set"
                     )
-            if "delete_on_termination" not in volume:
-                volume["delete_on_termination"] = not volume.get(
-                    "attach_existing", False
-                )
-
             volumes.append(volume)
 
-            update_raid_volumes(volume, volumes, instance)
+            update_raid_volumes(volume, volumes, old_instance)
 
-        transform["volumes"] = volumes
-        instances.append(transform)
+        instance["volumes"] = volumes
+        instances.append(instance)
 
     return instances
 
@@ -332,7 +357,7 @@ def update_raid_volumes(volume, volumes, instance=None):
         raid_units = volume["raid_units"]
 
         if raid_units == "all":
-            if "ephemeral" in volume:
+            if "virtual_name" in volume:
                 if instance and instance.get("type") in EPHEMERAL_STORAGE:
                     raid_units = EPHEMERAL_STORAGE[instance["type"]]
                 else:
@@ -352,9 +377,9 @@ def update_raid_volumes(volume, volumes, instance=None):
             name = raid_volume["device_name"]
             raid_volume["device_name"] = name[0:-1] + chr(ord(name[-1]) + 1)
 
-            if "ephemeral" in raid_volume:
-                ename = raid_volume["ephemeral"]
-                raid_volume["ephemeral"] = ename[0:-1] + chr(ord(ename[-1]) + 1)
+            if "virtual_name" in raid_volume:
+                ename = raid_volume["virtual_name"]
+                raid_volume["virtual_name"] = ename[0:-1] + chr(ord(ename[-1]) + 1)
 
             volumes.append(raid_volume)
             raid_units -= 1
@@ -389,7 +414,7 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes=None):
                 ec2_volume = ec2_volumes[name]
 
                 if (
-                    volume["volume_size"] != ec2_volume["size"]
+                    volume["ebs"]["volume_size"] != ec2_volume["size"]
                     or volume.get("iops", ec2_volume["iops"]) != ec2_volume["iops"]
                     or volume.get("volume_type", ec2_volume["type"])
                     != ec2_volume["type"]

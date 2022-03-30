@@ -78,12 +78,11 @@
         cluster_facts|json_query('pg_replication_slots[*].slot_name')
       }}
     expected_slots: >
-      {{
-        all_cluster_facts|json_query(
-          "[?replica.primary_conninfo_parts.host=='" + inventory_hostname + "']"
-          + ".replica.primary_slot_name"
-        )
-      }}
+      {{ groups['role_postgres']
+      |map('extract', hostvars, 'cluster_facts')
+      |map(attribute='replica', default={})
+      |list|expected_replication_slots(inventory_hostname) }}
+
 
 # Now that everything should be replicating as configured, we can
 # configure and start repmgrd.

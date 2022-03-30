@@ -25,7 +25,7 @@
     }}"
 
 - name: Upload files to S3
-  aws_s3:
+  amazon.aws.aws_s3:
     bucket: "{{ cluster_bucket }}"
     object: "{{ cluster_name }}/{{ item|basename }}"
     src: "{{ item }}"

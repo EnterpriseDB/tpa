@@ -7,7 +7,7 @@
     ec2_attachable_volumes: {}
 
 - name: Search for attachable EBS volumes
-  ec2_vol_info:
+  amazon.aws.ec2_vol_info:
     region: "{{ r }}"
     filters:
       status: available

@@ -3,7 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - name: Tag all volumes attached to the provisioned instances
-  ec2_tag:
+  amazon.aws.ec2_tag:
     state: present
     region: "{{ item.region }}"
     resource: "{{ item.resource }}"

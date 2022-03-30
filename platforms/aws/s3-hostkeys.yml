@@ -11,7 +11,7 @@
 # they shouldn't often do anyway).
 
 - name: Check if cluster_bucket exists
-  aws_s3:
+  amazon.aws.s3_object:
     bucket: "{{ cluster_bucket }}"
     region: "{{ aws_regions[0] }}"
     mode: list
@@ -55,7 +55,7 @@
 - name: Create an S3 bucket for this cluster, if required
   block:
     - name: Create S3 bucket
-      s3_bucket:
+      amazon.aws.s3_bucket:
         name: "{{ cluster_bucket }}"
         region: "{{ aws_regions[0] }}"
         state: present
@@ -66,7 +66,7 @@
             })
           }}
     - name: Set S3 bucket contents to expire in a day
-      s3_lifecycle:
+      community.aws.s3_lifecycle:
         name: "{{ cluster_bucket }}"
         expiration_days: 1
         status: enabled
@@ -77,7 +77,7 @@
       or cluster_bucket_create.user_input|default('') == "yes"
 
 - name: Upload SSH host key files
-  aws_s3:
+  amazon.aws.s3_object:
     bucket: "{{ cluster_bucket }}"
     object: "{{ cluster_name }}/hostkeys/{{ item.0 }}{{ item.1 }}.txt"
     src: "{{ cluster_dir }}/hostkeys/ssh_host_{{ item.0 }}_key{{ item.1 }}"

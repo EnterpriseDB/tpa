@@ -2,21 +2,17 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-- name: Ensure that ec2.py succeeded
-  assert:
-    msg: "No ec2_id defined for AWS EC2 instance (did ec2.py fail?)"
-    that: ec2_id is defined
 
 - name: Translate platform-specific variable names
   action: set_fact
   args:
-    "{{ item.var }}": "{{ vars[item.source] }}"
+    "{{ item.var }}": "{{ vars[item.source]['Name'] }}"
   when:
     item.source in vars and
     (item.var not in vars or ('override' in item and item.override))
   with_items:
     - var: name
-      source: ec2_tag_Name
+      source: tags
 
 # An EC2 instance in a VPC will always have a private IP address. It may
 # also have a public IP address (which may or may not be an elastic IP).
@@ -26,13 +22,13 @@
 
 - name: Set private IP address
   set_fact:
-    private_ip: "{{ ec2_private_ip_address|default(ansible_host) }}"
+    private_ip: "{{ private_ip_address|default(ansible_host) }}"
   when:
     private_ip is not defined
 
 - name: Set public IP address if available
   set_fact:
-    public_ip: "{{ ec2_ip_address }}"
+    public_ip: "{{ public_ip_address }}"
   when:
     public_ip is not defined and
-    ec2_ip_address is defined
+    public_ip_address is defined

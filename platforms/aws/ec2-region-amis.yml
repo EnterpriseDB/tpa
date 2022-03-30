@@ -11,7 +11,7 @@
     ec2_ami_properties: {}
 
 - name: Search for AMI named {{ ec2_ami['Name'] }}
-  ec2_ami_info:
+  amazon.aws.ec2_ami_info:
     region: "{{ item }}"
     owner: "{{ ec2_ami['Owner']|default(omit) }}"
     filters: >

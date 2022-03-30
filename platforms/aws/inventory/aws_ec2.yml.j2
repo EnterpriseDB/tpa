@@ -1,0 +1,37 @@
+plugin: aws_ec2
+regions: {{ aws_regions|list }}
+
+filters:
+  # All instances with their `Cluster` tag set to `cluster_name`
+  tag:Cluster: {{ cluster_name }}
+
+keyed_groups:
+  - key: placement.region
+    separator: ''
+  - key: instance_id
+    separator: ''
+  - key: image_id
+    separator: ''
+  - key: key_name
+    separator: ''
+  - key: vpc_id
+    separator: ''
+  - key: tags
+    prefix: tag
+  - key: public_dns_name
+    separator: ''
+compose:
+  ansible_host: {% if ec2_instance_reachability|default('public') == 'private' %} private_ip_address {% else %} public_ip_address {% endif %}
+
+use_contrib_script_compatible_sanitization: yes
+hostnames:
+  - tag:Name
+  - dns-name
+  - public-ip-address
+  - private-ip-address
+
+cache: yes
+cache_plugin: jsonfile
+cache_timeout: 300
+cache_prefix: {{ cluster_name }}
+cache_connection: tmp

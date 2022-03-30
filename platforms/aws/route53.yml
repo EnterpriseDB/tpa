@@ -3,7 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - name: Update DNS records in Route53
-  route53:
+  community.aws.route53:
     command: create
     zone: "{{ item.0.route53_zone }}"
     hosted_zone_id: "{{ item.0.route53_hosted_zone_id }}"
