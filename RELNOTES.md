@@ -2,6 +2,48 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.10 (2022-03-31)
+
+### Notable changes
+
+- Improve automated testing
+
+- Introduce vulnerability scanning in CI
+
+### HARP-related changes
+
+- Add support for harp_dcs_client_dsn_attributes setting to pass extra connection
+  parameters for harp-proxy's connection to BDR as DCS
+
+- Use `harp_listen_address` as HARP2 listen address to override the default,
+  which is to listen on all interfaces
+
+- Fix proxy start error by granting required execute privileges to harp_dcs_user
+
+### Minor changes
+
+- Allow the use of FQDNs for Docker containers
+
+- Ensure that ping is installed on EFM nodes for EFM internal use
+
+- Add `Rocky` to `--os` available option list for AWS clusters
+
+- Use latest AMIs for Ubuntu and Debian on aws platform
+
+- Bump EFM's default version to 4.4
+
+- Miscellaneous documentation improvements
+
+### Bugfixes
+
+- Fix repmgr source builds switching from `git://` to `https://` for repository
+  links since github stopped supporting the former
+
+- Fix "module 'jinja2.ext' has no attribute 'with_'" errors from inventory
+  script with recent versions of Jinja2
+
+- Update hostname validation to be RFC compliant
+
 ## v22.9 (2022-02-24)
 
 ### Notable changes
