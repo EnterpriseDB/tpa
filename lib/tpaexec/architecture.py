@@ -765,6 +765,7 @@ class Architecture(object):
             "pglogical3": {
                 "name": "pglogical",
                 "git_repository_url": "git@github.com:EnterpriseDB/pglogical.git",
+                "git_repository_ref": "REL3_7_STABLE",
             },
             "bdr3": {
                 "name": "bdr",
