@@ -30,4 +30,3 @@ requirements:
     - libxslt-devel
     - perl-Test-Simple
     - perl-App-cpanminus
-    - "@Development tools"
