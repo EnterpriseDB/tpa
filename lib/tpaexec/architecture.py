@@ -747,8 +747,7 @@ class Architecture(object):
                     "repo_gpgcheck": "no",
                 }
 
-
-            if self.args.get("postgres_version") == "9.4":
+            if self.args.get("bdr_version") == "1" :
                 cluster_vars["yum_repository_list"].append("EDB")
 
             if self.args.get("postgres_version") == "9.6":
