@@ -141,36 +141,30 @@ _install_pip_packages() {
     # Ansible's own dependencies into the venv.
     #
     # Otherwise, we need to install it into the venv either from the
-    # bundled copy of the repository, or directly from github. In this
-    # case, pip will install the dependencies automatically.
-
+    # bundled package from tpaexec-deps, or directly from github.
+    CP_FROM="$TPA_VENV"
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
-        pip3 install "${pip_args[@]}" \
-            -r "$ANSIBLE_HOME/requirements.txt" \
-            -r "$TPA_DIR/requirements.txt"
-        cp "$ANSIBLE_HOME"/contrib/inventory/ec2.py \
-        "$TPA_DIR"/platforms/aws/inventory
-        cp "$ANSIBLE_HOME"/contrib/inventory/lxd.py \
-        "$TPA_DIR"/platforms/lxd/inventory
+        pip_args+=(-r "$ANSIBLE_HOME/requirements.txt")
+        pip_args+=(-r "$TPA_DIR/requirements.txt")
+        CP_FROM="$ANSIBLE_HOME"
+
     else
-        if [[ -d $PIP_DIR/ansible ]]; then
-            ANSIBLE_HOME=$PIP_DIR/ansible
-            pip3 install "${pip_args[@]}" file:"$ANSIBLE_HOME" \
-            -r "$TPA_DIR/requirements.txt"
-            cp "$ANSIBLE_HOME"/contrib/inventory/ec2.py \
-            "$TPA_DIR"/platforms/aws/inventory
-            cp "$ANSIBLE_HOME"/contrib/inventory/lxd.py \
-            "$TPA_DIR"/platforms/lxd/inventory
+        if [[ -d $PIP_DIR && -f $PIP_DIR/ansible.txt ]]; then
+            pip_args+=(-r "${PIP_DIR}/ansible.txt")
+            pip_args+=(-r "${PIP_DIR}/requirements.txt")
         else
-            pip3 install "${pip_args[@]}" \
-            -r "$TPA_DIR/ansible.txt" \
-            -r "$TPA_DIR/requirements.txt"
-            cp -v "$TPA_VENV"/contrib/inventory/ec2.py \
-            "$TPA_DIR"/platforms/aws/inventory/ec2.py
-            cp -v "$TPA_VENV"/contrib/inventory/lxd.py \
-            "$TPA_DIR"/platforms/lxd/inventory/lxd.py
+            pip_args+=(-r "${TPA_DIR}/ansible.txt")
+            pip_args+=(-r "${TPA_DIR}/requirements.txt")
+
         fi
+        CP_FROM="$TPA_VENV"
     fi
+
+    pip3 install "${pip_args[@]}"
+    cp -v "$CP_FROM"/contrib/inventory/lxd.py \
+    "$TPA_DIR"/platforms/aws/inventory/ec2.py
+    cp -v "$CP_FROM"/contrib/inventory/lxd.py \
+        "$TPA_DIR"/platforms/lxd/inventory/lxd.py
 }
 
 _apply_patch_if_not_applied() {
