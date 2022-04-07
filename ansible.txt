@@ -4,8 +4,8 @@
 #
 #    pip-compile --generate-hashes --output-file=ansible.txt ansible.in
 #
-ansible @ https://github.com/2ndQuadrant/ansible/releases/latest/download/ansible-2.9.27+tpa.1.0.2-py3-none-any.whl \
-    --hash=sha256:623e3c55ab19555649a2f27ee6873e5bdb55304f09ddc10f28d1b4608fb02d44
+ansible @ https://github.com/2ndQuadrant/ansible/releases/download/v2.9.27-tpa-1.1.0/ansible-2.9.27+tpa.1.1.0-py3-none-any.whl \
+    --hash=sha256:c1cda118399b5c7c69e71b647599b62e64b47d93ba3b1d9ea212cc49ef3b8fb5
     # via -r ansible.in
 cffi==1.15.0 \
     --hash=sha256:00c878c90cb53ccfaae6b8bc18ad05d2036553e6d9d1d9dbcf323bbe83854ca3 \
