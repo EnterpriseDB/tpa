@@ -161,8 +161,8 @@ _install_pip_packages() {
     fi
 
     pip3 install "${pip_args[@]}"
-    cp -v "$CP_FROM"/contrib/inventory/lxd.py \
-    "$TPA_DIR"/platforms/aws/inventory/ec2.py
+    cp -v "$CP_FROM"/contrib/inventory/ec2.py \
+        "$TPA_DIR"/platforms/aws/inventory/ec2.py
     cp -v "$CP_FROM"/contrib/inventory/lxd.py \
         "$TPA_DIR"/platforms/lxd/inventory/lxd.py
 }
