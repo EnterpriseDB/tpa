@@ -2,6 +2,12 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.12 (2022-04-08)
+
+### Bugfixes
+
+- Correct file copy path during tpaexec setup for dynamic inventory scripts
+
 ## v22.11 (2022-04-08)
 
 ### Bugfixes
