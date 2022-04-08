@@ -12,6 +12,9 @@
 - Ensure that the bundled ansible from tpaexec-deps is used, if present
   (workaround for a pip limitation)
 
+- Ensure that we install a Postgres-specific logrotate configuration only on
+  Postgres instances
+
 ## v22.10 (2022-03-31)
 
 ### Notable changes
