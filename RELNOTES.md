@@ -2,6 +2,25 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.12 (2022-04-08)
+
+### Bugfixes
+
+- Correct file copy path during tpaexec setup for dynamic inventory scripts
+
+## v22.11 (2022-04-08)
+
+### Bugfixes
+
+- Use correct Ansible release tarball download location (to fix 404 errors
+  while downloading Ansible during `tpaexec setup`)
+
+- Ensure that the bundled ansible from tpaexec-deps is used, if present
+  (workaround for a pip limitation)
+
+- Ensure that we install a Postgres-specific logrotate configuration only on
+  Postgres instances
+
 ## v22.10 (2022-03-31)
 
 ### Notable changes
