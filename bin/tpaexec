@@ -142,29 +142,32 @@ _install_pip_packages() {
     #
     # Otherwise, we need to install it into the venv either from the
     # bundled package from tpaexec-deps, or directly from github.
-    CP_FROM="$TPA_VENV"
+
+    ANSIBLE_REQUIREMENTS="$TPA_DIR"/ansible.txt
+    TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
+    CONTRIB_DIR="$TPA_VENV/contrib"
+
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
-        pip_args+=(-r "$ANSIBLE_HOME/requirements.txt")
-        pip_args+=(-r "$TPA_DIR/requirements.txt")
-        CP_FROM="$ANSIBLE_HOME"
-
-    else
-        if [[ -d $PIP_DIR && -f $PIP_DIR/ansible.txt ]]; then
-            pip_args+=(-r "${PIP_DIR}/ansible.txt")
-            pip_args+=(-r "${PIP_DIR}/requirements.txt")
-        else
-            pip_args+=(-r "${TPA_DIR}/ansible.txt")
-            pip_args+=(-r "${TPA_DIR}/requirements.txt")
-
-        fi
-        CP_FROM="$TPA_VENV"
+        ANSIBLE_REQUIREMENTS="$ANSIBLE_HOME/requirements.txt"
+        CONTRIB_DIR="$ANSIBLE_HOME/contrib"
+    elif [[ -d $PIP_DIR && -f $PIP_DIR/ansible.txt ]]; then
+        ANSIBLE_REQUIREMENTS="$PIP_DIR/ansible.txt"
+        TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
     fi
 
+    pip_args+=(-r "$ANSIBLE_REQUIREMENTS")
+    pip_args+=(-r "$TPA_REQUIREMENTS")
     pip3 install "${pip_args[@]}"
-    cp -v "$CP_FROM"/contrib/inventory/ec2.py \
-        "$TPA_DIR"/platforms/aws/inventory/ec2.py
-    cp -v "$CP_FROM"/contrib/inventory/lxd.py \
-        "$TPA_DIR"/platforms/lxd/inventory/lxd.py
+
+    declare -A contribs
+    contribs=(
+        [inventory/ec2.py]=platforms/aws
+        [inventory/lxd.py]=platforms/lxd
+    )
+    for f in "${!contribs[@]}"; do
+        cp -v "$CONTRIB_DIR/$f" \
+            "$TPA_DIR/${contribs[$f]}/$f"
+    done
 }
 
 _apply_patch_if_not_applied() {
