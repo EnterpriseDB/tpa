@@ -7,8 +7,7 @@
     ],
     "exclude": [
         "tpa-venv",
-        "platforms/aws/inventory",
-        "platforms/lxd/inventory"
+        "platforms/aws/inventory"
     ],
     "venvPath": ".",
     "venv": "tpa-venv"

@@ -162,7 +162,6 @@ _install_pip_packages() {
     declare -A contribs
     contribs=(
         [inventory/ec2.py]=platforms/aws
-        [inventory/lxd.py]=platforms/lxd
     )
     for f in "${!contribs[@]}"; do
         cp -v "$CONTRIB_DIR/$f" \

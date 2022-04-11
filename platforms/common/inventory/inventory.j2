@@ -1,9 +1,7 @@
 {# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
 [{{ cluster_tag }}]
 {% for h in instance_vars %}
-{% if h.platform == 'lxd' %}
-{{ h.Name }} ansible_connection=lxd node={{ h.node }} platform={{ h.platform }}
-{% elif h.platform == 'docker' %}
+{% if h.platform == 'docker' %}
 {{ h.Name }} ansible_connection=docker node={{ h.node }} platform={{ h.platform }}
 {% else%}
 {{ h.Name }} ansible_host={{ h|deploy_ip_address }} node={{ h.node }} platform={{ h.platform }}

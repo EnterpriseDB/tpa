@@ -19,7 +19,6 @@ nav:
     - AWS: platform-aws.md
     - Bare metal: platform-bare.md
     - Docker: platform-docker.md
-    - LXD: platform-lxd.md
     - Vagrant: platform-vagrant.md
   - Customisations:
     - Cluster configuration: configure-cluster.md
