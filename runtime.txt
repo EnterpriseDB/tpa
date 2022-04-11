@@ -1,1 +1,3 @@
+# This file is used by Dependabot to select runtime version of python it should
+# use to run and generate requirements files for its PRs.
 python-3.6.15
