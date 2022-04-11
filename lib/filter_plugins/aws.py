@@ -360,7 +360,7 @@ def update_raid_volumes(volume, volumes, instance=None):
             raid_units -= 1
 
 
-def match_existing_volumes(old_instances, cluster_name, ec2_volumes):
+def match_existing_volumes(old_instances, cluster_name, ec2_volumes=None):
     """
     Filter to set the volume_id for any volumes that match existing attachable volumes as discovered by a tag search.
 

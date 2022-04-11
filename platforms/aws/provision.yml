@@ -333,8 +333,6 @@
 # region to their volume-ids.
 
 - include_tasks: ec2-attachable-volumes.yml
-  when:
-    aws_instances|json_query('[*].volumes[]|[?attach_existing]')|count > 0
   tags: [aws, ebs]
 
 # Preprocess instance definitions through various helpful filters to
