@@ -98,6 +98,8 @@ default_failover_manager: repmgr
 
 default_etcd_peer_port: 2380
 default_etcd_client_port: 2379
+default_etcd_compaction_mode: revision
+default_etcd_compaction_retention: 10
 
 default_repmgr_conf_dir: "/etc/repmgr/{{ postgres_version }}"
 
