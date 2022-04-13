@@ -6,7 +6,7 @@ import copy
 import sys
 import importlib.util
 
-DEFAULT_VOLUME_DEVICE_NAME = '/dev/sd'
+DEFAULT_VOLUME_DEVICE_NAME = "/dev/sd"
 
 
 class Platform:

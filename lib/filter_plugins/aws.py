@@ -378,7 +378,12 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes=None):
                 continue
 
             name = ":".join(
-                [instance["region"], cluster_name, str(instance["node"]), volume["device_name"]]
+                [
+                    instance["region"],
+                    cluster_name,
+                    str(instance["node"]),
+                    volume["device_name"],
+                ]
             )
             if name in ec2_volumes:
                 ec2_volume = ec2_volumes[name]
@@ -386,7 +391,8 @@ def match_existing_volumes(old_instances, cluster_name, ec2_volumes=None):
                 if (
                     volume["volume_size"] != ec2_volume["size"]
                     or volume.get("iops", ec2_volume["iops"]) != ec2_volume["iops"]
-                    or volume.get("volume_type", ec2_volume["type"]) != ec2_volume["type"]
+                    or volume.get("volume_type", ec2_volume["type"])
+                    != ec2_volume["type"]
                 ):
                     continue
 
