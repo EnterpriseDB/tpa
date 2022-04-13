@@ -22,7 +22,8 @@ Spin up a cluster with 2ndQPostgres and pglogical3 built from the stable
 3.6 branches, with BDR3 built from a development branch:
 
 ```bash
-$ tpaexec configure ~/clusters/speedy -a BDR-Simple             \
+$ tpaexec configure ~/clusters/speedy -a BDR-Always-ON          \
+    --layout bronze                                             \
     --install-from-source                                       \
       2ndqpostgres:2QREL_11_STABLE_3_6                          \
       pglogical3:REL3_6_STABLE                                  \
@@ -35,7 +36,8 @@ pglogical and BDR. This feature is specific to Docker:
 
 ```bash
 $ tpaexec configure ~/clusters/speedy                           \
-    --architecture BDR-Simple --platform docker                 \
+    --architecture BDR-Always-ON --layout bronze                \
+    --platform docker                                           \
     --install-from-source 2ndqpostgres:2QREL_11_STABLE_3_6      \
       pglogical3 bdr3                                           \
     --local-source-directories                                  \
@@ -83,7 +85,8 @@ to build:
 
 ```bash
 $ tpaexec configure ~/clusters/speedy                           \
-    --architecture BDR-Simple --platform docker                 \
+    --architecture BDR-Always-ON --layout bronze                \
+    --platform docker                                           \
     --install-from-source 2ndqpostgres:2QREL_11_STABLE_3_6      \
       pglogical3:REL3_6_STABLE bdr3:REL3_6_STABLE               \
       …
@@ -96,7 +99,8 @@ sources to be taken directly from your host machine instead:
 
 ```bash
 $ tpaexec configure ~/clusters/speedy                           \
-    --architecture BDR-Simple --platform docker                 \
+    --architecture BDR-Always-ON --layout bronze                \
+    --platform docker                                           \
     --install-from-source 2ndqpostgres:2QREL_11_STABLE_3_6      \
       pglogical3 bdr3                                           \
     --local-source-directories                                  \

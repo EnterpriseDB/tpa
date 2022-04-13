@@ -1,8 +1,6 @@
 # BDR-Always-ON
 
 BDR in an Always-ON configuration, intended for use in production.
-(BDR-Simple is an alternative that is more geared towards
-experimentation.)
 
 In BDR-Always-ON architecture we have four variants, which can be
 selected with the `--layout` configure option:

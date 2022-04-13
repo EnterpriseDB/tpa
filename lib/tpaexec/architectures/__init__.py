@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 
 from .bdr_always_on import BDR_Always_ON
 from .bdr_autoscale import BDR_Autoscale
-from .bdr_simple import BDR_Simple
 from .images import Images
 from .m1 import M1
 from .training import Training
@@ -19,7 +18,6 @@ class SelectArchitecture:
     ARCHITECTURES = {
         "BDR-Always-ON": BDR_Always_ON,
         "BDR-Autoscale": BDR_Autoscale,
-        "BDR-Simple": BDR_Simple,
         "Images": Images,
         "M1": M1,
         "Training": Training,

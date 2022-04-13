@@ -20,7 +20,7 @@ and therefore requires a valid subscription.
 
 ## Supported architectures
 
-PEM is supported with M1, BDR-Simple and BDR-Always-ON architectures via
+PEM is supported with M1 and BDR-Always-ON architectures via
 `--enable-pem` configuration command line option. You could optionally edit
 the generated cluster config (config.yml) and assign or remove `pem-agent`
 role from any postgres instance in the cluster in order to enable or

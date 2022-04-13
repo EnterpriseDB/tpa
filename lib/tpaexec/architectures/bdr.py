@@ -159,7 +159,7 @@ class BDR(Architecture):
         # If --enable-camo is specified, we collect all the instances with role
         # [bdr,primary] and no partner already set and set them pairwise to be
         # each other's CAMO partners. This is crude, but it's good enough to
-        # experiment with CAMO on a two- or four-node BDR-Simple cluster.
+        # experiment with CAMO.
 
         if self.args.get("enable_camo", False):
             bdr_primaries = []

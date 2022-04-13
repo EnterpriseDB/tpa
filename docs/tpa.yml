@@ -14,7 +14,6 @@ nav:
   - Architectures:
     - M1: architecture-M1.md
     - BDR-Always-ON: architecture-BDR-Always-ON.md
-    - BDR-Simple: architecture-BDR-Simple.md
   - Platforms:
     - AWS: platform-aws.md
     - Bare metal: platform-bare.md

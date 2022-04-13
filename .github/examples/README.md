@@ -6,5 +6,5 @@ If you want to run a single integration test with inputs use one of the event fi
 your own.
 
 ```shell
-act -W .github/workflows/single_integration_test.yml --eventpath .github/examples/bdr-simple-event.json workflow_dispatch
+act -W .github/workflows/single_integration_test.yml --eventpath .github/examples/bdr-always-on-event.json workflow_dispatch
 ```

@@ -1,1 +1,0 @@
-../../docs/src/architecture-BDR-Simple.md

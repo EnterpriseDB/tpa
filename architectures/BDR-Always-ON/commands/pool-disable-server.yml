@@ -16,7 +16,7 @@
 
 # Remove a server from the haproxy pool: this is the first part of
 # what we would have to do to update Postgres and BDR on a running
-# cluster (see BDR-Simple/commands/update-postgres.yml).
+# cluster.
 
 - name: Collect haproxy facts for cluster {{ cluster_dir }}
   any_errors_fatal: True

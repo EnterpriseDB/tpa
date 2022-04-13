@@ -1,1 +1,140 @@
-../../BDR-Simple/commands/update-postgres.yml
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  tags: always
+
+# We must perform a minor-version update of Postgres and BDR on a
+# running cluster while maintaining overall cluster availability.
+#
+# The cluster may comprise BDR primary, logical standby, and physical
+# streaming replica instances; and pgbouncer+haproxy instances besides.
+# Logical standby and physical replica instances can be updated without
+# any special precautions. Just stop, update, start.
+#
+# For BDR primaries, we must first check if haproxy is routing traffic
+# to them, and if so, redirect to another primary before stopping and
+# upgrading this one.
+#
+# (We don't try to minimise the downtime on each instance by downloading
+# the packages before stopping the server, but we should explore that in
+# future as an optimisation. Although the architecture tolerates delays,
+# we would prefer the downtime to be predictable rather than dependent
+# on the whims of the network.)
+
+- name: Collect update facts for cluster {{ cluster_dir }}
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: all
+  tasks:
+
+  # Set all_haproxy_backend_servers and proxies_for_backend_server, as
+  # well as my_haproxies.
+
+  - include_role:
+      name: haproxy
+      tasks_from: map-backend-proxies.yml
+
+  # As a precaution, we start the update only if the servers are healthy
+  # and match the expected configuration. It's convenient to do this by
+  # just rerunning the basic pgbouncer and haproxy tests.
+  #
+  # This does mean that if the update leaves a backend server in "maint"
+  # state because a package installation fails, it will have to be fixed
+  # by hand before retrying the update with a fixed configuration.
+
+  - name: Check pgbouncer configuration and status
+    include_role:
+      name: test
+      tasks_from: pgbouncer/basic.yml
+    when: >
+      'pgbouncer' in role
+
+  - name: Check haproxy configuration and status
+    include_role:
+      name: test
+      tasks_from: haproxy/basic.yml
+    when: >
+      'haproxy' in role
+
+# Now that we're convinced the cluster is in a reasonable initial state,
+# we start the update process one by one on the instances. You can run
+# the command with ``-e update_hosts=a,b,c,…`` to control the order in
+# which we attempt the updates (for example, to make sure that primary
+# instances are updated last in the cycle).
+
+- name: Update postgres on instances in cluster {{ cluster_dir }}
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  hosts: "{{ update_hosts|default('all') }}"
+  serial: 1
+  tasks:
+
+  # We mark this backend as disabled in haproxy and tell pgbouncer to
+  # reconnect to haproxy and wait for active connections to be closed.
+
+  - include_role:
+      name: haproxy
+      tasks_from: disable-backend.yml
+
+  # Now we can perform the update on Postgres instances, whether proxied
+  # (e.g., primary instances) or not (e.g., logical standby instances).
+  # We don't do anything for non-Postgres instances at the moment.
+
+  - name: Stop/update/restart Postgres on {{ inventory_hostname }}
+    block:
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: stopped
+    - include_role: name=postgres/update
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: started
+    when: >
+      'postgres' in role
+
+  # After we update one instance in a CAMO pair, we must wait for its
+  # partner to catch up. If we stop the partner before it is ready, we
+  # will lose the status of transactions committed on the origin.
+
+  - name: Wait for CAMO partner to be ready before proceeding
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      query: >
+        SELECT bdr.is_camo_partner_connected() AND
+          bdr.is_camo_partner_ready() AS ready
+    register: camo_status
+    until: camo_status.ready
+    retries: 180
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when: bdr_node_camo_partner is defined
+
+  # Once that's done, we can inform haproxy that this backend is once
+  # again ready to accept connections.
+
+  - name: Declare backend {{ inventory_hostname }} as ready
+    shell: >
+      echo "set server be/{{ inventory_hostname }} state ready" |
+      socat stdio "{{ haproxy_stats_socket }}"
+    args:
+      executable: /bin/bash
+    with_items: "{{ my_haproxies }}"
+    delegate_to: "{{ item }}"
+
+  # Ansible won't stop execution if a host becomes unreachable, despite
+  # the any_errors_fatal setting. We must detect that situation and fail
+  # so that we don't proceed to the next host if something went wrong in
+  # upgrading this one.
+
+  - name: Fail if any host became unreachable
+    assert:
+      msg: "One or more hosts are no longer reachable"
+      that:
+        ansible_play_hosts == ansible_play_hosts_all

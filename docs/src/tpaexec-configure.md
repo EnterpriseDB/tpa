@@ -34,7 +34,7 @@ e.g., `~/clusters` in the example above.
 The next argument must be `--architecture <name>` to select an
 architecture, e.g.,
 [M1](architecture-M1.md) or
-[BDR-Simple](architecture-BDR-Simple.md).
+[BDR-Always-ON](architecture-BDR-Always-ON.md).
 For a complete list of architectures, run
 `tpaexec info architectures`.
 
@@ -51,8 +51,7 @@ Typically, each architecture accepts some unique options as well as the
 generic options described below.
 
 For example, with M1 you can use `--num-cascaded-replicas 3` to create
-a cluster with three cascaded replicas. With BDR-Simple, you can use
-`--num-instances 2` for a two-instance BDR cluster. Please consult the
+a cluster with three cascaded replicas. Please consult the
 documentation for an architecture for a list of options that it accepts
 (or, in some cases, requires).
 

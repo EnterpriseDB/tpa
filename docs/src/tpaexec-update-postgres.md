@@ -22,7 +22,7 @@ one by one and does the following:
 
 BDR logical standby or physical replica instances are updated without
 any haproxy or pgbouncer interaction. Non-Postgres instances in the
-cluster are left alone. 
+cluster are left alone.
 
 You can control the order in which the cluster's instances are updated
 by defining the `update_hosts` variable:
@@ -40,8 +40,6 @@ If your environment requires additional actions, the
 [postgres-pre-update and postgres-post-update hooks](tpaexec-hooks.md)
 allow you to execute custom Ansible tasks before and after the package
 installation step.
-
-(The above also applies to the BDR-Simple architecture.)
 
 ## M1
 

@@ -1,9 +1,0 @@
-{
-  "act": true,
-  "action": "workflow_dispatch",
-  "inputs": {
-      "tpa_architecture": "BDR-Simple",
-      "tpa_os_image": "tpa/debian:10",
-      "tpa_postgres_flavour": "postgresql"
-  }
-}

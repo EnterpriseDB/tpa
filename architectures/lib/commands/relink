@@ -35,12 +35,15 @@ TPA_DIR = os.environ["TPA_DIR"]
 # Given the name of a symbolic link and the missing target of the link, this
 # function tries to point it to $TPA_DIR.
 
-
 def repair_dangling_symlink(link, target):
     new_target = re.sub("^.*/TPA/", "", target)
 
     if new_target.startswith("architectures/CAMO2x2/"):
         new_target = re.sub("CAMO2x2", "BDR-Always-ON", new_target)
+
+    for old_bdr_arch in ["CAMO2x2", "BDR-Simple"]:
+        if new_target.startswith(f'architectures/{old_bdr_arch}/'):
+            new_target = re.sub(old_bdr_arch, 'BDR-Always-ON', new_target)
 
     new_target = os.path.join(TPA_DIR, new_target)
     if os.path.exists(new_target):
