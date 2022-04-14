@@ -1,0 +1,7 @@
+cluster:
+  name: {{ cluster_name }}
+  endpoints:
+{%  for h in groups[bdr_node_group] %}
+{%    set v = hostvars[h] %}
+  - "{{ v.bdr_node_dsn }}"
+{%  endfor %}

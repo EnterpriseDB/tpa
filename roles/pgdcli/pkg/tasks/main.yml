@@ -1,0 +1,17 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Install pgdcli packages
+  package:
+    name: "{{ _pgdcli_packages }}"
+    state: "{{
+      (pgdcli_packages_version is defined)|ternary('present', 'latest')
+    }}"
+  vars:
+    _pgdcli_packages: "{{
+      pgdcli_packages|packages_for(ansible_os_family, pgdcli_packages_version)
+    }}"
+  when:
+    _pgdcli_packages is not empty
+  tags: pkg

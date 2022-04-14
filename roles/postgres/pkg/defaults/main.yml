@@ -102,16 +102,19 @@ bdr4_packages:
   postgresql:
     Debian: &bdr4_pg_packages
       - edb-bdr{{ bdr_version }}-pg{{ postgres_versionNN }}
+      - edb-bdr-utilities
     RedHat: *bdr4_pg_packages
     Ubuntu: *bdr4_pg_packages
   pgextended:
     Debian: &bdr4_pge_packages
       - edb-bdr{{ bdr_version }}-pgextended{{ postgres_versionNN }}
+      - edb-bdr-utilities
     RedHat: *bdr4_pge_packages
     Ubuntu: *bdr4_pge_packages
   epas:
     Debian: &bdr4_epas_packages
       - edb-bdr{{ bdr_version }}-epas{{ postgres_versionNN }}
+      - edb-bdr-utilities
     RedHat: *bdr4_epas_packages
     Ubuntu: *bdr4_epas_packages
 

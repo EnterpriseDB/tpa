@@ -1,0 +1,18 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Ensure pgdcli_directory exists
+  file:
+    path: "{{ pgdcli_directory }}"
+    state: directory
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+
+- name: Install pgdcli configuration file
+  template:
+    src: pgd.config.j2
+    dest: "{{ pgdcli_directory }}/pgd-config.yml"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_user }}"
+    mode: 0644
