@@ -2,7 +2,7 @@
 
 import os, re, sys, yaml
 
-if len(sys.argv) > 1 and sys.argv[1] == '--help':
+if len(sys.argv) > 1 and sys.argv[1] == "--help":
     print(
         """Command: tpaexec relink clustername
 
@@ -12,31 +12,35 @@ appropriate. (TPA_DIR=%s)
 
 This command is useful if a cluster was configured on one machine and
 then moved to another with TPAexec installed in a different location,
-or to add links for new commands.""" % os.environ.get('TPA_DIR', '<unset>')
+or to add links for new commands."""
+        % os.environ.get("TPA_DIR", "<unset>")
     )
     sys.exit(0)
 
 v = 0
-if len(sys.argv) > 1 and sys.argv[1].startswith('-v'):
+if len(sys.argv) > 1 and sys.argv[1].startswith("-v"):
     v = 1
 
 # First, we establish that we were invoked as ``tpaexec relink clusterdir`` on a
 # valid cluster directory.
 
-if 'TPA_DIR' not in os.environ or not os.path.exists('./config.yml'):
-    print("ERROR: please invoke as 'tpaexec relink /path/to/cluster/dir'", file=sys.stderr)
+if "TPA_DIR" not in os.environ or not os.path.exists("./config.yml"):
+    print(
+        "ERROR: please invoke as 'tpaexec relink /path/to/cluster/dir'", file=sys.stderr
+    )
     sys.exit(-1)
 
-TPA_DIR = os.environ['TPA_DIR']
+TPA_DIR = os.environ["TPA_DIR"]
 
 # Given the name of a symbolic link and the missing target of the link, this
 # function tries to point it to $TPA_DIR.
 
-def repair_dangling_symlink(link, target):
-    new_target = re.sub('^.*/TPA/', '', target)
 
-    if new_target.startswith('architectures/CAMO2x2/'):
-        new_target = re.sub('CAMO2x2', 'BDR-Always-ON', new_target)
+def repair_dangling_symlink(link, target):
+    new_target = re.sub("^.*/TPA/", "", target)
+
+    if new_target.startswith("architectures/CAMO2x2/"):
+        new_target = re.sub("CAMO2x2", "BDR-Always-ON", new_target)
 
     new_target = os.path.join(TPA_DIR, new_target)
     if os.path.exists(new_target):
@@ -49,34 +53,35 @@ def repair_dangling_symlink(link, target):
         if v:
             print("%s: <removed>" % link)
 
+
 # Now we can look for dangling symlinks somewhere under the current directory
 # and try to repair them.
 
-for subdir, dirs, files in os.walk('.'):
+for subdir, dirs, files in os.walk("."):
     for f in files:
         file = os.path.join(subdir, f)
         if os.path.islink(file):
             target = os.readlink(file)
             if not os.path.exists(target):
-                if '/TPA/' in target:
+                if "/TPA/" in target:
                     repair_dangling_symlink(file, target)
 
 # Create links to any new commands or tests for this cluster's architecture.
 # (The cluster configuration may have been generated long before the current
 # TPAexec release.)
 
-with open(r'./config.yml') as config_file:
+with open(r"./config.yml") as config_file:
     try:
         config = yaml.safe_load(config_file)
-        architecture = config['architecture']
+        architecture = config["architecture"]
     except:
         sys.exit("Failed to read 'architecture' from config.yml")
 
     # In theory, the architecture may return something else from
     # links_to_create(), but we ignore that possibility for now.
 
-    for s in ['deploy.yml', 'commands', 'tests']:
-        target = '%s/architectures/%s/%s' % (TPA_DIR, architecture, s)
+    for s in ["deploy.yml", "commands", "tests"]:
+        target = "%s/architectures/%s/%s" % (TPA_DIR, architecture, s)
 
         if os.path.isfile(target) and not os.path.exists(s):
             os.symlink(target, s)
@@ -88,9 +93,9 @@ with open(r'./config.yml') as config_file:
                 os.mkdir(s)
 
             for l in os.listdir(target):
-                if not os.path.exists('%s/%s' % (s, l)):
-                    link = '%s/%s' % (s, l)
-                    dest = '%s/%s' % (target, l)
+                if not os.path.exists("%s/%s" % (s, l)):
+                    link = "%s/%s" % (s, l)
+                    dest = "%s/%s" % (target, l)
                     os.symlink(dest, link)
                     if v:
                         print("%s: %s" % (link, dest))
