@@ -159,14 +159,8 @@ _install_pip_packages() {
     pip_args+=(-r "$TPA_REQUIREMENTS")
     pip3 install "${pip_args[@]}"
 
-    declare -A contribs
-    contribs=(
-        [inventory/ec2.py]=platforms/aws
-    )
-    for f in "${!contribs[@]}"; do
-        cp -v "$CONTRIB_DIR/$f" \
-            "$TPA_DIR/${contribs[$f]}/$f"
-    done
+    cp -v "$CONTRIB_DIR"/inventory/ec2.py \
+        "$TPA_DIR"/platforms/aws/inventory/ec2.py
 }
 
 _apply_patch_if_not_applied() {
