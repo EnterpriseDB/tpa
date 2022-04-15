@@ -36,10 +36,13 @@ TPA_DIR = os.environ["TPA_DIR"]
 # function tries to point it to $TPA_DIR.
 
 def repair_dangling_symlink(link, target):
-    new_target = re.sub("^.*/TPA/", "", target)
+    # We can't repair links that don't point to TPA_DIR
+    if not re.findall('/(TPA|tpaexec)/', target):
+        if v:
+            print("%s: <ignored; unrecognised target>" % link)
+        return
 
-    if new_target.startswith("architectures/CAMO2x2/"):
-        new_target = re.sub("CAMO2x2", "BDR-Always-ON", new_target)
+    new_target = re.sub('^.*/(TPA|tpaexec)/', '', target)
 
     for old_bdr_arch in ["CAMO2x2", "BDR-Simple"]:
         if new_target.startswith(f'architectures/{old_bdr_arch}/'):
@@ -66,8 +69,7 @@ for subdir, dirs, files in os.walk("."):
         if os.path.islink(file):
             target = os.readlink(file)
             if not os.path.exists(target):
-                if "/TPA/" in target:
-                    repair_dangling_symlink(file, target)
+                repair_dangling_symlink(file, target)
 
 # Create links to any new commands or tests for this cluster's architecture.
 # (The cluster configuration may have been generated long before the current
