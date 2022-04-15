@@ -4,12 +4,13 @@
 
 - meta: flush_handlers
 
-- name: Start or restart etcd service
-  service:
-    name: etcd
-    state: "{{ etcd_service_end_state|default('started') }}"
-  become_user: root
-  become: yes
-  when: >
-    'etcd' in role
+# We don't want to restart all running etcds at the same time, so we
+# loop over the list of all etcd instances and have each one restart
+# itself in turn.
+
+- name: Start or restart etcd service one-by-one on etcd instances
+  include_tasks: restart-one.yml
+  with_items: "{{ groups['role_etcd'] }}"
+  when:
+    inventory_hostname == item
   tags: [service, restart]

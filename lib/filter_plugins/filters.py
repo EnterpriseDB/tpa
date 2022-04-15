@@ -446,6 +446,14 @@ def index_list_of_dicts(obj, key=None, recursive=False):
     return ret_dict
 
 
+def pyformat_hostvars(hostname, format_str, hostvars):
+    """
+    Takes a hostname, hostvars, and a string with {references} to attributes in
+    hostvars, and returns the .format()ed string
+    """
+    return format_str.format(**hostvars.get(hostname, {}))
+
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -471,4 +479,5 @@ class FilterModule(object):
             "physical_replication_group": physical_replication_group,
             "dictify": dictify,
             "list2idxdict": index_list_of_dicts,
+            "pyformat_hostvars": pyformat_hostvars,
         }

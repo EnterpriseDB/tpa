@@ -1,0 +1,50 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# This sequence of tasks is executed on each etcd instance in its turn
+# (because of how main.yml includes this file).
+#
+# In a running cluster, we must be careful about restarting etcd only if
+# the cluster is healthy, otherwise we risk breaking harp too.
+
+- set_fact:
+    etcd_service_end_state: "{{
+      etcd_service_end_state|default('started')
+    }}"
+    etcd_endpoints: "{{
+      groups['role_etcd']
+      |map('pyformat_hostvars', '{inventory_hostname}:{etcd_client_port}', hostvars)
+      |list
+      |join(',')
+    }}"
+
+- name: Check etcd cluster health before restart
+  command:
+    etcdctl endpoint health --endpoints="{{ etcd_endpoints }}"
+  register: etcd_health_check
+  when:
+    etcd_service_end_state == 'restarted'
+
+- assert:
+    msg: Refusing to restart etcd in an unhealthy cluster
+    that:
+      etcd_service_end_state == 'started'
+      or etcd_health_check.rc == 0
+
+- name: Start or restart etcd service
+  service:
+    name: etcd
+    state: "{{ etcd_service_end_state|default('started') }}"
+  become_user: root
+  become: yes
+
+- name: Wait until etcd cluster is healthy after restart
+  command:
+    etcdctl endpoint health --endpoints="{{ etcd_endpoints }}"
+  register: etcd_post_check
+  until: etcd_post_check.rc == 0
+  retries: 3
+  delay: 1
+  when:
+    etcd_service_end_state == 'restarted'
