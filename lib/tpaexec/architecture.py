@@ -752,6 +752,7 @@ class Architecture(object):
             "bdr4",
             "bdr_enterprise_4",
             "bdr_enterprise_4-epas",
+            "lasso",
         ]
 
     def installable_sources(self):
