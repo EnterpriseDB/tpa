@@ -3,10 +3,10 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - assert:
-    msg: "Ansible 2.8.x is required"
+    msg: "Ansible 2.9.x is required"
     that:
       - ansible_version.major == 2
-      - ansible_version.minor in [8, 9]
+      - ansible_version.minor == 9
   tags: prereqs
 
 - import_tasks: validate-compat.yml

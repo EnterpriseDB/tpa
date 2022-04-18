@@ -5,13 +5,13 @@
 - name: Gather facts on localhost
   setup: gather_subset=min
 
-- name: Check for Python 3.6.x+ and Ansible 2.8.x
+- name: Check for Python 3.6.x+ and Ansible 2.9.x
   assert:
     msg: "Python 3.6.x+ and Ansible 2.8.x are required"
     that:
       - ansible_facts.python_version is version('3.6', '>=')
       - ansible_version.major == 2
-      - ansible_version.minor in [8, 9]
+      - ansible_version.minor == 9
 
 - name: Ensure that local dependencies are installed
   become: no
