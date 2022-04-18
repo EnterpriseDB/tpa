@@ -1,7 +1,7 @@
 ---
 name: Custom issue template
 about: Redirect people to Jira
-title: ''
+title: TPAexec uses Jira for new issues
 labels: ''
 assignees: ''
 
