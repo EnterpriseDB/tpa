@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#  © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+#  © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 """Testing net module."""
 import os.path
 from ipaddress import IPv4Network

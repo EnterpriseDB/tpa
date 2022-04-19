@@ -1,12 +1,15 @@
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
 name: SonarQube Scan
+
 on:
   pull_request:
     branches: [ master ]
   push:
     branches: [ master ]
- 
+
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:  
+  workflow_dispatch:
 jobs:
   sonarQube:
     name: SonarQube-Job
@@ -15,7 +18,7 @@ jobs:
     steps:
       - name: Checkout source repo
         uses: actions/checkout@v3
-      
+
       - name: Checkout GitHub Action Repo
         uses: actions/checkout@v3
         with:

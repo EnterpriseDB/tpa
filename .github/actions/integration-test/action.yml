@@ -1,3 +1,5 @@
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
 name: Integration Test
 description: Run an integration test for the given architecture and platform
 
@@ -54,12 +56,13 @@ runs:
       shell: bash {0}
 
     - name: Provision the cluster
+      # Until we can validate role assignment for service principals this is disabled
       run: ./bin/tpaexec provision "$CLUSTER" -vv
-      shell: bash {0}
+      shell: bash
 
     - name: Deploy the cluster
       run: ./bin/tpaexec deploy "$CLUSTER" -vv
-      shell: bash {0}
+      shell: bash
 
     - name: Test the cluster
       run: ./bin/tpaexec test "$CLUSTER" -vv
@@ -78,7 +81,7 @@ runs:
     - name: Save cluster artifacts before deletion
       uses: actions/upload-artifact@v2
       with:
-        name: cluster-${{ github.run_number }}-${{ github.run_attempts }}
+        name: cluster-${{ github.run_number }}-${{ github.run_attempt }}
         path: "cluster-*.tar.gz"
       if: always()
 

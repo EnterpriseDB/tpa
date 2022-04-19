@@ -1,3 +1,5 @@
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
 name: "Install Requirements"
 description: "Install Python and other TPAexec dependencies"
 

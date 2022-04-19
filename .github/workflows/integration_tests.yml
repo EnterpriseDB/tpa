@@ -1,3 +1,5 @@
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
 name: Integration Tests
 
 on:
@@ -30,8 +32,8 @@ jobs:
   integration-test:
     # In addition to the event triggers above, this job only runs when any of these conditions are met:
     #  * the branch is master
-    #  * a PR review is requested from the tpaexec-team
-    #  * a PR review is marked as approved
+    #  * review is requested from the tpaexec-team on a PR for a branch starting with 'rc/'
+    #  * review is marked as approved on a PR for a branch starting with 'rc/'
     #  * a manual run is executed
     if: >
       github.ref_name == 'master'

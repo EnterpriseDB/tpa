@@ -1,4 +1,6 @@
 ---
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
 # this action runs pip-compile on the one that changed on latest push making
 # changes in one of the requirements .in files paths.
 
