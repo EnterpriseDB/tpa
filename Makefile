@@ -65,7 +65,7 @@ install_update_reqs: venv
 	$(WORKON_HOME)/$(NAME)/bin/pip install pip-tools
 
 %.txt: %.in
-	pip-compile --generate-hashes -o $@ $<
+	$(WORKON_HOME)/$(NAME)/bin/pip-compile --generate-hashes -o $@ $<
 
 REQUIREMENTS_IN = $(wildcard *.in requirements/*in)
 REQUIREMENTS_TXT = $(REQUIREMENTS_IN:.in=.txt)
