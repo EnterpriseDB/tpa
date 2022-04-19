@@ -1,4 +1,4 @@
-# Configuring PEM
+# Configuring Postgres Enterprise Manager (PEM)
 
 TPAexec will install and configure PEM when `tpaexec configure` command
 is run with `--enable-pem` command line option.
