@@ -29,6 +29,20 @@ env:
 
 jobs:
 
+  load-matrix:
+    name: Load Matrix
+    runs-on: self-hosted
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/load-yaml
+        id: load-yaml
+        with:
+          file: .github/config/matrix.yml
+          key: default
+
   integration-test:
     # In addition to the event triggers above, this job only runs when any of these conditions are met:
     #  * the branch is master
@@ -47,26 +61,10 @@ jobs:
     # env not supported here
     # || env.ACT
     name: Integration Tests
+    needs: load-matrix
     strategy:
       fail-fast: false
-      matrix:
-        tpa_architecture:
-          - "M1"
-          - "BDR-Always-ON"
-        tpa_platform:
-          - "docker"
-        tpa_os_image:
-          - "ubuntu"
-          - "debian:10"
-          - "redhat"
-        tpa_postgres_flavour:
-          - "postgresql"
-          - "2q"
-          - "epas"
-        exclude:
-          - tpa_architecture: "M1"
-            tpa_postgres_flavour: "2q"
-
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
     runs-on: self-hosted
 
     steps:

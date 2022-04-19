@@ -30,6 +30,20 @@ env:
 
 jobs:
 
+  load-matrix:
+    name: Load Matrix
+    runs-on: self-hosted
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/load-yaml
+        id: load-yaml
+        with:
+          file: .github/config/matrix.yml
+          key: simple
+
   integration-test:
     # In addition to the event triggers above, this job only runs when any of these conditions are met:
     #  * a PR review is requested from the tpaexec-team
@@ -44,17 +58,10 @@ jobs:
     # env not supported here
     # || env.ACT
     name: Integration test
-
+    needs: load-matrix
     strategy:
       fail-fast: false
-      matrix:
-        tpa_architecture:
-          - "M1"
-          - "BDR-Always-ON"
-        tpa_postgres_flavour:
-          - "postgresql"
-          - "epas"
-
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
     runs-on: self-hosted
 
     steps:

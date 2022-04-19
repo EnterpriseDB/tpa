@@ -12,14 +12,22 @@ inputs:
     required: false
     description: "TPA architecture"
     default: BDR-Always-ON
+  tpa_os:
+    required: false
+    description: "Operating System to use with TPA (--os)"
+    default: ""
+  tpa_os_version:
+    required: false
+    description: "Operating System version to use with TPA (--os-version)"
+    default: ""
   tpa_os_image:
     required: false
     description: "Image to use with TPA platform"
-    default: "tpa/ubuntu"
+    default: ""
   tpa_postgres_flavour:
     required: false
     description: "TPA postgres type selection"
-    default: "postgresql"
+    default: ""
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -31,6 +39,8 @@ runs:
   steps:
 
     - uses: ./.github/actions/install-requirements
+      with:
+        platform: ${{ inputs.tpa_platform }}
 
     - uses: ./.github/actions/tpaexec-setup
 
@@ -41,19 +51,34 @@ runs:
 
     - name: Filter characters from cluster variable
       run: |
-        CLUSTER=${{ inputs.cluster }}
+        CLUSTER="cluster-${GITHUB_RUN_NUMBER:-1}-${GITHUB_RUN_ATTEMPT:-0}${INPUTS_CLUSTER}"
         echo CLUSTER=${CLUSTER//[:\/]/_} >>$GITHUB_ENV
       shell: bash
 
     - name: Generate an initial configuration for a simple cluster
-      run: >
-        ./bin/tpaexec configure "$CLUSTER"
-        --architecture ${{ inputs.tpa_architecture }}
-        --platform ${{ inputs.tpa_platform }}
-        --postgres-flavour ${{ inputs.tpa_postgres_flavour }}
-        --os-image ${{ inputs.tpa_os_image }}
-        --enable-pem
-      shell: bash {0}
+      run: |
+        if [ "${{ matrix.tpa_architecture }}" == "BDR-Always-ON" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --layout bronze"
+        fi
+        if [ -n "${{ inputs.tpa_os }}" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --os ${{ inputs.tpa_os }}"
+        fi
+        if [ -n "${{ inputs.tpa_os_version }}" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --os-version ${{ inputs.tpa_os_version }}"
+        fi
+        if [ -n "${{ inputs.tpa_os_image }}" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --os-image ${{ inputs.tpa_os_image }}"
+        fi
+        if [ -n "${{ inputs.tpa_postgres_flavour }}" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --postgres-flavour ${{ inputs.tpa_postgres_flavour }}"
+        fi
+
+        ./bin/tpaexec configure "$CLUSTER" \
+          --architecture ${{ inputs.tpa_architecture }} \
+          --platform ${{ inputs.tpa_platform }} \
+          --enable-pem \
+          ${CONFIGURE_EXTRA_ARGS}
+      shell: bash
 
     - name: Provision the cluster
       # Until we can validate role assignment for service principals this is disabled

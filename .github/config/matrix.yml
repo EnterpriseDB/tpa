@@ -1,0 +1,23 @@
+---
+default:
+  tpa_architecture: &default_tpa_architecture
+    - "M1"
+    - "BDR-Always-ON"
+  tpa_platform:
+    - "docker"
+  tpa_os_image:
+    - "ubuntu"
+    - "debian:10"
+    - "redhat"
+  tpa_postgres_flavour:
+    - "postgresql"
+    - "2q"
+    - "epas"
+  exclude:
+    - tpa_architecture: "M1"
+      tpa_postgres_flavour: "2q"
+simple:
+  tpa_architecture: *default_tpa_architecture
+  tpa_postgres_flavour:
+    - "postgresql"
+    - "epas"

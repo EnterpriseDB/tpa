@@ -1,0 +1,38 @@
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+name: "Load YAML file"
+description: "Loads a YAML file."
+
+inputs:
+  file:
+    description: "Path to YAML file to load"
+    default: ''
+    required: true
+  key:
+    description: "Return data found at key"
+    default: ''
+    required: false
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Install Deps
+      shell: bash
+      run: |
+        pip3 install pyyaml
+
+    - name: Set input args
+      shell: bash
+      run: |
+        echo
+
+    - name: Load YAML Data
+      id: load-yaml
+      shell: bash
+      run: .github/actions/load-yaml/load-yaml.py ${{ inputs.file }} ${{ inputs.key }}
+
+outputs:
+  json:
+    description: JSON dump of data
+    value: ${{ steps.load-yaml.outputs.json }}

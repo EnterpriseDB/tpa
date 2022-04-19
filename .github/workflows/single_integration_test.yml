@@ -10,14 +10,18 @@ on:
         description: "TPA architecture"
         required: true
         default: "BDR-Always-ON"
+      tpa_platform:
+        description: "TPA platform"
+        required: false
+        default: ""
       tpa_os_image:
         description: "TPA OS image"
-        required: true
-        default: "tpa/redhat"
+        required: false
+        default: ""
       tpa_postgres_flavour:
         description: "Postgres flavour"
-        required: true
-        default: "epas"
+        required: false
+        default: ""
 
 env:
   LANG: "C.UTF-8"
@@ -41,3 +45,4 @@ jobs:
           tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
           tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
           tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
+          tpa_platform: ${{ github.event.inputs.tpa_platform }}

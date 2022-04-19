@@ -12,6 +12,10 @@ inputs:
     required: true
     description: "CPU architecture"
     default: 'x64'
+  platform:
+    default: ''
+    description: "TPAexec platform argument"
+    required: false
 
 runs:
   using: "composite"
