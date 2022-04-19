@@ -111,9 +111,10 @@ class Architecture(object):
         if layouts:
             g.add_argument(
                 "--layout",
+                required=self.default_layout_name() is None,
                 choices=self.layout_names(),
                 default=self.default_layout_name(),
-                help="optional architecture-specific layout selection",
+                help="architecture-specific layout selection",
             )
         g.add_argument(
             "--platform",

@@ -18,8 +18,6 @@ and barman each; plus a bdr+witness in a third location
 4. platinum: gold, but with one bdr+readonly (logical standby) added to
 each of the main locations
 
-The default layout is gold.
-
 You can check EDB's Postgres-BDR Always On Architectures
 [whitepaper](https://www.enterprisedb.com/promote/bdr-always-on-architectures)
 for the detailed layout diagrams.
@@ -38,12 +36,11 @@ You must specify `--architecture BDR-Always-ON`. (In the example
 above, it is the only option required to produce a working
 configuration.)
 
-You may optionally specify `--layout layoutname` to set one of the
-supported BDR use-case variations. The current options are bronze,
-silver, gold, and platinum (default: gold). The bronze, gold and
-platinum layouts have a BDR witness node to ensure odd number of nodes
-for Raft consensus majority. Witness nodes do not participate in the
-data replication.
+You also must specify `--layout layoutname` to set one of the supported BDR
+use-case variations. The current options are bronze, silver, gold, and
+platinum. The bronze, gold and platinum layouts have a BDR witness node
+to ensure odd number of nodes for Raft consensus majority. Witness nodes do
+not participate in the data replication.
 
 You may optionally specify `--bdr-node-group groupname` to set the
 name of the BDR node group (default: bdrgroup).
