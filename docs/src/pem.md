@@ -15,7 +15,7 @@ following for details:
 * [Configure pg_hba.conf](pg_hba.conf.md)
 * [Configure postgresql.conf](postgresql.conf.md)
 
-Note that PEM is only available via EnterpriseDB's package repositories
+Note that PEM is only available via EDB's package repositories
 and therefore requires a valid subscription.
 
 ## Supported architectures

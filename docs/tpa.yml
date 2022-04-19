@@ -48,7 +48,7 @@ plugins:
         - architectures/*
   - search
   - with-pdf:
-      author: EnterpriseDB UK Limited
+      author: EDB
       cover_title: TPAexec
       cover_subtitle: "Version 22.12 (2022-04-08)"
       toc_level: 3

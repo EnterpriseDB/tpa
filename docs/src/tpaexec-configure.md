@@ -206,9 +206,9 @@ To use product repositories, you must first
 get your subscription token from the 2ndQuadrant Portal, under "Company
 info" in the left menu, then "Company".
 
-### EnterpriseDB repositories
+### EDB repositories
 
-In order to install software from EnterpriseDB's APT and YUM repositories
+In order to install software from EDB's APT and YUM repositories
 you must first `export EDB_REPO_CREDENTIALS_FILE=/path/to/credentials/file`
 before you run tpaexec. Credentials file is a text file that contains your
 access credentials in the `username:password` format. If you don't have them
@@ -242,7 +242,7 @@ like `2:...`.
 
 You may optionally specify `--epas` which sets `postgresql_flavour` to
 `epas` in the generated config.yml. This means that tpaexec will install
-EnterpriseDB Postgres Advanced Server (requires EDB repository access)
+EDB Postgres Advanced Server (requires EDB repository access)
 instead of community Postgres (the default).
 
 Since EPAS supports both Oracle and postgres compatiblity features,

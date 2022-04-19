@@ -3,7 +3,7 @@
 To use TPAexec, you need to install tpaexec and run the `tpaexec setup`
 command. This document explains how to install TPAexec packages.
 
-TPAexec packages are available to EnterpriseDB/2ndQuadrant customers by
+TPAexec packages are available to EDB/2ndQuadrant customers by
 prior arrangement. Please contact your account manager to request
 access.
 

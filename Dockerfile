@@ -2,7 +2,7 @@
 
 FROM debian:buster
 
-MAINTAINER EnterpriseDB <tpa@enterprisedb.com>
+MAINTAINER EDB <tpa@enterprisedb.com>
 
 # Set up repositories and install packages, including the Docker CE CLI
 # (https://docs.docker.com/engine/install/debian/).

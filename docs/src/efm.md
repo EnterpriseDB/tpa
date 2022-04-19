@@ -3,7 +3,7 @@
 TPAexec will install and configure EFM when `failover_manager` is set to
 `efm`.
 
-Note that EFM is only available via EnterpriseDB's package repositories
+Note that EFM is only available via EDB's package repositories
 and requires a valid subscription.
 
 ## EFM configuration

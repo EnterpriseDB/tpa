@@ -8,7 +8,7 @@ Confidential property of EDB; not for public release.
 ## Overview
 
 TPA (Trusted Postgres Architecture) is a set of recommendations from
-EnterpriseDB (and formerly 2ndQuadrant) about how to set up a Postgres cluster
+EDB (and formerly 2ndQuadrant) about how to set up a Postgres cluster
 in various scenarios. These represent the best practices followed by EDB, and
 are as applicable to quick testbed setups as to production environments.
 

@@ -12,7 +12,7 @@ TPAexec is an orchestration tool that uses Ansible to build Postgres
 clusters as specified by TPA (Trusted Postgres Architecture), a set of
 reference architectures that document how to set up and operate Postgres
 in various scenarios. TPA represents the best practices followed by
-EnterpriseDB (and formerly, 2ndQuadrant), and its recommendations are as
+EDB (and formerly, 2ndQuadrant), and its recommendations are as
 applicable to quick testbed setups as to production environments.
 
 (You can skip straight to the [TPAexec installation
@@ -115,7 +115,7 @@ rerunning the entire process will not change anything either.
 TPAexec supports a variety of configuration options, so you can do a lot
 just by editing config.yml and re-running provision/deploy/test. Should
 you need to go beyond what is already implemented, you can write [hook
-scripts](tpaexec-hooks.md) to extend the deployment process. 
+scripts](tpaexec-hooks.md) to extend the deployment process.
 
 This mechanism places the full range of Ansible functionality at your
 disposal during every stage of the deployment. For example, any tasks in
