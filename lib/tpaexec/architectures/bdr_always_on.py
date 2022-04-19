@@ -32,7 +32,7 @@ class BDR_Always_ON(BDR):
         # templates are loaded, so we hardcode the number of instances defined
         # in the various layouts.
         instances_per_layout = {
-            "default": 13,
+            "default": 11,
             "platinum": 13,
             "gold": 11,
             "silver": 6,
