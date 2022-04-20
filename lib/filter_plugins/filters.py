@@ -8,11 +8,10 @@ import re
 import sys
 import shlex
 import os.path
-from collections import Iterable, MutableMapping
+from collections.abc import Mapping, MutableMapping
 
 from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
-from collections.abc import Mapping
 
 # Based on PR ansible/ansible#11083, this filter takes a container and a subkey
 # ('x.y.z', or [x,y,z]) and a default value, and returns container.x.y.z or the
