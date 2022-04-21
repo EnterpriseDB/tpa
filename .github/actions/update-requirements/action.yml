@@ -47,11 +47,6 @@ runs:
       run: |
         pip-compile --generate-hashes requirements/testing.in -o requirements/testing.txt
 
-    - name: Run pip-compile on documentation dependency requirements/document.in
-      shell: bash
-      run: |
-        pip-compile --generate-hashes requirements/document.in -o requirements/document.txt
-
     # commit and push changes (if any) on the same branch than the current commit.
     - name: Commit and push changes
       uses: devops-infra/action-commit-push@v0.5
