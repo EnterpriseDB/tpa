@@ -12,6 +12,8 @@ on:
   workflow_dispatch:
 jobs:
   sonarQube:
+    if: >
+      !(startsWith(github.event.pull_request.base.ref, '/dependabot'))
     name: SonarQube-Job
     runs-on: ubuntu-latest
 

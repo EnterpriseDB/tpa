@@ -7,6 +7,9 @@ name: Python requirements file update
 # runs on push that made changes to one of the .in files inside the project.
 on:
   push:
+    branches-ignore:
+      - master
+      - dependabot/**
     paths:
       - ansible.in
       - requirements.in
