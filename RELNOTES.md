@@ -2,6 +2,15 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.13 (unreleased)
+
+### Notable changes
+
+- Remove support for the unused lxd and vagrant platforms
+
+  (VMs provisioned with Vagrant can still be used as bare instances in TPAexec
+  if required; existing Vagrantfiles will also continue to work)
+
 ## v22.12 (2022-04-08)
 
 ### Bugfixes
