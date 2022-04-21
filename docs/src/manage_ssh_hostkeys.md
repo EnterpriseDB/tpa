@@ -3,7 +3,7 @@
 TPAexec generates a set of SSH host keys while provisioning a cluster.
 These keys are stored in the cluster directory, under the `hostkeys`
 subdirectory. These host keys are automatically installed into
-`/etc/ssh` on AWS EC2 instances, Vagrant boxes, and Docker containers.
+`/etc/ssh` on AWS EC2 instances and Docker containers.
 
 By default, these host keys are not installed on
 [bare instances](platform-bare.md),
