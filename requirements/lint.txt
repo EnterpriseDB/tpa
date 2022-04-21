@@ -4,14 +4,18 @@
 #
 #    pip-compile --generate-hashes --output-file=requirements/lint.txt requirements/lint.in
 #
-astroid==2.9.3 \
-    --hash=sha256:1efdf4e867d4d8ba4a9f6cf9ce07cd182c4c41de77f23814feb27ca93ca9d877 \
-    --hash=sha256:506daabe5edffb7e696ad82483ad0228245a9742ed7d2d8c9cdb31537decf9f6
+astroid==2.11.3 \
+    --hash=sha256:4e5ba10571e197785e312966ea5efb2f5783176d4c1a73fa922d474ae2be59f7 \
+    --hash=sha256:f1af57483cd17e963b2eddce8361e00fc593d1520fe19948488e94ff6476bd71
     # via
     #   pylint
     #   pylint-celery
     #   pylint-flask
     #   requirements-detector
+dill==0.3.4 \
+    --hash=sha256:7e40e4a70304fd9ceab3535d36e58791d9c4a776b38ec7f7ec9afc8d3dca4d4f \
+    --hash=sha256:9f9734205146b2b353ab3fec9af0070237b6ddae78452af83d2fca84d739e675
+    # via pylint
 dodgy==0.2.1 \
     --hash=sha256:28323cbfc9352139fdd3d316fa17f325cc0e9ac74438cbba51d70f9b48f86c3a \
     --hash=sha256:51f54c0fd886fa3854387f354b19f429d38c04f984f38bc572558b703c0542a6
@@ -112,9 +116,9 @@ pyflakes==2.3.1 \
     # via
     #   flake8
     #   prospector
-pylint==2.12.2 \
-    --hash=sha256:9d945a73640e1fec07ee34b42f5669b770c759acd536ec7b16d7e4b87a9c9ff9 \
-    --hash=sha256:daabda3f7ed9d1c60f52d563b1b854632fd90035bcf01443e234d3dc794e3b74
+pylint==2.13.7 \
+    --hash=sha256:13ddbbd8872c804574149e81197c28877eba75224ba6b76cd8652fc31df55c1c \
+    --hash=sha256:911d3a97c808f7554643bcc5416028cfdc42eae34ed129b150741888c688d5d5
     # via
     #   -r requirements/lint.in
     #   prospector
@@ -189,9 +193,11 @@ snowballstemmer==2.2.0 \
 toml==0.10.2 \
     --hash=sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b \
     --hash=sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
-    # via
-    #   prospector
-    #   pylint
+    # via prospector
+tomli==1.2.3 \
+    --hash=sha256:05b6166bff487dc068d322585c7ea4ef78deed501cc124060e0f238e89a9231f \
+    --hash=sha256:e3069e4be3ead9668e21cb9b074cd948f7b3113fd9c8bba083f48247aab8b11c
+    # via pylint
 typed-ast==1.5.2 \
     --hash=sha256:0eb77764ea470f14fcbb89d51bc6bbf5e7623446ac4ed06cbd9ca9495b62e36e \
     --hash=sha256:1098df9a0592dd4c8c0ccfc2e98931278a6c6c53cb3a3e2cf7e9ee3b06153344 \
