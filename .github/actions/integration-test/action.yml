@@ -73,10 +73,16 @@ runs:
           CONFIGURE_EXTRA_ARGS+=" --postgres-flavour ${{ inputs.tpa_postgres_flavour }}"
         fi
 
+        # Disable pem for pgextended because of missing pgextendedNN-server-sslutils
+        # dependency. We can remove this check when pgextendedNN-server-sslutils is
+        # available
+        if [ "${{ inputs.tpa_postgres_flavour }}" != "2q" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --enable-pem"
+        fi
+
         ./bin/tpaexec configure "$CLUSTER" \
           --architecture ${{ inputs.tpa_architecture }} \
           --platform ${{ inputs.tpa_platform }} \
-          --enable-pem \
           ${CONFIGURE_EXTRA_ARGS}
       shell: bash
 
