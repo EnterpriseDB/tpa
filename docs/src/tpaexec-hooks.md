@@ -116,6 +116,5 @@ services that TPAexec does not manage).
 
 ## New hooks
 
-2ndQuadrant adds new hooks to TPAexec as the need arises. If your use
-case is not covered by the existing hooks, please contact us to discuss
-the matter.
+EDB adds new hooks to TPAexec as the need arises. If your use case is not
+covered by the existing hooks, please contact us to discuss the matter.

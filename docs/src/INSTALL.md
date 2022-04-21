@@ -3,7 +3,7 @@
 To use TPAexec, you need to install tpaexec and run the `tpaexec setup`
 command. This document explains how to install TPAexec packages.
 
-TPAexec packages are available to EDB/2ndQuadrant customers by
+TPAexec packages are available to EDB customers by
 prior arrangement. Please contact your account manager to request
 access.
 
@@ -16,7 +16,7 @@ which TPAexec requires. (However, TPAexec supports a wider range of
 ## Quickstart
 
 First, [subscribe to the TPAexec package repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
-through the 2ndQuadrant Portal.
+through the EDB Customer Support Portal.
 
 Then run the following commands:
 
@@ -49,7 +49,7 @@ $ sudo ntpdate pool.ntp.org
 
 [Subscribe to the "products/tpa/release" repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
 to install the latest TPAexec packages.
-(Login to the 2ndQuadrant Portal, add a subscription under
+(Login to the EDB Customer Support Portal, add a subscription under
 Support/Software/Subscriptions, and follow the instructions to enable
 the repository on your system.)
 
