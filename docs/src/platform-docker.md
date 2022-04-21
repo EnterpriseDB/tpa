@@ -4,7 +4,7 @@ TPAexec can create Docker containers and deploy a cluster to them. At
 present, it sets up containers to run systemd and other services as if
 they were ordinary VMs.
 
-Deploying to docker container is an easy way to test different cluster
+Deploying to docker containers is an easy way to test different cluster
 configurations. It is not meant for production use.
 
 ## Synopsis
