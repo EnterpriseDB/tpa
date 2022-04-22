@@ -29,7 +29,7 @@
 
   (Existing clusters are unaffected by this change)
 
-- Remove support for the unused lxd and vagrant platforms
+- Remove support for the unused LXD and Vagrant platforms
 
   (VMs provisioned with Vagrant can still be used as bare instances in TPAexec
   if required; existing Vagrantfiles will also continue to work)
@@ -40,7 +40,7 @@
 
 ### Minor changes
 
-- Set default compaction configuration for etcd keyspace to keep 10(ten)
+- Set default compaction configuration for etcd keyspace to keep 10 (ten)
   revisions
 
   Earlier versions did not set default compaction settings. Since etcd keeps
