@@ -6,6 +6,11 @@
 
 ### Notable changes
 
+- Remove support for generating configurations for the BDR-Simple testing
+  architecture
+
+  (Existing clusters are unaffected by this change)
+
 - Remove support for the unused lxd and vagrant platforms
 
   (VMs provisioned with Vagrant can still be used as bare instances in TPAexec
