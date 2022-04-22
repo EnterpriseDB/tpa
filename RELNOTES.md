@@ -6,6 +6,24 @@
 
 ### Notable changes
 
+- Create a long-lived S3 bucket by default for new AWS clusters
+
+  Earlier versions used a hardcoded default S3 bucket, which was not accessible
+  outside an internal AWS account, requiring you to always set `cluster_bucket`
+  explicitly
+
+  The name of the automatically-created bucket is based on your AWS username,
+  and you will be prompted to confirm that you want to create it. It will not
+  be removed when you deprovision the cluster (this means the bucket will be
+  reused for any clusters you create, which we recommend)
+
+  To use an existing S3 bucket, use the `--cluster-bucket name-of-bucket`
+  configure option to set `cluster_bucket: name-of-bucket` in config.yml
+  (as before, existing S3 buckets will never be removed)
+
+- Make `--layout` a required parameter for configuring a new BDR-Always-ON
+  cluster. Previously it would use `platinum` as default
+
 - Remove support for generating configurations for the BDR-Simple testing
   architecture
 
@@ -15,6 +33,30 @@
 
   (VMs provisioned with Vagrant can still be used as bare instances in TPAexec
   if required; existing Vagrantfiles will also continue to work)
+
+- Introduce alpha support for Postgres Enterprise Manager (PEM)
+
+  (Not recommended for production deployments yet)
+
+### Minor changes
+
+- Set default compaction configuration for etcd keyspace to keep 10(ten)
+  revisions
+
+  Earlier versions did not set default compaction settings. Since etcd keeps
+  an exact history of its keyspace, this history should be periodically compacted
+  to avoid performance degradation and eventual storage space exhaustion
+
+- Ensure that etcd restart happens on one instance at a time
+
+  (When an etcd cluster is already serving as the consensus layer for HARP,
+  we can't afford to restart etcd on all instances simultaneously, because
+  that will cause HARP to become unhappy and break routing)
+
+### Bugfixes
+
+- Correctly deprovision any internet gateway created along with a VPC for an
+  AWS cluster (earlier, deprovision would fail when trying to remove the VPC)
 
 ## v22.12 (2022-04-08)
 
