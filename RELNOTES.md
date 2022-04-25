@@ -29,7 +29,7 @@
 
   (Existing clusters are unaffected by this change)
 
-- Remove support for the unused LXD and Vagrant platforms
+- Remove support for the LXD and Vagrant platforms
 
   (VMs provisioned with Vagrant can still be used as bare instances in TPAexec
   if required; existing Vagrantfiles will also continue to work)
