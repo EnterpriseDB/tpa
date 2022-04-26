@@ -2,6 +2,25 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+# When using BDR as the DCS, harpctl apply will work only after the BDR
+# nodes have reached consensus through RAFT.
+
+- name: Wait for bdr nodes to reach consensus before 'harpctl apply'
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    query: >
+      SELECT status, message FROM bdr.monitor_group_raft()
+  register: bdr_raft
+  until: bdr_raft.status == 'OK'
+  retries: 60
+  delay: 1
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when: >
+    'bdr' in role
+    and harp_consensus_protocol == 'bdr'
+    and harp_version is version('2', '==')
+
 # Before we start harp2, we must run "harpctl apply" once per unique
 # harp_location (because we have set up one etcd per harp_location).
 # With BDR, we've already made sure there is only one harp_location
