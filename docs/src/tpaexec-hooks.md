@@ -84,6 +84,11 @@ TPAexec invokes `hooks/post-deploy.yml` at the end of the deployment.
 
 You can go on to do whatever you want after this stage.
 
+If you use this hook to make changes to any configuration files that
+were generated or altered during the TPAexec deployment, you run the
+risk that the next `tpaexec deploy` will overwrite your changes (since
+TPAexec doesn't know what your hook might have done).
+
 ## BDR3 hooks
 
 These hooks are specific to BDRv3 deployments.
