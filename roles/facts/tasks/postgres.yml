@@ -157,7 +157,6 @@
     publications: "{{ publications|default([]) }}"
     subscriptions: "{{ subscriptions|default([]) }}"
     failover_manager: "{{ failover_manager|default(default_failover_manager) }}"
-    harp_consensus_protocol: "{{ harp_consensus_protocol|default(default_harp_consensus_protocols[harp_version]) }}"
     harp_location: "{{ harp_location|default(location) }}"
     harp_directory: "{{ harp_directory|default(default_harp_directories[harp_version]) }}"
     harp_proxy_mode: "{{ harp_proxy_mode|default(default_harp_proxy_mode) }}"
@@ -213,6 +212,62 @@
   when: >
     'bdr' in role
     and failover_manager not in ['harp']
+
+# We must set harp_consensus_protocol for BDR and harp-proxy instances.
+# The value may be set in config.yml, or set by minimal_postgres_setup
+# above on an existing cluster, or be set to the default value for the
+# harp_version in use. We use the value from first_bdr_primary, if any,
+# to set the value for other instances.
+
+- set_fact:
+    harp_consensus_protocol: "{{
+      harp_consensus_protocol
+      |default(
+        hostvars[first_bdr_primary].harp_consensus_protocol
+        |default(default_harp_consensus_protocols[harp_version])
+      )
+    }}"
+  when: >
+    failover_manager == 'harp'
+    and ('bdr' in role or 'harp-proxy' in role)
+
+# We must ensure that instances within a single bdr_node_group, and any
+# harp-proxy instances for the bdr_node_group, have the same setting of
+# harp_consensus_protocol.
+
+- assert:
+    msg: >-
+      Every bdr and harp-proxy instance with bdr_node_group={{ bdr_node_group }}
+      must have harp_consensus_protocol={{ harp_consensus_protocol }}, but
+      {{ _mismatch_descriptions|join(", ") }}
+    that:
+      _mismatched_instances is empty
+  vars:
+    _group_proxies: "{{
+      groups['role_harp-proxy']
+      |select_by_hostvar(hostvars, 'bdr_node_group', bdr_node_group)
+      |list
+    }}"
+    _all_group_instances: "{{
+      groups[bdr_node_group]|union(_group_proxies)
+    }}"
+    _compliant_instances: "{{
+      _all_group_instances
+      |select_by_hostvar(hostvars, 'harp_consensus_protocol', harp_consensus_protocol)
+      |list
+    }}"
+    _mismatched_instances: "{{
+      _all_group_instances|symmetric_difference(_compliant_instances)
+    }}"
+    _mismatch_descriptions: "{{
+      _mismatched_instances
+      |map('pyformat_hostvars', '{inventory_hostname} has the value {harp_consensus_protocol}', hostvars)
+      |list
+    }}"
+  when: >
+    'bdr' in role
+    and failover_manager == 'harp'
+    and inventory_hostname == first_bdr_primary
 
 # If we are using HARP v2 with etcd as the consensus layer, and there
 # are no instances explicitly labelled with `role: etcd`, we add the

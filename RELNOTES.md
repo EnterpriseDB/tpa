@@ -2,6 +2,15 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.14 (unreleased)
+
+### Notable changes
+
+- Change the default HARP v2 consensus protocol from etcd to bdr
+
+  This does not affect existing clusters that are using etcd (even if
+  they do not have harp_consensus_protocol set explicitly)
+
 ## v22.13 (2022-04-25)
 
 ### Notable changes

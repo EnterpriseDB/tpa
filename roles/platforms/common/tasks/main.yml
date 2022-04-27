@@ -14,7 +14,7 @@
 # role_xxx groups for those roles first, and then recreate all groups
 # after we're done modifying instance roles.
 
-- name: Create role-based groups for 
+- name: Create role-based groups for roles which affect other instances
   group_by: key="role_{{ item }}"
   when: item in role
   with_items:
@@ -166,6 +166,7 @@
       {{ groups|members_of(bdr_node_group, not_in=ro_groups) }}
   when: >
     'bdr' in role
+    or 'harp-proxy' in role
 
 - name: Designate arbitrary r/w instance as first_bdr_primary
   set_fact:
@@ -174,6 +175,7 @@
     }}"
   when: >
     'bdr' in role
+    or 'harp-proxy' in role
 
 - include_tasks: hostvars.yml
 

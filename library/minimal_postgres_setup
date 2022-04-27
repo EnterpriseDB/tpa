@@ -19,16 +19,21 @@ if [[ -f $VERSION ]]; then
     fi
 fi
 
+if [[ -f /etc/harp/config.yml ]]; then
+    harp_consensus_protocol=$(awk -F '"' '/driver: "(.*)"/{print($2)}' /etc/harp/config.yml)
+fi
+
 grep -Ev '": "*,*$' <<RESULT
 {
     "changed": false,
     "ansible_facts": {
-        "pgdata": "$pgdata",
         "pgdata_wal_dir": "$pgdata_wal_dir",
         "pgdata_user": "$pgdata_user",
         "pgdata_version": $pgdata_version,
         "pgdata_initialised": $pgdata_initialised,
-        "postgres_running": $postgres_running
+        "postgres_running": $postgres_running,
+        "harp_consensus_protocol": "$harp_consensus_protocol",
+        "pgdata": "$pgdata"
     }
 }
 RESULT

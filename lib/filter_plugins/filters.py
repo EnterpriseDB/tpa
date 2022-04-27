@@ -454,6 +454,21 @@ def pyformat_hostvars(hostname, format_str, hostvars):
     return format_str.format(**hostvars.get(hostname, {}))
 
 
+def select_by_hostvar(hostnames, hostvars, varname, value):
+    """
+    Takes a list of hostnames, hostvars, the name of a variable, and a value to
+    compare with, and returns those hostnames for which the variable is set to
+    the given value in hostvars.
+    """
+    results = []
+    for h in hostnames:
+        v = hostvars[h].get(varname)
+        if v == value:
+            results.append(h)
+
+    return results
+
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -480,4 +495,5 @@ class FilterModule(object):
             "dictify": dictify,
             "list2idxdict": index_list_of_dicts,
             "pyformat_hostvars": pyformat_hostvars,
+            "select_by_hostvar": select_by_hostvar,
         }
