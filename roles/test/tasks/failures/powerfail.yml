@@ -30,8 +30,8 @@
 - name: powerfail for docker
   block:
   # save /etc/hosts to restore later
-  - name: Update /etc/hosts
-    command: cp /etc/hosts /tmp/hosts_existing
+  - name: Backup /etc/hosts
+    command: cp /etc/hosts /etc/hosts.org
 
   - name: kill docker container
     shell: >
@@ -49,9 +49,9 @@
   # restore /etc/hosts
   - name: Update /etc/hosts
     shell: >
-     if [[ -f /tmp/hosts_existing ]]; then
-       cat /tmp/hosts_existing >  /etc/hosts;
-       rm /tmp/hosts_existing;
+     if [[ -f /etc/hosts.org ]]; then
+       cat /etc/hosts.org >  /etc/hosts;
+       rm /etc/hosts.org;
      fi
     args:
       executable: /bin/bash
