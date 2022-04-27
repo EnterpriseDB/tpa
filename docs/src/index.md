@@ -22,6 +22,11 @@ instructions](INSTALL.md) if you want to get started.)
 
 TPAexec operates in four distinct stages to bring up a Postgres cluster:
 
+* Generate a cluster [configuration](#configuration)
+* [Provision](#provisioning) servers (VMs, containers) to host the cluster
+* [Deploy](#deployment) software to the provisioned instances
+* [Test](#testing) the deployed cluster
+
 ```bash
 # 1. Configuration: decide what kind of cluster you want
 [tpa]$ tpaexec configure clustername --architecture M1 --platform aws
@@ -110,24 +115,37 @@ config.yml, and run through the process again to deploy the change. If
 nothing has changed in the configuration or on the instances, then
 rerunning the entire process will not change anything either.
 
-### Extensible through Ansible
-
-TPAexec supports a variety of configuration options, so you can do a lot
-just by editing config.yml and re-running provision/deploy/test. Should
-you need to go beyond what is already implemented, you can write [hook
-scripts](tpaexec-hooks.md) to extend the deployment process.
-
-This mechanism places the full range of Ansible functionality at your
-disposal during every stage of the deployment. For example, any tasks in
-`hooks/pre-deploy.yml` will be executed before the main deployment;
-and there are also `post-deploy` and many other hooks.
-
 ### Cluster management
 
 Once your cluster is up and running, TPAexec provides convenient cluster
 management functions, including configuration changes, switchover, and
 zero-downtime minor-version upgrades. These features make it easier and
 safer to manage your cluster than making the changes by hand.
+
+### Extensible through Ansible
+
+TPAexec supports a [variety of configuration
+options](configure-instance.md), so you can do a lot just by editing
+config.yml and re-running provision/deploy/test. If you do need to go
+beyond what TPAexec already supports implemented, you can write
+
+* [Custom commands](tpaexec-commands.md), which make it simple to write
+  playbooks to run on the cluster. Just create
+  `commands/xyz.yml` in your cluster directory, and invoke it
+  using `tpaexec xyz /path/to/cluster`. Ideal for any management tasks
+  or processes that you need to automate.
+
+* [Custom tests](tpaexec-tests.md), which augment the builtin tests with
+  in-depth verifications specific to your environment and application.
+  Using `tpaexec test` to run all tests in a uniform, repeatable way
+  ensures that you will not miss out on anything important, either when
+  dealing with a crisis, or just during routine cluster management.
+
+* [Hook scripts](tpaexec-hooks.md), which are invoked during various
+  stages of the deployment. For example, tasks in `hooks/pre-deploy.yml`
+  will be run before the main deployment; there are many other hooks,
+  including `post-deploy`. This places the full range of Ansible
+  functionality at your disposal.
 
 ## It's just Postgres
 
