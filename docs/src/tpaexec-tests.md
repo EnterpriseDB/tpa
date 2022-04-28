@@ -3,11 +3,12 @@
 You can easily define in-depth tests specific to your environment and
 application to augment TPAexec's [builtin tests](tpaexec-test.md).
 
-We strongly recommend writing tests for any tasks you would run as a
-"sanity check" on your cluster, no matter how simple. Having a uniform
-and repeatable way to run such tests ensures that you don't miss out on
-anything important, whether you're dealing with a crisis or just doing
-routine cluster management.
+We strongly recommend writing tests for any tasks, no matter how simple,
+that you would run on your cluster to reassure yourself that everything
+is working as you expect. Having a uniform and repeatable way to run
+such tests ensures that you don't miss out on anything important,
+whether you're dealing with a crisis or just doing routine cluster
+management.
 
 If you write tests that target cluster instances by their configured
 role (or other properties), you can be sure that all applicable tests
