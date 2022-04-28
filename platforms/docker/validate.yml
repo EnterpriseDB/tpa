@@ -7,7 +7,7 @@
   register: docker_system
 
 - assert:
-    msg: "TPAexec supports Docker CE version 20.x or later (you are
+    msg: "TPAexec requires Docker CE version 20.x or later (you are
       running {{ _docker_version }})"
     that:
       _docker_version is version('20.10', '>=')
