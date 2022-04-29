@@ -7,7 +7,7 @@
 
 - name: Check for Python 3.6.x+ and Ansible 2.9.x
   assert:
-    msg: "Python 3.6.x+ and Ansible 2.8.x are required"
+    msg: "Python 3.6.x+ and Ansible 2.9.x are required"
     that:
       - ansible_facts.python_version is version('3.6', '>=')
       - ansible_version.major == 2
