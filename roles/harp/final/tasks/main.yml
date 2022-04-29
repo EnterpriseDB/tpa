@@ -40,10 +40,6 @@
     name: "{{ item }}"
     state: "{{ harp_service_end_state|default('started') }}"
     enabled: yes
-    daemon_reload: "{{
-      (manager_unit is defined and manager_unit is changed)
-      or (proxy_unit is defined and proxy_unit is changed)
-    }}"
   with_items: "{{ harp_services[harp_version] }}"
   vars:
     harp_services:
@@ -52,5 +48,11 @@
         - harp_manager
       "2":
         - "{{ ('postgres' in role)|ternary('harp-manager', []) }}"
-        - "{{ ('harp-proxy' in role)|ternary('harp-proxy', []) }}"
+  tags: [service, restart]
+
+- name: Start or restart harp-proxy one-by-one on proxy instances
+  include_tasks: restart-one-proxy.yml
+  with_items: "{{ groups['role_harp-proxy'] }}"
+  when:
+    inventory_hostname == item
   tags: [service, restart]
