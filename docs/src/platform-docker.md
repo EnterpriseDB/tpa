@@ -50,6 +50,28 @@ On MacOS X, you can [install "Docker Desktop for
 Mac"](https://hub.docker.com/editions/community/docker-ce-desktop-mac/)
 and launch Docker from the application menu.
 
+### CgroupVersion
+
+Support for CgroupVersion 2 is not fully baked yet for docker sdk in
+ansible and related tooling. So while we recommend using a recent
+version of docker; we rely on CgroupVersion 1 until version 2 is
+fully supported. Instructions below suggest the changes to switch to
+CgroupVersion 1 if your platform uses CgroupVersion 2 by default.
+
+On Linux:
+```
+$ echo 'GRUB_CMDLINE_LINUX=systemd.unified_cgroup_hierarchy=false' > \
+  /etc/default/grub.d/cgroup.cfg
+$ update-grub
+$ reboot
+```
+On MacOS:
+
+1. Edit ~/Library/Group\ Containers/group.com.docker/settings.json
+   and make the following replacement
+   `"deprecatedCgroupv1": false` → `"deprecatedCgroupv1": true`
+2. Restart Docker Desktop app
+
 ### Permissions
 
 TPAexec expects the user running it to have permission to access to the
