@@ -9,7 +9,6 @@ from .bdr_always_on import BDR_Always_ON
 from .bdr_autoscale import BDR_Autoscale
 from .images import Images
 from .m1 import M1
-from .training import Training
 
 
 class SelectArchitecture:
@@ -20,7 +19,6 @@ class SelectArchitecture:
         "BDR-Autoscale": BDR_Autoscale,
         "Images": Images,
         "M1": M1,
-        "Training": Training,
     }
 
     def __new__(cls, name, *args, **kwargs):
