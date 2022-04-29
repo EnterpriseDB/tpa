@@ -127,7 +127,7 @@ safer to manage your cluster than making the changes by hand.
 TPAexec supports a [variety of configuration
 options](configure-instance.md), so you can do a lot just by editing
 config.yml and re-running provision/deploy/test. If you do need to go
-beyond what TPAexec already supports implemented, you can write
+beyond what TPAexec already supports, you can write
 
 * [Custom commands](tpaexec-commands.md), which make it simple to write
   playbooks to run on the cluster. Just create
