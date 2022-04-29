@@ -22,13 +22,6 @@ class M1(Architecture):
     def default_location_names(self):
         return ["main", "dr"]
 
-    def update_cluster_vars(self, cluster_vars):
-        cluster_vars.update(
-            {
-                "vpn_network": "192.168.33.0/24",
-            }
-        )
-
     def update_instances(self, instances):
 
         # If --enable-pem is specified, we collect all the instances with role

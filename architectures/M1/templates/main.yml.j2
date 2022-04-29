@@ -22,7 +22,6 @@ instances:
   role:
     - barman
     - log-server
-    - openvpn-server
     - monitoring-server
 {% if (cascaded_replicas+2) % 2 == 0 %}
     - witness
