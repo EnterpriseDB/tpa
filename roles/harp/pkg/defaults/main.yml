@@ -3,12 +3,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 harp_packages:
-  "1":
-    Debian: &debian_harp1_packages
-      - harp
-    RedHat:
-      - harp
-    Ubuntu: *debian_harp1_packages
   "2":
     Debian: &debian_harp2_packages
       - harp-manager
@@ -17,10 +11,6 @@ harp_packages:
     Ubuntu: *debian_harp2_packages
 
 harp_proxy_packages:
-  "1":
-    Debian: []
-    RedHat: []
-    Ubuntu: []
   "2":
     Debian: &debian_harp2_proxy_packages
       - harp-proxy

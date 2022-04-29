@@ -44,7 +44,6 @@
         inventory_hostname == groups[harp_location_group]|sort|first
   when: >
     'bdr' in role
-    and harp_version is version('2', '==')
     and inventory_hostname in first_bdr_primary_candidates
 
 - meta: flush_handlers
@@ -62,9 +61,6 @@
   with_items: "{{ harp_services[harp_version] }}"
   vars:
     harp_services:
-      "1":
-        - harp_router
-        - harp_manager
       "2":
         - "{{ ('postgres' in role)|ternary('harp-manager', []) }}"
   tags: [service, restart]

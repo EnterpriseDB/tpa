@@ -16,15 +16,6 @@
     }}"
   tags: pkg
 
-- name: Install Python etcd package if required
-  package:
-    name: python3-etcd
-    state: latest
-  when: >
-    harp_version|int == 1
-    and harp_consensus_protocol == 'etcd'
-  tags: pkg
-
 - name: Install pgbouncer if required
   include_role:
     name: pgbouncer/pkg

@@ -3,19 +3,15 @@
 TPAexec will install and configure HARP when `failover_manager` is set
 to `harp`, which is the default for BDR-Always-ON clusters.
 
-By default, TPAexec will install HARP v2, but you can still
-[install and configure HARP v1](harp1.md) (deprecated)
-by setting `harp_version: 1` explicitly.
-
 ## Installing HARP
 
 You must provide the `harp-manager` and `harp-proxy` packages. Please
 contact EDB to obtain access to these packages.
 
-## Configuring HARP 
+## Configuring HARP
 
 See the [HARP documentation](https://documentation.enterprisedb.com/harp/release/latest/configuration/)
-for more details on HARP configuration. 
+for more details on HARP configuration.
 
 Variable | Default value | Description
 ---- | ---- | ---
@@ -27,14 +23,14 @@ Variable | Default value | Description
 `harp_leader_lease_duration` | `6` | Amount of time in seconds the Lead Master lease will persist if not refreshed.
 `harp_lease_refresh_interval` | `2000` | Amount of time in milliseconds between refreshes of the Lead Master lease.
 `harp_dcs_reconnect_interval` | `1000` | The interval, measured in ms, between attempts that a disconnected node tries to reconnect to the DCS.
-`harp_dcs_priority` | `500` | In the case two nodes have an equal amount of lag and other qualified criteria to take the Lead Master lease, this acts as an additional ranking value to prioritize one node over another. 
+`harp_dcs_priority` | `500` | In the case two nodes have an equal amount of lag and other qualified criteria to take the Lead Master lease, this acts as an additional ranking value to prioritize one node over another.
 `harp_stop_database_when_fenced` | `false` | Rather than simply removing a node from all possible routing, stop the database on a node when it is fenced.
 `harp_fenced_node_on_dcs_failure` | `false` | If HARP is unable to reach the DCS then fence the node.
 `harp_maximum_lag` | `1048576` | Highest allowable variance (in bytes) between last recorded LSN of previous Lead Master and this node before being allowed to take the Lead Master lock.
 `harp_maximum_camo_lag` | `1048576` | Highest allowable variance (in bytes) between last received LSN and applied LSN between this node and its CAMO partner(s).
-`harp_camo_enforcement` | `lag_only` | Whether CAMO queue state should be strictly enforced. 
+`harp_camo_enforcement` | `lag_only` | Whether CAMO queue state should be strictly enforced.
 `harp_use_unix_sock` | `false` | Use unix domain socket for manager database access.
-`harp_request_timeout` | `250` | Time in milliseconds to allow a query to the DCS to succeed.  
+`harp_request_timeout` | `250` | Time in milliseconds to allow a query to the DCS to succeed.
 `harp_watch_poll_interval` | `500` | Milliseconds to sleep between polling DCS.  Only applies when `harp_consensus_protocol` is `bdr`.
 `harp_proxy_timeout` | `1` | Builtin proxy connection timeout, in seconds, to Lead Master.
 `harp_proxy_keepalive` | `5` | Amount of time builtin proxy will wait on an idle connection to the Lead Master before sending a keepalive ping.
