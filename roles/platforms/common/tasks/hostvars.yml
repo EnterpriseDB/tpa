@@ -39,6 +39,16 @@
     tpa_2q_repositories is not defined and
     twoq_repositories is defined
 
+# We add the default 2ndqpostgres repository for --2q clusters only if
+# no repositories are specified explicitly.
+
+- set_fact:
+    tpa_2q_repositories:
+      - products/2ndqpostgres/release
+  when:
+    postgresql_flavour == '2q'
+    and tpa_2q_repositories is not defined
+
 # To use 2ndQuadrant repositories (e.g., for 2ndQPostgres), get a
 # subscription token from the Customer Portal and export
 # TPA_2Q_SUBSCRIPTION_TOKEN in the environment.
