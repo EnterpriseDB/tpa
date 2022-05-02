@@ -5,6 +5,8 @@
 pgdcli_packages:
   Debian: &debian_pgdcli_package
     - edb-pgd-cli
+    - edb-bdr-utilities
   RedHat:
     - edb-pgd-cli
+    - edb-bdr-utilities
   Ubuntu: *debian_pgdcli_package
