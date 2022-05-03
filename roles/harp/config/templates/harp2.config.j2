@@ -3,7 +3,7 @@ cluster:
 
 dcs:
   driver: "{{ harp_consensus_protocol }}"
-  request_timeout: {{ harp_request_timeout|default(250) }}
+  request_timeout: {{ harp_request_timeout|default(6000) }}
   watch_poll_interval: {{ harp_watch_poll_interval|default(500) }}
 {% if harp_consensus_protocol == 'etcd' %}
   ssl: "off"
