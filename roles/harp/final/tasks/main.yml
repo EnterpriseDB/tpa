@@ -9,7 +9,7 @@
   postgresql_query:
     conninfo: "{{ dsn|dbname(bdr_database) }}"
     query: >
-      SELECT status, message FROM bdr.monitor_group_raft()
+      SELECT status FROM bdr.monitor_group_raft()
   register: bdr_raft
   until: bdr_raft.status == 'OK'
   retries: 60
