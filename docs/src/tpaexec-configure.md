@@ -168,6 +168,12 @@ option other than `--random-sort` (which is the default).
 Use `--hostnames-unsorted` to not sort hostnames at all. In this case,
 they will be assigned in the order they are found in the hostnames file.
 
+Hostnames may contain only letters (a-z), digits (0-9), and '-'. They
+may be FQDNs, depending on the selected platform. Hostnames should be
+in lowercase; any uppercase characters will be converted to lowercase
+internally, and any references to these hostnames in config.yml (e.g.,
+`upstream: hostname`) must use the lowercase version.
+
 ## Software selection
 
 ### Distribution
