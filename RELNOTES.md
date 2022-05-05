@@ -11,6 +11,40 @@
   This does not affect existing clusters that are using etcd (even if
   they do not have harp_consensus_protocol set explicitly)
 
+- Require Docker CE v20.10+
+
+  There are a number of problems on older versions of Docker that we can
+  neither fix, nor work around. We now require the latest major release
+  of Docker CE.
+
+### Minor changes
+
+- Restart harp-proxy one by one on proxy instances
+
+  The earlier behaviour, which was to restart all harp-proxy services
+  simultaneously if there was any configuration change, could lead to
+  disruption in traffic routing
+
+- Wait for BDR to achieve RAFT consensus before running "harpctl apply"
+
+- Increase the default HARP DCS request timeout to 6s
+
+  Note: this will cause a harp restart on deploy.
+
+- Change the default M1 configuration to not use openvpn
+
+  The functionality is still supported, if you need to use it, but now
+  you have to set `vpn_network` and assign an `openvpn-server` instance
+  explicitly. Does not affect existing clusters.
+
+### Bugfixes
+
+- Check that TPA_2Q_SUBSCRIPTION_TOKEN is set when needed
+
+  Fixes a 403 error during the repository in clusters configured to use
+  Postgres Extended (--2q) without setting --2Q-repositories and without
+  providing a token.
+
 ## v22.13 (2022-04-25)
 
 ### Notable changes
