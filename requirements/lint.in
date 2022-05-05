@@ -3,6 +3,6 @@ PyYAML~=5.2
 # flake8 constraints needed due to bug in prospector dependencies
 flake8<4.0.0
 prospector~=1.5.3.1
-pylint~=2.13.7
+pylint~=2.13.8
 pylint-django~=2.4.4
 pyfakefs~=4.5.6
