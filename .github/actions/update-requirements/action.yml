@@ -22,10 +22,10 @@ runs:
       run: |
         pip-compile --generate-hashes requirements.in -o requirements.txt
 
-    - name: Run pip-compile on ansible.in
+    - name: Run pip-compile on requirements-ansible.in
       shell: bash
       run: |
-        pip-compile --generate-hashes ansible.in -o ansible.txt
+        pip-compile --generate-hashes requirements-ansible.in -o requirements-ansible.txt
 
     - name: Run pip-compile on test dependency requirements/ansible.in
       shell: bash

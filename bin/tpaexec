@@ -143,15 +143,15 @@ _install_pip_packages() {
     # Otherwise, we need to install it into the venv either from the
     # bundled package from tpaexec-deps, or directly from github.
 
-    ANSIBLE_REQUIREMENTS="$TPA_DIR"/ansible.txt
+    ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible.txt
     TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
     CONTRIB_DIR="$TPA_VENV/contrib"
 
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
         ANSIBLE_REQUIREMENTS="$ANSIBLE_HOME/requirements.txt"
         CONTRIB_DIR="$ANSIBLE_HOME/contrib"
-    elif [[ -d $PIP_DIR && -f $PIP_DIR/ansible.txt ]]; then
-        ANSIBLE_REQUIREMENTS="$PIP_DIR/ansible.txt"
+    elif [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible.txt ]]; then
+        ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible.txt"
         TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
     fi
 

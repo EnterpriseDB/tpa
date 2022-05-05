@@ -11,7 +11,7 @@ on:
       - master
       - dependabot/**
     paths:
-      - ansible.in
+      - requirements-ansible.in
       - requirements.in
       - requirements/*.in
   # Allows you to run this workflow manually from the Actions tab
