@@ -46,7 +46,8 @@
     tpa_2q_repositories:
       - products/2ndqpostgres/release
   when:
-    postgresql_flavour == '2q'
+    postgresql_flavour is defined
+    and postgresql_flavour == '2q'
     and tpa_2q_repositories is not defined
 
 # To use 2ndQuadrant repositories (e.g., for 2ndQPostgres), get a
