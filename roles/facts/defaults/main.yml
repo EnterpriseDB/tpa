@@ -116,6 +116,7 @@ default_haproxy_port:
 default_haproxy_stats_socket: /var/lib/haproxy/stats
 default_pgbouncer_port: 6432
 default_pgbouncer_server_login_retry: 0
+default_harp_proxy_port: 6432
 
 # By default, pgbouncer will forward all connections to 127.0.0.1:5432
 # (which may be either postgres or haproxy that has been configured to

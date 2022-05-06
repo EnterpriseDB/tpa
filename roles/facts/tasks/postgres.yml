@@ -145,6 +145,7 @@
     bdr_node_group: "{{ bdr_node_group|default(default_bdr_node_group) }}"
     haproxy_port: "{{ haproxy_port|default(default_haproxy_port[postgres_family]) }}"
     haproxy_bind_address: "{{ haproxy_bind_address|default(default_haproxy_bind_address) }}"
+    harp_proxy_port: "{{ harp_proxy_port|default(default_harp_proxy_port) }}"
     pgbouncer_port: "{{ pgbouncer_port|default(default_pgbouncer_port) }}"
     pgbouncer_backend: "{{ pgbouncer_backend|default(default_pgbouncer_backend) }}"
     pgbouncer_backend_port: "{{ pgbouncer_backend_port|default(default_pgbouncer_backend_port[postgres_family]) }}"
@@ -346,6 +347,33 @@
     _backend_port: "{{
       _backend_vars['haproxy_port']|default(_backend_vars['postgres_port'])
     }}"
+
+# On harp-proxy+pgbouncer instances, we configure pgbouncer to connect
+# to harp-proxy (but make sure that harp-proxy isn't also configured to
+# connect to pgbouncer via harp_proxy_mode).
+
+- block:
+  - name: Ensure that we don't run pgbouncer on both sides of harp-proxy
+    assert:
+      msg: >-
+        On a pgbouncer instance, harp_proxy_mode must not be 'pgbouncer'
+        (try 'builtin')
+      that: harp_proxy_mode != 'pgbouncer'
+
+  - name: Change harp_proxy_port if it conflicts with pgbouncer_port
+    set_fact:
+      harp_proxy_port: "{{ harp_proxy_port|int+1 }}"
+    when:
+      harp_proxy_port|int == pgbouncer_port|int
+
+  - name: Configure pgbouncer to connect to harp-proxy
+    set_fact:
+      pgbouncer_backend_port: "{{ harp_proxy_port }}"
+      harp_listen_address: "{{ pgbouncer_backend }}"
+
+  when: >
+    'pgbouncer' in role and 'harp-proxy' in role
+    and pgbouncer_backend == default_pgbouncer_backend
 
 # We set pgbouncer_max_client_conn to 90% of max_connections for the
 # backend Postgres server by default. In the special case of haproxy
