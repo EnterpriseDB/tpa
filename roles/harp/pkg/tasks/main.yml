@@ -16,6 +16,10 @@
     }}"
   tags: pkg
 
+# If we're not using the pgbouncer role (i.e., setting up pgbouncer to
+# connect to harp-proxy), and we're using harp_proxy_mode = pgbouncer,
+# we must install pgbouncer here. harp-proxy will manage the service.
+
 - name: Install pgbouncer if required
   include_role:
     name: pgbouncer/pkg
@@ -23,6 +27,7 @@
       tags: [pgbouncer, pkg]
   when: >
     'harp-proxy' in role
+    and 'pgbouncer' not in role
     and harp_proxy_mode == "pgbouncer"
     and platform not in ['shared']
   tags: pkg
@@ -35,4 +40,5 @@
     enabled: no
   when: >
     'harp-proxy' in role
+    and 'pgbouncer' not in role
     and harp_proxy_mode == "pgbouncer"

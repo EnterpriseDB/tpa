@@ -37,7 +37,7 @@
     username: "{{ pgbouncer_auth_user }}"
     password_encryption: md5
   when: >
-    'harp-proxy' in role
+    ('harp-proxy' in role and 'pgbouncer' not in role)
     or ('postgres' in role
       and groups['role_harp-proxy']|default([]) is not empty)
   tags: always

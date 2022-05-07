@@ -27,6 +27,8 @@
       - role_readonly
       - role_subscriber-only
       - role_witness
+  when: >
+    'pgbouncer' not in role
 
 # We must also add the pgbouncer password to .pgpass, so that harp-proxy
 # can use it to connect to pgbouncer and issue administrative commands.
