@@ -18,7 +18,7 @@ from ansible.utils.vars import merge_hash
 from functools import reduce
 
 from .net import Network, DEFAULT_SUBNET_PREFIX_LENGTH, DEFAULT_NETWORK_CIDR
-from .platform import Platform
+from .platforms import Platform
 
 
 class Architecture(object):
