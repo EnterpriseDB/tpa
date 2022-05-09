@@ -17,25 +17,68 @@ class docker(Platform):
         g.add_argument("--local-source-directories", nargs="+", metavar="NAME:PATH")
 
     def validate_arguments(self, args):
-        errors = []
-        sources = args.get("local_source_directories") or []
-        installable = self.arch.installable_sources()
+        local_sources, errors = self._validate_sources(args.get("local_source_directories") or [])
+        if errors:
+            for e in errors:
+                print(f"ERROR: --local-source-directories {e}", file=sys.stderr)
+            sys.exit(-1)
+        args["local_sources"] = local_sources
+
+        if args.get("install_from_source"):
+            self._validate_ccache(args.get("shared_ccache"))
+
+    def _validate_ccache(self, shared):
+        """
+        Setup shared ccache.
+
+        If we're going to be building anything from source, we set up a shared
+        ccache. By default, this is a named Docker volume shared between the
+        containers in the cluster, so that it doesn't affect anything on the
+        host.
+
+        Args:
+            shared: Specify a path to a shared ccache to use a host directory instead.
+
+        """
+        if shared:
+            ccache = os.path.abspath(os.path.expanduser(shared))
+            if not os.path.isdir(ccache):
+                try:
+                    os.mkdir(ccache)
+                except OSError as e:
+                    print(f"ERROR: --shared-ccache: {str(e)}", file=sys.stderr)
+                    sys.exit(-1)
+        else:
+            # We don't have access to the cluster name here (it's set only
+            # in process_arguments), so we leave a '%s' to be filled in by
+            # update_instance_defaults() below.
+            ccache = "ccache-%%s-%s" % time.strftime(
+                "%Y%m%d%H%M%S", time.localtime()
+            )
+        self.ccache = f"{ccache}:/root/.ccache:rw"
+
+    def _validate_sources(self, sources):
+        """
+        Validate the paths given for local source directories.
+
+        Args:
+            sources: We accept a list of "name:/host/dir/[:/container/dir[:flags]]" arguments here,
+                     and transform it into a list of docker volume definitions.
+                     The name must correspond to a product that --install-from-source recognises.
+
+        """
         local_sources = {}
-
-        # We accept a list of "name:/host/dir/[:/container/dir[:flags]]"
-        # arguments here, and transform it into a list of docker volume
-        # definitions. The name must correspond to a product that
-        # --install-from-source recognises.
-
+        installable = self.arch.installable_sources()
+        errors = []
         for s in sources:
             if ":" not in s:
-                errors.append("expected name:/path/to/source, got %s" % s)
+                errors.append(f"expected name:/path/to/source, got {s}")
                 continue
 
-            (name, vol) = s.split(":", 1)
+            name, vol = s.split(":", 1)
 
             if name.lower() not in installable.keys():
-                errors.append("doesn't know what to do with sources for '%s'" % name)
+                errors.append(f"doesn't know what to do with sources for '{name}'")
                 continue
 
             parts = vol.split(":", 2)
@@ -43,7 +86,7 @@ class docker(Platform):
             host_path = os.path.abspath(os.path.expanduser(parts[0]))
             if not os.path.isdir(host_path):
                 errors.append(
-                    "can't find source directory for '%s': %s" % (name, host_path)
+                    f"can't find source directory for '{name}': {host_path}"
                 )
                 continue
 
@@ -51,7 +94,7 @@ class docker(Platform):
             if "name" in installable[name]:
                 dirname = installable[name]["name"]
 
-            container_path = "/opt/postgres/src/%s" % dirname
+            container_path = f"/opt/postgres/src/{dirname}"
             if len(parts) > 1:
                 container_path = parts[1]
 
@@ -59,35 +102,7 @@ class docker(Platform):
             if len(parts) > 2:
                 container_path = parts[2]
 
-            local_sources[name] = "%s:%s:%s" % (host_path, container_path, flags)
-
-        if errors:
-            for e in errors:
-                print("ERROR: --local-source-directories %s" % (e), file=sys.stderr)
-            sys.exit(-1)
-
-        # If we're going to be building anything from source, we set up a shared
-        # ccache. By default, this is a named Docker volume shared between the
-        # containers in the cluster, so that it doesn't affect anything on the
-        # host. Specify --shared-ccache to use a host directory instead.
-
-        if args.get("install_from_source"):
-            ccache = args.get("shared_ccache")
-            if ccache:
-                ccache = os.path.abspath(os.path.expanduser(args.get("shared_ccache")))
-                if not os.path.isdir(ccache):
-                    try:
-                        os.mkdir(ccache)
-                    except Exception as e:
-                        print("ERROR: --shared-ccache: %s" % str(e), file=sys.stderr)
-                        sys.exit(-1)
-            else:
-                # We don't have access to the cluster name here (it's set only
-                # in process_arguments), so we leave a '%s' to be filled in by
-                # update_instance_defaults() below.
-                ccache = "ccache-%%s-%s" % time.strftime(
-                    "%Y%m%d%H%M%S", time.localtime()
-                )
+            local_sources[name] = f"{host_path}:{container_path}:{flags}"
 
             self.ccache = "%s:/root/.ccache:rw" % ccache
 
@@ -100,7 +115,7 @@ class docker(Platform):
                 ]
             )
 
-        args["local_sources"] = local_sources
+        return local_sources, errors
 
     def supported_distributions(self):
         return ["Debian", "RedHat", "Ubuntu", "Rocky", "AlmaLinux"]
