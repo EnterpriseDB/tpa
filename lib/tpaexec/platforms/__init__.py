@@ -3,8 +3,9 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 import argparse
 import copy
-import sys
 import importlib.util
+
+from tpaexec.exceptions import PlatformError
 
 DEFAULT_VOLUME_DEVICE_NAME = "/dev/sd"
 
@@ -27,8 +28,7 @@ class Platform:
         name = Platform.guess_platform(args) or arch.default_platform()
         module = "tpaexec.platforms.%s" % name
         if not importlib.util.find_spec(module):
-            print("ERROR: unknown platform: %s" % name, file=sys.stderr)
-            sys.exit(-1)
+            raise PlatformError("Unknown platform: %s" % name)
 
         p = getattr(__import__(module, fromlist=[name]), name)
         return p(name, arch)
@@ -40,7 +40,7 @@ class Platform:
         found in the given args, or None if no platform was specified
         """
         parser = argparse.ArgumentParser(add_help=False)
-        parser.add_argument('--platform')
+        parser.add_argument("--platform")
         parsed, _ = parser.parse_known_args(args)
         return parsed.platform
 
