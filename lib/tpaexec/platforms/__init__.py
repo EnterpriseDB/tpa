@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
-
+import argparse
 import copy
 import sys
 import importlib.util
@@ -39,10 +39,10 @@ class Platform:
         Returns the name of a platform based on any «--platform x» arguments
         found in the given args, or None if no platform was specified
         """
-        for i, arg in enumerate(args):
-            if i > 0 and args[i - 1] == "--platform":
-                return arg
-        return None
+        parser = argparse.ArgumentParser(add_help=False)
+        parser.add_argument('--platform')
+        parsed, _ = parser.parse_known_args(args)
+        return parsed.platform
 
     @staticmethod
     def all_platforms():
