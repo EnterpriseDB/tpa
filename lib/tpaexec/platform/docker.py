@@ -219,7 +219,7 @@ class docker(Platform):
             volumes = i.get("volumes", [])
             for v in volumes:
                 if "volume_type" in v and v["volume_type"] == "none":
-                    pass
+                    continue
                 else:
                     newvolumes.append(v)
             if volumes:
