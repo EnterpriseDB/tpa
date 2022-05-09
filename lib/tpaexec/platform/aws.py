@@ -12,6 +12,10 @@ AWS_DEFAULT_REGION = "eu-west-1"
 AWS_DEFAULT_VOLUME_DEVICE_NAME = "/dev/xvd"
 
 
+class AWSPlatformError(Exception):
+    """Error condition in TPA AWS platform use."""
+
+
 class aws(CloudPlatform):
     def __init__(self, name, arch):
         super().__init__(name, arch)
@@ -170,7 +174,7 @@ class aws(CloudPlatform):
             print("aws: Got lookup result: %s" % str(r))
         n = len(r["Images"])
         if n != 1:
-            raise Exception("Expected 1 match for %s, found %d" % (image["name"], n))
+            raise AWSPlatformError("Expected 1 match for %s, found %d" % (image["name"], n))
         return {"image_id": r["Images"][0]["ImageId"]}
 
     def update_cluster_tags(self, cluster_tags, args, **kwargs):
