@@ -14,6 +14,7 @@
     }}"
     etcd_endpoints: "{{
       groups['role_etcd']
+      |select_by_hostvar(hostvars, 'harp_location', harp_location)
       |map('pyformat_hostvars', '{inventory_hostname}:{etcd_client_port}', hostvars)
       |list
       |join(',')
