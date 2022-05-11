@@ -67,7 +67,7 @@
         cluster_vars|combine({
           'cluster_tag': cluster_tag,
           'cluster_name': cluster_name,
-          'tpa_version': lookup('pipe', 'if [ -f {0}/VERSION ]; then cat {0}/VERSION; else cd {0} && git describe --always; fi'.format(tpa_dir)),
+          'tpa_version': tpa_version,
           'ssh_key_file': ssh_key_file,
         })
       }}

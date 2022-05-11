@@ -2,6 +2,25 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+# If TPAexec was installed from an OS package (deb, rpm) then we should have the VERSION file in the
+# root of the installation directory at `tpa_dir`.
+# Otherwise, if the source code from git was cloned then we should be able to show the last tag
+# Either of these two commands should provide output if we're in a valid installation source.
+
+- name: Determine TPAexec version from installation source
+  block:
+    - assert:
+        that: >
+          tpa_file_version or tpa_git_version
+        msg: >
+          Invalid installation source. Please install TPAexec from a supported
+          package for your operating system or source code repository clone
+    - set_fact:
+        tpa_version: "{{ tpa_file_version or tpa_git_version }}"
+  vars:
+    tpa_file_version: "{{ lookup('file', tpa_dir + '/VERSION', errors='ignore') }}"
+    tpa_git_version: "{{ lookup('pipe', 'cd %s && git describe --always' % tpa_dir, errors='ignore') }}"
+
 - assert:
     msg: "Ansible 2.9.x is required"
     that:
