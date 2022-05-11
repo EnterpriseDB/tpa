@@ -390,10 +390,9 @@
     'pgbouncer' in role
   vars:
     _backend: "{{
-      pgbouncer_backend
-        if pgbouncer_backend not in
-          ['127.0.0.1', 'localhost', inventory_hostname]
-        else inventory_hostname
+      ('harp-proxy' in role)
+      |ternary(first_bdr_primary,(pgbouncer_backend in ['127.0.0.1', 'localhost', inventory_hostname])
+      |ternary(inventory_hostname,pgbouncer_backend))
     }}"
     _backend_maxconn: "{{
       hostvars.get(_backend, {}).get('max_connections')
