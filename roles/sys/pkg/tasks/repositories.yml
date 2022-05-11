@@ -1,0 +1,22 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# We must use products/default/release if we need repmgr package(s)
+# built against EPAS; and we need repmgr often enough to not require
+# people to specify the repository explicitly in tpa_2q_repositories.
+
+- set_fact:
+    tpa_2q_repositories: "{{
+      tpa_2q_repositories|default([])|union([
+        'products/default/release'
+      ])
+    }}"
+  when:
+    postgresql_flavour == 'epas'
+    and 'products/default/release' not in tpa_2q_repositories|default([])
+
+- include_tasks:
+    file: "os/{{ ansible_os_family }}/repositories.yml"
+    apply:
+      tags: public_repos

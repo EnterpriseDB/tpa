@@ -1,0 +1,28 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# We look for *.list files with uncommented deb… lines in /etc/apt and
+# comment them out (except the list for the repository we create).
+
+- name: Disable all defined external repositories
+  raw: |
+    changes=0
+    while IFS= read -r listfile; do
+      sed -i 's/^\(deb.*\)/# \1/' "$listfile" || exit 1
+      changes=$((changes+1))
+    done < <({{ find_list_files }})
+    [[ $changes == 0 ]] && exit 99
+    exit 0
+  environment: {}
+  register: disable_repos
+  failed_when:
+    disable_repos.rc not in [0, 99]
+  changed_when:
+    disable_repos.rc != 99
+  vars:
+    find_list_files: >-
+      find /etc/apt /etc/apt/sources.list.d -maxdepth 1
+      -name "{{ target_repo_config[ansible_os_family].path|basename }}" -prune
+      -o -name '*.list' -print0|xargs -0 grep -l '^deb'
+  notify: "Repo configuration changed"

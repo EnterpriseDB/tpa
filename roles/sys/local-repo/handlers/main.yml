@@ -1,0 +1,14 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Update/clean remote repository metadata after changes
+  raw: >
+    command {{ _commands[ansible_os_family] }}
+  listen:
+    - "Repo configuration changed"
+    - "Repo contents changed"
+  vars:
+    _commands:
+      RedHat: yum clean metadata
+      Debian: apt-get -q -y update

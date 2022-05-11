@@ -1,0 +1,42 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# We look for /etc/yum.repos.d/*.repo files with enabled=1 lines and
+# change them to enabled=0 (except for the repository we create).
+
+- name: Disable all defined external repositories
+  raw: |
+    changes=0
+    while IFS= read -r repofile; do
+      sed -i 's/^enabled=1/enabled=0/' "$repofile" || exit 1
+      changes=$((changes+1))
+    done < <({{ find_repo_files }})
+    [[ $changes == 0 ]] && exit 99
+    exit 0
+  environment: {}
+  register: disable_repos
+  failed_when:
+    disable_repos.rc not in [0, 99]
+  changed_when:
+    disable_repos.rc != 99
+  vars:
+    find_repo_files: >-
+      find /etc/yum.repos.d -maxdepth 1
+      -name "{{ target_repo_config[ansible_os_family].path|basename }}" -prune
+      -o -name '*.repo' -print0|xargs -0 grep -l '^enabled=1'
+  notify: "Repo configuration changed"
+
+- name: Disable RedHat subscription services
+  raw:
+    subscription-manager config --rhsm.manage_repos=0
+  environment: {}
+  register: subscription_disable
+  failed_when:
+    - subscription_disable.rc > 0 and subscription_disable.rc != 127
+  changed_when:
+    - subscription_disable.stdout != ''
+    - subscription_disable is success
+    - subscription_disable.rc != 127
+  when: >
+    ansible_distribution == 'RedHat' and ansible_distribution_major_version|int >= 8

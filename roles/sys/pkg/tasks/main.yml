@@ -7,6 +7,7 @@
 - include_tasks: "os/{{ ansible_os_family }}/2ndquadrant-repository-keys.yml"
   when:
     ansible_os_family == "Debian"
+    and not use_local_repo_only
 
 # Ensure that a usable Python is installed, along with anything else we
 # need to run Ansible modules such as "pkg" below.
@@ -23,20 +24,9 @@
 # Configure package repositories ({apt,yum}_repositories,
 # tpa_2q_repositories).
 
-- set_fact:
-    tpa_2q_repositories: "{{
-      tpa_2q_repositories|default([])|union([
-        'products/default/release'
-      ])
-    }}"
+- include_tasks: repositories.yml
   when:
-    postgresql_flavour == 'epas'
-    and 'products/default/release' not in tpa_2q_repositories|default([])
-
-- include_tasks:
-    file: "os/{{ ansible_os_family }}/repositories.yml"
-    apply:
-      tags: public_repos
+    not use_local_repo_only
 
 - name: Include post-repo hook
   include_tasks: "{{ hook }}"

@@ -2,7 +2,15 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-# First, we set the /etc/hosts lines for each host: one for the main IP
+# By default, we configure and use remote package repositories. If you
+# set `use_local_repo_only: yes`, we use only sys/local-repo instead.
+
+- set_fact:
+    use_local_repo_only: "{{
+      use_local_repo_only|default('no')|bool
+    }}"
+
+# We set the /etc/hosts lines for each host: one for the main IP
 # address and hostname, plus one for each hostname_aliases entry. Then
 # we aggregate them so that each host has its own lines as well as the
 # lines for all the other hosts in the cluster.

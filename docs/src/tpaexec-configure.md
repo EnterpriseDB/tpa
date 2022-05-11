@@ -220,6 +220,19 @@ access credentials in the `username:password` format. If you don't have them
 already, you can get your access credentials by registering for access at
 https://www.enterprisedb.com/user/register?destination=/repository-access-request
 
+### Local repository support
+
+Use `--enable-local-repo` to create a local package repository from
+which to ship packages to target instances.
+
+In environments with restricted network access, you can instead use
+`--use-local-repo-only` to create a local repository and disable all
+other package repositories on target instances, so that packages are
+installed only from the local repository.
+
+The page about [Local repository support](local-repo.md) has more
+details.
+
 ### Software versions
 
 You may optionally specify `--postgres-version 10` (the default) or

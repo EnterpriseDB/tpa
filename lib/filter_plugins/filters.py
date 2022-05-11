@@ -12,6 +12,7 @@ from collections.abc import Mapping, MutableMapping
 
 from jinja2.runtime import StrictUndefined
 from ansible.errors import AnsibleFilterError
+from six import text_type
 
 # Based on PR ansible/ansible#11083, this filter takes a container and a subkey
 # ('x.y.z', or [x,y,z]) and a default value, and returns container.x.y.z or the
@@ -495,5 +496,7 @@ class FilterModule(object):
             "dictify": dictify,
             "list2idxdict": index_list_of_dicts,
             "pyformat_hostvars": pyformat_hostvars,
+            "split": text_type.split,
             "select_by_hostvar": select_by_hostvar,
+            "joinpath": os.path.join,
         }

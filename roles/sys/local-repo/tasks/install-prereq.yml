@@ -1,0 +1,78 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved
+
+# Run a command and, if it fails, install the specified package.
+#
+# We must use the raw module here because we're doing this too early in
+# the deployment to be able to depend on Python being available.
+
+- name: Check for {{ package_name }} and install from external repositories if required
+  raw: >
+    if {{ check_command }}; then exit 99; fi;
+    {{ install_command[ansible_os_family] }} {{ package_name }}
+  environment: {}
+  register: prereq_install
+  failed_when:
+    prereq_install.rc not in [0, 99]
+  changed_when:
+    prereq_install is successful
+    and prereq_install.rc != 99
+  when:
+    not use_local_repo_only
+  vars:
+    install_command:
+      Debian: apt-get -q -y update && apt-get install -q -y
+      Redhat: yum install -y
+
+# If we can't use external repositories, we have to copy the package
+# from the local repository and install it. The package must not have
+# any unmet dependencies, because we're equipped to deal with copying
+# only a single file matching package_name*
+
+- name: Check for {{ package_name }} and install from local repository if required
+  block:
+  - name: Run check command for {{ package_name }}
+    raw: "{{ check_command }}"
+    environment: {}
+
+  rescue:
+  - assert:
+      that:
+        - package_glob is not empty
+        - package_glob|length == 1
+      fail_msg: >-
+        Expected one local package matching {{ package_name }}* in {{ local_repo_dir }};
+        found {{ package_glob|length }}
+
+  - block:
+    - name: Check if the {{ package_name }} package exists in the repo already
+      raw: >
+        test -f "{{ target_repo_dir }}/{{ package_filename }}"
+      environment: {}
+    rescue:
+    - name: Copy local package for {{ package_name }} using scp
+      shell:
+        cmd: >
+          scp -F "{{ cluster_dir }}"/ssh_config
+          {{ local_repo_dir }}/{{ package_filename }}
+          {{ inventory_hostname }}:{{ target_repo_dir }}/
+      delegate_to: localhost
+      become: no
+    when:
+      platform not in ['docker', 'shared']
+
+  - name: Install {{ package_name }} from copied package
+    raw: >
+      {{ install_command[ansible_os_family] }} "{{ target_repo_dir }}/{{ package_filename }}"
+    vars:
+      install_command:
+        Debian: dpkg -i
+        RedHat: yum install -y
+  vars:
+      package_glob: "{{
+        lookup('fileglob', '%s/%s*' % (local_repo_dir, package_name), wantlist=True)
+      }}"
+      package_filename: "{{ package_glob[0]|basename }}"
+  when:
+    use_local_repo_only

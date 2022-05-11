@@ -87,6 +87,12 @@ class Platform:
         """
         return {}
 
+    def setup_local_repo(self):
+        """
+        Performs necessary platform specific setup for package repository
+        """
+        pass
+
     def update_cluster_tags(self, cluster_tags, args, **kwargs):
         """
         Makes platform-specific changes to cluster_tags

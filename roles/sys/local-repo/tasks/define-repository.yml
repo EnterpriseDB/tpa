@@ -1,0 +1,28 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Configure {{ target_repo_name }} repository
+  raw: |
+    tmpfile=$(mktemp)
+    trap 'rm -f "$tmpfile"' EXIT
+    cat >"$tmpfile" <<EOF
+    {{ content }}
+    EOF
+    [ -f "{{ path }}" ] || (
+      mv "$tmpfile" "{{ path }}"
+      exit 200
+    )
+    pathsum=$(sha256sum "{{ path }}")
+    [ "{{ content_checksum }}" == "${pathsum/ */}" ] || (
+      mv "$tmpfile" "{{ path }}"
+      exit 201
+    )
+  register: _create_repo
+  failed_when:
+    _create_repo.rc > 0 and _create_repo.rc < 200
+  changed_when:
+    _create_repo.rc >= 200
+  vars:
+    content_checksum: "{{ content|hash('sha256') }}"
+  notify: "Repo configuration changed"

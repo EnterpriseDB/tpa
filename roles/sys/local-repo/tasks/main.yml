@@ -1,0 +1,89 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# If cluster_dir/local-repo exists, we copy any packages it contains to
+# a new directory that we create on all target instances, and configure
+# it as a package repository. This gives us an easy way to ship extra
+# packages for use during deployment.
+#
+# If use_local_repo_only is also set, we must not depend on any outside
+# repositories to install the packages we need to set up the repository
+# and deploy the cluster. We disable all other repositories and expect
+# local-repo to contain all packages required for deployment (starting
+# from rsync, used to copy the other packages).
+#
+# We strongly recommend creating distribution-specific subdirectories
+# under local-repo, but we don't stop you from just dumping packages
+# straight into the directory either.
+
+- name: Look for a distribution-specific local repository directory
+  set_fact:
+    local_repo_dir: "{{ local_repo_dir|default(found_repo_dir) }}"
+  vars:
+    maybe_repo_dirs:
+      - "{{ local_repo_base_dir }}/{{ ansible_distribution }}/{{ ansible_distribution_version }}"
+      - "{{ local_repo_base_dir }}/{{ ansible_distribution }}/{{ ansible_distribution_major_version }}"
+      - "{{ local_repo_base_dir }}/{{ ansible_distribution }}/{{ ansible_distribution_release }}"
+      - "{{ local_repo_base_dir }}/{{ ansible_distribution }}"
+      - "{{ local_repo_base_dir }}"
+    found_repo_dir: "{{
+      lookup('first_found', dict(files=maybe_repo_dirs, skip=True))
+    }}"
+
+- name: Ensure that we know how to configure a repository on target instances
+  assert:
+    that:
+      - ansible_os_family in target_repo_config
+      - repo_config.path is defined
+      - repo_config.content is defined
+      - repo_config.path and repo_config.content
+    fail_msg: >-
+      Cannot configure repository for {{ ansible_os_family }}.
+      Please ensure that the repository configuration file path and
+      content are defined in target_repo_config
+  vars:
+    repo_config: "{{ target_repo_config[ansible_os_family] }}"
+  when:
+    local_repo_dir is not empty
+
+# If we aren't allowed to depend on other repositories, we disable them
+# before setting up the new repository, so that we don't try to install
+# any packages from them.
+
+- block:
+  - assert:
+      msg: Cannot use_local_repo_only unless {{ local_repo_base_dir }} exists
+      that: local_repo_dir is not empty
+  - include_tasks:
+      file: "os/{{ ansible_os_family }}/disable-repositories.yml"
+  when:
+    use_local_repo_only
+
+# We copy packages to targets unless we can use platform-specific magic
+# to mirror the local directory (e.g., we bind-mount the directory into
+# Docker containers). Then we just tell the package manager about the
+# new repository.
+
+- block:
+  # We'll copy packages from local_repo_base_dir/<whatever we found> to
+  # target_repo_base_dir/<the same thing>.
+  - set_fact:
+      target_repo_dir: "{{ target_repo_base_dir|joinpath(suffix) }}"
+    vars:
+      suffix: "{{ local_repo_dir|relpath(local_repo_base_dir) }}"
+    when:
+      local_repo_dir != local_repo_base_dir
+
+  - include_tasks: copy-packages.yml
+    when:
+      platform not in ['docker', 'shared']
+
+  - include_tasks: define-repository.yml
+    vars:
+      path: "{{ target_repo_config[ansible_os_family].path }}"
+      content: "{{ target_repo_config[ansible_os_family].content }}"
+  when:
+    local_repo_dir is not empty
+
+- meta: flush_handlers

@@ -110,33 +110,37 @@ class aws(CloudPlatform):
             },
         }
 
-        # Transform the table of known images into a form that allows for direct
-        # lookup based on label and version.
-
-        amis = {}
-        for d in images:
-            amis[d] = {}
-            for n in images[d]:
-                entry = images[d][n]
-                for v in entry["versions"]:
-                    amis[d][v] = {"name": n, **entry}
-
         image = {}
 
         if label in self.supported_distributions():
-            label = label.replace("-minimal", "").lower()
+            label_base = label.replace("-minimal", "")
             version = kwargs.get("version") or "default"
-            image = amis.get(label, {}).get(version)
-            if not image:
+            # Find the name and other attributes of any entry under
+            # images that matches the desired label and version.
+            try:
+                image = next(
+                    {"name": k, **v}
+                    for k, v in images[label_base.lower()].items()
+                    if version in v["versions"]
+                )
+            except (KeyError, StopIteration):
                 print(
-                    "ERROR: cannot determine AMI name for %s/%s" % (label, version),
+                    f"ERROR: cannot determine AMI name for {label_base}/{version}",
                     file=sys.stderr,
                 )
                 sys.exit(-1)
+            image["os"] = label_base
+            try:
+                if "default" in image["versions"]:
+                    image["versions"].remove("default")
+                image["version"] = image["versions"][0]
+            except IndexError:
+                pass
             del image["versions"]
             if "preferred_python_version" in image:
                 self.preferred_python_version = image["preferred_python_version"]
                 del image["preferred_python_version"]
+
         else:
             image["name"] = label
 

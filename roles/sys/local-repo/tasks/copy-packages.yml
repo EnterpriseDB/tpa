@@ -1,0 +1,62 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# You forgot to create the repository metadata, didn't you?
+# Well, we can't really blame you.
+
+- name: Check if repository metadata exists locally
+  assert:
+    that:
+      _check_exists is not empty
+    fail_msg: >-
+      Repository metadata not found locally; {{ _check.suggestion }}
+  vars:
+    repo_metadata_checks:
+      Debian:
+        must_exist: Packages.gz
+        suggestion: "Run 'dpkg-scanpackages . | gzip > Packages.gz' in {{ local_repo_dir|relpath(cluster_dir) }}"
+      RedHat:
+        must_exist: repodata/repomd.xml
+        suggestion: "Run 'createrepo .' in {{ local_repo_dir|relpath(cluster_dir) }}"
+    _check:
+      "{{ repo_metadata_checks[ansible_os_family] }}"
+    _check_exists: "{{
+      lookup(
+        'first_found', dict(
+          files='%s/%s' % (local_repo_dir, _check.must_exist),
+          skip=True
+        )
+      )
+    }}"
+
+# The repository directory must be owned by ansible_user because we need
+# to rsync stuff directly into it.
+
+- name: Ensure repository directory exists
+  file:
+    path: "{{ target_repo_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: root
+    mode: 0755
+    recurse: true
+
+- name: Ensure rsync is available
+  include_tasks: "install-prereq.yml"
+  vars:
+    check_command: "command -v rsync >/dev/null 2>&1"
+    package_name: rsync
+
+- name: Copy contents of local-repo directory to all instances
+  shell:
+    cmd: >
+      rsync -av --rsh='ssh -F {{ cluster_dir }}/ssh_config'
+      {{ local_repo_dir }}/
+      {{ inventory_hostname }}:{{ target_repo_dir }}/
+  delegate_to: localhost
+  register: rsync_copy
+  changed_when: >
+    rsync_copy.stdout_lines|length > 5
+  become: no
+  notify: "Repo contents changed"

@@ -91,6 +91,15 @@ class docker(Platform):
 
             self.ccache = "%s:/root/.ccache:rw" % ccache
 
+        if args.get("enable_local_repo"):
+            local_sources["local-repo"] = ":".join(
+                [
+                    os.path.abspath(os.path.join(self.arch.cluster, "local-repo")),
+                    "/var/opt/tpa/local-repo",
+                    "ro",
+                ]
+            )
+
         args["local_sources"] = local_sources
 
     def supported_distributions(self):
@@ -100,28 +109,59 @@ class docker(Platform):
         return "Rocky"
 
     def image(self, label, **kwargs):
+        """
+        Resolve an image name from known names.
+
+        The label might match one of these formats:
+        * the OS name, e.g. "Debian", converts to tpa image name, e.g. "tpa/debian".
+        * a docker image, e.g. "tpa/debian"
+        * a docker image with a version, e.g. "tpa/debian:11".
+
+            image = {'name': 'tpa/debian', 'os': 'Debian', 'version': '11'}
+
+        Args:
+            label: The image label supplied as a default or on the command line
+            **kwargs:
+
+        Returns: dictionary with key "name", also keys "version" and "os" if known
+
+        """
         image = {}
+        name, _, version = label.partition(":")
+        org, _, img = name.rpartition("/")
 
-        if label in self.supported_distributions():
-            label = "tpa/%s" % label.lower()
-            version = kwargs.get("version")
-            if version and version != "latest":
-                known_versions = {
-                    "tpa/debian": ["9", "10", "11", "stretch", "buster", "bullseye"],
-                    "tpa/ubuntu": ["18.04", "20.04", "bionic", "focal"],
-                    "tpa/redhat": ["7", "8"],
-                    "tpa/rocky": ["8"],
-                    "tpa/almalinux": ["8"],
-                }
+        known_versions = {
+            "tpa/debian": ["stretch", "buster", "bullseye", "9", "10", "11"],
+            "tpa/ubuntu": ["bionic", "focal", "18.04", "20.04"],
+            "tpa/redhat": ["7", "8"],
+            "tpa/rocky": ["8"],
+            "tpa/almalinux": ["8"],
+        }
 
-                if version not in known_versions[label]:
+        def valid_version(img_name, ver):
+            ver = ver or kwargs.get("version")
+            if ver and ver != "latest":
+                if ver not in known_versions[img_name]:
                     print(
-                        "ERROR: %s:%s is not supported" % (label, version),
+                        "ERROR: image %s:%s is not supported" % (img_name, ver),
                         file=sys.stderr,
                     )
                     sys.exit(-1)
+            return ver or known_versions[image_name].pop()
 
-                label = label + ":" + version
+        # Cater for image names, e.g. "tpa/debian" or "tpa/debian:10"
+        if name in known_versions:
+            image["os"] = img.capitalize()
+            image_name = name
+            image["version"] = valid_version(name, version)
+
+        # Cater for OS names, e.g. "Debian"
+        if name in self.supported_distributions():
+            image["os"] = name
+            image_name = "tpa/%s" % name.lower()
+            version = valid_version(image_name, version)
+            image["version"] = version
+            label = image_name + ":" + version
 
         image["name"] = label
 

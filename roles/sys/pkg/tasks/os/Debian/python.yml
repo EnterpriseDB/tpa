@@ -17,6 +17,7 @@
         or (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 18)
         else ''
     }}"
+  when: not use_local_repo_only
 
 - name: Install python
   raw: if ! command -v {{ python }} >/dev/null 2>&1; then apt-get -q -y install {{ python.startswith('python2')|ternary('python2.7', 'python3') }}; fi

@@ -1,0 +1,23 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+local_repo_base_dir: "{{ cluster_dir }}/local-repo"
+
+target_repo_name: "tpa-local-repo"
+target_repo_base_dir: "/var/opt/tpa/local-repo"
+target_repo_dir: "{{ target_repo_base_dir }}"
+
+target_repo_config:
+  Debian:
+    path: /etc/apt/sources.list.d/{{ target_repo_name }}.list
+    content: |
+      deb [trusted=yes] file:{{ target_repo_dir }} ./
+  RedHat:
+    path: /etc/yum.repos.d/{{ target_repo_name }}.repo
+    content: |
+      [{{ target_repo_name }}]
+      name=Local repository (set up by TPAexec)
+      baseurl=file://{{ target_repo_dir }}
+      gpgcheck=0
+      enabled=1

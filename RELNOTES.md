@@ -6,6 +6,15 @@
 
 ### Notable changes
 
+- Add `--enable-local-repo` configure option to ship packages that you
+  provide (in cluster_dir/local-repo) to a new local package repository
+  on each instance in the cluster
+
+- Add `--use-local-repo-only` option to create a local repo as described
+  above and also disable all other repositories on the instance. In this
+  case, the local repo must contain all packages required for
+  deployment, starting with rsync and Python
+
 - Change the default HARP v2 consensus protocol from etcd to bdr
 
   This does not affect existing clusters that are using etcd (even if

@@ -59,6 +59,14 @@ class Architecture(object):
             self._args = vars(self.argument_parser().parse_args(args=self._argv))
         return self._args
 
+    @property
+    def cluster(self):
+        """
+        The path to the cluster directory, as given to `tpaexec configure`, but
+        with trailing slashes removed (to simplify path construction).
+        """
+        return re.sub("/*$", "", self.args["cluster"])
+
     def configure(self, force=False):
         """
         Obtains command-line arguments based on the selected architecture and
@@ -209,6 +217,18 @@ class Architecture(object):
             "--enable-pem",
             action="store_true",
             help="Add a PEM monitoring server to the cluster",
+        )
+
+        g = p.add_mutually_exclusive_group()
+        g.add_argument(
+            "--enable-local-repo",
+            action="store_true",
+            help="Make packages available to instances from cluster_dir/local-repo",
+        )
+        g.add_argument(
+            "--use-local-repo-only",
+            action="store_true",
+            help="Make packages available to instances from cluster_dir/local-repo, and disable all other repositories",
         )
 
         g = p.add_argument_group("volume sizes in GB")
@@ -367,6 +387,10 @@ class Architecture(object):
             )
             sys.exit(-1)
 
+        # --use-local-repo-only implies --enable-local-repo
+        if self.args.get("use_local_repo_only"):
+            self.args["enable_local_repo"] = True
+
         self.platform.validate_arguments(args)
 
     def process_arguments(self, args):
@@ -380,7 +404,6 @@ class Architecture(object):
         # combination of values specified on the command-line and defaults set
         # by the architecture. Now we start augmenting that information.
 
-        self.cluster = re.sub("/*$", "", args["cluster"])
         args["cluster_name"] = self.cluster_name()
 
         # If --overrides-from is specified, we load files one by one (treating
@@ -709,6 +732,9 @@ class Architecture(object):
             top.update({"forward_ssh_agent": "yes"})
             self.args["top_level_settings"] = top
 
+        if self.args.get("use_local_repo_only"):
+            cluster_vars["use_local_repo_only"] = True
+
     def cluster_vars_args(self):
         """
         Returns the names of any variables set by command-line options that
@@ -869,11 +895,33 @@ class Architecture(object):
             print("Could not write cluster directory: %s" % str(e), file=sys.stderr)
             sys.exit(-1)
 
+    def setup_local_repo(self):
+        """
+        Create a directory under cluster/local-repo to contain packages for the
+        distribution and version derived from the cluster's selected image().
+        """
+        image = self.image()
+        distro = image.get("os")
+        version = image.get("version")
+
+        if distro and version:
+            os.makedirs(os.path.join(self.cluster, "local-repo", distro, version))
+        else:
+            print(
+                f"Unable to detect OS distribution and version or image ({image.get('name', 'None')})\n"
+                f"Please create the '{self.cluster}/local-repo/<distribution>/<version>' directory yourself.\n"
+                f"(See docs/src/local-repo.md for details.)",
+                file=sys.stderr,
+            )
+
     def after_configuration(self, force: bool = False) -> None:
         """
         Performs additional actions after config.yml has been written
         """
         self.create_links(force=force)
+        if self.args.get("enable_local_repo"):
+            self.setup_local_repo()
+            self.platform.setup_local_repo()
 
     def create_links(self, force: bool = False) -> None:
         """

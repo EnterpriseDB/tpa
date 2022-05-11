@@ -3,6 +3,12 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - include_role:
+    name: sys/local-repo
+    apply:
+      tags: local-repo
+  tags: local-repo
+
+- include_role:
     name: sys/pkg
     apply:
       tags: pkg
