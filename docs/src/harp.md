@@ -34,6 +34,7 @@ Variable | Default value | Description
 `harp_watch_poll_interval` | `500` | Milliseconds to sleep between polling DCS.  Only applies when `harp_consensus_protocol` is `bdr`.
 `harp_proxy_timeout` | `1` | Builtin proxy connection timeout, in seconds, to Lead Master.
 `harp_proxy_keepalive` | `5` | Amount of time builtin proxy will wait on an idle connection to the Lead Master before sending a keepalive ping.
+
 ## Consensus layer
 
 By default, TPAexec will set `harp_consensus_protocol: etcd`, and
@@ -52,3 +53,10 @@ etcd_client_port	| 2379	| The port used by clients to connect to etcd
 You can set `harp_consensus_protocol: bdr` instead, in which case the
 existing BDR instances will be used for consensus, and no further
 configuration is required.
+
+## Configuring a separate user for harp proxy
+
+If you want harp proxy to use a separate readonly user, you can specify that
+by setting `harp_dcs_user: username` under cluster_vars. TPAexec will use
+`harp_dcs_user` setting to create a readonly user and set it up in the DCS
+configuration.
