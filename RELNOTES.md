@@ -46,6 +46,9 @@
   you have to set `vpn_network` and assign an `openvpn-server` instance
   explicitly. Does not affect existing clusters.
 
+- Add `bdr_camo_use_raft_for_local_mode: [true|false]` setting to
+  configure the RAFT fallback mode for CAMO pairs in BDR 4.1 (only)
+
 ### Bugfixes
 
 - Check that TPA_2Q_SUBSCRIPTION_TOKEN is set when needed

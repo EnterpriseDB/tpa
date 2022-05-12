@@ -10,6 +10,18 @@
   when:
     bdr_node_camo_partner is defined
 
+- assert:
+    that:
+      - hostvars[bdr_node_camo_partner].bdr_camo_use_raft_for_local_mode is defined
+      - hostvars[bdr_node_camo_partner].bdr_camo_use_raft_for_local_mode
+        == bdr_camo_use_raft_for_local_mode
+    msg: >
+      CAMO pairs must set bdr_camo_use_raft_for_local_mode to the same
+      value on both instances
+  when:
+    - bdr_node_camo_partner is defined
+    - bdr_camo_use_raft_for_local_mode is defined
+
 # This function returns the name of the current CAMO partner when
 # executed on a node that has a CAMO partner, i.e., a node that was
 # mentioned in a previous .add_camo_pair() call. If there is no CAMO
@@ -57,11 +69,24 @@
     conninfo: "{{ dsn|dbname(bdr_database) }}"
     queries:
       - text: >
-          SELECT bdr.add_camo_pair(node_group := %s, left_node := %s, right_node := %s)
+          SELECT bdr.add_camo_pair({{ argument_string }})
         args:
-          - "{{ bdr_node_group }}"
-          - "{{ inventory_hostname }}"
-          - "{{ bdr_node_camo_partner }}"
+          "{{ argument_values|flatten }}"
+  vars:
+    have_bcurflm:
+      "{{ bdr_version_num >= 40100 and bdr_camo_use_raft_for_local_mode is defined }}"
+    argument_keys:
+      - node_group
+      - left_node
+      - right_node
+      - "{{ 'require_raft' if have_bcurflm else [] }}"
+    argument_string: >
+      {{ argument_keys|flatten|map('apply_format', '{0} := %s')|list|join(', ') }}
+    argument_values:
+      - "{{ bdr_node_group }}"
+      - "{{ inventory_hostname }}"
+      - "{{ bdr_node_camo_partner }}"
+      - "{{ bdr_camo_use_raft_for_local_mode if have_bcurflm else [] }}"
   become_user: "{{ postgres_user }}"
   become: yes
   when:
@@ -69,3 +94,53 @@
     and (_camo_query.partner == None
       or _camo_query.partner != bdr_node_camo_partner)
     and inventory_hostname == [inventory_hostname, bdr_node_camo_partner]|sort|first
+
+# We must alter the CAMO configuration if bdr.camo_pairs.require_raft is
+# different from bdr_camo_use_raft_for_local_mode.
+
+- name: Update CAMO pair configuration if required
+  block:
+  - name: Fetch current require_raft setting for this CAMO pair
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      queries:
+        - text: >
+            SELECT require_raft
+              FROM bdr.camo_pairs p
+              LEFT JOIN bdr.node l ON p.left_node_id = l.node_id
+              LEFT JOIN bdr.node r ON p.right_node_id = r.node_id
+              WHERE (l.node_name = %(myself)s AND r.node_name = %(partner)s)
+                 OR (r.node_name = %(myself)s AND l.node_name = %(partner)s)
+          named_args:
+            myself: "{{ inventory_hostname }}"
+            partner: "{{ bdr_node_camo_partner }}"
+    register: bcurflm_check
+    failed_when:
+      bcurflm_check is not successful
+      or bcurflm_check.rowcount == 0
+
+  - name: Update require_raft setting for this CAMO pair
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      queries:
+        - text: >
+            SELECT bdr.alter_camo_pair(
+              node_group := %s, left_node := %s, right_node := %s,
+              require_raft := %s
+            )
+          args:
+            - "{{ bdr_node_group }}"
+            - "{{ inventory_hostname }}"
+            - "{{ bdr_node_camo_partner }}"
+            - "{{ bdr_camo_use_raft_for_local_mode }}"
+    changed_when: True
+    when:
+      bcurflm_check.require_raft != bdr_camo_use_raft_for_local_mode
+
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    - bdr_version_num >= 40100
+    - bdr_node_camo_partner is defined
+    - bdr_camo_use_raft_for_local_mode is defined
+    - inventory_hostname == [inventory_hostname, bdr_node_camo_partner]|sort|first
