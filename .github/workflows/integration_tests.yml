@@ -46,13 +46,13 @@ jobs:
   integration-test:
     # In addition to the event triggers above, this job only runs when any of these conditions are met:
     #  * the branch is master
-    #  * review is requested from the tpaexec-team on a PR for a branch starting with 'rc/'
+    #  * review is requested from the tpaexec-dev-team on a PR for a branch starting with 'rc/'
     #  * review is marked as approved on a PR for a branch starting with 'rc/'
     #  * a manual run is executed
     if: >
       github.ref_name == 'master'
       || (github.event.requested_team
-          && github.event.requested_team.name == 'tpaexec-team')
+          && github.event.requested_team.name == 'tpaexec-dev-team')
           && startsWith(github.event.pull_request.base.ref, 'rc/')
       || (github.event.review
           && github.event.review.state == 'approved'

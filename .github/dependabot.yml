@@ -15,7 +15,7 @@ updates:
     pull-request-branch-name:
       separator: "/"
     reviewers:
-      - "EnterpriseDB/tpaexec-team"
+      - "EnterpriseDB/tpaexec-dev-team"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -29,5 +29,5 @@ updates:
     pull-request-branch-name:
       separator: "/"
     reviewers:
-      - "EnterpriseDB/tpaexec-team"
+      - "EnterpriseDB/tpaexec-dev-team"
 
