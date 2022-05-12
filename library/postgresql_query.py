@@ -24,9 +24,10 @@ options:
   queries:
     description:
       - A list of SQL queries to execute. Each element in the list may be either
-        a string (i.e., the query text) or a dict with the query 'text' and a
-        list of 'args' to bind to %s placeholders in the query. All of the
-        queries are executed in the same transaction.
+        a string (i.e., the query text) or a dict with the query 'text' and
+        either a list of 'args' to bind to %s placeholders in the query, or a
+        dict of 'named_args' to bind to %(name)s placeholders in the query.
+        All of the queries are executed in the same transaction.
         You must specify exactly one of 'query' or 'queries'.
     required: true
   conninfo:
@@ -66,6 +67,10 @@ EXAMPLES = """
           - 42
           - foo
       - SELECT 42 as a
+      - text: insert into y(p,q) values (%(p)s, %(q)s)
+        named_args:
+          p: "hello"
+          q: "world"
 - debug: msg="{{ query.rowcounts[0] }} rows"
 - debug: msg="also {{ query.rowcount }} rows"
   when:
@@ -129,6 +134,68 @@ else:
     psycopg2_found = True
 
 
+def get_queries(module):
+    """
+    Return a list of queries to process, regardless of which calling convention
+    happens to be in use. May fail if the calling convention in use isn't one we
+    recognise.
+    """
+    queries = module.params["queries"] or module.params["query"]
+    if isinstance(queries, string_types):
+        queries = [queries.strip()]
+        if queries[0].startswith("["):
+            module.fail_json(
+                msg="you probably didn't mean to pass this query as a list"
+            )
+        if queries[0].startswith("{"):
+            module.fail_json(
+                msg="you probably didn't mean to pass this query as a dict"
+            )
+    return queries
+
+
+def get_query(q):
+    """
+    Given an entry from 'queries', returns the text of the query as well as the
+    arguments, which may be either a list (args) or a dict (named_args) or an
+    empty list (if only the query text is specified).
+
+    May modify q to reflect changes to the argument list.
+    """
+    text = q
+    args = []
+    if isinstance(q, dict):
+        text = q["text"]
+
+        # The query entry may specify either named_args for %(name)s
+        # placeholders, or just args for %s placeholders. The former
+        # take precedence if specified.
+        named_args = q.get("named_args", {})
+        args = q.get("args", [])
+
+        # We use this test to filter out or transform omitted values
+        # from the query arguments list.
+        def is_null(s):
+            """
+            Returns true if the value passed in looks like the result of
+            specifying NULL via "|default(omit)" for a query parameter.
+            """
+            return isinstance(s, str) and s.startswith("__omit_place_holder__")
+
+        if named_args:
+            # XXX: We'd like to support explicit NULLs with 'omit', the
+            # way we do below, but hash keys don't get passed in to us
+            # at all if you specify `key: "{{ omit }}"`, so we can't.
+            args = named_args
+        elif args:
+            args = list(map(lambda s: s if not is_null(s) else None, args))
+            # We modify the query entry here so that the module result includes
+            # the processed arguments.
+            q["args"] = args
+
+    return text, args
+
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
@@ -159,21 +226,10 @@ def main():
     if autocommit:
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
-    queries = module.params["queries"] or module.params["query"]
-    if isinstance(queries, string_types):
-        queries = [queries.strip()]
-        if queries[0].startswith("["):
-            module.fail_json(
-                msg="you probably didn't mean to pass this query as a list"
-            )
-        if queries[0].startswith("{"):
-            module.fail_json(
-                msg="you probably didn't mean to pass this query as a dict"
-            )
-
     m = dict()
     changed = False
 
+    queries = get_queries(module)
     m["queries"] = queries
 
     results = []
@@ -183,24 +239,7 @@ def main():
         for q in queries:
             cur = conn.cursor()
 
-            text = q
-            args = []
-            if isinstance(q, dict):
-                text = q["text"]
-                args = q.get("args", [])
-                if args:
-                    args = list(
-                        map(
-                            lambda s: s
-                            if not (
-                                isinstance(s, str)
-                                and s.startswith("__omit_place_holder__")
-                            )
-                            else None,
-                            args,
-                        )
-                    )
-                    q["args"] = args
+            text, args = get_query(q)
 
             starttime = time.time()
             cur.execute(text, args)
