@@ -17,7 +17,7 @@
         selectattr('role','defined')|selectattr('role','contains','barman')|
         list|count == 1
   with_items:
-    "{{ query('flattened',instances|selectattr('backup', 'defined')|map(attribute='backup')|list)|unique }}"
+    "{{ instances|selectattr('backup', 'defined')|map(attribute='backup')|list|flatten|unique }}"
   register: barman_references_result
   when:
     barman_references_result is not defined

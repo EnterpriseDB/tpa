@@ -157,8 +157,8 @@
       |ternary({}, {'join_node_group': 'f'})
     }}"
     _options: "{{ _group_options|combine(_join_options) }}"
-    _keys: "{{ query('flattened', ['node_group_name', _options.keys()|list]) }}"
-    _values: "{{ query('flattened', [_group, _options.values()|list]) }}"
+    _keys: "{{ ['node_group_name', _options.keys()|list]|flatten }}"
+    _values: "{{ [_group, _options.values()|list]|flatten }}"
     _option_string: >
       {{ _keys|map('apply_format', '{0} := %s')|list|join(', ') }}
   when:

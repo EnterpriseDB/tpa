@@ -126,7 +126,7 @@
   set_fact:
     haproxy_server_options: "{{
       hostvars[item].haproxy_server_options|union(
-        query('flattened', ['check', _check_options])
+        ['check', _check_options]|flatten
       )
     }}"
   with_items: "{{ haproxy_backend_servers }}"

@@ -5,7 +5,7 @@
 - name: Enumerate postgres debuginfo packages
   set_fact:
     postgres_debuginfo_packages: >
-      {{ query('flattened', package_lists) }}
+      {{ package_lists|flatten }}
   vars:
     package_lists:
     - "{{ postgres_debug_packages[postgres_family]|packages_for(ansible_distribution, postgres_package_version) }}"

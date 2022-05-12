@@ -34,8 +34,7 @@
 - name: Update shared_preload_libraries list
   set_fact:
     _preload_list: "{{
-      query('flattened',
-        _old_list|union(shared_preload_libraries|default([]))
+              _old_list|union(shared_preload_libraries|default([])|flatten
       )
     }}"
   vars:

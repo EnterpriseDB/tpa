@@ -58,7 +58,7 @@
     - "{{ postgres_conf_dir if postgres_data_dir != postgres_conf_dir else [] }}"
     - "{{ postgres_wal_dir if postgres_data_dir != postgres_wal_dir|dirname else [] }}"
     - "{{ postgres_tablespaces.values()|map(attribute='location')|list }}"
-    secontext_dirs: "{{ query('flattened', _dirs) }}"
+    secontext_dirs: "{{ _dirs|flatten }}"
     fcontext_commands: >
       {{ secontext_dirs|map('apply_format', 'fcontext -a -t postgresql_db_t "{0}(/.*)?"')|list }}
   register: restorecon

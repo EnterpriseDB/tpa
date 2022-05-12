@@ -5,7 +5,7 @@
 - name: Install build requirements
   package:
     name: >
-      {{ query('flattened', package_lists) }}
+      {{ package_lists|flatten }}
     state: latest
   vars:
     package_lists:

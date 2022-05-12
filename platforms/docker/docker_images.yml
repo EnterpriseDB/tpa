@@ -14,7 +14,7 @@
   with_items: "{{ docker_image_list }}"
   vars:
     _known_tags: >
-      {{ query('flattened', _available.images|map(attribute='RepoTags')|list) }}
+      {{ _available.images|map(attribute='RepoTags')|list|flatten }}
   when: >
     item not in _known_tags
     and item + ":latest" not in _known_tags

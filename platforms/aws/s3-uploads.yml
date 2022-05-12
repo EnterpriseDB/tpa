@@ -31,4 +31,4 @@
     src: "{{ item }}"
     overwrite: different
     mode: put
-  with_items: "{{ query('flattened', s3_uploads_files) }}"
+  with_items: "{{ s3_uploads_files|flatten }}"

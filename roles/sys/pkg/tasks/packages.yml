@@ -12,7 +12,7 @@
 - name: Install required packages
   package:
     name: >
-      {{ query('flattened', package_lists) }}
+      {{ package_lists|flatten }}
     state: latest
   vars:
     package_lists:
@@ -36,7 +36,7 @@
 - name: Remove unwanted packages
   package:
     name: >
-      {{ query('flattened', package_lists) }}
+      {{ package_lists|flatten }}
     state: absent
   vars:
     package_lists:

@@ -6,7 +6,7 @@
   postgresql_query:
     conninfo: "{{ dsn|dbname(pgbench_dbname) }}"
     autocommit: yes
-    queries: "{{ query('flattened', timeout_queries) }}"
+    queries: "{{ timeout_queries|flatten }}"
   become_user: "{{ postgres_user }}"
   become: yes
   vars:
@@ -49,7 +49,7 @@
   postgresql_query:
     conninfo: "{{ dsn|dbname(pgbench_dbname) }}"
     autocommit: yes
-    queries: "{{ query('flattened', reset_queries) }}"
+    queries: "{{ reset_queries|flatten }}"
   become_user: "{{ postgres_user }}"
   become: yes
   vars:

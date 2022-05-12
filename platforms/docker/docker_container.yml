@@ -44,7 +44,7 @@
     published_ports: "{{ item.published_ports|default(omit) }}"
     devices: "{{ item.devices|default(omit) }}"
     networks: "{{ item.networks|default(omit) }}"
-    volumes: "{{ query('flattened', volumes) }}"
+    volumes: "{{ volumes|flatten }}"
     sysctls: "{{ item.sysctls|default(omit) }}"
     ulimits: "{{ item.ulimits|default(omit) }}"
     networks_cli_compatible: yes

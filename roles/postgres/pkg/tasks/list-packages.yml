@@ -36,7 +36,7 @@
 - name: Enumerate all postgres packages
   set_fact:
     all_postgres_packages: >
-      {{ query('flattened', package_lists) }}
+      {{ package_lists|flatten }}
   vars:
     _postgres_packages: "{{ postgres_packages[postgres_family] }}"
     _postgres_client_packages: "{{ postgres_client_packages[postgres_family] }}"
