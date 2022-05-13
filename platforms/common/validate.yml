@@ -13,8 +13,9 @@
         that: >
           tpa_file_version or tpa_git_version
         msg: >
-          Invalid installation source. Please install TPAexec from a supported
-          package for your operating system or source code repository clone
+          Unsupported installation method. Please install a TPAexec package from the
+          EDB repository (https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/),
+          or run it from a clone of the source code repository
     - set_fact:
         tpa_version: "{{ tpa_file_version or tpa_git_version }}"
   vars:
