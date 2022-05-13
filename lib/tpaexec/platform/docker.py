@@ -22,6 +22,16 @@ class docker(Platform):
             for e in errors:
                 print(f"ERROR: --local-source-directories {e}", file=sys.stderr)
             sys.exit(-1)
+
+        if args.get("enable_local_repo"):
+            local_sources["local-repo"] = ":".join(
+                [
+                    os.path.abspath(os.path.join(self.arch.cluster, "local-repo")),
+                    "/var/opt/tpa/local-repo",
+                    "ro",
+                ]
+            )
+
         args["local_sources"] = local_sources
 
         if args.get("install_from_source"):
@@ -93,27 +103,16 @@ class docker(Platform):
             dirname = name
             if "name" in installable[name]:
                 dirname = installable[name]["name"]
+            flags = "ro"
 
             container_path = f"/opt/postgres/src/{dirname}"
             if len(parts) > 1:
                 container_path = parts[1]
 
-            flags = "ro"
             if len(parts) > 2:
                 container_path = parts[2]
 
             local_sources[name] = f"{host_path}:{container_path}:{flags}"
-
-            self.ccache = "%s:/root/.ccache:rw" % ccache
-
-        if args.get("enable_local_repo"):
-            local_sources["local-repo"] = ":".join(
-                [
-                    os.path.abspath(os.path.join(self.arch.cluster, "local-repo")),
-                    "/var/opt/tpa/local-repo",
-                    "ro",
-                ]
-            )
 
         return local_sources, errors
 
