@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-## v22.14 (unreleased)
+## v22.14 (2022-05-16)
 
 ### Notable changes
 
@@ -25,6 +25,14 @@
   There are a number of problems on older versions of Docker that we can
   neither fix, nor work around. We now require the latest major release
   of Docker CE.
+
+- Support running pgbouncer in front of harp-proxy on the same instance
+  (by setting `role: [harp-proxy, pgbouncer]` on the instance)
+
+  This allows applications to connect to harp-proxy through pgbouncer,
+  and is not the same thing as running harp-proxy in pgbouncer mode,
+  which involves harp-proxy connecting to Postgres through pgbouncer.
+  (These two modes are mutually exclusive.)
 
 ### Minor changes
 
@@ -49,6 +57,9 @@
 - Add `bdr_camo_use_raft_for_local_mode: [true|false]` setting to
   configure the RAFT fallback mode for CAMO pairs in BDR 4.1 (only)
 
+- Install edb-pgd-cli and edb-bdr-utilities packages by default on all
+  BDR (4.1 and above only) instances
+
 ### Bugfixes
 
 - Check that TPA_2Q_SUBSCRIPTION_TOKEN is set when needed
@@ -56,6 +67,10 @@
   Fixes a 403 error during the repository in clusters configured to use
   Postgres Extended (--2q) without setting --2Q-repositories and without
   providing a token.
+
+- Before restarting etcd, check endpoint health of etcd instances in the
+  same harp_location only (since instances in other locations may not be
+  reachable)
 
 ## v22.13 (2022-04-25)
 
