@@ -63,7 +63,7 @@ export PYTHONPATH=${PYTHONPATH:+$PYTHONPATH:}$TPA_DIR/lib
 version() {
     if [[ -f $TPA_DIR/VERSION ]]; then
         VERSION=$(cat "$TPA_DIR/VERSION")
-    elif [[ -d $TPA_DIR/.git ]]; then
+    elif [[ -e $TPA_DIR/.git ]]; then
         if command -v git &>/dev/null; then
             VERSION=$(cd "$TPA_DIR" && echo "$(git describe) (branch: $(git branch | sed -n 's/^\* //p'))")
         else
