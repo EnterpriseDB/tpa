@@ -246,6 +246,7 @@
   vars:
     _group_proxies: "{{
       groups['role_harp-proxy']
+      |default([])
       |select_by_hostvar(hostvars, 'bdr_node_group', bdr_node_group)
       |list
     }}"
