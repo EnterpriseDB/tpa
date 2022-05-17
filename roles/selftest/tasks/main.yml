@@ -22,3 +22,10 @@
     - flock
   vars:
     path: "{{ lookup('pipe', 'command -v {{ item }} || true') }}"
+
+- name: Ensure collection community.crypto is installed
+  community.crypto.crypto_info:
+  register: crypto_information
+- name: Ensure python crypto module is installed
+  assert:
+    that: crypto_information.python_cryptography_installed

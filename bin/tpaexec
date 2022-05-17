@@ -204,6 +204,23 @@ _apply_patches() {
     fi
 }
 
+_install_ansible_collections() {
+
+    # If ansible collections are bundled (i.e. the tpaexec-deps package has
+    # been installed), we configure ansible-galaxy to use them instead of trying
+    # to download them from the network.
+
+    if [ -d "${TPA_DIR}/collections-static" ] ;then
+        ANSIBLE_COLLECTIONS="${TPA_DIR}/collections-static"
+    else
+        ANSIBLE_COLLECTIONS="${TPA_DIR}/collections"
+    fi
+    (
+        cd "$ANSIBLE_COLLECTIONS" && \
+        "${ansible}"-galaxy collection install -p "${TPA_VENV}/collections" -r requirements.yml
+    )
+}
+
 setup() {
     while [[ $# -gt 0 ]]; do
         opt=$1
@@ -227,6 +244,7 @@ setup() {
     _create_and_activate_venv "${vpath:=$TPA_VENV}"
     _install_pip_packages
     _apply_patches
+    _install_ansible_collections
 }
 
 _with_ansible_env() {
@@ -234,6 +252,7 @@ _with_ansible_env() {
     ANSIBLE_FILTER_PLUGINS=${ANSIBLE_FILTER_PLUGINS:+$ANSIBLE_FILTER_PLUGINS:}$TPA_DIR/lib/filter_plugins \
     ANSIBLE_LOOKUP_PLUGINS=${ANSIBLE_LOOKUP_PLUGINS:+$ANSIBLE_LOOKUP_PLUGINS:}$TPA_DIR/lib/lookup_plugins \
     ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TPA_DIR/lib/test_plugins \
+    ANSIBLE_COLLECTIONS_PATHS=${ANSIBLE_COLLECTIONS_PATHS:+$ANSIBLE_COLLECTIONS_PATHS:}$TPA_VENV/collections \
     "$@"
 }
 
