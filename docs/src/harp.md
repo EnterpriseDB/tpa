@@ -17,7 +17,7 @@ Variable | Default value | Description
 ---- | ---- | ---
 `cluster_name` | `` | The name of the cluster.
 
-`harp_consensus_protocol` | `bdr` | The consensus layer to use (`etcd` or `bdr`)
+`harp_consensus_protocol` | `etcd` | The consensus layer to use (`etcd` or `bdr`)
 `harp_location` | `location` | The location of this instance (defaults to the `location` parameter)
 `harp_ready_status_duration` | `10` | Amount of time in seconds the node's readiness status will persist if not refreshed.
 `harp_leader_lease_duration` | `6` | Amount of time in seconds the Lead Master lease will persist if not refreshed.
@@ -37,9 +37,8 @@ Variable | Default value | Description
 
 ## Consensus layer
 
-By default, TPAexec will set `harp_consensus_protocol: bdr`, but if you
-set it to `etcd` instead, it can install and configure etcd on the BDR
-instances.
+By default, TPAexec will set `harp_consensus_protocol: etcd`, and
+install and configure etcd on the BDR instances.
 
 HARP v2 requires etcd v3.5.0 or above, which is available in the
 products/harp/release package repositories provided by EDB.
