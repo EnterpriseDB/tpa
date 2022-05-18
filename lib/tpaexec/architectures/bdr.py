@@ -47,12 +47,19 @@ class BDR(Architecture):
             action="store_true",
             help="assign instances pairwise as CAMO partners",
         )
+        g.add_argument(
+            "--harp-consensus-protocol",
+            choices=["etcd", "bdr"],
+            default="etcd",
+            help="the consensus protocol to use for HARP v2",
+        )
 
     def cluster_vars_args(self):
         return super().cluster_vars_args() + [
             "bdr_version",
             "bdr_node_group",
             "bdr_database",
+            "harp_consensus_protocol",
         ]
 
     def update_cluster_vars(self, cluster_vars):
