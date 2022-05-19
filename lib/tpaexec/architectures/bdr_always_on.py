@@ -17,6 +17,15 @@ class BDR_Always_ON(BDR):
             ("14", "4"),
         ]
 
+    def add_architecture_options(self, p, g):
+        super().add_architecture_options(p, g)
+        g.add_argument(
+            "--harp-consensus-protocol",
+            choices=["etcd", "bdr"],
+            required=True,
+            help="the consensus protocol to use for HARP v2",
+        )
+
     def update_argument_defaults(self, defaults):
         super().update_argument_defaults(defaults)
         defaults.update(

@@ -59,6 +59,7 @@ runs:
       run: |
         if [ "${{ matrix.tpa_architecture }}" == "BDR-Always-ON" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --layout bronze"
+          CONFIGURE_EXTRA_ARGS+=" --harp-consensus-protocol etcd"
         fi
         if [ -n "${{ inputs.tpa_os }}" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --os ${{ inputs.tpa_os }}"
