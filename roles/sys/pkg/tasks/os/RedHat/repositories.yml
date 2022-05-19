@@ -215,6 +215,7 @@
 
 - name: Retrieve list of PGDG repository entries
   shell: >
+    set -o pipefail &&
     test -f {{ _repo }} &&
     awk 'match($0, /^\[(.*)\]$/, t) { repo = t[1] }
     match($0, /^\[({{ _wanted }}.*)\]$/, t) { print t[1] }

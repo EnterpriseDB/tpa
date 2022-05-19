@@ -4,6 +4,7 @@
 
 - name: Remove unused 2Q repository definitions
   shell: >
+    set -o pipefail &&
     if [[ $({{ find_cmd }}| wc -l) != 0 ]]; then
     {{ find_cmd }} -exec rm {} ';'; exit 99;
     fi
