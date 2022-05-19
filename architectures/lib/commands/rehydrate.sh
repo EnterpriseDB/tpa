@@ -32,9 +32,9 @@ _tpaexec_command() {
         shift
     fi
 
-    # We terminate the old instances after performing some sanity
-    # checks, provision replacements for them, and deploy to the
-    # newly-provisioned instances.
+    # We terminate the old instances (after checking that we will be
+    # able to reattach their volumes), provision replacements for them,
+    # and deploy to the newly-provisioned instances.
 
     playbook "$TPA_DIR/platforms/aws/terminate-for-rehydration.yml" \
         -e i_really_want_to_destroy_my_entire_cluster=$DESTROY \

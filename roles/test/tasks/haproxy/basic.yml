@@ -3,8 +3,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # NOTE: This test is special, because update-postgres uses it directly
-# as a sanity check. It should test only the fundamental properties we
-# expect from the haproxy configuration.
+# as a pre-update health check of the cluster. It should test only the
+# fundamental properties we expect from the haproxy configuration.
 
 - assert:
     msg: "This test may be applied only to haproxy instances"
@@ -42,7 +42,8 @@
 # The first (commented) line is a list of column names, most of which we
 # don't care about (see contrib/prometheus-exporter/service-prometheus.c
 # in the haproxy source for an explanation of the column names). But we
-# build a table of results in order to perform some basic sanity checks.
+# build a table of results in order to verify that the frontends and
+# backends are all working as expected.
 #
 # The "pxname" (proxy name) should be either "fe" or "be", corresponding
 # to the definitions in haproxy.cfg. The fe proxy should have one entry

@@ -81,7 +81,7 @@
 ## Final topology validation
 #
 # Once all the platform-specific validations have been run and given an
-# opportunity to fix anything they can, we perform some sanity checks on
-# the cluster topology.
+# opportunity to fix anything they can, we check the overall cluster
+# topology and relationships between instances.
 
 - import_tasks: common/validate-topology.yml

@@ -573,7 +573,7 @@ SETUP
             cat <<SELFTEST
 Command: tpaexec selftest
 
-Performs a sanity test on this installation of TPAexec
+Performs some tests to verify that TPAexec is installed correctly.
 SELFTEST
             ;;
 

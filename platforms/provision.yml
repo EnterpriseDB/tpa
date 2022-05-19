@@ -40,8 +40,8 @@
 
   ## Validation
   #
-  # Now we can perform some generic sanity checks of the configuration
-  # followed by platform-specific ones.
+  # Now we check that the configuration is valid. We perform generic
+  # tests first, followed by platform-specific ones.
   #
   # For convenience, we separate instances[] into aws_instances[],
   # bare_instances[], and so on, and each platform can operate on its

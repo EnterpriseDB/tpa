@@ -3,8 +3,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # NOTE: This test is special, because update-postgres uses it directly
-# as a sanity check. It should test only the fundamental properties we
-# expect from the pgbouncer configuration.
+# as a pre-update health check of the cluster. It should test only the
+# fundamental properties we expect from the pgbouncer configuration.
 
 - assert:
     msg: "This test may be applied only to pgbouncer instances"

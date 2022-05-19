@@ -49,8 +49,7 @@
   become: yes
 
 # Now we can collect cluster_facts for this instance if they are not yet
-# available, and subsequent sanity checks can depend on the presence of
-# these facts.
+# available; subsequent tests depend on the presence of these facts.
 
 - include_role: name=postgres/facts
   when:

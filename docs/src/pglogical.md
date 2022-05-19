@@ -68,9 +68,9 @@ specify a different `node_name` if required—for example, when you have
 configured a publication in the same database, so that all subscriptions
 in that database must share the same pglogical node.
 
-TPAexec performs a basic sanity check on the configuration—it will point
-out the error if you spell `replication_sets` as `replciation_sets`,
-or try to subscribe to a publication that is not defined, but it is your
+TPAexec does some basic validation of the configuration—it will point
+out the error if you spell `replication_sets` as `replciation_sets`, or
+try to subscribe to a publication that is not defined, but it is your
 responsibility to specify a meaningful set of publications and
 subscriptions.
 
@@ -251,7 +251,7 @@ not apply.
 
 * There is currently no support for
   `pglogical.replication_set_add_all_{tables,sequences}()`
-    
+
 * There is currently no support for
   `pglogical.alter_subscription_{interface,writer_options}()` or
   `pglogical.alter_subscription_{add,remove}_log()`

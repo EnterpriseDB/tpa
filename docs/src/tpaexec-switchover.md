@@ -7,9 +7,9 @@ selected replica is promoted to be the new primary, the former primary
 becomes a new replica, and any other replicas in the cluster will be
 reconfigured to follow the new primary.
 
-The command performs various sanity checks before switching roles, and
-is designed to be run without having to shut down any repmgr services
-beforehand.
+The command checks that the cluster is healthy before switching roles,
+and is designed to be run without having to shut down any repmgr
+services beforehand.
 
 (This is equivalent to running `repmgr standby switchover` with the
 `--siblings-follow` option.)

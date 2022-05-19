@@ -2,10 +2,10 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-# Now we do whatever is necessary to run ``repmgr xxx register`` on the
-# instances in the cluster. That means some sanity checking for primary
-# and witness instances, but for replicas, it might involve cloning the
-# primary first.
+# Now we do whatever is necessary to run `repmgr xxx register` on the
+# instances in the cluster. For primary and witness instances, we need
+# only check that they're not already registered, but for replicas, we
+# may need to clone the primary first.
 
 - include_role: name=repmgr/primary/final
   when: >
