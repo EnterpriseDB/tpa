@@ -44,3 +44,21 @@ class BDR_Always_ON(BDR):
 
     def default_location_names(self):
         return [chr(ord("a") + i) for i in range(self.num_locations())]
+
+    def update_instances(self, instances):
+        """
+        When using `harp_consensus_protocol: etcd`, explicitly add 'etcd' to the
+        role for each BDR primary or witness instance that should run etcd.
+        """
+
+        if self.args.get("harp_consensus_protocol") == "etcd":
+            ins_defs = self.args["instance_defaults"]
+            for i in instances:
+                role = i.get("role", ins_defs.get("role", []))
+                if (
+                    "bdr" in role
+                    and "replica" not in role
+                    and "readonly" not in role
+                    and "subscriber-only" not in role
+                ):
+                    i["role"].append("etcd")
