@@ -26,6 +26,7 @@ env:
   EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
   EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
   ANSIBLE_SKIP_TAGS: pgbench
+  PYTHONWARNINGS: once
 
 jobs:
 
