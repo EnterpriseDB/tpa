@@ -19,10 +19,17 @@
 
   - name: Show last few lines of installation log file, if it exists
     block:
-    - name: Fetch lines from installation log
+    - name: set log_file
+      set_fact:
+        log_file: >
+          {{ inst_log in ansible_failed_result.stdout
+          |ternary(ansible_failed_result.stdout,ansible_failed_result.stderr)
+          |regex_search('\/tmp\/2ndq_packages_installation\.log\..[a-z]+') }}
+
+    - name: Fetch lines from {{ log_file }}
       shell: >
         set -o pipefail &&
-        ls -tr /tmp/2ndq_packages_installation.log.*
+        ls -tr {{ log_file }}
         | tail -n1
         | xargs tail -n5
       args:
@@ -34,7 +41,7 @@
       fail:
         msg: "{{ inst_log_tail.stdout }}"
       when:
-        inst_log_tail is not skipped
+        not inst_log_tail.skipped
 
     vars:
       inst_log: /tmp/2ndq_packages_installation.log
