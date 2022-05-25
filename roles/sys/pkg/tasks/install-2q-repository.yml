@@ -19,7 +19,7 @@
 
   - name: Show last few lines of installation log file, if it exists
     block:
-    - name: set log_file
+    - name: Search command output to find temp log_file name
       set_fact:
         log_file: >
           {{ ansible_failed_result.stdout
