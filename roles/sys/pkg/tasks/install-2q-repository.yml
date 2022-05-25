@@ -22,32 +22,22 @@
     - name: set log_file
       set_fact:
         log_file: >
-          {{ inst_log in ansible_failed_result.stdout
-          |ternary(ansible_failed_result.stdout,ansible_failed_result.stderr)
-          |regex_search('\/tmp\/2ndq_packages_installation\.log\..[a-z]+') }}
+          {{ ansible_failed_result.stdout
+          |regex_search('\/tmp\/2ndq_packages_installation\.log\..[a-zA-Z0-9]+') }}
 
     - name: Fetch lines from {{ log_file }}
-      shell: >
-        set -o pipefail &&
-        ls -tr {{ log_file }}
-        | tail -n1
-        | xargs tail -n5
-      args:
-        executable: /bin/bash
+      command: tail -n5 {{ log_file }}
       register: inst_log_tail
       changed_when: False
 
-    - name: Display lines from failed installation log
+    - name: Display lines from failed installation log {{ log_file }}
       fail:
         msg: "{{ inst_log_tail.stdout }}"
-      when:
-        not inst_log_tail.skipped
 
     vars:
       inst_log: /tmp/2ndq_packages_installation.log
     when:
       inst_log in ansible_failed_result.stdout
-      or inst_log in ansible_failed_result.stderr
 
   - name: "Failed task '{{ ansible_failed_task.name }}'"
     fail:
