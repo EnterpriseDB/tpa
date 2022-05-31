@@ -1,0 +1,68 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- include_tasks: privatekey.yml
+
+- name: Check if server certificate exists
+  stat:
+    path: "{{ certificate_path }}"
+  register: crt_check
+  check_mode: no
+
+- name: "Verify server certificate {{ certificate_path }}"
+  include_role:
+    name: sys/ssl
+    tasks_from: verify
+  when: crt_check.stat.exists
+
+- include_tasks: "{{
+    use_ssl_cert_authentication|ternary(
+      'certificate.yml', 'selfsigned.yml'
+    )
+  }}"
+  when: >
+    not crt_check.stat.exists
+    or not cert_verify_passed
+
+- name: Copy CA certificate to target instances
+  copy:
+    src: "{{ local_ca_certificate_path }}"
+    dest: "{{ ca_path }}"
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
+    mode: 0644
+    force: no
+  when:
+    use_ssl_cert_authentication
+  notify:
+    - Note SSL configuration changed
+
+- name: Set path to CA certificate(s)
+  set_fact:
+    ssl_ca_file: "{{ ssl_ca_file|default(ca_path) }}"
+  when:
+    use_ssl_cert_authentication
+
+- name: Set paths to SSL key and certificate
+  set_fact:
+    ssl_key_file: "{{ ssl_key_file|default(privatekey_path) }}"
+    ssl_cert_file: "{{ ssl_cert_file|default(certificate_path) }}"
+
+- include_role:
+    name: sys/ssl
+    tasks_from: security
+  vars:
+    ssl_dirs: [ssl_dir|default(certificate_path|dirname)]
+
+- name: Verify certificate was generated correctly
+  include_role:
+    name: sys/ssl
+    tasks_from: verify
+
+- name: Bail if certificate does not pass verification checks
+  fail:
+    msg: >
+      Post creation verification checks did not pass for Server certificate.
+      Please run with verbose flags to determine the reason.
+  when: not cert_verify_passed

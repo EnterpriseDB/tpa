@@ -1,0 +1,89 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Include pre-client-csr hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/pre-client-csr.yml"
+  tags: always
+
+- name: Generate client CSR on target instances
+  community.crypto.openssl_csr:
+    path: "{{ csr_path }}"
+    privatekey_path: "{{ privatekey_path }}"
+    common_name: "{{ CN }}"
+    basic_constraints: "CA:FALSE"
+    basic_constraints_critical: yes
+    force: no
+
+- name: Retrieve client CSRs from target instances
+  fetch:
+    src: "{{ csr_path }}"
+    dest: "{{ local_csr_path }}"
+    flat: yes
+
+- name: Include pre-client-cert hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/pre-client-cert.yml"
+  tags: always
+
+# We will only sign CSRs with the local CA key and certificate that we
+# generated; if you want to sign the CSR differently, you must use the
+# pre-client-cert hook and generate the certificate, in which case this
+# task will do nothing.
+
+- name: Generate client certificate locally
+  community.crypto.x509_certificate:
+    path: "{{ local_certificate_path }}"
+    csr_path: "{{ local_csr_path }}"
+    ownca_path: "{{ local_ca_certificate_path }}"
+    ownca_privatekey_path: "{{ local_ca_privatekey_path }}"
+    ownca_not_after: "{{ _expiry }}"
+    provider: ownca
+    force: no
+  vars:
+    _expiry: "{{
+        ssl_client_cert_expiry
+        |default(ssl_cert_expiry)
+        |default(default_ssl_client_cert_expiry)
+      }}"
+  delegate_to: localhost
+  become: no
+
+- name: Copy client certificate to target instances
+  copy:
+    src: "{{ local_certificate_path }}"
+    dest: "{{ certificate_path }}"
+    owner: "{{ clientcert_owner }}"
+    group: "{{ clientcert_group }}"
+    mode: 0644
+
+# The hook may have used a different CA certificate and changed the
+# local_ca_certificate_path, so we don't insist on copying only our
+# own CA.crt.
+
+- name: Copy root certificate to target instances
+  copy:
+    src: "{{ local_ca_certificate_path }}"
+    dest: "{{ ca_path }}"
+    owner: "{{ clientcert_owner }}"
+    group: "{{ clientcert_group }}"
+    mode: 0644
+
+- name: Remove client CSR on target instances
+  file:
+    path: "{{ csr_path }}"
+    state: absent
+
+- name: Ensure certificate and key permissions are secure
+  include_role:
+    name: sys/ssl
+    tasks_from: security
+  vars:
+    ssl_dirs: [ssl_dir]

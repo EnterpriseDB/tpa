@@ -1,0 +1,46 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# Verify any x509 certificate and private key pair
+# Verify that:
+#  * the certificate is current
+#  * the public and private key match
+#  * the certificate is signed by the CA (if one is defined) or is self-signed
+
+- name: "Get information on the private key {{ privatekey_path }}"
+  community.crypto.openssl_privatekey_info:
+    path: "{{ privatekey_path }}"
+  register: key_info
+
+- name: "Get information on the certificate {{ certificate_path }}"
+  community.crypto.x509_certificate_info:
+    path: "{{ certificate_path }}"
+    valid_at:
+      min_valid_period: "{{ ssl_cert_min_valid_period|default('+7d') }}"
+  register: cert_info
+
+- name: "Get information on the CA certificate"
+  community.crypto.x509_certificate_info:
+    path: "{{ _ca_path }}"
+  register: ca_cert_info
+  when: >
+    _ca_path
+  vars:
+    _ca_path: "{{ ssl_ca_file|default(ca_path)|default(None) }}"
+
+- name: "Set facts on validity for certificate {{ certificate_path }}"
+  set_fact:
+    cert_key_match: "{{ key_info.public_key == cert_info.public_key }}"
+    cert_expired: "{{ cert_info.expired }}"
+    cert_valid_until_min_period: "{{ cert_info.valid_at.min_valid_period }}"
+    cert_signed_by_ca: "{{ cert_info.issuer == ca_cert_info.subject|default(cert_info.issuer) }}"
+
+- name: Set an overall pass fact for the certificate validation checks
+  set_fact:
+    cert_verify_passed: "{{
+       cert_key_match
+       and not cert_expired
+       and cert_valid_until_min_period
+       and cert_signed_by_ca
+    }}"

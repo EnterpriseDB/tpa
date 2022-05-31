@@ -1,0 +1,18 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# We used to generate a cluster_name.{key,crt} keypair earlier. If these
+# files exist, and we don't need to configure certificate authentication
+# (which won't work with self-signed host certificates), we just use the
+# existing keys for backwards compatibility.
+
+- name: Check if legacy server certificate is installed
+  stat:
+    path: "/etc/tpa/{{ cluster_name }}.crt"
+  register: old_crt_check
+  check_mode: no
+
+- name: Set legacy ssl fact if certificate is present
+  set_fact:
+    legacy_ssl_enabled: "{{ old_crt_check.stat.exists }}"

@@ -1,0 +1,33 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Generate server CSR
+  community.crypto.openssl_csr:
+    path: "{{ csr_path|mandatory }}"
+    privatekey_path: "{{ privatekey_path|mandatory }}"
+    common_name: "{{ inventory_hostname }}"
+    basic_constraints: "CA:FALSE"
+    basic_constraints_critical: yes
+
+- name: Generate self-signed server certificate
+  community.crypto.x509_certificate:
+    path: "{{ certificate_path }}"
+    csr_path: "{{ csr_path }}"
+    privatekey_path: "{{ privatekey_path }}"
+    selfsigned_not_after: "{{ _expiry }}"
+    provider: selfsigned
+    force: no
+  vars:
+    _expiry: "{{
+        ssl_server_cert_expiry
+        |default(ssl_cert_expiry)
+        |default(default_ssl_server_cert_expiry)
+      }}"
+  notify:
+    - Note SSL configuration changed
+
+- name: Remove server CSR
+  file:
+    path: "{{ csr_path }}"
+    state: absent

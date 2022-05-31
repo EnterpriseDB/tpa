@@ -1,0 +1,24 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# Make sure that any installed certificates have sensible ownership and
+# permissions.
+
+- name: Retrieve list of key/certificate files
+  find:
+    paths: "{{ ssl_dirs }}"
+    patterns: ["*.crt", "*.key"]
+  register: keycertfiles
+  changed_when: False
+  check_mode: no
+
+- name: Set correct ownership and mode on key/certificate files
+  file:
+    path: "{{ item.path }}"
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
+    mode: "{{
+      '0600' if item.path.endswith('.key') else '0644'
+    }}"
+  with_items: "{{ keycertfiles.files }}"

@@ -1,0 +1,11 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+default_ssl_client_cert_expiry: +365d
+
+local_ssl_dir: "{{ cluster_dir }}/ssl"
+
+local_ca_certificate_path: "{{ local_ssl_dir }}/CA.crt"
+local_csr_path: "{{ local_ssl_dir }}/{{ inventory_hostname }}/{{ username }}.csr"
+local_certificate_path: "{{ local_ssl_dir }}/{{ inventory_hostname }}/{{ username }}.crt"

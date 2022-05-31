@@ -1,0 +1,15 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+CN: "{{ username }}"
+
+clientcert_owner: "{{ username }}"
+clientcert_group: "{{ username }}"
+clientcert_service: "{{ username }}"
+
+ssl_dir: "/etc/tpa/client"
+ca_path: "{{ ssl_dir }}/root.crt"
+csr_path: "{{ ssl_dir }}/{{ clientcert_service }}.csr"
+privatekey_path: "{{ ssl_dir }}/{{ clientcert_service }}.key"
+certificate_path: "{{ ssl_dir }}/{{ clientcert_service }}.crt"

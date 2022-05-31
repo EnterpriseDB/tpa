@@ -103,6 +103,12 @@
   tags: cloudinit
 
 - include_role:
+    name: sys/ssl
+    apply:
+      tags: ssl
+  tags: ssl
+
+- include_role:
     name: sys/rsyslog
     apply:
       tags: rsyslog

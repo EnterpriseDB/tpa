@@ -9,3 +9,8 @@
 - name: Note Postgres restart required
   set_fact:
     postgres_service_end_state: restarted
+
+- name: Restart Postgres when SSL configuration changes
+  listen: Note SSL configuration changed
+  set_fact:
+    postgres_service_end_state: restarted

@@ -1,0 +1,67 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Include pre-server-csr hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/pre-server-csr.yml"
+  tags: always
+
+- name: Generate server CSR on target instances
+  community.crypto.openssl_csr:
+    path: "{{ csr_path|mandatory }}"
+    privatekey_path: "{{ privatekey_path|mandatory }}"
+    common_name: "{{ inventory_hostname }}"
+    basic_constraints: "CA:FALSE"
+    basic_constraints_critical: yes
+    force: no
+
+- name: Retrieve server CSRs from target instances
+  fetch:
+    src: "{{ csr_path }}"
+    dest: "{{ local_csr_path }}"
+    flat: yes
+
+- name: Include pre-server-cert hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/pre-server-cert.yml"
+  tags: always
+
+- name: Generate server certificate locally
+  community.crypto.x509_certificate:
+    path: "{{ local_certificate_path }}"
+    csr_path: "{{ local_csr_path }}"
+    ownca_path: "{{ local_ca_certificate_path }}"
+    ownca_privatekey_path: "{{ local_ca_privatekey_path }}"
+    ownca_not_after: "{{ _expiry }}"
+    provider: ownca
+    force: no
+  vars:
+    _expiry: "{{
+        ssl_server_cert_expiry
+        |default(ssl_cert_expiry)
+        |default(default_ssl_server_cert_expiry)
+      }}"
+  delegate_to: localhost
+  become: no
+
+- name: Copy server certificate to target instances
+  copy:
+    src: "{{ local_certificate_path }}"
+    dest: "{{ certificate_path }}"
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
+    mode: 0644
+  notify:
+    - Note SSL configuration changed
+
+- name: Remove server CSR on target instances
+  file:
+    path: "{{ csr_path }}"
+    state: absent

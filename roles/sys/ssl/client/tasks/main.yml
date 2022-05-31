@@ -1,0 +1,57 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Create client SSL directory if required
+  file:
+    state: directory
+    path: "{{ ssl_dir }}"
+    owner: "{{ clientcert_owner }}"
+    group: "{{ clientcert_group }}"
+    mode: 0700
+
+- name: Generate private key
+  community.crypto.openssl_privatekey:
+    state: present
+    path: "{{ privatekey_path|mandatory }}"
+    owner: "{{ clientcert_owner }}"
+    group: "{{ clientcert_group }}"
+    mode: 0600
+    force: no
+
+- name: Check if client certificate exists
+  stat:
+    path: "{{ certificate_path }}"
+  register: client_crt_check
+  check_mode: no
+
+- name: "Verify client certificate {{ certificate_path }}"
+  include_role:
+    name: sys/ssl
+    tasks_from: verify
+  when: crt_check.stat.exists
+
+- include_tasks: certificate.yml
+  when:
+    not client_crt_check.stat.exists
+    or not cert_verify_passed
+
+- include_role:
+    name: sys/ssl
+    tasks_from: security
+  vars:
+    ssl_dirs: [ssl_dir]
+    ssl_user: "{{ clientcert_owner }}"
+    ssl_group: "{{ clientcert_group }}"
+
+- name: Verify certificate was generated correctly
+  include_role:
+    name: sys/ssl
+    tasks_from: verify
+
+- name: Bail if certificate does not pass verification checks
+  fail:
+    msg: >
+      Post creation verification checks did not pass for Client certificate.
+      Please run with verbose flags to determine the reason.
+  when: not cert_verify_passed

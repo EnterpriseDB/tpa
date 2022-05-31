@@ -1,0 +1,37 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# Verify x509 CA certificate and private key pair
+# Verify that the certificate is current and the public and private key match
+
+- block:
+    - name: "Get information on the private key {{ local_ca_privatekey_path }}"
+      community.crypto.openssl_privatekey_info:
+        path: "{{ local_ca_privatekey_path }}"
+      register: ca_key_info
+
+    - name: "Get information on the certificate {{ local_ca_certificate_path }}"
+      community.crypto.x509_certificate_info:
+        path: "{{ local_ca_certificate_path }}"
+        valid_at:
+          min_valid_period: "{{ ssl_cert_min_valid_period|default('+7d') }}"
+      register: ca_cert_info
+
+    - name: "Set facts on validity for certificate {{ local_ca_certificate_path }}"
+      set_fact:
+        ca_cert_key_match: "{{ ca_key_info.public_key == ca_cert_info.public_key }}"
+        ca_cert_expired: "{{ ca_cert_info.expired }}"
+        ca_cert_valid_until_min_period: "{{ ca_cert_info.valid_at.min_valid_period }}"
+
+    - name: Set an overall pass fact for the certificate validation checks
+      set_fact:
+        ca_cert_verify_passed: "{{
+           ca_cert_key_match
+           and not ca_cert_expired
+           and ca_cert_valid_until_min_period
+        }}"
+
+  delegate_to: localhost
+  run_once: true
+  become: no
