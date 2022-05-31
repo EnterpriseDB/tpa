@@ -19,6 +19,10 @@
       privs: SELECT
       schema: bdr
       objs: consensus_kv_data
+    - type: table
+      privs: SELECT
+      schema: bdr
+      objs: local_node_summary
     - type: function
       privs: EXECUTE
       schema: bdr
@@ -31,6 +35,18 @@
       privs: EXECUTE
       schema: bdr
       objs: "bdr_version_num()"
+    - type: function
+      privs: EXECUTE
+      schema: bdr
+      objs: "get_raft_status()"
+    - type: function
+      privs: EXECUTE
+      schema: bdr
+      objs: "peer_state_name(oid)"
+    - type: function
+      privs: EXECUTE
+      schema: bdr
+      objs: "monitor_group_raft()"
   become_user: "{{ postgres_user }}"
   become: yes
   when:
