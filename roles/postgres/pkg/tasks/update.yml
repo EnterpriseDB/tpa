@@ -3,10 +3,12 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - include_tasks: list-packages.yml
+  vars:
+    list_varname: _all_postgres_packages
 
 - name: Install latest Postgres packages
   package:
-    name: "{{ all_postgres_packages }}"
+    name: "{{ _all_postgres_packages }}"
     state: "{{ _state }}"
   vars:
     _state: "{{

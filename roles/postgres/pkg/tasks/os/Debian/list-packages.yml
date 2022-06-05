@@ -2,21 +2,157 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-# For Postgres 10+ on Debian and Ubuntu, the main postgresql package
-# "provides" a virtual postgresql-contrib, and there is no longer a
-# separate package for the latter. We could continue to install it,
-# but it doesn't work if postgres_package_version is set explicitly.
+# We don't try to install postgresql-contrib for Postgres 10+ on Debian
+# and Ubuntu, because there isn't a separate package any more. The main
+# postgresql package "provides" a virtual postgresql-contrib (which you
+# can't install if postgres_package_version is set explicitly). For 9.6
+# and below, we must add postgresql-contrib back to the package list.
 
-- name: Omit contrib package for Postgres 10+
+- name: Add separate contrib package for Postgres 9.6 and below
   set_fact:
     postgres_packages: "{{
       postgres_packages|combine({
-        postgres_family: {
-          ansible_distribution:
-            postgres_packages[postgres_family][ansible_distribution]
-            |reject('contains', '-contrib-')
-            |list
-          }
+        postgres_family: {ansible_distribution: _new_pkg_list}
       })
     }}"
-  when: postgres_version is version('10', '>=')
+  vars:
+    _contrib_package:
+      "{{ postgres_package_name }}-contrib-{{ postgres_version }}"
+    _old_pkg_list:
+      "{{ postgres_packages[postgres_family][ansible_distribution] }}"
+    _new_pkg_list:
+      "{{ _old_pkg_list|union(_contrib_package) }}"
+  when:
+    postgres_version is version('9.6', '<=')
+
+# Also, for older versions, we must switch to using -dbg packages
+# instead of -dbgsym ones for Postgres (only; but see below).
+
+- name: Switch to dbg (not dbgsym) debug packages for Postgres 9.6 and below
+  set_fact:
+    postgres_debug_packages: "{{
+      postgres_debug_packages|combine({
+        postgres_family: {ansible_distribution: _new_pkg_list}
+      })
+    }}"
+  vars:
+    _old_pkg_list:
+      "{{ postgres_packages[postgres_family][ansible_distribution] }}"
+    _new_pkg_list:
+      "{{ _old_pkg_list|map('replace', '-dbgsym', '-dbg')|list }}"
+  when:
+    postgres_version is version('9.6', '<=')
+
+# In an ideal world, we would just install -dbgsym packages on all
+# recent versions/distributions. Alas, even this humble vision is
+# tantalisingly beyond our reach when it comes to pglogical/BDR.
+#
+# PGDG follows the same convention for dbg/dbgsym as for postgres debug
+# packages above, so if we're installing pglogical 2.x from PGDG (which
+# we don't know; it all depends on which repositories are configured),
+# we can use the default -dbgsym packages. We can also use -dbgsym
+# packages for any EPAS build.
+#
+# We must, however, switch to -dbg with older versions of Postgres, and
+# for pglogical/BDR packages published in the 2Q repos (even with recent
+# versions of Postgres), at least until we start publishing -dbgsym
+# packages (if that day ever comes).
+
+- when: postgres_family != 'epas'
+  block:
+
+  # Check if we can install the default pglogical -dbgsym packages, and
+  # switch to dbg otherwise. For older versions, we must always switch.
+
+  - when: need_pglogical_packages
+    block:
+    - name: Check if pglogical -dbgsym packages are available
+      include_role: name=pkg/install
+      vars:
+        package_list_name: "pglogical debug packages"
+        package_list: "{{
+            pglogical_debug_packages[postgres_family]
+            |packages_for(ansible_distribution, pglogical_package_version)
+          }}"
+        check_result_varname: pglogical_dbgsym_check
+        check_install_only: yes
+      when:
+        postgres_version is version('10', '>=')
+
+    - name: Switch to dbg (not dbgsym) debug packages for pglogical
+      set_fact:
+        pglogical_debug_packages: "{{
+            pglogical_debug_packages|combine({
+              postgres_family: {ansible_distribution: _new_pkg_list}
+            })
+          }}"
+      vars:
+        _old_pkg_list:
+          "{{ pglogical_debug_packages[postgres_family][ansible_distribution] }}"
+        _new_pkg_list:
+          "{{ _old_pkg_list|map('replace', '-dbgsym', '-dbg')|list }}"
+      when:
+        pglogical_dbgsym_check is skipped
+        or pglogical_dbgsym_check is not successful
+
+  # Same thing again for BDR, except that if we've already checked for
+  # pglogical, we don't need to test again (fortunately, if we publish
+  # dbg packages for one, we won't publish dbgsym packages for the
+  # other).
+
+  - when: need_bdr_packages
+    block:
+    - name: Check if bdr -dbgsym packages are available
+      include_role: name=pkg/install
+      vars:
+        package_list_name: "bdr debug packages"
+        package_list: "{{
+            (bdr_version is version('4', '<'))
+            |ternary(
+              bdr_debug_packages[postgres_family],
+              bdr4_debug_packages[postgres_family_extended])
+            |packages_for(ansible_distribution, bdr_package_version)
+          }}"
+        check_result_varname: bdr_dbgsym_check
+        check_install_only: yes
+      when:
+        postgres_version is version('10', '>=')
+        or (pglogical_dbgsym_check is defined
+          and pglogical_dbgsym_check is not successful)
+
+    # Trying to modify either bdr_debug_packages or bdr4_debug_packages
+    # in the same task would make the task unnecessarily hard to read.
+
+    - name: Switch to dbg (not dbgsym) debug packages for BDR v3 and below
+      set_fact:
+        bdr_debug_packages: "{{
+            bdr_debug_packages|combine({
+              postgres_family: {ansible_distribution: _new_pkg_list}
+            })
+          }}"
+      vars:
+        _old_pkg_list:
+          "{{ bdr_debug_packages[postgres_family][ansible_distribution] }}"
+        _new_pkg_list:
+          "{{ _old_pkg_list|map('replace', '-dbgsym', '-dbg')|list }}"
+      when:
+        bdr_version is version('4', '<')
+        and (bdr_dbgsym_check is skipped
+          or bdr_dbgsym_check is not successful)
+
+    - name: Switch to dbg (not dbgsym) debug packages for BDR v4 and above
+      set_fact:
+        bdr4_debug_packages: "{{
+            bdr4_debug_packages|combine({
+              postgres_family_extended: {ansible_distribution: _new_pkg_list}
+            })
+          }}"
+      vars:
+        _old_pkg_list:
+          "{{ bdr4_debug_packages[postgres_family_extended][ansible_distribution] }}"
+        _new_pkg_list:
+          "{{ _old_pkg_list|map('replace', '-dbgsym', '-dbg')|list }}"
+      when:
+        bdr_version is version('4', '>=')
+        and (bdr_dbgsym_check is skipped
+          or bdr_dbgsym_check is not successful)
