@@ -1,0 +1,75 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# We need apt-rdepends for recursive (note: not reverse! this is not
+# like `apt-cache rdepends`) dependency resolution, and dpkg-dev for
+# dpkg-scanpackages, to generate repository metadata.
+
+- name: Install apt-rdepends and dpkg-dev
+  package:
+    name:
+      - apt-rdepends
+      - dpkg-dev
+
+# We run apt-rdepends on the passed-in package_list to get a recursive
+# list of dependencies. For example, `apt-rdepends lsof` shows
+#
+# $ apt-rdepends lsof
+# lsof
+#   Depends: libc6 (>= 2.11)
+#   Depends: libselinux1 (>= 3.1~)
+# libc6
+#   Depends: libcrypt1
+#   Depends: libgcc-s1
+# libcrypt1
+#   Depends: libc6 (>= 2.25)
+# libgcc-s1
+#   Depends: gcc-10-base (= 10.2.1-6)
+#   Depends: libc6 (>= 2.14)
+# gcc-10-base
+# libselinux1
+#   Depends: libc6 (>= 2.14)
+#   Depends: libpcre2-8-0 (>= 10.22)
+# libpcre2-8-0
+#   Depends: libc6 (>= 2.14)
+#
+# We take the all package names (minus "Depends:" and versions) and
+# run those through `apt-cache depends` to identify and exclude virtual
+# packages shown within <>:
+#
+# $ apt-cache depends postgresql-contrib-14
+# <postgresql-contrib-14>
+#
+# A resolved virtual package provider should be listed (indented)
+# The final list of unique packages is what we need to download.
+
+- name: Generate list of packages with all dependencies
+  shell: |
+    set -eo pipefail &&
+    apt-cache depends $(
+      apt-rdepends {{ _packages }} \
+      |sed 's/.*: \([^\s]*\)\s?.*/\1/' \
+      |sort -u
+    )|sed '/[<:]/d;s/\s*//'|sort -u
+  args:
+    executable: /bin/bash
+  register: _pkg_list
+  vars:
+    _packages: "{{ package_list|mandatory|map('quote')|join(' ') }}"
+
+- name: Download packages with apt-get (for {{ ansible_distribution }} {{ ansible_distribution_major_version }})
+  command: "apt-get download {{ _all_packages_and_dependencies }}"
+  args:
+    chdir: "{{ _download_dir }}"
+  register: _apt_get_download
+  vars:
+    _all_packages_and_dependencies: >
+      {{ _pkg_list.stdout_lines|map('quote')|join(' ') }}
+  changed_when: >
+    _apt_get_download.stdout_lines|length > 0
+
+- name: Generate repository metadata with dpkg-scanpackages
+  shell: dpkg-scanpackages . | gzip > Packages.gz
+  args:
+    chdir: "{{ _download_dir }}"

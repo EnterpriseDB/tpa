@@ -1,0 +1,6 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- include_tasks:
+    file: "os/{{ ansible_os_family }}/download.yml"

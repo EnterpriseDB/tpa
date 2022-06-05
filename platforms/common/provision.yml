@@ -9,9 +9,6 @@
   with_items:
     - vault
     - hostkeys
-    - inventory
-    - inventory/host_vars
-    - inventory/group_vars
   tags: always
 
 - import_tasks: ../common/read-provisioning-vars.yml

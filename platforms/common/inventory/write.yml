@@ -2,6 +2,16 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+- name: Ensure that the cluster's inventory directories exist
+  file:
+    path: "{{ cluster_dir }}/{{ item }}"
+    state: directory
+  with_items:
+    - inventory
+    - inventory/host_vars
+    - inventory/group_vars
+  tags: always
+
 - name: Write static inventory file
   template:
     src: inventory.j2

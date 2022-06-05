@@ -15,11 +15,14 @@
   environment: "{{ target_environment }}"
   hosts: all
   tasks:
-  - include_role: name=sys/pkg
-  - include_role: name=postgres/pkg
-  - include_role: name=sys/openvpn/pkg
-  - include_role: name=pgbouncer/pkg
-  - include_role: name=barman/pkg
-  - include_role: name=repmgr/pkg
+  - include_role:
+      name: sys/repositories
+  - include_role:
+      name: pkg/list_all_packages
+  - include_role:
+      name: pkg/install
+    vars:
+      package_list_name: "all packages"
+      package_list: "{{ all_packages }}"
   - include_role: name=sys/upgrade
   - include_role: name=sys/firstboot

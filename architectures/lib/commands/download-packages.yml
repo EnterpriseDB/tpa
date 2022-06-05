@@ -1,0 +1,165 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- name: Provision temporary container to download packages
+  hosts: localhost
+  tags: always
+  tasks:
+    - set_fact:
+        download_dir: "{{ download_dir|default(cluster_dir + '/local-repo') }}"
+
+    - name: Ensure download directory exists
+      file:
+        path: "{{ download_dir }}"
+        state: directory
+        mode: "755"
+
+    # Load the existing configuration (i.e., we require config.yml to
+    # exist, but we don't care if there's an inventory or not).
+
+    - name: Load config.yml
+      include_tasks: "{{ tpa_dir }}/platforms/load-config.yml"
+
+    # The container we provision must have its role set to include the
+    # role of every other instance in the cluster, so that it "needs"
+    # any package that any real instance might need.
+
+    - name: Collect list of all roles used in this cluster
+      set_fact:
+        cluster_roles: >
+          {{
+            instances
+            |map(attribute='role', default=[])
+            |flatten
+            |unique
+            |list
+          }}
+
+    # To create the container, we pass a synthetic docker_instances[]
+    # entry to docker/provision.yml, but we don't modify the inventory
+    # on disk (to avoid affecting any existing instances).
+
+    - name: Define downloader instance entry for provisioning
+      set_fact:
+        downloader_instance:
+          platform: docker
+          node: "{{ instances|map(attribute='node')|max + 1 }}"
+          Name: "{{ cluster_name|replace('_', '-') }}-downloader"
+          image: "{{ instance_defaults.docker_image|default(default_docker_image|default('tpa/redhat')) }}"
+          role: "{{ cluster_roles + ['downloader'] }}"
+          location: "{{ locations[0].Name|default('main') }}"
+          volumes:
+            - "{{ download_dir }}:/local-repo:z"
+          vars:
+            ansible_user: root
+            manage_ssh_hostkeys: false
+          tags: []
+
+    - name: Provision downloader instance
+      include_tasks:
+        file: "{{ tpa_dir }}/platforms/{{ provisioner }}.yml"
+      vars:
+        docker_instances:
+          - "{{ downloader_instance }}"
+        docker_context_path: "{{ tpa_dir }}/platforms/docker/images"
+      with_items:
+        - common/validate
+        - common/provision
+        - docker/provision
+      loop_control:
+        loop_var: provisioner
+
+    # Add the container to the inventory such that it's (a) identifiable
+    # by a group name in the next play, and (b) inherits all the cluster
+    # configuration from the existing inventory.
+
+    - action: add_host
+      args: >
+        {{
+          downloader_instance
+          |combine(_extra_args)
+          |combine(cluster_vars)
+        }}
+      vars:
+        _extra_args:
+          name: "{{ downloader_instance.Name }}"
+          cluster_name: "{{ cluster_name }}"
+          cluster_tag: "{{ cluster_tag }}"
+          groups:
+            - "{{ cluster_tag }}"
+            - role_downloader
+          ansible_connection: docker
+          ansible_user: root
+          manage_ssh_hostkeys: false
+          private_ip: "{{ instance_vars[0].vars.private_ip }}"
+
+- name: Download packages within container
+  hosts: role_downloader
+  vars:
+    download_dir:
+      "/local-repo/{{ ansible_distribution }}/{{ ansible_distribution_major_version }}"
+  tasks:
+
+    - include_role:
+        name: init
+
+    - include_role:
+        name: sys/bootstrap
+        apply:
+          tags: bootstrap
+      tags: bootstrap
+
+    - include_role:
+        name: sys/repositories
+        tasks_from: repositories.yml
+
+    - include_role:
+        name: pkg/list_all_packages
+
+    # The host's cluster_dir/local-repo is bind-mounted as /local-repo
+    # in the container, and we download packages into a subdirectory
+    # based on the distribution used by the current --docker-image.
+
+    - name: Ensure download directory exists
+      file:
+        path: "{{ download_dir }}"
+        state: directory
+        mode: 0755
+
+    - name: Download packages and dependencies
+      include_role:
+        name: pkg/download
+      vars:
+        package_list: "{{
+            all_packages|difference(excluded_packages|default([]))
+          }}"
+        package_download_dir: "{{ download_dir }}"
+        excluded_packages: "{{
+            exclude_packages_str|default('')|split(',')
+          }}"
+      tags:
+        - download
+
+    # We're running inside the container as root, so we must be careful
+    # to not leave root-owned files inside the shared download_dir.
+
+    - name: Ensure target directory has correct permissions
+      file:
+        path: /local-repo
+        state: directory
+        owner: "{{ lookup('pipe', 'id -u') }}"
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes
+
+- name: Remove the download container
+  hosts: localhost
+  tasks:
+
+    - docker_container:
+        name: "{{ item }}"
+        state: absent
+      with_items: "{{ groups['role_downloader'] }}"
+
+  tags:
+    - cleanup

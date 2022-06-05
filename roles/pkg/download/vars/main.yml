@@ -1,0 +1,5 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+_download_dir: "{{ package_download_dir|mandatory }}"

@@ -903,9 +903,10 @@ class Architecture(object):
         image = self.image()
         distro = image.get("os")
         version = image.get("version")
+        major_version = version.split('.')[0]
 
-        if distro and version:
-            os.makedirs(os.path.join(self.cluster, "local-repo", distro, version))
+        if distro and major_version:
+            os.makedirs(os.path.join(self.cluster, "local-repo", distro, major_version))
         else:
             print(
                 f"Unable to detect OS distribution and version or image ({image.get('name', 'None')})\n"

@@ -51,7 +51,7 @@
     _image_key: "{{ '%s-%s' % (_label, _version) }}"
     _entry:
       base_image: "{{ _tpa_images[_image_key] }}"
-      context_path: docker/images
+      context_path: "{{ docker_context_path|default('docker/images') }}"
     _tpa_images:
       debian-9: debian:9
       debian-stretch: debian:9

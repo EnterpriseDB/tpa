@@ -10,9 +10,6 @@
 #
 # See platforms/aws/README.md for more details.
 
-- include_tasks: inventory/write.yml
-  tags: [aws, inventory]
-
 # We need an SSH key to access the newly-provisioned instances.
 #
 # We generated an SSH keypair named id_clustername above. Now we

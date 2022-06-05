@@ -1,0 +1,29 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# We start with a list of all /pkg roles and end up with all_packages
+# set to the list of all packages that would be installed by any of
+# these roles on this instance (i.e., the list will include barman
+# packages only if this is a barman instance).
+
+- name: Fetch list of tpaexec pkg roles
+  shell:
+    find {{ tpa_dir }}/roles \( -path '*/roles/pkg' -prune \) -o -name pkg -print |
+    sed -e 's,^.*/roles/,,' -e 's,/pkg$,,' | sort
+  delegate_to: localhost
+  register: role_list
+  check_mode: no
+
+- name: Collect a list of all installable packages
+  include_role:
+    name: "{{ rolename }}/pkg"
+    tasks_from: list-packages.yml
+  vars:
+    list_varname: all_packages
+  loop_control:
+    loop_var: rolename
+    label: >-
+      {{ rolename }}
+  with_items:
+    "{{ role_list.stdout_lines }}"

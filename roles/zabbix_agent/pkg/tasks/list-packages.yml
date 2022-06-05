@@ -1,0 +1,6 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# Nothing here, because the zabbix_agent/pkg role doesn't quite follow
+# the same conventions as the other pkg roles.

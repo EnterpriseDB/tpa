@@ -74,6 +74,14 @@
   # and add the results to instance_vars[], which forms the basis for
   # the combined inventory that we write out at the end.
 
-  - include_tasks: common/inventory/write.yml
+  - include_tasks: "{{ platform }}/inventory/write.yml"
+    with_items:
+      - common
+      - "{{ cluster_platforms|difference(['shared']) }}"
+      - "{{ ('shared' in cluster_platforms)|ternary(['shared'], []) }}"
+    loop_control:
+      loop_var: platform
+    when: >
+      ("%s/%s/inventory/write.yml"|format(playbook_dir, platform)) is file
     vars:
       ansible_port: "{{ cluster_ssh_port|default(22) }}"

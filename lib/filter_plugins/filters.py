@@ -303,7 +303,7 @@ def cmdline(playbook_dir):
 
 def sort_by_node(hosts, hostvars):
     def node_for_host(host):
-        return hostvars[host].get("node")
+        return int(hostvars[host].get("node"))
 
     sorted_hosts = sorted(hosts, key=node_for_host)
     return sorted_hosts

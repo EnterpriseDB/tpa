@@ -76,12 +76,11 @@ different distributions, they'll all use the same subdirectory.
 
 ## Populating the repository
 
+Run [`tpaexec download-packages`](tpaexec-download-packages.md) to
+download all the packages required by a cluster into the local-repo.
+
 You must copy packages into the appropriate repository directory and
 generate repository metadata before running `tpaexec deploy`.
-
-Note: a future version of TPAexec will include a command that will
-download all the packages required for deployment on a disconnected
-cluster into the appropriate `local-repo` subdirectory. Until then,
 
 After copying the necessary packages into the repository directory, you
 must use an OS-specific tool to generate the repository metadata.
