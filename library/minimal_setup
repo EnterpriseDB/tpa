@@ -75,6 +75,9 @@ if command -v locale &>/dev/null; then
     system_locale=${LC_ALL:-$LANG}
 fi
 
+etc_tpa_exists=false
+if [[ -d /etc/tpa ]]; then etc_tpa_exists=true; fi
+
 grep -Ev '": ""' <<RESULT
 {
     "ansible_facts": {
@@ -89,6 +92,7 @@ grep -Ev '": ""' <<RESULT
         "python_pkg_prefix": "$python_pkg_prefix",
         "python": "$python",
         "system_locale": "${system_locale:-}",
+        "etc_tpa_exists": $etc_tpa_exists,
         "ansible_memtotal_mb": $memtotal
     }
 }

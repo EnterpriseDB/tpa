@@ -7,7 +7,7 @@
 
 - name: Run apt-get update
   raw: >-
-    test -d /etc/tpa || apt-get -q -y {{ allow_releaseinfo_change }} update
+    apt-get -q -y {{ allow_releaseinfo_change }} update
   environment: {}
   register: update
   changed_when: >

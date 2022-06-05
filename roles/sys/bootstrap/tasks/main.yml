@@ -6,8 +6,20 @@
 # with everything else we need to configure repositories and install
 # packages and run Ansible modules.
 #
+# If /etc/tpa exists already, which minimal_setup will tell us, we can
+# safely assume that everything has already been set up properly.
+#
 # (The packages installed using raw commands here must also be listed in
 # sys/bootstrap/pkg/tasks/list-packages.yml)
 
-- include_tasks: "os/{{ ansible_os_family }}/python.yml"
-- include_tasks: "os/{{ ansible_os_family }}/packages.yml"
+- when: not etc_tpa_exists
+  block:
+  - include_tasks: "os/{{ ansible_os_family }}/python.yml"
+  - include_tasks: "os/{{ ansible_os_family }}/packages.yml"
+  - name: Create /etc/tpa directory
+    file:
+      path: /etc/tpa
+      owner: root
+      group: root
+      state: directory
+      mode: 0755
