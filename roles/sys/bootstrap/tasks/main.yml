@@ -1,0 +1,13 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# We must ensure that a usable Python interpreter is installed, along
+# with everything else we need to configure repositories and install
+# packages and run Ansible modules.
+#
+# (The packages installed using raw commands here must also be listed in
+# sys/bootstrap/pkg/tasks/list-packages.yml)
+
+- include_tasks: "os/{{ ansible_os_family }}/python.yml"
+- include_tasks: "os/{{ ansible_os_family }}/packages.yml"

@@ -2,11 +2,44 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+# The first time we reach here on a new instance, we know only what
+# distribution it is running, but we take nothing else for granted,
+# including the presence of a usable Python interpreter.
+#
+# We invoke sys/bootstrap to check whether the basic requirements are
+# satisfied, and install them otherwise; but instances without outside
+# network access can't install anything that's missing, so we invoke
+# sys/local-repo first (in such an environment, the local-repo must
+# provide all packages required during deployment).
+
 - include_role:
     name: sys/local-repo
     apply:
       tags: local-repo
   tags: local-repo
+
+# Now that all instances have a source of packages (either the network
+# or the local-repo), we can check what's missing and install it. After
+# this stage, we can run any Ansible modules we need.
+
+- include_role:
+    name: sys/bootstrap
+    apply:
+      tags: bootstrap
+  tags: bootstrap
+
+# Now we set up package repositories, including {apt,yum}_repositories
+# entries mentioned in {apt,yum}_repository_list (e.g., PGDG, EPEL), and
+# any EDB/2ndQuadrant repositories we might need (tpa_2q_repositories).
+
+- include_role:
+    name: sys/repositories
+    apply:
+      tags: [pkg, repo]
+  tags: [pkg, repo]
+
+# Once the repositories are available, we can install any other
+# (non-Postgres-related) packages we need.
 
 - include_role:
     name: sys/pkg

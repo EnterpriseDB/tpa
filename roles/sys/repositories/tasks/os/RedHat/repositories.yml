@@ -2,31 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-- name: Install gpg
-  raw: command -v gpg >/dev/null 2>&1 || yum -y install gnupg2; true
-  environment: {}
-  register: gpg_install
-  changed_when: >
-    gpg_install is successful
-    and gpg_install.stdout.strip() != ''
-    and 'already installed' not in gpg_install.stdout
-
-- name: Install curl
-  raw: command -v curl >/dev/null 2>&1 || yum -y install curl; true
-  environment: {}
-  register: curl_install
-  changed_when: >
-    curl_install is successful
-    and curl_install.stdout.strip() != ''
-    and 'already installed' not in curl_install.stdout
-
-- name: Ensure update for RHBA-2021:3649 is applied (DST Root CA X3 expiry)
-  package:
-    name:
-      - ca-certificates
-    state: latest
-    disablerepo: "pgdg*"
-
 - set_fact:
     default_yum_repository_list: "{{
       default_yum_repository_list|union(['EDB'])

@@ -1,0 +1,29 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# We need all of the packages listed here during bootstrapping, but we
+# don't install them the usual way with pkg/install. See sys/bootstrap
+# for the careful raw commands used to install these packages.
+#
+# If you add more raw tasks to install packages, be sure to add them
+# here so that `tpaexec download-packages` knows about them too.
+
+- include_role: name=pkg/add_to_list
+  vars:
+    list_contents: "{{ _combined|flatten }}"
+    _combined:
+      - "{{ _raw_packages['common'] }}"
+      - "{{ _raw_packages[ansible_os_family] }}"
+    _raw_packages:
+      common:
+        - gpg
+        - curl
+      Debian:
+        - apt-transport-https
+        - "{{ ['python-backports.ssl-match-hostname'] if python in ['python2', 'python2.7'] else [] }}"
+        - "{{ python.startswith('python2')|ternary('python2.7', 'python3') }}"
+      RedHat:
+        - ca-certificates
+        - "{{ ['python-backports-ssl_match_hostname'] if python in ['python2', 'python2.7'] else [] }}"
+        - "{{ python.startswith('python2')|ternary('python', 'python3') }}"

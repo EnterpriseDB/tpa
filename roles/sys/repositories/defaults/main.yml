@@ -1,0 +1,51 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+## Repositories
+#
+# By default, we install the PGDG repository (all community packages).
+#
+# All of the above applies to both apt and yum.
+
+edb_repo_hostname_suffix: "{{ edb_testing_repo|default(false)|bool|ternary('-staging', '') }}.enterprisedb.com"
+edb_repo_name_suffix: "{{ edb_testing_repo|default(false)|bool|ternary('-testing', '') }}"
+
+apt_repositories: {}
+default_apt_repositories:
+  PGDG:
+    key_id: ACCC4CF8
+    key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    repo: >-
+      deb https://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
+
+  EDB:
+    key_id: 4EC55148FE026ECC
+    key_url: https://apt.enterprisedb.com/edb-deb.gpg.key
+    filename: >-
+      edb-{{ ansible_distribution_release }}
+    repo: >-
+      deb [arch=amd64] https://apt{{ edb_repo_hostname_suffix }}/{{ ansible_distribution_release }}-edb{{ edb_repo_name_suffix }}/ {{ ansible_distribution_release }} main
+
+default_apt_repository_list: [PGDG]
+
+yum_repositories: {}
+default_yum_repositories:
+  EPEL:
+    rpm_url: >-
+      {{
+        (ansible_distribution_id == 'centos')|ternary(
+          'epel-release',
+          'https://dl.fedoraproject.org/pub/epel/epel-release-latest-%s.noarch.rpm' % ansible_distribution_major_version
+        )
+      }}
+
+  PGDG:
+    rpm_url: >-
+      https://download.postgresql.org/pub/repos/yum/reporpms/EL-{{ ansible_distribution_major_version }}-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+
+  EDB:
+    rpm_url: >-
+      https://yum{{ edb_repo_hostname_suffix }}/edbrepos/edb-repo-latest.noarch.rpm
+
+default_yum_repository_list: [EPEL, PGDG]

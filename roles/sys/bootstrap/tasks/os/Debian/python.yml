@@ -2,6 +2,9 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+# Any packages installed here must also be listed in
+# sys/bootstrap/pkg/list-packages.yml
+
 - name: Run apt-get update
   raw: >-
     test -d /etc/tpa || apt-get -q -y {{ allow_releaseinfo_change }} update
@@ -19,8 +22,12 @@
     }}"
   when: not use_local_repo_only
 
+- name: Set python package name
+  set_fact:
+    python_package_name: "{{ python.startswith('python2') | ternary('python2.7', 'python3') }}"
+
 - name: Install python
-  raw: if ! command -v {{ python }} >/dev/null 2>&1; then apt-get -q -y install {{ python.startswith('python2')|ternary('python2.7', 'python3') }}; fi
+  raw: if ! command -v {{ python }} >/dev/null 2>&1; then apt-get -q -y install {{ python_package_name }}; fi
   environment: {}
   register: python_install
   changed_when: >

@@ -1,0 +1,16 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# Note that `tpaexec download-packages` won't know about these packages,
+# but that's fine, because they're optional. (You can always add entries
+# to `packages` if you want to make sure the packages are downloaded.)
+
+- include_role: name=pkg/add_to_list
+  vars:
+    list_contents: "{{ package_lists|flatten }}"
+    package_lists:
+      - "{{ default_optional_packages['common'] }}"
+      - "{{ optional_packages['common']|default([]) }}"
+      - "{{ default_optional_packages[ansible_distribution] }}"
+      - "{{ optional_packages[ansible_distribution]|default([]) }}"

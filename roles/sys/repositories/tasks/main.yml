@@ -1,0 +1,28 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# Replace expired 2ndQuadrant apt repository keys, if needed.
+
+- include_tasks: "os/{{ ansible_os_family }}/2ndquadrant-repository-keys.yml"
+  when:
+    ansible_os_family == "Debian"
+    and not use_local_repo_only
+
+- name: Include pre-deploy hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/pre-deploy.yml"
+
+- include_tasks: repositories.yml
+  when:
+    not use_local_repo_only
+
+- name: Include post-repo hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/post-repo.yml"
