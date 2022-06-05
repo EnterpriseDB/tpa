@@ -2,14 +2,14 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-- name: Install repmgr package
-  package:
-    name: "{{
-      repmgr_packages[postgres_family_extended]|packages_for(ansible_os_family, repmgr_package_version)
-    }}"
-    state: "{{
-      (repmgr_package_version is defined)|ternary('present', 'latest')
-    }}"
+- include_tasks: list-packages.yml
+  vars:
+    list_varname: _all_repmgr_packages
+
+- include_role: name=pkg/install
+  vars:
+    package_list_name: "repmgr packages"
+    package_list: "{{ _all_repmgr_packages }}"
 
 # We install our own service units later, so we disable the packaged
 # versions here. The default service name on Debian is repmgrd, but it

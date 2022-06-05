@@ -691,3 +691,14 @@
     - "'replica' in role"
     - upstream_primary is defined
     - upstream_postgres_tablespaces is defined or postgres_tablespaces is defined
+
+# We must install and configure harp on proxies and postgres instances
+# that are eligible to be first_bdr_primary (i.e., not subscriber-only
+# nodes or replicas or anything). However, there are other tasks that
+# need to run on other instances, so we set a flag here.
+
+- set_fact:
+    initialise_harp: "{{
+      'harp-proxy' in role
+      or inventory_hostname in first_bdr_primary_candidates|default([])
+    }}"

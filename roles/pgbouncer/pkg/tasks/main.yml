@@ -2,19 +2,11 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-- include_role:
-    name: postgres/pkg
-    tasks_from: client.yml
-    apply:
-      tags: [postgres, pkg]
-
-- name: Install pgbouncer package
-  package:
-    name: >
-      {{ package_lists|flatten }}
-    state: "{{
-      (pgbouncer_package_version is defined)|ternary('present', 'latest')
-    }}"
+- include_tasks: list-packages.yml
   vars:
-    package_lists:
-      - "{{ pgbouncer_packages|packages_for(ansible_distribution, pgbouncer_package_version) }}"
+    list_varname: _all_pgbouncer_packages
+
+- include_role: name=pkg/install
+  vars:
+    package_list_name: "pgbouncer packages"
+    package_list: "{{ _all_pgbouncer_packages }}"

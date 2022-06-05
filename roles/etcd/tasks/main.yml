@@ -6,9 +6,6 @@
     name: etcd/pkg
     apply:
       tags: [etcd, pkg]
-  when: >
-    'etcd' in role
-    and platform not in ['shared']
   tags: pkg
 
 - include_role:

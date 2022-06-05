@@ -89,7 +89,14 @@
   block:
   - include_role: name=sys/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
 
-  - include_role: name=postgres/pkg tasks_from=list-packages.yml
+  - set_fact:
+      all_postgres_packages: []
+
+  - include_role:
+      name: postgres/pkg
+      tasks_from: list-packages.yml
+    vars:
+      list_varname: all_postgres_packages
 
   - debug:
       msg: "{{ all_postgres_packages }}"
@@ -123,7 +130,14 @@
   block:
   - include_role: name=sys/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
 
-  - include_role: name=postgres/pkg tasks_from=list-packages.yml
+  - set_fact:
+      all_postgres_packages: []
+
+  - include_role:
+      name: postgres/pkg
+      tasks_from: list-packages.yml
+    vars:
+      list_varname: all_postgres_packages
 
   - debug:
       msg: "{{ all_postgres_packages }}"
@@ -144,7 +158,14 @@
   block:
   - include_role: name=sys/pkg tasks_from="os/{{ ansible_distribution }}/repositories.yml"
 
-  - include_role: name=postgres/pkg tasks_from=list-packages.yml
+  - set_fact:
+      all_postgres_packages: []
+
+  - include_role:
+      name: postgres/pkg
+      tasks_from: list-packages.yml
+    vars:
+      list_varname: all_postgres_packages
 
   - debug:
       msg: "{{ all_postgres_packages }}"

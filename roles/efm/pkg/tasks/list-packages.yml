@@ -1,0 +1,27 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+# The EFM packages do not declare Java as a dependency, so we have to
+# include Java packages ourselves.
+
+- name: Load correct efm_dependency_packages for {{ ansible_distribution }}-{{ ansible_distribution_major_version}}
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+
+- when: "'efm' in role"
+  block:
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          efm_dependency_packages|packages_for(ansible_os_family)
+        }}"
+
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          efm_packages|packages_for(ansible_os_family)
+        }}"

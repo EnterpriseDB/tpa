@@ -2,18 +2,11 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-# If etcd packages are available for this system, we install them by
-# default.
-
-- name: Install etcd from packages if available
-  package:
-    name: "{{ _etcd_packages }}"
-    state: "{{
-      (etcd_package_version is defined)|ternary('present', 'latest')
-    }}"
+- include_tasks: list-packages.yml
   vars:
-    _etcd_packages: "{{
-      etcd_packages|packages_for(ansible_os_family, etcd_package_version)
-    }}"
-  when:
-    _etcd_packages is not empty
+    list_varname: _all_etcd_packages
+
+- include_role: name=pkg/install
+  vars:
+    package_list_name: "etcd packages"
+    package_list: "{{ _all_etcd_packages }}"

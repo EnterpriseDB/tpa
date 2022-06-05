@@ -1,0 +1,17 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- when: >
+    'pgbouncer' in role
+    or ('harp-proxy' in role and harp_proxy_mode == 'pgbouncer')
+  block:
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          pgbouncer_packages|packages_for(ansible_distribution, pgbouncer_package_version)
+        }}"
+
+  - include_role:
+      name: postgres/pkg
+      tasks_from: list-client-packages.yml

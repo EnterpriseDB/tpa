@@ -2,15 +2,14 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-- name: Install haproxy package
-  package:
-    name: "{{
-      haproxy_packages|packages_for(ansible_os_family, haproxy_package_version)
-    }}"
-    state: "{{
-      (haproxy_package_version is defined)|ternary('present', 'latest')
-    }}"
-  tags: pkg
+- include_tasks: list-packages.yml
+  vars:
+    list_varname: _all_haproxy_packages
+
+- include_role: name=pkg/install
+  vars:
+    package_list_name: "haproxy packages"
+    package_list: "{{ _all_haproxy_packages }}"
 
 - name: Ensure haproxy group exists
   group:

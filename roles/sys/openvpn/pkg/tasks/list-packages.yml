@@ -1,0 +1,11 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- include_role: name=pkg/add_to_list
+  vars:
+    list_contents: "{{
+        openvpn_packages|packages_for(ansible_os_family)
+      }}"
+  when: >
+    'role_openvpn-server' in groups

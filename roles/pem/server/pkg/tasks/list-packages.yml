@@ -1,0 +1,18 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- when: "'pem-server' in role"
+  block:
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          pem_server_packages|packages_for(ansible_os_family)
+        }}"
+
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          pem_server_sslutils_packages[postgres_family_extended]
+          |packages_for(ansible_os_family)
+        }}"

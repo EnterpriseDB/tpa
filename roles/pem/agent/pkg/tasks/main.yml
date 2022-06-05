@@ -2,20 +2,11 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-# We may want to install the PEM agent on instances that aren't running
-# Postgres, so we shouldn't take it for granted that libpq is available.
+- include_tasks: list-packages.yml
+  vars:
+    list_varname: _all_pem_agent_packages
 
-- include_role:
-    name: postgres/pkg
-    tasks_from: client.yml
-    apply:
-      tags: [postgres, pkg]
-
-- name: Install PEM agent packages
-  package:
-    name: "{{
-      pem_agent_packages|packages_for(ansible_os_family, pem_agent_package_version)
-    }}"
-    state: "{{
-      (pem_agent_package_version is defined)|ternary('present', 'latest')
-    }}"
+- include_role: name=pkg/install
+  vars:
+    package_list_name: "PEM agent packages"
+    package_list: "{{ _all_pem_agent_packages }}"

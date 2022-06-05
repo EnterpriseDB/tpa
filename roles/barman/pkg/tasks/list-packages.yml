@@ -1,0 +1,32 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+
+- when: "'barman' in role"
+  block:
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          barman_packages|packages_for(ansible_os_family, barman_package_version)
+        }}"
+    when:
+      barman_installation_method == 'pkg'
+
+  - include_role:
+      name: postgres/pkg
+      tasks_from: list-client-packages.yml
+
+  # We expect pg_receivewal to be installed, but the EPAS client rpm does
+  # not include it (although the deb package does), so we have to install
+  # the server package as a temporary workaround. 2ndQPostgres 13 also
+  # needs the same workaround.
+
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents:
+        - "{{ postgres_package_name }}{{ postgres_versionNN }}-server"
+    when:
+      ansible_os_family == 'RedHat'
+      and (postgresql_flavour == 'epas'
+        or (postgresql_flavour == '2q'
+            and postgres_version is version('13', '>=')))
