@@ -1,0 +1,46 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# Normally, you would invoke this role as follows:
+#
+# - include_role: name=pkg/install
+#   vars:
+#     package_list_name: "some packages"
+#     package_list: "{{ _some_packages }}"
+#
+# If you just want to check if (all of) a list of packages can be
+# installed, you can instead do:
+#
+# - include_role: name=pkg/install
+#   vars:
+#     package_list_name: "some test packages"
+#     package_list: "{{ _some_packages }}"
+#     check_install_only: yes
+#     check_result_varname: some_pkg_check
+#
+# - debug:
+#     msg: "woe is me, some packages are missing"
+#   when:
+#     some_pkg_check is not successful
+
+- name: Install {{ package_list_name|mandatory }}{{ check_install_only|default(False)|bool|ternary(' (dry run only)', '') }}
+  package:
+    name: "{{ package_list|mandatory }}"
+    state: present
+  register: install_cmd
+  check_mode:
+    "{{ check_install_only|default(omit) }}"
+  ignore_errors:
+    "{{ check_install_only|default(False)|bool }}"
+  when:
+    platform not in ['shared']
+    and package_list|default([]) is not empty
+  tags: pkg
+
+- action: set_fact
+  args:
+    "{{ check_result_varname|default('install_check') }}": "{{ install_cmd }}"
+  when:
+    check_install_only|default(False)|bool
+  tags: pkg
