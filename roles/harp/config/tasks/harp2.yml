@@ -24,6 +24,7 @@
       Debian: /usr/sbin
       RedHat: /usr/bin
     pgbouncer_bin_dir: "{{ pgbouncer_bin_dirs[ansible_os_family] }}"
+  notify: Note HARP restart required
   when:
     initialise_harp|bool
 
