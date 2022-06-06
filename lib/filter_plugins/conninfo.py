@@ -3,7 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 from ansible.errors import AnsibleFilterError
-from typing import Dict
+from typing import Dict, List
 
 
 def parse_conninfo(conninfo: str, key: str = None) -> Dict[str, str]:
@@ -60,6 +60,49 @@ def dbname(conninfo: str, dbname: str = "postgres", **kwargs) -> str:
     for k in kwargs:
         parts[k] = kwargs[k]
     return conninfo_string(parts)
+
+
+def multihost_conninfo(conninfos: List[str]) -> str:
+    """
+    Takes a list of conninfo strings and returns a conninfo with the host and
+    port set to comma-separated strings of the hosts and ports in the original
+    list (or port set to a single value if all conninfos have the same value),
+    and all other connection parameters unmodified.
+
+    Each conninfo string must specify the host and port explicitly (i.e., there
+    are valid inputs with implicit settings that libpq would accept, but which
+    this function will not), and all other parameters must be identical.
+
+    https://www.postgresql.org/docs/14/libpq-connect.html#LIBPQ-MULTIPLE-HOSTS
+    """
+
+    result = {}
+    all_hosts = []
+    all_ports = []
+
+    # We step through the inputs, collecting lists of hosts and ports, and
+    # comparing connection parameters for successive entries in the list to
+    # ensure that they don't say anything different.
+
+    for item in conninfos:
+        params = parse_conninfo(item)
+        all_hosts.append(params['host'])
+        all_ports.append(params['port'])
+        del params['host']
+        del params['port']
+        if result and result != params:
+            raise AnsibleFilterError(
+                f"|multihost_conninfo expects DSNs that differ only in "
+                f"host/port; got '{item}' vs. '{conninfos[0]}'"
+            )
+        result = params
+
+    result['host'] = ','.join(all_hosts)
+    if len(set(all_ports)) == 1:
+        result['port'] = all_ports[0]
+    else:
+        result['port'] = ','.join(all_ports)
+    return conninfo_string(result)
 
 
 # Given a subscription (and access to hostvars), this function returns a
@@ -128,4 +171,5 @@ class FilterModule(object):
             "conninfo_string": conninfo_string,
             "dbname": dbname,
             "provider_dsn": provider_dsn,
+            "multihost_conninfo": multihost_conninfo,
         }
