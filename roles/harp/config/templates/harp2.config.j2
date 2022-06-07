@@ -23,16 +23,18 @@ dcs:
 {%   if 'harp-proxy' not in role %}
   - "{{ bdr_node_dsn|dbname(bdr_database, host=unix_socket_directories|first) }}"
 {%   else %}
+{%     set dcs_dsns = [] %}
 {%     for h in groups[bdr_node_group] %}
 {%       set v = hostvars[h] %}
 {%       if 'subscriber-only' not in v.role %}
+{%         set dsn = v.bdr_node_dsn %}
 {%         if harp_dcs_user is defined %}
-  - "{{ v.harp_dcs_node_dsn|dbname(v.bdr_database, user=harp_dcs_user) }}"
-{%         else %}
-  - "{{ v.bdr_node_dsn }}"
+{%           set dsn = v.harp_dcs_node_dsn|dbname(v.bdr_database, user=harp_dcs_user) %}
 {%         endif %}
+{%         if dcs_dsns.append(dsn) %}{% endif %}
 {%       endif %}
 {%     endfor %}
+  - "{{ dcs_dsns|multihost_conninfo }}"
 {%   endif %}
 {% endif %}
 
