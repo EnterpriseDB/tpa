@@ -174,8 +174,9 @@
       preferred_first_bdr_primary|default(first_bdr_primary_candidates|first)
     }}"
   when: >
-    'bdr' in role
-    or 'harp-proxy' in role
+    ('bdr' in role or 'harp-proxy' in role)
+    and (preferred_first_bdr_primary is defined
+      or first_bdr_primary_candidates is not empty)
 
 - include_tasks: hostvars.yml
 
