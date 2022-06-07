@@ -45,12 +45,14 @@ default_packages:
     - "{{ python_pkg_prefix }}-cryptography"
     - ca-certificates
     - rsync
+    - logrotate
   Debian:
     - "{{ (ansible_distribution_release == 'jessie')|ternary('linux-tools', 'linux-perf') }}"
     # Required for hostnamectl, used in sys
     - "{{ ['dbus'] if platform not in ['docker', 'lxd', 'vagrant'] else [] }}"
     - openssh-client
     - "{{ python_pkg_prefix }}-apt"
+    - cron
   RedHat:
     - perf
     # Required for semanage, used in postgres/initdb
@@ -62,6 +64,7 @@ default_packages:
     - linux-tools-generic
     - openssh-client
     - "{{ python_pkg_prefix }}-apt"
+    - cron
 
 optional_packages: {}
 default_optional_packages:
