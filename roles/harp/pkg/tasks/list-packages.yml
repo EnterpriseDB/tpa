@@ -2,17 +2,29 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
+# If initialise_harp is true, we must install either the harp_manager or
+# harp_proxy packages on the instance, not both; however, the downloader
+# needs to get both sets of packages.
+
 - include_role: name=pkg/add_to_list
   vars:
     list_contents: "{{
-        _manager_or_proxy_packages[harp_version]
+        harp_packages[harp_version]
         |packages_for(ansible_os_family, harp_package_version)
       }}"
-    _manager_or_proxy_packages: "{{
-      ('harp-proxy' not in role)|ternary(harp_packages, harp_proxy_packages)
-    }}"
   when:
-    initialise_harp
+    (initialise_harp and 'harp-proxy' not in role)
+    or ('bdr' in role and failover_manager == 'harp'
+      and 'downloader' in role)
+
+- include_role: name=pkg/add_to_list
+  vars:
+    list_contents: "{{
+        harp_proxy_packages[harp_version]
+        |packages_for(ansible_os_family, harp_package_version)
+      }}"
+  when: >
+    'harp-proxy' in role
 
 # If we're not using the pgbouncer role (i.e., setting up pgbouncer to
 # connect to harp-proxy), and we're using harp_proxy_mode = pgbouncer,
