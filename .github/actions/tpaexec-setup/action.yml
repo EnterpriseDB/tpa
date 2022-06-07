@@ -8,6 +8,6 @@ runs:
   steps:
     - name: Run tpaexec setup
       shell: bash
-      run: ./bin/tpaexec setup
+      run: ./bin/tpaexec setup --pip-cache-dir ~/.cache/pip
 
 outputs: {}

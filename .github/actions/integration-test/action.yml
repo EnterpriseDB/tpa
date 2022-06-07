@@ -28,6 +28,10 @@ inputs:
     required: false
     description: "TPA postgres type selection"
     default: ""
+  tpa_package_cache:
+    required: false
+    description: "Enable local repo and reuse packages"
+    default: "true"
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -57,18 +61,27 @@ runs:
 
     - name: Generate an initial configuration for a simple cluster
       run: |
-        if [ "${{ matrix.tpa_architecture }}" == "BDR-Always-ON" ] ;then
+        if [ "${{ inputs.tpa_architecture }}" == "BDR-Always-ON" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --layout bronze"
           CONFIGURE_EXTRA_ARGS+=" --harp-consensus-protocol etcd"
         fi
         if [ -n "${{ inputs.tpa_os }}" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --os ${{ inputs.tpa_os }}"
+          IMAGE_OS="${{ inputs.tpa_os }}"
+          IMAGE_OS="${IMAGE_OS,,}"
+          IMAGE="tpa/${IMAGE_OS}"
         fi
         if [ -n "${{ inputs.tpa_os_version }}" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --os-version ${{ inputs.tpa_os_version }}"
+          IMAGE_VERSION="${{ inputs.tpa_os_version }}"
+          IMAGE="${IMAGE:+${IMAGE}:${IMAGE_VERSION}}"
         fi
         if [ -n "${{ inputs.tpa_os_image }}" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --os-image ${{ inputs.tpa_os_image }}"
+          IMAGE="${{ inputs.tpa_os_image }}"
+          IMAGE_OS="${IMAGE/:*}"
+          IMAGE_OS="${IMAGE_OS/tpa\/}"
+          IMAGE_VERSION="${IMAGE/*:}"
         fi
         if [ -n "${{ inputs.tpa_postgres_flavour }}" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --postgres-flavour ${{ inputs.tpa_postgres_flavour }}"
@@ -81,11 +94,53 @@ runs:
           CONFIGURE_EXTRA_ARGS+=" --enable-pem"
         fi
 
+        # If package caching is enabled we enforce use of local repo
+        if [ "${{ inputs.tpa_package_cache }}" == "true" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --use-local-repo-only"
+        fi
+
+        # Assume the default image is tpa/redhat if we're using docker as a platform
+        # Otherwise we are not sure what should be used so exit
+        if [[ "${{ inputs.tpa_platform }}" != "docker" && -z "$IMAGE" ]] ;then
+          echo "Please set either TPA OS and Version or OS Image"
+          exit 1
+        fi
+        IMAGE="${IMAGE:-tpa/redhat}"
+        # Set a base os image name stripping the docker image tag
+        image_os_base="${IMAGE/:*}"
+        # Set a image version stripping the docker image name leaving the tag only if it's set
+        [[ "${IMAGE}" =~ : ]] && image_ver="${IMAGE/*:}"
+        # Set a default IMAGE_OS to be the base image name minus "tpa/"
+        : "${IMAGE_OS:=${image_os_base/tpa\/}}"
+        # Set a default IMAGE_OS_VERSION to be the docker image tag or "latest" if it's not set
+        : "${IMAGE_VERSION:=${image_ver:-latest}}"
+
+        # Save the image info for reuse in actions/cache
+        echo IMAGE="${IMAGE}" >>$GITHUB_ENV
+        echo IMAGE_OS="${IMAGE_OS}" >>$GITHUB_ENV
+        echo IMAGE_VERSION="${IMAGE_VERSION}" >>$GITHUB_ENV
+
+        # Finally run configure with constructed options
         ./bin/tpaexec configure "$CLUSTER" \
           --architecture ${{ inputs.tpa_architecture }} \
           --platform ${{ inputs.tpa_platform }} \
           ${CONFIGURE_EXTRA_ARGS}
       shell: bash
+
+    - name: Prepare package cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ inputs.cluster }}/local-repo
+        key: local-repo-${{ env.IMAGE_OS }}-${{ env.IMAGE_VERSION }}-${{ github.ref_name }}-${{ github.sha }}
+        restore-keys: |
+          local-repo-${{ env.IMAGE_OS }}-${{ env.IMAGE_VERSION }}-${{ github.ref_name }}
+          local-repo-${{ env.IMAGE_OS }}-${{ env.IMAGE_VERSION }}
+      if: inputs.tpa_package_cache == 'true'
+
+    - name: Populate the package cache
+      run: ./bin/tpaexec download-packages "$CLUSTER" --docker-image "$IMAGE" -vv
+      shell: bash
+      if: inputs.tpa_package_cache == 'true'
 
     - name: Provision the cluster
       # Until we can validate role assignment for service principals this is disabled
@@ -106,7 +161,7 @@ runs:
       if: always()
 
     - name: Archive the cluster directory
-      run: tar cvzf "cluster-$CLUSTER.tar.gz" "$CLUSTER"
+      run: tar cvzf "cluster-$CLUSTER.tar.gz" --exclude="local-repo" "$CLUSTER"
       shell: bash
       if: always()
 

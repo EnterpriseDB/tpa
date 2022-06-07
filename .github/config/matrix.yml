@@ -6,9 +6,12 @@ default:
   tpa_platform:
     - "docker"
   tpa_os_image:
-    - "ubuntu"
+    - "ubuntu:18.04"
+    - "ubuntu:20.04"
     - "debian:10"
-    - "redhat"
+    - "redhat:7"
+    - "redhat:8"
+    # - "debian:11"
   tpa_postgres_flavour:
     - "postgresql"
     - "2q"
