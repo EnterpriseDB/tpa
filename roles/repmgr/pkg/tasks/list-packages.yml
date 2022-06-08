@@ -3,7 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
 # We don't check for failover_manager == 'repmgr' here, because we use
-# repmgr to clone replicas even when using EFM or HARP.
+# repmgr to clone replicas even when using EFM.
 
 - include_role: name=pkg/add_to_list
   vars:
@@ -13,3 +13,4 @@
       }}"
   when: >
     'postgres' in role
+    and 'bdr' not in role
