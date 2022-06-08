@@ -56,8 +56,16 @@ class BDR_Always_ON(BDR):
 
     def update_instances(self, instances):
         """
-        When using `harp_consensus_protocol: etcd`, explicitly add 'etcd' to the
-        role for each BDR primary or witness instance that should run etcd.
+        When using 'harp_consensus_protocol: etcd', explicitly add 'etcd' to the
+        role for each of the following instances:
+        - BDR Primary ('bdr' role)
+        - BDR Logical Standby ('bdr' + 'readonly' roles)
+        - only for the Bronze layout: BDR Witness ('bdr' + 'witness' roles)
+        - only for the Gold layout: Barman ('barman' role)
+        Note that this is one of the possible choices for the template, and not
+        necessarily the best one; different placements are possible, as long as
+        there are three etcd instances for each location, and the BDR nodes have
+        a local etcd node, which seems convenient.
         """
 
         super().update_instances(instances)
@@ -69,7 +77,14 @@ class BDR_Always_ON(BDR):
                 if (
                     "bdr" in role
                     and "replica" not in role
-                    and "readonly" not in role
+                    and "witness" not in role
                     and "subscriber-only" not in role
+                ) or (
+                    "bdr" in role
+                    and "witness" in role
+                    and self.args["layout"] == "bronze"
+                ) or (
+                    "barman" in role
+                    and self.args["layout"] == "gold"
                 ):
                     i["role"].append("etcd")
