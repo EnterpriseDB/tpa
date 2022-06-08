@@ -103,6 +103,15 @@
     tags: always
 
   - include_role:
+      name: pgdcli
+      apply:
+        tags: pgdcli
+    when:
+      ('bdr' in role and bdr_version is version('4', '>='))
+      or 'pgdcli' in role
+    tags: always
+
+  - include_role:
       name: final
       apply:
         tags: final

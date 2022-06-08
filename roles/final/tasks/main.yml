@@ -96,15 +96,6 @@
   tags: [postgres, bdr]
 
 - include_role:
-    name: pgdcli
-    apply:
-      tags: pgdcli
-  when:
-    ('bdr' in role and bdr_version_num is defined and bdr_version_num >= 40100)
-    or 'pgdcli' in role
-  tags: pgdcli
-
-- include_role:
     name: harp/final
     apply:
       tags: harp
