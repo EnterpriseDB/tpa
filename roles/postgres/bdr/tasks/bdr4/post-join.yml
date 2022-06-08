@@ -3,7 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - assert:
-    msg: All CAMO pairs must be symmetric in BDR4
+    msg: All CAMO pairs must be symmetric in BDR4+
     that:
       - hostvars[bdr_node_camo_partner].bdr_node_camo_partner is defined
       - hostvars[bdr_node_camo_partner].bdr_node_camo_partner == inventory_hostname

@@ -37,4 +37,4 @@
     pgbench_dbname: "{{ bdr_database }}"
   when: >
     'bdr' in role
-    and bdr_major_version in [3, 4]
+    and bdr_major_version in [3, 4, 5]

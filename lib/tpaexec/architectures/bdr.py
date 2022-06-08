@@ -126,6 +126,9 @@ class BDR(Architecture):
         elif bdr_version == "4":
             if not tpa_2q_repositories or "/bdr4/" not in given_repositories:
                 tpa_2q_repositories.append("products/bdr4/release")
+        elif bdr_version == "5":
+            if not tpa_2q_repositories or "/bdr5/" not in given_repositories:
+                tpa_2q_repositories.append("products/bdr5/release")
 
         if harp_enabled and (
             not tpa_2q_repositories or "/harp/" not in given_repositories
