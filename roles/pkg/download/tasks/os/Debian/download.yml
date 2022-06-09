@@ -4,7 +4,7 @@
 
 # We need dpkg-dev for dpkg-scanpackages, to generate repository metadata.
 
-- name: Install apt-rdepends and dpkg-dev
+- name: Install dpkg-dev
   package:
     name:
       - dpkg-dev
@@ -45,6 +45,8 @@
     _apt_get_download.stdout_lines|length > 0
 
 - name: Generate repository metadata with dpkg-scanpackages
-  shell: dpkg-scanpackages . | gzip > Packages.gz
+  shell: |
+    set -eo pipefail
+    (dpkg-scanpackages --type deb . && dpkg-scanpackages --type ddeb .) | gzip > Packages.gz
   args:
     chdir: "{{ _download_dir }}"
