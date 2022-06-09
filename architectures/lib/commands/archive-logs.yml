@@ -27,6 +27,11 @@
     archive: "/tmp/{{ inventory_hostname }}-logs-{{ log_timestamp }}.tar.gz"
   tasks:
 
+    - name: Run minimal_setup to detect OS and python version
+      include_role:
+        name: facts
+        tasks_from: distribution
+
     # tar's exit code is 1 if files change whilst the archive is being created,
     # logs are likely to change, so we ignore this exit code
     - name: Create archive of log files
