@@ -93,7 +93,9 @@
       vars:
         postgres_service_end_state: stopped
     - include_role: name=postgres/update
+    - include_role: name=postgres/config
     - include_role: name=postgres/restart
+    - include_role: name=postgres/config/final
       vars:
         postgres_service_end_state: started
     when: >

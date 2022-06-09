@@ -2,9 +2,32 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+# The BDR4 packages are meant to replace (not coexist with) BDR3 and
+# pglogical3 packages. The BDR4 package dependencies do reflect this,
+# and we should be able to install them and have the package manager
+# remove the older packages. Unfortunately, the Postgres and Postgres
+# Extended builds of BDR3/pglogical3 both use the same package names,
+# and declare the same (Postgres) dependencies, and the package manager
+# can't choose between the multiple available upgrade paths, so we have
+# to remove BDR3/pglogical3 explicitly before installing BDR4.
+
 - include_tasks: list-packages.yml
   vars:
     list_varname: _all_postgres_packages
+
+- name: Fetch BDR3-related packages
+  include_tasks: list-bdr-packages.yml
+  vars:
+    list_varname: _all_bdr3_packages
+    bdr_version: 3
+
+- name: Remove BDR3-related packages when bdr_version is 4
+  package:
+    name: "{{ _all_bdr3_packages|default([]) }}"
+    state: absent
+  when: >
+    'bdr' in role
+    and bdr_version is version('4', '>=')
 
 - name: Install latest Postgres packages
   package:
