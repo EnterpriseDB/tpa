@@ -2,56 +2,31 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-# We need apt-rdepends for recursive (note: not reverse! this is not
-# like `apt-cache rdepends`) dependency resolution, and dpkg-dev for
-# dpkg-scanpackages, to generate repository metadata.
+# We need dpkg-dev for dpkg-scanpackages, to generate repository metadata.
 
 - name: Install apt-rdepends and dpkg-dev
   package:
     name:
-      - apt-rdepends
       - dpkg-dev
 
-# We run apt-rdepends on the passed-in package_list to get a recursive
-# list of dependencies. For example, `apt-rdepends lsof` shows
+# We use the apt cache to extract Depends and PreDepends packages
+# filtering out other types of association like Recommends and Suggests.
+# Additionally, the recurse option follows all dependency trees
+# including virtual packages.
 #
-# $ apt-rdepends lsof
-# lsof
-#   Depends: libc6 (>= 2.11)
-#   Depends: libselinux1 (>= 3.1~)
-# libc6
-#   Depends: libcrypt1
-#   Depends: libgcc-s1
-# libcrypt1
-#   Depends: libc6 (>= 2.25)
-# libgcc-s1
-#   Depends: gcc-10-base (= 10.2.1-6)
-#   Depends: libc6 (>= 2.14)
-# gcc-10-base
-# libselinux1
-#   Depends: libc6 (>= 2.14)
-#   Depends: libpcre2-8-0 (>= 10.22)
-# libpcre2-8-0
-#   Depends: libc6 (>= 2.14)
+# Any remaining virtual packages in the list and indented lines are
+# excluded, the list is sorted and duplicates removed.
 #
-# We take the all package names (minus "Depends:" and versions) and
-# run those through `apt-cache depends` to identify and exclude virtual
-# packages shown within <>:
-#
-# $ apt-cache depends postgresql-contrib-14
-# <postgresql-contrib-14>
-#
-# A resolved virtual package provider should be listed (indented)
-# The final list of unique packages is what we need to download.
+# The final output contains packages that we need to download.
 
 - name: Generate list of packages with all dependencies
   shell: |
-    set -eo pipefail &&
-    apt-cache depends $(
-      apt-rdepends {{ _packages }} \
-      |sed 's/.*: \([^\s]*\)\s?.*/\1/' \
-      |sort -u
-    )|sed '/[<:]/d;s/\s*//'|sort -u
+    apt-cache depends \
+      --no-recommends --no-suggests --no-conflicts \
+      --no-breaks --no-replaces --no-enhances \
+      --recurse \
+      {{ _packages }} \
+    | grep '^\w' | sort -u
   args:
     executable: /bin/bash
   register: _pkg_list
