@@ -26,8 +26,10 @@
 # With BDR, we've already made sure there is only one harp_location
 # across the cluster, so the same code will do the right thing.
 #
-# XXX We should try to detect when the cluster is already initialised,
-# and not keep doing this during each deploy.
+# We check to ensure `harpctl apply` runs only when harp.cluster.init.yml
+# has changed (true for a fresh installation as well)
+
+- meta: flush_handlers
 
 - block:
     - set_fact:
@@ -45,8 +47,7 @@
   when: >
     'bdr' in role
     and inventory_hostname in first_bdr_primary_candidates
-
-- meta: flush_handlers
+    and (harp_bootstrap_required|default(false))|bool
 
 - include_role:
     name: harp/service

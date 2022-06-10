@@ -24,8 +24,7 @@
     initialise_harp|bool
   tags: config
 
-- name: Install HARP configuration
-  include_tasks:
+- include_tasks:
     file: "harp{{ harp_version }}.yml"
     apply:
       tags: config

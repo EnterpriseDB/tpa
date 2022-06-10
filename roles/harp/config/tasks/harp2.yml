@@ -2,18 +2,34 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-- name: Install HARP configuration files
+- name: Install HARP cluster bootstrap configuration file
   template:
-    src: "{{ item.src  }}"
-    dest: "{{ item.dest }}"
+    src: harp2.cluster.init.j2
+    dest: "{{ harp_directory }}/harp.cluster.init.yml"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0644
-  with_items:
-    - src: harp2.cluster.init.j2
-      dest: "{{ harp_directory }}/harp.cluster.init.yml"
-    - src: harp2.config.j2
-      dest: "{{ harp_directory }}/config.yml"
+  vars:
+    bdr_ro_groups:
+    - role_replica
+    - role_readonly
+    - role_subscriber-only
+    - role_witness
+    pgbouncer_bin_dirs:
+      Debian: /usr/sbin
+      RedHat: /usr/bin
+    pgbouncer_bin_dir: "{{ pgbouncer_bin_dirs[ansible_os_family] }}"
+  notify: Note HARP bootstrap required
+  when:
+    initialise_harp|bool
+
+- name: Install HARP configuration file
+  template:
+    src: harp2.config.j2
+    dest: "{{ harp_directory }}/config.yml"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
   vars:
     bdr_ro_groups:
     - role_replica

@@ -7,13 +7,13 @@ locations:
 {% if harp_consensus_protocol == 'etcd' %}
 - location: {{ harp_location }}
 {% else %}
-{%   for l in groups|members_of(bdr_node_group, not_in=bdr_ro_groups)|map('extract', hostvars, 'harp_location')|unique|list %}
+{%   for l in groups|members_of(bdr_node_group, not_in=bdr_ro_groups)|map('extract', hostvars, 'harp_location')|unique|list|sort %}
 - location: {{ l }}
 {%   endfor %}
 {% endif %}
 
 nodes:
-{% for h in groups|members_of(bdr_node_group, not_in=bdr_ro_groups) %}
+{% for h in groups|members_of(bdr_node_group, not_in=bdr_ro_groups)|sort %}
 {%   set v = hostvars[h] %}
 {%   if harp_consensus_protocol != 'etcd' or v.harp_location == harp_location %}
 - name: {{ v.bdr_node_name|default(h) }}
@@ -63,7 +63,7 @@ proxies:
   keepalive: {{ harp_proxy_keepalive|default(5) }}
 {% endif %}
   instances:
-{% for p in groups['role_harp-proxy']|default([]) %}
+{% for p in groups['role_harp-proxy']|default([])|sort %}
 {%   if harp_consensus_protocol != 'etcd' or hostvars[p].harp_location == harp_location %}
     - name: "{{ p }}-proxy"
       listen_address: {{ hostvars[p].harp_listen_address|default(p) }}

@@ -2,6 +2,10 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+- name: Note HARP bootstrap required
+  set_fact:
+    harp_bootstrap_required: true
+
 - name: Note HARP restart required
   set_fact:
     harp_service_end_state: restarted

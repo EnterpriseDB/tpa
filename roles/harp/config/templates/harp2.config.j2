@@ -13,7 +13,7 @@ dcs:
 {% endif %}
   endpoints:
 {% if harp_consensus_protocol == 'etcd' %}
-{%   for h in groups['role_etcd'] %}
+{%   for h in groups['role_etcd']|sort %}
 {%     set v = hostvars[h] %}
 {%     if v.harp_location == harp_location %}
   - {{ h }}:{{ v.etcd_client_port|default(2379) }}
@@ -24,7 +24,7 @@ dcs:
   - "{{ bdr_node_dsn|dbname(bdr_database, host=unix_socket_directories|first) }}"
 {%   else %}
 {%     set dcs_dsns = [] %}
-{%     for h in groups[bdr_node_group] %}
+{%     for h in groups[bdr_node_group]|sort %}
 {%       set v = hostvars[h] %}
 {%       if 'subscriber-only' not in v.role %}
 {%         set dsn = v.bdr_node_dsn %}
