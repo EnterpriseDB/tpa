@@ -17,7 +17,9 @@ class docker(Platform):
         g.add_argument("--local-source-directories", nargs="+", metavar="NAME:PATH")
 
     def validate_arguments(self, args):
-        local_sources, errors = self._validate_sources(args.get("local_source_directories") or [])
+        local_sources, errors = self._validate_sources(
+            args.get("local_source_directories") or []
+        )
         if errors:
             for e in errors:
                 print(f"ERROR: --local-source-directories {e}", file=sys.stderr)
@@ -62,9 +64,7 @@ class docker(Platform):
             # We don't have access to the cluster name here (it's set only
             # in process_arguments), so we leave a '%s' to be filled in by
             # update_instance_defaults() below.
-            ccache = "ccache-%%s-%s" % time.strftime(
-                "%Y%m%d%H%M%S", time.localtime()
-            )
+            ccache = "ccache-%%s-%s" % time.strftime("%Y%m%d%H%M%S", time.localtime())
         self.ccache = f"{ccache}:/root/.ccache:rw"
 
     def _validate_sources(self, sources):
@@ -95,9 +95,7 @@ class docker(Platform):
 
             host_path = os.path.abspath(os.path.expanduser(parts[0]))
             if not os.path.isdir(host_path):
-                errors.append(
-                    f"can't find source directory for '{name}': {host_path}"
-                )
+                errors.append(f"can't find source directory for '{name}': {host_path}")
                 continue
 
             dirname = name
@@ -184,7 +182,7 @@ class docker(Platform):
         if name in known_images:
             image = known_images[name]
             image["version"] = valid_version(name, version)
-            del(image['versions'])
+            del image["versions"]
             image.setdefault("os_family", image.get("os"))
 
         # Cater for OS names, e.g. "Debian"

@@ -903,10 +903,12 @@ class Architecture(object):
         image = self.image()
         os_family = image.get("os_family")
         version = image.get("version")
-        major_version = version.split('.')[0]
+        major_version = version.split(".")[0]
 
         if os_family and major_version:
-            os.makedirs(os.path.join(self.cluster, "local-repo", os_family, major_version))
+            os.makedirs(
+                os.path.join(self.cluster, "local-repo", os_family, major_version)
+            )
         else:
             print(
                 f"Unable to detect OS family and version or image ({image.get('name', 'None')})\n"

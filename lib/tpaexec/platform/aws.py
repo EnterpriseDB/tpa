@@ -176,7 +176,9 @@ class aws(CloudPlatform):
             print("aws: Got lookup result: %s" % str(r))
         n = len(r["Images"])
         if n != 1:
-            raise AWSPlatformError("Expected 1 match for %s, found %d" % (image["name"], n))
+            raise AWSPlatformError(
+                "Expected 1 match for %s, found %d" % (image["name"], n)
+            )
         return {"image_id": r["Images"][0]["ImageId"]}
 
     def update_cluster_tags(self, cluster_tags, args, **kwargs):
