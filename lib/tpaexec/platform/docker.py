@@ -142,40 +142,59 @@ class docker(Platform):
         """
         image = {}
         name, _, version = label.partition(":")
-        org, _, img = name.rpartition("/")
+        _, _, img = name.rpartition("/")
 
-        known_versions = {
-            "tpa/debian": ["stretch", "buster", "bullseye", "9", "10", "11"],
-            "tpa/ubuntu": ["bionic", "focal", "18.04", "20.04"],
-            "tpa/redhat": ["7", "8"],
-            "tpa/rocky": ["8"],
-            "tpa/almalinux": ["8"],
+        known_images = {
+            "tpa/debian": {
+                "versions": ["stretch", "buster", "bullseye", "9", "10", "11"],
+                "os": "Debian",
+            },
+            "tpa/ubuntu": {
+                "versions": ["bionic", "focal", "18.04", "20.04"],
+                "os": "Ubuntu",
+            },
+            "tpa/redhat": {
+                "versions": ["7", "8"],
+                "os": "RedHat",
+            },
+            "tpa/rocky": {
+                "versions": ["8"],
+                "os": "Rocky",
+                "os_family": "RedHat",
+            },
+            "tpa/almalinux": {
+                "versions": ["8"],
+                "os": "AlmaLinux",
+                "os_family": "RedHat",
+            },
         }
 
         def valid_version(img_name, ver):
             ver = ver or kwargs.get("version")
             if ver and ver != "latest":
-                if ver not in known_versions[img_name]:
+                if ver not in known_images[img_name]["versions"]:
                     print(
                         "ERROR: image %s:%s is not supported" % (img_name, ver),
                         file=sys.stderr,
                     )
                     sys.exit(-1)
-            return ver or known_versions[image_name].pop()
+            return ver or known_images[img_name]["versions"].pop()
 
         # Cater for image names, e.g. "tpa/debian" or "tpa/debian:10"
-        if name in known_versions:
-            image["os"] = img.capitalize()
-            image_name = name
+        if name in known_images:
+            image = known_images[name]
             image["version"] = valid_version(name, version)
+            del(image['versions'])
+            image.setdefault("os_family", image.get("os"))
 
         # Cater for OS names, e.g. "Debian"
         if name in self.supported_distributions():
-            image["os"] = name
-            image_name = "tpa/%s" % name.lower()
+            image_name = f"tpa/{name.lower()}"
+            image = known_images[image_name]
             version = valid_version(image_name, version)
             image["version"] = version
             label = image_name + ":" + version
+            image.setdefault("os_family", image.get("os"))
 
         image["name"] = label
 

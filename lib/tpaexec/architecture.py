@@ -901,16 +901,16 @@ class Architecture(object):
         distribution and version derived from the cluster's selected image().
         """
         image = self.image()
-        distro = image.get("os")
+        os_family = image.get("os_family")
         version = image.get("version")
         major_version = version.split('.')[0]
 
-        if distro and major_version:
-            os.makedirs(os.path.join(self.cluster, "local-repo", distro, major_version))
+        if os_family and major_version:
+            os.makedirs(os.path.join(self.cluster, "local-repo", os_family, major_version))
         else:
             print(
-                f"Unable to detect OS distribution and version or image ({image.get('name', 'None')})\n"
-                f"Please create the '{self.cluster}/local-repo/<distribution>/<version>' directory yourself.\n"
+                f"Unable to detect OS family and version or image ({image.get('name', 'None')})\n"
+                f"Please create the '{self.cluster}/local-repo/<os_family>/<version>' directory yourself.\n"
                 f"(See docs/src/local-repo.md for details.)",
                 file=sys.stderr,
             )

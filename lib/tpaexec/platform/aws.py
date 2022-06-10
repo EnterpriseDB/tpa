@@ -93,6 +93,7 @@ class aws(CloudPlatform):
                     "preferred_python_version": "python3",
                     "owner": "792107900819",
                     "user": "rocky",
+                    "os_family": "RedHat",
                 }
             },
             "ubuntu": {
@@ -134,6 +135,7 @@ class aws(CloudPlatform):
                 )
                 sys.exit(-1)
             image["os"] = label_base
+            image["os_family"] = image.get("os_family", label_base)
             try:
                 if "default" in image["versions"]:
                     image["versions"].remove("default")
