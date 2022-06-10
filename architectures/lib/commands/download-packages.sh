@@ -52,7 +52,7 @@ _tpaexec_command() {
     docker_image="${docker_image:-${image_os:+tpa/${image_os,,}}${os_version:+:${os_version}}}"
     OPTS+=('-e' "default_docker_image=$docker_image")
 
-    if [[ -z ${docker_image+x} ]]; then
+    if [[ -z "${docker_image:+x}" ]]; then
         echo "Please specify an image for the package download container with --docker-image" >&2
         echo "(e.g., '--docker-image tpa/redhat', or tpa/debian, or tpa/ubuntu)" >&2
         exit 1
