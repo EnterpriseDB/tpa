@@ -21,7 +21,7 @@ dcs:
 {%   endfor %}
 {% elif harp_consensus_protocol == 'bdr' %}
 {%   if 'harp-proxy' not in role %}
-  - "{{ bdr_node_dsn|dbname(bdr_database, host=unix_socket_directories|first) }}"
+  - "{{ bdr_node_local_dsn }}"
 {%   else %}
 {%     set dcs_dsns = [] %}
 {%     for h in groups[bdr_node_group]|sort %}

@@ -416,6 +416,8 @@
       host={{ _repmgr_hostname }} port={{ postgres_port }} dbname=repmgr user=repmgr {{ repmgr_client_dsn_attributes }}
     bdr_node_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ bdr_client_dsn_attributes }}
+    bdr_node_local_dsn: >-
+      host={{ unix_socket_directories|first }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }}
     pgbouncer_node_dsn: >-
       host={{ inventory_hostname }} port={{ pgbouncer_port }}
     harp_dcs_node_dsn: >-
