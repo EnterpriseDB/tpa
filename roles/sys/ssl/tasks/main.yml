@@ -13,7 +13,7 @@
 
 - include_role: name=sys/ssl/ca
   when:
-    use_ssl_cert_authentication
+    not selfsigned
 
 - include_tasks: legacy.yml
 
@@ -25,7 +25,7 @@
     privatekey_path: "/etc/tpa/{{ inventory_hostname }}.key"
     certificate_path: "/etc/tpa/{{ inventory_hostname }}.crt"
   when:
-    use_ssl_cert_authentication
+    not selfsigned
     or not legacy_ssl_enabled
 
 # Temporarily disabled to avoid resetting permissions on already-created

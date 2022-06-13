@@ -16,6 +16,8 @@
     csr_path: "{{ csr_path }}"
     privatekey_path: "{{ privatekey_path }}"
     selfsigned_not_after: "{{ _expiry }}"
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
     provider: selfsigned
     force: no
   vars:

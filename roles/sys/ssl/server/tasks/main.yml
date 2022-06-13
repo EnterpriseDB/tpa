@@ -17,8 +17,8 @@
   when: crt_check.stat.exists
 
 - include_tasks: "{{
-    use_ssl_cert_authentication|ternary(
-      'certificate.yml', 'selfsigned.yml'
+    selfsigned|ternary(
+    'selfsigned.yml', 'certificate.yml'
     )
   }}"
   when: >
@@ -33,7 +33,7 @@
     force: no
   register: cert_copy
   when:
-    use_ssl_cert_authentication
+    not selfsigned
   notify:
     - Note SSL configuration changed
 
@@ -41,7 +41,7 @@
   set_fact:
     ssl_ca_file: "{{ ssl_ca_file|default(ca_path) }}"
   when:
-    use_ssl_cert_authentication
+    not selfsigned
 
 - name: Set paths to SSL key and certificate
   set_fact:
