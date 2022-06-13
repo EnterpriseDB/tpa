@@ -21,23 +21,8 @@ directory and OS-specific subdirectories. See below for details of the
 
 ## Disconnected environments
 
-In an environment where the target instances will not have network
-access, you can instead configure your cluster with this option:
-
-    tpaexec configure --use-local-repo-only …
-
-This will do everything that `--enable-local-repo` does, and disable the
-configuration for all other package repositories. On RedHat instances,
-this also includes disabling access to subscription-based services.
-
-In an existing cluster, you can just create the `local-repo` directory
-and subdirectories yourself. For a cluster with a local repo enabled
-already, you can set `use_local_repo_only: yes` in `config.yml`:
-
-```yaml
-cluster_vars:
-  use_local_repo_only: yes
-```
+See instructions for managing clusters in an [air-gapped](air-gapped.md)
+environment.
 
 ## Local repo layout
 
