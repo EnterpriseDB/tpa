@@ -23,9 +23,21 @@
   vars:
     path: "{{ lookup('pipe', 'command -v {{ item }} || true') }}"
 
-- name: Ensure collection community.crypto is installed
-  community.crypto.crypto_info:
-  register: crypto_information
-- name: Ensure python crypto module is installed
+- name: Ensure that all required Ansible collections have been installed
   assert:
-    that: crypto_information.python_cryptography_installed
+    that: found_collection is not empty
+    fail_msg: >-
+      Could not find the Ansible collection {{ item }} in {{ params.paths }}.
+      Please run `tpaexec setup` to remedy this.
+  vars:
+    params:
+      files: 'MANIFEST.json'
+      paths: "{{
+        lookup('config', 'COLLECTIONS_PATHS')
+        |apply_format('{}/ansible_collections/' + item|replace('.', '/'))
+      }}"
+      skip: True
+    found_collection: "{{ lookup('first_found', params) }}"
+  with_items: "{{
+    (lookup('file', tpa_dir + '/collections/requirements.yml')|from_yaml).collections|map(attribute='name')|list
+  }}"
