@@ -2,6 +2,57 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v22.15 (unreleased)
+
+This release requires you to run `tpaexec setup` after upgrading (and
+will fail with an error otherwise)
+
+### Notable changes
+
+- Run "harpctl apply" only if the HARP bootstrap config is changed
+
+  WARNING: This will trigger a single harp service restart on existing
+  clusters when you run `tpaexec deploy`, because config.yml is changed
+  to ensure that lists are consistently ordered, to avoid unintended
+  changes in future deploys
+
+- Add `tpaexec download-packages` command to download all packages
+  required by a cluster into a local-repo directory, so that they can be
+  copied to cluster instances in airgapped/disconnected environments.
+  See air-gapped.md and local-repo.md for details
+
+- Require `--harp-consensus-protocol <etcd|bdr>` configure option
+  for new BDR-Always-ON clusters
+
+  The best choice depends on the number of locations, network latency,
+  and other factors that tpaexec cannot guess to set a good default.
+
+  This affects the configuration of newly-generated clusters, but does
+  not affect existing clusters that use the former default of `etcd`
+  without setting harp_consensus_protocol explicitly
+
+### Minor changes
+
+- Install openjdk-11 instead of openjdk-8 for EFM on distributions where
+  the older version is not available
+
+- Accept `harp_log_level` setting (e.g., under cluster_vars) to override
+  the default harp-manager and harp-proxy log level (info)
+
+- Configure harp-proxy to use a single multi-host BDR DCS endpoint DSN
+  instead of a list of individual endpoint DSNs, to improve resilience
+
+- Omit extra connection attributes (e.g., ssl*) from the local (Unix
+  socket) DSN for the BDR DCS for harp-manager
+
+### Bugfixes
+
+- Ensure that harp-manager and harp-proxy are restarted if their config
+  changes
+
+- Fix harp-proxy errors by granting additional (new) permissions
+  required by the readonly harp_dcs_user
+
 ## v22.14 (2022-05-16)
 
 ### Notable changes
