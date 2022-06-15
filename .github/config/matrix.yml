@@ -24,3 +24,12 @@ simple:
   tpa_postgres_flavour:
     - "postgresql"
     - "epas"
+update_bdr:
+  tpa_architecture:
+    - "BDR-Always-ON"
+  tpa_platform:
+    - "docker"
+  tpa_os_image:
+    - "ubuntu"
+    - "debian:10"
+    - "redhat"

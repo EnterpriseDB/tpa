@@ -1,6 +1,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-name: Integration Test
+name: Update Cluster Integration Test
 description: Run an integration test for the given architecture and platform
 
 inputs:
@@ -28,10 +28,6 @@ inputs:
     required: false
     description: "TPA postgres type selection"
     default: ""
-  tpa_package_cache:
-    required: false
-    description: "Enable local repo and reuse packages"
-    default: "true"
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -42,6 +38,12 @@ runs:
 
   steps:
 
+    - name: Set extra arguments for initial state of cluster
+      run: |
+        CONFIGURE_EXTRA_ARGS+="--bdr-version 3"
+        echo CONFIGURE_EXTRA_ARGS="${CONFIGURE_EXTRA_ARGS}" >>$GITHUB_ENV
+      shell: bash
+
     - uses: ./.github/actions/initialise_integration_test
       with:
         tpa_platform: ${{ inputs.tpa_platform }}
@@ -50,7 +52,6 @@ runs:
         tpa_os_version: ${{ inputs.tpa_os_version }}
         tpa_os_image: ${{ inputs.tpa_os_image }}
         tpa_postgres_flavour: ${{ inputs.tpa_postgres_flavour }}
-        tpa_package_cache: "true"
         cluster: ${{ inputs.cluster }}
 
     - name: Provision the cluster
@@ -61,6 +62,39 @@ runs:
       run: ./bin/tpaexec deploy "$CLUSTER" -vv
       shell: bash
 
+    - name: Alter config.yml to set 2q repostories to BDR 4
+      run: |
+        cp "$CLUSTER"/config.yml "$CLUSTER"/config.yml.orig
+        pip install -y yq
+        yq -y '.cluster_vars.tpa_2q_repsoitories=["products/bdr4/release","products/harp/release"]' \
+         "$CLUSTER"/config.yml >"$CLUSTER"/config.yml.new
+        mv "$CLUSTER"/config.yml.new "$CLUSTER"/config.yml
+      shell: bash
+
+    - name: Provision the cluster with new repo config
+      run: ./bin/tpaexec provision "$CLUSTER" -vv
+      shell: bash
+
+    - name: Deploy the cluster with new repo config
+      run: ./bin/tpaexec deploy "$CLUSTER" -vv
+      shell: bash
+
+    - name: Alter config.yml to set BDR version 4 and remove extensions
+      run: |
+        cp "$CLUSTER"/config.yml "$CLUSTER"/config.yml.pre_bdr4
+        yq -y 'del(.cluster_vars.extra_postgres_extensions)|.cluster_vars.bdr_version="4"' \
+         "$CLUSTER"/config.yml >"$CLUSTER"/config.yml.new
+        mv "$CLUSTER"/config.yml.new "$CLUSTER"/config.yml
+      shell: bash
+
+    - name: Provision the cluster with BDR 4 config.yml
+      run: ./bin/tpaexec provision "$CLUSTER" -vv
+      shell: bash
+
+    - name: Update postgres in the cluster
+      run: ./bin/tpaexec update-postgres "$CLUSTER" -vv
+      shell: bash
+
     - name: Test the cluster
       run: ./bin/tpaexec test "$CLUSTER" -vv
       shell: bash
@@ -69,5 +103,3 @@ runs:
       with:
         cluster: ${{ env.CLUSTER }}
       if: always()
-
-outputs: { }

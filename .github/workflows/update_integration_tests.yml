@@ -1,0 +1,48 @@
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+name: Update Integration Tests
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  ANSIBLE_SKIP_TAGS: pgbench
+
+jobs:
+
+  load-matrix:
+    name: Load Matrix
+    runs-on: self-hosted
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/load-yaml
+        id: load-yaml
+        with:
+          file: .github/config/matrix.yml
+          key: update_bdr
+
+  integration-test:
+    name: Update Integration Tests
+    needs: load-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/update-integration-test
+        with:
+          cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_os_image }}
+          tpa_architecture: ${{ matrix.tpa_architecture }}
+          tpa_platform: ${{ matrix.tpa_platform }}
+          tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"

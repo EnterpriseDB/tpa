@@ -1,0 +1,143 @@
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+name: Initialise Integration Test
+description: Install requirements and run configure for integration test for the given architecture and platform
+
+inputs:
+  tpa_platform: # id of input
+    description: "TPA platform"
+    required: false
+    default: docker
+  tpa_architecture:
+    required: false
+    description: "TPA architecture"
+    default: BDR-Always-ON
+  tpa_os:
+    required: false
+    description: "Operating System to use with TPA (--os)"
+    default: ""
+  tpa_os_version:
+    required: false
+    description: "Operating System version to use with TPA (--os-version)"
+    default: ""
+  tpa_os_image:
+    required: false
+    description: "Image to use with TPA platform"
+    default: ""
+  tpa_postgres_flavour:
+    required: false
+    description: "TPA postgres type selection"
+    default: ""
+  tpa_package_cache:
+    required: false
+    description: "Enable local repo and reuse packages"
+    default: "false"
+  cluster:
+    required: false
+    description: "Name of the cluster directory"
+    default: "cluster"
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - uses: ./.github/actions/install-requirements
+      with:
+        platform: ${{ inputs.tpa_platform }}
+
+    - uses: ./.github/actions/tpaexec-setup
+
+    - name: Export EDB_REPO_CREDENTIALS_FILE to use EDB repositories
+      run: |
+        umask 066 && echo $EDB_REPO_CREDENTIALS > $EDB_REPO_CREDENTIALS_FILE
+      shell: bash
+
+    - name: Filter characters from cluster variable
+      run: |
+        CLUSTER="cluster-${GITHUB_RUN_NUMBER:-1}-${GITHUB_RUN_ATTEMPT:-0}${{ inputs.cluster }}"
+        echo CLUSTER=${CLUSTER//[:\/.]/_} >>$GITHUB_ENV
+      shell: bash
+
+    - name: Generate an initial configuration for a simple cluster
+      run: |
+        if [ "${{ inputs.tpa_architecture }}" == "BDR-Always-ON" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --layout bronze"
+          CONFIGURE_EXTRA_ARGS+=" --harp-consensus-protocol bdr"
+        fi
+        if [ -n "${{ inputs.tpa_os }}" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --os ${{ inputs.tpa_os }}"
+          IMAGE_OS="${{ inputs.tpa_os }}"
+          IMAGE_OS="${IMAGE_OS,,}"
+          IMAGE="tpa/${IMAGE_OS}"
+        fi
+        if [ -n "${{ inputs.tpa_os_version }}" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --os-version ${{ inputs.tpa_os_version }}"
+          IMAGE_VERSION="${{ inputs.tpa_os_version }}"
+          IMAGE="${IMAGE:+${IMAGE}:${IMAGE_VERSION}}"
+        fi
+        if [ -n "${{ inputs.tpa_os_image }}" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --os-image ${{ inputs.tpa_os_image }}"
+          IMAGE="${{ inputs.tpa_os_image }}"
+          IMAGE_OS="${IMAGE/:*}"
+          IMAGE_OS="${IMAGE_OS/tpa\/}"
+          IMAGE_VERSION="${IMAGE/*:}"
+        fi
+        if [ -n "${{ inputs.tpa_postgres_flavour }}" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --postgres-flavour ${{ inputs.tpa_postgres_flavour }}"
+        fi
+
+        # Disable pem for pgextended because of missing pgextendedNN-server-sslutils
+        # dependency. We can remove this check when pgextendedNN-server-sslutils is
+        # available
+        if [ "${{ inputs.tpa_postgres_flavour }}" != "2q" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --enable-pem"
+        fi
+
+        # If package caching is enabled we enforce use of local repo
+        if [ "${{ inputs.tpa_package_cache }}" == "true" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --use-local-repo-only"
+        fi
+
+        # Assume the default image is tpa/redhat if we're using docker as a platform
+        # Otherwise we are not sure what should be used so exit
+        if [[ "${{ inputs.tpa_platform }}" != "docker" && -z "$IMAGE" ]] ;then
+          echo "Please set either TPA OS and Version or OS Image"
+          exit 1
+        fi
+        IMAGE="${IMAGE:-tpa/redhat}"
+        # Set a base os image name stripping the docker image tag
+        image_os_base="${IMAGE/:*}"
+        # Set a image version stripping the docker image name leaving the tag only if it's set
+        [[ "${IMAGE}" =~ : ]] && image_ver="${IMAGE/*:}"
+        # Set a default IMAGE_OS to be the base image name minus "tpa/"
+        : "${IMAGE_OS:=${image_os_base/tpa\/}}"
+        # Set a default IMAGE_OS_VERSION to be the docker image tag or "latest" if it's not set
+        : "${IMAGE_VERSION:=${image_ver:-latest}}"
+
+        # Save the image info for reuse in actions/cache
+        echo IMAGE="${IMAGE}" >>$GITHUB_ENV
+        echo IMAGE_OS="${IMAGE_OS}" >>$GITHUB_ENV
+        echo IMAGE_VERSION="${IMAGE_VERSION}" >>$GITHUB_ENV
+
+        # Finally run configure with constructed options
+        ./bin/tpaexec configure "$CLUSTER" \
+          --architecture ${{ inputs.tpa_architecture }} \
+          --platform ${{ inputs.tpa_platform }} \
+          ${CONFIGURE_EXTRA_ARGS}
+      shell: bash
+
+    - name: Prepare package cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ inputs.cluster }}/local-repo
+        key: local-repo-${{ env.IMAGE_OS }}-${{ env.IMAGE_VERSION }}-${{ github.ref_name }}-${{ github.sha }}
+        restore-keys: |
+          local-repo-${{ env.IMAGE_OS }}-${{ env.IMAGE_VERSION }}-${{ github.ref_name }}
+          local-repo-${{ env.IMAGE_OS }}-${{ env.IMAGE_VERSION }}
+      if: inputs.tpa_package_cache == 'true'
+
+    - name: Populate the package cache
+      run: ./bin/tpaexec download-packages "$CLUSTER" --docker-image "$IMAGE" -vv
+      shell: bash
+      if: inputs.tpa_package_cache == 'true'

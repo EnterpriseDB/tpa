@@ -1,0 +1,44 @@
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+name: Finalise Integration Test
+description: Capture output data, deprovision and remove cluster
+
+inputs:
+  cluster: # id of input
+    required: false
+    description: "Name of the cluster directory"
+    default: "cluster"
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - name: Archive the cluster logs
+      run: ./bin/tpaexec archive-logs "${{ inputs.cluster }}" -vv
+      shell: bash
+      if: always()
+
+    - name: Archive the cluster directory
+      run: tar cvzf "cluster-${{ inputs.cluster }}.tar.gz" --exclude="local-repo" "${{ inputs.cluster }}"
+      shell: bash
+      if: always()
+
+    - name: Save cluster artifacts before deletion
+      uses: actions/upload-artifact@v2
+      with:
+        name: cluster-${{ github.run_number }}-${{ github.run_attempt }}
+        path: "cluster-*.tar.gz"
+      if: always()
+
+    - name: Deprovision the cluster
+      run: ./bin/tpaexec deprovision "${{ inputs.cluster }}" -vv
+      shell: bash {0}
+      if: always()
+
+    - name: Remove cluster directory
+      run: rm -rf "${{ inputs.cluster }}"
+      shell: bash
+      if: always()
+
+outputs: { }

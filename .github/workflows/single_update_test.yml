@@ -1,0 +1,48 @@
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+name: Single Integration Test
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      tpa_architecture:
+        description: "TPA architecture"
+        required: true
+        default: "BDR-Always-ON"
+      tpa_platform:
+        description: "TPA platform"
+        required: false
+        default: "docker"
+      tpa_os_image:
+        description: "TPA OS image"
+        required: false
+        default: ""
+      tpa_postgres_flavour:
+        description: "Postgres flavour"
+        required: false
+        default: ""
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  ANSIBLE_SKIP_TAGS: pgbench
+
+jobs:
+
+  integration-test:
+    name: Integration test
+
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ./.github/actions/update-integration-test
+        with:
+          tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
+          tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
+          tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
+          tpa_platform: ${{ github.event.inputs.tpa_platform }}
