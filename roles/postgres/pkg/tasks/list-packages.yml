@@ -6,11 +6,6 @@
 # from a replica. (To do so, we also have to create the extension on the
 # corresponding primary, which we don't do by default yet, because the
 # extension has known crash-the-server problems.)
-#
-# By default, we always install pglogical packages (if it's not being
-# installed from source), unless it's not supported (e.g., with BDRv4).
-# On BDR instances, we must also install BDR packages (again, if it's
-# not being installed from source).
 
 - name: Determine which optional packages should be installed
   set_fact:
@@ -18,16 +13,6 @@
       postgres_family == 'postgresql' and postgres_version is version(9.5, '<=')
       and postgresql_flavour != 'postgresql-bdr'
     }}"
-    need_pglogical_packages: "{{
-      'pglogical' not in sources and (
-        postgres_family == 'postgresql' or
-        (postgres_family == 'epas' and 'bdr' in role)
-        or 'pglogical' in postgres_extensions
-      )
-      and postgresql_flavour != 'postgresql-bdr'
-      and bdr_version is version(4, '<')
-    }}"
-    need_bdr_packages: "{{ 'bdr' in role and 'bdr' not in sources }}"
   vars:
     sources: "{{ install_from_source|map(attribute='name')|unique|list }}"
 
@@ -45,8 +30,6 @@
           |union(_additional_postgres_packages)
           |union(_extra_postgres_packages)
           |union(_pgespresso_packages if need_pgespresso_packages else [])
-          |union(_pglogical_packages if need_pglogical_packages else [])
-          |union(_bdr_packages if need_bdr_packages else [])
           |union(_psycopg2_packages)
           |flatten
         }}"
@@ -65,17 +48,6 @@
           |union(extra_postgres_packages['common']|default([]))
         }}"
       _pgespresso_packages: "{{ pgespresso_packages|packages_for(ansible_distribution) }}"
-      _pglogical_packages: "{{
-          pglogical_packages[postgres_family]
-          |packages_for(ansible_distribution, pglogical_package_version)
-        }}"
-      _bdr_packages: "{{
-          (bdr_version is version('4', '<'))
-          |ternary(
-            bdr_packages[postgres_family],
-            bdr4_packages[postgres_family_extended])
-          |packages_for(ansible_distribution, bdr_package_version)
-        }}"
       _psycopg2_packages: "{{
           psycopg2_packages|packages_for(ansible_os_family)
         }}"
@@ -84,8 +56,6 @@
     vars:
       list_contents: "{{
           _postgres_debug_packages
-          |union(_pglogical_debug_packages if need_pglogical_packages else [])
-          |union(_bdr_debug_packages if need_bdr_packages else [])
           |flatten
         }}"
 
@@ -94,15 +64,4 @@
           |packages_for(ansible_distribution, postgres_package_version)
         }}"
 
-      _pglogical_debug_packages: "{{
-          pglogical_debug_packages[postgres_family]
-          |packages_for(ansible_distribution, pglogical_package_version)
-        }}"
-
-      _bdr_debug_packages: "{{
-          (bdr_version is version('4', '<'))
-          |ternary(
-            bdr_debug_packages[postgres_family],
-            bdr4_debug_packages[postgres_family_extended])
-          |packages_for(ansible_distribution, bdr_package_version)
-        }}"
+- include_tasks: list-bdr-packages.yml

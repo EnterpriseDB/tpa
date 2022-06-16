@@ -64,7 +64,7 @@
   # Check if we can install the default pglogical -dbgsym packages, and
   # switch to dbg otherwise. For older versions, we must always switch.
 
-  - when: need_pglogical_packages
+  - when: need_pglogical_packages|default(False)
     block:
     - name: Check if pglogical -dbgsym packages are available
       include_role: name=pkg/install
@@ -100,7 +100,7 @@
   # dbg packages for one, we won't publish dbgsym packages for the
   # other).
 
-  - when: need_bdr_packages
+  - when: need_bdr_packages|default(False)
     block:
     - name: Check if bdr -dbgsym packages are available
       include_role: name=pkg/install
