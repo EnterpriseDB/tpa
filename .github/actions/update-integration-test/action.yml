@@ -65,8 +65,8 @@ runs:
     - name: Alter config.yml to set 2q repostories to BDR 4
       run: |
         cp "$CLUSTER"/config.yml "$CLUSTER"/config.yml.orig
-        pip install -y yq
-        yq -y '.cluster_vars.tpa_2q_repsoitories=["products/bdr4/release","products/harp/release"]' \
+        pip install yq
+        yq -y '.cluster_vars.tpa_2q_repositories=["products/bdr4/release","products/harp/release"]' \
          "$CLUSTER"/config.yml >"$CLUSTER"/config.yml.new
         mv "$CLUSTER"/config.yml.new "$CLUSTER"/config.yml
       shell: bash
@@ -76,7 +76,7 @@ runs:
       shell: bash
 
     - name: Deploy the cluster with new repo config
-      run: ./bin/tpaexec deploy "$CLUSTER" -vv
+      run: ./bin/tpaexec deploy "$CLUSTER" -vv --tags pkg,repo
       shell: bash
 
     - name: Alter config.yml to set BDR version 4 and remove extensions
