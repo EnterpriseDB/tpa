@@ -7,6 +7,27 @@
 This release requires you to run `tpaexec setup` after upgrading (and
 will fail with an error otherwise)
 
+### Changes to package installation behaviour
+
+In earlier versions, running `tpaexec deploy` could potentially upgrade
+installed packages, unless an exact version was explicitly specified
+(e.g., by setting postgres_package_version). However, this was never a
+safe, supported, or recommended way to upgrade. In particular, services
+may not have been safely and correctly restarted after a package upgrade
+during deploy.
+
+With this release onwards, `tpaexec deploy` will never upgrade installed
+packages. The first deploy will install all required packages (either a
+specific version, if set, or the latest available), and subsequent runs
+will see that the package is installed, and do nothing further. This is
+a predictable and safe new default behaviour.
+
+If you need to update components, use `tpaexec update-postgres`. In this
+release, the command can update Postgres and Postgres-related packages
+such as BDR or pglogical, as well as certain other components, such as
+HARP, pgbouncer, and etcd (if applicable to a particular cluster).
+Future releases will safely support upgrades of more components.
+
 ### Notable changes
 
 - Run "harpctl apply" only if the HARP bootstrap config is changed
