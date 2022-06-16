@@ -15,4 +15,9 @@ pg2q.enable_camo = {{ enable_camo }}
 {%   else %}
 bdr.enable_camo = {{ enable_camo }}
 {%   endif %}
+{%   if bdr_version_num is defined and bdr_version_num >= 40000 %}
+# Disable transaction streaming which is not supported in combination
+# with CAMO protected transactions.
+bdr.default_streaming_mode = off
+{%   endif %}
 {% endif %}
