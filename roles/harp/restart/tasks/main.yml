@@ -1,0 +1,18 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- meta: flush_handlers
+
+- name: Start or restart harp services
+  systemd:
+    name: "{{ item }}"
+    state: "{{ harp_service_end_state|default('started') }}"
+    enabled: yes
+  with_items: "{{ harp_services[harp_version] }}"
+  vars:
+    harp_services:
+      "2":
+        - "{{ ('postgres' in role)|ternary('harp-manager', []) }}"
+        - "{{ ('harp-proxy' in role)|ternary('harp-proxy', []) }}"
+  tags: [service, restart]
