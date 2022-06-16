@@ -102,8 +102,7 @@ class BDR(Architecture):
 
         if (postgres_version, bdr_version) not in self.supported_versions():
             print(
-                "ERROR: Postgres %s with BDR %s is not supported"
-                % (postgres_version, bdr_version),
+                "ERROR: Postgres %s with BDR %s is not supported" % (postgres_version, bdr_version),
                 file=sys.stderr,
             )
             sys.exit(-1)
@@ -121,9 +120,7 @@ class BDR(Architecture):
                 if postgresql_flavour == "2q":
                     tpa_2q_repositories.append("products/bdr_enterprise_3_7/release")
                 elif postgresql_flavour == "epas":
-                    tpa_2q_repositories.append(
-                        "products/bdr_enterprise_3_7-epas/release"
-                    )
+                    tpa_2q_repositories.append("products/bdr_enterprise_3_7-epas/release")
                 else:
                     tpa_2q_repositories.append("products/bdr3_7/release")
                     tpa_2q_repositories.append("products/pglogical3_7/release")
@@ -131,9 +128,7 @@ class BDR(Architecture):
             if not tpa_2q_repositories or "/bdr4/" not in given_repositories:
                 tpa_2q_repositories.append("products/bdr4/release")
 
-        if harp_enabled and (
-            not tpa_2q_repositories or "/harp/" not in given_repositories
-        ):
+        if harp_enabled and (not tpa_2q_repositories or "/harp/" not in given_repositories):
             tpa_2q_repositories.append("products/harp/release")
 
         cluster_vars.update(
@@ -157,26 +152,63 @@ class BDR(Architecture):
 
     def update_instances(self, instances):
 
-        # If --enable-camo is specified, we collect all the instances with role
-        # [bdr,primary] and no partner already set and set them pairwise to be
-        # each other's CAMO partners. This is crude, but it's good enough to
-        # experiment with CAMO.
+        self._update_instance_camo(instances)
+        self._update_instance_pem(instances)
 
+    @property
+    def _candidate_roles(self):
+        """
+        Instance roles that can be considered as BDR node candidates.
+
+        Returns: Set of roles names
+
+        """
+        return {
+            "bdr",
+            "replica",
+            "readonly",
+            "subscriber-only",
+            "witness",
+        }
+
+    @property
+    def _camo_candidate_roles(self):
+        """
+        Instance roles that can be considered a CAMO partner.
+
+        Returns: Set of role names
+
+        """
+        return self._candidate_roles
+
+    @property
+    def _pemagent_candidate_roles(self):
+        """
+        Instance roles that should run PEM agent.
+
+        Returns: Set of role names
+
+        """
+        return self._candidate_roles.union({"primary"})
+
+    def _instance_roles(self, instance):
+        """Get the roles for an instance."""
+        ins_defs = self.args["instance_defaults"]
+        return set(instance.get("role", ins_defs.get("role", [])))
+
+    def _update_instance_camo(self, instances):
+        """
+        If --enable-camo is specified, we collect all the instances with role
+        [bdr,primary] and no partner already set and set them pairwise to be
+        each other's CAMO partners. This is crude, but it's good enough to
+        experiment with CAMO.
+        """
         if self.args.get("enable_camo", False):
             bdr_primaries = []
-            ins_defs = self.args["instance_defaults"]
-            for i in instances:
-                _vars = i.get("vars", {})
-                role = i.get("role", ins_defs.get("role", []))
-                if (
-                    "bdr" in role
-                    and "replica" not in role
-                    and "readonly" not in role
-                    and "subscriber-only" not in role
-                    and "witness" not in role
-                ):
-                    if "bdr_node_camo_partner" not in _vars:
-                        bdr_primaries.append(i)
+            for instance in instances:
+                _vars = instance.get("vars", {})
+                if self._camo_candidate_roles & self._instance_roles(instance) and "bdr_node_camo_partner" not in _vars:
+                    bdr_primaries.append(instance)
 
             idx = 0
             while idx + 1 < len(bdr_primaries):
@@ -193,23 +225,18 @@ class BDR(Architecture):
 
                 idx += 2
 
-        # If --enable-pem is specified, we collect all the instances with role
-        # [primary, bdr, replica, readonly, witness, subscriber-only] and append
-        # 'pem-agent' role to the existing set of roles assigned to them. We later
-        # add a dedicated 'pemserver' instance to host our PEM server.
+    def _update_instance_pem(self, instances):
+        """
+        If --enable-pem is specified, we collect all the instances with role
+        [primary, bdr, replica, readonly, witness, subscriber-only] and append
+        'pem-agent' role to the existing set of roles assigned to them. We later
+        add a dedicated 'pemserver' instance to host our PEM server.
+        """
 
         if self.args.get("enable_pem", False):
-            ins_defs = self.args["instance_defaults"]
+
             for instance in instances:
-                role = instance.get("role", ins_defs.get("role", []))
-                if (
-                    "primary" in role
-                    or "bdr" in role
-                    or "replica" in role
-                    or "readonly" in role
-                    or "subscriber-only" in role
-                    or "witness" in role
-                ):
+                if self._pemagent_candidate_roles & self._instance_roles(instance):
                     instance["role"].append("pem-agent")
 
             n = instances[-1].get("node")

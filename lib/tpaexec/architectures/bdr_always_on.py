@@ -60,6 +60,8 @@ class BDR_Always_ON(BDR):
         role for each BDR primary or witness instance that should run etcd.
         """
 
+        super().update_instances(instances)
+
         if self.args.get("harp_consensus_protocol") == "etcd":
             ins_defs = self.args["instance_defaults"]
             for i in instances:
