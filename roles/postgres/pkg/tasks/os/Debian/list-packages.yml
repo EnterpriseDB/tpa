@@ -74,7 +74,7 @@
             pglogical_debug_packages[postgres_family]
             |packages_for(ansible_distribution, pglogical_package_version)
           }}"
-        check_result_varname: pglogical_dbgsym_check
+        result_varname: pglogical_dbgsym_check
         check_install_only: yes
       when:
         postgres_version is version('10', '>=')
@@ -113,7 +113,7 @@
               bdr4_debug_packages[postgres_family_extended])
             |packages_for(ansible_distribution, bdr_package_version)
           }}"
-        check_result_varname: bdr_dbgsym_check
+        result_varname: bdr_dbgsym_check
         check_install_only: yes
       when:
         postgres_version is version('10', '>=')

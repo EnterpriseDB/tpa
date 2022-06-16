@@ -1,0 +1,43 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# Because pkg/install was invoked with `allow_package_upgrades` set, we
+# have license to set `state: latest` for packages we are installing.
+#
+# We must still use `state: present` for packages with explicit version
+# specifications (i.e., xxx_package_version is set), because we'll get
+# an error with `state: latest`. If an older version is installed, the
+# package will be upgraded anyway with `state: present`.
+#
+# Packages with version specifications look like `xxx=1.2.3` (Debian) or
+# `yyy-2.3.4` (RedHat). We don't deal with any non-alphanumeric version
+# specifications in tpaexec, so the regex below doesn't consider those.
+#
+# This mode does not support dry runs.
+
+- name: Install or upgrade {{ package_list_name|mandatory }} with explicit versions specified
+  package:
+    name: "{{ _versioned_packages }}"
+    state: present
+  vars:
+    _versioned_packages: "{{
+        package_list|default([])|select('regex', '[=-][0-9]')|list
+      }}"
+  when:
+    platform not in ['shared']
+    and _versioned_packages is not empty
+  tags: pkg
+
+- name: Install or upgrade {{ package_list_name|mandatory }} without explicit versions specified
+  package:
+    name: "{{ _unversioned_packages }}"
+    state: latest
+  vars:
+    _unversioned_packages: "{{
+        package_list|default([])|reject('regex', '[=-][0-9]')|list
+      }}"
+  when:
+    platform not in ['shared']
+    and _unversioned_packages is not empty
+  tags: pkg
