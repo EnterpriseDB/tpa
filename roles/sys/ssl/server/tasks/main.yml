@@ -29,10 +29,9 @@
   copy:
     src: "{{ local_ca_certificate_path }}"
     dest: "{{ ca_path }}"
-    owner: "{{ ssl_user }}"
-    group: "{{ ssl_group }}"
     mode: 0644
     force: no
+  register: cert_copy
   when:
     use_ssl_cert_authentication
   notify:
@@ -54,6 +53,9 @@
     tasks_from: security
   vars:
     ssl_dirs: [ssl_dir|default(certificate_path|dirname)]
+  when:
+    not crt_check.stat.exists
+    or cert_copy is changed
 
 - name: Verify certificate was generated correctly
   include_role:
