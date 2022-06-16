@@ -101,6 +101,51 @@
     when: >
       'postgres' in role
 
+  - name: Stop/update/restart pgbouncer on {{ inventory_hostname }}
+    block:
+    - include_role: name=pgbouncer/restart
+      vars:
+        pgbouncer_service_end_state: stopped
+    - include_role: name=pgbouncer/pkg
+      vars:
+        allow_package_upgrades: yes
+    - include_role: name=pgbouncer/restart
+      vars:
+        pgbouncer_service_end_state: started
+    when: >
+      'pgbouncer' in role
+
+  - name: Stop/update/restart etcd on {{ inventory_hostname }}
+    block:
+    - include_role: name=etcd/restart
+      vars:
+        etcd_service_end_state: stopped
+    - include_role: name=etcd/pkg
+      vars:
+        allow_package_upgrades: yes
+    - include_role: name=etcd/restart
+      vars:
+        etcd_service_end_state: started
+    when: >
+      'etcd' in role
+
+  - name: Stop/update/restart harp on {{ inventory_hostname }}
+    block:
+    - include_role: name=harp/restart
+      vars:
+        harp_service_end_state: stopped
+    - include_role: name=harp/pkg
+      vars:
+        allow_package_upgrades: yes
+    - include_role: name=harp/restart
+      vars:
+        harp_service_end_state: started
+    when: >
+      'harp-proxy' in role
+      or ('bdr' in role
+        and failover_manager == 'harp'
+        and inventory_hostname in first_bdr_primary_candidates|default([]))
+
   # After we update one instance in a CAMO pair, we must wait for its
   # partner to catch up. If we stop the partner before it is ready, we
   # will lose the status of transactions committed on the origin.
