@@ -45,8 +45,11 @@ Future releases will safely support upgrades of more components.
 - Require `--harp-consensus-protocol <etcd|bdr>` configure option
   for new BDR-Always-ON clusters
 
-  The best choice depends on the number of locations, network latency,
-  and other factors that tpaexec cannot guess to set a good default.
+  TPAexec no longer supplies a default value here because the choice
+  of consensus protocol can negatively affect failover performance,
+  depending on network latency between data centres/locations, so the
+  user is in a better position to select the protocol most suitable for
+  a given cluster.
 
   This affects the configuration of newly-generated clusters, but does
   not affect existing clusters that use the former default of `etcd`
