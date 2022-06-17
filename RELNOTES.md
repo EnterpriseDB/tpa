@@ -77,6 +77,13 @@ Future releases will safely support upgrades of more components.
 - Fix harp-proxy errors by granting additional (new) permissions
   required by the readonly harp_dcs_user
 
+- Disable BDR4 transaction streaming when CAMO is enabled
+
+  If bdr.enable_camo is set, we must disable bdr.default_streaming_mode,
+  which is not compatible with CAMO-protected transactions in BDR4. This
+  will cause a server restart on CAMO-enabled BDR4 clusters (which could
+  not work with streaming enabled anyway).
+
 ## v22.14 (2022-05-16)
 
 ### Notable changes
