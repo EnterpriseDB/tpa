@@ -56,6 +56,16 @@ class BDR_Always_ON(BDR):
 
     def update_instances(self, instances):
         """
+        Update instances with bdr-always-on specific changes.
+        Invoke BDR generic update to process updates common to multiple BDR
+        architectures (BDR-A-ON, BDR-autoscale).
+        """
+
+        super().update_instances(instances)
+        self._update_instances_harp_etcd(instances)
+
+    def _update_instances_harp_etcd(self, instances):
+        """
         When using 'harp_consensus_protocol: etcd', explicitly add 'etcd' to the
         role for each of the following instances:
         - BDR Primary ('bdr' role)
@@ -66,25 +76,31 @@ class BDR_Always_ON(BDR):
         necessarily the best one; different placements are possible, as long as
         there are three etcd instances for each location, and the BDR nodes have
         a local etcd node, which seems convenient.
+        Args:
+            instances (list): list of instances to update
         """
-
-        super().update_instances(instances)
-
         if self.args.get("harp_consensus_protocol") == "etcd":
-            ins_defs = self.args["instance_defaults"]
-            for i in instances:
-                role = i.get("role", ins_defs.get("role", []))
-                if (
-                    "bdr" in role
-                    and "replica" not in role
-                    and "witness" not in role
-                    and "subscriber-only" not in role
-                ) or (
-                    "bdr" in role
-                    and "witness" in role
-                    and self.args["layout"] == "bronze"
-                ) or (
-                    "barman" in role
-                    and self.args["layout"] == "gold"
+            for instance in instances:
+                if self._instance_roles(instance).isdisjoint(
+                    self._etcd_harp_exclude_roles
+                ) and "bdr" in self._instance_roles(instance):
+                    instance["role"].append("etcd")
+                if self.args["layout"] == "gold" and "barman" in self._instance_roles(
+                    instance
                 ):
-                    i["role"].append("etcd")
+                    instance["role"].append("etcd")
+
+    @property
+    def _etcd_harp_exclude_roles(self):
+        """
+        Instance roles that should not run etcd while using harp consensus etcd.
+        Returns: Set of role names
+        """
+        _exclude_roles = {
+            "replica",
+            "subscriber-only",
+            "witness",
+        }
+        if self.args["layout"] == "bronze":
+            _exclude_roles.difference_update({"witness"})
+        return _exclude_roles
