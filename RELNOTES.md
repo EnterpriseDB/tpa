@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-## v22.15 (unreleased)
+## v23.1 (2022-06-20)
 
 This release requires you to run `tpaexec setup` after upgrading (and
 will fail with an error otherwise)
