@@ -28,7 +28,11 @@
     use_ssl_cert_authentication
     or not legacy_ssl_enabled
 
-- include_tasks: security.yml
-  vars:
-    ssl_dirs: ["/etc/tpa"]
-  tags: always
+# Temporarily disabled to avoid resetting permissions on already-created
+# server certificates that must remain owned by postgres/postgres for
+# Postgres to start.
+#
+# - include_tasks: security.yml
+#   vars:
+#     ssl_dirs: ["/etc/tpa"]
+#   tags: always
