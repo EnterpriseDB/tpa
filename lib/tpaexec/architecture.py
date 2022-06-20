@@ -751,15 +751,15 @@ class Architecture(object):
                 cluster_vars["yum_repository_list"].append("EDB")
 
             if self.args.get("postgres_version") == "9.6":
-
-                cluster_vars["yum_repositories"]["{}-debuginfo".format(repo_name)] = {
+                DEBUGINFO_SUFFIX= "{}-debuginfo"
+                cluster_vars["yum_repositories"][DEBUGINFO_SUFFIX.format(repo_name)] = {
                         "description": "Postgres Debug Info {} Repo".format(self.args.get("postgres_version")),
                         "baseurl": "https://download.postgresql.org/pub/repos/yum/debug/{}/redhat/rhel-$releasever-$basearch".format(self.args.get("postgres_version")),
-                        "file": "{}-debuginfo".format(repo_name),
+                        "file": DEBUGINFO_SUFFIX.format(repo_name),
                         "gpgkey": "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG",
                         "repo_gpgcheck": "yes",
                 }
-                cluster_vars["yum_repository_list"].append("{}-debuginfo".format(repo_name))
+                cluster_vars["yum_repository_list"].append(DEBUGINFO_SUFFIX.format(repo_name))
 
     def cluster_vars_args(self):
         """
