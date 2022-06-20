@@ -135,11 +135,16 @@
     platform not in ['docker', 'lxd', 'vagrant']
   tags: cloudinit
 
-- include_role:
-    name: sys/ssl
-    apply:
-      tags: ssl
-  tags: ssl
+# The sys/ssl role is incompatible with the legacy method of generating a
+# certificate for postgres. When proper certificate authentication has been
+# implemented and roles/postgres/user/tasks/tls.yml is gone this can be
+# reactivated.
+
+#- include_role:
+#    name: sys/ssl
+#    apply:
+#      tags: ssl
+#  tags: ssl
 
 - include_role:
     name: sys/rsyslog
