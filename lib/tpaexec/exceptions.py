@@ -25,7 +25,7 @@ class TPABaseException(Exception):
 
     """
 
-    MSG = "An error was encountered during execution of tpaexec configure"
+    MSG = "An error occurred during execution of tpaexec configure"
 
     @property
     def message(self):
@@ -36,3 +36,28 @@ class PlatformError(TPABaseException):
     """Error condition in TPA platform use."""
 
     MSG = "An error occurred during Platform processing"
+
+
+class ArchitectureError(TPABaseException):
+    """Architecture error exception."""
+
+    MSG = "An error occurred during Architecture processing"
+
+
+class BDRArchitectureError(ArchitectureError):
+
+    """BDR Architecture error exception class."""
+
+    MSG = "An error occurred during BDR Architecture processing"
+
+
+class AWSPlatformError(PlatformError):
+    """Error condition in TPA AWS platform use."""
+
+    MSG = "An error occurred during AWS Platform processing"
+
+
+class DockerPlatformError(PlatformError):
+    """Docker specific platform error exception."""
+
+    MSG = "An error occurred during docker platform processing"

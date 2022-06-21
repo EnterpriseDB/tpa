@@ -3,17 +3,13 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 import boto3
-import sys
 
 from . import CloudPlatform
+from ..exceptions import AWSPlatformError
 
 AWS_DEFAULT_INSTANCE_TYPE = "t3.micro"
 AWS_DEFAULT_REGION = "eu-west-1"
 AWS_DEFAULT_VOLUME_DEVICE_NAME = "/dev/xvd"
-
-
-class AWSPlatformError(Exception):
-    """Error condition in TPA AWS platform use."""
 
 
 class aws(CloudPlatform):
@@ -129,11 +125,8 @@ class aws(CloudPlatform):
                     if version in v["versions"]
                 )
             except (KeyError, StopIteration):
-                print(
-                    f"ERROR: cannot determine AMI name for {label_base}/{version}",
-                    file=sys.stderr,
-                )
-                sys.exit(-1)
+                raise AWSPlatformError(f"ERROR: cannot determine AMI name for {label_base}/{version}")
+
             image["os"] = label_base
             image["os_family"] = image.get("os_family", label_base)
             try:

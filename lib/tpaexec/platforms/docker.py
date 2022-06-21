@@ -4,7 +4,10 @@
 
 from . import Platform
 
-import os, sys, time
+import os
+import time
+
+from ..exceptions import DockerPlatformError
 
 
 class docker(Platform):
@@ -21,9 +24,7 @@ class docker(Platform):
             args.get("local_source_directories") or []
         )
         if errors:
-            for e in errors:
-                print(f"ERROR: --local-source-directories {e}", file=sys.stderr)
-            sys.exit(-1)
+            raise DockerPlatformError(*(f"--local-source-directories {e}" for e in errors))
 
         if args.get("enable_local_repo"):
             local_sources["local-repo"] = ":".join(
@@ -58,8 +59,7 @@ class docker(Platform):
                 try:
                     os.mkdir(ccache)
                 except OSError as e:
-                    print(f"ERROR: --shared-ccache: {str(e)}", file=sys.stderr)
-                    sys.exit(-1)
+                    raise DockerPlatformError(f"--shared-ccache: {str(e)}")
         else:
             # We don't have access to the cluster name here (it's set only
             # in process_arguments), so we leave a '%s' to be filled in by
@@ -169,13 +169,8 @@ class docker(Platform):
 
         def valid_version(img_name, ver):
             ver = ver or kwargs.get("version")
-            if ver and ver != "latest":
-                if ver not in known_images[img_name]["versions"]:
-                    print(
-                        "ERROR: image %s:%s is not supported" % (img_name, ver),
-                        file=sys.stderr,
-                    )
-                    sys.exit(-1)
+            if ver and ver != "latest" and ver not in known_images[img_name]["versions"]:
+                raise DockerPlatformError(f"ERROR: image {img_name}:{ver} is not supported")
             return ver or known_images[img_name]["versions"].pop()
 
         # Cater for image names, e.g. "tpa/debian" or "tpa/debian:10"

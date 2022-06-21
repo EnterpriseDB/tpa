@@ -17,6 +17,7 @@ from ansible.template import Templar
 from ansible.utils.vars import merge_hash
 from functools import reduce
 
+from .exceptions import ArchitectureError
 from .net import Network, DEFAULT_SUBNET_PREFIX_LENGTH, DEFAULT_NETWORK_CIDR
 from .platforms import Platform
 
@@ -345,9 +346,7 @@ class Architecture(object):
                 errors.append("invalid name (expected source/product/maturity)")
 
             if errors:
-                for e in errors:
-                    print("ERROR: repository '%s' has %s" % (r, e), file=sys.stderr)
-                sys.exit(-1)
+                raise ArchitectureError(*(f"repository '{r}' has {e}" for e in errors))
 
         # Validate arguments to --install-from-source
         errors = []
@@ -373,19 +372,10 @@ class Architecture(object):
             pass
 
         if errors:
-            for e in errors:
-                print("ERROR: --install-from-source %s" % (e), file=sys.stderr)
-            sys.exit(-1)
+            raise ArchitectureError(*(f"--install-from-source {e}" for e in errors))
 
-        if (
-            args.get("epas_redwood_compat") == False
-            and args.get("postgresql_flavour") != "epas"
-        ):
-            print(
-                "ERROR: You can specify --no-redwood only when using --epas",
-                file=sys.stderr,
-            )
-            sys.exit(-1)
+        if args.get("epas_redwood_compat") is False and args.get("postgresql_flavour") != "epas":
+            raise ArchitectureError("You can specify --no-redwood only when using --epas")
 
         # --use-local-repo-only implies --enable-local-repo
         if self.args.get("use_local_repo_only"):
@@ -522,8 +512,7 @@ class Architecture(object):
         (stdout, stderr) = p.communicate()
 
         if p.returncode != 0:
-            print(stderr.strip(), file=sys.stderr)
-            sys.exit(-1)
+            raise ArchitectureError(stderr.strip())
 
         return ["zero"] + stdout.strip().split(" ")
 
@@ -588,13 +577,11 @@ class Architecture(object):
         )
 
         if len(list(subnets)) < num:
-            print(
-                f"ERROR: Network {subnets.cidr.with_prefixlen} cannot contain {num} /{subnets.new_prefix} subnets.\n"
-                f"ERROR: You might want to try providing a larger network with --network or smaller subnets with"
+            raise ArchitectureError(
+                f"Network {subnets.cidr.with_prefixlen} cannot contain {num} /{subnets.new_prefix} subnets. "
+                f"You might want to try providing a larger network with --network or smaller subnets with"
                 f" --subnet-prefix {subnets.new_prefix+1}",
-                file=sys.stderr,
             )
-            sys.exit(-1)
 
         # This dramatically reduces conflicts between people who are deploying their clusters into the same VPC
         # otherwise we pick the same subnets in the network range every time
@@ -633,11 +620,7 @@ class Architecture(object):
                     if instance_default_subnet:
                         values.append(instance_default_subnet)
             except FileNotFoundError:
-                print(
-                    f"Could not open a config.yml file in the provided path: {dir_name}",
-                    file=sys.stderr,
-                )
-                sys.exit(-1)
+                raise ArchitectureError(f"Could not open a config.yml file in the provided path: {dir_name}")
         return list(set(values))
 
     def _init_locations(self, locations):
@@ -702,12 +685,9 @@ class Architecture(object):
             entry = installable_sources[name]
 
             if ref and name in local_sources:
-                print(
-                    "ERROR: --install-from-source can't guarantee %s:%s while using local source directory %s"
-                    % (name, ref, local_sources[name].split(":")[0]),
-                    file=sys.stderr,
-                )
-                sys.exit(-1)
+                raise ArchitectureError(
+                    f"--install-from-source can't guarantee {name}:{ref} while using local source"
+                    f" directory {local_sources[name].split(':')[0]}")
 
             if name in ["postgres", "2ndqpostgres"]:
                 if ref:
@@ -892,8 +872,7 @@ class Architecture(object):
                 with open(config_path, "w") as cfg:
                     cfg.write(configuration)
         except OSError as e:
-            print("Could not write cluster directory: %s" % str(e), file=sys.stderr)
-            sys.exit(-1)
+            raise ArchitectureError(f"Could not write cluster directory: {str(e)}")
 
     def setup_local_repo(self):
         """

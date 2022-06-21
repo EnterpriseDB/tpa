@@ -3,9 +3,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 from ..architecture import Architecture
+from ..exceptions import BDRArchitectureError
 from typing import List, Tuple
-
-import sys
 
 
 class BDR(Architecture):
@@ -101,11 +100,7 @@ class BDR(Architecture):
             postgres_version = default_pg_versions.get(bdr_version)
 
         if (postgres_version, bdr_version) not in self.supported_versions():
-            print(
-                "ERROR: Postgres %s with BDR %s is not supported" % (postgres_version, bdr_version),
-                file=sys.stderr,
-            )
-            sys.exit(-1)
+            raise BDRArchitectureError(f"Postgres {postgres_version} with BDR {bdr_version} is not supported")
 
         extensions = []
 
