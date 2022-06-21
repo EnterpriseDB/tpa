@@ -24,7 +24,9 @@ class docker(Platform):
             args.get("local_source_directories") or []
         )
         if errors:
-            raise DockerPlatformError(*(f"--local-source-directories {e}" for e in errors))
+            raise DockerPlatformError(
+                *(f"--local-source-directories {e}" for e in errors)
+            )
 
         if args.get("enable_local_repo"):
             local_sources["local-repo"] = ":".join(
@@ -169,8 +171,14 @@ class docker(Platform):
 
         def valid_version(img_name, ver):
             ver = ver or kwargs.get("version")
-            if ver and ver != "latest" and ver not in known_images[img_name]["versions"]:
-                raise DockerPlatformError(f"ERROR: image {img_name}:{ver} is not supported")
+            if (
+                ver
+                and ver != "latest"
+                and ver not in known_images[img_name]["versions"]
+            ):
+                raise DockerPlatformError(
+                    f"ERROR: image {img_name}:{ver} is not supported"
+                )
             return ver or known_images[img_name]["versions"].pop()
 
         # Cater for image names, e.g. "tpa/debian" or "tpa/debian:10"

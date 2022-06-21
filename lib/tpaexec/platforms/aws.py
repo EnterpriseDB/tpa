@@ -125,7 +125,9 @@ class aws(CloudPlatform):
                     if version in v["versions"]
                 )
             except (KeyError, StopIteration):
-                raise AWSPlatformError(f"ERROR: cannot determine AMI name for {label_base}/{version}")
+                raise AWSPlatformError(
+                    f"ERROR: cannot determine AMI name for {label_base}/{version}"
+                )
 
             image["os"] = label_base
             image["os_family"] = image.get("os_family", label_base)

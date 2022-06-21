@@ -100,7 +100,9 @@ class BDR(Architecture):
             postgres_version = default_pg_versions.get(bdr_version)
 
         if (postgres_version, bdr_version) not in self.supported_versions():
-            raise BDRArchitectureError(f"Postgres {postgres_version} with BDR {bdr_version} is not supported")
+            raise BDRArchitectureError(
+                f"Postgres {postgres_version} with BDR {bdr_version} is not supported"
+            )
 
         extensions = []
 
@@ -115,7 +117,9 @@ class BDR(Architecture):
                 if postgresql_flavour == "2q":
                     tpa_2q_repositories.append("products/bdr_enterprise_3_7/release")
                 elif postgresql_flavour == "epas":
-                    tpa_2q_repositories.append("products/bdr_enterprise_3_7-epas/release")
+                    tpa_2q_repositories.append(
+                        "products/bdr_enterprise_3_7-epas/release"
+                    )
                 else:
                     tpa_2q_repositories.append("products/bdr3_7/release")
                     tpa_2q_repositories.append("products/pglogical3_7/release")
@@ -123,7 +127,9 @@ class BDR(Architecture):
             if not tpa_2q_repositories or "/bdr4/" not in given_repositories:
                 tpa_2q_repositories.append("products/bdr4/release")
 
-        if harp_enabled and (not tpa_2q_repositories or "/harp/" not in given_repositories):
+        if harp_enabled and (
+            not tpa_2q_repositories or "/harp/" not in given_repositories
+        ):
             tpa_2q_repositories.append("products/harp/release")
 
         cluster_vars.update(
@@ -202,7 +208,10 @@ class BDR(Architecture):
             bdr_primaries = []
             for instance in instances:
                 _vars = instance.get("vars", {})
-                if self._camo_candidate_roles & self._instance_roles(instance) and "bdr_node_camo_partner" not in _vars:
+                if (
+                    self._camo_candidate_roles & self._instance_roles(instance)
+                    and "bdr_node_camo_partner" not in _vars
+                ):
                     bdr_primaries.append(instance)
 
             idx = 0

@@ -374,8 +374,13 @@ class Architecture(object):
         if errors:
             raise ArchitectureError(*(f"--install-from-source {e}" for e in errors))
 
-        if args.get("epas_redwood_compat") is False and args.get("postgresql_flavour") != "epas":
-            raise ArchitectureError("You can specify --no-redwood only when using --epas")
+        if (
+            args.get("epas_redwood_compat") is False
+            and args.get("postgresql_flavour") != "epas"
+        ):
+            raise ArchitectureError(
+                "You can specify --no-redwood only when using --epas"
+            )
 
         # --use-local-repo-only implies --enable-local-repo
         if self.args.get("use_local_repo_only"):
@@ -620,7 +625,9 @@ class Architecture(object):
                     if instance_default_subnet:
                         values.append(instance_default_subnet)
             except FileNotFoundError:
-                raise ArchitectureError(f"Could not open a config.yml file in the provided path: {dir_name}")
+                raise ArchitectureError(
+                    f"Could not open a config.yml file in the provided path: {dir_name}"
+                )
         return list(set(values))
 
     def _init_locations(self, locations):
@@ -687,7 +694,8 @@ class Architecture(object):
             if ref and name in local_sources:
                 raise ArchitectureError(
                     f"--install-from-source can't guarantee {name}:{ref} while using local source"
-                    f" directory {local_sources[name].split(':')[0]}")
+                    f" directory {local_sources[name].split(':')[0]}"
+                )
 
             if name in ["postgres", "2ndqpostgres"]:
                 if ref:
