@@ -24,6 +24,18 @@ requirements:
     - libkrb5-dev
     - liblz4-dev
   RedHat:
+    - autoconf
+    - automake
+    - binutils
+    - gcc
+    - gcc-c++
+    - gdb
+    - glibc-devel
+    - libtool
+    - make
+    - pkgconf
+    - pkgconf-m4
+    - pkgconf-pkg-config
     - readline-devel
     - zlib-devel
     - openssl-devel
