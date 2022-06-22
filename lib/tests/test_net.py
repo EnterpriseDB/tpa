@@ -7,8 +7,9 @@ from ipaddress import IPv4Network
 
 import pytest
 
-from lib.tpaexec.net import Network, Subnets
+from tpaexec.net import Network, Subnets
 from tpaexec.architecture import Architecture
+from tpaexec.exceptions import NetError
 
 
 @pytest.fixture()
@@ -59,12 +60,14 @@ class TestSubnets:
         assert not subnets.ranges == sub_list
 
     def test_subnets_too_large(self, subnet_too_large):
-        with pytest.raises(ValueError):
+        with pytest.raises(NetError) as exc:
             subnet_too_large.validate()
+        assert exc.value.args == ('prefix length for subnets must be between 23-29: 9',)
 
     def test_subnets_too_small(self, subnet_too_small):
-        with pytest.raises(ValueError):
+        with pytest.raises(NetError) as exc:
             subnet_too_small.validate()
+        assert exc.value.args == ('prefix length for subnets must be between 23-29: 30',)
 
     def test_subnets_get(self, subnets):
         assert subnets[0] == IPv4Network("10.0.0.0/28")

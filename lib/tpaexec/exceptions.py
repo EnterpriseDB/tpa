@@ -70,16 +70,15 @@ class DockerPlatformError(PlatformError):
     MSG = "An error occurred during docker platform processing"
 
 
-class NetError(ArchitectureError):
+class NetError(TPABaseException):
 
     """Net error exception class."""
 
     MSG = "An error occurred during network address processing"
 
 
-class TestCompilerError(ArchitectureError):
+class TestCompilerError(TPABaseException):
 
     """Test Compiler error exception class."""
 
     MSG = "An error occurred during test compiling"
-
