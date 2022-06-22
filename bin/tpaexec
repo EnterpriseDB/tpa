@@ -509,18 +509,32 @@ Available help topics:
     provision   Provision instances to host a cluster
     deploy      Install and configure software on a cluster
     test        Test the deployed cluster
+    relink      Relink symbolic links within a cluster directory
 
     ping        Ping instances in a cluster
     playbook    Execute an arbitrary playbook on instances
     cmd         Execute arbitrary commands on instances
 
-    rehydrate   Terminate and replace instances (AWS)
-    deprovision Destroy the resources used by a cluster
+    switchover  Switchover between a primary and a replica
+
+    start-postgres
+    stop-postgres
+                Commands for clusters that use LUKS-encrypted volumes
+
+    update-postgres
+                Upgrade Postgres and Postgres-related packages
+                (e.g, BDR, pglogical, HARP, pgbouncer)
+
+    download-packages
+                Download all packages required for a cluster
 
     show-password
     store-password
                 Commands to manage passwords for cluster users
                 (e.g., postgres_password, pgbouncer_password)
+
+    rehydrate   Terminate and replace instances (AWS)
+    deprovision Destroy the resources used by a cluster
 
 Run 'tpaexec help topicname' for more details.
 TOPICS
