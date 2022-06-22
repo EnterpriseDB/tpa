@@ -28,5 +28,5 @@
     when:
       ansible_os_family == 'RedHat'
       and (postgresql_flavour == 'epas'
-        or (postgresql_flavour == '2q'
+        or (postgresql_flavour == 'pgextended'
             and postgres_version is version('13', '>=')))

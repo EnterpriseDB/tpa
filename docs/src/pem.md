@@ -26,7 +26,7 @@ the generated cluster config (config.yml) and assign or remove `pem-agent`
 role from any postgres instance in the cluster in order to enable or
 disable PEM there.
 
-Note that PEM server does not support postgres-extended for a backend yet.
+Note that PEM server does not support pgextended for a backend yet.
 
 ## PEM configuration
 

@@ -176,15 +176,16 @@ class Architecture(object):
             "--2q",
             "--2ndq",
             "--2ndqpostgres",
+            "--pgextended",
             action="store_const",
-            const="2q",
+            const="pgextended",
             dest="postgresql_flavour",
-            help="Install 2ndQuadrant Postgres for BDR EE (2ndQPostgres)",
+            help="Install Postgres Extended for BDR EE",
         )
         g.add_argument(
             "--postgres-flavour",
             dest="postgresql_flavour",
-            choices=["2q", "epas", "postgresql"],
+            choices=["pgextended", "epas", "postgresql"],
         )
         g.add_argument(
             "--postgres-version",
@@ -789,6 +790,7 @@ class Architecture(object):
         return [
             "default",
             "2ndqpostgres",
+            "pgextended",
             "bdr2",
             "bdr3",
             "pglogical3",

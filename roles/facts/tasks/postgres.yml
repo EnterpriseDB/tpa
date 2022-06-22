@@ -4,7 +4,7 @@
 
 - name: Infer default_postgresql_flavour from configured repositories
   set_fact:
-    default_postgresql_flavour: 2q
+    default_postgresql_flavour: pgextended
   when: >
     _repos is search('bdr_enterprise') or _repos is search('2ndqpostgres')
   vars:
@@ -14,7 +14,7 @@
   set_fact:
     postgresql_flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
     postgres_family: "{{ (_flavour == 'epas')|ternary('epas', 'postgresql') }}"
-    postgres_family_extended: "{{ (_flavour == '2q')|ternary('pgextended', _flavour) }}"
+    postgres_family_extended: "{{ (_flavour == 'pgextended')|ternary('pgextended', _flavour) }}"
   vars:
     _flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
 
@@ -22,9 +22,9 @@
   assert:
     msg: >-
       Unrecognised postgresql_flavour setting: '{{ postgresql_flavour }}'
-      (try postgresql, 2q, or epas)
+      (try postgresql, pgextended, or epas)
     that:
-      - postgresql_flavour in ['postgresql', '2q', 'epas', 'postgresql-bdr']
+      - postgresql_flavour in ['postgresql', 'pgextended', 'epas', 'postgresql-bdr']
 
 - name: Set postgres_data_dir
   set_fact:
@@ -108,7 +108,7 @@
 - name: Set various postgres facts
   set_fact:
     postgres_package_name: "{{
-      'postgresql' if postgresql_flavour in ['postgresql', '2q'] else
+      'postgresql' if postgresql_flavour in ['postgresql', 'pgextended'] else
       'postgresql-bdr' if postgresql_flavour == 'postgresql-bdr' else
       'edb-as' if postgres_family == 'epas' else ''
     }}"

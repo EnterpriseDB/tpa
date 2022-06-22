@@ -4,7 +4,7 @@
   "inputs": {
       "tpa_architecture": "BDR-Always-ON",
       "tpa_os_image": "tpa/debian:10",
-      "tpa_postgres_flavour": "2q",
+      "tpa_postgres_flavour": "pgextended",
       "tpa_platform": "docker"
   }
 }

@@ -114,7 +114,7 @@ class BDR(Architecture):
         elif bdr_version == "3":
             extensions = ["pglogical"]
             if not tpa_2q_repositories:
-                if postgresql_flavour == "2q":
+                if postgresql_flavour == "pgextended":
                     tpa_2q_repositories.append("products/bdr_enterprise_3_7/release")
                 elif postgresql_flavour == "epas":
                     tpa_2q_repositories.append(
@@ -126,9 +126,18 @@ class BDR(Architecture):
         elif bdr_version == "4":
             if not tpa_2q_repositories or "/bdr4/" not in given_repositories:
                 tpa_2q_repositories.append("products/bdr4/release")
+            if postgresql_flavour == "pgextended" and (
+                not tpa_2q_repositories or "/2ndqpostgres/" not in given_repositories
+            ):
+                tpa_2q_repositories.append("products/2ndqpostgres/release")
+
         elif bdr_version == "5":
             if not tpa_2q_repositories or "/bdr5/" not in given_repositories:
                 tpa_2q_repositories.append("products/bdr5/release")
+            if postgresql_flavour == "pgextended" and (
+                not tpa_2q_repositories or "/2ndqpostgres/" not in given_repositories
+            ):
+                tpa_2q_repositories.append("products/2ndqpostgres/release")
 
         if harp_enabled and (
             not tpa_2q_repositories or "/harp/" not in given_repositories

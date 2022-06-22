@@ -14,11 +14,11 @@ default:
     # - "debian:11"
   tpa_postgres_flavour:
     - "postgresql"
-    - "2q"
+    - "pgextended"
     - "epas"
   exclude:
     - tpa_architecture: "M1"
-      tpa_postgres_flavour: "2q"
+      tpa_postgres_flavour: "pgextended"
 simple:
   tpa_architecture: *default_tpa_architecture
   tpa_postgres_flavour:

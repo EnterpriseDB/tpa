@@ -90,7 +90,7 @@ runs:
         # Disable pem for pgextended because of missing pgextendedNN-server-sslutils
         # dependency. We can remove this check when pgextendedNN-server-sslutils is
         # available
-        if [ "${{ inputs.tpa_postgres_flavour }}" != "2q" ] ;then
+        if [ "${{ inputs.tpa_postgres_flavour }}" != "pgextended" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --enable-pem"
         fi
 

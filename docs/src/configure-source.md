@@ -59,7 +59,7 @@ There are two aspects to configuring source builds.
 If you just want a cluster running a particular combination of sources,
 run `tpaexec configure` to generate a configuration with sensible
 defaults to download, compile, and install the components you select.
-You can build Postgres or 2ndQPostgres, pglogical, and BDR, and specify
+You can build Postgres or Postgres Extended, pglogical, and BDR, and specify
 branch names to build from, as shown in the examples above.
 
 The underlying mechanism is capable of much more than the command-line
@@ -92,7 +92,7 @@ $ tpaexec configure ~/clusters/speedy                           \
       …
 ```
 
-By default, this will clone the known repositories for 2ndqPostgres,
+By default, this will clone the known repositories for Postgres Extended,
 pglogical3, and bdr3, check out the given branches, and build them. But
 you can add `--local-source-directories` to specify that you want the
 sources to be taken directly from your host machine instead:
@@ -108,7 +108,7 @@ $ tpaexec configure ~/clusters/speedy                           \
     …
 ```
 
-This configuration will still install 2ndQPostgres from the repository,
+This configuration will still install Postgres Extended from the repository,
 but it obtains pglogical3 and bdr3 sources from the given directories on
 the host. These directories are bind-mounted read-only into the Docker
 containers at the same locations where the git repository would have
