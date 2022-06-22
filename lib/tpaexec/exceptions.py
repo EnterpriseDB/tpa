@@ -51,6 +51,13 @@ class BDRArchitectureError(ArchitectureError):
     MSG = "An error occurred during BDR Architecture processing"
 
 
+class ImagesArchitectureError(ArchitectureError):
+
+    """Images Architecture error exception class."""
+
+    MSG = "An error occurred during Images Architecture processing"
+
+
 class AWSPlatformError(PlatformError):
     """Error condition in TPA AWS platform use."""
 
@@ -61,3 +68,18 @@ class DockerPlatformError(PlatformError):
     """Docker specific platform error exception."""
 
     MSG = "An error occurred during docker platform processing"
+
+
+class NetError(ArchitectureError):
+
+    """Net error exception class."""
+
+    MSG = "An error occurred during network address processing"
+
+
+class TestCompilerError(ArchitectureError):
+
+    """Test Compiler error exception class."""
+
+    MSG = "An error occurred during test compiling"
+

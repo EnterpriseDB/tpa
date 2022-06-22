@@ -6,6 +6,8 @@ from ..architecture import Architecture
 
 import re
 
+from ..exceptions import ImagesArchitectureError
+
 
 class Images(Architecture):
     def add_architecture_options(self, p, g):
@@ -82,7 +84,7 @@ class Images(Architecture):
         regions = args["regions"]
         distributions = args["distributions"]
         if args.get("distribution"):
-            raise Exception(
+            raise ImagesArchitectureError(
                 "Please use --distributions (not --distribution) for this architecture"
             )
 

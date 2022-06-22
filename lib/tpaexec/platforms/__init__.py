@@ -5,7 +5,7 @@ import argparse
 import copy
 import importlib.util
 
-from tpaexec.exceptions import PlatformError
+from ..exceptions import PlatformError
 
 DEFAULT_VOLUME_DEVICE_NAME = "/dev/sd"
 

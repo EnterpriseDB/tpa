@@ -9,6 +9,7 @@ from .bdr_always_on import BDR_Always_ON
 from .bdr_autoscale import BDR_Autoscale
 from .images import Images
 from .m1 import M1
+from ..exceptions import ArchitectureError
 
 
 class SelectArchitecture:
@@ -31,7 +32,7 @@ class SelectArchitecture:
         try:
             return cls.ARCHITECTURES[name](*args, **kwargs)
         except KeyError:
-            raise KeyError(f"Unknown architecture: {name}")
+            raise ArchitectureError(f"Unknown architecture: {name}")
 
 
 def configure(argv, tpa_dir=None):

@@ -10,6 +10,8 @@ import re
 import random
 import string
 
+from ..exceptions import TestCompilerError
+
 
 class TestCompiler(object):
     """
@@ -30,13 +32,13 @@ class TestCompiler(object):
         """
         specs = read_yaml(infile)
         if not isinstance(specs, list):
-            raise Exception("expected a list of test specifications in YAML format")
+            raise TestCompilerError("expected a list of test specifications in YAML format")
 
         for i, spec in enumerate(specs):
             if not isinstance(spec, dict):
-                raise Exception("test #%s: not a dict" % i)
+                raise TestCompilerError("test #%s: not a dict" % i)
             if spec.get("test") is None:
-                raise Exception("test #%s: no 'test' id specified" % i)
+                raise TestCompilerError("test #%s: no 'test' id specified" % i)
 
             self.tests.append(Test.compile(spec, self.options))
 
@@ -54,7 +56,7 @@ class TestCompiler(object):
                 all_plays.append(p)
             for i in t.includes:
                 if i in all_includes:
-                    raise Exception("include filename collision: %s (rerun)" % i)
+                    raise TestCompilerError("include filename collision: %s (rerun)" % i)
                 all_includes[i] = t.includes[i]
 
         write_yaml(outdir, "index.yml", all_plays)
@@ -96,7 +98,7 @@ class Test(object):
 
         t.test_options = spec.get("options", {})
         if not isinstance(t.test_options, dict):
-            raise Exception("%s: options: not a dict" % t.id)
+            raise TestCompilerError("%s: options: not a dict" % t.id)
 
         # The hosts list comprises notional host names (which make sense for the
         # purposes of the test, but are not necessarily assigned to real hosts)
@@ -105,10 +107,10 @@ class Test(object):
 
         hosts = spec.get("hosts", [])
         if not isinstance(hosts, list):
-            raise Exception("%s: hosts: not a list" % t.id)
+            raise TestCompilerError("%s: hosts: not a list" % t.id)
         for h in hosts:
             if not (isinstance(h, dict) and len(h) == 1):
-                raise Exception(
+                raise TestCompilerError(
                     "%s: hosts: entry must map {hostlabel: [conditions]}" % t.id
                 )
 
@@ -126,10 +128,10 @@ class Test(object):
 
         steps = spec.get("steps", [])
         if not isinstance(steps, list):
-            raise Exception("%s: steps: not a list" % t.id)
+            raise TestCompilerError("%s: steps: not a list" % t.id)
         for s in steps:
             if not isinstance(s, dict):
-                raise Exception("%s: steps: each entry must be a dict" % t.id)
+                raise TestCompilerError("%s: steps: each entry must be a dict" % t.id)
 
         t.append_play(
             {
@@ -200,7 +202,7 @@ class Test(object):
                 elif "has_vars" in e:
                     _vars = e["has_vars"]
                     if not isinstance(_vars, list):
-                        raise Exception("has_vars must specify a list")
+                        raise TestCompilerError("has_vars must specify a list")
                     for v in _vars:
                         if isinstance(v, str):
                             conditions.append("hostvars[item]['%s'] is defined" % v)
@@ -211,7 +213,7 @@ class Test(object):
                                 "hostvars[item]['%s'] == %s" % (name, v[name])
                             )
                         else:
-                            raise Exception(
+                            raise TestCompilerError(
                                 "has_vars: entry must be str or {var: value}"
                             )
 
@@ -265,7 +267,7 @@ class Test(object):
 
         for i, s in enumerate(steps):
             if not isinstance(s, dict):
-                raise Exception("step #%s: not a dict" % i)
+                raise TestCompilerError("step #%s: not a dict" % i)
 
             t = {"vars": {}, "when": []}
 
@@ -286,7 +288,7 @@ class Test(object):
             elif "block" in s:
                 block = s["block"]
                 if not isinstance(block, list):
-                    raise Exception("every block must be a list of steps")
+                    raise TestCompilerError("every block must be a list of steps")
 
                 substeps = self.translate_steps(block)
                 t.update({"block": substeps})
@@ -294,7 +296,7 @@ class Test(object):
             else:
                 step = self.find_custom_step(s)
                 if step is None:
-                    raise Exception("unhandled step: %s" % s)
+                    raise TestCompilerError("unhandled step: %s" % s)
                 t.update(step)
 
             # By default, every step runs on every host, but you can set 'hosts'

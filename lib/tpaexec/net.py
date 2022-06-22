@@ -9,6 +9,8 @@ from ipaddress import IPv4Network, ip_network
 from random import shuffle
 from typing import Iterator, MutableSequence, List
 
+from .exceptions import NetError
+
 DEFAULT_NETWORK_CIDR = "10.33.0.0/16"
 DEFAULT_SUBNET_PREFIX_LENGTH = 28
 
@@ -83,7 +85,7 @@ class Subnets:
     def validate(self):
         """Validate the prefix length restrictions."""
         if not (self.MAX_PREFIX > self.new_prefix > self.MIN_PREFIX):
-            raise ValueError(
+            raise NetError(
                 f"prefix length for subnets must be between "
                 f"{self.MIN_PREFIX}-{self.MAX_PREFIX}: {self.new_prefix}"
             )
