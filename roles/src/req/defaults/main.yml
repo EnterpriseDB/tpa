@@ -21,6 +21,8 @@ requirements:
     - libedit-dev
     - libpam0g-dev
     - krb5-multidev
+    - libkrb5-dev
+    - liblz4-dev
   RedHat:
     - readline-devel
     - zlib-devel
@@ -30,3 +32,5 @@ requirements:
     - libxslt-devel
     - perl-Test-Simple
     - perl-App-cpanminus
+    - libkrb5-devel
+    - liblz4-devel
