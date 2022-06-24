@@ -2,15 +2,8 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-default_ssl_server_cert_expiry: +365d
-
-ssl_dir: "/etc/tpa"
-csr_path: "{{ ssl_dir }}/{{ inventory_hostname }}.csr"
-privatekey_path: "{{ ssl_dir }}/{{ inventory_hostname }}.key"
-certificate_path: "{{ ssl_dir }}/{{ inventory_hostname }}.crt"
-
 local_ssl_dir: "{{ cluster_dir }}/ssl"
 local_ca_certificate_path: "{{ local_ssl_dir }}/CA.crt"
 local_ca_privatekey_path: "{{ local_ssl_dir }}/CA.key"
-local_csr_path: "{{ local_ssl_dir }}/{{ inventory_hostname }}.csr"
-local_certificate_path: "{{ local_ssl_dir }}/{{ inventory_hostname }}.crt"
+local_csr_path: "{{ local_ssl_dir }}/{{ inventory_hostname }}/{{ ssl_service }}.csr"
+local_certificate_path: "{{ local_ssl_dir }}/{{ inventory_hostname }}/{{ ssl_service }}.crt"

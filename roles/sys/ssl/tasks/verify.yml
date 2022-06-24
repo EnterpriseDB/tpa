@@ -25,7 +25,7 @@
     path: "{{ _ca_path }}"
   register: ca_cert_info
   when: >
-    _ca_path
+    _ca_path and not selfsigned
   vars:
     _ca_path: "{{ ssl_ca_file|default(ca_path)|default(None) }}"
 

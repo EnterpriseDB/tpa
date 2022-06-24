@@ -8,11 +8,13 @@
 # existing keys for backwards compatibility.
 
 - name: Check if legacy server certificate is installed
-  stat:
-    path: "/etc/tpa/{{ cluster_name }}.crt"
+  raw: >
+    test -f /etc/tpa/{{ cluster_name }}.crt
+  failed_when: false
+  changed_when: false
   register: old_crt_check
   check_mode: no
 
 - name: Set legacy ssl fact if certificate is present
   set_fact:
-    legacy_ssl_enabled: "{{ old_crt_check.stat.exists }}"
+    legacy_ssl_enabled: "{{ old_crt_check.rc == 0 }}"

@@ -7,5 +7,6 @@ default_ssl_client_cert_expiry: +365d
 local_ssl_dir: "{{ cluster_dir }}/ssl"
 
 local_ca_certificate_path: "{{ local_ssl_dir }}/CA.crt"
+local_ca_privatekey_path: "{{ local_ssl_dir }}/CA.key"
 local_csr_path: "{{ local_ssl_dir }}/{{ inventory_hostname }}/{{ username }}.csr"
 local_certificate_path: "{{ local_ssl_dir }}/{{ inventory_hostname }}/{{ username }}.crt"

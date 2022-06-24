@@ -2,37 +2,9 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-## SSL certificates
-
-# By default, we generate a private key and self-signed certificate on
-# every Postgres instance, to enable opportunistic encryption without
-# authentication.
-
 # When certificate authentication is configured, we create a local CA
 # and use it to sign CSRs generated on the target instances.
 
 - include_role: name=sys/ssl/ca
   when:
     not selfsigned
-
-- include_tasks: legacy.yml
-
-- name: Generate server certificate
-  include_role: name=sys/ssl/server
-  vars:
-    ca_path: "{{ use_ssl_cert_authentication|ternary('/etc/tpa/CA.crt', None) }}"
-    csr_path: "/etc/tpa/{{ inventory_hostname }}.csr"
-    privatekey_path: "/etc/tpa/{{ inventory_hostname }}.key"
-    certificate_path: "/etc/tpa/{{ inventory_hostname }}.crt"
-  when:
-    not selfsigned
-    or not legacy_ssl_enabled
-
-# Temporarily disabled to avoid resetting permissions on already-created
-# server certificates that must remain owned by postgres/postgres for
-# Postgres to start.
-#
-# - include_tasks: security.yml
-#   vars:
-#     ssl_dirs: ["/etc/tpa"]
-#   tags: always

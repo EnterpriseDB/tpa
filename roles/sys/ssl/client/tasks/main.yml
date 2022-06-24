@@ -29,7 +29,10 @@
   include_role:
     name: sys/ssl
     tasks_from: verify
-  when: crt_check.stat.exists
+  vars:
+    ssl_service: "{{ clientcert_service }}"
+  when:
+    client_crt_check.stat.exists
 
 - include_tasks: certificate.yml
   when:
@@ -48,10 +51,23 @@
   include_role:
     name: sys/ssl
     tasks_from: verify
+  vars:
+    ssl_service: "{{ clientcert_service }}"
 
 - name: Bail if certificate does not pass verification checks
   fail:
     msg: >
       Post creation verification checks did not pass for Client certificate.
       Please run with verbose flags to determine the reason.
-  when: not cert_verify_passed
+  when:
+    not cert_verify_passed
+
+# Calls to sys/ssl roles will overwrite these variables, so we
+# export them, so they can be used by the caller as more specific names
+
+- name: Set SSL file locations
+  action: set_fact
+  args:
+    "{{ check_result_varname }}_ssl_ca_file": "{{ ca_path }}"
+    "{{ check_result_varname }}_ssl_client_cert_file": "{{ certificate_path }}"
+    "{{ check_result_varname }}_ssl_client_key_file": "{{ privatekey_path }}"

@@ -54,7 +54,7 @@
     name: sys/ssl
     tasks_from: security
   vars:
-    ssl_dirs: [ssl_dir|default(certificate_path|dirname)]
+    ssl_dirs: [ssl_dir]
   when:
     not crt_check.stat.exists
     or cert_copy is changed
@@ -63,6 +63,10 @@
   include_role:
     name: sys/ssl
     tasks_from: verify
+  vars:
+    privatekey_path: "{{ ssl_key_file }}"
+    certificate_path: "{{ ssl_cert_file }}"
+    ca_path: "{{ ssl_ca_file|default(None) }}"
 
 - name: Bail if certificate does not pass verification checks
   fail:
@@ -70,3 +74,20 @@
       Post creation verification checks did not pass for Server certificate.
       Please run with verbose flags to determine the reason.
   when: not cert_verify_passed
+
+# Calls to sys/ssl roles will overwrite these variables, so we
+# export them, so they can be used by the caller as more specific names
+
+- name: Set SSL file locations
+  action: set_fact
+  args:
+    "{{ check_result_varname }}_ssl_ca_file": "{{
+        (not selfsigned and not legacy_ssl_enabled)|ternary(ssl_ca_file, '')
+      }}"
+    "{{ check_result_varname }}_ssl_crl_file": "{{ ssl_crl_file|default('') }}"
+    "{{ check_result_varname }}_ssl_cert_file": "{{
+        legacy_ssl_enabled|ternary('/etc/tpa/' + cluster_name + '.crt', ssl_cert_file)
+      }}"
+    "{{ check_result_varname }}_ssl_key_file": "{{
+        legacy_ssl_enabled|ternary('/etc/tpa/' + cluster_name + '.key', ssl_key_file)
+      }}"

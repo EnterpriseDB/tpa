@@ -2,5 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-ssl_user: root
-ssl_group: root
+local_ssl_dir: "{{ cluster_dir }}/ssl"
+local_ca_certificate_path: "{{ local_ssl_dir }}/CA.crt"
+local_ca_privatekey_path: "{{ local_ssl_dir }}/CA.key"

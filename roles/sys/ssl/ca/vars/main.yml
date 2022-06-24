@@ -2,15 +2,12 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-default_ssl_ca_cert_expiry: +3650d
-
 CA_CN: "{{ cluster_name }}.CA"
-
-ssl_user: "{{ username }}"
-ssl_group: "{{ username }}"
 
 local_ssl_dir: "{{ cluster_dir }}/ssl"
 
 local_ca_certificate_path: "{{ local_ssl_dir }}/CA.crt"
 local_ca_csr_path: "{{ local_ssl_dir }}/CA.csr"
 local_ca_privatekey_path: "{{ local_ssl_dir }}/CA.key"
+
+ca_path: "{{ ssl_dir }}/root.crt"

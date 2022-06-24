@@ -81,3 +81,15 @@
       Post creation verification checks did not pass for Server certificate.
       Please run with verbose flags to determine the reason.
   when: not ca_cert_verify_passed
+
+- name: Push CA cert to the node
+  copy:
+    src: "{{ local_ca_certificate_path }}"
+    dest: "{{ ca_path }}"
+    mode: 0644
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
+
+- name: Set ssl_ca_file fact for client or server callers
+  set_fact:
+    ssl_ca_file: "{{ ca_path }}"
