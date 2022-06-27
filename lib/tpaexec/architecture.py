@@ -180,7 +180,7 @@ class Architecture(object):
             action="store_const",
             const="pgextended",
             dest="postgresql_flavour",
-            help="Install Postgres Extended for BDR EE",
+            help="Install Postgres Extended (formerly 2ndQuadrant Postgres) for BDR EE",
         )
         g.add_argument(
             "--postgres-flavour",
