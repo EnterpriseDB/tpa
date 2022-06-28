@@ -5,3 +5,4 @@
 efm_dependency_packages:
   - java-1.8.0-openjdk
   - iputils
+  - procps

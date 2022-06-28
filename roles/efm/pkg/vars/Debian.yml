@@ -5,3 +5,4 @@
 efm_dependency_packages:
   - openjdk-8-jre
   - iputils-ping
+  - procps
