@@ -215,14 +215,7 @@
     'bdr' in role
     and failover_manager not in ['harp']
 
-# When running `tpaexec download-packages`, some normal assumptions may
-# not apply. For example, first_bdr_primary is most likely not set. We
-# don't need it for the downloader, but we do need to skip everything
-# else that depends on it.
-
 - include_tasks: bdr.yml
-  when: >
-    'downloader' not in role
 
 - name: Add {{ bdr_database }} to postgres_databases
   set_fact:

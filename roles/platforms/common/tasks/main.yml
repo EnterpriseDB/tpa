@@ -168,6 +168,13 @@
     'bdr' in role
     or 'harp-proxy' in role
 
+- name: Ensure BDR candidates fact is established on downloader instance
+  set_fact:
+    first_bdr_primary_candidates: "{{ [inventory_hostname] }}"
+  when: >
+    'downloader' in role
+    and 'bdr' in role
+
 - name: Designate arbitrary r/w instance as first_bdr_primary
   set_fact:
     first_bdr_primary: "{{
