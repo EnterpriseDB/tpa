@@ -636,3 +636,15 @@
       'harp-proxy' in role
       or inventory_hostname in first_bdr_primary_candidates|default([])
     }}"
+
+- name: Add efm to role when efm failover manager is selected
+  set_fact:
+    role: "{{ role|union(['efm']) }}"
+  when:
+    failover_manager == 'efm' and ('postgres' in role or 'efm-witness' in role)
+
+- name: Recreate role_efm group after role changes
+  group_by:
+    key: "role_efm"
+  when: >
+    'efm' in role

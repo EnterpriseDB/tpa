@@ -45,9 +45,8 @@
   - block:
       - include_role: name=repmgr
       - include_role: name=efm
-        when:
-          failover_manager == 'efm'
-          and ('postgres' in role or 'efm-witness' in role)
+        when: >
+          'efm' in role
     when:
       groups|members_of('role_replica', not_in=['role_readonly']) is not empty
       and (pem_shared|default(false)) is false

@@ -12,12 +12,13 @@
     - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
     - "{{ ansible_distribution }}.yml"
 
-- when: "'efm' in role"
+- when: >
+    'efm' in role
   block:
   - include_role: name=pkg/add_to_list
     vars:
       list_contents: "{{
-          efm_dependency_packages|packages_for(ansible_os_family)
+          efm_dependency_packages
         }}"
 
   - include_role: name=pkg/add_to_list
