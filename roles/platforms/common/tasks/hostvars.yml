@@ -39,6 +39,15 @@
     tpa_2q_repositories is not defined and
     twoq_repositories is defined
 
+# We set the postgresql_flavour: pgextended to maintain backwards compatibility
+# with existing clusters that have postgresql_flavour: 2q explicitly set.
+
+- set_fact:
+    postgresql_flavour: pgextended
+  when:
+    postgresql_flavour is defined
+    and postgresql_flavour == '2q'
+
 # We add the default Postgres Extended repository for --pgextended clusters only if
 # no repositories are specified explicitly.
 

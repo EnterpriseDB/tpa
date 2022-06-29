@@ -790,7 +790,6 @@ class Architecture(object):
         return [
             "default",
             "2ndqpostgres",
-            "pgextended",
             "bdr2",
             "bdr3",
             "pglogical3",
