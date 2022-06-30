@@ -6,22 +6,30 @@
   docker_host_info:
   register: docker_system
 
+- name: Check required docker version
+  assert:
+    that:
+      - _docker_version is version('20.10', '>=')
+    msg:
+      - "TPAexec requires Docker CE version 20.10 or later (you are running {{ _docker_version }})"
+      - "Consult platform-docker.md for information on using docker platform"
+  vars:
+    _docker_version: "{{ docker_system.host_info.ServerVersion }}"
+
 # Support for CgroupVersion 2 is not fully baked yet for docker sdk in
 # ansible and related tooling so while we try to make sure we are using
 # a recent version of docker; we rely on CgroupVersion 1 until version
 # 2 is fully supported.
+
 - name: Check required docker environment
   assert:
     that:
-      - _docker_version is version('20.10', '>=')
       - _cgroup_version == '1'
     msg:
-      - "TPAexec requires Docker CE version 20.x or later (you are running {{ _docker_version }})"
       - "TPAexec currently supports CgroupVersion 1 (you are running CgroupVersion {{ _cgroup_version }})"
       - "Consult platform-docker.md for information on using docker platform"
   vars:
-    _docker_version: "{{ docker_system.host_info.ServerVersion }}"
-    _cgroup_version: "{{ docker_system.host_info.CgroupVersion }}"
+    _cgroup_version: "{{ docker_system.host_info.CgroupVersion|default(None) }}"
 
 - name: Ensure that every instance has a defined image
   assert:

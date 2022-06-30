@@ -43,7 +43,7 @@ creating containers.
 
 Please consult the
 [Docker documentation](https://docs.docker.com) if you need help to
-[install Docker](https://docs.docker.com/install) and
+[install Docker](https://docs.docker.com/engine/install/) and
 [get started](https://docs.docker.com/get-started/) with it.
 
 On MacOS X, you can [install "Docker Desktop for
