@@ -8,6 +8,7 @@ requirements:
     - flex
     - bison
     - ccache
+    - gcc
     - "{{ python_pkg_prefix }}-setuptools"
   Debian:
     - libreadline-dev
@@ -32,5 +33,5 @@ requirements:
     - libxslt-devel
     - perl-Test-Simple
     - perl-App-cpanminus
-    - libkrb5-devel
-    - liblz4-devel
+    - krb5-devel
+    - lz4-devel
