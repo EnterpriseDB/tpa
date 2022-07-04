@@ -21,17 +21,19 @@
     }}"
 
 - name: Check etcd cluster health before restart
-  command:
-    etcdctl endpoint health --endpoints="{{ etcd_endpoints }}"
-  register: etcd_health_check
+  block:
+  - command:
+      etcdctl endpoint health --endpoints="{{ etcd_endpoints }}"
+    register: etcd_health_check
+
+  - assert:
+      msg: Refusing to restart etcd in an unhealthy cluster
+      that:
+        etcd_service_end_state == 'started'
+        or etcd_health_check.rc == 0
+
   when:
     etcd_service_end_state == 'restarted'
-
-- assert:
-    msg: Refusing to restart etcd in an unhealthy cluster
-    that:
-      etcd_service_end_state == 'started'
-      or etcd_health_check.rc == 0
 
 - name: Start or restart etcd service
   service:
