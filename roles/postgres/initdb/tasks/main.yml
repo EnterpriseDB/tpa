@@ -70,21 +70,6 @@
     secontext_dirs is not empty
     and platform not in ['docker']
 
-# systemd fails to start postgres when postmaster symlink does not have SELinux
-# context labeled.
-- name: Check if postmaster symlink exists
-  stat:
-    path: "{{ postgres_bin_dir }}/postmaster"
-  register: postmaster
-
-- name: Restore SELinux context for postmaster symlink
-  shell: >
-    restorecon -R -v {{ postgres_bin_dir }}/postmaster
-  when:
-    postmaster.stat.islnk is defined
-    and postmaster.stat.islnk
-    and platform not in ['docker']
-
 # Even if PGDATA was not initialised when we ran minimal_postgres_setup
 # from init, we may now have a valid PGDATA now after mounting a volume
 # or doing something in the pre-initdb hook. Therefore we must re-check
