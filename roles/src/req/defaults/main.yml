@@ -32,5 +32,5 @@ requirements:
     - libxslt-devel
     - perl-Test-Simple
     - perl-App-cpanminus
-    - libkrb5-devel
-    - liblz4-devel
+    - krb5-devel
+    - lz4-devel
