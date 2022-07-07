@@ -57,6 +57,20 @@
   notify:
     - Note Postgres restart required
 
+- name: Collect facts on SELinux status
+  setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - selinux
+
+- name: Restore SELinux file context for Postgres install directory
+  shell: >
+    restorecon -R -v {{ postgres_install_dir }}
+  when:
+    platform not in ['docker']
+    and ansible_selinux.status == 'enabled'
+
 - include_role:
     name: postgres/pkg
     tasks_from: src.yml
