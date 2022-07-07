@@ -46,3 +46,4 @@ requirements:
     - perl-App-cpanminus
     - krb5-devel
     - lz4-devel
+    - libcurl-devel
