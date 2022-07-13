@@ -54,7 +54,7 @@
   become: yes
   vars:
     lock_name: >-
-      {{ (bdr_major_version|int >= 3))|ternary('global', 'bdr_ddl') }}_lock_timeout
+      {{ (bdr_major_version|int >= 3)|ternary('global', 'bdr_ddl') }}_lock_timeout
     statement_timeout:
       text: "ALTER SYSTEM SET bdr.global_lock_statement_timeout TO default"
     reset_queries:
