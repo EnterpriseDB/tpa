@@ -313,3 +313,20 @@ instance profile.
 # required permissions assigned to it).
 # instance_profile_name: xxx
 ```
+
+### Instance Locale
+
+For some ec2 images and environments it might be desirable to change the
+region and language settings.
+The default is `en_US.UTF-8`. To find supported locales consult the
+output of the following command on RedHat or Rocky Linux:
+```shell
+localectl list-locales
+```
+Or the contents of the file /etc/locales.defs on a Debian or Ubuntu.
+
+Set the desired locale in your config.yml:
+
+```yaml
+user_locale: en_GB.UTF-8
+```

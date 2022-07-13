@@ -28,6 +28,11 @@ export {{ k }}="{{ user_data_environment[k] }}"
 {% endfor %}
 
 {#
+    Configure locale
+#}
+{% include 'user-data/locale.j2' %}
+
+{#
     Install awscli, nvmecli, and mdadm if required.
 #}
 {% include 'user-data/pkg.j2' %}

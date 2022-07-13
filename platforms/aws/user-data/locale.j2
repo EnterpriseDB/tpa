@@ -1,0 +1,39 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
+
+# Make sure the desired language and character set locales are installed
+
+USER_LOCALE={{ user_locale|default('en_US.UTF-8') }}
+OS_VERSION="${VERSION_ID%.*}"
+case "${ID}:${OS_VERSION}" in
+
+    debian:*|ubuntu:*)
+        if grep -q "${USER_LOCALE}" /etc/locale.def ;then
+            sed -i -e "s/^# \(${USER_LOCALE}.*\)/\1/" /etc/locale.gen
+            dpkg-reconfigure --frontend=noninteractive locales
+        else
+            echo "Locale not found: $USER_LOCALE"
+            exit 1
+        fi
+        ;;
+
+    centos:*|rhel:*|ol:*|rocky:*)
+        if [ "$OS_VERSION" -ge "8" ] ;then
+            locale="${USER_LOCALE/.*}"
+            charset="${USER_LOCALE/$locale}"
+            [ "$charset" == ".UTF-8" ] && charset=".utf8"
+            user_locale="${locale}${charset}"
+            if ! localectl list-locales | grep -iq "^${user_locale}$" ;then
+                echo "Locale not found: $USER_LOCALE ($user_locale)"
+                exit 1
+            fi
+            lang_pack="${user_locale/_*}"
+            dnf install -y "glibc-langpack-${lang_pack}" "langpacks-${lang_pack}"
+        else
+            echo "No locales will be installed for: ${ID}:${OS_VERSION}"
+        fi
+        ;;
+
+    *) echo "Missing dependencies on ${ID}:${VERSION_ID}"; exit 1 ;;
+
+esac
+echo "Finished installing up locales"
