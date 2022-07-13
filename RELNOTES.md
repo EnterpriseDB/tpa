@@ -2,6 +2,47 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v23.2 (2022-07-12)
+
+### Notable changes
+
+* Add support for Postgres Backup API for use with Barman and PEM.
+  Accessible through the `--enable-pg-backup-api` option.
+* SSL certificates can now be created on a per-service basis, for
+  example the server certificate for Postgres Backup API proxy service.
+  Certificates will be placed in `/etc/tpa/<service>/<hostname>.cert`
+  These certificates can also be signed by a CA certificate generated
+  for the cluster.
+* Placement of Etcd for the BDR-Always-ON architecture
+  When using 'harp_consensus_protocol: etcd', explicitly add 'etcd' to
+  the role for each of the following instances:
+  - BDR Primary ('bdr' role)
+  - BDR Logical Standby ('bdr' + 'readonly' roles)
+  - only for the Bronze layout: BDR Witness ('bdr' + 'witness' roles)
+  - only for the Gold layout: Barman ('barman' role)
+  Credit: Gianni Ciolli <gianni.ciolli@enterprisedb.com>
+
+### Minor changes
+
+* Replace configure argument `--2q` with `--pgextended` to reflect
+  product branding changes. Existing configuration will retain expected
+  behaviour.
+* Improve error reporting on Docker platform compatibility checks when
+  using version 18 of docker, which comes with Debian old stable.
+* Add some missing commands to CLI help documentation.
+* Improved error reporting of configure command.
+* Add initial support for building BDR 5 from source.
+  Credit: Florin Irion <florin.irion@enterprisedb.com>
+* Changes to ensure ongoing compatibility for migration from older
+  versions of Postgres with EDB products.
+
+### Bugfixes
+
+* Fixed an issue which meant packages for etcd were missing when using
+  the download-packages command to populate the local-repo.
+* Fixed an issue affecting the use of efm failover manager and the
+  selection of its package dependencies
+
 ## v23.1 (2022-06-20)
 
 This release requires you to run `tpaexec setup` after upgrading (and
