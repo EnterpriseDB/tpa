@@ -47,6 +47,14 @@
   when:
     local_repo_dir is not empty
 
+- set_fact:
+    target_repo_dir: "{{ target_repo_base_dir|joinpath(suffix) }}"
+  vars:
+    suffix: "{{ local_repo_dir|relpath(local_repo_base_dir) }}"
+  when:
+    local_repo_dir is not empty
+    and local_repo_dir != local_repo_base_dir
+
 # If we aren't allowed to depend on other repositories, we disable them
 # before setting up the new repository, so that we don't try to install
 # any packages from them.
@@ -68,13 +76,6 @@
 - block:
   # We'll copy packages from local_repo_base_dir/<whatever we found> to
   # target_repo_base_dir/<the same thing>.
-  - set_fact:
-      target_repo_dir: "{{ target_repo_base_dir|joinpath(suffix) }}"
-    vars:
-      suffix: "{{ local_repo_dir|relpath(local_repo_base_dir) }}"
-    when:
-      local_repo_dir != local_repo_base_dir
-
   - include_tasks: copy-packages.yml
     when:
       platform not in ['docker', 'shared']
