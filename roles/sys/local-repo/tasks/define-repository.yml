@@ -4,25 +4,22 @@
 
 - name: Configure {{ target_repo_name }} repository
   raw: |
+    set -x
     tmpfile=$(mktemp)
     trap 'rm -f "$tmpfile"' EXIT
-    cat >"$tmpfile" <<EOF
+    tee "$tmpfile" <<EOF
     {{ content }}
     EOF
-    [ -f "{{ path }}" ] || (
-      mv "$tmpfile" "{{ path }}"
-      exit 200
-    )
-    pathsum=$(sha256sum "{{ path }}")
-    [ "{{ content_checksum }}" == "${pathsum/ */}" ] || (
-      mv "$tmpfile" "{{ path }}"
-      exit 201
-    )
+    content_sum=$(sha256sum "$tmpfile")
+    path_sum=$(sha256sum "{{ path }}")
+    if [ ! -f "{{ path }}" ] ;then
+      mv "$tmpfile" "{{ path }}" && exit 200
+    elif [ "${content_sum/ */}" != "${path_sum/ */}" ] ;then
+      mv "$tmpfile" "{{ path }}" && exit 201
+    fi
   register: _create_repo
   failed_when:
     _create_repo.rc > 0 and _create_repo.rc < 200
   changed_when:
     _create_repo.rc >= 200
-  vars:
-    content_checksum: "{{ content|hash('sha256') }}"
   notify: "Repo configuration changed"
