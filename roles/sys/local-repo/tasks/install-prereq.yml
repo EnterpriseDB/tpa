@@ -68,7 +68,7 @@
     vars:
       install_command:
         Debian: dpkg -i
-        RedHat: yum install -y
+        RedHat: rpm -i
   vars:
       package_glob: "{{
         lookup('fileglob', '%s/%s*' % (local_repo_dir, package_name), wantlist=True)
