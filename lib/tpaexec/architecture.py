@@ -223,8 +223,8 @@ class Architecture(object):
         g.add_argument(
             "--enable-pg-backup-api",
             action="store_true",
-            help="Install pg-backup-api on barman server and register to pem server if enabled"
-            )
+            help="Install pg-backup-api on barman server and register to pem server if enabled",
+        )
 
         g = p.add_mutually_exclusive_group()
         g.add_argument(
@@ -592,7 +592,7 @@ class Architecture(object):
             raise ArchitectureError(
                 f"Network {subnets.cidr.with_prefixlen} cannot contain {num} /{subnets.new_prefix} subnets. "
                 f"You might want to try providing a larger network with --network or smaller subnets with"
-                f" --subnet-prefix {subnets.new_prefix+1}",
+                f" --subnet-prefix {subnets.new_prefix + 1}",
             )
 
         # This dramatically reduces conflicts between people who are deploying their clusters into the same VPC
@@ -736,8 +736,15 @@ class Architecture(object):
 
     def postgres_eol_repos(self, cluster_vars):
 
-        if (self.args.get("postgres_version") in ["9.4", "9.5", "9.6",]
-                and self.args.get("distribution") == 'RedHat'):
+        if (
+            self.args.get("postgres_version")
+            in [
+                "9.4",
+                "9.5",
+                "9.6",
+            ]
+            and self.args.get("distribution") == "RedHat"
+        ):
 
             if "yum_repositories" not in cluster_vars.keys():
                 cluster_vars["yum_repositories"] = {}
@@ -749,27 +756,37 @@ class Architecture(object):
                 repo_name,
             ]
             cluster_vars["yum_repositories"][repo_name] = {
-                    "description": "Archive Postgres {} Repo".format(self.args.get("postgres_version")),
-                    "baseurl": "https://yum-archive.postgresql.org/{}/redhat/rhel-$releasever-$basearch".format(self.args.get("postgres_version")),
-                    "file": repo_name,
-                    "gpgkey": "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG",
-                    "exclude": "python-psycopg2 python2-psycopg2 python3-psycopg2",
-                    "repo_gpgcheck": "no",
-                }
+                "description": "Archive Postgres {} Repo".format(
+                    self.args.get("postgres_version")
+                ),
+                "baseurl": "https://yum-archive.postgresql.org/{}/redhat/rhel-$releasever-$basearch".format(
+                    self.args.get("postgres_version")
+                ),
+                "file": repo_name,
+                "gpgkey": "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG",
+                "exclude": "python-psycopg2 python2-psycopg2 python3-psycopg2",
+                "repo_gpgcheck": "no",
+            }
 
-            if self.args.get("bdr_version") == "1" :
+            if self.args.get("bdr_version") == "1":
                 cluster_vars["yum_repository_list"].append("EDB")
 
             if self.args.get("postgres_version") == "9.6":
-                DEBUGINFO_SUFFIX= "{}-debuginfo"
+                DEBUGINFO_SUFFIX = "{}-debuginfo"
                 cluster_vars["yum_repositories"][DEBUGINFO_SUFFIX.format(repo_name)] = {
-                        "description": "Postgres Debug Info {} Repo".format(self.args.get("postgres_version")),
-                        "baseurl": "https://download.postgresql.org/pub/repos/yum/debug/{}/redhat/rhel-$releasever-$basearch".format(self.args.get("postgres_version")),
-                        "file": DEBUGINFO_SUFFIX.format(repo_name),
-                        "gpgkey": "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG",
-                        "repo_gpgcheck": "yes",
+                    "description": "Postgres Debug Info {} Repo".format(
+                        self.args.get("postgres_version")
+                    ),
+                    "baseurl": "https://download.postgresql.org/pub/repos/yum/debug/{}/redhat/rhel-$releasever-$basearch".format(
+                        self.args.get("postgres_version")
+                    ),
+                    "file": DEBUGINFO_SUFFIX.format(repo_name),
+                    "gpgkey": "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG",
+                    "repo_gpgcheck": "yes",
                 }
-                cluster_vars["yum_repository_list"].append(DEBUGINFO_SUFFIX.format(repo_name))
+                cluster_vars["yum_repository_list"].append(
+                    DEBUGINFO_SUFFIX.format(repo_name)
+                )
 
     def cluster_vars_args(self):
         """
@@ -870,8 +887,8 @@ class Architecture(object):
             },
             "pg-backup-api": {
                 "pg_backup_api_installation_method": "src",
-                "pg_backup_api_git_url": "git@github.com:EnterpriseDB/pg-backup-api.git"
-            }
+                "pg_backup_api_git_url": "git@github.com:EnterpriseDB/pg-backup-api.git",
+            },
         }
 
     def update_cluster_vars(self, cluster_vars):
@@ -940,21 +957,18 @@ class Architecture(object):
         Create a directory under cluster/local-repo to contain packages for the
         distribution and version derived from the cluster's selected image().
         """
-        image = self.image()
-        os_family = image.get("os_family")
-        version = image.get("version")
-        major_version = version.split(".")[0]
-
-        if os_family and major_version:
+        try:
+            major_version = self.image()["version"].split(".")[0]
             os.makedirs(
-                os.path.join(self.cluster, "local-repo", os_family, major_version)
+                os.path.join(
+                    self.cluster, "local-repo", self.image()["os_family"], major_version
+                )
             )
-        else:
-            print(
-                f"Unable to detect OS family and version or image ({image.get('name', 'None')})\n"
+        except KeyError:
+            raise ArchitectureError(
+                f"Warning: Unable to detect OS family and version or image ({self.image().get('name', 'None')})\n"
                 f"Please create the '{self.cluster}/local-repo/<os_family>/<version>' directory yourself.\n"
                 f"(See docs/src/local-repo.md for details.)",
-                file=sys.stderr,
             )
 
     def after_configuration(self, force: bool = False) -> None:
@@ -963,7 +977,10 @@ class Architecture(object):
         """
         self.create_links(force=force)
         if self.args.get("enable_local_repo"):
-            self.setup_local_repo()
+            try:
+                self.setup_local_repo()
+            except ArchitectureError as err:
+                print(err, file=sys.stderr)
             self.platform.setup_local_repo()
 
     def create_links(self, force: bool = False) -> None:

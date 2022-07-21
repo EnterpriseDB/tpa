@@ -7,6 +7,7 @@
 import pytest
 
 from tpaexec.architecture import Architecture
+from tpaexec.exceptions import ArchitectureError
 from tpaexec.platforms import Platform, PlatformError
 
 
@@ -70,3 +71,30 @@ class TestPlatform:
 
     def test_default_platform(self, architecture):
         assert Platform.load([], architecture).name == architecture.default_platform()
+
+
+@pytest.fixture
+def architecture_bare():
+    d = BasicArchitecture(
+        directory="lib/tests/architectures/basic",
+        lib="lib/tests/architectures/lib",
+        argv=[
+            "lib/tests/config/cluster-basic",
+            "--architecture",
+            "basic",
+            "--network",
+            "10.33.0.0/24",
+            "--platform",
+            "bare",
+        ],
+    )
+    d.configure(force=True)
+    return d
+
+
+class TestBarePlatform:
+
+    def test_bare_setup_local_repo(self, architecture_bare):
+        """Bare platform has no OS version to detect so local repo creation should return a warning."""
+        with pytest.raises(ArchitectureError):
+            architecture_bare.setup_local_repo()
