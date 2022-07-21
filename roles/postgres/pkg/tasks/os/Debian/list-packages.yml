@@ -17,7 +17,7 @@
     }}"
   vars:
     _contrib_package:
-      "{{ postgres_package_name }}-contrib-{{ postgres_version }}"
+      - "{{ postgres_package_name }}-contrib-{{ postgres_version }}"
     _old_pkg_list:
       "{{ postgres_packages[postgres_family][ansible_distribution] }}"
     _new_pkg_list:
@@ -92,8 +92,9 @@
         _new_pkg_list:
           "{{ _old_pkg_list|map('replace', '-dbgsym', '-dbg')|list }}"
       when:
-        pglogical_dbgsym_check is skipped
-        or pglogical_dbgsym_check is not successful
+        pglogical_dbgsym_check is defined
+        and (pglogical_dbgsym_check is skipped
+          or pglogical_dbgsym_check is not successful)
 
   # Same thing again for BDR, except that if we've already checked for
   # pglogical, we don't need to test again (fortunately, if we publish
