@@ -55,3 +55,8 @@ proxy:
   pgbouncer_bin_dir: {{ pgbouncer_bin_dir }}
 {% endif %}
 {% endif %}
+{% if harp_ssl_password_command|default(None) %}
+db:
+  ssl_password_command: {{ harp_ssl_password_command }}
+  request_timeout: {{ harp_db_request_timeout|default('10s') }}
+{% endif %}
