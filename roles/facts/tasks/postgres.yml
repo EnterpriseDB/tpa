@@ -144,6 +144,8 @@
     bdr_database: "{{ bdr_database|default(default_bdr_database) }}"
     bdr_node_name: "{{ bdr_node_name|default(inventory_hostname) }}"
     bdr_node_group: "{{ bdr_node_group|default(default_bdr_node_group) }}"
+    pgd_proxy_user: "{{ pgd_proxy_user|default(default_pgd_proxy_user) }}"
+    pgd_proxy_group: "{{ pgd_proxy_group|default(default_pgd_proxy_group) }}"
     haproxy_port: "{{ haproxy_port|default(default_haproxy_port[postgres_family]) }}"
     haproxy_bind_address: "{{ haproxy_bind_address|default(default_haproxy_bind_address) }}"
     harp_proxy_port: "{{ harp_proxy_port|default(default_harp_proxy_port) }}"
@@ -209,12 +211,18 @@
   with_dict: >-
     {{ postgres_tablespaces|default({}) }}
 
-- name: Disable repmgr/EFM for BDR instances
+# The only failover_manager setting we accept for BDR 3/4 is harp, and
+# the only one we accept for BDR 5 is pgd, because failover is managed
+# internally by BDR in conjunction with pgd-proxy.
+
+- name: Ensure failover_manager is set correctly according to BDR version
   set_fact:
-    failover_manager: none
+    failover_manager:
+      "{{ 'pgd' if bdr_version is version('5', '>=')
+          else 'harp' if failover_manager == 'harp'
+          else 'none' }}"
   when: >
     'bdr' in role
-    and failover_manager not in ['harp']
 
 - include_tasks: bdr.yml
 

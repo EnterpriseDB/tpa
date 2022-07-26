@@ -1,0 +1,21 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Install custom pgd-proxy service unit file
+  template:
+    src: pgd-proxy.service.j2
+    dest: /etc/systemd/system/pgd-proxy.service
+    owner: root
+    group: root
+    mode: 0644
+  register: pgd_proxy_unit
+  tags: [pgd-proxy, service]
+
+- name: Ensure pgd-proxy service is enabled on boot
+  service:
+    name: pgd-proxy
+    enabled: yes
+    state: started
+  when: >
+    'pgd-proxy' in role

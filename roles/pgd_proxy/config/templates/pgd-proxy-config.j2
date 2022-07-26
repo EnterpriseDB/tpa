@@ -1,0 +1,13 @@
+cluster:
+  name: {{ cluster_name }}
+  endpoints:
+{%  for h in groups[bdr_node_group] %}
+{%    set v = hostvars[h] %}
+    - "host={{ v.inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ pgd_proxy_user }} {{ bdr_client_dsn_attributes }}"
+{%  endfor %}
+{% if pgd_ssl_password_command|default(None) %}
+  ssl:
+    ssl_password_command: {{ pgd_ssl_password_command }}
+{% endif %}
+  proxy:
+    name: "{{ inventory_hostname }}"

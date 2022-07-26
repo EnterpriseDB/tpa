@@ -90,6 +90,25 @@
     tags: always
 
   - include_role:
+      name: pgd_proxy/dbuser
+      apply:
+        tags: [pgd-proxy, dbuser]
+    when:
+      failover_manager == 'pgd'
+      and 'bdr' in role
+      and 'pem-server' not in role
+
+  - include_role:
+      name: pgd_proxy
+      apply:
+        tags: pgd-proxy
+    when:
+      failover_manager == 'pgd'
+      and 'pgd-proxy' in role
+      and 'pem-server' not in role
+    tags: always
+
+  - include_role:
       name: pem
       apply:
         tags: pem
@@ -108,6 +127,7 @@
     when:
       ('bdr' in role and bdr_version is version('4', '>='))
       or 'pgdcli' in role
+      or 'pgd-proxy' in role
     tags: always
 
   - include_role:

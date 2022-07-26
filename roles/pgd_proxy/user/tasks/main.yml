@@ -1,0 +1,26 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# On pgd-proxy instances (that aren't also postgres instances), we must
+# create the pgd_proxy_{group,user} and an associated ~/.pgpass file.
+
+- name: Create {{ pgd_proxy_group }} Unix group
+  group:
+    state: present
+    name: "{{ pgd_proxy_group }}"
+
+- name: Create {{ pgd_proxy_user }} Unix user
+  user:
+    user: "{{ pgd_proxy_user }}"
+    group: "{{ pgd_proxy_group }}"
+    home: "{{ pgd_proxy_home }}"
+    shell: /bin/bash
+
+- include_role: name=postgres/pgpass
+  vars:
+    pgpassfile: "{{ pgd_proxy_home }}/.pgpass"
+    pgpass_owner: "{{ pgd_proxy_user }}"
+    pgpass_group: "{{ pgd_proxy_group }}"
+    pgpass_users:
+      - "{{ pgd_proxy_user }}"

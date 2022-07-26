@@ -85,6 +85,9 @@ host all efm {{ addr }} md5
 host haproxy haproxy {{ addr }} {{ password_encryption }}
 hostssl all all {{ addr }} {{ password_encryption }}
 {%     endif %}
+{%     if groups['role_pgd-proxy']|default([]) is not empty %}
+hostssl {{ bdr_database }} {{ pgd_proxy_user }} {{ addr }} {{ password_encryption }}
+{%     endif %}
 {%   endfor %}
 {% endfor %}
 

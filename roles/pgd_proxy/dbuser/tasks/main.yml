@@ -1,0 +1,15 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- include_role:
+    name: postgres/createuser
+    apply:
+      tags: [pgd-proxy, user]
+  vars:
+    username: "{{ pgd_proxy_user }}"
+    granted_roles: [bdr_superuser]
+  when:
+    failover_manager == 'pgd'
+    and groups['role_pgd-proxy']|default([]) is not empty
+    and 'pem-server' not in role

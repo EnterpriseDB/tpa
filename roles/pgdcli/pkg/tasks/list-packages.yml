@@ -9,4 +9,5 @@
       }}"
   when: >
     'pgdcli' in role
+    or 'pgd-proxy' in role
     or ('bdr' in role and bdr_version is version('4', '>='))

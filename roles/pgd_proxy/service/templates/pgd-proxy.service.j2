@@ -1,0 +1,18 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
+
+[Unit]
+Description=PGD Proxy
+
+[Service]
+Type=simple
+User={{ pgd_proxy_user }}
+Group={{ pgd_proxy_group }}
+Restart=on-failure
+RestartSec=1s
+ExecStart=/usr/bin/pgd-proxy -f {{ pgd_proxy_config_directory }}/pgd-proxy-config.yml
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=pgd-proxy
+
+[Install]
+WantedBy=multi-user.target

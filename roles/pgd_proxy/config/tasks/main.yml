@@ -1,0 +1,19 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Ensure pgd-proxy config directory exists
+  file:
+    path: "{{ pgd_proxy_config_directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Install pgd-proxy configuration file
+  template:
+    src: pgd-proxy-config.j2
+    dest: "{{ pgd_proxy_config_directory }}/pgd-proxy-config.yml"
+    owner: "{{ pgd_proxy_user }}"
+    group: "{{ pgd_proxy_group }}"
+    mode: 0600

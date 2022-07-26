@@ -1,0 +1,28 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- assert:
+    that: bdr_version is version('5', '>=')
+    fail_msg: >-
+      pgd-proxy requires BDR version 5 or later
+
+- include_role:
+    name: pgd_proxy/pkg
+    apply:
+      tags: [pgd-proxy, pkg]
+
+- include_role:
+    name: pgd_proxy/user
+    apply:
+      tags: [pgd-proxy, user]
+
+- include_role:
+    name: pgd_proxy/config
+    apply:
+      tags: [pgd-proxy, config]
+
+- include_role:
+    name: pgd_proxy/service
+    apply:
+      tags: [pgd-proxy, service]

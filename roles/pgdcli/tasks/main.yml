@@ -2,6 +2,11 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+- assert:
+    that: bdr_version is version('4', '>=')
+    fail_msg: >-
+      PGD CLI requires BDR version 4 or later
+
 - include_role:
     name: pgdcli/pkg
     apply:

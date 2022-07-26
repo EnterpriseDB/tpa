@@ -1,0 +1,15 @@
+cluster:
+  name: {{ cluster_name }}
+  endpoints:
+{%  for h in groups[bdr_node_group] %}
+{%    set v = hostvars[h] %}
+{%  if 'bdr' in role %}
+    - "{{ v.bdr_node_dsn }}"
+{%  elif 'pgd-proxy' in role %}
+    - "host={{ v.inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ pgd_proxy_user }} {{ bdr_client_dsn_attributes }}"
+{%  endif %}
+{%  endfor %}
+{% if bdr_version is version('5', '>=') and pgd_ssl_password_command|default(None) %}
+  ssl:
+    ssl_password_command: {{ pgd_ssl_password_command }}
+{% endif %}

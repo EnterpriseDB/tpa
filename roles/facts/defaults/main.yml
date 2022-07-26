@@ -165,3 +165,6 @@ default_pem_agent_base_dir: /usr/edb/pem/agent
 default_pem_agent_service_name: pemagent
 default_pem_database: pem
 default_pem_server_group: "PEM Server Directory"
+
+default_pgd_proxy_user: pgdproxy
+default_pgd_proxy_group: pgdproxy

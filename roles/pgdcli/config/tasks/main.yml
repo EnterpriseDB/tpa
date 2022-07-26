@@ -2,17 +2,29 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+- name: Determine owner/group for pgd-cli config files
+  set_fact:
+    pgd_cli_user:
+      "{{ postgres_user if 'postgres' in role
+        else pgd_proxy_user if 'pgd-proxy' in role
+        else 'root' }}"
+    pgd_cli_group:
+      "{{ postgres_group if 'postgres' in role
+        else pgd_proxy_group if 'pgd-proxy' in role
+        else 'root' }}"
+
 - name: Ensure pgdcli_directory exists
   file:
     path: "{{ pgdcli_directory }}"
     state: directory
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
+    owner: "{{ pgd_cli_user }}"
+    group: "{{ pgd_cli_group }}"
+    mode: 0750
 
 - name: Install pgdcli configuration file
   template:
-    src: pgd.config.j2
-    dest: "{{ pgdcli_directory }}/pgd-config.yml"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0644
+    src: pgd-cli-config.j2
+    dest: "{{ pgdcli_directory }}/pgd-cli-config.yml"
+    owner: "{{ pgd_cli_user }}"
+    group: "{{ pgd_cli_group }}"
+    mode: 0600
