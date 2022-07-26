@@ -2,20 +2,23 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+- name: Get a list of docker containers
+  docker_container_info:
+    name: "{{ item.Name }}"
+  with_items: "{{ docker_instances }}"
+  register: running_containers
+
 - name: Deprovision docker containers
   docker_container:
-    name: "{{ item.Name }}"
-    labels: >
-      {{
-        cluster_tags|combine(item.tags)|combine({
-          'Cluster': cluster_name,
-        })
-      }}
+    name: "{{ item.container.Name }}"
     state: absent
-  with_items: "{{ docker_instances }}"
+  with_items: "{{ running_containers.results }}"
   loop_control:
     label: >-
-      {{ item.Name }}
+      {{ item.item.Name }}
+  when:
+    item.container
+    and item.container.Config.Labels.Cluster|default(None) == cluster_name
   tags: docker
 
 - name: Remove docker ccache volume(s)
