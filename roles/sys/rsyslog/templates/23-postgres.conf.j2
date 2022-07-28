@@ -1,0 +1,14 @@
+$FileOwner root
+$FileGroup root
+if $programname == 'postgres' then ?LOGPERHOST
+if $programname == 'pgbouncer' then ?LOGPERHOST
+{% if failover_manager == 'repmgr' %}
+if $programname == 'repmgrd' then ?LOGPERHOST
+{% endif %}
+if $programname == 'harp-manager' then ?LOGPERHOST
+if $programname == 'harp-proxy' then ?LOGPERHOST
+if $programname == 'pgbouncer' then ?LOGPERHOST
+if $programname == 'barman' then ?LOGPERHOST
+{% if failover_manager == 'efm' %}
+if $programname == 'efm' then ?LOGPERHOST
+{% endif %}

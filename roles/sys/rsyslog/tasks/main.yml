@@ -17,7 +17,20 @@
   notify:
     - Note rsyslog restart required
 
-- name: Add rsyslog rules for remote logging
+- name: Configure barman logs on rsyslog
+  copy:
+    src: 55-barman.conf
+    dest: /etc/rsyslog.d/55-barman.conf
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - log_server is defined
+    - "'barman' in role"
+  notify:
+    - Note rsyslog restart required
+
+- name: Configure rsyslog rules for remote logging
   template:
     src: 99-forward.conf.j2
     dest: /etc/rsyslog.d/99-forward.conf
@@ -28,7 +41,20 @@
   notify:
     - Note rsyslog restart required
 
-- name: Configure rsyslog server
+- name: Enable rsyslog UDP listening for efm logs
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/rsyslog.d/{{ item }}"
+    mode: 0644
+  with_items:
+    - 01-enable-udp-reception.conf
+  when:
+    - log_server is defined
+    - failover_manager == 'efm'
+  notify:
+    - Note rsyslog restart required
+
+- name: Ensure remote log folder exists on log-server
   block:
     - name: Ensure /var/log/hosts exists
       file:
@@ -38,14 +64,23 @@
         mode: 0755
         state: directory
 
-    - name: Install rsyslog configuration files
+    - name: Configure rsyslog forward per programname
+      template:
+        src: "{{ item }}.j2"
+        dest: "/etc/rsyslog.d/{{ item }}"
+        mode: 0644
+      with_items:
+        - 23-postgres.conf
+      notify:
+        - Note rsyslog restart required
+
+    - name: configure TCP listening on log-server
       copy:
         src: "{{ item }}"
         dest: "/etc/rsyslog.d/{{ item }}"
         mode: 0644
       with_items:
         - 00-enable-tcp-reception.conf
-        - 23-postgres.conf
       notify:
         - Note rsyslog restart required
   when: >
@@ -56,7 +91,8 @@
     name: rsyslog
     enabled: yes
 
-- meta: flush_handlers
+- name: Flush handlers
+  meta: flush_handlers
 
 - name: Restart rsyslog
   service:
