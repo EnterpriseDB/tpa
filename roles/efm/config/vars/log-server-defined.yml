@@ -1,0 +1,3 @@
+syslog_efm_conf_settings:
+  'syslog.enabled': true
+  'syslog.host': "{{ inventory_hostname }}"

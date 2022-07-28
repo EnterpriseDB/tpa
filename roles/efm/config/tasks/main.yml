@@ -10,7 +10,8 @@
     mode: 0755
     state: directory
 
-- include_role: name=postgres/createuser
+- name: Include role postgres/creatuser
+  include_role: name=postgres/createuser
   vars:
     username: efm
     role_attrs:
@@ -34,6 +35,21 @@
   changed_when: false
   no_log: true
 
+- name: Configure efm for syslog
+  block:
+
+    - name: Load syslog_efm_conf_settings
+      include_vars:
+        file: log-server-defined.yml
+
+    - name: Configure efm for syslog
+      set_fact:
+        efm_conf_settings: "{{ syslog_efm_conf_settings|combine(efm_conf_settings) }}"
+
+  when:
+    - log_server is defined
+    - log_server != inventory_hostname
+
 - name: Install efm.properties for {{ cluster_name }}
   template:
     src: efm.properties.j2
@@ -55,8 +71,8 @@
     mode: 0640
   vars:
     node_ips: "{{
-      groups[cluster_tag] | map('extract', hostvars, ['ip_address']) | product([efm_bind_port]) | map('join', ':') | join('\n')
-    }}"
+        groups[cluster_tag] | map('extract', hostvars, ['ip_address']) | product([efm_bind_port]) | map('join', ':') | join('\n')
+      }}"
   notify:
     - Note efm restart required
 
