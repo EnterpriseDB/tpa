@@ -82,12 +82,14 @@ default_pool_size = {{ pgbouncer_default_pool_size|default(default_pgbouncer_def
 ;;;
 ;;; Logging
 ;;;
-
+{% if log_server is defined %}
 syslog = 1
 syslog_facility = daemon
 syslog_ident = pgbouncer
-
-;logfile = /var/log/pgbouncer/pgbouncer.log
+{% else %}
+syslog = 0
+logfile = /var/log/pgbouncer/pgbouncer.log
+{% endif %}
 log_connections = 0
 log_disconnections = 0
 ;log_pooler_errors = 1
