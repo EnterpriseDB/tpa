@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # We create cluster_dir/ssl and generate a private key (ssl/CA.key) and
 # a corresponding self-signed CA certificate (ssl/CA.crt).

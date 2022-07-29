@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # The EFM packages do not declare Java as a dependency, so we have to
 # include Java packages ourselves.

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # Note that `tpaexec download-packages` won't know about these packages,
 # but that's fine, because they're optional. (You can always add entries

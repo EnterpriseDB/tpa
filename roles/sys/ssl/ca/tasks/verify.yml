@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # Verify x509 CA certificate and private key pair
 # Verify that the certificate is current and the public and private key match

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # When certificate authentication is configured, we create a local CA
 # and use it to sign CSRs generated on the target instances.
