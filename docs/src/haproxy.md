@@ -11,6 +11,9 @@ TPAexec will install the latest available version of haproxy by default.
 You can install a specific version instead by setting
 `haproxy_package_version: 1.9.15*` (for example).
 
+Note: see limitations of using wildcards in package_version in
+[tpaexec-configure](tpaexec-configure.md#known-issue-with-wildcard-use).
+
 You can set the following variables on any `haproxy` instance.
 
 Variable | Default value | Description

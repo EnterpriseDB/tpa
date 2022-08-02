@@ -280,6 +280,23 @@ The `--extra-optional-packages p1 p2 …` option behaves like
 `--extra-packages`, but it is not an error if the named packages
 cannot be installed.
 
+### Known issue with wildcard use
+
+Please note that the use of wildcards in `*_package_version` when added
+permanently to `config.yml`, can result in unexpected updates to
+installed software during `tpaexec deploy` on nodes with RHEL 8 and
+above (or derivative OSs which use dnf such as Rocky Linux).
+When deploy runs on an existing cluster that already has packages
+installed ansible may be unable to match the full package version.
+For example, if the value for `bdr_package_version` was set to `3.6*`
+then ansible would not be able to match this to an installed version of
+BDR, it would assume no package is installed, and it would attempt to
+install the latest version available of the package with the same name
+in the configured repository, e.g. 3.7.
+
+We are aware of this limitation as an ansible dnf module bug and hope
+to address this in a future release of TPAexec.
+
 ### Building and installing from source
 
 If you specify `--install-from-source postgres`, Postgres will be

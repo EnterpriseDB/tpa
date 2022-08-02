@@ -78,6 +78,9 @@ Please note that version syntax here depends on your OS distribution and
 package manager. In particular, yum accepts `*xyz*` wildcards, while
 apt only understands `xyz*` (as in the example above).
 
+Note: see limitations of using wildcards in package_version in
+[tpaexec-configure](tpaexec-configure.md#known-issue-with-wildcard-use).
+
 It is your responsibility to ensure that the combination of Postgres,
 BDR, and pglogical package versions that you request are sensible. That
 is, they should work together, and there should be an upgrade path from
@@ -90,16 +93,3 @@ dependencies.
 
 We strongly recommend testing the update in a QA environment before
 running it in production.
-
-## Known issues
-
-Please note that the use of wildcards in `*_package_version` is not
-supported when added permanently to `config.yml`. Unexpected updates to
-installed software can occur during `tpaexec deploy` operations. For
-example, if the value for `bdr_package_version` was set to `3.6.*` then
-ansible would not be able to match this to an installed version of bdr,
-and it would attempt to install the latest version available of the same
-package name, e.g. 3.7.
-
-We are aware of this limitation as an ansible bug and will address
-this in a future release of TPAexec.
