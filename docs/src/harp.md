@@ -16,7 +16,6 @@ for more details on HARP configuration.
 Variable | Default value | Description
 ---- | ---- | ---
 `cluster_name` | `` | The name of the cluster.
-
 `harp_consensus_protocol` | `etcd` | The consensus layer to use (`etcd` or `bdr`)
 `harp_location` | `location` | The location of this instance (defaults to the `location` parameter)
 `harp_ready_status_duration` | `10` | Amount of time in seconds the node's readiness status will persist if not refreshed.
@@ -31,9 +30,11 @@ Variable | Default value | Description
 `harp_camo_enforcement` | `lag_only` | Whether CAMO queue state should be strictly enforced.
 `harp_use_unix_sock` | `false` | Use unix domain socket for manager database access.
 `harp_request_timeout` | `250` | Time in milliseconds to allow a query to the DCS to succeed.
-`harp_watch_poll_interval` | `500` | Milliseconds to sleep between polling DCS.  Only applies when `harp_consensus_protocol` is `bdr`.
+`harp_watch_poll_interval` | `500` | Milliseconds to sleep between polling DCS. Only applies when `harp_consensus_protocol` is `bdr`.
 `harp_proxy_timeout` | `1` | Builtin proxy connection timeout, in seconds, to Lead Master.
 `harp_proxy_keepalive` | `5` | Amount of time builtin proxy will wait on an idle connection to the Lead Master before sending a keepalive ping.
+`harp_ssl_password_command` | None | a custom command that should receive the obfuscated sslpassword in the stdin and provide the handled sslpassword via stdout.
+`harp_db_request_timeout`| `10s` | similar to dcs -> request_timeout, but for connection to the database itself.
 
 ## Consensus layer
 
@@ -60,3 +61,11 @@ If you want harp proxy to use a separate readonly user, you can specify that
 by setting `harp_dcs_user: username` under cluster_vars. TPAexec will use
 `harp_dcs_user` setting to create a readonly user and set it up in the DCS
 configuration.
+
+## Custom SSL password command
+
+The command provided by `harp_ssl_password_command` will be used by HARP
+to de-obfuscate the `sslpassword` given in connection string. If
+`sslpassword` is not present then `harp_ssl_password_command` is
+ignored. If `sslpassword` is not obfuscated then
+`harp_ssl_password_command` is not required and should not be specified.
