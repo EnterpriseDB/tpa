@@ -2,18 +2,79 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v23.3 (2022-08-03)
+
+### Notable changes
+
+- TPA-118 Exposed two new options in harp-manager configuration. The
+  first sets HARP `harp_db_request_timeout` similar to dcs
+  request_timeout but for database connections and the second
+  `harp_ssl_password_command` specifies a command used to de-obfuscate
+  sslpassword used to decrypt the sslkey in SSL enabled database
+  connection
+
+### Minor changes
+
+- TPA-117 Add documentation update on the use of wildcards in
+  `package_version` options in tpaexec config.yml. This introduces a
+  warning that unexpected package upgrades can occur during a `deploy`
+  operation. See documentation in `tpaexec-configure.md` for more info
+- TPA-38 Add locale files for all versions of Debian, and RHEL 8 and
+  above. Some EDB software, such as Barman, has a requirement to set the
+  user locale to `en_US.UTF-8`. Some users may wish to also change the
+  locale, character set or language to a local region. This change
+  ensures that OS files provided by libc are installed on AWS instances
+  during firstboot using user-data scripts. The default locale is
+  `en_US.UTF-8`. See `platform_aws.md` documentation for more info
+- TPA-23 Add log config for syslog for cluster services Barman, HARP,
+  repmgr, PgBouncer and EFM. The designated log server will store log
+  files received in `/var/log/hosts` directories for these services
+- TPA-109 Minor refactoring of the code in pgbench role around choosing
+  lock timeout syntax based on a given version of BDR
+
+### Bugfixes
+
+- TPA-147 For clusters that use the source install method some missing
+  packages for Debian and Rocky Linux were observed. Debian receives
+  library headers for krb5 and lz4. On RedHat derived OSs the mandatory
+  packages from the "Development Tools" package group and the libcurl
+  headers have been added
+- TPA-146 Small fix to the method of package selection for clusters
+  installing Postgres 9.6
+- TPA-138 Addresses a warning message on clusters that use the "bare"
+  platform that enable the local-repo configure options. As the OS is
+  not managed by TPAexec in the bare platform we need to inform the user
+  to create the local-repo structure. This previously caused an
+  unhandled error halting the configure progress
+- TPA-135 When using `--use-local-repo-only` with the "docker" platform
+  and the Rocky Linux image initial removal of existing yum repository
+  configuration on nodes would fail due to the missing commands `find`
+  and `xargs`. This change ensures that if the `findutils` package
+  exists in the source repo it will be installed first
+- TPA-111 Remove a redundant additional argument on the command used to
+  register agents with the PEM server when `--enable-pem` option is
+  given. Previously, this would have caused no problems as the first
+  argument, the one now removed, would be overridden by the second
+- TPA-108 Restore SELinux file context for postmaster symlink when
+  Postgres is installed from source. Previously, a cluster using a
+  SELinux enabled OS that is installing postgres from source would fail
+  to restart Postgres as the systemd daemon would be unable to read the
+  symlink stored in the Postgres data bin directory. This was discovered
+  in tests using a recently adopted Rocky Linux image in AWS that has
+  SELinux enabled and in enforcing mode by default
+
 ## v23.2 (2022-07-12)
 
 ### Notable changes
 
-* Add support for Postgres Backup API for use with Barman and PEM.
+- Add support for Postgres Backup API for use with Barman and PEM.
   Accessible through the `--enable-pg-backup-api` option.
-* SSL certificates can now be created on a per-service basis, for
+- SSL certificates can now be created on a per-service basis, for
   example the server certificate for Postgres Backup API proxy service.
   Certificates will be placed in `/etc/tpa/<service>/<hostname>.cert`
   These certificates can also be signed by a CA certificate generated
   for the cluster.
-* Placement of Etcd for the BDR-Always-ON architecture
+- Placement of Etcd for the BDR-Always-ON architecture
   When using 'harp_consensus_protocol: etcd', explicitly add 'etcd' to
   the role for each of the following instances:
   - BDR Primary ('bdr' role)
@@ -24,23 +85,23 @@
 
 ### Minor changes
 
-* Replace configure argument `--2q` with `--pgextended` to reflect
+- Replace configure argument `--2q` with `--pgextended` to reflect
   product branding changes. Existing configuration will retain expected
   behaviour.
-* Improve error reporting on Docker platform compatibility checks when
+- Improve error reporting on Docker platform compatibility checks when
   using version 18 of docker, which comes with Debian old stable.
-* Add some missing commands to CLI help documentation.
-* Improved error reporting of configure command.
-* Add initial support for building BDR 5 from source.
+- Add some missing commands to CLI help documentation.
+- Improved error reporting of configure command.
+- Add initial support for building BDR 5 from source.
   Credit: Florin Irion <florin.irion@enterprisedb.com>
-* Changes to ensure ongoing compatibility for migration from older
+- Changes to ensure ongoing compatibility for migration from older
   versions of Postgres with EDB products.
 
 ### Bugfixes
 
-* Fixed an issue which meant packages for etcd were missing when using
+- Fixed an issue which meant packages for etcd were missing when using
   the download-packages command to populate the local-repo.
-* Fixed an issue affecting the use of efm failover manager and the
+- Fixed an issue affecting the use of efm failover manager and the
   selection of its package dependencies
 
 ## v23.1 (2022-06-20)
