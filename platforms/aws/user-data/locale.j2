@@ -7,7 +7,7 @@ OS_VERSION="${VERSION_ID%.*}"
 case "${ID}:${OS_VERSION}" in
 
     debian:*|ubuntu:*)
-        if grep -q "${USER_LOCALE}" /etc/locale.def ;then
+        if grep -q "${USER_LOCALE}" /usr/share/i18n/SUPPORTED ;then
             sed -i -e "s/^# \(${USER_LOCALE}.*\)/\1/" /etc/locale.gen
             dpkg-reconfigure --frontend=noninteractive locales
         else
