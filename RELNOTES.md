@@ -9,7 +9,8 @@
 - TPA-152 fix an issue with locale detection during first boot of Debian
   instances in AWS Hosts would fail to complete first boot which would
   manifest as SSH key negotiation issues and errors with disks not found
-  during deployment
+  during deployment. This issue was introduced in 23.3 and is related to
+  TPA-38
 
 ## v23.3 (2022-08-03)
 
