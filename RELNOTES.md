@@ -2,6 +2,15 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v23.4 (2022-08-05)
+
+### Bugfixes
+
+- TPA-152 fix an issue with locale detection during first boot of Debian
+  instances in AWS Hosts would fail to complete first boot which would
+  manifest as SSH key negotiation issues and errors with disks not found
+  during deployment
+
 ## v23.3 (2022-08-03)
 
 ### Notable changes
