@@ -1,6 +1,6 @@
 # tox dependencies for test env
 coverage>=4.0.1
-PyYAML~=5.2
+PyYAML>=6
 pytest==4.6.5; python_version <= '3.4'
 pytest~=7.0.1; python_version > '3.4'
 pytest-cov~=3.0.0

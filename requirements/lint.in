@@ -1,5 +1,5 @@
 # tox dependencies for lint environment
-PyYAML~=5.2
+PyYAML>=6.0
 # flake8 constraints needed due to bug in prospector dependencies
 flake8<4.0.0
 prospector~=1.5.3.1
