@@ -24,6 +24,8 @@
   block:
   - command:
       etcdctl endpoint health --endpoints="{{ etcd_endpoints }}"
+    environment:
+      ETCDCTL_API: 3
     register: etcd_health_check
 
   - assert:
@@ -45,6 +47,8 @@
 - name: Wait until etcd cluster is healthy after restart
   command:
     etcdctl endpoint health --endpoints="{{ etcd_endpoints }}"
+  environment:
+    ETCDCTL_API: 3
   register: etcd_post_check
   until: etcd_post_check.rc == 0
   retries: 3

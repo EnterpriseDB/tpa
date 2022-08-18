@@ -3,14 +3,27 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 # There aren't recent-enough etcd packages available in the default
-# repositories for Debian, and none at all for RedHat. The following
-# custom packages (etcd and etcdctl packaged separately) are available
-# from an EDB repository.
+# repositories for Debian, and none at all for RedHat 8. RedHat 7 has
+# package available in "extras" which needs to be enabled first.
+
+# The following custom packages (etcd and etcdctl packaged separately)
+# are available from an EDB repository for harp.
+# Otherwise, the default uses older etcd on Debian and Ubuntu and
+# the etcd packages from PGDG on RedHat.
+# Patroni uses the default.
 
 etcd_packages:
-  Debian:
-    - harp-etcd
-    - harp-etcdctl
-  RedHat:
-    - harp-etcd
-    - harp-etcdctl
+  default: &default_etcd_packages
+    Debian:
+      - etcd-client
+      - etcd-server
+    RedHat:
+      - etcd
+  patroni: *default_etcd_packages
+  harp:
+    Debian:
+      - harp-etcd
+      - harp-etcdctl
+    RedHat:
+      - harp-etcd
+      - harp-etcdctl

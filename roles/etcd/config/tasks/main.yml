@@ -2,6 +2,25 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+- name: Create etcd group
+  group:
+    name: "{{ etcd_group }}"
+  when: >
+    'etcd' in role
+    and etcd_group != 'root'
+
+- name: Create etcd user
+  user:
+    name: "{{ etcd_user }}"
+    system: yes
+    comment: "etcd key-value store"
+    home: /var/lib/etcd/
+    password: '!'
+    shell: /bin/nologin
+  when: >
+    'etcd' in role
+    and etcd_user != 'root'
+
 - name: Ensure /etc/etcd exists
   file:
     path: /etc/etcd
@@ -22,3 +41,12 @@
     - Note etcd restart required
   when: >
     'etcd' in role
+
+- name: Ensure etcd data files have correct ownership
+  file:
+    dest: /var/lib/etcd
+    owner: "{{ etcd_user }}"
+    group: "{{ etcd_group }}"
+    recurse: yes
+  notify:
+    - Note etcd restart required

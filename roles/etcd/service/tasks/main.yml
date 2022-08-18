@@ -2,10 +2,21 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+- name: Ensure etcd systemd service is in place
+  template:
+    src: etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+    mode: 0644
+    owner: root
+    group: root
+  register: unit
+  when: >
+    'etcd' in role
+
 - name: Ensure etcd service is enabled on boot
   service:
     name: etcd
     enabled: yes
-    state: started
+    daemon_reload: "{{ unit is changed }}"
   when: >
     'etcd' in role

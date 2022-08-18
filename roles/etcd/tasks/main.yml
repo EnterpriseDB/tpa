@@ -2,11 +2,10 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-- include_role:
-    name: etcd/pkg
-    apply:
-      tags: [etcd, pkg]
-  tags: pkg
+# The etcd-server package supplied on debian installs and starts a
+# default systemd service and data storage location which conflicts
+# with how we want it. To ensure that the configuration is correct
+# we put this in place before installing the packages.
 
 - include_role:
     name: etcd/config
@@ -14,3 +13,14 @@
       tags: [etcd, config]
   when: >
     'etcd' in role
+
+- include_role:
+    name: etcd/service
+    apply:
+      tags: [etcd, service]
+
+- include_role:
+    name: etcd/pkg
+    apply:
+      tags: [etcd, pkg]
+  tags: pkg

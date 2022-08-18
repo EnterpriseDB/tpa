@@ -1,0 +1,20 @@
+[Unit]
+Description=etcd key-value store
+Documentation=https://github.com/etcd-io/etcd
+After=network-online.target local-fs.target remote-fs.target time-sync.target
+Wants=network-online.target local-fs.target remote-fs.target time-sync.target
+
+[Service]
+User={{ etcd_user }}
+Group={{ etcd_group }}
+Type=notify
+Environment=ETCD_DATA_DIR=/var/lib/etcd
+Environment=ETCD_NAME=%m
+ExecStart=/usr/bin/etcd
+EnvironmentFile=/etc/etcd/etcd.conf
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target

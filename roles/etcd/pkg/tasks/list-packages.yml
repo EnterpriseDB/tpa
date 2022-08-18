@@ -4,8 +4,13 @@
 
 - include_role: name=pkg/add_to_list
   vars:
+    _failover_manager_key: "{{
+        (failover_manager|default('default') in etcd_packages.keys())
+        |ternary(failover_manager, 'default')
+      }}"
     list_contents: "{{
-        etcd_packages|packages_for(ansible_os_family, etcd_package_version)
+        etcd_packages[_failover_manager_key]
+        |packages_for(ansible_os_family, etcd_package_version)
       }}"
   when: >
     'etcd' in role

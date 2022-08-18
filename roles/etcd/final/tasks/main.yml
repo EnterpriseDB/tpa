@@ -3,9 +3,9 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 - include_role:
-    name: etcd/service
+    name: etcd/start
     apply:
-      tags: [etcd, service]
+      tags: [etcd, start]
 
 - include_role:
     name: etcd/restart

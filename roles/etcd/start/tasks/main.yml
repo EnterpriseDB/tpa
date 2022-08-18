@@ -1,0 +1,38 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Conditionally start etcd if it is not already running, as the etcd_service_end_state
+# fact is always `restarted` at this point on a fresh installation and on an existing
+# cluster we want to carefully restart each node sequentially as long as etcd is in
+# a healthy condition. See roles/etcd/restart.
+
+- name: Discover the state of systemd services
+  service_facts:
+
+- name: Set OS specific etcd service fact
+  set_fact:
+    etcd_service_state: "{{
+        ansible_facts.services[_etcd_service_key].state
+        |default('absent')
+      }}"
+  vars:
+    _etcd_service_name:
+      RedHat: etcd.service
+      Debian: etcd
+    _etcd_service_key: "{{ _etcd_service_name[ansible_os_family] }}"
+
+- name: Ensure the service state could be found
+  assert:
+    that: "{{
+        etcd_service_state != 'absent'
+      }}"
+    fail_msg: "The systemd service for etcd could not be found"
+
+- name: Start the etcd service, if required
+  service:
+    name: etcd
+    state: "{{ etcd_service_end_state|default('started') }}"
+  when: >
+    'etcd' in role
+    and etcd_service_state not in ['running', 'failed']
