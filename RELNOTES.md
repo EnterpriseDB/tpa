@@ -2,6 +2,15 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v23.5 (2022-08-22)
+
+### Notable changes
+
+- TPA-81 Publish tpaexec and tpaexec-deps packages for Ubuntu 22.04 Jammy
+- TPA-26 Support harp-proxy and harp-manager installation on a single node.
+  It is now possible to have both harp-proxy and harp-manager service running
+  on the same target node in a cluster.
+
 ## v23.4 (2022-08-05)
 
 ### Bugfixes
