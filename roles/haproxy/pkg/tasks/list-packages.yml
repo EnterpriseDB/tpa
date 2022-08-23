@@ -2,10 +2,16 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-- include_role: name=pkg/add_to_list
-  vars:
-    list_contents: "{{
-        haproxy_packages|packages_for(ansible_os_family, haproxy_package_version)
-      }}"
+- block:
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          haproxy_packages|packages_for(ansible_os_family, haproxy_package_version)
+        }}"
+
+  # test scripts require psycopg2
+  - include_role:
+      name: postgres/pkg
+      tasks_from: list-client-packages.yml
   when: >
     'haproxy' in role
