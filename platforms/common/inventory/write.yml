@@ -21,6 +21,7 @@
 - name: Compose group_vars for cluster
   set_fact:
     ansible_group_vars:
+      ansible_shell_executable: /bin/bash
       ansible_port: "{{ ansible_port }}"
       ansible_ssh_private_key_file: "{{ ssh_key_file }}"
       ansible_ssh_common_args: >-
