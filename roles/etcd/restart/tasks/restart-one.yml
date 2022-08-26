@@ -6,7 +6,8 @@
 # (because of how main.yml includes this file).
 #
 # In a running cluster, we must be careful about restarting etcd only if
-# the cluster is healthy, otherwise we risk breaking harp too.
+# the cluster is healthy, otherwise we risk breaking services that rely on
+# it too, such as harp and patroni.
 
 - set_fact:
     etcd_service_end_state: "{{
@@ -14,7 +15,7 @@
       }}"
     etcd_endpoints: "{{
         groups['role_etcd']
-        |select_by_hostvar(hostvars, 'harp_location', harp_location)
+        |select_by_hostvar(hostvars, 'etcd_location', etcd_location)
         |map('pyformat_hostvars', '{inventory_hostname}:{etcd_client_port}', hostvars)
         |list
         |join(',')

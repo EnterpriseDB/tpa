@@ -190,6 +190,7 @@
     harp_location: "{{ harp_location|default(location) }}"
     harp_directory: "{{ harp_directory|default(default_harp_directories[harp_version]) }}"
     harp_proxy_mode: "{{ harp_proxy_mode|default(default_harp_proxy_mode) }}"
+    etcd_location: "{{ etcd_location|default(harp_location|default(location)) }}"
     etcd_peer_port: "{{ etcd_peer_port|default(default_etcd_peer_port) }}"
     etcd_client_port: "{{ etcd_client_port|default(default_etcd_client_port) }}"
     etcd_compaction_mode: "{{ etcd_compaction_mode|default(default_etcd_compaction_mode) }}"

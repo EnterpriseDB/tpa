@@ -49,6 +49,8 @@ instances:
   location: {{ i % 2 }}
   role:
     - etcd
+  vars:
+    etcd_location: main
 {% endfor %}
 
 {% if enable_haproxy %}
