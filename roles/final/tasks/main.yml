@@ -110,9 +110,8 @@
     name: efm/final
     apply:
       tags: efm
-  when:
-    failover_manager == 'efm'
-    and ('postgres' in role or 'efm-witness' in role)
+  when: >
+     'efm' in role
   tags: efm
 
 - include_role:

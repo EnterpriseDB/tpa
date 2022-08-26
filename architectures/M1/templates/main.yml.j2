@@ -24,8 +24,12 @@ instances:
     - log-server
     - monitoring-server
 {% if (cascaded_replicas+2) % 2 == 0 %}
+{%   if failover_manager == 'efm' %}
+    - efm-witness
+{%   else %}
     - witness
   upstream: {{ hostnames[1] }}
+{%   endif %}
 {% endif %}
 
 {% for i in range(4,4+cascaded_replicas) %}
