@@ -65,6 +65,14 @@
   when: >
     hostvars[pem_server].pem_shared|default(false)
 
+# XXX We are controlling throttle on this one because of the agent
+# registration code resulting in database errors on pem server when
+# multiple agent registation queries are sent in parallel. Without
+# the throttle control, this task would result in an error similar
+# to the following:
+#
+# "msg": "Mon Aug 22 11:40:23 2022 ERROR: ERROR:  tuple concurrently updated"
+
 - name: Register PEM agent
   command: >
     {{ pem_agent_base_dir }}/bin/pemworker --register-agent     \
@@ -84,6 +92,7 @@
   when:
     not agent_cfg_check.stat.exists
   no_log: true
+  throttle: 1
 
 - name: Display stderr from failed agent registration
   assert:
