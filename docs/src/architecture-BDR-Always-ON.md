@@ -26,6 +26,7 @@ for the detailed layout diagrams.
 [tpa]$ tpaexec configure ~/clusters/bdr \
          --architecture BDR-Always-ON \
          --layout gold \
+         --harp-consensus-protocol bdr \
          --platform aws --region eu-west-1 --instance-type t3.micro \
          --distribution Debian-minimal
 ```
@@ -39,6 +40,9 @@ use-case variations. The current options are bronze, silver, gold, and
 platinum. The bronze, gold and platinum layouts have a BDR witness node
 to ensure odd number of nodes for Raft consensus majority. Witness nodes do
 not participate in the data replication.
+
+You must specify `--harp-consensus-protocol protocolname`. The supported
+protocols are bdr and etcd; see [`Configuring HARP`](harp.md) for more details.
 
 You may optionally specify `--bdr-node-group groupname` to set the
 name of the BDR node group (default: bdrgroup).

@@ -16,7 +16,7 @@ for more details on HARP configuration.
 Variable | Default value | Description
 ---- | ---- | ---
 `cluster_name` | `` | The name of the cluster.
-`harp_consensus_protocol` | `etcd` | The consensus layer to use (`etcd` or `bdr`)
+`harp_consensus_protocol` | `` | The consensus layer to use (`etcd` or `bdr`)
 `harp_location` | `location` | The location of this instance (defaults to the `location` parameter)
 `harp_ready_status_duration` | `10` | Amount of time in seconds the node's readiness status will persist if not refreshed.
 `harp_leader_lease_duration` | `6` | Amount of time in seconds the Lead Master lease will persist if not refreshed.
@@ -38,8 +38,15 @@ Variable | Default value | Description
 
 ## Consensus layer
 
-By default, TPAexec will set `harp_consensus_protocol: etcd`, and
-install and configure etcd on the BDR instances.
+The `--harp-consensus-protocol` argument to `tpaexec configure` is
+mandatory for the BDR-Always-ON architecture.
+
+### etcd
+
+If the `--harp-consensus-protocol etcd` option is given to `tpaexec
+configure`, then TPAexec will set `harp_consensus_protocol` to `etcd`
+in config.yml and give the `etcd` role to a suitable subset of the
+instances, depending on your chosen layout.
 
 HARP v2 requires etcd v3.5.0 or above, which is available in the
 products/harp/release package repositories provided by EDB.
@@ -51,9 +58,12 @@ Variable	| Default value	| Description
 etcd_peer_port	| 2380	| The port used by etcd for peer communication
 etcd_client_port	| 2379	| The port used by clients to connect to etcd
 
-You can set `harp_consensus_protocol: bdr` instead, in which case the
-existing BDR instances will be used for consensus, and no further
-configuration is required.
+### bdr
+
+If the `--harp-consensus-protocol bdr` option is given to `tpaexec
+configure`, then TPAexec will set `harp_consensus_protocol` to `bdr`
+in config.yml.  In this case the existing BDR instances will be used
+for consensus, and no further configuration is required.
 
 ## Configuring a separate user for harp proxy
 
