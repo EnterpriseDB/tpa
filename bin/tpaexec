@@ -357,8 +357,16 @@ try_as_playbook_or_script() {
             exec=$dir/$command
 
             if [[ -x $exec ]]; then
-                _with_ansible_env "$exec" "$@"
-                return $?
+                case $command in
+                    store-password|show-password)
+                        _with_ansible_env "$exec" "$@" "--vault_password_file=vault/vault_pass.txt"
+                        return $?
+                    ;;
+                    *)
+                        _with_ansible_env "$exec" "$@"
+                        return $?
+                    ;;
+                esac
             elif [[ -f $script ]]; then
                 source "$script"
                 if [[ $(type -t _tpaexec_command) != function ]]; then
