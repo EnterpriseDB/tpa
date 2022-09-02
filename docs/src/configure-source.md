@@ -18,16 +18,17 @@ operations.
 
 ## Quickstart
 
-Spin up a cluster with 2ndQPostgres and pglogical3 built from the stable
-3.6 branches, with BDR3 built from a development branch:
+Spin up a cluster with 2ndQPostgres, pglogical3, and bdr all built from
+stable branches:
 
 ```bash
 $ tpaexec configure ~/clusters/speedy -a BDR-Always-ON          \
     --layout bronze                                             \
+    --harp-consensus-protocol etcd                              \
     --install-from-source                                       \
-      2ndqpostgres:2QREL_11_STABLE_3_6                          \
-      pglogical3:REL3_6_STABLE                                  \
-      bdr3:dev/RM12345-feature
+      2ndqpostgres:2QREL_13_STABLE_dev                          \
+      pglogical3:REL3_7_STABLE                                  \
+      bdr3:REL3_7_STABLE
 ```
 
 As above, but set up a cluster that builds 2ndQPostgres source code from
@@ -37,8 +38,9 @@ pglogical and BDR. This feature is specific to Docker:
 ```bash
 $ tpaexec configure ~/clusters/speedy                           \
     --architecture BDR-Always-ON --layout bronze                \
+    --harp-consensus-protocol etcd                              \
     --platform docker                                           \
-    --install-from-source 2ndqpostgres:2QREL_11_STABLE_3_6      \
+    --install-from-source 2ndqpostgres:2QREL_13_STABLE_dev      \
       pglogical3 bdr3                                           \
     --local-source-directories                                  \
       pglogical3:~/src/pglogical bdr3:~/src/bdr
@@ -86,9 +88,10 @@ to build:
 ```bash
 $ tpaexec configure ~/clusters/speedy                           \
     --architecture BDR-Always-ON --layout bronze                \
+    --harp-consensus-protocol etcd                              \
     --platform docker                                           \
-    --install-from-source 2ndqpostgres:2QREL_11_STABLE_3_6      \
-      pglogical3:REL3_6_STABLE bdr3:REL3_6_STABLE               \
+    --install-from-source 2ndqpostgres:2QREL_13_STABLE_dev      \
+      pglogical3:REL3_7_STABLE bdr3:REL3_7_STABLE               \
       …
 ```
 
@@ -100,8 +103,9 @@ sources to be taken directly from your host machine instead:
 ```bash
 $ tpaexec configure ~/clusters/speedy                           \
     --architecture BDR-Always-ON --layout bronze                \
+    --harp-consensus-protocol etcd                              \
     --platform docker                                           \
-    --install-from-source 2ndqpostgres:2QREL_11_STABLE_3_6      \
+    --install-from-source 2ndqpostgres:2QREL_13_STABLE_dev      \
       pglogical3 bdr3                                           \
     --local-source-directories                                  \
       pglogical3:~/src/pglogical bdr3:~/src/bdr                 \
@@ -115,7 +119,7 @@ containers at the same locations where the git repository would have
 been cloned to, and the default (out-of-tree) build proceeds as usual.
 
 If you specify a local source directory for a component, you cannot
-specify a branch to build (cf. `pglogical3:REL3_6_STABLE` vs.
+specify a branch to build (cf. `pglogical3:REL3_7_STABLE` vs.
 `pglogical3` for `--install-from-source` in the examples above). The
 source directory is mounted read-only in the containers, so TPAexec
 cannot do anything to change it—neither `git pull`, nor
