@@ -168,3 +168,19 @@
     path: /run/nologin
     state: absent
   when: platform in ['docker']
+
+# RemoveIPC=no in logind.conf is necessary for source builds because
+# they result in the postgres user having uid > 1000.
+
+- name: Ensure RemoveIPC=no in logind.conf
+  block:
+    - ini_file:
+        dest: "/etc/systemd/logind.conf"
+        section: "Login"
+        option: RemoveIPC
+        value: "no"
+    - systemd:
+        name: systemd-logind
+        state: restarted
+  when: >
+    'postgres' in role and postgres_installation_method == 'src'
