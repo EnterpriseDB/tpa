@@ -923,6 +923,14 @@ class Architecture(object):
             "bdr4": {
                 "name": "bdr",
                 "git_repository_url": "git@github.com:EnterpriseDB/bdr.git",
+                "git_repository_ref": "REL_4_STABLE",
+                "build_commands": [
+                    "make -f ../../src/bdr/Makefile -s install",
+                ],
+            },
+            "bdr5": {
+                "name": "bdr",
+                "git_repository_url": "git@github.com:EnterpriseDB/bdr.git",
                 "build_commands": [
                     "make -f ../../src/bdr/Makefile -s install",
                 ],

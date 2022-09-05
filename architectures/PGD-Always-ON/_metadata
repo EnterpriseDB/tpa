@@ -1,0 +1,2 @@
+STATUS="production"
+DESCRIPTION="EDB Postgres Distributed in an Always-ON configuration"

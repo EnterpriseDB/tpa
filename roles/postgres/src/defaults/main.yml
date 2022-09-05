@@ -61,6 +61,7 @@ postgres_configure_opts:
   - --enable-cassert
   - --enable-tap-tests
   - --config-cache
+  - --with-systemd
 postgres_extra_configure_opts: []
 postgres_make_command: "make -s"
 postgres_build_targets:

@@ -76,6 +76,7 @@ class BDR(Architecture):
 
         given_repositories = " ".join(tpa_2q_repositories)
 
+        arch = self.args["architecture"]
         default_bdr_versions = {
             "9.4": "1",
             "9.6": "2",
@@ -83,8 +84,8 @@ class BDR(Architecture):
             "11": "3",
             "12": "3",
             "13": "3",
-            "14": "4",
-            None: "3",
+            "14": "5" if arch == "PGD-Always-ON" else "4",
+            None: "5" if arch == "PGD-Always-ON" else "3",
         }
 
         default_pg_versions = {
@@ -92,6 +93,7 @@ class BDR(Architecture):
             "2": "9.6",
             "3": "13",
             "4": "14",
+            "5": "14",
         }
 
         if bdr_version is None:

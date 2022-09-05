@@ -23,6 +23,8 @@ requirements:
     - krb5-multidev
     - libkrb5-dev
     - liblz4-dev
+    - libsystemd-dev
+    - libcurl4-gnutls-dev
   RedHat:
     - autoconf
     - automake
@@ -47,3 +49,4 @@ requirements:
     - krb5-devel
     - lz4-devel
     - libcurl-devel
+    - systemd-devel
