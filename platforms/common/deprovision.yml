@@ -24,6 +24,7 @@
     - inventory/group_vars/{{ cluster_tag }}/00-ansible.yml
     - inventory/group_vars/{{ cluster_tag }}/01-{{ cluster_name }}.yml
     - inventory/group_vars/{{ cluster_tag }}/secrets
+    - inventory/group_vars/
 
 # First, we delete any files we may have generated into host_vars.
 # We really want something like «with_fileglob: host_vars/*» here,
