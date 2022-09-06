@@ -5,7 +5,7 @@
 - include_role: name=pkg/add_to_list
   vars:
     list_contents: "{{
-        haproxy_packages|packages_for(ansible_os_family)
+        haproxy_packages|packages_for(ansible_os_family, haproxy_package_version)
       }}"
   when: >
     'haproxy' in role
