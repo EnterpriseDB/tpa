@@ -138,9 +138,6 @@ class aws(CloudPlatform):
             except IndexError:
                 pass
             del image["versions"]
-            if "preferred_python_version" in image:
-                self.preferred_python_version = image["preferred_python_version"]
-                del image["preferred_python_version"]
 
         else:
             image["name"] = label
@@ -213,9 +210,7 @@ class aws(CloudPlatform):
                 location["az"] = location.get("az", az)
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
-        cluster_vars["preferred_python_version"] = cluster_vars.get(
-            "preferred_python_version", self.preferred_python_version
-        )
+        pass
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml("platforms/aws/instance_defaults.yml.j2", args)

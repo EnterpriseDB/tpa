@@ -137,7 +137,8 @@ class docker(Platform):
             label: The image label supplied as a default or on the command line
             **kwargs:
 
-        Returns: dictionary with key "name", also keys "version" and "os" if known
+        Returns: dictionary with key "name", also keys "version" and "os" if known,
+        and key "preferred_python_version" if the image has a preference
 
         """
         image = {}
@@ -198,26 +199,12 @@ class docker(Platform):
             image.setdefault("os_family", image.get("os"))
 
         image["name"] = label
+        if (image["name"] == "tpa/redhat:7" or image["name"] == "centos/systemd"):
+            image["preferred_python_version"] = "python2"
 
         return image
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
-        preferred_python_version = "python3"
-        image = args["image"]
-        if image:
-            # Use tpa/redhat:7 by default for BDRv1 on RH, because we do not
-            # publish packages for newer distributions. Specify `--os-version`
-            # explicitly to override this decision.
-            if (
-                image["name"] == "tpa/redhat"
-                and cluster_vars.get("postgresql_flavour") == "postgresql-bdr"
-            ):
-                image["name"] = "tpa/redhat:7"
-            if image["name"] in ["centos/systemd", "tpa/redhat:7"]:
-                preferred_python_version = "python2"
-        cluster_vars["preferred_python_version"] = cluster_vars.get(
-            "preferred_python_version", preferred_python_version
-        )
         cluster_vars["use_volatile_subscriptions"] = True
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):

@@ -661,8 +661,11 @@ class Architecture(object):
         """
         Makes changes to cluster_vars applicable across architectures
         """
-        cluster_vars["preferred_python_version"] = cluster_vars.get(
+        preferred_python_version = self.args["image"].get(
             "preferred_python_version", "python3"
+        )
+        cluster_vars["preferred_python_version"] = cluster_vars.get(
+            "preferred_python_version", preferred_python_version
         )
 
         for k in self.cluster_vars_args():
