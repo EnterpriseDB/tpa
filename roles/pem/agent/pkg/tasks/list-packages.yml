@@ -6,7 +6,7 @@
   block:
   - include_role: name=pkg/add_to_list
     vars:
-      list_contents: "{{ pem_agent_packages|packages_for(ansible_os_family) }}"
+      list_contents: "{{ pem_agent_packages|packages_for(ansible_os_family, pem_agent_package_version) }}"
 
   # We may want to install the PEM agent on instances that aren't
   # running Postgres, so we shouldn't take it for granted that

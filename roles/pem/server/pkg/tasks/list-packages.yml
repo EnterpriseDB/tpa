@@ -7,7 +7,7 @@
   - include_role: name=pkg/add_to_list
     vars:
       list_contents: "{{
-          pem_server_packages|packages_for(ansible_os_family)
+          pem_server_packages|packages_for(ansible_os_family,pem_server_package_version)
         }}"
 
   - include_role: name=pkg/add_to_list
