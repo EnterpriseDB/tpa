@@ -90,6 +90,7 @@
             - "{{ cluster_tag }}"
             - role_downloader
           ansible_connection: docker
+          ansible_shell_executable: /bin/bash
           ansible_user: root
           manage_ssh_hostkeys: false
           private_ip: "{{ instance_vars[0].vars.private_ip }}"
