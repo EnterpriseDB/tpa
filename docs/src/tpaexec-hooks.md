@@ -78,6 +78,17 @@ Postgres and creating users, databases, and extensions. You can use this
 hook to execute SQL commands, for example, to perform custom extension
 configuration or create database objects.
 
+### harp-config
+
+TPAexec invokes `hooks/harp-config.yml` after generating HARP configuration
+files, but before the HARP service has been started.
+
+You can use this hook, for example, to perform any customizations to the HARP
+proxy that are not provided by the built-in interface of TPAexec.
+
+Please note that this hook will be run in any node that installs HARP packages,
+including BDR nodes.
+
 ### post-deploy
 
 TPAexec invokes `hooks/post-deploy.yml` at the end of the deployment.

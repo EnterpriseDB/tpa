@@ -29,3 +29,11 @@
     apply:
       tags: config
   tags: config
+
+- name: Include harp-config hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/harp-config.yml"
+  tags: config

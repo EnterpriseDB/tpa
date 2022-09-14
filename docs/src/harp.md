@@ -36,6 +36,11 @@ Variable | Default value | Description
 `harp_ssl_password_command` | None | a custom command that should receive the obfuscated sslpassword in the stdin and provide the handled sslpassword via stdout.
 `harp_db_request_timeout`| `10s` | similar to dcs -> request_timeout, but for connection to the database itself.
 
+You can use the
+[harp-config hook](tpaexec-hooks.md#harp-config)
+to execute tasks after the HARP configuration files have been
+installed (e.g., to install additional configuration files).
+
 ## Consensus layer
 
 The `--harp-consensus-protocol` argument to `tpaexec configure` is
