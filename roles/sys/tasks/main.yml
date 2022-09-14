@@ -174,13 +174,21 @@
 
 - name: Ensure RemoveIPC=no in logind.conf
   block:
-    - ini_file:
+    - name: Check whether systemd-logind is active
+      command: systemctl is-active systemd-logind
+      register: logind_state
+      ignore_errors: yes
+    - name: Set RemoveIPC in logind.conf
+      ini_file:
         dest: "/etc/systemd/logind.conf"
         section: "Login"
         option: RemoveIPC
         value: "no"
-    - systemd:
+    - name: Restart logind if necessary
+      systemd:
         name: systemd-logind
         state: restarted
+      when: >
+        logind_state.stdout == 'active'
   when: >
     'postgres' in role and postgres_installation_method == 'src'
