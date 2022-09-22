@@ -457,7 +457,7 @@
           )
         }}"
     vpc_subnet_id: "{{ ec2_region_subnets[item.region][item.subnet] }}"
-    security_group: "{{ ec2_region_groups[item.region] }}"
+    security_groups: "{{ ec2_region_groups[item.region] }}"
     volumes: "{{ item.volumes|map('remove_keys', keys_to_remove)|reject('has_subkey','volume_id')|list|default(omit) }}"
     user_data: "{{
         lookup('template', 'user-data.j2',
