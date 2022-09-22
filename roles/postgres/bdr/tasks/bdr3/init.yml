@@ -2,12 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-# We need to create the local BDR node if bdr.node is empty.
-#
-# If it's not empty, it may contain either one row for the local node
-# (if it hasn't joined the BDR group yet) or rows for each node in the
-# group. In either case, we know that the local node must exist already.
-
 - name: Include bdr-pre-node-creation hook
   include_tasks: "{{ hook }}"
   when:
@@ -17,18 +11,17 @@
     hook: "{{ cluster_dir }}/hooks/bdr-pre-node-creation.yml"
   tags: always
 
-- name: Create BDR node if necessary
-  postgresql_query:
-    conninfo: "{{ bdr_node_dsn }}"
-    queries:
-      - text: SELECT bdr.create_node(node_name := %s, local_dsn := %s) AS node_id
-        args:
-          - "{{ bdr_node_name }}"
-          - "{{ bdr_node_dsn }}"
-  become_user: "{{ postgres_user }}"
-  become: yes
-  register: new_bdr_node
-  changed_when: True
+# We need to create the local BDR node if bdr.node is empty.
+#
+# If it's not empty, it may contain either one row for the local node
+# (if it hasn't joined the BDR group yet) or rows for each node in the
+# group. In either case, we know that the local node must exist already.
+#
+# After this step, new_bdr_node contains the return value from
+# bdr.create_node.
+
+- include_tasks:
+    file: create-node.yml
   when:
     bdr_database_facts.bdr.node is empty
 
@@ -181,81 +174,13 @@
     hook: "{{ cluster_dir }}/hooks/bdr-post-group-creation.yml"
   tags: always
 
-# If there are any BDR witnesses, there must be a witness-only
-# replication set for them to subscribe to. We can either add a
-# publication (if there isn't a matching one), or add the missing
-# witness-only repset to a matching BDR publication.
+# Create a custom replication set to support witness nodes, except for
+# BDR v5 and above, where you can specify node_kind := 'witness'.
 
-- name: Add witness-only replication set to publications if required
-  set_fact:
-    publications: "{{
-      publications|ensure_publication(default_witness_publication)
-    }}"
-  vars:
-    bdr_witnesses: >-
-      {{ groups['role_bdr']|intersect(groups['role_witness']|default([])) }}
-    default_witness_publication:
-      type: bdr
-      database: "{{ bdr_database }}"
-      replication_sets:
-        - name: witness-only
-          autoadd_tables: false
-          replicate_insert: false
-          replicate_delete: false
-          replicate_update: false
-          replicate_truncate: false
-  when:
-    inventory_hostname == first_bdr_primary
-    and bdr_witnesses is not empty
-  tags: replication-sets
-
-# We add a default subscription to the witness-only replication set on
-# witnesses, unless the instance already explicitly defines a BDR
-# subscription to bdr_database.
-
-- name: Subscribe to witness-only replication set on witnesses
-  set_fact:
-    subscriptions: "{{
-      subscriptions|union([default_witness_subscription])
-    }}"
-  vars:
-    q: >-
-      [?type=='bdr' && database=='%s']
-    bdr_subscription: >
-      {{ subscriptions|json_query(q % bdr_database) }}
-    default_witness_subscription:
-      type: bdr
-      database: "{{ bdr_database }}"
-      replication_sets:
-        - witness-only
+- include_tasks:
+    file: bdr3/witness-repset.yml
   when: >
-    'witness' in role
-    and bdr_subscription is empty
-  tags: replication-sets
-
-# Filtering by replication set currently works only when the nodes have
-# at least one replication set in common, so we must make all the other
-# nodes subscribe to the witness-only replication set too. We accept a
-# slightly misleading replication set name for now, because we expect
-# future versions of BDR to relax this restriction.
-
-- name: Subscribe to witness-only replication set if required
-  set_fact:
-    subscriptions: "{{
-      subscriptions|ensure_subscription(default_witness_subscription)
-    }}"
-  vars:
-    bdr_witnesses: >-
-      {{ groups['role_bdr']|intersect(groups['role_witness']|default([])) }}
-    default_witness_subscription:
-      type: bdr
-      database: "{{ bdr_database }}"
-      replication_sets:
-        - witness-only
-  when: >
-    'witness' not in role
-    and bdr_witnesses is not empty
-  tags: replication-sets
+      bdr_version is version('5', '<')
 
 # Set up replication sets according to the publications/subscriptions
 # settings before group join.

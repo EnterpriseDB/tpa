@@ -1,0 +1,16 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Create BDR node
+  postgresql_query:
+    conninfo: "{{ bdr_node_dsn }}"
+    queries:
+      - text: SELECT bdr.create_node(node_name := %s, local_dsn := %s) AS node_id
+        args:
+          - "{{ bdr_node_name }}"
+          - "{{ bdr_node_dsn }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  register: new_bdr_node
+  changed_when: True
