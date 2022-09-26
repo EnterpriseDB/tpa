@@ -5,17 +5,17 @@
 {% if bdr_node_camo_partner is defined %}
 synchronous_replication_availability = {{ synchronous_replication_availability|default('async') }}
 synchronous_commit = {{ synchronous_commit|default('on') }}
-{%   if bdr_version is defined and bdr_version|int < 40000 %}
+{%   if bdr_version_num is defined and bdr_version_num < 40000 %}
 bdr.camo_origin_for = '{{ bdr_database }}:{{ hostvars[bdr_node_camo_partner].bdr_node_name }}'
 bdr.camo_partner_of = '{{ bdr_database }}:{{ hostvars[bdr_node_camo_partner].bdr_node_name }}'
 {%   endif %}
-{%   if bdr_version is defined and bdr_version|int < 30703 %}
+{%   if bdr_version_num is defined and bdr_version_num < 30703 %}
 report_transaction_id = true
 pg2q.enable_camo = {{ enable_camo }}
 {%   else %}
 bdr.enable_camo = {{ enable_camo }}
 {%   endif %}
-{%   if bdr_version is defined and bdr_version|int >= 40000 %}
+{%   if bdr_version_num is defined and bdr_version_num >= 40000 %}
 # Disable transaction streaming which is not supported in combination
 # with CAMO protected transactions.
 bdr.default_streaming_mode = off
