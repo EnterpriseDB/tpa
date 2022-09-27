@@ -6,26 +6,36 @@
 
 ### Notable changes
 
-- TPA-21 Use boto3 for AWS deployments. This enables SSO login and other useful
-  features
+- TPA-21 Use boto3 for AWS deployments. This enables SSO login and other
+  useful features.
 
-### Minor changes
-
-- TPA-202 Add harp-config hook
-- TPA-185 Update example tpaexec configure invocations in docs
-- TPA-184 Add rebuild-sources command to short-circuit source rebuilds
-- TPA-134 Add custom wait_for_ssh ansible module
+- TPA-202 Add harp-config hook. This deploy-time hook executes after HARP 
+  is installed and configured and before it is started on all nodes
+  where HARP is installed.
 
 ### Bugfixes
 
-- TPA-181 Set python version to 2 on RHEL 7
-- TPA-210 Fix aws deployments using existing security groups
-- TPA-189 Remove group_vars directory on deprovision
+- TPA-181 Set default python version to 2 on RHEL 7. Formerly, tpaexec
+  could generate a config.yml with the unsupported combination of RHEL 7
+  and python 3.
+- TPA-210 Fix aws deployments using existing security groups. Such a
+  deployment used to fail at provision-time but will now work as
+  expected.
+- TPA-189 Remove group_vars directory on deprovision. This fixes a
+  problem that caused a subsequent provision to fail because of a
+  dangling symlink.
 - TPA-175 Correctly configure systemd to leave shared memory segments
-  alone
-- TPA-160 Allow version setting for haproxy and PEM
-- TPA-172 Install EFM on the correct set of hosts
-- TPA-113 Serialize PEM agent registration
+  alone. This only affects source builds.
+- TPA-160 Allow version setting for haproxy and PEM. This fixes a bug
+  whereby latest versions of packages would be installed even if a
+  specific version was specified.
+- TPA-172 Install EFM on the correct set of hosts. EFM should be
+  installed only on postgres servers that are members of the cluster,
+  not servers which have postgres installed for other reasons, such as
+  PEM servers.
+- TPA-113 Serialize PEM agent registration. This avoids a race condition
+  when several hosts try to run pemworker --register-agent at the same
+  time.
 
 ## v23.5 (2022-08-22)
 
