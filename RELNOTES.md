@@ -6,8 +6,8 @@
 
 ### Notable changes
 
-- TPA-21 Use boto3 for AWS deployments. This enables SSO login and other
-  useful features.
+- TPA-21 Use boto3 (instead of the unmaintained boto2) AWS client library
+  for AWS deployments. This enables SSO login and other useful features.
 
 - TPA-202 Add harp-config hook. This deploy-time hook executes after HARP 
   is installed and configured and before it is started on all nodes
