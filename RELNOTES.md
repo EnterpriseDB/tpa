@@ -2,6 +2,31 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v23.6 (2022-09-27)
+
+### Notable changes
+
+- TPA-21 Use boto3 for AWS deployments. This enables SSO login and other useful
+  features
+
+### Minor changes
+
+- TPA-202 Add harp-config hook
+- TPA-185 Update example tpaexec configure invocations in docs
+- TPA-184 Add rebuild-sources command to short-circuit source rebuilds
+- TPA-134 Add custom wait_for_ssh ansible module
+
+### Bugfixes
+
+- TPA-181 Set python version to 2 on RHEL 7
+- TPA-210 Fix aws deployments using existing security groups
+- TPA-189 Remove group_vars directory on deprovision
+- TPA-175 Correctly configure systemd to leave shared memory segments
+  alone
+- TPA-160 Allow version setting for haproxy and PEM
+- TPA-172 Install EFM on the correct set of hosts
+- TPA-113 Serialize PEM agent registration
+
 ## v23.5 (2022-08-22)
 
 ### Notable changes
