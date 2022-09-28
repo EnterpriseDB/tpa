@@ -18,21 +18,27 @@
 - TPA-181 Set default python version to 2 on RHEL 7. Formerly, tpaexec
   could generate a config.yml with the unsupported combination of RHEL 7
   and python 3.
+  
 - TPA-210 Fix aws deployments using existing security groups. Such a
   deployment used to fail at provision-time but will now work as
   expected.
+  
 - TPA-189 Remove group_vars directory on deprovision. This fixes a
   problem that caused a subsequent provision to fail because of a
   dangling symlink.
+  
 - TPA-175 Correctly configure systemd to leave shared memory segments
   alone. This only affects source builds.
+  
 - TPA-160 Allow version setting for haproxy and PEM. This fixes a bug
   whereby latest versions of packages would be installed even if a
   specific version was specified.
+  
 - TPA-172 Install EFM on the correct set of hosts. EFM should be
   installed only on postgres servers that are members of the cluster,
   not servers which have postgres installed for other reasons, such as
   PEM servers.
+
 - TPA-113 Serialize PEM agent registration. This avoids a race condition
   when several hosts try to run pemworker --register-agent at the same
   time.
