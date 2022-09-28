@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-## v23.6 (2022-09-27)
+## v23.6 (2022-09-28)
 
 ### Notable changes
 
