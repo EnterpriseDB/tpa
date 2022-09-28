@@ -11,7 +11,7 @@
 
 - name: Install Python
   raw: if ! command -v {{ python }} >/dev/null 2>&1; then yum -y install {{ python_package_name }}; fi
-  environment: {}
+
   register: python_install
   changed_when: >
     python_install is successful
@@ -25,7 +25,7 @@
     fi
   args:
     executable: /bin/sh
-  environment: {}
+
   register: backport_install
   when: python in ['python2', 'python2.7']
   changed_when: >

@@ -29,6 +29,6 @@
     fi
   args:
     executable: /bin/bash
-  environment: {}
+
   register: repository_keys_installed
   changed_when: repository_keys_installed.stdout.strip() != ''

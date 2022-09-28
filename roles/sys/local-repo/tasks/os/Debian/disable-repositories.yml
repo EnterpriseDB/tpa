@@ -14,7 +14,7 @@
     done < <({{ find_list_files }})
     [[ $changes == 0 ]] && exit 99
     exit 0
-  environment: {}
+
   register: disable_repos
   failed_when:
     disable_repos.rc not in [0, 99]

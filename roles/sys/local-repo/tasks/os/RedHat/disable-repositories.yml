@@ -20,7 +20,7 @@
     done < <({{ find_repo_files }})
     [[ $changes == 0 ]] && exit 99
     exit 0
-  environment: {}
+
   register: disable_repos
   failed_when:
     disable_repos.rc not in [0, 99]
@@ -36,7 +36,7 @@
 - name: Disable RedHat subscription services
   raw:
     subscription-manager config --rhsm.manage_repos=0
-  environment: {}
+
   register: subscription_disable
   failed_when:
     - subscription_disable.rc > 0 and subscription_disable.rc != 127

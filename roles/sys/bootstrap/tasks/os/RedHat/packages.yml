@@ -7,7 +7,7 @@
 
 - name: Install gpg
   raw: command -v gpg >/dev/null 2>&1 || yum -y install gnupg2; true
-  environment: {}
+
   register: gpg_install
   changed_when: >
     gpg_install is successful
@@ -16,7 +16,7 @@
 
 - name: Install curl
   raw: command -v curl >/dev/null 2>&1 || yum -y install curl; true
-  environment: {}
+
   register: curl_install
   changed_when: >
     curl_install is successful

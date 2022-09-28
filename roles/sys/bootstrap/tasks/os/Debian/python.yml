@@ -8,7 +8,7 @@
 - name: Run apt-get update
   raw: >-
     apt-get -q -y {{ allow_releaseinfo_change }} update
-  environment: {}
+
   register: update
   changed_when: >
     update is successful
@@ -28,7 +28,7 @@
 
 - name: Install python
   raw: if ! command -v {{ python }} >/dev/null 2>&1; then apt-get -q -y install {{ python_package_name }}; fi
-  environment: {}
+
   register: python_install
   changed_when: >
     python_install is successful
@@ -42,7 +42,7 @@
     fi
   args:
     executable: /bin/sh
-  environment: {}
+
   register: backport_install
   when: python in ['python2', 'python2.7']
   changed_when: >

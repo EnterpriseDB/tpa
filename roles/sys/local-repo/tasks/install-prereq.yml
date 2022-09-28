@@ -11,7 +11,7 @@
   raw: >
     if {{ check_command }}; then exit 99; fi;
     {{ install_command[ansible_os_family] }} {{ package_name }}
-  environment: {}
+
   register: prereq_install
   failed_when:
     prereq_install.rc not in [0, 99]
@@ -34,7 +34,7 @@
   block:
   - name: Run check command for {{ package_name }}
     raw: "{{ check_command }}"
-    environment: {}
+
 
   rescue:
   - assert:
@@ -49,7 +49,7 @@
     - name: Check if the {{ package_name }} package exists in the repo already
       raw: >
         test -f "{{ target_repo_dir }}/{{ package_filename }}"
-      environment: {}
+
     rescue:
     - name: Copy local package for {{ package_name }} using scp
       shell:
