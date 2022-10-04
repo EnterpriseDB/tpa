@@ -69,7 +69,8 @@
     name: "{{ inventory_hostname }}"
     use: systemd
   when:
-    platform not in ['docker']
+    platform not in ['docker', 'lxd']
+    and target_container_type is not defined
   tags: hostname
 
 - name: Ensure authorized_keys allows admin access
@@ -115,6 +116,7 @@
       tags: sysctl
   when:
     platform not in ['docker', 'lxd']
+    and target_container_type is not defined
   tags: sysctl
 
 - include_role:
@@ -184,7 +186,9 @@
   file:
     path: /run/nologin
     state: absent
-  when: platform in ['docker']
+  when:
+    platform in ['docker']
+    or target_container_type|default('unknown') == 'docker'
 
 # RemoveIPC=no in logind.conf is necessary for source builds because
 # they result in the postgres user having uid > 1000.

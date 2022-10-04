@@ -88,6 +88,14 @@ fi
 etc_tpa_exists=false
 if [[ -d /etc/tpa ]]; then etc_tpa_exists=true; fi
 
+# Detects and returns the type of container we're executing in, or an
+# empty string if we are not in a container or can't tell.
+
+container_type=$(systemd-detect-virt -c 2>/dev/null)
+if [[ $container_type == "none" ]]; then
+    container_type=""
+fi
+
 grep -Ev '": ""' <<RESULT
 {
     "ansible_facts": {
@@ -103,6 +111,7 @@ grep -Ev '": ""' <<RESULT
         "python": "$python",
         "system_locale": "${system_locale:-}",
         "etc_tpa_exists": $etc_tpa_exists,
+        "target_container_type": "$container_type",
         "ansible_memtotal_mb": $memtotal
     }
 }

@@ -23,8 +23,13 @@
   vars:
     sysctls: "{{ sysctl_defaults|combine(sysctl_values) }}"
     nr_hugepages: "{{ sysctls['vm.nr_hugepages'] }}"
+  when:
+    platform not in ['docker', 'lxd']
+    and target_container_type is not defined
 
 - name: Run update-grub
   command: update-grub
   when:
     cmdline is changed
+    and platform not in ['docker', 'lxd']
+    and target_container_type is not defined

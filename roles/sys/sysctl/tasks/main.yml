@@ -18,6 +18,9 @@
     _ip_forward:
       "{{ ('openvpn-server' in role)
           |ternary({'net.ipv4.ip_forward': 1}, {}) }}"
+  when:
+    platform not in ['docker', 'lxd']
+    and target_container_type is not defined
 
 - name: Reload sysctl values if changed
   command:
