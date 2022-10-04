@@ -94,7 +94,7 @@ before you run tpaexec. You can get a subscription token from the
 
 ## Software versions
 
-You may optionally specify ``--postgres-version 10`` (the default) or
+You may optionally specify ``--postgres-version 13`` or
 any other major version of Postgres (e.g., 9.6). TPA supports Postgres
 9.4 and above. Postgres 9.4 and 9.5 were known to work at one time, but
 are no longer actively maintained.

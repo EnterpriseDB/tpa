@@ -189,7 +189,7 @@ class Architecture(object):
         )
         g.add_argument(
             "--postgres-version",
-            choices=["9.4", "9.5", "9.6", "10", "11", "12", "13", "14"],
+            choices=["9.4", "9.5", "9.6", "10", "11", "12", "13", "14", "15"],
         )
         g.add_argument(
             "--use-volatile-subscriptions",
