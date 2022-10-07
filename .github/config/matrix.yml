@@ -3,6 +3,7 @@ default:
   tpa_architecture: &default_tpa_architecture
     - "M1"
     - "BDR-Always-ON"
+    - "PGD-Always-ON"
   tpa_platform:
     - "docker"
   tpa_os_image:

@@ -64,6 +64,14 @@ runs:
         if [ "${{ inputs.tpa_architecture }}" == "BDR-Always-ON" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --layout bronze"
           CONFIGURE_EXTRA_ARGS+=" --harp-consensus-protocol bdr"
+        elif [ "${{ inputs.tpa_architecture }}" == "PGD-Always-ON" ]; then
+
+          CONFIGURE_EXTRA_ARGS+=" --location-names a b c"
+          CONFIGURE_EXTRA_ARGS+=" --data-nodes-per-location 2"
+          CONFIGURE_EXTRA_ARGS+=" --add-witness-node-per-location"
+          CONFIGURE_EXTRA_ARGS+=" --active-locations a b"
+          CONFIGURE_EXTRA_ARGS+=" --add-witness-only-location c"
+
         fi
         if [ -n "${{ inputs.tpa_os }}" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --os ${{ inputs.tpa_os }}"
