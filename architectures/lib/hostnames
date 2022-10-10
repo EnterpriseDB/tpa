@@ -16,9 +16,16 @@ set -eu
 
 libdir=$(dirname "$0")
 wanted=${1:?Number of hostnames not specified}
-namesfile=${2:-${HOSTNAMES_FROM:=$libdir/hostnames.txt}}
-pattern=${3:-${HOSTNAMES_PATTERN:='[a-zA-Z0-9-]+'}}
+defaultnamesfile="$libdir/hostnames.txt"
+namesfile=${2:-${HOSTNAMES_FROM:=$defaultnamesfile}}
+pattern=${3:-${HOSTNAMES_PATTERN:='[a-zA-Z0-9-]+( +[0-9a-f.:]+)?'}}
 order=${HOSTNAMES_SORTED_BY:---random-sort}
+
+sortcmd="sort"
+if [[ ( ${HOSTNAMES_UNSORTED:-'False'} == 'True')  || ( $namesfile != "$defaultnamesfile" ) ]]; then
+    sortcmd="cat"
+    order=-
+fi
 
 type realpath &>/dev/null && namesfile=$(realpath "$namesfile")
 if [[ ! -f $namesfile ]]; then
@@ -26,14 +33,8 @@ if [[ ! -f $namesfile ]]; then
     exit 1
 fi
 
-sortcmd="sort"
-if [[ ${HOSTNAMES_UNSORTED:-'False'} == 'True' ]]; then
-    sortcmd="cat"
-    order=-
-fi
-
 names=()
-while IFS='' read -r line; do names+=("$line"); done < \
+while IFS='' read -r line; do names+=("$line"); echo $line; done < \
     <(grep -xE "$pattern" "$namesfile"|"$sortcmd" "$order"|head -"$wanted")
 
 if [[ "${#names[@]}" -lt $wanted ]];
@@ -41,5 +42,3 @@ then
     echo "ERROR: found only ${#names[@]}/$wanted names matching '$pattern' in $namesfile" >&2
     exit 1
 fi
-
-echo "${names[@]}"

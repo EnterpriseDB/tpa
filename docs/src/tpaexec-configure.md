@@ -157,7 +157,9 @@ be enough for most clusters.
 
 Specify `--hostnames-from <filename>` to select hostnames from a file
 with one name per line. The file must contain at least as many valid
-hostnames as there are instances in your cluster.
+hostnames as there are instances in your cluster. Each line may contain
+an optional IP address after the name; if present, this address will be
+set as the `ip_address` for the corresponding instance in `config.yml`.
 
 Use `--hostnames-pattern '…pattern…'` to limit the selection to
 lines matching an egrep pattern.
@@ -167,6 +169,7 @@ option other than `--random-sort` (which is the default).
 
 Use `--hostnames-unsorted` to not sort hostnames at all. In this case,
 they will be assigned in the order they are found in the hostnames file.
+This is the default when a hostnames file is explicitly specified.
 
 Hostnames may contain only letters (a-z), digits (0-9), and '-'. They
 may be FQDNs, depending on the selected platform. Hostnames should be

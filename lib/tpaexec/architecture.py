@@ -6,6 +6,7 @@ import os
 import io
 import subprocess
 import argparse
+import ipaddress
 from pathlib import Path
 
 import yaml
@@ -419,7 +420,7 @@ class Architecture(object):
 
         # The architecture's num_instances() method should work by this point,
         # so that we can generate the correct number of hostnames.
-        args["hostnames"] = self.hostnames(self.num_instances())
+        (args["hostnames"], args["ip_addresses"]) = self.hostnames(self.num_instances())
 
         # Figure out how to get the desired distribution.
         args["image"] = self.image()
@@ -429,6 +430,11 @@ class Architecture(object):
 
         # Figure out the basic structure of the cluster.
         self.load_topology(args)
+
+        if "instances" in args:
+            for instance in args["instances"]:
+                if args["ip_addresses"][instance["node"]] is not None:
+                    instance["ip_address"] = args["ip_addresses"][instance["node"]]
 
         # Now that main.yml.h2 has been loaded, and we have the initial set of
         # instances[] defined, num_locations() should work, and we can generate
@@ -494,10 +500,13 @@ class Architecture(object):
 
     def hostnames(self, num):
         """
-        Returns an array containing 'zero' followed by the requested number of
-        hostnames, so that templates can assign hostnames[i] to node[i] without
-        regard to the fact that we number nodes starting from 1
+        Returns two arrays. The first contains 'zero' followed by the
+        requested number of hostnames, so that templates can assign
+        hostnames[i] to node[i] without regard to the fact that we number
+        nodes starting from 1.  The second contains the corresponding
+        address for each hostname, or None if no address was provided.
         """
+
         env = {}
         for arg in [
             "hostnames_from",
@@ -526,7 +535,13 @@ class Architecture(object):
         if p.returncode != 0:
             raise ArchitectureError(stderr.strip())
 
-        return ["zero"] + stdout.strip().split(" ")
+        names = []
+        addresses = []
+        for line in stdout.splitlines():
+            fields = line.split()
+            names.append(fields[0])
+            addresses.append(fields[1] if len(fields) > 1 else None)
+        return ["zero"] + names, [None] + addresses
 
     def image(self):
         """
