@@ -202,3 +202,11 @@
     subscription_sets: >-
       {{ _subscription_sets|map('pyformat', bdr_node_ids=bdr_node_ids)|list }}
   tags: replication-sets
+
+- name: Include bdr-pre-group-join hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/bdr-pre-group-join.yml"
+  tags: always

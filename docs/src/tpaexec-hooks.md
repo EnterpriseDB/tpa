@@ -116,6 +116,19 @@ TPAexec invokes `hooks/bdr-post-group-creation.yml` on all instances
 after creating any BDR node group on the `first_bdr_primary` instance.
 The hook will not be invoked if the required BDR groups already exist.
 
+### bdr-pre-group-join
+
+TPAexec invokes `hooks/bdr-pre-group-join.yml` on all instances
+after creating, changing or removing the replication sets and
+configuring the required subscriptions, before the node join.
+
+You can use this hook to execute SQL commands and perform other
+adjustments to the replication set configuration and subscriptions that
+might be required before the node join starts.
+
+For example, you can adjust the BDR witness replication set to
+automatically add new tables and create DDL filters in general.
+
 ## Other hooks
 
 ### postgres-pre-update, postgres-post-update
