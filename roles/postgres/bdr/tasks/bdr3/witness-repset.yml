@@ -49,3 +49,27 @@
   when: >
     'witness' in role
     and bdr_subscription is empty
+
+# Filtering by replication set currently works only when the nodes have
+# at least one replication set in common, so we must make all the other
+# nodes subscribe to the witness-only replication set too. We accept a
+# slightly misleading replication set name for now, because we expect
+# future versions of BDR to relax this restriction.
+
+- name: Subscribe to witness-only replication set if required
+  set_fact:
+    subscriptions: "{{
+      subscriptions|ensure_subscription(default_witness_subscription)
+    }}"
+  vars:
+    bdr_witnesses: >-
+      {{ groups['role_bdr']|intersect(groups['role_witness']|default([])) }}
+    default_witness_subscription:
+      type: bdr
+      database: "{{ bdr_database }}"
+      replication_sets:
+        - witness-only
+  when: >
+    'witness' not in role
+    and bdr_witnesses is not empty
+  tags: replication-sets
