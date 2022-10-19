@@ -73,4 +73,5 @@
       mode: 0755
   when:
     postgres_installation_method == 'src'
+    or repmgr_installation_method == 'src'
     or install_from_source is not empty

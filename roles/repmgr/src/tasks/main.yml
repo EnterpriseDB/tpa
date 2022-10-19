@@ -40,3 +40,9 @@
   args:
     chdir: "{{ repmgr_build_dir }}"
     executable: /bin/bash
+
+- name: Install repmgr rebuild script
+  template:
+    src: rebuild-sources.sh.j2
+    dest: "/etc/tpa/rebuild-scripts/rebuild-repmgr.sh"
+    mode: 0755
