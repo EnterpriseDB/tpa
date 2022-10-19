@@ -17,22 +17,20 @@
   when:
     repmgr_git_ref is defined
 
-# XXX Although a --local-source-directories attempt to build repmgr
-# would be handled "for free" by the tasks above, the following code
-# does an in-tree build, and would therefore fail in this scenario.
-
-- name: Remove old build artifacts
-  command: git clean -dxf
-  args:
-    chdir: "{{ repmgr_src_dir }}"
+- name: Remove old build directory
+  file: state=absent path="{{ repmgr_build_dir }}" force=yes
   tags: [build-clean, repmgr-clean]
+
+- name: Ensure build directory exists
+  file: state=directory path="{{ repmgr_build_dir }}"
+
 
 - name: Configure repmgr if necessary
   shell: >
-    test -x ./configure &&
-    PATH={{ build_path }} ./configure
+    PATH={{ build_path }} \
+    "{{ repmgr_src_dir }}"/configure
   args:
-    chdir: "{{ repmgr_src_dir }}"
+    chdir: "{{ repmgr_build_dir }}"
     executable: /bin/bash
   tags: [build-configure, repmgr-configure]
 
@@ -40,5 +38,5 @@
   shell: >
     PATH={{ build_path }} make -s USE_PGXS=1 with_llvm=no install
   args:
-    chdir: "{{ repmgr_src_dir }}"
+    chdir: "{{ repmgr_build_dir }}"
     executable: /bin/bash
