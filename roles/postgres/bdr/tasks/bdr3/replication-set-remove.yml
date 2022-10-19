@@ -2,6 +2,11 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+# We want to remove unnecessary replication sets, but we need to keep
+# both bdr group_names and associated group_names_ext replication sets
+# (e.g., s_group_a and s_group_a_ext automatically created by bdr for
+# autoscale).
+
 - name: Remove unnecessary replication sets
   postgresql_query:
     conninfo: "{{ dsn|dbname(bdr_database) }}"
@@ -13,9 +18,11 @@
   vars:
     _set_names: "{{ publication_sets|json_query('[*].name') }}"
     _group_names: "{{ bdr_node_groups|json_query('[*].name') }}"
+    _group_names_ext: >-
+      {{ _group_names|product(['_ext'])|map('join')|list }}
   when:
     publications is defined
-    and item.set_name not in _set_names|union(_group_names)
+    and item.set_name not in _set_names|union(_group_names)|union(_group_names_ext)
   changed_when: True
   become_user: "{{ postgres_user }}"
   become: yes
