@@ -1,3 +1,0 @@
-# ansible dependency list for tpaexec setup
-pyyaml>=6
-ansible>=2.9,<2.10

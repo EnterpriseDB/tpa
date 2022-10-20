@@ -142,14 +142,17 @@ _install_pip_packages() {
     #
     # Otherwise, we need to install it into the venv either from the
     # bundled package from tpaexec-deps, or directly from github.
-
-    ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible.txt
+    ANSIBLE_VERSION='2q'
+    if [[ $use_community == true ]]; then
+        ANSIBLE_VERSION='community'
+    fi
+    ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible-${ANSIBLE_VERSION}.txt
     TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
 
     if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
         ANSIBLE_REQUIREMENTS="$ANSIBLE_HOME/requirements.txt"
-    elif [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible.txt ]]; then
-        ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible.txt"
+    elif [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible-${ANSIBLE_VERSION}.txt ]]; then
+        ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible-${ANSIBLE_VERSION}.txt"
         TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
     fi
 
@@ -217,6 +220,7 @@ _install_ansible_collections() {
 }
 
 setup() {
+    use_community=false
     while [[ $# -gt 0 ]]; do
         opt=$1
         shift
@@ -230,15 +234,35 @@ setup() {
                 pip_cache_dir=${1:?pip cache directory not specified}
                 shift
                 ;;
+            --use-community)
+                use_community=true
+                ;;
             *)
                 error "unrecognised option: $opt"
                 ;;
         esac
     done
-
+    _display_notification
     _create_and_activate_venv "${vpath:=$TPA_VENV}"
     _install_pip_packages
     _install_ansible_collections
+}
+_display_notification() {
+    if [[ $use_community == false ]]; then
+        cat <<NOTIFICATION
+TPAexec now supports ansible community, you may choose to use it by
+using --use-community option during setup, default will be to use the
+legacy 2quadrant ansible fork. This will change in a future release,
+support for 2quadrant ansible will be dropped.
+
+notable difference:
+    - change the --skip-flags options to community behavior where a
+    task will be skipped if part of the list given to the --skip-tag
+    option even if it is also tagged with special tag 'always'.
+
+NOTIFICATION
+
+    fi
 }
 
 _with_ansible_env() {
