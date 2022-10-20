@@ -267,7 +267,7 @@ def expand_instance_volumes(old_instances):
             # docker volumes are bind mounted directories they don't need to be
             # initialised, the filter validate_volume_for doesn't apply, no
             # type is needed either. docker volumes entries are not dicts.
-            if transform.get("platform") == 'docker':
+            if transform.get("platform") == "docker":
                 volumes.append(volume)
                 continue
 

@@ -83,11 +83,13 @@ class TestCompilerError(TPABaseException):
 
     MSG = "An error occurred during test compiling"
 
+
 class PasswordReadError(TPABaseException):
 
     """Password reading error exception class."""
 
     MSG = "An error occurred while reading password"
+
 
 class PasswordWriteError(TPABaseException):
 

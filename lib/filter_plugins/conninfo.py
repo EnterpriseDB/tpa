@@ -86,10 +86,10 @@ def multihost_conninfo(conninfos: List[str]) -> str:
 
     for item in conninfos:
         params = parse_conninfo(item)
-        all_hosts.append(params['host'])
-        all_ports.append(params['port'])
-        del params['host']
-        del params['port']
+        all_hosts.append(params["host"])
+        all_ports.append(params["port"])
+        del params["host"]
+        del params["port"]
         if result and result != params:
             raise AnsibleFilterError(
                 f"|multihost_conninfo expects DSNs that differ only in "
@@ -97,11 +97,11 @@ def multihost_conninfo(conninfos: List[str]) -> str:
             )
         result = params
 
-    result['host'] = ','.join(all_hosts)
+    result["host"] = ",".join(all_hosts)
     if len(set(all_ports)) == 1:
-        result['port'] = all_ports[0]
+        result["port"] = all_ports[0]
     else:
-        result['port'] = ','.join(all_ports)
+        result["port"] = ",".join(all_ports)
     return conninfo_string(result)
 
 

@@ -62,12 +62,14 @@ class TestSubnets:
     def test_subnets_too_large(self, subnet_too_large):
         with pytest.raises(NetError) as exc:
             subnet_too_large.validate()
-        assert exc.value.args == ('prefix length for subnets must be between 23-29: 9',)
+        assert exc.value.args == ("prefix length for subnets must be between 23-29: 9",)
 
     def test_subnets_too_small(self, subnet_too_small):
         with pytest.raises(NetError) as exc:
             subnet_too_small.validate()
-        assert exc.value.args == ('prefix length for subnets must be between 23-29: 30',)
+        assert exc.value.args == (
+            "prefix length for subnets must be between 23-29: 30",
+        )
 
     def test_subnets_get(self, subnets):
         assert subnets[0] == IPv4Network("10.0.0.0/28")

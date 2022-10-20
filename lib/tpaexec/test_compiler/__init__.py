@@ -32,7 +32,9 @@ class TestCompiler(object):
         """
         specs = read_yaml(infile)
         if not isinstance(specs, list):
-            raise TestCompilerError("expected a list of test specifications in YAML format")
+            raise TestCompilerError(
+                "expected a list of test specifications in YAML format"
+            )
 
         for i, spec in enumerate(specs):
             if not isinstance(spec, dict):
@@ -56,7 +58,9 @@ class TestCompiler(object):
                 all_plays.append(p)
             for i in t.includes:
                 if i in all_includes:
-                    raise TestCompilerError("include filename collision: %s (rerun)" % i)
+                    raise TestCompilerError(
+                        "include filename collision: %s (rerun)" % i
+                    )
                 all_includes[i] = t.includes[i]
 
         write_yaml(outdir, "index.yml", all_plays)

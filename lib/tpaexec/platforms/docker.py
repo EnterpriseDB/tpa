@@ -199,7 +199,7 @@ class docker(Platform):
             image.setdefault("os_family", image.get("os"))
 
         image["name"] = label
-        if (image["name"] == "tpa/redhat:7" or image["name"] == "centos/systemd"):
+        if image["name"] == "tpa/redhat:7" or image["name"] == "centos/systemd":
             image["preferred_python_version"] = "python2"
 
         return image

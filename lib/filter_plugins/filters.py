@@ -454,6 +454,7 @@ def pyformat_hostvars(hostname, format_str, hostvars):
     """
     return format_str.format(**hostvars.get(hostname, {}))
 
+
 def expected_replication_slots(replica_list, inventory_hostname):
     """
     Deep copy a variable inside a clean dict to ensure the variable is correctly
@@ -463,10 +464,11 @@ def expected_replication_slots(replica_list, inventory_hostname):
     """
     expected_slots = []
     for replica in replica_list:
-        pcp = replica.get('primary_conninfo_parts',{})
-        if inventory_hostname == pcp.get('host'):
-            expected_slots.append(replica.get('primary_slot_name'))
+        pcp = replica.get("primary_conninfo_parts", {})
+        if inventory_hostname == pcp.get("host"):
+            expected_slots.append(replica.get("primary_slot_name"))
     return expected_slots
+
 
 def select_by_hostvar(hostnames, hostvars, varname, value):
     """

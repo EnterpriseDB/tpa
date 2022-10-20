@@ -35,10 +35,7 @@ class M1(Architecture):
                 role = instance.get("role", ins_defs.get("role", []))
                 if "primary" in role or "replica" in role or "witness" in role:
                     instance["role"].append("pem-agent")
-                if (
-                    "barman" in role
-                    and self.args.get("enable_pg_backup_api", False)
-                ):
+                if "barman" in role and self.args.get("enable_pg_backup_api", False):
                     instance["role"].append("pem-agent")
             n = instances[-1].get("node")
             instances.append(

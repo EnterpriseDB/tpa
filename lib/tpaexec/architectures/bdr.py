@@ -256,7 +256,9 @@ class BDR(Architecture):
                 if self._pemagent_candidate_roles & self._instance_roles(instance):
                     instance["role"].append("pem-agent")
 
-                if "barman" in self._instance_roles(instance) and self.args.get("enable_pg_backup_api", False):
+                if "barman" in self._instance_roles(instance) and self.args.get(
+                    "enable_pg_backup_api", False
+                ):
                     instance["role"].append("pem-agent")
 
             n = instances[-1].get("node")

@@ -55,19 +55,18 @@ class TestBasicArchitecture:
 
 
 class TestPlatform:
-
     def test_guess_platform(self):
-        assert Platform.guess_platform(['--platform', 'basic']) == 'basic'
+        assert Platform.guess_platform(["--platform", "basic"]) == "basic"
 
     def test_guess_platform_none(self):
         assert Platform.guess_platform([]) is None
 
     def test_unknown_platform(self, architecture):
         with pytest.raises(PlatformError):
-            Platform.load(['--platform', 'basic'], architecture)
+            Platform.load(["--platform", "basic"], architecture)
 
     def test_known_platform(self, architecture):
-        assert Platform.load(['--platform', 'docker'], architecture).name == 'docker'
+        assert Platform.load(["--platform", "docker"], architecture).name == "docker"
 
     def test_default_platform(self, architecture):
         assert Platform.load([], architecture).name == architecture.default_platform()
@@ -93,7 +92,6 @@ def architecture_bare():
 
 
 class TestBarePlatform:
-
     def test_bare_setup_local_repo(self, architecture_bare):
         """Bare platform has no OS version to detect so local repo creation should return a warning."""
         with pytest.raises(ArchitectureError):
