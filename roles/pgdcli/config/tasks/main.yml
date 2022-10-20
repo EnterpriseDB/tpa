@@ -14,5 +14,5 @@
     src: pgd.config.j2
     dest: "{{ pgdcli_directory }}/pgd-config.yml"
     owner: "{{ postgres_user }}"
-    group: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
     mode: 0644
