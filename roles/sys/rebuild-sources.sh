@@ -2,6 +2,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 shopt -s nullglob
+set -e
 
 for file in /etc/tpa/rebuild-scripts/*.sh; do
     "${file}"

@@ -1,6 +1,8 @@
 {# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved. #}
 #!/bin/sh
 
+set -e
+
 cd {{ repmgr_src_dir }}
 findmnt . > /dev/null || git pull
 
