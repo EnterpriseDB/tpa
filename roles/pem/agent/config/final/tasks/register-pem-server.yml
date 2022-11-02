@@ -18,7 +18,7 @@
 
 - name: Register PEM backend database server for monitoring and configuration
   postgresql_query:
-    conninfo: "{{ ps.node_dsn|dbname(ps.pem_database) }}"
+    conninfo: "{{ hostvars[pem_server].node_dsn|dbname(hostvars[pem_server].pem_database) }}"
     queries:
     - text: >
         SELECT pem.startup(server_desc := %s, server_name := %s,
@@ -37,8 +37,6 @@
       - "{{ pem_server_group }}"        # ser_group
       - "{{ pem_agent_id }}"            # agentid
       - "pem"                           # agent_database
-  vars:
-    ps: "{{ hostvars[pem_server] }}"
   become_user: "{{ postgres_user }}"
   delegate_to: "{{ pem_server }}"
   become: yes
@@ -69,11 +67,10 @@
   - name: Execute pem-server-random.sql
     command: >
       {{ postgres_bin_dir }}/psql -a \
-        -h "{{ pem_server }}" -p "{{ ps.postgres_port }}" \
-        -U "{{ ps.postgres_user }}" -d "{{ ps.pem_database }}" \
+        -h "{{ pem_server }}" -p "{{ hostvars[pem_server].postgres_port }}" \
+        -U "{{ hostvars[pem_server].postgres_user }}" \
+        -d "{{ hostvars[pem_server].pem_database }}" \
         -f "{{ sql_path }}"
-    vars:
-      ps: "{{ hostvars[pem_server] }}"
     become_user: "{{ postgres_user }}"
     become: yes
 
