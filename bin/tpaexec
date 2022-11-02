@@ -144,6 +144,7 @@ _install_pip_packages() {
     # bundled package from tpaexec-deps, or directly from github.
     ANSIBLE_VERSION='2q'
     if [[ $use_community == true ]]; then
+        pip uninstall -y -r "$TPA_DIR"/requirements-ansible-${ANSIBLE_VERSION}.txt
         ANSIBLE_VERSION='community'
     fi
     ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible-${ANSIBLE_VERSION}.txt
