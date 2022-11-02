@@ -126,3 +126,19 @@ you can install the packages by any means available.
 We recommend that you run `tpaexec setup` again whenever a new version
 of `tpaexec` is installed. Some new releases may not strictly require
 this, but others will not work without it.
+
+## Ansible community support
+
+TPAexec now supports ansible community, you may choose to use it by
+using `--use-community-ansible` option during `tpaexec setup`, default
+will be to use the legacy 2ndQuadrant/ansible fork. This will change in
+a future release, support for 2ndQuadrant/ansible will be dropped and
+community ansible will become the new default.
+
+notable difference:
+- change the `--skip-flags` options to community behavior where a
+task will be skipped if part of the list given to the `--skip-tags`
+option even if it is also tagged with special tag `always`.
+TPAexec expects all tasks tagged with `always` to be run to ensure
+a complete deployment, therefor `--skip-tags` should not be used when
+using community ansible.
