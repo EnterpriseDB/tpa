@@ -50,9 +50,11 @@
     streaming_from: "{{ item }}"
   with_items: "{{ groups['role_postgres'] }}"
   vars:
-    _h: "{{ hostvars[item] }}"
-    _aliases: "{{ _h.hostname_aliases.keys() }}"
-    _addresses: "{{ (_h|extract_keys(_h.ip_addresses)).values()|list }}"
+    _aliases: "{{ hostvars[item].hostname_aliases.keys() }}"
+    _addresses:
+      "{{
+        (hostvars[item]|extract_keys(hostvars[item].ip_addresses)).values()|list
+      }}"
   when:
     - streaming_from is defined
     - streaming_from not in hostvars

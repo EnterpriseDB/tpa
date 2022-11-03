@@ -269,10 +269,11 @@
     (hostvars[pgbouncer_backend].haproxy_port is defined or
      hostvars[pgbouncer_backend].postgres_port is defined)
   vars:
-    _backend_vars: "{{ hostvars[pgbouncer_backend] }}"
-    _backend_port: "{{
-      _backend_vars['haproxy_port']|default(_backend_vars['postgres_port'])
-    }}"
+    _backend_port:
+      "{{
+        hostvars[pgbouncer_backend]['haproxy_port']
+        |default(hostvars[pgbouncer_backend]['postgres_port'])
+      }}"
 
 # On harp-proxy+pgbouncer instances, we configure pgbouncer to connect
 # to harp-proxy (but make sure that harp-proxy isn't also configured to
