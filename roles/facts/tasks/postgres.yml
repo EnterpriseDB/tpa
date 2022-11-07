@@ -139,6 +139,7 @@
     barman_home: "{{ barman_home|default(default_barman_home) }}"
     backup_name: "{{ backup_name|default(inventory_hostname) }}"
     repmgr_conf_dir: "{{ repmgr_conf_dir|default(default_repmgr_conf_dir) }}"
+    repmgr_installation_method: "{{ repmgr_installation_method| default(default_postgres_installation_method) }}"
     bdr_version: "{{ bdr_version|default(default_bdr_version) }}"
     bdr_database: "{{ bdr_database|default(default_bdr_database) }}"
     bdr_node_name: "{{ bdr_node_name|default(inventory_hostname) }}"
