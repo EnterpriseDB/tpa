@@ -1,4 +1,4 @@
 # 2q ansible dependency list for tpaexec setup
 pyyaml>=6
 https://github.com/2ndQuadrant/ansible/releases/download/v2.9.27-tpa-1.1.1/ansible-2.9.27+tpa.1.1.1-py3-none-any.whl
-cffi<=1.15.0 # due to cryptography req in main req file
+cffi<1.16.0 # due to cryptography req in main req file
