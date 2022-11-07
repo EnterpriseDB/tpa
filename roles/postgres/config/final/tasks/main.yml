@@ -39,7 +39,7 @@
 # then (e.g., bdr_application).
 
 - name: Create Postgres users
-  postgresql_user:
+  community.postgresql.postgresql_user:
     port: "{{ postgres_port }}"
     login_user: "{{ postgres_user }}"
     login_db: postgres
