@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-## v23.7 (2022-10-08)
+## v23.7 (2022-10-09)
 
 ### Notable changes
 
@@ -54,6 +54,10 @@
   Formerly, the code that sets up dynamic groups to use appropriate symlinks
   to a given secret file would fail occasionally due to a race condition when
   executed for multiple hosts
+
+- TPA-252 Restore code to make all nodes publish to the witness-only replication set
+
+  This was a recent regression introduced as part of code refactoring that was performed per TPA-193
 
 ## v23.6 (2022-09-28)
 
