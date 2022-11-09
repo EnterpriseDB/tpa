@@ -2,6 +2,59 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v23.7 (unreleased)
+
+### Notable changes
+
+- TPA-234 Support Ansible community
+
+  Formerly TPAexec only used 2ndQuadrant/ansible fork. You may choose
+  to use Ansible community instead by using `--use-community-ansible`
+  option during `tpaexec setup`, default will be to use the legacy
+  2ndQuadrant/ansible fork. This will change in a future release,
+  support for 2ndQuadrant/ansible will be dropped and community ansible
+  will become the new default
+
+### Minor changes
+
+- TPA-209 Accept `--postgres-version 15` as a valid `tpaexec configure`
+  command line option
+
+- TPA-226 Accept ip addresses in hostnames file. We extend the format
+  of the hostnames file to allow an optional ip address after each
+  hostname. If an address is given, it will be added to the ip_address
+  field for that host in config.yml. Hostnames are no longer randomised
+  by default if a non-default hostnames file is given
+
+- TPA-231 Add bdr-pre-group-join hook. This hook, if supplied, is executed
+  at the end of bdrX/init.yml after the replication sets are configured
+
+- TPA-130 Use community.postgresql collection to patch scram password issue
+  in postgresl_user module. The module version included with ansible would
+  break idempotency when using scram encrypted password as parameter
+
+- TPA-250 Bump dependencies versions where applicable
+
+### Bugfixes
+
+- TPA-220 Avoid prepending ":" to LD_LIBRARY_PATH if no existing …PATH is set
+
+- TPA-82 Fix deploy so it doesn’t inadvertently remove replication sets created
+  for internal use
+
+- TPA-247 Avoid using `hostvars[x]` intermediate variables
+
+  TPAexec internally uses references such as hostvars[hostname] without
+  specifying a variable name at various places which didn't work reliably
+  with the aws inventory plugin. This change tries to address that
+
+- TPA-232 Ensure that code to create symlinks to the generated secret is
+  run only once per password
+
+  Formerly, the code that sets up dynamic groups to use appropriate symlinks
+  to a given secret file would fail occasionally due to a race condition when
+  executed for multiple hosts
+
 ## v23.6 (2022-09-28)
 
 ### Notable changes
