@@ -31,13 +31,17 @@
   (If you specify your own `--hostnames-from` file, the hostnames will
   no longer be randomised by default.)
 
-- TPA-231 Add a bdr-pre-group-join hook, which is executed before each
-  node joins the BDR node group. This hook may be used to change the
-  default replication set configuration that TPAexec provides.
+- TPA-231 Add a new bdr-pre-group-join hook
 
-- TPA-130 Use the postgresql_user module from the community.postgresql
-  collection in order to correctly report the task status when using a
-  SCRAM password (the default module always reports `changed`).
+  This hook is executed before each node joins the BDR node group. It
+  may be used to change the default replication set configuration that
+  TPAexec provides.
+
+- TPA-130 Use the postgresql_user module from community.postgresql
+
+  The updated module from the community.postgresql collection is needed
+  in order to correctly report the task status when using a SCRAM
+  password (the default module always reports `changed`).
 
 - TPA-250 Upgrade to the latest versions of various Python dependencies
 
