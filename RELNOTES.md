@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-## v23.7 (unreleased)
+## v23.7 (2022-10-08)
 
 ### Notable changes
 
@@ -62,7 +62,7 @@
 - TPA-21 Use boto3 (instead of the unmaintained boto2) AWS client library
   for AWS deployments. This enables SSO login and other useful features.
 
-- TPA-202 Add harp-config hook. This deploy-time hook executes after HARP 
+- TPA-202 Add harp-config hook. This deploy-time hook executes after HARP
   is installed and configured and before it is started on all nodes
   where HARP is installed.
 
@@ -71,22 +71,22 @@
 - TPA-181 Set default python version to 2 on RHEL 7. Formerly, tpaexec
   could generate a config.yml with the unsupported combination of RHEL 7
   and python 3.
-  
+
 - TPA-210 Fix aws deployments using existing security groups. Such a
   deployment used to fail at provision-time but will now work as
   expected.
-  
+
 - TPA-189 Remove group_vars directory on deprovision. This fixes a
   problem that caused a subsequent provision to fail because of a
   dangling symlink.
-  
+
 - TPA-175 Correctly configure systemd to leave shared memory segments
   alone. This only affects source builds.
-  
+
 - TPA-160 Allow version setting for haproxy and PEM. This fixes a bug
   whereby latest versions of packages would be installed even if a
   specific version was specified.
-  
+
 - TPA-172 Install EFM on the correct set of hosts. EFM should be
   installed only on postgres servers that are members of the cluster,
   not servers which have postgres installed for other reasons, such as
