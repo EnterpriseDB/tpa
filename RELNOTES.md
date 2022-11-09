@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-## v23.7 (2022-10-09)
+## v23.7 (2022-11-09)
 
 ### Notable changes
 
@@ -10,8 +10,8 @@
 
   Formerly TPAexec only used 2ndQuadrant/ansible fork. You may choose
   to use Ansible community instead by using `--use-community-ansible`
-  option during `tpaexec setup`, default will be to use the legacy
-  2ndQuadrant/ansible fork. This will change in a future release,
+  option during `tpaexec setup`. Default will still be to use the legacy
+  2ndQuadrant/ansible fork. This will change in a future release, as
   support for 2ndQuadrant/ansible will be dropped and community ansible
   will become the new default
 
