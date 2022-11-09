@@ -2,58 +2,72 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-## v23.7 (unreleased)
+## v23.7 (2022-11-09)
 
 ### Notable changes
 
-- TPA-234 Support Ansible community
+- TPA-234 Support the community release of Ansible 2.9
 
-  Formerly TPAexec only used 2ndQuadrant/ansible fork. You may choose
-  to use Ansible community instead by using `--use-community-ansible`
-  option during `tpaexec setup`, default will be to use the legacy
-  2ndQuadrant/ansible fork. This will change in a future release,
-  support for 2ndQuadrant/ansible will be dropped and community ansible
-  will become the new default
+  TPAexec used to require the 2ndQuadrant/ansible fork of Ansible 2.9.
+  In this release, you may instead choose to use the community release
+  of Ansible with the `tpaexec setup --use-community-ansible`.
+
+  For now, the default continues to be to use 2ndQuadrant/ansible. This
+  will change in a future release; support for 2ndQuadrant/ansible will
+  be dropped, and Ansible will become the new default.
 
 ### Minor changes
 
 - TPA-209 Accept `--postgres-version 15` as a valid `tpaexec configure`
-  command line option
+  option, subsequent to the release of Postgres 15
 
-- TPA-226 Accept ip addresses in hostnames file. We extend the format
-  of the hostnames file to allow an optional ip address after each
-  hostname. If an address is given, it will be added to the ip_address
-  field for that host in config.yml. Hostnames are no longer randomised
-  by default if a non-default hostnames file is given
+- TPA-226 Accept IP addresses in the `--hostnames-from` file
 
-- TPA-231 Add bdr-pre-group-join hook. This hook, if supplied, is executed
-  at the end of bdrX/init.yml after the replication sets are configured
+  Formerly, the file passed to `tpaexec configure` was expected to
+  contain one hostname per line. Now it may also contain an optional IP
+  address after each hostname. If present, this address will be set as
+  the `ip_address` for the corresponding instance in config.yml.
 
-- TPA-130 Use community.postgresql collection to patch scram password issue
-  in postgresl_user module. The module version included with ansible would
-  break idempotency when using scram encrypted password as parameter
+  (If you specify your own `--hostnames-from` file, the hostnames will
+  no longer be randomised by default.)
 
-- TPA-250 Bump dependencies versions where applicable
+- TPA-231 Add a new bdr-pre-group-join hook
+
+  This hook is executed before each node joins the BDR node group. It
+  may be used to change the default replication set configuration that
+  TPAexec provides.
+
+- TPA-130 Use the postgresql_user module from community.postgresql
+
+  The updated module from the community.postgresql collection is needed
+  in order to correctly report the task status when using a SCRAM
+  password (the default module always reports `changed`).
+
+- TPA-250 Upgrade to the latest versions of various Python dependencies
 
 ### Bugfixes
 
-- TPA-220 Avoid prepending ":" to LD_LIBRARY_PATH if no existing …PATH is set
+- TPA-220 Ensure LD_LIBRARY_PATH in .bashrc does not start with ":"
 
-- TPA-82 Fix deploy so it doesn’t inadvertently remove replication sets created
-  for internal use
+- TPA-82 Avoid removing BDR-internal ${group_name}_ext replication sets
 
-- TPA-247 Avoid using `hostvars[x]` intermediate variables
+- TPA-247 Fix "'str object' has no attribute 'node_dsn'" errors on AWS
 
-  TPAexec internally uses references such as hostvars[hostname] without
-  specifying a variable name at various places which didn't work reliably
-  with the aws inventory plugin. This change tries to address that
+  The code no longer assigns `hostvars[hostname]` to an intermediate
+  variable and expects it to behave like a normal dict later (which
+  works only sometimes). This fixes a regression in 23.6 reported for
+  AWS clusters with PEM enabled, but also fixes other similar errors
+  throughout the codebase.
 
-- TPA-232 Ensure that code to create symlinks to the generated secret is
-  run only once per password
+- TPA-232 Eliminate a race condition in creating a symlink to generated
+  secrets in the inventory that resulted in "Error while linking:
+  [Errno 17] File exists" errors
 
-  Formerly, the code that sets up dynamic groups to use appropriate symlinks
-  to a given secret file would fail occasionally due to a race condition when
-  executed for multiple hosts
+- TPA-252 Restore code to make all BDR nodes publish to the witness-only
+  replication set
+
+  This code block was inadvertently removed in the v23.6 release as part
+  of the refactoring work done for TPA-193.
 
 ## v23.6 (2022-09-28)
 
@@ -62,7 +76,7 @@
 - TPA-21 Use boto3 (instead of the unmaintained boto2) AWS client library
   for AWS deployments. This enables SSO login and other useful features.
 
-- TPA-202 Add harp-config hook. This deploy-time hook executes after HARP 
+- TPA-202 Add harp-config hook. This deploy-time hook executes after HARP
   is installed and configured and before it is started on all nodes
   where HARP is installed.
 
@@ -71,22 +85,22 @@
 - TPA-181 Set default python version to 2 on RHEL 7. Formerly, tpaexec
   could generate a config.yml with the unsupported combination of RHEL 7
   and python 3.
-  
+
 - TPA-210 Fix aws deployments using existing security groups. Such a
   deployment used to fail at provision-time but will now work as
   expected.
-  
+
 - TPA-189 Remove group_vars directory on deprovision. This fixes a
   problem that caused a subsequent provision to fail because of a
   dangling symlink.
-  
+
 - TPA-175 Correctly configure systemd to leave shared memory segments
   alone. This only affects source builds.
-  
+
 - TPA-160 Allow version setting for haproxy and PEM. This fixes a bug
   whereby latest versions of packages would be installed even if a
   specific version was specified.
-  
+
 - TPA-172 Install EFM on the correct set of hosts. EFM should be
   installed only on postgres servers that are members of the cluster,
   not servers which have postgres installed for other reasons, such as
