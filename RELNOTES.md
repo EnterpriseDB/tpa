@@ -57,7 +57,8 @@
 
 - TPA-252 Restore code to make all nodes publish to the witness-only replication set
 
-  This was a recent regression introduced as part of code refactoring that was performed per TPA-193
+  This was a recent regression introduced as part of code refactoring that was
+  performed per TPA-193
 
 ## v23.6 (2022-09-28)
 
