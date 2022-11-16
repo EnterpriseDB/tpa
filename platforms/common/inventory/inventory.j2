@@ -4,6 +4,6 @@
 {% if h.platform == 'docker' %}
 {{ h.Name }} ansible_connection=docker node={{ h.node }} platform={{ h.platform }}
 {% else%}
-{{ h.Name }} ansible_host={{ h|deploy_ip_address }} node={{ h.node }} platform={{ h.platform }}
+{{ h.Name }} {% if not ansible_tower %}ansible_host={{ h|deploy_ip_address }}{% endif %} node={{ h.node }} platform={{ h.platform }}
 {% endif%}
 {% endfor %}

@@ -10,6 +10,7 @@
       or item.public_ip is defined
       or item.private_ip is defined
   with_items: "{{ bare_instances }}"
+  when: not ansible_tower
 
 - name: Allow single-word or FQDN hostnames for bare instances
   set_fact:

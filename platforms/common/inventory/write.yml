@@ -18,16 +18,36 @@
     dest: "{{ cluster_dir }}/inventory/00-{{ cluster_name }}"
     mode: 0644
 
-- name: Compose group_vars for cluster
+- name: Compose ansible_group_vars for cluster
   set_fact:
     ansible_group_vars:
       ansible_shell_executable: /bin/bash
       ansible_port: "{{ ansible_port }}"
-      ansible_ssh_private_key_file: "{{ ssh_key_file }}"
       ansible_ssh_common_args: >-
         -o ServerAliveInterval=60 -o UserKnownHostsFile='known_hosts tpa_known_hosts'
         {% if not use_ssh_agent|default(False) %}-o IdentitiesOnly=yes{% endif %}
         {% if forward_ssh_agent is defined %}-o ForwardAgent=yes{% endif %}
+
+- name: Add ssh_key_file to ansible_group_vars for cluster
+  set_fact:
+    ansible_group_vars: "{{ ansible_group_vars|combine({'ansible_ssh_private_key_file': ssh_key_file}) }}"
+  when: not ansible_tower
+
+- name: Compose cluster_group_vars
+  set_fact:
+    cluster_group_vars: "{{
+        cluster_vars|combine({
+          'cluster_tag': cluster_tag,
+          'cluster_name': cluster_name,
+          'tpa_version': tpa_version,
+        }) }}"
+
+- name: Add ssh_key_file to cluster_group_vars
+  set_fact:
+    cluster_group_vars: "{{
+      cluster_group_vars|combine({'ssh_key_file': ssh_key_file})
+      }}"
+  when: not ansible_tower
 
 - name: Create group_vars and host_vars subdirectories
   shell: >
@@ -73,15 +93,7 @@
   vars:
     file_name: "01-{{ cluster_name }}.yml"
     group_dir: "{{ cluster_dir }}/inventory/group_vars/{{ cluster_tag }}"
-    group_vars: >
-      {{
-        cluster_vars|combine({
-          'cluster_tag': cluster_tag,
-          'cluster_name': cluster_name,
-          'tpa_version': tpa_version,
-          'ssh_key_file': ssh_key_file,
-        })
-      }}
+    group_vars: "{{ cluster_group_vars}}"
 
 - name: Write instance variables for hosts
   copy:
@@ -127,3 +139,34 @@
     src: ssh_config.j2
     dest: "{{ cluster_dir }}/ssh_config"
     mode: 0644
+
+# Tower won't use our ansible wrapper script to invoke ansible inside
+# its execution environment, so we generate a custom configuration file
+# that sets the correct paths.
+
+- name: Generate ansible.cfg for Tower
+  template:
+    src: tower_ansible.cfg.j2
+    dest: "{{ cluster_dir }}/ansible.cfg"
+    mode: 0644
+  when: ansible_tower
+
+# Right now, we have no way to convey secrets generated during deploy
+# back to the Ansible Tower inventory. Until we use the inventory API to
+# persist such changes, we can work around the problem by pre-generating
+# some secrets that we know we will need.
+#
+# XXX This does not take into account any `postgres_users` settings.
+
+- name: Generate secrets for this cluster
+  include_role: name=secret
+  vars:
+    secret_name: "{{ item }}"
+    lock_file: "{{ cluster_dir }}/vault/vault_pass.txt"
+  with_items:
+    - postgres_password
+    - barman_password
+    - streaming_barman_password
+    - pgbouncer_auth_user_password
+    - pgbouncer_password
+  when: ansible_tower

@@ -6,6 +6,7 @@ import os
 import io
 import subprocess
 import argparse
+import shutil
 import ipaddress
 from pathlib import Path
 
@@ -145,6 +146,12 @@ class Architecture(object):
         g = p.add_argument_group("cluster options")
         g.add_argument("--owner")
         g.add_argument("--overrides-from", nargs="+", metavar="FILE")
+        g.add_argument(
+            "--use-redhat-aac", "--use-ansible-tower",
+            action="store",
+            dest="tower_api_url",
+            help="Provision this cluster for use with Ansible Automation Controller (Tower)",
+        )
 
         g = p.add_argument_group("software selection")
         labels = self.platform.supported_distributions()
@@ -752,6 +759,16 @@ class Architecture(object):
         if self.args.get("use_local_repo_only"):
             cluster_vars["use_local_repo_only"] = True
 
+        if self.args.get("tower_api_url"):
+            top = self.args.get("top_level_settings") or {}
+            top.update({"use_ssh_agent": "true"})
+
+            tower = self.args.get("tower_settings") or {}
+            tower.update({"api_url": self.args["tower_api_url"]})
+
+            self.args["tower_settings"] = tower
+            self.args["top_level_settings"] = top
+
     def postgres_eol_repos(self, cluster_vars):
 
         if (
@@ -922,7 +939,7 @@ class Architecture(object):
         if instance_defaults.get("platform") is None:
             instance_defaults["platform"] = self.platform.name
         vars = instance_defaults.get("vars", {})
-        if vars.get("ansible_user") is None:
+        if vars.get("ansible_user") is None and "tower_settings" not in self.args:
             vars["ansible_user"] = self.args["image"].get("user", "root")
             instance_defaults["vars"] = vars
 
@@ -1007,9 +1024,26 @@ class Architecture(object):
         (e.g., for deploy.yml and commands; see links_to_create below)
         """
         for link in self.links_to_create():
-            update_symlinks_recursively(
-                os.path.join(self.dir, link), os.path.join(self.cluster, link), force
-            )
+            # If we're provisioning for AAC/Tower, we copy files into the
+            # cluster directory (to be checked in to a git repository),
+            # instead of generating symlinks to our local $TPA_DIR.
+            if (
+                "tower_settings" in self.args
+            ):
+                if os.path.isfile(os.path.join(self.dir, link)):
+                    shutil.copy(
+                        os.path.join(self.dir, link), os.path.join(self.cluster, link)
+                    )
+                elif os.path.isdir(os.path.join(self.dir, link)):
+                    shutil.copytree(
+                        os.path.join(self.dir, link), os.path.join(self.cluster, link)
+                    )
+            else:
+                update_symlinks_recursively(
+                    os.path.join(self.dir, link),
+                    os.path.join(self.cluster, link),
+                    force,
+                )
 
     def links_to_create(self) -> List[str]:
         """

@@ -35,6 +35,7 @@
   set_fact:
     locations: "{{ locations|default([]) }}"
     cluster_vars: "{{ cluster_vars|default({}) }}"
+    ansible_tower: "{{ ansible_tower|default({}) }}"
 
 - name: Ensure cluster_name is specified
   assert:

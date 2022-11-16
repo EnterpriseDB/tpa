@@ -6,6 +6,12 @@ cluster_name: {{ cluster_name }}
 {% if top_level_settings|default({}) is not empty %}
 {{ top_level_settings|to_nice_yaml(indent=2) }}
 {% endif %}
+{% if tower_settings|default({}) is not empty %}
+# Configuration settings for Ansible Tower, also known as Ansible
+# Automation Controller
+
+{{ dict(ansible_tower=tower_settings)|to_nice_yaml(indent=2) }}
+{% endif %}
 {% if platform_settings|default({}) is not empty %}
 {{ platform_settings|to_nice_yaml(indent=2) }}
 {% endif %}

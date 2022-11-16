@@ -29,6 +29,7 @@ nav:
     - Server pool management: tpaexec-server-pool.md
     - Rehydration: tpaexec-rehydrate.md
   - Miscellaneous:
+    - Ansible Tower (Automation Controller): tower.md
     - TPAexec, Ansible, and sudo: misc-ansible-sudo.md
     - PuTTY configuration: misc-configure-putty.md
     - Troubleshooting: misc-troubleshooting.md
