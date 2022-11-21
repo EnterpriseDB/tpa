@@ -1,0 +1,25 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Set system locale default based on the OS family detected
+
+- name: Record locale setting as a fact
+  set_fact:
+    user_locale: "{{ _locale }}.{{ _charset }}"
+  vars:
+    _os_locale_default:
+      Debian: "en_US.UTF-8"
+      RedHat: "en_US.utf8"
+    _user_locale: "{{ user_locale|default(_os_locale_default[ansible_os_family]) }}"
+    _locale_parts: "{{ _user_locale.split('.') }}"
+    _locale: "{{ _locale_parts[0] }}"
+    __charset: "{{ _locale_parts[1] }}"
+    _charset: "{{
+      (ansible_os_family == 'RedHat')
+      |ternary(
+        (__charset == 'UTF-8')
+        |ternary('utf8', __charset),
+        __charset
+      )
+    }}"

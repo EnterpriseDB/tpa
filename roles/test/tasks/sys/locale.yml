@@ -1,0 +1,15 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Test that the system locale is present
+  shell:
+    cmd: "LANG={{ user_locale }}"
+  failed_when: false
+  changed_when: false
+  register: locale_set
+
+- name: Validate locale set
+  assert:
+    that: locale_set.rc == 0
+    fail_msg: "The requested system locale {{ user_locale }} is not installed."

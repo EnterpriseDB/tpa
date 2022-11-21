@@ -67,6 +67,7 @@ documented in their own sections below.
 * [Set sysctl values](sysctl_values.md)
 * [Configure /etc/hosts](hosts.md)
 * [Manage ssh_known_hosts entries](manage_ssh_hostkeys.md)
+* [Add system locale](locale.md)
 
 <!-- WIP
 

@@ -62,6 +62,8 @@
 
 - include_tasks: distribution.yml
 
+- include_tasks: locale.yml
+
 # Set various facts related to Postgres and other components we need to
 # install and configure (BDR, pgbouncer, haproxy, etc.). Also complains
 # about various configuration problems.

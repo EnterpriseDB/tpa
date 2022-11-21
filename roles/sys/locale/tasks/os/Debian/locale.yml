@@ -1,0 +1,13 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Make sure the desired language and character set locale is installed
+
+- name: Install system package for generating locales
+  include_role:
+    name: sys/locale/pkg
+
+- name: Add locale to system config and generate
+  locale_gen:
+    name: "{{ user_locale }}"

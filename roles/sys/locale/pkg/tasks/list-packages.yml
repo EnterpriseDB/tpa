@@ -1,0 +1,17 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- include_role:
+    name: pkg/add_to_list
+  vars:
+    _lang_pack: "{{ user_locale|default('en_US.UTF-8')|regex_replace('_.*') }}"
+    _locale_packages:
+      Debian:
+        - locales
+      RedHat:
+        - "glibc-langpack-{{ _lang_pack }}"
+        - "langpacks-{{ _lang_pack }}"
+    list_contents: "{{ _locale_packages[ansible_os_family] }}"
+  when:
+    not (ansible_distribution == 'RedHat' and ansible_distribution_major_version|int == 7)

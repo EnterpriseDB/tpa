@@ -28,6 +28,16 @@
       tags: bootstrap
   tags: bootstrap
 
+# As system locale files are required by a substantial amount of software
+# that can run after this point, make sure the default or user selected
+# locale is available.
+
+- include_role:
+    name: sys/locale
+    apply:
+      tags: locale
+  tags: locale
+
 # Now we set up package repositories, including {apt,yum}_repositories
 # entries mentioned in {apt,yum}_repository_list (e.g., PGDG, EPEL), and
 # any EDB/2ndQuadrant repositories we might need (tpa_2q_repositories).
