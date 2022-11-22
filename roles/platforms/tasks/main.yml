@@ -1,14 +1,26 @@
 ---
-
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - name: Set tpa_dir
   set_fact:
     tpa_dir: "{{ tpa_dir|default(lookup('env', 'TPA_DIR')) }}"
 
+- name: Check if project path exists
+  stat:
+    path: "{{ lookup('env', 'AWX_PRIVATE_DATA_DIR') + '/project'}}"
+  register: project_dir
+  when: lookup('env', 'AWX_PRIVATE_DATA_DIR') != ''
+
+- name: Set cluster_dir to project path
+  set_fact:
+    cluster_dir: "{{ project_dir.stat.exists | project_dir }}"
+  when: >
+    cluster_dir is not defined
+    and project_dir is defined
+    and project_dir.stat.exists
+
 - include_tasks: ssh.yml
-  when:
-    ansible_connection == 'ssh'
+  when: ansible_connection == 'ssh'
 
 - include_role:
     name: "platforms/{{ platform }}"
