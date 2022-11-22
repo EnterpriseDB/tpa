@@ -34,7 +34,7 @@
       files: 'MANIFEST.json'
       paths: "{{
         lookup('config', 'COLLECTIONS_PATHS')
-        |apply_format('{}/ansible_collections/' + item|replace('.', '/'))
+        |map('apply_format', '{}/ansible_collections/' + item|replace('.', '/'))|list
       }}"
       skip: True
     found_collection: "{{ lookup('first_found', params) }}"
