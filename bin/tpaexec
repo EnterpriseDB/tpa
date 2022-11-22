@@ -83,6 +83,10 @@ _detect_venv() {
     python3 -c "import sys; print('venv' if hasattr(sys, 'real_prefix') or sys.base_prefix != sys.prefix else 'no venv')"
 }
 
+_detect_site_packages() {
+    python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'
+}
+
 _ansible_version() {
     python3 -c 'import ansible.release; print(ansible.release.__version__)'
 }
@@ -111,6 +115,21 @@ _create_and_activate_venv() {
     fi
 
     _activate_venv "$vpath"
+}
+
+_install_tpaexec_pth() {
+    # Install a .pth file in the site-packages directory of the venv.
+    # The .pth file contains a single line, which is the path to the
+    # $TPA_DIR/lib directory. The .pth file makes venv add the $TPA_DIR/lib
+    # to the PYTHONPATH when the venv is activated.
+
+    # This allows us to use "import tpaexec" in the Ansible modules,
+    # without having to install TPAexec itself into the venv.
+
+    if [[ $(_detect_venv) == "venv" ]]; then
+        echo  "Add $TPA_DIR/lib to the PYTHONPATH"
+        echo "${TPA_DIR}/lib" > $(_detect_site_packages)/tpaexec.pth
+    fi
 }
 
 _install_pip_packages() {
@@ -247,6 +266,7 @@ setup() {
     _create_and_activate_venv "${vpath:=$TPA_VENV}"
     _install_pip_packages
     _install_ansible_collections
+    _install_tpaexec_pth
 }
 _display_notification() {
     if [[ $use_community == false ]]; then
