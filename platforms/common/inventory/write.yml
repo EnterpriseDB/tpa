@@ -169,4 +169,5 @@
     - streaming_barman_password
     - pgbouncer_auth_user_password
     - pgbouncer_password
+    - repmgr_password
   when: ansible_tower
