@@ -2,46 +2,88 @@
 
 TPAexec can be used with RedHat Ansible Automation Controller (formerly
 known as Ansible Tower) by running the configure and provision steps on
-a different machine, treating the cluster as a bare-metal one, and then
-importing the resulting inventory and other generated files into Tower. A
-custom Execution Environment which contains an installation of tpaexec can
-then be used for the deployment step and subsequent cluster management.
+a standalone machine, treating the cluster as a bare-metal one, and then
+importing the resulting inventory and other generated files into Tower.
+
+A TPAexec installation on Tower instance, which includes its own virtual
+environment (tpa-venv), is then used for the deployment step in Tower.
+
+This document describes the appropriate procedure for Ansible Tower
+version 3.8.
 
 ## Preparing Tower for working with TPAexec
 
-- Add the TPAexec Execution Environment to your Tower installation.
+- Install tpaexec on your Tower server under /opt/EDB/TPA. This is the
+  default location when TPAexec is installed from package.
+- Run `tpaexec setup` which will create a virtual environment under
+  /opt/EDB/TPA/tpa-venv and install the required packages.
+- Add TPAexec directory (/opt/EDB/TPA) to the "CUSTOM VIRTUAL ENVIRONMENT PATHS"
+  field in the System Settings page of Tower UI.
+- Create custom credential type called "TPA_2Q_SUBSCRIPTION_TOKEN".
+
+### Creating the TPA_2Q_SUBSCRIPTION_TOKEN credential type
+
+- Go to the Credentials Type page in Tower UI.
+- Set the "NAME" field to "TPA_2Q_SUBSCRIPTION_TOKEN".
+- Paste this to "INPUT CONFIGURATION" field:
+
+  ```yaml
+  fields:
+  - id: tpa_2q_sub_token
+    type: string
+    label: TPA_2Q_SUBSCRIPTION_TOKEN
+  required:
+  - tpa_2q_subscription_token
+  ```
+
+- Paste this to "INJECTOR CONFIGURATION" field:
+
+  ```yaml
+  env:
+    TPA_2Q_SUBSCRIPTION_TOKEN: '{{ tpa_2q_sub_token }}'
+  ```
+- Click "SAVE" button.
 
 ## Setting up a cluster
 
 - Ensure the hosts you intend to use for your cluster are known to your
   Tower installation, that you have a Credential that can access them over
-  SSH, and that they have public_ip and private_ip set.
+  SSH, and that they have ansible_host, public_ip and private_ip set.
 
 - On a machine with tpaexec installed, prepare a file with a list of
-  your hostnames, one per line, with ip addresses:
+  your hostnames, one per line:
 
 ```text
-mercury 34.243.117.57
-venus 54.170.86.124
-mars 63.35.233.50
-jupiter 34.243.13.96
-saturn 34.243.196.146
-neptune 34.251.84.161
+mercury
+venus
+mars
+jupiter
+saturn
+neptune
 ```
 
 
-- Run `tpaexec configure` giving at least the following arguments:
+- Run `tpaexec configure`:
 
 ```bash
-[tpa]$ tpaexec configure \
+[tpa]$ tpaexec configure <clustername> \
+         --platform bare \
          --use-ansible-tower https://aac.example.com/api \
-         --ansible-tower-repository ssh://git@git.example.com/example \
+         --tower-git-repository ssh://git@git.example.com/example \
          --hostnames-from <hostnamefile> \
-         --platform bare <clustername>
+         --architecture BDR-Always-ON \
+         --layout bronze \
+         --harp-consensus-protocol bdr
 ```
 
-  giving the API endpoint of your Tower instance. All
-  other options to `tpaexec configure`, as described in [Configuration](tpaexec-configure.md) are still valid.
+  The API endpoint is currently accepted and added to config.yml but
+  not used.  The git repository will be used to import the cluster data
+  into Tower; tpaexec will create its own branch in the repository
+  for this cluster so it doesn't matter what branches already exist
+  in it. (This allows you to use the same repository for all of your
+  clusters.)  All other options to `tpaexec configure`, as described in
+  [Configuration](tpaexec-configure.md) are still valid.
+
   This will create a cluster directory named after your cluster.
 
 - config.yml will now include the top-level dictionary `ansible_tower`,
@@ -57,12 +99,11 @@ neptune 34.251.84.161
 - Add the inventory from the project as an external source to your
   inventory.
 
-- Create a Template in Tower specifying the TPAexec Execution Environment,
+- Create a Template in Tower specifying the TPAexec virtual environment,
   your inventory, and the newly created project. Also include any required
   credentials to reach your hosts, and a credential with a TPA
-  subscription token. Set the two variables:
+  subscription token (TPA_2Q_SUBSCRIPTION_TOKEN).
 
-  - tpa_dir: /opt/EDB/TPA
-  - cluster_dir: /runner/project/PROJECTNAME
+- Set one additional variable: `tpa_dir: /opt/EDB/TPA`
 
 - Run a job based on the new Template to deploy your cluster.
