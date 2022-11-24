@@ -85,3 +85,9 @@
       ("%s/%s/inventory/write.yml"|format(playbook_dir, platform)) is file
     vars:
       ansible_port: "{{ cluster_ssh_port|default(22) }}"
+
+  ## Post-inventory hooks
+  #
+  # We can generalise this to work per-platform if platforms ever need it.
+
+  - include_tasks: common/inventory/post-write.yml

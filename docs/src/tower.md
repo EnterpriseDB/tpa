@@ -35,6 +35,7 @@ neptune 34.251.84.161
 ```bash
 [tpa]$ tpaexec configure \
          --use-ansible-tower https://aac.example.com/api \
+         --ansible-tower-repository ssh://git@git.example.com/example \
          --hostnames-from <hostnamefile> \
          --platform bare <clustername>
 ```
@@ -50,10 +51,6 @@ neptune 34.251.84.161
 - Edit config.yml if you need to make any other changes.
 
 - Run `tpaexec provision` to generate inventory and other related files.
-
-- Ensure that your cluster directory is the root of a git repository
-  and add the required files to git: ansible.cfg, deploy.yml, commands/,
-  inventory/, vault/ ; push them to an upstream git repository.
 
 - Add a Project in Tower with the git repository.
 

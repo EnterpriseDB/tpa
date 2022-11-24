@@ -147,10 +147,17 @@ class Architecture(object):
         g.add_argument("--owner")
         g.add_argument("--overrides-from", nargs="+", metavar="FILE")
         g.add_argument(
-            "--use-redhat-aac", "--use-ansible-tower",
+            "--use-redhat-aac",
+            "--use-ansible-tower",
             action="store",
             dest="tower_api_url",
             help="Provision this cluster for use with Ansible Automation Controller (Tower)",
+        )
+        g.add_argument(
+            "--tower-git-repository",
+            action="store",
+            dest="tower_git_remote",
+            help="A git repository for Tower generated data",
         )
 
         g = p.add_argument_group("software selection")
@@ -769,6 +776,11 @@ class Architecture(object):
             self.args["tower_settings"] = tower
             self.args["top_level_settings"] = top
 
+        if self.args.get("tower_git_remote"):
+            tower = self.args.get("tower_settings") or {}
+            tower.update({"git_remote": self.args["tower_git_remote"]})
+            self.args["tower_settings"] = tower
+
     def postgres_eol_repos(self, cluster_vars):
 
         if (
@@ -1017,6 +1029,71 @@ class Architecture(object):
             except ArchitectureError as err:
                 print(err, file=sys.stderr)
             self.platform.setup_local_repo()
+        try:
+            self.setup_git_repository()
+        except Exception as err:
+            print(f"Failed to set up git repository: { err }", file=sys.stderr)
+
+    def setup_git_repository(self) -> None:
+        """
+        Creates a git repository for the cluster directory, adds the files and links that have
+        been created to it, and adds a remote for Tower if one was given on the command line.
+        """
+        try:
+            cp = subprocess.run(
+                ["git", "init", "-b", self.args["cluster_name"]],
+                cwd=self.cluster,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+            )
+        except:
+            raise ArchitectureError(
+                f"Failed to initialise git repository: { cp.stderr }"
+            )
+        if self.args.get("tower_git_repository"):
+            try:
+                cp = subprocess.run(
+                    ["git", "remote", "add", self.args["tower_git_repository"]],
+                    cwd=self.cluster,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                )
+            except:
+                raise ArchitectureError(
+                    f"Failed to add remote repository: { cp.stderr }"
+                )
+
+        files = [
+            f
+            for f in ["config.yml", *self.links_to_create()]
+            if os.path.exists(os.path.join(self.cluster, f))
+        ]
+        try:
+            cp = subprocess.run(
+                ["git", "add"] + files,
+                cwd=self.cluster,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+            )
+        except:
+            raise ArchitectureError(f"Failed to add files to git: { cp.stderr }")
+
+        try:
+            subprocess.run(
+                [
+                    "git",
+                    "commit",
+                    "-m",
+                    f'Initial configuration for cluster { self.args["cluster_name"] }',
+                    "-m",
+                    " ".join(sys.argv),
+                ],
+                cwd=self.cluster,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+            )
+        except:
+            raise ArchitectureError(f"Failed to commit files to git: { cp.stderr }")
 
     def create_links(self, force: bool = False) -> None:
         """
@@ -1027,9 +1104,7 @@ class Architecture(object):
             # If we're provisioning for AAC/Tower, we copy files into the
             # cluster directory (to be checked in to a git repository),
             # instead of generating symlinks to our local $TPA_DIR.
-            if (
-                "tower_settings" in self.args
-            ):
+            if "tower_settings" in self.args:
                 if os.path.isfile(os.path.join(self.dir, link)):
                     shutil.copy(
                         os.path.join(self.dir, link), os.path.join(self.cluster, link)

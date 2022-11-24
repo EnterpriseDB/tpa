@@ -1,0 +1,79 @@
+- name: Commit inventory for aap
+  block:
+    - set_fact:
+        git_inventory_files:
+          - 'ansible.cfg'
+          - 'deploy.yml'
+          - 'commands/'
+          - 'inventory/'
+          - 'vault/'
+    
+    - name: check if we are the root of a git repository
+      command:
+        cmd: test -d .git
+      args:
+        chdir: "{{ cluster_dir }}"
+      register: is_git_repository
+      ignore_errors: yes
+
+    - name: Create a git repository
+      command:
+        cmd: git init -b {{ cluster_name }}
+      args:
+        chdir: "{{ cluster_dir }}"
+      when: is_git_repository.rc != 0
+
+    - name: Check for an existing tower remote repository
+      command:
+        cmd: git remote get-url tower
+      args:
+        chdir: "{{ cluster_dir }}"
+      register: existing_tower_remote
+      ignore_errors: yes
+
+    - name: Warn if remote repositories clash
+      assert:
+        that: ansible_tower.git_remote == existing_tower_remote.stdout
+        fail_msg: "Configured remote repository {{ ansible_tower.git_remote }} does not match {{ existing_tower_remote.stdout }}"
+      when: ansible_tower.git_remote is defined
+        and existing_tower_remote.rc == 0
+
+    - name: Add remote git repository
+      command:
+        cmd: git remote add tower {{ ansible_tower.git_remote }}
+      args:
+        chdir: "{{ cluster_dir }}"
+      when: ansible_tower.git_remote is defined and existing_tower_remote.rc != 0
+
+    - name: Add inventory files to git
+      command: 
+        cmd: git add {{ item }}
+      with_items: "{{ git_inventory_files }}"
+      args:
+        chdir: "{{ cluster_dir }}"
+      register: added_files
+    
+    - name: Check if commit is required
+      shell:
+        cmd: git status --porcelain -uno | egrep '^[AM]'
+      args:
+        chdir: "{{ cluster_dir }}"
+      register: commit_required
+      ignore_errors: yes
+
+    - name: Commit inventory
+      command:
+        cmd: git commit -m "Inventory files for cluster {{ cluster_name }}"
+      args:
+        chdir: "{{ cluster_dir }}"
+      when: commit_required.stdout != ""
+
+    - name: Push inventory to tower
+      command:
+        cmd: git push tower {{ cluster_name }}
+      args:
+        chdir: "{{ cluster_dir }}"
+      when: ansible_tower.git_remote is defined
+        and (commit_required.stdout != "" or existing_tower_remote.rc != 0)
+    
+  when: ansible_tower
