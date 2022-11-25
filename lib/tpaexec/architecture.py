@@ -159,6 +159,12 @@ class Architecture(object):
             dest="tower_git_remote",
             help="A git repository for Tower generated data",
         )
+        g.add_argument(
+            "--no-git",
+            action="store_true",
+            dest="no_git",
+            help="Suppress creation of git repository",
+        )
 
         g = p.add_argument_group("software selection")
         labels = self.platform.supported_distributions()
@@ -1029,10 +1035,11 @@ class Architecture(object):
             except ArchitectureError as err:
                 print(err, file=sys.stderr)
             self.platform.setup_local_repo()
-        try:
-            self.setup_git_repository()
-        except Exception as err:
-            print(f"Failed to set up git repository: { err }", file=sys.stderr)
+        if not self.args['no_git']:
+            try:
+                self.setup_git_repository()
+            except Exception as err:
+                print(f"Failed to set up git repository: { err }", file=sys.stderr)
 
     def setup_git_repository(self) -> None:
         """
