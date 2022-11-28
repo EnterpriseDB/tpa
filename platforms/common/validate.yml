@@ -127,3 +127,19 @@
     mismatched_replicas: "{{
       instances|find_replica_tablespace_mismatches
     }}"
+
+- name: Check for uncommitted changes
+  shell:
+    cmd: git status --porcelain -uno | egrep '^(A| M)'
+  args:
+    chdir: "{{ cluster_dir }}"
+  register: modified_files
+  ignore_errors: yes
+
+- name: Abort if there are uncommitted changes
+  assert:
+    that: modified_files.stdout == ""
+    msg: "There are uncommitted changes in {{ cluster_dir }}. Modified files: {{ modified_files.stdout }}"
+  when:
+    modified_files.rc == 0
+

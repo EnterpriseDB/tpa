@@ -156,7 +156,7 @@ class Architecture(object):
         g.add_argument(
             "--tower-git-repository",
             action="store",
-            dest="tower_git_remote",
+            dest="tower_git_repository",
             help="A git repository for Tower generated data",
         )
         g.add_argument(
@@ -782,9 +782,9 @@ class Architecture(object):
             self.args["tower_settings"] = tower
             self.args["top_level_settings"] = top
 
-        if self.args.get("tower_git_remote"):
+        if self.args.get("tower_git_repository"):
             tower = self.args.get("tower_settings") or {}
-            tower.update({"git_remote": self.args["tower_git_remote"]})
+            tower.update({"git_repository": self.args["tower_git_repository"]})
             self.args["tower_settings"] = tower
 
     def postgres_eol_repos(self, cluster_vars):
@@ -1036,34 +1036,58 @@ class Architecture(object):
                 print(err, file=sys.stderr)
             self.platform.setup_local_repo()
         if not self.args['no_git']:
-            try:
-                self.setup_git_repository()
-            except Exception as err:
-                print(f"Failed to set up git repository: { err }", file=sys.stderr)
+            self.setup_git_repository()
 
     def setup_git_repository(self) -> None:
         """
         Creates a git repository for the cluster directory, adds the files and links that have
-        been created to it, and adds a remote for Tower if one was given on the command line.
+        been created to it, and adds a remote repository for Tower if one was given on the command line.
         """
         try:
             cp = subprocess.run(
-                ["git", "init", "-b", self.args["cluster_name"]],
+                ["git", "--version"],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except:
+            return
+        try:
+            cp = subprocess.run(
+                ["git", "init"],
                 cwd=self.cluster,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
+                check=True,
             )
         except:
             raise ArchitectureError(
                 f"Failed to initialise git repository: { cp.stderr }"
             )
+        try:
+            cp = subprocess.run(
+                ["git", "checkout", "-b", self.args["cluster_name"]],
+                cwd=self.cluster,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                check=True,
+            )
+        except:
+            raise ArchitectureError(f"Failed to check out git branch: { cp.stderr }")
         if self.args.get("tower_git_repository"):
             try:
                 cp = subprocess.run(
-                    ["git", "remote", "add", self.args["tower_git_repository"]],
+                    [
+                        "git",
+                        "remote",
+                        "add",
+                        "tower",
+                        self.args["tower_git_repository"],
+                    ],
                     cwd=self.cluster,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.PIPE,
+                    check=True,
                 )
             except:
                 raise ArchitectureError(
@@ -1081,6 +1105,7 @@ class Architecture(object):
                 cwd=self.cluster,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
+                check=True,
             )
         except:
             raise ArchitectureError(f"Failed to add files to git: { cp.stderr }")
@@ -1098,6 +1123,7 @@ class Architecture(object):
                 cwd=self.cluster,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
+                check=True,
             )
         except:
             raise ArchitectureError(f"Failed to commit files to git: { cp.stderr }")
