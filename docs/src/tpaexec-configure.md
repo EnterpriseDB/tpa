@@ -13,6 +13,8 @@ cycle.
 This command will create a directory named `~/clusters/speedy` and
 generate a configuration file named `config.yml` that follows the
 layout of the architecture named M1 (single primary, N replicas).
+It will create a git repository in the new directory and make an initial
+commit containing the generated `config.yml`.
 
 The command also accepts various options (some specific to the selected
 architecture or platform) to modify the configuration, but the defaults
@@ -366,6 +368,23 @@ That said, the mechanism does not enforce any restrictions, so please
 exercise due caution. It is a good idea to generate two configurations
 with and without the overrides and diff the two config.yml files to make
 sure you understand the effect of all the overrides.
+
+## Ansible Tower
+
+Use the `--use-ansible-tower` and `--tower-git-repository` options to
+create a cluster adapted for deployment with Ansible Tower. See [Ansible
+Tower](tower.md) for details.
+
+## git repository
+
+By default, a git repository is created with an initial branch named
+after the cluster, and a single commit is made, with the configure
+options you used in the commit message. If you don't have git in your
+`$PATH`, tpaexec will not raise an error but the repository will not be
+created. To suppress creation of the git repository, use the `--no-git`
+option. (Note that in an Ansible Tower cluster, a git repository is
+required and will be created later by `tpaexec provision` if it does not
+already exist.)
 
 ## Examples
 
