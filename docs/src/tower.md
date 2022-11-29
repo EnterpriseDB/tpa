@@ -13,15 +13,23 @@ version 3.8.
 
 ## Preparing Tower for working with TPAexec
 
+### Setting up a TPAexec virtual environment
+
 - Install tpaexec on your Tower server under /opt/EDB/TPA. This is the
   default location when TPAexec is installed from package.
 - Run `tpaexec setup` which will create a virtual environment under
   /opt/EDB/TPA/tpa-venv and install the required packages.
 - Add TPAexec directory (/opt/EDB/TPA) to the "CUSTOM VIRTUAL ENVIRONMENT PATHS"
   field in the System Settings page of Tower UI.
-- Create custom credential type called "TPA_2Q_SUBSCRIPTION_TOKEN".
+- Ansible Tower 3.8 has psutil as dependency, which is not available in
+  the default Tower virtual environment. To install psutil, run the
+  following command in the Tower virtual environment:
+  `sudo pip install psutil`
 
 ### Creating the TPA_2Q_SUBSCRIPTION_TOKEN credential type
+
+Create the custom credential type called "TPA_2Q_SUBSCRIPTION_TOKEN"
+as described below:
 
 - Go to the Credentials Type page in Tower UI.
 - Set the "NAME" field to "TPA_2Q_SUBSCRIPTION_TOKEN".
