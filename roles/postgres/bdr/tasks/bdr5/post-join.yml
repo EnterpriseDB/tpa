@@ -1,1 +1,42 @@
-../bdr4/post-join.yml
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# Do whatever we need to do for CAMO setup in BDRv4.
+
+- include_tasks: ../bdr4/post-join.yml
+
+# Process any entries in bdr_node_groups for which 'enable_raft' is set.
+# Now that the group joins have been completed, we can enable subgroup
+# raft. (Disabling it once it's enabled is not supported by BDR.)
+
+- name: Enable subgroup raft for BDR node groups, if necessary
+  postgresql_query:
+    conninfo: "{{ bdr_node_dsn }}"
+    queries:
+      - text: >
+          SELECT bdr.alter_node_group_option(node_group_name := %s,
+            config_key := 'enable_raft', config_value := %s::TEXT)
+        args:
+          - "{{ item.name }}"
+          - "{{ enable_raft }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ bdr_node_groups }}"
+  loop_control:
+    label: >-
+      {{ item.name }}:{{ enable_raft }}
+  vars:
+    this_group_facts:
+      "{{ bdr_database_facts.bdr.node_group
+          |selectattr('node_group_name', 'equalto', item.name)
+          |list }}"
+    enable_raft:
+      "{{ item.enable_raft|default(false)|bool }}"
+  when:
+    - inventory_hostname == first_bdr_primary
+    - item.name != bdr_node_group
+    - enable_raft is true
+    - this_group_facts is empty
+      or this_group_facts[0].node_group_enable_raft is false
+  changed_when: true
