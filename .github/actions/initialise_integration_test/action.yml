@@ -124,6 +124,7 @@ runs:
         ./bin/tpaexec configure "$CLUSTER" \
           --architecture ${{ inputs.tpa_architecture }} \
           --platform ${{ inputs.tpa_platform }} \
+          --no-git \
           ${CONFIGURE_EXTRA_ARGS}
       shell: bash
 

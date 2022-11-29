@@ -40,6 +40,7 @@ def architecture():
             "basic",
             "--network",
             "10.33.0.0/24",
+            "--no-git",
         ],
     )
     d.configure(force=True)
@@ -85,6 +86,7 @@ def architecture_bare():
             "10.33.0.0/24",
             "--platform",
             "bare",
+            "--no-git",
         ],
     )
     d.configure(force=True)
