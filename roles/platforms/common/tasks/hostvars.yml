@@ -70,6 +70,18 @@
       tpa_2q_repositories|default([]) is empty
   tags: public_repos
 
+- assert:
+    that: env_token not in expired_tokens
+    fail_msg: >-
+      Your TPA_2Q_SUBSCRIPTION_TOKEN has expired; please fetch an updated token
+      from https://techsupport.enterprisedb.com/customer_portal/company/
+  vars:
+    env_token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
+    expired_tokens:
+    - QGcOzwnsVlaKF5jQfYlIwq57kUbKVtAM
+  run_once: yes
+  tags: public_repos
+
 # To use EDB repositories (e.g., for EPAS), get a username/password from
 # https://www.enterprisedb.com/user/register?destination=/repository-access-request
 # and export EDB_REPO_CREDENTIALS_FILE=/path/to/file in the environment,
