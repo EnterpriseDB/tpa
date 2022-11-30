@@ -128,18 +128,42 @@
       instances|find_replica_tablespace_mismatches
     }}"
 
+# If TPAexec ran `git init` within this cluster_dir, we bail out if any
+# committed files are modified (except config.yml, which we are prepared
+# to commit along with generated changes).
+
+- name: Determine if TPAexec initialised a git repository in cluster_dir
+  shell: >
+    if command -v git &>/dev/null && test -d .git; then
+      if git rev-parse HEAD &>/dev/null; then
+        git notes show $(git rev-list --reverse HEAD|head -1) 2>/dev/null || true;
+      fi;
+    fi
+  args:
+    chdir: "{{ cluster_dir }}"
+    executable: /bin/bash
+  register: git_repo_note
+  changed_when: False
+
+- set_fact:
+    tpaexec_initialised_cluster_git_repo: "{{
+      git_repo_note.stdout_lines is not empty
+      and git_repo_note.stdout_lines[0].startswith('Created by TPAexec')
+    }}"
+
 - name: Check for uncommitted changes
   shell:
-    cmd: git status --porcelain -uno | egrep '^(A| M)'
+    cmd: git status --porcelain -uno | egrep '^(A| M)' | grep -v 'config.yml$'
   args:
     chdir: "{{ cluster_dir }}"
   register: modified_files
+  changed_when: False
   ignore_errors: yes
+  when: tpaexec_initialised_cluster_git_repo
 
 - name: Abort if there are uncommitted changes
   assert:
-    that: modified_files.stdout == ""
+    that: modified_files.stdout_lines is empty
     msg: "There are uncommitted changes in {{ cluster_dir }}. Modified files: {{ modified_files.stdout }}"
   when:
-    modified_files.rc == 0
-
+    modified_files is not skipped

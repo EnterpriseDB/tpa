@@ -2,51 +2,45 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-- name: Check for .git within the cluster directory
-  command:
-    cmd: test -d .git
-  args:
-    chdir: "{{ cluster_dir }}"
-  register: is_git_repository
-  ignore_errors: yes
-
 - name: Ensure we have local and remote repositories for Tower
-  block:
-  - name: Create a git repository if necessary
-    block:
-    - command:
-        cmd: git init
-      args:
-        chdir: "{{ cluster_dir }}"
-    - command:
-        cmd: git checkout -b {{ cluster_name }}
-      args:
-        chdir: "{{ cluster_dir }}"
-    when: is_git_repository.rc != 0
-
-  - name: Check for an existing tower remote repository
-    command:
-      cmd: git remote get-url tower
-    args:
-      chdir: "{{ cluster_dir }}"
-    register: existing_tower_remote_repository
-    ignore_errors: yes
-
-  - name: Warn if remote repositories clash
-    assert:
-      that: ansible_tower.git_repository == existing_tower_remote_repository.stdout
-      fail_msg: "Configured remote repository {{ ansible_tower.git_repository }} does not match {{ existing_tower_remote_repository.stdout }}"
-    when: ansible_tower.git_repository is defined
-      and existing_tower_remote_repository.rc == 0
-
-  - name: Add remote git repository
-    command:
-      cmd: git remote add tower {{ ansible_tower.git_repository }}
-    args:
-      chdir: "{{ cluster_dir }}"
-    when: ansible_tower.git_repository is defined and existing_tower_remote_repository.rc != 0
-
   when: ansible_tower
+  block:
+  - name: Create a local git repository if necessary
+    shell: >
+      if [[ ! -d .git ]]; then
+        git init && git checkout -b "{{ cluster_name }}"
+      fi
+    args:
+      executable: /bin/bash
+      chdir: "{{ cluster_dir }}"
+
+  - name: Ensure tower remote repository is defined
+    when: ansible_tower.git_repository is defined
+    block:
+    - name: Check for an existing tower remote repository
+      command:
+        cmd: git remote get-url tower
+      args:
+        chdir: "{{ cluster_dir }}"
+      register: existing_tower_remote_url
+      ignore_errors: yes
+
+    - name: Fail if remote repository does not match configured ansible_tower.git_repository
+      assert:
+        that: ansible_tower.git_repository == existing_tower_remote_url.stdout
+        fail_msg: >-
+          ansible_tower.git_repository in config.yml point to {{ ansible_tower.git_repository }},
+          but `git remote tower` points to {{ existing_tower_remote_url.stdout }}
+      when:
+        existing_tower_remote_url.rc == 0
+
+    - name: Add remote git repository if required
+      command:
+        cmd: git remote add tower "{{ ansible_tower.git_repository }}"
+      args:
+        chdir: "{{ cluster_dir }}"
+      when:
+        existing_tower_remote_url.rc != 0
 
 - set_fact:
     git_inventory_files:
@@ -58,8 +52,9 @@
       - 'vault/'
 
 - name: Add and commit files to git
+  when: ansible_tower or tpaexec_initialised_cluster_git_repo
   block:
-  - name: Add inventory files to git
+  - name: Add generated files from cluster directory to git
     command:
       cmd: git add --ignore-errors {{ item }}
     with_items: "{{ git_inventory_files }}"
@@ -68,7 +63,7 @@
     register: added_files
     ignore_errors: yes
 
-  - name: Check if commit is required
+  - name: Check for modified files
     shell:
       cmd: git status --porcelain -uno | egrep '^(A| M)'
     args:
@@ -76,19 +71,18 @@
     register: commit_required
     ignore_errors: yes
 
-  - name: Commit inventory
+  - name: Commit modifications if required
     command:
       cmd: git commit -m "Inventory files for cluster {{ cluster_name }}"
     args:
       chdir: "{{ cluster_dir }}"
     when: commit_required.stdout != ""
-  when: ansible_tower or is_git_repository.rc == 0
 
-- name: Push inventory to tower
+- name: Push changes to tower remote repository
   command:
-    cmd: git push tower {{ cluster_name }}
+    cmd: git push tower "{{ cluster_name }}"
   args:
     chdir: "{{ cluster_dir }}"
   when: ansible_tower
     and ansible_tower.git_repository is defined
-    and (commit_required.stdout != "" or existing_tower_remote_repository.rc != 0)
+    and (commit_required.stdout != "" or existing_tower_remote_url.rc != 0)

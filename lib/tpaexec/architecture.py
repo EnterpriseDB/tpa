@@ -1035,7 +1035,7 @@ class Architecture(object):
             except ArchitectureError as err:
                 print(err, file=sys.stderr)
             self.platform.setup_local_repo()
-        if not self.args['no_git']:
+        if not self.args["no_git"]:
             self.setup_git_repository()
 
     def setup_git_repository(self) -> None:
@@ -1127,6 +1127,17 @@ class Architecture(object):
             )
         except:
             raise ArchitectureError(f"Failed to commit files to git: { cp.stderr }")
+
+        try:
+            subprocess.run(
+                ["git", "notes", "add", "-m", "Created by TPAexec"],
+                cwd=self.cluster,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                check=True,
+            )
+        except:
+            raise ArchitectureError(f"Failed to create git note: { cp.stderr }")
 
     def create_links(self, force: bool = False) -> None:
         """
