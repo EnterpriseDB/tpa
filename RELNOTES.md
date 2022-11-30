@@ -2,6 +2,36 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v23.8 (2022-11-30)
+
+### Notable changes
+
+- TPA-18 Support Ansible Tower 3.8
+
+  This release supports execution of `deploy.yml` (only) on a `bare` cluster
+  (i.e., with existing servers) through Ansible Tower 3.8.
+
+  Install TPAexec on the Tower server and run `tpaexec setup` to create
+  a virtual environment which can be used in Tower Templates to run
+  TPAexec playbooks.
+
+  Use the `--use-ansible-tower` and `--tower-git-repository` configure
+  options to generate a Tower-compatible cluster configuration.
+
+  For details, see [Ansible Tower](docs/src/tower.md).
+
+### Minor changes
+
+- TPA-238 Initialise the cluster directory as a git repository
+
+  If git is available on the system where you run TPAexec, `tpaexec configure`
+  will now initialise a git repository within the cluster directory by default.
+  If git is not available, it will continue as before.
+
+  To avoid creating the repository (for example, if you want to store the
+  cluster directory within an existing repository), use the `--no-git`
+  option.
+
 ## v23.7 (2022-11-09)
 
 ### Notable changes
