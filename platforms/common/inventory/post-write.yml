@@ -65,7 +65,7 @@
 
   - name: Check for modified files
     shell:
-      cmd: git status --porcelain -uno | egrep '^(A| M)'
+      cmd: git status --porcelain -uno | egrep '^(A|M| M)'
     args:
       chdir: "{{ cluster_dir }}"
     register: commit_required
