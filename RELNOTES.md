@@ -18,7 +18,7 @@
   Use the `--use-ansible-tower` and `--tower-git-repository` configure
   options to generate a Tower-compatible cluster configuration.
 
-  For details, see [Ansible Tower](docs/src/tower.md).
+  For details, see [Ansible Tower](tower.md).
 
 ### Minor changes
 
