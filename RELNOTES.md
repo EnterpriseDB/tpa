@@ -2,6 +2,14 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
+## v23.9 (unreleased)
+
+### Bugfixes
+
+- TPA-278 Remove "umask 0" directive from rsyslog configuration, which
+  previously resulted in the creation of world-readable files such as
+  rsyslogd.pid
+
 ## v23.8 (2022-11-30)
 
 ### Notable changes
