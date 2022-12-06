@@ -2,8 +2,11 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-# Register the database server with the PEM Server for monitoring
+- name: Change the default monitoring database for agents on BDR nodes
+  set_fact: asb_host_db="{{ bdr_database }}"
+  when: inventory_hostname in groups['role_bdr']
 
+# Register the database server with the PEM Server for monitoring
 - name: Register database server for monitoring and configuration
   command: >
     {{ pem_agent_base_dir }}/bin/pemworker --register-server           \
@@ -15,6 +18,7 @@
       --pem-server "{{ pem_server }}"                                  \
       --pem-port "{{ hostvars[pem_server].postgres_port }}"            \
       --pem-user "{{ pem_postgres_user }}"                             \
+      --asb-host-db "{{ asb_host_db|default('postgres') }}"            \
       --remote-monitoring "{{ remote_monitoring|default('no') }}"      \
       --group "{{ monitoring_group|default('PEM Server Directory') }}" \
       --team "{{ monitoring_team |default('') }}"                      \
