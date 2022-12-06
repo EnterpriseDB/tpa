@@ -42,12 +42,12 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         # Construct a message based on the type of exception class instance (tpa or external)
         message = getattr(
             exc_value,
-            "message",
+            "MSG",
             "An error was encountered during execution of tpaexec configure",
         )
-        print(f'{message}: {", ".join(exc_value.args)}', file=sys.stderr)
+        print(f'{message}: {", ".join((str(i) for i in exc_value.args))}', file=sys.stderr)
         # If it's not one of our errors print a full stack trace as well
-        if not getattr(exc_value, "message", None):
+        if not getattr(exc_value, "MSG", None):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
         sys.exit(1)
 
