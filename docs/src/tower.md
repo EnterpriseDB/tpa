@@ -21,10 +21,6 @@ version 3.8.
   /opt/EDB/TPA/tpa-venv and install the required packages.
 - Add TPAexec directory (/opt/EDB/TPA) to the "CUSTOM VIRTUAL ENVIRONMENT PATHS"
   field in the System Settings page of Tower UI.
-- Ansible Tower 3.8 has psutil as dependency, which is not available in
-  the default Tower virtual environment. To install psutil, run the
-  following command in the Tower virtual environment:
-  `sudo pip install psutil`
 
 ### Creating the TPA_2Q_SUBSCRIPTION_TOKEN credential type
 

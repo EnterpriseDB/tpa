@@ -6,3 +6,4 @@ netaddr
 boto3>=1.5.31
 docker
 passlib
+psutil
