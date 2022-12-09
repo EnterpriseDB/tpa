@@ -1,0 +1,6 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+watchdog_user: "{{ postgres_user|default('root') }}"
+watchdog_group: "{{ postgres_group|default('root') }}"

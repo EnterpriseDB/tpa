@@ -1,0 +1,25 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Enable watchdog udev rule
+  copy:
+    content: |
+      KERNEL=="watchdog", OWNER="{{ watchdog_user }}", GROUP="{{ watchdog_group }}"
+    dest: /etc/udev/rules.d/99-watchdog.rules
+
+- name: Enable softdog kernel module
+  copy:
+    content: |
+      softdog
+    dest: /etc/modules-load.d/softdog.conf
+
+- name: Load softdog kernel module
+  modprobe:
+    name: softdog
+
+- name: Ensure correct ownership of /dev/watchdog
+  file:
+    path: /dev/watchdog
+    owner: "{{ watchdog_user }}"
+    group: "{{ watchdog_group }}"
