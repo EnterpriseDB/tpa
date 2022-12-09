@@ -244,6 +244,19 @@
     'PGDG' in yum_repository_list
     and postgres_version is version('9.6', '<=')
 
+- name: Add the dl/default repo to tpa_2q_repositories
+  set_fact:
+    tpa_2q_repositories: "{{
+        tpa_2q_repositories
+        |default([])
+        |union([
+          'dl/default/release'
+        ])
+      }}"
+  when:
+    tpa_2q_repositories is not defined or
+    tpa_2q_repositories is not empty
+
 - set_fact:
     _2q_repositories: []
 
@@ -318,6 +331,49 @@
   when: >
     'products/bdr3/release' in tpa_2q_repositories
     and ansible_distribution_major_version|int == 8
+
+- name: Exclude haproxy from dl/default repo for patroni clusters
+  ini_file:
+    dest: "/etc/yum.repos.d/2ndquadrant-dl-default-release-pg{{ postgres_versionNN }}.repo"
+    create: no
+    section: "2ndquadrant-dl-default-release-pg{{ postgres_versionNN }}"
+    option: exclude
+    value: haproxy
+  when: >
+    'dl/default/release' in tpa_2q_repositories|default([])
+    and 'PGDG' in yum_repository_list
+    and 'haproxy' in role
+    and failover_manager == 'patroni'
+
+# The extras repo on RHEL 7 supplies etcd packages for patroni
+
+- name: Enable the RHEL 7 RHUI extras repo if available
+  ini_file:
+    dest: "/etc/yum.repos.d/{{ _repo_path }}.repo"
+    create: no
+    section: "{{ _section }}"
+    option: enabled
+    value: '1'
+  vars:
+    _repo_path: "{{
+        rhel_7_extras_repo_path|default(
+          (ansible_distribution_id == 'centos')|ternary(
+            'CentOS-Base',
+            'redhat-rhui'
+          )
+        )
+      }}"
+    _section: "{{
+        rhel_7_extras_repo_section|default(
+          (ansible_distribution_id == 'centos')|ternary(
+            'extras',
+            'rhel-7-server-rhui-extras-rpms'
+          )
+        )
+      }}"
+  when:
+    ansible_distribution_major_version|int == 7
+    and failover_manager == 'patroni'
 
 - include_tasks: repository-cleanup.yml
   vars:
