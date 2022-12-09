@@ -6,7 +6,7 @@
 
 ### Bugfixes
 
-- TPA-301 Set cluster_dir correctly on Tower clusters
+- TPA-301 Fix auto-detection of cluster_dir for Tower clusters
 
   When deploying a Tower cluster, we set cluster_dir as part of
   deployment; the check for its existence must be run on the controller
@@ -18,8 +18,8 @@
   previously resulted in the creation of world-readable files such as
   rsyslogd.pid
 
-- TPA-291 Respect postgres version setting when installing the postgres
-  server package on Barman nodes on RedHat
+- TPA-291 Respect the postgres_package_version setting when installing
+  the Postgres server package to obtain pg_receivewal on Barman instances
 
 ## v23.8 (2022-11-30)
 
