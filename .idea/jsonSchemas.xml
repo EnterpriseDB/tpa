@@ -3,11 +3,11 @@
   <component name="JsonSchemaMappingsProjectConfiguration">
     <state>
       <map>
-        <entry key="Ansible Role">
+        <entry key="Ansible Tasks File">
           <value>
             <SchemaInfo>
-              <option name="name" value="Ansible Role" />
-              <option name="relativePathToSchema" value="https://json.schemastore.org/ansible-role-2.9.json" />
+              <option name="name" value="Ansible Tasks File" />
+              <option name="relativePathToSchema" value="https://raw.githubusercontent.com/ansible/schemas/main/f/ansible.json#/$defs/tasks" />
               <option name="applicationDefined" value="true" />
               <option name="patterns">
                 <list>
