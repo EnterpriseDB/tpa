@@ -5,19 +5,21 @@
   set_fact:
     tpa_dir: "{{ tpa_dir|default(lookup('env', 'TPA_DIR')) }}"
 
-- name: Check if project path exists
-  stat:
-    path: "{{ lookup('env', 'AWX_PRIVATE_DATA_DIR') + '/project'}}"
-  register: project_dir
-  when: lookup('env', 'AWX_PRIVATE_DATA_DIR') != ''
-
-- name: Set cluster_dir to project path
-  set_fact:
-    cluster_dir: "{{ project_dir.stat.exists | project_dir }}"
-  when: >
-    cluster_dir is not defined
-    and project_dir is defined
-    and project_dir.stat.exists
+- name: Set cluster_dir to Tower project directory, if available
+  vars:
+    awx_data_dir: "{{ lookup('env', 'AWX_PRIVATE_DATA_DIR') }}"
+  when:
+    cluster_dir is not defined and awx_data_dir != ''
+  block:
+  - stat:
+      path: "{{ awx_data_dir ~ '/project' }}"
+    register: project_dir
+    delegate_to: localhost
+  - assert:
+      that: project_dir.stat.exists
+      fail_msg: project directory not found in {{ awx_data_dir }}
+  - set_fact:
+      cluster_dir: "{{ project_dir.stat.path }}"
 
 - include_tasks: ssh.yml
   when: ansible_connection == 'ssh'
