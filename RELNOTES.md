@@ -8,8 +8,8 @@
 
 - TPA-301 Fix auto-detection of cluster_dir for Tower clusters
 
-  When deploying a Tower cluster, we set cluster_dir as part of
-  deployment; the check for its existence must be run on the controller
+  When setting cluster_dir based on the Tower project directory, we now
+  correctly check for the existence of the directory on the controller, and
   not on the instances being deployed to.
 
 - TPA-283 Add dependency on psutil, required for Ansible Tower.
