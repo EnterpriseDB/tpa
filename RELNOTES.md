@@ -16,10 +16,10 @@
 
 - TPA-278 Remove "umask 0" directive from rsyslog configuration, which
   previously resulted in the creation of world-readable files such as
-  rsyslogd.pid
+  rsyslogd.pid .
 
 - TPA-291 Respect the postgres_package_version setting when installing
-  the Postgres server package to obtain pg_receivewal on Barman instances
+  the Postgres server package to obtain pg_receivewal on Barman instances.
 
 ## v23.8 (2022-11-30)
 
