@@ -2,13 +2,24 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-## v23.9 (unreleased)
+## v23.9 (2022-12-12)
 
 ### Bugfixes
 
+- TPA-301 Fix auto-detection of cluster_dir for Tower clusters
+
+  When setting cluster_dir based on the Tower project directory, we now
+  correctly check for the existence of the directory on the controller, and
+  not on the instances being deployed to.
+
+- TPA-283 Add dependency on psutil, required for Ansible Tower.
+
 - TPA-278 Remove "umask 0" directive from rsyslog configuration, which
   previously resulted in the creation of world-readable files such as
-  rsyslogd.pid
+  rsyslogd.pid .
+
+- TPA-291 Respect the postgres_package_version setting when installing
+  the Postgres server package to obtain pg_receivewal on Barman instances.
 
 ## v23.8 (2022-11-30)
 
