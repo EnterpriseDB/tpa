@@ -5,11 +5,18 @@ on target instances. This page explains how Ansible uses sudo (which is
 in no way TPAexec-specific), and the consequences to systems managed
 with TPAexec.
 
-TPAexec needs root privileges to install packages, stop and restart
-services, and a variety of other tasks. TPAexec also needs to be able to
-use sudo. You can make it ssh in as root directly by setting
-`ansible_user: root`, but it will still use sudo to execute tasks as
-other users (e.g., postgres).
+TPAexec needs root privileges;
+
+* to install packages (required packages using the operating system's
+  native package manager, and optional packages using pip)
+* to stop, reload and restart services (i.e Postgres, repmgr, efm, etcd,
+  haproxy, pgbouncer etc.)
+* to perform a variety of other tasks (e.g., gathering cluster facts,
+  performing switchover, setting up cluster nodes)
+
+TPAexec also needs to be able to use sudo. You can make it ssh in as root
+directly by setting `ansible_user: root`, but it will still use sudo to
+execute tasks as other users (e.g., postgres).
 
 ## Ansible sudo invocations
 
@@ -34,12 +41,13 @@ Ansible playbook is not just a shell script written in YAML format.
 There is no way to “extract” shell commands that would do the same thing
 as executing an arbitrary Ansible playbook.
 
-There is one significant consequence of how Ansible uses sudo: it is not
-possible to limit sudo invocations to specific commands in sudoers.conf,
-as some administrators are used to doing. For one thing, most tasks will
-just invoke python. You could have restricted sudo access to python if
-it were not for the random string in every command—but once Python is
-running as root, there's no effective limit on what it can do anyway.
+There is one significant consequence of how Ansible uses sudo: [privilege
+escalation must be general](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html#privilege-escalation-must-be-general). That, it is not possible
+to limit sudo invocations to specific commands in sudoers.conf,
+as some administrators are used to doing. Most tasks will just invoke python.
+You could have restricted sudo access to python if it were not
+for the random string in every command—but once Python is running as root,
+there's no effective limit on what it can do anyway.
 
 Executing Python modules on target hosts is just the way Ansible works.
 None of this is specific to TPAexec in any way, and these considerations
