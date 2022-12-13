@@ -203,6 +203,15 @@
       {{ _subscription_sets|map('pyformat', bdr_node_ids=bdr_node_ids)|list }}
   tags: replication-sets
 
+- name: Configure BDR commit scopes (v4.1+ only)
+  include_tasks:
+    file: bdr4/commit-scopes.yml
+    apply:
+      tags: commit-scopes
+  when:
+    bdr_commit_scopes|default([]) is not empty
+    and inventory_hostname == first_bdr_primary
+
 - name: Include bdr-pre-group-join hook
   include_tasks: "{{ hook }}"
   when:

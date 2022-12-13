@@ -1,0 +1,86 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# https://www.enterprisedb.com/docs/pgd/latest/bdr/group-commit/
+
+- assert:
+    that:
+      bdr_version_num >= 40100
+    fail_msg: >-
+      bdr_commit_scopes are available only in BDR 4.1 and above
+      (but we have version: {{ cluster_facts.databases[bdr_database].bdr.bdr_version }})
+
+# Fetch existing commit scopes from the database in order to compare
+# them with the desired configuration.
+
+- name: Retrieve existing BDR commit scopes
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    query: SELECT * FROM bdr.commit_scopes
+  register: commit_scope_tuples
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+# Create any commit scope that is named in bdr_commit_scopes but does
+# not occur in commit_scope_tuples.results; alter any commit scope that
+# exists, but whose attributes in the database are different from the
+# configuration.
+
+- name: Create or alter BDR commit scopes
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >-
+        SELECT bdr.{{ op }}_commit_scope(
+          commit_scope_name := %s,
+          origin_node_group := %s,
+          rule := %s
+        )
+      args:
+        - "{{ item.name }}"
+        - "{{ item.origin }}"
+        - "{{ item.rule }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  vars:
+    match: >
+      {{
+        commit_scope_tuples.results
+        |json_query("[?commit_scope_name=='%s' && origin_node_group=='%s']" % (item.name, item.origin))
+        |first|default({})
+      }}
+    op: >-
+      {{ (match is empty)|ternary('create', 'alter') }}
+  with_items: "{{ bdr_commit_scopes }}"
+  loop_control:
+    label: >-
+      {{ item.name }}
+  when: >
+    match is empty
+    or item.rule != match.rule
+  changed_when: true
+
+# Remove any existing commit scopes that are not mentioned in the
+# configuration.
+#
+# XXX This will fail if any of the commit scopes are used as the default
+# commit scope for a group, but we don't currently support that anyway.
+
+- name: Remove unwanted BDR commit scopes
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: SELECT bdr.remove_commit_scope(commit_scope_name := %s, origin_node_group := %s)
+      args:
+      - "{{ item.commit_scope_name }}"
+      - "{{ item.origin_node_group }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ commit_scope_tuples.results }}"
+  loop_control:
+    label: >-
+      {{ item.commit_scope_name }}
+  when:
+    item.commit_scope_name not in bdr_commit_scopes|json_query('[*].name')
+  changed_when: true
