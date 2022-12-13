@@ -16,7 +16,7 @@ jobs:
        !(startsWith(github.event.pull_request.head.ref, 'dependabot/'))
     name: BlackDuck-scan
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v3
