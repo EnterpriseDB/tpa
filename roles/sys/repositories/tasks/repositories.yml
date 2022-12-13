@@ -4,15 +4,21 @@
 
 # We must use products/default/release if we need repmgr package(s)
 # built against EPAS; and we need repmgr often enough to not require
-# people to specify the repository explicitly in tpa_2q_repositories.
+# people to specify the repository explicitly in tpa_2q_repositories
+# (unless it is explicitly set to an empty list to allow deployments
+# from local repo mirrors only, with no internet access).
 
 - set_fact:
-    tpa_2q_repositories:
-      "{{ tpa_2q_repositories|default([])
-          |union(['products/default/release']) }}"
-  when:
-    postgresql_flavour == 'epas'
-    and 'products/default/release' not in tpa_2q_repositories|default([])
+    tpa_2q_repositories: "{{
+      tpa_2q_repositories|union([
+        'products/default/release'
+      ])
+    }}"
+  when: >-
+    postgresql_flavour == 'epas' and
+    tpa_2q_repositories is defined and
+    tpa_2q_repositories is not empty and
+    'products/default/release' not in tpa_2q_repositories
 
 - set_fact:
     edb_repositories: "{{ edb_repositories|default([]) }}"
