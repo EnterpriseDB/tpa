@@ -199,6 +199,36 @@
   register: vpcs
   tags: ec2_vpcs
 
+# If a VPC has a security group that was created automatically by
+# Firewall Manager, it will cause a dependency violation rather than
+# being automatically deleted when we delete the VPC, so we identify
+# and manually delete it.
+
+- name: Search for remaining security groups in this cluster's VPCs
+  amazon.aws.ec2_group_info:
+    region: "{{ item.0.region }}"
+    filters:
+      "vpc_id": "{{ item.1.id }}"
+  with_nested_dependents:
+    - "{{ vpcs.results }}"
+    - item.0.vpcs
+  register: remaining_security_groups
+  tags: ec2_groups
+
+- name: Remove FMS managed security groups
+  amazon.aws.ec2_group:
+    state: absent
+    region: "{{ item.0.item.0.region }}"
+    group_id: "{{ item.1.group_id }}"
+  when: item.1.description == 'FMS managed security group.'
+  with_nested_dependents:
+    - "{{ remaining_security_groups.results }}"
+    - item.0.security_groups
+  loop_control:
+    label: >-
+      {{ item.0.item.0.region }}:{{ item.1.group_id }}
+  tags: ec2_groups
+
 - name: Remove this cluster's VPC in each region
   amazon.aws.ec2_vpc_net:
     state: absent
