@@ -39,7 +39,7 @@
 
     - name: List the schema to be upgraded
       command: >
-        /usr/bin/python3 "{{ pem_base_dir }}/resources/list_upgrade_schema.py" -s "{{ current_pem_schema_version }}"
+        "{{ pem_python_executable }}" "{{ pem_base_dir }}/resources/list_upgrade_schema.py" -s "{{ current_pem_schema_version }}"
       register: list_upgrades
 
     - name: Upgrading the schema
