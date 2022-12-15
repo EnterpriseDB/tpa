@@ -154,7 +154,8 @@
 # Right now, we have no way to convey secrets generated during deploy
 # back to the Ansible Tower inventory. Until we use the inventory API to
 # persist such changes, we can work around the problem by pre-generating
-# some secrets that we know we will need.
+# some secrets that we know we will need. For example, `enterprisedb_password`
+# is required for EPAS installations.
 #
 # XXX This does not take into account any `postgres_users` settings.
 
@@ -170,4 +171,5 @@
     - pgbouncer_auth_user_password
     - pgbouncer_password
     - repmgr_password
+    - enterprisedb_password
   when: ansible_tower
