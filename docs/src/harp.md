@@ -33,6 +33,7 @@ Variable | Default value | Description
 `harp_watch_poll_interval` | `500` | Milliseconds to sleep between polling DCS. Only applies when `harp_consensus_protocol` is `bdr`.
 `harp_proxy_timeout` | `1` | Builtin proxy connection timeout, in seconds, to Lead Master.
 `harp_proxy_keepalive` | `5` | Amount of time builtin proxy will wait on an idle connection to the Lead Master before sending a keepalive ping.
+`harp_proxy_max_client_conn` | `75` | Maximum number of client connections accepted by harp-proxy (`max_client_conn`)
 `harp_ssl_password_command` | None | a custom command that should receive the obfuscated sslpassword in the stdin and provide the handled sslpassword via stdout.
 `harp_db_request_timeout`| `10s` | similar to dcs -> request_timeout, but for connection to the database itself.
 
