@@ -4,7 +4,8 @@
 
 - name: Change the default monitoring database for agents on BDR nodes
   set_fact: asb_host_db="{{ bdr_database }}"
-  when: inventory_hostname in groups['role_bdr']
+  when: >
+    'bdr' in role
 
 # Register the database server with the PEM Server for monitoring
 - name: Register database server for monitoring and configuration
