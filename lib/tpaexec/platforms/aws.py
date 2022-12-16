@@ -145,6 +145,15 @@ class aws(CloudPlatform):
         if kwargs.get("lookup", False):
             image.update(**self._lookup_ami(image, kwargs["region"]))
 
+        if self.arch.args.get("instance_type") == "t3.micro" and (
+            image["name"].lower().startswith("rhel")
+            or image["name"].lower().startswith("rocky")
+        ):
+            print(
+                "WARNING: Consider using `--instance-type t3.medium` for RedHat distributions"
+            )
+            print("(t3.micro instances often run out of memory)")
+
         return image
 
     def _lookup_ami(self, image, region):
