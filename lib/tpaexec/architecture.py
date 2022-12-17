@@ -802,7 +802,7 @@ class Architecture(object):
             if "yum_repositories" not in cluster_vars.keys():
                 cluster_vars["yum_repositories"] = {}
 
-            repo_name = "PGDG" + re.sub("\.", "", self.args.get("postgres_version"))
+            repo_name = "PGDG" + str.replace(self.args.get("postgres_version"), ".", "")
             cluster_vars["yum_repository_list"] = [
                 "PGDG",
                 "EPEL",
