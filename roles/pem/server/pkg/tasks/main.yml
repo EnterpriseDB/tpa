@@ -19,7 +19,7 @@
 
 - name: Determine PEM python interpreter path
   shell: >
-    eval $(grep -E '^\s*(PEM_PYTHON|PEM_PYTHON_EXECUTABLE)=' /usr/edb/pem/bin/configure-pem-server.sh);
+    eval $(grep -E '^(PEM_PYTHON|PEM_PYTHON_EXECUTABLE)=' /usr/edb/pem/bin/configure-pem-server.sh);
     echo ${PEM_PYTHON_EXECUTABLE:-$(command -v python3)}
   args:
     executable: /bin/bash
