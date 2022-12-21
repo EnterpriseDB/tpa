@@ -64,4 +64,5 @@
     dbs: "{{ auth_function_dbs|default({}) }}"
   when:
     - item not in ['template0', 'bdr_supervisordb']
-    - item not in dbs or dbs[item].pgbouncer_can_execute == false
+    - item not in dbs
+      or dbs[item].pgbouncer_can_execute is false

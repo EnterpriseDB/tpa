@@ -63,7 +63,7 @@
 # backups at all.
 
 - include_role:
-    name: barman/first-backup
+    name: barman/first_backup
     apply:
       tags: first-backup
   with_items: "{{ backup|default([]) }}"

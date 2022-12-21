@@ -13,6 +13,9 @@
   register: is_pem_server_ca_cert_exists
 
 - name: Generate certificates
+  when:
+    not is_pem_server_ca_key_exists.stat.exists
+    and not is_pem_server_ca_cert_exists.stat.exists
   block:
     - name: Generate ca key
       postgresql_query:
@@ -92,5 +95,3 @@
       include_role: name=postgres/restart
       vars:
         postgres_service_end_state: restarted
-
-  when: is_pem_server_ca_key_exists.stat.exists == False and is_pem_server_ca_cert_exists.stat.exists == False

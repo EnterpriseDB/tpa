@@ -143,4 +143,5 @@
     repository_files: "{{ _2q_repositories|map(attribute='file')|list }}"
 
 - name: Update apt cache
-  apt: update_cache=yes
+  apt:
+    update_cache: yes

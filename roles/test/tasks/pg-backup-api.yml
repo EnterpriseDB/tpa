@@ -25,11 +25,11 @@
     - pgbapi_diagnose.content|contains('global')
     - pgbapi_diagnose.content|contains('servers')
 
-- name: return_content
+- name: Set return_content
   set_fact:
     return_content: "{{ pgbapi_diagnose.content | from_json }}"
 
-- name: servers_content
+- name: Set servers_content
   set_fact:
     servers_content: "{{ return_content.servers }}"
 

@@ -27,6 +27,7 @@
     'postgres' in role
     and groups['role_haproxy']|default([]) is not empty
 
-- set_fact: initialise_haproxy=True
+- set_fact:
+    initialise_haproxy: true
   when: >
     'haproxy' in role

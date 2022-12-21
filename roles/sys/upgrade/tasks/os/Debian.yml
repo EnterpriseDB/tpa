@@ -2,4 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-- apt: update_cache=yes upgrade=dist
+- apt:
+    update_cache: yes
+    upgrade: dist

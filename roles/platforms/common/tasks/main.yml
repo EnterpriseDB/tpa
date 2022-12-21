@@ -15,7 +15,8 @@
 # after we're done modifying instance roles.
 
 - name: Create role-based groups for roles which affect other instances
-  group_by: key="role_{{ item }}"
+  group_by:
+    key: "role_{{ item }}"
   when: item in role
   with_items:
   - log-server
@@ -142,7 +143,8 @@
     and 'pem-server' not in role
 
 - name: Create role-based groups
-  group_by: key="role_{{ item }}"
+  group_by:
+    key: "role_{{ item }}"
   with_items: "{{ role }}"
 
 - name: Create group(s) based on the value of bdr_node_group

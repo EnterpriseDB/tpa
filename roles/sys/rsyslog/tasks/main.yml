@@ -74,7 +74,7 @@
       notify:
         - Note rsyslog restart required
 
-    - name: configure TCP listening on log-server
+    - name: Configure TCP listening on log-server
       copy:
         src: "{{ item }}"
         dest: "/etc/rsyslog.d/{{ item }}"

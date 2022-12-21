@@ -16,6 +16,7 @@
     'postgres' in role or
     'pgbouncer' in role
 
-- set_fact: initialise_pgbouncer=True
+- set_fact:
+    initialise_pgbouncer: true
   when: >
     'pgbouncer' in role

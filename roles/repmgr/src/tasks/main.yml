@@ -18,12 +18,16 @@
     repmgr_git_ref is defined
 
 - name: Remove old build directory
-  file: state=absent path="{{ repmgr_build_dir }}" force=yes
+  file:
+    path: "{{ repmgr_build_dir }}"
+    state: absent
+    force: yes
   tags: [build-clean, repmgr-clean]
 
 - name: Ensure build directory exists
-  file: state=directory path="{{ repmgr_build_dir }}"
-
+  file:
+    path: "{{ repmgr_build_dir }}"
+    state: directory
 
 - name: Configure repmgr if necessary
   shell: >

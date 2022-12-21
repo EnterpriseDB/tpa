@@ -57,7 +57,7 @@
     check_result_varname: "pgbapi"
 
 # Update trusted CA cert to include our CA
-- name: copy CA to shared trusted CA
+- name: Copy CA to shared trusted CA
   copy:
     src: "{{ ssl_ca_file }}"
     remote_src: yes

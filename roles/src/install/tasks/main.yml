@@ -21,11 +21,16 @@
 
 - block:
   - name: Remove old build directory
-    file: state=absent path="{{ build_directory }}" force=yes
+    file:
+      path: "{{ build_directory }}"
+      state: absent
+      force: yes
     tags: build-clean
 
   - name: Ensure build directory exists
-    file: state=directory path="{{ build_directory }}"
+    file:
+      path: "{{ build_directory }}"
+      state: directory
   when:
     build_directory|default(source_directory) != source_directory
 

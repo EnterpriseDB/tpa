@@ -63,4 +63,5 @@
 
 - include_role: name=postgres/config
 
-- set_fact: pgdata_initialised=True
+- set_fact:
+    pgdata_initialised: true

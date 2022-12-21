@@ -14,10 +14,10 @@
   become: yes
   tags: [pem-server, pem-webserver]
 
-- name: ssl-pem configuration (Debian/Ubuntu)
+- name: Enable ssl-pem configuration (Debian/Ubuntu)
   block:
     - name: "Enable the apache2 site: {{ pem_branding_edb_wl }}-ssl-pem.conf"
-      shell: "/usr/sbin/a2ensite -m {{ pem_branding_edb_wl }}-ssl-pem"
+      command: "/usr/sbin/a2ensite -m {{ pem_branding_edb_wl }}-ssl-pem"
 
     - name: "Install {{ pem_branding_edb_wl }}-gnutls-pem.conf"
       template:
@@ -28,7 +28,7 @@
         mode: 0644
 
     - name: "Enable the apache2 site: {{ pem_branding_edb_wl }}-gnutls-pem.conf"
-      shell: "/usr/sbin/a2ensite -m {{ pem_branding_edb_wl }}-gnutls-pem"
+      command: "/usr/sbin/a2ensite -m {{ pem_branding_edb_wl }}-gnutls-pem"
 
   when: ansible_os_family == 'Debian'
   become: yes

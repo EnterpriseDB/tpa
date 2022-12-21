@@ -20,9 +20,9 @@
 - include_role: name=postgres/facts
   when: >
     'postgres' in role and
-    pgdata_initialised|default('false') == True and
+    pgdata_initialised|default('false') is true and
     pgdata_user|default('UNKNOWN') != 'UNKNOWN' and
-    postgres_running|default('false') == True
+    postgres_running|default('false') is true
 
 # We may change default values over time, but the changes are not always
 # worth forcing a reload or restart on existing clusters. Now that we've

@@ -40,7 +40,7 @@
   - set_fact:
       postgres_service_name: harp-postgres.target
 
-  - name:
+  - name: Ensure postgres service is enabled
     systemd:
       name: "{{ postgres_service_name }}"
       enabled: yes

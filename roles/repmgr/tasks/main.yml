@@ -15,4 +15,5 @@
   when: >
     'postgres' in role
 
-- set_fact: initialise_replication=True
+- set_fact:
+    initialise_replication: true

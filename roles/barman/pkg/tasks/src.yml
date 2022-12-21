@@ -18,11 +18,16 @@
     barman_git_ref is defined
 
 - name: Remove old build directory
-  file: state=absent path="{{ barman_build_dir }}" force=yes
+  file:
+    path: "{{ barman_build_dir }}"
+    state: absent
+    force: yes
   tags: [build-clean, barman-clean]
 
 - name: Ensure build directory exists
-  file: state=directory path="{{ barman_build_dir }}"
+  file:
+    path: "{{ barman_build_dir }}"
+    state: directory
 
 # The source directory may be read-only, and setup.py does not make it
 # convenient to do an out-of-tree build the way we do for other things,

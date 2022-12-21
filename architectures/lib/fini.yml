@@ -32,7 +32,7 @@
       is not empty
 
   - include_role:
-      name: post-deploy
+      name: post_deploy
       apply:
         tags: post-deploy
     tags: always

@@ -72,12 +72,12 @@
 - include_tasks: pem_sites.yml
 
 - name: Run setup.py to create pem.db
-  shell: "{{ pem_python_executable }} /usr/edb/pem/web/setup.py"
+  command: "{{ pem_python_executable }} /usr/edb/pem/web/setup.py"
   become_user: pem
   become: yes
 
 - name: Configure SELinux security policy for PEM
-  shell: "{{ pem_base_dir }}/bin/configure-selinux.sh"
+  command: "{{ pem_base_dir }}/bin/configure-selinux.sh"
 
 # XXX: What triggers this restart? Is it the SELinux config?
 - name: "Restart httpd service - {{ pem_web_server_service_name[ansible_os_family] }}"

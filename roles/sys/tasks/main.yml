@@ -9,11 +9,11 @@
 # We invoke sys/bootstrap to check whether the basic requirements are
 # satisfied, and install them otherwise; but instances without outside
 # network access can't install anything that's missing, so we invoke
-# sys/local-repo first (in such an environment, the local-repo must
+# sys/local_repo first (in such an environment, the local-repo must
 # provide all packages required during deployment).
 
 - include_role:
-    name: sys/local-repo
+    name: sys/local_repo
     apply:
       tags: local-repo
   tags: local-repo

@@ -3,12 +3,12 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - name: "Including userparameters"
-  include: "userparameter.yml"
+  include_tasks: "userparameter.yml"
   when: zabbix_agent_userparameters|length > 0
   tags: [zabbix-agent, config]
 
 - name: "Install zabbix_agentd config file"
-  include: "Linux.yml"
+  include_tasks: "Linux.yml"
   tags: [zabbix-agent, config]
 
 - include_role: name=postgres/pgpass

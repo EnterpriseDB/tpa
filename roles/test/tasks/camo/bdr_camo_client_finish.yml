@@ -31,7 +31,8 @@
 
 - block:
   - name: Wait for bdr_camo_client to complete
-    async_status: jid="{{ client_run.ansible_job_id }}"
+    async_status:
+      jid: "{{ client_run.ansible_job_id }}"
     register: client
     until: client.finished
     retries: 600
@@ -51,7 +52,7 @@
     when: client is not successful
     tags: [camo, fail, upgrade]
 
-  - name: get LSN after bdr_camo_client run
+  - name: Get LSN after bdr_camo_client run
     postgresql_query:
       conninfo: "{{ origin_conninfo }}"
       queries:
@@ -66,7 +67,7 @@
     inventory_hostname == tester_instance
 
 - block:
-  - name: wait for BDR instances to apply changes
+  - name: Wait for BDR instances to apply changes
     postgresql_query:
       conninfo: "{{ bdr_node_dsn }}"
       queries:
@@ -92,7 +93,7 @@
     until: script_running.stdout == ''
     retries: 20
     ignore_errors: true
-  - name: kill run_time_check script if not already finished. Possible data divergence.
+  - name: Kill run_time_check script if not already finished. Possible data divergence.
     shell: |
        ps -ef | grep run_time_check | cut -d ' ' -f 2 || kill -9
     when: script_running is defined

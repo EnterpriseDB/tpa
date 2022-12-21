@@ -3,7 +3,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - name: Change the default monitoring database for agents on BDR nodes
-  set_fact: asb_host_db="{{ bdr_database }}"
+  set_fact:
+    asb_host_db: "{{ bdr_database }}"
   when: >
     'bdr' in role
 

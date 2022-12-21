@@ -186,7 +186,8 @@
 
 - block:
   - name: Wait for bdr_camo_client to complete
-    async_status: jid="{{ client_run.ansible_job_id }}"
+    async_status:
+      jid: "{{ client_run.ansible_job_id }}"
     register: client
     until: client.finished
     retries: 600
@@ -206,7 +207,7 @@
     when: client is not successful
     tags: [camo, fail, upgrade]
 
-  - name: get LSN after bdr_camo_client run
+  - name: Get LSN after bdr_camo_client run
     postgresql_query:
       conninfo: "{{ ping_conninfo }}"
       queries:
@@ -221,7 +222,7 @@
     inventory_hostname == tester_instance
 
 - block:
-  - name: wait for BDR instances to apply changes
+  - name: Wait for BDR instances to apply changes
     postgresql_query:
       conninfo: "{{ bdr_node_dsn }}"
       queries:

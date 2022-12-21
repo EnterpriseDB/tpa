@@ -6,7 +6,7 @@
 # disks or anything) via sysrq. The slightly convoluted invocation makes
 # it less likely that this task will fail.
 
-- name: powerfail for AWS
+- name: Powerfail for AWS
   block:
   - name: Request immediate reboot
     shell: >
@@ -27,18 +27,18 @@
       timeout: 120
   when: platform != 'docker'
 
-- name: powerfail for docker
+- name: Powerfail for docker
   block:
   # save /etc/hosts to restore later
   - name: Backup /etc/hosts
     command: cp /etc/hosts /etc/hosts.org
 
-  - name: kill docker container
+  - name: Kill docker container
     shell: >
       docker kill {{ inventory_hostname }}
     delegate_to: localhost
 
-  - name: start docker container
+  - name: Start docker container
     shell: >
       sleep {{ powerfail_timeout|default('60') }};
       docker start {{ inventory_hostname }};

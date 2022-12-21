@@ -5,13 +5,13 @@
 - name: "Configure Add-ons for {{ pem_web_server_name[ansible_os_family] }}..."
   block:
     - name: Check the mod_ssl
-      shell: /usr/sbin/a2query -m ssl
+      command: /usr/sbin/a2query -m ssl
       register: mod_ssl
       ignore_errors: true
       no_log: true
 
     - name: Check the mod_gnutls
-      shell: /usr/sbin/a2query -m gnutls
+      command: /usr/sbin/a2query -m gnutls
       register: mod_gnutls
       ignore_errors: true
       no_log: true

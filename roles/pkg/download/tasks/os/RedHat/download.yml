@@ -33,7 +33,7 @@
     |list|length > 0
 
 - name: Generate repository metadata with createrepo for RH7
-  shell: createrepo .
+  command: createrepo .
   args:
     chdir: "{{ _download_dir }}"
   when: >
