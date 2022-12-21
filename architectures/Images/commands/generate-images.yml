@@ -12,12 +12,12 @@
   tasks:
   - set_fact:
       _image_name: "{{
-        image_name.format(
-          distribution=ansible_distribution,
-          label=image_label, version=image_version,
-          date=date,
-        )
-      }}"
+          image_name.format(
+            distribution=ansible_distribution,
+            label=image_label, version=image_version,
+            date=date,
+          )
+        }}"
     vars:
       date: >-
         {{ lookup('pipe', 'date +%Y%m%d') }}

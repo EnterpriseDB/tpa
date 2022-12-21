@@ -105,9 +105,9 @@
     creates: "{{ new_path }}"
   vars:
     current_path: "{{
-      cluster_facts.pg_settings.get(item.key)
-        if cluster_facts.pg_settings is defined
-    }}"
+        cluster_facts.pg_settings.get(item.key)
+          if cluster_facts.pg_settings is defined
+      }}"
     new_path: >-
       {{ postgres_conf_dir }}/{{ item.value }}
   with_dict: "{{ postgres_conf_files }}"

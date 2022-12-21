@@ -27,9 +27,8 @@
       - "{{ local_repo_base_dir }}/{{ ansible_distribution }}/{{ ansible_distribution_release }}"
       - "{{ local_repo_base_dir }}/{{ ansible_distribution }}"
       - "{{ local_repo_base_dir }}"
-    found_repo_dir: "{{
-      lookup('first_found', dict(files=maybe_repo_dirs, skip=True))
-    }}"
+    found_repo_dir:
+      "{{ lookup('first_found', dict(files=maybe_repo_dirs, skip=True)) }}"
 
 - name: Ensure that we know how to configure a repository on target instances
   assert:

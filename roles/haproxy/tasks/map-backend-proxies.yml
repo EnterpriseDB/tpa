@@ -11,14 +11,13 @@
 
 - name: Record haproxy/backend relationships
   set_fact:
-    all_haproxy_backend_servers: "{{
-      all_haproxy_backend_servers|default([])|union([item.1])
-    }}"
+    all_haproxy_backend_servers:
+      "{{ all_haproxy_backend_servers|default([])|union([item.1]) }}"
     proxies_for_backend_server: "{{
-      proxies_for_backend_server|default({})|combine({
-        item.1: proxies_for_backend_server[item.1]|default([])|union([item.0])
-      })
-    }}"
+        proxies_for_backend_server|default({})|combine({
+          item.1: proxies_for_backend_server[item.1]|default([])|union([item.0])
+        })
+      }}"
   with_nested_dependents:
   - groups['role_haproxy']|default([])
   - hostvars[item.0].haproxy_backend_servers

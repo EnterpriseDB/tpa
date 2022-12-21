@@ -3,9 +3,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - set_fact:
-    default_apt_repository_list: "{{
-      default_apt_repository_list|union(['EDB'])
-    }}"
+    default_apt_repository_list:
+      "{{ default_apt_repository_list|union(['EDB']) }}"
   when:
     postgres_installation_method == 'pkg' and (
       postgresql_flavour == 'epas'
@@ -14,9 +13,8 @@
     )
 
 - set_fact:
-    apt_repository_list: "{{
-      apt_repository_list|default(default_apt_repository_list)
-    }}"
+    apt_repository_list:
+      "{{ apt_repository_list|default(default_apt_repository_list) }}"
 
 # XXX Duplicated in RedHat/repositories.yml
 
@@ -59,14 +57,14 @@
     _credentials: "{{ _file and lookup('file', _file) or '' }}"
     repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
     r: "{{ repos[item] }}"
-    needs_auth: "{{
-      item == 'EDB' and ansible_distribution_release in ['jessie', 'stretch']
-    }}"
+    needs_auth:
+      "{{ item == 'EDB'
+          and ansible_distribution_release in ['jessie', 'stretch'] }}"
     repo_entry: "{{
-      needs_auth|ternary(
-        r.repo|regex_replace('https://', 'https://%s@' % _credentials), r.repo
-      )
-    }}"
+        needs_auth|ternary(
+          r.repo|regex_replace('https://', 'https://%s@' % _credentials), r.repo
+        )
+      }}"
   no_log: "{{ needs_auth }}"
 
 - name: Ensure old EDB sources.list.d entry is absent
@@ -104,12 +102,12 @@
 - name: Enumerate 2ndQuadrant repositories
   set_fact:
     _2q_repositories: "{{
-      _2q_repositories|union([{
-        'url': url,
-        'file': file,
-        'repo': item
-      }])
-    }}"
+        _2q_repositories|union([{
+          'url': url,
+          'file': file,
+          'repo': item
+        }])
+      }}"
   with_items:
     - dl/default/release
     - "{{ tpa_2q_repositories|default([]) }}"
@@ -120,11 +118,11 @@
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
     volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
     urltemplate: "{{
-      (item == 'dl/default/release')|ternary(
-        'https://techsupport.enterprisedb.com/api/repository/{label}/deb{volatile}',
-        'https://techsupport.enterprisedb.com/api/repository/{token}/{label}/deb{volatile}'
-      )
-    }}"
+        (item == 'dl/default/release')|ternary(
+          'https://techsupport.enterprisedb.com/api/repository/{label}/deb{volatile}',
+          'https://techsupport.enterprisedb.com/api/repository/{token}/{label}/deb{volatile}'
+        )
+      }}"
     url: >-
       {{ urltemplate.format(token=token, label=item, volatile=volatile) }}
     file: "/etc/apt/sources.list.d/2ndquadrant-{{ item|replace('/', '-') }}.list"

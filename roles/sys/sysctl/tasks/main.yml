@@ -11,14 +11,13 @@
     lines: "{{ sysctl_conf_settings|dict_format('{key}={value}') }}"
   register: sysctl_conf
   vars:
-    sysctl_conf_settings: "{{
-      sysctl_defaults
-      |combine(_ip_forward)
-      |combine(sysctl_values)
-    }}"
-    _ip_forward: "{{
-      ('openvpn-server' in role)|ternary({'net.ipv4.ip_forward': 1}, {})
-    }}"
+    sysctl_conf_settings:
+      "{{ sysctl_defaults
+          |combine(_ip_forward)
+          |combine(sysctl_values) }}"
+    _ip_forward:
+      "{{ ('openvpn-server' in role)
+          |ternary({'net.ipv4.ip_forward': 1}, {}) }}"
 
 - name: Reload sysctl values if changed
   command:

@@ -31,7 +31,8 @@
   vars:
     existing_pgbouncer_password: "{{ userlist_cmd.stdout or 'none' }}"
     existing_auth_user_password: "{{
-      hostvars[pgbouncer_backend_instance].cluster_facts.roles[pgbouncer_auth_user].rolpassword|default('unknown')
-    }}"
+        hostvars[pgbouncer_backend_instance].cluster_facts.roles[pgbouncer_auth_user].rolpassword
+        |default('unknown')
+      }}"
   notify:
     - Note pgbouncer restart required

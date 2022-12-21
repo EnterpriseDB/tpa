@@ -35,10 +35,10 @@
 - name: Map node numbers to bdr_node_ids
   set_fact:
     bdr_node_ids: "{{
-      bdr_node_ids|default({})|combine({
-        hostvars[item].node: hostvars[item].bdr_node_id
-      })
-    }}"
+        bdr_node_ids|default({})|combine({
+          hostvars[item].node: hostvars[item].bdr_node_id
+        })
+      }}"
   with_items: "{{ groups[bdr_node_group] }}"
   when:
     hostvars[item].bdr_node_id is defined
@@ -108,8 +108,8 @@
 - name: Map BDR group names to options
   set_fact:
     _bdr_group_options: "{{
-      _bdr_group_options|default({})|combine({group: options})
-    }}"
+        _bdr_group_options|default({})|combine({group: options})
+      }}"
   with_items: "{{ bdr_node_groups }}"
   vars:
     group: "{{ item.name }}"
@@ -143,12 +143,12 @@
   vars:
     _group_options: "{{ _bdr_group_options[_group] }}"
     _join_options: "{{
-      (_group == bdr_node_group or
-       (bdr_child_group is defined and
-        _group == bdr_child_group) or
-       'parent_group_name' not in _group_options)
-      |ternary({}, {'join_node_group': 'f'})
-    }}"
+        (_group == bdr_node_group or
+         (bdr_child_group is defined and
+          _group == bdr_child_group) or
+         'parent_group_name' not in _group_options)
+        |ternary({}, {'join_node_group': 'f'})
+      }}"
     _options: "{{ _group_options|combine(_join_options) }}"
     _keys: "{{ ['node_group_name', _options.keys()|list]|flatten }}"
     _values: "{{ [_group, _options.values()|list]|flatten }}"
@@ -162,8 +162,8 @@
 - name: Identify logical standby nodes
   set_fact:
     bdr_node_pause_in_standby: "{{
-      bdr_node_pause_in_standby|default('readonly' in role)
-    }}"
+        bdr_node_pause_in_standby|default('readonly' in role)
+      }}"
 
 - name: Include bdr-post-group-creation hook
   include_tasks: "{{ hook }}"

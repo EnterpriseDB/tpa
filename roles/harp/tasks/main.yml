@@ -15,12 +15,14 @@
     that:
       (num_locations|int % 2) == 1 or num_harp_locations|int == 1
   vars:
-    num_locations: "{{
-      groups[bdr_node_group]|map('extract', hostvars, 'location')|unique|length
-    }}"
-    num_harp_locations: "{{
-      groups[bdr_node_group]|map('extract', hostvars, 'harp_location')|unique|length
-    }}"
+    num_locations:
+      "{{ groups[bdr_node_group]
+          |map('extract', hostvars, 'location')
+          |unique|length }}"
+    num_harp_locations:
+      "{{ groups[bdr_node_group]
+          |map('extract', hostvars, 'harp_location')
+          |unique|length }}"
   when: harp_consensus_protocol == 'bdr'
 
 - include_role:

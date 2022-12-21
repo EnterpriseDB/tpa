@@ -35,10 +35,10 @@
     state: "{{ _state }}"
   vars:
     _state: "{{
-      (postgres_package_version is not defined and
-       pglogical_package_version is not defined and
-       bdr_package_version is not defined)
-      |ternary('latest', 'present')
-    }}"
+        (postgres_package_version is not defined and
+         pglogical_package_version is not defined and
+         bdr_package_version is not defined)
+        |ternary('latest', 'present')
+      }}"
   notify:
     - Note Postgres restart required

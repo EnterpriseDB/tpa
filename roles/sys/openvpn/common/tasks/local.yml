@@ -63,9 +63,8 @@
 
 - name: Select extension type for host certificate
   set_fact:
-    openssl_extensions: "{{
-      ('openvpn-server' in role)|ternary('server_exts', 'client_exts')
-    }}"
+    openssl_extensions:
+      "{{ ('openvpn-server' in role)|ternary('server_exts', 'client_exts') }}"
 
 - name: Sign each CSR with the CA certificate
   shell: >

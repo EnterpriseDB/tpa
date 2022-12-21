@@ -10,12 +10,12 @@
 
 - set_fact:
     harp_consensus_protocol: "{{
-      harp_consensus_protocol
-      |default(
-        hostvars[first_bdr_primary].harp_consensus_protocol
-        |default(default_harp_consensus_protocols[harp_version])
-      )
-    }}"
+        harp_consensus_protocol
+        |default(
+          hostvars[first_bdr_primary].harp_consensus_protocol
+          |default(default_harp_consensus_protocols[harp_version])
+        )
+      }}"
   when: >
     failover_manager == 'harp'
     and ('bdr' in role or 'harp-proxy' in role)
@@ -33,27 +33,27 @@
       _mismatched_instances is empty
   vars:
     _group_proxies: "{{
-      groups['role_harp-proxy']
-      |default([])
-      |select_by_hostvar(hostvars, 'bdr_node_group', bdr_node_group)
-      |list
-    }}"
+        groups['role_harp-proxy']
+        |default([])
+        |select_by_hostvar(hostvars, 'bdr_node_group', bdr_node_group)
+        |list
+      }}"
     _all_group_instances: "{{
-      groups[bdr_node_group]|union(_group_proxies)
-    }}"
+        groups[bdr_node_group]|union(_group_proxies)
+      }}"
     _compliant_instances: "{{
-      _all_group_instances
-      |select_by_hostvar(hostvars, 'harp_consensus_protocol', harp_consensus_protocol)
-      |list
-    }}"
+        _all_group_instances
+        |select_by_hostvar(hostvars, 'harp_consensus_protocol', harp_consensus_protocol)
+        |list
+      }}"
     _mismatched_instances: "{{
-      _all_group_instances|symmetric_difference(_compliant_instances)
-    }}"
+        _all_group_instances|symmetric_difference(_compliant_instances)
+      }}"
     _mismatch_descriptions: "{{
-      _mismatched_instances
-      |map('pyformat_hostvars', '{inventory_hostname} has the value {harp_consensus_protocol}', hostvars)
-      |list
-    }}"
+        _mismatched_instances
+        |map('pyformat_hostvars', '{inventory_hostname} has the value {harp_consensus_protocol}', hostvars)
+        |list
+      }}"
   when: >
     'bdr' in role
     and failover_manager == 'harp'

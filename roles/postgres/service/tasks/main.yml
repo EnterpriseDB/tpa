@@ -24,11 +24,11 @@
   register: unit
   vars:
     _postmaster: "{{
-      '%s/%spostmaster' % (
-        postgres_bin_dir,
-        (postgresql_flavour == 'epas')|ternary('edb-', '')
-      )
-    }}"
+        '%s/%spostmaster' % (
+          postgres_bin_dir,
+          (postgresql_flavour == 'epas')|ternary('edb-', '')
+        )
+      }}"
 
 - name: Enable postgres services
   systemd:

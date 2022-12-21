@@ -3,13 +3,12 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 _device: "{{
-  (_encryption == 'luks')|ternary(
-    ('/dev/mapper/%s' % _luks_volume), volume.device
-  )
-}}"
+    (_encryption == 'luks')|ternary(
+      ('/dev/mapper/%s' % _luks_volume), volume.device
+    )
+  }}"
 _encryption: "{{ volume.encryption|default('none') }}"
-_luks_volume: "{{
-  volume.luks_volume|default('%s_crypt' % volume.device|basename)
-}}"
+_luks_volume:
+  "{{ volume.luks_volume|default('%s_crypt' % volume.device|basename) }}"
 _fstype: "{{ volume.fstype|default(default_fstype) }}"
 _readahead: "{{ volume.readahead|default(default_readahead) }}"

@@ -144,9 +144,9 @@
     required_values:
       - "{{ set.name }}"
     optional_arguments: "{{
-      set|remove_keys(replication_set_keys)
-      |remove_keys(['autoadd_existing'] if op == 'alter' else [])
-    }}"
+        set|remove_keys(replication_set_keys)
+        |remove_keys(['autoadd_existing'] if op == 'alter' else [])
+      }}"
     argument_keys: >
       {{ required_keys + optional_arguments.keys()|list }}
     argument_values: >

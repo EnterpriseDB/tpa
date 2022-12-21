@@ -35,6 +35,5 @@
   vars:
     _mountopts: "{{ volume.mountopts|default(default_mountopts) }}"
     _noauto: "{{ (_encryption == 'luks')|ternary(['noauto'], []) }}"
-    _mount_options: "{{
-      _mountopts.split(',')|map('trim')|list|union(_noauto)|join(',')
-    }}"
+    _mount_options:
+      "{{ _mountopts.split(',')|map('trim')|list|union(_noauto)|join(',') }}"

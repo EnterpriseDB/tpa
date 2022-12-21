@@ -45,7 +45,7 @@
 - name: Add ssh_key_file to cluster_group_vars
   set_fact:
     cluster_group_vars: "{{
-      cluster_group_vars|combine({'ssh_key_file': ssh_key_file})
+        cluster_group_vars|combine({'ssh_key_file': ssh_key_file})
       }}"
   when: not ansible_tower
 

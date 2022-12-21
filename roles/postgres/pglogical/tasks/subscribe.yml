@@ -64,8 +64,8 @@
       unrecognised_keys is empty
   vars:
     recognised_keys: "{{
-      subscription_keys|union(subscription_optional_arguments)
-    }}"
+        subscription_keys|union(subscription_optional_arguments)
+      }}"
     unrecognised_keys: >
       {{ sub.keys()|list|difference(recognised_keys) }}
 
@@ -88,9 +88,9 @@
       - matching_publications|length == 1
     vars:
       matching_publications: "{{
-        hostvars[sub.publication.instance].publications
-        |default([])|json_query(_match_q % sub.publication.name)
-      }}"
+          hostvars[sub.publication.instance].publications
+          |default([])|json_query(_match_q % sub.publication.name)
+        }}"
     when:
       sub.publication.instance is defined
 
@@ -193,8 +193,8 @@
   vars:
     sub_enabled: "{{ subscription_tuples.results[0].sub_enabled }}"
     action: "{{
-      sub_enabled|ternary('disable', 'enable')
-    }}"
+        sub_enabled|ternary('disable', 'enable')
+      }}"
   become_user: "{{ postgres_user }}"
   become: yes
   when:
@@ -216,11 +216,11 @@
   vars:
     cfg_replication_sets: "{{ sub.replication_sets|default([]) }}"
     sub_replication_sets: "{{
-      subscription_tuples.results[0].sub_replication_sets or []
-    }}"
+        subscription_tuples.results[0].sub_replication_sets or []
+      }}"
     action: "{{
-      (set_name in sub_replication_sets)|ternary('remove', 'add')
-    }}"
+        (set_name in sub_replication_sets)|ternary('remove', 'add')
+      }}"
   become_user: "{{ postgres_user }}"
   become: yes
   with_items: "{{ cfg_replication_sets|symmetric_difference(sub_replication_sets) }}"

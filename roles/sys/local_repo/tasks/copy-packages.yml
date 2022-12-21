@@ -22,13 +22,13 @@
     _check:
       "{{ repo_metadata_checks[ansible_os_family] }}"
     _check_exists: "{{
-      lookup(
-        'first_found', dict(
-          files='%s/%s' % (local_repo_dir, _check.must_exist),
-          skip=True
+        lookup(
+          'first_found', dict(
+            files='%s/%s' % (local_repo_dir, _check.must_exist),
+            skip=True
+          )
         )
-      )
-    }}"
+      }}"
 
 # The repository directory must be owned by ansible_user because we need
 # to rsync stuff directly into it.

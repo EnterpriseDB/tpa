@@ -23,11 +23,11 @@
 - include_tasks: bdr-extension.yml
   vars:
     dbs_with_unused_bdr_extension: "{{
-      cluster_facts.databases.values()
-      |selectattr('bdr.node', 'defined')
-      |selectattr('bdr.node', 'empty')
-      |list
-    }}"
+        cluster_facts.databases.values()
+        |selectattr('bdr.node', 'defined')
+        |selectattr('bdr.node', 'empty')
+        |list
+      }}"
   when: >
     'bdr' in role
     and 'primary' in role
@@ -41,11 +41,11 @@
 - include_tasks: pglogical-extension.yml
   vars:
     dbs_with_zombie_pglogical: "{{
-      cluster_facts.databases.values()
-      |selectattr('pglogical', 'defined')
-      |selectattr('pglogical', 'empty')
-      |list
-    }}"
+        cluster_facts.databases.values()
+        |selectattr('pglogical', 'defined')
+        |selectattr('pglogical', 'empty')
+        |list
+      }}"
   when: >
     'primary' in role
     and dbs_with_zombie_pglogical is not empty

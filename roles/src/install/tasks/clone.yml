@@ -35,10 +35,10 @@
     task_env:
       TMPDIR: /var/tmp
     _task_environment: "{{
-      git_credentials|ternary(git_env, {})
-      |combine(ssh_auth_sock|ternary(ssh_env, {}))
-      |combine(task_env)
-    }}"
+        git_credentials|ternary(git_env, {})
+        |combine(ssh_auth_sock|ternary(ssh_env, {}))
+        |combine(task_env)
+      }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
   when:
     dest not in mounted_sources

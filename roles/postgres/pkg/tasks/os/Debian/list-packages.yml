@@ -11,10 +11,10 @@
 - name: Add separate contrib package for Postgres 9.6 and below
   set_fact:
     postgres_packages: "{{
-      postgres_packages|combine({
-        postgres_family: {ansible_distribution: _new_pkg_list}
-      })
-    }}"
+        postgres_packages|combine({
+          postgres_family: {ansible_distribution: _new_pkg_list}
+        })
+      }}"
   vars:
     _contrib_package:
       - "{{ postgres_package_name }}-contrib-{{ postgres_version }}"
@@ -31,10 +31,10 @@
 - name: Switch to dbg (not dbgsym) debug packages for Postgres 9.6 and below
   set_fact:
     postgres_debug_packages: "{{
-      postgres_debug_packages|combine({
-        postgres_family: {ansible_distribution: _new_pkg_list}
-      })
-    }}"
+        postgres_debug_packages|combine({
+          postgres_family: {ansible_distribution: _new_pkg_list}
+        })
+      }}"
   vars:
     _old_pkg_list:
       "{{ postgres_packages[postgres_family][ansible_distribution] }}"

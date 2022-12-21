@@ -29,21 +29,20 @@
 
 - set_fact:
     openvpn_config: "{{
-      _openvpn_old_config.stat.exists|ternary(
-        '/etc/openvpn/%s' % _vpn_name,
-        '/etc/openvpn/%s/%s' % (_vpn_type, _vpn_name)
-      )
-    }}"
+        _openvpn_old_config.stat.exists|ternary(
+          '/etc/openvpn/%s' % _vpn_name,
+          '/etc/openvpn/%s/%s' % (_vpn_type, _vpn_name)
+        )
+      }}"
     openvpn_service_name: "{{
-      _openvpn_old_config.stat.exists|ternary(
-        'openvpn@%s' % _vpn_name,
-        'openvpn-%s@%s' % (_vpn_type, _vpn_name),
-      )
-    }}"
+        _openvpn_old_config.stat.exists|ternary(
+          'openvpn@%s' % _vpn_name,
+          'openvpn-%s@%s' % (_vpn_type, _vpn_name),
+        )
+      }}"
   vars:
-    _vpn_type: "{{
-      ('openvpn-server' in role)|ternary('server', 'client')
-    }}"
+    _vpn_type:
+      "{{ ('openvpn-server' in role)|ternary('server', 'client') }}"
 
 - include_role: name=sys/openvpn/common
 

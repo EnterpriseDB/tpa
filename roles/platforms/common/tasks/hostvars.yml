@@ -136,10 +136,10 @@
       loop_var: tokenline
   - set_fact:
       edb_repo_tokens: "{{
-        edb_repo_tokens|default({})|combine({
-          _parts[0]: _parts[1]
-        })
-      }}"
+          edb_repo_tokens|default({})|combine({
+            _parts[0]: _parts[1]
+          })
+        }}"
     vars:
       _parts: "{{ tokenline.split(':') }}"
     with_items: "{{ _tfile_lines }}"
@@ -182,11 +182,10 @@
       are already installed); please remove the files to continue.
     that: legacy_certs is empty
   vars:
-    legacy_certs: "{{
-      lookup('fileglob',
-             '%s/%s.key' % (cluster_dir, cluster_name),
-             '%s/%s.crt' % (cluster_dir, cluster_name))
-    }}"
+    legacy_certs:
+      "{{ lookup('fileglob',
+                 '%s/%s.key' % (cluster_dir, cluster_name),
+                 '%s/%s.crt' % (cluster_dir, cluster_name)) }}"
 
 # To use shared PEM server in a given cluster get a username/password for
 # the PEM backend database that agents can use to register themselves, put

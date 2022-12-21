@@ -177,8 +177,7 @@
 - name: Enable and start pemagent service
   systemd:
     name: "{{ pem_agent_service_name }}"
-    state: "{{
-      (agent_cfg is not changed)|ternary('started', 'restarted')
-    }}"
+    state:
+      "{{ (agent_cfg is not changed)|ternary('started', 'restarted') }}"
     enabled: yes
     daemon_reload: yes

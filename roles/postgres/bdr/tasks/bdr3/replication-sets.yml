@@ -39,8 +39,8 @@
   become: yes
   vars:
     _repsets: "{{
-      (bdr_version_num >= 30700)|ternary('N.sub_repsets', 'replication_sets')
-    }}"
+        (bdr_version_num >= 30700)|ternary('N.sub_repsets', 'replication_sets')
+      }}"
 
 - name: Alter subscription to include desired replication sets
   postgresql_query:

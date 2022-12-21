@@ -16,11 +16,8 @@
     tasks_from: verify
   when: crt_check.stat.exists
 
-- include_tasks: "{{
-    selfsigned|ternary(
-    'selfsigned.yml', 'certificate.yml'
-    )
-  }}"
+- include_tasks:
+    "{{ selfsigned|ternary('selfsigned.yml', 'certificate.yml') }}"
   when: >
     not crt_check.stat.exists
     or not cert_verify_passed

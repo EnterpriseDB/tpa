@@ -34,5 +34,5 @@
 
 - set_fact:
     pglogical_node_id: "{{
-      _pgl_node.node_id|default(_pgl_new_node.node_id)
-    }}"
+        _pgl_node.node_id|default(_pgl_new_node.node_id)
+      }}"

@@ -19,10 +19,10 @@
 - name: Add custom ssh port to security group
   set_fact:
     cluster_rules: "{{
-      cluster_rules|union([
-        dict(proto='tcp', from_port=ssh_port, to_port=ssh_port, cidr_ip='0.0.0.0/0')
-      ])
-    }}"
+        cluster_rules|union([
+          dict(proto='tcp', from_port=ssh_port, to_port=ssh_port, cidr_ip='0.0.0.0/0')
+        ])
+      }}"
   when:
     ssh_port|int != 22
 
@@ -36,10 +36,10 @@
 - name: Add https port to security group for PEM
   set_fact:
     cluster_rules: "{{
-      cluster_rules|union([
-        dict(proto='tcp', from_port=443, to_port=443, cidr_ip='0.0.0.0/0')
-      ])
-    }}"
+        cluster_rules|union([
+          dict(proto='tcp', from_port=443, to_port=443, cidr_ip='0.0.0.0/0')
+        ])
+      }}"
   when:
     instances|json_query('[*].role[]')|contains('pem-server')
 

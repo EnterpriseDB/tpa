@@ -71,8 +71,8 @@
         RedHat: rpm -i
   vars:
       package_glob: "{{
-        lookup('fileglob', '%s/%s*' % (local_repo_dir, package_name), wantlist=True)
-      }}"
+          lookup('fileglob', '%s/%s*' % (local_repo_dir, package_name), wantlist=True)
+        }}"
       package_filename: "{{ package_glob[0]|basename }}"
   when:
     use_local_repo_only

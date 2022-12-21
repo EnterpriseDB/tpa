@@ -155,9 +155,8 @@
 
 - name: Enumerate instances eligible to become first_bdr_primary
   set_fact:
-    first_bdr_primary_candidates: "{{
-      first_bdr_primary_candidates|default(_primary_candidates)
-    }}"
+    first_bdr_primary_candidates:
+      "{{ first_bdr_primary_candidates|default(_primary_candidates) }}"
   vars:
     ro_groups:
     - role_replica
@@ -179,9 +178,9 @@
 
 - name: Designate arbitrary r/w instance as first_bdr_primary
   set_fact:
-    first_bdr_primary: "{{
-      preferred_first_bdr_primary|default(first_bdr_primary_candidates|first)
-    }}"
+    first_bdr_primary:
+      "{{ preferred_first_bdr_primary
+          |default(first_bdr_primary_candidates|first) }}"
   when: >
     ('bdr' in role or 'harp-proxy' in role)
     and (preferred_first_bdr_primary is defined

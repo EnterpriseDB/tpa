@@ -15,14 +15,13 @@
 
 - name: Determine files to be uploaded to S3
   set_fact:
-    s3_uploads_files: "{{
-      s3_uploads_files|default([])|union([query('fileglob', term)])
-    }}"
+    s3_uploads_files:
+      "{{ s3_uploads_files|default([])|union([query('fileglob', term)]) }}"
   with_items: "{{ s3_uploads }}"
   vars:
-    term: "{{
-      item.startswith('/')|ternary(item, '%s/%s' % (cluster_dir, item))
-    }}"
+    term:
+      "{{ item.startswith('/')
+          |ternary(item, '%s/%s' % (cluster_dir, item)) }}"
 
 - name: Upload files to S3
   amazon.aws.aws_s3:

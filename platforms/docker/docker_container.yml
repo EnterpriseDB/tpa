@@ -90,13 +90,13 @@
 
 - set_fact:
     docker_container_results: "{{
-      docker_container_results|default([])|union([
-        ansible_facts.docker_container|combine({
-          'item': item|combine({
-            'private_ip': n.IPAddress or n.Networks[item.networks[0].name]['IPAddress']
+        docker_container_results|default([])|union([
+          ansible_facts.docker_container|combine({
+            'item': item|combine({
+              'private_ip': n.IPAddress or n.Networks[item.networks[0].name]['IPAddress']
+            })
           })
-        })
-      ])
-    }}"
+        ])
+      }}"
   vars:
     n: "{{ ansible_facts.docker_container.NetworkSettings }}"

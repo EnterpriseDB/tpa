@@ -39,10 +39,10 @@
 - name: Fall back to Name and cidr filters if required
   set_fact:
     ec2_vpc_filters: "{{
-      ec2_vpc_filters|combine({
-        ec2_vpc_filter_tags[item]|default(item): vpc[item]
-      })
-    }}"
+        ec2_vpc_filters|combine({
+          ec2_vpc_filter_tags[item]|default(item): vpc[item]
+        })
+      }}"
   when:
     vpc[item] is defined and
     vpc['filters'] is not defined
@@ -63,10 +63,10 @@
 - name: Record existing VPC {{ _vpc_name }} in {{ region }}
   set_fact:
     ec2_region_vpcs: "{{
-      ec2_region_vpcs|default({})|combine({
-        region: found.vpcs[0].id
-      })
-    }}"
+        ec2_region_vpcs|default({})|combine({
+          region: found.vpcs[0].id
+        })
+      }}"
   when: found.vpcs|length == 1
 
 # Once we're sure the VPC doesn't exist, we can create it any way we
@@ -97,18 +97,18 @@
         region: "{{ region }}"
         cidr_block: "{{ vpc['cidr'] }}"
         tags: "{{
-          cluster_tags|combine({
-            'Name': vpc['Name'],
-            'CreatingCluster': cluster_name
-          })
-        }}"
+            cluster_tags|combine({
+              'Name': vpc['Name'],
+              'CreatingCluster': cluster_name
+            })
+          }}"
       register: v
 
     - name: Record new VPC {{ vpc['Name'] }} in {{ region }}
       set_fact:
         ec2_region_vpcs: "{{
-          ec2_region_vpcs|default({})|combine({
-            region: v.vpc.id
-          })
-        }}"
+            ec2_region_vpcs|default({})|combine({
+              region: v.vpc.id
+            })
+          }}"
   when: found.vpcs is empty

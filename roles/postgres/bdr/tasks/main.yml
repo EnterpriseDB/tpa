@@ -48,9 +48,9 @@
 
 - set_fact:
     bdr_database_collations: "{{
-      bdr_database_collations|default([])
-      |union([h_databases[h_bdr_database].datcollate])
-    }}"
+        bdr_database_collations|default([])
+        |union([h_databases[h_bdr_database].datcollate])
+      }}"
   vars:
     h_databases: >
       {{ hostvars[h].cluster_facts.databases }}

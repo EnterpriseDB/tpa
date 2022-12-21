@@ -10,14 +10,14 @@
 - name: Determine which optional packages should be installed
   set_fact:
     need_pglogical_packages: "{{
-      'pglogical' not in sources and (
-        postgres_family == 'postgresql' or
-        (postgres_family == 'epas' and 'bdr' in role)
-        or 'pglogical' in postgres_extensions
-      )
-      and postgresql_flavour != 'postgresql-bdr'
-      and bdr_version is version(4, '<')
-    }}"
+        'pglogical' not in sources and (
+          postgres_family == 'postgresql' or
+          (postgres_family == 'epas' and 'bdr' in role)
+          or 'pglogical' in postgres_extensions
+        )
+        and postgresql_flavour != 'postgresql-bdr'
+        and bdr_version is version(4, '<')
+      }}"
     need_bdr_packages: "{{ 'bdr' in role and 'bdr' not in sources }}"
   vars:
     sources: "{{ install_from_source|map(attribute='name')|unique|list }}"

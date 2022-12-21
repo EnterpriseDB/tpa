@@ -83,10 +83,10 @@
 - name: Set default_postgres_tablespaces based on postgres_tablespace volumes
   set_fact:
     default_postgres_tablespaces: "{{
-      default_postgres_tablespaces|combine({
-        item.tablespace_name: {'location': item.mountpoint + '/tablespace_data'}
-      })
-    }}"
+        default_postgres_tablespaces|combine({
+          item.tablespace_name: {'location': item.mountpoint + '/tablespace_data'}
+        })
+      }}"
   with_items: >-
     {{ volumes|json_query("[?volume_for=='postgres_tablespace']") }}
 
@@ -108,10 +108,10 @@
 - name: Set various postgres facts
   set_fact:
     postgres_package_name: "{{
-      'postgresql' if postgresql_flavour in ['postgresql', 'pgextended'] else
-      'postgresql-bdr' if postgresql_flavour == 'postgresql-bdr' else
-      'edb-as' if postgres_family == 'epas' else ''
-    }}"
+        'postgresql' if postgresql_flavour in ['postgresql', 'pgextended'] else
+        'postgresql-bdr' if postgresql_flavour == 'postgresql-bdr' else
+        'edb-as' if postgres_family == 'epas' else ''
+      }}"
     postgres_user: "{{ postgres_user|default(default_postgres_user[postgres_family]) }}"
     postgres_group: "{{ postgres_group|default(default_postgres_user[postgres_family]) }}"
     postgres_home: "{{ postgres_home|default(default_postgres_home_dir[postgres_family][ansible_os_family]) }}"
@@ -120,8 +120,8 @@
     postgres_host: "{{ postgres_host|default('localhost') }}"
     postgres_port: "{{ postgres_port|default(default_postgres_port[postgres_family]) }}"
     unix_socket_directories: "{{
-      unix_socket_directories|default(default_unix_socket_directories[postgres_family][ansible_os_family])
-    }}"
+        unix_socket_directories|default(default_unix_socket_directories[postgres_family][ansible_os_family])
+      }}"
     postgres_service_name: postgres
     postgres_installation_method: "{{ postgres_installation_method|default(default_postgres_installation_method) }}"
     postgres_install_dir: "{{ postgres_install_dir|default(default_postgres_install_dir) }}"
@@ -221,8 +221,8 @@
 - name: Add {{ bdr_database }} to postgres_databases
   set_fact:
     postgres_databases: "{{
-      postgres_databases|union([default_bdr_database_entry])
-    }}"
+        postgres_databases|union([default_bdr_database_entry])
+      }}"
   vars:
     default_bdr_database_entry:
       name: "{{ bdr_database }}"
@@ -239,8 +239,8 @@
 - name: Ensure haproxy_maxconn is set
   set_fact:
     haproxy_maxconn: "{{
-      haproxy_maxconn|default(((max_connections|int)*0.90)|int)
-    }}"
+        haproxy_maxconn|default(((max_connections|int)*0.90)|int)
+      }}"
 
 - name: Ensure haproxy_backend_servers is defined
   set_fact:
@@ -311,41 +311,39 @@
 
 - name: Set pgbouncer_max_client_conn from max_connections
   set_fact:
-    pgbouncer_max_client_conn: "{{
-      pgbouncer_max_client_conn|default(_maxconn)
-    }}"
+    pgbouncer_max_client_conn:
+      "{{ pgbouncer_max_client_conn|default(_maxconn) }}"
   when: >
     'pgbouncer' in role
   vars:
     _backend: "{{
-      ('harp-proxy' in role)
-      |ternary(first_bdr_primary,(pgbouncer_backend in ['127.0.0.1', 'localhost', inventory_hostname])
-      |ternary(inventory_hostname,pgbouncer_backend))
-    }}"
-    _backend_maxconn: "{{
-      hostvars.get(_backend, {}).get('max_connections')
-    }}"
+        ('harp-proxy' in role)
+        |ternary(first_bdr_primary,(pgbouncer_backend in ['127.0.0.1', 'localhost', inventory_hostname])
+        |ternary(inventory_hostname,pgbouncer_backend))
+      }}"
+    _backend_maxconn:
+      "{{ hostvars.get(_backend, {}).get('max_connections') }}"
     _backend_is_haproxy: "{{
-      'haproxy' in role
-      and _backend == inventory_hostname
-      and pgbouncer_backend_port == haproxy_port
-    }}"
+        'haproxy' in role
+        and _backend == inventory_hostname
+        and pgbouncer_backend_port == haproxy_port
+      }}"
     _haproxy_backend_maxconns: "{{
-      haproxy_backend_servers|default([])
-      |map('extract', hostvars, 'haproxy_maxconn')
-      |select('defined')|list
-    }}"
+        haproxy_backend_servers|default([])
+        |map('extract', hostvars, 'haproxy_maxconn')
+        |select('defined')|list
+      }}"
     _haproxy_backend_maxconn: "{{
-      _haproxy_backend_maxconns is not empty
-      and _haproxy_backend_maxconns|min
-    }}"
+        _haproxy_backend_maxconns is not empty
+        and _haproxy_backend_maxconns|min
+      }}"
     _maxconn: "{{
-      _backend_is_haproxy and
-        _haproxy_backend_maxconn or
-        (_backend_maxconn is defined and
-          ((_backend_maxconn|int)*0.90)|int or
-          default_pgbouncer_max_client_conn)
-    }}"
+        _backend_is_haproxy and
+          _haproxy_backend_maxconn or
+          (_backend_maxconn is defined and
+            ((_backend_maxconn|int)*0.90)|int or
+            default_pgbouncer_max_client_conn)
+      }}"
 
 # Transform pgbouncer_databases into a new list where each item's
 # 'options' is guaranteed to have host/port/auth_user set. Also, for
@@ -357,21 +355,21 @@
 - name: Fill in pgbouncer_databases options
   set_fact:
     _pgbouncer_databases: "{{
-      _pgbouncer_databases|default([])|union([
-        {
-          'name': item.name,
-          'options': {
-            'host': pgbouncer_backend,
-            'port': pgbouncer_backend_port,
-          }|combine(item.options|default({}))|combine({'auth_user': pgbouncer_auth_user})
-        }|combine(
-          ('dsn' in item)|ternary(
-            {'dsn': '%s auth_user=%s' % (item.get('dsn'), pgbouncer_auth_user)},
-            {}
+        _pgbouncer_databases|default([])|union([
+          {
+            'name': item.name,
+            'options': {
+              'host': pgbouncer_backend,
+              'port': pgbouncer_backend_port,
+            }|combine(item.options|default({}))|combine({'auth_user': pgbouncer_auth_user})
+          }|combine(
+            ('dsn' in item)|ternary(
+              {'dsn': '%s auth_user=%s' % (item.get('dsn'), pgbouncer_auth_user)},
+              {}
+            )
           )
-        )
-      ])
-    }}"
+        ])
+      }}"
   with_items: "{{ pgbouncer_databases|default(default_pgbouncer_databases) }}"
 
 - name: Set pgbouncer_databases
@@ -444,9 +442,9 @@
 - name: Record name of any upstream or sibling with backups
   set_fact:
     upstream_backedup: "{{
-      groups[cluster_tag]
-      |instance_with_backup_of(upstream_primary, inventory_hostname, hostvars)
-    }}"
+        groups[cluster_tag]
+        |instance_with_backup_of(upstream_primary, inventory_hostname, hostvars)
+      }}"
   when: >
     'postgres' in role
 
@@ -454,9 +452,8 @@
 
 - name: Add {{ pem_database }} to postgres_databases
   set_fact:
-    postgres_databases: "{{
-      postgres_databases|union([default_pem_database_entry])
-    }}"
+    postgres_databases:
+      "{{ postgres_databases|union([default_pem_database_entry]) }}"
   vars:
     default_pem_database_entry:
       name: "{{ pem_database }}"
@@ -473,12 +470,12 @@
 - name: Set list of Postgres extensions
   set_fact:
     postgres_extensions: "{{
-      postgres_extensions|default(
-        default_postgres_extensions
-        |union(extra_postgres_extensions|default([]))
-        |union(needs_pglogical|ternary(['pglogical'], []))
-      )
-    }}"
+        postgres_extensions|default(
+          default_postgres_extensions
+          |union(extra_postgres_extensions|default([]))
+          |union(needs_pglogical|ternary(['pglogical'], []))
+        )
+      }}"
   vars:
     needs_pglogical: >-
       {{
@@ -490,20 +487,20 @@
 - name: Remove pg_visibility for Postgres <9.6
   set_fact:
     postgres_extensions: "{{
-      postgres_extensions
-      |reject('equalto', 'pg_visibility')
-      |list
-    }}"
+        postgres_extensions
+        |reject('equalto', 'pg_visibility')
+        |list
+      }}"
   when: postgres_version is version('9.6', '<')
 
 - name: Define platypus configuration settings
   set_fact:
     platypus_port: "{{ platypus_port|default(6400) }}"
     platypus_database: "{{
-      platypus_database|default(
-        ('bdr' in role)|ternary(bdr_database, 'postgres')
-      )
-    }}"
+        platypus_database|default(
+          ('bdr' in role)|ternary(bdr_database, 'postgres')
+        )
+      }}"
 
 - name: Derive a value for shared_buffers_mb
   action: set_fact
@@ -562,15 +559,15 @@
 - name: Calculate a base value for max_worker_processes
   set_fact:
     base_max_worker_processes: "{{
-      max_worker_processes|default(
-        (
-          ('bdr' in role)|ternary(
-            num_postgres_instances + 1*8 + 2*2 + 2*(num_postgres_instances-1),
-            0
-          )
-        ) + twice_postgres_instances
-      )
-    }}"
+        max_worker_processes|default(
+          (
+            ('bdr' in role)|ternary(
+              num_postgres_instances + 1*8 + 2*2 + 2*(num_postgres_instances-1),
+              0
+            )
+          ) + twice_postgres_instances
+        )
+      }}"
 
 # If max_worker_processes is not explicitly set, we use the value
 # calculated above or the default, whichever is larger.
@@ -578,10 +575,10 @@
 - name: Set default value for max_worker_processes
   set_fact:
     max_worker_processes: "{{
-      max_worker_processes|default(
-        [base_max_worker_processes|int, default_max_worker_processes]|max
-      )
-    }}"
+        max_worker_processes|default(
+          [base_max_worker_processes|int, default_max_worker_processes]|max
+        )
+      }}"
 
 - name: Set barman archive command if required
   set_fact:
@@ -597,9 +594,8 @@
   set_fact:
     max_worker_processes: "{{ upstream_max_worker_processes }}"
   vars:
-    upstream_max_worker_processes: "{{
-      hostvars[upstream_primary].get('max_worker_processes')
-    }}"
+    upstream_max_worker_processes:
+      "{{ hostvars[upstream_primary].get('max_worker_processes') }}"
   when:
     - "'replica' in role"
     - upstream_primary is defined
@@ -613,9 +609,8 @@
       as primary
     that: upstream_postgres_tablespaces == postgres_tablespaces
   vars:
-    upstream_postgres_tablespaces: "{{
-      hostvars[upstream_primary].get('postgres_tablespaces')
-    }}"
+    upstream_postgres_tablespaces:
+      "{{ hostvars[upstream_primary].get('postgres_tablespaces') }}"
   when:
     - "'replica' in role"
     - upstream_primary is defined
@@ -628,9 +623,9 @@
 
 - set_fact:
     initialise_harp: "{{
-      'harp-proxy' in role
-      or inventory_hostname in first_bdr_primary_candidates|default([])
-    }}"
+        'harp-proxy' in role
+        or inventory_hostname in first_bdr_primary_candidates|default([])
+      }}"
 
 - name: Add efm to role when efm failover manager is selected
   set_fact:

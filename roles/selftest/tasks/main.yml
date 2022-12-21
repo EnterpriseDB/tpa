@@ -34,11 +34,11 @@
     params:
       files: 'MANIFEST.json'
       paths: "{{
-        lookup('config', 'COLLECTIONS_PATHS')
-        |map('apply_format', '{}/ansible_collections/' + item|replace('.', '/'))|list
-      }}"
+          lookup('config', 'COLLECTIONS_PATHS')
+          |map('apply_format', '{}/ansible_collections/' + item|replace('.', '/'))|list
+        }}"
       skip: true
     found_collection: "{{ lookup('first_found', params) }}"
-  with_items: "{{
-    (lookup('file', tpa_dir + '/collections/requirements.yml')|from_yaml).collections|map(attribute='name')|list
-  }}"
+  with_items:
+    "{{ (lookup('file', tpa_dir + '/collections/requirements.yml')|from_yaml).collections
+        |map(attribute='name')|list }}"

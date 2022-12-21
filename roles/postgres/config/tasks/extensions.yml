@@ -26,9 +26,8 @@
 
 - name: Add shared_preload_libraries entries for postgres_extensions
   set_fact:
-    shared_preload_libraries: "{{
-      shared_preload_libraries|default([])|union([item])
-    }}"
+    shared_preload_libraries:
+      "{{ shared_preload_libraries|default([])|union([item]) }}"
   with_items: "{{ _preload_extensions }}"
   when:
     item in postgres_extensions
@@ -36,9 +35,8 @@
 
 - name: Add repmgr to shared_preload_libraries if required
   set_fact:
-    shared_preload_libraries: "{{
-      shared_preload_libraries|union(['repmgr'])
-    }}"
+    shared_preload_libraries:
+      "{{ shared_preload_libraries|union(['repmgr']) }}"
   when: >
     failover_manager == 'repmgr'
     and groups|members_of('role_replica') is not empty

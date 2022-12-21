@@ -10,15 +10,15 @@
 
 - set_fact:
     etcd_service_end_state: "{{
-      etcd_service_end_state|default('started')
-    }}"
+        etcd_service_end_state|default('started')
+      }}"
     etcd_endpoints: "{{
-      groups['role_etcd']
-      |select_by_hostvar(hostvars, 'harp_location', harp_location)
-      |map('pyformat_hostvars', '{inventory_hostname}:{etcd_client_port}', hostvars)
-      |list
-      |join(',')
-    }}"
+        groups['role_etcd']
+        |select_by_hostvar(hostvars, 'harp_location', harp_location)
+        |map('pyformat_hostvars', '{inventory_hostname}:{etcd_client_port}', hostvars)
+        |list
+        |join(',')
+      }}"
 
 - name: Check etcd cluster health before restart
   block:

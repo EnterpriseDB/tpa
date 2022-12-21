@@ -3,9 +3,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - set_fact:
-    default_yum_repository_list: "{{
-      default_yum_repository_list|union(['EDB'])
-    }}"
+    default_yum_repository_list:
+      "{{ default_yum_repository_list|union(['EDB']) }}"
   when:
     postgres_installation_method == 'pkg' and (
       postgresql_flavour == 'epas'
@@ -14,9 +13,8 @@
     )
 
 - set_fact:
-    yum_repository_list: "{{
-      yum_repository_list|default(default_yum_repository_list)
-    }}"
+    yum_repository_list:
+      "{{ yum_repository_list|default(default_yum_repository_list) }}"
 
 # XXX Duplicated in Debian/repositories.yml
 
@@ -28,10 +26,10 @@
 
 - set_fact:
     yum_repository_list: "{{
-      yum_repository_list
-      |reject('equalto', 'EDB')
-      |list|union(['EDB'])
-    }}"
+        yum_repository_list
+        |reject('equalto', 'EDB')
+        |list|union(['EDB'])
+      }}"
   when:
     - "'EDB' in yum_repository_list"
     - yum_repository_list|last != 'EDB'
@@ -264,12 +262,12 @@
 - name: Enumerate 2ndQuadrant repositories
   set_fact:
     _2q_repositories: "{{
-      _2q_repositories|union([{
-        'url': url,
-        'file': file,
-        'repo': item
-      }])
-    }}"
+        _2q_repositories|union([{
+          'url': url,
+          'file': file,
+          'repo': item
+        }])
+      }}"
   with_items:
     - dl/default/release
     - "{{ tpa_2q_repositories|default([]) }}"
@@ -284,11 +282,11 @@
     version_tag: >-
       {{ (_flavour == 'postgresql-bdr')|ternary('bdr9.4', postgres_version) }}
     urltemplate: "{{
-      (item == 'dl/default/release')|ternary(
-        'https://techsupport.enterprisedb.com/api/repository/{label}/{version}/rpm{volatile}',
-        'https://techsupport.enterprisedb.com/api/repository/{token}/{label}/{version}/rpm{volatile}'
-      )
-    }}"
+        (item == 'dl/default/release')|ternary(
+          'https://techsupport.enterprisedb.com/api/repository/{label}/{version}/rpm{volatile}',
+          'https://techsupport.enterprisedb.com/api/repository/{token}/{label}/{version}/rpm{volatile}'
+        )
+      }}"
     url: >-
       {{ urltemplate.format(token=token, label=item, version=version_tag, volatile=volatile) }}
     file: "/etc/yum.repos.d/2ndquadrant-{{ item|replace('/', '-') }}-{{ _repopg }}{{ postgres_version }}.repo"

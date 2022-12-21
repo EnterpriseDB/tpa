@@ -45,9 +45,9 @@
       name: "{{ postgres_service_name }}"
       enabled: yes
       daemon_reload: "{{
-        managed_unit is defined
-        and managed_unit is changed
-      }}"
+          managed_unit is defined
+          and managed_unit is changed
+        }}"
   when: >
     'postgres' in role
 
@@ -74,6 +74,6 @@
 - name: Reload systemd if any service definitions were changed
   systemd:
     daemon_reload: "{{
-      (manager_unit is defined and manager_unit is changed)
-      or (proxy_unit is defined and proxy_unit is changed)
-    }}"
+        (manager_unit is defined and manager_unit is changed)
+        or (proxy_unit is defined and proxy_unit is changed)
+      }}"

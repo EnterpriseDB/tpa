@@ -84,11 +84,11 @@
 - name: Set defaults for instance definitions
   set_fact:
     instances: "{{
-      instances|set_instance_defaults(cluster_name,
-        compat_defaults|combine(instance_defaults|default({}), recursive=True),
-        locations
-      )|expand_instance_volumes
-    }}"
+        instances|set_instance_defaults(cluster_name,
+          compat_defaults|combine(instance_defaults|default({}), recursive=True),
+          locations
+        )|expand_instance_volumes
+      }}"
 
 - name: Ensure that every instance specifies a unique node id and Name
   assert:
@@ -100,10 +100,10 @@
 - name: Set valid instance keys
   set_fact:
     valid_instance_keys: "{{
-      valid_instance_keys|default({})|combine({
-        'common': instance_keys
-      })
-    }}"
+        valid_instance_keys|default({})|combine({
+          'common': instance_keys
+        })
+      }}"
   vars:
     instance_keys:
     - Name
@@ -125,8 +125,8 @@
       mismatched_replicas is empty
   vars:
     mismatched_replicas: "{{
-      instances|find_replica_tablespace_mismatches
-    }}"
+        instances|find_replica_tablespace_mismatches
+      }}"
 
 # If TPAexec ran `git init` within this cluster_dir, we bail out if any
 # committed files are modified (except config.yml, which we are prepared
@@ -147,9 +147,9 @@
 
 - set_fact:
     tpaexec_initialised_cluster_git_repo: "{{
-      git_repo_note.stdout_lines is not empty
-      and git_repo_note.stdout_lines[0].startswith('Created by TPAexec')
-    }}"
+        git_repo_note.stdout_lines is not empty
+        and git_repo_note.stdout_lines[0].startswith('Created by TPAexec')
+      }}"
 
 - name: Check for uncommitted changes
   shell:

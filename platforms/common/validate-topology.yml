@@ -23,9 +23,11 @@
     barman_references_result is not defined
     or barman_references_result is not failed
   vars:
-    referring_instances: "{{
-      instances|selectattr('backup','defined')|selectattr('backup','contains',item)|map(attribute='Name')|list
-    }}"
+    referring_instances:
+      "{{ instances
+          |selectattr('backup','defined')
+          |selectattr('backup','contains',item)
+          |map(attribute='Name')|list }}"
 
 # Likewise, for every instance that has an "upstream: xxx" tag, there
 # should be exactly one instance with a "Name: xxx" tag.
@@ -46,20 +48,22 @@
     upstream_references_result is not defined
     or upstream_references_result is not failed
   vars:
-    referring_instances: "{{
-      instances|selectattr('upstream','defined')|selectattr('upstream','equalto',item)|map(attribute='Name')|list
-    }}"
+    referring_instances:
+      "{{ instances
+          |selectattr('upstream','defined')
+          |selectattr('upstream','equalto',item)
+          |map(attribute='Name')|list }}"
 
 - name: Ensure every witness node declares an upstream
   assert:
     msg: "Please define an upstream node for witness {{ item.Name }}"
     that:
       - item.upstream is defined
-  with_items: "{{
-    instances|selectattr('role', 'defined')
-    |selectattr('role','contains','witness')|rejectattr('role','contains','bdr')
-    |list
-  }}"
+  with_items:
+    "{{ instances
+        |selectattr('role', 'defined')
+        |selectattr('role','contains','witness')
+        |rejectattr('role','contains','bdr')|list }}"
 
 - name: Validate "bdr_node_camo_partner" references
   assert:
@@ -82,9 +86,10 @@
 
 - name: Convert cluster_network to cluster_networks
   set_fact:
-    cluster_vars: "{{
-      cluster_vars|remove_keys(['cluster_network'])|combine({'cluster_networks': [n]})
-    }}"
+    cluster_vars:
+      "{{ cluster_vars
+          |remove_keys(['cluster_network'])
+          |combine({'cluster_networks': [n]}) }}"
   when:
     n is string and 'cluster_networks' not in cluster_vars
   vars:

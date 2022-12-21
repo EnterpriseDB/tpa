@@ -37,12 +37,12 @@
   become: yes
   vars:
     seq_name: "{{
-      'public.%s' % seq.name
-        if '.' not in seq.name else seq.name
-    }}"
+        'public.%s' % seq.name
+          if '.' not in seq.name else seq.name
+      }}"
     existing_sequences: "{{
-      sequence_tuples.results[1]|json_query('[*].set_seqoid')
-    }}"
+        sequence_tuples.results[1]|json_query('[*].set_seqoid')
+      }}"
   with_items: "{{ set.sequences }}"
   loop_control:
     loop_var: seq

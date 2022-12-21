@@ -10,14 +10,14 @@
 
 postgres_git_url: git://git.postgresql.org/git/postgresql.git
 default_postgres_git_ref: "{{
-  '%sREL%s_STABLE' % (
-    ('2ndQPostgres' in postgres_git_url)|ternary('2Q', ''),
-    postgres_version is version('10', '<')|ternary(
-      postgres_version|replace('.', '_'),
-      '_' + postgres_version
+    '%sREL%s_STABLE' % (
+      ('2ndQPostgres' in postgres_git_url)|ternary('2Q', ''),
+      postgres_version is version('10', '<')|ternary(
+        postgres_version|replace('.', '_'),
+        '_' + postgres_version
+      )
     )
-  )
-}}"
+  }}"
 postgres_git_reference_repo: ""
 
 ## Build and install locations

@@ -10,8 +10,8 @@
 - name: Add witness-only replication set to publications if required
   set_fact:
     publications: "{{
-      publications|ensure_publication(default_witness_publication)
-    }}"
+        publications|ensure_publication(default_witness_publication)
+      }}"
   vars:
     bdr_witnesses: >-
       {{ groups['role_bdr']|intersect(groups['role_witness']|default([])) }}
@@ -37,8 +37,8 @@
 - name: Subscribe to witness-only replication set on witnesses
   set_fact:
     subscriptions: "{{
-      subscriptions|union([default_witness_subscription])
-    }}"
+        subscriptions|union([default_witness_subscription])
+      }}"
   vars:
     q: >-
       [?type=='bdr' && database=='%s']
@@ -62,8 +62,8 @@
 - name: Subscribe to witness-only replication set if required
   set_fact:
     subscriptions: "{{
-      subscriptions|ensure_subscription(default_witness_subscription)
-    }}"
+        subscriptions|ensure_subscription(default_witness_subscription)
+      }}"
   vars:
     bdr_witnesses: >-
       {{ groups['role_bdr']|intersect(groups['role_witness']|default([])) }}

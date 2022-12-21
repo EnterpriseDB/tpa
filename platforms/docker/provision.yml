@@ -4,9 +4,8 @@
 
 - include_tasks: docker_images.yml
   vars:
-    docker_image_list: "{{
-      docker_instances|map(attribute='image')|unique|list
-    }}"
+    docker_image_list:
+      "{{ docker_instances|map(attribute='image')|unique|list }}"
   tags: docker
 
 - name: Create docker networks
@@ -28,15 +27,15 @@
 - name: Set instance variables and IP
   set_fact:
     instance_vars: "{{
-      instance_vars|default([])|union([
-        addresses|combine({
-          'Name': item.item.Name,
-          'node': item.item.node,
-          'vars': addresses|combine(item.item|export_vars),
-          'platform': 'docker',
-        })
-      ])
-    }}"
+        instance_vars|default([])|union([
+          addresses|combine({
+            'Name': item.item.Name,
+            'node': item.item.node,
+            'vars': addresses|combine(item.item|export_vars),
+            'platform': 'docker',
+          })
+        ])
+      }}"
   with_items:
     "{{ docker_container_results }}"
   loop_control:

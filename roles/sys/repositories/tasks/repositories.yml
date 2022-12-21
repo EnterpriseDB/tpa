@@ -7,11 +7,9 @@
 # people to specify the repository explicitly in tpa_2q_repositories.
 
 - set_fact:
-    tpa_2q_repositories: "{{
-      tpa_2q_repositories|default([])|union([
-        'products/default/release'
-      ])
-    }}"
+    tpa_2q_repositories:
+      "{{ tpa_2q_repositories|default([])
+          |union(['products/default/release']) }}"
   when:
     postgresql_flavour == 'epas'
     and 'products/default/release' not in tpa_2q_repositories|default([])

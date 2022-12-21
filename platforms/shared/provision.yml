@@ -5,22 +5,23 @@
 - name: Set instance variables
   set_fact:
     instance_vars: "{{
-      instance_vars|default([])|union([
-        addresses|combine({
-          'Name': item.Name,
-          'node': item.node,
-          'vars': addresses|combine(item|export_vars),
-          'platform': 'shared',
-        })
-      ])
-    }}"
+        instance_vars|default([])|union([
+          addresses|combine({
+            'Name': item.Name,
+            'node': item.node,
+            'vars': addresses|combine(item|export_vars),
+            'platform': 'shared',
+          })
+        ])
+      }}"
   with_items:
     "{{ shared_instances }}"
   loop_control:
     label: >-
       {{ item.Name }}
   vars:
-    hosted_by: "{{
-      instance_vars|selectattr('Name', 'equalto', item.get('hosted_by'))|list|first
-    }}"
+    hosted_by:
+      "{{ instance_vars
+          |selectattr('Name', 'equalto', item.get('hosted_by'))|list
+          |first }}"
     addresses: "{{ hosted_by|ip_addresses }}"

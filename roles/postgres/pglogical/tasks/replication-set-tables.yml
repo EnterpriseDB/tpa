@@ -41,12 +41,12 @@
   become: yes
   vars:
     rel_name: "{{
-      'public.%s' % rel.name
-        if '.' not in rel.name else rel.name
-    }}"
+        'public.%s' % rel.name
+          if '.' not in rel.name else rel.name
+      }}"
     existing_tables: "{{
-      table_tuples.results[1]|json_query('[*].set_reloid')
-    }}"
+        table_tuples.results[1]|json_query('[*].set_reloid')
+      }}"
   with_items: "{{ set.tables }}"
   loop_control:
     loop_var: rel

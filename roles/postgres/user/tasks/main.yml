@@ -43,8 +43,8 @@
     shell: /bin/bash
   vars:
     extra_groups: "{{
-      (failover_manager == 'efm')|ternary(['efm'], [])
-    }}"
+        (failover_manager == 'efm')|ternary(['efm'], [])
+      }}"
 
 - name: Enhance soft/hard system limits for user {{ postgres_user }}
   blockinfile:
@@ -126,8 +126,8 @@
 - block:
   - set_fact:
       _run_directory_items: "{{
-        _run_directory_items|union([{'path': item, 'mode': '02775'}])
-      }}"
+          _run_directory_items|union([{'path': item, 'mode': '02775'}])
+        }}"
     with_items: "{{ run_directories }}"
 
   - name: Ensure postgres runtime directories exist
@@ -154,8 +154,8 @@
         d /var/log/postgresql 0775 {{ postgres_user }} {{ postgres_group }} - -
   vars:
     run_directories: "{{
-      unix_socket_directories|reject('equalto', '/tmp')|list
-    }}"
+        unix_socket_directories|reject('equalto', '/tmp')|list
+      }}"
     _run_directory_items: []
 
 # Allow postgres_user to run various Postgres-related systemctl commands
@@ -164,10 +164,10 @@
 - name: Collect a list of postgres commands to allow in sudoers
   set_fact:
     postgres_commands: "{{
-      postgres_commands|default([])|union([
-        '/bin/systemctl ' ~ item.1 ~ ' ' ~ item.0
-      ])
-    }}"
+        postgres_commands|default([])|union([
+          '/bin/systemctl ' ~ item.1 ~ ' ' ~ item.0
+        ])
+      }}"
   with_nested:
     - ['{{ postgres_service_name }}', 'repmgr']
     - [start, stop, reload, restart, status]

@@ -33,10 +33,8 @@
 
 - name: Update shared_preload_libraries list
   set_fact:
-    _preload_list: "{{
-              _old_list|union(shared_preload_libraries|default([])|flatten
-      )
-    }}"
+    _preload_list:
+      "{{ _old_list|union(shared_preload_libraries|default([])|flatten) }}"
   vars:
     _old_list: >
       {{ libs.stdout and libs.stdout.split(',')|map('trim')|list or [] }}
@@ -51,9 +49,8 @@
 
 - name: Adjust ordering of shared_preload_libraries if required
   set_fact:
-    _preload_list: "{{
-      _preload_list|reject('in', p_and_b)|list|union(p_and_b)
-    }}"
+    _preload_list:
+      "{{ _preload_list|reject('in', p_and_b)|list|union(p_and_b) }}"
   when: >
     ('bdr' in _preload_list and 'pglogical' in _preload_list and
     _preload_list.index('bdr')|int < _preload_list.index('pglogical')|int) or
@@ -64,9 +61,8 @@
 
 - name: Remove pglogical if BDR v4 is in use
   set_fact:
-    _preload_list: "{{
-      _preload_list|reject('equalto', 'pglogical')|list
-    }}"
+    _preload_list:
+      "{{ _preload_list|reject('equalto', 'pglogical')|list }}"
   when: >
     'bdr' in role
     and bdr_version is version('4', '>=')

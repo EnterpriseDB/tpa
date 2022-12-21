@@ -29,10 +29,10 @@
     set_fact:
       haproxy_backend_list: "{{
         haproxy_backend_list|default([])|union([{
-          'name': item,
-          'backends': hostvars[item].haproxy_backend_servers,
-        }])
-      }}"
+            'name': item,
+            'backends': hostvars[item].haproxy_backend_servers,
+          }])
+        }}"
     with_items: "{{ groups['role_haproxy'] }}"
 
   - set_fact:
@@ -125,9 +125,9 @@
           - partition
           - powerfail
           - postgres-down
-        failures: "{{
-          destroy_cluster|default(False)|ternary(destructive_failures, nondestructive_failures)
-        }}"
+        failures:
+          "{{ destroy_cluster|default(False)
+              |ternary(destructive_failures, nondestructive_failures) }}"
       when:
         ( inventory_hostname in groups[bdr_node_group] or inventory_hostname == tester_instance )
          and 'crash_test' in ansible_run_tags

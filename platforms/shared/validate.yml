@@ -11,25 +11,25 @@
     - (hosted_by|first).get('platform') != 'shared'
   with_items: "{{ shared_instances }}"
   vars:
-    hosted_by: "{{
-      instances|selectattr('Name', 'equalto', item.get('hosted_by'))|list
-    }}"
+    hosted_by:
+      "{{ instances
+          |selectattr('Name', 'equalto', item.get('hosted_by'))|list }}"
 
 - name: Allow single-word or FQDN hostnames for shared instances
   set_fact:
     hostname_patterns: "{{
-      hostname_patterns|default({})|combine({
-        'shared': '^[a-z0-9][a-z0-9-]*[a-z0-9](\\.[a-z0-9][a-z0-9-]*[a-z0-9])*$'
-      })
-    }}"
+        hostname_patterns|default({})|combine({
+          'shared': '^[a-z0-9][a-z0-9-]*[a-z0-9](\\.[a-z0-9][a-z0-9-]*[a-z0-9])*$'
+        })
+      }}"
 
 - name: Set valid instance keys
   set_fact:
     valid_instance_keys: "{{
-      valid_instance_keys|default({})|combine({
-        'shared': instance_keys
-      })
-    }}"
+        valid_instance_keys|default({})|combine({
+          'shared': instance_keys
+        })
+      }}"
   vars:
     instance_keys:
     - hosted_by

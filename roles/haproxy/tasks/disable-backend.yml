@@ -52,9 +52,8 @@
 - include_tasks: parse-haproxy-status.yml
   vars:
     haproxy_instance: "{{ item.0 }}"
-    haproxy_status: "{{
-      item.1.stdout_lines|default([])
-    }}"
+    haproxy_status:
+      "{{ item.1.stdout_lines|default([]) }}"
   with_together:
   - "{{ my_haproxies }}"
   - "{{ haproxy_stats.results }}"
@@ -71,10 +70,10 @@
     conninfo: "{{ _dsn|dbname('pgbouncer', user='pgbouncer') }}"
     autocommit: yes
     queries: "{{
-      [_commands[0]]|union(
-        wait_close|default('yes')|bool|ternary([_commands[1]], [])
-      )
-    }}"
+        [_commands[0]]|union(
+          wait_close|default('yes')|bool|ternary([_commands[1]], [])
+        )
+      }}"
   vars:
     _dsn: "{{ hostvars[haproxy_instance].pgbouncer_node_dsn }}"
     _task_environment:

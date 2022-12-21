@@ -25,10 +25,10 @@
 - name: Record existing volumes in each region
   set_fact:
     ec2_attachable_volumes: "{{
-      ec2_attachable_volumes|combine({
-        item.region ~ ':' ~ item.tags.TPAAttachmentLabel: item
-      })
-    }}"
+        ec2_attachable_volumes|combine({
+          item.region ~ ':' ~ item.tags.TPAAttachmentLabel: item
+        })
+      }}"
   with_items: >
     {{ ec2_volumes|json_query('results[?volumes][].volumes') }}
   loop_control:

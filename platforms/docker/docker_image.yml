@@ -41,9 +41,8 @@
 
 - name: Set default build configuration
   set_fact:
-    docker_images: "{{
-      {image: _entry}|combine(docker_images|default({}))
-    }}"
+    docker_images:
+      "{{ {image: _entry}|combine(docker_images|default({})) }}"
   vars:
     _parts: "{{ image.split(':') }}"
     _label: "{{ _parts[0]|regex_replace('^tpa/', '') }}"
@@ -94,9 +93,9 @@
   vars:
     _entry: "{{ docker_images[image] }}"
     _parts: "{{ image.split(':') }}"
-    _base_image_name: "{{
-      _entry.base_image_name|default('%s-base:%s' % (_parts[0], _parts[1]|default('latest')))
-    }}"
+    _base_image_name:
+      "{{ _entry.base_image_name
+          |default('%s-base:%s' % (_parts[0], _parts[1]|default('latest'))) }}"
   when:
     _entry.base_context_path is defined
 
@@ -119,6 +118,4 @@
       pull: "{{ _entry['pull']|default(_pull) }}"
   vars:
     _entry: "{{ docker_images[image] }}"
-    _pull: "{{
-      lookup('env', 'TPA_DOCKER_PULL_BASE_IMAGE') or 'yes'
-    }}"
+    _pull: "{{ lookup('env', 'TPA_DOCKER_PULL_BASE_IMAGE') or 'yes' }}"

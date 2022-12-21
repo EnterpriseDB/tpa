@@ -47,18 +47,18 @@
 - name: Allow single-word or FQDN hostnames for docker containers
   set_fact:
     hostname_patterns: "{{
-      hostname_patterns|default({})|combine({
-        'docker': '^[a-z0-9][a-z0-9-]*[a-z0-9](\\.[a-z0-9][a-z0-9-]*[a-z0-9])*$'
-      })
-    }}"
+        hostname_patterns|default({})|combine({
+          'docker': '^[a-z0-9][a-z0-9-]*[a-z0-9](\\.[a-z0-9][a-z0-9-]*[a-z0-9])*$'
+        })
+      }}"
 
 - name: Set valid instance keys
   set_fact:
     valid_instance_keys: "{{
-      valid_instance_keys|default({})|combine({
-        'docker': instance_keys
-      })
-    }}"
+        valid_instance_keys|default({})|combine({
+          'docker': instance_keys
+        })
+      }}"
   vars:
     instance_keys:
     - image

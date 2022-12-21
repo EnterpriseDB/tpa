@@ -8,9 +8,8 @@
 
 - name: Initialise ec2_region_subnets['{{ region }}']
   set_fact:
-    ec2_region_subnets: "{{
-      ec2_region_subnets|default({})|combine({region: {}})
-    }}"
+    ec2_region_subnets:
+      "{{ ec2_region_subnets|default({})|combine({region: {}}) }}"
 
 # We don't try to restrict our search to subnets that are referenced
 # from instance definitions. We can live with a few unused entries
@@ -26,10 +25,10 @@
 - name: Record existing subnet-ids in {{ region }}
   set_fact:
     ec2_region_subnets: "{{
-      ec2_region_subnets|combine({
-        region: {item.cidr_block: item.id}
-      }, recursive=True)
-    }}"
+        ec2_region_subnets|combine({
+          region: {item.cidr_block: item.id}
+        }, recursive=True)
+      }}"
   with_items: "{{ found.subnets }}"
   loop_control:
     label: >-
@@ -52,13 +51,13 @@
     az: "{{ ec2_vpc_subnets|try_subkey([region,item,'az'])|default(omit) }}"
     resource_tags:
       Name: "{{
-        ec2_vpc_subnets|try_subkey([region,item,'Name'],
-          cluster_name+'/'+ec2_vpc_subnets|try_subkey([region,item,'az'], region)
-        )
-      }}"
+          ec2_vpc_subnets|try_subkey([region,item,'Name'],
+            cluster_name+'/'+ec2_vpc_subnets|try_subkey([region,item,'az'], region)
+          )
+        }}"
       Description: "Automatically created for {{ cluster_name }} in {{
-        ec2_vpc_subnets|try_subkey([region,item,'az'], region)
-      }}"
+          ec2_vpc_subnets|try_subkey([region,item,'az'], region)
+        }}"
       CreatingCluster: "{{ cluster_name }}"
   when: ec2_region_subnets[region][item] is not defined
   with_items: "{{ subnets }}"
@@ -71,10 +70,10 @@
     - name: Record new subnet-ids in {{ region }}
       set_fact:
         ec2_region_subnets: "{{
-          ec2_region_subnets|combine({
-            region: {item.item: item.subnet.id}
-          }, recursive=True)
-        }}"
+            ec2_region_subnets|combine({
+              region: {item.item: item.subnet.id}
+            }, recursive=True)
+          }}"
       with_items: "{{ new_subnets.results }}"
       loop_control:
         label: >-

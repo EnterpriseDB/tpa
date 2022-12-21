@@ -51,9 +51,9 @@
     source: "{{ upstream_to_clone|default(upstream_primary) }}"
     source_facts: "{{ hostvars[source].cluster_facts }}"
     source_path: "{{
-      source_facts.pg_settings.get(item.key)
-        if source_facts.pg_settings is defined
-    }}"
+        source_facts.pg_settings.get(item.key)
+          if source_facts.pg_settings is defined
+      }}"
   with_dict: "{{ postgres_conf_files }}"
 
 # PGDATA didn't exist until we just created it, so postgres/config would

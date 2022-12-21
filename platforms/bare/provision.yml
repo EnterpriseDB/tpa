@@ -5,15 +5,15 @@
 - name: Set instance variables
   set_fact:
     instance_vars: "{{
-      instance_vars|default([])|union([
-        addresses|combine({
-          'Name': item.Name,
-          'node': item.node,
-          'vars': addresses|combine(item|export_vars),
-          'platform': 'bare',
-        })
-      ])
-    }}"
+        instance_vars|default([])|union([
+          addresses|combine({
+            'Name': item.Name,
+            'node': item.node,
+            'vars': addresses|combine(item|export_vars),
+            'platform': 'bare',
+          })
+        ])
+      }}"
   with_items:
     "{{ bare_instances }}"
   loop_control:

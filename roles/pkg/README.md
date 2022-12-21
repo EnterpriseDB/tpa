@@ -48,11 +48,9 @@ list of packages, but on a postgres instance, it should return [].
       - include_role: name=pkg/add_to_list
         vars:
           # Fetch and evaluate the right list for the distribution
-          list_contents: "{{
-              xxx_packages|packages_for(
-                  ansible_distribution, xxx_package_version
-              )
-          }}"
+          list_contents:
+            "{{ xxx_packages
+                |packages_for(ansible_distribution, xxx_package_version) }}"
 
       # (You can include pkg/add_to_list multiple times if needed.)
 

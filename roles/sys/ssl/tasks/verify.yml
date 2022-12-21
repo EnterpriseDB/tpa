@@ -39,8 +39,8 @@
 - name: Set an overall pass fact for the certificate validation checks
   set_fact:
     cert_verify_passed: "{{
-       cert_key_match
-       and not cert_expired
-       and cert_valid_until_min_period
-       and cert_signed_by_ca
-    }}"
+         cert_key_match
+         and not cert_expired
+         and cert_valid_until_min_period
+         and cert_signed_by_ca
+      }}"

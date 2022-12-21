@@ -60,10 +60,10 @@
 - name: Build haproxy_stats results array
   set_fact:
     haproxy_stats: "{{
-      haproxy_stats|default([])|union([
-        item|from_csv(column_names)
-      ])
-    }}"
+        haproxy_stats|default([])|union([
+          item|from_csv(column_names)
+        ])
+      }}"
   with_items: "{{ hstat.stdout_lines }}"
   when:
     not item.startswith('#')

@@ -23,9 +23,8 @@
 
 - name: Find provisioning_vars that will be overriden
   set_fact:
-    overriden_keys: "{{
-      overriden_keys|default([])|union([item.key])
-    }}"
+    overriden_keys:
+      "{{ overriden_keys|default([])|union([item.key]) }}"
   when:
     item.key in vars
   with_dict: "{{ provisioning_vars }}"

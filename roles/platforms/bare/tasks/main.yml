@@ -4,6 +4,5 @@
 
 - name: Disable manage_ssh_hostkeys by default
   set_fact:
-    manage_ssh_hostkeys: "{{
-      manage_ssh_hostkeys|default(False)
-    }}"
+    manage_ssh_hostkeys:
+      "{{ manage_ssh_hostkeys|default(False) }}"

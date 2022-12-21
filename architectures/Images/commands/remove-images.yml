@@ -49,9 +49,9 @@
   # [{region: …, amis: [ami-xxx, ami-yyy, …]}, …]
 
   - set_fact:
-      region_amis: "{{
-        ec2_amis.results|json_query('[*].{region:r,amis:[images[*].[image_id][]][]}')
-      }}"
+      region_amis:
+        "{{ ec2_amis.results
+            |json_query('[*].{region:r,amis:[images[*].[image_id][]][]}') }}"
 
   # Iterate over region_amis and remove each AMI that we found.
   #

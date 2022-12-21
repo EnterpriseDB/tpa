@@ -26,15 +26,13 @@
     diagnosis: "{{ diagnosis.stdout|from_json }}"
 
 - set_fact:
-    this_server: "{{
-      diagnosis|json_query('servers.\"%s\"' % backup_name)
-    }}"
+    this_server:
+      "{{ diagnosis|json_query('servers.\"%s\"' % backup_name) }}"
 
 - set_fact:
     backups: "{{ this_server.backups }}"
-    minimum_redundancy: "{{
-      this_server.config.minimum_redundancy|default(1)
-    }}"
+    minimum_redundancy:
+      "{{ this_server.config.minimum_redundancy|default(1) }}"
 
 - set_fact:
     have_backups: >-

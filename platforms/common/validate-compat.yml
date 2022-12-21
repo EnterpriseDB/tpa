@@ -29,10 +29,10 @@
 
 - set_fact:
     compat_defaults: "{{
-      compat_defaults|combine(
-        {'vars': {'ansible_user': vars[item]}}, recursive=True
-      )
-    }}"
+        compat_defaults|combine(
+          {'vars': {'ansible_user': vars[item]}}, recursive=True
+        )
+      }}"
   with_items:
     - ec2_ami_user
     - cluster_ssh_user

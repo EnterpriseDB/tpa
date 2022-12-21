@@ -15,18 +15,18 @@
 - name: Allow single-word or FQDN hostnames for bare instances
   set_fact:
     hostname_patterns: "{{
-      hostname_patterns|default({})|combine({
-        'bare': '^[a-z0-9][a-z0-9-]*[a-z0-9](\\.[a-z0-9][a-z0-9-]*[a-z0-9])*$'
-      })
-    }}"
+        hostname_patterns|default({})|combine({
+          'bare': '^[a-z0-9][a-z0-9-]*[a-z0-9](\\.[a-z0-9][a-z0-9-]*[a-z0-9])*$'
+        })
+      }}"
 
 - name: Set valid instance keys
   set_fact:
     valid_instance_keys: "{{
-      valid_instance_keys|default({})|combine({
-        'bare': instance_keys
-      })
-    }}"
+        valid_instance_keys|default({})|combine({
+          'bare': instance_keys
+        })
+      }}"
   vars:
     instance_keys:
     - ip_address

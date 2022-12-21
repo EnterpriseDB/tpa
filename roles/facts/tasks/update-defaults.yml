@@ -9,8 +9,8 @@
 - name: Override first_bdr_primary if required
   set_fact:
     first_bdr_primary: "{{
-      first_bdr_primary_candidates|intersect(_current_bdr_candidates)|first
-    }}"
+        first_bdr_primary_candidates|intersect(_current_bdr_candidates)|first
+      }}"
   when:
     - "'bdr' in role"
     - _current_bdr_candidates is not empty
@@ -33,14 +33,14 @@
 - name: Set password_encryption
   set_fact:
     password_encryption: "{{
-      password_encryption|default(
-        (current_setting == 'on')|ternary('md5', current_setting)
-      )
-    }}"
+        password_encryption|default(
+          (current_setting == 'on')|ternary('md5', current_setting)
+        )
+      }}"
   vars:
-    current_setting: "{{
-      cluster_facts.pg_settings.password_encryption|default(default_password_encryption)
-    }}"
+    current_setting:
+      "{{ cluster_facts.pg_settings.password_encryption
+          |default(default_password_encryption) }}"
 
 # If enable_camo is not explicitly set, we set it based on the current
 # value of bdr.enable_camo (or pg2q.enable_camo for older versions of
@@ -60,14 +60,14 @@
   vars:
     pg_settings: "{{ cluster_facts.pg_settings|default({}) }}"
     _current_or_default: "{{
-      pg_settings.get('bdr.enable_camo', undefined)|default(
-        pg_settings.get('pg2q.enable_camo', undefined)|default('on')
-      )
-    }}"
+        pg_settings.get('bdr.enable_camo', undefined)|default(
+          pg_settings.get('pg2q.enable_camo', undefined)|default('on')
+        )
+      }}"
     _value: "{{
-      (_current_or_default == 'remote_commit_flush')|ternary(
-        'on', _current_or_default
-      )
-    }}"
+        (_current_or_default == 'remote_commit_flush')|ternary(
+          'on', _current_or_default
+        )
+      }}"
   when: >
     'bdr' in role

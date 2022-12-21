@@ -6,8 +6,7 @@
   hosts_lines:
     path: /etc/hosts
     platform: "{{ platform }}"
-    lines: "{{
-      etc_hosts_lines
-      |default(default_etc_hosts_lines)
-      |union(extra_etc_hosts_lines|default([]))
-    }}"
+    lines:
+      "{{ etc_hosts_lines
+          |default(default_etc_hosts_lines)
+          |union(extra_etc_hosts_lines|default([])) }}"

@@ -39,9 +39,8 @@
     chdir: "{{ postgres_build_dir }}"
     executable: /bin/bash
   vars:
-    all_configure_opts: "{{
-      postgres_configure_opts|union(postgres_extra_configure_opts)
-    }}"
+    all_configure_opts:
+      "{{ postgres_configure_opts|union(postgres_extra_configure_opts) }}"
     _task_environment: "{{ postgres_configure_env|combine(postgres_extra_configure_env) }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
   tags: [build-clean, postgres-clean]

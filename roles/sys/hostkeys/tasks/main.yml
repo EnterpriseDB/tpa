@@ -35,9 +35,8 @@
     name: "{{ ssh_service_name }}"
     state: restarted
   vars:
-    ssh_service_name: "{{
-      (ansible_distribution == 'RedHat')|ternary('sshd', 'ssh')
-    }}"
+    ssh_service_name:
+      "{{ (ansible_distribution == 'RedHat')|ternary('sshd', 'ssh') }}"
   when: hostkeys_installed is changed
 
 # Next, we must ensure that every instance knows the host keys of all
@@ -103,20 +102,20 @@
 - name: Accumulate hostnames, addresses, and public hostkeys
   set_fact:
     known_hosts_and_keys: "{{
-      known_hosts_and_keys|default({})|combine({
-        h: {
-          'hosts': query('flattened', [
-            h, hostvars[h].inventory_hostname_short,
-            (hostvars[h].hostname_aliases).keys()|list,
-            (hostvars[h]|extract_keys(hostvars[h].ip_addresses)).values()|list,
-          ]) | unique | map('ternary_format',
-            hostvars[h].ansible_port|int == 22, '{value}',
-            '[{value}]:{port}', port=hostvars[h].ansible_port,
-          ) | list,
-          'hostkeys': hostvars[h].unmanaged_keys.stdout_lines|default([]),
-        }
-      })
-    }}"
+        known_hosts_and_keys|default({})|combine({
+          h: {
+            'hosts': query('flattened', [
+              h, hostvars[h].inventory_hostname_short,
+              (hostvars[h].hostname_aliases).keys()|list,
+              (hostvars[h]|extract_keys(hostvars[h].ip_addresses)).values()|list,
+            ]) | unique | map('ternary_format',
+              hostvars[h].ansible_port|int == 22, '{value}',
+              '[{value}]:{port}', port=hostvars[h].ansible_port,
+            ) | list,
+            'hostkeys': hostvars[h].unmanaged_keys.stdout_lines|default([]),
+          }
+        })
+      }}"
   with_items: "{{ groups[cluster_tag] }}"
   loop_control:
     loop_var: h
@@ -134,10 +133,10 @@
     managed_hostkeys: >
       {{ lookup('pipe', cat_hostkeys).splitlines() }}
     known_hosts_lines: "{{
-      lookup('template', 'known_hosts.j2',
-        template_vars=dict(
-          known_hosts_and_keys=known_hosts_and_keys,
-          managed_hostkeys=managed_hostkeys,
-        )
-      ).splitlines()
-    }}"
+        lookup('template', 'known_hosts.j2',
+          template_vars=dict(
+            known_hosts_and_keys=known_hosts_and_keys,
+            managed_hostkeys=managed_hostkeys,
+          )
+        ).splitlines()
+      }}"

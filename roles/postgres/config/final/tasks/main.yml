@@ -45,12 +45,12 @@
     login_db: postgres
     name: "{{ item.username }}"
     password: "{{
-      encrypted_password if generated_password is defined else omit
-    }}"
+        encrypted_password if generated_password is defined else omit
+      }}"
     encrypted: yes
     role_attr_flags: "{{
-      item.role_attrs|default([])|join(',') or omit
-    }}"
+        item.role_attrs|default([])|join(',') or omit
+      }}"
   vars:
     secret_name: >-
       {{ item.username }}_password
@@ -59,10 +59,10 @@
     existing_password: >-
       {{ cluster_facts.roles[item.username].rolpassword|default('unknown') }}
     encrypted_password: "{{
-      item.password_encryption|default(password_encryption)|encrypted_password(
-        generated_password, item.username, existing_password=existing_password
-      )
-    }}"
+        item.password_encryption|default(password_encryption)|encrypted_password(
+          generated_password, item.username, existing_password=existing_password
+        )
+      }}"
   with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes

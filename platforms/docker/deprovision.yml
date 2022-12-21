@@ -28,14 +28,14 @@
   with_items: "{{ ccache_volumes }}"
   vars:
     ccache_volumes: "{{
-      query(
-        'flattened',
-        docker_instances|map(attribute='local_source_directories')
-        |select('defined')|list
-      )
-      |select('startswith', 'ccache-')|list
-      |unique
-    }}"
+        query(
+          'flattened',
+          docker_instances|map(attribute='local_source_directories')
+          |select('defined')|list
+        )
+        |select('startswith', 'ccache-')|list
+        |unique
+      }}"
   loop_control:
     label: >-
       {{ item.split(':')[0] }}

@@ -64,15 +64,15 @@
 
 - set_fact:
     pgbouncer_backend_instance: "{{
-      (pgbouncer_backend == '127.0.0.1')|ternary(
-        inventory_hostname, pgbouncer_backend
-      )
-    }}"
+        (pgbouncer_backend == '127.0.0.1')|ternary(
+          inventory_hostname, pgbouncer_backend
+        )
+      }}"
 
 - set_fact:
     pgbouncer_backend_instance: "{{
-      hostvars[pgbouncer_backend_instance].haproxy_backend_servers[0]
-    }}"
+        hostvars[pgbouncer_backend_instance].haproxy_backend_servers[0]
+      }}"
   when:
     - pgbouncer_backend_instance in hostvars
     - "'haproxy' in hostvars[pgbouncer_backend_instance].role"
