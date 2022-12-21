@@ -39,4 +39,3 @@
       please verify that pg-backup-api is correctly configured.
     that:
     - servers_content != {}
-

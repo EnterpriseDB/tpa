@@ -5,7 +5,7 @@
 - name: Run apt list
   command: apt list --installed '{{ package_pattern }}'
   register: package_list
-  ignore_errors: yes
+  ignore_errors: true
 
 - include_tasks: output.yml
   vars:

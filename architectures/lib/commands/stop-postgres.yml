@@ -10,7 +10,7 @@
 # We stop services and unmount and close any LUKS-encrypted volumes.
 
 - name: Start Postgres on cluster {{ cluster_dir }}
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes

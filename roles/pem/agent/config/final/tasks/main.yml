@@ -13,7 +13,7 @@
   args:
     executable: /bin/bash
   register: pemagent_version_check
-  changed_when: False
+  changed_when: false
   check_mode: no
 
 - name: Set pem_agent_version
@@ -104,7 +104,7 @@
   command: >
     awk -F= '/^agent_id=/ { print $2 }' "{{ pem_agent_config_path }}"
   register: agentid_check
-  changed_when: False
+  changed_when: false
   check_mode: no
 
 - name: Set pem_agent_id
@@ -169,7 +169,7 @@
   when: >
     not agent_cfg_check.stat.exists and
     'barman' in role
-    and enable_pg_backup_api|default(False)
+    and enable_pg_backup_api|default(false)
 
 # Only now that agent.cfg is the way we want it can we start or restart
 # the service.

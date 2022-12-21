@@ -69,7 +69,7 @@
             , PRIMARY KEY (key, attempt_no))
     become_user: "{{ postgres_user }}"
     become: yes
-  
+
   - name: Wait for DDL to replicate to BDR instances
     postgresql_query:
       conninfo: "{{ ping_conninfo }}"
@@ -110,7 +110,7 @@
 
   - name: Start run_time_check script
     shell: >
-      ./run_time_check.py 
+      ./run_time_check.py
       "{{ hostvars[ping].bdr_node_dsn }}"
       "{{ hostvars[pong].bdr_node_dsn }}"
       "{{ bdr_node_dsn }}"

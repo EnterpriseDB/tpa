@@ -45,4 +45,3 @@
       /etc/tpa/barman-home-ok && /usr/bin/barman backup {{ backup_name }}
     state: present
   delegate_to: "{{ this_barman }}"
-

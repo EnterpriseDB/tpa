@@ -13,4 +13,4 @@
   become_user: "{{ postgres_user }}"
   become: yes
   register: new_bdr_node
-  changed_when: True
+  changed_when: true

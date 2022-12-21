@@ -46,10 +46,10 @@
     user: "{{ postgres_user }}"
     cron_file: /etc/cron.d/repmgr_cleanup
     name: Purge old repmgr monitor records
-    minute:  "{{ _repmgr_cluster_cleanup_interval[0] }}"
-    hour:    "{{ _repmgr_cluster_cleanup_interval[1] }}"
-    day:     "{{ _repmgr_cluster_cleanup_interval[2] }}"
-    month:   "{{ _repmgr_cluster_cleanup_interval[3] }}"
+    minute: "{{ _repmgr_cluster_cleanup_interval[0] }}"
+    hour: "{{ _repmgr_cluster_cleanup_interval[1] }}"
+    day: "{{ _repmgr_cluster_cleanup_interval[2] }}"
+    month: "{{ _repmgr_cluster_cleanup_interval[3] }}"
     weekday: "{{ _repmgr_cluster_cleanup_interval[4] }}"
     job: >
       repmgr -f "{{ repmgr_conf_file }}" node status | grep -q 'Role: primary' &&

@@ -172,7 +172,7 @@
       'set_autoadd_seqs' in match
       and set.autoadd_sequences|default(match.set_autoadd_seqs) != match.set_autoadd_seqs
     )
-  changed_when: True
+  changed_when: true
 
 # We remove any existing replication sets that are not mentioned in the
 # publication, with the exception of the default replication sets that
@@ -194,7 +194,7 @@
   when:
     item.set_name not in pub.replication_sets|json_query('[*].name')
     and item.set_name not in ['default', 'default_insert_only', 'ddl_sql']
-  changed_when: True
+  changed_when: true
 
 # Now that all the desired replication sets exist, we must deal with any
 # tables and sequences assigned to each one.

@@ -30,7 +30,7 @@
   become: yes
   when:
     _pgl_node.rowcount == 0
-  changed_when: True
+  changed_when: true
 
 - set_fact:
     pglogical_node_id: "{{

@@ -7,7 +7,7 @@
 
   - name: Wait for Postgres to become available
     command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
-    changed_when: False
+    changed_when: false
     become_user: "{{ postgres_user }}"
     become: yes
     when:
@@ -25,7 +25,7 @@
       -o cat
 
     register: unit_log
-    changed_when: False
+    changed_when: false
 
   - name: Show excerpt from server logfile if Postgres did not start
     fail:

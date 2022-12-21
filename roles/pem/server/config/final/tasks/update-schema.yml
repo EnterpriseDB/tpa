@@ -56,4 +56,3 @@
 
   when: >
     current_pem_schema_version != pem_supported_schema_version
-

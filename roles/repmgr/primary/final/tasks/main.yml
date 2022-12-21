@@ -21,8 +21,8 @@
       FROM repmgr.nodes
       WHERE node_name='{{ inventory_hostname }}' AND active
   register: primary_check
-  ignore_errors: True
-  changed_when: False
+  ignore_errors: true
+  changed_when: false
   become_user: "{{ postgres_user }}"
   become: yes
 

@@ -28,7 +28,7 @@
     - name: Fetch lines from {{ log_file }}
       command: tail -n5 {{ log_file }}
       register: inst_log_tail
-      changed_when: False
+      changed_when: false
 
     - name: Display lines from failed installation log {{ log_file }}
       fail:

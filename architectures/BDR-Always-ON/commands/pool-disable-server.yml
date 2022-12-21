@@ -19,7 +19,7 @@
 # cluster.
 
 - name: Collect haproxy facts for cluster {{ cluster_dir }}
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes
@@ -57,7 +57,7 @@
 # instances (if any).
 
 - name: Remove instance {{ disable_instance }} from haproxy server pools
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes

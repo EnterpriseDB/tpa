@@ -16,4 +16,3 @@
     name: efm/restart
     apply:
       tags: [efm, restart]
-

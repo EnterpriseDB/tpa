@@ -254,7 +254,7 @@
     name: haproxy_connect_any
     state: yes
     persistent: yes
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Enable haproxy service
   service:

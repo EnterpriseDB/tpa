@@ -11,7 +11,7 @@
 # instances in the cluster. First, we unlock any LUKS-encrypted volumes.
 
 - name: Start Postgres on cluster {{ cluster_dir }}
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes
@@ -35,7 +35,7 @@
       state: started
 
   - command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
-    changed_when: False
+    changed_when: false
     become_user: "{{ postgres_user }}"
     become: yes
 

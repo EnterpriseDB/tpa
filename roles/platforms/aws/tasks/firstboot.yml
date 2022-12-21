@@ -7,7 +7,7 @@
     test -s {{ faillog }} && cat {{ faillog }}
 
   register: failures
-  failed_when: False
+  failed_when: false
   changed_when: >
     'stdout' in failures and failures.stdout.strip() != ''
   vars:

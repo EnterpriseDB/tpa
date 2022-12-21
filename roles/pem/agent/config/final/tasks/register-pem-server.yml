@@ -60,9 +60,9 @@
       regexp: "{{ item.str }}"
       replace: "{{ item.to_replace }}"
     loop:
-      - { str: 'ENC_PASSWORD', to_replace: "{{ enc_password.stdout }}" }
-      - { str: 'AGENT_ID', to_replace: "{{ pem_agent_id }}" }
-      - { str: 'PGPORT', to_replace: "{{ postgres_port }}" }
+      - {str: 'ENC_PASSWORD', to_replace: "{{ enc_password.stdout }}"}
+      - {str: 'AGENT_ID', to_replace: "{{ pem_agent_id }}"}
+      - {str: 'PGPORT', to_replace: "{{ postgres_port }}"}
 
   - name: Execute pem-server-random.sql
     command: >

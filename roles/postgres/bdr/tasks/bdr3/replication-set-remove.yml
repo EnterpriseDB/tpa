@@ -23,6 +23,6 @@
   when:
     publications is defined
     and item.set_name not in _set_names|union(_group_names)|union(_group_names_ext)
-  changed_when: True
+  changed_when: true
   become_user: "{{ postgres_user }}"
   become: yes

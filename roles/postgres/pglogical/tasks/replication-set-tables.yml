@@ -17,7 +17,7 @@
   register: table_tuples
   become_user: "{{ postgres_user }}"
   become: yes
-  changed_when: False
+  changed_when: false
 
 # Any table mentioned in set.tables that is not already in table_tuples
 # needs to be added to the replication set.
@@ -54,7 +54,7 @@
       {{ rel.name }}
   when:
     rel_name not in existing_tables
-  changed_when: True
+  changed_when: true
 
 # For now, we ignore the possibility that the table is already a member
 # of the replication set, but with a different configuration. In theory,
@@ -89,4 +89,4 @@
   when:
     rel.set_reloid not in set_tables
     and rel.set_reloid|regex_replace('^public\.', '') not in set_tables
-  changed_when: True
+  changed_when: true

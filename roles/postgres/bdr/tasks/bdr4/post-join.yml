@@ -133,7 +133,7 @@
             - "{{ inventory_hostname }}"
             - "{{ bdr_node_camo_partner }}"
             - "{{ bdr_camo_use_raft_for_local_mode }}"
-    changed_when: True
+    changed_when: true
     when:
       bcurflm_check.require_raft != bdr_camo_use_raft_for_local_mode
 

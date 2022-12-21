@@ -50,7 +50,7 @@
 - name: "Do a yum clean"
   shell: yum clean all
   args:
-    warn: False
+    warn: false
   when: yum_repo_installed.changed
   become: yes
   tags: [skip_ansible_lint]

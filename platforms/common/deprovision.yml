@@ -60,8 +60,7 @@
     find_cmd: >-
       find "{{ cluster_dir }}"/inventory -depth -type d
   register: rmdir
-  ignore_errors: yes
+  ignore_errors: true
   changed_when: >
     rmdir.rc == 99 and 'Directory not empty' not in rmdir.stderr
   failed_when: rmdir.rc not in [0, 99]
-

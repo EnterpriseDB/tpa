@@ -7,7 +7,7 @@
   tags: always
 
 - name: Evaluate expression
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   hosts: "{{ eval_hosts|default('all') }}"
   tasks:

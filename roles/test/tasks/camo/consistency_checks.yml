@@ -70,7 +70,7 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
-- name: Get total txns on all nodes 
+- name: Get total txns on all nodes
   postgresql_query:
     conninfo: "{{ bdr_node_dsn }}"
     query: >
@@ -81,7 +81,7 @@
   failed_when:
     local_txns is not successful
 
-- name: Consistency check 
+- name: Consistency check
   assert:
     that:
        - "local_txns.count == txns_on_origin.count"

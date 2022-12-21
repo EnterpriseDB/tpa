@@ -190,7 +190,7 @@
     register: client
     until: client.finished
     retries: 600
-    ignore_errors: yes
+    ignore_errors: true
     become_user: "{{ postgres_user }}"
     become: yes
 

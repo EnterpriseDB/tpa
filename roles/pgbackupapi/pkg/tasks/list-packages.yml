@@ -1,13 +1,12 @@
 ---
+
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
-  - block:
-    - include_role:
-        name: pkg/add_to_list
-      vars:
-        list_contents: "{{
+- when: "'barman' in role"
+  block:
+  - include_role:
+      name: pkg/add_to_list
+    vars:
+      list_contents: "{{
           pgbapi_packages|packages_for(ansible_os_family)
-          }}"
-
-    when:
-      - "'barman' in role"
+        }}"

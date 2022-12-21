@@ -5,7 +5,7 @@
 # We process an entry from ``subscriptions`` with ``type: pglogical``,
 # and either create a new pglogical subscription or alter an existing
 # one.  Here's an example of how to define a pglogical subscription:
-# 
+#
 # subscriptions:
 # - type: pglogical
 #   database: mydb
@@ -176,7 +176,7 @@
   become: yes
   when:
     subscription_tuples.rowcount == 0
-  changed_when: True
+  changed_when: true
 
 # TODO: If pglogical.subscription has an entry corresponding to sub.name
 # already, we must compare its attributes with the configuration and run
@@ -200,7 +200,7 @@
   when:
     - subscription_tuples.rowcount == 1
     - sub.enabled|default(true)|bool != sub_enabled|bool
-  changed_when: True
+  changed_when: true
 
 - name: Add or remove replication sets for subscription {{ sub.name }}
   postgresql_query:
@@ -230,4 +230,4 @@
     - subscription_tuples.rowcount == 1
     - ((set_name in cfg_replication_sets and set_name not in sub_replication_sets)
        or (set_name not in cfg_replication_sets and set_name in sub_replication_sets))
-  changed_when: True
+  changed_when: true

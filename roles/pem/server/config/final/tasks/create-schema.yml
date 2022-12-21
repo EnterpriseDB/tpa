@@ -22,4 +22,3 @@
     query: GRANT pem_admin TO current_user
   become_user: "{{ postgres_user }}"
   become: yes
-

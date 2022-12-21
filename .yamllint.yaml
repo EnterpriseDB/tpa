@@ -1,0 +1,14 @@
+---
+
+extends: default
+
+ignore: |
+  .github/
+  tpa-venv/
+  collections/
+  .prospector.yaml
+
+rules:
+  line-length: disable
+  indentation: disable
+  truthy: disable

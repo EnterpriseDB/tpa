@@ -37,7 +37,7 @@
   args:
     chdir: "{{ cluster_dir }}"
     creates: "{{ ssh_key_file }}.ppk"
-  ignore_errors: yes
+  ignore_errors: true
   when: >
     lookup('pipe', 'command -v puttygen || true') != ''
     and ssh_key_file == default_ssh_key_file

@@ -97,7 +97,7 @@
   when:
     platform == 'bare'
     and not manage_ssh_hostkeys|default(false)|bool
-  changed_when: False
+  changed_when: false
   check_mode: no
 
 - name: Accumulate hostnames, addresses, and public hostkeys

@@ -6,7 +6,7 @@
   - name: Wait for node to recover
     wait_for:
       host: "{{ partner_conninfo }}"
-      timeout: "{{ wait_for_partner }}"  
+      timeout: "{{ wait_for_partner }}"
   - name: Get workload status
     postgresql_query:
       conninfo: "{{ origin_conninfo }}"
@@ -27,7 +27,7 @@
     partner_conninfo: "{{ hostvars[partner].bdr_node_dsn }}"
   when: >
     inventory_hostname == tester_instance
-     
+
 
 - block:
   - name: Wait for bdr_camo_client to complete
@@ -35,7 +35,7 @@
     register: client
     until: client.finished
     retries: 600
-    ignore_errors: yes
+    ignore_errors: true
     become_user: "{{ postgres_user }}"
     become: yes
 
@@ -78,12 +78,12 @@
     register: done
     until: done.completed
     retries: 60
-    ignore_errors: yes
+    ignore_errors: true
     become_user: "{{ postgres_user }}"
     become: yes
   when:
     inventory_hostname in groups[bdr_node_group] and  inventory_hostname != origin
-  
+
 - block:
   - name: Wait for run_time_check script to finish
     shell: |
@@ -91,17 +91,16 @@
     register: script_running
     until: script_running.stdout == ''
     retries: 20
-    ignore_errors: yes 
+    ignore_errors: true
   - name: kill run_time_check script if not already finished. Possible data divergence.
     shell: |
        ps -ef | grep run_time_check | cut -d ' ' -f 2 || kill -9
     when: script_running is defined
-    ignore_errors: yes 
+    ignore_errors: true
   - name: Save run_time_check output
     fetch:
       src: "{{ run_time_output }}"
       dest: "{{ output_dir }}/{{ inventory_hostname }}/{{ run_time_output|basename }}"
       flat: yes
-  when: >
+  when:
     inventory_hostname == tester_instance
-

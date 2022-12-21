@@ -157,7 +157,7 @@
   when:
     inventory_hostname == first_bdr_primary
     and _group not in have_bdr_group_names
-  changed_when: True
+  changed_when: true
 
 - name: Identify logical standby nodes
   set_fact:

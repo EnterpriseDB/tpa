@@ -16,7 +16,7 @@
   args:
     executable: /bin/bash
   register: repmgr_version
-  changed_when: False
+  changed_when: false
   check_mode: no
 
 - name: Install custom repmgr service unit file

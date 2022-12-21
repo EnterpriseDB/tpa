@@ -46,7 +46,7 @@
   - fail:
       msg: "Test cluster is unsupported. Requires haproxy backends to be camo pairs"
     when: haproxy_node is undefined
- 
+
   - name: get haproxy haproxy_backend
     postgresql_query:
       conninfo: "host={{ haproxy_node }} port={{ pgbouncer_port }}  dbname={{bdr_database}} user={{postgres_user}}"

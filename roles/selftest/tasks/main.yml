@@ -36,7 +36,7 @@
         lookup('config', 'COLLECTIONS_PATHS')
         |map('apply_format', '{}/ansible_collections/' + item|replace('.', '/'))|list
       }}"
-      skip: True
+      skip: true
     found_collection: "{{ lookup('first_found', params) }}"
   with_items: "{{
     (lookup('file', tpa_dir + '/collections/requirements.yml')|from_yaml).collections|map(attribute='name')|list

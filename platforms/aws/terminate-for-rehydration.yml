@@ -3,7 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 - hosts: all
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   environment: "{{ target_environment|default({}) }}"
   tasks:

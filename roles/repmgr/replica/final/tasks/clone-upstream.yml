@@ -13,7 +13,7 @@
     query: >
       SELECT 42 as up
   register: upstreamconn
-  ignore_errors: yes
+  ignore_errors: true
   become_user: "{{ postgres_user }}"
   become: yes
 

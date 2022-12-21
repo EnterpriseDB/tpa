@@ -58,7 +58,7 @@
   args:
     chdir: "{{ cluster_dir }}/inventory"
     executable: /bin/bash
-  ignore_errors: yes
+  ignore_errors: true
   changed_when: false
   vars:
     hostlist: >

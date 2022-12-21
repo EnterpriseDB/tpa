@@ -17,8 +17,8 @@
   args:
     executable: /bin/bash
   register: userlist_cmd
-  changed_when: False
-  ignore_errors: True
+  changed_when: false
+  ignore_errors: true
   check_mode: no
 
 - name: Install userlist.txt

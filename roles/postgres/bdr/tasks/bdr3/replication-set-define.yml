@@ -45,7 +45,7 @@
       {{ _matches[0]|default({}) }}
   when:
     existing_set is empty
-  changed_when: True
+  changed_when: true
   become_user: "{{ postgres_user }}"
   become: yes
 
@@ -86,6 +86,6 @@
         [set.replicate_insert|default(true), set.replicate_update|default(true),
          set.replicate_delete|default(true), set.replicate_truncate|default(true),
          set.autoadd_tables|default(false)]
-  changed_when: True
+  changed_when: true
   become_user: "{{ postgres_user }}"
   become: yes

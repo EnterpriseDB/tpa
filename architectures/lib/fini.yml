@@ -6,7 +6,7 @@
 # end of deployment.
 
 - name: Run final cluster-wide tasks
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes

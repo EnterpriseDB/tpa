@@ -15,7 +15,7 @@
   tags: always
 
 - name: Add instance {{ enable_instance }} to haproxy servers for cluster {{ cluster_dir }}
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes

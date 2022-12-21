@@ -143,7 +143,7 @@
     chdir: "{{ cluster_dir }}"
     executable: /bin/bash
   register: git_repo_note
-  changed_when: False
+  changed_when: false
 
 - set_fact:
     tpaexec_initialised_cluster_git_repo: "{{
@@ -157,8 +157,8 @@
   args:
     chdir: "{{ cluster_dir }}"
   register: modified_files
-  changed_when: False
-  ignore_errors: yes
+  changed_when: false
+  ignore_errors: true
   when: tpaexec_initialised_cluster_git_repo
 
 - name: Abort if there are uncommitted changes

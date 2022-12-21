@@ -12,7 +12,7 @@
     executable: /bin/bash
   register: auth_sock_cmd
   become: no
-  changed_when: False
+  changed_when: false
 
 - name: Fetch {{ name }} from {{ repo }}, {{ version }}
   git:

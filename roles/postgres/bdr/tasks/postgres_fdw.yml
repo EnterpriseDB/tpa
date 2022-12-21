@@ -48,7 +48,7 @@
     queries:
     - text: >
         SELECT coalesce(array_agg(srvname),'{}'::text[]) as existing_mappings
-        FROM pg_catalog.pg_user_mapping pum 
+        FROM pg_catalog.pg_user_mapping pum
         JOIN pg_catalog.pg_foreign_server pfs ON (pum.umserver=pfs.oid)
         JOIN pg_catalog.pg_foreign_data_wrapper pfdw ON (pfs.srvfdw=pfdw.oid)
         WHERE fdwname='postgres_fdw' AND srvname = ANY(%s)

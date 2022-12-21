@@ -8,7 +8,7 @@
 # If 'pem' schema already exists, we try to upgrade in case a newer
 # version of pem packages got installed as part of the current run
 # of `tpaexec deploy`
- 
+
 - name: Update the PEM database schema (if already exists)
   include_tasks: update-schema.yml
   when: >

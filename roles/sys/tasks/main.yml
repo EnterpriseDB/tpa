@@ -140,11 +140,11 @@
 # implemented and roles/postgres/user/tasks/tls.yml is gone this can be
 # reactivated.
 
-#- include_role:
-#    name: sys/ssl
-#    apply:
-#      tags: ssl
-#  tags: ssl
+# - include_role:
+#     name: sys/ssl
+#     apply:
+#       tags: ssl
+#   tags: ssl
 
 - include_role:
     name: sys/rsyslog
@@ -177,7 +177,7 @@
     - name: Check whether systemd-logind is active
       command: systemctl is-active systemd-logind
       register: logind_state
-      ignore_errors: yes
+      ignore_errors: true
     - name: Set RemoveIPC in logind.conf
       ini_file:
         dest: "/etc/systemd/logind.conf"

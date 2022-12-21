@@ -256,4 +256,3 @@
     - inventory/ec2.ini
     - prehydrate-vars.yml
     - inventory/aws_ec2.yml
-

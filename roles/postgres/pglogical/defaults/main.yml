@@ -19,7 +19,7 @@ publication_keys:
   - replication_sets
 
 # An entry in publications[*].replication_sets may have the following
-# keys, or any of the optional arguments defined below. 
+# keys, or any of the optional arguments defined below.
 
 replication_set_keys:
   - name

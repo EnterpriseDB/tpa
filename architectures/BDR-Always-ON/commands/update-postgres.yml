@@ -24,7 +24,7 @@
 # on the whims of the network.)
 
 - name: Collect update facts for cluster {{ cluster_dir }}
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes
@@ -68,7 +68,7 @@
 # instances are updated last in the cycle).
 
 - name: Update postgres on instances in cluster {{ cluster_dir }}
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes

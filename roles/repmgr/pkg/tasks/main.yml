@@ -22,7 +22,7 @@
     name: "{{ item }}"
     state: stopped
     masked: yes
-  ignore_errors: yes
+  ignore_errors: true
   with_items:
     - repmgrd
     - repmgr{{ postgres_versionNN }}

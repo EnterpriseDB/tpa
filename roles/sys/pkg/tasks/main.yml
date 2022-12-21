@@ -29,7 +29,7 @@
     - "{{ optional_packages['common']|default([]) }}"
     - "{{ default_optional_packages[ansible_distribution] }}"
     - "{{ optional_packages[ansible_distribution]|default([]) }}"
-  ignore_errors: yes
+  ignore_errors: true
   tags: pkg
   when:
     platform not in ['shared']

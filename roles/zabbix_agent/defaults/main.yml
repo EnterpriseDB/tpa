@@ -11,7 +11,7 @@ zabbix_get_package: zabbix-get
 zabbix_agent_package_state: present
 zabbix_agent_server:
 zabbix_agent_serveractive:
-zabbix_selinux: False
+zabbix_selinux: false
 
 # Zabbix role related vars
 zabbix_install_pip_packages: true
@@ -43,8 +43,8 @@ zabbix_repo_yum:
 zabbix_url: "http://zabbix.dj-wasabi.local"
 zabbix_api_user: Admin
 zabbix_api_pass: zabbix
-zabbix_api_create_hostgroup: False
-zabbix_api_create_hosts: False
+zabbix_api_create_hostgroup: false
+zabbix_api_create_hosts: false
 zabbix_create_hostgroup: present  # or absent
 zabbix_create_host: present       # or absent
 zabbix_update_host: yes
@@ -65,8 +65,8 @@ zabbix_agent_interfaces:
     dns: "{{ ansible_fqdn }}"
     port: "{{ zabbix_agent_listenport }}"
 
-zabbix_agent_firewall_enable: False
-zabbix_agent_firewalld_enable: False
+zabbix_agent_firewall_enable: false
+zabbix_agent_firewalld_enable: false
 zabbix_agent_firewalld_source: "{{ zabbix_agent_server }}"
 # Zabbix configuration variables
 zabbix_agent_pidfile: /var/run/zabbix/zabbix_agentd.pid
@@ -99,7 +99,7 @@ zabbix_agent_userparameters: []
 zabbix_agent_custom_scripts: false
 zabbix_agent_loadmodulepath: ${libdir}/modules
 zabbix_agent_loadmodule:
-zabbix_agent_become_on_localhost: True
+zabbix_agent_become_on_localhost: true
 
 # TLS settings
 zabbix_agent_tlsconnect:
@@ -111,7 +111,7 @@ zabbix_agent_tlsservercertsubject:
 zabbix_agent_tlscertfile:
 zabbix_agent_tlskeyfile:
 zabbix_agent_tlspskidentity:
-zabbix_agent_tlspsk_auto: False
+zabbix_agent_tlspsk_auto: false
 
 zabbix_agent_tls_config:
   unencrypted: '1'

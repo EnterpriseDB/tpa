@@ -8,7 +8,7 @@
   tags: always
 
 - name: Set up TPA image nodes
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: true

@@ -13,7 +13,7 @@
 # hosts are available, and perform basic fact discovery.
 
 - name: Basic initialisation and fact discovery
-  any_errors_fatal: True
+  any_errors_fatal: true
   max_fail_percentage: 0
   strategy: linear
   environment: "{{ target_environment|default({}) }}"

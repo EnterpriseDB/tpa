@@ -10,7 +10,7 @@
 - name: Run barman check
   command: barman check all
   register: barman_check
-  ignore_errors: yes
+  ignore_errors: true
   become_user: "{{ barman_user }}"
   become: yes
 
@@ -23,7 +23,7 @@
 - name: Run barman diagnose
   command: barman diagnose
   register: barman_diagnose
-  ignore_errors: yes
+  ignore_errors: true
   become_user: "{{ barman_user }}"
   become: yes
 

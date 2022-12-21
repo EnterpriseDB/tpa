@@ -59,7 +59,7 @@
       {{ subscribed.replication_sets|default([])|union(maybe_default_repset) }}
   when:
     subscribed_sets|symmetric_difference(wanted_sets) is not empty
-  changed_when: True
+  changed_when: true
   become_user: "{{ postgres_user }}"
   become: yes
 

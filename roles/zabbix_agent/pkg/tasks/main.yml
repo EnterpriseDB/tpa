@@ -7,6 +7,5 @@
   tags: [zabbix-agent, vars]
 
 - name: "Install the correct repository"
-  include_tasks: "os/{{ ansible_distribution }}.yml" 
+  include_tasks: "os/{{ ansible_distribution }}.yml"
   tags: [zabbix-agent, init, config, service]
-

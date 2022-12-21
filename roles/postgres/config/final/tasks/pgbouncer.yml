@@ -56,7 +56,7 @@
           $$ LANGUAGE plpgsql SECURITY DEFINER
       - text: REVOKE ALL ON FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT) FROM PUBLIC
       - text: GRANT EXECUTE ON FUNCTION pg_catalog.pgbouncer_get_auth(p_usename TEXT) TO "{{ pgbouncer_auth_user }}"
-  changed_when: True
+  changed_when: true
   become_user: "{{ postgres_user }}"
   become: yes
   with_items: "{{ cluster_facts.databases.keys()|list }}"

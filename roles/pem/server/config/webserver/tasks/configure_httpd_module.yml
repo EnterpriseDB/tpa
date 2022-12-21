@@ -7,13 +7,13 @@
     - name: Check the mod_ssl
       shell: /usr/sbin/a2query -m ssl
       register: mod_ssl
-      ignore_errors: yes
+      ignore_errors: true
       no_log: true
 
     - name: Check the mod_gnutls
       shell: /usr/sbin/a2query -m gnutls
       register: mod_gnutls
-      ignore_errors: yes
+      ignore_errors: true
       no_log: true
 
     - name: Disabling mod_gnutls as both mod_ssl and mod_gnutls are enabled
@@ -50,7 +50,7 @@
           apache2_module:
             state: absent
             name: wsgi
-          ignore_errors: yes
+          ignore_errors: true
 
         # Enabling mod_edb-python3-mod-wsgi results in the stdout getting following message:
         # "stdout": "Enabling module edb-python3-mod-wsgi.\nTo activate the new configuration, you need to run:\n  systemctl restart apache2\n"
@@ -60,7 +60,7 @@
           apache2_module:
             state: present
             name: edb-python3-mod-wsgi
-          ignore_errors: yes
+          ignore_errors: true
 
         - name: "Restart httpd service - {{ pem_web_server_service_name[ansible_os_family] }}"
           service:

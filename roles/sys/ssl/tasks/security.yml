@@ -10,7 +10,7 @@
     paths: "{{ ssl_dirs }}"
     patterns: ["*.crt", "*.key"]
   register: keycertfiles
-  changed_when: False
+  changed_when: false
   check_mode: no
 
 - name: Set correct ownership and mode on key/certificate files
