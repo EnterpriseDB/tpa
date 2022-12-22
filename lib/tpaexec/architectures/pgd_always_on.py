@@ -5,6 +5,7 @@
 from .bdr import BDR
 from ..exceptions import ArchitectureError
 from typing import List, Tuple
+import re
 
 
 class PGD_Always_ON(BDR):
@@ -138,43 +139,43 @@ class PGD_Always_ON(BDR):
             raise ArchitectureError(*(f"PGD-Always-ON parameter {e}" for e in errors))
 
     def update_cluster_vars(self, cluster_vars):
+        """
+        Define bdr_node_groups, along with any pgd-proxy options required,
+        under cluster_vars.
+        """
         super().update_cluster_vars(cluster_vars)
 
         top = self.args["bdr_node_group"]
         bdr_node_groups = [{"name": top}]
-        for i in range(len(self.args.get("location_names"))):
-            bdr_node_groups.append(
-                {
-                    "name": self._sub_group_name(self.args.get("location_names")[i]),
-                    "parent_group_name": top,
+
+        for loc in self.args.get("location_names"):
+            group = {
+                "name": self._sub_group_name(loc),
+                "parent_group_name": top,
+            }
+
+            # Enable proxy routing only in locations with a proxy
+            if not self._is_witness_only_location(loc):
+                group["options"] = {
+                    "enable_proxy_routing": True,
                 }
-            )
+
+            bdr_node_groups.append(group)
 
         cluster_vars.update(
             {
                 "bdr_node_groups": bdr_node_groups,
+                "default_pgd_proxy_options": {
+                    "listen_port": 6432,
+                },
             }
         )
 
-    def _sub_group_name(self, loc):
-        return "s_group_%s" % loc
-
-    def _bdr_primaries(self):
-        primaries = []
-        for i in self.args["instances"]:
-            r = self._instance_roles(i)
-            if "bdr" in r and "readonly" not in r and "subscriber-only" not in r:
-                primaries.append(i.get("node"))
-
-        return primaries
-
     def update_instances(self, instances):
         """
-        Update instances with bdr-always-on specific changes.
-        Invoke BDR generic update to process updates common to multiple BDR
-        architectures (BDR-A-ON, BDR-autoscale).
+        Update instances with bdr node and proxy configuration specific
+        to PGD-Always-ON.
         """
-
         super().update_instances(instances)
 
         # Map location names to the corresponding barman instances.
@@ -186,10 +187,9 @@ class PGD_Always_ON(BDR):
             ]
         )
 
-        bdr_primaries = self._bdr_primaries()
-
         for instance in instances:
             role = self._instance_roles(instance)
+            instance_vars = instance.get("vars", {})
             location = instance["location"]
 
             # Make sure at least one instance in each location has "backup"
@@ -200,11 +200,82 @@ class PGD_Always_ON(BDR):
                     instance["backup"] = b["Name"]
                     del barman_instances_by_location[location]
 
-            if instance.get("node") in bdr_primaries:
-                vars = instance.get("vars", {})
-                vars.update(
-                    {
-                        "bdr_child_group": self._sub_group_name(location),
-                    }
+            # All BDR instances need bdr_child_group set; nodes that pgd-proxy
+            # can route to also need routing options set.
+            if "bdr" in role:
+                instance_vars.update(
+                    {"bdr_child_group": self._sub_group_name(location)}
                 )
-                instance["vars"] = vars
+
+                if (
+                    "subscriber-only" not in role
+                    and "readonly" not in role
+                    and "witness" not in role
+                ):
+                    instance_vars.update(
+                        {
+                            "bdr_node_options": {
+                                "route_priority": 100,
+                            }
+                        }
+                    )
+
+            # Proxy nodes may need some proxy-specific configuration.
+            if "pgd-proxy" in role:
+                instance_vars.update(
+                    {"bdr_child_group": self._sub_group_name(location)}
+                )
+                fallback_groups = [
+                    self._sub_group_name(l) for l in self._fallback_locations(location)
+                ]
+                if fallback_groups:
+                    instance_vars.update(
+                        {
+                            "pgd_proxy_options": {
+                                "fallback_groups": fallback_groups,
+                            }
+                        }
+                    )
+
+            if instance_vars:
+                instance["vars"] = instance_vars
+
+    def _sub_group_name(self, loc):
+        """
+        Returns a name for the BDR subgroup in the given location.
+        """
+        loc = re.sub("[^a-z0-9_]", "_", loc)
+        return f"{loc}_subgroup"
+
+    def _is_witness_only_location(self, location):
+        """
+        Returns true if the given location is a witness-only location,
+        and false otherwise.
+        """
+        return location == self.args.get("witness_only_location")
+
+    def _fallback_locations(self, location):
+        """
+        Returns a list of fallback location names for the pgd-proxy in the given
+        location to use.
+
+        BDR currently supports only one fallback location, so we return a list
+        containing only one location for now (cf. bdr_alter_proxy_option_sql).
+        The basis of selection is only that it must be a different location
+        which is not a witness-only location.
+
+        Args:
+            location: the location for which to return fallback locations
+
+        Returns:
+            list: list of fallback location names, may be empty if no fallback
+            locations are available
+        """
+
+        possible_fallback_locations = [
+            l
+            for l in self.args.get("location_names")
+            if not (l == location or self._is_witness_only_location(l))
+        ]
+
+        return sorted(possible_fallback_locations)[:1]

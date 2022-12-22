@@ -43,21 +43,42 @@
   when:
     hostvars[item].bdr_node_id is defined
 
+- name: Set BDR node options, if required
+  include_tasks: bdr5/alter_node_option.yml
+  vars:
+    _default_options:
+      route_dsn: "{{ bdr_node_route_dsn }}"
+  with_dict:
+    "{{ _default_options|combine(bdr_node_options) }}"
+  loop_control:
+    loop_var: node_option
+    label: >
+      {{ node_option.key }}:{{ node_option.value }}
+  when:
+    bdr_major_version == 5
+
 # Now we must ensure that the required BDR node groups exist. The
 # first_bdr_primary will create every group in bdr_node_groups.
 #
 # Each bdr_node_groups entry must specify a group name, may specify the
 # node_group_type and parent_group_name to express the group hierarchy,
-# and may also include other group options:
+# and may also include other group options, either at the top level, or
+# under an "options" key for BDRv5 and above:
 #
 #   bdr_node_groups:
 #   - name: topgroup
 #     node_group_type: global
-#     option1: value1
+#     legacy_option1: value1
+#     options:
+#       enable_raft: true
+#       new_option1: value1
 #   - name: group_a
 #     node_group_type: datanode
 #     parent_group_name: topgroup
-#     option2: value2
+#     legacy_option2: value2
+#     options:
+#       enable_raft: true
+#       enable_proxy_routing: true
 #   - name: group_a_2
 #     node_group_type: subscriber-only
 #     parent_group_name: group_a
@@ -137,13 +158,17 @@
   vars:
     _rafted_node_groups: []
     _default_setting:
-      enable_raft: "{{ enable_subgroup_raft|bool }}"
+      options:
+        enable_raft: "{{ enable_subgroup_raft|bool }}"
+    _combined_setting:
+      "{{ _default_setting
+          |combine(item, recursive=True) }}"
   block:
   - name: Set or unset enable_raft for BDR node groups
     set_fact:
       _rafted_node_groups:
         "{{ _rafted_node_groups
-            |union([_default_setting|combine(item)]) }}"
+            |union([_combined_setting]) }}"
     with_items: "{{ bdr_node_groups }}"
   - set_fact:
       bdr_node_groups: "{{ _rafted_node_groups }}"
@@ -151,10 +176,7 @@
 # From bdr_node_groups, we now construct maps from group names to those
 # options that must be specified while creating the group, and the ones
 # that may be changed afterwards using bdr.alter_node_group_config().
-#
-# If any of the bdr_node_groups entries has 'enable_raft' set, we do not
-# include it in _group_config_options. We'll process it later, after the
-# group join.
+# This excludes the ones that are explicitly defined under "options".
 
 - name: Map BDR group names to options
   set_fact:
@@ -172,7 +194,7 @@
     group: "{{ item.name }}"
     create_options: "{{ item|extract_keys(create_option_names) }}"
     config_options:
-      "{{ item|remove_keys(create_option_names+['name','enable_raft']) }}"
+      "{{ item|remove_keys(create_option_names+['name','options']) }}"
 
 # Now we check if bdr.node_group has entries for all the groups named in
 # bdr_node_groups. If not, the first_bdr_primary must create each group
@@ -223,16 +245,19 @@
 
 - name: Identify logical standby nodes
   set_fact:
-    bdr_node_pause_in_standby: "{{
-        bdr_node_pause_in_standby|default('readonly' in role)
-      }}"
+    bdr_node_pause_in_standby:
+      "{{ bdr_node_pause_in_standby|default('readonly' in role) }}"
 
 # Next, we call bdr.alter_node_group_config() on any leftover options,
-# i.e., the ones we couldn't specify at creation time.
+# i.e., the ones we couldn't specify at creation time, but which are not
+# inside "options" (and which we therefore presume will be accepted by
+# this function).
 #
-# XXX How can we avoid calling this function every time through (if any
-# options are specified)? There's no catalog that contains the current
-# configuration for us to compare with.
+# XXX This is a legacy interface (supported by all versions of BDR, but
+# not supporting all options recognised by recent versions of BDR), and
+# we can expect _config_options to usually be empty. We don't go to the
+# trouble of skipping repeated calls to the function by comparing with
+# the config options from the database, though we could.
 
 - name: Alter BDR node group configuration, if necessary
   postgresql_query:
@@ -254,7 +279,20 @@
   when:
     inventory_hostname == first_bdr_primary
     and _config_options is not empty
-  changed_when: false
+  changed_when: true
+
+# Now we're left with only bdr_node_groups[*].options{}, which we
+# process using bdr.alter_node_group_option(), which is new in BDRv5.
+# (But note that "enable_raft" and "enable_proxy_routing" are special.
+# See bdr5/post-join.yml for more.)
+
+- name: Set BDR node group options for each group
+  include_tasks: bdr5/alter_node_group_options.yml
+  with_items: "{{ bdr_node_groups }}"
+  loop_control:
+    loop_var: node_group
+  when:
+    inventory_hostname == first_bdr_primary
 
 - name: Include bdr-post-group-creation hook
   include_tasks: "{{ hook }}"

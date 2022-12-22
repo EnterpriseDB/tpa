@@ -1,0 +1,27 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Alter options for pgd-proxy {{ proxy_name }}
+  include_tasks: bdr5/alter_proxy_option.yml
+  vars:
+    config_key: "{{ option.key }}"
+    config_value: "{{ option.value }}"
+    catalog_key: "{{ option.key }}"
+    this_proxy_facts:
+      "{{ bdr_database_facts.bdr.proxy_config_summary
+          |selectattr('proxy_name', 'equalto', proxy_name)
+          |list }}"
+  with_dict:
+    "{{ default_pgd_proxy_options
+        |combine(hostvars[proxy_name].pgd_proxy_options
+                 |default({})
+        ) }}"
+  loop_control:
+    loop_var: option
+    label: >
+      {{ proxy_name }}:{{ option.key }}:{{ option.value }}
+  when:
+    - this_proxy_facts is empty
+      or catalog_key not in this_proxy_facts[0]
+      or this_proxy_facts[0][catalog_key] != option.value

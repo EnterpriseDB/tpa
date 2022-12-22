@@ -146,6 +146,8 @@
     bdr_node_group: "{{ bdr_node_group|default(default_bdr_node_group) }}"
     pgd_proxy_user: "{{ pgd_proxy_user|default(default_pgd_proxy_user) }}"
     pgd_proxy_group: "{{ pgd_proxy_group|default(default_pgd_proxy_group) }}"
+    pgd_proxy_options: "{{ pgd_proxy_options|default({}) }}"
+    bdr_node_options: "{{ bdr_node_options|default({}) }}"
     haproxy_port: "{{ haproxy_port|default(default_haproxy_port[postgres_family]) }}"
     haproxy_bind_address: "{{ haproxy_bind_address|default(default_haproxy_bind_address) }}"
     harp_proxy_port: "{{ harp_proxy_port|default(default_harp_proxy_port) }}"
@@ -418,6 +420,8 @@
       host={{ _repmgr_hostname }} port={{ postgres_port }} dbname=repmgr user=repmgr {{ repmgr_client_dsn_attributes }}
     bdr_node_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ bdr_client_dsn_attributes }}
+    bdr_node_route_dsn: >-
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ pgd_proxy_user }} {{ bdr_client_dsn_attributes }}
     bdr_node_local_dsn: >-
       host={{ unix_socket_directories|first }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }}
     pgbouncer_node_dsn: >-

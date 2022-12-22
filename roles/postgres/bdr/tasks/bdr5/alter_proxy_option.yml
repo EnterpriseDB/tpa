@@ -1,0 +1,24 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+- name: Alter option {{ config_key }} for pgd-proxy {{ proxy_name }}
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >
+        SELECT bdr.alter_proxy_option(proxy_name := %s,
+          config_key := %s, config_value := %s::TEXT)
+      args:
+        - "{{ proxy_name }}"
+        - "{{ config_key }}"
+        - "{{ _config_value }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+  changed_when: true
+  vars:
+    # Although the option is called "fallback_groups", at the moment it
+    # only takes a single string value.
+    _config_value:
+      "{{ (config_key == 'fallback_groups' and config_value is sequence)
+          |ternary(config_value|first, config_value) }}"

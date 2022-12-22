@@ -120,3 +120,11 @@
     'pem-server' in role
     or 'pem-agent' in role
   tags: pem
+
+- include_role:
+    name: pgd_proxy/final
+    apply:
+      tags: pgd-proxy
+  when: >
+    'pgd-proxy' in role
+  tags: pgd-proxy

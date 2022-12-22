@@ -1,0 +1,31 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# We assume that a key named x in bdr_node_groups[*].options corresponds
+# to the bdr.node_group_summary.x column in the database. If this is not
+# the case, we may unnecessarily repeat calls to this function.
+
+- name: Alter options for BDR node group {{ node_group.name }}
+  include_tasks: bdr5/alter_node_group_option.yml
+  vars:
+    node_group_name: "{{ node_group.name }}"
+    config_key: "{{ option.key }}"
+    config_value: "{{ option.value }}"
+    catalog_key: "{{ option.key }}"
+    this_group_facts:
+      "{{ bdr_database_facts.bdr.node_group_summary
+          |selectattr('node_group_name', 'equalto', node_group.name)
+          |list }}"
+  with_dict:
+    "{{ node_group.options|default({}) }}"
+  loop_control:
+    loop_var: option
+    label: >
+      {{ node_group.name }}:{{ option.key }}:{{ option.value }}
+  when:
+    # Some options are handled later in bdr5/post-join.yml
+    - option.key not in ["enable_raft", "enable_proxy_routing"]
+    - this_group_facts is empty
+      or catalog_key not in this_group_facts[0]
+      or this_group_facts[0][catalog_key] != option.value

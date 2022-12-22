@@ -360,6 +360,24 @@ def bdr_discovery(module, conn, m0):
             }
         )
 
+    if bdr_major_version >= 5:
+        m.update(
+            {
+                "local_node_summary": query_results(
+                    conn, "SELECT * FROM bdr.local_node_summary"
+                ),
+                "node_config_summary": query_results(
+                    conn, "SELECT * FROM bdr.node_summary"
+                ),
+                "node_group_summary": query_results(
+                    conn, "SELECT * FROM bdr.node_group_summary"
+                ),
+                "proxy_config_summary": query_results(
+                    conn, "SELECT * FROM bdr.proxy_config_summary"
+                ),
+            }
+        )
+
     return {"bdr": m} if m else {}
 
 

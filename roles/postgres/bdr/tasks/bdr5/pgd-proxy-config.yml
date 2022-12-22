@@ -1,0 +1,55 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# For each pgd-proxy instance, we should run bdr.create_proxy() if it's
+# not in the database already.
+
+- name: Create pgd-proxy configuration via BDR
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >
+        SELECT bdr.create_proxy(proxy_name := %s, node_group := %s)
+      args:
+        - "{{ item }}"
+        - "{{ hostvars[item].bdr_child_group }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+  with_items:
+    "{{ groups['role_pgd-proxy'] }}"
+  vars:
+    this_proxy_facts:
+      "{{ bdr_database_facts.bdr.proxy_config_summary
+          |selectattr('proxy_name', 'equalto', item)
+          |list }}"
+  when:
+    this_proxy_facts is empty
+
+# Next, remove any proxies that were configured, but do not correspond
+# to a pgd-proxy instance in the configuration any longer (e.g., the
+# pgd-proxy role was removed from an instance).
+
+- name: Remove unwanted pgd-proxy instances
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >
+        SELECT bdr.drop_proxy(proxy_name := %s)
+      args:
+        - "{{ item }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+  with_items:
+    "{{ bdr_database_facts.bdr.proxy_config_summary
+        |map(attribute='proxy_name')|list
+        |difference(groups['role_pgd-proxy']) }}"
+
+# Finally, we call bdr.alter_proxy_option() for each option in
+# pgd_proxy_options.
+
+- name: Set pgd-proxy options
+  include_tasks: bdr5/alter_proxy_options.yml
+  with_items: "{{ groups['role_pgd-proxy'] }}"
+  loop_control:
+    loop_var: proxy_name

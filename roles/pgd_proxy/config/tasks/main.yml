@@ -17,3 +17,5 @@
     owner: "{{ pgd_proxy_user }}"
     group: "{{ pgd_proxy_group }}"
     mode: 0600
+  notify:
+    - Note pgd-proxy restart required

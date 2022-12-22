@@ -1,0 +1,29 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+
+# Execute bdr.alter_node_option() for the given key and value, unless we
+# can see that the value has already been set via bdr.node_summary.
+
+- name: Alter BDR node option {{ node_option.key }}
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >
+        SELECT bdr.alter_node_option(node_name := %s,
+          config_key := %s, config_value := %s::TEXT)
+      args:
+        - "{{ bdr_node_name }}"
+        - "{{ node_option.key }}"
+        - "{{ node_option.value }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+  vars:
+    this_node_facts:
+      "{{ bdr_database_facts.bdr.node_config_summary
+          |selectattr('node_name', 'equalto', bdr_node_name)
+          |list }}"
+  when:
+    this_node_facts is empty
+    or node_option.key not in this_node_facts[0]
+    or this_node_facts[0][node_option.key] != node_option.value

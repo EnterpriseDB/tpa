@@ -11,32 +11,48 @@
 # raft. (Disabling it once it's enabled is not supported by BDR.)
 
 - name: Enable subgroup raft for BDR node groups, if necessary
-  postgresql_query:
-    conninfo: "{{ bdr_node_dsn }}"
-    queries:
-      - text: >
-          SELECT bdr.alter_node_group_option(node_group_name := %s,
-            config_key := 'enable_raft', config_value := %s::TEXT)
-        args:
-          - "{{ item.name }}"
-          - "{{ enable_raft }}"
-  become_user: "{{ postgres_user }}"
-  become: yes
+  include_tasks: alter_node_group_option.yml
   with_items: "{{ bdr_node_groups }}"
   loop_control:
     label: >-
       {{ item.name }}:{{ enable_raft }}
   vars:
+    node_group_name: "{{ item.name }}"
+    config_key: enable_raft
+    config_value: "{{ enable_raft }}"
+    enable_raft:
+      "{{ item|try_subkey('options.enable_raft', False)|bool }}"
     this_group_facts:
-      "{{ bdr_database_facts.bdr.node_group
+      "{{ bdr_database_facts.bdr.node_group_summary
           |selectattr('node_group_name', 'equalto', item.name)
           |list }}"
-    enable_raft:
-      "{{ item.enable_raft|default(false)|bool }}"
   when:
     - inventory_hostname == first_bdr_primary
     - item.name != bdr_node_group
     - enable_raft is true
     - this_group_facts is empty
-      or this_group_facts[0].node_group_enable_raft is false
-  changed_when: true
+      or this_group_facts[0].enable_raft is false
+
+# Next, do the same for `enable_proxy_routing`.
+
+- name: Enable or disable proxy routing for BDR node groups, if necessary
+  include_tasks: alter_node_group_option.yml
+  with_items: "{{ bdr_node_groups }}"
+  loop_control:
+    label: >-
+      {{ item.name }}:{{ enable_proxy_routing }}
+  vars:
+    node_group_name: "{{ item.name }}"
+    config_key: enable_proxy_routing
+    config_value: "{{ enable_proxy_routing }}"
+    enable_proxy_routing:
+      "{{ item|try_subkey('options.enable_proxy_routing', False)|bool }}"
+    this_group_facts:
+      "{{ bdr_database_facts.bdr.node_group_summary
+          |selectattr('node_group_name', 'equalto', item.name)
+          |list }}"
+  when:
+    - inventory_hostname == first_bdr_primary
+    - item.name != bdr_node_group
+    - this_group_facts is empty
+      or this_group_facts[0].enable_proxy_routing != enable_proxy_routing
