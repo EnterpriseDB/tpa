@@ -288,7 +288,9 @@ def schema_discovery(module, conn, m0):
     m = dict()
     m["schemas"] = dict()
 
-    schemas = query_results(conn, "SELECT * FROM pg_catalog.pg_namespace")
+    schemas = query_results(
+        conn, "SELECT nspname, nspowner, nspacl FROM pg_catalog.pg_namespace"
+    )
     for s in schemas:
         results = dict(s)
         nspname = s["nspname"]
