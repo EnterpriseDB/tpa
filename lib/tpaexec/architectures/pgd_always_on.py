@@ -165,6 +165,7 @@ class PGD_Always_ON(BDR):
         cluster_vars.update(
             {
                 "bdr_node_groups": bdr_node_groups,
+                "enable_subgroup_raft": "false",
                 "default_pgd_proxy_options": {
                     "listen_port": 6432,
                 },
