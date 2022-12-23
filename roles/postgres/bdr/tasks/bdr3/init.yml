@@ -56,6 +56,7 @@
       {{ node_option.key }}:{{ node_option.value }}
   when:
     bdr_major_version == 5
+    and false # (delayed until bdr5/post-join.yml due to segfault)
 
 # Now we must ensure that the required BDR node groups exist. The
 # first_bdr_primary will create every group in bdr_node_groups.
