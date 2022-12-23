@@ -278,4 +278,12 @@ class PGD_Always_ON(BDR):
             if not (l == location or self._is_witness_only_location(l))
         ]
 
+        # The correct use of fallback locations depends on the number of
+        # locations available (e.g., one has to be careful to avoid cyclic
+        # dependencies), requires the user to be aware of the implications, and
+        # may need user input as well. Since it can't be handled with an on/off
+        # switch for now, we disable it altogether by pretending that there are
+        # no fallback locations available.
+        possible_fallback_locations = []
+
         return sorted(possible_fallback_locations)[:1]
