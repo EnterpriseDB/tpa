@@ -45,10 +45,6 @@ among the active locations list.
 You may optionally specify `--cohost-proxies` to configure PGD-Proxy instances
 to run on the same hosts as data nodes.
 
-You may optionally specify `--node-group-name groupname` to set the
-name of the cluster-level BDR node group (default: bdrgroup). This will
-be also used as prefix for per-location data groups.
-
 You may optionally specify `--database-name dbname` to set the name of
 the database with BDR enabled (default: bdrdb).
 

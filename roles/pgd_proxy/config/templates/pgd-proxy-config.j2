@@ -1,5 +1,5 @@
 cluster:
-  name: {{ cluster_name }}
+  name: {{ pgd_cluster_name }}
   endpoints:
 {%  for h in groups[bdr_node_group] %}
 {%    set v = hostvars[h] %}

@@ -44,9 +44,6 @@ not participate in the data replication.
 You must specify `--harp-consensus-protocol protocolname`. The supported
 protocols are bdr and etcd; see [`Configuring HARP`](harp.md) for more details.
 
-You may optionally specify `--bdr-node-group groupname` to set the
-name of the BDR node group (default: bdrgroup).
-
 You may optionally specify `--bdr-database dbname` to set the name of
 the database with BDR enabled (default: bdrdb).
 

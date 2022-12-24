@@ -20,6 +20,16 @@
     failover_manager == 'harp'
     and ('bdr' in role or 'harp-proxy' in role)
 
+# This is the cluster_name to use in the pgd-{cli,proxy} configuration
+# files, which should match bdr_node_group on new clusters, but should
+# be set to whatever value is already in use for existing clusters.
+
+- set_fact:
+    pgd_cluster_name:
+      "{{ pgd_cluster_name|default(bdr_node_group) }}"
+    harp_cluster_name:
+      "{{ harp_cluster_name|default(bdr_node_group) }}"
+
 # We must ensure that instances within a single bdr_node_group, and any
 # harp-proxy instances for the bdr_node_group, have the same setting of
 # harp_consensus_protocol.

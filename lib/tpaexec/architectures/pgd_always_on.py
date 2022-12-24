@@ -154,7 +154,7 @@ class PGD_Always_ON(BDR):
         """
         super().update_cluster_vars(cluster_vars)
 
-        top = self.args["bdr_node_group"]
+        top = self.cluster_name()
         bdr_node_groups = [{"name": top}]
 
         for loc in self.args.get("location_names"):

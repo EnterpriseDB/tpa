@@ -19,9 +19,21 @@ if [[ -f $VERSION ]]; then
     fi
 fi
 
-if [[ -f /etc/harp/config.yml ]]; then
-    harp_consensus_protocol=$(awk -F '"' '/driver: "(.*)"/{print($2)}' /etc/harp/config.yml)
+cluster_name() {
+    awk '/^cluster:$/ { cluster=1 ; next } cluster && /^ *name: (.*)$/ { print($2) } /./ { cluster=0 }' "$1"
+}
+
+F=/etc/harp/config.yml
+if [[ -f $F ]]; then
+    harp_consensus_protocol=$(awk -F '"' '/driver: "(.*)"/{print($2)}' $F)
+    harp_cluster_name=$(cluster_name $F)
 fi
+
+for F in /etc/edb/pgd-config.yml /etc/edb/pgd-cli/pgd-cli-config.yml /etc/edb/pgd-proxy/pgd-proxy-config.yml; do
+    if [[ -f $F ]]; then
+        pgd_cluster_name=$(cluster_name $F)
+    fi
+done
 
 grep -Ev '": "*,*$' <<RESULT
 {
@@ -33,6 +45,8 @@ grep -Ev '": "*,*$' <<RESULT
         "pgdata_initialised": $pgdata_initialised,
         "postgres_running": $postgres_running,
         "harp_consensus_protocol": "$harp_consensus_protocol",
+        "harp_cluster_name": "$harp_cluster_name",
+        "pgd_cluster_name": "$pgd_cluster_name",
         "pgdata": "$pgdata"
     }
 }

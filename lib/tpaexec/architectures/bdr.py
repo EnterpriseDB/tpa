@@ -5,6 +5,7 @@
 from ..architecture import Architecture
 from ..exceptions import BDRArchitectureError
 from typing import List, Tuple
+import re
 
 
 class BDR(Architecture):
@@ -30,12 +31,6 @@ class BDR(Architecture):
             choices=self.bdr_major_versions(),
         )
         g.add_argument(
-            "--bdr-node-group",
-            metavar="NAME",
-            help="name of BDR node group",
-            default="bdrgroup",
-        )
-        g.add_argument(
             "--bdr-database",
             metavar="NAME",
             help="name of BDR-enabled database",
@@ -50,7 +45,6 @@ class BDR(Architecture):
     def cluster_vars_args(self):
         return super().cluster_vars_args() + [
             "bdr_version",
-            "bdr_node_group",
             "bdr_database",
             "harp_consensus_protocol",
         ]
@@ -164,6 +158,21 @@ class BDR(Architecture):
 
         if extensions:
             cluster_vars.update({"extra_postgres_extensions": extensions})
+
+        # The node group name used to be configurable, but it's now hardcoded to
+        # match the cluster name, because harp/pgdcli/pgd-proxy depend on their
+        # cluster name setting matching the node group name.
+        cluster_vars.update({"bdr_node_group": self.bdr_safe_name(self.cluster_name())})
+
+    def bdr_safe_name(self, name):
+        """
+        Return a string containing the given name with all uppercase characters
+        transformed to lowercase, and any other characters outside [a-z0-9_-]
+        transformed to _, for use as the name of a BDR node, group, etc.
+
+        See bdr_functions.c:is_valid_bdr_name()
+        """
+        return re.sub("[^a-z0-9_-]", "_", name.lower())
 
     def update_instances(self, instances):
 

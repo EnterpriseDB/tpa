@@ -9,7 +9,7 @@ configures BDR autoscaling.
 [tpa]$ tpaexec configure ~/clusters/bdr-autoscale \
          --architecture BDR-Autoscale \
          --location-names dc-one dc-two \
-         --bdr-database bdrdb --bdr-node-group bdrgroup \
+         --bdr-database bdrdb \
          --2Q-repositories products/2ndqpostgres/release products/default/release
 ```
 
@@ -19,9 +19,6 @@ configuration.)
 
 You may specify `--num-shard-groups` and `--instances-per-shard` to
 determine the number of instances to deploy.
-
-You may optionally specify `--bdr-node-group groupname` to set the
-name of the BDR node group (default: bdrgroup).
 
 You may optionally specify `--bdr-database dbname` to set the name of
 the database with BDR enabled (default: bdrdb).
