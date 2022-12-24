@@ -152,13 +152,24 @@ class PGD_Always_ON(BDR):
             group = {
                 "name": self._sub_group_name(loc),
                 "parent_group_name": top,
+                "options": {"location": loc},
             }
 
-            # Enable proxy routing only in locations with a proxy
-            if not self._is_witness_only_location(loc):
-                group["options"] = {
-                    "enable_proxy_routing": True,
-                }
+            # Disable subgroup raft and proxy routing for witness-only
+            # locations, and enable proxy routing for locations with a proxy
+            # (subgroup raft will be enabled based on enable_subgroup_raft").
+            if self._is_witness_only_location(loc):
+                group["options"].update(
+                    {
+                        "enable_raft": False,
+                    }
+                )
+            else:
+                group["options"].update(
+                    {
+                        "enable_proxy_routing": True,
+                    }
+                )
 
             bdr_node_groups.append(group)
 
