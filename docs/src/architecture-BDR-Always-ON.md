@@ -20,6 +20,8 @@ You can check EDB's Postgres-BDR Always On Architectures
 [whitepaper](https://www.enterprisedb.com/promote/bdr-always-on-architectures)
 for the detailed layout diagrams.
 
+This architecture is meant for use with BDR versions 3.6, 3.7, and 4.
+
 ## Cluster configuration
 
 ```

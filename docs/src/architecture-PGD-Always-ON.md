@@ -2,6 +2,8 @@
 
 EDB Postgres Distributed in an Always-ON configuration, intended for use in production.
 
+This architecture is meant for use with PGD (BDR) version 5 only.
+
 ## Cluster configuration
 
 ```

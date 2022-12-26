@@ -176,11 +176,7 @@ You can use the
 to execute tasks after the post-startup Postgres configuration has been
 completed (e.g., to perform SQL queries to create objects or load data).
 
-<!-- WIP
-
 * [Configure BDR](bdr.md)
-
--->
 
 You can use the
 [post-deploy hook](tpaexec-hooks.md#post-deploy)
