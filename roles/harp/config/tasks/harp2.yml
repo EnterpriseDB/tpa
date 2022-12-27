@@ -152,3 +152,27 @@
 - include_tasks: harp2-proxy.yml
   when: >
     'harp-proxy' in role
+
+# If we want harp-manager to use a separate bdr_superuser user, we
+# need to create it too and add it to the .pgpass on the BDR nodes.
+
+- include_role: name=postgres/createuser
+  vars:
+    username: "{{ harp_manager_user }}"
+    granted_roles:
+    - bdr_superuser
+  when: >
+    'bdr' in role
+    and harp_manager_user is defined
+
+- include_role: name=postgres/pgpass
+  vars:
+    pgpassfile: "~{{ postgres_user }}/.pgpass"
+    pgpass_owner: "{{ postgres_user }}"
+    pgpass_group: "{{ postgres_group }}"
+    pgpass_users:
+    - "{{ harp_manager_user }}"
+  when: >
+    'bdr' in role
+    and harp_manager_user is defined
+    and postgres_users|json_query("[?username=='%s']" % harp_manager_user) != []

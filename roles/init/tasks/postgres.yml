@@ -489,13 +489,14 @@
     bdr_node_route_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ pgd_proxy_user }} {{ bdr_client_dsn_attributes }}
     bdr_node_local_dsn: >-
-      host={{ unix_socket_directories|first }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }}
+      host={{ unix_socket_directories|first }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ _harp_manager_user }}
     pgbouncer_node_dsn: >-
       host={{ inventory_hostname }} port={{ pgbouncer_port }}
     harp_dcs_node_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} user={{ postgres_user }} {{ harp_dcs_client_dsn_attributes }}
   vars:
     _repmgr_hostname: "{{ repmgr_hostname|default(inventory_hostname) }}"
+    _harp_manager_user: "{{ harp_manager_user|default(postgres_user) }}"
 
 - name: Set default max_prepared_transactions
   set_fact:
