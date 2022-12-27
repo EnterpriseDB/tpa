@@ -84,3 +84,11 @@ to de-obfuscate the `sslpassword` given in connection string. If
 `sslpassword` is not present then `harp_ssl_password_command` is
 ignored. If `sslpassword` is not obfuscated then
 `harp_ssl_password_command` is not required and should not be specified.
+
+## Configuring the harp service
+
+You can configure the following parameters for the harp service:
+
+Variable	| Default value	| Description
+---|---|---
+`harp_manager_restart_on_failure`	| `false`	| If `true`, the `harp-manager` service is overridden so it's restarted on failure. The default is `false` to comply with the service installed by the `harp-manager` package.

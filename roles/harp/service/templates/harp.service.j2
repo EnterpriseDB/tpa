@@ -4,9 +4,20 @@
 PartOf=harp-postgres.target
 After={{ postgres_service_name }}-monitor.service
 
-{% endif %}
-{% if postgres_user != 'postgres' or postgres_group != 'postgres' %}
+{%   if postgres_user != 'postgres' or postgres_group != 'postgres' or harp_manager_restart_on_failure|default(false) %}
+[Service]
+{%     if postgres_user != 'postgres' or postgres_group != 'postgres' %}
+User={{ postgres_user }}
+Group={{ postgres_user }}
+{%     endif %}
+{%     if harp_manager_restart_on_failure|default(false) %}
+Restart=on-failure
+{%     endif %}
+{%   endif %}
+{% else %}
+{%   if postgres_user != 'postgres' or postgres_group != 'postgres' %}
 [Service]
 User={{ postgres_user }}
 Group={{ postgres_user }}
+{%   endif %}
 {% endif %}
