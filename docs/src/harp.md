@@ -78,6 +78,10 @@ by setting `harp_dcs_user: username` under cluster_vars. TPA will use
 `harp_dcs_user` setting to create a readonly user and set it up in the DCS
 configuration.
 
+## Configuring a separate user for harp manager
+
+If you want harp manager to use a separate user, you can specify that by setting `harp_manager_user: username` under `cluster_vars`. TPAexec will use that setting to create a new user and grant it the `bdr_superuser` role.
+
 ## Custom SSL password command
 
 The command provided by `harp_ssl_password_command` will be used by HARP
