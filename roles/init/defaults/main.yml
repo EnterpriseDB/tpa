@@ -186,6 +186,7 @@ default_harp_consensus_protocols:
 default_harp_directories:
   "2": /etc/harp
 default_harp_proxy_mode: builtin
+default_harp_manager_user: harpmanager
 default_harp_http_options:
   enable: false
   host: "{{ inventory_hostname }}"

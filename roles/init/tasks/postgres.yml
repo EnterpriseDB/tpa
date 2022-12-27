@@ -228,6 +228,27 @@
       {%- else -%}xlog
       {%- endif -%}
 
+
+# Find and set right HARP manager user. The var from config.yml takes precendence,
+# otherwise TPA will try to find the username from a configured cluster. If that's
+# not possible because of reasons, a default will be given.
+
+- name: Read current configuration file if exists
+  shell: "cat {{ harp_directory }}/config.yml"
+  register: config_yml
+  ignore_errors: true
+
+- set_fact:
+    current_harp_manager_user: "{{ item.split('user=')[1] | trim }}"
+  vars:
+    harp_config_struct: "{{ config_yml.stdout | from_yaml }}"
+    endpoints: "{{ harp_config_struct.dcs.endpoints }}"
+  loop: "{{ endpoints }}"
+  when: config_yml.rc == 0
+
+- set_fact:
+    harp_manager_user: "{{ harp_manager_user|default(current_harp_manager_user| default(default_harp_manager_user)) }}"
+
 - name: Add postgres libs and PGHOST to target_environment
   set_fact:
     target_environment: "{{ target_environment|combine(_task_environment) }}"
@@ -491,7 +512,7 @@
     bdr_node_route_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ pgd_proxy_user }} {{ bdr_client_dsn_attributes }}
     bdr_node_local_dsn: >-
-      host={{ unix_socket_directories|first }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }}
+      host={{ unix_socket_directories|first }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ harp_manager_user }}
     pgbouncer_node_dsn: >-
       host={{ inventory_hostname }} port={{ pgbouncer_port }}
     harp_dcs_node_dsn: >-
