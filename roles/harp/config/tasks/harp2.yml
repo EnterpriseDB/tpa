@@ -163,7 +163,7 @@
     - bdr_superuser
   when: >
     'bdr' in role
-    and harp_manager_user is defined
+    and harp_manager_user != postgres_user
 
 - include_role: name=postgres/pgpass
   vars:
@@ -174,5 +174,5 @@
     - "{{ harp_manager_user }}"
   when: >
     'bdr' in role
-    and harp_manager_user is defined
+    and harp_manager_user != postgres_user
     and postgres_users|json_query("[?username=='%s']" % harp_manager_user) != []
