@@ -2,12 +2,9 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-# If ansible_distribution is not specified in the inventory, we perform
-# "lightweight" distribution detection. We support Debian, RedHat, and
-# Ubuntu—and we aren't worried about detecting older versions of these
-# platforms accurately (since we control what runs on the machines).
-#
-# We can't rely on there being a usable Python installed yet.
+# Detect which distribution is in use, and fail if it's not supported.
+# (We use the minimal_setup module because we can't rely on a usable
+# Python interpreter being available yet.)
 
 - minimal_setup:
     preferred_python_version: "{{ preferred_python_version|default('python2') }}"

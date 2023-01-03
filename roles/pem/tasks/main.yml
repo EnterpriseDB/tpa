@@ -17,8 +17,8 @@
 
 # An instance with `pem_server` set to the name of a pem-server instance
 # will be monitored by that PEM server. We added 'pem-agent' to the role
-# for such instances earlier (in platforms/common). Now we must install
-# the PEM agent on these instances.
+# for such instances earlier (in roles/init). Now we must install the
+# PEM agent on these instances.
 
 - include_role:
     name: pem/agent

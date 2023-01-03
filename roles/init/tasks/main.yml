@@ -2,6 +2,89 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-- include_role: name=platforms
+- name: Set tpa_dir
+  set_fact:
+    tpa_dir: "{{ tpa_dir|default(lookup('env', 'TPA_DIR')) }}"
 
-- include_role: name=facts
+# Normally, bin/tpaexec will set cluster_dir to the cluster directory we
+# are using. That doesn't happen when we're running under Ansible Tower,
+# so we try to derive the location from the project directory.
+
+- name: Set cluster_dir to Tower project directory, if available
+  vars:
+    awx_data_dir: "{{ lookup('env', 'AWX_PRIVATE_DATA_DIR') }}"
+  when:
+    cluster_dir is not defined and awx_data_dir != ''
+  block:
+  - stat:
+      path: "{{ awx_data_dir ~ '/project' }}"
+    register: project_dir
+    delegate_to: localhost
+  - assert:
+      that: project_dir.stat.exists
+      fail_msg: project directory not found in {{ awx_data_dir }}
+  - set_fact:
+      cluster_dir: "{{ project_dir.stat.path }}"
+
+# We set up the ssh configuration here. Also, regardless of platform, we
+# wait until ssh connections succeed (or clearly don't work, e.g., due
+# to authentication failures).
+
+- include_tasks: ssh.yml
+  when:
+    ansible_connection == 'ssh'
+
+# If we need to do anything platform-specific, now's our chance. (For
+# example, on AWS EC2 instances, we translate some dynamic inventory
+# settings and wait for instance reachability checks to pass.)
+
+- include_role:
+    name: "init/platforms/{{ platform }}"
+  vars:
+    platform_tasks_main:
+      "{{ tpa_dir }}/roles/init/platforms/{{ platform }}/tasks/main.yml"
+  when:
+    platform_tasks_main is file
+
+# Next up are tasks that apply to instances regardless of platform,
+# including implicit role setting and validation, hostname and alias
+# enumeration, etc.
+
+- include_tasks: roles.yml
+- include_tasks: hostvars.yml
+- include_tasks: volumes.yml
+- include_tasks: sys.yml
+- include_tasks: ssl.yml
+
+# Detect which distribution is in use, and fail if it's not supported.
+# (We use the minimal_setup module because we can't rely on a usable
+# Python interpreter being available yet.)
+
+- include_tasks: distribution.yml
+
+# Set various facts related to Postgres and other components we need to
+# install and configure (BDR, pgbouncer, haproxy, etc.). Also complains
+# about various configuration problems.
+
+- include_tasks: postgres.yml
+
+# We attempt to gather postgres facts only if there is a valid PGDATA
+# directory, the postgres user exists, and postgres is running; or in
+# other words, only if we have a reasonable chance of being able to
+# connect to Postgres. At this early stage of deployment, it is not an
+# error if these conditions are not met (e.g., when we are attaching an
+# existing PGDATA to a new instance).
+
+- include_role: name=postgres/facts
+  when: >
+    'postgres' in role
+    and pgdata_initialised|default(False)
+    and postgres_running|default(False)
+    and pgdata_user is defined
+
+# We may change default values over time, but the changes are not always
+# worth forcing a reload or restart on existing clusters. Now that we've
+# finished running minimal_postgres_setup and cluster_discovery, we can
+# alter default values, if needed, based on the values in cluster_facts.
+
+- include_tasks: update-defaults.yml

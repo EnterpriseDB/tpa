@@ -29,7 +29,7 @@
 
     - name: Run minimal_setup to detect OS and python version
       include_role:
-        name: facts
+        name: init
         tasks_from: distribution
 
     # tar's exit code is 1 if files change whilst the archive is being created,

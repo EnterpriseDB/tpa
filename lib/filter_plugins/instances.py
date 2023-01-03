@@ -301,7 +301,7 @@ def validate_volume_for(device_name, _vars) -> None:
     which is what translate_volume_deployment_defaults() later passes in. This
     is why the function takes "vars", and not "vol".
 
-    See roles/platforms/common/tasks/volumes.yml for more details.
+    See roles/init/tasks/volumes.yml for more details.
     """
     volume_for = _vars.get("volume_for")
     if volume_for and volume_for not in VOLUME_TRANSLATIONS:
@@ -323,7 +323,7 @@ def translate_volume_deployment_defaults(vol):
     volume_for into a mountpoint and other volume defaults if needed. Meant to
     be used only as a |map function.
 
-    See roles/platforms/common/tasks/volumes.yml for more details.
+    See roles/init/tasks/volumes.yml for more details.
 
     Args:
         vol: Dict containing volume data, including to `volume_for`, `mountpoint` types and `encryption`

@@ -81,5 +81,5 @@
   tags: always
 
 - include_role:
-    name: facts
+    name: init
     tasks_from: sys.yml
