@@ -2,6 +2,30 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.10 (2023-01-04)
+
+### Minor changes
+
+- TPA-161 Introduce `harp_manager_restart_on_failure` setting (defaults
+  to false) to enable process restart on failure for the harp-manager
+  systemd service
+
+### Bugfixes
+
+- TPA-281 Delete FMS security groups when deprovisioning an AWS cluster
+
+  Fixes a failure to deprovision a cluster's VPC because of unremoved
+  dependencies.
+
+- TPA-305 Add enterprisedb_password to pre-generated secrets for Tower
+
+- TPA-306 Prefer PEM_PYTHON_EXECUTABLE, if present, to /usr/bin/python3
+
+  Fixes a Python module import error during deployment with PEM 9.0.
+
+- TPA-219 Make pem-agent monitor the bdr_database by default on BDR
+  instances
+
 ## v23.9 (2022-12-12)
 
 ### Bugfixes
