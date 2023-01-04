@@ -1,0 +1,32 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# We want to clone a replica, i.e., set up cascading replication.
+#
+# In the best case, the replica we want to clone is up and running and
+# registered already. Then we don't need to do anything special.
+
+- name: Check if we can connect to the defined upstream
+  postgresql_query:
+    conninfo: "{{ hostvars[upstream].replication_node_dsn }}"
+    query: >
+      SELECT 42 as up
+  register: upstreamconn
+  ignore_errors: yes
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Record name of upstream to clone
+  set_fact:
+    upstream_to_clone: "{{
+      (upstreamconn is successful and upstreamconn.up == 42) |
+      ternary(upstream, upstream_primary)
+    }}"
+
+# If the upstream replica is not available (most probably because it's
+# being set up in parallel with this node), we will clone the upstream
+# primary and sort out replication later by changing primary_conninfo.
+#
+# TODO: We could try harder to find an initialised replica in the same
+# location to clone instead of the upstream_primary.

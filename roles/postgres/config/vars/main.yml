@@ -5,3 +5,4 @@
 _include_dir: "{{ include_dir|default(postgres_conf_dir+'/conf.d') }}"
 
 _preload_extensions: "{{ preload_extensions|default([])|union(default_preload_extensions) }}"
+_pgpassfile: "{{ pgpassfile|default('%s/.pgpass' % postgres_home) }}"

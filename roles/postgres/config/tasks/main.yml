@@ -208,6 +208,83 @@
     and bdr_version is version('4', '>=')
     and bdr_node_camo_partner is defined
 
+# If we are using repmgr to clone replicas, it takes care of writing the
+# recovery configuration (recovery.conf or postgresql.auto.conf) as part
+# of the cloning process. When using postgres/replica for v12+ instead,
+# we have to write the equivalent recovery configuration ourselves.
+#
+# Note that we don't use pg_basebackup -R, which would write a recovery
+# configuration too, but not necessarily the one we want when we're
+# setting up cascading replication.
+#
+# TODO: This code doesn't permit a non-streaming replica to be set up
+# (i.e., one that depends entirely on log shipping).
+
+- name: Write recovery configuration for replicas, if required
+  when: >
+    'replica' in role
+    and failover_manager != 'repmgr'
+    and postgres_version is version('12', '>=')
+  block:
+  - name: Configure primary_conninfo
+    copy:
+      content: >
+        primary_conninfo = '{{ primary_conninfo }}'
+      dest: "{{ _include_dir }}/8901-primary_conninfo.conf"
+      owner: "{{ postgres_user }}"
+      group: "{{ postgres_group }}"
+      mode: 0644
+    vars:
+      primary_conninfo: "{{ hostvars[upstream].replication_node_dsn }} passfile={{ _pgpassfile }}"
+    notify:
+      - Note Postgres reload required
+
+  - name: Configure primary_slot_name
+    copy:
+      content: >
+        primary_slot_name = '{{ primary_slot_name }}'
+      dest: "{{ _include_dir }}/8901-primary_slot_name.conf"
+      owner: "{{ postgres_user }}"
+      group: "{{ postgres_group }}"
+      mode: 0644
+    notify:
+      - Note Postgres reload required
+
+  - name: Set restore_command to point to a Barman server, if available
+    set_fact:
+      restore_command: "{{ restore_command|default(barman_command) }}"
+    vars:
+      _backup: "{{ hostvars[upstream_backedup].backup }}"
+      barman_server:
+        "{{ ([_backup] if _backup is string else _backup)|list|first }}"
+      barman_command: >-
+        /usr/bin/barman-wal-restore -U {{ barman_user }} -z -p 8
+        {{ barman_server }} {{ hostvars[upstream_backedup].backup_name }} %f %p
+    when:
+      upstream_backedup != ''
+
+  - name: Configure restore_command
+    copy:
+      content: >
+        restore_command = '{{ restore_command }}'
+      dest: "{{ _include_dir }}/8901-restore_command.conf"
+      owner: "{{ postgres_user }}"
+      group: "{{ postgres_group }}"
+      mode: 0644
+    when:
+      restore_command is defined
+    notify:
+      - Note Postgres reload required
+
+  - name: Ensure that $PGDATA/standby.signal exists
+    copy:
+      content: ""
+      dest: "{{ postgres_data_dir }}/standby.signal"
+      owner: "{{ postgres_user }}"
+      group: "{{ postgres_group }}"
+      mode: 0644
+      force: no
+
 # If 9900-role-settings.conf (old config file for storing settings specified via
 # postgres_conf_settings, new name 9900-tpa_postgres_conf_settings.conf) exists,
 # we move it to 9900-tpa_postgres_conf_settings.conf without either a reload or a
@@ -269,6 +346,12 @@
   vars:
     username: "{{ postgres_user }}"
     role_attrs: [superuser]
+  tags: always
+
+- include_role: name=postgres/createuser
+  vars:
+    username: "{{ replication_user }}"
+    role_attrs: [replication]
   tags: always
 
 - name: Include postgres-config hook

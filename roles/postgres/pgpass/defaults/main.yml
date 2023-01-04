@@ -5,3 +5,4 @@
 default_pgpass_users:
 - "{{ postgres_user }}"
 - repmgr
+- replication

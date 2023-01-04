@@ -233,3 +233,48 @@
   vars:
     hook: "{{ cluster_dir }}/hooks/postgres-config-final.yml"
   tags: always
+
+# If we know that there are uninitialised replicas that we will need to
+# clone, we create a replication slot on the primary to ensure that WAL
+# will not be discarded during the process. (We can't assume that Barman
+# is available or set up here, at least during the initial deployment.)
+#
+# Nothing is expected to connect to this slot. We create separate slots
+# for each replica, as required, and drop the guard slot after all the
+# replicas are up and running.
+#
+# XXX We avoid creating this guard slot on BDR clusters for now, pending
+# a complete analysis of how we want to set up physical replicas in a
+# BDR cluster.
+#
+# XXX We drop this slot in postgres/cleanup after we've finished setting
+# up replicas. If any intermediate tasks fail, the slot will be left on
+# the primary.
+
+- set_fact:
+    uninitialised_replicas: []
+
+- set_fact:
+    uninitialised_replicas:
+      "{{ uninitialised_replicas|default([])
+          |union([item]) }}"
+  with_items:
+    "{{ groups|members_of('role_replica', not_in=['role_readonly']) }}"
+  when:
+    hostvars[item].pgdata_initialised is false
+
+- name: Create guard replication slot to keep WAL segments before creating replicas
+  postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
+    queries:
+      - text: "SELECT pg_create_physical_replication_slot(%s, TRUE)"
+        args:
+          - "{{ replication_guard_slot_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+  - "'primary' in role"
+  - "'bdr' not in role"
+  - uninitialised_replicas is not empty
+  - replication_guard_slot_name not in
+    cluster_facts.pg_replication_slots|map(attribute='slot_name')|list

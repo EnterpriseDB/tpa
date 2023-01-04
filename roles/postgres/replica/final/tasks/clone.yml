@@ -1,0 +1,90 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Fail if the data directory exists
+  fail:
+    msg: "Can't clone replica over existing PGDATA"
+  when: pgdata_initialised
+
+# Now we have to decide where to clone from.
+#
+# The obvious answer is our 'upstream' instance, which may be a primary
+# or another replica. The problem is that if it's a replica, it may not
+# have been initialised yet. We check if we can connect to the upstream
+# and if so, clone from it; if not, we clone from the primary and do a
+# little magic to make the replication work as desired afterwards.
+#
+# pg_basebackup will use a temporary replication slot, and we'll create
+# the correct persistent replication slots on the (primary or replica)
+# upstream instances after we start Postgres on them. The guard slot we
+# created in postgres/config/final ensures that we don't lose any WAL in
+# between.
+
+- include_tasks: select-clone-source.yml
+  when: >
+    upstream|default(upstream_primary) != upstream_primary
+
+- name: Run pg_basebackup to clone replica
+  command: >
+    {{ postgres_bin_dir }}/pg_basebackup -v -D "{{ postgres_data_dir }}"
+    --checkpoint=fast -X stream -d "{{ upstream_conninfo }}"
+  vars:
+    source: "{{ upstream_to_clone|default(upstream_primary) }}"
+    upstream_conninfo: "{{ hostvars[source].replication_node_dsn }} application_name={{ inventory_hostname }}"
+  become_user: "{{ postgres_user }}"
+  become: true
+  register: this
+  failed_when:
+    this.rc != 0 or 'error' in this.stderr
+
+# If we are cloning an instance with postgres_conf_dir separated from
+# postgres_data_dir, we copy its configuration files to the replica's
+# postgres_conf_dir (which may or may not be the same as PGDATA, and
+# that's why we can't use --copy-external-config-files above).
+
+- name: Copy configuration files separately if required
+  command: >
+    scp "{{ source }}:{{ source_path }}"
+        "{{ postgres_conf_dir }}/{{ item.value }}"
+  args:
+    creates: "{{ postgres_conf_dir }}/{{ item.value }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  vars:
+    source: "{{ upstream_to_clone|default(upstream_primary) }}"
+    source_facts: "{{ hostvars[source].cluster_facts }}"
+    source_path:
+      "{{ source_facts.pg_settings.get(item.key)
+          if source_facts.pg_settings is defined }}"
+  with_dict: "{{ postgres_conf_files }}"
+
+# PGDATA didn't exist until we just created it, so postgres/config would
+# have skipped this instance earlier. We install the configuration files
+# here; on subsequent deployments, postgres/config will manage them with
+# the other instances.
+#
+# This will also set up the recovery configuration for us
+# (primary_conninfo and primary_slot_name).
+
+- include_role: name=postgres/config
+
+# We don't want Postgres to enter archive recovery when we start it on
+# the newly-initialised replica, because we're going to wait until it
+# starts streaming (in order to know when it's safe to drop the guard
+# slot on the primary).
+#
+# We don't support setting restore_command directly, but the user may
+# set it via postgres_conf_settings or a custom template or something.
+# So we write a failing restore_command to postgresql.auto.conf, and
+# remove it later (after we're sure the replica is running).
+
+- name: Override restore_command in postgresql.auto.conf
+  lineinfile:
+    path: "{{ postgres_data_dir }}/postgresql.auto.conf"
+    line: >
+      restore_command = '/bin/false'
+    state: present
+    insertafter: EOF
+
+- set_fact: pgdata_initialised=True

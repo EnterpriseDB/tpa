@@ -1,0 +1,50 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# This role is applied to every postgres replica instance that isn't
+# handled by repmgr. It uses pg_basebackup to set up a new replica.
+
+- assert:
+    that:
+      postgres_version is version('12', '>=')
+    fail_msg: >-
+      TPA requires repmgr to create physical replicas for Postgres v11
+      and below.
+
+- assert:
+    that: >
+      'bdr' not in role
+    fail_msg: >-
+      Support for creating BDR physical replicas has been removed
+      temporarily due to concerns about potential data loss
+
+# First, we must initialise our PGDATA by cloning an upstream instance.
+
+- include_tasks: clone.yml
+
+# Next we must check if the replica is streaming properly, for which we
+# need Postgres to be running. If it's already running, the tasks below
+# should succeed immediately.
+
+- name: Ensure that Postgres is running
+  service:
+    name: "{{ postgres_service_name }}"
+    state: started
+
+- name: Wait for Postgres to start
+  include_role:
+    name: postgres/restart
+    tasks_from: check-postgres-available.yml
+
+# Now we can collect cluster_facts for this instance if they are not yet
+# available; subsequent tests depend on the presence of these facts.
+
+- include_role: name=postgres/facts
+  when:
+    cluster_facts is empty
+
+# Now we can check that this instance is in fact a replica, and has a
+# reasonable configuration.
+
+- include_tasks: check-replica.yml

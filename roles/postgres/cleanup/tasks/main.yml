@@ -50,3 +50,24 @@
   when: >
     'primary' in role
     and dbs_with_zombie_pglogical is not empty
+
+# At this point, all instances should be running, including any replicas
+# that were initialised during this deploy run, so we can drop the guard
+# replication slot that we created before starting to clone replicas. We
+# created the slot on the primary, but it may have been helpfully copied
+# to the new replicas by EFM (for example).
+
+- name: Drop guard replication slot after replica setup
+  postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
+    queries:
+      - text: >
+          SELECT pg_drop_replication_slot(slot_name)
+          FROM pg_catalog.pg_replication_slots
+          WHERE slot_name = %s
+        args:
+        - "{{ replication_guard_slot_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  register: drop_guard_slot
+  changed_when: drop_guard_slot.rowcount != 0

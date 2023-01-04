@@ -10,14 +10,29 @@
     'postgres' in role
   tags: postgres
 
+# Now that Postgres is running, we can ensure that any physical replicas
+# are properly configured (whether we're using repmgr or pg_basebackup).
+
 - include_role:
     name: repmgr/final
     apply:
       tags: repmgr
   when: >
-    'postgres' in role and
-    initialise_replication is defined
+    'postgres' in role
+    and failover_manager == 'repmgr'
+    and initialise_replication is defined
   tags: repmgr
+
+- include_role:
+    name: postgres/replica/final
+    apply:
+      tags: [postgres, replica]
+  when: >
+    'postgres' in role
+    and 'replica' in role
+    and not pgdata_initialised
+    and failover_manager != 'repmgr'
+    and not ('bdr' in role and 'readonly' in role)
 
 - include_role:
     name: barman/final

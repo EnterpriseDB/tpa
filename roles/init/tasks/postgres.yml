@@ -196,6 +196,9 @@
     pem_server_description: "{{ pem_server_description|default(inventory_hostname) }}"
     pem_server_group: "{{ pem_server_group|default(default_pem_server_group) }}"
     efm_bind_port: "{{ efm_bind_port|default(default_efm_bind_port) }}"
+    replication_user: "{{ replication_user|default('replication') }}"
+    replication_guard_slot_name: "tpa_tmp_higgs_boson_slot"
+    primary_slot_name: "{{ primary_slot_name|default(default_primary_slot_name) }}"
   vars:
     default_postgres_installation_method: >-
       {{ postgres_installation_source|default('pkg') }}
@@ -422,6 +425,7 @@
 - name: Set client DSN attributes
   set_fact:
     postgres_client_dsn_attributes: "{{ postgres_client_dsn_attributes|default('') }}"
+    replica_client_dsn_attributes: "{{ replica_client_dsn_attributes|default('') }}"
     barman_client_dsn_attributes: "{{ barman_client_dsn_attributes|default('') }}"
     repmgr_client_dsn_attributes: "{{ repmgr_client_dsn_attributes|default('') }}"
     bdr_client_dsn_attributes: "{{ bdr_client_dsn_attributes|default('') }}"
@@ -435,6 +439,8 @@
       host={{ inventory_hostname }} port={{ postgres_port }}
     repmgr_node_dsn: >-
       host={{ _repmgr_hostname }} port={{ postgres_port }} dbname=repmgr user=repmgr {{ repmgr_client_dsn_attributes }}
+    replication_node_dsn: >-
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname=postgres user={{ replication_user }} {{ replica_client_dsn_attributes }}
     bdr_node_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ bdr_client_dsn_attributes }}
     bdr_node_route_dsn: >-

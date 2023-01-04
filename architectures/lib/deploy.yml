@@ -42,8 +42,15 @@
       groups['role_barman']|default([]) is not empty
     tags: always
 
+  # If there are physical replicas in the cluster, we need to setup
+  # either repmgr or efm (the other possible failover_managers are
+  # BDR-specific).
+
   - block:
       - include_role: name=repmgr
+        when:
+          failover_manager == 'repmgr'
+          and 'postgres' in role
       - include_role: name=efm
         when: >
           'efm' in role
