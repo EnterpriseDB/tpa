@@ -33,7 +33,7 @@ jobs:
 
   load-matrix:
     name: Load Matrix
-    runs-on: self-hosted
+    runs-on: aws-self-hosted
     outputs:
       json: ${{ steps.load-yaml.outputs.json }}
     steps:
@@ -63,7 +63,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
-    runs-on: self-hosted
+    runs-on: aws-self-hosted
 
     steps:
       - uses: actions/checkout@v3

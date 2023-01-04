@@ -24,7 +24,7 @@ env:
 jobs:
   requirements:
     name: Requirements update
-    runs-on: self-hosted
+    runs-on: aws-self-hosted
     steps:
       - uses: actions/checkout@v3
 

@@ -36,7 +36,7 @@ jobs:
   integration-test:
     name: Integration test
 
-    runs-on: self-hosted
+    runs-on: aws-self-hosted
 
     steps:
       - uses: actions/checkout@v3
