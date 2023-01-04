@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 # We must encrypt the agent's password for storage in the pem database,
 # but the pemEncryptor binary that we use to do so is included only in

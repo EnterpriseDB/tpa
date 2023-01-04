@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 # By default, we always install pglogical packages (if it's not being
 # installed from source), unless it's not supported (e.g., with BDRv4).
