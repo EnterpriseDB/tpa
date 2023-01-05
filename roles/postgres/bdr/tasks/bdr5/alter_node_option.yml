@@ -3,7 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2022 - All rights reserved.
 
 # Execute bdr.alter_node_option() for the given key and value, unless we
-# can see that the value has already been set via bdr.node_summary.
+# find the same value already in bdr.node_config.
 
 - name: Alter BDR node option {{ node_option.key }}
   postgresql_query:
@@ -20,10 +20,12 @@
   become_user: "{{ postgres_user }}"
   vars:
     this_node_facts:
-      "{{ bdr_database_facts.bdr.node_config_summary
+      "{{ bdr_database_facts.bdr.node_config
           |selectattr('node_name', 'equalto', bdr_node_name)
           |list }}"
+    lookup_key:
+      "node_{{ node_option.key }}"
   when:
     this_node_facts is empty
-    or node_option.key not in this_node_facts[0]
-    or this_node_facts[0][node_option.key] != node_option.value
+    or lookup_key not in this_node_facts[0]
+    or this_node_facts[0][lookup_key] != node_option.value

@@ -344,10 +344,8 @@ def bdr_discovery(module, conn, m0):
     if function_exists(conn, "bdr.bdr_version_num"):
         v = query_results(
             conn,
-            """
-            SELECT bdr.bdr_version(), bdr.bdr_version_num(),
-            (bdr.bdr_version_num()/10000)::int as bdr_major_version
-        """,
+            """SELECT bdr.bdr_version(), bdr.bdr_version_num(),
+            (bdr.bdr_version_num()/10000)::int as bdr_major_version""",
         )
         m.update(v[0])
         bdr_major_version = m["bdr_major_version"]
@@ -368,8 +366,10 @@ def bdr_discovery(module, conn, m0):
                 "local_node_summary": query_results(
                     conn, "SELECT * FROM bdr.local_node_summary"
                 ),
-                "node_config_summary": query_results(
-                    conn, "SELECT * FROM bdr.node_summary"
+                "node_config": query_results(
+                    conn,
+                    """SELECT n.node_name, nc.* FROM bdr.node n
+                    LEFT JOIN bdr.node_config nc USING (node_id)""",
                 ),
                 "node_group_summary": query_results(
                     conn, "SELECT * FROM bdr.node_group_summary"
