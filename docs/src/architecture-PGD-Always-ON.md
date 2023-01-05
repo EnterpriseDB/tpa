@@ -9,9 +9,9 @@ EDB Postgres Distributed in an Always-ON configuration, intended for use in prod
          --architecture PGD-Always-ON \
          --location-names eu-west-1 eu-north-1 eu-central-1 \
          --data-nodes-per-location 2 \
-         --witness-node-per-location \
+         --add-witness-node-per-location \
          --active-locations eu-west-1 eu-central-1 \
-         --witness-only-location eu-north-1 \
+         --add-witness-only-location eu-north-1 \
          --platform aws --instance-type t3.micro \
          --distribution Debian-minimal
 ```
@@ -33,14 +33,14 @@ across all locations. Empty list can be specified, this disable the builtin
 connection routing management and will not configure any PGD-Proxies.
 
 You may optionally specify whether there should be witness node in every location
-using `--witness-node-per-location`. The default behavior depends on value of
+using `--add-witness-node-per-location`. The default behavior depends on value of
 `--data-nodes-per-location`, with `--data-nodes-per-location` set to 2, this
 will default to true, otherwise it's false by default.
 
 You may also specify a special location that does not contain any data nodes
 but only has single witness node used for improved availability of consensus
-using `–-witness-only-location` parameter. This location cannot be among the
-active locations list.
+using `–-add-witness-only-location` parameter. This location cannot be
+among the active locations list.
 
 You may optionally specify `--cohost-proxies` to configure PGD-Proxy instances
 to run on the same hosts as data nodes.

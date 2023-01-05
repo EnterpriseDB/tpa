@@ -35,13 +35,14 @@ class PGD_Always_ON(BDR):
             help="how many PGD nodes per location should be deployed",
         )
         g.add_argument(
-            "--witness-node-per-location",
+            "--add-witness-node-per-location",
             action="store_true",
             help="should there be witness node in every location",
             dest="witness_node_per_location",
         )
         g.add_argument(
-            "--witness-only-location",
+            "--add-witness-only-location",
+            dest="witness_only_location",
             help="optional witness only location",
             default=None,
         )
@@ -101,8 +102,9 @@ class PGD_Always_ON(BDR):
             self.args["location_names"] = self.default_location_names()
 
         location_names = self.args["location_names"]
-        data_nodes_per_location = self.args["data_nodes_per_location"]
         witness_only_location = self.args["witness_only_location"]
+        data_nodes_per_location = self.args["data_nodes_per_location"]
+        witness_node_per_location = self.args["witness_node_per_location"]
 
         if data_nodes_per_location < 2:
             errors.append("--data-nodes-per-location cannot be less than 2")
@@ -112,19 +114,26 @@ class PGD_Always_ON(BDR):
                 "PGD does not support more than 1000 nodes per cluster, please modify --data-nodes-per-location value"
             )
 
-        if self.args["witness_node_per_location"] and data_nodes_per_location % 2 != 0:
+        # We must add a witness automatically if there are only two data
+        # nodes per location. Otherwise, we allow adding a witness only
+        # if the number of data nodes is even.
+
+        if data_nodes_per_location == 2:
+            self.args["witness_node_per_location"] = True
+
+        if witness_node_per_location and data_nodes_per_location % 2 != 0:
             errors.append(
-                "--witness-node-per-location can only be specified with even number of data nodes per location"
+                "--add-witness-node-per-location can only be specified with even number of data nodes per location"
             )
 
         if witness_only_location and len(location_names) % 2 == 0:
             errors.append(
-                "--witness-only-location can only be specified with odd number of locations"
+                "--add-witness-only-location can only be specified with odd number of locations"
             )
 
         if witness_only_location and witness_only_location not in location_names:
             errors.append(
-                '--witness-only-location location "%s" must be included in location list'
+                "--add-witness-only-location '%s' must be included in location list"
                 % self.args["witness_only_location"]
             )
 
@@ -132,7 +141,7 @@ class PGD_Always_ON(BDR):
             for aloc in self.args["active_locations"]:
                 if aloc not in self.args["location_names"]:
                     errors.append(
-                        '--active-locations location "%s" must be included in location list'
+                        "--active-locations '%s' must be included in location list"
                         % aloc
                     )
         if errors:
