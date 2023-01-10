@@ -184,6 +184,8 @@ default_harp_directories:
   "2": /etc/harp
 default_harp_proxy_mode: builtin
 
+default_patroni_listen_port: 8008
+
 default_build_path:
   - "{{ postgres_bin_dir }}"
   - /usr/lib64/ccache

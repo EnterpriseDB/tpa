@@ -6,13 +6,16 @@ haproxy_backend_names:
 - be
 - be_check_queue
 
-haproxy_default_server_options:
-- inter 1500 downinter 6s rise 5 fall 3
-- agent-inter 2000
-
-haproxy_harp_default_server_options:
-- inter 100ms downinter 1s rise 5 fall 3
-- on-error mark-down
-- on-marked-down shutdown-sessions
+haproxy_default_server_options_by_failover_manager:
+  default:
+    - inter 1500 downinter 6s rise 5 fall 3
+    - agent-inter 2000
+  harp:
+    - inter 100ms downinter 1s rise 5 fall 3
+    - on-error mark-down
+    - on-marked-down shutdown-sessions
+  patroni:
+    - inter 3s fall 3 rise 2
+    - on-marked-down shutdown-sessions
 
 haproxy_default_server_extra_options: []

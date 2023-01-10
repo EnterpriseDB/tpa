@@ -25,11 +25,11 @@
 # Set ``haproxy_backend_queue_check: none`` to not configure queue
 # checks even if they are needed.
 
-- name: Disable backend queue checks if HARP is enabled
+- name: Disable backend queue checks if HARP or Patroni is enabled
   set_fact:
     haproxy_backend_queue_check: none
   when:
-    failover_manager == 'harp'
+    failover_manager in ['harp', 'patroni']
 
 - name: Determine haproxy_backend_queue_check type
   set_fact:
@@ -55,11 +55,20 @@
     all_backends_have_platypus:
       "{{ haproxy_backend_servers|length == backends_with_platypus|length }}"
 
-- name: Set haproxy_default_server_options for HARP
+- name: Set haproxy_default_server_options based on failover manager
   set_fact:
-    haproxy_default_server_options:
-      "{{ haproxy_harp_default_server_options }}"
-  when: failover_manager == 'harp'
+    haproxy_default_server_options: "{{
+        haproxy_default_server_options
+        |default(
+          haproxy_harp_default_server_options
+          |default(haproxy_default_server_options_by_failover_manager[_failover_manager])
+        )
+      }}"
+  vars:
+    _failover_manager: "{{
+        (failover_manager|default('default') in haproxy_default_server_options_by_failover_manager.keys()|list)
+        |ternary(failover_manager, 'default')
+      }}"
 
 - name: Add agent check settings to haproxy_default_server_options
   set_fact:
@@ -71,6 +80,17 @@
     _agent_options:
       - agent-addr 127.0.0.1
       - agent-port 15432
+
+- name: Determine whether to enable haproxy peer configuration
+  set_fact:
+    haproxy_peer_enabled: "{{
+        haproxy_peer_enabled
+        |default(
+          (failover_manager in ['harp', 'patroni'])
+          |ternary(true, false)
+        )
+        |bool
+      }}"
 
 # Now we build haproxy_backend_settings to map between haproxy backend
 # names and the "default-server" options for each backend. We want to
@@ -139,8 +159,11 @@
     _check_port: "{{
         (failover_manager == 'harp')|ternary(
           hostvars[item].harp_listen_port,
-          (haproxy_backend_queue_check == 'platypus')|ternary(
-            hostvars[item].platypus_port, 0
+          (failover_manager == 'patroni')|ternary(
+            hostvars[item].patroni_listen_port,
+            (haproxy_backend_queue_check == 'platypus')|ternary(
+              hostvars[item].platypus_port, 0
+            )
           )
         )
       }}"
