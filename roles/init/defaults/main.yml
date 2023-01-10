@@ -146,7 +146,10 @@ default_haproxy_port:
   postgresql: 5432
   epas: 5444
   edbpge: 5432
-
+default_haproxy_read_only_port:
+  postgresql: 5433
+  epas: 5445
+  edbpge: 5433
 default_haproxy_stats_socket: /var/lib/haproxy/stats
 default_pgbouncer_port: 6432
 default_pgbouncer_server_login_retry: 0

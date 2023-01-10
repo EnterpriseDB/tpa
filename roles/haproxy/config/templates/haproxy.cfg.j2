@@ -29,6 +29,15 @@ frontend fe
 
     default_backend be
 
+{% if haproxy_read_only_load_balancer_enabled %}
+frontend fe_ro
+    bind {{ haproxy_bind_address }}:{{ haproxy_read_only_port }}
+
+    maxconn 1000
+
+    default_backend be_ro
+{% endif %}
+
 {% if haproxy_backend_queue_check != 'none' %}
 frontend lua_agent
     bind 127.0.0.1:15432
@@ -87,6 +96,34 @@ backend be_check_queue
 {% endif %}
 
     default-server {{ haproxy_backend_settings['be_check_queue']['default_server_options']|join(' ') }}
+
+{% for b in haproxy_backend_servers %}
+{%   set v = hostvars[b] %}
+{%   set backup = loop.first|ternary('', 'backup') %}
+    server {{ b }} {{ b }}:{{ v.postgres_port }} {{ v.haproxy_server_options|join(' ') }} {{ backup }}
+{% endfor %}
+{% endif %}
+
+{% if haproxy_read_only_load_balancer_enabled %}
+backend be_ro
+    mode tcp
+    balance roundrobin
+
+    stick-table type ip size 1 {% if haproxy_peer_enabled %}peers {{ location }}{% endif %}
+
+    stick on dst
+
+{% if failover_manager == 'patroni' %}
+    option httpchk OPTIONS /replica{% if patroni_repl_max_lag|default(None) %}?lag={{ patroni_repl_max_lag }}{% endif %}
+
+    http-check expect status 200
+{% else %}
+    option httpchk GET /status
+    http-check disable-on-404
+    http-check expect string OK
+{% endif %}
+
+    default-server {{ haproxy_backend_settings['be_ro']['default_server_options']|join(' ') }}
 
 {% for b in haproxy_backend_servers %}
 {%   set v = hostvars[b] %}

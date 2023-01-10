@@ -3,8 +3,9 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 haproxy_backend_names:
-- be
-- be_check_queue
+  - be
+  - be_check_queue
+  - be_ro
 
 haproxy_default_server_options_by_failover_manager:
   default:

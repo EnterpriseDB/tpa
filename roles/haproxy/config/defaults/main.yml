@@ -1,0 +1,5 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+haproxy_read_only_load_balancer_enabled: no

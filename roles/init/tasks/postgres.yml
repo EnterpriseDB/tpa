@@ -172,6 +172,7 @@
     pgd_proxy_options: "{{ default_pgd_proxy_options|combine(pgd_proxy_options|default({}), recursive=true) }}"
     bdr_node_options: "{{ bdr_node_options|default({}) }}"
     haproxy_port: "{{ haproxy_port|default(default_haproxy_port[postgres_family]) }}"
+    haproxy_read_only_port: "{{ haproxy_read_only_port|default(default_haproxy_read_only_port[postgres_family]) }}"
     haproxy_bind_address: "{{ haproxy_bind_address|default(default_haproxy_bind_address) }}"
     harp_proxy_port: "{{ harp_proxy_port|default(default_harp_proxy_port) }}"
     pgbouncer_port: "{{ pgbouncer_port|default(default_pgbouncer_port) }}"

@@ -94,6 +94,34 @@
       {{ haproxy_stats|selectattr('pxname', 'equalto', 'be')|rejectattr('svname', 'equalto', 'BACKEND')|list }}
     num_servers_wanted: "{{ haproxy_backend_servers|length }}"
 
+- name: Ensure haproxy read-only frontend is up
+  assert:
+    msg: "Expected one working haproxy frontend"
+    that:
+    - frontends|length == 1
+    - frontends|map(attribute='status')|first == 'OPEN'
+  vars:
+    frontends: >-
+      {{ haproxy_stats|selectattr('pxname', 'equalto', 'fe_ro')|selectattr('svname', 'equalto', 'FRONTEND')|list }}
+  when:
+    haproxy_read_only_load_balancer_enabled|default(false)
+
+- name: Ensure haproxy read-only backend is up
+  assert:
+    msg: "Expected one working haproxy backend with {{ num_servers_wanted }} servers"
+    that:
+    - backends|length == 1
+    - backends|map(attribute='status')|first == 'UP'
+    - servers|length == num_servers_wanted|int
+  vars:
+    backends: >-
+      {{ haproxy_stats|selectattr('pxname', 'equalto', 'be_ro')|selectattr('svname', 'equalto', 'BACKEND')|list }}
+    servers: >-
+      {{ haproxy_stats|selectattr('pxname', 'equalto', 'be_ro')|rejectattr('svname', 'equalto', 'BACKEND')|list }}
+    num_servers_wanted: "{{ haproxy_backend_servers|length }}"
+  when:
+    haproxy_read_only_load_balancer_enabled|default(false)
+
 - name: Ensure each server in haproxy_backend_servers is up
   assert:
     msg: >-
@@ -113,6 +141,22 @@
     servers: >-
       {{ haproxy_stats|selectattr('pxname', 'equalto', 'be')|rejectattr('svname', 'equalto', 'BACKEND')|list }}
 
-  # Patroni has an active leader and inactive replicas so this test is unnecessary
+- name: Ensure each server in the read-only backend is up
+  assert:
+    msg: >-
+      Expected {{ num_servers_wanted }} servers to be UP, got {{ up_servers }} instead
+      {% for s in servers %}{{ s.svname }}={{ s.status }}{{ loop.last|ternary('', ', ') }}{% endfor %}
+    that:
+      - up_servers == num_servers_wanted
+  vars:
+    num_servers: >
+      {{ haproxy_backend_servers|length }}
+    # Patroni has an inactive leader and active replicas
+    num_servers_wanted: >
+      {{ (failover_manager == 'patroni')|ternary(num_servers|int - 1, num_servers) }}
+    up_servers: >
+      {{ servers|map(attribute='status')|reject('equalto', 'DOWN')|list|length }}
+    servers: >-
+      {{ haproxy_stats|selectattr('pxname', 'equalto', 'be_ro')|rejectattr('svname', 'equalto', 'BACKEND')|list }}
   when:
-    failover_manager != 'patroni'
+    haproxy_read_only_load_balancer_enabled|default(false)

@@ -22,12 +22,25 @@ Packages from PGDG extras repo can be installed if required.
 
 You can set the following variables on any `haproxy` instance.
 
-Variable | Default value | Description
----- | ---- | ----
-`haproxy_bind_address` | 127.0.0.1 | The address haproxy should bind to
-`haproxy_port` | 5432 | The TCP port haproxy should listen on
-`haproxy_backend_servers` | None | A list of Postgres instance names
-`haproxy_maxconn` | `max_connections`×0.9 | The maximum number of connections allowed per backend server; the default is derived from the backend's `max_connections` setting
+| Variable                  | Default value         | Description                                                                                                                       |
+|---------------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `haproxy_bind_address`    | 127.0.0.1             | The address haproxy should bind to                                                                                                |
+| `haproxy_port`            | 5432 (5444 for EPAS)  | The TCP port haproxy should listen on                                                                                             |
+| `haproxy_read_only_port`  | 5433 (5445 for EPAS)  | TCP port for read-only load-balancer                                                                                              |
+| `haproxy_backend_servers` | None                  | A list of Postgres instance names                                                                                                 |
+| `haproxy_maxconn`         | `max_connections`×0.9 | The maximum number of connections allowed per backend server; the default is derived from the backend's `max_connections` setting |
+
+## Read-Only load-balancer
+
+Haproxy can be configured to listen on an additional port for read-only
+access to the database. At the moment this is only supported with the
+Patroni failover manager. The backend health check determines which
+postgres instances are currently acting as replicas and will send
+traffic using a roundrobin load balancing algorithm.
+
+The read-only load balancer is disabled by default but can be turned on
+using the cluster_vars variable
+`haproxy_read_only_load_balancer_enabled`.
 
 ## Server options
 

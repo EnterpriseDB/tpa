@@ -99,6 +99,7 @@
 # haproxy_backend_settings:
 #   be:             { default_server_options: […] }
 #   be_check_queue: { default_server_options: […] }
+#   be_ro:          { default_server_options: […] }
 #
 # If haproxy_backend_settings[*].default_server_options is not defined,
 # we set it to the union of haproxy_default_server_options (the minimum
