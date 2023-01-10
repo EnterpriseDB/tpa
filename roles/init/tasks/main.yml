@@ -70,6 +70,9 @@
 
 - include_tasks: postgres.yml
 - include_tasks: src.yml
+- include_role: name=haproxy/facts
+  when: >
+    'haproxy' in role
 
 # Decide which repositories we should use, and check that we have
 # whatever credentials we need to access them.

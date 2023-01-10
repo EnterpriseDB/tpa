@@ -35,7 +35,7 @@ frontend lua_agent
     tcp-request content use-service lua.agent
 {% endif %}
 
-{% if not enable_harp %}
+{% if haproxy_peer_enabled %}
 peers {{ location }}
 {% for h in groups['role_haproxy'] %}
 {%   if hostvars[h].location == location %}
@@ -47,11 +47,11 @@ peers {{ location }}
 backend be
     mode tcp
 
-    stick-table type ip size 1 {% if not enable_harp %}peers {{ location }}{% endif %}
+    stick-table type ip size 1 {% if haproxy_peer_enabled %}peers {{ location }}{% endif %}
 
     stick on dst
 
-{% if enable_harp %}
+{% if failover_manager == 'harp' %}
     option httpchk
 {% elif haproxy_backend_queue_check != 'platypus' %}
     option pgsql-check user haproxy
