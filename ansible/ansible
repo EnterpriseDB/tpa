@@ -2,8 +2,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 #
 # This is a wrapper for bin/ansible that sets various environment
-# variables before invoking the real executable (which must be under
-# ANSIBLE_HOME or in our venv).
+# variables before invoking the real executable (which must be in
+# our venv).
 
 IFS=$' \t\n'
 set -eu
@@ -47,28 +47,12 @@ export ANSIBLE_CALLBACK_PLUGINS=${ANSIBLE_CALLBACK_PLUGINS:+$ANSIBLE_CALLBACK_PL
 export ANSIBLE_COLLECTIONS_PATHS=${ANSIBLE_COLLECTIONS_PATHS:+$ANSIBLE_COLLECTIONS_PATHS:}$TPA_VENV/collections
 
 # This script may be invoked through symlinks as ansible, ansible-vault,
-# or ansible-playbook. If ANSIBLE_HOME is set, we expect it to point to
-# a git checkout, and do approximately what hacking/env-setup would do.
-# Otherwise, we just try to run ansible from our venv.
+# or ansible-playbook. We try to run ansible from our venv, or fail if
+# we can't find it there.
 
 cmd=$(basename "$0")
 
-if [[ -n "${ANSIBLE_HOME:-}" ]]; then
-    ansidir=$ANSIBLE_HOME
-    if [ ! -x "$ansidir/bin/ansible" ]; then
-        echo "ERROR: can't find $ansidir/bin/ansible" 1>&2
-        exit 1
-    fi
-
-    test -f "$VENV_BIN/activate" && source "$VENV_BIN/activate"
-    export PYTHONPATH=$ansidir/lib:${PYTHONPATH:-""}
-
-    NEWPATH="$ansidir/bin:$PATH"
-    cmd="$ansidir/bin/$cmd"
-elif [[ -x $VENV_BIN/ansible ]]; then
-    NEWPATH="$VENV_BIN:$PATH"
-    cmd="$VENV_BIN/$cmd"
-else
+if [[ ! -x $VENV_BIN/ansible ]]; then
     echo -n "ERROR: ansible not found" >&2
     if command -v ansible &>/dev/null; then
         echo " (won't use $(command -v ansible); did you run tpaexec setup?)" >&2
@@ -78,4 +62,4 @@ else
     exit 1
 fi
 
-PATH="$NEWPATH" $cmd "$@"
+PATH="$VENV_BIN:$PATH" "$VENV_BIN/$cmd" "$@"

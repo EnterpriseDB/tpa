@@ -126,15 +126,3 @@ to its location, for example by adding the following line to your
 ```bash
 export TPA_VENV="/other/location"
 ```
-
-## Using a modified Ansible (for TPAexec developers)
-
-By default, `tpaexec setup` will install the required version of Ansible
-into `tpa-venv`. If you need to make or test changes to 2ndQuadrant
-Ansible (not ordinarily required), clone the repository and set
-`ANSIBLE_HOME` in your environment (and .bashrc/.profile):
-
-```bash
-$ git clone https://github.com/2ndQuadrant/ansible
-$ export ANSIBLE_HOME=/path/to/ansibledir
-```

@@ -154,13 +154,9 @@ _install_pip_packages() {
 
     pip3 install "${pip_args[@]}" "pip>=10.0.1" wheel
 
-    # If we have a local copy of the ansible repository, we want to use
-    # it in-situ rather than installing it into the venv (so that any
-    # changes take effect immediately). We do still need to install
-    # Ansible's own dependencies into the venv.
-    #
-    # Otherwise, we need to install it into the venv either from the
-    # bundled package from tpaexec-deps, or directly from github.
+    # We need to install Ansible and its dependencies into the venv,
+    # either from the bundled package from tpaexec-deps, or directly
+    # from github/PyPI, depending on the flavour of Ansible we want.
     ANSIBLE_VERSION='2q'
     if [[ $use_community == true ]]; then
         pip uninstall -y -r "$TPA_DIR"/requirements-ansible-${ANSIBLE_VERSION}.txt
@@ -169,9 +165,7 @@ _install_pip_packages() {
     ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible-${ANSIBLE_VERSION}.txt
     TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
 
-    if [[ -n "${ANSIBLE_HOME:-}" && -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
-        ANSIBLE_REQUIREMENTS="$ANSIBLE_HOME/requirements.txt"
-    elif [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible-${ANSIBLE_VERSION}.txt ]]; then
+    if [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible-${ANSIBLE_VERSION}.txt ]]; then
         ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible-${ANSIBLE_VERSION}.txt"
         TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
     fi
@@ -292,7 +286,6 @@ NOTIFICATION
 }
 
 _with_ansible_env() {
-    PYTHONPATH=${PYTHONPATH}${ANSIBLE_HOME:+:$ANSIBLE_HOME/lib} \
     ANSIBLE_FILTER_PLUGINS=${ANSIBLE_FILTER_PLUGINS:+$ANSIBLE_FILTER_PLUGINS:}$TPA_DIR/lib/filter_plugins \
     ANSIBLE_LOOKUP_PLUGINS=${ANSIBLE_LOOKUP_PLUGINS:+$ANSIBLE_LOOKUP_PLUGINS:}$TPA_DIR/lib/lookup_plugins \
     ANSIBLE_TEST_PLUGINS=${ANSIBLE_TEST_PLUGINS:+$ANSIBLE_TEST_PLUGINS:}$TPA_DIR/lib/test_plugins \
@@ -465,14 +458,7 @@ _tpaexec_info() {
         echo TPA_VENV=none "(did you run tpaexec setup?)"
     fi
 
-    if [[ -n "${ANSIBLE_HOME:-}" ]]; then
-        echo -n ANSIBLE_HOME="$ANSIBLE_HOME"
-        if [[ -d $ANSIBLE_HOME && -x $ANSIBLE_HOME/bin/ansible ]]; then
-            echo " (v$(PYTHONPATH=$ANSIBLE_HOME/lib _ansible_version))"
-        else
-            echo " (invalid)"
-        fi
-    elif [[ "$(command -v ansible)" == $TPA_VENV/bin/ansible ]]; then
+    if [[ "$(command -v ansible)" == $TPA_VENV/bin/ansible ]]; then
         echo -n ANSIBLE="$(command -v ansible)"
         echo " (v$(_ansible_version))"
     else
