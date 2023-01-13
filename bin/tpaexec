@@ -128,7 +128,7 @@ _install_tpaexec_pth() {
 
     if [[ $(_detect_venv) == "venv" ]]; then
         echo  "Add $TPA_DIR/lib to the PYTHONPATH"
-        echo "${TPA_DIR}/lib" > $(_detect_site_packages)/tpaexec.pth
+        echo "${TPA_DIR}/lib" > "$(_detect_site_packages)"/tpaexec.pth
     fi
 }
 
