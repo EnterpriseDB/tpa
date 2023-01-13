@@ -157,16 +157,16 @@ _install_pip_packages() {
     # We need to install Ansible and its dependencies into the venv,
     # either from the bundled package from tpaexec-deps, or directly
     # from github/PyPI, depending on the flavour of Ansible we want.
-    ANSIBLE_VERSION='2q'
+    ANSIBLE_FLAVOUR='2q'
     if [[ $use_community == true ]]; then
-        pip uninstall -y -r "$TPA_DIR"/requirements-ansible-${ANSIBLE_VERSION}.txt
-        ANSIBLE_VERSION='community'
+        pip uninstall -y -r "$TPA_DIR"/requirements-ansible-${ANSIBLE_FLAVOUR}.txt
+        ANSIBLE_FLAVOUR='community'
     fi
-    ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible-${ANSIBLE_VERSION}.txt
+    ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible-${ANSIBLE_FLAVOUR}.txt
     TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
 
-    if [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible-${ANSIBLE_VERSION}.txt ]]; then
-        ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible-${ANSIBLE_VERSION}.txt"
+    if [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible-${ANSIBLE_FLAVOUR}.txt ]]; then
+        ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible-${ANSIBLE_FLAVOUR}.txt"
         TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
     fi
 
