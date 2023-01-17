@@ -3,6 +3,7 @@
 """Load a YAML file to use as input for a Github action."""
 
 import argparse
+import os
 
 import yaml
 import json
@@ -24,10 +25,15 @@ def read_data(file_name):
         return yaml.safe_load(fh)
 
 
+def set_output(data):
+    with open(os.environ['GITHUB_OUTPUT'], 'a') as output_fh:
+        output_fh.write(f'json={json.dumps(data)}\n')
+
+
 def main():
     args = get_args()
     data = args.data[args.key] if args.key else args.data
-    print(f"::set-output name=json::{json.dumps(data)}")
+    set_output(data)
 
 
 if __name__ == "__main__":
