@@ -47,6 +47,13 @@
       tags: pkg
   tags: pkg
 
+- include_role:
+    name: src/req
+    apply:
+      tags: pkg
+  tags: pkg
+  when: has_src_install
+
 - name: Set the hostname
   hostname:
     name: "{{ inventory_hostname }}"

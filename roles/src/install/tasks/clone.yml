@@ -2,10 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-- include_role: name=src/req
-  when:
-    mounted_sources is not defined
-
 - name: Check if ssh agent forwarding is enabled
   shell: echo $SSH_AUTH_SOCK
   args:
@@ -14,7 +10,7 @@
   become: no
   changed_when: false
 
-- name: Fetch {{ name }} from {{ repo }}, {{ version }}
+- name: Fetch {{ source_name }} from {{ repo }}, {{ version }}
   git:
     repo: "{{ repo }}"
     dest: "{{ dest }}"

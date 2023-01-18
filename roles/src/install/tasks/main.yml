@@ -6,7 +6,6 @@
 
 - include_role: name=src/install tasks_from=clone.yml
   vars:
-    name: "{{ ifs.name }}"
     repo: "{{ git_repository_url }}"
     dest: "{{ source_directory }}"
     version: "{{ git_repository_ref or 'master' }}"
@@ -38,7 +37,7 @@
 # install the results. The caller may specify a build_commands array and
 # a build_environment hash, or we'll just run "make install" by default.
 
-- name: Build {{ ifs.name }}
+- name: Build {{ source_name }}
   shell: >
     PATH={{ build_path }} {{ item }} >> {{ build_log }} 2>&1
   args:
@@ -54,10 +53,10 @@
   notify:
     - Note Postgres restart required
 
-- name: Write rebuild script for {{ ifs.name }}
+- name: Write rebuild script for {{ source_name }}
   template:
     src: general_rebuild_script.sh.j2
-    dest: /etc/tpa/rebuild-scripts/rebuild-{{ ifs.name }}.sh
+    dest: /etc/tpa/rebuild-scripts/rebuild-{{ source_name }}.sh
     mode: '0755'
   vars:
     build_log: "{{ build_log|default('/tmp/build.log') }}"

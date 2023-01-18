@@ -13,13 +13,9 @@
 # Second, no matter how we installed Postgres, we may need to build and
 # install some (ostensibly) extensions from source.
 
-- include_role: name=src/req
-  when:
-    install_from_source is not empty
-    and postgres_installation_method != 'src'
-
 - include_role: name=src/install
   vars:
+    source_name: "{{ ifs.name }}"
     source_directory: >-
       {{ ifs.source_directory|default('/opt/postgres/src/%s' % ifs.name) }}
     build_directory: >-
