@@ -59,7 +59,8 @@
     and groups['role_pgd-proxy']|default([]) is not empty
   tags: pgd-proxy
 
-# Finally, we can `enable_proxy_routing`.
+# Finally, we can `enable_proxy_routing` for those groups where it's
+# desired and for which subgroup RAFT is also enabled.
 
 - name: Enable or disable proxy routing for BDR node groups, if necessary
   include_tasks: bdr5/alter_node_group_option.yml
@@ -71,6 +72,8 @@
     node_group_name: "{{ item.name }}"
     config_key: enable_proxy_routing
     config_value: "{{ enable_proxy_routing }}"
+    enable_raft:
+      "{{ item|try_subkey('options.enable_raft', False)|bool }}"
     enable_proxy_routing:
       "{{ item|try_subkey('options.enable_proxy_routing', False)|bool }}"
     this_group_facts:
@@ -79,6 +82,7 @@
           |list }}"
   when:
     - inventory_hostname == first_bdr_primary
-    - item.name != bdr_node_group
+    - enable_raft is true
+      or item.name == bdr_node_group
     - this_group_facts is empty
       or this_group_facts[0].enable_proxy_routing != enable_proxy_routing
