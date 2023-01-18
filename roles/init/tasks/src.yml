@@ -1,0 +1,30 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Set a global boolean fact based on whether any installation method has
+# 'src', rather than checking specific `*_installation_method` vars by
+# name later.
+
+# The `_installation_methods` var first matches any hostvars key with the
+# pattern `installation_method`. It then extracts the values for those
+# keys from hostvars for the host. The resultant list will contain a
+# number of 'src' strings for each match. Finally, the value of the fact
+# will be true if the list contains the 'src' string.
+
+# This gives us a single boolean fact if any installation method is 'src'
+
+- name: Determine if any component needs to be built from source
+  set_fact:
+    has_src_install: "{{
+        'src' in _installation_methods
+        or install_from_source is not empty
+      }}"
+  vars:
+    _installation_methods: "{{
+        hostvars[inventory_hostname]
+        |map('regex_search', '.*_installation_method$')
+        |select('string')
+        |map('extract', hostvars[inventory_hostname])
+        |list
+      }}"

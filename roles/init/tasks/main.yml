@@ -55,6 +55,7 @@
 - include_tasks: volumes.yml
 - include_tasks: sys.yml
 - include_tasks: ssl.yml
+- include_tasks: src.yml
 
 # Detect which distribution is in use, and fail if it's not supported.
 # (We use the minimal_setup module because we can't rely on a usable
