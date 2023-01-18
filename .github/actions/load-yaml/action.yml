@@ -6,7 +6,6 @@ description: "Loads a YAML file."
 inputs:
   file:
     description: "Path to YAML file to load"
-    default: ''
     required: true
   key:
     description: "Return data found at key"
@@ -22,15 +21,10 @@ runs:
       run: |
         pip3 install pyyaml
 
-    - name: Set input args
-      shell: bash
-      run: |
-        echo
-
     - name: Load YAML Data
       id: load-yaml
       shell: bash
-      run: .github/actions/load-yaml/load-yaml.py ${{ inputs.file }} ${{ inputs.key }}
+      run: ${{ github.action_path }}/load-yaml.py ${{ inputs.file }} ${{ inputs.key }}
 
 outputs:
   json:
