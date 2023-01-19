@@ -53,6 +53,14 @@ class PGD_Always_ON(BDR):
             dest="cohost_proxies",
         )
 
+        g.add_argument(
+            "--enable-subgroup-raft",
+            dest="enable_subgroup_raft",
+            action="store_true",
+            default=False,
+            help="Enable subgroup RAFT for all eligible node groups",
+        )
+
     def update_argument_defaults(self, defaults):
         super().update_argument_defaults(defaults)
         defaults.update(
@@ -185,7 +193,7 @@ class PGD_Always_ON(BDR):
         cluster_vars.update(
             {
                 "bdr_node_groups": bdr_node_groups,
-                "enable_subgroup_raft": "false",
+                "enable_subgroup_raft": self.args.get("enable_subgroup_raft"),
                 "default_pgd_proxy_options": {
                     "listen_port": 6432,
                 },

@@ -45,6 +45,10 @@ among the active locations list.
 You may optionally specify `--cohost-proxies` to configure PGD-Proxy instances
 to run on the same hosts as data nodes.
 
+You may optionally specify `--enable-subgroup-raft` to enable RAFT for
+each eligible node group in the cluster, i.e., for the groups in all
+non-witness locations. This is required to enable proxy routing.
+
 You may optionally specify `--database-name dbname` to set the name of
 the database with BDR enabled (default: bdrdb).
 
