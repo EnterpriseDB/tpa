@@ -127,13 +127,7 @@ class BDR(Architecture):
             ):
                 tpa_2q_repositories.append("products/2ndqpostgres/release")
 
-        elif bdr_version == "5":
-            if not tpa_2q_repositories or "/bdr5/" not in given_repositories:
-                tpa_2q_repositories.append("products/bdr5/release")
-            if postgresql_flavour == "pgextended" and (
-                not tpa_2q_repositories or "/2ndqpostgres/" not in given_repositories
-            ):
-                tpa_2q_repositories.append("products/2ndqpostgres/release")
+        # bdr5 is in EBD CS repositories
 
         if harp_enabled and (
             not tpa_2q_repositories or "/harp/" not in given_repositories

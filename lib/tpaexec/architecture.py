@@ -222,6 +222,12 @@ class Architecture(object):
             nargs="+",
             metavar="source/name/maturity",
         )
+        g.add_argument(
+            "--edb-repositories",
+            dest="edb_repositories",
+            nargs="+",
+            metavar="repository",
+        )
         for pkg in self.versionable_packages():
             g.add_argument("--%s-package-version" % pkg, metavar="VER")
         g.add_argument(
@@ -477,6 +483,7 @@ class Architecture(object):
         self._init_cluster_vars(cluster_vars)
         self.update_cluster_vars(cluster_vars)
         self.postgres_eol_repos(cluster_vars)
+        self.add_edb_repos(cluster_vars)
         self.platform.update_cluster_vars(cluster_vars, args)
         args["cluster_vars"] = cluster_vars
 
@@ -840,6 +847,29 @@ class Architecture(object):
                 cluster_vars["yum_repository_list"].append(
                     DEBUGINFO_SUFFIX.format(repo_name)
                 )
+
+    def add_edb_repos(self, cluster_vars):
+        edb_repositories = self.args.get("edb_repositories") or []
+        postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
+        postgres_version = self.args.get("postgres_version")
+        bdr_version = cluster_vars.get("bdr_version")
+
+        given_repositories = " ".join(edb_repositories)
+
+        if bdr_version == "5":
+            if not edb_repositories or "postgres_extended" not in given_repositories:
+                edb_repositories.append("dev_postgres_extended")
+            if "postgres_distributed" not in given_repositories:
+                edb_repositories.append("dev_postgres_distributed")
+            edb_repositories.append("enterprise")
+
+        if edb_repositories:
+            cluster_vars.update(
+                {
+                    "edb_repositories": edb_repositories,
+                }
+            )
+
 
     def cluster_vars_args(self):
         """

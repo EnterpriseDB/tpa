@@ -299,6 +299,41 @@
     label: >-
       {{ repo.repo }}
 
+- name: Install EDB repositories for x86_64
+  when:
+    edb_repositories is not empty
+  with_items:
+    - "{{ edb_repositories }}"
+  loop_control:
+    loop_var: repository
+  vars:
+    repo_name: enterprisedb-{{ repository }}-x86_64
+    repo:
+      description: enterprisedb-{{ repository }}-x86_64
+      file: enterprisedb-{{ repository }}
+      baseurl: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/el/{{ansible_distribution_major_version }}/x86_64/
+      gpgkey: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/gpg.key
+  include_tasks:
+    add-repository.yml
+
+- name: Install EDB repositories for noarch
+  when:
+    edb_repositories is not empty
+  with_items:
+    - "{{ edb_repositories }}"
+  loop_control:
+    loop_var: repository
+  vars:
+    repo_name: enterprisedb-{{ repository }}-noarch
+    repo:
+      description: enterprisedb-{{ repository }}-noarch
+      file: enterprisedb-{{ repository }}
+      baseurl: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/el/{{ansible_distribution_major_version }}/noarch/
+      gpgkey: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/gpg.key
+  include_tasks:
+    add-repository.yml
+
+
 - name: Exclude lua packages from 2ndQuadrant products/bdr3/release repo
   ini_file:
     dest: "/etc/yum.repos.d/2ndquadrant-products-bdr3-release-pg{{ postgres_versionNN }}.repo"

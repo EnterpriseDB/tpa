@@ -71,7 +71,7 @@
   # as an environment variable.
   - assert:
       msg: >
-        Export EDB_SUBSCRIPTION_TOKEN to use new tpa_edb_repositories
+        Export EDB_SUBSCRIPTION_TOKEN to use new edb_repositories
       that:
         lookup('env', 'EDB_SUBSCRIPTION_TOKEN') != ''
     tags: public_repos
