@@ -59,99 +59,88 @@
     and postgresql_flavour == 'pgextended'
     and tpa_2q_repositories is not defined
 
-# To use 2ndQuadrant repositories (e.g., for 2ndQPostgres), get a
-# subscription token from the Customer Portal and export
-# TPA_2Q_SUBSCRIPTION_TOKEN in the environment.
-
-- assert:
-    msg: "Export TPA_2Q_SUBSCRIPTION_TOKEN to use tpa_2q_repositories"
-    that:
-      lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') != '' or
-      tpa_2q_repositories|default([]) is empty
-  tags: public_repos
-
-- assert:
-    that: env_token not in expired_tokens
-    fail_msg: >-
-      Your TPA_2Q_SUBSCRIPTION_TOKEN has expired; please fetch an updated token
-      from https://techsupport.enterprisedb.com/customer_portal/company/
-  vars:
-    env_token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
-    expired_tokens:
-    - QGcOzwnsVlaKF5jQfYlIwq57kUbKVtAM
-  run_once: yes
-  tags: public_repos
-
-# To use EDB repositories (e.g., for EPAS), get a username/password from
-# https://www.enterprisedb.com/user/register?destination=/repository-access-request
-# and export EDB_REPO_CREDENTIALS_FILE=/path/to/file in the environment,
-# where the file contains a single line with "username:password".
-
+# We need to ensure that either cloudsmith token (EDB_SUBSCRIPTION_TOKEN) is defined
+# or the legacy 2q repo token (TPA_2Q_SUBSCRIPTION_TOKEN)+ EDB repo file
+# (EDB_REPO_CREDENTIALS_FILE) when needed.
+# we add the new cloudsmith env test and try to rescue the run by checking for
+# legacy token when the test fails.
 - block:
-  - stat:
-      path: "{{ _file }}"
-    register: _credsfile
-    delegate_to: localhost
-  - assert:
-      msg: "EDB_REPO_CREDENTIALS_FILE={{ _file }} must exist and have mode 0600"
-      that:
-      - _credsfile.stat.exists
-      - _credsfile.stat.mode == '0600'
-  - assert:
-      msg: "EDB_REPO_CREDENTIALS_FILE={{ _file }} must contain username:password"
-      that:
-      - _credentials != ''
-      - _credentials.split(':')|length == 2
-    vars:
-      _credentials: "{{ lookup('file', _file) }}"
-  vars:
-    _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
-  when:
-    _file != ''
-  tags: public_repos
 
-# To use new EDB cloudsmith repositories (experimental), obtain an
-# entitlement token for each repository you need to use and export
-# EDB_REPO_TOKENS=/path/to/file in the environment, where the file
-# contains a "repo:entitlement-token" line for each repository.
+  # EDB repositories now will be available via cloudsmith,
+  # we need to ensure that the EDB cloudsmith token is defined
+  # as an environment variable.
+  - assert:
+      msg: >
+        Export EDB_SUBSCRIPTION_TOKEN to use new tpa_edb_repositories
+      that:
+        lookup('env', 'EDB_SUBSCRIPTION_TOKEN') != ''
+    tags: public_repos
 
-- block:
-  - stat:
-      path: "{{ _tfile }}"
-    register: _tokensfile
-    delegate_to: localhost
-  - assert:
-      msg: "EDB_REPO_TOKENS={{ _tfile }} must exist and have mode 0600"
-      that:
-      - _tokensfile.stat.exists
-      - _tokensfile.stat.mode == '0600'
-  - assert:
-      msg: "EDB_REPO_TOKENS={{ _tfile }} must contain only 'repo:token' lines"
-      that:
-      - tokenline != ''
-      - tokenline.split(':')|length == 2
-      - tokenline.split(':')|last|length == 16
-    with_items: "{{ _tfile_lines }}"
-    loop_control:
-      loop_var: tokenline
   - set_fact:
-      edb_repo_tokens: "{{
-          edb_repo_tokens|default({})|combine({
-            _parts[0]: _parts[1]
-          })
-        }}"
-    vars:
-      _parts: "{{ tokenline.split(':') }}"
-    with_items: "{{ _tfile_lines }}"
-    loop_control:
-      loop_var: tokenline
-  vars:
-    _tfile: "{{ lookup('env', 'EDB_REPO_TOKENS') }}"
-    _tfile_lines: "{{ lookup('file', _tfile).split('\n') if _tfile else [] }}"
-  when:
-    _tfile != ''
-  tags: public_repos
+      edb_repos_token: "{{ lookup('env', 'EDB_SUBSCRIPTION_TOKEN') }}"
+      edb_cloudsmith_repo: true
+      tpa_2q_repositories: []
 
+  rescue:
+
+  # PGD5+ will only live in cloudsmith repositories, we need to have the token
+  # exported into EDB_SUBSCRIPTION_TOKEN otherwise we can safely stop the run.
+  - assert:
+      msg: "PGD-Always-ON architecture requires you to export EDB_SUBSCRIPTION_TOKEN"
+      that: bdr_version is not version('5','>=')
+    tags: public_repos
+
+  # To use 2ndQuadrant repositories (e.g., for 2ndQPostgres), get a
+  # subscription token from the Customer Portal and export
+  # TPA_2Q_SUBSCRIPTION_TOKEN in the environment.
+  - assert:
+      msg: "Export TPA_2Q_SUBSCRIPTION_TOKEN to use tpa_2q_repositories"
+      that:
+        lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') != '' or
+        tpa_2q_repositories|default([]) is empty
+    tags: public_repos
+
+  - assert:
+      that: env_token not in expired_tokens
+      fail_msg: >-
+        Your TPA_2Q_SUBSCRIPTION_TOKEN has expired; please fetch an updated token
+        from https://techsupport.enterprisedb.com/customer_portal/company/
+    vars:
+      env_token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
+      expired_tokens:
+      - QGcOzwnsVlaKF5jQfYlIwq57kUbKVtAM
+    run_once: yes
+    tags: public_repos
+
+  # To use EDB repositories (e.g., for EPAS), get a username/password from
+  # https://www.enterprisedb.com/user/register?destination=/repository-access-request
+  # and export EDB_REPO_CREDENTIALS_FILE=/path/to/file in the environment,
+  # where the file contains a single line with "username:password".
+
+  - block:
+    - stat:
+        path: "{{ _file }}"
+      register: _credsfile
+      delegate_to: localhost
+    - assert:
+        msg: "EDB_REPO_CREDENTIALS_FILE={{ _file }} must exist and have mode 0600"
+        that:
+        - _credsfile.stat.exists
+        - _credsfile.stat.mode == '0600'
+    - assert:
+        msg: "EDB_REPO_CREDENTIALS_FILE={{ _file }} must contain username:password"
+        that:
+        - _credentials != ''
+        - _credentials.split(':')|length == 2
+      vars:
+        _credentials: "{{ lookup('file', _file) }}"
+    vars:
+      _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
+    when:
+      _file != ''
+    tags: public_repos
+  - set_fact:
+      edb_cloudsmith_repo: false
 - set_fact:
     use_volatile_subscriptions: "{{ use_volatile_subscriptions|default(false)|bool }}"
 
