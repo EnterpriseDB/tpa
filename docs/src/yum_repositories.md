@@ -13,16 +13,28 @@ cluster_vars:
       rpm_url: >-
         https://repo.example.com/repos/Example/example-repo.rpm
 
+    Other:
+      description: "Optional repository description"
+      baseurl: https://other.example.com/repos/Other/$basearch
+      gpgkey:
+        https://other.example.com/repos/Other/gpg.XXXXXXXXXXXXXXXX.key
+
   yum_repository_list:
     - EPEL
     - PGDG
     - Example
+    - Other
 ```
 
-This configuration would install the “repo RPM” for EPEL, PGDG, and the
-new Example repository. The repo RPM customarily installs the necessary
-`/etc/yum.repos.d/*.repo` files and any GPG keys needed to verify
-signed packages from the repository.
+This example shows two ways to define a YUM repository.
+
+If the repository has a “repo RPM” (a package that customarily installs
+the necessary `/etc/yum.repos.d/*.repo` file and any GPG keys needed to
+verify signed packages from the repository), you can just point to it.
+
+Otherwise, you can specify a description, a `baseurl`, and a `gpgkey`
+URL, and TPAexec will create a `/etc/yum.repos.d/Other.repo` file for
+you based on this information.
 
 The EPEL and PGDG repositories are defined by default. The EPEL
 repository is required for correct operation, so you must always
@@ -32,9 +44,9 @@ you want to install PGDG packages.
 You can set `yum_repository_list: []` to not install any repositories
 (but things will break without an alternative source of EPEL packages).
 
-To configure a repository which does not have a repo RPM, you can use a
-[pre-deploy hook](tpaexec-hooks.md) to install the relevant files
-yourself:
+If you need to perform any special steps to configure repository access,
+you can use a [pre-deploy hook](tpaexec-hooks.md) to create the .repo
+file yourself:
 
 ```yaml
 - name: Define Example repository
