@@ -2,11 +2,22 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-pgdcli_packages:
-  Debian: &debian_pgdcli_package
+# pgd-cli packages for v1
+pgdcli1_packages:
+  Debian: &debian_pgdcli1_package
     - edb-pgd-cli
     - edb-bdr-utilities
   RedHat:
     - edb-pgd-cli
+    - edb-bdr-utilities
+  Ubuntu: *debian_pgdcli1_package
+
+# pgd-cli packages for v5 and above
+pgdcli_packages:
+  Debian: &debian_pgdcli_package
+    - edb-pgd{{ bdr_version }}-cli
+    - edb-bdr-utilities
+  RedHat:
+    - edb-pgd{{ bdr_version }}-cli
     - edb-bdr-utilities
   Ubuntu: *debian_pgdcli_package

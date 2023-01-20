@@ -4,7 +4,7 @@
 
 pgd_proxy_packages:
   Debian: &debian_pgdproxy_package
-    - edb-pgd-proxy-{{ bdr_version }}
+    - edb-pgd{{ bdr_version }}-proxy
   RedHat:
-    - edb-pgd-proxy-{{ bdr_version }}
+    - edb-pgd{{ bdr_version }}-proxy
   Ubuntu: *debian_pgdproxy_package
