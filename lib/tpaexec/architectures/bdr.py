@@ -143,6 +143,11 @@ class BDR(Architecture):
             }
         )
 
+        if postgresql_flavour == "epas" and (
+            not tpa_2q_repositories or
+            "products/default/release" not in given_repositories):
+            tpa_2q_repositories.append("products/default/release")
+
         if tpa_2q_repositories:
             cluster_vars.update(
                 {

@@ -46,3 +46,23 @@ class M1(Architecture):
                     "location": self.args["locations"][0]["Name"],
                 }
             )
+    def update_cluster_vars(self, cluster_vars):
+        """
+        Makes architecture-specific changes to cluster_vars if required
+        """
+        tpa_2q_repositories = self.args.get("tpa_2q_repositories") or []
+        postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
+
+        given_repositories = " ".join(tpa_2q_repositories)
+
+        if postgresql_flavour == "epas" and (
+            not tpa_2q_repositories or
+            "products/default/release" not in given_repositories):
+            tpa_2q_repositories.append("products/default/release")
+
+        if tpa_2q_repositories:
+            cluster_vars.update(
+                {
+                    "tpa_2q_repositories": tpa_2q_repositories,
+                }
+            )

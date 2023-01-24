@@ -10,15 +10,21 @@
 
 - set_fact:
     tpa_2q_repositories: "{{
-      tpa_2q_repositories|union([
+      tpa_2q_repositories|default([])|union([
         'products/default/release'
       ])
     }}"
   when: >-
-    postgresql_flavour == 'epas' and
-    tpa_2q_repositories is defined and
-    tpa_2q_repositories is not empty and
-    'products/default/release' not in tpa_2q_repositories
+    postgresql_flavour == 'epas'
+    and
+    ((
+      tpa_2q_repositories is defined
+      and tpa_2q_repositories is not empty
+      and 'products/default/release' not in tpa_2q_repositories
+      ) or
+     (
+      tpa_2q_repositories is not defined
+      ))
 
 - set_fact:
     edb_repositories: "{{ edb_repositories|default([]) }}"
