@@ -300,8 +300,6 @@
       {{ repo.repo }}
 
 - name: Install EDB repositories for x86_64
-  when:
-    edb_repositories is not empty
   with_items:
     - "{{ edb_repositories }}"
   loop_control:
@@ -317,8 +315,6 @@
     add-repository.yml
 
 - name: Install EDB repositories for noarch
-  when:
-    edb_repositories is not empty
   with_items:
     - "{{ edb_repositories }}"
   loop_control:

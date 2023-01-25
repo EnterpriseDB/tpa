@@ -14,6 +14,9 @@
     postgresql_flavour == 'epas'
     and 'products/default/release' not in tpa_2q_repositories|default([])
 
+- set_fact:
+    edb_repositories: "{{ edb_repositories|default([]) }}"
+
 - include_tasks:
     file: "os/{{ ansible_os_family }}/repositories.yml"
     apply:

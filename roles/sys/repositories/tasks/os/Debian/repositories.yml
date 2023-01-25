@@ -143,8 +143,6 @@
 
 
 - name: Install EDB repositories
-  when:
-    edb_repositories is not empty
   with_items:
     - "{{ edb_repositories }}"
   loop_control:

@@ -49,3 +49,4 @@ default_yum_repositories:
       https://yum{{ edb_repo_hostname_suffix }}/edbrepos/edb-repo-latest.noarch.rpm
 
 default_yum_repository_list: [EPEL, PGDG]
+
