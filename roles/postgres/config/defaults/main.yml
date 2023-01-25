@@ -28,6 +28,7 @@ default_preload_extensions:
   - pglogical
   - bdr
   - autoscale
+  - edb_wait_states
 
 # The following settings (on the Postgres server) will cause pg_hba.conf
 # to be generated with "hostssl" instead of "host" lines, and to require
