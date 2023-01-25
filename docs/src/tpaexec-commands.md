@@ -1,7 +1,7 @@
-# TPAexec custom commands
+# TPA custom commands
 
 You can define custom commands that perform tasks specific to your
-environment on the instances in a TPAexec cluster.
+environment on the instances in a TPA cluster.
 
 You can use this mechanism to automate any processes that apply to your
 cluster. These commands can be invoked against your cluster directory,
@@ -13,7 +13,7 @@ correct in the past, but has drifted away from reality since then.
 Writing Ansible playbooks means that you can implement arbitrarily
 complex tasks; following the custom command conventions means you can
 take advantage of various facts that are set based on your config.yml
-and the cluster discovery tasks that TPAexec performs, and not have to
+and the cluster discovery tasks that TPA performs, and not have to
 think about details like connections, authentication, and other basic
 features.
 

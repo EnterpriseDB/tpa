@@ -1,4 +1,4 @@
-When an instance is given the `barman` role in config.yml, TPAexec will
+When an instance is given the `barman` role in config.yml, TPA will
 configure it as a [Barman](https://pgbarman.org/) server to take backups
 of any other instances that name it in their `backup` setting.
 
@@ -65,7 +65,7 @@ removed:
 
 ## Backup scheduling
 
-TPAexec installs a cron job in `/etc/cron.d/barman` which will run every
+TPA installs a cron job in `/etc/cron.d/barman` which will run every
 minute and invoke `barman cron` to perform maintenance tasks.
 
 For each instance being backed up, it installs another cron job in
@@ -76,7 +76,7 @@ Wednesday and Saturday.
 
 ## SSH keys
 
-TPAexec will generate ssh key pairs for the `postgres` and `barman`
+TPA will generate ssh key pairs for the `postgres` and `barman`
 users and install them into the respective ~/.ssh directories, and add
 them to each other's authorized_keys file. The postgres user must be
 able to ssh to the barman server in order to archive WAL segments (if

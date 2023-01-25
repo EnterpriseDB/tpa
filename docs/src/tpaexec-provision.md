@@ -8,7 +8,7 @@ and platform (e.g. [AWS](platform-aws.md))
 that you selected while configuring the cluster.
 
 At the end of the provisioning stage, you will have the required number
-of instances with the basic operating system installed, which TPAexec
+of instances with the basic operating system installed, which TPA
 can access via ssh (with sudo to root).
 
 ## Prerequisites
@@ -64,7 +64,7 @@ software.
 
 When provisioning cloud instances, it is especially important to make
 sure instances are directly traceable to a human responsible for them.
-By default, TPAexec will tag EC2 instances as being owned by the login
+By default, TPA will tag EC2 instances as being owned by the login
 name of the user running `tpaexec provision`.
 
 Specify `--owner <name>` to change the name (e.g., if your username

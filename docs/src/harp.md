@@ -1,6 +1,6 @@
 # Configuring HARP
 
-TPAexec will install and configure HARP when `failover_manager` is set
+TPA will install and configure HARP when `failover_manager` is set
 to `harp`, which is the default for BDR-Always-ON clusters.
 
 ## Installing HARP
@@ -49,7 +49,7 @@ mandatory for the BDR-Always-ON architecture.
 ### etcd
 
 If the `--harp-consensus-protocol etcd` option is given to `tpaexec
-configure`, then TPAexec will set `harp_consensus_protocol` to `etcd`
+configure`, then TPA will set `harp_consensus_protocol` to `etcd`
 in config.yml and give the `etcd` role to a suitable subset of the
 instances, depending on your chosen layout.
 
@@ -66,14 +66,14 @@ etcd_client_port	| 2379	| The port used by clients to connect to etcd
 ### bdr
 
 If the `--harp-consensus-protocol bdr` option is given to `tpaexec
-configure`, then TPAexec will set `harp_consensus_protocol` to `bdr`
+configure`, then TPA will set `harp_consensus_protocol` to `bdr`
 in config.yml.  In this case the existing BDR instances will be used
 for consensus, and no further configuration is required.
 
 ## Configuring a separate user for harp proxy
 
 If you want harp proxy to use a separate readonly user, you can specify that
-by setting `harp_dcs_user: username` under cluster_vars. TPAexec will use
+by setting `harp_dcs_user: username` under cluster_vars. TPA will use
 `harp_dcs_user` setting to create a readonly user and set it up in the DCS
 configuration.
 

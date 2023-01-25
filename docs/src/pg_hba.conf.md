@@ -3,7 +3,7 @@
 The Postgres documentation explains the various options available in
 [`pg_hba.conf`](https://www.postgresql.org/docs/current/auth-pg-hba-conf.html).
 
-By default, TPAexec will generate a sensible `pg_hba.conf` for your
+By default, TPA will generate a sensible `pg_hba.conf` for your
 cluster, to allow replication between instances, and connections from
 authenticated clients.
 

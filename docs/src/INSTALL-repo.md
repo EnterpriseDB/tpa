@@ -1,22 +1,22 @@
-# Installing TPAexec from source
+# Installing TPA from source
 
-This document explains how to use TPAexec from a copy of the source code
+This document explains how to use TPA from a copy of the source code
 repository.
 
-Please [install TPAexec from packages](INSTALL.md) if you can; install
+Please [install TPA from packages](INSTALL.md) if you can; install
 from source only if no packages are available for your system (e.g., on
-MacOS X), or if you are collaborating with the TPAexec developers to
+MacOS X), or if you are collaborating with the TPA developers to
 test unreleased code.
 
-To run TPAexec from source, you must install all of the dependencies
+To run TPA from source, you must install all of the dependencies
 (e.g., Python 3.6+) that the packages would handle for you, or download
-the source and [run TPAexec in a Docker container](INSTALL-docker.md).
+the source and [run TPA in a Docker container](INSTALL-docker.md).
 (Either way will work fine on Linux and MacOS X.)
 
 ## Quickstart
 
 First, you must install the various dependencies that would have been
-installed automatically along with the TPAexec packages. (You can use
+installed automatically along with the TPA packages. (You can use
 something other than `sudo` to run these commands as root, if you
 prefer.)
 
@@ -35,7 +35,7 @@ $ brew tap discoteq/discoteq
 $ brew install python@3 openvpn flock coreutils gpatch git
 ```
 
-Next, install TPAexec itself:
+Next, install TPA itself:
 
 ```bash
 $ git clone ssh://git@github.com/EnterpriseDB/tpaexec.git
@@ -49,11 +49,11 @@ Install the various dependencies as described above.
 
 If your system does not have Python 3.6+ packages, you can use `pyenv`
 to install a more recent Python in your home directory (see below), or
-you can [run TPAexec in a Docker container](INSTALL-docker.md).
+you can [run TPA in a Docker container](INSTALL-docker.md).
 
-Next, clone the TPAexec repository into, say, `~/tpaexec`. (It doesn't
+Next, clone the TPA repository into, say, `~/tpaexec`. (It doesn't
 matter where you put it, but don't use `/opt/EDB/TPA` or
-`/opt/2ndQuadrant/TPA`, to avoid conflicts if you install the TPAexec
+`/opt/2ndQuadrant/TPA`, to avoid conflicts if you install the TPA
 packages in future.)
 
 ```bash
@@ -74,12 +74,12 @@ $ tpaexec setup
 $ tpaexec selftest
 ```
 
-If the self-test completes without any errors, your TPAexec installation
+If the self-test completes without any errors, your TPA installation
 is ready for use.
 
 ## Python 3.6+
 
-TPAexec requires Python 3.6 or later, available on most
+TPA requires Python 3.6 or later, available on most
 modern distributions. If you don't have it, you can use
 [pyenv](https://github.com/pyenv/pyenv) to install any version of Python
 you like without affecting the system packages.

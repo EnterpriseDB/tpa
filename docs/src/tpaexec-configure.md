@@ -78,7 +78,7 @@ respectively. Please refer to the platform documentation for more details.
 If you do not explicitly select a platform, the default is currently
 aws.
 
-**Note:** TPAexec fully supports creating clusters with instances on
+**Note:** TPA fully supports creating clusters with instances on
 different platforms, but `tpaexec configure` cannot currently generate
 such a configuration. You must edit config.yml to specify multiple
 platforms.
@@ -101,7 +101,7 @@ Specify `--region <region>` to select a region.
 This option is meaningful only for cloud platforms. The default for AWS
 is eu-west-1.
 
-**Note:** TPAexec fully supports creating clusters that span multiple
+**Note:** TPA fully supports creating clusters that span multiple
 regions, but `tpaexec configure` cannot currently generate such a
 configuration. You must edit config.yml to specify multiple regions.
 
@@ -128,7 +128,7 @@ already used in existing cluster config.yml files. You can specify this
 argument multiple times for each directory.
 
 **Note:** These options are not meaningful for the "bare" platform, where
-TPAexec will not alter the network configuration of existing servers.
+TPA will not alter the network configuration of existing servers.
 
 ### Instance type
 
@@ -149,7 +149,7 @@ of the Postgres and Barman volumes on those architectures and platforms
 that support separate volumes for Postgres and Barman.
 
 None of these options is meaningful for the "bare" platform, where
-TPAexec has no control over volume sizes.
+TPA has no control over volume sizes.
 
 ### Hostnames
 
@@ -193,12 +193,12 @@ to select TPA images that have Postgres and other software preinstalled
 (to reduce deployment times). To use stock distribution images instead,
 append "-minimal" to the label, e.g., "Debian-minimal".
 
-This option is not meaningful for the "bare" platform, where TPAexec has
+This option is not meaningful for the "bare" platform, where TPA has
 no control over which distribution is installed.
 
 ### 2ndQuadrant repositories
 
-TPAexec can enable any 2ndQuadrant software repository that you have
+TPA can enable any 2ndQuadrant software repository that you have
 access to through the 2ndQuadrant Portal subscription mechanism.
 
 By default, it will install the 2ndQuadrant public repository (which
@@ -208,7 +208,7 @@ the architecture may require (e.g., the BDR repository).
 Use `--2Q-repositories source/name/maturity …`
 to specify the complete list of 2ndQuadrant repositories to install on
 each instance in addition to the 2ndQuadrant public repository. Use this
-option with care. TPAexec will configure the named repositories with no
+option with care. TPA will configure the named repositories with no
 attempt to make sure the combination is appropriate.
 
 To use product repositories, you must first
@@ -300,7 +300,7 @@ install the latest version available of the package with the same name
 in the configured repository, e.g. 3.7.
 
 We are aware of this limitation as an ansible dnf module bug and hope
-to address this in a future release of TPAexec.
+to address this in a future release of TPA.
 
 ### Building and installing from source
 

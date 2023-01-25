@@ -1,5 +1,5 @@
-EDB TPAexec
-===========
+EDB TPA
+=======
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
@@ -7,17 +7,16 @@ Confidential property of EDB; not for public release.
 
 ## Overview
 
-TPA (Trusted Postgres Architecture) is a set of recommendations from
-EDB (and formerly 2ndQuadrant) about how to set up a Postgres cluster
-in various scenarios. These represent the best practices followed by EDB, and
-are as applicable to quick testbed setups as to production environments.
-
-TPAexec is an orchestration tool that uses Ansible to build Postgres
+TPA is an orchestration tool that uses Ansible to build Postgres
 clusters according to EDB's recommendations.
 
-## What can TPAexec do?
+These recommendations represent the best practices followed by EDB, and
+comprise many years of hard-earned experience of deploying Postgres and
+associated components in various scenarios.
 
-With TPAexec, you can:
+## What can TPA do?
+
+With TPA, you can:
 
 1. Provision hosts and other resources on AWS and other platforms,
    including existing (already-provisioned or bare metal) servers.
@@ -30,22 +29,22 @@ With TPAexec, you can:
 
 4. Run automated tests on the cluster after deployment
 
-TPAexec will generate an initial configuration for the type of cluster
+TPA will generate an initial configuration for the type of cluster
 you want. You can use this default configuration straightaway, or edit
 it to suit your needs. In most cases, this simple text configuration
 file is all you will need to set up your cluster.
 
-If you ever need to extend the functionality of TPAexec, the full range
+If you ever need to extend the functionality of TPA, the full range
 of Ansible functionality is at your disposal.
 
 ## Installation
 
-To use TPAexec, you need to install tpaexec and run the `tpaexec setup`
-command. Please use the [TPAexec packages](docs/src/INSTALL.md) if they are
+To use TPA, you need to install tpaexec and run the `tpaexec setup`
+command. Please use the [TPA packages](docs/src/INSTALL.md) if they are
 available for your platform.
 
-If you have an EDB Github account that gives you access to the TPAexec
-repository, and you want to use TPAexec on MacOS X or another platform
+If you have an EDB Github account that gives you access to the TPA
+repository, and you want to use TPA on MacOS X or another platform
 for which packages are not available, you can [install it from
 source](docs/src/INSTALL-repo.md) or [run it inside a Docker
 container](docs/src/INSTALL-docker.md).

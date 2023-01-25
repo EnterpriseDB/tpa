@@ -8,7 +8,7 @@ There's a separate page about how to create
 
 ## Shell configuration
 
-TPAexec will install a `.bashrc` file and ensure that it's also included
+TPA will install a `.bashrc` file and ensure that it's also included
 by the `.profile` or `.bash_profile` files.
 
 It will set a prompt that includes the username and hostname and working
@@ -34,13 +34,13 @@ descriptor limits.
 
 ## SSH keys
 
-TPAexec will use `ssh-keygen` to generate and install an SSH keypair for
+TPA will use `ssh-keygen` to generate and install an SSH keypair for
 the postgres user, and edit `.ssh/authorized_keys` so that the instances
 in the cluster can ssh to each other as `postgres`.
 
 ## TLS certificates
 
-By default, TPAexec will generate a private key and a self-signed TLS
+By default, TPA will generate a private key and a self-signed TLS
 certificate for use within the cluster. If you create `cluster_name.key`
 and `cluster_name.crt` files within your cluster directory, it will use
 that key and certificate instead of generating one.

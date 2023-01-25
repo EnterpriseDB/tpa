@@ -1,6 +1,6 @@
 # postgresql.conf
 
-TPAexec creates a `conf.d` directory with various `.conf` files under
+TPA creates a `conf.d` directory with various `.conf` files under
 it, and uses `include_dir` in the main `postgresql.conf` to use these
 additional configuration files.
 
@@ -22,13 +22,13 @@ cluster_vars:
   max_wal_senders: 32
 ```
 
-TPAexec splits the configuration up into multiple files. The two main
+TPA splits the configuration up into multiple files. The two main
 files are `0000-tpa.conf` and `0001-tpa_restart.conf`. These contain
 settings that require a server reload or restart to change,
-respectively. During deployment, TPAexec will write any changes to the
+respectively. During deployment, TPA will write any changes to the
 correct file and reload or restart Postgres as required.
 
-TPAexec may use other files in certain circumstances (e.g., to configure
+TPA may use other files in certain circumstances (e.g., to configure
 optional extensions), but you do not ordinarily need to care where
 exactly a given parameter is set.
 
@@ -37,12 +37,12 @@ changes may be overwritten when you next run `tpaexec deploy`.
 
 ## postgres_conf_settings
 
-TPAexec provides variables like `temp_buffers` and
+TPA provides variables like `temp_buffers` and
 `maintenance_work_mem` that you can set directly for many, but not all,
 available postgresql.conf settings.
 
 You can use `postgres_conf_settings` to set any parameters, whether
-recognised by TPAexec or not. You need to quote the value exactly as it
+recognised by TPA or not. You need to quote the value exactly as it
 would appear in `postgresql.conf`:
 
 ```yaml
@@ -56,7 +56,7 @@ cluster_vars:
     bdr.global_lock_statement_timeout: 60s
 ```
 
-This is most useful with settings that TPAexec does not recognise
+This is most useful with settings that TPA does not recognise
 natively, but you can use it for any parameter (e.g.,
 `effective_cache_size` can be set as a variable, but
 `authentication_timeout` cannot).
@@ -64,7 +64,7 @@ natively, but you can use it for any parameter (e.g.,
 These settings will be written to `conf.d/9900-role-settings.conf`, and
 therefore take priority over variables set in any other way.
 
-If you make changes to values under `postgres_conf_settings`, TPAexec
+If you make changes to values under `postgres_conf_settings`, TPA
 has no way to know whether the a reload is sufficient to effect the
 changes, or if a restart is required. Therefore it will always restart
 the server to activate the changes. This is why it's always preferable
@@ -72,7 +72,7 @@ to use variables directly whenever possible.
 
 ## shared_buffers
 
-By default, TPAexec will set `shared_buffers` to 25% of the available memory
+By default, TPA will set `shared_buffers` to 25% of the available memory
 (this is just a rule of thumb, not a recommendation). You can override this
 default by setting `shared_buffers_ratio: 0.35` to use a different proportion,
 or by setting `shared_buffers_mb: 796` to a specific number of MB, or by
@@ -80,7 +80,7 @@ specifying an exact value directly, e.g., `shared_buffers: "2GB"`.
 
 ## effective_cache_size
 
-By default, TPAexec will set `effective_cache_size` to 50% of the available
+By default, TPA will set `effective_cache_size` to 50% of the available
 memory. You can override this default by setting
 `effective_cache_size_ratio: 0.35` to use a different proportion, or by setting
 `effective_cache_size_mb: 796` to a specific number of MB, or by specifying an
@@ -88,7 +88,7 @@ exact value directly, e.g., `effective_cache_size: "8GB"`.
 
 ## shared_preload_libraries
 
-TPAexec maintains an internal list of extensions that require entries in
+TPA maintains an internal list of extensions that require entries in
 `shared_preload_libraries` to work, and if you include any such
 extensions in `postgres_extensions`, it will automatically update
 `shared_preload_libraries` for you.
@@ -117,7 +117,7 @@ value is set in `conf.d/9900-tpa_postgres_conf_settings.conf`.
 
 ## Making changes by hand
 
-There are two ways you can override anything in the TPAexec-generated
+There are two ways you can override anything in the TPA-generated
 configuration.
 
 The first (and recommended) option is to use `ALTER SYSTEM`, which
@@ -134,7 +134,7 @@ $ echo "bdr.global_lock_statement_timeout='60s'" >> conf.d/9999-override.conf
 ```
 
 All other files under `conf.d` are subject to be overwritten during
-deployment if the configuration changes, but TPAexec will never change
+deployment if the configuration changes, but TPA will never change
 `9999-override.conf` after initially creating the empty file.
 
 Depending on which settings you change, you may need to execute
@@ -143,7 +143,7 @@ effect.
 
 ## Generating postgresql.conf from scratch
 
-By default, TPAexec will leave the default (i.e., `initdb`-generated)
+By default, TPA will leave the default (i.e., `initdb`-generated)
 postgresql.conf file alone other than adding the `include_dir`. You
 should not ordinarily need to override this behaviour, but you can set
 `postgres_conf_template` to do so:

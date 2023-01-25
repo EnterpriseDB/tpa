@@ -20,7 +20,7 @@ cluster_vars:
 ```
 
 The example above would create two users (apart from any users that
-TPAexec itself decides to create, such as repmgr or barman).
+TPA itself decides to create, such as repmgr or barman).
 
 Each entry must specify the `username` to create.
 
@@ -34,7 +34,7 @@ user or a role) etc.
 
 ## Password generation
 
-By default, TPAexec will generate a random password for the user, and
+By default, TPA will generate a random password for the user, and
 store it in a vault-encrypted variable named `<username>_password` in
 the cluster's inventory. You can retrieve the value later:
 

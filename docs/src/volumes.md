@@ -1,6 +1,6 @@
 # Filesystem configuration
 
-TPAexec allows you to define a list of `volumes` attached to each
+TPA allows you to define a list of `volumes` attached to each
 instance.
 
 This list comprises both platform-specific settings that are used during
@@ -133,7 +133,7 @@ instances:
     …
 ```
 
-TPAexec translates a `device_name` of `root` to `/dev/sda` or
+TPA translates a `device_name` of `root` to `/dev/sda` or
 `/dev/xvda` based on the instance type, so that you don't need to
 remember (or change) which one to use.
 
@@ -144,7 +144,7 @@ which case you must also set `iops: 5000`), etc.
 The `volume_size` specifies the size of the volume in gigabytes.
 
 Set `encrypted: yes` to enable EBS encryption at rest. (This is an AWS
-feature, enabled by default in newly-generated TPAexec configurations,
+feature, enabled by default in newly-generated TPA configurations,
 and is different from [LUKS encryption](#luks-encryption), explained
 below.)
 
@@ -176,7 +176,7 @@ volumes created from snapshots.
 
 ## Platform bare
 
-TPAexec has no control over what volumes may be attached to
+TPA has no control over what volumes may be attached to
 pre-provisioned `bare` instances, but if you define `volumes` with the
 appropriate `device_name`, it will handle `mkfs` and `mount` for the
 devices if required.
@@ -228,14 +228,14 @@ assemble them into a RAID-1 volume named `/dev/md0`. The handling of
 `volume_for` or `mountpoint` during deployment happens as with any other
 volume.
 
-TPAexec does not currently support the creation and assembly of RAID
+TPA does not currently support the creation and assembly of RAID
 arrays on other platforms, but you can use an existing array by adding
 an entry to volumes with `device_name: /dev/md0` or `/dev/mapper/xyz`.
-TPAexec will handle `mkfs` and `mount` as with any other block device.
+TPA will handle `mkfs` and `mount` as with any other block device.
 
 ## LUKS encryption
 
-TPAexec can set up a LUKS-encrypted device:
+TPA can set up a LUKS-encrypted device:
 
 ```yaml
 instances:
@@ -250,14 +250,14 @@ instances:
 ```
 
 If a volume with `encryption: luks` set is not already initialised,
-TPAexec will use `cryptsetup` to first `luksFormat` and then `luksOpen`
+TPA will use `cryptsetup` to first `luksFormat` and then `luksOpen`
 it to map it under `/dev/mapper/mappedname` before handling filesystem
 creation as with any other device.
 
-(To avoid any possibility of data loss, TPAexec will refuse to set up
+(To avoid any possibility of data loss, TPA will refuse to set up
 LUKS encryption on a device that contains a valid filesystem already.)
 
-If you create a LUKS-encrypted `volume_for: postgres_data`, TPAexec will
+If you create a LUKS-encrypted `volume_for: postgres_data`, TPA will
 configure Postgres to not start automatically at boot. You can use
 `tpaexec start-postgres clustername` to mount the volume and start
 Postgres (and `stop-postgres` to stop Postgres and unmap the volume).
@@ -292,14 +292,14 @@ You can specify the `fstype` (default: ext4), `fsopts` to be passed to
 mkfs (default: none), and `mountopts` to be passed to mount and written
 to fstab (see below).
 
-TPAexec will set the readahead for the device to 16MB by default (and
+TPA will set the readahead for the device to 16MB by default (and
 make the value persist across reboots), but you can specify a different
 value for the volume as shown above.
 
 There are two ways to determine where a volume is mounted. You can
 either specify a `mountpoint` explicitly, or you can set `volume_for` to
 `postgres_data`, `postgres_wal`, `postgres_tablespace` or `barman_data`,
-and TPAexec will translate the setting into an appropriate mountpoint
+and TPA will translate the setting into an appropriate mountpoint
 for the system.
 
 Once the `mountpoint` is determined, the `device` will be mounted there
@@ -309,6 +309,6 @@ also be created for the filesystem in `/etc/fstab`.
 You may optionally specify `owner`, `group`, or `mode` for the volume,
 and these attributes will be set on the `mountpoint`. Remember that at
 this very early stage of deployment, you cannot count on the `postgres`
-user to exist. In any case, TPAexec will (separately) ensure that any
+user to exist. In any case, TPA will (separately) ensure that any
 directories needed by Postgres have the right ownership and permissions,
 so you don't have to do it yourself.

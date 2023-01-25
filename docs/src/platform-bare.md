@@ -21,15 +21,15 @@ instances:
 
 You must ensure that
 
-1. TPAexec can ssh to the instance as `ansible_user`
+1. TPA can ssh to the instance as `ansible_user`
 2. The `ansible_user` has sudo access on the instance
 
 ## SSH access
 
-In the example above, TPAexec will ssh to `xyzzy@192.0.2.1` to access
+In the example above, TPA will ssh to `xyzzy@192.0.2.1` to access
 the instance.
 
-By default, TPAexec will run `ssh-keygen` to generate a new SSH keypair
+By default, TPA will run `ssh-keygen` to generate a new SSH keypair
 in your cluster directory. The private key is named `id_cluster_name`
 and the public key is stored in `id_cluster_name.pub`.
 
@@ -41,7 +41,7 @@ will append the contents of `id_cluster_name.pub` to
 
 You must also ensure that ssh can verify the host key(s) of the
 instance. You can either add entries to the `known_hosts` file in your
-cluster directory, or install the TPAexec-generated host keys from
+cluster directory, or install the TPA-generated host keys from
 `hostkeys/ssh_host_*_key*` in your cluster directory into `/etc/ssh` on
 the instance (the generated `tpa_known_hosts` file contains entries for
 these keys).
@@ -69,8 +69,8 @@ For more details:
 
 ## Distribution support
 
-TPAexec will try to detect the distribution running on target instances,
-and fail if it is not supported. TPAexec currently supports Debian
+TPA will try to detect the distribution running on target instances,
+and fail if it is not supported. TPA currently supports Debian
 (8/9/10; or jessie/stretch/buster), Ubuntu (16.04/18.04/20.04; or
 xenial/bionic/focal), and RHEL/CentOS/Rocky/AlmaLinux (7.x/8.x) on `bare` instances.
 
@@ -78,7 +78,7 @@ xenial/bionic/focal), and RHEL/CentOS/Rocky/AlmaLinux (7.x/8.x) on `bare` instan
 
 You can specify the `public_ip`, `private_ip`, or both for any instance.
 
-TPAexec uses these IP addresses in two ways: first, to ssh to the
+TPA uses these IP addresses in two ways: first, to ssh to the
 instance to execute commands during deployment; and second, to set up
 communications within the cluster, e.g., for `/etc/hosts` or to set
 `primary_conninfo` for Postgres.
@@ -91,6 +91,6 @@ cluster communications.
 
 If you specify only one or the other, the address will be used for both
 purposes. For example, you could set only `public_ip` for servers on
-different networks, or only `private_ip` if you're running TPAexec
+different networks, or only `private_ip` if you're running TPA
 inside a closed network. (Instead of using public/private, you can set
 `ip_address` if you need to specify only one IP address.)

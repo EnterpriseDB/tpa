@@ -1,6 +1,6 @@
 # Installing packages
 
-TPAexec installs a batch of non-Postgres-related packages early during
+TPA installs a batch of non-Postgres-related packages early during
 the deployment, then all Postgres-related packages together, and then
 packages for optional components separately. This page is about
 installing packages like sysstat or strace, which have no dependency on
@@ -24,7 +24,7 @@ cluster_vars:
       - ubpkg1
 ```
 
-In the example above, TPAexec will install its own list of
+In the example above, TPA will install its own list of
 `default_packages` and the packages listed under `packages.common`
 on every instance, and the remaining distribution-specific packages
 based on which distribution the instance is running. If any of these

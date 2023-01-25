@@ -1,6 +1,6 @@
 # Configuring pgbouncer
 
-TPAexec will install and configure pgbouncer on instances whose `role`
+TPA will install and configure pgbouncer on instances whose `role`
 contains `pgbouncer`.
 
 By default, pgbouncer listens for connections on port 6432 and forwards
@@ -19,7 +19,7 @@ Variable | Default value | Description
 
 ## Databases
 
-By default, TPAexec will generate
+By default, TPA will generate
 `/etc/pgbouncer/pgbouncer.databases.ini` with a single wildcard `*`
 entry under `[databases]` to forward all connections to the backend
 server. You can set `pgbouncer_databases` as shown in the example below

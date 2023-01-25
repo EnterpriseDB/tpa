@@ -1,6 +1,6 @@
 # Configuring repmgr
 
-TPAexec will install repmgr on all postgres instances that have the
+TPA will install repmgr on all postgres instances that have the
 `failover_manager` instance variable set to `repmgr`; this is the
 default setting.
 

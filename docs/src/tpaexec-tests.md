@@ -1,7 +1,7 @@
-# TPAexec custom tests
+# TPA custom tests
 
 You can easily define in-depth tests specific to your environment and
-application to augment TPAexec's [builtin tests](tpaexec-test.md).
+application to augment TPA's [builtin tests](tpaexec-test.md).
 
 We strongly recommend writing tests for any tasks, no matter how simple,
 that you would run on your cluster to reassure yourself that everything
@@ -82,7 +82,7 @@ test output in a timestamped test directory in your cluster directory.
 
 Each test must be a complete Ansible playbook (i.e., a list of plays,
 not just a list of tasks). It will be imported and executed after the
-basic TPAexec setup tasks.
+basic TPA setup tasks.
 
 ## Destructive tests
 

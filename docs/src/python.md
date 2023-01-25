@@ -1,6 +1,6 @@
 # Python environment
 
-TPAexec decides which Python interpreter to use based on the
+TPA decides which Python interpreter to use based on the
 [distribution it detects](distributions.md) on a target instance. It
 will use Python 3 wherever possible, and fall back to Python 2 only when
 unavoidable.
@@ -23,7 +23,7 @@ RHEL 8.x|✗|✓ (3.6)
 Ubuntu 20.04, 22.04 and RHEL 8.x can be used only with Python 3.
 
 RHEL 7.x ships with Python 3.6, but the librpm bindings for Python 3 are
-not available, so TPAexec must use Python 2 instead. Debian 8 does not
+not available, so TPA must use Python 2 instead. Debian 8 does not
 have the Python 3.5+ required to support Ansible.
 
 You can decide for other distributions whether you prefer `python2` or
@@ -40,5 +40,5 @@ cluster_vars:
   preferred_python_version: python3
 ```
 
-TPAexec will ignore this setting on distributions where it cannot use
+TPA will ignore this setting on distributions where it cannot use
 Python 3.

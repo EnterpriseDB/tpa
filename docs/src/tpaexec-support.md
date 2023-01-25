@@ -1,11 +1,11 @@
-# TPAexec capabilities and supported software
+# TPA capabilities and supported software
 
 * [Python requirements](python.md)
 * [Supported distributions](distributions.md)
 
 ## Supported software
 
-TPAexec can install and configure the following major components.
+TPA can install and configure the following major components.
 
 * Postgres 14, 13, 12, 11, 10
 

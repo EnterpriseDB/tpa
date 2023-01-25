@@ -1,6 +1,6 @@
 # Instance configuration
 
-This page presents an overview of the various controls that TPAexec
+This page presents an overview of the various controls that TPA
 offers to customise the deployment process on cluster instances, with
 links to more detailed documentation.
 
@@ -12,7 +12,7 @@ easy-to-review configuration.
 
 ## System-level configuration
 
-The first thing TPAexec does is to ensure that Python is bootstrapped
+The first thing TPA does is to ensure that Python is bootstrapped
 and ready to execute Ansible modules (a distribution-specific process).
 Then it completes various system-level configuration tasks before moving
 on to [Postgres configuration](#postgres) below.
@@ -106,7 +106,7 @@ according to the architecture's needs:
 * [Build and install Postgres and extensions from source](postgres_installation_method_src.md)
   (for development and testing)
 
-Whichever installation method you choose, TPAexec can give you the same
+Whichever installation method you choose, TPA can give you the same
 cluster configuration with a minimum of effort.
 
 ### Configuration
@@ -124,7 +124,7 @@ You can use the
 to execute tasks after the Postgres configuration files have been
 installed (e.g., to install additional configuration files).
 
-Once the Postgres configuration is in place, TPAexec will go on to
+Once the Postgres configuration is in place, TPA will go on to
 install and configure other components such as Barman, repmgr,
 pgbouncer, and haproxy, according to the details of the architecture.
 
@@ -144,7 +144,7 @@ pgbouncer, and haproxy, according to the details of the architecture.
 
 ### Configuring and starting services
 
-TPAexec will now install systemd service unit files for each service.
+TPA will now install systemd service unit files for each service.
 The service for Postgres is named `postgres.service`, and can be started
 or stopped with `systemctl start postgres`.
 

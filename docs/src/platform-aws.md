@@ -1,6 +1,6 @@
 # aws
 
-TPAexec fully supports provisioning production clusters on AWS EC2.
+TPA fully supports provisioning production clusters on AWS EC2.
 
 ## API access setup
 
@@ -158,9 +158,9 @@ This is the default configuration, which creates a VPC named Test with the
 given CIDR if it does not exist, or uses the existing VPC otherwise.
 
 To create a VPC, you must specify both the Name and the cidr. If you specify
-only a VPC Name, TPAexec will fail if a matching VPC does not exist.
+only a VPC Name, TPA will fail if a matching VPC does not exist.
 
-If TPAexec creates a VPC,
+If TPA creates a VPC,
 `tpaexec deprovision` will attempt to remove it, but will leave any
 pre-existing VPC alone. (Think twice before creating new VPCs, because
 AWS has a single-digit default limit on the number of VPCs per account.)
@@ -278,13 +278,13 @@ For more fine-grained control, you can set:
 
 ### S3 bucket (optional)
 
-TPAexec requires access to an S3 bucket to provision an AWS cluster. This bucket
+TPA requires access to an S3 bucket to provision an AWS cluster. This bucket
 is used to temporarily store files such as SSH host keys, but may also be used for
 other cluster data (such as backups).
 
-By default, TPAexec will use an S3 bucket named `edb-tpa-<aws-account-user-id>`
+By default, TPA will use an S3 bucket named `edb-tpa-<aws-account-user-id>`
 for any clusters you provision. (If the bucket does not exist, you will be asked to
-confirm that you want TPAexec  to create it for you.)
+confirm that you want TPA  to create it for you.)
 
 To use an existing S3 bucket instead, set
 
@@ -293,7 +293,7 @@ To use an existing S3 bucket instead, set
 (You can also set `cluster_bucket: auto` to accept the default bucket name without
 the confirmation prompt.)
 
-TPAexec will never remove any S3 buckets when you deprovision the cluster. To remove
+TPA will never remove any S3 buckets when you deprovision the cluster. To remove
 the bucket yourself, run:
 
     aws s3 rb s3://<bucket> --force

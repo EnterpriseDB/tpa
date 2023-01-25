@@ -1,26 +1,27 @@
-# TPAexec
+# TPA
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 Confidential property of EDB; not for public release.
 
-[Link to TPAexec documentation in PDF format](tpaexec.pdf)
+[Link to TPA documentation in PDF format](tpaexec.pdf)
 
 ## Introduction
 
-TPAexec is an orchestration tool that uses Ansible to build Postgres
-clusters as specified by TPA (Trusted Postgres Architecture), a set of
-reference architectures that document how to set up and operate Postgres
-in various scenarios. TPA represents the best practices followed by
-EDB (and formerly, 2ndQuadrant), and its recommendations are as
-applicable to quick testbed setups as to production environments.
+TPA is an orchestration tool that uses Ansible to build Postgres
+clusters according to EDB's recommendations.
 
-(You can skip straight to the [TPAexec installation
+TPA embodies the best practices followed by EDB, and is informed by many
+years of experience with deploying Postgres and associated components in
+various scenarios. These recommendations are as applicable to quick
+testbed setups as to production environments.
+
+(You can skip straight to the [TPA installation
 instructions](INSTALL.md) if you want to get started.)
 
-## What can TPAexec do?
+## What can TPA do?
 
-TPAexec operates in four distinct stages to bring up a Postgres cluster:
+TPA operates in four distinct stages to bring up a Postgres cluster:
 
 * Generate a cluster [configuration](#configuration)
 * [Provision](#provisioning) servers (VMs, containers) to host the cluster
@@ -41,7 +42,7 @@ TPAexec operates in four distinct stages to bring up a Postgres cluster:
 [tpa]$ tpaexec test clustername
 ```
 
-You can run TPAexec from your laptop, an EC2 instance, or any machine
+You can run TPA from your laptop, an EC2 instance, or any machine
 that can reach the cluster's servers over the network.
 
 Here's a [list of capabilities and supported software](tpaexec-support.md).
@@ -71,28 +72,28 @@ command creates instances and other resources required by the cluster.
 The details of the process depend on the architecture (e.g., M1) and
 platform (e.g., AWS) that you selected while configuring the cluster.
 
-For example, given AWS access with the necessary privileges, TPAexec
+For example, given AWS access with the necessary privileges, TPA
 will provision EC2 instances, VPCs, subnets, routing tables, internet
 gateways, security groups, EBS volumes, elastic IPs, etc.
 
 You can also "provision" existing servers by selecting the "bare"
 platform and providing connection details. Whether these are bare metal
 servers or those provisioned separately on a cloud platform, they can be
-used just as if they had been created by TPAexec.
+used just as if they had been created by TPA.
 
 You are not restricted to a single platform—you can spread your cluster
 out across some AWS instances (in multiple regions) and some on-premise
 servers, or servers in other data centres, as needed.
 
 At the end of the provisioning stage, you will have the required number
-of instances with the basic operating system installed, which TPAexec
+of instances with the basic operating system installed, which TPA
 can access via SSH (with sudo to root).
 
 ### Deployment
 
 The [`tpaexec deploy`](tpaexec-deploy.md)
 command installs and configures Postgres and other software on the
-provisioned servers (which may or may not have been created by TPAexec;
+provisioned servers (which may or may not have been created by TPA;
 but it doesn't matter who created them so long as SSH and sudo access is
 available). This includes setting up replication, backups, and so on.
 
@@ -109,7 +110,7 @@ cluster.
 
 ### Incremental changes
 
-TPAexec is carefully designed so that provisioning, deployment, and
+TPA is carefully designed so that provisioning, deployment, and
 testing are idempotent. You can run through them, make a change to
 config.yml, and run through the process again to deploy the change. If
 nothing has changed in the configuration or on the instances, then
@@ -117,17 +118,17 @@ rerunning the entire process will not change anything either.
 
 ### Cluster management
 
-Once your cluster is up and running, TPAexec provides convenient cluster
+Once your cluster is up and running, TPA provides convenient cluster
 management functions, including configuration changes, switchover, and
 zero-downtime minor-version upgrades. These features make it easier and
 safer to manage your cluster than making the changes by hand.
 
 ### Extensible through Ansible
 
-TPAexec supports a [variety of configuration
+TPA supports a [variety of configuration
 options](configure-instance.md), so you can do a lot just by editing
 config.yml and re-running provision/deploy/test. If you do need to go
-beyond what TPAexec already supports, you can write
+beyond what TPA already supports, you can write
 
 * [Custom commands](tpaexec-commands.md), which make it simple to write
   playbooks to run on the cluster. Just create
@@ -149,7 +150,7 @@ beyond what TPAexec already supports, you can write
 
 ## It's just Postgres
 
-TPAexec can create complex clusters with many features configured, but
+TPA can create complex clusters with many features configured, but
 the result is just Postgres. The installation follows some conventions
 designed to make life simpler, but there is no hidden magic or anything
 standing in the way between you and the database. You can do everything
@@ -157,5 +158,5 @@ on a TPA cluster that you could do on any other Postgres installation.
 
 ## Getting started
 
-Follow the [TPAexec installation instructions](INSTALL.md) for your
+Follow the [TPA installation instructions](INSTALL.md) for your
 system, then [configure your first cluster](tpaexec-configure.md).

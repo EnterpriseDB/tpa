@@ -1,13 +1,13 @@
 # Configuring haproxy
 
-TPAexec will install and configure haproxy on instances whose `role`
+TPA will install and configure haproxy on instances whose `role`
 contains `haproxy`.
 
 By default, haproxy listens on `127.0.0.1:5432` for requests forwarded
 by [`pgbouncer`](pgbouncer.md) running on the same instance. You must
 specify a list of `haproxy_backend_servers` to forward requests to.
 
-TPAexec will install the latest available version of haproxy by default.
+TPA will install the latest available version of haproxy by default.
 You can install a specific version instead by setting
 `haproxy_package_version: 1.9.15*` (for example).
 
@@ -25,7 +25,7 @@ Variable | Default value | Description
 
 ## Server options
 
-TPAexec will generate `/etc/haproxy/haproxy.cfg` with a backend that has
+TPA will generate `/etc/haproxy/haproxy.cfg` with a backend that has
 a `default-server` line and one line per backend server. All but the
 first one will be marked as "backup" servers.
 

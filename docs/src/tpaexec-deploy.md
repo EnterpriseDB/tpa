@@ -18,7 +18,7 @@ configuration and then provisioned the servers with
 Before deployment, you must
 `export TPA_2Q_SUBSCRIPTION_TOKEN=xxx` to enable any 2ndQuadrant
 repositories that require subscription. You can use the subscription
-token that you used to [install TPAexec](INSTALL.md) itself. If you
+token that you used to [install TPA](INSTALL.md) itself. If you
 forget to do this, an error message will soon remind you.
 
 ## Quickstart
@@ -81,7 +81,7 @@ initially execute some tasks on other hosts to collect information about
 the state of the cluster.
 
 (Setting `deploy_hosts` is the recommended alternative to using
-Ansible's `--limit` option, which TPAexec does not support.)
+Ansible's `--limit` option, which TPA does not support.)
 
 ## deploy.yml
 

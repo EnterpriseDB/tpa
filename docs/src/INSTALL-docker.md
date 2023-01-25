@@ -1,14 +1,14 @@
-# Running TPAexec in a Docker container
+# Running TPA in a Docker container
 
-If you are using a system for which there are no [TPAexec
-packages](INSTALL.md) available, and it's difficult to run TPAexec after
+If you are using a system for which there are no [TPA
+packages](INSTALL.md) available, and it's difficult to run TPA after
 [installing from source](INSTALL-repo.md) (for example, because it's not
 easy to obtain a working Python 3.6+ interpreter), your last resort may
-be to build a Docker image and run TPAexec inside a Docker container.
+be to build a Docker image and run TPA inside a Docker container.
 
-Please note that you do not need to run TPAexec in a Docker container in
+Please note that you do not need to run TPA in a Docker container in
 order to [deploy to Docker containers](platform-docker.md). It's always
-preferable to run TPAexec directly if you can (even on MacOS X).
+preferable to run TPA directly if you can (even on MacOS X).
 
 ## Quickstart
 
@@ -38,7 +38,7 @@ TPA_VENV=/opt/EDB/TPA/tpa-venv
 ANSIBLE=/opt/EDB/TPA/tpa-venv/bin/ansible (v2.8.15)
 ```
 
-Create a TPAexec container and make your cluster configuration directories
+Create a TPA container and make your cluster configuration directories
 available inside the container:
 
 ```bash
@@ -49,7 +49,7 @@ $ docker run --rm -v ~/clusters:/clusters \
 You can now run commands like `tpaexec provision /clusters/speedy` at the
 container prompt. (When you exit the shell, the container will be removed.)
 
-If you want to provision Docker containers using TPAexec, you must also allow
+If you want to provision Docker containers using TPA, you must also allow
 the container to access the Docker control socket on the host:
 
 ```

@@ -1,6 +1,6 @@
 # Configuring pgd-proxy
 
-TPAexec will install and configure pgd-proxy for the PGD-Always-ON
+TPA will install and configure pgd-proxy for the PGD-Always-ON
 architecture with BDR 5 on any instance with `pgd-proxy` in its `role`.
 
 (By default, the [PGD-Always-ON architecture](architecture-PGD-Always-ON.md)

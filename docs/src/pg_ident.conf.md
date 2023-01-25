@@ -1,7 +1,7 @@
 # pg_ident.conf
 
 You should not normally need to change `pg_ident.conf`, and by default,
-TPAexec will not modify it.
+TPA will not modify it.
 
 You can set `postgres_ident_template` to replace `pg_ident.conf` with
 whatever content you like.

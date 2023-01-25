@@ -1,6 +1,6 @@
 # Installing Postgres-related packages
 
-TPAexec installs a batch of non-Postgres-related packages early during
+TPA installs a batch of non-Postgres-related packages early during
 the deployment, then all Postgres-related packages together, and then
 packages for optional components separately. This page is about
 installing packages like pglogical that depend on Postgres itself.

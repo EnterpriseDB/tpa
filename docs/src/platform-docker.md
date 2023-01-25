@@ -1,6 +1,6 @@
 # Docker
 
-TPAexec can create Docker containers and deploy a cluster to them. At
+TPA can create Docker containers and deploy a cluster to them. At
 present, it sets up containers to run systemd and other services as if
 they were ordinary VMs.
 
@@ -20,7 +20,7 @@ Just select the platform at configure-time:
 ## Operating system selection
 
 Use the standard `--os Debian/Ubuntu/RedHat` configure option to
-select which distribution to use for the containers. TPAexec will build
+select which distribution to use for the containers. TPA will build
 its own systemd-enabled images for this distribution. These images will
 be named with a `tpa/` prefix, e.g., `tpa/redhat:8`.
 
@@ -29,13 +29,13 @@ systemd-enabled image instead. For example, the
 [centos/systemd](https://hub.docker.com/r/centos/systemd/)
 image (based on CentOS 7) can be used in this way.
 
-TPAexec does not support Debian 8 (jessie) or Ubuntu 16.04 (xenial) for
+TPA does not support Debian 8 (jessie) or Ubuntu 16.04 (xenial) for
 Docker containers, because of bugs in the old version of systemd shipped
 on those distributions.
 
 ## Installing Docker
 
-We test TPAexec with the latest stable Docker-CE packages.
+We test TPA with the latest stable Docker-CE packages.
 
 This documentation assumes that you have a working Docker installation,
 and are familiar with basic operations such as pulling images and
@@ -74,7 +74,7 @@ On MacOS:
 
 ### Permissions
 
-TPAexec expects the user running it to have permission to access to the
+TPA expects the user running it to have permission to access to the
 Docker daemon (typically by being a member of the `docker` group that
 owns `/var/run/docker.sock`). Run a command like this to check if you
 have access:
@@ -92,7 +92,7 @@ should have access to the Docker daemon.
 
 #### Privileged containers
 
-By default TPAexec provisions Docker containers in unprivileged mode, with no
+By default TPA provisions Docker containers in unprivileged mode, with no
 added Linux capabilities flags. Such containers cannot manage host firewall
 rules, file systems, block devices, or most other tasks that require true root
 privileges on the host.

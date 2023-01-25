@@ -17,7 +17,7 @@ To create a new virtual environment (assuming tpaexec was installed into the def
 ```
 
 ###Strange AWS errors regarding credentials
-If the time & date of the TPAexec server isn't correct, you can get AWS errors similar to this during provisioning:
+If the time & date of the TPA server isn't correct, you can get AWS errors similar to this during provisioning:
 ```
 TASK [Register key tpa_cluster in each region] **********************************************
 An exception occurred during task execution. To see the full traceback, use -vvv. The error was: ClientError: An error occurred (AuthFailure) when calling the DescribeKeyPairs operation: AWS was not able to validate the provided access credentials
@@ -76,9 +76,9 @@ no spaces; for example:
 [tpa]$ tpaexec test <clustername> --skip-tags barman,pgbench
 ```
 
-### TPAexec server test
+### TPA server test
 
-To check the installation of the TPAexec server itself, run:
+To check the installation of the TPA server itself, run:
 
 ```
 [tpa]$ tpaexec selftest

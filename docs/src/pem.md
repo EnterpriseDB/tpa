@@ -1,6 +1,6 @@
 # Configuring Postgres Enterprise Manager (PEM)
 
-TPAexec will install and configure PEM when `tpaexec configure` command is run
+TPA will install and configure PEM when `tpaexec configure` command is run
 with `--enable-pem` command line option.
 
 The default behavior with `--enable-pem` is to enable `pem-agent` role for all
@@ -33,7 +33,7 @@ Note that PEM server does not support pgextended for a backend yet.
 
 ## PEM configuration
 
-TPAexec will configure pem agents and pem server with the appropriate
+TPA will configure pem agents and pem server with the appropriate
 instance-specific settings, with remaining settings set to the respective
 default values. Some of the configuration options may be exposed for user
 configuration at some point in future.

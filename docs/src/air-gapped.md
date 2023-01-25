@@ -2,15 +2,15 @@
 
 In a security controlled environment where no direct connection to the
 Internet is allowed, it is necessary to provide all packages needed by
-TPAexec to complete the deployment. This can be done via a local-repo on
-each node in the cluster. TPAexec supports the addition of custom
+TPA to complete the deployment. This can be done via a local-repo on
+each node in the cluster. TPA supports the addition of custom
 repositories on each node via a
 [local-repo](local-repo.md) and the required packages can be downloaded
 using the [download-packages](tpaexec-download-packages.md) command.
 
 ## Preparation
 
-Choose an internet connected machine where you can install TPAexec,
+Choose an internet connected machine where you can install TPA,
 follow instructions below to either copy an existing cluster
 configuration or create a new cluster.
 
@@ -58,7 +58,7 @@ The resulting repository will be contained in the
 `cluster-dir/local-repo` directory. This is a complete package repo for
 the target OS. Copy this directory, from the connected controller to the
 disconnected controller that will be used to deploy the cluster. Place
-the directory in the same place, beneath the cluster directory. TPAexec
+the directory in the same place, beneath the cluster directory. TPA
 will then copy packages to the instances automatically.
 
 ## Deploying in a disconnected environment

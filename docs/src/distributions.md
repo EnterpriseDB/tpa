@@ -1,10 +1,10 @@
 # Distribution support
 
-TPAexec detects and adapts to the distribution running on each target
+TPA detects and adapts to the distribution running on each target
 instance.
 
 (This page is about distribution support on target instances that you
-are deploying *to*, not about the system you are running TPAexec *from*.
+are deploying *to*, not about the system you are running TPA *from*.
 See the [installation instructions](INSTALL.md#distribution-support) for
 more on the latter.)
 

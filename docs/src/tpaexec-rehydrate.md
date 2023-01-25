@@ -2,7 +2,7 @@
 
 The `tpaexec rehydrate` command rebuilds AWS EC2 instances with an
 updated machine image (AMI), and allows for the rapid deployment of
-security patches and OS upgrades to a cluster managed by TPAexec.
+security patches and OS upgrades to a cluster managed by TPA.
 
 Given a new AMI with all the required changes, this command terminates
 an instance, replaces it with a newly-provisioned instance that uses the
@@ -17,7 +17,7 @@ It makes it simpler to track the state of each server at a glance, and
 discourages any manual changes to individual servers (they would be
 wiped out during the instance replacement).
 
-TPAexec makes it simple to minimise disruption to the cluster as a whole
+TPA makes it simple to minimise disruption to the cluster as a whole
 during the rehydration, even though the process must necessarily involve
 downtime for individual servers as they are terminated and replaced. On
 a [streaming replication cluster](architecture-M1.md), you can rehydrate
@@ -41,7 +41,7 @@ new EBS root volume.)
 By default, when you terminate an EC2 instance, the EBS volumes attached
 to it are also terminated. In this case, since we want to reattach them
 to a new instance, we must disable `delete_on_termination`. Setting
-`attach_existing` makes TPAexec search for old volumes when provisioning
+`attach_existing` makes TPA search for old volumes when provisioning
 a new instance and, if found, attach them to the instance after it's
 running.
 

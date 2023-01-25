@@ -1,6 +1,6 @@
 # Configuring /etc/hosts
 
-By default, TPAexec will add lines to /etc/hosts on the target instances
+By default, TPA will add lines to /etc/hosts on the target instances
 with the IP address and hostname(s) of every instance in the cluster, so
 that they can use each other's names for communication within the
 cluster (e.g., in `primary_conninfo` for Postgres).

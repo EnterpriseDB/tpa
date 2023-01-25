@@ -1,6 +1,6 @@
 # pglogical configuration
 
-TPAexec can configure pglogical replication sets (publications) and
+TPA can configure pglogical replication sets (publications) and
 subscriptions with pglogical v2 and pglogical v3.
 
 ```yaml
@@ -40,7 +40,7 @@ you to determine which version will be installed (e.g., subscribe to the
 
 ## Introduction
 
-TPAexec can configure everything needed to replicate changes between
+TPA can configure everything needed to replicate changes between
 instances using pglogical, and can also alter the replication setup
 based on config.yml changes.
 
@@ -54,13 +54,13 @@ in config.yml just assigns a name to a collection of replication sets,
 and subscriptions can use this name to refer to the desired provider.
 
 To use pglogical replication, both publishers and subscribers need a
-named local pglogical node. TPAexec will create this node with
+named local pglogical node. TPA will create this node with
 `pglogical.create_node()` if it does not exist. For publications, the
 publication name is used as the pglogical node name. There can be only
 one pglogical node in any given database, so you can have only one entry
 in `publications` per database.
 
-However, pglogical subscriptions *do* have a name of their own. TPAexec
+However, pglogical subscriptions *do* have a name of their own. TPA
 will create subscriptions with the given `name`, and use a default
 value for the pglogical node name based on the instance's name and the
 name of the database in which the subscription is created. You can
@@ -68,13 +68,13 @@ specify a different `node_name` if required—for example, when you have
 configured a publication in the same database, so that all subscriptions
 in that database must share the same pglogical node.
 
-TPAexec does some basic validation of the configuration—it will point
+TPA does some basic validation of the configuration—it will point
 out the error if you spell `replication_sets` as `replciation_sets`, or
 try to subscribe to a publication that is not defined, but it is your
 responsibility to specify a meaningful set of publications and
 subscriptions.
 
-TPAexec will configure pglogical after creating users, extensions, and
+TPA will configure pglogical after creating users, extensions, and
 databases, but before any BDR configuration. You can set
 [`postgres_users`](postgres_users.md) and
 [`postgres_databases`](postgres_databases.md) to create databases
@@ -186,7 +186,7 @@ Instead of referring to publications by name, you may explicitly specify
 a `provider_dsn` instead. In this case, the given DSN is passed to
 `pglogical.create_subscription()` directly (and `publication` is
 ignored). You can use this mechanism to subscribe to instances outside
-the TPAexec cluster.
+the TPA cluster.
 
 The other attributes in the example above are optional. If defined, they
 will be included as named parameters in the call to
@@ -199,19 +199,19 @@ For publications, you can add or remove replication sets, change the
 attributes of a replication set, or change its membership (the tables
 and sequences it contains).
 
-If you change `replicate_*` or `autoadd_*`, TPAexec will call
+If you change `replicate_*` or `autoadd_*`, TPA will call
 `pglogical.alter_replication_set()` accordingly (but note that you
 cannot change `autoadd_existing` for existing replication sets, and
 the `autoadd_*` parameters are all pglogical3-specific).
 
 If you change the list of `tables` or `sequences` for a replication
-set, TPAexec will reconcile these changes by calling
+set, TPA will reconcile these changes by calling
 `pglogical.alter_replication_set_{add,remove}_{table,sequence}()` as
 needed.
 
 However, if you change `synchronize_data` or other attributes for a
 relation (table or sequence) that is already a member of a replication
-set, TPAexec will not propagate the changes (e.g., by dropping the table
+set, TPA will not propagate the changes (e.g., by dropping the table
 and re-adding it with a different configuration).
 
 For subscriptions, you can only change the list of `replication_sets`

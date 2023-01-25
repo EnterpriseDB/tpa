@@ -1,4 +1,4 @@
-# TPAexec rolling updates
+# TPA rolling updates
 
 The `tpaexec update-postgres` command performs a minor-version update
 of Postgres and related packages without interrupting overall cluster

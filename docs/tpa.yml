@@ -4,7 +4,7 @@
 
 site_name: TPA
 nav:
-  - TPAExec: index.md
+  - TPA: index.md
   - Installation: INSTALL.md
   - Creating a cluster:
     - Configuration: tpaexec-configure.md
@@ -30,7 +30,7 @@ nav:
     - Rehydration: tpaexec-rehydrate.md
   - Miscellaneous:
     - Ansible Tower (Automation Controller): tower.md
-    - TPAexec, Ansible, and sudo: misc-ansible-sudo.md
+    - TPA, Ansible, and sudo: misc-ansible-sudo.md
     - PuTTY configuration: misc-configure-putty.md
     - Troubleshooting: misc-troubleshooting.md
 
@@ -48,7 +48,7 @@ plugins:
   - search
   - with-pdf:
       author: EDB
-      cover_title: TPAexec
+      cover_title: TPA
       cover_subtitle: "Version 23.10 (2023-01-04)"
       toc_level: 3
       output_path: tpaexec.pdf

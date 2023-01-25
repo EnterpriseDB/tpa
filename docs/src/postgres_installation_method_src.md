@@ -1,6 +1,6 @@
 # Postgres source installation
 
-TPAexec will compile and install Postgres from source if you set
+TPA will compile and install Postgres from source if you set
 `postgres_installation_method` to `src`. This feature is meant for use
 in development and testing, and allows you to switch between packaged
 and source builds within an identically-configured cluster.
@@ -32,7 +32,7 @@ directory already exists (e.g., if you are re-deploying).
 
 ### Build customisation
 
-By default, TPAexec will configure and build Postgres with debugging
+By default, TPA will configure and build Postgres with debugging
 enabled and sensible defaults in `postgres_build_dir` (default:
 `/opt/postgres/build/postgres`). You can change various settings to
 customise the build:

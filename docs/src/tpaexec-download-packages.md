@@ -1,7 +1,7 @@
 # tpaexec download-packages
 
 The purpose of the downloader is to provide the packages required to do
-a full installation of a TPAexec cluster from an existing configuration.
+a full installation of a TPA cluster from an existing configuration.
 This is useful when you want to ship packages to secure clusters that do
 not have internet access, or avoid downloading packages repeatedly for
 test clusters.
@@ -57,4 +57,4 @@ cluster-dir/
 You can use this in the cluster as is or copy it to a target control
 node. See [recommendations for installing to an air-gapped environment](
 air-gapped.md). A [local-repo](local-repo.md) will be detected and used
-automatically by TPAexec.
+automatically by TPA.

@@ -21,7 +21,7 @@ cluster_vars:
         VAR: value
 ```
 
-TPAexec will build and install extensions one by one in the order
+TPA will build and install extensions one by one in the order
 listed, so you can build extensions that depend on another (such as
 pglogical and BDR) by mentioning them in the correct order.
 
@@ -42,7 +42,7 @@ Whenever you run a source build, Postgres will be restarted.
 
 ## Build dependencies
 
-If you're building from source, TPAexec will ensure that the basic
+If you're building from source, TPA will ensure that the basic
 Postgres build dependencies are installed. If you need any additional
 packages, mention them in [`packages`](packages.md). For example
 

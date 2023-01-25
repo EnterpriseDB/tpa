@@ -1,6 +1,6 @@
 # Building from source
 
-TPAexec can build Postgres and other required components from source and
+TPA can build Postgres and other required components from source and
 deploy a cluster with exactly the same configuration as with the default
 packaged installation. This makes it possible to deploy repeatedly from
 source to quickly test changes in a realistic, fully-configured cluster
@@ -78,7 +78,7 @@ The available options are documented here:
 
 ## Local source directories
 
-You can use TPAexec to provision Docker containers that build Postgres
+You can use TPA to provision Docker containers that build Postgres
 and/or extensions from your local source directories instead of from a
 Git repository.
 
@@ -121,7 +121,7 @@ been cloned to, and the default (out-of-tree) build proceeds as usual.
 If you specify a local source directory for a component, you cannot
 specify a branch to build (cf. `pglogical3:REL3_7_STABLE` vs.
 `pglogical3` for `--install-from-source` in the examples above). The
-source directory is mounted read-only in the containers, so TPAexec
+source directory is mounted read-only in the containers, so TPA
 cannot do anything to change it—neither `git pull`, nor
 `git checkout`. You get whichever branch you have checked out locally,
 uncommitted changes and all.
@@ -138,7 +138,7 @@ local_source_directories:
 
 ### ccache
 
-TPAexec installs ccache by default for source builds of all kinds. When
+TPA installs ccache by default for source builds of all kinds. When
 you are using a Docker cluster with local source directories, by default
 a new Docker volume is attached to the cluster's containers to serve as
 a shared ccache directory. This volume is completely isolated from the

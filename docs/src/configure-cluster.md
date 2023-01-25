@@ -1,6 +1,6 @@
 # Cluster configuration
 
-With TPAexec, the way to make any configuration change to a cluster is
+With TPA, the way to make any configuration change to a cluster is
 to edit config.yml and run the provision/deploy/test cycle. The process
 is carefully designed to be idempotent, and to make changes only in
 response to a change in the configuration or a change on the instances.
@@ -51,7 +51,7 @@ These three definitions are central to your cluster configuration. The
 file may contain many other definitions (including platform-specific
 details), but the list of `instances` with `vars` set either for one
 instance or for the whole cluster are the basic building blocks of
-every TPAexec configuration.
+every TPA configuration.
 
 All
 [`tpaexec configure`](tpaexec-configure.md)
@@ -69,7 +69,7 @@ each key is defined only once.** If you were to inadvertently repeat the
 the former, and your next deployment could make unintended changes
 because of missing (shadowed) variables.
 
-TPAexec checks the consistency of the overall cluster topology (for
+TPA checks the consistency of the overall cluster topology (for
 example, if you declare an instance with the role "replica", you must
 also declare the name of its upstream instance, and that instance must
 exist), but it will not prevent you from setting any variable you like
@@ -79,7 +79,7 @@ a test environment before rolling them out into production.
 ## Variables
 
 In Ansible terminology, most configuration settings are “inventory
-variables”—TPAexec will translate `cluster_vars` into `group_vars`
+variables”—TPA will translate `cluster_vars` into `group_vars`
 (that apply to the cluster as a whole) and each instance's `vars` into
 `host_vars` in the inventory during provisioning, and deployment will
 use the inventory values. After you change config.yml, **you must
@@ -245,5 +245,5 @@ example above).
 
 Locations represent a collection of settings that instances can “opt in”
 to. You can use them to stand for different data centres, AWS regions,
-Docker hosts, or something else entirely. TPAexec does not expect or
+Docker hosts, or something else entirely. TPA does not expect or
 enforce any particular interpretation.

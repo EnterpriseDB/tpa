@@ -1,25 +1,25 @@
-# TPAexec and Ansible Tower/Ansible Automation Controller
+# TPA and Ansible Tower/Ansible Automation Controller
 
-TPAexec can be used with RedHat Ansible Automation Controller (formerly
+TPA can be used with RedHat Ansible Automation Controller (formerly
 known as Ansible Tower) by running the configure and provision steps on
 a standalone machine, treating the cluster as a bare-metal one, and then
 importing the resulting inventory and other generated files into Tower.
 
-A TPAexec installation on Tower instance, which includes its own virtual
+A TPA installation on Tower instance, which includes its own virtual
 environment (tpa-venv), is then used for the deployment step in Tower.
 
 This document describes the appropriate procedure for Ansible Tower
 version 3.8.
 
-## Preparing Tower for working with TPAexec
+## Preparing Tower for working with TPA
 
-### Setting up a TPAexec virtual environment
+### Setting up a TPA virtual environment
 
 - Install tpaexec on your Tower server under /opt/EDB/TPA. This is the
-  default location when TPAexec is installed from package.
+  default location when TPA is installed from package.
 - Run `tpaexec setup` which will create a virtual environment under
   /opt/EDB/TPA/tpa-venv and install the required packages.
-- Add TPAexec directory (/opt/EDB/TPA) to the "CUSTOM VIRTUAL ENVIRONMENT PATHS"
+- Add TPA directory (/opt/EDB/TPA) to the "CUSTOM VIRTUAL ENVIRONMENT PATHS"
   field in the System Settings page of Tower UI.
 
 ### Creating the TPA_2Q_SUBSCRIPTION_TOKEN credential type
@@ -103,7 +103,7 @@ neptune
 - Add the inventory from the project as an external source to your
   inventory.
 
-- Create a Template in Tower specifying the TPAexec virtual environment,
+- Create a Template in Tower specifying the TPA virtual environment,
   your inventory, and the newly created project. Also include any required
   credentials to reach your hosts, and a credential with a TPA
   subscription token (TPA_2Q_SUBSCRIPTION_TOKEN).

@@ -1,11 +1,11 @@
-# TPAexec, Ansible, and sudo
+# TPA, Ansible, and sudo
 
-TPAexec uses Ansible with sudo to execute tasks with elevated privileges
+TPA uses Ansible with sudo to execute tasks with elevated privileges
 on target instances. This page explains how Ansible uses sudo (which is
-in no way TPAexec-specific), and the consequences to systems managed
-with TPAexec.
+in no way TPA-specific), and the consequences to systems managed
+with TPA.
 
-TPAexec needs root privileges;
+TPA needs root privileges;
 
 * to install packages (required packages using the operating system's
   native package manager, and optional packages using pip)
@@ -14,7 +14,7 @@ TPAexec needs root privileges;
 * to perform a variety of other tasks (e.g., gathering cluster facts,
   performing switchover, setting up cluster nodes)
 
-TPAexec also needs to be able to use sudo. You can make it ssh in as root
+TPA also needs to be able to use sudo. You can make it ssh in as root
 directly by setting `ansible_user: root`, but it will still use sudo to
 execute tasks as other users (e.g., postgres).
 
@@ -33,7 +33,7 @@ People who were expecting something like `sudo yum install -y xyzpkg`
 are often surprised by this. By and large, most tasks in Ansible will
 invoke a Python interpreter to execute Python code, rather than
 executing recognisable shell commands. (Playbooks may execute `raw`
-shell commands, but TPAexec uses such tasks only to bootstrap a Python
+shell commands, but TPA uses such tasks only to bootstrap a Python
 interpreter.)
 
 Ansible modules contain Python code of varying complexity, and an
@@ -50,7 +50,7 @@ for the random string in every command—but once Python is running as root,
 there's no effective limit on what it can do anyway.
 
 Executing Python modules on target hosts is just the way Ansible works.
-None of this is specific to TPAexec in any way, and these considerations
+None of this is specific to TPA in any way, and these considerations
 would apply equally to any other Ansible playbook.
 
 ## Recommendations
@@ -61,7 +61,7 @@ would apply equally to any other Ansible playbook.
 
 * Restrict access by time, rather than by command.
 
-TPAexec needs access only when you are first setting up your cluster or
+TPA needs access only when you are first setting up your cluster or
 running `tpaexec deploy` again to make configuration changes, e.g.,
 during a maintenance window. Until then, you can disable its access
 entirely (a one-line change for both ssh and sudo).
@@ -133,9 +133,9 @@ increasing overhead with increased logging.
 ## Local privileges
 
 The
-[installation instructions for TPAexec](INSTALL.md)
+[installation instructions for TPA](INSTALL.md)
 mention sudo only as shorthand for “run these commands as root somehow”.
-Once TPAexec is installed and you have run `tpaexec setup`, TPAexec
+Once TPA is installed and you have run `tpaexec setup`, TPA
 itself does not require elevated privileges on the local machine. (But
 if you use Docker, you must run tpaexec as a user that belongs to a
 group that is permitted to connect to the Docker daemon.)

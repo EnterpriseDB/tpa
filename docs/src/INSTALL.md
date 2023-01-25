@@ -1,21 +1,21 @@
-# TPAexec installation
+# TPA installation
 
-To use TPAexec, you need to install tpaexec and run the `tpaexec setup`
-command. This document explains how to install TPAexec packages.
+To use TPA, you need to install tpaexec and run the `tpaexec setup`
+command. This document explains how to install TPA packages.
 
-TPAexec packages are available to EDB customers by
+TPA packages are available to EDB customers by
 prior arrangement. Please contact your account manager to request
 access.
 
-We publish TPAexec packages for Debian 10 (buster), Ubuntu 22.04 (jammy), Ubuntu 20.04
+We publish TPA packages for Debian 10 (buster), Ubuntu 22.04 (jammy), Ubuntu 20.04
 (focal), Ubuntu 18.04 (bionic), RHEL/CentOS 7.x and 8.x, Rocky 8.x and AlmaLinux 8.x. These
 distributions provide a usable Python 3.6+ environment out of the box,
-which TPAexec requires. (However, TPAexec supports a wider range of
+which TPA requires. (However, TPA supports a wider range of
 [distributions on target instances](distributions.md).)
 
 ## Quickstart
 
-First, [subscribe to the TPAexec package repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
+First, [subscribe to the TPA package repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
 through the EDB Customer Support Portal.
 
 Then run the following commands:
@@ -48,7 +48,7 @@ $ sudo ntpdate pool.ntp.org
 ## Packages
 
 [Subscribe to the "products/tpa/release" repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
-to install the latest TPAexec packages.
+to install the latest TPA packages.
 (Login to the EDB Customer Support Portal, add a subscription under
 Support/Software/Subscriptions, and follow the instructions to enable
 the repository on your system.)
@@ -61,7 +61,7 @@ $ sudo apt-get install tpaexec
 $ sudo yum install tpaexec
 ```
 
-This will install TPAexec into `/opt/EDB/TPA`. It will also
+This will install TPA into `/opt/EDB/TPA`. It will also
 ensure that other required packages (e.g., Python 3.6 or later) are
 installed.
 
@@ -107,18 +107,18 @@ to verify your local installation:
 $ tpaexec selftest
 ```
 
-If that command completes without any errors, your TPAexec installation
+If that command completes without any errors, your TPA installation
 is ready for use.
 
 ## Upgrading
 
-To upgrade to a later release of TPAexec, you must:
+To upgrade to a later release of TPA, you must:
 
 1. Install the latest `tpaexec` package
 2. Install the latest `tpaexec-deps` package (if required; see above)
 3. Run `tpaexec setup` again
 
-If you have subscribed to the TPAexec package repository as described
+If you have subscribed to the TPA package repository as described
 above, running `apt-get update && apt-get upgrade` or `yum update`
 should install the latest available versions of these packages. If not,
 you can install the packages by any means available.
@@ -129,7 +129,7 @@ this, but others will not work without it.
 
 ## Ansible community support
 
-TPAexec now supports ansible community, you may choose to use it by
+TPA now supports ansible community, you may choose to use it by
 using `--use-community-ansible` option during `tpaexec setup`, default
 will be to use the legacy 2ndQuadrant/ansible fork. This will change in
 a future release, support for 2ndQuadrant/ansible will be dropped and
@@ -139,6 +139,6 @@ notable difference:
 - change the `--skip-flags` options to community behavior where a
 task will be skipped if part of the list given to the `--skip-tags`
 option even if it is also tagged with special tag `always`.
-TPAexec expects all tasks tagged with `always` to be run to ensure
+TPA expects all tasks tagged with `always` to be run to ensure
 a complete deployment, therefor `--skip-tags` should not be used when
 using community ansible.
