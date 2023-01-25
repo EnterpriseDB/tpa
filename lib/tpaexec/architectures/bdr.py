@@ -173,46 +173,37 @@ class BDR(Architecture):
         self._update_instance_camo(instances)
         self._update_instance_pem(instances)
 
-    @property
-    def _candidate_roles(self):
+    def _instance_roles(self, instance):
         """
-        Instance roles that can be considered as BDR node candidates.
+        Returns a set of role names for the given instance, which includes roles
+        set directly on the instance, as well as any roles in instance_defaults.
+        """
+        ins_defs = self.args["instance_defaults"]
+        return set(instance.get("role", ins_defs.get("role", [])))
 
-        Returns: Set of roles names
-
+    @property
+    def _readonly_bdr_roles(self):
+        """
+        Returns a set of role names, any of which, if present on a BDR instance,
+        indicate that it is not a primary instance.
         """
         return {
-            "bdr",
             "replica",
             "readonly",
             "subscriber-only",
             "witness",
         }
 
-    @property
-    def _camo_candidate_roles(self):
+    def _is_bdr_primary(self, instance):
         """
-        Instance roles that can be considered a CAMO partner.
+        Returns true if the given instance is a BDR primary, false otherwise.
 
-        Returns: Set of role names
-
+        At this stage, a BDR primary would not have "primary" in its role, so it
+        is a BDR instance that has none of the roles that would identify it as a
+        not-primary instance.
         """
-        return self._candidate_roles
-
-    @property
-    def _pemagent_candidate_roles(self):
-        """
-        Instance roles that should run PEM agent.
-
-        Returns: Set of role names
-
-        """
-        return self._candidate_roles.union({"primary"})
-
-    def _instance_roles(self, instance):
-        """Get the roles for an instance."""
-        ins_defs = self.args["instance_defaults"]
-        return set(instance.get("role", ins_defs.get("role", [])))
+        roles = self._instance_roles(instance)
+        return "bdr" in roles and not roles & self._readonly_bdr_roles
 
     def _update_instance_camo(self, instances):
         """
@@ -226,7 +217,7 @@ class BDR(Architecture):
             for instance in instances:
                 _vars = instance.get("vars", {})
                 if (
-                    self._camo_candidate_roles & self._instance_roles(instance)
+                    self._is_bdr_primary(instance)
                     and "bdr_node_camo_partner" not in _vars
                 ):
                     bdr_primaries.append(instance)
@@ -250,15 +241,14 @@ class BDR(Architecture):
         """
         Add pem-agent to instance roles where applicable.
 
-        If --enable-pem is specified, we collect all the instances with role
-        [primary, bdr, replica, readonly, witness, subscriber-only] and append
-        'pem-agent' role to the existing set of roles assigned to them. We later
-        add a dedicated 'pemserver' instance to host our PEM server.
+        If --enable-pem is specified, we add the 'pem-agent' role to BDR and
+        Barman instances, and add a dedicated 'pemserver' instance to host the
+        PEM server.
         """
         if self.args.get("enable_pem", False):
 
             for instance in instances:
-                if self._pemagent_candidate_roles & self._instance_roles(instance):
+                if "bdr" in self._instance_roles(instance):
                     instance["role"].append("pem-agent")
 
                 if "barman" in self._instance_roles(instance) and self.args.get(
