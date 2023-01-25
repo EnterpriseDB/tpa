@@ -87,7 +87,7 @@
   # exported into EDB_SUBSCRIPTION_TOKEN otherwise we can safely stop the run.
   - assert:
       msg: "PGD-Always-ON architecture requires you to export EDB_SUBSCRIPTION_TOKEN"
-      that: bdr_version is not version('5','>=')
+      that: bdr_version is not defined or bdr_version is not version('5','>=')
     tags: public_repos
 
   # To use 2ndQuadrant repositories (e.g., for 2ndQPostgres), get a
