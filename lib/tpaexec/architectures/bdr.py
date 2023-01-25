@@ -181,6 +181,14 @@ class BDR(Architecture):
         ins_defs = self.args["instance_defaults"]
         return set(instance.get("role", ins_defs.get("role", [])))
 
+    def _instance_location(self, instance):
+        """
+        Returns the location setting for the given instance, which may be
+        inherited from instance_defaults instead of being set on the instance.
+        """
+        ins_defs = self.args["instance_defaults"]
+        return instance.get("location", ins_defs.get("location"))
+
     @property
     def _readonly_bdr_roles(self):
         """
@@ -226,6 +234,13 @@ class BDR(Architecture):
             while idx + 1 < len(bdr_primaries):
                 a = bdr_primaries[idx]
                 b = bdr_primaries[idx + 1]
+
+                # Don't assign instances in different locations to be each
+                # other's partner, just skip this pair and see if there are
+                # other possible matches.
+                if self._instance_location(a) != self._instance_location(b):
+                    idx += 1
+                    continue
 
                 a_vars = a.get("vars", {})
                 a_vars["bdr_node_camo_partner"] = b.get("Name")
