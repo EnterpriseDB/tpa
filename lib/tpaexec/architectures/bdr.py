@@ -156,7 +156,8 @@ class BDR(Architecture):
         # The node group name used to be configurable, but it's now hardcoded to
         # match the cluster name, because harp/pgdcli/pgd-proxy depend on their
         # cluster name setting matching the node group name.
-        cluster_vars.update({"bdr_node_group": self.bdr_safe_name(self.cluster_name())})
+        self.args["bdr_node_group"] = self.bdr_safe_name(self.cluster_name())
+        cluster_vars.update({"bdr_node_group": self.args["bdr_node_group"]})
 
     def bdr_safe_name(self, name):
         """
