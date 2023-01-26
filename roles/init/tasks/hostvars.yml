@@ -68,7 +68,14 @@
 
   # EDB repositories now will be available via cloudsmith,
   # we need to ensure that the EDB cloudsmith token is defined
-  # as an environment variable.
+  # as an environment variable if we try to use any cloudsmith repo.
+  - assert:
+      msg: >
+        edb_repositories not defined, reverting to legacy token
+        verifications.
+      that:
+        edb_repositories is defined
+
   - assert:
       msg: >
         Export EDB_SUBSCRIPTION_TOKEN to use new edb_repositories
