@@ -25,7 +25,7 @@ cluster_vars:
 ```
 
 The example above would create two databases (apart from any databases
-that TPA itself decides to create, such as `bdr_database`.
+that TPA itself decides to create, such as `bdr_database`).
 
 Each entry must specify the `name` of the database to create. All
 other attributes are optional.
@@ -49,3 +49,7 @@ within each database (in addition to any extensions or languages
 inherited from the template database). Any packages required must be
 installed already, for example by including them in
 [`extra_postgres_packages`](postgres_installation_method_pkg.md).
+
+TPA will not drop existing databases that are not mentioned in
+`postgres_databases`, and it may create additional databases if required
+(e.g., for BDR).
