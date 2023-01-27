@@ -25,7 +25,7 @@
   vars:
     node_group_name: "{{ item.name }}"
     config_key: default_commit_scope
-    catalog_key: commit_scope
+    catalog_key: default_commit_scope
     config_value: "{{ scope_name }}"
     scope_name:
       "{{ item|try_subkey('options.default_commit_scope') }}"

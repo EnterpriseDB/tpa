@@ -216,6 +216,14 @@ class PGD_Always_ON(BDR):
             ]
         )
 
+        # Map BDR group names to a list of instances in the group.
+        bdr_primaries_by_group = {}
+        for i in instances:
+            if self._is_bdr_primary(i):
+                group = self._instance_bdr_group(i)
+                bdr_primaries_by_group.setdefault(group, [])
+                bdr_primaries_by_group[group].append(i)
+
         for instance in instances:
             role = self._instance_roles(instance)
             instance_vars = instance.get("vars", {})
@@ -249,6 +257,42 @@ class PGD_Always_ON(BDR):
                         }
                     )
 
+                # CAMO partners need special handling in BDRv5. We must create
+                # a commit scope for the group, and ensure that the group does
+                # not have more than two data nodes.
+
+                if "bdr_node_camo_partner" in instance_vars:
+                    cluster_vars = self.args["cluster_vars"]
+                    cluster_vars.setdefault("bdr_commit_scopes", [])
+
+                    group = instance_vars["bdr_child_group"]
+                    scope = f"camo"
+
+                    # Whichever is the first instance in the CAMO pair can
+                    # create the new commit scope.
+                    commit_scopes = [
+                        (s["name"], s["origin"])
+                        for s in cluster_vars["bdr_commit_scopes"]
+                    ]
+                    if (scope, group) not in commit_scopes:
+                        cluster_vars["bdr_commit_scopes"].append(
+                            {
+                                "name": scope,
+                                "origin": group,
+                                "rule": f"ALL ({group}) ON durable CAMO DEGRADE ON (timeout = 3600s) TO ASYNC",
+                            }
+                        )
+
+                    if len(bdr_primaries_by_group[group]) > 2:
+                        raise ArchitectureError(
+                            f"Cannot enable CAMO for node group {group} with >2 data nodes"
+                        )
+
+                    for g in cluster_vars["bdr_node_groups"]:
+                        if g["name"] == group:
+                            g.setdefault("options", {})
+                            g["options"]["default_commit_scope"] = scope
+
             # Proxy nodes may need some proxy-specific configuration.
             if "pgd-proxy" in role:
                 instance_vars.update(
@@ -268,6 +312,12 @@ class PGD_Always_ON(BDR):
 
             if instance_vars:
                 instance["vars"] = instance_vars
+
+    def _instance_bdr_group(self, instance):
+        """Returns the name of the node group that this instance is (or rather,
+        will be) a member of."""
+        v = instance.get("vars", {})
+        return v.get("bdr_child_group", self._sub_group_name(instance.get("location")))
 
     def _sub_group_name(self, loc):
         """
