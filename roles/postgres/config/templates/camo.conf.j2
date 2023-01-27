@@ -12,7 +12,7 @@ bdr.camo_partner_of = '{{ bdr_database }}:{{ hostvars[bdr_node_camo_partner].bdr
 {%   if bdr_version_num is defined and bdr_version_num < 30703 %}
 report_transaction_id = true
 pg2q.enable_camo = {{ enable_camo }}
-{%   else %}
+{%   elif bdr_version is version('5', '<') %}
 bdr.enable_camo = {{ enable_camo }}
 {%   endif %}
 {%   if bdr_version_num is defined and bdr_version_num >= 40000 %}

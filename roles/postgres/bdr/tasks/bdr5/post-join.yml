@@ -2,10 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-# Do whatever we need to do for CAMO setup in BDRv4.
-
-- include_tasks: bdr4/post-join.yml
-
 # Process any entries in bdr_node_groups for which 'enable_raft' is set.
 # Now that the group joins have been completed, we can enable subgroup
 # raft. (Disabling it once it's enabled is not supported by BDR.)
