@@ -24,7 +24,7 @@
 
 # Some extensions need entries in shared_preload_libraries.
 
-- name: Add shared_preload_libraries entries for postgres_extensions
+- name: Add shared_preload_libraries entries for extensions
   set_fact:
     shared_preload_libraries:
       "{{ shared_preload_libraries|default([])|union([item]) }}"
@@ -32,6 +32,7 @@
   when:
     item in postgres_extensions
     or (item == 'bdr' and 'bdr' in role)
+    or item in postgres_databases|json_query('[*].extensions[*].name|[]')
 
 - name: Add repmgr to shared_preload_libraries if required
   set_fact:
