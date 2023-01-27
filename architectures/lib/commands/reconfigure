@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+import sys
+
+# Ignore all warnings unless warning options are passed in via -W argument or the PYTHONWARNINGS env var
+if not sys.warnoptions:
+    import warnings
+
+    warnings.simplefilter("ignore")
+
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    """
+    Override exception handling for uncaught exceptions.
+
+    Used in replacement of the default handler in sys.excepthook
+
+    If an exception is raised replace the normal behaviour. Further interrogate the exception
+    class to see if it has a 'message' property, if so it's one of our custom exception classes.
+    In this case we format the error message with the custom message attribute from the exception class
+    first, then the values of exception instance's args attribute. e.g.
+
+        An error occurred during Platform processing.: Unknown platform: bogus
+
+    If the exception class is not one of ours print a generic formatted error with a full traceback.
+
+    Retain standard behaviour if Ctrl-C is pressed by just printing the traceback with the original
+    sys.__excepthook__().
+
+    Args:
+        exc_type: Exception type
+        exc_value: Exception value
+        exc_traceback: Exception traceback
+
+    """
+    # Pass through to original excepthook method if we see a keyboard interrupt (Ctrl-C)
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+    else:
+        # Construct a message based on the type of exception class instance (tpa or external)
+        message = getattr(
+            exc_value,
+            "MSG",
+            "Error during tpaexec reconfigure",
+        )
+        print(f'{message}: {", ".join((str(i) for i in exc_value.args))}', file=sys.stderr)
+        # If it's not one of our errors print a full stack trace as well
+        if not getattr(exc_value, "MSG", None):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        sys.exit(1)
+
+
+def main():
+    """Called when this file is executed as a script."""
+    sys.excepthook = handle_exception
+    from tpa.commands.reconfigure import reconfigure  # pylint: disable=import-outside-toplevel
+
+    reconfigure(sys.argv[1:])
+
+
+if __name__ == "__main__":
+    main()

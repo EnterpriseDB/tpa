@@ -231,13 +231,4 @@ test-output/
 workflow/
 
 coverage-reports/
-lib/tests/config/cluster-BDR/config.yml
-lib/tests/config/cluster-BDR/deploy.yml
-lib/tests/config/cluster-BDR/commands/pool-disable-server.sh
-lib/tests/config/cluster-BDR/commands/pool-disable-server.yml
-lib/tests/config/cluster-BDR/commands/pool-enable-server.sh
-lib/tests/config/cluster-BDR/commands/pool-enable-server.yml
-lib/tests/config/cluster-BDR/commands/update-postgres.yml
-lib/tests/config/cluster-PGD/config.yml
-lib/tests/config/cluster-PGD/deploy.yml
-lib/tests/config/cluster-PGD/commands/update-postgres.yml
+lib/tests/config/*

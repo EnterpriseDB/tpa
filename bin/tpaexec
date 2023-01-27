@@ -298,9 +298,11 @@ _with_ansible_env() {
 }
 
 configure() {
-    # Let lib/configure parse the arguments, determine which architecture and platform to use,
-    # and generate the cluster configuration into the target directory.
     _with_ansible_env "${TPA_DIR}/architectures/lib/configure" "$@"
+}
+
+reconfigure() {
+    _with_ansible_env "${TPA_DIR}/architectures/lib/commands/reconfigure" "$@"
 }
 
 provision() {
@@ -652,7 +654,7 @@ Next, try 'tpaexec help configure'
 SELFTEST
             ;;
 
-        *config*)
+        config*)
             cat <<CONFIG
 Command: tpaexec configure
 
@@ -693,6 +695,61 @@ Options:
 
 Docs: $TPA_DIR/docs/src/tpaexec-configure.md
 CONFIG
+            ;;
+
+        reconfigure)
+            cat <<RECONFIG
+Command: tpaexec reconfigure
+
+Changes the configuration of an existing cluster by modifying config.yml
+according to the options specified.
+
+At present, the only operation available is to upgrade a BDR-Always-ON
+cluster to a PGD-Always-ON cluster (i.e., going from BDR4 to PGD5).
+
+Synopsis:
+
+    tpaexec configure /path/to/clustername  \\
+        [--describe] [--output FILENAME]    \\
+        …options…
+
+    tpaexec reconfigure /path/to/clustername --help
+
+Example:
+
+    # Change an existing BDR-Always-ON cluster to PGD-Always-ON
+
+    tpaexec reconfigure clustername         \\
+        --architecture PGD-Always-ON        \\
+        --pgd-proxy-routing global
+
+Options:
+
+    --architecture NAME
+
+        Change the cluster's architecture. At present, PGD-Always-ON is
+        the only supported architecture
+
+    --describe
+
+        Describe what would be changed without changing anything
+
+    --check
+
+        Check the cluster configuration against the proposed changes,
+        and report any problems without changing anything
+
+    --output FILENAME
+
+        Write the modified config.yml to the given file, rather than
+        overwriting config.yml in-place
+
+    --help
+
+        Displays all other options available.
+
+Docs: $TPA_DIR/docs/src/tpaexec-reconfigure.md
+RECONFIG
             ;;
 
         provision)
@@ -1032,7 +1089,7 @@ case "$command" in
         help "$*"
         ;;
 
-    info|version|setup|configure|selftest)
+    info|version|setup|configure|reconfigure|selftest)
         $command "$@"
         ;;
 
