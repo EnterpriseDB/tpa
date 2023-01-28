@@ -50,6 +50,7 @@
       - 'commands/'
       - 'inventory/'
       - 'vault/'
+      - 'hooks/'
 
 - name: Add and commit files to git
   when: ansible_tower or tpaexec_initialised_cluster_git_repo
