@@ -1,56 +1,61 @@
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
-
-name: BlackDuck Scan
+###
+##  Foundation-security BlackDuck workflow 
+#
+name: Foundation-Security/Black Duck Scan
 
 on:
-  # Triggers the workflow on push request events but only for the master branch
-  pull_request:
-    branches:
-      - master
-  # Allows you to run this workflow manually from the Actions tab
+  push:
+    tags:        
+      - '**'
   workflow_dispatch:
 
 jobs:
-  scan:
-    if: >
-       !(startsWith(github.event.pull_request.head.ref, 'dependabot/'))
-    name: BlackDuck-scan
-    # The type of runner that the job will run on
+  Blackduck-Scan:
     runs-on: ubuntu-20.04
-
     steps:
-      - uses: actions/checkout@v3
+    - name: Checkout source repository
+      id: checkout-source
+      uses: actions/checkout@v3
 
-      - uses: ./.github/actions/install-requirements
-      - uses: ./.github/actions/tpaexec-setup
+    - name: Checkout foundation repository
+      id: checkout-foundation
+      uses: actions/checkout@v3
+      with:
+          repository: EnterpriseDB/foundation-packaging
+          ref: main
+          path: foundation
+          token: ${{secrets.GH_SLONIK}}
 
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: 8
+    - name: Set defaults
+      id: set-default
+      shell: bash
+      run: |
+        echo "foundation_scanning_blackduck_java-distribution=adopt" >> $GITHUB_ENV;
+        echo "foundation_scanning_blackduck_java-version=11" >> $GITHUB_ENV;
+        echo "foundation_scanning_blackduck_detect-version=8.2.0" >> $GITHUB_ENV;
+        echo "foundation_scanning_blackduck_scan-mode=INTELLIGENT" >> $GITHUB_ENV;
 
-
-      # -- Build your project here -- eg. mvn clean package
-      # -- Build with steps and requirements
-      - name: Synopsys Detect
-        uses: blackducksoftware/github-action@v2.2
-        with:
-          blackduck.url: "${{ secrets.BLACKDUCK_URL}}"
-          blackduck.api.token: "${{ secrets.BLACKDUCK_API_TOKEN}}"
-          args: '--detect.project.name="TPAexec" --detect.project.version.name="CI/CD" --detect.risk.report.pdf=true --detect.excluded.detector.types="npm,cpan,nuget,git,maven,lerna"'
-
-      - name: Check WD
-        run: pwd
-
-      # Runs a set of commands using the runners shell
-      - name: End of Scan
-        run: |
-          echo Finished scanning.
-
-      #- name: Slack Notification
-      #  uses: rtCamp/action-slack-notify@v2
-      #  env:
-      #    SLACK_MESSAGE: '${{ secrets.PRODUCT}} - ${{ secrets.VERSION}} blackduck scan finished from github action. ${{ secrets.BLACKDUCK_BDR_PROJECT_URL }}'
-      #    SLACK_TITLE: '${{ secrets.PRODUCT}} - ${{ secrets.VERSION}} BlackDuck Signature Scan'
-      #    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+    - name: Get foundation config
+      id: get-foundation-config
+      uses: ./foundation/actions/get/foundation-config
+      continue-on-error: true     
+        
+    - name: Set up JDK
+      id: setup-jdk
+      uses: actions/setup-java@v3
+      with:
+        distribution: ${{ env.foundation_scanning_blackduck_java-distribution }}
+        java-version: ${{ env.foundation_scanning_blackduck_java-version }}
+       
+    - name: Run Synopsys Detect
+      id: run-synopsys-detect
+      uses: synopsys-sig/detect-action@v0.3.3
+      env:
+        DETECT.PROJECT.VERSION.NAME: ${{ github.ref_type }}/${{ github.ref_name }}
+        DETECT.PROJECT.NAME: ${{ github.event.repository.name }}
+      with: 
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        blackduck-url: ${{ secrets.BLACKDUCK_URL }}
+        blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+        detect-version: ${{ env.foundation_scanning_blackduck_detect-version }}
+        scan-mode: ${{ env.foundation_scanning_blackduck_scan-mode }}
