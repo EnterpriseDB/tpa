@@ -58,7 +58,7 @@ All
 options translate to config.yml variables in
 some way. A single option may affect several variables (e.g.,
 `--bdr-version` could set `postgres_version`,
-`tpa_2q_repositories`, `extra_postgres_extensions`, and so on), but
+`tpa_2q_repositories`, `edb_repositories`, `extra_postgres_extensions`, and so on), but
 you can always accomplish with an editor what you could by running the
 command.
 

@@ -36,6 +36,9 @@ to execute tasks before any package repositories are configured.
 * [Configure 2ndQuadrant repositories](tpa_2q_repositories.md)
   (on any system)
 
+* [Configure EDB repositories](edb_repositories.md)
+  (on any system)
+
 * [Configure a local package repository](local-repo.md)
   (to ship packages to target instances)
 
