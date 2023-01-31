@@ -1,6 +1,29 @@
 # TPA release notes
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+## v23.11 (2023-01-31)
+
+### Notable changes
+
+- TPA-180 Introduce experimental support for PGD-Always-ON architecture (to be
+  released later this year).
+
+  PGD-Always-ON architecture will use the upcoming BDR version 5.
+  Initial support has been added for internal purposes and will be improved in
+  upcoming releases.
+
+### Minor changes
+
+- TPA-349 Bump dependency versions
+
+  Bump cryptography version from 38.0.4 to 39.0.0
+  
+  Bump jq version from 1.3.0 to 1.4.0
+
+- TPA-345 Change TPAexec references to TPA in documentation.
+
+  Update the documentation to use 'TPA' instead of 'TPAexec' when referring
+  to the product.
 
 ## v23.10 (2023-01-04)
 
