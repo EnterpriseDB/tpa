@@ -17,7 +17,10 @@
 - name: Retrieve existing BDR commit scopes
   postgresql_query:
     conninfo: "{{ dsn|dbname(bdr_database) }}"
-    query: SELECT * FROM bdr.commit_scopes
+    query: >
+      SELECT cs.*, g.node_group_name as origin_node_group
+      FROM bdr.commit_scopes cs
+      JOIN bdr.node_group g ON (commit_scope_origin_node_group=node_group_id)
   register: commit_scope_tuples
   become_user: "{{ postgres_user }}"
   become: yes
@@ -51,21 +54,21 @@
         |first|default({})
       }}
     op: >-
-      {{ (match is empty)|ternary('create', 'alter') }}
+      {{ (match is empty)|ternary('add', 'alter') }}
   with_items: "{{ bdr_commit_scopes }}"
   loop_control:
     label: >-
       {{ item.name }}
   when: >
     match is empty
-    or item.rule != match.rule
+    or item.rule != match.commit_scope_rule
   changed_when: true
 
 # Remove any existing commit scopes that are not mentioned in the
 # configuration.
 #
 # XXX This will fail if any of the commit scopes are used as the default
-# commit scope for a group, but we don't currently support that anyway.
+# commit scope for a group.
 
 - name: Remove unwanted BDR commit scopes
   postgresql_query:

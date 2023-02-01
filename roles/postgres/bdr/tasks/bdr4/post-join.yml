@@ -2,6 +2,18 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+- name: Configure BDR commit scopes (v4.1+ only)
+  include_tasks:
+    file: commit-scopes.yml
+    apply:
+      tags: commit-scopes
+  when:
+    bdr_commit_scopes|default([]) is not empty
+    and inventory_hostname == first_bdr_primary
+
+# XXX We don't handle setting default_commit_scope for groups in BDRv4
+# at present, since bdr.alter_node_group_option() is not available.
+
 - assert:
     msg: All CAMO pairs must be symmetric in BDR4+
     that:

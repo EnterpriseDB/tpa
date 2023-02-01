@@ -24,8 +24,8 @@
     label: >
       {{ node_group.name }}:{{ option.key }}:{{ option.value }}
   when:
-    # Some options are handled later in bdr5/post-join.yml
-    - option.key not in ["enable_raft", "enable_proxy_routing"]
+    # Some options are handled later in post-join.yml
+    - option.key not in ["enable_raft", "enable_proxy_routing", "default_commit_scope"]
     - this_group_facts is empty
       or catalog_key not in this_group_facts[0]
       or this_group_facts[0][catalog_key] != option.value

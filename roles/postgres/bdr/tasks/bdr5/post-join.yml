@@ -2,6 +2,43 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+- name: Configure BDR commit scopes (v4.1+ only)
+  include_tasks:
+    file: bdr4/commit-scopes.yml
+    apply:
+      tags: commit-scopes
+  when:
+    bdr_commit_scopes|default([]) is not empty
+    and inventory_hostname == first_bdr_primary
+
+# Set the default commit_scope for any groups that need it, now that the
+# commit scopes have been set up. (Note that setting the default commit
+# scope for a group is a CAMO-specific action, even though commit scopes
+# themselves are not.)
+
+- name: Set default commit scope for BDR node groups, if necessary
+  include_tasks: bdr5/alter_node_group_option.yml
+  with_items: "{{ bdr_node_groups }}"
+  loop_control:
+    label: >-
+      {{ item.name }}:{{ scope_name }}
+  vars:
+    node_group_name: "{{ item.name }}"
+    config_key: default_commit_scope
+    catalog_key: commit_scope
+    config_value: "{{ scope_name }}"
+    scope_name:
+      "{{ item|try_subkey('options.default_commit_scope') }}"
+    this_group_facts:
+      "{{ bdr_database_facts.bdr.node_group_summary
+          |selectattr('node_group_name', 'equalto', item.name)
+          |list }}"
+  when:
+    - inventory_hostname == first_bdr_primary
+    - "'default_commit_scope' in item.options|default({})"
+    - this_group_facts is empty
+      or this_group_facts[0][catalog_key] != scope_name
+
 # Process any entries in bdr_node_groups for which 'enable_raft' is set.
 # Now that the group joins have been completed, we can enable subgroup
 # raft. (Disabling it once it's enabled is not supported by BDR.)
