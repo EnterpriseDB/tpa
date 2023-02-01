@@ -31,6 +31,7 @@
   when: >
     'bdr' in role
     and 'primary' in role
+    and 'bdr' in cluster_facts.databases["template1"].extensions
     and dbs_with_unused_bdr_extension is not empty
 
 # We should drop the pglogical extension and schema from any database

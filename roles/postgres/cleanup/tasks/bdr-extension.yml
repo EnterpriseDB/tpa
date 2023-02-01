@@ -14,8 +14,18 @@
   loop_control:
     label: >-
       {{ item.key }}
+  vars:
+    this_db_config:
+      "{{ postgres_databases
+          |selectattr('name', 'equalto', item.key)
+          |list }}"
+    this_db_extensions:
+      "{{ this_db_config[0].extensions
+          |default([]) }}"
   when:
   - item.key != bdr_database
+    and (this_db_config is empty
+      or 'bdr' not in this_db_extensions|json_query('[*].name'))
   - item.value.bdr is defined
   - item.value.bdr.node is empty
   become_user: "{{ postgres_user }}"
