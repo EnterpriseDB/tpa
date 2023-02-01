@@ -29,9 +29,9 @@
   pause:
     prompt: |-
 
-      TPAexec needs access to an S3 bucket to provision this cluster.
+      TPA needs access to an S3 bucket to provision this cluster.
 
-      TPAexec can create a bucket named {{ cluster_bucket }} for you now.
+      TPA can create a bucket named {{ cluster_bucket }} for you now.
 
       To use an existing bucket, set `cluster_bucket: name-of-bucket` in config.yml
       (or configure your cluster with `--cluster-bucket name-of-bucket`). If you want
@@ -39,7 +39,7 @@
 
           aws s3 mb s3://name-of-bucket --region {{ aws_regions[0] }}
 
-      TPAexec will never remove any S3 buckets when you deprovision the cluster. To remove
+      TPA will never remove any S3 buckets when you deprovision the cluster. To remove
       the bucket yourself, run: `aws s3 rb s3://name-of-bucket --force`
 
       To create an S3 bucket named {{ cluster_bucket }} now, type "yes"

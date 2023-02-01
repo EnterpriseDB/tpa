@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 #
-# The dispatcher for all TPAexec functionality, including initial setup,
+# The dispatcher for all TPA functionality, including initial setup,
 # and the configuration, provision, deployment, and testing of clusters.
 
 IFS=$' \t\n'
@@ -124,7 +124,7 @@ _install_tpaexec_pth() {
     # to the PYTHONPATH when the venv is activated.
 
     # This allows us to use "import tpaexec" in the Ansible modules,
-    # without having to install TPAexec itself into the venv.
+    # without having to install TPA itself into the venv.
 
     if [[ $(_detect_venv) == "venv" ]]; then
         echo  "Add $TPA_DIR/lib to the PYTHONPATH"
@@ -266,7 +266,7 @@ _display_notification() {
     if [[ $use_community == false ]]; then
         cat <<NOTIFICATION
 
-TPAexec now supports ansible community, you may choose to use it by
+TPA now supports ansible community, you may choose to use it by
 using --use-community-ansible option during setup, default will be to use the
 legacy 2ndQuadrant/ansible fork. This will change in a future release,
 support for 2ndQuadrant/ansible will be dropped and community ansible will
@@ -276,7 +276,7 @@ notable difference:
     - change the --skip-flags options to community behavior where a
     task will be skipped if part of the list given to the --skip-tag
     option even if it is also tagged with special tag 'always'.
-    TPAexec expects all tasks tagged with 'always' to be run to ensure
+    TPA expects all tasks tagged with 'always' to be run to ensure
     a complete deployment, therefor --skip-tags should not be used when
     using community ansible.
 
@@ -598,7 +598,7 @@ Available info subcommands:
         Displays some information about this installation
 
     tpaexec info version
-        Displays current TPAexec version
+        Displays current TPA version
 
     tpaexec info platforms
         Displays available deployment platforms
@@ -637,7 +637,7 @@ SETUP
             cat <<SELFTEST
 Command: tpaexec selftest
 
-Performs some tests to verify that TPAexec is installed correctly.
+Performs some tests to verify that TPA is installed correctly.
 SELFTEST
             ;;
 

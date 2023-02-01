@@ -3,7 +3,7 @@ FROM ${BASE_IMAGE}
 ENV container docker
 #
 # This image won't shutdown on SIGTERM. It expects the custom stop signal
-# RTMIN+3 per systemd requirements. TPAexec will set this automatically and
+# RTMIN+3 per systemd requirements. TPA will set this automatically and
 # 'docker stop' knows to use it. But declare it in the image itself to be
 # extra clear.
 #

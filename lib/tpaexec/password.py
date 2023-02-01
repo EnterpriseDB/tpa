@@ -7,7 +7,7 @@ from passlib import pwd
 
 def generate_password():
     """
-    Generates a password for use within TPAexec.
+    Generates a password for use within TPA.
 
     This function takes no arguments and returns a string containing a password
     that is suitable for use as a database password, or as needed elsewhere for

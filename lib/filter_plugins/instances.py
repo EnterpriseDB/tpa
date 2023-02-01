@@ -43,7 +43,7 @@ def ip_addresses(instance):
 
 def deploy_ip_address(instance):
     """
-    Returns the IP address that TPAexec should use to ssh to an instance.
+    Returns the IP address that TPA should use to ssh to an instance.
 
     The public_ip, ip_address, and private_ip are used in order of decreasing preference.
 

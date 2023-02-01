@@ -17,7 +17,7 @@ target_repo_config:
     path: /etc/yum.repos.d/{{ target_repo_name }}.repo
     content: |
       [{{ target_repo_name }}]
-      name=Local repository (set up by TPAexec)
+      name=Local repository (set up by TPA)
       baseurl=file://{{ target_repo_dir }}
       gpgcheck=0
       enabled=1

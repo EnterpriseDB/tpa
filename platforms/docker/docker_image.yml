@@ -6,7 +6,7 @@
 # does not exist locally, we must now do whatever is required to provide
 # it, or fail with an error.
 #
-# At present, TPAexec expects containers to run systemd. Most upstream
+# At present, TPA expects containers to run systemd. Most upstream
 # images are not set up to do this, so we need to build systemd-enabled
 # Docker images for supported distributions.
 #
@@ -24,7 +24,7 @@
 # In this example, we run `docker build` in images/image-final to build
 # an image named 'some/image:ver'.
 #
-# You can also build your own image and have TPAexec add in the required
+# You can also build your own image and have TPA add in the required
 # systemd-specific parts. For example:
 #
 #     docker_images:

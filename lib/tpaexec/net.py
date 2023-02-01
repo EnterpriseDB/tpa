@@ -39,7 +39,7 @@ class Network:
         self._subnets = None
 
     def subnets(self, limit=1):
-        """Generate subnets for use with TPAexec."""
+        """Generate subnets for use with TPA."""
         return Subnets(self.net.with_prefixlen, limit, self.subnet_prefix)
 
     def overlaps(self, other):

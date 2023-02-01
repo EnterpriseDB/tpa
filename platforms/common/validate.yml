@@ -2,18 +2,18 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-# If TPAexec was installed from an OS package (deb, rpm) then we should have the VERSION file in the
+# If TPA was installed from an OS package (deb, rpm) then we should have the VERSION file in the
 # root of the installation directory at `tpa_dir`.
 # Otherwise, if the source code from git was cloned then we should be able to show the last tag
 # Either of these two commands should provide output if we're in a valid installation source.
 
-- name: Determine TPAexec version from installation source
+- name: Determine TPA version from installation source
   block:
     - assert:
         that: >
           tpa_file_version or tpa_git_version
         msg: >
-          Unsupported installation method. Please install a TPAexec package from the
+          Unsupported installation method. Please install a tpaexec package from the
           EDB repository (https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/),
           or run it from a clone of the source code repository
     - set_fact:
@@ -128,11 +128,11 @@
         instances|find_replica_tablespace_mismatches
       }}"
 
-# If TPAexec ran `git init` within this cluster_dir, we bail out if any
+# If TPA ran `git init` within this cluster_dir, we bail out if any
 # committed files are modified (except config.yml, which we are prepared
 # to commit along with generated changes).
 
-- name: Determine if TPAexec initialised a git repository in cluster_dir
+- name: Determine if TPA initialised a git repository in cluster_dir
   shell: >
     if command -v git &>/dev/null && test -d .git; then
       if git rev-parse HEAD &>/dev/null; then
@@ -148,7 +148,7 @@
 - set_fact:
     tpaexec_initialised_cluster_git_repo: "{{
         git_repo_note.stdout_lines is not empty
-        and git_repo_note.stdout_lines[0].startswith('Created by TPAexec')
+        and git_repo_note.stdout_lines[0].startswith('Created by TPA')
       }}"
 
 - name: Check for uncommitted changes

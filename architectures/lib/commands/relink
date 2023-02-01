@@ -11,7 +11,7 @@ Tries to repair any dangling symbolic links within a cluster directory
 appropriate. (TPA_DIR=%s)
 
 This command is useful if a cluster was configured on one machine and
-then moved to another with TPAexec installed in a different location,
+moved to another system with TPA installed in a different location,
 or to add links for new commands."""
         % os.environ.get("TPA_DIR", "<unset>")
     )
@@ -73,7 +73,7 @@ for subdir, dirs, files in os.walk("."):
 
 # Create links to any new commands or tests for this cluster's architecture.
 # (The cluster configuration may have been generated long before the current
-# TPAexec release.)
+# TPA release.)
 
 with open(r"./config.yml") as config_file:
     try:

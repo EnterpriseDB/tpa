@@ -76,7 +76,7 @@ append "-minimal" to the label, e.g., "Debian-minimal".
 
 For brevity, you can also use ``--os`` instead of ``--distribution``.
 
-This option is not meaningful for the "bare" platform, where TPAexec has
+This option is not meaningful for the "bare" platform, where TPA has
 no control over what distribution is installed.
 
 ## 2ndQuadrant repositories

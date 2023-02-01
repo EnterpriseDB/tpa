@@ -35,7 +35,7 @@ export ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-$TPA_DIR/ansible/hosts}
 # Append our directories to various search paths.
 #
 # In exceptional situations, this allows you to do things like set
-# ANSIBLE_ROLES_PATH to override a specific TPAexec-provided role.
+# ANSIBLE_ROLES_PATH to override a specific TPA-provided role.
 
 export ANSIBLE_LIBRARY=${ANSIBLE_LIBRARY:+$ANSIBLE_LIBRARY:}$TPA_DIR/library
 export ANSIBLE_ROLES_PATH=${ANSIBLE_ROLES_PATH:+$ANSIBLE_ROLES_PATH:}$TPA_DIR/roles

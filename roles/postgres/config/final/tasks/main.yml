@@ -6,7 +6,7 @@
 # desired attributes and passwords.
 #
 # The entries in postgres_users may be specified in config.yml, or come
-# from invocations of postgres/createuser by other roles in TPAexec (to
+# from invocations of postgres/createuser by other roles in TPA (to
 # create, for example, the users required by repmgr or barman).
 #
 # postgres_users:

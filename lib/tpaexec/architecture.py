@@ -1168,7 +1168,7 @@ class Architecture(object):
 
         try:
             subprocess.run(
-                ["git", "notes", "add", "-m", "Created by TPAexec"],
+                ["git", "notes", "add", "-m", "Created by TPA"],
                 cwd=self.cluster,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
