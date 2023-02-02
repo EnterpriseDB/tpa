@@ -196,34 +196,34 @@ append "-minimal" to the label, e.g., "Debian-minimal".
 This option is not meaningful for the "bare" platform, where TPA has
 no control over which distribution is installed.
 
-### 2ndQuadrant repositories
+### 2ndQuadrant and EDB repositories
 
-TPA can enable any 2ndQuadrant software repository that you have
-access to through the 2ndQuadrant Portal subscription mechanism.
+TPA can enable any 2ndQuadrant or EDB software repository that you have
+access to through a subscription.
 
 By default, it will install the 2ndQuadrant public repository (which
 does not need a subscription) and add on any product repositories that
 the architecture may require (e.g., the BDR repository).
 
-Use `--2Q-repositories source/name/maturity …`
-to specify the complete list of 2ndQuadrant repositories to install on
-each instance in addition to the 2ndQuadrant public repository. Use this
-option with care. TPA will configure the named repositories with no
-attempt to make sure the combination is appropriate.
+More detailed explanation of how TPA uses 2ndQuadrant and EDB
+repositories is available [here](2q_and_edb_repositories.md)
 
-To use product repositories, you must first
-`export TPA_2Q_SUBSCRIPTION_TOKEN=xxx` before you run tpaexec. You can
-get your subscription token from the 2ndQuadrant Portal, under "Company
-info" in the left menu, then "Company".
+Specify ``--2Q-repositories source/name/maturity …`` or
+``--edb-repositories repository …`` to specify the complete list of
+2ndQuadrant or EDB repositories to install on each instance in addition
+to the 2ndQuadrant public repository.
 
-### EDB repositories
+If any EDB repositories are specified, any 2ndQuadrant ones will be
+ignored.
 
-In order to install software from EDB's APT and YUM repositories
-you must first `export EDB_REPO_CREDENTIALS_FILE=/path/to/credentials/file`
-before you run tpaexec. Credentials file is a text file that contains your
-access credentials in the `username:password` format. If you don't have them
-already, you can get your access credentials by registering for access at
-https://www.enterprisedb.com/user/register?destination=/repository-access-request
+Use this option with care. TPA will configure the named repositories
+with no attempt to make sure the combination is appropriate.
+
+To use these options, you must ``export TPA_2Q_SUBSCRIPTION_TOKEN=xxx``
+or ``export EDB_SUBSCRIPTION_TOKEN=xxx`` before you run tpaexec. 
+You can get a 2ndQuadrant token from the 2ndQuadrant Portal under
+"Company info" in the left menu, then "Company". You can get an EDB
+token from enterprisedb.com/repos.
 
 ### Local repository support
 
