@@ -1,8 +1,15 @@
 # How TPA uses 2ndQuadrant and EDB repositories
 
-This page explains the different package sources from which TPA can
-download software, how the source varies depending on the selected
-software and how to configure access to each source.
+This page explains the package sources from which TPA can download EDB
+(including 2ndQuadrant) software, how the source varies depending on the
+selected software, and how to configure access to each source.
+
+Note that this page only describes the special configuration options and
+logic for EDB and 2ndQuadrant sources. Arbitrary
+[yum](yum_repositories.md) or [apt](apt_repositories.md) repositories
+can be added independently of the logic described here. Likewise,
+packages can be [downloaded in advance](tpaexec-download-packages.md)
+and added to a [local repository](local-repo.md) if preferred.
 
 ## Package sources used by TPA
 
@@ -94,8 +101,12 @@ This example will install the pglogical3 and bdr3 release repositories.
 On Debian and Ubuntu systems, it will use the APT repository, and on
 RedHat systems, it will use the YUM repository.
 
-
 The `dl/default/release` repository is always installed by default,
-unless you explicitly set `tpa_2q_repositories: []` so as to not
-configure any 2ndQuadrant repositories at all.
+unless you 
+
+- explicitly set `tpa_2q_repositories: []`, or
+- have at least one entry in `edb_repositories`.
+
+Either or the above will result in no 2ndQuadrant repositories being
+installed.
 

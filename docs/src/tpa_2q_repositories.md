@@ -29,5 +29,9 @@ Portal, under "Company info" in the left menu, then "Company". Some
 repositories are available only by prior arrangement.
 
 The `dl/default/release` repository is always installed by default,
-unless you explicitly set `tpa_2q_repositories: []` so as to not
-configure any 2ndQuadrant repositories at all.
+unless you 
+
+- explicitly set `tpa_2q_repositories: []`, or
+- have at least one entry in `edb_repositories`.
+
+Either or the above will result in no 2ndQuadrant repositories being installed.
