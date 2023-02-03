@@ -10,6 +10,25 @@ from ..exceptions import AWSPlatformError
 AWS_DEFAULT_INSTANCE_TYPE = "t3.micro"
 AWS_DEFAULT_REGION = "eu-west-1"
 AWS_DEFAULT_VOLUME_DEVICE_NAME = "/dev/xvd"
+AWS_ZONES_PER_REGION = {
+    "ap-northeast-1": ["a", "b", "c", "d"],
+    "ap-northeast-2": ["a", "b", "c", "d"],
+    "ap-northeast-3": ["a", "b", "c"],
+    "ap-south-1": ["a", "b", "c"],
+    "ap-southeast-1": ["a", "b", "c"],
+    "ap-southeast-2": ["a", "b", "c"],
+    "ca-central-1": ["a", "b", "d"],  # !!!
+    "eu-central-1": ["a", "b", "c"],
+    "eu-north-1": ["a", "b", "c"],
+    "eu-west-1": ["a", "b", "c"],
+    "eu-west-2": ["a", "b", "c"],
+    "eu-west-3": ["a", "b", "c"],
+    "sa-east-1": ["a", "b", "c"],
+    "us-east-1": ["a", "b", "c", "d", "e", "f"],
+    "us-east-2": ["a", "b", "c"],
+    "us-west-1": ["a", "b", "c"],
+    "us-west-2": ["a", "b", "c", "d"],
+}
 
 
 class aws(CloudPlatform):
@@ -19,12 +38,26 @@ class aws(CloudPlatform):
         self.preferred_python_version = "python3"
 
     @property
+    def zones_per_region(self):
+        return AWS_ZONES_PER_REGION
+
+    @property
     def default_volume_device_group(self):
         return AWS_DEFAULT_VOLUME_DEVICE_NAME
 
     def add_platform_options(self, p, g):
         if self.arch.name != "Images":
-            g.add_argument("--region", default=AWS_DEFAULT_REGION)
+            region_group = g.add_mutually_exclusive_group()
+            region_group.add_argument(
+                "--region",
+                default=AWS_DEFAULT_REGION,
+                choices=self.zones_per_region.keys(),
+            )
+            region_group.add_argument(
+                "--regions",
+                choices=self.zones_per_region.keys(),
+                nargs="+",
+            )
         g.add_argument(
             "--instance-type", default=AWS_DEFAULT_INSTANCE_TYPE, metavar="TYPE"
         )
@@ -186,36 +219,16 @@ class aws(CloudPlatform):
         if args["owner"] is not None:
             cluster_tags["Owner"] = cluster_tags.get("Owner", args["owner"])
 
-    zones_per_region = {
-        "ap-northeast-1": ["a", "b", "c", "d"],
-        "ap-northeast-2": ["a", "b", "c", "d"],
-        "ap-northeast-3": ["a", "b", "c"],
-        "ap-south-1": ["a", "b", "c"],
-        "ap-southeast-1": ["a", "b", "c"],
-        "ap-southeast-2": ["a", "b", "c"],
-        "ca-central-1": ["a", "b", "d"],  # !!!
-        "eu-central-1": ["a", "b", "c"],
-        "eu-north-1": ["a", "b", "c"],
-        "eu-west-1": ["a", "b", "c"],
-        "eu-west-2": ["a", "b", "c"],
-        "eu-west-3": ["a", "b", "c"],
-        "sa-east-1": ["a", "b", "c"],
-        "us-east-1": ["a", "b", "c", "d", "e", "f"],
-        "us-east-2": ["a", "b", "c"],
-        "us-west-1": ["a", "b", "c"],
-        "us-west-2": ["a", "b", "c", "d"],
-    }
-
     def update_locations(self, locations, args, **kwargs):
-        region = args.get("region")
+        regions = args.get("regions")
         subnets = args["subnets"]
         for li, location in enumerate(locations):
             location["subnet"] = location.get("subnet", subnets[li])
-            region = location.get("region", region)
+            region = regions[li % len(regions)]
             if region:
                 location["region"] = region
                 azs = self.zones_per_region[region]
-                az = region + azs[li % len(azs)]
+                az = region + azs[(li // len(regions)) % len(azs)]
                 location["az"] = location.get("az", az)
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
@@ -228,13 +241,36 @@ class aws(CloudPlatform):
 
     def update_instances(self, instances, args, **kwargs):
         for instance in instances:
-
             self.update_barman_instance_volume(self.arch, args, instance)
+
+    def validate_arguments(self, args):
+        """
+        Validate aws specific arguments
+        """
+
+        # ensure regions given are not duplicated.
+        if args["regions"]:
+            args["regions"] = list(dict.fromkeys(args["regions"]))
+            if len(args["regions"]) > 1:
+                print(
+                    """Warning:
+When using multiple regions you MUST manually edit config.yml to ensure that
+`ec2_vpc` `cidr` don't overlap to allow vpc peering between regions.
+`cluster_rules` and `locations` `subnet` values must all be changed
+accordingly.
+
+VPC peering must be setup manually after `tpaexec provision` is run.
+                    """
+                )
+        else:
+            args["regions"] = [args.get("region")]
 
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}
+        ec2_vpc = {}
+        for region in args["regions"]:
+            ec2_vpc[region] = {"Name": "Test", "cidr": str(self.arch.net)}
 
-        ec2_vpc = {"Name": "Test", "cidr": str(self.arch.net)}
         ec2_vpc.update(args.get("ec2_vpc", {}))
         s["ec2_vpc"] = ec2_vpc
 
