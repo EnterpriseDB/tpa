@@ -1,7 +1,7 @@
 cluster:
   name: {{ pgd_cluster_name }}
   endpoints:
-{%  for h in groups[bdr_node_group] %}
+{%  for h in groups[bdr_node_group]|sort %}
 {%    set v = hostvars[h] %}
     - "{{ v.bdr_node_route_dsn }}"
 {%  endfor %}
