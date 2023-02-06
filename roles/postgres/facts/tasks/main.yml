@@ -81,3 +81,4 @@
           ('replica' in role)|ternary('replica',
             'other'))
       }}"
+  changed_when: false

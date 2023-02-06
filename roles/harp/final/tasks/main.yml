@@ -37,6 +37,7 @@
 
     - group_by:
         key: "{{ harp_location_group }}"
+      changed_when: false
 
     - name: Initialise cluster with harpctl apply
       command: "harpctl apply {{ harp_directory }}/harp.cluster.init.yml"

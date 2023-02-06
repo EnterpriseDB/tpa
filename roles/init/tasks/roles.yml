@@ -23,6 +23,7 @@
   - pem-server
   - openvpn-server
   - monitoring-server
+  changed_when: false
 
 # If an instance has 'log-server' in its role, we set it as the default
 # log_server for every other instance.
@@ -146,12 +147,14 @@
   group_by:
     key: "role_{{ item }}"
   with_items: "{{ role }}"
+  changed_when: false
 
 - name: Create group(s) based on the value of bdr_node_group
   group_by:
     key: "{{ bdr_node_group }}"
   when:
     role|contains('bdr', 'primary')
+  changed_when: false
 
 - name: Enumerate instances eligible to become first_bdr_primary
   set_fact:

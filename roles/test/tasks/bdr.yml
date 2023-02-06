@@ -24,6 +24,7 @@
     group_by:
       key: "{{ camo_node_group }}"
     when: camo_node_group is defined
+    changed_when: false
 
   - set_fact:
       all_camo_groups: "{{ groups.keys()|select('startswith', 'camo_')|list }}"

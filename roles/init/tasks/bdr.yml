@@ -89,3 +89,4 @@
     key: "role_etcd"
   when: >
     'etcd' in role
+  changed_when: false

@@ -652,3 +652,4 @@
     key: "role_efm"
   when: >
     'efm' in role
+  changed_when: false
