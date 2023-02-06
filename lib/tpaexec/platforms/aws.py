@@ -257,7 +257,7 @@ class aws(CloudPlatform):
 When using multiple regions you MUST manually edit config.yml to ensure that
 `ec2_vpc` `cidr` don't overlap to allow vpc peering between regions.
 `cluster_rules` and `locations` `subnet` values must all be changed
-accordingly.
+accordingly. See documentation https://documentation.enterprisedb.com/tpa/release/latest/platform-aws/#regions
 
 VPC peering must be setup manually after `tpaexec provision` is run.
                     """

@@ -146,6 +146,31 @@ permit access.
 Here's a brief description of the AWS-specific settings that you can
 specify via `tpaexec configure` or define directly in config.yml.
 
+### Regions
+
+You can specify one or more regions for the cluster to use with `--region` or
+`--regions`. TPA will generate the required vpc entries associated to each of
+them and distribute locations into these regions evenly by using different
+availability zones while possible.
+
+`regions` are differents from `locations`, each location belongs to a region
+(and an availability zone inside this region). `regions` are AWS specific
+objects, `locations` are cluster objects.
+
+Note: When specifying multiple regions, you need to manually edit network
+configurations:
+  - `ec2_vpc` entries must have non-overlaping cidr networks to allow use of
+  AWS vpc peering. by default TPA will set all cidr to `10.33.0.0/16`.
+  See [VPC](#vpc-required) for more informations.
+  - each `location` must be updated with `subnet` that match the `ec2_vpc`
+  `cidr` they belong to. See [Subnets](#subnets-optional) for more informations.
+  - TPA creates security groups with basic rules under `cluster_rules` and
+  those need to be updated to match `ec2_vpc` cidr for each `subnet` cidr.
+  see [Security groups](#security-groups-optional) for more informations.
+  - VPC peering must be setup manually before `tpaexec deploy`. We recommand
+  creating VPCs and required VPC peerings before running `tpaexec configure`
+  and using `vpc-id` in config.yml. See [VPC](#vpc-required) for more informations.
+
 ### VPC (required)
 
 You must specify a VPC to use:
