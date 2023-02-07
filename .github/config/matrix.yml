@@ -30,6 +30,7 @@ simple:
     - "pgextended"
     - "epas"
     - "postgresql"
+    - "edbpge"
   exclude:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "pgextended"
@@ -37,6 +38,8 @@ simple:
       tpa_postgres_flavour: "postgresql"
     - tpa_architecture: "PGD-Always-ON"
       tpa_postgres_flavour: "postgresql"
+    - tpa_architecture: "M1"
+      tpa_postgres_flavour: "edbpge"
 update_bdr:
   tpa_architecture:
     - "BDR-Always-ON"

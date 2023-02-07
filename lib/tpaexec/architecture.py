@@ -204,9 +204,16 @@ class Architecture(object):
             help="Install Postgres Extended (formerly 2ndQuadrant Postgres) for BDR EE",
         )
         g.add_argument(
+            "--edbpge",
+            action="store_const",
+            const="edbpge",
+            dest="postgresql_flavour",
+            help="Install EDB Postgres Extended",
+        )
+        g.add_argument(
             "--postgres-flavour",
             dest="postgresql_flavour",
-            choices=["pgextended", "epas", "postgresql"],
+            choices=["pgextended", "epas", "postgresql", "edbpge"],
         )
         g.add_argument(
             "--postgres-version",
@@ -856,12 +863,21 @@ class Architecture(object):
 
         given_repositories = " ".join(edb_repositories)
 
+        # XXX We are using standard, dev_postgres_extended and dev_postgres_distributed
+        #     while we are still testing and corresponding production repos ain't available.
+        #     This needs to change before we release PGE and BDR5 support.
+        if postgresql_flavour == "postgresql" and "standard" not in given_repositories:
+            edb_repositories.append("standard")
+        if postgresql_flavour == "edbpge" and "standard" not in given_repositories:
+            edb_repositories.append("standard")
+        if postgresql_flavour == "pgextended" and "dev_postgres_extended" not in given_repositories:
+            edb_repositories.append("dev_postgres_extended")
+
         if bdr_version == "5":
-            if not edb_repositories or "postgres_extended" not in given_repositories:
-                edb_repositories.append("dev_postgres_extended")
             if "postgres_distributed" not in given_repositories:
                 edb_repositories.append("dev_postgres_distributed")
-            edb_repositories.append("enterprise")
+            if "enterprise" not in given_repositories:
+                edb_repositories.append("enterprise")
 
         if edb_repositories:
             cluster_vars.update(

@@ -13,8 +13,10 @@
 - name: Set postgres_family and postgresql_flavour
   set_fact:
     postgresql_flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
-    postgres_family: "{{ (_flavour == 'epas')|ternary('epas', 'postgresql') }}"
-    postgres_family_extended: "{{ (_flavour == 'pgextended')|ternary('pgextended', _flavour) }}"
+    postgres_family: "{{ 'edbpge' if _flavour == 'edbpge'
+                          else 'epas' if _flavour == 'epas'
+                          else 'postgresql' }}"
+    postgres_family_extended: "{{ (_flavour == 'pgextended' or _flavour == 'edbpge')|ternary('pgextended', _flavour) }}"
   vars:
     _flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
 
@@ -22,9 +24,9 @@
   assert:
     msg: >-
       Unrecognised postgresql_flavour setting: '{{ postgresql_flavour }}'
-      (try postgresql, pgextended, or epas)
+      (try postgresql, pgextended, epas or edbpge)
     that:
-      - postgresql_flavour in ['postgresql', 'pgextended', 'epas', 'postgresql-bdr']
+      - postgresql_flavour in ['postgresql', 'pgextended', 'epas', 'postgresql-bdr', 'edbpge']
 
 - name: Set postgres_data_dir
   set_fact:
@@ -110,7 +112,8 @@
     postgres_package_name: "{{
         'postgresql' if postgresql_flavour in ['postgresql', 'pgextended'] else
         'postgresql-bdr' if postgresql_flavour == 'postgresql-bdr' else
-        'edb-as' if postgres_family == 'epas' else ''
+        'edb-as' if postgres_family == 'epas' else
+        'edb-postgresextended' if postgresql_flavour == 'edbpge' else ''
       }}"
     postgres_user: "{{ postgres_user|default(default_postgres_user[postgres_family]) }}"
     postgres_group: "{{ postgres_group|default(default_postgres_user[postgres_family]) }}"

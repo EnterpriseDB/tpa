@@ -29,6 +29,17 @@ postgres_packages:
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-devel"
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-plperl"
     Ubuntu: *debian_epas_packages
+  edbpge:
+    Debian: &debian_edbpge_packages
+      - "{{ postgres_package_name }}-{{ postgres_version }}"
+      - "{{ postgres_package_name }}-server-dev-{{ postgres_version }}"
+      - "{{ postgres_package_name }}-plperl-{{ postgres_version }}"
+    RedHat:
+      - "{{ postgres_package_name }}{{ postgres_versionNN }}-contrib"
+      - "{{ postgres_package_name }}{{ postgres_versionNN }}-server"
+      - "{{ postgres_package_name }}{{ postgres_versionNN }}-libs"
+      - "{{ postgres_package_name }}{{ postgres_versionNN }}-plperl"
+    Ubuntu: *debian_edbpge_packages
 
 postgres_client_packages:
   postgresql:
@@ -42,6 +53,12 @@ postgres_client_packages:
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-client"
     RedHat: *all_epas_client_packages
     Ubuntu: *all_epas_client_packages
+  edbpge:
+    Debian: &debian_edbpge_client_packages
+      - "{{ postgres_package_name }}-client-{{ postgres_version }}"
+    RedHat:
+      - "{{ postgres_package_name }}{{ postgres_versionNN }}"
+    Ubuntu: *debian_edbpge_client_packages
 
 postgres_debug_packages:
   postgresql:
@@ -54,6 +71,12 @@ postgres_debug_packages:
     Debian: &all_epas_debug_packages []
     RedHat: *all_epas_debug_packages
     Ubuntu: *all_epas_debug_packages
+  edbpge:
+    Debian: &debian_edbpge_debug_packages
+      - "{{ postgres_package_name }}-{{ postgres_version }}-dbgsym"
+    RedHat:
+      - "{{ postgres_package_name }}{{ postgres_versionNN }}-debuginfo"
+    Ubuntu: *debian_edbpge_debug_packages
 
 pglogical_packages:
   postgresql:
@@ -68,6 +91,12 @@ pglogical_packages:
     RedHat:
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-pglogical"
     Ubuntu: *debian_epas_pglogical_packages
+  edbpge:
+    Debian: &debian_edbpge_pglogical_packages
+      - postgresql-{{ postgres_version }}-pglogical
+    RedHat:
+      - postgresql{{ postgres_versionNN }}-pglogical
+    Ubuntu: *debian_edbpge_pglogical_packages
 
 pglogical_debug_packages:
   postgresql:
@@ -82,6 +111,12 @@ pglogical_debug_packages:
     RedHat:
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-pglogical-debuginfo"
     Ubuntu: *debian_epas_pglogical_debug_packages
+  edbpge:
+    Debian: &debian_edbpge_pglogical_debug_packages
+      - postgresql-{{ postgres_version }}-pglogical-dbgsym
+    RedHat:
+      - postgresql{{ postgres_versionNN }}-pglogical-debuginfo
+    Ubuntu: *debian_edbpge_pglogical_debug_packages
 
 bdr_packages:
   postgresql:
@@ -193,3 +228,6 @@ default_postgres_service_names:
   epas:
     Debian: edb-as
     RedHat: "edb-as-{{ postgres_version }}"
+  edbpge:
+    Debian: "edb-pge-{{ postgres_version }}"
+    RedHat: "edb-pge-{{ postgres_version }}"
