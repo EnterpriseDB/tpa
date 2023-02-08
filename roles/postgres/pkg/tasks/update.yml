@@ -29,6 +29,20 @@
     'bdr' in role
     and bdr_version is version('4', '>=')
 
+- name: Fetch BDR4-related packages
+  include_tasks: list-bdr-packages.yml
+  vars:
+    list_varname: _all_bdr4_packages
+    bdr_version: 4
+
+- name: Remove BDR4-related packages when bdr_version is 5
+  package:
+    name: "{{ _all_bdr4_packages|default([]) }}"
+    state: absent
+  when: >
+    'bdr' in role
+    and bdr_version is version('5', '>=')
+
 - name: Install latest Postgres packages
   package:
     name: "{{ _all_postgres_packages }}"
