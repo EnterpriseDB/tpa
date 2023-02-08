@@ -44,7 +44,7 @@
           except:
               pass
   delegate_to: "{{ this_barman }}"
-  become_user: barman
+  become_user: "{{ barman_user }}"
   become: yes
 
 - name: Wait for old WAL segment to be archived
@@ -53,7 +53,7 @@
     delay: 3
     timeout: 130
   delegate_to: "{{ this_barman }}"
-  become_user: barman
+  become_user: "{{ barman_user }}"
   become: yes
 
 # We know now that «barman archive-wal» has been invoked and moved the
@@ -70,5 +70,5 @@
   vars:
     lockfile: "{{ barman_home }}/.{{ backup_name }}-archive-wal.lock"
   delegate_to: "{{ this_barman }}"
-  become_user: barman
+  become_user: "{{ barman_user }}"
   become: yes

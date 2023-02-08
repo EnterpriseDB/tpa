@@ -20,7 +20,7 @@
   delegate_to: "{{ this_barman }}"
   changed_when: false
   ignore_errors: true
-  become_user: barman
+  become_user: "{{ barman_user }}"
   become: yes
 
 # Now we create a replication slot for pg_receivexlog.
@@ -42,7 +42,7 @@
     slot_creation is successful
   vars:
     already_exists_message: "Replication slot '{{ slot_name }}' already exists"
-  become_user: barman
+  become_user: "{{ barman_user }}"
   become: yes
   notify:
     - Barman configuration changed
@@ -58,7 +58,7 @@
   register: barman_cron
   when: >
     conf is changed
-  become_user: barman
+  become_user: "{{ barman_user }}"
   become: yes
   notify:
     - Barman configuration changed

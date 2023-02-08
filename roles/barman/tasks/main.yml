@@ -14,7 +14,7 @@
 
 - include_role: name=sys/ssh tasks_from=keygen.yml
   vars:
-    ssh_username: barman
+    ssh_username: "{{ barman_user }}"
 
 - name: Install Barman
   include_role:
@@ -28,7 +28,7 @@
 
 - include_role: name=sys/ssh tasks_from=authorize.yml
   vars:
-    ssh_username: barman
+    ssh_username: "{{ barman_user }}"
     ssh_key_name: "id_{{ postgres_user }}"
   when: >
     'barman' in role
@@ -37,7 +37,7 @@
 
 - include_role: name=sys/ssh tasks_from=install.yml
   vars:
-    ssh_username: barman
+    ssh_username: "{{ barman_user }}"
   when: >
     'barman' in role
 
@@ -52,7 +52,7 @@
 - include_role: name=sys/ssh tasks_from=authorize.yml
   vars:
     ssh_username: "{{ postgres_user }}"
-    ssh_key_name: id_barman
+    ssh_key_name: "id_{{ barman_user }}"
   when: >
     'postgres' in role
 

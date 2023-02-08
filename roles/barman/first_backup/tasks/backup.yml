@@ -12,7 +12,7 @@
   command: >
     /usr/bin/barman backup "{{ backup_name }}" --wait --wait-timeout {{ backup_wait_timeout }}
   delegate_to: "{{ this_barman }}"
-  become_user: barman
+  become_user: "{{ barman_user }}"
   become: yes
   async: 900
   poll: 0
@@ -32,7 +32,7 @@
   async_status:
     jid: "{{ barman_backup_run.ansible_job_id }}"
   delegate_to: "{{ this_barman }}"
-  become_user: barman
+  become_user: "{{ barman_user }}"
   become: yes
   register: barman_backup_result
   until: barman_backup_result.finished

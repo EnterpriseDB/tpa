@@ -18,7 +18,7 @@
   register: diagnosis
   delegate_to: "{{ this_barman }}"
   changed_when: false
-  become_user: barman
+  become_user: "{{ barman_user }}"
   become: yes
   check_mode: no
 

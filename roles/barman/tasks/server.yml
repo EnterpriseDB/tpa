@@ -29,8 +29,8 @@
 - name: Ensure that barman_home exists with the right ownership and permissions
   file:
     path: "{{ barman_home }}"
-    owner: barman
-    group: barman
+    owner: "{{ barman_user }}"
+    group: "{{ barman_group }}"
     mode: 0750
     state: directory
 
@@ -83,8 +83,8 @@
 - include_role: name=postgres/pgpass
   vars:
     pgpassfile: ~barman/.pgpass
-    pgpass_owner: barman
-    pgpass_group: barman
+    pgpass_owner: "{{ barman_user }}"
+    pgpass_group: "{{ barman_group }}"
     pgpass_users:
     - barman
     - streaming_barman
@@ -92,14 +92,14 @@
 - name: Set correct ownership and mode on ~/.postgresql
   file:
     path: ~barman/.postgresql
-    owner: barman
-    group: barman
+    owner: "{{ barman_user }}"
+    group: "{{ barman_group }}"
     state: directory
     mode: 0700
 
 - name: Retrieve list of key/certificate files
   command: >
-    find ~barman/.postgresql -name '*.crt' -o -name '*.key'
+    find ~{{ barman_user }}/.postgresql -name '*.crt' -o -name '*.key'
   register: keycertfiles
   changed_when: false
   check_mode: no
@@ -107,8 +107,8 @@
 - name: Set correct ownership and mode on key/certificate files
   file:
     path: "{{ item }}"
-    owner: barman
-    group: barman
+    owner: "{{ barman_user }}"
+    group: "{{ barman_group }}"
     mode: 0600
   with_items: "{{ keycertfiles.stdout_lines }}"
 

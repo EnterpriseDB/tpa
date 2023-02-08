@@ -54,13 +54,13 @@
 
 - name: Ensure barman group exists
   group:
-    name: barman
+    name: "{{ barman_group }}"
     state: present
 
 - name: Ensure barman user exists
   user:
-    name: barman
-    group: barman
+    name: "{{ barman_user }}"
+    group: "{{ barman_group }}"
     shell: /bin/bash
     home: "{{ barman_home }}"
     create_home: no
@@ -71,8 +71,8 @@
   file:
     path: "{{ item }}"
     state: directory
-    owner: barman
-    group: barman
+    owner: "{{ barman_user }}"
+    group: "{{ barman_group }}"
     mode: 0750
   with_items:
     - "{{ barman_home }}"

@@ -8,8 +8,8 @@
   template:
       src: pg-backup-api.conf.j2
       dest: "/etc/{{ _apache_svc }}/{{ _apache_dir }}/pg-backup-api.conf"
-      owner: barman
-      group: barman
+      owner: "{{ barman_user }}"
+      group: "{{ barman_group }}"
       mode: 0644
   vars:
     _apache_svc: "{{ apache_conf[ansible_os_family]['service'] }}"
