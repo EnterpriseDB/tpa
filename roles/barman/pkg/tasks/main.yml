@@ -15,3 +15,33 @@
 
 - include_tasks: src.yml
   when: barman_installation_method == 'src'
+
+# Normally, installing the package creates the group and user and home
+# and log directories, but we may need to create them ourselves for a
+# source installation, or if barman_{user,group} have been changed.
+
+- name: Ensure barman group exists
+  group:
+    name: "{{ barman_group }}"
+    state: present
+
+- name: Ensure barman user exists
+  user:
+    name: "{{ barman_user }}"
+    group: "{{ barman_group }}"
+    shell: /bin/bash
+    home: "{{ barman_home }}"
+    create_home: no
+    system: yes
+    state: present
+
+- name: Ensure barman directories exist with the right ownership and permissions
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ barman_user }}"
+    group: "{{ barman_group }}"
+    mode: 0750
+  with_items:
+    - "{{ barman_home }}"
+    - /var/log/barman
