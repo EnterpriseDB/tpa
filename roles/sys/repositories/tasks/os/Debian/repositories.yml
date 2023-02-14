@@ -150,8 +150,8 @@
   apt_repository:
     filename: edb-{{ repository }}
     repo: >-
-      deb https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/deb/debian {{ ansible_distribution_release }} main
-
+      deb https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/deb/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} main
+  no_log: true
 
 - include_tasks: repository-cleanup.yml
   vars:
