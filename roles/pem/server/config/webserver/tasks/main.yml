@@ -1,6 +1,11 @@
 ---
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+- package_facts:
+    manager: auto
+
+- set_fact:
+    pem_version: "{{ ansible_facts.packages['edb-pem'][0]['version']|split('-')|first }}"
 
 - include_tasks: configure_httpd_module.yml
 

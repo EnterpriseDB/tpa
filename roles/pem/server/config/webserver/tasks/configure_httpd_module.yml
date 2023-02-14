@@ -37,35 +37,32 @@
       apache2_module:
         state: present
         name: rewrite
+  when: ansible_os_family == 'Debian'
 
-    - name: Enabling mod_wsgi
+- name: Enable edb-python3-mod-wsgi
+  block:
+    - name: Disabling mod_wsgi
+      apache2_module:
+        state: absent
+        name: wsgi
+      ignore_errors: true
+
+    # Enabling mod_edb-python3-mod-wsgi results in the stdout getting following message:
+    # "stdout": "Enabling module edb-python3-mod-wsgi.\nTo activate the new configuration, you need to run:\n  systemctl restart apache2\n"
+    # so we set ignore_errors to 'yes' to avoid a failure here. And we do an 'apache2'
+    # service restart right after to do exactly what was suggested.
+    - name: Enabling mod_edb-python3-mod-wsgi
       apache2_module:
         state: present
-        name: wsgi
-      when: ansible_distribution != 'Debian' or ansible_distribution_major_version != "9"
+        name: edb-python3-mod-wsgi
+      ignore_errors: true
 
-    - name: Enable edb-python3-mod-wsgi (Debian 9)
-      block:
-        - name: Disabling mod_wsgi
-          apache2_module:
-            state: absent
-            name: wsgi
-          ignore_errors: true
-
-        # Enabling mod_edb-python3-mod-wsgi results in the stdout getting following message:
-        # "stdout": "Enabling module edb-python3-mod-wsgi.\nTo activate the new configuration, you need to run:\n  systemctl restart apache2\n"
-        # so we set ignore_errors to 'yes' to avoid a failure here. And we do an 'apache2'
-        # service restart right after to do exactly what was suggested.
-        - name: Enabling mod_edb-python3-mod-wsgi
-          apache2_module:
-            state: present
-            name: edb-python3-mod-wsgi
-          ignore_errors: true
-
-        - name: "Restart httpd service - {{ pem_web_server_service_name[ansible_os_family] }}"
-          service:
-             name: "{{ pem_web_server_service_name[ansible_os_family] }}"
-             state: restarted
-
-      when: ansible_distribution == 'Debian' and ansible_distribution_major_version == "9"
-  when: ansible_os_family == 'Debian'
+    - name: "Restart httpd service - {{ pem_web_server_service_name[ansible_os_family] }}"
+      service:
+          name: "{{ pem_web_server_service_name[ansible_os_family] }}"
+          state: restarted
+  when: >
+    ansible_os_family == 'Debian'
+    and pem_version is version('9.0','>=')
+    and not (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '20' and pem_version is version("9.1","<"))
+    and not (ansible_distribution == 'Debian' and ansible_distribution_major_version == '11' and pem_version is version("9.1","<"))
