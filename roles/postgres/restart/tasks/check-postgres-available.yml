@@ -2,19 +2,19 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-- name: Run postgres-monitor and tail postgres.log if it fails
+- name: Wait for Postgres to become available
+  command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  register: postgres_available
+  changed_when: false
+  ignore_errors: true
+  when:
+    pgdata_initialised and
+    postgres_service_end_state|default('started') != 'stopped'
+
+- when: postgres_available is not successful
   block:
-
-  - name: Wait for Postgres to become available
-    command: /etc/tpa/postgres-monitor "{{ postgres_dsn }}"
-    changed_when: false
-    become_user: "{{ postgres_user }}"
-    become: yes
-    when:
-      pgdata_initialised and
-      postgres_service_end_state|default('started') != 'stopped'
-
-  rescue:
   - name: Retrieve last five minutes of Postgres server logfile
     command: >
       journalctl
@@ -23,10 +23,9 @@
       --no-pager
       --since "5 min ago"
       -o cat
-
     register: unit_log
     changed_when: false
 
   - name: Show excerpt from server logfile if Postgres did not start
     fail:
-      msg: "{{ unit_log }}"
+      msg: "{{ unit_log.stdout }}"
