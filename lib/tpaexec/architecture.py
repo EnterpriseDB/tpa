@@ -965,13 +965,6 @@ class Architecture(object):
                     "make -f ../../src/bdr/Makefile -s install",
                 ],
             },
-            "autoscale": {
-                "name": "autoscale",
-                "git_repository_url": "git@github.com:EnterpriseDB/autoscale.git",
-                "build_commands": [
-                    "make -f ../../src/autoscale/Makefile -s install",
-                ],
-            },
             "barman": {
                 "barman_installation_method": "src",
                 "barman_git_url": "git@github.com:EnterpriseDB/barman.git",

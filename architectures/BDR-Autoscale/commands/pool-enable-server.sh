@@ -1,1 +1,0 @@
-../../BDR-Always-ON/commands/pool-enable-server.sh

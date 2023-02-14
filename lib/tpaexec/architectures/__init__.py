@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 
 from .bdr_always_on import BDR_Always_ON
 from .pgd_always_on import PGD_Always_ON
-from .bdr_autoscale import BDR_Autoscale
 from .images import Images
 from .m1 import M1
 from ..exceptions import ArchitectureError
@@ -19,7 +18,6 @@ class SelectArchitecture:
     ARCHITECTURES = {
         "BDR-Always-ON": BDR_Always_ON,
         "PGD-Always-ON": PGD_Always_ON,
-        "BDR-Autoscale": BDR_Autoscale,
         "Images": Images,
         "M1": M1,
     }
