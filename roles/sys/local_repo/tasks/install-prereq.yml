@@ -23,7 +23,7 @@
   vars:
     install_command:
       Debian: apt-get -q -y update && apt-get install -q -y
-      Redhat: yum install -y
+      RedHat: yum install -y
 
 # If we can't use external repositories, we have to copy the package
 # from the local repository and install it. The package must not have
