@@ -639,7 +639,8 @@
 - set_fact:
     initialise_harp: "{{
         'harp-proxy' in role
-        or inventory_hostname in first_bdr_primary_candidates|default([])
+        or (inventory_hostname in first_bdr_primary_candidates|default([])
+          and failover_manager == 'harp')
       }}"
 
 - name: Add efm to role when efm failover manager is selected
