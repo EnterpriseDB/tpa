@@ -59,6 +59,16 @@
   vars:
     p_and_b: ['pglogical', 'bdr']
 
+- name: Adjust ordering to avoid conflict with pgaudit
+  set_fact:
+    _preload_list: "{{ _preload_list|reject('==', 'pgaudit')|list|union(['pgaudit']) }}"
+  when: >
+    'bdr' in role
+    and bdr_version is version('4', '>=')
+    and 'bdr' in _preload_list
+    and 'pgaudit' in _preload_list
+    and _preload_list.index('bdr')|int > _preload_list.index('pgaudit')|int
+
 - name: Remove pglogical if BDR v4 is in use
   set_fact:
     _preload_list:
