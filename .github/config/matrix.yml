@@ -20,11 +20,23 @@ default:
   exclude:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "pgextended"
+    - tpa_architecture: "BDR-Always-ON"
+      tpa_postgres_flavour: "postgresql"
+    - tpa_architecture: "PGD-Always-ON"
+      tpa_postgres_flavour: "postgresql"
 simple:
   tpa_architecture: *default_tpa_architecture
   tpa_postgres_flavour:
-    - "postgresql"
+    - "pgextended"
     - "epas"
+    - "postgresql"
+  exclude:
+    - tpa_architecture: "M1"
+      tpa_postgres_flavour: "pgextended"
+    - tpa_architecture: "BDR-Always-ON"
+      tpa_postgres_flavour: "postgresql"
+    - tpa_architecture: "PGD-Always-ON"
+      tpa_postgres_flavour: "postgresql"
 update_bdr:
   tpa_architecture:
     - "BDR-Always-ON"
