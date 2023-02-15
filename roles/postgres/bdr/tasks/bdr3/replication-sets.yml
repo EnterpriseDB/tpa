@@ -51,12 +51,14 @@
           - "{{ bdr_node_name }}"
           - "{{ wanted_sets }}"
   vars:
-    maybe_default_repset: >-
-      {{ ('witness' in role)|ternary([], [bdr_node_group]) }}
+    default_repsets: >-
+      {{ [bdr_node_group, bdr_child_group]|select('defined')|list }}
+    maybe_default_repsets: >-
+      {{ ('witness' in role)|ternary([], default_repsets) }}
     wanted_sets: >-
-      {{ subscription_sets|union(maybe_default_repset) }}
+      {{ subscription_sets|union(maybe_default_repsets) }}
     subscribed_sets: >-
-      {{ subscribed.replication_sets|default([])|union(maybe_default_repset) }}
+      {{ subscribed.replication_sets|default([])|union(maybe_default_repsets) }}
   when:
     subscribed_sets|symmetric_difference(wanted_sets) is not empty
     and (bdr_version_num < 50000 or 'witness' not in role)
