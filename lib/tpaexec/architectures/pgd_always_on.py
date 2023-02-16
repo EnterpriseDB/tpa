@@ -53,14 +53,6 @@ class PGD_Always_ON(BDR):
             dest="cohost_proxies",
         )
 
-        g.add_argument(
-            "--enable-subgroup-raft",
-            dest="enable_subgroup_raft",
-            action="store_true",
-            default=False,
-            help="Enable subgroup RAFT for all eligible node groups",
-        )
-
     def update_argument_defaults(self, defaults):
         super().update_argument_defaults(defaults)
         defaults.update(
@@ -113,7 +105,7 @@ class PGD_Always_ON(BDR):
         witness_only_location = self.args["witness_only_location"]
         data_nodes_per_location = self.args["data_nodes_per_location"]
         witness_node_per_location = self.args["witness_node_per_location"]
-        active_locations = self.args.get("active_locations", [])
+        active_locations = self.args.get("active_locations") or []
 
         if data_nodes_per_location < 2:
             errors.append("--data-nodes-per-location cannot be less than 2")
@@ -155,8 +147,7 @@ class PGD_Always_ON(BDR):
         for aloc in active_locations:
             if aloc not in location_names:
                 errors.append(
-                    "--active-locations '%s' must be included in location list"
-                    % aloc
+                    "--active-locations '%s' must be included in location list" % aloc
                 )
 
         if errors:
@@ -172,25 +163,31 @@ class PGD_Always_ON(BDR):
         top = self.args["bdr_node_group"]
         bdr_node_groups = [{"name": top}]
 
-        for loc in self.args.get("location_names"):
+        location_names = self.args.get("location_names") or []
+        active_locations = self.args.get("active_locations") or []
+        if not active_locations:
+            bdr_node_groups[0]["options"] = {"enable_proxy_routing": True}
+
+        for loc in location_names:
             group = {
                 "name": self._sub_group_name(loc),
                 "parent_group_name": top,
                 "options": {"location": loc},
             }
 
-            # Disable subgroup raft and proxy routing for witness-only
-            # locations, and enable proxy routing for locations with a proxy
-            # (subgroup raft will be enabled based on enable_subgroup_raft").
+            # Active locations have subgroup RAFT and proxy routing
+            # enabled, and witness-only locations have both disabled.
             if self._is_witness_only_location(loc):
                 group["options"].update(
                     {
                         "enable_raft": False,
+                        "enable_proxy_routing": False,
                     }
                 )
-            else:
+            elif loc in active_locations:
                 group["options"].update(
                     {
+                        "enable_raft": True,
                         "enable_proxy_routing": True,
                     }
                 )
@@ -200,7 +197,6 @@ class PGD_Always_ON(BDR):
         cluster_vars.update(
             {
                 "bdr_node_groups": bdr_node_groups,
-                "enable_subgroup_raft": self.args.get("enable_subgroup_raft"),
                 "default_pgd_proxy_options": {
                     "listen_port": 6432,
                 },

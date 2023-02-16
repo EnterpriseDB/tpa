@@ -149,36 +149,6 @@
   when: >
     'subscriber-only' in role
 
-# On BDRv5, we must set 'enable_raft' in each group based on the global
-# setting 'enable_subgroup_raft' (except that we never want to enable it
-# for subscriber-only groups). Note that if the entry explicitly sets
-# enable_raft, it will take precedence over the global setting.
-
-- name: Alter bdr_node_groups to respect enable_subgroup_raft setting
-  when:
-    bdr_major_version == 5 and enable_subgroup_raft is defined
-  vars:
-    _rafted_node_groups: []
-    _node_group_type: "{{ item.node_group_type|default('unknown') }}"
-    _allow_raft:
-      "{{ _node_group_type not in ['subscriber-only'] }}"
-    _default_setting:
-      options:
-        enable_raft:
-          "{{ _allow_raft|ternary(enable_subgroup_raft|bool, False) }}"
-    _group_with_raft_setting:
-      "{{ _default_setting
-          |combine(item, recursive=True) }}"
-  block:
-  - name: Set or unset enable_raft for BDR node groups
-    set_fact:
-      _rafted_node_groups:
-        "{{ _rafted_node_groups
-            |union([_group_with_raft_setting]) }}"
-    with_items: "{{ bdr_node_groups }}"
-  - set_fact:
-      bdr_node_groups: "{{ _rafted_node_groups }}"
-
 # From bdr_node_groups, we now construct maps from group names to those
 # options that must be specified while creating the group, and the ones
 # that may be changed afterwards using bdr.alter_node_group_config().
