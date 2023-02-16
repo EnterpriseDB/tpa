@@ -113,6 +113,7 @@ class PGD_Always_ON(BDR):
         witness_only_location = self.args["witness_only_location"]
         data_nodes_per_location = self.args["data_nodes_per_location"]
         witness_node_per_location = self.args["witness_node_per_location"]
+        active_locations = self.args.get("active_locations", [])
 
         if data_nodes_per_location < 2:
             errors.append("--data-nodes-per-location cannot be less than 2")
@@ -142,16 +143,22 @@ class PGD_Always_ON(BDR):
         if witness_only_location and witness_only_location not in location_names:
             errors.append(
                 "--add-witness-only-location '%s' must be included in location list"
-                % self.args["witness_only_location"]
+                % witness_only_location
             )
 
-        if self.args["active_locations"]:
-            for aloc in self.args["active_locations"]:
-                if aloc not in self.args["location_names"]:
-                    errors.append(
-                        "--active-locations '%s' must be included in location list"
-                        % aloc
-                    )
+        if witness_only_location and witness_only_location in active_locations:
+            errors.append(
+                "--add-witness-only-location '%s' must not be an active location"
+                % witness_only_location
+            )
+
+        for aloc in active_locations:
+            if aloc not in location_names:
+                errors.append(
+                    "--active-locations '%s' must be included in location list"
+                    % aloc
+                )
+
         if errors:
             raise ArchitectureError(*(f"PGD-Always-ON parameter {e}" for e in errors))
 
