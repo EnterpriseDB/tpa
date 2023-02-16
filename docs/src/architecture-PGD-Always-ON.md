@@ -18,36 +18,50 @@ EDB Postgres Distributed in an Always-ON configuration, intended for use in prod
 
 You must specify `--architecture PGD-Always-ON`.
 
-You must also specify list of locations that can be mapped to cloud provider
-regions, or availability zones or your vm locations, or any other physical
-location description you use.
+You must specify a list of location names for the cluster with
+`--location-names dc1 dc2 dc3`.
 
-You may optionally specify how many data nodes there should be per location
-using `--data-nodes-per-location`. Minimum number of data nodes is 2, if not
-specified, this defaults to 3.
+A location represents an independent data centre that provides a level
+of redundancy, in whatever way this definition makes sense to your use
+case. For example, AWS regions, or availability zones within a region,
+or any other designation to identify where your servers are hosted.
 
-You may optionally specify which locations are active, meaning, accepting writes,
-using `--active-locations`. If not specified this defaults to globally handled
-write connection routing, which elects write lead from all available nodes
-across all locations. Empty list can be specified, this disable the builtin
-connection routing management and will not configure any PGD-Proxies.
+A PGD-Always-ON cluster comprises one or more locations with the same
+number of data nodes (if required to establish consensus, there may be
+an additional witness node in each location, as well as a single extra
+witness-only location). These locations, as many as required, must be
+named in the `--location-names` list.
 
-You may optionally specify whether there should be witness node in every location
-using `--add-witness-node-per-location`. The default behavior depends on value of
-`--data-nodes-per-location`, with `--data-nodes-per-location` set to 2, this
-will default to true, otherwise it's false by default.
+(If you are using TPA to provision an AWS cluster, the locations will be
+mapped to separate availability zones within the `--region` you specify.
+You may specify multiple `--regions`, but TPA does not currently set up
+VPC peering to allow instances in different regions to communicate with
+each other. For a multi-region cluster, you will need to set up VPC
+peering yourself.)
 
-You may also specify a special location that does not contain any data nodes
-but only has single witness node used for improved availability of consensus
-using `–-add-witness-only-location` parameter. This location cannot be
+By default, each location will have three data nodes. You may specify
+a different number with `--data-nodes-per-location N`. The minimum
+number is 2.
+
+If you have two data nodes per location, each location must also have an
+extra witness node, and TPA will add one by default. For any even number
+of data nodes >2, you may specify `--add-witness-node-per-location` to
+add the extra witness node.
+
+By default, each location will also have separate PGD-Proxy instances.
+You may specify `--cohost-proxies` to run PGD-Proxy on the data nodes.
+
+By default, TPA will configure PGD-Proxy to use global connection
+routing, i.e., to elect a write lead from all available data nodes
+across all locations. You may specify `--active-locations l2 l3` to
+limit connection routing to nodes in the specified locations. This will
+enable subgroup RAFT and proxy routing for those locations only.
+
+You may optionally specify `--add-witness-only-location loc` to
+designate one of the cluster's locations as a special witness-only
+location that contains no data nodes and only a single witness node,
+used to improve the availability of consensus. This location cannot be
 among the active locations list.
-
-You may optionally specify `--cohost-proxies` to configure PGD-Proxy instances
-to run on the same hosts as data nodes.
-
-You may optionally specify `--enable-subgroup-raft` to enable RAFT for
-each eligible node group in the cluster, i.e., for the groups in all
-non-witness locations. This is required to enable proxy routing.
 
 You may optionally specify `--database-name dbname` to set the name of
 the database with BDR enabled (default: bdrdb).
