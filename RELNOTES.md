@@ -1,6 +1,80 @@
 # TPA release notes
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+## v23.12 (unreleased)
+
+### Notable changes
+
+- TPA-180, TPA-342 Introduce full support for PGD5, including CAMO
+  configuration support based on commit scopes
+
+- Introduce support for EDB Postgres Extended repository and packages
+
+### Minor changes
+
+- TPA-270 Preliminary support for configuring multi-region AWS clusters
+
+  Multi-region clusters require manual setup of VPCs and VPC peering, and
+  editing config.yml to ensure subnets do not overlap.
+
+- Enable proxy routing (and, therefore, subgroup RAFT) automatically for
+  --active-locations, and remove the configure option to enable subgroup
+  RAFT globally
+
+### Bugfixes
+
+- TPA-327 Ensure the EDB_SUBSCRIPTION_TOKEN is not logged
+
+- TPA-303 Allow the user to suppress addition of the
+  products/default/release repo to tpa_2q_repositories
+
+- TPA-359 Ensure that nodes subscribe to bdr_child_group, if available
+
+  In clusters with multiple subgroups, TPA did not expect instances to
+  be subscribed to the replication sets for both the top group and the
+  subgroup, so it would incorrectly remove the latter from the node's
+  subscribed replication sets.
+
+- TPA-354 Fail reliably with a useful error if Postgres doesn't start
+
+  Due to an Ansible bug, the deployment would not fail if Postgres did
+  not start on some instances, but did start on others (e.g., due to a
+  difference in the configuration). Continuing on with the deployment
+  resulted in errors when trying to access `cluster_facts` for the
+  failed hosts later.
+
+- Don't call bdr.alter_node_replication_sets() on witnesses for BDR 4.3+
+
+  This adjusts to a new restriction in BDR versions where witness nodes
+  are not handled with a custom replication set configuration.
+
+- TPA-174, TPA-248 Replace harcoded "barman" references to enable use
+  of the barman_{user,group} settings to customise the barman user and
+  home directory
+
+- TPA-347 Add shared_preload_libraries entries, where appropriate, for
+  extensions mentioned under postgres_databases[*].extensions
+
+- TPA-198 Ensure that pgaudit does not appear before bdr in
+  shared_preload_libraries (to avoid a known crash)
+
+- Fix syntax error (DSN quoting) in pgd-cli config file
+
+- Sort endpoints in pgd-proxy config to avoid file rewrites
+
+  This will likely require a pgd-proxy restart on the next deploy (but
+  it will avoid unnecessary future rewrites/restarts on subsequent
+  deploys).
+
+- Fix an error while installing rsync from a local-repo on RH systems
+
+- Fix an error with Apache WSGI module configuration for PEM 9 on Debian
+  systems
+
+- Don't remove the bdr extension if it has been created on purpose, even
+  if it is unused.
+
 ## v23.11 (2023-01-31)
 
 ### Notable changes
@@ -17,7 +91,7 @@
 - TPA-349 Bump dependency versions
 
   Bump cryptography version from 38.0.4 to 39.0.0
-  
+
   Bump jq version from 1.3.0 to 1.4.0
 
 - TPA-345 Change TPAexec references to TPA in documentation.
