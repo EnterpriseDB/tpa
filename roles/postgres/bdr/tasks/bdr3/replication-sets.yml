@@ -61,7 +61,7 @@
       {{ subscribed.replication_sets|default([])|union(maybe_default_repsets) }}
   when:
     subscribed_sets|symmetric_difference(wanted_sets) is not empty
-    and (bdr_version_num < 50000 or 'witness' not in role)
+    and (bdr_version_num < 40300 or 'witness' not in role)
   changed_when: true
   become_user: "{{ postgres_user }}"
   become: yes
