@@ -29,7 +29,7 @@ Double-check the created image:
 $ docker image ls tpa/tpaexec
 REPOSITORY    TAG       IMAGE ID       CREATED         SIZE
 tpa/tpaexec   latest    e145cf8276fb   8 seconds ago   1.73GB
-$ docker run --rm tpa/tpaexec tpaexec info
+$ docker run --platform=linux/amd64 --rm tpa/tpaexec tpaexec info
 # TPAexec v20.11-59-g85a62fe3 (branch: master)
 tpaexec=/usr/local/bin/tpaexec
 TPA_DIR=/opt/EDB/TPA
@@ -42,7 +42,7 @@ Create a TPA container and make your cluster configuration directories
 available inside the container:
 
 ```bash
-$ docker run --rm -v ~/clusters:/clusters \
+$ docker run --platform=linux/amd64 --rm -v ~/clusters:/clusters \
     -it tpa/tpaexec:latest
 ```
 
@@ -53,7 +53,7 @@ If you want to provision Docker containers using TPA, you must also allow
 the container to access the Docker control socket on the host:
 
 ```
-$ docker run --rm -v ~/clusters:/clusters \
+$ docker run --platform=linux/amd64 --rm -v ~/clusters:/clusters \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -it tpa/tpaexec:latest
 ```

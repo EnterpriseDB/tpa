@@ -1,6 +1,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-FROM debian:buster
+FROM --platform=linux/amd64 debian:buster
 
 LABEL maintainer="EDB <tpa@enterprisedb.com>"
 
