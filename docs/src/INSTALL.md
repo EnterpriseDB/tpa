@@ -3,20 +3,29 @@
 To use TPA, you need to install tpaexec and run the `tpaexec setup`
 command. This document explains how to install TPA packages.
 
-TPA packages are available to EDB customers by
-prior arrangement. Please contact your account manager to request
-access.
+TPA packages are available to EDB customers with a valid Postgres
+Distributed subscription or by prior arrangement. Please contact your
+account manager to request access.
 
 We publish TPA packages for Debian 10 (buster), Ubuntu 22.04 (jammy), Ubuntu 20.04
 (focal), Ubuntu 18.04 (bionic), RHEL/CentOS 7.x and 8.x, Rocky 8.x and AlmaLinux 8.x. These
 distributions provide a usable Python 3.6+ environment out of the box,
-which TPA requires. (However, TPA supports a wider range of
-[distributions on target instances](distributions.md).)
+which TPA requires. However, TPA supports a wider range of
+[distributions on target instances](distributions.md).
 
 ## Quickstart
 
-First, [subscribe to the TPA package repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
-through the EDB Customer Support Portal.
+Login to [EDB Repos 2.0](https://www.enterprisedb.com/repos-downloads)
+to obtain your token. Then execute the following command, substituting
+your token for `<your-token>`.
+
+```bash
+# Add repository (Debian, Ubuntu)
+$ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.deb.sh' | sudo -E bash
+
+# Add repository (RedHat, Rocky or AlmaLinux)
+$ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.rpm.sh' | sudo -E bash
+```
 
 Then run the following commands:
 
@@ -24,7 +33,7 @@ Then run the following commands:
 # Install packages (Debian, Ubuntu)
 $ sudo apt-get install tpaexec
 
-# Install packages (RedHat)
+# Install packages (RedHat, Rocky or AlmaLinux)
 $ sudo yum install tpaexec
 
 # Install additional dependencies
@@ -47,11 +56,29 @@ $ sudo ntpdate pool.ntp.org
 
 ## Packages
 
-[Subscribe to the "products/tpa/release" repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
-to install the latest TPA packages.
-(Login to the EDB Customer Support Portal, add a subscription under
-Support/Software/Subscriptions, and follow the instructions to enable
-the repository on your system.)
+To install TPA, you must first subscribe to an EDB repository that
+provides it. The preferred source for repositories is EDB Repos 2.0.
+
+Login to [EDB Repos 2.0](https://www.enterprisedb.com/repos-downloads)
+to obtain your token. Then execute the following command, substituting
+your token for `<your-token>`.
+
+```bash
+# Debian or Ubuntu
+$ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.deb.sh' | sudo -E bash
+
+# RedHat, Rocky or AlmaLinux
+$ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.rpm.sh' | sudo -E bash
+```
+
+Alternatively, you may obtain TPA from the legacy 2ndQuadrant
+repository. To do so, login to the EDB Customer Support Portal and
+subscribe to the ["products/tpa/release" repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
+by adding a subscription under Support/Software/Subscriptions,
+and following the instructions to enable the repository on your system.
+
+Once you have enabled one of these repositories, you may install TPA
+as follows:
 
 ```bash
 # Debian or Ubuntu
@@ -86,7 +113,7 @@ normally run `tpaexec` commands. For example, you could add this to
 your .bashrc or equivalent shell configuration file:
 
 ```bash
-export PATH=$PATH:/opt/EDB/TPA/bin
+$ export PATH=$PATH:/opt/EDB/TPA/bin
 ```
 
 ### Installing without network access
