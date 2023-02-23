@@ -12,7 +12,7 @@
       or failover_manager == 'efm'
       or pem_enabled
     )
-    and edb_repositories is not empty
+    and edb_repositories is empty
 
 - set_fact:
     apt_repository_list:
