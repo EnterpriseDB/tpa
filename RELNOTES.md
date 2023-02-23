@@ -2,6 +2,14 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.13 (2023-02-23)
+
+### Bugfixes
+
+- TPA-362 Don't enable old EDB repo with PGD-Always-ON and `--epas`
+
+- TPA-363 Fix error with PGD-Always-ON and `--postgres-version 15`
+
 ## v23.12 (2023-02-21)
 
 ### Notable changes
