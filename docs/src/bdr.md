@@ -8,7 +8,7 @@ Access to PGD/BDR packages is through EDB's package repositories only.
 You must have a valid EDB subscription token to download the packages.
 
 This documentation touches on several aspects of BDR configuration, but
-we refer you to the [BDR documentation](XXX) for an authoritative
+we refer you to the [PGD documentation](https://enterprisedb.com/docs/pgd/latest/) for an authoritative
 description of the details.
 
 ## Introduction

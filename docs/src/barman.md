@@ -1,3 +1,5 @@
+# Barman
+
 When an instance is given the `barman` role in config.yml, TPA will
 configure it as a [Barman](https://pgbarman.org/) server to take backups
 of any other instances that name it in their `backup` setting.

@@ -42,8 +42,8 @@ The root certificate will be copied to
 
 A client certificate and key (`pg-backup-user.crt`and
 `pg-backup-user.key`) will be generated for testing (through
-`tpaexec test`) or command line from the barman host see
-[Verify Setup](#verify-setup) section.
+`tpaexec test`) or command line from the barman host. See
+[Testing](tpaexec-test).
 
 An apache proxy server certificate and key (`pg-backup-api.crt` and
 `pg-backup-api.key`) will also be generated

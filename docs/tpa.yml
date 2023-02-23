@@ -19,7 +19,7 @@ nav:
     - AWS: platform-aws.md
     - Bare metal: platform-bare.md
     - Docker: platform-docker.md
-  - Customisations:
+  - Customizations:
     - Cluster configuration: configure-cluster.md
     - Instance configuration: configure-instance.md
     - Building from source: configure-source.md
@@ -31,7 +31,7 @@ nav:
     - Rehydration: tpaexec-rehydrate.md
   - Miscellaneous:
     - Ansible Tower (Automation Controller): tower.md
-    - TPA, Ansible, and sudo: misc-ansible-sudo.md
+    - TPA, Ansible, and sudo: ansible-and-sudo.md
     - PuTTY configuration: misc-configure-putty.md
     - Troubleshooting: misc-troubleshooting.md
 
