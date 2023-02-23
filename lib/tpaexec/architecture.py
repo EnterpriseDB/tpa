@@ -856,33 +856,40 @@ class Architecture(object):
                 )
 
     def add_edb_repos(self, cluster_vars):
-        edb_repositories = self.args.get("edb_repositories") or []
+        """Set default values for edb_repositories based on the Postgres flavour
+        and version in use."""
+
         postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
         postgres_version = self.args.get("postgres_version")
         bdr_version = cluster_vars.get("bdr_version")
 
-        given_repositories = " ".join(edb_repositories)
+        postgres_repos = {
+            "postgresql": ["standard"],
+            "edbpge": ["standard"],
+            "pgextended": [],
+            "epas": ["enterprise"],
+        }
 
-        if postgresql_flavour == "postgresql" and "standard" not in given_repositories:
-            edb_repositories.append("standard")
-        if postgresql_flavour == "edbpge" and "standard" not in given_repositories:
-            edb_repositories.append("standard")
-        if postgresql_flavour == "pgextended" and "postgres_extended" not in given_repositories:
-            edb_repositories.append("postgres_extended")
-
+        default_repos = postgres_repos[postgresql_flavour]
         if bdr_version == "5":
-            if "postgres_distributed" not in given_repositories:
-                edb_repositories.append("postgres_distributed")
-            if "enterprise" not in given_repositories:
-                edb_repositories.append("enterprise")
+            if postgresql_flavour == "pgextended":
+                raise ArchitectureError(
+                    "Please use --edbpge instead of --pgextended for PGD-Always-ON"
+                )
 
-        if edb_repositories:
-            cluster_vars.update(
-                {
-                    "edb_repositories": edb_repositories,
-                }
-            )
+            default_repos.append("postgres_distributed")
 
+        # If we have a list of --edb-repositories, we assume the list is
+        # complete, and can override the defaults.
+
+        edb_repositories = self.args.get("edb_repositories")
+        if edb_repositories is None:
+            edb_repositories = default_repos
+        cluster_vars.update(
+            {
+                "edb_repositories": edb_repositories or [],
+            }
+        )
 
     def cluster_vars_args(self):
         """

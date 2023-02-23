@@ -13,8 +13,6 @@ class PGD_Always_ON(BDR):
         return [
             ("12", "5"),
             ("13", "5"),
-            ("12", "5"),
-            ("13", "5"),
             ("14", "5"),
             ("15", "5"),
         ]
@@ -61,6 +59,7 @@ class PGD_Always_ON(BDR):
                 "barman_volume_size": 128,
                 "postgres_volume_size": 64,
                 "failover_manager": "pgd",
+                "postgres_version": "15",
             }
         )
 
