@@ -76,11 +76,11 @@ class BDR(Architecture):
             "9.6": "2",
             "10": "3",
             "11": "3",
-            "12": "3",
-            "13": "3",
+            "12": "5" if arch == "PGD-Always-ON" else "4",
+            "13": "5" if arch == "PGD-Always-ON" else "4",
             "14": "5" if arch == "PGD-Always-ON" else "4",
             "15": "5" if arch == "PGD-Always-ON" else "4",
-            None: "5" if arch == "PGD-Always-ON" else "3",
+            None: "5" if arch == "PGD-Always-ON" else "4",
         }
 
         default_pg_versions = {
@@ -88,7 +88,7 @@ class BDR(Architecture):
             "2": "9.6",
             "3": "13",
             "4": "14",
-            "5": "14",
+            "5": "15",
         }
 
         if bdr_version is None:
