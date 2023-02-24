@@ -137,23 +137,9 @@
     label: >-
       {{ repo.repo }}
 
-- name: Add EDB repository keys
-  with_items:
-    - "{{ edb_repositories }}"
-  apt_key:
-    url: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ item }}/gpg.key
-
-
-- name: Install EDB repositories
-  with_items:
-    - "{{ edb_repositories }}"
-  loop_control:
-    loop_var: repository
-  apt_repository:
-    filename: edb-{{ repository }}
-    repo: >-
-      deb https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/deb/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} main
-  no_log: true
+- include_tasks: edb-repositories.yml
+  when:
+    edb_repositories is not empty
 
 - include_tasks: repository-cleanup.yml
   vars:
