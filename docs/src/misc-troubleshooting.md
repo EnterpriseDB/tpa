@@ -16,7 +16,8 @@ To create a new virtual environment (assuming tpaexec was installed into the def
 [tpa]$ sudo /opt/EDB/TPA/bin/tpaexec setup
 ```
 
-###Strange AWS errors regarding credentials
+### Strange AWS errors regarding credentials
+
 If the time & date of the TPA server isn't correct, you can get AWS errors similar to this during provisioning:
 ```
 TASK [Register key tpa_cluster in each region] **********************************************
