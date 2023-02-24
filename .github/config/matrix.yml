@@ -38,6 +38,8 @@ simple:
       tpa_postgres_flavour: "postgresql"
     - tpa_architecture: "PGD-Always-ON"
       tpa_postgres_flavour: "postgresql"
+    - tpa_architecture: "PGD-Always-ON"
+      tpa_postgres_flavour: "pgextended"
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "edbpge"
 update_bdr:
