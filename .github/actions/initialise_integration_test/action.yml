@@ -71,7 +71,6 @@ runs:
           CONFIGURE_EXTRA_ARGS+=" --add-witness-node-per-location"
           CONFIGURE_EXTRA_ARGS+=" --active-locations a b"
           CONFIGURE_EXTRA_ARGS+=" --add-witness-only-location c"
-          CONFIGURE_EXTRA_ARGS+=" --edb-repositories dev_postgres_distributed"
 
         fi
         if [ -n "${{ inputs.tpa_os }}" ] ;then
