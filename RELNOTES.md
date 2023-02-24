@@ -2,6 +2,12 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.14 (2023-02-24)
+
+### Bugfixes
+
+- TPA-365 Fix an error whereby package lists are not correctly populated for BDR 3 and 4 configurations
+
 ## v23.13 (2023-02-23)
 
 ### Bugfixes
