@@ -2,32 +2,17 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-# We must use products/default/release if we need repmgr package(s)
-# built against EPAS; and we need repmgr often enough to not require
-# people to specify the repository explicitly in tpa_2q_repositories
-# (unless it is explicitly set to an empty list to allow deployments
-# from local repo mirrors only, with no internet access).
+# We must include the legacy EDB repository if we are installing
+# software that comes from there (which we decide in roles/init).
 
-- set_fact:
-    tpa_2q_repositories: "{{
-      tpa_2q_repositories|default([])|union([
-        'products/default/release'
-      ])
-    }}"
-  when: >-
-    postgresql_flavour == 'epas'
-    and
-    ((
-      tpa_2q_repositories is defined
-      and tpa_2q_repositories is not empty
-      and 'products/default/release' not in tpa_2q_repositories
-      ) or
-     (
-      tpa_2q_repositories is not defined
-      ))
-
-- set_fact:
-    edb_repositories: "{{ edb_repositories|default([]) }}"
+- name: Add legacy EDB repo (1.0) if required
+  set_fact:
+    default_apt_repository_list:
+      "{{ default_apt_repository_list|union(['EDB']) }}"
+    default_yum_repository_list:
+      "{{ default_yum_repository_list|union(['EDB']) }}"
+  when:
+    need_legacy_edb_repo
 
 - include_tasks:
     file: "os/{{ ansible_os_family }}/repositories.yml"

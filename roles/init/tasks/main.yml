@@ -69,6 +69,11 @@
 - include_tasks: postgres.yml
 - include_tasks: src.yml
 
+# Decide which repositories we should use, and check that we have
+# whatever credentials we need to access them.
+
+- include_tasks: repos.yml
+
 # We attempt to gather postgres facts only if there is a valid PGDATA
 # directory, the postgres user exists, and postgres is running; or in
 # other words, only if we have a reasonable chance of being able to

@@ -3,32 +3,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 - set_fact:
-    default_apt_repository_list:
-      "{{ default_apt_repository_list|union(['EDB']) }}"
-  when:
-    postgres_installation_method == 'pkg'
-    and (
-      postgresql_flavour == 'epas'
-      or failover_manager == 'efm'
-      or pem_enabled
-    )
-    and edb_repositories is empty
-
-- set_fact:
     apt_repository_list:
       "{{ apt_repository_list|default(default_apt_repository_list) }}"
-
-# XXX Duplicated in RedHat/repositories.yml
-
-- assert:
-    msg: >
-      Export EDB_REPO_CREDENTIALS_FILE to use the EDB repository
-      (see https://www.enterprisedb.com/user/ for credentials)
-    that:
-      lookup('env', 'EDB_REPO_CREDENTIALS_FILE') != ''
-  when: >
-    'EDB' in apt_repository_list
-  tags: public_repos
 
 - name: Ensure repository list is defined
   assert:
@@ -110,12 +86,7 @@
           'repo': item
         }])
       }}"
-  with_items:
-    - dl/default/release
-    - "{{ tpa_2q_repositories|default([]) }}"
-  when:
-    tpa_2q_repositories is not defined or
-    tpa_2q_repositories is not empty
+  with_items: "{{ tpa_2q_repositories }}"
   vars:
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
     volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
