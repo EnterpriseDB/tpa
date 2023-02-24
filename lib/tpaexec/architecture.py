@@ -859,6 +859,11 @@ class Architecture(object):
         """Set default values for edb_repositories based on the Postgres flavour
         and version in use."""
 
+        edb_repositories = self.args.get("edb_repositories")
+
+        if self.name != "PGD-Always-ON" and not edb_repositories:
+            return
+
         postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
         postgres_version = self.args.get("postgres_version")
         bdr_version = cluster_vars.get("bdr_version")
@@ -882,12 +887,11 @@ class Architecture(object):
         # If we have a list of --edb-repositories, we assume the list is
         # complete, and can override the defaults.
 
-        edb_repositories = self.args.get("edb_repositories")
         if edb_repositories is None:
             edb_repositories = default_repos
         cluster_vars.update(
             {
-                "edb_repositories": edb_repositories or [],
+                "edb_repositories": edb_repositories,
             }
         )
 
