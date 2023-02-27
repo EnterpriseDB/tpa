@@ -47,6 +47,11 @@ jobs:
         distribution: ${{ env.foundation_scanning_blackduck_java-distribution }}
         java-version: ${{ env.foundation_scanning_blackduck_java-version }}
        
+    - name: tpaexec install
+      id: tpaexec-install
+      run: bin/tpaexec setup
+      
+       
     - name: Run Synopsys Detect
       id: run-synopsys-detect
       uses: synopsys-sig/detect-action@v0.3.4
