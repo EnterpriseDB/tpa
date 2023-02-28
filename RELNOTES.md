@@ -6,7 +6,11 @@
 
 ### Bugfixes
 
-- TPA-365 Fix an error whereby package lists are not correctly populated for BDR 3 and 4 configurations
+- TPA-365 Don't set edb_repositories for non-PGD5 clusters
+
+### Minor changes
+
+- TPA-360 Use multi-line BDR DCS configuration in HARP's config.yml
 
 ## v23.13 (2023-02-23)
 
