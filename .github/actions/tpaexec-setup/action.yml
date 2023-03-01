@@ -8,6 +8,11 @@ runs:
   steps:
     - name: Run tpaexec setup
       shell: bash
-      run: ./bin/tpaexec setup --pip-cache-dir ~/.cache/pip
+      run: ./bin/tpaexec setup --pip-cache-dir ~/.cache/pip &>/tmp/setup-output
+
+    - name: Display output on failure
+      run: cat /tmp/setup-output
+      shell: bash
+      if: failure()
 
 outputs: {}

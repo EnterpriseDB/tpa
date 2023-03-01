@@ -19,9 +19,14 @@ runs:
   steps:
 
     - name: Archive the cluster logs
-      run: ./bin/tpaexec archive-logs "${{ inputs.path }}/${{ inputs.cluster }}" -vv
+      run: ./bin/tpaexec archive-logs "${{ inputs.path }}/${{ inputs.cluster }}" -vv &>/tmp/archive-logs
       shell: bash
       if: always()
+
+    - name: Display archive-logs output on failure only
+      run: cat /tmp/archive-logs
+      shell: bash
+      if: failure()
 
     - name: Archive the cluster directory
       run: |
@@ -38,9 +43,14 @@ runs:
       if: always()
 
     - name: Deprovision the cluster
-      run: ./bin/tpaexec deprovision "${{ inputs.path }}/${{ inputs.cluster }}" -vv
+      run: ./bin/tpaexec deprovision "${{ inputs.path }}/${{ inputs.cluster }}" -vv &>/tmp/deprovision
       shell: bash {0}
       if: always()
+
+    - name: Display deprovision output on failure only
+      run: cat /tmp/deprovision
+      shell: bash
+      if: failure()
 
     - name: Remove cluster directory
       run: rm -rf "${{ inputs.path }}/${{ inputs.cluster }}"
