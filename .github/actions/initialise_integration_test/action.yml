@@ -28,6 +28,10 @@ inputs:
     required: false
     description: "TPA postgres type selection"
     default: ""
+  tpa_postgres_version:
+    required: false
+    description: "Postgres version"
+    default: ""
   tpa_package_cache:
     required: false
     description: "Enable local repo and reuse packages"
@@ -93,6 +97,9 @@ runs:
         fi
         if [ -n "${{ inputs.tpa_postgres_flavour }}" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --postgres-flavour ${{ inputs.tpa_postgres_flavour }}"
+        fi
+        if [ -n "${{ inputs.tpa_postgres_version }}" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --postgres-version ${{ inputs.tpa_postgres_version }}"
         fi
 
         # Disable pem for pgextended because of missing pgextendedNN-server-sslutils

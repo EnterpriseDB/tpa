@@ -28,6 +28,10 @@ inputs:
     required: false
     description: "TPA postgres type selection"
     default: ""
+  tpa_postgres_version:
+    required: false
+    description: "Postgres version"
+    default: ""
   tpa_package_cache:
     required: false
     description: "Enable local repo and reuse packages"
@@ -50,6 +54,7 @@ runs:
         tpa_os_version: ${{ inputs.tpa_os_version }}
         tpa_os_image: ${{ inputs.tpa_os_image }}
         tpa_postgres_flavour: ${{ inputs.tpa_postgres_flavour }}
+        tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
         tpa_package_cache: "true"
         cluster: ${{ inputs.cluster }}
 
