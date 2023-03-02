@@ -31,7 +31,7 @@ runs:
       if: always()
 
     - name: Save cluster artifacts before deletion
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: cluster-${{ github.run_number }}-${{ github.run_attempt }}
         path: "${{ inputs.path }}/cluster-*.tar.gz"
