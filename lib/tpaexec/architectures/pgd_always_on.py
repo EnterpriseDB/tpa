@@ -159,6 +159,13 @@ class PGD_Always_ON(BDR):
         """
         super().update_cluster_vars(cluster_vars)
 
+        cluster_vars.update(
+            {
+                "apt_repository_list": [],
+                "yum_repository_list": ["EPEL"],
+            }
+        )
+
         top = self.args["bdr_node_group"]
         bdr_node_groups = [{"name": top}]
 
