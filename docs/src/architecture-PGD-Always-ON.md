@@ -34,7 +34,8 @@ A PGD-Always-ON cluster comprises one or more locations, each with an
 odd number of data nodes (or an even number with an extra witness node),
 and an optional witness-only location, if required to establish reliable
 consensus. These locations, as many as you require, must be named in the
-`--location-names` list.
+`--location-names` list. (If you do not specify any location names, the
+default is to use one location with three data nodes.)
 
 (If you are using TPA to provision an AWS cluster, the locations will be
 mapped to separate availability zones within the `--region` you specify.

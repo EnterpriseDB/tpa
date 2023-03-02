@@ -62,6 +62,9 @@ class PGD_Always_ON(BDR):
             }
         )
 
+    def default_location_names(self):
+        return ["first"]
+
     def num_data_locations(self):
         res = len(self.args["location_names"])
         if self.args["witness_only_location"] is not None:
