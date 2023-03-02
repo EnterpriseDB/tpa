@@ -114,11 +114,7 @@ class PGD_Always_ON(BDR):
                 "PGD does not support more than 1000 nodes per cluster, please modify --data-nodes-per-location value"
             )
 
-        # We must add a witness automatically if there are only two data
-        # nodes per location. Otherwise, we allow adding a witness only
-        # if the number of data nodes is even.
-
-        if data_nodes_per_location == 2:
+        if data_nodes_per_location % 2 == 0:
             self.args["witness_node_per_location"] = True
 
         if witness_node_per_location and data_nodes_per_location % 2 != 0:

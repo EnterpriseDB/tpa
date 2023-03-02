@@ -13,7 +13,6 @@ a subscription to [EDB Repos 2.0](2q_and_edb_repositories.md).
          --architecture PGD-Always-ON \
          --location-names eu-west-1 eu-north-1 eu-central-1 \
          --data-nodes-per-location 2 \
-         --add-witness-node-per-location \
          --active-locations eu-west-1 eu-central-1 \
          --add-witness-only-location eu-north-1 \
          --platform aws --instance-type t3.micro \
@@ -31,11 +30,11 @@ of redundancy, in whatever way this definition makes sense to your use
 case. For example, AWS regions, or availability zones within a region,
 or any other designation to identify where your servers are hosted.
 
-A PGD-Always-ON cluster comprises one or more locations with the same
-number of data nodes (if required to establish consensus, there may be
-an additional witness node in each location, as well as a single extra
-witness-only location). These locations, as many as required, must be
-named in the `--location-names` list.
+A PGD-Always-ON cluster comprises one or more locations, each with an
+odd number of data nodes (or an even number with an extra witness node),
+and an optional witness-only location, if required to establish reliable
+consensus. These locations, as many as you require, must be named in the
+`--location-names` list.
 
 (If you are using TPA to provision an AWS cluster, the locations will be
 mapped to separate availability zones within the `--region` you specify.
@@ -48,10 +47,8 @@ By default, each location will have three data nodes. You may specify
 a different number with `--data-nodes-per-location N`. The minimum
 number is 2.
 
-If you have two data nodes per location, each location must also have an
-extra witness node, and TPA will add one by default. For any even number
-of data nodes >2, you may specify `--add-witness-node-per-location` to
-add the extra witness node.
+If you have an even number of data nodes per location, TPA will add an
+extra witness node to each location automatically.
 
 By default, each location will also have separate PGD-Proxy instances.
 You may specify `--cohost-proxies` to run PGD-Proxy on the data nodes.
