@@ -110,7 +110,10 @@ default_barman_group: barman
 default_barman_home: /var/lib/barman
 default_barman_archive_command: "'barman-wal-archive {{ backup }} {{ inventory_hostname }} %p'"
 
-default_failover_manager: repmgr
+default_failover_manager:
+  epas: efm
+  postgresql: repmgr
+  edbpge: repmgr
 
 default_etcd_peer_port: 2380
 default_etcd_client_port: 2379
