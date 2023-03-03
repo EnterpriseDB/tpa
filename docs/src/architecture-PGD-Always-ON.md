@@ -14,7 +14,7 @@ a subscription to [EDB Repos 2.0](2q_and_edb_repositories.md).
          --location-names eu-west-1 eu-north-1 eu-central-1 \
          --data-nodes-per-location 2 \
          --active-locations eu-west-1 eu-central-1 \
-         --add-witness-only-location eu-north-1 \
+         --witness-only-location eu-north-1 \
          --platform aws --instance-type t3.micro \
          --distribution Debian-minimal \
          --edbpge 15
@@ -27,15 +27,8 @@ You must specify a list of location names for the cluster with
 
 A location represents an independent data centre that provides a level
 of redundancy, in whatever way this definition makes sense to your use
-case. For example, AWS regions, or availability zones within a region,
-or any other designation to identify where your servers are hosted.
-
-A PGD-Always-ON cluster comprises one or more locations, each with an
-odd number of data nodes (or an even number with an extra witness node),
-and an optional witness-only location, if required to establish reliable
-consensus. These locations, as many as you require, must be named in the
-`--location-names` list. (If you do not specify any location names, the
-default is to use one location with three data nodes.)
+case. For example, AWS regions, your own data centres, or any other
+designation to identify where your servers are hosted.
 
 (If you are using TPA to provision an AWS cluster, the locations will be
 mapped to separate availability zones within the `--region` you specify.
@@ -44,12 +37,25 @@ VPC peering to allow instances in different regions to communicate with
 each other. For a multi-region cluster, you will need to set up VPC
 peering yourself.)
 
-By default, each location will have three data nodes. You may specify
-a different number with `--data-nodes-per-location N`. The minimum
-number is 2.
+A PGD-Always-ON cluster comprises a number of locations, preferably odd,
+each with the same number of data nodes, again preferably odd. If you do
+not specify any --location-names, the default is to use a single
+location with three data nodes.
 
-If you have an even number of data nodes per location, TPA will add an
-extra witness node to each location automatically.
+Use `--data-nodes-per-location N` to specify a different number of data
+nodes. The minimum number is 2.
+
+If you specify an even number of data nodes per location, TPA will add
+an extra witness node to each location automatically. This retains the
+ability to establish reliable consensus while allowing cost savings (a
+witness has minimal hardware requirements compared to the data nodes).
+
+A cluster with only two locations would entirely lose the ability to
+establish global consensus if one of the locations were to fail. We
+recommend adding a third witness-only location (which contains no data
+nodes, only a witness node, again used to reliably establish consensus).
+Use `--witness-only-location loc` to designate one of your locations as
+a witness. (This location must not be among the `--active-locations`.)
 
 By default, each location will also have separate PGD-Proxy instances.
 You may specify `--cohost-proxies` to run PGD-Proxy on the data nodes.
@@ -59,12 +65,6 @@ routing, i.e., to elect a write lead from all available data nodes
 across all locations. You may specify `--active-locations l2 l3` to
 limit connection routing to nodes in the specified locations. This will
 enable subgroup RAFT and proxy routing for those locations only.
-
-You may optionally specify `--add-witness-only-location loc` to
-designate one of the cluster's locations as a special witness-only
-location that contains no data nodes and only a single witness node,
-used to improve the availability of consensus. This location cannot be
-among the active locations list.
 
 You may optionally specify `--database-name dbname` to set the name of
 the database with BDR enabled (default: bdrdb).

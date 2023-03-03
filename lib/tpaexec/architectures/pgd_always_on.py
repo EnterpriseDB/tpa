@@ -40,6 +40,7 @@ class PGD_Always_ON(BDR):
             dest="witness_node_per_location",
         )
         g.add_argument(
+            "--witness-only-location",
             "--add-witness-only-location",
             dest="witness_only_location",
             help="optional witness only location",
@@ -113,8 +114,15 @@ class PGD_Always_ON(BDR):
             errors.append("--data-nodes-per-location cannot be less than 2")
 
         if data_nodes_per_location * len(location_names) > 1000:
-            errors.append(
-                "PGD does not support more than 1000 nodes per cluster, please modify --data-nodes-per-location value"
+            raise ArchitectureError(
+                f"PGD-Always-ON does not support more than 1000 nodes per cluster"
+            )
+
+        if len(location_names) == 2:
+            print(
+                "WARNING: PGD-Always-ON clusters with only two locations will "
+                "lose global consensus entirely if any one location fails.\n"
+                "Consider adding another location (which may be a --witness-only-location)"
             )
 
         if data_nodes_per_location % 2 == 0:
@@ -125,20 +133,15 @@ class PGD_Always_ON(BDR):
                 "--add-witness-node-per-location can only be specified with even number of data nodes per location"
             )
 
-        if witness_only_location and len(location_names) % 2 == 0:
-            errors.append(
-                "--add-witness-only-location can only be specified with odd number of locations"
-            )
-
         if witness_only_location and witness_only_location not in location_names:
             errors.append(
-                "--add-witness-only-location '%s' must be included in location list"
+                "--witness-only-location '%s' must be included in location list"
                 % witness_only_location
             )
 
         if witness_only_location and witness_only_location in active_locations:
             errors.append(
-                "--add-witness-only-location '%s' must not be an active location"
+                "--witness-only-location '%s' must not be an active location"
                 % witness_only_location
             )
 
