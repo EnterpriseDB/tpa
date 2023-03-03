@@ -1,8 +1,10 @@
 # PGD-Always-ON
 
-EDB Postgres Distributed in an Always-ON configuration, intended for use in production.
+EDB Postgres Distributed 5 in an Always-ON configuration,
+suitable for use in test and production.
 
-This architecture is meant for use with PGD (BDR) version 5 only.
+This architecture is valid for use with PGD version 5 only and requires
+a subscription to [EDB Repos 2.0](2q_and_edb_repositories.md).
 
 ## Cluster configuration
 

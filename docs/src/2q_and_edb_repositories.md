@@ -28,6 +28,10 @@ ensure that you have a valid subscription for all the sources used and
 that you have [exported the token](#authenticating-with-package-sources)
 before running `tpaexec deploy` or the operation will fail.
 
+!!! Note
+    EDB is in the process of publishing all software through Repos 2.0,
+    and will eventually remove the older repositories.
+
 ## Authenticating with package sources
 
 To use [EDB Repos 2.0](https://www.enterprisedb.com/repos/) you must
@@ -54,14 +58,17 @@ https://www.enterprisedb.com/user/register?destination=/repository-access-reques
 
 ## How sources are selected by default
 
-For M1 and BDR-Always-ON architectures, the default source is
-2ndQuadrant and the necessary repositories will be added from this
-source. For software that is not available from this source (e.g EDB
-Advanced Server), repositories will be selected from EDB Repos 1.0.
-
 If the PGD-Always-ON architecture is selected, repositories will be
 selected from EDB Repos 2.0 and all software will be sourced
 from these repositories.
+
+For M1 and BDR-Always-ON architectures, the default source is
+2ndQuadrant, and the necessary repositories will be added from this
+source. In addition, the PGDG repositories will be used for community
+packages such as PostgreSQL and etcd as required.
+If EDB software not available in the 2ndQuadrant repos is required
+(e.g. EDB Advanced Server), repositories will be selected from EDB Repos
+1.0.
 
 ## Specifying EDB 2.0 repositories
 
@@ -76,8 +83,8 @@ cluster_vars:
     - postgres_distributed
 ```
 
-This example will install enterprise subscription repository as well as
-postgres_distributed giving access to EPAS and BDR4+ products.
+This example will configure the `enterprise` and `postgres_distributed`
+repositories, giving access to EPAS and PGD5 products.
 On Debian and Ubuntu systems, it will use the APT repository, and on
 RedHat systems, it will use the YUM repository.
 
@@ -102,7 +109,7 @@ On Debian and Ubuntu systems, it will use the APT repository, and on
 RedHat systems, it will use the YUM repository.
 
 The `dl/default/release` repository is always installed by default,
-unless you 
+unless you
 
 - explicitly set `tpa_2q_repositories: []`, or
 - have at least one entry in `edb_repositories`.

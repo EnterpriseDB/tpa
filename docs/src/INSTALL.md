@@ -100,6 +100,10 @@ privileges. You may use any other means to run the commands as root.
 Next, run `tpaexec setup` to create an isolated Python environment and
 install the correct versions of all required modules.
 
+!!! Note
+    On Ubuntu versions prior to 20.04, please use `sudo -H tpaexec setup`
+    (to avoid subsequent permission errors during `tpaexec configure`)
+
 ```bash
 $ sudo /opt/EDB/TPA/bin/tpaexec setup
 ```

@@ -19,6 +19,11 @@ disk on the target instance:
   `export TPA_GIT_CREDENTIALS=username:token` in your environment
   before running `tpaexec deploy`.
 
+!!! Note
+    When deploying to Docker on macOS, you should use only `https://`
+    repository URLs because Docker containers cannot be accessed by ssh
+    from the host in this environment.
+
 ## SSH key authentication
 
 If you are cloning an SSH repository and have an SSH keypair

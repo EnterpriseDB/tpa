@@ -1,9 +1,9 @@
 # Configuring EDB Repos 2.0 repositories
 
-This page explains how to configure EDB Repos 2.0 package repositories 
+This page explains how to configure EDB Repos 2.0 package repositories
 on any system.
 
-For more details on the EDB and 2ndQuadrant package sources used by 
+For more details on the EDB and 2ndQuadrant package sources used by
 TPA see [this page](2q_and_edb_repositories.md).
 
 To specify the complete list of repositories from EDB Repos 2.0 to
@@ -17,8 +17,8 @@ cluster_vars:
     - postgres_distributed
 ```
 
-This example will install enterprise subscription repository as well as
-postgres_distributed giving access to EPAS and BDR4+ products.
+This example will install the enterprise subscription repository as well
+as postgres_distributed giving access to EPAS and PGD5 products.
 On Debian and Ubuntu systems, it will use the APT repository, and on
 RedHat systems, it will use the YUM repository.
 

@@ -1,8 +1,14 @@
 # BDR-Always-ON
 
-BDR in an Always-ON configuration, intended for use in production.
+EDB Postgres Distributed 4 or below in an Always-ON configuration,
+suitable for use in test and production.
 
-In BDR-Always-ON architecture we have four variants, which can be
+This architecture requires a subscription to the legacy 2ndQuadrant
+repositories, and some options require a subscription to EDB Repos 1.0.
+See [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
+for more detail on this topic.
+
+The BDR-Always-ON architecture has four variants, which can be
 selected with the `--layout` configure option:
 
 1. bronze: 2×bdr+primary, bdr+witness, barman, 2×harp-proxy

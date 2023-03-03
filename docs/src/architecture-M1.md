@@ -2,7 +2,19 @@
 
 A Postgres cluster with a primary and a streaming replica, one Barman
 server, and any number of additional replicas cascaded from the first
-one.
+one. This architecture is suitable for testing, demonstrating and
+learning. We plan to release a production primary/standby architecture
+for TPA in the near future.
+
+In default configuration this architecture uses open source software
+only. To use subscription-only EDB software with this architecture
+requires credentials for EDB Repos 1.0. If you choose EDB Advanced
+Server (EPAS) you will also require credentials for the legacy
+2ndQuadrant repos.
+See [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
+for more detail on this topic.
+
+## Default layout
 
 By default, the primary has one read-only replica attached in the same
 location; the replica, in turn, has one cascaded replica attached in a
