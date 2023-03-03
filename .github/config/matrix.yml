@@ -17,13 +17,20 @@ default:
     - "postgresql"
     - "pgextended"
     - "epas"
+    - "edbpge"
   exclude:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "pgextended"
     - tpa_architecture: "BDR-Always-ON"
       tpa_postgres_flavour: "postgresql"
+    - tpa_architecture: "BDR-Always-ON"
+      tpa_postgres_flavour: "edbpge"
     - tpa_architecture: "PGD-Always-ON"
       tpa_postgres_flavour: "postgresql"
+    - tpa_architecture: "PGD-Always-ON"
+      tpa_postgres_flavour: "pgextended"
+    - tpa_architecture: "M1"
+      tpa_postgres_flavour: "edbpge"
 simple:
   tpa_architecture: *default_tpa_architecture
   tpa_postgres_flavour:
