@@ -5,10 +5,11 @@
 - name: Infer default_postgresql_flavour from configured repositories
   set_fact:
     default_postgresql_flavour: pgextended
-  when: >
-    _repos is search('bdr_enterprise') or _repos is search('2ndqpostgres')
-  vars:
-    _repos: "{{ tpa_2q_repositories|default([])|map('lower')|join(',') }}"
+  when:
+    tpa_2q_repositories|default([])
+    |map('lower')
+    |select('contains_any', 'bdr_enterprise', '2ndqpostgres')
+    |list is not empty
 
 # First, we identify a flavour of Postgres that we want to install, but
 # then group some flavours together for the purpose of deriving common
