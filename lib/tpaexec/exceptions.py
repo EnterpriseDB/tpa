@@ -25,7 +25,7 @@ class TPABaseException(Exception):
 
     """
 
-    MSG = "An error occurred during execution of tpaexec configure"
+    MSG = "Error"
 
     @property
     def message(self):
@@ -35,64 +35,60 @@ class TPABaseException(Exception):
 class PlatformError(TPABaseException):
     """Error condition in TPA platform use."""
 
-    MSG = "An error occurred during Platform processing"
+    MSG = "Platform error"
 
 
 class ArchitectureError(TPABaseException):
     """Architecture error exception."""
 
-    MSG = "An error occurred during Architecture processing"
+    MSG = "Architecture error"
 
 
 class BDRArchitectureError(ArchitectureError):
 
     """BDR Architecture error exception class."""
 
-    MSG = "An error occurred during BDR Architecture processing"
+    MSG = "BDR Architecture error"
 
 
 class ImagesArchitectureError(ArchitectureError):
 
     """Images Architecture error exception class."""
 
-    MSG = "An error occurred during Images Architecture processing"
+    MSG = "Images Architecture error"
 
 
 class AWSPlatformError(PlatformError):
     """Error condition in TPA AWS platform use."""
 
-    MSG = "An error occurred during AWS Platform processing"
+    MSG = "AWS Platform error"
 
 
 class DockerPlatformError(PlatformError):
     """Docker specific platform error exception."""
 
-    MSG = "An error occurred during docker platform processing"
+    MSG = "Docker platform error"
 
 
 class NetError(TPABaseException):
-
     """Net error exception class."""
 
-    MSG = "An error occurred during network address processing"
+    pass
 
 
 class TestCompilerError(TPABaseException):
-
     """Test Compiler error exception class."""
 
-    MSG = "An error occurred during test compiling"
+    pass
 
 
 class PasswordReadError(TPABaseException):
-
     """Password reading error exception class."""
 
-    MSG = "An error occurred while reading password"
+    pass
 
 
 class PasswordWriteError(TPABaseException):
-
     """Password writing error exception class."""
 
-    MSG = "An error occurred while writing password"
+    pass
