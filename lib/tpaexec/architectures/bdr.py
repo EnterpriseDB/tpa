@@ -228,6 +228,12 @@ class BDR(Architecture):
         experiment with CAMO.
         """
         if self.args.get("enable_camo", False):
+            postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
+            if postgresql_flavour not in ["edbpge", "pgextended", "epas"]:
+                raise BDRArchitectureError(
+                    "You must use Postgres Extended or EPAS to --enable-camo"
+                )
+
             bdr_primaries = []
             for instance in instances:
                 _vars = instance.get("vars", {})
