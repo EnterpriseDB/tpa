@@ -145,8 +145,9 @@ class BDR(Architecture):
         )
 
         if postgres_flavour == "epas" and (
-            not tpa_2q_repositories or
-            "products/default/release" not in given_repositories):
+            not tpa_2q_repositories
+            or "products/default/release" not in given_repositories
+        ):
             tpa_2q_repositories.append("products/default/release")
 
         if tpa_2q_repositories:
@@ -228,8 +229,8 @@ class BDR(Architecture):
         experiment with CAMO.
         """
         if self.args.get("enable_camo", False):
-            postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
-            if postgresql_flavour not in ["edbpge", "pgextended", "epas"]:
+            postgres_flavour = self.args.get("postgres_flavour")
+            if postgres_flavour not in ["edbpge", "pgextended", "epas"]:
                 raise BDRArchitectureError(
                     "You must use Postgres Extended or EPAS to --enable-camo"
                 )
