@@ -9,21 +9,25 @@ a subscription to [EDB Repos 2.0](2q_and_edb_repositories.md).
 ## Cluster configuration
 
 ```
+# Example invocation
 [tpa]$ tpaexec configure ~/clusters/pgd-ao \
          --architecture PGD-Always-ON \
-         --location-names eu-west-1 eu-north-1 eu-central-1 \
+         --location-names dc1 dc2 dc3 \
+         --active-locations dc1 dc2 \
+         --witness-only-location dc3 \
          --data-nodes-per-location 2 \
-         --active-locations eu-west-1 eu-central-1 \
-         --witness-only-location eu-north-1 \
          --platform aws --instance-type t3.micro \
          --distribution Debian \
          --edbpge 15
+
+# Show all available options
+[tpa]$ tpaexec configure --architecture PGD-Always-ON --help
 ```
 
 You must specify `--architecture PGD-Always-ON`.
 
 You must specify a list of location names for the cluster with
-`--location-names dc1 dc2 dc3`.
+`--location-names dc1 dc2 …`.
 
 A location represents an independent data centre that provides a level
 of redundancy, in whatever way this definition makes sense to your use

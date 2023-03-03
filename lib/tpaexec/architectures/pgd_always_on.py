@@ -22,7 +22,7 @@ class PGD_Always_ON(BDR):
 
         g.add_argument(
             "--active-locations",
-            help="list of active (write) locations",
+            help="List of locations for which proxy routing should be enabled",
             dest="active_locations",
             nargs="+",
         )
@@ -31,25 +31,25 @@ class PGD_Always_ON(BDR):
             type=int,
             dest="data_nodes_per_location",
             default=3,
-            help="how many PGD nodes per location should be deployed",
+            help="Number of PGD data nodes per location",
         )
         g.add_argument(
             "--add-witness-node-per-location",
             action="store_true",
-            help="should there be witness node in every location",
+            help="Not needed; witness nodes are added automatically when required",
             dest="witness_node_per_location",
         )
         g.add_argument(
             "--witness-only-location",
             "--add-witness-only-location",
             dest="witness_only_location",
-            help="optional witness only location",
+            help="Designate a location as a witness-only location (no data nodes)",
             default=None,
         )
         g.add_argument(
             "--cohost-proxies",
             action="store_true",
-            help="cohost proxies on PGD data nodes",
+            help="Run pgd-proxy on data nodes rather than creating separate proxy instances",
             dest="cohost_proxies",
         )
 
