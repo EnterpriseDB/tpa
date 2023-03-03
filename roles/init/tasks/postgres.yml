@@ -10,13 +10,26 @@
   vars:
     _repos: "{{ tpa_2q_repositories|default([])|map('lower')|join(',') }}"
 
+# First, we identify a flavour of Postgres that we want to install, but
+# then group some flavours together for the purpose of deriving common
+# defaults. However, 'edbpge' and 'pgextended' group differently.
+#
+# We treat 'pgextended' as being in the 'postgresql' family (because
+# various things like the default_postgres_bin_dir are the same), but
+# 'edbpge' is another postgres_family. For postgres_family_extended,
+# however, 'edbpge' and 'pgextended' both share defaults which are
+# different from 'postgresql' (mostly package names).
+
 - name: Set postgres_family and postgresql_flavour
   set_fact:
-    postgresql_flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
-    postgres_family: "{{ 'edbpge' if _flavour == 'edbpge'
-                          else 'epas' if _flavour == 'epas'
-                          else 'postgresql' }}"
-    postgres_family_extended: "{{ (_flavour == 'pgextended' or _flavour == 'edbpge')|ternary('pgextended', _flavour) }}"
+    postgresql_flavour: "{{ _flavour }}"
+    postgres_family:
+      "{{ 'edbpge' if _flavour == 'edbpge'
+          else 'epas' if _flavour == 'epas'
+          else 'postgresql' }}"
+    postgres_family_extended:
+      "{{ 'pgextended' if _flavour in ['pgextended', 'edbpge']
+          else _flavour }}"
   vars:
     _flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
 
