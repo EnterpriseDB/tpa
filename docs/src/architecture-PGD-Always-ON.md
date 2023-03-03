@@ -16,7 +16,7 @@ a subscription to [EDB Repos 2.0](2q_and_edb_repositories.md).
          --active-locations eu-west-1 eu-central-1 \
          --witness-only-location eu-north-1 \
          --platform aws --instance-type t3.micro \
-         --distribution Debian-minimal \
+         --distribution Debian \
          --edbpge 15
 ```
 

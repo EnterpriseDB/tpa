@@ -193,9 +193,7 @@ The selected platform determines which distributions are available, and
 which one is used by default.
 
 In general, you should be able to use "Debian", "RedHat", and "Ubuntu"
-to select TPA images that have Postgres and other software preinstalled
-(to reduce deployment times). To use stock distribution images instead,
-append "-minimal" to the label, e.g., "Debian-minimal".
+to select the right images.
 
 This option is not meaningful for the "bare" platform, where TPA has
 no control over which distribution is installed.
@@ -409,7 +407,7 @@ Let's see what happens when we run the following command:
 
 ```bash
 [tpa]$ tpaexec configure ~/clusters/speedy --architecture M1 \
-        --num-cascaded-replicas 2 --distribution Debian-minimal \
+        --num-cascaded-replicas 2 --distribution Debian \
         --platform aws --region us-east-1 --subnet-pattern 10.33.x.x/28 \
         --instance-type t2.medium --root-volume-size 32 \
         --postgres-volume-size 64 --barman-volume-size 128 \

@@ -36,7 +36,7 @@ This architecture is meant for use with BDR versions 3.6, 3.7, and 4.
          --layout gold \
          --harp-consensus-protocol bdr \
          --platform aws --region eu-west-1 --instance-type t3.micro \
-         --distribution Debian-minimal
+         --distribution Debian
 ```
 
 You must specify `--architecture BDR-Always-ON`. (In the example
