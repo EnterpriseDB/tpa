@@ -179,24 +179,45 @@ class Architecture(object):
         )
         g.add_argument("--os-version", metavar="VERSION")
         g.add_argument("--os-image", metavar="LABEL")
+
+        # A combination of --postgres-flavour and --postgres-version tells us
+        # exactly which server to deploy. We need both things, but because we
+        # support multiple ways to specify them, we don't mark the options as
+        # required, just check that we have the value in validate_arguments.
+
         g.add_argument(
-            "--epas",
-            action="store_const",
-            const="epas",
+            "--postgres-flavour",
             dest="postgresql_flavour",
-            help="Install EDB Postgres Advanced Server (EPAS)",
+            choices=["postgresql", "pgextended", "edbpge", "epas"],
+            help="Select a Postgres flavour/distribution to install",
         )
         g.add_argument(
-            "--no-redwood",
-            "--no-redwood-compat",
-            action="store_false",
-            dest="epas_redwood_compat",
-            help="Install EDB Postgres Advanced Server (EPAS) without Oracle compatibility features",
+            "--postgres-version",
+            choices=["10", "11", "12", "13", "14", "15"],
+            help="Select a major version of Postgres to install",
         )
+
+        # For convenience, we accept some shortcuts to set postgresql_flavour.
+
         g.add_argument(
-            "--2q",
-            "--2ndq",
-            "--2ndqpostgres",
+            "--postgresql",
+            action="store_const",
+            const="postgresql",
+            dest="postgresql_flavour",
+            help="Install PostgreSQL",
+        )
+
+        # There are two related variants of Postgres Extended.
+        #
+        # One is what we used to call 2ndQPostgres, which has the same package
+        # names as Postgres, and is provided only through the legacy 2Q repos
+        # for use with existing BDR 3 or 4 clusters (--pgextended).
+        #
+        # The other is EDB Postgres Extended, which has different package names
+        # (edb-postgresextended*) and is available for use with new clusters,
+        # either by itself or with BDR 5 (--edbpge).
+
+        g.add_argument(
             "--pgextended",
             action="store_const",
             const="pgextended",
@@ -210,15 +231,34 @@ class Architecture(object):
             dest="postgresql_flavour",
             help="Install EDB Postgres Extended",
         )
+
+        # When installing EPAS, you must specify whether to use Redwood mode
+        # (with Oracle compatibility features enabled) or Berkeley mode. EPAS
+        # itself operates in Redwood mode by default (it's an initdb option).
+
         g.add_argument(
-            "--postgres-flavour",
+            "--epas",
+            action="store_const",
+            const="epas",
             dest="postgresql_flavour",
-            choices=["pgextended", "epas", "postgresql", "edbpge"],
+            help="Install EDB Postgres Advanced Server (EPAS)",
         )
         g.add_argument(
-            "--postgres-version",
-            choices=["9.4", "9.5", "9.6", "10", "11", "12", "13", "14", "15"],
+            "--redwood",
+            action="store_true",
+            dest="epas_redwood_compat",
+            default=None,
+            help="Enable Oracle compatibility features for EPAS",
         )
+        g.add_argument(
+            "--no-redwood",
+            "--no-redwood-compat",
+            action="store_false",
+            dest="epas_redwood_compat",
+            default=None,
+            help="Disable Oracle compatibility features for EPAS",
+        )
+
         g.add_argument(
             "--use-volatile-subscriptions",
             action="store_true",
@@ -363,6 +403,24 @@ class Architecture(object):
         Look at the arguments collected from the command-line and complain if
         anything seems wrong.
         """
+
+        flavour = args.get("postgresql_flavour")
+        if flavour is None:
+            raise ArchitectureError(
+                "You must select a Postgres flavour, e.g., --postgresql, --epas, --edbpge"
+            )
+
+        redwood = args.get("epas_redwood_compat")
+        if flavour == "epas":
+            if redwood is None:
+                raise ArchitectureError(
+                    "You must specify --redwood or --no-redwood to enable or disable Oracle compatibility features in EPAS"
+                )
+        elif redwood is not None:
+            raise ArchitectureError(
+                "You can specify --redwood/--no-redwood only when using --epas"
+            )
+
         # Validate arguments to --2Q-repositories
         repos = args.get("tpa_2q_repositories") or []
         for r in repos:
@@ -413,14 +471,6 @@ class Architecture(object):
 
         if errors:
             raise ArchitectureError(*(f"--install-from-source {e}" for e in errors))
-
-        if (
-            args.get("epas_redwood_compat") is False
-            and args.get("postgresql_flavour") != "epas"
-        ):
-            raise ArchitectureError(
-                "You can specify --no-redwood only when using --epas"
-            )
 
         # --use-local-repo-only implies --enable-local-repo
         if self.args.get("use_local_repo_only"):
@@ -802,7 +852,6 @@ class Architecture(object):
             self.args["tower_settings"] = tower
 
     def postgres_eol_repos(self, cluster_vars):
-
         if (
             self.args.get("postgres_version")
             in [
@@ -812,7 +861,6 @@ class Architecture(object):
             ]
             and self.args.get("distribution") == "RedHat"
         ):
-
             if "yum_repositories" not in cluster_vars.keys():
                 cluster_vars["yum_repositories"] = {}
 
