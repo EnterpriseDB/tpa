@@ -46,11 +46,19 @@ class PGD_Always_ON(BDR):
             help="Designate a location as a witness-only location (no data nodes)",
             default=None,
         )
+
         g.add_argument(
             "--cohost-proxies",
-            action="store_true",
-            help="Run pgd-proxy on data nodes rather than creating separate proxy instances",
-            dest="cohost_proxies",
+            action="store_const",
+            const=0,
+            dest="proxy_nodes_per_location",
+            help="Not needed; pgd-proxy runs on the data nodes by default",
+        )
+        g.add_argument(
+            "--add-proxy-nodes-per-location",
+            type=int,
+            dest="proxy_nodes_per_location",
+            help="Number of separate PGD-Proxy nodes to add in each location",
         )
 
     def update_argument_defaults(self, defaults):
@@ -60,6 +68,7 @@ class PGD_Always_ON(BDR):
                 "barman_volume_size": 128,
                 "postgres_volume_size": 64,
                 "failover_manager": "pgd",
+                "proxy_nodes_per_location": 0,
             }
         )
 
@@ -83,9 +92,9 @@ class PGD_Always_ON(BDR):
         if self.args["witness_node_per_location"]:
             res += self.num_data_locations()
 
-        # 2 Proxies per data location
-        if not self.args["cohost_proxies"]:
-            res += self.num_data_locations() * 2
+        # Up to N proxies per data location
+        num_proxies = self.args.get("proxy_nodes_per_location") or 0
+        res += self.num_data_locations() * num_proxies
 
         # Barman per data location
         res += self.num_data_locations()

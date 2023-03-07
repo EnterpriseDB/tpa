@@ -61,8 +61,10 @@ nodes, only a witness node, again used to reliably establish consensus).
 Use `--witness-only-location loc` to designate one of your locations as
 a witness. (This location must not be among the `--active-locations`.)
 
-By default, each location will also have separate PGD-Proxy instances.
-You may specify `--cohost-proxies` to run PGD-Proxy on the data nodes.
+By default, every data node (in every location) will also run PGD-Proxy
+for connection routing. To create separate PGD-Proxy instances instead,
+use `--add-proxy-nodes-per-location 3` (or however many proxies you want
+to add).
 
 By default, TPA will configure PGD-Proxy to use global connection
 routing, i.e., to elect a write lead from all available data nodes

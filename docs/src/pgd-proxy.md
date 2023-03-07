@@ -4,9 +4,9 @@ TPA will install and configure pgd-proxy for the PGD-Always-ON
 architecture with BDR 5 on any instance with `pgd-proxy` in its `role`.
 
 (By default, the [PGD-Always-ON architecture](architecture-PGD-Always-ON.md)
-includes standalone `pgd-proxy` instances in each location, but using
-the `--cohost-proxies` configure option will install pgd-proxy on the
-BDR instances instead.)
+will run `pgd-proxy` on all the data nodes in every location, but you
+can instead create any number of additional proxy instances with
+`--add-proxy-nodes-per-location 3`.)
 
 ## Configuration
 

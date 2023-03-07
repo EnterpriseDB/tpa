@@ -5,6 +5,7 @@
 
 instances:
 {% for location in location_names %}
+{%   set num_proxies = proxy_nodes_per_location|default(0)|int %}
 {%   if witness_only_location is not defined or location != witness_only_location %}
 {%     for i in range(data_nodes_per_location) %}
 - node: {{ ns.counter }}
@@ -12,7 +13,7 @@ instances:
   location: {{ location }}
   role:
     - bdr
-{%       if cohost_proxies %}
+{%       if num_proxies == 0 %}
     - pgd-proxy
 {%       endif %}
 {%       set ns.counter = ns.counter + 1 %}
@@ -26,8 +27,7 @@ instances:
     - witness
 {%       set ns.counter = ns.counter + 1 %}
 {%     endif %}
-{%     if not cohost_proxies %}
-{%       for i in range(2) %}
+{%     for i in range(num_proxies) %}
 - node: {{ ns.counter }}
   Name: {{ hostnames[ns.counter] }}
   location: {{ location }}
@@ -36,9 +36,8 @@ instances:
       volume_type: none
   role:
     - pgd-proxy
-{%         set ns.counter = ns.counter + 1 %}
-{%       endfor %}
-{%     endif %}
+{%       set ns.counter = ns.counter + 1 %}
+{%     endfor %}
 - node: {{ ns.counter }}
   Name: {{ hostnames[ns.counter] }}
   location: {{ location }}
