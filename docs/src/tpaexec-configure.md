@@ -416,7 +416,7 @@ Let's see what happens when we run the following command:
         --platform aws --region us-east-1 --subnet-pattern 10.33.x.x/28 \
         --instance-type t2.medium --root-volume-size 32 \
         --postgres-volume-size 64 --barman-volume-size 128 \
-        --postgres-version 9.6
+        --postgresql 14
 [tpa]$
 ```
 

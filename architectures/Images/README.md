@@ -11,6 +11,6 @@ For example:
       --distributions Debian RedHat Ubuntu \
       --image-name 'TPA-{distribution}-{label}-{version}-{date}' \
       --image-label 'Postgres' --image-version '9.6' \
-      --postgres-version 9.6
+      --postgresql 14
 
     tpaexec build-images images-20180718 -v

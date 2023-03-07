@@ -34,7 +34,8 @@ enabling automatic failover.
 [tpa]$ tpaexec configure ~/clusters/m1 \
          --architecture M1 \
          --platform aws --region eu-west-1 --instance-type t3.micro \
-         --distribution Debian-minimal
+         --distribution Debian-minimal \
+         --postgresql 14
 ```
 
 You must specify `--architecture M1`. (In the example above, this is

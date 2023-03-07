@@ -77,7 +77,8 @@ neptune
          --hostnames-from <hostnamefile> \
          --architecture BDR-Always-ON \
          --layout bronze \
-         --harp-consensus-protocol bdr
+         --harp-consensus-protocol bdr \
+         --postgresql 14
 ```
 
   The API endpoint is currently accepted and added to config.yml but
