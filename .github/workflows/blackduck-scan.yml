@@ -1,66 +1,48 @@
 ###
-##  Foundation-security BlackDuck workflow 
+##  Foundation-security BlackDuck workflow
 #
 name: Foundation-Security/Black Duck Scan
 
 on:
   push:
-    tags:        
+    tags:
       - '**'
   workflow_dispatch:
 
 jobs:
   Blackduck-Scan:
     runs-on: ubuntu-20.04
+    permissions: # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+      id-token: write
+      contents: read
     steps:
-    - name: Checkout source repository
-      id: checkout-source
-      uses: actions/checkout@v3
-
-    - name: Checkout foundation repository
-      id: checkout-foundation
-      uses: actions/checkout@v3
-      with:
-          repository: EnterpriseDB/foundation-packaging
-          ref: main
-          path: foundation
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: ${{github.repository}}
+          ref: ${{ github.ref }}
+          path: source
           token: ${{secrets.GH_SLONIK}}
 
-    - name: Set defaults
-      id: set-default
-      shell: bash
-      run: |
-        echo "foundation_scanning_blackduck_java-distribution=adopt" >> $GITHUB_ENV;
-        echo "foundation_scanning_blackduck_java-version=11" >> $GITHUB_ENV;
-        echo "foundation_scanning_blackduck_detect-version=8.2.0" >> $GITHUB_ENV;
-        echo "foundation_scanning_blackduck_scan-mode=INTELLIGENT" >> $GITHUB_ENV;
+      - name: Checkout foundation-security repository
+        id: checkout-foundation-security
+        uses: actions/checkout@v3
+        with:
+          repository: EnterpriseDB/foundation-security
+          ref: master
+          path: foundation-security
+          token: ${{secrets.GH_SLONIK}}
 
-    - name: Get foundation config
-      id: get-foundation-config
-      uses: ./foundation/actions/get/foundation-config
-      continue-on-error: true     
-        
-    - name: Set up JDK
-      id: setup-jdk
-      uses: actions/setup-java@v3
-      with:
-        distribution: ${{ env.foundation_scanning_blackduck_java-distribution }}
-        java-version: ${{ env.foundation_scanning_blackduck_java-version }}
-       
-    - name: tpaexec install
-      id: tpaexec-install
-      run: bin/tpaexec setup
-      
-       
-    - name: Run Synopsys Detect
-      id: run-synopsys-detect
-      uses: synopsys-sig/detect-action@v0.3.4
-      env:
-        DETECT.PROJECT.VERSION.NAME: ${{ github.ref_type }}/${{ github.ref_name }}
-        DETECT.PROJECT.NAME: ${{ github.event.repository.name }}
-      with: 
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        blackduck-url: ${{ secrets.BLACKDUCK_URL }}
-        blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
-        detect-version: ${{ env.foundation_scanning_blackduck_detect-version }}
-        scan-mode: ${{ env.foundation_scanning_blackduck_scan-mode }}
+      - name: tpaexec install
+        id: tpaexec-install
+        run: bin/tpaexec setup
+
+      - name: BlackDuck Scan
+        id: call-bd-action
+        uses: ./foundation-security/actions/blackduck
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          blackduck-url: ${{ secrets.BLACKDUCK_URL }}
+          blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
