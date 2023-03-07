@@ -2,6 +2,54 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.16 (unreleased)
+
+### Notable changes
+
+- TPA-372 Use a single location by default for PGD-Always-ON clusters
+
+  The default PGD-Always-ON cluster will now have one location with an
+  associated subgroup containing 2 data nodes and 1 witness node.
+
+- TPA-370 Run pgd-proxy on data nodes by default
+
+  Adopt the old `--cohost-proxies` behaviour by running pgd-proxy
+  on data nodes by default.
+
+  Add a new option: `--add-proxy-nodes-per-location N` which will create
+  separate proxy instances.
+
+- TPA-371 Add a witness node automatically if `--data_nodes_per_location`
+  is even and print a warning if you specify a cluster with only two
+  locations
+
+  Rename `--add-witness-only-location` back to `--witness-only-location`
+  because we're NOT adding a location, but merely designating an already-named
+  (in `--location-names`) location as a witness-only one.
+
+### Minor changes
+
+- TPA-368 Require both Postgres flavour and version to be specified explicitly
+  at `tpaexec configure` time
+
+  Here are some examples:
+
+  * --postgresql 14
+  * --edbpge 15
+  * --epas 15 --redwood
+  * --postgresql --postgres-version 14
+
+- TPA-385 Improve both documentation and code around the use of the various
+  different supported EDB software repositories
+
+- TPA-374 Don't include PGDG repository by default for PGD-Always-ON clusters
+
+### Bugfixes
+
+- TPA-318 Use EFM by default to manage failover with EPAS
+
+- TPA-378 Do not install pglogical for M1 architecture by default
+
 ## v23.15 (2023-03-15)
 
 ### Minor changes
