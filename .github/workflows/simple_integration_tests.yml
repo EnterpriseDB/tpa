@@ -74,3 +74,4 @@ jobs:
           cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}
           tpa_architecture: ${{ matrix.tpa_architecture }}
           tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ matrix.tpa_postgres_version }}

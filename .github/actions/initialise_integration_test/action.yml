@@ -109,6 +109,10 @@ runs:
           CONFIGURE_EXTRA_ARGS+=" --enable-pem"
         fi
 
+        # enable redwood for epas.
+        if [ "${{ inputs.tpa_postgres_flavour }}" == "epas" ] ;then
+          CONFIGURE_EXTRA_ARGS+=" --redwood"
+        fi
         # If package caching is enabled we enforce use of local repo
         if [ "${{ inputs.tpa_package_cache }}" == "true" ] ;then
           CONFIGURE_EXTRA_ARGS+=" --use-local-repo-only"

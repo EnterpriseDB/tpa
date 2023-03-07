@@ -41,6 +41,8 @@ def architecture():
             "--network",
             "10.33.0.0/24",
             "--no-git",
+            "--postgresql",
+            "14",
         ],
     )
     d.configure(force=True)
@@ -87,6 +89,8 @@ def architecture_bare():
             "--platform",
             "bare",
             "--no-git",
+            "--postgresql",
+            "14",
         ],
     )
     d.configure(force=True)

@@ -18,6 +18,8 @@ default:
     - "pgextended"
     - "epas"
     - "edbpge"
+  tpa_postgres_version:
+    - 14
   exclude:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "pgextended"
@@ -38,6 +40,8 @@ simple:
     - "epas"
     - "postgresql"
     - "edbpge"
+  tpa_postgres_version:
+    - 14
   exclude:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "pgextended"
