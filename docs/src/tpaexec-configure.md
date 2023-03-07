@@ -460,7 +460,7 @@ ec2_vpc_subnets:
 
 cluster_vars:
   postgres_version: 14
-  postgresql_flavour: postgresql
+  postgres_flavour: postgresql
   tpa_2q_repositories: []
   vpn_network: 192.168.33.0/24
 

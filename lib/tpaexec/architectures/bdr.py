@@ -63,7 +63,7 @@ class BDR(Architecture):
         # that setting at all.
 
         tpa_2q_repositories = self.args.get("tpa_2q_repositories") or []
-        postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
+        postgres_flavour = self.args.get("postgres_flavour")
         postgres_version = self.args.get("postgres_version")
         bdr_version = self.args.get("bdr_version")
         harp_enabled = self.args.get("failover_manager") == "harp"
@@ -104,16 +104,16 @@ class BDR(Architecture):
         extensions = []
 
         if bdr_version == "1":
-            postgresql_flavour = "postgresql-bdr"
+            postgres_flavour = "postgresql-bdr"
         elif bdr_version == "2":
             if not tpa_2q_repositories or "/bdr2/" not in given_repositories:
                 tpa_2q_repositories.append("products/bdr2/release")
         elif bdr_version == "3":
             extensions = ["pglogical"]
             if not tpa_2q_repositories:
-                if postgresql_flavour == "pgextended":
+                if postgres_flavour == "pgextended":
                     tpa_2q_repositories.append("products/bdr_enterprise_3_7/release")
-                elif postgresql_flavour == "epas":
+                elif postgres_flavour == "epas":
                     tpa_2q_repositories.append(
                         "products/bdr_enterprise_3_7-epas/release"
                     )
@@ -123,7 +123,7 @@ class BDR(Architecture):
         elif bdr_version == "4":
             if not tpa_2q_repositories or "/bdr4/" not in given_repositories:
                 tpa_2q_repositories.append("products/bdr4/release")
-            if postgresql_flavour == "pgextended" and (
+            if postgres_flavour == "pgextended" and (
                 not tpa_2q_repositories or "/2ndqpostgres/" not in given_repositories
             ):
                 tpa_2q_repositories.append("products/2ndqpostgres/release")
@@ -140,11 +140,11 @@ class BDR(Architecture):
                 "postgres_coredump_filter": "0xff",
                 "bdr_version": bdr_version,
                 "postgres_version": postgres_version,
-                "postgresql_flavour": postgresql_flavour,
+                "postgres_flavour": postgres_flavour,
             }
         )
 
-        if postgresql_flavour == "epas" and (
+        if postgres_flavour == "epas" and (
             not tpa_2q_repositories or
             "products/default/release" not in given_repositories):
             tpa_2q_repositories.append("products/default/release")

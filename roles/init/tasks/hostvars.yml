@@ -39,14 +39,23 @@
     tpa_2q_repositories is not defined and
     twoq_repositories is defined
 
-# We set the postgresql_flavour: pgextended to maintain backwards compatibility
-# with existing clusters that have postgresql_flavour: 2q explicitly set.
+# For backwards compability, we translate postgresql_flavour to
+# postgres_flavour (but new configurations will only use the latter).
 
 - set_fact:
-    postgresql_flavour: pgextended
+    postgres_flavour: "{{ postgresql_flavour }}"
   when:
-    postgresql_flavour is defined
-    and postgresql_flavour == '2q'
+    postgres_flavour is not defined
+    and postgresql_flavour is defined
+
+# We set the postgres_flavour: pgextended to maintain backwards compatibility
+# with existing clusters that have postgres_flavour: 2q explicitly set.
+
+- set_fact:
+    postgres_flavour: pgextended
+  when:
+    postgres_flavour is defined
+    and postgres_flavour == '2q'
 
 - set_fact:
     failover_manager: harp

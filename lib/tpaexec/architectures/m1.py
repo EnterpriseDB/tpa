@@ -51,11 +51,11 @@ class M1(Architecture):
         Makes architecture-specific changes to cluster_vars if required
         """
         tpa_2q_repositories = self.args.get("tpa_2q_repositories") or []
-        postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
+        postgres_flavour = self.args.get("postgres_flavour")
 
         given_repositories = " ".join(tpa_2q_repositories)
 
-        if postgresql_flavour == "epas" and (
+        if postgres_flavour == "epas" and (
             not tpa_2q_repositories or
             "products/default/release" not in given_repositories):
             tpa_2q_repositories.append("products/default/release")

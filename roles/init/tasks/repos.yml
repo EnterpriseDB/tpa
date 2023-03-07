@@ -58,8 +58,8 @@
     tpa_2q_repositories:
       - products/2ndqpostgres/release
   when:
-    postgresql_flavour is defined
-    and postgresql_flavour == 'pgextended'
+    postgres_flavour is defined
+    and postgres_flavour == 'pgextended'
     and tpa_2q_repositories is not defined
 
 # We must use products/default/release if we need repmgr package(s)
@@ -74,7 +74,7 @@
       "{{ tpa_2q_repositories|default([])
           |union(['products/default/release']) }}"
   when:
-    - postgresql_flavour == 'epas'
+    - postgres_flavour == 'epas'
     - tpa_2q_repositories is not defined
       or tpa_2q_repositories is not empty
 
@@ -143,7 +143,7 @@
   set_fact:
     need_legacy_edb_repo:
       "{{ postgres_installation_method == 'pkg'
-          and (postgresql_flavour == 'epas'
+          and (postgres_flavour == 'epas'
             or failover_manager == 'efm'
             or pem_enabled)
           and edb_repositories is empty }}"

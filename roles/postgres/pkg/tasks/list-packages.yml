@@ -11,7 +11,7 @@
   set_fact:
     need_pgespresso_packages: "{{
         postgres_family == 'postgresql' and postgres_version is version(9.5, '<=')
-        and postgresql_flavour != 'postgresql-bdr'
+        and postgres_flavour != 'postgresql-bdr'
       }}"
   vars:
     sources: "{{ install_from_source|map(attribute='name')|unique|list }}"

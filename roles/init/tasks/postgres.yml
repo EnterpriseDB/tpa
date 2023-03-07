@@ -2,9 +2,9 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-- name: Infer default_postgresql_flavour from configured repositories
+- name: Infer default_postgres_flavour from configured repositories
   set_fact:
-    default_postgresql_flavour: pgextended
+    default_postgres_flavour: pgextended
   when:
     tpa_2q_repositories|default([])
     |map('lower')
@@ -21,9 +21,9 @@
 # however, 'edbpge' and 'pgextended' both share defaults which are
 # different from 'postgresql' (mostly package names).
 
-- name: Set postgres_family and postgresql_flavour
+- name: Set postgres_family and postgres_flavour
   set_fact:
-    postgresql_flavour: "{{ _flavour }}"
+    postgres_flavour: "{{ _flavour }}"
     postgres_family:
       "{{ 'edbpge' if _flavour == 'edbpge'
           else 'epas' if _flavour == 'epas'
@@ -32,15 +32,15 @@
       "{{ 'pgextended' if _flavour in ['pgextended', 'edbpge']
           else _flavour }}"
   vars:
-    _flavour: "{{ postgresql_flavour|default(default_postgresql_flavour) }}"
+    _flavour: "{{ postgres_flavour|default(default_postgres_flavour) }}"
 
-- name: Validate postgresql_flavour according those which are supported
+- name: Ensure postgres_flavour is set to a supported value
   assert:
     msg: >-
-      Unrecognised postgresql_flavour setting: '{{ postgresql_flavour }}'
+      Unrecognised postgres_flavour setting: '{{ postgres_flavour }}'
       (try postgresql, pgextended, epas or edbpge)
     that:
-      - postgresql_flavour in ['postgresql', 'pgextended', 'epas', 'postgresql-bdr', 'edbpge']
+      postgres_flavour in ['postgresql', 'pgextended', 'epas', 'postgresql-bdr', 'edbpge']
 
 - name: Set postgres_data_dir
   set_fact:
@@ -124,10 +124,10 @@
 - name: Set various postgres facts
   set_fact:
     postgres_package_name: "{{
-        'postgresql' if postgresql_flavour in ['postgresql', 'pgextended'] else
-        'postgresql-bdr' if postgresql_flavour == 'postgresql-bdr' else
+        'postgresql' if postgres_flavour in ['postgresql', 'pgextended'] else
+        'postgresql-bdr' if postgres_flavour == 'postgresql-bdr' else
         'edb-as' if postgres_family == 'epas' else
-        'edb-postgresextended' if postgresql_flavour == 'edbpge' else ''
+        'edb-postgresextended' if postgres_flavour == 'edbpge' else ''
       }}"
     postgres_user: "{{ postgres_user|default(default_postgres_user[postgres_family]) }}"
     postgres_group: "{{ postgres_group|default(default_postgres_user[postgres_family]) }}"

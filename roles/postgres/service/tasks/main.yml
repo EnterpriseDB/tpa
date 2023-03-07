@@ -26,7 +26,7 @@
     _postmaster: "{{
         '%s/%spostmaster' % (
           postgres_bin_dir,
-          (postgresql_flavour == 'epas')|ternary('edb-', '')
+          (postgres_flavour == 'epas')|ternary('edb-', '')
         )
       }}"
 

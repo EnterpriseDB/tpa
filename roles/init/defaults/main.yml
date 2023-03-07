@@ -2,7 +2,7 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-default_postgresql_flavour: postgresql
+default_postgres_flavour: postgresql
 
 default_postgres_version: 13
 

@@ -229,7 +229,7 @@ class Architecture(object):
 
         g_flavour.add_argument(
             "--postgres-flavour",
-            dest="postgresql_flavour",
+            dest="postgres_flavour",
             choices=supported_flavours,
             help="Select a Postgres flavour/distribution to install",
         )
@@ -239,7 +239,7 @@ class Architecture(object):
             action=FlavourAndMaybeVersionAction,
             const="postgresql",
             nargs="?",
-            dest="postgresql_flavour",
+            dest="postgres_flavour",
             choices=supported_versions,
             help="Install PostgreSQL",
         )
@@ -259,7 +259,7 @@ class Architecture(object):
             action=FlavourAndMaybeVersionAction,
             const="pgextended",
             nargs="?",
-            dest="postgresql_flavour",
+            dest="postgres_flavour",
             choices=supported_versions,
             help="Install Postgres Extended (formerly 2ndQuadrant Postgres) for BDR EE",
         )
@@ -269,7 +269,7 @@ class Architecture(object):
             action=FlavourAndMaybeVersionAction,
             const="edbpge",
             nargs="?",
-            dest="postgresql_flavour",
+            dest="postgres_flavour",
             choices=supported_versions,
             help="Install EDB Postgres Extended",
         )
@@ -279,7 +279,7 @@ class Architecture(object):
             action=FlavourAndMaybeVersionAction,
             const="epas",
             nargs="?",
-            dest="postgresql_flavour",
+            dest="postgres_flavour",
             choices=supported_versions,
             help="Install EDB Postgres Advanced Server (EPAS)",
         )
@@ -449,11 +449,11 @@ class Architecture(object):
         anything seems wrong.
         """
 
-        # By now, both postgresql_flavour and postgres_version must be set,
+        # By now, both postgres_flavour and postgres_version must be set,
         # whether they were specified separately or through a shortcut like
         # `--postgresql 14`.
 
-        flavour = args.get("postgresql_flavour")
+        flavour = args.get("postgres_flavour")
         version = args.get("postgres_version")
 
         if isinstance(flavour, tuple):
@@ -465,7 +465,7 @@ class Architecture(object):
                 raise ArchitectureError(
                     f"You must select a single Postgres version, '--{flavour} {v}' conflicts with '--postgres-version {version}'"
                 )
-            args["postgresql_flavour"] = flavour
+            args["postgres_flavour"] = flavour
             args["postgres_version"] = version = v
 
         if not flavour:
@@ -839,7 +839,7 @@ class Architecture(object):
             if val is not None:
                 cluster_vars[k] = cluster_vars.get(k, val)
 
-        if self.args.get("postgresql_flavour") == "epas":
+        if self.args.get("postgres_flavour") == "epas":
             k = "epas_redwood_compat"
             cluster_vars[k] = cluster_vars.get(k, self.args.get(k))
 
@@ -979,7 +979,7 @@ class Architecture(object):
         if self.name != "PGD-Always-ON" and not edb_repositories:
             return
 
-        postgresql_flavour = self.args.get("postgresql_flavour")
+        postgres_flavour = self.args.get("postgres_flavour")
         postgres_version = self.args.get("postgres_version")
         bdr_version = cluster_vars.get("bdr_version")
 
@@ -990,9 +990,9 @@ class Architecture(object):
             "epas": ["enterprise"],
         }
 
-        default_repos = postgres_repos[postgresql_flavour]
+        default_repos = postgres_repos[postgres_flavour]
         if bdr_version == "5":
-            if postgresql_flavour == "pgextended":
+            if postgres_flavour == "pgextended":
                 raise ArchitectureError(
                     "Please use --edbpge instead of --pgextended for PGD-Always-ON"
                 )
@@ -1016,7 +1016,7 @@ class Architecture(object):
         belong under cluster_vars
         """
         return [
-            "postgresql_flavour",
+            "postgres_flavour",
             "postgres_version",
             "tpa_2q_repositories",
             "use_volatile_subscriptions",

@@ -250,7 +250,7 @@
   vars:
     token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
     volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
-    _flavour: "{{ postgresql_flavour|default('postgresql') }}"
+    _flavour: "{{ postgres_flavour }}"
     _repopg: "{{ (_flavour == 'postgresql-bdr')|ternary('pgbdr', 'pg') }}"
     version_tag: >-
       {{ (_flavour == 'postgresql-bdr')|ternary('bdr9.4', postgres_version) }}
