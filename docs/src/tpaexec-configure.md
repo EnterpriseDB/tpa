@@ -7,7 +7,8 @@ cycle.
 ## Quickstart
 
 ```bash
-[tpa]$ tpaexec configure ~/clusters/speedy --architecture M1
+[tpa]$ tpaexec configure ~/clusters/speedy --architecture M1 \
+        --postgresql 14
 ```
 
 This command will create a directory named `~/clusters/speedy` and
@@ -39,6 +40,9 @@ architecture, e.g.,
 [BDR-Always-ON](architecture-BDR-Always-ON.md).
 For a complete list of architectures, run
 `tpaexec info architectures`.
+
+Next, you must specify a [flavour and version of
+Postgres](#postgres-flavour-and-version) to install.
 
 The arguments above are always mandatory. The rest of the options
 described here may be safely omitted, as in the example above; the
@@ -220,7 +224,7 @@ Use this option with care. TPA will configure the named repositories
 with no attempt to make sure the combination is appropriate.
 
 To use these options, you must ``export TPA_2Q_SUBSCRIPTION_TOKEN=xxx``
-or ``export EDB_SUBSCRIPTION_TOKEN=xxx`` before you run tpaexec. 
+or ``export EDB_SUBSCRIPTION_TOKEN=xxx`` before you run tpaexec.
 You can get a 2ndQuadrant token from the 2ndQuadrant Portal under
 "Company info" in the left menu, then "Company". You can get an EDB
 token from enterprisedb.com/repos.
@@ -240,8 +244,35 @@ details.
 
 ### Software versions
 
-You may optionally specify `--postgres-version 13` or any other
-supported major version of Postgres.
+#### Postgres flavour and version
+
+TPA supports PostgreSQL, EDB Postgres Extended, and EDB Postgres
+Advanced Server (EPAS) versions 11 through 15.
+
+You must specify both the flavour (or distribution) and major version of
+Postgres to install, for example:
+
+* `--postgresql 14` will install PostgreSQL 14
+
+* `--edbpge 15` will install EDB Postgres Extended 15
+
+* `--epas 15 --redwood` will install EPAS 15 in "Redwood" mode
+
+* `--epas 15 --no-redwood` will install EPAS 15 in non-Redwood or
+  "Berkeley" mode
+
+If you are installing EPAS, you must specify whether it should operate
+in `--redwood` or `--no-redwood` mode, i.e., whether to enable or
+disable its Oracle compatibility features.
+
+In addition to the shortcuts above, `configure` will also accept
+`--postgres-flavour postgresql` (or `edbpge`, or `epas`) along with
+`--postgres-version 15` (or any valid supported version).
+
+Installing EDB Postgres Extended or Postgres Advanced Server requires
+a valid [EDB repository subscription](2q_and_edb_repositories.md).
+
+#### Package versions
 
 By default, we always install the latest version of every package. This
 is usually the desired behaviour, but in some testing scenarios, it may
@@ -260,17 +291,6 @@ You may use any version specifier that apt or yum would accept.
 If your version does not match, try appending a `*` wildcard. This
 is often necessary when the package version has an epoch qualifier
 like `2:...`.
-
-You may optionally specify `--epas` which sets `postgresql_flavour` to
-`epas` in the generated config.yml. This means that tpaexec will install
-EDB Postgres Advanced Server (requires EDB repository access)
-instead of community Postgres (the default).
-
-Since EPAS supports both Oracle and postgres compatiblity features,
-by default, EPAS initializes the cluster in `redwood` i.e. Oracle
-compatibility mode. In order to initialize the cluster in postgres
-mode, you may optionally specify `--no-redwood` which sets
-`epas_redwood_compat` to False in the generated config.yml.
 
 You may also specify `--extra-packages p1 p2 …` or
 `--extra-postgres-packages p1 p2 …` to install additional packages.
@@ -439,7 +459,8 @@ ec2_vpc_subnets:
       az: us-east-1b
 
 cluster_vars:
-  postgres_version: 9.6
+  postgres_version: 14
+  postgresql_flavour: postgresql
   tpa_2q_repositories: []
   vpn_network: 192.168.33.0/24
 

@@ -185,25 +185,62 @@ class Architecture(object):
         # support multiple ways to specify them, we don't mark the options as
         # required, just check that we have the value in validate_arguments.
 
-        g.add_argument(
-            "--postgres-flavour",
-            dest="postgresql_flavour",
-            choices=["postgresql", "pgextended", "edbpge", "epas"],
-            help="Select a Postgres flavour/distribution to install",
-        )
+        supported_flavours = ["postgresql", "pgextended", "edbpge", "epas"]
+        supported_versions = ["10", "11", "12", "13", "14", "15"]
+
         g.add_argument(
             "--postgres-version",
-            choices=["10", "11", "12", "13", "14", "15"],
+            dest="postgres_version",
+            choices=supported_versions,
             help="Select a major version of Postgres to install",
         )
 
-        # For convenience, we accept some shortcuts to set postgresql_flavour.
+        class FlavourAndMaybeVersionAction(argparse.Action):
+            """Takes an option such as `--epas` or `--postgresql 15` and stores
+            'epas' or ('postgresql', 15) to `dest`. This lets you avoid having
+            to spell out `--postgres-flavour x --postgres-version y` all the
+            time."""
 
-        g.add_argument(
-            "--postgresql",
-            action="store_const",
-            const="postgresql",
+            def __init__(self, option_strings, dest, nargs=None, **kwargs):
+                # We have to validate `choices` ourselves, because with nargs=?,
+                # if you say just --epas, argparse by default tries to validate
+                # the `const` against `choices`.
+                self.version_choices = kwargs.get('choices')
+                kwargs = {k: v for k, v in kwargs.items() if k != 'choices'}
+                super().__init__(option_strings, dest, nargs=nargs, **kwargs)
+
+            def __call__(self, parser, namespace, arg, option_string=None):
+                value = None
+
+                # `--epas` stores 'epas' (== `const`), `--edbpge 15` stores
+                # ('edbpge', '15'), which validate_arguments will decode.
+                if arg == self.const:
+                    value = arg
+                elif self.version_choices and arg not in self.version_choices:
+                    raise ArchitectureError(
+                        f"You must specify a version in [{', '.join(self.version_choices)}]"
+                    )
+                else:
+                    value = (self.const, arg)
+
+                setattr(namespace, self.dest, value)
+
+        g_flavour = p.add_mutually_exclusive_group()
+
+        g_flavour.add_argument(
+            "--postgres-flavour",
             dest="postgresql_flavour",
+            choices=supported_flavours,
+            help="Select a Postgres flavour/distribution to install",
+        )
+
+        g_flavour.add_argument(
+            "--postgresql",
+            action=FlavourAndMaybeVersionAction,
+            const="postgresql",
+            nargs="?",
+            dest="postgresql_flavour",
+            choices=supported_versions,
             help="Install PostgreSQL",
         )
 
@@ -217,32 +254,40 @@ class Architecture(object):
         # (edb-postgresextended*) and is available for use with new clusters,
         # either by itself or with BDR 5 (--edbpge).
 
-        g.add_argument(
+        g_flavour.add_argument(
             "--pgextended",
-            action="store_const",
+            action=FlavourAndMaybeVersionAction,
             const="pgextended",
+            nargs="?",
             dest="postgresql_flavour",
+            choices=supported_versions,
             help="Install Postgres Extended (formerly 2ndQuadrant Postgres) for BDR EE",
         )
-        g.add_argument(
+
+        g_flavour.add_argument(
             "--edbpge",
-            action="store_const",
+            action=FlavourAndMaybeVersionAction,
             const="edbpge",
+            nargs="?",
             dest="postgresql_flavour",
+            choices=supported_versions,
             help="Install EDB Postgres Extended",
+        )
+
+        g_flavour.add_argument(
+            "--epas",
+            action=FlavourAndMaybeVersionAction,
+            const="epas",
+            nargs="?",
+            dest="postgresql_flavour",
+            choices=supported_versions,
+            help="Install EDB Postgres Advanced Server (EPAS)",
         )
 
         # When installing EPAS, you must specify whether to use Redwood mode
         # (with Oracle compatibility features enabled) or Berkeley mode. EPAS
         # itself operates in Redwood mode by default (it's an initdb option).
 
-        g.add_argument(
-            "--epas",
-            action="store_const",
-            const="epas",
-            dest="postgresql_flavour",
-            help="Install EDB Postgres Advanced Server (EPAS)",
-        )
         g.add_argument(
             "--redwood",
             action="store_true",
@@ -404,10 +449,32 @@ class Architecture(object):
         anything seems wrong.
         """
 
+        # By now, both postgresql_flavour and postgres_version must be set,
+        # whether they were specified separately or through a shortcut like
+        # `--postgresql 14`.
+
         flavour = args.get("postgresql_flavour")
-        if flavour is None:
+        version = args.get("postgres_version")
+
+        if isinstance(flavour, tuple):
+            (flavour, v) = flavour
+            if version and version != v:
+                # We don't need to worry about conflicts between
+                # `--postgres-flavour epas` and `--epas`, because they're in a
+                # mutually exclusive group.
+                raise ArchitectureError(
+                    f"You must select a single Postgres version, '--{flavour} {v}' conflicts with '--postgres-version {version}'"
+                )
+            args["postgresql_flavour"] = flavour
+            args["postgres_version"] = version = v
+
+        if not flavour:
             raise ArchitectureError(
-                "You must select a Postgres flavour, e.g., --postgresql, --epas, --edbpge"
+                "You must select a Postgres flavour, e.g., with --postgresql/--edbpge/--epas"
+            )
+        if not version:
+            raise ArchitectureError(
+                "You must select a Postgres version, e.g., with '--postgres-version 14'"
             )
 
         redwood = args.get("epas_redwood_compat")
@@ -912,7 +979,7 @@ class Architecture(object):
         if self.name != "PGD-Always-ON" and not edb_repositories:
             return
 
-        postgresql_flavour = self.args.get("postgresql_flavour") or "postgresql"
+        postgresql_flavour = self.args.get("postgresql_flavour")
         postgres_version = self.args.get("postgres_version")
         bdr_version = cluster_vars.get("bdr_version")
 
