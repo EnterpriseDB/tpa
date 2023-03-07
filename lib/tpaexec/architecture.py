@@ -248,33 +248,34 @@ class Architecture(object):
         #
         # One is what we used to call 2ndQPostgres, which has the same package
         # names as Postgres, and is provided only through the legacy 2Q repos
-        # for use with existing BDR 3 or 4 clusters (--pgextended).
+        # for use with existing BDR 3 or 4 clusters (--pgextended). Its use
+        # outside BDR-EE was never encouraged (though it used to work), and
+        # that combination was explicitly removed from support.
         #
         # The other is EDB Postgres Extended, which has different package names
-        # (edb-postgresextended*) and is available for use with new clusters,
-        # either by itself or with BDR 5 (--edbpge).
+        # (edb-postgresextended*) and is available for use with new clusters
+        # from the new repos, either by itself or with BDR 5 (--edbpge).
+        #
+        # Because these two flavours, which we MUST internally treat as distinct
+        # (they have different default values and package names), cannot be used
+        # in the same architecture, we are able to accept a single option and
+        # translate it into different postgres_flavour settings based on the
+        # context of its use.
 
         g_flavour.add_argument(
+            "--edb-postgres-extended",
             "--pgextended",
-            action=FlavourAndMaybeVersionAction,
-            const="pgextended",
-            nargs="?",
-            dest="postgres_flavour",
-            choices=supported_versions,
-            help="Install Postgres Extended (formerly 2ndQuadrant Postgres) for BDR EE",
-        )
-
-        g_flavour.add_argument(
             "--edbpge",
             action=FlavourAndMaybeVersionAction,
-            const="edbpge",
+            const="edb-postgres-extended",
             nargs="?",
             dest="postgres_flavour",
             choices=supported_versions,
-            help="Install EDB Postgres Extended",
+            help="Install EDB Postgres Extended (formerly 2ndQuadrant Postgres)",
         )
 
         g_flavour.add_argument(
+            "--edb-postgres-advanced",
             "--epas",
             action=FlavourAndMaybeVersionAction,
             const="epas",
@@ -285,8 +286,9 @@ class Architecture(object):
         )
 
         # When installing EPAS, you must specify whether to use Redwood mode
-        # (with Oracle compatibility features enabled) or Berkeley mode. EPAS
-        # itself operates in Redwood mode by default (it's an initdb option).
+        # (with Oracle compatibility features enabled) or Postgres-compatible
+        # mode. EPAS itself operates in Redwood mode by default (it's an initdb
+        # option).
 
         g.add_argument(
             "--redwood",
@@ -470,7 +472,7 @@ class Architecture(object):
 
         if not flavour:
             raise ArchitectureError(
-                "You must select a Postgres flavour, e.g., with --postgresql/--edbpge/--epas"
+                "You must select a Postgres flavour, e.g., with --postgresql or --edb-postgres-{extended,advanced}"
             )
         if not version:
             raise ArchitectureError(
@@ -485,8 +487,16 @@ class Architecture(object):
                 )
         elif redwood is not None:
             raise ArchitectureError(
-                "You can specify --redwood/--no-redwood only when using --epas"
+                "You can specify --redwood/--no-redwood only when using EPAS"
             )
+
+        # If you specify --edb-postgres-extended, we have to translate the value
+        # to pgextended or edbpge depending on architecture.
+        if flavour == "edb-postgres-extended":
+            if self.name == "BDR-Always-ON":
+                args["postgres_flavour"] = "pgextended"
+            else:
+                args["postgres_flavour"] = "edbpge"
 
         # Validate arguments to --2Q-repositories
         repos = args.get("tpa_2q_repositories") or []
@@ -994,7 +1004,7 @@ class Architecture(object):
         if bdr_version == "5":
             if postgres_flavour == "pgextended":
                 raise ArchitectureError(
-                    "Please use --edbpge instead of --pgextended for PGD-Always-ON"
+                    "Please use --edb-postgres-extended instead of '--postgres-flavour pgextended' for PGD-Always-ON"
                 )
 
             default_repos.append("postgres_distributed")

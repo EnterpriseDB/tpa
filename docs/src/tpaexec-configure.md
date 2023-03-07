@@ -254,20 +254,17 @@ Postgres to install, for example:
 
 * `--postgresql 14` will install PostgreSQL 14
 
-* `--edbpge 15` will install EDB Postgres Extended 15
+* `--edb-postgres-extended 15` will install EDB Postgres Extended 15
 
-* `--epas 15 --redwood` will install EPAS 15 in "Redwood" mode
+* `--edb-postgres-advanced 15 --redwood` will install EPAS 15 in
+  "Redwood" mode
 
-* `--epas 15 --no-redwood` will install EPAS 15 in non-Redwood or
-  "Berkeley" mode
+* `--edb-postgres-advanced 15 --no-redwood` will install EPAS 15 in
+  non-Redwood mode
 
 If you are installing EPAS, you must specify whether it should operate
 in `--redwood` or `--no-redwood` mode, i.e., whether to enable or
 disable its Oracle compatibility features.
-
-In addition to the shortcuts above, `configure` will also accept
-`--postgres-flavour postgresql` (or `edbpge`, or `epas`) along with
-`--postgres-version 15` (or any valid supported version).
 
 Installing EDB Postgres Extended or Postgres Advanced Server requires
 a valid [EDB repository subscription](2q_and_edb_repositories.md).
