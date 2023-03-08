@@ -18,6 +18,11 @@ runs:
 
   steps:
 
+    - name: Start teardown output group
+      run: echo "::group::Teardown"
+      shell: bash
+      if: always()
+
     - name: Archive the cluster logs
       run: ./bin/tpaexec archive-logs "${{ inputs.path }}/${{ inputs.cluster }}" -vv &>/tmp/archive-logs
       shell: bash
@@ -54,6 +59,11 @@ runs:
 
     - name: Remove cluster directory
       run: rm -rf "${{ inputs.path }}/${{ inputs.cluster }}"
+      shell: bash
+      if: always()
+
+    - name: End teardown output group
+      run: echo "::endgroup::"
       shell: bash
       if: always()
 
