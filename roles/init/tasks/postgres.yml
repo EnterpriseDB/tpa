@@ -661,10 +661,16 @@
   set_fact:
     role: "{{ role|union(['efm']) }}"
   when:
-    - failover_manager == 'efm'
-    - "'pem-server' not in role"
-    - ('postgres' in role or 'efm-witness' in role)
-
+     failover_manager == 'efm'
+     and
+     ( 'downloader' in role
+       or (
+            ( 'efm-witness' in role
+               or 'postgres' in role
+            )
+            and 'pem-server' not in role
+          )
+     )
 - name: Recreate role_efm group after role changes
   group_by:
     key: "role_efm"
