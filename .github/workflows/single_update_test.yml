@@ -1,6 +1,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-name: Single Integration Test
+name: Single Update Test
 
 on:
   # Allows you to run this workflow manually from the Actions tab
