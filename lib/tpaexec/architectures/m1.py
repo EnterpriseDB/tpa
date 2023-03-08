@@ -52,6 +52,7 @@ class M1(Architecture):
         """
         tpa_2q_repositories = self.args.get("tpa_2q_repositories") or []
         postgres_flavour = self.args.get("postgres_flavour")
+        failover_manager = self.args.get("failover_manager")
 
         given_repositories = " ".join(tpa_2q_repositories)
 
@@ -64,5 +65,16 @@ class M1(Architecture):
             cluster_vars.update(
                 {
                     "tpa_2q_repositories": tpa_2q_repositories,
+                }
+            )
+        if postgres_flavour == "epas" and not failover_manager:
+            failover_manager = "efm"
+        elif postgres_flavour in ["pgextended", "edbpge", "postgresql"]:
+            failover_manager = "repmgr"
+
+        if failover_manager:
+            cluster_vars.update(
+                {
+                    "failover_manager": failover_manager,
                 }
             )
