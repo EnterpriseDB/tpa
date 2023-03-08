@@ -3,22 +3,18 @@
 name: Simple Integration Tests
 
 on:
-  # Trigger on dev branches
   push:
     branches-ignore:
       - master
       - 'rc/**'
-  # Run when a user requests a review on a PR targeting master
   pull_request:
     types:
       - review_requested
     branches:
       - master
-  # Runs when a user submits a review (see if statement in the jobs section below)
   pull_request_review:
     types:
       - submitted
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:

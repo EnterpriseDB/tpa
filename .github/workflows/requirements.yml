@@ -4,7 +4,6 @@
 # runs dep check to ensure everything is fine after update.
 
 name: Python requirements file update
-# runs on push that made changes to one of the .in files inside the project.
 on:
   push:
     branches-ignore:
@@ -14,7 +13,6 @@ on:
       - requirements-ansible-*.in
       - requirements.in
       - requirements/*.in
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 env:
   LC_ALL: C.UTF-8

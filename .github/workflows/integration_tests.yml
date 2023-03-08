@@ -3,21 +3,17 @@
 name: Integration Tests
 
 on:
-  # Run when changes are pushed to the master branch
   push:
     branches:
       - master
-  # Run when a user requests a review on a PR targeting master
   pull_request:
     types:
       - review_requested
     branches:
       - master
-  # Run when a user submits a review (see if statement in the jobs section below)
   pull_request_review:
     types:
       - submitted
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:
@@ -74,8 +70,9 @@ jobs:
 
       - uses: ./.github/actions/integration-test
         with:
-          cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_os_image }}
+          cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}-${{ matrix.tpa_os_image }}
           tpa_architecture: ${{ matrix.tpa_architecture }}
           tpa_platform: ${{ matrix.tpa_platform }}
           tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
           tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ matrix.tpa_postgres_version }}

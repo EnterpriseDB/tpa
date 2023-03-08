@@ -5,6 +5,7 @@
       "tpa_architecture": "BDR-Always-ON",
       "tpa_os_image": "tpa/debian:10",
       "tpa_postgres_flavour": "pgextended",
+      "tpa_postgres_version": "15",
       "tpa_platform": "docker"
   }
 }

@@ -1,13 +1,10 @@
-###
-##  Foundation-security SonarQube workflow.
-#
 name: Foundation-Security/SonarQube Scan
 
 on:
   push:
-    tags:        
+    tags:
       - '**'
-  pull_request:    
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -23,7 +20,7 @@ jobs:
           fetch-depth: 0
           repository: ${{github.repository}}
           ref: ${{ github.ref }}
-          token: ${{secrets.GH_SLONIK}}     
+          token: ${{secrets.GH_SLONIK}}
 
       - name: Checkout foundation repository
         id: checkout-foundation
@@ -32,7 +29,7 @@ jobs:
            repository: EnterpriseDB/foundation-packaging
            ref: main
            path: foundation
-           token: ${{secrets.GH_SLONIK}}     
+           token: ${{secrets.GH_SLONIK}}
 
       - name: Checkout foundation-security repository
         id: checkout-foundation-security
@@ -41,9 +38,9 @@ jobs:
           repository: EnterpriseDB/foundation-security
           ref: master
           path: foundation-security
-          token: ${{secrets.GH_SLONIK}}    
+          token: ${{secrets.GH_SLONIK}}
 
-      - name: SonarQube Scan 
+      - name: SonarQube Scan
         id: call-sq-composite
         uses: ./foundation-security/actions/sonarqube
         with:

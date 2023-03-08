@@ -1,6 +1,3 @@
-###
-##  Foundation-security BlackDuck workflow
-#
 name: Foundation-Security/Black Duck Scan
 
 on:
