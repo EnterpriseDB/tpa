@@ -35,14 +35,4 @@ runs:
         key: pip-cache-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('requirements**') }}
         restore-keys: pip-cache-${{ runner.os }}-${{ env.pythonLocation }}-
 
-    - name: Install dependencies
-      shell: bash
-      run: |
-        python -m pip install --upgrade pip &>/tmp/pip
-
-    - name: Display output on failure
-      shell: bash
-      run: cat /tmp/pip
-      if: failure()
-
 outputs: {}

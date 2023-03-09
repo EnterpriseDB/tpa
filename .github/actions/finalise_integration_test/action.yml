@@ -18,25 +18,18 @@ runs:
 
   steps:
 
-    - name: Start teardown output group
-      run: echo "::group::Teardown"
-      shell: bash
-      if: always()
-
-    - name: Archive the cluster logs
-      run: ./bin/tpaexec archive-logs "${{ inputs.path }}/${{ inputs.cluster }}" -vv &>/tmp/archive-logs
-      shell: bash
-      if: always()
-
-    - name: Display archive-logs output on failure only
-      run: cat /tmp/archive-logs
-      shell: bash
-      if: failure()
-
-    - name: Archive the cluster directory
+    - name: Archive logs and decommission the cluster
       run: |
-        tar cvzf "${{ inputs.path }}/cluster-${{ inputs.cluster }}.tar.gz" \
-          --exclude="local-repo" "${{ inputs.path }}/${{ inputs.cluster }}"
+        echo "::group::Teardown";
+        cluster="${{ inputs.path }}/${{ inputs.cluster }}";
+        if [[ -d $cluster ]]; then
+          ./bin/tpaexec archive-logs "$cluster" -vv &>/tmp/archive-logs || cat /tmp/archive-logs;
+          tar cvzf "${{ inputs.path }}/cluster-${{ inputs.cluster }}.tar.gz" \
+            --exclude="local-repo" "$cluster";
+          ./bin/tpaexec deprovision "$cluster" -vv &>/tmp/deprovision || cat /tmp/deprovision;
+          rm -rf "$cluster";
+        fi;
+        echo "::endgroup::"
       shell: bash
       if: always()
 
@@ -45,26 +38,6 @@ runs:
       with:
         name: cluster-${{ github.run_number }}-${{ github.run_attempt }}
         path: "${{ inputs.path }}/cluster-*.tar.gz"
-      if: always()
-
-    - name: Deprovision the cluster
-      run: ./bin/tpaexec deprovision "${{ inputs.path }}/${{ inputs.cluster }}" -vv &>/tmp/deprovision
-      shell: bash {0}
-      if: always()
-
-    - name: Display deprovision output on failure only
-      run: cat /tmp/deprovision
-      shell: bash
-      if: failure()
-
-    - name: Remove cluster directory
-      run: rm -rf "${{ inputs.path }}/${{ inputs.cluster }}"
-      shell: bash
-      if: always()
-
-    - name: End teardown output group
-      run: echo "::endgroup::"
-      shell: bash
       if: always()
 
 outputs: { }
