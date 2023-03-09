@@ -545,48 +545,48 @@ help() {
             cat <<TOPICS
 Available help topics:
 
+  Installation and setup
+
     info        Show information about this installation
     setup       Install tpaexec dependencies
     selftest    Test that tpaexec is installed properly
 
-    configure   Generate a cluster configuration
-    configure-options
-                Options available for 'tpaexec configure'
+  Main commands
 
-    provision   Provision instances to host a cluster
+    configure   Generate an initial cluster configuration (config.yml)
+    provision   Create instances and Ansible inventory from config.yml
     deploy      Install and configure software on a cluster
     test        Test the deployed cluster
-    relink      Relink symbolic links within a cluster directory
 
-    ping        Ping instances in a cluster
-    playbook    Execute an arbitrary playbook on instances
-    cmd         Execute arbitrary commands on instances
+  Utility commands
 
-    switchover  Switchover between a primary and a replica
+    ping        Test ssh connectivity to cluster instances
+    cmd         Execute arbitrary Ansible commands
+    playbook    Execute arbitrary Ansible playbooks
 
-    start-postgres
-    stop-postgres
-                Commands for clusters that use LUKS-encrypted volumes
+  Cluster management
+
+    download-packages
+                Download all packages required for a cluster (useful when
+                cluster instances don't have outside connectivity)
 
     update-postgres
                 Upgrade Postgres and Postgres-related packages
                 (e.g, BDR, pglogical, HARP, pgbouncer)
-
-    download-packages
-                Download all packages required for a cluster
 
     show-password
     store-password
                 Commands to manage passwords for cluster users
                 (e.g., postgres_password, pgbouncer_password)
 
-    rebuild-sources
-                Rebuild components configured to build from source
+  Miscellaneous
 
-    rehydrate   Terminate and replace instances (AWS)
-    deprovision Destroy the resources used by a cluster
+    relink      Relink symbolic links within a cluster directory (useful
+                when someone sends you their cluster directory)
 
-Run 'tpaexec help topicname' for more details.
+    deprovision Destroy the cluster and resources it uses
+
+Run 'tpaexec help <topic>' for more details.
 TOPICS
             ;;
 
@@ -619,17 +619,14 @@ INFO
 Command: tpaexec setup
 
 Installs all Python dependencies (Ansible, modules) in an isolated
-virtual environment (using the Python 3 builtin venv module).
+virtual environment (using the Python 3 builtin venv module). The
+venv will be activated automatically whenever you run tpaexec.
+
+Synopsis:
+
+    $TPA_DIR/bin/tpaexec setup
 
 The default location is $TPA_VENV
-
-If you use the default location, which we recommend, the venv will
-be activated automatically whenever you run tpaexec.
-
-You can optionally use '--venv /other/location' to specify a
-different location for the venv. If you do this, you must also
-'export TPA_VENV=/other/location' so that tpaexec can find the
-custom environment.
 SETUP
             ;;
 
@@ -637,50 +634,113 @@ SETUP
             cat <<SELFTEST
 Command: tpaexec selftest
 
-Performs some tests to verify that TPA is installed correctly.
-SELFTEST
-            ;;
+Performs some tests to verify that TPA is installed correctly. You need
+to run this only once, after 'tpaexec setup'.
 
-        configure-options)
-            $PAGER "$TPA_DIR/architectures/lib/OPTIONS.md"
+If this succeeds (all green, failed=0), you're good to go.
+
+Synopsis:
+
+    tpaexec selftest
+
+Next, try 'tpaexec help configure'
+SELFTEST
             ;;
 
         *config*)
             cat <<CONFIG
-Command: tpaexec configure clustername --architecture archname …
+Command: tpaexec configure
 
-Creates a clustername directory containing config.yml and deploy.yml
-according to the selected architecture. After this step, you can run
-'tpaexec provision clustername'.
+Generates an initial cluster configuration based on the options you
+specify for the selected architecture and platform. This command will
+create 'clustername/config.yml' and other files for you.
 
-For more information, see:
-    tpaexec info architectures
-    tpaexec info architectures/<archname>
+The next step is 'tpaexec provision'.
+
+Synopsis:
+
+    tpaexec configure --architecture '<x>' --help
+
+    tpaexec configure /path/to/clustername …options…
+
+Example:
+
+    tpaexec configure clustername           \\
+        --architecture PGD-Always-ON        \\
+        --postgresql 14 --platform docker
+
+Options:
+
+    --architecture Name
+
+        See 'tpaexec info architectures' for a list of supported
+        architectures, and 'tpaexec info architectures/Name' for
+        more details.
+
+    --platform Name
+
+        See 'tpaexec info platforms' for a list of supported platforms,
+        and 'tpaexec info platforms/Name' for more details.
+
+    --help
+
+        Displays all other options available.
+
+Docs: $TPA_DIR/docs/src/tpaexec-configure.md
 CONFIG
             ;;
 
         provision)
             cat <<PROVISION
-Command: tpaexec provision clustername [--owner Owner] [--cached] …
+Command: tpaexec provision
 
-Provisions a cluster according to clustername/config.yml
+Reads clustername/config.yml (as generated by 'tpaexec configure') and
+creates any resources required (e.g., AWS EC2 VMs or Docker containers)
+to host the cluster, and generates an Ansible inventory for the cluster.
 
-You may specify '--owner OwnerName' to override the default cluster
-owner (which is the login name of the current user: ${USER:-$(id -u -n)}).
+(If you are using existing instances with '--platform bare', it will not
+need to create any servers, but just write the connection details you
+specify into the generated inventory.)
 
-You may specify '--cached' to speed up repeated provision runs in
-development by relying on cached information and skipping retests of
-resources like VPCs and subnets.
+Note: you must run 'tpaexec provision' every time you change config.yml,
+to regenerate the inventory.
 
-Any other arguments will be passed to ansible-playbook unmodified.
+The next step is 'tpaexec deploy'.
+
+Synopsis:
+
+    tpaexec provision clustername [-vv]
+
+Options:
+
+    --owner OwnerName
+
+        Override the cluster owner (default: your login name, ${USER:-$(id -u -n)}).
+
+    --cached
+
+        Speed up repeated provision runs in development by relying on
+        cached information and skipping retests of resources like VPCs
+        and subnets.
+
+Any other arguments will be passed through to ansible-playbook.
 PROVISION
             ;;
 
         command|adhoc|cmd)
             cat <<COMMAND
-Command: tpaexec cmd clustername all -m module -a "arguments"
+Command: tpaexec cmd
 
-Runs an ansible command in the context of a cluster
+Runs an ansible(1) ad-hoc command on the instances in a cluster (as
+opposed to ansible-playbook(1); see also 'tpaexec help playbook').
+
+You can specify a list of hosts (or 'all'), a module name, and arguments
+to the module. These will be passed to ansible(1) along with options to
+load the correct inventory for your cluster.
+
+Synopsis:
+
+    tpaexec cmd clustername all -m module -a "arguments"
 
 Examples:
 
@@ -696,41 +756,80 @@ Examples:
     # Ensure key is present in ~admin/.ssh/authorized_keys
     tpaexec cmd clustername all -m authorized_key -a \\
         "user=admin key=\"{{ lookup('file', 'id_someone.pub') }}\""
+
+See also 'tpaexec help playbook'.
 COMMAND
             ;;
 
         ping)
             cat <<PING
-Command: tpaexec ping clustername
+Command: tpaexec ping
 
-Runs the ansible ping module against all hosts in a cluster
+Tests connectivity (usually via SSH) to cluster instances (by running
+the Ansible 'ping' module against all the hosts). If this fails, you
+should investigate and fix the problem before 'tpaexec deploy'.
+
+(You must have already run 'tpaexec provision' first.)
+
+Synopsis:
+
+    tpaexec ping clustername [-vvv]
+
+Options:
+
+    -vvv    Increase verbosity enough to show the exact ssh commands
+            used. Helpful for debugging.
 PING
             ;;
 
         playbook)
             cat <<PLAYBOOK
-Command: tpaexec playbook clustername/playbook.yml
-Command: tpaexec playbook clustername /path/to/playbook.yml
+Command: tpaexec playbook
 
-Runs a playbook in the context of a particular cluster
+Runs an Ansible playbook against the instances in the given cluster.
 
-Any additional arguments will be passed to ansible-playbook unmodified.
+(You must have already run 'tpaexec provision' first.)
+
+Synopsis:
+
+    tpaexec playbook clustername/playbook.yml
+    tpaexec playbook clustername /path/to/playbook.yml
+
+Any options you specify will be passed through to ansible-playbook.
+
+See also 'tpaexec help cmd' to execute ad-hoc commands.
 PLAYBOOK
             ;;
 
         deploy)
             cat <<DEPLOY
-Command: tpaexec deploy clustername
+Command: tpaexec deploy
 
-Deploys a cluster according to clustername/deploy.yml
+Starts with an already-provisioned cluster (i.e., an Ansible inventory
+with server connection details and information derived from config.yml)
+and installs and configures software on the cluster instances.
 
-Any additional arguments will be passed to ansible-playbook unmodified.
+(You must have already run 'tpaexec provision' first.)
+
+Synopsis:
+
+    tpaexec deploy clustername [-vv] [-e var=value]
+
+Options:
+
+    -vv     Increase verbosity (recommended to debug any failures).
+
+    -e var=value
+
+            Override the value of a variable during the deploy.
+
+Any options you specify will be passed through to ansible-playbook.
 DEPLOY
             ;;
 
         test)
             cat <<TEST
-Command: tpaexec test clustername [testname] [options]
+Command: tpaexec test
 
 Runs tests for a cluster according to its architecture.
 
@@ -743,8 +842,16 @@ in the cluster's tests subdirectory first, then fall back to built-in
 tests. You may create new tests (as Ansible playbooks) under the
 cluster's tests subdirectory.
 
-To run tests from a different location, you may specify
-'--include-tests-from /other/path'.
+Synopsis:
+
+    tpaexec test clustername [testname] [options]
+
+Options:
+
+    --include-tests-from /other/path
+
+        Also look for tests defined under /other/path (in addition to
+        the default locations).
 
 The different kinds of tests executed by default have different tags,
 e.g., postgres, repmgr, barman, pgbench. Use '--tags x,y' to select
@@ -759,9 +866,17 @@ TEST
 
         deprovision)
             cat <<DEPROVISION
-Command: tpaexec deprovision clustername
+Command: tpaexec deprovision
 
-Completely destroys a clustername and all associated resources
+Completely destroys a cluster and all associated resources (e.g., any
+cloud VMs that TPA created during 'tpaexec provision'). You'll be left
+with only config.yml and other files generated by 'tpaexec configure'.
+
+Synopsis:
+
+    tpaexec deprovision clustername
+
+Any options you specify will be passed through to ansible-playbook.
 DEPROVISION
             ;;
 
