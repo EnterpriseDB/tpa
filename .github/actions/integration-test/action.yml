@@ -59,15 +59,49 @@ runs:
         cluster: ${{ inputs.cluster }}
 
     - name: Provision the cluster
-      run: ./bin/tpaexec provision "$CLUSTER" -vv
+      run: |
+        echo "::group::tpaexec provision -vv"
+        ./bin/tpaexec provision "$CLUSTER" -vv &>/tmp/tpaexec-provision
+        status=$?
+        cat /tmp/tpaexec-provision
+        echo "::endgroup::"
+        sed -n '/PLAY RECAP/,$p' /tmp/tpaexec-provision|egrep -v '(ResourceWarning|cli.run)' > /tmp/provision-recap;
+        cat /tmp/provision-recap
+        (echo -e "\`tpaexec provision $CLUSTER\`:";
+         echo -e "\`\`\`";
+         cat /tmp/provision-recap;
+         echo -e "\`\`\`") >> $GITHUB_STEP_SUMMARY
+        exit $status
       shell: bash
 
     - name: Deploy the cluster
-      run: ./bin/tpaexec deploy "$CLUSTER" -vv
+      run: |
+        echo "::group::tpaexec deploy -vv"
+        ./bin/tpaexec deploy "$CLUSTER" -vv &>/tmp/tpaexec-deploy
+        status=$?
+        cat /tmp/tpaexec-deploy
+        echo "::endgroup::"
+        sed -n '/PLAY RECAP/,$p' /tmp/tpaexec-deploy|egrep -v '(ResourceWarning|cli.run)' > /tmp/deploy-recap;
+        cat /tmp/deploy-recap
+        (echo -e "\`tpaexec deploy $CLUSTER\`:";
+         echo -e "\`\`\`";
+         cat /tmp/deploy-recap;
+         echo -e "\`\`\`") >> $GITHUB_STEP_SUMMARY
+        exit $status
       shell: bash
 
     - name: Test the cluster
-      run: ./bin/tpaexec test "$CLUSTER" -vv
+      run: |
+        echo "::group::tpaexec test -vv"
+        ./bin/tpaexec test "$CLUSTER" -vv &>/tmp/tpaexec-test
+        cat /tmp/tpaexec-test
+        echo "::endgroup::"
+        sed -n '/PLAY RECAP/,$p' /tmp/tpaexec-test|egrep -v '(ResourceWarning|cli.run)' > /tmp/test-recap;
+        cat /tmp/test-recap
+        (echo -e "\`tpaexec test $CLUSTER\`:";
+         echo -e "\`\`\`";
+         cat /tmp/test-recap;
+         echo -e "\`\`\`") >> $GITHUB_STEP_SUMMARY
       shell: bash
 
     - uses: ./.github/actions/finalise_integration_test
