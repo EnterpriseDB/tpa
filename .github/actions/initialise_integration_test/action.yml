@@ -146,7 +146,10 @@ runs:
         ./bin/tpaexec configure "$CLUSTER" ${CONFIGURE_OPTS} --no-git
         echo "::endgroup::"
         echo "Configure command: tpaexec configure $CLUSTER $CONFIGURE_OPTS"
-        echo "\`tpaexec configure $CLUSTER $CONFIGURE_OPTS\`" >> $GITHUB_STEP_SUMMARY
+        (echo "\`\`\`";
+         echo "tpaexec configure $CLUSTER \\";
+         echo "  $CONFIGURE_OPTS"|fmt|sed -e 's/$/ \\/' -e '$s/ \\$//';
+         echo "\`\`\`") >> $GITHUB_STEP_SUMMARY
       shell: bash
 
     - name: Prepare package cache
