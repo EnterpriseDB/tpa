@@ -1,6 +1,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-FROM --platform=linux/amd64 debian:buster
+FROM debian:buster
 
 LABEL maintainer="EDB <tpa@enterprisedb.com>"
 
@@ -11,7 +11,7 @@ RUN apt-get -y update && \
     apt-get -y install curl gnupg software-properties-common \
     python3.7 python3-pip python3-venv openvpn patch git && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" && \
+    add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/debian buster stable" && \
     apt-get -y update && apt-get -y install docker-ce-cli
 
 # Copy tpaexec sources from the current directory into the image, and
