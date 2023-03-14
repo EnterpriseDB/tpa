@@ -2,21 +2,16 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-# By default, we always install pglogical packages (if it's not being
-# installed from source), unless it's not supported (e.g., with BDRv4).
-# On BDR instances, we must also install BDR packages (again, if it's
-# not being installed from source).
+# We install pglogical packages only if pglogical is in the postgres_extensions
+# list, or if we're installing BDRv3. On BDR instances, we must also install
+# BDR packages if it is not being installed from source.
 
 - name: Determine which optional packages should be installed
   set_fact:
     need_pglogical_packages: "{{
-        'pglogical' not in sources and (
-          postgres_family == 'postgresql' or
-          (postgres_family == 'epas' and 'bdr' in role)
-          or 'pglogical' in postgres_extensions
-        )
-        and postgres_flavour != 'postgresql-bdr'
-        and bdr_version is version(4, '<')
+        ('bdr' in role and bdr_version is version('3', '='))
+        or 'pglogical' in postgres_extensions
+        or 'pglogical' in postgres_databases|json_query('[*].extensions[*].name|[]')
       }}"
     need_bdr_packages: "{{ 'bdr' in role and 'bdr' not in sources }}"
   vars:
@@ -26,41 +21,35 @@
 
 - include_tasks: "os/{{ ansible_os_family }}/list-packages.yml"
 
-- when: "'postgres' in role"
+- when: "'postgres' in role and need_pglogical_packages"
   block:
   - include_role: name=pkg/add_to_list
     vars:
       list_contents: "{{
-          (_pglogical_packages if need_pglogical_packages else [])
-          |union(_bdr_packages if need_bdr_packages else [])
-          |flatten
-        }}"
-
-      _pglogical_packages: "{{
           pglogical_packages[postgres_family]
           |packages_for(ansible_distribution, pglogical_package_version)
         }}"
-      _bdr_packages: "{{
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          pglogical_debug_packages[postgres_family]
+          |packages_for(ansible_distribution, pglogical_package_version)
+        }}"
+
+- when: "'postgres' in role and need_bdr_packages"
+  block:
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
           (bdr_version is version('4', '<'))
           |ternary(
             bdr_packages[postgres_family],
             bdr4_packages[postgres_family_extended])
           |packages_for(ansible_distribution, bdr_package_version)
         }}"
-
   - include_role: name=pkg/add_to_list
     vars:
       list_contents: "{{
-          (_pglogical_debug_packages if need_pglogical_packages else [])
-          |union(_bdr_debug_packages if need_bdr_packages else [])
-          |flatten
-        }}"
-
-      _pglogical_debug_packages: "{{
-          pglogical_debug_packages[postgres_family]
-          |packages_for(ansible_distribution, pglogical_package_version)
-        }}"
-      _bdr_debug_packages: "{{
           (bdr_version is version('4', '<'))
           |ternary(
             bdr_debug_packages[postgres_family],
