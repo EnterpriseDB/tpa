@@ -74,8 +74,7 @@ postgres_debug_packages:
   edbpge:
     Debian: &debian_edbpge_debug_packages
       - "{{ postgres_package_name }}-{{ postgres_version }}-dbgsym"
-    RedHat:
-      - "{{ postgres_package_name }}{{ postgres_versionNN }}-debuginfo"
+    RedHat: []
     Ubuntu: *debian_edbpge_debug_packages
 
 pglogical_packages:
@@ -102,20 +101,17 @@ pglogical_debug_packages:
   postgresql:
     Debian: &debian_pglogical_debug_packages
       - postgresql-{{ postgres_version }}-pglogical-dbgsym
-    RedHat:
-      - postgresql{{ postgres_versionNN }}-pglogical-debuginfo
+    RedHat: []
     Ubuntu: *debian_pglogical_debug_packages
   epas:
     Debian: &debian_epas_pglogical_debug_packages
       - "{{ postgres_package_name }}{{ postgres_version }}-pglogical-dbgsym"
-    RedHat:
-      - "{{ postgres_package_name }}{{ postgres_versionNN }}-pglogical-debuginfo"
+    RedHat: []
     Ubuntu: *debian_epas_pglogical_debug_packages
   edbpge:
     Debian: &debian_edbpge_pglogical_debug_packages
       - postgresql-{{ postgres_version }}-pglogical-dbgsym
-    RedHat:
-      - postgresql{{ postgres_versionNN }}-pglogical-debuginfo
+    RedHat: []
     Ubuntu: *debian_edbpge_pglogical_debug_packages
 
 bdr_packages:
@@ -153,34 +149,29 @@ bdr_debug_packages:
   postgresql:
     Debian: &debian_bdr_debug_packages
       - "{{ postgres_package_name }}-{{ postgres_version }}-bdr-plugin-dbgsym"
-    RedHat:
-      - "{{ postgres_package_name }}{{ postgres_versionNN }}-bdr-debuginfo"
+    RedHat: []
     Ubuntu: *debian_bdr_debug_packages
   epas:
     Debian: &debian_epas_bdr_debug_packages
       - "{{ postgres_package_name }}{{ postgres_version }}-bdr-plugin-dbgsym"
-    RedHat:
-      - "{{ postgres_package_name }}{{ postgres_versionNN }}-bdr-debuginfo"
+    RedHat: []
     Ubuntu: *debian_epas_bdr_debug_packages
 
 bdr4_debug_packages:
   postgresql:
     Debian: &bdr4_debug_pg_packages
       - edb-bdr{{ bdr_version }}-pg{{ postgres_versionNN }}-dbgsym
-    RedHat:
-      - edb-bdr{{ bdr_version }}-pg{{ postgres_versionNN }}-debuginfo
+    RedHat: []
     Ubuntu: *bdr4_debug_pg_packages
   pgextended:
     Debian: &bdr4_debug_pge_packages
       - edb-bdr{{ bdr_version }}-pgextended{{ postgres_versionNN }}-dbgsym
-    RedHat:
-      - edb-bdr{{ bdr_version }}-pgextended{{ postgres_versionNN }}-debuginfo
+    RedHat: []
     Ubuntu: *bdr4_debug_pge_packages
   epas:
     Debian: &bdr4_debug_epas_packages
       - edb-bdr{{ bdr_version }}-epas{{ postgres_versionNN }}-dbgsym
-    RedHat:
-      - edb-bdr{{ bdr_version }}-epas{{ postgres_versionNN }}-debuginfo
+    RedHat: []
     Ubuntu: *bdr4_debug_epas_packages
 
 pgespresso_packages:
