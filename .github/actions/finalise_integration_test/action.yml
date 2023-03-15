@@ -23,10 +23,10 @@ runs:
         echo "::group::Teardown";
         cluster="${{ inputs.path }}/${{ inputs.cluster }}";
         if [[ -d $cluster ]]; then
-          ./bin/tpaexec archive-logs "$cluster" -vv &>/tmp/archive-logs || cat /tmp/archive-logs;
+          ./bin/tpaexec archive-logs "$cluster" -vv &>"$CLUSTER"/archive-logs || cat "$CLUSTER"/archive-logs;
           tar cvzf "${{ inputs.path }}/cluster-${{ inputs.cluster }}.tar.gz" \
             --exclude="local-repo" "$cluster";
-          ./bin/tpaexec deprovision "$cluster" -vv &>/tmp/deprovision || cat /tmp/deprovision;
+          ./bin/tpaexec deprovision "$cluster" -vv &>"$CLUSTER"/deprovision || cat "$CLUSTER"/deprovision;
           rm -rf "$cluster";
         fi;
         echo "::endgroup::"

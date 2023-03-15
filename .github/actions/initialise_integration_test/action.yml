@@ -165,13 +165,13 @@ runs:
     - name: Populate the package cache
       run: |
         echo "::group::Download packages"
-        ./bin/tpaexec download-packages "$CLUSTER" --docker-image "$IMAGE" -vv &>/tmp/download-packages
+        ./bin/tpaexec download-packages "$CLUSTER" --docker-image "$IMAGE" -vv &>"$CLUSTER"/download-packages
         status=$?
         find "$CLUSTER/local-repo" -ls
         if [[ $status != 0 ]]; then
-          cat /tmp/download-packages
-          exit 1
+          cat "$CLUSTER/download-packages"
         fi
         echo "::endgroup::"
-      shell: bash
+        exit $status
+      shell: bash {0}
       if: inputs.tpa_package_cache == 'true'

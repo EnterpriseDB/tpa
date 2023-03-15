@@ -61,48 +61,48 @@ runs:
     - name: Provision the cluster
       run: |
         echo "::group::tpaexec provision -vv"
-        ./bin/tpaexec provision "$CLUSTER" -vv &>/tmp/tpaexec-provision
+        ./bin/tpaexec provision "$CLUSTER" -vv &>"$CLUSTER"/tpaexec-provision
         status=$?
-        cat /tmp/tpaexec-provision
+        cat "$CLUSTER"/tpaexec-provision
         echo "::endgroup::"
-        sed -n '/PLAY RECAP/,$p' /tmp/tpaexec-provision|egrep -v '(ResourceWarning|cli.run)' > /tmp/provision-recap;
-        cat /tmp/provision-recap
+        sed -n '/PLAY RECAP/,$p' "$CLUSTER"/tpaexec-provision|egrep -v '(ResourceWarning|cli.run)' > "$CLUSTER"/provision-recap;
+        cat "$CLUSTER"/provision-recap
         (echo -e "\`tpaexec provision $CLUSTER\`:";
          echo -e "\`\`\`";
-         cat /tmp/provision-recap;
+         cat "$CLUSTER"/provision-recap;
          echo -e "\`\`\`") >> $GITHUB_STEP_SUMMARY
         exit $status
-      shell: bash
+      shell: bash {0}
 
     - name: Deploy the cluster
       run: |
         echo "::group::tpaexec deploy -vv"
-        ./bin/tpaexec deploy "$CLUSTER" -vv &>/tmp/tpaexec-deploy
+        ./bin/tpaexec deploy "$CLUSTER" -vv &>"$CLUSTER"/tpaexec-deploy
         status=$?
-        cat /tmp/tpaexec-deploy
+        cat "$CLUSTER"/tpaexec-deploy
         echo "::endgroup::"
-        sed -n '/PLAY RECAP/,$p' /tmp/tpaexec-deploy|egrep -v '(ResourceWarning|cli.run)' > /tmp/deploy-recap;
-        cat /tmp/deploy-recap
+        sed -n '/PLAY RECAP/,$p' "$CLUSTER"/tpaexec-deploy|egrep -v '(ResourceWarning|cli.run)' > "$CLUSTER"/deploy-recap;
+        cat "$CLUSTER"/deploy-recap
         (echo -e "\`tpaexec deploy $CLUSTER\`:";
          echo -e "\`\`\`";
-         cat /tmp/deploy-recap;
+         cat "$CLUSTER"/deploy-recap;
          echo -e "\`\`\`") >> $GITHUB_STEP_SUMMARY
         exit $status
-      shell: bash
+      shell: bash {0}
 
     - name: Test the cluster
       run: |
         echo "::group::tpaexec test -vv"
-        ./bin/tpaexec test "$CLUSTER" -vv &>/tmp/tpaexec-test
-        cat /tmp/tpaexec-test
+        ./bin/tpaexec test "$CLUSTER" -vv &>"$CLUSTER"/tpaexec-test
+        cat "$CLUSTER"/tpaexec-test
         echo "::endgroup::"
-        sed -n '/PLAY RECAP/,$p' /tmp/tpaexec-test|egrep -v '(ResourceWarning|cli.run)' > /tmp/test-recap;
-        cat /tmp/test-recap
+        sed -n '/PLAY RECAP/,$p' "$CLUSTER"/tpaexec-test|egrep -v '(ResourceWarning|cli.run)' > "$CLUSTER"/test-recap;
+        cat "$CLUSTER"/test-recap
         (echo -e "\`tpaexec test $CLUSTER\`:";
          echo -e "\`\`\`";
-         cat /tmp/test-recap;
+         cat "$CLUSTER"/test-recap;
          echo -e "\`\`\`") >> $GITHUB_STEP_SUMMARY
-      shell: bash
+      shell: bash {0}
 
     - uses: ./.github/actions/finalise_integration_test
       with:
