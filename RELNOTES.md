@@ -2,6 +2,12 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.15 (2023-03-15)
+
+### Minor changes
+
+- Update includes changes to dependency mappings
+
 ## v23.14 (2023-02-24)
 
 ### Bugfixes
