@@ -21,10 +21,12 @@ class PGD_Always_ON(BDR):
         super().add_architecture_options(p, g)
 
         g.add_argument(
-            "--active-locations",
-            help="List of locations for which proxy routing should be enabled",
-            dest="active_locations",
-            nargs="+",
+            "--pgd-proxy-routing",
+            help="Configure each PGD-Proxy to route connections to a globally-elected write leader (global) or a write leader within its own location (local)",
+            choices=["global", "local"],
+            dest="pgd_proxy_routing",
+            default=None,
+            required=True,
         )
         g.add_argument(
             "--data-nodes-per-location",
@@ -117,7 +119,7 @@ class PGD_Always_ON(BDR):
         witness_only_location = self.args["witness_only_location"]
         data_nodes_per_location = self.args["data_nodes_per_location"]
         witness_node_per_location = self.args["witness_node_per_location"]
-        active_locations = self.args.get("active_locations") or []
+        pgd_proxy_routing = self.args["pgd_proxy_routing"]
 
         if data_nodes_per_location < 2:
             errors.append("--data-nodes-per-location cannot be less than 2")
@@ -148,18 +150,6 @@ class PGD_Always_ON(BDR):
                 % witness_only_location
             )
 
-        if witness_only_location and witness_only_location in active_locations:
-            errors.append(
-                "--witness-only-location '%s' must not be an active location"
-                % witness_only_location
-            )
-
-        for aloc in active_locations:
-            if aloc not in location_names:
-                errors.append(
-                    "--active-locations '%s' must be included in location list" % aloc
-                )
-
         if errors:
             raise ArchitectureError(*(f"PGD-Always-ON parameter {e}" for e in errors))
 
@@ -180,11 +170,18 @@ class PGD_Always_ON(BDR):
         top = self.args["bdr_node_group"]
         bdr_node_groups = [{"name": top}]
 
-        location_names = self.args.get("location_names") or []
-        active_locations = self.args.get("active_locations") or []
-        if not active_locations:
+        # If --pgd-proxy-routing is set to global, we need to enable
+        # proxy routing on the top-level group and all proxies are
+        # part of the top-level group. If routing is set to local,
+        # we need to enable proxy routing (and enable_raft) on the
+        # subgroups we create for each location, and proxies are
+        # part of the local subgroup.
+
+        pgd_proxy_routing = self.args["pgd_proxy_routing"]
+        if pgd_proxy_routing == "global":
             bdr_node_groups[0]["options"] = {"enable_proxy_routing": True}
 
+        location_names = self.args["location_names"]
         for loc in location_names:
             group = {
                 "name": self._sub_group_name(loc),
@@ -192,8 +189,8 @@ class PGD_Always_ON(BDR):
                 "options": {"location": loc},
             }
 
-            # Active locations have subgroup RAFT and proxy routing
-            # enabled, and witness-only locations have both disabled.
+            # Local routing enables subgroup RAFT and proxy routing,
+            # and witness-only locations have both disabled.
             if self._is_witness_only_location(loc):
                 group["options"].update(
                     {
@@ -201,7 +198,8 @@ class PGD_Always_ON(BDR):
                         "enable_proxy_routing": False,
                     }
                 )
-            elif loc in active_locations:
+
+            elif pgd_proxy_routing == "local":
                 group["options"].update(
                     {
                         "enable_raft": True,

@@ -13,7 +13,7 @@ a subscription to [EDB Repos 2.0](2q_and_edb_repositories.md).
 [tpa]$ tpaexec configure ~/clusters/pgd-ao \
          --architecture PGD-Always-ON \
          --location-names dc1 dc2 dc3 \
-         --active-locations dc1 dc2 \
+         --pgd-proxy-routing local \
          --witness-only-location dc3 \
          --data-nodes-per-location 2 \
          --platform aws --instance-type t3.micro \
@@ -43,7 +43,7 @@ peering yourself.)
 
 A PGD-Always-ON cluster comprises a number of locations, preferably odd,
 each with the same number of data nodes, again preferably odd. If you do
-not specify any --location-names, the default is to use a single
+not specify any `--location-names`, the default is to use a single
 location with three data nodes.
 
 Use `--data-nodes-per-location N` to specify a different number of data
@@ -59,18 +59,19 @@ establish global consensus if one of the locations were to fail. We
 recommend adding a third witness-only location (which contains no data
 nodes, only a witness node, again used to reliably establish consensus).
 Use `--witness-only-location loc` to designate one of your locations as
-a witness. (This location must not be among the `--active-locations`.)
+a witness.
 
 By default, every data node (in every location) will also run PGD-Proxy
 for connection routing. To create separate PGD-Proxy instances instead,
 use `--add-proxy-nodes-per-location 3` (or however many proxies you want
 to add).
 
-By default, TPA will configure PGD-Proxy to use global connection
-routing, i.e., to elect a write lead from all available data nodes
-across all locations. You may specify `--active-locations l2 l3` to
-limit connection routing to nodes in the specified locations. This will
-enable subgroup RAFT and proxy routing for those locations only.
+Depending on your use-case, you must specify `--pgd-proxy-routing local`
+or `global` to configure how PGD-Proxy will route connections to a write
+leader. Local routing will make every PGD-Proxy route to a write leader
+within its own location (suitable for geo-sharding applications). Global
+routing will make every proxy route to a single write leader, elected
+amongst all available data nodes across all locations.
 
 You may optionally specify `--database-name dbname` to set the name of
 the database with BDR enabled (default: bdrdb).

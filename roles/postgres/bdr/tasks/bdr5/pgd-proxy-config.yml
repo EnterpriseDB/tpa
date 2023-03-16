@@ -4,6 +4,9 @@
 
 # For each pgd-proxy instance, we should run bdr.create_proxy() if it's
 # not in the database already.
+#
+# We attach to the node's bdr_child_group only if it has proxy_routing
+# enabled, otherwise to the bdr_node_group (i.e., for global routing).
 
 - name: Create pgd-proxy configuration via BDR
   postgresql_query:
@@ -13,7 +16,7 @@
         SELECT bdr.create_proxy(proxy_name := %s, node_group := %s)
       args:
         - "{{ item }}"
-        - "{{ hostvars[item].bdr_child_group }}"
+        - "{{ proxy_attach_group }}"
   become: yes
   become_user: "{{ postgres_user }}"
   with_items:
@@ -23,6 +26,9 @@
       "{{ bdr_database_facts.bdr.proxy_config_summary
           |selectattr('proxy_name', 'equalto', item)
           |list }}"
+    proxy_attach_group:
+      "{{ bdr_node_groups[hostvars[item].bdr_child_group].options.enable_proxy_routing|default(False)
+          |ternary(hostvars[item].bdr_child_group, bdr_node_group) }}"
   when:
     this_proxy_facts is empty
 

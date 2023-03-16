@@ -76,7 +76,7 @@ runs:
           CONFIGURE_OPTS+=" --location-names a b c"
           CONFIGURE_OPTS+=" --data-nodes-per-location 2"
           CONFIGURE_OPTS+=" --add-witness-node-per-location"
-          CONFIGURE_OPTS+=" --active-locations a b"
+          CONFIGURE_OPTS+=" --pdg-proxy-routing local"
           CONFIGURE_OPTS+=" --add-witness-only-location c"
 
         fi
