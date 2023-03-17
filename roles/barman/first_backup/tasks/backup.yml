@@ -18,6 +18,17 @@
   poll: 0
   register: barman_backup_run
 
+# Make sure there is some WAL generated so we will really get a new file
+
+- name: Force WAL to be generated
+  postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
+    query: >
+      checkpoint
+  delegate_to: "{{ inventory_hostname|upstream_root(hostvars) }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+
 # Barman will force a WAL segment switch itself when taking backups from
 # a primary. Otherwise we do it, so that the backup will (eventually) go
 # from WAITING_FOR_WALS to DONE (in Barman >= 2.5 terminology).
