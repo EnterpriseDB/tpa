@@ -2,24 +2,51 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-Confidential property of EDB; not for public release.
-
-[Link to TPA documentation in PDF format](tpaexec.pdf)
-
 ## Introduction
 
-TPA is an orchestration tool that uses Ansible to build Postgres
+TPA is an orchestration tool that uses Ansible to deploy Postgres
 clusters according to EDB's recommendations.
 
-TPA embodies the best practices followed by EDB, and is informed by many
-years of experience with deploying Postgres and associated components in
-various scenarios. These recommendations are as applicable to quick
-testbed setups as to production environments.
-
-(You can skip straight to the [TPA installation
-instructions](INSTALL.md) if you want to get started.)
+TPA embodies the best practices followed by EDB, informed by many years
+of hard-earned experience with deploying and supporting Postgres. These
+recommendations are as applicable to quick testbed setups as to
+production environments.
 
 ## What can TPA do?
+
+TPA is built around a declarative configuration mechanism that you can
+use to describe a Postgres cluster, from its topology right down to the
+smallest details of its configuration.
+
+Start by running `tpaexec configure` to generate an initial cluster
+configuration based on a few high-level choices (e.g., which version of
+Postgres to install). The default configuration is ready to use as-is,
+but you can edit it to suit your needs (the generated configuration is
+just a text file, config.yml).
+
+Using this configuration, TPA can:
+
+1. Provision servers (e.g., AWS EC2 instances or Docker containers) and
+   any other resources needed to host the cluster (or you can deploy to
+   existing servers or VMs just by specifying connection details).
+
+2. Configure the operating system (tweak kernel settings, create users
+   and SSH keys, install packages, define systemd services, set up log
+   rotation, and so on).
+
+3. Install and configure Postgres and associated components (e.g., PGD,
+   Barman, pgbouncer, repmgr, and various Postgres extensions).
+
+4. Run automated tests on the cluster after deployment.
+
+5. Deploy future changes to your configuration (e.g., changing Postgres
+   settings, installing and upgrading packages, adding new servers, and
+   so on).
+
+## How do I use it?
+
+To use TPA, you need to install it and run the `tpaexec setup` command.
+Follow the [installation instructions](INSTALL.md) for your platform.
 
 TPA operates in four distinct stages to bring up a Postgres cluster:
 
@@ -53,7 +80,7 @@ Here's a [list of capabilities and supported software](tpaexec-support.md).
 The [`tpaexec configure`](tpaexec-configure.md)
 command generates a simple YAML configuration file to describe a
 cluster, based on the options you select. The configuration is ready for
-immediate use, and you can modify it to better suit your needs. Editing
+immediate use, but you can modify it to better suit your needs. Editing
 the configuration file is the usual way to [make any configuration
 changes to your cluster](configure-cluster.md), both before and after
 it's created.
