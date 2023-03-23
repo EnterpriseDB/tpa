@@ -146,26 +146,28 @@ class Architecture(object):
         g.add_argument("--owner")
         g.add_argument("--overrides-from", nargs="+", metavar="FILE")
         g.add_argument(
+            "--no-git",
+            action="store_true",
+            dest="no_git",
+            help="don't create cluster dir as a local git repository",
+        )
+
+        g = p.add_argument_group("AAP/Tower options")
+        g.add_argument(
             "--use-redhat-aac",
             "--use-ansible-tower",
             action="store",
             dest="tower_api_url",
-            help="Provision this cluster for use with Ansible Automation Controller (Tower)",
+            help="provision this cluster for use with Ansible Automation Controller (Tower)",
         )
         g.add_argument(
             "--tower-git-repository",
             action="store",
             dest="tower_git_repository",
-            help="A git repository for Tower generated data",
-        )
-        g.add_argument(
-            "--no-git",
-            action="store_true",
-            dest="no_git",
-            help="Suppress creation of git repository",
+            help="git remote repository to push Tower generated data",
         )
 
-        g = p.add_argument_group("software selection")
+        g = p.add_argument_group("OS selection")
         labels = self.platform.supported_distributions()
         label_opts = {"choices": labels} if labels else {}
         default_label = self.platform.default_distribution()
@@ -179,6 +181,49 @@ class Architecture(object):
         g.add_argument("--os-version", metavar="VERSION")
         g.add_argument("--os-image", metavar="LABEL")
 
+        # When installing EPAS, you must specify whether to use Redwood mode
+        # (with Oracle compatibility features enabled) or Postgres-compatible
+        # mode. EPAS itself operates in Redwood mode by default (it's an initdb
+        # option).
+        g = p.add_argument_group("repository selection")
+
+        g.add_argument(
+            "--use-volatile-subscriptions",
+            action="store_true",
+        )
+        g_repo = g.add_mutually_exclusive_group()
+        g_repo.add_argument(
+            "--2Q-repositories",
+            dest="tpa_2q_repositories",
+            nargs="+",
+            metavar="source/name/maturity",
+        )
+        g_repo.add_argument(
+            "--edb-repositories",
+            dest="edb_repositories",
+            nargs="+",
+            metavar="repository",
+        )
+
+        g = p.add_argument_group("install from source options")
+        g.add_argument("--install-from-source", nargs="+", metavar="NAME")
+        for pkg in self.versionable_packages():
+            g.add_argument("--%s-package-version" % pkg, metavar="VER")
+
+        g = p.add_argument_group("software selection")
+        g.add_argument(
+            "--enable-pem",
+            action="store_true",
+            help="add a PEM monitoring server to the cluster",
+        )
+        g.add_argument(
+            "--enable-pg-backup-api",
+            action="store_true",
+            help="install pg-backup-api on barman server and register to pem server if enabled",
+        )
+        g.add_argument("--extra-packages", nargs="+", metavar="NAME")
+        g.add_argument("--extra-optional-packages", nargs="+", metavar="NAME")
+
         # A combination of --postgres-flavour and --postgres-version tells us
         # exactly which server to deploy. We need both things, but because we
         # support multiple ways to specify them, we don't mark the options as
@@ -186,13 +231,6 @@ class Architecture(object):
 
         supported_flavours = ["postgresql", "pgextended", "edbpge", "epas"]
         supported_versions = ["10", "11", "12", "13", "14", "15", "16"]
-
-        g.add_argument(
-            "--postgres-version",
-            dest="postgres_version",
-            choices=supported_versions,
-            help="Select a major version of Postgres to install",
-        )
 
         class FlavourAndMaybeVersionAction(argparse.Action):
             """Takes an option such as `--epas` or `--postgresql 15` and stores
@@ -224,15 +262,14 @@ class Architecture(object):
 
                 setattr(namespace, self.dest, value)
 
-        g_flavour = p.add_mutually_exclusive_group()
-
+        g = p.add_argument_group("postgres options")
+        g_flavour = g.add_mutually_exclusive_group(required=True)
         g_flavour.add_argument(
             "--postgres-flavour",
             dest="postgres_flavour",
             choices=supported_flavours,
-            help="Select a Postgres flavour/distribution to install",
+            help="select a Postgres flavour/distribution to install",
         )
-
         g_flavour.add_argument(
             "--postgresql",
             action=FlavourAndMaybeVersionAction,
@@ -240,9 +277,9 @@ class Architecture(object):
             nargs="?",
             dest="postgres_flavour",
             choices=supported_versions,
-            help="Install PostgreSQL",
+            help="install PostgreSQL",
+            metavar="VERSION",
         )
-
         # There are two related variants of Postgres Extended.
         #
         # One is what we used to call 2ndQPostgres, which has the same package
@@ -260,7 +297,6 @@ class Architecture(object):
         # in the same architecture, we are able to accept a single option and
         # translate it into different postgres_flavour settings based on the
         # context of its use.
-
         g_flavour.add_argument(
             "--edb-postgres-extended",
             "--pgextended",
@@ -270,9 +306,9 @@ class Architecture(object):
             nargs="?",
             dest="postgres_flavour",
             choices=supported_versions,
-            help="Install EDB Postgres Extended (formerly 2ndQuadrant Postgres)",
+            help="install EDB Postgres Extended (formerly 2ndQuadrant Postgres)",
+            metavar="VERSION",
         )
-
         g_flavour.add_argument(
             "--edb-postgres-advanced",
             "--epas",
@@ -281,80 +317,50 @@ class Architecture(object):
             nargs="?",
             dest="postgres_flavour",
             choices=supported_versions,
-            help="Install EDB Postgres Advanced Server (EPAS)",
-        )
-
-        # When installing EPAS, you must specify whether to use Redwood mode
-        # (with Oracle compatibility features enabled) or Postgres-compatible
-        # mode. EPAS itself operates in Redwood mode by default (it's an initdb
-        # option).
-
-        g.add_argument(
-            "--redwood",
-            action="store_true",
-            dest="epas_redwood_compat",
-            default=None,
-            help="Enable Oracle compatibility features for EPAS",
+            help="install EDB Postgres Advanced Server (EPAS)",
+            metavar="VERSION",
         )
         g.add_argument(
-            "--no-redwood",
-            "--no-redwood-compat",
-            action="store_false",
-            dest="epas_redwood_compat",
-            default=None,
-            help="Disable Oracle compatibility features for EPAS",
+            "--postgres-version",
+            dest="postgres_version",
+            choices=supported_versions,
+            help="select a major version of Postgres to install",
         )
-
-        g.add_argument(
-            "--use-volatile-subscriptions",
-            action="store_true",
-        )
-        g_repo = g.add_mutually_exclusive_group()
-        g_repo.add_argument(
-            "--2Q-repositories",
-            dest="tpa_2q_repositories",
-            nargs="+",
-            metavar="source/name/maturity",
-        )
-        g_repo.add_argument(
-            "--edb-repositories",
-            dest="edb_repositories",
-            nargs="+",
-            metavar="repository",
-        )
-        for pkg in self.versionable_packages():
-            g.add_argument("--%s-package-version" % pkg, metavar="VER")
         g.add_argument(
             "--extra-postgres-packages",
             nargs="+",
             metavar="NAME",
         )
-        g.add_argument("--extra-packages", nargs="+", metavar="NAME")
-        g.add_argument("--extra-optional-packages", nargs="+", metavar="NAME")
 
-        g.add_argument("--install-from-source", nargs="+", metavar="NAME")
-
-        g.add_argument(
-            "--enable-pem",
+        g = p.add_argument_group("EPAS options")
+        g_redwood = g.add_mutually_exclusive_group()
+        g_redwood.add_argument(
+            "--redwood",
             action="store_true",
-            help="Add a PEM monitoring server to the cluster",
+            dest="epas_redwood_compat",
+            default=None,
+            help="enable Oracle compatibility features for EPAS",
         )
-        g.add_argument(
-            "--enable-pg-backup-api",
-            action="store_true",
-            help="Install pg-backup-api on barman server and register to pem server if enabled",
+        g_redwood.add_argument(
+            "--no-redwood",
+            "--no-redwood-compat",
+            action="store_false",
+            dest="epas_redwood_compat",
+            default=None,
+            help="disable Oracle compatibility features for EPAS",
         )
 
-        g = p.add_mutually_exclusive_group()
-        g.add_argument(
+        g = p.add_argument_group("local repo")
+        g_local = g.add_mutually_exclusive_group()
+        g_local.add_argument(
             "--enable-local-repo",
             action="store_true",
-            help="Make packages available to instances from cluster_dir/local-repo",
+            help="make packages available to instances from cluster_dir/local-repo",
         )
-        g.add_argument(
+        g_local.add_argument(
             "--use-local-repo-only",
             action="store_true",
-            help="Make packages available to instances from cluster_dir/local-repo, and disable all other repositories",
+            help="make packages available to instances from cluster_dir/local-repo, and disable all other repositories",
         )
 
         g = p.add_argument_group("volume sizes in GB")
