@@ -41,6 +41,7 @@
           'cluster_tag': cluster_tag,
           'cluster_name': cluster_name,
           'tpa_version': tpa_version,
+          'keyring_backend': keyring_backend|default(None)
         }) }}"
 
 - name: Add ssh_key_file to cluster_group_vars
@@ -165,7 +166,7 @@
   include_role: name=secret
   vars:
     secret_name: "{{ item }}"
-    lock_file: "{{ cluster_dir }}/vault/vault_pass.txt"
+    lock_file: "{{ tpa_dir }}/architectures/lib/use-vault"
   with_items:
     - postgres_password
     - barman_password

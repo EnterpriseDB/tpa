@@ -265,7 +265,7 @@ def cmdline(playbook_dir):
         and args[5] == "-i"
         and args[6] == "inventory"
         and args[7] == "--vault-password-file"
-        and args[8] == "vault/vault_pass.txt"
+        and args[8].endswith("use-vault")
     ):
         tpaexec = "tpaexec"
 

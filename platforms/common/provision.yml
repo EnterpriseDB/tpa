@@ -58,12 +58,27 @@
 # This obviously needs improvement—we should GPG-encrypt it with the
 # public keys of everyone who needs access to the secret.
 
-- name: Generate the vault passphrase for this cluster
+- name: Generate the vault passphrase using keyring backend {{ keyring_backend }}
+  command: >
+    "{{ tpa_dir }}"/architectures/lib/generate-vault
+    "{{ cluster_dir }}"
+    "{{ keyring_backend }}"
+  register: vault_gen
+  changed_when: vault_gen.rc == 0
+  failed_when: vault_gen.rc not in [0,2]
+  when: >
+    keyring_backend is defined
+    and keyring_backend != "legacy"
+  tags: [common, vault]
+
+- name: Generate the vault passphrase using plaintext
   shell: >
     "{{ tpa_dir }}"/architectures/lib/password > vault_pass.txt
   args:
     chdir: "{{ cluster_dir }}/vault"
     creates: vault_pass.txt
     executable: /bin/bash
-  delegate_to: localhost
+  when: >
+    keyring_backend is not defined
+    or keyring_backend == "legacy"
   tags: [common, vault]
