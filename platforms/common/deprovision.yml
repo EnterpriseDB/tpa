@@ -64,3 +64,15 @@
   changed_when: >
     rmdir.rc == 99 and 'Directory not empty' not in rmdir.stderr
   failed_when: rmdir.rc not in [0, 99]
+
+- name: Delete vault password (system)
+  shell: >
+    "{{ tpa_dir }}"/architectures/lib/delete-vault
+    "{{ cluster_dir }}"
+    "{{ keyring_backend }}"
+  args:
+    executable: /bin/bash
+  register: rmvault
+  changed_when: rmvault.rc == 0
+  failed_when: rmvault.rc not in [0, 2]
+  when: keyring_backend is defined and keyring_backend == "system"

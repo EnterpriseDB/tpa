@@ -395,7 +395,7 @@ Use the `--use-ansible-tower` and `--tower-git-repository` options to
 create a cluster adapted for deployment with Ansible Tower. See [Ansible
 Tower](tower.md) for details.
 
-## git repository
+## Git repository
 
 By default, a git repository is created with an initial branch named
 after the cluster, and a single commit is made, with the configure
@@ -405,6 +405,20 @@ created. To suppress creation of the git repository, use the `--no-git`
 option. (Note that in an Ansible Tower cluster, a git repository is
 required and will be created later by `tpaexec provision` if it does not
 already exist.)
+
+## Keyring backend for vault password
+
+TPA generates a cluster specific ansible vault password.
+This password is used to encrypt other sensitive variables generated
+for the cluster, postgres user password, barman user password and so on.
+
+Keyring backend `system` will leverage the best keyring backend on your system
+from the list of supported backend by python keyring module including
+gnome-keyring and secret-tool.
+
+Default is to store the vault password using `system` keyring for new cluster.
+removing `keyring_backend: system` in config.yml file **before** any `provision`
+will revert previous default to store vault password in plaintext file.
 
 ## Examples
 

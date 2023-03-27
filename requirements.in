@@ -14,3 +14,4 @@ certifi>=2023.7.22
 docker
 passlib
 psutil
+keyring
