@@ -1,4 +1,4 @@
-# Managing clusters in a disconnected or Air-Gapped environment
+# Managing clusters in a disconnected or air-gapped environment
 
 In a security controlled environment where no direct connection to the
 Internet is allowed, it is necessary to provide all packages needed by
