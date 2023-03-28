@@ -7,4 +7,4 @@ pytest-cov~=4.0.0
 pytest-html~=3.2.0
 requests_mock~=1.10.0
 pytest-mock~=3.6.1
-jq~=1.4.0
+jq~=1.4.1
