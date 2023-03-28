@@ -121,6 +121,11 @@ runs:
           CONFIGURE_OPTS+=" --use-local-repo-only"
         fi
 
+        # If we are going to use efm, override its network connectivity test
+        if [[ "${{ inputs.tpa_platform }}" == "docker" && "${{ inputs.tpa_postgres_flavour }}" == "epas" && "${{ inputs.tpa_architecture }}" == "M1" ]] ;then
+          CONFIGURE_OPTS+=" --overrides-from ${{ github.action_path }}/efm_ping.yml"
+        fi
+
         # Assume the default image is tpa/redhat if we're using docker as a platform
         # Otherwise we are not sure what should be used so exit
         if [[ "${{ inputs.tpa_platform }}" != "docker" && -z "$IMAGE" ]] ;then
