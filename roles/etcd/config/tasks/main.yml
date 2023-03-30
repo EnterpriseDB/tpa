@@ -12,6 +12,7 @@
 - name: Create etcd user
   user:
     name: "{{ etcd_user }}"
+    group: "{{ etcd_group }}"
     system: yes
     comment: "etcd key-value store"
     home: /var/lib/etcd/
