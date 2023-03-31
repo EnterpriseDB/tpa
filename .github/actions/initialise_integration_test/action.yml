@@ -66,64 +66,72 @@ runs:
     - name: Generate an initial configuration for a simple cluster
       run: |
         echo "::group::Configure"
-        CONFIGURE_OPTS+="--architecture ${{ inputs.tpa_architecture }}"
-        CONFIGURE_OPTS+=" --platform ${{ inputs.tpa_platform }}"
+        # Set an array to avoid joins
+        declare -a CONFIGURE_OPTS
+
+        CONFIGURE_OPTS+=(--architecture "${{ inputs.tpa_architecture }}")
+        CONFIGURE_OPTS+=(--platform "${{ inputs.tpa_platform }}")
         if [ "${{ inputs.tpa_architecture }}" == "BDR-Always-ON" ] ;then
-          CONFIGURE_OPTS+=" --layout bronze"
-          CONFIGURE_OPTS+=" --harp-consensus-protocol bdr"
+          CONFIGURE_OPTS+=(
+            --layout bronze
+            --harp-consensus-protocol bdr
+          )
         elif [ "${{ inputs.tpa_architecture }}" == "PGD-Always-ON" ]; then
-
-          CONFIGURE_OPTS+=" --location-names a b c"
-          CONFIGURE_OPTS+=" --data-nodes-per-location 2"
-          CONFIGURE_OPTS+=" --add-witness-node-per-location"
-          CONFIGURE_OPTS+=" --pgd-proxy-routing local"
-          CONFIGURE_OPTS+=" --add-witness-only-location c"
-
+          CONFIGURE_OPTS+=(
+            --location-names a b c
+            --data-nodes-per-location 2
+            --add-witness-node-per-location
+            --pgd-proxy-routing local
+            --add-witness-only-location c
+          )
         fi
         if [ -n "${{ inputs.tpa_os }}" ] ;then
-          CONFIGURE_OPTS+=" --os ${{ inputs.tpa_os }}"
+          CONFIGURE_OPTS+=(--os "${{ inputs.tpa_os }}")
           IMAGE_OS="${{ inputs.tpa_os }}"
           IMAGE_OS="${IMAGE_OS,,}"
           IMAGE="tpa/${IMAGE_OS}"
         fi
         if [ -n "${{ inputs.tpa_os_version }}" ] ;then
-          CONFIGURE_OPTS+=" --os-version ${{ inputs.tpa_os_version }}"
+          CONFIGURE_OPTS+=(--os-version "${{ inputs.tpa_os_version }}")
           IMAGE_VERSION="${{ inputs.tpa_os_version }}"
           IMAGE="${IMAGE:+${IMAGE}:${IMAGE_VERSION}}"
         fi
         if [ -n "${{ inputs.tpa_os_image }}" ] ;then
-          CONFIGURE_OPTS+=" --os-image ${{ inputs.tpa_os_image }}"
+          CONFIGURE_OPTS+=(--os-image "${{ inputs.tpa_os_image }}")
           IMAGE="${{ inputs.tpa_os_image }}"
           IMAGE_OS="${IMAGE/:*}"
           IMAGE_OS="${IMAGE_OS/tpa\/}"
           IMAGE_VERSION="${IMAGE/*:}"
         fi
         if [ -n "${{ inputs.tpa_postgres_flavour }}" ] ;then
-          CONFIGURE_OPTS+=" --postgres-flavour ${{ inputs.tpa_postgres_flavour }}"
+          CONFIGURE_OPTS+=(--postgres-flavour "${{ inputs.tpa_postgres_flavour }}")
         fi
         if [ -n "${{ inputs.tpa_postgres_version }}" ] ;then
-          CONFIGURE_OPTS+=" --postgres-version ${{ inputs.tpa_postgres_version }}"
+          CONFIGURE_OPTS+=(--postgres-version "${{ inputs.tpa_postgres_version }}")
         fi
 
         # Disable pem for pgextended because of missing pgextendedNN-server-sslutils
         # dependency. We can remove this check when pgextendedNN-server-sslutils is
         # available
-        if [ "${{ inputs.tpa_postgres_flavour }}" != "pgextended" -a "${{ inputs.tpa_postgres_flavour }}" != "edbpge" ] ;then
-          CONFIGURE_OPTS+=" --enable-pem"
+        if [[ "${{ inputs.tpa_postgres_flavour }}" != "pgextended"
+              && "${{ inputs.tpa_postgres_flavour }}" != "edbpge" ]] ;then
+          CONFIGURE_OPTS+=(--enable-pem)
         fi
 
         # enable redwood for epas.
         if [ "${{ inputs.tpa_postgres_flavour }}" == "epas" ] ;then
-          CONFIGURE_OPTS+=" --redwood"
+          CONFIGURE_OPTS+=(--redwood)
         fi
         # If package caching is enabled we enforce use of local repo
         if [ "${{ inputs.tpa_package_cache }}" == "true" ] ;then
-          CONFIGURE_OPTS+=" --use-local-repo-only"
+          CONFIGURE_OPTS+=(--use-local-repo-only)
         fi
 
         # If we are going to use efm, override its network connectivity test
-        if [[ "${{ inputs.tpa_platform }}" == "docker" && "${{ inputs.tpa_postgres_flavour }}" == "epas" && "${{ inputs.tpa_architecture }}" == "M1" ]] ;then
-          CONFIGURE_OPTS+=" --overrides-from ${{ github.action_path }}/efm_ping.yml"
+        if [[ "${{ inputs.tpa_platform }}" == "docker"
+              && "${{ inputs.tpa_postgres_flavour }}" == "epas"
+              && "${{ inputs.tpa_architecture }}" == "M1" ]] ;then
+          CONFIGURE_OPTS+=(--overrides-from "${{ github.action_path }}/efm_ping.yml")
         fi
 
         # Assume the default image is tpa/redhat if we're using docker as a platform
@@ -147,13 +155,22 @@ runs:
         echo IMAGE_OS="${IMAGE_OS}" >>$GITHUB_ENV
         echo IMAGE_VERSION="${IMAGE_VERSION}" >>$GITHUB_ENV
 
-        # Finally run configure with constructed options
-        ./bin/tpaexec configure "$CLUSTER" ${CONFIGURE_OPTS} --no-git
+        CONFIGURE_OPTS+=(--no-git)
+
+        # Load extra arguments from calling workflows
+        read -r -a CONFIGURE_EXTRA_ARGS <<<"$CONFIGURE_EXTRA_ARGS"
+        CONFIGURE_OPTS+=("${CONFIGURE_EXTRA_ARGS[@]}")
         echo "::endgroup::"
-        echo "Configure command: tpaexec configure $CLUSTER $CONFIGURE_OPTS"
+
+        echo "Configure command: tpaexec configure $CLUSTER ${CONFIGURE_OPTS[@]}"
+
+        echo "::group::Execute Configure"
+        # Finally run configure with constructed options
+        ./bin/tpaexec configure "$CLUSTER" "${CONFIGURE_OPTS[@]}"
+        echo "::endgroup::"
         (echo "\`\`\`";
          echo "tpaexec configure $CLUSTER \\";
-         echo "  $CONFIGURE_OPTS"|fmt|sed -e 's/$/ \\/' -e '$s/ \\$//';
+         echo "${CONFIGURE_OPTS[@]}"|fmt|sed -e 's/$/ \\/' -e '$s/ \\$//';
          echo "\`\`\`") >> $GITHUB_STEP_SUMMARY
       shell: bash
 
