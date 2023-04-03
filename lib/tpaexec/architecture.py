@@ -1291,7 +1291,7 @@ class Architecture(object):
             raise ArchitectureError(f"Failed to add files to git: { cp.stderr }")
 
         try:
-            subprocess.run(
+            cp = subprocess.run(
                 [
                     "git",
                     "commit",
