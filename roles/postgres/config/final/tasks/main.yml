@@ -45,7 +45,7 @@
     login_db: postgres
     name: "{{ item.username }}"
     password: "{{
-        encrypted_password if generated_password is defined else omit
+        encrypted_password if generated_password is not empty else omit
       }}"
     encrypted: yes
     role_attr_flags: "{{
