@@ -40,6 +40,7 @@
     home: "{{ postgres_home }}"
     group: "{{ postgres_group }}"
     groups: "{{ extra_groups }}"
+    append: yes
     shell: /bin/bash
   vars:
     extra_groups: "{{
