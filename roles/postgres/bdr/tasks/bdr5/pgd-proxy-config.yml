@@ -26,8 +26,12 @@
       "{{ bdr_database_facts.bdr.proxy_config_summary
           |selectattr('proxy_name', 'equalto', item)
           |list }}"
+    child_group_entry:
+      "{{ bdr_node_groups
+          |selectattr('name', 'equalto', hostvars[item].bdr_child_group)
+          |first }}"
     proxy_attach_group:
-      "{{ bdr_node_groups[hostvars[item].bdr_child_group].options.enable_proxy_routing|default(False)
+      "{{ child_group_entry.options.enable_proxy_routing|default(False)
           |ternary(hostvars[item].bdr_child_group, bdr_node_group) }}"
   when:
     this_proxy_facts is empty
