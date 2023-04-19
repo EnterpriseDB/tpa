@@ -7,6 +7,10 @@ if [[ $ID = "debian" || $ID = "ubuntu" ]]; then
     apt-get update -y && apt-get install -y systemd
 fi
 
+if [[ $ID = "rocky" ]]; then
+    dnf update -y && dnf install -y systemd
+fi
+
 # Don't try to run a full system in the container
 systemctl enable basic.target
 systemctl set-default multi-user

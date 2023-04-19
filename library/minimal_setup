@@ -55,6 +55,11 @@ case "${ID}:${VERSION_ID%.*}" in
         release=$VERSION_ID
         python=python3
         ;;
+    rhel:9|centos:9|ol:9|rocky:9|almalinux:9)
+        distribution=RedHat
+        release=$VERSION_ID
+        python=python3
+        ;;
     *)
         cat <<RESULT
         {"failed": true, "msg": "Unsupported distribution: ${ID}:${VERSION_ID}"}

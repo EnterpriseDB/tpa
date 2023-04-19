@@ -20,7 +20,9 @@ case "${ID}:${OS_VERSION}" in
         if [ "$OS_VERSION" -ge "8" ] ;then
             locale="${USER_LOCALE/.*}"
             charset="${USER_LOCALE/$locale}"
-            [ "$charset" == ".UTF-8" ] && charset=".utf8"
+            if [ "$OS_VERSION" -eq "8" ] ;then
+                [ "$charset" == ".UTF-8" ] && charset=".utf8"
+            fi
             user_locale="${locale}${charset}"
             if ! localectl list-locales | grep -iq "^${user_locale}$" ;then
                 echo "Locale not found: $USER_LOCALE ($user_locale)"

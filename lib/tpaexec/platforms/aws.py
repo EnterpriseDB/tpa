@@ -115,6 +115,11 @@ class aws(CloudPlatform):
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
+                "RHEL-9.0.0_HVM-20230313-x86_64-43-Hourly2-GP2": {
+                    "versions": ["9"],
+                    "owner": "309956199498",
+                    "user": "ec2-user",
+                },
             },
             "rocky": {
                 "Rocky-8-ec2-8.5-20211114.2.x86_64": {

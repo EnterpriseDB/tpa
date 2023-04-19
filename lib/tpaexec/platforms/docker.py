@@ -155,16 +155,16 @@ class docker(Platform):
                 "os": "Ubuntu",
             },
             "tpa/redhat": {
-                "versions": ["7", "8"],
+                "versions": ["7", "8", "9"],
                 "os": "RedHat",
             },
             "tpa/rocky": {
-                "versions": ["8"],
+                "versions": ["8", "9"],
                 "os": "Rocky",
                 "os_family": "RedHat",
             },
             "tpa/almalinux": {
-                "versions": ["8"],
+                "versions": ["8", "9"],
                 "os": "AlmaLinux",
                 "os_family": "RedHat",
             },
