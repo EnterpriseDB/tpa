@@ -316,17 +316,6 @@ class PGD_Always_ON(BDR):
                 instance_vars.update(
                     {"bdr_child_group": self._sub_group_name(location)}
                 )
-                fallback_groups = [
-                    self._sub_group_name(l) for l in self._fallback_locations(location)
-                ]
-                if fallback_groups:
-                    instance_vars.update(
-                        {
-                            "pgd_proxy_options": {
-                                "fallback_groups": fallback_groups,
-                            }
-                        }
-                    )
 
             if instance_vars:
                 instance["vars"] = instance_vars
@@ -351,36 +340,3 @@ class PGD_Always_ON(BDR):
         """
         return location == self.args.get("witness_only_location")
 
-    def _fallback_locations(self, location):
-        """
-        Returns a list of fallback location names for the pgd-proxy in the given
-        location to use.
-
-        BDR currently supports only one fallback location, so we return a list
-        containing only one location for now (cf. bdr_alter_proxy_option_sql).
-        The basis of selection is only that it must be a different location
-        which is not a witness-only location.
-
-        Args:
-            location: the location for which to return fallback locations
-
-        Returns:
-            list: list of fallback location names, may be empty if no fallback
-            locations are available
-        """
-
-        possible_fallback_locations = [
-            l
-            for l in self.args.get("location_names")
-            if not (l == location or self._is_witness_only_location(l))
-        ]
-
-        # The correct use of fallback locations depends on the number of
-        # locations available (e.g., one has to be careful to avoid cyclic
-        # dependencies), requires the user to be aware of the implications, and
-        # may need user input as well. Since it can't be handled with an on/off
-        # switch for now, we disable it altogether by pretending that there are
-        # no fallback locations available.
-        possible_fallback_locations = []
-
-        return sorted(possible_fallback_locations)[:1]
