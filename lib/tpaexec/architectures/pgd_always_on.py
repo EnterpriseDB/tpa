@@ -341,7 +341,7 @@ class PGD_Always_ON(BDR):
         """
         Returns a name for the BDR subgroup in the given location.
         """
-        loc = re.sub("[^a-z0-9_]", "_", loc)
+        loc = re.sub("[^a-z0-9_]", "_", loc.lower())
         return f"{loc}_subgroup"
 
     def _is_witness_only_location(self, location):
