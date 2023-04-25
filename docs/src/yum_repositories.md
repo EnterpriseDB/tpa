@@ -33,7 +33,7 @@ the necessary `/etc/yum.repos.d/*.repo` file and any GPG keys needed to
 verify signed packages from the repository), you can just point to it.
 
 Otherwise, you can specify a description, a `baseurl`, and a `gpgkey`
-URL, and TPAexec will create a `/etc/yum.repos.d/Other.repo` file for
+URL, and TPA will create a `/etc/yum.repos.d/Other.repo` file for
 you based on this information.
 
 The EPEL and PGDG repositories are defined by default. The EPEL

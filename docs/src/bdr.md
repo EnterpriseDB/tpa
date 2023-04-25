@@ -1,6 +1,6 @@
 # EDB Postgres Distributed configuration
 
-TPAexec can install and configure EDB Postgres Distributed (PGD),
+TPA can install and configure EDB Postgres Distributed (PGD),
 formerly known as BDR (Bi-directional replication) versions 3.7, 4.x,
 and 5.x.
 
@@ -14,7 +14,7 @@ authoritative description of the details.
 
 ## Introduction
 
-TPAexec will install PGD and any dependencies on all PGD instances along
+TPA will install PGD and any dependencies on all PGD instances along
 with Postgres itself.
 
 After completing the basic Postgres setup and starting Postgres, TPA
@@ -23,7 +23,7 @@ through the various steps described below.
 
 ## Installation
 
-TPAexec will install the correct PGD packages, depending on the version
+TPA will install the correct PGD packages, depending on the version
 and flavour of Postgres in use (e.g., Postgres, Postgres Extended, or
 EPAS).
 
