@@ -205,7 +205,7 @@ access to through a subscription.
 
 By default, it will install the 2ndQuadrant public repository (which
 does not need a subscription) and add on any product repositories that
-the architecture may require (e.g., the BDR repository).
+the architecture may require (e.g., the PGD repository).
 
 More detailed explanation of how TPA uses 2ndQuadrant and EDB
 repositories is available [here](2q_and_edb_repositories.md)
@@ -310,7 +310,7 @@ When deploy runs on an existing cluster that already has packages
 installed ansible may be unable to match the full package version.
 For example, if the value for `bdr_package_version` was set to `3.6*`
 then ansible would not be able to match this to an installed version of
-BDR, it would assume no package is installed, and it would attempt to
+PGD, it would assume no package is installed, and it would attempt to
 install the latest version available of the package with the same name
 in the configured repository, e.g. 3.7.
 
@@ -328,8 +328,8 @@ install 2ndQPostgres. By default, this will build the appropriate
 You may use `--install-from-source 2ndqpostgres pglogical3 bdr3` to
 build and install all three components from source, or just use
 `--install-from-source pglogical3 bdr3` to use packages for
-2ndQPostgres, but build and install pglogical v3 and BDR v3 from source.
-By default, this will build the `master` branch of pglogical and BDR.
+2ndQPostgres, but build and install pglogical v3 and PGD v3 from source.
+By default, this will build the `master` branch of pglogical and PGD.
 
 To build a different branch, append `:branchname` to the corresponding
 argument. For example `--install-from-source 2ndqpostgres:dev/xxx`, or
@@ -337,8 +337,8 @@ argument. For example `--install-from-source 2ndqpostgres:dev/xxx`, or
 
 You may not be able to install packages that depend on a package that
 you chose to replace with a source installation instead. For example,
-BDR v3 packages depend on pglogical v3 packages, so you can't install
-pglogical from its source repository and BDR from packages. Likewise,
+PGD v3 packages depend on pglogical v3 packages, so you can't install
+pglogical from its source repository and PGD from packages. Likewise,
 you can't install Postgres from source and pglogical from packages.
 
 ## Overrides

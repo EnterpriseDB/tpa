@@ -22,11 +22,11 @@ and barman each; plus a bdr+witness in a third location
 4. platinum: gold, but with one bdr+readonly (logical standby) added to
 each of the main locations
 
-You can check EDB's Postgres-BDR Always On Architectures
+You can check EDB's Postgres Distributed Always On Architectures
 [whitepaper](https://www.enterprisedb.com/promote/bdr-always-on-architectures)
 for the detailed layout diagrams.
 
-This architecture is meant for use with BDR versions 3.6, 3.7, and 4.
+This architecture is meant for use with PGD versions 3.7, and 4.
 
 ## Cluster configuration
 
@@ -43,9 +43,9 @@ You must specify `--architecture BDR-Always-ON`. (In the example
 above, it is the only option required to produce a working
 configuration.)
 
-You also must specify `--layout layoutname` to set one of the supported BDR
+You also must specify `--layout layoutname` to set one of the supported PGD
 use-case variations. The current options are bronze, silver, gold, and
-platinum. The bronze, gold and platinum layouts have a BDR witness node
+platinum. The bronze, gold and platinum layouts have a PGD witness node
 to ensure odd number of nodes for Raft consensus majority. Witness nodes do
 not participate in the data replication.
 
@@ -53,9 +53,9 @@ You must specify `--harp-consensus-protocol protocolname`. The supported
 protocols are bdr and etcd; see [`Configuring HARP`](harp.md) for more details.
 
 You may optionally specify `--bdr-database dbname` to set the name of
-the database with BDR enabled (default: bdrdb).
+the database with PGD enabled (default: bdrdb).
 
-You may optionally specify `--enable-camo` to set the pair of BDR
+You may optionally specify `--enable-camo` to set the pair of PGD
 primary instances in each region to be each other's CAMO partners.
 
 Please note we enable HARP2 by default in BDR-Always-ON architecture.

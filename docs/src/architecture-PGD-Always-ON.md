@@ -74,7 +74,7 @@ routing will make every proxy route to a single write leader, elected
 amongst all available data nodes across all locations.
 
 You may optionally specify `--database-name dbname` to set the name of
-the database with BDR enabled (default: bdrdb).
+the database with PGD enabled (default: bdrdb).
 
 You may optionally specify `--enable-camo` to set the pair of BDR
 primary instances in each region to be each other's CAMO partners.

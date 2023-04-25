@@ -28,6 +28,6 @@ The following instance variables can be set:
 Any extra settings in `repmgr_conf_settings` will also be passed through
 into the repmgr config file.
 
-## repmgr on BDR instances
+## repmgr on PGD instances
 
-On BDR instances, `repmgr_failover` will be set to `manual` by default.
+On PGD instances, `repmgr_failover` will be set to `manual` by default.

@@ -7,11 +7,11 @@
 
 TPA can install and configure the following major components.
 
-* Postgres 15, 14, 13, 12, 11, 10
+* Postgres 15, 14, 13, 12, 11
 
 * EPAS (EDB Postgres Advanced Server) 15, 14, 13, 12
 
-* BDR 5, 4, 3.7, 3.6
+* PGD 5, 4, 3.7
 
 * pglogical 3, 2 (open source)
 
@@ -25,7 +25,7 @@ TPA can install and configure the following major components.
 
 * pgbouncer
 
-* haproxy (supported only for BDR 3.x)
+* haproxy (supported only for PGD 3.7)
 
 * Failover Manager (EFM)
 

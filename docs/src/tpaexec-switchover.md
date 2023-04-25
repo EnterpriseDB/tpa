@@ -31,4 +31,4 @@ replicas.
 
 For BDR-Always-ON clusters, use the
 [HAProxy server pool management commands](tpaexec-server-pool.md) to
-perform maintenance on BDR instances.
+perform maintenance on PGD instances.

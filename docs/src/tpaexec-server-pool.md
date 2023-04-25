@@ -1,14 +1,14 @@
 # BDR/HAProxy server pool management
 
 The `tpaexec pool-disable-server` and `pool-enable-server` commands
-allow a BDR instance in a [BDR-Always-ON
+allow a PGD instance in a [BDR-Always-ON
 cluster](architecture-BDR-Always-ON.md) to be temporarily removed from
 the HAProxy active server pool for maintenance, and then added back
 afterwards.
 
 These commands follow the same process as [rolling
 updates](tpaexec-update-postgres.md) by default, so
-`pool-disable-server` will wait for active transactions against a BDR
+`pool-disable-server` will wait for active transactions against a PGD
 instance to complete and for pgbouncer to direct new connections to
 another instance before completing. Use the `--nowait` option if you
 don't want to wait for active sessions to end.
@@ -29,7 +29,7 @@ server to the pool of every relevant proxy in parallel.
 ```bash
 $ tpaexec pool-disable-server ~/clusters/clockwork orange # --nowait
 
-# HAProxy will no longer direct any traffic to the BDR instance named
+# HAProxy will no longer direct any traffic to the PGD instance named
 # 'orange', so you can perform maintenance on it (e.g., run `tpaexec
 # rehydrate`).
 

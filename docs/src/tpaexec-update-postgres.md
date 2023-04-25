@@ -10,7 +10,7 @@ The exact procedure is architecture-specific.
 
 ## BDR-Always-ON
 
-For BDR clusters, the update process goes through the cluster instances
+For PGD clusters, the update process goes through the cluster instances
 one by one and does the following:
 
 1. Tell haproxy the server is under maintenance.
@@ -20,7 +20,7 @@ one by one and does the following:
 5. Finally, mark the server as "ready" again to receive requests through
    haproxy.
 
-BDR logical standby or physical replica instances are updated without
+PGD logical standby or physical replica instances are updated without
 any haproxy or pgbouncer interaction. Non-Postgres instances in the
 cluster are left alone.
 
@@ -33,7 +33,7 @@ $ tpaexec update-postgres ~/clusters/speedy \
 ```
 
 This may be useful to minimise lead/shadow switchovers during the update
-by listing the active BDR primary instances last, so that the shadow
+by listing the active PGD primary instances last, so that the shadow
 servers are updated first.
 
 If your environment requires additional actions, the
@@ -52,7 +52,7 @@ switchover back to it again.
 
 By default, `tpaexec update-postgres` will update to the latest
 available versions of the installed packages if you did not explicitly
-specify any package versions (e.g., Postgres, BDR, or pglogical) when
+specify any package versions (e.g., Postgres, PGD, or pglogical) when
 you created the cluster.
 
 If you did select specific versions, for example by using any of the
@@ -82,12 +82,12 @@ Note: see limitations of using wildcards in package_version in
 [tpaexec-configure](tpaexec-configure.md#known-issue-with-wildcard-use).
 
 It is your responsibility to ensure that the combination of Postgres,
-BDR, and pglogical package versions that you request are sensible. That
+PGD, and pglogical package versions that you request are sensible. That
 is, they should work together, and there should be an upgrade path from
 what you have installed to the new versions.
 
-For BDR clusters, it is a good idea to explicitly specify exact versions
-for all three components (Postgres, BDR, pglogical) rather than rely on
+For PGD clusters, it is a good idea to explicitly specify exact versions
+for all three components (Postgres, PGD, pglogical) rather than rely on
 the package manager's dependency resolution to select the correct
 dependencies.
 

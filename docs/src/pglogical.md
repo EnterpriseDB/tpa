@@ -75,7 +75,7 @@ responsibility to specify a meaningful set of publications and
 subscriptions.
 
 TPA will configure pglogical after creating users, extensions, and
-databases, but before any BDR configuration. You can set
+databases, but before any PGD configuration. You can set
 [`postgres_users`](postgres_users.md) and
 [`postgres_databases`](postgres_databases.md) to create databases
 for replication, and use the
@@ -227,22 +227,19 @@ publisher—but the default replication sets named `default`,
 If you edit config.yml, remember to run `tpaexec provision` before
 running `tpaexec deploy`.
 
-## Interaction with BDR
+## Interaction with PGD
 
-It is possible to use BDR and pglogical together in the same database if
+It is possible to use PGD and pglogical together in the same database if
 you exercise caution.
 
-BDR3 uses pglogical3 internally, and will create a pglogical node if one
-does not exist. There can be only one pglogical node per database, so if
-you configure a pglogical publication in `bdr_database`, the
-instance's `bdr_node_name` must be the same as the publication's
-`name`. Otherwise, the node will be created for the publication
-first, and `bdr.create_node()` will fail later with an error about a
-node name conflict. Any `subscriptions` in `bdr_database` must use
-the same `node_name` too.
-
-Earlier versions of BDR do not use pglogical, so these considerations do
-not apply.
+PGD v3 uses pglogical3 internally, and will create a pglogical node if
+one does not exist. There can be only one pglogical node per database,
+so if you configure a pglogical publication in `bdr_database`, the
+instance's `bdr_node_name` must be the same as the publication's `name`.
+Otherwise, the node will be created for the publication first, and
+`bdr.create_node()` will fail later with an error about a node name
+conflict. Any `subscriptions` in `bdr_database` must use the same
+`node_name` too.
 
 ## Limitations
 

@@ -68,7 +68,7 @@ etcd_client_port	| 2379	| The port used by clients to connect to etcd
 
 If the `--harp-consensus-protocol bdr` option is given to `tpaexec
 configure`, then TPA will set `harp_consensus_protocol` to `bdr`
-in config.yml.  In this case the existing BDR instances will be used
+in config.yml.  In this case the existing PGD instances will be used
 for consensus, and no further configuration is required.
 
 ## Configuring a separate user for harp proxy

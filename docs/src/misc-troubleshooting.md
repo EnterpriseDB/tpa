@@ -96,7 +96,7 @@ For example to miss out the repmgr tasks:
 ```
 
 To jump straight to re-run a particular task by specifying a tag--for example,
-to immediately run BDR tasks:
+to immediately run PGD tasks (the tag being `bdr` for legacy reasons):
 
 ```
 [tpa]$ tpaexec deploy <bdr-clustername> --tags bdr

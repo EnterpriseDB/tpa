@@ -9,8 +9,8 @@ architecture or platform.
 
 You can even combine packaged installations of certain components with
 source builds of others. For example, you can install Postgres from
-packages and compile pglogical and BDR from source, but package
-dependencies would prevent installing pglogical from source and BDR from
+packages and compile pglogical and PGD from source, but package
+dependencies would prevent installing pglogical from source and PGD from
 packages.
 
 Source builds are meant for use in development, testing, and for support

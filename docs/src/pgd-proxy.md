@@ -1,7 +1,7 @@
 # Configuring pgd-proxy
 
 TPA will install and configure pgd-proxy for the PGD-Always-ON
-architecture with BDR 5 on any instance with `pgd-proxy` in its `role`.
+architecture with PGD 5 on any instance with `pgd-proxy` in its `role`.
 
 (By default, the [PGD-Always-ON architecture](architecture-PGD-Always-ON.md)
 will run `pgd-proxy` on all the data nodes in every location, but you
@@ -10,15 +10,15 @@ can instead create any number of additional proxy instances with
 
 ## Configuration
 
-`pgd-proxy` is configured at BDR level via SQL functions.
+`pgd-proxy` is configured at PGD level via SQL functions.
 
 Hash | Function | Description
 ---- | ---- | ----
 `pgd_proxy_options` | `bdr.alter_proxy_option()` | pgd-proxy configuration, e.g. port
 `bdr_node_groups` | `bdr.alter_node_group_option()` | configuration for the proxy's node group, e.g. `enable_proxy_routing`
-`bdr_node_options` | `bdr.alter_node_option()` | routing configuration for individual BDR nodes
+`bdr_node_options` | `bdr.alter_node_option()` | routing configuration for individual PGD nodes
 
-See the BDR documentation for more details.
+See the PGD documentation for more details.
 
 ### bdr_node_groups
 
@@ -38,7 +38,7 @@ Note that `enable_proxy_routing` must be explicitly set to `true` for pgd-proxy 
 ### bdr_node_options
 
 Node-level options related to pgd-proxy can be set under
-`bdr_node_options` on any BDR instance:
+`bdr_node_options` on any PGD instance:
 
 ```
 instances:

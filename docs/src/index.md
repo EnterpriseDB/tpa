@@ -89,9 +89,9 @@ At this stage, you must select an architecture and a platform for the
 cluster. An **architecture** is a recommended layout of servers and
 software to set up Postgres for a specific purpose. Examples include
 "M1" (Postgres with a primary and streaming replicas) and
-"BDR-Always-ON" (Postgres with BDR in an HA configuration). A
-**platform** is a means to host the servers to deploy any architecture,
-e.g., AWS, Docker, or bare-metal servers.
+"PGD-Always-ON" (EDB Postgres Distributed 5 in an Always On
+configuration). A **platform** is a means to host the servers to deploy
+any architecture, e.g., AWS, Docker, or bare-metal servers.
 
 ### Provisioning
 

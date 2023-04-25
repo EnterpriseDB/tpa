@@ -87,7 +87,7 @@ You can use this hook, for example, to perform any customizations to the HARP
 proxy that are not provided by the built-in interface of TPA.
 
 Please note that this hook will be run in any node that installs HARP packages,
-including BDR nodes.
+including PGD nodes.
 
 ### post-deploy
 
@@ -100,21 +100,21 @@ were generated or altered during the TPA deployment, you run the
 risk that the next `tpaexec deploy` will overwrite your changes (since
 TPA doesn't know what your hook might have done).
 
-## BDR3 hooks
+## PGD hooks
 
-These hooks are specific to BDRv3 deployments.
+These hooks are specific to PGD deployments.
 
 ### bdr-pre-node-creation
 
 TPA invokes `hooks/bdr-pre-node-creation.yml` on all instances
-before creating a BDR node on any instance for the first time. The hook
-will not be invoked if all required BDR nodes already exist.
+before creating a PGD node on any instance for the first time. The hook
+will not be invoked if all required PGD nodes already exist.
 
 ### bdr-post-group-creation
 
 TPA invokes `hooks/bdr-post-group-creation.yml` on all instances
-after creating any BDR node group on the `first_bdr_primary` instance.
-The hook will not be invoked if the required BDR groups already exist.
+after creating any PGD node group on the `first_bdr_primary` instance.
+The hook will not be invoked if the required PGD groups already exist.
 
 ### bdr-pre-group-join
 
@@ -126,7 +126,7 @@ You can use this hook to execute SQL commands and perform other
 adjustments to the replication set configuration and subscriptions that
 might be required before the node join starts.
 
-For example, you can adjust the BDR witness replication set to
+For example, you can adjust the PGD witness replication set to
 automatically add new tables and create DDL filters in general.
 
 ## Other hooks
