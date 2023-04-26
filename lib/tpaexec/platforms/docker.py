@@ -151,7 +151,7 @@ class docker(Platform):
                 "os": "Debian",
             },
             "tpa/ubuntu": {
-                "versions": ["bionic", "focal", "18.04", "20.04"],
+                "versions": ["bionic", "focal", "jammy", "18.04", "20.04", "22.04"],
                 "os": "Ubuntu",
             },
             "tpa/redhat": {

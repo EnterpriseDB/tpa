@@ -16,6 +16,7 @@ more on the latter.)
 
 ## Ubuntu
 
+* Ubuntu 22.04/jammy is fully supported
 * Ubuntu 20.04/focal is fully supported
 * Ubuntu 18.04/bionic is fully supported
 * Ubuntu 16.04/xenial is supported as a legacy platform

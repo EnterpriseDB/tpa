@@ -45,7 +45,7 @@ case "${ID}:${VERSION_ID%.*}" in
             python=python2.7
         fi
         ;;
-    ubuntu:20)
+    ubuntu:20|ubuntu:22)
         distribution=Ubuntu
         release=$VERSION_CODENAME
         python=python3

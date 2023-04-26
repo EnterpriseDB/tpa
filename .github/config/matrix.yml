@@ -9,6 +9,7 @@ default:
   tpa_os_image:
     - "ubuntu:18.04"
     - "ubuntu:20.04"
+    - "ubuntu:22.04"
     - "debian:10"
     - "redhat:7"
     - "redhat:8"
