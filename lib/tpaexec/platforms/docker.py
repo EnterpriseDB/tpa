@@ -156,10 +156,12 @@ class docker(Platform):
             },
             "tpa/redhat": {
                 "versions": ["7", "8", "9"],
+                "default_version": "8",
                 "os": "RedHat",
             },
             "tpa/rocky": {
                 "versions": ["8", "9"],
+                "default_version": "8",
                 "os": "Rocky",
                 "os_family": "RedHat",
             },
@@ -172,6 +174,9 @@ class docker(Platform):
 
         def valid_version(img_name, ver):
             ver = ver or kwargs.get("version")
+            if not ver and "default_version" in known_images[img_name]:
+                ver = known_images[img_name]["default_version"]
+
             if (
                 ver
                 and ver != "latest"
@@ -180,6 +185,7 @@ class docker(Platform):
                 raise DockerPlatformError(
                     f"ERROR: image {img_name}:{ver} is not supported"
                 )
+
             return ver or known_images[img_name]["versions"].pop()
 
         # Cater for image names, e.g. "tpa/debian" or "tpa/debian:10"

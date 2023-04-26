@@ -69,10 +69,10 @@
       redhat-7: centos:7
       redhat-8: rockylinux:8
       redhat-9: rockylinux:9
-      redhat-latest: rockylinux:9
+      redhat-latest: rockylinux:8
       rocky-8: rockylinux:8
       rocky-9: rockylinux:9
-      rocky-latest: rockylinux:9
+      rocky-latest: rockylinux:8
       centos-8: centos:8
       centos-9: centos:9
       almalinux-8: almalinux:8
