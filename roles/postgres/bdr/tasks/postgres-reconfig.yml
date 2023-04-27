@@ -23,6 +23,8 @@
     bdr_major_version is version('3', '==')
     and bdr_node_camo_partner is defined
 
+- meta: flush_handlers
+
 - include_role: name=postgres/restart
   when:
     postgres_service_end_state != 'started'
