@@ -188,5 +188,6 @@ default_pem_agent_service_name: pemagent
 default_pem_database: pem
 default_pem_server_group: "PEM Server Directory"
 
+default_pgd_proxy_options: {}
 default_pgd_proxy_user: pgdproxy
 default_pgd_proxy_group: pgdproxy

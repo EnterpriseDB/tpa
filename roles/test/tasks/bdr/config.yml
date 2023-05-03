@@ -1,0 +1,309 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- set_fact:
+    pgdcli_bin: >-
+      {{ (bdr_major_version==4)|ternary('/usr/local/bin/', '') }}pgd
+    pgdcli_config: >-
+      {{ pgdcli_directory|default('/etc/edb/pgd-cli') }}/pgd-cli-config.yml
+
+- name: Run pgd-cli health check
+  when:
+    bdr_major_version >= 4
+    and inventory_hostname == first_bdr_primary
+  block:
+  - name: Run pgd check-health command
+    command: >
+      {{ pgdcli_bin }} check-health
+      -f "{{ pgdcli_config }}"
+      --output json
+    become: true
+    become_user: "{{ postgres_user }}"
+    changed_when: false
+    register: pgd_check
+
+  - name: Verify that all pgd health checks succeeded
+    assert:
+      that: failed_checks is empty
+      fail_msg: >-
+        pgd health-check returned not-Ok status for
+        {{ failed_checks|map(attribute='check')|list|join(', ') }}
+    vars:
+      failed_checks:
+        "{{ (pgd_check.stdout|from_json)
+            |rejectattr('status', 'equalto', 'Ok')
+            |list }}"
+
+# Check `pgd verify-settings` for bdr
+- block:
+
+  - name: Run pgd verify-settings
+    command: >
+      pgd verify-settings
+      --output json
+      -f "{{ pgdcli_config }}"
+    become: true
+    become_user: "{{ postgres_user }}"
+    register: pgd_settings
+    changed_when: false
+
+    ## we check that test returns true for all nodes or that the list of statuses
+    ## for all nodes doesn't contain a critical status in order to avoid fatal error
+    ## on shared_preload_libraries test that returns Warning if bdr is not the first
+    ## library of the list.
+
+  - name: Assert statuses from pgd verify-settings
+    assert:
+      that: >
+        list_not_ok is empty
+        or
+        list_critical is empty
+      fail_msg: >
+        failed for {{ list_critical }}
+    vars:
+      list_not_ok: >
+        {{ pgd_settings.stdout
+        |from_json
+        |rejectattr('all_node_values_ok', 'equalto', true)
+        |list }}
+      list_critical: >
+        {{ list_not_ok
+        |map(attribute='node_setting_result')
+        |list|last
+        |selectattr('status','equalto', 'Critical')
+        |list }}
+
+  when: >
+    inventory_hostname == first_bdr_primary
+    and bdr_major_version > 4
+
+# Check pgd verify-cluster output
+
+- block:
+  - name: Run pgd verify-cluster command
+    command: >
+      pgd verify-cluster
+      --output json
+      -f "{{ pgdcli_config }}"
+
+    become: true
+    become_user: "{{ postgres_user }}"
+    changed_when: false
+    register: pgd_cluster
+
+  - name: Assert statuses from pgd verify-cluster
+    assert:
+      that: list_not_ok is empty
+      fail_msg: >
+        failed for {{ list_not_ok }}
+    vars:
+      list_not_ok: >
+        {{ pgd_cluster.stdout|from_json
+        |rejectattr('status', 'equalto','Ok')
+        |list }}
+
+  when: >
+    inventory_hostname == first_bdr_primary
+    and bdr_major_version > 4
+
+## Check that raft leaders are not witness-only nodes
+#
+# this test is here due to some bug with bdr4 where DDL query
+# might not be replicated if a witness node is RAFT_LEADER.
+# GLOBAL_DDL_LOCK is granted, because RAFT is working, but,
+# the DDL doesn't get replicated, because the RAFT leader is a witness,
+# and it doesn't have any schema nor data.
+
+# TODO: Should this test be kept ? couldn't get bdr4 to elect a witness node
+# as leader and verify the bug is still present. Plus, failing only due to
+# this assertion seems arbitrary atm.
+
+- block:
+  - name: Register raft leaders and their pub_repsets
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        WITH node_repsets AS (
+          SELECT jsonb_array_elements(
+            bdr.run_on_all_nodes($$
+              SELECT
+                node_id,
+                node_name,
+                pub_repsets,
+                sub_repsets
+        FROM bdr.local_node_summary;
+          $$)::jsonb
+          ) AS j
+          )
+        SELECT j->'response'->'command_tuples'->0->>'node_id' AS node_id,
+               j->'response'->'command_tuples'->0->>'pub_repsets' AS pub_repsets,
+               b.node_name
+        FROM node_repsets
+        INNER JOIN bdr.group_raft_details as b
+        ON j->'response'->'command_tuples'->0->>'node_id' = b.node_id
+        WHERE state= 'RAFT_LEADER';
+    register: group_raft
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: verify that no witness is RAFT_LEADER
+    assert:
+      that: >
+        group_raft.results|selectattr('node_name', 'equalto', item)|map(attribute='pub_repsets')|list|last != '{witness-only}'
+      msg: >
+        witness should not be RAFT_LEADER, {{ item }} is RAFT_LEADER
+    with_items: "{{ group_raft.results|map(attribute='node_name')|list }}"
+  when: >
+    inventory_hostname == first_bdr_primary
+    and bdr_major_version == 4
+
+## Check that synchronous_standby_names contains only valid application names
+- name: Get synchronous_standby_names value
+  postgresql_query:
+    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+    query: >
+      SHOW synchronous_standby_names;
+  register: sync_standby
+  changed_when: false
+  vars:
+    _task_environment:
+      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+
+- name: extract standby_list
+  set_fact:
+    standby_list: >-
+      {{ sync_standby.results[0]['synchronous_standby_names']| regex_findall(regex) }}
+  vars:
+    regex: >-
+      (?:[,\'\"\s\(]?|^)(\w+?)(?:[\,\)\'\"]|$|\s,|\s\))
+- name: Assert that standby are valid nodes
+  assert:
+    that:
+      - standby_list is defined
+      - standby_list is subset(groups|members_of('role_bdr', not_in=['role_witness']))
+    fail_msg: >
+      synchronous_standby_names contains standby(s) that are not eligible nodes of the cluster:
+      {{ standby_list|difference(groups|members_of('role_bdr', not_in=['role_witness'])) }}
+
+# Check that bdr.standby_slot_names are actual cluster nodes
+- name: Get bdr.standby_slot_names value
+  postgresql_query:
+    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+    query: >
+      SHOW bdr.standby_slot_names;
+  register: standby_slot_names
+  vars:
+    _task_environment:
+      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+
+- name: extract standby_slot_names
+  set_fact:
+    standby_slot_list: >-
+      {{ standby_slot_names.results[0]['bdr.standby_slot_names']| regex_findall(regex) }}
+  vars:
+    regex: >-
+      (?:[\,\'\"\s]?|^)(\w+?)(?:[\,\'\"\s]|$)
+
+- name: Assert that standby are valid nodes
+  assert:
+    that:
+      - standby_slot_list is defined
+      - standby_slot_list is subset(groups|members_of('role_bdr', not_in=['role_witness']))
+    fail_msg: >
+      bdr.standby_slot_names contains standby(s) that are not eligible nodes of the cluster:
+      {{ standby_slot_list|difference(groups|members_of('role_bdr', not_in=['role_witness'])) }}
+
+- name: Get bdr.standby_slot_names value
+  postgresql_query:
+    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+    query: >
+      SHOW bdr.standby_slots_min_confirmed;
+  register: min_confirmed
+  vars:
+    _task_environment:
+      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+
+- name: Assert that bdr.standby_slots_min_confirmed <= size of bdr.standby_slot_names
+  assert:
+    that: min_confirmed.results[0]['bdr.standby_slots_min_confirmed']|int <= standby_slot_list|length
+    fail_msg: >
+      Expecting more confirmed slots than defined slots in bdr.standby_slot_names
+
+
+# check that max_worker_processes is above minimal required for the cluster
+# TODO: Duplicated by verify-settings check
+# could be useful for bdr4 but bdr.get_min_required_worker_processes() doesn't
+# exist for pgdcli v1... would need to compute the min ourself
+
+- block:
+  - name: get current max_worker_processes value
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        SHOW max_worker_processes;
+    register: worker_process
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: get minimum max_worker_processes value for the cluster
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        SELECT bdr.get_min_required_worker_processes() as min_worker_processes;
+    register: min_worker_processes
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+
+  - name: Assert that max_worker_processes > minimum
+    assert:
+      that: >
+        worker_process.results[0]['max_worker_processes']|int
+        >= min_worker_processes.results[0]['min_worker_processes']
+      fail_msg: >
+        max_worker_processes value is too low, current setting is
+        {{ worker_process.results[0]['max_worker_processes']|int }},
+        minimum recommended is
+        {{ min_worker_processes.results[0]['min_worker_processes'] }}
+  when: bdr_major_version > 4
+
+# check that max_wal_senders is over the minimum recommended value
+# TODO: Duplicated by verify-settings check
+# can be kept to be run vs bdr4 cluster where verify-settings is not
+# available (pgdcli v1)
+
+- block:
+  - name: get max_wal_senders value
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        SHOW max_wal_senders;
+    register: max_wal_senders
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: Assert that max_wal_senders > minimum
+    assert:
+      that: >
+        max_wal_senders.results[0]['max_wal_senders']|int
+        >= min_wal_senders
+      fail_msg: >
+        max_wal_senders value is too low, current setting is
+        {{ max_wal_senders.results[0]['max_wal_senders']|int }},
+        minimum recommended is
+        {{ min_wal_senders }}
+    vars:
+      min_wal_senders: "{{ twice_postgres_instances }}"
+  when: bdr_major_version == 4

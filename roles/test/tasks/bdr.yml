@@ -6,8 +6,14 @@
   tags: always
 
 ## BDR tests
-#
-# [Include tests for basic BDR functionality here]
+
+- name: Verify BDR configuration
+  include_tasks: bdr/config.yml
+  tags: bdr
+
+- name: Perform DDL tests in the BDR cluster
+  include_tasks: bdr/ddl.yml
+  tags: [bdr, ddl]
 
 ## CAMO tests
 #

@@ -60,3 +60,12 @@
   when: >
     'haproxy' in role
   tags: haproxy
+
+- name: Run pgd-proxy tests
+  include_tasks:
+    file: pgd-proxy.yml
+    apply:
+      tags: pgd-proxy
+  when: >
+    'pgd-proxy' in role
+  tags: pgd-proxy

@@ -163,7 +163,7 @@
     bdr_node_group: "{{ bdr_node_group|default(default_bdr_node_group) }}"
     pgd_proxy_user: "{{ pgd_proxy_user|default(default_pgd_proxy_user) }}"
     pgd_proxy_group: "{{ pgd_proxy_group|default(default_pgd_proxy_group) }}"
-    pgd_proxy_options: "{{ pgd_proxy_options|default({}) }}"
+    pgd_proxy_options: "{{ default_pgd_proxy_options|combine(pgd_proxy_options|default({}), recursive=true) }}"
     bdr_node_options: "{{ bdr_node_options|default({}) }}"
     haproxy_port: "{{ haproxy_port|default(default_haproxy_port[postgres_family]) }}"
     haproxy_bind_address: "{{ haproxy_bind_address|default(default_haproxy_bind_address) }}"

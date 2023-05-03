@@ -1,0 +1,140 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+## basic DDL operation and verifications
+#
+# aim is to create a dummy table and check that it's correctly behaving in the PGD cluster
+- set_fact:
+    bdr_testers: "{{ groups|members_of('role_bdr', not_in=['role_witness']) }}"
+- block:
+  - name: create tpa table in {{ bdr_database }}
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        CREATE TABLE bdr.tpa
+        (
+        tpa_id INT,
+        tpa_name VARCHAR(30),
+        tpa_date TIMESTAMP,
+        tpa_bool BOOLEAN,
+        tpa_text TEXT
+        );
+    register: create_tpa
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+  - name: set replica identity
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        ALTER TABLE bdr.tpa
+        REPLICA IDENTITY FULL;
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: add random data in the table
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        INSERT INTO bdr.tpa
+        (tpa_id, tpa_name, tpa_date, tpa_bool, tpa_text)
+        VALUES
+        (
+          generate_series(1, 1000),
+          random()::text,
+          LOCALTIMESTAMP - interval '10 years' * random(),
+          round(random())::int::boolean,
+          random()::text
+        )
+        ;
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: update data in the table tpa
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        UPDATE bdr.tpa
+        SET tpa_bool = true
+        WHERE tpa_bool = false
+        ;
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: delete data in table tpa
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        DELETE FROM bdr.tpa
+        WHERE tpa_id > 500
+        ;
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: alter table tpa, add primary key
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        ALTER TABLE bdr.tpa
+        ADD PRIMARY KEY (tpa_id)
+        ;
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: alter table tpa, drop column tpa_bool
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        ALTER TABLE bdr.tpa
+        DROP COLUMN tpa_bool
+        ;
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: check table is available for other node {{ bdr_tester }}
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host=bdr_tester) }}"
+      query: >
+        SELECT * FROM bdr.tpa;
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+      bdr_tester: "{{ bdr_testers|difference([inventory_hostname])|first }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: truncate table tpa
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        TRUNCATE TABLE bdr.tpa;
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  - name: drop table tpa
+    postgresql_query:
+      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      query: >
+        DROP TABLE bdr.tpa;
+    vars:
+      _task_environment:
+        PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+
+  run_once: true
+  when: inventory_hostname in bdr_testers
