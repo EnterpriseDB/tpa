@@ -37,4 +37,4 @@
       }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
   when:
-    dest not in mounted_sources
+    dest not in mounted_dirs

@@ -90,15 +90,15 @@
 
 # If any of the source directories are mounted, as they might be if you
 # use `--local-source-directories`, we should skip trying to clone and
-# update them in all of the roles that build from source.
+# update them in the roles that build from source.
 
-- name: Retrieve active mounts under /opt/postgres/src
+- name: Retrieve active mounts
   command: >
-    awk '{if ($2 ~ /\/opt\/postgres\/src/) {print $2}}' /proc/mounts
-  register: mounted_sources_cmd
+    awk '{print $2}' /proc/mounts
+  register: mounts_cmd
   changed_when: false
   check_mode: no
 
-- name: Set mounted_sources
+- name: Set mounted_dirs
   set_fact:
-    mounted_sources: "{{ mounted_sources_cmd.stdout_lines|default([]) }}"
+    mounted_dirs: "{{ mounts_cmd.stdout_lines|default([]) }}"

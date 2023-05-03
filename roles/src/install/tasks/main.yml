@@ -11,11 +11,11 @@
     version: "{{ git_repository_ref or 'master' }}"
     reference: "{{ git_reference_repository|default(omit) }}"
   when:
-    source_directory not in mounted_sources
+    source_directory not in mounted_dirs
 
 - include_role: name=src/install tasks_from=verify-branch.yml
   when:
-    source_directory in mounted_sources
+    source_directory in mounted_dirs
     and git_repository_ref|default('') != ''
 
 - block:
