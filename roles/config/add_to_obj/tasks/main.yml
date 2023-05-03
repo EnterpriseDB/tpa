@@ -1,0 +1,24 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Given the _name_ of a fact (e.g., "postgres_conf_tpa")
+# in `object_varname` and an object of settings in `object_contents`,
+# adds the given object to the _value_ of the fact.
+# If a boolean value is given in `condition` the optional alternative
+# object `object_alt_contents` will be assigned if the boolean evaluates
+# to false. The default is an empty object `{}`.
+
+- action: set_fact
+  args:
+    "{{ object_varname|mandatory }}": "{{
+        vars[object_varname]|default({})
+        |combine(
+          (when|default(true)|bool)
+          |ternary(
+            object_contents|mandatory,
+            object_alt_contents|default({})
+          ),
+          recursive=True
+        )
+      }}"
