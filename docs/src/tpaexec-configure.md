@@ -408,7 +408,7 @@ Let's see what happens when we run the following command:
 ```bash
 [tpa]$ tpaexec configure ~/clusters/speedy --architecture M1 \
         --num-cascaded-replicas 2 --distribution Debian \
-        --platform aws --region us-east-1 --subnet-pattern 10.33.x.x/28 \
+        --platform aws --region us-east-1 --network 10.33.0.0/16 \
         --instance-type t2.medium --root-volume-size 32 \
         --postgres-volume-size 64 --barman-volume-size 128 \
         --postgresql 14
@@ -434,88 +434,107 @@ directly. Here's what the configuration looks like:
 ```yaml
 ---
 architecture: M1
-
 cluster_name: speedy
 cluster_tags: {}
 
-ec2_vpc:
-  Name: Test
-  cidr: 10.33.0.0/16
-
+cluster_rules:
+- cidr_ip: 0.0.0.0/0
+  from_port: 22
+  proto: tcp
+  to_port: 22
+- cidr_ip: 10.33.76.176/28
+  from_port: 0
+  proto: tcp
+  to_port: 65535
+- cidr_ip: 10.33.148.240/28
+  from_port: 0
+  proto: tcp
+  to_port: 65535
 ec2_ami:
-  Name: debian-stretch-hvm-x86_64-gp2-2018-08-20-85640
-  Owner: 379101102735
-
-ec2_vpc_subnets:
+  Name: debian-10-amd64-20210721-710
+  Owner: '136693071363'
+ec2_instance_reachability: public
+ec2_vpc:
   us-east-1:
-    10.33.161.64/28:
-      az: us-east-1a
-    10.33.189.80/28:
-      az: us-east-1b
+    Name: Test
+    cidr: 10.33.0.0/16
 
 cluster_vars:
-  postgres_version: 14
+  enable_pg_backup_api: false
+  failover_manager: repmgr
   postgres_flavour: postgresql
-  tpa_2q_repositories: []
-  vpn_network: 192.168.33.0/24
+  postgres_version: '14'
+  preferred_python_version: python3
+  use_volatile_subscriptions: false
+
+locations:
+- Name: main
+  az: us-east-1a
+  region: us-east-1
+  subnet: 10.33.76.176/28
+- Name: dr
+  az: us-east-1b
+  region: us-east-1
+  subnet: 10.33.148.240/28
 
 instance_defaults:
+  default_volumes:
+  - device_name: root
+    encrypted: true
+    volume_size: 32
+    volume_type: gp2
+  - device_name: /dev/sdf
+    encrypted: true
+    vars:
+      volume_for: postgres_data
+    volume_size: 64
+    volume_type: gp2
   platform: aws
   type: t2.medium
-  region: us-east-1
-  default_volumes:
-    - device_name: root
-      volume_type: gp2
-      volume_size: 32
-    - device_name: /dev/xvdf
-      volume_type: gp2
-      volume_size: 64
-      vars:
-        volume_for: postgres_data
   vars:
     ansible_user: admin
 
 instances:
-  - node: 1
-    Name: quirk
-    role: primary
-    subnet: 10.33.161.64/28
-
-  - node: 2
-    Name: keeper
-    role: replica
-    upstream: quirk
-    backup: zealot
-    subnet: 10.33.161.64/28
-
-  - node: 3
-    Name: zealot
-    role:
-      - barman
-      - log-server
-      - openvpn-server
-      - monitoring-server
-      - witness
-    volumes:
-        - device_name: /dev/xvdf
-          volume_type: gp2
-          volume_size: 128
-          vars:
-            volume_for: barman_data
-    subnet: 10.33.189.80/28
-
-  - node: 4
-    Name: quaver
-    role: replica
-    upstream: keeper
-    subnet: 10.33.189.80/28
-
-  - node: 5
-    Name: quavery
-    role: replica
-    upstream: keeper
-    subnet: 10.33.189.80/28
-
+- Name: upsets
+  backup: kayak
+  location: main
+  node: 1
+  role:
+  - primary
+- Name: zebra
+  location: main
+  node: 2
+  role:
+  - replica
+  upstream: upsets
+- Name: kayak
+  location: main
+  node: 3
+  role:
+  - barman
+  - log-server
+  - monitoring-server
+  - witness
+  upstream: upsets
+  volumes:
+  - device_name: /dev/sdf
+    encrypted: true
+    vars:
+      volume_for: barman_data
+    volume_size: 128
+    volume_type: gp2
+- Name: queen
+  location: dr
+  node: 4
+  role:
+  - replica
+  upstream: zebra
+- Name: knock
+  location: dr
+  node: 5
+  role:
+  - replica
+  upstream: zebra
 ```
 
 The next step is to run [`tpaexec provision`](tpaexec-provision.md)

@@ -42,10 +42,6 @@ each subnet may be anywhere between a /24 and a /29.
 
 You may specify ``--subnet 192.0.2.128/27`` to use a particular subnet.
 
-You may instead specify ``--subnet-pattern 192.0.x.x`` to generate
-random subnets (as many as required by the architecture) matching the
-given pattern.
-
 ## Disk space
 
 You may optionally specify ``--root-volume-size 64`` to set the size of
