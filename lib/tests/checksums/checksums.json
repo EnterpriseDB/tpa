@@ -1,0 +1,8 @@
+{
+    "test_file_1.txt": "09ca7e4eaa6e8ae9c7d261167129184883644d07dfba7cbfbc4c8a2e08360d5b",
+    "test_file_2.json": "9d04e1f31ecaf8f3ed0d7045d5ca5ed3f55a3f36ef84d48f7e8a457f67a70a86",
+    "test_file_3.yml": "09df67fb867923d6ba1427ac60cbc6463a903057cb98a042476c7592a8493662",
+    "dir/nested_file_1.txt": "048d14ea4eb5b1eeb26fa2faf36bbf266a0a09fca91f9ab6c042b77aee1753cf",
+    "dir/nested_file_3.yml": "c6ccc102ce67649087ddf6f21f890cc803a6125c922a41fe152e31af2d71710d",
+    "dir/nested_file_2.json": "31cce14a25dc97ebcf91cfc5647944a90c94cd84a7119e6fcfb8eb5260f49855"
+}

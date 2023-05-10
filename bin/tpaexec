@@ -75,6 +75,10 @@ version() {
     echo "# TPAexec $VERSION"
 }
 
+_checksums() {
+   python3  $TPA_DIR/lib/tpaexec/compare_checksums.py $TPA_DIR $TPA_DIR/checksums.json
+}
+
 _python_version() {
     python3 -c 'import sys; print("%d.%d.%d" % (sys.version_info[0:3]))'
 }
@@ -469,6 +473,8 @@ _tpaexec_info() {
             echo " (did you run tpaexec setup?)"
         fi
     fi
+
+    echo Validation: "$(_checksums)"
 }
 
 selftest() {
