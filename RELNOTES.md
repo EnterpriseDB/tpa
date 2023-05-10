@@ -14,7 +14,6 @@
   on the subgroups we create for each location, and proxies are
   part of the local subgroup.
 
-
 - TPA-102 Support deploying to Ubuntu 22.04
 
   TPA will now provision and deploy nodes running Ubuntu 22.04 ("Jammy
@@ -25,12 +24,6 @@
 - Overhaul documentation for local repository use
 
 - Consistently refer to PGD as PGD not as BDR in documentation
-
-- TPA-325 Ensure that locale settings are available on all platforms
-
-- TPA-314 Allow installation of non-harp etcd packages
-
-- TPA-413 Remove generation of fallback configuration
 
 - Update AWS AMIs for RHEL7 and RHEL8
 
@@ -44,9 +37,16 @@
 
 - TPA-416 Correctly sanitise subgroup names
 
+  If subgroup names contain upper-case letters, lowercase them rather
+  than replacing them with underscores.
+
 - TPA-415 Restart postgres after changing camo config
 
 - TPA-400 Ensure etcd config changes are idempotent
+
+  Enforce an ordering on the list of etc nodes and create data files
+  with correct permissions, so that etcd doesn't get restarted
+  unnecessarily on second and subsequent deployments.
 
 ## v23.16 (2023-03-21)
 
