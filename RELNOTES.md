@@ -2,6 +2,52 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.17 (2023-05-10)
+
+### Notable changes
+
+- TPA-383 Replace --active-locations option with --pgd-proxy-routing
+
+  If --pgd-proxy-routing is set to global, we enable proxy routing
+  on the top-level group and all proxies are part of the top-level group.
+  If routing is set to local, we enable proxy routing (and enable_raft)
+  on the subgroups we create for each location, and proxies are
+  part of the local subgroup.
+
+
+- TPA-102 Support deploying to Ubuntu 22.04
+
+  TPA will now provision and deploy nodes running Ubuntu 22.04 ("Jammy
+  Jellyfish") on either docker containers or AWS.
+
+### Minor changes
+
+- Overhaul documentation for local repository use
+
+- Consistently refer to PGD as PGD not as BDR in documentation
+
+- TPA-325 Ensure that locale settings are available on all platforms
+
+- TPA-314 Allow installation of non-harp etcd packages
+
+- TPA-413 Remove generation of fallback configuration
+
+- Update AWS AMIs for RHEL7 and RHEL8
+
+- Various documentation fixes
+
+### Bugfixes
+
+- TPA-404 Don't remove groups from an existing postgres user
+
+- Fix error reporting if the initial git commit for a cluster fails
+
+- TPA-416 Correctly sanitise subgroup names
+
+- TPA-415 Restart postgres after changing camo config
+
+- TPA-400 Ensure etcd config changes are idempotent
+
 ## v23.16 (2023-03-21)
 
 ### Notable changes
