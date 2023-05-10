@@ -6,41 +6,46 @@
 
 ### Notable changes
 
-- TPA-383 Replace --active-locations option with --pgd-proxy-routing
+- TPA-383 Require --pgd-proxy-routing global|local to be specified at
+  configure time for PGD-Always-ON clusters
 
-  If --pgd-proxy-routing is set to global, we enable proxy routing
-  on the top-level group and all proxies are part of the top-level group.
-  If routing is set to local, we enable proxy routing (and enable_raft)
-  on the subgroups we create for each location, and proxies are
-  part of the local subgroup.
+  This option determines how PGD-Proxy instances will route connections
+  to a write leader. Local routing will make every PGD-Proxy route to
+  a write leader within its own location (suitable for geo-sharding
+  applications). Global routing will make every proxy route to a
+  single write leader, elected amongst all available data nodes across
+  all locations (i.e., all pgd-proxy instances will be attached to the
+  top-level node group).
+
+  (This option entirely replaces the earlier --active-locations option,
+  and also resolves some problems with the earlier top-level routing
+  configuration.)
 
 - TPA-102 Support deploying to Ubuntu 22.04
 
-  TPA will now provision and deploy nodes running Ubuntu 22.04 ("Jammy
+  TPA can now provision and deploy nodes running Ubuntu 22.04 ("Jammy
   Jellyfish") on either docker containers or AWS.
 
 ### Minor changes
 
-- Overhaul documentation for local repository use
-
-- Consistently refer to PGD as PGD not as BDR in documentation
-
 - Update AWS AMIs for RHEL7 and RHEL8
 
-- Various documentation fixes
+- Documentation improvements
 
 ### Bugfixes
 
 - TPA-404 Don't remove groups from an existing postgres user
 
-- Fix error reporting if the initial git commit for a cluster fails
+- Fix `Failed to commit files to git: b''` error from `tpaexec configure`;
+  if the commit fails, the correct error message will now be shown
 
 - TPA-416 Correctly sanitise subgroup names
 
   If subgroup names contain upper-case letters, lowercase them rather
   than replacing them with underscores.
 
-- TPA-415 Restart postgres after changing camo config
+- TPA-415 Ensure Postgres is correctly restarted, if required, after
+  CAMO configuration
 
 - TPA-400 Ensure etcd config changes are idempotent
 
