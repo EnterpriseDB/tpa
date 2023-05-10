@@ -104,13 +104,13 @@ class aws(CloudPlatform):
                 },
             },
             "redhat": {
-                "RHEL-7.9_HVM-20210208-x86_64-0-Hourly2-GP2": {
+                "RHEL-7.9_HVM-20221027-x86_64-0-Hourly2-GP2": {
                     "versions": ["7"],
                     "preferred_python_version": "python2",
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-8.4.0_HVM-20210825-x86_64-0-Hourly2-GP2": {
+                "RHEL-8.7.0_HVM-20230330-x86_64-56-Hourly2-GP2": {
                     "versions": ["8", "default"],
                     "owner": "309956199498",
                     "user": "ec2-user",
