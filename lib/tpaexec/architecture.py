@@ -617,6 +617,7 @@ class Architecture(object):
         self._init_cluster_vars(cluster_vars)
         self.update_cluster_vars(cluster_vars)
         self.postgres_eol_repos(cluster_vars)
+        self.set_2q_repos(cluster_vars)
         self.add_edb_repos(cluster_vars)
         self.platform.update_cluster_vars(cluster_vars, args)
         args["cluster_vars"] = cluster_vars
@@ -979,6 +980,29 @@ class Architecture(object):
                 cluster_vars["yum_repository_list"].append(
                     DEBUGINFO_SUFFIX.format(repo_name)
                 )
+
+    def set_2q_repos(self, cluster_vars):
+        """ Set 2q repos to be empty explicitly if we are on an OS/version combination
+        that they don't support."""
+
+        supported_combinations = [
+            "RedHat:7", "RedHat:8",
+            "Rocky:8",
+            "AlmaLinux:8",
+            "Debian:8", "Debian:9", "Debian:10", "Debian:11",
+            "Debian:jessie", "Debian:stretch", "Debian:buster", "Debian:bullseye",
+            "Ubuntu:16.04", "Ubuntu:18.04", "Ubuntu:20.04", "Ubuntu:22.04",
+            "Ubuntu:xenial", "Ubuntu:bionic", "Ubuntu:focal", "Ubuntu:jammy",
+        ]
+
+        distribution = self.args.get("distribution")
+        os_version = self.args.get("os_version")
+
+        if (distribution and os_version
+                and distribution + ":" + os_version not in supported_combinations
+                and "tpa_2q_repositories" not in cluster_vars):
+
+            cluster_vars["tpa_2q_repositories"] = []
 
     def add_edb_repos(self, cluster_vars):
         """Set default values for edb_repositories based on the Postgres flavour
