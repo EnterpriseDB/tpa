@@ -10,16 +10,25 @@ using the [download-packages](tpaexec-download-packages.md) command.
 
 ## Preparation
 
-Choose an internet connected machine where you can install TPA,
-follow instructions below to either copy an existing cluster
+Choose an internet connected machine where you can install TPA and
+follow the instructions below to either copy an existing cluster
 configuration or create a new cluster.
+
+!!! Note 
+    If the air-gapped server does not already have TPA installed,
+    follow the instructions
+    [here](INSTALL.md#installing-tpa-without-internet-or-network-access-air-gapped)
+    to install it.
 
 If you have an existing cluster in a disconnected environment, all you
 need on the internet connected host is the config.yml. Create a
-directory and copy that file into it.
+directory and copy that file into it then run `tpaexec relink` on that
+directory to generate the remaining files that would normally be created
+by `tpaexec configure`.
 
-For an environment where the target instances will not have network
-access, configure a new cluster with this option:
+Alternatively, to create a new configuration for an environment where
+the target instances will not have network access, configure a new
+cluster with this option:
 
     tpaexec configure --use-local-repo-only …
 

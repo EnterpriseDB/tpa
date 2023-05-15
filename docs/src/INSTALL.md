@@ -122,14 +122,40 @@ your .bashrc or equivalent shell configuration file:
 $ export PATH=$PATH:/opt/EDB/TPA/bin
 ```
 
-### Installing without network access
+## Installing TPA without internet or network access (air-gapped)
+
+This section describes how to install TPA onto a server which cannot
+access either the EDB repositories, a Python package index, or both.
+For information on how to use TPA in such an environment, please see
+[Managing clusters in a disconnected or air-gapped
+environment](air-gapped.md)
+
+### Downloading TPA packages
+
+If you cannot access the EDB repositories directly from the server on
+which you need to install TPA, you can download the packages from an
+internet-connected machine and transfer them. There are several ways to
+achieve this.
+
+If your internet-connected machine uses the same operating system as the
+target, we recommend using `yumdownloader` (RHEL-like) or `apt download`
+(Debian-like) to download the packages.
+
+If this is not possible, please contact EDB support and we will provide
+you with a download link or instructions appropriate to your
+subscription.
+
+### Installing without access to a Python package index
 
 When you run `tpaexec setup`, it will ordinarily download the Python
-packages from the network. The `tpaexec-deps` package (available from
-the same repository as tpaexec) bundles everything that would have been
-downloaded, so that they can be installed without network access. Just
-install the package before you run `tpaexec setup` and the bundled
-copies will be used automatically.
+packages from a Python package index. Unless your environment provides a
+different index the default is the official [PyPI](https://pypi.org). If
+no package index is available, you should install the `tpaexec-deps`
+package in the same way your installed `tpaexec`. The `tpaexec-deps`
+package (available from the same repository as tpaexec) bundles
+everything that would have been downloaded, so that they can be
+installed without network access. Just install the package before you
+run `tpaexec setup` and the bundled copies will be used automatically.
 
 ## Verification
 
