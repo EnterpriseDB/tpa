@@ -20,6 +20,10 @@
   vars:
     list_varname: _all_bdr3_packages
     bdr_version: 3
+  when: >
+    'bdr' in role
+    and bdr_version is version('4', '==')
+    and postgres_flavour != 'edbpge'
 
 - name: Remove BDR3-related packages when bdr_version is 4
   package:
@@ -27,13 +31,18 @@
     state: absent
   when: >
     'bdr' in role
-    and bdr_version is version('4', '>=')
+    and bdr_version is version('4', '==')
+    and postgres_flavour != 'edbpge'
 
 - name: Fetch BDR4-related packages
   include_tasks: list-bdr-packages.yml
   vars:
     list_varname: _all_bdr4_packages
     bdr_version: 4
+  when: >
+    'bdr' in role
+    and bdr_version is version('5', '==')
+    and postgres_flavour != 'edbpge'
 
 - name: Remove BDR4-related packages when bdr_version is 5
   package:
@@ -41,7 +50,8 @@
     state: absent
   when: >
     'bdr' in role
-    and bdr_version is version('5', '>=')
+    and bdr_version is version('5', '==')
+    and postgres_flavour != 'edbpge'
 
 - name: Install latest Postgres packages
   package:

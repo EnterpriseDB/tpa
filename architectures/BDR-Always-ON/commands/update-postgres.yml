@@ -61,6 +61,13 @@
     when: >
       'haproxy' in role
 
+  - name: Check pgd-proxy configuration and status
+    include_role:
+      name: test
+      tasks_from: pgd-proxy/basic.yml
+    when: >
+      'pgd-proxy' in role
+
 # Now that we're convinced the cluster is in a reasonable initial state,
 # we start the update process one by one on the instances. You can run
 # the command with ``-e update_hosts=a,b,c,…`` to control the order in
@@ -82,6 +89,8 @@
   - include_role:
       name: haproxy
       tasks_from: disable-backend.yml
+    when: >
+      'role_haproxy' in groups
 
   # Now we can perform the update on Postgres instances, whether proxied
   # (e.g., primary instances) or not (e.g., logical standby instances).
@@ -145,6 +154,30 @@
       or ('bdr' in role
         and failover_manager == 'harp'
         and inventory_hostname in first_bdr_primary_candidates|default([]))
+
+  - name: Stop/update/restart pgd-proxy on {{ inventory_hostname }}
+    block:
+    - include_role: name=pgd_proxy/restart
+      vars:
+        pgd_proxy_service_end_state: stopped
+    - include_role: name=pgd_proxy/pkg
+      vars:
+        allow_package_upgrades: yes
+    - include_role: name=pgd_proxy/restart
+      vars:
+        pgd_proxy_service_end_state: started
+    when: >
+      'pgd-proxy' in role
+
+  - name: upgrade pgdcli on {{ inventory_hostname }}
+    block:
+    - include_role: name=pgdcli/pkg
+      vars:
+        allow_package_upgrades: yes
+    when: >
+      ('bdr' in role and bdr_version is version('4', '>='))
+      or 'pgdcli' in role
+      or 'pgd-proxy' in role
 
   # After we update one instance in a CAMO pair, we must wait for its
   # partner to catch up. If we stop the partner before it is ready, we
