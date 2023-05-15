@@ -23,23 +23,51 @@ backups from the primary.
 
 ![Cluster with cascading replication](images/m1.png)
 
-If there is an even number of PostgreSQL nodes, the Barman node is
-additionally configured as a repmgr witness. This ensures that the
-number of repmgr nodes is always odd, which is convenient when
+If there is an even number of Postgres nodes, the Barman node is
+additionally configured as a witness. This ensures that the
+number of nodes is always odd, which is convenient when
 enabling automatic failover.
 
 ## Cluster configuration
 
-```
-[tpa]$ tpaexec configure ~/clusters/m1 \
+### Overview of configuration options
+
+An example invocation of `tpaexec configure` for this architecture
+is shown below.
+
+```shell
+tpaexec configure ~/clusters/m1 \
          --architecture M1 \
          --platform aws --region eu-west-1 --instance-type t3.micro \
          --distribution Debian \
          --postgresql 14
 ```
 
-You must specify `--architecture M1`. (In the example above, this is
-the only option required to produce a working configuration.)
+You can list all available options using the help command.
+
+```shell
+tpaexec configure --architecture M1 --help
+```
+
+The table below describes the mandatory options for M1
+and additional important options.
+More detail on the options is provided in the following section.
+
+#### Mandatory Options
+
+| Option                                                | Description                                                                                 |
+|-------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `--architecture` (`-a`)                               | Must be set to `M1`.                                                                        |
+| Postgres flavour and version (e.g. `--postgresql 15`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
+
+#### Additional Options
+
+| Option                    | Description                                             | Behaviour if omitted |
+|---------------------------|---------------------------------------------------------|----------------------|
+| `--platform`              | One of `aws`, `docker`, `bare`.                         | Defaults to `aws`.   |
+| `--num-cascaded-replicas` | The number of cascaded replicas from the first replica. | Defaults to 1.       |
+
+### More detail about M1 configuration
 
 You may optionally specify `--num-cascaded-replicas N` to request N
 cascaded replicas (including 0 for none; default: 1).

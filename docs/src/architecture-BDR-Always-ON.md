@@ -1,7 +1,7 @@
 # BDR-Always-ON
 
-EDB Postgres Distributed 4 or below in an Always-ON configuration,
-suitable for use in test and production.
+EDB Postgres Distributed 3.7 or 4 in an Always-ON
+configuration, suitable for use in test and production.
 
 This architecture requires a subscription to the legacy 2ndQuadrant
 repositories, and some options require a subscription to EDB Repos 1.0.
@@ -26,25 +26,56 @@ You can check EDB's Postgres Distributed Always On Architectures
 [whitepaper](https://www.enterprisedb.com/promote/bdr-always-on-architectures)
 for the detailed layout diagrams.
 
-This architecture is meant for use with PGD versions 3.7, and 4.
+This architecture is meant for use with PGD versions 3.7 and 4.
 
 ## Cluster configuration
 
-```
-[tpa]$ tpaexec configure ~/clusters/bdr \
+### Overview of configuration options
+
+An example invocation of `tpaexec configure` for this architecture
+is shown below.
+
+```shell
+tpaexec configure ~/clusters/bdr \
          --architecture BDR-Always-ON \
-         --layout gold \
-         --harp-consensus-protocol bdr \
          --platform aws --region eu-west-1 --instance-type t3.micro \
-         --distribution Debian
+         --distribution Debian \
+         --edb-postgres-advanced 14 --redwood
+         --layout gold \
+         --harp-consensus-protocol bdr
 ```
 
-You must specify `--architecture BDR-Always-ON`. (In the example
-above, it is the only option required to produce a working
-configuration.)
+You can list all available options using the help command.
 
-You also must specify `--layout layoutname` to set one of the supported PGD
-use-case variations. The current options are bronze, silver, gold, and
+```shell
+tpaexec configure --architecture BDR-Always-ON --help
+```
+
+The table below describes the mandatory options for BDR-Always-ON
+and additional important options.
+More detail on the options is provided in the following section.
+
+#### Mandatory Options
+
+| Option                                                | Description                                                                                 |
+|-------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `--architecture` (`-a`)                               | Must be set to `BDR-Always-ON`.                                                             |
+| Postgres flavour and version (e.g. `--postgresql 14`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
+| `--layout`                                            | One of `bronze`, `silver`, `gold`, `platinum`.                                              |
+| `--harp-consensus-protocol`                           | One of `bdr`, `etcd`.                                                                       |
+
+#### Additional Options
+
+| Option                           | Description                                                                                                 | Behaviour if omitted                                        |
+|----------------------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+| `--platform`                     | One of `aws`, `docker`, `bare`.                                                                             | Defaults to `aws`.                                          |
+| `--enable-camo`                  | Sets two data nodes in each location as CAMO partners.                                                      | CAMO will not be enabled.                                   |
+| `--bdr-database`                | The name of the database to be used for replication.                                                        | Defaults to `bdrdb`.                                        |
+
+### More detail about BDR-Always-ON configuration
+
+You must specify `--layout layoutname` to set one of the supported BDR
+use-case variations. The options are bronze, silver, gold, and
 platinum. The bronze, gold and platinum layouts have a PGD witness node
 to ensure odd number of nodes for Raft consensus majority. Witness nodes do
 not participate in the data replication.
