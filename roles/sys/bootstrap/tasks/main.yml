@@ -23,3 +23,7 @@
       group: root
       state: directory
       mode: 0755
+
+- name: Store fact that the system has been bootstrapped
+  set_fact:
+    etc_tpa_exists: true
