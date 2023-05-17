@@ -32,5 +32,9 @@
         }}"
     when:
       ansible_os_family == 'RedHat'
-      and postgres_flavour in ['pgextended', 'edbpge', 'epas']
-      and postgres_version is version('13', '>=')
+      and (
+        (postgres_flavour == 'epas')
+        or
+        (postgres_flavour in ['pgextended', 'edbpge']
+         and postgres_version is version('13', '>='))
+      )
