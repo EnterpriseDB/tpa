@@ -8,10 +8,10 @@ necessary packages, but this is not considered a supported use of TPA
 and is not suitable for production use.
 
 !!! Note
-    This page is about distribution support on target instances that you
-    are deploying *to*, not about the system you are running TPA *from*.
-    See the [installation instructions](INSTALL.md#distribution-support) for
-    more on the latter.
+This page is about distribution support on target instances that you
+are deploying *to*, not about the system you are running TPA *from*.
+See the [installation instructions](INSTALL.md#distribution-support) for
+more on the latter.
 !!!
 
 ## Debian x86
