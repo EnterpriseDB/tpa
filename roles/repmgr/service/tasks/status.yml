@@ -1,0 +1,11 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Display cluster status
+  command: >
+    {{ postgres_bin_dir }}/repmgr cluster show --verbose -f {{ repmgr_conf_file }}
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when: >
+    inventory_hostname == target|default(inventory_hostname)

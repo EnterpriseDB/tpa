@@ -1,0 +1,35 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- assert:
+    that:
+      target is defined
+    fail_msg:
+      Please define the parameter "target" host to become the new primary
+
+- name: Stop repmgr
+  service:
+    name: repmgr
+    state: stopped
+  when: >
+    'primary' in role or 'replica' in role
+
+- name: Perform switchover to {{ target }}
+  command: >
+    {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when: >
+    'postgres' in role and inventory_hostname == target
+
+- name: Restart repmgr
+  service:
+    name: repmgr
+    state: started
+  when: >
+    'primary' in role or 'replica' in role
+
+- include_role:
+    name: repmgr/service
+    tasks_from: status
