@@ -37,15 +37,18 @@ More detail on the options is provided in the following section.
 
 #### Mandatory Options
 
-| Option                                                | Description                                                                                 |
+| Options                                               | Description                                                                                 |
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `--architecture` (`-a`)                               | Must be set to `PGD-Always-ON`                                                              |
 | Postgres flavour and version (e.g. `--postgresql 15`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
 | `--pgd-proxy-routing`                                 | Must be either `global` or `local`.                                                         |
 
+<br/><br/>
+
+
 #### Additional Options
 
-| Option                           | Description                                                                                                 | Behaviour if omitted                                        |
+| Options                          | Description                                                                                                 | Behaviour if omitted                                        |
 |----------------------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
 | `--platform`                     | One of `aws`, `docker`, `bare`.                                                                             | Defaults to `aws`.                                          |
 | `--location-names`               | A space-separated list of location names. The number of locations is equal to the number of names supplied. | TPA will configure a single location with three data nodes. |
@@ -53,8 +56,9 @@ More detail on the options is provided in the following section.
 | `--data-nodes-per-location`      | The number of data nodes in each location, must be at least 2.                                              | Defaults to 3.                                              |
 | `--add-proxy-nodes-per-location` | The number of proxy nodes in each location.                                                                 | PGD-proxy will be installed on each data node.              |
 | `--enable-camo`                  | Sets two data nodes in each location as CAMO partners.                                                      | CAMO will not be enabled.                                   |
-| `--bdr-database`                | The name of the database to be used for replication.                                                        | Defaults to `bdrdb`.                                        |
+| `--bdr-database`                 | The name of the database to be used for replication.                                                        | Defaults to `bdrdb`.                                        |
 
+<br/><br/>
 
 ### More detail about PGD-Always-ON configuration
 

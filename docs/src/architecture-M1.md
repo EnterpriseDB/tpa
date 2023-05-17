@@ -49,23 +49,27 @@ You can list all available options using the help command.
 tpaexec configure --architecture M1 --help
 ```
 
-The table below describes the mandatory options for M1
+The tables below describe the mandatory options for M1
 and additional important options.
 More detail on the options is provided in the following section.
 
 #### Mandatory Options
 
-| Option                                                | Description                                                                                 |
+| Parameter                                             | Description                                                                                 |
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `--architecture` (`-a`)                               | Must be set to `M1`.                                                                        |
 | Postgres flavour and version (e.g. `--postgresql 15`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
 
+<br/><br/>
+
 #### Additional Options
 
-| Option                    | Description                                             | Behaviour if omitted |
+| Parameter                 | Description                                             | Behaviour if omitted |
 |---------------------------|---------------------------------------------------------|----------------------|
 | `--platform`              | One of `aws`, `docker`, `bare`.                         | Defaults to `aws`.   |
 | `--num-cascaded-replicas` | The number of cascaded replicas from the first replica. | Defaults to 1.       |
+
+<br/><br/>
 
 ### More detail about M1 configuration
 

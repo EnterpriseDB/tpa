@@ -51,7 +51,7 @@ You can list all available options using the help command.
 tpaexec configure --architecture BDR-Always-ON --help
 ```
 
-The table below describes the mandatory options for BDR-Always-ON
+The tables below describe the mandatory options for BDR-Always-ON
 and additional important options.
 More detail on the options is provided in the following section.
 
@@ -64,18 +64,22 @@ More detail on the options is provided in the following section.
 | `--layout`                                            | One of `bronze`, `silver`, `gold`, `platinum`.                                              |
 | `--harp-consensus-protocol`                           | One of `bdr`, `etcd`.                                                                       |
 
+<br/><br/>
+
 #### Additional Options
 
 | Option                           | Description                                                                                                 | Behaviour if omitted                                        |
 |----------------------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
 | `--platform`                     | One of `aws`, `docker`, `bare`.                                                                             | Defaults to `aws`.                                          |
 | `--enable-camo`                  | Sets two data nodes in each location as CAMO partners.                                                      | CAMO will not be enabled.                                   |
-| `--bdr-database`                | The name of the database to be used for replication.                                                        | Defaults to `bdrdb`.                                        |
+| `--bdr-database`                 | The name of the database to be used for replication.                                                        | Defaults to `bdrdb`.                                        |
+
+<br/><br/>
 
 ### More detail about BDR-Always-ON configuration
 
 You must specify `--layout layoutname` to set one of the supported BDR
-use-case variations. The options are bronze, silver, gold, and
+use-case variations. The permitted arguments are bronze, silver, gold, and
 platinum. The bronze, gold and platinum layouts have a PGD witness node
 to ensure odd number of nodes for Raft consensus majority. Witness nodes do
 not participate in the data replication.

@@ -9,8 +9,9 @@ Please contact your account manager to request access.
 
 ## Distribution support
 
-We publish TPA packages for Debian 10 (buster), Ubuntu 22.04 (jammy), Ubuntu 20.04
-(focal), Ubuntu 18.04 (bionic), RHEL/CentOS 7.x and 8.x, Rocky 8.x and AlmaLinux 8.x. These
+We publish TPA packages for Debian 11 (bullseye), Debian 10 (buster),
+Ubuntu 22.04 (jammy), Ubuntu 20.04 (focal), Ubuntu 18.04 (bionic),
+RHEL/CentOS 7.x and 8.x, Rocky 8.x and AlmaLinux 8.x. These
 distributions provide a usable Python 3.6+ environment out of the box,
 which TPA requires. However, TPA supports a wider range of
 [distributions on target instances](distributions.md).

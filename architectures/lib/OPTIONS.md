@@ -96,25 +96,53 @@ token from enterprisedb.com/repos.
 
 ## Software versions
 
-You may optionally specify ``--postgres-version 13`` or
-any other major version of Postgres (e.g., 9.6). TPA supports Postgres
-9.4 and above. Postgres 9.4 and 9.5 were known to work at one time, but
-are no longer actively maintained.
+#### Postgres flavour and version
+
+TPA supports PostgreSQL, EDB Postgres Extended, and EDB Postgres
+Advanced Server (EPAS) versions 11 through 15.
+
+You must specify both the flavour (or distribution) and major version of
+Postgres to install, for example:
+
+* `--postgresql 14` will install PostgreSQL 14
+
+* `--edb-postgres-extended 15` will install EDB Postgres Extended 15
+
+* `--edb-postgres-advanced 15 --redwood` will install EPAS 15 in
+  "Redwood" mode
+
+* `--edb-postgres-advanced 15 --no-redwood` will install EPAS 15 in
+  non-Redwood mode
+
+If you are installing EPAS, you must specify whether it should operate
+in `--redwood` or `--no-redwood` mode, i.e., whether to enable or
+disable its Oracle compatibility features.
+
+Installing EDB Postgres Extended or Postgres Advanced Server requires
+a valid EDB repository subscription.
+
+#### Package versions
 
 By default, we always install the latest version of every package. This
 is usually the desired behaviour, but in some testing scenarios, it may
-be necessary to select specific package versions using the following
-options:
+be necessary to select specific package versions using any of the
+following options:
 
-1. ``--postgres-package-version 10.4-2.pgdg90+1``
-2. ``--repmgr-package-version 4.0.5-1.pgdg90+1``
-3. ``--barman-package-version 2.4-1.pgdg90+1``
-4. ``--pglogical-package-version '2.2.0*'``
-5. ``--bdr-package-version '3.0.2*'``
-5. ``--pgbouncer-package-version '1.8*'``
+1. `--postgres-package-version 10.4-2.pgdg90+1`
+2. `--repmgr-package-version 4.0.5-1.pgdg90+1`
+3. `--barman-package-version 2.4-1.pgdg90+1`
+4. `--pglogical-package-version '2.2.0*'`
+5. `--bdr-package-version '3.0.2*'`
+6. `--pgbouncer-package-version '1.8*'`
 
-You may also specify ``--extra-packages p1 p2 …`` or
-``--extra-postgres-packages p1 p2 …`` to install additional packages.
+You may use any version specifier that apt or yum would accept.
+
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
+
+You may also specify `--extra-packages p1 p2 …` or
+`--extra-postgres-packages p1 p2 …` to install additional packages.
 The former lists packages to install along with system packages, while
 the latter lists packages to install later along with postgres packages.
 (If you mention packages that depend on Postgres in the former list, the
@@ -122,8 +150,8 @@ installation will fail because Postgres will not yet be installed.) The
 arguments are passed on to the package manager for installation without
 any modifications.
 
-The ``--extra-optional-packages p1 p2 …`` option behaves like
-``--extra-packages``, but it is not an error if the named packages
+The `--extra-optional-packages p1 p2 …` option behaves like
+`--extra-packages`, but it is not an error if the named packages
 cannot be installed.
 
 ## Hostnames

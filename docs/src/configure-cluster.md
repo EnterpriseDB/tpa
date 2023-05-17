@@ -26,7 +26,7 @@ cluster with two instances:
 cluster_name: speedy
 
 cluster_vars:
-  postgres_version: 9.6
+  postgres_version: 14
 
 instances:
 - node: 1
@@ -106,7 +106,7 @@ be translated directly into group variables in the Ansible inventory:
 
 ```yaml
 cluster_vars:
-  postgres_version: 11
+  postgres_version: 14
   tpa_2q_repositories:
   - products/bdr3/release
   - products/pglogical3/release

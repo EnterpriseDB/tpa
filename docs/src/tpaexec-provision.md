@@ -171,8 +171,8 @@ quavery ansible_host=34.200.214.150 node=5 platform=aws
 [tpa]$ cat inventory/group_vars/tag_Cluster_speedy/01-speedy.yml 
 cluster_name: speedy
 cluster_tag: tag_Cluster_speedy
-postgres_version: 9.6
-tpa_version: v3.0-451-g10647888
+postgres_version: 15
+tpa_version: v23.10-22-g30c1d5ea
 tpa_2q_repositories: []
 vpn_network: 192.168.33.0/24
 
