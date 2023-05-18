@@ -67,10 +67,12 @@ class M1(Architecture):
                     "tpa_2q_repositories": tpa_2q_repositories,
                 }
             )
-        if postgres_flavour == "epas" and not failover_manager:
-            failover_manager = "efm"
-        elif postgres_flavour in ["pgextended", "edbpge", "postgresql"]:
-            failover_manager = "repmgr"
+
+        if not failover_manager:
+            if postgres_flavour == "epas":
+                failover_manager = "efm"
+            elif postgres_flavour in ["pgextended", "edbpge", "postgresql"]:
+                failover_manager = "repmgr"
 
         if failover_manager:
             cluster_vars.update(
