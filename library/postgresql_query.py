@@ -231,6 +231,7 @@ def main():
 
     queries = get_queries(module)
     m["queries"] = queries
+    m["conninfo"] = conninfo
 
     results = []
     runtimes = []
