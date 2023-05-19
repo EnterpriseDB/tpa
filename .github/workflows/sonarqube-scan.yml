@@ -12,15 +12,14 @@ jobs:
     name: SonarQube Scan Job
     runs-on: ubuntu-20.04
     steps:
-
       - name: Checkout source repository
         id: checkout-source
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          repository: ${{github.repository}}
-          ref: ${{ github.ref }}
-          token: ${{secrets.GH_SLONIK}}
+          repository: '${{github.repository}}'
+          ref: '${{ github.ref }}'
+          token: '${{secrets.GH_SLONIK}}'
 
       - name: Checkout foundation repository
         id: checkout-foundation
@@ -29,7 +28,7 @@ jobs:
            repository: EnterpriseDB/foundation-packaging
            ref: main
            path: foundation
-           token: ${{secrets.GH_SLONIK}}
+           token: '${{secrets.GH_SLONIK}}'
 
       - name: Checkout foundation-security repository
         id: checkout-foundation-security
@@ -38,7 +37,7 @@ jobs:
           repository: EnterpriseDB/foundation-security
           ref: master
           path: foundation-security
-          token: ${{secrets.GH_SLONIK}}
+          token: '${{secrets.GH_SLONIK}}'
 
       - name: SonarQube Scan
         id: call-sq-composite
@@ -48,5 +47,8 @@ jobs:
           GITHUB_REF: '${{github.ref}}'
           SONARQUBE_URL: '${{secrets.SONARQUBE_URL}}'
           SONARQUBE_TOKEN: '${{secrets.SONARQUBE_TOKEN}}'
+          PULL_REQUEST_KEY: '${{github.event.number}}'
+          PULL_REQUEST_BRANCH: '${{github.head_ref}}'
+          PULL_REQUEST_BASE_BRANCH: '${{github.base_ref}}'
           FOUNDATION_SECURITY_SONARQUBE_TOKEN: '${{secrets.FOUNDATION_SECURITY_SONARQUBE_TOKEN}}'
           CLOUDSMITH_TOKEN: '${{secrets.CLOUDSMITH_READ_ALL}}'

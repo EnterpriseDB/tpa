@@ -40,6 +40,6 @@ jobs:
         id: call-bd-action
         uses: ./foundation-security/actions/blackduck
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_SLONIK }}
           blackduck-url: ${{ secrets.BLACKDUCK_URL }}
           blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
