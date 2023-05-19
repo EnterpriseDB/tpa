@@ -31,7 +31,7 @@ follow_command = '{{ repmgr_conf_dir }}/follow_command.sh'
 {%   if not barman_server is string %}
 {%     set barman_server = barman_server|list|first %}
 {%   endif %}
-restore_command = '/usr/bin/barman-wal-restore -U barman -z -p 8 {{ barman_server }} {{ hostvars[upstream_backedup].backup_name }} %f %p'
+restore_command = '/usr/bin/barman-wal-restore -U {{ barman_user }} -z -p 8 {{ barman_server }} {{ hostvars[upstream_backedup].backup_name }} %f %p'
 {% endif %}
 
 service_start_command = 'sudo systemctl start {{ postgres_service_name }}'
