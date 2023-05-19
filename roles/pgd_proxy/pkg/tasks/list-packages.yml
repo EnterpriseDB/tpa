@@ -9,3 +9,10 @@
       }}"
   when: >
     'pgd-proxy' in role
+
+# Our tests require psycopg2, included with the client packages.
+- include_role:
+      name: postgres/pkg
+      tasks_from: list-client-packages.yml
+  when: >
+    'pgd-proxy' in role
