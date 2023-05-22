@@ -125,6 +125,25 @@ class M1(Architecture):
                 }
             )
 
-        # Ensure nodes are members of a single etcd_location per cluster for patroni.
         if failover_manager == "patroni":
+
+            # Ensure nodes are members of a single etcd_location per cluster for patroni.
             cluster_vars["etcd_location"] = "main"
+
+            if postgres_flavour == 'pgextended':
+                raise ArchitectureError(
+                    "2Q Postgres Extended is not compatible with the failover manager Patroni."
+                    " Try `--postgres-flavour edbpge` instead."
+                )
+
+            edb_repositories = set(cluster_vars.get('edb_repositories') or [])
+
+            # Adds repo containing postgres as a dependency, as use of any edb v2 repo disables v1/2q repos
+            # When generic support for M1 with EDB v2 repos is supported this can be removed
+            edb_repositories.add("enterprise" if postgres_flavour == "epas" else "standard")
+
+            # Add EDB v2 package repos to include Patroni packages
+            edb_repositories.add(
+                'community_360'
+            )
+            cluster_vars['edb_repositories'] = list(edb_repositories)
