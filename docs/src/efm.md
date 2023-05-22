@@ -44,6 +44,9 @@ contains `efm-witness`.
 ### Repmgr
 
 EFM works as a failover manager and therefore TPA will still install
-repmgr for setting up postgresql replicas. `repmgrd` i.e. repmgr's daemon
-remains disabled in this case and repmgr's only job is to provided replication
-setup functionality.
+repmgr for setting up postgresql replicas on postgres versions 11 and
+below. `repmgrd` i.e. repmgr's daemon remains disabled in this case and
+repmgr's only job is to provided replication setup functionality.
+
+For postgres versions 12 and above, any cluster that uses EFM will use
+`pg_basebackup` to create standby nodes and not use repmgr in any form.
