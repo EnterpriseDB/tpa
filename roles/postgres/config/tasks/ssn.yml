@@ -12,5 +12,8 @@
   vars:
     variable: synchronous_standby_names
     value: "{{ synchronous_standby_names }}"
+  when: postgres_config_split
   notify:
     - Note Postgres reload required
+
+- include_tasks: conf_ssn.yml

@@ -38,34 +38,59 @@
 #    in postgres_hba_settings will be appended to these defaults.
 # 4. You can set postgres_hba_template to something else and do whatever
 #    you want in the custom template.
+#
+# The option `postgres_create_hba_file` is used internally by TPA to
+# optionally not manage the pg_hba.conf whilst still having a template set.
 
-- name: Install pg_hba.conf
-  template:
-    src: "{{ hba }}"
-    dest: "{{ postgres_conf_dir }}/pg_hba.conf"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0644
+- block:
+  - name: Install pg_hba.conf
+    template:
+      src: "{{ hba }}"
+      dest: "{{ postgres_conf_dir }}/pg_hba.conf"
+      owner: "{{ postgres_user }}"
+      group: "{{ postgres_group }}"
+      mode: 0644
+    when: postgres_create_hba_file
+    notify:
+      - Note Postgres reload required
+
+  - name: Set a fact for contents of pg_hba.conf
+    set_fact:
+      postgres_pg_hba_config: "{{
+          lookup('ansible.builtin.template', hba)
+          |split('\n')
+          |reject('match', '#')
+          |list
+        }}"
   when:
     hba != ''
-  notify:
-    - Note Postgres reload required
   vars:
     tmpl: pg_hba.conf.j2
     hba: "{{ postgres_hba_template|default(tmpl) }}"
 
 # If postgres_ident_template is set, we use it to install pg_ident.conf.
-# Otherwise we leave the file alone.
+# Otherwise, we leave the file alone.
 
-- name: Install pg_ident.conf
-  template:
-    src: "{{ postgres_ident_template }}"
-    dest: "{{ postgres_conf_dir }}/pg_ident.conf"
-    owner: "{{ postgres_user }}"
-    group: "{{ postgres_group }}"
-    mode: 0644
-  notify:
-    - Note Postgres reload required
+- block:
+  - name: Install pg_ident.conf
+    template:
+      src: "{{ postgres_ident_template }}"
+      dest: "{{ postgres_conf_dir }}/pg_ident.conf"
+      owner: "{{ postgres_user }}"
+      group: "{{ postgres_group }}"
+      mode: 0644
+    notify:
+      - Note Postgres reload required
+    when: postgres_create_ident_file
+
+  - name: Set a fact for contents of pg_ident.conf
+    set_fact:
+      postgres_pg_ident_config: "{{
+          lookup('ansible.builtin.template', postgres_ident_template)
+          |split('\n')
+          |reject('match', '#')
+          |list
+        }}"
   when:
     postgres_ident_template|default('') != ''
 
@@ -132,8 +157,16 @@
       include_dir = '{{ _include_dir|relpath(postgres_data_dir) }}'
     insertafter: EOF
     state: present
+  when: postgres_config_split
   notify:
     - Note Postgres restart required
+
+# Setup postgres_config fact with the desired settings so it can be used
+# by anything that needs them, usually coupled with `postgres_config_split: false`.
+# Note: the postgres conf.d include files do not use these facts
+
+- include_tasks: set_tpa_facts.yml
+- include_tasks: set_tpa_restart_facts.yml
 
 # Now we put any desired settings into conf.d, where they will override
 # the defaults. We know that tpa.conf.j2 only contains settings that do
@@ -148,6 +181,7 @@
     mode: 0644
   when:
     postgres_conf_template == ''
+    and postgres_config_split
   notify:
     - Note Postgres reload required
 
@@ -160,6 +194,7 @@
     mode: 0644
   when:
     postgres_conf_template == ''
+    and postgres_config_split
   notify:
     - Note Postgres restart required
 
@@ -307,6 +342,8 @@
 # hash to be quoted properly; we don't try to quote them when writing
 # out the configuration.
 
+- include_tasks: set_postgres_conf_settings_facts.yml
+
 - name: Generate configuration based on postgres_conf_settings (optional)
   template:
     src: settings.conf.j2
@@ -314,7 +351,9 @@
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0644
-  when: postgres_conf_settings
+  when:
+    postgres_conf_settings
+    and postgres_config_split
   notify:
     - Note Postgres restart required
 
@@ -329,6 +368,7 @@
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0644
+  when: postgres_config_split
   notify:
     - Note Postgres restart required
 

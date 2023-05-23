@@ -1,0 +1,101 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- include_vars:
+    name: _tpa_postgres_config
+    file: conf_tpa.yml
+
+- name: Set fact for tpa.conf include file settings
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents: "{{ _tpa_postgres_config }}"
+
+- name: Update postgres `log_min_messages` setting if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents:
+      log_min_messages: "{{ log_min_messages }}"
+  when:
+    log_min_messages is defined
+
+- name: Update postgres `synchronous_commit` setting if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents:
+      synchronous_commit: "{{ synchronous_commit|default('on') }}"
+  when: >
+    'bdr' not in role
+
+- name: Update postgres `wal_size` settings if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    when: "{{ postgres_version is version('9.5', '>=') }}"
+    object_contents:
+      max_wal_size: "{{ max_wal_size|default('4GB') }}"
+      min_wal_size: "{{ min_wal_size|default('128MB') }}"
+    object_alt_contents:
+      checkpoint_segments: "{{ checkpoint_segments|default(128) }}"
+
+- name: Update postgres `wal_compression` setting if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents:
+      wal_compression: "{{ wal_compression|default('off') }}"
+  when: postgres_version is version('9.4', '>')
+
+- name: Update postgres `operator_precedence_warning` setting if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents:
+      operator_precedence_warning: "{{ operator_precedence_warning|default('off') }}"
+  when:
+    postgres_version is version('9.4', '>')
+    and postgres_version is version('14', '<')
+
+- name: Update postgres `password_encryption` setting if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents:
+      password_encryption: "{{ password_encryption }}"
+  when:
+    password_encryption != 'md5'
+
+- name: Update postgres `ssl_min_protocol_version` setting if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents:
+      ssl_min_protocol_version:  'TLSv1.2'
+  when:
+    postgres_version is version('12', '>=')
+    or (postgres_flavour == 'pgextended' and postgres_version is version ('11', '>='))
+
+- name: Extend postgres log destination settings if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents:
+      log_directory: '/var/log/postgresql'
+      log_filename: 'postgres.log'
+      log_file_mode: '0640'
+      log_rotation_age: '0'
+      log_rotation_size: '0'
+  when:
+    log_destination == 'stderr'

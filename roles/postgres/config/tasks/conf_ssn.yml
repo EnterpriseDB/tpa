@@ -1,0 +1,12 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Update postgres config fact with `synchronous_standby_names` settings if required
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents:
+      synchronous_standby_names: "{{ synchronous_standby_names }}"
+  when:
+    synchronous_standby_names is defined

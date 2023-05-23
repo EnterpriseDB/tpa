@@ -12,6 +12,8 @@
 # configuration will be ignored if we aren't installing a particular
 # extension after all.
 
+- include_tasks: set_extensions_facts.yml
+
 - name: Install default extension configuration file
   template:
     src: extensions.conf.j2
@@ -19,6 +21,7 @@
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0644
+  when: postgres_config_split
   notify:
     - Note Postgres restart required
 
@@ -44,3 +47,5 @@
 
 - name: Add entries to shared_preload_libraries
   include_tasks: preload-library.yml
+
+- include_tasks: set_preload_library_facts.yml

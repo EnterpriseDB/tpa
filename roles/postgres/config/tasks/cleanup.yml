@@ -1,0 +1,46 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- block:
+  - name: Remove postgres config if unused
+    file:
+      path: "{{ _include_dir }}/{{ item }}"
+      state: absent
+    with_items:
+      - 0000-tpa.conf
+      - 8888-synchronous_standby_names.conf
+    notify:
+      - Note Postgres reload required
+
+  - name: Find postgres include files created with `set-variable` method
+    find:
+      path: "{{ _include_dir }}"
+      patterns:
+        - "8888-*.conf"
+    register: _found_8888_conf
+
+  - name: Remove postgres config if unused
+    file:
+      path: "{{ _include_dir }}/{{ item }}"
+      state: absent
+    with_items: "{{ restart_files }}"
+    vars:
+      known_files:
+        - 0001-tpa_restart.conf
+        - 1111-extensions.conf
+        - 9900-tpa_postgres_conf_settings.conf
+        - 9999-override.conf
+      restart_files: "{{
+          known_files
+          |union(
+            _found_8888_conf.files
+            |map(attribute='path')
+            |list
+            |map('basename')
+            |list
+          )
+        }}"
+    notify:
+      - Note Postgres restart required
+  when:
+    not postgres_config_split

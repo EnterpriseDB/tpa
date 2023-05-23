@@ -1,0 +1,58 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# {% if postgres_conf_dir != postgres_data_dir %}
+# hba_file: '{{ postgres_conf_dir }}/pg_hba.conf'
+# ident_file: '{{ postgres_conf_dir }}/pg_ident.conf'
+# {% endif %}
+
+listen_addresses: '*'
+port: "{{ postgres_port }}"
+unix_socket_directories: '{{ unix_socket_directories|join(", ") }}'
+
+max_connections: "{{ max_connections }}"
+
+shared_buffers: "{{ shared_buffers|default(shared_buffers_mb~'MB') }}"
+max_prepared_transactions: "{{ max_prepared_transactions|default(0) }}"
+
+max_worker_processes: "{{ max_worker_processes }}"
+
+logging_collector: "{{ logging_collector|default((log_destination == 'stderr')|ternary('on', 'off')) }}"
+
+# {% if postgres_version is version('9.4', '>') %}
+# cluster_name: '{{ postgres_cluster_name }}'
+# {% endif %}
+
+archive_mode: "on"
+
+max_wal_senders: "{{ max_wal_senders|default(16) }}"
+max_replication_slots: "{{ max_replication_slots|default(16) }}"
+# {% if postgres_version is version('13', '>=') %}
+# wal_keep_size: {{ wal_keep_size|default((wal_segment_size|default(16))*(wal_keep_segments|default(0))) }}
+# {% else %}
+wal_keep_segments: "{{ wal_keep_segments|default(0) }}"
+# {% endif %}
+# {% if ('bdr' in role) or postgres_version is version('9.4', '>') %}
+# track_commit_timestamp: {{ track_commit_timestamp|default(('bdr' in role)|ternary('on','off')) }}
+# {% endif %}
+
+hot_standby: "on"
+
+ssl: "on"
+ssl_ca_file: '{{ ssl_ca_file|default("") }}'
+ssl_crl_file: '{{ ssl_crl_file|default("") }}'
+ssl_cert_file: '{{ ssl_cert_file|default("/etc/tpa/"+cluster_name+".crt") }}'
+ssl_key_file: '{{ ssl_key_file|default("/etc/tpa/"+cluster_name+".key") }}'
+ssl_ciphers: 'HIGH:!3DES:!aNULL'
+ssl_prefer_server_ciphers: "on"
+
+autovacuum_max_workers: '{{ autovacuum_max_workers|default(3) }}'
+autovacuum_freeze_max_age: '{{ autovacuum_freeze_max_age|default(200000000) }}'
+autovacuum_multixact_freeze_max_age: '{{ autovacuum_multixact_freeze_max_age|default(400000000) }}'
+
+wal_level: "{{ wal_level|default('logical') }}"
+
+wal_log_hints: "{{ wal_log_hints|default('on') }}"
+wal_buffers: "{{ wal_buffers|default(-1) }}"
+
+shared_preload_libraries: '{{ shared_preload_libraries|default("") }}'

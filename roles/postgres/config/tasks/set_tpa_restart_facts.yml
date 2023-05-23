@@ -1,0 +1,68 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- include_vars:
+    name: _tpa_restart_postgres_config
+    file: conf_tpa_restart.yml
+
+- name: Set fact for tpa_restart.conf include file settings
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_restart_config
+    object_contents: "{{ _tpa_restart_postgres_config }}"
+
+- name: Update postgres settings for config directory location if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_restart_config
+    object_contents:
+      hba_file: "{{ postgres_conf_dir }}/pg_hba.conf"
+      ident_file: "{{ postgres_conf_dir }}/pg_ident.conf"
+  when:
+    postgres_conf_dir != postgres_data_dir
+
+- name: Update postgres `cluster_name` setting if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_restart_config
+    object_contents:
+      cluster_name: "{{ postgres_cluster_name }}"
+  when:
+    postgres_version is version('9.4', '>')
+
+- name: Update postgres `wal_keep_size` setting if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_restart_config
+    object_contents:
+      wal_keep_size: "{{
+          wal_keep_size
+          |default(
+            (wal_segment_size|default(16)) * (wal_keep_segments|default(0))
+          )
+        }}"
+    object_alt_contents:
+      wal_keep_segments: "{{ wal_keep_segments|default(0) }}"
+  when:
+    postgres_version is version('13', '>=')
+
+- name: Update postgres `track_commit_timestamp` setting if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_restart_config
+    object_contents:
+      track_commit_timestamp: "{{
+          track_commit_timestamp
+          |default(
+            ('bdr' in role)
+            |ternary('on','off')
+          )
+        }}"
+  when:
+    ('bdr' in role)
+    or postgres_version is version('9.4', '>')

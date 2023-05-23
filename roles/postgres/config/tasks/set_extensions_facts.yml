@@ -1,0 +1,26 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- include_vars:
+    name: _extensions_postgres_config
+    file: conf_extensions.yml
+
+- name: Set fact for tpa_restart.conf include file settings
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents: "{{ _extensions_postgres_config }}"
+
+- name: Update postgres config for the platypus extension if required
+  when: >
+    'platypus' in postgres_extensions
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents:
+      platypus.port: "{{ platypus_port }}"
+      platypus.database: "{{ platypus_database }}"
+      platypus.bind: "{{ platypus_bind|default(omit) }}"
+      platypus.idle_timeout: '{{ platypus_idle_timeout|default(omit) }}'

@@ -1,0 +1,10 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Update postgres_config when `postgres_conf_settings` is defined
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_config
+    object_contents: "{{ postgres_conf_settings }}"
+  when: postgres_conf_settings
