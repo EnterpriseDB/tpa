@@ -213,3 +213,9 @@
         logind_state.stdout == 'active'
   when: >
     'postgres' in role and postgres_installation_method == 'src'
+
+- include_role:
+    name: sys/paths
+    apply:
+      tags: paths
+  tags: always

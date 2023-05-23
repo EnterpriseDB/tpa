@@ -1,0 +1,18 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2023 - All rights reserved.
+
+# We create a common configuration directory in /etc, world-readable, where
+# various components can create their own subdirectories with appropriate
+# ownership and permissions. The directory name is hard-coded, because it is
+# also hardcoded in the packages that use it.  
+- name: Create root configuration directory
+  ansible.builtin.file:
+    name: /etc/edb
+    state: directory
+    owner: root
+    group: root
+    mode: 0755 
+  tags: paths
+  when:
+    platform not in ['shared']
