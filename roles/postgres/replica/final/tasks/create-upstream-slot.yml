@@ -1,0 +1,22 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# (?) TODO: There's nothing analogous to setting `repmgr_use_slots: 0`
+# to opt out of using replication slots.
+
+- name: Create primary replication slot on upstream instance
+  postgresql_query:
+    conninfo: "{{ hostvars[upstream].replication_node_dsn }}"
+    queries:
+      - text: >
+          SELECT pg_create_physical_replication_slot(%(slot)s, true)
+          WHERE NOT EXISTS (SELECT 1
+            FROM pg_catalog.pg_replication_slots
+            WHERE slot_name = %(slot)s)
+        named_args:
+          slot: "{{ primary_slot_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  register: create_slot
+  changed_when: create_slot.rowcount != 0

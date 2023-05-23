@@ -23,9 +23,8 @@
 
 - include_tasks: clone.yml
 
-# Next we must check if the replica is streaming properly, for which we
-# need Postgres to be running. If it's already running, the tasks below
-# should succeed immediately.
+# Next, we start Postgres on the replicas and collect cluster_facts
+# (after recovery of the WAL from `pg_basebackup -X stream`).
 
 - name: Ensure that Postgres is running
   service:
@@ -37,14 +36,11 @@
     name: postgres/restart
     tasks_from: check-postgres-available.yml
 
-# Now we can collect cluster_facts for this instance if they are not yet
-# available; subsequent tests depend on the presence of these facts.
-
 - include_role: name=postgres/facts
   when:
     cluster_facts is empty
 
-# Now we can check that this instance is in fact a replica, and has a
-# reasonable configuration.
+# Postgres is now running on both primary and replicas, but the replicas
+# can't start streaming until we create the necessary replication slots.
 
-- include_tasks: check-replica.yml
+- include_tasks: start-replication.yml

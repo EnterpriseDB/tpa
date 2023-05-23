@@ -1,0 +1,86 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Ensure that this instance is a replica
+  assert:
+    msg: "Postgres is not running as a replica"
+    that:
+      - role|contains('replica')
+      - cluster_facts.pg_is_in_recovery
+
+# Postgres is running on the newly-cloned replicas, but we've turned off
+# restore_command, and we haven't yet created primary_slot_name on their
+# upstream instances, so they're not streaming yet. However, the guard
+# slot on the primary is reserving the WAL required.
+#
+# We create replication slots on the upstream replicas first (i.e., to
+# reserve WAL before they start streaming from the primary). Downstream
+# replicas can then connect and start streaming, even though there's no
+# new WAL yet. Since WAL is reserved, we don't need to wait for replicas
+# to start streaming before we go on to create slots on the primary for
+# the upstream replicas.
+
+- name: Create replication slots on upstream replicas
+  include_tasks:
+    file: create-upstream-slot.yml
+  when: >
+    'replica' in hostvars[upstream].role
+
+- name: Create replication slots on primary
+  include_tasks:
+    file: create-upstream-slot.yml
+  when: >
+    'primary' in hostvars[upstream].role
+
+# Once all the replicas are streaming, we know that dropping the guard
+# slot on the primary won't affect them any more.
+#
+# The replica's walreceiver will start and connect to the upstream (via
+# primary_conninfo) and try to stream from primary_slot_name (which must
+# have happened and failed until we created the slot on a freshly-cloned
+# upstream replica).
+#
+# We can only hope that streaming starts quickly. We wait for an entry
+# in pg_stat_wal_receiver with status='streaming', which corresponds to
+# an entry in pg_stat_replication on the upstream with state='streaming'
+# (or perhaps "catchup", but we don't care about the distinction here).
+
+- name: Wait until replicas are streaming
+  postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
+    queries:
+      - text: >
+          SELECT count(*)
+          FROM pg_stat_wal_receiver
+          WHERE slot_name=%s AND status='streaming'
+        args:
+        - "{{ primary_slot_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  register: walreceiver
+  until: >
+    walreceiver is failed
+    or walreceiver.count == 1
+  retries: 300
+  delay: 1
+
+# Once streaming starts, we can remove the override of restore_command
+# that we created in clone.yml (to suppress remote archive recovery in
+# favour of streaming). The guard slot is dropped in postgres/cleanup.
+
+- name: Remove restore_command override in postgresql.auto.conf
+  lineinfile:
+    path: "{{ postgres_data_dir }}/postgresql.auto.conf"
+    line: >
+      restore_command = '/bin/false'
+    state: absent
+  register: restore_override
+
+- name: Reload Postgres configuration after removing restore_command override
+  include_role:
+    name: postgres/restart
+  vars:
+    postgres_service_end_state: reloaded
+  when:
+    restore_override is changed
