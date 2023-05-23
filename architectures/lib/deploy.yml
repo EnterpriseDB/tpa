@@ -55,7 +55,8 @@
         when: >
           'efm' in role
     when:
-      groups|members_of('role_replica', not_in=['role_readonly']) is not empty
+      failover_manager in ['repmgr', 'efm']
+      and groups|members_of('role_replica', not_in=['role_readonly']) is not empty
       and (pem_shared|default(false)) is false
     tags: always
 
@@ -84,6 +85,23 @@
     when:
       groups['role_etcd']|default([]) is not empty
       and (pem_shared|default(false)) is false
+    tags: always
+
+  - block:
+    - include_role:
+        name: watchdog
+        apply:
+          tags: watchdog
+      when:
+        patroni_watchdog_enabled|default(false)
+    - include_role:
+        name: patroni
+        apply:
+          tags: patroni
+    when:
+      failover_manager == 'patroni'
+      and 'postgres' in role
+      and 'pem-server' not in role
     tags: always
 
   - include_role:

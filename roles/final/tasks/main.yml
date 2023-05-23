@@ -31,7 +31,7 @@
     'postgres' in role
     and 'replica' in role
     and not pgdata_initialised
-    and failover_manager != 'repmgr'
+    and failover_manager not in ['repmgr', 'patroni']
     and not ('bdr' in role and 'readonly' in role)
 
 - include_role:
@@ -49,6 +49,16 @@
   when: >
     'etcd' in role
   tags: etcd
+
+- include_role:
+    name: patroni/final
+    apply:
+      tags: patroni
+  when:
+    failover_manager == 'patroni'
+    and ('primary' in role or 'replica' in role)
+    and 'pem-server' not in role
+  tags: patroni
 
 - include_role:
     name: haproxy/final

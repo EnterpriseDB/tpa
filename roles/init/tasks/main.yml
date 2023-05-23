@@ -74,6 +74,8 @@
   when: >
     'haproxy' in role
 
+- include_role: name=patroni/facts
+
 # Decide which repositories we should use, and check that we have
 # whatever credentials we need to access them.
 
