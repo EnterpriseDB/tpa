@@ -13,6 +13,12 @@
   environment: "{{ target_environment }}"
   hosts: all
   tasks:
+  - assert:
+      that:
+        failover_manager != 'patroni'
+      fail_msg:
+        Upgrade postgres does not support patroni managed clusters
+
   - name: Stop repmgr
     service:
       name: repmgr
