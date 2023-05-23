@@ -8,19 +8,8 @@
 
 - TPA-316 Support replica setup using pg_basebackup instead of repmgr
 
-  Even on clusters which don't use repmgrd to manage failover (e.g., with
-  `failover_manager: efm`), we found it convenient to use repmgr to create
-  replica instances.
-
-  Sadly, repmgr is now essentially unmaintained. Publishing new packages
-  is increasingly burdensome over time, especially for newer versions of
-  EPAS (EDB doesn't support repmgr for use with EPAS in the first place).
-  EFM does not support creating replicas, and there are no prospects of
-  such a feature being developed in the near future.
-
-  Given the circumstances, we can use pg_basebackup to create replicas in
-  a self-contained way, at the cost of reinventing everything that repmgr
-  takes care of for us.
+  TPA now uses pg_basebackup for initial replica creation instead of
+  repmgr, except for postgresql versions before 12.
 
 - TPA-101 Support deploying to SLES 15
 
@@ -38,6 +27,8 @@
 - TPA-418 Minor version upgrade support for PGD 5
 
 - TPA-425 Improve tests run as part of `tpaexec test`
+
+- TPA-101 Build packages to run TPA on SLES 15
 
 - Various documentation updates
 
