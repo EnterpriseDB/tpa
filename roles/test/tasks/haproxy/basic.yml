@@ -101,7 +101,18 @@
       got {% for s in servers %}{{ s.svname }}={{ s.status }}{{ loop.last|ternary('', ', ') }}{% endfor %}
     that:
     - servers|map(attribute='svname')|sort == haproxy_backend_servers|sort
-    - servers|map(attribute='status')|reject('equalto', 'UP')|list is empty
+    - up_servers == num_servers_wanted
   vars:
+    num_servers: >
+      {{ haproxy_backend_servers|length }}
+    # Patroni has an active leader and inactive replicas
+    num_servers_wanted: >
+      {{ (failover_manager == 'patroni')|ternary(1, num_servers) }}
+    up_servers: >
+      {{ servers|map(attribute='status')|reject('equalto', 'DOWN')|list|length }}
     servers: >-
       {{ haproxy_stats|selectattr('pxname', 'equalto', 'be')|rejectattr('svname', 'equalto', 'BACKEND')|list }}
+
+  # Patroni has an active leader and inactive replicas so this test is unnecessary
+  when:
+    failover_manager != 'patroni'

@@ -2,6 +2,11 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+- assert:
+    msg: "Please define a list of haproxy_backend_servers to use haproxy"
+    that:
+      - haproxy_backend_servers is defined
+
 - name: Create ssl-dh-param-file
   openssl_dhparam:
     path: /etc/ssl/dhparams.pem

@@ -53,6 +53,9 @@ backend be
 
 {% if failover_manager == 'harp' %}
     option httpchk
+{% elif failover_manager == 'patroni' %}
+    option httpchk
+    http-check expect status 200
 {% elif haproxy_backend_queue_check != 'platypus' %}
     option pgsql-check user haproxy
 {% else %}

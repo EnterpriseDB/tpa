@@ -1,4 +1,4 @@
-# Configuring haproxy
+# Installing haproxy
 
 TPA will install and configure haproxy on instances whose `role`
 contains `haproxy`.
@@ -13,6 +13,12 @@ You can install a specific version instead by setting
 
 Note: see limitations of using wildcards in package_version in
 [tpaexec-configure](tpaexec-configure.md#known-issue-with-wildcard-use).
+
+Haproxy packages are selected according to the type of architecture.
+An EDB managed haproxy package may be used but requires a subscription.
+Packages from PGDG extras repo can be installed if required.
+
+# Configuring haproxy
 
 You can set the following variables on any `haproxy` instance.
 
