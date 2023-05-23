@@ -33,7 +33,11 @@
 - name: Enable postgres services
   systemd:
     name: "{{ item }}"
-    enabled: "{{ not postgres_volume_encrypted|bool }}"
+    enabled: "{{
+        (not postgres_volume_encrypted
+         and postgres_service_enabled|default(true)
+        )|bool
+      }}"
     daemon_reload: "{{ unit is changed }}"
   with_items:
     - "{{ postgres_service_name }}"
