@@ -2,6 +2,68 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.18 (2023-05-23)
+
+### Notable changes
+
+- TPA-101 Support deploying to SLES 15
+
+  Pass `--os SLES` to `tpaexec configure` to deploy to SLES.
+
+  The M1 and PGD-Always-ON architectures are supported on all platforms.
+
+  Creation of local repositories (and therefore air-gapped installation)
+  is not yet supported on SLES
+
+- TPA-316 Support replica setup using pg_basebackup instead of repmgr
+
+  Even on clusters which don't use repmgrd to manage failover (e.g., with
+  `failover_manager: efm`), we found it convenient to use repmgr to create
+  replica instances.
+
+  Sadly, repmgr is now essentially unmaintained. Publishing new packages
+  is increasingly burdensome over time, especially for newer versions of
+  EPAS (EDB doesn't support repmgr for use with EPAS in the first place).
+  EFM does not support creating replicas, and there are no prospects of
+  such a feature being developed in the near future.
+
+  Given the circumstances, we can use pg_basebackup to create replicas in
+  a self-contained way, at the cost of reinventing everything that repmgr
+  takes care of for us. We simplify matters considerably by limiting the
+  use of pg_basebackup to Postgres v12 and above (i.e., no recovery.conf
+  to deal with). If you want to create replicas with older versions, you
+  must use repmgr (but repmgr packages exist for older versions).
+
+- TPA-412 Support deploying to RHEL 9
+
+  All architectures are supported on all platforms.
+
+### Minor changes
+
+- TPA-425 Improve tests run as part of `tpaexec test`
+
+- Various documentation updates
+
+### Bugfixes
+
+- TPA-418 Update pgd-proxy and pgdcli when updating postgres
+
+- TPA-439 Don't try to use 2q repositories on unsupported distributions
+
+- TPA-443 Install server packages for pg_receivewal on older epas
+
+  On barman servers, we need to install the postgresql server package
+  for certain flavour/version/os combinations so that the pg_receivewal
+  binary will be present. This fixes the logic to include the case of
+  epas version < 13.
+
+- TPA-448 Fix device lookup failures on AWS
+
+  This fixes intermittent failures to create symlinks to block devices
+  on AWS hosts, which manifested as successful provision followed by
+  failing deployment.
+
+
 ## v23.17 (2023-05-10)
 
 ### Notable changes
