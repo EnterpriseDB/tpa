@@ -23,7 +23,7 @@ instances:
     - barman
     - log-server
     - monitoring-server
-{% if (cascaded_replicas+2) % 2 == 0 %}
+{% if (2+cascaded_replicas) % 2 == 0 %}
 {%   if failover_manager == 'efm' %}
     - efm-witness
 {%   else %}
@@ -40,3 +40,31 @@ instances:
     - replica
   upstream: {{ hostnames[2] }}
 {% endfor %}
+
+{# Place etcd and haproxy nodes across locations #}
+{% if failover_manager == 'patroni' %}
+{% for i in range(4+cascaded_replicas,7+cascaded_replicas) %}
+- node: {{ i }}
+  Name: {{ hostnames[i] }}
+  location: {{ i % 2 }}
+  role:
+    - etcd
+{% endfor %}
+
+{% if enable_haproxy %}
+{% for i in range(7+cascaded_replicas,9+cascaded_replicas) %}
+- node: {{ i }}
+  Name: {{ hostnames[i] }}
+  location: {{ i % 2 }}
+  role:
+    - haproxy
+  vars:
+    haproxy_backend_servers:
+      - {{ hostnames[1] }}
+      - {{ hostnames[2] }}
+{% for be in range(4,4+cascaded_replicas) %}
+      - {{ hostnames[be] }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% endif %}
