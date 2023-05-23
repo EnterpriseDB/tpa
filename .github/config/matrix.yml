@@ -14,12 +14,12 @@ default:
     - "redhat:7"
     - "redhat:8"
     # - "debian:11"
-  tpa_postgres_flavour:
+  tpa_postgres_flavour: &default_tpa_postgres_flavour
     - "postgresql"
     - "pgextended"
     - "epas"
     - "edbpge"
-  tpa_postgres_version:
+  tpa_postgres_version: &default_tpa_postgres_version
     - 14
   exclude:
     - tpa_architecture: "M1"
@@ -38,13 +38,8 @@ default:
       tpa_architecture: "BDR-Always-ON"
 simple:
   tpa_architecture: *default_tpa_architecture
-  tpa_postgres_flavour:
-    - "pgextended"
-    - "epas"
-    - "postgresql"
-    - "edbpge"
-  tpa_postgres_version:
-    - 14
+  tpa_postgres_flavour: *default_tpa_postgres_flavour
+  tpa_postgres_version: *default_tpa_postgres_version
   exclude:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "pgextended"
@@ -67,3 +62,20 @@ update_bdr:
     - "ubuntu"
     - "debian:10"
     - "redhat"
+patroni:
+  tpa_architecture:
+    - M1
+  tpa_platform:
+    - docker
+  tpa_os_image:
+    - "ubuntu:18.04"
+    - "ubuntu:20.04"
+    - "debian:10"
+    - "debian:11"
+#    - "redhat:7"  # Unsupported configuration TPA-335
+    - "redhat:8"
+  tpa_postgres_flavour:
+    - "postgresql"
+    - "epas"
+    - "edbpge"
+  tpa_postgres_version: *default_tpa_postgres_version
