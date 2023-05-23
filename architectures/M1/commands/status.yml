@@ -1,0 +1,29 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  tags: always
+
+- hosts: all
+  any_errors_fatal: True
+  max_fail_percentage: 0
+  environment: "{{ target_environment|default({}) }}"
+  tasks:
+    - name: Report repmgr status
+      include_role:
+        name: repmgr/service
+        tasks_from: status
+      when: >
+        'primary' in role
+        and failover_manager == 'repmgr'
+        and 'pem-server' not in role
+
+    - name: Report patroni status
+      include_role:
+        name: patroni/service
+        tasks_from: status
+      when: >
+        'primary' in role
+        and failover_manager == 'patroni'
+        and 'pem-server' not in role
