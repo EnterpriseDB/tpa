@@ -25,6 +25,8 @@ requirements:
     - liblz4-dev
     - libsystemd-dev
     - libcurl4-gnutls-dev
+    - "{{ python_pkg_prefix }}-dev"
+    - "{{ python_pkg_prefix }}-venv"
   RedHat:
     - autoconf
     - automake
@@ -50,3 +52,4 @@ requirements:
     - lz4-devel
     - libcurl-devel
     - systemd-devel
+    - "{{ python_pkg_prefix }}-virtualenv"
