@@ -596,7 +596,7 @@ class Architecture(object):
                 if args["ip_addresses"][instance["node"]] is not None:
                     instance["ip_address"] = args["ip_addresses"][instance["node"]]
 
-        # Now that main.yml.h2 has been loaded, and we have the initial set of
+        # Now that main.yml.j2 has been loaded, and we have the initial set of
         # instances[] defined, num_locations() should work, and we can generate
         # the necessary number of subnets.
         args["subnets"] = self.subnets(self.num_locations())
@@ -896,6 +896,10 @@ class Architecture(object):
                 if ref:
                     entry.update({"pg_backup_api_git_ref": ref})
                 cluster_vars.update(entry)
+            elif name in ['patroni', 'patroni-edb']:
+                if ref:
+                    entry.update({"patroni_git_ref": ref})
+                cluster_vars.update(entry)
             else:
                 if ref:
                     entry.update({"git_repository_ref": ref})
@@ -1145,6 +1149,15 @@ class Architecture(object):
             "pg-backup-api": {
                 "pg_backup_api_installation_method": "src",
                 "pg_backup_api_git_url": "git@github.com:EnterpriseDB/pg-backup-api.git",
+            },
+            "patroni": {
+                "patroni_installation_method": "src",
+                "patroni_git_url": "https://github.com/zalando/patroni.git",
+            },
+            "patroni-edb": {
+                "name": "patroni",
+                "patroni_installation_method": "src",
+                "patroni_git_url": "https://github.com/EnterpriseDB/patroni.git",
             },
         }
 
