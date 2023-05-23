@@ -78,6 +78,7 @@
       almalinux-8: almalinux:8
       almalinux-9: almalinux:9
       almalinux-latest: almalinux:9
+      sles-15: registry.suse.com/bci/bci-base:15.4
   when:
     image.startswith('tpa/')
     and _image_key in _tpa_images

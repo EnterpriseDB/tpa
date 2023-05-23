@@ -11,6 +11,12 @@ if [[ $ID = "rocky" ]]; then
     dnf update -y && dnf install -y systemd
 fi
 
+if [[ $ID = "sles" ]]; then
+    zypper -n install systemd
+    ln -s /usr/lib/systemd/systemd /sbin/init
+    zypper -n install awk
+fi
+
 # Don't try to run a full system in the container
 systemctl enable basic.target
 systemctl set-default multi-user

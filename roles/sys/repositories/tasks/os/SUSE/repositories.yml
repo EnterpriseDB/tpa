@@ -1,0 +1,71 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- set_fact:
+    suse_repository_list:
+      "{{ suse_repository_list|default(default_suse_repository_list) }}"
+
+# no need to worry about the repository called "EDB"
+
+- name: Ensure repository list is defined
+  assert:
+    msg: "Repository {{ item }} is not defined in suse_repositories"
+    that: item in default_suse_repositories|combine(suse_repositories)
+  with_items: "{{ suse_repository_list }}"
+
+# all repositories must have a "repo" field
+
+#- name: Install SUSE repositories
+#  zypper_repository:
+#    description: "{{ repo.description|default(omit) }}"
+#    repo: "{{ repo.repo_uri }}"
+#    auto_import_keys: "true"
+#      #autorefresh: "true"
+#      #runrefresh: "true"
+#  with_items: "{{ suse_repository_list }}"
+#  loop_control:
+#    loop_var: r
+#  vars:
+#    repos: "{{ default_suse_repositories|combine(suse_repositories) }}"
+#    repo_name: "{{ r }}"
+#    repo: "{{ repos[r] }}"
+
+- name: Install SUSE repositories
+  shell: zypper --non-interactive addrepo --refresh --priority 50 --check {{ repo.repo_uri }}; zypper --gpg-auto-import-keys refresh
+  with_items: "{{ suse_repository_list }}"
+  loop_control:
+    loop_var: r
+  vars:
+    repos: "{{ default_suse_repositories|combine(suse_repositories) }}"
+    repo_name: "{{ r }}"
+    repo: "{{ repos[r] }}"
+  ignore_errors: true
+
+- name: Install EDB repositories for x86_64
+  zypper_repository:
+    name: "{{ repo.name }}"
+    repo: "{{ repo.uri }}"
+    runrefresh: true
+    auto_import_keys: true
+  with_items: "{{ edb_repositories}} "
+  loop_control:
+    loop_var: repository
+  vars:
+    repo:
+      uri: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/sles/{{ ansible_distribution_major_version }}/x86_64/
+      name: enterprisedb-{{ repository }}-x86_64
+
+- name: Install EDB repositories for noarch
+  zypper_repository:
+    name: "{{ repo.name }}"
+    repo: "{{ repo.uri }}"
+    runrefresh: true
+    auto_import_keys: true
+  with_items: "{{ edb_repositories}} "
+  loop_control:
+    loop_var: repository
+  vars:
+    repo:
+      uri: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/sles/{{ ansible_distribution_major_version }}/noarch/
+      name: enterprisedb-{{ repository }}-noarch

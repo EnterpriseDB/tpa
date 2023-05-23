@@ -34,6 +34,8 @@ default:
       tpa_postgres_flavour: "pgextended"
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "edbpge"
+    - tpa_os_image: "registry.suse.com/bci/bci-base:15.4"
+      tpa_architecture: "BDR-Always-ON"
 simple:
   tpa_architecture: *default_tpa_architecture
   tpa_postgres_flavour:

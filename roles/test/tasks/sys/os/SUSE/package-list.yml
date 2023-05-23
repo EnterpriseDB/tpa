@@ -1,0 +1,16 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Run yum list
+  command: zypper info '{{ package_pattern }}'
+  register: package_list
+  ignore_errors: true
+  become_user: root
+  become: yes
+
+- include_tasks: output.yml
+  vars:
+    output_file: package-list.txt
+    content: |
+      {{ package_list.stdout }}

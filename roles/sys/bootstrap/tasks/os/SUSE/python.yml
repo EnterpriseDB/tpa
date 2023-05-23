@@ -1,0 +1,38 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Any packages installed here must also be listed in
+# sys/bootstrap/pkg/list-packages.yml
+
+- name: Set python package name
+  set_fact:
+    python_package_name: "{{ python.startswith('python2') | ternary('python', 'python3') }}"
+
+- name: Install Python
+  raw: if ! command -v {{ python }} >/dev/null 2>&1; then zypper -n install {{ python_package_name }}; fi
+
+  register: python_install
+  changed_when: >
+    python_install is successful
+    and python_install.stdout.strip() != ''
+    and 'already installed' not in python_install.stdout
+
+- name: Install backports.ssl_match_hostname
+  raw: >
+    if [ $({{ python }} -c 'import sys; print("old" if sys.version_info < (2,7,9) else "ok")') != "ok" ];
+    then {{ python }} -c 'import backports.ssl_match_hostname' >/dev/null 2>&1 || zypper -n install python-backports-ssl_match_hostname; true;
+    fi
+  args:
+    executable: /bin/sh
+
+  register: backport_install
+  when: python in ['python2', 'python2.7']
+  changed_when: >
+    backport_install is successful
+    and backport_install.stdout.strip() != ''
+    and 'already installed' not in backport_install.stdout
+
+- name: Install python selinux module
+  raw: >
+    zypper -n install {{ python_package_name }}-selinux

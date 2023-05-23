@@ -34,6 +34,12 @@ case "${ID}:${OS_VERSION}" in
             echo "No locales will be installed for: ${ID}:${OS_VERSION}"
         fi
         ;;
+    sles:*)
+        if ! localectl list-locales | grep -iq "^${USER_LOCALE}$" ; then
+            echo "Locale not found: $USER_LOCALE"
+            exit 1
+        fi
+        ;;
 
     *) echo "Missing dependencies on ${ID}:${VERSION_ID}"; exit 1 ;;
 

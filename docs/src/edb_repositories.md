@@ -19,8 +19,9 @@ cluster_vars:
 
 This example will install the enterprise subscription repository as well
 as postgres_distributed giving access to EPAS and PGD5 products.
-On Debian and Ubuntu systems, it will use the APT repository, and on
-RedHat systems, it will use the YUM repository.
+On Debian or Ubuntu systems, it will use the APT repository and on
+RedHat or SLES systems, it will use the rpm repositories, through the yum
+or zypper frontends respectively.
 
 If any EDB repositories are specified, any 2ndQuadrant repositories
 specified will be ignored and no EDB Repos 1.0 will be installed.

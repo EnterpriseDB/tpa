@@ -11,6 +11,7 @@
     _os_locale_default:
       Debian: "en_US.UTF-8"
       RedHat: "en_US.utf8"
+      SUSE: "en_US.UTF-8"
     _user_locale: "{{ user_locale|default(_os_locale_default[ansible_os_family]) }}"
     _locale_parts: "{{ _user_locale.split('.') }}"
     _locale: "{{ _locale_parts[0] }}"

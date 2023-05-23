@@ -36,7 +36,7 @@
     state: restarted
   vars:
     ssh_service_name:
-      "{{ (ansible_distribution == 'RedHat')|ternary('sshd', 'ssh') }}"
+      "{{ (ansible_distribution in ('RedHat', 'SLES'))|ternary('sshd', 'ssh') }}"
   when: hostkeys_installed is changed
 
 # Next, we must ensure that every instance knows the host keys of all

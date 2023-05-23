@@ -5,8 +5,8 @@
 ## Repositories
 #
 # By default, we install the PGDG repository (all community packages).
+# For RedHat only, we also install the EPEL repository by default.
 #
-# All of the above applies to both apt and yum.
 
 edb_repo_hostname_suffix: "{{ edb_testing_repo|default(false)|bool|ternary('-staging', '') }}.enterprisedb.com"
 edb_repo_name_suffix: "{{ edb_testing_repo|default(false)|bool|ternary('-testing', '') }}"
@@ -49,4 +49,11 @@ default_yum_repositories:
       https://yum{{ edb_repo_hostname_suffix }}/edbrepos/edb-repo-latest.noarch.rpm
 
 default_yum_repository_list: [EPEL, PGDG]
+
+suse_repositories: {}
+default_suse_repositories:
+  PGDG:
+    repo_uri: https://download.postgresql.org/pub/repos/zypp/repo/pgdg-sles-{{ ansible_distribution_major_version }}-pg{{ postgres_version }}.repo
+
+default_suse_repository_list: [PGDG]
 

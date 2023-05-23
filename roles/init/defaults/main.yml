@@ -15,12 +15,15 @@ default_postgres_home_dir:
   postgresql:
     Debian: /var/lib/postgresql
     RedHat: /var/lib/pgsql
+    SUSE: /var/lib/pgsql
   epas:
     Debian: /var/lib/edb-as
     RedHat: /var/lib/edb
+    SUSE: /var/lib/edb
   edbpge:
     Debian: /var/lib/postgresql
     RedHat: /var/lib/pgsql
+    SUSE: /var/lib/pgsql
 
 default_postgres_port:
   postgresql: 5432
@@ -33,16 +36,20 @@ default_unix_socket_directories:
       - /var/run/postgresql
       - /tmp
     RedHat: *all_socket_directories
+    SUSE: *all_socket_directories
   epas:
     Debian:
       - /var/run/edb-as
     RedHat:
+      - /tmp
+    SUSE:
       - /tmp
   edbpge:
     Debian: &all_edbpge_socket_directories
       - /var/run/edb-pge
       - /tmp
     RedHat: *all_edbpge_socket_directories
+    SUSE: *all_edbpge_socket_directories
 
 default_postgres_data_dir: /opt/postgres/data
 default_postgres_wal_dir: "{{ postgres_data_dir }}/pg_wal"
@@ -58,23 +65,29 @@ default_postgres_bin_dir:
   postgresql:
     Debian: "/usr/lib/postgresql/{{ postgres_version }}/bin"
     RedHat: "/usr/pgsql-{{ postgres_version }}/bin"
+    SUSE: "/usr/pgsql-{{ postgres_version }}/bin"
   epas:
     Debian: "/usr/lib/edb-as/{{ postgres_version }}/bin"
     RedHat: "/usr/edb/as{{ postgres_version }}/bin"
+    SUSE: "/usr/edb/as{{ postgres_version }}/bin"
   edbpge:
     Debian: "/usr/lib/edb-pge/{{ postgres_version }}/bin"
     RedHat: "/usr/edb/pge{{ postgres_version }}/bin"
+    SUSE: "/usr/edb/pge{{ postgres_version }}/bin"
 
 default_postgres_lib_dir:
   postgresql:
     Debian: "/usr/lib/postgresql/{{ postgres_version }}/lib"
     RedHat: "/usr/pgsql-{{ postgres_version }}/lib"
+    SUSE: "/usr/pgsql-{{ postgres_version }}/lib"
   epas:
     Debian: "/usr/lib/edb-as/{{ postgres_version }}/lib"
     RedHat: "/usr/edb/as{{ postgres_version }}/lib"
+    SUSE: "/usr/edb/as{{ postgres_version }}/lib"
   edbpge:
     Debian: "/usr/lib/edb-pge/{{ postgres_version }}/lib"
     RedHat: "/usr/edb/pge{{ postgres_version }}/lib"
+    SUSE: "/usr/edb/pge{{ postgres_version }}/lib"
 
 default_postgres_tablespaces: {}
 

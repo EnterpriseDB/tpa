@@ -27,3 +27,8 @@
         - ca-certificates
         - "{{ ['python-backports-ssl_match_hostname'] if python in ['python2', 'python2.7'] else [] }}"
         - "{{ python.startswith('python2')|ternary('python', 'python3') }}"
+      SUSE:
+        - ca-certificates
+        - "{{ ['python-backports-ssl_match_hostname'] if python in ['python2', 'python2.7'] else [] }}"
+        - "{{ python.startswith('python2')|ternary('python', 'python3') }}"
+        - "{{ python.startswith('python2')|ternary('python-selinux', 'python3-selinux') }}"

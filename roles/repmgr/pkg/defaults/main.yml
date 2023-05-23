@@ -8,6 +8,8 @@ repmgr_packages:
       - postgresql-{{ postgres_version }}-repmgr
     RedHat:
       - repmgr{{ postgres_versionNN }}
+    SUSE:
+      - repmgr_{{ postgres_versionNN }}
   epas:
     Debian: &epas_repmgr_packages
       - edb-as{{ postgres_versionNN }}-repmgr

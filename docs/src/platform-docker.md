@@ -19,7 +19,7 @@ Just select the platform at configure-time:
 
 ## Operating system selection
 
-Use the standard `--os Debian/Ubuntu/RedHat` configure option to
+Use the standard `--os Debian/Ubuntu/RedHat/SLES` configure option to
 select which distribution to use for the containers. TPA will build
 its own systemd-enabled images for this distribution. These images will
 be named with a `tpa/` prefix, e.g., `tpa/redhat:8`.

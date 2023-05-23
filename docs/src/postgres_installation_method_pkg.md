@@ -22,6 +22,8 @@ cluster_vars:
       - postgres11-rhpkg2
     Ubuntu:
       - ubpkg1
+    SLES:
+      - slespkg1
 ```
 
 The packages listed under `packages.common` will be installed on every

@@ -12,6 +12,7 @@
       RedHat:
         - "glibc-langpack-{{ _lang_pack }}"
         - "langpacks-{{ _lang_pack }}"
+      SUSE: []
     list_contents: "{{ _locale_packages[ansible_os_family] }}"
   when:
     not (ansible_distribution == 'RedHat' and ansible_distribution_major_version|int == 7)

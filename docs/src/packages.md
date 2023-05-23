@@ -22,6 +22,8 @@ cluster_vars:
       - rhpkg2
     Ubuntu:
       - ubpkg1
+    SLES:
+      - slespkg1
 ```
 
 In the example above, TPA will install its own list of

@@ -26,12 +26,14 @@
       redhat_workaround_packages:
         RedHat:
           - "{{ postgres_package_name }}{{ postgres_versionNN }}-server"
+        SUSE:
+          - "{{ postgres_package_name }}{{ postgres_versionNN }}-server"
       list_contents: "{{
           redhat_workaround_packages
           |packages_for(ansible_os_family, postgres_package_version)
         }}"
     when:
-      ansible_os_family == 'RedHat'
+      ansible_os_family in ('RedHat', 'SUSE')
       and (
         (postgres_flavour == 'epas')
         or

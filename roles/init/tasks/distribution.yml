@@ -11,7 +11,7 @@
 
 - name: Ensure ansible_distribution is supported
   assert:
-    msg: "ansible_distribution must be set to Debian/RedHat/Ubuntu"
+    msg: "ansible_distribution must be set to Debian/RedHat/Ubuntu/SLES"
     that:
       - ansible_distribution is defined
-      - ansible_distribution in ('Debian', 'RedHat', 'Ubuntu')
+      - ansible_distribution in ('Debian', 'RedHat', 'Ubuntu', 'SLES')

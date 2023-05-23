@@ -12,6 +12,7 @@
     service_name:
       Debian: cron
       RedHat: crond
+      SUSE: cron
 
 - name: Check which compression program is available
   shell: >
@@ -61,6 +62,7 @@
         cron_service_names:
           Debian: cron
           RedHat: crond
+          SUSE: cron
   when: >
     barman_home_ok is changed and
     platform in ['docker']

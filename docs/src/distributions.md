@@ -33,6 +33,10 @@ more on the latter.
 * RHEL/CentOS/Rocky/AlmaLinux 8.x is fully supported (python3 only)
 * RHEL/CentOS 7.x is fully supported (python2 only)
 
+## SLES
+
+* SLES 15.x is fully supported
+
 ## Platform-specific considerations
 
 Some platforms may not work with the legacy distributions mentioned here.

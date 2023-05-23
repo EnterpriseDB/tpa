@@ -226,7 +226,7 @@ You can add filter specifications for more precise matching:
 for you based on the `--distribution` argument.)
 
 This platform supports Debian 9 (stretch), RedHat Enterprise Linux 7,
-Rocky 8, and Ubuntu 16.04 (Xenial).
+Rocky 8, Ubuntu 16.04 (Xenial), and SUSE Linux Enterprise Server 15.
 
 ### Subnets (optional)
 

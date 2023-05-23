@@ -7,8 +7,8 @@
 source "$1"
 
 declare -A families pkg_mgrs
-families=([Debian]=Debian [RedHat]=RedHat [Ubuntu]=Debian)
-pkg_mgrs=([Debian]=apt [RedHat]=dnf)
+families=([Debian]=Debian [RedHat]=RedHat [Ubuntu]=Debian [SLES]=SUSE)
+pkg_mgrs=([Debian]=apt [RedHat]=dnf [SUSE]=zypper)
 
 . /etc/os-release
 
@@ -57,6 +57,9 @@ case "${ID}:${VERSION_ID%.*}" in
         ;;
     rhel:9|centos:9|ol:9|rocky:9|almalinux:9)
         distribution=RedHat
+        ;;
+    sles:15)
+        distribution=SLES
         release=$VERSION_ID
         python=python3
         ;;

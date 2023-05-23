@@ -8,3 +8,4 @@ postgres_initdb_opts:
 default_postgres_data_dirs:
   Debian: "/var/lib/postgresql/{{ postgres_version }}/main"
   RedHat: "/var/lib/pgsql/{{ postgres_version }}/data"
+  SUSE: "/var/lib/pgsql/{{ postgres_version }}/data"

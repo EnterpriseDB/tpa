@@ -1,5 +1,5 @@
 {# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved. #}
-ulimit -c unlimited
+ulimit -c {{ (ansible_os_family=='SUSE')|ternary('0', 'unlimited') }}
 export PS1='\u@\h:\w $ '
 export PATH=$PATH:{{ postgres_bin_dir }}
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}{{ postgres_lib_dir }}

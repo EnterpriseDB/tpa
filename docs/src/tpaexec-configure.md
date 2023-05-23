@@ -192,8 +192,8 @@ Specify `--distribution <name>` to select a distribution.
 The selected platform determines which distributions are available, and
 which one is used by default.
 
-In general, you should be able to use "Debian", "RedHat", and "Ubuntu"
-to select the right images.
+In general, you should be able to use "Debian", "RedHat", "Ubuntu", and
+"SLES" to select the right images.
 
 This option is not meaningful for the "bare" platform, where TPA has
 no control over which distribution is installed.

@@ -111,7 +111,7 @@ $ cd local-repo/Debian/buster
 $ dpkg-scanpackages . | gzip > Packages.gz
 ```
 
-### RedHat repository metadata
+### RedHat/SLES repository metadata
 
 First, install the `createrepo` package:
 

@@ -65,6 +65,10 @@ default_packages:
     - openssh-client
     - "{{ python_pkg_prefix }}-apt"
     - cron
+  SLES:
+    - python3-selinux
+    - cron
+    - openssh-clients
 
 optional_packages: {}
 default_optional_packages:
@@ -76,9 +80,11 @@ default_optional_packages:
   Debian: []
   RedHat: []
   Ubuntu: []
+  SLES: []
 
 unwanted_packages: {}
 default_unwanted_packages:
   Debian: &debian_unpackages [unattended-upgrades]
   RedHat: []
   Ubuntu: *debian_unpackages
+  SLES: []

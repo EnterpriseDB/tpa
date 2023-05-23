@@ -49,7 +49,7 @@
         }}"
       _pgespresso_packages: "{{ pgespresso_packages|packages_for(ansible_distribution) }}"
       _psycopg2_packages: "{{
-          psycopg2_packages|packages_for(ansible_os_family)
+          psycopg2_packages|packages_for(ansible_distribution)
         }}"
 
   - include_role: name=pkg/add_to_list
