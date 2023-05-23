@@ -2,6 +2,53 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.18 (2023-05-23)
+
+### Notable changes
+
+- TPA-316 Support replica setup using pg_basebackup instead of repmgr
+
+  TPA now uses pg_basebackup for initial replica creation instead of
+  repmgr, except for postgresql versions before 12.
+
+- TPA-101 Support deploying to SLES 15
+
+  Pass `--os SLES` to `tpaexec configure` to deploy to SLES.
+
+  The M1 and PGD-Always-ON architectures are supported on all platforms.
+
+  Creation of local repositories (and therefore air-gapped installation)
+  is not yet supported on SLES
+
+### Minor changes
+
+- TPA-412 Support deploying to RHEL 9
+
+- TPA-418 Minor version upgrade support for PGD 5
+
+- TPA-425 Improve tests run as part of `tpaexec test`
+
+- TPA-101 Build packages to run TPA on SLES 15
+
+- Various documentation updates
+
+### Bugfixes
+
+- TPA-439 Don't try to use 2q repositories on unsupported distributions
+
+- TPA-443 Install server packages for pg_receivewal on older epas
+
+  On barman servers, we need to install the postgresql server package
+  for certain flavour/version/os combinations so that the pg_receivewal
+  binary will be present. This fixes the logic to include the case of
+  epas version < 13.
+
+- TPA-448 Fix device lookup failures on AWS
+
+  This fixes intermittent failures to create symlinks to block devices
+  on AWS hosts, which manifested as successful provision followed by
+  failing deployment.
+
 ## v23.17 (2023-05-10)
 
 ### Notable changes
