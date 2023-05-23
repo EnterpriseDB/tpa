@@ -6,15 +6,6 @@
 
 ### Notable changes
 
-- TPA-101 Support deploying to SLES 15
-
-  Pass `--os SLES` to `tpaexec configure` to deploy to SLES.
-
-  The M1 and PGD-Always-ON architectures are supported on all platforms.
-
-  Creation of local repositories (and therefore air-gapped installation)
-  is not yet supported on SLES
-
 - TPA-316 Support replica setup using pg_basebackup instead of repmgr
 
   Even on clusters which don't use repmgrd to manage failover (e.g., with
@@ -29,24 +20,28 @@
 
   Given the circumstances, we can use pg_basebackup to create replicas in
   a self-contained way, at the cost of reinventing everything that repmgr
-  takes care of for us. We simplify matters considerably by limiting the
-  use of pg_basebackup to Postgres v12 and above (i.e., no recovery.conf
-  to deal with). If you want to create replicas with older versions, you
-  must use repmgr (but repmgr packages exist for older versions).
+  takes care of for us.
+
+- TPA-101 Support deploying to SLES 15
+
+  Pass `--os SLES` to `tpaexec configure` to deploy to SLES.
+
+  The M1 and PGD-Always-ON architectures are supported on all platforms.
+
+  Creation of local repositories (and therefore air-gapped installation)
+  is not yet supported on SLES
+
+### Minor changes
 
 - TPA-412 Support deploying to RHEL 9
 
-  All architectures are supported on all platforms.
-
-### Minor changes
+- TPA-418 Minor version upgrade support for PGD 5
 
 - TPA-425 Improve tests run as part of `tpaexec test`
 
 - Various documentation updates
 
 ### Bugfixes
-
-- TPA-418 Update pgd-proxy and pgdcli when updating postgres
 
 - TPA-439 Don't try to use 2q repositories on unsupported distributions
 
@@ -62,7 +57,6 @@
   This fixes intermittent failures to create symlinks to block devices
   on AWS hosts, which manifested as successful provision followed by
   failing deployment.
-
 
 ## v23.17 (2023-05-10)
 
