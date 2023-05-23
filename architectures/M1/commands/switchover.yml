@@ -14,6 +14,12 @@
   hosts: all
   tasks:
   - assert:
+      msg: "Switchover target host is not a member this cluster: {{ target }}"
+      that:
+        - target in ansible_play_hosts_all
+    run_once: true
+
+  - assert:
       msg: "Switchover target is not a postgres server: {{ target }}"
       that:
         - "'postgres' in role"
@@ -28,38 +34,26 @@
       inventory_hostname == target
 
   - assert:
-      msg: "Expected only one primary, but found: {{ groups['primary']|join(', ') }}"
+      msg: "Expected only one primary, but found: {{ primaries|join(', ') }}"
       that:
-        - groups['primary']|length == 1
+        - primaries|length == 1
+    vars:
+      primaries: "{{
+        groups['primary']
+        |reject('in', groups['role_pem-server']|default([]))
+        |list
+      }}"
     when: >
       inventory_hostname == target
 
-  - name: Stop repmgr
-    service:
-      name: repmgr
-      state: stopped
-    when: >
-      'primary' in role or 'replica' in role
+  - name: Perform a switchover on a repmgr cluster
+    include_role:
+      name: repmgr/switchover
+    when:
+      failover_manager == 'repmgr'
 
-  - name: Perform switchover to {{ target }}
-    command: >
-      {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
-    become_user: "{{ postgres_user }}"
-    become: yes
-    when: >
-      'postgres' in role and inventory_hostname == target
-
-  - name: Restart repmgr
-    service:
-      name: repmgr
-      state: started
-    when: >
-      'primary' in role or 'replica' in role
-
-  - name: Display cluster status
-    command: >
-      {{ postgres_bin_dir }}/repmgr cluster show --verbose -f {{ repmgr_conf_file }}
-    become_user: "{{ postgres_user }}"
-    become: yes
-    when: >
-      inventory_hostname == target
+  - name: Perform a switchover on a patroni cluster
+    include_role:
+      name: patroni/switchover
+    when:
+      failover_manager == 'patroni'
