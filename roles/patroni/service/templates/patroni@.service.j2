@@ -1,0 +1,42 @@
+# systemd service template for patroni instances. The actual instances will
+# be called "patroni@version-cluster", e.g. "patroni@10-main". The
+# variable %i expands to "version-cluster", %I expands to "version/cluster".
+# (%I breaks for cluster names containing dashes.)
+[Unit]
+Description=Patroni instance %i
+After=network.target
+ConditionPathExists={{ patroni_etc }}/%i.yml
+
+[Service]
+Type=simple
+
+User={{ postgres_user }}
+Group={{ postgres_group }}
+
+# Read in configuration file if it exists, otherwise proceed
+EnvironmentFile=-{{ patroni_etc }}/env.conf
+
+PermissionsStartOnly=True
+RuntimeDirectory=postgresql/%i.pg_stat_tmp
+RuntimeDirectoryMode=2775
+SyslogIdentifier=patroni@%i
+
+ExecStart={{ patroni_path }} {{ patroni_etc }}/%i.yml
+
+# Send HUP to reload from patroni.yml
+ExecReload=/bin/kill -s HUP $MAINPID
+
+# only kill the patroni process, not it's children, so it will gracefully stop postgres
+KillMode=process
+
+# Give a reasonable amount of time for the server to start up/shut down
+TimeoutSec=30
+
+# Do not restart the service if it crashes, we want to manually inspect database on failure
+Restart=no
+
+# Uncomment in order to get debugging output
+#Environment=PATRONI_LOGLEVEL=DEBUG
+
+[Install]
+WantedBy=multi-user.target

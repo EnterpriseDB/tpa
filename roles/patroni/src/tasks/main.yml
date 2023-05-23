@@ -1,0 +1,23 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Ensure python is supported
+  assert:
+    that:
+      python == 'python3'
+    fail_msg: "Patroni source install requires python3"
+
+- name: Install patroni from source
+  include_role:
+    name: src/install
+  vars:
+    source_name: patroni
+    git_repository_url: "{{ patroni_git_url }}"
+    source_directory: "{{ patroni_src_dir }}"
+    build_directory: "{{ patroni_build_dir }}"
+    git_repository_ref: "{{ patroni_git_ref }}"
+    build_log: "{{ patroni_build_dir }}/build.log"
+    build_commands: "{{ patroni_build_commands }}"
+
+      #- "{{ python }} setup.py install {{ extra_args[ansible_os_family]|join(' ') }}"

@@ -1,0 +1,11 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- block:
+
+  - include_tasks: validate.yml
+  - include_tasks: state.yml
+
+  when: >
+    ('primary' in role or 'replica' in role)
+    and failover_manager == 'patroni'

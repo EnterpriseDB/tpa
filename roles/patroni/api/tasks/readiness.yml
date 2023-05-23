@@ -1,0 +1,28 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# From the patroni docs:
+# GET /readiness: returns HTTP status code 200 when the Patroni node
+# is running as the leader or when PostgreSQL is up and running.
+
+- include_vars: ../../vars/main.yml
+
+- name: Wait until the patroni cluster is in a ready state
+  uri:
+    url: "{{ _patroni_api_scheme }}://{{ inventory_hostname }}:{{ patroni_listen_port }}/readiness"
+    follow_redirects: none
+    method: GET
+    body_format: json
+    url_username: "{{ patroni_restapi_user }}"
+    url_password: "{{ vars['%s_password' % patroni_restapi_user] }}"
+
+    # This option is not supported until ansible core 2.11
+    # ca_path: "{{ patroni_ssl_enabled|ternary(_patroni_ssl_ca_path, omit) }}"
+    validate_certs: no
+
+  register: patroni_readiness_api_output
+  until:
+    patroni_readiness_api_output.status in [-1, 200]
+  retries: 90
+  delay: 2

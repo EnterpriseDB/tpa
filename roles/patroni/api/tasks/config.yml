@@ -1,0 +1,38 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Handle calls to the Patroni API
+
+# GET /config: Get the current version of the dynamic configuration
+# PATCH /config: Change the existing configuration. If you want to remove (reset) some setting just patch it with `null`
+# PUT /config: Perform a full rewrite of an existing dynamic configuration unconditionally
+
+- include_vars: ../../vars/main.yml
+
+- name: Call the Patroni config API
+  uri:
+    body: "{{ body|default(omit)|to_json }}"
+    method: "{{ method }}"
+    url: "{{ _patroni_api_scheme }}://{{ inventory_hostname }}:{{ patroni_listen_port }}/config"
+    body_format: json
+    url_username: "{{ patroni_restapi_user }}"
+    url_password: "{{ vars['%s_password' % patroni_restapi_user] }}"
+
+    # This option is not supported until ansible core 2.11
+    # ca_path: "{{ patroni_ssl_enabled|ternary(_patroni_ssl_ca_path, omit) }}"
+    validate_certs: no
+
+  vars:
+    method: "{{
+      (body is defined)
+      |ternary(
+        (
+          api_force|default(false)
+        )
+        |ternary('PUT', 'PATCH'),
+        'GET'
+      )
+    }}"
+
+  register: patroni_config_api_output

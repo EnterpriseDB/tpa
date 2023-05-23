@@ -1,0 +1,16 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+patroni_git_url: https://github.com/zalando/patroni.git
+patroni_git_ref: master
+
+patroni_src_dir: /opt/patroni/src
+patroni_build_dir: /opt/patroni/build
+patroni_install_dir: /opt/patroni
+patroni_build_commands:
+  - "cp -a {{ patroni_src_dir }}/* {{ patroni_build_dir }}"
+  - "{{ python }} -m venv {{ patroni_install_dir }}"
+  - "{{ patroni_install_dir }}/bin/pip install --upgrade pip"
+  - "{{ patroni_install_dir }}/bin/pip install -r requirements.txt -r requirements.dev.txt"
+  - "{{ patroni_install_dir }}/bin/python3 setup.py install"

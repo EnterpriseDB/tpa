@@ -1,0 +1,23 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Create patroni configuration
+  copy:
+    content: "{{
+      patroni_conf
+      |to_nice_yaml(indent=2, explicit_start=True, sort_keys=False)
+    }}"
+    dest: "{{ patroni_etc }}/{{ cluster_name }}.yml"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0640
+
+  # This can be enabled when PAT-106 is resolved
+  #   validate: "{{ patroni_path }} --validate-config %s"
+  # environment:
+  #   LANG: "{{ user_locale }}"
+  #   LC_ALL: "{{ user_locale }}"
+
+  notify:
+    Note patroni config reload required

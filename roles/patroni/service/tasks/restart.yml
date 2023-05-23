@@ -1,0 +1,18 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- include_tasks: transition.yml
+  when: >
+    'replica' in role
+    and 'pem-server' not in role
+
+- include_tasks: transition.yml
+  when: >
+    'primary' in role
+    and 'pem-server' not in role
+
+- include_tasks: postgres_restart.yml
+  when: >
+    'postgres' in role
+    and 'pem-server' not in role

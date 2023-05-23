@@ -1,0 +1,71 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# The default superuser is the postgres user so don't create that
+# if we already have it specified
+
+- include_vars: ../../vars/main.yml
+
+- include_role:
+    name: postgres/createuser
+  when:
+    item.username not in postgres_users
+  with_items: "{{ _patroni_users }}"
+  vars:
+    username: "{{ item.username }}"
+    role_attrs: "{{ item.role_attrs }}"
+    _patroni_users:
+      - username: "{{ patroni_super_user }}"
+        role_attrs: [ superuser ]
+      - username: "{{ patroni_replication_user }}"
+        role_attrs: [ replication ]
+      - username: "{{ patroni_rewind_user }}"
+        role_attrs: []
+  tags: always
+
+- name: Generate a password for the patroni REST API
+  include_role:
+    name: secret
+  vars:
+    secret_name: "{{ patroni_restapi_user }}_password"
+    generate_password: true
+
+- name: Create and ensure owner on patroni etc directory
+  file:
+    path: "{{ patroni_etc }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0750
+    state: directory
+
+# Make sure users have been created before the config file is templated
+
+- include_tasks: config.yml
+
+- name: Ensure log directory exists and has correct ownership
+  file:
+    state: directory
+    path: "{{ patroni_conf.log.dir }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0750
+  when:
+    patroni_conf.log.dir is defined
+    and patroni_conf.log.dir != ''
+
+- include_role:
+    name: postgres/config
+    tasks_from: syslog
+
+# Compatibility with EPAS for this issue in patroni is tracked in PAT-17
+# Until that is resolved the workaround below is needed
+
+- name: Create symlink for postgres for patroni for EPAS
+  file:
+    path: "{{ postgres_bin_dir }}/postgres"
+    src: "{{ postgres_bin_dir }}/edb-postgres"
+    state: link
+  when: >
+    failover_manager == 'patroni'
+    and postgres_flavour == 'epas'

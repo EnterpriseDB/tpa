@@ -1,0 +1,7 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Note patroni restart required
+  set_fact:
+    patroni_service_end_state: restarted

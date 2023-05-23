@@ -1,0 +1,12 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- include_tasks: list-packages.yml
+  vars:
+    list_varname: _all_patroni_packages
+
+- include_role: name=pkg/install
+  vars:
+    package_list_name: "patroni packages"
+    package_list: "{{ _all_patroni_packages }}"

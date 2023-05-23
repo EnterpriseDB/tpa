@@ -1,0 +1,58 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# These facts and assertions are set once early during TPA init phase
+
+- name: Set default type of Distributed Configuration Store for patroni
+  set_fact:
+    patroni_dcs: "{{ patroni_dcs|default('etcd') }}"
+
+- name: Set postgres_cluster_name to TPA cluster_name
+  set_fact:
+    postgres_cluster_name: "{{ cluster_name }}"
+
+- name: Ensure valid patroni_dcs is set
+  assert:
+    that: patroni_dcs in ['etcd']
+    fail_msg:
+      TPA only supports etcd as the patroni_dcs at this time.
+
+- name: Ensure OS is supported with this configuration
+  assert:
+    that: not (
+        ansible_distribution == 'RedHat'
+        and ansible_distribution_release == '7'
+        and groups['role_haproxy']|default([]) is not empty
+      )
+    fail_msg:
+      TPA does not support Patroni with HAproxy on RedHat/CentOS 7
+
+- name: Check for incompatible `postgres_conf_template`
+  assert:
+    that:
+      postgres_conf_template is not defined
+    fail_msg: >
+      Patroni as a failover manager is incompatible with a custom `postgres_conf_template`
+      as Patroni will overwrite the postgresql.conf with its own managed one.
+      Please migrate all Postgres settings to config.yml options and/or `postgres_conf_settings`.
+
+- name: Check for incompatible `postgres_conf_dir`
+  assert:
+    that:
+      postgres_conf_dir|default(postgres_data_dir) == postgres_data_dir
+    fail_msg: >
+      Patroni as a failover manager is incompatible with the setting `postgres_data_dir` due
+      to the way Patroni manages Postgres configuration. Please migrate all Postgres settings
+      to config.yml options and/or `postgres_conf_settings`.
+
+- name: Add patroni to role
+  set_fact:
+    role: "{{
+        role
+        |union(['patroni'])
+      }}"
+
+- name: Create role-based groups
+  group_by:
+    key: patroni
+  changed_when: false

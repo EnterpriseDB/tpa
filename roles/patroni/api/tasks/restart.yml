@@ -1,0 +1,50 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Handle calls to the Patroni API
+
+- include_vars: ../../vars/main.yml
+
+#  Restart endpoint
+#  POST /restart: You can restart Postgres on the specific node by performing the POST /restart call.
+#  In the JSON body of POST request it is possible to optionally specify some restart conditions:
+#  restart_pending: boolean, if set to true Patroni will restart PostgreSQL only when restart is pending in order to
+#  apply some changes in the PostgreSQL config.
+#  role: perform restart only if the current role of the node matches with the role from the POST request.
+#  postgres_version: perform restart only if the current version of postgres is smaller than specified in the POST
+#  request.
+#  timeout: how long we should wait before PostgreSQL starts accepting connections. Overrides master_start_timeout.
+#  schedule: timestamp with time zone, schedule the restart somewhere in the future.
+#  DELETE /restart: delete the scheduled restart
+#  POST /restart and DELETE /restart endpoints are used by patronictl restart and patronictl flush <cluster-name>
+#  restart respectively.
+
+# If the API returns a 503 status the criteria supplied in the body did not match the state of the node.
+# e.g. if `restart_pending` is true and the server is not pending a restart
+
+- name: Call the Patroni restart API
+  uri:
+    method: POST
+    url: "{{ _patroni_api_scheme }}://{{ inventory_hostname }}:{{ patroni_listen_port }}/restart"
+    body_format: json
+    body: "{{ body|default(omit)|to_json }}"
+    url_username: "{{ patroni_restapi_user }}"
+    url_password: "{{ vars['%s_password' % patroni_restapi_user] }}"
+
+    # This option is not supported until ansible core 2.11
+    # ca_path: "{{ patroni_ssl_enabled|ternary(_patroni_ssl_ca_path, omit) }}"
+    validate_certs: no
+
+  register: patroni_restart_api_output
+  until:
+    patroni_restart_api_output.status is defined
+    and patroni_restart_api_output.status in [-1, 200, 503]
+  changed_when:
+    patroni_restart_api_output.status is defined
+    and patroni_restart_api_output.status == 200
+  failed_when:
+    patroni_restart_api_output.status is defined
+    and patroni_restart_api_output.status not in [200, 503]
+  retries: 5
+  delay: 10

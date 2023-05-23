@@ -1,0 +1,29 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- block:
+    - include_role:
+        name: patroni/pkg
+        tasks_from: dependencies.yml
+    - include_role:
+        name: "patroni/{{ patroni_installation_method }}"
+  when: >
+    'postgres' in role
+  tags:
+    - pkg
+    - src
+
+- include_role:
+    name: patroni/config
+  when: >
+    'postgres' in role
+  tags:
+    - config
+
+- include_role:
+    name: patroni/service
+  when: >
+    'postgres' in role
+  tags:
+    - service

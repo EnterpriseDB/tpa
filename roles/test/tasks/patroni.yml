@@ -1,0 +1,44 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Get current patroni cluster health
+  include_role:
+    name: patroni/api
+    tasks_from: health
+
+- include_tasks: output.yml
+  vars:
+    output_file: patroni-node-health.json
+    content: |
+      {{ patroni_health_api_output.json }}
+
+- name: Get current patroni node liveness
+  include_role:
+    name: patroni/api
+    tasks_from: liveness
+
+- name: Get current patroni node readiness
+  include_role:
+    name: patroni/api
+    tasks_from: readiness
+
+- name: Fail if any of the above tasks failed
+  fail:
+    msg: "patroni node health/liveness/readiness failed (use --skip-tags fail to skip)"
+  when:
+    patroni_health_api_output is not successful
+    or patroni_liveness_api_output is not successful
+    or patroni_readiness_api_output is not successful
+  tags: [patroni, fail]
+
+- name: Get current patroni cluster topology
+  include_role:
+    name: patroni/api
+    tasks_from: cluster
+
+- include_tasks: output.yml
+  vars:
+    output_file: patroni-cluster.json
+    content: |
+      {{ patroni_cluster_api_output.json }}

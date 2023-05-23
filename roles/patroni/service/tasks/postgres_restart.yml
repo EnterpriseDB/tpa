@@ -1,0 +1,24 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Process pending restart of postgres through patroni if required
+  include_role:
+    name: patroni/api
+    tasks_from: restart
+  vars:
+    _pending_only: "{{
+        pending_only
+        |default(
+          (postgres_service_end_state|default('none') != 'restarted')
+        )
+        |bool
+      }}"
+    # The API treats this as a matching criteria, if the criteria doesn't match it returns 503 status
+    body: "{{
+      _pending_only|ternary({'restart_pending': true}, {})
+    }}"
+
+- include_role:
+    name: patroni/api
+    tasks_from: readiness

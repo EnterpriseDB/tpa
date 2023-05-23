@@ -1,0 +1,105 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- include_vars: ../../vars/main.yml
+
+- block:
+  - assert:
+      that:
+        target is defined
+      fail_msg:
+        Please define the parameter "target" host to become the new primary
+
+  - include_role:
+      name: patroni/facts
+      tasks_from: gather
+
+  - name: Make sure tpaexec and patroni agree on who the primary is
+    assert:
+      that:
+        leader == primary
+      fail_msg: >-
+        The current Leader role in patroni DCS ({{ leader }}) does not
+        match the role according to tpaexec ({{ primary }})
+    vars:
+      leader: "{{
+        (
+          patroni_cluster.members|
+          selectattr('Role', 'eq', 'Leader')
+          |list
+          |first
+          |default({})
+        ).Member|default('none')
+      }}"
+      primary: "{{
+        groups['primary']|first
+      }}"
+
+  - name: Make sure the target host is a replica according to patroni
+    assert:
+      that:
+        target in replicas
+      fail_msg:
+        The host {{ target }} is not known as a Replica in patroni DCS ({{ replicas|join(',') }})
+    vars:
+      replicas: "{{
+        patroni_cluster.members
+        |selectattr('Role', 'eq', 'Replica')
+        |map(attribute='Member')
+        |list
+        |default([])
+      }}"
+
+  #   Switchover to a replica
+  #
+  # Options:
+  #   --master TEXT     The name of the current master
+  #   --candidate TEXT  The name of the candidate
+  #   --scheduled TEXT  Timestamp of a scheduled switchover in unambiguous format
+  #                     (e.g. ISO 8601)
+  #   --force           Do not ask for confirmation at any point
+
+  - name: Perform switchover to {{ target }}
+    command: >
+      {{ patronictl_path }}
+      -c {{ patroni_etc }}/{{ cluster_name }}.yml
+      switchover
+      --master {{ groups['primary']|first }}
+      --scheduled now
+      --candidate {{ target }}
+      --force
+      {{ cluster_name }}
+    environment: "{{ _target_env|combine(target_environment) }}"
+    vars:
+      _locale: "{{
+        user_locale|default(
+            (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int < 8)
+            |ternary('en_US.utf-8', 'C.UTF-8')
+          )
+        }}"
+      _target_env:
+        LC_ALL: "{{ _locale }}"
+        LANG: "{{ _locale }}"
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  when: >
+    'postgres' in role
+    and inventory_hostname == target
+
+- name: Wait until all hosts are ready
+  include_role:
+    name: patroni/api
+    tasks_from: readiness
+  when: >
+    'postgres' in role
+    and 'pem-server' not in role
+
+- name: Report on cluster health
+  include_role:
+    name: patroni/service
+    tasks_from: status
+  when: >
+    'postgres' in role
+    and inventory_hostname == target

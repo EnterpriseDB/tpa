@@ -1,0 +1,29 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Setup patroni systemd service
+  template:
+    dest: /etc/systemd/system/patroni@.service
+    src: patroni@.service.j2
+  register: unit
+  notify:
+    - Note patroni restart required
+
+# FIXME should the service name be pg_version+cluster or just cluster. Check upgrade paths
+
+- name: Create a patroni service name using cluster name
+  set_fact:
+    patroni_service_name: "patroni@{{ cluster_name }}"
+
+- name: Enable the patroni cluster instance systemd service unit
+  service:
+    name: "{{ patroni_service_name }}"
+    enabled: "{{ failover_manager == 'patroni' }}"
+    daemon_reload: "{{ unit is changed }}"
+
+- name: Disable the generic patroni systemd service unit
+  service:
+    name: "patroni"
+    enabled: no
+  failed_when: false

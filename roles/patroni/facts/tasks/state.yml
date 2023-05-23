@@ -1,0 +1,40 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# These facts are set conditionally based on the state of the cluster.
+# This is called once at the start of a deployment during the TPA init phase,
+# and again once a new cluster has been initialised.
+
+- block:
+  - include_tasks: gather.yml
+    when:
+      etc_tpa_exists
+
+  - name: Store fact for initialised state of patroni cluster
+    set_fact:
+      patroni_initialised: "{{ patroni_cluster is defined and patroni_cluster.initialised|bool }}"
+  rescue:
+    - name: Store fact for initialised state of patroni cluster
+      set_fact:
+        patroni_initialised: false
+
+- name: Disable postgres split configuration if patroni is initialised
+  set_fact:
+    postgres_config_split: "{{ not patroni_initialised }}"
+
+- name: Set fact to disable creation of pg_hba.conf so it can be managed by patroni
+  set_fact:
+    postgres_create_hba_file: "{{ not patroni_initialised }}"
+
+- name: Set fact to disable creation of pg_ident.conf so it can be managed by patroni
+  set_fact:
+    postgres_create_ident_file: "{{ not patroni_initialised }}"
+
+- name: Stop managing postgres systemd service if patroni is initialised
+  set_fact:
+    postgres_service_managed: "{{ postgres_service_managed and not patroni_initialised }}"
+    postgres_service_enabled: false
+
+- name: Set empty list of postgres_conf_files so they can be managed by patroni
+  set_fact:
+    postgres_conf_files: []

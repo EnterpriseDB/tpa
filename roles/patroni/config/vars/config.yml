@@ -1,0 +1,180 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# The block `_patroni_conf` forms the default configuration for patroni cluster
+# YAML file.
+# Any values which are different based on a condition has its own block defined
+# below. The final configuration is merged together at the bottom of this file.
+
+# This has been done
+# 1) to allow for configuration features to be enabled in blocks,
+# 2) to provide the user with the ability to override any configuration
+# parameter or add entire sections that are not present in the default
+# block by using `patroni_conf_settings` in config.yml,
+# 3) and, to render the entire file as YAML therefore getting a free validation
+# that it is syntactically valid.
+
+_patroni_dynamic_conf_defaults:
+  ttl: 30
+  loop_wait: 10
+  retry_timeout: 10
+  maximum_lag_on_failover: 1048576
+  postgresql:
+    use_pg_rewind: false
+    use_slots: true
+
+#    Patroni requires these postgresql settings to exist otherwise it will override them with defaults!
+#    Most of these values are already set by roles/postgres/config/tasks/tpa-restart.yml
+#
+#    Controlled by Patroni so do not set here
+#
+#    cluster_name: "{{ postgres_cluster_name }}"
+#    listen_addresses: "*"
+#    port: "{{ postgres_port }}"
+#    hot_standby: "on"
+#
+#      # DCS only see https://patroni.readthedocs.io/en/latest/dynamic_configuration.html
+#
+#    parameters:
+#      max_connections: "{{ postgres_restart_config.max_connections }}"
+#      max_locks_per_transaction: "{{ postgres_restart_config.max_locks_per_transaction }}"
+#      max_worker_processes: "{{ postgres_restart_config.max_worker_processes }}"
+#      max_prepared_transactions: "{{ postgres_restart_config.max_prepared_transactions }}"
+#      wal_level: "{{ postgres_restart_config.wal_level }}"
+#      wal_log_hints: "{{ postgres_restart_config.wal_log_hints }}"
+#      track_commit_timestamp: "{{ postgres_restart_config.track_commit_timestamp }}"
+#
+#      max_wal_senders: "{{ postgres_restart_config.max_wal_senders }}"
+#      max_replication_slots: "{{ postgres_restart_config.max_replication_slots }}"
+
+_patroni_conf:
+  scope: "{{ postgres_cluster_name }}"
+  namespace: "/{{ patroni_dcs_namespace|default('tpa') }}/"
+  name: "{{ inventory_hostname }}"
+
+  restapi:
+    listen: "0.0.0.0:{{ patroni_listen_port }}"
+    connect_address: "{{ inventory_hostname }}:{{ patroni_listen_port }}"
+    authentication:
+      username: "{{ patroni_restapi_user }}"
+      password: "{{ vars['%s_password' % patroni_restapi_user] }}"
+
+  # Please note that this is only used once when a patroni cluster is instantiated
+  # Any subsequent changes will need to be set using either `patronictl edit-config or the API
+  # Also, note that the dynamic settings get merged later with user supplied settings.
+
+  bootstrap:
+
+    # This is the minimum required to bootstrap a node
+    # This is normally overridden by `postgresql.pg_hba` populated during deploy
+    pg_hba:
+      - host replication replicator 127.0.0.1/32 md5
+      - host all all 0.0.0.0/0 md5
+
+    # Initdb is run by TPA at deploy
+    initdb:
+      - encoding: UTF8
+      - data-checksums
+      - auth-local: peer
+      - auth-host: scram-sha-256
+
+  postgresql:
+    listen: "0.0.0.0:{{ postgres_port }}"
+    connect_address: "{{ inventory_hostname }}:{{ postgres_port }}"
+    data_dir: "{{ postgres_data_dir }}"
+    bin_dir: "{{ postgres_bin_dir }}"
+    pgpass: /etc/patroni/.pgpass
+    authentication:
+      replication:
+        username: "{{ patroni_replication_user }}"
+        password: "{{ vars['%s_password' % patroni_replication_user] }}"
+      superuser:
+        username: "{{ patroni_super_user }}"
+        password: "{{ vars['%s_password' % patroni_super_user] }}"
+      rewind:
+        username: "{{ patroni_rewind_user }}"
+        password: "{{ vars['%s_password' % patroni_rewind_user]|default('') }}"
+    parameters:
+      unix_socket_directories: "{{ unix_socket_directories|join(',') }}"
+    create_replica_methods:
+        - basebackup
+    basebackup:
+        checkpoint: fast
+
+  watchdog:
+    mode: 'off'
+
+  log:
+    dir: /var/log/patroni
+
+  tags:
+    nofailover: false
+    noloadbalance: false
+    clonefrom: false
+    replicatefrom: "{{ upstream|default(false) }}"
+    nosync: false
+
+# `patroni_ssl_enabled` is true
+
+_patroni_conf_ssl:
+  restapi:
+    certfile: "{{ ssl_cert_file|default('/etc/tpa/'+cluster_name+'.crt') }}"
+    keyfile: "{{ ssl_key_file|default('/etc/tpa/'+cluster_name+'.key') }}"
+  ctl:
+    cacert: "{{ ssl_ca_file|default(ssl_cert_file|default('/etc/tpa/'+cluster_name+'.crt')) }}"
+    certfile: "{{ ssl_cert_file|default('/etc/tpa/'+cluster_name+'.crt') }}"
+
+# `patroni_rewind_enabled` is true
+
+_patroni_conf_rewind:
+  bootstrap:
+    dcs:
+      postgresql:
+        use_pg_rewind: true
+
+# `patroni_dcs == 'etcd'`
+
+_patroni_conf_etcd:
+  etcd3:
+    hosts: "{{
+        groups['role_etcd']
+        |default([])
+        |map('apply_format', '{0}:{1}', etcd_client_port|default(default_etcd_client_port))
+        |list
+        |sort
+      }}"
+
+# `patroni_watchdog_enabled` is true
+
+_patroni_conf_watchdog:
+  watchdog:
+    mode: required
+    device: /dev/watchdog
+    safety_margin: 5
+
+# `backup` exists
+
+_patroni_conf_backup:
+  bootstrap:
+    dcs:
+      ignore_slots:
+        - name: "{{ backup|default('')|backup_slot_name }}"
+          type: physical
+
+# Build the Dynamic Config first from defaults, then from any bootstrap.dcs settings supplied
+# in `config.yml`, then finally from `patroni_dynamic_conf_settings` supplied in `config.yml`.
+# This is used to update running clusters once bootstrapped and also the initial bootstrap
+# settings in the patroni config YAML file
+
+_patroni_dynamic_conf: "{{
+    _patroni_dynamic_conf_defaults
+    |combine(
+      patroni_conf_settings.bootstrap.dcs|default({})
+      |combine(
+        patroni_dynamic_conf_settings|default({}),
+        recursive=True
+      ),
+      recursive=True
+    )
+  }}"

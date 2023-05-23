@@ -1,0 +1,22 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Gather patroni cluster facts
+  include_role:
+    name: patroni/facts
+    tasks_from: gather
+
+- name: Get cluster health from API
+  include_role:
+    name: patroni/api
+    tasks_from: health
+
+- name: Report the status of the cluster
+  debug:
+    msg: "{{
+      {
+        'api': patroni_health_api_output.json,
+        'facts': patroni_cluster
+      }
+    }}"

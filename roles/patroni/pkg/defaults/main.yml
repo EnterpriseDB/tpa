@@ -1,0 +1,17 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+patroni_packages:
+  Debian: &all_patroni_packages
+    - patroni
+  RedHat:
+    - patroni
+    - "patroni-{{ patroni_dcs|default('etcd') }}"
+  Ubuntu: *all_patroni_packages
+
+patroni_dependency_packages:
+  Debian: &all_patroni_dependency_packages
+    - jq
+  RedHat: *all_patroni_dependency_packages
+  Ubuntu: *all_patroni_dependency_packages
