@@ -5,7 +5,7 @@
 pem_agent_config_path: "{{ pem_agent_base_dir }}/etc/agent.cfg"
 pem_agent_certificate_directory: /root/.pem
 
-pemagent_CN: pemagent_{{ inventory_hostname }}
+pemagent_CN: pemagent-{{ inventory_hostname }}
 pemagent_clientcert_owner: "{{ pem_group|default('root') }}"
 pemagent_clientcert_group: "{{ pem_group|default('root') }}"
 pemagent_clientcert_service: "{{ pemagent_CN }}"
