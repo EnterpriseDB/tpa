@@ -45,7 +45,7 @@
         downloader_instance:
           platform: docker
           node: "{{ instances|map(attribute='node')|max + 1 }}"
-          Name: "{{ cluster_name|replace('_', '-') }}-downloader"
+          Name: "{{ (cluster_name|replace('_', '-') ~ '-downloader')|truncate(64, True, '', 0) }}"
           image: "{{ instance_defaults.docker_image|default(default_docker_image|default('tpa/redhat')) }}"
           role: "{{ cluster_roles + ['downloader'] }}"
           location: "{{ locations[0].Name|default('main') }}"
