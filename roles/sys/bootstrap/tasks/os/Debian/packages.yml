@@ -5,6 +5,9 @@
 # Any packages installed here must also be listed in
 # sys/bootstrap/pkg/list-packages.yml
 
+- name: Update apt package list
+  raw: apt-get update
+
 - name: Install apt-transport-https to support https repositories
   raw: apt-get -q -y install apt-transport-https
 

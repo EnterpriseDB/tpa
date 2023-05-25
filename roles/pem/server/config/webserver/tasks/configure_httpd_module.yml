@@ -66,3 +66,4 @@
     and pem_version is version('9.0','>=')
     and not (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '20' and pem_version is version("9.1","<"))
     and not (ansible_distribution == 'Debian' and ansible_distribution_major_version == '11' and pem_version is version("9.1","<"))
+    and not (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '22' and pem_version is version("9.1",">="))
