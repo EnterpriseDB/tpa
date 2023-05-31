@@ -57,6 +57,8 @@ case "${ID}:${VERSION_ID%.*}" in
         ;;
     rhel:9|centos:9|ol:9|rocky:9|almalinux:9)
         distribution=RedHat
+        release=$VERSION_ID
+        python=python3
         ;;
     sles:15)
         distribution=SLES
