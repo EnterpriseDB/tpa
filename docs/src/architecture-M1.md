@@ -68,7 +68,7 @@ More detail on the options is provided in the following section.
 |---------------------------|----------------------------------------------------------|----------------------|
 | `--platform`              | One of `aws`, `docker`, `bare`.                          | Defaults to `aws`.   |
 | `--num-cascaded-replicas` | The number of cascaded replicas from the first replica.  | Defaults to 1.       |
-| `--enable-efm`            | Configure EDB Enterprise Failover Manager as the cluster failover manager. | TPA will select EFM<br/>as the failover manager<br/>for EPAS, and repmgr<br/>for all other flavours.  |
+| `--enable-efm`            | Configure Failover Manager as the cluster failover manager. | TPA will select EFM<br/>as the failover manager<br/>for EPAS, and repmgr<br/>for all other flavours.  |
 
 
 <br/><br/>
