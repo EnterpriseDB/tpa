@@ -15,9 +15,10 @@
 - assert:
     that: >
       'bdr' not in role
+      or 'subscriber-only' in role
     fail_msg: >-
-      Support for creating BDR physical replicas has been removed
-      temporarily due to concerns about potential data loss
+      Support for creating physical replicas of BDR data nodes has been
+      removed from TPA due to concerns about potential data loss
 
 # First, we must initialise our PGDATA by cloning an upstream instance.
 
