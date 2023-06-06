@@ -1257,94 +1257,93 @@ class Architecture(object):
         except:
             return
 
-        try:
-            subprocess.run(
-                ["git", "init"],
-                cwd=self.cluster,
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-        except subprocess.CalledProcessError as cpe:
+        p = subprocess.Popen(
+            ["git", "init"],
+            cwd=self.cluster,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        (outs, errs) = p.communicate()
+        if p.returncode != 0:
             raise ArchitectureError(
-                f"Failed to initialise git repository: { cpe.stderr }"
+                f"Failed to initialise git repository: { errs }"
             )
 
-        try:
-            subprocess.run(
-                ["git", "checkout", "-b", self.args["cluster_name"]],
-                cwd=self.cluster,
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-        except subprocess.CalledProcessError as cpe:
-            raise ArchitectureError(f"Failed to check out git branch: { cpe.stderr }")
+        p = subprocess.Popen(
+            ["git", "checkout", "-b", self.args["cluster_name"]],
+            cwd=self.cluster,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        (outs, errs) = p.communicate()
+        if p.returncode != 0:
+            raise ArchitectureError(f"Failed to check out git branch: { errs }")
 
         if self.args.get("tower_git_repository"):
-            try:
-                subprocess.run(
-                    [
-                        "git",
-                        "remote",
-                        "add",
-                        "tower",
-                        self.args["tower_git_repository"],
-                    ],
-                    cwd=self.cluster,
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                )
-            except subprocess.CalledProcessError as cpe:
-                raise ArchitectureError(
-                    f"Failed to add remote repository: { cpe.stderr }"
-                )
+           p = subprocess.run(
+                [
+                    "git",
+                    "remote",
+                    "add",
+                    "tower",
+                    self.args["tower_git_repository"],
+                ],
+                cwd=self.cluster,
+                universal_newlines=True,
+            )
+        (outs, errs) = p.communicate()
+        if p.returncode != 0:
+            raise ArchitectureError(
+                f"Failed to add remote repository: { errs }"
+            )
 
         files = [
             f
             for f in ["config.yml", *self.links_to_create()]
             if os.path.exists(os.path.join(self.cluster, f))
         ]
-        try:
-            subprocess.run(
-                ["git", "add"] + files,
-                cwd=self.cluster,
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-        except subprocess.CalledProcessError as cpe:
-            raise ArchitectureError(f"Failed to add files to git: { cpe.stderr }")
 
-        try:
-            subprocess.run(
-                [
-                    "git",
-                    "commit",
-                    "-m",
-                    f'Initial configuration for cluster { self.args["cluster_name"] }',
-                    "-m",
-                    " ".join(sys.argv),
-                ],
-                cwd=self.cluster,
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-        except subprocess.CalledProcessError as cpe:
-            raise ArchitectureError(f"Failed to commit files to git: { cpe.stderr }")
+        p = subprocess.Popen(
+            ["git", "add"] + files,
+            cwd=self.cluster,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        (outs, errs) = p.communicate()
+        if p.returncode != 0:
+            raise ArchitectureError(f"Failed to add files to git: { errs }")
 
-        try:
-            subprocess.run(
-                ["git", "notes", "add", "-m", "Created by TPA"],
-                cwd=self.cluster,
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-        except subprocess.CalledProcessError as cpe:
-            raise ArchitectureError(f"Failed to create git note: { cpe.stderr }")
+        p = subprocess.Popen(
+            [
+                "git",
+                "commit",
+                "-m",
+                f'Initial configuration for cluster { self.args["cluster_name"] }',
+                "-m",
+                " ".join(sys.argv),
+            ],
+            cwd=self.cluster,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        (outs, errs) = p.communicate()
+        if p.returncode != 0:
+            raise ArchitectureError(f"Failed to commit files to git: { errs }")
+
+        p = subprocess.Popen(
+            ["git", "notes", "add", "-m", "Created by TPA"],
+            cwd=self.cluster,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        (outs, errs) = p.communicate()
+        if p.returncode != 0:
+            raise ArchitectureError(f"Failed to create git note: { errs }")
 
     def create_links(self, force: bool = False) -> None:
         """
