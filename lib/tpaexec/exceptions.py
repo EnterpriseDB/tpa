@@ -92,3 +92,8 @@ class PasswordWriteError(TPABaseException):
     """Password writing error exception class."""
 
     pass
+
+class ExternalCommandError(TPABaseException):
+    """External command execution error."""
+
+    pass

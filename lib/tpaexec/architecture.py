@@ -19,7 +19,7 @@ from ansible.template import Templar
 from ansible.utils.vars import merge_hash
 from functools import reduce
 
-from .exceptions import ArchitectureError
+from .exceptions import ArchitectureError, ExternalCommandError
 from .net import Network, DEFAULT_SUBNET_PREFIX_LENGTH, DEFAULT_NETWORK_CIDR
 from .platforms import Platform
 
@@ -1242,6 +1242,18 @@ class Architecture(object):
         if not self.args["no_git"]:
             self.setup_git_repository()
 
+    def run_external_command(self, command) -> None:
+        p = subprocess.Popen(
+            command,
+            cwd=self.cluster,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        (_, errstr) = p.communicate()
+        if p.returncode != 0:
+            raise ExternalCommandError(errstr)
+
     def setup_git_repository(self) -> None:
         """
         Creates a git repository for the cluster directory, adds the files and links that have
@@ -1257,47 +1269,37 @@ class Architecture(object):
         except:
             return
 
-        p = subprocess.Popen(
-            ["git", "init"],
-            cwd=self.cluster,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-        )
-        (outs, errs) = p.communicate()
-        if p.returncode != 0:
+        try:
+            self.run_external_command(
+                ["git", "init"],
+            )
+        except ExternalCommandError as ece:
             raise ArchitectureError(
-                f"Failed to initialise git repository: { errs }"
+                f"Failed to initialise git repository: { ece.errstr }"
             )
 
-        p = subprocess.Popen(
-            ["git", "checkout", "-b", self.args["cluster_name"]],
-            cwd=self.cluster,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-        )
-        (outs, errs) = p.communicate()
-        if p.returncode != 0:
-            raise ArchitectureError(f"Failed to check out git branch: { errs }")
+        try:
+            self.run_external_command(
+                ["git", "checkout", "-b", self.args["cluster_name"]],
+            )
+        except ExternalCommandError as ece:
+            raise ArchitectureError(f"Failed to check out git branch: { ece.errstr }")
 
         if self.args.get("tower_git_repository"):
-           p = subprocess.run(
-                [
-                    "git",
-                    "remote",
-                    "add",
-                    "tower",
-                    self.args["tower_git_repository"],
-                ],
-                cwd=self.cluster,
-                universal_newlines=True,
-            )
-        (outs, errs) = p.communicate()
-        if p.returncode != 0:
-            raise ArchitectureError(
-                f"Failed to add remote repository: { errs }"
-            )
+            try:
+                self.run_external_command(
+                    [
+                        "git",
+                        "remote",
+                        "add",
+                        "tower",
+                        self.args["tower_git_repository"],
+                    ],
+                )
+            except ExternalCommandError as ece:
+                raise ArchitectureError(
+                    f"Failed to add remote repository: { ece.errstr }"
+                )
 
         files = [
             f
@@ -1305,45 +1307,33 @@ class Architecture(object):
             if os.path.exists(os.path.join(self.cluster, f))
         ]
 
-        p = subprocess.Popen(
-            ["git", "add"] + files,
-            cwd=self.cluster,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-        )
-        (outs, errs) = p.communicate()
-        if p.returncode != 0:
-            raise ArchitectureError(f"Failed to add files to git: { errs }")
+        try:
+            self.run_external_command(
+                ["git", "add"] + files,
+            )
+        except ExternalCommandError as ece:
+            raise ArchitectureError(f"Failed to add files to git: { ece.errstr }")
 
-        p = subprocess.Popen(
-            [
-                "git",
-                "commit",
-                "-m",
-                f'Initial configuration for cluster { self.args["cluster_name"] }',
-                "-m",
-                " ".join(sys.argv),
-            ],
-            cwd=self.cluster,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-        )
-        (outs, errs) = p.communicate()
-        if p.returncode != 0:
-            raise ArchitectureError(f"Failed to commit files to git: { errs }")
+        try:
+            self.run_external_command(
+                [
+                    "git",
+                    "commit",
+                    "-m",
+                    f'Initial configuration for cluster { self.args["cluster_name"] }',
+                    "-m",
+                    " ".join(sys.argv),
+                ],
+            )
+        except ExternalCommandError as ece:
+            raise ArchitectureError(f"Failed to commit files to git: { ece.errstr }")
 
-        p = subprocess.Popen(
-            ["git", "notes", "add", "-m", "Created by TPA"],
-            cwd=self.cluster,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-        )
-        (outs, errs) = p.communicate()
-        if p.returncode != 0:
-            raise ArchitectureError(f"Failed to create git note: { errs }")
+        try:
+            self.run_external_command(
+                ["git", "notes", "add", "-m", "Created by TPA"],
+            )
+        except ExternalCommandError as ece:
+            raise ArchitectureError(f"Failed to create git note: { ece.errstr }")
 
     def create_links(self, force: bool = False) -> None:
         """
