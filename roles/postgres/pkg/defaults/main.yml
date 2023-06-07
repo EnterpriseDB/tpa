@@ -75,10 +75,10 @@ postgres_debug_packages:
     Ubuntu: *debian_debug_packages
     SLES: []
   epas:
-    Debian: &all_epas_debug_packages []
-    RedHat: *all_epas_debug_packages
-    Ubuntu: *all_epas_debug_packages
-    SLES: *all_epas_debug_packages
+    Debian: []
+    RedHat: []
+    Ubuntu: []
+    SLES: []
   edbpge:
     Debian: &debian_edbpge_debug_packages
       - "{{ postgres_package_name }}-{{ postgres_version }}-dbgsym"
@@ -165,7 +165,7 @@ bdr4_packages:
     Ubuntu: *bdr4_epas_packages
     SLES: *bdr4_epas_packages
 
-bdr_debug_packages:
+default_bdr_debug_packages: &default_bdr_debug_packages
   postgresql:
     Debian: &debian_bdr_debug_packages
       - "{{ postgres_package_name }}-{{ postgres_version }}-bdr-plugin-dbgsym"
@@ -179,7 +179,9 @@ bdr_debug_packages:
     Ubuntu: *debian_epas_bdr_debug_packages
     SLES: []
 
-bdr4_debug_packages:
+bdr_debug_packages: *default_bdr_debug_packages
+
+default_bdr4_debug_packages: &default_bdr4_debug_packages
   postgresql:
     Debian: &bdr4_debug_pg_packages
       - edb-bdr{{ bdr_version }}-pg{{ postgres_versionNN }}-dbgsym
@@ -198,6 +200,8 @@ bdr4_debug_packages:
     RedHat: []
     Ubuntu: *bdr4_debug_epas_packages
     SLES: []
+
+bdr4_debug_packages: *default_bdr4_debug_packages
 
 pgespresso_packages:
   Debian: &debian_pgespresso_packages

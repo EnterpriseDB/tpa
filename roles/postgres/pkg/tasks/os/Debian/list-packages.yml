@@ -126,13 +126,13 @@
   - name: Switch to dbg (not dbgsym) debug packages for BDR v3 and below
     set_fact:
       bdr_debug_packages: "{{
-          bdr_debug_packages|combine({
+          default_bdr_debug_packages|combine({
             postgres_family: {ansible_distribution: _new_pkg_list}
           })
         }}"
     vars:
       _old_pkg_list:
-        "{{ bdr_debug_packages[postgres_family][ansible_distribution] }}"
+        "{{ default_bdr_debug_packages[postgres_family][ansible_distribution] }}"
       _new_pkg_list:
         "{{ _old_pkg_list|map('replace', '-dbgsym', '-dbg')|list }}"
     when:
@@ -143,13 +143,13 @@
   - name: Switch to dbg (not dbgsym) debug packages for BDR v4 and above
     set_fact:
       bdr4_debug_packages: "{{
-          bdr4_debug_packages|combine({
+          default_bdr4_debug_packages|combine({
             postgres_family_extended: {ansible_distribution: _new_pkg_list}
           })
         }}"
     vars:
       _old_pkg_list:
-        "{{ bdr4_debug_packages[postgres_family_extended][ansible_distribution] }}"
+        "{{ default_bdr4_debug_packages[postgres_family_extended][ansible_distribution] }}"
       _new_pkg_list:
         "{{ _old_pkg_list|map('replace', '-dbgsym', '-dbg')|list }}"
     when:
