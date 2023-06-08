@@ -86,8 +86,7 @@
     haproxy_peer_enabled: "{{
         haproxy_peer_enabled
         |default(
-          (failover_manager in ['harp', 'patroni'])
-          |ternary(true, false)
+          (failover_manager not in ['harp', 'patroni'])
         )
         |bool
       }}"
