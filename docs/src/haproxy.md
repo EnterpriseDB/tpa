@@ -29,6 +29,7 @@ You can set the following variables on any `haproxy` instance.
 | `haproxy_read_only_port`  | 5433 (5445 for EPAS)  | TCP port for read-only load-balancer                                                                                              |
 | `haproxy_backend_servers` | None                  | A list of Postgres instance names                                                                                                 |
 | `haproxy_maxconn`         | `max_connections`×0.9 | The maximum number of connections allowed per backend server; the default is derived from the backend's `max_connections` setting |
+| `haproxy_peer_enabled`    | True*                 | Add known haproxy hosts as `peer` list. <br/>*`False` if `failover_manager` is harp or patroni.                                   |
 
 ## Read-Only load-balancer
 
