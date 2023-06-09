@@ -45,6 +45,13 @@
       to the way Patroni manages Postgres configuration. Please migrate all Postgres settings
       to config.yml options and/or `postgres_conf_settings`.
 
+- name: Check for incompatible platform use with watchdog
+  assert:
+    that:
+      not (platform == 'docker' and patroni_watchdog_enabled|default(false))
+    fail_msg:
+      Patroni watchdog cannot be used on docker platform.
+
 - name: Add patroni to role
   set_fact:
     role: "{{
