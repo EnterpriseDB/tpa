@@ -5,14 +5,20 @@
 - name: Enable watchdog udev rule
   copy:
     content: |
-      KERNEL=="watchdog", OWNER="{{ watchdog_user }}", GROUP="{{ watchdog_group }}"
+      KERNEL=="watchdog", OWNER="{{ watchdog_user }}", GROUP="{{ watchdog_group }}", MODE="660"
     dest: /etc/udev/rules.d/99-watchdog.rules
+    owner: root
+    group: root
+    mode: "0644"
 
 - name: Enable softdog kernel module
   copy:
     content: |
       softdog
     dest: /etc/modules-load.d/softdog.conf
+    owner: root
+    group: root
+    mode: "0644"
 
 - name: Load softdog kernel module
   modprobe:
@@ -23,3 +29,4 @@
     path: /dev/watchdog
     owner: "{{ watchdog_user }}"
     group: "{{ watchdog_group }}"
+    mode: "0660"
