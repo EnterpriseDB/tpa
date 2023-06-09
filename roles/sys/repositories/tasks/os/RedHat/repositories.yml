@@ -188,18 +188,28 @@
     create: no
     section: "{{ item }}"
     option: enabled
-    value: "{{ (item in all_wanted_pgdg_repos)|ternary('1', '0') }}"
-  with_items:
-    - "{{ interesting_pgdg_repos.stdout_lines }}"
-    - pgdg-common
+    value: "{{ (item in all_wanted_pgdg_repos|flatten)|ternary('1', '0') }}"
+  with_items: "{{ enable_repos|flatten }}"
   when: >
     'PGDG' in yum_repository_list
   vars:
+    rhel_extras: "{{
+        (ansible_distribution_major_version|int > 7)
+        |ternary(
+          'pgdg-rhel' + ansible_distribution_major_version|string + '-extras',
+          []
+        )
+      }}"
+    enable_repos:
+      - "{{ interesting_pgdg_repos.stdout_lines }}"
+      - pgdg-common
+      - "{{ rhel_extras }}"
     wanted_pgdg_repo: "pgdg{{ postgres_versionNN }}"
     all_wanted_pgdg_repos:
       - "{{ wanted_pgdg_repo }}"
       - "{{ wanted_pgdg_repo }}-debuginfo"
       - pgdg-common
+      - "{{ rhel_extras }}"
 
 - name: Exclude barman-related packages from PGDG-common repos
   ini_file:
