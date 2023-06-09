@@ -148,6 +148,7 @@
         |map(attribute='node_group_type')|list|first == 'subscriber-only'
   when: >
     'subscriber-only' in role
+    and bdr_version is version('5', '<')
 
 # From bdr_node_groups, we now construct maps from group names to those
 # options that must be specified while creating the group, and the ones
