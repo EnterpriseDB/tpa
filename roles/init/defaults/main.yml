@@ -205,4 +205,4 @@ default_pgd_proxy_options: {}
 default_pgd_proxy_user: pgdproxy
 default_pgd_proxy_group: pgdproxy
 
-default_primary_slot_name: "tpa_{{ inventory_hostname }}"
+default_primary_slot_name: "tpa_{{ inventory_hostname|regex_replace('[^a-zA-Z0-9_]', '_') }}"
