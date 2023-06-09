@@ -10,17 +10,14 @@
 - name: Discover the state of systemd services
   service_facts:
 
-- name: Set OS specific etcd service fact
+- name: Set etcd service fact
   set_fact:
     etcd_service_state: "{{
-        ansible_facts.services[_etcd_service_key].state
+        ansible_facts.services[_etcd_service_name].state
         |default('absent')
       }}"
   vars:
-    _etcd_service_name:
-      RedHat: etcd.service
-      Debian: etcd
-    _etcd_service_key: "{{ _etcd_service_name[ansible_os_family] }}"
+    _etcd_service_name: etcd.service
 
 - name: Ensure the service state could be found
   assert:
