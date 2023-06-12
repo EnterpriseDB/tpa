@@ -64,12 +64,16 @@ More detail on the options is provided in the following section.
 
 #### Additional Options
 
-| Parameter                 | Description                                              | Behaviour if omitted |
-|---------------------------|----------------------------------------------------------|----------------------|
-| `--platform`              | One of `aws`, `docker`, `bare`.                          | Defaults to `aws`.   |
-| `--num-cascaded-replicas` | The number of cascaded replicas from the first replica.  | Defaults to 1.       |
-| `--enable-efm`            | Configure Failover Manager as the cluster failover manager. | TPA will select EFM<br/>as the failover manager<br/>for EPAS, and repmgr<br/>for all other flavours.  |
-
+| Parameter                 | Description                                                                                                       | Behaviour if omitted                                                                                 |
+|---------------------------|-------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| `--platform`              | One of `aws`, `docker`, `bare`.                                                                                   | Defaults to `aws`.                                                                                   |
+| `--num-cascaded-replicas` | The number of cascaded replicas from the first replica.                                                           | Defaults to 1.                                                                                       |
+| `--failover-manager`      | Select the fail-over manager from `efm`, `repmgr` and `patroni`.                                                  | TPA will select EFM<br/>as the failover manager<br/>for EPAS, and repmgr<br/>for all other flavours. |
+| `--enable-efm`            | Configure Failover Manager as the cluster fail-over manager.                                                      | See `--failover-manager` above.                                                                      |
+| `--enable-repmgr`         | Configure Replication Manager as the cluster fail-over manager.                                                   | See `--failover-manager` above.                                                                      |
+| `--enable-patroni`        | Configure Patroni as the cluster fail-over manager.                                                               | See `--failover-manager` above.                                                                      |
+| `--enable-haproxy`        | 2 additional nodes will be added as a load balancer layer.<br/>Only supported with Patroni as a failover manager. | HAproxy nodes will not be added to the cluster.                                                      |
+| `--patroni-dcs`           | Select the Distributed Configuration Store backend for patroni.<br/>Only option is `etcd` at this time.           | Defaults to `etcd`.                                                                                  |
 
 <br/><br/>
 
