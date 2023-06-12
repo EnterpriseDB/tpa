@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+import argparse
 
 from ..architecture import Architecture
 from ..exceptions import ArchitectureError
@@ -16,24 +17,53 @@ class M1(Architecture):
             dest="cascaded_replicas",
             default=1,
         )
-        g.add_argument(
+
+        assert isinstance(p, argparse.ArgumentParser)
+        fail_over_group = p.add_argument_group('M1 architecture fail-over manager options')
+        fail_over_me_group = fail_over_group.add_mutually_exclusive_group()
+
+        fail_over_me_group.add_argument(
+            "--failover-manager",
+            "--fail-over-manager",
+            choices=["efm", "patroni", "repmgr"],
+            help="The type of fail-over manager to use for the cluster."
+        )
+
+        fail_over_me_group.add_argument(
+            "--enable-efm",
+            action="store_const",
+            const="efm",
+            dest="failover_manager",
+            help="Enable EDB Failover Manager"
+        )
+
+        fail_over_me_group.add_argument(
+            "--enable-repmgr",
+            action="store_const",
+            const="repmgr",
+            dest="failover_manager",
+            help="Enable Replication Manager as HA fail-over manager"
+        )
+
+        fail_over_me_group.add_argument(
             "--enable-patroni",
             action="store_const",
             const="patroni",
             dest="failover_manager",
-            help="Enable Patroni HA cluster failover manager",
+            help="Enable Patroni HA cluster fail-over manager",
         )
+
         g.add_argument(
             "--enable-haproxy",
             action="store_true",
-            help="Enable HAproxy layer hosts when using Patroni failover manager",
+            help="Enable HAproxy layer hosts when using Patroni fail-over manager",
         )
         g.add_argument(
             "--patroni-dcs",
             choices=["etcd"],
             required=False,
             default="etcd",
-            help="the Distributed Configuration Store to use with Patroni",
+            help="The Distributed Configuration Store to use with Patroni",
         )
 
     def validate_arguments(self, args):

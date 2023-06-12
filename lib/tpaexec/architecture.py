@@ -333,9 +333,7 @@ class Architecture(object):
         g.add_argument("--extra-optional-packages", nargs="+", metavar="NAME")
 
         g.add_argument("--install-from-source", nargs="+", metavar="NAME")
-        g.add_argument(
-            "--enable-efm", action="store_const", const="efm", dest="failover_manager"
-        )
+
         g.add_argument(
             "--enable-pem",
             action="store_true",
