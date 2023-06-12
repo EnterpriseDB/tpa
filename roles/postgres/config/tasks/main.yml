@@ -39,8 +39,15 @@
 # 4. You can set postgres_hba_template to something else and do whatever
 #    you want in the custom template.
 #
-# The option `postgres_create_hba_file` is used internally by TPA to
-# optionally not manage the pg_hba.conf whilst still having a template set.
+# The variables `_postgres_create_hba_file` and `_postgres_create_ident_file`
+# are used internally by TPA to optionally disable the creation of the
+# `pg_hba.conf` and `pg_ident.conf` files respectively, whilst still
+# allowing for a user supplied HBA template to be set. Instead of creating
+# the file, the contents is stored in a fact so that this can be used by
+# other roles that are responsible for managing the creation of this file,
+# for example Patroni HA fail-over manager. Thus allowing users to supply
+# their own templates and continue to use TPA's configuration interface in
+# `config.yml`.
 
 - block:
   - name: Install pg_hba.conf
