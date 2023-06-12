@@ -5,6 +5,45 @@
 # This is called once at the start of a deployment during the TPA init phase,
 # and again once a new cluster has been initialised.
 
+# When a new cluster is created using TPA and Patroni is selected as the fail-over
+# manager, and patroni has not been initialised (no existing state is present in
+# the DCS), TPA will:
+#
+# 1. Create a single standalone PostgreSQL server using the same method that
+#   it does for other cluster types and fail-over managers. TPA will create
+#   configuration files, initialise the database, start the server with the
+#   `postgres` systemd service unit configured with TPA, establish what users
+#   should be created, add extension configuration, etc.
+# 2. create a Patroni configuration with bootstrap settings that will initialise
+#   the DCS with settings and PostgreSQL configuration generated and provided by
+#   TPA.
+# 3. start Patroni on the primary node, where Patroni will populate the DCS with
+#   configuration from the bootstrap configuration in the Patroni config file,
+#   read the state of the database, and promote itself to be the leader.
+# 4. start Patroni on secondary nodes, that will connect to the DCS and see
+#   there is an existing cluster, establishing a connection with the primary
+#   and perform replica creation.
+# 5. detect the Patroni cluster is initialised and perform any clean up that is
+#   required, including removing configuration files for PostgreSQL laid down by
+#   TPA in step 1 above.
+#
+# Once a cluster has been deployed, subsequent `deploy` runs with TPA will:
+#
+# 1. detect that Patroni is initialised, disabling the creation of PostgreSQL
+#  configuration files and management of postgres systemd service.
+# 2. compare configuration supplied via TPA `config.yml` with the contents of
+#  Patroni configuration YAML and stage a reload of the Patroni daemon if needed.
+# 3. compare configuration with the contents of the DCS by calling the Patroni
+#  API endpoint, and schedule an update if needed. If a restart of PostgreSQL
+#  is needed this will be handled by Patroni, TPA will send a request to the
+#  Patroni API endpoint requesting it to do this if it thinks it is needed,
+#  because for example it detected a change previously.
+#
+# The automation here should allow for a Patroni cluster to be managed both from
+# the host using `patronictl` command line interface or via the Patroni API.
+# However, TPA remains the source of truth and will overwrite configuration
+# clashes if they exist.
+
 - block:
   - include_tasks: gather.yml
     when:

@@ -19,5 +19,3 @@
     git_repository_ref: "{{ patroni_git_ref }}"
     build_log: "{{ patroni_build_dir }}/build.log"
     build_commands: "{{ patroni_build_commands }}"
-
-      #- "{{ python }} setup.py install {{ extra_args[ansible_os_family]|join(' ') }}"
