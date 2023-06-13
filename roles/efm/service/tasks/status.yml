@@ -1,0 +1,19 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Get EFM status
+  command: "{{ efm_bin_dir }}/efm cluster-status {{ cluster_name }}"
+  register: efm_status
+  when: >
+    'primary' in role
+  become_user: "{{ postgres_user }}"
+
+- name: Show cluster status
+  pause:
+    seconds: 0
+    prompt: |
+      EFM cluster status:
+
+      {{ efm_status.stdout }}
+  changed_when: false

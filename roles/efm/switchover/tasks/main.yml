@@ -1,0 +1,80 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Check that required argument `target` was supplied
+  assert:
+    that:
+      target is defined
+    fail_msg:
+      Please define the parameter "target" host to become the new primary
+
+- name: Ensure target is a postgres server
+  assert:
+    msg: "Switchover target is not a postgres server: {{ target }}"
+    that:
+      - "'postgres' in role"
+  when: >
+    inventory_hostname == target
+
+- name: Ensure target is not already a primary
+  assert:
+    msg: "Switchover target is already a primary: {{ target }}"
+    that:
+      - target not in groups['primary']
+  when: >
+    inventory_hostname == target
+
+- name: Ensure that there is only one primary
+  assert:
+    msg: "Expected only one primary, but found: {{ groups['primary']|join(', ') }}"
+    that:
+      - groups['primary']|length == 1
+  when: >
+    inventory_hostname == target
+
+- name: Ensure that the new target is not a cascading replica
+  assert:
+    msg: "The new target cannot be promoted as it is a cascading replica."
+    that:
+      - upstream is not defined or upstream is defined and upstream in groups['primary']
+  when: >
+    inventory_hostname == target
+
+- name: Set node priority to {{ target }}
+  command: >
+    {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ hostvars[target].ip_address }} 1
+  when: >
+    inventory_hostname == target
+
+- name: Perform switchover with EFM to {{ target }}
+  command: >
+    {{ efm_bin_dir }}/efm promote {{ cluster_name }} -switchover
+  when: >
+    inventory_hostname == target
+
+- name: Display cluster status
+  command: >
+    {{ efm_bin_dir }}/efm cluster-status-json {{ cluster_name }}
+  when: >
+    inventory_hostname == target
+  register: cluster_status
+  retries: 5
+  delay: 2
+  until: cluster_status is success
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Show status of cluster after switchover
+  debug:
+    var: cluster_status
+
+- name: Ensure switch over was successful
+  assert:
+    that:
+      status.nodes[target_ip].type == 'Primary'
+  vars:
+    target_ip: "{{ hostvars[target].ip_address }}"
+    status: "{{ cluster_status.stdout|from_json }}"
+  when: >
+    inventory_hostname == target

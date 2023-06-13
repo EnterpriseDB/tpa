@@ -46,6 +46,12 @@
     when: >
       inventory_hostname == target
 
+  - name: Perform a switchover on a efm cluster
+    include_role:
+      name: efm/switchover
+    when:
+      failover_manager == 'efm'
+
   - name: Perform a switchover on a repmgr cluster
     include_role:
       name: repmgr/switchover

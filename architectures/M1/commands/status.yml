@@ -10,6 +10,16 @@
   max_fail_percentage: 0
   environment: "{{ target_environment|default({}) }}"
   tasks:
+
+    - name: Report EFM status
+      include_role:
+        name: efm/service
+        tasks_from: status
+      when: >
+        'primary' in role
+        and failover_manager == 'efm'
+        and 'pem-server' not in role
+
     - name: Report repmgr status
       include_role:
         name: repmgr/service
