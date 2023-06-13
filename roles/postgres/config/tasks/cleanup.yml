@@ -43,4 +43,4 @@
     notify:
       - Note Postgres restart required
   when:
-    not postgres_config_split
+    not _postgres_config_split

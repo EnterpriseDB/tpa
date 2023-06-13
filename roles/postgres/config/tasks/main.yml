@@ -50,7 +50,7 @@
       owner: "{{ postgres_user }}"
       group: "{{ postgres_group }}"
       mode: 0644
-    when: postgres_create_hba_file
+    when: _postgres_create_hba_file
     notify:
       - Note Postgres reload required
 
@@ -81,7 +81,7 @@
       mode: 0644
     notify:
       - Note Postgres reload required
-    when: postgres_create_ident_file
+    when: _postgres_create_ident_file
 
   - name: Set a fact for contents of pg_ident.conf
     set_fact:
@@ -157,12 +157,12 @@
       include_dir = '{{ _include_dir|relpath(postgres_data_dir) }}'
     insertafter: EOF
     state: present
-  when: postgres_config_split
+  when: _postgres_config_split
   notify:
     - Note Postgres restart required
 
 # Setup postgres_config fact with the desired settings so it can be used
-# by anything that needs them, usually coupled with `postgres_config_split: false`.
+# by anything that needs them, usually coupled with `_postgres_config_split: false`.
 # Note: the postgres conf.d include files do not use these facts
 
 - include_tasks: set_tpa_facts.yml
@@ -181,7 +181,7 @@
     mode: 0644
   when:
     postgres_conf_template == ''
-    and postgres_config_split
+    and _postgres_config_split
   notify:
     - Note Postgres reload required
 
@@ -194,7 +194,7 @@
     mode: 0644
   when:
     postgres_conf_template == ''
-    and postgres_config_split
+    and _postgres_config_split
   notify:
     - Note Postgres restart required
 
@@ -353,7 +353,7 @@
     mode: 0644
   when:
     postgres_conf_settings
-    and postgres_config_split
+    and _postgres_config_split
   notify:
     - Note Postgres restart required
 
@@ -368,7 +368,7 @@
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0644
-  when: postgres_config_split
+  when: _postgres_config_split
   notify:
     - Note Postgres restart required
 

@@ -16,9 +16,9 @@
   become_user: root
   become: yes
   when:
-    pgdata_initialised and postgres_service_managed
+    pgdata_initialised and _postgres_service_managed
   tags: [service, restart]
 
 - name: Wait for Postgres to start
   include_tasks: check-postgres-available.yml
-  when: postgres_service_managed
+  when: _postgres_service_managed

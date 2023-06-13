@@ -93,6 +93,6 @@
     variable: shared_preload_libraries
     value: >
       '{{ _preload_list|join(', ') }}'
-  when: postgres_config_split
+  when: _postgres_config_split
   notify:
     - Note Postgres restart required

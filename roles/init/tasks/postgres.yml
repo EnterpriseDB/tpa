@@ -135,16 +135,16 @@
     postgres_home: "{{ postgres_home|default(default_postgres_home_dir[postgres_family][ansible_os_family]) }}"
     postgres_bin_dir: "{{ postgres_bin_dir|default(default_postgres_bin_dir[postgres_family][ansible_os_family]) }}"
     postgres_lib_dir: "{{ postgres_lib_dir|default(default_postgres_lib_dir[postgres_family][ansible_os_family]) }}"
-    postgres_config_split: true
-    postgres_create_hba_file: true
-    postgres_create_ident_file: true
+    _postgres_config_split: true
+    _postgres_create_hba_file: true
+    _postgres_create_ident_file: true
     postgres_host: "{{ postgres_host|default('localhost') }}"
     postgres_port: "{{ postgres_port|default(default_postgres_port[postgres_family]) }}"
     unix_socket_directories: "{{
         unix_socket_directories|default(default_unix_socket_directories[postgres_family][ansible_os_family])
       }}"
     postgres_service_name: postgres
-    postgres_service_managed: true
+    _postgres_service_managed: true
     postgres_service_enabled: true
     postgres_installation_method: "{{ postgres_installation_method|default(default_postgres_installation_method) }}"
     postgres_install_dir: "{{ postgres_install_dir|default(default_postgres_install_dir) }}"

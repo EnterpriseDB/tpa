@@ -21,7 +21,7 @@
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     mode: 0644
-  when: postgres_config_split
+  when: _postgres_config_split
   notify:
     - Note Postgres restart required
 
