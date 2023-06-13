@@ -68,10 +68,19 @@ The resulting repository will be contained in the
 the target OS. Copy this directory, from the connected controller to the
 disconnected controller that will be used to deploy the cluster. Place
 the directory in the same place, beneath the cluster directory. TPA
-will then copy packages to the instances automatically.
+will then copy packages to the instances automatically when `deploy` is 
+run.
 
 ## Deploying in a disconnected environment
 
 Ensure that the cluster config.yml has been configured as above in
 [Preparation](#preparation). Run `tpaexec provision` and `deploy` as you
 would normally.
+
+## Updating in a disconnected environment
+
+You can use the [update-postgres](tpaexec-update-postgres.md) command to
+perform updates in an air-gapped environment. Prior to running this
+command you must run `download-packages` on the connected controller,
+copy the updated repository to the disconnected controller *and* then
+run `deploy` to copy these packages to the target instances.
