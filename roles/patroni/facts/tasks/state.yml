@@ -20,19 +20,19 @@
 
 - name: Disable postgres split configuration if patroni is initialised
   set_fact:
-    postgres_config_split: "{{ not patroni_initialised }}"
+    _postgres_config_split: "{{ not patroni_initialised }}"
 
 - name: Set fact to disable creation of pg_hba.conf so it can be managed by patroni
   set_fact:
-    postgres_create_hba_file: "{{ not patroni_initialised }}"
+    _postgres_create_hba_file: "{{ not patroni_initialised }}"
 
 - name: Set fact to disable creation of pg_ident.conf so it can be managed by patroni
   set_fact:
-    postgres_create_ident_file: "{{ not patroni_initialised }}"
+    _postgres_create_ident_file: "{{ not patroni_initialised }}"
 
 - name: Stop managing postgres systemd service if patroni is initialised
   set_fact:
-    postgres_service_managed: "{{ postgres_service_managed and not patroni_initialised }}"
+    _postgres_service_managed: "{{ _postgres_service_managed and not patroni_initialised }}"
     postgres_service_enabled: false
 
 - name: Set empty list of postgres_conf_files so they can be managed by patroni
