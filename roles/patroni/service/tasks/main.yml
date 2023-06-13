@@ -10,9 +10,7 @@
   notify:
     - Note patroni restart required
 
-# FIXME should the service name be pg_version+cluster or just cluster. Check upgrade paths
-
-- name: Create a patroni service name using cluster name
+- name: "Create a patroni@{{ cluster_name }} service name using cluster name"
   set_fact:
     patroni_service_name: "patroni@{{ cluster_name }}"
 

@@ -8,9 +8,7 @@
 # PATCH /config: Change the existing configuration. If you want to remove (reset) some setting just patch it with `null`
 # PUT /config: Perform a full rewrite of an existing dynamic configuration unconditionally
 
-- include_vars: ../../vars/main.yml
-
-- name: Call the Patroni config API
+- name: Retrieve or update the Patroni configuration using the `/config` API
   uri:
     body: "{{ body|default(omit)|to_json }}"
     method: "{{ method }}"

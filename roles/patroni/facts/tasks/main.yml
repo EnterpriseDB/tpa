@@ -3,6 +3,7 @@
 
 - block:
 
+  - include_tasks: vars.yml
   - include_tasks: validate.yml
   - include_tasks: state.yml
 

@@ -27,14 +27,15 @@ _patroni_dynamic_conf_defaults:
 #    Patroni requires these postgresql settings to exist otherwise it will override them with defaults!
 #    Most of these values are already set by roles/postgres/config/tasks/tpa-restart.yml
 #
-#    Controlled by Patroni so do not set here
+#    These 4 options are controlled by Patroni, so do not set in `postgresql`
 #
 #    cluster_name: "{{ postgres_cluster_name }}"
 #    listen_addresses: "*"
 #    port: "{{ postgres_port }}"
 #    hot_standby: "on"
-#
-#      # DCS only see https://patroni.readthedocs.io/en/latest/dynamic_configuration.html
+
+#    The following parameters should only be set in the DCS section only,
+#    see https://patroni.readthedocs.io/en/latest/dynamic_configuration.html
 #
 #    parameters:
 #      max_connections: "{{ postgres_restart_config.max_connections }}"

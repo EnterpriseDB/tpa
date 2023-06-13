@@ -6,9 +6,7 @@
 
 # GET /health: returns HTTP status code 200 only when PostgreSQL is up and running
 
-- include_vars: ../../vars/main.yml
-
-- name: Call the Patroni health API
+- name: Get the current Patroni cluster health status using the `/health` API
   uri:
     method: GET
     url: "{{ _patroni_api_scheme }}://{{ inventory_hostname }}:{{ patroni_listen_port }}/health"

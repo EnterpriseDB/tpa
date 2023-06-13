@@ -89,12 +89,6 @@
 
   - block:
     - include_role:
-        name: watchdog
-        apply:
-          tags: watchdog
-      when:
-        patroni_watchdog_enabled|default(false)
-    - include_role:
         name: patroni
         apply:
           tags: patroni

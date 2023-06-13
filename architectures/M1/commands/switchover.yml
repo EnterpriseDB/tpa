@@ -14,7 +14,7 @@
   hosts: all
   tasks:
   - assert:
-      msg: "Switchover target host is not a member this cluster: {{ target }}"
+      msg: "Switchover target host is not a member of this cluster: {{ target }}"
       that:
         - target in ansible_play_hosts_all
     run_once: true

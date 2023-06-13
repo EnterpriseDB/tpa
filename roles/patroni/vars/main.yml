@@ -1,9 +1,0 @@
----
-
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
-
-patroni_etc: '/etc/patroni'
-
-patroni_prefix: "{{ (patroni_installation_method == 'src')|ternary('/opt/patroni', '/usr') }}"
-patroni_path: "{{ patroni_prefix }}/bin/patroni"
-patronictl_path: "{{ patroni_prefix }}/bin/patronictl"

@@ -6,8 +6,6 @@
 # GET /readiness: returns HTTP status code 200 when the Patroni node
 # is running as the leader or when PostgreSQL is up and running.
 
-- include_vars: ../../vars/main.yml
-
 - name: Wait until the patroni cluster is in a ready state
   uri:
     url: "{{ _patroni_api_scheme }}://{{ inventory_hostname }}:{{ patroni_listen_port }}/readiness"

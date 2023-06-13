@@ -1,8 +1,6 @@
 ---
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-- include_vars: ../../vars/main.yml
-
 - name: Gather facts about the patroni cluster
   patroni_cluster_facts:
     cluster: "{{ cluster_name }}"
@@ -15,3 +13,4 @@
         )
       }}"
   become: yes
+  become_user: root

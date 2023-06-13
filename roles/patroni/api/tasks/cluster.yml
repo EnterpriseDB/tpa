@@ -6,9 +6,7 @@
 
 # The GET /cluster endpoint generates a JSON document describing the current cluster topology and state
 
-- include_vars: ../../vars/main.yml
-
-- name: Call the Patroni cluster API
+- name: Get the Patroni cluster topology and state from the `/cluster` API
   uri:
     method: GET
     url: "{{ _patroni_api_scheme }}://{{ inventory_hostname }}:{{ patroni_listen_port }}/cluster"

@@ -1,6 +1,6 @@
 # systemd service template for patroni instances. The actual instances will
-# be called "patroni@version-cluster", e.g. "patroni@10-main". The
-# variable %i expands to "version-cluster", %I expands to "version/cluster".
+# be called "patroni@cluster", e.g. "patroni@main". The
+# variable %i expands to "cluster", %I expands to "cluster".
 # (%I breaks for cluster names containing dashes.)
 [Unit]
 Description=Patroni instance %i

@@ -1,15 +1,7 @@
 ---
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-# These facts and assertions are set once early during TPA init phase
-
-- name: Set default type of Distributed Configuration Store for patroni
-  set_fact:
-    patroni_dcs: "{{ patroni_dcs|default('etcd') }}"
-
-- name: Set postgres_cluster_name to TPA cluster_name
-  set_fact:
-    postgres_cluster_name: "{{ cluster_name }}"
+# These assertions are made once early during TPA init phase
 
 - name: Ensure valid patroni_dcs is set
   assert:
@@ -51,15 +43,3 @@
       not (platform == 'docker' and patroni_watchdog_enabled|default(false))
     fail_msg:
       Patroni watchdog cannot be used on docker platform.
-
-- name: Add patroni to role
-  set_fact:
-    role: "{{
-        role
-        |union(['patroni'])
-      }}"
-
-- name: Create role-based groups
-  group_by:
-    key: patroni
-  changed_when: false

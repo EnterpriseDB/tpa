@@ -1,0 +1,48 @@
+---
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# These facts are set once early during TPA init phase
+
+- name: Set default type of Distributed Configuration Store for patroni
+  set_fact:
+    patroni_dcs: "{{ patroni_dcs|default('etcd') }}"
+
+- name: Set postgres_cluster_name to TPA cluster_name
+  set_fact:
+    postgres_cluster_name: "{{ cluster_name }}"
+
+- name: Set Patroni installation method fact
+  set_fact:
+    patroni_installation_method: "{{ patroni_installation_method|default('pkg') }}"
+
+- name: Set facts for various Patroni file locations
+  set_fact:
+    patroni_etc: '/etc/patroni'
+    patroni_prefix: "{{ _patroni_prefix }}"
+    patroni_path: "{{ _patroni_prefix }}/bin/patroni"
+    patronictl_path: "{{ _patroni_prefix }}/bin/patronictl"
+  vars:
+    _patroni_prefix: "{{ (patroni_installation_method == 'src')|ternary('/opt/patroni', '/usr') }}"
+
+- name: Set various Patroni service and config defaults
+  set_fact:
+    patroni_restapi_user: "{{ patroni_restapi_user|default('patroni') }}"
+    patroni_super_user: "{{ postgres_user }}"
+    patroni_replication_user: "{{ patroni_replication_user|default(replication_user) }}"
+    patroni_rewind_user: "{{ patroni_rewind_user|default('rewind') }}"
+    patroni_ssl_enabled: "{{ patroni_ssl_enabled|default(false)|bool }}"
+    patroni_rewind_enabled: "{{ patroni_rewind_enabled|default(true)|bool }}"
+    patroni_watchdog_enabled: "{{ patroni_watchdog_enabled|default(false)|bool }}"
+    patroni_listen_port: "{{ patroni_listen_port|default('8008') }}"
+
+- name: Add patroni to role
+  set_fact:
+    role: "{{
+        role
+        |union(['patroni'])
+      }}"
+
+- name: Create role-based groups
+  group_by:
+    key: patroni
+  changed_when: false

@@ -1,24 +1,3 @@
 ---
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
-
-# Handle calls to the Patroni API
-
-# GET /patroni is used by Patroni during the leader race.
-# The JSON document produced by this endpoint has the same structure as the JSON produced by the health check endpoints
-
-- include_vars: ../../vars/main.yml
-
-- name: Call the Patroni API
-  uri:
-    method: GET
-    url: "{{ _patroni_api_scheme }}://{{ inventory_hostname }}:{{ patroni_listen_port }}/patroni"
-    body_format: json
-    url_username: "{{ patroni_restapi_user }}"
-    url_password: "{{ vars['%s_password' % patroni_restapi_user] }}"
-
-    # This option is not supported until ansible core 2.11
-    # ca_path: "{{ patroni_ssl_enabled|ternary(_patroni_ssl_ca_path, omit) }}"
-    validate_certs: no
-
-  register: patroni_api_output

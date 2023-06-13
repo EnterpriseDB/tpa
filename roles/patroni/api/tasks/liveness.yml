@@ -8,9 +8,7 @@
 # and 503 if the last run was more than ttl seconds ago on the primary or 2*ttl on the replica.
 # Could be used for livenessProbe.
 
-- include_vars: ../../vars/main.yml
-
-- name: Call the Patroni cluster API
+- name: Check if Patroni is ready to start serving requests by calling the `/liveness` API
   uri:
     method: GET
     url: "{{ _patroni_api_scheme }}://{{ inventory_hostname }}:{{ patroni_listen_port }}/cluster"

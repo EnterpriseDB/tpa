@@ -2,6 +2,14 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+- include_role:
+    name: watchdog
+    apply:
+      tags: watchdog
+  when: >
+    'postgres' in role
+    and patroni_watchdog_enabled|default(false)
+
 - block:
     - include_role:
         name: patroni/pkg

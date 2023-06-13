@@ -5,8 +5,6 @@
 # The default superuser is the postgres user so don't create that
 # if we already have it specified
 
-- include_vars: ../../vars/main.yml
-
 - include_role:
     name: postgres/createuser
   when:

@@ -26,7 +26,7 @@
   when: >
     'bdr' not in role
     and 'pem-server' not in role
-    and failover_manager in ['repmgr', 'efm']
+    and failover_manager == 'repmgr'
   tags: repmgr
 
 - name: Run patroni tests

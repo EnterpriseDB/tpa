@@ -1153,7 +1153,6 @@ class Architecture(object):
                 "patroni_git_url": "https://github.com/zalando/patroni.git",
             },
             "patroni-edb": {
-                "name": "patroni",
                 "patroni_installation_method": "src",
                 "patroni_git_url": "https://github.com/EnterpriseDB/patroni.git",
             },

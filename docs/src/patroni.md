@@ -24,7 +24,7 @@ configuration. Once a single PostgreSQL server and database has been
 created, Patroni will create replicas and configure replication.
 TPA will then remove any postgres configuration files used during setup.
 
-Once setup postgres can continue to be managed using TPA and settings
+Once set up, Postgres can continue to be managed using TPA and settings
 in `config.yml` for the cluster. You can also use Patroni interfaces,
 such as the command line `patronictl` and the REST API, but it is
 recommended to use TPA methods wherever possible.
