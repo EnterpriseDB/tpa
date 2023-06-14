@@ -27,7 +27,6 @@ default_preload_extensions:
   - postgres_fdw
   - pglogical
   - bdr
-  - autoscale
   - edb_wait_states
 
 # The following settings (on the Postgres server) will cause pg_hba.conf

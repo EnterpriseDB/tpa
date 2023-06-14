@@ -61,8 +61,6 @@ class BDR_Always_ON(BDR):
     def update_instances(self, instances):
         """
         Update instances with bdr-always-on specific changes.
-        Invoke BDR generic update to process updates common to multiple BDR
-        architectures (BDR-A-ON, BDR-autoscale).
         """
 
         super().update_instances(instances)

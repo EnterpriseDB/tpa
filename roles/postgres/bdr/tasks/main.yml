@@ -135,13 +135,3 @@
     apply:
       tags: config
   tags: config
-
-- name: Perform postgres_fdw setup
-  include_tasks:
-    file: postgres_fdw.yml
-    apply:
-      tags: fdw
-  when: >
-    'autoscale' in postgres_extensions
-    and inventory_hostname == first_bdr_primary
-  tags: fdw
