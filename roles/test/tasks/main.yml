@@ -61,6 +61,15 @@
     'haproxy' in role
   tags: haproxy
 
+- name: Run harp-proxy tests
+  include_tasks:
+    file: harp-proxy.yml
+    apply:
+      tags: harp-proxy
+  when: >
+    'harp-proxy' in role
+  tags: harp-proxy
+
 - name: Run pgd-proxy tests
   include_tasks:
     file: pgd-proxy.yml

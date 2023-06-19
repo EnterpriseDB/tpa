@@ -10,19 +10,8 @@
         args:
           - "{{ bdr_node_name }}"
           - "{{ bdr_node_dsn }}"
-          - "{{ bdr_node_kind }}"
+          - "{{ role|bdr_node_kind }}"
   become_user: "{{ postgres_user }}"
   become: yes
   register: new_bdr_node
   changed_when: true
-  vars:
-    bdr_node_kind: >-
-      {%- if 'witness' in role -%}
-      witness
-      {%- elif 'subscriber-only' in role -%}
-      subscriber-only
-      {%- elif 'standby' in role -%}
-      standby
-      {%- else -%}
-      data
-      {%- endif -%}

@@ -27,6 +27,13 @@
   when: >
     'harp-proxy' in role
 
+# Our tests require psycopg2.
+- include_role:
+    name: postgres/pkg
+    tasks_from: list-client-packages.yml
+  when: >
+    'harp-proxy' in role
+
 # If we're not using the pgbouncer role (i.e., setting up pgbouncer to
 # connect to harp-proxy), and we're using harp_proxy_mode = pgbouncer,
 # we must install pgbouncer here. harp-proxy will manage the service.

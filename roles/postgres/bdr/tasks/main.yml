@@ -11,63 +11,8 @@
 # streaming replicas and don't need BDR-specific initialisation anyway),
 # but we do handle "logical standby" instances with bdr+primary+readonly
 # in role.
-#
-# By now, the bdr_database is already created by config/final on every
-# BDR instance according to the configuration in postgres_databases.
 
-- assert:
-    msg: "BDR must be available in database {{ bdr_database }}"
-    that: cluster_facts.databases[bdr_database].bdr is defined
-
-# Next, we need to decide which flavour of BDR we're working with.
-#
-# BDR1: BDR-Postgres 9.4 only
-# BDR2: BDR-Postgres 9.4, plus
-#       {,2ndQ}Postgres 9.6
-# BDR3: {,2ndQ}Postgres 10+ only
-#
-# https://techsupport.enterprisedb.com/kb/a/comparison-of-logical-replication-solutions/
-#
-# We don't try to second-guess the decision taken by postgres/pkg about
-# which versions of Postgres and BDR to install. We just detect what is
-# available and do our best to work with it. Things will break if the
-# installed combination is not sensible.
-#
-# Note: unfortunately, there do exist versions of BDR that do not have
-# bdr_version_num(), but we choose not to support them, as they are of
-# little or no practical importance (e.g., no customers use them).
-
-- include_tasks: version.yml
-
-# We check that all of the BDR databases belonging to a cluster have the
-# same LC_COLLATE setting, because doing otherwise risks data loss.
-#
-# If you have a cluster where bdr_database has different collations
-# across instances, and you want to keep it that way for some reason,
-# deploy with ``-e enforce_bdr_collation=no``.
-
-- set_fact:
-    bdr_database_collations: "{{
-        bdr_database_collations|default([])
-        |union([h_databases[h_bdr_database].datcollate])
-      }}"
-  vars:
-    h_databases: >
-      {{ hostvars[h].cluster_facts.databases }}
-    h_bdr_database: >-
-      {{ hostvars[h].bdr_database }}
-  with_items: "{{ groups[bdr_node_group] }}"
-  loop_control:
-    loop_var: h
-
-- assert:
-    msg: >-
-      All instances must have the same LC_COLLATE setting for bdr_database
-      (got: {{ bdr_database_collations|join(', ') }})
-    that:
-      bdr_database_collations|length == 1
-  when:
-    enforce_bdr_collation|default(true)|bool
+- include_tasks: validate.yml
 
 # Now one node must create a BDR group, and the other nodes must join
 # the group. It doesn't matter which node creates the group, so long as

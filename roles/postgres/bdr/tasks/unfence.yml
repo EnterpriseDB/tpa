@@ -1,0 +1,68 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Unfence a node in the most appropriate way for this cluster. Postgres
+# must have been started already. Meant to be used from upgrade.yml
+# after the node was fenced with fence.yml.
+
+- include_tasks: version.yml
+
+- assert:
+    that:
+      bdr_major_version >= 3
+    fail_msg: >-
+      Node fencing is currently not supported for BDR v{{ bdr_major_version }}
+
+- name: Unfence node using HARP for BDR 3/4
+  when: >
+    'bdr' in role
+    and failover_manager == 'harp'
+  block:
+  - name: Run 'harpctl unfence'
+    command:
+      harpctl -f /etc/harp/config.yml unfence
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  # When "harpctl get node" shows that the node is no longer fenced, we
+  # can be reasonably sure that the DCS is healthy. If we're using etcd,
+  # we don't know that BDR consensus has also been re-established, but
+  # the node-by-node upgrade process will wait for that already after
+  # this step, so we don't check here.
+
+  # XXX We don't know how long writing the node information to the DCS
+  # will actually take in a production cluster. Maybe it will behave
+  # differently depending on whether we're using etcd or bdr. We should
+  # consult with the HARP developers to decide on the appropriate number
+  # of retries/delay.
+
+  - name: Wait for node to be unfenced
+    command: >
+      harpctl -f /etc/harp/config.yml
+      get node {{ inventory_hostname }} -o json
+    register: harpctl_get_node
+    become_user: "{{ postgres_user }}"
+    become: yes
+    retries: 60
+    vars:
+      node_info: "{{ harpctl_get_node.stdout|from_json }}"
+    until:
+      harpctl_get_node is failed
+      or 'fenced' not in node_info
+
+# XXX Do we need to wait for the following change to propagate? How?
+
+- name: Unfence node for PGD 5
+  when: >
+    'bdr' in role
+    and bdr_major_version >= 5
+    and failover_manager == 'pgd'
+  block:
+  - name: Unset route_fence for node
+    include_tasks: bdr5/alter_node_option.yml
+    vars:
+      bdr_database_facts: "{{ cluster_facts.databases[bdr_database] }}"
+      node_option:
+        key: route_fence
+        value: false

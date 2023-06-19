@@ -1,0 +1,71 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Fence a node in the most appropriate way for this cluster, and return
+# when it's safe to stop Postgres. Meant to be used from upgrade.yml.
+
+- include_tasks: version.yml
+
+- assert:
+    that:
+      bdr_major_version >= 3
+    fail_msg: >-
+      Node fencing is currently not supported for BDR v{{ bdr_major_version }}
+
+# When using HARP (with BDR 3.7/4), we use "harpctl fence" (--force is
+# required to fence the active node) and wait for the "harpctl get node"
+# output to reflect the fenced status. We don't have to care whether the
+# cluster is using etcd or BDR for consensus this way.
+
+- name: Fence node using HARP for BDR 3/4
+  when: >
+    'bdr' in role
+    and failover_manager == 'harp'
+  block:
+  - name: Run 'harpctl fence'
+    command:
+      harpctl -f /etc/harp/config.yml fence --force
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  # XXX We don't know how long writing the node information to the DCS
+  # will actually take in a production cluster. Maybe it will behave
+  # differently depending on whether we're using etcd or bdr. We should
+  # consult with the HARP developers to decide on the appropriate number
+  # of retries/delay.
+  #
+  # (This also applies to the unfencing operation.)
+
+  - name: Wait for node to be fenced
+    command: >
+      harpctl -f /etc/harp/config.yml
+      get node {{ inventory_hostname }} -o json
+    register: harpctl_get_node
+    become_user: "{{ postgres_user }}"
+    become: yes
+    retries: 60
+    vars:
+      node_info: "{{ harpctl_get_node.stdout|from_json }}"
+    until:
+      harpctl_get_node is failed
+      or ('fenced' in node_info and node_info.fenced)
+
+# On PGD5 nodes, we can just set the route_fence option directly using
+# bdr.alter_node_option() (as "pgd set-node-options" would also do).
+#
+# XXX Do we need to wait for the change to propagate? How?
+
+- name: Fence node for PGD 5
+  when: >
+    'bdr' in role
+    and bdr_major_version >= 5
+    and failover_manager == 'pgd'
+  block:
+  - name: Set route_fence for node
+    include_tasks: bdr5/alter_node_option.yml
+    vars:
+      bdr_database_facts: "{{ cluster_facts.databases[bdr_database] }}"
+      node_option:
+        key: route_fence
+        value: true

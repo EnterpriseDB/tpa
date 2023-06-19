@@ -29,7 +29,7 @@ rehydrating it, then add it back afterwards.
 
 If you just want to install minor-version updates to Postgres and
 associated components, you can use the
-[`tpaexec update-postgres`](tpaexec-update-postgres.md) command instead.
+[`tpaexec upgrade`](tpaexec-upgrade.md) command instead.
 
 ## Prerequisites
 

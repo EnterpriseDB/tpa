@@ -25,7 +25,7 @@ nav:
     - Building from source: configure-source.md
     - Deployment hooks: tpaexec-hooks.md
   - Cluster management:
-    - Rolling updates: tpaexec-update-postgres.md
+    - Rolling upgrades: tpaexec-upgrade.md
     - Switchover: tpaexec-switchover.md
     - Server pool management: tpaexec-server-pool.md
     - Rehydration: tpaexec-rehydrate.md

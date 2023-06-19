@@ -38,6 +38,10 @@
     and _bdr_version is version('4', '==')
     and postgres_flavour != 'edbpge'
 
+- set_fact:
+    _bdr_version: "{{ bdr_version }}"
+  when: "'bdr' in role"
+
 - name: Fetch BDR4-related packages
   include_tasks: list-bdr-packages.yml
   vars:

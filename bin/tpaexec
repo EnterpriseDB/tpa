@@ -379,6 +379,22 @@ deploy() {
     playbook deploy.yml "$@"
 }
 
+upgrade() {
+    if [[ ! -d inventory ]]; then
+       error "No inventory found. Did you run 'tpaexec deploy $(pwd)'?"
+    fi
+
+    if [[ -h commands/update-postgres.yml && ! -h commands/upgrade.yml ]]; then
+        "$TPA_DIR"/architectures/lib/commands/relink .
+    elif [[ -h commands/upgrade.yml ]]; then
+        rm commands/upgrade.yml
+        "$TPA_DIR"/architectures/lib/commands/relink .
+    fi
+
+    provision
+    playbook commands/upgrade.yml "$@"
+}
+
 deprovision() {
     playbook "$TPA_DIR/platforms/deprovision.yml" "$@"
 }
@@ -574,9 +590,10 @@ Available help topics:
                 Download all packages required for a cluster (useful when
                 cluster instances don't have outside connectivity)
 
-    update-postgres
-                Upgrade Postgres and Postgres-related packages
-                (e.g, BDR, pglogical, HARP, pgbouncer)
+    upgrade
+                Perform a node-by-node upgrade of Postgres and related
+                components installed on a cluster (e.g, BDR, pglogical,
+                HARP, pgbouncer)
 
     show-password
     store-password
@@ -1062,7 +1079,7 @@ case "$command" in
         cd "$cluster"
         ;;
 
-    cmd|ping|provision|deploy|deprovision)
+    cmd|ping|provision|deploy|upgrade|deprovision)
         cluster=${1:?No cluster specified}
         shift
 
@@ -1089,11 +1106,15 @@ case "$command" in
         help "$*"
         ;;
 
+    update-postgres)
+        error "Please use 'tpaexec upgrade' instead"
+        ;;
+
     info|version|setup|configure|reconfigure|selftest)
         $command "$@"
         ;;
 
-    cmd|ping|provision|deploy|playbook|deprovision)
+    cmd|ping|provision|deploy|upgrade|playbook|deprovision)
         time $command "$@"
         ;;
 

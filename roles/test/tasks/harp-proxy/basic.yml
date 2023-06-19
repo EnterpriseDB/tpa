@@ -1,0 +1,31 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- assert:
+    msg: "This test may be applied only to harp-proxy instances"
+    that:
+    - role|contains('harp-proxy')
+
+- include_role:
+    name: test
+    tasks_from: psycopg2.yml
+
+# First, we check that connections through harp-proxy to the backend
+# database are TLS-protected from end-to-end (as a side effect, we
+# ensure that we can connect and issue queries too).
+
+- name: Ensure that connections through harp-proxy are TLS-protected
+  postgresql_query:
+    conninfo: "{{ bdr_node_route_dsn|dbname('postgres', user=postgres_user, port=harp_proxy_port) }}"
+    query: >
+      SELECT ssl
+      FROM pg_stat_activity sa JOIN pg_stat_ssl ss USING (pid)
+      WHERE pid = pg_backend_pid()
+  register: q
+  failed_when:
+    q is not successful or not q.ssl
+  vars:
+    _task_environment:
+      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"

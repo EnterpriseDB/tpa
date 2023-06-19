@@ -16,6 +16,5 @@
   service:
     name: pgd-proxy
     enabled: yes
-    state: started
   when: >
     'pgd-proxy' in role

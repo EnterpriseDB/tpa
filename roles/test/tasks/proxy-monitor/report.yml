@@ -1,0 +1,29 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Terminates the proxy-monitor (which must have been started earlier
+# against the same instance using start.yml) and displays its output.
+#
+# We expect the proxy-monitor to still be running, but if it's failed on
+# its own for some reason, we can find out here. If it's not finished,
+# we know it will keep running until we stop it, so we don't need to
+# loop over this task "until finished" as we would normally do.
+
+- name: Fetch proxy-monitor status
+  async_status:
+    jid: "{{ proxy_monitor_cmd.ansible_job_id }}"
+  register: proxy_monitor_job_status
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Terminate any earlier proxy-monitor instance
+  include_role:
+    name: test
+    tasks_from: proxy-monitor/stop.yml
+  when:
+    not proxy_monitor_job_status.finished
+
+- name: Display proxy-monitor output
+  command: cat /var/log/tpa-proxy-monitor.log
+  ignore_errors: yes

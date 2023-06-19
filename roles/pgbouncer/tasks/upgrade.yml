@@ -1,0 +1,22 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Stop/update/restart pgbouncer
+  when: >
+    'pgbouncer' in role
+  block:
+  - include_role: name=pgbouncer/restart
+    vars:
+      pgbouncer_service_end_state: stopped
+
+  - include_role: name=pgbouncer/pkg
+    vars:
+      allow_package_upgrades: yes
+
+  # TODO This is the right time to update the pgbouncer configuration,
+  # if required, before restarting pgbouncer.
+
+  - include_role: name=pgbouncer/restart
+    vars:
+      pgbouncer_service_end_state: started

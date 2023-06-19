@@ -1,0 +1,20 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- assert:
+    that: bdr_version is version('4', '>=')
+    fail_msg: >-
+      PGD CLI requires BDR version 4 or later
+
+- name: Remove pgd-cli v1 packages for BDR v5
+  package:
+    name: edb-pgd-cli
+    state: absent
+  when:
+    bdr_version is version('5', '>=')
+
+- include_role:
+    name: pgdcli/pkg
+  vars:
+    allow_package_upgrades: yes

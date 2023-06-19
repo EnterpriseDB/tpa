@@ -1,0 +1,27 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Check if psycopg2 is available
+  command: >
+    {{ ansible_python_interpreter }} -c 'import psycopg2'
+  register: psycopg2_check_cmd
+  changed_when: false
+  failed_when: false
+  check_mode: no
+
+- name: Install psycopg2 if required
+  when: psycopg2_check_cmd.rc != 0
+  become_user: root
+  become: yes
+  block:
+  - include_role:
+      name: postgres/pkg
+      tasks_from: list-client-packages.yml
+    vars:
+      list_varname: _postgres_client_packages
+
+  - include_role: name=pkg/install
+    vars:
+      package_list_name: "postgres client packages"
+      package_list: "{{ _postgres_client_packages }}"

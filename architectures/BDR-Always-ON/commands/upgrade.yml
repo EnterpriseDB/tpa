@@ -3,6 +3,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  vars:
+    upgrade_in_progress: true
   tags: always
 
 # We must perform a minor-version update of Postgres and BDR on a

@@ -66,8 +66,8 @@
     - this_group_facts is empty
       or this_group_facts[0].enable_raft is false
 
-# We would like to set node options immediately after creating the node,
-# but that currently doesn't work, so we do it here.
+# Now that node has joined the group, we can set any node options that
+# were specified in bdr_node_options.
 
 - name: Set BDR node options, if required
   include_tasks: bdr5/alter_node_option.yml
@@ -80,6 +80,7 @@
     loop_var: node_option
     label: >
       {{ node_option.key }}:{{ node_option.value }}
+  when: bdr_major_version >= 5
 
 - name: Perform pgd_proxy setup
   include_tasks:

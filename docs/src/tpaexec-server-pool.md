@@ -7,7 +7,7 @@ the HAProxy active server pool for maintenance, and then added back
 afterwards.
 
 These commands follow the same process as [rolling
-updates](tpaexec-update-postgres.md) by default, so
+updates](tpaexec-upgrade.md) by default, so
 `pool-disable-server` will wait for active transactions against a PGD
 instance to complete and for pgbouncer to direct new connections to
 another instance before completing. Use the `--nowait` option if you

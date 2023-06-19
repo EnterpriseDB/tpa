@@ -1,0 +1,60 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- include_tasks: validate.yml
+
+- name: Alter node kind for all BDR nodes
+  postgresql_query:
+    conninfo: "{{ bdr_node_dsn }}"
+    queries:
+      - text: SELECT bdr.alter_node_kind(node_name := %s, node_kind := %s) from bdr.node where node_name = %s and node_kind = 0;
+        args:
+          - "{{ this_bdr_node_name }}"
+          - "{{ bdr_node_role|bdr_node_kind }}"
+          - "{{ this_bdr_node_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ groups['role_bdr'] }}"
+  loop_control:
+    loop_var: bdr_node
+  vars:
+    this_bdr_node_name: "{{ hostvars[bdr_node].bdr_node_name }}"
+    bdr_node_role: "{{ hostvars[bdr_node].role }}"
+    bdr_node_database_facts: >
+      {{ hostvars[bdr_node].cluster_facts.databases[hostvars[bdr_node].bdr_database] }}
+  when: >
+    inventory_hostname == first_bdr_primary
+    and bdr_node_database_facts.bdr.local_node_summary[0].node_kind_name == "unknown"
+
+- block:
+    - include_tasks: "bdr{{ bdr_major_version }}/init.yml"
+
+    - include_role:
+        name: postgres/facts
+
+    - name: Switch node group for all BDR nodes
+      postgresql_query:
+        conninfo: "{{ hostvars[bdr_node].bdr_node_dsn }}"
+        queries:
+          - text: SELECT bdr.switch_node_group(node_group_name := %s);
+            args:
+              - "{{ bdr_node_child_group }}"
+      become_user: "{{ postgres_user }}"
+      become: yes
+      with_items: "{{ groups['role_bdr'] }}"
+      loop_control:
+        loop_var: bdr_node
+      vars:
+        bdr_node_child_group: "{{
+            hostvars[bdr_node].bdr_child_group|default(hostvars[bdr_node].bdr_node_group)
+          }}"
+        bdr_node_database_facts: >
+          {{ hostvars[bdr_node].cluster_facts.databases[hostvars[bdr_node].bdr_database] }}
+      when: >
+        inventory_hostname == first_bdr_primary
+        and bdr_node_database_facts.bdr.local_node_summary[0].node_group_name != bdr_node_child_group
+
+    - include_tasks: "bdr{{ bdr_major_version }}/post-join.yml"
+  vars:
+    bdr_database_facts: "{{ cluster_facts.databases[bdr_database] }}"

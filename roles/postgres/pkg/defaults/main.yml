@@ -80,10 +80,9 @@ postgres_debug_packages:
     Ubuntu: []
     SLES: []
   edbpge:
-    Debian: &debian_edbpge_debug_packages
-      - "{{ postgres_package_name }}-{{ postgres_version }}-dbgsym"
+    Debian: []
     RedHat: []
-    Ubuntu: *debian_edbpge_debug_packages
+    Ubuntu: []
     SLES: []
 
 pglogical_packages:

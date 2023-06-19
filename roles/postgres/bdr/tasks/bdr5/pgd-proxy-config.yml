@@ -22,17 +22,20 @@
   with_items:
     "{{ groups['role_pgd-proxy'] }}"
   vars:
-    this_proxy_facts:
-      "{{ bdr_database_facts.bdr.proxy_config_summary
+    this_proxy_facts: >-
+      {{ bdr_database_facts.bdr.proxy_config_summary
           |selectattr('proxy_name', 'equalto', item)
-          |list }}"
-    child_group_entry:
-      "{{ bdr_node_groups
-          |selectattr('name', 'equalto', hostvars[item].bdr_child_group)
-          |first }}"
-    proxy_attach_group:
-      "{{ child_group_entry.options.enable_proxy_routing|default(False)
-          |ternary(hostvars[item].bdr_child_group, bdr_node_group) }}"
+          |list }}
+    this_bdr_child_group: >-
+      {{ hostvars[item].bdr_child_group|default(none) }}
+    child_group_entry: >-
+      {{ bdr_node_groups
+          |selectattr('name', 'equalto', this_bdr_child_group)
+          |first
+          |default(none)}}
+    proxy_attach_group: >-
+      {{ child_group_entry is not none and child_group_entry.options.enable_proxy_routing|default(False)
+          |ternary(this_bdr_child_group, bdr_node_group) }}
   when:
     this_proxy_facts is empty
 

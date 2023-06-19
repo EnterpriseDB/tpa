@@ -71,3 +71,24 @@
       }}"
   when: >
     'bdr' in role
+
+# We bail out if bdr_version does not match the version in bdr_database,
+# if available. We don't want someone modifying bdr_version and running
+# deploy, and if they do, we want to fail before postgres/pkg, so that
+# we don't end up with multiple versions of BDR installed.
+
+- name: Ensure bdr_version from config.yml equals installed bdr_major_version, if available
+  assert:
+    that: bdr_version|int == bdr_major_version|int
+    fail_msg: >
+      Cannot upgrade installed BDR {{ bdr_major_version }} to BDR {{ bdr_version }}
+      using `tpaexec deploy`; use `tpaexec upgrade` instead
+  vars:
+    bdr_major_version:
+      "{{ cluster_facts.databases[bdr_database].bdr.bdr_major_version }}"
+  when: >
+    'bdr' in role
+    and cluster_facts is defined
+    and bdr_database in cluster_facts.databases
+    and 'bdr' in cluster_facts.databases[bdr_database]
+    and not upgrade_in_progress|default(False)

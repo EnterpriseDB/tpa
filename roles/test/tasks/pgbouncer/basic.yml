@@ -2,7 +2,7 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-# NOTE: This test is special, because update-postgres uses it directly
+# NOTE: This test is special, because upgrade uses it directly
 # as a pre-update health check of the cluster. It should test only the
 # fundamental properties we expect from the pgbouncer configuration.
 

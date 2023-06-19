@@ -133,7 +133,7 @@ automatically add new tables and create DDL filters in general.
 
 ### postgres-pre-update, postgres-post-update
 
-The [`update-postgres`](tpaexec-update-postgres.md) command invokes
+The [`upgrade`](tpaexec-upgrade.md) command invokes
 `hooks/postgres-pre-update.yml` on a particular instance before it
 installs any packages, and invokes `hooks/postgres-post-update.yml`
 after the package installation is complete. Both hooks are invoked only

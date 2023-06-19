@@ -1,0 +1,10 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Stop running proxy-monitor, if any
+  command:
+    pkill -TERM -f proxy-monitor
+  become_user: "{{ postgres_user }}"
+  become: yes
+  ignore_errors: yes

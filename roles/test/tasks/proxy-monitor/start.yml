@@ -1,0 +1,47 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# Starts the proxy-monitor against the given list of conninfo strings
+# (conninfos must be defined).
+
+- name: Copy proxy-monitor to instance
+  copy:
+    src: proxy-monitor.py
+    dest: /etc/tpa/proxy-monitor
+    owner: root
+    group: root
+    mode: 0555
+
+- name: Create proxy-monitor log output directory
+  file:
+    state: directory
+    path: /var/log/tpa-proxy-monitor
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0755
+
+- name: Terminate any earlier proxy-monitor instance
+  include_role:
+    name: test
+    tasks_from: proxy-monitor/stop.yml
+
+- name: Start proxy monitoring
+  shell: >
+    PYTHONUNBUFFERED=1
+    /etc/tpa/proxy-monitor {{ conninfos|map('quote')|join(' ') }}
+    > /var/log/tpa-proxy-monitor/log 2>&1
+  args:
+    executable: /bin/bash
+  register: proxy_monitor_cmd
+  become_user: "{{ postgres_user }}"
+  become: yes
+  async: 7200
+  poll: 0
+
+- name: Check if proxy-monitor failed to start
+  async_status:
+    jid: "{{ proxy_monitor_cmd.ansible_job_id }}"
+  register: proxy_monitor_job_status
+  become_user: "{{ postgres_user }}"
+  become: yes

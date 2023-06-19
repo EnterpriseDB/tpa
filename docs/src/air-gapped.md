@@ -14,7 +14,7 @@ Choose an internet connected machine where you can install TPA and
 follow the instructions below to either copy an existing cluster
 configuration or create a new cluster.
 
-!!! Note 
+!!! Note
     If the air-gapped server does not already have TPA installed,
     follow the instructions
     [here](INSTALL.md#installing-tpa-without-internet-or-network-access-air-gapped)
@@ -68,7 +68,7 @@ The resulting repository will be contained in the
 the target OS. Copy this directory, from the connected controller to the
 disconnected controller that will be used to deploy the cluster. Place
 the directory in the same place, beneath the cluster directory. TPA
-will then copy packages to the instances automatically when `deploy` is 
+will then copy packages to the instances automatically when `deploy` is
 run.
 
 ## Deploying in a disconnected environment
@@ -79,7 +79,7 @@ would normally.
 
 ## Updating in a disconnected environment
 
-You can use the [update-postgres](tpaexec-update-postgres.md) command to
+You can use the [upgrade](tpaexec-upgrade.md) command to
 perform updates in an air-gapped environment. Prior to running this
 command you must run `download-packages` on the connected controller,
 copy the updated repository to the disconnected controller *and* then

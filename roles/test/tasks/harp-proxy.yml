@@ -1,0 +1,12 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- assert:
+    msg: "This test may be applied only to harp-proxy instances"
+    that:
+    - role|contains('harp-proxy')
+
+- name: Run basic harp-proxy tests
+  include_tasks:
+    file: harp-proxy/basic.yml

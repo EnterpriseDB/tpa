@@ -1,0 +1,19 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Stop/update/restart pgd-proxy
+  when: >
+    'pgd-proxy' in role
+  block:
+  - include_role: name=pgd_proxy/restart
+    vars:
+      pgd_proxy_service_end_state: stopped
+
+  - include_role: name=pgd_proxy/pkg
+    vars:
+      allow_package_upgrades: yes
+
+  - include_role: name=pgd_proxy/restart
+    vars:
+      pgd_proxy_service_end_state: started

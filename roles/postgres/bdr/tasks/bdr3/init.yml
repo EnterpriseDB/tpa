@@ -43,21 +43,6 @@
   when:
     hostvars[item].bdr_node_id is defined
 
-- name: Set BDR node options, if required
-  include_tasks: bdr5/alter_node_option.yml
-  vars:
-    _default_options:
-      route_dsn: "{{ bdr_node_route_dsn }}"
-  with_dict:
-    "{{ _default_options|combine(bdr_node_options) }}"
-  loop_control:
-    loop_var: node_option
-    label: >
-      {{ node_option.key }}:{{ node_option.value }}
-  when:
-    bdr_major_version == 5
-    and false # (delayed until bdr5/post-join.yml due to segfault)
-
 # Now we must ensure that the required BDR node groups exist. The
 # first_bdr_primary will create every group in bdr_node_groups.
 #
