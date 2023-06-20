@@ -27,3 +27,25 @@
 
 - name: Load cluster configuration file
   include_vars: "{{ config_file }}"
+
+# Try to load config_hashes (written by inventory/post-write.yml) from
+# the inventory, and add the hash of the current contents of config.yml
+
+- set_fact:
+    config_hash_path:
+      "{{ cluster_dir }}/inventory/group_vars/hashes/config.yml"
+
+- name: Retrieve hash of last provisioned config.yml, if available
+  include_vars: "{{ config_hash_path }}"
+  when:
+    lookup('first_found', config_hash_path, errors='ignore')
+
+- name: Compute hash of config.yml at present
+  set_fact:
+    config_hashes:
+      "{{ config_hashes
+          |default({})
+          |combine({'current': current_hash}) }}"
+  vars:
+    current_hash:
+      "{{ lookup('file', config_file)|hash('sha256') }}"

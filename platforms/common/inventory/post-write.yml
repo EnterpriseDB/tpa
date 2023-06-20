@@ -2,6 +2,19 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+- name: Record hash of config.yml in inventory
+  copy:
+    dest: "{{ config_hash_path }}"
+    mode: 0644
+    content:
+      "{{ {'config_hashes': _output_hashes}
+          |to_nice_yaml }}"
+  vars:
+    _output_hashes:
+      "{{ config_hashes
+          |remove_keys(['last_provisioned', 'current'])
+          |combine({'last_provisioned': config_hashes['current']}) }}"
+
 - name: Ensure we have local and remote repositories for Tower
   when: ansible_tower
   block:

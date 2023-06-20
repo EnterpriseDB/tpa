@@ -317,6 +317,9 @@ provision() {
             --cache*)
                 cache=1
                 ;;
+            --force-reprovision)
+                reprovision=1
+                ;;
             --)
                 break
                 ;;
@@ -338,6 +341,7 @@ provision() {
     set -- "${REMAINDER[@]:+${REMAINDER[@]}}" "$@"
 
     "$ansible"-playbook "$TPA_DIR/platforms/provision.yml" \
+        ${reprovision:+-e force_reprovision=$reprovision} \
         ${cache:+-e use_cached_vars=$cache} \
         ${owner:+-e Owner=$owner} \
         -e cluster_dir="$(pwd)" "$@"
@@ -369,18 +373,7 @@ playbook() {
 }
 
 deploy() {
-    # It is pointless to run `tpaexec deploy ...` on a cluster with no
-    # inventory directory.
-    # This could potentially happen for a couple of reasons:
-    # a) when `tpaexec deploy` is invoked without having run
-    #    `tpaexec provision`
-    # b) when `tpaexec provision` got interrupted for some reason
-    #    and failed to write a valid inventory
-
-    if [ ! -d inventory ]; then
-       error "No inventory found. Did you run 'tpaexec provision $(pwd)'?"
-    fi
-
+    provision
     playbook deploy.yml "$@"
 }
 
@@ -734,6 +727,10 @@ Options:
         Speed up repeated provision runs in development by relying on
         cached information and skipping retests of resources like VPCs
         and subnets.
+
+    --force-reprovision
+
+        Repeat the process even if there are no changes to config.yml
 
 Any other arguments will be passed through to ansible-playbook.
 PROVISION

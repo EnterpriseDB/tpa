@@ -38,6 +38,18 @@
   - import_tasks: load-config.yml
     tags: always
 
+  - name: Exit if there are no changes to config.yml since the last provision
+    set_fact:
+      no_recent_config_changes: true
+    when: >
+      'last_provisioned' in config_hashes
+      and config_hashes['last_provisioned'] == config_hashes['current']
+
+  - meta: end_play
+    when:
+      no_recent_config_changes|default(false)
+      and not force_reprovision|default(false)
+
   ## Validation
   #
   # Now we check that the configuration is valid. We perform generic
