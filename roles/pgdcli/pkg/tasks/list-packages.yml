@@ -15,3 +15,13 @@
     'pgdcli' in role
     or 'pgd-proxy' in role
     or ('bdr' in role and bdr_version is version('4', '>='))
+
+- include_role: name=pkg/add_to_list
+  vars:
+    list_contents: "{{
+        bdr_utilities_packages|packages_for(ansible_os_family, bdr_utilities_package_version)
+      }}"
+  when: >
+    'pgdcli' in role
+    or 'pgd-proxy' in role
+    or ('bdr' in role and bdr_version is version('4', '>='))
