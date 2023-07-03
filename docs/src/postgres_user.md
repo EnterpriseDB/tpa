@@ -41,16 +41,11 @@ in the cluster can ssh to each other as `postgres`.
 ## TLS certificates
 
 By default, TPA will generate a private key and a self-signed TLS
-certificate for use within the cluster. If you create `cluster_name.key`
-and `cluster_name.crt` files within your cluster directory, it will use
-that key and certificate instead of generating one.
-
-We strongly recommend either using the self-signed certificate
-(perfectly sufficient to ensure that traffic between clients and server
-is encrypted in transit) or making some more secure alternative
-arrangement to install the TLS private key and certificate on the
-instances (where the private key does not leave the instances). The
-details depend on your certificate-signing infrastructure.
+certificate for use within the cluster. This is sufficient to ensure
+that traffic between clients and server is encrypted in transit. Should
+you wish to use your own certificate signing infrastructure you may
+replace these after deployment is complete, or replace them during
+deployment using a [hook](tpaexec-hooks.md).
 
 ## Username
 
