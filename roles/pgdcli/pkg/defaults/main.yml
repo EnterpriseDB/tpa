@@ -14,8 +14,10 @@ pgdcli1_packages:
 pgdcli_packages:
   Debian: &debian_pgdcli_package
     - edb-pgd{{ bdr_version }}-cli
+    - bash-completion
   RedHat:
     - edb-pgd{{ bdr_version }}-cli
+    - bash-completion
   Ubuntu: *debian_pgdcli_package
 
 bdr_utilities_packages:
