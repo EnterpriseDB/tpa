@@ -1,0 +1,40 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Ensure ssl directory exists
+  file:
+    path: "{{ pgd_proxy_ssl_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+# generate client CA if we don't use one yet for server certs
+- name: Generate CA.crt if using selfsigned server certs
+  include_role:
+    name: sys/ssl/ca
+  when:
+    not use_ssl_cert_authentication
+
+# push global CA.crt or dedicated one created in previous task
+- name: Push CA cert to the node
+  copy:
+    src: "{{ ssl_ca_file }}"
+    remote_src: yes
+    dest: "{{ pgd_proxy_ssl_dir }}/CA.crt"
+    mode: 0644
+    owner: root
+    group: root
+
+# Server certificate
+- name: Generate webserver SSL artifacts
+  include_role:
+    name: sys/ssl/server
+  vars:
+    ssl_user: "{{ pgd_proxy_user }}"
+    ssl_group: "{{ pgd_proxy_group }}"
+    ssl_dir: "{{ pgd_proxy_ssl_dir }}"
+    ssl_service: "{{ pgd_proxy_ssl_service }}"
+    check_result_varname: "pgdproxy"
+    legacy_ssl_enabled: false

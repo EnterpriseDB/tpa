@@ -24,7 +24,7 @@
   copy:
     src: "{{ ssl_ca_file }}"
     remote_src: yes
-    dest: "{{ pg_backup_api_ssl_dir }}/CA.cert"
+    dest: "{{ pg_backup_api_ssl_dir }}/CA.crt"
     mode: 0644
     owner: "{{ pg_backup_api_ssl_user }}"
     group: "{{ pg_backup_api_ssl_group }}"
@@ -61,7 +61,7 @@
   copy:
     src: "{{ ssl_ca_file }}"
     remote_src: yes
-    dest: "{{ apache_conf[ansible_os_family]['ca_trust_dir'] }}/CA.cert"
+    dest: "{{ apache_conf[ansible_os_family]['ca_trust_dir'] }}/CA.crt"
 
 - name: Update CA certificate trust
   command: "{{ apache_conf[ansible_os_family]['ca_trust_cmd'] }}"

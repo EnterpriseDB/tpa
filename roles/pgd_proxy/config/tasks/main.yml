@@ -10,6 +10,82 @@
     group: root
     mode: 0755
 
+- name: Are cert_file and key_file both set or none are set
+  assert:
+    that: >
+      (pgd_http_options['cert_file'] is defined
+      and pgd_http_options['key_file'] is defined)
+      or
+      not ( pgd_http_options['cert_file'] is defined
+        or pgd_http_options['key_file'] is defined )
+    fail_msg: >
+      One of cert_file or key_file is defined but not both.
+      Define both cert_file and key_file to use your already existing cert and key.
+      Otherwise don't define any and TPA will generate cert and key file using a cluster
+      specific CA certificate.
+  run_once: true
+
+- name: Ensure cert and key provided are present
+  block:
+  - name: Stat cert_file {{ pgd_http_options['cert_file'] }}
+    stat:
+      path: "{{ pgd_http_options['cert_file'] }}"
+    register: stat_cert
+
+  - name: Stat key_file {{ pgd_http_options['key_file'] }}
+    stat:
+      path: "{{ pgd_http_options['key_file'] }}"
+    register: stat_key
+
+  - name: Ensure cert and key provided exist
+    assert:
+      that: >
+        stat_key.stat.exists
+        and stat_cert.stat.exists
+      fail_msg: >
+        cert_file and key_file are missing, ensure that both are present
+        before retrying deploy.
+
+  when: >
+    pgd_http_options['cert_file'] is defined
+    and pgd_http_options['key_file'] is defined
+    and pgd_http_options['secure']
+
+- name: Set up SSL certificate for pgd-proxy https probes
+  block:
+  - name: Generate SSL certificate for pgd-proxy https probes
+    include_tasks: ssl.yml
+
+  - name: Update certs path for http config section
+    set_fact:
+      pgd_http_options: "{{ pgd_http_options|
+        combine(secure_certs, recursive=true) }}"
+    vars:
+      secure_certs:
+        'cert_file': "{{ pgdproxy_ssl_cert_file }}"
+        'key_file': "{{ pgdproxy_ssl_key_file }}"
+  when: >
+    pgd_http_options['enable']
+    and pgd_http_options['secure']
+    and not( pgd_http_options['cert_file'] is defined
+          or pgd_http_options['key_file'] is defined )
+
+- name: Set endpoint
+  set_fact:
+    pgd_http_options: "{{ endpoint|
+        combine(pgd_http_options, recursive=true) }}"
+  vars:
+    endpoint:
+      endpoint: >-
+        "host={{ inventory_hostname }}
+        port={{ pgd_proxy_options['listen_port'] }}
+        dbname={{ bdr_database }}
+        user={{ pgd_proxy_user }}
+        {{ bdr_client_dsn_attributes }}"
+
+  when: >
+    pgd_http_options['enable']
+
 - name: Install pgd-proxy configuration file
   template:
     src: pgd-proxy-config.j2

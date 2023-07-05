@@ -1,0 +1,14 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Copy CA to shared trusted CA
+  copy:
+    src: "{{ local_ca_certificate_path }}"
+    dest: "{{ ca_trust[ansible_os_family]['ca_trust_dir'] }}/CA.crt"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Update CA certificate trust
+  command: "{{ ca_trust[ansible_os_family]['ca_trust_cmd'] }}"

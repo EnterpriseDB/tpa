@@ -1,0 +1,12 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+ca_trust:
+  Debian:
+    ca_trust_dir: /usr/local/share/ca-certificates
+    ca_trust_cmd: update-ca-certificates
+  RedHat:
+    ca_trust_dir: /etc/pki/ca-trust/source/anchors
+    ca_trust_cmd: update-ca-trust
+local_ca_certificate_path: "{{ cluster_dir }}/ssl/CA.crt"

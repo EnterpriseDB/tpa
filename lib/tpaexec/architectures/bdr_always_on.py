@@ -4,7 +4,7 @@
 
 from .bdr import BDR
 from typing import List, Tuple
-
+from argparse import SUPPRESS
 
 class BDR_Always_ON(BDR):
     def supported_versions(self) -> List[Tuple[str, str]]:
@@ -28,6 +28,13 @@ class BDR_Always_ON(BDR):
             choices=["etcd", "bdr"],
             required=True,
             help="the consensus protocol to use for HARP v2",
+        )
+        g.add_argument(
+            "--enable-harp-probes",
+            choices=["http", "https"],
+            nargs="?",
+            default= SUPPRESS,
+            help="Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health",
         )
 
     def update_argument_defaults(self, defaults):
@@ -57,6 +64,18 @@ class BDR_Always_ON(BDR):
 
     def default_location_names(self):
         return [chr(ord("a") + i) for i in range(self.num_locations())]
+
+    def update_cluster_vars(self, cluster_vars):
+        super().update_cluster_vars(cluster_vars)
+        self._update_harp_probes(cluster_vars)
+
+    def _update_harp_probes(self, cluster_vars):
+        http= {}
+        if "enable_harp_probes" in self.args:
+            http = {"harp_http_options": {"enable": True}}
+            if self.args["enable_harp_probes"] in ["https"] :
+                http["harp_http_options"].update({"secure": True})
+        cluster_vars.update(http)
 
     def update_instances(self, instances):
         """

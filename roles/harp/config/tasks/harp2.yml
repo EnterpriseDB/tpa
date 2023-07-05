@@ -23,6 +23,67 @@
   when:
     initialise_harp|bool
 
+- name: Are cert_file and key_file both set or none are set
+  assert:
+    that: >
+      (harp_http_options['cert_file'] is defined
+      and harp_http_options['key_file'] is defined)
+      or
+      not ( harp_http_options['cert_file'] is defined
+        or harp_http_options['key_file'] is defined )
+    fail_msg: >
+      One of cert_file or key_file is defined but not both.
+      Define both cert_file and key_file to use your already existing cert and key.
+      Otherwise don't define any and TPA will generate cert and key file using a cluster
+      specific CA certificate.
+  run_once: true
+
+- name: Ensure cert and key provided are present
+  block:
+  - name: Stat cert_file {{ harp_http_options['cert_file'] }}
+    stat:
+      path: "{{ harp_http_options['cert_file'] }}"
+    register: stat_cert
+
+  - name: Stat key_file {{ harp_http_options['key_file'] }}
+    stat:
+      path: "{{ harp_http_options['key_file'] }}"
+    register: stat_key
+
+  - name: Ensure cert and key provided exist
+    assert:
+      that: >
+        stat_key.stat.exists
+        and stat_cert.stat.exists
+      fail_msg: >
+        cert_file and key_file are missing, ensure that both are present
+        before retrying deploy.
+
+  when: >
+    harp_http_options['cert_file'] is defined
+    and harp_http_options['key_file'] is defined
+    and harp_http_options['secure']
+
+- name: Set up SSL certificate for harp-proxy https probes
+  block:
+
+  - name: Generate SSL certificate for harp-proxy https probes
+    include_tasks: ssl.yml
+
+  - name: Update certs path for http config section
+    set_fact:
+      harp_http_options: "{{ harp_http_options|
+        combine(secure_certs, recursive=true) }}"
+    vars:
+      secure_certs:
+        'cert_file': "{{ harpproxy_ssl_cert_file }}"
+        'key_file': "{{ harpproxy_ssl_key_file }}"
+  when: >
+    harp_http_options['enable']
+    and harp_http_options['secure']
+    and not( harp_http_options['cert_file'] is defined
+          or harp_http_options['key_file'] is defined )
+
 - name: Install HARP configuration file
   template:
     src: harp2.config.j2

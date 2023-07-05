@@ -11,3 +11,17 @@ cluster:
 {% endif %}
   proxy:
     name: "{{ inventory_hostname }}"
+{%  if 'pgd-proxy' in role and pgd_http_options['enable']|bool %}
+    endpoint: {{ pgd_http_options['endpoint'] }}
+    http:
+      enable: {{ pgd_http_options['enable']|bool|lower }}
+      host: {{ pgd_http_options['host'] }}
+      port: {{ pgd_http_options['port'] }}
+      secure: {{ pgd_http_options['secure']|bool|lower }}
+{%    if pgd_http_options['secure']|bool %}
+      cert_file: {{ pgd_http_options['cert_file'] }}
+      key_file: {{ pgd_http_options['key_file'] }}
+{%    endif %}
+      probes:
+        timeout: {{ pgd_http_options['probes']['timeout'] }}
+{%  endif %}

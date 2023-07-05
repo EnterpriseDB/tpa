@@ -153,3 +153,11 @@
   when: >
     'pgd-proxy' in role
   tags: pgd-proxy
+
+- include_role:
+    name: sys/ssl/ca/final
+    apply:
+      tags: ssl
+  when:
+    - ca_created is defined
+    - ca_created

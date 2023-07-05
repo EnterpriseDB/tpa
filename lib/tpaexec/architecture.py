@@ -1481,6 +1481,10 @@ def update_symlinks_recursively(source, destination, force):
                 os.path.join(source, ls_link), os.path.join(destination, ls_link), force
             )
     else:
-        if os.path.exists(destination) and force:
-            os.unlink(destination)
+        if force:
+            try:
+                os.unlink(destination)
+            except:
+                pass
+
         os.symlink(source, destination)

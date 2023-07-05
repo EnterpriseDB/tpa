@@ -6,7 +6,7 @@ from .bdr import BDR
 from ..exceptions import ArchitectureError
 from typing import List, Tuple
 import re
-
+from argparse import SUPPRESS
 
 class PGD_Always_ON(BDR):
     def supported_versions(self) -> List[Tuple[str, str]]:
@@ -61,6 +61,13 @@ class PGD_Always_ON(BDR):
             type=int,
             dest="proxy_nodes_per_location",
             help="Number of separate PGD-Proxy nodes to add in each location",
+        )
+        g.add_argument(
+            "--enable-pgd-probes",
+            choices=["http", "https"],
+            nargs="?",
+            default=SUPPRESS,
+            help="Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health",
         )
 
     def update_argument_defaults(self, defaults):
@@ -217,6 +224,15 @@ class PGD_Always_ON(BDR):
                 },
             }
         )
+        self._update_pgd_probes(cluster_vars)
+
+    def _update_pgd_probes(self, cluster_vars):
+        http={}
+        if "enable_pgd_probes" in self.args:
+            http = {"pgd_http_options": {"enable": True}}
+            if self.args["enable_pgd_probes"] in ["https"]:
+                http["pgd_http_options"].update({"secure": True})
+        cluster_vars.update(http)
 
     def update_instances(self, instances):
         """
@@ -339,4 +355,3 @@ class PGD_Always_ON(BDR):
         and false otherwise.
         """
         return location == self.args.get("witness_only_location")
-

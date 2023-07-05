@@ -57,6 +57,7 @@ More detail on the options is provided in the following section.
 | `--add-proxy-nodes-per-location` | The number of proxy nodes in each location.                                                                 | PGD-proxy will be installed on each data node.              |
 | `--enable-camo`                  | Sets two data nodes in each location as CAMO partners.                                                      | CAMO will not be enabled.                                   |
 | `--bdr-database`                 | The name of the database to be used for replication.                                                        | Defaults to `bdrdb`.                                        |
+| `--enable-pgd-probes`            | Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health.       | Disabled by default.                                        |
 
 <br/><br/>
 
@@ -115,6 +116,9 @@ the database with BDR enabled (default: bdrdb).
 
 You may optionally specify `--enable-camo` to set two data nodes in
 each region as CAMO partners.
+
+You may optionally specify `--enable-pgd-probes [{http, https}]` to
+enable http(s) api endpoints that will allow to easily probe proxy's health.
 
 You may also specify any of the options described by
 [`tpaexec help configure-options`](tpaexec-configure.md).

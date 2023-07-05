@@ -1,0 +1,11 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+use_ssl_cert_authentication: no
+
+harp_proxy_ssl_service: harp_proxy
+harp_proxy_ssl_dir: "/etc/tpa/{{ harp_proxy_ssl_service }}"
+harp_proxy_local_ssl_dir: "{{
+  use_ssl_cert_authentication|
+   ternary(cluster_dir ~ '/ssl', cluster_dir ~ '/ssl/harp-proxy') }}"

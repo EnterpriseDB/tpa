@@ -68,12 +68,12 @@ More detail on the options is provided in the following section.
 
 #### Additional Options
 
-| Option                           | Description                                                                                                 | Behaviour if omitted                                        |
-|----------------------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
-| `--platform`                     | One of `aws`, `docker`, `bare`.                                                                             | Defaults to `aws`.                                          |
-| `--enable-camo`                  | Sets two data nodes in each location as CAMO partners.                                                      | CAMO will not be enabled.                                   |
-| `--bdr-database`                 | The name of the database to be used for replication.                                                        | Defaults to `bdrdb`.                                        |
-
+| Option                       | Description                                                                                           | Behaviour if omitted      |
+|------------------------------|-------------------------------------------------------------------------------------------------------|---------------------------|
+| `--platform`                 | One of `aws`, `docker`, `bare`.                                                                       | Defaults to `aws`.        |
+| `--enable-camo`              | Sets two data nodes in each location as CAMO partners.                                                | CAMO will not be enabled. |
+| `--bdr-database`             | The name of the database to be used for replication.                                                  | Defaults to `bdrdb`.      |
+| `--enable-harp-probes`       | Enable http(s) api endpoints for harp such as `health/is-ready` to allow probing harp's health.      | Disabled by default.      |
 <br/><br/>
 
 ### More detail about BDR-Always-ON configuration
@@ -92,6 +92,9 @@ the database with PGD enabled (default: bdrdb).
 
 You may optionally specify `--enable-camo` to set the pair of PGD
 primary instances in each region to be each other's CAMO partners.
+
+You may optionally specify `--enable-harp-probes [{http, https}]` to
+enable http(s) api endpoints that will allow to easily probe harp's health.
 
 Please note we enable HARP2 by default in BDR-Always-ON architecture.
 

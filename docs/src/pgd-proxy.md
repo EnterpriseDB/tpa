@@ -73,3 +73,40 @@ In this case, `someproxy` ends up with the `listen_port` setting from
 also override the default `listen_port` by defining a different value
 alongside `fallback_groups`; this instance-level setting would take
 precedence over the defaults in `cluster_vars`.
+
+### PGD proxy http(s) health probes
+
+You can enable and configure the http(s) service for PGD proxy that will
+provide api endpoints to monitor the proxy's health.
+
+`pgd_http_options` under `cluster_vars` or instance `vars` will store
+all the settings that defines the http(s) api which live under the `http`
+subsection of the `proxy` top section of `pgd-proxy-config.yml`.
+
+The variable can contain these keys:
+```
+enable: false
+secure: false
+cert_file: "/etc/tpa/harp_proxy/harp_proxy.crt"
+key_file: "/etc/tpa/harp_proxy/harp_proxy.key"
+host: <inventory_hostname>
+port: 8080
+probes:
+  timeout: 10s
+endpoint: "<valid dsn>"
+```
+
+The `cert_file` and `key_file` keys are both required if you use `secure: true`
+and are willing to use your own certificate and key.
+
+You must ensure that both certificate and key are available at the given
+location on the target node before running `deploy`.
+
+Leave both `cert_file` and `key_file` empty if you want TPA to generate a
+certificate and key for you using a cluster specific CA certificate.
+TPA CA certificate won't be 'well known', you will need to add this certificate
+to the trust store of each machine that will probe the endpoints.
+The CA certificate can be found on the cluster directory on the TPA node at:
+`<cluster_dir>/ssl/CA.crt` after `deploy`.
+
+see pgd-proxy documentation for more information on the available api endpoints.

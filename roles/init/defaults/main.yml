@@ -186,6 +186,13 @@ default_harp_consensus_protocols:
 default_harp_directories:
   "2": /etc/harp
 default_harp_proxy_mode: builtin
+default_harp_http_options:
+  enable: false
+  host: "{{ inventory_hostname }}"
+  port: 8080
+  secure: false
+  probes:
+    timeout: 10s
 
 default_patroni_listen_port: 8008
 
@@ -206,7 +213,16 @@ default_pem_agent_service_name: pemagent
 default_pem_database: pem
 default_pem_server_group: "PEM Server Directory"
 
+default_pgd_proxy_home: /home/pgdproxy
+default_pgd_proxy_config_directory: /etc/edb/pgd-proxy
 default_pgd_proxy_options: {}
+default_pgd_http_options:
+  enable: false
+  host: "{{ inventory_hostname }}"
+  port: 8080
+  secure: false
+  probes:
+    timeout: 10s
 default_pgd_proxy_user: pgdproxy
 default_pgd_proxy_group: pgdproxy
 

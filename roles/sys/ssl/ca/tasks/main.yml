@@ -93,3 +93,10 @@
 - name: Set ssl_ca_file fact for client or server callers
   set_fact:
     ssl_ca_file: "{{ ca_path }}"
+
+- name: Set ca_created
+  set_fact:
+    ca_created: true
+  delegate_to: "{{ item }}"
+  with_items: "{{ play_hosts }}"
+  run_once: yes

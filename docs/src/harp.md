@@ -93,3 +93,40 @@ You can configure the following parameters for the harp service:
 Variable	| Default value	| Description
 ---|---|---
 `harp_manager_restart_on_failure`	| `false`	| If `true`, the `harp-manager` service is overridden so it's restarted on failure. The default is `false` to comply with the service installed by the `harp-manager` package.
+
+## Configuring harp http(s) health probes
+
+You can enable and configure the http(s) service for harp that will
+provide api endpoints to monitor service's health.
+
+Variable	| Default value	| Description
+---|---|---
+`harp_http_options`| <br>`enable: false`<br>`secure: false`<br>`host: <inventory_hostname>`<br>`port: 8080`<br>`probes:`<br>&nbsp;&nbsp;`timeout: 10s`<br>`endpoint: "host=<proxy_name> port=<6432> dbname=<bdrdb> user=<username>"`| Configure the http section of harp config.yml that defines the http(s) api settings.|
+
+The variable can contain these keys:
+```
+enable: false
+secure: false
+cert_file: "/etc/tpa/harp_proxy/harp_proxy.crt"
+key_file: "/etc/tpa/harp_proxy/harp_proxy.key"
+host: <inventory_hostname>
+port: 8080
+probes:
+  timeout: 10s
+endpoint: "<valid dsn>"
+```
+
+The `cert_file` and `key_file` keys are both required if you use `secure: true`
+and are willing to use your own certificate and key.
+
+You must ensure that both certificate and key are available at the given
+location on the target node before running `deploy`.
+
+Leave both `cert_file` and `key_file` empty if you want TPA to generate a
+certificate and key for you using a cluster specific CA certificate.
+TPA CA certificate won't be 'well known', you will need to add this certificate
+to the trust store of each machine that will probe the endpoints.
+The CA certificate can be found on the cluster directory on the TPA node at:
+`<cluster_dir>/ssl/CA.crt` after `deploy`.
+
+see harp documentation for more information on the available api endpoints.

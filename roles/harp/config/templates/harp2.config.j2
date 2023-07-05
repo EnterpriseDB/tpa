@@ -52,8 +52,24 @@ proxy:
 {% if harp_proxy_mode == "pgbouncer" %}
   pgbouncer_bin_dir: {{ pgbouncer_bin_dir }}
 {% endif %}
+{% if harp_http_options['enable']|bool and "endpoint" in harp_http_options %}
+  endpoint: {{ harp_http_options['endpoint'] }}
 {% endif %}
 
+{% endif %}
+{%  if harp_http_options['enable']|bool %}
+http:
+  enable: {{ harp_http_options['enable']|bool|lower }}
+  host: {{ harp_http_options['host'] }}
+  port: {{ harp_http_options['port'] }}
+  secure: {{ harp_http_options['secure']|bool|lower }}
+{%    if harp_http_options['secure']|bool %}
+  cert_file: {{ harp_http_options['cert_file'] }}
+  key_file: {{ harp_http_options['key_file'] }}
+{%    endif %}
+  probes:
+    timeout: {{ harp_http_options['probes']['timeout'] }}
+{%  endif %}
 db:
   request_timeout: {{ harp_db_request_timeout|default('10s') }}
 {% if harp_ssl_password_command|default(None) %}
