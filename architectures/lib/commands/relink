@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, re, sys, yaml
+import os, re, subprocess, sys, yaml
 
 if len(sys.argv) > 1 and sys.argv[1] == "--help":
     print(
@@ -31,6 +31,8 @@ if "TPA_DIR" not in os.environ or not os.path.exists("./config.yml"):
     sys.exit(-1)
 
 TPA_DIR = os.environ["TPA_DIR"]
+
+modified_paths = []
 
 # Given the name of a symbolic link and the missing target of the link, this
 # function tries to point it to $TPA_DIR.
@@ -70,6 +72,7 @@ for subdir, dirs, files in os.walk("."):
             target = os.readlink(file)
             if not os.path.exists(target):
                 repair_dangling_symlink(file, target)
+                modified_paths.append(file)
 
 # Create links to any new commands or tests for this cluster's architecture.
 # (The cluster configuration may have been generated long before the current
@@ -90,6 +93,7 @@ with open(r"./config.yml") as config_file:
 
         if os.path.isfile(target) and not os.path.exists(s):
             os.symlink(target, s)
+            modified_paths.append(s)
             if v:
                 print("%s: %s" % (s, target))
 
@@ -102,5 +106,32 @@ with open(r"./config.yml") as config_file:
                     link = "%s/%s" % (s, l)
                     dest = "%s/%s" % (target, l)
                     os.symlink(dest, link)
+                    modified_paths.append(link)
                     if v:
                         print("%s: %s" % (link, dest))
+
+if os.path.exists(".git") and modified_paths:
+    try:
+        cp = subprocess.run(
+            "git notes show $(git rev-list --reverse HEAD | head -1)",
+            shell=True,
+            capture_output=True,
+            universal_newlines=True,
+        )
+        if cp.stdout.rstrip() == "Created by TPA":
+            cp = subprocess.run(
+                ["git", "add", *modified_paths],
+                capture_output=True,
+                universal_newlines=True,
+            )
+            if v:
+                print(cp.stdout)
+            cp = subprocess.run(
+                ["git", "commit", "-m", "Relink files to the correct $TPA_DIR"],
+                capture_output=True,
+                universal_newlines=True,
+            )
+            if v:
+                print(cp.stdout)
+    except subprocess.CalledProcessError as cpe:
+        print("Failed to git commit: %s" % cpe.stderr)
