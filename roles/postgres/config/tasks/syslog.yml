@@ -19,6 +19,13 @@
     - postgres_log_file.stat.pw_name != postgres_user
     - postgres_log_file.stat.gr_name != postgres_group
 
+# Even if a stricter default umask is set, we want the permissions on the directory to always be 0700
+- name: Explicitly set permissions for /var/log/postgres to 0700
+  file:
+    path: /var/log/postgres
+    state: directory
+    mode: '700'
+
 - name: Add rsyslog rule for PostgreSQL logging
   template:
     src: syslog-postgres.conf.j2
