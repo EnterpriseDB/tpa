@@ -2,6 +2,127 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.19 (unreleased)
+
+### Notable changes
+
+- TPA-455 Allow physical standby HA for 'subscriber-only' nodes
+
+  'subscriber-only' nodes in a PGD cluster only receive data, which
+  makes them a good choice as CDC sources in PGD clusters.  This change
+  allows creating physical replicas of subscriber-only nodes, so that
+  a replica with the same LSNs is available in case of a failure of a
+  subscriber-only node used as a CDC source.
+
+- TPA-453 Accept `--enable-harp-probes` and `--enable-pgd-probes`
+  configure options to enable http(s) health probes for harp-proxy and
+  pgd-proxy respectively
+
+  These configure options introduce `harp_http_options` and
+  `pgd_http_options` settings respectively in the config.yml with minimal
+  default options for health probes. See harp.md and pgd-proxy.md
+  for details on configuring these options in TPA. For further details on
+  health probes usage, consult product documentation for HARP and PGD
+  Proxy.
+
+- TPA-392 Introduce initial support for Patroni for M1 clusters
+
+  Accept `--enable-patroni` configure option to enable patroni as the
+  failover manager for M1 clusters.  Alternatively, set `failover_manager:
+  patroni` in config.yml to enable Patroni support. The initial support is
+  for experimental purposes and not recommended for production deployment
+  yet. For more details of Patroni support in TPA, refer to patroni.md.
+
+### Minor changes
+
+- TPA-410 Select correct debug package suffix on Debian-like systems
+
+  On Debian-like systems, fix the package selection code so we use `-dbg`
+  rather than `-dbgsym` for certain packages where applicable. Previously,
+  we always looked for `-dbgsym` packages when installing EPAS, but now
+  the same logic applies to EPAS as for other flavours.
+
+- TPA-451 Restrict the character limit for the name of the downloader
+  Docker container to a maximum of 64 characters
+
+  When using `tpaexec download-packages` command, the host name for the
+  downloader container is formed by adding `-downloader` to the cluster
+  name; in the case of a systematically generated cluster name, this can
+  result in a name longer than Docker's maximum 64-character limit and
+  somewhat confusing error. TPA now simply truncates the name to 64
+  characters if necessary when setting the details for the downloader.
+
+- TPA-465 Don't allow hyphens in primary_slot_name
+
+  Our default_primary_slot_name gets set to the inventory_hostname which
+  could be using hyphens but Postgres does not accept that and it would
+  result in a warning similar to:
+
+      WARNING:  replication slot name \"tpa_amva-mnl-feather\" contains
+      invalid character
+      HINT:  Replication slot names may only contain lower case letters,
+      numbers, and the underscore character.
+
+- TPA-489 Allow version setting for edb-pgd-proxy and edb-bdr-utilities.
+
+  This allows installing specific versions of the named packages instead
+  of always installing the latest version.
+
+- TPA-481 Bump default EFM version to 4.7
+
+- TPA-479 Misc. code tidying related changes
+
+- Misc. documentation improvements
+
+### Bugfixes
+
+- TPA-457 Fix regression in PGD 3.7 to 4 upgrades. This was a recent
+  regression in 23.18
+
+- TPA-452 Don't use underscore in CN for PEM agent's SSL certificate
+
+  Per RFC 952, hostnames and subsequent CNs can only contain letters,
+  digits and hyphens. Some platforms are more tolerant to the violation of
+  this rule, on others it results in a error similar to:
+
+      "msg": "Error while creating CSR: The label pemagent_ghzedlcmbnedb01 is not a valid A-label\nThis is probably caused because the Common Name is used as a SAN. Specifying use_common_name_for_san=false might fix this."}
+
+- TPA-456 Fix wrong etcd service name for Debian platforms. This was a
+  recent regression affecting Debian-like platforms and resulting in an
+  error similar to:
+
+    TASK [etcd/start : Ensure the service state could be found]
+    fatal: [kinfolk]: FAILED! => {
+        "assertion": false,
+        "changed": false,
+        "evaluated_to": false,
+        "msg": "The systemd service for etcd could not be found"
+     }
+
+- TPA-464 Fix problems with installing PGDG etcd packages on RHEL 8
+
+  TPA recently introduced support for installing etcd packages that are
+  not specific to PGD installation; mainly for the patroni support in M1
+  clusters, but that failed for RHEL 8 because it needs
+  pgdg-rhel<ver>-extra repo for etcd package.
+
+- TPA-358 Fix "Failed to commit files to git: b''" during configure
+
+  TPA-238 introduced support for initialising cluster directory as a git
+  repository and above error was reported in some scenarios when running
+  `tpaexec configure` command. There was an an earlier attempt to fix
+  the same problem in 23.17; but apparently it still appeared in some
+  cases.
+
+- TPA-403 Respect `generate_password: false` setting for postgres_users
+  when generating passwords. Without the fix, TPA would generate and
+  overwrite the user password
+
+- Fix volume map creation on aws to take account of region. In v23.18,
+  aws clusters in regions other than eu-west-1 would fail with error
+  messages mentioning '/dev/sdf'.
+
+
 ## v23.18 (2023-05-23)
 
 ### Notable changes
