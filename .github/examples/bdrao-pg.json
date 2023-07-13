@@ -1,0 +1,12 @@
+{
+  "act": true,
+  "action": "workflow_dispatch",
+  "inputs": {
+      "tpa_architecture": "BDR-Always-ON",
+      "tpa_os_image": "tpa/debian:10",
+      "tpa_postgres_flavour": "postgresql",
+      "tpa_postgres_version": "15",
+      "tpa_platform": "docker",
+      "tpa_layout": "silver"
+  }
+}

@@ -13,6 +13,15 @@
     bdr_major_version >= 4
     and inventory_hostname == first_bdr_primary
   block:
+  - name: Run pgdcli version
+    command: >
+      pgd --version
+    register: pgdcli_version
+
+  - name: Show pgdcli version
+    debug:
+      var: pgdcli_version
+
   - name: Run pgd check-health command
     command: >
       {{ pgdcli_bin }} check-health

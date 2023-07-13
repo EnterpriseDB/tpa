@@ -12,6 +12,10 @@ inputs:
     required: false
     description: "TPA architecture"
     default: BDR-Always-ON
+  tpa_layout:
+    required: false
+    description: "TPA BDR layout"
+    default: bronze
   tpa_os:
     required: false
     description: "Operating System to use with TPA (--os)"
@@ -73,7 +77,7 @@ runs:
         CONFIGURE_OPTS+=(--platform "${{ inputs.tpa_platform }}")
         if [ "${{ inputs.tpa_architecture }}" == "BDR-Always-ON" ] ;then
           CONFIGURE_OPTS+=(
-            --layout bronze
+            --layout "${{ inputs.tpa_layout }}"
             --harp-consensus-protocol bdr
           )
         elif [ "${{ inputs.tpa_architecture }}" == "PGD-Always-ON" ]; then
