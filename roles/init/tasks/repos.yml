@@ -145,6 +145,7 @@
       "{{ postgres_installation_method == 'pkg'
           and (postgres_flavour == 'epas'
             or failover_manager == 'efm'
+            or enable_pg_backup_api
             or pem_enabled)
           and edb_repositories is empty }}"
 
