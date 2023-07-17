@@ -1,0 +1,52 @@
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+name: Matrix Upgrade test
+
+on:
+  workflow_dispatch:
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.EDB_SUBSCRIPTION_TOKEN }}
+  ANSIBLE_SKIP_TAGS: pgbench
+
+jobs:
+
+  load-matrix:
+    name: Load Matrix
+    runs-on: ubuntu-20.04
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/load-yaml
+        id: load-yaml
+        with:
+          file: .github/config/upgrade_matrix.yml
+          key: default
+
+  integration-test:
+    name: Matrix Upgrade test
+    needs: load-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/upgrade-integration-test
+        with:
+          tpa_architecture: ${{ matrix.tpa_architecture }}
+          tpa_platform: ${{ matrix.tpa_platform }}
+          tpa_layout: ${{ matrix.tpa_layout }}
+          tpa_os_image: ${{ matrix.tpa_os_image }}
+          tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
+          tpa_proxy_routing: ${{ matrix.tpa_proxy_routing }}
+          tpa_edb_repo: ${{ matrix.tpa_edb_repo }}

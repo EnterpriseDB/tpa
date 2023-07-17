@@ -1,0 +1,53 @@
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+---
+default:
+  tpa_architecture: &default_tpa_architecture
+    - "BDR-Always-ON"
+  tpa_platform:
+    - "docker"
+  tpa_os_image: &default_tpa_os_image
+    - "ubuntu:18.04"
+    - "ubuntu:20.04"
+    - "ubuntu:22.04"
+    - "debian:10"
+    - "redhat:7"
+    - "redhat:8"
+    # - "debian:11"
+  tpa_postgres_flavour: &default_tpa_postgres_flavour
+    - "postgresql"
+    - "pgextended"
+    - "epas"
+  tpa_postgres_version: &default_tpa_postgres_version
+    - 14
+    - 15
+  tpa_layout: &default_tpa_layout
+    - bronze
+    - silver
+    - gold
+    - platinum
+  tpa_proxy_routing: &default_tpa_proxy_routing
+    - local
+    - global
+  # Using dev atm to avoid issues with 5.1 PGD that doesn't support witness
+  # node group change
+  tpa_edb_repo: &default_tpa_edb_repo
+    - "dev dev_postgres_distributed"
+
+simple:
+  tpa_architecture: *default_tpa_architecture
+  tpa_postgres_flavour: *default_tpa_postgres_flavour
+  tpa_postgres_version: *default_tpa_postgres_version
+  tpa_os_image: *default_tpa_os_image
+  tpa_edb_repo: *default_tpa_edb_repo
+  tpa_layout: *default_tpa_layout
+
+  exclude:
+    - tpa_architecture: "BDR-Always-ON"
+      tpa_postgres_flavour: "postgresql"
+    - tpa_os_image: "ubuntu:18.04"
+    - tpa_os_image: "ubuntu:20.04"
+    - tpa_os_image: "redhat:7"
+    - tpa_layout: bronze
+    - tpa_layout: gold
+    - tpa_layout: platinum
