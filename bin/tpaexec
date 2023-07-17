@@ -474,7 +474,7 @@ _tpaexec_info() {
         fi
     fi
 
-    echo Validation: "$(_checksums)"
+    echo "$(_checksums)"
 }
 
 selftest() {
@@ -537,6 +537,9 @@ info() {
                 exit 1
             fi
             $PAGER "$doc"
+            ;;
+        validate)
+            echo "$(_checksums)"
             ;;
         *)
             error "unrecognised info subcommand: $subcommand"
@@ -617,6 +620,9 @@ Available info subcommands:
 
     tpaexec info architectures/xxx
         Displays information about a particular architecture
+
+    tpaexec info validate
+        Checks if any files have been modified from the original installation
 INFO
             ;;
 

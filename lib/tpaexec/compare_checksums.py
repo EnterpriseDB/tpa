@@ -71,6 +71,7 @@ if __name__ == "__main__":  # pragma: no cover
         path_to_file=args.checksums_file, target_directory=args.directory
     )
     if len(mismatch_list) == 0:
-        print(f"{_hash_file(path_to_file=Path(args.checksums_file)).hexdigest()} [OK]")
+        print(f"Validated: {_hash_file(path_to_file=Path(args.checksums_file)).hexdigest()} [OK]")
     else:
+        print("Modified:", end=" ")
         print(*mismatch_list, sep=", ")
