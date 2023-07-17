@@ -1,0 +1,12 @@
+---
+
+- name: Debian family update repository cache
+  apt:
+    update_cache: yes
+  when:
+    ansible_os_family == "Debian"
+
+- name: RedHat family update repository cache
+  command: yum clean all
+  when:
+    ansible_os_family == "RedHat"

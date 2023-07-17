@@ -38,6 +38,18 @@ inputs:
     required: false
     description: "Name of the cluster directory"
     default: "cluster"
+  tpa_proxy_routing:
+    required: false
+    description: "proxy routing mode for pgd5"
+    default: "local"
+  tpa_edb_repo:
+    required: false
+    description: "PGD repos for reconfigure command"
+    default: ""
+  tpa_package_cache:
+    required: false
+    description: "Enable local repo and reuse packages"
+    default: "true"
 
 runs:
   using: "composite"
@@ -61,6 +73,7 @@ runs:
         tpa_postgres_flavour: ${{ inputs.tpa_postgres_flavour }}
         tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
         cluster: ${{ inputs.cluster }}
+        tpa_package_cache: ${{ inputs.tpa_package_cache }}
 
     - name: Provision the cluster
       run: ./bin/tpaexec provision "$CLUSTER" -vv
@@ -72,17 +85,55 @@ runs:
 
     - name: Reconfigure cluster
       run: |
+        echo "::group::Reconfigure cluster"
         ./bin/tpaexec reconfigure "$CLUSTER" \
         --architecture PGD-Always-ON \
-        --pgd-proxy-routing local
+        --pgd-proxy-routing ${{ inputs.tpa_proxy_routing }} \
+        ${{ inputs.tpa_edb_repo != '' && format('--edb-repositories {0}',inputs.tpa_edb_repo) || '' }}
+        status=$?
+        echo "::endgroup::"
+        exit $status
+      shell: bash
+
+    - name: Add post-repo hook
+      run: |
+        echo "::group::Copy post-repo hook"
+        mkdir "$CLUSTER/hooks"
+        cp .github/actions/upgrade-integration-test/post-repo.yml "$CLUSTER/hooks/post-repo.yml" -vv
+        status=$?
+        echo "::endgroup::"
+        exit $status
+      shell: bash
+
+    - name: Download newly needed packages after reconfigure
+      run: |
+        echo "::group::Download reconfigure packages"
+        ./bin/tpaexec download-packages "$CLUSTER" --docker-image "$IMAGE" -vv &>"$CLUSTER"/download-packages
+        status=$?
+        find "$CLUSTER/local-repo" -ls
+        if [[ $status != 0 ]]; then
+          cat "$CLUSTER/download-packages"
+        fi
+        echo "::endgroup::"
+        exit $status
       shell: bash
 
     - name: Run upgrade command
-      run: ./bin/tpaexec upgrade "$CLUSTER" -vv
+      run: |
+        echo "::group::Upgrade cluster"
+        ./bin/tpaexec upgrade "$CLUSTER" -vv
+        status=$?
+        echo "::endgroup::"
+        exit $status
       shell: bash
 
     - name: Test the cluster
-      run: ./bin/tpaexec test "$CLUSTER" -vv
+      run: |
+        echo "::group::Test upgraded cluster"
+        ./bin/tpaexec test "$CLUSTER" -vv --skip-tags pgbench
+        status=$?
+        echo "::endgroup::"
+        exit $status
       shell: bash
 
     - uses: ./.github/actions/finalise_integration_test

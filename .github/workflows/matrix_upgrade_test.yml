@@ -4,6 +4,16 @@ name: Matrix Upgrade test
 
 on:
   workflow_dispatch:
+    inputs:
+      matrix_key:
+        description: "Set of inputs to use"
+        required: false
+        default: "latest-silver-14"
+        type: choice
+        options:
+          - latest-silver
+          - debian11-silver-14
+          - debian11-epas14
 
 env:
   LANG: "C.UTF-8"
@@ -27,7 +37,7 @@ jobs:
         id: load-yaml
         with:
           file: .github/config/upgrade_matrix.yml
-          key: default
+          key: ${{ github.event.inputs.matrix_key }}
 
   integration-test:
     name: Matrix Upgrade test
@@ -45,7 +55,7 @@ jobs:
           tpa_architecture: ${{ matrix.tpa_architecture }}
           tpa_platform: ${{ matrix.tpa_platform }}
           tpa_layout: ${{ matrix.tpa_layout }}
-          tpa_os_image: ${{ matrix.tpa_os_image }}
+          tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
           tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
           tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
           tpa_proxy_routing: ${{ matrix.tpa_proxy_routing }}

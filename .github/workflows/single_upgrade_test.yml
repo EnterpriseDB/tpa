@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tpa_architecture:
-        description: "TPA architecture"
+        description: "TPA architecture for initial cluster"
         required: true
         default: "BDR-Always-ON"
         type: choice
@@ -18,6 +18,12 @@ on:
         required: false
         description: "TPA BDR layout"
         default: silver
+        type: choice
+        options:
+        - bronze
+        - silver
+        - gold
+        - platinum
       tpa_platform:
         description: "TPA platform"
         required: false
@@ -57,6 +63,18 @@ on:
         - 13
         - 14
         - 15
+      tpa_proxy_routing:
+        required: false
+        description: "proxy routing mode for pgd5"
+        default: "local"
+        type: choice
+        options:
+        - local
+        - global
+      tpa_edb_repo:
+        required: false
+        description: "PGD repos for reconfigure command"
+        default: ""
 
 env:
   LANG: "C.UTF-8"
@@ -84,3 +102,5 @@ jobs:
           tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
           tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
+          tpa_proxy_routing: ${{ github.event.inputs.tpa_proxy_routing }}
+          tpa_edb_repo: ${{ github.event.inputs.tpa_edb_repo }}

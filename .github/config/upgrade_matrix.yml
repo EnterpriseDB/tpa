@@ -1,53 +1,92 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 ---
-default:
-  tpa_architecture: &default_tpa_architecture
+full: # 500+ clusters do not use this option
+  tpa_architecture: &full_tpa_architecture
     - "BDR-Always-ON"
-  tpa_platform:
+  tpa_platform: &full_tpa_platform
     - "docker"
-  tpa_os_image: &default_tpa_os_image
+  tpa_os_image: &full_tpa_os_image
     - "ubuntu:18.04"
     - "ubuntu:20.04"
     - "ubuntu:22.04"
     - "debian:10"
+    - "debian:11"
     - "redhat:7"
     - "redhat:8"
-    # - "debian:11"
-  tpa_postgres_flavour: &default_tpa_postgres_flavour
+  tpa_postgres_flavour: &full_tpa_postgres_flavour
     - "postgresql"
-    - "pgextended"
+    - "pgextended" # edbpge is not available for bdr4, it will be changed to edbpge during reconfigure
     - "epas"
-  tpa_postgres_version: &default_tpa_postgres_version
+  tpa_postgres_version: &full_tpa_postgres_version
+    - 12
+    - 13
     - 14
-    - 15
-  tpa_layout: &default_tpa_layout
+  tpa_layout: &full_tpa_layout
     - bronze
     - silver
     - gold
     - platinum
-  tpa_proxy_routing: &default_tpa_proxy_routing
+  tpa_proxy_routing: &full_tpa_proxy_routing
     - local
     - global
   # Using dev atm to avoid issues with 5.1 PGD that doesn't support witness
   # node group change
-  tpa_edb_repo: &default_tpa_edb_repo
+  tpa_edb_repo: &full_tpa_edb_repo
     - "dev dev_postgres_distributed"
 
-simple:
-  tpa_architecture: *default_tpa_architecture
-  tpa_postgres_flavour: *default_tpa_postgres_flavour
-  tpa_postgres_version: *default_tpa_postgres_version
-  tpa_os_image: *default_tpa_os_image
-  tpa_edb_repo: *default_tpa_edb_repo
-  tpa_layout: *default_tpa_layout
 
-  exclude:
-    - tpa_architecture: "BDR-Always-ON"
-      tpa_postgres_flavour: "postgresql"
-    - tpa_os_image: "ubuntu:18.04"
-    - tpa_os_image: "ubuntu:20.04"
-    - tpa_os_image: "redhat:7"
-    - tpa_layout: bronze
-    - tpa_layout: gold
-    - tpa_layout: platinum
+# Only latest version of each os
+# postgresql, epas, pgextended(for bdr4 initial deploy)
+# only silver layout
+# latest postgres version
+# starts 3*3*2 runs (postgres_flavour * os_image * proxy_routing)
+latest-silver:
+  tpa_architecture: *full_tpa_architecture
+  tpa_platform: *full_tpa_platform
+  tpa_edb_repo: *full_tpa_edb_repo
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 14
+  tpa_os_image:
+    - "debian:11"
+    - "redhat:8"
+    - "ubuntu:22.04"
+  tpa_layout:
+    - silver
+  tpa_proxy_routing: *full_tpa_proxy_routing
+
+
+# debian 11
+# silver layout
+# all postgres_flavour
+# postgres 14
+debian11-silver-14:
+  tpa_architecture: *full_tpa_architecture
+  tpa_platform: *full_tpa_platform
+  tpa_edb_repo: *full_tpa_edb_repo
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 14
+  tpa_os_image:
+    - "debian:11"
+  tpa_layout:
+    - silver
+  tpa_proxy_routing: *full_tpa_proxy_routing
+
+# debian 11
+# silver layout
+# all postgres_flavour
+# postgres version 14
+debian11-epas14:
+  tpa_architecture: *full_tpa_architecture
+  tpa_platform: *full_tpa_platform
+  tpa_edb_repo: *full_tpa_edb_repo
+  tpa_postgres_flavour:
+    - epas
+  tpa_postgres_version:
+    - 14
+  tpa_os_image:
+    - "debian:11"
+  tpa_layout: *full_tpa_layout
+  tpa_proxy_routing: *full_tpa_proxy_routing

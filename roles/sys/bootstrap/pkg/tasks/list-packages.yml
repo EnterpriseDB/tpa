@@ -17,8 +17,8 @@
       - "{{ _raw_packages[ansible_os_family] }}"
     _raw_packages:
       common:
-        - gpg
         - curl
+        - gnupg2
       Debian:
         - apt-transport-https
         - "{{ ['python-backports.ssl-match-hostname'] if python in ['python2', 'python2.7'] else [] }}"
