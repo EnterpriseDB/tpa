@@ -67,17 +67,35 @@
         This upgrade process supports upgrades from BDR v4 to PGD v5, or
         minor version upgrades of PGD v5 only
 
-  - name: Collect list of all unique BDR major versions from all nodes
+  - name: Collect list of all unique BDR versions from all nodes
     set_fact:
+      all_bdr_versions: "{{ _versions.values()|list }}"
       all_bdr_major_versions:
-        "{{ (groups['role_bdr']|bdr_node_versions(hostvars)).values()
+        "{{ _versions.values()
             |map('regex_replace', '\\..*', '')
             |unique|list }}"
+    vars:
+      _versions:
+        "{{ groups['role_bdr']|bdr_node_versions(hostvars) }}"
 
   - name: Determine whether we're doing a major version upgrade from BDR 4
     set_fact:
       bdr_major_version_upgrade:
         "{{ '4' in all_bdr_major_versions }}"
+
+  # We already know that a bdr_major_version_upgrade requires 5.2, so we
+  # require at least 4.3 to start with, because older BDR versions don't
+  # have an extension upgrade path to 5.2.
+
+  - name: Ensure that BDR major version upgrades start from a recent version of BDR v4
+    assert:
+      that: all_bdr_versions|select('version', '4.3', '<')|list is empty
+      fail_msg: >-
+        Please upgrade to the latest available BDR 4.x release before trying to
+        upgrade to PGD 5.2
+    when:
+      bdr_major_version_upgrade
+      and inventory_hostname == first_bdr_primary
 
   - name: Log exact versions for every BDR node
     debug:
