@@ -295,6 +295,13 @@
     when: >
       'postgres' in role
 
+  - set_fact:
+      any_harp_proxy_still_running:
+        "{{ groups['role_harp-proxy']|default([])
+            |map('extract', hostvars, 'harp_proxy_still_running')
+            |select('defined')
+            |contains(true) }}"
+
   - name: Create symlink for harp-manager to connect to database
     file:
       name: "/var/run/postgresql/.s.PGSQL.{{ postgres_port }}"
@@ -304,7 +311,7 @@
       postgres_flavour == 'edbpge'
       and 'bdr' in role
       and (bdr_major_version_upgrade
-        or harp_proxy_still_running)
+        or any_harp_proxy_still_running)
 
   - name: Unfence the node after upgrade
     include_role:
@@ -573,7 +580,7 @@
         postgres_flavour == 'edbpge'
         and 'bdr' in role
         and (bdr_major_version_upgrade
-          or harp_proxy_still_running)
+          or any_harp_proxy_still_running)
 
     - name: Remove additional harp service definitions
       file:
