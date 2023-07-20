@@ -1,0 +1,53 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- assert:
+    that: bdr_version is version('4', '>=')
+    fail_msg: >-
+      PGD CLI requires BDR version 4 or later
+
+- set_fact:
+    pgdcli_bin: >-
+      {{ bdr_version is version('4', '==')|ternary('/usr/local/bin/', '') }}pgd
+
+- name: Run 'pgd --version' first
+  command: >
+    {{ pgdcli_bin }} --version
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Run various pgd subcommands and log output
+  command: >
+    {{ pgdcli_bin }} -f {{ pgdcli_directory }}/pgd-cli-config.yml
+    {{ subcommand }} -o json
+  become_user: "{{ postgres_user }}"
+  become: yes
+  register: pgd_subcommand
+  ignore_errors: yes
+  vars:
+    subcommands:
+      4:
+        - check-health
+        - show-version
+        - show-nodes
+        - show-raft
+        - show-replslots
+        - show-subscriptions
+      5:
+        - check-health
+        - show-version
+        - show-groups
+        - show-nodes
+        - show-raft
+        - show-proxies
+        - show-replslots
+        - show-subscriptions
+  with_items:
+    "{{ subcommands[bdr_version|int] }}"
+  loop_control:
+    loop_var: subcommand
+
+# TODO It would be remarkably nice to log the above via output.yml only
+# if we were running under `tpaexec test` (and not, say, when included
+# from upgrade.yml). But that's something we can do later.

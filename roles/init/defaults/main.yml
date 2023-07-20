@@ -227,3 +227,5 @@ default_pgd_proxy_user: pgdproxy
 default_pgd_proxy_group: pgdproxy
 
 default_primary_slot_name: "tpa_{{ inventory_hostname|regex_replace('[^a-zA-Z0-9_]', '_') }}"
+
+default_pgdcli_directory: /etc/edb/pgd-cli

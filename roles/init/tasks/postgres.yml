@@ -212,6 +212,7 @@
     replication_user: "{{ replication_user|default('replication') }}"
     replication_guard_slot_name: "tpa_tmp_higgs_boson_slot"
     primary_slot_name: "{{ primary_slot_name|default(default_primary_slot_name) }}"
+    pgdcli_directory: "{{ pgdcli_directory|default(default_pgdcli_directory) }}"
   vars:
     default_postgres_installation_method: >-
       {{ postgres_installation_source|default('pkg') }}
