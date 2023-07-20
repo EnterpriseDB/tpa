@@ -18,6 +18,10 @@ This command will try to perform the upgrade with minimal disruption to
 cluster operations. The exact details of the specialised upgrade process
 depend on the architecture of the cluster, as documented below.
 
+When upgrading, you should always use barman to take a backup before
+beginning the upgrade and disable any scheduled backups which would take
+place during the time set aside for the upgrade.
+
 In general, TPA will proceed instance-by-instance, stopping any affected
 services, installing new packages, updating the configuration if needed,
 restarting services, and performing any runtime configuration changes,
@@ -66,22 +70,28 @@ changes, run `tpaexec upgrade` to perform the upgrade.
 (`tpaexec upgrade` will automatically run `tpaexec provision` for you.) The upgrade
 process does the following:
 
-1. Checks that there are no witness nodes or version mismatches which
-   would prevent the upgrade from working.
-2. For each instance in the cluster:
-    - Ensure that it has the right repositories available to install the
-      software required for PGD-Always-ON.
-    - Stop harp-manager.
-    - Install pgd-proxy.
-    - Stop Postgres and update packages.
-    - Restart harp-manager; this will restart Postgres on the instance.
-    - Wait for BDR consensus to be reached before continuing.
-3. Update the BDR configuration on each instance.
-4. Stop harp-proxy and set up pgd-proxy to replace it.
-5. Restart pgbouncer on any pgbouncer instances.
-6. Remove harp-manager and harp-proxy.
-7. Upgrade pgd-cli.
-
+1. Checks that all preconditions for upgrading the cluster are met.
+2. Starts a proxy monitoring process which will record the health of the
+   cluster in the database during the upgrade.
+3. For each instance in the cluster, checks that it has the correct
+   repositories configured and that the required postgres packages are
+   available in them.
+4. For each instance in the cluster:
+    - Fences the node off to ensure that harp-proxy doesn't send any
+      connections to it.
+    - Stops, updates, and restarts postgres.
+    - Unfences the node so it can receive connections again.
+    - Updates pgbouncer, pgd-proxy, and pgd-cli, as applicable for this
+      node.
+5. For each instance in the cluster, updates its BDR configuration
+   specifically for BDR v5
+6. For each proxy node in the cluster:
+    - Sets up pgd-proxy.
+    - Stops harp-proxy.
+    - Starts pgd-proxy.
+7. Stops the proxy monitoring process and displays a summary of its
+   results.
+8. Removes harp-proxy and its support files.
 
 ## BDR-Always-ON
 

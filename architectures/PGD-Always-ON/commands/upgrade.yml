@@ -21,10 +21,10 @@
 # 1. Check that the cluster looks normal before doing anything.
 # 2. Then, for each Postgres instance:
 #    a. Fence the node (depending on the configuration)
-#    b. Stop Postgres
-#    c. Install and configure new packages (again, depending on the
+#    b. Stop, update, and restart Postgres
+#    c. Unfence the node if necessary
+#    d. Install and configure new packages (again, depending on the
 #       cluster's configuration)
-#    d. Start Postgres
 #    e. Wait for the cluster to settle before moving on
 # 3. Perform some additional tasks that are relevant only to major
 #    version upgrades:
