@@ -194,6 +194,27 @@
     include_role:
       name: sys/repositories
 
+  # Do the repositories we configured actually contain the packages we
+  # need for the upgrade? Unfortunately, we can't always tell for sure,
+  # especially with upgrades, without actually trying to install them.
+  # Still, any errors we can catch now, before we stop Postgres on any
+  # instances, are most helpful.
+  #
+  # (In principle, we ought to check that every instance has ALL the
+  # packages it needs, e.g., pgd-proxy or pgbouncer. However, to avoid
+  # adding a lot of potentially-confusing noise to the process, and in
+  # light of the fact that there are very few repositories involved, it
+  # is enough to check that the major packages, i.e., Postgres/BDR, are
+  # available on one instance.)
+
+  - name: Check if required packages are available
+    include_role:
+      name: postgres/pkg
+      tasks_from: check-update.yml
+    when: >
+      'bdr' in role
+      and inventory_hostname == first_bdr_primary
+
 # When doing a BDR major version upgrade, we start a program that stays
 # connected to the active proxies and repeatedly runs queries, reporting
 # on any interruptions (some brief interruptions are expected).
