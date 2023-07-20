@@ -46,9 +46,9 @@
     become: yes
     retries: 60
     vars:
-      node_info: "{{ harpctl_get_node.stdout|from_json }}"
+      node_info: "{{ (harpctl_get_node.stdout or '{}')|from_json }}"
     until:
-      harpctl_get_node is failed
+      harpctl_get_node is not successful
       or ('fenced' in node_info and node_info.fenced)
 
 # On PGD5 nodes, we can just set the route_fence option directly using

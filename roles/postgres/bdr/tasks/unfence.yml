@@ -46,9 +46,9 @@
     become: yes
     retries: 60
     vars:
-      node_info: "{{ harpctl_get_node.stdout|from_json }}"
+      node_info: "{{ (harpctl_get_node.stdout or '{}')|from_json }}"
     until:
-      harpctl_get_node is failed
+      harpctl_get_node is not successful
       or 'fenced' not in node_info
 
 # XXX Do we need to wait for the following change to propagate? How?

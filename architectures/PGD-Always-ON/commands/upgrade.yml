@@ -350,6 +350,28 @@
       name: postgres/bdr
       tasks_from: update.yml
 
+  - name: Wait for write leader elections to complete
+    command:
+      pgd show-groups -o json
+    register: pgd_show_groups
+    become_user: "{{ postgres_user }}"
+    become: yes
+    vars:
+      group_info: "{{ (pgd_show_groups.stdout or '[]')|from_json }}"
+      leaderless_routing_groups: >-
+        {{ group_info
+           |json_query("[?enable_proxy_routing && write_lead == '']") }}
+      election_timeout: >-
+        {{ cluster_facts.pg_settings["bdr.raft_global_election_timeout"]
+           |default(6000) }}
+    until:
+      pgd_show_groups is not successful
+      or leaderless_routing_groups is empty
+    retries: "{{ (4*(election_timeout|int)/1000)|int }}"
+    delay: 1
+    when:
+      inventory_hostname == first_bdr_primary
+
 # During a BDR major version upgrade, all harp-proxy instances remain
 # generally available throughout the process (other than the two brief
 # interruptions when we fence the active node). Once the node-by-node
@@ -481,9 +503,9 @@
         become: yes
         retries: 60
         vars:
-          cluster_info: "{{ harpctl_get_cluster.stdout|from_json }}"
+          cluster_info: "{{ (harpctl_get_cluster.stdout or '{}')|from_json }}"
         until:
-          harpctl_get_cluster is failed
+          harpctl_get_cluster is not successful
           or ('is_managed' in cluster_info and not cluster_info.is_managed)
 
     - name: Ensure that harp-manager is not running
