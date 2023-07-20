@@ -134,6 +134,10 @@
       first_bdr_primary is defined
       and bdr_major_version_upgrade is not defined
 
+  - set_fact:
+      enable_proxy_monitoring:
+        "{{ enable_proxy_monitoring|default(false) }}"
+
 # As a precaution, we refuse to start any upgrade if any proxies are
 # unhealthy.
 #
@@ -267,7 +271,7 @@
     when:
       bdr_major_version_upgrade
       and inventory_hostname == first_bdr_primary
-      and enable_proxy_monitoring|default('true')
+      and enable_proxy_monitoring
 
 # Now that we're convinced the cluster is in a reasonable initial state,
 # we start the update process one by one on the instances. You can run
@@ -497,7 +501,7 @@
     when:
       bdr_major_version_upgrade
       and inventory_hostname == first_bdr_primary
-      and enable_proxy_monitoring|default('true')
+      and enable_proxy_monitoring
 
 - name: Log diagnostic output after upgrade
   any_errors_fatal: true
