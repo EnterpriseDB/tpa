@@ -7,12 +7,8 @@ legacy platform is likely to work as long as you have access to the
 necessary packages, but this is not considered a supported use of TPA
 and is not suitable for production use.
 
-!!! Note
-This page is about distribution support on target instances that you
-are deploying *to*, not about the system you are running TPA *from*.
-See the [installation instructions](INSTALL.md#distribution-support) for
-more on the latter.
-!!!
+Fully supported platforms are supported both as host systems for running
+TPA and target systems on which TPA deploys the Postgres cluster.
 
 ## Debian x86
 
@@ -30,6 +26,7 @@ more on the latter.
 
 ## RedHat x86
 
+* RHEL/Rocky/AlmaLinux/Oracle Linux 9.x is fully supported (python3 only)
 * RHEL/CentOS/Rocky/AlmaLinux 8.x is fully supported (python3 only)
 * RHEL/CentOS 7.x is fully supported (python2 only)
 

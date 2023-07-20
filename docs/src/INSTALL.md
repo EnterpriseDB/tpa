@@ -1,20 +1,19 @@
 # TPA installation
 
 To use TPA, you need to install tpaexec and run the `tpaexec setup`
-command. This document explains how to install TPA packages.
+command. This document explains how to install TPA packages. See
+[Distribution support](distributions.md) for information on what
+platforms are supported.
 
 TPA packages are available to prospects (for a 60 day trial), EDB
 customers with a valid Extreme HA subscription, or by prior arrangement.
 Please contact your account manager to request access.
 
-## Distribution support
-
-We publish TPA packages for Debian 11 (bullseye), Debian 10 (buster),
-Ubuntu 22.04 (jammy), Ubuntu 20.04 (focal), Ubuntu 18.04 (bionic),
-RHEL/CentOS 7.x and 8.x, Rocky 8.x and AlmaLinux 8.x. These
-distributions provide a usable Python 3.6+ environment out of the box,
-which TPA requires. However, TPA supports a wider range of
-[distributions on target instances](distributions.md).
+!!! Info
+    Please make absolutely sure that your system has the correct
+    date and time set, because various things will fail otherwise. We
+    recommend you use a network time, for example `sudo ntpdate
+    pool.ntp.org`
 
 ## Quickstart
 
@@ -22,42 +21,43 @@ Login to [EDB Repos 2.0](https://www.enterprisedb.com/repos-downloads)
 to obtain your token. Then execute the following command, substituting
 your token for `<your-token>`.
 
+#### Add repository and install TPA on Debian or Ubuntu
 ```bash
-# Add repository (Debian, Ubuntu)
-$ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.deb.sh' | sudo -E bash
-
-# Add repository (RedHat, Rocky or AlmaLinux)
-$ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.rpm.sh' | sudo -E bash
+curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.deb.sh' | sudo -E bash
+sudo apt-get install tpaexec
 ```
 
-Then run the following commands:
-
+#### Add repository and install TPA on RHEL, Rocky, AlmaLinux or Oracle Linux
 ```bash
-# Install packages (Debian, Ubuntu)
-$ sudo apt-get install tpaexec
-
-# Install packages (RedHat, Rocky or AlmaLinux)
-$ sudo yum install tpaexec
-
-# Install additional dependencies
-$ sudo /opt/EDB/TPA/bin/tpaexec setup
-
-# Verify installation (run as a normal user)
-$ /opt/EDB/TPA/bin/tpaexec selftest
+curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.rpm.sh' | sudo -E bash
+sudo yum install tpaexec
 ```
 
-More detailed explanations are given below.
-
-## What time is it?
-
-Please make absolutely sure that your system has the correct date and
-time set, because various things will fail otherwise. For example:
-
+#### Install additional dependencies
 ```bash
-$ sudo ntpdate pool.ntp.org
+sudo /opt/EDB/TPA/bin/tpaexec setup
 ```
 
-## Packages
+#### Verify installation (run as a normal user)
+```bash
+/opt/EDB/TPA/bin/tpaexec selftest
+```
+
+More detailed explanations of each step are given below.
+
+## Where to install TPA
+
+As long as you are using a supported platform, TPA can be installed and
+run from your workstation. This is fine for learning, local testing or demonstration purposes. TPA supports [deploying to Docker containers](platform-docker.md)
+should you wish to perform a complete deployment on your own workstation.
+
+For production use, we recommend running TPA on a dedicated, persistent
+virtual machine. We recommend this because it ensures that the cluster
+directories are retained and available to your team for future cluster
+management or update. It also means you only have to update one copy of
+TPA and you only need to provide network access from a single TPA host
+to the target instances.
+## Installing TPA packages
 
 To install TPA, you must first subscribe to an EDB repository that
 provides it. The preferred source for repositories is EDB Repos 2.0.
@@ -66,12 +66,15 @@ Login to [EDB Repos 2.0](https://www.enterprisedb.com/repos-downloads)
 to obtain your token. Then execute the following command, substituting
 your token for `<your-token>`.
 
+#### Add repository on Debian or Ubuntu
 ```bash
-# Debian or Ubuntu
-$ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.deb.sh' | sudo -E bash
+curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.deb.sh' | sudo -E bash
 
-# RedHat, Rocky or AlmaLinux
-$ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.rpm.sh' | sudo -E bash
+```
+
+#### Add repository on RHEL, Rocky, AlmaLinux or Oracle Linux
+```bash
+curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/postgres_distributed/setup.rpm.sh' | sudo -E bash
 ```
 
 Alternatively, you may obtain TPA from the legacy 2ndQuadrant
@@ -83,12 +86,13 @@ and following the instructions to enable the repository on your system.
 Once you have enabled one of these repositories, you may install TPA
 as follows:
 
+#### Install on Debian or Ubuntu
 ```bash
-# Debian or Ubuntu
-$ sudo apt-get install tpaexec
-
-# RedHat, Rocky or AlmaLinux
-$ sudo yum install tpaexec
+sudo apt-get install tpaexec
+```
+#### Install on RHEL, Rocky, AlmaLinux or Oracle Linux
+```bash
+sudo yum install tpaexec
 ```
 
 This will install TPA into `/opt/EDB/TPA`. It will also
@@ -98,17 +102,17 @@ installed.
 We mention `sudo` here only to indicate which commands need root
 privileges. You may use any other means to run the commands as root.
 
-## Python environment
+## Setting up the TPA Python environment
 
 Next, run `tpaexec setup` to create an isolated Python environment and
 install the correct versions of all required modules.
 
 !!! Note
     On Ubuntu versions prior to 20.04, please use `sudo -H tpaexec setup`
-    (to avoid subsequent permission errors during `tpaexec configure`)
+    to avoid subsequent permission errors during `tpaexec configure`
 
 ```bash
-$ sudo /opt/EDB/TPA/bin/tpaexec setup
+sudo /opt/EDB/TPA/bin/tpaexec setup
 ```
 
 You must run this as root because it writes to `/opt/EDB/TPA`,
@@ -120,7 +124,7 @@ normally run `tpaexec` commands. For example, you could add this to
 your .bashrc or equivalent shell configuration file:
 
 ```bash
-$ export PATH=$PATH:/opt/EDB/TPA/bin
+export PATH=$PATH:/opt/EDB/TPA/bin
 ```
 
 ## Installing TPA without internet or network access (air-gapped)
@@ -158,19 +162,19 @@ everything that would have been downloaded, so that they can be
 installed without network access. Just install the package before you
 run `tpaexec setup` and the bundled copies will be used automatically.
 
-## Verification
+## Verifying your TPA installation
 
 Once you're done with all of the above steps, run the following command
 to verify your local installation:
 
 ```bash
-$ tpaexec selftest
+tpaexec selftest
 ```
 
 If that command completes without any errors, your TPA installation
 is ready for use.
 
-## Upgrading
+## Upgrading TPA
 
 To upgrade to a later release of TPA, you must:
 
