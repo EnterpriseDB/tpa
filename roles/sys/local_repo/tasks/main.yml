@@ -79,6 +79,13 @@
     when:
       platform not in ['docker', 'shared']
 
+  - debug:
+      msg: "Always refresh local-repo in containers"
+    changed_when: true
+    notify: Repo contents changed
+    when:
+      platform in ['docker']
+
   - include_tasks: define-repository.yml
     vars:
       path: "{{ target_repo_config[ansible_os_family].path }}"

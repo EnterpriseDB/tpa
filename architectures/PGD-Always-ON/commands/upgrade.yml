@@ -206,8 +206,6 @@
 # changes to the repository configuration that may be required. For
 # example, during a BDR4→PGD5 upgrade, we have to switch to the new
 # Cloudsmith repositories.
-#
-# XXX This doesn't take sys/local-repo into account.
 
 - name: Update repository configuration, if required
   any_errors_fatal: true
@@ -217,6 +215,10 @@
   environment: "{{ target_environment }}"
   hosts: "{{ update_hosts|default('all') }}"
   tasks:
+  - name: Configure local-repo, if available
+    include_role:
+      name: sys/local_repo
+
   - name: Set up repositories
     include_role:
       name: sys/repositories
