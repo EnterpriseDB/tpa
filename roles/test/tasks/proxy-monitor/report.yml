@@ -14,6 +14,7 @@
   async_status:
     jid: "{{ proxy_monitor_cmd.ansible_job_id }}"
   register: proxy_monitor_job_status
+  ignore_errors: yes
   become_user: "{{ postgres_user }}"
   become: yes
 
