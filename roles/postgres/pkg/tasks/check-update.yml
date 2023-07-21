@@ -15,8 +15,22 @@
     check_install_only: yes
     result_varname: postgres_pkg_check
 
-- fail:
+# The purpose of this check is to warn the user as early as possible if
+# they are missing any packages that we would try to install during an
+# upgrade window.
+#
+# Unfortunately, with the way RPM package dependencies work, if new bdr5
+# packages ARE present, the check fails with a "Depsolve Error", which
+# tells us only that bdr5 packages conflict with the bdr4 ones. That's
+# not actually an error, and we shouldn't bother the user with it.
+
+- name: Try to check for required Postgres-related packages before upgrade
+  fail:
     msg: >-
       Package installation check failed: {{ postgres_pkg_check.msg }}
+      (rerun with `-e check_packages_before_upgrade=no` to skip)
   when:
     postgres_pkg_check is not successful
+    and not (ansible_distribution == 'RedHat'
+      and "Depsolve Error" in postgres_pkg_check.msg)
+    and check_packages_before_upgrade|default(true)
