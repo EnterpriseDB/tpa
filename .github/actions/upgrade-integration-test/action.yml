@@ -95,16 +95,6 @@ runs:
         exit $status
       shell: bash
 
-    - name: Add post-repo hook
-      run: |
-        echo "::group::Copy post-repo hook"
-        mkdir "$CLUSTER/hooks"
-        cp .github/actions/upgrade-integration-test/post-repo.yml "$CLUSTER/hooks/post-repo.yml" -vv
-        status=$?
-        echo "::endgroup::"
-        exit $status
-      shell: bash
-
     - name: Download newly needed packages after reconfigure
       run: |
         echo "::group::Download reconfigure packages"
@@ -121,7 +111,7 @@ runs:
     - name: Run upgrade command
       run: |
         echo "::group::Upgrade cluster"
-        ./bin/tpaexec upgrade "$CLUSTER" -vv
+        ./bin/tpaexec upgrade "$CLUSTER" -vv -e enable_proxy_monitoring=yes
         status=$?
         echo "::endgroup::"
         exit $status
