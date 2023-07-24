@@ -81,14 +81,17 @@
     # all switching to a new group at the same time.
 
     - debug:
-        msg: >
+        msg: >-
           Node {{ inventory_hostname }} with node_kind={{ role|bdr_node_kind }}
-          is currently in node group {{ bdr_current_node_group }}, should be in
-          node group {{ bdr_child_group|default(bdr_node_group) }}
+          is currently in node group {{ current_node_group }},
+          {% if current_node_group == target_node_group %}no change needed
+          {% else %}should be in group {{ target_node_group }}{% endif %}
       vars:
-        bdr_current_node_group:
+        current_node_group:
           "{{ cluster_facts.databases[bdr_database].bdr
               .local_node_summary[0].node_group_name }}"
+        target_node_group:
+          "{{ bdr_child_group|default(bdr_node_group) }}"
 
     - name: Ensure that all BDR nodes are in the desired (sub)group
       postgresql_query:
