@@ -2,10 +2,6 @@
 
 ---
 full: # 500+ clusters do not use this option
-  tpa_architecture: &full_tpa_architecture
-    - "BDR-Always-ON"
-  tpa_platform: &full_tpa_platform
-    - "docker"
   tpa_os_image: &full_tpa_os_image
     - "ubuntu:18.04"
     - "ubuntu:20.04"
@@ -30,31 +26,36 @@ full: # 500+ clusters do not use this option
   tpa_proxy_routing: &full_tpa_proxy_routing
     - local
     - global
+  tpa_platform: &full_tpa_platform
+    - "docker"
+  tpa_architecture: &full_tpa_architecture
+    - "BDR-Always-ON"
   # Using dev atm to avoid issues with 5.1 PGD that doesn't support witness
   # node group change
   tpa_edb_repo: &full_tpa_edb_repo
     - "dev dev_postgres_distributed"
 
 
-# Only latest version of each os
-# postgresql, epas, pgextended(for bdr4 initial deploy)
-# only silver layout
-# latest postgres version
-# starts 3*3*2 runs (postgres_flavour * os_image * proxy_routing)
-latest-silver:
-  tpa_architecture: *full_tpa_architecture
-  tpa_platform: *full_tpa_platform
-  tpa_edb_repo: *full_tpa_edb_repo
-  tpa_postgres_flavour: *full_tpa_postgres_flavour
-  tpa_postgres_version:
-    - 14
+# latest os               3
+# silver                  1
+# all postgres_flavour    3
+# postgres 14             1
+# proxy routing           2
+# total                   18
+latest-silver-14:
   tpa_os_image:
     - "debian:11"
     - "redhat:8"
     - "ubuntu:22.04"
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 14
   tpa_layout:
     - silver
   tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo: *full_tpa_edb_repo
 
 
 # debian 11
@@ -62,31 +63,192 @@ latest-silver:
 # all postgres_flavour
 # postgres 14
 debian11-silver-14:
-  tpa_architecture: *full_tpa_architecture
-  tpa_platform: *full_tpa_platform
-  tpa_edb_repo: *full_tpa_edb_repo
+  tpa_os_image:
+    - "debian:11"
   tpa_postgres_flavour: *full_tpa_postgres_flavour
   tpa_postgres_version:
     - 14
-  tpa_os_image:
-    - "debian:11"
   tpa_layout:
     - silver
   tpa_proxy_routing: *full_tpa_proxy_routing
-
-# debian 11
-# silver layout
-# all postgres_flavour
-# postgres version 14
-debian11-epas14:
-  tpa_architecture: *full_tpa_architecture
   tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
   tpa_edb_repo: *full_tpa_edb_repo
+
+# debian 11               1
+# all layout              4
+# epas                    1
+# postgres version 14     1
+# proxy routing           2
+# total                   8
+debian11-all-epas-14:
+  tpa_os_image:
+    - "debian:11"
   tpa_postgres_flavour:
     - epas
   tpa_postgres_version:
     - 14
-  tpa_os_image:
-    - "debian:11"
   tpa_layout: *full_tpa_layout
   tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo: *full_tpa_edb_repo
+
+# redhat 8                1
+# all layout              4
+# epas                    1
+# postgres version 14     1
+# proxy routing           2
+# total                   8
+redhat8-all-epas-14:
+  tpa_os_image:
+    - "redhat:8"
+  tpa_postgres_flavour:
+    - epas
+  tpa_postgres_version:
+    - 14
+  tpa_layout: *full_tpa_layout
+  tpa_platform: *full_tpa_platform
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo: *full_tpa_edb_repo
+
+# ubuntu 22.04            1
+# all layout              4
+# epas                    1
+# postgres version 14     1
+# proxy routing           2
+# total                   8
+ubuntu22-all-epas-14:
+  tpa_os_image:
+    - "ubuntu:22.04"
+  tpa_postgres_flavour:
+    - epas
+  tpa_postgres_version:
+    - 14
+  tpa_layout: *full_tpa_layout
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo: *full_tpa_edb_repo
+
+# latest os               3
+# all layout              4
+# epas                    1
+# postgres version 14     1
+# proxy routing           2
+# total                   24
+latest-epas-14:
+  tpa_os_image:
+    - "debian:11"
+    - "redhat:8"
+    - "ubuntu:22.04"
+  tpa_postgres_flavour:
+    - epas
+  tpa_postgres_version:
+    - 14
+  tpa_layout: *full_tpa_layout
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo: *full_tpa_edb_repo
+
+# latest os               3
+# all layout              4
+# postgresql              1
+# postgres version 14     1
+# proxy routing           2
+# total                   24
+latest-pg-14:
+  tpa_os_image:
+    - "debian:11"
+    - "redhat:8"
+    - "ubuntu:22.04"
+  tpa_postgres_flavour:
+    - "postgresql"
+  tpa_postgres_version:
+    - 14
+  tpa_layout: *full_tpa_layout
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo: *full_tpa_edb_repo
+
+# latest os               3
+# all layout              4
+# edb-pge                 1
+# postgres version 14     1
+# proxy routing           2
+# total                   24
+latest-pge-14:
+  tpa_os_image:
+    - "debian:11"
+    - "redhat:8"
+    - "ubuntu:22.04"
+  tpa_postgres_flavour:
+    - "pgextended"
+  tpa_postgres_version:
+    - 14
+  tpa_layout: *full_tpa_layout
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo: *full_tpa_edb_repo
+
+# all debian              2
+# all layout              4
+# all flavour             3
+# postgres version 14     1
+# proxy routing           2
+# total                   48
+debian-full-14:
+  tpa_os_image:
+    - "debian:11"
+    - "debian:10"
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 14
+  tpa_layout: *full_tpa_layout
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo: *full_tpa_edb_repo
+
+# all redhat              2
+# all layout              4
+# all flavour             3
+# postgres version 14     1
+# proxy routing           2
+# total                   48
+redhat-full-14:
+  tpa_os_image:
+    - "redhat:7"
+    - "redhat:8"
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 14
+  tpa_layout: *full_tpa_layout
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo: *full_tpa_edb_repo
+
+# all ubuntu              3
+# all layout              4
+# all flavour             3
+# postgres version 14     1
+# proxy routing           2
+# total                   72
+ubuntu-full-14:
+  tpa_os_image:
+    - "ubuntu:18.04"
+    - "ubuntu:20.04"
+    - "ubuntu:22.04"
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 14
+  tpa_layout: *full_tpa_layout
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo: *full_tpa_edb_repo

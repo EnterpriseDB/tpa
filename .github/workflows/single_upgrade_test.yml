@@ -98,9 +98,14 @@ jobs:
         with:
           tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
           tpa_platform: ${{ github.event.inputs.tpa_platform }}
-          tpa_layout: ${{ inputs.tpa_layout }}
+          tpa_layout: ${{ github.event.inputs.tpa_layout }}
           tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
           tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
           tpa_proxy_routing: ${{ github.event.inputs.tpa_proxy_routing }}
           tpa_edb_repo: ${{ github.event.inputs.tpa_edb_repo }}
+          cluster: "${{ github.event.inputs.tpa_postgres_flavour }}-\
+            ${{ github.event.inputs.tpa_postgres_version }}-\
+            ${{ github.event.inputs.tpa_os_image }}-\
+            ${{ github.event.inputs.tpa_layout }}-\
+            ${{ github.event.inputs.tpa_proxy_routing }}"

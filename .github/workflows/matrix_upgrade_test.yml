@@ -60,3 +60,8 @@ jobs:
           tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
           tpa_proxy_routing: ${{ matrix.tpa_proxy_routing }}
           tpa_edb_repo: ${{ matrix.tpa_edb_repo }}
+          cluster: "${{ matrix.tpa_postgres_flavour }}-\
+            ${{ matrix.tpa_postgres_version }}-\
+            ${{ matrix.tpa_os_image }}-\
+            ${{ matrix.tpa_layout }}-\
+            ${{ matrix.tpa_proxy_routing }}"
