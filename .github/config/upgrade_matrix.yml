@@ -1,6 +1,13 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 ---
+
+# all os                  7
+# all layout              4
+# all postgres_flavour    3
+# all postgres version    3
+# proxy routing           2
+# total                   504
 full: # 500+ clusters do not use this option
   tpa_os_image: &full_tpa_os_image
     - "ubuntu:18.04"
@@ -58,10 +65,12 @@ latest-silver-14:
   tpa_edb_repo: *full_tpa_edb_repo
 
 
-# debian 11
-# silver layout
-# all postgres_flavour
-# postgres 14
+# debian 11               1
+# silver layout           1
+# all postgres_flavour    3
+# postgres version 14     1
+# proxy routing           2
+# total                   6
 debian11-silver-14:
   tpa_os_image:
     - "debian:11"

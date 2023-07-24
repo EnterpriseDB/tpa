@@ -8,12 +8,20 @@ on:
       matrix_key:
         description: "Set of inputs to use"
         required: false
-        default: "latest-silver-14"
+        default: "debian11-silver-14"
         type: choice
         options:
-          - latest-silver
           - debian11-silver-14
-          - debian11-epas14
+          - debian11-all-epas-14
+          - redhat8-all-epas-14
+          - ubuntu22-all-epas-14
+          - latest-silver-14
+          - latest-epas-14
+          - latest-pg-14
+          - latest-pge-14
+          - debian-full-14
+          - redhat-full-14
+          - ubuntu-full-14
 
 env:
   LANG: "C.UTF-8"
