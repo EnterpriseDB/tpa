@@ -477,6 +477,21 @@
     when: >
       'pgd-proxy' in role
 
+  # This play is applied only to proxies, and we want to run pgd-cli on
+  # a BDR data node, so we 'delegate_to: first_bdr_primary', but we have
+  # to wrap the task in a block because you can't delegate the include,
+  # but you can set delegate_to on a containing block. 🤷
+
+  - name: Log pgd-cli diagnostic output
+    block:
+    - include_role:
+        name: test
+        tasks_from: pgd-cli/info.yml
+    when: >
+      'pgd-proxy' in role
+    delegate_to: "{{ first_bdr_primary }}"
+    run_once: true
+
   # No matter what sort of upgrade we're doing, pgd-proxy should be
   # correctly routing traffic now.
 
