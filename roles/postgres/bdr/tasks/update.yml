@@ -4,11 +4,22 @@
 
 - include_tasks: validate.yml
 
-- name: Alter node kind for all BDR nodes
+# PGD5 introduced the notion of a "node_kind", to be specified at the
+# time of create_node(). (This was later backported to v4 for witness
+# nodes, but TPA doesn't use that.) We can set the node_kind only when
+# all nodes are running a protocol version that recognises the concept.
+#
+# At this point, we expect all nodes to be running v5, so we can call
+# bdr.alter_node_kind() to set the node_kind for all nodes that do not
+# already have a node_kind set.
+
+- name: Ensure that all BDR nodes have an appropriate node_kind set
   postgresql_query:
     conninfo: "{{ bdr_node_dsn }}"
     queries:
-      - text: SELECT bdr.alter_node_kind(node_name := %s, node_kind := %s) from bdr.node where node_name = %s and node_kind = 0;
+      - text: >
+          SELECT bdr.alter_node_kind(node_name := %s, node_kind := %s)
+            FROM bdr.node where node_name = %s and node_kind = 0;
         args:
           - "{{ this_bdr_node_name }}"
           - "{{ bdr_node_role|bdr_node_kind }}"
@@ -18,6 +29,8 @@
   with_items: "{{ groups['role_bdr'] }}"
   loop_control:
     loop_var: bdr_node
+    label: >-
+      {{ bdr_node }}:{{ bdr_node_role|bdr_node_kind }}
   vars:
     this_bdr_node_name: "{{ hostvars[bdr_node].bdr_node_name }}"
     bdr_node_role: "{{ hostvars[bdr_node].role }}"
@@ -27,13 +40,57 @@
     inventory_hostname == first_bdr_primary
     and bdr_node_database_facts.bdr.local_node_summary[0].node_kind_name == "unknown"
 
-- block:
+# Now that the nodes are set up the same way we would create them for a
+# new PGD5 deployment, we can run the remaining BDR setup tasks that we
+# would ordinarily. This includes creating groups, setting group and
+# node options, etc.
+#
+# Most likely, the nodes in a BDR4 cluster will all be in the top-level
+# node group (named "bdrgroup" by TPA versions before v23.11, or after
+# cluster_name afterwards). TPA did allow creating separate groups for
+# BDR4, but in practice nobody used it.
+#
+# With PGD5, we create one additional group per location by default. (It
+# is possible to define arbitrary group hierarchies, but creating nested
+# subgroups on first_bdr_primary is not currently possible; see BDR-3609
+# for details).
+#
+# The postgres/bdr code included via init.yml below will create the node
+# groups and set the correct group options. Then we must place existing
+# v4 nodes into the correct groups with bdr.switch_node_group(), rather
+# than using the usual group-join code (since the nodes are already in
+# the top group).
+
+- name: Complete BDR initialisation tasks
+  vars:
+    bdr_database_facts: "{{ cluster_facts.databases[bdr_database] }}"
+  block:
     - include_tasks: "bdr{{ bdr_major_version }}/init.yml"
+
+    # We depend on updated cluster_facts below to avoid trying to switch
+    # to a node group we're already a member of—this may be the case for
+    # first_bdr_primary, which may create a group with 'join_node_group'
+    # set because of its own bdr_child_group setting.
 
     - include_role:
         name: postgres/facts
 
-    - name: Switch node group for all BDR nodes
+    # As with the group join during a normal deploy, we execute the node
+    # switches on first_bdr_primary by connecting to each node in turn,
+    # so as to avoid noise/confusion/potential errors from having nodes
+    # all switching to a new group at the same time.
+
+    - debug:
+        msg: >
+          Node {{ inventory_hostname }} with node_kind={{ role|bdr_node_kind }}
+          is currently in node group {{ bdr_current_node_group }}, should be in
+          node group {{ bdr_child_group|default(bdr_node_group) }}
+      vars:
+        bdr_current_node_group:
+          "{{ cluster_facts.databases[bdr_database].bdr
+              .local_node_summary[0].node_group_name }}"
+
+    - name: Ensure that all BDR nodes are in the desired (sub)group
       postgresql_query:
         conninfo: "{{ hostvars[bdr_node].bdr_node_dsn }}"
         queries:
@@ -45,6 +102,8 @@
       with_items: "{{ groups['role_bdr'] }}"
       loop_control:
         loop_var: bdr_node
+        label: >-
+          {{ bdr_node }}:{{ bdr_node_child_group }}
       vars:
         bdr_node_child_group: "{{
             hostvars[bdr_node].bdr_child_group|default(hostvars[bdr_node].bdr_node_group)
@@ -55,6 +114,8 @@
         inventory_hostname == first_bdr_primary
         and bdr_node_database_facts.bdr.local_node_summary[0].node_group_name != bdr_node_child_group
 
+    # With the nodes in the correct groups, we can now proceed to the
+    # usual post-join setup tasks, which include setting group options
+    # like enable_raft/enable_proxy_routing, defining proxies, etc.
+
     - include_tasks: "bdr{{ bdr_major_version }}/post-join.yml"
-  vars:
-    bdr_database_facts: "{{ cluster_facts.databases[bdr_database] }}"
