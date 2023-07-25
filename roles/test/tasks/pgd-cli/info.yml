@@ -7,9 +7,14 @@
     fail_msg: >-
       PGD CLI requires BDR version 4 or later
 
+- name: Check for pgd binary location
+  stat:
+    path: /usr/local/bin/pgd
+  register: pgd
+
 - set_fact:
     pgdcli_bin: >-
-      {{ bdr_version is version('4', '==')|ternary('/usr/local/bin/', '') }}pgd
+      {{ pgd.stat.exists | ternary('/usr/local/bin/', '') }}pgd
 
 - name: Run 'pgd --version' first
   command: >
