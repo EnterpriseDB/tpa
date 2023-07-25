@@ -26,5 +26,5 @@
     not proxy_monitor_job_status.finished
 
 - name: Display proxy-monitor output
-  command: cat /var/log/tpa-proxy-monitor.log
+  command: cat /var/log/tpa-proxy-monitor/log
   ignore_errors: yes
