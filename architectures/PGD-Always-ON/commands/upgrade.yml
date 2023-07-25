@@ -126,13 +126,20 @@
   environment: "{{ target_environment }}"
   hosts: all
   tasks:
+
+  # We set bdr_major_version_upgrade for all BDR instances above (and we
+  # know that they must all have the same value). Now we extend that for
+  # other hosts, e.g., standalone pgd-proxy instances.
+
   - name: Determine whether we're doing a major version upgrade from BDR 4
     set_fact:
       bdr_major_version_upgrade:
-        "{{ hostvars[first_bdr_primary].bdr_major_version_upgrade }}"
+        "{{ groups['role_bdr']
+            |map('extract', hostvars, 'bdr_major_version_upgrade')
+            |select('defined')
+            |first }}"
     when:
-      first_bdr_primary is defined
-      and bdr_major_version_upgrade is not defined
+      bdr_major_version_upgrade is not defined
 
   - set_fact:
       enable_proxy_monitoring:
