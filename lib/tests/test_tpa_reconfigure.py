@@ -46,7 +46,9 @@ class TestReconfigure:
             ),
         ],
     )
+
     def test_reconfigure_basic(self, input, expected, result, create_cluster):
+        """test basic reconfigure function"""
         if expected:
             with expected as x:
                 reconfigure(args=input)

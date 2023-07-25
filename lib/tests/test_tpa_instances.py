@@ -8,7 +8,7 @@ import pytest
 from tpa.cluster import Cluster
 from tpa.instances import Instances
 from tpa.instance import Instance
-from tpa.exceptions import InstanceError
+from tpa.exceptions import InstanceError, ConfigureError
 
 
 @pytest.fixture
@@ -95,7 +95,7 @@ def instances_with_roles(basic_instances):
     for instance in basic_instances:
         if instance.name == "a":
             instance.add_role("bdr")
-            instance.add_role("witness-only")
+            instance.add_role("witness")
         else:
             instance.add_role("bdr")
             instance.add_role("pgd-proxy")
@@ -119,6 +119,15 @@ def instances_with_hostvars(basic_instances):
             }
     return basic_instances
 
+@pytest.fixture
+def instances_with_kind(basic_cluster):
+    """generate instances with roles  for each node_kind"""
+    basic_cluster.add_instance("w", location_name="known",settings={"role":["witness","bdr"]})
+    basic_cluster.add_instance("s", location_name="known",settings={"role":["standby","bdr"]})
+    basic_cluster.add_instance("so", location_name="known",settings={"role":["subscriber-only","bdr"]})
+    basic_cluster.add_instance("data", location_name="known",settings={"role":["bdr"]})
+    basic_cluster.add_instance("other", location_name="known",settings={"role":["barman"]})
+    return Instances(basic_cluster.instances)
 
 class TestInstances:
     """test Instances class"""
@@ -160,10 +169,39 @@ class TestInstances:
     @pytest.mark.parametrize(
         "input, expected",
         [
+            ("a", ["a"]),
+            ("c", []),
+            (1, []),
+        ],
+    )
+    def test_instances_with_name(self, basic_instances, input, expected):
+        """test with_name function"""
+
+        assert basic_instances.with_name(input).get_names() == expected
+
+    @pytest.mark.parametrize(
+        "input, expected",
+        [
+            ("data", ["data"]),
+            ("other", []),
+            ("witness", ["w"]),
+            ("standby", ["s"]),
+            ("subscriber-only", ["so"]),
+        ],
+    )
+    def test_instances_with_bdr_node_kind(self, instances_with_kind, input, expected):
+        """test with_bdr_node_kind function"""
+
+        assert instances_with_kind.with_bdr_node_kind(input).get_names() == expected
+
+
+    @pytest.mark.parametrize(
+        "input, expected",
+        [
             (["bdr"], ["a", "b"]),
             (["unknown"], []),
             (["bdr", "pgd-proxy"], ["b"]),
-            (["bdr", "pgd-proxy", "witness-only"], []),
+            (["bdr", "pgd-proxy", "witness"], []),
         ],
     )
     def test_instances_with_roles(self, instances_with_roles, input, expected):
@@ -235,3 +273,21 @@ class TestInstances:
         assert basic_instances.with_role(input).get_names() == []
         assert basic_instances.add_role(input)
         assert basic_instances.with_role(input).get_names() == ["a", "b"]
+
+    def test_instances_only(self,basic_cluster, basic_instances):
+        """test only function"""
+        instances = Instances()
+        with pytest.raises(ConfigureError):
+            assert instances.only()
+            assert basic_instances.only()
+        instances = Instances([Instance("a",cluster=basic_cluster,location_name="known")])
+        assert instances.only().name == "a"
+
+    def test_instances_maybe(self, basic_cluster, basic_instances):
+        """test maybe function"""
+        instances = Instances()
+        assert instances.maybe() == None
+        with pytest.raises(ConfigureError):
+            assert basic_instances.maybe()
+        instances = Instances([Instance("a",cluster=basic_cluster,location_name="known")])
+        assert instances.maybe().name == "a"

@@ -34,7 +34,11 @@ class Repositories(Transmogrifier):
         return ChangeDescription(items=[f"Set edb_repositories to {repos}"])
 
     # XXX This function is at present suitable only for use from BDR4PGD5.
-
+    # - we need to ensure we are given valid repositories
+    # - we currently assume edb_repositories are set, this might not be true
+    #   (bdr4 cluster only needing to add edb_repositories but not through BDR4PGD5)
+    # - we assume postgres_flavour is set (could be postgresql for old cluster if used
+    #   alone without BDR4PGD5)
     def edb_repositories(self, cluster):
         postgres_flavour = cluster.vars.get("postgres_flavour")
         postgres_repos = {

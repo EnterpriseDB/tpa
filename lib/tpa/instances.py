@@ -72,14 +72,17 @@ class Instances(list):
         # XXX This duplicates bdr_node_kind in lib/filter_plugins/bdr.py as a
         # temporary helper function for convenience.
         def bdr_node_kind(role: List[str]) -> str:
-            if "witness" in role:
-                return "witness"
-            elif "subscriber-only" in role:
-                return "subscriber-only"
-            elif "standby" in role:
-                return "standby"
+            if "bdr" in role:
+                if "witness" in role:
+                    return "witness"
+                elif "subscriber-only" in role:
+                    return "subscriber-only"
+                elif "standby" in role:
+                    return "standby"
+                else:
+                    return "data"
             else:
-                return "data"
+                return ""
 
         return Instances([i for i in self if bdr_node_kind(i.roles) == kind])
 
@@ -107,11 +110,11 @@ class Instances(list):
         contain only one instance if you used this method in the first place.
         """
         num = len(self)
-        if num > 1:
-            raise ConfigureError(
-                f"Internal error: expected .only() one instance, found {num}"
-            )
-        return self[0]
+        if num == 1:
+            return self[0]
+        raise ConfigureError(
+            f"Internal error: expected .only() one instance, found {num}"
+        )
 
     def maybe(self) -> Optional[Instance]:
         """Returns a single Instance if it is the only one in the collection, or
