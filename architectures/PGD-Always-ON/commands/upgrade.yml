@@ -276,8 +276,7 @@
             |map('extract', hostvars, 'harp_proxy_endpoint')
             |list }}"
     when:
-      bdr_major_version_upgrade
-      and inventory_hostname == first_bdr_primary
+      inventory_hostname == first_bdr_primary
       and enable_proxy_monitoring
 
 # Now that we're convinced the cluster is in a reasonable initial state,
@@ -522,8 +521,7 @@
       name: test
       tasks_from: proxy-monitor/report.yml
     when:
-      bdr_major_version_upgrade
-      and inventory_hostname == first_bdr_primary
+      inventory_hostname == first_bdr_primary
       and enable_proxy_monitoring
 
 - name: Log diagnostic output after upgrade
