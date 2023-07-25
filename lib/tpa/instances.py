@@ -95,6 +95,12 @@ class Instances(list):
             i.add_role(role)
         return self
 
+    def set_hostvar(self, var, val):
+        """Sets the given var=val on the instances in this list."""
+        for i in self:
+            i.host_vars[var] = val
+        return self
+
     def only(self) -> Instance:
         """Returns a single Instance if it is the only one in the collection, or
         raises an error because you must have been expecting the collection to

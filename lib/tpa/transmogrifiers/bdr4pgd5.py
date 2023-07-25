@@ -108,8 +108,18 @@ class BDR4PGD5(Transmogrifier):
         # Initialise bdr_node_groups (which is not expected to be set in a BDR4
         # cluster—it was supported in theory, but in practice it wouldn't have
         # worked properly).
+
+        if cluster.vars.get("bdr_node_groups"):
+            raise ConfigureError(
+                "Can't reconfigure BDR4 clusters with bdr_node_groups defined"
+            )
+
+        # We define an entry for the top group (which must always exist), and
+        # create one additional BDR group per location.
         #
-        # We create one additional BDR group per location.
+        # If the old cluster had subscriber-only instances, we would have added
+        # a subscriber-only group for them by default. If we find this to be the
+        # case, we make this explicit in the new configuration.
 
         top = cluster.vars["bdr_node_group"]
         bdr_node_groups = [{"name": top}]
@@ -118,8 +128,29 @@ class BDR4PGD5(Transmogrifier):
         if pgd_proxy_routing == "global":
             bdr_node_groups[0]["options"] = {"enable_proxy_routing": True}
 
-        for loc in cluster.locations:
+        subscribers = instances.with_roles(["bdr", "subscriber-only"])
+        if subscribers:
+            if subscribers.with_hostvar("bdr_child_group"):
+                raise ConfigureError(
+                    "Can't reconfigure clusters with subscriber-only "
+                    "instances that use non-default groups"
+                )
 
+            # Now we know that there were subscriber-only nodes that would have
+            # been in the default subscriber-only group (added automatically by
+            # postgres/bdr:bdr3/init.yml), which looks like this:
+
+            bdr_node_groups.append(
+                {
+                    "name": "subscriber-only",
+                    "node_group_type": "subscriber-only",
+                    "parent_group_name": top,
+                }
+            )
+
+            subscribers.set_hostvar("bdr_child_group", "subscriber-only")
+
+        for loc in cluster.locations:
             loc_instances = instances.in_location(loc.name)
 
             if len(loc_instances.with_role("bdr")) > 0:
@@ -129,8 +160,8 @@ class BDR4PGD5(Transmogrifier):
                     "options": {"location": loc.name},
                 }
 
-            # Local routing enables subgroup RAFT and proxy routing,
-            # and witness-only locations have both disabled.
+                # Local routing enables subgroup RAFT and proxy routing,
+                # and witness-only locations have both disabled.
 
                 loc_witnesses = loc_instances.with_role("witness")
 
@@ -138,7 +169,8 @@ class BDR4PGD5(Transmogrifier):
                     if instance in instances.with_role("bdr") + instances.with_role(
                         "pgd-proxy"
                     ):
-                        instance.host_vars["bdr_child_group"] = group["name"]
+                        if not "bdr_child_group" in instance.host_vars:
+                            instance.host_vars["bdr_child_group"] = group["name"]
 
                     # Add route_priority to bdr data nodes that pgd-proxy
                     # nodes can route to.
