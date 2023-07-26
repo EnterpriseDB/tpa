@@ -5,6 +5,7 @@
 - name: Run default cluster tests
   any_errors_fatal: true
   max_fail_percentage: 0
+  environment: "{{ target_environment }}"
   hosts: all
   tasks:
   - include_role:
