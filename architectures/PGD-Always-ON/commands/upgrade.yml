@@ -174,6 +174,9 @@
   # with pgd-proxy, a subsequent upgrade will (correctly) think it's a
   # minor version upgrade, but should still not run the pgd-proxy test.
 
+  - set_fact:
+      harp_proxy_still_running: false
+
   - name: Check for unreplaced harp-proxy processes
     when: >
       'harp-proxy' in role
