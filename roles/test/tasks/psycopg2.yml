@@ -10,18 +10,17 @@
   failed_when: false
   check_mode: no
 
+# We crib the package from psycopg2_packages in postgres/pkg/defaults,
+# because we really want to install *only* psycopg2 here, not including
+# any of the other things list-client-packages would normally give us.
+
 - name: Install psycopg2 if required
   when: psycopg2_check_cmd.rc != 0
   become_user: root
   become: yes
   block:
-  - include_role:
-      name: postgres/pkg
-      tasks_from: list-client-packages.yml
-    vars:
-      list_varname: _postgres_client_packages
-
   - include_role: name=pkg/install
     vars:
-      package_list_name: "postgres client packages"
-      package_list: "{{ _postgres_client_packages }}"
+      package_list_name: "psycopg2 packages"
+      package_list:
+        - "{{ python_pkg_prefix }}-psycopg2"
