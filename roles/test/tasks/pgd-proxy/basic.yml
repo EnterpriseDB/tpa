@@ -7,6 +7,10 @@
     that:
     - role|contains('pgd-proxy')
 
+- include_role:
+    name: test
+    tasks_from: psycopg2.yml
+
 # First, we check that connections through pgd-proxy to the backend
 # database are TLS-protected from end-to-end (as a side effect, we
 # ensure that we can connect and issue queries too).
