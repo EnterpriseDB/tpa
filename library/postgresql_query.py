@@ -212,7 +212,15 @@ def main():
     if not psycopg2_found:
         module.fail_json(msg="the python psycopg2 module is required")
 
+    m = dict()
+    changed = False
+
+    queries = get_queries(module)
+    m["queries"] = queries
+
     conninfo = module.params["conninfo"]
+    m["conninfo"] = conninfo
+
     try:
         conn = psycopg2.connect(dsn=conninfo)
     except Exception as e:
@@ -220,18 +228,12 @@ def main():
             msg="Could not connect to database",
             err=str(e),
             exception=traceback.format_exc(),
+            **m,
         )
 
     autocommit = module.params["autocommit"]
     if autocommit:
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-
-    m = dict()
-    changed = False
-
-    queries = get_queries(module)
-    m["queries"] = queries
-    m["conninfo"] = conninfo
 
     results = []
     runtimes = []
@@ -267,7 +269,7 @@ def main():
             msg="Database query failed",
             err=str(e),
             exception=traceback.format_exc(),
-            **m
+            **m,
         )
     else:
         if module.check_mode:
