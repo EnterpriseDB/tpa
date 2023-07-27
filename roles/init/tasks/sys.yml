@@ -30,10 +30,10 @@
   set_fact:
     my_hosts_lines:
       "{{ my_hosts_lines|union([alias_line]) }}"
-  with_items: "{{ hostname_aliases|dictsort }}"
+  with_dict: "{{ hostname_aliases }}"
   vars:
     alias_line: >-
-      {{ item[1] }} {{ item[2] }}
+      {{ item.value }} {{ item.key }}
 
 - name: Aggregate /etc/hosts lines across hosts
   set_fact:
