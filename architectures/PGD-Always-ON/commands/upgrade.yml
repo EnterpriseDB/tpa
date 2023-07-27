@@ -500,7 +500,8 @@
         tasks_from: pgd-cli/info.yml
     when: >
       'pgd-proxy' in role
-    delegate_to: "{{ first_bdr_primary }}"
+    vars:
+      with_user: "{{ pgd_proxy_user }}"
     run_once: true
 
   # No matter what sort of upgrade we're doing, pgd-proxy should be

@@ -1,6 +1,8 @@
 ---
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+- set_fact:
+    with_user: "{{with_user|default(postgres_user)}}"
 
 - assert:
     that: bdr_version is version('4', '>=')
@@ -19,14 +21,14 @@
 - name: Run 'pgd --version' first
   command: >
     {{ pgdcli_bin }} --version
-  become_user: "{{ postgres_user }}"
+  become_user: "{{ with_user }}"
   become: yes
 
 - name: Run various pgd subcommands and log output
   command: >
     {{ pgdcli_bin }} -f {{ pgdcli_directory }}/pgd-cli-config.yml
     {{ subcommand }} -o json
-  become_user: "{{ postgres_user }}"
+  become_user: "{{ with_user }}"
   become: yes
   register: pgd_subcommand
   ignore_errors: yes
