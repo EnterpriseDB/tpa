@@ -4,5 +4,6 @@
 
 efm_dependency_packages:
   - java-11-openjdk
+  - tzdata-java
   - iputils
   - procps
