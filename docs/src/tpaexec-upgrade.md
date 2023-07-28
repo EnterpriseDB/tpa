@@ -28,6 +28,15 @@ restarting services, and performing any runtime configuration changes,
 before moving on to do the same thing on the next instance. At any time
 during the process, only one of the cluster's nodes will be unavailable.
 
+When upgrading a cluster to PGD-Always-ON or upgrading an existing
+PGD-Always-ON cluster, you can enable monitoring of the status of your
+proxy nodes during the upgrade by adding the option
+`-e enable_proxy_monitoring=true` to your `tpaexec upgrade` command
+line. If enabled, this will create an extra table in the bdr database
+and write monitoring data to it while the upgrade takes place. The
+performance impact of enabling monitoring is very small and it is
+recommended that it is enabled.
+
 ## Configuration
 
 In many cases, minor-version upgrades do not need changes to config.yml.
@@ -53,8 +62,8 @@ unrelated pending changes before you begin the software upgrade process.
 
 ## Upgrading from BDR-Always-ON to PGD-Always-ON
 
-To upgrade from BDR-Always-ON to PGD-Always-ON, run `tpaexec
-reconfigure`:
+To upgrade from BDR-Always-ON to PGD-Always-ON (that is, from BDR4 to
+PGD5), first run `tpaexec reconfigure`:
 
 ```
 $ tpaexec reconfigure ~/clusters/speedy\
@@ -66,32 +75,58 @@ This command will read config.yml, work out the changes necessary to
 upgrade the cluster, and write a new config.yml. For details of its
 invocation, see [the command's own
 documentation](tpaexec-reconfigure.md). After reviewing the
-changes, run `tpaexec upgrade` to perform the upgrade.
-(`tpaexec upgrade` will automatically run `tpaexec provision` for you.) The upgrade
-process does the following:
+changes, run `tpaexec upgrade` to perform the upgrade:
+
+```
+$ tpaexec upgrade ~/clusters/speedy\
+```
+
+Or to run the upgrade with proxy monitoring enabled,
+
+```
+$ tpaexec upgrade ~/clusters/speedy\
+  -e enable_proxy_monitoring=true
+```
+
+`tpaexec upgrade` will automatically run `tpaexec provision`, to update
+the ansible inventory. The upgrade process does the following:
 
 1. Checks that all preconditions for upgrading the cluster are met.
-2. Starts a proxy monitoring process which will record the health of the
-   cluster in the database during the upgrade.
-3. For each instance in the cluster, checks that it has the correct
+2. For each instance in the cluster, checks that it has the correct
    repositories configured and that the required postgres packages are
    available in them.
-4. For each instance in the cluster:
+3. For each BDR node in the cluster, one at a time:
     - Fences the node off to ensure that harp-proxy doesn't send any
+      connections to it.
+    - Stops, updates, and restarts postgres, including replacing BDR4
+      with PGD5.
+    - Unfences the node so it can receive connections again.
+    - Updates pgbouncer and pgd-cli, as applicable for this node.
+4. For each instance in the cluster, updates its BDR configuration
+   specifically for BDR v5
+5. For each proxy node in the cluster, one at a time:
+    - Sets up pgd-proxy.
+    - Stops harp-proxy.
+    - Starts pgd-proxy.
+6. Removes harp-proxy and its support files.
+
+## PGD-Always-ON
+
+When upgrading an existing PGD-Always-ON (PGD5) cluster to the latest available
+software versions, the upgrade process does the following:
+
+1. Checks that all preconditions for upgrading the cluster are
+   met.
+2. For each instance in the cluster, checks that it has the correct
+   repositories configured and that the required postgres packages are
+   available in them.
+3. For each BDR node in the cluster, one at a time:
+    - Fences the node off to ensure that pgd-proxy doesn't send any
       connections to it.
     - Stops, updates, and restarts postgres.
     - Unfences the node so it can receive connections again.
     - Updates pgbouncer, pgd-proxy, and pgd-cli, as applicable for this
       node.
-5. For each instance in the cluster, updates its BDR configuration
-   specifically for BDR v5
-6. For each proxy node in the cluster:
-    - Sets up pgd-proxy.
-    - Stops harp-proxy.
-    - Starts pgd-proxy.
-7. Stops the proxy monitoring process and displays a summary of its
-   results.
-8. Removes harp-proxy and its support files.
 
 ## BDR-Always-ON
 

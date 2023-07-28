@@ -18,7 +18,7 @@ architecture is `PGD-Always-ON`
 
 - `--pgd-proxy-routing <global|local>`(required)<br>
 How PGD-Proxy is to route connections. See
-[the PGD-Always-ON documentation](architecture-PGD-Always-ON) for more
+[the PGD-Always-ON documentation](architecture-PGD-Always-ON.md) for more
 information about the meaning of this argument.
 
 - `--edb-repositories <repositories>`(optional)<br>
