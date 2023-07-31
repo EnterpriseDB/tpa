@@ -64,15 +64,12 @@ instances:
 - Name: someproxy
   vars:
     pgd_proxy_options:
-      fallback_groups:
-        - somegroup
+      listen_port: 9000
 ```
 
-In this case, `someproxy` ends up with the `listen_port` setting from
-`cluster_vars` and its own `fallback_groups` setting. However, it could
-also override the default `listen_port` by defining a different value
-alongside `fallback_groups`; this instance-level setting would take
-precedence over the defaults in `cluster_vars`.
+In this case, while other instances will get their `listen_port` setting from
+`cluster_vars`, `someproxy` overrides that default setting and configures its 
+own `listen_port` in the instances' `vars` section.
 
 ### PGD proxy http(s) health probes
 
