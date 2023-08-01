@@ -2,7 +2,61 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-## v23.19 (unreleased)
+## v23.20 (2023-08-01)
+
+### Notable changes
+
+- TPA-387 Allow upgrades from BDR4 to PGD5
+
+  A cluster created with the BDR-Always-ON architecture, running BDR4,
+  can now be upgraded to the PGD-Always-ON architecture, running PGD5,
+  by running the new command `tpexec reconfigure` to generate a revised
+  config.yml and then `tpaexec upgrade`, which replaces `tpaexec
+  update-postgres`, to perform the upgrade.
+
+  The minimum version requirement to start the upgrade is BDR4.3. A
+  cluster running an older version of BDR must be upgraded to BDR4.3
+  before doing the major-version upgrade.
+
+  Please refer to the section `Upgrading from BDR-Always-ON to
+  PGD-Always-ON` in `tpaexec-upgrade.md` in the documentation for
+  details on the upgrade procedure.
+
+### Minor changes
+
+- TPA-322 Add source validation
+
+  The new subcommand `tpaexec info validate` runs a checksum over the TPA
+  installation and confirms that it matches the one distributed with the
+  package. This is not a security mechanism, but rather a way of
+  confirming that an installation has not been altered when debugging
+  unexpected behaviour.
+
+- TPA-513 Work around broken OpenJDK dependencies on RHEL
+
+  On RHEL8 or RHEL9, when installing EFM, we install OpenJDK as a
+  prerequisite, which has a broken dependency on the tzdata-java
+  package. So we add tzdata-java explicitly to our package list.
+
+- Bump PyYAML version from 6.0 to 6.0.1
+
+- Update to the latest Debian AMIs for AWS clusters
+
+- Run `tpaexec provision` automatically as part of `tpaexec deploy` or
+  `tpaexec upgrade` if config.yml has changed
+
+### Bugfixes
+
+- TPA-521 Use correct user when running pgd-cli on pgd-proxy nodes
+
+  When upgrading a PGD-Always-ON cluster with a pgd-proxy node which is
+  not also a BDR node, we now run pgd-cli as a user which is guaranteed
+  to exist.
+
+- If the cluster directory has been set up as a git repository, commit
+  changes made by `tpaexec relink` correctly
+
+## v23.19 (2023-07-23)
 
 ### Notable changes
 
