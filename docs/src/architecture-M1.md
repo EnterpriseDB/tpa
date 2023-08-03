@@ -59,6 +59,8 @@ More detail on the options is provided in the following section.
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `--architecture` (`-a`)                               | Must be set to `M1`.                                                                        |
 | Postgres flavour and version (e.g. `--postgresql 15`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
+| One of: <br> * `--failover-manager {efm, repmgr, patroni}`<br> * `--fail-over-manager {efm, repmgr, patroni}` <br> * `--enable-efm`<br> * `--enable-repmgr`<br> * `--enable-patroni`  | Select the failover manager from `efm`, `repmgr` and `patroni`.                                                  |
+
 
 <br/><br/>
 
@@ -68,10 +70,6 @@ More detail on the options is provided in the following section.
 |---------------------------|-------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | `--platform`              | One of `aws`, `docker`, `bare`.                                                                                   | Defaults to `aws`.                                                                                   |
 | `--num-cascaded-replicas` | The number of cascaded replicas from the first replica.                                                           | Defaults to 1.                                                                                       |
-| `--failover-manager`      | Select the failover manager from `efm`, `repmgr` and `patroni`.                                                  | TPA will select EFM<br/>as the failover manager<br/>for EPAS, and repmgr<br/>for all other flavours. |
-| `--enable-efm`            | Configure Failover Manager as the cluster failover manager.                                                      | See `--failover-manager` above.                                                                      |
-| `--enable-repmgr`         | Configure Replication Manager as the cluster failover manager.                                                   | See `--failover-manager` above.                                                                      |
-| `--enable-patroni`        | Configure Patroni as the cluster failover manager.                                                               | See `--failover-manager` above.                                                                      |
 | `--enable-haproxy`        | 2 additional nodes will be added as a load balancer layer.<br/>Only supported with Patroni as the failover manager. | HAproxy nodes will not be added to the cluster.                                                      |
 | `--patroni-dcs`           | Select the Distributed Configuration Store backend for patroni.<br/>Only option is `etcd` at this time. <br/>Only supported with Patroni as the failover manager.          | Defaults to `etcd`.                                                                                  |
 

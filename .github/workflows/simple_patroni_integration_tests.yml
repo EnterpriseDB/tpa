@@ -56,11 +56,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Add patroni arguments for tpaexec configure
-        run: |
-          CONFIGURE_EXTRA_ARGS+=" --enable-patroni "
-          echo "CONFIGURE_EXTRA_ARGS=$CONFIGURE_EXTRA_ARGS" >>"$GITHUB_ENV"
-
       - uses: ./.github/actions/initialise_integration_test
         with:
           tpa_platform: ${{ matrix.tpa_platform }}
@@ -69,6 +64,7 @@ jobs:
           tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
           tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
           tpa_package_cache: "false"
+          tpa_failover_manager: "patroni"
           cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}
 
       - name: Provision the cluster

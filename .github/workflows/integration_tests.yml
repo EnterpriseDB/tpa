@@ -75,4 +75,5 @@ jobs:
           tpa_platform: ${{ matrix.tpa_platform }}
           tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
           tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
+          tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
           tpa_postgres_version: ${{ matrix.tpa_postgres_version }}

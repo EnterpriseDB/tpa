@@ -36,6 +36,9 @@ inputs:
     required: false
     description: "Enable local repo and reuse packages"
     default: "true"
+  tpa_failover_manager:
+    required: false
+    description: "Failover manager (for M1 only)"
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -56,6 +59,7 @@ runs:
         tpa_postgres_flavour: ${{ inputs.tpa_postgres_flavour }}
         tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
         tpa_package_cache: "true"
+        tpa_failover_manager: ${{ inputs.tpa_failover_manager }}
         cluster: ${{ inputs.cluster }}
 
     - name: Provision the cluster

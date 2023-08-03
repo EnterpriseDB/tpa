@@ -40,6 +40,9 @@ inputs:
     required: false
     description: "Enable local repo and reuse packages"
     default: "false"
+  tpa_failover_manager:
+    required: false
+    description: "Failover manager (for M1 only)"
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -131,9 +134,13 @@ runs:
           CONFIGURE_OPTS+=(--use-local-repo-only)
         fi
 
+        if [ "${{ inputs.tpa_architecture }}" = "M1" ] ;then
+          CONFIGURE_OPTS+=(--failover-manager "${{ inputs.tpa_failover_manager }}")
+        fi
+
         # If we are going to use efm, override its network connectivity test
         if [[ "${{ inputs.tpa_platform }}" == "docker"
-              && "${{ inputs.tpa_postgres_flavour }}" == "epas"
+              && "${{ inputs.tpa_failover_manager }}" == "efm"
               && "${{ inputs.tpa_architecture }}" == "M1" ]] ;then
           CONFIGURE_OPTS+=(--overrides-from "${{ github.action_path }}/efm_ping.yml")
         fi

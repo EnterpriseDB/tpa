@@ -26,7 +26,6 @@ class M1(Architecture):
 
         fail_over_me_group.add_argument(
             "--failover-manager",
-            "--fail-over-manager",
             choices=["efm", "patroni", "repmgr"],
             help="The type of fail-over manager to use for the cluster.",
         )
@@ -84,6 +83,10 @@ class M1(Architecture):
         ):
             raise ArchitectureError(
                 "TPA does not support Patroni with HAproxy on RedHat/CentOS 7"
+            )
+        if args.get("failover_manager") == "repmgr" and args.get("postgres_flavour") == "epas":
+            raise ArchitectureError(
+                f"TPA does not support repmgr with {args.get('postgres_flavour')}"
             )
 
     def num_instances(self):
@@ -146,18 +149,11 @@ class M1(Architecture):
                 }
             )
 
-        if not failover_manager:
-            if postgres_flavour == "epas":
-                failover_manager = "efm"
-            elif postgres_flavour in ["pgextended", "edbpge", "postgresql"]:
-                failover_manager = "repmgr"
-
-        if failover_manager:
-            cluster_vars.update(
-                {
-                    "failover_manager": failover_manager,
-                }
-            )
+        cluster_vars.update(
+            {
+                "failover_manager": failover_manager,
+            }
+        )
 
         if failover_manager == "patroni":
             # Ensure nodes are members of a single etcd_location per cluster for patroni.

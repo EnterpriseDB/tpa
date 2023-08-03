@@ -53,6 +53,12 @@ on:
         - 13
         - 14
         - 15
+      tpa_failover_manager:
+        description: "Failover-manager (for M1 only)"
+        type: choice
+        options:
+        - "efm"
+        - "repmgr"
 
 env:
   LANG: "C.UTF-8"
@@ -80,3 +86,4 @@ jobs:
           tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
           tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
+          tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager}}
