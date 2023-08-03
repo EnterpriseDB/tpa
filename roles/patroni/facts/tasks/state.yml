@@ -5,12 +5,12 @@
 # This is called once at the start of a deployment during the TPA init phase,
 # and again once a new cluster has been initialised.
 
-# When a new cluster is created using TPA and Patroni is selected as the fail-over
+# When a new cluster is created using TPA and Patroni is selected as the failover
 # manager, and patroni has not been initialised (no existing state is present in
 # the DCS), TPA will:
 #
 # 1. Create a single standalone PostgreSQL server using the same method that
-#   it does for other cluster types and fail-over managers. TPA will create
+#   it does for other cluster types and failover managers. TPA will create
 #   configuration files, initialise the database, start the server with the
 #   `postgres` systemd service unit configured with TPA, establish what users
 #   should be created, add extension configuration, etc.

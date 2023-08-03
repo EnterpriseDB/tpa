@@ -19,18 +19,18 @@ class M1(Architecture):
         )
 
         assert isinstance(p, argparse.ArgumentParser)
-        fail_over_group = p.add_argument_group(
-            "M1 architecture fail-over manager options"
+        failover_group = p.add_argument_group(
+            "M1 architecture failover manager options"
         )
-        fail_over_me_group = fail_over_group.add_mutually_exclusive_group()
+        failover_me_group = failover_group.add_mutually_exclusive_group(required=True)
 
-        fail_over_me_group.add_argument(
+        failover_me_group.add_argument(
             "--failover-manager",
             choices=["efm", "patroni", "repmgr"],
-            help="The type of fail-over manager to use for the cluster.",
+            help="The type of failover manager to use for the cluster.",
         )
 
-        fail_over_me_group.add_argument(
+        failover_me_group.add_argument(
             "--enable-efm",
             action="store_const",
             const="efm",
@@ -38,26 +38,26 @@ class M1(Architecture):
             help="Enable EDB Failover Manager",
         )
 
-        fail_over_me_group.add_argument(
+        failover_me_group.add_argument(
             "--enable-repmgr",
             action="store_const",
             const="repmgr",
             dest="failover_manager",
-            help="Enable Replication Manager as HA fail-over manager",
+            help="Enable Replication Manager as HA failover manager",
         )
 
-        fail_over_me_group.add_argument(
+        failover_me_group.add_argument(
             "--enable-patroni",
             action="store_const",
             const="patroni",
             dest="failover_manager",
-            help="Enable Patroni HA cluster fail-over manager",
+            help="Enable Patroni HA cluster failover manager",
         )
 
         g.add_argument(
             "--enable-haproxy",
             action="store_true",
-            help="Enable HAproxy layer hosts when using Patroni fail-over manager",
+            help="Enable HAproxy layer hosts when using Patroni failover manager",
         )
         g.add_argument(
             "--patroni-dcs",

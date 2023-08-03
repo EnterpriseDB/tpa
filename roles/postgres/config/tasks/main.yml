@@ -45,7 +45,7 @@
 # allowing for a user supplied HBA template to be set. Instead of creating
 # the file, the contents is stored in a fact so that this can be used by
 # other roles that are responsible for managing the creation of this file,
-# for example Patroni HA fail-over manager. Thus allowing users to supply
+# for example Patroni HA failover manager. Thus allowing users to supply
 # their own templates and continue to use TPA's configuration interface in
 # `config.yml`.
 
