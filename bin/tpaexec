@@ -484,7 +484,11 @@ _tpaexec_info() {
         fi
     fi
 
-    echo "$(_checksums)"
+    if [[ -f $TPA_DIR/checksums.json ]]; then
+        echo "$(_checksums)"
+    elif [[ -d $TPA_DIR/.git ]]; then
+        git -C $TPA_DIR status
+    fi
 }
 
 selftest() {
@@ -547,9 +551,6 @@ info() {
                 exit 1
             fi
             $PAGER "$doc"
-            ;;
-        validate)
-            echo "$(_checksums)"
             ;;
         *)
             error "unrecognised info subcommand: $subcommand"
@@ -632,8 +633,6 @@ Available info subcommands:
     tpaexec info architectures/xxx
         Displays information about a particular architecture
 
-    tpaexec info validate
-        Checks if any files have been modified from the original installation
 INFO
             ;;
 

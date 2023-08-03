@@ -7,7 +7,6 @@ import pytest
 from pathlib import Path
 from tpaexec.compare_checksums import (
     _hash_file,
-    _git_status,
     compare_data,
     get_args,
 )
@@ -38,12 +37,6 @@ def test_hash_file(setup):
             checksum = _hash_file(path_to_file=path)
             assert len(checksum.digest()) == 32
             assert len(checksum.hexdigest()) == 64
-
-
-def test_git_status():
-    with pytest.raises(SystemExit) as exit:
-        _git_status()
-    assert exit.type == SystemExit
 
 
 def test_compare_data(setup):

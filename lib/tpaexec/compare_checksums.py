@@ -6,7 +6,6 @@ import argparse
 import hashlib
 import json
 import sys
-import subprocess
 from pathlib import Path
 
 
@@ -31,18 +30,6 @@ def _hash_file(path_to_file: Path):
     return sha256_hash
 
 
-def _git_status():
-    try:
-        result = subprocess.run(["git", "status"], stdout=subprocess.PIPE, check=True)
-        print(result.stdout.decode("utf-8"))
-        sys.exit(0)
-    except subprocess.CalledProcessError:
-        print(
-            "Unable to compare checksums!\n'checksums.json' file not found, and 'git status' could not be run."
-        )
-        sys.exit(1)
-
-
 def compare_data(path_to_file: str, target_directory: str):
     mismatch_list = []
     missing_list = []
@@ -60,7 +47,7 @@ def compare_data(path_to_file: str, target_directory: str):
                     missing_list.append(f"{source_filepath}")
 
     except IOError:
-        _git_status()
+        sys.exit(1)
 
     return mismatch_list, missing_list
 
@@ -71,7 +58,9 @@ if __name__ == "__main__":  # pragma: no cover
         path_to_file=args.checksums_file, target_directory=args.directory
     )
     if len(mismatch_list) == 0:
-        print(f"Validated: {_hash_file(path_to_file=Path(args.checksums_file)).hexdigest()} [OK]")
+        print(
+            f"Validated: {_hash_file(path_to_file=Path(args.checksums_file)).hexdigest()} [OK]"
+        )
     else:
         print("Modified:", end=" ")
         print(*mismatch_list, sep=", ")
