@@ -37,11 +37,6 @@ full: # 500+ clusters do not use this option
     - "docker"
   tpa_architecture: &full_tpa_architecture
     - "BDR-Always-ON"
-  # Using dev atm to avoid issues with 5.1 PGD that doesn't support witness
-  # node group change
-  tpa_edb_repo: &full_tpa_edb_repo
-    - "standard dev_postgres_distributed"
-
 # latest os               3
 # silver                  1
 # all postgres_flavour    3
@@ -61,15 +56,6 @@ latest-silver-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  include:
-    - tpa_edb_repo: "enterprise dev_postgres_distributed"
-      tpa_postgres_flavour: "epas"
-    - tpa_edb_repo: "standard dev_postgres_distributed"
-      tpa_postgres_flavour: "pgextended"
-    - tpa_edb_repo: "standard dev_postgres_distributed"
-      tpa_postgres_flavour: "postgresql"
-
-
 # debian 11               1
 # silver layout           1
 # all postgres_flavour    3
@@ -87,15 +73,6 @@ debian11-silver-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  include:
-    - tpa_edb_repo: "enterprise dev_postgres_distributed"
-      tpa_postgres_flavour: "epas"
-    - tpa_edb_repo: "standard dev_postgres_distributed"
-      tpa_postgres_flavour: "pgextended"
-    - tpa_edb_repo: "standard dev_postgres_distributed"
-      tpa_postgres_flavour: "postgresql"
-
-
 # debian 11               1
 # all layout              4
 # epas                    1
@@ -113,9 +90,6 @@ debian11-all-epas-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  tpa_edb_repo:
-    - "enterprise dev_postgres_distributed"
-
 # redhat 8                1
 # all layout              4
 # epas                    1
@@ -133,8 +107,6 @@ redhat8-all-epas-14:
   tpa_platform: *full_tpa_platform
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_architecture: *full_tpa_architecture
-  tpa_edb_repo:
-    - "enterprise dev_postgres_distributed"
 # ubuntu 22.04            1
 # all layout              4
 # epas                    1
@@ -152,8 +124,6 @@ ubuntu22-all-epas-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  tpa_edb_repo:
-    - "enterprise dev_postgres_distributed"
 # latest os               3
 # all layout              4
 # epas                    1
@@ -173,9 +143,6 @@ latest-epas-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  tpa_edb_repo:
-    - "enterprise dev_postgres_distributed"
-
 # latest os               3
 # all layout              4
 # postgresql              1
@@ -195,8 +162,6 @@ latest-pg-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  tpa_edb_repo: *full_tpa_edb_repo
-
 # latest os               3
 # all layout              4
 # edb-pge                 1
@@ -216,8 +181,6 @@ latest-pge-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  tpa_edb_repo: *full_tpa_edb_repo
-
 # all debian              2
 # all layout              4
 # all flavour             3
@@ -235,14 +198,6 @@ debian-full-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  include:
-    - tpa_edb_repo: "enterprise dev_postgres_distributed"
-      tpa_postgres_flavour: "epas"
-    - tpa_edb_repo: "standard dev_postgres_distributed"
-      tpa_postgres_flavour: "pgextended"
-    - tpa_edb_repo: "standard dev_postgres_distributed"
-      tpa_postgres_flavour: "postgresql"
-
 # all redhat              2
 # all layout              4
 # all flavour             3
@@ -260,14 +215,6 @@ redhat-full-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  include:
-    - tpa_edb_repo: "enterprise dev_postgres_distributed"
-      tpa_postgres_flavour: "epas"
-    - tpa_edb_repo: "standard dev_postgres_distributed"
-      tpa_postgres_flavour: "pgextended"
-    - tpa_edb_repo: "standard dev_postgres_distributed"
-      tpa_postgres_flavour: "postgresql"
-
 # all ubuntu              3
 # all layout              4
 # all flavour             3
@@ -286,10 +233,3 @@ ubuntu-full-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  include:
-    - tpa_edb_repo: "enterprise dev_postgres_distributed"
-      tpa_postgres_flavour: "epas"
-    - tpa_edb_repo: "standard dev_postgres_distributed"
-      tpa_postgres_flavour: "pgextended"
-    - tpa_edb_repo: "standard dev_postgres_distributed"
-      tpa_postgres_flavour: "postgresql"
