@@ -36,6 +36,15 @@
   register: agent_cfg_check
   check_mode: no
 
+- name: Check if agent is configured for barman
+  command:
+    cmd: "sed -n '/BARMAN/,$p' {{ pem_agent_config_path }}"
+  register: barman_configuration
+  when:
+    agent_cfg_check.stat.exists
+    and 'barman' in role
+    and enable_pg_backup_api|default(false)
+
 - name: Record PEM server credentials
   set_fact:
     pem_postgres_password: "{{vars['%s_password' % postgres_user]}}"
@@ -167,9 +176,11 @@
 - name: Register Barman server monitoring
   include_tasks: register-barman.yml
   when: >
-    not agent_cfg_check.stat.exists and
-    'barman' in role
-    and enable_pg_backup_api|default(false)
+    'barman' in role and
+    enable_pg_backup_api|default(false) and (
+      not agent_cfg_check.stat.exists or
+      barman_configuration.stdout|default('') == ''
+    )
 
 # Only now that agent.cfg is the way we want it can we start or restart
 # the service.
