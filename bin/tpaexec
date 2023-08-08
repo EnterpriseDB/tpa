@@ -75,8 +75,8 @@ version() {
     echo "# TPAexec $VERSION"
 }
 
-_checksums() {
-   python3  $TPA_DIR/lib/tpaexec/compare_checksums.py $TPA_DIR $TPA_DIR/checksums.json
+verify_checksums() {
+   python3 "$TPA_DIR"/lib/tpaexec/compare_checksums.py "$TPA_DIR" "$TPA_DIR"/checksums.json
 }
 
 _python_version() {
@@ -485,9 +485,9 @@ _tpaexec_info() {
     fi
 
     if [[ -f $TPA_DIR/checksums.json ]]; then
-        echo "$(_checksums)"
+        verify_checksums
     elif [[ -d $TPA_DIR/.git ]]; then
-        git -C $TPA_DIR status
+        git -C "$TPA_DIR" status
     fi
 }
 
