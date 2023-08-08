@@ -228,7 +228,7 @@ def main():
             msg="Could not connect to database",
             err=str(e),
             exception=traceback.format_exc(),
-            **m,
+            **m
         )
 
     autocommit = module.params["autocommit"]
@@ -269,7 +269,7 @@ def main():
             msg="Database query failed",
             err=str(e),
             exception=traceback.format_exc(),
-            **m,
+            **m
         )
     else:
         if module.check_mode:
