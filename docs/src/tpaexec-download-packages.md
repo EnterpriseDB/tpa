@@ -58,3 +58,21 @@ You can use this in the cluster as is or copy it to a target control
 node. See [recommendations for installing to an air-gapped environment](
 air-gapped.md). A [local-repo](local-repo.md) will be detected and used
 automatically by TPA.
+
+## Cleaning up failed downloader container
+
+If there is an error during the download process, the command will leave
+behind the downloader container running to help with debugging. For
+instance you may want to log in to the failed downloader container to
+inspect logs or networking. Downloader container is typically named
+$cluster_name-downloader unless it exceeds the allowed limit of 64
+characters for the container name. You can check for the exact name by
+running `docker ps` to list the running containers and look for a container
+name that matches your cluster name. In most cases you can log in to the
+running container by executing `docker exec -it $cluster_name-downloader /bin/bash`.
+After the inspection, you can clean up the left over container by running the
+`download-packages` command with `--tags cleanup`. For example:
+
+```shell
+tpaexec download-packages cluster-dir --docker-image tpa/redhat:8 --tags cleanup
+```
