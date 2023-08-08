@@ -10,7 +10,7 @@ export PGHOST='{{ unix_socket_directories|join(",") }}'
 {% for l in extra_bashrc_lines|default([]) %}
 {{ l }}
 {% endfor %}
-{% if 'bdr' in role and bdr_version is version('4', '>=') %}
+{% if 'bdr' in role and bdr_version is version('5', '>=') %}
 # enable bash completion for PGD CLI
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
