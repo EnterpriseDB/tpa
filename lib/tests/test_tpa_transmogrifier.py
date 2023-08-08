@@ -7,14 +7,12 @@
 import pytest
 from argparse import Namespace
 from unittest.mock import PropertyMock, patch
-from pytest_mock import mocker
 
 from tpa.checkresult import CheckResult
 from tpa.changedescription import ChangeDescription
 from tpa.cluster import Cluster
 
 from tpa.transmogrifier import Transmogrifier, opt, apply, check, describe
-from tpa.transmogrifiers import BDR4PGD5
 from tpa.exceptions import ConfigureError, TransmogrifierError
 
 
@@ -110,12 +108,12 @@ class TestTransmogrifier:
     def test_transmogrifier_is_applicable(self, basic_transmogrifier, basic_cluster):
         """test is_applicable function"""
 
-        assert basic_transmogrifier.is_applicable(basic_cluster) == True
+        assert basic_transmogrifier.is_applicable(basic_cluster) is True
 
     def test_transmogrifier_is_ready(self, basic_transmogrifier, basic_cluster):
         """test is_ready function"""
 
-        assert basic_transmogrifier.is_ready(basic_cluster) == True
+        assert basic_transmogrifier.is_ready(basic_cluster) is True
 
     def test_transmogrifier_description(self, basic_transmogrifier, basic_cluster):
         """test description function"""

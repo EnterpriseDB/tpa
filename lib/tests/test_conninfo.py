@@ -7,7 +7,6 @@ from ansible.errors import AnsibleFilterError
 import re
 from ..filter_plugins.conninfo import (
     parse_conninfo,
-    conninfo_string,
     dbname,
     multihost_conninfo,
 )

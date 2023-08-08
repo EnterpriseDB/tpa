@@ -11,15 +11,18 @@ from tpa.exceptions import ConfigureError
 import yaml
 import os
 
-CLUSTER_DIR="lib/tests/config/basic-cluster"
+CLUSTER_DIR = "lib/tests/config/basic-cluster"
+
+
 @pytest.fixture
 def create_cluster():
-    cluster = Cluster(CLUSTER_DIR,"basic")
+    cluster = Cluster(CLUSTER_DIR, "basic")
     if not os.path.exists(CLUSTER_DIR):
         os.mkdir(CLUSTER_DIR)
-        with open(os.path.join(CLUSTER_DIR,"config.yml"),"w") as config:
+        with open(os.path.join(CLUSTER_DIR, "config.yml"), "w") as config:
             config.write(cluster.to_yaml())
     return cluster
+
 
 class TestReconfigure:
     """Test suite for reconfigure command"""
@@ -46,7 +49,6 @@ class TestReconfigure:
             ),
         ],
     )
-
     def test_reconfigure_basic(self, input, expected, result, create_cluster):
         """test basic reconfigure function"""
         if expected:
@@ -58,7 +60,6 @@ class TestReconfigure:
                 assert x.value.args[0] == result["msg"]
         else:
             reconfigure(args=input)
-
 
     def test_reconfigure_write_output(
         self,

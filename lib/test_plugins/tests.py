@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-from jinja2 import Undefined
 from ansible.plugins.test.core import match
 
 # This filter takes a container and a subkey ('x.y.z', or [x,y,z]) and returns

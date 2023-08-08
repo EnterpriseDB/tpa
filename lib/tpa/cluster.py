@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-from pprint import pprint
 from typing import List, Dict, Any, Optional
 import yaml
 import copy
@@ -30,11 +29,9 @@ class Cluster:
     subgroup per location. Every instance belongs to the group for the location
     it is in, and inherits membership in the main group thereby."""
 
-    def __init__(
-        self, cluster_name, architecture, platform=None, group_vars=None
-    ):
+    def __init__(self, cluster_name, architecture, platform=None, group_vars=None):
         self._name: str = cluster_name
-        self._original_yaml: Optional[Dict[str,Any]] = None
+        self._original_yaml: Optional[Dict[str, Any]] = None
         self._architecture: str = architecture
         self._platform: Optional[str] = platform
         self._group = Group(cluster_name, group_vars=group_vars)
@@ -99,16 +96,16 @@ class Cluster:
         """Returns the location with the given location_name, or None if it is
         not defined for this cluster."""
 
-        return next((l for l in self.locations if l.name == location_name), None)
+        return next((loc for loc in self.locations if loc.name == location_name), None)
 
     def add_location(self, location_name: str, **kwargs) -> Location:
         """Creates a location with the given name, add it to this cluster along
         with its associated group, and return the new location"""
 
-        l = Location(location_name, **kwargs)
-        self._group.add_subgroup(l.group)
-        self._locations.append(l)
-        return l
+        loc = Location(location_name, **kwargs)
+        self._group.add_subgroup(loc.group)
+        self._locations.append(loc)
+        return loc
 
     def add_instance(self, instance_name: str, **kwargs):
         """Creates an instance with the given name, add it to this cluster, and
@@ -118,7 +115,9 @@ class Cluster:
             self._instances.append(i)
             return i
         else:
-            raise ClusterError(f"A node with the name: {instance_name} already exists in the cluster")
+            raise ClusterError(
+                f"A node with the name: {instance_name} already exists in the cluster"
+            )
 
     def to_yaml(self):
         """Returns a YAML representation of this cluster (WIP)
@@ -131,7 +130,7 @@ class Cluster:
         c.update(
             {
                 "cluster_vars": self.group.group_vars,
-                "locations": [l.to_yaml_dict() for l in self.locations],
+                "locations": [loc.to_yaml_dict() for loc in self.locations],
                 "instance_defaults": self.instance_defaults,
                 "instances": [i.to_yaml_dict() for i in self.instances],
             }
@@ -140,7 +139,7 @@ class Cluster:
         # XXX Quick prototype to reproduce original YAML document key order (but
         # not comments, which we can't do with pyyaml anyway). Needs testing.
 
-        def _reorder_keys(d: Dict[str,Any], ref: Dict[str,Any]) -> Dict[str,Any]:
+        def _reorder_keys(d: Dict[str, Any], ref: Dict[str, Any]) -> Dict[str, Any]:
             """Returns the contents of d while preserving the key order of
             ref as far as possible."""
             result = {}
@@ -149,10 +148,10 @@ class Cluster:
                     continue
                 if isinstance(val, dict) and isinstance(d[key], dict):
                     result[key] = _reorder_keys(d[key], val)
-                    del(d[key])
+                    del d[key]
                 else:
                     result[key] = d[key]
-                    del(d[key])
+                    del d[key]
             result.update(d)
             return result
 
@@ -181,8 +180,10 @@ class Cluster:
         c._original_yaml = original_yaml
 
         locations = y.pop("locations", [])
-        for l in locations:
-            c.add_location(l.pop("Name"), group_vars=l.pop("vars", {}), settings=l)
+        for loc in locations:
+            c.add_location(
+                loc.pop("Name"), group_vars=loc.pop("vars", {}), settings=loc
+            )
 
         c._instance_defaults = y.pop("instance_defaults", {})
 

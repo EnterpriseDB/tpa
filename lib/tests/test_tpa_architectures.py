@@ -7,11 +7,11 @@
 import pytest
 
 from tpa.architecture import Architecture
-from tpa.architectures import M1, BDRAlwaysON, PGDAlwaysON
 
 
 class BasicArchitecture(Architecture):
     """Basic Architecure class to test common functions inherited from Architecture class"""
+
     pass
 
 

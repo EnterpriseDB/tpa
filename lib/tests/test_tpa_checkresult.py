@@ -3,15 +3,16 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 """Tests for checkresult object."""
-import pytest
 
 from tpa.checkresult import CheckResult
 
 
 class TestCheckResult:
     """Test suite for CheckResult class"""
+
     WARNING = "A warning"
     ERROR = "An error"
+
     def test_checkresult_basic(self):
         """test basic checkresult creation"""
         cr = CheckResult()
@@ -19,21 +20,21 @@ class TestCheckResult:
         assert cr.errors == []
 
     def test_checkresult_error(self):
-        """ test error function"""
+        """test error function"""
         cr = CheckResult()
         assert cr.errors == []
         cr.error(self.ERROR)
         assert cr.errors == [self.ERROR]
 
     def test_checkresult_warning(self):
-        """ test warning function"""
+        """test warning function"""
         cr = CheckResult()
         assert cr.warnings == []
         cr.warning(self.WARNING)
         assert cr.warnings == [self.WARNING]
 
     def test_checkresult_absorb(self):
-        """ test absorb function"""
+        """test absorb function"""
         cr = CheckResult()
         cr2 = CheckResult()
 
@@ -44,11 +45,11 @@ class TestCheckResult:
         assert cr.warnings == [self.WARNING]
 
     def test_checkresult_str(self):
-        """ test __str__ function"""
+        """test __str__ function"""
 
         cr = CheckResult()
         cr.warning(self.WARNING)
         cr.error(self.ERROR)
 
         print(cr)
-        assert str(cr) == 'Warnings:\n* A warning\nErrors:\n* An error'
+        assert str(cr) == "Warnings:\n* A warning\nErrors:\n* An error"

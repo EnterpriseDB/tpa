@@ -4,5 +4,6 @@
 
 from ..architecture import Architecture
 
+
 class BDRAlwaysON(Architecture):
     pass

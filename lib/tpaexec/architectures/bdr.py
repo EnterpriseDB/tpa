@@ -177,7 +177,6 @@ class BDR(Architecture):
         return re.sub("[^a-z0-9_-]", "_", name.lower())
 
     def update_instances(self, instances):
-
         self._update_instance_camo(instances)
         self._update_instance_pem(instances)
 
@@ -275,7 +274,6 @@ class BDR(Architecture):
         PEM server.
         """
         if self.args.get("enable_pem", False):
-
             for instance in instances:
                 if "bdr" in self._instance_roles(instance):
                     instance["role"].append("pem-agent")

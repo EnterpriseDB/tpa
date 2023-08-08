@@ -119,15 +119,27 @@ def instances_with_hostvars(basic_instances):
             }
     return basic_instances
 
+
 @pytest.fixture
 def instances_with_kind(basic_cluster):
     """generate instances with roles  for each node_kind"""
-    basic_cluster.add_instance("w", location_name="known",settings={"role":["witness","bdr"]})
-    basic_cluster.add_instance("s", location_name="known",settings={"role":["standby","bdr"]})
-    basic_cluster.add_instance("so", location_name="known",settings={"role":["subscriber-only","bdr"]})
-    basic_cluster.add_instance("data", location_name="known",settings={"role":["bdr"]})
-    basic_cluster.add_instance("other", location_name="known",settings={"role":["barman"]})
+    basic_cluster.add_instance(
+        "w", location_name="known", settings={"role": ["witness", "bdr"]}
+    )
+    basic_cluster.add_instance(
+        "s", location_name="known", settings={"role": ["standby", "bdr"]}
+    )
+    basic_cluster.add_instance(
+        "so", location_name="known", settings={"role": ["subscriber-only", "bdr"]}
+    )
+    basic_cluster.add_instance(
+        "data", location_name="known", settings={"role": ["bdr"]}
+    )
+    basic_cluster.add_instance(
+        "other", location_name="known", settings={"role": ["barman"]}
+    )
     return Instances(basic_cluster.instances)
+
 
 class TestInstances:
     """test Instances class"""
@@ -193,7 +205,6 @@ class TestInstances:
         """test with_bdr_node_kind function"""
 
         assert instances_with_kind.with_bdr_node_kind(input).get_names() == expected
-
 
     @pytest.mark.parametrize(
         "input, expected",
@@ -274,20 +285,24 @@ class TestInstances:
         assert basic_instances.add_role(input)
         assert basic_instances.with_role(input).get_names() == ["a", "b"]
 
-    def test_instances_only(self,basic_cluster, basic_instances):
+    def test_instances_only(self, basic_cluster, basic_instances):
         """test only function"""
         instances = Instances()
         with pytest.raises(ConfigureError):
             assert instances.only()
             assert basic_instances.only()
-        instances = Instances([Instance("a",cluster=basic_cluster,location_name="known")])
+        instances = Instances(
+            [Instance("a", cluster=basic_cluster, location_name="known")]
+        )
         assert instances.only().name == "a"
 
     def test_instances_maybe(self, basic_cluster, basic_instances):
         """test maybe function"""
         instances = Instances()
-        assert instances.maybe() == None
+        assert instances.maybe() is None
         with pytest.raises(ConfigureError):
             assert basic_instances.maybe()
-        instances = Instances([Instance("a",cluster=basic_cluster,location_name="known")])
+        instances = Instances(
+            [Instance("a", cluster=basic_cluster, location_name="known")]
+        )
         assert instances.maybe().name == "a"

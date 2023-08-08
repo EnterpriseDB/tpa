@@ -44,7 +44,7 @@ def conninfo_string(d: Dict[str, str]) -> str:
         return "'%s'" % str(s).replace("\\", "\\\\").replace("'", "\\'")
 
     s = []
-    for (k, v) in d.items():
+    for k, v in d.items():
         s.append("%s=%s" % (k, _quote(str(v))))
     return " ".join(s)
 

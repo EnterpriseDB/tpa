@@ -49,9 +49,9 @@ class BDR4PGD5(Transmogrifier):
             )
 
         bdr_locations = [
-            l
-            for l in cluster.locations
-            if len(cluster.instances.in_location(l.name).with_role("bdr")) > 0
+            loc
+            for loc in cluster.locations
+            if len(cluster.instances.in_location(loc.name).with_role("bdr")) > 0
         ]
 
         for loc in bdr_locations:
@@ -169,7 +169,7 @@ class BDR4PGD5(Transmogrifier):
                     if instance in instances.with_role("bdr") + instances.with_role(
                         "pgd-proxy"
                     ):
-                        if not "bdr_child_group" in instance.host_vars:
+                        if "bdr_child_group" not in instance.host_vars:
                             instance.host_vars["bdr_child_group"] = group["name"]
 
                     # Add route_priority to bdr data nodes that pgd-proxy

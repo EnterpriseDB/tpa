@@ -49,10 +49,11 @@ class TestConfigure:
     """test suite for configure command"""
 
     @pytest.mark.parametrize(
-        "argv, error, expected", [
+        "argv, error, expected",
+        [
             (["test", "-a", "Basic"], None, Cluster),
             (["test", "-a", "Other"], SystemExit, Cluster),
-            ]
+        ],
     )
     def test_configure(self, argv, error, expected):
         """test configure command"""

@@ -6,9 +6,8 @@
 
 import pytest
 
-from tpa.exceptions import ConfigureError, ClusterError
+from tpa.exceptions import ClusterError
 from tpa.cluster import Cluster
-from tpa.architectures import PGDAlwaysON, BDRAlwaysON
 
 
 class TestCluster:
@@ -78,7 +77,9 @@ class TestCluster:
         # verify clusters match
         assert len(basic_bdr_cluster.locations) == len(from_yaml.locations)
         assert len(basic_bdr_cluster.instances) == len(from_yaml.instances)
-        assert basic_bdr_cluster.instances.get_names() == from_yaml.instances.get_names()
+        assert (
+            basic_bdr_cluster.instances.get_names() == from_yaml.instances.get_names()
+        )
 
         # test covering _reorder_keys() function
         assert from_yaml.to_yaml()

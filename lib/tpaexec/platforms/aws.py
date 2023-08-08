@@ -147,7 +147,10 @@ class aws(CloudPlatform):
                     "user": "ubuntu",
                 },
                 "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20230325": {
-                    "versions": ["22.04", "jammy",],
+                    "versions": [
+                        "22.04",
+                        "jammy",
+                    ],
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
@@ -159,7 +162,7 @@ class aws(CloudPlatform):
                     "owner": "013907871322",
                     "user": "ec2-user",
                 }
-            }
+            },
         }
 
         image = {}
@@ -208,7 +211,7 @@ class aws(CloudPlatform):
         return image
 
     def _lookup_ami(self, image, region):
-        if not region in self.ec2:
+        if region not in self.ec2:
             self.ec2[region] = boto3.client("ec2", region_name=region)
         filters = [
             {"Name": "name", "Values": [image["name"]]},

@@ -4,5 +4,6 @@
 
 from ..architecture import Architecture
 
+
 class M1(Architecture):
     pass

@@ -56,7 +56,7 @@ class ChangeDescription:
         for i in self._items:
             s = str(i)
             if isinstance(i, ChangeDescription):
-                lines += indent(s, prefix=level*"  ").splitlines()
+                lines += indent(s, prefix=level * "  ").splitlines()
             else:
                 lines += wrap(
                     s,

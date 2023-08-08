@@ -68,7 +68,7 @@ def transmogrifiers_from_args(args: List[str]) -> List[Transmogrifier]:
     # we don't want to add Common, the command should error out with `Nothing
     # to do` message.
 
-    if len(tlist) == 0 :
+    if len(tlist) == 0:
         return tlist
 
     # Next, we build a complete parser for the list of Transmogrifiers, parse

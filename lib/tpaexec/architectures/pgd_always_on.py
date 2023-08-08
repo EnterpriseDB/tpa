@@ -8,6 +8,7 @@ from typing import List, Tuple
 import re
 from argparse import SUPPRESS
 
+
 class PGD_Always_ON(BDR):
     def supported_versions(self) -> List[Tuple[str, str]]:
         return [
@@ -126,14 +127,14 @@ class PGD_Always_ON(BDR):
         witness_only_location = self.args["witness_only_location"]
         data_nodes_per_location = self.args["data_nodes_per_location"]
         witness_node_per_location = self.args["witness_node_per_location"]
-        pgd_proxy_routing = self.args["pgd_proxy_routing"]
+        self.args["pgd_proxy_routing"]
 
         if data_nodes_per_location < 2:
             errors.append("--data-nodes-per-location cannot be less than 2")
 
         if data_nodes_per_location * len(location_names) > 1000:
             raise ArchitectureError(
-                f"PGD-Always-ON does not support more than 1000 nodes per cluster"
+                "PGD-Always-ON does not support more than 1000 nodes per cluster"
             )
 
         if len(location_names) == 2:
@@ -227,7 +228,7 @@ class PGD_Always_ON(BDR):
         self._update_pgd_probes(cluster_vars)
 
     def _update_pgd_probes(self, cluster_vars):
-        http={}
+        http = {}
         if "enable_pgd_probes" in self.args:
             http = {"pgd_http_options": {"enable": True}}
             if self.args["enable_pgd_probes"] in ["https"]:
@@ -300,7 +301,7 @@ class PGD_Always_ON(BDR):
                     cluster_vars.setdefault("bdr_commit_scopes", [])
 
                     group = instance_vars["bdr_child_group"]
-                    scope = f"camo"
+                    scope = "camo"
 
                     # Whichever is the first instance in the CAMO pair can
                     # create the new commit scope.

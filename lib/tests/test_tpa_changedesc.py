@@ -13,7 +13,6 @@ def basic_changedesc():
 
 
 class TestChangeDesc:
-
     def test_changedesc_basic(self, basic_changedesc):
         """test basic ChangeDescription creation"""
 
@@ -23,5 +22,10 @@ class TestChangeDesc:
     def test_changedesc_str(self, basic_changedesc):
         """test __str__ function"""
 
-        basic_changedesc._items.append(ChangeDescription(title="subtest", items=["subchange 1"]))
-        assert str(basic_changedesc) == '* Test\n  * Change 1\n  * Change 2\n  * subtest\n    * subchange 1'
+        basic_changedesc._items.append(
+            ChangeDescription(title="subtest", items=["subchange 1"])
+        )
+        assert (
+            str(basic_changedesc)
+            == "* Test\n  * Change 1\n  * Change 2\n  * subtest\n    * subchange 1"
+        )

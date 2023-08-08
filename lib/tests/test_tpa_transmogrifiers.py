@@ -242,10 +242,22 @@ class TestRepositories:
     @pytest.mark.parametrize(
         "vars, expected",
         [
-            ({"postgres_flavour": "postgresql","edb_repositories": []}, {"postgres_flavour": "postgresql", "edb_repositories": ["standard"]}),
-            ({"postgres_flavour": "pgextended","edb_repositories": []}, {"postgres_flavour": "pgextended","edb_repositories": ["standard"]}),
-            ({"postgres_flavour": "epas", "edb_repositories": [] }, {"postgres_flavour": "epas", "edb_repositories": ["enterprise"]}),
-            ({"postgres_flavour": "edbpge","edb_repositories": []}, {"postgres_flavour": "edbpge","edb_repositories": ["standard"]}),
+            (
+                {"postgres_flavour": "postgresql", "edb_repositories": []},
+                {"postgres_flavour": "postgresql", "edb_repositories": ["standard"]},
+            ),
+            (
+                {"postgres_flavour": "pgextended", "edb_repositories": []},
+                {"postgres_flavour": "pgextended", "edb_repositories": ["standard"]},
+            ),
+            (
+                {"postgres_flavour": "epas", "edb_repositories": []},
+                {"postgres_flavour": "epas", "edb_repositories": ["enterprise"]},
+            ),
+            (
+                {"postgres_flavour": "edbpge", "edb_repositories": []},
+                {"postgres_flavour": "edbpge", "edb_repositories": ["standard"]},
+            ),
         ],
     )
     def test_repositories_apply(self, vars, expected, basic_bdr_cluster):
@@ -261,6 +273,10 @@ class TestRepositories:
         "test apply function"
         x = Repositories()
         x._args = Namespace(edb_repositories=[])
-        basic_bdr_cluster.vars.update({"postgres_flavour": "postgresql", "edb_repositories":[]})
-        assert x.description(basic_bdr_cluster)._items == ["Set edb_repositories to ['standard']"]
+        basic_bdr_cluster.vars.update(
+            {"postgres_flavour": "postgresql", "edb_repositories": []}
+        )
+        assert x.description(basic_bdr_cluster)._items == [
+            "Set edb_repositories to ['standard']"
+        ]
         assert x.description(basic_bdr_cluster)._title is None

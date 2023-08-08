@@ -6,11 +6,14 @@
 class ConfigureError(Exception):
     MSG = "Error"
 
+
 class ClusterError(Exception):
     MSG = "Error"
 
+
 class InstanceError(Exception):
     MSG = "Error"
+
 
 class TransmogrifierError(Exception):
     MSG = "Error"

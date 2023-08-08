@@ -267,7 +267,6 @@ def cmdline(playbook_dir):
         and args[7] == "--vault-password-file"
         and args[8] == "vault/vault_pass.txt"
     ):
-
         tpaexec = "tpaexec"
 
         tpa_dir = args[2].replace("tpa_dir=", "")

@@ -3,7 +3,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 import os
-import sys
 import shutil
 from typing import List
 from argparse import ArgumentParser
@@ -112,7 +111,9 @@ def write_output(cluster: Cluster, output_file: str) -> None:
     # XXX Should we run `git status` instead? Do we need to worry about whether
     # output_file is tracked or not?
 
-    if os.path.exists(output_file) and not os.path.exists(os.path.join(cluster.name, ".git")):
+    if os.path.exists(output_file) and not os.path.exists(
+        os.path.join(cluster.name, ".git")
+    ):
         counter = 0
         backup_file = output_file
         while os.path.exists(backup_file):

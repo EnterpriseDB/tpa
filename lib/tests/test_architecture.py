@@ -20,6 +20,8 @@ CONFIG_PATH = {
     "BDR": "lib/tests/config/cluster-BDR",
     "PGD": "lib/tests/config/cluster-PGD",
 }
+
+
 class BasicArchitecture(Architecture):
     """
     This represents the bare minimum required to instantiate an Architecture,
@@ -120,8 +122,6 @@ class TestBarePlatform:
         """Bare platform has no OS version to detect so local repo creation should return a warning."""
         with pytest.raises(ArchitectureError):
             architecture_bare.setup_local_repo()
-
-
 
 
 @pytest.fixture

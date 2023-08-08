@@ -19,14 +19,16 @@ class M1(Architecture):
         )
 
         assert isinstance(p, argparse.ArgumentParser)
-        fail_over_group = p.add_argument_group('M1 architecture fail-over manager options')
+        fail_over_group = p.add_argument_group(
+            "M1 architecture fail-over manager options"
+        )
         fail_over_me_group = fail_over_group.add_mutually_exclusive_group()
 
         fail_over_me_group.add_argument(
             "--failover-manager",
             "--fail-over-manager",
             choices=["efm", "patroni", "repmgr"],
-            help="The type of fail-over manager to use for the cluster."
+            help="The type of fail-over manager to use for the cluster.",
         )
 
         fail_over_me_group.add_argument(
@@ -34,7 +36,7 @@ class M1(Architecture):
             action="store_const",
             const="efm",
             dest="failover_manager",
-            help="Enable EDB Failover Manager"
+            help="Enable EDB Failover Manager",
         )
 
         fail_over_me_group.add_argument(
@@ -42,7 +44,7 @@ class M1(Architecture):
             action="store_const",
             const="repmgr",
             dest="failover_manager",
-            help="Enable Replication Manager as HA fail-over manager"
+            help="Enable Replication Manager as HA fail-over manager",
         )
 
         fail_over_me_group.add_argument(
@@ -88,7 +90,9 @@ class M1(Architecture):
         return (
             3
             + self.args.get("cascaded_replicas", 1)
-            + (3 if self.args.get("failover_manager") == "patroni" else 0)  # DCS nodes (etcd)
+            + (
+                3 if self.args.get("failover_manager") == "patroni" else 0
+            )  # DCS nodes (etcd)
             + (2 if self.args.get("enable_haproxy") else 0)
         )
 
@@ -96,7 +100,6 @@ class M1(Architecture):
         return ["main", "dr"]
 
     def update_instances(self, instances):
-
         # If --enable-pem is specified, we collect all the instances with role
         # [primary, replica, witness] and append 'pem-agent' role to the existing
         # set of roles assigned to them. We later add a dedicated 'pemserver'
@@ -131,8 +134,9 @@ class M1(Architecture):
         given_repositories = " ".join(tpa_2q_repositories)
 
         if postgres_flavour == "epas" and (
-            not tpa_2q_repositories or
-            "products/default/release" not in given_repositories):
+            not tpa_2q_repositories
+            or "products/default/release" not in given_repositories
+        ):
             tpa_2q_repositories.append("products/default/release")
 
         if tpa_2q_repositories:
@@ -156,24 +160,23 @@ class M1(Architecture):
             )
 
         if failover_manager == "patroni":
-
             # Ensure nodes are members of a single etcd_location per cluster for patroni.
             cluster_vars["etcd_location"] = "main"
 
-            if postgres_flavour == 'pgextended':
+            if postgres_flavour == "pgextended":
                 raise ArchitectureError(
                     "2Q Postgres Extended is not compatible with the failover manager Patroni."
                     " Try `--postgres-flavour edbpge` instead."
                 )
 
-            edb_repositories = set(cluster_vars.get('edb_repositories') or [])
+            edb_repositories = set(cluster_vars.get("edb_repositories") or [])
 
             # Adds repo containing postgres as a dependency, as use of any edb v2 repo disables v1/2q repos
             # When generic support for M1 with EDB v2 repos is supported this can be removed
-            edb_repositories.add("enterprise" if postgres_flavour == "epas" else "standard")
+            edb_repositories.add(
+                "enterprise" if postgres_flavour == "epas" else "standard"
+            )
 
             # Add EDB v2 package repos to include Patroni packages
-            edb_repositories.add(
-                'community_360'
-            )
-            cluster_vars['edb_repositories'] = list(edb_repositories)
+            edb_repositories.add("community_360")
+            cluster_vars["edb_repositories"] = list(edb_repositories)

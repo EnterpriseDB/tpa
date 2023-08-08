@@ -30,13 +30,11 @@ from jinja2.exceptions import UndefinedError
 
 from collections.abc import Iterable
 from ansible.errors import AnsibleError, AnsibleUndefinedVariable
-from ansible.utils.listify import listify_lookup_plugin_terms
 from ansible.plugins.lookup import LookupBase
 
 
 class LookupModule(LookupBase):
     def run(self, terms, variables=None, **kwargs):
-
         v = variables.copy()
         self._templar.set_available_variables(v)
 
@@ -56,7 +54,6 @@ class LookupModule(LookupBase):
         return self.accumulate(v, [], terms[0], terms[1:])
 
     def accumulate(self, v, items, current_term, terms):
-
         v.update({"item": items})
 
         list = []

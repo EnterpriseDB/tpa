@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-from ansible.errors import AnsibleFilterError
 from typing import Dict, List, Any
 
 

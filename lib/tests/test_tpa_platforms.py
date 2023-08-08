@@ -9,19 +9,16 @@ import pytest
 from tpa.platform import Platform
 
 
-
 @pytest.fixture
 def basic_platform():
     """generate a basic platform"""
     return Platform("test")
 
 
-
-class TestPlatform():
+class TestPlatform:
     """test suite for Platform class"""
 
     def test_platform_basic(self, basic_platform):
         """test basic Platform creation"""
 
         assert basic_platform.name == "test"
-

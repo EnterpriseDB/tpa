@@ -93,6 +93,7 @@ class PasswordWriteError(TPABaseException):
 
     pass
 
+
 class ExternalCommandError(TPABaseException):
     """External command execution error."""
 

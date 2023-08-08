@@ -5,7 +5,6 @@
 from typing import Any
 from collections import ChainMap
 
-from .location import Location
 from .exceptions import InstanceError
 
 

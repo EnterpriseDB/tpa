@@ -4,5 +4,6 @@
 
 from ..architecture import Architecture
 
+
 class PGDAlwaysON(Architecture):
     pass

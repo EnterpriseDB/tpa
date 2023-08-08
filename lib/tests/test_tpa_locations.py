@@ -7,6 +7,7 @@ import pytest
 
 from tpa.location import Location
 
+
 @pytest.fixture
 def basic_location():
     """generatet a basic location"""
@@ -23,7 +24,7 @@ class TestLocation:
         assert basic_location.group.name == "location_test"
         assert basic_location.group.group_vars == {}
         assert basic_location.settings == {}
-        assert basic_location.witness_only == False
+        assert basic_location.witness_only is False
         assert basic_location.sub_group_name == "test_subgroup"
 
     def test_location_to_yaml_dict(self, basic_location):
