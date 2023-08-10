@@ -17,8 +17,9 @@ etcd_packages:
     Debian:
       - etcd-client
       - etcd-server
-    RedHat:
+    RedHat: &default_rpm_etcd_packages
       - etcd
+    SUSE: *default_rpm_etcd_packages
   patroni: *default_etcd_packages
   harp:
     Debian:
