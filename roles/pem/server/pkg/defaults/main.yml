@@ -22,3 +22,7 @@ pem_server_sslutils_packages:
     RedHat: &epas_sslutils_package
       - edb-as{{ postgres_versionNN }}-server-sslutils
     Debian: *epas_sslutils_package
+  edbpge:
+    RedHat: &edbpge_sslutils_package
+      - edb-postgresextended{{ postgres_versionNN }}-sslutils
+    Debian: *edbpge_sslutils_package
