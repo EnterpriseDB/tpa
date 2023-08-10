@@ -9,11 +9,9 @@ patroni_packages:
     - patroni
     - "patroni-{{ patroni_dcs|default('etcd') }}"
   SUSE: *all_rpm_patroni_packages
-  Ubuntu: *all_deb_patroni_packages
 
 patroni_dependency_packages:
   Debian: &all_patroni_dependency_packages
     - jq
   RedHat: *all_patroni_dependency_packages
   SUSE: *all_patroni_dependency_packages
-  Ubuntu: *all_patroni_dependency_packages
