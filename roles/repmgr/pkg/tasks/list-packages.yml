@@ -5,7 +5,7 @@
 - include_role: name=pkg/add_to_list
   vars:
     list_contents: "{{
-        repmgr_packages[postgres_family_extended]
+        repmgr_packages[postgres_flavour]
         |packages_for(ansible_os_family, repmgr_package_version)
       }}"
   when:
