@@ -293,6 +293,26 @@
     label: >-
       {{ repo.repo }}
 
+- name: Find existing EDB repositories
+  find:
+    paths: /etc/yum.repos.d/
+    patterns: 'enterprisedb-*.repo'
+    file_type: "file"
+  register: existing_edb_repos
+
+- name: Remove unwanted EDB repositories
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ existing_edb_repos.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  vars:
+    # enterprisedb-repo.repo => [enterprisedb, repo]
+    repo: "{{ item.path|basename|split('.')|first|split('-') }}"
+  when: >
+    repo[1] not in edb_repositories
+
 - name: Install EDB repositories for x86_64
   include_tasks: add-repository.yml
   with_items: "{{ edb_repositories }}"
