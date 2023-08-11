@@ -2,6 +2,26 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+- name: Find existing EDB repositories
+  find:
+    paths: /etc/apt/sources.list.d/
+    patterns: 'edb-*.list'
+    file_type: "file"
+  register: existing_edb_repos
+
+- name: Remove unwanted EDB repositories
+  file:
+    name: "{{ item.path }}"
+    state: absent
+  loop: "{{ existing_edb_repos.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  vars:
+    # edb-repo.list => [edb, repo]
+    repo: "{{ item.path|basename|split('.')|first|split('-') }}"
+  when: >
+    repo[1] not in edb_repositories
+
 - name: Add EDB repository keys
   apt_key:
     url: "https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ item }}/gpg.key"
