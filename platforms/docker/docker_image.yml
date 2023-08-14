@@ -38,6 +38,17 @@
 #
 # (Set ``dockerfile: Somefile`` or ``base_dockerfile: Otherfile`` if
 # your Dockerfile is named something other than Dockerfile.)
+#
+# Set `base_build_args` if your base Dockerfile requires ARGS to be set.
+# For Example:
+#
+#     docker_images:
+#       "some/other:ver":
+#         base_context_path: images/other-base
+#         context_path: images/common-systemd
+#         base_build_args:
+#           ARG1: VALUE
+#
 
 - name: Set default build configuration
   set_fact:
@@ -96,6 +107,7 @@
       path: "{{ _entry.base_context_path }}"
       dockerfile: "{{ _entry.base_dockerfile|default(omit) }}"
       pull: no
+      args: "{{ _entry.base_build_args|default(omit) }}"
   register: base_image
   vars:
     _entry: "{{ docker_images[image] }}"
