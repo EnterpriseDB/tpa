@@ -118,6 +118,13 @@
   when:
     _entry.base_context_path is defined
 
+- name: Store name and tag of base image
+  set_fact:
+    _base_image_tag: "{{ base_image.image.RepoTags[0] }}"
+  when:
+    base_image.image.RepoTags is defined
+    and base_image.image.RepoTags is not empty
+
 - name: Build final docker image {{ image }}
   docker_image:
     name: "{{ image }}"
@@ -129,10 +136,12 @@
       path: "{{ _entry.context_path }}"
       dockerfile: "{{ _entry.dockerfile|default(omit) }}"
       args:
-        # Specify the base image using the container-id of the parent, so we
-        # ensure we build on top of exactly what we produced in the event of
-        # concurrent rebuilds/re-tags, etc.
-        BASE_IMAGE: "{{ base_image.image.Id|default(_entry.base_image|default('none')) }}"
+        # The `FROM` line of the Dockerfile requires an image "repository" name and
+        # a tag and/or digest. The digest part can only be retrieved from an image
+        # that has been pushed to a registry. Locally built base image will have
+        # image repository name and tag. As an image ID cannot be used in FROM
+        # the tag could be reset by concurrent image build on the same host.
+        BASE_IMAGE: "{{ _base_image_tag|default(_entry.base_image|default('none')) }}"
       nocache: "{{ _entry.nocache|default('no') }}"
       pull: "{{ _entry['pull']|default(_pull) }}"
   vars:
