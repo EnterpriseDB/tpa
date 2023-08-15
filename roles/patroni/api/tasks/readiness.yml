@@ -20,7 +20,14 @@
     validate_certs: no
 
   register: patroni_readiness_api_output
+
+  # If the patroni daemon has just been started it can take a second or two before the
+  # API endpoint starts listening, so ignore the first few connection refused statuses
   until:
-    patroni_readiness_api_output.status in [-1, 200]
+    (patroni_readiness_api_output.attempts < 3)
+    |ternary(
+      patroni_readiness_api_output.status == 200,
+      patroni_readiness_api_output.status in [-1, 200]
+    )
   retries: 90
   delay: 2
