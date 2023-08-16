@@ -3,7 +3,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 efm_dependency_packages:
-  - java-11-openjdk
-  - tzdata-java
-  - iputils
+  - openjdk-8-jre
+  - iputils-ping
   - procps
