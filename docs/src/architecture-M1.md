@@ -2,9 +2,9 @@
 
 A Postgres cluster with a primary and a streaming replica, one Barman
 server, and any number of additional replicas cascaded from the first
-one. This architecture is suitable for testing, demonstrating and
-learning. We plan to release a production primary/standby architecture
-for TPA in the near future.
+one. This architecture is suitable for production and is also suited to
+testing, demonstrating and learning due to its simplicity and ability to
+be configured with no proprietary components.
 
 In default configuration this architecture uses open source software
 only. To use subscription-only EDB software with this architecture
@@ -27,6 +27,26 @@ If there is an even number of Postgres nodes, the Barman node is
 additionally configured as a witness. This ensures that the
 number of nodes is always odd, which is convenient when
 enabling automatic failover.
+
+## Application and backup failover
+
+The M1 architecture implements failover management in that it ensures
+that a replica will be promoted to take the place of the primary should
+the primary become unavailable. However it *does not provide any
+automatic facility to reroute application traffic to the primary*. If
+you require, automatic failover of application traffic you will need to
+configure this at the application itself (for example using multi-host
+connections) or by using an appropriate proxy or load balancer and the
+facilities offered by your selected failover manager.
+
+The above is also true of the connection between the backup and the
+primary created by TPA. The backup will not be automatically adjusted to
+target the new primary in the event of failover, instead it will remain
+connected to the original primary. If you are performing a manual
+failover and wish to connect the backup to the new primary, you may
+simply re-run `tpaexec deploy`. If you wish to automatically change the
+backup source, you should implement this as described for application
+failover above.
 
 ## Cluster configuration
 
