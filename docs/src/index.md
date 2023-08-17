@@ -184,7 +184,33 @@ designed to make life simpler, but there is no hidden magic or anything
 standing in the way between you and the database. You can do everything
 on a TPA cluster that you could do on any other Postgres installation.
 
-## Getting started
+## Versioning in TPA
+
+TPA previously used a date-based versioning scheme whereby the major
+version was derived from the year. From version 23 we have moved to a
+derivative of semantic versioning. For historical reasons, we are not
+using the full three-part semantic version number. Instead TPA uses a
+two-part `major.minor` format. The minor version is incremented on every
+release, the major version is only incremented where required to comply
+with the backward compatibility principle below.
+
+### Backwards compatibility
+
+A key development principle of TPA is to maintain backwards
+compatibility so there is no reason for users to need anything other
+than the latest version of TPA. We define backwards compatibility as
+follows:
+
+- A config.yml created with TPA X.a will be valid with TPA X.b where
+  b>=a
+- The cluster created from that config.yml will be maintainable and
+  re-deployable with TPA X.b
+
+ Therefore, a new major version implies a break in backward
+ compatibility. As such, we aim to avoid releasing major versions and
+ will only do so in exceptional circumstances.
+
+ ## Getting started
 
 Follow the [TPA installation instructions](INSTALL.md) for your
 system, then [configure your first cluster](tpaexec-configure.md).
