@@ -39,14 +39,14 @@ configure this at the application itself (for example using multi-host
 connections) or by using an appropriate proxy or load balancer and the
 facilities offered by your selected failover manager.
 
-The above is also true of the connection between the backup and the
+The above is also true of the connection between the backup node and the
 primary created by TPA. The backup will not be automatically adjusted to
 target the new primary in the event of failover, instead it will remain
 connected to the original primary. If you are performing a manual
 failover and wish to connect the backup to the new primary, you may
 simply re-run `tpaexec deploy`. If you wish to automatically change the
-backup source, you should implement this as described for application
-failover above.
+backup source, you should implement this using your selected failover
+manager as noted above.
 
 ## Cluster configuration
 
