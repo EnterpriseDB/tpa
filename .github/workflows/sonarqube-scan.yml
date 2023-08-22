@@ -12,43 +12,27 @@ jobs:
     name: SonarQube Scan Job
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout source repository
-        id: checkout-source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          repository: '${{github.repository}}'
-          ref: '${{ github.ref }}'
-          token: '${{secrets.GH_SLONIK}}'
-
-      - name: Checkout foundation repository
-        id: checkout-foundation
-        uses: actions/checkout@v3
-        with:
-           repository: EnterpriseDB/foundation-packaging
-           ref: main
-           path: foundation
-           token: '${{secrets.GH_SLONIK}}'
-
-      - name: Checkout foundation-security repository
-        id: checkout-foundation-security
-        uses: actions/checkout@v3
-        with:
-          repository: EnterpriseDB/foundation-security
-          ref: master
-          path: foundation-security
-          token: '${{secrets.GH_SLONIK}}'
-
-      - name: SonarQube Scan
-        id: call-sq-composite
-        uses: ./foundation-security/actions/sonarqube
-        with:
-          GITHUB_TOKEN: '${{secrets.GH_SLONIK}}'
-          GITHUB_REF: '${{github.ref}}'
-          SONARQUBE_URL: '${{secrets.SONARQUBE_URL}}'
-          SONARQUBE_TOKEN: '${{secrets.SONARQUBE_TOKEN}}'
+      - name: Trigger Workflow
+        uses: actions/github-script@v6
+        env:
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref }}
           PULL_REQUEST_KEY: '${{github.event.number}}'
           PULL_REQUEST_BRANCH: '${{github.head_ref}}'
           PULL_REQUEST_BASE_BRANCH: '${{github.base_ref}}'
-          FOUNDATION_SECURITY_SONARQUBE_TOKEN: '${{secrets.FOUNDATION_SECURITY_SONARQUBE_TOKEN}}'
-          CLOUDSMITH_TOKEN: '${{secrets.CLOUDSMITH_READ_ALL}}'
+        with:
+          github-token: ${{ secrets.TPAEXEC_CI }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'EnterpriseDB',
+              repo: 'tpaexec-ci',
+              workflow_id: 'sonarqube-scan.yml',
+              ref: 'master',
+              inputs: {
+                repository: process.env.REPOSITORY,
+                ref: process.env.REF,
+                pr_key: process.env.PULL_REQUEST_KEY,
+                pr_branch_ref: process.env.PULL_REQUEST_BRANCH,
+                pr_base_branch_ref: process.env.PULL_REQUEST_BASE_BRANCH
+              },
+            })

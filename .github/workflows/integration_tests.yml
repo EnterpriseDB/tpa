@@ -16,30 +16,7 @@ on:
       - submitted
   workflow_dispatch:
 
-env:
-  LANG: "C.UTF-8"
-  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
-  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
-  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.EDB_SUBSCRIPTION_TOKEN }}
-  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
-  ANSIBLE_SKIP_TAGS: pgbench
-  PYTHONWARNINGS: once
-
 jobs:
-
-  load-matrix:
-    name: Load Matrix
-    runs-on: ubuntu-20.04
-    outputs:
-      json: ${{ steps.load-yaml.outputs.json }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: ./.github/actions/load-yaml
-        id: load-yaml
-        with:
-          file: .github/config/matrix.yml
-          key: default
 
   integration-test:
     # In addition to the event triggers above, this job only runs when any of these conditions are met:
@@ -59,21 +36,17 @@ jobs:
     # env not supported here
     # || env.ACT
     name: Integration Tests
-    needs: load-matrix
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3
-
-      - uses: ./.github/actions/integration-test
+      - name: Trigger Workflow
+        uses: actions/github-script@v6
         with:
-          cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}-${{ matrix.tpa_os_image }}
-          tpa_architecture: ${{ matrix.tpa_architecture }}
-          tpa_platform: ${{ matrix.tpa_platform }}
-          tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
-          tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
-          tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
-          tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
+          github-token: ${{ secrets.TPAEXEC_CI }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'EnterpriseDB',
+              repo: 'tpaexec-ci',
+              workflow_id: 'integration_tests.yml',
+              ref: 'master',
+            })

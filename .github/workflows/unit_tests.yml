@@ -11,12 +11,6 @@ on:
         - master
   workflow_dispatch:
 
-env:
-  LANG: "C.UTF-8"
-  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
-  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
-  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
-
 jobs:
 
   unit-test:
@@ -24,13 +18,21 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3
-
-      - uses: ./.github/actions/install-requirements
-
-      - name: Install tox
-        run: pip install tox
-
-      - name: Run tests with tox
-        run: |
-          TOX_PARALLEL_NO_SPINNER=1 tox -e py36-test,dep -p auto
+      - name: Trigger Workflow
+        uses: actions/github-script@v6
+        env:
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref }}
+        with:
+          github-token: ${{ secrets.TPAEXEC_CI }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'EnterpriseDB',
+              repo: 'tpaexec-ci',
+              workflow_id: 'unit_tests.yml',
+              ref: 'master',
+              inputs: {
+                repository: process.env.REPOSITORY,
+                ref: process.env.REF
+              },
+            })

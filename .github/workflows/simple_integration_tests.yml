@@ -5,42 +5,19 @@ name: Simple Integration Tests
 on:
   push:
     branches-ignore:
-      - master
-      - 'rc/**'
+    - master
+    - 'rc/**'
   pull_request:
     types:
-      - review_requested
+    - review_requested
     branches:
-      - master
+    - master
   pull_request_review:
     types:
-      - submitted
+    - submitted
   workflow_dispatch:
 
-env:
-  LANG: "C.UTF-8"
-  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
-  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
-  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
-  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.EDB_SUBSCRIPTION_TOKEN }}
-  ANSIBLE_SKIP_TAGS: pgbench
-  PYTHONWARNINGS: once
-
 jobs:
-
-  load-matrix:
-    name: Load Matrix
-    runs-on: ubuntu-20.04
-    outputs:
-      json: ${{ steps.load-yaml.outputs.json }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: ./.github/actions/load-yaml
-        id: load-yaml
-        with:
-          file: .github/config/matrix.yml
-          key: simple
 
   integration-test:
     # In addition to the event triggers above, this job only runs when any of these conditions are met:
@@ -48,27 +25,23 @@ jobs:
     #  * a PR review is marked as approved
     #  * a manual run is executed
     if: >
-      (github.event.requested_team && github.event.requested_team.name == 'tpaexec-dev-team')
-      || (github.event.review
+      (github.event.requested_team && github.event.requested_team.name == 'tpaexec-dev-team') || (github.event.review
           && github.event.review.state == 'approved'
           && startsWith(github.event.pull_request.base.ref, 'master'))
       || github.event_name == 'workflow_dispatch'
-    # env not supported here
-    # || env.ACT
+
     name: Integration test
-    needs: load-matrix
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3
-
-      - uses: ./.github/actions/integration-test
+      - name: Trigger Workflow
+        uses: actions/github-script@v6
         with:
-          cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}
-          tpa_architecture: ${{ matrix.tpa_architecture }}
-          tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
-          tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
-          tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
+          github-token: ${{ secrets.TPAEXEC_CI }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'EnterpriseDB',
+              repo: 'tpaexec-ci',
+              workflow_id: 'simple_integration_tests.yml',
+              ref: 'master',
+            })

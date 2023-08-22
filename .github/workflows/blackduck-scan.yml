@@ -9,37 +9,23 @@ on:
 jobs:
   Blackduck-Scan:
     runs-on: ubuntu-20.04
-    permissions: # These permissions are needed to interact with GitHub's OIDC Token endpoint.
-      id-token: write
-      contents: read
+
     steps:
-      - name: Checkout source repository
-        id: checkout-source
-        uses: actions/checkout@v3
+      - name: Trigger Workflow
+        uses: actions/github-script@v6
+        env:
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref }}
         with:
-          fetch-depth: 0
-          repository: ${{github.repository}}
-          ref: ${{ github.ref }}
-          path: source
-          token: ${{secrets.GH_SLONIK}}
-
-      - name: Checkout foundation-security repository
-        id: checkout-foundation-security
-        uses: actions/checkout@v3
-        with:
-          repository: EnterpriseDB/foundation-security
-          ref: master
-          path: foundation-security
-          token: ${{secrets.GH_SLONIK}}
-
-      - name: tpaexec install
-        id: tpaexec-install
-        run: bin/tpaexec setup
-
-      - name: BlackDuck Scan
-        id: call-bd-action
-        uses: ./foundation-security/actions/blackduck
-        with:
-          github-token: ${{ secrets.GH_SLONIK }}
-          blackduck-url: ${{ secrets.BLACKDUCK_URL }}
-          blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+          github-token: ${{ secrets.TPAEXEC_CI }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'EnterpriseDB',
+              repo: 'tpaexec-ci',
+              workflow_id: 'blackduck-scan.yml',
+              ref: 'master',
+              inputs: {
+                repository: process.env.REPOSITORY,
+                ref: process.env.REF
+              },
+            })
