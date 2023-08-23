@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
 import argparse
+
+from typing import List
 
 from ..architecture import Architecture
 from ..exceptions import ArchitectureError
@@ -76,18 +79,22 @@ class M1(Architecture):
             )
 
         if (
-            (args.get("distribution") == "RedHat" and args.get("os_version") == "7")
-            or args.get("os_image") == "tpa/centos:7"
-        ) and (
-            args.get("failover_manager") == "patroni" and args.get("enable_haproxy")
+            args.get("failover_manager") == "patroni"
+            and args.get("enable_haproxy")
+            and (
+                (args.get("distribution") == "RedHat" and args.get("os_version") == "7")
+                or args.get("os_image") == "tpa/centos:7"
+            )
         ):
             raise ArchitectureError(
                 "TPA does not support Patroni with HAproxy on RedHat/CentOS 7"
             )
-        if args.get("failover_manager") == "repmgr" and args.get("postgres_flavour") == "epas":
-            raise ArchitectureError(
-                f"TPA does not support repmgr with {args.get('postgres_flavour')}"
-            )
+
+        if (
+            args.get("failover_manager") == "repmgr"
+            and args.get("postgres_flavour") == "epas"
+        ):
+            raise ArchitectureError(f"TPA does not support repmgr with EPAS")
 
     def num_instances(self):
         return (
@@ -130,25 +137,7 @@ class M1(Architecture):
         """
         Makes architecture-specific changes to cluster_vars if required
         """
-        tpa_2q_repositories = self.args.get("tpa_2q_repositories") or []
-        postgres_flavour = self.args.get("postgres_flavour")
         failover_manager = self.args.get("failover_manager")
-
-        given_repositories = " ".join(tpa_2q_repositories)
-
-        if postgres_flavour == "epas" and (
-            not tpa_2q_repositories
-            or "products/default/release" not in given_repositories
-        ):
-            tpa_2q_repositories.append("products/default/release")
-
-        if tpa_2q_repositories:
-            cluster_vars.update(
-                {
-                    "tpa_2q_repositories": tpa_2q_repositories,
-                }
-            )
-
         cluster_vars.update(
             {
                 "failover_manager": failover_manager,
@@ -158,21 +147,3 @@ class M1(Architecture):
         if failover_manager == "patroni":
             # Ensure nodes are members of a single etcd_location per cluster for patroni.
             cluster_vars["etcd_location"] = "main"
-
-            if postgres_flavour == "pgextended":
-                raise ArchitectureError(
-                    "2Q Postgres Extended is not compatible with the failover manager Patroni."
-                    " Try `--postgres-flavour edbpge` instead."
-                )
-
-            edb_repositories = set(cluster_vars.get("edb_repositories") or [])
-
-            # Adds repo containing postgres as a dependency, as use of any edb v2 repo disables v1/2q repos
-            # When generic support for M1 with EDB v2 repos is supported this can be removed
-            edb_repositories.add(
-                "enterprise" if postgres_flavour == "epas" else "standard"
-            )
-
-            # Add EDB v2 package repos to include Patroni packages
-            edb_repositories.add("community_360")
-            cluster_vars["edb_repositories"] = list(edb_repositories)

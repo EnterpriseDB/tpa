@@ -309,13 +309,14 @@ class Architecture(object):
             "--use-volatile-subscriptions",
             action="store_true",
         )
-        g.add_argument(
+        g_repo = g.add_mutually_exclusive_group()
+        g_repo.add_argument(
             "--2Q-repositories",
             dest="tpa_2q_repositories",
             nargs="+",
             metavar="source/name/maturity",
         )
-        g.add_argument(
+        g_repo.add_argument(
             "--edb-repositories",
             dest="edb_repositories",
             nargs="+",
@@ -615,7 +616,7 @@ class Architecture(object):
         self.update_cluster_vars(cluster_vars)
         self.postgres_eol_repos(cluster_vars)
         self.set_2q_repos(cluster_vars)
-        self.add_edb_repos(cluster_vars)
+        self.update_repos(cluster_vars)
         self.platform.update_cluster_vars(cluster_vars, args)
         args["cluster_vars"] = cluster_vars
 
@@ -1020,45 +1021,143 @@ class Architecture(object):
         ):
             cluster_vars["tpa_2q_repositories"] = []
 
-    def add_edb_repos(self, cluster_vars):
-        """Set default values for edb_repositories based on the Postgres flavour
-        and version in use."""
+    def default_edb_repos(self, cluster_vars) -> List[str]:
+        """Returns the default EDB (i.e., Cloudsmith) repositories we think are
+        required for the given cluster, based on postgres_flavour etc. (which
+        are required to be set by now)."""
 
-        edb_repositories = self.args.get("edb_repositories")
-
-        if self.name != "PGD-Always-ON" and not edb_repositories:
-            return
-
-        postgres_flavour = self.args.get("postgres_flavour")
-        postgres_version = self.args.get("postgres_version")
-        bdr_version = cluster_vars.get("bdr_version")
+        postgres_flavour = self.args.get("postgres_flavour") or "impossible"
 
         postgres_repos = {
             "postgresql": ["standard"],
             "edbpge": ["standard"],
+            # No matter how the flavour is specified, we translate 'pgextended'
+            # into 'edbpge' for all but BDR-Always-ON, for which we would never
+            # call this function anyway (see below).
             "pgextended": [],
             "epas": ["enterprise"],
         }
 
-        default_repos = postgres_repos[postgres_flavour]
-        if bdr_version == "5":
-            if postgres_flavour == "pgextended":
-                raise ArchitectureError(
-                    "Please use --edb-postgres-extended instead of '--postgres-flavour pgextended' for PGD-Always-ON"
-                )
+        repos = postgres_repos[postgres_flavour]
 
-            default_repos.append("postgres_distributed")
+        # If you just need Postgres and haven't asked for any other proprietary
+        # software, we don't need to require any EDB repos. You'll be fine with
+        # just PGDG. For anything else, you can always specify the correct list
+        # with --edb-repositories.
 
-        # If we have a list of --edb-repositories, we assume the list is
-        # complete, and can override the defaults.
+        if (
+            postgres_flavour == "postgresql"
+            and not self.args.get("failover_manager") == "efm"
+            and not self.name == "PGD-Always-ON"
+            and not self.args.get("enable_pem")
+        ):
+            repos = []
 
-        if edb_repositories is None:
-            edb_repositories = default_repos
-        cluster_vars.update(
-            {
-                "edb_repositories": edb_repositories,
-            }
-        )
+        return repos
+
+    def update_repos(self, cluster_vars):
+        """Define package repositories for the cluster based on the selected
+        architecture and Postgres flavour/version."""
+
+        # TPA supports three kinds of repositories: (a) EDB's new Cloudsmith
+        # repositories, defined via --edb-repositories; (b) legacy 2ndQuadrant
+        # repositories, defined via --2Q-repositories; and (c) arbitrary APT or
+        # YUM repos, defined by setting {apt,yum}_{repositories,repository_list}
+        # in config.yml (not via configure options). PGDG, EPEL, and the legacy
+        # EDB repos ({apt,yum}.enterprisedb.com) are defined using this method
+        # (see default_{apt,yum}_repositories).
+        #
+        # EDB's new Cloudsmith repositories are arranged around the different
+        # subscription levels available to customers: community_360, standard,
+        # and enterprise (and postgres_distributed, for the Extreme HA add-on
+        # subscription available with either standard or enterprise).
+        #
+        # The original idea was to provide EDB's builds of supported open-source
+        # software in the community_360 repo, as an alternative to PGDG packages
+        # (which are also fully supported). The standard repo would include the
+        # community_360 packages, plus some proprietary software (e.g., PGE).
+        # The enterprise repo would include everything in community_360 and
+        # standard, plus EPAS and some other proprietary software.
+        #
+        # In practice, the standard and enterprise repos follow this layout, but
+        # the community_360 repo does not contain any packages, and it will take
+        # a good while before it becomes a viable alternative to using PGDG. For
+        # now, we never use the community_360 repo by default; and even if it's
+        # explicitly requested, we make sure to include PGDG as well (which we
+        # don't do otherwise, e.g., for PGD-Always-ON).
+        #
+        # Ideally, a new cluster would use only the EDB Cloudsmith repositories
+        # if it needed any EDB proprietary software (this is the case for all
+        # PGD-Always-ON clusters). If it did not need proprietary software, it
+        # would use only PGDG (whose packages remain fully supported).
+        #
+        # Before the Cloudsmith repositories were introduced, clusters required
+        # a mixture of 2Q repositories with PGDG(+EPEL) and the legacy EDB repos
+        # (for EPAS/EFM/etc., if used). BDR-Always-ON clusters still need the 2Q
+        # repos, but otherwise (and especially for M1), new clusters don't need
+        # so many repos. (Of course, you can still specify different/additional
+        # repositories in config.yml, and existing configurations will continue
+        # to work as before.)
+        #
+        # In order to protect users against accidents and confusion, TPA does
+        # not allow edb_repositories and tpa_2q_repositories to be used together
+        # (by making --edb-repositories and --2Q-repositories mutually exclusive
+        # at configure time, and also at deploy time by asserts in roles/init).
+        #
+        # If a user goes to the trouble of specifying an --edb-repositories list
+        # (and not just "none" or the flavour-dependent defaults derived later),
+        # that wins over everything else.
+
+        edb_repositories = self.args.get("edb_repositories")
+        if edb_repositories and edb_repositories != ["none"]:
+            cluster_vars.update({"edb_repositories": edb_repositories})
+            return
+
+        # If cluster_vars.tpa_2q_repositories is defined when we reach here, we
+        # know that it must already take the --2Q-repositories into account (see
+        # BDR.update_cluster_vars), and we don't need to do anything more (and
+        # we must not configure any edb_repositories).
+
+        if "tpa_2q_repositories" in cluster_vars:
+            return
+
+        # Otherwise, if --2Q-repositories is specified, we use the repository
+        # list without any modifications. Again, we must not configure any
+        # edb_repositories in this case.
+
+        tpa_2q_repositories = self.args.get("tpa_2q_repositories")
+        if tpa_2q_repositories:
+            cluster_vars.update({"tpa_2q_repositories": tpa_2q_repositories})
+            return
+
+        # We know that the cluster doesn't need any 2Q repos, either because the
+        # user asked for them explicitly, or because other configure options did
+        # so implicitly. Now we can focus on setting edb_repositories correctly.
+        #
+        # If --edb-repositories is specified, we use the list to override the
+        # defaults based on postgres_flavour. We translate `none` to [], but do
+        # not make any other changes to the given list (no automagic additions
+        # to the list, unlike BDR.update_cluster_vars).
+
+        if not edb_repositories:
+            edb_repositories = self.default_edb_repos(cluster_vars)
+        elif edb_repositories == ["none"]:
+            edb_repositories = []
+
+        if edb_repositories:
+            cluster_vars.update({"edb_repositories": edb_repositories})
+
+        # In general, if we're using EDB repositories at all, we don't want
+        # packages from PGDG, unless we're using community_360 as explained
+        # above. Note that `--edb-repositories none` means we do want PGDG.
+
+        if edb_repositories and "community_360" not in edb_repositories:
+            cluster_vars.update(
+                {
+                    "apt_repository_list": [],
+                    "yum_repository_list": ["EPEL"],
+                }
+            )
 
     def cluster_vars_args(self):
         """

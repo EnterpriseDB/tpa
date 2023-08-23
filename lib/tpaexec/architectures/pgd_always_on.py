@@ -168,13 +168,6 @@ class PGD_Always_ON(BDR):
         """
         super().update_cluster_vars(cluster_vars)
 
-        cluster_vars.update(
-            {
-                "apt_repository_list": [],
-                "yum_repository_list": ["EPEL"],
-            }
-        )
-
         top = self.args["bdr_node_group"]
         bdr_node_groups = [{"name": top}]
 
@@ -226,6 +219,9 @@ class PGD_Always_ON(BDR):
             }
         )
         self._update_pgd_probes(cluster_vars)
+
+    def default_edb_repos(self, cluster_vars) -> List[str]:
+        return super().default_edb_repos(cluster_vars) + ["postgres_distributed"]
 
     def _update_pgd_probes(self, cluster_vars):
         http = {}
