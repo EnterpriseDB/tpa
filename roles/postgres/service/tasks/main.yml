@@ -23,8 +23,8 @@
        '{{ postgres_service_name }}-monitor']
   register: unit
   vars:
-    _postmaster: "{{
-        '%s/%spostmaster' % (
+    _postgres: "{{
+        '%s/%spostgres' % (
           postgres_bin_dir,
           (postgres_flavour == 'epas')|ternary('edb-', '')
         )
