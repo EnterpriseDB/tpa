@@ -1,0 +1,6 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- fail:
+    msg: "Please redeploy to upgrade a source installation"

@@ -1,0 +1,26 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Include postgres-pre-upgrade hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/postgres-pre-upgrade.yml"
+  tags: always
+
+- include_tasks: "{{ postgres_installation_method }}.yml"
+
+- name: Include postgres-post-upgrade hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/postgres-post-upgrade.yml"
+  tags: always
+
+- fail:
+    msg: Please redeploy to update extensions built from source
+  when: >
+    install_from_source is not empty
