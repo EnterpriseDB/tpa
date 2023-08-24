@@ -62,7 +62,11 @@ If the PGD-Always-ON architecture is selected, repositories will be
 selected from EDB Repos 2.0 and all software will be sourced
 from these repositories.
 
-For M1 and BDR-Always-ON architectures, the default source is
+If the M1 architecture is selected, community packages will be sourced
+from PGDG and any selected EDB packages will be sourced from EDB Repos
+2.0.
+
+For the BDR-Always-ON architecture, the default source is
 2ndQuadrant, and the necessary repositories will be added from this
 source. In addition, the PGDG repositories will be used for community
 packages such as PostgreSQL and etcd as required.

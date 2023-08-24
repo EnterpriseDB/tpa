@@ -6,11 +6,8 @@ one. This architecture is suitable for production and is also suited to
 testing, demonstrating and learning due to its simplicity and ability to
 be configured with no proprietary components.
 
-In default configuration this architecture uses open source software
-only. To use subscription-only EDB software with this architecture
-requires credentials for EDB Repos 1.0. If you choose EDB Advanced
-Server (EPAS) you will also require credentials for the legacy
-2ndQuadrant repos.
+If you select subscription-only EDB software with this architecture
+it will be sourced from EDB Repos 2.0 and you will need to provide a token. 
 See [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
 for more detail on this topic.
 
