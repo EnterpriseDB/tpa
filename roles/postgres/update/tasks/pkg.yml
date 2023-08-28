@@ -4,4 +4,8 @@
 
 - include_role:
     name: postgres/pkg
-    tasks_from: update.yml
+    tasks_from: "{{ upd_or_upg }}.yml"
+  vars:
+    upd_or_upg: "{{ run_maj_upg|ternary('upgrade','update') }}"
+    run_maj_upg: "{{ postgres_major_version_upgrade is defined|ternary(postgres_major_version_upgrade,false) }}"
+

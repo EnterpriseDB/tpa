@@ -110,7 +110,13 @@ class PatroniCluster(object):
 
     def _patronictl(self, *args):
         if not os.path.exists(self.patronictl_path):
-            return "", "Path to patronictl does not exist: {path}".format(path=self.patronictl_path), 127
+            return (
+                "",
+                "Path to patronictl does not exist: {path}".format(
+                    path=self.patronictl_path
+                ),
+                127,
+            )
         os.environ["LANG"] = self.locale
         os.environ["LC_ALL"] = self.locale
         command = [self.patronictl_path] + list(args)

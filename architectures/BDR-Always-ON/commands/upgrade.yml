@@ -33,6 +33,11 @@
   environment: "{{ target_environment }}"
   hosts: all
   tasks:
+  - include_role: name=postgres/facts
+    vars:
+      pgdata_initialised: true
+    when: >
+      'postgres' in role and cluster_facts is not defined
 
   # Set all_haproxy_backend_servers and proxies_for_backend_server, as
   # well as my_haproxies.
@@ -98,20 +103,31 @@
   # (e.g., primary instances) or not (e.g., logical standby instances).
   # We don't do anything for non-Postgres instances at the moment.
 
+  - name: Check to perform major upgrade for Postgres
+    set_fact:
+      postgres_major_version_upgrade: "{{ cluster_facts.postgres_version is version(postgres_version, 'lt') }}"
+
+  - name: Stop/upgrade Postgres on {{ inventory_hostname }}
+    block:
+    - include_role: name=postgres/bdr tasks_from=fence.yml
+    - include_role: name=postgres/update
+    - include_role: name=postgres/bdr tasks_from=unfence.yml
+    when: >
+      'postgres' in role and postgres_major_version_upgrade
+
   - name: Stop/update/restart Postgres on {{ inventory_hostname }}
     block:
     - include_role: name=postgres/restart
       vars:
         postgres_service_end_state: stopped
     - include_role: name=postgres/update
-    - include_role: name=postgres/upgrade
     - include_role: name=postgres/config
     - include_role: name=postgres/restart
     - include_role: name=postgres/config/final
       vars:
         postgres_service_end_state: started
     when: >
-      'postgres' in role
+      'postgres' in role and not postgres_major_version_upgrade
 
   - name: Stop/update/restart pgbouncer on {{ inventory_hostname }}
     block:

@@ -5,82 +5,85 @@
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   tags: always
 
-- name: Stop repmgr
+- name: Update postgres on instances in M1 cluster {{ cluster_dir }}
   any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes
-  environment: "{{ target_environment }}"
-  hosts: all
-  tasks:
-  - assert:
-      that:
-        failover_manager != 'patroni'
-      fail_msg:
-        Upgrade postgres does not support patroni managed clusters
-
-  - name: Stop repmgr
-    service:
-      name: repmgr
-      state: stopped
-    when: >
-      'postgres' in role
-
-- name: Update postgres on replicas in cluster {{ cluster_dir }}
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  environment: "{{ target_environment }}"
-  hosts: all
+  hosts: "{{ update_hosts|default('all') }}"
   serial: 1
   tasks:
-  - include_role: name=postgres/update
+  - include_role: name=postgres/facts
+    vars:
+      pgdata_initialised: true
     when: >
-      'replica' in role
+      'postgres' in role and cluster_facts is not defined
 
-- name: Update postgres on primary in cluster {{ cluster_dir }}
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  environment: "{{ target_environment }}"
-  hosts: all
-  tasks:
-  - name: Switchover to a replica
-    command: >
-      {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
-    become_user: "{{ postgres_user }}"
-    become: yes
-    when: >
-      inventory_hostname == groups['replica'][0]
+  - name: Stop repmgr
+    block:
+    - assert:
+        that:
+          failover_manager != 'patroni'
+        fail_msg:
+          Upgrade postgres does not support patroni managed clusters
 
-  # Note: this role was calculated earlier, so it's outdated after the
-  # switchover, but it correctly identifies the instance to use.
+    - name: Stop repmgr
+      service:
+        name: repmgr
+        state: stopped
+      when: >
+        'postgres' in role
 
-  - include_role: name=postgres/update
-    when: >
-      'primary' in role
+  - name: Update postgres on replicas in cluster {{ cluster_dir }}
+    block:
+    - name: Check to perform major upgrade for Postgres
+      set_fact:
+        postgres_major_version_upgrade: "{{ cluster_facts.postgres_version is version(postgres_version, 'lt') }}"
+      when: >
+        'postgres' in role
 
-  - name: Switch back to the old primary
-    command: >
-      {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
-    become_user: "{{ postgres_user }}"
-    become: yes
-    when: >
-      'primary' in role
+    - include_role: name=postgres/update
+      when: >
+        'replica' in role
 
-- name: Start repmgr again
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  environment: "{{ target_environment }}"
-  hosts: all
-  tasks:
-  - name: Restart repmgr
-    service:
-      name: repmgr
-      state: started
-    when: >
-      'postgres' in role
+  - name: Update postgres on primary in cluster {{ cluster_dir }}
+    block:
+    - name: Switchover to a replica
+      command: >
+        {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
+      become_user: "{{ postgres_user }}"
+      become: yes
+      when: >
+        inventory_hostname == groups['replica'][0] and not postgres_major_version_upgrade
+
+    # Note: this role was calculated earlier, so it's outdated after the
+    # switchover, but it correctly identifies the instance to use.
+
+    - include_role: name=postgres/update
+      when: >
+        'primary' in role
+
+    - name: Start new instance
+      shell: |
+        {{ postgres_bin_dir }}/pg_ctl start -D {{ postgres_data_dir }}
+      become: yes
+      become_user: "{{ postgres_user }}"
+      when: >
+        'primary' in role and postgres_major_version_upgrade
+
+    - name: Switch back to the old primary
+      command: >
+        {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
+      become_user: "{{ postgres_user }}"
+      become: yes
+      when: >
+        'primary' in role and not postgres_major_version_upgrade
+
+  - name: Start repmgr again
+    block:
+    - name: Restart repmgr
+      service:
+        name: repmgr
+        state: started
+      when: >
+        'postgres' in role
