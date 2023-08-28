@@ -211,6 +211,14 @@
       - pgdg-common
       - "{{ rhel_extras }}"
 
+- name: Determine if PGDG is being used by itself or with EDB repositories
+  set_fact:
+    edb_repos_in_use:
+      "{{ (edb_repositories is not empty
+            and 'community360' not in edb_repositories)
+          or (edb_repositories is empty
+            and tpa_2q_repositories is not empty) }}"
+
 - name: Exclude barman-related packages from PGDG-common repos
   ini_file:
     dest: /etc/yum.repos.d/pgdg-redhat-all.repo
@@ -221,6 +229,7 @@
   when: >
     'PGDG' in yum_repository_list
     and postgres_version is version('9.6', '>')
+    and edb_repos_in_use
 
 - name: Exclude psycopg2 packages from PGDG repos
   ini_file:
@@ -232,6 +241,7 @@
   when: >
     'PGDG' in yum_repository_list
     and postgres_version is version('9.6', '>')
+    and edb_repos_in_use
 
 - name: Exclude psycopg2 packages from PGDG-common repos
   ini_file:
@@ -243,6 +253,7 @@
   when: >
     'PGDG' in yum_repository_list
     and postgres_version is version('9.6', '<=')
+    and edb_repos_in_use
 
 - set_fact:
     _2q_repositories: []
