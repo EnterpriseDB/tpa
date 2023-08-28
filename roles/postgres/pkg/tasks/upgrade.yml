@@ -21,7 +21,8 @@
 # is not removed by this script post-upgrade.
 
 
-- package:
+- name: Install procps if missing (RedHat only)
+  package:
     name: procps-ng
     state: present
   when: >
@@ -97,8 +98,8 @@
   - assert:
       that: "{{ pg_service_status.status.ActiveState == 'active' or old_postgres_running }}"
       msg: "FAILED: the old Postgres instance must be running, exiting."
-   
   
+
   - set_fact:
       old_postgres_data_dir: "{{ service_pgdata }}"
 
@@ -110,17 +111,17 @@
     register: old_postgres_version
     become: yes
     become_user: "{{ postgres_user }}"
-  
-  
+
+
   - set_fact:
       old_postgres_version: "{{ old_postgres_version.results[0].version.split('.')[0] }}"
-  
-  
+
+
   - assert:
       that: "{{ old_postgres_version is version('11', 'ge') }}"
       msg: "FAILED: the old Postgres version must be at least version 11, exiting."
-  
-  
+
+
   - assert:
       that: "{{ new_postgres_version is version(old_postgres_version, 'gt') }}"
       msg: "FAILED: the new Postgres version must be higher than the old Postgres version, exiting."
@@ -130,13 +131,23 @@
       that: "{{ new_postgres_version is version(old_postgres_version|int + 1, 'eq') }}"
       msg: "FAILED: the new Postgres version must be only one major version higher than the old Postgres version, exiting"
     when: new_postgres_version is version(old_postgres_version, 'ne') 
-  
-  
+
+
   - debug:
       msg: "Skipping major upgrade of {{ inventory_hostname }}; the running instance is already version {{ new_postgres_version }}."
     when: new_postgres_version is version(old_postgres_version, 'eq') 
-  
-   
+
+ 
+  - name: Stop harp-manager on {{ inventory_hostname }}
+    systemd:
+      name: harp-manager
+      state: stopped
+    when: >
+      ('bdr' in role 
+       and failover_manager == 'harp'
+       and inventory_hostname in first_bdr_primary_candidates)
+
+
   - name: Download and install Postgres {{ new_postgres_version }}
     block:
     - name: Remove BDR debug packages (conflict issue)
@@ -149,14 +160,11 @@
         'bdr' in role and postgresql_flavour == 'epas'
 
 
-    - name: Stop and mask the old instance
+    - name: Stop the old instance
       systemd:
         name: postgres
         state: stopped
         masked: true
-
-
-    - include_role: name=sys/repositories
 
 
     - include_role: 
@@ -231,14 +239,14 @@
               - "{{ postgres_port }}"
       become: yes
       become_user: "{{ postgres_user }}"
- 
+
 
     - name: Stop the new instance
       shell: |
         {{ new_postgres_bin_dir }}/pg_ctl stop -D {{ new_postgres_data_dir }}
       become: yes
       become_user: "{{ postgres_user }}"
-        
+      
 
     - name: Start the old instance
       systemd:
@@ -254,47 +262,26 @@
       become: yes
       become_user: "{{ postgres_user }}"
       with_items: "{{ cluster_facts.databases.keys()|list }}"
-      when: item not in ['template0', 'bdr_supervisordb']
+      when: > 
+        - "item not in ['template0', 'bdr_supervisordb']"
+        - 'readonly' not in role
       ignore_errors: yes
 
 
-    - name: 
+    - name: Does the BDR schema exist? 
       postgresql_query:
         conninfo: "{{ dsn|dbname(bdr_database) }}"
         query: >
           SELECT 'OK' FROM pg_namespace WHERE nspname='bdr'
       become_user: "{{ postgres_user }}"
       become: yes
-      register: found_bdr
+      register: bdr_schema_found
       when: >
         'bdr' in role
 
 
     - set_fact:
-        found_bdr: "{{ false if found_bdr is skipped else (found_bdr.rowcount == 1)|bool }}" 
- 
-
-    - name: Part {{ inventory_hostname }}
-      postgresql_query:
-        conninfo: "{{ dsn|dbname(bdr_database) }}"
-        query: >
-          SELECT 'OK' FROM bdr.part_node
-          ( node_name := '{{ inventory_hostname }}'
-          , wait_for_completion := false
-          , force := false )
-          WHERE EXISTS (
-            SELECT 1 FROM bdr.node_summary
-            WHERE node_name = '{{ inventory_hostname }}'
-              AND peer_state_name NOT IN ('PARTED', 'PARTING', 'DROPPED', 'DROPPING', 'STANDBY')
-          )        
-      become_user: "{{ postgres_user }}"
-      become: yes
-      register: o
-      async: 180
-      until: o.failed == false
-      retries: 3
-      delay: 2
-      when: found_bdr
+        bdr_schema_found: "{{ false if bdr_schema_found is skipped else (bdr_schema_found.rowcount == 1)|bool }}" 
 
 
     - name: De-register PEM agent
@@ -319,13 +306,14 @@
           _task_environment:
             PEM_SERVER_PASSWORD: "{{ pem_postgres_password }}"
             PEM_MONITORED_SERVER_PASSWORD: "{{ vars['%s_password' % postgres_user] }}"
-        register: register_server_cmd
+        register: deregister_server_cmd
         no_log: false
 
       - debug:
-          msg: "{{ register_server_cmd.stdout }}"
+          msg: "{{ deregister_server_cmd.stdout }}"
 
-      - service:
+      - name: Stopping PEM agent (may take a while)
+        service:
           name: pemagent
           state: stopped
 
@@ -343,7 +331,7 @@
         state: directory
       become: yes
       become_user: "{{ postgres_user }}"
- 
+
 
     - name: Run bdr_pg_upgrade on {{ inventory_hostname }}
       block:
@@ -366,71 +354,25 @@
         ignore_errors: yes
 
       - name: Get upgrade results
-        block:
-
-        - set_fact:
-            upgrade_result: "{{ pg_upgrade_result }}"
-
+        set_fact:
+          upgrade_result: "{{ pg_upgrade_result }}"
         when: >
           pg_upgrade_result is not skipped
 
       when: >
-        'bdr' in role and found_bdr
+        'bdr' in role and bdr_schema_found
 
 
     - debug:
         msg: "{{ upgrade_result }}"
 
 
-    - name: Run pg_upgrade on {{ inventory_host }}
-      block:
-
-      - postgresql_query:
-          conninfo: "{{ dsn|dbname(bdr_database) }}"
-          query: >
-            DROP EXTENSION bdr CASCADE;
-        become: yes
-        become_user: "{{ postgres_user }}"
-        when: >
-          'bdr' not in role and found_bdr
-        ignore_errors: yes
-
-      - shell:
-          cmd: "{{ new_postgres_bin_dir }}/pg_upgrade"
-          chdir: "{{ new_postgres_data_dir }}/upgrade_logs"
-        environment: "{{ _task_environment }}"
-        vars:
-          _task_environment:
-            PGBINOLD: "{{ old_postgres_bin_dir }}"
-            PGBINNEW: "{{ new_postgres_bin_dir }}"
-            PGDATAOLD: "{{ old_postgres_data_dir }}"
-            PGDATANEW: "{{ new_postgres_data_dir }}"
-            PGPORTOLD: "{{ postgres_port }}"
-            PGSOCKETDIR: /tmp
-        register: pg_upgrade_result
-        become: yes
-        become_user: "{{ postgres_user }}"
-        ignore_errors: yes
-
-      - name: Get upgrade results
-        block:
-
-        - set_fact:
-            upgrade_result: "{{ pg_upgrade_result }}"
-
-        when: >
-          pg_upgrade_result is not skipped
-
-      when: >
-         ('bdr' in role and not found_bdr) or ('bdr' not in role and found_bdr)
-
-
     - find:
         paths: "{{ new_postgres_data_dir }}/upgrade_logs"
         patterns: '*'
       register: upgrade_logs
-  
-  
+
+
     - name: Get upgrade logs from {{ inventory_hostname }}
       fetch:
         src: "{{ item.path }}"
@@ -440,22 +382,22 @@
         - "{{ upgrade_logs.files }}"
       become: yes
       become_user: "{{ postgres_user }}"    
-  
+
 
     - debug:
         msg: "{{ upgrade_result.stdout_lines }}" 
 
- 
+
     - assert:
         that: "{{ upgrade_result.rc == 0 }}"
         msg: "Upgrade FAILED, see logs in {{ cluster_dir }}/upgrade_logs/{{ inventory_hostname }}"
-  
-  
+
+
     - name: Stop old Postgres on {{ inventory_hostname }}
       include_role: name=postgres/restart
       vars:
         postgres_service_end_state: stopped
-  
-
+    
   when: >
-    'postgres' in role and not already_upgraded
+    not already_upgraded
+
