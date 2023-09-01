@@ -76,7 +76,7 @@ More detail on the options is provided in the following section.
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `--architecture` (`-a`)                               | Must be set to `M1`.                                                                        |
 | Postgres flavour and version (e.g. `--postgresql 15`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
-| One of: <br> * `--failover-manager {efm, repmgr, patroni}`<br> * `--enable-efm`<br> * `--enable-repmgr`<br> * `--enable-patroni`  | Select the failover manager from `efm`, `repmgr` and `patroni`.                                                  |
+| One of: <br> * `--failover-manager {efm, repmgr, patroni}`<br> * `--enable-efm`<br> * `--enable-repmgr`<br> * `--enable-patroni`  | Select the failover manager from [`efm`](efm.md), [`repmgr`](repmgr.md) and [`patroni`](patroni.md).                                                  |
 
 
 <br/><br/>

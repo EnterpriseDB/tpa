@@ -14,6 +14,15 @@ cluster_vars:
   failover_manager: patroni
 ```
 
+If deploying to RedHat you must also add the `PGDG` repository to your
+yum repository list in config.yml:
+
+```yaml
+cluster_vars:
+  yum_repository_list:
+  - PGDG
+```
+
 TPA `configure` will add 3 etcd nodes and 2 haproxy nodes. Etcd is used
 for the Distributed Configuration Store (DCS). Patroni supports other
 DCS backends, but they are not currently supported by EDB or TPA.
