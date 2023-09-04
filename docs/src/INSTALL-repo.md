@@ -21,8 +21,8 @@ prefer.)
 
 
 ```bash
-# Debian (python3.7) or Ubuntu (python3.6)
-$ sudo apt-get install python3.7 python3-pip python3-venv \
+# Debian or Ubuntu 
+$ sudo apt-get install python3 python3-pip python3-venv \
       git openvpn patch
 
 # RedHat, Rocky or AlmaLinux (python3 for RHEL7, python36 for RHEL8)
