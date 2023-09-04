@@ -1068,21 +1068,21 @@ class Architecture(object):
         # (see default_{apt,yum}_repositories).
         #
         # EDB's new Cloudsmith repositories are arranged around the different
-        # subscription levels available to customers: community_360, standard,
+        # subscription levels available to customers: community360, standard,
         # and enterprise (and postgres_distributed, for the Extreme HA add-on
         # subscription available with either standard or enterprise).
         #
         # The original idea was to provide EDB's builds of supported open-source
-        # software in the community_360 repo, as an alternative to PGDG packages
+        # software in the community360 repo, as an alternative to PGDG packages
         # (which are also fully supported). The standard repo would include the
-        # community_360 packages, plus some proprietary software (e.g., PGE).
-        # The enterprise repo would include everything in community_360 and
+        # community360 packages, plus some proprietary software (e.g., PGE).
+        # The enterprise repo would include everything in community360 and
         # standard, plus EPAS and some other proprietary software.
         #
         # In practice, the standard and enterprise repos follow this layout, but
-        # the community_360 repo does not contain any packages, and it will take
+        # the community360 repo does not contain any packages, and it will take
         # a good while before it becomes a viable alternative to using PGDG. For
-        # now, we never use the community_360 repo by default; and even if it's
+        # now, we never use the community360 repo by default; and even if it's
         # explicitly requested, we make sure to include PGDG as well (which we
         # don't do otherwise, e.g., for PGD-Always-ON).
         #
@@ -1148,10 +1148,10 @@ class Architecture(object):
             cluster_vars.update({"edb_repositories": edb_repositories})
 
         # In general, if we're using EDB repositories at all, we don't want
-        # packages from PGDG, unless we're using community_360 as explained
+        # packages from PGDG, unless we're using community360 as explained
         # above. Note that `--edb-repositories none` means we do want PGDG.
 
-        if edb_repositories and "community_360" not in edb_repositories:
+        if edb_repositories and "community360" not in edb_repositories:
             cluster_vars.update(
                 {
                     "apt_repository_list": [],
