@@ -3,15 +3,14 @@
 This document explains how to use TPA from a copy of the source code
 repository.
 
-Please [install TPA from packages](INSTALL.md) if you can; install
-from source only if no packages are available for your system (e.g., on
-MacOS X), or if you are collaborating with the TPA developers to
-test unreleased code.
+!!! Note 
+      EDB customers must [install TPA from packages](INSTALL.md) in
+      order to receive EDB support for the software.
 
 To run TPA from source, you must install all of the dependencies
 (e.g., Python 3.6+) that the packages would handle for you, or download
 the source and [run TPA in a Docker container](INSTALL-docker.md).
-(Either way will work fine on Linux and MacOS X.)
+(Either way will work fine on Linux and macOS.)
 
 ## Quickstart
 
