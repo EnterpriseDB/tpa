@@ -7,7 +7,7 @@ testing, demonstrating and learning due to its simplicity and ability to
 be configured with no proprietary components.
 
 If you select subscription-only EDB software with this architecture
-it will be sourced from EDB Repos 2.0 and you will need to provide a token. 
+it will be sourced from EDB Repos 2.0 and you will need to provide a token.
 See [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
 for more detail on this topic.
 
@@ -57,7 +57,8 @@ tpaexec configure ~/clusters/m1 \
          --architecture M1 \
          --platform aws --region eu-west-1 --instance-type t3.micro \
          --distribution Debian \
-         --postgresql 14
+         --postgresql 14 \
+         --failover-manager repmgr
 ```
 
 You can list all available options using the help command.

@@ -8,7 +8,8 @@ cycle.
 
 ```bash
 [tpa]$ tpaexec configure ~/clusters/speedy --architecture M1 \
-        --postgresql 14
+        --postgresql 14 \
+        --failover-manager repmgr
 ```
 
 This command will create a directory named `~/clusters/speedy` and
@@ -411,7 +412,8 @@ Let's see what happens when we run the following command:
         --platform aws --region us-east-1 --network 10.33.0.0/16 \
         --instance-type t2.medium --root-volume-size 32 \
         --postgres-volume-size 64 --barman-volume-size 128 \
-        --postgresql 14
+        --postgresql 14 \
+        --failover-manager repmgr
 [tpa]$
 ```
 
