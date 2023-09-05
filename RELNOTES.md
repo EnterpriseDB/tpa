@@ -2,6 +2,76 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.21 (2023-09-05)
+
+### Notable changes
+
+- TPA-478 Use edb_repositories for M1 by default
+
+  TPA now generates a default configuration for new M1 clusters to use
+  the EDB repos 2.0. Access requires a subscription. For details, see
+  https://www.enterprisedb.com/repos-downloads
+
+  To use these new repos, you must obtain a subscription token from the
+  URL above and "export EDB_SUBSCRIPTION_TOKEN=<your token>" before you
+  run "tpaexec deploy".
+
+  Existing clusters are unaffected by this change, regardless of their
+  repository configuration.
+
+  You can always override the default repository configuration by using
+  `--edb-repositories standard` (or enterprise, depending on which repo
+  your subscription provides access to).
+
+  To avoid confusion, TPA does not permit EDB repos 2.0 to be configured
+  with the old 2ndQuadrant repos on the same instance. You can specify a
+  list of `--2Q-repositories` to use instead, but only if you do not
+  specify any `--edb-repositories`.
+
+  (PGD-Always-ON and BDR-Always-ON clusters are unaffected; the former
+  will always use EDB repos 2.0, while the latter uses the 2ndQuadrant
+  repos, together with EDB repos 1.0 for EPAS.)
+
+### Minor changes
+
+- TPA-526 Make --failover-manager a mandatory configure option for M1
+
+  You must now choose between efm, patroni, and repmgr when generating a
+  new cluster configuration. Note that repmgr is not supported for use
+  with EPAS clusters.
+
+- TPA-490 Add bash-completion support for pgd-cli with PGD5
+
+### Bugfixes
+
+- TPA-523 Allow creating a replica of a [bdr,subscriber-only] node
+
+  The earlier code incorrectly required 'subscriber-only' to be set on
+  the replica, instead of the upstream instance.
+
+- TPA-156 Skip some inapplicable tasks while running in containers
+
+  TPA would skip certain tasks when it knew that the target instances
+  were containers, but it would not do so if you deployed to containers
+  with `platform: bare` set. Now it uses systemd-detect-virt to decide
+  whether to skip those tasks (like setting the hostname or sysctls).
+
+- TPA-444 Ensure consistent permissions for /etc/edb
+
+  Earlier, if you added the pgd-proxy role to a data node in a deployed
+  PGD5 cluster, pgd-proxy would fail to start because it did not have
+  permissions to open pgd-proxy-config.yml.
+
+- TPA-447 Ensure consistent permissions for /var/log/postgres
+
+  Earlier, the directory could end up with the inappropriate mode 0600
+  if a strict umask was set.
+
+- TPA-549 Fix problem with Barman registration for pemagent
+
+  Earlier, repeating `tpaexec deploy` on a Barman instance correctly
+  registered with PEM would lose the Barman configuration.
+
 ## v23.20 (2023-08-01)
 
 ### Notable changes
