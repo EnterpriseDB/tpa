@@ -1,12 +1,17 @@
 ---
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-# {% if postgres_conf_dir != postgres_data_dir %}
-# hba_file: '{{ postgres_conf_dir }}/pg_hba.conf'
-# ident_file: '{{ postgres_conf_dir }}/pg_ident.conf'
-# {% endif %}
+# These vars are used as a starting point for postgres configuration fact `_tpa_restart_postgres_config`.
+# More GUC names are added to this fact dynamically depending on cluster configuration and state,
+# see `roles/postgres/config/tasks/set_tpa_restart_facts.yml`.
 
-listen_addresses: '*'
+# All these values require a postgres daemon restart when changed.
+
+# All these GUC names and values will be added to Patroni postgres configuration. The standard postgres config
+# role does not use these values at this time. See the template file
+# `roles/postgres/config/templates/tpa_restart.conf.j2` instead.
+
+
 port: "{{ postgres_port }}"
 unix_socket_directories: '{{ unix_socket_directories|join(", ") }}'
 
@@ -19,22 +24,10 @@ max_worker_processes: "{{ max_worker_processes }}"
 
 logging_collector: "{{ logging_collector|default((log_destination == 'stderr')|ternary('on', 'off')) }}"
 
-# {% if postgres_version is version('9.4', '>') %}
-# cluster_name: '{{ postgres_cluster_name }}'
-# {% endif %}
-
 archive_mode: "on"
 
 max_wal_senders: "{{ max_wal_senders|default(16) }}"
 max_replication_slots: "{{ max_replication_slots|default(16) }}"
-# {% if postgres_version is version('13', '>=') %}
-# wal_keep_size: {{ wal_keep_size|default((wal_segment_size|default(16))*(wal_keep_segments|default(0))) }}
-# {% else %}
-wal_keep_segments: "{{ wal_keep_segments|default(0) }}"
-# {% endif %}
-# {% if ('bdr' in role) or postgres_version is version('9.4', '>') %}
-# track_commit_timestamp: {{ track_commit_timestamp|default(('bdr' in role)|ternary('on','off')) }}
-# {% endif %}
 
 hot_standby: "on"
 
