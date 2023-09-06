@@ -18,8 +18,8 @@ Run the following commands to clone the tpaexec source repository from Github
 and build a new Docker image named `tpa/tpaexec`:
 
 ```bash
-$ git clone ssh://git@github.com/EnterpriseDB/tpaexec.git
-$ cd tpaexec
+$ git clone ssh://git@github.com/EnterpriseDB/tpa.git
+$ cd tpa
 $ docker build -t tpa/tpaexec .
 ```
 
