@@ -209,6 +209,7 @@
     _task_environment:
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
+  when: bdr_major_version >= 4
 
 - name: extract standby_slot_names
   set_fact:
@@ -217,6 +218,7 @@
   vars:
     regex: >-
       (?:[\,\'\"\s]?|^)(\w+?)(?:[\,\'\"\s]|$)
+  when: bdr_major_version >= 4
 
 - name: Assert that standby are valid nodes
   assert:
@@ -226,6 +228,7 @@
     fail_msg: >
       bdr.standby_slot_names contains standby(s) that are not eligible nodes of the cluster:
       {{ standby_slot_list|difference(groups|members_of('role_bdr', not_in=['role_witness'])) }}
+  when: bdr_major_version >= 4
 
 - name: Get bdr.standby_slot_names value
   postgresql_query:
@@ -237,13 +240,14 @@
     _task_environment:
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
+  when: bdr_major_version >= 4
 
 - name: Assert that bdr.standby_slots_min_confirmed <= size of bdr.standby_slot_names
   assert:
     that: min_confirmed.results[0]['bdr.standby_slots_min_confirmed']|int <= standby_slot_list|length
     fail_msg: >
       Expecting more confirmed slots than defined slots in bdr.standby_slot_names
-
+  when: bdr_major_version >= 4
 
 # check that max_worker_processes is above minimal required for the cluster
 # TODO: Duplicated by verify-settings check
