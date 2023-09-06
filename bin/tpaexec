@@ -76,23 +76,27 @@ version() {
 }
 
 verify_checksums() {
-   python3 "$TPA_DIR"/lib/tpaexec/compare_checksums.py "$TPA_DIR" "$TPA_DIR"/checksums.json
+   $PYTHON "$TPA_DIR"/lib/tpaexec/compare_checksums.py "$TPA_DIR" "$TPA_DIR"/checksums.json
 }
 
 _python_version() {
-    python3 -c 'import sys; print("%d.%d.%d" % (sys.version_info[0:3]))'
+    $PYTHON -c 'import sys; print("%d.%d.%d" % (sys.version_info[0:3]))'
+}
+
+_python39_or_later() {
+    $PYTHON -c 'import sys; print(sys.version_info[0:2] >= (3, 9))'
 }
 
 _detect_venv() {
-    python3 -c "import sys; print('venv' if hasattr(sys, 'real_prefix') or sys.base_prefix != sys.prefix else 'no venv')"
+    $PYTHON -c "import sys; print('venv' if hasattr(sys, 'real_prefix') or sys.base_prefix != sys.prefix else 'no venv')"
 }
 
 _detect_site_packages() {
-    python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'
+    $PYTHON -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'
 }
 
 _ansible_version() {
-    python3 -c 'import ansible.release; print(ansible.release.__version__)'
+    $PYTHON -c 'import ansible.release; print(ansible.release.__version__)'
 }
 
 _activate_venv() {
@@ -112,9 +116,9 @@ _create_and_activate_venv() {
         if ! mkdir -p "$vpath"; then
             error "couldn't create $vpath (try '--venv /other/path' or use sudo)"
         fi
-        if ! python3 -m venv "$vpath"; then
+        if ! $PYTHON -m venv "$vpath"; then
             rm -rf "$vpath"
-            error "couldn't initialise $vpath using 'python3 -m venv'"
+            error "couldn't initialise $vpath using '$PYTHON -m venv'"
         fi
     fi
 
@@ -461,9 +465,15 @@ _tpaexec_info() {
     echo tpaexec="$0"
     echo TPA_DIR="$TPA_DIR"
 
-    if command -v python3 &>/dev/null; then
-        echo -n PYTHON="$(command -v python3)"
-        echo " (v$(_python_version), $(_detect_venv))"
+    if command -v "$PYTHON" &>/dev/null; then
+        python_bin=$(command -v "$PYTHON")
+        if [[ $(_python39_or_later) == "True" ]]; then
+            echo -n PYTHON="$python_bin"
+            echo " (v$(_python_version), $(_detect_venv))"
+        else
+            echo -n PYTHON=none "(need 3.9+, won't use $python_bin"
+            echo " (v$(_python_version), $(_detect_venv)))"
+        fi
     else
         echo PYTHON=none
     fi
@@ -1095,9 +1105,24 @@ esac
 # If we can find a venv located relative to TPA_DIR, we activate it as a
 # convenience.
 
+PYTHON=${PYTHON:=python3}
 if [[ -f $TPA_VENV/bin/activate ]]; then
     _activate_venv "$TPA_VENV"
 fi
+
+case "$command" in
+    *help|info|version)
+        # Let through some basic commands, info in particular, without
+        # checking the Python version first.
+        ;;
+
+    *)
+        if [[ $(_python39_or_later) == "False" ]]; then
+            error "TPA requires Python 3.9+, but found only" \
+                "$(_python_version) ($(command -v $PYTHON))"
+        fi
+        ;;
+esac
 
 # Now we can look at the command-line arguments and decide which
 # function to call.
