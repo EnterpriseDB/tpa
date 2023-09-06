@@ -42,7 +42,7 @@
       wal_keep_size: "{{
           wal_keep_size
           |default(
-            (wal_segment_size|default(16)) * (wal_keep_segments|default(0))
+            (wal_segment_size|default(16)) * (wal_keep_segments|default(1))
           )
         }}"
     object_alt_contents:
