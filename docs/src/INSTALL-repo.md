@@ -37,9 +37,9 @@ $ brew install python@3 openvpn flock coreutils gpatch git
 Next, install TPA itself:
 
 ```bash
-$ git clone ssh://git@github.com/EnterpriseDB/tpaexec.git
-$ ./tpaexec/bin/tpaexec setup
-$ ./tpaexec/bin/tpaexec selftest
+$ git clone ssh://git@github.com/EnterpriseDB/tpa.git
+$ ./tpa/bin/tpaexec setup
+$ ./tpa/bin/tpaexec selftest
 ```
 
 ## Step-by-step
@@ -50,13 +50,13 @@ If your system does not have Python 3.6+ packages, you can use `pyenv`
 to install a more recent Python in your home directory (see below), or
 you can [run TPA in a Docker container](INSTALL-docker.md).
 
-Next, clone the TPA repository into, say, `~/tpaexec`. (It doesn't
+Next, clone the TPA repository into, say, `~/tpa`. (It doesn't
 matter where you put it, but don't use `/opt/EDB/TPA` or
 `/opt/2ndQuadrant/TPA`, to avoid conflicts if you install the TPA
 packages in future.)
 
 ```bash
-$ git clone ssh://git@github.com/EnterpriseDB/tpaexec.git ~/tpaexec
+$ git clone ssh://git@github.com/EnterpriseDB/tpa.git ~/tpa
 ```
 
 (If you're installing from source, please clone the repository instead
@@ -67,7 +67,7 @@ The remaining steps are the same as if you had installed the package.
 ```bash
 # Add tpaexec to your PATH for convenience
 # (Put this in your ~/.bashrc too)
-$ export PATH=$PATH:$HOME/tpaexec/bin
+$ export PATH=$PATH:$HOME/tpa/bin
 
 $ tpaexec setup
 $ tpaexec selftest
