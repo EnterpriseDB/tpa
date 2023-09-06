@@ -2,6 +2,19 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.23 (unreleased)
+
+## Notable changes
+
+- Add support for Postgres 16
+
+## Minor changes
+
+- Add SUSE entries for etcd and patroni package lists
+
+- Adjust EFM dependency lists to use JDK 11 by default, except on
+  platforms where it is not available
+
 ## v23.22 (2023-09-05)
 
 ### Notable changes
