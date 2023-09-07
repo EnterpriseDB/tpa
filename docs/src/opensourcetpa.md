@@ -10,16 +10,10 @@ As an open source deployment tool, TPA can perform similar tasks using open sour
 
 Before you install TPA, you must install the required packages: Python 3, git, openvpn and patch.
 
-#### Debian
+#### Debian/Ubuntu
 
 ```
-sudo apt-get install python3.7 python3-pip python3-venv git openvpn patch
-```
-#### Ubuntu
-
-```
-sudo apt-get install python3.6 python3-pip python3-venv git openvpn patch
-
+sudo apt-get install python3 python3-pip python3-venv git openvpn patch
 ```
 
 #### Redhat, Rocky or AlmaLinux (RHEL7)
@@ -33,16 +27,6 @@ sudo yum install python3 python3-pip epel-release git openvpn patch
 ```
 sudo yum install python36 python3-pip epel-release git openvpn patch
 ```
-
-#### macOS
-
-We recommend you use [HomeBrew](https://brew.sh) to install the prerequisites.
-
-```
-brew tap discoteq/discoteq
-brew install python@3 openvpn flock coreutils gpatch git
-```
-
 
 ## Clone and setup
 
@@ -206,7 +190,7 @@ uptight | SUCCESS => {
 }
 ```
 
-Select one of the nodes which has responded with `SUCCESS`. We shall use `uptake` foir this example.
+Select one of the nodes which responded with `SUCCESS`. We shall use `uptake` for this example.
 
 Change current directory to the created configuration directory. For example, our configuration is called demo, so we go to that directory. In there, we run `ssh -F ssh_config ourhostname` to connect.
 
@@ -245,7 +229,7 @@ Host uptake
     HostName 172.17.0.11
 ```
 
-We are gping to connect to uptake, so the IP address is 172.17.0.11. 
+We are going to connect to uptake, so the IP address is 172.17.0.11. 
 
 You will also need to retrieve the password for the postgres user too. Run `tpaexec show-password demo postgres` to get the stored password from the system.
 
@@ -254,7 +238,7 @@ tpaexec show-password demo postgres
 a9LmI1X^uMOpPoEnLuRdL%L$oRQak3om
 ```
 
-Now, assuming you have a Postgresql client installed, you can then run:
+Assuming you have a Postgresql client installed, you can then run:
 
 ```
 psql --host 172.17.0.11 -U postgres
