@@ -5,12 +5,12 @@ name: Integration Tests
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     types:
       - review_requested
     branches:
-      - master
+      - main
   pull_request_review:
     types:
       - submitted
@@ -20,12 +20,12 @@ jobs:
 
   integration-test:
     # In addition to the event triggers above, this job only runs when any of these conditions are met:
-    #  * the branch is master
+    #  * the branch is main
     #  * review is requested from the tpaexec-dev-team on a PR for a branch starting with 'rc/'
     #  * review is marked as approved on a PR for a branch starting with 'rc/'
     #  * a manual run is executed
     if: >
-      github.ref_name == 'master'
+      github.ref_name == 'main'
       || (github.event.requested_team
           && github.event.requested_team.name == 'tpaexec-dev-team')
           && startsWith(github.event.pull_request.base.ref, 'rc/')
