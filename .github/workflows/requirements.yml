@@ -7,7 +7,7 @@ name: Python requirements file update
 on:
   push:
     branches-ignore:
-      - master
+      - main
       - dependabot/**
     paths:
       - requirements-ansible-*.in

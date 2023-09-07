@@ -5,13 +5,13 @@ name: Simple Integration Tests
 on:
   push:
     branches-ignore:
-    - master
+    - main
     - 'rc/**'
   pull_request:
     types:
     - review_requested
     branches:
-    - master
+    - main
   pull_request_review:
     types:
     - submitted
@@ -27,7 +27,7 @@ jobs:
     if: >
       (github.event.requested_team && github.event.requested_team.name == 'tpaexec-dev-team') || (github.event.review
           && github.event.review.state == 'approved'
-          && startsWith(github.event.pull_request.base.ref, 'master'))
+          && startsWith(github.event.pull_request.base.ref, 'main'))
       || github.event_name == 'workflow_dispatch'
 
     name: Integration test

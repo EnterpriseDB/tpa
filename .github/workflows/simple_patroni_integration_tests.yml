@@ -13,7 +13,7 @@ on:
       - '**haproxy**'
       - '**watchdog**'
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 jobs:
