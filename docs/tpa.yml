@@ -6,6 +6,7 @@ site_name: TPA
 nav:
   - TPA: index.md
   - Installation: INSTALL.md
+  - Open Source: opensourcetpa.md
   - Creating a cluster:
     - Configuration: tpaexec-configure.md
     - Provisioning: tpaexec-provision.md
