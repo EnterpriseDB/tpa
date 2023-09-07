@@ -111,7 +111,9 @@ operator_precedence_warning = {{ operator_precedence_warning|default('off') }}
 transform_null_equals = {{ transform_null_equals|default('off') }}
 array_nulls = {{ array_nulls|default('on') }}
 backslash_quote = {{ backslash_quote|default('safe_encoding') }}
+{% if postgres_version is version('9.6', '>=') and postgres_version is version('13', '<') %}
 default_with_oids = {{ default_with_oids|default('off') }}
+{% endif %}
 escape_string_warning = {{ escape_string_warning|default('on') }}
 lo_compat_privileges = {{ lo_compat_privileges|default('off') }}
 quote_all_identifiers = {{ quote_all_identifiers|default('off') }}
