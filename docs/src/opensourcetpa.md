@@ -143,7 +143,7 @@ You will see TPA work through the various operations needed to prepare for deplo
 
 ## Deploying
 
-Once provisioned, you can move on to deployment. The installs, if needed, operating systems and system packages. It then installs the requested Postgres architecture and performs all the needed configuration. 
+Once provisioned, you can move on to deployment. This installs, if needed, operating systems and system packages. It then installs the requested Postgres architecture and performs all the needed configuration. 
 
 ```
 tpaexec deploy demo
