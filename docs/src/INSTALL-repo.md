@@ -28,10 +28,6 @@ $ sudo apt-get install python3 python3-pip python3-venv \
 # RedHat, Rocky or AlmaLinux (python3 for RHEL7, python36 for RHEL8)
 $ sudo yum install python36 python3-pip \
       epel-release git openvpn patch
-
-# MacOS X
-$ brew tap discoteq/discoteq
-$ brew install python@3 openvpn flock coreutils gpatch git
 ```
 
 Next, install TPA itself:
