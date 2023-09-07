@@ -1,8 +1,10 @@
 # Open source TPA
 
-Trusted Postgres Architect has historically been built to address the deployment needs of EDB customers. Among its playbooks is the ability to deploy EDB-recommended architectures using EDB repositories containing EDB versions of Postgres and other tools.
+Trusted Postgres Architect is a tool developed by EDB to make the deployment multiple server PostgreSQL systems simpler. It has built in flexibility to install various operating systems and tools on host systems and pull the software for installation from a range of repositories, including private or air-gapped sources. 
 
-As an open source deployment tool, TPA can perform similar tasks using open source repositories. This section of the documentation covers what an open source user of TPA needs to know: How to set up and configure TPA and deploy a basic configuration of open source Postgres tools.
+This section of the documentation covers how to set up and configure TPA and deploy a basic configuration of open source Postgres tools. 
+
+The other sections in the TPA documentation cover the different configuration options that are available to TPA users.
 
 ## Setting up TPA
 
@@ -68,14 +70,16 @@ You are now ready to configure a deployment using TPA. For the example here, we 
 We are going to deploy the example deployment onto Docker, so before we do that, we need to install Docker-CE.
 ### Installing Docker
 
-On Ubuntu, install Docker by running:
+On Debian or Ubuntu, install Docker by running:
 
 ```
 sudo apt update
 sudo apt install docker.io
 ```
 
-You will then want to add your user to the docker group with:
+For other Linux distibutions, consult the [Docker Engine Install page](hhttps://docs.docker.com/engine/install/).
+
+You will want to add your user to the docker group with:
 
 ```
 sudo usermod -aG docker <yourusername>
@@ -162,13 +166,13 @@ tpaexec test demo
 
 ## Connecting
 
-To get to a psql prompt, the simplest route is to log into one of the containers (or VMs or host depending on configuration) using SSH. Run 
+To get to a psql prompt, the simplest route is to log into one of the containers (or VMs or host depending on configuration) using docker or SSH. Run 
 
 ```
 tpaexec ping demo
 ```
 
-to ping all the SSH connectable hosts in the deployment: You will get output that looks something like:
+to ping all the connectable hosts in the deployment: You will get output that looks something like:
 
 ```
 $ tpaexec ping demo 
@@ -192,7 +196,11 @@ uptight | SUCCESS => {
 
 Select one of the nodes which responded with `SUCCESS`. We shall use `uptake` for this example.
 
-Change current directory to the created configuration directory. For example, our configuration is called demo, so we go to that directory. In there, we run `ssh -F ssh_config ourhostname` to connect.
+If you are only planning on using docker, use the command `docker exec -it uptake /bin/bash`, substituting in the appropriate hostname.
+
+Another option, that works with all types of TPA deployment is to use SSH. To do that, first change current directory to the created configuration directory. 
+
+For example, our configuration is called demo, so we go to that directory. In there, we run `ssh -F ssh_config ourhostname` to connect.
 
 ```
 cd demo
@@ -200,6 +208,8 @@ ssh -F ssh_config uptake
 Last login: Wed Sep  6 10:08:01 2023 from 172.17.0.1
 [root@uptake ~]# 
 ```
+
+In both cases, you will be logged in as a root user on the container.
 
 We can now change user to the `postgres` user using `sudo -iu postgres`. As `postgres` we can run `psql`. TPA has already configured that user with a `.pgpass` file so there's no need to present a password.
 
