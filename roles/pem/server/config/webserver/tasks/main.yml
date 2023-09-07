@@ -84,6 +84,11 @@
 - name: Configure SELinux security policy for PEM
   command: "{{ pem_base_dir }}/bin/configure-selinux.sh"
 
+- name: Ensure web server is started on boot
+  service:
+    name: "{{ pem_web_server_service_name[ansible_os_family] }}"
+    enabled: yes
+
 # XXX: What triggers this restart? Is it the SELinux config?
 - name: "Restart httpd service - {{ pem_web_server_service_name[ansible_os_family] }}"
   service:
