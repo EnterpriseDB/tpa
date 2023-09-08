@@ -4,7 +4,7 @@
 #
 #  docker build -t tpaexec:$(git describe --tags) -t tpaexec:latest .
 
-# Use the container image, create an like this
+# To use the container image, create a shell alias like this
 #
 #   alias tpaexec="docker run --rm -v $PWD:/work -v $HOME/.git:/root/.git -v $HOME/.gitconfig:/root/.gitconfig \
 #      -v /var/run/docker.sock:/var/run/docker.sock \
