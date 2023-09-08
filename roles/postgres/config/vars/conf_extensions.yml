@@ -1,18 +1,16 @@
 ## contrib/auto_explain
 
-auto_explain:
-  log_min_duration: '60s'
-  log_analyze: 'on'
-  log_buffers: 'on'
-  log_timing: 'on'
-  log_verbose: 'on'
-  log_format: 'text'
-  log_nested_statements: 'on'
+auto_explain.log_min_duration: '60s'
+auto_explain.log_analyze: 'on'
+auto_explain.log_buffers: 'on'
+auto_explain.log_timing: 'on'
+auto_explain.log_verbose: 'on'
+auto_explain.log_format: 'text'
+auto_explain.log_nested_statements: 'on'
 
 ## contrib/pg_stat_statements
 
-pg_stat_statements:
-  max: '1000'
-  track: 'all'
-  track_utility: 'on'
-  save: 'on'
+pg_stat_statements.max: '1000'
+pg_stat_statements.track: 'all'
+pg_stat_statements.track_utility: 'on'
+pg_stat_statements.save: 'on'
