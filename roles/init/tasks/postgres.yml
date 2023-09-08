@@ -65,6 +65,13 @@
   become_user: root
   become: yes
 
+# We must create postgres_wal_dir when it's not in its default location
+# inside PGDATA only, to avoid making initdb and pg_basebackup unhappy.
+
+- name: Detect if pg_wal location is outside PGDATA
+  set_fact:
+    pg_wal_dir_outside_pgdata: "{{ false if postgres_wal_dir|dirname == postgres_data_dir else true }}"
+
 - name: Ensure postgres_version matches pgdata_version, if defined
   assert:
     msg: >-

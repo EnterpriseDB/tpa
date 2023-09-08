@@ -28,10 +28,12 @@
 - name: Run pg_basebackup to clone replica
   command: >
     {{ postgres_bin_dir }}/pg_basebackup -v -D "{{ postgres_data_dir }}"
-    --checkpoint=fast -X stream -d "{{ upstream_conninfo }}"
+    --checkpoint=fast -X stream -d "{{ upstream_conninfo }}" {{ extra_option }}
   vars:
     source: "{{ upstream_to_clone|default(upstream_primary) }}"
     upstream_conninfo: "{{ hostvars[source].replication_node_dsn }} application_name={{ inventory_hostname }}"
+    waldir_option: "--waldir {{ postgres_wal_dir }}"
+    extra_option: "{{ waldir_option if pg_wal_dir_outside_pgdata else '' }}"
   become_user: "{{ postgres_user }}"
   become: true
   register: this
