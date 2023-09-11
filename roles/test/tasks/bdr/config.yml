@@ -199,7 +199,7 @@
       {{ standby_list|difference(groups|members_of('role_bdr', not_in=['role_witness'])) }}
 
 # Check that bdr.standby_slot_names are actual cluster nodes
-- name: set schema to use for next tests
+- name: Set schema to use for next tests
   set_fact:
     schema: "{{ (bdr_major_version == 3)|ternary('pglogical', 'bdr') }}"
 
