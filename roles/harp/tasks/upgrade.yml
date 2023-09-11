@@ -1,0 +1,21 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Stop/update/restart harp
+  when: >
+    'harp-proxy' in role
+    or ('bdr' in role
+      and failover_manager == 'harp')
+  block:
+  - include_role: name=harp/restart
+    vars:
+      harp_service_end_state: stopped
+
+  - include_role: name=harp/pkg
+    vars:
+      allow_package_upgrades: yes
+
+  - include_role: name=harp/restart
+    vars:
+      harp_service_end_state: started

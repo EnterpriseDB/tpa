@@ -2,6 +2,16 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+# This transmogrifier handles required transformations from BDR-Always-ON
+# architecture i.e. bdr version 3/4 clusters to PGD-Always-ON architecture i.e.
+# clusters with bdr version 5. The fundamental changes from 3 to 5 and 4 to 5
+# are the same except for the presence of pglogical in bdr3 clusters and
+# possible presence of haproxy (which is not handled in the transformation
+# and upgrades yet). So in retrospect, perhaps the transmogrifier itself should
+# be called BDRAOPGDAO instead of its current name i.e. BDR4PGD5 since that is
+# the fundamental case it makes and addresses. Something to think about for
+# later ...
+
 from ..exceptions import ConfigureError
 from ..transmogrifier import Transmogrifier, opt
 from ..changedescription import ChangeDescription
@@ -84,11 +94,12 @@ class BDR4PGD5(Transmogrifier):
 
     def apply(self, cluster):
         bdr_version = cluster.vars.get("bdr_version")
-        if bdr_version and int(bdr_version) != 4:
+        if bdr_version and int(bdr_version) not in [3, 4]:
             raise ConfigureError(
                 f"Don't know how to convert bdr_version from {bdr_version} to 5"
             )
         else:
+            self._bdr_3to5_changes(cluster)
             cluster.vars["bdr_version"] = "5"
 
         cluster._architecture = self.args.target_architecture
@@ -270,6 +281,20 @@ class BDR4PGD5(Transmogrifier):
 
         if bdr_commit_scopes:
             cluster.vars["bdr_commit_scopes"] = bdr_commit_scopes
+
+    def _bdr_3to5_changes(self, cluster):
+        """specific changes for BDR3 to PGD5 upgrade"""
+
+        # merged all conditions for now since no other changes were needed
+        if (int(cluster.vars.get("bdr_version")) == 3
+            and cluster.vars.get("extra_postgres_extensions")
+            and "pglogical" in cluster.vars["extra_postgres_extensions"]
+        ):
+            cluster.vars["extra_postgres_extensions"].remove("pglogical")
+            # remove the option completely if extra_postgres_extensions is
+            # empty after removing pglogical.
+            if not cluster.vars["extra_postgres_extensions"]:
+                cluster.vars.pop("extra_postgres_extensions")
 
     def description(self, cluster):
         items = [

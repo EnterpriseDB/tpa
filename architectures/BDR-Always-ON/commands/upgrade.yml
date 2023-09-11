@@ -25,6 +25,25 @@
 # we would prefer the downtime to be predictable rather than dependent
 # on the whims of the network.)
 
+- name: Check that the cluster can be upgraded
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr
+  tasks:
+  - assert:
+      that:
+        - cluster_facts is defined
+      fail_msg: >
+        Couldn't perform cluster discovery. Are all nodes running?
+
+  - set_fact:
+      bdrdb_major_version:
+        "{{ cluster_facts.databases[bdr_database].bdr.bdr_major_version }}"
+
+
 - name: Collect update facts for cluster {{ cluster_dir }}
   any_errors_fatal: true
   max_fail_percentage: 0
@@ -33,6 +52,17 @@
   environment: "{{ target_environment }}"
   hosts: all
   tasks:
+
+  # Set the bdrdb_major_version on non bdr node
+  # used for pgd-cli to ensure we install configuration file
+  # if upgrading from bdr3 to bdr4.
+  - set_fact:
+      bdrdb_major_version: "{{ groups['role_bdr']
+            |map('extract', hostvars, 'bdrdb_major_version')
+            |select('defined')
+            |first }}"
+    when: >
+      'bdr' not in role
 
   # Set all_haproxy_backend_servers and proxies_for_backend_server, as
   # well as my_haproxies.
@@ -63,13 +93,6 @@
     when: >
       'haproxy' in role
 
-  - name: Check pgd-proxy configuration and status
-    include_role:
-      name: test
-      tasks_from: pgd-proxy/basic.yml
-    when: >
-      'pgd-proxy' in role
-
 # Now that we're convinced the cluster is in a reasonable initial state,
 # we start the update process one by one on the instances. You can run
 # the command with ``-e update_hosts=a,b,c,…`` to control the order in
@@ -97,6 +120,7 @@
   max_fail_percentage: 0
   become_user: root
   become: yes
+  environment: "{{ target_environment }}"
   hosts: "{{ update_hosts|default('all') }}"
   serial: 1
   tasks:
@@ -110,9 +134,30 @@
     when: >
       'role_haproxy' in groups
 
+  - name: Fence the node before upgrade
+    include_role:
+      name: postgres/bdr
+      tasks_from: fence.yml
+    when:
+      - "'bdr' in role"
+      - failover_manager == 'harp'
+      - inventory_hostname in first_bdr_primary_candidates
+
+  # We have to stop harp-manager to upgrade it, and it might stop and
+  # restart Postgres when we do, so we do it after fencing the node.
+
+  - name: Stop/update/restart harp on {{ inventory_hostname }}
+    include_role:
+      name: harp
+      tasks_from: upgrade.yml
+    when: >
+      'harp-proxy' in role
+      or ('bdr' in role
+        and failover_manager == 'harp'
+        and inventory_hostname in first_bdr_primary_candidates|default([]))
+
   # Now we can perform the update on Postgres instances, whether proxied
   # (e.g., primary instances) or not (e.g., logical standby instances).
-  # We don't do anything for non-Postgres instances at the moment.
 
   - name: Stop/update/restart Postgres on {{ inventory_hostname }}
     block:
@@ -120,6 +165,8 @@
       vars:
         postgres_service_end_state: stopped
     - include_role: name=postgres/update
+      vars:
+        upgrade_from: "{{ bdrdb_major_version }}"
     - include_role: name=postgres/config
     - include_role: name=postgres/restart
     - include_role: name=postgres/config/final
@@ -127,75 +174,50 @@
         postgres_service_end_state: started
     when: >
       'postgres' in role
+      and 'pem-server' not in role
+
+  - name: Upgrade postgres instance on the pem server
+    block:
+    - include_role: name=postgres/restart
+    - include_role: name=postgres/update
+    - include_role: name=postgres/config
+    - include_role: name=postgres/restart
+    - include_role: name=postgres/config/final
+      vars:
+        postgres_service_end_state: started
+    when: >
+      'pem-server' in role
 
   - name: Stop/update/restart pgbouncer on {{ inventory_hostname }}
-    block:
-    - include_role: name=pgbouncer/restart
-      vars:
-        pgbouncer_service_end_state: stopped
-    - include_role: name=pgbouncer/pkg
-      vars:
-        allow_package_upgrades: yes
-    - include_role: name=pgbouncer/restart
-      vars:
-        pgbouncer_service_end_state: started
+    include_role:
+      name: pgbouncer
+      tasks_from: upgrade.yml
     when: >
       'pgbouncer' in role
 
   - name: Stop/update/restart etcd on {{ inventory_hostname }}
-    block:
-    - include_role: name=etcd/restart
-      vars:
-        etcd_service_end_state: stopped
-    - include_role: name=etcd/pkg
-      vars:
-        allow_package_upgrades: yes
-    - include_role: name=etcd/restart
-      vars:
-        etcd_service_end_state: started
+    include_role:
+      name: etcd
+      tasks_from: upgrade.yml
     when: >
       'etcd' in role
 
-  - name: Stop/update/restart harp on {{ inventory_hostname }}
+  - name: Upgrade pgd-cli on {{ inventory_hostname }}
     block:
-    - include_role: name=harp/restart
-      vars:
-        harp_service_end_state: stopped
-    - include_role: name=harp/pkg
-      vars:
-        allow_package_upgrades: yes
-    - include_role: name=harp/restart
-      vars:
-        harp_service_end_state: started
-    when: >
-      'harp-proxy' in role
-      or ('bdr' in role
-        and failover_manager == 'harp'
-        and inventory_hostname in first_bdr_primary_candidates|default([]))
+      - name: Upgrade pgdcli package
+        include_role:
+          name: pgdcli
+          tasks_from: upgrade.yml
 
-  - name: Stop/update/restart pgd-proxy on {{ inventory_hostname }}
-    block:
-    - include_role: name=pgd_proxy/restart
-      vars:
-        pgd_proxy_service_end_state: stopped
-    - include_role: name=pgd_proxy/pkg
-      vars:
-        allow_package_upgrades: yes
-    - include_role: name=pgd_proxy/restart
-      vars:
-        pgd_proxy_service_end_state: started
-    when: >
-      'pgd-proxy' in role
-
-  - name: upgrade pgdcli on {{ inventory_hostname }}
-    block:
-    - include_role: name=pgdcli/pkg
-      vars:
-        allow_package_upgrades: yes
+      - name: Configure pgdcli when upgrading from bdr3
+        include_role:
+          name: pgdcli/config
+        when:
+        - bdrdb_major_version|int == 3
+        - bdr_version is version('4', '>=')
     when: >
       ('bdr' in role and bdr_version is version('4', '>='))
       or 'pgdcli' in role
-      or 'pgd-proxy' in role
 
   # After we update one instance in a CAMO pair, we must wait for its
   # partner to catch up. If we stop the partner before it is ready, we
@@ -225,6 +247,15 @@
       executable: /bin/bash
     with_items: "{{ my_haproxies }}"
     delegate_to: "{{ item }}"
+
+  - name: Unfence the node after upgrade
+    include_role:
+      name: postgres/bdr
+      tasks_from: unfence.yml
+    when:
+      - "'bdr' in role"
+      - failover_manager == 'harp'
+      - inventory_hostname in first_bdr_primary_candidates
 
   # Ansible won't stop execution if a host becomes unreachable, despite
   # the any_errors_fatal setting. We must detect that situation and fail
