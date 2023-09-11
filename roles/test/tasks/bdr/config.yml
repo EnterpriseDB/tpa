@@ -199,11 +199,15 @@
       {{ standby_list|difference(groups|members_of('role_bdr', not_in=['role_witness'])) }}
 
 # Check that bdr.standby_slot_names are actual cluster nodes
+- name: set schema to use for next tests
+  set_fact:
+    schema: "{{ (bdr_major_version == 3)|ternary('pglogical', 'bdr') }}"
+
 - name: Get bdr.standby_slot_names value
   postgresql_query:
     conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
     query: >
-      SHOW bdr.standby_slot_names;
+      SHOW {{ schema }}.standby_slot_names;
   register: standby_slot_names
   vars:
     _task_environment:
@@ -213,8 +217,9 @@
 - name: extract standby_slot_names
   set_fact:
     standby_slot_list: >-
-      {{ standby_slot_names.results[0]['bdr.standby_slot_names']| regex_findall(regex) }}
+      {{ standby_slot_names.results[0][result_key]| regex_findall(regex) }}
   vars:
+    result_key: "{{ schema }}.standby_slot_names"
     regex: >-
       (?:[\,\'\"\s]?|^)(\w+?)(?:[\,\'\"\s]|$)
 
@@ -224,14 +229,15 @@
       - standby_slot_list is defined
       - standby_slot_list is subset(groups|members_of('role_bdr', not_in=['role_witness']))
     fail_msg: >
-      bdr.standby_slot_names contains standby(s) that are not eligible nodes of the cluster:
+      {{ schema }}.standby_slot_names contains standby(s) that are not eligible nodes of the cluster:
       {{ standby_slot_list|difference(groups|members_of('role_bdr', not_in=['role_witness'])) }}
 
-- name: Get bdr.standby_slot_names value
+
+- name: Get standby_slot_names value
   postgresql_query:
     conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
     query: >
-      SHOW bdr.standby_slots_min_confirmed;
+      SHOW {{ schema }}.standby_slots_min_confirmed;
   register: min_confirmed
   vars:
     _task_environment:
@@ -240,10 +246,11 @@
 
 - name: Assert that bdr.standby_slots_min_confirmed <= size of bdr.standby_slot_names
   assert:
-    that: min_confirmed.results[0]['bdr.standby_slots_min_confirmed']|int <= standby_slot_list|length
+    that: min_confirmed.results[0][result_key]|int <= standby_slot_list|length
     fail_msg: >
       Expecting more confirmed slots than defined slots in bdr.standby_slot_names
-
+  vars:
+    result_key: "{{ schema }}.standby_slots_min_confirmed"
 
 # check that max_worker_processes is above minimal required for the cluster
 # TODO: Duplicated by verify-settings check
