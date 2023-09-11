@@ -62,7 +62,7 @@ unrelated pending changes before you begin the software upgrade process.
 
 ## Upgrading from BDR-Always-ON to PGD-Always-ON
 
-To upgrade from BDR-Always-ON to PGD-Always-ON (that is, from BDR4 to
+To upgrade from BDR-Always-ON to PGD-Always-ON (that is, from BDR3/4 to
 PGD5), first run `tpaexec reconfigure`:
 
 ```
