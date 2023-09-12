@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-set -x
-
 reset_perms() {
     [ -n "$USER_ID" ] && chown "$USER_ID" -R /work
     [ -n "$GROUP_ID" ] && chgrp "$GROUP_ID" -R /work
