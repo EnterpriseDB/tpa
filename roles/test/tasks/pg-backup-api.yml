@@ -16,6 +16,7 @@
     client_key: /etc/tpa/pg-backup-api/pg-backup-user.key
     return_content: yes
   register: pgbapi_diagnose
+  become: true
 
 - assert:
     msg: >
