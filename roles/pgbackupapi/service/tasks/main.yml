@@ -35,6 +35,12 @@
   when:
     ansible_os_family == 'Debian'
 
+- name: Enable apache service for pg-backup-api
+  service:
+    name: "{{ apache_conf[ansible_os_family]['service'] }}"
+    enabled: yes
+    state: started
+
 - name: Switch off port 80
   lineinfile:
     path: "{{ apache_conf[ansible_os_family]['default_conf'] }}"
