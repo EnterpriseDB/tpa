@@ -124,7 +124,7 @@
        and failover_manager == 'harp'
        and inventory_hostname in first_bdr_primary_candidates)
 
-  - name: Download and install Postgres {{ new_postgres_version }}
+  - name: Download and install new Postgres binaries for major upgrade
     block:
     - name: Remove BDR debug packages (conflict issue)
       package:
@@ -166,7 +166,7 @@
           when:
             failover_manager == 'repmgr'
 
-        # TBD same as above, copy efm.properties and update for paths of new instance
+        # TBD same as above, copy efm.properties and update accordingly
         - include_role: name=efm/pkg
           when: >
             'efm' in role
@@ -196,7 +196,7 @@
                                   |map(attribute='config_file')
                                   |first }}"
       when:
-        failover_manager in ['repmgr', 'efm'] and 'primary' in role
+        failover_manager in ['repmgr', 'efm']
 
 - name: De-register PEM agent
   block:
@@ -239,7 +239,7 @@
     'pem-agent' in role
   ignore_errors: true
 
-- name: Prepare to upgrade {{ inventory_hostname }} to Postgres {{ new_postgres_version }}
+- name: Prep node for major Postgres upgrade
   block:
   - name: Start new instance
     shell: |
@@ -351,7 +351,7 @@
   - set_fact:
       bdr_schema_found: "{{ false if bdr_schema_found is skipped else bdr_schema_found.rowcount == 1|bool }}" 
 
-  - name: Perform major Postgres upgrade to version {{ new_postgres_version }}
+  - name: Perform major Postgres upgrade
     block:
     - file:
         path: "{{ new_postgres_data_dir }}/upgrade_logs"
@@ -407,9 +407,9 @@
           name: postgres
           state: stopped
  
-      - name: Run pg_upgrade on {{ inventory_host }}
+      - name: Run pg_upgrade
         shell:
-          cmd: "{{ new_postgres_bin_dir }}/pg_upgrade --clone"
+          cmd: "{{ new_postgres_bin_dir }}/pg_upgrade --link"
           chdir: "{{ new_postgres_data_dir }}/upgrade_logs"
         environment: "{{ _task_environment }}"
         vars:
@@ -439,7 +439,7 @@
         patterns: '*'
       register: upgrade_logs
   
-    - name: Get upgrade logs from {{ inventory_hostname }}
+    - name: Get upgrade logs
       fetch:
         src: "{{ item.path }}"
         dest: "{{ cluster_dir }}/upgrade_logs/{{ inventory_hostname }}/"

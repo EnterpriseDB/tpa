@@ -5,6 +5,20 @@
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   tags: always
 
+- name: Collect update facts for cluster {{ cluster_dir }}
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: "{{ update_hosts|default('all') }}"
+  tasks:
+  - include_role: name=postgres/facts
+    vars:
+      pgdata_initialised: true
+    when: >
+      'postgres' in role and cluster_facts is not defined
+
 - name: Update postgres on instances in M1 cluster {{ cluster_dir }}
   any_errors_fatal: true
   max_fail_percentage: 0
@@ -13,12 +27,6 @@
   hosts: "{{ update_hosts|default('all') }}"
   serial: "{{ update_hosts|ternary('1',omit) }}"
   tasks:
-  - include_role: name=postgres/facts
-    vars:
-      pgdata_initialised: true
-    when: >
-      'postgres' in role and cluster_facts is not defined
-
   - name: Stop repmgr
     block:
     - assert:
@@ -27,8 +35,7 @@
         fail_msg:
           Upgrade postgres does not support patroni managed clusters
 
-    - name: Stop repmgr
-      service:
+    - service:
         name: repmgr
         state: stopped
       when: >
@@ -45,7 +52,7 @@
     when: >
       'replica' in role
 
-  - name: Unregister replica(s) if upgrading
+  - name: Unregister replicas if major upgrading
     command: >
       {{ _postgres_bin_dir }}/repmgr standby unregister --verbose -f {{ _repmgr_conf_file }}
     become_user: "{{ postgres_user }}"
@@ -84,6 +91,21 @@
         {{ postgres_bin_dir }}/pg_ctl start -D {{ postgres_data_dir }}
       become: yes
       become_user: "{{ postgres_user }}"
+      when: >
+        'primary' in role and postgres_major_version_upgrade
+
+    - name: Rename old PGDATA on replicas
+      shell: |
+        mv {{ _postgres_data_dir }} {{ _postgres_data_dir }}_old
+      become_user: "{{ postgres_user }}"
+      become: yes
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['role_replica'] }}"
+      vars:
+        _postgres_data_dir: "{{ cluster_facts.postgres_data_dir }}"
+      when: >
+        'primary' in role and postgres_major_version_upgrade
+
       when: >
         'primary' in role and postgres_major_version_upgrade
 
