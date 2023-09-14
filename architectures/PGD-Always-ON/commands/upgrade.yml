@@ -57,14 +57,16 @@
       bdrdb_major_version:
         "{{ cluster_facts.databases[bdr_database].bdr.bdr_major_version }}"
 
-  - name: Ensure that bdr_version in config.yml is 5, and the database has v4/v5
+
+  - name: Ensure that bdr_version in config.yml is 5, and the database has v3/v4/v5
     assert:
       that:
         - bdr_version is version('5', '==')
-        - bdrdb_major_version is version('4', '==')
+        - bdrdb_major_version is version('3', '==')
+          or bdrdb_major_version is version('4', '==')
           or bdrdb_major_version is version('5', '==')
       fail_msg: >-
-        This upgrade process supports upgrades from BDR v4 to PGD v5, or
+        This upgrade process supports upgrades from BDR v3 to PGD5, BDR v4 to PGD v5, or
         minor version upgrades of PGD v5 only
 
   - name: Collect list of all unique BDR versions from all nodes
@@ -78,6 +80,11 @@
       _versions:
         "{{ groups['role_bdr']|bdr_node_versions(hostvars) }}"
 
+  - name: Determine whether we're doing a major version upgrade from BDR 3
+    set_fact:
+      bdr3_major_version_upgrade:
+        "{{ '3' in all_bdr_major_versions }}"
+
   - name: Determine whether we're doing a major version upgrade from BDR 4
     set_fact:
       bdr4_major_version_upgrade:
@@ -85,7 +92,7 @@
 
   - name: Determine whether we are doing a minor version upgrade
     set_fact:
-      bdr5_minor_version_upgrade: "{{ not (bdr4_major_version_upgrade) }}"
+      bdr5_minor_version_upgrade: "{{ not (bdr3_major_version_upgrade or bdr4_major_version_upgrade) }}"
 
 - name: Set upgrade facts for all hosts
   any_errors_fatal: true
@@ -102,6 +109,11 @@
 
   - name: Determine whether we're doing a major version upgrade from BDR 4
     set_fact:
+      bdr3_major_version_upgrade:
+        "{{ groups['role_bdr']
+            |map('extract', hostvars, 'bdr3_major_version_upgrade')
+            |select('defined')
+            |first }}"
       bdr4_major_version_upgrade:
         "{{ groups['role_bdr']
             |map('extract', hostvars, 'bdr4_major_version_upgrade')
@@ -127,3 +139,7 @@
     bdr4_major_version_upgrade
     or
     bdr5_minor_version_upgrade
+
+- import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_major_3to5.yml"
+  when: >
+    bdr3_major_version_upgrade
