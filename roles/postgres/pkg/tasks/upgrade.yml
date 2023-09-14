@@ -196,7 +196,7 @@
                                   |map(attribute='config_file')
                                   |first }}"
       when:
-        failover_manager in ['repmgr', 'efm']
+        failover_manager in ['repmgr', 'efm'] and 'primary' in role
 
 - name: De-register PEM agent
   block:
@@ -409,7 +409,7 @@
  
       - name: Run pg_upgrade on {{ inventory_host }}
         shell:
-          cmd: "{{ new_postgres_bin_dir }}/pg_upgrade --link"
+          cmd: "{{ new_postgres_bin_dir }}/pg_upgrade --clone"
           chdir: "{{ new_postgres_data_dir }}/upgrade_logs"
         environment: "{{ _task_environment }}"
         vars:

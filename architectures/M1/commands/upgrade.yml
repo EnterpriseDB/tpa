@@ -11,7 +11,7 @@
   become_user: root
   become: yes
   hosts: "{{ update_hosts|default('all') }}"
-  serial: 1
+  serial: "{{ update_hosts|ternary('1',omit) }}"
   tasks:
   - include_role: name=postgres/facts
     vars:
@@ -34,18 +34,34 @@
       when: >
         'postgres' in role
 
+  - name: Check to perform major upgrade for Postgres
+    set_fact:
+      postgres_major_version_upgrade: "{{ cluster_facts.postgres_version is version(postgres_version, 'lt') }}"
+    when: >
+      'postgres' in role
+
   - name: Update postgres on replicas in cluster {{ cluster_dir }}
-    block:
-    - name: Check to perform major upgrade for Postgres
-      set_fact:
-        postgres_major_version_upgrade: "{{ cluster_facts.postgres_version is version(postgres_version, 'lt') }}"
-      when: >
-        'postgres' in role
+    include_role: name=postgres/update
+    when: >
+      'replica' in role
 
-    - include_role: name=postgres/update
-      when: >
-        'replica' in role
-
+  - name: Unregister replica(s) if upgrading
+    command: >
+      {{ _postgres_bin_dir }}/repmgr standby unregister --verbose -f {{ _repmgr_conf_file }}
+    become_user: "{{ postgres_user }}"
+    become: yes
+    delegate_to: "{{ item }}"
+    with_items: "{{ groups['role_replica'] }}"
+    vars:
+      _postgres_bin_dir: "{{ cluster_facts.postgres_bin_dir }}"
+      _repmgr_conf_file: "{{ cluster_facts.repmgr.nodes
+                             |selectattr('node_name','eq', item)
+                             |list
+                             |map(attribute='config_file')
+                             |first }}"
+    when: >
+      postgres_major_version_upgrade and 'primary' in role
+    
   - name: Update postgres on primary in cluster {{ cluster_dir }}
     block:
     - name: Switchover to a replica
@@ -54,7 +70,7 @@
       become_user: "{{ postgres_user }}"
       become: yes
       when: >
-        inventory_hostname == groups['replica'][0] and not postgres_major_version_upgrade
+        not postgres_major_version_upgrade and inventory_hostname == groups['replica'][0]
 
     # Note: this role was calculated earlier, so it's outdated after the
     # switchover, but it correctly identifies the instance to use.
