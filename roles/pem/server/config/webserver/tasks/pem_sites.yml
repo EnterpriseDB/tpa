@@ -11,13 +11,17 @@
         owner: root
         group: root
         mode: 0644
+      notify: Restart apache for pem
   become: yes
   tags: [pem-server, pem-webserver]
 
 - name: Enable ssl-pem configuration (Debian/Ubuntu)
   block:
     - name: "Enable the apache2 site: {{ pem_branding_edb_wl }}-ssl-pem.conf"
-      command: "/usr/sbin/a2ensite -m {{ pem_branding_edb_wl }}-ssl-pem"
+      command:
+        cmd: "/usr/sbin/a2ensite -m {{ pem_branding_edb_wl }}-ssl-pem"
+        creates: "/etc/apache2/sites-enabled/{{ pem_branding_edb_wl }}-ssl-pem.conf"
+      notify: Restart apache for pem
 
     - name: "Install {{ pem_branding_edb_wl }}-gnutls-pem.conf"
       template:
@@ -26,9 +30,13 @@
         owner: root
         group: root
         mode: 0644
+      notify: Restart apache for pem
 
     - name: "Enable the apache2 site: {{ pem_branding_edb_wl }}-gnutls-pem.conf"
-      command: "/usr/sbin/a2ensite -m {{ pem_branding_edb_wl }}-gnutls-pem"
+      command:
+        cmd: "/usr/sbin/a2ensite -m {{ pem_branding_edb_wl }}-gnutls-pem"
+        creates: "/etc/apache2/sites-enabled/{{ pem_branding_edb_wl }}-gnutls-pem.conf"
+      notify: Restart apache for pem
 
   when: ansible_os_family == 'Debian'
   become: yes

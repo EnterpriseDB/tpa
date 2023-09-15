@@ -1,0 +1,9 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Restart apache for pem
+  service:
+    name: "{{ pem_web_server_service_name[ansible_os_family] }}"
+    state: restarted
+  listen: Restart apache for pem

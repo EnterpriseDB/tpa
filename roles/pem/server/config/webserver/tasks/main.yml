@@ -29,6 +29,7 @@
     dest: "{{ pem_base_dir }}/web/pem.wsgi"
     backup: yes
     remote_src: yes
+  notify: Restart apache for pem
 
 - name: Generating PEM Cookie Name
   shell: hexdump -n 4 -e '4/4 "%08X" 1 "\n"' /dev/random | head -c 6
@@ -64,6 +65,7 @@
     executable: /bin/bash
   when: >
     (pem_web_server_renew_tls_certificates|default(false)) or (not pem_web_server_certificate.stat.exists)
+  notify: Restart apache for pem
 
 - name: "Install {{ pem_branding_edb_wl }}-pem.conf"
   template:
@@ -72,6 +74,7 @@
     owner: root
     group: root
     mode: 0644
+  notify: Restart apache for pem
   tags: [pem-server, pem-webserver]
 
 - include_tasks: pem_sites.yml
@@ -88,17 +91,12 @@
   service:
     name: "{{ pem_web_server_service_name[ansible_os_family] }}"
     enabled: yes
+    state: started
 
-# XXX: What triggers this restart? Is it the SELinux config?
-- name: "Restart httpd service - {{ pem_web_server_service_name[ansible_os_family] }}"
-  service:
-    name: "{{ pem_web_server_service_name[ansible_os_family] }}"
-    state: restarted
-
-- name: Webserever configured
+- name: Webserver configured
   debug:
     msg: >
-      Configured the webservice for "{{ pem_branding_edb_wl }}" Postgres
+      Configured the webserver for "{{ pem_branding_edb_wl }}" Postgres
       Enterprise Manager (PEM) Server on port "{{ pem_server_ssl_port }}"
 
 - name: PEM server access info
