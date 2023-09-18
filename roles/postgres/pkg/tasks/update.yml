@@ -15,15 +15,26 @@
   vars:
     list_varname: _all_postgres_packages
 
+#we need this due to pgextended to edbpge switch for bdr3 to 5 upgrade.
+- name: set initial postgres family
+  set_fact:
+    init_postgres_family: "{{ (postgres_flavour != 'edbpge')|ternary(postgres_family,'postgresql') }}"
+    init_postgres_flavour: "{{ (postgres_flavour != 'edbpge')|ternary(postgres_flavour,'pgextended') }}"
+    init_postgres_package_name: "{{ (postgres_flavour != 'edbpge')|ternary(postgres_package_name,'postgresql') }}"
+  when:
+    upgrade_type == "3to5"
+
 - name: Fetch BDR3-related packages
   include_tasks: list-bdr-packages.yml
   vars:
     list_varname: _all_bdr3_packages
     bdr_version: 3
+    postgres_flavour: "{{ init_postgres_flavour }}"
+    postgres_family: "{{ init_postgres_family }}"
+    postgres_package_name: "{{ init_postgres_package_name }}"
   when: >
     'bdr' in role
     and (upgrade_type == "3to5" or upgrade_type == "3to4")
-    and postgres_flavour != 'edbpge'
 
 - name: Remove BDR3-related packages when upgrade from bdr3
   package:
@@ -32,7 +43,6 @@
   when: >
     'bdr' in role
     and upgrade_type == "3to5"
-    and postgres_flavour != 'edbpge'
 
 - name: Fetch BDR4-related packages
   include_tasks: list-bdr-packages.yml
