@@ -15,51 +15,55 @@
   vars:
     list_varname: _all_postgres_packages
 
+- name: Set target_bdr_version
+  set_fact:
+    target_bdr_version: "{{ bdr_version }}"
+
 #we need this due to pgextended to edbpge switch for bdr3 to 5 upgrade.
-- name: set initial postgres family
+- name: Set initial postgres family
   set_fact:
     init_postgres_family: "{{ (postgres_flavour != 'edbpge')|ternary(postgres_family,'postgresql') }}"
     init_postgres_flavour: "{{ (postgres_flavour != 'edbpge')|ternary(postgres_flavour,'pgextended') }}"
     init_postgres_package_name: "{{ (postgres_flavour != 'edbpge')|ternary(postgres_package_name,'postgresql') }}"
-  when:
-    upgrade_type == "3to5"
+  when: >
+    target_bdr_version is version('5','>=')
 
-- name: Fetch BDR3-related packages
-  include_tasks: list-bdr-packages.yml
-  vars:
-    list_varname: _all_bdr3_packages
-    bdr_version: 3
-    postgres_flavour: "{{ init_postgres_flavour }}"
-    postgres_family: "{{ init_postgres_family }}"
-    postgres_package_name: "{{ init_postgres_package_name }}"
+- name: BDR3 package removal
+  block:
+  - name: Fetch BDR3-related packages
+    include_tasks: list-bdr-packages.yml
+    vars:
+      list_varname: _all_bdr3_packages
+      bdr_version: 3
+      postgres_flavour: "{{ init_postgres_flavour }}"
+      postgres_family: "{{ init_postgres_family }}"
+      postgres_package_name: "{{ init_postgres_package_name }}"
+
+  - name: Remove BDR3-related packages when upgrade from bdr3
+    package:
+      name: "{{ _all_bdr3_packages|default([]) }}"
+      state: absent
   when: >
     'bdr' in role
-    and (upgrade_type == "3to5" or upgrade_type == "3to4")
+    and upgrade_from|int == 3
+    and target_bdr_version is version('3','>')
 
-- name: Remove BDR3-related packages when upgrade from bdr3
-  package:
-    name: "{{ _all_bdr3_packages|default([]) }}"
-    state: absent
+- name: BDR4 package removal
+  block:
+  - name: Fetch BDR4-related packages
+    include_tasks: list-bdr-packages.yml
+    vars:
+      list_varname: _all_bdr4_packages
+      bdr_version: 4
+
+  - name: Remove BDR4-related packages when upgrade from bdr4
+    package:
+      name: "{{ _all_bdr4_packages|default([]) }}"
+      state: absent
   when: >
     'bdr' in role
-    and upgrade_type == "3to5"
-
-- name: Fetch BDR4-related packages
-  include_tasks: list-bdr-packages.yml
-  vars:
-    list_varname: _all_bdr4_packages
-    bdr_version: 4
-  when: >
-    'bdr' in role
-    and upgrade_type == "4to5"
-
-- name: Remove BDR4-related packages when upgrade from bdr4
-  package:
-    name: "{{ _all_bdr4_packages|default([]) }}"
-    state: absent
-  when: >
-    'bdr' in role
-    and upgrade_type == "4to5"
+    and upgrade_from|int == 4
+    and target_bdr_version is version('4','>')
 
 - name: Install latest Postgres packages
   package:

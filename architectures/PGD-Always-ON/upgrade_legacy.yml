@@ -176,7 +176,7 @@
       name: postgres/pkg
       tasks_from: check-update.yml
     vars:
-      upgrade_type: "{{ (bdr_major_version_upgrade)|ternary('4to5','minor') }}"
+      upgrade_from: "{{ (bdr_major_version_upgrade)|ternary(4,5) }}"
     when: >
       'bdr' in role
       and inventory_hostname == first_bdr_primary
@@ -247,7 +247,7 @@
         postgres_service_end_state: stopped
     - include_role: name=postgres/update
       vars:
-        upgrade_type: "{{ (bdr_major_version_upgrade)|ternary('4to5','minor') }}"
+        upgrade_from: "{{ (bdr_major_version_upgrade)|ternary(4,5) }}"
     - include_role: name=postgres/user
     - include_role: name=postgres/config
     - include_role: name=postgres/final

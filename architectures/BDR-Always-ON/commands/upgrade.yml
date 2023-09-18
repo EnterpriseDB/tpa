@@ -121,7 +121,7 @@
         postgres_service_end_state: stopped
     - include_role: name=postgres/update
       vars:
-        upgrade_type: "3to4"
+        upgrade_from: 3
     - include_role: name=postgres/config
     - include_role: name=postgres/restart
     - include_role: name=postgres/config/final
