@@ -7,6 +7,11 @@
 # which the same postgres_package_version setting applies. Anything else
 # should go into additional/extra_postgres_packages below.
 
+# postgres_family: [postgresql, epas, edbpge] with pgextended = postgresql
+# postgres_family_extended: [postgresql, epas, pgextended] with pgextended = edbpge
+# postgres_flavour: [postgresql, pgextended, epas, edbpge]
+
+# uses postgres_family
 postgres_packages:
   postgresql:
     Debian: &debian_packages
@@ -44,6 +49,7 @@ postgres_packages:
     Ubuntu: *debian_edbpge_packages
     SLES: *redhat_edbpge_packages
 
+# uses postgres_family
 postgres_client_packages:
   postgresql:
     Debian: &debian_client_packages
@@ -66,6 +72,7 @@ postgres_client_packages:
     Ubuntu: *debian_edbpge_client_packages
     SLES: *redhat_edbpge_client_packages
 
+# uses postgres_family
 postgres_debug_packages:
   postgresql:
     Debian: &debian_debug_packages
@@ -85,6 +92,7 @@ postgres_debug_packages:
     Ubuntu: []
     SLES: []
 
+# uses postgres_family
 pglogical_packages:
   postgresql:
     Debian: &debian_pglogical_packages
@@ -108,6 +116,7 @@ pglogical_packages:
     Ubuntu: *debian_edbpge_pglogical_packages
     SLES: *redhat_edbpge_pglogical_packages
 
+# uses postgres_family
 pglogical_debug_packages:
   postgresql:
     Debian: &debian_pglogical_debug_packages
@@ -128,6 +137,7 @@ pglogical_debug_packages:
     Ubuntu: *debian_edbpge_pglogical_debug_packages
     SLES: []
 
+# uses postgres_family
 bdr_packages:
   postgresql:
     Debian: &debian_bdr_packages
@@ -144,6 +154,7 @@ bdr_packages:
     Ubuntu: *debian_epas_bdr_packages
     SLES: *redhat_epas_bdr_packages
 
+# uses postgres_family_extended
 bdr4_packages:
   postgresql:
     Debian: &bdr4_pg_packages
@@ -164,6 +175,7 @@ bdr4_packages:
     Ubuntu: *bdr4_epas_packages
     SLES: *bdr4_epas_packages
 
+# uses postgres_family
 default_bdr_debug_packages: &default_bdr_debug_packages
   postgresql:
     Debian: &debian_bdr_debug_packages
@@ -180,6 +192,7 @@ default_bdr_debug_packages: &default_bdr_debug_packages
 
 bdr_debug_packages: *default_bdr_debug_packages
 
+# uses postgres_family_extended
 default_bdr4_debug_packages: &default_bdr4_debug_packages
   postgresql:
     Debian: &bdr4_debug_pg_packages
@@ -245,6 +258,7 @@ extra_postgres_packages:
   Ubuntu: *debian_extra_packages
   SLES: []
 
+# uses postgres_family
 default_postgres_service_names:
   postgresql:
     Debian: postgresql

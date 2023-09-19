@@ -28,6 +28,25 @@
   when: >
     target_bdr_version is version('5','>=')
 
+- name: Remove pgextended when switching to edbpge
+  block:
+  - name: Fetch pgextended packages
+    include_tasks: list-packages.yml
+    vars:
+      list_varname: _all_pgextended_packages
+      bdr_version: 3
+      postgres_flavour: "{{ init_postgres_flavour }}"
+      postgres_family: "{{ init_postgres_family }}"
+      postgres_package_name: "{{ init_postgres_package_name }}"
+
+  - name: Remove pgextended packages
+    package:
+      name: "{{ _all_pgextended_packages|default([]) }}"
+      state: absent
+  when: >
+    target_bdr_version is version('5','>=')
+    and init_postgres_flavour == 'pgextended'
+
 - name: BDR3 package removal
   block:
   - name: Fetch BDR3-related packages
