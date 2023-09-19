@@ -1,6 +1,6 @@
 # A First Cluster Deployment
 
-In this short tutorial, we are going to work through deploying a simple M1 architecture  deployment onto a local Docker installation. By the end you will have four containers, one primary database and two replicas and a backup node, configured and ready for you to explore.
+In this short tutorial, we are going to work through deploying a simple [M1 architecture](architecture-M1.md) deployment onto a local Docker installation. By the end you will have four containers, one primary database, two replicas and a backup node, configured and ready for you to explore.
 
 For this example, we will run TPA on an Ubuntu system, but the considerations are similar for most Linux systems.
 
@@ -24,7 +24,7 @@ sudo apt update
 sudo apt install docker.io
 ```
 
-For other Linux distibutions, consult the [Docker Engine Install page](hhttps://docs.docker.com/engine/install/).
+For other Linux distributions, consult the [Docker Engine Install page](https://docs.docker.com/engine/install/).
 
 You will want to add your user to the docker group with:
 
@@ -58,9 +58,10 @@ sudo update-grub
 sudo reboot
 ```
 
-**WARNING**: Giving a user the ability to speak to the Docker daemon
-lets them trivially gain root on the Docker host. Only trusted users
-should have access to the Docker daemon.
+!!! Warning
+    Giving a user the ability to speak to the Docker daemon
+    lets them trivially gain root on the Docker host. Only trusted users
+    should have access to the Docker daemon.
 
 ### Creating a configuration with TPA
 

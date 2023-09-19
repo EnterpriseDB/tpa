@@ -16,7 +16,7 @@ the source and [run TPA in a Docker container](INSTALL-docker.md).
 
 First, you must install the various dependencies Python 3, Python 
 venv, git, openvpn and patch. Installing from EDB repositories would
-would automatically install these. automatically along with the TPA 
+would  install these automatically along with the TPA 
 packages.  
 
 Before you install TPA, you must install the required packages: 
@@ -36,11 +36,10 @@ git clone https://github.com/enterprisedb/tpa.git ~/tpa
 
 This creates a `tpa` directory in your home directory.
 
-!!! Note
-    If you prefer to checkout with ssh use:<br/>
-    ```
-    git clone ssh://git@github.com/EnterpriseDB/tpa.git ~/tpa
-    ```
+If you prefer to checkout with ssh use:<br/>
+```
+git clone ssh://git@github.com/EnterpriseDB/tpa.git ~/tpa
+```
 
 Add the bin directory, found within in your newly created clone, to your path with:
 
@@ -60,7 +59,7 @@ This will create the Python virtual environment that TPA will use in future. All
 tpaexec selftest
 `
 
-You now have tpaexec installed. If this is new 
+You now have tpaexec installed.
 
 ## Dependencies
 
