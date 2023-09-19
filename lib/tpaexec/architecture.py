@@ -1130,6 +1130,12 @@ class Architecture(object):
             cluster_vars.update({"tpa_2q_repositories": tpa_2q_repositories})
             return
 
+        # If we are configuring for a postgres version at least 16, we
+        # explicitly set tpa_2q_repositories to be empty, so that it
+        # doesn't get any entries automatically added at deploy-time
+        if int(self.args.get("postgres_version")) >= 16:
+            cluster_vars.update({"tpa_2q_repositories": []})
+
         # We know that the cluster doesn't need any 2Q repos, either because the
         # user asked for them explicitly, or because other configure options did
         # so implicitly. Now we can focus on setting edb_repositories correctly.
