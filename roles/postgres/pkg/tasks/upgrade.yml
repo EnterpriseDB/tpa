@@ -403,7 +403,18 @@
           'bdr' not in role and bdr_schema_found
         ignore_errors: yes
  
-      - systemd:
+      - name: Change Postgres port for the old instance
+        postgresql_query:
+          autocommit: yes
+          conninfo: "{{ dsn|dbname('postgres') }}"
+          queries:
+            - text: ALTER SYSTEM SET port = %s
+              args:
+                - "{{ upgrade_port }}"
+        become: yes
+        become_user: "{{ postgres_user }}"
+
+      - service:
           name: postgres
           state: stopped
  

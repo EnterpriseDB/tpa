@@ -67,7 +67,7 @@
                              |map(attribute='config_file')
                              |first }}"
     when: >
-      postgres_major_version_upgrade and 'primary' in role
+      'primary' in role and postgres_major_version_upgrade
     
   - name: Update postgres on primary in cluster {{ cluster_dir }}
     block:
@@ -86,6 +86,27 @@
       when: >
         'primary' in role
 
+    - name: Sync standbys after primary major upgrade
+      command: >
+        /usr/bin/rsync --archive --delete --hard-links --size-only --no-inc-recursive --progress \
+        {{ _postgres_data_dir }} {{ postgres_data_dir }} {{ remote_dir }}
+      vars:
+        _postgres_data_dir: "{{ cluster_facts.postgres_data_dir }}"
+        remote_dir: "{{ item + ':' + postgres_data_dir|dirname }}"
+      become_user: "{{ postgres_user }}"
+      become: true
+      with_items: "{{ groups['role_replica'] }}"
+      register: this
+      failed_when:
+        this.rc != 0 or 'error' in this.stderr
+      when: >
+        'primary' in role and postgres_major_version_upgrade
+
+    - debug:
+        msg: "{{ this }}"
+      when: >
+        this is not skipped
+
     - name: Start new instance
       shell: |
         {{ postgres_bin_dir }}/pg_ctl start -D {{ postgres_data_dir }}
@@ -94,9 +115,10 @@
       when: >
         'primary' in role and postgres_major_version_upgrade
 
-    - name: Rename old PGDATA on replicas
-      shell: |
-        mv {{ _postgres_data_dir }} {{ _postgres_data_dir }}_old
+    - name: Remove old Postgres data directories on standbys after primary major upgrade
+      file:
+        path: "{{ _postgres_data_dir }}"
+        state: absent
       become_user: "{{ postgres_user }}"
       become: yes
       delegate_to: "{{ item }}"
@@ -104,10 +126,7 @@
       vars:
         _postgres_data_dir: "{{ cluster_facts.postgres_data_dir }}"
       when: >
-        'primary' in role and postgres_major_version_upgrade
-
-      when: >
-        'primary' in role and postgres_major_version_upgrade
+        'primary' in role and postgres_major_version_upgrade and false
 
     - name: Switch back to the old primary
       command: >
