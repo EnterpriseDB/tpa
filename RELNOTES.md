@@ -6,14 +6,49 @@
 
 ## Notable changes
 
-- Add support for Postgres 16
+- TPA-551 Add support for Postgres 16
+
+  TPA can now install Postgres 16 with the M1 architecture.
+  - postgres binary (TPA-547)
+  - DJ and Simon's installation guide
+  - repositories (TPA-577)
 
 ## Minor changes
 
-- Add SUSE entries for etcd and patroni package lists
+- TPA-534, TPA-535 Add SUSE entries for etcd and patroni package lists
 
-- Adjust EFM dependency lists to use JDK 11 by default, except on
-  platforms where it is not available
+- TPA-548 Adjust EFM dependency lists to use JDK 11 by default, except on
+  platforms where it is not available (Debian 9 and Ubuntu 18.04)
+
+- TPA-545 Don't exclude PGDG packages if no EDB repositories are in use
+
+  When using EDB repositories, we exclude barman-related packages and
+  psycopg2 packages from the PGDG repositories; if no EBD repositories
+  are in use, we now don't exclude these packages.
+
+## Bugfixes
+
+- TPA-536 Construct docker image names correctly
+
+  A locally built docker base image has no digest, so we refer to it by
+  its tag when building the final image.
+
+- TPA-564 Flatten configuration keys for extensions in postgres config
+
+  Instead of supplying configuration keys for extensions as a nested
+  dictionary, which doesn't work, we format them as
+
+    extension_name.config_key: "value"
+
+  and put them in a single flat list.
+
+- TPA-537 Fix tests to use correct schema on bdr3 clusters
+
+- TPA-569 Ensure apache service is enabled and started for pg-backup-api
+
+- TPA-471 Run pg-backup-api tests with correct permissions
+
+- TPA-440 Ensure apache service is enabled and started for PEM
 
 ## v23.22 (2023-09-05)
 
