@@ -254,16 +254,38 @@
   with_dict: >-
     {{ postgres_tablespaces|default({}) }}
 
+# Determine the upstream primary for this host, that is, the primary at
+# the root of the cascading replication setup. This may be the instance
+# itself, if it's a primary.
+
+- name: Record name of the upstream primary
+  set_fact:
+    upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"
+  when: >
+    'postgres' in role
+
+- block:
+  - name: Allow physical replicas of BDR subscriber-only nodes
+    assert:
+      msg: >-
+        Support for creating physical replicas of BDR data nodes has been
+        removed from TPA due to concerns about potential data loss
+      that: "'subscriber-only' in hostvars[upstream_primary].role"
+    when: >
+      'replica' in role
+
 # The only failover_manager setting we accept for BDR 3/4 is harp, and
 # the only one we accept for BDR 5 is pgd, because failover is managed
-# internally by BDR in conjunction with pgd-proxy.
+# internally by BDR in conjunction with pgd-proxy. However, we might
+# allow repmgr if a replica is required from a subscriber-only node.
 
-- name: Ensure failover_manager is set correctly according to BDR version
-  set_fact:
-    failover_manager:
-      "{{ 'pgd' if bdr_version is version('5', '>=')
-          else 'harp' if failover_manager == 'harp'
-          else 'none' }}"
+  - name: Ensure failover_manager is set correctly according to BDR version
+    set_fact:
+      failover_manager:
+        "{{ 'pgd' if bdr_version is version('5', '>=')
+            else 'harp' if failover_manager == 'harp'
+            else 'repmgr' if failover_manager == 'repmgr' and ('subscriber-only' in role or 'replica' in role)
+            else 'none' }}"
   when: >
     'bdr' in role
 
@@ -480,16 +502,6 @@
     max_prepared_transactions: 16
   when: >
     'bdr' in role and max_prepared_transactions is not defined
-
-# Determine the upstream primary for this host, that is, the primary at
-# the root of the cascading replication setup. This may be the instance
-# itself, if it's a primary.
-
-- name: Record name of the upstream primary
-  set_fact:
-    upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"
-  when: >
-    'postgres' in role
 
 # Find any backed-up instance that is the upstream_primary, or a replica
 # thereof. We would prefer to use a backup server in the same region,

@@ -12,14 +12,6 @@
       TPA requires repmgr to create physical replicas for Postgres v11
       and below.
 
-- assert:
-    that: >
-      'bdr' not in hostvars[upstream].role
-      or 'subscriber-only' in hostvars[upstream].role
-    fail_msg: >-
-      Support for creating physical replicas of BDR data nodes has been
-      removed from TPA due to concerns about potential data loss
-
 # First, we must initialise our PGDATA by cloning an upstream instance.
 
 - include_tasks: clone.yml
