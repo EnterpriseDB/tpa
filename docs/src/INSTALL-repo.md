@@ -14,69 +14,56 @@ the source and [run TPA in a Docker container](INSTALL-docker.md).
 
 ## Quickstart
 
-First, you must install the various dependencies that would have been
-installed automatically along with the TPA packages. (You can use
-something other than `sudo` to run these commands as root, if you
-prefer.)
+First, you must install the various dependencies Python 3, Python 
+venv, git, openvpn and patch. Installing from EDB repositories would
+would  install these automatically along with the TPA 
+packages.  
+
+Before you install TPA, you must install the required packages: 
+
+* **Debian/Ubuntu** <br/> `sudo apt-get install python3 python3-pip python3-venv git openvpn patch`
+* **Redhat, Rocky or AlmaLinux (RHEL7)** <br/> `sudo yum install python3 python3-pip epel-release git openvpn patch`
+* **Redhat, Rocky or AlmaLinux (RHEL8)** <br/>`sudo yum install python36 python3-pip epel-release git openvpn patch`
 
 
-```bash
-# Debian or Ubuntu 
-$ sudo apt-get install python3 python3-pip python3-venv \
-      git openvpn patch
+## Clone and setup
 
-# RedHat, Rocky or AlmaLinux (python3 for RHEL7, python36 for RHEL8)
-$ sudo yum install python36 python3-pip \
-      epel-release git openvpn patch
+With prerequisites installed, you can now clone the repository.
 
-# MacOS X
-$ brew tap discoteq/discoteq
-$ brew install python@3 openvpn flock coreutils gpatch git
+```
+git clone https://github.com/enterprisedb/tpa.git ~/tpa
 ```
 
-Next, install TPA itself:
+This creates a `tpa` directory in your home directory.
 
-```bash
-$ git clone ssh://git@github.com/EnterpriseDB/tpa.git
-$ ./tpa/bin/tpaexec setup
-$ ./tpa/bin/tpaexec selftest
+If you prefer to checkout with ssh use:<br/>
+```
+git clone ssh://git@github.com/EnterpriseDB/tpa.git ~/tpa
 ```
 
-## Step-by-step
+Add the bin directory, found within in your newly created clone, to your path with:
 
-Install the various dependencies as described above.
+`export PATH=$PATH:$HOME/tpa/bin`
 
-If your system does not have Python 3.6+ packages, you can use `pyenv`
-to install a more recent Python in your home directory (see below), or
-you can [run TPA in a Docker container](INSTALL-docker.md).
+Add this line to your `.bashrc` file (or other profile file for your preferred shell).
 
-Next, clone the TPA repository into, say, `~/tpa`. (It doesn't
-matter where you put it, but don't use `/opt/EDB/TPA` or
-`/opt/2ndQuadrant/TPA`, to avoid conflicts if you install the TPA
-packages in future.)
+You can now create a working tpa environment by running:
 
-```bash
-$ git clone ssh://git@github.com/EnterpriseDB/tpa.git ~/tpa
-```
+`
+tpaexec setup
+`
 
-(If you're installing from source, please clone the repository instead
-of downloading an archive of the source.)
+This will create the Python virtual environment that TPA will use in future. All needed packages are installed in this environment. To test this configured correctly, run the following:
 
-The remaining steps are the same as if you had installed the package.
+`
+tpaexec selftest
+`
 
-```bash
-# Add tpaexec to your PATH for convenience
-# (Put this in your ~/.bashrc too)
-$ export PATH=$PATH:$HOME/tpa/bin
+You now have tpaexec installed.
 
-$ tpaexec setup
-$ tpaexec selftest
-```
+## Dependencies
 
-If the self-test completes without any errors, your TPA installation
-is ready for use.
-
-## Python 3.6+
+### Python 3.6+
 
 TPA requires Python 3.6 or later, available on most
 modern distributions. If you don't have it, you can use
@@ -108,7 +95,7 @@ If you were not already using pyenv, please remember to add `pyenv` to
 your PATH in .bashrc and call `eval "$(pyenv init -)"` as described in
 the [pyenv documentation](https://github.com/pyenv/pyenv#installation).
 
-## Virtual environment options
+### Virtual environment options
 
 By default, `tpaexec setup` will use the builtin Python 3 `-m venv`
 to create a venv under `$TPA_DIR/tpa-venv`, and activate it
