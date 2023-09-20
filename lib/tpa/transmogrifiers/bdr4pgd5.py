@@ -84,11 +84,12 @@ class BDR4PGD5(Transmogrifier):
 
     def apply(self, cluster):
         bdr_version = cluster.vars.get("bdr_version")
-        if bdr_version and int(bdr_version) != 4:
+        if bdr_version and int(bdr_version) not in [3, 4]:
             raise ConfigureError(
                 f"Don't know how to convert bdr_version from {bdr_version} to 5"
             )
         else:
+            self._bdr_3to5_changes(cluster)
             cluster.vars["bdr_version"] = "5"
 
         cluster._architecture = self.args.target_architecture
@@ -270,6 +271,20 @@ class BDR4PGD5(Transmogrifier):
 
         if bdr_commit_scopes:
             cluster.vars["bdr_commit_scopes"] = bdr_commit_scopes
+
+    def _bdr_3to5_changes(self, cluster):
+        """specific changes for BDR3 to PGD5 upgrade"""
+
+        # merged all conditions for now since no other changes were needed
+        if (int(cluster.vars.get("bdr_version")) == 3
+            and cluster.vars.get("extra_postgres_extensions")
+            and "pglogical" in cluster.vars["extra_postgres_extensions"]
+        ):
+            cluster.vars["extra_postgres_extensions"].remove("pglogical")
+            # remove the option completely if extra_postgres_extensions is
+            # empty after removing pglogical.
+            if not cluster.vars["extra_postgres_extensions"]:
+                cluster.vars.pop("extra_postgres_extensions")
 
     def description(self, cluster):
         items = [
