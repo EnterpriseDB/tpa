@@ -42,7 +42,8 @@
 
   and put them in a single flat list.
 
-- TPA-537 Fix tests to use correct schema on bdr3 clusters
+- TPA-527 Fix bdr.standby_slot_names and bdr.standby_slots_min_confirmed checks
+  to use correct schema on bdr3 clusters
 
 - TPA-569 Ensure apache service is enabled and started for pg-backup-api
 
