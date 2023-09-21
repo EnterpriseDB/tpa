@@ -9,9 +9,9 @@
 - TPA-551 Add support for Postgres 16
 
   TPA can now install Postgres 16 with the M1 architecture.
-  - postgres binary (TPA-547)
-  - DJ and Simon's installation guide
-  - repositories (TPA-577)
+  Do not configure dl/default/release for PG versions 16 and above.
+  Postgres 16 does not support postmaster symlink usage for service file,
+  TPA will now use postgres binary instead.
 
 ## Minor changes
 
@@ -28,10 +28,14 @@
 
 ## Bugfixes
 
-- TPA-536 Construct docker image names correctly
+- TPA-440 Ensure apache service is enabled and started for PEM
 
-  A locally built docker base image has no digest, so we refer to it by
-  its tag when building the final image.
+- TPA-471 Run pg-backup-api tests with correct permissions
+
+- TPA-569 Ensure apache service is enabled and started for pg-backup-api
+
+- TPA-527 Fix bdr.standby_slot_names and bdr.standby_slots_min_confirmed checks
+  to use correct schema on bdr3 clusters
 
 - TPA-564 Flatten configuration keys for extensions in postgres config
 
@@ -42,14 +46,10 @@
 
   and put them in a single flat list.
 
-- TPA-527 Fix bdr.standby_slot_names and bdr.standby_slots_min_confirmed checks
-  to use correct schema on bdr3 clusters
+- TPA-536 Construct docker image names correctly
 
-- TPA-569 Ensure apache service is enabled and started for pg-backup-api
-
-- TPA-471 Run pg-backup-api tests with correct permissions
-
-- TPA-440 Ensure apache service is enabled and started for PEM
+  A locally built docker base image has no digest, so we refer to it by
+  its tag when building the final image.
 
 ## v23.22 (2023-09-05)
 
