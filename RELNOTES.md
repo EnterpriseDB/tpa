@@ -2,6 +2,55 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.23 (unreleased)
+
+### Notable changes
+
+- TPA-551 Add support for Postgres 16
+
+  Accept `--postgres-version 16` as a valid tpa configure option.
+  PG 16 support available for M1 for now. Support for PGD clusters awaits the release of EPAS and PGE version 16 (scheduled for later).
+  Also, stop configuring legacy `dl/default/release` 2Q repository by default for it is no longer available for PG versions 16 and above.
+  Since PG has removed `postmaster` symlink, make the change where relevant to use `postgres` binary instead.
+
+### Minor changes
+
+- TPA-534, TPA-535 Add SUSE entries for etcd and patroni package lists
+
+- TPA-548 Adjust EFM dependency lists to use JDK 11 by default, except on
+  platforms where it is not available (Debian 9 and Ubuntu 18.04)
+
+- TPA-545 Don't exclude PGDG packages if no EDB repositories are in use
+
+  When using EDB repositories, we exclude barman-related packages and
+  psycopg2 packages from the PGDG repositories; if no EBD repositories
+  are in use, we now don't exclude these packages.
+
+### Bugfixes
+
+- TPA-440 Ensure apache service is enabled and started for PEM
+
+- TPA-471 Run pg-backup-api tests with correct permissions
+
+- TPA-569 Ensure apache service is enabled and started for pg-backup-api
+
+- TPA-527 Fix bdr.standby_slot_names and bdr.standby_slots_min_confirmed checks
+  to use correct schema on bdr3 clusters
+
+- TPA-564 Flatten configuration keys for extensions in postgres config
+
+  Instead of supplying configuration keys for extensions as a nested
+  dictionary, which doesn't work, we format them as
+
+    extension_name.config_key: "value"
+
+  and put them in a single flat list.
+
+- TPA-536 Construct docker image names correctly
+
+  A locally built docker base image has no digest, so we refer to it by
+  its tag when building the final image.
+
 ## v23.22 (2023-09-05)
 
 ### Notable changes
