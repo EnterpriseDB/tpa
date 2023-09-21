@@ -4,16 +4,16 @@
 
 ## v23.23 (unreleased)
 
-## Notable changes
+### Notable changes
 
 - TPA-551 Add support for Postgres 16
 
-  TPA can now install Postgres 16 with the M1 architecture.
-  - postgres binary (TPA-547)
-  - DJ and Simon's installation guide
-  - repositories (TPA-577)
+  Accept `--postgres-version 16` as a valid tpa configure option.
+  PG 16 support available for M1 for now. Support for PGD clusters awaits the release of EPAS and PGE version 16 (scheduled for later).
+  Also, stop configuring legacy `dl/default/release` 2Q repository by default for it is no longer available for PG versions 16 and above.
+  Since PG has removed `postmaster` symlink, make the change where relevant to use `postgres` binary instead.
 
-## Minor changes
+### Minor changes
 
 - TPA-534, TPA-535 Add SUSE entries for etcd and patroni package lists
 
@@ -26,12 +26,16 @@
   psycopg2 packages from the PGDG repositories; if no EBD repositories
   are in use, we now don't exclude these packages.
 
-## Bugfixes
+### Bugfixes
 
-- TPA-536 Construct docker image names correctly
+- TPA-440 Ensure apache service is enabled and started for PEM
 
-  A locally built docker base image has no digest, so we refer to it by
-  its tag when building the final image.
+- TPA-471 Run pg-backup-api tests with correct permissions
+
+- TPA-569 Ensure apache service is enabled and started for pg-backup-api
+
+- TPA-527 Fix bdr.standby_slot_names and bdr.standby_slots_min_confirmed checks
+  to use correct schema on bdr3 clusters
 
 - TPA-564 Flatten configuration keys for extensions in postgres config
 
@@ -42,14 +46,10 @@
 
   and put them in a single flat list.
 
-- TPA-527 Fix bdr.standby_slot_names and bdr.standby_slots_min_confirmed checks
-  to use correct schema on bdr3 clusters
+- TPA-536 Construct docker image names correctly
 
-- TPA-569 Ensure apache service is enabled and started for pg-backup-api
-
-- TPA-471 Run pg-backup-api tests with correct permissions
-
-- TPA-440 Ensure apache service is enabled and started for PEM
+  A locally built docker base image has no digest, so we refer to it by
+  its tag when building the final image.
 
 ## v23.22 (2023-09-05)
 
