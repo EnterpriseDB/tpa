@@ -67,7 +67,7 @@
                              |map(attribute='config_file')
                              |first }}"
     when: >
-      'primary' in role and postgres_major_version_upgrade
+      'primary' in role and postgres_major_version_upgrade and false
     
   - name: Update postgres on primary in cluster {{ cluster_dir }}
     block:
@@ -85,6 +85,15 @@
     - include_role: name=postgres/update
       when: >
         'primary' in role
+
+    - name: Stop standbys for rsync in-place upgrade
+      service:
+        name: postgres
+        state: stopped
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['role_replica'] }}"
+      when: >
+        'primary' in role and postgres_major_version_upgrade
 
     - name: Sync standbys after primary major upgrade
       command: >
@@ -113,6 +122,17 @@
       become: yes
       become_user: "{{ postgres_user }}"
       when: >
+        'primary' in role and postgres_major_version_upgrade and false
+
+    - include_role: name={{ r }}
+      vars:
+        postgres_running: false
+      with_items:
+        - postgres/final
+        - repmgr/final
+      loop_control:
+        loop_var: r
+      when: >
         'primary' in role and postgres_major_version_upgrade
 
     - name: Remove old Postgres data directories on standbys after primary major upgrade
@@ -126,7 +146,15 @@
       vars:
         _postgres_data_dir: "{{ cluster_facts.postgres_data_dir }}"
       when: >
-        'primary' in role and postgres_major_version_upgrade and false
+        'primary' in role and postgres_major_version_upgrade
+
+    - service:
+        name: postgres
+        state: started
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['role_replica'] }}"
+      when: >
+        'primary' in role and postgres_major_version_upgrade
 
     - name: Switch back to the old primary
       command: >
