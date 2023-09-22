@@ -52,23 +52,6 @@
     when: >
       'replica' in role
 
-  - name: Unregister replicas if major upgrading
-    command: >
-      {{ _postgres_bin_dir }}/repmgr standby unregister --verbose -f {{ _repmgr_conf_file }}
-    become_user: "{{ postgres_user }}"
-    become: yes
-    delegate_to: "{{ item }}"
-    with_items: "{{ groups['role_replica'] }}"
-    vars:
-      _postgres_bin_dir: "{{ cluster_facts.postgres_bin_dir }}"
-      _repmgr_conf_file: "{{ cluster_facts.repmgr.nodes
-                             |selectattr('node_name','eq', item)
-                             |list
-                             |map(attribute='config_file')
-                             |first }}"
-    when: >
-      'primary' in role and postgres_major_version_upgrade and false
-    
   - name: Update postgres on primary in cluster {{ cluster_dir }}
     block:
     - name: Switchover to a replica
@@ -110,19 +93,6 @@
         this.rc != 0 or 'error' in this.stderr
       when: >
         'primary' in role and postgres_major_version_upgrade
-
-    - debug:
-        msg: "{{ this }}"
-      when: >
-        this is not skipped
-
-    - name: Start new instance
-      shell: |
-        {{ postgres_bin_dir }}/pg_ctl start -D {{ postgres_data_dir }}
-      become: yes
-      become_user: "{{ postgres_user }}"
-      when: >
-        'primary' in role and postgres_major_version_upgrade and false
 
     - include_role: name={{ r }}
       vars:

@@ -126,15 +126,6 @@
 
   - name: Download and install new Postgres binaries for major upgrade
     block:
-    - name: Remove BDR debug packages (conflict issue)
-      package:
-        name: "edb-bdr{{ bdr_version }}-{{ postgresql_flavour }}{{ old_postgres_version }}-debuginfo*"
-        state: absent
-      vars:
-        _ansible_python_interpreter: /usr/bin/python2
-      when: >
-        'bdr' in role and postgresql_flavour == 'epas'
-
     - name: Stop the old instance
       systemd:
         name: postgres
@@ -187,7 +178,6 @@
                 name: postgres
                 state: restarted
 
-#            - include_role: name=repmgr/final
           when: >
             'replica' in role
 
@@ -344,11 +334,17 @@
       masked: false
 
   - name: Drop the repmgr database
-    shell: |
-      dropdb repmgr -f
+    postgresql_query:
+      autocommit: yes
+      conninfo: "{{ dsn|dbname('postgres') }}"
+      queries:
+        - text: SELECT pg_terminate_backend(pid)
+                FROM pg_stat_activity
+                WHERE pid <> pg_backend_pid()
+                 AND datname = 'repmgr'
+        - text: DROP DATABASE IF EXISTS repmgr
     become: yes
     become_user: "{{ postgres_user }}"
-    ignore_errors: yes
 
   - name: Stop the new instance
     shell: |
@@ -365,20 +361,6 @@
     with_items: "{{ cluster_facts.databases.keys()|list }}"
     when: > 
       item not in ['template0', 'bdr_supervisordb'] and 'readonly' not in role and 'primary' not in role
-
-  - name: Does the BDR schema exist? 
-    postgresql_query:
-      conninfo: "{{ dsn|dbname(bdr_database) }}"
-      query: >
-        SELECT 'OK' FROM pg_namespace WHERE nspname='bdr'
-    become_user: "{{ postgres_user }}"
-    become: yes
-    register: bdr_schema_found
-    when: >
-     'bdr' in role
-
-  - set_fact:
-      bdr_schema_found: "{{ false if bdr_schema_found is skipped else bdr_schema_found.rowcount == 1|bool }}" 
 
   - name: Perform major Postgres upgrade
     block:
@@ -414,7 +396,7 @@
           pg_upgrade_result is not skipped
   
       when: >
-        'bdr' in role and bdr_schema_found
+        'bdr' in role
   
     - debug:
         msg: "{{ upgrade_result }}"
@@ -422,28 +404,6 @@
         upgrade_result is defined
   
     - block:
-      - postgresql_query:
-          conninfo: "{{ dsn|dbname(bdr_database) }}"
-          query: >
-            DROP EXTENSION bdr CASCADE;
-        become: yes
-        become_user: "{{ postgres_user }}"
-        when: >
-          'bdr' not in role and bdr_schema_found
-        ignore_errors: yes
- 
-      - name: Change Postgres port for the old instance
-        postgresql_query:
-          autocommit: yes
-          conninfo: "{{ dsn|dbname('postgres') }}"
-          queries:
-            - text: ALTER SYSTEM SET port = %s
-              args:
-                - "{{ upgrade_port }}"
-        become: yes
-        become_user: "{{ postgres_user }}"
-        when: false
-
       - service:
           name: postgres
           state: stopped
@@ -473,7 +433,7 @@
           pg_upgrade_result is not skipped
   
       when: >
-         'bdr' not in role or ('bdr' in role and not bdr_schema_found)
+         'bdr' not in role
   
     - find:
         paths: "{{ new_postgres_data_dir }}/upgrade_logs"
