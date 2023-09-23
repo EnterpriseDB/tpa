@@ -460,6 +460,38 @@
       when: >
         upgrade_result is defined
 
+    - block:
+      - name: Stop standbys for rsync in-place upgrade
+        service:
+          name: postgres
+          state: stopped
+        delegate_to: "{{ item }}"
+        with_items: "{{ groups['role_replica'] }}"
+
+      - name: Sync standbys after primary major upgrade
+        command: >
+          /usr/bin/rsync --archive --delete --hard-links --size-only --no-inc-recursive --verbose \
+          {{ old_postgres_data_dir }} {{ new_postgres_data_dir }} {{ remote_dir }}
+        vars:
+          remote_dir: "{{ item + ':' + new_postgres_data_dir|dirname }}"
+        become_user: "{{ postgres_user }}"
+        become: true
+        with_items: "{{ groups['role_replica'] }}"
+        register: this
+        failed_when:
+          this.rc != 0 or 'error' in this.stderr
+     
+      - include_role: name={{ r }}
+        vars:
+          postgres_running: false
+        with_items:
+          - postgres/final
+          - repmgr/final
+        loop_control:
+          loop_var: r
+
+      when: >
+        'primary' in role
   when: >
     not already_upgraded and 'replica' not in role
 

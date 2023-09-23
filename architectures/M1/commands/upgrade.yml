@@ -69,60 +69,22 @@
       when: >
         'primary' in role
 
-    - name: Stop standbys for rsync in-place upgrade
-      service:
-        name: postgres
-        state: stopped
-      delegate_to: "{{ item }}"
-      with_items: "{{ groups['role_replica'] }}"
-      when: >
-        'primary' in role and postgres_major_version_upgrade
-
-    - name: Sync standbys after primary major upgrade
-      command: >
-        /usr/bin/rsync --archive --delete --hard-links --size-only --no-inc-recursive --progress \
-        {{ _postgres_data_dir }} {{ postgres_data_dir }} {{ remote_dir }}
-      vars:
-        _postgres_data_dir: "{{ cluster_facts.postgres_data_dir }}"
-        remote_dir: "{{ item + ':' + postgres_data_dir|dirname }}"
-      become_user: "{{ postgres_user }}"
-      become: true
-      with_items: "{{ groups['role_replica'] }}"
-      register: this
-      failed_when:
-        this.rc != 0 or 'error' in this.stderr
-      when: >
-        'primary' in role and postgres_major_version_upgrade
-
-    - include_role: name={{ r }}
-      vars:
-        postgres_running: false
-      with_items:
-        - postgres/final
-        - repmgr/final
-      loop_control:
-        loop_var: r
-      when: >
-        'primary' in role and postgres_major_version_upgrade
-
-    - name: Remove old Postgres data directories on standbys after primary major upgrade
-      file:
-        path: "{{ _postgres_data_dir }}"
-        state: absent
-      become_user: "{{ postgres_user }}"
-      become: yes
-      delegate_to: "{{ item }}"
-      with_items: "{{ groups['role_replica'] }}"
-      vars:
-        _postgres_data_dir: "{{ cluster_facts.postgres_data_dir }}"
-      when: >
-        'primary' in role and postgres_major_version_upgrade
-
-    - service:
-        name: postgres
-        state: started
-      delegate_to: "{{ item }}"
-      with_items: "{{ groups['role_replica'] }}"
+    - block:
+      - name: Rename old Postgres data directories on standbys
+        command: |
+          mv {{ _postgres_data_dir }} {{ _postgres_data_dir }}_old
+        vars:
+          _postgres_data_dir: "{{ cluster_facts.postgres_data_dir }}"
+        become_user: "{{ postgres_user }}"
+        become: yes
+        delegate_to: "{{ item }}"
+        with_items: "{{ groups['role_replica'] }}"
+ 
+      - service:
+          name: postgres
+          state: restarted
+        delegate_to: "{{ item }}"
+        with_items: "{{ groups['role_replica'] }}"
       when: >
         'primary' in role and postgres_major_version_upgrade
 
