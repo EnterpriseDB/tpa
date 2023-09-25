@@ -352,15 +352,31 @@
     become: yes
     become_user: "{{ postgres_user }}"
 
-  - name: Drop pg_catalog.pgbouncer_get_auth from the old instance to facilitate the upgrade
-    postgresql_query:
-      conninfo: "{{ dsn|dbname(item) }}"
-      query: DROP FUNCTION IF EXISTS pg_catalog.pgbouncer_get_auth
+  - postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      queries:
+        - text: SELECT bdr.promote_node()
     become: yes
     become_user: "{{ postgres_user }}"
+    when: >
+      'bdr' in role and 'readonly' in role
+
+  - name: Drop pg_catalog.pgbouncer_get_auth from the old instance to facilitate the upgrade
+    postgresql_query:
+      autocommit: yes
+      conninfo: "{{ dsn|dbname(item) }}"
+      queries:
+        - text: "{{ set_or_ignore }}"
+        - text: DROP FUNCTION IF EXISTS pg_catalog.pgbouncer_get_auth
+    become: yes
+    become_user: "{{ postgres_user }}"
+    vars:
+      set_or_ignore: "{{ set_sql if item == bdr_database else ignore_sql }}"
+      set_sql: "SET bdr.ddl_replication = off"
+      ignore_sql: "SELECT null"
     with_items: "{{ cluster_facts.databases.keys()|list }}"
     when: > 
-      item not in ['template0', 'bdr_supervisordb'] and 'readonly' not in role and 'primary' not in role
+      item not in ['template0', 'bdr_supervisordb']
 
   - name: Perform major Postgres upgrade
     block:
@@ -461,6 +477,25 @@
         upgrade_result is defined
 
     - block:
+      - include_role:
+          name: postgres/service
+          apply:
+            tags: service
+        tags: service
+
+      - service:
+          name: postgres
+          state: restarted
+
+      - include_role:
+          name: postgres/config/final
+          tasks_from: pgbouncer.yml
+        when: >
+          'readonly' not in role
+      when: >
+        'bdr' in role
+
+    - block:
       - name: Stop standbys for rsync in-place upgrade
         service:
           name: postgres
@@ -491,7 +526,7 @@
           loop_var: r
 
       when: >
-        'primary' in role
+        'primary' in role and 'bdr' not in role
   when: >
     not already_upgraded and 'replica' not in role
 

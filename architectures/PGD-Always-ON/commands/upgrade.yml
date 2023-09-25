@@ -329,7 +329,13 @@
 
   - name: Stop/upgrade Postgres on {{ inventory_hostname }}
     block:
+    - include_role: name=postgres/bdr tasks_from=fence.yml
+      when: >
+        'readonly' not in role
     - include_role: name=postgres/update
+    - include_role: name=postgres/bdr tasks_from=unfence.yml
+      when: >
+        'readonly' not in role
     when: >
       'postgres' in role and postgres_major_version_upgrade
 
