@@ -492,6 +492,7 @@
           tasks_from: pgbouncer.yml
         when: >
           'readonly' not in role
+      ignore_errors: yes
       when: >
         'bdr' in role
 
