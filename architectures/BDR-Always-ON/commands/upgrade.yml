@@ -87,7 +87,7 @@
   become_user: root
   become: yes
   hosts: "{{ update_hosts|default('all') }}"
-  serial: "{{ update_hosts|ternary('1',omit) }}" 
+  serial: 1
   tasks:
 
   # We mark this backend as disabled in haproxy and tell pgbouncer to
