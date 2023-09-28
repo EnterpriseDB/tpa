@@ -154,8 +154,34 @@
                 regexp: "{{ item.value.old_path }}"
                 replace: "{{ item.value.new_path }}"
               loop: "{{ _conf_dirs|dict2items }}"
+          vars:
+            _conf_dirs:
+              bin:
+                old_path:
+                  "{{ old_postgres_bin_dir }}"
+                new_path:
+                  "{{ new_postgres_bin_dir }}"
+              data:
+                old_path:
+                  "{{ old_postgres_data_dir }}"
+                new_path:
+                  "{{ new_postgres_data_dir }}"
+              repmgr:
+                old_path:
+                  "{{ old_repmgr_conf_dir }}"
+                new_path:
+                  "{{ new_repmgr_conf_dir }}"
+            new_repmgr_conf_dir: "{{ repmgr_conf_dir }}"
+            new_repmgr_conf_file: "{{ repmgr_conf_file }}"
+            old_repmgr_conf_dir: "{{ old_repmgr_conf_file|dirname }}"
+            old_repmgr_conf_file: "{{ cluster_facts.repmgr.nodes
+                                      |selectattr('node_name','eq', inventory_hostname)
+                                      |list
+                                      |map(attribute='config_file')
+                                      |first }}"
+          
           when:
-            failover_manager == 'repmgr'
+            failover_manager == 'repmgr' and cluster_facts.repmgr.nodes is defined
 
         # TBD same as above, copy efm.properties and update accordingly
         - include_role: name=efm/pkg
@@ -180,32 +206,6 @@
 
           when: >
             'replica' in role
-
-      vars:
-        _conf_dirs:
-          bin:
-            old_path: 
-              "{{ old_postgres_bin_dir }}"
-            new_path: 
-              "{{ new_postgres_bin_dir }}"
-          data:
-            old_path: 
-              "{{ old_postgres_data_dir }}"
-            new_path: 
-              "{{ new_postgres_data_dir }}"
-          repmgr:
-            old_path: 
-              "{{ old_repmgr_conf_dir }}"
-            new_path: 
-              "{{ new_repmgr_conf_dir }}"
-        new_repmgr_conf_dir: "{{ repmgr_conf_dir }}"
-        new_repmgr_conf_file: "{{ repmgr_conf_file }}"
-        old_repmgr_conf_dir: "{{ old_repmgr_conf_file|dirname }}"
-        old_repmgr_conf_file: "{{ cluster_facts.repmgr.nodes
-                                  |selectattr('node_name','eq', inventory_hostname)
-                                  |list
-                                  |map(attribute='config_file')
-                                  |first }}"
 
       when: >
         failover_manager in ['repmgr', 'efm']
@@ -376,7 +376,7 @@
       ignore_sql: "SELECT null"
     with_items: "{{ cluster_facts.databases.keys()|list }}"
     when: > 
-      item not in ['template0', 'bdr_supervisordb']
+      item not in ['template0', 'bdr_supervisordb', 'repmgr']
 
   - name: Perform major Postgres upgrade
     block:
