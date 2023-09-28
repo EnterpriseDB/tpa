@@ -24,6 +24,13 @@ ENV TPA_DIR=/opt/EDB/TPA
 
 COPY . ${TPA_DIR}
 
+# Recreate symlinks in case the repo has been cloned from windows
+RUN for link in config doc galaxy inventory playbook vault vaultpw; do \
+      [ -f ${TPA_DIR}/ansible/ansible-${link} ] \
+       && rm ${TPA_DIR}/ansible/ansible-${link} \
+       && ln -s ansible ${TPA_DIR}/ansible/ansible-${link}; \
+    done
+
 # Set up repositories and install packages, including the Docker CE CLI
 # (https://docs.docker.com/engine/install/debian/).
 
