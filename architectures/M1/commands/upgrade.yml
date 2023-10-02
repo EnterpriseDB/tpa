@@ -5,6 +5,22 @@
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   tags: always
 
+- name: Update repository configuration, if required
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: "{{ update_hosts|default('all') }}"
+  tasks:
+  - name: Configure local-repo, if available
+    include_role:
+      name: sys/local_repo
+
+  - name: Set up repositories
+    include_role:
+      name: sys/repositories
+
 - name: Stop repmgr
   any_errors_fatal: true
   max_fail_percentage: 0
