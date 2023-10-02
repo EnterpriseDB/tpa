@@ -35,7 +35,18 @@
   hosts: all
   serial: 1
   tasks:
-  - include_role: name=postgres/update
+
+  - name: Stop/update/restart Postgres on {{ inventory_hostname }}
+    block:
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: stopped
+    - include_role: name=postgres/update
+    - include_role: name=postgres/config
+    - include_role: name=postgres/restart
+    - include_role: name=postgres/config/final
+      vars:
+        postgres_service_end_state: started
     when: >
       'replica' in role
 
@@ -58,7 +69,17 @@
   # Note: this role was calculated earlier, so it's outdated after the
   # switchover, but it correctly identifies the instance to use.
 
-  - include_role: name=postgres/update
+  - name: Stop/update/restart Postgres on {{ inventory_hostname }}
+    block:
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: stopped
+    - include_role: name=postgres/update
+    - include_role: name=postgres/config
+    - include_role: name=postgres/restart
+    - include_role: name=postgres/config/final
+      vars:
+        postgres_service_end_state: started
     when: >
       'primary' in role
 
