@@ -1,5 +1,5 @@
 {# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved. #}
-{% if 'postgres' in role %}
+{% if config_for=='manager' %}
 [Unit]
 PartOf=harp-postgres.target
 After={{ postgres_service_name }}-monitor.service
@@ -8,16 +8,20 @@ After={{ postgres_service_name }}-monitor.service
 [Service]
 {%     if postgres_user != 'postgres' or postgres_group != 'postgres' %}
 User={{ postgres_user }}
-Group={{ postgres_user }}
+Group={{ postgres_group }}
 {%     endif %}
 {%     if harp_manager_restart_on_failure|default(false) %}
 Restart=on-failure
 {%     endif %}
 {%   endif %}
-{% else %}
-{%   if postgres_user != 'postgres' or postgres_group != 'postgres' %}
+{% elif config_for=='proxy' %}
+{%   if postgres_user != 'postgres' or postgres_group != 'postgres' or harp_cohost %}
 [Service]
 User={{ postgres_user }}
-Group={{ postgres_user }}
+Group={{ postgres_group }}
+{%   endif %}
+{%   if harp_cohost %}
+ExecStart=
+ExecStart=/usr/bin/harp-proxy -f "{{ harp_directory }}/proxy-config.yml"
 {%   endif %}
 {% endif %}

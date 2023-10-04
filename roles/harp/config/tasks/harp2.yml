@@ -15,10 +15,6 @@
     - role_readonly
     - role_subscriber-only
     - role_witness
-    pgbouncer_bin_dirs:
-      Debian: /usr/sbin
-      RedHat: /usr/bin
-    pgbouncer_bin_dir: "{{ pgbouncer_bin_dirs[ansible_os_family] }}"
   notify: Note HARP bootstrap required
   when:
     initialise_harp|bool
@@ -84,7 +80,30 @@
     and not( harp_http_options['cert_file'] is defined
           or harp_http_options['key_file'] is defined )
 
-- name: Install HARP configuration file
+- name: Record whether HARP proxy and manager are co-hosted
+  set_fact:
+    harp_cohost: "{{ 'bdr' in role and 'harp-proxy' in role }}"
+
+- name: Install HARP-proxy configuration file
+  template:
+    src: harp2.config.j2
+    dest: "{{ harp_directory }}/{{ prefix }}config.yml"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
+  vars:
+    pgbouncer_bin_dirs:
+      Debian: /usr/sbin
+      RedHat: /usr/bin
+    pgbouncer_bin_dir: "{{ pgbouncer_bin_dirs[ansible_os_family] }}"
+    config_for: 'proxy'
+    prefix: "{{ harp_cohost|ternary('proxy-','') }}"
+  notify: Note HARP restart required
+  when: >
+    initialise_harp|bool
+    and 'harp-proxy' in role
+
+- name: Install HARP manager configuration file
   template:
     src: harp2.config.j2
     dest: "{{ harp_directory }}/config.yml"
@@ -92,18 +111,15 @@
     group: "{{ postgres_group }}"
     mode: 0644
   vars:
-    bdr_ro_groups:
-    - role_replica
-    - role_readonly
-    - role_subscriber-only
-    - role_witness
     pgbouncer_bin_dirs:
       Debian: /usr/sbin
       RedHat: /usr/bin
     pgbouncer_bin_dir: "{{ pgbouncer_bin_dirs[ansible_os_family] }}"
+    config_for: 'manager'
   notify: Note HARP restart required
-  when:
+  when: >
     initialise_harp|bool
+    and 'postgres' in role
 
 # Instances with harp-proxy in role will install pgbouncer (via package
 # dependencies), but harp_proxy will manage the pgbouncer configuration.

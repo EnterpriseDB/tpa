@@ -9,6 +9,9 @@
 # The harp packages hardcode postgres/postgres, so we must override the
 # default unit definitions if we want to run harp services as another
 # user or group.
+- name: Record whether HARP proxy and manager are co-hosted
+  set_fact:
+    harp_cohost: "{{ 'bdr' in role and 'harp-proxy' in role }}"
 
 - block:
   - name: Ensure harp-manager service directory exists
@@ -26,6 +29,10 @@
       owner: root
       group: root
       mode: 0644
+    vars:
+      config_for: 'manager'
+    notify:
+      - Note HARP restart required
     register: manager_unit
 
   - name: Install harp-postgres.target definition
@@ -67,7 +74,11 @@
       owner: root
       group: root
       mode: 0644
+    vars:
+      config_for: 'proxy'
     register: proxy_unit
+    notify:
+      - Note HARP restart required
   when: >
     'harp-proxy' in role
 
