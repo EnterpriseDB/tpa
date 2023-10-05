@@ -75,7 +75,7 @@
       ubuntu-20.04: ubuntu:focal
       ubuntu-focal: ubuntu:focal
       ubuntu-22.04: ubuntu:jammy
-      ubunty-jammy: ubuntu:jammy
+      ubuntu-jammy: ubuntu:jammy
       ubuntu-latest: ubuntu:jammy
       redhat-7: centos:7
       redhat-8: rockylinux:8
