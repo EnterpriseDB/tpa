@@ -1,0 +1,8 @@
+[Unit]
+Description=Run system activity accounting tool every minute
+
+[Timer]
+OnCalendar=*:00/1
+
+[Install]
+WantedBy=sysstat.service

@@ -1,0 +1,9 @@
+[Unit]
+Description=system activity accounting tool
+Documentation=man:sa1(8)
+After=sysstat.service
+
+[Service]
+Type=oneshot
+User=root
+ExecStart={{ sysstat_sa1_bin }} -S XALL 60 1

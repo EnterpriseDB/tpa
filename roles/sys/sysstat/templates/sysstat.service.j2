@@ -1,0 +1,14 @@
+[Unit]
+Description=Resets System Activity Logs
+Documentation=man:sa1(8) man:sadc(8) man:sar(1)
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=root
+ExecStart={{ sysstat_sa1_bin }} --boot
+
+[Install]
+WantedBy=multi-user.target
+Also=sysstat-collect.timer
+Also=sysstat-summary.timer

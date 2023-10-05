@@ -2,4 +2,88 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-- include_tasks: "os/{{ ansible_os_family }}.yml"
+- name: Set sar binaries path for Debian <= 10 or Ubuntu <= 20
+  set_fact:
+    sysstat_sa1_bin: /usr/lib/sysstat/debian-sa1
+    sysstat_sa2_bin: /usr/lib/sysstat/sa2
+  when: >
+    ansible_distribution == 'Debian' and ansible_distribution_major_version|int <= 10 or
+    ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int <= 20
+
+- name: Set sar binaries path for Debian > 10 or Ubuntu > 20
+  set_fact:
+    sysstat_sa1_bin: /usr/lib/sysstat/sa1
+    sysstat_sa2_bin: /usr/lib/sysstat/sa2
+  when: >
+    ansible_distribution == 'Debian' and ansible_distribution_major_version|int > 10 or
+    ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 20
+
+- name: Set sar binaries path for RedHat or SUSE
+  set_fact:
+    sysstat_sa1_bin: /usr/lib64/sa/sa1
+    sysstat_sa2_bin: /usr/lib64/sa/sa2
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'SUSE'
+
+- name: Create, enable and start sysstat service
+  block:
+    - name: Install sysstat-collect.service
+      template:
+        src: sysstat-collect.service.j2
+        dest: /etc/systemd/system/sysstat-collect.service
+
+    - name: Install sysstat-collect.timer
+      template:
+        src: sysstat-collect.timer.j2
+        dest: /etc/systemd/system/sysstat-collect.timer
+
+    - name: Install sysstat-summary.service
+      template:
+        src: sysstat-summary.service.j2
+        dest: /etc/systemd/system/sysstat-summary.service
+
+    - name: Install sysstat-summary.timer
+      template:
+        src: sysstat-summary.timer.j2
+        dest: /etc/systemd/system/sysstat-summary.timer
+
+    - name: Install sysstat.service
+      template:
+        src: sysstat.service.j2
+        dest: /etc/systemd/system/sysstat.service
+
+    # When sysstat is installed on Debian 10 and Ubuntu Focal, it already comes
+    # enabled by default. That prevents the next step from working correctly and
+    # installing "sysstat-collect.timer" and "sysstat-summary.timer". This task
+    # work arounds that issue by disabling the sysstat unit before attempting to
+    # enable it
+    - name: Disable original sysstat service on Debian <= 10, Ubuntu <= 20, EL <= 7
+      systemd:
+        name: sysstat
+        enabled: false
+        daemon_reload: true
+      when: >
+        ansible_distribution == 'Debian' and ansible_distribution_major_version|int <= 10 or
+        ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int <= 20 or
+        ansible_os_family == 'RedHat' and ansible_distribution_major_version|int <= 7
+
+    - name: Enable and start sysstat service
+      systemd:
+        name: sysstat
+        state: started
+        enabled: true
+        daemon_reload: true
+
+- name: Enable sysstat on Debian based
+  lineinfile:
+    path: /etc/default/sysstat
+    regexp: '^ENABLED='
+    line: >-
+      ENABLED="true"
+  register: sysstat
+  when: ansible_os_family == 'Debian'
+
+- name: Restart sysstat if required on Debian based
+  service:
+    name: sysstat
+    state: restarted
+  when: ansible_os_family == 'Debian' and sysstat is changed
