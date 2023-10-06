@@ -20,13 +20,21 @@
     target_bdr_version: "{{ bdr_version }}"
 
 #we need this due to pgextended to edbpge switch for bdr3 to 5 upgrade.
-- name: Set initial postgres family
+- name: Set initial postgres family for pgd5 target
   set_fact:
     init_postgres_family: "{{ (postgres_flavour != 'edbpge')|ternary(postgres_family,'postgresql') }}"
     init_postgres_flavour: "{{ (postgres_flavour != 'edbpge')|ternary(postgres_flavour,'pgextended') }}"
     init_postgres_package_name: "{{ (postgres_flavour != 'edbpge')|ternary(postgres_package_name,'postgresql') }}"
   when: >
     target_bdr_version is version('5','>=')
+
+- name: Set initial postgres family
+  set_fact:
+    init_postgres_family: "{{ postgres_family }}"
+    init_postgres_flavour: "{{ postgres_flavour }}"
+    init_postgres_package_name: "{{ postgres_package_name }}"
+  when: >
+    target_bdr_version is version('5','<')
 
 - name: Remove pgextended when switching to edbpge
   block:
@@ -43,9 +51,10 @@
     package:
       name: "{{ _all_pgextended_packages|default([]) }}"
       state: absent
-  when: >
-    target_bdr_version is version('5','>=')
-    and init_postgres_flavour == 'pgextended'
+  when:
+  - target_bdr_version is version('5','>=')
+  - init_postgres_flavour == 'pgextended'
+  - postgres_flavour == 'edbpge'
 
 - name: BDR3 package removal
   block:
