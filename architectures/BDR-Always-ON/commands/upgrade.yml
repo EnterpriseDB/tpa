@@ -25,6 +25,35 @@
 # we would prefer the downtime to be predictable rather than dependent
 # on the whims of the network.)
 
+- name: Check that the cluster can be upgraded
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr
+  tasks:
+  - assert:
+      that:
+        - cluster_facts is defined
+      fail_msg: >
+        Couldn't perform cluster discovery. Are all nodes running?
+
+  - set_fact:
+      bdrdb_major_version:
+        "{{ cluster_facts.databases[bdr_database].bdr.bdr_major_version }}"
+
+  - name: Ensure that bdr major verions in config.yml matches the database
+    assert:
+      that:
+        - bdr_version is version('4', '==') and bdrdb_major_version is version('4', '==')
+          or
+          bdr_version is version('3', '==') and bdrdb_major_version is version('3', '==')
+      fail_msg: >-
+        This upgrade process supports upgrading within the same BDR major version only.
+        Version {{ bdr_version }} from config.yml does not match {{ bdrdb_major_version }}
+        currently running.
+
 - name: Collect update facts for cluster {{ cluster_dir }}
   any_errors_fatal: true
   max_fail_percentage: 0
@@ -62,13 +91,6 @@
       tasks_from: haproxy/basic.yml
     when: >
       'haproxy' in role
-
-  - name: Check pgd-proxy configuration and status
-    include_role:
-      name: test
-      tasks_from: pgd-proxy/basic.yml
-    when: >
-      'pgd-proxy' in role
 
 # Now that we're convinced the cluster is in a reasonable initial state,
 # we start the update process one by one on the instances. You can run
@@ -147,13 +169,6 @@
     when: >
       'etcd' in role
 
-  - name: Stop/update/restart pgd-proxy on {{ inventory_hostname }}
-    include_role:
-      name: pgd_proxy
-      tasks_from: upgrade.yml
-    when: >
-      'pgd-proxy' in role
-
   - name: Upgrade pgd-cli on {{ inventory_hostname }}
     include_role:
       name: pgdcli
@@ -161,7 +176,6 @@
     when: >
       ('bdr' in role and bdr_version is version('4', '>='))
       or 'pgdcli' in role
-      or 'pgd-proxy' in role
 
   # After we update one instance in a CAMO pair, we must wait for its
   # partner to catch up. If we stop the partner before it is ready, we
