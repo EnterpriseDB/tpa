@@ -94,6 +94,11 @@
       register: harp_proxy_check
       ignore_errors: yes
 
+    - name: Stop if harp-proxy check failed
+      fail:
+        msg: "Install pgrep with 'tpaexec command <clustername> {{ inventory_hostname }} -m package -a name=procps' to continue"
+      when: harp_proxy_check.rc == 2
+
     - set_fact:
         harp_proxy_still_running: "{{ harp_proxy_check.stdout != '' }}"
 
@@ -481,6 +486,11 @@
       command: pgrep harp-manager
       register: harp_manager_check
       ignore_errors: yes
+
+    - name: Stop if harp-proxy check failed
+      fail:
+        msg: "Install pgrep with 'tpaexec command <clustername> {{ inventory_hostname }} -m package -a name=procps' to continue"
+      when: harp_manager_check.rc == 2
 
     - name: Set the cluster to unmanaged before stopping harp-manager
       when:
