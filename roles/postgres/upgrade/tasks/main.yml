@@ -1,0 +1,177 @@
+---
+
+# We must perform an in-place major-version upgrade of Postgres and BDR
+# on a running cluster while maintaining overall cluster availability.
+#
+# The cluster may comprise BDR primary, logical standby, and physical
+# streaming replica instances; and pgbouncer+haproxy instances besides.
+# Logical standby and physical replica instances can be upgraded without
+# any special precautions. Just stop, upgrade, start.
+#
+# For BDR primaries, we must first check if haproxy is routing traffic
+# to them, and if so, redirect to another primary before stopping and
+# upgrading this one.
+#
+# We try to minimise the downtime on each instance by downloading
+# the packages before stopping the server.
+# 
+# At this time, neither the data directory of the previous version of 
+# Postgres nor its binaries are removed by this script post-upgrade.
+
+- set_fact:
+    old_postgres_version: "{{ cluster_facts.get('postgres_version') }}"
+    old_postgres_data_dir: "{{ cluster_facts.get('postgres_data_dir') }}"
+    old_postgres_bin_dir: "{{ cluster_facts.get('postgres_bin_dir') }}"
+    new_postgres_version: "{{ postgres_version }}"
+    new_postgres_data_dir: "{{ postgres_data_dir }}"
+    new_postgres_bin_dir: "{{ postgres_bin_dir }}"
+    upgrade_port: 50432
+
+- set_fact:
+    upgrade_dsn: "port={{ upgrade_port }}"
+
+- name: Install procps if missing (RedHat only)
+  package:
+    name: procps-ng
+    state: present
+  when: >
+    ansible_os_family == 'RedHat'
+
+- include_tasks: preupgrade-checks.yml
+ 
+- name: Stop harp-manager on {{ inventory_hostname }}
+  systemd:
+    name: harp-manager
+    state: stopped
+  when: >
+    ('bdr' in role 
+     and failover_manager == 'harp'
+     and inventory_hostname in first_bdr_primary_candidates)
+
+- name: Download and install new Postgres binaries for major upgrade
+  block:
+  - service: name=postgres state=stopped
+  - include_role: name=sys/repositories
+
+  - include_role: 
+      name: postgres
+      apply:
+        tags: [pkg, src, initdb]
+    tags: [pkg, src, initdb]
+
+- name: Copy failover configs and update for new version
+  include_tasks: preconfigure-failover.yml
+  when: >
+    failover_manager in ['repmgr','efm']
+
+- name: Prep and upgrade node 
+  block:
+  - include_tasks: deregister-pemagent.yml
+    ignore_errors: yes
+    when: >
+      'pem-agent' in role
+
+  - include_tasks: prepare-node.yml
+
+  - name: Perform major Postgres upgrade
+    block:
+    - file:
+        path: "{{ new_postgres_data_dir }}/upgrade_logs"
+        state: directory
+      become: yes
+      become_user: "{{ postgres_user }}"
+  
+    - block:
+      - name: Run bdr_pg_upgrade on {{ inventory_hostname }}
+        shell:
+          cmd: "/usr/bin/bdr_pg_upgrade --database {{ bdr_database }}"
+          chdir: "{{ new_postgres_data_dir }}/upgrade_logs"
+        environment: "{{ _task_environment }}"
+        vars:
+          _task_environment:
+            PGBINOLD: "{{ old_postgres_bin_dir }}"
+            PGBINNEW: "{{ new_postgres_bin_dir }}"
+            PGDATAOLD: "{{ old_postgres_data_dir }}"
+            PGDATANEW: "{{ new_postgres_data_dir }}"
+            PGPORTOLD: "{{ postgres_port }}"
+            PGSOCKETDIR: /tmp
+        register: pg_upgrade_result
+        become: yes
+        become_user: "{{ postgres_user }}"
+        ignore_errors: yes
+  
+      - name: Get upgrade results
+        set_fact:
+          upgrade_result: "{{ pg_upgrade_result }}"
+        when: >
+          pg_upgrade_result is not skipped
+  
+      when: >
+        'bdr' in role
+  
+    - debug:
+        msg: "{{ upgrade_result }}"
+      when:
+        upgrade_result is defined
+  
+    - block:
+      - service:
+          name: postgres
+          state: stopped
+ 
+      - name: Run pg_upgrade
+        shell:
+          cmd: "{{ new_postgres_bin_dir }}/pg_upgrade --link"
+          chdir: "{{ new_postgres_data_dir }}/upgrade_logs"
+        environment: "{{ _task_environment }}"
+        vars:
+          _task_environment:
+            PGBINOLD: "{{ old_postgres_bin_dir }}"
+            PGBINNEW: "{{ new_postgres_bin_dir }}"
+            PGDATAOLD: "{{ old_postgres_data_dir }}"
+            PGDATANEW: "{{ new_postgres_data_dir }}"
+            PGPORTOLD: "{{ postgres_port }}"
+            PGSOCKETDIR: /tmp
+        register: pg_upgrade_result
+        become: yes
+        become_user: "{{ postgres_user }}"
+        ignore_errors: yes
+  
+      - name: Get upgrade results
+        set_fact:
+          upgrade_result: "{{ pg_upgrade_result }}"
+        when: >
+          pg_upgrade_result is not skipped
+  
+      when: >
+         'bdr' not in role
+  
+    - find:
+        paths: "{{ new_postgres_data_dir }}/upgrade_logs"
+        patterns: '*'
+      register: upgrade_logs
+  
+    - name: Get upgrade logs
+      fetch:
+        src: "{{ item.path }}"
+        dest: "{{ cluster_dir }}/upgrade_logs/{{ inventory_hostname }}/"
+        flat: yes
+      with_items:
+        - "{{ upgrade_logs.files }}"
+      become: yes
+      become_user: "{{ postgres_user }}"    
+  
+    - block:
+      - debug:
+          msg: "{{ upgrade_result.stdout_lines }}" 
+  
+      - assert:
+          that: "{{ upgrade_result.rc == 0 }}"
+          msg: "Upgrade FAILED, see logs in {{ cluster_dir }}/upgrade_logs/{{ inventory_hostname }}"
+      when: >
+        upgrade_result is defined
+
+    - include_tasks: postupgrade-processing.yml
+  when: >
+    not already_upgraded and 'replica' not in role
+

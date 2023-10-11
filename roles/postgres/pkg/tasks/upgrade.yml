@@ -1,0 +1,1 @@
+- include_role: name=postgres/upgrade tasks_from=main.yml

@@ -95,7 +95,7 @@ flavours_and_versions = [["--postgresql", "--pgextended", "--edbpge"], versions]
 epas_and_versions = [
     ["--epas"],
     versions,
-    ["--redwood"], # Don't need ["--no-redwood"],
+    ["--redwood"],  # Don't need ["--no-redwood"],
 ]
 
 mixin_options = {
