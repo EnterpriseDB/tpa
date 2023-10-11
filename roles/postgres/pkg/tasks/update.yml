@@ -71,10 +71,10 @@
     package:
       name: "{{ _all_bdr3_packages|default([]) }}"
       state: absent
-  when: >
-    'bdr' in role
-    and upgrade_from|int == 3
-    and target_bdr_version is version('3','>')
+  when:
+  - "'bdr' in role"
+  - upgrade_from|int == 3
+  - target_bdr_version is version('3','>')
 
 - name: BDR4 package removal
   block:
@@ -88,10 +88,10 @@
     package:
       name: "{{ _all_bdr4_packages|default([]) }}"
       state: absent
-  when: >
-    'bdr' in role
-    and upgrade_from|int == 4
-    and target_bdr_version is version('4','>')
+  when:
+  - "'bdr' in role"
+  - upgrade_from|int == 4
+  - target_bdr_version is version('4','>')
 
 - name: Install latest Postgres packages
   package:
