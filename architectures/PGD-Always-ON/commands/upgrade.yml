@@ -127,6 +127,13 @@
   hosts: all
   tasks:
 
+  - name: add dynamic group for update_hosts
+    add_host:
+      name: "{{ item }}"
+      group:
+        - update_hosts_group
+    with_items: "{{ update_hosts|default(groups['all']) }}"
+
   # We set bdr_major_version_upgrade for all BDR instances above (and we
   # know that they must all have the same value). Now we extend that for
   # other hosts, e.g., standalone pgd-proxy instances.
@@ -227,7 +234,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: "{{ update_hosts|default('all') }}"
+  hosts: update_hosts_group
   tasks:
   - name: Configure local-repo, if available
     include_role:
@@ -268,7 +275,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr
+  hosts: role_bdr:&update_hosts_group
   tasks:
   - include_role:
       name: test
@@ -294,7 +301,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: "{{ update_hosts|default('all') }}"
+  hosts: update_hosts_group
   serial: 1
   tasks:
   - name: Fence the node before upgrade
@@ -410,14 +417,33 @@
       that:
         ansible_play_hosts == ansible_play_hosts_all
 
+# TODO: probably need to update the value of this var.
+    ## evaluate all major versions and ends play for the host when not fully v5
+    #    all_bdr_major_versions: "{{ _versions.values()
+    #         |map('regex_replace', '\\..*', '')
+    #         |unique|list }}"
+    # vars:
+    #   _versions:
+    #     "{{ groups['role_bdr']|bdr_node_versions(hostvars) }}"
+
+
+
 - name: Update BDR v5-specific configuration
   any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr
+  hosts: role_bdr:&update_hosts_group
+
   tasks:
+
+  - name: Show all_bdr_major_versions
+    debug:
+      var: all_bdr_major_versions
+  - meta: end_host
+    when: >
+      all_bdr_major_versions|length > 1
   - include_role:
       name: postgres/bdr
       tasks_from: update.yml
@@ -463,9 +489,11 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_harp-proxy:role_pgd-proxy:role_pgbouncer
+  hosts: role_harp-proxy:role_pgd-proxy:role_pgbouncer:&update_hosts_group
   tasks:
 
+
+# TODO: probably need to stop this part of the run too for partial upgrade.
   - name: Set up pgd-proxy
     include_role:
       name: pgd_proxy
@@ -515,7 +543,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr
+  hosts: role_bdr:&update_hosts_group
   tasks:
   - include_role:
       name: test
@@ -530,7 +558,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr
+  hosts: role_bdr:&update_hosts_group
   tasks:
   - name: Log pgd-cli diagnostic output
     include_role:
@@ -557,7 +585,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: all
+  hosts: update_hosts_group
   tasks:
 
   - name: Check for harp config.yml to determine if cleanup is needed
