@@ -1,0 +1,139 @@
+---
+
+# We need to take some measures to make sure that we can successfully
+# upgrade by:
+# - configuring the new instance
+# - updating (correcting) shared_preload_libraries*
+# - drop unnecessary roles from the new instance 
+# - rename/drop the repmgr database from the old instance*
+# - promote logical standbys to allow them to be upgraded*
+# - drop pg_catalog.pgbouncer_get_auth from all databases in the old instance*
+#
+# * denotes items to revisit
+
+- name: Start new instance
+  command: |
+    {{ new_postgres_bin_dir }}/pg_ctl start -D {{ new_postgres_data_dir }}
+  become: yes
+  become_user: "{{ postgres_user }}"
+
+- include_role: 
+    name: postgres/config
+  vars:
+    pgdata_initialised: false
+    postgres_port: "{{ upgrade_port }}"
+    dsn: "{{ upgrade_dsn }}"
+    postgres_dsn: "port={{ upgrade_port }} dbname=postgres"          
+
+- name: Update shared_preload_libraries in TPA restart-only configuration file
+  lineinfile:
+    path: "{{ new_postgres_data_dir }}/conf.d/0001-tpa_restart.conf"
+    regexp: '^shared_preload_libraries.*$'
+    line: |
+      shared_preload_libraries = '{{ shared_preload_libraries|join(', ') }}'
+
+- name: Restart the new instance for some settings to take effect
+  command: |
+    {{ new_postgres_bin_dir }}/pg_ctl restart -D {{ new_postgres_data_dir }} -o "-F -p {{ upgrade_port }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+
+- name: Change Postgres port for the new instance to match the old instance
+  postgresql_query:
+    autocommit: yes
+    conninfo: "{{ upgrade_dsn|dbname('postgres') }}"
+    queries:
+      - text: ALTER SYSTEM SET port = %s
+        args:
+          - "{{ postgres_port }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+
+- name: Collect all unnecessary Postgres roles in the new instance to be dropped
+  postgresql_query:
+    conninfo: "{{ upgrade_dsn|dbname('postgres') }}"
+    queries: 
+      - text:
+          SELECT rolname
+          FROM   pg_roles
+          WHERE  rolname NOT IN (%s,'aq_administrator_role')
+             AND rolname NOT LIKE 'pg_%%'
+        args:
+          - "{{ postgres_user }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+  register: granted_roles
+
+- name: Drop all unnecessary Postgres roles from the new instance
+  postgresql_query:
+    conninfo: "{{ upgrade_dsn|dbname('postgres') }}"
+    query: "DROP ROLE {{ item.rolname }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+  with_items:
+    "{{ granted_roles.results }}"
+  ignore_errors: yes
+
+- name: Change Postgres port for the new instance to match the old instance
+  postgresql_query:
+    autocommit: yes
+    conninfo: "{{ upgrade_dsn|dbname('postgres') }}"
+    queries:
+      - text: ALTER SYSTEM SET port = %s
+        args:
+          - "{{ postgres_port }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+
+- name: Start the old instance
+  systemd:
+    name: postgres
+    state: started
+    masked: false
+
+- name: Rename the repmgr database
+  postgresql_query:
+    autocommit: yes
+    conninfo: "{{ dsn|dbname('postgres') }}"
+    queries:
+      - text: SELECT pg_terminate_backend(pid)
+              FROM pg_stat_activity
+              WHERE pid <> pg_backend_pid()
+               AND datname = 'repmgr'
+      - text: ALTER DATABASE repmgr RENAME TO repmgr_preupgrade
+  become: yes
+  become_user: "{{ postgres_user }}"
+  ignore_errors: yes
+
+- name: Stop the new instance
+  command: |
+    {{ new_postgres_bin_dir }}/pg_ctl stop -D {{ new_postgres_data_dir }}
+  become: yes
+  become_user: "{{ postgres_user }}"
+
+- postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+      - text: SELECT bdr.promote_node()
+  become: yes
+  become_user: "{{ postgres_user }}"
+  when: >
+    'bdr' in role and 'readonly' in role
+
+- name: Drop pg_catalog.pgbouncer_get_auth from the old instance to facilitate the upgrade
+  postgresql_query:
+    autocommit: yes
+    conninfo: "{{ dsn|dbname(item) }}"
+    queries:
+      - text: "{{ set_or_ignore }}"
+      - text: DROP FUNCTION IF EXISTS pg_catalog.pgbouncer_get_auth
+  become: yes
+  become_user: "{{ postgres_user }}"
+  vars:
+    set_or_ignore: "{{ set_sql if item == bdr_database else ignore_sql }}"
+    set_sql: "SET bdr.ddl_replication = off"
+    ignore_sql: "SELECT null"
+  with_items: "{{ cluster_facts.databases.keys()|list }}"
+  when: > 
+    item not in ['template0', 'bdr_supervisordb', 'repmgr']
+

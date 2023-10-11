@@ -1,0 +1,75 @@
+---
+
+# We duplicate the repmgr and EFM configurations
+# to make sure that the new instance has all of
+# the same parameters as the old instance once all
+# nodes in the M1 cluster have been upgraded, even
+# if that means only package installation and 
+# basic configuration on the replicas. 
+
+- block:
+    - include_role: name=repmgr/pkg
+    - copy:
+        remote_src: yes
+        src: "{{ old_repmgr_conf_file }}"
+        dest: "{{ new_repmgr_conf_file }}"
+
+    - name: Replace paths in copy of repmgr.conf
+      replace:
+        path: "{{ new_repmgr_conf_file }}"
+        regexp: "{{ item.value.old_path }}"
+        replace: "{{ item.value.new_path }}"
+      loop: "{{ conf_dirs|dict2items }}"
+  vars:
+    conf_dirs:
+      bin:
+        old_path:
+          "{{ old_postgres_bin_dir }}"
+        new_path:
+          "{{ new_postgres_bin_dir }}"
+      data:
+        old_path:
+          "{{ old_postgres_data_dir }}"
+        new_path:
+          "{{ new_postgres_data_dir }}"
+      repmgr:
+        old_path:
+          "{{ old_repmgr_conf_dir }}"
+        new_path:
+          "{{ new_repmgr_conf_dir }}"
+    new_repmgr_conf_dir: "{{ repmgr_conf_dir }}"
+    new_repmgr_conf_file: "{{ repmgr_conf_file }}"
+    old_repmgr_conf_dir: "{{ old_repmgr_conf_file|dirname }}"
+    old_repmgr_conf_file: "{{ cluster_facts.repmgr.nodes
+                              |selectattr('node_name','eq', inventory_hostname)
+                              |list
+                              |map(attribute='config_file')
+                              |first }}"
+  
+  when:
+    failover_manager == 'repmgr' and cluster_facts.repmgr.nodes is defined
+
+# TBD same as above, copy efm.properties and update accordingly
+- include_role: name=efm/pkg
+  when: >
+    'efm' in role
+
+- block:
+  - include_role:
+      name: postgres/service
+      apply:
+        tags: service
+    tags: service
+
+  - command: |
+      {{ new_postgres_bin_dir }}/initdb -D {{ new_postgres_data_dir }}
+    become: yes
+    become_user: "{{ postgres_user }}"
+
+  - service:
+      name: postgres
+      state: restarted
+
+  when: >
+    'replica' in role
+

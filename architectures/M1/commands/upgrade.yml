@@ -41,9 +41,15 @@
       when: >
         'postgres' in role
 
+  - set_fact:
+      curr_postgres_version: "{{ cluster_facts.get('postgres_version') }}"
+      curr_postgres_data_dir: "{{ cluster_facts.get('postgres_data_dir') }}"
+      next_postgres_version: "{{ postgres_version }}"
+      next_postgres_data_dir: "{{ postgres_data_dir }}"
+
   - name: Check to perform major upgrade for Postgres
     set_fact:
-      postgres_major_version_upgrade: "{{ cluster_facts.postgres_version is version(postgres_version, 'lt') }}"
+      postgres_major_version_upgrade: "{{ curr_postgres_version is version(next_postgres_version, 'lt') }}"
     when: >
       'postgres' in role
 
@@ -72,9 +78,7 @@
     - block:
       - name: Rename old Postgres data directories on standbys
         command: |
-          mv {{ _postgres_data_dir }} {{ _postgres_data_dir }}_old
-        vars:
-          _postgres_data_dir: "{{ cluster_facts.postgres_data_dir }}"
+          mv {{ curr_postgres_data_dir }} {{ curr_postgres_data_dir }}_old
         become_user: "{{ postgres_user }}"
         become: yes
         delegate_to: "{{ item }}"

@@ -3,9 +3,9 @@
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
 - include_role:
-    name: postgres/pkg
-    tasks_from: "{{ upd_or_upg }}.yml"
+   name: "postgres/{{ subrole }}"
+   tasks_from: "{{ run_major_upgrade|ternary('main.yml','update.yml') }}"
   vars:
-    upd_or_upg: "{{ run_maj_upg|ternary('upgrade','update') }}"
-    run_maj_upg: "{{ postgres_major_version_upgrade is defined|ternary(postgres_major_version_upgrade,false) }}"
+    subrole: "{{ run_major_upgrade|ternary('upgrade','pkg') }}"
+    run_major_upgrade: "{{ postgres_major_version_upgrade is defined|ternary(postgres_major_version_upgrade,false) }}"
 

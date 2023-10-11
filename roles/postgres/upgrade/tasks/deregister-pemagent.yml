@@ -1,0 +1,42 @@
+---
+
+# We deregister the PEM agent for this node and
+# allow it to be re-registered by deploy. 
+
+# need pem_agent_config_path and pem_agent_certificate_directory provided by this role
+- include_role:
+    name: pem/agent/config/final
+    public: yes
+    apply:
+      when: false
+
+# need pem_postgres_password provided by this role
+- import_role:
+    name: pem/final
+
+- command: >
+    {{ pem_agent_base_dir }}/bin/pemworker --unregister-server  \
+      --pem-user "{{ hostvars[pem_server].postgres_user }}"     \
+      --server-addr "{{ inventory_hostname }}"                  \
+      --server-port "{{ postgres_port }}"                       \
+      --config-dir "{{ pem_agent_config_path|dirname }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+  vars:
+    _task_environment:
+      PEM_SERVER_PASSWORD: "{{ pem_postgres_password }}"
+      PEM_MONITORED_SERVER_PASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+  register: deregister_server_cmd
+  no_log: false
+
+- debug:
+    msg: "{{ deregister_server_cmd.stdout }}"
+
+- name: Stopping PEM agent (may take a while)
+  service:
+    name: pemagent
+    state: stopped
+
+- file:
+    path: "{{ pem_agent_config_path }}"
+    state: absent
+

@@ -105,7 +105,12 @@
 
   - name: Check to perform major upgrade for Postgres
     set_fact:
-      postgres_major_version_upgrade: "{{ cluster_facts.postgres_version is version(postgres_version, 'lt') }}"
+      postgres_major_version_upgrade: "{{ curr_postgres_version is version(next_postgres_version, 'lt') }}"
+    vars:
+      curr_postgres_version: "{{ cluster_facts.get('postgres_version') }}"
+      next_postgres_version: "{{ postgres_version }}"
+    when: >
+      'postgres' in role
 
   - name: Stop/upgrade Postgres on {{ inventory_hostname }}
     block:

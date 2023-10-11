@@ -1,0 +1,83 @@
+---
+
+# We gather facts on the newly upgraded node then
+# restart Postgres to use the new binaries and data directory.
+# After starting the instance, we add back the pgbouncer function
+# that we had to delete before the upgrade to satisfy the BDR upgrade. 
+
+- name: Start the new instance
+  command: |
+    {{ new_postgres_bin_dir }}/pg_ctl start -D {{ new_postgres_data_dir }}
+  become: yes
+  become_user: "{{ postgres_user }}"
+
+- include_role:
+    name: postgres/facts
+  vars:
+    pgdata_initialised: true
+
+- include_role:
+    name: postgres/service
+    apply:
+      tags: service
+  tags: service
+
+- include_role:
+    name: postgres/restart
+  vars:
+    postgres_service_end_state: restarted
+
+- name: Change the repmgr database name back to original
+  postgresql_query:
+    autocommit: yes
+    conninfo: "{{ dsn|dbname('postgres') }}"
+    queries:
+      - text: ALTER DATABASE repmgr_preupgrade RENAME TO repmgr
+  become: yes
+  become_user: "{{ postgres_user }}"
+  ignore_errors: yes
+
+- include_role:
+    name: postgres/config/final
+    tasks_from: pgbouncer.yml
+  ignore_errors: yes
+  when: >
+    'bdr' in role and 'readonly' not in role
+
+# This block stops the standbys in an M1 cluster to perform
+# the in-place upgrade of those instances per the pg_upgrade
+# documentation. Then we apply some early configuration 
+# prior to running deploy to ensure a clean finish.
+- block:
+  - name: Stop standbys for rsync in-place upgrade
+    service:
+      name: postgres
+      state: stopped
+    delegate_to: "{{ item }}"
+    with_items: "{{ groups['role_replica'] }}"
+
+  - name: Sync standbys after primary major upgrade
+    command: >
+      /usr/bin/rsync --archive --delete --hard-links --size-only --no-inc-recursive --verbose \
+      {{ old_postgres_data_dir }} {{ new_postgres_data_dir }} {{ remote_dir }}
+    vars:
+      remote_dir: "{{ item + ':' + new_postgres_data_dir|dirname }}"
+    become_user: "{{ postgres_user }}"
+    become: true
+    with_items: "{{ groups['role_replica'] }}"
+    register: this
+    failed_when:
+      this.rc != 0 or 'error' in this.stderr
+     
+  - include_role: name={{ r }}
+    vars:
+      postgres_running: true
+    with_items:
+      - postgres/final
+      - repmgr/final
+    loop_control:
+      loop_var: r
+
+  when: >
+    'primary' in role and 'bdr' not in role
+
