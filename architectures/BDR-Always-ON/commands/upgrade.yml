@@ -97,13 +97,14 @@
   # Now we can perform the update on Postgres instances, whether proxied
   # (e.g., primary instances) or not (e.g., logical standby instances).
   # We don't do anything for non-Postgres instances at the moment.
-  - set_fact:
-      bdrdb_major_version:
-        "{{ cluster_facts.databases[bdr_database].bdr.bdr_major_version }}"
+
 
 
   - name: Stop/update/restart Postgres on {{ inventory_hostname }}
     block:
+    - set_fact:
+        bdrdb_major_version:
+          "{{ cluster_facts.databases[bdr_database].bdr.bdr_major_version }}"
     - include_role: name=postgres/restart
       vars:
         postgres_service_end_state: stopped
@@ -117,6 +118,19 @@
         postgres_service_end_state: started
     when: >
       'postgres' in role
+      and 'pem-server' not in role
+
+  - name: Udate pem-server's postgres
+    block:
+    - include_role: name=postgres/restart
+    - include_role: name=postgres/update
+    - include_role: name=postgres/config
+    - include_role: name=postgres/restart
+    - include_role: name=postgres/config/final
+      vars:
+        postgres_service_end_state: started
+    when: >
+      'pem-server' in role
 
   - name: Stop/update/restart pgbouncer on {{ inventory_hostname }}
     block:
