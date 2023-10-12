@@ -237,7 +237,7 @@ _install_ansible_collections() {
 }
 
 setup() {
-    use_community=false
+    use_community=true
     while [[ $# -gt 0 ]]; do
         opt=$1
         shift
@@ -254,6 +254,9 @@ setup() {
             --use-community-ansible)
                 use_community=true
                 ;;
+            --use-2q-ansible)
+                use_community=false
+                ;;
             *)
                 error "unrecognised option: $opt"
                 ;;
@@ -269,19 +272,15 @@ _display_notification() {
     if [[ $use_community == false ]]; then
         cat <<NOTIFICATION
 
-TPA now supports ansible community, you may choose to use it by
-using --use-community-ansible option during setup, default will be to use the
-legacy 2ndQuadrant/ansible fork. This will change in a future release,
-support for 2ndQuadrant/ansible will be dropped and community ansible will
-become the new default.
+You have selected to use the 2ndQuadrant ansible fork. This is now
+deprecated in favour of community ansible and will cease to be supported
+in a future TPA release.
 
-notable difference:
-    - change the --skip-flags options to community behavior where a
-    task will be skipped if part of the list given to the --skip-tag
-    option even if it is also tagged with special tag 'always'.
-    TPA expects all tasks tagged with 'always' to be run to ensure
-    a complete deployment, therefor --skip-tags should not be used when
-    using community ansible.
+If you choose to re-run `tpaexec setup` to use community ansible, please
+be aware that the behaviour of the `--skip-tags` option is different and
+this option is not supported by TPA with community ansible. An alternative
+means of skipping tasks will be provided before support for 2ndQuadrant
+ansible is removed.
 
 NOTIFICATION
 
