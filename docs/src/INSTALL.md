@@ -4,7 +4,7 @@ To use TPA, you need to install from packages or source and run the
 `tpaexec setup` command. This document explains how to install TPA
 packages. If you have an EDB subscription plan, and therefore have
 access to the EDB repositories, you should follow these instructions. To
-install TPA from source, please refer to 
+install TPA from source, please refer to
 [Installing TPA from Source](INSTALL-repo.md).
 
 See [Distribution support](distributions.md) for information
@@ -51,7 +51,7 @@ More detailed explanations of each step are given below.
 ## Where to install TPA
 
 As long as you are using a supported platform, TPA can be installed and
-run from your workstation. This is fine for learning, local testing or 
+run from your workstation. This is fine for learning, local testing or
 demonstration purposes. TPA supports [deploying to Docker containers](platform-docker.md)
 should you wish to perform a complete deployment on your own workstation.
 
@@ -199,16 +199,13 @@ this, but others will not work without it.
 
 ## Ansible community support
 
-TPA now supports ansible community, you may choose to use it by
-using `--use-community-ansible` option during `tpaexec setup`, default
-will be to use the legacy 2ndQuadrant/ansible fork. This will change in
-a future release, support for 2ndQuadrant/ansible will be dropped and
-community ansible will become the new default.
+TPA now uses the community distribution of ansible by default; you can
+continue to use the 2ndQuadrant/ansible fork by passing the
+`--use-2q-ansible` option to `tpaexec setup`. In a future TPA release,
+support for the 2ndQuadrant ansible fork will be removed.
 
-notable difference:
-- change the `--skip-flags` options to community behavior where a
-task will be skipped if part of the list given to the `--skip-tags`
-option even if it is also tagged with special tag `always`.
-TPA expects all tasks tagged with `always` to be run to ensure
-a complete deployment, therefor `--skip-tags` should not be used when
-using community ansible.
+For most users, this makes no difference. However, if you are using
+`--skip-tags` with 2ndQuadrant ansible, be aware that this is not supported
+An alternative means of skipping tasks, compatible with all ansible
+versions, will be provided before support for 2ndQuadrant ansible is
+removed.
