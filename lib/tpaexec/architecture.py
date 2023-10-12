@@ -496,6 +496,12 @@ class Architecture(object):
             else:
                 args["postgres_flavour"] = "edbpge"
 
+        # The pgextended flavour implies the 2q repos and is therefore incompatible with PEM
+        if args.get("postgres_flavour") == "pgextended" and args.get("enable_pem"):
+            raise ArchitectureError(
+                "PEM is not compatible with the BDR-Always-ON architecture and EDB Postgres Extended"
+            )
+
         # Validate arguments to --2Q-repositories
         repos = args.get("tpa_2q_repositories") or []
         for r in repos:
