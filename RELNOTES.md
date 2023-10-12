@@ -2,6 +2,19 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.24 (unreleased)
+
+0a917d4b Support using postgres_wal_dir with pg_basebackup
+099f65d3 Accept `repmgr` as failover_manager in BDR when a replica is required.
+1bd108ca Fix `docker build` of `ubuntu:jammy` image
+22426196 TPA-529: Remove unwanted edb repos sources
+0ace7b25 TPA-554: Fix Cohost harp proxy/manager config
+2d05ccb6 TPA-472: Add repository cleanup to upgrade
+0d00beb3 Reuse the pgd_proxy/pgdcli/pgbouncer upgrade.yml in BDRAO upgrade.yml
+f6b65436 Introduce etcd:upgrade.yml and use it in BDRAO upgrade.yml
+492cdfca Fence/unfence the node using harpctl
+94f779c6 Check versions when upgrading BDR-Always-ON
+
 ## v23.23 (2023-09-21)
 
 ### Notable changes
