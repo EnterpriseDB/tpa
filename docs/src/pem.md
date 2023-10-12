@@ -24,12 +24,13 @@ requires a valid subscription.
 
 ## Supported architectures
 
-PEM is supported with M1 and BDR-Always-ON architectures via `--enable-pem`
-configuration command line option. You could optionally edit the generated
+PEM is supported with all architectures via the `--enable-pem`
+configuration command line option, with the exception of the
+BDR-Always-ON architecture when used with EDB Postgres Extended.
+You can optionally edit the generated
 cluster config (config.yml) and assign or remove `pem-agent` role from any
 postgres instance in the cluster in order to enable or disable PEM there.
 
-Note that PEM server does not support pgextended for a backend yet.
 
 ## PEM configuration
 
@@ -41,17 +42,17 @@ configuration at some point in future.
 PEM server's web interface is configured to run on https and uses 443 port
 for the same. PEM's webserver configuration uses self-signed certificates.
 
-Default login credentials for PEM server web interface use the postgres
-backend database user which is set to `postgres` for postgresql and
-`enterprisedb` for EPAS clusters by default. You could get the login
+The default login credentials for the PEM server web interface use the postgres
+backend database user, which is set to `postgres` for postgresql and
+`enterprisedb` for EPAS clusters by default. You can get the login
 password for the web interface by running
 `tpaexec show-password $clusterdir $user`.
 
 ## Shared PEM server
 
-Some deployments may want to use a single PEM sever for monitoring and
+Some deployments may want to use a single PEM server for monitoring and
 managing multiple clusters in the organization. Shared pem server deployment
-within tpaexec is supported via `pem_shared` variable that you could set via
+within tpaexec is supported via the `pem_shared` variable that you could set via
 `vars:` under the pem server instance for the given cluster config that plans
 to use an existing pem server. `pem_shared` is a boolean variable so possible
 values are true and false(default). When declaring a pemserver instance as
