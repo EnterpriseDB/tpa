@@ -4,16 +4,52 @@
 
 ## v23.24 (unreleased)
 
-0a917d4b Support using postgres_wal_dir with pg_basebackup
-099f65d3 Accept `repmgr` as failover_manager in BDR when a replica is required.
-1bd108ca Fix `docker build` of `ubuntu:jammy` image
-22426196 TPA-529: Remove unwanted edb repos sources
-0ace7b25 TPA-554: Fix Cohost harp proxy/manager config
-2d05ccb6 TPA-472: Add repository cleanup to upgrade
-0d00beb3 Reuse the pgd_proxy/pgdcli/pgbouncer upgrade.yml in BDRAO upgrade.yml
-f6b65436 Introduce etcd:upgrade.yml and use it in BDRAO upgrade.yml
-492cdfca Fence/unfence the node using harpctl
-94f779c6 Check versions when upgrading BDR-Always-ON
+### Notable changes
+
+- TPA-499 Change default ansible version to community ansible
+
+  `tpaexec setup` now defaults to using community ansible rather than
+  2ndQuadrant ansible. The option `--use-2q-ansible` can be used to
+  force the use of 2ndQuadrant ansible, which is now deprecated and will
+  be removed in a future release.
+
+### Minor changes
+
+- TPA-529 Remove unwanted EDB repositories
+
+  When a repository has been removed from `edb_repositories` in config.yml,
+  `tpaexec deploy` now removes it from the nodes.
+
+- TPA-552 Improve the upgrade process for BDR-Always-ON
+
+  When upgrading a BDR-Always-ON cluster, improve checks for
+  compatibility, simplify handling of upgrading components, and use HARP
+  fencing to guard against writes being directed to nodes while
+  they're being upgraded.
+
+- TPA-554 Fix harp configuration when proxy and manager are cohosted
+
+  Detect when harp-proxy and harp-manager are running on the same node
+  and use a different config file for harp-proxy.
+
+- TPA-472 Update repositories as part of upgrade process
+
+### Bugfixes
+
+- TPA-508 Upgrade fails for BDR 3.7 clusters
+
+  This is fixed by the changes made for TPA-552 (see above)
+
+- TPA-532 Respect postgres_wal_dir in pg_basebackup invocation
+
+- TPA-578 Accept repmgr as failover manager for subscriber-only nodes in
+  BDR clusters
+
+- TPA-594 Fix typo preventing build of ubuntu 22.04 docker images
+
+- TPA-602 Reject the unsupported combination of the BDR-Always-ON
+  architecture, the EDB Postgres Extended flavour, and PEM at
+  configure-time.
 
 ## v23.23 (2023-09-21)
 
