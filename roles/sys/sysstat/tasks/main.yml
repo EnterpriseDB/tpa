@@ -51,7 +51,16 @@
         src: sysstat.service.j2
         dest: /etc/systemd/system/sysstat.service
 
-    # When sysstat is installed on Debian 10 and Ubuntu Focal, it already comes
+    - name: Check if sar has already been properly enabled before
+      shell:
+        cmd: systemctl list-unit-files --state=enabled | grep "sysstat-collect.timer"
+      args:
+        executable: /bin/bash
+      register: sar_sysstat_collect_enabled
+      failed_when:
+        sar_sysstat_collect_enabled.rc not in [0, 1]
+
+    # When sysstat is installed on Debian 10, Ubuntu Focal, or EL 7 it already comes
     # enabled by default. That prevents the next step from working correctly and
     # installing "sysstat-collect.timer" and "sysstat-summary.timer". This task
     # work arounds that issue by disabling the sysstat unit before attempting to
@@ -62,9 +71,11 @@
         enabled: false
         daemon_reload: true
       when: >
-        ansible_distribution == 'Debian' and ansible_distribution_major_version|int <= 10 or
-        ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int <= 20 or
-        ansible_os_family == 'RedHat' and ansible_distribution_major_version|int <= 7
+        sar_sysstat_collect_enabled.rc == 1 and (
+          ansible_distribution == 'Debian' and ansible_distribution_major_version|int <= 10 or
+          ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int <= 20 or
+          ansible_os_family == 'RedHat' and ansible_distribution_major_version|int <= 7
+        )
 
     - name: Enable and start sysstat service
       systemd:
