@@ -110,30 +110,9 @@
     when: >
       'role_haproxy' in groups
 
-  - name: Fence the node before upgrade
-    include_role:
-      name: postgres/bdr
-      tasks_from: fence.yml
-    when:
-      - "'bdr' in role"
-      - failover_manager == 'harp'
-      - inventory_hostname in first_bdr_primary_candidates
-
-  # We have to stop harp-manager to upgrade it, and it might stop and
-  # restart Postgres when we do, so we do it after fencing the node.
-
-  - name: Stop/update/restart harp on {{ inventory_hostname }}
-    include_role:
-      name: harp
-      tasks_from: upgrade.yml
-    when: >
-      'harp-proxy' in role
-      or ('bdr' in role
-        and failover_manager == 'harp'
-        and inventory_hostname in first_bdr_primary_candidates|default([]))
-
   # Now we can perform the update on Postgres instances, whether proxied
   # (e.g., primary instances) or not (e.g., logical standby instances).
+  # We don't do anything for non-Postgres instances at the moment.
 
   - name: Stop/update/restart Postgres on {{ inventory_hostname }}
     block:
@@ -162,6 +141,23 @@
       tasks_from: upgrade.yml
     when: >
       'etcd' in role
+
+  - name: Stop/update/restart harp on {{ inventory_hostname }}
+    block:
+    - include_role: name=harp/restart
+      vars:
+        harp_service_end_state: stopped
+    - include_role: name=harp/pkg
+      vars:
+        allow_package_upgrades: yes
+    - include_role: name=harp/restart
+      vars:
+        harp_service_end_state: started
+    when: >
+      'harp-proxy' in role
+      or ('bdr' in role
+        and failover_manager == 'harp'
+        and inventory_hostname in first_bdr_primary_candidates|default([]))
 
   - name: Stop/update/restart pgd-proxy on {{ inventory_hostname }}
     include_role:
@@ -207,15 +203,6 @@
       executable: /bin/bash
     with_items: "{{ my_haproxies }}"
     delegate_to: "{{ item }}"
-
-  - name: Unfence the node after upgrade
-    include_role:
-      name: postgres/bdr
-      tasks_from: unfence.yml
-    when:
-      - "'bdr' in role"
-      - failover_manager == 'harp'
-      - inventory_hostname in first_bdr_primary_candidates
 
   # Ansible won't stop execution if a host becomes unreachable, despite
   # the any_errors_fatal setting. We must detect that situation and fail
