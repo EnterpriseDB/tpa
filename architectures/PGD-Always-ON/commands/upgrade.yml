@@ -390,7 +390,7 @@
       'pgd-proxy' in role
       and not bdr_major_version_upgrade
 
-  - name: Upgrade pgd-cli on {{ inventory_hostname }}
+  - name: Update pgd-cli on {{ inventory_hostname }}
     include_role:
       name: pgdcli
       tasks_from: upgrade.yml
