@@ -136,9 +136,16 @@
       'pgbouncer' in role
 
   - name: Stop/update/restart etcd on {{ inventory_hostname }}
-    include_role:
-      name: etcd
-      tasks_from: upgrade.yml
+    block:
+    - include_role: name=etcd/restart
+      vars:
+        etcd_service_end_state: stopped
+    - include_role: name=etcd/pkg
+      vars:
+        allow_package_upgrades: yes
+    - include_role: name=etcd/restart
+      vars:
+        etcd_service_end_state: started
     when: >
       'etcd' in role
 
