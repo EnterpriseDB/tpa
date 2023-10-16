@@ -20,13 +20,6 @@
   When a repository has been removed from `edb_repositories` in config.yml,
   `tpaexec deploy` now removes it from the nodes.
 
-- TPA-552 Improve the upgrade process for BDR-Always-ON
-
-  When upgrading a BDR-Always-ON cluster, improve checks for
-  compatibility, simplify handling of upgrading components, and use HARP
-  fencing to guard against writes being directed to nodes while
-  they're being upgraded.
-
 - TPA-554 Fix harp configuration when proxy and manager are cohosted
 
   Detect when harp-proxy and harp-manager are running on the same node
@@ -35,10 +28,6 @@
 - TPA-472 Update repositories as part of upgrade process
 
 ### Bugfixes
-
-- TPA-508 Upgrade fails for BDR 3.7 clusters
-
-  This is fixed by the changes made for TPA-552 (see above)
 
 - TPA-532 Respect postgres_wal_dir in pg_basebackup invocation
 
