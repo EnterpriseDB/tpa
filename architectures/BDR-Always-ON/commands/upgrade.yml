@@ -129,9 +129,16 @@
       'postgres' in role
 
   - name: Stop/update/restart pgbouncer on {{ inventory_hostname }}
-    include_role:
-      name: pgbouncer
-      tasks_from: upgrade.yml
+    block:
+    - include_role: name=pgbouncer/restart
+      vars:
+        pgbouncer_service_end_state: stopped
+    - include_role: name=pgbouncer/pkg
+      vars:
+        allow_package_upgrades: yes
+    - include_role: name=pgbouncer/restart
+      vars:
+        pgbouncer_service_end_state: started
     when: >
       'pgbouncer' in role
 
@@ -167,16 +174,24 @@
         and inventory_hostname in first_bdr_primary_candidates|default([]))
 
   - name: Stop/update/restart pgd-proxy on {{ inventory_hostname }}
-    include_role:
-      name: pgd_proxy
-      tasks_from: upgrade.yml
+    block:
+    - include_role: name=pgd_proxy/restart
+      vars:
+        pgd_proxy_service_end_state: stopped
+    - include_role: name=pgd_proxy/pkg
+      vars:
+        allow_package_upgrades: yes
+    - include_role: name=pgd_proxy/restart
+      vars:
+        pgd_proxy_service_end_state: started
     when: >
       'pgd-proxy' in role
 
-  - name: Upgrade pgd-cli on {{ inventory_hostname }}
-    include_role:
-      name: pgdcli
-      tasks_from: upgrade.yml
+  - name: upgrade pgdcli on {{ inventory_hostname }}
+    block:
+    - include_role: name=pgdcli/pkg
+      vars:
+        allow_package_upgrades: yes
     when: >
       ('bdr' in role and bdr_version is version('4', '>='))
       or 'pgdcli' in role
