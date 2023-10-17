@@ -2,6 +2,17 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## Testing links
+
+Here is a direct mention of a docs page
+[configure](tpaexec-configure.md).
+
+Here is an attempt at a github-working link:
+[provision](docs/src/tpaexec-provision.md).
+
+Here is an absolute link to the edb docs site:
+[deploy](https://www.enterprisedb.com/docs/tpa/latest/tpaexec-deploy/)
+
 ## v23.23 (2023-09-21)
 
 ### Notable changes
