@@ -2,6 +2,45 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.24 (unreleased)
+
+### Notable changes
+
+- TPA-499 Change default ansible version to community ansible
+
+  `tpaexec setup` now defaults to using community ansible rather than
+  2ndQuadrant ansible. The option `--use-2q-ansible` can be used to
+  force the use of 2ndQuadrant ansible, which is now deprecated and will
+  be removed in a future release. If you are using `--skip-tags`, see
+  [the install documentation](docs/src/INSTALL.md).
+
+### Minor changes
+
+- TPA-529 Remove unwanted EDB repositories
+
+  When a repository has been removed from `edb_repositories` in config.yml,
+  `tpaexec deploy` now removes it from the nodes.
+
+- TPA-554 Fix harp configuration when proxy and manager are cohosted
+
+  Detect when harp-proxy and harp-manager are running on the same node
+  and use a different config file for harp-proxy.
+
+- TPA-472 Update repositories as part of upgrade process
+
+### Bugfixes
+
+- TPA-532 Respect postgres_wal_dir in pg_basebackup invocation
+
+- TPA-578 Accept repmgr as failover manager for subscriber-only nodes in
+  BDR clusters
+
+- TPA-594 Fix typo preventing build of ubuntu 22.04 docker images
+
+- TPA-602 Reject the unsupported combination of the BDR-Always-ON
+  architecture, the EDB Postgres Extended flavour, and PEM at
+  configure-time.
+
 ## v23.23 (2023-09-21)
 
 ### Notable changes
