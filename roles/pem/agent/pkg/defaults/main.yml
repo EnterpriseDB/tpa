@@ -6,3 +6,4 @@ pem_agent_packages:
   Debian: &debian_pem_agent_packages
     - edb-pem-agent
   RedHat: *debian_pem_agent_packages
+  SUSE: *debian_pem_agent_packages

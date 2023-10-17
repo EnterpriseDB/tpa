@@ -39,6 +39,19 @@
         name: rewrite
   when: ansible_os_family == 'Debian'
 
+- name: "Configure apache for SUSE"
+  block:
+    - name: Enable mod_rewrite
+      apache2_module:
+        state: present
+        name: rewrite
+
+    - name: Enable mod_access_compat
+      apache2_module:
+        state: present
+        name: access_compat
+  when: ansible_os_family == 'SUSE'
+
 - name: Enable edb-python3-mod-wsgi
   block:
     - name: Disabling mod_wsgi
