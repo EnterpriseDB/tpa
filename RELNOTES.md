@@ -11,7 +11,8 @@
   `tpaexec setup` now defaults to using community ansible rather than
   2ndQuadrant ansible. The option `--use-2q-ansible` can be used to
   force the use of 2ndQuadrant ansible, which is now deprecated and will
-  be removed in a future release.
+  be removed in a future release. If you are using `--skip-tags`, see
+  [the install documentation](docs/src/INSTALL.md).
 
 ### Minor changes
 
