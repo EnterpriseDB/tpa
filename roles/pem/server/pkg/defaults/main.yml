@@ -7,6 +7,7 @@ pem_server_packages:
     - edb-pem
   Debian: *pem_server_package
   Ubuntu: *pem_server_package
+  SUSE: *pem_server_package
 
 pem_server_sslutils_packages:
   postgresql:
@@ -14,15 +15,20 @@ pem_server_sslutils_packages:
       - sslutils_{{ postgres_versionNN }}
     Debian:
       - postgresql-{{ postgres_versionNN }}-sslutils
+    SUSE:
+      - sslutils_{{ postgres_versionNN }}
   pgextended:
     RedHat: &pgextended_sslutils_package
       - pgextended{{ postgres_versionNN }}-server-sslutils
     Debian: *pgextended_sslutils_package
+    SUSE: *pgextended_sslutils_package
   epas:
     RedHat: &epas_sslutils_package
       - edb-as{{ postgres_versionNN }}-server-sslutils
     Debian: *epas_sslutils_package
+    SUSE: *epas_sslutils_package
   edbpge:
     RedHat: &edbpge_sslutils_package
       - edb-postgresextended{{ postgres_versionNN }}-sslutils
     Debian: *edbpge_sslutils_package
+    SUSE: *edbpge_sslutils_package
