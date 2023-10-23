@@ -177,7 +177,10 @@ class TestM1Architecture:
     @pytest.mark.parametrize(
         argnames=("argv", "expected"),
         argvalues=(
-            (ARGS + ["--failover-manager", "efm"], (4, ["zero", "one", "two", "three", "four"])),
+            (
+                ARGS + ["--failover-manager", "efm"],
+                (4, ["zero", "one", "two", "three", "four"]),
+            ),
             (
                 ARGS + ["--failover-manager", "efm"],
                 (4, ["zero", "one", "two", "three", "four"]),

@@ -1,3 +1,4 @@
+---
 ## contrib/auto_explain
 
 auto_explain.log_min_duration: '60s'

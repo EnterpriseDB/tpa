@@ -15,9 +15,9 @@
     role_attrs: "{{ item.role_attrs }}"
     _patroni_users:
       - username: "{{ patroni_super_user }}"
-        role_attrs: [ superuser ]
+        role_attrs: [superuser]
       - username: "{{ patroni_replication_user }}"
-        role_attrs: [ replication ]
+        role_attrs: [replication]
       - username: "{{ patroni_rewind_user }}"
         role_attrs: []
   tags: always

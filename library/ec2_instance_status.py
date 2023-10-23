@@ -123,7 +123,7 @@ def main():
             **aws_connect_params
         )
         status = get_instance_status(module, client)
-    except (botocore.exceptions.ClientError) as e:
+    except botocore.exceptions.ClientError as e:
         module.fail_json(
             msg=e.response["Error"]["Message"], exception=traceback.format_exc()
         )

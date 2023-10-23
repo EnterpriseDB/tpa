@@ -56,4 +56,3 @@ default_suse_repositories:
     repo_uri: https://download.postgresql.org/pub/repos/zypp/repo/pgdg-sles-{{ ansible_distribution_major_version }}-pg{{ postgres_version }}.repo
 
 default_suse_repository_list: [PGDG]
-
