@@ -1,0 +1,9 @@
+[Unit]
+Description=Generate a daily summary of process accounting
+Documentation=man:sa2(8)
+After=sysstat.service
+
+[Service]
+Type=oneshot
+User=root
+ExecStart={{ sysstat_sa2_bin }} -A
