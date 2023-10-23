@@ -1105,9 +1105,21 @@ esac
 # If we can find a venv located relative to TPA_DIR, we activate it as a
 # convenience.
 
-PYTHON=${PYTHON:=python3}
 if [[ -f $TPA_VENV/bin/activate ]]; then
     _activate_venv "$TPA_VENV"
+    PYTHON=python3
+elif [[ -z ${PYTHON:-""} ]]; then
+    EDB_PYTHON=/usr/libexec/edb-python39/bin/python3
+    if [ -f $EDB_PYTHON ]; then
+        PYTHON=$EDB_PYTHON
+    else
+        PYTHON=python3
+    fi
+fi
+
+if ! command -v $PYTHON
+then
+    error "TPA requires a version of python to continue"
 fi
 
 case "$command" in
