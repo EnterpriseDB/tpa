@@ -7,16 +7,16 @@
     sysstat_sa1_bin: /usr/lib/sysstat/debian-sa1
     sysstat_sa2_bin: /usr/lib/sysstat/sa2
   when: >
-    ansible_distribution == 'Debian' and ansible_distribution_major_version|int <= 10 or
-    ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int <= 20
+    (ansible_distribution == 'Debian' and ansible_distribution_major_version|int <= 10) or
+    (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int <= 20)
 
 - name: Set sar binaries path for Debian > 10 or Ubuntu > 20
   set_fact:
     sysstat_sa1_bin: /usr/lib/sysstat/sa1
     sysstat_sa2_bin: /usr/lib/sysstat/sa2
   when: >
-    ansible_distribution == 'Debian' and ansible_distribution_major_version|int > 10 or
-    ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 20
+    (ansible_distribution == 'Debian' and ansible_distribution_major_version|int > 10) or
+    (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 20)
 
 - name: Set sar binaries path for RedHat or SUSE
   set_fact:
