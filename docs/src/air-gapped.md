@@ -81,6 +81,5 @@ would normally.
 
 You can use the [upgrade](tpaexec-upgrade.md) command to
 perform updates in an air-gapped environment. Prior to running this
-command you must run `download-packages` on the connected controller,
-copy the updated repository to the disconnected controller *and* then
-run `deploy` to copy these packages to the target instances.
+command you must run `download-packages` on the connected controller and
+copy the updated repository to the disconnected controller.
