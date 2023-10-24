@@ -77,6 +77,58 @@ such that it describes the current state of the cluster and then running
 
 ### Example: removing a node
 
-### Example: adding an extension
-An M1 cluster 
+### Example: adding or removing an extension
+A simple single-node cluster can be deployed with the following config.yml. 
+```yaml
+---
+architecture: M1
+cluster_name: singlenode
 
+cluster_vars:
+  postgres_flavour: postgresql
+  postgres_version: '15'
+  preferred_python_version: python3
+  tpa_2q_repositories: []
+
+instance_defaults:
+  image: tpa/debian:11
+  platform: docker
+  vars:
+    ansible_user: root
+
+instances:
+- Name: nodeone
+  node: 1
+  role:
+  - primary
+```
+You may manually add the pgvector extension by connecting to the node
+and running `apt install postgresql-15-pgvector` then executing the
+following SQL command: `CREATE EXTENSION vector;`. This will not cause
+any operational issues, beyond the fact that config.yml no longer
+describes the cluster as fully as it did previously. However, it is
+advisable to reconcile config.yml (or indeed simply use TPA to add the
+extension in the first place) by adding the following cluster variables. 
+
+```yaml
+cluster_vars:
+  ...  
+  packages:
+   common:
+   - postgresql-15-pgvector
+  postgres_extensions:
+  - vector
+  ```
+
+After adding this configuration, you may manually remove the extension
+by executing the SQL command `DROP EXTENSION vector;` and then `apt
+remove postgresql-15-pgvector`. However if you run `tpaexec deploy`
+again without reconciling the config.yml, the extension will be
+reinstalled. To reconcile the config.yml, simply remove the lines added
+previously.
+
+!!! Note 
+    As noted previously, TPA will not honour destructive changes.
+    So simply removing the lines from config.yml will not remove the
+    extension. It is necessary to perform this operation manually then
+    reconcile the change.
