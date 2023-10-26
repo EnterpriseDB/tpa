@@ -43,16 +43,6 @@
       bdrdb_major_version:
         "{{ cluster_facts.databases[bdr_database].bdr.bdr_major_version }}"
 
-  - name: Ensure that bdr major verions in config.yml matches the database
-    assert:
-      that:
-        - bdr_version is version('4', '==') and bdrdb_major_version is version('4', '==')
-          or
-          bdr_version is version('3', '==') and bdrdb_major_version is version('3', '==')
-      fail_msg: >-
-        This upgrade process supports upgrading within the same BDR major version only.
-        Version {{ bdr_version }} from config.yml does not match {{ bdrdb_major_version }}
-        currently running.
 
 - name: Collect update facts for cluster {{ cluster_dir }}
   any_errors_fatal: true
@@ -62,6 +52,17 @@
   environment: "{{ target_environment }}"
   hosts: all
   tasks:
+
+  # Set the bdrdb_major_version on non bdr node
+  # used for pgd-cli to ensure we install configuration file
+  # if upgrading from bdr3 to bdr4.
+  - set_fact:
+      bdrdb_major_version: "{{ groups['role_bdr']
+            |map('extract', hostvars, 'bdrdb_major_version')
+            |select('defined')
+            |first }}"
+    when: >
+      'bdr' not in role
 
   # Set all_haproxy_backend_servers and proxies_for_backend_server, as
   # well as my_haproxies.
@@ -159,9 +160,6 @@
 
   - name: Stop/update/restart Postgres on {{ inventory_hostname }}
     block:
-    - set_fact:
-        bdrdb_major_version:
-          "{{ cluster_facts.databases[bdr_database].bdr.bdr_major_version }}"
     - include_role: name=postgres/restart
       vars:
         postgres_service_end_state: stopped
@@ -204,9 +202,18 @@
       'etcd' in role
 
   - name: Upgrade pgd-cli on {{ inventory_hostname }}
-    include_role:
-      name: pgdcli
-      tasks_from: upgrade.yml
+    block:
+      - name: Upgrade pgdcli package
+        include_role:
+          name: pgdcli
+          tasks_from: upgrade.yml
+
+      - name: Configure pgdcli when upgrading from bdr3
+        include_role:
+          name: pgdcli/config
+        when:
+        - bdrdb_major_version|int == 3
+        - bdr_version is version('4', '==')
     when: >
       ('bdr' in role and bdr_version is version('4', '>='))
       or 'pgdcli' in role
