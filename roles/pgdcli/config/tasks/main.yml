@@ -28,3 +28,12 @@
     owner: "{{ pgd_cli_user }}"
     group: "{{ pgd_cli_group }}"
     mode: 0600
+# Add a symlink to the default path for pgdcli config.
+# For pgdcli V1, this allows using cli without having to supply path to
+# config file via `-f`.
+
+- name: Create symlink to ease cli usage
+  file:
+    state: link
+    src: "{{ pgdcli_directory }}/pgd-cli-config.yml"
+    dest: /etc/edb/pgd-config.yml
