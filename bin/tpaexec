@@ -276,8 +276,8 @@ You have selected to use the 2ndQuadrant ansible fork. This is now
 deprecated in favour of community ansible and will cease to be supported
 in a future TPA release.
 
-If you choose to re-run `tpaexec setup` to use community ansible, please
-be aware that the behaviour of the `--skip-tags` option is different and
+If you choose to re-run 'tpaexec setup' to use community ansible, please
+be aware that the behaviour of the '--skip-tags' option is different and
 this option is not supported by TPA with community ansible. An alternative
 means of skipping tasks will be provided before support for 2ndQuadrant
 ansible is removed.
