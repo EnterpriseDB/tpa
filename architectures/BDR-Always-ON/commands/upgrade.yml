@@ -267,3 +267,58 @@
       msg: "One or more hosts are no longer reachable"
       that:
         ansible_play_hosts == ansible_play_hosts_all
+
+# BDR 4.3 adds node_kind to fix some issues and it is advised to set it
+# when moving to 4.3+ we need to wait after all nodes are updated to set
+# it for all bdr nodes.
+
+- name: Set node_kind
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: "role_bdr"
+  tasks:
+
+  - block:
+
+    # we expect all node to haave gone through upgrade process so we
+    # only check that we effectively upgraded to 4.3+ on first_bdr_primary
+    # before trying to make the change.
+    - name: Get bdr_version_num
+      postgresql_query:
+        conninfo: "{{ bdr_node_dsn }}"
+        queries:
+          - text: >
+              SELECT bdr.bdr_version_num()
+      become_user: "{{ postgres_user }}"
+      become: yes
+      register: query_version
+
+    - name: Ensure that all BDR nodes have an appropriate node_kind set
+      postgresql_query:
+        conninfo: "{{ bdr_node_dsn }}"
+        queries:
+          - text: >
+              SELECT bdr.alter_node_kind(node_name := %s, node_kind := %s)
+                FROM bdr.node where node_name = %s and node_kind = 0;
+            args:
+              - "{{ this_bdr_node_name }}"
+              - "{{ bdr_node_role|bdr_node_kind }}"
+              - "{{ this_bdr_node_name }}"
+      become_user: "{{ postgres_user }}"
+      become: yes
+      with_items: "{{ groups['role_bdr'] }}"
+      loop_control:
+        loop_var: bdr_node
+        label: >-
+          {{ bdr_node }}:{{ bdr_node_role|bdr_node_kind }}
+      vars:
+        this_bdr_node_name: "{{ hostvars[bdr_node].bdr_node_name }}"
+        bdr_node_role: "{{ hostvars[bdr_node].role }}"
+      when: >
+        query_version.bdr_version_num >= 40300
+
+    when: >
+      inventory_hostname == first_bdr_primary
