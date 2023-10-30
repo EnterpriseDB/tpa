@@ -156,3 +156,29 @@
     - bdr_node_camo_partner is defined
     - bdr_camo_use_raft_for_local_mode is defined
     - inventory_hostname == [inventory_hostname, bdr_node_camo_partner]|sort|first
+
+- name: Ensure that all BDR nodes have an appropriate node_kind set
+  postgresql_query:
+    conninfo: "{{ bdr_node_dsn }}"
+    queries:
+      - text: >
+          SELECT bdr.alter_node_kind(node_name := %s, node_kind := %s)
+            FROM bdr.node where node_name = %s and node_kind = 0;
+        args:
+          - "{{ this_bdr_node_name }}"
+          - "{{ bdr_node_role|bdr_node_kind }}"
+          - "{{ this_bdr_node_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ groups['role_bdr'] }}"
+  loop_control:
+    loop_var: bdr_node
+    label: >-
+      {{ bdr_node }}:{{ bdr_node_role|bdr_node_kind }}
+  vars:
+    this_bdr_node_name: "{{ hostvars[bdr_node].bdr_node_name }}"
+    bdr_node_role: "{{ hostvars[bdr_node].role }}"
+  when:
+    - inventory_hostname == first_bdr_primary
+    - bdr_version_num >= 40300
+
