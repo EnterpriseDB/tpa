@@ -28,6 +28,9 @@
   file:
     path: "{{ barman_build_dir }}"
     state: directory
+    owner: root
+    group: root
+    mode: "0755"
 
 # The source directory may be read-only, and setup.py does not make it
 # convenient to do an out-of-tree build the way we do for other things,
@@ -58,7 +61,7 @@
     dest: /etc/cron.d/barman
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     force: no
     content: |
       * * * * * barman /etc/tpa/barman-home-ok && /usr/bin/barman -q cron

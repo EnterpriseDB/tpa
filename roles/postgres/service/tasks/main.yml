@@ -8,7 +8,7 @@
     dest: /etc/tpa/postgres-monitor
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
 
 - name: Install Postgres service unit files
   template:
@@ -16,7 +16,7 @@
     dest: "/etc/systemd/system/{{ item.1 }}.service"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   with_together:
     - [postgres, postgres-monitor]
     - ['{{ postgres_service_name }}',

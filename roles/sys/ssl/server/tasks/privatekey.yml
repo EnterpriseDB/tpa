@@ -8,7 +8,7 @@
     path: "{{ privatekey_path|mandatory }}"
     owner: "{{ ssl_user }}"
     group: "{{ ssl_group }}"
-    mode: 0600
+    mode: "0600"
     force: no
   notify:
     - Note SSL configuration changed

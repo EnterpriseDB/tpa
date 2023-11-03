@@ -166,7 +166,7 @@
     dest: "{{ pem_agent_config_path }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   register: agent_cfg
 
 # Register barman server through pemworker on barman node when pg-backup-api

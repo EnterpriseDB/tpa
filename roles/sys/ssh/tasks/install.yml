@@ -18,7 +18,9 @@
   file:
     path: "~{{ ssh_username }}/.ssh"
     state: directory
-    mode: 0700
+    owner: "{{ ssh_username }}"
+    group: "{{ ssh_username }}"
+    mode: "0700"
   become_user: "{{ ssh_username }}"
   become: yes
 
@@ -28,9 +30,9 @@
   with_items:
     - src: "{{ _ssh_key_dir }}/{{ _ssh_key_name }}"
       dest: "~{{ ssh_username }}/.ssh/id_rsa"
-      mode: 0600
+      mode: "0600"
     - src: "{{ _ssh_key_dir }}/{{ _ssh_key_name }}.pub"
       dest: "~{{ ssh_username }}/.ssh/id_rsa.pub"
-      mode: 0640
+      mode: "0640"
   become_user: "{{ ssh_username }}"
   become: yes

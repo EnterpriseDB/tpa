@@ -19,7 +19,7 @@
     path: "{{ openvpn_config }}"
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
     state: directory
 
 - name: Install key and certificate files on each instance

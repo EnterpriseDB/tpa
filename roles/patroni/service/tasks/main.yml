@@ -6,6 +6,9 @@
   template:
     dest: /etc/systemd/system/patroni@.service
     src: patroni@.service.j2
+    owner: root
+    group: root
+    mode: "0644"
   register: unit
   notify:
     - Note patroni restart required

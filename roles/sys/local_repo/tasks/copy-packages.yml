@@ -39,7 +39,7 @@
     state: directory
     owner: "{{ ansible_user }}"
     group: root
-    mode: 0755
+    mode: "0755"
     recurse: true
 
 - name: Ensure rsync is available

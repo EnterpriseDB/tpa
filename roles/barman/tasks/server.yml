@@ -32,7 +32,7 @@
     path: "{{ barman_home }}"
     owner: "{{ barman_user }}"
     group: "{{ barman_group }}"
-    mode: 0750
+    mode: "0750"
     state: directory
 
 - name: Install global Barman configuration file
@@ -41,7 +41,7 @@
     dest: /etc/barman.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
 
 - name: Install /etc/tpa/barman-home-ok
   template:
@@ -49,7 +49,7 @@
     dest: /etc/tpa/barman-home-ok
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
   register: barman_home_ok
 
 - name: Restart cron once in docker containers
@@ -79,7 +79,7 @@
     path: /etc/barman.d
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
     state: directory
 
 - include_role: name=postgres/pgpass
@@ -97,7 +97,7 @@
     owner: "{{ barman_user }}"
     group: "{{ barman_group }}"
     state: directory
-    mode: 0700
+    mode: "0700"
 
 - name: Retrieve list of key/certificate files
   command: >
@@ -111,7 +111,7 @@
     path: "{{ item }}"
     owner: "{{ barman_user }}"
     group: "{{ barman_group }}"
-    mode: 0600
+    mode: "0600"
   with_items: "{{ keycertfiles.stdout_lines }}"
 
 # Barman's version-parsing code can get into trouble with 2ndQPostgres

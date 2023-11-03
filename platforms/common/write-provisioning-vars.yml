@@ -10,4 +10,4 @@
   copy:
     dest: "{{ cluster_dir }}/vars.json"
     content: "{{ provisioning_vars|to_json }}\n"
-    mode: 0600
+    mode: "0600"

@@ -23,7 +23,7 @@
     dest: /etc/rsyslog.d/55-barman.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   when:
     - log_server is defined
     - "'barman' in role"
@@ -36,7 +36,7 @@
     dest: /etc/rsyslog.d/99-forward.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   when: log_server|default('') != ''
   notify:
     - Note rsyslog restart required
@@ -45,7 +45,7 @@
   copy:
     src: "{{ item }}"
     dest: "/etc/rsyslog.d/{{ item }}"
-    mode: 0644
+    mode: "0644"
   with_items:
     - 01-enable-udp-reception.conf
   when:
@@ -61,14 +61,16 @@
         path: /var/log/hosts
         owner: root
         group: root
-        mode: 0755
+        mode: "0755"
         state: directory
 
     - name: Configure rsyslog forward per programname
       template:
         src: "{{ item }}.j2"
         dest: "/etc/rsyslog.d/{{ item }}"
-        mode: 0644
+        owner: root
+        group: root
+        mode: "0644"
       with_items:
         - 23-postgres.conf
       notify:
@@ -78,7 +80,9 @@
       copy:
         src: "{{ item }}"
         dest: "/etc/rsyslog.d/{{ item }}"
-        mode: 0644
+        owner: root
+        group: root
+        mode: "0644"
       with_items:
         - 00-enable-tcp-reception.conf
       notify:

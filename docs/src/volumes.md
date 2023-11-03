@@ -285,7 +285,7 @@ instances:
       readahead: 65536
       owner: root
       group: root
-      mode: 0755
+      mode: "0755"
 ```
 
 You can specify the `fstype` (default: ext4), `fsopts` to be passed to

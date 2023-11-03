@@ -28,6 +28,7 @@
     state: directory
     owner: root
     group: root
+    mode: "0750"
   when: >
     'etcd' in role
 
@@ -37,7 +38,7 @@
     dest: /etc/etcd/etcd.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - Note etcd restart required
   when: >

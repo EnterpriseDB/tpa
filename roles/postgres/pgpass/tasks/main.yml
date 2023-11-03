@@ -8,7 +8,7 @@
     dest: "{{ _pgpassfile }}"
     owner: "{{ _pgpass_owner }}"
     group: "{{ _pgpass_group }}"
-    mode: 0600
+    mode: "0600"
     force: no
 
 - name: Add entries to {{ _pgpassfile }}

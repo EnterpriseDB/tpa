@@ -32,6 +32,9 @@
   file:
     state: directory
     path: "{{ pg_backup_api_build_dir }}"
+    owner: root
+    group: root
+    mode: "0755"
 
 # The source directory may be read-only, and setup.py does not make it
 # convenient to do an out-of-tree build the way we do for other things,
@@ -59,7 +62,7 @@
     state: touch
     owner: "{{ barman_user }}"
     group: "{{ barman_group }}"
-    mode: 0750
+    mode: "0750"
 
 - name: Install custom Postgres Backup API service unit file
   copy:
@@ -67,7 +70,7 @@
     dest: /etc/systemd/system/pg-backup-api.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   register: unit
   notify:
     - Enable pgbapi

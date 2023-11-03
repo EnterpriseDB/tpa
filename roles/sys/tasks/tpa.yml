@@ -13,7 +13,7 @@
     dest: /etc/tpa/rc.local
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
     content: |
       #!/bin/bash
       #
@@ -25,7 +25,7 @@
     dest: /etc/rc.local
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
     content: |
       #!/bin/sh
       #
@@ -35,12 +35,12 @@
   file:
     path: /etc/rc.local
     follow: yes
-    mode: 0755
+    mode: "0755"
 
 - name: Make /etc/rc.local invoke /etc/tpa/rc.local
   lineinfile:
     path: /etc/rc.local
-    mode: 0755
+    mode: "0755"
     line: >-
       test -x /etc/tpa/rc.local && /etc/tpa/rc.local
     state: present
@@ -65,10 +65,10 @@
       owner: root
       group: root
       state: directory
-      mode: 0755
+      mode: "0755"
   - name: Create /etc/tpa/rebuild-sources.sh
     copy:
       src: rebuild-sources.sh
       dest: /etc/tpa/rebuild-sources.sh
-      mode: 0755
+      mode: "0755"
   when: has_src_install

@@ -56,7 +56,7 @@
       dest: "{{ postgres_conf_dir }}/pg_hba.conf"
       owner: "{{ postgres_user }}"
       group: "{{ postgres_group }}"
-      mode: 0644
+      mode: "0644"
     when: _postgres_create_hba_file
     notify:
       - Note Postgres reload required
@@ -85,7 +85,7 @@
       dest: "{{ postgres_conf_dir }}/pg_ident.conf"
       owner: "{{ postgres_user }}"
       group: "{{ postgres_group }}"
-      mode: 0644
+      mode: "0644"
     notify:
       - Note Postgres reload required
     when: _postgres_create_ident_file
@@ -152,7 +152,7 @@
     path: "{{ _include_dir }}"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0700
+    mode: "0700"
     state: directory
 
 - name: Enable include_dir in postgresql.conf
@@ -185,7 +185,7 @@
     dest: "{{ _include_dir }}/0000-tpa.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   when:
     postgres_conf_template == ''
     and _postgres_config_split
@@ -198,7 +198,7 @@
     dest: "{{ _include_dir }}/0001-tpa_restart.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   when:
     postgres_conf_template == ''
     and _postgres_config_split
@@ -293,7 +293,7 @@
       dest: "{{ _include_dir }}/8901-primary_conninfo.conf"
       owner: "{{ postgres_user }}"
       group: "{{ postgres_group }}"
-      mode: 0644
+      mode: "0644"
     vars:
       primary_conninfo: "{{ hostvars[upstream].replication_node_dsn }} passfile={{ _pgpassfile }}"
     notify:
@@ -320,7 +320,7 @@
       dest: "{{ _include_dir }}/8901-restore_command.conf"
       owner: "{{ postgres_user }}"
       group: "{{ postgres_group }}"
-      mode: 0644
+      mode: "0644"
     when:
       restore_command is defined
     notify:
@@ -332,7 +332,7 @@
       dest: "{{ postgres_data_dir }}/standby.signal"
       owner: "{{ postgres_user }}"
       group: "{{ postgres_group }}"
-      mode: 0644
+      mode: "0644"
       force: no
 
 # If 9900-role-settings.conf (old config file for storing settings specified via
@@ -365,7 +365,7 @@
     dest: "{{ _include_dir }}/9900-tpa_postgres_conf_settings.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   when:
     postgres_conf_settings
     and _postgres_config_split
@@ -382,7 +382,7 @@
     dest: "{{ _include_dir }}/9999-override.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   when: _postgres_config_split
   notify:
     - Note Postgres restart required

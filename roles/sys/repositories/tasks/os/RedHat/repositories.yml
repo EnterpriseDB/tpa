@@ -47,7 +47,9 @@
 - name: Ensure edb.repo is not world-readable
   file:
     path: /etc/yum.repos.d/edb.repo
-    mode: 0600
+    owner: root
+    group: root
+    mode: "0600"
   when: >
     'EDB' in yum_repository_list
 

@@ -26,7 +26,7 @@
   apt_repository:
     repo: "{{ repo_entry }}"
     filename: "{{ r.filename|default(omit) }}"
-    mode: "{{ needs_auth|ternary('0600', '0644') }}"
+    mode: "{{ needs_auth|ternary('0600', '"0644"') }}"
     state: present
     update_cache: no
   with_items: "{{ apt_repository_list }}"
@@ -57,7 +57,7 @@
     dest: /etc/apt/auth.conf.d/edb.conf
     owner: root
     group: root
-    mode: 0600
+    mode: "0600"
   vars:
     _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
     _credentials: "{{ lookup('file', _file).split(':', 1) }}"
@@ -72,7 +72,7 @@
     dest: /etc/apt/preferences.d/2ndquadrant-pins
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
 
 - set_fact:
     _2q_repositories: []

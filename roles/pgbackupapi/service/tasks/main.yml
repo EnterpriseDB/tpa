@@ -10,7 +10,7 @@
       dest: "/etc/{{ _apache_svc }}/{{ _apache_dir }}/pg-backup-api.conf"
       owner: "{{ barman_user }}"
       group: "{{ barman_group }}"
-      mode: 0644
+      mode: "0644"
   vars:
     _apache_svc: "{{ apache_conf[ansible_os_family]['service'] }}"
     _apache_dir: "{{ apache_conf[ansible_os_family]['conf_dir'] }}"

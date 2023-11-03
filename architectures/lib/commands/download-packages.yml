@@ -128,7 +128,7 @@
           file:
             path: "{{ download_dir }}"
             state: directory
-            mode: 0755
+            mode: "0755"
 
         - name: Download packages and dependencies
           include_role:

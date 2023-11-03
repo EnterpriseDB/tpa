@@ -8,7 +8,7 @@
     dest: "{{ _include_dir }}/8888-synchronous_standby_names.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   vars:
     variable: synchronous_standby_names
     value: "{{ synchronous_standby_names }}"

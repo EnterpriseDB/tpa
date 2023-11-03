@@ -6,6 +6,7 @@
   file:
     path: "{{ cluster_dir }}/{{ item }}"
     state: directory
+    mode: "0755"
   with_items:
     - inventory
     - inventory/host_vars
@@ -16,7 +17,7 @@
   template:
     src: inventory.j2
     dest: "{{ cluster_dir }}/inventory/00-{{ cluster_name }}"
-    mode: 0644
+    mode: "0644"
 
 - name: Compose ansible_group_vars for cluster
   set_fact:
@@ -77,7 +78,7 @@
       ansible_python_interpreter: '/usr/bin/{{ '{'+'{ ' }}python|default(preferred_python_version|default("python2.7")){{ ' }'+'}' }}'
       {{ group_vars|to_nice_yaml(indent=2) }}
     dest: "{{ group_dir }}/{{ file_name }}"
-    mode: 0644
+    mode: "0644"
     force: yes
   vars:
     file_name: "00-ansible.yml"
@@ -89,7 +90,7 @@
     content: |
       {{ group_vars|to_nice_yaml(indent=2) }}
     dest: "{{ group_dir }}/{{ file_name }}"
-    mode: 0644
+    mode: "0644"
     force: yes
   vars:
     file_name: "01-{{ cluster_name }}.yml"
@@ -101,7 +102,7 @@
     content: |
       {{ host_vars|to_nice_yaml(indent=2) }}
     dest: "{{ host_dir }}/{{ file_name }}"
-    mode: 0644
+    mode: "0644"
     force: yes
   vars:
     file_name: "01-instance_vars.yml"
@@ -133,13 +134,13 @@
   template:
     src: known_hosts.j2
     dest: "{{ cluster_dir }}/tpa_known_hosts"
-    mode: 0644
+    mode: "0644"
 
 - name: Generate ssh_config file for the cluster
   template:
     src: ssh_config.j2
     dest: "{{ cluster_dir }}/ssh_config"
-    mode: 0644
+    mode: "0644"
 
 # Tower won't use our ansible wrapper script to invoke ansible inside
 # its execution environment, so we generate a custom configuration file
@@ -149,7 +150,7 @@
   template:
     src: tower_ansible.cfg.j2
     dest: "{{ cluster_dir }}/ansible.cfg"
-    mode: 0644
+    mode: "0644"
   when: ansible_tower
 
 # Right now, we have no way to convey secrets generated during deploy

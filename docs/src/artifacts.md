@@ -10,13 +10,13 @@ cluster_vars:
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
   - type: file
     src: /host/path/to/file
     dest: /target/path/to/file
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   - type: archive
     src: example.tar.gz
     dest: /some/target/path

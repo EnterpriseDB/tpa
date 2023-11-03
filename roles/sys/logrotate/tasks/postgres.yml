@@ -9,7 +9,7 @@
     dest: /etc/logrotate.d/postgres
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   vars:
     postgres_logfile: "{{
         (log_destination == 'syslog')|ternary(

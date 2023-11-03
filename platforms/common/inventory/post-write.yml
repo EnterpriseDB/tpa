@@ -5,7 +5,7 @@
 - name: Record hash of config.yml in inventory
   copy:
     dest: "{{ config_hash_path }}"
-    mode: 0644
+    mode: "0644"
     content:
       "{{ {'config_hashes': _output_hashes}
           |to_nice_yaml }}"

@@ -17,6 +17,6 @@
     dest: "{{ _include_dir }}/8888-{{ name }}.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   notify:
     - Note Postgres restart required

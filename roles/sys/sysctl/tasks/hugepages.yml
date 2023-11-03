@@ -19,7 +19,7 @@
     dest: /etc/tpa/hugepages
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
   register: hugepages
   vars:
     enabled: >-

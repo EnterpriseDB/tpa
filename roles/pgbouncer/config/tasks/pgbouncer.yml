@@ -7,7 +7,7 @@
     path: /etc/pgbouncer
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0700
+    mode: "0700"
     state: directory
 
 - name: Ensure pgbouncer runtime directories exist
@@ -26,7 +26,7 @@
    dest: /usr/lib/tmpfiles.d/pgbouncer.conf
    owner: root
    group: root
-   mode: 0644
+   mode: "0644"
    content: |
        d /var/run/pgbouncer 0775 {{ postgres_user }} {{ postgres_group }} - -
 
@@ -36,7 +36,7 @@
     dest: "/etc/pgbouncer/pgbouncer.ini"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0640
+    mode: "0640"
   notify:
     - Note pgbouncer restart required
   tags: [ini]
@@ -47,7 +47,7 @@
     dest: "/etc/pgbouncer/pgbouncer.databases.ini"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0640
+    mode: "0640"
   notify:
     - Note pgbouncer restart required
   tags: [ini, databases.ini]

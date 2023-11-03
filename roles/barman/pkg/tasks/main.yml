@@ -41,7 +41,7 @@
     state: directory
     owner: "{{ barman_user }}"
     group: "{{ barman_group }}"
-    mode: 0750
+    mode: "0750"
   with_items:
     - "{{ barman_home }}"
     - /var/log/barman

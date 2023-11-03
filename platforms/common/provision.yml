@@ -6,6 +6,7 @@
   file:
     path: "{{ cluster_dir }}/{{ item }}"
     state: directory
+    mode: "0755"
   with_items:
     - vault
     - hostkeys

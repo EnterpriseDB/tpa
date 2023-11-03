@@ -28,6 +28,9 @@
   file:
     path: "{{ postgres_build_dir }}"
     state: directory
+    owner: root
+    group: root
+    mode: "0755"
 
 - name: Configure Postgres
   shell: >
@@ -79,7 +82,9 @@
   template:
     src: rebuild-sources.sh.j2
     dest: "/etc/tpa/rebuild-scripts/rebuild-postgres.sh"
-    mode: 0755
+    owner: root
+    group: root
+    mode: "0755"
 
 - include_role:
     name: postgres/pkg

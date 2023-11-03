@@ -7,7 +7,7 @@
     path: "{{ efm_conf_dir }}"
     owner: efm
     group: efm
-    mode: 0755
+    mode: "0755"
     state: directory
 
 - name: Include role postgres/creatuser
@@ -56,7 +56,7 @@
     dest: "{{ efm_conf_dir }}/{{ cluster_name }}.properties"
     owner: efm
     group: efm
-    mode: 0640
+    mode: "0640"
   vars:
     efm_encrypted_pass: "{{ efm_encrypted_pass_output.stdout }}"
   notify:
@@ -68,7 +68,7 @@
     dest: "{{ efm_conf_dir }}/{{ cluster_name }}.nodes"
     owner: efm
     group: efm
-    mode: 0640
+    mode: "0640"
   vars:
     node_ips: "{{
         groups[cluster_tag] | map('extract', hostvars, ['ip_address']) | product([efm_bind_port]) | map('join', ':') | join('\n')
@@ -85,4 +85,4 @@
     dest: "{{ efm_conf_dir }}/{{ cluster_name }}-efm.notification.sh"
     owner: efm
     group: efm
-    mode: 0750
+    mode: "0750"

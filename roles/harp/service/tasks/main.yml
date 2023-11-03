@@ -20,7 +20,7 @@
       state: directory
       owner: root
       group: root
-      mode: 0755
+      mode: "0755"
 
   - name: Install harp-manager service override file
     template:
@@ -28,7 +28,7 @@
       dest: "/etc/systemd/system/harp-manager.service.d/override.conf"
       owner: root
       group: root
-      mode: 0644
+      mode: "0644"
     vars:
       config_for: 'manager'
     notify:
@@ -41,7 +41,7 @@
       dest: /etc/systemd/system/harp-postgres.target
       owner: root
       group: root
-      mode: 0644
+      mode: "0644"
     register: managed_unit
 
   - set_fact:
@@ -65,7 +65,7 @@
       state: directory
       owner: root
       group: root
-      mode: 0755
+      mode: "0755"
 
   - name: Install harp-proxy service override file
     template:
@@ -73,7 +73,7 @@
       dest: "/etc/systemd/system/harp-proxy.service.d/override.conf"
       owner: root
       group: root
-      mode: 0644
+      mode: "0644"
     vars:
       config_for: 'proxy'
     register: proxy_unit

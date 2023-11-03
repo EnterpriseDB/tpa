@@ -8,7 +8,7 @@
     dest: /etc/systemd/system/pgd-proxy.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   register: pgd_proxy_unit
   tags: [pgd-proxy, service]
 

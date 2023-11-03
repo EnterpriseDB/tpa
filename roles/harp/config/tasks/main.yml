@@ -20,6 +20,7 @@
     state: directory
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
+    mode: "0755"
   when:
     initialise_harp|bool
   tags: config
