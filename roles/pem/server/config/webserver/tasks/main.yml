@@ -36,6 +36,9 @@
   copy:
     src: "{{ pem_base_dir }}/web/pem.wsgi.in"
     dest: "{{ pem_base_dir }}/web/pem.wsgi"
+    owner: root
+    group: root
+    mode: "0644"
     backup: yes
     remote_src: yes
   notify: Restart apache for pem
@@ -48,6 +51,9 @@
   template:
     src: config_setup.py.j2
     dest: "{{ pem_base_dir }}/web/config_setup.py"
+    owner: root
+    group: root
+    mode: "0644"
 
 - name: Check if web-server certificate already exists
   stat:
@@ -82,7 +88,7 @@
     dest: "{{ pem_web_config_file[ansible_os_family] }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart apache for pem
   tags: [pem-server, pem-webserver]
 

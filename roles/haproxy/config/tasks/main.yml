@@ -13,12 +13,15 @@
     size: 2048
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
 
 - name: Install haproxy.cfg
   template:
     src: haproxy.cfg.j2
     dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: "0644"
   notify:
     - Note haproxy reload required
 
@@ -30,7 +33,7 @@
     dest: /etc/rsyslog.d/
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   register: haproxy_syslog_conf
 
 - name: Restart rsyslog
@@ -39,6 +42,7 @@
     state: restarted
   when: haproxy_syslog_conf is changed
 
+# XXX I was unable to configure conditions to create this file
 - name: Install agent.lua
   template:
     src: agent.lua.j2
@@ -55,12 +59,13 @@
   when:
     haproxy_backend_queue_check != 'platypus'
 
+# XXX I was unable to configure conditions to create this file
 - block:
   - name: Install check-queue
     template:
       src: check-queue.j2
       dest: /etc/haproxy/check-queue
-      mode: 0755
+      mode: "0755"
     notify:
       - Note haproxy reload required
 
@@ -94,7 +99,7 @@
     state: directory
     owner: haproxy
     group: haproxy
-    mode: 0755
+    mode: "0755"
   when: not haproxy_stats_socket_dir.stat.exists
   vars:
     socket_dir: "{{ haproxy_stats_socket|dirname }}"

@@ -11,6 +11,7 @@
   file:
     path: "{{ output_dir }}/{{ inventory_hostname }}"
     state: directory
+    mode: "0755"
   delegate_to: localhost
   tags: always
 

@@ -19,7 +19,7 @@
     mode: "{{ mode }}"
   vars:
     file: "ssh_host_{{ item.0 }}_key{{ item.1 }}"
-    mode: "{{ (item.1 == '')|ternary('0600', '0644') }}"
+    mode: "{{ (item.1 == '')|ternary('0600', '"0644"') }}"
   with_nested:
   - ["rsa", "ecdsa"]
   - ["", ".pub"]
@@ -51,7 +51,7 @@
     dest: /etc/ssh/ssh_known_hosts
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     force: no
 
 # We generate known_hosts entries for two kinds of instances here: those

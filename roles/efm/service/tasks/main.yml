@@ -8,7 +8,7 @@
     dest: "/etc/systemd/system/edb-efm-{{ efm_version }}.service"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   register: unit
 
 - name: Enable efm service

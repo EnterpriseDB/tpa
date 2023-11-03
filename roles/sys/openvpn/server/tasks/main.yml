@@ -7,7 +7,7 @@
     path: "{{ openvpn_config }}/ccd"
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
     state: directory
 
 - name: Set permissions on openvpn configuration directory
@@ -24,7 +24,7 @@
     dest: "{{ openvpn_config }}/ccd/{{ item }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   with_items: "{{ play_hosts|difference(inventory_hostname) }}"
 
 - name: Install the DH parameters
@@ -33,7 +33,7 @@
     dest: "{{ openvpn_config }}/dh2048.pem"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - Note openvpn restart required
 
@@ -43,7 +43,7 @@
     dest: "{{ openvpn_config }}.conf"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - Note openvpn restart required
 

@@ -8,7 +8,7 @@
     path: "{{ ssl_dir }}"
     owner: "{{ clientcert_owner }}"
     group: "{{ clientcert_group }}"
-    mode: 0700
+    mode: "0700"
 
 - name: Generate private key
   community.crypto.openssl_privatekey:
@@ -16,7 +16,7 @@
     path: "{{ privatekey_path|mandatory }}"
     owner: "{{ clientcert_owner }}"
     group: "{{ clientcert_group }}"
-    mode: 0600
+    mode: "0600"
     force: no
 
 - name: Check if client certificate exists

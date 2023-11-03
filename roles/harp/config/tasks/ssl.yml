@@ -8,7 +8,7 @@
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
 
 # generate client CA if we don't use one yet for server certs
 - name: Generate CA.crt if using selfsigned server certs
@@ -23,7 +23,7 @@
     src: "{{ ssl_ca_file }}"
     remote_src: yes
     dest: "{{ harp_proxy_ssl_dir }}/CA.crt"
-    mode: 0644
+    mode: "0644"
     owner: root
     group: root
 

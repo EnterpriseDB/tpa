@@ -19,7 +19,7 @@
     path: /var/log/tpa-proxy-monitor
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0755
+    mode: "0755"
 
 - name: Terminate any earlier proxy-monitor instance
   include_role:

@@ -31,7 +31,7 @@
 - name: Upload barman lockfile script
   copy:
     dest: /tmp/lock.py
-    mode: 0755
+    mode: "0755"
     content: |
       #!/usr/bin/env python
 

@@ -54,7 +54,7 @@ file yourself:
     dest: /etc/yum.repos.d/example.repo
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     content: |
       [example]
       name=Example repo

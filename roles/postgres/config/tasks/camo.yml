@@ -8,6 +8,6 @@
     dest: "{{ _include_dir }}/3334-camo.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   notify:
     - Note Postgres restart required

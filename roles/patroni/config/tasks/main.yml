@@ -34,7 +34,7 @@
     path: "{{ patroni_etc }}"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0750
+    mode: "0750"
     state: directory
 
 # Make sure users have been created before the config file is templated
@@ -47,7 +47,7 @@
     path: "{{ patroni_conf.log.dir }}"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0750
+    mode: "0750"
   when:
     patroni_conf.log.dir is defined
     and patroni_conf.log.dir != ''

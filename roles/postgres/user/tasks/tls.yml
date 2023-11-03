@@ -37,5 +37,5 @@
     path: "{{ item }}"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0600
+    mode: "0600"
   with_items: "{{ keycertfiles.stdout_lines }}"

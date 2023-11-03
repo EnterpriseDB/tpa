@@ -15,7 +15,7 @@
     dest: /etc/cloud/cloud.cfg.d/99_hosts.cfg
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     content: >
       manage_etc_hosts: False
   when: cloudcfg.stat.exists

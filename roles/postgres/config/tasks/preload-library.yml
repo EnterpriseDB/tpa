@@ -87,7 +87,7 @@
     dest: "{{ spl_config }}"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   vars:
     spl_config: "{{ _include_dir }}/8888-shared_preload_libraries.conf"
     variable: shared_preload_libraries

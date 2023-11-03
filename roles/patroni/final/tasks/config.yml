@@ -11,7 +11,7 @@
     dest: "{{ patroni_etc }}/{{ cluster_name }}.yml"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0640
+    mode: "0640"
 
   # This can be enabled when PAT-106 is resolved
   #   validate: "{{ patroni_path }} --validate-config %s"

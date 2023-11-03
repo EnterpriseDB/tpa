@@ -8,7 +8,7 @@
     dest: /etc/systemd/system/pgbouncer.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   register: unit
   tags: [pgbouncer, service]
 

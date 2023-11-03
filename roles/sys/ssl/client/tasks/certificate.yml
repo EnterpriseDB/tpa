@@ -62,7 +62,7 @@
     dest: "{{ certificate_path }}"
     owner: "{{ clientcert_owner }}"
     group: "{{ clientcert_group }}"
-    mode: 0644
+    mode: "0644"
 
 # The hook may have used a different CA certificate and changed the
 # local_ca_certificate_path, so we don't insist on copying only our
@@ -74,7 +74,7 @@
     dest: "{{ ca_path }}"
     owner: "{{ clientcert_owner }}"
     group: "{{ clientcert_group }}"
-    mode: 0644
+    mode: "0644"
 
 - name: Remove client CSR on target instances
   file:

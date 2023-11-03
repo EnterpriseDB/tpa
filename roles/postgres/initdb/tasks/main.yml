@@ -15,7 +15,7 @@
     path: "{{ item }}"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0700
+    mode: "0700"
     state: directory
   with_items:
     - "{{ postgres_home }}"

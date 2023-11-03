@@ -55,7 +55,7 @@
       dest: /etc/tpa/gitcredentials
       owner: root
       group: root
-      mode: 0600
+      mode: "0600"
   - name: Configure git credential store
     command: >
       git config --global credential.helper

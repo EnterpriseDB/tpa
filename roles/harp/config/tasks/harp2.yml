@@ -8,7 +8,7 @@
     dest: "{{ harp_directory }}/harp.cluster.init.yml"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   vars:
     bdr_ro_groups:
     - role_replica
@@ -90,7 +90,7 @@
     dest: "{{ harp_directory }}/{{ prefix }}config.yml"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   vars:
     pgbouncer_bin_dirs:
       Debian: /usr/sbin
@@ -109,7 +109,7 @@
     dest: "{{ harp_directory }}/config.yml"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   vars:
     pgbouncer_bin_dirs:
       Debian: /usr/sbin

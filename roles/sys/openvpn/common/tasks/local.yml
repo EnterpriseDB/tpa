@@ -18,6 +18,7 @@
     msg: "Please ensure that openvpn is installed on the control node (where tpaexec runs) and the location is in $PATH"
     that: openvpn_bin != ''
 
+# XXX Could not find directory, even after delegating an openvpn-server role on a node
 - name: Ensure certs directory exists locally
   file:
     path: "{{ _local_cert_dir }}"

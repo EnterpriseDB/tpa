@@ -64,7 +64,7 @@
     dest: "~{{ postgres_user }}/.bashrc"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
 
 # We also refer to that .bashrc from .profile (read by login shells).
 
@@ -75,7 +75,7 @@
     dest: "~{{ postgres_user }}/.profile"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
 
 # That should be enough, right? Alas, no. The PGDG RPMs install a
 # .bash_profile, which has priority over .profile. We could overwrite
@@ -112,7 +112,7 @@
     path: "~{{ postgres_user }}/.ssh"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0700
+    mode: "0700"
     state: directory
 
 - name: Install .ssh/config file
@@ -120,7 +120,7 @@
     dest: "~{{ postgres_user }}/.ssh/config"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
     content: |
       ConnectTimeout 5s
 
@@ -147,7 +147,7 @@
       dest: /etc/tmpfiles.d/postgresql.conf
       owner: root
       group: root
-      mode: 0644
+      mode: "0644"
       content: |
         {% for rundir in run_directories %}
         d {{ rundir }} 2775 {{ postgres_user }} {{ postgres_group }} - -

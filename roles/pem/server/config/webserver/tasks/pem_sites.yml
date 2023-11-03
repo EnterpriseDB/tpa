@@ -10,7 +10,7 @@
         dest: "{{ pem_web_ssl_config_file[ansible_os_family] }}"
         owner: root
         group: root
-        mode: 0644
+        mode: "0644"
       notify: Restart apache for pem
   become: yes
   tags: [pem-server, pem-webserver]
@@ -29,7 +29,7 @@
         dest: "{{ pem_web_gnutls_config_file }}"
         owner: root
         group: root
-        mode: 0644
+        mode: "0644"
       notify: Restart apache for pem
 
     - name: "Enable the apache2 site: {{ pem_branding_edb_wl }}-gnutls-pem.conf"

@@ -6,7 +6,7 @@
   file:
     name: "{{ pg_backup_api_ssl_dir }}"
     state: directory
-    mode: 0755
+    mode: "0755"
     owner: root
     group: root
 
@@ -25,7 +25,7 @@
     src: "{{ ssl_ca_file }}"
     remote_src: yes
     dest: "{{ pg_backup_api_ssl_dir }}/CA.crt"
-    mode: 0644
+    mode: "0644"
     owner: "{{ pg_backup_api_ssl_user }}"
     group: "{{ pg_backup_api_ssl_group }}"
 

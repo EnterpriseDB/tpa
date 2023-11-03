@@ -19,7 +19,7 @@
     state: directory
     owner: "{{ pgd_cli_user }}"
     group: "{{ pgd_cli_group }}"
-    mode: 0750
+    mode: "0750"
 
 - name: Install pgdcli configuration file
   template:
@@ -27,7 +27,7 @@
     dest: "{{ pgdcli_directory }}/pgd-cli-config.yml"
     owner: "{{ pgd_cli_user }}"
     group: "{{ pgd_cli_group }}"
-    mode: 0600
+    mode: "0600"
 # Add a symlink to the default path for pgdcli config.
 # For pgdcli V1, this allows using cli without having to supply path to
 # config file via `-f`.
