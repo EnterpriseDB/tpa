@@ -4,6 +4,13 @@ cryptography
 python-dateutil
 netaddr
 boto3>=1.5.31
+# certifi is an indirect dependency coming from
+# docker -> requests -> certifi and by default
+# it pulls a pretty old version. So adding it
+# here explicitly so we pull the latest always.
+# We can safely remove it after we upgrade to
+# Python >=3.9 as part of edb-python package.
+certifi>=2023.7.22
 docker
 passlib
 psutil
