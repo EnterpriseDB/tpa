@@ -1,10 +1,12 @@
 # Reconciling changes made outside of TPA
+Any changes made to a TPA created cluster that are not performed by
+changing the TPA configuration will not be saved in `config.yml`. This
+means that your cluster will have changes that the TPA configuration
+won't be able to recreate.
 
-In general, if a cluster was created using TPA it is advisable to manage
-configuration changes to that cluster using TPA. This page is designed
-to help users understand how TPA manages configuration, what the
-implications of making local changes to a TPA-managed cluster are, and
-how to reconcile such changes. 
+This page shows how configuration is managed with TPA and the preferred
+ways to make configuration changes. We then look at strategies to make,
+and reconcile, the results of making manual changes to the cluster.
 
 ## Why might I need to make manual configuration changes?
 The most common scenario in which you may need to make configuration
@@ -56,9 +58,9 @@ Destructive changes that are easily detected and do not block TPA's
 operation will simply be undone when `tpaexec deploy` is next run.
 Consider manually removing an extension. From the perspective of TPA,
 this situation is indistinguishable from the user adding an extension to
-the config.yml file and running deploy. As such, TPA will add the
-extension such that the cluster and the config.yml are reconciled, albeit
-in the opposite way to that the user intended.
+the `config.yml` file and running deploy. As such, TPA will add the
+extension such that the cluster and the `config.yml` are reconciled,
+albeit in the opposite way to that the user intended.
 
 Similarly, changes made manually to configuration parameters will be
 undone unless they are:
@@ -74,8 +76,8 @@ there is no pressing operational reason to reconcile changes made by
 method 1 or 2.
 
 ### Destructive, blocking changes
-Changes which create a more fundamental mismatch between config.yml can
-block TPA from performing operations. For example if you physically
+Changes which create a more fundamental mismatch between `config.yml`
+can block TPA from performing operations. For example if you physically
 remove a node in a bare metal cluster, attempts by TPA to connect to
 that node will fail, meaning most TPA operations will exit with an error
 and you will be unable to manage the cluster with TPA until you
@@ -166,14 +168,17 @@ directory has been deleted.
 TPA automatically generates a password for the superuser which you may
 view using `tpaexec show-password <cluster> <superuser-name>`. If you
 change the password manually (for example using the `/password` command
-in psql) you will find that on after `tpaexec deploy` is next run, the
+in psql) you will find that after `tpaexec deploy` is next run, the
 password has reverted to the one set by TPA. To make the change through
 TPA, and therefore make it persist across runs of `tpaexec deploy`, you
 must use the command `tpaexec store-password <cluster> <superuser-name>`
-to specify the password, then run `tpaexec deploy`.
+to specify the password, then run `tpaexec deploy`. This also applies to
+any other user created through TPA.
 
 ### Example: adding or removing an extension
-A simple single-node cluster can be deployed with the following config.yml. 
+A simple single-node cluster can be deployed with the following
+`config.yml`.
+
 ```yaml
 ---
 architecture: M1
@@ -200,9 +205,9 @@ instances:
 You may manually add the pgvector extension by connecting to the node
 and running `apt install postgresql-15-pgvector` then executing the
 following SQL command: `CREATE EXTENSION vector;`. This will not cause
-any operational issues, beyond the fact that config.yml no longer
+any operational issues, beyond the fact that `config.yml` no longer
 describes the cluster as fully as it did previously. However, it is
-advisable to reconcile config.yml (or indeed simply use TPA to add the
+advisable to reconcile `config.yml` (or indeed simply use TPA to add the
 extension in the first place) by adding the following cluster variables. 
 
 ```yaml
@@ -218,13 +223,13 @@ cluster_vars:
 After adding this configuration, you may manually remove the extension
 by executing the SQL command `DROP EXTENSION vector;` and then `apt
 remove postgresql-15-pgvector`. However if you run `tpaexec deploy`
-again without reconciling the config.yml, the extension will be
-reinstalled. To reconcile the config.yml, simply remove the lines added
+again without reconciling `config.yml`, the extension will be
+reinstalled. To reconcile `config.yml`, simply remove the lines added
 previously.
 
 !!! Note 
 As noted previously, TPA will not honour destructive changes.
-So simply removing the lines from config.yml will not remove the
+So simply removing the lines from `config.yml` will not remove the
 extension. It is necessary to perform this operation manually then
 reconcile the change.
 !!!
