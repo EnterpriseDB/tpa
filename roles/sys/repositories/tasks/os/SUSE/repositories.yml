@@ -74,3 +74,34 @@
     repo:
       uri: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/sles/{{ ansible_distribution_major_version }}/noarch/
       name: enterprisedb-{{ repository }}-noarch
+
+- block:
+  - name: Install SUSEConnect
+    zypper:
+      name: SUSEConnect
+      state: present
+
+  - name: Check registration status
+    command:
+      cmd: SUSEConnect --status-text
+    register: registration_status
+
+  - block:
+    - name: Check registration code is available
+      assert:
+        that: lookup('env', 'SLES_REG_TOKEN') != ""
+        msg: "A SLES registration code is required to use EPAS on this system"
+
+    - name: Register system with SUSEConnect
+      command:
+        cmd: SUSEConnect -r {{ lookup('env', 'SLES_REG_TOKEN') }}
+
+    when: >
+      "Not Registered" in registration_status.stdout
+
+  - name: Install extra repositories from PackageHub
+    command:
+      cmd: SUSEConnect -p PackageHub/15.5/x86_64
+
+  when:
+    - postgres_flavour == 'epas'
