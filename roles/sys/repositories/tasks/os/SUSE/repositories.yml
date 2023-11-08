@@ -14,25 +14,8 @@
     that: item in default_suse_repositories|combine(suse_repositories)
   with_items: "{{ suse_repository_list }}"
 
-# all repositories must have a "repo" field
-
-#- name: Install SUSE repositories
-#  zypper_repository:
-#    description: "{{ repo.description|default(omit) }}"
-#    repo: "{{ repo.repo_uri }}"
-#    auto_import_keys: "true"
-#      #autorefresh: "true"
-#      #runrefresh: "true"
-#  with_items: "{{ suse_repository_list }}"
-#  loop_control:
-#    loop_var: r
-#  vars:
-#    repos: "{{ default_suse_repositories|combine(suse_repositories) }}"
-#    repo_name: "{{ r }}"
-#    repo: "{{ repos[r] }}"
-
 - name: Install SUSE repositories
-  shell: zypper --non-interactive addrepo --refresh --priority 50 --check {{ repo.repo_uri }}; zypper --gpg-auto-import-keys refresh
+  shell: zypper --non-interactive addrepo --refresh --priority 75 --check {{ repo.repo_uri }}; zypper --gpg-auto-import-keys refresh
   with_items: "{{ suse_repository_list }}"
   loop_control:
     loop_var: r
@@ -68,6 +51,7 @@
     repo: "{{ repo.uri }}"
     runrefresh: true
     auto_import_keys: true
+    priority: 50
   with_items: "{{ edb_repositories}} "
   loop_control:
     loop_var: repository
@@ -82,6 +66,7 @@
     repo: "{{ repo.uri }}"
     runrefresh: true
     auto_import_keys: true
+    priority: 50
   with_items: "{{ edb_repositories}} "
   loop_control:
     loop_var: repository

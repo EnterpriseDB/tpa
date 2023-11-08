@@ -7,4 +7,6 @@ efm_packages:
     - "edb-efm{{ efm_versionNN }}"
   RedHat:
     - "edb-efm{{ efm_versionNN }}"
+  SUSE:
+    - "edb-efm{{ efm_versionNN }}"
   Ubuntu: *debian_efm_packages
