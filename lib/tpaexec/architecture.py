@@ -1124,7 +1124,7 @@ class Architecture(object):
         # BDR.update_cluster_vars), and we don't need to do anything more (and
         # we must not configure any edb_repositories).
 
-        if "tpa_2q_repositories" in cluster_vars:
+        if cluster_vars.get("tpa_2q_repositories"):
             return
 
         # Otherwise, if --2Q-repositories is specified, we use the repository
