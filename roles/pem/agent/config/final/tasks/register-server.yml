@@ -22,7 +22,7 @@
       --pem-user "{{ pem_postgres_user }}"                             \
       --asb-host-db "{{ asb_host_db|default('postgres') }}"            \
       --remote-monitoring "{{ remote_monitoring|default('no') }}"      \
-      --group "{{ monitoring_group|default('PEM Server Directory') }}" \
+      --group "{{ hostvars[pem_server].pem_server_group }}" \
       --team "{{ monitoring_team |default('') }}"                      \
       --owner "{{ monitoring_server_owner |default('') }}"             \
       --config-dir "{{ pem_agent_config_path|dirname }}"               \
