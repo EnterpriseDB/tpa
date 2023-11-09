@@ -52,6 +52,9 @@
     copy:
       src: "{{ pem_base_dir }}/resources/pem-server-random.sql.in"
       dest: "{{ sql_path }}"
+      owner: "{{ postgres_user }}"
+      group: "{{ postgres_user }}"
+      mode: "0755"
       remote_src: yes
 
   - name: Replace placeholders in pem-server-random.sql

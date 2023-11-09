@@ -23,6 +23,15 @@
     pgpass_users:
       - "{{ pem_db_user }}"
 
+- name: Set pem_base_dir folder ownership
+  ansible.builtin.file:
+    path: "{{ pem_base_dir }}"
+    state: directory
+    recurse: yes
+    owner: pem
+    group: pem
+    mode: "0755"
+
 - name: Copy pem.wsgi.in to pem.wsgi
   copy:
     src: "{{ pem_base_dir }}/web/pem.wsgi.in"
