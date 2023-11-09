@@ -120,6 +120,7 @@
   when: >
     initialise_harp|bool
     and 'postgres' in role
+    and harp_manager_user != postgres_user
 
 # Instances with harp-proxy in role will install pgbouncer (via package
 # dependencies), but harp_proxy will manage the pgbouncer configuration.
