@@ -42,16 +42,15 @@ and whether the change blocks TPA from running by causing an error or
 invalidating the data in `config.yml`.
 
 ### Non-destructive, non-blocking changes
-Additive changes that can be detected by TPA by inspecting the cluster
-are often accommodated with no operational issues, Consider manually
-adding an extension. Because TPA does not make destructive changes, the
-extension will not be removed when `tpaexec deploy` is next run.
-Furthermore, because TPA inspects the cluster prior to making changes,
-`tpaexec upgrade` will successfully upgrade the new extension despite it
-being absent from `config.yml`.
+Additive changes are often accommodated with no immediate operational
+issues, Consider manually adding an extension. Because TPA does not make
+destructive changes, the extension will not be removed when `tpaexec
+deploy` is next run.
 
-It should be noted however that, even when such a change is detected,
-TPA will not make any attempt to modify the `config.yml` file.
+It should be noted however that, TPA will not make any attempt to modify
+the `config.yml` file to reflect this change and the new extension will
+be omitted from `tpaexec upgrade` which could lead to incompatible
+software versions existing on the cluster.
 
 ### Destructive, non-blocking changes
 Destructive changes that are easily detected and do not block TPA's
