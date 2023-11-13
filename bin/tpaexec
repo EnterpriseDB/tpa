@@ -373,7 +373,10 @@ playbook() {
 }
 
 deploy() {
-    provision
+    NO_PROVISION_OPTIONS="(--help)|(--list-hosts)|(--list-tasks)|(--list-tags)"
+    if [[ ! $@ =~ $NO_PROVISION_OPTIONS ]] ; then
+        provision
+    fi
     playbook deploy.yml "$@"
 }
 
