@@ -43,14 +43,23 @@ invalidating the data in `config.yml`.
 
 ### Non-destructive, non-blocking changes
 Additive changes are often accommodated with no immediate operational
-issues, Consider manually adding an extension. Because TPA does not make
-destructive changes, the extension will not be removed when `tpaexec
-deploy` is next run.
+issues. Consider manually adding a user. The new user will continue to
+exist and cause no issues with TPA at all. You may prefer to manage the
+user through TPA in which case you can declare it in `config.yml` but
+the existence of a manually-added user will cause no operational issues.
 
-It should be noted however that, TPA will not make any attempt to modify
-the `config.yml` file to reflect this change and the new extension will
-be omitted from `tpaexec upgrade` which could lead to incompatible
-software versions existing on the cluster.
+Some manual additions can have more nuanced effects. Consider manually
+adding an extension. Because TPA does not make destructive changes, the
+extension will not be removed when `tpaexec deploy` is next run.
+**However**, if you made any changes to the Postgres configuration to
+accommodate the new extension these may be overwritten if you did not
+make them using one of TPA's supported mechanisms (see below).
+
+Furthermore, TPA will not make any attempt to modify the `config.yml`
+file to reflect manual changes and the new extension will be omitted
+from `tpaexec upgrade` which could lead to incompatible software
+versions existing on the cluster.
+
 
 ### Destructive, non-blocking changes
 Destructive changes that are easily detected and do not block TPA's
@@ -95,7 +104,7 @@ command such as:
 tpaexec configure mycluster \
 -a PGD-Always-ON \
 --platform bare \
---edbpge 15
+--edbpge 15 \
 --location-names a \
 --pgd-proxy-routing local
 ```
@@ -212,7 +221,7 @@ extension in the first place) by adding the following cluster variables.
 ```yaml
 cluster_vars:
   ...  
-  packages:
+  extra_postgres_packages:
    common:
    - postgresql-15-pgvector
   postgres_extensions:
@@ -220,8 +229,8 @@ cluster_vars:
   ```
 
 After adding this configuration, you may manually remove the extension
-by executing the SQL command `DROP EXTENSION vector;` and then `apt
-remove postgresql-15-pgvector`. However if you run `tpaexec deploy`
+by executing the SQL command `DROP EXTENSION vector;` and then 
+`apt remove postgresql-15-pgvector`. However if you run `tpaexec deploy`
 again without reconciling `config.yml`, the extension will be
 reinstalled. To reconcile `config.yml`, simply remove the lines added
 previously.
