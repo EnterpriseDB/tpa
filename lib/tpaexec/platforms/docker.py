@@ -117,7 +117,7 @@ class docker(Platform):
         return local_sources, errors
 
     def supported_distributions(self):
-        return ["Debian", "RedHat", "Ubuntu", "Rocky", "AlmaLinux", "SLES"]
+        return ["AlmaLinux", "Debian", "RedHat", "Rocky", "SLES", "Ubuntu"]
 
     def default_distribution(self):
         return "Rocky"
@@ -146,13 +146,14 @@ class docker(Platform):
         _, _, img = name.rpartition("/")
 
         known_images = {
+            "tpa/almalinux": {
+                "versions": ["8", "9"],
+                "os": "AlmaLinux",
+                "os_family": "RedHat",
+            },
             "tpa/debian": {
                 "versions": ["stretch", "buster", "bullseye", "9", "10", "11"],
                 "os": "Debian",
-            },
-            "tpa/ubuntu": {
-                "versions": ["bionic", "focal", "jammy", "18.04", "20.04", "22.04"],
-                "os": "Ubuntu",
             },
             "tpa/redhat": {
                 "versions": ["7", "8", "9"],
@@ -165,15 +166,14 @@ class docker(Platform):
                 "os": "Rocky",
                 "os_family": "RedHat",
             },
-            "tpa/almalinux": {
-                "versions": ["8", "9"],
-                "os": "AlmaLinux",
-                "os_family": "RedHat",
-            },
             "tpa/sles": {
                 "versions": ["15"],
                 "os": "SLES",
                 "os_family": "SUSE",
+            },
+            "tpa/ubuntu": {
+                "versions": ["bionic", "focal", "jammy", "18.04", "20.04", "22.04"],
+                "os": "Ubuntu",
             },
         }
 
