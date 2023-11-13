@@ -70,6 +70,22 @@ class BDR_Always_ON(BDR):
         super().update_cluster_vars(cluster_vars)
         self._update_harp_probes(cluster_vars)
 
+    def default_edb_repos(self, cluster_vars) -> List[str]:
+        bdr_version = cluster_vars.get("bdr_version")
+        postgres_flavour = cluster_vars.get("postgres_flavour")
+        bdr_repositories = []
+        if bdr_version == "3":
+            extensions = ["pglogical"]
+            if postgres_flavour == "pgextended":
+                bdr_repositories.append("bdr_3_7_postgres_extended")
+            elif postgres_flavour == "epas":
+                bdr_repositories.append("bdr_3_7_postgres_advanced")
+            else:
+                bdr_repositories.append("bdr_3_7_postgres")
+        elif bdr_version == "4":
+            bdr_repositories.append("postgres_distributed_4")
+        return super().default_edb_repos(cluster_vars) + bdr_repositories
+
     def _update_harp_probes(self, cluster_vars):
         http = {}
         if "enable_harp_probes" in self.args:

@@ -59,22 +59,17 @@ class BDR(Architecture):
         # Postgres version. If both are specified, we check that the
         # combination makes sense.
         #
-        # If any --2Q-repositories are specified, we do not interfere with
-        # that setting at all.
 
-        tpa_2q_repositories = self.args.get("tpa_2q_repositories") or []
+        edb_repositories = self.args.get("edb_repositories") or []
         postgres_flavour = self.args.get("postgres_flavour")
         postgres_version = self.args.get("postgres_version")
         bdr_version = self.args.get("bdr_version")
         harp_enabled = self.args.get("failover_manager") == "harp"
 
-        given_repositories = " ".join(tpa_2q_repositories)
+        # given_repositories = " ".join(tpa_2q_repositories)
 
         arch = self.args["architecture"]
         default_bdr_versions = {
-            "9.4": "1",
-            "9.6": "2",
-            "10": "3",
             "11": "3",
             "12": "5" if arch == "PGD-Always-ON" else "4",
             "13": "5" if arch == "PGD-Always-ON" else "4",
@@ -83,18 +78,8 @@ class BDR(Architecture):
             None: "5" if arch == "PGD-Always-ON" else "4",
         }
 
-        default_pg_versions = {
-            "1": "9.4",
-            "2": "9.6",
-            "3": "13",
-            "4": "14",
-            "5": "15",
-        }
-
         if bdr_version is None:
             bdr_version = default_bdr_versions.get(postgres_version)
-        if postgres_version is None:
-            postgres_version = default_pg_versions.get(bdr_version)
 
         if (postgres_version, bdr_version) not in self.supported_versions():
             raise BDRArchitectureError(
@@ -103,37 +88,8 @@ class BDR(Architecture):
 
         extensions = []
 
-        if bdr_version == "1":
-            postgres_flavour = "postgresql-bdr"
-        elif bdr_version == "2":
-            if not tpa_2q_repositories or "/bdr2/" not in given_repositories:
-                tpa_2q_repositories.append("products/bdr2/release")
-        elif bdr_version == "3":
+        if bdr_version == "3":
             extensions = ["pglogical"]
-            if not tpa_2q_repositories:
-                if postgres_flavour == "pgextended":
-                    tpa_2q_repositories.append("products/bdr_enterprise_3_7/release")
-                elif postgres_flavour == "epas":
-                    tpa_2q_repositories.append(
-                        "products/bdr_enterprise_3_7-epas/release"
-                    )
-                else:
-                    tpa_2q_repositories.append("products/bdr3_7/release")
-                    tpa_2q_repositories.append("products/pglogical3_7/release")
-        elif bdr_version == "4":
-            if not tpa_2q_repositories or "/bdr4/" not in given_repositories:
-                tpa_2q_repositories.append("products/bdr4/release")
-            if postgres_flavour == "pgextended" and (
-                not tpa_2q_repositories or "/2ndqpostgres/" not in given_repositories
-            ):
-                tpa_2q_repositories.append("products/2ndqpostgres/release")
-
-        # bdr5 is in EBD CS repositories
-
-        if harp_enabled and (
-            not tpa_2q_repositories or "/harp/" not in given_repositories
-        ):
-            tpa_2q_repositories.append("products/harp/release")
 
         cluster_vars.update(
             {
@@ -144,17 +100,10 @@ class BDR(Architecture):
             }
         )
 
-        if postgres_flavour == "epas" and (
-            not tpa_2q_repositories
-            or "products/default/release" not in given_repositories
-        ):
-            if self.name != "PGD-Always-ON":
-                tpa_2q_repositories.append("products/default/release")
-
-        if tpa_2q_repositories:
+        if edb_repositories:
             cluster_vars.update(
                 {
-                    "tpa_2q_repositories": tpa_2q_repositories,
+                    "edb_repositories": edb_repositories,
                 }
             )
 
