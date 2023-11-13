@@ -626,7 +626,6 @@ class Architecture(object):
         self._init_cluster_vars(cluster_vars)
         self.update_cluster_vars(cluster_vars)
         self.postgres_eol_repos(cluster_vars)
-        self.set_2q_repos(cluster_vars)
         self.update_repos(cluster_vars)
         self.platform.update_cluster_vars(cluster_vars, args)
         args["cluster_vars"] = cluster_vars
@@ -1045,7 +1044,7 @@ class Architecture(object):
             # No matter how the flavour is specified, we translate 'pgextended'
             # into 'edbpge' for all but BDR-Always-ON, for which we would never
             # call this function anyway (see below).
-            "pgextended": [],
+            "pgextended": ["standard", "postgres_extended"],
             "epas": ["enterprise"],
         }
 
@@ -1059,7 +1058,7 @@ class Architecture(object):
         if (
             postgres_flavour == "postgresql"
             and not self.args.get("failover_manager") == "efm"
-            and not self.name == "PGD-Always-ON"
+            and not self.name in ("PGD-Always-ON", "BDR-Always-ON")
             and not self.args.get("enable_pem")
         ):
             repos = []
@@ -1070,9 +1069,8 @@ class Architecture(object):
         """Define package repositories for the cluster based on the selected
         architecture and Postgres flavour/version."""
 
-        # TPA supports three kinds of repositories: (a) EDB's new Cloudsmith
-        # repositories, defined via --edb-repositories; (b) legacy 2ndQuadrant
-        # repositories, defined via --2Q-repositories; and (c) arbitrary APT or
+        # TPA supports two kinds of repositories: (a) EDB's new Cloudsmith
+        # repositories, defined via --edb-repositories; and (b) arbitrary APT or
         # YUM repos, defined by setting {apt,yum}_{repositories,repository_list}
         # in config.yml (not via configure options). PGDG, EPEL, and the legacy
         # EDB repos ({apt,yum}.enterprisedb.com) are defined using this method
@@ -1104,16 +1102,11 @@ class Architecture(object):
         #
         # Before the Cloudsmith repositories were introduced, clusters required
         # a mixture of 2Q repositories with PGDG(+EPEL) and the legacy EDB repos
-        # (for EPAS/EFM/etc., if used). BDR-Always-ON clusters still need the 2Q
-        # repos, but otherwise (and especially for M1), new clusters don't need
-        # so many repos. (Of course, you can still specify different/additional
+        # (for EPAS/EFM/etc., if used). All supported packages that EDB provide
+        # are now available in the Cloudsmith repositories.
+        # (Of course, you can still specify different/additional
         # repositories in config.yml, and existing configurations will continue
         # to work as before.)
-        #
-        # In order to protect users against accidents and confusion, TPA does
-        # not allow edb_repositories and tpa_2q_repositories to be used together
-        # (by making --edb-repositories and --2Q-repositories mutually exclusive
-        # at configure time, and also at deploy time by asserts in roles/init).
         #
         # If a user goes to the trouble of specifying an --edb-repositories list
         # (and not just "none" or the flavour-dependent defaults derived later),
@@ -1124,33 +1117,6 @@ class Architecture(object):
             cluster_vars.update({"edb_repositories": edb_repositories})
             return
 
-        # If cluster_vars.tpa_2q_repositories is defined when we reach here, we
-        # know that it must already take the --2Q-repositories into account (see
-        # BDR.update_cluster_vars), and we don't need to do anything more (and
-        # we must not configure any edb_repositories).
-
-        if cluster_vars.get("tpa_2q_repositories"):
-            return
-
-        # Otherwise, if --2Q-repositories is specified, we use the repository
-        # list without any modifications. Again, we must not configure any
-        # edb_repositories in this case.
-
-        tpa_2q_repositories = self.args.get("tpa_2q_repositories")
-        if tpa_2q_repositories:
-            cluster_vars.update({"tpa_2q_repositories": tpa_2q_repositories})
-            return
-
-        # If we are configuring for a postgres version at least 16, we
-        # explicitly set tpa_2q_repositories to be empty, so that it
-        # doesn't get any entries automatically added at deploy-time
-        if int(self.args.get("postgres_version")) >= 16:
-            cluster_vars.update({"tpa_2q_repositories": []})
-
-        # We know that the cluster doesn't need any 2Q repos, either because the
-        # user asked for them explicitly, or because other configure options did
-        # so implicitly. Now we can focus on setting edb_repositories correctly.
-        #
         # If --edb-repositories is specified, we use the list to override the
         # defaults based on postgres_flavour. We translate `none` to [], but do
         # not make any other changes to the given list (no automagic additions
