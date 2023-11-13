@@ -63,6 +63,11 @@
       base_image: "{{ _tpa_images[_image_key] }}"
       context_path: "{{ docker_context_path|default('docker/images') }}"
     _tpa_images:
+      almalinux-8: almalinux:8
+      almalinux-9: almalinux:9
+      almalinux-latest: almalinux:9
+      centos-8: centos:8
+      centos-9: centos:9
       debian-9: debian:9
       debian-stretch: debian:9
       debian-10: debian:10
@@ -70,13 +75,6 @@
       debian-11: debian:11
       debian-bullseye: debian:11
       debian-latest: debian:11
-      ubuntu-18.04: ubuntu:bionic
-      ubuntu-bionic: ubuntu:bionic
-      ubuntu-20.04: ubuntu:focal
-      ubuntu-focal: ubuntu:focal
-      ubuntu-22.04: ubuntu:jammy
-      ubuntu-jammy: ubuntu:jammy
-      ubuntu-latest: ubuntu:jammy
       redhat-7: centos:7
       redhat-8: rockylinux:8
       redhat-9: rockylinux:9
@@ -84,12 +82,14 @@
       rocky-8: rockylinux:8
       rocky-9: rockylinux:9
       rocky-latest: rockylinux:8
-      centos-8: centos:8
-      centos-9: centos:9
-      almalinux-8: almalinux:8
-      almalinux-9: almalinux:9
-      almalinux-latest: almalinux:9
       sles-15: registry.suse.com/bci/bci-base:15.5
+      ubuntu-18.04: ubuntu:bionic
+      ubuntu-bionic: ubuntu:bionic
+      ubuntu-20.04: ubuntu:focal
+      ubuntu-focal: ubuntu:focal
+      ubuntu-22.04: ubuntu:jammy
+      ubuntu-jammy: ubuntu:jammy
+      ubuntu-latest: ubuntu:jammy
   when:
     image.startswith('tpa/')
     and _image_key in _tpa_images
