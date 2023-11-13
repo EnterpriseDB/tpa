@@ -242,6 +242,8 @@
         upgrade_from: 3
     - include_role: name=postgres/user
     - include_role: name=postgres/config
+      vars:
+        bdr_version_num: "{{target_bdr_version_num|default(50300)}}"
     - include_role: name=postgres/final
     when: >
       'postgres' in role
