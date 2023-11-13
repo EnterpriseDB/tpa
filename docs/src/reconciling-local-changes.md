@@ -48,12 +48,13 @@ exist and cause no issues with TPA at all. You may prefer to manage the
 user through TPA in which case you can declare it in `config.yml` but
 the existence of a manually-added user will cause no operational issues.
 
-Some manual additions can have more nuanced effects. Consider manually
-adding an extension. Because TPA does not make destructive changes, the
-extension will not be removed when `tpaexec deploy` is next run.
-**However**, if you made any changes to the Postgres configuration to
-accommodate the new extension these may be overwritten if you did not
-make them using one of TPA's supported mechanisms (see below).
+Some manual additions can have more nuanced effects. Take the example of
+an extension which has been manually added. Because TPA does not make
+destructive changes, the extension will not be removed when `tpaexec
+deploy` is next run. **However**, if you made any changes to the
+Postgres configuration to accommodate the new extension these may be
+overwritten if you did not make them using one of TPA's supported
+mechanisms (see below).
 
 Furthermore, TPA will not make any attempt to modify the `config.yml`
 file to reflect manual changes and the new extension will be omitted
