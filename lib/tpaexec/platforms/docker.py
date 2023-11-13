@@ -117,7 +117,7 @@ class docker(Platform):
         return local_sources, errors
 
     def supported_distributions(self):
-        return ["AlmaLinux", "Debian", "RedHat", "Rocky", "SLES", "Ubuntu"]
+        return ["AlmaLinux", "Debian", "RedHat", "Rocky", "SLES", "OracleLinux", "Ubuntu"]
 
     def default_distribution(self):
         return "Rocky"
@@ -170,6 +170,11 @@ class docker(Platform):
                 "versions": ["15"],
                 "os": "SLES",
                 "os_family": "SUSE",
+            },
+            "tpa/oraclelinux": {
+                "versions": ["9"],
+                "os": "OracleLinux",
+                "os_family": "RedHat",
             },
             "tpa/ubuntu": {
                 "versions": ["bionic", "focal", "jammy", "18.04", "20.04", "22.04"],

@@ -74,6 +74,7 @@
       debian-buster: debian:10
       debian-11: debian:11
       debian-bullseye: debian:11
+      oraclelinux-9: oraclelinux:9
       debian-latest: debian:11
       redhat-7: centos:7
       redhat-8: rockylinux:8
