@@ -201,12 +201,6 @@ apt only understands `xyz*` (as in the example above).
 Note: see limitations of using wildcards in package_version in
 [tpaexec-configure](tpaexec-configure.md#known-issue-with-wildcard-use).
 
-Note: when upgrading from BDR3.7 to PGD5 using a specific PGD5 version
-you should also specify `-e target_bdr_version_num=5YYZZ`
-with YY the minor version, ZZ the fix version, accordingly to targeted
-`bdr_package_version` already defined. The default is set to `50300`
-which corresponds to PGD version 5.3.
-
 It is your responsibility to ensure that the combination of Postgres,
 PGD, and pglogical package versions that you request are sensible. That
 is, they should work together, and there should be an upgrade path from
