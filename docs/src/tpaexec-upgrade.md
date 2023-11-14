@@ -62,6 +62,10 @@ unrelated pending changes before you begin the software upgrade process.
 
 ## Upgrading from BDR-Always-ON to PGD-Always-ON
 
+**Note:** The upgrade procedure from BDR-Always-ON to PGD-Always-ON for
+camo enabled clusters using BDR version 3.7 is not yet supported. This
+support will come in a later release.
+
 To upgrade from BDR-Always-ON to PGD-Always-ON (that is, from BDR3/4 to
 PGD5), first run `tpaexec reconfigure`:
 
