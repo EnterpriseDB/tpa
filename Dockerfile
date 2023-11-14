@@ -30,8 +30,8 @@ COPY . ${TPA_DIR}
 RUN apt-get -y update && \
     apt-get -y install --no-install-recommends \
       curl gnupg apt-transport-https \
-      python3 python3-pip python3-venv \
-      openvpn patch git && \
+      python3 python3-dev python3-pip python3-venv \
+      openvpn patch git gcc && \
     curl -fsSL https://download.docker.com/linux/debian/gpg >/etc/apt/trusted.gpg.d/docker.asc && \
     codename=$(awk -F= '/VERSION_CODENAME/{print $2}' /etc/os-release) && \
     arch=$(dpkg --print-architecture) && \
@@ -52,7 +52,7 @@ RUN apt-get -y update && \
     # Clean up unnecessary files and packages \
     \
     rm -rf ${TPA_DIR}/.[a-z]* && \
-    apt purge -y python3-pip python3-venv build-essential && \
+    apt purge -y gcc python3-dev python3-pip python3-venv build-essential && \
     apt autoremove -y && \
     apt autoclean -y && \
     apt clean -y && \
