@@ -10,7 +10,7 @@
 
   A BDR 3.7 cluster created with BDR-Always-ON architecture, can now be
   upgraded to the PGD-Always-ON architecture, running PGD5, by using
-  `tpexec reconfigure` to generate a revised config.yml for PGD5 and then
+  `tpaexec reconfigure` to generate a revised config.yml for PGD5 and then
   `tpaexec upgrade` to perform the upgrade.
 
   Minimum version for PGD5 to upgrade to needs to be 5.3.
