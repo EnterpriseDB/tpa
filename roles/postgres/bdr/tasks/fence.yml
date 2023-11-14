@@ -25,7 +25,7 @@
   block:
   - name: Run 'harpctl fence'
     command:
-      harpctl -f /etc/harp/config.yml fence --force
+      harpctl -f /etc/harp/config.yml fence {{ bdr_node_name|default(inventory_hostname) }} --force
     become_user: "{{ postgres_user }}"
     become: yes
 
@@ -40,7 +40,7 @@
   - name: Wait for node to be fenced
     command: >
       harpctl -f /etc/harp/config.yml
-      get node {{ inventory_hostname }} -o json
+      get node {{ bdr_node_name|default(inventory_hostname) }} -o json
     register: harpctl_get_node
     become_user: "{{ postgres_user }}"
     become: yes
