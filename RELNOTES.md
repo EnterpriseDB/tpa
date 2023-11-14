@@ -19,6 +19,9 @@
   PGD-Always-ON` in `tpaexec-upgrade.md` in the documentation for details
   on the upgrade procedure.
 
+  Note: The upgrade procedure for camo enabled clusters is not yet
+  supported. This support will come in a later release.
+
 - TPA-553 TPA support for v16 supported software
 
   v23.23 introduced the initial support for installing Postgres v16.
