@@ -21,7 +21,7 @@
   block:
   - name: Run 'harpctl unfence'
     command:
-      harpctl -f /etc/harp/config.yml unfence
+      harpctl -f /etc/harp/config.yml unfence {{ bdr_node_name|default(inventory_hostname) }}
     become_user: "{{ postgres_user }}"
     become: yes
 
@@ -40,7 +40,7 @@
   - name: Wait for node to be unfenced
     command: >
       harpctl -f /etc/harp/config.yml
-      get node {{ inventory_hostname }} -o json
+      get node {{ bdr_node_name|default(inventory_hostname) }} -o json
     register: harpctl_get_node
     become_user: "{{ postgres_user }}"
     become: yes
