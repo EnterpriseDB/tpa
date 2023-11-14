@@ -2,6 +2,81 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.25 (unreleased)
+
+### Notable changes
+
+- TPA-445 Support upgrades from BDR 3.7 to PGD5
+
+  A BDR 3.7 cluster created with BDR-Always-ON architecture, can now be
+  upgraded to the PGD-Always-ON architecture, running PGD5, by using
+  `tpexec reconfigure` to generate a revised config.yml for PGD5 and then
+  `tpaexec upgrade` to perform the upgrade.
+
+  Minimum version for PGD5 to upgrade to needs to be 5.3.
+
+  Please refer to the section `Upgrading from BDR-Always-ON to
+  PGD-Always-ON` in `tpaexec-upgrade.md` in the documentation for details
+  on the upgrade procedure.
+
+- TPA-553 TPA support for v16 supported software
+
+  v23.23 introduced the initial support for installing Postgres v16.
+  TPA-553 makes sure that TPA correctly handles v16 supported software.
+
+### Minor changes
+
+- TPA-552 Backport upgrade improvements to BDR-Always-ON
+
+  A number of improvements were introduced to the upgrade process for BDR4
+  to PGD5 upgrade as part of TPA-387 including improved checks for
+  compatibility, simplified handling of components being upgraded, and
+  using HARP fencing functionality to guard against writes being directed
+  to nodes while they're being upgraded. This change backports some of
+  those improvements to BDR-Always-ON upgrades also.
+
+- TPA-603 Support installing PEM on SLES
+
+- TPA-615 Set explicit permissions when creating filesystem objects
+
+  Also partially covers TPA-467. More improvements in this area targeted
+  for later versions.
+
+- TPA-462 Add pgd-cli config symlink for pgd-cli v1
+
+  Adds a symlink to the pgd-cli config file for v1 so it could be run
+  without having to specify the path via `-f` switch.
+
+- TPA-587 Set node kinds as part of BDR4 deployment and upgrade
+
+  BDR 4.3.0 had introduced support for `alter_node_kind` to set nodes
+  kinds as appropriate. This change ensures node kinds are correctly set
+  for BDR-Always-ON clusters using BDR version 4.3 and above.
+
+- TPA-604 Switch to using SP5 for SLES 15
+
+  Default cluster configuration from now on will use SP5 when SLES 15 is
+  requested.
+
+- Misc. documentation changes
+
+### Bugfixes
+
+- TPA-611 Fix `tpaexec setup` problems for tpaexec-deps users
+
+  v23.24 switched the default ansible installed as part of `tpaexec setup`
+  command from 2q-ansible to community ansible which resulted in a
+  checksum failure during `tpaexec setup` command for tpaexec-deps users.
+
+- TPA-613 Make sure `pem_server_group` (if specified) applies to pemworker
+
+- TPA-595 Make sure `sar` runs on all nodes
+
+  sys/sysstat role in previous versions installed and configured `sar` but
+  it would only set up the cron job responsible for sar on the barman node
+  which meant `sar` won't run on other instances. Also instead of cronjob,
+  use `systemd` timers for configuring sysstat.
+
 ## v23.24 (2023-10-17)
 
 ### Notable changes
