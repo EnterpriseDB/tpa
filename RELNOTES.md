@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-## v23.25 (unreleased)
+## v23.25 (2023-11-14)
 
 ### Notable changes
 
@@ -79,6 +79,8 @@
   it would only set up the cron job responsible for sar on the barman node
   which meant `sar` won't run on other instances. Also instead of cronjob,
   use `systemd` timers for configuring sysstat.
+
+- TPA-605 Remove references to defunct "shared" platform
 
 ## v23.24 (2023-10-17)
 
