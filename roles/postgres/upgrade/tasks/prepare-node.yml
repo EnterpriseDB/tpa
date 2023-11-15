@@ -91,11 +91,34 @@
     state: started
     masked: false
 
+- name: Rename the repmgr database
+  postgresql_query:
+    autocommit: yes
+    conninfo: "{{ dsn|dbname('postgres') }}"
+    queries:
+      - text: SELECT pg_terminate_backend(pid)
+              FROM pg_stat_activity
+              WHERE pid <> pg_backend_pid()
+               AND datname = 'repmgr'
+      - text: ALTER DATABASE repmgr RENAME TO repmgr_preupgrade
+  become: yes
+  become_user: "{{ postgres_user }}"
+  ignore_errors: yes
+
 - name: Stop the new instance
   command: |
     {{ new_postgres_bin_dir }}/pg_ctl stop -D {{ new_postgres_data_dir }}
   become: yes
   become_user: "{{ postgres_user }}"
+
+- postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+      - text: SELECT bdr.promote_node()
+  become: yes
+  become_user: "{{ postgres_user }}"
+  when: >
+    'bdr' in role and 'readonly' in role
 
 - name: Drop pg_catalog.pgbouncer_get_auth from the old instance to facilitate the upgrade
   postgresql_query:

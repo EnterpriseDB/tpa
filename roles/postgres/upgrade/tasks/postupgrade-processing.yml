@@ -27,6 +27,16 @@
   vars:
     postgres_service_end_state: restarted
 
+- name: Change the repmgr database name back to original
+  postgresql_query:
+    autocommit: yes
+    conninfo: "{{ dsn|dbname('postgres') }}"
+    queries:
+      - text: ALTER DATABASE repmgr_preupgrade RENAME TO repmgr
+  become: yes
+  become_user: "{{ postgres_user }}"
+  ignore_errors: yes
+
 - include_role:
     name: postgres/config/final
     tasks_from: pgbouncer.yml
@@ -46,9 +56,7 @@
       name: postgres
       state: stopped
     delegate_to: "{{ item }}"
-    with_items:
-      - "{{ groups['role_readonly']|default([]) }}"
-      - "{{ groups['role_replica']|default([]) }}"
+    with_items: "{{ groups['role_replica'] }}"
 
   - name: Sync standbys after primary major upgrade
     command: >
@@ -58,9 +66,7 @@
       remote_dir: "{{ item + ':' + new_postgres_data_dir|dirname }}"
     become_user: "{{ postgres_user }}"
     become: true
-    with_items:
-      - "{{ groups['role_readonly']|default([]) }}"
-      - "{{ groups['role_replica']|default([]) }}"
+    with_items: "{{ groups['role_replica'] }}"
     register: this
     failed_when:
       this.rc != 0 or 'error' in this.stderr

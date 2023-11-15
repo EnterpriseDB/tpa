@@ -25,16 +25,8 @@
   become_user: root
   become: yes
   hosts: "{{ update_hosts|default('all') }}"
-  serial: 1
+  serial: "{{ update_hosts|ternary('1',omit) }}"
   tasks:
-  - name: Configure local-repo, if available
-    include_role:
-      name: sys/local_repo
-
-  - name: Set up repositories
-    include_role:
-      name: sys/repositories
-
   - name: Stop repmgr
     block:
     - assert:
@@ -93,7 +85,6 @@
         become: yes
         delegate_to: "{{ item }}"
         with_items: "{{ groups['role_replica'] }}"
-        when: false
  
       - service:
           name: postgres
