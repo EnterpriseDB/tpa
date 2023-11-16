@@ -73,8 +73,10 @@
         {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
       become_user: "{{ postgres_user }}"
       become: yes
-      when: >
-        not postgres_major_version_upgrade and inventory_hostname == groups['replica'][0]
+      when:
+      - not postgres_major_version_upgrade
+      - groups['replica'] is not empty
+      - inventory_hostname == groups['replica'][0]
 
     # Note: this role was calculated earlier, so it's outdated after the
     # switchover, but it correctly identifies the instance to use.

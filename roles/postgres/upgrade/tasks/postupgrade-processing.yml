@@ -31,8 +31,10 @@
     name: postgres/config/final
     tasks_from: pgbouncer.yml
   ignore_errors: yes
-  when: >
-    'bdr' in role and 'readonly' not in role
+  when:
+    - "'bdr' in role"
+    - "'readonly' not in role"
+    - "'witness' not in role"
 
 # This block stops the standbys in an M1 cluster to perform
 # the in-place upgrade of those instances per the pg_upgrade
@@ -62,7 +64,23 @@
     register: this
     failed_when:
       this.rc != 0 or 'error' in this.stderr
-     
+  
+  - name: Sync WALs after primary major upgrade
+    command: >
+      /usr/bin/rsync --archive --delete --hard-links --size-only --no-inc-recursive --verbose \
+      {{ old_postgres_wal_dir }} {{ hostvars[item].postgres_wal_dir }} {{ remote_dir }}
+    vars:
+      remote_dir: "{{ item + ':' + hostvars[item].postgres_wal_dir|dirname }}"
+    become_user: "{{ postgres_user }}"
+    become: true
+    with_items:
+      - "{{ groups['role_readonly']|default([]) }}"
+      - "{{ groups['role_replica']|default([]) }}"
+    register: this
+    failed_when:
+      this.rc != 0 or 'error' in this.stderr
+    when: false
+
   - include_role: name={{ r }}
     vars:
       postgres_running: true
