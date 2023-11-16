@@ -7,7 +7,7 @@ if $programname == 'postgres' then {
         FileOwner="{{ postgres_user }}"
         FileGroup="{{ postgres_group }}"
         FileCreateMode="0640"
-        File="/var/log/postgres/postgres.log"
+        File="{{ postgres_log_file }}"
     )
 {% if log_server is not defined %}
     stop
