@@ -285,10 +285,15 @@ class BDR(Architecture):
                     instance["role"].append("pem-agent")
 
             n = instances[-1].get("node")
+            pemserver_name = (
+                "%s-pemserver" % self.args["cluster_name"]
+                if self.args.get("cluster_prefixed_hostnames")
+                else "pemserver"
+            )
             instances.append(
                 {
                     "node": n + 1,
-                    "Name": "pemserver",
+                    "Name": pemserver_name,
                     "role": ["pem-server"],
                     "location": self.args["locations"][0]["Name"],
                 }

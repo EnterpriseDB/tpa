@@ -383,6 +383,7 @@ class Architecture(object):
         g.add_argument("--hostnames-pattern", metavar="PATTERN")
         g.add_argument("--hostnames-sorted-by", metavar="OPTION")
         g.add_argument("--hostnames-unsorted", action="store_true")
+        g.add_argument("--cluster-prefixed-hostnames", action="store_true")
 
         g = p.add_argument_group("locations")
         g.add_argument("--location-names", metavar="LOCATION", nargs="+")
@@ -585,6 +586,10 @@ class Architecture(object):
         # The architecture's num_instances() method should work by this point,
         # so that we can generate the correct number of hostnames.
         (args["hostnames"], args["ip_addresses"]) = self.hostnames(self.num_instances())
+        if args.get("cluster_prefixed_hostnames"):
+            args["hostnames"] = [
+                args["cluster_name"] + "-" + hostname for hostname in args["hostnames"]
+            ]
 
         # Figure out how to get the desired distribution.
         args["image"] = self.image()
