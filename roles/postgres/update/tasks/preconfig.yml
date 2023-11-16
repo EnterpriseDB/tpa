@@ -1,0 +1,29 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# we need to run minimal_postgres_setup module to ensure we use
+# the updated values for bdr_version_num and "bdr_major_version":
+# during the postgres/config role.
+
+  - name: Update bdr_version facts
+    when: >
+      'bdr' in role
+    block:
+
+    - name: Run minimal_postgres_setup
+      minimal_postgres_setup:
+        pgdata: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
+        postgres_bin_dir: "{{ postgres_bin_dir }}"
+      become_user: root
+      become: yes
+
+    - name: Set updated versions
+      action: set_fact
+      args: >
+        {{
+          ('{"bdr_version_num": %s, "bdr_major_version": %s}' % (
+            ansible_facts.bdr_version_num,
+            ansible_facts.bdr_major_version,
+          ))|from_json
+        }}
