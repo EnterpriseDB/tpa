@@ -2,29 +2,33 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
-- name: Check the current owner of the postgres log under /var/log/postgres
+- name: Check the current owner of the postgres log {{ postgres_log_file }}
   stat:
-    path: /var/log/postgres/postgres.log
-  register: postgres_log_file
+    path: "{{ postgres_log_file }}"
+  register: log_file
 
-- name: Ensure all log files under /var/log/postgresql are owned by the postgres user and group
+- name: Ensure all log files under {{ log_dir }} are owned by the postgres user and group
   file:
-    path: /var/log/postgres
+    path: "{{ log_dir }}"
     state: directory
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     recurse: yes
+  vars:
+    log_dir: "{{ postgres_log_file | dirname }}"
   when:
-    - postgres_log_file.stat.exists
-    - postgres_log_file.stat.pw_name != postgres_user
-    - postgres_log_file.stat.gr_name != postgres_group
+    - log_file.stat.exists
+    - log_file.stat.pw_name != postgres_user
+    - log_file.stat.gr_name != postgres_group
 
 # Even if a stricter default umask is set, we want the permissions on the directory to always be 0700
-- name: Explicitly set permissions for /var/log/postgres to 0700
+- name: Explicitly set permissions for {{ log_dir }} to 0700
   file:
-    path: /var/log/postgres
+    path: "{{ log_dir }}"
     state: directory
     mode: "700"
+  vars:
+    log_dir: "{{ postgres_log_file | dirname }}"
 
 - name: Add rsyslog rule for PostgreSQL logging
   template:

@@ -1,4 +1,4 @@
-{{ postgres_logfile }} {
+{{ logrotate_postgres }} {
     daily
     maxsize {{ logrotate_maxsize|default('1G') }}
     rotate {{ logrotate_rotate|default('7') }}
