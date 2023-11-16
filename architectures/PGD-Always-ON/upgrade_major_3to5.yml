@@ -241,6 +241,21 @@
       vars:
         upgrade_from: 3
     - include_role: name=postgres/user
+    - include_role:
+        name: postgres/update
+        tasks_from: preconfig.yml
+      vars:
+        upgrade_from: 3
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: started
+    - include_role: name=postgres/facts
+    - include_role:
+        name: postgres/bdr
+        tasks_from: version.yml
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: stopped
     - include_role: name=postgres/config
     - include_role: name=postgres/final
     when: >

@@ -1,0 +1,61 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+# the goal of this preconfig is to remove the minimum from postgres config
+# in order to start postgres before config happens, run postgres/facts
+# to actualize things such as bdr_version_num to use the correct value
+# during postgres/config.
+
+  - name: BDR3 required preconfig steps
+    when: >
+      upgrade_from == 3
+      and 'bdr' in role
+    block:
+
+    # bdr3 uses pglogical extension, we need to remove it
+    - name: Remove pglogical from SPL
+      replace:
+        path: "{{ postgres_conf_dir }}/conf.d/8888-shared_preload_libraries.conf"
+        replace: '\1\2'
+        regexp: '^(shared_preload_libraries =.*)\spglogical,(.*)\s*'
+    # bdr.enable_camo and bdr.camo_{origin_for|partner_of} are unsupported
+    # configuration for camo with pgd5, postgres won't start if those are used
+    - name: camo related tasks
+      when:
+        bdr_node_camo_partner is defined
+      block:
+      - name: Remove bdr.enable_camo entry
+        lineinfile:
+            path: "{{ postgres_conf_dir }}/conf.d/3334-camo.conf"
+            regexp: '^bdr\.enable_camo'
+            state: absent
+      - name: Remove bdr.camo_partner entries
+        lineinfile:
+          path: "{{ postgres_conf_dir }}/conf.d/3334-camo.conf"
+          regexp: '^bdr\.camo_(?:origin_for|partner_of)'
+          state: absent
+
+  # This is required when running pgextended before upgrade and targeting pgd5
+  # which only uses edbpge.
+  - name: pgextended to edbpge
+    when:
+    - target_bdr_version is version('5','>=')
+    - init_postgres_flavour == 'pgextended'
+    - postgres_flavour == 'edbpge'
+    block:
+    - name: Change path for edbpge if needed
+      replace:
+        path: "/etc/systemd/system/{{ postgres_service_name }}.service"
+        regexp: '^(ExecStart=)(.*)(\s-D.*)'
+        replace: '\1{{ _postgres }}\3'
+      vars:
+        _postgres: "{{
+          '%s/%spostgres' % (
+          postgres_bin_dir,
+          (postgres_flavour == 'epas')|ternary('edb-', '')
+          )
+          }}"
+    - name: Reload-daemon
+      systemd:
+        daemon_reload: yes
