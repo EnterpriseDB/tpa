@@ -2,6 +2,18 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.26 (unreleased)
+
+### Notable changes
+### Minor changes
+
+- Add --cluster-prefixed-hostnames option to `tpaexec configure`
+
+  This makes it easy to avoid hostname clashes on machines hosting more
+  than one docker cluster.
+
+### Bugfixes
+
 ## v23.25 (2023-11-14)
 
 ### Notable changes

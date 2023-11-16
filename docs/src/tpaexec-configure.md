@@ -178,6 +178,10 @@ Use `--hostnames-unsorted` to not sort hostnames at all. In this case,
 they will be assigned in the order they are found in the hostnames file.
 This is the default when a hostnames file is explicitly specified.
 
+Use `--cluster-prefixed-hostnames` to make each hostname begin with the
+name of the cluster. This can be useful to avoid hostname clashes when
+running more than one docker cluster on the same host.
+
 Hostnames may contain only letters (a-z), digits (0-9), and '-'. They
 may be FQDNs, depending on the selected platform. Hostnames should be
 in lowercase; any uppercase characters will be converted to lowercase
