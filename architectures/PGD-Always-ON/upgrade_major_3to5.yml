@@ -241,6 +241,11 @@
       vars:
         upgrade_from: 3
     - include_role: name=postgres/user
+    - include_role:
+        name: postgres/update
+        tasks_from: preconfig.yml
+      vars:
+        upgrade_from: 3
     - include_role: name=postgres/config
     - include_role: name=postgres/final
     when: >
