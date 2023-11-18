@@ -29,12 +29,6 @@
 
 - include_role:
     name: postgres/config/final
-    tasks_from: pgbouncer.yml
-  ignore_errors: yes
-  when:
-    - "'bdr' in role"
-    - "'readonly' not in role"
-    - "'witness' not in role"
 
 # This block stops the standbys in an M1 cluster to perform
 # the in-place upgrade of those instances per the pg_upgrade
@@ -79,14 +73,15 @@
     register: this
     failed_when:
       this.rc != 0 or 'error' in this.stderr
-    when: false
+    when:
+      new_postgres_wal_dir|dirname != new_postgres_data_dir
 
-  - name: Sync WALs after primary major upgrade
+  - name: Sync tablespaces after primary major upgrade
     command: >
       /usr/bin/rsync --archive --delete --hard-links --size-only --no-inc-recursive --verbose \
-      {{ postgres_wal_dir }} {{ hostvars[item].postgres_wal_dir }} {{ remote_dir }}
+      {{ postgres_wal_dir }} tblspc_location {{ remote_dir }}
     vars:
-      remote_dir: "{{ item + ':' + hostvars[item].postgres_wal_dir|dirname }}"
+      remote_dir: "{{ item + ':' + tblspc_location|dirname }}"
     become_user: "{{ postgres_user }}"
     become: true
     with_items:
@@ -95,8 +90,10 @@
     register: this
     failed_when:
       this.rc != 0 or 'error' in this.stderr
-    when:
-      false and postgres_wal_dir|dirname != postgres_data_dir
+    loop: "{{ new_postgres_tablespaces.values()|map(attribute='location')|list }}"
+    loop_control:
+      loop_var: tblspc_location
+    when: false
 
   - include_role: name={{ r }}
     vars:

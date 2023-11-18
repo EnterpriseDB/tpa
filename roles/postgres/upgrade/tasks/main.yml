@@ -22,9 +22,13 @@
     old_postgres_version: "{{ cluster_facts.get('postgres_version') }}"
     old_postgres_data_dir: "{{ cluster_facts.get('postgres_data_dir') }}"
     old_postgres_bin_dir: "{{ cluster_facts.get('postgres_bin_dir') }}"
+    old_postgres_wal_dir: "{{ cluster_facts.get('postgres_wal_dir') }}"
+    old_postgres_tablespaces: "{{ cluster_facts.get('postgres_tablespaces') }}"
     new_postgres_version: "{{ postgres_version }}"
     new_postgres_data_dir: "{{ postgres_data_dir }}"
     new_postgres_bin_dir: "{{ postgres_bin_dir }}"
+    new_postgres_wal_dir: "{{ postgres_wal_dir }}"
+    new_postgres_tablespaces: "{{ postgres_tablespaces }}"
     upgrade_port: 50432
 
 - set_fact:
@@ -64,13 +68,27 @@
   when: >
     failover_manager in ['repmgr','efm']
 
+- include_tasks: deregister-pemagent.yml
+  ignore_errors: yes
+  when: >
+    'pem-agent' in role
+
+- name: Part the node if a readonly
+  postgresql_query:
+    autocommit: yes
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+      - text: SELECT bdr.part_node(node_name := %s, force := true)
+        args:
+          - "{{ bdr_node_name }}"
+  delegate_to: "{{ upstream }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+  when: >
+    'bdr' in role and 'readonly' in role
+
 - name: Prep and upgrade node 
   block:
-  - include_tasks: deregister-pemagent.yml
-    ignore_errors: yes
-    when: >
-      'pem-agent' in role
-
   - include_tasks: prepare-node.yml
 
   - name: Perform major Postgres upgrade
@@ -163,7 +181,8 @@
   
     - block:
       - debug:
-          msg: "{{ upgrade_result.stdout_lines }}" 
+          msg: "{{ upgrade_result.stdout_lines }}"
+        when: false 
   
       - assert:
           that: "{{ upgrade_result.rc == 0 }}"
@@ -172,6 +191,8 @@
         upgrade_result is defined
 
     - include_tasks: postupgrade-processing.yml
-  when: >
-    not already_upgraded and 'replica' not in role
+  when:
+    - not already_upgraded
+    - "'replica' not in role"
+    - "'readonly' not in role"
 
