@@ -81,12 +81,15 @@
     groups['role_pem-server']|default([]) is not empty
     or groups['role_pem-agent']|default([]) is not empty
 
-# Likewise, if an instance has 'pem-server' in its role, we set it as
-# the default pem_server for every other instance.
+# If any instance has 'pem-server' in its role, we set the first one as
+# pem_server for all instance where the value is not set. instances with
+# 'pem-server' role define themselves as 'pem_server' to avoid registering
+# to a different 'pem-server' if multiple ones are defined.
 
-- name: Set common pem_server for the entire cluster
+
+- name: Set a valid pem_server for the cluster
   set_fact:
-    pem_server: "{{ groups[ps][0] }}"
+    pem_server: "{{ ('pem-server' in role)|ternary(inventory_hostname, groups[ps][0]) }}"
   when: >
     pem_server is not defined
     and groups[ps]|default([]) is not empty
