@@ -179,14 +179,9 @@
       become: yes
       become_user: "{{ postgres_user }}"    
   
-    - block:
-      - debug:
-          msg: "{{ upgrade_result.stdout_lines }}"
-        when: false 
-  
-      - assert:
-          that: "{{ upgrade_result.rc == 0 }}"
-          msg: "Upgrade FAILED, see logs in {{ cluster_dir }}/upgrade_logs/{{ inventory_hostname }}"
+    - assert:
+        that: "{{ upgrade_result.rc == 0 }}"
+        msg: "Upgrade FAILED, see logs in {{ cluster_dir }}/upgrade_logs/{{ inventory_hostname }}"
       when: >
         upgrade_result is defined
 
