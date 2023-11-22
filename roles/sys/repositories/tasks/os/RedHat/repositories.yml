@@ -215,9 +215,7 @@
   set_fact:
     edb_repos_in_use:
       "{{ (edb_repositories is not empty
-            and 'community360' not in edb_repositories)
-          or (edb_repositories is empty
-            and tpa_2q_repositories is not empty) }}"
+            and 'community360' not in edb_repositories) }}"
 
 - name: Exclude barman-related packages from PGDG-common repos
   ini_file:

@@ -53,40 +53,6 @@
     use_volatile_subscriptions:
       "{{ use_volatile_subscriptions|default(false)|bool }}"
 
-- name: Add products/2ndqpostgres/release to tpa_2q_repositories, if not defined
-  set_fact:
-    tpa_2q_repositories:
-      - products/2ndqpostgres/release
-  when:
-    postgres_flavour is defined
-    and postgres_flavour == 'pgextended'
-    and tpa_2q_repositories is not defined
-
-# We must use products/default/release if we need repmgr package(s)
-# built against EPAS; and we need repmgr often enough to not require
-# people to specify the repository explicitly in tpa_2q_repositories
-# (unless it is explicitly set to an empty list to allow deployments
-# from local repo mirrors only, with no internet access).
-
-- name: Add products/default/release to tpa_2q_repositories, if not empty
-  set_fact:
-    tpa_2q_repositories:
-      "{{ tpa_2q_repositories|default([])
-          |union(['products/default/release']) }}"
-  when:
-    - postgres_flavour == 'epas'
-    - tpa_2q_repositories is not defined
-      or tpa_2q_repositories is not empty
-
-- name: Prepend dl/default/release to tpa_2q_repositories, if not empty
-  set_fact:
-    tpa_2q_repositories:
-      "{{ ['dl/default/release']
-          |union(tpa_2q_repositories|default([])) }}"
-  when:
-    tpa_2q_repositories is not defined or
-    tpa_2q_repositories is not empty
-
 # Notwithstanding anything we decide about tpa_2q_repositories above, we
 # won't use them at all if any edb_repositories are specified.
 #
