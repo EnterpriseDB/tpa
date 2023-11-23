@@ -2,60 +2,28 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-# the goal of this preconfig is to remove the minimum from postgres config
-# in order to start postgres before config happens, run postgres/facts
-# to actualize things such as bdr_version_num to use the correct value
-# during postgres/config.
+# we need to run minimal_postgres_setup module to ensure we use
+# the updated values for bdr_version_num and "bdr_major_version":
+# during the postgres/config role.
 
-  - name: BDR3 required preconfig steps
+  - name: Update bdr_version facts
     when: >
-      upgrade_from == 3
-      and 'bdr' in role
+      'bdr' in role
     block:
 
-    # bdr3 uses pglogical extension, we need to remove it
-    - name: Remove pglogical from SPL
-      replace:
-        path: "{{ postgres_conf_dir }}/conf.d/8888-shared_preload_libraries.conf"
-        replace: '\1\2'
-        regexp: '^(shared_preload_libraries =.*)\spglogical,(.*)\s*'
-    # bdr.enable_camo and bdr.camo_{origin_for|partner_of} are unsupported
-    # configuration for camo with pgd5, postgres won't start if those are used
-    - name: camo related tasks
-      when:
-        bdr_node_camo_partner is defined
-      block:
-      - name: Remove bdr.enable_camo entry
-        lineinfile:
-            path: "{{ postgres_conf_dir }}/conf.d/3334-camo.conf"
-            regexp: '^bdr\.enable_camo'
-            state: absent
-      - name: Remove bdr.camo_partner entries
-        lineinfile:
-          path: "{{ postgres_conf_dir }}/conf.d/3334-camo.conf"
-          regexp: '^bdr\.camo_(?:origin_for|partner_of)'
-          state: absent
+    - name: Run minimal_postgres_setup
+      minimal_postgres_setup:
+        pgdata: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
+        postgres_bin_dir: "{{ postgres_bin_dir }}"
+      become_user: root
+      become: yes
 
-  # This is required when running pgextended before upgrade and targeting pgd5
-  # which only uses edbpge.
-  - name: pgextended to edbpge
-    when:
-    - target_bdr_version is version('5','>=')
-    - init_postgres_flavour == 'pgextended'
-    - postgres_flavour == 'edbpge'
-    block:
-    - name: Change path for edbpge if needed
-      replace:
-        path: "/etc/systemd/system/{{ postgres_service_name }}.service"
-        regexp: '^(ExecStart=)(.*)(\s-D.*)'
-        replace: '\1{{ _postgres }}\3'
-      vars:
-        _postgres: "{{
-          '%s/%spostgres' % (
-          postgres_bin_dir,
-          (postgres_flavour == 'epas')|ternary('edb-', '')
-          )
-          }}"
-    - name: Reload-daemon
-      systemd:
-        daemon_reload: yes
+    - name: Set updated versions
+      action: set_fact
+      args: >
+        {{
+          ('{"bdr_version_num": %s, "bdr_major_version": %s}' % (
+            ansible_facts.bdr_version_num,
+            ansible_facts.bdr_major_version,
+          ))|from_json
+        }}
