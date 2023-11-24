@@ -75,7 +75,8 @@
       uri: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/sles/{{ ansible_distribution_major_version }}/noarch/
       name: enterprisedb-{{ repository }}-noarch
 
-- block:
+- when: postgres_flavour == 'epas'
+  block:
   - name: Install SUSEConnect
     zypper:
       name: SUSEConnect
@@ -102,6 +103,6 @@
   - name: Install extra repositories from PackageHub
     command:
       cmd: SUSEConnect -p PackageHub/15.5/x86_64
+    when:
+      not 'PackageHub/15.5/x86_64' in registration_status.stdout
 
-  when:
-    - postgres_flavour == 'epas'
