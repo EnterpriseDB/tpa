@@ -1,16 +1,17 @@
 # tpaexec reconfigure
 
 The `tpaexec reconfigure` command reads config.yml and generates a
-revised version of it that changes the cluster from one architecture to
-another. [tpaexec upgrade](tpaexec-upgrade.md) may then be invoked to
-make the required changes on the instances that make up the cluster.
+revised version of it that changes the cluster in various ways according
+to its arguments.
 
 ## Arguments
 
 As with other tpaexec commands, the cluster directory must always be
 given.
 
-The following arguments control the contents of the new config.yml:
+## Changing a cluster's architecture
+
+The following arguments enable the cluster's architecture to be changed:
 
 - `--architecture <architecture>`(required)<br>
 The new architecture for the cluster. At present the only supported
@@ -26,6 +27,20 @@ A space-separated list of EDB package repositories. It is usually
 unnecessary to specify this; `tpaexec configure` will choose a suitable
 repository based on the postgres flavour in use in the cluster.
 
+After changing the architecture, run [tpaexec
+upgrade](tpaexec-upgrade.md) to make the required changes to the
+cluster.
+
+## Changing a cluster from 2q to EDB repositories
+
+The `--replace-2q-repositories` argument removes any 2ndQuadrant
+repositories the cluster uses and adds EDB repositories as required to
+replace them.
+
+After reconfiguring with this argument, run [tpaexec
+deploy)(tpaexec-deploy.md) to make the required changes to the cluster.
+
+## Output format
 
 The following options control the form of the output:
 

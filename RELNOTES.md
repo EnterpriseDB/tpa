@@ -2,6 +2,20 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
+## v23.27 (unreleased)
+
+### Notable changes
+
+- TPA-582 Remove dependency on 2q repositories
+
+  Newly configured clusters will now never use 2q repositories.
+
+  The new `--replace-2q-repositories` argument to `tpaexec reconfigure`
+  will remove 2q repositories from an existing config.yml and add
+  suitable EDB repositories for the cluster's postgres flavour and BDR
+  version, if applicable. `tpaexec deploy` will then apply these changes
+  to the servers in the cluster.
+
 ## v23.26 (2023-11-30)
 
 ### Minor changes

@@ -20,7 +20,13 @@ class Replace2qRepositories(Transmogrifier):
 
     @classmethod
     def options(cls):
-        return {**opt("--replace-2q-repositories", action="store_true")}
+        return {
+            **opt(
+                "--replace-2q-repositories",
+                action="store_true",
+                help="Replace 2q repositories in config.yml with EDB repositories",
+            )
+        }
 
     def is_applicable(self, cluster):
         return True
