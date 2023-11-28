@@ -115,20 +115,20 @@ if os.path.exists(".git") and modified_paths:
         cp = subprocess.run(
             "git notes show $(git rev-list --reverse HEAD | head -1)",
             shell=True,
-            capture_output=True,
+            stdout=subprocess.PIPE,
             universal_newlines=True,
         )
         if cp.stdout.rstrip() == "Created by TPA":
             cp = subprocess.run(
                 ["git", "add", *modified_paths],
-                capture_output=True,
+                stdout=subprocess.PIPE,
                 universal_newlines=True,
             )
             if v:
                 print(cp.stdout)
             cp = subprocess.run(
                 ["git", "commit", "-m", "Relink files to the correct $TPA_DIR"],
-                capture_output=True,
+                stdout=subprocess.PIPE,
                 universal_newlines=True,
             )
             if v:
