@@ -172,7 +172,8 @@ class docker(Platform):
                 "os_family": "SUSE",
             },
             "tpa/oraclelinux": {
-                "versions": ["9"],
+                "versions": ["7", "8", "9"],
+                "default_version": "8",
                 "os": "OracleLinux",
                 "os_family": "RedHat",
             },

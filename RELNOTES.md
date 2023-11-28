@@ -18,6 +18,10 @@
 
 ### Minor changes
 
+- TPA-634 Support Oracle Linux 7 and 8 on the Docker platform
+
+  Support for AWS platform is underway.
+
 - TPA-626 Improve CAMO commit_scope generation during reconfigure
 
   Ensure that commit_scope for CAMO enabled partners is generated using

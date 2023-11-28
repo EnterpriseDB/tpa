@@ -24,6 +24,12 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 * Ubuntu 18.04/bionic is a legacy distribution
 * Ubuntu 16.04/xenial is a legacy distribution
 
+## Oracle Linux
+
+* Oracle Linux 9.x is fully supported (docker only)
+* Oracle Linux 8.x is fully supported (docker only)
+* Oracle Linux 7.x is fully supported (docker only)
+
 ## RedHat x86
 
 * RHEL/Rocky/AlmaLinux/Oracle Linux 9.x is fully supported (python3 only)
