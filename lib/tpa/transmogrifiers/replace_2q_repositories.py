@@ -29,7 +29,6 @@ class Replace2qRepositories(Transmogrifier):
         }
 
     def is_applicable(self, cluster):
-        return True
         if "edb_repositories" in cluster.vars:
             return False
 
@@ -57,8 +56,8 @@ class Replace2qRepositories(Transmogrifier):
                 self._using_closed_2q_repos(cluster) or postgres_flavour != "postgresql"
             )
         ):
-
             return False
+        return True
 
     def check(self, cluster):
         cr = CheckResult()
@@ -73,9 +72,7 @@ class Replace2qRepositories(Transmogrifier):
         return cr
 
     def _using_closed_2q_repos(self, cluster):
-        tpa_2q_repos = cluster.vars.get("tpa_2q_repositories")
-        if tpa_2q_repos is None:
-            return False
+        tpa_2q_repos = cluster.vars.get("tpa_2q_repositories", [])
         if len([r for r in tpa_2q_repos if r != "dl/default/release"]) > 0:
             return True
         return False
@@ -94,7 +91,7 @@ class Replace2qRepositories(Transmogrifier):
             elif postgres_flavour == "epas":
                 edb_repositories.append("bdr_3_7_postgres_advanced")
             else:
-                edb_repositories.appendd("bdr_3_7_postgres")
+                edb_repositories.append("bdr_3_7_postgres")
         elif bdr_version == "4":
             edb_repositories.append("postgres_distributed_4")
 

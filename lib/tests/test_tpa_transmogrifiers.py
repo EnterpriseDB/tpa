@@ -12,6 +12,7 @@ from tpa.exceptions import ConfigureError
 from tpa.transmogrifiers import (
     BDR4PGD5,
     Repositories,
+    Replace2qRepositories,
     Common,
     transmogrifiers_from_args,
     add_all_transmogrifier_options,
@@ -69,6 +70,73 @@ def basic_pgd_cluster():
 @pytest.fixture
 def basic_m1_cluster():
     return Cluster("basic", "M1", "docker")
+
+
+class TestReplace2qRepositories:
+    """tests for Replace2qRepositories transmogrifier"""
+
+    @pytest.mark.parametrize(
+        "tpa_2q_repositories, edb_repositories, postgres_flavour, expected",
+        [
+            (None, ["standard"], "epas", False),
+            ([], None, "edbpge", False),
+            (None, None, "epas", True),
+        ],
+    )
+    def test_replace2qrepositories_is_applicable(
+        self, tpa_2q_repositories, edb_repositories, postgres_flavour, expected
+    ):
+        """test is_applicable function"""
+        x = Replace2qRepositories()
+        cls = Cluster("test", "BDR-Always-ON", "docker")
+        if tpa_2q_repositories is not None:
+            cls.vars["tpa_2q_repositories"] = tpa_2q_repositories
+        if edb_repositories is not None:
+            cls.vars["edb_repositories"] = edb_repositories
+        cls.vars["postgres_flavour"] = postgres_flavour
+
+        assert x.is_applicable(cls) == expected
+
+    def test_replace2qrepositories_check(self):
+        """test check function"""
+        x = Replace2qRepositories()
+        cls = Cluster("test", "PGD-Always-ON", "docker")
+        cls.vars["bdr_version"] = "5"
+
+        assert len(x.check(cls).errors) == 1
+
+    @pytest.mark.parametrize(
+        "bdr_version, postgres_flavour, expected",
+        [
+            (
+                "3",
+                "pgextended",
+                ["bdr_3_7_postgres_extended", "standard", "postgres_extended"],
+            ),
+            (
+                "4",
+                "pgextended",
+                ["postgres_distributed_4", "standard", "postgres_extended"],
+            ),
+            ("4", "epas", ["postgres_distributed_4", "enterprise"]),
+            (None, "postgresql", None),
+        ],
+    )
+    def test_replace2q_repositories_apply(
+        self, bdr_version, postgres_flavour, expected
+    ):
+        """test apply function"""
+        x = Replace2qRepositories()
+        cls = Cluster("test", "test", "docker")
+        if bdr_version is not None:
+            cls.vars["bdr_version"] = bdr_version
+        cls.vars["postgres_flavour"] = postgres_flavour
+
+        x.apply(cls)
+
+        assert ("edb_repositories" not in cls.vars and expected is None) or (
+            set(cls.vars.get("edb_repositories")) == set(expected)
+        )
 
 
 class TestBDR4PGD5:
