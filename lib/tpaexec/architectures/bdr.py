@@ -66,8 +66,6 @@ class BDR(Architecture):
         bdr_version = self.args.get("bdr_version")
         harp_enabled = self.args.get("failover_manager") == "harp"
 
-        # given_repositories = " ".join(tpa_2q_repositories)
-
         arch = self.args["architecture"]
         default_bdr_versions = {
             "11": "3",
