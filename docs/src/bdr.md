@@ -140,7 +140,7 @@ is mentioned in `bdr_node_groups`), it will join that group instead of
 ### bdr_commit_scopes
 
 This is an optional list of
-[commit scopes](https://www.enterprisedb.com/docs/pgd/latest/bdr/group-commit/)
+[commit scopes](https://www.enterprisedb.com/docs/pgd/latest/durability/group-commit/)
 that must exist in the PGD database (available for PGD 4.1 and above).
 
 ```yaml

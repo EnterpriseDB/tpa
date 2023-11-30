@@ -77,7 +77,7 @@ undone unless they are:
 1. Made in the `conf.d/9999-override.conf` file reserved for manual
    edits;
 2. Made using `ALTER SYSTEM` SQL; or
-3. Made [natively in TPA](#postgres_conf_settings) by adding
+3. Made [natively in TPA](postgresql.conf.md#postgres_conf_settings) by adding
    `postgres_conf_settings`.
 
 Other than the fact that option 3 is self-documenting and portable,
