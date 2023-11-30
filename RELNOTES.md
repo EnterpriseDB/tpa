@@ -2,9 +2,8 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
 
-## v23.26 (unreleased)
+## v23.26 (2023-11-30)
 
-### Notable changes
 ### Minor changes
 
 - Add --cluster-prefixed-hostnames option to `tpaexec configure`
@@ -12,7 +11,39 @@
   This makes it easy to avoid hostname clashes on machines hosting more
   than one docker cluster.
 
+- TPA-617 Add packages to enable Docker builds on Mac OS X
+
+- TPA-483 Support Oracle Linux 9 on the Docker platform
+
+- TPA-608 Fix pemserver agent registration
+
+  When there are multiple PEM servers in a cluster, ensure that the
+  agent running on a server registers to its local server.
+
+- TPA-628 Improve default CAMO settings for PGD 5
+
+  Set timeout to 60s and require_write_lead to true.
+
+
 ### Bugfixes
+
+- TPA-592 Use bdr_node_name in harp fencing/unfencing
+
+  If bdr_node_name is different from the hostname, use it explicitly
+  when fencing or unfencing a HARP node.
+
+- TPA-558 Suppress automatic provision for some deploy options
+
+  When options that will suppress the actual deployment run are given to
+ `tpaexec deploy`, don't automatically run provision beforehand.
+
+- TPA-614 Fix BDR 3 to PGD 5 upgrades for CAMO clusters
+
+  When upgrading a BDR 3 cluster which uses CAMO to PGD 5, ensure that
+  CAMO config is set up correctly.
+
+- Misc. documentation changes
+
 
 ## v23.25 (2023-11-14)
 
