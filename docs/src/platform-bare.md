@@ -101,7 +101,7 @@ To start afresh with a cluster on the `bare` platform, use the appropriate
 external tools to reinstall, reimage, or reprovision the servers, and
 repeat the process described in this document. If your new servers have
 different IP addresses or if you have a complex ssh setup, it may be
-easier to run [tpaexec deprovision](tpaexec-provision.md) to remove all
+easier to run [tpaexec deprovision](tpaexec-deprovision.md) to remove all
 the locally created files and then [tpaexec provision](tpaexec-provision.md)
 to recreate them, followed by repeating the process from this document,
 as above.

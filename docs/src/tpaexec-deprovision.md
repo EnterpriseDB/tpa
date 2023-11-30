@@ -1,4 +1,4 @@
-## tpaexec deprovision
+# tpaexec deprovision
 
 Deprovision destroys a cluster and associated resources.
 
