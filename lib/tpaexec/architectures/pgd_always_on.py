@@ -310,7 +310,7 @@ class PGD_Always_ON(BDR):
                             {
                                 "name": scope,
                                 "origin": group,
-                                "rule": f"ALL ({group}) ON durable CAMO DEGRADE ON (timeout = 3600s) TO ASYNC",
+                                "rule": f"ALL ({group}) ON durable CAMO DEGRADE ON (timeout = 60s,  require_write_lead = true) TO ASYNC",
                             }
                         )
 
