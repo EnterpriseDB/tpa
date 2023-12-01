@@ -64,17 +64,25 @@ class Instance:
 
         return self._host_vars
 
-    def get_hostvar(self, key, default=None):
-        """Returns the value of the given key or the given default value if the
-        key is not in the instance's host_vars, its location's group_vars, or
-        the cluster's main group's group_vars (i.e., cluster_vars)."""
-
-        v = ChainMap(
+    def effective_vars(self):
+        """Generate a ChainMap with the various vars applied to the instance
+        ordered the same way ansible inventory would be applied.
+        Returns:
+            ChainMap : all vars applicable to the instance
+        """
+        return ChainMap(
             self.host_vars,
             self._cluster.instance_defaults.get("vars", {}),
             self.location.group.group_vars or {},
             self._cluster.group.group_vars,
         )
+
+    def get_hostvar(self, key, default=None):
+        """Returns the value of the given key or the given default value if the
+        key is not in the instance's host_vars, its location's group_vars, or
+        the cluster's main group's group_vars (i.e., cluster_vars)."""
+
+        v = self.effective_vars()
         return v.get(key, default)
 
     def get_setting(self, key, default=None) -> Any:
