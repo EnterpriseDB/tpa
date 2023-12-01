@@ -87,7 +87,9 @@
       cmd: SUSEConnect --status-text
     register: registration_status
 
-  - block:
+  - when: >
+      "Not Registered" in registration_status.stdout
+    block:
     - name: Check registration code is available
       assert:
         that: lookup('env', 'SLES_REG_TOKEN') != ""
@@ -97,8 +99,6 @@
       command:
         cmd: SUSEConnect -r {{ lookup('env', 'SLES_REG_TOKEN') }}
 
-    when: >
-      "Not Registered" in registration_status.stdout
 
   - name: Install extra repositories from PackageHub
     command:
