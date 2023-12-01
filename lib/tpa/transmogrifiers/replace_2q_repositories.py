@@ -36,7 +36,8 @@ class Replace2qRepositories(Transmogrifier):
             # this means no 2q repos at all, even those added at deploy-time
             return False
 
-        if cluster.vars.get("postgres_flavour") not in self.postgres_repos:
+        postgres_flavour = cluster.vars.get("postgres_flavour")
+        if postgres_flavour not in self.postgres_repos:
             return False
 
         # if you have been using an explicit yum or apt repo list that doesn't include
