@@ -76,15 +76,17 @@ class TestReplace2qRepositories:
     """tests for Replace2qRepositories transmogrifier"""
 
     @pytest.mark.parametrize(
-        "tpa_2q_repositories, edb_repositories, postgres_flavour, expected",
+        "tpa_2q_repositories, edb_repositories, extra_repositories, postgres_flavour, expected",
         [
-            (None, ["standard"], "epas", False),
-            ([], None, "edbpge", False),
-            (None, None, "epas", True),
+            (None, ["standard"], None, "epas", False),
+            ([], None, None, "edbpge", False),
+            (None, None, None, "epas", True),
+            (None, None, ["myrepo"], "postgresql", False),
+            (None, None, None, "invalid_flavour", False),
         ],
     )
     def test_replace2qrepositories_is_applicable(
-        self, tpa_2q_repositories, edb_repositories, postgres_flavour, expected
+        self, tpa_2q_repositories, edb_repositories, extra_repositories, postgres_flavour, expected
     ):
         """test is_applicable function"""
         x = Replace2qRepositories()
@@ -93,6 +95,8 @@ class TestReplace2qRepositories:
             cls.vars["tpa_2q_repositories"] = tpa_2q_repositories
         if edb_repositories is not None:
             cls.vars["edb_repositories"] = edb_repositories
+        if extra_repositories is not None:
+            cls.vars["yum_repository_list"] = extra_repositories
         cls.vars["postgres_flavour"] = postgres_flavour
 
         assert x.is_applicable(cls) == expected
@@ -106,24 +110,44 @@ class TestReplace2qRepositories:
         assert len(x.check(cls).errors) == 1
 
     @pytest.mark.parametrize(
-        "bdr_version, postgres_flavour, expected",
+        "bdr_version, postgres_flavour, tpa_2q_repositories, expected",
         [
             (
                 "3",
                 "pgextended",
+                None,
                 ["bdr_3_7_postgres_extended", "standard", "postgres_extended"],
+            ),
+            (
+                "3",
+                "epas",
+                None,
+                ["bdr_3_7_postgres_advanced", "enterprise"],
+            ),
+            (
+                "3",
+                "postgresql",
+                ["products/bdr/release"],
+                ["bdr_3_7_postgres", "standard"],
+            ),
+            (
+                None,
+                "postgresql",
+                ["products/dl/release"],
+                ["standard"],
             ),
             (
                 "4",
                 "pgextended",
+                ["products/bdr4/release"],
                 ["postgres_distributed_4", "standard", "postgres_extended"],
             ),
-            ("4", "epas", ["postgres_distributed_4", "enterprise"]),
-            (None, "postgresql", None),
+            ("4", "epas", None, ["postgres_distributed_4", "enterprise"]),
+            (None, "postgresql", None, None),
         ],
     )
     def test_replace2q_repositories_apply(
-        self, bdr_version, postgres_flavour, expected
+        self, bdr_version, postgres_flavour, tpa_2q_repositories, expected
     ):
         """test apply function"""
         x = Replace2qRepositories()
@@ -131,10 +155,13 @@ class TestReplace2qRepositories:
         if bdr_version is not None:
             cls.vars["bdr_version"] = bdr_version
         cls.vars["postgres_flavour"] = postgres_flavour
+        if tpa_2q_repositories is not None:
+            cls.vars["tpa_2q_repositories"] = tpa_2q_repositories
 
         x.apply(cls)
 
         assert ("edb_repositories" not in cls.vars and expected is None) or (
+            (cls.vars.get("edb_repositories") is None) or
             set(cls.vars.get("edb_repositories")) == set(expected)
         )
 
