@@ -263,10 +263,24 @@ class BDR4PGD5(Transmogrifier):
                     "contain exactly 2 data nodes + 1 optional witness only."
                 )
 
+            # Generate an appropriate scope for the partners
+            # by checking for bdr4 or bdr3 equivalent config
+            # already defined in the cluster.
+            # get postgres_conf_settings
+            pg_conf_settings = instance.get_hostvar("postgres_conf_settings", {})
+            # get existing synchronous_replication_availability value or default to ASYNC
+            sra = pg_conf_settings.get("synchronous_replication_availability", "ASYNC")
+            timeout = pg_conf_settings.get("bdr.global_commit_timeout", 60)
+
+            if sra.casefold() in ["WAIT".casefold(),"OFF".casefold()]:
+                rule = f"ALL ({subgroup}) ON durable CAMO"
+            else:
+                rule = f"ALL ({subgroup}) ON durable CAMO DEGRADE ON (timeout = {timeout}s, require_write_lead = true) TO {sra.upper()}"
+
             scope = {
                 "name": "camo",
                 "origin": subgroup,
-                "rule": f"ALL ({subgroup}) ON durable CAMO DEGRADE ON (timeout = 3600s) TO ASYNC",
+                "rule": rule,
             }
 
             # Do nothing if the first partner already defined the scope.
@@ -281,6 +295,18 @@ class BDR4PGD5(Transmogrifier):
 
         if bdr_commit_scopes:
             cluster.vars["bdr_commit_scopes"] = bdr_commit_scopes
+            for instance in cluster.instances:
+                self._remove_unwanted_nested_var(instance, "postgres_conf_settings", "synchronous_replication_availability")
+                self._remove_unwanted_nested_var(instance, "postgres_conf_settings", "bdr.global_commit_timeout")
+
+    def _remove_unwanted_nested_var(self, instance, var_name, nested_var):
+        for x in instance.effective_vars().maps:
+            try:
+                del x[var_name][nested_var]
+                if not x[var_name]:
+                    del x[var_name]
+            except KeyError:
+                continue
 
     def _bdr_3to5_changes(self, cluster):
         """specific changes for BDR3 to PGD5 upgrade"""
