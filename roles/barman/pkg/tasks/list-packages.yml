@@ -12,10 +12,6 @@
     when:
       barman_installation_method == 'pkg'
 
-  - include_role:
-      name: postgres/pkg
-      tasks_from: list-client-packages.yml
-
   # We expect pg_receivewal to be installed, but the EPAS client rpm does
   # not include it (although the deb package does), so we have to install
   # the server package as a temporary workaround. 2ndQPostgres 13 and above
