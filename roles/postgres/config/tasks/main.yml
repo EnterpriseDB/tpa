@@ -262,6 +262,24 @@
 # TODO: This code doesn't permit a non-streaming replica to be set up
 # (i.e., one that depends entirely on log shipping).
 
+# generate a primary_slot_name on primary and replica node for efm
+# used during switchover to ensure the old primary uses
+# a physical slot for replication.
+- name: Configure primary_slot_name on primary
+  copy:
+    content: >
+      primary_slot_name = '{{ primary_slot_name }}'
+    dest: "{{ _include_dir }}/8901-primary_slot_name.conf"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: 0644
+  when: >
+    ('primary' in role or 'replica' in role)
+    and failover_manager != 'repmgr'
+    and postgres_version is version('12', '>=')
+  notify:
+    - Note Postgres reload required
+
 - name: Write recovery configuration for replicas, if required
   when: >
     'replica' in role
@@ -281,16 +299,6 @@
     notify:
       - Note Postgres reload required
 
-  - name: Configure primary_slot_name
-    copy:
-      content: >
-        primary_slot_name = '{{ primary_slot_name }}'
-      dest: "{{ _include_dir }}/8901-primary_slot_name.conf"
-      owner: "{{ postgres_user }}"
-      group: "{{ postgres_group }}"
-      mode: 0644
-    notify:
-      - Note Postgres reload required
 
   - name: Set restore_command to point to a Barman server, if available
     set_fact:
