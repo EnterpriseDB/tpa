@@ -7,7 +7,7 @@ tcp_keepalives_count: "{{ tcp_keepalives_count|default(9) }}"
 
 temp_buffers: "{{ temp_buffers|default('16MB') }}"
 work_mem: "{{ work_mem|default('16MB') }}"
-maintenance_work_mem: "{{ maintenance_work_mem|default('1GB') }}"
+maintenance_work_mem: "{{ maintenance_work_mem|default('64MB') }}"
 autovacuum_work_mem: "{{ autovacuum_work_mem|default(-1) }}"
 
 bgwriter_delay: "{{ bgwriter_delay|default('200ms') }}"
