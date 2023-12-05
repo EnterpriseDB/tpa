@@ -1117,9 +1117,11 @@ case "$command" in
 
     cmd|ping|provision|deploy|upgrade|playbook|deprovision)
         time $command "$@"
+        playbook ${TPA_DIR}/architectures/lib/commands/check-repositories.yml
         ;;
 
     *)
         try_as_playbook_or_script "$@"
+        playbook ${TPA_DIR}/architectures/lib/commands/check-repositories.yml
         ;;
 esac
