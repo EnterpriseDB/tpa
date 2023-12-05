@@ -1,0 +1,16 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+- name: Check for old repositories
+  hosts: all
+
+  tasks:
+  - assert:
+      that: "{{ tpa_2q_repositories is not defined }}"
+      msg: >-
+        WARNING: you are using deprecated 2ndQuadrant repositories, which will
+        soon be decommissioned. Please use 'tpaexec reconfigure' to update to
+        EDB repositories 2.0
+    delegate_to: localhost
+    run_once: true
