@@ -25,6 +25,12 @@
   reconfigure command to prepare for major PGD upgrade. Improve default
   value when no previous config exist.
 
+- TPA-618 Generate a primary_slot_name on primary for efm
+
+  Generate a primary_slot_name also on primary node to be used in case of
+  switchover, to ensure the switched primary will have a physical slot on
+  the new primary.
+
 ## v23.26 (2023-11-30)
 
 ### Minor changes
