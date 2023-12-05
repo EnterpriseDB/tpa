@@ -1,0 +1,14 @@
+- summary: Support Keyring for cluster vault password storage
+  description: |
+    Add support for system keyring to store cluster vault password by
+    default. This leverages python keyring module to store vault
+    password in the supported system keyring when `keyring_backend` is
+    set to `system` (default for new clusters). This change does not
+    impact existing clusters or any clusters that set `keyring_backend`
+    to `legacy` in config.yml. `vault_name` setting in config.yml is
+    used in combination with `cluster_name` to ensure uniqueness to
+    allow provisioning for multiple clusters that all use the same
+    `cluster_name` setting. Refer to tpaexec-configure.md for details.
+  type: notable_change
+  jira_tickets:
+  - TPA-85
