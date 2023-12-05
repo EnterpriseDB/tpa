@@ -31,6 +31,10 @@
   switchover, to ensure the switched primary will have a physical slot on
   the new primary.
 
+## Bugfixes
+
+- TPA-560 Fix some patroni warnings
+
 ## v23.26 (2023-11-30)
 
 ### Minor changes
