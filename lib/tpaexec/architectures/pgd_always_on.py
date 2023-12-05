@@ -16,6 +16,7 @@ class PGD_Always_ON(BDR):
             ("13", "5"),
             ("14", "5"),
             ("15", "5"),
+            ("16", "5"),
         ]
 
     def add_architecture_options(self, p, g):

@@ -73,6 +73,7 @@ class BDR(Architecture):
             "13": "5" if arch == "PGD-Always-ON" else "4",
             "14": "5" if arch == "PGD-Always-ON" else "4",
             "15": "5" if arch == "PGD-Always-ON" else "4",
+            "16": "5" if arch == "PGD-Always-ON" else "4",
             None: "5" if arch == "PGD-Always-ON" else "4",
         }
 
