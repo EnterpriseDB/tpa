@@ -16,6 +16,15 @@
   version, if applicable. `tpaexec deploy` will then apply these changes
   to the servers in the cluster.
 
+### Minor changes
+
+- TPA-626 Improve CAMO commit_scope generation during reconfigure
+
+  Ensure that commit_scope for CAMO enabled partners is generated using
+  existing config options from older BDR versions when running tpaexec
+  reconfigure command to prepare for major PGD upgrade. Improve default
+  value when no previous config exist.
+
 ## v23.26 (2023-11-30)
 
 ### Minor changes
