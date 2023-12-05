@@ -95,6 +95,7 @@ as this might affect the stable operation of the cluster.
 As Patroni stores all postgres configuration in the DCS and controls
 how and when this is distributed to postgres, some features of TPA are
 incompatible with patroni:
+
 * It is not possible to change the template
 used to generate `postgresql.conf` with the setting
 `postgres_conf_template`.
