@@ -3,23 +3,23 @@
 This document explains how to use TPA from a copy of the source code
 repository.
 
-!!! Note 
+!!! Note
       EDB customers must [install TPA from packages](INSTALL.md) in
       order to receive EDB support for the software.
 
 To run TPA from source, you must install all of the dependencies
-(e.g., Python 3.6+) that the packages would handle for you, or download
+(e.g., Python 3.9+) that the packages would handle for you, or download
 the source and [run TPA in a Docker container](INSTALL-docker.md).
 (Either way will work fine on Linux and macOS.)
 
 ## Quickstart
 
-First, you must install the various dependencies Python 3, Python 
+First, you must install the various dependencies Python 3, Python
 venv, git, openvpn and patch. Installing from EDB repositories would
-would  install these automatically along with the TPA 
-packages.  
+would  install these automatically along with the TPA
+packages.
 
-Before you install TPA, you must install the required packages: 
+Before you install TPA, you must install the required packages:
 
 * **Debian/Ubuntu** <br/> `sudo apt-get install python3 python3-pip python3-venv git openvpn patch`
 * **Redhat, Rocky or AlmaLinux (RHEL7)** <br/> `sudo yum install python3 python3-pip epel-release git openvpn patch`
@@ -63,9 +63,9 @@ You now have tpaexec installed.
 
 ## Dependencies
 
-### Python 3.6+
+### Python 3.9+
 
-TPA requires Python 3.6 or later, available on most
+TPA requires Python 3.9 or later, available on most
 modern distributions. If you don't have it, you can use
 [pyenv](https://github.com/pyenv/pyenv) to install any version of Python
 you like without affecting the system packages.
