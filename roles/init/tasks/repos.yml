@@ -34,6 +34,7 @@
     that:
       edb_repositories is not empty
       or bdr_version|default('0') is not version('5', '>=')
+      or disable_repository_checks|default(false)
     fail_msg: >-
       You must set edb_repositories to use the PGD-Always-ON architecture
 
