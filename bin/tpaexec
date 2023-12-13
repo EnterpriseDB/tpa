@@ -1117,11 +1117,6 @@ elif [[ -z ${PYTHON:-""} ]]; then
     fi
 fi
 
-if ! command -v $PYTHON
-then
-    error "TPA requires a version of python to continue"
-fi
-
 case "$command" in
     *help|info|version)
         # Let through some basic commands, info in particular, without
@@ -1129,9 +1124,15 @@ case "$command" in
         ;;
 
     *)
-        if [[ $(_python39_or_later) == "False" ]]; then
-            error "TPA requires Python 3.9+, but found only" \
-                "$(_python_version) ($(command -v $PYTHON))"
+        if command -v "$PYTHON" &>/dev/null; then
+            if [[ $(_python39_or_later) == "False" ]]; then
+                error "TPA requires Python 3.9+, but found only" \
+                    "$(_python_version) ($(command -v $PYTHON));" \
+                    "please set PYTHON=/path/to/python3 or install edb-python"
+            fi
+        else
+            error "TPA requires at least Python 3.9; please " \
+                "set PYTHON=/path/to/python3 or install edb-python"
         fi
         ;;
 esac
