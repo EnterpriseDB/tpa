@@ -1,0 +1,37 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+#
+# package_spec contains a specification with an '=', possibly including
+# wildcards after the '='. We look at apt's cache and find a package
+# matching the given name and specification, and add it to package_list,
+# removing the corresponding original entry. We also add the package name
+# to versioned_package_list so that we can later exclude it from being
+# downloaded independently of versioning.
+
+- name: Extract package name and version from {{ package_spec }}
+  set_fact:
+    package_name: "{{
+        package_spec.split('=')[0]
+      }}"
+    package_version: "{{
+        package_spec.split('=')[1]
+      }}"
+
+- name: Get available versions of {{ package_name }}
+  shell: >
+    apt-cache show -a {{ package_name }}
+    | grep Version
+    | cut -d' ' -f 2
+  register: package_version_list
+
+- name: Find matching versions of {{ package_name }}
+  set_fact:
+    matching_version: "{{ item }}"
+  loop: "{{ package_version_list.stdout_lines }}"
+  when: item|fnmatch(package_version)
+
+- name: Update package list with versioned package
+  set_fact:
+    versioned_package_list: "{{ versioned_package_list|default([]) + [package_name] }}"
+    package_list: "{{ package_list|reject('equalto', package_spec)|list + [package_name ~ '=' ~ matching_version] }}"

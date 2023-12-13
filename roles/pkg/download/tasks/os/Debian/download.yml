@@ -19,6 +19,14 @@
 #
 # The final output contains packages that we need to download.
 
+- name: Resolve packages to specific versions
+  include_tasks: resolve-package.yml
+  loop: "{{ package_list }}"
+  loop_control:
+    loop_var: package_spec
+  when:
+    package_spec.find('=') > -1
+
 - name: Generate list of packages with all dependencies
   shell: |
     apt-cache depends \
@@ -33,14 +41,24 @@
   vars:
     _packages: "{{ package_list|mandatory|map('quote')|join(' ') }}"
 
+# The list we now have contains bare names of all packages, including
+# ones that we've resolved from a wildcard to a specific version. So we
+# remove the bare names of anything that's in versioned_package_list,
+# and download the rest of the output from the dependency resolution,
+# plus the original package list, which has been modified to include
+# specific versions if it contained wildcards. This merged list may
+# contain duplicates but that doesn't cause a problem.
+
 - name: Download packages with apt-get (for {{ ansible_distribution }} {{ ansible_distribution_major_version }})
   command: "apt-get download {{ _all_packages_and_dependencies }}"
   args:
     chdir: "{{ _download_dir }}"
   register: _apt_get_download
   vars:
+    dependencies: >
+      {{ _pkg_list.stdout_lines|reject('in', versioned_package_list|default([]))|list }}
     _all_packages_and_dependencies: >
-      {{ _pkg_list.stdout_lines|map('quote')|join(' ') }}
+      {{ ( dependencies + package_list )|map('quote')|join(' ') }}
   changed_when: >
     _apt_get_download.stdout_lines|length > 0
 
