@@ -31,7 +31,7 @@
     'postgres' in role
     and 'replica' in role
     and not pgdata_initialised
-    and failover_manager not in ['repmgr', 'patroni']
+    and failover_manager not in ['repmgr']
     and not ('bdr' in role and 'readonly' in role)
 
 - include_role:
