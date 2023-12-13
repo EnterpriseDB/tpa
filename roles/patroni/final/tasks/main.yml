@@ -5,7 +5,6 @@
 - include_tasks: init.yml
   when:
     not patroni_initialised
-    and 'primary' in role
 
 # All facts for configuration should be available by this stage so this is
 # where the patroni YAML config file can be created or updated.

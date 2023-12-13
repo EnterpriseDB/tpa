@@ -249,6 +249,17 @@
 - set_fact:
     harp_manager_user: "{{ harp_manager_user|default(current_harp_manager_user| default(default_harp_manager_user)) }}"
 
+# Patroni manages replication slots, and we should use the same name it expects
+# i.e., the same name which is provided to the `name` Patroni setting (TPA uses
+# the inventory hostname as `name`). The regex applied here is the same one
+# used by Patroni when handling the member name -- see
+# `slot_name_from_member_name` function in Patroni code
+- name: Override "primary_slot_name" when using Patroni
+  set_fact:
+    primary_slot_name: "{{ inventory_hostname|regex_replace('[^a-zA-Z0-9_]', '_') }}"
+  when: >
+    failover_manager == 'patroni'
+
 - name: Add postgres libs and PGHOST to target_environment
   set_fact:
     target_environment: "{{ target_environment|combine(_task_environment) }}"
