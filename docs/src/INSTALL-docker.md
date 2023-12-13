@@ -3,7 +3,7 @@
 If you are using a system for which there are no [TPA
 packages](INSTALL.md) available, and it's difficult to run TPA after
 [installing from source](INSTALL-repo.md) (for example, because it's not
-easy to obtain a working Python 3.6+ interpreter), your last resort may
+easy to obtain a working Python 3.9+ interpreter), your last resort may
 be to build a Docker image and run TPA inside a Docker container.
 
 Please note that you do not need to run TPA in a Docker container in
