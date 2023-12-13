@@ -16,12 +16,10 @@
 # can start the replicas who will start to sync from the primary
 # automatically.
 
+# Make Patroni take management over on the primary
+# We need to start with the primary so we avoid that Patroni would promote a
+# replica when taking over the cluster management
 - block:
-  - include_role:
-      name: postgres/restart
-    vars:
-      postgres_service_end_state: stopped
-
   - include_tasks: config.yml
 
   - include_role:
@@ -34,10 +32,14 @@
     and (patroni_cluster.members is not defined
       or patroni_cluster.members is empty)
 
+# Update facts which will be used by Patroni on the replicas
+# That's required so the replicas will have the updated facts when being taken
+# over by Patroni
 - include_role:
     name: patroni/facts
     tasks_from: gather
 
+# Make Patroni take management over on the replicas
 - block:
   - include_tasks: config.yml
 
@@ -50,3 +52,13 @@
   when: >
     'replica' in role
     and patroni_cluster.members|selectattr('Member', 'eq', inventory_hostname)|list is empty
+
+# This will take care of "stopping" the `postgres` systemd unit and making
+# Patroni start Postgres through `pg_ctl`
+- name: Issue a postgresql restart so Patroni can take it over
+  include_role:
+    name: patroni/api
+    tasks_from: restart
+  run_once: true
+  when:
+    patroni_initialised

@@ -163,6 +163,21 @@ _patroni_conf_backup:
         - name: "{{ backup|default('')|backup_slot_name }}"
           type: physical
 
+# permanent physical replication slots for members, so they don't get dropped
+# while Patroni is taking management over during the first `tpaexec deploy`.
+# The permanent slots will also avoid having the slots dropped if a node faces
+# a temporary disconnection from the cluster.
+_patroni_conf_permanent_slots:
+  bootstrap:
+    dcs:
+      slots: >-
+        {%- set _slots = {} -%}
+        {%- for h in groups['patroni']|sort -%}
+        {%-   set slot_name = hostvars[h].primary_slot_name -%}
+        {%-   set _ = _slots.update({slot_name: {'type': 'physical'}}) -%}
+        {%- endfor -%}
+        {{ _slots }}
+
 # Build the Dynamic Config first from defaults, then from any bootstrap.dcs settings supplied
 # in `config.yml`, then finally from `patroni_dynamic_conf_settings` supplied in `config.yml`.
 # This is used to update running clusters once bootstrapped and also the initial bootstrap
