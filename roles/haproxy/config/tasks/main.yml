@@ -42,7 +42,6 @@
     state: restarted
   when: haproxy_syslog_conf is changed
 
-# XXX I was unable to configure conditions to create this file
 - name: Install agent.lua
   template:
     src: agent.lua.j2
@@ -59,7 +58,6 @@
   when:
     haproxy_backend_queue_check != 'platypus'
 
-# XXX I was unable to configure conditions to create this file
 - block:
   - name: Install check-queue
     template:

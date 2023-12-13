@@ -30,7 +30,6 @@
   set_fact:
     current_pem_schema_version: "{{ pem_schema_version_check.stdout }}"
 
-# XXX Created a PEM server node, but did not find file
 - name: Upgrade the PEM schema
   block:
     - name: Copy the list-pem-schema.py on pem-server

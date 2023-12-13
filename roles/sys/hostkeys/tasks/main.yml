@@ -19,7 +19,7 @@
     mode: "{{ mode }}"
   vars:
     file: "ssh_host_{{ item.0 }}_key{{ item.1 }}"
-    mode: "{{ (item.1 == '')|ternary('0600', '"0644"') }}"
+    mode: "{{ (item.1 == '')|ternary('0600', '0644') }}"
   with_nested:
   - ["rsa", "ecdsa"]
   - ["", ".pub"]

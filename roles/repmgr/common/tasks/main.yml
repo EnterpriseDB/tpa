@@ -38,8 +38,8 @@
     group: "{{ postgres_group }}"
     mode: "{{ item.mode }}"
   with_items:
-    - {mode: ""0755"", path: promote_command.sh}
-    - {mode: ""0755"", path: follow_command.sh}
+    - {mode: "0755", path: promote_command.sh}
+    - {mode: "0755", path: follow_command.sh}
 
 - name: Set up a cron job to purge old monitor records
   cron:

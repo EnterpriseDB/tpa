@@ -272,7 +272,7 @@
     dest: "{{ _include_dir }}/8901-primary_slot_name.conf"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: 0644
+    mode: "0644"
   when: >
     ('primary' in role or 'replica' in role)
     and failover_manager != 'repmgr'
