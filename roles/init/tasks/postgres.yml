@@ -469,6 +469,8 @@
   set_fact:
     postgres_client_dsn_attributes: "{{ postgres_client_dsn_attributes|default('') }}"
     replica_client_dsn_attributes: "{{ replica_client_dsn_attributes|default('') }}"
+    streaming_barman_client_dsn_attributes: >
+      "{{ streaming_barman_client_dsn_attributes|default(barman_client_dsn_attributes)|default('') }}"
     barman_client_dsn_attributes: "{{ barman_client_dsn_attributes|default('') }}"
     repmgr_client_dsn_attributes: "{{ repmgr_client_dsn_attributes|default('') }}"
     bdr_client_dsn_attributes: "{{ bdr_client_dsn_attributes|default('') }}"
