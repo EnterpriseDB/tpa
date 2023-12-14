@@ -12,14 +12,13 @@ files for the target distribution package manager, so can be used
 exclusively to build clusters. At this time package managers Apt and YUM
 are supported.
 
-!!! Note 
-The download-packages feature requires Docker to be installed
-on the TPA host. This is because the downloader operates by creating a
-container of the target operating system and uses that system's package
-manager to resolve dependencies and download all necessary packages. The
-required Docker setup for download-packages is the same as that for
-[using Docker as a deployment platform](#platform-docker).
-!!!
+!!! Note
+    The download-packages feature requires Docker to be installed
+    on the TPA host. This is because the downloader operates by creating a
+    container of the target operating system and uses that system's package
+    manager to resolve dependencies and download all necessary packages. The
+    required Docker setup for download-packages is the same as that for
+    [using Docker as a deployment platform](#platform-docker).
 
 ## Usage
 
