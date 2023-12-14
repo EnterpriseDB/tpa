@@ -7,7 +7,9 @@
 
   tasks:
   - assert:
-      that: "{{ tpa_2q_repositories is not defined }}"
+      that: >
+        tpa_2q_repositories is not defined
+        or tpa_2q_repositories == []
       msg: >-
         WARNING: you are using deprecated 2ndQuadrant repositories, which will
         soon be decommissioned. Please use 'tpaexec reconfigure' to update to
