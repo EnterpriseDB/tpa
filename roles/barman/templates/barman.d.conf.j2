@@ -7,7 +7,7 @@ archiver = "{{ _barman_archiver }}"
 {% endif %}
 ssh_command = "ssh -q {{ postgres_user }}@{{ target }}"
 conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='barman') }} {{ barman_client_dsn_attributes }}"
-streaming_conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='streaming_barman') }} {{ barman_client_dsn_attributes }}"
+streaming_conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='streaming_barman') }} {{ streaming_barman_client_dsn_attributes }}"
 streaming_archiver = on
 slot_name = "{{ slot_name }}"
 {% if _barman_log_file != default_barman_log_file %}
