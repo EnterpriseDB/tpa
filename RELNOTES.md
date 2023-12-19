@@ -6,6 +6,13 @@
 
 ### Notable changes
 
+- TPA-553 TPA support for v16 supported software
+
+  Because v23.23 introduced the initial support for installing Postgres v16,
+  this change makes sure that TPA correctly handles v16 supported software.
+
+- TPA-562 TPA requires Python v3.9 to work
+
 - TPA-582 Remove dependency on 2q repositories
 
   Newly configured clusters will now never use 2q repositories.
@@ -16,11 +23,21 @@
   version, if applicable. `tpaexec deploy` will then apply these changes
   to the servers in the cluster.
 
+- TPA-637 Allow a different Barman user when connecting to servers
+
 ### Minor changes
 
-- TPA-634 Support Oracle Linux 7 and 8 on the Docker platform
+- TPA-467 Change octal integers to strings to abide by Ansible risky-octal linting
 
-  Support for AWS platform is underway.
+- TPA-609 No longer rely on Makefile to install tpaexec from source
+
+- TPA-616 Allow deployment regardless of where dependencies originated
+
+- TPA-618 Generate a primary_slot_name on primary for efm
+
+  Generate a primary_slot_name also on primary node to be used in case of
+  switchover, to ensure the switched primary will have a physical slot on
+  the new primary.
 
 - TPA-626 Improve CAMO commit_scope generation during reconfigure
 
@@ -29,15 +46,17 @@
   reconfigure command to prepare for major PGD upgrade. Improve default
   value when no previous config exist.
 
-- TPA-618 Generate a primary_slot_name on primary for efm
+- TPA-631 Warn if existing cluster are stil using 2q repos
 
-  Generate a primary_slot_name also on primary node to be used in case of
-  switchover, to ensure the switched primary will have a physical slot on
-  the new primary.
+- TPA-634 and TPA 483 Support Oracle Linux 7, 8 and 9 on Docker platform
+
+  Support for AWS platform is underway.
 
 ## Bugfixes
 
 - TPA-560 Fix some patroni warnings
+
+- TPA-629 Avoid OOM condition by reducing maintenance_work_mem by default
 
 ## v23.26 (2023-11-30)
 
@@ -101,11 +120,6 @@
 
   Note: The upgrade procedure for camo enabled clusters is not yet
   supported. This support will come in a later release.
-
-- TPA-553 TPA support for v16 supported software
-
-  v23.23 introduced the initial support for installing Postgres v16.
-  TPA-553 makes sure that TPA correctly handles v16 supported software.
 
 ### Minor changes
 
