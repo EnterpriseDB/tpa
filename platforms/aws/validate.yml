@@ -160,6 +160,7 @@
     - termination_protection
     - assign_public_ip
     - assign_elastic_ip
+    - elastic_ip
     - route53_hosted_zone_id
     - route53_private_zone
     - route53_zone

@@ -328,6 +328,17 @@ write access to this bucket. During provisioning, tpaexec will provide
 instances with read-only access to the cluster_bucket through the
 instance profile.
 
+### Elastic IP addresses
+
+To use elastic IP addresses, set `assign_elastic_ip` to `true` in
+config.yml, either in `instance_defaults` to affect all the instances in your
+cluster or individually on the separate instances as required. By
+default, this will allocate a new elastic ip address and assign it to
+the new instance.
+To use an elastic IP address that has already been allocated but not yet
+assigned, use `elastic_ip: 34.252.55.252`, substituting in your
+allocated address.
+
 ### Instance profile (optional)
 
 ```

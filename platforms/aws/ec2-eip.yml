@@ -9,6 +9,7 @@
     device_id: "{{ item.1.instances[0].instance_id }}"
     reuse_existing_ip_allowed: false
     in_vpc: true
+    public_ip: "{{ item.0.elastic_ip|default(omit) }}"
   when:
     item.0.assign_elastic_ip is defined
     and item.0.assign_elastic_ip
