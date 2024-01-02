@@ -2,28 +2,22 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
-# 2ndQuadrant sent out a Tech alert on 2020-03-11 that informed users of
-# an "Update to 2ndQuadrant Debian/Ubuntu Repositories Required".
-#
-# The GPG keys used to authenticate packages from the 2ndQuadrant Debian
-# and apt repositories were about to expire. We recommended installing
-# the 2ndquadrant-repository-keys package to keep the keys up-to-date.
-#
-# The keys have now expired, so for existing clusters without the new
-# keys, the first apt-get update would fail because of unauthenticated
-# repositories (so this can't be fixed in a pre-deploy hook). So if we
-# find that 2ndquadrant-repository-keys is not installed and there are
-# any 2ndQuadrant repositories configured, we install the new package.
+# To use 2ndQuadrant repositories after March 2020, it was necessary to
+# have the 2ndquadrant-repository-keys package installed. That package
+# created the directory /usr/share/2ndquadrant-repository-keys. We used to
+# install the package here if it wasn't already installed; however, as
+# the 2ndQuadrant repositories are being retired, installing the package
+# is no longer supported. So if you haven't redeployed since before March
+# 2020, you will now be unable to use 2ndQuadrant repositories at all.
 
 - name: Install 2ndquadrant-repository-keys
   raw:
     if [[ ! -d /usr/share/2ndquadrant-repository-keys ]]; then
       for f in /etc/apt/sources.list.d/2ndquadrant-*; do
         if [[ -e "$f" ]]; then
-          curl https://dl.enterprisedb.com/gpg-key.asc | apt-key add - &&
-          (apt-get update || true) &&
-          apt-get install -y 2ndquadrant-repository-keys;
-          break;
+          echo "2ndQuadrant repositories detected but no repository keys present";
+          echo "This installation can no longer be updated";
+          exit 1;
         fi;
       done;
     fi
