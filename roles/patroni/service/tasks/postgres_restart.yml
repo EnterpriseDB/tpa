@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 - name: Process pending restart of postgres through patroni if required
   include_role:

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 # This role is applied to every postgres replica instance that isn't
 # handled by repmgr. It uses pg_basebackup to set up a new replica.

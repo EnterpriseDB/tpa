@@ -1,4 +1,4 @@
-© Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+© Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 Confidential and private property of EDB. All rights reserved.
 

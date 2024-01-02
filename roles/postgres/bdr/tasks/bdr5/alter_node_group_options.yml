@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 # We assume that a key named x in bdr_node_groups[*].options corresponds
 # to the bdr.node_group_summary.x column in the database. If this is not

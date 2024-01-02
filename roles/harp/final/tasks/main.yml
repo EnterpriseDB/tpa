@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 # When using BDR as the DCS, harpctl apply will work only after the BDR
 # nodes have reached consensus through RAFT.

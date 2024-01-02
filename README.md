@@ -1,5 +1,5 @@
 # Trusted Postgres Architect
-© Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+© Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 ## What is Trusted Postgres Architect (TPA)?
 TPA is an orchestration tool developed by [EnterpriseDB (EDB)](https://www.enterprisedb.com/) that uses Ansible to deploy Postgres clusters according to EDB's recommendations.

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 # This service call should not handle restart, this is because it will also shut down postgres
 # when patroni stops. It is fine for a `reload` to occur through the systemd unit as the daemon

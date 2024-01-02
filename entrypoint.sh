@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 reset_perms() {
     [ -n "$USER_ID" ] && chown "$USER_ID" -R /work
