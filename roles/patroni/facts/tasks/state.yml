@@ -1,5 +1,5 @@
 ---
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 # These facts are set conditionally based on the state of the cluster.
 # This is called once at the start of a deployment during the TPA init phase,

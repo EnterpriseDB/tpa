@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 # This transmogrifier handles required transformations from BDR-Always-ON
 # architecture i.e. bdr version 3/4 clusters to PGD-Always-ON architecture i.e.

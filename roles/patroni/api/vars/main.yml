@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 _patroni_api_scheme: "{{ patroni_ssl_enabled|ternary('https', 'http') }}"
 _patroni_ssl_ca_path: "{{ ssl_ca_file|default(ssl_cert_file|default('/etc/tpa/'+cluster_name+'.crt')) }}"
