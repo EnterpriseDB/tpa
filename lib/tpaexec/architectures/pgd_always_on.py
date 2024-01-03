@@ -24,7 +24,7 @@ class PGD_Always_ON(BDR):
 
         g.add_argument(
             "--pgd-proxy-routing",
-            help="Configure each PGD-Proxy to route connections to a globally-elected write leader (global) or a write leader within its own location (local)",
+            help="configure each PGD-Proxy to route connections to a globally-elected write leader (global) or a write leader within its own location (local)",
             choices=["global", "local"],
             dest="pgd_proxy_routing",
             default=None,
@@ -35,19 +35,19 @@ class PGD_Always_ON(BDR):
             type=int,
             dest="data_nodes_per_location",
             default=3,
-            help="Number of PGD data nodes per location",
+            help="number of PGD data nodes per location",
         )
         g.add_argument(
             "--add-witness-node-per-location",
             action="store_true",
-            help="Not needed; witness nodes are added automatically when required",
+            help="not needed; witness nodes are added automatically when required",
             dest="witness_node_per_location",
         )
         g.add_argument(
             "--witness-only-location",
             "--add-witness-only-location",
             dest="witness_only_location",
-            help="Designate a location as a witness-only location (no data nodes)",
+            help="designate a location as a witness-only location (no data nodes)",
             default=None,
         )
 
@@ -56,13 +56,13 @@ class PGD_Always_ON(BDR):
             action="store_const",
             const=0,
             dest="proxy_nodes_per_location",
-            help="Not needed; pgd-proxy runs on the data nodes by default",
+            help="not needed; pgd-proxy runs on the data nodes by default",
         )
         g.add_argument(
             "--add-proxy-nodes-per-location",
             type=int,
             dest="proxy_nodes_per_location",
-            help="Number of separate PGD-Proxy nodes to add in each location",
+            help="number of separate PGD-Proxy nodes to add in each location",
         )
         g.add_argument(
             "--enable-pgd-probes",

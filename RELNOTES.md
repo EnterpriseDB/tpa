@@ -2,6 +2,16 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
+## v23.28 (unreleased)
+
+### Notable changes
+
+- TPA-85 Support Keyring for cluster vault password storage
+
+  Add support for system keyring to store cluster vault password by default.
+  This leverage python keyring module to avoid storing cluster vault password
+  in a plaintext file. This will not be enabled on already existing cluster.
+
 ## v23.27 (2023-12-19)
 
 ### Notable changes
