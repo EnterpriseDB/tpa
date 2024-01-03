@@ -257,6 +257,8 @@
 - name: Override "primary_slot_name" when using Patroni
   set_fact:
     primary_slot_name: "{{ inventory_hostname|regex_replace('[^a-zA-Z0-9_]', '_') }}"
+  when: >
+    failover_manager == 'patroni'
 
 - name: Add postgres libs and PGHOST to target_environment
   set_fact:
