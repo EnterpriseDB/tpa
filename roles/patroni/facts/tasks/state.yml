@@ -9,20 +9,23 @@
 # manager, and patroni has not been initialised (no existing state is present in
 # the DCS), TPA will:
 #
-# 1. Create a single standalone PostgreSQL server using the same method that
-#   it does for other cluster types and failover managers. TPA will create
-#   configuration files, initialise the database, start the server with the
-#   `postgres` systemd service unit configured with TPA, establish what users
-#   should be created, add extension configuration, etc.
+# 1. Create the primary and standbys using the same method that it does for
+#   other cluster types and failover managers. TPA will create configuration
+#   files, initialise the database, start the server with the `postgres` systemd
+#   service unit configured with TPA, establish what users should be created,
+#   add extension configuration, etc.
 # 2. create a Patroni configuration with bootstrap settings that will initialise
 #   the DCS with settings and PostgreSQL configuration generated and provided by
 #   TPA.
 # 3. start Patroni on the primary node, where Patroni will populate the DCS with
 #   configuration from the bootstrap configuration in the Patroni config file,
-#   read the state of the database, and promote itself to be the leader.
-# 4. start Patroni on secondary nodes, that will connect to the DCS and see
-#   there is an existing cluster, establishing a connection with the primary
-#   and perform replica creation.
+#   read the state of the database, and promote itself to be the leader. The DCS
+#   configuration will contain permanent physical replication slots configured
+#   for the members, so we avoid having the slots dropped while Patroni is
+#   taking the cluster management over.
+# 4. start Patroni on secondary nodes. Based on the information from the DCS and
+#   on the running Postgres instance Patroni will decide to do nothing else, and
+#   it will simply take over management of the running nodes.
 # 5. detect the Patroni cluster is initialised and perform any clean up that is
 #   required, including removing configuration files for PostgreSQL laid down by
 #   TPA in step 1 above.

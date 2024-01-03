@@ -9,12 +9,10 @@
 # DCS config.
 
 # So first of all we read the cluster state from the DCS, then we
-# start patroni on the only primary if the DCS is empty. This ensures
-# that the empty replicas do not try to initialise new databases and
-# form a cluster between them as this would result in a mismatch in
-# system ID in the DCS. Then once the DCS has correct information we
-# can start the replicas who will start to sync from the primary
-# automatically.
+# start patroni on the primary if the DCS is empty. This ensures that the
+# expected Postgres node is set as leader in the DCS. Then once the DCS has
+# correct information we can start Patroni on the standbys who will be
+# assigned with the correct role in the DCS (`replica`)
 
 # Make Patroni take management over on the primary
 # We need to start with the primary so we avoid that Patroni would promote a
