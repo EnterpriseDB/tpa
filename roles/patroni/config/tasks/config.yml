@@ -177,6 +177,13 @@
     backup is defined
     and backup is not empty
 
+- name: Update patroni config with permanent physical slots
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: patroni_conf
+    object_contents: "{{ _patroni_conf_permanent_slots }}"
+
 - name: Finally apply any user defined overrides
   include_role:
     name: config/add_to_obj
