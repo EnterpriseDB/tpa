@@ -1,15 +1,15 @@
 # How TPA uses 2ndQuadrant and EDB repositories
 
-This page explains the package sources from which TPA can download EDB
-(including 2ndQuadrant) software, how the source varies depending on the
-selected software, and how to configure access to each source.
+TPA can download EDB software
+(including 2ndQuadrant) from several package sources. The source varies depending on the
+selected software, You can configure access to each source.
 
-Note that this page only describes the special configuration options and
-logic for EDB and 2ndQuadrant sources. Arbitrary
+Special configuration options and
+logic for EDB and 2ndQuadrant sources are available. You can add arbitrary
 [yum](yum_repositories.md) or [apt](apt_repositories.md) repositories
-can be added independently of the logic described here. Likewise,
-packages can be [downloaded in advance](tpaexec-download-packages.md)
-and added to a [local repository](local-repo.md) if preferred.
+independently of the logic described here. Likewise, you can [download
+packages in advance](tpaexec-download-packages.md)
+and add them to a [local repository](local-repo.md) if you prefer.
 
 ## Package sources used by TPA
 
@@ -21,12 +21,11 @@ is available from more than one source.
  - [EDB Repos 1.0](https://www.enterprisedb.com/repos/legacy)
  - [2ndQuadrant Repos](https://techsupport.enterprisedb.com/customer_portal/sw/)
 
-By default, TPA will [select sources and repositories automatically](#how-sources-are-selected-by-default)
-based on the architecture and other options you have specified, so it is
-not generally necessary to change these. However, you will need to
+By default, TPA [selects sources and repositories](#how-sources-are-selected-by-default)
+based on the architecture and other options you specify. It's
+generally not necessary to change these. However, before running `tpaexec deploy`, you must
 ensure that you have a valid subscription for all the sources used and
-that you have [exported the token](#authenticating-with-package-sources)
-before running `tpaexec deploy` or the operation will fail.
+that you [exported the token](#authenticating-with-package-sources). Otherwise, the operation fails.
 
 !!! Note
     EDB is in the process of publishing all software through Repos 2.0,
@@ -34,44 +33,45 @@ before running `tpaexec deploy` or the operation will fail.
 
 ## Authenticating with package sources
 
-To use [EDB Repos 2.0](https://www.enterprisedb.com/repos/) you must
-`export EDB_SUBSCRIPTION_TOKEN=xxx` before you run tpaexec. You can get
+To use [EDB Repos 2.0](https://www.enterprisedb.com/repos/), before you run tpaexec, you must run
+`export EDB_SUBSCRIPTION_TOKEN=xxx`. You can get
 your subscription token from [the web
 interface](https://www.enterprisedb.com/repos-downloads).
 
 To use
 [2ndQuadrant repositories](https://techsupport.enterprisedb.com/customer_portal/sw/),
-you must `export TPA_2Q_SUBSCRIPTION_TOKEN=xxx` before you run
-tpaexec. You can get your subscription token from the 2ndQuadrant
-Portal, under "Company info" in the left menu, then "Company". Some
+before you run tpaexec, you must run `export TPA_2Q_SUBSCRIPTION_TOKEN=xxx`. 
+You can get your subscription token from the 2ndQuadrant
+Portal. In the left menu, under **Company info**, select **Company**. Some
 repositories are available only by prior arrangement.
 
-To use [EDB Repos 1.0](https://www.enterprisedb.com/repos/legacy) you
+To use [EDB Repos 1.0](https://www.enterprisedb.com/repos/legacy), you
 must create a text file that contains your access credentials in the
-`username:password` format and run `export
-EDB_REPO_CREDENTIALS_FILE=/path/to/credentials/file` before you run
-tpaexec.
+`username:password` format. Before you run tpaexec, run:
 
-If you do not have an account for any of the sites listed, you can
-register for access at
-https://www.enterprisedb.com/user/register?destination=/repository-access-request
+```
+export EDB_REPO_CREDENTIALS_FILE=/path/to/credentials/file
+```
+
+If you don't have an account for any of the sites listed, you can
+register for access at the [Account Registration page](https://www.enterprisedb.com/user/register?destination=/repository-access-request).
 
 ## How sources are selected by default
 
-If the PGD-Always-ON architecture is selected, repositories will be
-selected from EDB Repos 2.0 and all software will be sourced
+If you select the PGD-Always-ON architecture, repositories are
+selected from EDB Repos 2.0, and all software is sourced
 from these repositories.
 
-If the M1 architecture is selected and no proprietary EDB software is
-selected, all packages will be sourced from PGDG. If any proprietary EDB
-software is selected, all packages will be sourced from EDB Repos 2.0.
+If you select the M1 architecture and don't select any proprietary EDB software,
+all packages are sourced from PGDG. If you select any proprietary EDB
+software, all packages are sourced from EDB Repos 2.0.
 
 For the BDR-Always-ON architecture, the default source is
-2ndQuadrant, and the necessary repositories will be added from this
-source. In addition, the PGDG repositories will be used for community
-packages such as PostgreSQL and etcd as required.
-If EDB software not available in the 2ndQuadrant repos is required
-(e.g. EDB Advanced Server), repositories will be selected from EDB Repos
+2ndQuadrant, and the necessary repositories are added from this
+source. In addition, the PGDG repositories are used for community
+packages, such as PostgreSQL and etcd, as required.
+If EDB software that isn't available in the 2ndQuadrant repos is required
+(such as EDB Postgres Advanced Server), select repositories from EDB Repos
 1.0.
 
 ## Specifying EDB 2.0 repositories
@@ -87,14 +87,14 @@ cluster_vars:
     - postgres_distributed
 ```
 
-This example will configure the `enterprise` and `postgres_distributed`
-repositories, giving access to EPAS and PGD5 products.
-On Debian or Ubuntu systems, it will use the APT repository, and on
-RedHat or SLES systems, it will use the rpm repositories, through the yum
-or zypper frontends, respectively.
+This example configures the `enterprise` and `postgres_distributed`
+repositories, giving access to EDB Postgres Advanced Server and PGD5 products.
+On Debian or Ubuntu systems, it uses the APT repository. 
+RedHat systems use the rpm repositories through the yum front end. 
+SLES systems use the rpm repositories through the zypper front end. 
 
-If any EDB repositories are specified, any 2ndQuadrant repositories
-specified will be ignored and no EDB Repos 1.0 will be installed.
+If you specify any EDB repositories, any 2ndQuadrant repositories
+specified are ignored and no EDB Repos 1.0 are installed.
 
 ## Specifying 2ndQuadrant repositories
 
@@ -109,16 +109,15 @@ cluster_vars:
     - products/bdr3/release
 ```
 
-This example will install the pglogical3 and bdr3 release repositories.
-On Debian and Ubuntu systems, it will use the APT repository, and on
-RedHat systems, it will use the YUM repository.
+This example installs the pglogical3 and bdr3 release repositories.
+On Debian and Ubuntu systems, it uses the APT repository, and on
+RedHat systems, it uses the YUM repository.
 
 The `dl/default/release` repository is always installed by default,
-unless you
+unless you either:
 
-- explicitly set `tpa_2q_repositories: []`, or
-- have at least one entry in `edb_repositories`.
+- Explicitly set `tpa_2q_repositories: []`
+- Have at least one entry in `edb_repositories`
 
-Either or the above will result in no 2ndQuadrant repositories being
+Either of these action results in no 2ndQuadrant repositories being
 installed.
-
