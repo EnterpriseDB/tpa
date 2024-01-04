@@ -588,7 +588,8 @@ class Architecture(object):
         (args["hostnames"], args["ip_addresses"]) = self.hostnames(self.num_instances())
         if args.get("cluster_prefixed_hostnames"):
             args["hostnames"] = [
-                args["cluster_name"] + "-" + hostname for hostname in args["hostnames"]
+                re.sub("[^a-z0-9-]", "-", args["cluster_name"].lower()) + "-" + hostname
+                for hostname in args["hostnames"]
             ]
 
         # Figure out how to get the desired distribution.
