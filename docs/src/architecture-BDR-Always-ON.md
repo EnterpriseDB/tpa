@@ -1,28 +1,28 @@
 # BDR-Always-ON
 
 EDB Postgres Distributed 3.7 or 4 in an Always-ON
-configuration, suitable for use in test and production.
+configuration is suitable for use in test and production.
 
 This architecture requires a subscription to the legacy 2ndQuadrant
 repositories, and some options require a subscription to EDB Repos 1.0.
 See [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
-for more detail on this topic.
+for more detail.
 
 The BDR-Always-ON architecture has four variants, which can be
 selected with the `--layout` configure option:
 
-1. bronze: 2×bdr+primary, bdr+witness, barman, 2×harp-proxy
+- `bronze`: 2×bdr+primary, bdr+witness, barman, 2×harp-proxy
 
-2. silver: bronze, with bdr+witness promoted to bdr+primary, and barman
+- `silver`: bronze, with bdr+witness promoted to bdr+primary, and barman
 moved to separate location
 
-3. gold: two symmetric locations with 2×bdr+primary, 2×harp-proxy,
+- `gold`: two symmetric locations with 2×bdr+primary, 2×harp-proxy,
 and barman each; plus a bdr+witness in a third location
 
-4. platinum: gold, but with one bdr+readonly (logical standby) added to
+- `platinum`: gold, but with one bdr+readonly (logical standby) added to
 each of the main locations
 
-You can check EDB's Postgres Distributed Always On Architectures
+See EDB's Postgres Distributed Always On Architectures
 [whitepaper](https://www.enterprisedb.com/promote/bdr-always-on-architectures)
 for the detailed layout diagrams.
 
@@ -32,8 +32,7 @@ This architecture is meant for use with PGD versions 3.7 and 4.
 
 ### Overview of configuration options
 
-An example invocation of `tpaexec configure` for this architecture
-is shown below.
+This example shows an invocation of `tpaexec configure` for this architecture:
 
 ```shell
 tpaexec configure ~/clusters/bdr \
@@ -45,58 +44,54 @@ tpaexec configure ~/clusters/bdr \
          --harp-consensus-protocol bdr
 ```
 
-You can list all available options using the help command.
+You can list all available options using the `help` command.
 
 ```shell
 tpaexec configure --architecture BDR-Always-ON --help
 ```
 
-The tables below describe the mandatory options for BDR-Always-ON
-and additional important options.
-More detail on the options is provided in the following section.
-
-#### Mandatory Options
+#### Mandatory options
 
 | Option                                                | Description                                                                                 |
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `--architecture` (`-a`)                               | Must be set to `BDR-Always-ON`.                                                             |
-| Postgres flavour and version (e.g. `--postgresql 14`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
+| `--postgresql 14` (for example) | Any valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
 | `--layout`                                            | One of `bronze`, `silver`, `gold`, `platinum`.                                              |
 | `--harp-consensus-protocol`                           | One of `bdr`, `etcd`.                                                                       |
 
 <br/><br/>
 
-#### Additional Options
+#### Additional options
 
-| Option                       | Description                                                                                           | Behaviour if omitted      |
+| Option                       | Description                                                                                           | Behavior if omitted      |
 |------------------------------|-------------------------------------------------------------------------------------------------------|---------------------------|
 | `--platform`                 | One of `aws`, `docker`, `bare`.                                                                       | Defaults to `aws`.        |
-| `--enable-camo`              | Sets two data nodes in each location as CAMO partners.                                                | CAMO will not be enabled. |
+| `--enable-camo`              | Sets two data nodes in each location as CAMO partners.                                                | CAMO isn't enabled. |
 | `--bdr-database`             | The name of the database to be used for replication.                                                  | Defaults to `bdrdb`.      |
 | `--enable-harp-probes`       | Enable http(s) api endpoints for harp such as `health/is-ready` to allow probing harp's health.      | Disabled by default.      |
 <br/><br/>
 
 ### More detail about BDR-Always-ON configuration
 
-You must specify `--layout layoutname` to set one of the supported BDR
-use-case variations. The permitted arguments are bronze, silver, gold, and
-platinum. The bronze, gold and platinum layouts have a PGD witness node
-to ensure odd number of nodes for Raft consensus majority. Witness nodes do
-not participate in the data replication.
+Specify `--layout layoutname` to choose a layout:
+`bronze`, `silver`, `gold`, or
+`platinum`. The bronze, gold, and platinum layouts have a PGD witness node
+to ensure an odd number of nodes for Raft consensus majority. Witness nodes don't
+participate in the data replication.
 
 You must specify `--harp-consensus-protocol protocolname`. The supported
-protocols are bdr and etcd; see [`Configuring HARP`](harp.md) for more details.
+protocols are bdr and etcd. See [`Configuring HARP`](harp.md) for more details.
 
-You may optionally specify `--bdr-database dbname` to set the name of
-the database with PGD enabled (default: bdrdb).
+You can optionally specify `--bdr-database dbname` to set the name of
+the database with PGD enabled (default: `bdrdb`).
 
-You may optionally specify `--enable-camo` to set the pair of PGD
+You can optionally specify `--enable-camo` to set the pair of PGD
 primary instances in each region to be each other's CAMO partners.
 
-You may optionally specify `--enable-harp-probes [{http, https}]` to
-enable http(s) api endpoints that will allow to easily probe harp's health.
+You can optionally specify `--enable-harp-probes [{http, https}]` to
+enable http(s) api endpoints that allow you to easily probe harp's health.
 
-Please note we enable HARP2 by default in BDR-Always-ON architecture.
+HARP2 is enabled by default in the BDR-Always-ON architecture.
 
-You may also specify any of the options described by
+You can also specify any of the options described by
 [`tpaexec help configure-options`](tpaexec-configure.md).
