@@ -34,4 +34,4 @@
 - name: Update package list with versioned package
   set_fact:
     versioned_package_list: "{{ versioned_package_list|default([]) + [package_name] }}"
-    package_list: "{{ package_list|reject('equalto', package_spec)|list + [package_name ~ '=' ~ matching_version] }}"
+    copy_package_list: "{{ copy_package_list|reject('equalto', package_spec)|list + [package_name ~ '=' ~ matching_version] }}"
