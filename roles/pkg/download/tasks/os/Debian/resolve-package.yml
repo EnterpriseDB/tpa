@@ -29,7 +29,7 @@
   set_fact:
     matching_version: "{{ item }}"
   loop: "{{ package_version_list.stdout_lines }}"
-  when: item|fnmatch(package_version)
+  when: item|fnmatch(package_version) or item|fnmatch('*:' + package_version)
 
 - name: Update package list with versioned package
   set_fact:
