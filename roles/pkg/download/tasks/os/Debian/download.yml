@@ -19,9 +19,13 @@
 #
 # The final output contains packages that we need to download.
 
+- name: Create package list copy
+  set_fact:
+    copy_package_list: "{{ package_list }}"
+
 - name: Resolve packages to specific versions
   include_tasks: resolve-package.yml
-  loop: "{{ package_list }}"
+  loop: "{{ copy_package_list }}"
   loop_control:
     loop_var: package_spec
   when:
@@ -58,7 +62,7 @@
     dependencies: >
       {{ _pkg_list.stdout_lines|reject('in', versioned_package_list|default([]))|list }}
     _all_packages_and_dependencies: >
-      {{ ( dependencies + package_list )|map('quote')|join(' ') }}
+      {{ ( dependencies + copy_package_list )|map('quote')|join(' ') }}
   changed_when: >
     _apt_get_download.stdout_lines|length > 0
 
