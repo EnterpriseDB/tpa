@@ -1155,11 +1155,15 @@ case "$command" in
 
     cmd|ping|provision|deploy|upgrade|playbook|deprovision)
         time $command "$@"
+        real_exit_status=$?
         playbook ${TPA_DIR}/architectures/lib/commands/check-repositories.yml
+        exit $real_exit_status
         ;;
 
     *)
         try_as_playbook_or_script "$@"
+        real_exit_status=$?
         playbook ${TPA_DIR}/architectures/lib/commands/check-repositories.yml
+        exit $real_exit_status
         ;;
 esac
