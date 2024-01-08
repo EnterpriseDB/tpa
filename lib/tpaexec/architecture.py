@@ -558,6 +558,18 @@ class Architecture(object):
         if self.args.get("use_local_repo_only"):
             self.args["enable_local_repo"] = True
 
+        # validate *-package-version argument for Debian/Ubuntu
+        # ensure that epoch is part of the expression. this avoid
+        # failure in apt package search.
+        if self.args["distribution"] in ["Debian", "Ubuntu"]:
+            for package_version in [
+                    k + "_package_version"
+                    for k in self.versionable_packages()
+                    if self.args[k + "_package_version"] is not None
+                ]:
+                if not re.search(":", self.args[package_version]):
+                    self.args[package_version] = "*:" + self.args[package_version]
+
         self.platform.validate_arguments(args)
 
     def process_arguments(self, args):
