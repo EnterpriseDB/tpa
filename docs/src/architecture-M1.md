@@ -1,56 +1,55 @@
 # M1
 
-A Postgres cluster with a primary and a streaming replica, one Barman
+The M1 architecture is a Postgres cluster with a primary and a streaming replica, one Barman
 server, and any number of additional replicas cascaded from the first
-one. This architecture is suitable for production and is also suited to
-testing, demonstrating and learning due to its simplicity and ability to
+one. This architecture is suitable for production. It's also suited to
+testing, demonstrating, and learning due to its simplicity and ability to
 be configured with no proprietary components.
 
-If you select subscription-only EDB software with this architecture
-it will be sourced from EDB Repos 2.0 and you will need to provide a token.
+If you select subscription-only EDB software with this architecture,
+it's sourced from EDB Repos 2.0. You need to provide a token.
 See [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
-for more detail on this topic.
+for more detail.
 
 ## Default layout
 
 By default, the primary has one read-only replica attached in the same
-location; the replica, in turn, has one cascaded replica attached in a
+location. The replica, in turn, has one cascaded replica attached in a
 different location, where the Barman server is also configured to take
 backups from the primary.
 
 ![Cluster with cascading replication](images/m1.png)
 
-If there is an even number of Postgres nodes, the Barman node is
-additionally configured as a witness. This ensures that the
+If there's an even number of Postgres nodes, the Barman node is
+also configured as a witness. This configuration ensures that the
 number of nodes is always odd, which is convenient when
 enabling automatic failover.
 
 ## Application and backup failover
 
 The M1 architecture implements failover management in that it ensures
-that a replica will be promoted to take the place of the primary should
-the primary become unavailable. However it *does not provide any
-automatic facility to reroute application traffic to the primary*. If
-you require, automatic failover of application traffic you will need to
-configure this at the application itself (for example using multi-host
+that a replica is promoted to take the place of the primary if
+the primary become unavailable. However it doesn't provide any
+automatic facility to reroute application traffic to the primary. If
+you require automatic failover of application traffic, you must
+configure this at the application (for example using multi-host
 connections) or by using an appropriate proxy or load balancer and the
 facilities offered by your selected failover manager.
 
-The above is also true of the connection between the backup node and the
-primary created by TPA. The backup will not be automatically adjusted to
-target the new primary in the event of failover, instead it will remain
-connected to the original primary. If you are performing a manual
-failover and wish to connect the backup to the new primary, you may
-simply re-run `tpaexec deploy`. If you wish to automatically change the
-backup source, you should implement this using your selected failover
-manager as noted above.
+This also true of the connection between the backup node and the
+primary created by TPA. The backup isn't automatically adjusted to
+target the new primary in the event of failover. Instead, it remains
+connected to the original primary. If you're performing a manual
+failover and want to connect the backup to the new primary, you can
+rerun `tpaexec deploy`. If you want to automatically change the
+backup source, implement this using your selected failover
+manager.
 
 ## Cluster configuration
 
 ### Overview of configuration options
 
-An example invocation of `tpaexec configure` for this architecture
-is shown below.
+This example shows an invocation of `tpaexec configure` for this architecture:
 
 ```shell
 tpaexec configure ~/clusters/m1 \
@@ -61,17 +60,13 @@ tpaexec configure ~/clusters/m1 \
          --failover-manager repmgr
 ```
 
-You can list all available options using the help command.
+You can list all available options using the `help` command:
 
 ```shell
 tpaexec configure --architecture M1 --help
 ```
 
-The tables below describe the mandatory options for M1
-and additional important options.
-More detail on the options is provided in the following section.
-
-#### Mandatory Options
+#### Mandatory options
 
 | Parameter                                             | Description                                                                                 |
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------|
@@ -82,9 +77,9 @@ More detail on the options is provided in the following section.
 
 <br/><br/>
 
-#### Additional Options
+#### Additional options
 
-| Parameter                 | Description                                                                                                       | Behaviour if omitted                                                                                 |
+| Parameter                 | Description                                                                                                       | Behavior if omitted                                                                                 |
 |---------------------------|-------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | `--platform`              | One of `aws`, `docker`, `bare`.                                                                                   | Defaults to `aws`.                                                                                   |
 | `--num-cascaded-replicas` | The number of cascaded replicas from the first replica.                                                           | Defaults to 1.                                                                                       |
@@ -95,8 +90,8 @@ More detail on the options is provided in the following section.
 
 ### More detail about M1 configuration
 
-You may optionally specify `--num-cascaded-replicas N` to request N
+You can optionally specify `--num-cascaded-replicas N` to request N
 cascaded replicas (including 0 for none; default: 1).
 
-You may also specify any of the options described by
+You can also specify any of the options described by
 [`tpaexec help configure-options`](tpaexec-configure.md).
