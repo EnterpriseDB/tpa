@@ -89,6 +89,9 @@ default_postgres_lib_dir:
     RedHat: "/usr/edb/pge{{ postgres_version }}/lib"
     SUSE: "/usr/edb/pge{{ postgres_version }}/lib"
 
+
+default_postgres_log_file: "/var/log/postgres/postgres.log"
+
 default_postgres_tablespaces: {}
 
 default_postgres_extensions:
