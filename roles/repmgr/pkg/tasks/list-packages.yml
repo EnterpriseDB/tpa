@@ -7,8 +7,8 @@
     list_contents: "{{
       (ansible_os_family == 'RedHat'
         and edb_repositories is empty
-        and tpa_2q_repositories is empty)
-        and default_list_contents|select('match', 'repmgr_')|list is empty
+        and tpa_2q_repositories is empty
+        and default_list_contents|select('match', 'repmgr_')|list is empty)
       | ternary(
         default_list_contents|map('replace', 'repmgr', 'repmgr_')|list,
         default_list_contents,
