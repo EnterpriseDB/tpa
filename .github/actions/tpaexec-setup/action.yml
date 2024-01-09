@@ -1,0 +1,25 @@
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+name: "TPAexec setup"
+description: "Setup TPAexec virtual environment and package cache"
+
+inputs:
+  source_directory:
+    description: "Directory where tpaexec source code is checked out on runner"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run tpaexec setup
+      shell: bash
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec setup --pip-cache-dir ~/.cache/pip &>/tmp/setup-output
+
+    - name: Display output on failure
+      working-directory: ${{ inputs.source_directory }}
+      run: cat /tmp/setup-output
+      shell: bash
+      if: failure()
+
+outputs: {}

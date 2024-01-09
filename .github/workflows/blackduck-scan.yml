@@ -1,0 +1,53 @@
+name: Foundation-Security/Black Duck Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        default: "EnterpriseDB/tpa"
+        required: true
+      ref:
+        default: "main"
+        required: true
+
+jobs:
+  Blackduck-Scan:
+    runs-on: ubuntu-22.04
+    permissions: # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+      id-token: write
+      contents: read
+    steps:
+    - name: Checkout source repository
+      id: checkout-source
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        repository: ${{ github.event.inputs.repository }}
+        ref: ${{ github.event.inputs.ref }}
+        path: source
+        token: ${{secrets.GH_SLONIK}}
+
+    - name: Checkout foundation-security repository
+      id: checkout-foundation-security
+      uses: actions/checkout@v3
+      with:
+        repository: EnterpriseDB/foundation-security
+        ref: v2
+        path: foundation-security
+        token: ${{secrets.GH_SLONIK}}
+
+    - name: tpaexec install
+      id: tpaexec-install
+      run: source/bin/tpaexec setup
+
+    - name: BlackDuck Scan
+      id: call-bd-action
+      uses: ./foundation-security/actions/blackduck
+      with:
+        github-token: ${{ secrets.GH_SLONIK }}
+        cloudsmith-token: ${{ secrets.CLOUDSMITH_READ_ALL }}
+        blackduck-url: ${{ secrets.BLACKDUCK_URL }}
+        blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+        project-name: tpaexec
+        project-version: ${{ github.event.inputs.ref }}
+        use-clang-tools: false

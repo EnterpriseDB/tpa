@@ -1,0 +1,109 @@
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+name: Integration test
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        default: "main"
+        description: "Specific TPA branch to test against"
+        required: true
+      tpa_architecture:
+        description: "TPA architecture"
+        required: true
+        default: "BDR-Always-ON"
+        type: choice
+        options:
+        - M1
+        - BDR-Always-ON
+        - PGD-Always-ON
+      tpa_platform:
+        description: "TPA platform"
+        required: false
+        default: "docker"
+      tpa_os_image:
+        description: "TPA OS image"
+        required: true
+        type: choice
+        options:
+        - tpa/debian:11
+        - tpa/redhat:8
+        - tpa/ubuntu:20.04
+        - tpa/debian:9
+        - tpa/debian:10
+        - tpa/redhat:7
+        - tpa/sles:15
+      tpa_postgres_flavour:
+        description: "Postgres flavour"
+        required: true
+        default: "postgresql"
+        type: choice
+        options:
+        - postgresql
+        - pgextended
+        - edbpge
+        - epas
+      tpa_postgres_version:
+        description: "Postgres version"
+        required: true
+        default: "14"
+        type: choice
+        options:
+        - 10
+        - 11
+        - 12
+        - 13
+        - 14
+        - 15
+      tpa_failover_manager:
+        description: "Failover-manager (for M1 only)"
+        type: choice
+        options:
+        - "efm"
+        - "repmgr"
+      tpa_package_cache:
+        description: "Use the downloader"
+        type: boolean
+        default: true
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  CLOUDSMITH_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+  ANSIBLE_SKIP_TAGS: pgbench
+  PYTHONWARNINGS: once
+
+jobs:
+
+  integration-test:
+    name: Integration test
+
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v3
+        with:
+          repository: EnterpriseDB/tpa-internal-testing
+          ref: ${{ github.event.inputs.ref }}
+          path: source
+          token: ${{secrets.GH_SLONIK}}
+
+      - uses: ./.github/actions/integration-test
+        with:
+          source_directory: ${{ github.workspace }}/source
+          tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
+          tpa_platform: ${{ github.event.inputs.tpa_platform }}
+          tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
+          tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
+          tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager}}
+          tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}

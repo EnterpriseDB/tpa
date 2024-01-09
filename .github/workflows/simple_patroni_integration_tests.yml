@@ -1,0 +1,134 @@
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+name: Simple Patroni Integration Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        default: "main"
+        description: "Specific TPA branch to test against"
+        required: true
+env:
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+  ANSIBLE_SKIP_TAGS: pgbench
+  PYTHONWARNINGS: once
+
+jobs:
+
+  load-matrix:
+    name: Load Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/load-yaml
+        id: load-yaml
+        with:
+          file: .github/config/matrix.yml
+          key: patroni
+
+  integration-test:
+    name: Integration test
+    needs: load-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash --noprofile --norc -exo pipefail {0}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v3
+        with:
+          repository: EnterpriseDB/tpa-internal-testing
+          ref: ${{ github.event.inputs.ref }}
+          path: source
+          token: ${{secrets.GH_SLONIK}}
+
+      - uses: ./.github/actions/initialise_integration_test
+        with:
+          source_directory: ${{ github.workspace }}/source
+          tpa_platform: ${{ matrix.tpa_platform }}
+          tpa_architecture: ${{ matrix.tpa_architecture }}
+          tpa_os_image: tpa/${{ matrix.tpa_os_image }}
+          tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
+          tpa_package_cache: "false"
+          tpa_failover_manager: "patroni"
+          cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}
+
+      - name: Provision the cluster
+        working-directory: ${{ github.workspace }}/source
+        run: ./bin/tpaexec provision "$CLUSTER" -vv
+
+      - name: Deploy the cluster
+        working-directory: ${{ github.workspace }}/source
+        run: ./bin/tpaexec deploy "$CLUSTER" -vv
+
+      - name: Test the cluster
+        working-directory: ${{ github.workspace }}/source
+        run: ./bin/tpaexec test "$CLUSTER" -vv
+
+      - name: Get patroni cluster status
+        id: status
+        working-directory: ${{ github.workspace }}/source
+        run: |
+          json=$(
+            ANSIBLE_CALLBACK_WHITELIST=json ANSIBLE_STDOUT_CALLBACK=json \
+            ./bin/tpaexec status "$CLUSTER" \
+            | jq -c '
+              .plays[].tasks[]
+              |select(.task.name == "patroni/service : Report the status of the cluster")
+            '
+          )
+          echo "json=$json" >>"$GITHUB_OUTPUT"
+
+      - name: Find a single host name with role Replica
+        id: replica
+        working-directory: ${{ github.workspace }}/source
+        run: |
+          replica=$(
+            jq -r '
+              .hosts[].msg.facts.members[]
+              |select(.Role == "Replica")
+              |.Member
+            ' <<< '${{ steps.status.outputs.json }}' \
+            |head -1
+          )
+          if [[ -z "$replica" || "$replica" == "null" ]] ;then
+            echo "::error::Could not find a node with role replica"
+            exit 1
+          fi
+          echo "name=$replica" >>"$GITHUB_OUTPUT"
+
+      - name: Promote new leader node
+        working-directory: ${{ github.workspace }}/source
+        run: ./bin/tpaexec switchover "$CLUSTER" "${{ steps.replica.outputs.name }}" -vv
+
+      - name: Redeploy cluster after promotion
+        working-directory: ${{ github.workspace }}/source
+        run: ./bin/tpaexec deploy "$CLUSTER" -vv
+
+      - name: Final test after re-deploy
+        working-directory: ${{ github.workspace }}/source
+        run: ./bin/tpaexec test "$CLUSTER" -vv
+
+      - uses: ./.github/actions/finalise_integration_test
+        with:
+          source_directory: ${{ github.workspace }}/source
+          cluster: ${{ env.CLUSTER }}
+        if: always()

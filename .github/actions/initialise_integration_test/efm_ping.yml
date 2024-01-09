@@ -1,0 +1,3 @@
+cluster_vars:
+  efm_conf_settings:
+    ping.server.command: /bin/true
