@@ -26,7 +26,6 @@
     state: absent
     path: "{{ pg_backup_api_build_dir }}"
     force: yes
-  tags: [build-clean, pg-backup-api-clean]
 
 - name: Ensure build directory exists
   file:
@@ -76,4 +75,3 @@
     - Enable pgbapi
     - Daemon-reload
     - Restart pgbapi
-  tags: [pg-backup-api, service]

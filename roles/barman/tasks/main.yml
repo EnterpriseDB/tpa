@@ -19,9 +19,6 @@
 - name: Install Barman
   include_role:
     name: barman/pkg
-    apply:
-      tags: [barman, pkg]
-  tags: pkg
 
 # Allow postgres@ on any Postgres server to ssh to barman@ on any
 # Barman server.
@@ -65,21 +62,17 @@
   vars:
     username: barman
     role_attrs: [superuser]
-  tags: always
 
 - include_role: name=postgres/createuser
   vars:
     username: streaming_barman
     role_attrs: [replication]
-  tags: always
 
 # On any instance tagged as a Barman server (i.e., where tags.role
 # includes 'barman'), it will install and configure Barman.
 
 - include_tasks:
     file: server.yml
-    apply:
-      tags: barman
   when: >
     'barman' in role
 
@@ -89,8 +82,6 @@
 
 - include_tasks:
     file: client.yml
-    apply:
-      tags: barman
   with_items: "{{ backup|default([]) }}"
   loop_control:
     loop_var: this_barman

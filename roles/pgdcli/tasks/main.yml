@@ -9,11 +9,6 @@
 
 - include_role:
     name: pgdcli/pkg
-    apply:
-      tags: [pgdcli, pkg]
-  tags: pkg
 
 - include_role:
     name: pgdcli/config
-    apply:
-      tags: [pgdcli, config]

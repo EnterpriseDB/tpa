@@ -8,11 +8,8 @@
 
 - include_role:
     name: postgres/user
-    apply:
-      tags: user
   when: >
     'postgres' not in role
-  tags: user
 
 - name: Ensure harp directory exists
   file:
@@ -23,13 +20,9 @@
     mode: "0755"
   when:
     initialise_harp|bool
-  tags: config
 
 - include_tasks:
     file: "harp{{ harp_version }}.yml"
-    apply:
-      tags: config
-  tags: config
 
 - name: Include harp-config hook
   include_tasks: "{{ hook }}"
@@ -37,4 +30,3 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/harp-config.yml"
-  tags: config

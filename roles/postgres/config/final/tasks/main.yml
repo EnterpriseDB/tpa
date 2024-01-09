@@ -208,23 +208,17 @@
 
 - include_tasks:
     file: pgbouncer.yml
-    apply:
-      tags: pgbouncer
   when: >
     postgres_users|json_query("[?username=='%s']" % pgbouncer_auth_user) != []
-  tags: pgbouncer
 
 # If there's an entry for a harp_dcs_user in postgres_users, we must
 # grant it the required privileges.
 
 - include_tasks:
     file: harp.yml
-    apply:
-      tags: harp
   when:
     - harp_dcs_user is defined
     - postgres_users|json_query("[?username=='%s']" % harp_dcs_user) != []
-  tags: harp
 
 - name: Include postgres-config-final hook
   include_tasks: "{{ hook }}"
@@ -232,7 +226,6 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/postgres-config-final.yml"
-  tags: always
 
 # If we know that there are uninitialised replicas that we will need to
 # clone, we create a replication slot on the primary to ensure that WAL

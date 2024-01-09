@@ -392,22 +392,17 @@
 
 - include_tasks:
     file: syslog.yml
-    apply:
-      tags: syslog
-  tags: rsyslog
 
 - include_role:
     name: postgres/createuser
   vars:
     username: "{{ postgres_user }}"
     role_attrs: [superuser]
-  tags: always
 
 - include_role: name=postgres/createuser
   vars:
     username: "{{ replication_user }}"
     role_attrs: [replication]
-  tags: always
 
 - name: Include postgres-config hook
   include_tasks: "{{ hook }}"
@@ -415,4 +410,3 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/postgres-config.yml"
-  tags: always

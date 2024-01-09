@@ -30,7 +30,6 @@
     - "{{ default_optional_packages[ansible_distribution] }}"
     - "{{ optional_packages[ansible_distribution]|default([]) }}"
   ignore_errors: true
-  tags: pkg
   when:
     platform not in ['shared']
 
@@ -45,6 +44,5 @@
   package:
     name: "{{ _unwanted_sys_packages }}"
     state: absent
-  tags: pkg
   when:
     platform not in ['shared']

@@ -77,6 +77,3 @@
 - name: Change Postgres configuration if required
   include_tasks:
     file: postgres-reconfig.yml
-    apply:
-      tags: config
-  tags: config

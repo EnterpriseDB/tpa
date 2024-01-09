@@ -9,39 +9,26 @@
     - pgdata_initialised
 
 - include_tasks: postgres/controldata.yml
-  tags: always
 
 - include_tasks:
     file: bdr.yml
-    apply:
-      tags: bdr
   when: >
     'bdr' in role
-  tags: always
 
 - include_tasks:
     file: repmgr.yml
-    apply:
-      tags: repmgr
   when: >
     'bdr' not in role
     and 'pem-server' not in role
     and failover_manager == 'repmgr'
-  tags: repmgr
 
 - name: Run patroni tests
   include_tasks:
     file: patroni.yml
-    apply:
-      tags: patroni
   when:
     failover_manager == 'patroni'
     and 'postgres' in role
     and 'pem-server' not in role
-  tags: patroni
 
 - include_role:
     name: pgbench
-    apply:
-      tags: pgbench
-  tags: pgbench

@@ -8,7 +8,6 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/postgres-pre-update.yml"
-  tags: always
 
 - include_tasks: "{{ postgres_installation_method }}.yml"
 
@@ -18,7 +17,6 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/postgres-post-update.yml"
-  tags: always
 
 - fail:
     msg: Please redeploy to update extensions built from source

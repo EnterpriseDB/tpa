@@ -4,8 +4,6 @@
 
 - include_role:
     name: postgres/createuser
-    apply:
-      tags: [pgd-proxy, user]
   vars:
     username: "{{ pgd_proxy_user }}"
     granted_roles: [bdr_superuser]

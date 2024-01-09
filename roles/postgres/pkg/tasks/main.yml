@@ -16,4 +16,3 @@
     name: "{{ default_postgres_service_names[postgres_family][ansible_os_family] }}"
     state: stopped
     masked: yes
-  tags: service

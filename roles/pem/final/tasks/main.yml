@@ -4,14 +4,10 @@
 
 - include_role:
     name: pem/server/config/final
-    apply:
-      tags: [pem-server, config]
   when: >
     'pem-server' in role
 
 - include_role:
     name: pem/agent/config/final
-    apply:
-      tags: [pem-agent, config]
   when: >
     'pem-agent' in role

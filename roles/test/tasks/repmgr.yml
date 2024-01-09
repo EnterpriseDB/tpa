@@ -35,7 +35,6 @@
     msg: "repmgr node status/check failed (use --skip-tags fail to skip)"
   when:
     repmgr_status is not successful or repmgr_check is not successful
-  tags: [repmgr, fail]
 
 - name: Run repmgr cluster show
   command: >

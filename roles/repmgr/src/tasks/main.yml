@@ -22,7 +22,6 @@
     path: "{{ repmgr_build_dir }}"
     state: absent
     force: yes
-  tags: [build-clean, repmgr-clean]
 
 - name: Ensure build directory exists
   file:
@@ -39,7 +38,6 @@
   args:
     chdir: "{{ repmgr_build_dir }}"
     executable: /bin/bash
-  tags: [build-configure, repmgr-configure]
 
 - name: Build and install repmgr
   shell: >

@@ -16,4 +16,3 @@
     name: "edb-efm-{{ efm_version }}"
     enabled: "{{ failover_manager == 'efm' }}"
     daemon_reload: "{{ unit is changed }}"
-  tags: [efm, service]

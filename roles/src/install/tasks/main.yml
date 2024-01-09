@@ -24,7 +24,6 @@
       path: "{{ build_directory }}"
       state: absent
       force: yes
-    tags: build-clean
 
   - name: Ensure build directory exists
     file:

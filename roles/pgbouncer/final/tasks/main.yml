@@ -4,10 +4,6 @@
 
 - include_role:
     name: pgbouncer/service
-    apply:
-      tags: [pgbouncer, service]
 
 - include_role:
     name: pgbouncer/restart
-    apply:
-      tags: [pgbouncer, restart]

@@ -37,4 +37,3 @@
     msg: "Barman check/diagnose failed"
   when:
     barman_check is not successful or barman_diagnose is not successful
-  tags: [barman, fail]

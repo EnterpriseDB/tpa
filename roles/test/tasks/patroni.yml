@@ -30,7 +30,6 @@
     patroni_health_api_output is not successful
     or patroni_liveness_api_output is not successful
     or patroni_readiness_api_output is not successful
-  tags: [patroni, fail]
 
 - name: Get current patroni cluster topology
   include_role:

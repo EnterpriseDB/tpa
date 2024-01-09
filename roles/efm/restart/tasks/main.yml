@@ -14,4 +14,3 @@
     state: "{{ efm_service_end_state|default('started') }}"
   become_user: root
   become: yes
-  tags: [service, restart]

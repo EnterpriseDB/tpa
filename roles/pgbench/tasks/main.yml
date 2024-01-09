@@ -13,8 +13,6 @@
 
 - include_tasks:
     file: pgbench-postgres.yml
-    apply:
-      tags: [pgbench, postgres]
   vars:
     pgbench_dbname: postgres
 
@@ -31,8 +29,6 @@
 
 - include_tasks:
     file: pgbench-bdr.yml
-    apply:
-      tags: [pgbench, bdr]
   vars:
     pgbench_dbname: "{{ bdr_database }}"
   when: >

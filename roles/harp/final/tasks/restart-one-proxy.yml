@@ -7,4 +7,3 @@
     name: harp-proxy
     state: "{{ harp_service_end_state|default('started') }}"
     enabled: yes
-  tags: [service, restart]

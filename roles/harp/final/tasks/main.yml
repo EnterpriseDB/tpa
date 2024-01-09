@@ -52,8 +52,6 @@
 
 - include_role:
     name: harp/service
-    apply:
-      tags: [harp, service]
 
 - name: Start or restart harp services
   systemd:
@@ -65,11 +63,9 @@
     harp_services:
       "2":
         - "{{ ('postgres' in role)|ternary('harp-manager', []) }}"
-  tags: [service, restart]
 
 - name: Start or restart harp-proxy one-by-one on proxy instances
   include_tasks: restart-one-proxy.yml
   with_items: "{{ groups['role_harp-proxy'] }}"
   when:
     inventory_hostname == item
-  tags: [service, restart]

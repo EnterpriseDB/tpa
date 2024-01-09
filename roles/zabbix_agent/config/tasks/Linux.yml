@@ -37,9 +37,6 @@
   when:
     - zabbix_agent_listeninterface
     - (zabbix_agent_listeninterface not in ansible_all_ipv4_addresses)
-  tags:
-    - zabbix-agent
-    - config
 
 - name: "Set network interface"
   set_fact:
@@ -55,19 +52,12 @@
   when:
     - zabbix_agent_listeninterface
     - not zabbix_agent_listenip
-  tags:
-    - zabbix-agent
-    - config
-    - api
 
 - name: "Default agent_listenip to all when not specified"
   set_fact:
     zabbix_agent_listenip: '0.0.0.0'
   when:
     - not zabbix_agent_listenip
-  tags:
-    - zabbix-agent
-    - config
 
 - name: "Fail invalid specified agent_listenip"
   fail:
@@ -76,9 +66,6 @@
     - zabbix_agent_listenip != '0.0.0.0'
     - zabbix_agent_listenip != '127.0.0.1'
     - (zabbix_agent_listenip not in ansible_all_ipv4_addresses)
-  tags:
-    - zabbix-agent
-    - config
 
 # straight to getenforce binary , workaround for missing python_selinux library
 - name: "Get getenforce binary"
@@ -118,10 +105,6 @@
   notify:
     - restart zabbix-agent
   become: yes
-  tags:
-    - zabbix-agent
-    - config
-    - init
 
 - name: "Create include dir zabbix-agent"
   file:
@@ -131,9 +114,6 @@
     mode: "0750"
     state: directory
   become: yes
-  tags:
-    - config
-    - include
 
 - name: "Stop zabbix-agent service to set zabbix user home directory"
   service:
@@ -141,17 +121,11 @@
     state: stopped
     enabled: yes
   become: yes
-  tags:
-    - init
-    - service
 
 - name: Create zabbix home directory
   user:
     name: zabbix
     home: "/var/lib/zabbix"
-  tags:
-    - config
-    - userdir
 
 - name: Allow sudo without password for wheel group
   copy:
@@ -168,6 +142,3 @@
     state: started
     enabled: yes
   become: yes
-  tags:
-    - init
-    - service

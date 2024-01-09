@@ -9,20 +9,12 @@
 
 - include_role:
     name: pgd_proxy/pkg
-    apply:
-      tags: [pgd-proxy, pkg]
 
 - include_role:
     name: pgd_proxy/user
-    apply:
-      tags: [pgd-proxy, user]
 
 - include_role:
     name: pgd_proxy/config
-    apply:
-      tags: [pgd-proxy, config]
 
 - include_role:
     name: pgd_proxy/service
-    apply:
-      tags: [pgd-proxy, service]

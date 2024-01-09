@@ -15,4 +15,3 @@
       "2":
         - "{{ ('postgres' in role)|ternary('harp-manager', []) }}"
         - "{{ ('harp-proxy' in role)|ternary('harp-proxy', []) }}"
-  tags: [service, restart]

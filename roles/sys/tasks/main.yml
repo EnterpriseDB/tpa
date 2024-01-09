@@ -14,9 +14,6 @@
 
 - include_role:
     name: sys/local_repo
-    apply:
-      tags: local-repo
-  tags: local-repo
 
 # Now that all instances have a source of packages (either the network
 # or the local-repo), we can check what's missing and install it. After
@@ -24,9 +21,6 @@
 
 - include_role:
     name: sys/bootstrap
-    apply:
-      tags: bootstrap
-  tags: bootstrap
 
 # As system locale files are required by a substantial amount of software
 # that can run after this point, make sure the default or user selected
@@ -34,9 +28,6 @@
 
 - include_role:
     name: sys/locale
-    apply:
-      tags: locale
-  tags: locale
 
 # Now we set up package repositories, including {apt,yum}_repositories
 # entries mentioned in {apt,yum}_repository_list (e.g., PGDG, EPEL), and
@@ -44,24 +35,15 @@
 
 - include_role:
     name: sys/repositories
-    apply:
-      tags: [pkg, repo]
-  tags: [pkg, repo]
 
 # Once the repositories are available, we can install any other
 # (non-Postgres-related) packages we need.
 
 - include_role:
     name: sys/pkg
-    apply:
-      tags: pkg
-  tags: pkg
 
 - include_role:
     name: src/req
-    apply:
-      tags: pkg
-  tags: pkg
   when: has_src_install
 
 - name: Set the hostname
@@ -71,7 +53,6 @@
   when:
     platform not in ['docker', 'lxd']
     and target_container_type is not defined
-  tags: hostname
 
 - name: Ensure authorized_keys allows admin access
   authorized_key:
@@ -81,78 +62,51 @@
 
 - include_tasks:
     file: tpa.yml
-    apply:
-      tags: tpa
-  tags: tpa
 
 # Creates and mounts any additional filesystems required, e.g., any
 # postgres_data/barman_data volumes specified for the instance.
 
 - include_role:
     name: sys/fs
-    apply:
-      tags: fs
   with_items: "{{ volumes }}"
   loop_control:
     loop_var: volume
     label: >-
       {{ volume.device }}
-  tags: fs
 
 # Now that the any additional volumes have been mounted, we can copy in
 # any additional artifacts specified in config.yml
 - include_tasks:
     file: artifact.yml
-    apply:
-      tags: artifacts
   with_items: "{{ artifacts|default([]) }}"
   loop_control:
     loop_var: artifact
-  tags: artifacts
 
 - include_role:
     name: sys/sysctl
-    apply:
-      tags: sysctl
   when:
     platform not in ['docker', 'lxd']
     and target_container_type is not defined
-  tags: sysctl
 
 - include_role:
     name: sys/sysstat
-    apply:
-      tags: sysstat
-  tags: sysstat
 
 - include_role:
     name: sys/openvpn
-    apply:
-      tags: openvpn
   when: >
     platform not in ['docker', 'vagrant'] and
     'role_openvpn-server' in groups
-  tags: always
 
 - include_role:
     name: sys/hosts
-    apply:
-      tags: hosts
-  tags: hosts
 
 - include_role:
     name: sys/hostkeys
-    apply:
-      tags: hostkeys
-  tags: hostkeys
 
 - include_role:
     name: sys/cloudinit
-    apply:
-      tags: cloudinit
   when: >
     platform not in ['docker', 'lxd', 'vagrant']
-  tags: cloudinit
 
 # The sys/ssl role is incompatible with the legacy method of generating a
 # certificate for postgres. When proper certificate authentication has been
@@ -161,21 +115,12 @@
 
 # - include_role:
 #     name: sys/ssl
-#     apply:
-#       tags: ssl
-#   tags: ssl
 
 - include_role:
     name: sys/rsyslog
-    apply:
-      tags: rsyslog
-  tags: rsyslog
 
 - include_role:
     name: sys/logrotate
-    apply:
-      tags: rsyslog
-  tags: rsyslog
 
 # https://github.com/CentOS/CentOS-Dockerfiles/issues/173
 #
@@ -216,6 +161,3 @@
 
 - include_role:
     name: sys/paths
-    apply:
-      tags: paths
-  tags: always

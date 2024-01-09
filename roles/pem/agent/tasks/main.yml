@@ -4,5 +4,3 @@
 
 - include_role:
     name: pem/agent/pkg
-    apply:
-      tags: [pem-agent, pkg]

@@ -5,8 +5,6 @@
 - name: Configure BDR commit scopes (v4.1+ only)
   include_tasks:
     file: commit-scopes.yml
-    apply:
-      tags: commit-scopes
   when:
     bdr_commit_scopes|default([]) is not empty
     and inventory_hostname == first_bdr_primary

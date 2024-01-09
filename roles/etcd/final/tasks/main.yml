@@ -4,10 +4,6 @@
 
 - include_role:
     name: etcd/start
-    apply:
-      tags: [etcd, start]
 
 - include_role:
     name: etcd/restart
-    apply:
-      tags: [etcd, restart]

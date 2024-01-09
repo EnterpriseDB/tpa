@@ -22,7 +22,6 @@
     path: "{{ barman_build_dir }}"
     state: absent
     force: yes
-  tags: [build-clean, barman-clean]
 
 - name: Ensure build directory exists
   file:

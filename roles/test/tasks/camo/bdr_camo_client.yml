@@ -205,7 +205,6 @@
     fail:
       msg: "bdr_camo_client failed"
     when: client is not successful
-    tags: [camo, fail, upgrade]
 
   - name: Get LSN after bdr_camo_client run
     postgresql_query:

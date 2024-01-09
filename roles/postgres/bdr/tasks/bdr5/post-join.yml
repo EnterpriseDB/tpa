@@ -5,8 +5,6 @@
 - name: Configure BDR commit scopes (v4.1+ only)
   include_tasks:
     file: bdr4/commit-scopes.yml
-    apply:
-      tags: commit-scopes
   when:
     bdr_commit_scopes|default([]) is not empty
     and inventory_hostname == first_bdr_primary
@@ -85,13 +83,10 @@
 - name: Perform pgd_proxy setup
   include_tasks:
     file: "bdr{{ bdr_major_version }}/pgd-proxy-config.yml"
-    apply:
-      tags: pgd-proxy
   when:
     bdr_major_version >= 5
     and inventory_hostname == first_bdr_primary
     and groups['role_pgd-proxy']|default([]) is not empty
-  tags: pgd-proxy
 
 # Finally, we can `enable_proxy_routing` for those groups where it's
 # desired and for which subgroup RAFT is also enabled.

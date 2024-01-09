@@ -4,29 +4,21 @@
 
 - include_role:
     name: postgres/final
-    apply:
-      tags: postgres
   when: >
     'postgres' in role
-  tags: postgres
 
 # Now that Postgres is running, we can ensure that any physical replicas
 # are properly configured (whether we're using repmgr or pg_basebackup).
 
 - include_role:
     name: repmgr/final
-    apply:
-      tags: repmgr
   when: >
     'postgres' in role
     and failover_manager == 'repmgr'
     and initialise_replication is defined
-  tags: repmgr
 
 - include_role:
     name: postgres/replica/final
-    apply:
-      tags: [postgres, replica]
   when: >
     'postgres' in role
     and 'replica' in role
@@ -36,72 +28,49 @@
 
 - include_role:
     name: barman/final
-    apply:
-      tags: barman
   when: >
     'barman' in role or backup is defined
-  tags: barman
 
 - include_role:
     name: etcd/final
-    apply:
-      tags: etcd
   when: >
     'etcd' in role
-  tags: etcd
 
 - include_role:
     name: patroni/final
-    apply:
-      tags: patroni
   when:
     failover_manager == 'patroni'
     and ('primary' in role or 'replica' in role)
     and 'pem-server' not in role
-  tags: patroni
 
 - include_role:
     name: haproxy/final
-    apply:
-      tags: haproxy
   when: >
     'haproxy' in role
-  tags: haproxy
 
 - include_role:
     name: pgbouncer/final
-    apply:
-      tags: pgbouncer
   when: >
     'pgbouncer' in role
-  tags: pgbouncer
 
 - include_role:
     name: postgres/cleanup
-    apply:
-      tags: postgres
   when: >
     'postgres' in role
-  tags: postgres
 
 # We force an immediate backup for any instances that do not have any
 # backups at all.
 
 - include_role:
     name: barman/first_backup
-    apply:
-      tags: first-backup
   with_items: "{{ backup|default([]) }}"
   loop_control:
     loop_var: this_barman
   vars:
     slot_name: "{{ this_barman|backup_slot_name }}"
-  tags: first-backup
 
 - include_role:
     name: postgres/pglogical
-    apply:
-      tags: pglogical
   vars:
     pglogical_publications: >-
       {{ publications|json_query("[?type=='pglogical']") }}
@@ -110,54 +79,38 @@
   when:
     pglogical_publications is not empty
     or pglogical_subscriptions is not empty
-  tags: pglogical
 
 - include_role:
     name: postgres/bdr
-    apply:
-      tags: [postgres, bdr]
   when: >
     role|contains('bdr', 'primary')
-  tags: [postgres, bdr]
 
 - include_role:
     name: harp/final
-    apply:
-      tags: harp
   when:
     failover_manager == 'harp'
     and ('harp-proxy' in role
       or inventory_hostname in first_bdr_primary_candidates|default([]))
     and not 'pem-server' in role
-  tags: harp
 
 - include_role:
     name: efm/final
-    apply:
-      tags: efm
   when: >
      'efm' in role
-  tags: efm
 
 - include_role:
     name: pem/final
   when: >
     'pem-server' in role
     or 'pem-agent' in role
-  tags: pem
 
 - include_role:
     name: pgd_proxy/final
-    apply:
-      tags: pgd-proxy
   when: >
     'pgd-proxy' in role
-  tags: pgd-proxy
 
 - include_role:
     name: sys/ssl/ca/final
-    apply:
-      tags: ssl
   when:
     - ca_created is defined
     - ca_created

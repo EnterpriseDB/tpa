@@ -9,10 +9,6 @@
 
 - include_role:
     name: efm/service
-    apply:
-      tags: [efm, service]
 
 - include_role:
     name: efm/restart
-    apply:
-      tags: [efm, restart]

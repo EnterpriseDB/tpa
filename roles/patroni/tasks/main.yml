@@ -4,8 +4,6 @@
 
 - include_role:
     name: watchdog
-    apply:
-      tags: watchdog
   when: >
     'postgres' in role
     and patroni_watchdog_enabled|default(false)
@@ -18,20 +16,13 @@
         name: "patroni/{{ patroni_installation_method }}"
   when: >
     'postgres' in role
-  tags:
-    - pkg
-    - src
 
 - include_role:
     name: patroni/config
   when: >
     'postgres' in role
-  tags:
-    - config
 
 - include_role:
     name: patroni/service
   when: >
     'postgres' in role
-  tags:
-    - service
