@@ -45,7 +45,7 @@ jobs:
         id: checkout-source
         uses: actions/checkout@v3
         with:
-          repository: EnterpriseDB/tpa-internal-testing
+          repository: EnterpriseDB/tpa-internal
           path: source
           token: ${{secrets.GH_SLONIK}}
           

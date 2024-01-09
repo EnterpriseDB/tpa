@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       repository:
-        default: "EnterpriseDB/tpa-internal-testing"
+        default: "EnterpriseDB/tpa-internal"
         required: true
       ref:
         default: "main"
