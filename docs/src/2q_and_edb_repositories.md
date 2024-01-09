@@ -89,7 +89,7 @@ cluster_vars:
 
 This example configures the `enterprise` and `postgres_distributed`
 repositories, giving access to EDB Postgres Advanced Server and PGD version 5 products.
-On Debian or Ubuntu systems, it uses the APT repository. 
+On Debian or Ubuntu systems, it uses the apt repository. 
 RedHat systems use the rpm repositories through the yum front end. 
 SLES systems use the rpm repositories through the zypper front end. 
 
