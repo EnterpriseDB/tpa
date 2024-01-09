@@ -46,7 +46,7 @@ One significant consequence of how Ansible uses sudo is that [privilege
 escalation must be general](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html#privilege-escalation-must-be-general). It isn't possible
 to limit sudo invocations to specific commands in `sudoers.conf`,
 as some administrators are used to doing. Most tasks just invoke Python.
-You could have restricted sudo access to python if it weren't
+You could have restricted sudo access to Python if it weren't
 for the random string in every command. However, once Python is running as root,
 there's no effective limit on what it can do anyway.
 
