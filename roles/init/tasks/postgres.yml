@@ -21,6 +21,10 @@
 # however, 'edbpge' and 'pgextended' both share defaults which are
 # different from 'postgresql' (mostly package names).
 
+- name: Set postgres_extensions_dictionary
+  set_fact:
+    postgres_extensions_dictionary: "{{ default_extensions_dictionary }}"
+
 - name: Set postgres_family and postgres_flavour
   set_fact:
     postgres_flavour: "{{ _flavour }}"
@@ -574,6 +578,11 @@
         |selectattr('type', 'equalto', 'pglogical')
         |list is not empty
       }}
+
+- name: "Add sql_profiler and edb_wait_states extensions when role is pem-server"
+  set_fact:
+    postgres_extensions: "{{ postgres_extensions|union(default_extensions_for_pem_agent_nodes) }}"
+  when: "'pem-agent' in role and 'pem-server' not in role"
 
 - name: Remove pg_visibility for Postgres <9.6
   set_fact:

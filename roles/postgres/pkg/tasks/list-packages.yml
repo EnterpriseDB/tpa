@@ -20,6 +20,15 @@
 
 - include_tasks: "os/{{ ansible_os_family }}/list-packages.yml"
 
+- name: Add packages for extra_postgres_extensions
+  set_fact:
+    extra_postgres_packages:
+      common:
+        "{{ extra_postgres_packages.common | default([]) | union([item.value.packages[postgres_flavour][ansible_distribution]]) }}"
+  loop: "{{ lookup('dict', postgres_extensions_dictionary) }}"
+  when:
+    "extra_postgres_extensions is defined and item.key in extra_postgres_extensions and 'packages' in item.value"
+
 - when: "'postgres' in role"
   block:
   - include_role: name=pkg/add_to_list
@@ -63,5 +72,7 @@
           postgres_debug_packages[postgres_family]
           |packages_for(ansible_distribution, postgres_package_version)
         }}"
+
+- include_tasks: list-pemagent-packages.yml
 
 - include_tasks: list-bdr-packages.yml

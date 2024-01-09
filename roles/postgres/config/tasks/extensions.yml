@@ -37,6 +37,20 @@
     or (item == 'bdr' and 'bdr' in role)
     or item in postgres_databases|json_query('[*].extensions[*].name|[]')
 
+- name: Add shared_preload_libraries entries for extra_postgres_extensions
+  set_fact:
+    shared_preload_libraries:
+      "{{ shared_preload_libraries|default([])|union([item.value.spl])}}"
+  loop: "{{ lookup('dict', postgres_extensions_dictionary) }}"
+  when: "extra_postgres_extensions is defined and 'spl' in item.value and item.key in extra_postgres_extensions"
+
+- name: "Add sql-profiler and edb_wait_states entries to shared_preload_libraries if required"
+  set_fact:
+    shared_preload_libraries:
+      "{{ shared_preload_libraries|union([item]) }}"
+  with_items: "{{ ['sql-profiler', 'edb_wait_states'] }}"
+  when: "'pem-agent' in role and 'pem-server' not in role"
+
 - name: Add repmgr to shared_preload_libraries if required
   set_fact:
     shared_preload_libraries:

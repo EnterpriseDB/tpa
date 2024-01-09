@@ -56,4 +56,4 @@ wal_level = {{ wal_level|default('logical') }}
 wal_log_hints = {{ wal_log_hints|default('on') }}
 wal_buffers = {{ wal_buffers|default(-1) }}
 
-shared_preload_libraries = '{{ shared_preload_libraries|default("") }}'
+shared_preload_libraries = '{{ shared_preload_libraries|default([]) | join(', ') }}'

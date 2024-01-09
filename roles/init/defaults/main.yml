@@ -91,12 +91,210 @@ default_postgres_lib_dir:
 
 default_postgres_tablespaces: {}
 
+default_extensions_dictionary:        
+  edb_pg_tuner:
+    packages:
+      postgresql:
+        RedHat:
+          - edb-pg{{ postgres_version }}-postgres-tuner1
+        Debian:
+          - edb-pg{{ postgres_version }}-postgres-tuner-1
+        Ubuntu:
+          - edb-pg{{ postgres_version }}-postgres-tuner-1
+      epas:
+        RedHat:
+          - edb-as{{ postgres_version }}-postgres-tuner1
+        Debian:
+          - edb-as{{ postgres_version }}-postgres-tuner-1
+        Ubuntu:
+          - edb-as{{ postgres_version }}-postgres-tuner-1
+      pgextended:
+        RedHat:
+          - edb-pg{{ postgres_version }}-postgres-tuner1
+        Debian:
+          - edb-pg{{ postgres_version }}-postgres-tuner-1
+        Ubuntu:
+          - edb-pg{{ postgres_version }}-postgres-tuner-1
+      edbpge:
+        RedHat:
+          - edb-postgresextended{{ postgres_version }}-postgres-tuner1
+        Debian:
+          - edb-postgresextended{{ postgres_version }}-postgres-tuner-1
+        Ubuntu:
+          - edb-postgresextended{{ postgres_version }}-postgres-tuner-1
+    spl: edb_pg_tuner
+
+  query_advisor:
+    packages:
+      postgresql:
+        RedHat:
+          - edb-pg{{ postgres_version }}-query-advisor
+        Debian:
+          - edb-pg{{ postgres_version }}-query-advisor
+        Ubuntu:
+          - edb-pg{{ postgres_version }}-query-advisor
+      epas:
+        RedHat:
+          - edb-as{{ postgres_version }}-query-advisor
+        Debian:
+          - edb-as{{ postgres_version }}-query-advisor
+        Ubuntu:
+          - edb-as{{ postgres_version }}-query-advisor
+      pgextended:
+        RedHat:
+          - edb-pg{{ postgres_version }}-query-advisor
+        Debian:
+          - edb-pg{{ postgres_version }}-query-advisor
+        Ubuntu:
+          - edb-pg{{ postgres_version }}-query-advisor
+      edbpge:
+        RedHat:
+          - edb-postgresextended{{ postgres_version }}-query-advisor
+        Debian:
+          - edb-postgresextended{{ postgres_version }}-query-advisor
+        Ubuntu:
+          - edb-postgresextended{{ postgres_version }}-query-advisor
+    spl: query_advisor
+
+  edb_wait_states:
+    packages:
+      postgresql:
+        RedHat:
+          - postgresql{{ postgres_version }}-edb_wait_states
+        Debian:
+          - postgresql{{ postgres_version }}-edb-wait-states
+        Ubuntu:
+          - postgresql{{ postgres_version }}-edb-wait-states
+      epas:
+        RedHat:
+          - edb-as{{ postgres_version }}-server-edb_wait_states
+        Debian:
+          - edb-as{{ postgres_version }}-server-edb-wait-states
+        Ubuntu:
+          - edb-as{{ postgres_version }}-server-edb-wait-states
+      pgextended:
+        RedHat:
+          - postgresql{{ postgres_version }}-edb_wait_states
+        Debian:
+          - postgresql{{ postgres_version }}-edb-wait-states
+        Ubuntu:
+          - postgresql{{ postgres_version }}-edb-wait-states
+      edbpge:
+        RedHat:
+           - edb-postgresextended{{ postgres_version }}-wait-states
+        Debian:
+          - edb-postgresextended-wait-states-{{ postgres_version }}
+        Ubuntu:
+          - edb-postgresextended-wait-states-{{ postgres_version }}
+    spl: edb_wait_states
+
+  sql_profiler:
+    packages:
+      postgresql:
+        RedHat:
+          - sqlprofiler_{{ postgres_version }}
+        Debian:
+          - postgresql-{{ postgres_version }}-sqlprofiler
+        Ubuntu:
+          - postgresql-{{ postgres_version }}-sqlprofiler
+      epas:
+        RedHat:
+          - edb-as{{ postgres_version }}-server-sqlprofiler
+        Debian:
+          - edb-as{{ postgres_version }}-server-sqlprofiler
+        Ubuntu:
+          - edb-as{{ postgres_version }}-server-sqlprofiler
+      pgextended:
+        RedHat:
+          - sqlprofiler_{{ postgres_version }}
+        Debian:
+          - postgresql-{{ postgres_version }}-sqlprofiler
+        Ubuntu:
+          - postgresql-{{ postgres_version }}-sqlprofiler
+      edbpge:
+        RedHat:
+           - edb-postgresextended{{ postgres_version }}-sqlprofiler
+        Debian:
+          - edb-postgresextended-sqlprofiler-{{ postgres_version }}
+        Ubuntu:
+          - edb-postgresextended-sqlprofiler-{{ postgres_version }}
+    spl: sql-profiler
+
+  # EDB Storage Pack
+  autocluster:
+    packages:
+      postgresql:
+        RedHat:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+        Debian:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+        Ubuntu:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+      epas:
+        RedHat:
+          - edb-as{{ postgres_version }}-advanced-storage-pack
+        Debian:
+          - edb-as{{ postgres_version }}-advanced-storage-pack
+        Ubuntu:
+          - edb-as{{ postgres_version }}-advanced-storage-pack
+      pgextended:
+        RedHat:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+        Debian:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+        Ubuntu:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+      edbpge:
+        RedHat:
+           - edb-postgresextended{{ postgres_version }}-advanced-storage-pack
+        Debian:
+          - edb-postgresextended{{ postgres_version }}-advanced-storage-pack
+        Ubuntu:
+          - edb-postgresextended{{ postgres_version }}-advanced-storage-pack
+    spl: autocluster
+
+  refdata:
+    packages:
+      postgresql:
+        RedHat:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+        Debian:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+        Ubuntu:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+      epas:
+        RedHat:
+          - edb-as{{ postgres_version }}-advanced-storage-pack
+        Debian:
+          - edb-as{{ postgres_version }}-advanced-storage-pack
+        Ubuntu:
+          - edb-as{{ postgres_version }}-advanced-storage-pack
+      pgextended:
+        RedHat:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+        Debian:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+        Ubuntu:
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+      edbpge:
+        RedHat:
+           - edb-postgresextended{{ postgres_version }}-advanced-storage-pack
+        Debian:
+          - edb-postgresextended{{ postgres_version }}-advanced-storage-pack
+        Ubuntu:
+          - edb-postgresextended{{ postgres_version }}-advanced-storage-pack
+    spl: refdata
+
 default_postgres_extensions:
   - pg_stat_statements
   - pg_freespacemap
   - pg_visibility
   - pageinspect
   - pgstattuple
+
+default_extensions_for_pem_agent_nodes:
+  - sql_profiler
+  - edb_wait_states
 
 default_postgres_users: []
 default_postgres_databases: []
