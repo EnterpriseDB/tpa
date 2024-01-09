@@ -111,7 +111,7 @@ cluster_vars:
 
 This example installs the pglogical3 and bdr3 release repositories.
 On Debian and Ubuntu systems, it uses the APT repository, and on
-RedHat systems, it uses the YUM repository.
+RedHat systems, it uses the yum repository.
 
 The `dl/default/release` repository is always installed by default,
 unless you either:
