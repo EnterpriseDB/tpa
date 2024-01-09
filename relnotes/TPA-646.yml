@@ -1,0 +1,10 @@
+- summary: Support choosing Ansible version
+  description: |
+    The `--ansible-version` argument to `tpaexec setup` now accepts `8` or `9`
+    as valid ansible versions, as well as the existing `2q` or `community`, both
+    of which imply ansible 2.9. The default is now `8`.
+
+    Support for ansible 9 is experimental and requires python 3.10 or above.
+  type: notable_change
+  jira_tickets:
+  - TPA-646

@@ -2,7 +2,7 @@
 
 To use TPA, you need to install from packages or source and run the
 `tpaexec setup` command. If you have an EDB subscription plan, and therefore have
-access to the EDB repositories, follow these instructions to install TPA packages. 
+access to the EDB repositories, follow these instructions to install TPA packages.
 
 To install TPA from source, see
 [Installing from source](INSTALL-repo.md).
@@ -52,7 +52,7 @@ More detailed explanations of each step follow.
 
 As long as you're using a supported platform, you can install and run TPA
 from your workstation. This approach is fine for learning, local testing, or
-demonstration purposes. if you want to perform a complete deployment on your 
+demonstration purposes. if you want to perform a complete deployment on your
 own workstation, TPA supports [deploying to Docker containers](platform-docker.md).
 
 For production use, we recommend running TPA on a dedicated persistent
@@ -198,15 +198,25 @@ We recommend that you run `tpaexec setup` again whenever a new version
 of `tpaexec` is installed. Some new releases might not strictly require
 this, but others can't work without it.
 
-## Ansible community support
+## Ansible versions
 
-TPA now uses the community distribution of Ansible by default. You can
-continue to use the 2ndQuadrant/Ansible fork by passing the
-`--use-2q-ansible` option to `tpaexec setup`. In a future TPA release,
-support for the 2ndQuadrant/Ansible fork will be removed.
+TPA uses Ansible version 8 by default (ansible-core 2.15). You can use
+2ndQuadrant Ansible version 2.9 by passing the `--use-2q-ansible`
+option to `tpaexec setup`, or a different version of community Ansible
+by passing the `--ansible-version` option with a version number
+argument. The available versions are `2.9`, `8`, and `9`.
 
-For most users, this makes no difference. However, if you're using
-`--skip-tags` with 2ndQuadrant/Ansible, be aware that this isn't supported
-An alternative means of skipping tasks, compatible with all Ansible
-versions, will be provided before support for 2ndQuadrant/Ansible is
-removed.
+Ansible 2.9 is now deprecated in TPA and support for it will be removed
+in a future version. If you are using `--skip-tags`, you need to
+continue to use 2ndQuadrant Ansible 2.9 because of the changes in the
+behaviour of this option in community Ansible; an alternative means of
+skipping tasks will be provided in a future TPA version, before support
+for 2ndQuadrant ansible is removed.
+
+Support for Ansible 9 is experimental. It requires Python 3.10 or
+greater, so if you have edb-python 3.9 installed, you must explicitly
+set your python version when running `tpaexec setup`:
+
+```bash
+PYTHON=/usr/bin/python3.10 tpaexec setup --ansible-version 9
+```

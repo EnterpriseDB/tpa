@@ -22,11 +22,16 @@
     tpa_file_version: "{{ lookup('file', tpa_dir + '/VERSION', errors='ignore') }}"
     tpa_git_version: "{{ lookup('pipe', 'cd %s && git describe --always' % tpa_dir, errors='ignore') }}"
 
+# When installing Ansible, we think in versions of "Community Ansible",
+# but what we can test for is the version of "ansible core"
+# Community Ansible 8 corresponds to ansible core 2.15 and Commmunity
+# Ansible 9 corresponds to ansible core 2.16
+
 - assert:
-    msg: "Ansible 2.9.x is required"
+    msg: "Ansible 2.9, 8, or 9 is required"
     that:
       - ansible_version.major == 2
-      - ansible_version.minor == 9
+      - ansible_version.minor in [9, 15, 16]
   tags: prereqs
 
 - import_tasks: validate-compat.yml

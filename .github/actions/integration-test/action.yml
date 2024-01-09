@@ -46,6 +46,9 @@ inputs:
   tpa_failover_manager:
     required: false
     description: "Failover manager (for M1 only)"
+  tpa_ansible_version:
+    required: false
+    description: "Ansible version to use with TPA"
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -69,6 +72,7 @@ runs:
         tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
         tpa_package_cache: ${{ inputs.tpa_package_cache }}
         tpa_failover_manager: ${{ inputs.tpa_failover_manager }}
+        tpa_ansible_version: ${{ inputs.tpa_ansible_version }}
         cluster: ${{ inputs.cluster }}
 
     - name: Provision the cluster

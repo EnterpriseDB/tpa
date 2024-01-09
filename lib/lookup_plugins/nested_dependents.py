@@ -36,7 +36,7 @@ from ansible.plugins.lookup import LookupBase
 class LookupModule(LookupBase):
     def run(self, terms, variables=None, **kwargs):
         v = variables.copy()
-        self._templar.set_available_variables(v)
+        self._templar.available_variables = v
 
         # We start with an array of "terms", which are expressions that yield an
         # array or a single value when evaluated.

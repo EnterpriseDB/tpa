@@ -139,6 +139,19 @@ _install_tpaexec_pth() {
     fi
 }
 
+_check_ansible_version() {
+    if [[ $use_community == false && $ansible_version != "2.9" ]]; then
+        error "2ndQuadrant ansible can only be used with ansible version 2.9"
+    fi
+    case "$ansible_version" in
+        "2.9"|"8"|"9")
+            ;;
+        *)
+            error "Version $ansible_version of ansible is not supported"
+            ;;
+    esac
+}
+
 _install_pip_packages() {
     pip_args=(--upgrade)
 
@@ -164,17 +177,32 @@ _install_pip_packages() {
     # We need to install Ansible and its dependencies into the venv,
     # either from the bundled package from tpaexec-deps, or directly
     # from github/PyPI, depending on the flavour of Ansible we want.
+    #
+    # For historical reasons, we treat 2q ansible 2.9, community
+    # ansible 2.9, and separate recent ansible versions as separate
+    # "flavours"
     ANSIBLE_FLAVOUR='2q'
-    if [[ $use_community == true ]]; then
-        pip uninstall -y -r "$TPA_DIR"/requirements-ansible-${ANSIBLE_FLAVOUR}.txt
+    if [[ $ansible_version != "2.9" ]]; then
+        ANSIBLE_FLAVOUR=$ansible_version
+    elif [[ $use_community == true ]]; then
         ANSIBLE_FLAVOUR='community'
     fi
+
     ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible-${ANSIBLE_FLAVOUR}.txt
     TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
 
     if [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible-${ANSIBLE_FLAVOUR}.txt ]]; then
         ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible-${ANSIBLE_FLAVOUR}.txt"
         TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
+    fi
+
+    # If we have ansible already installed and we're going to install a different
+    # one, we must remove the old one first
+    existing_ansible_version=$(pip3 show ansible | grep Version | awk '{print $2}')
+    desired_ansible_version=$(grep 'ansible==' $ANSIBLE_REQUIREMENTS|grep -Eo '[[:digit:].]+')
+
+    if [[ $existing_ansible_version != $desired_ansible_version ]]; then
+        pip3 uninstall -y ansible
     fi
 
     pip_args+=(-r "$ANSIBLE_REQUIREMENTS")
@@ -242,6 +270,7 @@ _install_ansible_collections() {
 
 setup() {
     use_community=true
+    ansible_version=8
     while [[ $# -gt 0 ]]; do
         opt=$1
         shift
@@ -260,6 +289,11 @@ setup() {
                 ;;
             --use-2q-ansible)
                 use_community=false
+                ansible_version=2.9
+                ;;
+            --ansible-version)
+                ansible_version=${1:?ansible version not specified}
+                shift
                 ;;
             *)
                 error "unrecognised option: $opt"
@@ -267,6 +301,7 @@ setup() {
         esac
     done
     _display_notification
+    _check_ansible_version
     _create_and_activate_venv "${vpath:=$TPA_VENV}"
     _install_pip_packages
     _install_ansible_collections

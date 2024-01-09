@@ -59,6 +59,15 @@ on:
         options:
         - "efm"
         - "repmgr"
+      tpa_ansible_version:
+        description: "Ansible version"
+        required: true
+        default: "8"
+        type: choice
+        options:
+        - "2.9"
+        - "8"
+        - "9"
       tpa_package_cache:
         description: "Use the downloader"
         type: boolean

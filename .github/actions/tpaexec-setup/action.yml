@@ -7,6 +7,9 @@ inputs:
   source_directory:
     description: "Directory where tpaexec source code is checked out on runner"
     required: true
+  tpa_ansible_version:
+    required: false
+    description: "Ansible version to use with TPA"
 
 runs:
   using: "composite"
@@ -14,7 +17,15 @@ runs:
     - name: Run tpaexec setup
       shell: bash
       working-directory: ${{ inputs.source_directory }}
-      run: ./bin/tpaexec setup --pip-cache-dir ~/.cache/pip &>/tmp/setup-output
+      run: |
+        if [ -n "${{ inputs.tpa_ansible_version }}" ]; then
+          ANSIBLE_VERSION_OPT="--ansible-version ${{ inputs.tpa_ansible_version }}"
+        else
+          ANSIBLE_VERSION_OPT=""
+        fi
+        ./bin/tpaexec setup --pip-cache-dir ~/.cache/pip \
+          ${ANSIBLE_VERSION_OPT} \
+          &>/tmp/setup-output
 
     - name: Display output on failure
       working-directory: ${{ inputs.source_directory }}
