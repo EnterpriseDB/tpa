@@ -225,7 +225,7 @@ cluster_vars:
   extra_postgres_packages:
    common:
    - postgresql-15-pgvector
-  postgres_extensions:
+  extra_postgres_extensions:
   - vector
   ```
 

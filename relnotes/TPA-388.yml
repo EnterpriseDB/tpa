@@ -1,0 +1,12 @@
+- summary: Improve extension configuration
+  description: |
+    Automatically handles adding package names and shared preload
+    library entries for a subset of extensions.
+
+    For these specific extensions, only the extension name is needed in
+    the `extra_postgres_extensions` list or the the `extensions` list of
+    a database entry in `postgres_databases`.
+  type: minor_change
+  jira_tickets:
+  - TPA-388
+  - TPA-293

@@ -575,6 +575,10 @@
   when: >
     'pem-server' in role and pem_database_entry is empty
 
+- name: Set postgres_extensions_dictionary
+  set_fact:
+    postgres_extensions_dictionary: "{{ default_postgres_extensions_dictionary }}"
+
 - name: Set list of Postgres extensions
   set_fact:
     postgres_extensions: "{{
