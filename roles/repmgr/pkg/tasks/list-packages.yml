@@ -19,6 +19,7 @@
         |packages_for(ansible_os_family, repmgr_package_version)
       }}"
   when:
-    failover_manager in ['repmgr', 'efm']
+    (failover_manager == 'repmgr'
+      or (failover_manager == 'efm' and postgres_version is version('12', '<')))
     and 'postgres' in role
     and 'bdr' not in role
