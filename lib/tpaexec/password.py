@@ -95,7 +95,9 @@ def show_password(cluster_dir, password_name, keyring_backend):
 or ensure entry:
 service: {KEYRING_PREFIX + cluster_name}
 username: {password_name}
-exists with the correct vault password using:
+exists with the correct vault password by running:
+`tpaexec provision {cluster_dir}`
+or
 `keyring set {KEYRING_PREFIX + cluster_name} {password_name}`"""
             )
         return print(password)
