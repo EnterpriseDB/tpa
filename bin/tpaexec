@@ -354,7 +354,7 @@ provision() {
 cmd() {
     # first ensure that vault_pass is defined for the cluster
     # otherwise don't add it to the args
-    if ! [ "${TPA_DIR}/architectures/lib/use-vault " ]; then
+    if "${TPA_DIR}/architectures/lib/use-vault" >> /dev/null 2>&1; then
         args=--vault-password-file="${TPA_DIR}/architectures/lib/use-vault"
     fi
     $ansible \
@@ -374,7 +374,7 @@ playbook() {
         args+=(-i inventory)
     fi
 
-    if ! [ "${TPA_DIR}/architectures/lib/use-vault" ]; then
+    if "${TPA_DIR}/architectures/lib/use-vault" >> /dev/null 2>&1; then
         args+=(--vault-password-file "${TPA_DIR}/architectures/lib/use-vault")
     fi
 
@@ -1161,16 +1161,14 @@ case "$command" in
     cmd|ping|provision|deploy|upgrade|playbook|deprovision)
         time $command "$@"
         real_exit_status=$?
-        # should we run this test for all these commands ?
-        # cause error at the end of run for TPA-85
-        playbook ${TPA_DIR}/architectures/lib/commands/check-repositories.yml
+        playbook "${TPA_DIR}/architectures/lib/commands/check-repositories.yml"
         exit $real_exit_status
         ;;
 
     *)
         try_as_playbook_or_script "$@"
         real_exit_status=$?
-        playbook ${TPA_DIR}/architectures/lib/commands/check-repositories.yml
+        playbook "${TPA_DIR}/architectures/lib/commands/check-repositories.yml"
         exit $real_exit_status
         ;;
 esac
