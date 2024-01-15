@@ -28,7 +28,7 @@ jobs:
     outputs:
       json: ${{ steps.load-yaml.outputs.json }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ./.github/actions/load-yaml
         id: load-yaml
@@ -48,11 +48,11 @@ jobs:
         shell: bash --noprofile --norc -exo pipefail {0}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Checkout source repository
         id: checkout-source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: EnterpriseDB/tpa-internal
           ref: ${{ github.event.inputs.ref }}
