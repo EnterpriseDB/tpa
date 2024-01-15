@@ -352,8 +352,13 @@ provision() {
 }
 
 cmd() {
+    # first ensure that vault_pass is defined for the cluster
+    # otherwise don't add it to the args
+    if "${TPA_DIR}/architectures/lib/use-vault" >> /dev/null 2>&1; then
+        args=--vault-password-file="${TPA_DIR}/architectures/lib/use-vault"
+    fi
     $ansible \
-        -i inventory --vault-password-file vault/vault_pass.txt \
+        -i inventory "$args"\
         -e cluster_dir="$(pwd)" "$@"
 }
 
@@ -369,8 +374,8 @@ playbook() {
         args+=(-i inventory)
     fi
 
-    if [ -f vault/vault_pass.txt ]; then
-        args+=(--vault-password-file vault/vault_pass.txt)
+    if "${TPA_DIR}/architectures/lib/use-vault" >> /dev/null 2>&1; then
+        args+=(--vault-password-file "${TPA_DIR}/architectures/lib/use-vault")
     fi
 
     "$ansible"-playbook "${args[@]}" "$@"
@@ -422,7 +427,7 @@ try_as_playbook_or_script() {
             if [[ -x $exec ]]; then
                 case $command in
                     store-password|show-password)
-                        _with_ansible_env "$exec" "$@" "--vault_password_file=vault/vault_pass.txt"
+                        _with_ansible_env "$exec" "$@" "--vault_password_file=${TPA_DIR}/architectures/lib/use-vault"
                         return $?
                     ;;
                     *)
@@ -611,6 +616,9 @@ Available help topics:
     store-password
                 Commands to manage passwords for cluster users
                 (e.g., postgres_password, pgbouncer_password)
+    show-vault
+                Command to show the vault password of the cluster
+                This is used to encrypt other passwords.
 
   Miscellaneous
 
@@ -1156,14 +1164,14 @@ case "$command" in
     cmd|ping|provision|deploy|upgrade|playbook|deprovision)
         time $command "$@"
         real_exit_status=$?
-        playbook ${TPA_DIR}/architectures/lib/commands/check-repositories.yml
+        playbook "${TPA_DIR}/architectures/lib/commands/check-repositories.yml"
         exit $real_exit_status
         ;;
 
     *)
         try_as_playbook_or_script "$@"
         real_exit_status=$?
-        playbook ${TPA_DIR}/architectures/lib/commands/check-repositories.yml
+        playbook "${TPA_DIR}/architectures/lib/commands/check-repositories.yml"
         exit $real_exit_status
         ;;
 esac
