@@ -65,7 +65,7 @@ runs:
         platform: ${{ inputs.tpa_platform }}
 
     - uses: ./.github/actions/tpaexec-setup
-      with: 
+      with:
         source_directory: ${{ inputs.source_directory }}
 
     - name: Export EDB_REPO_CREDENTIALS_FILE to use EDB repositories
@@ -88,6 +88,7 @@ runs:
 
         CONFIGURE_OPTS+=(--architecture "${{ inputs.tpa_architecture }}")
         CONFIGURE_OPTS+=(--platform "${{ inputs.tpa_platform }}")
+        CONFIGURE_OPTS+=(--keyring-backend legacy)
         if [ "${{ inputs.tpa_architecture }}" == "BDR-Always-ON" ] ;then
           CONFIGURE_OPTS+=(
             --layout "${{ inputs.tpa_layout }}"
