@@ -28,22 +28,22 @@ cluster_vars:
 The following types are supported:
 
 * Use `path` to create or remove and change the ownership or mode of
-  files and directories (takes the same parameters as Ansible's `file`
-  module, which it uses internally)
+  files and directories. (This type takes the same parameters as Ansible's `file`
+  module, which it uses internally.)
 
 * Use `file` to copy a file from the controller and set the ownership
-  and mode (uses `copy`)
+  and mode (uses `copy`).
 
 * Use `archive` to extract files from an archive to a specified location
-  (uses `unarchive`)
+  (uses `unarchive`).
 
 * Use `directory` to rsync a directory from the controller to target
-  instances (uses `synchronize`)
+  instances (uses `synchronize`).
 
-The example shows one entry for each of the above artifact types, but
-you can use these or any other parameters that the corresponding Ansible
+The example shows one entry for each of these artifact types.
+You can use these or any other parameters that the corresponding Ansible
 module accepts.
 
-Copying files and directories to target instances is a common-enough
-need that this feature provides a convenient shortcut you can use
-instead of writing a [custom hook](tpaexec-hooks.md).
+Copying files and directories to target instances is a common need.
+Defining artifacts can be a convenient shortcut to
+writing a [custom hook](tpaexec-hooks.md).
