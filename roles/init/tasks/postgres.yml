@@ -239,12 +239,17 @@
   register: config_yml
   ignore_errors: true
 
-- set_fact:
-    current_harp_manager_user: "{{ item.split('user=')[1] | trim }}"
-  vars:
-    harp_config_struct: "{{ config_yml.stdout | from_yaml }}"
-    endpoints: "{{ harp_config_struct.dcs.endpoints }}"
-  loop: "{{ endpoints }}"
+- block:
+  - set_fact:
+      current_harp_manager_user: "{{ item.split('user=')[1] | trim }}"
+    vars:
+      harp_config_struct: "{{ config_yml.stdout | from_yaml }}"
+      endpoints: "{{ harp_config_struct.dcs.endpoints }}"
+    loop: "{{ endpoints }}"
+    when: >
+      config_yml.stdout != None
+      and harp_config_struct.dcs != None
+      and harp_config_struct.dcs.driver == 'bdr'
   when: config_yml.rc == 0
 
 - set_fact:
