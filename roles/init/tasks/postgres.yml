@@ -162,6 +162,7 @@
     postgres_databases: "{{ postgres_databases|default(default_postgres_databases) }}"
     postgres_conf_files: "{{ postgres_conf_files|default(default_postgres_conf_files) }}"
     postgres_hba_local_auth_method: "{{ postgres_hba_local_auth_method|default(default_postgres_hba_local_auth_method) }}"
+    postgres_log_file: "{{ postgres_log_file | default(default_postgres_log_file) }}"
     log_destination: "{{ log_destination|default(default_log_destination) }}"
     install_from_source: "{{ install_from_source|default([]) }}"
     barman_user: "{{ barman_user|default(default_barman_user) }}"
@@ -238,16 +239,32 @@
   register: config_yml
   ignore_errors: true
 
-- set_fact:
-    current_harp_manager_user: "{{ item.split('user=')[1] | trim }}"
-  vars:
-    harp_config_struct: "{{ config_yml.stdout | from_yaml }}"
-    endpoints: "{{ harp_config_struct.dcs.endpoints }}"
-  loop: "{{ endpoints }}"
+- block:
+  - set_fact:
+      current_harp_manager_user: "{{ item.split('user=')[1] | trim }}"
+    vars:
+      harp_config_struct: "{{ config_yml.stdout | from_yaml }}"
+      endpoints: "{{ harp_config_struct.dcs.endpoints }}"
+    loop: "{{ endpoints }}"
+    when: >
+      config_yml.stdout != None
+      and harp_config_struct.dcs != None
+      and harp_config_struct.dcs.driver == 'bdr'
   when: config_yml.rc == 0
 
 - set_fact:
     harp_manager_user: "{{ harp_manager_user|default(current_harp_manager_user| default(default_harp_manager_user)) }}"
+
+# Patroni manages replication slots, and we should use the same name it expects
+# i.e., the same name which is provided to the `name` Patroni setting (TPA uses
+# the inventory hostname as `name`). The regex applied here is the same one
+# used by Patroni when handling the member name -- see
+# `slot_name_from_member_name` function in Patroni code
+- name: Override "primary_slot_name" when using Patroni
+  set_fact:
+    primary_slot_name: "{{ inventory_hostname|regex_replace('[^a-zA-Z0-9_]', '_') }}"
+  when: >
+    failover_manager == 'patroni'
 
 - name: Add postgres libs and PGHOST to target_environment
   set_fact:

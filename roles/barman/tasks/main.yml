@@ -73,6 +73,17 @@
     role_attrs: [replication]
   tags: always
 
+# The barman-pre-config hook is triggered after installing Barman and
+# setting up the users, but before Barman is configured.
+
+- name: Include barman-pre-config hook
+  include_tasks: "{{ hook }}"
+  when:
+    lookup('first_found', dict(files=hook, skip=True))
+  vars:
+    hook: "{{ cluster_dir }}/hooks/barman-pre-config.yml"
+  tags: always
+
 # On any instance tagged as a Barman server (i.e., where tags.role
 # includes 'barman'), it will install and configure Barman.
 

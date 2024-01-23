@@ -1,0 +1,116 @@
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+name: Single test cluster deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      tpa_architecture:
+        description: "TPA architecture"
+        required: true
+        default: "PGD-Always-ON"
+        type: choice
+        options:
+        - M1
+        - BDR-Always-ON
+        - PGD-Always-ON
+      tpa_platform:
+        description: "TPA platform"
+        required: false
+        default: "docker"
+      tpa_os_image:
+        description: "TPA OS image"
+        required: true
+        type: choice
+        options:
+        - tpa/debian:11
+        - tpa/debian:10
+        - tpa/debian:9
+        - tpa/redhat:9
+        - tpa/redhat:8
+        - tpa/redhat:7
+        - tpa/ubuntu:22.04
+        - tpa/ubuntu:20.04
+        - tpa/sles:15
+      tpa_postgres_flavour:
+        description: "Postgres flavour"
+        required: true
+        default: "postgresql"
+        type: choice
+        options:
+        - postgresql
+        - pgextended
+        - edbpge
+        - epas
+      tpa_postgres_version:
+        description: "Postgres version"
+        required: true
+        default: "14"
+        type: choice
+        options:
+        - 10
+        - 11
+        - 12
+        - 13
+        - 14
+        - 15
+      tpa_enable_pem:
+        description: "Disable PEM"
+        required: true
+        default: "true"
+        type: choice
+        options:
+        - "true"
+        - "false"
+      tpa_edb_repos:
+        description: "Cloudsmith repos"
+        required: false
+        default: ""
+        type: string
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+  ANSIBLE_SKIP_TAGS: pgbench
+  PYTHONWARNINGS: once
+
+jobs:
+
+  integration-test:
+    name: Test_deploy
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Checkout source repository
+      id: checkout-source
+      uses: actions/checkout@v4
+      with:
+        repository: EnterpriseDB/tpa-internal
+        path: source
+        token: ${{secrets.GH_SLONIK}}
+
+    - name: Set extra arguments for tpaexec configure command
+      run: |
+        declare -a CONFIG_EXTRA_ARGS
+        if [ -n "${{ github.event.inputs.tpa_edb_repos }}" ] ;then
+           echo "repos: ${{ github.event.inputs.tpa_edb_repos }}"
+           CONFIG_EXTRA_ARGS+=(--edb-repositories "${{ github.event.inputs.tpa_edb_repos }}")
+           echo CONFIGURE_EXTRA_ARGS="${CONFIG_EXTRA_ARGS[@]}" >>$GITHUB_ENV
+        fi
+      shell: bash
+
+    - uses: ./.github/actions/integration-test
+      with:
+        source_directory: ${{ github.workspace }}/source
+        tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
+        tpa_platform: ${{ github.event.inputs.tpa_platform }}
+        tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
+        tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
+        tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}

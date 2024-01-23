@@ -1,0 +1,91 @@
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+name: Matrix Upgrade test
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        default: "main"
+        description: "Specific TPA branch to test against"
+        required: true
+      matrix_key:
+        description: "Set of inputs to use"
+        required: false
+        default: "debian11-silver-14"
+        type: choice
+        options:
+          - debian11-silver-14
+          - debian11-all-epas-14
+          - redhat8-all-epas-14
+          - ubuntu22-all-epas-14
+          - latest-silver-14
+          - latest-epas-14
+          - latest-pg-14
+          - latest-pge-14
+          - debian-full-14
+          - redhat-full-14
+          - ubuntu-full-14
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+  ANSIBLE_SKIP_TAGS: pgbench
+
+jobs:
+
+  load-matrix:
+    name: Load Matrix
+    runs-on: ubuntu-20.04
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/load-yaml
+        id: load-yaml
+        with:
+          file: .github/config/upgrade_matrix.yml
+          key: ${{ github.event.inputs.matrix_key }}
+
+  integration-test:
+    name: Matrix Upgrade test
+    needs: load-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+    runs-on:
+      labels: [aws-self-hosted]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v4
+        with:
+          repository: EnterpriseDB/tpa-internal
+          ref: ${{ github.event.inputs.ref }}
+          path: source
+          token: ${{secrets.GH_SLONIK}}
+
+      - uses: ./.github/actions/upgrade-integration-test
+        with:
+          source_directory: ${{ github.workspace }}/source
+          tpa_architecture: ${{ matrix.tpa_architecture }}
+          tpa_platform: ${{ matrix.tpa_platform }}
+          tpa_layout: ${{ matrix.tpa_layout }}
+          tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
+          tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
+          tpa_proxy_routing: ${{ matrix.tpa_proxy_routing }}
+          tpa_edb_repo: ${{ matrix.tpa_edb_repo }}
+          cluster: "${{ matrix.tpa_postgres_flavour }}-\
+            ${{ matrix.tpa_postgres_version }}-\
+            ${{ matrix.tpa_os_image }}-\
+            ${{ matrix.tpa_layout }}-\
+            ${{ matrix.tpa_proxy_routing }}"

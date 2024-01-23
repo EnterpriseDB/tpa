@@ -1,0 +1,78 @@
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        default: "main"
+        description: "Specific TPA branch to test against"
+        required: true
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  CLOUDSMITH_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  ANSIBLE_SKIP_TAGS: pgbench
+  PYTHONWARNINGS: once
+
+jobs:
+
+  load-matrix:
+    name: Load Matrix
+    runs-on: ubuntu-20.04
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: ./.github/actions/load-yaml
+      id: load-yaml
+      with:
+        file: .github/config/matrix.yml
+        key: default
+
+  integration-test:
+    name: Integration Tests
+    needs: load-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Checkout source repository
+      id: checkout-source
+      uses: actions/checkout@v4
+      with:
+        repository: EnterpriseDB/tpa-internal
+        ref: ${{ github.event.inputs.ref }}
+        path: source
+        token: ${{secrets.GH_SLONIK}}
+
+    - uses: ./.github/actions/integration-test
+      with:
+        source_directory: ${{ github.workspace }}/source
+        cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}-${{ matrix.tpa_os_image }}
+        tpa_architecture: ${{ matrix.tpa_architecture }}
+        tpa_platform: ${{ matrix.tpa_platform }}
+        tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
+        tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
+        tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
+        tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
+        tpa_package_cache: >-
+          ${{ ! (
+            contains(matrix.tpa_os_image, 'sles')
+            || (
+              (matrix.tpa_os_image == 'redhat:7')
+              && (matrix.tpa_architecture == 'PGD-Always-ON')
+              && (matrix.tpa_postgres_flavour == 'edbpge')
+            )
+          ) }}

@@ -11,8 +11,9 @@
     group: root
     mode: "0644"
   vars:
-    postgres_logfile: "{{
+    logrotate_postgres: >-
+      {{
         (log_destination == 'syslog')|ternary(
-          '/var/log/postgres/postgres.log', '/var/log/postgresql/postgres.log'
+          postgres_log_file, '/var/log/postgresql/postgres.log'
         )
-      }}"
+      }}

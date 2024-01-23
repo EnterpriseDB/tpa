@@ -78,6 +78,14 @@ Postgres and creating users, databases, and extensions. You can use this
 hook to execute SQL commands, for example, to perform custom extension
 configuration or create database objects.
 
+### barman-pre-config
+
+TPA invokes `hooks/barman-pre-config.yml` after installing Barman and
+setting up Barman users, but before generating any Barman configuration.
+
+You can use this hook, for example, to perform any tasks related with
+Barman certificate files or mount points.
+
 ### harp-config
 
 TPA invokes `hooks/harp-config.yml` after generating HARP configuration

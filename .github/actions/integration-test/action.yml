@@ -1,0 +1,147 @@
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+name: Integration Test
+description: Run an integration test for the given architecture and platform
+
+inputs:
+  source_directory:
+    description: "Directory where tpaexec source code is checked out on runner"
+    required: true
+  tpa_platform: # id of input
+    description: "TPA platform"
+    required: false
+    default: docker
+  tpa_architecture:
+    required: false
+    description: "TPA architecture"
+    default: BDR-Always-ON
+  tpa_os:
+    required: false
+    description: "Operating System to use with TPA (--os)"
+    default: ""
+  tpa_os_version:
+    required: false
+    description: "Operating System version to use with TPA (--os-version)"
+    default: ""
+  tpa_os_image:
+    required: false
+    description: "Image to use with TPA platform"
+    default: ""
+  tpa_postgres_flavour:
+    required: false
+    description: "TPA postgres type selection"
+    default: ""
+  tpa_postgres_version:
+    required: false
+    description: "Postgres version"
+    default: ""
+  tpa_package_cache:
+    required: false
+    description: "Enable local repo and reuse packages"
+    default: "true"
+  tpa_failover_manager:
+    required: false
+    description: "Failover manager (for M1 only)"
+  cluster:
+    required: false
+    description: "Name of the cluster directory"
+    default: "cluster"
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - uses: ./.github/actions/initialise_integration_test
+      with:
+        source_directory: ${{ inputs.source_directory }}
+        tpa_platform: ${{ inputs.tpa_platform }}
+        tpa_architecture: ${{ inputs.tpa_architecture }}
+        tpa_os: ${{ inputs.tpa_os }}
+        tpa_os_version: ${{ inputs.tpa_os_version }}
+        tpa_os_image: ${{ inputs.tpa_os_image }}
+        tpa_postgres_flavour: ${{ inputs.tpa_postgres_flavour }}
+        tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
+        tpa_package_cache: ${{ inputs.tpa_package_cache }}
+        tpa_failover_manager: ${{ inputs.tpa_failover_manager }}
+        cluster: ${{ inputs.cluster }}
+
+    - name: Provision the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: |
+        echo "::group::tpaexec provision -vv"
+        ./bin/tpaexec provision "$CLUSTER" -vv &>"$CLUSTER"/tpaexec-provision
+        status=$?
+        cat "$CLUSTER"/tpaexec-provision
+        echo "::endgroup::"
+        sed -n '/PLAY RECAP/,$p' "$CLUSTER"/tpaexec-provision|egrep -v '(ResourceWarning|cli.run)' > "$CLUSTER"/provision-recap;
+        cat "$CLUSTER"/provision-recap
+        (echo -e "\`tpaexec provision $CLUSTER\`:";
+         echo -e "\`\`\`";
+         cat "$CLUSTER"/provision-recap;
+         echo -e "\`\`\`") >> $GITHUB_STEP_SUMMARY
+        exit $status
+      shell: bash {0}
+
+    - name: Deploy the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: |
+        TEMP_BUFFER=""
+        MAX_GITHUB_OUTPUT_BYTES=1024000
+        CURRENT_BUFFER_BYTES=`cat $GITHUB_STEP_SUMMARY | wc -c`
+        REMAINING=$(expr $MAX_GITHUB_OUTPUT_BYTES - $CURRENT_BUFFER_BYTES)
+        echo "output might be dropped if it is larger than ${REMAINING} bytes. Let's see..."
+        echo "::group::tpaexec deploy -vv"
+        ./bin/tpaexec deploy "$CLUSTER" -vv &>"$CLUSTER"/tpaexec-deploy
+        status=$?
+        cat "$CLUSTER"/tpaexec-deploy
+        echo "::endgroup::"
+        sed -n '/PLAY RECAP/,$p' "$CLUSTER"/tpaexec-deploy|egrep -v '(ResourceWarning|cli.run)' > "$CLUSTER"/deploy-recap;
+        cat "$CLUSTER"/deploy-recap
+        (echo -e "\`tpaexec deploy $CLUSTER\`:";
+         echo -e "\`\`\`";
+         cat "$CLUSTER"/deploy-recap;
+         echo -e "\`\`\`") >> $TEMP_BUFFER
+        if [ $REMAINING -gt 0 ]; then
+          cat $TMP_BUFFER | tail -c $REMAINING >> $GITHUB_STEP_SUMMARY
+          rm -f $TEMP_BUFFER
+        else
+          echo "Hiting Github action limits on GITHUB_STEP_SUMMARY file. Content dropped."
+        fi
+
+        exit $status
+      shell: bash {0}
+
+    - name: Test the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: |
+        TEMP_BUFFER=""
+        MAX_GITHUB_OUTPUT_BYTES=1024000
+        CURRENT_BUFFER_BYTES=`cat $GITHUB_STEP_SUMMARY | wc -c`
+        REMAINING=$(expr $MAX_GITHUB_OUTPUT_BYTES - $CURRENT_BUFFER_BYTES)
+        echo "::group::tpaexec test -vv"
+        ./bin/tpaexec test "$CLUSTER" -vv &>"$CLUSTER"/tpaexec-test
+        cat "$CLUSTER"/tpaexec-test
+        echo "::endgroup::"
+        sed -n '/PLAY RECAP/,$p' "$CLUSTER"/tpaexec-test|egrep -v '(ResourceWarning|cli.run)' > "$CLUSTER"/test-recap;
+        cat "$CLUSTER"/test-recap
+        (echo -e "\`tpaexec test $CLUSTER\`:";
+         echo -e "\`\`\`";
+         cat "$CLUSTER"/test-recap;
+         echo -e "\`\`\`") >> $TEMP_BUFFER
+        if [ $REMAINING -gt 0 ]; then
+          cat $TMP_BUFFER | tail -c $REMAINING >> $GITHUB_STEP_SUMMARY
+          rm -f $TEMP_BUFFER
+        else
+          echo "Hiting Github action limits on GITHUB_STEP_SUMMARY file. Content dropped."
+        fi
+
+      shell: bash {0}
+
+    - uses: ./.github/actions/finalise_integration_test
+      with:
+        cluster: ${{ env.CLUSTER }}
+        source_directory: ${{ inputs.source_directory }}
+      if: always()
+
+outputs: { }

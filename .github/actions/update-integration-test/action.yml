@@ -1,0 +1,120 @@
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+name: Update Cluster Integration Test
+description: Run an integration test for the given architecture and platform
+
+inputs:
+  source_directory:
+    description: "Directory where tpaexec source code is checked out on runner"
+    required: true
+  tpa_platform: # id of input
+    description: "TPA platform"
+    required: false
+    default: docker
+  tpa_architecture:
+    required: false
+    description: "TPA architecture"
+    default: BDR-Always-ON
+  tpa_os:
+    required: false
+    description: "Operating System to use with TPA (--os)"
+    default: ""
+  tpa_os_version:
+    required: false
+    description: "Operating System version to use with TPA (--os-version)"
+    default: ""
+  tpa_os_image:
+    required: false
+    description: "Image to use with TPA platform"
+    default: ""
+  tpa_postgres_flavour:
+    required: true
+    description: "Postgres flavour"
+  tpa_postgres_version:
+    required: true
+    description: "Postgres version"
+  cluster:
+    required: false
+    description: "Name of the cluster directory"
+    default: "cluster"
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - name: Set extra arguments for initial state of cluster
+      run: |
+        CONFIGURE_EXTRA_ARGS+="--bdr-version 3"
+        echo CONFIGURE_EXTRA_ARGS="${CONFIGURE_EXTRA_ARGS}" >>$GITHUB_ENV
+      shell: bash
+
+    - uses: ./.github/actions/initialise_integration_test
+      with:
+        source_directory: ${{ inputs.source_directory }}
+        tpa_platform: ${{ inputs.tpa_platform }}
+        tpa_architecture: ${{ inputs.tpa_architecture }}
+        tpa_os: ${{ inputs.tpa_os }}
+        tpa_os_version: ${{ inputs.tpa_os_version }}
+        tpa_os_image: ${{ inputs.tpa_os_image }}
+        tpa_postgres_flavour: ${{ inputs.tpa_postgres_flavour }}
+        tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
+        cluster: ${{ inputs.cluster }}
+
+    - name: Provision the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec provision "$CLUSTER" -vv
+      shell: bash
+
+    - name: Deploy the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec deploy "$CLUSTER" -vv
+      shell: bash
+
+    - name: Alter config.yml to set 2q repostories to BDR 4
+      run: |
+        cp "$CLUSTER"/config.yml "$CLUSTER"/config.yml.orig
+        pip install yq
+        yq -y '.cluster_vars.tpa_2q_repositories=["products/bdr4/release","products/harp/release"]' \
+         "$CLUSTER"/config.yml >"$CLUSTER"/config.yml.new
+        mv "$CLUSTER"/config.yml.new "$CLUSTER"/config.yml
+      shell: bash
+
+    - name: Provision the cluster with new repo config
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec provision "$CLUSTER" -vv
+      shell: bash
+
+    - name: Deploy the cluster with new repo config
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec deploy "$CLUSTER" -vv --tags pkg,repo
+      shell: bash
+
+    - name: Alter config.yml to set BDR version 4 and remove extensions
+      run: |
+        cp "$CLUSTER"/config.yml "$CLUSTER"/config.yml.pre_bdr4
+        yq -y 'del(.cluster_vars.extra_postgres_extensions)|.cluster_vars.bdr_version="4"' \
+         "$CLUSTER"/config.yml >"$CLUSTER"/config.yml.new
+        mv "$CLUSTER"/config.yml.new "$CLUSTER"/config.yml
+      shell: bash
+
+    - name: Provision the cluster with BDR 4 config.yml
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec provision "$CLUSTER" -vv
+      shell: bash
+
+    - name: Update postgres in the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec update-postgres "$CLUSTER" -vv
+      shell: bash
+
+    - name: Test the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec test "$CLUSTER" -vv
+      shell: bash
+
+    - uses: ./.github/actions/finalise_integration_test
+      with:
+        source_directory: ${{ inputs.source_directory }}
+        cluster: ${{ env.CLUSTER }}
+      if: always()

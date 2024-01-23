@@ -2,6 +2,73 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
+## v23.28 (2024-01-23)
+
+### Notable changes
+
+- TPA-648 Refactor deployment of Patroni clusters
+
+  TPA now sets up replicas before handing over control of the cluster to
+  Patroni, rather than setting up the primary only and letting patroni
+  set up the replicas.
+
+- TPA-309 Introduce harp_manager_user
+
+  If harp_manager_user is defined in config.yml, TPA will create the
+  user, belonging to the `bdr_superuser` role, and set HARP manager to
+  operate as this user instead of as the postgres superuser.
+
+### Minor changes
+
+- TPA-157 New option postgres_log_file
+
+  This option sets the postgres log file, whether logging through stderr
+  or syslog. The default is '/var/log/postgres/postgres.log', the
+  previously hard-coded value.
+
+- TPA-601 New hook barman-pre-config
+
+  This hook is invoked after Barman is installed and its user is set up
+  but before it is configured. It can be used for installing
+  certificate files or other tasks which need the barman user to exist
+  but which must be done before Barman is started.
+
+- TPA-641 Support specifying elastic IP address on AWS clusters
+
+  The key `elastic_ip` on an instance in config.yml can be set to an
+  elastic IP address that has already been allocated in order to assign
+  it to this instance.
+
+### Bugfixes
+
+- Don't try to install repmgr on an efm cluster running postgres > 11.
+
+- Exit successfully from a deployment when the deployment succeeds but
+  we issue a warning about using 2ndQuadrant repositories.
+
+- TPA-463, TPA-583 Interpret wildcards correctly on Debian-family
+  systems when downloading packages for offline use.
+
+- TPA-576 Use correct package names for repmgr when installing from PGDG
+  repositories.
+
+- TPA-593 Fix barman connection failure when using selinux and a custom
+  barman home directory.
+
+- TPA-638 Use correct cluster name in show-password and store-password
+  commands when it is different from the directory name.
+
+- TPA-642 Error out cleanly if unavailable 2ndQuadrant repository keys
+  are required.
+
+- TPA-644 Sanitise hostnames correctly when the
+  --cluster-prefixed-hostnames option is used.
+
+- TPA-656 Ensure packages are correctly copied to the remote host when
+  upgrading a cluster using a local repo.
+
+- Misc. documentation changes
+
 ## v23.27 (2023-12-19)
 
 ### Notable changes

@@ -35,6 +35,12 @@
     mode: "0750"
     state: directory
 
+- name: Ensure that barman could connect if SELinux is enforced
+  shell: >
+    sudo semanage fcontext -a -t home_ssh_t '{{ barman_home }}/.ssh/authorized_keys'
+    sudo restorecon -FRv '{{ barman_home }}/.ssh'
+  when: ansible_selinux is defined and ansible_selinux.status == 'enabled'
+
 - name: Install global Barman configuration file
   template:
     src: barman.conf.j2

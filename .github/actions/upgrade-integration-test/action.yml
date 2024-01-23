@@ -1,0 +1,143 @@
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+name: Upgrade Cluster Integration Test
+description: Run an integration test for the given architecture and platform
+
+inputs:
+  source_directory:
+    description: "Directory where tpaexec source code is checked out on runner"
+    required: true
+  tpa_platform: # id of input
+    description: "TPA platform"
+    required: false
+    default: docker
+  tpa_architecture:
+    required: false
+    description: "TPA architecture"
+    default: BDR-Always-ON
+  tpa_layout:
+    required: false
+    description: "TPA BDR layout"
+    default: silver
+  tpa_os:
+    required: false
+    description: "Operating System to use with TPA (--os)"
+    default: ""
+  tpa_os_version:
+    required: false
+    description: "Operating System version to use with TPA (--os-version)"
+    default: ""
+  tpa_os_image:
+    required: false
+    description: "Image to use with TPA platform"
+    default: ""
+  tpa_postgres_flavour:
+    required: true
+    description: "Postgres flavour"
+  tpa_postgres_version:
+    required: true
+    description: "Postgres version"
+  cluster:
+    required: false
+    description: "Name of the cluster directory"
+    default: "cluster"
+  tpa_proxy_routing:
+    required: false
+    description: "proxy routing mode for pgd5"
+    default: "local"
+  tpa_edb_repo:
+    required: false
+    description: "PGD repos for reconfigure command"
+    default: ""
+  tpa_package_cache:
+    required: false
+    description: "Enable local repo and reuse packages"
+    default: "true"
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - name: Set extra arguments for initial state of cluster
+      run: |
+        CONFIGURE_EXTRA_ARGS+="--bdr-version 4"
+        echo CONFIGURE_EXTRA_ARGS="${CONFIGURE_EXTRA_ARGS}" >>$GITHUB_ENV
+      shell: bash
+
+    - uses: ./.github/actions/initialise_integration_test
+      with:
+        source_directory: ${{ inputs.source_directory }}
+        tpa_platform: ${{ inputs.tpa_platform }}
+        tpa_architecture: ${{ inputs.tpa_architecture }}
+        tpa_layout: ${{ inputs.tpa_layout }}
+        tpa_os: ${{ inputs.tpa_os }}
+        tpa_os_version: ${{ inputs.tpa_os_version }}
+        tpa_os_image: ${{ inputs.tpa_os_image }}
+        tpa_postgres_flavour: ${{ inputs.tpa_postgres_flavour }}
+        tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
+        cluster: ${{ inputs.cluster }}
+        tpa_package_cache: ${{ inputs.tpa_package_cache }}
+
+    - name: Provision the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec provision "$CLUSTER" -vv
+      shell: bash
+
+    - name: Deploy the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec deploy "$CLUSTER" -vv
+      shell: bash
+
+    - name: Reconfigure cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: |
+        echo "::group::Reconfigure cluster"
+        ./bin/tpaexec reconfigure "$CLUSTER" \
+        --architecture PGD-Always-ON \
+        --pgd-proxy-routing ${{ inputs.tpa_proxy_routing }} \
+        ${{ inputs.tpa_edb_repo != '' && format('--edb-repositories {0}',inputs.tpa_edb_repo) || '' }}
+        status=$?
+        echo "::endgroup::"
+        exit $status
+      shell: bash
+
+    - name: Download newly needed packages after reconfigure
+      working-directory: ${{ inputs.source_directory }}
+      run: |
+        echo "::group::Download reconfigure packages"
+        ./bin/tpaexec download-packages "$CLUSTER" --docker-image "$IMAGE" -vv &>"$CLUSTER"/download-packages
+        status=$?
+        find "$CLUSTER/local-repo" -ls
+        if [[ $status != 0 ]]; then
+          cat "$CLUSTER/download-packages"
+        fi
+        echo "::endgroup::"
+        exit $status
+      shell: bash
+
+    - name: Run upgrade command
+      working-directory: ${{ inputs.source_directory }}
+      run: |
+        echo "::group::Upgrade cluster"
+        ./bin/tpaexec upgrade "$CLUSTER" -vv -e enable_proxy_monitoring=yes
+        status=$?
+        echo "::endgroup::"
+        exit $status
+      shell: bash
+
+    - name: Test the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: |
+        echo "::group::Test upgraded cluster"
+        ./bin/tpaexec test "$CLUSTER" -vv --skip-tags pgbench
+        status=$?
+        echo "::endgroup::"
+        exit $status
+      shell: bash
+
+    - uses: ./.github/actions/finalise_integration_test
+      with:
+        source_directory: ${{ inputs.source_directory }}
+        cluster: ${{ env.CLUSTER }}
+      if: always()

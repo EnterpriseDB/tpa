@@ -60,3 +60,5 @@
     rsync_copy.stdout_lines|length > 5
   become: no
   notify: "Repo contents changed"
+  args:
+    chdir: "{{ cluster_dir }}"

@@ -115,6 +115,19 @@ you can set a fully-quoted value under
 [`postgres_conf_settings`](#postgres_conf_settings). In this case, the
 value is set in `conf.d/9900-tpa_postgres_conf_settings.conf`.
 
+## Postgres log
+
+The default log file is defined as `/var/log/postgres/postgres.log`. If you
+need to change that, you can now set postgres_log_file in your config.yml:
+
+```yaml
+cluster_vars:
+  [...]
+  postgres_log_file: '/srv/fantastic_logs/pg_server.log'
+```
+
+TPA will take care of creating the directories and rotate the log when needed.
+
 ## Making changes by hand
 
 There are two ways you can override anything in the TPA-generated

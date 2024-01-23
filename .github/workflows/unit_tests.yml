@@ -1,0 +1,48 @@
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+name: Unit Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        default: "EnterpriseDB/tpa-internal"
+        required: true
+      ref:
+        default: "main"
+        required: true
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+
+jobs:
+
+  unit-test:
+    name: Unit Test
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Checkout source repository
+      id: checkout-source
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        repository: ${{ github.event.inputs.repository }}
+        ref: ${{ github.event.inputs.ref }}
+        path: source
+        token: ${{secrets.GH_SLONIK}}
+
+    - uses: ./.github/actions/install-requirements
+
+    - name: Install tox
+      run: pip install tox
+
+    - name: Run tests with tox
+      working-directory: ${{ github.workspace }}/source
+      run: |
+        TOX_PARALLEL_NO_SPINNER=1 tox -e py36-test,dep -p auto

@@ -1,0 +1,47 @@
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+name: Finalise Integration Test
+description: Capture output data, deprovision and remove cluster
+
+inputs:
+  source_directory:
+    description: "Directory where tpaexec source code is checked out on runner"
+    required: true
+  cluster: # id of input
+    required: false
+    description: "Name of the cluster directory"
+    default: "cluster"
+  path:
+    required: false
+    description: Working directory
+    default: .
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - name: Archive logs and decommission the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: |
+        echo "::group::Teardown";
+        cluster="${{ inputs.path }}/${{ inputs.cluster }}";
+        if [[ -d $cluster ]]; then
+          ./bin/tpaexec archive-logs "$cluster" -vv &>"$cluster"/archive-logs || cat "$cluster"/archive-logs;
+          tar cvzf "${{ inputs.path }}/cluster-${{ inputs.cluster }}.tar.gz" \
+            --exclude="local-repo" "$cluster";
+          ./bin/tpaexec deprovision "$cluster" -vv &>"$cluster"/deprovision || cat "$cluster"/deprovision;
+          rm -rf "$cluster";
+        fi;
+        echo "::endgroup::"
+      shell: bash
+      if: always()
+
+    - name: Save cluster artifacts before deletion
+      uses: ./.github/actions/upload-artifact
+      with:
+        name: cluster-${{ github.run_number }}-${{ github.run_attempt }}
+        path: "${{ inputs.source_directory }}/cluster-*.tar.gz"
+      if: always()
+
+outputs: { }
