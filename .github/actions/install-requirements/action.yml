@@ -22,7 +22,7 @@ runs:
   steps:
 
     - name: Install Python 3
-      uses: ./.github/actions/setup-python
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
         architecture: ${{ inputs.architecture }}
