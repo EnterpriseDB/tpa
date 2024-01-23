@@ -1,25 +1,22 @@
 # Instance configuration
 
-This page presents an overview of the various controls that TPA
-offers to customise the deployment process on cluster instances, with
-links to more detailed documentation.
+This is an overview of the TPA settings you can use to
+customize the deployment process on cluster instances. 
 
-Before you dive into the details of deployment, it may be helpful to
-read [an overview of configuring a cluster](configure-cluster.md) to
-understand how cluster and instance variables and the other mechanisms
-in config.yml work together to allow you to write a concise,
-easy-to-review configuration.
+There's also [an overview of configuring a cluster](configure-cluster.md), which explains
+how to use cluster and instance variables together to write a concise,
+easy-to-review `config.yml`.
 
 ## System-level configuration
 
 The first thing TPA does is to ensure that Python is bootstrapped
 and ready to execute Ansible modules (a distribution-specific process).
-Then it completes various system-level configuration tasks before moving
-on to [Postgres configuration](#postgres) below.
+Then it completes various system-level configuration tasks before it
+[configures Postgres](#postgres).
 
 * [Distribution support](distributions.md)
 * [Python environment](python.md) (`preferred_python_version`)
-* [Environment variables](target_environment.md) (e.g., `https_proxy`)
+* [Environment variables](target_environment.md) (for example, `https_proxy`)
 
 ### Package repositories
 
@@ -28,7 +25,7 @@ You can use the
 to execute tasks before any package repositories are configured.
 
 * [Configure YUM repositories](yum_repositories.md)
-  (for RHEL, Rocky and AlmaLinux)
+  (for RHEL, Rocky, and AlmaLinux)
 
 * [Configure APT repositories](apt_repositories.md)
   (for Debian and Ubuntu)
@@ -41,9 +38,9 @@ to execute tasks before any package repositories are configured.
 
 You can use the
 [post-repo hook](tpaexec-hooks.md#post-repo)
-to execute tasks after package repositories have been configured (e.g.,
-to correct a problem with the repository configuration before installing
-any packages).
+to execute tasks after package repository configuration. For example,
+you can use it to correct a problem with the repository configuration before installing
+any packages.
 
 ### Package installation
 
@@ -52,15 +49,14 @@ stages throughout the deployment, beginning with a batch of system
 packages:
 
 * [Install non-Postgres packages](packages.md)
-  (e.g., acl, openssl, sysstat)
+  (for example, acl, openssl, sysstat)
 
-Postgres and other components (e.g., Barman, repmgr, pgbouncer) will be
-installed separately according to the cluster configuration; these are
-documented in their own sections below.
+Postgres and other components (for example, Barman, repmgr, pgbouncer) are
+installed separately according to the cluster configuration. See [Other components](#other-components).
 
 ### Other system-level tasks
 
-* [Create and mount filesystems](volumes.md) (including RAID,
+* [Create and mount file systems](volumes.md) (including RAID,
   LUKS setup)
 * [Upload artifacts](artifacts.md) (files, directories,
   tar archives)
@@ -78,19 +74,18 @@ documented in their own sections below.
 
 ## Postgres
 
-Postgres configuration is an extended process that goes hand-in-hand
-with setting up other components like repmgr and pgbouncer. It begins
-with installing Postgres itself.
+Postgres configuration is an extended process that's interleaved with the configuration of
+other components like repmgr and pgbouncer. The first step is to install Postgres.
 
 ### Version selection
 
 Use the [configure options](tpaexec-configure.md#software-versions) to
-select a Postgres flavour and version, or set `postgres_version` in
-config.yml to specify which Postgres major version you want to install.
+select a Postgres flavor and version, or set `postgres_version` in
+`config.yml` to specify the Postgres major version you want to install.
 
-That's all you really need to do to set up a working cluster. Everything
-else on this page is optional. You can control every aspect of the
-deployment if you want to, but the defaults are carefully tuned to give
+That's all you need to do to set up a working cluster. Everything
+else described here is optional. You can control every aspect of the
+deployment if you want to, but the defaults are carefully selected to give
 you a sensible cluster as a starting point.
 
 ### Installation
@@ -100,7 +95,7 @@ the version of Postgres you selected, along with various extensions,
 according to the architecture's needs:
 
 * [Install Postgres and Postgres-related packages](postgres_installation_method_pkg.md)
-  (e.g., pglogical, BDR, etc.)
+  (for example, pglogical, BDR, and so on)
 
 * [Build and install Postgres and extensions from source](postgres_installation_method_src.md)
   (for development and testing)
@@ -120,11 +115,11 @@ cluster configuration with a minimum of effort.
 
 You can use the
 [postgres-config hook](tpaexec-hooks.md#postgres-config)
-to execute tasks after the Postgres configuration files have been
-installed (e.g., to install additional configuration files).
+to execute tasks after the Postgres configuration files are
+installed (for example, to install additional configuration files).
 
-Once the Postgres configuration is in place, TPA will go on to
-install and configure other components such as Barman, repmgr,
+Once the Postgres configuration is in place, TPA
+installs and configures other components, such as Barman, repmgr,
 pgbouncer, and haproxy, according to the details of the architecture.
 
 ## Other components
@@ -143,17 +138,17 @@ pgbouncer, and haproxy, according to the details of the architecture.
 
 ### Configuring and starting services
 
-TPA will now install systemd service unit files for each service.
-The service for Postgres is named `postgres.service`, and can be started
-or stopped with `systemctl start postgres`.
+TPA installs systemd service unit files for each service.
+The service for Postgres is named `postgres.service`. You can use
+`systemctl start postgres` to start it and `systemctl stop postgres`
+to stop it.
 
-In the first deployment, the Postgres service will now be started. If
-you are running `tpaexec deploy` again, the service may be reloaded or
-restarted depending on what configuration changes you may have made. Of
-course, if the service is already running and there are no changes, then
-it's left alone.
+If you're deploying a cluster for the first time, TPA starts the Postgres service at this point.
+On an existing cluster, if there are any relevant configuration changes, TPA reloads or restarts
+the Postgres service as appropriate. If there are no changes and Postgres is already running, it
+leaves the service alone. (If Postgres isn't running on an existing cluster, TPA starts it.) 
 
-In any case, Postgres will be running at the end of this step.
+In any case, Postgres is running at the end of this step.
 
 ## After starting Postgres
 
@@ -169,11 +164,11 @@ In any case, Postgres will be running at the end of this step.
 
 You can use the
 [postgres-config-final hook](tpaexec-hooks.md#postgres-config-final)
-to execute tasks after the post-startup Postgres configuration has been
-completed (e.g., to perform SQL queries to create objects or load data).
+to execute tasks after the post-startup Postgres configuration is
+complete (for example, to perform SQL queries to create objects or load data).
 
 * [Configure BDR](bdr.md)
 
 You can use the
 [post-deploy hook](tpaexec-hooks.md#post-deploy)
-to execute tasks after the deployment process has completed.
+to execute tasks after the deployment process is complete.
