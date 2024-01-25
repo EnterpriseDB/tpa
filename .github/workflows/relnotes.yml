@@ -1,0 +1,128 @@
+name: Build release notes for a new version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version that is being released.
+        required: true
+        type: string
+
+      date:
+        description: Release date in the format 'yyyy-mm-dd'.
+        required: true
+        type: string
+
+      base_branch:
+        description: >
+          Base branch from repository. Will be used to create a new branch from,
+          and as head for the PR that will be created after applying changes.
+        required: true
+        type: string
+        default: main
+
+      source_directory:
+        description: >
+          Path to directory that contains files with release notes in YAML
+          format. Relative to the checked out repository root.
+        required: true
+        type: string
+        default: release_notes
+
+      output_file:
+        description: >
+          Path to the release notes file to be updated. Relative to the checked
+          out repository root.
+        required: true
+        type: string
+        default: RELNOTES.md
+
+      git_user_name:
+        description: User name to set in git config for commits.
+        required: true
+        type: string
+        default: 'github-actions[bot]'
+
+      git_user_email:
+        description: >
+          Email address to set in git config for commits (default is the ID for
+          the github-actions bot).
+        required: true
+        type: string
+        default: '41898282+github-actions[bot]@users.noreply.github.com'
+
+env:
+  # edb-slonik GitHub user must have enough rights to create a branch and a PR
+  # in the repository
+  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
+  SOURCE_REPO_PATH: source_repo
+  SOURCE_DIRECTORY: source_repo/${{ inputs.source_directory }}
+  OUTPUT_FILE: source_repo/${{ inputs.output_file }}
+  RELEASE_NOTES_BRANCH: release_notes/${{ inputs.version }}
+
+jobs:
+  update_relnotes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          path: ${{ env.SOURCE_REPO_PATH }}
+          ref: ${{ inputs.base_branch }}
+          token: ${{ env.GITHUB_TOKEN }}
+
+      - name: Checkout repo-actions
+        uses: actions/checkout@v3
+        with:
+          repository: EnterpriseDB/repo-actions
+          path: .github/repo-actions
+          ref: v1
+          token: ${{ env.GITHUB_TOKEN }}
+
+      - name: Start a new branch from main
+        run: |
+          cd ${{ env.SOURCE_REPO_PATH }}
+          git switch -c ${{ env.RELEASE_NOTES_BRANCH }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r ${{ env.SOURCE_REPO_PATH }}/.github/workflows/relnotes/requirements.txt
+
+      - name: Update release notes
+        run: |
+          python ${{ env.SOURCE_REPO_PATH }}/.github/workflows/relnotes/update_relnotes.py \
+            -s "${{ env.SOURCE_DIRECTORY }}" \
+            -o "${{ env.OUTPUT_FILE }}" \
+            -v "${{ inputs.version }}" \
+            -d "${{ inputs.date }}"
+
+      - name: Clean up release notes YAML files
+        run: |
+          rm "${{ env.SOURCE_DIRECTORY }}"/*
+
+      - name: Add changes, commit and push new branch
+        run: |
+          cd ${{ env.SOURCE_REPO_PATH }}
+          git config user.name "${{ inputs.git_user_name }}"
+          git config user.email "${{ inputs.git_user_email }}"
+          git add "${{ inputs.source_directory }}"
+          git add "${{ inputs.output_file }}"
+          git commit -m "Automated release notes for ${{ inputs.version }}"
+
+      # This step will create a PR if one does not exist yet, otherwise update
+      # an existing PR with a force push.
+      - name: Create a PR with the release notes
+        uses: ./.github/repo-actions/create-pull-request
+        with:
+          "token": ${{ env.GITHUB_TOKEN }}
+          path: ${{ env.SOURCE_REPO_PATH }}
+          head: ${{ env.RELEASE_NOTES_BRANCH }}
+          repo: ${{ github.repository }}
+          base: ${{ inputs.base_branch }}
+          pr_title: 'Automated release notes for ${{ inputs.version }}'
+          git_pre_action: force-push
