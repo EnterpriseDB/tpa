@@ -20,7 +20,7 @@
           or (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 18)
           else ''
       }}"
-  when: not use_local_repo_only
+  when: not use_local_repo_only or 'downloader' in role
 
 - name: Set python package name
   set_fact:
