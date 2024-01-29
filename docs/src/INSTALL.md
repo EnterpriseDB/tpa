@@ -1,28 +1,28 @@
 # TPA installation
 
 To use TPA, you need to install from packages or source and run the
-`tpaexec setup` command. This document explains how to install TPA
-packages. If you have an EDB subscription plan, and therefore have
-access to the EDB repositories, you should follow these instructions. To
-install TPA from source, please refer to
-[Installing TPA from Source](INSTALL-repo.md).
+`tpaexec setup` command. If you have an EDB subscription plan, and therefore have
+access to the EDB repositories, follow these instructions to install TPA packages. 
+
+To install TPA from source, see
+[Installing from source](INSTALL-repo.md).
 
 See [Distribution support](distributions.md) for information
-on what platforms are supported.
+about the platforms that are supported.
 
 !!! Info
-    Please make absolutely sure that your system has the correct
-    date and time set, because various things will fail otherwise. We
-    recommend you use a network time, for example `sudo ntpdate
-    pool.ntp.org`
+    Make absolutely sure that your system has the correct
+    date and time set. Various operations will fail otherwise. We
+    recommend you use a network time, for example, `sudo ntpdate
+    pool.ntp.org`.
 
-## Quickstart
+## Quick start
 
-Login to [EDB Repos 2.0](https://www.enterprisedb.com/repos-downloads)
-to obtain your token. Then execute the following command, substituting
-your token for `<your-token>` and replacing `<your-plan>` with
-one of the following according to which EDB plan you are subscribed:
-`enterprise`, `standard`, `community360`, `postgres_distributed`.
+To obtain your token, log in to [EDB Repos 2.0](https://www.enterprisedb.com/repos-downloads).
+Then execute the following command, substituting
+your token for `<your-token>`. Replace `<your-plan>` with
+one of the following according to the EDB plan you're subscribed to:
+`enterprise`, `standard`, `community360`, or `postgres_distributed`.
 
 #### Add repository and install TPA on Debian or Ubuntu
 ```bash
@@ -30,7 +30,7 @@ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/<your-plan>/setup.de
 sudo apt-get install tpaexec
 ```
 
-#### Add repository and install TPA on RHEL, Rocky, AlmaLinux or Oracle Linux
+#### Add repository and install TPA on RHEL, Rocky, AlmaLinux, or Oracle Linux
 ```bash
 curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/<your-plan>/setup.rpm.sh' | sudo -E bash
 sudo yum install tpaexec
@@ -46,31 +46,32 @@ sudo /opt/EDB/TPA/bin/tpaexec setup
 /opt/EDB/TPA/bin/tpaexec selftest
 ```
 
-More detailed explanations of each step are given below.
+More detailed explanations of each step follow.
 
 ## Where to install TPA
 
-As long as you are using a supported platform, TPA can be installed and
-run from your workstation. This is fine for learning, local testing or
-demonstration purposes. TPA supports [deploying to Docker containers](platform-docker.md)
-should you wish to perform a complete deployment on your own workstation.
+As long as you're using a supported platform, you can install and run TPA
+from your workstation. This approach is fine for learning, local testing, or
+demonstration purposes. if you want to perform a complete deployment on your 
+own workstation, TPA supports [deploying to Docker containers](platform-docker.md).
 
-For production use, we recommend running TPA on a dedicated, persistent
+For production use, we recommend running TPA on a dedicated persistent
 virtual machine. We recommend this because it ensures that the cluster
 directories are retained and available to your team for future cluster
-management or update. It also means you only have to update one copy of
-TPA and you only need to provide network access from a single TPA host
+management or update. It also means you have to update only one copy of
+TPA and you need to provide network access only from a single TPA host
 to the target instances.
+
 ## Installing TPA packages
 
 To install TPA, you must first subscribe to an EDB repository that
 provides it. The preferred source for repositories is EDB Repos 2.0.
 
-Login to [EDB Repos 2.0](https://www.enterprisedb.com/repos-downloads)
-to obtain your token. Then execute the following command, substituting
-your token for `<your-token>` and replacing `<your-plan>` with
-one of the following according to which EDB plan you are subscribed:
-`enterprise`, `standard`, `community360`, `postgres_distributed`.
+To obtain your token, log in to [EDB Repos 2.0](https://www.enterprisedb.com/repos-downloads).
+Then execute the following command, substituting
+your token for `<your-token>`. Replace `<your-plan>` with
+one of the following according to the EDB plan you're subscribed to:
+`enterprise`, `standard`, `community360`, or `postgres_distributed`.
 
 #### Add repository on Debian or Ubuntu
 ```bash
@@ -83,30 +84,30 @@ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/<your-plan>/setup.de
 curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/<your-plan>/setup.rpm.sh' | sudo -E bash
 ```
 
-Alternatively, you may obtain TPA from the legacy 2ndQuadrant
-repository. To do so, login to the EDB Customer Support Portal and
-subscribe to the ["products/tpa/release" repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
-by adding a subscription under Support/Software/Subscriptions,
-and following the instructions to enable the repository on your system.
+Alternatively, you can obtain TPA from the legacy 2ndQuadrant
+repository. To do so, log in to the EDB Customer Support Portal and
+subscribe to the [products/tpa/release repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
+by adding a subscription under **Support/Software/Subscriptions**.
+Then follow the instructions to enable the repository on your system.
 
-Once you have enabled one of these repositories, you may install TPA
-as follows:
+Once you have enabled one of these repositories, you can install TPA
+as follows.
 
 #### Install on Debian or Ubuntu
 ```bash
 sudo apt-get install tpaexec
 ```
-#### Install on RHEL, Rocky, AlmaLinux or Oracle Linux
+#### Install on RHEL, Rocky, AlmaLinux, or Oracle Linux
 ```bash
 sudo yum install tpaexec
 ```
 
-This will install TPA into `/opt/EDB/TPA`. It will also
-ensure that other required packages (e.g., Python 3.9 or later) are
+This command installs TPA into `/opt/EDB/TPA`. It also
+ensures that other required packages (such as Python 3.9 or later) are
 installed.
 
-We mention `sudo` here only to indicate which commands need root
-privileges. You may use any other means to run the commands as root.
+We mention `sudo` here only to indicate the commands that need root
+privileges. You can use any other means to run the commands as root.
 
 ## Setting up the TPA Python environment
 
@@ -114,20 +115,20 @@ Next, run `tpaexec setup` to create an isolated Python environment and
 install the correct versions of all required modules.
 
 !!! Note
-    On Ubuntu versions prior to 20.04, please use `sudo -H tpaexec setup`
-    to avoid subsequent permission errors during `tpaexec configure`
+    On Ubuntu versions prior to 20.04, use `sudo -H tpaexec setup`
+    to avoid subsequent permission errors during `tpaexec configure`.
 
 ```bash
 sudo /opt/EDB/TPA/bin/tpaexec setup
 ```
 
-You must run this as root because it writes to `/opt/EDB/TPA`,
-but the process will not affect any system-wide Python modules you may
+You must run this command as root because it writes to `/opt/EDB/TPA`,
+but the process doesn't affect any system-wide Python modules you
 have installed (including Ansible).
 
-Add `/opt/EDB/TPA/bin` to the `PATH` of the user who will
-normally run `tpaexec` commands. For example, you could add this to
-your .bashrc or equivalent shell configuration file:
+Add `/opt/EDB/TPA/bin` to the `PATH` of the user who
+normally runs `tpaexec` commands. For example, you can add this to
+your `.bashrc` or equivalent shell configuration file:
 
 ```bash
 export PATH=$PATH:/opt/EDB/TPA/bin
@@ -135,15 +136,15 @@ export PATH=$PATH:/opt/EDB/TPA/bin
 
 ## Installing TPA without internet or network access (air-gapped)
 
-This section describes how to install TPA onto a server which cannot
+You can install TPA onto a server that can't
 access either the EDB repositories, a Python package index, or both.
-For information on how to use TPA in such an environment, please see
+For information on how to use TPA in such an environment, see
 [Managing clusters in a disconnected or air-gapped
-environment](air-gapped.md)
+environment](air-gapped.md).
 
 ### Downloading TPA packages
 
-If you cannot access the EDB repositories directly from the server on
+If you can't access the EDB repositories directly from the server on
 which you need to install TPA, you can download the packages from an
 internet-connected machine and transfer them. There are several ways to
 achieve this.
@@ -152,60 +153,60 @@ If your internet-connected machine uses the same operating system as the
 target, we recommend using `yumdownloader` (RHEL-like) or `apt download`
 (Debian-like) to download the packages.
 
-If this is not possible, please contact EDB support and we will provide
+If this approach isn't possible, contact EDB Support, which can provide
 you with a download link or instructions appropriate to your
 subscription.
 
 ### Installing without access to a Python package index
 
-When you run `tpaexec setup`, it will ordinarily download the Python
+When you run `tpaexec setup`, it ordinarily downloads the Python
 packages from a Python package index. Unless your environment provides a
-different index the default is the official [PyPI](https://pypi.org). If
-no package index is available, you should install the `tpaexec-deps`
-package in the same way your installed `tpaexec`. The `tpaexec-deps`
+different index, the default is the official [PyPI](https://pypi.org). If
+no package index is available, install the `tpaexec-deps`
+package in the same way you installed tpaexec. The `tpaexec-deps`
 package (available from the same repository as tpaexec) bundles
-everything that would have been downloaded, so that they can be
-installed without network access. Just install the package before you
-run `tpaexec setup` and the bundled copies will be used automatically.
+everything that you would have downloaded, so that they can be
+installed without network access. Install the package before you
+run `tpaexec setup`, and the bundled copies are used automatically.
 
 ## Verifying your TPA installation
 
-Once you're done with all of the above steps, run the following command
-to verify your local installation:
+After completing the installation,
+verify your local installation:
 
 ```bash
 tpaexec selftest
 ```
 
-If that command completes without any errors, your TPA installation
+If this command completes without any errors, your TPA installation
 is ready for use.
 
 ## Upgrading TPA
 
 To upgrade to a later release of TPA, you must:
 
-1. Install the latest `tpaexec` package
-2. Install the latest `tpaexec-deps` package (if required; see above)
-3. Run `tpaexec setup` again
+1. Install the latest `tpaexec` package.
+2. Install the latest `tpaexec-deps` package (if required; see [Installing without access to a Python package index](#installing-without-access-to-a-python-package-index)).
+3. Run `tpaexec setup` again.
 
-If you have subscribed to the TPA package repository as described
-above, running `apt-get update && apt-get upgrade` or `yum update`
-should install the latest available versions of these packages. If not,
+If you subscribed to the TPA package repository,
+running `apt-get update && apt-get upgrade` or `yum update`
+installs the latest available versions of these packages. If not,
 you can install the packages by any means available.
 
 We recommend that you run `tpaexec setup` again whenever a new version
-of `tpaexec` is installed. Some new releases may not strictly require
-this, but others will not work without it.
+of `tpaexec` is installed. Some new releases might not strictly require
+this, but others can't work without it.
 
 ## Ansible community support
 
-TPA now uses the community distribution of ansible by default; you can
-continue to use the 2ndQuadrant/ansible fork by passing the
+TPA now uses the community distribution of Ansible by default. You can
+continue to use the 2ndQuadrant/Ansible fork by passing the
 `--use-2q-ansible` option to `tpaexec setup`. In a future TPA release,
-support for the 2ndQuadrant ansible fork will be removed.
+support for the 2ndQuadrant/Ansible fork will be removed.
 
-For most users, this makes no difference. However, if you are using
-`--skip-tags` with 2ndQuadrant ansible, be aware that this is not supported
-An alternative means of skipping tasks, compatible with all ansible
-versions, will be provided before support for 2ndQuadrant ansible is
+For most users, this makes no difference. However, if you're using
+`--skip-tags` with 2ndQuadrant/Ansible, be aware that this isn't supported
+An alternative means of skipping tasks, compatible with all Ansible
+versions, will be provided before support for 2ndQuadrant/Ansible is
 removed.
