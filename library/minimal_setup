@@ -96,6 +96,12 @@ if [[ $container_type == "none" ]]; then
     container_type=""
 fi
 
+if command -v sestatus >/dev/null 2>&1; then
+    selinux_status=$(sestatus | awk '/SELinux status:/ {print $3}')
+else
+    selinux_status="disabled"
+fi
+
 grep -Ev '": ""' <<RESULT
 {
     "ansible_facts": {
@@ -112,7 +118,10 @@ grep -Ev '": ""' <<RESULT
         "system_locale": "${system_locale:-}",
         "etc_tpa_exists": $etc_tpa_exists,
         "target_container_type": "$container_type",
-        "ansible_memtotal_mb": $memtotal
+        "ansible_memtotal_mb": $memtotal,
+        "ansible_selinux": {
+            "status": "$selinux_status"
+        }
     }
 }
 RESULT
