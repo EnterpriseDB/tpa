@@ -1,0 +1,7 @@
+- summary: Fix matrix upgrade workflow
+  description: |
+    Fix the upgrade matrix workflow, use ubuntu-20.04 github hosted runners,
+    use setup-python@v5 instead of the v4 fork, improve logging of download
+    package step.
+  type: bugfix
+  jira_tickets: TPA-661
