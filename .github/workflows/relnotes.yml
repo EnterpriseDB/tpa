@@ -65,14 +65,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ${{ env.SOURCE_REPO_PATH }}
           ref: ${{ inputs.base_branch }}
           token: ${{ env.GITHUB_TOKEN }}
 
       - name: Checkout repo-actions
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: EnterpriseDB/repo-actions
           path: .github/repo-actions
