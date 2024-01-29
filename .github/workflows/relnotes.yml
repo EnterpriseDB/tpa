@@ -52,9 +52,6 @@ on:
         default: '41898282+github-actions[bot]@users.noreply.github.com'
 
 env:
-  # edb-slonik GitHub user must have enough rights to create a branch and a PR
-  # in the repository
-  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
   SOURCE_REPO_PATH: source_repo
   SOURCE_DIRECTORY: source_repo/${{ inputs.source_directory }}
   OUTPUT_FILE: source_repo/${{ inputs.output_file }}
@@ -69,7 +66,6 @@ jobs:
         with:
           path: ${{ env.SOURCE_REPO_PATH }}
           ref: ${{ inputs.base_branch }}
-          token: ${{ env.GITHUB_TOKEN }}
 
       - name: Checkout repo-actions
         uses: actions/checkout@v4
@@ -77,7 +73,7 @@ jobs:
           repository: EnterpriseDB/repo-actions
           path: .github/repo-actions
           ref: v1
-          token: ${{ env.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_SLONIK }}
 
       - name: Start a new branch from main
         run: |
@@ -103,7 +99,7 @@ jobs:
 
       - name: Clean up release notes YAML files
         run: |
-          rm "${{ env.SOURCE_DIRECTORY }}"/*
+          rm "${{ env.SOURCE_DIRECTORY }}"/*.{yml,yaml}
 
       - name: Add changes, commit and push new branch
         run: |
@@ -119,7 +115,8 @@ jobs:
       - name: Create a PR with the release notes
         uses: ./.github/repo-actions/create-pull-request
         with:
-          "token": ${{ env.GITHUB_TOKEN }}
+          # Use a token with permission to create/update PR in tpa-internal
+          token: ${{ secrets.GITHUBSECURITYTOKEN }}
           path: ${{ env.SOURCE_REPO_PATH }}
           head: ${{ env.RELEASE_NOTES_BRANCH }}
           repo: ${{ github.repository }}

@@ -19,12 +19,14 @@ class RelNoteType(Enum):
 
         * ``NOTABLE_CHANGE``: a bigger impact change;
         * ``MINOR_CHANGE``: some punctual change;
-        * ``BUGFIX``: bugfix patch.
+        * ``BUGFIX``: bugfix patch;
+        * ``BREAKING_CHANGE``: a change which breaks backward compatibility.
     """
 
     NOTABLE_CHANGE = 1
     MINOR_CHANGE = 2
     BUGFIX = 3
+    BREAKING_CHANGE = 4
 
     def to_markdown(self) -> str:
         """Generate markdown string corresponding to *self*.
@@ -62,7 +64,9 @@ class RelNote:
 
             * ``notable_change``: a bigger impact change;
             * ``minor_change``: some punctual change;
-            * ``bugfix``: bugfix patch.
+            * ``bugfix``: bugfix patch;
+            * ``breaking_change``: a change which breaks backward
+                compatibility.
 
         :param jira_tickets: a list of 0 or more Jira tickets related to this
             release note.
@@ -80,8 +84,8 @@ class RelNote:
             self.type = RelNoteType.__members__[type.strip().upper()]
         except KeyError:
             raise RelNoteInvalidType(f"Type `{type}` is invalid. Use one among"
-                                     " `notable_change`, `minor_change`, or "
-                                     "`bugfix`.")
+                                     " `notable_change`, `minor_change`, "
+                                     "`bugfix` or `breaking_change`.")
         self.tickets: List[str] = jira_tickets + support_tickets
         if len(self.tickets) == 0:
             raise RelNoteNoTicket("Concatenation of Jira tickets and Support "

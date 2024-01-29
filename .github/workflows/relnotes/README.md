@@ -98,7 +98,8 @@ It should be written in markdown syntax. This is optional.
 - `type`: type of the release note. Should be one among:
     - `notable_change`: a bigger impact change.
     - `minor_change`: some punctual change.
-    - `bugfix`: bugfix patch.`
+    - `bugfix`: bugfix patch.
+    - `breaking_change`: a change that breaks backward compatibility.
 - `jira_tickets`: a list of Jira tickets related with this release note. This is
 optional.
 - `support_tickets`: a list of Support tickets related with this release note. This
