@@ -4,6 +4,7 @@
 # runs dep check to ensure everything is fine after update.
 
 name: Python requirements file update
+
 on:
   push:
     branches-ignore:
@@ -25,7 +26,8 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          token: ${{secrets.GH_SLONIK}}
       - uses: ./.github/actions/update-requirements
 
       - name: Install tox

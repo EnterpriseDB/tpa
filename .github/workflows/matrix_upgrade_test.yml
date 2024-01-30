@@ -5,10 +5,6 @@ name: Matrix Upgrade test
 on:
   workflow_dispatch:
     inputs:
-      ref:
-        default: "main"
-        description: "Specific TPA branch to test against"
-        required: true
       matrix_key:
         description: "Set of inputs to use"
         required: false
@@ -45,7 +41,8 @@ jobs:
       json: ${{ steps.load-yaml.outputs.json }}
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          token: ${{secrets.GH_SLONIK}}
       - uses: ./.github/actions/load-yaml
         id: load-yaml
         with:
@@ -69,13 +66,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: EnterpriseDB/tpa-internal
-          ref: ${{ github.event.inputs.ref }}
-          path: source
           token: ${{secrets.GH_SLONIK}}
 
       - uses: ./.github/actions/upgrade-integration-test
         with:
-          source_directory: ${{ github.workspace }}/source
+          source_directory: ${{ github.workspace }}
           tpa_architecture: ${{ matrix.tpa_architecture }}
           tpa_platform: ${{ matrix.tpa_platform }}
           tpa_layout: ${{ matrix.tpa_layout }}

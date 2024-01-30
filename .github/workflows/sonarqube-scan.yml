@@ -6,9 +6,6 @@ on:
       repository:
         default: "EnterpriseDB/tpa-internal"
         required: true
-      ref:
-        default: "main"
-        required: true
       pr_key:
         required: true
       pr_branch_ref:
@@ -27,7 +24,6 @@ jobs:
       with:
         fetch-depth: 0
         repository: '${{ github.event.inputs.repository }}'
-        ref: '${{ github.event.inputs.ref }}'
         token: '${{secrets.GH_SLONIK}}'
 
     - name: Checkout foundation repository
@@ -53,7 +49,6 @@ jobs:
       uses: ./foundation-security/actions/sonarqube
       with:
         GITHUB_TOKEN: '${{secrets.GH_SLONIK}}'
-        GITHUB_REF: '${{github.event.inputs.ref}}'
         SONARQUBE_URL: '${{secrets.SONARQUBE_URL}}'
         SONARQUBE_TOKEN: '${{secrets.SONARQUBE_TOKEN}}'
         PULL_REQUEST_KEY: '${{github.event.inputs.pr_key}}'

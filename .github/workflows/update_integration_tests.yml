@@ -23,7 +23,8 @@ jobs:
       json: ${{ steps.load-yaml.outputs.json }}
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          token: ${{secrets.GH_SLONIK}}
       - uses: ./.github/actions/load-yaml
         id: load-yaml
         with:
@@ -39,19 +40,16 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Checkout source repository
         id: checkout-source
         uses: actions/checkout@v4
         with:
           repository: EnterpriseDB/tpa-internal
-          path: source
           token: ${{secrets.GH_SLONIK}}
-          
+
       - uses: ./.github/actions/update-integration-test
         with:
-          source_directory: ${{ github.workspace }}/source
+          source_directory: ${{ github.workspace }}
           cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_os_image }}
           tpa_architecture: ${{ matrix.tpa_architecture }}
           tpa_platform: ${{ matrix.tpa_platform }}

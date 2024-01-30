@@ -4,11 +4,7 @@ name: Simple Patroni Integration Tests
 
 on:
   workflow_dispatch:
-    inputs:
-      ref:
-        default: "main"
-        description: "Specific TPA branch to test against"
-        required: true
+
 env:
   LC_ALL: C.UTF-8
   LANG: C.UTF-8
@@ -29,7 +25,8 @@ jobs:
       json: ${{ steps.load-yaml.outputs.json }}
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          token: ${{secrets.GH_SLONIK}}
       - uses: ./.github/actions/load-yaml
         id: load-yaml
         with:
@@ -48,20 +45,16 @@ jobs:
         shell: bash --noprofile --norc -exo pipefail {0}
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Checkout source repository
         id: checkout-source
         uses: actions/checkout@v4
         with:
           repository: EnterpriseDB/tpa-internal
-          ref: ${{ github.event.inputs.ref }}
-          path: source
           token: ${{secrets.GH_SLONIK}}
 
       - uses: ./.github/actions/initialise_integration_test
         with:
-          source_directory: ${{ github.workspace }}/source
+          source_directory: ${{ github.workspace }}
           tpa_platform: ${{ matrix.tpa_platform }}
           tpa_architecture: ${{ matrix.tpa_architecture }}
           tpa_os_image: tpa/${{ matrix.tpa_os_image }}
@@ -72,20 +65,20 @@ jobs:
           cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}
 
       - name: Provision the cluster
-        working-directory: ${{ github.workspace }}/source
+        working-directory: ${{ github.workspace }}
         run: ./bin/tpaexec provision "$CLUSTER" -vv
 
       - name: Deploy the cluster
-        working-directory: ${{ github.workspace }}/source
+        working-directory: ${{ github.workspace }}
         run: ./bin/tpaexec deploy "$CLUSTER" -vv
 
       - name: Test the cluster
-        working-directory: ${{ github.workspace }}/source
+        working-directory: ${{ github.workspace }}
         run: ./bin/tpaexec test "$CLUSTER" -vv
 
       - name: Get patroni cluster status
         id: status
-        working-directory: ${{ github.workspace }}/source
+        working-directory: ${{ github.workspace }}
         run: |
           json=$(
             ANSIBLE_CALLBACK_WHITELIST=json ANSIBLE_STDOUT_CALLBACK=json \
@@ -99,7 +92,7 @@ jobs:
 
       - name: Find a single host name with role Replica
         id: replica
-        working-directory: ${{ github.workspace }}/source
+        working-directory: ${{ github.workspace }}
         run: |
           replica=$(
             jq -r '
@@ -116,19 +109,19 @@ jobs:
           echo "name=$replica" >>"$GITHUB_OUTPUT"
 
       - name: Promote new leader node
-        working-directory: ${{ github.workspace }}/source
+        working-directory: ${{ github.workspace }}
         run: ./bin/tpaexec switchover "$CLUSTER" "${{ steps.replica.outputs.name }}" -vv
 
       - name: Redeploy cluster after promotion
-        working-directory: ${{ github.workspace }}/source
+        working-directory: ${{ github.workspace }}
         run: ./bin/tpaexec deploy "$CLUSTER" -vv
 
       - name: Final test after re-deploy
-        working-directory: ${{ github.workspace }}/source
+        working-directory: ${{ github.workspace }}
         run: ./bin/tpaexec test "$CLUSTER" -vv
 
       - uses: ./.github/actions/finalise_integration_test
         with:
-          source_directory: ${{ github.workspace }}/source
+          source_directory: ${{ github.workspace }}
           cluster: ${{ env.CLUSTER }}
         if: always()

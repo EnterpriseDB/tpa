@@ -4,10 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       repository:
-        default: "EnterpriseDB/tpa"
-        required: true
-      ref:
-        default: "main"
+        default: "EnterpriseDB/tpa-internal"
         required: true
 
 jobs:
@@ -23,8 +20,6 @@ jobs:
       with:
         fetch-depth: 0
         repository: ${{ github.event.inputs.repository }}
-        ref: ${{ github.event.inputs.ref }}
-        path: source
         token: ${{secrets.GH_SLONIK}}
 
     - name: Checkout foundation-security repository
@@ -38,7 +33,7 @@ jobs:
 
     - name: tpaexec install
       id: tpaexec-install
-      run: source/bin/tpaexec setup
+      run: ./bin/tpaexec setup
 
     - name: BlackDuck Scan
       id: call-bd-action
@@ -49,5 +44,5 @@ jobs:
         blackduck-url: ${{ secrets.BLACKDUCK_URL }}
         blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
         project-name: tpaexec
-        project-version: ${{ github.event.inputs.ref }}
+        project-version: ${{ github.ref }}
         use-clang-tools: false

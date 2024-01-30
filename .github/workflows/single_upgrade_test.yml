@@ -5,10 +5,6 @@ name: Upgrade test
 on:
   workflow_dispatch:
     inputs:
-      ref:
-        default: "main"
-        description: "Specific TPA branch to test against"
-        required: true
       tpa_architecture:
         description: "TPA architecture for initial cluster"
         required: true
@@ -96,20 +92,16 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Checkout source repository
         id: checkout-source
         uses: actions/checkout@v4
         with:
           repository: EnterpriseDB/tpa-internal
-          ref: ${{ github.event.inputs.ref }}
-          path: source
           token: ${{secrets.GH_SLONIK}}
 
       - uses: ./.github/actions/upgrade-integration-test
         with:
-          source_directory: ${{ github.workspace }}/source
+          source_directory: ${{ github.workspace }}
           tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
           tpa_platform: ${{ github.event.inputs.tpa_platform }}
           tpa_layout: ${{ github.event.inputs.tpa_layout }}

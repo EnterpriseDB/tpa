@@ -8,9 +8,6 @@ on:
       repository:
         default: "EnterpriseDB/tpa-internal"
         required: true
-      ref:
-        default: "main"
-        required: true
 
 env:
   LANG: "C.UTF-8"
@@ -25,16 +22,12 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v4
-
     - name: Checkout source repository
       id: checkout-source
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         repository: ${{ github.event.inputs.repository }}
-        ref: ${{ github.event.inputs.ref }}
-        path: source
         token: ${{secrets.GH_SLONIK}}
 
     - uses: ./.github/actions/install-requirements
@@ -43,6 +36,6 @@ jobs:
       run: pip install tox
 
     - name: Run tests with tox
-      working-directory: ${{ github.workspace }}/source
+      working-directory: ${{ github.workspace }}
       run: |
         TOX_PARALLEL_NO_SPINNER=1 tox -e py36-test,dep -p auto

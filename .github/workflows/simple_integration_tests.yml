@@ -16,12 +16,6 @@ on:
     types:
       - submitted
   workflow_dispatch:
-    inputs:
-      ref:
-        default: "main"
-        description: "Specific TPA branch to test against"
-        required: true
-  
 
 env:
   LANG: "C.UTF-8"
@@ -42,7 +36,8 @@ jobs:
       json: ${{ steps.load-yaml.outputs.json }}
     steps:
     - uses: actions/checkout@v4
-
+      with:
+        token: ${{secrets.GH_SLONIK}}
     - uses: ./.github/actions/load-yaml
       id: load-yaml
       with:
@@ -70,20 +65,16 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v4
-
     - name: Checkout source repository
       id: checkout-source
       uses: actions/checkout@v4
       with:
         repository: EnterpriseDB/tpa-internal
-        ref: ${{ github.event.inputs.ref }}
-        path: source
         token: ${{secrets.GH_SLONIK}}
 
     - uses: ./.github/actions/integration-test
       with:
-        source_directory: ${{ github.workspace }}/source
+        source_directory: ${{ github.workspace }}
         cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}
         tpa_architecture: ${{ matrix.tpa_architecture }}
         tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
