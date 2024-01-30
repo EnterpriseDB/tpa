@@ -4,11 +4,14 @@ name: Unit Tests
 
 on:
   workflow_dispatch:
-    inputs:
-      repository:
-        default: "EnterpriseDB/tpa-internal"
-        required: true
-
+  pull_request:
+    types:
+      - review_requested
+    branches:
+      - main
+  pull_request_review:
+    types:
+      - submitted
 env:
   LANG: "C.UTF-8"
   TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
@@ -27,7 +30,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        repository: ${{ github.event.inputs.repository }}
         token: ${{secrets.GH_SLONIK}}
 
     - uses: ./.github/actions/install-requirements
@@ -38,4 +40,4 @@ jobs:
     - name: Run tests with tox
       working-directory: ${{ github.workspace }}
       run: |
-        TOX_PARALLEL_NO_SPINNER=1 tox -e py36-test,dep -p auto
+        TOX_PARALLEL_NO_SPINNER=1 tox -e py39-test,dep -p auto
