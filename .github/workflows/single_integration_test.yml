@@ -5,8 +5,6 @@ name: Integration test
 on:
   workflow_dispatch:
     inputs:
-        description: "Specific TPA branch to test against"
-        required: true
       tpa_architecture:
         description: "TPA architecture"
         required: true
