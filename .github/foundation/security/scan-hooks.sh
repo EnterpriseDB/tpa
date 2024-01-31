@@ -6,7 +6,8 @@ if [ "${FS_SCANNER}" = "blackduck" ]; then
     case "${FS_SCANNER_STAGE}" in
     "pre")
         echo "Setup for BlackDuck pre stage"
-        pip install -r requirements.txt
+        # install ansible requirements for community use case only
+        pip install -r requirements.txt -r requirements-ansible-community.txt
         ;;
     "post")
         echo "Nothing to do for BlackDuck post stage"
