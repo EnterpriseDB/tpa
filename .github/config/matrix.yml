@@ -12,6 +12,7 @@ default:
     - "debian:10"
     - "redhat:7"
     - "redhat:8"
+    - "redhat:9"
     - "sles:15"
     # - "debian:11"
   tpa_postgres_flavour: &default_tpa_postgres_flavour
@@ -87,6 +88,7 @@ patroni:
     - "debian:11"
 #    - "redhat:7"  # Unsupported configuration TPA-335
     - "redhat:8"
+    - "redhat:9"
   tpa_postgres_flavour:
     - "postgresql"
     - "epas"

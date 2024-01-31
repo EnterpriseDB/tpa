@@ -30,6 +30,7 @@ on:
         - tpa/debian:10
         - tpa/redhat:7
         - tpa/sles:15
+        - tpa/redhat:9
       tpa_postgres_flavour:
         description: "Postgres flavour"
         required: true
