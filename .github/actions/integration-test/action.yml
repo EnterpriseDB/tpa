@@ -15,6 +15,10 @@ inputs:
     required: false
     description: "TPA architecture"
     default: BDR-Always-ON
+  tpa_harp_consensus_protocol:
+    required: false
+    description: "TPA HARP consensus protocol"
+    default: bdr
   tpa_os:
     required: false
     description: "Operating System to use with TPA (--os)"
@@ -57,6 +61,7 @@ runs:
         source_directory: ${{ inputs.source_directory }}
         tpa_platform: ${{ inputs.tpa_platform }}
         tpa_architecture: ${{ inputs.tpa_architecture }}
+        tpa_harp_consensus_protocol: ${{ inputs.tpa_harp_consensus_protocol }}
         tpa_os: ${{ inputs.tpa_os }}
         tpa_os_version: ${{ inputs.tpa_os_version }}
         tpa_os_image: ${{ inputs.tpa_os_image }}

@@ -60,6 +60,7 @@ jobs:
         tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
         tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
         tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
+        tpa_harp_consensus_protocol: ${{ matrix.tpa_harp_consensus_protocol }}
         tpa_package_cache: >-
           ${{ ! (
             contains(matrix.tpa_os_image, 'sles')

@@ -22,6 +22,9 @@ default:
     - "edbpge"
   tpa_postgres_version: &default_tpa_postgres_version
     - 14
+  tpa_harp_consensus_protocol:
+    - "bdr"
+    - "etcd"
   exclude:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "pgextended"
@@ -37,6 +40,10 @@ default:
       tpa_postgres_flavour: "edbpge"
     - tpa_os_image: "sles:15"
       tpa_architecture: "BDR-Always-ON"
+    - tpa_harp_consensus_protocol: "etcd"
+      tpa_architecture: "M1"
+    - tpa_harp_consensus_protocol: "etcd"
+      tpa_architecture: "PGD-Always-ON"
   include:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "postgresql"
