@@ -27,7 +27,7 @@ runs:
         python-version: ${{ inputs.python-version }}
         architecture: ${{ inputs.architecture }}
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       if: >
         !env.ACT
       with:
