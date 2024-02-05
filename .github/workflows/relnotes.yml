@@ -116,7 +116,7 @@ jobs:
         uses: ./.github/repo-actions/create-pull-request
         with:
           # Use a token with permission to create/update PR in tpa-internal
-          token: ${{ secrets.GITHUBSECURITYTOKEN }}
+          token: ${{ secrets.SECRET_REPO_TOKEN }}
           path: ${{ env.SOURCE_REPO_PATH }}
           head: ${{ env.RELEASE_NOTES_BRANCH }}
           repo: ${{ github.repository }}
