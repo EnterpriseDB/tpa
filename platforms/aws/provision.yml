@@ -550,8 +550,9 @@
             'vars': (item.0.item.item|export_vars),
             'platform': 'aws',
             'ip_address': item.1.public_ip|default(item.0.instances[0].network_interfaces[0].association.public_ip)
-              |default(item.0.network_interfaces[0].private_ip_address),
-            'public_ip': item.1.public_ip|default(item.0.instances[0].network_interfaces[0].association.public_ip),
+              |default(item.0.instances[0].network_interfaces[0].private_ip_address),
+            'public_ip': item.1.public_ip|default(item.0.instances[0].network_interfaces[0].association.public_ip)
+              |default(''),
           })
         ])
       }}"
