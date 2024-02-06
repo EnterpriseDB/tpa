@@ -7,7 +7,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
+      day: "sunday"
     labels:
       - "dependabot"
       - "pip dependencies"
@@ -21,7 +21,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
+      day: "sunday"
     labels:
       - "dependabot"
       - "github actions dependencies"
@@ -35,7 +35,7 @@ updates:
     directory: "/.github/actions/"
     schedule:
       interval: "weekly"
-      day: "monday"
+      day: "sunday"
     labels:
       - "dependabot"
       - "github actions dependencies"
