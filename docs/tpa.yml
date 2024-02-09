@@ -46,6 +46,7 @@ markdown_extensions:
       css_class: highlight
       guess_lang: true
   - admonition
+  - pymdownx.superfences
 plugins:
   - exclude:
       glob:
