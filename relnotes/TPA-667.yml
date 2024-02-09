@@ -1,0 +1,7 @@
+- summary: Fix password generation steps for tpaexec upgrade
+  description: |
+    Fix a bug in the password generation steps for tpaexec upgrade scenario
+    introduced with TPA-85 new vault password management.
+  type: bugfix
+  jira_tickets:
+  - TPA-667

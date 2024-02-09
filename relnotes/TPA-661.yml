@@ -4,4 +4,5 @@
     use setup-python@v5 instead of the v4 fork, improve logging of download
     package step.
   type: bugfix
-  jira_tickets: TPA-661
+  jira_tickets:
+  - TPA-661
