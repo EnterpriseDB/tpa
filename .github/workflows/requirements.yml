@@ -18,7 +18,7 @@ on:
 env:
   LC_ALL: C.UTF-8
   LANG: C.UTF-8
-  GITHUB_TOKEN: ${{ secrets.SECRET_REPO_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
 
 jobs:
   requirements:

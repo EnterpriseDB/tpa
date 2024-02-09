@@ -61,7 +61,7 @@ runs:
     - name: Commit and push changes
       uses: devops-infra/action-commit-push@v0.5
       with:
-        github_token: ${{ env.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ env.GH_SLONIK }}
         commit_message: "Update python requirements files"
       if: >
         !env.ACT
