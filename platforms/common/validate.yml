@@ -121,6 +121,7 @@
     - tags
     - vars
     - volumes
+    - provision_only
 
 - assert:
     msg: >-

@@ -9,6 +9,7 @@
           addresses|combine({
             'Name': item.Name,
             'node': item.node,
+            'add_to_inventory': not item.provision_only|default(false),
             'vars': addresses|combine(item|export_vars),
             'platform': 'bare',
           })

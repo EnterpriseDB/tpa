@@ -1,0 +1,11 @@
+- summary: Add option to provision without deploying
+  description: |
+    If an instance has `provision_only: true` in config.yml, it will
+    be provisioned as normal but not added to the inventory which is seen
+    by `tpaexec deploy`.
+
+    An example use for this is with a custom docker image to set up a
+    testing environment.
+  type: minor_change
+  jira_tickets:
+  - TPA-627

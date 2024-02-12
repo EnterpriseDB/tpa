@@ -1,7 +1,7 @@
 # Instance configuration
 
 This is an overview of the TPA settings you can use to
-customize the deployment process on cluster instances. 
+customize the deployment process on cluster instances.
 
 There's also [an overview of configuring a cluster](configure-cluster.md), which explains
 how to use cluster and instance variables together to write a concise,
@@ -65,6 +65,13 @@ installed separately according to the cluster configuration. See [Other componen
 * [Manage ssh_known_hosts entries](manage_ssh_hostkeys.md)
 * [Add system locale](locale.md)
 
+### Skipping deployment completely
+
+To prevent TPA from doing any part of the deployment process on an
+instance - in other words, if you want TPA to provision the instance and
+then leave it alone - set the `provision_only` setting for the instance
+to `true` in `config.yml`. This setting will make TPA omit the instance
+entirely from the inventory which `tpaexec deploy` sees.
 <!-- WIP
 
 * [Configure OpenVPN](openvpn.md)
@@ -146,7 +153,7 @@ to stop it.
 If you're deploying a cluster for the first time, TPA starts the Postgres service at this point.
 On an existing cluster, if there are any relevant configuration changes, TPA reloads or restarts
 the Postgres service as appropriate. If there are no changes and Postgres is already running, it
-leaves the service alone. (If Postgres isn't running on an existing cluster, TPA starts it.) 
+leaves the service alone. (If Postgres isn't running on an existing cluster, TPA starts it.)
 
 In any case, Postgres is running at the end of this step.
 
