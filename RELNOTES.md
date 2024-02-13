@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
-## v23.29 (2024-02-13)
+## v23.29 (2024-02-15)
 
 ### Notable changes
 
@@ -42,20 +42,49 @@
 
 ### Bugfixes
 
-- Fix password generation steps for tpaexec upgrade
+- Improve error recognition in postgres-monitor
 
-  Fix a bug in the password generation steps for tpaexec upgrade scenario
-  introduced with TPA-85 new vault password management.
+  postgres-monitor will now recognise the message "the database system is
+  not yet accepting connections" as a recoverable error.
 
-  References: TPA-667.
+  References: TPA-658.
 
-- Fix matrix upgrade workflow
+- Skip postgres/config/final role on replicas when upgrading
 
-  Fix the upgrade matrix workflow, use ubuntu-20.04 github hosted runners,
-  use setup-python@v5 instead of the v4 fork, improve logging of download
-  package step.
+  References: TPA-639.
 
-  References: TPA-661.
+- Respect package versions in the downloader
+
+  When using the downloader on a Debian-family system, we now perform our
+  own fnmatch-style globbing on any package versions specified in
+  config.yml, enabling constructions like `bdr_package_version: 4:5.0.*`
+  to behave in the same way as when the downloader is not in use.
+
+  References: TPA-583.
+
+- Ensure that the downloader gets latest packages for Debian
+
+  The downloader now runs apt-get update before fetching packages on Debian and Ubuntu systems
+
+  References: TPA-575.
+
+- Disable transaction streaming when camo is enabled
+
+  Set `bdr.default_streaming_mode` to `off` when `--enable_camo` is given
+
+  References: TPA-550.
+
+- Detect selinux and act accordingly on barman servers
+
+  In minimal_setup, populate ansible_facts.ansible_selinux.status as the full setup module would do.
+
+  On a barman server with the backup api enabled, set the httpd_can_network_connect boolean if required.
+  
+  Fix the existing code to set selinux context on a barman server.
+
+  References: TPA-491.
+
+
 
 ## v23.28 (2024-01-23)
 
