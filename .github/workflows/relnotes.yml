@@ -27,7 +27,7 @@ on:
           format. Relative to the checked out repository root.
         required: true
         type: string
-        default: release_notes
+        default: relnotes
 
       output_file:
         description: >
@@ -99,7 +99,7 @@ jobs:
 
       - name: Clean up release notes YAML files
         run: |
-          rm "${{ env.SOURCE_DIRECTORY }}"/*.{yml,yaml}
+          rm "${{ env.SOURCE_DIRECTORY }}"/*.yml
 
       - name: Add changes, commit and push new branch
         run: |
