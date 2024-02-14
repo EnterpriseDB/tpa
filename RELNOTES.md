@@ -2,7 +2,7 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
-## v23.29 (2024-02-13)
+## v23.29 (2024-02-15)
 
 ### Notable changes
 
@@ -41,21 +41,6 @@
   References: TPA-660.
 
 ### Bugfixes
-
-- Fix password generation steps for tpaexec upgrade
-
-  Fix a bug in the password generation steps for tpaexec upgrade scenario
-  introduced with TPA-85 new vault password management.
-
-  References: TPA-667.
-
-- Fix matrix upgrade workflow
-
-  Fix the upgrade matrix workflow, use ubuntu-20.04 github hosted runners,
-  use setup-python@v5 instead of the v4 fork, improve logging of download
-  package step.
-
-  References: TPA-661.
 
 - Improve error recognition in postgres-monitor
 
