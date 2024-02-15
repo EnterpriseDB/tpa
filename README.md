@@ -16,3 +16,6 @@ Yes, if you're an EDB customer then please contact support. Otherwise please ope
 
 ## Can I contribute?
 Sure, we'd love to hear from you but please open an issue before you start coding. We are quite selective with what TPA can/should do so bug fixes are more likely to get accepted than new features.
+
+## Is this a test?
+Yes
