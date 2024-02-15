@@ -49,6 +49,7 @@ def main():
 def recoverable(err):
     return err.startswith('FATAL: ') and \
         (err.endswith('the database system is starting up') or \
+        err.endswith('the database system is not yet accepting connections') or \
         err.endswith('the database system is in recovery mode'))
 
 if __name__ == '__main__':

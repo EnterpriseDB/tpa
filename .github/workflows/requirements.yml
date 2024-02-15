@@ -4,6 +4,7 @@
 # runs dep check to ensure everything is fine after update.
 
 name: Python requirements file update
+
 on:
   push:
     branches-ignore:
@@ -17,7 +18,7 @@ on:
 env:
   LC_ALL: C.UTF-8
   LANG: C.UTF-8
-  GITHUB_TOKEN: ${{ secrets.GITHUBSECURITYTOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
 
 jobs:
   requirements:
@@ -25,7 +26,8 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          token: ${{secrets.GH_SLONIK}}
       - uses: ./.github/actions/update-requirements
 
       - name: Install tox

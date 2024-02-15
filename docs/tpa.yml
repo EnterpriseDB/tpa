@@ -46,6 +46,7 @@ markdown_extensions:
       css_class: highlight
       guess_lang: true
   - admonition
+  - pymdownx.superfences
 plugins:
   - exclude:
       glob:
@@ -54,7 +55,7 @@ plugins:
   - with-pdf:
       author: EDB
       cover_title: TPA
-      cover_subtitle: "Version 23.28 (2023-01-23)"
+      cover_subtitle: "Version 23.29 (2024-02-15)"
       toc_level: 3
       output_path: tpaexec.pdf
       copyright: © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.

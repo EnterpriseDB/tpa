@@ -48,3 +48,8 @@
     regexp: '^Listen 80'
   notify:
     - Restart apache pgbapi
+
+- name: Enable apache to connect to pg-backup-api
+  command:
+    cmd: setsebool -P httpd_can_network_connect on
+  when: ansible_selinux is defined and ansible_selinux.status == "enabled"

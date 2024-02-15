@@ -86,14 +86,11 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v4
-
     - name: Checkout source repository
       id: checkout-source
       uses: actions/checkout@v4
       with:
         repository: EnterpriseDB/tpa-internal
-        path: source
         token: ${{secrets.GH_SLONIK}}
 
     - name: Set extra arguments for tpaexec configure command
@@ -108,7 +105,7 @@ jobs:
 
     - uses: ./.github/actions/integration-test
       with:
-        source_directory: ${{ github.workspace }}/source
+        source_directory: ${{ github.workspace }}
         tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
         tpa_platform: ${{ github.event.inputs.tpa_platform }}
         tpa_os_image: ${{ github.event.inputs.tpa_os_image }}

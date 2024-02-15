@@ -5,10 +5,6 @@ name: Integration test
 on:
   workflow_dispatch:
     inputs:
-      ref:
-        default: "main"
-        description: "Specific TPA branch to test against"
-        required: true
       tpa_architecture:
         description: "TPA architecture"
         required: true
@@ -34,6 +30,7 @@ on:
         - tpa/debian:10
         - tpa/redhat:7
         - tpa/sles:15
+        - tpa/redhat:9
       tpa_postgres_flavour:
         description: "Postgres flavour"
         required: true
@@ -62,6 +59,15 @@ on:
         options:
         - "efm"
         - "repmgr"
+      tpa_ansible_version:
+        description: "Ansible version"
+        required: true
+        default: "8"
+        type: choice
+        options:
+        - "2.9"
+        - "8"
+        - "9"
       tpa_package_cache:
         description: "Use the downloader"
         type: boolean
@@ -86,20 +92,16 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Checkout source repository
         id: checkout-source
         uses: actions/checkout@v4
         with:
           repository: EnterpriseDB/tpa-internal
-          ref: ${{ github.event.inputs.ref }}
-          path: source
           token: ${{secrets.GH_SLONIK}}
 
       - uses: ./.github/actions/integration-test
         with:
-          source_directory: ${{ github.workspace }}/source
+          source_directory: ${{ github.workspace }}
           tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
           tpa_platform: ${{ github.event.inputs.tpa_platform }}
           tpa_os_image: ${{ github.event.inputs.tpa_os_image }}

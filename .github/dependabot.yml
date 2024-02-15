@@ -7,7 +7,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
+      day: "sunday"
     labels:
       - "dependabot"
       - "pip dependencies"
@@ -21,7 +21,40 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
+      day: "sunday"
+    labels:
+      - "dependabot"
+      - "github actions dependencies"
+    open-pull-requests-limit: 5
+    pull-request-branch-name:
+      separator: "/"
+    reviewers:
+      - "EnterpriseDB/tpaexec-dev-team"
+
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    labels:
+      - "dependabot"
+      - "github actions dependencies"
+    open-pull-requests-limit: 5
+    pull-request-branch-name:
+      separator: "/"
+    reviewers:
+      - "EnterpriseDB/tpaexec-dev-team"
+
+# We're adding initialise_integration_test directly here because we
+# believe there's an error how dependabot would search the yml files.
+# If we see PRs open for custom actions other than this, then is
+# because either GH fixed the problem or dependabot now searches
+# recursively
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/initialise_integration_test/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
     labels:
       - "dependabot"
       - "github actions dependencies"

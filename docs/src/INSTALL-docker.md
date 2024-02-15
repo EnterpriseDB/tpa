@@ -1,21 +1,21 @@
 # Running TPA in a Docker container
 
-If you are using a system for which there are no [TPA
+If you're using a system for which there are no [TPA
 packages](INSTALL.md) available, and it's difficult to run TPA after
 [installing from source](INSTALL-repo.md) (for example, because it's not
-easy to obtain a working Python 3.9+ interpreter), your last resort may
+easy to obtain a working Python 3.9+ interpreter), your last resort might
 be to build a Docker image and run TPA inside a Docker container.
 
-Please note that you do not need to run TPA in a Docker container in
-order to [deploy to Docker containers](platform-docker.md). It's always
-preferable to run TPA directly if you can (even on MacOS X).
+You don't need to run TPA in a Docker container
+to [deploy to Docker containers](platform-docker.md). It's always
+preferable to run TPA directly if you can, even on MacOS X.
 
-## Quickstart
+## Quick start
 
-You must have Docker installed and working on your system already.
+Make sure you have Docker installed and working on your system.
 
-Run the following commands to clone the tpaexec source repository from Github
-and build a new Docker image named `tpa/tpaexec`:
+To clone the tpaexec source repository from Github
+and build a new Docker image named `tpa/tpaexec`, run the following commands:
 
 ```bash
 $ git clone ssh://git@github.com/EnterpriseDB/tpa.git
@@ -47,7 +47,7 @@ $ docker run --platform=linux/amd64 --rm -v ~/clusters:/clusters \
 ```
 
 You can now run commands like `tpaexec provision /clusters/speedy` at the
-container prompt. (When you exit the shell, the container will be removed.)
+container prompt. (When you exit the shell, the container is removed.)
 
 If you want to provision Docker containers using TPA, you must also allow
 the container to access the Docker control socket on the host:
@@ -58,16 +58,16 @@ $ docker run --platform=linux/amd64 --rm -v ~/clusters:/clusters \
     -it tpa/tpaexec:latest
 ```
 
-Run `docker ps` within the container to make sure that your connection to the
+Run `docker ps` in the container to make sure that your connection to the
 host Docker daemon is working.
 
 ## Installing Docker
 
-Please consult the
-[Docker documentation](https://docs.docker.com) if you need help to
-[install Docker](https://docs.docker.com/install) and
-[get started](https://docs.docker.com/get-started/) with it.
+See the
+[Docker documentation](https://docs.docker.com) if you need help
+[installing Docker](https://docs.docker.com/install) and
+[getting started](https://docs.docker.com/get-started/) with it.
 
-On MacOS X, you can [install "Docker Desktop for
-Mac"](https://hub.docker.com/editions/community/docker-ce-desktop-mac/)
+On MacOS X, you can [install Docker Desktop for
+Mac](https://hub.docker.com/editions/community/docker-ce-desktop-mac/)
 and launch Docker from the application menu.

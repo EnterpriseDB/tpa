@@ -232,3 +232,5 @@ workflow/
 
 coverage-reports/
 lib/tests/config/*
+requirements-dev.in
+requirements-dev.txt

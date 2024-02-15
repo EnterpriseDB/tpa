@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# © Copyright EnterpriseDB UK Limited 2015-2023 - All rights reserved.
+
+import sys
+from tpaexec.password import delete_password, exists
+
+
+def main(
+    cluster_dir, keyring_backend="system", password_name="vault_pass"
+):
+    """
+    delete vault password in chosen keyring backend
+    exit code 0 if a password was deleted, otherwise exit code 2.
+    """
+    if exists(cluster_dir, password_name, keyring_backend):
+        delete_password(cluster_dir, password_name, keyring_backend)
+        sys.exit(0)
+    else:
+        sys.exit(2)
+
+
+if __name__ == "__main__":
+    from sys import argv
+
+    main(*argv[1:])

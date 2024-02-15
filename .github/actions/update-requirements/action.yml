@@ -32,6 +32,11 @@ runs:
       run: |
         pip-compile --generate-hashes requirements-ansible-2q.in -o requirements-ansible-2q.txt
 
+    - name: Run pip-compile on requirements-ansible-8.in
+      shell: bash
+      run: |
+        pip-compile --generate-hashes requirements-ansible-8.in -o requirements-ansible-8.txt
+
     - name: Run pip-compile on test dependency requirements/ansible.in
       shell: bash
       run: |
@@ -56,7 +61,7 @@ runs:
     - name: Commit and push changes
       uses: devops-infra/action-commit-push@v0.5
       with:
-        github_token: ${{ env.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ env.GH_SLONIK }}
         commit_message: "Update python requirements files"
       if: >
         !env.ACT

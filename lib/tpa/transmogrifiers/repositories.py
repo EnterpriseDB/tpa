@@ -40,6 +40,19 @@ class Repositories(Transmogrifier):
     # - we assume postgres_flavour is set (could be postgresql for old cluster if used
     #   alone without BDR4PGD5)
     def edb_repositories(self, cluster):
+
+        return self.args.edb_repositories or self._unified_repos(cluster)
+
+    def _unified_repos(self, cluster):
+        """Returns the union  between existing and newly needed repos
+        for the given postgres_flavour
+
+        Args:
+            cluster (cluster): cluster configuration
+
+        Returns:
+            list: list of unique repos
+        """
         postgres_flavour = cluster.vars.get("postgres_flavour")
         postgres_repos = {
             "postgresql": ["standard"],
@@ -47,6 +60,5 @@ class Repositories(Transmogrifier):
             "pgextended": ["standard"],
             "epas": ["enterprise"],
         }
-        default_repos = postgres_repos[postgres_flavour] + self._default_repos
-
-        return self.args.edb_repositories or default_repos
+        existing = cluster.vars.get("edb_repositories")
+        return list(set(postgres_repos[postgres_flavour]).union(self._default_repos, existing))

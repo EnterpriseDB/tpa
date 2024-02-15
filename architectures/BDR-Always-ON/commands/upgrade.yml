@@ -158,6 +158,17 @@
 
   # Now we can perform the update on Postgres instances, whether proxied
   # (e.g., primary instances) or not (e.g., logical standby instances).
+  #
+  # We filter out 'replica' instances when running postgres/config/final
+  # since the idea around postgres/config/final is to do make changes
+  # that involve a running postgres instance, e.g. tasks like creating
+  # databses, extensions, users etc. This is unlike postgres/config that
+  # should render similar settings on both primary and replica so they
+  # match. Is there a scenario where a replica may have some setting
+  # that is different from the primary and could be done on a running
+  # postgres instance? Maybe, but we don't recommend replicas drifting
+  # in terms of configuration purely because a replica is supposed to
+  # replace a primary in case of a failover.
 
   - name: Stop/update/restart Postgres on {{ inventory_hostname }}
     block:
@@ -172,6 +183,8 @@
     - include_role: name=postgres/config/final
       vars:
         postgres_service_end_state: started
+      when: >
+        'replica' not in role
     when: >
       'postgres' in role
       and 'pem-server' not in role

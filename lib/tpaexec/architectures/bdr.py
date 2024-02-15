@@ -109,6 +109,11 @@ class BDR(Architecture):
         if extensions:
             cluster_vars.update({"extra_postgres_extensions": extensions})
 
+        if self.args.get("enable_camo", False):
+            if "postgres_conf_settings" not in cluster_vars:
+                cluster_vars["postgres_conf_settings"] = {}
+            cluster_vars["postgres_conf_settings"].update({"bdr.default_streaming_mode": "off"})
+
         # The node group name used to be configurable, but it's now hardcoded to
         # match the cluster name, because harp/pgdcli/pgd-proxy depend on their
         # cluster name setting matching the node group name.

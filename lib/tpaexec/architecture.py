@@ -4,6 +4,7 @@
 import sys
 import os
 import io
+import uuid
 import subprocess
 import argparse
 import shutil
@@ -21,6 +22,8 @@ from functools import reduce
 from .exceptions import ArchitectureError, ExternalCommandError
 from .net import Network, DEFAULT_SUBNET_PREFIX_LENGTH, DEFAULT_NETWORK_CIDR
 from .platforms import Platform
+
+KEYRING_SUPPORTED_BACKENDS = ["system", "legacy"]
 
 
 class Architecture(object):
@@ -146,26 +149,28 @@ class Architecture(object):
         g.add_argument("--owner")
         g.add_argument("--overrides-from", nargs="+", metavar="FILE")
         g.add_argument(
+            "--no-git",
+            action="store_true",
+            dest="no_git",
+            help="don't create cluster dir as a local git repository",
+        )
+
+        g = p.add_argument_group("AAP/Tower options")
+        g.add_argument(
             "--use-redhat-aac",
             "--use-ansible-tower",
             action="store",
             dest="tower_api_url",
-            help="Provision this cluster for use with Ansible Automation Controller (Tower)",
+            help="provision this cluster for use with Ansible Automation Controller (Tower)",
         )
         g.add_argument(
             "--tower-git-repository",
             action="store",
             dest="tower_git_repository",
-            help="A git repository for Tower generated data",
-        )
-        g.add_argument(
-            "--no-git",
-            action="store_true",
-            dest="no_git",
-            help="Suppress creation of git repository",
+            help="git remote repository to push Tower generated data",
         )
 
-        g = p.add_argument_group("software selection")
+        g = p.add_argument_group("OS selection")
         labels = self.platform.supported_distributions()
         label_opts = {"choices": labels} if labels else {}
         default_label = self.platform.default_distribution()
@@ -179,6 +184,51 @@ class Architecture(object):
         g.add_argument("--os-version", metavar="VERSION")
         g.add_argument("--os-image", metavar="LABEL")
 
+        # When installing EPAS, you must specify whether to use Redwood mode
+        # (with Oracle compatibility features enabled) or Postgres-compatible
+        # mode. EPAS itself operates in Redwood mode by default (it's an initdb
+        # option).
+        g = p.add_argument_group("repository selection")
+
+        g.add_argument(
+            "--use-volatile-subscriptions",
+            action="store_true",
+        )
+        g_repo = g.add_mutually_exclusive_group()
+        g_repo.add_argument(
+            "--2Q-repositories",
+            dest="tpa_2q_repositories",
+            nargs="+",
+            metavar="source/name/maturity",
+        )
+        g_repo.add_argument(
+            "--edb-repositories",
+            dest="edb_repositories",
+            nargs="+",
+            metavar="repository",
+        )
+
+        g = p.add_argument_group("install from source options")
+        g.add_argument("--install-from-source", nargs="+", metavar="NAME")
+        for pkg in self.versionable_packages():
+            g.add_argument("--%s-package-version" % pkg, metavar="VER")
+
+        g = p.add_argument_group("software selection")
+        g.add_argument(
+            "--enable-pem",
+            action="store_true",
+            default=argparse.SUPPRESS,
+            help="add a PEM monitoring server to the cluster",
+        )
+        g.add_argument(
+            "--enable-pg-backup-api",
+            action="store_true",
+            default=argparse.SUPPRESS,
+            help="install pg-backup-api on barman server and register to pem server if enabled",
+        )
+        g.add_argument("--extra-packages", nargs="+", metavar="NAME")
+        g.add_argument("--extra-optional-packages", nargs="+", metavar="NAME")
+
         # A combination of --postgres-flavour and --postgres-version tells us
         # exactly which server to deploy. We need both things, but because we
         # support multiple ways to specify them, we don't mark the options as
@@ -186,13 +236,6 @@ class Architecture(object):
 
         supported_flavours = ["postgresql", "pgextended", "edbpge", "epas"]
         supported_versions = ["10", "11", "12", "13", "14", "15", "16"]
-
-        g.add_argument(
-            "--postgres-version",
-            dest="postgres_version",
-            choices=supported_versions,
-            help="Select a major version of Postgres to install",
-        )
 
         class FlavourAndMaybeVersionAction(argparse.Action):
             """Takes an option such as `--epas` or `--postgresql 15` and stores
@@ -224,15 +267,14 @@ class Architecture(object):
 
                 setattr(namespace, self.dest, value)
 
-        g_flavour = p.add_mutually_exclusive_group()
-
+        g = p.add_argument_group("postgres options")
+        g_flavour = g.add_mutually_exclusive_group(required=True)
         g_flavour.add_argument(
             "--postgres-flavour",
             dest="postgres_flavour",
             choices=supported_flavours,
-            help="Select a Postgres flavour/distribution to install",
+            help="select a Postgres flavour/distribution to install",
         )
-
         g_flavour.add_argument(
             "--postgresql",
             action=FlavourAndMaybeVersionAction,
@@ -240,9 +282,9 @@ class Architecture(object):
             nargs="?",
             dest="postgres_flavour",
             choices=supported_versions,
-            help="Install PostgreSQL",
+            help="install PostgreSQL",
+            metavar="VERSION",
         )
-
         # There are two related variants of Postgres Extended.
         #
         # One is what we used to call 2ndQPostgres, which has the same package
@@ -260,7 +302,6 @@ class Architecture(object):
         # in the same architecture, we are able to accept a single option and
         # translate it into different postgres_flavour settings based on the
         # context of its use.
-
         g_flavour.add_argument(
             "--edb-postgres-extended",
             "--pgextended",
@@ -270,9 +311,9 @@ class Architecture(object):
             nargs="?",
             dest="postgres_flavour",
             choices=supported_versions,
-            help="Install EDB Postgres Extended (formerly 2ndQuadrant Postgres)",
+            help="install EDB Postgres Extended (formerly 2ndQuadrant Postgres)",
+            metavar="VERSION",
         )
-
         g_flavour.add_argument(
             "--edb-postgres-advanced",
             "--epas",
@@ -281,80 +322,52 @@ class Architecture(object):
             nargs="?",
             dest="postgres_flavour",
             choices=supported_versions,
-            help="Install EDB Postgres Advanced Server (EPAS)",
-        )
-
-        # When installing EPAS, you must specify whether to use Redwood mode
-        # (with Oracle compatibility features enabled) or Postgres-compatible
-        # mode. EPAS itself operates in Redwood mode by default (it's an initdb
-        # option).
-
-        g.add_argument(
-            "--redwood",
-            action="store_true",
-            dest="epas_redwood_compat",
-            default=None,
-            help="Enable Oracle compatibility features for EPAS",
+            help="install EDB Postgres Advanced Server (EPAS)",
+            metavar="VERSION",
         )
         g.add_argument(
-            "--no-redwood",
-            "--no-redwood-compat",
-            action="store_false",
-            dest="epas_redwood_compat",
-            default=None,
-            help="Disable Oracle compatibility features for EPAS",
+            "--postgres-version",
+            dest="postgres_version",
+            choices=supported_versions,
+            help="select a major version of Postgres to install",
         )
-
-        g.add_argument(
-            "--use-volatile-subscriptions",
-            action="store_true",
-        )
-        g_repo = g.add_mutually_exclusive_group()
-        g_repo.add_argument(
-            "--2Q-repositories",
-            dest="tpa_2q_repositories",
-            nargs="+",
-            metavar="source/name/maturity",
-        )
-        g_repo.add_argument(
-            "--edb-repositories",
-            dest="edb_repositories",
-            nargs="+",
-            metavar="repository",
-        )
-        for pkg in self.versionable_packages():
-            g.add_argument("--%s-package-version" % pkg, metavar="VER")
         g.add_argument(
             "--extra-postgres-packages",
             nargs="+",
             metavar="NAME",
         )
-        g.add_argument("--extra-packages", nargs="+", metavar="NAME")
-        g.add_argument("--extra-optional-packages", nargs="+", metavar="NAME")
 
-        g.add_argument("--install-from-source", nargs="+", metavar="NAME")
-
-        g.add_argument(
-            "--enable-pem",
+        g = p.add_argument_group("EPAS options")
+        g_redwood = g.add_mutually_exclusive_group()
+        g_redwood.add_argument(
+            "--redwood",
             action="store_true",
-            help="Add a PEM monitoring server to the cluster",
+            dest="epas_redwood_compat",
+            default=argparse.SUPPRESS,
+            help="enable Oracle compatibility features for EPAS",
         )
-        g.add_argument(
-            "--enable-pg-backup-api",
-            action="store_true",
-            help="Install pg-backup-api on barman server and register to pem server if enabled",
+        g_redwood.add_argument(
+            "--no-redwood",
+            "--no-redwood-compat",
+            action="store_false",
+            dest="epas_redwood_compat",
+            default=argparse.SUPPRESS,
+            help="disable Oracle compatibility features for EPAS",
         )
 
-        g = p.add_mutually_exclusive_group()
-        g.add_argument(
+        g = p.add_argument_group("local repo")
+        g_local = g.add_mutually_exclusive_group()
+        g_local.add_argument(
             "--enable-local-repo",
             action="store_true",
-            help="Make packages available to instances from cluster_dir/local-repo",
+            default=argparse.SUPPRESS,
+            help="make packages available to instances from cluster_dir/local-repo",
         )
-        g.add_argument(
+        g_local.add_argument(
             "--use-local-repo-only",
             action="store_true",
-            help="Make packages available to instances from cluster_dir/local-repo, and disable all other repositories",
+            help="make packages available to instances from cluster_dir/local-repo, and disable all other repositories",
+            default=argparse.SUPPRESS,
         )
 
         g = p.add_argument_group("volume sizes in GB")
@@ -388,7 +401,13 @@ class Architecture(object):
         g = p.add_argument_group("locations")
         g.add_argument("--location-names", metavar="LOCATION", nargs="+")
 
-        g = p.add_argument_group("host configuration")
+        g = p.add_argument_group("password management")
+        g.add_argument(
+            "--keyring-backend",
+            help="backend used to store cluster's vault password",
+            choices=KEYRING_SUPPORTED_BACKENDS,
+            default=argparse.SUPPRESS,
+        )
 
     def add_architecture_options(self, p, g):
         """
@@ -453,7 +472,33 @@ class Architecture(object):
         # By now, both postgres_flavour and postgres_version must be set,
         # whether they were specified separately or through a shortcut like
         # `--postgresql 14`.
+        self._validate_flavour_version(args)
 
+        # Validate arguments to --2Q-repositories
+        self._validate_2q_repositories(args)
+
+        # Validate arguments to --install-from-source
+        self._validate_from_source(args)
+
+        # --use-local-repo-only implies --enable-local-repo
+        if self.args.get("use_local_repo_only"):
+            self.args["enable_local_repo"] = True
+
+        # use either command line or environment variable
+        # to determine keyring backend, default to system.
+        if not self.args.get("keyring_backend"):
+            self.args["keyring_backend"] = os.environ.get(
+                "TPA_KEYRING_BACKEND", "system"
+            )
+
+        self.platform.validate_arguments(args)
+
+    def _validate_flavour_version(self, args):
+        """Verify postgres flavour, version and related arguments.
+        By now, both postgres_flavour and postgres_version must be set,
+        whether they were specified separately or through a shortcut like
+        `--postgresql 14`.
+        """
         flavour = args.get("postgres_flavour")
         version = args.get("postgres_version")
 
@@ -503,32 +548,39 @@ class Architecture(object):
                 "PEM is not compatible with the BDR-Always-ON architecture and EDB Postgres Extended"
             )
 
-        # Validate arguments to --2Q-repositories
+    def _validate_2q_repositories(self, args):
+        """Validate arguments to --2Q-repositories"""
         repos = args.get("tpa_2q_repositories") or []
         for r in repos:
             errors = []
             parts = r.split("/")
             if len(parts) == 3:
-                (source, name, maturity) = parts
-                if source not in ["ci-spool", "products", "dl"]:
-                    errors.append(
-                        "unknown source '%s' (try 'dl', 'products', or 'ci-spool')"
-                        % source
-                    )
-                if name not in self.product_repositories():
-                    errors.append("unknown product name '%s'" % name)
-                if maturity not in ["snapshot", "testing", "release"]:
-                    errors.append(
-                        "unknown maturity '%s' (try 'release', 'testing', or 'snapshot')"
-                        % maturity
-                    )
+                errors = self._2q_repo_exists(parts, errors)
             else:
                 errors.append("invalid name (expected source/product/maturity)")
 
             if errors:
                 raise ArchitectureError(*(f"repository '{r}' has {e}" for e in errors))
 
-        # Validate arguments to --install-from-source
+    def _2q_repo_exists(self, parts, errors):
+        """Ensure each part of a 2q repo is a valid input"""
+        (source, name, maturity) = parts
+        if source not in ["ci-spool", "products", "dl"]:
+            errors.append(
+                "unknown source '%s' (try 'dl', 'products', or 'ci-spool')" % source
+            )
+        if name not in self.product_repositories():
+            errors.append("unknown product name '%s'" % name)
+        if maturity not in ["snapshot", "testing", "release"]:
+            errors.append(
+                "unknown maturity '%s' (try 'release', 'testing', or 'snapshot')"
+                % maturity
+            )
+        return errors
+
+    def _validate_from_source(self, args):
+        """Validate arguments to --install-from-source"""
+
         errors = []
         source_names = []
         sources = args.get("install_from_source") or []
@@ -553,12 +605,6 @@ class Architecture(object):
 
         if errors:
             raise ArchitectureError(*(f"--install-from-source {e}" for e in errors))
-
-        # --use-local-repo-only implies --enable-local-repo
-        if self.args.get("use_local_repo_only"):
-            self.args["enable_local_repo"] = True
-
-        self.platform.validate_arguments(args)
 
     def process_arguments(self, args):
         """
@@ -622,6 +668,8 @@ class Architecture(object):
         self.update_cluster_tags(cluster_tags)
         self.platform.update_cluster_tags(cluster_tags, args)
         args["cluster_tags"] = cluster_tags
+
+        self._init_top_level_settings()
 
         cluster_vars = args.get("cluster_vars", {})
         self._init_cluster_vars(cluster_vars)
@@ -843,90 +891,14 @@ class Architecture(object):
         """
         pass
 
-    def _init_cluster_vars(self, cluster_vars):
-        """
-        Makes changes to cluster_vars applicable across architectures
-        """
-        preferred_python_version = self.args["image"].get(
-            "preferred_python_version", "python3"
-        )
-        cluster_vars["preferred_python_version"] = cluster_vars.get(
-            "preferred_python_version", preferred_python_version
-        )
+    def _init_top_level_settings(self):
+        """Add top level settings applicable accross all architectures"""
+        self._add_tower_settings()
 
-        for k in self.cluster_vars_args():
-            val = self.args.get(k)
-            if val is not None:
-                cluster_vars[k] = cluster_vars.get(k, val)
+        self._add_keyring_settings()
 
-        if self.args.get("postgres_flavour") == "epas":
-            k = "epas_redwood_compat"
-            cluster_vars[k] = cluster_vars.get(k, self.args.get(k))
-
-        package_option_vars = {
-            "extra_packages": "packages",
-            "extra_optional_packages": "optional_packages",
-            "extra_postgres_packages": "extra_postgres_packages",
-        }
-
-        for e in package_option_vars.keys():
-            packages = self.args.get(e)
-            if packages is not None:
-                var = package_option_vars[e]
-                val = {"common": packages}
-                cluster_vars[var] = cluster_vars.get(var, val)
-
-        sources = self.args.get("install_from_source") or []
-        local_sources = self.args.get("local_sources") or {}
-        installable_sources = self.installable_sources()
-        install_from_source = []
-        for name in sources:
-            ref = None
-            if ":" in name:
-                (name, ref) = name.split(":", 1)
-            name = name.lower()
-            entry = installable_sources[name]
-
-            if ref and name in local_sources:
-                raise ArchitectureError(
-                    f"--install-from-source can't guarantee {name}:{ref} while using local source"
-                    f" directory {local_sources[name].split(':')[0]}"
-                )
-
-            if name in ["postgres", "2ndqpostgres"]:
-                if ref:
-                    entry.update({"postgres_git_ref": ref})
-                cluster_vars.update(entry)
-            elif name == "barman":
-                if ref:
-                    entry.update({"barman_git_ref": ref})
-                cluster_vars.update(entry)
-            elif name == "pg-backup-api":
-                if ref:
-                    entry.update({"pg_backup_api_git_ref": ref})
-                cluster_vars.update(entry)
-            elif name in ["patroni", "patroni-edb"]:
-                if ref:
-                    entry.update({"patroni_git_ref": ref})
-                cluster_vars.update(entry)
-            else:
-                if ref:
-                    entry.update({"git_repository_ref": ref})
-                install_from_source.append(entry)
-
-        if install_from_source:
-            cluster_vars["install_from_source"] = cluster_vars.get(
-                "install_from_source", install_from_source
-            )
-
-        if sources:
-            top = self.args.get("top_level_settings") or {}
-            top.update({"forward_ssh_agent": "yes"})
-            self.args["top_level_settings"] = top
-
-        if self.args.get("use_local_repo_only"):
-            cluster_vars["use_local_repo_only"] = True
-
+    def _add_tower_settings(self):
+        """Add top level settings for Tower"""
         if self.args.get("tower_api_url"):
             top = self.args.get("top_level_settings") or {}
             top.update({"use_ssh_agent": "true"})
@@ -941,6 +913,115 @@ class Architecture(object):
             tower = self.args.get("tower_settings") or {}
             tower.update({"git_repository": self.args["tower_git_repository"]})
             self.args["tower_settings"] = tower
+
+    def _add_keyring_settings(self):
+        if self.args.get("keyring_backend"):
+            top = self.args.get("top_level_settings") or {}
+            top.update({"keyring_backend": self.args.get("keyring_backend")})
+            if self.args.get("keyring_backend") == "system":
+                top.update({"vault_name": str(uuid.uuid4())})
+            self.args["top_level_settings"] = top
+
+    def _init_cluster_vars(self, cluster_vars):
+        """
+        Makes changes to cluster_vars applicable across architectures
+        """
+        preferred_python_version = self.args["image"].get(
+            "preferred_python_version", "python3"
+        )
+        cluster_vars["preferred_python_version"] = cluster_vars.get(
+            "preferred_python_version", preferred_python_version
+        )
+
+        self._add_cluster_vars_args(cluster_vars)
+
+        if self.args.get("postgres_flavour") == "epas":
+            k = "epas_redwood_compat"
+            cluster_vars[k] = cluster_vars.get(k, self.args.get(k))
+
+        self._add_extra_packages(cluster_vars)
+
+        self._add_source_install(cluster_vars)
+
+    def _add_cluster_vars_args(self, cluster_vars):
+        """Add args that belongs to cluster_vars without any change or logic"""
+        for k in self.cluster_vars_args():
+            val = self.args.get(k)
+            if val is not None:
+                cluster_vars[k] = cluster_vars.get(k, val)
+
+    def _add_extra_packages(self, cluster_vars):
+        """Add extra packages lists to cluster_vars"""
+
+        package_option_vars = {
+            "extra_packages": "packages",
+            "extra_optional_packages": "optional_packages",
+            "extra_postgres_packages": "extra_postgres_packages",
+        }
+
+        for e in package_option_vars.keys():
+            packages = self.args.get(e)
+            if packages is not None:
+                var = package_option_vars[e]
+                val = {"common": packages}
+                cluster_vars[var] = cluster_vars.get(var, val)
+
+    def _add_source_install(self, cluster_vars):
+        """Add --install-from-source entries into cluster_vars"""
+        sources = self.args.get("install_from_source") or []
+        install_from_source = []
+        for name in sources:
+            self._update_source_refs(name, cluster_vars, install_from_source)
+
+        if install_from_source:
+            cluster_vars["install_from_source"] = cluster_vars.get(
+                "install_from_source", install_from_source
+            )
+
+        if sources:
+            top = self.args.get("top_level_settings") or {}
+            top.update({"forward_ssh_agent": "yes"})
+            self.args["top_level_settings"] = top
+
+    def _update_source_refs(self, name, cluster_vars, install_from_source):
+        installable_sources = self.installable_sources()
+        ref = None
+        if ":" in name:
+            (name, ref) = name.split(":", 1)
+        name = name.lower()
+        entry = installable_sources[name]
+
+        self._check_local_sources(name, ref)
+
+        if name in ["postgres", "2ndqpostgres", "epas"]:
+            if ref:
+                entry.update({"postgres_git_ref": ref})
+            cluster_vars.update(entry)
+        elif name == "barman":
+            if ref:
+                entry.update({"barman_git_ref": ref})
+            cluster_vars.update(entry)
+        elif name == "pg-backup-api":
+            if ref:
+                entry.update({"pg_backup_api_git_ref": ref})
+            cluster_vars.update(entry)
+        elif name in ["patroni", "patroni-edb"]:
+            if ref:
+                entry.update({"patroni_git_ref": ref})
+            cluster_vars.update(entry)
+        else:
+            if ref:
+                entry.update({"git_repository_ref": ref})
+            install_from_source.append(entry)
+
+    def _check_local_sources(self, name, ref):
+        """Check that we don't fix a ref when using local source"""
+        local_sources = self.args.get("local_sources") or {}
+        if ref and name in local_sources:
+            raise ArchitectureError(
+                f"--install-from-source can't guarantee {name}:{ref} while using local source"
+                f" directory {local_sources[name].split(':')[0]}"
+            )
 
     def postgres_eol_repos(self, cluster_vars):
         if (
@@ -1153,6 +1234,7 @@ class Architecture(object):
             "postgres_version",
             "tpa_2q_repositories",
             "use_volatile_subscriptions",
+            "use_local_repo_only",
             "failover_manager",
             "enable_pg_backup_api",
         ] + ["%s_package_version" % x for x in self.versionable_packages()]

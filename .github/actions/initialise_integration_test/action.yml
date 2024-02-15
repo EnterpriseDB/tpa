@@ -19,6 +19,10 @@ inputs:
     required: false
     description: "TPA BDR layout"
     default: bronze
+  tpa_harp_consensus_protocol:
+    required: false
+    description: "TPA HARP consensus protocol"
+    default: bdr
   tpa_os:
     required: false
     description: "Operating System to use with TPA (--os)"
@@ -46,6 +50,9 @@ inputs:
   tpa_failover_manager:
     required: false
     description: "Failover manager (for M1 only)"
+  tpa_ansible_version:
+    required: false
+    description: "Ansible version to use with TPA"
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -61,8 +68,9 @@ runs:
         platform: ${{ inputs.tpa_platform }}
 
     - uses: ./.github/actions/tpaexec-setup
-      with: 
+      with:
         source_directory: ${{ inputs.source_directory }}
+        tpa_ansible_version: ${{ inputs.tpa_ansible_version }}
 
     - name: Export EDB_REPO_CREDENTIALS_FILE to use EDB repositories
       run: |
@@ -84,10 +92,11 @@ runs:
 
         CONFIGURE_OPTS+=(--architecture "${{ inputs.tpa_architecture }}")
         CONFIGURE_OPTS+=(--platform "${{ inputs.tpa_platform }}")
+        CONFIGURE_OPTS+=(--keyring-backend legacy)
         if [ "${{ inputs.tpa_architecture }}" == "BDR-Always-ON" ] ;then
           CONFIGURE_OPTS+=(
             --layout "${{ inputs.tpa_layout }}"
-            --harp-consensus-protocol bdr
+            --harp-consensus-protocol "${{ inputs.tpa_harp_consensus_protocol }}"
           )
         elif [ "${{ inputs.tpa_architecture }}" == "PGD-Always-ON" ]; then
           CONFIGURE_OPTS+=(
@@ -192,7 +201,7 @@ runs:
       shell: bash
 
     - name: Prepare package cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ inputs.cluster }}/local-repo
         key: local-repo-${{ env.IMAGE_OS }}-${{ env.IMAGE_VERSION }}-${{ github.ref_name }}-${{ github.sha }}

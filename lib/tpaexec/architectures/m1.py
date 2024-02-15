@@ -89,12 +89,13 @@ class M1(Architecture):
             raise ArchitectureError(
                 "TPA does not support Patroni with HAproxy on RedHat/CentOS 7"
             )
-
         if (
             args.get("failover_manager") == "repmgr"
             and args.get("postgres_flavour") == "epas"
         ):
-            raise ArchitectureError(f"TPA does not support repmgr with EPAS")
+            raise ArchitectureError(
+                f"TPA does not support repmgr with {args.get('postgres_flavour')}"
+            )
 
     def num_instances(self):
         return (

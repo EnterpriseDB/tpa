@@ -1,0 +1,2 @@
+# community ansible dependency list for tpaexec setup
+ansible>=9,<10

@@ -54,16 +54,34 @@
     - ecdsa
   tags: [common, ssh, hostkeys]
 
-# We generate a random vault passphrase and store it in a text file.
-# This obviously needs improvement—we should GPG-encrypt it with the
-# public keys of everyone who needs access to the secret.
+# We generate a random vault passphrase and store it in the system keyring
+# if any available and supported by python keyring module.
 
-- name: Generate the vault passphrase for this cluster
+- name: Generate the vault passphrase using keyring backend {{ keyring_backend }}
+  command: >
+    "{{ tpa_dir }}"/architectures/lib/generate-vault
+    "{{ cluster_dir }}"
+    "{{ keyring_backend }}"
+    "{{ vault_name }}"
+  register: vault_gen
+  changed_when: vault_gen.rc == 0
+  failed_when: vault_gen.rc not in [0,2]
+  when: >
+    keyring_backend is defined
+    and keyring_backend != "legacy"
+  tags: [common, vault]
+
+# When using `keyring_backend: legacy` or if not set we revert to
+# storing vault password in a plain text file.
+
+- name: Generate the vault passphrase using plaintext
   shell: >
     "{{ tpa_dir }}"/architectures/lib/password > vault_pass.txt
   args:
     chdir: "{{ cluster_dir }}/vault"
     creates: vault_pass.txt
     executable: /bin/bash
-  delegate_to: localhost
+  when: >
+    keyring_backend is not defined
+    or keyring_backend == "legacy"
   tags: [common, vault]
