@@ -304,9 +304,9 @@ more-itertools==10.2.0 \
     --hash=sha256:686b06abe565edfab151cb8fd385a05651e1fdf8f0a14191e4439283421f8684 \
     --hash=sha256:8fccb480c43d3e99a00087634c06dd02b0d50fbf088b380de5a41a015ec239e1
     # via jaraco-classes
-netaddr==0.10.1 \
-    --hash=sha256:9822305b42ea1020d54fee322d43cee5622b044c07a1f0130b459bb467efcf88 \
-    --hash=sha256:f4da4222ca8c3f43c8e18a8263e5426c750a3a837fdfeccf74c68d0408eaa3bf
+netaddr==1.1.0 \
+    --hash=sha256:d542c37909f1624665ec7f59ea2e388a20eb678188f1b0c4cb50fdd600f89264 \
+    --hash=sha256:eabeba62193525757ed3ab4aacc4ab8089f84e57059fd41fde58df95c128a26d
     # via -r requirements.in
 packaging==23.2 \
     --hash=sha256:048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5 \
