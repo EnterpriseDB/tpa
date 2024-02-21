@@ -1,0 +1,10 @@
+- summary: Avoid synchronizing database structure to PGD witness nodes
+  description: |
+    Currently, when creating a witness node, PGD will by default synchronize
+    the source node's database structure. This is however not necessary
+    and the synchronized schema will never be used or updated. To prevent
+    this happening, explicitly set bdr.join_node_group()'s option
+    "synchronize_structure" to "none" for witness nodes.
+  type: minor_change
+  jira_tickets:
+  - TPA-665
