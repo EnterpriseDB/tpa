@@ -1,0 +1,38 @@
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+name: Build TPA Execution Environment image for AAP
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to apply to the image"
+        required: true
+        default: "latest"
+        type: string
+      name:
+        description: "Name of the image"
+        type: string
+        required: true
+        default: "tpa-ee"
+      environment_file:
+        description: "environment file to use"
+        type: string
+        required: true
+        default: "tpa-exec-ee.yml"
+
+jobs:
+
+  Build:
+    name: Build the Execution Environment
+    runs-on: ubuntu-20.04
+    steps:
+
+    # checkout tpaexec-ee repo holding the build files
+    - name: Checkout tpaexec-ee
+      id: checkout-tpaexec-ee
+      uses: actions/checkout@v4
+      with:
+        repository: EnterpriseDB/tpaexec-ee
+        ref: AAP24
+        token: ${{secrets.GH_SLONIK}}
