@@ -60,6 +60,7 @@ default_packages:
     - openssh
     - openssh-clients
     - cronie
+    - "{{ ['pcp-selinux'] if 'downloader' in role else [] }}"
   Ubuntu:
     - linux-tools-generic
     - openssh-client
