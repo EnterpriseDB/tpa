@@ -1,2 +1,2 @@
-# community ansible dependency list for tpaexec setup
-ansible>=9,<10
+# ansible-core dependency list for tpaexec setup
+ansible-core==2.16.*

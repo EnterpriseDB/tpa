@@ -198,11 +198,11 @@ _install_pip_packages() {
 
     # If we have ansible already installed and we're going to install a different
     # one, we must remove the old one first
-    existing_ansible_version=$(pip3 show ansible | grep Version | awk '{print $2}')
-    desired_ansible_version=$(grep 'ansible==' $ANSIBLE_REQUIREMENTS|grep -Eo '[[:digit:].]+')
+    existing_ansible_version=$(pip3 show ansible-core | grep Version | awk '{print $2}')
+    desired_ansible_version=$(grep 'ansible-core==' $ANSIBLE_REQUIREMENTS|grep -Eo '[[:digit:].]+')
 
     if [[ $existing_ansible_version != $desired_ansible_version ]]; then
-        pip3 uninstall -y ansible
+        pip3 uninstall -y ansible-core
     fi
 
     pip_args+=(-r "$ANSIBLE_REQUIREMENTS")
