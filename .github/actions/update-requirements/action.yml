@@ -20,42 +20,42 @@ runs:
     - name: Run pip-compile on requirements.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements.in -o requirements.txt
-
+        pip-compile -U --generate-hashes requirements.in -o requirements.txt
+        pip-compile -U requirements.in -o requirements-aap.txt
     - name: Run pip-compile on requirements-ansible-community.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements-ansible-community.in -o requirements-ansible-community.txt
+        pip-compile -U --generate-hashes requirements-ansible-community.in -o requirements-ansible-community.txt
 
     - name: Run pip-compile on requirements-ansible-2q.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements-ansible-2q.in -o requirements-ansible-2q.txt
+        pip-compile -U --generate-hashes requirements-ansible-2q.in -o requirements-ansible-2q.txt
 
     - name: Run pip-compile on requirements-ansible-8.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements-ansible-8.in -o requirements-ansible-8.txt
+        pip-compile -U --generate-hashes requirements-ansible-8.in -o requirements-ansible-8.txt
 
     - name: Run pip-compile on test dependency requirements/ansible.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements/ansible.in -o requirements/ansible.txt
+        pip-compile -U --generate-hashes requirements/ansible.in -o requirements/ansible.txt
 
     - name: Run pip-compile on test dependency requirements/dep.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements/dep.in -o requirements/dep.txt
+        pip-compile -U --generate-hashes requirements/dep.in -o requirements/dep.txt
 
     - name: Run pip-compile on test dependency requirements/lint.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements/lint.in -o requirements/lint.txt
+        pip-compile -U --generate-hashes requirements/lint.in -o requirements/lint.txt
 
     - name: Run pip-compile on test dependency requirements/testing.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements/testing.in -o requirements/testing.txt
+        pip-compile -U --generate-hashes requirements/testing.in -o requirements/testing.txt
 
     # commit and push changes (if any) on the same branch than the current commit.
     - name: Commit and push changes
