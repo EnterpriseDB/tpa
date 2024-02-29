@@ -6,4 +6,10 @@ collections:
 - name: amazon.aws
   version: 4.1.0
 - name: community.postgresql
-  version: 2.3.0
+  version: 2.4.3
+- name: community.general
+  version: 7.5.2
+- name: ansible.posix
+  version: 1.5.4
+- name: community.docker
+  version: 3.8.0
