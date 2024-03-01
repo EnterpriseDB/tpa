@@ -6,7 +6,7 @@
 #
 ansible==2.9.27 \
     --hash=sha256:479159e50b3bd90920d06bc59410c3a51d3f9be9b4e1029e11d1e4a2d0705736
-    # via -r ansible.in
+    # via -r requirements/ansible.in
 cffi==1.16.0 \
     --hash=sha256:0c9ef6ff37e974b73c25eecc13952c55bceed9112be2d9d938ded8e856138bcc \
     --hash=sha256:131fd094d1065b19540c3d72594260f118b231090295d8c34e19a7bbcf2e860a \
@@ -218,5 +218,5 @@ pyyaml==6.0.1 \
     --hash=sha256:fd1592b3fdf65fff2ad0004b5e363300ef59ced41c2e6b3a99d4089fa8c5435d \
     --hash=sha256:fd66fc5d0da6d9815ba2cebeb4205f95818ff4b79c3ebe268e75d961704af52f
     # via
-    #   -r ansible.in
+    #   -r requirements/ansible.in
     #   ansible
