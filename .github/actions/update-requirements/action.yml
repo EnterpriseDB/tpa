@@ -4,8 +4,11 @@
 # this action runs pip-compile on the one that changed on latest push making
 # changes in one of the requirements .in files paths.
 
-name: "Commit and push update"
-description: " use .in file to regenerate the associated .txt"
+name: "Update requirements .txt files and open a PR"
+description: |
+  use .in file to regenerate the associated .txt files
+  generates a PR targeting main branch with resulting changes
+  to .txt files.
 
 runs:
   using: "composite"
@@ -16,7 +19,9 @@ runs:
       shell: bash
       run: |
         pip install pip-tools
-
+    # generating 2 files from requirements.in:
+    # 1 with hashes for tpaexec setup
+    # one without hashes for AAP EE image creation
     - name: Run pip-compile on requirements.in
       shell: bash
       run: |
@@ -57,11 +62,45 @@ runs:
       run: |
         pip-compile -U --generate-hashes requirements/testing.in -o requirements/testing.txt
 
-    # commit and push changes (if any) on the same branch than the current commit.
-    - name: Commit and push changes
-      uses: devops-infra/action-commit-push@v0.5
+    # install tox and run dep test
+    - name: Install tox
+      shell: bash
+      run: pip install tox
+
+    - name: Run dependency test with tox
+      id: deps
+      shell: bash
+      run: |
+        TOX_PARALLEL_NO_SPINNER=1 tox -e dep
+
+    # create a PR with changes (if any) targeting main.
+    # PR will be in Draft mode if tox dep test failed.
+    # we add !cancelled() condition to ensure draft PR is created.
+
+    - name: Create Pull Request
+      if: ${{ !cancelled() }}
+      id: cpr
+      uses: peter-evans/create-pull-request@v6
       with:
-        GITHUB_TOKEN: ${{ env.GH_SLONIK }}
-        commit_message: "Update python requirements files"
-      if: >
-        !env.ACT
+        token: ${{ env.GITHUB_TOKEN }}
+        commit-message: |
+          Update python requirements
+
+          opened due to changes in requirements input files
+        # in PR#${{ github.event.pull_request.number }}
+        # triggered by ${{ github.ref }} being merged into main.
+        signoff: false
+        branch: bot/update-requirements
+        delete-branch: true
+        title: 'Update python requirements'
+        body: |
+          opened due to changes in requirements input files
+        # in PR#${{ github.event.pull_request.number }}
+        # triggered by ${{ github.ref }} being merged into main.
+        labels: |
+          pip dependencies
+        reviewers: EnterpriseDB/tpaexec-dev-team
+        draft: ${{ steps.deps.conclusion == 'failure' }}
+        add-paths: |
+          requirements*.txt
+          requirements/*.txt
