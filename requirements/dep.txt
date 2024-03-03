@@ -4,7 +4,7 @@
 #
 #    pip-compile --generate-hashes --output-file=requirements/dep.txt requirements/dep.in
 #
-pipdeptree==2.13.2 \
-    --hash=sha256:0ce50f03a78f688a81265a107dc2fdb2a548d459aedc02824e792485ba884c1d \
-    --hash=sha256:1237791977ef61602dc967b287167c1a6b058501afbc145a04e835c622355e6f
+pipdeptree==2.16.0 \
+    --hash=sha256:45b045a539a87dde690596f4293ac7af7c6a1cd0a3480b06de9d33046564d17b \
+    --hash=sha256:77b5f8a942eaea83599b76459ad8ff908e60065a3055e09d49dcab3eb0077f3c
     # via -r requirements/dep.in
