@@ -76,6 +76,14 @@ runs:
     # create a PR with changes (if any) targeting main.
     # PR will be in Draft mode if tox dep test failed.
     # we add !cancelled() condition to ensure draft PR is created.
+    - name: Template PR body
+      id: template
+      uses: chuhlomin/render-template@v1.4
+      with:
+        template: .github/actions/update-requirements/body.template.md
+        vars: |
+          pr_number: ${{ github.event.pull_request.number }}
+          ref: ${{ github.ref }}
 
     - name: Create Pull Request
       if: ${{ !cancelled() }}
@@ -83,20 +91,12 @@ runs:
       uses: peter-evans/create-pull-request@v6
       with:
         token: ${{ env.GITHUB_TOKEN }}
-        commit-message: |
-          Update python requirements
-
-          opened due to changes in requirements input files
-        # in PR#${{ github.event.pull_request.number }}
-        # triggered by ${{ github.ref }} being merged into main.
+        commit-message: ${{ steps.template.outputs.result }}
         signoff: false
         branch: bot/update-requirements
         delete-branch: true
         title: 'Update python requirements'
-        body: |
-          opened due to changes in requirements input files
-        # in PR#${{ github.event.pull_request.number }}
-        # triggered by ${{ github.ref }} being merged into main.
+        body: ${{ steps.template.outputs.result }}
         labels: |
           pip dependencies
         reviewers: EnterpriseDB/tpaexec-dev-team
