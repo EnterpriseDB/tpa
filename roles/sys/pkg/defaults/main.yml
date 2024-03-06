@@ -35,7 +35,6 @@ default_packages:
     - iotop
     # screen is no longer available on RHEL 8
     - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int >= 8)|ternary('tmux', 'screen') }}"
-    - dstat
     - openssh-server
     - openssl
     - rsyslog
@@ -77,7 +76,6 @@ default_optional_packages:
   common:
     # The following packages are available only through the EPEL
     # repository on RHEL.
-    - htop
     - pigz
   Debian: []
   RedHat: []
