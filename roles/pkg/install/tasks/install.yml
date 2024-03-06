@@ -36,7 +36,6 @@
   when:
     platform not in ['shared']
     and package_list|default([]) is not empty
-  tags: pkg
 
 - action: set_fact
   args:
@@ -44,4 +43,3 @@
   when:
     result_varname is defined
     or check_install_only|default(False)|bool
-  tags: pkg

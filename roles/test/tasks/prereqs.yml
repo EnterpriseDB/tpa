@@ -5,7 +5,6 @@
 - assert:
     msg: "output_dir must be defined"
     that: output_dir is defined
-  tags: always
 
 - name: Ensure that each instance has an output subdirectory
   file:
@@ -13,7 +12,6 @@
     state: directory
     mode: "0755"
   delegate_to: localhost
-  tags: always
 
 - name: Check if destructive tests should be run
   assert:
@@ -22,4 +20,3 @@
     - destroy_cluster|default(False)
   when: destructive|default(False)
   run_once: true
-  tags: always

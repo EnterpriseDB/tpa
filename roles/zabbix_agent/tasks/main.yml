@@ -4,16 +4,13 @@
 
 - include_role:
     name: zabbix_agent/pkg
-    apply:
-      tags: [zabbix_agent, pkg]
   when: >
     'zabbix_agent' in role
     and platform not in ['shared']
-  tags: pkg
+    and task_selector|selects('zabbix-agent', 'pkg')
 
 - include_role:
     name: zabbix_agent/config
-    apply:
-      tags: [zabbix_agent, config]
   when: >
     'zabbix_agent' in role
+    and task_selector|selects('zabbix-agent', 'config')

@@ -23,6 +23,9 @@
     mode: "0700"
   become_user: "{{ ssh_username }}"
   become: yes
+  when: >
+    task_selector|permits('ssh')
+
 
 - name: Install keypair {{ _ssh_key_name }} for user {{ ssh_username }}
   action: copy
@@ -36,3 +39,5 @@
       mode: "0640"
   become_user: "{{ ssh_username }}"
   become: yes
+  when: >
+    task_selector|permits('ssh')

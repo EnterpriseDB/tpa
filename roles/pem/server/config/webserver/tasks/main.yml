@@ -13,7 +13,6 @@
   vars:
     username: "{{ pem_db_user }}"
     role_attrs: [superuser]
-  tags: always
 
 - include_role: name=postgres/pgpass
   vars:
@@ -90,7 +89,6 @@
     group: root
     mode: "0644"
   notify: Restart apache for pem
-  tags: [pem-server, pem-webserver]
 
 - include_tasks: pem_sites.yml
 

@@ -7,8 +7,9 @@
 
 - include_role:
     name: "postgres/{{ postgres_installation_method }}"
-  when:
+  when: >
     platform not in ['shared']
+    and task_selector|permits(postgres_installation_method)
 
 # Second, no matter how we installed Postgres, we may need to build and
 # install some (ostensibly) extensions from source.
@@ -28,6 +29,8 @@
   with_items: "{{ install_from_source }}"
   loop_control:
     loop_var: ifs
+  when: >
+    task_selector|permits('src')
 
 - name: Ensure git credential store is removed
   file:

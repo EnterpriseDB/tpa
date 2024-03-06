@@ -6,7 +6,6 @@
   vars:
     username: repmgr
     role_attrs: [superuser]
-  tags: always
 
 - name: Ensure repmgr directories exist
   file:

@@ -130,7 +130,7 @@
               |ternary(destructive_failures, nondestructive_failures) }}"
       when:
         ( inventory_hostname in groups[bdr_node_group] or inventory_hostname == tester_instance )
-         and 'crash_test' in ansible_run_tags
+         and task_selector|permits('crash_test')
     - name: Run bdr rolling upgrade tests
       include_tasks: camo/upgrade_test.yml
       vars:
@@ -145,7 +145,7 @@
           - "postgresql11-bdr-test-{{ bdr_new_version }}"
       when:
         ( inventory_hostname in groups[bdr_node_group] or inventory_hostname == tester_instance )
-         and 'upgrade_test' in ansible_run_tags
+         and 'upgrade_test' in task_select.includes
   when:
     all_camo_groups is not empty and
     testers_with_client|default([]) is not empty

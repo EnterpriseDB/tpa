@@ -4,5 +4,5 @@
 
 - include_role:
     name: pem/agent/pkg
-    apply:
-      tags: [pem-agent, pkg]
+  when: >
+    task_selector|selects('pem-agent', 'pkg')

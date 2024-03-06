@@ -9,18 +9,16 @@
 
 - include_role:
     name: etcd/config
-    apply:
-      tags: [etcd, config]
   when: >
     'etcd' in role
+    and task_selector|permits('config')
 
 - include_role:
     name: etcd/service
-    apply:
-      tags: [etcd, service]
+  when: >
+    task_selector|permits('service')
 
 - include_role:
     name: etcd/pkg
-    apply:
-      tags: [etcd, pkg]
-  tags: pkg
+  when: >
+    task_selector|permits('pkg')

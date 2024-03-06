@@ -8,7 +8,6 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/pre-client-csr.yml"
-  tags: always
 
 - name: Generate client CSR on target instances
   community.crypto.openssl_csr:
@@ -31,7 +30,6 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/pre-client-cert.yml"
-  tags: always
 
 # We will only sign CSRs with the local CA key and certificate that we
 # generated; if you want to sign the CSR differently, you must use the

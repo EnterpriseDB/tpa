@@ -15,4 +15,5 @@
       "2":
         - "{{ ('postgres' in role)|ternary('harp-manager', []) }}"
         - "{{ ('harp-proxy' in role)|ternary('harp-proxy', []) }}"
-  tags: [service, restart]
+  when: >
+    task_selector|permits('service', 'restart')

@@ -13,6 +13,5 @@
     owner: root
     group: root
     mode: "0755"
-  tags: paths
   when:
     platform not in ['shared']

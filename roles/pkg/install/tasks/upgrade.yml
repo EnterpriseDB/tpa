@@ -27,7 +27,6 @@
   when:
     platform not in ['shared']
     and _versioned_packages is not empty
-  tags: pkg
 
 - name: Install or upgrade {{ package_list_name|mandatory }} without explicit versions specified
   package:
@@ -40,4 +39,3 @@
   when:
     platform not in ['shared']
     and _unversioned_packages is not empty
-  tags: pkg

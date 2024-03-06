@@ -5,11 +5,10 @@
 - name: Configure BDR commit scopes (v4.1+ only)
   include_tasks:
     file: commit-scopes.yml
-    apply:
-      tags: commit-scopes
   when:
     bdr_commit_scopes|default([]) is not empty
     and inventory_hostname == first_bdr_primary
+    and task_selector|permits('commit-scopes')
 
 # XXX We don't handle setting default_commit_scope for groups in BDRv4
 # at present, since bdr.alter_node_group_option() is not available.

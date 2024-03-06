@@ -4,10 +4,10 @@
 
 - include_role:
     name: etcd/start
-    apply:
-      tags: [etcd, start]
+  when: >
+    task_selector|selects('etcd', 'service')
 
 - include_role:
     name: etcd/restart
-    apply:
-      tags: [etcd, restart]
+  when: >
+    task_selector|selects('etcd', 'service', 'restart')

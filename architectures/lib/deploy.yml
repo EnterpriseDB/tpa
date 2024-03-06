@@ -5,7 +5,6 @@
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   vars:
     wait_for_instances: yes
-  tags: always
 
 - name: Set up TPA cluster nodes
   any_errors_fatal: true
@@ -18,29 +17,23 @@
   tasks:
   - include_role:
       name: sys
-      apply:
-        tags: sys
     when:
       platform not in ['shared']
       and (pem_shared|default(false)) is false
-    tags: always
+      and task_selector|selects('sys')
 
   - include_role:
       name: postgres
-      apply:
-        tags: postgres
     when: >
       'postgres' in role
       and (pem_shared|default(false)) is false
-    tags: always
+      and task_selector|selects('postgres')
 
   - include_role:
       name: barman
-      apply:
-        tags: barman
     when:
       groups['role_barman']|default([]) is not empty
-    tags: always
+      and task_selector|selects('barman')
 
   # If there are physical replicas in the cluster, we need to setup
   # either repmgr or efm (the other possible failover_managers are
@@ -51,71 +44,61 @@
         when:
           failover_manager == 'repmgr'
           and 'postgres' in role
+          and task_selector|selects('repmgr')
       - include_role: name=efm
         when: >
           'efm' in role
+          and task_selector|selects('efm')
     when:
       failover_manager in ['repmgr', 'efm']
       and groups|members_of('role_replica', not_in=['role_readonly']) is not empty
       and (pem_shared|default(false)) is false
-    tags: always
 
   - include_role:
       name: pgbouncer
-      apply:
-        tags: pgbouncer
     when:
       groups['role_pgbouncer']|default([]) is not empty
       and (pem_shared|default(false)) is false
-    tags: always
+      and task_selector|selects('pgbouncer')
 
   - include_role:
       name: haproxy
-      apply:
-        tags: haproxy
     when:
       groups['role_haproxy']|default([]) is not empty
       and (pem_shared|default(false)) is false
-    tags: always
+      and task_selector|selects('haproxy')
 
   - include_role:
       name: etcd
-      apply:
-        tags: etcd
     when:
       groups['role_etcd']|default([]) is not empty
       and (pem_shared|default(false)) is false
-    tags: always
+      and task_selector|selects('etcd')
 
   - block:
     - include_role:
         name: patroni
-        apply:
-          tags: patroni
     when:
       failover_manager == 'patroni'
       and 'postgres' in role
       and 'pem-server' not in role
-    tags: always
+      and task_selector|selects('patroni')
 
   - include_role:
       name: harp
-      apply:
-        tags: harp
     when:
       failover_manager == 'harp'
       and ('postgres' in role or 'harp-proxy' in role)
       and 'pem-server' not in role
-    tags: always
+      and task_selector|selects('harp')
 
   - include_role:
       name: pgd_proxy/dbuser
-      apply:
-        tags: [pgd-proxy, dbuser]
     when:
       failover_manager == 'pgd'
       and 'bdr' in role
       and 'pem-server' not in role
+      and task_selector|selects('pgd-proxy', 'dbuser')
 
   - include_role:
       name: pgd_proxy
@@ -125,29 +108,25 @@
       failover_manager == 'pgd'
       and 'pgd-proxy' in role
       and 'pem-server' not in role
-    tags: always
+      and task_selector|selects('pgd-proxy')
 
   - include_role:
       name: pem
-      apply:
-        tags: pem
     when:
       (
        groups['role_pem-server']|default([]) is not empty
        or groups['role_pem-agent']|default([]) is not empty
       )
       and (pem_shared|default(false)) is false
-    tags: always
+      and task_selector|selects('pem-server', 'pem-agent')
 
   - include_role:
       name: pgdcli
-      apply:
-        tags: pgdcli
     when:
       ('bdr' in role and bdr_version is version('4', '>='))
       or 'pgdcli' in role
       or 'pgd-proxy' in role
-    tags: always
+      and task_selector|selects('pgdcli')
 
   - include_role:
       name: final
@@ -155,6 +134,6 @@
         tags: final
     when:
       (pem_shared|default(false)) is false
-    tags: always
+      and task_selector|selects('final')
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/fini.yml"

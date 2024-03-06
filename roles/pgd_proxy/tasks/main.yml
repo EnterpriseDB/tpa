@@ -9,20 +9,20 @@
 
 - include_role:
     name: pgd_proxy/pkg
-    apply:
-      tags: [pgd-proxy, pkg]
+  when: >
+    task_selector|permits('pkg')
 
 - include_role:
     name: pgd_proxy/user
-    apply:
-      tags: [pgd-proxy, user]
+  when: >
+    task_selector|permits('user')
 
 - include_role:
     name: pgd_proxy/config
-    apply:
-      tags: [pgd-proxy, config]
+  when: >
+    task_selector|permits('config')
 
 - include_role:
     name: pgd_proxy/service
-    apply:
-      tags: [pgd-proxy, service]
+  when: >
+    task_selector|permits('service')

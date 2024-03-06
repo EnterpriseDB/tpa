@@ -70,3 +70,25 @@ YAML file should start with the following text:
 (On the other hand, `.j2` templates that we expand and install on the
 target do not contain a copyright message, but may need a warning to
 avoid editing them by hand.)
+
+## Conditional task execution
+
+To enable the user to include or exclude tasks conditionally, use a
+`when:` clause to check the contents of `task_selector` through the
+`selects` and `permits` filters. The difference between these is that
+the `selects` filter looks at both the included and excluded tag lists,
+whereas the `permits` filter looks only for whether the tag has been
+explicitly excluded.
+
+One or more tags can be checked.
+
+```
+  when: task_selector|selects('pkg', 'barman')
+```
+
+```
+when: task_selector|permits('service', 'restart')
+```
+
+There is no `always` tag; if a task needs to be executed
+unconditionally, omit the clause entirely.

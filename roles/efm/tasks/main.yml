@@ -4,10 +4,10 @@
 
 - include_role:
     name: efm/pkg
-    apply:
-      tags: [efm, pkg]
+  when: >
+    task_selector|permits('pkg')
 
 - include_role:
     name: efm/config
-    apply:
-      tags: [efm, config]
+  when: >
+    task_selector|permits('config')

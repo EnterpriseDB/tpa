@@ -24,7 +24,8 @@
       path: "{{ build_directory }}"
       state: absent
       force: yes
-    tags: build-clean
+    when: >
+      task_selector|permits('build-clean')
 
   - name: Ensure build directory exists
     file:

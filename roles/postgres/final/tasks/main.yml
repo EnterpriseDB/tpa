@@ -6,18 +6,16 @@
 
 - include_role:
     name: postgres/service
-    apply:
-      tags: service
-  tags: service
+  when: >
+    task_selector|permits('service')
 
 # Start, reload, or restart Postgres services based on
 # postgres_service_end_state.
 
 - include_role:
     name: postgres/restart
-    apply:
-      tags: service
-  tags: service
+  when: >
+    task_selector|permits('service')
 
 # If we just started Postgres, and it was not running during the initial
 # fact collection, we need to run cluster_discovery now to discover the
@@ -31,9 +29,8 @@
 
 - include_role:
     name: postgres/pgpass
-    apply:
-      tags: pgpass
-  tags: pgpass
+  when: >
+    task_selector|permits('pgpass')
 
 # Now we can perform configuration tasks that require Postgres to be
 # running (unlike the configuration-file changes in postgres/config),
@@ -41,11 +38,9 @@
 
 - include_role:
     name: postgres/config/final
-    apply:
-      tags: config
   when: >
     'replica' not in role
-  tags: config
+    and task_selector|permits('config')
 
 # Since we may have changed the Postgres configuration, we repeat the
 # cluster discovery process that was done at the beginning (roles/init)

@@ -4,8 +4,6 @@
 
 - include_role:
     name: postgres/createuser
-    apply:
-      tags: [pgd-proxy, user]
   vars:
     username: "{{ pgd_proxy_user }}"
     granted_roles: [bdr_superuser]
@@ -13,3 +11,4 @@
     failover_manager == 'pgd'
     and groups['role_pgd-proxy']|default([]) is not empty
     and 'pem-server' not in role
+    and task_selector|selects('pgd_proxy', 'user')

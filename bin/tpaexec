@@ -409,6 +409,19 @@ playbook() {
         args+=(-i inventory)
     fi
 
+    for arg in "$@"; do
+        shift
+        if [[ $arg == --excluded?tasks=* ]]; then
+            exclusion="${arg#*=}"
+            args+=(-e excluded_tasks=$exclusion)
+        elif [[ $arg == --included?tasks=* ]]; then
+            inclusion="${arg#*=}"
+            args+=(-e included_tasks=$inclusion)
+        else
+            set -- "$@" "$arg"
+        fi
+    done
+
     if "${TPA_DIR}/architectures/lib/use-vault" >> /dev/null 2>&1; then
         args+=(--vault-password-file "${TPA_DIR}/architectures/lib/use-vault")
     fi

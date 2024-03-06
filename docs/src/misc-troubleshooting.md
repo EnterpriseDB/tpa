@@ -65,16 +65,7 @@ An easy way to smoke test an existing cluster is to run:
 This command does a functional test of the cluster components, followed by a performance test of the cluster using pgbench. As pgbench can take a while to complete, you can omit benchmarking by running:
 
 ```
-[tpa]$ tpaexec test <clustername> --skip-tags pgbench
-```
-
-Tags in the test role are `repmgr,postgres,barman,pgbench`.
-
-Specify multiple tags using comma delimiting and
-no spaces. For example:
-
-```
-[tpa]$ tpaexec test <clustername> --skip-tags barman,pgbench
+[tpa]$ tpaexec test <clustername> --excluded_tasks pgbench
 ```
 
 ### TPA server test
@@ -85,26 +76,8 @@ To check the installation of the TPA server, run:
 [tpa]$ tpaexec selftest
 ```
 
-### Skipping or including specific tags
+### Including or excluding specific tasks
 
-When rerunning a tpaexec provision or deploy after a failure, in the interests
-of time, it can sometimes be useful to miss out tasks by skipping specific tags.
-For example to miss out the repmgr tasks:
-
-```
-[tpa]$ tpaexec deploy <clustername> --skip-tags repmgr
-```
-
-You can use a command to rerun a particular task by specifying a tag (assuming
-that the previous tasks all completed successfully). For example,
-to immediately run PGD tasks (the tag is `bdr` for legacy reasons), run:
-
-```
-[tpa]$ tpaexec deploy <bdr-clustername> --tags bdr
-```
-
-To find all the tags for the relevant architecture that might be useful, run:
-
-```
-[tpa]$ grep -rs "tags:" /opt/EDB/TPA/architectures
-```
+When re-running a tpaexec provision or deploy after a failure or when running
+tests, it can sometimes be useful to miss out tasks using TPA's [task
+selection mechanism](task-selection.md).

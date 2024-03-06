@@ -17,7 +17,8 @@
   become: yes
   when:
     pgdata_initialised and _postgres_service_managed
-  tags: [service, restart]
+  when: >
+    task_selector|permits('service', 'restart')
 
 - name: Wait for Postgres to start
   include_tasks: check-postgres-available.yml

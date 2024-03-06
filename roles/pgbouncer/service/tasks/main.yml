@@ -10,18 +10,15 @@
     group: root
     mode: "0644"
   register: unit
-  tags: [pgbouncer, service]
 
 - name: Disable existing pgbouncer service so our new unit gets enabled
   systemd:
     name: pgbouncer
     enabled: no
     daemon_reload: "{{ unit is changed }}"
-  tags: [pgbouncer, service]
 
 - name: Enable pgbouncer service
   systemd:
     name: pgbouncer
     enabled: yes
     daemon_reload: "{{ unit is changed }}"
-  tags: [pgbouncer, service]

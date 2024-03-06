@@ -9,7 +9,7 @@
     zabbix_get_package: "zabbix{{ zabbix_version | regex_replace('\\.', '') }}-get"
   when:
     - zabbix_repo == "epel"
-  tags: [zabbix-agent, init]
+
 
 - name: "RedHat | Set zabbix_agent_distribution_major_version to 6 when Amazon"
   set_fact:
@@ -45,7 +45,6 @@
   become: yes
   when:
     zabbix_repo == "zabbix"
-  tags: [zabbix-agent]
 
 - name: "Do a yum clean"
   shell: yum clean all
@@ -53,7 +52,6 @@
     warn: false
   when: yum_repo_installed.changed
   become: yes
-  tags: [skip_ansible_lint]
 
 - name: "RedHat | Installing zabbix-agent"
   package:
@@ -65,7 +63,6 @@
   register: zabbix_agent_package_installed
   until: zabbix_agent_package_installed is succeeded
   become: yes
-  tags: [zabbix-agent, init]
 
 - name: "Install policycoreutils-python"
   package:
@@ -73,9 +70,9 @@
     state: installed
   register: zabbix_agent_policycoreutils_installed
   until: zabbix_agent_package_installed is succeeded
-  when: zabbix_selinux | bool
+  when: >
+    zabbix_selinux | bool
   become: yes
-  tags: [zabbix-agent, init]
 
 - name: "RedHat | Enable the service"
   service:
@@ -83,4 +80,5 @@
     enabled: yes
     use: service
   become: yes
-  tags: [zabbix-agent, init, service]
+  when: >
+    task_selector|permits('service')
