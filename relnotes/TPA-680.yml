@@ -1,0 +1,11 @@
+- summary: Generate an Execution Environment image for Ansible Automation Platform support
+  description: |
+    TPA now generates a custom Execution Environment docker image to be used
+    in Ansible Automation Platform 2.4+ (Controller version 4+). this image
+    contains everything needed to run deployments via AAP. This image is built
+    using ansible-builder and a python-alpine lightweight base image.
+  type: notable_change
+  jira_tickets:
+  - TPA-679
+  - TPA-680
+  - TPA-682
