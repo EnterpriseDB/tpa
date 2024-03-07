@@ -5,7 +5,9 @@
 - name: Find existing EDB repositories
   find:
     paths: /etc/apt/sources.list.d/
-    patterns: 'edb-*.list'
+    patterns: 
+      - 'edb-*.list'
+      - 'enterprisedb-*.list'
     file_type: "file"
   register: existing_edb_repos
 
@@ -22,17 +24,12 @@
   when: >
     repo[1] not in edb_repositories
 
-- name: Add EDB repository keys
-  apt_key:
-    url: "https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ item }}/gpg.key"
-  with_items: "{{ edb_repositories }}"
-
-- name: Install EDB repositories
-  apt_repository:
-    filename: "edb-{{ repository }}"
-    repo: >-
-      deb https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/deb/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} main
-  with_items: "{{ edb_repositories }}"
+- name: Run setup script to set up EDB repositories
+  become: true
+  shell:
+    cmd: "curl -1sLf 'https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/setup.deb.sh' | bash"
+  loop: "{{ edb_repositories }}"
   loop_control:
     loop_var: repository
   no_log: true
+

@@ -1,0 +1,15 @@
+- summary: Set up EDB repositories via setup script for RedHat and Debian
+  description: |
+    The repository manager provides a shell script that sets up the 
+    desired EDB repositories.
+    
+    This simplifies EDB repository setup on TPA nodes into a single task.
+
+    Currently it is only done for `dnf`/'yum' and `apt` package managers; the
+    setup script was encountering an issue with `zypper` when the setup script
+    is run on subsequent deploys.
+
+    Due to this, SLES sets up EDB repositories without using the script.
+  type: minor_change
+  jira_tickets:
+  - TPA-689
