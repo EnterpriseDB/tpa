@@ -122,6 +122,7 @@
     - vars
     - volumes
     - provision_only
+    - ansible_host
 
 - assert:
     msg: >-

@@ -1,6 +1,5 @@
 [defaults]
 roles_path = /opt/EDB/TPA/roles
-collections_paths = /opt/EDB/TPA/tpa-venv/collections
 filter_plugins = /opt/EDB/TPA/lib/filter_plugins
 test_plugins = /opt/EDB/TPA/lib/test_plugins
 action_plugins =/opt/EDB/TPA/lib/action_plugins
@@ -20,7 +19,6 @@ retry_files_enabled = no
 retry_files_save_path = ~/.ansible-retry
 inject_facts_as_vars = true
 force_valid_group_names=ignore
-vault_password_file=vault/vault_pass.txt
 
 [inventory]
 unparsed_is_failed = true
