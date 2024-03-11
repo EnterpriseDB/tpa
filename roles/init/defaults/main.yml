@@ -242,6 +242,11 @@ default_postgres_extensions_dictionary:
   refdata:
     packages: *advanced_storage_pack_packages
     spl: refdata
+  
+  bluefin:
+    packages: *advanced_storage_pack_packages
+    spl: bluefin
+
 
 default_postgres_extensions:
   - pg_stat_statements

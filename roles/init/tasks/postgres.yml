@@ -605,6 +605,15 @@
       }}"
   when: postgres_version is version('9.6', '<')
 
+- name: Remove bluefin for Postgres < 15
+  set_fact:
+    postgres_extensions: "{{
+      postgres_extensions
+      |reject('equalto', 'bluefin')
+      |list
+    }}"
+  when: postgres_version is version('15', '<')
+
 - name: Define platypus configuration settings
   set_fact:
     platypus_port: "{{ platypus_port|default(6400) }}"
