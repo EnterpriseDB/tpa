@@ -1,0 +1,16 @@
+- summary: Remove support for ansible versions less than 8
+  description: |
+    Ansible 2.9 is no longer supported, neither as the community
+    distribution nor as the 2ndQuadrant fork.
+
+    Users who have been using the `--skip-tags` option to `tpaexec
+    deploy` should move to the new `--excluded_tasks` option.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-501
+  - TPA-686

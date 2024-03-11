@@ -8,11 +8,11 @@
 
 - name: Check for Python and Ansible versions
   assert:
-    msg: "Python 3.9.x+ and Ansible 2.9, 8, or 9 are required"
+    msg: "Python 3.9.x+ and Ansible 8 or 9 are required"
     that:
       - ansible_facts.python_version is version('3.9', '>=')
       - ansible_version.major == 2
-      - ansible_version.minor in [9, 15, 16]
+      - ansible_version.minor in [15, 16]
       - ansible_version.minor < 16 or ansible_facts.python_version is version('3.10', '>=')
 
 - name: Ensure that local dependencies are installed

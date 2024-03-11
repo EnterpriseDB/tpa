@@ -33,11 +33,11 @@ Providing this information is valuable for troubleshooting.
 The `tpaexec info` command outputs the following:
 
 ```bash
-# TPAexec 23.18.18
-tpaexec=./tpaexec
+# TPAexec 23.29
+tpaexec=/opt/EDB/TPA/bin/tpaexec
 TPA_DIR=/opt/EDB/TPA
-PYTHON=/opt/EDB/TPA/tpa-venv/bin/python3 (v3.7.3, venv)
+PYTHON=/opt/EDB/TPA/tpa-venv/bin/python3 (v3.9.18, venv)
 TPA_VENV=/opt/EDB/TPA/tpa-venv
-ANSIBLE=/opt/EDB/TPA/tpa-venv/bin/ansible (v2.9.27)
-Validation: e05e5302cd357b8ddbb042b7591bf66dfa283213ccbe5073b2cff3c783be1310 [OK]
+ANSIBLE=/opt/EDB/TPA/tpa-venv/bin/ansible (v2.15.9)
+Validated: ea844d1b90295597d080bbf824dbbc6954886cb54ffdb265c7c71b99bedee67b [OK]
 ```
