@@ -13,6 +13,7 @@ on:
     types:
       - submitted
 env:
+  CLOUDSMITH_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
   LANG: "C.UTF-8"
   TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
   EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
@@ -35,9 +36,11 @@ jobs:
     - uses: ./.github/actions/install-requirements
 
     - name: Install tox
-      run: pip install tox
+      run: |
+       /usr/libexec/edb-python39/bin/python3 -m venv /tmp/unit_test;
+       /tmp/unit_test/bin/pip install tox;
 
     - name: Run tests with tox
       working-directory: ${{ github.workspace }}
       run: |
-        TOX_PARALLEL_NO_SPINNER=1 tox -e py39-test,dep -p auto
+        TOX_PARALLEL_NO_SPINNER=1 /tmp/unit_test/bin/tox -e py39-test,dep -p auto
