@@ -1,17 +1,17 @@
 # pg_ident.conf
 
-You should not normally need to change `pg_ident.conf`, and by default,
-TPA will not modify it.
+You don't normally need to change `pg_ident.conf`. By default,
+TPA doesn't modify it.
 
 You can set `postgres_ident_template` to replace `pg_ident.conf` with
-whatever content you like.
+whatever content you like:
 
 ```yaml
 cluster_vars:
     pg_ident_template: ident.j2
 ```
 
-You will also need to create `templates/ident.j2` in the cluster
+You also need to create `templates/ident.j2` in the cluster
 directory:
 
 ```jinja2
