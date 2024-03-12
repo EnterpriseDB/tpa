@@ -9,7 +9,7 @@ To use the AWS API, you must:
 * [Obtain an access keypair](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
 * [Add it to your configuration](https://boto.readthedocs.org/en/latest/boto_config_tut.html)
 
-For example,
+For example:
 
 ```bash
 [tpa]$ cat > ~/.aws/credentials
@@ -18,8 +18,8 @@ aws_access_key_id = AKIAIOSFODNN7EXAMPLE
 aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
 
-The AMI user should at least have following set of permissions so tpaexec
-can use it to provision ec2 resources.
+The AMI user must have at least the following set of permissions so tpaexec
+can use it to provision ec2 resources:
 ```
 ec2:AssociateRouteTable
 ec2:AttachInternetGateway
@@ -94,27 +94,27 @@ s3:PutObjectAcl
 The service is physically subdivided into
 [regions and availability zones](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html).
 An availability zone is represented by a region code followed by a
-single letter, e.g., eu-west-1a (but that name may refer to different
-locations for different AWS accounts, and there is no way to coordinate
-the interpretation between accounts).
+single letter, for example, eu-west-1a. (But that name can refer to different
+locations for different AWS accounts, and there's no way to coordinate
+the interpretation between accounts.)
 
 AWS regions are completely isolated from each other and share no
 resources. Availability zones within a region are physically separated,
 and logically mostly isolated, but are connected by low-latency links
-and are able to share certain networking resources.
+and can share certain networking resources.
 
 ### Networking
 
 All networking configuration in AWS happens in the context of a
-[Virtual Private Cloud](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-vpc.html)
+[virtual private cloud](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-vpc.html)
 within a region. Within a VPC, you can create
 [subnets](https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html)
-that is tied to a specific availability zone, along with internet
+that are tied to a specific availability zone, along with internet
 gateways, routing tables, and so on.
 
 You can create any number of
-[Security Groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html#vpc-security-groups)
-to configure rules for what inbound and outbound traffic is permitted to
+[security groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html#vpc-security-groups)
+to configure rules for the inbound and outbound traffic that's permitted to
 instances (in terms of protocol, a destination port range, and a source
 or destination IP address range).
 
@@ -135,12 +135,12 @@ instances by registering an
 [SSH public key](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html).
 
 Instances are always assigned a private IP address within their subnet.
-Depending on the subnet configuration, they may also be assigned an
-[ephemeral public IP address](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html#concepts-public-addresses)
-(which is lost when the instance is shut down, and a different ephemeral
-IP is assigned when it is started again). You can instead assign a
-static region-specific routable IP address known as an
-[Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html)
+Depending on the subnet configuration, they might also be assigned an
+[ephemeral public IP address](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html#concepts-public-addresses),
+which is lost when the instance is shut down, and a different ephemeral
+IP is assigned when it's started again. You can instead assign a
+static region-specific, routable IP address known as an
+[elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html)
 to any instance.
 
 For an instance to be reachable from the outside world, it must not only
@@ -151,32 +151,32 @@ permit access.
 ## Configuration
 
 Here's a brief description of the AWS-specific settings that you can
-specify via `tpaexec configure` or define directly in config.yml.
+specify using `tpaexec configure` or define directly in `config.yml`.
 
 ### Regions
 
 You can specify one or more regions for the cluster to use with `--region` or
-`--regions`. TPA will generate the required vpc entries associated to each of
-them and distribute locations into these regions evenly by using different
+`--regions`. TPA generates the required VPC entries associated with each of
+them and distributes locations into these regions evenly by using different
 availability zones while possible.
 
-`regions` are differents from `locations`, each location belongs to a region
-(and an availability zone inside this region). `regions` are AWS specific
-objects, `locations` are cluster objects.
+`regions` are different from `locations`. Each location belongs to a region
+and an availability zone inside this region. `regions` are AWS specific
+objects. `locations` are cluster objects.
 
-Note: When specifying multiple regions, you need to manually edit network
+When specifying multiple regions, you need to manually edit network
 configurations:
-  - `ec2_vpc` entries must have non-overlaping cidr networks to allow use of
-  AWS vpc peering. by default TPA will set all cidr to `10.33.0.0/16`.
-  See [VPC](#vpc-required) for more informations.
-  - each `location` must be updated with `subnet` that match the `ec2_vpc`
-  `cidr` they belong to. See [Subnets](#subnets-optional) for more informations.
-  - TPA creates security groups with basic rules under `cluster_rules` and
-  those need to be updated to match `ec2_vpc` cidr for each `subnet` cidr.
-  see [Security groups](#security-groups-optional) for more informations.
-  - VPC peering must be setup manually before `tpaexec deploy`. We recommand
-  creating VPCs and required VPC peerings before running `tpaexec configure`
-  and using `vpc-id` in config.yml. See [VPC](#vpc-required) for more informations.
+  - `ec2_vpc` entries must have non-overlapping CIDR networks to allow use of
+  AWS VPC peering. By default, TPA sets all CIDR to `10.33.0.0/16`.
+  See [VPC](#vpc-required) for more information.
+  - Each `location` must be updated with a `subnet` that matches the `ec2_vpc`
+  CIDR it belongs to. See [Subnets](#subnets-optional) for more information.
+  - TPA creates security groups with basic rules under `cluster_rules`. 
+  Those need to be updated to match `ec2_vpc` CIDR for each `subnet` CIDR.
+  See [Security groups](#security-groups-optional) for more information.
+  - VPC peering must be set up manually before `tpaexec deploy`. We recommend
+  creating VPCs and required VPC peering before running `tpaexec configure`
+  and using `vpc-id` in `config.yml`. See [VPC](#vpc-required) for more information.
 
 ### VPC (required)
 
@@ -186,15 +186,15 @@ You must specify a VPC to use:
       Name: Test
       cidr: 10.33.0.0/16
 
-This is the default configuration, which creates a VPC named Test with the
-given CIDR if it does not exist, or uses the existing VPC otherwise.
+This is the default configuration, which creates a VPC named Test, if it doesn't exist, with the
+given CIDR. Otherwise, it uses the existing VPC.
 
-To create a VPC, you must specify both the Name and the cidr. If you specify
-only a VPC Name, TPA will fail if a matching VPC does not exist.
+To create a VPC, you must specify both the name and the CIDR. If you specify
+only a VPC name, TPA fails if a matching VPC doesn't exist.
 
 If TPA creates a VPC,
-`tpaexec deprovision` will attempt to remove it, but will leave any
-pre-existing VPC alone. (Think twice before creating new VPCs, because
+`tpaexec deprovision` attempts to remove it but leaves any
+preexisting VPC alone. (Think carefully before creating new VPCs, because
 AWS has a single-digit default limit on the number of VPCs per account.)
 
 If you need more fine-grained matching, or to specify different VPCs in
@@ -229,7 +229,7 @@ You can add filter specifications for more precise matching:
         architecture: x86_64
         [more key/value filters]
 
-(By default, `tpaexec configure` will select a suitable `ec2_ami`
+(By default, `tpaexec configure` selects a suitable `ec2_ami`
 for you based on the `--distribution` argument.)
 
 This platform supports Debian 9 (stretch), RedHat Enterprise Linux 7,
@@ -238,8 +238,8 @@ Rocky 8, Ubuntu 16.04 (Xenial), and SUSE Linux Enterprise Server 15.
 ### Subnets (optional)
 
 Every instance must specify its subnet (in CIDR form, or as a subnet-xxx
-id). You may optionally specify the name and availability zone for each
-subnet that we create:
+id). You can optionally specify the name and availability zone for each
+subnet that you create:
 
     ec2_vpc_subnets:
       us-east-1:
@@ -252,7 +252,7 @@ subnet that we create:
 
 ### Security groups (optional)
 
-By default, we create a security group for the cluster. To use one or
+By default, TPA creates a security group for the cluster. To use one or
 more existing security groups, set:
 
     ec2_groups:
@@ -260,7 +260,7 @@ more existing security groups, set:
         group-name:
           - foo
 
-If you want to customise the rules in the default security group, set
+If you want to customize the rules in the default security group, set
 `cluster_rules`:
 
     cluster_rules:
@@ -277,17 +277,17 @@ If you want to customise the rules in the default security group, set
       proto: tcp
       to_port: 65535
 
-This example permits ssh (port 22) from any address, and TCP connections on any
-port from specific IP ranges. (Note: from_port and to_port define a numeric
+This example permits SSH (port 22) from any address and TCP connections on any
+port from specific IP ranges. (`from_port` and `to_port` define a numeric
 range of ports, not a source and destination.)
 
 If you set up custom rules or use existing security groups, you must ensure
 that instances in the cluster are allowed to communicate with each other as
-required (e.g., allow tcp/5432 for Postgres).
+required (for example, allow tcp/5432 for Postgres).
 
 ### Internet gateways (optional)
 
-By default, we create internet gateways for every VPC, unless you set:
+By default, TPA creates internet gateways for every VPC, unless you set:
 
     ec2_instance_reachability: private
 
@@ -311,39 +311,40 @@ For more fine-grained control, you can set:
 ### S3 bucket (optional)
 
 TPA requires access to an S3 bucket to provision an AWS cluster. This bucket
-is used to temporarily store files such as SSH host keys, but may also be used for
-other cluster data (such as backups).
+is used to temporarily store files such as SSH host keys but can also be used for
+other cluster data, such as backups.
 
-By default, TPA will use an S3 bucket named `edb-tpa-<aws-account-user-id>`
-for any clusters you provision. (If the bucket does not exist, you will be asked to
-confirm that you want TPA  to create it for you.)
+By default, TPA uses an S3 bucket named `edb-tpa-<aws-account-user-id>`
+for any clusters you provision. (If the bucket doesn't exist, you're prompted to
+confirm that you want TPA to create it for you.)
 
-To use an existing S3 bucket instead, set
+To use an existing S3 bucket instead, set:
 
     cluster_bucket: name-of-bucket
 
 (You can also set `cluster_bucket: auto` to accept the default bucket name without
 the confirmation prompt.)
 
-TPA will never remove any S3 buckets when you deprovision the cluster. To remove
+TPA never removes any S3 buckets when you deprovision the cluster. To remove
 the bucket yourself, run:
 
     aws s3 rb s3://<bucket> --force
 
-The IAM user you are using to provision the instances must have read and
-write access to this bucket. During provisioning, tpaexec will provide
+The IAM user you're using to provision the instances must have read and
+write access to this bucket. During provisioning, tpaexec provides
 instances with read-only access to the cluster_bucket through the
 instance profile.
 
 ### Elastic IP addresses
 
 To use elastic IP addresses, set `assign_elastic_ip` to `true` in
-config.yml, either in `instance_defaults` to affect all the instances in your
-cluster or individually on the separate instances as required. By
-default, this will allocate a new elastic ip address and assign it to
+`config.yml`. Set it in `instance_defaults` to affect all the instances in your
+cluster or set it individually on the separate instances as required. By
+default, this setting allocates a new elastic IP address and assigns it to
 the new instance.
+
 To use an elastic IP address that has already been allocated but not yet
-assigned, use `elastic_ip: 34.252.55.252`, substituting in your
+assigned, use `elastic_ip: 34.252.55.252`, substituting your
 allocated address.
 
 ### Instance profile (optional)
