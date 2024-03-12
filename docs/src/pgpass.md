@@ -1,6 +1,6 @@
 # Configuring .pgpass
 
-TPA will create `~postgres/.pgpass` by default with the passwords
+TPA creates `~postgres/.pgpass` by default with the passwords
 for `postgres` and `repmgr` in it, for use between cluster instances.
 You can set `pgpass_users` to create entries for a different list of
 users.
