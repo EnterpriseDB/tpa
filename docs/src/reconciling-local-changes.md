@@ -155,22 +155,19 @@ To reconcile this change in `config.yml` simply delete the entry under
       route_priority: 100
 ```
 
-You can now manage this node as usual using TPA. However, the original
-cluster still has metadata that refers to `node-2` so to complete
-reconciliation it is recommended to run the following SQL on each node
-to remove the metadata. *This step is essential if you wish to add a
-node of the same name in future.*
+You can now manage this node as usual using TPA. The original cluster
+still has metadata that refers to `node-2` as a node whose state is
+`PARTED`, which is not removed by default as it does not affect
+cluster functionality.
 
-```sql
-select * from bdr.drop_node('node-2');
-```
-
-!!! Note 
+!!! Note
 If you wish to join the original `node-2` back to the cluster after
-removing it in this way, you can do so simply by restoring the deleted
-lines of `config.yml` but you must ensure that `select * from
-bdr.drop_node('node-2');` has been run on this node and that the PGDATA
-directory has been deleted.
+having removed it from `config.yml`, you can do so by restoring the
+deleted lines of `config.yml`, stopping Postgres, deleting the
+`PGDATA` directory on that node, and then repeating `tpaexec
+deploy`. As noted above, TPA will not remove an existing database,
+even if the corresponding entry is deleted from `config.yml`, so you
+need to perform this action manually.
 !!!
 
 ### Example: changing the superuser password
