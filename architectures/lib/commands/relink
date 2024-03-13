@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+import filecmp
 import os, re, subprocess, sys, yaml
+import shutil
 
 if len(sys.argv) > 1 and sys.argv[1] == "--help":
     print(
@@ -37,18 +39,19 @@ modified_paths = []
 # Given the name of a symbolic link and the missing target of the link, this
 # function tries to point it to $TPA_DIR.
 
+
 def repair_dangling_symlink(link, target):
     # We can't repair links that don't point to TPA_DIR
-    if not re.findall('/(TPA|tpaexec)/', target):
+    if not re.findall("/(TPA|tpaexec)/", target):
         if v:
             print("%s: <ignored; unrecognised target>" % link)
         return
 
-    new_target = re.sub('^.*/(TPA|tpaexec)/', '', target)
+    new_target = re.sub("^.*/(TPA|tpaexec)/", "", target)
 
     for old_bdr_arch in ["CAMO2x2", "BDR-Simple"]:
-        if new_target.startswith(f'architectures/{old_bdr_arch}/'):
-            new_target = re.sub(old_bdr_arch, 'BDR-Always-ON', new_target)
+        if new_target.startswith(f"architectures/{old_bdr_arch}/"):
+            new_target = re.sub(old_bdr_arch, "BDR-Always-ON", new_target)
 
     new_target = os.path.join(TPA_DIR, new_target)
     if os.path.exists(new_target):
@@ -91,8 +94,16 @@ with open(r"./config.yml") as config_file:
     for s in ["deploy.yml", "commands", "tests"]:
         target = "%s/architectures/%s/%s" % (TPA_DIR, architecture, s)
 
-        if os.path.isfile(target) and not os.path.exists(s):
-            os.symlink(target, s)
+        if os.path.isfile(target) and (
+            not os.path.exists(s) or not filecmp.cmp(target, s, shallow=False)
+        ):
+            # copy file for tower use case
+            # to ensure file content is passed in git repo
+            # instead of symlink path
+            if config.get("ansible_tower"):
+                shutil.copy(target, s)
+            else:
+                os.symlink(target, s)
             modified_paths.append(s)
             if v:
                 print("%s: %s" % (s, target))
@@ -102,10 +113,16 @@ with open(r"./config.yml") as config_file:
                 os.mkdir(s)
 
             for l in os.listdir(target):
-                if not os.path.exists("%s/%s" % (s, l)):
-                    link = "%s/%s" % (s, l)
-                    dest = "%s/%s" % (target, l)
-                    os.symlink(dest, link)
+                link = "%s/%s" % (s, l)
+                dest = "%s/%s" % (target, l)
+                if not os.path.exists(link) or not filecmp.cmp(link, dest, shallow=False):
+                    # copy file for tower use case
+                    # to ensure file content is passed in git repo
+                    # instead of symlink path
+                    if config.get("ansible_tower"):
+                        shutil.copy(dest, link)
+                    else:
+                        os.symlink(dest, link)
                     modified_paths.append(link)
                     if v:
                         print("%s: %s" % (link, dest))
