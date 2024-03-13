@@ -13,11 +13,11 @@ on:
     types:
       - submitted
 env:
-  CLOUDSMITH_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
   LANG: "C.UTF-8"
   TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
   EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
   EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
 
 jobs:
 
