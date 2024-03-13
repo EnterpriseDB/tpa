@@ -2,7 +2,7 @@
 
 To create Postgres databases during deployment, add entries to the list
 of `postgres_databases` under `cluster_vars` or a particular
-instance's `vars` in config.yml:
+instance's `vars` in `config.yml`:
 
 ```yaml
 cluster_vars:
@@ -24,8 +24,8 @@ cluster_vars:
     tablespace: exampletablespace
 ```
 
-The example above would create two databases (apart from any databases
-that TPA itself decides to create, such as `bdr_database`).
+This example creates two databases in addition to any databases
+that TPA decides to create, such as `bdr_database`.
 
 Each entry must specify the `name` of the database to create. All
 other attributes are optional.
@@ -35,21 +35,21 @@ valid username (the users in [`postgres_users`](postgres_users.md)
 will have been created by this time).
 
 The `encoding`, `lc_collate`, and `lc_ctype` values default to the
-`postgres_locale` set at the time of running initdb (the default is to
-use the target system's LC_ALL or LANG setting). If you are creating a
-database with non-default locale settings, you will also need to specify
+`postgres_locale` set at the time of running initdb. (The default is to
+use the target system's `LC_ALL` or `LANG` setting.) If you're creating a
+database with non-default locale settings, you also need to specify
 `template: template0`.
 
-You can optionally specify the default `tablespace` for a database; the
+You can optionally specify the default `tablespace` for a database. The
 tablespace must already exist
 (see [`postgres_tablespaces`](postgres_tablespaces.md)).
 
 You can specify optional lists of `extensions` and `languages` to create
-within each database (in addition to any extensions or languages
-inherited from the template database). Any packages required must be
-installed already, for example by including them in
+within each database, in addition to any extensions or languages
+inherited from the template database. Any packages required must be
+installed already, for example, by including them in
 [`extra_postgres_packages`](postgres_installation_method_pkg.md).
 
-TPA will not drop existing databases that are not mentioned in
-`postgres_databases`, and it may create additional databases if required
-(e.g., for BDR).
+TPA doesn't drop existing databases that aren't mentioned in
+`postgres_databases`, and it might create additional databases if required
+(for example, for BDR).
