@@ -2,12 +2,12 @@
 
 TPA installs a batch of non-Postgres-related packages early during
 the deployment, then all Postgres-related packages together, and then
-packages for optional components separately. This page is about
-installing packages like pglogical that depend on Postgres itself.
+packages for optional components separately. These instructions are for
+installing packages like pglogical that depend on Postgres.
 
-To install extra packages that depend on Postgres (e.g., Postgis), list
+To install extra packages that depend on Postgres (for example, Postgis), list
 them under `extra_postgres_packages` in `cluster_vars` or a
-particular instance's `vars` in config.yml:
+particular instance's `vars` in `config.yml`:
 
 ```yaml
 cluster_vars:
@@ -27,8 +27,8 @@ cluster_vars:
 ```
 
 The packages listed under `packages.common` will be installed on every
-instance, together with the default list of Postgres packages, and any
+instance, together with the default list of Postgres packages and any
 distribution-specific packages you specify.
 
-There's a separate page about
+See also
 [compiling and installing Postgres from source](postgres_installation_method_src.md).

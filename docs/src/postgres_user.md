@@ -1,23 +1,22 @@
 # The postgres Unix user
 
-This page documents how the postgres user and its home directory are
-configured.
+You can configure the postgres user and its home directory.
 
-There's a separate page about how to create
-[Postgres users in the database](postgres_users.md).
+For information about how to create Postgres users in the database, see
+[Creating Postgres users](postgres_users.md).
 
 ## Shell configuration
 
-TPA will install a `.bashrc` file and ensure that it's also included
+TPA installs a `.bashrc` file and ensures that it's also included
 by the `.profile` or `.bash_profile` files.
 
-It will set a prompt that includes the username and hostname and working
-directory, and ensure that `postgres_bin_dir` in in the `PATH`, and set
+It sets a prompt that includes the username, hostname, and working
+directory and ensures that `postgres_bin_dir` is in the `PATH`. It also sets
 `PGDATA` to the location of `postgres_data_dir`.
 
 You can optionally specify `extra_bashrc_lines` to append arbitrary
-lines to `.bashrc`. (Use the YAML multi-line string syntax `>-` to avoid
-having to worry about quoting and escaping shell metacharacters.)
+lines to `.bashrc`. (To avoid having to worry about quoting and 
+escaping shell meta-characters, Use the YAML multi-line string syntax `>-`.)
 
 ```yaml
 cluster_vars:
@@ -27,23 +26,23 @@ cluster_vars:
     export PATH="$PATH":/some/other/dir
 ```
 
-It will edit sudoers to allow
-`sudo systemctl start/stop/reload/restart/status postgres`, and also
-change `ulimits` to allow unlimited core dumps and raise the file
+TPA edits `sudoers` to allow
+`sudo systemctl start/stop/reload/restart/status postgres`. It also
+changes `ulimits` to allow unlimited core dumps and raises the file
 descriptor limits.
 
 ## SSH keys
 
-TPA will use `ssh-keygen` to generate and install an SSH keypair for
-the postgres user, and edit `.ssh/authorized_keys` so that the instances
-in the cluster can ssh to each other as `postgres`.
+TPA uses `ssh-keygen` to generate and install an SSH keypair for
+the postgres user. It also edits `.ssh/authorized_keys` so that the instances
+in the cluster can SSH to each other as postgres.
 
 ## TLS certificates
 
-By default, TPA will generate a private key and a self-signed TLS
-certificate for use within the cluster. This is sufficient to ensure
-that traffic between clients and server is encrypted in transit. Should
-you wish to use your own certificate signing infrastructure you may
+By default, TPA generates a private key and a self-signed TLS
+certificate for use in the cluster. This is sufficient to ensure
+that traffic between clients and server is encrypted in transit. If
+you want to use your own certificate-signing infrastructure, you can
 replace these after deployment is complete, or replace them during
 deployment using a [hook](tpaexec-hooks.md).
 
@@ -51,4 +50,4 @@ deployment using a [hook](tpaexec-hooks.md).
 
 The `postgres_user` and `postgres_group` settings (both `postgres` by
 default) are used consistently everywhere. You can change them if you
-need to run Postgres as a different user for some reason.
+need to run Postgres as a different user.
