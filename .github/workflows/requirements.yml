@@ -25,6 +25,7 @@ env:
   LC_ALL: C.UTF-8
   LANG: C.UTF-8
   GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
 
 jobs:
   requirements:

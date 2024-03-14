@@ -27,6 +27,9 @@ on:
         type: string
         required: false
 
+env:
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+
 jobs:
 
   Build:
@@ -62,7 +65,7 @@ jobs:
     # install requirements needed for build
     - name: Install python build requirements
       run: |
-        pip install -r build-requirements.txt
+        python3 -m pip install -r build-requirements.txt
       shell: bash
 
     # verify build environment
