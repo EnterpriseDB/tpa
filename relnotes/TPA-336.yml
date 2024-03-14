@@ -1,0 +1,12 @@
+- summary: Add useful extensions by default when role is pem-agent
+  description: |
+    The `sql_profiler`, `edb_wait_states` and `query_advisor` extensions
+    are automatically included for any `pem-agent` node.
+
+    The list of default extensions for pem-agent nodes is overridable by
+    including a list of `pemagent_extensions` in config.yml.
+
+    If this list is empty, no extensions will be automatically included.
+  type: minor_change
+  jira_tickets:
+  - TPA-336

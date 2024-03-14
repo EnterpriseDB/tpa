@@ -48,6 +48,16 @@ backend database user, which is set to `postgres` for postgresql and
 password for the web interface by running
 `tpaexec show-password $clusterdir $user`.
 
+## Useful extensions for the nodes with pem agent
+
+By default, TPA will add `sql_profiler`, `edb_wait_states` and
+`query_advisor` extensions to any instances that have `pem-agent` role.
+
+This list of default extensions for pem-agent nodes can be overriden by
+setting `pemagent_extensions` in config.yml.
+
+If this list is empty, no extensions will be automatically included.
+
 ## Shared PEM server
 
 Some deployments may want to use a single PEM server for monitoring and

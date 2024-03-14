@@ -255,6 +255,11 @@ default_postgres_extensions:
   - pageinspect
   - pgstattuple
 
+default_pemagent_extensions:
+  - sql_profiler
+  - edb_wait_states
+  - query_advisor
+
 default_postgres_users: []
 default_postgres_databases: []
 
