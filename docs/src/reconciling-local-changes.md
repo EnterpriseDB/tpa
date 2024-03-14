@@ -1,103 +1,105 @@
 # Reconciling changes made outside of TPA
-Any changes made to a TPA created cluster that are not performed by
-changing the TPA configuration will not be saved in `config.yml`. This
-means that your cluster will have changes that the TPA configuration
-won't be able to recreate.
+Any changes made to a TPA-created cluster that aren't performed by
+changing the TPA configuration aren't saved in `config.yml`. This
+means that your cluster can have changes that the TPA configuration
+can't re-create.
 
-This page shows how configuration is managed with TPA and the preferred
-ways to make configuration changes. We then look at strategies to make,
+You can manage the configuration with TPA, using the preferred
+ways to make configuration changes described here. You can also use the 
+strategies we recommend to make,
 and reconcile, the results of making manual changes to the cluster.
 
 ## Why might I need to make manual configuration changes?
-The most common scenario in which you may need to make configuration
-changes outside of TPA is if the operation you are performing is not
+The most common scenario in which you might need to make configuration
+changes outside of TPA is if the operation you're performing isn't
 supported by TPA. The two most common such operations are destructive
 changes, such as removing a node, and upgrading the major version of
 Postgres.
 
 ### Destructive changes
-In general TPA will not remove previously deployed elements of a
-cluster, even if these are removed from `config.yml`. This sometimes
+In general, TPA doesn't remove previously deployed elements of a
+cluster, even if these are removed from `config.yml`. This behavior sometimes
 surprises people because a strictly declarative system should always
 mutate the deployed artifacts to match the declaration. However, making
-destructive changes to production database can have serious consequences
-so it is something we have chosen not to support.
+destructive changes to a production database can have serious consequences,
+so it's something we've chosen not to support.
 
 ### Major-version Postgres upgrades
-TPA does not yet provide an automated mechanism for performing major
-version upgrades of Postgres. Therefore if you need to perform an
-in-place upgrade on an existing cluster this must be performed using
-other tools such as pg_upgrade or [bdr_pg_upgrade](https://www.enterprisedb.com/docs/pgd/latest/upgrades/bdr_pg_upgrade/#bdr_pg_upgrade-command-line).
+TPA doesn't yet provide an automated mechanism for performing major
+version upgrades of Postgres. Therefore, if you need to perform an
+in-place upgrade on an existing cluster, you need to do so using
+other tools, such as pg_upgrade or [bdr_pg_upgrade](https://www.enterprisedb.com/docs/pgd/latest/upgrades/bdr_pg_upgrade/#bdr_pg_upgrade-command-line).
 
-## What can happen if changes are not reconciled?
+## What can happen if changes aren't reconciled?
 A general issue with unreconciled changes is that if you deploy a new
-cluster using your existing `config.yml`, or provide your `config.yml` to
-EDB Support in order to reproduce a problem, it will not match the
-original cluster. In addition, there is potential for operational
-problems should you wish to use TPA to manage that cluster in future.
+cluster using your existing `config.yml` or provide your `config.yml` to
+EDB Support to reproduce a problem, it doesn't match the
+original cluster. In addition, there's potential for operational
+problems if you want to use TPA to manage that cluster in future.
 
 The operational impact of unreconciled changes varies depending on the
-nature of the changes. In particular whether the change is destructive,
+nature of the changes, in particular, whether the change is destructive
 and whether the change blocks TPA from running by causing an error or
 invalidating the data in `config.yml`.
 
-### Non-destructive, non-blocking changes
+### Nondestructive, non-blocking changes
 Additive changes are often accommodated with no immediate operational
-issues. Consider manually adding a user. The new user will continue to
-exist and cause no issues with TPA at all. You may prefer to manage the
-user through TPA in which case you can declare it in `config.yml` but
-the existence of a manually-added user will cause no operational issues.
+issues. Consider manually adding a user. The new user continues to
+exist and cause no issues with TPA. You might prefer to manage the
+user through TPA, in which case you can declare it in `config.yml`. But
+the existence of a manually added user doesn't cause operational issues.
 
 Some manual additions can have more nuanced effects. Take the example of
-an extension which has been manually added. Because TPA does not make
-destructive changes, the extension will not be removed when `tpaexec
-deploy` is next run. **However**, if you made any changes to the
-Postgres configuration to accommodate the new extension these may be
-overwritten if you did not make them using one of TPA's supported
-mechanisms (see below).
+an extension that was manually added. Because TPA doesn't make
+destructive changes, the extension isn't removed when `tpaexec
+deploy` next runs. However, if you made any changes to the
+Postgres configuration to accommodate the new extension, these might be
+overwritten if you didn't make them using one of TPA's supported
+mechanisms (see [Destructive, non-blocking changes](#destructive-non-blocking-changes) 
+and [Destructive, blocking changes](#destructive-blocking-changes).
 
-Furthermore, TPA will not make any attempt to modify the `config.yml`
-file to reflect manual changes and the new extension will be omitted
-from `tpaexec upgrade` which could lead to incompatible software
+Furthermore, TPA doesn't make any attempt to modify the `config.yml`
+file to reflect manual changes. The new extension is omitted
+from `tpaexec upgrade`, which can lead to incompatible software
 versions existing on the cluster.
 
 
 ### Destructive, non-blocking changes
-Destructive changes that are easily detected and do not block TPA's
-operation will simply be undone when `tpaexec deploy` is next run.
+Destructive changes that are easily detected and don't block TPA's
+operation are undone when `tpaexec deploy` next runs.
 Consider manually removing an extension. From the perspective of TPA,
-this situation is indistinguishable from the user adding an extension to
-the `config.yml` file and running deploy. As such, TPA will add the
+this situation is indistinguishable from adding an extension to
+the `config.yml` file and running `deploy`. As such, TPA adds the
 extension such that the cluster and the `config.yml` are reconciled,
-albeit in the opposite way to that the user intended.
+albeit in the opposite way to that was intended.
 
-Similarly, changes made manually to configuration parameters will be
-undone unless they are:
+Similarly, changes made manually to configuration parameters are
+undone unless they're made either:
 
-1. Made in the `conf.d/9999-override.conf` file reserved for manual
-   edits;
-2. Made using `ALTER SYSTEM` SQL; or
-3. Made [natively in TPA](postgresql.conf.md#postgres_conf_settings) by adding
-   `postgres_conf_settings`.
+- In the `conf.d/9999-override.conf` file reserved for manual
+   edits
+- Using `ALTER SYSTEM` SQL
+- [Natively in TPA](postgresql.conf.md#postgres_conf_settings) by adding
+   `postgres_conf_settings`
 
-Other than the fact that option 3 is self-documenting and portable,
-there is no pressing operational reason to reconcile changes made by
-method 1 or 2.
+Other than the fact making the changes natively in TPA is self-documenting and portable,
+there's no pressing operational reason to reconcile changes made by
+either of the other methods.
 
 ### Destructive, blocking changes
-Changes which create a more fundamental mismatch between `config.yml`
-can block TPA from performing operations. For example if you physically
-remove a node in a bare metal cluster, attempts by TPA to connect to
-that node will fail, meaning most TPA operations will exit with an error
-and you will be unable to manage the cluster with TPA until you
+Changes that create a more fundamental mismatch between `config.yml`
+can block TPA from performing operations. For example, if you physically
+remove a node in a bare-metal cluster, attempts by TPA to connect to
+that node will fail, meaning most TPA operations will exit with an error.
+You can't manage the cluster with TPA until you
 reconcile this difference. 
 
 ## How to reconcile configuration changes
-In general, the reconciliation process involves modifying `config.yml`
-such that it describes the current state of the cluster and then running
+In general, the reconciliation process involves modifying `config.yml`,
+such that it describes the current state of the cluster, and then running
 `tpaexec deploy`.
 
-### Example: parting a PGD node
+### Example: Parting a PGD node
 Deploy a minimal PGD cluster using the bare architecture and a configure
 command such as:
 
@@ -112,33 +114,35 @@ tpaexec configure mycluster \
 
 Part a node using this SQL, which can be executed from any node:
 
+```
   select * from bdr.part_node('node-2');
+```
 
-Rerun `deploy`. Note that, whilst no errors occur, the node is still
-parted. This can be verified using the command `pgd show-nodes` on any
-of the nodes. This is because TPA will not overwrite the metadata which
+Rerun `deploy`. While no errors occur, the node is still
+parted. You can verify this using the command `pgd show-nodes` on any
+of the nodes. This is because TPA doesn't overwrite the metadata that
 tells PGD the node is parted. 
 
 !!! Note 
-It is not possible to reconcile the `config.yml` with this cluster state
-because TPA, and indeed PGD itself, has no mechanism to initiate a node
-in the 'parted' state. In principle you could continue to use TPA to
-continue this parted cluster, but this is not advisable. In most cases
-you will wish to continue to fully remove the node and reconcile
+It isn't possible to reconcile the `config.yml` with this cluster state
+because TPA, and PGD itself, has no mechanism to initiate a node
+in the "parted" state. In principle, you can continue to use TPA to
+continue this parted cluster, but we don't recommend this. In most cases,
+you'll want to continue to fully remove the node and reconcile
 `config.yaml`.
 !!!
 
-### Example: removing a PGD node completely
-The previous example parted a node from the PGD cluster, but left the
-node itself intact and still managed by TPA in a viable but
-unreconcilable state. 
+### Example: Removing a PGD node completely
+The previous example parted a node from the PGD cluster but left the
+node intact and still managed by TPA in a viable but
+unreconcilable state.
 
-To completely decommission the node, it is safe to simply turn off the
+To completely decommission the node, it's safe to turn off the
 server corresponding to `node-2`. If you attempt to run `deploy` at this
-stage, it will fail early when it cannot reach the server. 
+stage, it will fail early when it can't reach the server. 
 
-To reconcile this change in `config.yml` simply delete the entry under
-`instances` corresponding to `node-2`. It will look something like this:
+To reconcile this change in `config.yml`, delete the entry under
+`instances` corresponding to `node-2`. It looks something like this:
 
 ```yaml
 - Name: node-2
@@ -155,10 +159,6 @@ To reconcile this change in `config.yml` simply delete the entry under
       route_priority: 100
 ```
 
-You can now manage this node as usual using TPA. The original cluster
-still has metadata that refers to `node-2` as a node whose state is
-`PARTED`, which is not removed by default as it does not affect
-cluster functionality.
 
 !!! Note
 If you wish to join the original `node-2` back to the cluster after
@@ -170,20 +170,20 @@ even if the corresponding entry is deleted from `config.yml`, so you
 need to perform this action manually.
 !!!
 
-### Example: changing the superuser password
-TPA automatically generates a password for the superuser which you may
+### Example: Changing the superuser password
+TPA generates a password for the superuser that you can
 view using `tpaexec show-password <cluster> <superuser-name>`. If you
 change the password manually (for example using the `/password` command
-in psql) you will find that after `tpaexec deploy` is next run, the
-password has reverted to the one set by TPA. To make the change through
+in psql), after `tpaexec deploy` next runs, the
+password reverts to the one set by TPA. To make the change through
 TPA, and therefore make it persist across runs of `tpaexec deploy`, you
 must use the command `tpaexec store-password <cluster> <superuser-name>`
-to specify the password, then run `tpaexec deploy`. This also applies to
+to specify the password, and then run `tpaexec deploy`. This requirement also applies to
 any other user created through TPA.
 
 ### Example: adding or removing an extension
-A simple single-node cluster can be deployed with the following
-`config.yml`.
+You can deploy a simple single-node cluster with the following
+`config.yml`:
 
 ```yaml
 ---
@@ -208,13 +208,13 @@ instances:
   role:
   - primary
 ```
-You may manually add the pgvector extension by connecting to the node
-and running `apt install postgresql-15-pgvector` then executing the
-following SQL command: `CREATE EXTENSION vector;`. This will not cause
-any operational issues, beyond the fact that `config.yml` no longer
-describes the cluster as fully as it did previously. However, it is
-advisable to reconcile `config.yml` (or indeed simply use TPA to add the
-extension in the first place) by adding the following cluster variables. 
+You can manually add the pgvector extension by connecting to the node
+and running `apt install postgresql-15-pgvector`. Then execute the
+following SQL command: `CREATE EXTENSION vector;`. This doesn't cause
+any operational issues beyond the fact that `config.yml` no longer
+describes the cluster as fully as it did previously. However, we
+recommend reconciling `config.yml` (or using TPA to add the
+extension in the first place) by adding the following cluster variables:
 
 ```yaml
 cluster_vars:
@@ -226,16 +226,16 @@ cluster_vars:
   - vector
   ```
 
-After adding this configuration, you may manually remove the extension
+After adding this configuration, you can manually remove the extension
 by executing the SQL command `DROP EXTENSION vector;` and then 
-`apt remove postgresql-15-pgvector`. However if you run `tpaexec deploy`
-again without reconciling `config.yml`, the extension will be
-reinstalled. To reconcile `config.yml`, simply remove the lines added
+`apt remove postgresql-15-pgvector`. However, if you run `tpaexec deploy`
+again without reconciling `config.yml`, the extension is
+reinstalled. To reconcile `config.yml`, remove the lines added
 previously.
 
 !!! Note 
-As noted previously, TPA will not honour destructive changes.
-So simply removing the lines from `config.yml` will not remove the
-extension. It is necessary to perform this operation manually then
+As noted previously, TPA doesn't honor destructive changes.
+So removing the lines from `config.yml` doesn't remove the
+extension. You need to perform this operation manually and then
 reconcile the change.
 !!!
