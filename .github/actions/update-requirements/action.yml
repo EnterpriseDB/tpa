@@ -27,16 +27,6 @@ runs:
       run: |
         pip-compile -U --generate-hashes requirements.in -o requirements.txt
         pip-compile -U requirements.in -o requirements-aap.txt
-    - name: Run pip-compile on requirements-ansible-community.in
-      shell: bash
-      run: |
-        pip-compile -U --generate-hashes requirements-ansible-community.in -o requirements-ansible-community.txt
-
-    - name: Run pip-compile on requirements-ansible-2q.in
-      shell: bash
-      run: |
-        pip-compile -U --generate-hashes requirements-ansible-2q.in -o requirements-ansible-2q.txt
-
     - name: Run pip-compile on requirements-ansible-8.in
       shell: bash
       run: |

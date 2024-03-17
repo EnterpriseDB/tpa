@@ -65,7 +65,6 @@ on:
         default: "8"
         type: choice
         options:
-        - "2.9"
         - "8"
         - "9"
       tpa_package_cache:
