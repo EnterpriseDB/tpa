@@ -8,19 +8,19 @@
 
 - name: Turn included_tasks into a list if required
   set_fact:
-    included_tasks: "{{ included_tasks|default('')|replace(',', ' ')|split }}"
+    included_tasks_list: "{{ included_tasks|default('')|replace(',', ' ')|split }}"
   when: included_tasks|default('') is string
 
 - name: Turn excluded_tasks into a list if required
   set_fact:
-    excluded_tasks: "{{ excluded_tasks|default('')|replace(',', ' ')|split }}"
+    excluded_tasks_list: "{{ excluded_tasks|default('')|replace(',', ' ')|split }}"
   when: excluded_tasks|default('') is string
 
 - name: Set up selectors for tag checks
   set_fact:
     task_selector:
-      include: "{{ included_tasks }}"
-      exclude: "{{ excluded_tasks }}"
+      include: "{{ included_tasks_list|default(included_tasks) }}"
+      exclude: "{{ excluded_tasks_list|default(excluded_tasks) }}"
 
 # Normally, bin/tpaexec will set cluster_dir to the cluster directory we
 # are using. That doesn't happen when we're running under Ansible Tower,
