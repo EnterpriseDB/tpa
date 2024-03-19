@@ -34,22 +34,21 @@ subscription access token:
 
 1. Paste the following into the **Input Configuration** field:
 
-```yaml
-fields:
-- id: tpa_edb_sub_token
-  type: string
-  label: EDB_SUBSCRIPTION_TOKEN
-  secret: true
-required:
-- tpa_edb_sub_token
-```
-
+    ```yaml
+    fields:
+    - id: tpa_edb_sub_token
+      type: string
+      label: EDB_SUBSCRIPTION_TOKEN
+      secret: true
+    required:
+    - tpa_edb_sub_token
+    ```
 1. Paste the following into the **Injector Configuration** field:
 
-  ```yaml
-  env:
-    EDB_SUBSCRIPTION_TOKEN: '{{ tpa_edb_sub_token }}'
-  ```
+    ```yaml
+    env:
+      EDB_SUBSCRIPTION_TOKEN: '{{ tpa_edb_sub_token }}'
+    ```
 
 1. Save the changes.
 
@@ -140,16 +139,16 @@ To create a template:
 1. Create a template that uses your project and your inventory.
 
 1. Include these required credentials:
-  - Vault credential
-  - `EDB_SUBSCRIPTION_TOKEN` credential
-  - Machine credential
+    - Vault credential
+    - `EDB_SUBSCRIPTION_TOKEN` credential
+    - Machine credential
 
 1. Set two additional variables:
 
-```yaml
-  tpa_dir: /opt/EDB/TPA
-  cluster_dir: /runner/project
-```
+    ```yaml
+    tpa_dir: /opt/EDB/TPA
+    cluster_dir: /runner/project
+    ```
 
 1. Select `deploy.yml` as the playbook.
 
