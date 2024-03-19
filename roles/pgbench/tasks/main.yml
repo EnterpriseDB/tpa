@@ -13,10 +13,10 @@
 
 - include_tasks:
     file: pgbench-postgres.yml
-    apply:
-      tags: [pgbench, postgres]
   vars:
     pgbench_dbname: postgres
+  when:
+    task_selector|selects('pgbench', 'postgres')
 
 # Next, for BDR instances, we run the following in the BDR-enabled
 # database:
@@ -31,10 +31,9 @@
 
 - include_tasks:
     file: pgbench-bdr.yml
-    apply:
-      tags: [pgbench, bdr]
   vars:
     pgbench_dbname: "{{ bdr_database }}"
   when: >
     'bdr' in role
     and bdr_major_version in [3, 4, 5]
+    and task_selector|selects('pgbench', 'bdr', 'postgres')

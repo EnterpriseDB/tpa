@@ -5,7 +5,9 @@
 - name: Fail if the data directory exists
   fail:
     msg: "Can't clone replica over existing PGDATA"
-  when: pgdata_initialised
+  when:
+    - pgdata_initialised
+    - task_selector|selects('postgres', 'replica')
 
 # Now we have to decide where to clone from.
 #
@@ -24,6 +26,7 @@
 - include_tasks: select-clone-source.yml
   when: >
     upstream|default(upstream_primary) != upstream_primary
+    and task_selector|selects('postgres', 'replica')
 
 - name: Run pg_basebackup to clone replica
   command: >
@@ -39,6 +42,8 @@
   register: this
   failed_when:
     this.rc != 0 or 'error' in this.stderr
+  when:
+    task_selector|selects('postgres', 'replica')
 
 # If we are cloning an instance with postgres_conf_dir separated from
 # postgres_data_dir, we copy its configuration files to the replica's
@@ -60,6 +65,8 @@
       "{{ source_facts.pg_settings.get(item.key)
           if source_facts.pg_settings is defined }}"
   with_dict: "{{ postgres_conf_files }}"
+  when:
+    task_selector|selects('postgres', 'replica')
 
 # PGDATA didn't exist until we just created it, so postgres/config would
 # have skipped this instance earlier. We install the configuration files
@@ -88,5 +95,7 @@
       restore_command = '/bin/false'
     state: present
     insertafter: EOF
+  when:
+    task_selector|selects('postgres', 'replica')
 
 - set_fact: pgdata_initialised=True

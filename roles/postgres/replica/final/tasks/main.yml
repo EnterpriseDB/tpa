@@ -32,6 +32,7 @@
 - include_role: name=postgres/facts
   when:
     cluster_facts is empty
+    and task_selector|selects('postgres', 'replica')
 
 # Postgres is now running on both primary and replicas, but the replicas
 # can't start streaming until we create the necessary replication slots.

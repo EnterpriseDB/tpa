@@ -31,6 +31,7 @@
           addresses|combine({
             'Name': item.item.Name,
             'node': item.item.node,
+            'add_to_inventory': not item.item.provision_only|default(false),
             'vars': addresses|combine(item.item|export_vars),
             'platform': 'docker',
           })

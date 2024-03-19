@@ -15,7 +15,6 @@
     id: "{{ sign_keys[zabbix_short_version][zabbix_agent_distribution_release]['sign_key'] }}"
     url: http://repo.zabbix.com/zabbix-official-repo.key
   become: yes
-  tags: [zabbix-agent, init]
 
 - name: "Ubuntu | Check for zabbix repositories"
   find:
@@ -24,7 +23,6 @@
     excludes: "repo_zabbix_com_zabbix_{{ zabbix_underscore_version }}_ubuntu.list"
   register: repositories
   become: yes
-  tags: [zabbix-agent, init]
 
 - name: "Ubuntu | Remove unecessary zabbix repositories"
   file:
@@ -32,21 +30,18 @@
     state: absent
   loop: "{{ repositories.files }}"
   become: yes
-  tags: [zabbix-agent, init]
 
 - name: "Ubuntu | Installing deb-src repository Ubuntu"
   apt_repository:
     repo: "deb-src http://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu {{ zabbix_agent_distribution_release }} main"
     state: present
   become: yes
-  tags: [zabbix-agent, init]
 
 - name: "Ubuntu | Installing deb repository Ubuntu"
   apt_repository:
     repo: "deb http://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu {{ zabbix_agent_distribution_release }} main"
     state: present
   become: yes
-  tags: [zabbix-agent, init]
 
 # Note: set cache_valid_time=0 to ensure that an apt-get update after the added repo-key
 # else you often get 'WARNING: The following packages cannot be authenticated!
@@ -67,7 +62,6 @@
   until: zabbix_agent_package_installed is succeeded
   become: yes
   check_mode: no
-  tags: [zabbix-agent, init]
 
 - name: "Install policycoreutils-python"
   apt:
@@ -88,4 +82,5 @@
     enabled: yes
     use: service
   become: yes
-  tags: [zabbix-agent, init, service]
+  when: >
+    task_selector|permits('service')

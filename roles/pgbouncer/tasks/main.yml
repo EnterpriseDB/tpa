@@ -4,17 +4,15 @@
 
 - include_role:
     name: pgbouncer/pkg
-    apply:
-      tags: [pgbouncer, pkg]
-  tags: pkg
+  when: >
+    task_selector|permits('pkg')
 
 - include_role:
     name: pgbouncer/config
-    apply:
-      tags: [pgbouncer, config]
   when: >
-    'postgres' in role or
-    'pgbouncer' in role
+    'postgres' in role
+    or 'pgbouncer' in role
+    and task_selector|permits('config')
 
 - set_fact:
     initialise_pgbouncer: true

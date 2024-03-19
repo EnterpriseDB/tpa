@@ -140,11 +140,8 @@ _install_tpaexec_pth() {
 }
 
 _check_ansible_version() {
-    if [[ $use_community == false && $ansible_version != "2.9" ]]; then
-        error "2ndQuadrant ansible can only be used with ansible version 2.9"
-    fi
     case "$ansible_version" in
-        "2.9"|"8"|"9")
+        "8"|"9")
             ;;
         *)
             error "Version $ansible_version of ansible is not supported"
@@ -175,34 +172,24 @@ _install_pip_packages() {
     pip3 install "${pip_args[@]}" "pip>=10.0.1" wheel
 
     # We need to install Ansible and its dependencies into the venv,
-    # either from the bundled package from tpaexec-deps, or directly
-    # from github/PyPI, depending on the flavour of Ansible we want.
-    #
-    # For historical reasons, we treat 2q ansible 2.9, community
-    # ansible 2.9, and separate recent ansible versions as separate
-    # "flavours"
-    ANSIBLE_FLAVOUR='2q'
-    if [[ $ansible_version != "2.9" ]]; then
-        ANSIBLE_FLAVOUR=$ansible_version
-    elif [[ $use_community == true ]]; then
-        ANSIBLE_FLAVOUR='community'
-    fi
+    # either from the bundled package from tpaexec-deps if present, or
+    # directly from github/PyPI
 
-    ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible-${ANSIBLE_FLAVOUR}.txt
+    ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible-${ansible_version}.txt
     TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
 
-    if [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible-${ANSIBLE_FLAVOUR}.txt ]]; then
-        ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible-${ANSIBLE_FLAVOUR}.txt"
+    if [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible-${ansible_version}.txt ]]; then
+        ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible-${ansible_version}.txt"
         TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
     fi
 
     # If we have ansible already installed and we're going to install a different
     # one, we must remove the old one first
-    existing_ansible_version=$(pip3 show ansible | grep Version | awk '{print $2}')
-    desired_ansible_version=$(grep 'ansible==' $ANSIBLE_REQUIREMENTS|grep -Eo '[[:digit:].]+')
+    existing_ansible_version=$(pip3 show ansible-core | grep Version | awk '{print $2}')
+    desired_ansible_version=$(grep 'ansible-core==' $ANSIBLE_REQUIREMENTS|grep -Eo '[[:digit:].]+')
 
     if [[ $existing_ansible_version != $desired_ansible_version ]]; then
-        pip3 uninstall -y ansible
+        pip3 uninstall -y ansible-core
     fi
 
     pip_args+=(-r "$ANSIBLE_REQUIREMENTS")
@@ -283,13 +270,6 @@ setup() {
             --pip-cache-dir)
                 pip_cache_dir=${1:?pip cache directory not specified}
                 shift
-                ;;
-            --use-community-ansible)
-                use_community=true
-                ;;
-            --use-2q-ansible)
-                use_community=false
-                ansible_version=2.9
                 ;;
             --ansible-version)
                 ansible_version=${1:?ansible version not specified}
@@ -408,6 +388,19 @@ playbook() {
     if [ -d inventory ]; then
         args+=(-i inventory)
     fi
+
+    for arg in "$@"; do
+        shift
+        if [[ $arg == --excluded?tasks=* ]]; then
+            exclusion="${arg#*=}"
+            args+=(-e excluded_tasks=$exclusion)
+        elif [[ $arg == --included?tasks=* ]]; then
+            inclusion="${arg#*=}"
+            args+=(-e included_tasks=$inclusion)
+        else
+            set -- "$@" "$arg"
+        fi
+    done
 
     if "${TPA_DIR}/architectures/lib/use-vault" >> /dev/null 2>&1; then
         args+=(--vault-password-file "${TPA_DIR}/architectures/lib/use-vault")

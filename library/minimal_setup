@@ -14,6 +14,7 @@ pkg_mgrs=([Debian]=apt [RedHat]=dnf [SUSE]=zypper)
 
 version=$VERSION_ID
 major_version=${VERSION_ID%.*}
+arch=$(uname -m)
 
 case "${ID}:${VERSION_ID%.*}" in
     rhel:7|centos:7|ol:7)
@@ -110,6 +111,7 @@ grep -Ev '": ""' <<RESULT
         "ansible_distribution_id": "$ID",
         "ansible_distribution_release": "$release",
         "ansible_distribution_version": "$version",
+        "ansible_architecture": "$arch",
         "ansible_distribution_major_version": "$major_version",
         "ansible_service_mgr": "$service_mgr",
         "ansible_pkg_mgr": "$pkg_mgr",

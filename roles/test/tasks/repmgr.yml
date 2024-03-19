@@ -32,10 +32,10 @@
 
 - name: Fail if either of the above tasks failed
   fail:
-    msg: "repmgr node status/check failed (use --skip-tags fail to skip)"
+    msg: "repmgr node status/check failed (use -e exclude=fail to skip)"
   when:
     repmgr_status is not successful or repmgr_check is not successful
-  tags: [repmgr, fail]
+    and task_selector|permits('fail')
 
 - name: Run repmgr cluster show
   command: >

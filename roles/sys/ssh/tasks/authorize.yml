@@ -16,3 +16,5 @@
     user: "{{ ssh_username }}"
     key: "{{ lookup('file', _ssh_key_dir+'/'+_ssh_key_name+'.pub') }}"
     key_options: "{{ ssh_key_options|default('')}}"
+  when: >
+    task_selector|permits('ssh')

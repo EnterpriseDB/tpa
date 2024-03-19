@@ -8,18 +8,14 @@
 - name: Install Postgres Backup API
   include_role:
     name: pgbackupapi/pkg
-    apply:
-      tags: [pg-backup-api, pkg]
   when: >
     'barman' in role
     and platform not in ['shared']
-  tags: pkg
+    and task_selector|selects('pg-backup-api', 'pkg')
 
 - include_role:
     name: pgbackupapi/service
-    apply:
-      tags: service
   when: >
     'barman' in role
     and platform not in ['shared']
-  tags: service
+    and task_selector|selects('pg-backup-api', 'service')

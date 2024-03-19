@@ -53,6 +53,7 @@ ec2:DescribeVpcs
 ec2:DisassociateRouteTable
 ec2:ImportKeyPair
 ec2:ModifyVpcAttribute
+ec2:RevokeSecurityGroupIngress
 ec2:RunInstances
 ec2:TerminateInstances
 iam:AddRoleToInstanceProfile
@@ -63,7 +64,8 @@ iam:DeleteRole
 iam:DeleteRolePolicy
 iam:GetInstanceProfile
 iam:GetRole
-iam:GetRolePolicy:
+iam:GetRolePolicy
+iam:ListAttachedRolePolicies
 iam:ListGroups
 iam:ListInstanceProfiles
 iam:ListInstanceProfilesForRole
@@ -75,9 +77,14 @@ iam:PutRolePolicy
 iam:RemoveRoleFromInstanceProfile
 kms:CreateGrant
 kms:GenerateDataKeyWithoutPlaintext
+s3:CreateBucket
+s3:GetBucketVersioning
 s3:GetObject
+s3:GetObjectTagging
 s3:ListAllMyBuckets
 s3:ListBucket
+s3:ListBucketVersions
+s3:PutBucketOwnershipControls
 s3:PutObject
 s3:PutObjectAcl
 ```

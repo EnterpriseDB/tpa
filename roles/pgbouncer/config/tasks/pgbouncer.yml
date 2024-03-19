@@ -39,7 +39,8 @@
     mode: "0640"
   notify:
     - Note pgbouncer restart required
-  tags: [ini]
+  when: >
+    task_selector|permits('pgbouncer-config')
 
 - name: Install pgbouncer.databases.ini
   template:
@@ -50,7 +51,8 @@
     mode: "0640"
   notify:
     - Note pgbouncer restart required
-  tags: [ini, databases.ini]
+  when: >
+    task_selector|permits('pgbouncer-config')
 
 # We must find a backend instance that pgbouncer points to, so that we
 # can check if vars['pgbouncer_auth_user_password'] is up-to-date when

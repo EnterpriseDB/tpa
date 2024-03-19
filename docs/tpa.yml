@@ -37,6 +37,7 @@ nav:
     - TPA, Ansible, and sudo: ansible-and-sudo.md
     - PuTTY configuration: misc-configure-putty.md
     - Troubleshooting: misc-troubleshooting.md
+    - Task selection: task-selection.md
 
 docs_dir: src
 theme:
@@ -55,7 +56,7 @@ plugins:
   - with-pdf:
       author: EDB
       cover_title: TPA
-      cover_subtitle: "Version 23.29 (2024-02-15)"
+      cover_subtitle: "Version 23.30 (2024-03-19)"
       toc_level: 3
       output_path: tpaexec.pdf
       copyright: © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.

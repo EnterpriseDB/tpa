@@ -27,12 +27,10 @@
 
 - include_role:
     name: harp/pkg
-    apply:
-      tags: pkg
-  tags: pkg
+  when: >
+    task_selector|permits('pkg')
 
 - include_role:
     name: harp/config
-    apply:
-      tags: config
-  tags: config
+  when: >
+    task_selector|permits('config')

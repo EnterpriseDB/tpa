@@ -4,10 +4,10 @@
 
 - include_role:
     name: pem/server/pkg
-    apply:
-      tags: [pem-server, pkg]
+  when: >
+    task_selector|selects('pem-server', 'pkg')
 
 - include_role:
     name: pem/server/config/webserver
-    apply:
-      tags: [pem-server, pem-config, pem-webserver]
+  when: >
+    task_selector|selects('pem-server', 'pem-webserver')

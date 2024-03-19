@@ -10,7 +10,6 @@
     group: root
     mode: "0644"
   register: pgd_proxy_unit
-  tags: [pgd-proxy, service]
 
 - name: Ensure pgd-proxy service is enabled on boot
   service:

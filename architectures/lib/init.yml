@@ -6,7 +6,6 @@
   hosts: localhost
   tasks:
   - include_role: name=selftest
-    tags: prereqs
 
 # This play must always be applied to all hosts in the cluster. Here we
 # do any platform-specific checks and initialisation, confirm that all
@@ -21,9 +20,6 @@
   tasks:
   - include_role:
       name: init
-      apply:
-        tags: always
-    tags: always
   - name: Record execution
     raw: |
       cat >> {{ _log_file }} <<"EOF"
@@ -41,4 +37,3 @@
       _log_file: /var/log/tpaexec.log
     changed_when: false
     check_mode: no
-    tags: always

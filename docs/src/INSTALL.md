@@ -200,22 +200,13 @@ this, but others can't work without it.
 
 ## Ansible versions
 
-TPA uses Ansible version 8 by default (ansible-core 2.15). You can use
-2ndQuadrant Ansible version 2.9 by passing the `--use-2q-ansible`
-option to `tpaexec setup`, or a different version of community Ansible
-by passing the `--ansible-version` option with a version number
-argument. The available versions are `2.9`, `8`, and `9`.
+TPA uses Ansible version 8 by default (ansible-core 2.15).
 
-Ansible 2.9 is now deprecated in TPA and support for it will be removed
-in a future version. If you are using `--skip-tags`, you need to
-continue to use 2ndQuadrant Ansible 2.9 because of the changes in the
-behaviour of this option in community Ansible; an alternative means of
-skipping tasks will be provided in a future TPA version, before support
-for 2ndQuadrant ansible is removed.
-
-Support for Ansible 9 is experimental. It requires Python 3.10 or
-greater, so if you have edb-python 3.9 installed, you must explicitly
-set your python version when running `tpaexec setup`:
+TPA has experimental support for Ansible 9 (ansible-core 2.16),
+which can be specified using the `--ansible-version` argument to
+`tpaexec setup`. It requires Python 3.10 or greater, so if you have
+edb-python 3.9 installed, you must explicitly set your python version
+when running `tpaexec setup`:
 
 ```bash
 PYTHON=/usr/bin/python3.10 tpaexec setup --ansible-version 9

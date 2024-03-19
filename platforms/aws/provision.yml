@@ -546,6 +546,7 @@
           item.0.instances[0]|combine({
             'Name': item.0.item.item.Name,
             'node': item.0.item.item.node,
+            'add_to_inventory': not item.0.item.item.provision_only|default(false),
             'vars': (item.0.item.item|export_vars),
             'platform': 'aws',
             'ip_address': item.1.public_ip|default(item.0.instances[0].network_interfaces[0].association.public_ip)

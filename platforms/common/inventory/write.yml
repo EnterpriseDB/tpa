@@ -175,4 +175,6 @@
     - pgbouncer_password
     - repmgr_password
     - enterprisedb_password
+    - pgdproxy_password
+    - replication_password
   when: ansible_tower

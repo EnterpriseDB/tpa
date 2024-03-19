@@ -42,7 +42,7 @@ default_yum_repositories:
 
   PGDG:
     rpm_url: >-
-      https://download.postgresql.org/pub/repos/yum/reporpms/EL-{{ ansible_distribution_major_version }}-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+      https://download.postgresql.org/pub/repos/yum/reporpms/EL-{{ ansible_distribution_major_version }}-{{ ansible_architecture }}/pgdg-redhat-repo-latest.noarch.rpm
 
   EDB:
     rpm_url: >-
@@ -53,6 +53,6 @@ default_yum_repository_list: [EPEL, PGDG]
 suse_repositories: {}
 default_suse_repositories:
   PGDG:
-    repo_uri: https://download.postgresql.org/pub/repos/zypp/repo/pgdg-sles-{{ ansible_distribution_major_version }}-pg{{ postgres_version }}.repo
+    rpm_url: https://download.postgresql.org/pub/repos/zypp/reporpms/SLES-{{ ansible_distribution_major_version }}-x86_64/pgdg-suse-repo-latest.noarch.rpm
 
 default_suse_repository_list: [PGDG]

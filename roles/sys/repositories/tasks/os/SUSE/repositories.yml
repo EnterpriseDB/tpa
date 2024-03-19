@@ -15,7 +15,7 @@
   with_items: "{{ suse_repository_list }}"
 
 - name: Install SUSE repositories
-  shell: zypper --non-interactive addrepo --refresh --priority 75 --check {{ repo.repo_uri }}; zypper --gpg-auto-import-keys refresh
+  shell: zypper --non-interactive install -y {{ repo.rpm_url }}
   with_items: "{{ suse_repository_list }}"
   loop_control:
     loop_var: r

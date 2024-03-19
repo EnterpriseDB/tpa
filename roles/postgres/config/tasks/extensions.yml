@@ -27,6 +27,22 @@
 
 # Some extensions need entries in shared_preload_libraries.
 
+# Any extensions for which TPA knows the corresponding
+# shared_preload_libraries entry name (captured in the
+# default_postgres_extensions_dictionary) is added to the
+# shared_preload_libraries list
+
+- name: Automatically add shared_preload_libraries entries for recognized extensions
+  set_fact:
+    shared_preload_libraries:
+      "{{ shared_preload_libraries|default([])|union([item.value.spl]) }}"
+  loop: "{{ lookup('dict', postgres_extensions_dictionary) }}"
+  when: >
+    'spl' in item.value
+    and
+    (item.key in postgres_extensions
+    or item.key in postgres_databases|json_query('[*].extensions[*].name|[]'))
+
 - name: Add shared_preload_libraries entries for extensions
   set_fact:
     shared_preload_libraries:

@@ -9,11 +9,10 @@
 
 - include_role:
     name: pgdcli/pkg
-    apply:
-      tags: [pgdcli, pkg]
-  tags: pkg
+  when: >
+    task_selector|permits('pkg')
 
 - include_role:
     name: pgdcli/config
-    apply:
-      tags: [pgdcli, config]
+  when: >
+    task_selector|permits('config')

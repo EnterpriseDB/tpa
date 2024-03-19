@@ -15,7 +15,9 @@
 - when: not etc_tpa_exists
   block:
   - include_tasks: "os/{{ ansible_os_family }}/python.yml"
+    when: task_selector|permits('bootstrap')
   - include_tasks: "os/{{ ansible_os_family }}/packages.yml"
+    when: task_selector|permits('bootstrap')
   - name: Create /etc/tpa directory
     file:
       path: /etc/tpa

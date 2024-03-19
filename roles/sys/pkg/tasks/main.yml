@@ -30,9 +30,9 @@
     - "{{ default_optional_packages[ansible_distribution] }}"
     - "{{ optional_packages[ansible_distribution]|default([]) }}"
   ignore_errors: true
-  tags: pkg
-  when:
+  when: >
     platform not in ['shared']
+    and task_selector|permits('pkg')
 
 # Finally, there are some packages that we don't want to have installed,
 # so we make sure of that here.
@@ -45,6 +45,6 @@
   package:
     name: "{{ _unwanted_sys_packages }}"
     state: absent
-  tags: pkg
-  when:
+  when: >
     platform not in ['shared']
+    and task_selector|permits('pkg')

@@ -12,4 +12,4 @@
   become: yes
   when: >
     'haproxy' in role
-  tags: [service, restart]
+    and task_selector|permits('service', 'restart')

@@ -1,15 +1,15 @@
 # Troubleshooting
 
-### Recreate python virtual environment
+### Re-create Python virtual environment
 
-Occasionally the python venv can get in an inconsistent state, in which case the easiest solution is to delete and recreate it. Symptoms of a broken venv can include errors during provisioning like:
+Occasionally the Python venv can get in an inconsistent state. In this case, the easiest solution is to delete the environment and create it again. Symptoms of a broken venv can include errors during provisioning like:
 
 ```
 TASK [Write Vagrantfile and firstboot.sh] ******************************************************************************************************************************
 failed: [localhost] (item=Vagrantfile) => {"changed": false, "checksum": "bf1403a17d897b68fa8137784d298d4da36fb7f9", "item": "Vagrantfile", "msg": "Aborting, target uses selinux but python bindings (libselinux-python) aren't installed!"}
 ```
 
-To create a new virtual environment (assuming tpaexec was installed into the default location):
+With tpaexec installed in the default location, to create a virtual environment, run:
 
 ```
 [tpa]$ sudo rm -rf /opt/EDB/TPA/tpa-venv
@@ -18,7 +18,7 @@ To create a new virtual environment (assuming tpaexec was installed into the def
 
 ### Strange AWS errors regarding credentials
 
-If the time & date of the TPA server isn't correct, you can get AWS errors similar to this during provisioning:
+If the time and date of the TPA server isn't correct, during provisioning, you can get AWS errors similar to this:
 ```
 TASK [Register key tpa_cluster in each region] **********************************************
 An exception occurred during task execution. To see the full traceback, use -vvv. The error was: ClientError: An error occurred (AuthFailure) when calling the DescribeKeyPairs operation: AWS was not able to validate the provided access credentials
@@ -26,7 +26,7 @@ failed: [localhost] (item=eu-central-1) => {"boto3_version": "1.8.8", "botocore_
 
 ```
 
-Solution - set the time and date correctly.
+Solution: Set the time and date correctly.
 
 ```
 [tpa]$ sudo ntpdate pool.ntp.org
@@ -34,15 +34,15 @@ Solution - set the time and date correctly.
 
 ### Logging
 
-By default, all tpaexec logging will be saved in logfile `<clusterdir>/ansible.log`
+By default, all tpaexec logging is saved in the log file `<clusterdir>/ansible.log`.
 
-To change the logfile location, set environment variable `ANSIBLE_LOG_PATH` to the desired location - e.g.
+To change the log file location, set the environment variable `ANSIBLE_LOG_PATH` to the desired location. For example:
 
 ```
 export ANSIBLE_LOG_PATH=~/ansible.log
 ```
 
-To increase the verbosity of logging, just add `-v`/`-vv`/`-vvv`/`-vvvv`/`-vvvvv` to tpaexec command line:
+To increase the verbosity of logging, add `-v`/`-vv`/`-vvv`/`-vvvv`/`-vvvvv` to the tpaexec command line:
 
 ```
 [tpa]$ tpaexec deploy <clustername> -v
@@ -56,57 +56,28 @@ To increase the verbosity of logging, just add `-v`/`-vv`/`-vvv`/`-vvvv`/`-vvvvv
 
 ### Cluster test
 
-An easy way to smoketest an existing cluster is to run:
+An easy way to smoke test an existing cluster is to run:
 
 ```
 [tpa]$ tpaexec test <clustername>
 ```
 
-This will do a functional test of the cluster components, followed by a performance test of the cluster, using pgbench. As pgbench can take a while to complete, benchmarking can be omitted by running:
+This command does a functional test of the cluster components, followed by a performance test of the cluster using pgbench. As pgbench can take a while to complete, you can omit benchmarking by running:
 
 ```
-[tpa]$ tpaexec test <clustername> --skip-tags pgbench
-```
-
-Tags in the test role are `repmgr,postgres,barman,pgbench`
-
-Note that when specifying multiple tags, they should be comma delimited, with
-no spaces; for example: 
-
-```
-[tpa]$ tpaexec test <clustername> --skip-tags barman,pgbench
+[tpa]$ tpaexec test <clustername> --excluded_tasks pgbench
 ```
 
 ### TPA server test
 
-To check the installation of the TPA server itself, run:
+To check the installation of the TPA server, run:
 
 ```
 [tpa]$ tpaexec selftest
 ```
 
-### Skipping or including specific tags
+### Including or excluding specific tasks
 
-When re-running a tpaexec provision or deploy after a failure, in the interests
-of time, it can sometimes be useful to miss out tasks by skipping specific tags.
-For example to miss out the repmgr tasks:
-
-```
-[tpa]$ tpaexec deploy <clustername> --skip-tags repmgr
-```
-
-To jump straight to re-run a particular task by specifying a tag--for example,
-to immediately run PGD tasks (the tag being `bdr` for legacy reasons):
-
-```
-[tpa]$ tpaexec deploy <bdr-clustername> --tags bdr
-```
-
-*Note that this assumes that the previous tasks all completed successfully.*
-
-
-To find all the tags for the relevant architecture that might be useful, run:
-
-```
-[tpa]$ grep -rs "tags:" /opt/EDB/TPA/architectures
-```
+When re-running a tpaexec provision or deploy after a failure or when running
+tests, it can sometimes be useful to miss out tasks using TPA's [task
+selection mechanism](task-selection.md).

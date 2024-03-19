@@ -13,7 +13,6 @@
         mode: "0644"
       notify: Restart apache for pem
   become: yes
-  tags: [pem-server, pem-webserver]
 
 - name: Enable ssl-pem configuration (Debian/Ubuntu)
   block:
@@ -40,4 +39,3 @@
 
   when: ansible_os_family == 'Debian'
   become: yes
-  tags: [pem-server, pem-webserver]

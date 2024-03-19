@@ -20,3 +20,5 @@
         not allow_package_upgrades|default(False)|bool
         or check_install_only|default(False)|bool
       }}"
+  when: >
+    task_selector|permits('pkg')

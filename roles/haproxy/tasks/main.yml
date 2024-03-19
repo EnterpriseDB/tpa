@@ -4,28 +4,24 @@
 
 - include_role:
     name: haproxy/pkg
-    apply:
-      tags: [haproxy, pkg]
   when: >
     'haproxy' in role
     and platform not in ['shared']
-  tags: pkg
+    and task_selector|permits('pkg')
 
 - include_role:
     name: haproxy/config
-    apply:
-      tags: [haproxy, config]
   when: >
     'haproxy' in role
+    and task_selector|permits('config')
 
 - include_role:
     name: haproxy/config
     tasks_from: users.yml
-    apply:
-      tags: [haproxy, config, users]
   when: >
     'postgres' in role
     and groups['role_haproxy']|default([]) is not empty
+    and task_selector|permits('config', 'users')
 
 - set_fact:
     initialise_haproxy: true

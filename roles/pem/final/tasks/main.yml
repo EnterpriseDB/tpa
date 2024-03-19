@@ -4,14 +4,12 @@
 
 - include_role:
     name: pem/server/config/final
-    apply:
-      tags: [pem-server, config]
   when: >
     'pem-server' in role
+    and task_selector|permits('pem-server', 'config')
 
 - include_role:
     name: pem/agent/config/final
-    apply:
-      tags: [pem-agent, config]
   when: >
     'pem-agent' in role
+    and task_selector|permits('pem-agent', 'config')

@@ -482,7 +482,7 @@ def export_vars(instance):
     for key in always_export + instance.get("export_as_vars", []):
         exports[key] = instance.get(key)
 
-    export_if_set = ["region", "backup", "upstream"]
+    export_if_set = ["region", "backup", "upstream", "ansible_host"]
     for key in export_if_set:
         value = instance.get(key)
         if value is not None:

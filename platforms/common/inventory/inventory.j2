@@ -1,6 +1,6 @@
 {# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved. #}
 [{{ cluster_tag }}]
-{% for h in instance_vars %}
+{% for h in instance_vars|selectattr("add_to_inventory") %}
 {% if h.platform == 'docker' %}
 {{ h.Name }} ansible_connection=docker node={{ h.node }} platform={{ h.platform }}
 {% else%}

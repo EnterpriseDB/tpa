@@ -3,17 +3,16 @@
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 - include_role: name=postgres/bdr tasks_from=version.yml
-  tags: always
 
 ## BDR tests
 
 - name: Verify BDR configuration
   include_tasks: bdr/config.yml
-  tags: bdr
 
 - name: Perform DDL tests in the BDR cluster
   include_tasks: bdr/ddl.yml
-  tags: [bdr, ddl]
+  when: >
+    task_selector|selects('ddl')
 
 ## CAMO tests
 #
@@ -37,8 +36,7 @@
 
   - include_tasks:
       file: camo.yml
-      apply:
-         tags: camo
     when:
       all_camo_groups is not empty
-  tags: camo
+  when: >
+    task_selector|selects('camo')

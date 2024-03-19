@@ -9,7 +9,6 @@
     and lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/bdr-pre-node-creation.yml"
-  tags: always
 
 # We need to create the local BDR node if bdr.node is empty.
 #
@@ -210,6 +209,16 @@
     bdr_node_pause_in_standby:
       "{{ bdr_node_pause_in_standby|default('readonly' in role) }}"
 
+# By default, "bdr.join_node_group()" will synchronize the database structure.
+# This is neither needed nor desirable for witness nodes.
+# Note that from BDR 6.0, "bdr.join_node_group()" will forcibly set
+# "synchronize_structure" to "false" for witness nodes.
+
+- name: Determine whether the database structure should be synchronized
+  set_fact:
+    bdr_node_synchronize_structure:
+      "{{ bdr_node_synchronize_structure|default('witness' not in role) }}"
+
 # Next, we call bdr.alter_node_group_config() on any leftover options,
 # i.e., the ones we couldn't specify at creation time, but which are not
 # inside "options" (and which we therefore presume will be accepted by
@@ -263,7 +272,6 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/bdr-post-group-creation.yml"
-  tags: always
 
 # Create a custom replication set to support witness nodes, except for
 # BDR v5 and above, where you can specify node_kind := 'witness'.
@@ -279,8 +287,6 @@
 - name: Configure replication sets
   include_tasks:
     file: bdr3/replication-sets.yml
-    apply:
-      tags: replication-sets
   vars:
     q: >-
       [?type=='bdr' && database=='%s'].replication_sets|[]
@@ -292,7 +298,8 @@
       {{ _publication_sets|map('pyformat_attr', 'name', bdr_node_ids=bdr_node_ids)|list }}
     subscription_sets: >-
       {{ _subscription_sets|map('pyformat', bdr_node_ids=bdr_node_ids)|list }}
-  tags: replication-sets
+  when: >
+    task_selector|permits('replication-sets')
 
 - name: Include bdr-pre-group-join hook
   include_tasks: "{{ hook }}"
@@ -300,4 +307,3 @@
     lookup('first_found', dict(files=hook, skip=True))
   vars:
     hook: "{{ cluster_dir }}/hooks/bdr-pre-group-join.yml"
-  tags: always

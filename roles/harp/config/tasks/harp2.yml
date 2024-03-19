@@ -134,7 +134,6 @@
     ('harp-proxy' in role and 'pgbouncer' not in role)
     or ('postgres' in role
       and groups['role_harp-proxy']|default([]) is not empty)
-  tags: always
 
 # If we want harp-proxy to use a separate readonly user, we need to
 # create it too (and specify the username in the DCS configuration).
@@ -147,7 +146,6 @@
     and ('harp-proxy' in role
       or ('postgres' in role
         and groups['role_harp-proxy']|default([]) is not empty))
-  tags: always
 
 - include_tasks: harp2-proxy.yml
   when: >

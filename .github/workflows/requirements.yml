@@ -5,34 +5,36 @@
 
 name: Python requirements file update
 
+# Runs on:
+# pull_request
+# targeting main branch
+# making change to any of paths
+# when PR is closed
+# if PR was merged (!= closed) see jobs: section for conditional.
 on:
-  push:
-    branches-ignore:
+  pull_request:
+    types:
+      - closed
+    branches:
       - main
-      - dependabot/**
     paths:
-      - requirements-ansible-*.in
-      - requirements.in
+      - requirements*.in
       - requirements/*.in
   workflow_dispatch:
 env:
   LC_ALL: C.UTF-8
   LANG: C.UTF-8
   GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
 
 jobs:
   requirements:
+    if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' }}
     name: Requirements update
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{secrets.GH_SLONIK}}
+          token: ${{ secrets.GH_SLONIK }}
       - uses: ./.github/actions/update-requirements
 
-      - name: Install tox
-        run: pip install tox
-
-      - name: Run dependence tree with tox
-        run: |
-          TOX_PARALLEL_NO_SPINNER=1 tox -e dep

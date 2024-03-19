@@ -1,5 +1,11 @@
 # Building from source
 
+!!! Warning
+This option is intended for developers and advanced users. 
+Only software built and tested by EDB is supported by EDB. Please refer to 
+[Self-Managed Supported Open Source Software](https://www.enterprisedb.com/product-compatibility/edb-supported-open-source-software.pdf).
+!!!
+
 TPA can build Postgres and other required components from source and
 deploy a cluster with exactly the same configuration as with the default
 packaged installation. This ability makes it possible to deploy repeatedly from

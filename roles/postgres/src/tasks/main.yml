@@ -22,7 +22,8 @@
     path: "{{ postgres_build_dir }}"
     state: absent
     force: yes
-  tags: [build-clean, postgres-clean]
+  when: >
+    task_selector|permits('build-clean', 'postgres-clean')
 
 - name: Ensure build directory exists
   file:
@@ -46,7 +47,8 @@
       "{{ postgres_configure_opts|union(postgres_extra_configure_opts) }}"
     _task_environment: "{{ postgres_configure_env|combine(postgres_extra_configure_env) }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
-  tags: [build-clean, postgres-clean]
+  when: >
+    task_selector|permits('build-clean', 'postgres-clean')
 
 - name: Build Postgres
   shell: "PATH={{ build_path }} {{ postgres_make_command }} {{ item }}"
@@ -89,6 +91,5 @@
 - include_role:
     name: postgres/pkg
     tasks_from: src.yml
-    apply:
-      tags: pkg
-  tags: pkg
+  when: >
+    task_selector|permits('pkg')

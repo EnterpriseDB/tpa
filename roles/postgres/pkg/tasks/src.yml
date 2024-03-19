@@ -11,4 +11,5 @@
     package_lists:
     - "{{ src_extra_packages|packages_for(ansible_os_family) }}"
     - "{{ psycopg2_packages|packages_for(ansible_os_family) }}"
-  tags: pkg
+  when: >
+    task_selector|permits('pkg')

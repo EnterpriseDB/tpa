@@ -28,10 +28,10 @@
 # Ansible 9 corresponds to ansible core 2.16
 
 - assert:
-    msg: "Ansible 2.9, 8, or 9 is required"
+    msg: "Ansible 8 or 9 is required"
     that:
       - ansible_version.major == 2
-      - ansible_version.minor in [9, 15, 16]
+      - ansible_version.minor in [15, 16]
   tags: prereqs
 
 - import_tasks: validate-compat.yml
@@ -121,6 +121,8 @@
     - tags
     - vars
     - volumes
+    - provision_only
+    - ansible_host
 
 - assert:
     msg: >-

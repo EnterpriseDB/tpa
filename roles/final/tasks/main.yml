@@ -4,104 +4,85 @@
 
 - include_role:
     name: postgres/final
-    apply:
-      tags: postgres
   when: >
     'postgres' in role
-  tags: postgres
+    and task_selector|selects('postgres')
 
 # Now that Postgres is running, we can ensure that any physical replicas
 # are properly configured (whether we're using repmgr or pg_basebackup).
 
 - include_role:
     name: repmgr/final
-    apply:
-      tags: repmgr
   when: >
     'postgres' in role
     and failover_manager == 'repmgr'
     and initialise_replication is defined
-  tags: repmgr
+    and task_selector|selects('repmgr')
 
+# need to always go into this because it contains always stuff
 - include_role:
     name: postgres/replica/final
-    apply:
-      tags: [postgres, replica]
   when: >
     'postgres' in role
     and 'replica' in role
     and not pgdata_initialised
     and failover_manager not in ['repmgr']
     and not ('bdr' in role and 'readonly' in role)
+    and task_selector|selects('postgres', 'replica')
 
 - include_role:
     name: barman/final
-    apply:
-      tags: barman
   when: >
     'barman' in role or backup is defined
-  tags: barman
+    and task_selector|selects('barman')
 
 - include_role:
     name: etcd/final
-    apply:
-      tags: etcd
   when: >
     'etcd' in role
-  tags: etcd
 
 - include_role:
     name: patroni/final
-    apply:
-      tags: patroni
   when:
     failover_manager == 'patroni'
     and ('primary' in role or 'replica' in role)
     and 'pem-server' not in role
-  tags: patroni
+    and task_selector|selects('patroni')
 
 - include_role:
     name: haproxy/final
-    apply:
-      tags: haproxy
   when: >
     'haproxy' in role
-  tags: haproxy
+    and task_selector|selects('patroni')
 
 - include_role:
     name: pgbouncer/final
-    apply:
-      tags: pgbouncer
   when: >
     'pgbouncer' in role
-  tags: pgbouncer
+    and task_selector|selects('pgbouncer')
 
 - include_role:
     name: postgres/cleanup
-    apply:
-      tags: postgres
   when: >
     'postgres' in role
-  tags: postgres
+    and task_selector|selects('postgres')
 
 # We force an immediate backup for any instances that do not have any
 # backups at all.
 
 - include_role:
     name: barman/first_backup
-    apply:
-      tags: first-backup
   with_items: "{{ backup|default([]) }}"
   loop_control:
     loop_var: this_barman
   vars:
     slot_name: "{{ this_barman|backup_slot_name }}"
-  tags: first-backup
+  when: >
+    task_selector|selects('barman', 'first-backup')
+
 
 - include_role:
     name: postgres/pglogical
-    apply:
-      tags: pglogical
   vars:
     pglogical_publications: >-
       {{ publications|json_query("[?type=='pglogical']") }}
@@ -110,54 +91,44 @@
   when:
     pglogical_publications is not empty
     or pglogical_subscriptions is not empty
-  tags: pglogical
+    and task_selector|selects('pglogical')
 
 - include_role:
     name: postgres/bdr
-    apply:
-      tags: [postgres, bdr]
   when: >
     role|contains('bdr', 'primary')
-  tags: [postgres, bdr]
+    and task_selector|selects('postgres', 'bdr')
 
 - include_role:
     name: harp/final
-    apply:
-      tags: harp
   when:
     failover_manager == 'harp'
     and ('harp-proxy' in role
       or inventory_hostname in first_bdr_primary_candidates|default([]))
     and not 'pem-server' in role
-  tags: harp
+    and task_selector|selects('harp')
 
 - include_role:
     name: efm/final
-    apply:
-      tags: efm
   when: >
      'efm' in role
-  tags: efm
+     and task_selector|selects('efm')
 
 - include_role:
     name: pem/final
   when: >
     'pem-server' in role
     or 'pem-agent' in role
-  tags: pem
+    and task_selector|selects('pem-server', 'pem-agent')
 
 - include_role:
     name: pgd_proxy/final
-    apply:
-      tags: pgd-proxy
   when: >
     'pgd-proxy' in role
-  tags: pgd-proxy
+    and task_selector|selects('pgd-proxy')
 
 - include_role:
     name: sys/ssl/ca/final
-    apply:
-      tags: ssl
   when:
     - ca_created is defined
     - ca_created

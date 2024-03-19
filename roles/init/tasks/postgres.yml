@@ -575,6 +575,10 @@
   when: >
     'pem-server' in role and pem_database_entry is empty
 
+- name: Set postgres_extensions_dictionary
+  set_fact:
+    postgres_extensions_dictionary: "{{ default_postgres_extensions_dictionary }}"
+
 - name: Set list of Postgres extensions
   set_fact:
     postgres_extensions: "{{
@@ -600,6 +604,15 @@
         |list
       }}"
   when: postgres_version is version('9.6', '<')
+
+- name: Remove bluefin for Postgres < 15
+  set_fact:
+    postgres_extensions: "{{
+      postgres_extensions
+      |reject('equalto', 'bluefin')
+      |list
+    }}"
+  when: postgres_version is version('15', '<')
 
 - name: Define platypus configuration settings
   set_fact:

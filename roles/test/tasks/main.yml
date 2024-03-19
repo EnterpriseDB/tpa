@@ -6,14 +6,12 @@
 # applicable to any cluster.
 
 - include_tasks: prereqs.yml
-  tags: always
 
 - name: Run system-level tests
   include_tasks:
     file: sys.yml
-    apply:
-      tags: sys
-  tags: always
+  when: >
+    task_selector|selects('sys')
 
 - name: Run postgres tests
   include_tasks:
@@ -22,59 +20,46 @@
       tags: postgres
   when: >
     'postgres' in role and pgdata_initialised
-  tags: always
 
 - name: Run barman tests
   include_tasks:
     file: barman.yml
-    apply:
-      tags: barman
   when: >
     'barman' in role
-  tags: barman
+    and task_selector|selects('barman')
 
 - name: Run pg-backup-api tests
   include_tasks:
     file: pg-backup-api.yml
-    apply:
-      tags: pg-backup-api
   when: >
     'barman' in role and
-    enable_pg_backup_api|default(False)|bool
-  tags: pg-backup-api
+    enable_pg_backup_api|default(False)|bool and
+    task_selector|selects('pg-backup-api')
 
 - name: Run pgbouncer tests
   include_tasks:
     file: pgbouncer.yml
-    apply:
-      tags: pgbouncer
   when: >
     'pgbouncer' in role
-  tags: pgbouncer
+    task_selector|selects('pgbouncer')
 
 - name: Run haproxy tests
   include_tasks:
     file: haproxy.yml
-    apply:
-      tags: haproxy
   when: >
     'haproxy' in role
-  tags: haproxy
+    and task_selector|selects('haproxy')
 
 - name: Run harp-proxy tests
   include_tasks:
     file: harp-proxy.yml
-    apply:
-      tags: harp-proxy
   when: >
     'harp-proxy' in role
-  tags: harp-proxy
+    and task_selector|selects('haproxy')
 
 - name: Run pgd-proxy tests
   include_tasks:
     file: pgd-proxy.yml
-    apply:
-      tags: pgd-proxy
   when: >
     'pgd-proxy' in role
-  tags: pgd-proxy
+    and task_selector|selects('pgd-proxy')

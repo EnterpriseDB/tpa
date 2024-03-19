@@ -94,6 +94,160 @@ default_postgres_log_file: "/var/log/postgres/postgres.log"
 
 default_postgres_tablespaces: {}
 
+default_postgres_extensions_dictionary:
+  edb_pg_tuner:
+    packages:
+      postgresql:
+        Debian: &debian_pg_edb_pg_tuner_packages
+          - edb-pg{{ postgres_version }}-postgres-tuner-1
+        RedHat: &redhat_pg_edb_pg_tuner_packages
+          - edb-pg{{ postgres_version }}-postgres-tuner1
+        Ubuntu: *debian_pg_edb_pg_tuner_packages
+        SLES: *redhat_pg_edb_pg_tuner_packages
+      epas:
+        Debian: &debian_as_edb_pg_tuner_packages
+          - edb-as{{ postgres_version }}-postgres-tuner-1
+        RedHat: &redhat_as_edb_pg_tuner_packages
+          - edb-as{{ postgres_version }}-postgres-tuner1
+        Ubuntu: *debian_as_edb_pg_tuner_packages
+        SLES: *redhat_as_edb_pg_tuner_packages
+      pgextended:
+        Debian: *debian_pg_edb_pg_tuner_packages
+        RedHat: *redhat_pg_edb_pg_tuner_packages
+        Ubuntu: *debian_pg_edb_pg_tuner_packages
+        SLES: *redhat_pg_edb_pg_tuner_packages
+      edbpge:
+        Debian: &debian_pge_edb_pg_tuner_packages
+          - edb-postgresextended{{ postgres_version }}-postgres-tuner-1
+        RedHat: &redhat_pge_edb_pg_tuner_packages
+          - edb-postgresextended{{ postgres_version }}-postgres-tuner1
+        Ubuntu: *debian_pge_edb_pg_tuner_packages
+        SLES: *redhat_pge_edb_pg_tuner_packages
+    spl: edb_pg_tuner
+
+  query_advisor:
+    packages:
+      postgresql:
+        Debian: &query_advisor_pg_packages
+          - edb-pg{{ postgres_version }}-query-advisor
+        RedHat: *query_advisor_pg_packages
+        Ubuntu: *query_advisor_pg_packages
+        SLES: *query_advisor_pg_packages
+      epas:
+        Debian: &query_advisor_as_packages
+          - edb-as{{ postgres_version }}-query-advisor
+        RedHat: *query_advisor_as_packages
+        Ubuntu: *query_advisor_as_packages
+        SLES: *query_advisor_as_packages
+      pgextended:
+        Debian: *query_advisor_pg_packages
+        RedHat: *query_advisor_pg_packages
+        Ubuntu: *query_advisor_pg_packages
+        SLES: *query_advisor_pg_packages
+      edbpge:
+        Debian: &query_advisor_pge_packages
+          - edb-postgresextended{{ postgres_version }}-query-advisor
+        RedHat: *query_advisor_pge_packages
+        Ubuntu: *query_advisor_pge_packages
+        SLES: *query_advisor_pge_packages
+    spl: query_advisor
+
+  edb_wait_states:
+    packages:
+      postgresql:
+        Debian: &debian_pg_edb_wait_states_packages
+          - postgresql{{ postgres_version }}-edb-wait-states
+        RedHat: &redhat_pg_edb_wait_states_packages
+          - postgresql{{ postgres_version }}-edb_wait_states
+        Ubuntu: *debian_pg_edb_wait_states_packages
+        SLES: *redhat_pg_edb_wait_states_packages
+      epas:
+        Debian: &debian_as_edb_wait_states_packages
+          - edb-as{{ postgres_version }}-server-edb-wait-states
+        RedHat: &redhat_as_edb_wait_states_packages
+          - edb-as{{ postgres_version }}-server-edb_wait_states
+        Ubuntu: *debian_as_edb_wait_states_packages
+        SLES: *redhat_as_edb_wait_states_packages
+      pgextended:
+        Debian: *debian_pg_edb_wait_states_packages
+        RedHat: *redhat_pg_edb_wait_states_packages
+        Ubuntu: *debian_pg_edb_wait_states_packages
+        SLES: *redhat_pg_edb_wait_states_packages
+      edbpge:
+        Debian: &debian_pge_edb_wait_states_packages
+          - edb-postgresextended-wait-states-{{ postgres_version }}
+        RedHat: &redhat_pge_edb_wait_states_packages
+           - edb-postgresextended{{ postgres_version }}-wait-states
+        Ubuntu: *debian_pge_edb_wait_states_packages
+        SLES: *redhat_pge_edb_wait_states_packages
+    spl: edb_wait_states
+
+  sql_profiler:
+    packages:
+      postgresql:
+        Debian: &debian_pg_sql_profiler_packages
+          - postgresql-{{ postgres_version }}-sqlprofiler
+        RedHat: &redhat_pg_sql_profiler_packages
+          - sqlprofiler_{{ postgres_version }}
+        Ubuntu: *debian_pg_sql_profiler_packages
+        SLES: *redhat_pg_sql_profiler_packages
+      epas:
+        Debian: &as_sql_profiler_packages
+          - edb-as{{ postgres_version }}-server-sqlprofiler
+        RedHat: *as_sql_profiler_packages
+        Ubuntu: *as_sql_profiler_packages
+        SLES: *as_sql_profiler_packages
+      pgextended:
+        Debian: *debian_pg_sql_profiler_packages
+        RedHat: *redhat_pg_sql_profiler_packages
+        Ubuntu: *debian_pg_sql_profiler_packages
+        SLES: *redhat_pg_sql_profiler_packages
+      edbpge:
+        Debian: &debian_pge_sql_profiler_packages
+          - edb-postgresextended-sqlprofiler-{{ postgres_version }}
+        RedHat: &redhat_pge_sql_profiler_packages
+           - edb-postgresextended{{ postgres_version }}-sqlprofiler
+        Ubuntu: *debian_pge_sql_profiler_packages
+        SLES: *redhat_pge_sql_profiler_packages
+    spl: sql-profiler
+
+  # EDB Storage Pack
+  autocluster:
+    packages: &advanced_storage_pack_packages
+      postgresql:
+        Debian: &pg_advanced_storage_pack_packages
+          - edb-pg{{ postgres_version }}-advanced-storage-pack
+        RedHat: *pg_advanced_storage_pack_packages
+        Ubuntu: *pg_advanced_storage_pack_packages
+        SLES: *pg_advanced_storage_pack_packages
+      epas:
+        Debian: &as_advanced_storage_pack_packages
+          - edb-as{{ postgres_version }}-advanced-storage-pack
+        RedHat: *as_advanced_storage_pack_packages
+        Ubuntu: *as_advanced_storage_pack_packages
+        SLES: *as_advanced_storage_pack_packages
+      pgextended:
+        Debian: *pg_advanced_storage_pack_packages
+        RedHat: *pg_advanced_storage_pack_packages
+        Ubuntu: *pg_advanced_storage_pack_packages
+        SLES: *pg_advanced_storage_pack_packages
+      edbpge:
+        Debian: &pge_advanced_storage_pack_packages
+          - edb-postgresextended{{ postgres_version }}-advanced-storage-pack
+        RedHat: *pge_advanced_storage_pack_packages
+        Ubuntu: *pge_advanced_storage_pack_packages
+        SLES: *pge_advanced_storage_pack_packages
+    spl: autocluster
+
+  refdata:
+    packages: *advanced_storage_pack_packages
+    spl: refdata
+  
+  bluefin:
+    packages: *advanced_storage_pack_packages
+    spl: bluefin
+
+
 default_postgres_extensions:
   - pg_stat_statements
   - pg_freespacemap

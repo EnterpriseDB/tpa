@@ -17,6 +17,7 @@ env:
   TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
   EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
   EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
 
 jobs:
 
@@ -35,7 +36,8 @@ jobs:
     - uses: ./.github/actions/install-requirements
 
     - name: Install tox
-      run: pip install tox
+      run: |
+       python3 -m pip install tox
 
     - name: Run tests with tox
       working-directory: ${{ github.workspace }}

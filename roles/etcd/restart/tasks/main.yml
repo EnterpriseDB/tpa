@@ -13,4 +13,3 @@
   with_items: "{{ groups['role_etcd'] }}"
   when:
     inventory_hostname == item
-  tags: [service, restart]

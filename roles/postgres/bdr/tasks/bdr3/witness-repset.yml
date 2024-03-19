@@ -28,7 +28,7 @@
   when:
     inventory_hostname == first_bdr_primary
     and bdr_witnesses is not empty
-  tags: replication-sets
+    and task_selector|permits('replication-sets')
 
 # We add a default subscription to the witness-only replication set on
 # witnesses, unless the instance already explicitly defines a BDR
@@ -75,4 +75,4 @@
   when: >
     'witness' not in role
     and bdr_witnesses is not empty
-  tags: replication-sets
+    and task_selector|permits('replication-sets')

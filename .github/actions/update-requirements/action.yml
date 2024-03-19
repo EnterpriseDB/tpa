@@ -4,8 +4,11 @@
 # this action runs pip-compile on the one that changed on latest push making
 # changes in one of the requirements .in files paths.
 
-name: "Commit and push update"
-description: " use .in file to regenerate the associated .txt"
+name: "Update requirements .txt files and open a PR"
+description: |
+  use .in file to regenerate the associated .txt files
+  generates a PR targeting main branch with resulting changes
+  to .txt files.
 
 runs:
   using: "composite"
@@ -16,52 +19,78 @@ runs:
       shell: bash
       run: |
         pip install pip-tools
-
+    # generating 2 files from requirements.in:
+    # 1 with hashes for tpaexec setup
+    # one without hashes for AAP EE image creation
     - name: Run pip-compile on requirements.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements.in -o requirements.txt
-
-    - name: Run pip-compile on requirements-ansible-community.in
-      shell: bash
-      run: |
-        pip-compile --generate-hashes requirements-ansible-community.in -o requirements-ansible-community.txt
-
-    - name: Run pip-compile on requirements-ansible-2q.in
-      shell: bash
-      run: |
-        pip-compile --generate-hashes requirements-ansible-2q.in -o requirements-ansible-2q.txt
-
+        pip-compile -U --generate-hashes requirements.in -o requirements.txt
+        pip-compile -U requirements.in -o requirements-aap.txt
     - name: Run pip-compile on requirements-ansible-8.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements-ansible-8.in -o requirements-ansible-8.txt
+        pip-compile -U --generate-hashes requirements-ansible-8.in -o requirements-ansible-8.txt
 
     - name: Run pip-compile on test dependency requirements/ansible.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements/ansible.in -o requirements/ansible.txt
+        pip-compile -U --generate-hashes requirements/ansible.in -o requirements/ansible.txt
 
     - name: Run pip-compile on test dependency requirements/dep.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements/dep.in -o requirements/dep.txt
+        pip-compile -U --generate-hashes requirements/dep.in -o requirements/dep.txt
 
     - name: Run pip-compile on test dependency requirements/lint.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements/lint.in -o requirements/lint.txt
+        pip-compile -U --generate-hashes requirements/lint.in -o requirements/lint.txt
 
     - name: Run pip-compile on test dependency requirements/testing.in
       shell: bash
       run: |
-        pip-compile --generate-hashes requirements/testing.in -o requirements/testing.txt
+        pip-compile -U --generate-hashes requirements/testing.in -o requirements/testing.txt
 
-    # commit and push changes (if any) on the same branch than the current commit.
-    - name: Commit and push changes
-      uses: devops-infra/action-commit-push@v0.5
+    # install tox and run dep test
+    - name: Install tox
+      shell: bash
+      run: pip install tox
+
+    - name: Run dependency test with tox
+      id: deps
+      shell: bash
+      run: |
+        TOX_PARALLEL_NO_SPINNER=1 tox -e dep
+
+    # create a PR with changes (if any) targeting main.
+    # PR will be in Draft mode if tox dep test failed.
+    # we add !cancelled() condition to ensure draft PR is created.
+    - name: Template PR body
+      id: template
+      uses: chuhlomin/render-template@v1.4
       with:
-        GITHUB_TOKEN: ${{ env.GH_SLONIK }}
-        commit_message: "Update python requirements files"
-      if: >
-        !env.ACT
+        template: .github/actions/update-requirements/body.template.md
+        vars: |
+          pr_number: ${{ github.event.pull_request.number }}
+          ref: ${{ github.ref }}
+
+    - name: Create Pull Request
+      if: ${{ !cancelled() }}
+      id: cpr
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ env.GITHUB_TOKEN }}
+        commit-message: ${{ steps.template.outputs.result }}
+        signoff: false
+        branch: bot/update-requirements
+        delete-branch: true
+        title: 'Update python requirements'
+        body: ${{ steps.template.outputs.result }}
+        labels: |
+          pip dependencies
+        reviewers: EnterpriseDB/tpaexec-dev-team
+        draft: ${{ steps.deps.conclusion == 'failure' }}
+        add-paths: |
+          requirements*.txt
+          requirements/*.txt
