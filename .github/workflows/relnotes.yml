@@ -99,7 +99,7 @@ jobs:
 
       - name: Clean up release notes YAML files
         run: |
-          rm "${{ env.SOURCE_DIRECTORY }}"/*.yml
+          rm -f "${{ env.SOURCE_DIRECTORY }}"/*.{yml,yaml}
 
       - name: Add changes, commit and push new branch
         run: |
