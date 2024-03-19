@@ -10,6 +10,12 @@
 
   Ansible 2.9 is no longer supported, neither as the community
   distribution nor as the 2ndQuadrant fork.
+  Please note that, per the previously issued deprecation notice,
+  this release completely removes support for 2ndQuadrant Ansible,
+  which is no longer maintained. In addition, after Ansible 8 became
+  the default in version 23.29, this version requires Ansible 8 or
+  newer. To ensure you have a compatible Ansible version, please run
+  tpaexec setup after updating TPA as detailed in the documentation.
 
   Users who have been using the `--skip-tags` option to `tpaexec
   deploy` should move to the new `--excluded_tasks` option.
@@ -173,7 +179,7 @@
   In minimal_setup, populate ansible_facts.ansible_selinux.status as the full setup module would do.
 
   On a barman server with the backup api enabled, set the httpd_can_network_connect boolean if required.
-  
+
   Fix the existing code to set selinux context on a barman server.
 
   References: TPA-491.
