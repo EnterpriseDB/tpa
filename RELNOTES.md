@@ -2,6 +2,17 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
+## 23.31 (2024-03-19)
+
+### Bugfixes
+
+- Fix errors in conditionals
+
+  Fixes to syntax errors in some conditionals which could stop a deploy
+  from running.
+
+  References: TPA-702.
+
 ## v23.30 (2024-03-19)
 
 ### Notable changes
