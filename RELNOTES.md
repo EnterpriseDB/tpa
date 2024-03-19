@@ -2,6 +2,100 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
+## v23.30 (2024-03-19)
+
+### Notable changes
+
+- Remove support for ansible versions less than 8
+
+  Ansible 2.9 is no longer supported, neither as the community
+  distribution nor as the 2ndQuadrant fork.
+
+  Users who have been using the `--skip-tags` option to `tpaexec
+  deploy` should move to the new `--excluded_tasks` option.
+
+  References: TPA-501, TPA-686.
+
+- Generate an Execution Environment image for Ansible Automation Platform support
+
+  TPA now generates a custom Execution Environment docker image to be used
+  in Ansible Automation Platform 2.4+ (Controller version 4+). this image
+  contains everything needed to run deployments via AAP. This image is built
+  using ansible-builder and a python-alpine lightweight base image.
+
+  References: TPA-679, TPA-680, TPA-682.
+
+- Task selectors replace ansible tags
+
+  Selective execution of tasks is now supported using custom selectors
+  rather than ansible tags.
+
+  To run only tasks matching a certain selector:
+
+    tpaexec deploy . --included_tasks=barman
+
+  To skip tasks matching a certain selector:
+
+    tpaexec deploy . --excluded_tasks=ssh
+
+  Task selectors can also be used by specifying the `excluded_tasks` or
+  `included_tasks` variables in config.yml .
+
+  References: TPA-657.
+
+### Minor changes
+
+- Improve extension configuration
+
+  Automatically handles adding package names and shared preload
+  library entries for a subset of extensions.
+
+  For these specific extensions, only the extension name is needed in
+  the `extra_postgres_extensions` list or the the `extensions` list of
+  a database entry in `postgres_databases`.
+
+  References: TPA-388, TPA-293.
+
+- Add `bluefin` to list of recognized extensions
+
+  The EDB Advanced Storage Pack package and shared preload library
+  entry will automatically be added for `bluefin` when a user
+  specifies it as an extension and the `postgres_version` is 15 or
+  greater.
+
+  References: TPA-307.
+
+- Avoid synchronizing database structure to PGD witness nodes
+
+  Currently, when creating a witness node, PGD will by default synchronize
+  the source node's database structure. This is however not necessary
+  and the synchronized schema will never be used or updated. To prevent
+  this happening, explicitly set bdr.join_node_group()'s option
+  "synchronize_structure" to "none" for witness nodes.
+
+  References: TPA-665.
+
+- Add option to provision without deploying
+
+  If an instance has `provision_only: true` in config.yml, it will
+  be provisioned as normal but not added to the inventory which is seen
+  by `tpaexec deploy`.
+
+  An example use for this is with a custom docker image to set up a
+  testing environment.
+
+  References: TPA-627.
+
+### Bugfixes
+
+- Fix preloads that differ from their extension name
+
+  Addressed by TPA-388, the `default_postgres_extensions_dictionary`
+  contains the correct shared preload library entry name for each
+  extension.
+
+  References: TPA-645.
+
 ## v23.29 (2024-02-15)
 
 ### Notable changes

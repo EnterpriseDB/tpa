@@ -1,8 +1,0 @@
-- summary: Fix preloads that differ from their extension name
-  description: |
-    Addressed by TPA-388, the `default_postgres_extensions_dictionary`
-    contains the correct shared preload library entry name for each
-    extension.
-  type: bugfix
-  jira_tickets:
-  - TPA-645
