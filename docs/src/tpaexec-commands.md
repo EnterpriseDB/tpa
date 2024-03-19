@@ -8,29 +8,29 @@ cluster. These commands can be invoked against your cluster directory,
 like any built-in cluster management command. Having a uniform way to
 define and run such processes reduces the likelihood of errors caused by
 misunderstandings and operator error, or process documentation that was
-correct in the past, but has drifted away from reality since then.
+correct in the past but has become incorrect since then.
 
 Writing Ansible playbooks means that you can implement arbitrarily
-complex tasks; following the custom command conventions means you can
-take advantage of various facts that are set based on your config.yml
-and the cluster discovery tasks that TPA performs, and not have to
+complex tasks. Following the custom command conventions means you can
+take advantage of various facts that are set based on your `config.yml`
+and the cluster discovery tasks that TPA performs. You don't have to
 think about details like connections, authentication, and other basic
 features.
 
-This makes it much easier to write resilient, idempotent commands in a
-way that ad-hoc shell scripts (could be, but) usually aren't.
+This approach makes it much easier to write resilient, idempotent commands in a
+way that ad hoc shell scripts can be, but usually aren't.
 
-## Quickstart
+## Quick start
 
-* Create `commands/mycmd.yml` within your cluster directory
-* Run `tpaexec mycmd /path/to/cluster`
+* In your cluster directory, create `commands/mycmd.yml`. 
+* Run `tpaexec mycmd /path/to/cluster`.
 
 ## Example
 
-Here's an example of a command that runs a single command on all
-instances in the cluster. Depending on the use-case, you can write
-commands that target different hosts (e.g., `hosts: role_postgres` to
-run only on Postgres instances), or run additional tasks and evaluate
+This example shows a command that runs a single command on all
+instances in the cluster. Depending on the use case, you can write
+commands that target different hosts (for example, `hosts: role_postgres` to
+run only on Postgres instances) or run additional tasks and evaluate
 conditions to determine exactly what to do.
 
 ```yaml
