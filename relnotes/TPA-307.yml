@@ -1,9 +1,0 @@
-- summary: Add `bluefin` to list of recognized extensions
-  description: |
-    The EDB Advanced Storage Pack package and shared preload library
-    entry will automatically be added for `bluefin` when a user
-    specifies it as an extension and the `postgres_version` is 15 or
-    greater.
-  type: minor_change
-  jira_tickets:
-  - TPA-307
