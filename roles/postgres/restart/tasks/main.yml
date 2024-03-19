@@ -15,9 +15,8 @@
     state: "{{ postgres_service_end_state|default('started') }}"
   become_user: root
   become: yes
-  when:
-    pgdata_initialised and _postgres_service_managed
   when: >
+    pgdata_initialised and _postgres_service_managed and
     task_selector|permits('service', 'restart')
 
 - name: Wait for Postgres to start

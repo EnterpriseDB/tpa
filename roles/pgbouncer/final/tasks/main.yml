@@ -4,10 +4,10 @@
 
 - include_role:
     name: pgbouncer/service
-    when: >
-      task_selector|permits('service')
+  when: >
+    task_selector|permits('service')
 
 - include_role:
     name: pgbouncer/restart
-    when: >
-      task_selector|permits('service', 'restart')
+  when: >
+    task_selector|permits('service', 'restart')
