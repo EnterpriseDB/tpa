@@ -17,9 +17,9 @@ Starting version 2.4 AAP uses container images to run ansible playbooks.
 These containers, called Execution Environment (EE), bundle dependencies
 required by playbooks to run successfully.
 
-!!! Note:
-  EDB customers can reach out to EDB support for help with the Execution
-  Environment (EE)
+!!! Note
+    EDB customers can reach out to EDB support for help with the Execution
+    Environment (EE)
 
 As an AAP admin, create an entry in your available EE list pointing to
 your EE image.
@@ -105,27 +105,27 @@ Run `tpaexec provision` to generate inventory and other related files.
 Add a Project in AAP using the git repository as source.
 Set default EE to use tpa provided image.
 
-!!! Note on project options
+!!! Note project options
 
-  Use of `Update Revision on Launch` is strongly suggested to ensure
-  changes are correctly synced before running a job.
+    Use of `Update Revision on Launch` is strongly suggested to ensure
+    changes are correctly synced before running a job.
 
-  `Allow Branch Override` is required when trying to use multiple
-  inventory with a single project.
+    `Allow Branch Override` is required when trying to use multiple
+    inventory with a single project.
 
 #### Inventory
 
 Add an empty inventory, use the project as an external source to
 populate it using `inventory/00-cluster_name` as inventory file.
 
-!!! Note on inventory options
+!!! Note inventory options
 
-  Use of `Overwrite local groups and hosts from remote inventory source`
-  is strongly suggested to ensure changes are correctly synced.
+    Use of `Overwrite local groups and hosts from remote inventory source`
+    is strongly suggested to ensure changes are correctly synced.
 
-  `Overwrite local variables from remote inventory source` is also
-  suggested when not setting additionnal variables outside TPA's control
-  in AAP.
+    `Overwrite local variables from remote inventory source` is also
+    suggested when not setting additionnal variables outside TPA's control
+    in AAP.
 
 #### Credentials
 
@@ -144,7 +144,8 @@ Include required credentials:
 - machine credential
 
 Set two additional variable:
-```
+
+```yaml
   tpa_dir: /opt/EDB/TPA
   cluster_dir: /runner/project
 ```
@@ -192,7 +193,8 @@ workstation package version used.
 Ensure that any cluster using AAP is up to date by running `tpaexec
 relink <cluster_dir>`. Ensure that you push any change committed by
 `relink` command.
-```
+
+```bash
 $ git status
 On branch cluster_name
 Your branch is ahead of 'tower/cluster_name' by 1 commit.
