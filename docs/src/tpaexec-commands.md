@@ -7,7 +7,7 @@ You can use this mechanism to automate any processes that apply to your
 cluster. These commands can be invoked against your cluster directory,
 like any built-in cluster management command. Having a uniform way to
 define and run such processes reduces the likelihood of errors caused by
-misunderstandings and operator error, or process documentation that was
+misunderstandings and operator error or process documentation that was
 correct in the past but has become incorrect since then.
 
 Writing Ansible playbooks means that you can implement arbitrarily
@@ -18,7 +18,7 @@ think about details like connections, authentication, and other basic
 features.
 
 This approach makes it much easier to write resilient, idempotent commands in a
-way that ad hoc shell scripts can be, but usually aren't.
+way that ad hoc shell scripts can be but usually aren't.
 
 ## Quick start
 

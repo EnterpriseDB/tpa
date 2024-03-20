@@ -55,7 +55,7 @@ Run `tpaexec help configure-options` for a list of common options.
 
 The architecture you select determines the other options that are accepted.
 Typically, each architecture accepts some unique options as well as the
-generic options that follow
+generic options that follow.
 
 For example, with M1 you can use `--num-cascaded-replicas 3` to create
 a cluster with three cascaded replicas. Consult the
@@ -121,10 +121,10 @@ architecture.
 Specify `--network 192.168.0.0/16` to assign subnets from a different network.
 
 !!! Note
-    On AWS clusters, this corresponds to the VPC CIDR.
+    On AWS clusters, this value corresponds to the VPC CIDR.
     See the [AWS](platform-aws.md#vpc-required) documentation for details.
 
-Specify `--subnet-prefix 26` to assign subnets of a different size, /26 instead
+Specify `--subnet-prefix 26` to assign subnets of a different size: /26 instead
 of /28 in this case.
 
 Specify `--no-shuffle-subnets` to allocate subnets from the start of the
@@ -163,7 +163,7 @@ TPA has no control over volume sizes.
 ### Hostnames
 
 By default, `tpaexec configure` randomly selects as many hostnames
-as it needs from a pre-approved list of several dozen names. This value is
+as it needs from a pre-approved list of several dozen names. This selection is
 enough for most clusters.
 
 Specify `--hostnames-from <filename>` to select hostnames from a file
@@ -180,16 +180,16 @@ option other than `--random-sort`, which is the default.
 
 Use `--hostnames-unsorted` to not sort hostnames at all. In this case,
 they're assigned in the order in which they're found in the hostnames file.
-This is the default when you explicity specify a hostnames file.
+This is the default when you explicitly specify a hostnames file.
 
 Use `--cluster-prefixed-hostnames` to make each hostname begin with the
 name of the cluster. This setting can be useful to avoid hostname clashes when
 running more than one Docker cluster on the same host.
 
-Hostnames can contain only letters (a-z), digits (0-9), and '-'. They
+Hostnames can contain only letters (a-z), digits (0-9), and hyphen (-). They
 can be FQDNs, depending on the selected platform. Specify hostnames
 in lower case. Any uppercase characters are converted to lower case
-internally, and any references to these hostnames in `config.yml` (for example,
+internally. Any references to these hostnames in `config.yml` (for example,
 `upstream: hostname`) must use only lowercase letters.
 
 ## Software selection
@@ -216,8 +216,7 @@ By default, it installs the 2ndQuadrant public repository, which
 doesn't need a subscription, and adds on any product repositories that
 the architecture requires (for example, the PGD repository).
 
-For a ore detailed explanation of how TPA uses 2ndQuadrant and EDB
-repositories, see [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md).
+For more details, see [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md).
 
 Use `--2Q-repositories source/name/maturity …` or
 `--edb-repositories repository …` to specify the complete list of
@@ -259,14 +258,14 @@ Advanced Server (EPAS) versions 11 through 16.
 You must specify both the flavour (or distribution) and major version of
 Postgres to install, for example:
 
-* `--postgresql 14` will install PostgreSQL 14.
+* `--postgresql 14` installs PostgreSQL 14.
 
-* `--edb-postgres-extended 15` will install EDB Postgres Extended 15.
+* `--edb-postgres-extended 15` installs EDB Postgres Extended 15.
 
-* `--edb-postgres-advanced 15 --redwood` will install EDB Postgres Advanced Server 15 in
+* `--edb-postgres-advanced 15 --redwood` installs EDB Postgres Advanced Server 15 in
   Redwood mode.
 
-* `--edb-postgres-advanced 15 --no-redwood` will install EDB Postgres Advanced Server 15 in
+* `--edb-postgres-advanced 15 --no-redwood` installs EDB Postgres Advanced Server 15 in
   non-Redwood mode.
 
 If you're installing EDB Postgres Advanced Server, you must specify whether it operates
@@ -299,7 +298,7 @@ like `2:...`.
 You can also specify `--extra-packages p1 p2 …` or
 `--extra-postgres-packages p1 p2 …` to install additional packages.
 The former lists packages to install along with system packages, while
-the latter lists packages to install later along with postgres packages.
+the latter lists packages to install later along with Postgres packages.
 (If you mention packages that depend on Postgres in the former list, the
 installation fails because Postgres isn't yet installed.) The
 arguments are passed on to the package manager for installation without
@@ -314,13 +313,13 @@ can't be installed.
 The use of wildcards in `*_package_version` when added
 permanently to `config.yml` can result in unexpected updates to
 installed software during `tpaexec deploy` on nodes with RHEL 8 and
-above (or derivative OSs that use dnf, such as Rocky Linux).
+above (or derivative operating systems that use dnf, such as Rocky Linux).
 When deploy runs on an existing cluster that already has packages
 installed, Ansible might be unable to match the full package version.
 For example, if the value for `bdr_package_version` was set to `3.6*`,
 then:
 1. Ansible can't match this to an installed version of PGD. 
-a. It assumes no package is installed. 
+1. It assumes no package is installed. 
 1. It attempts to install the latest version available of the package with the same name
 in the configured repository, that is, 3.7.
 
@@ -423,11 +422,11 @@ gnome-keyring and secret-tool.
 
 The default is to store the vault password using the `system` keyring for the new cluster.
 Removing `keyring_backend: system` in `config.yml` file before any `provision`
-will revert the previous default to store then vault password in a plaintext file.
+reverts the previous default to store the vault password in a plaintext file.
 
 Using `keyring_backend: system` also generates a `vault_name` entry in `config.yml`
-used to store the vault password unique storage name. TPA generates an UUID by
-default, but there 's no naming scheme requirements.
+used to store the vault password unique storage name. TPA generates a UUID by
+default, but there's no naming scheme requirements.
 
 !!! Note
     When using `keyring_backend: system` and the same base `config.yml` file

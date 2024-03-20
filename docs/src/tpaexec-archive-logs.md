@@ -13,8 +13,8 @@ in the cluster into a separate directory.
 ## Prerequisites
 
 If you have an existing cluster, you can run `tpaexec archive-logs`
-immediately. But if you are configuring a new cluster, you must at least
-[provision](tpaexec-provision.md) the cluster. You will get more logs if
+immediately. But if you're configuring a new cluster, you must at least
+[provision](tpaexec-provision.md) the cluster. You'll get more logs if
 you also [deploy](tpaexec-deploy.md) the cluster.
 
 ## Quick start
@@ -51,7 +51,7 @@ uncivil                    : ok=3    changed=3    unreachable=0    failed=0
 urchin                     : ok=3    changed=3    unreachable=0    failed=0
 ```
 
-You can append `-v`, `-vv`, and so on, to the command if you want more verbose output.
+If you want more verbose output, you can append `-v`, `-vv`, and so on, to the command.
 
 ## Generated files
 
