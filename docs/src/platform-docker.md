@@ -130,7 +130,7 @@ tpaexec with the `instance_defaults` or per-container variable
       docker_security_opts:
         - no-new-privileges
 
-Other arguments to `docker run`'s `--security-opts` are also accepted, for example,
+Other arguments to the `--security-opts` argument of the `docker run` command are also accepted, for example,
 SELinux user and role.
 
 #### Linux capabilities flags
