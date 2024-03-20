@@ -14,8 +14,7 @@
     name: postgres/user
   when: >
     'pgbouncer' in role and
-    'postgres' not in role
-  when: >
+    'postgres' not in role and
     task_selector|permits('user')
 
 - include_tasks: pgbouncer.yml
