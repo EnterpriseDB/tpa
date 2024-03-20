@@ -14,8 +14,7 @@ cluster_vars:
 ```
 
 Values you specify take precedence over any TPA default
-values for that variable. First add the settings to
-`sysctl.conf`, each on its own line. Then load them with `sysctl -p`.
-
+values for that variable. TPA first adds the settings to
+`sysctl.conf` line-by-line, and finally loaded them with `sysctl -p`.
 Docker and lxd instances don't support setting sysctl values, so TPA
 skips this step for those platforms.
