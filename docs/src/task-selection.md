@@ -77,7 +77,7 @@ The following selectors are supported for either inclusion or exclusion:
 
 - haproxy
 
-    Tasks related to Haproxy.
+    Tasks related to HAProxy.
 
 - harp
 
