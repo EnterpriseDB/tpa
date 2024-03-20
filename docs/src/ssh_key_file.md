@@ -13,5 +13,5 @@ of `.pub` at the same location.
 ssh_key_file: ~/.ssh/id_rsa
 ```
 
-(If `~/.ssh/id_rs` doesn't already exist, it's created by `ssh-keygen`
+(If `~/.ssh/id_rsa` doesn't already exist, it's created by `ssh-keygen`
 during provisioning.)
