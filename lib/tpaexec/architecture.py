@@ -1278,6 +1278,9 @@ class Architecture(object):
         Returns a map of things that should be accepted as arguments to
         --install-from-source to their corresponding build configuration
         """
+        bdr_default_source_dir = "/opt/postgres/src/bdr"
+        bdr_build_commands = ["make -C %s -s install" % bdr_default_source_dir]
+
         return {
             "postgres": {
                 "postgres_installation_method": "src",
@@ -1300,24 +1303,18 @@ class Architecture(object):
                 "name": "bdr",
                 "git_repository_url": "git@github.com:EnterpriseDB/bdr.git",
                 "git_repository_ref": "REL3_7_STABLE",
-                "build_commands": [
-                    "make -f ../../src/bdr/Makefile -s install",
-                ],
+                "build_commands": bdr_build_commands,
             },
             "bdr4": {
                 "name": "bdr",
                 "git_repository_url": "git@github.com:EnterpriseDB/bdr.git",
                 "git_repository_ref": "REL_4_STABLE",
-                "build_commands": [
-                    "make -f ../../src/bdr/Makefile -s install",
-                ],
+                "build_commands": bdr_build_commands,
             },
             "bdr5": {
                 "name": "bdr",
                 "git_repository_url": "git@github.com:EnterpriseDB/bdr.git",
-                "build_commands": [
-                    "make -f ../../src/bdr/Makefile -s install",
-                ],
+                "build_commands": bdr_build_commands,
             },
             "barman": {
                 "barman_installation_method": "src",
