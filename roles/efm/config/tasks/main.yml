@@ -10,13 +10,23 @@
     mode: "0755"
     state: directory
 
-- name: Include role postgres/creatuser
+- name: Include role postgres/createuser
   include_role: name=postgres/createuser
   vars:
     username: efm
     role_attrs:
     - superuser
     password_encryption: md5
+
+- name: Allow efm user to run db function as {{ postgres_user }}
+  community.general.sudoers:
+    name: "efm_run_as_{{ postgres_user }}"
+    state: present
+    user: efm
+    runas: "{{ postgres_user }}"
+    commands: "{{ efm_bin_dir }}/efm_db_functions"
+  when: >
+    failover_manager == "efm"
 
 # EFM requires MD5 authentication, but instead of storing an MD5 secret,
 # it uses a homebrew "encryption" scheme that feeds the cluster name to

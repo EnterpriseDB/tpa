@@ -19,7 +19,7 @@
     path: "~{{ ssh_username }}/.ssh"
     state: directory
     owner: "{{ ssh_username }}"
-    group: "{{ ssh_username }}"
+    group: "{{ ssh_usergroup }}"
     mode: "0700"
   become_user: "{{ ssh_username }}"
   become: yes

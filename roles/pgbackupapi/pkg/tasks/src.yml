@@ -66,8 +66,8 @@
     mode: "0750"
 
 - name: Install custom Postgres Backup API service unit file
-  copy:
-    src: pg-backup-api.service
+  template:
+    src: pg-backup-api.service.j2
     dest: /etc/systemd/system/pg-backup-api.service
     owner: root
     group: root
