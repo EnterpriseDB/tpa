@@ -30,6 +30,10 @@ importlib-metadata==7.0.2
     # via keyring
 jaraco-classes==3.3.1
     # via keyring
+jaraco-context==4.3.0
+    # via keyring
+jaraco-functools==4.0.0
+    # via keyring
 jeepney==0.8.0
     # via
     #   keyring
@@ -40,12 +44,14 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-keyring==24.3.1
+keyring==25.0.0
     # via -r requirements.in
 markupsafe==2.1.5
     # via jinja2
 more-itertools==10.2.0
-    # via jaraco-classes
+    # via
+    #   jaraco-classes
+    #   jaraco-functools
 netaddr==1.2.1
     # via -r requirements.in
 packaging==24.0
