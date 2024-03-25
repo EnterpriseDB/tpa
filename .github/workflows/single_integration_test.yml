@@ -71,6 +71,14 @@ on:
         description: "Use the downloader"
         type: boolean
         default: true
+      runner:
+        description: "Runner version"
+        required: false
+        default: "ubuntu-22.04"
+        type: choice
+        options:
+        - "ubuntu-20.04"
+        - "ubuntu-22.04"
 
 env:
   LANG: "C.UTF-8"
@@ -87,7 +95,7 @@ jobs:
   integration-test:
     name: Integration test
 
-    runs-on: ubuntu-20.04
+    runs-on: ${{ github.event.inputs.runner }}
 
     steps:
       - name: Checkout source repository

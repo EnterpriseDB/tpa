@@ -34,7 +34,7 @@ jobs:
 
   Build:
     name: Build the Execution Environment
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       IMAGE_NAME: ${{ github.event.inputs.tpaexec-ee-ref == 'AAP24' && 'tpa-ee' || 'tpa-ee-alpine' }}
     steps:

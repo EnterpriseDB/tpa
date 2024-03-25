@@ -67,6 +67,14 @@ on:
         required: false
         default: ""
         type: string
+      runner:
+        description: "github runner"
+        required: false
+        default: "ubuntu-22.04"
+        type: choice
+        options:
+        - "ubuntu-20.04"
+        - "ubuntu-22.04"
 
 env:
   LANG: "C.UTF-8"
@@ -83,7 +91,7 @@ jobs:
   integration-test:
     name: Test_deploy
 
-    runs-on: ubuntu-20.04
+    runs-on: {{ github.events.inputs.runner }}
 
     steps:
     - name: Checkout source repository

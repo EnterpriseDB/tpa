@@ -36,6 +36,10 @@ full: # 500+ clusters do not use this option
     - "docker"
   tpa_architecture: &full_tpa_architecture
     - "BDR-Always-ON"
+  include:
+    - tpa_os_image: "redhat:7"
+      runner: "ubuntu-20.04"
+
 # latest os               3
 # silver                  1
 # all postgres_flavour    3
@@ -214,6 +218,9 @@ redhat-full-14:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
+  include:
+    - tpa_os_image: "redhat:7"
+      runner: "ubuntu-20.04"
 # all ubuntu              3
 # all layout              4
 # all flavour             3

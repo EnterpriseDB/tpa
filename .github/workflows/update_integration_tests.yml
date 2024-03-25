@@ -18,7 +18,7 @@ jobs:
 
   load-matrix:
     name: Load Matrix
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       json: ${{ steps.load-yaml.outputs.json }}
     steps:
@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout source repository

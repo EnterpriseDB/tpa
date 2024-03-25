@@ -50,19 +50,25 @@ On MacOS X, you can [install "Docker Desktop for
 Mac"](https://hub.docker.com/editions/community/docker-ce-desktop-mac/)
 and launch Docker from the application menu.
 
-### CgroupVersion
+### Cgroups
 
-Support for CgroupVersion 2 is not fully baked yet for docker sdk in
-ansible and related tooling. So while we recommend using a recent
-version of docker; we rely on CgroupVersion 1 until version 2 is
-fully supported. Instructions below suggest the changes to switch to
-CgroupVersion 1 if your platform uses CgroupVersion 2 by default.
+TPA supports Docker containers on hosts running cgroups version 1 or 2.
+On a host running cgroups2, instances running RHEL 7 are not supported.
 
-On Linux:
+If you need to use RHEL 7 instances but your host is running cgroups
+version 2, you can switch to cgroups version 1 as follows.
+
+On Debian-family Linux distributions:
 ```
 $ echo 'GRUB_CMDLINE_LINUX=systemd.unified_cgroup_hierarchy=false' > \
   /etc/default/grub.d/cgroup.cfg
 $ update-grub
+$ reboot
+```
+
+On RedHat-family Linux distributions:
+```
+$ grubby --args=systemd.unified_cgroup_hierarchy=false --update-kernel=ALL
 $ reboot
 ```
 On MacOS:

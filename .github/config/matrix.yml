@@ -51,6 +51,8 @@ default:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "epas"
       tpa_failover_manager: "efm"
+    - tpa_os_image: "redhat:7"
+      runner: "ubuntu-20.04"
 simple:
   tpa_architecture: *default_tpa_architecture
   tpa_postgres_flavour: *default_tpa_postgres_flavour
