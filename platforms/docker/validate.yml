@@ -32,7 +32,7 @@
        _host_cgroup_version == '1'
        or _bad_images|length == 0
     msg:
-      - "TPA currently supports CgroupVersion 1 for the following images: {{ _bad_images|unique }}"
+      - "TPA doesn't support CgroupVersion 2 for the following images: {{ _bad_images|unique }}"
       - "Consult platform-docker.md for information on using docker platform"
   vars:
     _host_cgroup_version: "{{ docker_system.host_info.CgroupVersion|default(None) }}"

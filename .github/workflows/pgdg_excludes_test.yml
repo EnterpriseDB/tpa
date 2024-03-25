@@ -65,7 +65,7 @@ on:
         - "true"
         - "false"
       runner:
-        description: "github runner"
+        description: "github runner (ubuntu20.04 required when using tpa_os_image: 'tpa/redhat:7')"
         required: true
         default: "ubuntu-22.04"
         type: choice
