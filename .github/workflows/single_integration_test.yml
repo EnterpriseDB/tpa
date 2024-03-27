@@ -23,11 +23,12 @@ on:
         required: true
         type: choice
         options:
-        - tpa/debian:11
         - tpa/redhat:8
         - tpa/ubuntu:20.04
         - tpa/debian:9
         - tpa/debian:10
+        - tpa/debian:11
+        - tpa/debian:12
         - tpa/redhat:7
         - tpa/sles:15
         - tpa/redhat:9

@@ -10,6 +10,8 @@ according to the distribution.
 
 Distribution| Python 2| Python 3
 ----|----|----
+Debian 12/bookworm|✓|✓ (3.11)
+Debian 11/bullseye|✓|✓ (3.9)
 Debian 10/buster|✓|✓ (3.7)
 Debian 9/stretch|✓|✓ (3.5)
 Debian 8/jessie|✓|✗ (3.4)

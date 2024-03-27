@@ -12,6 +12,7 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 
 ## Debian x86
 
+* Debian 12/bookworm is fully supported
 * Debian 11/bullseye is fully supported
 * Debian 10/buster is fully supported
 * Debian 9/stretch is a legacy distribution

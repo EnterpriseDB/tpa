@@ -50,7 +50,7 @@ it is ready to use immediately.
 To create a local repository manually, you must first create an
 appropriate directory structure. When using `--enable-local-repo`,
 TPA will create a `local-repo` directory and OS-specific
-subdirectories within it (e.g., `local-repo/Debian/10`), based on the OS
+subdirectories within it (e.g., `local-repo/Debian/12`), based on the OS
 you select for the cluster. We recommend that this structure is also
 used for manually created repositories.
 
@@ -92,7 +92,7 @@ tool for your system as detailed below.
 
 !!! Note
     You must generate the metadata in the subdirectory that the instance
-    will use, i.e., if you copy packages into `local-repo/Debian/10`, you
+    will use, i.e., if you copy packages into `local-repo/Debian/12`, you
     must create the metadata in that directory, not in `local-repo/Debian`.
 
 ### Debian/Ubuntu repository metadata
@@ -106,7 +106,7 @@ $ sudo apt-get update && sudo apt-get install -y dpkg-dev
 Now you can use `dpkg-scanpackages` to generate the metadata:
 
 ```shell
-$ cd local-repo/Debian/buster
+$ cd local-repo/Debian/bookworm
 # download/copy .deb package files
 $ dpkg-scanpackages . | gzip > Packages.gz
 ```

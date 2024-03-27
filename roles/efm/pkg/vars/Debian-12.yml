@@ -1,0 +1,8 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+efm_dependency_packages:
+  - openjdk-17-jre
+  - iputils-ping
+  - procps
