@@ -33,15 +33,15 @@
     file: pg-backup-api.yml
   when: >
     'barman' in role and
-    enable_pg_backup_api|default(False)|bool and
-    task_selector|selects('pg-backup-api')
+    enable_pg_backup_api|default(False)|bool
+    and task_selector|selects('pg-backup-api')
 
 - name: Run pgbouncer tests
   include_tasks:
     file: pgbouncer.yml
   when: >
     'pgbouncer' in role
-    task_selector|selects('pgbouncer')
+    and task_selector|selects('pgbouncer')
 
 - name: Run haproxy tests
   include_tasks:
