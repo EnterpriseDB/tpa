@@ -191,7 +191,7 @@ workstation package version used.
 ### Run tpaexec relink on your cluster directory
 
 Ensure that any cluster using AAP is up to date by running `tpaexec
-relink <cluster_dir>`. Ensure that you push any change committed by
+relink <cluster_dir> --force`. Push any change committed by the
 `relink` command.
 
 ```bash

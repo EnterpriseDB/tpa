@@ -1,27 +1,40 @@
 #!/usr/bin/env python3
 
-import filecmp
+import argparse
 import os, re, subprocess, sys, yaml
 import shutil
+import textwrap
 
-if len(sys.argv) > 1 and sys.argv[1] == "--help":
-    print(
-        """Command: tpaexec relink clustername
+p = argparse.ArgumentParser(
+    description="""
+        Creates links from the cluster directory into the tpa directory
+    """,
+    usage=textwrap.dedent(
+        """
+        tpaexec relink clustername [--force]
 
-Tries to repair any dangling symbolic links within a cluster directory
-(e.g., deploy.yml) by making them point to the correct $TPA_DIR when
-appropriate. (TPA_DIR=%s)
+        Tries to repair any dangling or missing symbolic links within a cluster
+        directory (e.g., deploy.yml) by making them point to the correct
+        $TPA_DIR when appropriate. (TPA_DIR=%s)
 
-This command is useful if a cluster was configured on one machine and
-moved to another system with TPA installed in a different location,
-or to add links for new commands."""
-        % os.environ.get("TPA_DIR", "<unset>")
+        This command is useful if a cluster was configured on one machine and
+        moved to another system with TPA installed in a different location,
+        or to add links for new commands.
+
+        If the cluster is configured for use with Ansible Automation Platform,
+        copies files instead of creating symlinks.
+
+        With --force, removes links or files if they already exist.
+
+                          """
     )
-    sys.exit(0)
+    % os.environ.get("TPA_DIR", "<unset>"),
+)
+p.add_argument("--force", help="remove existing files", action="store_true")
+p.add_argument("--verbose", "-v", action="store_true")
 
-v = 0
-if len(sys.argv) > 1 and sys.argv[1].startswith("-v"):
-    v = 1
+args = vars(p.parse_args())
+v = args.get("verbose")
 
 # First, we establish that we were invoked as ``tpaexec relink clusterdir`` on a
 # valid cluster directory.
@@ -94,19 +107,20 @@ with open(r"./config.yml") as config_file:
     for s in ["deploy.yml", "commands", "tests"]:
         target = "%s/architectures/%s/%s" % (TPA_DIR, architecture, s)
 
-        if os.path.isfile(target) and (
-            not os.path.exists(s) or not filecmp.cmp(target, s, shallow=False)
-        ):
-            # copy file for tower use case
-            # to ensure file content is passed in git repo
-            # instead of symlink path
-            if config.get("ansible_tower"):
-                shutil.copy(target, s)
-            else:
-                os.symlink(target, s)
-            modified_paths.append(s)
-            if v:
-                print("%s: %s" % (s, target))
+        if os.path.isfile(target):
+            if args.get("force") and os.path.isfile(s):
+                os.remove(s)
+            if not os.path.exists(s):
+                # copy file for tower use case
+                # to ensure file content is passed in git repo
+                # instead of symlink path
+                if config.get("ansible_tower"):
+                    shutil.copy(target, s)
+                else:
+                    os.symlink(target, s)
+                modified_paths.append(s)
+                if v:
+                    print("%s: %s" % (s, target))
 
         elif os.path.isdir(target):
             if not os.path.exists(s):
@@ -115,7 +129,9 @@ with open(r"./config.yml") as config_file:
             for l in os.listdir(target):
                 link = "%s/%s" % (s, l)
                 dest = "%s/%s" % (target, l)
-                if not os.path.exists(link) or not filecmp.cmp(link, dest, shallow=False):
+                if args.get("force") and os.path.isfile(link):
+                    os.remove(link)
+                if not os.path.exists(link):
                     # copy file for tower use case
                     # to ensure file content is passed in git repo
                     # instead of symlink path

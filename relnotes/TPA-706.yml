@@ -1,0 +1,17 @@
+- summary: Add --force option to `tpaexec relink`
+  description: |
+    By default, relink doesn't modify targeted files if they already
+    exist. With --force, relink removes all existing targeted files then
+    recreates them.
+
+    --force is needed to update AAP-enabled cluster directories after
+    TPA package upgrade and is also useful for rescuing a cluster that
+    has been broken by manual intervention.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-706
