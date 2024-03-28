@@ -2,12 +2,12 @@
 
 TPA installs a batch of non-Postgres-related packages early during
 the deployment, then all Postgres-related packages together, and then
-packages for optional components separately. These instructions are for
+packages for optional components separately. This page is about
 installing packages like sysstat or strace, which have no dependency on
 Postgres packages.
 
 You can add entries to `packages` under `cluster_vars` or a
-particular instance's `vars` in `config.yml`:
+particular instance's `vars` in config.yml:
 
 ```yaml
 cluster_vars:
@@ -26,20 +26,20 @@ cluster_vars:
       - slespkg1
 ```
 
-In this example, TPA installs its own list of
-`default_packages`, the packages listed under `packages.common`
+In the example above, TPA will install its own list of
+`default_packages` and the packages listed under `packages.common`
 on every instance, and the remaining distribution-specific packages
-based on the distribution the instance is running. If any of these
-packages isn't available, the deployment fails.
+based on which distribution the instance is running. If any of these
+packages is not available, the deployment will fail.
 
-Don't list any packages that depend on Postgres. Use
+Don't list any packages that depend on Postgres; use
 [`extra_postgres_packages`](postgres_installation_method_pkg.md)
 instead.
 
 ## Optional packages
 
-You can specify a list of `optional_packages` that can be installed. They will be
-installed if they're available and ignored otherwise. As with the
+You can specify a list of `optional_packages` to install. They will be
+installed if they are available, and ignored otherwise. As with the
 other settings, the `common` entries apply to every instance, whereas
 any other lists apply only to instances running the relevant
 distribution.
@@ -55,8 +55,8 @@ optional_packages:
 
 ## Removing packages
 
-You can specify a list of `unwanted_packages` to
-remove if they're installed.
+You can specify a list of `unwanted_packages` that should be
+removed if they are installed.
 
 ```yaml
 unwanted_packages:

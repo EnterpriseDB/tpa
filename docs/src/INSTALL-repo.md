@@ -1,22 +1,22 @@
 # Installing TPA from source
 
-You can use TPA from a copy of the source code
+This document explains how to use TPA from a copy of the source code
 repository.
 
 !!! Note
-      To receive EDB support for the software,
-      EDB customers must [install TPA from packages](INSTALL.md).
+      EDB customers must [install TPA from packages](INSTALL.md) in
+      order to receive EDB support for the software.
 
 To run TPA from source, you must install all of the dependencies
-(for example, Python 3.9+) that the packages would handle for you. Or, download
+(e.g., Python 3.9+) that the packages would handle for you, or download
 the source and [run TPA in a Docker container](INSTALL-docker.md).
-(Either way works fine on Linux and macOS.)
+(Either way will work fine on Linux and macOS.)
 
 ## Quickstart
 
-First, you must install the various dependencies: Python 3, Python
-venv, git, openvpn, and patch. Installing from EDB repositories 
-installs these for you along with the TPA
+First, you must install the various dependencies Python 3, Python
+venv, git, openvpn and patch. Installing from EDB repositories would
+would  install these automatically along with the TPA
 packages.
 
 Before you install TPA, you must install the required packages:
@@ -28,40 +28,38 @@ Before you install TPA, you must install the required packages:
 
 ## Clone and setup
 
-After the prerequisites are installed, you can clone the repository:
+With prerequisites installed, you can now clone the repository.
 
 ```
 git clone https://github.com/enterprisedb/tpa.git ~/tpa
 ```
 
-Cloning creates a `tpa` directory in your home directory.
+This creates a `tpa` directory in your home directory.
 
-If you prefer to check out with SSH, use:
-
+If you prefer to checkout with ssh use:<br/>
 ```
 git clone ssh://git@github.com/EnterpriseDB/tpa.git ~/tpa
 ```
 
-Add the bin directory to your path. You can find the bin directory in your newly created clone. 
-
-Add this line to your `.bashrc` file (or other profile file for your preferred shell):
+Add the bin directory, found within in your newly created clone, to your path with:
 
 `export PATH=$PATH:$HOME/tpa/bin`
 
+Add this line to your `.bashrc` file (or other profile file for your preferred shell).
 
-You can now create a working TPA environment by running:
+You can now create a working tpa environment by running:
 
 `
 tpaexec setup
 `
 
-This command creates the Python virtual environment that TPA will use in future. All needed packages are installed in this environment. To test whether this was configured correctly, run:
+This will create the Python virtual environment that TPA will use in future. All needed packages are installed in this environment. To test this configured correctly, run the following:
 
 `
 tpaexec selftest
 `
 
-tpaexec is now installed.
+You now have tpaexec installed.
 
 ## Dependencies
 
@@ -70,9 +68,7 @@ tpaexec is now installed.
 TPA requires Python 3.9 or later, available on most
 modern distributions. If you don't have it, you can use
 [pyenv](https://github.com/pyenv/pyenv) to install any version of Python
-you like without affecting the system packages. (If you weren't already using pyenv, add `pyenv` to
-your PATH in `.bashrc`, and call `eval "$(pyenv init -)"` as described in
-the [pyenv documentation](https://github.com/pyenv/pyenv#installation).)
+you like without affecting the system packages.
 
 ```bash
 # First, install pyenv and activate it in ~/.bashrc
@@ -95,19 +91,23 @@ $ python3 --version
 3.9.0
 ```
 
+If you were not already using pyenv, please remember to add `pyenv` to
+your PATH in .bashrc and call `eval "$(pyenv init -)"` as described in
+the [pyenv documentation](https://github.com/pyenv/pyenv#installation).
+
 ### Virtual environment options
 
-By default, `tpaexec setup` uses the builtin Python 3 `-m venv`
-to create a venv under `$TPA_DIR/tpa-venv` and activate it
-whenever `tpaexec` is invoked.
+By default, `tpaexec setup` will use the builtin Python 3 `-m venv`
+to create a venv under `$TPA_DIR/tpa-venv`, and activate it
+automatically whenever `tpaexec` is invoked.
 
 You can run `tpaexec setup --venv /other/location` to specify a
 different location for the new venv.
 
-However, we strongly suggest leaving the default venv location. If you use a
-different location, you must also set the environment variable `TPA_VENV`
-to that location. For example, add the following line to your
-`.bashrc` or other shell startup scripts:
+We strongly suggest sticking to the default venv location. If you use a
+different location, you must also set the environment variable TPA_VENV
+to its location, for example by adding the following line to your
+.bashrc (or other shell startup scripts):
 
 ```bash
 export TPA_VENV="/other/location"

@@ -1,10 +1,10 @@
 # pg_hba.conf
 
-The Postgres documentation explains the options available in
+The Postgres documentation explains the various options available in
 [`pg_hba.conf`](https://www.postgresql.org/docs/current/auth-pg-hba-conf.html).
 
-By default, TPA generates a sensible `pg_hba.conf` for your
-cluster to allow replication between instances and connections from
+By default, TPA will generate a sensible `pg_hba.conf` for your
+cluster, to allow replication between instances, and connections from
 authenticated clients.
 
 You can add entries to the default configuration by providing a list of
@@ -17,7 +17,7 @@ cluster_vars:
   - hostssl all all 0.0.0.0/0 scram-sha-256
 ```
 
-You can override the default `local all all peer` line in `pg_hba.conf` by
+You can override the default `local all all peer` line in pg_hba.conf by
 setting `postgres_hba_local_auth_method: md5`.
 
 If you don't want any of the default entries, you can change
@@ -41,15 +41,15 @@ cluster_vars:
   postgres_hba_template: my_hba.j2
 ```
 
-If you want to leave the existing `pg_hba.conf` alone, you can do
-that, too:
+If you just want to leave the existing `pg_hba.conf` alone, you can do
+that too:
 
 ```yaml
 cluster_vars:
   postgres_hba_template: ''
 ```
 
-Although it's possible to configure `pg_hba.conf` to be different on
-different instances, we generally recommend a uniform configuration. This approach
-avoids problems with access and replication after any
-topology-changing events, such as switchovers and failovers.
+Although it is possible to configure `pg_hba.conf` to be different on
+different instances, we generally recommend a uniform configuration, so
+as to avoid problems with access and replication after any
+topology-changing events such as switchovers and failovers.

@@ -1,27 +1,27 @@
 # tpaexec deploy
 
 Deployment is the process of installing and configuring Postgres and
-other software on the cluster's servers. This process includes setting up
+other software on the cluster's servers. This includes setting up
 replication, backups, and so on.
 
 At the end of the deployment stage, Postgres will be up and running
-along with other components like repmgr, Barman, pgbouncer, and so on,
-depending on the architecture selected.
+along with other components like repmgr, Barman, pgbouncer, etc.
+(depending on the architecture selected).
 
 ## Prerequisites
 
-Before you can run `tpaexec deploy`, you must run
+Before you can run `tpaexec deploy`, you must have already run
 [`tpaexec configure`](tpaexec-configure.md) to generate the cluster
-configuration. You then must provision the servers with
+configuration and then provisioned the servers with
 [`tpaexec provision`](tpaexec-provision.md).
 
-Before deployment, you must run
+Before deployment, you must
 `export TPA_2Q_SUBSCRIPTION_TOKEN=xxx` to enable any 2ndQuadrant
-repositories that require a subscription. You can use the subscription
-token that you used to [install TPA](INSTALL.md). If you
-forget to do this, an error message reminds you.
+repositories that require subscription. You can use the subscription
+token that you used to [install TPA](INSTALL.md) itself. If you
+forget to do this, an error message will soon remind you.
 
-## Quick start
+## Quickstart
 
 ```bash
 [tpa]$ tpaexec deploy ~/clusters/speedy -v
@@ -46,25 +46,26 @@ user    3m2.492s
 sys     1m5.318s
 ```
 
-This command produces a lot of output and can take a long time.
-The time it takes depends primarily on the latency between the host running tpaexec and
-the hosts in the cluster. It also depends on how long it takes the instances to
-download the packages they need to install. We recommend that you use
+This command produces a great deal of output and may take a long time
+(depending primarily on the latency between the host running tpaexec and
+the hosts in the cluster, as well as how long it takes the instances to
+download the packages they need to install). We recommend that you use
 at least one `-v` during deployment. The output is also logged to
 `ansible.log` in the cluster directory.
 
-The exact number of hosts, tasks, and changed tasks varies based on your needs.
+The exact number of hosts, tasks, and changed tasks may of course vary.
 
-The `deploy` command takes no options. Any options you provide after
-the cluster name are passed on, unmodified, to Ansible (for example, `-v`).
+The deploy command takes no options itself—any options you provide after
+the cluster name are passed on unmodified to Ansible (e.g., `-v`).
 
-If you're familiar with Ansible, you might be concerned to see the occasional
-red "failed" task output scrolling by. However, if the process
-doesn't stop soon after, the error has no effect, and the
-code recovers from it without the need for action.
+Those who are familiar with Ansible may be concerned by the occasional
+red "failed" task output scrolling by. Rest assured that if the process
+does not stop soon afterwards, the error is of no consequence, and the
+code will recover from it automatically.
 
 When the deployment is complete, you can run
 [`tpaexec test`](tpaexec-test.md) to verify the installation.
+
 
 ## Selective deployment
 
@@ -75,24 +76,23 @@ You can limit the deployment to a subset of your hosts by setting
 [tpa]$ tpaexec deploy ~/clusters/speedy -v -e deploy_hosts=keeper,quaver
 ```
 
-This command runs the deployment on the given instances, but it also
-initially executes some tasks on other hosts to collect information about
+This will run the deployment on the given instances, though it will also
+initially execute some tasks on other hosts to collect information about
 the state of the cluster.
 
-!!! Note
-    We recommend setting `deploy_hosts` instead of using
-    Ansible's `--limit` option, which TPA doesn't support.
+(Setting `deploy_hosts` is the recommended alternative to using
+Ansible's `--limit` option, which TPA does not support.)
 
 ## deploy.yml
 
-The deployment process is architecture specific. See this overview of
+The deployment process is architecture-specific. Here's an overview of
 the various
 [configuration settings that affect the deployment](configure-instance.md).
-If you're familiar with Ansible playbooks, you can follow along as
+If you are familiar with Ansible playbooks, you can follow along as
 tpaexec applies various roles to the cluster's instances.
 
-Unlike `config.yml`, `deploy.yml` isn't designed to be edited. It's
-usually a link into the architectures directory. Even if you want to
-extend the deployment process to run your own Ansible tasks,
-do so by [creating hooks](tpaexec-hooks.md). This technique protects you from
-future implementation changes in a particular architecture.
+Unlike config.yml, deploy.yml is not designed to be edited (and is
+usually a link into the architectures directory). Even if you want to
+extend the deployment process to run your own Ansible tasks, you should
+do so by [creating hooks](tpaexec-hooks.md). This protects you from
+future implementation changes within a particular architecture.

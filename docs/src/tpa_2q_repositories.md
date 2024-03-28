@@ -1,10 +1,10 @@
 # Configuring 2ndQuadrant repositories
 
-You can configure 2ndQuadrant package repositories on
-any supported system.
+This page explains how to configure 2ndQuadrant package repositories on
+any system.
 
 For more details on the EDB and 2ndQuadrant package sources used by
-TPA, see [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md).
+TPA see [this page](2q_and_edb_repositories.md).
 
 To specify the complete list of 2ndQuadrant repositories to install on
 each instance in addition to the 2ndQuadrant public repository, set
@@ -17,22 +17,22 @@ cluster_vars:
     - products/bdr3/release
 ```
 
-This example installs the pglogical3 and bdr3 release repositories.
-On Debian and Ubuntu systems, it uses the APT repository, and on
-RedHat systems, it uses the YUM repository. The 2ndQuadrant
-repositories aren't available for SLES systems.
+This example will install the pglogical3 and bdr3 release repositories.
+On Debian and Ubuntu systems, it will use the APT repository, and on
+RedHat systems, it will use the YUM repository. The 2ndQuadrant
+repositories are not available for SLES systems.
 
 To use
 [2ndQuadrant repositories](https://techsupport.enterprisedb.com/customer_portal/sw/),
-you must run `export TPA_2Q_SUBSCRIPTION_TOKEN=xxx` before you run
+you must `export TPA_2Q_SUBSCRIPTION_TOKEN=xxx` before you run
 tpaexec. You can get your subscription token from the 2ndQuadrant
-Portal. In the left menu, select **Company info > Company**. Some
+Portal, under "Company info" in the left menu, then "Company". Some
 repositories are available only by prior arrangement.
 
 The `dl/default/release` repository is always installed by default,
-unless you either:
+unless you
 
-- Explicitly set `tpa_2q_repositories: []`
-- Have at least one entry in `edb_repositories`
+- explicitly set `tpa_2q_repositories: []`, or
+- have at least one entry in `edb_repositories`.
 
-As a result of either of these actions, no 2ndQuadrant repositories is installed.
+Either or the above will result in no 2ndQuadrant repositories being installed.

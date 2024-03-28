@@ -1,7 +1,7 @@
 # Installing from source
 
 You can define a list of extensions to build and install from their Git
-repositories by setting `install_from_source` in `config.yml`:
+repositories by setting `install_from_source` in config.yml:
 
 ```yaml
 cluster_vars:
@@ -21,30 +21,30 @@ cluster_vars:
         VAR: value
 ```
 
-TPA builds and installs extensions one by one in the order
-listed. So you can build extensions that depend on another (such as
+TPA will build and install extensions one by one in the order
+listed, so you can build extensions that depend on another (such as
 pglogical and BDR) by mentioning them in the correct order.
 
 Each entry must specify a `name`, `git_repository_url`, and
 `git_repository_ref` (default: `master`) to build. You can use
 [SSH agent forwarding or an HTTPS username/password](git-credentials.md)
-to authenticate to the Git repository. Also set
+to authenticate to the Git repository; and also set
 `source_directory`, `build_directory`, `build_environment`, and
-`build_commands`, as shown in the example.
+`build_commands` as shown above.
 
-To reuse the build directory when doing repeated deploys, 
-run `tpaexec deploy … --skip-tags build-clean`. Otherwise the old build
-directory is emptied before starting the build. You can also configure
+Run `tpaexec deploy … --skip-tags build-clean` in order to reuse the
+build directory when doing repeated deploys. (Otherwise the old build
+directory is emptied before starting the build.) You can also configure
 [local source directories](configure-source.md#local-source-directories)
 to speed up your development builds.
 
-Whenever you run a source build, Postgres is restarted.
+Whenever you run a source build, Postgres will be restarted.
 
 ## Build dependencies
 
-If you're building from source, TPA ensures that the basic
+If you're building from source, TPA will ensure that the basic
 Postgres build dependencies are installed. If you need any additional
-packages, mention them in [`packages`](packages.md). For example:
+packages, mention them in [`packages`](packages.md). For example
 
 ```yaml
 cluster_vars:

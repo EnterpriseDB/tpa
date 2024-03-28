@@ -1,23 +1,23 @@
 # tpaexec archive-logs
 
-To create a log directory and archive logs from instances, run:
+To create a log directory and archive logs from instances, run
 
 ```bash
 tpaexec archive-logs <cluster-dir>
 ```
 
-This command creates a `logs/YYYYMMDDHHMMss/` directory in your cluster directory.
-It downloads a `tar.gz` archive of all the files under `/var/log` on each instance
+This will create a logs/YYYYMMDDHHMMss/ directory in your cluster directory
+and download a tar.gz archive of all the files under /var/log on each instance
 in the cluster into a separate directory.
 
 ## Prerequisites
 
-If you have an existing cluster, you can run `tpaexec archive-logs`
-immediately. But if you're configuring a new cluster, you must at least
-[provision](tpaexec-provision.md) the cluster. You'll get more logs if
+If you have an existing cluster you can run `tpaexec archive-logs`
+immediately. But if you are configuring a new cluster, you must at least
+[provision](tpaexec-provision.md) the cluster. You will get more logs if
 you also [deploy](tpaexec-deploy.md) the cluster.
 
-## Quick start
+## Quickstart
 
 ```bash
 [tpa]$ tpaexec archive-logs ~/clusters/speedy
@@ -51,7 +51,7 @@ uncivil                    : ok=3    changed=3    unreachable=0    failed=0
 urchin                     : ok=3    changed=3    unreachable=0    failed=0
 ```
 
-If you want more verbose output, you can append `-v`, `-vv`, and so on, to the command.
+You can append `-v`, `-vv`, etc. to the command if you want more verbose output.
 
 ## Generated files
 

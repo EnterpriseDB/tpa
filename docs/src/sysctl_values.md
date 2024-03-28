@@ -1,6 +1,6 @@
 # Setting sysctl values
 
-By default, TPA sets various sysctl values on target instances and
+By default, TPA sets various sysctl values on target instances, and
 includes them in `/etc/sysctl.conf` so that they persist across reboots.
 
 You can optionally specify your own values in `sysctl_values`:
@@ -13,8 +13,9 @@ cluster_vars:
     vm.zone_reclaim_mode: 0
 ```
 
-Values you specify take precedence over any TPA default
-values for that variable. TPA first adds the settings to
-`sysctl.conf` line-by-line, and finally loaded them with `sysctl -p`.
-Docker and lxd instances don't support setting sysctl values, so TPA
-skips this step for those platforms.
+Any values you specify will take precedence over TPA's default
+values for that variable (if any). The settings will first be added to
+`sysctl.conf` line-by-line, and finally loaded with `sysctl -p`.
+
+Docker and lxd instances do not support setting sysctls, so TPA will
+skip this step altogether for those platforms.

@@ -1,22 +1,21 @@
-# Using Patroni as a failover manager
+# Using Patroni as a Failover Manager
 
-You can use Patroni as a single-master failover manager with the M1
-architecture using the following command options:
+Patroni can be used as a single master failover manager with the M1
+architecture using the following command options.
 
 ```shell
 tpaexec configure cluster_name -a M1 --enable-patroni --postgresql 14
 ```
 
-You can also use Patroni as a failover manager by setting the following
-`config.yml` option:
+Or by setting the config.yml option
 
 ```yaml
 cluster_vars:
   failover_manager: patroni
 ```
 
-If deploying to RedHat, you must also add the `PGDG` repository to your
-yum repository list in `config.yml`:
+If deploying to RedHat you must also add the `PGDG` repository to your
+yum repository list in config.yml:
 
 ```yaml
 cluster_vars:
@@ -24,83 +23,83 @@ cluster_vars:
   - PGDG
 ```
 
-TPA `configure` adds 3 etcd nodes and 2 haproxy nodes. Etcd is used
+TPA `configure` will add 3 etcd nodes and 2 haproxy nodes. Etcd is used
 for the Distributed Configuration Store (DCS). Patroni supports other
-DCS backends, but they aren't currently supported by EDB or TPA.
+DCS backends, but they are not currently supported by EDB or TPA.
 
 TPA uses Patroni's feature of converting an existing PostgreSQL
-standalone server. This mechanism allows for TPA to initialize and manage
-configuration. Once a single PostgreSQL server and database is
-created, Patroni creates replicas and configures replication.
-TPA then removes any Postgres configuration files used during setup.
+standalone server. This allows for TPA to initialise and manage
+configuration. Once a single PostgreSQL server and database has been
+created, Patroni will create replicas and configure replication.
+TPA will then remove any postgres configuration files used during setup.
 
-Once this is set up, you can continue to manage Postgres using TPA and settings
+Once set up, Postgres can continue to be managed using TPA and settings
 in `config.yml` for the cluster. You can also use Patroni interfaces,
-such as the command line `patronictl` and the REST API, but we
-recommend using TPA methods wherever possible.
+such as the command line `patronictl` and the REST API, but it is
+recommended to use TPA methods wherever possible.
 
 # Configuration options
 
-You can use these configuration variables to control certain behaviors
-when deploying Patroni in TPA.
+These configuration variables can be used to control certain behaviours
+in the deployment of Patroni in TPA.
 
 | Variable                        | Default value | Description                                                                                                                                                                                                                                                          |
 |---------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `patroni_super_user`            | postgres      | User to create in Postgres for superuser role.                                                                                                                                                                                                                       |
-| `patroni_replication_user`      | replicator    | Username to create in Postgres for replication role.                                                                                                                                                                                                                 |
-| `patroni_restapi_user`          | patroni       | Username to configure for the Patroni REST API.                                                                                                                                                                                                                      |
+| `patroni_super_user`            | postgres      | User to create in postgres for superuser role.                                                                                                                                                                                                                       |
+| `patroni_replication_user`      | replicator    | Username to create in postgres for replication role.                                                                                                                                                                                                                 |
+| `patroni_restapi_user`          | patroni       | Username to configure for the patroni REST API.                                                                                                                                                                                                                      |
 | `patroni_rewind_user`           | rewind        | Username to create in postgres for pg_rewind function.                                                                                                                                                                                                               |
-| `patroni_installation_method`   | pkg           | Install Patroni from packages or source (for example, Git repo or local source directory if Docker).                                                                                                                                                                         |
-| `patroni_ssl_enabled`           | no            | Whether to enable SSL for REST API and ctl connection. Uses the cluster SSL cert and CA if available.                                                                                                                                                            |
-| `patroni_rewind_enabled`        | yes           | Whether to enable Postgres rewind; creates a user defined by patroni_rewind_user and adds config section.                                                                                                                                                            |
-| `patroni_watchdog_enabled`      | no            | Whether to configure the kernel watchdog for additional split-brain prevention.                                                                                                                                                                                      |
-| `patroni_dcs`                   | etcd          | The backend to use for the DCS. Currently, the only option is etcd.                                                                                                                                                                                              |
-| `patroni_listen_port`           | 8008          | REST API TCP port number.                                                                                                                                                                                                                                             |
-| `patroni_conf_settings`         | {}            | A structured data object with overrides for Patroni configuration.<br/>Partial data can be provided and will be merged with the generated config.<br/>Be careful to not override values that are generated based on instance information known at runtime.           |
+| `patroni_installation_method`   | pkg           | Install patroni from packages or source (e.g. git repo or local source directory if docker).                                                                                                                                                                         |
+| `patroni_ssl_enabled`           | no            | Whether to enable SSL for REST API and ctl connection. Will use the cluster SSL cert and CA if available.                                                                                                                                                            |
+| `patroni_rewind_enabled`        | yes           | Whether to enable postgres rewind, creates a user defined by patroni_rewind_user and adds config section.                                                                                                                                                            |
+| `patroni_watchdog_enabled`      | no            | Whether to configure the kernel watchdog for additional split brain prevention.                                                                                                                                                                                      |
+| `patroni_dcs`                   | etcd          | What backend to use for the DCS. The only option is etcd at the moment.                                                                                                                                                                                              |
+| `patroni_listen_port`           | 8008          | REST API TCP port number                                                                                                                                                                                                                                             |
+| `patroni_conf_settings`         | {}            | A structured data object with overrides for patroni configuration.<br/>Partial data can be provided and will be merged with the generated config.<br/>Be careful to not override values that are generated based on instance information known at runtime.           |
 | `patroni_dynamic_conf_settings` | {}            | Optional structured data just for DCS settings. This will be merged onto `patroni_conf_settings`.                                                                                                                                                                    |
-| `patroni_repl_max_lag`          | None          | This is used in the haproxy backend health check only when `haproxy_read_only_load_balancer_enabled` is true.<br/>See [REST API documentation](https://patroni.readthedocs.io/en/latest/rest_api.html#health-check-endpoints) for possible values for `/replica?lag`. |
+| `patroni_repl_max_lag`          | None          | This is used in the haproxy backend health check only when `haproxy_read_only_load_balancer_enabled` is true.<br/>See [REST API documentation](https://patroni.readthedocs.io/en/latest/rest_api.html#health-check-endpoints) for possible values for `/replica?lag` |
 
 ## Patroni configuration file settings
 
-Configuration for Patroni is built from three layers, starting with
+Configuration for patroni is built from three layers, starting with
 defaults set by the Patroni daemon, config loaded from the DCS,
 and finally from local configuration. The last can be controlled from
-either configuration file and overrides by way of the environment. TPA
-controls the configuration file, and values are built up in this order.
+either configuration file and overrides via the environment. TPA
+controls the configuration file and values are built up in this order.
 
 DCS config to be sent to the API and stored in the bootstrap section
 of the config file:
 
-* TPA vars for `postgres` are loaded into the DCS settings.
-  See [postgresql.conf.md](postgresql.conf.md).
-  Some features aren't supported. See notes that follow.
-* Patroni defaults for DCS settings.
-* User-supplied defaults in `patroni_dynamic_conf_settings`. If you want
-  to override any DCS settings, you can do that here.
+* TPA vars for `postgres` are loaded into the DCS settings,
+  see [postgresql.conf.md](postgresql.conf.md).
+  Some features are not supported, see notes below.
+* Patroni defaults for DCS settings
+* User supplied defaults in `patroni_dynamic_conf_settings`, if you want
+  to override any DCS settings you can do that here.
 
 Local config stored in the YAML configuration file:
 
-* `bootstrap.dcs` loaded from previous steps.
-* Configuration enabled by feature flags, such as `patroni_ssl_enabled`.
-  See the table in [Configuration options](#configuration-options).
-* Then, finally, overloaded from user-supplied settings, the
+* `bootstrap.dcs` loaded from previous steps above.
+* configuration enabled by feature flags, such as `patroni_ssl_enabled`,
+  see table above.
+* then finally overloaded from user supplied settings, the
   `patroni_conf_settings` option. If you want to change or add
-  a configuration not controlled by a feature flag, then this is the best
+  configuration not controlled by a feature flag then this is the best
   place to do it.
 
-Configuration is merged on top of the configuration
+Please note that configuration is *merged* on top of configuration
 generated by TPA from cluster information, such as IP addresses,
-port numbers, cluster roles, and so on. Use caution in what you override,
+port numbers, cluster roles, etc. Exercise caution in what you override
 as this might affect the stable operation of the cluster.
 
-As Patroni stores all Postgres configuration in the DCS and controls
-how and when this is distributed to Postgres, some features of TPA are
-incompatible with Patroni:
+As Patroni stores all postgres configuration in the DCS and controls
+how and when this is distributed to postgres, some features of TPA are
+incompatible with patroni:
 
-* You can't change the template
+* It is not possible to change the template
 used to generate `postgresql.conf` with the setting
 `postgres_conf_template`.
-* You can't change the location of Postgres config files with the
+* You cannot change the location of Postgres config files with the
   setting `postgres_conf_dir`.
 
 ### Patroni configuration in TPA `config.yml`
@@ -115,7 +114,7 @@ cluster_vars:
         ttl: 120
 ```
 
-You can also override full blocks (with an example from Patroni documentation):
+Or full blocks (with an example from Patroni docs):
 
 ```yaml
 cluster_vars:
@@ -129,18 +128,18 @@ cluster_vars:
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
 ```
 
-If you want to negate a value or section that's present in the default
-TPA config vars, you can set the value to `null`. This causes
-Patroni to ignore this section when loading the config file.
+If you want to negate a value or section that is present in the default
+TPA config vars you can set the value to `null`. This will cause
+patroni to ignore this section when loading the config file.
 
-For example, the default TPA config for `log` is:
+For example the default TPA config for `log` is
 
 ```yaml
 log:
   dir: /var/log/patroni
 ```
 
-To turn off logging, add this to `config.yml`:
+To turn off logging add this to `config.yml`:
 
 ```yaml
 cluster_vars:
@@ -150,13 +149,13 @@ cluster_vars:
 
 # Patroni cluster management commands
 
-TPA provides this minimal set of tools for managing Patroni
+TPA provides these minimal set of tools for managing Patroni
 clusters.
 
 ## Status
 
-To see the current status of the TPA cluster according to Patroni,
-run:
+To see the current status of the TPA cluster according to Patroni
+run
 
 ```shell
 tpaexec status cluster_name
@@ -164,24 +163,24 @@ tpaexec status cluster_name
 
 ## Switchover
 
-To perform a switchover to a replica node (for example, to perform maintenance)
-run:
+To perform a switchover to a replica node (e.g. to perform maintenance)
+run the command
 
 ```shell
-tpaexec switchover cluster_name <new_primary>
+tpaexec switchover cluster_name new_primary
 ```
 
-The `new_primary` argument must be the name of an existing cluster node
-that's currently running as a healthy replica. Checks are performed
+The new_primary argument must be the name of an existing cluster node
+that is currently running as a healthy replica. Checks will be performed
 to ensure this is true before a switchover is performed.
 
-Once a switchover has been performed, we recommend that you run
-`deploy` and `test` to ensure a healthy cluster:
+Once a switchover has been performed it is recommended that you run
+`deploy` and `test` to ensure a healthy cluster.
 
 ```shell
 tpaexec deploy cluster_name
 tpaexec test cluster_name
 ```
 
-TPA detects the current role of nodes during deploy regardless of
-what `config.yml` contains, for example, if a different node is the leader.
+TPA will detect the current role of nodes during deploy regardless of
+what config.yml contains, for example if a different node is the leader.
