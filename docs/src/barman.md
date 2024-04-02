@@ -30,14 +30,17 @@ the last 4 weeks.
 
 ## Barman configuration
 
-On each barman server, a global configuration file will be created
-as `/etc/barman.conf`; this contains default values for many barman
-configuration variables. For each postgres server being backed up,
-an additional Barman configuration file is created: to back up the
-server `one`, the file will be `/etc/barman.d/one.conf`, and the backups
-will be stored in `/var/lib/barman/one`. The file and directory names
-are taken from the backed-up instance's `backup_name` setting, defaulting
-to the instance's name.
+The Barman home directory on the Barman server can be set using the
+cluster variable `barman_home`; its default value is `/var/lib/barman`.
+
+On each Barman server, a global configuration file is created
+as `/etc/barman.conf`. This file contains default values for many Barman
+configuration variables. For each Postgres server being backed up,
+an additional Barman configuration file is created. For example, to back up the
+server `one`, the file is `/etc/barman.d/one.conf`, and the backups
+are stored in the subdirectory `one` in the Barman home directory. The
+configuration file and directory names are taken from the backed-up instance's
+`backup_name` setting. The default for this setting is the instance name.
 
 The following variables can be set on the backed-up instance and are
 passed through into Barman's configuration with the prefix `barman_`
