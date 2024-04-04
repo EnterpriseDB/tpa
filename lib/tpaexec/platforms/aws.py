@@ -82,11 +82,6 @@ class aws(CloudPlatform):
     def image(self, label, **kwargs):
         images = {
             "debian": {
-                "debian-stretch-hvm-x86_64-gp2-2022-07-01-66430": {
-                    "versions": ["9", "stretch"],
-                    "owner": "379101102735",
-                    "user": "admin",
-                },
                 "debian-10-amd64-20240204-1647": {
                     "versions": ["10", "buster", "default"],
                     "owner": "136693071363",
@@ -131,16 +126,6 @@ class aws(CloudPlatform):
                 }
             },
             "ubuntu": {
-                "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20210721": {
-                    "versions": ["16.04", "xenial"],
-                    "owner": "099720109477",
-                    "user": "ubuntu",
-                },
-                "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-arm64-server-20230531": {
-                    "versions": ["18.04", "bionic"],
-                    "owner": "099720109477",
-                    "user": "ubuntu",
-                },
                 "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20240228": {
                     "versions": ["20.04", "focal", "default"],
                     "owner": "099720109477",
