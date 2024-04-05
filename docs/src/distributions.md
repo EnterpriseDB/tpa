@@ -37,6 +37,11 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 * RHEL/CentOS/Rocky/AlmaLinux 8.x is fully supported (python3 only)
 * RHEL/CentOS 7.x is fully supported (python2 only)
 
+## RedHat ppc64le
+
+* RHEL/Rocky/AlmaLinux 9.x is fully supported (python3 only)
+* RHEL/AlmaLinux 8.x is fully supported (python3 only)
+
 ## SLES
 
 * SLES 15.x is fully supported

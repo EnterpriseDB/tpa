@@ -1,0 +1,13 @@
+- summary: Begin support for ppc64le
+  description: |
+    Customers running on ppc64 infrastructure can now install and use tpaexec
+    directly from our packages. Thanks to this new advance, the gap between
+    x86_64 and ppc64le regarding accessibility of software has been reduced.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-675
