@@ -211,6 +211,37 @@ default_postgres_extensions_dictionary:
         SLES: *redhat_pge_sql_profiler_packages
     spl: sql-profiler
 
+  pg_failover_slots:
+    packages:
+      postgresql:
+        Debian: &debian_pg_pg_failover_slots
+          - edb-pg{{ postgres_version }}-pg-failover-slots-1
+        RedHat: &redhat_pg_pg_failover_slots
+          - edb-pg{{ postgres_version }}-pg-failover-slots1
+        Ubuntu: *debian_pg_pg_failover_slots
+        SLES: *redhat_pg_pg_failover_slots
+      epas:
+        Debian: &debian_as_pg_failover_slots
+          - edb-as{{ postgres_version }}-pg-failover-slots-1
+        RedHat: &redhat_as_pg_failover_slots
+          - edb-as{{ postgres_version }}-pg-failover-slots1
+        Ubuntu: *debian_as_pg_failover_slots
+        SLES: *redhat_as_pg_failover_slots
+      pgextended:
+        Debian: *debian_pg_pg_failover_slots
+        RedHat: *redhat_pg_pg_failover_slots
+        Ubuntu: *debian_pg_pg_failover_slots
+        SLES: *redhat_pg_pg_failover_slots
+      edbpge:
+        Debian: &debian_pge_pg_failover_slots
+          - edb-postgresextended{{ postgres_version }}-pg-failover-slots-1
+        RedHat: &redhat_pge_pg_failover_slots
+          - edb-postgresextended{{ postgres_version }}-pg-failover-slots1
+        Ubuntu: *debian_pge_pg_failover_slots
+        SLES: *redhat_pge_pg_failover_slots
+    spl: pg_failover_slots
+    module: true
+
   # EDB Storage Pack
   autocluster:
     packages: &advanced_storage_pack_packages
@@ -242,7 +273,7 @@ default_postgres_extensions_dictionary:
   refdata:
     packages: *advanced_storage_pack_packages
     spl: refdata
-  
+
   bluefin:
     packages: *advanced_storage_pack_packages
     spl: bluefin

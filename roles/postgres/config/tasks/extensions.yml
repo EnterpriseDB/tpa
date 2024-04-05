@@ -65,3 +65,32 @@
   include_tasks: preload-library.yml
 
 - include_tasks: set_preload_library_facts.yml
+
+- name: Create list of modules from recognized extensions
+  set_fact:
+    modules: "{{ modules|default([])|union([item.key]) }}"
+    db_format_modules:
+      "{{ db_format_modules|default([])|union([{'name': item.key}]) }}"
+  loop: "{{ lookup('dict', postgres_extensions_dictionary) }}"
+  when: "'module' in item.value and item.value.module"
+
+- name: Remove modules from postgres_extensions
+  set_fact:
+    postgres_extensions:
+      "{{ postgres_extensions|difference(modules) }}"
+
+- name: Remove modules from list of extensions for postgres_databases
+  set_fact:
+    updated_postgres_databases: "{{
+      updated_postgres_databases|default([])
+      |union([
+        {'name': item.name, 'extensions': item.extensions|difference(db_format_modules)}
+      ])
+    }}"
+  loop: "{{ postgres_databases }}"
+
+- name: Replace postgres_databases with updated list of extensions
+  set_fact:
+    postgres_databases: "{{ updated_postgres_databases }}"
+  when: >
+    postgres_databases is not empty
