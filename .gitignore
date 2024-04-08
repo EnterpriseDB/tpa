@@ -234,3 +234,7 @@ coverage-reports/
 lib/tests/config/*
 requirements-dev.in
 requirements-dev.txt
+
+#execution environment venv
+tpa-ee/aap24/build-venv/
+_build

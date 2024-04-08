@@ -1,63 +1,83 @@
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+ARG EE_BASE_IMAGE="registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9:latest"
+ARG PYCMD="/usr/bin/python3"
+ARG PKGMGR_PRESERVE_CACHE=""
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS=""
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS=""
+ARG PKGMGR="/usr/bin/microdnf"
 
-# Build this container image like this
-#
-#  docker build -t tpaexec:$(git describe --tags) -t tpaexec:latest .
+# Base build stage
+FROM $EE_BASE_IMAGE as base
+USER root
+ARG EE_BASE_IMAGE
+ARG PYCMD
+ARG PKGMGR_PRESERVE_CACHE
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS
+ARG PKGMGR
 
-# To use the container image, create a shell alias like this
-#
-#   alias tpaexec="docker run --rm -v $PWD:/work -v $HOME/.git:/root/.git -v $HOME/.gitconfig:/root/.gitconfig \
-#      -v /var/run/docker.sock:/var/run/docker.sock \
-#      -e USER_ID=$(id -u) -e GROUP_ID=$(id -g) tpaexec"
-#
-# Then run commands like this
-#
-#   tpaexec configure cluster -a M1 --postgresql 15 --failover-manager patroni --platform docker
-#   tpaexec deploy cluster
+RUN $PYCMD -m ensurepip
+COPY _build/scripts/ /output/scripts/
+COPY _build/scripts/entrypoint /opt/builder/bin/entrypoint
 
-FROM debian:bookworm-slim
+# Galaxy build stage
+FROM base as galaxy
+ARG EE_BASE_IMAGE
+ARG PYCMD
+ARG PKGMGR_PRESERVE_CACHE
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS
+ARG PKGMGR
 
-LABEL maintainer="EDB <tpa@enterprisedb.com>"
+RUN /output/scripts/check_galaxy
+COPY _build /build
+WORKDIR /build
 
-# Copy tpaexec sources from the current directory into the image
-ENV TPA_DIR=/opt/EDB/TPA
+RUN ansible-galaxy role install $ANSIBLE_GALAXY_CLI_ROLE_OPTS -r requirements.yml --roles-path "/usr/share/ansible/roles"
+RUN ANSIBLE_GALAXY_DISABLE_GPG_VERIFY=1 ansible-galaxy collection install $ANSIBLE_GALAXY_CLI_COLLECTION_OPTS -r requirements.yml --collections-path "/usr/share/ansible/collections"
 
-COPY . ${TPA_DIR}
+# Builder build stage
+FROM base as builder
+WORKDIR /build
+ARG EE_BASE_IMAGE
+ARG PYCMD
+ARG PKGMGR_PRESERVE_CACHE
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS
+ARG PKGMGR
 
-# Set up repositories and install packages, including the Docker CE CLI
-# (https://docs.docker.com/engine/install/debian/).
+RUN $PYCMD -m pip install --no-cache-dir bindep pyyaml requirements-parser
 
-RUN apt-get -y update && \
-    apt-get -y install --no-install-recommends \
-      curl gnupg apt-transport-https \
-      python3 python3-dev python3-pip python3-venv \
-      openvpn patch git gcc && \
-    curl -fsSL https://download.docker.com/linux/debian/gpg >/etc/apt/trusted.gpg.d/docker.asc && \
-    codename=$(awk -F= '/VERSION_CODENAME/{print $2}' /etc/os-release) && \
-    arch=$(dpkg --print-architecture) && \
-    echo "deb [arch=$arch] https://download.docker.com/linux/debian $codename stable" \
-      >/etc/apt/sources.list.d/docker.list && \
-    apt-get -y update && \
-    apt-get -y install --no-install-recommends docker-ce-cli && \
-    \
-    # run `tpaexec setup` to complete the installation, and then `tpaexec selftest` to verify it. \
-    \
-    ln -sf ${TPA_DIR}/bin/tpaexec /usr/local/bin && \
-    mkdir /opt/2ndQuadrant/ && \
-    ln -sf ${TPA_DIR} /opt/2ndQuadrant/TPA && \
-    tpaexec setup --use-community-ansible && \
-    tpaexec selftest && \
-    (cd "${TPA_DIR}" && git describe --tags >VERSION) && \
-    \
-    # Clean up unnecessary files and packages \
-    \
-    rm -rf ${TPA_DIR}/.[a-z]* && \
-    apt purge -y gcc python3-dev python3-pip python3-venv build-essential && \
-    apt autoremove -y && \
-    apt autoclean -y && \
-    apt clean -y && \
-    rm -rf /var/cache/apt /var/lib/apt/lists
+COPY --from=galaxy /usr/share/ansible /usr/share/ansible
 
-WORKDIR /work
-CMD ["--help"]
-ENTRYPOINT ["/opt/EDB/TPA/entrypoint.sh"]
+COPY _build/requirements.txt requirements.txt
+RUN $PYCMD /output/scripts/introspect.py introspect --sanitize --user-pip=requirements.txt --write-bindep=/tmp/src/bindep.txt --write-pip=/tmp/src/requirements.txt
+RUN /output/scripts/assemble
+
+# Final build stage
+FROM base as final
+ARG EE_BASE_IMAGE
+ARG PYCMD
+ARG PKGMGR_PRESERVE_CACHE
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS
+ARG PKGMGR
+
+RUN /output/scripts/check_ansible $PYCMD
+
+COPY --from=galaxy /usr/share/ansible /usr/share/ansible
+
+COPY --from=builder /output/ /output/
+RUN /output/scripts/install-from-bindep && rm -rf /output/wheels
+RUN chmod ug+rw /etc/passwd
+RUN mkdir -p /runner && chgrp 0 /runner && chmod -R ug+rwx /runner
+WORKDIR /runner
+RUN $PYCMD -m pip install --no-cache-dir 'dumb-init==1.2.5'
+RUN mkdir -p /opt/EDB/TPA
+RUN ls . -als
+COPY . /opt/EDB/TPA
+ENV PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}/opt/EDB/TPA/lib"
+RUN rm -rf /output
+LABEL ansible-execution-environment=true
+USER 1000
+ENTRYPOINT ["/opt/builder/bin/entrypoint", "dumb-init"]
+CMD ["bash"]

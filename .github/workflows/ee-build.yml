@@ -14,14 +14,14 @@ on:
         description: "environment file to use"
         type: string
         required: true
-        default: "tpa-exec-ee.yml"
-      tpaexec-ee-ref:
-        description: "ref used for tpaexec-ee repo"
+        default: "execution-environment.yml"
+      base-image:
+        description: "base image (rhel, alpine)"
         type: choice
-        default: AAP24
+        default: RHEL
         options:
-        - AAP24
-        - AAP24-alpine
+        - RHEL
+        - Alpine
       tpa-internal-ref:
         description: "ref used for tpa-internal repo"
         type: string
@@ -35,18 +35,12 @@ jobs:
   Build:
     name: Build the Execution Environment
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./tpa-ee/aap24/${{ github.event.inputs.base-image == 'RHEL' && 'rhel' || 'alpine' }}
     env:
-      IMAGE_NAME: ${{ github.event.inputs.tpaexec-ee-ref == 'AAP24' && 'tpa-ee' || 'tpa-ee-alpine' }}
+      IMAGE_NAME: ${{ github.event.inputs.base-image == 'RHEL' && 'tpa-ee' || 'tpa-ee-alpine' }}
     steps:
-
-    # checkout tpaexec-ee repo holding the build files
-    - name: Checkout tpaexec-ee
-      id: checkout-tpaexec-ee
-      uses: actions/checkout@v4
-      with:
-        repository: EnterpriseDB/tpaexec-ee
-        ref: ${{ github.event.inputs.tpaexec-ee-ref }}
-        token: ${{secrets.GH_SLONIK}}
 
     # checkout tpa-internal required to build the EE
     - name: Checkout tpa-internal
@@ -55,17 +49,16 @@ jobs:
       with:
         repository: EnterpriseDB/tpa-internal
         token: ${{secrets.GH_SLONIK}}
-        path: 'tpa-internal'
         ref: ${{ github.event.inputs.tpa-internal-ref || github.ref }}
 
     # setup python
     - name: setup python
-      uses: ./tpa-internal/.github/actions/install-requirements
+      uses: ./.github/actions/install-requirements
 
     # install requirements needed for build
     - name: Install python build requirements
       run: |
-        python3 -m pip install -r build-requirements.txt
+        python3 -m pip install -r ../build-requirements.txt
       shell: bash
 
     # verify build environment
@@ -79,7 +72,7 @@ jobs:
 
     # login to redhat registry to pull minimal EE image on redhat9
     - name: Login to RedHat Container Registry
-      if: ${{ github.event.inputs.tpaexec-ee-ref == 'AAP24' }}
+      if: ${{ github.event.inputs.base-image == 'RHEL' }}
       uses: docker/login-action@v3
       with:
         registry: registry.redhat.io
@@ -100,13 +93,16 @@ jobs:
         --container-runtime docker \
         --tag ghcr.io/enterprisedb/tpa/${{ env.IMAGE_NAME }}:${{ github.event.inputs.tag }} \
         -f ${{ github.event.inputs.environment_file }} \
-        -c . --verbosity 3 --no-cache
+        -c ../../../ \
+        --verbosity 3 \
+        --no-cache \
+        --squash new
 
     - name: Archive build folder
       uses: actions/upload-artifact@v4
       with:
         name: build_artifact
-        path: .
+        path: ./tpa-ee/aap24/${{ github.event.inputs.base-image == 'RHEL' && 'rhel' || 'alpine' }}
 
     - name: Push to ghcr.io/enterprisedb/tpa
       run: |

@@ -1,0 +1,36 @@
+#build_arg_defaults:
+#  # redhat minimal EE image using redhat9 and ansible-core 2.15
+#  EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9:latest'
+#  # redhat EE image + redhat supported collections using redhat9 and ansible-core 2.15
+#  #EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest'
+#  # redhat EE image  using redhat8 and ansible-core 2.9
+#  #EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-24/ee-29-rhel8:latest'
+
+version: 3
+images:
+  base_image:
+    name: 'python:3.9-alpine3.19'
+dependencies:
+  python_interpreter:
+    python_path: /usr/local/bin/python3
+  ansible_core:
+    package_pip: ansible-core==2.15.*
+  ansible_runner:
+    package_pip: ansible-runner
+  python: ../../../requirements-aap.txt
+  galaxy: ../../../collections/requirements.yml
+options:
+  package_manager_path: /sbin/apk
+build_arg_defaults:
+  PKGMGR_PRESERVE_CACHE: 'always'
+additional_build_steps:
+  prepend_base:
+   - RUN $PKGMGR upgrade && $PKGMGR add bash openssh gcc build-base linux-headers libexpat && $PKGMGR cache clean && rm -f /var/cache/apk/*
+   - RUN $PYCMD -m pip install --upgrade pip
+
+  append_final:
+   - RUN mkdir -p /opt/EDB/TPA
+   - COPY . /opt/EDB/TPA
+   - ENV PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}/opt/EDB/TPA/lib"
+   - RUN $PKGMGR cache clean && rm -f /var/cache/apk/*
+   - RUN $PYCMD -m pip cache purge
