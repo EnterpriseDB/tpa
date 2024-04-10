@@ -25,6 +25,7 @@ default_packages:
   common:
     # Required to support ``become: unprivileged_user``
     - acl
+    - chrony
     - tcpdump
     - vim
     - rsync

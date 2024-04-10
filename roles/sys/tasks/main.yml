@@ -156,6 +156,11 @@
   when: >
     task_selector|permits('rsyslog')
 
+- include_role:
+    name: sys/ntp
+  when: >
+    task_selector|permits('ntp')
+
 # https://github.com/CentOS/CentOS-Dockerfiles/issues/173
 #
 # Retained for compatibility with centos/systemd docker containers;
