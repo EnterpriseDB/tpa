@@ -45,7 +45,7 @@ RUN apt-get -y update && \
     ln -sf ${TPA_DIR}/bin/tpaexec /usr/local/bin && \
     mkdir /opt/2ndQuadrant/ && \
     ln -sf ${TPA_DIR} /opt/2ndQuadrant/TPA && \
-    tpaexec setup --use-community-ansible && \
+    tpaexec setup && \
     tpaexec selftest && \
     (cd "${TPA_DIR}" && git describe --tags >VERSION) && \
     \
