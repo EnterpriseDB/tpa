@@ -1,0 +1,13 @@
+- summary: use archive.debian.org to get buster backports on aws
+  description: |
+    The backports repository for debian 10 (buster) is no longer available
+    on deb.debian.org but the standard AWS AMI still refers to it, so we
+    modify /etc/apt/sources.list accordingly before attempting apt operations.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-715

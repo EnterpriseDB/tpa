@@ -14,6 +14,11 @@
 
 - when: not etc_tpa_exists
   block:
+  - raw: "sed -i 's/http:\\/\\/cdn-aws.deb.debian.org\\/debian buster-backports/http:\\/\\/archive.debian.org\\/debian buster-backports/' /etc/apt/sources.list"
+    when:
+      - ansible_distribution == 'Debian'
+      - ansible_distribution_major_version == '10'
+      - platform == 'aws'
   - include_tasks: "os/{{ ansible_os_family }}/python.yml"
     when: task_selector|permits('bootstrap')
   - include_tasks: "os/{{ ansible_os_family }}/packages.yml"
