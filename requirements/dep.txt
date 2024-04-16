@@ -4,7 +4,16 @@
 #
 #    pip-compile --generate-hashes --output-file=requirements/dep.txt requirements/dep.in
 #
-pipdeptree==2.16.2 \
-    --hash=sha256:4b60a20f632aa3449880141d1cd0bc99cb5f93ed46d54d689fd1c9b95f0e53d0 \
-    --hash=sha256:96ecde8e6f40c95998491a385e4af56d387f94ff7d3b8f209aa34982a721bc43
+packaging==24.0 \
+    --hash=sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5 \
+    --hash=sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9
+    # via pipdeptree
+pipdeptree==2.18.1 \
+    --hash=sha256:cb6cacc5434dc04811bdc91d659622689107e60a163b79a5758e593577fdb875 \
+    --hash=sha256:f0ae7786cf7f7eeed77b5bb756e0f44f2bfae2e8ae9a9739d8d75bbc8796d961
     # via -r requirements/dep.in
+
+# WARNING: The following packages were not pinned, but pip requires them to be
+# pinned when the requirements file includes hashes and the requirement is not
+# satisfied by a package already installed. Consider using the --allow-unsafe flag.
+# pip
