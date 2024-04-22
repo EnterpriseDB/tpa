@@ -57,8 +57,8 @@ The architecture you select determines what other options are accepted.
 Typically, each architecture accepts some unique options as well as the
 generic options described below.
 
-For example, with M1 you can use `--num-cascaded-replicas 3` to create
-a cluster with three cascaded replicas. Please consult the
+For example, with M1 you can use `--location-names l1 l2` to create
+a cluster with nodes in two named locations. Please consult the
 documentation for an architecture for a list of options that it accepts
 (or, in some cases, requires).
 

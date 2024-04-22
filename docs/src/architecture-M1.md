@@ -1,8 +1,12 @@
 # M1
 
-A Postgres cluster with a primary and a streaming replica, one Barman
-server, and any number of additional replicas cascaded from the first
-one. This architecture is suitable for production and is also suited to
+A Postgres cluster with one or more active locations, each with the same
+number of Postgres nodes and an extra Barman node. Optionally, there can
+also be a location containing only a witness node, or a location
+containing only a single node, even if the active locations have more
+than one.
+
+This architecture is suitable for production and is also suited to
 testing, demonstrating and learning due to its simplicity and ability to
 be configured with no proprietary components.
 
@@ -10,20 +14,6 @@ If you select subscription-only EDB software with this architecture
 it will be sourced from EDB Repos 2.0 and you will need to provide a token.
 See [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
 for more detail on this topic.
-
-## Default layout
-
-By default, the primary has one read-only replica attached in the same
-location; the replica, in turn, has one cascaded replica attached in a
-different location, where the Barman server is also configured to take
-backups from the primary.
-
-![Cluster with cascading replication](images/m1.png)
-
-If there is an even number of Postgres nodes, the Barman node is
-additionally configured as a witness. This ensures that the
-number of nodes is always odd, which is convenient when
-enabling automatic failover.
 
 ## Application and backup failover
 
@@ -58,7 +48,8 @@ tpaexec configure ~/clusters/m1 \
          --platform aws --region eu-west-1 --instance-type t3.micro \
          --distribution Debian \
          --postgresql 14 \
-         --failover-manager repmgr
+         --failover-manager repmgr \
+         --data-nodes-per-location 3
 ```
 
 You can list all available options using the help command.
@@ -87,7 +78,11 @@ More detail on the options is provided in the following section.
 | Parameter                 | Description                                                                                                       | Behaviour if omitted                                                                                 |
 |---------------------------|-------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | `--platform`              | One of `aws`, `docker`, `bare`.                                                                                   | Defaults to `aws`.                                                                                   |
-| `--num-cascaded-replicas` | The number of cascaded replicas from the first replica.                                                           | Defaults to 1.                                                                                       |
+| `--location-names` | A space-separated list of location names. The number of active locations is equal to the number of names supplied, minus one for each of the witness-only location and the single-node location if they are requested. | A single location called "main" is used. |
+| `--primary-location` | The location where the primary server will be. Must be a member of `location-names`. | The first listed location is used. |
+| `--data-nodes-per-location` | A number from 1 upwards. In each location, one node will be configured to stream directly from the cluster's primary node, and the other nodes, if present, will stream from that one. | Defaults to 2.
+| `--witness-only-location` | A location name, must be a member of `location-names`. | No witness-only location is added. |
+| `--single-node-location` | A location name, must be a member of `location-names`. | No single-node location is added. |
 | `--enable-haproxy`        | 2 additional nodes will be added as a load balancer layer.<br/>Only supported with Patroni as the failover manager. | HAproxy nodes will not be added to the cluster.                                                      |
 | `--patroni-dcs`           | Select the Distributed Configuration Store backend for patroni.<br/>Only option is `etcd` at this time. <br/>Only supported with Patroni as the failover manager.          | Defaults to `etcd`.                                                                                  |
 
@@ -95,8 +90,6 @@ More detail on the options is provided in the following section.
 
 ### More detail about M1 configuration
 
-You may optionally specify `--num-cascaded-replicas N` to request N
-cascaded replicas (including 0 for none; default: 1).
 
 You may also specify any of the options described by
 [`tpaexec help configure-options`](tpaexec-configure.md).

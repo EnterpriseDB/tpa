@@ -1,0 +1,20 @@
+- summary: Flexible M1 architecture
+  description: |
+    The M1 architecture now supports the following additional arguments to
+    `tpaexec configure`:
+
+    --location-names
+    --primary-location
+    --data-nodes-per-location
+    --witness-only-location
+    --single-node-location
+
+    By combining these arguments, various layouts can be specified.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-333

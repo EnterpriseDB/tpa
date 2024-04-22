@@ -2,72 +2,109 @@
 ---
 
 instances:
-- node: 1
-  Name: {{ hostnames[1] }}
-  location: 0
-  role:
-    - primary
-  backup: {{ hostnames[3] }}
+{% set total_nodes_per_location =
+    data_nodes_per_location
+    + (3 if failover_manager == 'patroni' else 0)
+    + (2 if enable_haproxy else 0)
+%}
+{% set globals = namespace() %}
+{% set globals.node_number = 0 %}
+{% for location_name in active_locations %}
 
-- node: 2
-  Name: {{ hostnames[2] }}
-  location: 0
-  role:
-    - replica
-  upstream: {{ hostnames[1] }}
+{% set location_number = loop.index0 %}
+{% set location_data_nodes = [] %}
+{% set location_backup_server = hostnames[globals.node_number + data_nodes_per_location + 1] %}
 
-- node: 3
-  Name: {{ hostnames[3] }}
-  location: 0
+{% for node in range(0, data_nodes_per_location) %}
+{% set globals.node_number = globals.node_number + 1 %}
+{% set role = ( "primary" if location_name == primary_location and loop.first else "replica") %}
+{% if role == "primary" %}{% set globals.primary_name = hostnames[globals.node_number] %}{% endif %}
+{% if loop.first %}{% set globals.location_leader = hostnames[globals.node_number] %}{% endif %}
+{% set location_data_nodes = location_data_nodes.append(hostnames[globals.node_number]) %}
+
+- node: {{ globals.node_number }}
+  Name: {{ hostnames[globals.node_number] }}
+  location: {{ location_name }}
+{% if role == 'primary' %}
+  backup: {{ location_backup_server }}
+{% endif %}
+{% if role == 'replica' %}
+{% if location_name != primary_location and loop.first %}
+  upstream: {{ globals.primary_name }}
+{% else %}
+  upstream: {{ globals.location_leader }}
+{% endif %}
+{% endif %}{# role == 'replica' #}
   role:
-    - barman
-    - log-server
-    - monitoring-server
-{% if (2+cascaded_replicas) % 2 == 0 %}
-{%   if failover_manager == 'efm' %}
-    - efm-witness
-{%   elif failover_manager == 'patroni' %}
-{%   else %}
-    - witness
-  upstream: {{ hostnames[1] }}
-{%   endif %}
+  - {{ role }}
+
+{% endfor %}{# data nodes #}
+
+{% if location_name == primary_location %}
+{% set globals.node_number = globals.node_number + 1 %}
+- node: {{ globals.node_number }}
+  Name: {{ hostnames[globals.node_number] }}
+  location: {{ location_name }}
+  role:
+  - barman
+  - log_server
+{% if ((not single_node_location)
+   and ((active_locations|length == 2)
+     or (active_locations|length == 1 and data_nodes_per_location % 2 == 0))) %}
+  - witness
+  upstream: {{ globals.primary_name }}
+{% endif %}
 {% endif %}
 
-{% for i in range(4,4+cascaded_replicas) %}
-- node: {{ i }}
-  Name: {{ hostnames[i] }}
-  location: 1
-  role:
-    - replica
-  upstream: {{ hostnames[2] }}
-{% endfor %}
-
-{# Place etcd and haproxy nodes across locations #}
+{# for patroni, three more etcd nodes per location #}
 {% if failover_manager == 'patroni' %}
-{% for i in range(4+cascaded_replicas,7+cascaded_replicas) %}
-- node: {{ i }}
-  Name: {{ hostnames[i] }}
-  location: {{ i % 2 }}
+{% for node in range(0, 3) %}
+{% set globals.node_number = globals.node_number + 1 %}
+- node: {{ globals.node_number }}
+  Name: {{ hostnames[globals.node_number] }}
+  location: {{ location_name }}
   role:
     - etcd
   vars:
-    etcd_location: main
+    etcd_location: {{ primary_location }}
 {% endfor %}
+{% endif %}{# failover_manager == 'patroni' #}
 
+{# for haproxy, two nodes per location #}
 {% if enable_haproxy %}
-{% for i in range(7+cascaded_replicas,9+cascaded_replicas) %}
-- node: {{ i }}
-  Name: {{ hostnames[i] }}
-  location: {{ i % 2 }}
+{% for node in range(0, 2) %}
+{% set globals.node_number = globals.node_number + 1 %}
+- node: {{ globals.node_number }}
+  Name: {{ hostnames[globals.node_number] }}
+  location: {{ location_name }}
   role:
     - haproxy
   vars:
     haproxy_backend_servers:
-      - {{ hostnames[1] }}
-      - {{ hostnames[2] }}
-{% for be in range(4,4+cascaded_replicas) %}
-      - {{ hostnames[be] }}
+{% for node in location_data_nodes %}
+        - {{ node }}
 {% endfor %}
 {% endfor %}
+{% endif %}{# enable_haproxy #}
+{% endfor %}{# active locations #}
+
+{% if single_node_location %}
+{% set globals.node_number = globals.node_number + 1 %}
+- node: {{ globals.node_number }}
+  Name: {{ hostnames[globals.node_number] }}
+  location: {{ single_node_location }}
+  role:
+  - replica
+  upstream: {{ globals.primary_name }}
 {% endif %}
+
+{% if witness_only_location %}
+{% set globals.node_number = globals.node_number + 1 %}
+- node: {{ globals.node_number }}
+  Name: {{ hostnames[globals.node_number] }}
+  location: {{ witness_only_location }}
+  role:
+  - witness
+  upstream: {{ globals.primary_name }}
 {% endif %}
+
