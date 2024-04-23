@@ -10,6 +10,7 @@ env:
   TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
   EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
   EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
   SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
   EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
   ANSIBLE_SKIP_TAGS: pgbench
@@ -47,7 +48,21 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: EnterpriseDB/tpa-internal
-        token: ${{secrets.GH_SLONIK}}
+        token: ${{ env.GITHUB_TOKEN }}
+
+    - name: Checkout fundation repository branch/tag ${{ env.FOUNDATION_VER }}
+      uses: actions/checkout@v4
+      with:
+        repository: EnterpriseDB/foundation-packaging
+        ref: ${{ env.FOUNDATION_VER }}
+        token: ${{ env.GITHUB_TOKEN }}
+        path: foundation
+
+    - name: Connect to a Native Executor
+      uses: ./foundation/actions/linux/native/executor/connect
+      with:
+        architecture: ${{ matrix.cpu_architecture }}
+        tunnel-login: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
 
     - uses: ./.github/actions/integration-test
       with:
@@ -69,3 +84,6 @@ jobs:
               && (matrix.tpa_postgres_flavour == 'edbpge')
             )
           ) }}
+
+    - name: Disconnect from a Native Executor
+      uses: ./foundation/actions/linux/native/executor/disconnect

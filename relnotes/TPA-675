@@ -1,4 +1,4 @@
-- summary: Begin support for ppc64le
+- summary: Introduce support for ppc64le
   description: |
     Customers running on ppc64 infrastructure can now install and use tpaexec
     directly from our packages. Thanks to this new advance, the gap between

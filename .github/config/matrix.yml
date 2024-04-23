@@ -1,5 +1,7 @@
 ---
 default:
+  cpu_architecture: &default_cpu_architecture
+    - "amd64"
   tpa_architecture: &default_tpa_architecture
     - "M1"
     - "BDR-Always-ON"
@@ -53,6 +55,13 @@ default:
       tpa_failover_manager: "efm"
     - tpa_os_image: "redhat:7"
       runner: "ubuntu-20.04"
+    - cpu_architecture: "ppc64le"
+      tpa_architecture: "M1"
+      tpa_os_image: "redhat:9"
+      tpa_platform: "docker"
+      tpa_postgres_flavour: "postgresql"
+      tpa_postgres_version: "14"
+      tpa_failover_manager: "efm"
 simple:
   tpa_architecture: *default_tpa_architecture
   tpa_postgres_flavour: *default_tpa_postgres_flavour
