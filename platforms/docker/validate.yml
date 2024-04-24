@@ -6,6 +6,11 @@
   docker_host_info:
   register: docker_system
 
+# Some platforms e.g. ppcle in our tests include a leading 'v' character
+# and also a '+' sign in the docker version string. Remove it before
+# running the version check so the version test doesn't fail because of
+# the invalid version string.
+
 - name: Check required docker version
   assert:
     that:
@@ -14,7 +19,7 @@
       - "TPA requires Docker CE version 20.10 or later (you are running {{ _docker_version }})"
       - "Consult platform-docker.md for information on using docker platform"
   vars:
-    _docker_version: "{{ docker_system.host_info.ServerVersion }}"
+    _docker_version: '{{ docker_system.host_info.ServerVersion | regex_replace("[a-z\+]+", "") }}'
 
 - name: Ensure that every instance has a defined image
   assert:
