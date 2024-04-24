@@ -423,10 +423,12 @@ upgrade() {
     fi
 
     if [[ -h commands/update-postgres.yml && ! -h commands/upgrade.yml ]]; then
-        "$TPA_DIR"/architectures/lib/commands/relink .
+        echo "Creating link to upgrade.yml"
+        "$TPA_DIR"/architectures/lib/commands/relink
     elif [[ -h commands/upgrade.yml ]]; then
+        echo "Recreating link to upgrade.yml"
         rm commands/upgrade.yml
-        "$TPA_DIR"/architectures/lib/commands/relink .
+        "$TPA_DIR"/architectures/lib/commands/relink
     fi
 
     provision
