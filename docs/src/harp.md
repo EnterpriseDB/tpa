@@ -10,7 +10,7 @@ contact EDB to obtain access to these packages.
 
 ## Configuring HARP
 
-See the [HARP documentation](https://documentation.enterprisedb.com/harp/release/latest/configuration/)
+See the [HARP documentation](https://www.enterprisedb.com/docs/pgd/4/harp/04_configuration/)
 for more details on HARP configuration.
 
 Variable | Default value | Description
