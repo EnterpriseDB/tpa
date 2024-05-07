@@ -50,6 +50,22 @@ inputs:
   tpa_failover_manager:
     required: false
     description: "Failover manager (for M1 only)"
+  tpa_location_names:
+    required: false
+    description: "Location names (for M1 only)"
+    default: "l1 l2"
+  tpa_data_nodes_per_location:
+    required: false
+    description: "Data nodes per location (for M1 only)"
+    default: 2
+  tpa_witness_only_location:
+    required: false
+    description: "Use a witness-only location (for M1 only)"
+    default: false
+  tpa_single_node_location:
+    required: false
+    description: "Use a single-node location (for M1 only)"
+    default: false
   tpa_ansible_version:
     required: false
     description: "Ansible version to use with TPA"
@@ -136,8 +152,15 @@ runs:
         # dependency. We can remove this check when pgextendedNN-server-sslutils is
         # available
         if [[ "${{ inputs.tpa_postgres_flavour }}" != "pgextended"
-              && "${{ inputs.tpa_postgres_flavour }}" != "edbpge" ]] ;then
+              && "${{ inputs.tpa_postgres_flavour }}" != "edbpge"
+              && "${{ inputs.tpa_architecture }}" != "M1" ]] ;then
           CONFIGURE_OPTS+=(--enable-pem)
+        fi
+
+        # For M1, we must use an older barman package version because the barman
+        # 3.10 in PGDG has incorrect dependency information
+        if [[ "${{ inputs.tpa_architecture }}" == "M1" ]] ;then
+          CONFIGURE_OPTS+=(--barman-package-version 3.9.0)
         fi
 
         # enable redwood for epas.
@@ -151,6 +174,16 @@ runs:
 
         if [ "${{ inputs.tpa_architecture }}" = "M1" ] ;then
           CONFIGURE_OPTS+=(--failover-manager "${{ inputs.tpa_failover_manager }}")
+          CONFIGURE_OPTS+=(--location-names "${{ inputs.tpa_location_names }}")
+          CONFIGURE_OPTS+=(--data-nodes-per-location "${{ inputs.tpa_data_nodes_per_location }}")
+          if [ ${{ inputs.tpa_witness-only-location }} ] ;then
+            WITNESS_ONLY_LOCATION=$(awk '{print $NF}' <<< "${{ inputs.tpa_location_names }}")
+            CONFIGURE_OPTS+=(--witness-only-location $WITNESS_ONLY_LOCATION)
+          fi
+          if [ ${{ inputs.tpa_single-node-location }} ] ;then
+            SINGLE_NODE_LOCATION=$(awk '{print $NF}' <<< "${{ inputs.tpa_location_names }}")
+            CONFIGURE_OPTS+=(--single-node-location $SINGLE_NODE_LOCATION)
+          fi
         fi
 
         # If we are going to use efm, override its network connectivity test

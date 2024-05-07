@@ -113,3 +113,38 @@ patroni:
     - "epas"
     - "edbpge"
   tpa_postgres_version: *default_tpa_postgres_version
+m1_layouts:
+  tpa_architecture:
+    - "M1"
+  tpa_postgres_flavour:
+    - "postgresql"
+  tpa_postgres_version: *default_tpa_postgres_version
+  tpa_platform:
+    - docker
+  tpa_failover_manager:
+    - "efm"
+    - "repmgr"
+  layout:
+    - tpa_location_names: "l1"
+      tpa_data_nodes_per_location: 2
+    - tpa_location_names: "l1 l2"
+      tpa_data_nodes_per_location: 2
+      tpa_single_node_location: true
+    - tpa_location_names: "l1 l2"
+      tpa_data_nodes_per_location: 2
+    - tpa_location_names: "l1 l2 l3"
+      tpa_data_nodes_per_location: 3
+      tpa_witness_only_location: true
+    - tpa_location_names: "l1 l2 l3"
+      tpa_data_nodes_per_location: 1
+    - tpa_location_names: "l1 l2 l3"
+      tpa_data_nodes_per_location: 3
+  include:
+    - tpa_architecture: "M1"
+      tpa_postgres_flavour: "postgresql"
+      tpa_postgres_version: 14
+      tpa_platform: "docker"
+      tpa_failover_manager: "patroni"
+      layout:
+        tpa_location_names: "l1"
+        tpa_data_nodes_per_location: 2

@@ -46,6 +46,22 @@ inputs:
   tpa_failover_manager:
     required: false
     description: "Failover manager (for M1 only)"
+  tpa_location_names:
+    required: false
+    description: "Location names (for M1 only)"
+    default: "l1 l2"
+  tpa_data_nodes_per_location:
+    required: false
+    description: "Data nodes per location (for M1 only)"
+    default: 2
+  tpa_witness_only_location:
+    required: false
+    description: "Use a witness-only location (for M1 only)"
+    default: false
+  tpa_single_node_location:
+    required: false
+    description: "Use a single-node location (for M1 only)"
+    default: false
   tpa_ansible_version:
     required: false
     description: "Ansible version to use with TPA"
@@ -72,6 +88,10 @@ runs:
         tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
         tpa_package_cache: ${{ inputs.tpa_package_cache }}
         tpa_failover_manager: ${{ inputs.tpa_failover_manager }}
+        tpa_location_names: ${{ inputs.tpa_location_names }}
+        tpa_data_nodes_per_location: ${{ inputs.tpa_data_nodes_per_location }}
+        tpa_witness_only_location: ${{ inputs.tpa_witness_only_location }}
+        tpa_single_node_location: ${{ inputs.tpa_single_node_location }}
         tpa_ansible_version: ${{ inputs.tpa_ansible_version }}
         cluster: ${{ inputs.cluster }}
 
