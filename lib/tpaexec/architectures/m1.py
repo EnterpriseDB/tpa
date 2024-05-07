@@ -113,6 +113,11 @@ class M1(Architecture):
         # first in the active locations list
         locations = self.all_locations()
 
+        if args.get("single_node_location") and args.get("witness_only_location"):
+            raise ArchitectureError(
+                "A single-node location and a witness-only location cannot be combined"
+            )
+
         if args.get("single_node_location"):
             if args["single_node_location"] not in locations:
                 raise ArchitectureError(
