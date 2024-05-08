@@ -237,6 +237,10 @@ class docker(Platform):
             instance_defaults.update(y)
 
     def update_instances(self, instances, args, **kwargs):
+        # Get an iterator that provides IP addresses
+        host_ips = self.arch.hosts_in_cidr(args['subnets'][0])
+        # Discard the first item from the iterator as Docker needs that for the gateway
+        _ = next(host_ips)
         for i in instances:
             newvolumes = []
             volumes = i.get("volumes", [])
@@ -249,6 +253,8 @@ class docker(Platform):
                 i["volumes"] = newvolumes
                 if not i["volumes"]:
                     del i["volumes"]
+            # i['private_ip'] = str(next(host_ips))
+            i["networks"] = [{"ipv4_address": str(next(host_ips)), "name": args["cluster_name"]}]
 
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}
@@ -256,5 +262,8 @@ class docker(Platform):
         docker_images = args.get("docker_images")
         if docker_images:
             s["docker_images"] = docker_images
+
+        # Declare a user-defined Docker network using the name of the cluster as the network name
+        s["docker_networks"] = [{"ipam_config": [{"subnet": args["subnets"][0]}], "name": args["cluster_name"]}]
 
         args["platform_settings"] = s

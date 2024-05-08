@@ -666,7 +666,7 @@ class Architecture(object):
         # Now that main.yml.j2 has been loaded, and we have the initial set of
         # instances[] defined, num_locations() should work, and we can generate
         # the necessary number of subnets.
-        args["subnets"] = self.subnets(self.num_locations())
+        args["subnets"] = self.subnets(self.num_subnets())
 
         locations = args.get("locations", [])
         if not locations:
@@ -727,6 +727,15 @@ class Architecture(object):
             if loc is not None:
                 locations[loc] = 1
         return len(locations)
+
+    def num_subnets(self):
+        """
+        Returns the number of subnets required by this architecture
+        """
+        if self.platform.name == "docker":
+            return 1
+
+        return self.num_locations()
 
     def hostnames(self, num):
         """
@@ -1648,6 +1657,12 @@ class Architecture(object):
                 return "{}"
 
         return MinimalLoader(basedirs or self.template_directories())
+
+    @staticmethod
+    def hosts_in_cidr(cidr: str):
+        """ Returns an iterator that yields hosts in the given CIDR range
+        """
+        return Network(cidr=cidr).net.hosts()
 
 
 def update_symlinks_recursively(source, destination, force):
