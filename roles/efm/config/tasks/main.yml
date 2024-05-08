@@ -60,6 +60,59 @@
     - log_server is defined
     - log_server != inventory_hostname
 
+# Ensure EFM properties file exists before executing
+# any EFM commands in the block below
+- name: Check for efm properties file location
+  stat:
+    path: "{{ efm_conf_dir }}/{{ cluster_name }}.properties"
+  register: efm_cluster_properties
+
+# After a switchover, the current 'Primary' node must be determined from EFM
+- name: Update upstream_primary to reflect switchover
+  block:
+    - name: Get current EFM cluster status
+      command: >
+        {{ efm_bin_dir }}/efm cluster-status-json {{ cluster_name }}
+      when: >
+        'primary' in role or 'replica' in role
+      register: cluster_status
+      retries: 5
+      delay: 2
+      until: cluster_status is success
+      become_user: "{{ postgres_user }}"
+      become: yes
+
+    # Create a dictionary of nodes in EFM cluster from output of `cluster-status-json`
+    - name: Get EFM nodes
+      set_fact:
+        efm_nodes: "{{ status.nodes | dict2items(key_name='ip', value_name='info') }}"
+      vars:
+        status: "{{ cluster_status.stdout|from_json }}"
+      when: >
+        cluster_status is defined and cluster_status is success
+
+    # Set the IP address of the node marked 'primary'
+    - name: Loop over efm_nodes
+      set_fact:
+        primary_ip: "{{ item.ip }}"
+      loop: "{{ efm_nodes }}"
+      when: >
+        item.info.type | lower == 'primary'
+    
+    # Loop over all the hosts on which the play runs.
+    # When the ip address of the host matches the ip address of the `primary`
+    # node (determined above), set the 'upstream_primary' to the name of that host.
+    - name: Assign new upstream_primary
+      set_fact:
+        upstream_primary: "{{ item }}"
+      loop: "{{ play_hosts }}"
+      when: >
+        hostvars[item].ip_address == primary_ip
+          
+  when: efm_cluster_properties.stat.islnk is defined
+  run_once: true
+
+
 - name: Install efm.properties for {{ cluster_name }}
   template:
     src: efm.properties.j2
