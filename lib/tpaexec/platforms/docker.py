@@ -239,7 +239,7 @@ class docker(Platform):
     def update_instances(self, instances, args, **kwargs):
         # Get an iterator that provides IP addresses
         host_ips = self.arch.hosts_in_cidr(args['subnets'][0])
-        # Discard the first item from the iterator as Docker needs that for the gateway
+        # Discard the first item from the iterator because Docker needs that for the gateway
         _ = next(host_ips)
         for i in instances:
             newvolumes = []
@@ -253,8 +253,7 @@ class docker(Platform):
                 i["volumes"] = newvolumes
                 if not i["volumes"]:
                     del i["volumes"]
-            # i['private_ip'] = str(next(host_ips))
-            i["networks"] = [{"ipv4_address": str(next(host_ips)), "name": args["cluster_name"]}]
+            i['private_ip'] = str(next(host_ips))
 
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}

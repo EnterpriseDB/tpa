@@ -40,6 +40,16 @@
   changed_when: false
   failed_when: rw_cgroup.rc > 1
 
+# If the config.yml uses the abbreviated `private_ip` form to specify the IP of each instance
+# we need to construct a full `networks` hash to use in the next step.
+# This fact is ignored if a full 'networks` hash is passed explcitly in `items.networks`
+- name: Construct a `networks` variable for each instance from network name and IP (if supplied)
+  set_fact:
+    instance_networks:
+      - name: "{{ docker_networks[0].name }}"
+        ipv4_address: "{{ item.private_ip | default(omit) }}"
+  when: docker_networks[0].name is defined and item.network is not defined
+
 - name: Provision docker container {{ item.Name }}
   docker_container:
     name: "{{ item.Name }}"
@@ -70,7 +80,7 @@
     exposed_ports: "{{ item.exposed_ports|default(['22','5432','6432']) }}"
     published_ports: "{{ item.published_ports|default(omit) }}"
     devices: "{{ item.devices|default(omit) }}"
-    networks: "{{ item.networks|default(omit) }}"
+    networks: "{{ item.networks | default(instance_networks) | default(omit) }}"
     volumes: "{{ volumes|flatten }}"
     sysctls: "{{ item.sysctls|default(omit) }}"
     ulimits: "{{ item.ulimits|default(omit) }}"
@@ -116,6 +126,13 @@
             and item.networks is defined
             and c.NetworkSettings.Networks[item.networks[0].name]['IPAddress'] is defined
             and c.NetworkSettings.Networks[item.networks[0].name]['IPAddress'] is not empty
+            and item.networks[0].name == docker_networks[0].name
+        )
+        or (
+            c.NetworkSettings.Networks is defined
+            and item.networks is not defined
+            and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is defined
+            and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is not empty
         )
     msg: "Docker failed to create {{ item.Name }} with sensible network settings. Check docker logs for details"
   vars:
@@ -126,7 +143,7 @@
         docker_container_results|default([])|union([
           container_info.container|combine({
             'item': item|combine({
-              'private_ip': n.IPAddress or n.Networks[item.networks[0].name]['IPAddress']
+              'private_ip': n.IPAddress or n.Networks[docker_networks[0].name]['IPAddress']
             })
           })
         ])
