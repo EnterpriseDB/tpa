@@ -1,0 +1,9 @@
+- summary: Document instructions for creating an Execution Environment (EE)
+  description: |
+    TPA version 23.30 introduced the support for Ansible Automation
+    Platform (AAP) version 2.4. This version of AAP makes use of EE to
+    run ansible playbooks. This change includes updates to the tower/AAP
+    documentation to include instructions on creating your own EE.
+  type: minor_change
+  jira_tickets:
+  - TPA-708
