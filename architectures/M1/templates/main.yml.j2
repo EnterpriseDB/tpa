@@ -47,7 +47,7 @@ instances:
   location: {{ location_name }}
   role:
   - barman
-  - log_server
+  - log-server
 {% if ((not single_node_location)
    and ((active_locations|length == 2)
      or (active_locations|length == 1 and data_nodes_per_location % 2 == 0))) %}
