@@ -33,35 +33,16 @@ sudo usermod -aG docker <yourusername>
 newgrp docker
 ```
 
-### CgroupVersion
-
-Currently, TPA requires Cgroups Version 1 be configured on your system,
-
-Run:
-
-```
-mount | grep cgroup | head -1
-```
-
-and if you do not see a reference to `tmpfs` in the output, you'll need to disable cgroups v2.
-
-Run:
-
-```
-echo 'GRUB_CMDLINE_LINUX=systemd.unified_cgroup_hierarchy=false' | sudo tee /etc/default/grub.d/cgroup.cfg
-```
-
-To make the appropriate changes, then update Grub and reboot your system with:
-
-```
-sudo update-grub
-sudo reboot
-```
-
 !!! Warning
     Giving a user the ability to speak to the Docker daemon
     lets them trivially gain root on the Docker host. Only trusted users
     should have access to the Docker daemon.
+
+!!! Note on RHEL 7 instances
+    To use RHEL 7 instances your host must be configured to run cgroups v1. 
+    Refer to documentation for your system to verify and alter cgroups configuration, 
+    or choose another operating system for your containers to follow this tutorial.
+
 
 ### Creating a configuration with TPA
 
