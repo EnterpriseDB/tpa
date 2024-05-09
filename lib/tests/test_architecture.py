@@ -179,23 +179,21 @@ class TestM1Architecture:
         argvalues=(
             (
                 ARGS + ["--failover-manager", "efm"],
-                (4, ["zero", "one", "two", "three", "four"]),
-            ),
-            (
-                ARGS + ["--failover-manager", "efm"],
-                (4, ["zero", "one", "two", "three", "four"]),
+                (3, ["zero", "one", "two", "three"]),
             ),
             (
                 ARGS + ["--failover-manager", "repmgr"],
-                (4, ["zero", "one", "two", "three", "four"]),
+                (3, ["zero", "one", "two", "three"]),
             ),
             (
                 ARGS + ["--failover-manager", "patroni"],
-                (7, ["zero", "one", "two", "three", "four", "five", "six", "seven"]),
+                (6, ["zero", "one", "two", "three", "four", "five", "six"]),
             ),
         ),
     )
     def test_m1_instances(self, argv, expected, architecture_m1):
+        args = architecture_m1.args
+        architecture_m1.validate_arguments(args)
         instances = architecture_m1.num_instances()
         assert instances == expected[0]
         hostnames, _ = architecture_m1.hostnames(instances)
