@@ -1,0 +1,15 @@
+- summary: Have `configure` create a user-defined network on docker
+  description: |
+    The configure command will now automatically add a named network and static IP addresses to config.yml
+    when docker is the selected platform.
+
+    The network name is the same as the cluster name and the address range follows the existing semantics of the
+    --network option with the exception that only one subnet is used for the whole cluster rather than one per
+    location.
+
+    The key `private_ip` may now be used to specify a static IP for a Docker instance as long as a named network
+    is specified in included in the config.yml.
+
+  type: change
+  jira_tickets:
+  - TPA-261
