@@ -3,18 +3,6 @@
 name: M1 layout tests
 
 on:
-  push:
-    branches-ignore:
-      - main
-      - 'rc/**'
-  pull_request:
-    types:
-      - review_requested
-    branches:
-      - main
-  pull_request_review:
-    types:
-      - submitted
   workflow_dispatch:
 
 env:
