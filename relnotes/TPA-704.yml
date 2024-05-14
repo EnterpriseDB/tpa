@@ -1,9 +1,0 @@
-- summary: Fix problems with custom barman and postgres users
-  description: |
-    Fixed problems with various roles that caused mixed errors when
-    trying to use custom users for barman and postgres, thereby
-    resulting in a failed deployment.
-  type: bugfix
-  jira_tickets:
-  - TPA-704
-  - TPA-151

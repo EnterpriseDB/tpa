@@ -2,6 +2,187 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
+## v23.32 (2024-05-14)
+
+### Notable changes
+
+- Install chrony NTP service by default
+
+  TPA will install chrony during deploy now keeping the default config upon
+  all except on AWS where we point to Amazon Time Sync service.
+
+  References: TPA-93.
+
+- Flexible M1 architecture
+
+  The M1 architecture now supports the following additional arguments to
+  `tpaexec configure`:
+
+  --location-names
+  --primary-location
+  --data-nodes-per-location
+  --witness-only-location
+  --single-node-location
+
+  By combining these arguments, various layouts can be specified.
+
+  References: TPA-333.
+
+- Support cgroups v2 systems for the docker platform
+
+  TPA can now provision docker clusters on hosts running cgroups 2,
+  for all systems except RHEL 7. On newer systems (RHEL 9 or Ubuntu 22.04),
+  TPA will use cgroups 2 scopes for additional isolation between the host
+  and the containers.
+
+  References: TPA-441.
+
+- Add support for debian 12 x86
+
+  Now it's posible to enjoy tpaexec packages for bookworm but also create
+  and manage clusters in either docker and AWS.
+
+  References: TPA-717.
+
+- Introduce support for ppc64le
+
+  Customers running on ppc64 infrastructure can now install and use tpaexec
+  directly from our packages. Thanks to this new advance, the gap between
+  x86_64 and ppc64le regarding accessibility of software has been reduced.
+
+  References: TPA-675.
+
+### Minor changes
+
+- Change to sourcedir when compiling BDR from source
+
+  Move to the location where the source code has been downloaded
+  before compiling BDR instead of using a relative path.
+  This decreases the chances of picking a wrong Makefile or worse,
+  ending in a broken path.
+
+  References: TPA-153.
+
+- Add useful extensions by default when role is pem-agent
+
+  The `sql_profiler`, `edb_wait_states` and `query_advisor` extensions
+  are automatically included for any `pem-agent` node.
+
+  The list of default extensions for pem-agent nodes is overridable by
+  including a list of `pemagent_extensions` in config.yml.
+
+  If this list is empty, no extensions will be automatically included.
+
+  References: TPA-336.
+
+- Update AWS AMI versions
+
+  AWS AMI versions for certain distributions will be out of date, so each
+  supported AMI was updated to the latest version.
+
+  References: TPA-710.
+
+- Add --force option to `tpaexec relink`
+
+  By default, relink doesn't modify targeted files if they already
+  exist. With --force, relink removes all existing targeted files then
+  recreates them.
+
+  --force is needed to update AAP-enabled cluster directories after
+  TPA package upgrade and is also useful for rescuing a cluster that
+  has been broken by manual intervention.
+
+  References: TPA-706.
+
+- Document instructions for creating an Execution Environment (EE)
+
+  TPA version 23.30 introduced the support for Ansible Automation
+  Platform (AAP) version 2.4. This version of AAP makes use of EE to
+  run ansible playbooks. This change includes updates to the tower/AAP
+  documentation to include instructions on creating your own EE.
+
+  References: TPA-708.
+
+- Add `pg_failover_slots` to recognized extensions
+
+  pg_failover_slots is a module, so CREATE EXTENSION cannot be run
+  for its entry in either `postgres_extensions` or the list of
+  extensions named under `postgres_databases`.
+
+  A key-value pair of `module: true` is included with its entry in the
+  `default_postgres_extensions_dictionary`.
+
+  Logic is added to construct a list of extensions flagged `module`
+  and remove the entries from the `postgres_extensions` and extensions
+  under `postgres_databases` if necessary.
+
+  The required package and shared_preload_library entry are included and
+  CREATE EXTENSION is not run for `pg_failover_slots`.
+
+  References: TPA-406.
+
+- Add ip_address to the ip_addresses list
+
+  If the key `ip_address` is defined for a node, add a corresponding entry
+  to `ip_addresses`. This ensures that TPA can correctly work out whether
+  streaming is working correctly when re-running deploy on an existing cluster.
+
+  This fixes error messages like "Unrecognised host=10.136.4.247 in
+  primary_conninfo" for nodes with `ip_address` defined.
+
+  References: TPA-711, RT103488.
+
+- use archive.debian.org to get buster backports on aws
+
+  The backports repository for debian 10 (buster) is no longer available
+  on deb.debian.org but the standard AWS AMI still refers to it, so we
+  modify /etc/apt/sources.list accordingly before attempting apt operations.
+
+  References: TPA-715.
+
+- Prevent deployment failing on AWS when `assign_public_ip:no` is set
+
+  When AWS was selected as platform and `assign_public_ip` was set to no,
+  there were some cases where tpa was still looking for a public IP. This
+  change now prevents that.
+
+  References: TPA-666.
+
+
+### Bugfixes
+
+- Suppressed 2q token error message
+
+  Fixed an issue whereby an error would be raised if the user had an
+  expired subscription token for 2q repositories, even if their
+  configuration didn't use those repositories.
+
+  References: TPA-705.
+
+- Fix formatting of `line` option for `lineinfile` command
+
+  The task was skipped because the command was incorrectly formatted,
+  resulting in the restore_command override not being removed from
+  `postgresql.auto.conf`
+
+  References: TPA-691.
+
+- Fix problems with custom barman and postgres users
+
+  Fixed problems with various roles that caused mixed errors when
+  trying to use custom users for barman and postgres, thereby
+  resulting in a failed deployment.
+
+  References: TPA-704, TPA-151.
+
+- Fix relink error when upgrading
+
+  Fixed an error whereby `tpaexec upgrade` could invoke the relink
+  script in a way which caused an error and showed an unhelpful usage
+  message for `tpaexec relink`.
+
+  References: TPA-721.
+
 ## 23.31 (2024-03-19)
 
 ### Bugfixes
