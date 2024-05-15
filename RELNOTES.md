@@ -6,13 +6,6 @@
 
 ### Notable changes
 
-- Install chrony NTP service by default
-
-  TPA will install chrony during deploy now keeping the default config upon
-  all except on AWS where we point to Amazon Time Sync service.
-
-  References: TPA-93.
-
 - Flexible M1 architecture
 
   The M1 architecture now supports the following additional arguments to
@@ -28,16 +21,7 @@
 
   References: TPA-333.
 
-- Support cgroups v2 systems for the docker platform
-
-  TPA can now provision docker clusters on hosts running cgroups 2,
-  for all systems except RHEL 7. On newer systems (RHEL 9 or Ubuntu 22.04),
-  TPA will use cgroups 2 scopes for additional isolation between the host
-  and the containers.
-
-  References: TPA-441.
-
-- Add support for debian 12 x86
+- Add support for Debian 12 x86
 
   Now it's posible to enjoy tpaexec packages for bookworm but also create
   and manage clusters in either docker and AWS.
@@ -52,16 +36,25 @@
 
   References: TPA-675.
 
+- Support cgroups v2 systems for the docker platform
+
+  TPA can now provision docker clusters on hosts running cgroups 2,
+  for all systems except RHEL 7. On newer systems (RHEL 9 or Ubuntu 22.04),
+  TPA will use cgroups 2 scopes for additional isolation between the host
+  and the containers.
+
+  References: TPA-441.
+
 ### Minor changes
 
-- Change to sourcedir when compiling BDR from source
+- Document instructions for creating an Execution Environment (EE)
 
-  Move to the location where the source code has been downloaded
-  before compiling BDR instead of using a relative path.
-  This decreases the chances of picking a wrong Makefile or worse,
-  ending in a broken path.
+  TPA version 23.30 introduced the support for Ansible Automation
+  Platform (AAP) version 2.4. This version of AAP makes use of EE to
+  run ansible playbooks. This change includes updates to the tower/AAP
+  documentation to include instructions on creating your own EE.
 
-  References: TPA-153.
+  References: TPA-708.
 
 - Add useful extensions by default when role is pem-agent
 
@@ -82,6 +75,13 @@
 
   References: TPA-710.
 
+- Install chrony NTP service by default
+
+  TPA will install chrony during deploy now keeping the default config upon
+  all except on AWS where we point to Amazon Time Sync service.
+
+  References: TPA-93.
+
 - Add --force option to `tpaexec relink`
 
   By default, relink doesn't modify targeted files if they already
@@ -93,15 +93,6 @@
   has been broken by manual intervention.
 
   References: TPA-706.
-
-- Document instructions for creating an Execution Environment (EE)
-
-  TPA version 23.30 introduced the support for Ansible Automation
-  Platform (AAP) version 2.4. This version of AAP makes use of EE to
-  run ansible playbooks. This change includes updates to the tower/AAP
-  documentation to include instructions on creating your own EE.
-
-  References: TPA-708.
 
 - Add `pg_failover_slots` to recognized extensions
 
@@ -132,7 +123,7 @@
 
   References: TPA-711, RT103488.
 
-- use archive.debian.org to get buster backports on aws
+- Use archive.debian.org to get buster backports on aws
 
   The backports repository for debian 10 (buster) is no longer available
   on deb.debian.org but the standard AWS AMI still refers to it, so we
@@ -147,6 +138,15 @@
   change now prevents that.
 
   References: TPA-666.
+
+- Change to sourcedir when compiling BDR from source
+
+  Move to the location where the source code has been downloaded
+  before compiling BDR instead of using a relative path.
+  This decreases the chances of picking a wrong Makefile or worse,
+  ending in a broken path.
+
+  References: TPA-153.
 
 
 ### Bugfixes
