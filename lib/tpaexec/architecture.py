@@ -1088,6 +1088,7 @@ class Architecture(object):
             "Debian:9",
             "Debian:10",
             "Debian:11",
+            "Debian:12",
             "Debian:jessie",
             "Debian:stretch",
             "Debian:buster",
