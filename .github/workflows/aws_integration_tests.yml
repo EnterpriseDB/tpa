@@ -1,0 +1,148 @@
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+name: AWS integration Tests
+
+on:
+  workflow_dispatch:
+
+env:
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
+  LANG: "C.UTF-8"
+  PYTHONWARNINGS: once
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  load-matrix:
+    name: Load Matrix
+    runs-on: ubuntu-22.04
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ env.GITHUB_TOKEN }}
+
+    - uses: ./.github/actions/load-yaml
+      id: load-yaml
+      with:
+        file: .github/config/matrix.yml
+        key: aws
+
+  jobs:
+    needs: load-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Public IP
+        id: ip
+        uses: haythem/public-ip@v1.3
+
+      - name: Put public IP into envvar
+        run: |
+          echo RUNNER_IP=${{ steps.ip.outputs.ipv4 }} >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::629432531727:role/tpa_gh_aws_role
+          role-session-name: github-actions
+          aws-region: us-east-1
+
+      - name: Check if AWS credentials are valid
+        shell: bash
+        run: aws sts get-caller-identity
+
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v4
+        with:
+          repository: EnterpriseDB/tpa-internal
+          token: ${{ env.GITHUB_TOKEN }}
+
+      - name: Define cluster name envvar
+        run: |
+          set +xe
+          INCREDIBLE_RANDOM_NUMBER=$((1 + $RANDOM % 100))
+          CLUSTER_NAME="aws_cluster_${INCREDIBLE_RANDOM_NUMBER}"
+          echo "CLUSTER_NAME=${CLUSTER_NAME}" >> $GITHUB_ENV
+        shell: bash
+
+      - name: env cluster secgroup
+        run: |
+          echo "AWS_DEFAULT_REGION=eu-west-1" >> $GITHUB_ENV
+          echo "AWS_REGION=eu-west-1" >> $GITHUB_ENV
+          echo "${CLUSTER_NAME}/eu-west-1"
+
+      - name: Install EDB Repo and edb-python
+        run: |
+          SUFFIX="deb"
+          CMD="apt"
+          curl -1sLf "https://downloads.enterprisedb.com/${EDB_SUBSCRIPTION_TOKEN}/dev/setup.${SUFFIX}.sh" | sudo bash
+          sudo $CMD install -y edb-python39
+        shell: bash
+
+      - name: Export EDB_REPO_CREDENTIALS_FILE to use EDB repositories
+        run: umask 066 && echo $EDB_REPO_CREDENTIALS > $EDB_REPO_CREDENTIALS_FILE
+        shell: bash
+
+      - name: Run Setup and configure
+        run: |
+          set -xe
+          echo "::group::tpaexec setup..."
+          declare -a EXTRA_CONFIGURE_OPTS
+          ./bin/tpaexec setup
+          echo "::endgroup::"
+
+          if [ "${{ matrix.tpa_postgres_flavour }}" == "epas" ]; then
+            EXTRA_CONFIGURE_OPTS+=(--no-redwood)
+          fi
+
+          OS_IMAGE=${{ matrix.tpa_os_image }}
+          OS_IMAGE_VALUES=($(echo $OS_IMAGE | tr ":" "\n"))
+
+          echo "::group::tpaexec configure..."
+          ./bin/tpaexec configure $CLUSTER_NAME \
+             --architecture M1 \
+             --platform aws \
+             --cluster-bucket edb-tpa-integration-tests \
+             --keyring-backend legacy \
+             --os ${OS_IMAGE_VALUES[0]^} --os-version ${OS_IMAGE_VALUES[1]} \
+             --postgres-flavour ${{ matrix.tpa_postgres_flavour }} \
+             --postgres-version ${{ matrix.tpa_postgres_version }} \
+             --failover-manager efm \
+             --no-git "${EXTRA_CONFIGURE_OPTS[@]}"
+          echo "::endgroup::"
+
+      - name: Provisioning the cluster
+        run: |
+          ./bin/tpaexec provision $CLUSTER_NAME -v
+        shell: bash
+
+      - name: Add runner IP to security group
+        run: |
+          set -xe
+          SECURITY_GROUP_ID=$(aws ec2 describe-security-groups --region eu-west-1 --filter Name=vpc-id,Values=vpc-0a06b62f7605a196b Name=group-name,Values="Group ${{ env.CLUSTER_NAME }}/eu-west-1" --query 'SecurityGroups[*].[GroupId]' --output text)
+          aws ec2 authorize-security-group-ingress --group-id $SECURITY_GROUP_ID --protocol tcp --port 22 --cidr ${{ env.RUNNER_IP }}/32
+
+      - name: Deploy the cluster
+        run: |
+          ./bin/tpaexec deploy $CLUSTER_NAME -vvv
+        shell: bash
+
+      - name: Nuking all
+        if: always()
+        run: |
+          ./bin/tpaexec deprovision $CLUSTER_NAME -vvv
+        shell: bash

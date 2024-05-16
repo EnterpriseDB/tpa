@@ -94,6 +94,16 @@ simple:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "epas"
       tpa_failover_manager: "efm"
+aws:
+  tpa_postgres_flavour:
+    - "postgresql"
+    - "epas"
+  tpa_os_image:
+    - "debian:12"
+    - "debian-arm:12"
+  tpa_postgres_version:
+    - 15
+    - 16
 update_bdr:
   cpu_architecture: *default_cpu_architecture
   tpa_architecture:
