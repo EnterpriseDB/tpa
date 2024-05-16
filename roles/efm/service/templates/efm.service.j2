@@ -9,7 +9,9 @@ Type=forking
 TimeoutSec=120
 Environment=CLUSTER={{ cluster_name }}
 User=efm
+{% if platform not in ['docker'] %}
 PIDFile=/var/run/efm-{{ efm_version }}/{{ cluster_name }}.pid
+{% endif %}
 
 ExecStart=/bin/bash -c "/usr/edb/efm-{{ efm_version }}/bin/runefm.sh start ${CLUSTER}"
 ExecStop=/bin/bash -c "/usr/edb/efm-{{ efm_version }}/bin/runefm.sh stop ${CLUSTER}"
