@@ -1,8 +1,0 @@
-- summary: Fix formatting of `line` option for `lineinfile` command
-  description: |
-    The task was skipped because the command was incorrectly formatted,
-    resulting in the restore_command override not being removed from
-    `postgresql.auto.conf`
-  type: bugfix
-  jira_tickets:
-  - TPA-691
