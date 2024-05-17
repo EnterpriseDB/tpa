@@ -65,6 +65,7 @@ jobs:
           ).decode().strip().split("\n")
 
           release_notes_files = []
+          non_release_notes_files = []
 
           for file in file_list:
               # We are only interested in YAML files from the release notes directory.
@@ -72,6 +73,7 @@ jobs:
                   continue
 
               if not file.lower().endswith((".yml", ".yaml")):
+                  non_release_notes_files.append(file)
                   continue
 
               with open(file, "r") as fd:
@@ -86,13 +88,34 @@ jobs:
 
               release_notes_files.append(file)
 
-          # Inform how many release notes files were touched by this PR.
           with open(os.environ["GITHUB_OUTPUT"], "a") as fd:
+              # Inform how many release notes files were touched by this PR.
               fd.write(f"release_notes_files_num={len(release_notes_files)}\n")
+
+              # Inform files which were mistakenly placed inside the release notes folder.
+              # Either they are actual release notes files but with the wrong extension, or
+              # files that should be put somewhere else.
+              if len(non_release_notes_files) > 0:
+                  non_release_notes_files = '\n'.join(non_release_notes_files)
+                  fd.write(f"non_release_notes_files={non_release_notes_files}")
         shell: python
         working-directory: ${{ env.SOURCE_REPO_PATH }}
         env:
           PYTHONPATH: ".github/workflows/relnotes"
+
+      # Send a PR comment with a warning that unexpected files were found under the
+      # release notes directory.
+      - name: Report that unexpected files were found, if that is the case
+        if: ${{ steps.get-files.outputs.non_release_notes_files != null }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '❗ This PR contains unexpected files under the release notes folder:\n\n${{ steps.get-files.outputs.non_release_notes_files }}'
+            })
 
       # Send a PR comment with a warning that the PR misses to add or modify the release
       # notes.
