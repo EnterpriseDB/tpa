@@ -8,9 +8,9 @@ packaging==24.0 \
     --hash=sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5 \
     --hash=sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9
     # via pipdeptree
-pipdeptree==2.19.1 \
-    --hash=sha256:9e68b1af1cef009e47763343fa3df795d14a367eb1b3d7c461d34a0887235d04 \
-    --hash=sha256:e342d7c13b3bb87f996607cf10514cc33da899c25b23220d7f0f0adcf48e1f67
+pipdeptree==2.20.0 \
+    --hash=sha256:8fa583060e6ee5482d5f7da00163a847c892a457ea51e720fca1b8df8fccff31 \
+    --hash=sha256:bea21daf9ccb991650a237bfa4730932c7332c3c37cce7c4b4fade43ee5a2be5
     # via -r requirements/dep.in
 
 # WARNING: The following packages were not pinned, but pip requires them to be
