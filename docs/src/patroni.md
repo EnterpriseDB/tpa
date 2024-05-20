@@ -14,24 +14,24 @@ cluster_vars:
   failover_manager: patroni
 ```
 
-If deploying to RedHat you must also add the `PGDG` repository to your
-yum repository list in config.yml:
+TPA is able to deploy Patroni clusters using either `patroni` packages (from
+PGDG repositories) or `edb-patroni` packages (from EDB repositories). You can
+configure that through the `patroni_package_flavour` option under `cluster_vars`
+in the config.yml, which can also be set through the `--patroni-package-flavour`
+command-line argument. If no `patroni_package_flavour` is explicitly set, TPA
+will attempt to infere the flavour based on the configured repositories: if EDB
+repositories were configured, implicitly select `edb` flavour, otherwise
+implicitly select `community` flavour.
 
-```yaml
-cluster_vars:
-  yum_repository_list:
-  - PGDG
-```
+TPA `configure` will add 3 etcd nodes, and may add 2 haproxy nodes if you
+specify the option `--enable-haproxy`. Etcd is used for the Distributed
+Configuration Store (DCS). Patroni supports other DCS backends, but they are not
+currently supported by EDB or TPA.
 
-TPA `configure` will add 3 etcd nodes and 2 haproxy nodes. Etcd is used
-for the Distributed Configuration Store (DCS). Patroni supports other
-DCS backends, but they are not currently supported by EDB or TPA.
-
-TPA uses Patroni's feature of converting an existing PostgreSQL
-standalone server. This allows for TPA to initialise and manage
-configuration. Once a single PostgreSQL server and database has been
-created, Patroni will create replicas and configure replication.
-TPA will then remove any postgres configuration files used during setup.
+TPA uses Patroni's feature of converting an existing PostgreSQL cluster. This
+allows for TPA to initialise and manage configuration. Once the PostgreSQL
+cluster has been created, Patroni will take the management over. TPA will then
+remove any postgres configuration files used during setup.
 
 Once set up, Postgres can continue to be managed using TPA and settings
 in `config.yml` for the cluster. You can also use Patroni interfaces,
@@ -50,6 +50,7 @@ in the deployment of Patroni in TPA.
 | `patroni_restapi_user`          | patroni       | Username to configure for the patroni REST API.                                                                                                                                                                                                                      |
 | `patroni_rewind_user`           | rewind        | Username to create in postgres for pg_rewind function.                                                                                                                                                                                                               |
 | `patroni_installation_method`   | pkg           | Install patroni from packages or source (e.g. git repo or local source directory if docker).                                                                                                                                                                         |
+| `patroni_package_flavour`       | community if no EDB repository is configured, else edb | Whether to install `edb-patroni` package (`edb` flavour, requires EDB repositories) or `patroni` package (`community` flavour, requires PGDG and EPEL (RedHat based only) repositories). |
 | `patroni_ssl_enabled`           | no            | Whether to enable SSL for REST API and ctl connection. Will use the cluster SSL cert and CA if available.                                                                                                                                                            |
 | `patroni_rewind_enabled`        | yes           | Whether to enable postgres rewind, creates a user defined by patroni_rewind_user and adds config section.                                                                                                                                                            |
 | `patroni_watchdog_enabled`      | no            | Whether to configure the kernel watchdog for additional split brain prevention.                                                                                                                                                                                      |
