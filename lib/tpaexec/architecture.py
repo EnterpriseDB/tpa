@@ -1137,11 +1137,13 @@ class Architecture(object):
         # software, we don't need to require any EDB repos. You'll be fine with
         # just PGDG. For anything else, you can always specify the correct list
         # with --edb-repositories.
+        # Note: Patroni requires EDB repos because we want users to install our
+        # 'edb-patroni' package instead of the 'patroni' package from PGDG.
 
         if (
             postgres_flavour == "postgresql"
-            and not self.args.get("failover_manager") == "efm"
-            and not self.name in ("PGD-Always-ON", "BDR-Always-ON")
+            and self.args.get("failover_manager") not in ["efm", "patroni"]
+            and self.name not in ("PGD-Always-ON", "BDR-Always-ON")
             and not self.args.get("enable_pem")
         ):
             repos = []
