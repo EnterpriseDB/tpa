@@ -244,6 +244,42 @@ class M1(Architecture):
                 }
             )
 
+        self._set_etcd_repos(instances)
+
+    def _set_etcd_repos(self, instances):
+        """
+        Set repositories to be used in etcd nodes, when deploying Patroni clusters.
+
+        If Patroni is the failover manager, we want to enable PGDG (more specifically
+        PGDG extras) so we can install etcd packages on the etcd nodes. We do nothing
+        in regards to Debian/Ubuntu because etcd packages are not provided through
+        PGDG, but system repos.
+
+        Note that etcd is also used by HARP, but in that case we provide other custom
+        etcd packages through EDB repositories. That's why we handle only Patroni here.
+
+        :param instances: the instances which belong to this TPA cluster. We are
+            interested in the ones with role ``etcd``, so we can configure PGDG repos
+            for them.
+        """
+        if self.args.get("failover_manager") == "patroni":
+            for repo_var_name in ["yum_repository_list", "suse_repository_list"]:
+                # We don't want to miss repositories configured at the 'cluster_vars'
+                # level, if set. As 'vars' set at instance level overrides the
+                # 'cluster_vars' corresponding value, we make sure to extend the current
+                # repository list, if one exists.
+
+                repo_list = set(self.args["cluster_vars"].get(repo_var_name, []))
+                repo_list.add("PGDG")
+                repo_list = list(repo_list)
+
+                for instance in instances:
+                    if "etcd" in instance["role"]:
+                        # We know for a fact that the 'vars' entry exists in this case,
+                        # at least with the 'etcd_location', so we can use key access
+                        # instead of 'get' method.
+                        instance["vars"][repo_var_name] = repo_list
+
     def update_cluster_vars(self, cluster_vars):
         """
         Makes architecture-specific changes to cluster_vars if required
