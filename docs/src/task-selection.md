@@ -22,19 +22,19 @@ available for `tpaexec test`.
 To deploy without running barman-related tasks:
 
 ```
-[tpa]$ tpaexec deploy <clustername> --excluded_tasks barman
+[tpa]$ tpaexec deploy <clustername> --excluded_tasks=barman
 ```
 
 To deploy running only repmgr-related tasks:
 
 ```
-[tpa]$ tpaexec deploy <clustername> --included_tasks repmgr
+[tpa]$ tpaexec deploy <clustername> --included_tasks=repmgr
 ```
 
 To deploy without trying to set hostnames on the instances:
 
 ```
-[tpa]$ tpaexec deploy <clustername> --excluded_tasks hostname
+[tpa]$ tpaexec deploy <clustername> --excluded_tasks=hostname
 ```
 
 To prevent bootstrap and ssh tasks from ever running, put the following
@@ -117,6 +117,10 @@ The following selectors are supported for either inclusion or exclusion:
 - pkg
 
     Tasks which install packages using the system package manager.
+
+- post-deploy
+
+    The post-deploy hook, if one is defined.
 
 - postgres
 

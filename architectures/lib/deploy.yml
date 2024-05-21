@@ -102,8 +102,6 @@
 
   - include_role:
       name: pgd_proxy
-      apply:
-        tags: pgd-proxy
     when:
       failover_manager == 'pgd'
       and 'pgd-proxy' in role
@@ -130,8 +128,6 @@
 
   - include_role:
       name: final
-      apply:
-        tags: final
     when:
       (pem_shared|default(false)) is false
       and task_selector|selects('final')

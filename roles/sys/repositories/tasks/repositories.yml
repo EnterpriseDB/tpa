@@ -16,5 +16,3 @@
 
 - include_tasks:
     file: "os/{{ ansible_os_family }}/repositories.yml"
-    apply:
-      tags: public_repos

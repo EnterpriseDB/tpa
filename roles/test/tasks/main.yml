@@ -16,10 +16,10 @@
 - name: Run postgres tests
   include_tasks:
     file: postgres.yml
-    apply:
-      tags: postgres
   when: >
-    'postgres' in role and pgdata_initialised
+    'postgres' in role
+    and pgdata_initialised
+    and task_selector|selects('postgres')
 
 - name: Run barman tests
   include_tasks:

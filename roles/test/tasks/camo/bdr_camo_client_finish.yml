@@ -49,8 +49,9 @@
   - name: Fail if bdr_camo_client failed
     fail:
       msg: "bdr_camo_client failed"
-    when: client is not successful
-    tags: [camo, fail, upgrade]
+    when:
+      client is not successful
+      and task_selector|permits('camo', 'fail', 'upgrade')
 
   - name: Get LSN after bdr_camo_client run
     postgresql_query:

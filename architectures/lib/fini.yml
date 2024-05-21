@@ -20,12 +20,14 @@
   - block:
     - include_role:
         name: sys/hosts
-        apply:
-          tags: [sys, hosts]
+      when:
+        - task_selector|selects('sys')
+        - task_selector|permits('hosts')
     - include_role:
         name: sys/hostkeys
-        apply:
-          tags: [sys, hostkeys]
+      when:
+        - task_selector|selects('sys')
+        - task_selector|permits('hostkeys')
     when:
     - deploy_hosts|default('all') != 'all'
     - deploy_hosts.split(',')|symmetric_difference(groups[cluster_tag])
@@ -33,6 +35,5 @@
 
   - include_role:
       name: post_deploy
-      apply:
-        tags: post-deploy
-    tags: always
+    when:
+      task_selector|selects('post-deploy')

@@ -1,0 +1,14 @@
+- summary: Various task selection fixes
+  description: |
+    Task selectors are now consistently applied in the final stage of
+    deployment; in particular the 'post-deploy' selector is now supported.
+    Consistency of task selectors in the tests is also improved and the
+    examples of task selectors in the docs are now correct.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-713
