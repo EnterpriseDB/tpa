@@ -84,6 +84,7 @@ env:
   EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
   EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
   EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  FOUNDATION_TUNNEL_LOGIN: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
   FOUNDATION_VER: ${{ vars.FOUNDATION_PACKAGING_VERSION }}
   GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
   SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
@@ -113,12 +114,6 @@ jobs:
           token: ${{ env.GITHUB_TOKEN }}
           path: foundation
 
-      - name: Connect to a Native Executor
-        uses: ./foundation/actions/linux/native/executor/connect
-        with:
-          architecture: "amd64"
-          tunnel-login: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
-
       - uses: ./.github/actions/integration-test
         with:
           source_directory: ${{ github.workspace }}
@@ -133,6 +128,3 @@ jobs:
           tpa_witness_only_location: ${{ github.event.inputs.tpa_witness_only_location }}
           tpa_single_node_location: ${{ github.event.inputs.tpa_single_node_location }}
           tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}
-
-      - name: Disconnect from a Native Executor
-        uses: ./foundation/actions/linux/native/executor/disconnect

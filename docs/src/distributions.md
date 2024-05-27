@@ -10,6 +10,10 @@ and is not suitable for production use.
 Fully supported platforms are supported both as host systems for running
 TPA and target systems on which TPA deploys the Postgres cluster.
 
+## Debian ARM64
+
+* Debian 12/bookworm is fully supported
+
 ## Debian x86
 
 * Debian 12/bookworm is fully supported

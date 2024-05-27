@@ -4,6 +4,10 @@ name: Integration Test
 description: Run an integration test for the given architecture and platform
 
 inputs:
+  cpu_architecture:
+    description: "CPU the native Executor will pick"
+    required: True
+    default: amd64
   source_directory:
     description: "Directory where tpaexec source code is checked out on runner"
     required: true
@@ -74,6 +78,20 @@ runs:
   using: "composite"
 
   steps:
+
+    - name: Checkout fundation repository branch/tag ${{ env.FOUNDATION_VER }}
+      uses: actions/checkout@v4
+      with:
+        repository: EnterpriseDB/foundation-packaging
+        ref: ${{ env.FOUNDATION_VER }}
+        token: ${{ env.GITHUB_TOKEN }}
+        path: foundation
+
+    - name: Connect to a Native Executor
+      uses: ./foundation/actions/linux/native/executor/connect
+      with:
+        architecture: ${{ inputs.cpu_architecture }}
+        tunnel-login: ${{ env.FOUNDATION_TUNNEL_LOGIN }}
 
     - uses: ./.github/actions/initialise_integration_test
       with:
@@ -172,5 +190,8 @@ runs:
         cluster: ${{ env.CLUSTER }}
         source_directory: ${{ inputs.source_directory }}
       if: always()
+
+    - name: Disconnect from a Native Executor
+      uses: ./foundation/actions/linux/native/executor/disconnect
 
 outputs: { }
