@@ -92,6 +92,22 @@
     patroni_initialised
     and postgres_service_end_state|default('started') == 'restarted'
 
+# If "patroni" package was replaced with "edb-patroni" package during this deploy
+# run, then the cluster should be in paused state at this point (see
+# "patroni/pkg/replace-packages.yml"). In that case, we need to unpause the Patroni
+# cluster now, so it resumes normal operation after the package replacement.
+
+- name: Unpause the Patroni cluster when replacing patroni with edb-patroni package
+  include_role:
+    name: patroni/api
+    tasks_from: config
+  run_once: true
+  vars:
+    body:
+      pause: false
+  when:
+    replacing_patroni_package|default(false)
+
 # Since the topology of the cluster may have changed during the patroni
 # setup process, we collect cluster_facts again.
 

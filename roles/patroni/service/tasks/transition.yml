@@ -5,9 +5,9 @@
 # This service call should not handle restart, this is because it will also shut down postgres
 # when patroni stops. It is fine for a `reload` to occur through the systemd unit as the daemon
 # performs the same action for a SIGHUP as it does via a `patronictl reload` and via the /reload
-# API
+# API. A stop call should only be fired when Patroni is paused, so we avoid failovers.
 
-- name: Start or reload Patroni service, as required
+- name: Start, reload or stop Patroni service, as required
   service:
     name: "{{ patroni_service_name }}"
     state: "{{ to_state|default('started') }}"
@@ -15,3 +15,5 @@
 - include_role:
     name: patroni/api
     tasks_from: readiness
+  when: >
+    to_state|default('started') != 'stopped'

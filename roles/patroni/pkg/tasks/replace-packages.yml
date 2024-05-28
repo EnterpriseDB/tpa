@@ -1,0 +1,59 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+# This task is only called when a Patroni cluster already exists and we are again
+# going through the provision/deploy procedure. At this point we want to check if
+# by chance the user has an existing cluster which was deployed with the "patroni"
+# package. We need to check that because from now on TPA will install the
+# "edb-patroni" package instead, which replaces "patroni" and installs the
+# modules in a different path in the operating system. With that in mind, we need
+# to perform a graceful transition from patroni to edb-patroni package, which
+# consists of:
+#
+# 1. Detect "edb-patroni" will be installed over "patroni";
+# 2. Pause the Patroni cluster, so we avoid failovers;
+# 3. Stop the Patroni service, as it is using the binary and modules from the
+#    "patroni" package;
+# 4. Install "edb-patroni" -- this will uninstall "patroni" as well;
+# 5. Start Patroni service, which will now use the binary and modules from the
+#    "edb-patroni" package;
+# 6. Unpause the Patroni cluster, so we resume to normal operations.
+#
+# This task performs the steps "1.", "2.", and "3.". The parent task takes care
+# of performing step "4.". The other steps are performed near the end of the
+# deployment.
+
+- package_facts:
+
+- set_fact:
+    replacing_patroni_package: "'patroni' in ansible_facts.packages"
+
+- block:
+  - name: Pause the Patroni cluster when replacing patroni with edb-patroni package
+    include_role:
+      name: patroni/api
+      tasks_from: config
+    run_once: true
+    vars:
+      body:
+        pause: true
+
+  # This is a hack so the next step won't fail because of an undefined variable.
+  # This "replace-packages.yml" is not expected to be executed often (how many
+  # Patroni clusters we have out there at this moment?). The issue is we need to
+  # Stop the current Patroni services before installing "edb-patroni" over "patroni",
+  # so we avoid possible issues from being faced by Patroni because of missing
+  # modules in the meantime.
+  - set_fact:
+      patroni_service_name: "patroni@{{ cluster_name }}"
+
+  - name: Stop the Patroni service when replacing patroni with edb-patroni package
+    include_role:
+      name: patroni/service
+      tasks_from: transition
+    vars:
+      to_state: stopped
+
+  when:
+    replacing_patroni_package
