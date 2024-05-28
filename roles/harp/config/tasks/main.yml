@@ -34,4 +34,4 @@
     hook: "{{ cluster_dir }}/hooks/harp-config.yml"
   when: >
     lookup('first_found', dict(files=hook, skip=True))
-    and task_selector|permits('config')
+    and task_selector|permits('harp-config')

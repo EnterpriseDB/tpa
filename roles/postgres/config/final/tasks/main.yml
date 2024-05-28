@@ -224,8 +224,9 @@
 
 - name: Include postgres-config-final hook
   include_tasks: "{{ hook }}"
-  when:
+  when: >
     lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|permits('postgres-config-final')
   vars:
     hook: "{{ cluster_dir }}/hooks/postgres-config-final.yml"
 

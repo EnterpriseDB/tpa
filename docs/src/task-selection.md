@@ -158,6 +158,22 @@ The following selectors are supported only for exclusion:
     Tasks which clean up the Barman build directory if Barman is being
     built from source.
 
+- barman-pre-config
+
+    The barman-pre-config hook, if one is defined.
+
+- bdr-pre-node-creation
+
+    The bdr-pre-node-creation hook, if one is defined.
+
+- bdr-post-group-creation
+
+    The bdr-post-group-creation hook, if one is defined.
+
+- bdr-pre-group-join
+
+    The bdr-pre-group-join hook, if one is defined.
+
 - bootstrap
 
     Tasks which ensure that python and other minimal dependencies are
@@ -231,10 +247,30 @@ The following selectors are supported only for exclusion:
 
     Tasks which create the [.pgpass](pgpass.md) file.
 
+- post-repo
+
+    The post-repo hook, if one is defined.
+
 - postgres-clean
 
     Tasks which clean up the build directory if postgres is being built
     from source.
+
+- postgres-config
+
+    The postgres-config hook, if one is defined.
+
+- postgres-config-final
+
+    The postgres-config-final hook, if one is defined.
+
+- pre-deploy
+
+    The pre-deploy hook, if one is defined.
+
+- pre-initdb
+
+    The pre-initdb hook, if one is defined.
 
 - replication-sets
 
