@@ -266,12 +266,6 @@
   when: >
     failover_manager == 'patroni'
 
-- name: Update haproxy_bind_address to accept connections to proxy nodes
-  set_fact:
-    haproxy_bind_address: 0.0.0.0
-  when: >
-    failover_manager == 'patroni'
-
 - name: Add postgres libs and PGHOST to target_environment
   set_fact:
     target_environment: "{{ target_environment|combine(_task_environment) }}"

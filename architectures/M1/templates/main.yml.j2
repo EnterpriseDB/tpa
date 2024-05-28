@@ -81,6 +81,9 @@ instances:
   role:
     - haproxy
   vars:
+{% if failover_manager == 'patroni' %}
+    haproxy_bind_address: '0.0.0.0'
+{% endif %}{# failover_manager == 'patroni' #}
     haproxy_backend_servers:
 {% for node in location_data_nodes %}
         - {{ node }}
