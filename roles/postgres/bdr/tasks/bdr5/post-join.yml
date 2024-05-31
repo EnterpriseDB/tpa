@@ -79,7 +79,9 @@
     loop_var: node_option
     label: >
       {{ node_option.key }}:{{ node_option.value }}
-  when: bdr_major_version >= 5
+  when: 
+    bdr_major_version >= 5 
+    and groups['role_pgd-proxy']|default([]) is not empty
 
 - name: Perform pgd_proxy setup
   include_tasks:
