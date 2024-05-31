@@ -71,6 +71,18 @@ class PGD_Always_ON(BDR):
             default=SUPPRESS,
             help="Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health",
         )
+        g.add_argument(
+            "--proxy-listen-port",
+            type=int,
+            dest="listen_port",
+            default=6432
+        )
+        g.add_argument(
+            "--proxy-read-only-port",
+            type=int,
+            dest="read_listen_port",
+            default=6433
+        )
 
     def update_argument_defaults(self, defaults):
         super().update_argument_defaults(defaults)
@@ -211,14 +223,28 @@ class PGD_Always_ON(BDR):
 
             bdr_node_groups.append(group)
 
-        cluster_vars.update(
-            {
-                "bdr_node_groups": bdr_node_groups,
-                "default_pgd_proxy_options": {
-                    "listen_port": 6432,
-                },
-            }
-        )
+        bdr_package_version = cluster_vars.get("bdr_package_version")
+        if self._meets_mininimum_package_version(bdr_package_version, req_major_version='5', req_minor_version='5'):
+            cluster_vars.update(
+                {
+                    "bdr_node_groups": bdr_node_groups,
+                    "default_pgd_proxy_options": {
+                        "listen_port": self.args["listen_port"],
+                        "read_listen_port": self.args["read_listen_port"]
+                    },
+                }
+            )
+
+        else:
+            cluster_vars.update(
+                {
+                    "bdr_node_groups": bdr_node_groups,
+                    "default_pgd_proxy_options": {
+                        "listen_port": self.args["listen_port"],
+                    },
+                }
+            )
+
         self._update_pgd_probes(cluster_vars)
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
@@ -353,3 +379,12 @@ class PGD_Always_ON(BDR):
         and false otherwise.
         """
         return location == self.args.get("witness_only_location")
+
+    def _meets_mininimum_package_version(self, package_version_string, req_major_version = '5', req_minor_version = '5'):
+        if package_version_string is None:
+            return True
+        else:
+            version_parts = package_version_string.split(':', maxsplit=1)[-1].split('.')
+            is_major = re.fullmatch(rf"^[{req_major_version}-9]{{1}}|[1-9][0-9]{{1,}}|\*", version_parts[0])
+            is_minor = re.fullmatch(rf"^[{req_minor_version}-9]{{1}}|[1-9][0-9]{{1,}}|\*", version_parts[1])
+            return bool(is_major) and bool(is_minor)
