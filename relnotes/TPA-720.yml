@@ -1,8 +1,8 @@
 - summary: Change haproxy_bind_address when Patroni is failover_manager
   description: |
-    The default_haproxy_bind_address value '127.0.0.1' does not allow for communication
-    between Postgres nodes and haproxy nodes (namely invoking pg_isready). 
-    The bind address is set to '0.0.0.0' when Patroni is the failover manager.
+    The default value of `haproxy_bind_address` (`127.0.0.1`) does not allow for
+    communication between Postgres nodes and haproxy nodes. 
+    The bind address is now set to `0.0.0.0` when Patroni is the failover manager.
     Users should change this value to something more restrictive and 
     appropriate for their cluster networking.
   # Possible types: notable_change, minor_change, bugfix or breaking_change
