@@ -97,7 +97,7 @@
 # "patroni/pkg/replace-packages.yml"). In that case, we need to unpause the Patroni
 # cluster now, so it resumes normal operation after the package replacement.
 
-- name: Unpause the Patroni cluster when replacing patroni with edb-patroni package
+- name: Unpause the Patroni cluster when replacing patroni with edb-patroni package (or vice-versa)
   include_role:
     name: patroni/api
     tasks_from: config

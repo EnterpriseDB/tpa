@@ -1137,8 +1137,6 @@ class Architecture(object):
         # software, we don't need to require any EDB repos. You'll be fine with
         # just PGDG. For anything else, you can always specify the correct list
         # with --edb-repositories.
-        # Note: Patroni requires EDB repos because we want users to install our
-        # 'edb-patroni' package instead of the 'patroni' package from PGDG.
 
         if (
             postgres_flavour == "postgresql"

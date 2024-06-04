@@ -69,6 +69,12 @@ class M1(Architecture):
             default="etcd",
             help="The Distributed Configuration Store to use with Patroni",
         )
+        g.add_argument(
+            "--patroni-package-flavour",
+            choices=["edb", "community"],
+            required=False,
+            help="The flavour of Patroni packages to be installed"
+        )
 
         layout_group = p.add_argument_group("M1 architecture layout options")
         layout_group.add_argument(
@@ -280,6 +286,40 @@ class M1(Architecture):
                         # instead of 'get' method.
                         instance["vars"][repo_var_name] = repo_list
 
+    def _get_patroni_flavour(self, cluster_vars):
+        """
+        Get value for ``patroni_package_flavour`` configuration.
+
+        Use value configured by the user, if any, otherwise get a default value based on
+        the configured repositories.
+
+        :param cluster_vars: cluster variables to be inspected.
+        """
+        # If the user explicitly set the flavour, use that.
+        ret = self.args.get("patroni_package_flavour")
+
+        if ret is not None:
+            return ret
+
+        # If the user explicitly configured EDB repos, use 'edb' flavour
+        if len(cluster_vars.get("edb_repositories", [])) > 0:
+            return "edb"
+
+        # :meth:`update_cluster_vars` is executed before than the method
+        # :meth:`Architecture.update_repos`, so we don't have implicit values for
+        # 'edb_repositories' yet. This code is a hack to mimic the behavior of
+        # update_repos, so use 'edb' flavour when edb_repositories are going to be
+        # configured by TPA.
+        if self.args.get("enable_pem"):
+            return "edb"
+
+        if self.args.get("postgres_flavour") != "postgresql":
+            return "edb"
+
+        # If the user requested no flavour, and apparently no EDB repos are going to be
+        # configured, we fall back to 'community' flavour.
+        return "community"
+
     def update_cluster_vars(self, cluster_vars):
         """
         Makes architecture-specific changes to cluster_vars if required
@@ -294,3 +334,6 @@ class M1(Architecture):
         if failover_manager == "patroni":
             # Ensure nodes are members of a single etcd_location per cluster for patroni.
             cluster_vars["etcd_location"] = "main"
+            cluster_vars["patroni_package_flavour"] = self._get_patroni_flavour(
+                cluster_vars,
+            )

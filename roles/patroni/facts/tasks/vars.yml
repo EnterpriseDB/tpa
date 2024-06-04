@@ -11,9 +11,28 @@
   set_fact:
     postgres_cluster_name: "{{ cluster_name }}"
 
-- name: Set Patroni installation method fact
+- name: Set Patroni installation facts
   set_fact:
     patroni_installation_method: "{{ patroni_installation_method|default('pkg') }}"
+
+# If the user set no Patroni package flavour, we attempt to infere that from the
+# list of repositories.
+
+- block:
+  - name: Set default Patroni package flavour as 'edb'
+    set_fact:
+      patroni_package_flavour: edb
+    when:
+      edb_repositories|default([]) is not empty
+
+  - name: Set default Patroni package flavour as 'community'
+    set_fact:
+      patroni_package_flavour: community
+    when:
+      edb_repositories|default([]) is empty
+
+  when:
+    patroni_package_flavour is undefined
 
 - name: Set facts for various Patroni file locations
   set_fact:
