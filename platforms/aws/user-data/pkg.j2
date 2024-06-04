@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 {# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved. #}
 {#
-    We must ensure that nvmecli, awscli, and mdadm are installed.
+    We must ensure that nvmecli and awscli are installed.
 
     We now use /etc/os-release to decide what to do on the target, so we
     need compact code that supports all relevant distributions. We can't
@@ -15,14 +15,14 @@
     some of the features we depend on).
 #}
 
-P=(nvme-cli mdadm)
+P=(nvme-cli)
 V=(python3 -m venv)
 U=(apt-get -q -y update)
 I=(apt-get -q -y --no-install-recommends install)
 DV=/usr/local/share/tpa/python-virtualenv
 
 export DEBIAN_FRONTEND=noninteractive
-if ! command -v aws &>/dev/null || ! command -v nvmecli &>/dev/null || ! command -v mdadm &>/dev/null; then
+if ! command -v aws &>/dev/null || ! command -v nvmecli &>/dev/null; then
     case "${ID}:${VERSION_ID%.*}" in
         debian:10|debian:11|debian:12|ubuntu:18|ubuntu:20|ubuntu:22) P+=(python3 python3-venv) ;;
         ubuntu:16) P+=(python python-virtualenv virtualenv); V=(virtualenv) ;;
