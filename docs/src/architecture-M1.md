@@ -1,3 +1,7 @@
+---
+description: Configuring the M1 architecture with TPA.
+---
+
 # M1
 
 A Postgres cluster with one or more active locations, each with the same

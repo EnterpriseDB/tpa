@@ -1,3 +1,8 @@
+---
+description: Uploading files and directories to target instances with TPA.
+---
+
+
 # Uploading artifacts
 
 You can define `artifacts` to create or copy files to target instances:

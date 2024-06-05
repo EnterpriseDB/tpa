@@ -1,3 +1,7 @@
+---
+description: Provisioning production clusters on AWS EC2 with TPA.
+---
+
 # aws
 
 TPA fully supports provisioning production clusters on AWS EC2.

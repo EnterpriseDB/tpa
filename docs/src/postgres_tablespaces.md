@@ -1,3 +1,7 @@
+---
+description: Tablespaces in Postgres and how to configure them with TPA.
+---
+
 # Creating Postgres tablespaces
 
 To create Postgres tablespaces during deployment, define their names and

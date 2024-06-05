@@ -1,3 +1,7 @@
+---
+description: Using Patroni as a failover manager with TPA.
+---
+
 # Using Patroni as a Failover Manager
 
 Patroni can be used as a single master failover manager with the M1

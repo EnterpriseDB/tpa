@@ -1,3 +1,8 @@
+---
+description: The command that creates and configures a new cluster.
+---
+
+
 # Cluster configuration
 
 The `tpaexec configure` command generates a YAML cluster configuration

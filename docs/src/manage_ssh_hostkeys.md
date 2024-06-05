@@ -1,3 +1,8 @@
+---
+description: Managing a cluster's SSH host keys with TPA.
+---
+
+
 # Managing SSH host keys
 
 TPA generates a set of SSH host keys while provisioning a cluster.

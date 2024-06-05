@@ -1,3 +1,7 @@
+---
+description: How to install and configure EFM with TPA.
+---
+
 # Configuring EFM
 
 TPA will install and configure EFM when `failover_manager` is set to

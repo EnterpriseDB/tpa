@@ -1,3 +1,7 @@
+---
+description: Configuring pglogical replication with TPA.
+---
+
 # pglogical configuration
 
 TPA can configure pglogical replication sets (publications) and

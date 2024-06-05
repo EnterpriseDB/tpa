@@ -1,3 +1,8 @@
+---
+description: How to configure PuTTY to connect to a TPA cluster.
+---
+
+
 # TPA - PuTTY Configuration guide
 
 In order to use PuTTY under Windows to connect via ssh to the AWS instances

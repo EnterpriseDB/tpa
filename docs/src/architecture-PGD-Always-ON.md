@@ -1,3 +1,7 @@
+---
+description: Configuring a PGD-Always-ON cluster with TPA.
+---
+
 # PGD-Always-ON
 
 EDB Postgres Distributed 5 in an Always-ON configuration,

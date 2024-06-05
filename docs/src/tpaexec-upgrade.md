@@ -1,3 +1,8 @@
+---
+description: Upgrading your TPA cluster.
+---
+
+
 # Upgrading your cluster
 
 The `tpaexec upgrade` command is used to upgrade the software running on

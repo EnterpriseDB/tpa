@@ -1,3 +1,7 @@
+---
+description: Incorporating pgd-proxy into your TPA deployed PGD 5 cluster.
+---
+
 # Configuring pgd-proxy
 
 TPA will install and configure pgd-proxy for the PGD-Always-ON

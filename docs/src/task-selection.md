@@ -1,3 +1,7 @@
+---
+description: Selecting which tasks TPA should run during deployment.
+---
+
 # Selective task execution
 
 ## Using task selectors

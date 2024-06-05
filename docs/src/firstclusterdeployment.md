@@ -1,3 +1,7 @@
+---
+description: A simple tutorial to deploy a Postgres cluster with TPA on Docker.
+---
+
 # A First Cluster Deployment
 
 In this short tutorial, we are going to work through deploying a simple [M1 architecture](architecture-M1.md) deployment onto a local Docker installation. By the end you will have four containers, one primary database, two replicas and a backup node, configured and ready for you to explore.

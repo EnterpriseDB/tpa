@@ -1,3 +1,7 @@
+---
+description: The command that reads config.yml, changes the cluster in various ways and outputs a new config.yml. 
+---
+
 # tpaexec reconfigure
 
 The `tpaexec reconfigure` command reads config.yml and generates a

@@ -1,3 +1,8 @@
+---
+description: A command to output information about the TPA installation.
+---
+
+
 # tpaexec info
 
 You can use the info command to output information about the TPA installation.

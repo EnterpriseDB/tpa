@@ -1,3 +1,7 @@
+---
+description: Installing TPA packages and setting up the Python environment.
+---
+
 # TPA installation
 
 To use TPA, you need to install from packages or source and run the

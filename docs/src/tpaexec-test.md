@@ -1,3 +1,8 @@
+---
+description: Run architecture-specific tests against a deployed cluster.
+---
+
+
 # tpaexec test
 
 Now we run architecture-specific tests against a deployed cluster to

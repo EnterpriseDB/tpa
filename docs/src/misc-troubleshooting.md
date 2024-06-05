@@ -1,3 +1,7 @@
+---
+description: How to troubleshoot TPA installations
+---
+
 # Troubleshooting
 
 ### Recreate python virtual environment

@@ -1,3 +1,7 @@
+---
+description: Which Linux distributions are supported by TPA.
+---
+
 # Distribution support
 
 TPA detects and adapts to the distribution running on each target

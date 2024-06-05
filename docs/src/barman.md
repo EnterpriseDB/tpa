@@ -1,3 +1,7 @@
+---
+description: Configuring Barman for backup and recovery with TPA.
+---
+
 # Barman
 
 When an instance is given the `barman` role in config.yml, TPA will

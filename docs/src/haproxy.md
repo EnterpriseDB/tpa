@@ -1,3 +1,7 @@
+---
+description: How to install and configure haproxy with TPA.
+---
+
 # Installing haproxy
 
 TPA will install and configure haproxy on instances whose `role`

@@ -1,3 +1,7 @@
+---
+description: Configuring /etc/hosts on instances with TPA
+---
+
 # Configuring /etc/hosts
 
 By default, TPA will add lines to /etc/hosts on the target instances

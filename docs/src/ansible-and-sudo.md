@@ -1,3 +1,7 @@
+---
+description: How TPA uses Ansible with sudo to execute tasks with elevated privileges on target instances.
+---
+
 # TPA, Ansible, and sudo
 
 TPA uses Ansible with sudo to execute tasks with elevated privileges

@@ -1,3 +1,7 @@
+---
+description: Configuring APT repositories for Debian and Ubuntu systems.
+---
+
 # Configuring APT repositories
 
 This page explains how to configure APT package repositories on Debian

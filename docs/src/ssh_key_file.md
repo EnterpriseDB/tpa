@@ -1,3 +1,7 @@
+---
+description: About the ssh_key_file setting in config.yml and how to use an existing SSH keypair for a cluster.
+---
+
 # ssh_key_file
 
 By default, `tpaexec provision` will use `ssh-keygen` to generate a new

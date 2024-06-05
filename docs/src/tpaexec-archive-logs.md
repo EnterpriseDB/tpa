@@ -1,3 +1,8 @@
+---
+description: How to archive logs from a TPA cluster.
+---
+
+
 # tpaexec archive-logs
 
 To create a log directory and archive logs from instances, run

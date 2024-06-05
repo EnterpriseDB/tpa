@@ -1,3 +1,7 @@
+---
+description: Extending TPA with hooks to execute arbitrary Anisible tasks.
+---
+
 # TPA hooks
 
 TPA can set up fully-functional clusters with no user intervention,

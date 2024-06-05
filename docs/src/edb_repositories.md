@@ -1,3 +1,7 @@
+---
+description: How to configure EDB Repos 2.0 package repositories on any system.
+---
+
 # Configuring EDB Repos 2.0 repositories
 
 This page explains how to configure EDB Repos 2.0 package repositories

@@ -1,3 +1,8 @@
+---
+description: Modifying postgresql.conf on a TPA-managed Postgres cluster.
+---
+
+
 # postgresql.conf
 
 TPA creates a `conf.d` directory with various `.conf` files under

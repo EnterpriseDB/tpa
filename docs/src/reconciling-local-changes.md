@@ -1,4 +1,9 @@
+---
+description: How to reconcile changes made outside of TPA with the configuration in `config.yml`.
+---
+
 # Reconciling changes made outside of TPA
+
 Any changes made to a TPA created cluster that are not performed by
 changing the TPA configuration will not be saved in `config.yml`. This
 means that your cluster will have changes that the TPA configuration

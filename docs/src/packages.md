@@ -1,3 +1,8 @@
+---
+description: Installing packages on target instances with TPA.
+---
+
+
 # Installing packages
 
 TPA installs a batch of non-Postgres-related packages early during
