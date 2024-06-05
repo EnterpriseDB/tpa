@@ -116,6 +116,21 @@ _patroni_conf:
     replicatefrom: "{{ upstream|default(false) }}"
     nosync: false
 
+# Custom `postgres_wal_dir` was configured.
+# Neither of these will be initially used as TPA takes care of setting up the initial
+# cluster. Patroni will only use `--waldir` in `pg_basebackup` if it ever needs to
+# rebuild a replica on its own, out of TPA. The `initdb` parameter is filled only for
+# completeness, but it will never be used by Patroni as TPA takes care of the initial
+# bootstrapping.
+
+_patroni_custom_postgres_wal_dir:
+  bootstrap:
+    initdb:
+      - waldir: "{{ postgres_wal_dir }}"
+  postgresql:
+    basebackup:
+      waldir: "{{ postgres_wal_dir }}"
+
 # `patroni_ssl_enabled` is true
 
 _patroni_conf_ssl:

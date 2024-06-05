@@ -135,6 +135,17 @@
           "{{ postgres_pg_ident_config }}"
   when: postgres_pg_ident_config is defined
 
+# We only want to add this when the custom waldir is not under datadir, otherwise
+# Patroni will get into an infinite crash loop if it ever attempts to rebuild a replica.
+
+- name: Update patroni config with custom 'postgres_wal_dir'
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: patroni_conf
+    object_contents: "{{ _patroni_custom_postgres_wal_dir }}"
+  when: not postgres_wal_dir.startswith(postgres_data_dir)
+
 - name: Update patroni config with SSL settings if required
   include_role:
     name: config/add_to_obj
