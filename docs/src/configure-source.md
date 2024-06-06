@@ -28,7 +28,7 @@ operations.
 
 ## Quickstart
 
-Spin up a cluster with 2ndQPostgres, pglog  ical3, and bdr all built from
+Spin up a cluster with 2ndQPostgres, pglogical3, and bdr all built from
 stable branches:
 
 ```bash
