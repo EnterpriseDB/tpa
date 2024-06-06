@@ -1,0 +1,11 @@
+- summary: Add support for `postgres_wal_dir` in Patroni deployments
+  description: |
+    When a custom `postgres_wal_dir` is specified in TPA configuration, TPA will
+    make sure to relay that option to the corresponding settings in the Patroni
+    configuration file.
+
+    That way, if Patroni ever needs to rebuild a standby on its own, out of TPA,
+    the standby will be properly set up with a custom WAL directory.
+  type: minor_change
+  jira_tickets:
+  - TPA-741
