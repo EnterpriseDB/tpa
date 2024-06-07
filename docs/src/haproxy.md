@@ -24,7 +24,7 @@ You can set the following variables on any `haproxy` instance.
 
 | Variable                  | Default value         | Description                                                                                                                       |
 |---------------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `haproxy_bind_address`    | 127.0.0.1             | The address haproxy should bind to                                                                                                |
+| `haproxy_bind_address`    | 127.0.0.1*             | The address to which haproxy should bind<br/>*0.0.0.0 if `failover_manager` is patroni. **Users should change this value to something more restrictive and appropriate for their cluster networking**                                                                                                |
 | `haproxy_port`            | 5432 (5444 for EPAS)  | The TCP port haproxy should listen on                                                                                             |
 | `haproxy_read_only_port`  | 5433 (5445 for EPAS)  | TCP port for read-only load-balancer                                                                                              |
 | `haproxy_backend_servers` | None                  | A list of Postgres instance names                                                                                                 |
