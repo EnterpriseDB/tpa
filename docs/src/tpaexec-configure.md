@@ -395,6 +395,13 @@ Use the `--use-ansible-tower` and `--tower-git-repository` options to
 create a cluster adapted for deployment with Ansible Tower. See [Ansible
 Tower](tower.md) for details.
 
+## Beacon agent
+
+Use the `--enable-beacon-agent` and `--beacon-agent-project-id` options
+to install the beacon agent, which enables you to view your cluster in
+the EDB Postgres AI Console. See [Configuring the beacon
+agent](beacon-agent.md) for details.
+
 ## Git repository
 
 By default, a git repository is created with an initial branch named

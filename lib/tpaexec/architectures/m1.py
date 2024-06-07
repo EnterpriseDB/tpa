@@ -261,7 +261,17 @@ class M1(Architecture):
                 }
             )
 
+        if self.args.get("enable_beacon_agent"):
+            self._add_beacon_agent_role(instances)
+
         self._set_etcd_repos(instances)
+
+    def _add_beacon_agent_role(self, instances):
+        for instance in instances:
+            ins_defs = self.args["instance_defaults"]
+            role = instance.get("role", ins_defs.get("role", []))
+            if "primary" in role or "replica" in role:
+                instance["role"].append("beacon-agent")
 
     def _set_etcd_repos(self, instances):
         """

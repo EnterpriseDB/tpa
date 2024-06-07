@@ -1,0 +1,19 @@
+agent:
+    access_key: {{ beacon_agent_access_key }}
+    access_key_grpc_header: "x-access-key"
+    batch:
+        size: 100
+    beacon_server: "beacon.biganimal.com:443"
+    feature_flag_interval: 10m0s
+    project_id: {{ beacon_agent_project_id }}
+    providers:
+        - "onprem"
+provider:
+    onprem:
+        databases:
+            {{ beacon_db_name }}:
+                dsn: "host=localhost port={{ postgres_port }} user=beacon dbname=postgres"
+                tags:
+                    - tpa_cluster={{ cluster_name }}
+        host:
+            resource_id: ""

@@ -226,6 +226,17 @@ class Architecture(object):
             default=argparse.SUPPRESS,
             help="install pg-backup-api on barman server and register to pem server if enabled",
         )
+        g.add_argument(
+            "--enable-beacon-agent",
+            action="store_true",
+            default=argparse.SUPPRESS,
+            help="install the beacon agent on postgres nodes",
+        )
+        g.add_argument(
+            "--beacon-agent-project-id",
+            dest="beacon_agent_project_id",
+            metavar="prj_XXXXXXX"
+        )
         g.add_argument("--extra-packages", nargs="+", metavar="NAME")
         g.add_argument("--extra-optional-packages", nargs="+", metavar="NAME")
 
@@ -938,6 +949,9 @@ class Architecture(object):
         if self.args.get("postgres_flavour") == "epas":
             k = "epas_redwood_compat"
             cluster_vars[k] = cluster_vars.get(k, self.args.get(k))
+
+        if self.args.get("beacon_agent_project_id"):
+            cluster_vars["beacon_agent_project_id"] = self.args["beacon_agent_project_id"]
 
         self._add_extra_packages(cluster_vars)
 

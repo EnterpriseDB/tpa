@@ -1,0 +1,18 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+- name: Install custom beacon agent service unit file
+  copy:
+    src: beacon-agent.service
+    dest: "/etc/systemd/system/beacon-agent.service"
+    owner: root
+    group: root
+    mode: "0644"
+  register: unit
+
+- name: Enable beacon agent service
+  systemd:
+    name: "beacon-agent"
+    enabled: yes
+    daemon_reload: "{{ unit is changed }}"

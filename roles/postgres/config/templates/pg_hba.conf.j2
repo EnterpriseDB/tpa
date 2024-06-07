@@ -38,6 +38,9 @@ hostssl pem +pem_agent {{ hostvars[key].ip_address }}/32 cert
 {% endfor %}
 ### pem-server: End
 {% endif %}
+{% if 'beacon-agent' in role %}
+hostssl all beacon 127.0.0.1/32 {{ password_encryption }}
+{% endif %}
 host    all             all             127.0.0.1/32            {{ password_encryption }}
 host    all             all             ::1/128                 {{ password_encryption }}
 host    replication     all             127.0.0.1/32            {{ password_encryption }}

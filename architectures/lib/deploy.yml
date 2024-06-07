@@ -127,6 +127,12 @@
       and task_selector|selects('pgdcli')
 
   - include_role:
+      name: beacon-agent
+    when:
+      groups['role_beacon-agent']|default([]) is not empty
+      and task_selector|selects('beacon-agent')
+
+  - include_role:
       name: final
     when:
       (pem_shared|default(false)) is false

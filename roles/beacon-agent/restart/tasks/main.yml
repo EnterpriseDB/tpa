@@ -1,0 +1,13 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+- name: Start or restart beacon agent
+  service:
+    name: beacon-agent
+    state: "{{ beacon_agent_service_end_state|default('started') }}"
+  become_user: root
+  become: yes
+  when: >
+    task_selector|permits('service', 'restart')
+
