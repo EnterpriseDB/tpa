@@ -28,6 +28,12 @@ specify the option `--enable-haproxy`. Etcd is used for the Distributed
 Configuration Store (DCS). Patroni supports other DCS backends, but they are not
 currently supported by EDB or TPA.
 
+Alternative to HAProxy, you can use the `--enable-pgbouncer` option to configure
+PgBouncer in the Postgres nodes. PgBouncer will be configured to pool
+connections for the primary. Patroni will be configured to reconfigure PgBouncer
+upon failovers or switchovers in the cluster, so PgBouncer follows the new
+primary Postgres instance.
+
 TPA uses Patroni's feature of converting an existing PostgreSQL cluster. This
 allows for TPA to initialise and manage configuration. Once the PostgreSQL
 cluster has been created, Patroni will take the management over. TPA will then

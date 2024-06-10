@@ -84,6 +84,7 @@ More detail on the options is provided in the following section.
 | `--witness-only-location` | A location name, must be a member of `location-names`. | No witness-only location is added. |
 | `--single-node-location` | A location name, must be a member of `location-names`. | No single-node location is added. |
 | `--enable-haproxy`        | 2 additional nodes will be added as a load balancer layer.<br/>Only supported with Patroni as the failover manager. | HAproxy nodes will not be added to the cluster.                                                      |
+| `--enable-pgbouncer`        | PgBouncer will be configured in the Postgres nodes to pool connections for the primary. | PgBouncer will not be configured in the cluster.                                                      |
 | `--patroni-dcs`           | Select the Distributed Configuration Store backend for patroni.<br/>Only option is `etcd` at this time. <br/>Only supported with Patroni as the failover manager.          | Defaults to `etcd`.                                                                                  |
 
 <br/><br/>
