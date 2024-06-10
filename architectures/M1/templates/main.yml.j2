@@ -37,6 +37,11 @@ instances:
 {% endif %}{# role == 'replica' #}
   role:
   - {{ role }}
+{% if enable_pgbouncer %}
+  - pgbouncer
+  vars:
+    pgbouncer_backend: {{ globals.primary_name }}
+{% endif %}
 
 {% endfor %}{# data nodes #}
 

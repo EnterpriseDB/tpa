@@ -57,11 +57,22 @@ class M1(Architecture):
             help="Enable Patroni HA cluster failover manager",
         )
 
-        g.add_argument(
+
+        frontend_group = p.add_argument_group(
+            "M1 architecture connection frontend options"
+        )
+        frontend_me_group = frontend_group.add_mutually_exclusive_group(required=False)
+        frontend_me_group.add_argument(
             "--enable-haproxy",
             action="store_true",
             help="Enable HAproxy layer hosts when using Patroni failover manager",
         )
+        frontend_me_group.add_argument(
+            "--enable-pgbouncer",
+            action="store_true",
+            help="Enable PgBouncer connection pooler in Postgres nodes",
+        )
+
         g.add_argument(
             "--patroni-dcs",
             choices=["etcd"],
