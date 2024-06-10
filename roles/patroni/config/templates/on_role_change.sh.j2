@@ -1,0 +1,33 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved. #}
+#!/bin/bash
+
+set -x
+
+# Patroni will pass the action, role and cluster name to every callback it triggers.
+ACTION="$1"
+ROLE="$2"
+CLUSTER="$3"
+
+if [ "${ACTION}" != "on_role_change" ]; then
+    echo "Skipping callback execution because action is not 'on_role_change': ${ACTION}"
+    exit 1
+fi
+
+case "${ROLE}" in
+    master|primary|promoted)
+        echo "Got promoted, reconfiguring pgbouncer..."
+        set +e
+
+        {% if inventory_hostname in groups['role_pgbouncer'] %}
+bash -c "sed -e 's,host=[^ ]* port=[^ ]*,{{ node_dsn }},' -i /etc/pgbouncer/pgbouncer.databases.ini && pkill -HUP -x pgbouncer"
+        {% endif %}
+        {% for instance in groups['role_pgbouncer']|reject('equalto', inventory_hostname)|list %}
+/usr/bin/ssh {{ instance }} "sed -e 's,host=[^ ]* port=[^ ]*,{{ node_dsn }},' -i /etc/pgbouncer/pgbouncer.databases.ini && pkill -HUP -x pgbouncer" &
+        {% endfor %}
+        ;;
+    *)
+        echo "Doing nothing because I'm not the primary."
+        ;;
+esac
+
+exit 0

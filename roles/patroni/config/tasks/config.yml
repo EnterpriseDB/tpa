@@ -195,6 +195,24 @@
     object_varname: patroni_conf
     object_contents: "{{ _patroni_conf_permanent_slots }}"
 
+- name: Configure integration of patroni and pgbouncer (reconfigure pgbouncer on failovers)
+  block:
+    - name: Install on_role_change script
+      template:
+        src: "on_role_change.sh.j2"
+        dest: "{{ patroni_etc }}/on_role_change.sh"
+        owner: "{{ postgres_user }}"
+        group: "{{ postgres_group }}"
+        mode: "0750"
+
+    - name: Update config with on_role_change callback
+      include_role:
+        name: config/add_to_obj
+      vars:
+        object_varname: patroni_conf
+        object_contents: "{{ _patroni_conf_on_role_change }}"
+  when: not groups['role_pgbouncer']|default([]) is empty
+
 - name: Finally apply any user defined overrides
   include_role:
     name: config/add_to_obj

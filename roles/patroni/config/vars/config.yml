@@ -193,6 +193,11 @@ _patroni_conf_permanent_slots:
         {%- endfor -%}
         {{ _slots }}
 
+_patroni_conf_on_role_change:
+  postgresql:
+    callbacks:
+      on_role_change: "{{ patroni_etc }}/on_role_change.sh"
+
 # Build the Dynamic Config first from defaults, then from any bootstrap.dcs settings supplied
 # in `config.yml`, then finally from `patroni_dynamic_conf_settings` supplied in `config.yml`.
 # This is used to update running clusters once bootstrapped and also the initial bootstrap
