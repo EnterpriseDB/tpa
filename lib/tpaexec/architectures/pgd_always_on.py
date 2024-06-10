@@ -4,9 +4,10 @@
 
 from .bdr import BDR
 from ..exceptions import ArchitectureError
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import re
 from argparse import SUPPRESS
+from packaging.version import Version, InvalidVersion, parse
 
 
 class PGD_Always_ON(BDR):
@@ -223,28 +224,27 @@ class PGD_Always_ON(BDR):
 
             bdr_node_groups.append(group)
 
+        cluster_vars.update(
+            {
+                "bdr_node_groups": bdr_node_groups,
+                "default_pgd_proxy_options": {
+                    "listen_port": self.args["listen_port"],
+                },
+            }
+        )
+    
         bdr_package_version = cluster_vars.get("bdr_package_version")
-        if self._meets_mininimum_package_version(bdr_package_version, req_major_version='5', req_minor_version='5'):
+        version_parts = bdr_package_version.split(':', maxsplit=1)[-1].split('.')
+        sanitized_version = self._sanitize_version(version_parts=version_parts)
+        if self._is_above_minimum(sanitized_version, Version("5.5"), includes_wildcard=version_parts[1] == "*"):
             cluster_vars.update(
                 {
-                    "bdr_node_groups": bdr_node_groups,
                     "default_pgd_proxy_options": {
                         "listen_port": self.args["listen_port"],
                         "read_listen_port": self.args["read_listen_port"]
-                    },
+                    }
                 }
             )
-
-        else:
-            cluster_vars.update(
-                {
-                    "bdr_node_groups": bdr_node_groups,
-                    "default_pgd_proxy_options": {
-                        "listen_port": self.args["listen_port"],
-                    },
-                }
-            )
-
         self._update_pgd_probes(cluster_vars)
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
@@ -380,11 +380,19 @@ class PGD_Always_ON(BDR):
         """
         return location == self.args.get("witness_only_location")
 
-    def _meets_mininimum_package_version(self, package_version_string, req_major_version = '5', req_minor_version = '5'):
-        if package_version_string is None:
-            return True
+    def _sanitize_version(self, version_parts: List) -> Union[Version, None]:
+        try:
+            if version_parts[1] == "*":
+                return parse(version_parts[0])
+            else:
+                return parse(f"{version_parts[0]}.{version_parts[1]}")
+        except InvalidVersion:
+            return None
+        
+    def _is_above_minimum(self, x: Union[Version, None], y: Union[Version, None], includes_wildcard: bool) -> bool:
+        if x is None or y is None:
+            return False
+        elif includes_wildcard:
+            return x.major >= y.major
         else:
-            version_parts = package_version_string.split(':', maxsplit=1)[-1].split('.')
-            is_major = re.fullmatch(rf"^[{req_major_version}-9]{{1}}|[1-9][0-9]{{1,}}|\*", version_parts[0])
-            is_minor = re.fullmatch(rf"^[{req_minor_version}-9]{{1}}|[1-9][0-9]{{1,}}|\*", version_parts[1])
-            return bool(is_major) and bool(is_minor)
+            return x >= y
