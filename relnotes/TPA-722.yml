@@ -6,7 +6,7 @@
     and `pgd_proxy_options` in `config.yml`. This parameter is included by default when 
     the PGD version is >= 5.5. 
     
-    User's can also specify the port numbers by passing `--proxy-listen-port` 
+    Users can also specify the port numbers by passing `--proxy-listen-port` 
     and `proxy-read-listen-port` arguments to the `tpaexec configure` command.
   # Possible types: notable_change, minor_change, bugfix or breaking_change
   type: minor_change
