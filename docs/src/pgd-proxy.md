@@ -59,12 +59,14 @@ it is attached to, can be set under `default_pgd_proxy_options` under
 cluster_vars:
   default_pgd_proxy_options:
     listen_port: 6432
+    read_listen_port: 6433
 
 instances:
 - Name: someproxy
   vars:
     pgd_proxy_options:
       listen_port: 9000
+      read_listen_port: 9001
 ```
 
 In this case, while other instances will get their `listen_port` setting from

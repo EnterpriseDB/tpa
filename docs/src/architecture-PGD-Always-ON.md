@@ -58,6 +58,8 @@ More detail on the options is provided in the following section.
 | `--enable-camo`                  | Sets two data nodes in each location as CAMO partners.                                                      | CAMO will not be enabled.                                   |
 | `--bdr-database`                 | The name of the database to be used for replication.                                                        | Defaults to `bdrdb`.                                        |
 | `--enable-pgd-probes`            | Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health.       | Disabled by default.                                        |
+| `--proxy-listen-port`            | The port on which proxy nodes will route traffic to the write leader.                                       | Defauilts to 6432                                            |
+| `--proxy-read-only-port`         | The port on which proxy nodes will route read-only traffic to shadow nodes.                                 | Defaults to 6433
 
 <br/><br/>
 

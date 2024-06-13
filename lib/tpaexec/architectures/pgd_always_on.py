@@ -76,13 +76,15 @@ class PGD_Always_ON(BDR):
             "--proxy-listen-port",
             type=int,
             dest="listen_port",
-            default=6432
+            default=6432,
+            help="port on which proxy nodes will route traffic to the write leader"
         )
         g.add_argument(
             "--proxy-read-only-port",
             type=int,
             dest="read_listen_port",
-            default=6433
+            default=6433,
+            help="port on which proxy nodes will route read-only traffic to shadow nodes"
         )
 
     def update_argument_defaults(self, defaults):

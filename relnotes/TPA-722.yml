@@ -1,0 +1,18 @@
+- summary: Support configuring read-only endpoints on PGD proxy nodes
+  description: |
+    PGD version 5.5 allows for proxy nodes to be configured as read endpoints, 
+    which direct read-only queries to a shadow node. TPA supports this configuration 
+    option by setting a `read_listen_port` parameter under `default_pgd_proxy_options` 
+    and `pgd_proxy_options` in `config.yml`. This parameter is included by default when 
+    the PGD version is >= 5.5. 
+    
+    User's can also specify the port numbers by passing `--proxy-listen-port` 
+    and `proxy-read-listen-port` arguments to the `tpaexec configure` command.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-722
