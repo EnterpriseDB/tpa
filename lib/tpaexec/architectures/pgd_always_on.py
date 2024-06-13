@@ -236,9 +236,8 @@ class PGD_Always_ON(BDR):
         )
     
         bdr_package_version = cluster_vars.get("bdr_package_version")
-        version_parts = bdr_package_version.split(':', maxsplit=1)[-1].split('.')
-        sanitized_version = self._sanitize_version(version_parts=version_parts)
-        if self._is_above_minimum(sanitized_version, Version("5.5"), includes_wildcard=version_parts[1] == "*"):
+        sanitized_version, includes_wildcard = self._sanitize_version(version_string=bdr_package_version)
+        if self._is_above_minimum(sanitized_version, Version("5.5"), includes_wildcard=includes_wildcard):
             cluster_vars.update(
                 {
                     "default_pgd_proxy_options": {
@@ -382,14 +381,15 @@ class PGD_Always_ON(BDR):
         """
         return location == self.args.get("witness_only_location")
 
-    def _sanitize_version(self, version_parts: List) -> Union[Version, None]:
+    def _sanitize_version(self, version_string) -> Union[(Version, bool), (None, bool)]:
         try:
+            version_parts = version_string.split(':', maxsplit=1)[-1].split('.')
             if version_parts[1] == "*":
-                return parse(version_parts[0])
+                return parse(version_parts[0]), True
             else:
-                return parse(f"{version_parts[0]}.{version_parts[1]}")
-        except InvalidVersion:
-            return None
+                return parse(f"{version_parts[0]}.{version_parts[1]}"), False
+        except (InvalidVersion, AttributeError) as e:
+            return None, False
         
     def _is_above_minimum(self, x: Union[Version, None], y: Union[Version, None], includes_wildcard: bool) -> bool:
         if x is None or y is None:
