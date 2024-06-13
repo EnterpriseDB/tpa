@@ -381,7 +381,7 @@ class PGD_Always_ON(BDR):
         """
         return location == self.args.get("witness_only_location")
 
-    def _sanitize_version(self, version_string) -> Union[(Version, bool), (None, bool)]:
+    def _sanitize_version(self, version_string) -> Union[Tuple[Version, bool], Tuple[None, bool]]:
         try:
             version_parts = version_string.split(':', maxsplit=1)[-1].split('.')
             if version_parts[1] == "*":
