@@ -152,9 +152,18 @@ If your internet-connected machine uses the same operating system as the
 target, we recommend using `yumdownloader` (RHEL-like) or `apt download`
 (Debian-like) to download the packages.
 
-If this is not possible, please contact EDB support and we will provide
-you with a download link or instructions appropriate to your
-subscription.
+Alternatively, you can download packages for any platform from your 
+browser by visiting [EDB Repos](https://www.enterprisedb.com/repos) and
+selecting either 'Enterprise', 'Standard' or 'Community 360' under the 
+heading 'Download EDB software packages from your browser'. 
+To install TPA you need these packages:
+
+* tpaexec
+* tpaexec-deps
+* edb-python39
+
+Once you have transferred the downloaded packages to the target server,
+you must install them using the appropriate tool for your platform.
 
 ### Installing without access to a Python package index
 
