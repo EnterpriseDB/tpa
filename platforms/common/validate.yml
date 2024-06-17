@@ -13,9 +13,8 @@
         that: >
           tpa_file_version or tpa_git_version
         msg: >
-          Unsupported installation method. Please install a tpaexec package from the
-          EDB repository (https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/),
-          or run it from a clone of the source code repository
+          Unsupported installation method. Please install using one of the supported options. More information
+          about where to install TPA can be found in "https://www.enterprisedb.com/docs/tpa/latest/INSTALL".
     - set_fact:
         tpa_version: "{{ tpa_file_version or tpa_git_version }}"
   vars:
