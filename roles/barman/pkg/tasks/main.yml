@@ -2,6 +2,17 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
+# if we are installing barman from PGDG packages, we force version
+# 3.9
+
+- name: Set barman package version
+  set_fact:
+    barman_package_version: '3.9.*'
+  when:
+    - barman_package_version is not defined
+    - edb_repositories == []
+    - ansible_os_family == 'RedHat'
+
 - include_tasks: list-packages.yml
   vars:
     list_varname: _all_barman_packages

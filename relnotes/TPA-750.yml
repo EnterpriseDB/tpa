@@ -1,0 +1,14 @@
+- summary: Force barman 3.9 when installing rpms from PGDG
+  description: |
+    To work around broken barman 3.10 packages in the PGDG repos, TPA
+    now installs version 3.9 of barman if using PGDG repos on an
+    RHEL-family system. This behaviour can be overridden by explicitly
+    setting barman_package_version in config.yml .
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-750
