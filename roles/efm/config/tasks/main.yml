@@ -111,6 +111,7 @@
           
   when: efm_cluster_properties.stat.islnk is defined
   run_once: true
+  delegate_to: "{{ upstream_primary }}"
 
 
 - name: Install efm.properties for {{ cluster_name }}
