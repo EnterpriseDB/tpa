@@ -55,6 +55,7 @@
           |union(_extra_postgres_packages)
           |union(_pgespresso_packages if need_pgespresso_packages else [])
           |union(_psycopg2_packages)
+          |union(_barman_client_packages)
           |flatten
         }}"
 
@@ -75,6 +76,9 @@
       _psycopg2_packages: "{{
           psycopg2_packages|packages_for(ansible_distribution)
         }}"
+      _barman_client_packages: "{{
+          barman_client_packages|packages_for(ansible_distribution, barman_package_version)
+      }}"
 
   - include_role: name=pkg/add_to_list
     vars:
