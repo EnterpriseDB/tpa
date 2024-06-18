@@ -100,7 +100,6 @@ env:
   FOUNDATION_VER: ${{ vars.FOUNDATION_PACKAGING_VERSION }}
   GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
   SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
-  ANSIBLE_SKIP_TAGS: pgbench
   PYTHONWARNINGS: once
 
 jobs:
