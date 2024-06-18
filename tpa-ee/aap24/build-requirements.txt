@@ -6,7 +6,7 @@
 #
 ansible-builder==3.0.0
     # via
-    #   -r requirements.in
+    #   -r build-requirements.in
     #   ansible-navigator
 ansible-compat==4.1.11
     # via ansible-lint
@@ -17,7 +17,7 @@ ansible-core==2.15.9
 ansible-lint==6.22.2
     # via ansible-navigator
 ansible-navigator==24.2.0
-    # via -r requirements.in
+    # via -r build-requirements.in
 ansible-runner==2.3.5
     # via ansible-navigator
 attrs==23.2.0
@@ -26,7 +26,7 @@ attrs==23.2.0
     #   referencing
 bindep==2.11.0
     # via ansible-builder
-black==24.2.0
+black==24.3.0
     # via ansible-lint
 bracex==2.4
     # via wcmatch
