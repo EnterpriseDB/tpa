@@ -159,28 +159,11 @@ PGD logical standby or physical replica instances are updated without
 any haproxy or pgbouncer interaction. Non-Postgres instances in the
 cluster are left alone.
 
-You can control the order in which the cluster's instances are updated
-by defining the `update_hosts` variable:
-
-```
-$ tpaexec upgrade ~/clusters/speedy \
-  -e update_hosts=quirk,keeper,quaver
-```
-
-This may be useful to minimise lead/shadow switchovers during the update
-by listing the active PGD primary instances last, so that the shadow
-servers are updated first.
-
-If your environment requires additional actions, the
-[postgres-pre-update and postgres-post-update hooks](tpaexec-hooks.md)
-allow you to execute custom Ansible tasks before and after the package
-installation step.
-
 ## M1
 
 !!! Warning
 The `upgrade` command for M1 is affected by a known bug and will fail
-where the failover manager is Patroni or EFM. TPA will provide full 
+where the failover manager is Patroni or EFM. TPA will provide full
 upgrade functionality for M1 in a future release.
 !!!
 
@@ -188,6 +171,31 @@ For M1 clusters, `upgrade` will first update the streaming
 replicas one by one, then perform a [switchover](tpaexec-switchover.md)
 from the primary to one of the replicas, update the primary, and
 switchover back to it again.
+
+## Controlling the upgrade process
+
+You can control the order in which the cluster's instances are upgraded
+by defining the `update_hosts` variable:
+
+```
+$ tpaexec upgrade ~/clusters/speedy \
+  -e update_hosts=quirk,keeper,quaver
+```
+
+This may be useful to minimise lead/shadow switchovers during the upgrade
+by listing the active PGD primary instances last, so that the shadow
+servers are upgraded first.
+
+You can upgrade a subset of the instances by specifying only these 
+instances in update_hosts. However, you must always include any 
+instances with the`harp-proxy`, `pgd-proxy`, or `pgbouncer` 
+roles in the list, otherwise the upgrade could fail with package 
+version conflicts.
+
+If your environment requires additional actions, the
+[postgres-pre-update and postgres-post-update hooks](tpaexec-hooks.md)
+allow you to execute custom Ansible tasks before and after the package
+installation step.
 
 ## Package version selection
 
