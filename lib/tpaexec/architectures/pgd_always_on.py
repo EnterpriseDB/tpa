@@ -391,9 +391,9 @@ class PGD_Always_ON(BDR):
         except (InvalidVersion, AttributeError) as e:
             return None, False
         
-    def _is_above_minimum(self, x: Union[Version, None], y: Union[Version, None], includes_wildcard: bool) -> bool:
-        if x is None or y is None:
-            return False
+    def _is_above_minimum(self, x: Union[Version, None], y: Version, includes_wildcard: bool) -> bool:
+        if x is None:
+            return True
         elif includes_wildcard:
             return x.major >= y.major
         else:
