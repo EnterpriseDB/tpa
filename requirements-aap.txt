@@ -76,7 +76,7 @@ secretstorage==3.3.3
     # via keyring
 six==1.16.0
     # via python-dateutil
-urllib3==1.26.18
+urllib3==1.26.19
     # via
     #   botocore
     #   docker
