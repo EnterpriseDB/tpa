@@ -49,5 +49,6 @@
       objs: "monitor_group_raft()"
   become_user: "{{ postgres_user }}"
   become: yes
-  when:
+  when: >
     inventory_hostname == first_bdr_primary
+    or 'witness' in role
