@@ -1,3 +1,7 @@
+---
+description: Integrating TPA deployments with EDB Postgres AI using the agent
+---
+
 # Configuring the beacon agent
 
 TPA installs and configures the beacon agent on nodes which have
