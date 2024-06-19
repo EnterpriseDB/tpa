@@ -78,3 +78,38 @@
     status: "{{ cluster_status.stdout|from_json }}"
   when: >
     inventory_hostname == target
+
+- name: Update upstream_primary and efm.properties to reflect switchover
+  block:
+    - name: Set {{ target }} as upstream_primary
+      set_fact: 
+        upstream_primary: "{{ target }}"
+
+    - name: Encrypt efm password
+      shell: >
+        "{{ efm_bin_dir }}"/efm encrypt "{{ cluster_name }}" --from-env
+      environment: "{{ target_environment|combine(_task_environment) }}"
+      vars:
+        _task_environment:
+          EFMPASS: "{{ efm_password }}"
+      register: efm_encrypted_pass_output
+      changed_when: false
+      no_log: false
+
+    - name: Install efm.properties for {{ cluster_name }}
+      template:
+        src: efm.properties.j2
+        dest: "{{ efm_conf_dir }}/{{ cluster_name }}.properties"
+        owner: efm
+        group: efm
+        mode: "0640"
+      vars:
+        efm_encrypted_pass: "{{ efm_encrypted_pass_output.stdout }}"
+
+    - include_role:
+        name: efm/restart
+      vars: 
+        efm_service_end_state: restarted
+
+  when: >
+    'primary' in role or 'replica' in role
