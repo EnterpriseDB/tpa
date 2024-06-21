@@ -57,7 +57,6 @@ class M1(Architecture):
             help="Enable Patroni HA cluster failover manager",
         )
 
-
         frontend_group = p.add_argument_group(
             "M1 architecture connection frontend options"
         )
@@ -84,7 +83,7 @@ class M1(Architecture):
             "--patroni-package-flavour",
             choices=["edb", "community"],
             required=False,
-            help="The flavour of Patroni packages to be installed"
+            help="The flavour of Patroni packages to be installed",
         )
 
         layout_group = p.add_argument_group("M1 architecture layout options")
@@ -297,15 +296,17 @@ class M1(Architecture):
                 # repository list, if one exists.
 
                 repo_list = set(self.args["cluster_vars"].get(repo_var_name, []))
-                repo_list.add("PGDG")
-                repo_list = list(repo_list)
+                # An empty repo_list means we will add both EPEL and PGDG by default
+                if repo_list != set([]):
+                    repo_list.add("PGDG")
+                    repo_list = list(repo_list)
 
-                for instance in instances:
-                    if "etcd" in instance["role"]:
-                        # We know for a fact that the 'vars' entry exists in this case,
-                        # at least with the 'etcd_location', so we can use key access
-                        # instead of 'get' method.
-                        instance["vars"][repo_var_name] = repo_list
+                    for instance in instances:
+                        if "etcd" in instance["role"]:
+                            # We know for a fact that the 'vars' entry exists in this case,
+                            # at least with the 'etcd_location', so we can use key access
+                            # instead of 'get' method.
+                            instance["vars"][repo_var_name] = repo_list
 
     def _get_patroni_flavour(self, cluster_vars):
         """
@@ -323,7 +324,10 @@ class M1(Architecture):
             return ret
 
         # If the user explicitly configured EDB repos, use 'edb' flavour
-        if len(cluster_vars.get("edb_repositories", [])) > 0:
+        if (
+            self.args.get("edb_repositories", []) is not None
+            and self.args.get("edb_repositories", []) != ["none"]
+        ):
             return "edb"
 
         # :meth:`update_cluster_vars` is executed before than the method

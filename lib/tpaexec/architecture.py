@@ -1154,7 +1154,7 @@ class Architecture(object):
 
         if (
             postgres_flavour == "postgresql"
-            and self.args.get("failover_manager") not in ["efm", "patroni"]
+            and self.args.get("failover_manager") != 'efm'
             and self.name not in ("PGD-Always-ON", "BDR-Always-ON")
             and not self.args.get("enable_pem")
         ):
@@ -1224,7 +1224,7 @@ class Architecture(object):
         elif edb_repositories == ["none"]:
             edb_repositories = []
 
-        if edb_repositories:
+        if edb_repositories is not None:
             cluster_vars.update({"edb_repositories": edb_repositories})
 
         # In general, if we're using EDB repositories at all, we don't want

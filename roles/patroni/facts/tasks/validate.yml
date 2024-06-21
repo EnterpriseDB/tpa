@@ -24,18 +24,17 @@
   - name: Ensure required repositories are configured when using 'community' package flavour
     assert:
       that:
-        required_repos[ansible_os_family] is subset(repo_list[ansible_os_family])
+        required_repos is subset(repo_list[ansible_os_family])
       fail_msg: >
-        Patroni flavour 'community' requires the following repos to be defined: {{ required_repos[ansible_os_family] }}
+        Patroni flavour 'community' requires the following repos to be defined: {{ required_repos }}
+        got {{ repo_list[ansible_os_family] }}
     vars:
       required_repos:
-        RedHat: ['EPEL','PGDG']
-        SUSE: ['PGDG']
-        Debian: ['PGDG']
+      - PGDG
       repo_list:
-        RedHat: "{{ yum_repository_list|default([]) }}"
-        SUSE: "{{ suse_repository_list|default([]) }}"
-        Debian: "{{ apt_repository_list|default([]) }}"
+        RedHat: "{{ yum_repository_list|default(['PGDG','EPEL']) }}"
+        SUSE: "{{ suse_repository_list|default(['PGDG']) }}"
+        Debian: "{{ apt_repository_list|default(['PGDG']) }}"
     when:
       patroni_package_flavour == 'community'
 
