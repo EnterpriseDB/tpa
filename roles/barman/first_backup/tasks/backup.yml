@@ -18,6 +18,19 @@
   poll: 0
   register: barman_backup_run
 
+- name: Wait for barman to complete base backup
+  shell: >
+    /usr/bin/barman list-backups "{{ backup_name }}" | grep STARTED
+  delegate_to: "{{ this_barman }}"
+  become_user: "{{ barman_user }}"
+  register: result
+  until: result.rc != 0
+  retries: 30
+  delay: 1
+  failed_when: result.rc > 1
+  when: >
+    'replica' in role
+
 # Make sure there is some WAL generated so we will really get a new file
 
 - name: Force WAL to be generated
