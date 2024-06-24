@@ -1,9 +1,0 @@
-- summary: Clear error message when running cmd or ping before provision
-  # Possible types: notable_change, minor_change, bugfix or breaking_change
-  type: bugfix
-  # At least one between jira_tickets or support_tickets must be defined. You
-  # can define both if you want
-  # You must have at least one list item in each *_tickets section that is
-  # defined
-  jira_tickets:
-  - TPA-733
