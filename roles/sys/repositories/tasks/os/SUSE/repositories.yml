@@ -108,7 +108,9 @@
 
   - name: Install extra repositories from PackageHub
     command:
-      cmd: SUSEConnect -p PackageHub/15.5/{{ ansible_architecture }}
+      cmd: SUSEConnect -p {{ repo }}
+    vars:
+      repo: "PackageHub/15.5/{{ ansible_architecture }}"
     when:
-      not 'PackageHub/15.5/{{ ansible_architecture }}' in registration_status.stdout
+      repo not in registration_status.stdout
 
