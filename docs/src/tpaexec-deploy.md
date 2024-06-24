@@ -1,3 +1,7 @@
+---
+description: The command that starts a TPA deploying to a cluster.
+---
+
 # tpaexec deploy
 
 Deployment is the process of installing and configuring Postgres and

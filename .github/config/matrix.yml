@@ -62,7 +62,15 @@ default:
       tpa_postgres_flavour: "postgresql"
       tpa_postgres_version: "14"
       tpa_failover_manager: "efm"
+    - cpu_architecture: "arm64"
+      tpa_architecture: "M1"
+      tpa_os_image: "debian:12"
+      tpa_platform: "docker"
+      tpa_postgres_flavour: "epas"
+      tpa_postgres_version: "15"
+      tpa_failover_manager: "efm"
 simple:
+  cpu_architecture: *default_cpu_architecture
   tpa_architecture: *default_tpa_architecture
   tpa_postgres_flavour: *default_tpa_postgres_flavour
   tpa_postgres_version: *default_tpa_postgres_version
@@ -86,7 +94,18 @@ simple:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "epas"
       tpa_failover_manager: "efm"
+aws:
+  tpa_postgres_flavour:
+    - "postgresql"
+    - "epas"
+  tpa_os_image:
+    - "debian:12"
+    - "debian-arm:12"
+  tpa_postgres_version:
+    - 15
+    - 16
 update_bdr:
+  cpu_architecture: *default_cpu_architecture
   tpa_architecture:
     - "BDR-Always-ON"
   tpa_platform:
@@ -96,6 +115,7 @@ update_bdr:
     - "debian:10"
     - "redhat"
 patroni:
+  cpu_architecture: *default_cpu_architecture
   tpa_architecture:
     - M1
   tpa_platform:
@@ -114,6 +134,7 @@ patroni:
     - "edbpge"
   tpa_postgres_version: *default_tpa_postgres_version
 m1_layouts:
+  cpu_architecture: *default_cpu_architecture
   tpa_architecture:
     - "M1"
   tpa_postgres_flavour:

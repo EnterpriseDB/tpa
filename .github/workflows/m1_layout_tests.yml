@@ -11,6 +11,7 @@ env:
   EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
   EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
   EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
   SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
   ANSIBLE_SKIP_TAGS: pgbench
   PYTHONWARNINGS: once
@@ -25,7 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        token: ${{secrets.GH_SLONIK}}
+        token: ${{ env.GITHUB_TOKEN }}
     - uses: ./.github/actions/load-yaml
       id: load-yaml
       with:

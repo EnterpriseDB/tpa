@@ -14,6 +14,12 @@
     that: item in default_suse_repositories|combine(suse_repositories)
   with_items: "{{ suse_repository_list }}"
 
+- name: Add PGDG keys if required
+  shell: >
+    rpm --import https://zypp.postgresql.org/keys/PGDG-RPM-GPG-KEY-SLES{{ ansible_distribution_major_version }}
+  when: >
+    'PGDG' in suse_repository_list|default(default_suse_repository_list)
+
 - name: Install SUSE repositories
   shell: zypper --non-interactive install -y {{ repo.rpm_url }}
   with_items: "{{ suse_repository_list }}"
@@ -45,7 +51,7 @@
   when: >
     repo[1] not in edb_repositories
 
-- name: Install EDB repositories for x86_64
+- name: Install EDB repositories for {{ ansible_architecture }}
   zypper_repository:
     name: "{{ repo.name }}"
     repo: "{{ repo.uri }}"
@@ -57,8 +63,8 @@
     loop_var: repository
   vars:
     repo:
-      uri: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/sles/{{ ansible_distribution_major_version }}/x86_64/
-      name: enterprisedb-{{ repository }}-x86_64
+      uri: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/sles/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/
+      name: enterprisedb-{{ repository }}-{{ ansible_architecture }}
 
 - name: Install EDB repositories for noarch
   zypper_repository:
@@ -102,7 +108,9 @@
 
   - name: Install extra repositories from PackageHub
     command:
-      cmd: SUSEConnect -p PackageHub/15.5/x86_64
+      cmd: SUSEConnect -p {{ repo }}
+    vars:
+      repo: "PackageHub/15.5/{{ ansible_architecture }}"
     when:
-      not 'PackageHub/15.5/x86_64' in registration_status.stdout
+      repo not in registration_status.stdout
 

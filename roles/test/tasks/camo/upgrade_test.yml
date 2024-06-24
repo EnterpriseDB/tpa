@@ -99,7 +99,7 @@
     become: yes
     with_items:
      - "{{ groups[bdr_node_group] }}"
-    when: inventory_hostname == item and "upgrade" in ansible_run_tags
+    when: inventory_hostname == item
   when: inventory_hostname != ping and inventory_hostname != pong
 
 - include_tasks: camo/bdr_camo_client_finish.yml

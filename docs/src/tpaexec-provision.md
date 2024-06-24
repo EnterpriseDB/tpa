@@ -1,3 +1,7 @@
+---
+description: The command to provision instances and resources for a TPA cluster.
+---
+
 # tpaexec provision
 
 Provision creates instances and other resources required by the cluster.

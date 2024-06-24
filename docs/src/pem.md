@@ -1,3 +1,7 @@
+---
+description: Installing and configuring Postgres Enterprise Manager (PEM) with TPA.
+---
+
 # Configuring Postgres Enterprise Manager (PEM)
 
 TPA will install and configure PEM when `tpaexec configure` command is run

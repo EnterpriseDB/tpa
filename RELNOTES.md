@@ -2,6 +2,144 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
+## 23.33 (2024-06-24)
+
+### Notable changes
+
+- Add support for ARM64 in Debian 12 (Bookworm)
+
+  This debian version is the first in its kind to receive full EDB support
+  on arm64 devices.
+
+  References: TPA-528.
+
+### Minor changes
+
+- Change haproxy_bind_address when Patroni is failover_manager
+
+  The default value of `haproxy_bind_address` (`127.0.0.1`) does not allow for
+  communication between Postgres nodes and haproxy nodes. 
+  The bind address is now set to `0.0.0.0` when Patroni is the failover manager.
+  Users should change this value to something more restrictive and 
+  appropriate for their cluster networking.
+
+  References: TPA-720.
+
+- Basic integration between Patroni and PgBouncer
+
+  The `--enable-pgbouncer` option of `tpaexec configure` is made available so
+  users can easily create a cluster with PgBouncer. When given through the
+  command-line, TPA will add the `pgbouncer` role to the Postgres hosts and
+  configure PgBouncer to pool connections for the primary node.
+
+  When adding PgBouncer nodes in a Patroni enabled cluster, TPA
+  configures Patroni with a `on_role_change` callback. That callback takes
+  care of updating the primary connection info in the PgBouncer nodes in
+  response to failover and switchover events.
+
+  References: TPA-754.
+
+- Various task selection fixes
+
+  Task selectors are now consistently applied in the final stage of
+  deployment. Consistency of task selectors in the tests is improved
+  and the examples of task selectors in the docs are now correct.
+
+  All deploy-time hooks now have corresponding task selectors.
+
+  References: TPA-713.
+
+- Support configuring read-only endpoints on PGD proxy nodes
+
+  PGD version 5.5 allows for proxy nodes to be configured as read endpoints, 
+  which direct read-only queries to a shadow node. TPA supports this configuration 
+  option by setting a `read_listen_port` parameter under `default_pgd_proxy_options` 
+  and `pgd_proxy_options` in `config.yml`. This parameter is included by default when 
+  the PGD version is >= 5.5. 
+
+  Users can also specify the port numbers by passing `--proxy-listen-port` 
+  and `proxy-read-listen-port` arguments to the `tpaexec configure` command.
+
+  References: TPA-722.
+
+- Make barman-cli package subject to barman_package_version
+
+  If barman_package_version is set, TPA will now look at it when looking
+  for the barman-cli package as well as for barman itself. This resolves
+  an inconsistency which caused clusters using the downloader to fail when
+  barman_package_version was used.
+
+  References: TPA-749.
+
+- Force barman 3.9 when installing rpms from PGDG
+
+  To work around broken barman 3.10 packages in the PGDG repos, TPA
+  now installs version 3.9 of barman if using PGDG repos on an
+  RHEL-family system. This behaviour can be overridden by explicitly
+  setting barman_package_version in config.yml .
+
+  References: TPA-750.
+
+- Add support for `postgres_wal_dir` in Patroni deployments
+
+  When a custom `postgres_wal_dir` is specified in TPA configuration, TPA will
+  make sure to relay that option to the corresponding settings in the Patroni
+  configuration file.
+
+  That way, if Patroni ever needs to rebuild a standby on its own, out of TPA,
+  the standby will be properly set up with a custom WAL directory.
+
+  References: TPA-741.
+
+- Allow the user to choose between `edb-patroni` and `patroni` packages
+
+  EDB now produces its own `edb-patroni` package instead of rebuilding the
+  `patroni` packages from PGDG. As a consequence, TPA was changed to allow
+  users to select between `patroni` and `edb-patroni` packages.
+
+  The selection is made through the new TPA setting `patroni_package_flavour`,
+  which can have one among the following values:
+
+  * `edb`: Install `edb-patroni` (using EDB repositories). This requires the
+    user to configure `edb_repositories` TPA setting;
+  * `community`: Install `patroni` package (using PGDG repositories). This
+     requires the user to configure `PGDG` repository in either
+     `apt_repository_list`, `yum_repository_list` or `suse_repository_list`
+     TPA settings, depending on the target operating system.
+
+  Note that you can change the package flavour at any time. TPA is able to
+  transparently migrate between flavours. You only need to make sure the
+  appropriate repositories are configured.
+
+  For TPA clusters which have no `patroni_package_flavour` set in the
+  configuration file, TPA will attempt to infere the flavour based on the
+  configured repositories. If EDB repos are configured, `edb` flavour is
+  assumed, otherwise `community` flavour.
+
+  References: TPA-725.
+
+### Bugfixes
+
+- Fixed an issue whereby docker provisioning failed with "read-only file system"
+
+  On host systems running cgroup1 with docker containers running recent
+  OS images, `tpaexec provision` could fail to provision containers
+  with an error message like "mkdir /sys/fs/cgroup/tpa.scope: read-only
+  file system". TPA will now detect this case and avoid it.
+
+  References: TPA-740.
+
+- Clear error message when running cmd or ping before provision
+
+  References: TPA-733.
+
+- Fixed permissions for harp dcs user
+
+  Fixed an issue whereby required permissions on functions in the bdr database
+  were not being granted to the harp dcs user on a witness node.
+
+  References: TPA-746.
+
 ## v23.32 (2024-05-14)
 
 ### Notable changes

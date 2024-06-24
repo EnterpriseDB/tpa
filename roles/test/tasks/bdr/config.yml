@@ -65,11 +65,9 @@
   - name: Assert statuses from pgd verify-settings
     assert:
       that: >
-        list_not_ok is empty
-        or
         list_critical is empty
       fail_msg: >
-        failed for {{ list_critical }}
+        failed for {{ list_critical|map(attribute='setting') }} with {{ list_critical }}
     vars:
       list_not_ok: >
         {{ pgd_settings.stdout
@@ -78,10 +76,8 @@
         |list }}
       list_critical: >
         {{ list_not_ok
-        |map(attribute='node_setting_result')
-        |list|last
-        |selectattr('status','equalto', 'Critical')
-        |list }}
+        |flatten
+        |selectattr('node_setting_result', 'search', 'Critical') }}
 
   when: >
     inventory_hostname == first_bdr_primary

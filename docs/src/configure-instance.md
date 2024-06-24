@@ -1,3 +1,7 @@
+---
+description: Customising the deployment process on cluster instances.
+---
+
 # Instance configuration
 
 This page presents an overview of the various controls that TPA

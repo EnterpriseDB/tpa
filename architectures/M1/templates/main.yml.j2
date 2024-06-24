@@ -37,6 +37,11 @@ instances:
 {% endif %}{# role == 'replica' #}
   role:
   - {{ role }}
+{% if enable_pgbouncer %}
+  - pgbouncer
+  vars:
+    pgbouncer_backend: {{ globals.primary_name }}
+{% endif %}
 
 {% endfor %}{# data nodes #}
 
@@ -81,6 +86,9 @@ instances:
   role:
     - haproxy
   vars:
+{% if failover_manager == 'patroni' %}
+    haproxy_bind_address: '0.0.0.0'
+{% endif %}{# failover_manager == 'patroni' #}
     haproxy_backend_servers:
 {% for node in location_data_nodes %}
         - {{ node }}

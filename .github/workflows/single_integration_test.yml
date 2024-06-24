@@ -12,6 +12,7 @@ on:
         type: choice
         options:
         - amd64
+        - arm64
         - ppc64le
         - s390x
       tpa_architecture:
@@ -99,7 +100,6 @@ env:
   FOUNDATION_VER: ${{ vars.FOUNDATION_PACKAGING_VERSION }}
   GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
   SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
-  ANSIBLE_SKIP_TAGS: pgbench
   PYTHONWARNINGS: once
 
 jobs:
@@ -125,14 +125,9 @@ jobs:
           token: ${{ env.GITHUB_TOKEN }}
           path: foundation
 
-      - name: Connect to a Native Executor
-        uses: ./foundation/actions/linux/native/executor/connect
-        with:
-          architecture: ${{ github.event.inputs.cpu_architecture }}
-          tunnel-login: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
-
       - uses: ./.github/actions/integration-test
         with:
+          cpu_architecture: ${{ github.event.inputs.cpu_architecture }}
           source_directory: ${{ github.workspace }}
           tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
           tpa_platform: ${{ github.event.inputs.tpa_platform }}
@@ -141,6 +136,3 @@ jobs:
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
           tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager}}
           tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}
-
-      - name: Disconnect from a Native Executor
-        uses: ./foundation/actions/linux/native/executor/disconnect

@@ -1,0 +1,15 @@
+[Unit]
+Description=Beacon Agent
+After=network.target
+After=postgres.service
+
+[Service]
+Type=simple
+User=beacon
+WorkingDirectory=/home/beacon
+ExecStart=/usr/local/bin/beacon-agent
+Restart=on-failure
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target

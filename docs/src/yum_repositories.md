@@ -1,3 +1,7 @@
+---
+description: Configuring YUM package repositories on RedHat systems.
+---
+
 # Configuring YUM repositories
 
 This page explains how to configure YUM package repositories on RedHat

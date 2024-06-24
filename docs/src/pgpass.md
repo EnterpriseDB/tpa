@@ -1,3 +1,7 @@
+---
+description: Defining the generated .pgpass file with TPA.
+---
+
 # Configuring .pgpass
 
 TPA will create `~postgres/.pgpass` by default with the passwords

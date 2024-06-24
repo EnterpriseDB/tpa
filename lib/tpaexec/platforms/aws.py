@@ -66,6 +66,7 @@ class aws(CloudPlatform):
     def supported_distributions(self):
         return [
             "Debian",
+            "Debian-arm",
             "Debian-minimal",
             "RedHat",
             "RedHat-minimal",
@@ -94,6 +95,13 @@ class aws(CloudPlatform):
                 },
                 "debian-12-amd64-20240201-1644": {
                     "versions": ["12", "bookworm"],
+                    "owner": "136693071363",
+                    "user": "admin",
+                },
+            },
+            "debian-arm": {
+                "debian-12-arm64-20231013-1532": {
+                    "versions": ["12", "bookworm", "default"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
@@ -185,7 +193,7 @@ class aws(CloudPlatform):
         if kwargs.get("lookup", False):
             image.update(**self._lookup_ami(image, kwargs["region"]))
 
-        if self.arch.args.get("instance_type") == "t3.micro" and (
+        if self._is_default_ec2_instance_type() and (
             image["name"].lower().startswith("rhel")
             or image["name"].lower().startswith("rocky")
         ):
@@ -194,7 +202,13 @@ class aws(CloudPlatform):
             )
             print("(t3.micro instances often run out of memory)")
 
+        if self._is_default_ec2_instance_type() and image["os"].lower().startswith("debian-arm"):
+            self.arch.args["instance_type"] = "a1.medium"
+
         return image
+
+    def _is_default_ec2_instance_type(self):
+        return self.arch.args.get("instance_type") == AWS_DEFAULT_INSTANCE_TYPE
 
     def _lookup_ami(self, image, region):
         if region not in self.ec2:

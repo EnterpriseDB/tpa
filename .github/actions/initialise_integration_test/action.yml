@@ -105,6 +105,7 @@ runs:
         echo "::group::Configure"
         # Set an array to avoid joins
         declare -a CONFIGURE_OPTS
+        declare -a OVERRIDE_FILES
 
         CONFIGURE_OPTS+=(--architecture "${{ inputs.tpa_architecture }}")
         CONFIGURE_OPTS+=(--platform "${{ inputs.tpa_platform }}")
@@ -157,12 +158,6 @@ runs:
           CONFIGURE_OPTS+=(--enable-pem)
         fi
 
-        # For M1, we must use an older barman package version because the barman
-        # 3.10 in PGDG has incorrect dependency information
-        if [[ "${{ inputs.tpa_architecture }}" == "M1" ]] ;then
-          CONFIGURE_OPTS+=(--barman-package-version 3.9.0)
-        fi
-
         # enable redwood for epas.
         if [ "${{ inputs.tpa_postgres_flavour }}" == "epas" ] ;then
           CONFIGURE_OPTS+=(--redwood)
@@ -174,13 +169,13 @@ runs:
 
         if [ "${{ inputs.tpa_architecture }}" = "M1" ] ;then
           CONFIGURE_OPTS+=(--failover-manager "${{ inputs.tpa_failover_manager }}")
-          CONFIGURE_OPTS+=(--location-names "${{ inputs.tpa_location_names }}")
+          CONFIGURE_OPTS+=(--location-names ${{ inputs.tpa_location_names }})
           CONFIGURE_OPTS+=(--data-nodes-per-location "${{ inputs.tpa_data_nodes_per_location }}")
-          if [ ${{ inputs.tpa_witness-only-location }} ] ;then
+          if [[ "${{ inputs.tpa_witness_only_location }}" == 'true' ]] ;then
             WITNESS_ONLY_LOCATION=$(awk '{print $NF}' <<< "${{ inputs.tpa_location_names }}")
             CONFIGURE_OPTS+=(--witness-only-location $WITNESS_ONLY_LOCATION)
           fi
-          if [ ${{ inputs.tpa_single-node-location }} ] ;then
+          if [[ "${{ inputs.tpa_single_node_location}}" == 'true' ]] ;then
             SINGLE_NODE_LOCATION=$(awk '{print $NF}' <<< "${{ inputs.tpa_location_names }}")
             CONFIGURE_OPTS+=(--single-node-location $SINGLE_NODE_LOCATION)
           fi
@@ -190,7 +185,8 @@ runs:
         if [[ "${{ inputs.tpa_platform }}" == "docker"
               && "${{ inputs.tpa_failover_manager }}" == "efm"
               && "${{ inputs.tpa_architecture }}" == "M1" ]] ;then
-          CONFIGURE_OPTS+=(--overrides-from "${{ github.action_path }}/efm_ping.yml")
+          # CONFIGURE_OPTS+=(--overrides-from "${{ github.action_path }}/efm_ping.yml")
+          OVERRIDE_FILES+=(${{ github.action_path }}/efm_ping.yml)
         fi
 
         # Assume the default image is tpa/redhat if we're using docker as a platform
@@ -209,10 +205,25 @@ runs:
         # Set a default IMAGE_OS_VERSION to be the docker image tag or "latest" if it's not set
         : "${IMAGE_VERSION:=${image_ver:-latest}}"
 
+        # For M1, we must use an older barman package version because the barman
+        # 3.10 in PGDG has incorrect dependency information
+        if [[ "${{ inputs.tpa_architecture }}" == "M1"
+              && "${IMAGE_OS}" == "redhat"
+              && "${IMAGE_VERSION}" != "7" ]];then
+          CONFIGURE_OPTS+=(--barman-package-version 3.9.0)
+          # CONFIGURE_OPTS+=(--overrides-from "${{ github.action_path}}/barman_cli_pin.yml")
+          OVERRIDE_FILES+=(${{ github.action_path }}/barman_cli_pin.yml)
+        fi
+
+
         # Save the image info for reuse in actions/cache
         echo IMAGE="${IMAGE}" >>$GITHUB_ENV
         echo IMAGE_OS="${IMAGE_OS}" >>$GITHUB_ENV
         echo IMAGE_VERSION="${IMAGE_VERSION}" >>$GITHUB_ENV
+
+        if [ ${#OVERRIDE_FILES[0]} -ne 0 ]; then
+          CONFIGURE_OPTS+=(--overrides-from "${OVERRIDE_FILES[@]}")
+        fi
 
         CONFIGURE_OPTS+=(--no-git)
 

@@ -1,0 +1,11 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+beacon_agent_packages:
+  Debian: &beacon_agent_packages
+    - beacon-agent
+  RedHat: *beacon_agent_packages
+  Ubuntu: *beacon_agent_packages
+  SLES: *beacon_agent_packages
+

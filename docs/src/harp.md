@@ -1,3 +1,7 @@
+---
+description: Configuring HARP for BDR-Always-ON clusters.
+---
+
 # Configuring HARP
 
 TPA will install and configure HARP when `failover_manager` is set

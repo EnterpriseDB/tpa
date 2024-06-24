@@ -1,3 +1,7 @@
+---
+description: Postgres extensions and how to configure them with TPA.
+---
+
 # Adding Postgres extensions
 
 ## Default Postgres extensions

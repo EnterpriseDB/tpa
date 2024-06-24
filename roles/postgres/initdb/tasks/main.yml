@@ -4,8 +4,9 @@
 
 - name: Include pre-initdb hook
   include_tasks: "{{ hook }}"
-  when:
+  when: >
     lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|permits('pre-initdb')
   vars:
     hook: "{{ cluster_dir }}/hooks/pre-initdb.yml"
 

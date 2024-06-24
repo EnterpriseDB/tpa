@@ -1,3 +1,7 @@
+---
+description: How to configure 2ndQuadrant package repositories on any system.
+---
+
 # Configuring 2ndQuadrant repositories
 
 This page explains how to configure 2ndQuadrant package repositories on

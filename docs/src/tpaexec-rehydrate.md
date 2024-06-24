@@ -1,3 +1,8 @@
+---
+description: Rehydrate an AWS EC2 instance with a new machine image (AMI).
+---
+
+
 # tpaexec rehydrate
 
 The `tpaexec rehydrate` command rebuilds AWS EC2 instances with an

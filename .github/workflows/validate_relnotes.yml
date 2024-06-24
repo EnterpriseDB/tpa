@@ -1,0 +1,146 @@
+# When a PR is opened or reopened, check if the PR adds or modifies the release notes.
+#
+# This is not supposed to block the merging of a PR. There are PRs which should not have
+# release notes, so we contain ourselves to sending information or warning messages as
+# comments in the PR. The developer/review need to evaluate and proceed accordingly.
+#
+# This workflow would only fail if the spec of the release notes is invalid, in which
+# case a parser error is thrown.
+#
+# This workflow requires the user to set up a GitHub Actions variable named
+# `RELNOTES_DIRECTORY`, which should contain the name of the release notes directory
+# inside the source code repository.
+name: Validate release notes on PRs
+
+on:
+  pull_request:
+    branches:
+      - main
+
+    types:
+      - opened
+      - reopened
+
+env:
+  SOURCE_REPO_PATH: source_repo
+  RELNOTES_DIRECTORY: ${{ vars.RELNOTES_DIRECTORY }}
+
+jobs:
+  validate_release_notes:
+    name: Check if release notes exist and are valid
+    runs-on: ubuntu-latest
+
+    steps:
+      # We use depth 2 because on PR events the `actions/checkout` action is a detached
+      # head which simulates the merge of the PR into the target branch.
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          path: ${{ env.SOURCE_REPO_PATH }}
+
+      - name: Get list of release notes files introduced/modified by this PR
+        id: get-files
+        run: |
+          import os
+          import subprocess
+
+          import yaml
+
+          from relnotes.base import RelNote
+
+          relnotes_directory = os.environ["RELNOTES_DIRECTORY"]
+
+          # Get list of files which were added or modified by this PR.
+          file_list = subprocess.check_output(
+              [
+                  "git",
+                  "diff",
+                  "--name-only",
+                  "-r",
+                  "--diff-filter=AM",
+                  "HEAD^1",
+                  "HEAD"
+              ]
+          ).decode().strip().split("\n")
+
+          release_notes_files = []
+          non_release_notes_files = []
+
+          for file in file_list:
+              # We are only interested in YAML files from the release notes directory.
+              if not file.startswith(relnotes_directory):
+                  continue
+
+              if not file.lower().endswith((".yml", ".yaml")):
+                  non_release_notes_files.append(file)
+                  continue
+
+              with open(file, "r") as fd:
+                  # If an exception is raised by `safe_load` or `RelNote.__init__`, we
+                  # will not catch them on purpose. If the relnote spec is invalid, we
+                  # want the workflow to fail with an exception, and force the developer
+                  # or reviewer to fix the release notes.
+                  relnote_specs = yaml.safe_load(fd)
+
+                  for relnote_spec in relnote_specs:
+                      RelNote(**relnote_spec)
+
+              release_notes_files.append(file)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fd:
+              # Inform how many release notes files were touched by this PR.
+              fd.write(f"release_notes_files_num={len(release_notes_files)}\n")
+
+              # Inform files which were mistakenly placed inside the release notes folder.
+              # Either they are actual release notes files but with the wrong extension, or
+              # files that should be put somewhere else.
+              if len(non_release_notes_files) > 0:
+                  non_release_notes_files = '\n'.join(non_release_notes_files)
+                  fd.write(f"non_release_notes_files={non_release_notes_files}")
+        shell: python
+        working-directory: ${{ env.SOURCE_REPO_PATH }}
+        env:
+          PYTHONPATH: ".github/workflows/relnotes"
+
+      # Send a PR comment with a warning that unexpected files were found under the
+      # release notes directory.
+      - name: Report that unexpected files were found, if that is the case
+        if: ${{ steps.get-files.outputs.non_release_notes_files != null }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '❗ This PR contains unexpected files under the release notes folder:\n\n${{ steps.get-files.outputs.non_release_notes_files }}'
+            })
+
+      # Send a PR comment with a warning that the PR misses to add or modify the release
+      # notes.
+      - name: Report that no release notes files were touched, if that is the case
+        if: ${{ steps.get-files.outputs.release_notes_files_num == 0}}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ This PR is missing to add or modify release notes!'
+            })
+
+      # Send a PR comment with an info message that the PR is fine in terms of release
+      # notes.
+      - name: Report that release notes files were touched, if that is the case
+        if: ${{ steps.get-files.outputs.release_notes_files_num > 0}}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ This PR adds or modifies release notes!'
+            })

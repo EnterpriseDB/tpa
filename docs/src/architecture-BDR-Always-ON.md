@@ -1,3 +1,7 @@
+---
+description: Configuring a BDR-Always-ON cluster with TPA.
+---
+
 # BDR-Always-ON
 
 EDB Postgres Distributed 3.7 or 4 in an Always-ON

@@ -6,6 +6,10 @@
   vars:
     list_varname: _all_patroni_packages
 
+- include_tasks: replace-packages.yml
+  when: >
+    patroni_initialised
+
 - include_role: name=pkg/install
   vars:
     package_list_name: "patroni packages"

@@ -128,6 +128,12 @@
     and task_selector|selects('pgd-proxy')
 
 - include_role:
+    name: beacon-agent/final
+  when: >
+    'beacon-agent' in role
+    and task_selector|selects('beacon-agent')
+
+- include_role:
     name: sys/ssl/ca/final
   when:
     - ca_created is defined

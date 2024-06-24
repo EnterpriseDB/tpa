@@ -1,3 +1,8 @@
+---
+description: Adding pgbouncer to your Postgres cluster.
+---
+
+
 # Configuring pgbouncer
 
 TPA will install and configure pgbouncer on instances whose `role`

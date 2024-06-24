@@ -1,3 +1,7 @@
+---
+description: Setting the locale for the target instance.
+---
+
 # Locale
 
 For some platform images and environments it might be desirable to

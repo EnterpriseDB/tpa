@@ -133,6 +133,7 @@ class BDR(Architecture):
     def update_instances(self, instances):
         self._update_instance_camo(instances)
         self._update_instance_pem(instances)
+        self._update_instance_beacon(instances)
 
     def _instance_roles(self, instance):
         """
@@ -251,3 +252,12 @@ class BDR(Architecture):
                     "location": self.args["locations"][0]["Name"],
                 }
             )
+    def _update_instance_beacon(self, instances):
+        """
+        Add beacon-agent to instance roles where applicable
+        """
+        if self.args.get("enable_beacon_agent"):
+            for instance in instances:
+                roles = self._instance_roles(instance)
+                if "bdr" in roles:
+                    instance["role"].append("beacon-agent")

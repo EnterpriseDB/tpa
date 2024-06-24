@@ -1,3 +1,7 @@
+---
+description: Building and installing Postgres extensions from source.
+---
+
 # Installing from source
 
 You can define a list of extensions to build and install from their Git

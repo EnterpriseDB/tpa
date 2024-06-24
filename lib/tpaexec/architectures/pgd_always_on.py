@@ -4,9 +4,10 @@
 
 from .bdr import BDR
 from ..exceptions import ArchitectureError
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import re
 from argparse import SUPPRESS
+from packaging.version import Version, InvalidVersion, parse
 
 
 class PGD_Always_ON(BDR):
@@ -70,6 +71,20 @@ class PGD_Always_ON(BDR):
             nargs="?",
             default=SUPPRESS,
             help="Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health",
+        )
+        g.add_argument(
+            "--proxy-listen-port",
+            type=int,
+            dest="listen_port",
+            default=6432,
+            help="port on which proxy nodes will route traffic to the write leader"
+        )
+        g.add_argument(
+            "--proxy-read-only-port",
+            type=int,
+            dest="read_listen_port",
+            default=6433,
+            help="port on which proxy nodes will route read-only traffic to shadow nodes"
         )
 
     def update_argument_defaults(self, defaults):
@@ -215,10 +230,22 @@ class PGD_Always_ON(BDR):
             {
                 "bdr_node_groups": bdr_node_groups,
                 "default_pgd_proxy_options": {
-                    "listen_port": 6432,
+                    "listen_port": self.args["listen_port"],
                 },
             }
         )
+    
+        bdr_package_version = cluster_vars.get("bdr_package_version")
+        sanitized_version, includes_wildcard = self._sanitize_version(version_string=bdr_package_version)
+        if self._is_above_minimum(sanitized_version, Version("5.5"), includes_wildcard=includes_wildcard):
+            cluster_vars.update(
+                {
+                    "default_pgd_proxy_options": {
+                        "listen_port": self.args["listen_port"],
+                        "read_listen_port": self.args["read_listen_port"]
+                    }
+                }
+            )
         self._update_pgd_probes(cluster_vars)
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
@@ -353,3 +380,21 @@ class PGD_Always_ON(BDR):
         and false otherwise.
         """
         return location == self.args.get("witness_only_location")
+
+    def _sanitize_version(self, version_string) -> Union[Tuple[Version, bool], Tuple[None, bool]]:
+        try:
+            version_parts = version_string.split(':', maxsplit=1)[-1].split('.')
+            if version_parts[1] == "*":
+                return parse(version_parts[0]), True
+            else:
+                return parse(f"{version_parts[0]}.{version_parts[1]}"), False
+        except (InvalidVersion, AttributeError) as e:
+            return None, False
+        
+    def _is_above_minimum(self, x: Union[Version, None], y: Version, includes_wildcard: bool) -> bool:
+        if x is None:
+            return True
+        elif includes_wildcard:
+            return x.major >= y.major
+        else:
+            return x >= y

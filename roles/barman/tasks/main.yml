@@ -75,8 +75,9 @@
 
 - name: Include barman-pre-config hook
   include_tasks: "{{ hook }}"
-  when:
+  when: >
     lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|permits('barman-pre-config')
   vars:
     hook: "{{ cluster_dir }}/hooks/barman-pre-config.yml"
 

@@ -25,32 +25,60 @@ runs:
     - name: Run pip-compile on requirements.in
       shell: bash
       run: |
-        pip-compile -U --generate-hashes requirements.in -o requirements.txt
-        pip-compile -U requirements.in -o requirements-aap.txt
+        pip-compile --generate-hashes --reuse-hashes requirements.in -o requirements.txt
+        pip-compile requirements.in -o requirements-aap.txt
+
+    - name: Prevents removal of PPC64 nor ARM64 hashes by mistake
+      shell: bash
+      run: |
+       #!/bin/bash
+
+       MAIN_REQUIREMENTS_FILE="requirements.txt"
+       PPC64_REQUIREMENTS_FILE="requirements-ppc64le.txt"
+       ARM64_REQUIREMENTS_FILE="requirements-arm64.txt"
+       RET_VALUE=0
+
+       function check_hash_present_in_file() {
+         file_name=$1
+         HASHES=$(cat $file_name | grep "hash=sha256" | cut -d ":" -f2)
+         for _hash in $HASHES
+         do
+           if ! grep -q $_hash $MAIN_REQUIREMENTS_FILE ; then
+             echo "Failed to find ($_hash) in $file_name"
+             RET_VALUE=-1
+           fi
+         done
+       }
+
+       check_hash_present_in_file $PPC64_REQUIREMENTS_FILE
+       check_hash_present_in_file $ARM64_REQUIREMENTS_FILE
+
+       exit $RET_VALUE
+
     - name: Run pip-compile on requirements-ansible-8.in
       shell: bash
       run: |
-        pip-compile -U --generate-hashes requirements-ansible-8.in -o requirements-ansible-8.txt
+        pip-compile --generate-hashes --reuse-hashes requirements-ansible-8.in -o requirements-ansible-8.txt
 
     - name: Run pip-compile on test dependency requirements/ansible.in
       shell: bash
       run: |
-        pip-compile -U --generate-hashes requirements/ansible.in -o requirements/ansible.txt
+        pip-compile --generate-hashes --reuse-hashes requirements/ansible.in -o requirements/ansible.txt
 
     - name: Run pip-compile on test dependency requirements/dep.in
       shell: bash
       run: |
-        pip-compile -U --generate-hashes requirements/dep.in -o requirements/dep.txt
+        pip-compile --generate-hashes --reuse-hashes requirements/dep.in -o requirements/dep.txt
 
     - name: Run pip-compile on test dependency requirements/lint.in
       shell: bash
       run: |
-        pip-compile -U --generate-hashes requirements/lint.in -o requirements/lint.txt
+        pip-compile --generate-hashes --reuse-hashes requirements/lint.in -o requirements/lint.txt
 
     - name: Run pip-compile on test dependency requirements/testing.in
       shell: bash
       run: |
-        pip-compile -U --generate-hashes requirements/testing.in -o requirements/testing.txt
+        pip-compile --generate-hashes --reuse-hashes requirements/testing.in -o requirements/testing.txt
 
     # install tox and run dep test
     - name: Install tox

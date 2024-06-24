@@ -10,6 +10,7 @@ env:
   TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
   EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
   EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  FOUNDATION_TUNNEL_LOGIN: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
   GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
   SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
   EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
@@ -58,16 +59,11 @@ jobs:
         token: ${{ env.GITHUB_TOKEN }}
         path: foundation
 
-    - name: Connect to a Native Executor
-      uses: ./foundation/actions/linux/native/executor/connect
-      with:
-        architecture: ${{ matrix.cpu_architecture }}
-        tunnel-login: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
-
     - uses: ./.github/actions/integration-test
       with:
-        source_directory: ${{ github.workspace }}
         cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}-${{ matrix.tpa_os_image }}
+        cpu_architecture: ${{ matrix.cpu_architecture }}
+        source_directory: ${{ github.workspace }}
         tpa_architecture: ${{ matrix.tpa_architecture }}
         tpa_platform: ${{ matrix.tpa_platform }}
         tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
@@ -84,6 +80,3 @@ jobs:
               && (matrix.tpa_postgres_flavour == 'edbpge')
             )
           ) }}
-
-    - name: Disconnect from a Native Executor
-      uses: ./foundation/actions/linux/native/executor/disconnect

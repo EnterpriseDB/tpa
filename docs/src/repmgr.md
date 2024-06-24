@@ -1,3 +1,8 @@
+---
+description: How to install and configure repmgr with TPA.
+---
+
+
 # Configuring repmgr
 
 TPA will install repmgr on all postgres instances that have the

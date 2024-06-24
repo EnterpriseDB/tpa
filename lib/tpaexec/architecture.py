@@ -226,6 +226,17 @@ class Architecture(object):
             default=argparse.SUPPRESS,
             help="install pg-backup-api on barman server and register to pem server if enabled",
         )
+        g.add_argument(
+            "--enable-beacon-agent",
+            action="store_true",
+            default=argparse.SUPPRESS,
+            help="install the beacon agent on postgres nodes",
+        )
+        g.add_argument(
+            "--beacon-agent-project-id",
+            dest="beacon_agent_project_id",
+            metavar="prj_XXXXXXX"
+        )
         g.add_argument("--extra-packages", nargs="+", metavar="NAME")
         g.add_argument("--extra-optional-packages", nargs="+", metavar="NAME")
 
@@ -939,6 +950,9 @@ class Architecture(object):
             k = "epas_redwood_compat"
             cluster_vars[k] = cluster_vars.get(k, self.args.get(k))
 
+        if self.args.get("beacon_agent_project_id"):
+            cluster_vars["beacon_agent_project_id"] = self.args["beacon_agent_project_id"]
+
         self._add_extra_packages(cluster_vars)
 
         self._add_source_install(cluster_vars)
@@ -1140,8 +1154,8 @@ class Architecture(object):
 
         if (
             postgres_flavour == "postgresql"
-            and not self.args.get("failover_manager") == "efm"
-            and not self.name in ("PGD-Always-ON", "BDR-Always-ON")
+            and self.args.get("failover_manager") != 'efm'
+            and self.name not in ("PGD-Always-ON", "BDR-Always-ON")
             and not self.args.get("enable_pem")
         ):
             repos = []
@@ -1210,7 +1224,7 @@ class Architecture(object):
         elif edb_repositories == ["none"]:
             edb_repositories = []
 
-        if edb_repositories:
+        if edb_repositories is not None:
             cluster_vars.update({"edb_repositories": edb_repositories})
 
         # In general, if we're using EDB repositories at all, we don't want

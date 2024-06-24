@@ -1,3 +1,7 @@
+---
+description: Customizing the pg_hba.conf file for your Postgres cluster.
+---
+
 # pg_hba.conf
 
 The Postgres documentation explains the various options available in

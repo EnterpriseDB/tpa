@@ -1,3 +1,7 @@
+---
+description: How to authenticate to Git repositories during deployment.
+---
+
 # Git credentials
 
 This page explains how to clone Git repositories that require

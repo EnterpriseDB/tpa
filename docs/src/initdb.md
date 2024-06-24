@@ -1,3 +1,7 @@
+---
+description: Running initdb to initialise a Postgres data directory on a target instance.
+---
+
 # Running initdb
 
 TPA will first create `postgres_data_dir` if it does not exist, and

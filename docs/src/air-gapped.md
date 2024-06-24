@@ -1,3 +1,7 @@
+---
+description: How to manage clusters in a disconnected or air-gapped environment
+---
+
 # Managing clusters in a disconnected or air-gapped environment
 
 In a security controlled environment where no direct connection to the

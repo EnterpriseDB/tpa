@@ -1,3 +1,7 @@
+---
+description: How TPA uses 2ndQuadrant and EDB repositories.
+---
+
 # How TPA uses 2ndQuadrant and EDB repositories
 
 This page explains the package sources from which TPA can download EDB

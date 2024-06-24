@@ -1,0 +1,24 @@
+#build_arg_defaults:
+#  # redhat minimal EE image using redhat9 and ansible-core 2.15
+#  EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9:latest'
+#  # redhat EE image + redhat supported collections using redhat9 and ansible-core 2.15
+#  #EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest'
+#  # redhat EE image  using redhat8 and ansible-core 2.9
+#  #EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-24/ee-29-rhel8:latest'
+
+version: 3
+images:
+  base_image:
+    name: 'registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9:latest'
+dependencies:
+  python: ../../../requirements-aap.txt
+  galaxy: ../../../collections/requirements.yml
+options:
+  package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+  append_final:
+   - RUN mkdir -p /opt/EDB/TPA
+   - RUN ls . -als
+   - COPY . /opt/EDB/TPA
+   - ENV PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}/opt/EDB/TPA/lib"

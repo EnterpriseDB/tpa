@@ -1,3 +1,7 @@
+---
+description: Working with pg_ident.conf.
+---
+
 # pg_ident.conf
 
 You should not normally need to change `pg_ident.conf`, and by default,

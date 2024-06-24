@@ -57,17 +57,33 @@ class M1(Architecture):
             help="Enable Patroni HA cluster failover manager",
         )
 
-        g.add_argument(
+        frontend_group = p.add_argument_group(
+            "M1 architecture connection frontend options"
+        )
+        frontend_me_group = frontend_group.add_mutually_exclusive_group(required=False)
+        frontend_me_group.add_argument(
             "--enable-haproxy",
             action="store_true",
             help="Enable HAproxy layer hosts when using Patroni failover manager",
         )
+        frontend_me_group.add_argument(
+            "--enable-pgbouncer",
+            action="store_true",
+            help="Enable PgBouncer connection pooler in Postgres nodes",
+        )
+
         g.add_argument(
             "--patroni-dcs",
             choices=["etcd"],
             required=False,
             default="etcd",
             help="The Distributed Configuration Store to use with Patroni",
+        )
+        g.add_argument(
+            "--patroni-package-flavour",
+            choices=["edb", "community"],
+            required=False,
+            help="The flavour of Patroni packages to be installed",
         )
 
         layout_group = p.add_argument_group("M1 architecture layout options")
@@ -244,6 +260,91 @@ class M1(Architecture):
                 }
             )
 
+        if self.args.get("enable_beacon_agent"):
+            self._add_beacon_agent_role(instances)
+
+        self._set_etcd_repos(instances)
+
+    def _add_beacon_agent_role(self, instances):
+        for instance in instances:
+            ins_defs = self.args["instance_defaults"]
+            role = instance.get("role", ins_defs.get("role", []))
+            if "primary" in role or "replica" in role:
+                instance["role"].append("beacon-agent")
+
+    def _set_etcd_repos(self, instances):
+        """
+        Set repositories to be used in etcd nodes, when deploying Patroni clusters.
+
+        If Patroni is the failover manager, we want to enable PGDG (more specifically
+        PGDG extras) so we can install etcd packages on the etcd nodes. We do nothing
+        in regards to Debian/Ubuntu because etcd packages are not provided through
+        PGDG, but system repos.
+
+        Note that etcd is also used by HARP, but in that case we provide other custom
+        etcd packages through EDB repositories. That's why we handle only Patroni here.
+
+        :param instances: the instances which belong to this TPA cluster. We are
+            interested in the ones with role ``etcd``, so we can configure PGDG repos
+            for them.
+        """
+        if self.args.get("failover_manager") == "patroni":
+            for repo_var_name in ["yum_repository_list", "suse_repository_list"]:
+                # We don't want to miss repositories configured at the 'cluster_vars'
+                # level, if set. As 'vars' set at instance level overrides the
+                # 'cluster_vars' corresponding value, we make sure to extend the current
+                # repository list, if one exists.
+
+                repo_list = set(self.args["cluster_vars"].get(repo_var_name, []))
+                # An empty repo_list means we will add both EPEL and PGDG by default
+                if repo_list != set([]):
+                    repo_list.add("PGDG")
+                    repo_list = list(repo_list)
+
+                    for instance in instances:
+                        if "etcd" in instance["role"]:
+                            # We know for a fact that the 'vars' entry exists in this case,
+                            # at least with the 'etcd_location', so we can use key access
+                            # instead of 'get' method.
+                            instance["vars"][repo_var_name] = repo_list
+
+    def _get_patroni_flavour(self, cluster_vars):
+        """
+        Get value for ``patroni_package_flavour`` configuration.
+
+        Use value configured by the user, if any, otherwise get a default value based on
+        the configured repositories.
+
+        :param cluster_vars: cluster variables to be inspected.
+        """
+        # If the user explicitly set the flavour, use that.
+        ret = self.args.get("patroni_package_flavour")
+
+        if ret is not None:
+            return ret
+
+        # If the user explicitly configured EDB repos, use 'edb' flavour
+        if (
+            self.args.get("edb_repositories", []) is not None
+            and self.args.get("edb_repositories", []) != ["none"]
+        ):
+            return "edb"
+
+        # :meth:`update_cluster_vars` is executed before than the method
+        # :meth:`Architecture.update_repos`, so we don't have implicit values for
+        # 'edb_repositories' yet. This code is a hack to mimic the behavior of
+        # update_repos, so use 'edb' flavour when edb_repositories are going to be
+        # configured by TPA.
+        if self.args.get("enable_pem"):
+            return "edb"
+
+        if self.args.get("postgres_flavour") != "postgresql":
+            return "edb"
+
+        # If the user requested no flavour, and apparently no EDB repos are going to be
+        # configured, we fall back to 'community' flavour.
+        return "community"
+
     def update_cluster_vars(self, cluster_vars):
         """
         Makes architecture-specific changes to cluster_vars if required
@@ -258,3 +359,6 @@ class M1(Architecture):
         if failover_manager == "patroni":
             # Ensure nodes are members of a single etcd_location per cluster for patroni.
             cluster_vars["etcd_location"] = "main"
+            cluster_vars["patroni_package_flavour"] = self._get_patroni_flavour(
+                cluster_vars,
+            )

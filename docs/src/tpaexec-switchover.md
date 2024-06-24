@@ -1,3 +1,7 @@
+---
+description: Perform a controlled switchover between a primary and a replica in a cluster that uses streaming replication.
+---
+
 # tpaexec switchover
 
 The `tpaexec switchover` command performs a controlled switchover

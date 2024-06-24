@@ -1,3 +1,7 @@
+---
+description: How to troubleshoot TPA installations
+---
+
 # Troubleshooting
 
 ### Recreate python virtual environment
@@ -65,7 +69,7 @@ An easy way to smoketest an existing cluster is to run:
 This will do a functional test of the cluster components, followed by a performance test of the cluster, using pgbench. As pgbench can take a while to complete, benchmarking can be omitted by running:
 
 ```
-[tpa]$ tpaexec test <clustername> --excluded_tasks pgbench
+[tpa]$ tpaexec test <clustername> --excluded_tasks=pgbench
 ```
 
 ### TPA server test

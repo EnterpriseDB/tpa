@@ -1,0 +1,81 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+# This task is only called when a Patroni cluster already exists and we are again
+# going through the provision/deploy procedure. At this point we want to check if
+# by chance the user has an existing cluster which was deployed with a different
+# package flavour. We need to check that because from now on TPA will allow to
+# install both "patroni" packages (from PGDG) and "edb-patroni" packages (from EDB
+# repositories). As there are some differences in terms of the Python instance and
+# installation paths, we need to perform a graceful transition from between flavours,
+# which consists of:
+#
+# 1. Detect "edb-patroni" will be installed over "patroni" or vice-versa;
+# 2. Pause the Patroni cluster, so we avoid failovers;
+# 3. Stop the Patroni service, as it is using the binary and modules from the
+#    previously configured flavour;
+# 4. Uninstall packages from the previously configured flavour;
+# 5. Install packages of the currently configured flavour;
+# 6. Start Patroni service, which will now use the binary and modules from the
+#    currently configured flavour;
+# 7. Unpause the Patroni cluster, so we resume to normal operations.
+#
+# This task performs the steps "1.", "2.", "3." and "4.". The parent task takes
+# care of performing step "5.". The other steps are performed near the end of the
+# deployment.
+
+- package_facts:
+
+- set_fact:
+    replacing_patroni_package: >-
+      {{ (patroni_package_flavour == 'edb' and 'patroni' in ansible_facts.packages) or
+         (patroni_package_flavour == 'community' and 'edb-patroni' in ansible_facts.packages) }}
+
+- block:
+  - name: Pause the Patroni cluster when replacing patroni with edb-patroni package (or vice-versa)
+    include_role:
+      name: patroni/api
+      tasks_from: config
+    run_once: true
+    vars:
+      body:
+        pause: true
+
+  # This is a hack so the next step won't fail because of an undefined variable.
+  # This "replace-packages.yml" is not expected to be executed often (how many
+  # Patroni clusters we have out there at this moment?). The issue is we need to
+  # Stop the current Patroni services before installing "edb-patroni" over "patroni",
+  # so we avoid possible issues from being faced by Patroni because of missing
+  # modules in the meantime.
+  - set_fact:
+      patroni_service_name: "patroni@{{ cluster_name }}"
+
+  - name: Stop the Patroni service when replacing patroni with edb-patroni package (or vice-versa)
+    include_role:
+      name: patroni/service
+      tasks_from: transition
+    vars:
+      to_state: stopped
+
+  # We need to remove 'edb-patroni' package before installing 'patroni' package
+  # because the former obsoletes the latter. We would be able to install
+  # 'edb-patroni' over 'patroni' with no issues, but we use the same approach
+  # just to keep a pattern.
+
+  - name: Uninstall 'community' flavour packages when 'edb' is selected
+    package:
+      name: "{{ community_patroni_packages|packages_for(ansible_os_family) }}"
+      state: absent
+    when:
+      patroni_package_flavour == 'edb'
+
+  - name: Uninstall 'edb' flavour packages when 'community' is selected
+    package:
+      name: "{{ edb_patroni_packages|packages_for(ansible_os_family) }}"
+      state: absent
+    when:
+      patroni_package_flavour == 'community'
+
+  when:
+    replacing_patroni_package

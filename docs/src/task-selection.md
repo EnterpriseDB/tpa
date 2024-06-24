@@ -1,3 +1,7 @@
+---
+description: Selecting which tasks TPA should run during deployment.
+---
+
 # Selective task execution
 
 ## Using task selectors
@@ -22,19 +26,19 @@ available for `tpaexec test`.
 To deploy without running barman-related tasks:
 
 ```
-[tpa]$ tpaexec deploy <clustername> --excluded_tasks barman
+[tpa]$ tpaexec deploy <clustername> --excluded_tasks=barman
 ```
 
 To deploy running only repmgr-related tasks:
 
 ```
-[tpa]$ tpaexec deploy <clustername> --included_tasks repmgr
+[tpa]$ tpaexec deploy <clustername> --included_tasks=repmgr
 ```
 
 To deploy without trying to set hostnames on the instances:
 
 ```
-[tpa]$ tpaexec deploy <clustername> --excluded_tasks hostname
+[tpa]$ tpaexec deploy <clustername> --excluded_tasks=hostname
 ```
 
 To prevent bootstrap and ssh tasks from ever running, put the following
@@ -118,6 +122,10 @@ The following selectors are supported for either inclusion or exclusion:
 
     Tasks which install packages using the system package manager.
 
+- post-deploy
+
+    The post-deploy hook, if one is defined.
+
 - postgres
 
     Tasks related to postgres.
@@ -153,6 +161,22 @@ The following selectors are supported only for exclusion:
 
     Tasks which clean up the Barman build directory if Barman is being
     built from source.
+
+- barman-pre-config
+
+    The barman-pre-config hook, if one is defined.
+
+- bdr-pre-node-creation
+
+    The bdr-pre-node-creation hook, if one is defined.
+
+- bdr-post-group-creation
+
+    The bdr-post-group-creation hook, if one is defined.
+
+- bdr-pre-group-join
+
+    The bdr-pre-group-join hook, if one is defined.
 
 - bootstrap
 
@@ -227,10 +251,30 @@ The following selectors are supported only for exclusion:
 
     Tasks which create the [.pgpass](pgpass.md) file.
 
+- post-repo
+
+    The post-repo hook, if one is defined.
+
 - postgres-clean
 
     Tasks which clean up the build directory if postgres is being built
     from source.
+
+- postgres-config
+
+    The postgres-config hook, if one is defined.
+
+- postgres-config-final
+
+    The postgres-config-final hook, if one is defined.
+
+- pre-deploy
+
+    The pre-deploy hook, if one is defined.
+
+- pre-initdb
+
+    The pre-initdb hook, if one is defined.
 
 - replication-sets
 

@@ -1,3 +1,7 @@
+---
+description: How to configure a TPA cluster.
+---
+
 # Cluster configuration
 
 With TPA, the way to make any configuration change to a cluster is

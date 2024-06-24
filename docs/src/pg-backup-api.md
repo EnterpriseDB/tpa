@@ -1,3 +1,7 @@
+---
+description: Enabling the pg-backup-api and configuring client cert authentication.
+---
+
 # PG Backup API
 
 If you set `enable_pg_backup_api: true` in `config.yml` or use the

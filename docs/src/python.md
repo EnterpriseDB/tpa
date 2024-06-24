@@ -1,3 +1,7 @@
+---
+description: The Python environment used by TPA and how to configure it.
+---
+
 # Python environment
 
 TPA decides which Python interpreter to use based on the

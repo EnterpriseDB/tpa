@@ -1,3 +1,7 @@
+---
+description: What software can be installed and configured by TPA.
+---
+
 # TPA capabilities and supported software
 
 * [Python requirements](python.md)

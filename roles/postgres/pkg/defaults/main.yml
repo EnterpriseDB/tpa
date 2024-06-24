@@ -231,18 +231,24 @@ psycopg2_packages:
   Ubuntu: *common_psycopg2_packages
   SLES: *common_psycopg2_packages
 
+barman_client_packages:
+  common: &common_barman_client_packages
+    - barman-cli
+  Debian: *common_barman_client_packages
+  RedHat: *common_barman_client_packages
+  Ubuntu: *common_barman_client_packages
+  SLES: *common_barman_client_packages
+
 # Next, additional_postgres_packages is a list of other Postgres-related
 # packages that we install by default, and extra_postgres_packages is an
 # empty list that the caller can define to install other packages. These
 # are all unrelated packages and may have different versions.
 
 additional_postgres_packages:
-  Debian: &debian_additional_packages
-    - barman-cli
-  RedHat: &redhat_additional_packages
-    - barman-cli
-  Ubuntu: *debian_additional_packages
-  SLES: *redhat_additional_packages
+  Debian: []
+  RedHat: []
+  Ubuntu: []
+  SLES: []
 
 src_extra_packages:
   Debian: &debian_src_extra_packages

@@ -367,8 +367,12 @@ provision() {
 }
 
 cmd() {
+    if [[ ! -d inventory ]]; then
+        error "No inventory found. Did you run 'tpaexec provision $(pwd)'?"
+    fi
     # first ensure that vault_pass is defined for the cluster
     # otherwise don't add it to the args
+    args=""
     if "${TPA_DIR}/architectures/lib/use-vault" >> /dev/null 2>&1; then
         args=--vault-password-file="${TPA_DIR}/architectures/lib/use-vault"
     fi

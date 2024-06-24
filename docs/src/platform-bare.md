@@ -1,3 +1,7 @@
+---
+description: Provisioning and managing bare(-metal) servers with TPA.
+---
+
 # bare(-metal servers)
 
 Set `platform: bare` in config.yml

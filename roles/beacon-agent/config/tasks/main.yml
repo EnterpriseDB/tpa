@@ -1,0 +1,58 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+- name: Ensure beacon group exists
+  group:
+    name: beacon
+    system: yes
+    state: present
+
+- name: Create beacon os user
+  user:
+    name: beacon
+    group: beacon
+    home: /home/beacon
+    system: yes
+    state: present
+
+- name: Create beacon config directory
+  file:
+    name: /home/beacon/.beacon
+    owner: beacon
+    group: beacon
+    mode: '700'
+    state: directory
+
+- include_role: name=postgres/createuser
+  vars:
+    username: beacon
+
+- include_role: name=postgres/pgpass
+  vars:
+    pgpassfile: /home/beacon/.pgpass
+    pgpass_owner: beacon
+    pgpass_group: beacon
+    pgpass_users:
+      - beacon
+
+- name: Warn if no beacon agent access key is found
+  debug:
+    msg: >
+      No beacon agent access key found. Set BEACON_AGENT_ACCESS_KEY
+      in your environment and re-run 'tpaexec provision'.
+  when:
+    beacon_agent_access_key_password is not defined
+
+- name: Install beacon_agent.yaml
+  template:
+    src: beacon_agent.yaml.j2
+    dest: /home/beacon/.beacon/beacon_agent.yaml
+    owner: beacon
+    group: beacon
+    mode: '600'
+  vars:
+    beacon_db_name: "{{ cluster_name }}-{{ inventory_hostname }}"
+    beacon_agent_access_key: "{{ beacon_agent_access_key_password }}"
+  when: >
+    beacon_agent_access_key_password is defined

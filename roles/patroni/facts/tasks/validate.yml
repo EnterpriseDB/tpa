@@ -3,6 +3,43 @@
 
 # These assertions are made once early during TPA init phase
 
+- block:
+  - name: Ensure the configured Patroni package flavour is valid
+    assert:
+      that:
+        patroni_package_flavour in ['edb', 'community']
+      fail_msg: >
+        You need to set 'patroni_package_flavour' either as 'edb' or 'community'.
+        Refer to the TPA documentation for more information.
+
+  - name: Ensure EDB repositories are configured when using 'edb' package flavour
+    assert:
+      that:
+        edb_repositories|default([]) is not empty
+      fail_msg: >
+        Patroni flavour 'edb' requires EDB repositories to be defined.
+    when:
+      patroni_package_flavour == 'edb'
+
+  - name: Ensure required repositories are configured when using 'community' package flavour
+    assert:
+      that:
+        required_repos is subset(repo_list[ansible_os_family])
+      fail_msg: >
+        Patroni flavour 'community' requires the following repos to be defined: {{ required_repos }}
+        got {{ repo_list[ansible_os_family] }}
+    vars:
+      required_repos:
+      - PGDG
+      repo_list:
+        RedHat: "{{ yum_repository_list|default(['PGDG','EPEL']) }}"
+        SUSE: "{{ suse_repository_list|default(['PGDG']) }}"
+        Debian: "{{ apt_repository_list|default(['PGDG']) }}"
+    when:
+      patroni_package_flavour == 'community'
+
+  when: patroni_installation_method == 'pkg'
+
 - name: Ensure valid patroni_dcs is set
   assert:
     that: patroni_dcs in ['etcd']

@@ -1,0 +1,15 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+- meta: flush_handlers
+
+- include_role:
+    name: beacon-agent/service
+  when: >
+    task_selector|permits('service')
+
+- include_role:
+    name: beacon-agent/restart
+  when: >
+    task_selector|permits('service', 'restart')

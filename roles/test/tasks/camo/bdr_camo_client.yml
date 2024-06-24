@@ -83,7 +83,7 @@
   - name: Cause failure {{ failure }} on CAMO partner {{ pong }}
     include_role: name=test tasks_from="failures/{{ failure }}.yml"
   when:
-      inventory_hostname == pong and "upgrade" not in ansible_run_tags
+      inventory_hostname == pong
 
 - name: Upgrade host ping of the CAMO pair
   block:
@@ -124,7 +124,7 @@
     become: yes
     vars:
       ping_conninfo: "{{ hostvars[ping].bdr_node_dsn }}"
-  when: "'upgrade' in ansible_run_tags and inventory_hostname == ping"
+  when: inventory_hostname == ping
 
 - name: Upgrade host pong of the CAMO pair
   block:
@@ -151,7 +151,7 @@
     vars:
       postgres_service_end_state: restarted
     become: yes
-  when: "'upgrade' in ansible_run_tags and inventory_hostname == pong"
+  when: inventory_hostname == pong
 
 
 - name: Upgrade all other nodes
@@ -181,8 +181,8 @@
     become: yes
     with_items:
      - "{{ groups[bdr_node_group] }}"
-    when: inventory_hostname == item and "upgrade" in ansible_run_tags
-  when: "'upgrade' in ansible_run_tags and inventory_hostname != ping and inventory_hostname != pong"
+    when: inventory_hostname == item
+  when: inventory_hostname != ping and inventory_hostname != pong
 
 - block:
   - name: Wait for bdr_camo_client to complete
@@ -204,8 +204,9 @@
   - name: Fail if bdr_camo_client failed
     fail:
       msg: "bdr_camo_client failed"
-    when: client is not successful
-    tags: [camo, fail, upgrade]
+    when:
+      client is not successful
+      and task_selector|permits('camo', 'fail')
 
   - name: Get LSN after bdr_camo_client run
     postgresql_query:

@@ -1,3 +1,7 @@
+---
+description: Manage the HAProxy server pool for a BDR/HAProxy cluster.
+---
+
 # BDR/HAProxy server pool management
 
 The `tpaexec pool-disable-server` and `pool-enable-server` commands

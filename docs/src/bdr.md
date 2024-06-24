@@ -1,3 +1,7 @@
+---
+description: How to configure and deploy EDB Postgres Distributed (PGD) with TPA.
+---
+
 # EDB Postgres Distributed configuration
 
 TPA can install and configure EDB Postgres Distributed (PGD),

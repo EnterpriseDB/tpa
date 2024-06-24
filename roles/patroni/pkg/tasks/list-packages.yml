@@ -2,12 +2,24 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
-- include_role: name=pkg/add_to_list
-  vars:
-    list_contents: "{{
-        patroni_packages|packages_for(ansible_os_family, patroni_package_version)
-      }}"
+- block:
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          edb_patroni_packages|packages_for(ansible_os_family, patroni_package_version)
+        }}"
+    when: >
+      patroni_package_flavour == 'edb'
+
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          community_patroni_packages|packages_for(ansible_os_family, patroni_package_version)
+        }}"
+    when: >
+      patroni_package_flavour == 'community'
+
   when: >
-    'patroni' in role
+      'patroni' in role
 
 - import_tasks: list-dependency-packages.yml

@@ -1,3 +1,7 @@
+---
+description: Adding extra packages that depend on Postgres to your cluster.
+---
+
 # Installing Postgres-related packages
 
 TPA installs a batch of non-Postgres-related packages early during

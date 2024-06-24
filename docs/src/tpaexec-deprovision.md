@@ -1,3 +1,8 @@
+---
+description: The command that destroys a cluster and associated resources.
+---
+
+
 # tpaexec deprovision
 
 Deprovision destroys a cluster and associated resources.

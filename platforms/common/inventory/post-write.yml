@@ -15,6 +15,23 @@
           |remove_keys(['last_provisioned', 'current'])
           |combine({'last_provisioned': config_hashes['current']}) }}"
 
+
+- name: Write beacon agent access key
+  shell:
+    cmd: |
+      ansible-vault encrypt_string \
+        --vault-password-file {{ tpa_dir }}/architectures/lib/use-vault \
+        --name {{ _secret_name }} \
+        {{ lookup('env', 'BEACON_AGENT_ACCESS_KEY') }} \
+        > {{ _secret_file }}
+  vars:
+    _secret_name: "beacon_agent_access_key_password"
+    _secret_file: "{{ '%s/inventory/group_vars/tag_Cluster_%s/secrets/%s.yml' % (cluster_dir, cluster_name, _secret_name) }}"
+  args:
+    chdir: "{{ cluster_dir }}"
+  when: >
+    lookup('env', 'BEACON_AGENT_ACCESS_KEY') != ""
+
 - name: Ensure we have local and remote repositories for Tower
   when: ansible_tower
   block:

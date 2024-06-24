@@ -11,8 +11,9 @@
 
 - name: Include pre-deploy hook
   include_tasks: "{{ hook }}"
-  when:
+  when: >
     lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|selects('pre-deploy')
   vars:
     hook: "{{ cluster_dir }}/hooks/pre-deploy.yml"
 
@@ -22,7 +23,8 @@
 
 - name: Include post-repo hook
   include_tasks: "{{ hook }}"
-  when:
+  when: >
     lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|selects('post-repo')
   vars:
     hook: "{{ cluster_dir }}/hooks/post-repo.yml"
