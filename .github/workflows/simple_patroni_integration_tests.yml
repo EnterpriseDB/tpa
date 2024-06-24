@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         shell: bash --noprofile --norc -exo pipefail {0}

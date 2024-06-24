@@ -31,7 +31,7 @@ jobs:
   requirements:
     if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' }}
     name: Requirements update
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:

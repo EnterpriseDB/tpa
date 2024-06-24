@@ -1,0 +1,26 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+# Despite we install chrony on all platforms and distros, we only change the default
+# NTP server on AWS.
+
+- name: Replace NTP (chrony) default server on AWS hosts
+  vars:
+      chrony_config_file: "{{ '/etc/chrony/chrony.conf' if ansible_os_family == 'Debian' else '/etc/chrony.conf' }}"
+  ansible.builtin.lineinfile:
+    path: "{{ chrony_config_file }}"
+    regexp: "^pool "
+    line: "server 169.254.169.123 prefer iburst minpoll 4 maxpoll 4"
+    owner: root
+    group: root
+    mode: "0644"
+  when: platform == "aws"
+  register: ntp_conf_service
+
+- name: Restart NTP service when needed
+  service:
+    name: chronyd
+    state: restarted
+    enabled: True
+  when: ntp_conf_service.changed

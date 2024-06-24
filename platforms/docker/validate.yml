@@ -6,6 +6,11 @@
   docker_host_info:
   register: docker_system
 
+# Some platforms e.g. ppcle in our tests include a leading 'v' character
+# and also a '+' sign in the docker version string. Remove it before
+# running the version check so the version test doesn't fail because of
+# the invalid version string.
+
 - name: Check required docker version
   assert:
     that:
@@ -14,28 +19,30 @@
       - "TPA requires Docker CE version 20.10 or later (you are running {{ _docker_version }})"
       - "Consult platform-docker.md for information on using docker platform"
   vars:
-    _docker_version: "{{ docker_system.host_info.ServerVersion }}"
-
-# Support for CgroupVersion 2 is not fully baked yet for docker sdk in
-# ansible and related tooling so while we try to make sure we are using
-# a recent version of docker; we rely on CgroupVersion 1 until version
-# 2 is fully supported.
-
-- name: Check required docker environment
-  assert:
-    that:
-      - _cgroup_version == '1'
-    msg:
-      - "TPA currently supports CgroupVersion 1 (you are running CgroupVersion {{ _cgroup_version }})"
-      - "Consult platform-docker.md for information on using docker platform"
-  vars:
-    _cgroup_version: "{{ docker_system.host_info.CgroupVersion|default(None) }}"
+    _docker_version: '{{ docker_system.host_info.ServerVersion | regex_replace("[a-z\+]+", "") }}'
 
 - name: Ensure that every instance has a defined image
   assert:
     msg: "Please set 'image' on every instance"
     that:
       - docker_instances|selectattr('image','defined')|list|count == docker_instances|count
+
+# if we are running on a cgroups 1 system, we can use any image; if we
+# we are running on a cgroups 2 system, we must check that we are not
+# trying to use an incompatible older image
+
+- name: Check required docker environment
+  assert:
+    that: >
+       _host_cgroup_version == '1'
+       or _bad_images|length == 0
+    msg:
+      - "TPA doesn't support CgroupVersion 2 for the following images: {{ _bad_images|unique }}"
+      - "Consult platform-docker.md for information on using docker platform"
+  vars:
+    _host_cgroup_version: "{{ docker_system.host_info.CgroupVersion|default(None) }}"
+    _cgroups1_only_images: [ "tpa/redhat:7" ]
+    _bad_images: "{{ docker_instances|map(attribute='image')|select('in', _cgroups1_only_images) }}"
 
 - name: Ensure that docker_images, if defined, is a hash
   assert:

@@ -74,6 +74,14 @@ on:
         required: false
         description: "PGD repos for reconfigure command"
         default: ""
+      runner:
+        description: "github runner (ubuntu20.04 required when using tpa_os_image: 'tpa/redhat:7')"
+        required: false
+        default: "ubuntu-22.04"
+        type: choice
+        options:
+        - "ubuntu-20.04"
+        - "ubuntu-22.04"
 
 env:
   LANG: "C.UTF-8"
@@ -89,7 +97,7 @@ jobs:
   integration-test:
     name: Upgrade test
 
-    runs-on: ubuntu-20.04
+    runs-on: ${{ github.event.inputs.runner }}
 
     steps:
       - name: Checkout source repository

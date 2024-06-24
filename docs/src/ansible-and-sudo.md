@@ -1,27 +1,26 @@
 # TPA, Ansible, and sudo
 
 TPA uses Ansible with sudo to execute tasks with elevated privileges
-on target instances. 
-It's important to understand how Ansible uses sudo (which isn't specific to TPA) 
-and the consequences to systems managed
+on target instances. This page explains how Ansible uses sudo (which is
+in no way TPA-specific), and the consequences to systems managed
 with TPA.
 
 TPA needs root privileges;
 
-* To install packages (required packages using the operating system's
-  native package manager and optional packages using pip)
-* To stop, reload, and restart services (that is, Postgres, repmgr, efm, etcd,
-  haproxy, pgbouncer, and so on)
-* To perform a variety of other tasks (such as gathering cluster facts,
-  performing switchover, and setting up cluster nodes)
+* to install packages (required packages using the operating system's
+  native package manager, and optional packages using pip)
+* to stop, reload and restart services (i.e Postgres, repmgr, efm, etcd,
+  haproxy, pgbouncer etc.)
+* to perform a variety of other tasks (e.g., gathering cluster facts,
+  performing switchover, setting up cluster nodes)
 
-TPA also must be able to use sudo. You can make it ssh in as root
-directly by setting `ansible_user: root`, but it still uses sudo to
-execute tasks as other users (for example, postgres).
+TPA also needs to be able to use sudo. You can make it ssh in as root
+directly by setting `ansible_user: root`, but it will still use sudo to
+execute tasks as other users (e.g., postgres).
 
 ## Ansible sudo invocations
 
-When Ansible runs a task using sudo, you see a process on the
+When Ansible runs a task using sudo, you will see a process on the
 target instance that looks something like this:
 
 ```
@@ -30,106 +29,104 @@ target instance that looks something like this:
   /usr/bin/python2'"'"' && sleep 0'
 ```
 
-Users who were expecting something like `sudo yum install -y xyzpkg`
-are often surprised by this. By and large, most tasks in Ansible
-invoke a Python interpreter to execute Python code rather than
-executing recognizable shell commands. (Playbooks can execute `raw`
+People who were expecting something like `sudo yum install -y xyzpkg`
+are often surprised by this. By and large, most tasks in Ansible will
+invoke a Python interpreter to execute Python code, rather than
+executing recognisable shell commands. (Playbooks may execute `raw`
 shell commands, but TPA uses such tasks only to bootstrap a Python
 interpreter.)
 
 Ansible modules contain Python code of varying complexity, and an
-Ansible playbook isn't just a shell script written in YAML format.
-There's no way to “extract” shell commands that do the same thing
+Ansible playbook is not just a shell script written in YAML format.
+There is no way to “extract” shell commands that would do the same thing
 as executing an arbitrary Ansible playbook.
 
-One significant consequence of how Ansible uses sudo is that [privilege
-escalation must be general](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html#privilege-escalation-must-be-general). It isn't possible
-to limit sudo invocations to specific commands in `sudoers.conf`,
-as some administrators are used to doing. Most tasks just invoke Python.
-You could have restricted sudo access to Python if it weren't
-for the random string in every command. However, once Python is running as root,
+There is one significant consequence of how Ansible uses sudo: [privilege
+escalation must be general](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html#privilege-escalation-must-be-general). That, it is not possible
+to limit sudo invocations to specific commands in sudoers.conf,
+as some administrators are used to doing. Most tasks will just invoke python.
+You could have restricted sudo access to python if it were not
+for the random string in every command—but once Python is running as root,
 there's no effective limit on what it can do anyway.
 
-Executing Python modules on target hosts is how Ansible works.
-None of this is specific to TPA, and these considerations
-apply equally to any other Ansible playbook.
+Executing Python modules on target hosts is just the way Ansible works.
+None of this is specific to TPA in any way, and these considerations
+would apply equally to any other Ansible playbook.
 
 ## Recommendations
 
-* Use SSH public-key-based authentication to access target instances.
+* Use SSH public key-based authentication to access target instances.
 
 * Allow the SSH user to execute sudo commands without a password.
 
-* Restrict access by time rather than by command.
+* Restrict access by time, rather than by command.
 
-TPA needs access only when you're first setting up your cluster or
-running `tpaexec deploy` again to make configuration changes, for example,
+TPA needs access only when you are first setting up your cluster or
+running `tpaexec deploy` again to make configuration changes, e.g.,
 during a maintenance window. Until then, you can disable its access
-entirely, which is a one-line change for both ssh and sudo.
+entirely (a one-line change for both ssh and sudo).
 
 During deployment, everything Ansible does is generally predictable
-based on what the playbooks are doing and the parameters you provide.
-Each action is visible in the system logs on the target instances
-as well as in the Ansible log on the machine where tpaexec runs.
+based on what the playbooks are doing and what parameters you provide,
+and each action is visible in the system logs on the target instances,
+as well as the Ansible log on the machine where tpaexec itself runs.
 
-Ansible's focus is less to impose fine-grained restrictions on the
-actions you can execute and more to provide visibility into what it does
-as it executes. Thus elevated privileges are better assigned and managed
+Ansible's focus is less to impose fine-grained restrictions on what
+actions may be executed and more to provide visibility into what it does
+as it executes, so elevated privileges are better assigned and managed
 by time rather than by scope.
 
 ## SSH and sudo passwords
 
-We strongly recommend setting up passwordless SSH key authentication
-and passwordless sudo access. However, it's possible to use passwords too.
+We *strongly* recommend setting up password-less SSH key authentication
+and password-less sudo access, but it is possible to use passwords too.
 
 If you set `ANSIBLE_ASK_PASS=yes` and `ANSIBLE_BECOME_ASK_PASS=yes`
-in your environment before running tpaexec, Ansible prompts you to
+in your environment before running tpaexec, Ansible will prompt you to
 enter a login password and a sudo password for the remote servers. It
-then negotiates the login/sudo password prompt on the remote server
-and sends the password you specify, which makes your playbooks take
-noticeably longer to run.
+will then negotiate the login/sudo password prompt on the remote server
+and send the password you specify (which will make your playbooks take
+noticeably longer to run).
 
-We don't recommend this mode of operation because it's a more
+We do not recommend this mode of operation because we feel it is a more
 effective security control to completely disable access through a
 particular account when not needed than to use a combination of
 passwords to restrict access. Using public key authentication for ssh
 provides an effective control over who can access the server, and it's
-easier to protect a single private key per authorized user than it is to
+easier to protect a single private key per authorised user than it is to
 protect a shared password or multiple shared passwords. Also, if you
-limit access at the ssh/sudo level to when it's required, the passwords
-don't add any extra security during your maintenance window.
+limit access at the ssh/sudo level to when it is required, the passwords
+do not add any extra security during your maintenance window.
 
 ## sudo options
 
-To use Ansible with sudo, don't set `requiretty` in `sudoers.conf`.
+To use Ansible with sudo, you must not set `requiretty` in sudoers.conf.
 
 If needed, you can change the sudo options that Ansible uses
-(`-H -S -n`) by setting either:
-- `become_flags` in the `[privilege_escalation]` section of `ansible.cfg`
-- `ANSIBLE_BECOME_FLAGS` in the environment
-- `ansible_become_flags` in the inventory 
-
-All three methods are equivalent, but change
-the sudo options only if there's a specific need to do so. The defaults
+(`-H -S -n`) by setting `become_flags` in the
+`[privilege_escalation]` section of ansible.cfg, or
+`ANSIBLE_BECOME_FLAGS` in the environment, or `ansible_become_flags`
+in the inventory. All three methods are equivalent, but please change
+the sudo options only if there is a specific need to do so. The defaults
 were chosen for good reasons. For example, removing `-S -n` will cause
-tasks to time out if passwordless sudo is incorrectly configured.
+tasks to timeout if password-less sudo is incorrectly configured.
 
 ## Logging
 
-For playbook executions, the sudo logs show mostly invocations of
-Python, just as it shows only an invocation of bash when
-`sudo -i` is used.
+For playbook executions, the sudo logs will show mostly invocations of
+Python (just as it will show only an invocation of bash when someone
+uses `sudo -i`).
 
-For more detail, the syslog shows the exact arguments to each module
+For more detail, the syslog will show the exact arguments to each module
 invocation on the target instance. For a higher-level view of why that
-module was invoked, the `ansible.log` on the controller shows what that
+module was invoked, the ansible.log on the controller shows what that
 task was trying to do, and the result.
 
-If you want even more detail or an independent source of audit data,
+If you want even more detail, or an independent source of audit data,
 you can run auditd on the server and use the SELinux log files. You can
-get still more fine-grained syscall-level information from bpftrace/bcc.
-(For example, opensnoop shows every file opened on the system, and execsnoop
-shows every process executed on the system.) You can do any or all of
+get still more fine-grained syscall-level information from bpftrace/bcc
+(e.g., opensnoop shows every file opened on the system, and execsnoop
+shows every process executed on the system). You can do any or all of
 these things, depending on your needs, with the obvious caveat of
 increasing overhead with increased logging.
 
@@ -137,8 +134,8 @@ increasing overhead with increased logging.
 
 The
 [installation instructions for TPA](INSTALL.md)
-mention sudo only as shorthand for “run these commands as root somehow.”
-Once TPA is installed and you've run `tpaexec setup`, TPA
-doesn't require elevated privileges on the local machine. (But
+mention sudo only as shorthand for “run these commands as root somehow”.
+Once TPA is installed and you have run `tpaexec setup`, TPA
+itself does not require elevated privileges on the local machine. (But
 if you use Docker, you must run tpaexec as a user that belongs to a
-Unix group that has permission to connect to the Docker daemon.)
+group that is permitted to connect to the Docker daemon.)

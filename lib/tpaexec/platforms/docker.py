@@ -152,7 +152,7 @@ class docker(Platform):
                 "os_family": "RedHat",
             },
             "tpa/debian": {
-                "versions": ["stretch", "buster", "bullseye", "9", "10", "11"],
+                "versions": ["stretch", "buster", "bullseye", "bookworm", "9", "10", "11", "12"],
                 "os": "Debian",
             },
             "tpa/redhat": {

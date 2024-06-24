@@ -13,6 +13,26 @@
 #
 # https://docs.ansible.com/ansible/2.8/modules/docker_container_module.html
 
+
+# This is a list of images for which we can use cgroups2 scopes to mount
+# only part of the host's /sys/fs/cgroup into the container. We do this
+# if possible, so that the container can't interfere with the host's
+# operation.
+#
+# The image names appear in this list as they do in config.yml, and
+# correspond to a subset of the ones listed in docker_image.yml
+- name: Set list of images with support for cgroups2 scopes
+  set_fact:
+    scoped_support_images:
+    - "tpa/redhat:9"
+    - "tpa/almalinux:9"
+    - "tpa/rocky:9"
+    - "tpa/oraclelinux:9"
+    - "tpa/ubuntu:22.04"
+    - "tpa/ubuntu:jammy"
+    - "tpa/ubuntu:latest"
+
+
 - name: Provision docker container {{ item.Name }}
   docker_container:
     name: "{{ item.Name }}"
@@ -53,9 +73,12 @@
       - "/run"
       - "/run/lock"
     security_opts: "{{ item.docker_security_opts|default(omit) }}"
+    cgroupns_mode: "host"
   vars:
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - "{{ (item.image in scoped_support_images)|ternary('/sys/fs/cgroup/tpa.scope', '/sys/fs/cgroup')
+        ~ ':/sys/fs/cgroup:'
+        ~ (docker_system.host_info.CgroupVersion|default(None) == '1')|ternary('ro', 'rw') }}"
       - "{{ item.volumes|default([]) }}"
       - "{{ item.local_source_directories|default([]) }}"
 

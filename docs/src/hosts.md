@@ -1,11 +1,11 @@
 # Configuring /etc/hosts
 
-By default, TPA adds lines to `/etc/hosts` on the target instances
-with the IP address and hostnames of every instance in the cluster. This
-enables the instances to use each other's names for communication within the
-cluster (for example, in `primary_conninfo` for Postgres).
+By default, TPA will add lines to /etc/hosts on the target instances
+with the IP address and hostname(s) of every instance in the cluster, so
+that they can use each other's names for communication within the
+cluster (e.g., in `primary_conninfo` for Postgres).
 
-You can specify a list of `extra_etc_hosts_lines`, too:
+You can specify a list of `extra_etc_hosts_lines` too:
 
 ```yaml
 instances:
@@ -17,9 +17,9 @@ instances:
     - 192.0.2.2 water.example.com
 ```
 
-If you don't want any of the default entries, you can specify the
-complete list of `etc_hosts_lines` for an instance instead. Add only
-those lines to `/etc/hosts`:
+If you don't want the default entries at all, you can specify the
+complete list of `etc_hosts_lines` for an instance instead, and only
+those lines will be added to /etc/hosts:
 
 ```yaml
 instances:
@@ -32,6 +32,6 @@ instances:
     - 192.0.2.3 base.example.com
 ```
 
-If your `/etc/hosts` doesn't contain the default entries for instances in
-the cluster, you need to ensure the names can be resolved in some
+If your /etc/hosts doesn't contain the default entries for instances in
+the cluster, you'll need to ensure the names can be resolved in some
 other way.

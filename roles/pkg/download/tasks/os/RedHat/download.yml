@@ -20,12 +20,12 @@
     yumdownloader
       --destdir "{{ _download_dir }}"
       --resolve
-      {{ (ansible_distribution_major_version|int > 7)|ternary(_opts_8, _opts_7) }}
+      {{ (ansible_distribution_major_version|int > 7)|ternary(_opts_8_and_above, _opts_7) }}
       {{ package_list|map('quote')|join(' ') }}
   register: _yum_download
   vars:
-    _opts_7: "--archlist x86_64,noarch"
-    _opts_8: "--alldeps --arch x86_64 --arch noarch"
+    _opts_7: "--archlist {{ ansible_architecture }}, noarch"
+    _opts_8_and_above: "--alldeps --arch {{ ansible_architecture }} --arch noarch"
   changed_when: >
     _yum_download.stdout_lines
     |reject('match', '^Last metadata')

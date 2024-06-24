@@ -93,7 +93,9 @@
 
 - name: Warn about using already-rotated subscription tokens
   assert:
-    that: env_token not in expired_tokens
+    that:
+      env_token not in expired_tokens
+      or tpa_2q_repositories|default([]) == []
     fail_msg: >-
       Your TPA_2Q_SUBSCRIPTION_TOKEN has expired; please fetch an updated token
       from https://techsupport.enterprisedb.com/customer_portal/company/

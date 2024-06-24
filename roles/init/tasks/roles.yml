@@ -126,6 +126,22 @@
   when: >
     bdr_node_pause_in_standby|default(false)|bool
 
+# A node with the "witness" role in an efm cluster gets "efm-witness"
+# instead
+
+- name: Add efm-witness role to witnesses if needed
+  set_fact:
+    role: "{{ role|union(['efm-witness']) }}"
+  when: >
+    'witness' in role
+    and failover_manager == 'efm'
+
+- name: Remove witness role from efm witnesses
+  set_fact:
+    role: "{{ role|difference(['witness'])}}"
+  when: >
+    'efm-witness' in role
+
 # Add 'postgres' to role when any of 'primary' or 'replica' or 'witness'
 # is given, just as a convenience.
 

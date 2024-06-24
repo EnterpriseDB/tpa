@@ -14,6 +14,16 @@ The exception to this rule is that `tpaexec deploy` will refuse to
 install a different version of a package that is already installed.
 Instead, you must use `tpaexec upgrade` to perform software upgrades.
 
+!!! Note What can I do with `upgrade`?
+Supported uses of the  `upgrade` command include:
+
+- Upgrading Postgres and other cluster components to the latest minor version without modifying `config.yml`
+- Upgrading components to a new minor version specified by modifying `config.yml`
+- Performing a major version upgrade of Postgres Distributed in combination with the `reconfigure` command.
+
+**Upgrade does not support major version upgrades of Postgres.**
+!!!
+
 This command will try to perform the upgrade with minimal disruption to
 cluster operations. The exact details of the specialised upgrade process
 depend on the architecture of the cluster, as documented below.
@@ -61,10 +71,6 @@ upgrade. To avoid confusion, we recommend that you `tpaexec deploy` any
 unrelated pending changes before you begin the software upgrade process.
 
 ## Upgrading from BDR-Always-ON to PGD-Always-ON
-
-**Note:** The upgrade procedure from BDR-Always-ON to PGD-Always-ON for
-camo enabled clusters using BDR version 3.7 is not yet supported. This
-support will come in a later release.
 
 To upgrade from BDR-Always-ON to PGD-Always-ON (that is, from BDR3/4 to
 PGD5), first run `tpaexec reconfigure`:
@@ -166,6 +172,12 @@ allow you to execute custom Ansible tasks before and after the package
 installation step.
 
 ## M1
+
+!!! Warning
+The `upgrade` command for M1 is affected by a known bug and will fail
+where the failover manager is Patroni or EFM. TPA will provide full 
+upgrade functionality for M1 in a future release.
+!!!
 
 For M1 clusters, `upgrade` will first update the streaming
 replicas one by one, then perform a [switchover](tpaexec-switchover.md)

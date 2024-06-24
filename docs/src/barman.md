@@ -1,7 +1,7 @@
 # Barman
 
-When an instance has the `barman` role in `config.yml`, TPA
-configures the instance as a [Barman](https://pgbarman.org/) server to take backups
+When an instance is given the `barman` role in config.yml, TPA will
+configure it as a [Barman](https://pgbarman.org/) server to take backups
 of any other instances that name it in their `backup` setting.
 
 ```yaml
@@ -17,33 +17,36 @@ instances:
 ```
 
 Multiple `postgres` instances can have the same Barman server named as
-their `backup`. Any `postgres` instance can have a list of
-Barman servers named as its `backup`. In this case, backups are taken to all
+their `backup`; equally, one `postgres` instance can have a list of
+Barman servers named as its `backup` and backups will be taken to all
 of the named servers.
 
-The default Barman configuration connects to PostgreSQL using
-`pg_receivewal` to take continuous backups of WAL. It takes a full
+The default Barman configuration will connect to PostgreSQL using
+pg_receivewal to take continuous backups of WAL, and will take a full
 backup of the instance using rsync over ssh twice weekly. Full backups
 and WAL are retained for long enough to enable recovery to any point in
-the previous 4 weeks.
+the last 4 weeks.
 
 
 ## Barman configuration
+
+The Barman home directory on the Barman server can be set using the
+cluster variable `barman_home`; its default value is `/var/lib/barman`.
 
 On each Barman server, a global configuration file is created
 as `/etc/barman.conf`. This file contains default values for many Barman
 configuration variables. For each Postgres server being backed up,
 an additional Barman configuration file is created. For example, to back up the
 server `one`, the file is `/etc/barman.d/one.conf`, and the backups
-are stored in `/var/lib/barman/one`. The file and directory names
-are taken from the backed-up instance's `backup_name` setting. The default for this setting
-is the instance name.
+are stored in the subdirectory `one` in the Barman home directory. The
+configuration file and directory names are taken from the backed-up instance's
+`backup_name` setting. The default for this setting is the instance name.
 
-You can set the following variables on the backed-up instance. They are
+The following variables can be set on the backed-up instance and are
 passed through into Barman's configuration with the prefix `barman_`
-removed.
+removed:
 
-| Variable | Default |
+| variable | default |
 |----------|---------|
 | barman_archiver | false |
 | barman_log_file | /var/log/barman.log |
@@ -67,22 +70,20 @@ removed.
 
 ## Backup scheduling
 
-TPA installs a cron job in `/etc/cron.d/barman` that runs every
-minute and invokes `barman cron` to perform maintenance tasks.
+TPA installs a cron job in `/etc/cron.d/barman` which will run every
+minute and invoke `barman cron` to perform maintenance tasks.
 
-For each instance being backed up, TPA installs another cron job in
-`/etc/cron.d/<backup_name>` that takes the backups of that instance.
+For each instance being backed up, it installs another cron job in
+`/etc/cron.d/<backup_name>` which takes the backups of that instance.
 This job runs as determined by the `barman_backup_interval` variable for
-the instance. The default is to take backups at 04:00 every
+the instance, with the default being to take backups at 04:00 every
 Wednesday and Saturday.
 
 ## SSH keys
 
-TPA generates ssh key pairs for the postgres and barman
-users and installs them into the respective `~/.ssh` directories. Keys for
-the postgres user are added to the barman `authorized_keys` file, and
-keys for the barman user are added to the postgres `authorized_keys` file.
-The postgres user must be
-able to ssh to the Barman server to archive WAL segments (if
+TPA will generate ssh key pairs for the `postgres` and `barman`
+users and install them into the respective ~/.ssh directories, and add
+them to each other's authorized_keys file. The postgres user must be
+able to ssh to the barman server in order to archive WAL segments (if
 configured), and the barman user must be able to ssh to the Postgres
 instance to take or restore backups.

@@ -72,8 +72,7 @@
 - name: Remove restore_command override in postgresql.auto.conf
   lineinfile:
     path: "{{ postgres_data_dir }}/postgresql.auto.conf"
-    line: >
-      restore_command = '/bin/false'
+    line: restore_command = '/bin/false'
     state: absent
   register: restore_override
 

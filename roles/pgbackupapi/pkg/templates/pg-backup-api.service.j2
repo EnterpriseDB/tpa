@@ -4,8 +4,8 @@ Description=Postgres Backup API
 
 [Service]
 Type=simple
-User=barman
-Group=barman
+User= {{ barman_user }}
+Group= {{ barman_group }}
 ExecStart=/usr/bin/pg-backup-api serve
 Restart=always
 

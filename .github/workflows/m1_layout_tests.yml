@@ -1,20 +1,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
-name: Simple Integration Tests
+name: M1 layout tests
 
 on:
-  push:
-    branches-ignore:
-      - main
-      - 'rc/**'
-  pull_request:
-    types:
-      - review_requested
-    branches:
-      - main
-  pull_request_review:
-    types:
-      - submitted
   workflow_dispatch:
 
 env:
@@ -42,7 +30,7 @@ jobs:
       id: load-yaml
       with:
         file: .github/config/matrix.yml
-        key: simple
+        key: m1_layouts
 
   integration-test:
     # In addition to the event triggers above, this job only runs when any of these conditions are met:
@@ -80,3 +68,7 @@ jobs:
         tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
         tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
         tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
+        tpa_location_names: ${{ matrix.layout.tpa_location_names }}
+        tpa_data_nodes_per_location: ${{ matrix.layout.tpa_data_nodes_per_location }}
+        tpa_single_node_location: ${{ matrix.layout.tpa_single_node_location }}
+        tpa_witness_only_location: ${{ matrix.layout.tpa_witness_only_location }}

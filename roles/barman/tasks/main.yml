@@ -36,6 +36,7 @@
 - include_role: name=sys/ssh tasks_from=install.yml
   vars:
     ssh_username: "{{ barman_user }}"
+    ssh_usergroup: "{{ barman_group }}"
   when: >
     'barman' in role
 

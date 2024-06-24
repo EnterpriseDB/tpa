@@ -22,6 +22,19 @@
 # To register the generated keypair under a different name, set
 # «ec2_key_name: yyy».
 
+- name: Don't allow assign_public_ip if ec2_instance_reachability is private
+  assert:
+    that:
+      - item.assign_public_ip|default(false) == false
+    fail_msg: "You cannot request a public IP on private instances"
+  with_items: "{{ aws_instances }}"
+  loop_control:
+    label: >-
+      {{ item.region }}:{{ item.Name }}
+  when:
+    - ec2_instance_reachability is defined
+    - ec2_instance_reachability == "private"
+
 - include_tasks: ec2-register-key.yml
   when:
     - ec2_key_name != ''
@@ -541,26 +554,7 @@
 
 - name: Set instance variables and elastic IP overrides
   set_fact:
-    instance_vars: "{{
-        instance_vars|default([])|union([
-          item.0.instances[0]|combine({
-            'Name': item.0.item.item.Name,
-            'node': item.0.item.item.node,
-            'add_to_inventory': not item.0.item.item.provision_only|default(false),
-            'vars': (item.0.item.item|export_vars),
-            'platform': 'aws',
-            'ip_address': item.1.public_ip|default(item.0.instances[0].network_interfaces[0].association.public_ip)
-              |default(item.0.network_interfaces[0].private_ip_address),
-            'public_ip': item.1.public_ip|default(item.0.instances[0].network_interfaces[0].association.public_ip),
-          })
-        ])
-      }}"
-  with_together:
-    - "{{ ec2_jobs.results }}"
-    - "{{ ec2_eips.results }}"
-  loop_control:
-    label: >-
-      {{ item.0.item.item.Name }}
+    instance_vars: "{{ ec2_jobs.results | extract_instance_vars }}"
 
 # We update A records for any instance with a route53_hosted_zone_id
 # and route53_hosted_zone (or if they are specified globally, which

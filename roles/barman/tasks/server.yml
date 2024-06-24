@@ -78,7 +78,7 @@
     path: /etc/cron.d/barman
     regexp: 'barman -q cron$'
     line: >-
-      * * * * * barman /etc/tpa/barman-home-ok && /usr/bin/barman -q cron
+      * * * * * {{ barman_user }} /etc/tpa/barman-home-ok && /usr/bin/barman -q cron
 
 - name: Ensure /etc/barman.d exists
   file:
@@ -99,7 +99,7 @@
 
 - name: Set correct ownership and mode on ~/.postgresql
   file:
-    path: ~barman/.postgresql
+    path: ~{{ barman_user }}/.postgresql
     owner: "{{ barman_user }}"
     group: "{{ barman_group }}"
     state: directory

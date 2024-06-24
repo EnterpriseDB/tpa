@@ -1,32 +1,10 @@
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
-name: Integration test
+name: M1 integration test
 
 on:
   workflow_dispatch:
     inputs:
-      cpu_architecture:
-        description: "CPU this test will run upon"
-        required: true
-        default: "amd64"
-        type: choice
-        options:
-        - amd64
-        - ppc64le
-        - s390x
-      tpa_architecture:
-        description: "TPA architecture"
-        required: true
-        default: "BDR-Always-ON"
-        type: choice
-        options:
-        - M1
-        - BDR-Always-ON
-        - PGD-Always-ON
-      tpa_platform:
-        description: "TPA platform"
-        required: false
-        default: "docker"
       tpa_os_image:
         description: "TPA OS image"
         required: true
@@ -38,7 +16,6 @@ on:
         - tpa/debian:10
         - tpa/debian:11
         - tpa/debian:12
-        - tpa/redhat:7
         - tpa/sles:15
         - tpa/redhat:9
       tpa_postgres_flavour:
@@ -64,11 +41,30 @@ on:
         - 14
         - 15
       tpa_failover_manager:
-        description: "Failover-manager (for M1 only)"
+        description: "Failover-manager"
         type: choice
         options:
         - "efm"
         - "repmgr"
+      tpa_location_names:
+        description: "Location names"
+        type: string
+        required: false
+        default: "l1 l2"
+      tpa_data_nodes_per_location:
+        description: "Data nodes per location"
+        type: number
+        required: false
+        default: 2
+      tpa_witness_only_location:
+        description: "Use a witness-only location"
+        type: boolean
+        required: false
+        default: false
+      tpa_single_node_location:
+        description: "Use a single-node location"
+        type: boolean
+        required: false
       tpa_ansible_version:
         description: "Ansible version"
         required: true
@@ -81,14 +77,6 @@ on:
         description: "Use the downloader"
         type: boolean
         default: true
-      runner:
-        description: "github runner (ubuntu20.04 required when using tpa_os_image: 'tpa/redhat:7')"
-        required: false
-        default: "ubuntu-22.04"
-        type: choice
-        options:
-        - "ubuntu-20.04"
-        - "ubuntu-22.04"
 
 env:
   LANG: "C.UTF-8"
@@ -107,7 +95,7 @@ jobs:
   integration-test:
     name: Integration test
 
-    runs-on: ${{ github.event.inputs.runner }}
+    runs-on: "ubuntu-22.04"
 
     steps:
       - name: Checkout source repository
@@ -128,18 +116,22 @@ jobs:
       - name: Connect to a Native Executor
         uses: ./foundation/actions/linux/native/executor/connect
         with:
-          architecture: ${{ github.event.inputs.cpu_architecture }}
+          architecture: "amd64"
           tunnel-login: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
 
       - uses: ./.github/actions/integration-test
         with:
           source_directory: ${{ github.workspace }}
-          tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
-          tpa_platform: ${{ github.event.inputs.tpa_platform }}
+          tpa_architecture: "M1"
+          tpa_platform: "docker"
           tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
           tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
           tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager}}
+          tpa_location_names: ${{ github.event.inputs.tpa_location_names }}
+          tpa_data_nodes_per_location: ${{ github.event.inputs.tpa_data_nodes_per_location }}
+          tpa_witness_only_location: ${{ github.event.inputs.tpa_witness_only_location }}
+          tpa_single_node_location: ${{ github.event.inputs.tpa_single_node_location }}
           tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}
 
       - name: Disconnect from a Native Executor

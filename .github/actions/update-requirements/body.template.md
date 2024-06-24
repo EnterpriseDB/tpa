@@ -1,4 +1,6 @@
-PR opened due to changes in requirements input files
-automated workflow upgrading all .txt files to latest available dependencies.
+Update dependencies to the latest available versions
 
-triggered by PR#{{ .pr_number }} at ref {{ .ref }} being merged into main.
+PR submitted by the update-requirements GH action.
+
+Triggered by PR#{{ .pr_number }} at ref {{ .ref }} being merged into
+main.

@@ -232,9 +232,6 @@ You can add filter specifications for more precise matching:
 (By default, `tpaexec configure` will select a suitable `ec2_ami`
 for you based on the `--distribution` argument.)
 
-This platform supports Debian 9 (stretch), RedHat Enterprise Linux 7,
-Rocky 8, Ubuntu 16.04 (Xenial), and SUSE Linux Enterprise Server 15.
-
 ### Subnets (optional)
 
 Every instance must specify its subnet (in CIDR form, or as a subnet-xxx

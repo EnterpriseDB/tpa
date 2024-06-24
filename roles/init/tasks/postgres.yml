@@ -579,6 +579,10 @@
   set_fact:
     postgres_extensions_dictionary: "{{ default_postgres_extensions_dictionary }}"
 
+- name: Record the list of extensions for the pem-agent instances
+  set_fact:
+    pemagent_extensions: "{{ pemagent_extensions|default(default_pemagent_extensions) }}"
+
 - name: Set list of Postgres extensions
   set_fact:
     postgres_extensions: "{{
@@ -586,6 +590,7 @@
           default_postgres_extensions
           |union(extra_postgres_extensions|default([]))
           |union(needs_pglogical|ternary(['pglogical'], []))
+          |union(needs_pemagent_extensions|ternary(pemagent_extensions, []))
         )
       }}"
   vars:
@@ -595,6 +600,13 @@
         |selectattr('type', 'equalto', 'pglogical')
         |list is not empty
       }}
+
+    needs_pemagent_extensions: >-
+      {{
+        'pem-agent' in role
+        and 'postgres' in role
+      }}
+
 
 - name: Remove pg_visibility for Postgres <9.6
   set_fact:

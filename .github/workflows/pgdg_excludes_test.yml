@@ -64,6 +64,14 @@ on:
         options:
         - "true"
         - "false"
+      runner:
+        description: "github runner (ubuntu20.04 required when using tpa_os_image: 'tpa/redhat:7')"
+        required: true
+        default: "ubuntu-22.04"
+        type: choice
+        options:
+        - "ubuntu-20.04"
+        - "ubuntu-22.04"
 
 env:
   LANG: "C.UTF-8"
@@ -80,7 +88,7 @@ jobs:
   pgdg-test:
     name: Test Deploy with PGDG
 
-    runs-on: ubuntu-20.04
+    runs-on: ${{ github.event.inputs.runner }}
 
     steps:
     - name: Checkout source repository

@@ -19,4 +19,3 @@
   loop_control:
     label: >-
       {{ item.1.invocation.module_args.region }}:{{ item.1.instances[0].instance_id }}
-  register: ec2_eips

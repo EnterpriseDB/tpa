@@ -6,6 +6,11 @@
   set_fact:
     target_environment: "{{ target_environment|default({}) }}"
 
+# The list 'ip_addresses' is a list of text strings which are the keys
+# in the host vars whose values are ip addresses. It is used when
+# checking that streaming is set up correctly and contains strings
+# corresponding to all of the node's ip addresses that we know about.
+
 - name: Set ip_addresses to []
   set_fact:
     ip_addresses: []
@@ -21,6 +26,12 @@
     ip_addresses: "{{ ip_addresses|union(['public_ip']) }}"
   when:
     public_ip is defined
+
+- name: Add ip_address to the address list
+  set_fact:
+    ip_addresses: "{{ ip_addresses|union(['ip_address']) }}"
+  when:
+    ip_address is defined
 
 - name: Set primary IP address
   set_fact:

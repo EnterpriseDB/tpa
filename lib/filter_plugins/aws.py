@@ -6,6 +6,8 @@
 
 import copy
 
+from filter_plugins.instances import export_vars
+
 from ansible.errors import AnsibleFilterError
 
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html#instance-store-volumes
@@ -342,6 +344,30 @@ def expand_ec2_instance_volumes(old_instances, ec2_ami_properties):
 
     return instances
 
+def _detect_if_ips_are_private_only(aws_item):
+    #default is True, meaning we must receive a public IP from amazon
+    #unless user decides to not get one
+    assign_public_ip = aws_item["item"].get("assign_public_ip", True)
+    return assign_public_ip == False
+
+def extract_instance_vars(ec2_jobs_results):
+    instances = []
+    for node in ec2_jobs_results:
+        item = node["item"]
+        netiface = node["instances"][0].get("network_interfaces")[0]
+        private_ip_only = _detect_if_ips_are_private_only(item)
+        public_ip = netiface.get("association", {}).get("public_ip", "")
+        instance = {
+              "ip_address": netiface.get("private_ip_address") if private_ip_only else public_ip,
+              "Name": item['item'].get("Name"),
+              "node": item['item'].get("node"),
+              "add_to_inventory": not item['item'].get("provision_only"),
+              "platform": "aws",
+              "public_ip" : public_ip,
+              "vars": export_vars(item["item"]),
+              }
+        instances.append(instance)
+    return instances
 
 def update_raid_volumes(volume, volumes, instance=None):
     """
@@ -433,5 +459,6 @@ class FilterModule:
         return {
             "expand_ec2_instance_image": expand_ec2_instance_image,
             "expand_ec2_instance_volumes": expand_ec2_instance_volumes,
+            "extract_instance_vars": extract_instance_vars,
             "match_existing_volumes": match_existing_volumes,
         }
