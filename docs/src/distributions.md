@@ -22,7 +22,7 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 
 * Debian 12/bookworm is fully supported
 * Debian 11/bullseye is fully supported
-* Debian 10/buster is fully supported
+* Debian 10/buster is a legacy distribution
 * Debian 9/stretch is a legacy distribution
 * Debian 8/jessie is a legacy distribution
 
@@ -33,24 +33,24 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 * Ubuntu 18.04/bionic is a legacy distribution
 * Ubuntu 16.04/xenial is a legacy distribution
 
-## Oracle Linux
+## Oracle Linux x86
 
 * Oracle Linux 9.x is fully supported (docker only)
 * Oracle Linux 8.x is fully supported (docker only)
-* Oracle Linux 7.x is fully supported (docker only)
+* Oracle Linux 7.x is a legacy distribution (docker only)
 
 ## RedHat x86
 
 * RHEL/Rocky/AlmaLinux/Oracle Linux 9.x is fully supported (python3 only)
 * RHEL/CentOS/Rocky/AlmaLinux 8.x is fully supported (python3 only)
-* RHEL/CentOS 7.x is fully supported (python2 only)
+* RHEL/CentOS 7.x is a legacy distribution (python2 only)
 
 ## RedHat ppc64le
 
 * RHEL/Rocky/AlmaLinux 9.x is fully supported (python3 only)
 * RHEL/AlmaLinux 8.x is fully supported (python3 only)
 
-## SLES
+## SLES x86
 
 * SLES 15.x is fully supported
 
