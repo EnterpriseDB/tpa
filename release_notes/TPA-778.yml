@@ -1,0 +1,21 @@
+- summary: Change default output to TPA's own format
+  description: |
+    Ansible's default output plugin shows a lot of information, much of
+    which is useful when debugging but obscures the flow of information if
+    you just want to see what TPA is doing. TPA now has its own output
+    plugin, which shows one line of information per task, omitting tasks
+    for which even one line would be uninformative. The lines are indented
+    to enable TPA's control flow to be visible, and include colour-coded
+    counts of successful, skipped, and ignored hosts.
+
+    The fuller output can be turned on by setting TPA_USE_DEFAULT_OUTPUT=true
+    in your environment, or by adding the -v switch to the command line.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-673
+  - TPA-778
