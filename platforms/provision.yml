@@ -4,6 +4,7 @@
 
 - name: Provision cluster
   hosts: localhost
+  gather_facts: true
   tasks:
   ## Configuration
   #

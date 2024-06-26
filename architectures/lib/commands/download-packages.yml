@@ -4,6 +4,7 @@
 
 - name: Provision temporary container to download packages
   hosts: localhost
+  gather_facts: true
   tags: always
   tasks:
     - set_fact:
