@@ -8,7 +8,7 @@
     location.
 
     The key `private_ip` may now be used to specify a static IP for a Docker instance as long as a named network
-    is specified in included in the config.yml.
+    is specified in the config.yml.
 
   type: change
   jira_tickets:
