@@ -75,6 +75,18 @@ class TestBasicArchitecture:
         assert architecture.args["hostnames"] == ["zero", "one"]
         assert architecture.args["network"] == "10.33.0.0/24"
 
+    def test_hosts_in_cidr(self, architecture):
+        host_iterator = architecture.hosts_in_cidr("10.33.0.0/29")
+        expected_hosts = ["10.33.0.1",
+                          "10.33.0.2",
+                          "10.33.0.3",
+                          "10.33.0.4",
+                          "10.33.0.5",
+                          "10.33.0.6",
+                          ]
+        for i, host in enumerate(host_iterator):
+            assert str(host) == expected_hosts[i]
+
 
 class TestPlatform:
     def test_guess_platform(self):
