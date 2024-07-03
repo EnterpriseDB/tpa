@@ -253,7 +253,11 @@ class docker(Platform):
                 i["volumes"] = newvolumes
                 if not i["volumes"]:
                     del i["volumes"]
-            i['private_ip'] = str(next(host_ips))
+            try:
+                i['private_ip'] = str(next(host_ips))
+            except StopIteration:
+                raise DockerPlatformError(f"The subnet '{args['subnets'][0]}' is too small for the specified cluster. "
+                                          f"Use `subnet-prefix` to specify a larger subnet.")
 
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}
