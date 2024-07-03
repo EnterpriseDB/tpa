@@ -94,7 +94,7 @@
           EFMPASS: "{{ efm_password }}"
       register: efm_encrypted_pass_output
       changed_when: false
-      no_log: false
+      no_log: true
 
     - name: Install efm.properties for {{ cluster_name }}
       template:
