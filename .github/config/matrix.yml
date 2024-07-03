@@ -11,9 +11,7 @@ default:
   tpa_os_image:
     - "ubuntu:20.04"
     - "ubuntu:22.04"
-    - "debian:10"
     - "debian:12"
-    - "redhat:7"
     - "redhat:8"
     - "redhat:9"
     - "sles:15"
@@ -23,11 +21,21 @@ default:
     - "epas"
     - "edbpge"
   tpa_postgres_version: &default_tpa_postgres_version
+    - 16
     - 14
   tpa_harp_consensus_protocol:
     - "bdr"
     - "etcd"
   exclude:
+    - tpa_architecture: "M1"
+      tpa_postgres_version: "14"
+    - tpa_architecture: "PGD-Always-ON"
+      tpa_postgres_version: "14"
+    - tpa_architecture: "BDR-Always-ON"
+      tpa_postgres_version: "16"
+    - tpa_architecture: "BDR-Always-ON"
+      tpa_postgres_version: "14"
+      tpa_os_image: "debian:12"
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "pgextended"
     - tpa_architecture: "BDR-Always-ON"
@@ -53,8 +61,6 @@ default:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "epas"
       tpa_failover_manager: "efm"
-    - tpa_os_image: "redhat:7"
-      runner: "ubuntu-20.04"
     - cpu_architecture: "ppc64le"
       tpa_architecture: "M1"
       tpa_os_image: "redhat:9"
@@ -75,6 +81,12 @@ simple:
   tpa_postgres_flavour: *default_tpa_postgres_flavour
   tpa_postgres_version: *default_tpa_postgres_version
   exclude:
+    - tpa_architecture: "M1"
+      tpa_postgres_version: "14"
+    - tpa_architecture: "PGD-Always-ON"
+      tpa_postgres_version: "14"
+    - tpa_architecture: "BDR-Always-ON"
+      tpa_postgres_version: "16"
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "pgextended"
     - tpa_architecture: "BDR-Always-ON"
@@ -112,7 +124,6 @@ update_bdr:
     - "docker"
   tpa_os_image:
     - "ubuntu"
-    - "debian:10"
     - "redhat"
 patroni:
   cpu_architecture: *default_cpu_architecture
@@ -122,10 +133,8 @@ patroni:
     - docker
   tpa_os_image:
     - "ubuntu:20.04"
-    - "debian:10"
     - "debian:11"
     - "debian:12"
-#    - "redhat:7"  # Unsupported configuration TPA-335
     - "redhat:8"
     - "redhat:9"
   tpa_postgres_flavour:
