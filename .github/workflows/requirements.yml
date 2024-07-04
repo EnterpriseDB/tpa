@@ -20,6 +20,7 @@ on:
     paths:
       - requirements*.in
       - requirements/*.in
+      - tpa-ee/aap24/*.in
   workflow_dispatch:
 env:
   LC_ALL: C.UTF-8
