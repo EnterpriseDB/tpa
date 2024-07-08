@@ -1,0 +1,14 @@
+- summary: Set appropriate PEM agent parameters monitored servers
+  description: |
+    TPA broadly sets PEM agent parameters on all instances that are only 
+    appropriate for the pemserver instance. This is fixed by conditionally
+    setting parameters in `agent.cfg.j2` based on whether or not the node 
+    is a pem-server. 
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-744
