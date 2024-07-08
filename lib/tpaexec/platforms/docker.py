@@ -241,7 +241,7 @@ class docker(Platform):
         # Generate a Network from the first (and only) random subnet
         docker_network = net.Network(args['subnets'][0])
         # Check that it's big enough
-        if docker_network.net.num_addresses() - 1 < self.arch.num_instances():
+        if docker_network.net.num_addresses - 1 < self.arch.num_instances():
             raise DockerPlatformError(f"The subnet '{args['subnets'][0]}' is too small for the specified cluster. "
                                       f"Use `subnet-prefix` to specify a larger subnet.")
 
