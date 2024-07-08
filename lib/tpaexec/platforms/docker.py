@@ -3,6 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 from . import Platform
+from .. import net
 
 import os
 import time
@@ -237,8 +238,15 @@ class docker(Platform):
             instance_defaults.update(y)
 
     def update_instances(self, instances, args, **kwargs):
+        # Generate a Network from the first (and only) random subnet
+        docker_network = net.Network(args['subnets'][0])
+        # Check that it's big enough
+        if docker_network.net.num_addresses() - 1 < self.arch.num_instances():
+            raise DockerPlatformError(f"The subnet '{args['subnets'][0]}' is too small for the specified cluster. "
+                                      f"Use `subnet-prefix` to specify a larger subnet.")
+
         # Get an iterator that provides IP addresses
-        host_ips = self.arch.hosts_in_cidr(args['subnets'][0])
+        host_ips = docker_network.net.hosts()
         # Discard the first item from the iterator because Docker needs that for the gateway
         _ = next(host_ips)
         for i in instances:
@@ -253,11 +261,8 @@ class docker(Platform):
                 i["volumes"] = newvolumes
                 if not i["volumes"]:
                     del i["volumes"]
-            try:
-                i['private_ip'] = str(next(host_ips))
-            except StopIteration:
-                raise DockerPlatformError(f"The subnet '{args['subnets'][0]}' is too small for the specified cluster. "
-                                          f"Use `subnet-prefix` to specify a larger subnet.")
+
+            i['private_ip'] = str(next(host_ips))
 
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}

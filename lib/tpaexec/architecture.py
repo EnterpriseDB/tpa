@@ -1658,12 +1658,6 @@ class Architecture(object):
 
         return MinimalLoader(basedirs or self.template_directories())
 
-    @staticmethod
-    def hosts_in_cidr(cidr: str):
-        """ Returns an iterator that yields hosts in the given CIDR range
-        """
-        return Network(cidr=cidr).net.hosts()
-
 
 def update_symlinks_recursively(source, destination, force):
     """
