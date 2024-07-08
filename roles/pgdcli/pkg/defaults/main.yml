@@ -9,7 +9,8 @@ pgdcli1_packages:
   RedHat:
     - edb-pgd-cli
   Ubuntu: *debian_pgdcli1_package
-
+  SUSE:
+    - edb-pgd-cli
 # pgd-cli packages for v5 and above
 pgdcli_packages:
   Debian: &debian_pgdcli_package
@@ -19,6 +20,9 @@ pgdcli_packages:
     - edb-pgd{{ bdr_version }}-cli
     - bash-completion
   Ubuntu: *debian_pgdcli_package
+  SUSE:
+    - edb-pgd{{ bdr_version }}-cli
+    - bash-completion
 
 bdr_utilities_packages:
   Debian: &debian_bdrutilities_package
@@ -26,3 +30,5 @@ bdr_utilities_packages:
   RedHat:
     - edb-bdr-utilities
   Ubuntu: *debian_bdrutilities_package
+  SUSE:
+    - edb-bdr-utilities
