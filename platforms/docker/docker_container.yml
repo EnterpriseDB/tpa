@@ -114,26 +114,28 @@
 # and starting it but it fails to assign proper network settings.
 # So here we do a quick check to confirm if the requested container
 # exists with proper network configs.
+- name: Detect network configuration settings for {{ item.Name }}
+  set_fact:
+    network_settings_ipaddress_is_set: >
+      c.NetworkSettings.IPAddress is defined
+      and c.NetworkSettings.IPAddress is not empty
+    networks_ipaddress_is_set: >
+      item.networks is defined
+      and c.NetworkSettings.Networks is defined
+      and c.NetworkSettings.Networks[item.networks[0].name]['IPAddress'] is defined
+      and c.NetworkSettings.Networks[item.networks[0].name]['IPAddress'] is not empty
+    docker_ipaddress_is_set: >
+      item.networks is not defined
+      and c.NetworkSettings.Networks is defined
+      and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is defined
+      and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is not empty
+      and item.networks[0].name == docker_networks[0].name
+
 - name: Make sure container {{ item.Name }} received useful network settings
   assert:
     that:
       - c.NetworkSettings is defined
-      - ( c.NetworkSettings.IPAddress is defined
-          and c.NetworkSettings.IPAddress is not empty
-        )
-        or (
-            c.NetworkSettings.Networks is defined
-            and item.networks is defined
-            and c.NetworkSettings.Networks[item.networks[0].name]['IPAddress'] is defined
-            and c.NetworkSettings.Networks[item.networks[0].name]['IPAddress'] is not empty
-            and item.networks[0].name == docker_networks[0].name
-        )
-        or (
-            c.NetworkSettings.Networks is defined
-            and item.networks is not defined
-            and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is defined
-            and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is not empty
-        )
+      - network_settings_ipaddress_is_set or networks_ipaddress_is_set or docker_ipaddress_is_set
     msg: "Docker failed to create {{ item.Name }} with sensible network settings. Check docker logs for details"
   vars:
     c: "{{ container_info.container }}"
