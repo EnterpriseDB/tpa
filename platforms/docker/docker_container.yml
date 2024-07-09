@@ -117,20 +117,33 @@
 - name: Detect network configuration settings for {{ item.Name }}
   set_fact:
     network_settings_ipaddress_is_set: >
+      "{{
       c.NetworkSettings.IPAddress is defined
       and c.NetworkSettings.IPAddress is not empty
+      }}"
+    # This condition is met when containers are assigned IPs using the `networks:ipv4_address` key
+    # or when no IP is specified in config.yml
     networks_ipaddress_is_set: >
+      "{{
       item.networks is defined
       and c.NetworkSettings.Networks is defined
+      and docker_networks is defined
       and c.NetworkSettings.Networks[item.networks[0].name]['IPAddress'] is defined
       and c.NetworkSettings.Networks[item.networks[0].name]['IPAddress'] is not empty
+      and item.networks[0].name == docker_networks[0].name
+      }}"
+    # This condition is met when containers are assigned IPs using `private_ip` key
     docker_ipaddress_is_set: >
+      "{{
       item.networks is not defined
+      and docker_networks is defined
       and c.NetworkSettings.Networks is defined
       and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is defined
       and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is not empty
-      and item.networks[0].name == docker_networks[0].name
+      }}"
   when: c.NetworkSettings is defined
+  vars:
+    c: "{{ container_info.container }}"
 
 - name: Make sure container {{ item.Name }} received useful network settings
   assert:
