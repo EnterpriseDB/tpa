@@ -130,6 +130,7 @@
       and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is defined
       and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is not empty
       and item.networks[0].name == docker_networks[0].name
+  when: c.NetworkSettings is defined
 
 - name: Make sure container {{ item.Name }} received useful network settings
   assert:
