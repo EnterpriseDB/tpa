@@ -41,7 +41,7 @@
       loop: "{{ efm_nodes }}"
       when: >
         item.info.type | lower == 'primary'
-    
+
     # Loop over all the hosts on which the play runs.
     # When the ip address of the host matches the ip address of the `primary`
     # node (determined above), set the 'upstream_primary' to the name of that host.
@@ -51,7 +51,7 @@
       loop: "{{ play_hosts }}"
       when: >
         hostvars[item].ip_address == primary_ip
-          
+
   when: efm_cluster_properties.stat.islnk is defined
   run_once: true
   delegate_to: "{{ upstream_primary }}"
