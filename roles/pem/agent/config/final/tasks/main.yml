@@ -81,6 +81,9 @@
 # to the following:
 #
 # "msg": "Mon Aug 22 11:40:23 2022 ERROR: ERROR:  tuple concurrently updated"
+    
+- set_fact:
+    pem_opts: "{{ pem_opts | default([]) }}"
 
 - name: Register PEM agent
   command: >
@@ -89,7 +92,8 @@
       --pem-port "{{ hostvars[pem_server].postgres_port }}"     \
       --pem-user "{{ pem_postgres_user }}"                      \
       --config-dir "{{ pem_agent_config_path|dirname }}"        \
-      --cert-path "{{ pem_agent_certificate_directory }}"
+      --cert-path "{{ pem_agent_certificate_directory }}"       \
+      {% for option in pem_opts %} {{ option }} {% endfor %}
   args:
     creates: "{{ pem_agent_config_path }}"
   environment: "{{ target_environment|combine(_task_environment) }}"

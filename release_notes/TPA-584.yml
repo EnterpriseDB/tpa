@@ -1,0 +1,12 @@
+- summary: Add support for passing options to register PEM agent
+  description: |
+    Additional options can be included when registering PEM agents by
+    listing them under `pem_opts` in `cluster_vars`.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-584
