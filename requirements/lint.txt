@@ -63,9 +63,9 @@ pydocstyle==6.3.0 \
     --hash=sha256:118762d452a49d6b05e194ef344a55822987a462831ade91ec5c06fd2169d019 \
     --hash=sha256:7ce43f0c0ac87b07494eb9c0b462c0b73e6ff276807f204d6b53edc72b7e44e1
     # via prospector
-pyfakefs==5.5.0 \
-    --hash=sha256:7448aaa07142f892d0a4eb52a5ed3206a9f02c6599e686cd97d624c18979c154 \
-    --hash=sha256:8dbf203ab7bef1529f11f7d41b9478b898e95bf9f3b71262163aac07a518cd76
+pyfakefs==5.6.0 \
+    --hash=sha256:1a45bba8615323ec29d65929d32dc66d7b59a1e60a02109950440edb0486c539 \
+    --hash=sha256:7a549b32865aa97d8ba6538285a93816941d9b7359be2954ac60ec36b277e879
     # via -r requirements/lint.in
 pyflakes==2.3.1 \
     --hash=sha256:7893783d01b8a89811dd72d7dfd4d84ff098e5eed95cfa8905b22bbffe52efc3 \
