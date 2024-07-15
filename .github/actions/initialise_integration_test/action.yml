@@ -169,12 +169,17 @@ runs:
 
         if [ "${{ inputs.tpa_architecture }}" = "M1" ] ;then
           CONFIGURE_OPTS+=(--failover-manager "${{ inputs.tpa_failover_manager }}")
-          CONFIGURE_OPTS+=(--location-names ${{ inputs.tpa_location_names }})
-          CONFIGURE_OPTS+=(--data-nodes-per-location "${{ inputs.tpa_data_nodes_per_location }}")
-          if [[ "${{ inputs.tpa_witness_only_location }}" == 'true' ]] ;then
-            WITNESS_ONLY_LOCATION=$(awk '{print $NF}' <<< "${{ inputs.tpa_location_names }}")
-            CONFIGURE_OPTS+=(--witness-only-location $WITNESS_ONLY_LOCATION)
+
+          if [ "${{ inputs.tpa_failover_manager }}" != "patroni" ] ;then
+          #Architecture error: TPA does not support Patroni with multiple locations
+            CONFIGURE_OPTS+=(--location-names ${{ inputs.tpa_location_names }})
+            CONFIGURE_OPTS+=(--data-nodes-per-location "${{ inputs.tpa_data_nodes_per_location }}")
+            if [[ "${{ inputs.tpa_witness_only_location }}" == 'true' ]] ;then
+              WITNESS_ONLY_LOCATION=$(awk '{print $NF}' <<< "${{ inputs.tpa_location_names }}")
+              CONFIGURE_OPTS+=(--witness-only-location $WITNESS_ONLY_LOCATION)
           fi
+        fi
+
           if [[ "${{ inputs.tpa_single_node_location}}" == 'true' ]] ;then
             SINGLE_NODE_LOCATION=$(awk '{print $NF}' <<< "${{ inputs.tpa_location_names }}")
             CONFIGURE_OPTS+=(--single-node-location $SINGLE_NODE_LOCATION)
