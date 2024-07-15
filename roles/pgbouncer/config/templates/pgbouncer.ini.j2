@@ -28,9 +28,11 @@ client_tls_protocols = secure
 ;; disable, allow, require, verify-ca, verify-full
 server_tls_sslmode = require
 
-;server_tls_ca_file = <system default>
-;server_tls_key_file =
-;server_tls_cert_file =
+{% if pgbouncer_use_cert_authentication == true %}
+server_tls_ca_file = {{ ssl_ca_file|default(ssl_cert_file|default("/etc/tpa/"+cluster_name+".crt")) }}
+server_tls_key_file = {{ pgbouncer_certificate_key }}
+server_tls_cert_file = {{ pgbouncer_certificate }}
+{% endif %}
 
 ;server_tls_ciphers = fast ; normal, secure, legacy, <ciphersuite>
 server_tls_protocols = secure
@@ -39,7 +41,8 @@ server_tls_protocols = secure
 ;;; Authentication settings
 ;;;
 
-auth_type = md5
+auth_type = {{ pgbouncer_auth_user_password_encryption }}
+
 auth_file = /etc/pgbouncer/userlist.txt
 auth_user = {{ pgbouncer_auth_user }}
 auth_query = SELECT * FROM pg_catalog.pgbouncer_get_auth($1)

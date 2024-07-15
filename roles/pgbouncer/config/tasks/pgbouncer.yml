@@ -21,6 +21,13 @@
       - {path: /var/log/pgbouncer, mode: "0775"}
       - {path: /var/run/pgbouncer, mode: "0775"}
 
+- name: postgres group can access SSL certs for authentication
+  file:
+    path: "/home/pgbouncer"
+    group: "{{ postgres_group }}"
+    mode: "0750"
+    state: directory
+
 - name: Install tmpfiles.d entries for pgbouncer runtime directories
   copy:
    dest: /usr/lib/tmpfiles.d/pgbouncer.conf

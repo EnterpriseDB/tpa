@@ -1,0 +1,21 @@
+- summary: Allow cert authentication on pgbouncer
+  description: |
+    pgbouncer can now use cert authentication when connecting to its
+    postgres backend. This is particularly useful with FIPS; it's
+    required because the authentication algorithm is also changed, from
+    md5 to scram-sha-256. The variable
+    `pgbouncer_use_cert_authentication` must be defined to true in
+    cluster_vars, should someone decide to enable this mode. When this
+    mode is enabled, TPA will create a CA and two more certificates
+    replacing the self-signed certificate created by default in all
+    clusters.
+
+    Change requires a postgres restart.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-650

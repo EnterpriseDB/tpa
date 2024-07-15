@@ -1,22 +1,27 @@
 ---
 
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
-
 - include_role: name=postgres/createuser
   vars:
     username: "{{ pgbouncer_auth_user }}"
-    password_encryption: md5
+    password_encryption: "{{ pgbouncer_auth_user_password_encryption }}"
   when: >
     'postgres' in role or
     'pgbouncer' in role
 
-- include_role:
-    name: postgres/user
-  when: >
-    'pgbouncer' in role and
-    'postgres' not in role and
-    task_selector|permits('user')
+- name: Configurations for pgbouncer
+  block:
 
-- include_tasks: pgbouncer.yml
+    - include_role: name=postgres/user
+      when: >
+        'postgres' not in role and
+        task_selector|permits('user')
+
+    - include_tasks: ssl.yml
+      when: >
+        pgbouncer_use_cert_authentication == true
+
+    - include_tasks: pgbouncer.yml
+
   when: >
     'pgbouncer' in role

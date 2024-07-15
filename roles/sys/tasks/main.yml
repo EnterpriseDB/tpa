@@ -140,11 +140,8 @@
 # implemented and roles/postgres/user/tasks/tls.yml is gone this can be
 # reactivated.
 
-# - include_role:
-#     name: sys/ssl
-#     apply:
-#       tags: ssl
-#   tags: ssl
+- include_role:
+    name: sys/ssl
 
 - include_role:
     name: sys/rsyslog
