@@ -1,0 +1,8 @@
+cryptography==42.0.8 \
+    --hash=sha256:8fb57023a4416678c09f4f547f108363cd9ecfc4781fc8e6ccf64a2ac30a6bee
+markupsafe==2.1.5 \
+    --hash=sha256:9ba81866a78622e383f48a82bc70e7c6835b8a514ce9047bbb873d022df98aa5
+psutil==5.9.8 \
+    --hash=sha256:42f94b3539dbcca65ca7510a568f17e1abc2008111e01a3961dc87e0d978443f
+pyyaml==6.0.1 \
+    --hash=sha256:a56cbdb91d2413864b72f551376b902191f5bb9cf3881b01944c771e04fe72dc
