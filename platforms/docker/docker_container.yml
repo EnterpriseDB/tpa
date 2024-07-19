@@ -38,6 +38,7 @@
   register: rw_cgroup
   when: ansible_distribution != 'MacOSX'
   changed_when: false
+  failed_when: rw_cgroup.rc > 1
 
 - name: Provision docker container {{ item.Name }}
   docker_container:
