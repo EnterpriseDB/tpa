@@ -320,9 +320,10 @@
   - name: Ensure failover_manager is set correctly according to BDR version
     set_fact:
       failover_manager:
-        "{{ 'pgd' if bdr_version is version('5', '>=')
+        "{{
+            'repmgr' if failover_manager == 'repmgr' and ('subscriber-only' in role or 'replica' in role)
+            else 'pgd' if bdr_version is version('5', '>=')
             else 'harp' if failover_manager == 'harp'
-            else 'repmgr' if failover_manager == 'repmgr' and ('subscriber-only' in role or 'replica' in role)
             else 'none' }}"
   when: >
     'bdr' in role
