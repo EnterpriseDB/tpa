@@ -31,8 +31,8 @@
         TransferLog "/var/log/{{ pem_web_server_name[ansible_os_family] }}/access_log"
 
         SSLEngine on
-        SSLCertificateFile "{{ pem_base_dir }}/resources/server-pem.crt"
-        SSLCertificateKeyFile "{{ pem_base_dir }}/resources/server-pem.key"
+        SSLCertificateFile "{{ pem_base_dir }}/resources/{{ ssl_certificate | default('server-pem.crt') }}"
+        SSLCertificateKeyFile "{{ pem_base_dir }}/resources/{{ ssl_key | default('server-pem.key') }}"
 
         <FilesMatch "\.(cgi|shtml|phtml|php)$">
             SSLOptions +StdEnvVars

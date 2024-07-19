@@ -54,9 +54,33 @@
     group: root
     mode: "0644"
 
+- name: Copy over user-provided pem server SSL certificate
+  copy:
+    src: "{{ cluster_dir }}/{{ ssl_certificate }}"
+    dest: "{{ pem_base_dir }}/resources/{{ ssl_certificate }}"
+    owner: root
+    group: root
+    mode: "0644"
+    force: false
+  when: >
+    ssl_certificate is defined
+
+- name: Copy over user-provided pem server SSL key
+  copy:
+    src: "{{ cluster_dir }}/{{ ssl_key }}"
+    dest: "{{ pem_base_dir }}/resources/{{ ssl_key }}"
+    owner: root
+    group: root
+    mode: "0644"
+    force: false
+  when: >
+    ssl_key is defined
+
 - name: Check if web-server certificate already exists
   stat:
-    path: "{{ pem_base_dir }}/resources/server-pem.crt"
+    path: "{{ pem_base_dir }}/resources/{{ certificate }}"
+  vars:
+    certificate: "{{ ssl_certificate | default('server-pem.crt')}}"
   register: pem_web_server_certificate
 
 # We don't want to generate a new set of TLS key/certificate pair
@@ -72,11 +96,14 @@
   shell: >
     umask 077 &&
     /bin/echo -e "US\nMA\nBedford\n{{ pem_branding_company_name_wl }}\n{{ pem_branding_edb_wl|upper }} Postgres Manager - HTTPD Server\n{{ pem_server }}\n{{ pem_support_email }}\n" |
-    /usr/bin/openssl req -newkey rsa:4096 -keyout "server-pem.key" -nodes -x509 -days 365 -out "server-pem.crt"
+    /usr/bin/openssl req -newkey rsa:4096 -keyout {{ key_out | quote }} -nodes -x509 -days 365 -out {{ certificate_out | quote }}
   args:
     chdir: "{{ pem_base_dir }}/resources"
-    creates: "pem-server.crt"
+    creates: "{{ certificate_out | quote }}"
     executable: /bin/bash
+  vars:
+    certificate_out: "{{ ssl_certificate | default('server-pem.crt')}}"
+    key_out: "{{ ssl_key | default('server-pem.key')}}"
   when: >
     (pem_web_server_renew_tls_certificates|default(false)) or (not pem_web_server_certificate.stat.exists)
   notify: Restart apache for pem
