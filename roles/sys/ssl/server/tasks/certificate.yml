@@ -55,7 +55,7 @@
     dest: "{{ certificate_path }}"
     owner: "{{ ssl_user }}"
     group: "{{ ssl_group }}"
-    mode: 0644
+    mode: "0644"
   notify:
     - Note SSL configuration changed
 

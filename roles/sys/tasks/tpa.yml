@@ -54,7 +54,7 @@
 - name: Set permissions and ownership for tpaexec.log
   file:
     path: /var/log/tpaexec.log
-    mode: 0644
+    mode: "0644"
     owner: root
     group: root
 

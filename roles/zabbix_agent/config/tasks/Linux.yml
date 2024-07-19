@@ -101,7 +101,7 @@
     dest: "/etc/zabbix/{{ zabbix_agent_conf }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - restart zabbix-agent
   become: yes
@@ -134,7 +134,7 @@
     content: |
       zabbix ALL=(barman) NOPASSWD:/usr/bin/barman
     dest: /etc/sudoers.d/zabbix_nopasswd
-    mode: 0440
+    mode: "0440"
   when: >
     'barman' in role
 

@@ -44,7 +44,7 @@
       mode: "{{ item.mode }}"
       state: directory
     with_items:
-      - {path: /var/log/postgresql, mode: '0775'}
+      - {path: /var/log/postgresql, mode: "0775"}
       - "{{ _run_directory_items }}"
 
   - name: Install tmpfiles.d entries for postgres runtime directories

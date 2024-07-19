@@ -8,7 +8,7 @@
     dest: "{{ zabbix_agent_include }}/userparameter_{{ item }}.conf"
     owner: zabbix
     group: zabbix
-    mode: 0644
+    mode: "0644"
   notify: restart zabbix-agent
   become: yes
   with_items: "{{ zabbix_agent_userparameters }}"

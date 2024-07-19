@@ -28,7 +28,7 @@
     state: directory
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: "700"
+    mode: "0700"
   vars:
     log_dir: "{{ postgres_log_file | dirname }}"
 
