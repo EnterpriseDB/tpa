@@ -23,6 +23,7 @@
       until: cluster_status is success
       become_user: "{{ postgres_user }}"
       become: yes
+      changed_when: false
 
     # Create a dictionary of nodes in EFM cluster from output of `cluster-status-json`
     - name: Get EFM nodes

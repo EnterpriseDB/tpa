@@ -236,6 +236,7 @@
 
 - name: Read current configuration file if exists
   shell: "cat {{ harp_directory }}/config.yml"
+  changed_when: false
   register: config_yml
   ignore_errors: true
 
@@ -621,10 +622,10 @@
 - name: Remove bluefin for Postgres < 15
   set_fact:
     postgres_extensions: "{{
-      postgres_extensions
-      |reject('equalto', 'bluefin')
-      |list
-    }}"
+        postgres_extensions
+        |reject('equalto', 'bluefin')
+        |list
+      }}"
   when: postgres_version is version('15', '<')
 
 - name: Define platypus configuration settings
