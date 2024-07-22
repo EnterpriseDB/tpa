@@ -168,6 +168,7 @@ runs:
         REMAINING=$(expr $MAX_GITHUB_OUTPUT_BYTES - $CURRENT_BUFFER_BYTES)
         echo "::group::tpaexec test -vv"
         ./bin/tpaexec test "$CLUSTER" -vv &>"$CLUSTER"/tpaexec-test
+        status=$?
         cat "$CLUSTER"/tpaexec-test
         echo "::endgroup::"
         sed -n '/PLAY RECAP/,$p' "$CLUSTER"/tpaexec-test|egrep -v '(ResourceWarning|cli.run)' > "$CLUSTER"/test-recap;
@@ -182,6 +183,7 @@ runs:
         else
           echo "Hiting Github action limits on GITHUB_STEP_SUMMARY file. Content dropped."
         fi
+        exit $status
 
       shell: bash {0}
 
