@@ -62,6 +62,32 @@ setting `pemagent_extensions` in config.yml.
 
 If this list is empty, no extensions will be automatically included.
 
+## Providing an external certificate for PEM server SSL authentication
+
+By default, the PEM server creates a self-signed certificate pair, 
+`server-pem.crt` and `server-pem.key` and configures the webserver to use them
+for HTTPS access. 
+
+To provide your own certificate pair, first move
+the key and certificate files into the root of the cluster directory. 
+Next, set the variables `pem_server_ssl_certificate` and `pem_server_ssl_key` 
+with the respective file names as values for the `vars:` under the pem server 
+instance or `cluster_vars` in the cluster config file.
+
+TPA will handle copying these files over to the pem server instance and
+configure the webserver accordingly.
+
+```yml
+- Name: pemserver
+  location: main
+  node: 4
+  role:
+  - pem-server
+  vars:
+    pem_server_ssl_certificate: externally-provided.crt
+    pem_server_ssl_key: externally-provided.key
+```
+
 ## Shared PEM server
 
 Some deployments may want to use a single PEM server for monitoring and
