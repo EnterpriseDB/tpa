@@ -75,24 +75,18 @@ For brevity, you can also use ``--os`` instead of ``--distribution``.
 This option is not meaningful for the "bare" platform, where TPA has
 no control over what distribution is installed.
 
-## 2ndQuadrant and EDB repositories
+## EDB repositories
 
-By default, we install the 2ndQuadrant public repository and add on any
-product repositories that the architecture requires.
+By default, we install any product repositories that the architecture 
+requires.
 
-You may optionally specify ``--2Q-repositories source/name/maturity …`` 
-or ``--edb-repositories repository …`` to specify the complete list of
-2ndQuadrant or EDB repositories to install on each instance in addition
-to the 2ndQuadrant public repository.
+You may optionally specify ``--edb-repositories repository …`` to 
+specify the complete list of EDB repositories to install on each 
+instance.
 
-If any EDB repositories are specified, any 2ndQuadrant ones will be
-ignored.
-
-To use these options, you must ``export TPA_2Q_SUBSCRIPTION_TOKEN=xxx``
-or ``export EDB_SUBSCRIPTION_TOKEN=xxx`` before you run tpaexec. 
-You can get a 2ndQuadrant token from the 2ndQuadrant Portal under
-"Company info" in the left menu, then "Company". You can get an EDB
-token from enterprisedb.com/repos.
+To use these options, you must ``export EDB_SUBSCRIPTION_TOKEN=xxx`` 
+before you run tpaexec. 
+You can get an EDB token from enterprisedb.com/repos.
 
 ## Software versions
 

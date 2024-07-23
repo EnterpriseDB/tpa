@@ -87,12 +87,6 @@ curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/<your-plan>/setup.de
 curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/<your-plan>/setup.rpm.sh' | sudo -E bash
 ```
 
-Alternatively, you may obtain TPA from the legacy 2ndQuadrant
-repository. To do so, login to the EDB Customer Support Portal and
-subscribe to the ["products/tpa/release" repository](https://techsupport.enterprisedb.com/software_subscriptions/add/products/tpa/)
-by adding a subscription under Support/Software/Subscriptions,
-and following the instructions to enable the repository on your system.
-
 Once you have enabled one of these repositories, you may install TPA
 as follows:
 

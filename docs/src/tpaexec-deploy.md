@@ -20,9 +20,8 @@ configuration and then provisioned the servers with
 [`tpaexec provision`](tpaexec-provision.md).
 
 Before deployment, you must
-`export TPA_2Q_SUBSCRIPTION_TOKEN=xxx` to enable any 2ndQuadrant
-repositories that require subscription. You can use the subscription
-token that you used to [install TPA](INSTALL.md) itself. If you
+`export EDB_SUBSCRIPTION_TOKEN=xxx` if you are using any 
+[EDB repositories](edb_repositories.md). If you
 forget to do this, an error message will soon remind you.
 
 ## Quickstart

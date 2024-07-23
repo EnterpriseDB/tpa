@@ -4,11 +4,15 @@ description: Configuring a PGD-Always-ON cluster with TPA.
 
 # PGD-Always-ON
 
+!!! Note
+This architecture is for Postgres Distributed 5 only. 
+If you require PGD 4 or 3.7 please use [BDR-Always-ON](BDR-Always-ON.md).
+
 EDB Postgres Distributed 5 in an Always-ON configuration,
 suitable for use in test and production.
 
-This architecture is valid for use with EDB Postgres Distributed 5 only
-and requires a subscription to [EDB Repos 2.0](2q_and_edb_repositories.md).
+This architecture requires an EDB subscription. 
+All software will be sourced from [EDB Repos 2.0](edb_repositories.md).
 
 ## Cluster configuration
 

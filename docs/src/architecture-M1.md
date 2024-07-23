@@ -15,9 +15,8 @@ testing, demonstrating and learning due to its simplicity and ability to
 be configured with no proprietary components.
 
 If you select subscription-only EDB software with this architecture
-it will be sourced from EDB Repos 2.0 and you will need to provide a token.
-See [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
-for more detail on this topic.
+it will be sourced from EDB Repos 2.0 and you will need to 
+[provide a token](edb_repositories.md).
 
 ## Application and backup failover
 

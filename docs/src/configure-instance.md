@@ -37,7 +37,7 @@ to execute tasks before any package repositories are configured.
 * [Configure APT repositories](apt_repositories.md)
   (for Debian and Ubuntu)
 
-* [Configure 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
+* [Configure EDB repositories](edb_repositories.md)
   (on any system)
 
 * [Configure a local package repository](local-repo.md)

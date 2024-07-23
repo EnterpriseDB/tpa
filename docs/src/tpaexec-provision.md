@@ -35,23 +35,21 @@ PLAY [Provision cluster] *******************************************************
 ...
 
 TASK [Set up EC2 instances] *******************************************************
-changed: [localhost] => (item=us-east-1:quirk)
-changed: [localhost] => (item=us-east-1:keeper)
-changed: [localhost] => (item=us-east-1:zealot)
-changed: [localhost] => (item=us-east-1:quaver)
-changed: [localhost] => (item=us-east-1:quavery)
+changed: [localhost] => (item=us-east-1:uproar)
+changed: [localhost] => (item=us-east-1:unravel)
+changed: [localhost] => (item=us-east-1:kinsman)
 ...
 
 TASK [Generate ssh_config file for the cluster] ***********************************
 changed: [localhost]
 
 PLAY RECAP ************************************************************************
-localhost                  : ok=128  changed=20   unreachable=0    failed=0   
+localhost                  : ok=163  changed=35   unreachable=0    failed=0    skipped=44   rescued=0    ignored=2
 
 
-real    2m19.386s
-user    0m51.819s
-sys     0m27.852s
+real	4m42.726s
+user	0m39.101s
+sys	    0m15.687s
 ```
 
 This command will produce lots of output (append `-v`, `-vv`, etc.
@@ -92,37 +90,22 @@ Host *
     Port 22
     IdentitiesOnly yes
     IdentityFile "id_speedy"
-    UserKnownHostsFile "known_hosts tpa_known_hosts"
+    UserKnownHostsFile known_hosts tpa_known_hosts
     ServerAliveInterval 60
 
-Host quirk
+Host uproar
     User admin
-    HostName 54.227.207.189
-Host keeper
+    HostName 3.88.255.205
+Host unravel
     User admin
-    HostName 34.229.111.196
-Host zealot
+    HostName 54.80.99.142
+Host kinsman
     User admin
-    HostName 18.207.108.211
-Host quaver
-    User admin
-    HostName 54.236.36.251
-Host quavery
-    User admin
-    HostName 34.200.214.150
-[tpa]$ ssh -F ssh_config quirk
-Linux quirk 4.9.0-6-amd64 #1 SMP Debian 4.9.82-1+deb9u3 (2018-03-02) x86_64
-
-The programs included with the Debian GNU/Linux system are free software;
-the exact distribution terms for each program are described in the
-individual files in /usr/share/doc/*/copyright.
-
-Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
-permitted by applicable law.
-Last login: Sat Aug  4 12:31:28 2018 from 136.243.148.74
-admin@quirk:~$ sudo -i
-root@quirk:~# 
+    HostName 54.165.229.179
 ```
+
+To login to a host, use the command `ssh -F ssh_config` followed by the
+hostname. For example `ssh -F ssh_config uproar`.
 
 You can run [`tpaexec deploy`](tpaexec-deploy.md) immediately after
 provisioning. It will wait as long as required for the instances to come
@@ -166,28 +149,36 @@ as well as group and host variable definitions from config.yml.
 ```bash
 [tpa]$ cat inventory/00-speedy
 [tag_Cluster_speedy]
-quirk ansible_host=54.227.207.189 node=1 platform=aws
-keeper ansible_host=34.229.111.196 node=2 platform=aws
-zealot ansible_host=18.207.108.211 node=3 platform=aws
-quaver ansible_host=54.236.36.251 node=4 platform=aws
-quavery ansible_host=34.200.214.150 node=5 platform=aws
+uproar ansible_host=3.88.255.205 node=1 platform=aws
+unravel ansible_host=54.80.99.142 node=2 platform=aws
+kinsman ansible_host=54.165.229.179 node=3 platform=aws
 
 [tpa]$ cat inventory/group_vars/tag_Cluster_speedy/01-speedy.yml 
 cluster_name: speedy
 cluster_tag: tag_Cluster_speedy
-postgres_version: 15
-tpa_version: v23.10-22-g30c1d5ea
-tpa_2q_repositories: []
-vpn_network: 192.168.33.0/24
+edb_repositories: []
+failover_manager: repmgr
+keyring_backend: system
+postgres_flavour: postgresql
+postgres_version: '14'
+preferred_python_version: python3
+ssh_key_file: id_speedy
+tpa_version: v23.33-24-g4c0909d1
+use_volatile_subscriptions: false
 
-[tpa]$ cat inventory/host_vars/zealot/02-topology.yml
+[tpa]$ cat inventory/host_vars/kinsman/01-instance_vars.yml
+ansible_user: admin
+location: main
+region: us-east-1
 role:
 - barman
 - log-server
-- openvpn-server
-- monitoring-server
 - witness
-upstream: quirk
+upstream: uproar
+volumes:
+- device: /dev/xvda
+- device: /dev/sdf
+  volume_for: barman_data
 ```
 
 If you now change a variable in config.yml and rerun provision, these
