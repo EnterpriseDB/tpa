@@ -399,8 +399,8 @@ def expand_ec2_instance_volumes(old_instances, ec2_ami_properties):
         "kms_key_id",
     ]
 
-    ephemeral_count = 0
     for old_instance in old_instances:
+        ephemeral_count = 0
         instance = copy.deepcopy(old_instance)
         volumes = []
         for vol in instance.get("volumes", []):
