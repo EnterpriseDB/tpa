@@ -96,16 +96,13 @@
   shell: >
     umask 077 &&
     /bin/echo -e "US\nMA\nBedford\n{{ pem_branding_company_name_wl }}\n{{ pem_branding_edb_wl|upper }} Postgres Manager - HTTPD Server\n{{ pem_server }}\n{{ pem_support_email }}\n" |
-    /usr/bin/openssl req -newkey rsa:4096 -keyout {{ key_out | quote }} -nodes -x509 -days 365 -out {{ certificate_out | quote }}
+    /usr/bin/openssl req -newkey rsa:4096 -keyout "server-pem.key" -nodes -x509 -days 365 -out "server-pem.crt"
   args:
     chdir: "{{ pem_base_dir }}/resources"
-    creates: "{{ certificate_out | quote }}"
     executable: /bin/bash
-  vars:
-    certificate_out: "{{ pem_server_ssl_certificate | default('server-pem.crt')}}"
-    key_out: "{{ pem_server_ssl_key | default('server-pem.key')}}"
   when: >
-    (pem_web_server_renew_tls_certificates|default(false)) or (not pem_web_server_certificate.stat.exists)
+    (pem_web_server_renew_tls_certificates|default(false) and pem_web_server_certificate.stat.path | basename == "server-pem.crt") 
+    or (not pem_web_server_certificate.stat.exists)
   notify: Restart apache for pem
 
 - name: "Install {{ pem_branding_edb_wl }}-pem.conf"
