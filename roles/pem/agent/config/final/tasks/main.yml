@@ -82,9 +82,6 @@
 #
 # "msg": "Mon Aug 22 11:40:23 2022 ERROR: ERROR:  tuple concurrently updated"
     
-- set_fact:
-    pem_opts: "{{ pem_opts | default([]) }}"
-
 - name: Register PEM agent
   command: >
     {{ pem_agent_base_dir }}/bin/pemworker --register-agent     \
@@ -93,18 +90,19 @@
       --pem-user "{{ pem_postgres_user }}"                      \
       --config-dir "{{ pem_agent_config_path|dirname }}"        \
       --cert-path "{{ pem_agent_certificate_directory }}"       \
-      {% for option in pem_opts %} {{ option }} {% endfor %}
+      {% for option in registration_options  %} {{ option }} {% endfor %}
   args:
     creates: "{{ pem_agent_config_path }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
   vars:
+    registration_options: "{{ pemagent_registration_opts | default([]) }}"
     _task_environment:
       PEM_SERVER_PASSWORD: "{{ pem_postgres_password }}"
   register: register_cmd
   ignore_errors: true
   when:
     not agent_cfg_check.stat.exists
-  no_log: true
+  no_log: false
   throttle: 1
 
 - name: Display stderr from failed agent registration

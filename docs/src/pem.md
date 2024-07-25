@@ -52,6 +52,28 @@ backend database user, which is set to `postgres` for postgresql and
 password for the web interface by running
 `tpaexec show-password $clusterdir $user`.
 
+
+## Passing additional options when registering PEM agents
+
+TPA registers each PEM agent in the cluster using the `pemworker` utility's
+`--register agent` command. 
+
+A list of additional registration options can be
+passed by including `pemagent_registration_opts` in the cluster config.
+
+For example:
+```yml
+  pemagent_registration_opts:
+  - --enable-smtp true
+  - --enable-heartbeat-connection
+  - --allow-batch-probes true
+  - -l DEBUG1
+```
+
+The [PEM documentation](https://www.enterprisedb.com/docs/pem/latest/registering_agent/#registering-a-pem-agent-using-the-pemworker-utility)
+lists more information about registration options.
+
+
 ## Useful extensions for the nodes with pem agent
 
 By default, TPA will add `sql_profiler`, `edb_wait_states` and
