@@ -106,6 +106,12 @@ class M1(Architecture):
             "--primary-location",
             help="The location for the primary database node",
         )
+        layout_group.add_argument(
+            "--efm-bind-by-hostname",
+            action="store_true",
+            required=False,
+            help="Configure efm to use hostnames instead of IP",
+        )
 
     def active_locations(self):
         locations = self.all_locations()
@@ -201,6 +207,10 @@ class M1(Architecture):
         ):
             raise ArchitectureError(
                 f"TPA does not support repmgr with {args.get('postgres_flavour')}"
+            )
+        if args.get("failover_manager") != "efm" and args.get("efm_bind_by_hostname"):
+            raise ArchitectureError(
+                f"--efm-bind-by-hostname can't be used with {args.get('failover_manager')}"
             )
 
     def num_instances(self):
@@ -324,10 +334,9 @@ class M1(Architecture):
             return ret
 
         # If the user explicitly configured EDB repos, use 'edb' flavour
-        if (
-            self.args.get("edb_repositories", []) is not None
-            and self.args.get("edb_repositories", []) != ["none"]
-        ):
+        if self.args.get("edb_repositories", []) is not None and self.args.get(
+            "edb_repositories", []
+        ) != ["none"]:
             return "edb"
 
         # :meth:`update_cluster_vars` is executed before than the method
@@ -355,6 +364,13 @@ class M1(Architecture):
                 "failover_manager": failover_manager,
             }
         )
+
+        if self.args.get("efm_bind_by_hostname"):
+            cluster_vars.update(
+                {
+                    "efm_bind_by_hostname": self.args.get("efm_bind_by_hostname"),
+                }
+            )
 
         if failover_manager == "patroni":
             # Ensure nodes are members of a single etcd_location per cluster for patroni.

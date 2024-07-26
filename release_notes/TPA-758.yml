@@ -1,0 +1,16 @@
+- summary: Enable efm to use hostname instead of IP address as `bind.address`
+  description: |
+    Add a new configure option to let efm setup the cluster using hostname
+    resolution instead of IP addresses for `bind.address` value.
+
+    Introduce `--efm-bind-by-hostname` for architecture M1 configure command and
+    `efm_bind_by_hostname: true|false` in cluster_vars  section of config.yml.
+    Defaults to `false` when omitted.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-758

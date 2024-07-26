@@ -122,6 +122,7 @@
     node_ips: "{{
         groups[cluster_tag] | map('extract', hostvars, ['ip_address']) | product([efm_bind_port]) | map('join', ':') | join('\n')
       }}"
+    node_hostnames: "{{ groups[cluster_tag] | product([efm_bind_port]) | map('join', ':') | join('\n') }}"
   notify:
     - Note efm restart required
 # only apply this to new clusters when there was a change in the templating step.

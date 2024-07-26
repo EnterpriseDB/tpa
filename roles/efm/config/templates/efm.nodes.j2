@@ -1,2 +1,6 @@
 {# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved. #}
+{% if efm_bind_by_hostname %}
+{{ node_hostnames }}
+{% else %}
 {{ node_ips }}
+{% endif %}
