@@ -68,8 +68,15 @@ By default, the PEM server creates a self-signed certificate pair,
 `server-pem.crt` and `server-pem.key` and configures the webserver to use them
 for HTTPS access. 
 
-To provide your own certificate pair, first move
-the key and certificate files into the root of the cluster directory. 
+To provide your own certificate pair, create a directory under the root of the 
+cluster directory named `ssl/pemserver` and place the certificate pair inside.
+```
+cluster directory
+├── ssl
+│   └── pemserver
+│       ├── externally-provided.crt
+│       └── externally-provided.key
+```
 Next, set the variables `pem_server_ssl_certificate` and `pem_server_ssl_key` 
 with the respective file names as values for the `vars:` under the pem server 
 instance or `cluster_vars` in the cluster config file.

@@ -56,7 +56,7 @@
 
 - name: Copy over user-provided pem server SSL certificate
   copy:
-    src: "{{ cluster_dir }}/{{ pem_server_ssl_certificate }}"
+    src: "{{ cluster_dir }}/ssl/pemserver/{{ pem_server_ssl_certificate }}"
     dest: "{{ pem_base_dir }}/resources/{{ pem_server_ssl_certificate }}"
     owner: root
     group: root
@@ -67,7 +67,7 @@
 
 - name: Copy over user-provided pem server SSL key
   copy:
-    src: "{{ cluster_dir }}/{{ pem_server_ssl_key }}"
+    src: "{{ cluster_dir }}/ssl/pemserver/{{ pem_server_ssl_key }}"
     dest: "{{ pem_base_dir }}/resources/{{ pem_server_ssl_key }}"
     owner: root
     group: root
