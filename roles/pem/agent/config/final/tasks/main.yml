@@ -81,7 +81,6 @@
 # to the following:
 #
 # "msg": "Mon Aug 22 11:40:23 2022 ERROR: ERROR:  tuple concurrently updated"
-    
 - name: Register PEM agent
   command: >
     {{ pem_agent_base_dir }}/bin/pemworker --register-agent     \
