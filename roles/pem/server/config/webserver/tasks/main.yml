@@ -101,7 +101,7 @@
     chdir: "{{ pem_base_dir }}/resources"
     executable: /bin/bash
   when: >
-    (pem_web_server_renew_tls_certificates|default(false) and pem_web_server_certificate.stat.path | basename == "server-pem.crt") 
+    (pem_web_server_renew_tls_certificates|default(false) and pem_server_ssl_certificate is not defined) 
     or (not pem_web_server_certificate.stat.exists)
   notify: Restart apache for pem
 
