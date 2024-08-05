@@ -14,9 +14,9 @@
 - name: Add entries to {{ _pgpassfile }}
   lineinfile:
     path: "{{ _pgpassfile }}"
-    regexp: '^\*:\*:\*:{{ item }}:'
+    regexp: '^{{ escaped_host }}:\*:\*:{{ item }}:'
     line: >-
-      *:*:*:{{ item }}:{{ escaped_password }}
+      {{ _pgpass_host }}:*:*:{{ item }}:{{ escaped_password }}
   with_items: "{{ _pgpass_users }}"
   vars:
     varname: >-
@@ -25,5 +25,7 @@
       {{ vars[varname] }}
     escaped_password: >-
       {{ password|regex_replace('\\', '\\\\')|replace(':', '\:') }}
+    escaped_host: >-
+      {{ _pgpass_host|replace('*', '\\*') }}
   when: >
     varname in vars and vars[varname] is defined

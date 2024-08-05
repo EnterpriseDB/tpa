@@ -1,5 +1,4 @@
 ---
-
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 # if we are installing barman from PGDG packages, we force version
@@ -7,7 +6,7 @@
 
 - name: Set barman package version
   set_fact:
-    barman_package_version: '3.9.*'
+    barman_package_version: "3.9.*"
   when:
     - barman_package_version is not defined
     - edb_repositories == []
@@ -21,8 +20,7 @@
   vars:
     package_list_name: "barman packages"
     package_list: "{{ _all_barman_packages }}"
-  when:
-    barman_installation_method == 'pkg'
+  when: barman_installation_method == 'pkg'
 
 - include_tasks: src.yml
   when: barman_installation_method == 'src'
@@ -31,28 +29,37 @@
 # and log directories, but we may need to create them ourselves for a
 # source installation, or if barman_{user,group} have been changed.
 
-- name: Ensure barman group exists
-  group:
-    name: "{{ barman_group }}"
-    state: present
+# For shared Barman servers, users can set `barman_shared: true` in instance
+# vars for the barman instance included as the shared barman instace. It
+# assumes that the cluster that deploys and managed barman instance itself
+# does not set `barman_shared: true`. This helps prevent an usermod issue due
+# to the fact that the Barman user already has processes running
+# from previous deployments.
 
-- name: Ensure barman user exists
-  user:
-    name: "{{ barman_user }}"
-    group: "{{ barman_group }}"
-    shell: /bin/bash
-    home: "{{ barman_home }}"
-    create_home: no
-    system: yes
-    state: present
+- when: barman_shared|default(false) is false
+  block:
+    - name: Ensure barman group exists
+      group:
+        name: "{{ barman_group }}"
+        state: present
 
-- name: Ensure barman directories exist with the right ownership and permissions
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ barman_user }}"
-    group: "{{ barman_group }}"
-    mode: "0750"
-  with_items:
-    - "{{ barman_home }}"
-    - /var/log/barman
+    - name: Ensure barman user exists
+      user:
+        name: "{{ barman_user }}"
+        group: "{{ barman_group }}"
+        shell: /bin/bash
+        home: "{{ barman_home }}"
+        create_home: no
+        system: yes
+        state: present
+
+    - name: Ensure barman directories exist with the right ownership and permissions
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ barman_user }}"
+        group: "{{ barman_group }}"
+        mode: "0750"
+      with_items:
+        - "{{ barman_home }}"
+        - /var/log/barman

@@ -88,15 +88,6 @@
     mode: "0755"
     state: directory
 
-- include_role: name=postgres/pgpass
-  vars:
-    pgpassfile: ~barman/.pgpass
-    pgpass_owner: "{{ barman_user }}"
-    pgpass_group: "{{ barman_group }}"
-    pgpass_users:
-    - barman
-    - streaming_barman
-
 - name: Set correct ownership and mode on ~/.postgresql
   file:
     path: ~{{ barman_user }}/.postgresql

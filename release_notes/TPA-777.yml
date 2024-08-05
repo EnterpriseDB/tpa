@@ -1,0 +1,20 @@
+- summary: Added experimental support for using an existing Barman node as backup node in new cluster
+  description: |
+    When using an existing Barman node as a backup node in a new cluster, users
+    can set `barman_shared: true` in the Barman instance's vars with the platform
+    set to `bare` and other information supplied as usual for bare instances.
+
+    This change allows TPA to skip some configuration steps that would
+    otherwise fail due to usermod issues, as the Barman user already has
+    running processes from previous deployments.
+
+    The shared Barman instance is treated as a bare instance, so the required
+    access, including the Barman user's access to the target PostgreSQL
+    instances, must be already in place. Copying the Barman user's keys from
+    the original cluster to the new cluster can be used to achieve this, 
+    see the Barman section of the TPA documentation for detailed information.
+  type: minor_change
+  jira_tickets:
+    - TPA-777
+  support_tickets:
+    - RT37792
