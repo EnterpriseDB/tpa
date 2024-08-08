@@ -68,10 +68,6 @@
     - log_server is defined
     - log_server != inventory_hostname
 
-- name: Set current upstream_primary based on EFM properties
-  include_tasks:
-    file: properties.yml
-
 # for already deployed clusters we want to avoid these steps
 # so that we avoid an efm reboot.
 # check that .properties file exists
@@ -81,6 +77,13 @@
     get_checksum: false
     get_mime: false
   register: efm_cluster_prop
+
+# on deploys after a switchover, set the current upstream_primary
+# so the .properties file is configured correctly on each efm node.
+- name: Set current upstream_primary based on cluster facts
+  include_tasks:
+    file: upstream_primary.yml
+  when: efm_cluster_prop.stat.exists
 
 # check if the raw folder exists (2nd deploy for new clusters using /raw already)
 - name: Check if {{ efm_conf_dir }}/raw folder exists

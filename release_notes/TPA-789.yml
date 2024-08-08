@@ -1,0 +1,16 @@
+- summary: Remove EFM dependency for resolving upstream_primary
+  description: |
+    Previously, EFM was queried for the current primary on a deploy after 
+    a switchover. If EFM is not running, this will fail. 
+    Now the cluster_facts collected through Postgres are used to determine 
+    the current primary after a switchover, removing the dependency on EFM.
+    
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-789
+  - TPA-580

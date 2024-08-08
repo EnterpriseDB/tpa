@@ -42,8 +42,15 @@
     inventory_hostname == target
 
 - name: Set node priority to {{ target }}
-  command: >
-    {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ hostvars[target].ip_address }} 1
+  block:
+    - command: >
+        {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ hostvars[target].ip_address }} 1
+      when: >
+        not efm_bind_by_hostname
+    - command: >
+        {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ target }} 1
+      when: >
+        efm_bind_by_hostname
   when: >
     inventory_hostname == target
 
@@ -70,9 +77,17 @@
     var: cluster_status
 
 - name: Ensure switch over was successful
-  assert:
-    that:
-      status.nodes[target_ip].type == 'Primary'
+  block:
+    - assert:
+        that:
+          status.nodes[target_ip].type == 'Primary'
+      when: >
+        not efm_bind_by_hostname
+    - assert:
+        that:
+          status.nodes[target].type == 'Primary'
+      when: >
+        efm_bind_by_hostname
   vars:
     target_ip: "{{ hostvars[target].ip_address }}"
     status: "{{ cluster_status.stdout|from_json }}"
