@@ -278,6 +278,40 @@ default_postgres_extensions_dictionary:
     packages: *advanced_storage_pack_packages
     spl: bluefin
 
+  # Other
+  postgis:
+    packages:
+      postgresql:
+        Debian: &debian_pg_postgis_packages
+        - postgresql-{{ postgres_version }}-postgis-3
+        RedHat: &redhat_pg_postgis_packages
+        - postgis34_{{ postgres_version }}
+        Ubuntu: *debian_pg_postgis_packages
+        SLES: *redhat_pg_postgis_packages
+      epas:
+        Debian: &postgis_as_packages
+        - edb-as{{ postgres_version }}-postgis34
+        RedHat: *postgis_as_packages
+        Ubuntu: *postgis_as_packages
+        SLES: *postgis_as_packages
+      pgextended:
+        Debian: *debian_pg_postgis_packages
+        RedHat: *redhat_pg_postgis_packages
+        Ubuntu: *debian_pg_postgis_packages
+        SLES: *redhat_pg_postgis_packages
+      edbpge:
+        Debian: &postgis_pge_packages
+        - edb-postgresextended{{ postgres_version }}-postgis34
+        RedHat: *postgis_pge_packages
+        Ubuntu: *postgis_pge_packages
+        SLES: *postgis_pge_packages
+    repository_setup_commands:
+      Debian: []
+      RedHat: 
+      - crb enable
+      Ubuntu: []
+      SLES: []
+
 
 default_postgres_extensions:
   - pg_stat_statements
