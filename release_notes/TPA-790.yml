@@ -1,0 +1,14 @@
+- summary: Ignore proxy settings when accessing the Patroni API
+  description: |
+    The Ansible default is to use a proxy, if defined. This does not
+    work in the (rather common) case of an airgapped environment that
+    needs a proxy to download packages from the internet, because the
+    proxy also intercepts (and disrupts) calls to the Patroni API.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-790
