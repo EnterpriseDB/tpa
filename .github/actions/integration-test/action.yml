@@ -19,6 +19,9 @@ inputs:
     required: false
     description: "TPA architecture"
     default: BDR-Always-ON
+  tpa_enable_pgbouncer:
+    description: "Enable pgbouncer"
+    default: false
   tpa_harp_consensus_protocol:
     required: false
     description: "TPA HARP consensus protocol"
@@ -98,6 +101,7 @@ runs:
         source_directory: ${{ inputs.source_directory }}
         tpa_platform: ${{ inputs.tpa_platform }}
         tpa_architecture: ${{ inputs.tpa_architecture }}
+        tpa_enable_pgbouncer: ${{ inputs.tpa_enable_pgbouncer }}
         tpa_harp_consensus_protocol: ${{ inputs.tpa_harp_consensus_protocol }}
         tpa_os: ${{ inputs.tpa_os }}
         tpa_os_version: ${{ inputs.tpa_os_version }}

@@ -9,14 +9,15 @@ pgbouncer_certificate_key: "{{ pgbouncer_ssl_dir }}/postgresql.key"
 
 # Client cert vars
 pgbouncer_cn: "{{ pgbouncer_auth_user }}"
-pgbouncer_clientcert_owner: "postgres"
-pgbouncer_clientcert_group: "postgres"
+pgbouncer_clientcert_owner: "{{ postgres_user }}"
+pgbouncer_clientcert_group: "{{ postgres_group }}"
 
 # pgbouncer's system user
-pgbouncer_user_ssl_dir: "/home/pgbouncer/.postgresql"
+pgbouncer_home: "/home/pgbouncer"
+pgbouncer_user_ssl_dir: "{{ pgbouncer_home }}/.postgresql"
 
 ssl_service: "pgbouncer"
-ssl_user: "postgres"
+ssl_user: "{{ postgres_user }}"
 ssl_group: "root"
 
 use_ssl_cert_authentication: false

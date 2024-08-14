@@ -15,6 +15,9 @@ inputs:
     required: false
     description: "TPA architecture"
     default: BDR-Always-ON
+  tpa_enable_pgbouncer:
+    description: "Enable pgbouncer"
+    default: false
   tpa_layout:
     required: false
     description: "TPA BDR layout"
@@ -177,6 +180,10 @@ runs:
             if [[ "${{ inputs.tpa_witness_only_location }}" == 'true' ]] ;then
               WITNESS_ONLY_LOCATION=$(awk '{print $NF}' <<< "${{ inputs.tpa_location_names }}")
               CONFIGURE_OPTS+=(--witness-only-location $WITNESS_ONLY_LOCATION)
+          fi
+
+          if [ "${{ inputs.tpa_enable_pgbouncer }}" == "true" ] ;then
+            CONFIGURE_OPTS+=(--enable-pgbouncer)
           fi
         fi
 

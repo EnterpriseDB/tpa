@@ -23,7 +23,7 @@
 
 - name: postgres group can access SSL certs for authentication
   file:
-    path: "/home/pgbouncer"
+    path: "{{ pgbouncer_home }}"
     group: "{{ postgres_group }}"
     mode: "0750"
     state: directory
