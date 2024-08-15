@@ -18,6 +18,14 @@
     - superuser
     password_encryption: md5
 
+- name: Include efm-pre-config hook
+  include_tasks: "{{ hook }}"
+  when: >
+    lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|permits('efm-pre-config')
+  vars:
+    hook: "{{ cluster_dir }}/hooks/efm-pre-config.yml"
+
 - name: Allow efm user to run db function as {{ postgres_user }}
   community.general.sudoers:
     name: "efm_run_as_{{ postgres_user }}"
