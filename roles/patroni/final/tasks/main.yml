@@ -51,16 +51,19 @@
       name: patroni/api
       tasks_from: config
 
-  - name: Compare generated config to current
+  - name: Assemble new dcs config
     set_fact:
-      patroni_dcs_config_update: "{{ current_dcs_config != new_patroni_dcs_config }}"
+      new_dcs_config: "{{ patroni_dynamic_conf|combine(extra_conf) }}"
+    vars:
+      slots: "{{ _patroni_conf_permanent_slots['bootstrap']['dcs']['slots'] }}"
+      ignore_slots: "{{ _patroni_conf_backup['bootstrap']['dcs']['ignore_slots'] }}"
+      extra_conf: "{{ {'slots': slots, 'ignore_slots': ignore_slots } }}"
+
+  - name: Compare new config to current
+    set_fact:
+      patroni_dcs_config_update: "{{ current_dcs_config != new_dcs_config }}"
     vars:
       current_dcs_config: "{{ patroni_config_api_output.json }}"
-      new_patroni_dcs_config: "{{ patroni_dynamic_conf }}"
-
-  - name: Set final dcs config
-    set_fact:
-      patroni_final_dcs_config: "{{ patroni_dynamic_conf }}"
 
   when:
     patroni_initialised
@@ -75,7 +78,8 @@
     and patroni_initialised
     and 'primary' in role
   vars:
-    body: "{{ patroni_final_dcs_config }}"
+    body: "{{ new_dcs_config }}"
+    method: "PUT"
 
 # If any pending postgres restart is queued, first from any TPA changes and then
 # from patroni's perspective, do that now.
@@ -90,7 +94,6 @@
       restart_pending: true
   when:
     patroni_initialised
-    and postgres_service_end_state|default('started') == 'restarted'
 
 # If "patroni" package was replaced with "edb-patroni" package during this deploy
 # run, then the cluster should be in paused state at this point (see

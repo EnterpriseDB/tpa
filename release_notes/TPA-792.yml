@@ -1,0 +1,13 @@
+- summary: Enable new replicas in patroni clusters
+  description: |
+    Fixed an issue whereby new replicas in patroni clusters would fail
+    with errors related to replication slots.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-792
+  - TPA-781

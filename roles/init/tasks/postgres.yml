@@ -695,7 +695,7 @@
     max_wal_senders: >-
       {{ max_wal_senders|default(twice_postgres_instances) }}
     max_replication_slots: >-
-      {{ max_replication_slots|default(twice_postgres_instances) }}
+      {{ max_replication_slots|default(twice_postgres_instances + 3) }}
 
 # “The formula for the correct minimal number of workers is: one per
 # PostgreSQL instance + one per database on that instance + two per BDR
