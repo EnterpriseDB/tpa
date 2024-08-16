@@ -84,12 +84,12 @@ class aws(CloudPlatform):
         images = {
             "debian": {
                 "debian-10-amd64-20240204-1647": {
-                    "versions": ["10", "buster", "default"],
+                    "versions": ["10", "buster"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
                 "debian-11-amd64-20240104-1616": {
-                    "versions": ["11", "bullseye"],
+                    "versions": ["11", "bullseye", "default"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
@@ -135,7 +135,7 @@ class aws(CloudPlatform):
             },
             "ubuntu": {
                 "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20240228": {
-                    "versions": ["20.04", "focal", "default"],
+                    "versions": ["20.04", "focal"],
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
@@ -143,6 +143,7 @@ class aws(CloudPlatform):
                     "versions": [
                         "22.04",
                         "jammy",
+                        "default",
                     ],
                     "owner": "099720109477",
                     "user": "ubuntu",
