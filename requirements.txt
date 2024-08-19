@@ -190,6 +190,7 @@ cryptography==43.0.0 \
     --hash=sha256:844b6d608374e7d08f4f6e6f9f7b951f9256db41421917dfb2d003dde4cd6b66 \
     --hash=sha256:9a8d6802e0825767476f62aafed40532bd435e8a5f7d23bd8b4f5fd04cc80ecf \
     --hash=sha256:aae4d918f6b180a8ab8bf6511a419473d107df4dbb4225c7b48c5c9602c38c7f \
+    --hash=sha256:a2e47f3dc299cdc949079667e69f47719fb3fbfb7d797fd8e1366c92c220ff39 \
     --hash=sha256:ac1955ce000cb29ab40def14fd1bbfa7af2017cca696ee696925615cafd0dce5 \
     --hash=sha256:b88075ada2d51aa9f18283532c9f60e72170041bba88d7f37e49cbb10275299e \
     --hash=sha256:cb013933d4c127349b3948aa8aaf2f12c0353ad0eccd715ca789c8a0f671646f \
@@ -339,7 +340,8 @@ psutil==6.0.0 \
     --hash=sha256:c588a7e9b1173b6e866756dde596fd4cad94f9399daf99ad8c3258b3cb2b47a0 \
     --hash=sha256:e2e8d0054fc88153ca0544f5c4d554d42e33df2e009c4ff42284ac9ebdef4132 \
     --hash=sha256:fc8c9510cde0146432bbdb433322861ee8c3efbf8589865c8bf8d21cb30c4d14 \
-    --hash=sha256:ffe7fc9b6b36beadc8c322f84e1caff51e8703b88eee1da46d1e3a6ae11b4fd0
+    --hash=sha256:ffe7fc9b6b36beadc8c322f84e1caff51e8703b88eee1da46d1e3a6ae11b4fd0 \
+    --hash=sha256:b3ce503bd299dcf3954e66f3348ac5409103eec707aad4620d0dce3f142fa7e8
     # via -r requirements.in
 pycparser==2.22 \
     --hash=sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6 \

@@ -1,8 +1,19 @@
-cryptography==42.0.8 \
-    --hash=sha256:8fb57023a4416678c09f4f547f108363cd9ecfc4781fc8e6ccf64a2ac30a6bee
+#
+cffi==1.16.0 \
+    --hash=sha256:b86851a328eedc692acf81fb05444bdf1891747c25af7529e39ddafaf68a4f3f
+    # via cryptography
+cryptography==43.0.0 \
+    --hash=sha256:a2e47f3dc299cdc949079667e69f47719fb3fbfb7d797fd8e1366c92c220ff39
+    # via -r requirements-ppc64le.in
 markupsafe==2.1.5 \
     --hash=sha256:9ba81866a78622e383f48a82bc70e7c6835b8a514ce9047bbb873d022df98aa5
-psutil==5.9.8 \
-    --hash=sha256:42f94b3539dbcca65ca7510a568f17e1abc2008111e01a3961dc87e0d978443f
+    # via -r requirements-ppc64le.in
+psutil==6.0.0 \
+    --hash=sha256:b3ce503bd299dcf3954e66f3348ac5409103eec707aad4620d0dce3f142fa7e8
+    # via -r requirements-ppc64le.in
+pycparser==2.22 \
+    --hash=sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
+    # via cffi
 pyyaml==6.0.1 \
     --hash=sha256:a56cbdb91d2413864b72f551376b902191f5bb9cf3881b01944c771e04fe72dc
+    # via -r requirements-ppc64le.in
