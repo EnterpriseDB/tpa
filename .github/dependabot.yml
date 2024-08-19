@@ -19,8 +19,8 @@ updates:
 
   - package-ecosystem: "github-actions"
     directories:
-      - "/.github/actions"
-      - "/.github/workflows"
+      - "/.github/actions/**/*"
+      - "/.github/workflows/**/*"
     schedule:
       interval: "weekly"
       day: "sunday"
