@@ -1,0 +1,9 @@
+- summary: Explicitly install packages for PEM web server
+  description: |
+    PEM 9.7.0 no longer depends on Apache at a package level therefore
+    to use Apache as the web server we install the packages explicitly.
+    This prevents deploy failing with PEM 9.7.0 or later.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  jira_tickets:
+  - TPA-795
