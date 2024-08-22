@@ -342,7 +342,6 @@
       name: "{{ bdr_database }}"
       owner: "{{ postgres_user }}"
       extensions:
-      - name: btree_gist
       - name: bdr
         cascade: "{{ postgres_version is version('9.6', '>=') }}"
     bdr_database_entry: >-
