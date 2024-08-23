@@ -1,0 +1,16 @@
+- summary: Running deploy after a switchover fails for nodes with `efm-witness` role
+  description: |
+    The `upstream-primary` for EFM nodes is determined using the facts
+    gathered from Postgres. This fails for nodes with `efm-witness` roles 
+    since they do not have Postgres. The task to determine upstream-primary 
+    is now run only on nodes with `primary` or `replica` roles
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-580
+  - TPA-789
+  - TPA-798
