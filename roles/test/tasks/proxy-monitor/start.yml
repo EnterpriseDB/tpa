@@ -11,7 +11,7 @@
     dest: /etc/tpa/proxy-monitor
     owner: root
     group: root
-    mode: 0555
+    mode: "0555"
 
 - name: Create proxy-monitor log output directory
   file:

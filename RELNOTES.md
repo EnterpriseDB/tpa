@@ -2,6 +2,217 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
+## v23.34 (2024-08-21)
+
+### Notable changes
+
+- Allow cert authentication on pgbouncer
+
+  pgbouncer can now use cert authentication when connecting to its
+  postgres backend. This is particularly useful with FIPS; it's
+  required because the authentication algorithm is also changed, from
+  md5 to scram-sha-256. The variable
+  `pgbouncer_use_cert_authentication` must be defined to true in
+  cluster_vars, should someone decide to enable this mode. When this
+  mode is enabled, TPA will create a CA and two more certificates
+  replacing the self-signed certificate created by default in all
+  clusters.
+
+  Change requires a postgres restart.
+
+  References: TPA-650.
+
+- Remove support for Raid volume creation on AWS
+
+  TPA no longer supports RAID creation on AWS. All EBS volumes are automatically
+  replicated across different servers which might be seen as redundant if during
+  or before boot, a RAID device is provisioned. If anyone despite this level of
+  default availability provided by AWS still requires a form of software RAID,
+  the device must be created manually and configured to be used by TPA afterwards.
+
+  References: TPA-13.
+
+- Change default output to TPA's own format
+
+  Ansible's default output plugin shows a lot of information, much of
+  which is useful when debugging but obscures the flow of information if
+  you just want to see what TPA is doing. TPA now has its own output
+  plugin, which shows one line of information per task, omitting tasks
+  for which even one line would be uninformative. The lines are indented
+  to enable TPA's control flow to be visible, and include colour-coded
+  counts of successful, skipped, and ignored hosts.
+
+  The fuller output can be turned on by setting TPA_USE_DEFAULT_OUTPUT=true
+  in your environment, or by adding the -v switch to the command line.
+
+  References: TPA-673, TPA-778.
+
+### Minor changes
+
+- Run efm upgrade-conf on new clusters
+
+  Run the efm upgrade-conf on new cluster deployments to benefit
+  from the comments and inline documentation that are added to
+  both <cluster_name>.properties and <cluster_name>.nodes files.
+
+  References: TPA-707.
+
+- Add efm-pre-config hook
+
+  The efm-pre-config hook runs after efm has been installed and its
+  configuration directory and user have been created, but before efm is
+  configured. It can be used to install custom efm helper scripts.
+
+  References: TPA-791.
+
+- Add support for passing options to register PEM agent
+
+  Additional options can be included when registering PEM agents by
+  listing them under `pemagent_registration_opts` in `cluster_vars`.
+
+  References: TPA-584.
+
+- Update upstream_primary after switchover
+
+  The `upstream_primary` is now correctly updated after switchover, 
+  resulting in the correct `auto.reconfigure` setting be set on replicas.
+  Standbys now follow the new primary.
+
+  References: TPA-580.
+
+- Allow customer's to use their own SSL certificates on the PEM server
+
+  Users can include the names of the certificate and key pair for use on the PEM server in `config.yml`
+  under the cluster_vars or pem-server instance vars `pem_server_ssl_certificate` and `pem_server_ssl_key`.
+  TPA will copy them from the `ssl/pemserver` directory of the cluster directory to the PEM server and 
+  configure Apache/httpd accordingly.
+
+  References: TPA-718, TPA-752, RT35811.
+
+- Add missing properties to efm template
+
+  Add properties that are present in EFM 4.9 that were not in the
+  template already:
+
+  enable.stop.cluster: boolean, default true
+  priority.standbys: default ''
+  detach.on.agent.failure: boolean, default false
+  pid.dir: default ''
+
+  On existing clusters, since this means a change in the EFM
+  configuration, TPA will restart EFM services to make sure changes
+  are applied.
+
+  EFM agents only process the properties that they know about, so if
+  the new properties are written out for an older version of EFM that
+  does not use them, they will be ignored.
+
+  References: TPA-776.
+
+- Enable efm to use hostname instead of IP address as `bind.address`
+
+  Add a new configure option to let efm setup the cluster using hostname
+  resolution instead of IP addresses for `bind.address` value.
+
+  Introduce `--efm-bind-by-hostname` for architecture M1 configure command and
+  `efm_bind_by_hostname: true|false` in cluster_vars  section of config.yml.
+  Defaults to `false` when omitted.
+
+  References: TPA-758.
+
+- Remove EFM dependency for resolving upstream_primary
+
+  Previously, EFM was queried for the current primary on a deploy after 
+  a switchover. If EFM is not running, this will fail. 
+  Now the cluster_facts collected through Postgres are used to determine 
+  the current primary after a switchover, removing the dependency on EFM.
+
+  References: TPA-789, TPA-580.
+
+### Bugfixes
+
+- Fixed an issue when backing up from a replica
+
+  When taking backups from a replica, barman could fail when taking its
+  initial backup by timing out waiting for WAL files. This is fixed by
+  waiting for barman to complete its base backup before forcing a WAL
+  segment switch.
+
+  References: TPA-719.
+
+- Ensure we flush handlers soon after finishing postgres configuration
+
+  This problem manifested itself when a new node was added to a repmgr
+  or efm cluster, TPA would fail to reload/restart postgres on
+  existing nodes to re-read configuration changes and the new node
+  would therefore fail to connect to the cluster.
+
+  References: TPA-781.
+
+- Ignore proxy settings when accessing the Patroni API
+
+  The Ansible default is to use a proxy, if defined. This does not
+  work in the (rather common) case of an airgapped environment that
+  needs a proxy to download packages from the internet, because the
+  proxy also intercepts (and disrupts) calls to the Patroni API.
+
+  References: TPA-790.
+
+- Set appropriate PEM agent parameters monitored servers
+
+  TPA broadly sets PEM agent parameters on all instances that are only 
+  appropriate for the pemserver instance. This is fixed by conditionally
+  setting parameters in `agent.cfg.j2` based on whether or not the node 
+  is a pem-server.
+
+  References: TPA-744.
+
+- Fix incorrect detection of cgroup data
+
+  Fix two cases of incorrect cgroup detection:
+    - on MacOSX, we no longer try to read /proc/mounts
+    - on systems where /sys/fs/cgroup is ro but mounts under it are rw, we
+      now correctly detect this
+
+  References: TPA-760.
+
+- Fix missing pgd-proxy and pgdcli package name for SLES
+
+  Add missing entries for pgd-proxy and pgdcli default package name when
+  using SLES operating system as target for cluster nodes.
+
+  References: TPA-768.
+
+- Fix witness node registration to repmgr
+
+  Ensure that `repmgr witness register` command is used with the correct postgres_port value
+  even when using non-default postgres port for the upstream_primary postgres.
+
+  References: TPA-772.
+
+- Honour failover_manager when overriden at instance level for PGD instances
+
+  Allow failover_manager override to `repmgr` to work correctly when
+  set at instance level for subscriber-only nodes and their replicas
+  in PGD clusters.
+
+  References: TPA-767.
+
+- Fix tpaexec test for pgd-proxy read_listen_port check
+
+  Ensure we can verify the actual config set on pgd-proxy nodes for the newly added
+  `read_listen_port` option in pgd-proxy.
+
+  References: TPA-775.
+
+- Explicitly install packages for PEM web server
+
+  PEM 9.7.0 no longer depends on Apache at a package level therefore
+  to use Apache as the web server we install the packages explicitly.
+  This prevents deploy failing with PEM 9.7.0 or later.
+
+  References: TPA-795.
+
 ## 23.33 (2024-06-24)
 
 ### Notable changes

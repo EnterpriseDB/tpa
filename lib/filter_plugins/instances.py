@@ -187,7 +187,7 @@ def update_instance_volume_defaults(instance, defaults):
     if default_volumes and (len(volumes) > 0 or "volumes" not in instance):
         volume_map = {}
         for vol in default_volumes + volumes:
-            name = vol.get("raid_device", vol.get("device_name"))
+            name = vol.get("device_name")
             if name.startswith("/dev/"):
                 name = name[5:]
             volume_map[name] = vol
@@ -403,19 +403,12 @@ def get_device_variables(volumes):
     Return unique list of device variables.
 
     Takes a list of volumes and returns a new list where there is only one entry
-    per device name (raid_device if defined, else device_name), consisting of the
-    device name and any variables defined for it.
+    per device name, consisting of the device name and any variables defined for it.
 
     The expanded list we start with looks like this:
 
     volumes:
-      - raid_device: /dev/md0
-        device_name: /dev/xvdf
-        vars:
-          mountpoint: /var/lib/postgresql
-        …
-      - raid_device: /dev/md0
-        device_name: /dev/xvdg
+      - device_name: /dev/xvdg
         vars:
           mountpoint: /var/lib/postgresql
         …
@@ -429,7 +422,7 @@ def get_device_variables(volumes):
     volumes:
       - device: /dev/md0
         mountpoint: /var/lib/postgresql
-      - device: /dev/xvdf
+      - device: /dev/xvdh
         mountpoint: /var/lib/barman
 
     Args:
@@ -441,7 +434,7 @@ def get_device_variables(volumes):
     for volume in volumes:
         if not isinstance(volume, dict):
             continue
-        dev = volume.get("raid_device", volume.get("device_name"))
+        dev = volume.get("device_name")
         if dev not in seen:
             seen.add(dev)
             results.append(dict(device=dev, **volume.get("vars", {})))

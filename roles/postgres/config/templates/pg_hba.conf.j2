@@ -16,9 +16,15 @@ local all {{ harp_manager_user }} {{ password_encryption }}
 {% endif %}
 local   replication     all                                     peer
 local   all             all                                     {{ postgres_hba_local_auth_method }}
+
 {% if 'pgbouncer' in role or 'harp-proxy' in role %}
+{%    if pgbouncer_use_cert_authentication == true %}
+hostssl all {{ pgbouncer_auth_user }} 127.0.0.1/32 cert
+{%    else %}
 hostssl all {{ pgbouncer_auth_user }} 127.0.0.1/32 md5
+{%    endif %}
 {% endif %}
+
 {% if 'harp-proxy' in role and harp_dcs_user is defined %}
 hostssl all {{ harp_dcs_user }} 127.0.0.1/32 {{ password_encryption }}
 {% endif %}
@@ -71,7 +77,13 @@ hostssl pem +pem_agent {{ addr }} cert
 {%   endfor %}
 # {{ h }}
 {%     if 'pgbouncer' in role or 'harp-proxy' in role %}
+### cert auth with pgbouncer
+{%      if pgbouncer_use_cert_authentication == true %}
+hostssl all {{ pgbouncer_auth_user }} {{ addr }} cert
+{%      else %}
 hostssl all {{ pgbouncer_auth_user }} {{ addr }} md5
+### END cert auth with pgbouncer
+{%      endif %}
 {%     endif %}
 {%     if 'harp-proxy' in role and harp_dcs_user is defined %}
 hostssl all {{ harp_dcs_user }} {{ addr }} {{ password_encryption }}

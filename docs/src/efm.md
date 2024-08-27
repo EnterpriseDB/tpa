@@ -16,7 +16,9 @@ TPA will generate `efm.nodes` and `efm.properties` with the appropriate
 instance-specific settings, with remaining settings set to the respective
 default values. TPA will also place an `efm.notification.sh` script which
 basically contains nothing by default and leaves it up to the user to fill it
-in however they want.
+in however they want. TPA will override the default settings for
+`auto.allow.hosts` and `stable.nodes.file` to simplify adding agents
+to the cluster.
 
 See the [EFM documentation](https://www.enterprisedb.com/docs/efm/latest/)
 for more details on EFM configuration.
@@ -30,11 +32,8 @@ would appear in `efm.properties`:
 ```yaml
 cluster_vars:
   efm_conf_settings:
-     standby.restart.delay: 1
-     application.name: quarry
-     reconfigure.num.sync: true
-     reconfigure.num.sync.max: 1
-     reconfigure.sync.primary: true
+     notification.level=WARNING
+     ping.server.ip=<well known address in network>
 ```
 
 If you make changes to values under `efm_conf_settings`, TPA will always

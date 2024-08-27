@@ -205,6 +205,10 @@ The following selectors are supported only for exclusion:
 
     Tasks which create config files.
 
+- efm-pre-config
+
+    The efm-pre-config hook, if one is defined.
+
 - fs
 
     Tasks related to setting up additional [volumes](volumes.md) on

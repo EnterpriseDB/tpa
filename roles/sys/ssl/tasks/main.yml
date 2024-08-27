@@ -5,6 +5,15 @@
 # When certificate authentication is configured, we create a local CA
 # and use it to sign CSRs generated on the target instances.
 
-- include_role: name=sys/ssl/ca
+- name: Generate CA.crt for client cert if using selfsigned server certs
+  include_role:
+    name: sys/ssl/ca
+  vars:
+    ssl_enabled_services:
+      - "{{ enable_pg_backup_api|default(false) }}"
+      - "{{ harp_http_options['secure'] }}"
+      - "{{ pgbouncer_use_cert_authentication }}"
+      - "{{ pgd_http_options['secure'] }}"
   when:
-    not selfsigned
+    ssl_cert_authentication_enabled
+    or ssl_enabled_services is any

@@ -90,6 +90,14 @@ setting up Barman users, but before generating any Barman configuration.
 You can use this hook, for example, to perform any tasks related with
 Barman certificate files or mount points.
 
+### efm-pre-config
+
+TPA invokes `hooks/efm-pre-config.yml` after installing efm, creating
+its configuration directory, and setting up the efm user, but before
+generating any efm configuration.
+
+An example use of this hook is to install efm helper scripts.
+
 ### harp-config
 
 TPA invokes `hooks/harp-config.yml` after generating HARP configuration

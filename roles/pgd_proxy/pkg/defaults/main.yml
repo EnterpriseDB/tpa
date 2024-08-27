@@ -8,3 +8,5 @@ pgd_proxy_packages:
   RedHat:
     - edb-pgd{{ bdr_version }}-proxy
   Ubuntu: *debian_pgdproxy_package
+  SUSE:
+    - edb-pgd{{ bdr_version }}-proxy

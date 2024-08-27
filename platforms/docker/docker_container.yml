@@ -34,8 +34,11 @@
 
 - name: Check if /sys/fs/cgroup is mounted read-write
   shell:
-    cmd: grep /sys/fs/cgroup /proc/mounts | grep rw
+    cmd: grep /sys/fs/cgroup[[:space:]] /proc/mounts | grep rw
   register: rw_cgroup
+  when: ansible_distribution != 'MacOSX'
+  changed_when: false
+  failed_when: rw_cgroup.rc > 1
 
 - name: Provision docker container {{ item.Name }}
   docker_container:
@@ -79,9 +82,9 @@
     security_opts: "{{ item.docker_security_opts|default(omit) }}"
     cgroupns_mode: "host"
   vars:
+    use_scopes: "{{ item.image in scoped_support_images and rw_cgroup.rc|default(1) == 0}}"
     volumes:
-      - "{{ (item.image in scoped_support_images and rw_cgroup.rc == 0)
-          |ternary('/sys/fs/cgroup/tpa.scope', '/sys/fs/cgroup')
+      - "{{ use_scopes |ternary('/sys/fs/cgroup/tpa.scope', '/sys/fs/cgroup')
         ~ ':/sys/fs/cgroup:'
         ~ (docker_system.host_info.CgroupVersion|default(None) == '1')|ternary('ro', 'rw') }}"
       - "{{ item.volumes|default([]) }}"

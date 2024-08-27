@@ -1,0 +1,40 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+- name: Generate pgbouncer certificate
+  include_role:
+    name: sys/ssl/client
+  vars:
+    CN: "{{ pgbouncer_cn }}"
+    username: "{{ pgbouncer_cn }}"
+    clientcert_owner: "{{ pgbouncer_clientcert_owner }}"
+    clientcert_group: "{{ pgbouncer_clientcert_group }}"
+    clientcert_service: "{{ ssl_service }}"
+    clientcert_ssl_key_mode: "0640"
+    certificate_path: "{{ pgbouncer_certificate }}"
+    privatekey_path: "{{ pgbouncer_certificate_key }}"
+    check_result_varname: "_pgbouncer_disposable_name"
+
+# Currently pgbouncer service is running as postgres. We also need to have
+# pgbouncer user created in the system for any administrative usage. Eventually,
+# we might need to revise that decision and stay with the default, in which
+# case the copy and related tasks below would be irrelevant.
+
+- name: Ensure default cert dir exists
+  file:
+    path: "{{ pgbouncer_user_ssl_dir }}"
+    state: directory
+    owner: "pgbouncer"
+    mode: "0700"
+
+- name: Copy certificate and its private key for pgbouncer system user
+  copy:
+    src: "{{ item }}"
+    dest: "{{ pgbouncer_user_ssl_dir }}"
+    mode: "0600"
+    owner: "pgbouncer"
+    remote_src: true
+  loop:
+    - "{{ pgbouncer_certificate }}"
+    - "{{ pgbouncer_certificate_key }}"

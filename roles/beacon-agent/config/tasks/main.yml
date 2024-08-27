@@ -21,7 +21,7 @@
     name: /home/beacon/.beacon
     owner: beacon
     group: beacon
-    mode: '700'
+    mode: "0700"
     state: directory
 
 - include_role: name=postgres/createuser
@@ -50,7 +50,7 @@
     dest: /home/beacon/.beacon/beacon_agent.yaml
     owner: beacon
     group: beacon
-    mode: '600'
+    mode: "0600"
   vars:
     beacon_db_name: "{{ cluster_name }}-{{ inventory_hostname }}"
     beacon_agent_access_key: "{{ beacon_agent_access_key_password }}"

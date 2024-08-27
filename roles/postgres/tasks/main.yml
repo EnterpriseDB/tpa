@@ -32,3 +32,8 @@
   when: >
     pgdata_initialised
     and task_selector|permits('config')
+
+# If we need to restart postgres, we now have an outstanding handler
+# notification; we must flush it now or it will be forgotten
+
+- meta: flush_handlers

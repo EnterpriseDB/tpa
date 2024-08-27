@@ -208,34 +208,25 @@ In general, you should be able to use "Debian", "RedHat", "Ubuntu", and
 This option is not meaningful for the "bare" platform, where TPA has
 no control over which distribution is installed.
 
-### 2ndQuadrant and EDB repositories
+### EDB repositories
 
-TPA can enable any 2ndQuadrant or EDB software repository that you have
-access to through a subscription.
+TPA can enable any EDB software repository that you have
+access to through a subscription. By default, TPA will install any
+product repositories that the architecture requires.
 
-By default, it will install the 2ndQuadrant public repository (which
-does not need a subscription) and add on any product repositories that
-the architecture may require (e.g., the PGD repository).
+More detailed explanation of how TPA uses EDB
+repositories is available [here](edb_repositories.md) and on the page
+for each architecture.
 
-More detailed explanation of how TPA uses 2ndQuadrant and EDB
-repositories is available [here](2q_and_edb_repositories.md)
-
-Specify ``--2Q-repositories source/name/maturity …`` or
-``--edb-repositories repository …`` to specify the complete list of
-2ndQuadrant or EDB repositories to install on each instance in addition
-to the 2ndQuadrant public repository.
-
-If any EDB repositories are specified, any 2ndQuadrant ones will be
-ignored.
+Specify ``--edb-repositories repository …`` to specify the complete list
+of EDB repositories to install on each instance.
 
 Use this option with care. TPA will configure the named repositories
 with no attempt to make sure the combination is appropriate.
 
-To use these options, you must ``export TPA_2Q_SUBSCRIPTION_TOKEN=xxx``
-or ``export EDB_SUBSCRIPTION_TOKEN=xxx`` before you run tpaexec.
-You can get a 2ndQuadrant token from the 2ndQuadrant Portal under
-"Company info" in the left menu, then "Company". You can get an EDB
-token from enterprisedb.com/repos.
+To use this options, you must ``export EDB_SUBSCRIPTION_TOKEN=xxx``
+before you run TPA.
+You can get an EDB token from enterprisedb.com/repos.
 
 ### Local repository support
 
@@ -275,7 +266,7 @@ in `--redwood` or `--no-redwood` mode, i.e., whether to enable or
 disable its Oracle compatibility features.
 
 Installing EDB Postgres Extended or Postgres Advanced Server requires
-a valid [EDB repository subscription](2q_and_edb_repositories.md).
+a valid [EDB repository subscription](edb_repositories.md).
 
 #### Package versions
 
@@ -331,15 +322,14 @@ to address this in a future release of TPA.
 
 If you specify `--install-from-source postgres`, Postgres will be
 built and installed from a git repository instead of installed from
-packages. Use `2ndqpostgres` instead of `postgres` to build and
-install 2ndQPostgres. By default, this will build the appropriate
+packages. By default, this will build the appropriate
 `REL_nnn_STABLE` branch.
 
-You may use `--install-from-source 2ndqpostgres pglogical3 bdr3` to
-build and install all three components from source, or just use
-`--install-from-source pglogical3 bdr3` to use packages for
-2ndQPostgres, but build and install pglogical v3 and PGD v3 from source.
-By default, this will build the `master` branch of pglogical and PGD.
+You may use `--install-from-source postgres bdr5` to
+build and install both components from source, or just use
+`--install-from-source bdr5` to use packages for
+Postgres, but build and install PGD v5 from source.
+By default, this will build the `main` branch of PGD.
 
 To build a different branch, append `:branchname` to the corresponding
 argument. For example `--install-from-source 2ndqpostgres:dev/xxx`, or
@@ -452,7 +442,7 @@ Let's see what happens when we run the following command:
 
 ```bash
 [tpa]$ tpaexec configure ~/clusters/speedy --architecture M1 \
-        --num-cascaded-replicas 2 --distribution Debian \
+        --distribution Debian \
         --platform aws --region us-east-1 --network 10.33.0.0/16 \
         --instance-type t2.medium --root-volume-size 32 \
         --postgres-volume-size 64 --barman-volume-size 128 \
@@ -465,12 +455,11 @@ There is no output, so there were no errors. The cluster directory has
 been created and populated.
 
 ```bash
-$ ls ~/clusters/speedy
-total 8
-drwxr-xr-x 2 ams ams 4096 Aug  4 16:23 commands
--rw-r--r-- 1 ams ams 1374 Aug  4 16:23 config.yml
-lrwxrwxrwx 1 ams ams   51 Aug  4 16:23 deploy.yml ->
-                         /home/ams/work/2ndq/TPA/architectures/M1/deploy.yml
+$ ls -lh ~/clusters/speedy/
+total 8.0K
+drwxrwxr-x 2 haroon haroon 4.0K Aug 17 02:33 commands
+-rw-rw-r-- 1 haroon haroon 1.5K Aug 17 02:33 config.yml
+lrwxrwxrwx 1 haroon haroon   53 Aug 17 02:33 deploy.yml -> /home/haroon/tpa/architectures/M1/deploy.yml
 ```
 
 The cluster configuration is in config.yml, and its neighbours are links
@@ -483,21 +472,20 @@ architecture: M1
 cluster_name: speedy
 cluster_tags: {}
 
+keyring_backend: system
+vault_name: cfae3da3-ec00-46cd-ab05-e153f1c788db
+
 cluster_rules:
 - cidr_ip: 0.0.0.0/0
   from_port: 22
   proto: tcp
   to_port: 22
-- cidr_ip: 10.33.76.176/28
-  from_port: 0
-  proto: tcp
-  to_port: 65535
-- cidr_ip: 10.33.148.240/28
+- cidr_ip: 10.33.120.80/28
   from_port: 0
   proto: tcp
   to_port: 65535
 ec2_ami:
-  Name: debian-10-amd64-20210721-710
+  Name: debian-11-amd64-20240104-1616
   Owner: '136693071363'
 ec2_instance_reachability: public
 ec2_vpc:
@@ -506,7 +494,7 @@ ec2_vpc:
     cidr: 10.33.0.0/16
 
 cluster_vars:
-  enable_pg_backup_api: false
+  edb_repositories: []
   failover_manager: repmgr
   postgres_flavour: postgresql
   postgres_version: '14'
@@ -517,11 +505,7 @@ locations:
 - Name: main
   az: us-east-1a
   region: us-east-1
-  subnet: 10.33.76.176/28
-- Name: dr
-  az: us-east-1b
-  region: us-east-1
-  subnet: 10.33.148.240/28
+  subnet: 10.33.120.80/28
 
 instance_defaults:
   default_volumes:
@@ -541,27 +525,26 @@ instance_defaults:
     ansible_user: admin
 
 instances:
-- Name: upsets
-  backup: kayak
+- Name: uproar
+  backup: kinsman
   location: main
   node: 1
   role:
   - primary
-- Name: zebra
+- Name: unravel
   location: main
   node: 2
   role:
   - replica
-  upstream: upsets
-- Name: kayak
+  upstream: uproar
+- Name: kinsman
   location: main
   node: 3
   role:
   - barman
   - log-server
-  - monitoring-server
   - witness
-  upstream: upsets
+  upstream: uproar
   volumes:
   - device_name: /dev/sdf
     encrypted: true
@@ -569,18 +552,6 @@ instances:
       volume_for: barman_data
     volume_size: 128
     volume_type: gp2
-- Name: queen
-  location: dr
-  node: 4
-  role:
-  - replica
-  upstream: zebra
-- Name: knock
-  location: dr
-  node: 5
-  role:
-  - replica
-  upstream: zebra
 ```
 
 The next step is to run [`tpaexec provision`](tpaexec-provision.md)

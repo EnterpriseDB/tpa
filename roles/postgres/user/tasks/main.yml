@@ -50,7 +50,7 @@
 - name: Ensure {{ postgres_home }} has correct permissions
   file:
     state: directory
-    mode: 0775
+    mode: "0700"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     path: "{{ postgres_home }}"
@@ -158,6 +158,8 @@
       {{ postgres_user }} ALL=(ALL) NOPASSWD: POSTGRES_COMMANDS
 
 # Finally, we generate the TLS certificates needed by Postgres.
+# Note: this is legacy tech, we're adding cert authentication just for pgbouncer
+# at the moment but eventually this shall get deprecated.
 
 - include_tasks:
     file: tls.yml

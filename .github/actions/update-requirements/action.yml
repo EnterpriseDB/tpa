@@ -80,6 +80,11 @@ runs:
       run: |
         pip-compile --generate-hashes --reuse-hashes requirements/testing.in -o requirements/testing.txt
 
+    - name: Run pip-compile on tpa-ee build requirements
+      shell: bash
+      run: |
+        pip-compile --generate-hashes --reuse-hashes tpa-ee/aap24/build-requirements.in -o tpa-ee/aap24/build-requirements.txt
+
     # install tox and run dep test
     - name: Install tox
       shell: bash

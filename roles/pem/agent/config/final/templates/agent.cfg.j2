@@ -13,12 +13,20 @@ log_location={{ pem_worker_logfile|default('/var/log/pem/worker.log') }}
 agent_log_location={{ pem_agent_logfile|default('/var/log/pem/agent.log') }}
 long_wait=30
 short_wait=10
+{% if 'pem-server' in role %}
 alert_threads={{ pem_agent_alert_threads|default(1) }}
 enable_smtp={{ pem_agent_enable_smtp|default('true') }}
 enable_snmp={{ pem_agent_enable_snmp|default('true') }}
-{% if pem_agent_version is version('8', '>=') %}
+{% else %}
+alert_threads={{ pem_agent_alert_threads|default(0) }}
+enable_smtp={{ pem_agent_enable_smtp|default('false') }}
+enable_snmp={{ pem_agent_enable_snmp|default('false') }}
+{% endif %}
+{% if pem_agent_version is version('8', '>=') and 'pem-server' in role %}
 enable_webhook=true
 max_webhook_retries=3
+{% else %}
+enable_webhook=false
 {% endif %}
 allow_server_restart=true
 max_connections=0

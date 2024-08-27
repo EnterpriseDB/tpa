@@ -28,34 +28,35 @@ instances:
   - device_name: root
     volume_type: gp2
     volume_size: 32
-  - raid_device: /dev/md0
-    device_name: /dev/xvdf
+  - device_name: /dev/xvdf
     volume_type: io2
     volume_size: 64
-    raid_units: 2
-    raid_level: 1
     iops: 5000
     vars:
       volume_for: postgres_data
       encryption: luks
-  - raid_device: /dev/md1
-    device_name: /dev/xvdh
+  - device_name: /dev/xvdb
     ephemeral: ephemeral0
-    raid_units: all
     vars:
       mountpoint: /mnt/scratch
 ```
 
 In this example, the EC2 instance will end up with a 32GB EBS root
-volume, a 64GB RAID-1 volume comprising two provisioned-iops EBS volumes
-mounted as /opt/postgres/data, and a /tmp/scratch filesystem comprising
-all available instance-store (“ephemeral”) volumes, whose number and
-size are determined by the instance type.
+volume, a 64GB io2 volume (provisioned-iops EBS volumes) mounted as
+/opt/postgres/data, and a /tmp/scratch filesystem provided by an
+instance-store (“ephemeral”) volume, whose number and size are determined
+by the instance type.
 
 The details are documented in the section on AWS below, but settings
 like `volume_type` and `volume_size` are used during provisioning, while
 settings under `vars` like `volume_for` or `mountpoint` are written to
 the inventory for use during deployment.
+
+!!! NOTE  ephemeral0 instance store
+    nowadays most of the internal storage
+    is NVMe in which volumes are automatically enumerated and assigned a device
+    name by AWS, hence you might need to modify `device_name` in your config.yml
+    to whatever was given after the provision phase.
 
 ## default_volumes
 
@@ -211,32 +212,25 @@ further actions during deployment.
 
 ## RAID arrays
 
-On AWS EC2 instances, you can define RAID volumes:
+On AWS EC2 instances, only RAID 0 is recommended by Amazon. You can
+create RAID volumes with a similar command:
+
+```shell
+sudo mdadm --create --verbose /dev/md0 --level=0 --name=MY_RAID --raid-devices=number_of_volumes device_name1 device_name2
+```
+
+This example will attach the block device named `/dev/md0`. The handling of
+`volume_for` or `mountpoint` during deployment happens as the same as with
+any other volume. TPA will handle `mkfs` and `mount` for it.
 
 ```yaml
-instances:
 - Name: one
   …
   volumes:
-  - raid_device: /dev/md0
-    device_name: /dev/xvdf
-    raid_units: 2
-    raid_level: 1
-    volume_type: gp2
-    volume_size: 100
+  - device_name: /dev/md0
     vars:
       volume_for: postgres_data
 ```
-
-This example will attach 4×100GB EBS gp2 volumes (`/dev/xvd[f-i]`) and
-assemble them into a RAID-1 volume named `/dev/md0`. The handling of
-`volume_for` or `mountpoint` during deployment happens as with any other
-volume.
-
-TPA does not currently support the creation and assembly of RAID
-arrays on other platforms, but you can use an existing array by adding
-an entry to volumes with `device_name: /dev/md0` or `/dev/mapper/xyz`.
-TPA will handle `mkfs` and `mount` as with any other block device.
 
 ## LUKS encryption
 

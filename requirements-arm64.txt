@@ -1,2 +1,0 @@
-psutil==5.9.8 \
-      --hash=sha256:aaea6ba26520aae0e7a8bd9bbcd28678579e6c1a66a4de7a7ad3a31dda5cf277

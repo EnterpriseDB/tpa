@@ -7,10 +7,8 @@ description: Configuring a BDR-Always-ON cluster with TPA.
 EDB Postgres Distributed 3.7 or 4 in an Always-ON
 configuration, suitable for use in test and production.
 
-This architecture requires a subscription to the legacy 2ndQuadrant
-repositories, and some options require a subscription to EDB Repos 1.0.
-See [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
-for more detail on this topic.
+This architecture requires an EDB subscription. 
+All software will be sourced from [EDB Repos 2.0](edb_repositories.md).
 
 The BDR-Always-ON architecture has four variants, which can be
 selected with the `--layout` configure option:

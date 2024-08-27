@@ -62,7 +62,7 @@ All
 options translate to config.yml variables in
 some way. A single option may affect several variables (e.g.,
 `--bdr-version` could set `postgres_version`,
-`tpa_2q_repositories`, `edb_repositories`, `extra_postgres_extensions`, and so on), but
+`edb_repositories`, `extra_postgres_extensions`, and so on), but
 you can always accomplish with an editor what you could by running the
 command.
 
@@ -111,9 +111,9 @@ be translated directly into group variables in the Ansible inventory:
 ```yaml
 cluster_vars:
   postgres_version: 14
-  tpa_2q_repositories:
-  - products/bdr3/release
-  - products/pglogical3/release
+  edb_repositories:
+  - enterprise
+  - postgres_distributed
   postgres_conf_settings:
     bdr.trace_replay: true
 ```

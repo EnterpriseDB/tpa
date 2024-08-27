@@ -18,8 +18,15 @@
       mode: "{{ item.mode }}"
       state: directory
   with_items:
-      - {path: /var/log/pgbouncer, mode: '0775'}
-      - {path: /var/run/pgbouncer, mode: '0775'}
+      - {path: /var/log/pgbouncer, mode: "0775"}
+      - {path: /var/run/pgbouncer, mode: "0775"}
+
+- name: postgres group can access SSL certs for authentication
+  file:
+    path: "{{ pgbouncer_home }}"
+    group: "{{ postgres_group }}"
+    mode: "0750"
+    state: directory
 
 - name: Install tmpfiles.d entries for pgbouncer runtime directories
   copy:

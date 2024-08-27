@@ -1,0 +1,20 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+- name: Collect facts about the Postgres cluster
+  cluster_discovery:
+    conninfo: "{{ postgres_dsn }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- set_fact:
+    cluster_facts: "{{ ansible_facts.cluster_facts|default({}) }}"
+
+- name: Determine upstream_primary
+  set_fact:
+    upstream_primary: "{{ item }}"
+  loop: "{{ play_hosts }}"
+  when:
+    - hostvars[item]['cluster_facts']['role'] is defined
+    - hostvars[item]['cluster_facts']['role'] == 'primary'

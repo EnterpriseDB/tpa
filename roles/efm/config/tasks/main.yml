@@ -18,6 +18,14 @@
     - superuser
     password_encryption: md5
 
+- name: Include efm-pre-config hook
+  include_tasks: "{{ hook }}"
+  when: >
+    lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|permits('efm-pre-config')
+  vars:
+    hook: "{{ cluster_dir }}/hooks/efm-pre-config.yml"
+
 - name: Allow efm user to run db function as {{ postgres_user }}
   community.general.sudoers:
     name: "efm_run_as_{{ postgres_user }}"
@@ -60,13 +68,55 @@
     - log_server is defined
     - log_server != inventory_hostname
 
+# for already deployed clusters we want to avoid these steps
+# so that we avoid an efm reboot.
+# check that .properties file exists
+- name: Check if {{ efm_conf_dir }}/{{ cluster_name }}.properties file exists
+  stat:
+    path: "{{ efm_conf_dir }}/{{ cluster_name }}.properties"
+    get_checksum: false
+    get_mime: false
+  register: efm_cluster_prop
+
+# on deploys after a switchover, set the current upstream_primary
+# so the .properties file is configured correctly on each efm node.
+- name: Set current upstream_primary based on cluster facts
+  include_tasks:
+    file: upstream_primary.yml
+  when: efm_cluster_prop.stat.exists
+
+# check if the raw folder exists (2nd deploy for new clusters using /raw already)
+- name: Check if {{ efm_conf_dir }}/raw folder exists
+  stat:
+    path: "{{ efm_conf_dir }}/raw"
+    get_checksum: false
+    get_mime: false
+  register: efm_raw
+
+# creates the raw subfolder for new clusters (no .properties exists)
+- name: Ensure raw folder exists for new clusters
+  file:
+    path: "{{ efm_conf_dir }}/raw"
+    state: directory
+    owner: efm
+    group: efm
+    mode: "0755"
+  when: >
+    not efm_cluster_prop.stat.exists
+
+# set the correct path for next steps
+- set_fact:
+    raw: "{{ (not efm_cluster_prop.stat.exists or efm_raw.stat.exists)|ternary('/raw','') }}"
+
+# Generate the config file in raw sub folder for new clusters
 - name: Install efm.properties for {{ cluster_name }}
   template:
     src: efm.properties.j2
-    dest: "{{ efm_conf_dir }}/{{ cluster_name }}.properties"
+    dest: "{{ efm_conf_dir }}{{ raw }}/{{ cluster_name }}.properties"
     owner: efm
     group: efm
     mode: "0640"
+  register: efm_properties
   vars:
     efm_encrypted_pass: "{{ efm_encrypted_pass_output.stdout }}"
   notify:
@@ -75,7 +125,7 @@
 - name: Install efm.nodes
   template:
     src: efm.nodes.j2
-    dest: "{{ efm_conf_dir }}/{{ cluster_name }}.nodes"
+    dest: "{{ efm_conf_dir }}{{ raw }}/{{ cluster_name }}.nodes"
     owner: efm
     group: efm
     mode: "0640"
@@ -83,8 +133,19 @@
     node_ips: "{{
         groups[cluster_tag] | map('extract', hostvars, ['ip_address']) | product([efm_bind_port]) | map('join', ':') | join('\n')
       }}"
+    node_hostnames: "{{ groups[cluster_tag] | product([efm_bind_port]) | map('join', ':') | join('\n') }}"
   notify:
     - Note efm restart required
+# only apply this to new clusters when there was a change in the templating step.
+- name: Add useful comments to efm properties and nodes files
+  command: "{{ efm_bin_dir }}/efm upgrade-conf {{ cluster_name }} -source {{ efm_conf_dir }}{{ raw }}"
+  args:
+    chdir: "{{ efm_conf_dir }}"
+  become: true
+  become_user: efm
+  when: >
+    (not efm_cluster_prop.stat.exists or efm_raw.stat.exists)
+    and efm_properties.changed
 
 # EFM requires us to either configure email alerts or provide a custom
 # notification script. For now, we install a no-op notification script.

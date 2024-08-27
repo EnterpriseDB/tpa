@@ -33,7 +33,7 @@ export {{ k }}="{{ user_data_environment[k] }}"
 {% include 'user-data/locale.j2' %}
 
 {#
-    Install awscli, nvmecli, and mdadm if required.
+    Install awscli and nvmecli if required.
 #}
 {% include 'user-data/pkg.j2' %}
 
@@ -48,13 +48,6 @@ export {{ k }}="{{ user_data_environment[k] }}"
 #}
 {% if item.volumes|select('has_subkey', 'volume_id')|list|count > 0 %}
 {% include 'user-data/attach-volumes.j2' %}
-{% endif %}
-
-{#
-    Next, create any RAID arrays that are required on this system.
-#}
-{% if item.volumes|select('has_subkey', 'raid_device')|list|count > 0 %}
-{% include 'user-data/raid.j2' %}
 {% endif %}
 
 {#

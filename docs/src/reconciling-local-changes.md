@@ -199,7 +199,6 @@ cluster_vars:
   postgres_flavour: postgresql
   postgres_version: '15'
   preferred_python_version: python3
-  tpa_2q_repositories: []
 
 instance_defaults:
   image: tpa/debian:11

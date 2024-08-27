@@ -15,9 +15,8 @@ testing, demonstrating and learning due to its simplicity and ability to
 be configured with no proprietary components.
 
 If you select subscription-only EDB software with this architecture
-it will be sourced from EDB Repos 2.0 and you will need to provide a token.
-See [How TPA uses 2ndQuadrant and EDB repositories](2q_and_edb_repositories.md)
-for more detail on this topic.
+it will be sourced from EDB Repos 2.0 and you will need to 
+[provide a token](edb_repositories.md).
 
 ## Application and backup failover
 
@@ -72,8 +71,7 @@ More detail on the options is provided in the following section.
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `--architecture` (`-a`)                               | Must be set to `M1`.                                                                        |
 | Postgres flavour and version (e.g. `--postgresql 15`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
-| One of: <br> * `--failover-manager {efm, repmgr, patroni}`<br> * `--enable-efm`<br> * `--enable-repmgr`<br> * `--enable-patroni`  | Select the failover manager from [`efm`](efm.md), [`repmgr`](repmgr.md) and [`patroni`](patroni.md).                                                  |
-
+| One of: <br> - `--failover-manager {efm, repmgr, patroni}`<br>- `--enable-efm`<br> - `--enable-repmgr`<br>- `--enable-patroni`  | Select the failover manager from [`efm`](efm.md), [`repmgr`](repmgr.md) and [`patroni`](patroni.md).                                                  |
 
 <br/><br/>
 
@@ -89,12 +87,12 @@ More detail on the options is provided in the following section.
 | `--single-node-location` | A location name, must be a member of `location-names`. | No single-node location is added. |
 | `--enable-haproxy`        | 2 additional nodes will be added as a load balancer layer.<br/>Only supported with Patroni as the failover manager. | HAproxy nodes will not be added to the cluster.                                                      |
 | `--enable-pgbouncer`        | PgBouncer will be configured in the Postgres nodes to pool connections for the primary. | PgBouncer will not be configured in the cluster.                                                      |
-| `--patroni-dcs`           | Select the Distributed Configuration Store backend for patroni.<br/>Only option is `etcd` at this time. <br/>Only supported with Patroni as the failover manager.          | Defaults to `etcd`.                                                                                  |
+| `--patroni-dcs`           | Select the Distributed Configuration Store backend for patroni.<br/>Only option is `etcd` at this time. <br/>Only supported with Patroni as the failover manager. | Defaults to `etcd`. |
+| `--efm-bind-by-hostname` | Enable efm to use hostnames instead of IP addresses to configure the cluster `bind.address`. | Defaults to use IP addresses |
 
 <br/><br/>
 
 ### More detail about M1 configuration
-
 
 You may also specify any of the options described by
 [`tpaexec help configure-options`](tpaexec-configure.md).

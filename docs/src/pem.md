@@ -52,6 +52,28 @@ backend database user, which is set to `postgres` for postgresql and
 password for the web interface by running
 `tpaexec show-password $clusterdir $user`.
 
+
+## Passing additional options when registering PEM agents
+
+TPA registers each PEM agent in the cluster using the `pemworker` utility's
+`--register agent` command. 
+
+A list of additional registration options can be
+passed by including `pemagent_registration_opts` in the cluster config.
+
+For example:
+```yml
+  pemagent_registration_opts:
+  - --enable-smtp true
+  - --enable-heartbeat-connection
+  - --allow-batch-probes true
+  - -l DEBUG1
+```
+
+The [PEM documentation](https://www.enterprisedb.com/docs/pem/latest/registering_agent/#registering-a-pem-agent-using-the-pemworker-utility)
+lists more information about registration options.
+
+
 ## Useful extensions for the nodes with pem agent
 
 By default, TPA will add `sql_profiler`, `edb_wait_states` and
@@ -61,6 +83,39 @@ This list of default extensions for pem-agent nodes can be overriden by
 setting `pemagent_extensions` in config.yml.
 
 If this list is empty, no extensions will be automatically included.
+
+## Providing an external certificate for PEM server SSL authentication
+
+By default, the PEM server creates a self-signed certificate pair, 
+`server-pem.crt` and `server-pem.key` and configures the webserver to use them
+for HTTPS access. 
+
+To provide your own certificate pair, create a directory under the root of the 
+cluster directory named `ssl/pemserver` and place the certificate pair inside.
+```
+cluster directory
+├── ssl
+│   └── pemserver
+│       ├── externally-provided.crt
+│       └── externally-provided.key
+```
+Next, set the variables `pem_server_ssl_certificate` and `pem_server_ssl_key` 
+with the respective file names as values for the `vars:` under the pem server 
+instance or `cluster_vars` in the cluster config file.
+
+TPA will handle copying these files over to the pem server instance and
+configure the webserver accordingly.
+
+```yml
+- Name: pemserver
+  location: main
+  node: 4
+  role:
+  - pem-server
+  vars:
+    pem_server_ssl_certificate: externally-provided.crt
+    pem_server_ssl_key: externally-provided.key
+```
 
 ## Shared PEM server
 

@@ -20,7 +20,7 @@
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
     state: directory
-    mode: 0700
+    mode: "0700"
 
 - name: Retrieve list of key/certificate files
   shell: >

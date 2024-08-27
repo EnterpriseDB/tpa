@@ -57,6 +57,7 @@
       args:
         executable: /bin/bash
       register: sar_sysstat_collect_enabled
+      changed_when: false
       failed_when:
         sar_sysstat_collect_enabled.rc not in [0, 1]
 

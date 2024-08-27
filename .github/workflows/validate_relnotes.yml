@@ -1,11 +1,11 @@
-# When a PR is opened or reopened, check if the PR adds or modifies the release notes.
+# When a PR event is triggered, check if the PR adds or modifies the release notes.
 #
 # This is not supposed to block the merging of a PR. There are PRs which should not have
 # release notes, so we contain ourselves to sending information or warning messages as
 # comments in the PR. The developer/review need to evaluate and proceed accordingly.
 #
 # This workflow would only fail if the spec of the release notes is invalid, in which
-# case a parser error is thrown.
+# case a parser error is thrown, or if non release notes files are found in the folder.
 #
 # This workflow requires the user to set up a GitHub Actions variable named
 # `RELNOTES_DIRECTORY`, which should contain the name of the release notes directory
@@ -17,13 +17,10 @@ on:
     branches:
       - main
 
-    types:
-      - opened
-      - reopened
-
 env:
   SOURCE_REPO_PATH: source_repo
   RELNOTES_DIRECTORY: ${{ vars.RELNOTES_DIRECTORY }}
+  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
 
 jobs:
   validate_release_notes:
@@ -39,8 +36,16 @@ jobs:
           fetch-depth: 2
           path: ${{ env.SOURCE_REPO_PATH }}
 
-      - name: Get list of release notes files introduced/modified by this PR
-        id: get-files
+      - name: Checkout repo-actions
+        uses: actions/checkout@v4
+        with:
+          repository: EnterpriseDB/repo-actions
+          token: ${{ env.GITHUB_TOKEN }}
+          ref: v1
+          path: ./.github/repo-actions
+
+      - name: Validate release notes files introduced/modified by this PR
+        id: validate-relnotes
         run: |
           import os
           import subprocess
@@ -66,6 +71,7 @@ jobs:
 
           release_notes_files = []
           non_release_notes_files = []
+          invalid_release_notes_files = []
 
           for file in file_list:
               # We are only interested in YAML files from the release notes directory.
@@ -77,70 +83,78 @@ jobs:
                   continue
 
               with open(file, "r") as fd:
-                  # If an exception is raised by `safe_load` or `RelNote.__init__`, we
-                  # will not catch them on purpose. If the relnote spec is invalid, we
-                  # want the workflow to fail with an exception, and force the developer
-                  # or reviewer to fix the release notes.
-                  relnote_specs = yaml.safe_load(fd)
+                  try:
+                      relnote_specs = yaml.safe_load(fd)
 
-                  for relnote_spec in relnote_specs:
-                      RelNote(**relnote_spec)
+                      for relnote_spec in relnote_specs:
+                          RelNote(**relnote_spec)
+                  except Exception as exc:
+                      invalid_release_notes_files.append(
+                          f"{file}: {str(exc)}"
+                      )
+
+                      continue
 
               release_notes_files.append(file)
 
-          with open(os.environ["GITHUB_OUTPUT"], "a") as fd:
-              # Inform how many release notes files were touched by this PR.
-              fd.write(f"release_notes_files_num={len(release_notes_files)}\n")
+          exit_code = 0
+          comments = []
 
-              # Inform files which were mistakenly placed inside the release notes folder.
-              # Either they are actual release notes files but with the wrong extension, or
-              # files that should be put somewhere else.
-              if len(non_release_notes_files) > 0:
-                  non_release_notes_files = '\n'.join(non_release_notes_files)
-                  fd.write(f"non_release_notes_files={non_release_notes_files}")
+          if len(release_notes_files) > 0:
+              # If the PR contains release notes we should be fine
+              comments.append(
+                  "✅ This PR adds or modifies release notes!"
+              )
+          else:
+              # If the PR does not contain release notes, we might be fine. Maybe it
+              # refers to a non-customer facing change?
+              comments.append(
+                  "❌ This PR is missing to add or modify release notes!"
+              )
+
+          if len(non_release_notes_files) > 0:
+              # If we find anything other than YAML files under the release notes
+              # folder, that's an issue that should be addressed
+              exit_code = 1
+              comments.append(
+                  "❗ This PR contains unexpected files under the release notes folder:"
+              )
+              comments.append(
+                  "\n".join(non_release_notes_files)
+              )
+
+          if len(invalid_release_notes_files) > 0:
+              # If we are not able to parse any of the release notes files, that's an
+              # issue that should be addressed
+              exit_code = 1
+              comments.append(
+                  "❗ This PR contains invalid files under the release notes folder:"
+              )
+              comments.append(
+                  "\n".join(invalid_release_notes_files)
+              )
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fd:
+              # We need to "encode" line-breaks as literal "\n" values when writing to
+              # GITHUB_OUTPUT so we avoid "Invalid format" errors in Actions
+              comments = '\n\n'.join(comments).replace("\n", r"\n")
+              fd.write(f"comments={comments}\n")
+              fd.write(f"exit_code={exit_code}\n")
         shell: python
         working-directory: ${{ env.SOURCE_REPO_PATH }}
         env:
           PYTHONPATH: ".github/workflows/relnotes"
 
-      # Send a PR comment with a warning that unexpected files were found under the
-      # release notes directory.
-      - name: Report that unexpected files were found, if that is the case
-        if: ${{ steps.get-files.outputs.non_release_notes_files != null }}
-        uses: actions/github-script@v7
+      - name: Create or update comment about release notes validation
+        uses: ./.github/repo-actions/create-or-update-comment
         with:
-          script: |
-            github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: '❗ This PR contains unexpected files under the release notes folder:\n\n${{ steps.get-files.outputs.non_release_notes_files }}'
-            })
+          token: ${{ env.GITHUB_TOKEN }}
+          repo: ${{ github.repository }}
+          issue-number: ${{ github.event.pull_request.number }}
+          comment: '# Release Notes Status\n\n${{ steps.validate-relnotes.outputs.comments }}'
+          matches: '^# Release Notes Status\n\n'
 
-      # Send a PR comment with a warning that the PR misses to add or modify the release
-      # notes.
-      - name: Report that no release notes files were touched, if that is the case
-        if: ${{ steps.get-files.outputs.release_notes_files_num == 0}}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '❌ This PR is missing to add or modify release notes!'
-            })
-
-      # Send a PR comment with an info message that the PR is fine in terms of release
-      # notes.
-      - name: Report that release notes files were touched, if that is the case
-        if: ${{ steps.get-files.outputs.release_notes_files_num > 0}}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '✅ This PR adds or modifies release notes!'
-            })
+      - name: Exit with exit code reported by release notes validation
+        run: |
+          # shellcheck disable=SC2242
+          exit ${{ steps.validate-relnotes.outputs.exit_code }}

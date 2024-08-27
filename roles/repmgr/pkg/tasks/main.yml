@@ -26,3 +26,4 @@
   with_items:
     - repmgrd
     - repmgr{{ postgres_versionNN }}
+    - edb-pge-{{ postgres_versionNN }}-repmgr

@@ -39,7 +39,8 @@
   command: >
     {{ postgres_bin_dir }}/repmgr witness register --verbose \
       -f "{{ repmgr_conf_file }}" \
-      -h "{{ upstream_primary }}"
+      -h "{{ upstream_primary }}" \
+      -p "{{ postgres_port }}"
   become_user: "{{ postgres_user }}"
   become: yes
   when: registration.results is empty

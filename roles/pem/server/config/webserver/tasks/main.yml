@@ -54,9 +54,33 @@
     group: root
     mode: "0644"
 
+- name: Copy over user-provided pem server SSL certificate
+  copy:
+    src: "{{ cluster_dir }}/ssl/pemserver/{{ pem_server_ssl_certificate }}"
+    dest: "{{ pem_base_dir }}/resources/{{ pem_server_ssl_certificate }}"
+    owner: root
+    group: root
+    mode: "0644"
+    force: false
+  when: >
+    pem_server_ssl_certificate is defined
+
+- name: Copy over user-provided pem server SSL key
+  copy:
+    src: "{{ cluster_dir }}/ssl/pemserver/{{ pem_server_ssl_key }}"
+    dest: "{{ pem_base_dir }}/resources/{{ pem_server_ssl_key }}"
+    owner: root
+    group: root
+    mode: "0644"
+    force: false
+  when: >
+    pem_server_ssl_key is defined
+
 - name: Check if web-server certificate already exists
   stat:
-    path: "{{ pem_base_dir }}/resources/server-pem.crt"
+    path: "{{ pem_base_dir }}/resources/{{ certificate }}"
+  vars:
+    certificate: "{{ pem_server_ssl_certificate | default('server-pem.crt')}}"
   register: pem_web_server_certificate
 
 # We don't want to generate a new set of TLS key/certificate pair
@@ -75,10 +99,10 @@
     /usr/bin/openssl req -newkey rsa:4096 -keyout "server-pem.key" -nodes -x509 -days 365 -out "server-pem.crt"
   args:
     chdir: "{{ pem_base_dir }}/resources"
-    creates: "pem-server.crt"
     executable: /bin/bash
   when: >
-    (pem_web_server_renew_tls_certificates|default(false)) or (not pem_web_server_certificate.stat.exists)
+    (pem_web_server_renew_tls_certificates|default(false) and pem_server_ssl_certificate is not defined) 
+    or (not pem_web_server_certificate.stat.exists)
   notify: Restart apache for pem
 
 - name: "Install {{ pem_branding_edb_wl }}-pem.conf"

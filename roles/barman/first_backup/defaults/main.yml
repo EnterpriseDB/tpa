@@ -4,4 +4,4 @@
 
 ## Barman first backup command --wait-timeout
 
-backup_wait_timeout: 30
+backup_wait_timeout: "{{ ('replica' in role)| ternary('90', '30') }}"

@@ -19,6 +19,10 @@
     # ca_path: "{{ patroni_ssl_enabled|ternary(_patroni_ssl_ca_path, omit) }}"
     validate_certs: no
 
+    # This is needed to avoid blocking API calls in case there is a
+    # proxy, e.g. for downloading packages
+    use_proxy: no
+
   register: patroni_readiness_api_output
 
   # If the patroni daemon has just been started it can take a second or two before the

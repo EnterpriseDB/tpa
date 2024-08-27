@@ -42,8 +42,15 @@
     inventory_hostname == target
 
 - name: Set node priority to {{ target }}
-  command: >
-    {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ hostvars[target].ip_address }} 1
+  block:
+    - command: >
+        {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ hostvars[target].ip_address }} 1
+      when: >
+        not efm_bind_by_hostname
+    - command: >
+        {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ target }} 1
+      when: >
+        efm_bind_by_hostname
   when: >
     inventory_hostname == target
 
@@ -70,11 +77,54 @@
     var: cluster_status
 
 - name: Ensure switch over was successful
-  assert:
-    that:
-      status.nodes[target_ip].type == 'Primary'
+  block:
+    - assert:
+        that:
+          status.nodes[target_ip].type == 'Primary'
+      when: >
+        not efm_bind_by_hostname
+    - assert:
+        that:
+          status.nodes[target].type == 'Primary'
+      when: >
+        efm_bind_by_hostname
   vars:
     target_ip: "{{ hostvars[target].ip_address }}"
     status: "{{ cluster_status.stdout|from_json }}"
   when: >
     inventory_hostname == target
+
+- name: Update upstream_primary and efm.properties to reflect switchover
+  block:
+    - name: Set {{ target }} as upstream_primary
+      set_fact: 
+        upstream_primary: "{{ target }}"
+
+    - name: Encrypt efm password
+      shell: >
+        "{{ efm_bin_dir }}"/efm encrypt "{{ cluster_name }}" --from-env
+      environment: "{{ target_environment|combine(_task_environment) }}"
+      vars:
+        _task_environment:
+          EFMPASS: "{{ efm_password }}"
+      register: efm_encrypted_pass_output
+      changed_when: false
+      no_log: true
+
+    - name: Install efm.properties for {{ cluster_name }}
+      template:
+        src: efm.properties.j2
+        dest: "{{ efm_conf_dir }}/{{ cluster_name }}.properties"
+        owner: efm
+        group: efm
+        mode: "0640"
+      vars:
+        efm_encrypted_pass: "{{ efm_encrypted_pass_output.stdout }}"
+
+    - include_role:
+        name: efm/restart
+      vars: 
+        efm_service_end_state: restarted
+
+  when: >
+    'primary' in role or 'replica' in role

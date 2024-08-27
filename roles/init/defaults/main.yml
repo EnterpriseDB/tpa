@@ -344,8 +344,6 @@ default_haproxy_read_only_port:
   epas: 5445
   edbpge: 5433
 default_haproxy_stats_socket: /var/lib/haproxy/stats
-default_pgbouncer_port: 6432
-default_pgbouncer_server_login_retry: 0
 default_harp_proxy_port: 6432
 
 # By default, pgbouncer will forward all connections to 127.0.0.1:5432
@@ -354,13 +352,16 @@ default_harp_proxy_port: 6432
 # name of some instances, its postgres_port setting will be respected,
 # as will max_connections to set pgbouncer_max_client_conn.
 
+default_pgbouncer_auth_user: pgbouncer_auth_user
 default_pgbouncer_backend: 127.0.0.1
 default_pgbouncer_backend_port:
   postgresql: 5432
   epas: 5444
   edbpge: 5432
 default_pgbouncer_max_client_conn: 100
-default_pgbouncer_auth_user: pgbouncer_auth_user
+default_pgbouncer_port: 6432
+default_pgbouncer_server_login_retry: 0
+default_pgbouncer_use_cert_authentication: false
 
 # By default, we create a single wildcard entry under [databases], which
 # forwards all connections to the pgbouncer_backend defined above. Set

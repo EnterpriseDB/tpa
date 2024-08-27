@@ -186,11 +186,12 @@
     haproxy_read_only_port: "{{ haproxy_read_only_port|default(default_haproxy_read_only_port[postgres_family]) }}"
     haproxy_bind_address: "{{ haproxy_bind_address|default(default_haproxy_bind_address) }}"
     harp_proxy_port: "{{ harp_proxy_port|default(default_harp_proxy_port) }}"
+    pgbouncer_auth_user: "{{ pgbouncer_auth_user|default(default_pgbouncer_auth_user) }}"
     pgbouncer_port: "{{ pgbouncer_port|default(default_pgbouncer_port) }}"
     pgbouncer_backend: "{{ pgbouncer_backend|default(default_pgbouncer_backend) }}"
     pgbouncer_backend_port: "{{ pgbouncer_backend_port|default(default_pgbouncer_backend_port[postgres_family]) }}"
-    pgbouncer_auth_user: "{{ pgbouncer_auth_user|default(default_pgbouncer_auth_user) }}"
     pgbouncer_server_login_retry: "{{ pgbouncer_server_login_retry|default(default_pgbouncer_server_login_retry) }}"
+    pgbouncer_use_cert_authentication: "{{ pgbouncer_use_cert_authentication|default(default_pgbouncer_use_cert_authentication) }}"
     haproxy_server_options: "{{ haproxy_server_options|default([]) }}"
     wal_or_xlog: "{{ wal_string }}"
     max_connections: "{{ max_connections|default(default_max_connections) }}"
@@ -236,6 +237,7 @@
 
 - name: Read current configuration file if exists
   shell: "cat {{ harp_directory }}/config.yml"
+  changed_when: false
   register: config_yml
   ignore_errors: true
 
@@ -320,9 +322,10 @@
   - name: Ensure failover_manager is set correctly according to BDR version
     set_fact:
       failover_manager:
-        "{{ 'pgd' if bdr_version is version('5', '>=')
+        "{{
+            'repmgr' if failover_manager == 'repmgr' and ('subscriber-only' in role or 'replica' in role)
+            else 'pgd' if bdr_version is version('5', '>=')
             else 'harp' if failover_manager == 'harp'
-            else 'repmgr' if failover_manager == 'repmgr' and ('subscriber-only' in role or 'replica' in role)
             else 'none' }}"
   when: >
     'bdr' in role
@@ -620,10 +623,10 @@
 - name: Remove bluefin for Postgres < 15
   set_fact:
     postgres_extensions: "{{
-      postgres_extensions
-      |reject('equalto', 'bluefin')
-      |list
-    }}"
+        postgres_extensions
+        |reject('equalto', 'bluefin')
+        |list
+      }}"
   when: postgres_version is version('15', '<')
 
 - name: Define platypus configuration settings
