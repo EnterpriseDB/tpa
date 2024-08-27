@@ -1,8 +1,0 @@
-- summary: Honour failover_manager when overriden at instance level for PGD instances
-  description: |
-    Allow failover_manager override to `repmgr` to work correctly when
-    set at instance level for subscriber-only nodes and their replicas
-    in PGD clusters.
-  type: bugfix
-  jira_tickets:
-  - TPA-767
