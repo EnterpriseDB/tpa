@@ -30,10 +30,16 @@
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
 
+- name: Get current pgd-proxy version
+  shell: >
+    journalctl -u pgd-proxy | grep -P "(?<=proxy version: \")([0-9]*\.[0-9]*\.[0-9]*)" -o | tail -1
+  register: pgdproxy_version
+  changed_when: false
+
 # check that configuration matches
 # register the config summary
 
-- name: gather current pgd-proxy configuration
+- name: gather current pgd-proxy configuration (PGD 5.5+)
   postgresql_query:
     conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, port=pgd_proxy_options['listen_port']) }}"
     query: >
@@ -41,13 +47,35 @@
       cast(server_conn_timeout as text), cast(server_conn_keepalive as text), node_group_enable_proxy_routing,
       node_group_location, fallback_groups, cast(fallback_group_timeout as text)
       FROM bdr.proxy_config_summary
-  register: proxy_config
+  register: proxy_config_post
   vars:
     _task_environment:
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
   run_once: true
+  when: >
+    pgdproxy_version.stdout is version('5.5','>=')
 
+- name: gather current pgd-proxy configuration (before PGD 5.5)
+  postgresql_query:
+    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, port=pgd_proxy_options['listen_port']) }}"
+    query: >
+      SELECT proxy_name, node_group_name,listen_addresses, listen_port, max_client_conn, max_server_conn,
+      cast(server_conn_timeout as text), cast(server_conn_keepalive as text), node_group_enable_proxy_routing,
+      node_group_location, fallback_groups, cast(fallback_group_timeout as text)
+      FROM bdr.proxy_config_summary
+  register: proxy_config_pre
+  vars:
+    _task_environment:
+      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+  run_once: true
+  when: >
+    pgdproxy_version.stdout  is version('5.5','<')
+
+- name: proxy_config
+  set_fact:
+    proxy_config: "{{ (pgdproxy_version.stdout  is version('5.5','<'))|ternary(proxy_config_pre,proxy_config_post) }}"
 # use registered info to compare to node configuration.
 
 # check existing fallback_groups configuration, compare to expected configuration.
@@ -100,7 +128,7 @@
     msg: >
       {{ item }} does not match expected configuration for {{ inventory_hostname }}.
       got {{ this_proxy_config[0][item] }}, expected {{ pgd_proxy_options[item] }}.
-  with_items: "{{ pgd_proxy_options.keys()|list }}"
+  with_items: "{{ pgd_proxy_options.keys()|list|difference((pgdproxy_version.stdout  is version('5.5','<') )|ternary(['read_listen_port'],[])) }}"
   vars:
     this_proxy_config: "{{ proxy_config.results|selectattr('proxy_name', 'equalto', inventory_hostname)|list }}"
   when:
