@@ -151,6 +151,14 @@ class aws(CloudPlatform):
                     "versions": [
                         "22.04",
                         "jammy",
+                    ],
+                    "owner": "099720109477",
+                    "user": "ubuntu",
+                },
+                "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20240801": {
+                    "versions": [
+                        "24.04",
+                        "noble",
                         "default",
                     ],
                     "owner": "099720109477",

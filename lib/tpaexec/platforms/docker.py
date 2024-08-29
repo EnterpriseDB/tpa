@@ -179,7 +179,7 @@ class docker(Platform):
                 "os_family": "RedHat",
             },
             "tpa/ubuntu": {
-                "versions": ["bionic", "focal", "jammy", "18.04", "20.04", "22.04"],
+                "versions": ["bionic", "focal", "jammy", "noble", "18.04", "20.04", "22.04", "24.04"],
                 "os": "Ubuntu",
             },
         }

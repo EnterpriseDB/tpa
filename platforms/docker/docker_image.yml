@@ -94,7 +94,9 @@
       ubuntu-focal: ubuntu:focal
       ubuntu-22.04: ubuntu:jammy
       ubuntu-jammy: ubuntu:jammy
-      ubuntu-latest: ubuntu:jammy
+      ubuntu-24.04: ubuntu:noble
+      ubuntu-noble: ubuntu:noble
+      ubuntu-latest: ubuntu:noble
   when:
     image.startswith('tpa/')
     and _image_key in _tpa_images
