@@ -26,7 +26,14 @@
       --team "{{ monitoring_team |default('') }}"                      \
       --owner "{{ monitoring_server_owner |default('') }}"             \
       --config-dir "{{ pem_agent_config_path|dirname }}"               \
-      --cert-path "{{ pem_agent_certificate_directory }}"
+      --cert-path "{{ pem_agent_certificate_directory }}"              \
+      {% if 'efm' in role %}
+        {{ 
+          --efm-install-path "{{ default_efm_bin_dir }}"               \
+          --efm-cluster-name "{{ cluster_name }}"	
+        }}
+      {% endif %}
+      
   environment: "{{ target_environment|combine(_task_environment) }}"
   vars:
     _task_environment:

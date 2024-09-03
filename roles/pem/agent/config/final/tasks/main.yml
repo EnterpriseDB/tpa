@@ -193,3 +193,17 @@
       "{{ (agent_cfg is not changed)|ternary('started', 'restarted') }}"
     enabled: yes
     daemon_reload: yes
+
+- name: Enable probes for PEM agents registered on EFM nodes
+  command: >
+    {{ pem_agent_base_dir }}/bin/pemworker --pem-user {{ pem_postgres_user }} --enable-probe --probe-display-name {{ item | quote }}
+  environment: "{{ target_environment|combine(_task_environment) }}"
+  vars:
+    _task_environment:
+      PEM_SERVER_PASSWORD: "{{ pem_postgres_password }}"
+  loop:
+  - "streaming replication"
+  - "failover manager node status"
+  - "failover manager cluster info"
+  when: >
+    'efm' in role
