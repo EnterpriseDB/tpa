@@ -1,4 +1,4 @@
-- summary: `barman` Postgres user should not be a superuser
+- summary: The `barman` Postgres user should not be a superuser
   description: |
     Certain required privileges are granted to Postgres role, `barman_role`, which is
     then granted to the `barman` Postgres user. This avoids creating the `barman`
