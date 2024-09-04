@@ -181,7 +181,13 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
-# Now we can complete the task of granting roles to `postgres_users`.
+# Explicitly grant required privileges to the 'barman_role' role.
+# The 'barman' Postgres user has this role listed under it's 
+# granted_roles list in postgres/createuser to avoid creating it
+# as a superuser.
+- include_tasks:
+    file: barman_role.yml
+  when: backup is defined
 
 - name: Grant roles to Postgres users if required
   postgresql_membership:
