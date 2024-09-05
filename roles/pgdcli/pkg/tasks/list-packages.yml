@@ -7,9 +7,12 @@
     list_contents: "{{
         (bdr_version is version('5', '<'))
         |ternary(
-          pgdcli1_packages,
-          pgdcli_packages)
-        |packages_for(ansible_os_family, pgdcli_package_version)
+          pgdcli1_packages 
+          | packages_for(ansible_os_family, pgdcli_package_version),
+          pgdcli_packages 
+          | packages_for(ansible_os_family, pgdcli_package_version)
+          | union(['bash-completion'])
+        )
       }}"
   when: >
     'pgdcli' in role
