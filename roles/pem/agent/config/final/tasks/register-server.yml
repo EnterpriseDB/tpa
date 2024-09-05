@@ -27,15 +27,14 @@
       --owner "{{ monitoring_server_owner |default('') }}"             \
       --config-dir "{{ pem_agent_config_path|dirname }}"               \
       --cert-path "{{ pem_agent_certificate_directory }}"              \
-      {% if 'efm' in role %}
-        {{ 
-          --efm-install-path "{{ default_efm_bin_dir }}"               \
-          --efm-cluster-name "{{ cluster_name }}"	
-        }}
-      {% endif %}
+      {% for option in efm_options if 'efm' in role %} {{ option }} {% endfor %}
+
       
   environment: "{{ target_environment|combine(_task_environment) }}"
   vars:
+    efm_options:
+    - --efm-install-path "{{ efm_bin_dir }}"
+    - --efm-cluster-name "{{ cluster_name }}"
     _task_environment:
       PEM_SERVER_PASSWORD: "{{ pem_postgres_password }}"
       PEM_MONITORED_SERVER_PASSWORD: "{{ vars['%s_password' % postgres_user] }}"
