@@ -83,7 +83,9 @@
 - name: Set current upstream_primary based on cluster facts
   include_tasks:
     file: upstream_primary.yml
-  when: efm_cluster_prop.stat.exists
+  when: >
+    ('primary' in role or 'replica' in role)
+    and efm_cluster_prop.stat.exists
 
 # check if the raw folder exists (2nd deploy for new clusters using /raw already)
 - name: Check if {{ efm_conf_dir }}/raw folder exists
