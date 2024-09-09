@@ -2,6 +2,19 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
+## v23.34.1 (2024-09-10)
+
+### Bugfixes
+
+- Running deploy after a switchover fails for nodes with `efm-witness` role
+
+  The `upstream-primary` for EFM nodes is determined using the facts
+  gathered from Postgres. This fails for nodes with `efm-witness` roles 
+  since they do not have Postgres. The task to determine upstream-primary 
+  is now run only on nodes with `primary` or `replica` roles
+
+  References: TPA-580, TPA-789, TPA-798.
+
 ## v23.34 (2024-08-21)
 
 ### Notable changes
