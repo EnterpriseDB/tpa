@@ -275,7 +275,7 @@
     mode: "0644"
   when: >
     ('primary' in role or 'replica' in role)
-    and failover_manager != 'repmgr'
+    and failover_manager == 'efm'
     and postgres_version is version('12', '>=')
   notify:
     - Note Postgres reload required

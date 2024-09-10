@@ -1,0 +1,23 @@
+- summary: >
+    `primary_slot_name` added for EFM compatibility interferes with `bdr_init_physical`
+  description: |
+    A `primary_slot_name` is configured on the primary node to ensure the 
+    old primary uses a physical slot for replication during an EFM switchover.
+    
+    However, 'bdr_init_physical' attempts to use it for node initialisation 
+    and hangs indefinitely, because the slot does not exist in a PGD installation.
+
+    This `primary_slot_name` is now conditionally set explicitly when the 
+    `failover_manager` is EFM to avoid setting it unnecessarily.
+# used during switchover to ensure the old primary uses
+# a physical slot for replication
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-712
+  support_tickets:
+  - RT36064
