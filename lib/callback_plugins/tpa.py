@@ -77,6 +77,7 @@ class CallbackModule(CallbackModule_default):
             self._task_name = task.get_name().strip()
             self._task_uuid = task._uuid
             self._output_lines = []
+            self._errors = []
 
             # if this isn't the task we were expecting, that's because the last task
             # was an include that got expanded
