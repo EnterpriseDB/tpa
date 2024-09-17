@@ -578,6 +578,12 @@
   when: >
     'pem-server' in role and pem_database_entry is empty
 
+- set_fact:
+    postgis_version_maj_min: "{{ item | split('.') }}"
+  loop: "{{ supported_postgis_versions }}"
+  when: > 
+    postgis_version|default(default_postgis_version) is match((item + '.*') )
+  
 - name: Set postgres_extensions_dictionary
   set_fact:
     postgres_extensions_dictionary: "{{ default_postgres_extensions_dictionary }}"

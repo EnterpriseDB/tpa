@@ -2,18 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
-# Some extension packages require extra repositories to be set up to install dependencies
-
-- name: Automatically run additional repository setup commands for recognized extensions
-  command: >
-   {% for command in item.value.repository_setup_commands[ansible_distribution] %} {{ command }} {% endfor %}
-  loop: "{{ lookup('dict', postgres_extensions_dictionary) }}"
-  when: >
-    'repository_setup_commands' in item.value
-    and
-    (item.key in postgres_extensions
-    or item.key in postgres_databases|json_query('[*].extensions[*].name|[]'))
-
 # On Postgres 9.5, pgespresso is required to support rsync-based backups
 # from a replica. (To do so, we also have to create the extension on the
 # corresponding primary, which we don't do by default yet, because the

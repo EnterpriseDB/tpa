@@ -117,6 +117,10 @@
     repository_path: /etc/apt/sources.list.d
     repository_files: "{{ _2q_repositories|map(attribute='file')|list }}"
 
+# Some extension packages require extra repositories to be set up to install dependencies
+
+- include_tasks: extension-repositories.yml
+
 - name: Update apt cache
   apt:
     update_cache: yes

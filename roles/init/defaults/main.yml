@@ -94,6 +94,13 @@ default_postgres_log_file: "/var/log/postgres/postgres.log"
 
 default_postgres_tablespaces: {}
 
+supported_postgis_versions:
+  - '3.3'
+  - '3.4'
+
+default_postgis_version: "{{ supported_postgis_versions | last }}"
+postgis_version_maj_min: "{{ default_postgis_version | split('.') }}"
+
 default_postgres_extensions_dictionary:
   edb_pg_tuner:
     packages:
@@ -283,14 +290,14 @@ default_postgres_extensions_dictionary:
     packages:
       postgresql:
         Debian: &debian_pg_postgis_packages
-        - postgresql-{{ postgres_version }}-postgis-3
+        - postgresql-{{ postgres_versionNN }}-postgis-{{ postgis_version_maj_min[0] }}
         RedHat: &redhat_pg_postgis_packages
-        - postgis34_{{ postgres_version }}
+        - postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}_{{ postgres_versionNN }}
         Ubuntu: *debian_pg_postgis_packages
         SLES: *redhat_pg_postgis_packages
       epas:
         Debian: &postgis_as_packages
-        - edb-as{{ postgres_version }}-postgis34
+        - edb-as{{ postgres_versionNN }}-postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}
         RedHat: *postgis_as_packages
         Ubuntu: *postgis_as_packages
         SLES: *postgis_as_packages
@@ -301,7 +308,7 @@ default_postgres_extensions_dictionary:
         SLES: *redhat_pg_postgis_packages
       edbpge:
         Debian: &postgis_pge_packages
-        - edb-postgresextended{{ postgres_version }}-postgis34
+        - edb-postgresextended{{ postgres_versionNN }}-postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}
         RedHat: *postgis_pge_packages
         Ubuntu: *postgis_pge_packages
         SLES: *postgis_pge_packages
