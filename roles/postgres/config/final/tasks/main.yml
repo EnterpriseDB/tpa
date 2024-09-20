@@ -187,8 +187,8 @@
 # as a superuser.
 - include_tasks:
     file: barman_role.yml
-  when: backup is defined
 
+# Now we can complete the task of granting roles to `postgres_users`.
 - name: Grant roles to Postgres users if required
   postgresql_membership:
     port: "{{ postgres_port }}"
