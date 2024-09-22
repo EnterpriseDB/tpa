@@ -4,9 +4,9 @@
 #
 #    pip-compile --generate-hashes --output-file=requirements/lint.txt requirements/lint.in
 #
-astroid==3.2.4 \
-    --hash=sha256:0e14202810b30da1b735827f78f5157be2bbd4a7a59b7707ca0bfc2fb4c0063a \
-    --hash=sha256:413658a61eeca6202a59231abb473f932038fbcbf1666587f66d482083413a25
+astroid==3.3.3 \
+    --hash=sha256:2d79acfd3c594b6a2d4141fea98a1d62ab4a52e54332b1f1ddcf07b652cc5c0f \
+    --hash=sha256:63f8c5370d9bad8294163c87b2d440a7fdf546be6c72bbeac0549c93244dbd72
     # via
     #   pylint
     #   pylint-celery
@@ -73,9 +73,9 @@ pyflakes==2.3.1 \
     # via
     #   flake8
     #   prospector
-pylint==3.2.6 \
-    --hash=sha256:03c8e3baa1d9fb995b12c1dbe00aa6c4bcef210c2a2634374aedeb22fb4a8f8f \
-    --hash=sha256:a5d01678349454806cff6d886fb072294f56a58c4761278c97fb557d708e1eb3
+pylint==3.3.0 \
+    --hash=sha256:02dce1845f68974b9b03045894eb3bf05a8b3c7da9fd10af4de3c91e69eb92f1 \
+    --hash=sha256:c685fe3c061ee5fb0ce7c29436174ab84a2f525fce2a268b1986e921e083fe22
     # via
     #   -r requirements/lint.in
     #   prospector
@@ -135,6 +135,7 @@ pyyaml==6.0.1 \
     --hash=sha256:9eb6caa9a297fc2c2fb8862bc5370d0303ddba53ba97e71f08023b6cd73d16a8 \
     --hash=sha256:a08c6f0fe150303c1c6b71ebcd7213c2858041a7e01975da3a99aed1e7a378ef \
     --hash=sha256:a0cd17c15d3bb3fa06978b4e8958dcdc6e0174ccea823003a106c7d4d7899ac5 \
+    --hash=sha256:a56cbdb91d2413864b72f551376b902191f5bb9cf3881b01944c771e04fe72dc \
     --hash=sha256:afd7e57eddb1a54f0f1a974bc4391af8bcce0b444685d936840f125cf046d5bd \
     --hash=sha256:b1275ad35a5d18c62a7220633c913e1b42d44b46ee12554e5fd39c70a243d6a3 \
     --hash=sha256:b786eecbdf8499b9ca1d697215862083bd6d2a99965554781d0d8d1ad31e13a0 \
@@ -154,8 +155,7 @@ pyyaml==6.0.1 \
     --hash=sha256:faca3bdcf85b2fc05d06ff3fbc1f83e1391b3e724afa3feba7d13eeab355484c \
     --hash=sha256:fca0e3a251908a499833aa292323f32437106001d436eca0e6e7833256674585 \
     --hash=sha256:fd1592b3fdf65fff2ad0004b5e363300ef59ced41c2e6b3a99d4089fa8c5435d \
-    --hash=sha256:fd66fc5d0da6d9815ba2cebeb4205f95818ff4b79c3ebe268e75d961704af52f \
-    --hash=sha256:a56cbdb91d2413864b72f551376b902191f5bb9cf3881b01944c771e04fe72dc
+    --hash=sha256:fd66fc5d0da6d9815ba2cebeb4205f95818ff4b79c3ebe268e75d961704af52f
     # via
     #   -r requirements/lint.in
     #   prospector
