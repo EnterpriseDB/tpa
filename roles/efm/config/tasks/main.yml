@@ -124,15 +124,6 @@
   notify:
     - Note efm restart required
 
-- set_fact: 
-    efm_node_hostnames: "{{ efm_node_hostnames | default([]) | union([hostname]) | reject('equalto', omit) }}"
-    efm_node_ips: "{{ efm_node_ips | default([]) | union([ip]) | reject('equalto', omit) }}"
-  vars:
-    hostname: "{{ is_efm_node | ternary(item, omit) }}"
-    ip: "{{ is_efm_node | ternary(hostvars[item]['ip_address'], omit) }}"
-    is_efm_node: "{{ 'efm' in hostvars[item]['role'] }}"
-  loop: "{{ groups[cluster_tag] }}"
-
 - name: Install efm.nodes
   template:
     src: efm.nodes.j2
@@ -140,6 +131,11 @@
     owner: efm
     group: efm
     mode: "0640"
+  vars:
+    node_ips: "{{
+        groups['role_efm'] | map('extract', hostvars, ['ip_address']) | product([efm_bind_port]) | map('join', ':') | join('\n')
+      }}"
+    node_hostnames: "{{ groups['role_efm'] | product([efm_bind_port]) | map('join', ':') | join('\n') }}"
   notify:
     - Note efm restart required
 

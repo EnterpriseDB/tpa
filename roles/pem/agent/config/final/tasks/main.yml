@@ -196,7 +196,7 @@
 
 - name: Enable probes for PEM agents registered on EFM nodes
   command: >
-    {{ pem_agent_base_dir }}/bin/pemworker --pem-user {{ pem_postgres_user }} --enable-probe --probe-display-name {{ item | quote }}
+    {{ pem_agent_base_dir }}/bin/pemworker --pem-user {{ pem_postgres_user }} --pem-port {{ hostvars[pem_server].postgres_port }} --enable-probe --probe-display-name {{ item | quote }}
   environment: "{{ target_environment|combine(_task_environment) }}"
   vars:
     _task_environment:
