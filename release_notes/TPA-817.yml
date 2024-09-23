@@ -1,0 +1,17 @@
+- summary: Only add nodes with `efm` role to cluster `efm.nodes` file
+  description: |
+    A support ticket questioned why the `pemserver` and `barman` nodes are
+    added to the `Allowed node host list` in EFM when they are not 
+    relevant to EFM functions. Refactored the task that writes the `efm.node`
+    configuration to only include those nodes that have `efm` in their list 
+    of roles.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-817
+  support_tickets:
+  - RT40645
