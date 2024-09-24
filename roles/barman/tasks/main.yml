@@ -71,6 +71,7 @@
 - include_role: name=postgres/createuser
   vars:
     username: barman
+    role_attrs: [NOSUPERUSER]
     granted_roles: [barman_role]
 
 - include_role: name=postgres/createuser
