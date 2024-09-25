@@ -112,7 +112,9 @@ class BDR(Architecture):
         if self.args.get("enable_camo", False):
             if "postgres_conf_settings" not in cluster_vars:
                 cluster_vars["postgres_conf_settings"] = {}
-            cluster_vars["postgres_conf_settings"].update({"bdr.default_streaming_mode": "off"})
+            cluster_vars["postgres_conf_settings"].update(
+                {"bdr.default_streaming_mode": "off"}
+            )
 
         # The node group name used to be configurable, but it's now hardcoded to
         # match the cluster name, because harp/pgdcli/pgd-proxy depend on their
@@ -230,14 +232,11 @@ class BDR(Architecture):
         """
         if self.args.get("enable_pem", False):
             for instance in instances:
-                if "bdr" in self._instance_roles(instance):
-                    instance["role"].append("pem-agent")
-
-                if "barman" in self._instance_roles(instance) and self.args.get(
-                    "enable_pg_backup_api", False
+                if "bdr" in self._instance_roles(instance) or (
+                    "barman" in self._instance_roles(instance)
+                    and self.args.get("enable_pg_backup_api", False)
                 ):
                     instance["role"].append("pem-agent")
-
             n = instances[-1].get("node")
             pemserver_name = (
                 "%s-pemserver" % self.args["cluster_name"]
@@ -252,6 +251,7 @@ class BDR(Architecture):
                     "location": self.args["locations"][0]["Name"],
                 }
             )
+
     def _update_instance_beacon(self, instances):
         """
         Add beacon-agent to instance roles where applicable

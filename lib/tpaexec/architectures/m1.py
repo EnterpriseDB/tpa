@@ -250,9 +250,9 @@ class M1(Architecture):
             for instance in instances:
                 ins_defs = self.args["instance_defaults"]
                 role = instance.get("role", ins_defs.get("role", []))
-                if "primary" in role or "replica" in role or "witness" in role:
-                    instance["role"].append("pem-agent")
-                if "barman" in role and "pem-agent" not in role and self.args.get("enable_pg_backup_api", False):
+                if set(["primary", "replica", "witness"]).intersection(set(role)) or (
+                    "barman" in role and self.args.get("enable_pg_backup_api", False)
+                ):
                     instance["role"].append("pem-agent")
             n = instances[-1].get("node")
             pemserver_name = (
