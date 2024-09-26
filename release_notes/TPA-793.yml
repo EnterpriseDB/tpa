@@ -2,8 +2,8 @@
   description: |
     If `--enable-pem` and `--enable-pg-backup-api` are passed to `tpaexec configure`,
     `pem-agent` is added twice to the `barman` node if it is also a `witness`. 
-    Fixed by checking that the `pem-agent` role is not already present in the list of
-    roles before appending it.
+    Fixed by by consolidating both `if` statements together to only evaluate 
+    the conditions once.
     
   # Possible types: notable_change, minor_change, bugfix or breaking_change
   type: bugfix
