@@ -1,0 +1,15 @@
+- summary: Improve postgres-monitor script
+  description: |
+    Improve postgres-monitor script to better manage recoverable errors and
+    add retries on network errors to ensure that it won't return failure when
+    it just didn't allow enough time for postgres service to  be fully started.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-796
+  support_tickets:
+  - RT39191
