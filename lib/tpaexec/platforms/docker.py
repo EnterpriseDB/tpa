@@ -275,3 +275,18 @@ class docker(Platform):
         s["docker_networks"] = [{"ipam_config": [{"subnet": args["subnets"][0]}], "name": args["cluster_name"]}]
 
         args["platform_settings"] = s
+
+    def get_default_subnet_prefix(self, num_instances=None) -> int:
+        """
+        Return a subnet prefix large enough to fit all the instances
+        """
+        if num_instances is None:
+            return net.DEFAULT_SUBNET_PREFIX_LENGTH
+
+        # docker uses one IP for the gateway so these sizes are one less than the actual size
+        subnet_sizes = {253: 24, 125: 25, 61: 26, 29: 27, 13: 28}
+
+        best_size = min(x for x in subnet_sizes.keys() if x >= num_instances)
+
+        return subnet_sizes[best_size]
+

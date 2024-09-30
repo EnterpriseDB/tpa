@@ -397,7 +397,6 @@ class Architecture(object):
         g.add_argument("--no-shuffle-subnets", action="store_true")
         g.add_argument(
             "--subnet-prefix",
-            default=DEFAULT_SUBNET_PREFIX_LENGTH,
             type=int,
             help="number of bits to use to define subnets, e.g. to create subnets as /26 use 26",
         )
@@ -822,7 +821,9 @@ class Architecture(object):
             else:
                 cidr = self.args.get("subnet", DEFAULT_NETWORK_CIDR)
 
-            self.args.setdefault("subnet_prefix", DEFAULT_SUBNET_PREFIX_LENGTH)
+            # set platform-specific default subnet size if a non-None value has not been specified
+            if self.args.get("subnet_prefix") is None:
+                self.args["subnet_prefix"] = self.platform.get_default_subnet_prefix(self.num_instances())
             net = Network(cidr, self.args["subnet_prefix"])
             self._net = net
         return self._net

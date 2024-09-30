@@ -6,6 +6,7 @@ import copy
 import importlib.util
 
 from ..exceptions import PlatformError
+from ..net import DEFAULT_SUBNET_PREFIX_LENGTH
 
 DEFAULT_VOLUME_DEVICE_NAME = "/dev/sd"
 
@@ -134,6 +135,12 @@ class Platform:
         Make platform-specific changes to argument defaults.
         """
         return {}
+
+    def get_default_subnet_prefix(self, num_instances=None):
+        """
+        Make platform-specific changes the subnet prefix used if none is specified by the user.
+        """
+        return DEFAULT_SUBNET_PREFIX_LENGTH
 
 
 class CloudPlatform(Platform):
