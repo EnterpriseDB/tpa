@@ -7,7 +7,7 @@
     --network option with the exception that only one subnet is used for the whole cluster rather than one per
     location.
 
-    The key `private_ip` may now be used to specify a static IP for a Docker instance as long as a named network
+    The key `ip_address` may now be used to specify a static IP for a Docker instance as long as a named network
     is specified in the config.yml.
 
   type: change

@@ -262,7 +262,7 @@ class docker(Platform):
                 if not i["volumes"]:
                     del i["volumes"]
 
-            i['private_ip'] = str(next(host_ips))
+            i['ip_address'] = str(next(host_ips))
 
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}

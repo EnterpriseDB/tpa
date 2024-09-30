@@ -47,7 +47,7 @@
   set_fact:
     instance_networks:
       - name: "{{ docker_networks[0].name }}"
-        ipv4_address: "{{ item.private_ip | default(omit) }}"
+        ipv4_address: "{{ item.ip_address | default(omit) }}"
   when: docker_networks[0].name is defined and item.network is not defined
 
 - name: Provision docker container {{ item.Name }}
