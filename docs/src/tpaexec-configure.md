@@ -117,17 +117,31 @@ configuration. You must edit config.yml to specify multiple regions.
 
 ### Network configuration
 
+!!! Note
+These options are not meaningful for the "bare" platform, where
+TPA will not alter the network configuration of existing servers.
+!!!
+
 By default, each cluster will be configured with a number of randomly selected
 `/28` subnets from the CIDR range `10.33.0.0/16`, depending on the selected
 architecture.
 
 Specify `--network 192.168.0.0/16` to assign subnets from a different network.
-
-**Note:** On AWS clusters, this corresponds to the VPC CIDR.
+On AWS clusters, this corresponds to the VPC CIDR.
 See [aws](platform-aws.md#vpc-required) documentation for details.
 
 Specify `--subnet-prefix 26` to assign subnets of a different size, /26 instead
 of /28 in this case.
+
+!!! Note
+When the "docker" platform is selected, TPA will always place the
+entire cluster in a single subnet regardless of the architecture. This
+subnet is generated according to the logic described here with the
+exception that if the `subnet-prefix` is not specified, TPA will
+automatically select a subnet size large enough to accomodate the number
+of instances in
+`config.yaml`.
+!!!
 
 Specify `--no-shuffle-subnets` to allocate subnets from the start of the
 network CIDR range, without randomisation, e.g. `10.33.0.0/28`, then
@@ -136,9 +150,6 @@ network CIDR range, without randomisation, e.g. `10.33.0.0/28`, then
 Specify `--exclude-subnets-from <directory>` to exclude subnets that are
 already used in existing cluster config.yml files. You can specify this
 argument multiple times for each directory.
-
-**Note:** These options are not meaningful for the "bare" platform, where
-TPA will not alter the network configuration of existing servers.
 
 ### Instance type
 
