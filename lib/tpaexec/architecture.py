@@ -246,7 +246,7 @@ class Architecture(object):
         # required, just check that we have the value in validate_arguments.
 
         supported_flavours = ["postgresql", "pgextended", "edbpge", "epas"]
-        supported_versions = ["10", "11", "12", "13", "14", "15", "16"]
+        supported_versions = ["11", "12", "13", "14", "15", "16", "17"]
 
         class FlavourAndMaybeVersionAction(argparse.Action):
             """Takes an option such as `--epas` or `--postgresql 15` and stores

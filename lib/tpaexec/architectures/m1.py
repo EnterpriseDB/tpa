@@ -208,6 +208,13 @@ class M1(Architecture):
             raise ArchitectureError(
                 f"TPA does not support repmgr with {args.get('postgres_flavour')}"
             )
+        if(
+            args.get("failover_manager") == "repmgr"
+            and args.get("postgres_version") >= "17"
+        ):
+            raise ArchitectureError(
+                f"TPA does not support repmgr for {args.get('postgres_flavour')} 17"
+            )
         if args.get("failover_manager") != "efm" and args.get("efm_bind_by_hostname"):
             raise ArchitectureError(
                 f"--efm-bind-by-hostname can't be used with {args.get('failover_manager')}"

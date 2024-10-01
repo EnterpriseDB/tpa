@@ -93,7 +93,7 @@ You can get an EDB token from enterprisedb.com/repos.
 #### Postgres flavour and version
 
 TPA supports PostgreSQL, EDB Postgres Extended, and EDB Postgres
-Advanced Server (EPAS) versions 11 through 15.
+Advanced Server (EPAS) versions 11 through 17.
 
 You must specify both the flavour (or distribution) and major version of
 Postgres to install, for example:

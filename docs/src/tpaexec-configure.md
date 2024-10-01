@@ -257,7 +257,7 @@ details.
 #### Postgres flavour and version
 
 TPA supports PostgreSQL, EDB Postgres Extended, and EDB Postgres
-Advanced Server (EPAS) versions 11 through 16.
+Advanced Server (EPAS) versions 11 through 17.
 
 You must specify both the flavour (or distribution) and major version of
 Postgres to install, for example:

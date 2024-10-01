@@ -1,0 +1,22 @@
+- summary: Support PostgreSQL, EDB Postgres Extended, and EDB Postgres Advanced Server 17
+  description: |
+    Clusters can be configured to use PostgreSQL, EDB Postgres Extended and 
+    EDB Postgres Advanced Server version 17.
+
+    Barman no longer needs to install the postgres server package to get 
+    the `pg_receivewal` binary when using EDB Postgres Advanced Server 17 or 
+    EDB Postgres Extended 17 since the binary has been added to the client 
+    package for these versions.
+    
+    Raise an architecture error when a cluster is configured with `repmgr` 
+    as the failover_manager as it is not available for Postgres 17.
+    
+    Updated documentation to reflect supported versions.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-803
