@@ -91,3 +91,18 @@ them to each other's authorized_keys file. The postgres user must be
 able to ssh to the barman server in order to archive WAL segments (if
 configured), and the barman user must be able to ssh to the Postgres
 instance to take or restore backups.
+
+## `barman` and `barman_role` Postgres users
+
+TPA will create two Postgres users, `barman` and `barman_role`.
+
+TPA versions `<23.35` created the `barman` Postgres user as a `superuser`.
+
+Beginning with `23.35` the `barman` user is created with `NOSUPERUSER`,
+so any re-deploys on existing clusters will remove the `superuser` attribute
+from the `barman` Postgres user. Instead, the `barman_role` is granted the 
+required set of privileges and the `barman` user is granted `barman_role` membership. 
+
+This avoids granting the `superuser` attribute to the `barman` user, using the set
+of privileges provided in the [Barman Manual](https://docs.pgbarman.org/release/latest/#postgresql-connection).
+
