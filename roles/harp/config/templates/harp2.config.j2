@@ -13,12 +13,16 @@ dcs:
 {% endif %}
   endpoints:
 {% if harp_consensus_protocol == 'etcd' %}
-{%   for h in groups['role_etcd']|sort %}
-{%     set v = hostvars[h] %}
-{%     if v.harp_location == harp_location %}
+{%   if config_for == 'manager' and local_etcd_only|bool|default(False) %}
+  - {{ inventory_hostname }}:{{ etcd_client_port|default(2379) }}
+{%   else %}
+{%     for h in groups['role_etcd']|sort %}
+{%       set v = hostvars[h] %}
+{%       if v.harp_location == harp_location %}
   - {{ h }}:{{ v.etcd_client_port|default(2379) }}
-{%     endif %}
-{%   endfor %}
+{%       endif %}
+{%     endfor %}
+{%   endif %}
 {% elif harp_consensus_protocol == 'bdr' %}
 {%   if config_for == 'manager' %}
   - "{{ bdr_node_local_dsn }}"
