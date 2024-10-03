@@ -1,0 +1,13 @@
+- summary: Add new option when using etcd with HARP
+  description: |
+    Add new optional var `harp_local_etcd_only` available when using etcd
+    with HARP. This option tells HARP manager to connect to local etcd node.
+    This recommendation follows the best practices learnt by doing the same
+    when `bdr` as consensus procotol is being used.
+
+    The default mode of adding multiple endpoints can lead to performance issues
+    in some cases. This option is added to give more control to the user.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  jira_tickets:
+  - TPA-821
