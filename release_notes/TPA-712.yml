@@ -8,7 +8,7 @@
     the slot does not exist in a PGD installation.
 
     This `primary_slot_name` is now conditionally set explicitly when the 
-    `failover_manager` is EFM to avoid setting it unnecessarily.
+    `failover_manager` is EFM or Patroni to avoid setting it unnecessarily.
 # used during switchover to ensure the old primary uses
 # a physical slot for replication
   # Possible types: notable_change, minor_change, bugfix or breaking_change
@@ -19,5 +19,6 @@
   # defined
   jira_tickets:
   - TPA-712
+  - TPA-825
   support_tickets:
   - RT36064
