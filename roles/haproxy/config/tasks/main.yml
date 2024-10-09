@@ -55,6 +55,8 @@
   vars:
     username: haproxy
     role_attrs: [nologin]
+    conn_limit: "{{ (compliance|default('') == 'stig')|ternary(groups['role_haproxy']|count, null) }}"
+
   when:
     haproxy_backend_queue_check != 'platypus'
 

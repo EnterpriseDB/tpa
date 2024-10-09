@@ -51,6 +51,7 @@
     role_attr_flags: "{{
         item.role_attrs|default([])|join(',') or omit
       }}"
+    conn_limit: "{{ item.conn_limit|default(-1) }}"
   vars:
     secret_name: >-
       {{ item.username }}_password
@@ -66,6 +67,23 @@
   with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes
+
+# The superuser that was created by initdb will have rolconnlimit still set to
+# -1, which we must change for STIG compliance
+
+- name: Restrict max connections for Postgres superuser
+  community.postgresql.postgresql_user:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    login_db: postgres
+    name: enterprisedb
+    conn_limit: 10
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when: compliance|default('') == 'stig'
+
+
+
 
 # Now we issue a CREATE EXTENSION command for each extension in
 # `postgres_extensions`, in the postgres and template1 databases.

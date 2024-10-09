@@ -80,6 +80,7 @@ class Architecture(object):
         """
         self.validate_arguments(self.args)
         self.process_arguments(self.args)
+        self.apply_compliance(self.args)
         configuration = self.generate_configuration()
         self.write_configuration(configuration, force=force)
         self.after_configuration(force=force)
@@ -170,6 +171,14 @@ class Architecture(object):
             help="git remote repository to push Tower generated data",
         )
 
+        g = p.add_argument_group("Compliance options")
+        g.add_argument(
+            "--compliance",
+            action="store",
+            dest="compliance",
+            help="a supported compliance standard",
+        )
+
         g = p.add_argument_group("OS selection")
         labels = self.platform.supported_distributions()
         label_opts = {"choices": labels} if labels else {}
@@ -235,7 +244,7 @@ class Architecture(object):
         g.add_argument(
             "--beacon-agent-project-id",
             dest="beacon_agent_project_id",
-            metavar="prj_XXXXXXX"
+            metavar="prj_XXXXXXX",
         )
         g.add_argument("--extra-packages", nargs="+", metavar="NAME")
         g.add_argument("--extra-optional-packages", nargs="+", metavar="NAME")
@@ -490,6 +499,9 @@ class Architecture(object):
         # Validate arguments to --install-from-source
         self._validate_from_source(args)
 
+        # Validate requested compliance targets
+        self._validate_compliance(args)
+
         # --use-local-repo-only implies --enable-local-repo
         if self.args.get("use_local_repo_only"):
             self.args["enable_local_repo"] = True
@@ -509,6 +521,15 @@ class Architecture(object):
             self.args["architecture"] = "PGD-Always-ON"
 
         self.platform.validate_arguments(args)
+
+    def _validate_compliance(self, args):
+        """
+        Verify that if a compliance target has been requested, it is a
+        supported one.
+        """
+        target = args.get("compliance")
+        if target is not None and target not in ("stig", "cis"):
+            raise ArchitectureError(f"Available compliance targets: stig, cis")
 
     def _validate_flavour_version(self, args):
         """Verify postgres flavour, version and related arguments.
@@ -713,6 +734,68 @@ class Architecture(object):
         args["instances"] = instances
 
         self.platform.process_arguments(args)
+
+    def apply_compliance(self, args):
+        """
+        Applies whatever compliance options are required by the
+        given arguments
+        """
+        compliance_target = args.get("compliance")
+        if compliance_target is None:
+            return
+
+        if compliance_target == "stig":
+            top = args.get("top_level_settings") or {}
+            top.update({"compliance": "stig"})
+            args["top_level_settings"] = top
+
+            if args.get("platform") != "bare":
+                raise ArchitectureError('STIG compliance requires the "bare" platform')
+
+            cluster_vars = args.get("cluster_vars")
+            if cluster_vars.get("postgres_flavour") != "epas":
+                raise ArchitectureError('STIG compliance requires the "epas" flavour')
+
+            if args.get("distribution") != "RedHat" or args.get("os_version") not in (
+                "8",
+                "9",
+            ):
+                raise ArchitectureError("STIG compliance requires RHEL version 8 or 9")
+
+            pcs = cluster_vars.get("postgres_conf_settings") or {}
+            pcs.update(
+                {
+                    "edb_audit": "xml",
+                    "edb_audit_statement": "all",
+                    "edb_audit_connect": "all",
+                    "edb_audit_disconnect": "all",
+                    "statement_timeout": 1000,
+                    "client_min_messages": "ERROR",
+                }
+            )
+            cluster_vars["postgres_conf_settings"] = pcs
+
+            cluster_vars.update(
+                {
+                    "tcp_keepalives_idle": 10,
+                    "tcp_keepalives_interval": 10,
+                    "tcp_keepalives_count": 10,
+                    "log_destination": "stderr",
+                    "postgres_log_file_mode": "0600",
+                    "hba_force_hostssl": True,
+                    "hba_force_certificate_auth": True,
+                    "hba_cert_authentication_map": "sslmap",
+                    "extra_postgres_extensions": cluster_vars.get("extra_postgres_extensions", [])
+                    + ["sql_protect"]
+                }
+            )
+
+            # set various GUCs in cluster_vars
+            # set compliance: stig so later checks can see it
+            # set something to install sql/protect
+            # set something to make certs work
+            # check that we have got certs provided also
+            # check that we are bare, RHEL8/9, EPAS
 
     def cluster_name(self):
         """
@@ -977,7 +1060,9 @@ class Architecture(object):
             cluster_vars[k] = cluster_vars.get(k, self.args.get(k))
 
         if self.args.get("beacon_agent_project_id"):
-            cluster_vars["beacon_agent_project_id"] = self.args["beacon_agent_project_id"]
+            cluster_vars["beacon_agent_project_id"] = self.args[
+                "beacon_agent_project_id"
+            ]
 
         self._add_extra_packages(cluster_vars)
 

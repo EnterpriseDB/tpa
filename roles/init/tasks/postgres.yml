@@ -163,6 +163,7 @@
     postgres_conf_files: "{{ postgres_conf_files|default(default_postgres_conf_files) }}"
     postgres_hba_local_auth_method: "{{ postgres_hba_local_auth_method|default(default_postgres_hba_local_auth_method) }}"
     postgres_log_file: "{{ postgres_log_file | default(default_postgres_log_file) }}"
+    postgres_log_file_mode: "{{ postgres_log_file_mode | default(default_postgres_log_file_mode) }}"
     log_destination: "{{ log_destination|default(default_log_destination) }}"
     install_from_source: "{{ install_from_source|default([]) }}"
     barman_user: "{{ barman_user|default(default_barman_user) }}"
@@ -580,7 +581,7 @@
       {{ postgres_databases|json_query("[?name=='%s']" % pem_database) }}
   when: >
     'pem-server' in role and pem_database_entry is empty
-  
+
 - name: Record the list of extensions for the pem-agent instances
   set_fact:
     pemagent_extensions: "{{ pemagent_extensions|default(default_pemagent_extensions) }}"
@@ -637,7 +638,7 @@
 - name: Set postgres_extensions_dictionary
   set_fact:
     postgres_extensions_dictionary: "{{ default_postgres_extensions_dictionary }}"
-    
+
 - name: Define platypus configuration settings
   set_fact:
     platypus_port: "{{ platypus_port|default(6400) }}"

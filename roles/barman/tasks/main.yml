@@ -86,11 +86,13 @@
     username: barman
     role_attrs: [NOSUPERUSER]
     granted_roles: [barman_role]
+    conn_limit: "{{ (compliance|default('') == 'stig')|ternary(groups['role_barman']|count, null) }}"
 
 - include_role: name=postgres/createuser
   vars:
     username: streaming_barman
     role_attrs: [replication]
+    conn_limit: "{{ (compliance|default('') == 'stig')|ternary(2 * groups['role_barman']|count, null) }}"
 
 # The barman-pre-config hook is triggered after installing Barman and
 # setting up the users, but before Barman is configured.
