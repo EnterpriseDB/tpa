@@ -1,0 +1,21 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+- name: Run FIPS crypto check
+  command:
+    cmd: "cat /proc/sys/crypto/fips_enabled"
+  register: crypto_fips_enabled
+
+- assert:
+    that: crypto_fips_enabled.stdout == "1"
+    fail_msg: "FIPS crypto not enabled"
+
+- name: Run FIPS mode check
+  command:
+    cmd: "/usr/bin/fips-mode-setup --check"
+  register: fips_mode
+
+- assert:
+    that: fips_mode.stdout.startswith("FIPS mode is enabled")
+    fail_msg: "FIPS mode not enabled"

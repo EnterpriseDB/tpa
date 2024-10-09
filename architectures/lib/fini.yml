@@ -37,3 +37,17 @@
       name: post_deploy
     when:
       task_selector|selects('post-deploy')
+
+  - include_role:
+      name: test
+      tasks_from: compliance/stig.yml
+    when: >
+      compliance|default('') == 'stig'
+      and task_selector|permits('compliance')
+
+  - include_role:
+      name: test
+      tasks_from: compliance/cis.yml
+    when: >
+      compliance|default('') == 'cis'
+      and task_selector|permits('compliance')
