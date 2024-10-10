@@ -137,8 +137,9 @@ class CallbackModule(CallbackModule_default):
             self._super.v2_runner_on_ok(result)
         else:
             if result._task.action in C._ACTION_DEBUG:
+                self._clean_results(result._result, result._task.action)
                 self._output_lines.append(
-                    f"{result._host.get_name()} => { result._result['msg'] }"
+                    f"{result._host.get_name()} => { self._dump_results(result._result) }"
                 )
             self._ok += 1
 
