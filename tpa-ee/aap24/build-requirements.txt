@@ -8,7 +8,7 @@ ansible-builder==3.1.0
     # via
     #   -r tpa-ee/aap24/build-requirements.in
     #   ansible-navigator
-ansible-compat==24.7.0
+ansible-compat==24.9.1
     # via ansible-lint
 ansible-core==2.15.12
     # via
@@ -20,29 +20,29 @@ ansible-navigator==24.2.0
     # via -r tpa-ee/aap24/build-requirements.in
 ansible-runner==2.4.0
     # via ansible-navigator
-attrs==23.2.0
+attrs==24.2.0
     # via
     #   jsonschema
     #   referencing
 bindep==2.11.0
     # via ansible-builder
-black==24.4.2
+black==24.10.0
     # via ansible-lint
-bracex==2.4
+bracex==2.5.post1
     # via wcmatch
-cffi==1.16.0
+cffi==1.17.1
     # via
     #   cryptography
     #   onigurumacffi
 click==8.1.7
     # via black
-cryptography==43.0.0
+cryptography==43.0.1
     # via ansible-core
 distro==1.9.0
     # via bindep
 docutils==0.21.2
     # via python-daemon
-filelock==3.15.4
+filelock==3.16.1
     # via ansible-lint
 importlib-metadata==6.2.1
     # via
@@ -60,13 +60,13 @@ jsonschema==4.23.0
     #   ansible-compat
     #   ansible-lint
     #   ansible-navigator
-jsonschema-specifications==2023.12.1
+jsonschema-specifications==2024.10.1
     # via jsonschema
 lockfile==0.12.2
     # via python-daemon
 markdown-it-py==3.0.0
     # via rich
-markupsafe==2.1.5
+markupsafe==3.0.1
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
@@ -90,11 +90,11 @@ pathspec==0.12.1
     #   ansible-lint
     #   black
     #   yamllint
-pbr==6.0.0
+pbr==6.1.0
     # via bindep
 pexpect==4.9.0
     # via ansible-runner
-platformdirs==4.2.2
+platformdirs==4.3.6
     # via black
 ptyprocess==0.7.0
     # via pexpect
@@ -104,7 +104,7 @@ pygments==2.18.0
     # via rich
 python-daemon==3.0.1
     # via ansible-runner
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via
     #   ansible-builder
     #   ansible-compat
@@ -119,9 +119,9 @@ referencing==0.35.1
     #   jsonschema-specifications
 resolvelib==1.0.1
     # via ansible-core
-rich==13.7.1
+rich==13.9.2
     # via ansible-lint
-rpds-py==0.19.1
+rpds-py==0.20.0
     # via
     #   jsonschema
     #   referencing
@@ -133,19 +133,20 @@ subprocess-tee==0.4.2
     # via
     #   ansible-compat
     #   ansible-lint
-tomli==2.0.1
+tomli==2.0.2
     # via black
 typing-extensions==4.12.2
     # via
     #   ansible-compat
     #   black
-tzdata==2024.1
+    #   rich
+tzdata==2024.2
     # via ansible-navigator
-wcmatch==8.5.2
+wcmatch==10.0
     # via ansible-lint
 yamllint==1.35.1
     # via ansible-lint
-zipp==3.19.2
+zipp==3.20.2
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
