@@ -4,11 +4,8 @@ description: Configuring the M1 architecture with TPA.
 
 # M1
 
-A Postgres cluster with one or more active locations, each with the same
-number of Postgres nodes and an extra Barman node. Optionally, there can
-also be a location containing only a witness node, or a location
-containing only a single node, even if the active locations have more
-than one.
+A Postgres cluster with a single primary node and physical replication
+to a number of standby nodes including backup and failover management.
 
 This architecture is suitable for production and is also suited to
 testing, demonstrating and learning due to its simplicity and ability to
@@ -18,21 +15,56 @@ If you select subscription-only EDB software with this architecture
 it will be sourced from EDB Repos 2.0 and you will need to 
 [provide a token](edb_repositories.md).
 
-## Application and backup failover
+## Failover management
 
-The M1 architecture implements failover management in that it ensures
-that a replica will be promoted to take the place of the primary should
-the primary become unavailable. However it *does not provide any
-automatic facility to reroute application traffic to the primary*. If
-you require, automatic failover of application traffic you will need to
-configure this at the application itself (for example using multi-host
-connections) or by using an appropriate proxy or load balancer and the
-facilities offered by your selected failover manager.
+The M1 architecture always includes a failover manager. Supported
+options are repmgr, EDB Failover Manager (EFM) and Patroni. In all
+cases, the failover manager will be configured by default to ensure that
+a replica will be promoted to take the place of the primary should the
+primary become unavailable. 
 
-The above is also true of the connection between the backup node and the
-primary created by TPA. The backup will not be automatically adjusted to
+### Application failover
+
+The M1 architecture does not generally provide an automatic facility to
+reroute application traffic to the primary. There are several ways you
+can add this capability to your cluster.
+
+In TPA:
+
+* If you choose repmgr as the failover manager and enable PgBouncer, you
+  can include the `repmgr_redirect_pgbouncer: true` hash under
+  `cluster_vars` in `config.yml`. This causes repmgr to automatically
+  reconfigure PgBouncer to route traffic to the new primary on failover.
+  
+* If you choose EFM as the failover manager, you can use the
+  `efm_conf_settings` hash under `cluster_vars` in `config.yml` to
+  [configure EFM to use a virtual IP address
+  (VIP)](/efm/latest/04_configuring_efm/05_using_vip_addresses/). This
+  is an additional IP address which will always route to the primary
+  node.
+
+!!! Note
+We plan to make the option to automatically redirect pgBouncer to the
+primary available for all failover managers in a future release of TPA.
+!!!
+
+Outside of TPA:
+
+* Place an appropriate proxy or load balancer between the cluster and
+  you application and configure your selected failover manager to update
+  the it with the route to the new primary on failover.
+
+* Handle failover at the application itself, for example buy using
+  multi-hosting connection strings.
+
+### Backup failover
+
+Barman backup nodes will not be automatically adjusted to
 target the new primary in the event of failover, instead it will remain
-connected to the original primary. If you are performing a manual
+connected to the original primary. 
+
+!! This stuff is wrong I think and needs update!!
+If you are performing a manual
 failover and wish to connect the backup to the new primary, you may
 simply re-run `tpaexec deploy`. If you wish to automatically change the
 backup source, you should implement this using your selected failover
