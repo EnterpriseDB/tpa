@@ -52,7 +52,7 @@ Outside of TPA:
 
 * Place an appropriate proxy or load balancer between the cluster and
   you application and configure your selected failover manager to update
- it with the route to the new primary on failover.
+  it with the route to the new primary on failover.
 
 * Handle failover at the application itself, for example buy using
   multi-hosting connection strings.
