@@ -59,16 +59,11 @@ Outside of TPA:
 
 ### Backup failover
 
-Barman backup nodes will not be automatically adjusted to
-target the new primary in the event of failover, instead it will remain
-connected to the original primary. 
-
-!! This stuff is wrong I think and needs update!!
-If you are performing a manual
-failover and wish to connect the backup to the new primary, you may
-simply re-run `tpaexec deploy`. If you wish to automatically change the
-backup source, you should implement this using your selected failover
-manager as noted above.
+TPA does not configure any kind of 'backup failover'. If the Postgres
+node from which you are backing up is down, backups will simply halt
+until the node is back online. To manually connect the backup to the new
+primary, edit `config.yml` to add the `backup` hash to the new primary
+instance and re-run `tpaexec deploy`. 
 
 ## Cluster configuration
 
