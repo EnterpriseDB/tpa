@@ -54,8 +54,8 @@ Outside of TPA:
   you application and configure your selected failover manager to update
   it with the route to the new primary on failover.
 
-* Handle failover at the application itself, for example buy using
-  multi-hosting connection strings.
+* Handle failover at the application itself, for example by using
+  multi-host connection strings.
 
 ### Backup failover
 
