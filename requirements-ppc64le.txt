@@ -7,9 +7,8 @@ cryptography==43.0.1 \
 markupsafe==3.0.1 \
     --hash=sha256:2c578f1941e2f223182c9ba0b34caeb04c0ef530b7a0aeff6eb13e8d1655607c
     # via -r /out/requirements-ppc64le.in
-psutil==6.0.0 \
-    --hash=sha256:987b8f8c987323e0b56801f20173ca26ead18cdc29576c1deb4651551994591f \
-    --hash=sha256:e2e8d0054fc88153ca0544f5c4d554d42e33df2e009c4ff42284ac9ebdef4132
+psutil==6.1.0 \
+    --hash=sha256:10c42fadeeb8aeb9f7de1aeb663c3c8368309c55f2cee5efd7cb99f3c1992405
     # via -r /out/requirements-ppc64le.in
 pycparser==2.22 \
     --hash=sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
