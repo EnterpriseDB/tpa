@@ -35,6 +35,10 @@ In TPA:
   can include the `repmgr_redirect_pgbouncer: true` hash under
   `cluster_vars` in `config.yml`. This causes repmgr to automatically
   reconfigure PgBouncer to route traffic to the new primary on failover.
+
+* If you choose Patroni as the failover manager and enable PgBouncer,
+  Patroni will automatically reconfigure PgBouncer to route traffic to
+  the new primary on failover.
   
 * If you choose EFM as the failover manager, you can use the
   `efm_conf_settings` hash under `cluster_vars` in `config.yml` to
