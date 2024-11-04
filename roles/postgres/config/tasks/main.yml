@@ -274,7 +274,7 @@
     group: "{{ postgres_group }}"
     mode: "0644"
   when: >
-    role in ['primary', 'replica']
+    ('primary' in role or 'replica' in role)
     and failover_manager in ['efm', 'patroni']
     and postgres_version is version('12', '>=')
   notify:
