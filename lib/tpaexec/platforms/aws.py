@@ -69,6 +69,7 @@ class aws(CloudPlatform):
             "Debian-arm",
             "Debian-minimal",
             "RedHat",
+            "RedHat-arm",
             "RedHat-minimal",
             "Rocky",
             "Rocky-minimal",
@@ -122,6 +123,13 @@ class aws(CloudPlatform):
                     "versions": ["9"],
                     "owner": "309956199498",
                     "user": "ec2-user",
+                },
+            },
+            "redhat-arm" : {
+                "RHEL-9.4.0_HVM-20240605-arm64-82-Hourly2-GP3" : {
+                    "versions": ["9"],
+                    "owner": "309956199498",
+                    "user": "ec2-user"
                 },
             },
             "rocky": {
