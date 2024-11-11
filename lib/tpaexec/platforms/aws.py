@@ -212,7 +212,7 @@ class aws(CloudPlatform):
             print("(t3.micro instances often run out of memory)")
 
         if self._is_default_ec2_instance_type() and self._is_an_arm64_image(image["os"]):
-            self.arch.args["instance_type"] = "a1.medium"
+            self.arch.args["instance_type"] = "t4g.medium"
 
         return image
 
