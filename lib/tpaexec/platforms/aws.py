@@ -211,10 +211,14 @@ class aws(CloudPlatform):
             )
             print("(t3.micro instances often run out of memory)")
 
-        if self._is_default_ec2_instance_type() and image["os"].lower().startswith("debian-arm"):
+        if self._is_default_ec2_instance_type() and self._is_an_arm64_image(image["os"]):
             self.arch.args["instance_type"] = "a1.medium"
 
         return image
+
+    def _is_an_arm64_image(self, image):
+        accepted_arm64_images = ("debian-arm", "redhat-arm")
+        return image.lower().startswith(accepted_arm64_images)
 
     def _is_default_ec2_instance_type(self):
         return self.arch.args.get("instance_type") == AWS_DEFAULT_INSTANCE_TYPE
