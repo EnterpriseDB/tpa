@@ -444,7 +444,7 @@ class Architecture(object):
             "postgres_volume_size": 16,
         }
 
-    def update_argument_defaults(self, argument_defaults):
+    def update_argument_defaults(self, defaults):
         """
         Makes architecture-specific changes to argument_defaults if required
         """
@@ -500,6 +500,13 @@ class Architecture(object):
             self.args["keyring_backend"] = os.environ.get(
                 "TPA_KEYRING_BACKEND", "system"
             )
+
+        # Change the name value of the architecture to output
+        # PGD-Always-ON in the config.yml instead of Lightweight
+        # we do it now to let all the lightweight specific configure
+        # code to be used first before changing the name.
+        if self.args.get("architecture") == "Lightweight":
+            self.args["architecture"] = "PGD-Always-ON"
 
         self.platform.validate_arguments(args)
 
@@ -1174,7 +1181,7 @@ class Architecture(object):
         if (
             postgres_flavour == "postgresql"
             and self.args.get("failover_manager") != 'efm'
-            and self.name not in ("PGD-Always-ON", "BDR-Always-ON")
+            and self.name not in ("PGD-Always-ON", "BDR-Always-ON", "Lightweight")
             and not self.args.get("enable_pem")
         ):
             repos = []

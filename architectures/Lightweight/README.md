@@ -1,0 +1,1 @@
+../../docs/src/architecture-PGD-Lightweight.md

@@ -36,11 +36,12 @@ class BDR(Architecture):
             help="name of BDR-enabled database",
             default="bdrdb",
         )
-        g.add_argument(
-            "--enable-camo",
-            action="store_true",
-            help="assign instances pairwise as CAMO partners",
-        )
+        if self.name != "Lightweight":
+            g.add_argument(
+                "--enable-camo",
+                action="store_true",
+                help="assign instances pairwise as CAMO partners",
+            )
 
     def cluster_vars_args(self):
         return super().cluster_vars_args() + [
@@ -69,13 +70,13 @@ class BDR(Architecture):
         arch = self.args["architecture"]
         default_bdr_versions = {
             "11": "3",
-            "12": "5" if arch == "PGD-Always-ON" else "4",
-            "13": "5" if arch == "PGD-Always-ON" else "4",
-            "14": "5" if arch == "PGD-Always-ON" else "4",
-            "15": "5" if arch == "PGD-Always-ON" else "4",
-            "16": "5" if arch == "PGD-Always-ON" else "4",
-            "17": "5" if arch == "PGD-Always-ON" else "4",
-            None: "5" if arch == "PGD-Always-ON" else "4",
+            "12": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            "13": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            "14": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            "15": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            "16": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            "17": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            None: "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
         }
 
         if bdr_version is None:
