@@ -1,18 +1,18 @@
 cffi==1.17.1 \
     --hash=sha256:f7f5baafcc48261359e14bcd6d9bff6d4b28d9103847c9e136694cb0501aef87
     # via cryptography
-cryptography==43.0.1 \
-    --hash=sha256:bc894ac24234ca663d87f83c6b870579c733393bec855e9e896b539e4b41736e
+cryptography==43.0.3 \
+    --hash=sha256:8f6f9250cbe5546eae452b07b26e0cf3eeca40ea80810f30c7760e2727bf45cb
     # via -r /out/requirements-ppc64le.in
-markupsafe==3.0.1 \
-    --hash=sha256:2c578f1941e2f223182c9ba0b34caeb04c0ef530b7a0aeff6eb13e8d1655607c
+markupsafe==3.0.2 \
+    --hash=sha256:70fa62ee74c613f24525884f825c0e2ec98a8ee476419fe7cfc224d8031a5191
     # via -r /out/requirements-ppc64le.in
 psutil==6.1.0 \
-    --hash=sha256:10c42fadeeb8aeb9f7de1aeb663c3c8368309c55f2cee5efd7cb99f3c1992405
+    --hash=sha256:3ffae8c6fdafc1ee3b4c5b1ebf26440275c97b31776f27de12adfd821e69ca84
     # via -r /out/requirements-ppc64le.in
 pycparser==2.22 \
     --hash=sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
     # via cffi
 pyyaml==6.0.2 \
-    --hash=sha256:b70a73873a9db3b12e48152ad1322c07ad8a704a82c220c7fcbb69bb3f46cd31
+    --hash=sha256:bcddb998561d8d258470985a03e74cf26b26a91b06e9e96ed7739875cca19ee4
     # via -r /out/requirements-ppc64le.in
