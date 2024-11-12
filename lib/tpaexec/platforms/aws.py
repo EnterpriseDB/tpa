@@ -127,7 +127,7 @@ class aws(CloudPlatform):
             },
             "redhat-arm" : {
                 "RHEL-9.4.0_HVM-20240605-arm64-82-Hourly2-GP3" : {
-                    "versions": ["9"],
+                    "versions": ["9", "default"],
                     "owner": "309956199498",
                     "user": "ec2-user"
                 },
