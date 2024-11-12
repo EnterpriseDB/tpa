@@ -6,7 +6,7 @@ description: Configuring a PGD Lightweight cluster with TPA.
 
 !!! Note
     This architecture is for Postgres Distributed 5 only.
-    If you require PGD 4 or 3.7 please use [BDR-Always-ON](BDR-Always-ON.md).
+    If you require PGD 4 or 3.7 please use [BDR-Always-ON](architecture-BDR-Always-ON.md).
 
     EDB Postgres Distributed 5 in a Lightweight configuration,
     suitable for use in test and production.
