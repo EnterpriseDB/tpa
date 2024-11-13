@@ -4,6 +4,10 @@
     deployments using this architecture and OS.
     Also updated the list of supported AWS images to include the RedHat 9
     ARM64 AMI provided by Amazon.
+    The default `instance_type` for ARM64 EC2 instances has been updated
+    from `a1` to `t4g`, which is the current generation processor available
+    for burstable general purpose workloads.
+
   # Possible types: notable_change, minor_change, bugfix or breaking_change
   type: minor_change
   # At least one between jira_tickets or support_tickets must be defined. You

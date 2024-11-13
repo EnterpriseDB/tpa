@@ -125,11 +125,11 @@ class aws(CloudPlatform):
                     "user": "ec2-user",
                 },
             },
-            "redhat-arm" : {
-                "RHEL-9.4.0_HVM-20240605-arm64-82-Hourly2-GP3" : {
+            "redhat-arm": {
+                "RHEL-9.4.0_HVM-20240605-arm64-82-Hourly2-GP3": {
                     "versions": ["9", "default"],
                     "owner": "309956199498",
-                    "user": "ec2-user"
+                    "user": "ec2-user",
                 },
             },
             "rocky": {
@@ -164,7 +164,6 @@ class aws(CloudPlatform):
                     "owner": "013907871322",
                     "user": "ec2-user",
                 }
-
             },
         }
 
@@ -202,19 +201,23 @@ class aws(CloudPlatform):
         if kwargs.get("lookup", False):
             image.update(**self._lookup_ami(image, kwargs["region"]))
 
-        if self._is_default_ec2_instance_type() \
-            and self._is_rhel_image(image["os"]) \
-            and not self._is_an_arm64_image(image["os"]):
-                self.arch.args["instance_type"] = "t3.medium"
+        if (
+            self._is_default_ec2_instance_type()
+            and self._is_rhel_image(image["os"])
+            and not self._is_an_arm64_image(image["os"])
+        ):
+            self.arch.args["instance_type"] = "t3.medium"
 
-        if self._is_default_ec2_instance_type() and self._is_an_arm64_image(image["os"]):
+        if self._is_default_ec2_instance_type() and self._is_an_arm64_image(
+            image["os"]
+        ):
             self.arch.args["instance_type"] = "t4g.medium"
 
         return image
 
     def _is_rhel_image(self, image):
         accepted_rhel_images = ("rhel", "redhat", "rocky")
-        return image.lower().startswith(accepted_rhel_images) 
+        return image.lower().startswith(accepted_rhel_images)
 
     def _is_an_arm64_image(self, image):
         accepted_arm64_images = ("debian-arm", "redhat-arm")
