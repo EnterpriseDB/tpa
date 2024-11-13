@@ -1,14 +1,19 @@
 - summary: >
     `primary_slot_name` added for EFM compatibility interferes with `bdr_init_physical`
   description: |
-    A `primary_slot_name` is configured on the primary node to 
-    ensure the old primary uses a physical slot for replication 
-    during an EFM switchover. However, 'bdr_init_physical' attempts 
-    to use it for node initialisation and hangs indefinitely since 
-    the slot does not exist in a PGD installation.
+    Previously, the `primary_slot_name` configuration task runs when the
+    `failover_manager` is NOT `repmgr`; both `efm` and `patroni` 
+    use `pg_basebackup` which, unlike `repmgr`, does not configure a 
+    `primary_slot_name` on the primary node when creating a replica.
+    This is to ensure the old primary uses a physical slot for replication 
+    during a switchover.
+    
+    However, this also caused the task to run when the `failover_manager` is `bdr`.
+    When `bdr_init_physical` was used on PGD cluster nodes, initialisation failed 
+    because it used a non-existent slot.
 
-    This `primary_slot_name` is now conditionally set explicitly when the 
-    `failover_manager` is EFM or Patroni to avoid setting it unnecessarily.
+    This is fixed by conditionally running the task which configures the `primary_slot_name` 
+    when the `failover_manager` is explicitly `efm` or `patroni` to avoid setting it unnecessarily.
 # used during switchover to ensure the old primary uses
 # a physical slot for replication
   # Possible types: notable_change, minor_change, bugfix or breaking_change
