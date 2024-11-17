@@ -196,7 +196,7 @@ class TestM1Architecture:
         architecture_m1.validate_arguments(args)
         instances = architecture_m1.num_instances()
         assert instances == expected[0]
-        hostnames, _ = architecture_m1.hostnames(instances)
+        hostnames, _, _ = architecture_m1.hostnames(instances)
         assert hostnames == expected[1]
 
     @pytest.mark.parametrize(

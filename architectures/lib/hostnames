@@ -18,7 +18,7 @@ libdir=$(dirname "$0")
 wanted=${1:?Number of hostnames not specified}
 defaultnamesfile="$libdir/hostnames.txt"
 namesfile=${2:-${HOSTNAMES_FROM:=$defaultnamesfile}}
-pattern=${3:-${HOSTNAMES_PATTERN:='[a-zA-Z0-9-]+( +[0-9a-f.:]+)?'}}
+pattern=${3:-${HOSTNAMES_PATTERN:='[a-zA-Z0-9-]+( +[0-9a-f.:]+)?( +[0-9a-f.:]+)?'}}
 order=${HOSTNAMES_SORTED_BY:---random-sort}
 
 sortcmd="sort"
