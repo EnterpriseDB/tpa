@@ -172,6 +172,8 @@ with one name per line. The file must contain at least as many valid
 hostnames as there are instances in your cluster. Each line may contain
 an optional IP address after the name; if present, this address will be
 set as the `ip_address` for the corresponding instance in `config.yml`.
+If two ip addresses are present, the first will be set as `public_ip`
+and the second as `private_ip`.
 
 Use `--hostnames-pattern '…pattern…'` to limit the selection to
 lines matching an egrep pattern.
