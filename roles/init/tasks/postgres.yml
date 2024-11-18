@@ -162,6 +162,7 @@
     postgres_databases: "{{ postgres_databases|default(default_postgres_databases) }}"
     postgres_conf_files: "{{ postgres_conf_files|default(default_postgres_conf_files) }}"
     postgres_hba_local_auth_method: "{{ postgres_hba_local_auth_method|default(default_postgres_hba_local_auth_method) }}"
+    efm_user_password_encryption: "{{ efm_user_password_encryption|default(default_efm_user_password_encryption) }}"
     postgres_log_file: "{{ postgres_log_file | default(default_postgres_log_file) }}"
     postgres_log_file_mode: "{{ postgres_log_file_mode | default(default_postgres_log_file_mode) }}"
     log_destination: "{{ log_destination|default(default_log_destination) }}"
@@ -788,6 +789,15 @@
             and 'pem-server' not in role
           )
      )
+
+- name: Ensure efm_user_password_encryption uses an algorithm accepted by Postgres
+  assert:
+    that: efm_user_password_encryption in ['scram-sha-256', 'md5']
+    fail_msg: >
+      'efm_user_password_encryption' must be either 'scram-sha-256' or 'md5'
+  when: >
+    efm_user_password_encryption is defined
+
 - name: Recreate role_efm group after role changes
   group_by:
     key: "role_efm"

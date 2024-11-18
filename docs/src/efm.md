@@ -23,6 +23,18 @@ to the cluster.
 See the [EFM documentation](https://www.enterprisedb.com/docs/efm/latest/)
 for more details on EFM configuration.
 
+## efm_user_password_encryption
+
+Must be either `scram-sha-256` or `md5`
+
+Set `efm_user_password_encryption` to control the `auth-method` for the 
+`efm` Postgres user's `auth-method` in `pg_hba.conf` as well as the algorithm 
+used when generating it's encrypted password.
+
+```yaml
+efm_user_password_encryption: 'scram-sha-256' # or can be set to `md5`
+```
+
 ## efm_conf_settings
 
 You can use `efm_conf_settings` to set any parameters, whether recognised

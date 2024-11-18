@@ -100,7 +100,7 @@ hostssl all {{ pgbouncer_auth_user }} {{ addr }} md5
 hostssl all {{ harp_dcs_user }} {{ addr }} {{ password_encryption }}
 {%     endif %}
 {%     if 'efm-witness' in role or ('postgres' in role and failover_manager == 'efm')  %}
-host all efm {{ addr }} md5
+host all efm {{ addr }} {{ efm_user_password_encryption|default(default_efm_user_password_encryption) }}
 {%     endif %}
 {%     if 'barman' in role %}
 {{type}} postgres barman {{ addr }} {{ method }}

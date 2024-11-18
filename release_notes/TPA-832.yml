@@ -1,0 +1,19 @@
+- summary: Make `password_encryption` algorithm for `efm` Postgres user configurable.
+  description: |
+    Expose a configurable `efm_user_password_encryption` variable which should
+    be set to either `'md5'` or `'scram-sha-256'` depending on user requirements.
+    This controls the `auth-method` for the `efm` Postgres user in `pg_hba.conf` 
+    and the algorithm used for generating it's encrypted password.
+
+    In clusters deployed with `compliance` configured to `stig`, the 'efm' Postgres
+    user's `auth-method` in `pg_hba.conf` will be set to `scram-sha-256` since 
+    FIPS-enabled operating systems do not allow `md5` to be used.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-832
+  - TPA-836
