@@ -101,6 +101,22 @@ supported_postgis_versions:
 default_postgis_version: "{{ supported_postgis_versions | last }}"
 postgis_version_maj_min: "{{ default_postgis_version | split('.') }}"
 
+pgdg_pgaudit_version:
+  "12": "14"
+  "13": "15"
+  "14": "16"
+  "15": "17"
+  "16": ""
+  "17": ""
+
+edb_pgaudit_version:
+  "12": "1"
+  "13": "1"
+  "14": "1"
+  "15": "1"
+  "16": "16"
+  "17": "17"
+
 default_postgres_extensions_dictionary:
   edb_pg_tuner:
     packages:
@@ -249,6 +265,18 @@ default_postgres_extensions_dictionary:
     spl: pg_failover_slots
     module: true
 
+  sql_protect:
+    packages:
+      epas:
+        Debian: &as_sql_protect_packages
+        - edb-as{{ postgres_version }}-server-sqlprotect
+        RedHat: *as_sql_protect_packages
+        Ubuntu: *as_sql_protect_packages
+        SLES: *as_sql_protect_packages
+    spl: sqlprotect
+    module: true
+
+
   # EDB Storage Pack
   autocluster:
     packages: &advanced_storage_pack_packages
@@ -318,6 +346,34 @@ default_postgres_extensions_dictionary:
       - crb enable
       Ubuntu: []
       SLES: []
+
+  pgaudit:
+    packages:
+      postgresql:
+        Debian: &debian_pg_pgaudit_packages
+        - postgresql-{{ postgres_versionNN }}-pgaudit
+        RedHat: &redhat_pg_pgaudit_packages
+        - pgaudit{{ pgdg_pgaudit_version[postgres_version] }}_{{ postgres_versionNN }}
+      Ubuntu: *debian_pg_pgaudit_packages
+      SLES: *redhat_pg_pgaudit_packages
+
+      epas:
+        Debian: &pgaudit_as_packages
+        - edb-pg{{ postgres_versionNN }}-pgaudit{{ edb_pgaudit_version[postgres_version] }}
+        RedHat: *pgaudit_as_packages
+        Ubuntu: *pgaudit_as_packages
+        SLES: *pgaudit_as_packages
+      pgextended:
+        Debian: &pgaudit_pge_packages
+        - edb-postgresextended{{ postgres_versionNN }}-pgaudit{{ edb_pgaudit_version[postgres_version] }}
+        RedHat: *pgaudit_pge_packages
+        Ubuntu: *pgaudit_pge_packages
+        SLES: *pgaudit_pge_packages
+    spl: pgaudit
+
+  passwordcheck:
+    spl: passwordcheck
+    module: true
 
 
 default_postgres_extensions:
