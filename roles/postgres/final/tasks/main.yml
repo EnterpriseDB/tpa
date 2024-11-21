@@ -32,6 +32,38 @@
   when: >
     task_selector|permits('pgpass')
 
+# now we have established everything we need to write pg_ident.conf
+
+# Populating pg_ident_entries is incompatible with using
+# postgres_ident_template; this is enforced by an assert when the
+# entries are added
+
+- name: write pg_ident entries on primary
+  block:
+    - set_fact:
+        all_pg_ident_entries: "{{ all_pg_ident_entries|default({})|combine(hostvars[item]['pg_ident_entries']|default({}), list_merge='append_rp') }}"
+      with_items:
+        "{{ groups[cluster_tag] }}"
+
+    - name: Add pg_ident.conf entries
+      lineinfile:
+        path: "{{ postgres_data_dir }}/pg_ident.conf"
+        line: >-
+          {{ hba_cert_authentication_map }} {{ item.0 }} {{ item.1 }}
+      with_nested_dependents:
+        - all_pg_ident_entries.keys()
+        - all_pg_ident_entries[item.0]
+
+    - name: Add general-purpose pg_ident.conf entry
+      lineinfile:
+        path: "{{ postgres_data_dir }}/pg_ident.conf"
+        line: >-
+          {{ hba_cert_authentication_map }} /^(.*)$ \1
+  when: >
+    'replica' not in role
+    and hba_cert_authentication_map|default('') != ''
+
+
 # Now we can perform configuration tasks that require Postgres to be
 # running (unlike the configuration-file changes in postgres/config),
 # such as creating users, databases, and extensions.

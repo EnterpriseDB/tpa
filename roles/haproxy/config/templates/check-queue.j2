@@ -21,6 +21,8 @@ def main():
     _, _, ip_address, port = sys.argv[1:5]
 
     os.environ['PGPASSFILE'] = "/etc/haproxy/.pgpass"
+    os.environ['PGSSLCERT'] = "/etc/haproxy/.postgresql/check_queue.crt"
+    os.environ['PGSSLKEY'] = "/etc/haproxy/.postgresql/check_queue.key"
     conninfo = 'host=%s port=%s dbname={{ bdr_database }} user=check_queue' % (ip_address, port)
     res = None
 

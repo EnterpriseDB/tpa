@@ -29,3 +29,85 @@
       {{ _pgpass_host|replace('*', '\\*') }}
   when: >
     varname in vars and vars[varname] is defined
+
+# if a key/certificate pair is available for this user, copy
+# them to the appropriate place
+
+- name: Determine CN for SSL cert
+  set_fact:
+    cn: "{{ _pgpass_users[0] }}"
+
+- name: Check for an SSL cert for user
+  stat:
+    path: "{{ (_ssl_client_cert_dir, certfilename)|path_join }}"
+  vars:
+    certfilename: "{{ cn }}.crt"
+  register: certfile
+
+- name: Check for an SSL key for user
+  stat:
+    path: "{{ (_ssl_client_cert_dir, keyfilename)|path_join }}"
+  vars:
+    keyfilename: "{{ cn }}.key"
+  register: keyfile
+
+- name: Assert that we have cert and key if required by compliance
+  assert:
+    that:
+      certfile.stat.exists and keyfile.stat.exists
+    fail_msg: "Certificate and key for {{ cn }} not found in {{ _ssl_client_cert_dir }}"
+  when:
+    compliance|default('') == 'stig'
+
+
+
+- block:
+  - name: Check for conflicts of pg_ident.conf
+    assert:
+      that: postgres_ident_template|default('') == ''
+      msg: "client certificates cannot be used with a custom pg_ident.conf template"
+
+
+  # this is OK, because .pgpass is in the home directory except
+  # for haproxy, when we will be overriding everything in a way
+  # that also keeps the directories the same
+  - name: Set SSL certificate/key directory
+    set_fact:
+      ssl_path: "{{ pgpassdir }}/.postgresql/"
+    vars:
+      pgpassdir: "{{ _pgpassfile | replace('/.pgpass', '/') }}"
+
+  - name: Create SSL certificate directory
+    file:
+      path: "{{ ssl_path }}"
+      owner: "{{ _pgpass_owner }}"
+      group: "{{ _pgpass_group }}"
+      mode: "0711"
+      state: "directory"
+
+  - name: Copy SSL cert into place
+    copy:
+      remote_src: true
+      src: "{{ certfile.stat.path }}"
+      dest: "{{ ssl_path }}/postgresql.crt"
+      owner: "{{ _pgpass_owner }}"
+      group: "{{ _pgpass_group }}"
+      mode: "0600"
+
+  - name: Copy SSL key into place
+    copy:
+      remote_src: true
+      src: "{{ keyfile.stat.path }}"
+      dest: "{{ ssl_path }}/postgresql.key"
+      owner: "{{ _pgpass_owner }}"
+      group: "{{ _pgpass_group }}"
+      mode: "0600"
+
+  - name: Add pg_ident.conf entries
+    set_fact:
+      pg_ident_entries: "{{ pg_ident_entries|default({})|combine(new_entry,list_merge='append_rp') }}"
+    vars:
+      new_entry: "{{ { cn: _pgpass_users } }}"
+
+  when:
+    certfile.stat.exists and keyfile.stat.exists
