@@ -56,8 +56,9 @@
     that:
       certfile.stat.exists and keyfile.stat.exists
     fail_msg: "Certificate and key for {{ cn }} not found in {{ _ssl_client_cert_dir }}"
-  when:
+  when: >
     compliance|default('') == 'stig'
+    and task_selector|permits('compliance')
 
 
 

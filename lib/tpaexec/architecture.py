@@ -790,6 +790,34 @@ class Architecture(object):
                 }
             )
 
+        if compliance_target == "cis":
+            top = args.get("top_level_settings") or {}
+            top.update({"compliance": "cis"})
+            args["top_level_settings"] = top
+
+            cluster_vars = args.get("cluster_vars")
+            pcs = cluster_vars.get("postgres_conf_settings") or {}
+            pcs.update(
+                {
+                    "log_error_verbosity": "verbose",
+                    "log_line_prefix": "'%m [%p]: [%l-1] db=%d,user=%u,app=%a,client=%h '",
+                    "log_replication_commands": "on",
+                    "temp_file_limit": "1GB",
+                }
+            )
+            cluster_vars["postgres_conf_settings"] = pcs
+
+            cluster_vars.update(
+                {
+                    "log_connections": "on",
+                    "log_disconnections": "on",
+                    "extra_bash_rc_lines": cluster_vars.get("extra_bashrc_lines", [])
+                    + ["umask 0077"],
+                    "extra_postgres_extensions": cluster_vars.get("extra_postgres_extensions", [])
+                    + ["passwordcheck", "pgaudit"]
+                }
+            )
+
             # set various GUCs in cluster_vars
             # set compliance: stig so later checks can see it
             # set something to install sql/protect
