@@ -1,0 +1,27 @@
+- summary: Support STIG/CIS compliance
+  description: |
+    TPA now supports command-line options to create a cluster configured
+    to conform to many of the requirements of the STIG and CIS security
+    standards.
+
+    These options cause TPA to set many postgresql.conf settings as
+    defined in the relevant standards, to install required extensions,
+    to configure other aspects of system behaviour such as filesystem
+    permissions and user connection limits, and to check for other
+    requirements such as FIPS crypto standards which TPA can't directly
+    impose.
+
+    The clusters thus generated are not certified by TPA to conform to
+    the standards, but much of the groundwork of creating a conforming
+    cluster is now automated.
+
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-366
+  - TPA-836
+  - TPA-837
