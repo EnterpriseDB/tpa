@@ -21,7 +21,7 @@ specifying the extension name, any required shared preload entries and
 the package containing the extension.
 - [Adding the *vector* extension through configuration](reconciling-local-changes.md)
 - [Specifying extensions for configured databases](postgres_databases.md)
-- [Including shared preload entries for extensions](postgresql.conf.md#shared-preload-libraries)
+- [Including shared preload entries for extensions](postgresql.conf.md#shared_preload_libraries)
 - [Installing Postgres-related packages](postgres_installation_method_pkg.md)
 
 ## TPA recognized extensions
