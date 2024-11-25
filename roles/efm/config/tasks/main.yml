@@ -16,9 +16,7 @@
     username: efm
     role_attrs:
     - superuser
-    password_encryption: 
-      "{{ efm_user_password_encryption
-          |default(default_efm_user_password_encryption) }}"
+    password_encryption: "{{ efm_user_password_encryption }}"
 
 - name: Include efm-pre-config hook
   include_tasks: "{{ hook }}"
