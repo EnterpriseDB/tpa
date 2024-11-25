@@ -2,6 +2,275 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
+## v23.35.0 (2024-11-25)
+
+### Notable changes
+
+- Support PostgreSQL, EDB Postgres Extended, and EDB Postgres Advanced Server 17
+
+  Clusters can be configured to use PostgreSQL, EDB Postgres Extended and 
+  EDB Postgres Advanced Server version 17.
+
+  Barman no longer needs to install the postgres server package to get 
+  the `pg_receivewal` binary when using EDB Postgres Advanced Server 17 or 
+  EDB Postgres Extended 17 since the binary has been added to the client 
+  package for these versions.
+
+  Raise an architecture error when a cluster is configured with `repmgr` 
+  as the failover_manager as it is not available for Postgres 17.
+
+  Updated documentation to reflect supported versions.
+
+  References: TPA-803.
+
+- Add new option when using etcd with HARP
+
+  Add new optional var `harp_local_etcd_only` available when using etcd
+  with HARP. This option tells HARP manager to connect to local etcd node.
+  This recommendation follows the best practices learnt by doing the same
+  when `bdr` as consensus procotol is being used.
+
+  The default mode of adding multiple endpoints can lead to performance issues
+  in some cases. This option is added to give more control to the user.
+
+  References: TPA-821.
+
+- Support STIG/CIS compliance
+
+  TPA now supports command-line options to create a cluster configured
+  to conform to many of the requirements of the STIG and CIS security
+  standards.
+
+  These options cause TPA to set many postgresql.conf settings as
+  defined in the relevant standards, to install required extensions,
+  to configure other aspects of system behaviour such as filesystem
+  permissions and user connection limits, and to check for other
+  requirements such as FIPS crypto standards which TPA can't directly
+  impose.
+
+  The clusters thus generated are not certified by TPA to conform to
+  the standards, but much of the groundwork of creating a conforming
+  cluster is now automated.
+
+  References: TPA-366, TPA-836, TPA-837.
+
+- Add support for PGD Lightweight architecture
+
+  TPA is now able to generate a PGD Lightweight architecture comprised of
+  three nodes in two locations (2 nodes in Primary and one in Disaster
+  Recovery) designed to ease migrations from physical replication.
+
+  Users can now run `tpaexec configure lw -a Lightweight --postgresql 15`.
+
+  References: TPA-838.
+
+- Have `configure` create a user-defined network on docker
+
+  The configure command will now automatically add a named network and static IP addresses to config.yml
+  when Docker is the selected platform.
+
+  The network name is the same as the cluster name and the address range follows the existing semantics of the
+  --network option with the exception that only one subnet is used for the whole cluster rather than one per
+  location. If a subnet prefix is not specified by the user, TPA will attempt to select a prefix which results
+  in a subnet large enough to fit the whole cluster.
+
+  The key `ip_address` may now be used to specify a static IP for a Docker instance as long as a named network
+  is specified in the config.yml.
+
+  References: TPA-261, TPA-407, TPA-434.
+
+### Minor changes
+
+- Support RedHat Enterprise Linux 9 for ARM architectures
+
+  Packages are now published targeting RHEL 9 ARM64, and TPA should support
+  deployments using this architecture and OS.
+  Also updated the list of supported AWS images to include the RedHat 9
+  ARM64 AMI provided by Amazon.
+  The default `instance_type` for ARM64 EC2 instances has been updated
+  from `a1` to `t4g`, which is the current generation processor available
+  for burstable general purpose workloads.
+
+  References: TPA-780.
+
+- Added experimental support for using an existing Barman node as backup node in new cluster
+
+  When using an existing Barman node as a backup node in a new cluster, users
+  can set `barman_shared: true` in the Barman instance's vars with the platform
+  set to `bare` and other information supplied as usual for bare instances.
+
+  This change allows TPA to skip some configuration steps that would
+  otherwise fail due to usermod issues, as the Barman user already has
+  running processes from previous deployments.
+
+  The shared Barman instance is treated as a bare instance, so the required
+  access, including the Barman user's access to the target PostgreSQL
+  instances, must be already in place. Copying the Barman user's keys from
+  the original cluster to the new cluster can be used to achieve this, 
+  see the Barman section of the TPA documentation for detailed information.
+
+  References: TPA-777, RT37792.
+
+- Only add nodes with `efm` role to cluster `efm.nodes` file
+
+  A support ticket questioned why the `pemserver` and `barman` nodes are
+  added to the `Allowed node host list` in EFM when they are not 
+  relevant to EFM functions. Refactored the task that writes the `efm.node`
+  configuration to only include those nodes that have `efm` in their list 
+  of roles.
+
+  References: TPA-817, RT40645.
+
+- Remove deprecated `PermissionStartOnly` in postgres.service.j2 template
+
+  `PermissionsStartOnly` has been deprecated and is now achieved via 
+  `ExecStartPost=+/bin/bash...` syntax
+
+  References: TPA-762.
+
+- Improve postgres-monitor script
+
+  Improve postgres-monitor script to better manage recoverable errors and
+  add retries on network errors to ensure that it won't return failure when
+  it just didn't allow enough time for postgres service to  be fully started.
+
+  References: TPA-796, RT39191.
+
+- Enable EFM probes when a PEM agent is registered on an EFM node
+
+  The `--efm-install-path` and `--efm-cluster-name` flags are set when a 
+  PEM server is registered on an EFM node. 
+
+  The `Streaming Replication`, `Failover Manager Node Status` and 
+  `Failover Manager Cluster Info` probes are enabled when a PEM agent is 
+  registered on an EFM node.
+
+  References: TPA-586.
+
+- The `barman` Postgres user should not be a superuser
+
+  Certain required privileges are granted to Postgres role, `barman_role`, which is
+  then granted to the `barman` Postgres user. This avoids creating the `barman`
+  user as a superuser. This role can also be granted to other Postgres users
+  by adding it to their `granted_roles` list using `postgres/createuser`.
+
+  The `barman_role` is created as part of the Barman tasks; if Barman is not
+  used, this role will not be created. Therefore, the task that grants privileges
+  to this role is only executed if the `barman_role` username is in the list 
+  of Postgres users that are created.
+
+  The 'barman' user now has `NOSUPERUSER` explicitly specified as a role attribute. 
+  If a cluster was deployed with a previous TPA version (which created the 'barman' 
+  user as a superuser), deploying with this version will remove the `superuser`
+  role attribute from the `barman` user.
+
+  References: TPA-148, TPA-818.
+
+- Add `postgis` to list of recognized extensions
+
+  The PostGIS package will automatically be added when a user specifies 
+  `postgis` as an entry in either `postgres_extensions` or the list of
+  extensions named under `postgres_databases`.
+
+  Also enables the CRB (Code Ready Builder) repository for RHEL-compatible
+  distributions so PostGIS dependencies can be installed.
+
+  References: TPA-771.
+
+- Allow multiple addresses to be supplied with hostnames
+
+  When using the `--hostnames-from` option to `tpaexec configure`, you
+  can now include two ip addresses on each line, which will be included
+  in the generated config.yml as public_ip and private_ip.
+
+  References: TPA-841.
+
+- Make `password_encryption` algorithm for `efm` Postgres user configurable.
+
+  Expose a configurable `efm_user_password_encryption` variable which should
+  be set to either `'md5'` or `'scram-sha-256'` depending on user requirements.
+  This controls the `auth-method` for the `efm` Postgres user in `pg_hba.conf` 
+  and the algorithm used for generating it's encrypted password.
+
+  In clusters deployed with `compliance` configured to `stig`, the 'efm' Postgres
+  user's `auth-method` in `pg_hba.conf` will be set to `scram-sha-256` since 
+  FIPS-enabled operating systems do not allow `md5` to be used.
+
+  References: TPA-832, TPA-836.
+
+### Bugfixes
+
+- set pem_python_executable outside pkg role
+
+  Fixed a bug whereby if the user excluded the `pkg` selector, later
+  pem-related tasks would fail because the pem_python_executable fact
+  had not been set.
+
+  References: TPA-814.
+
+- `primary_slot_name` added for EFM compatibility interferes with `bdr_init_physical`
+
+  Previously, the `primary_slot_name` configuration task runs when the
+  `failover_manager` is NOT `repmgr`; both `efm` and `patroni` 
+  use `pg_basebackup` which, unlike `repmgr`, does not configure a 
+  `primary_slot_name` on the primary node when creating a replica.
+  This is to ensure the old primary uses a physical slot for replication 
+  during a switchover.
+
+  However, this also caused the task to run when the `failover_manager` is `bdr`.
+  When `bdr_init_physical` was used on PGD cluster nodes, initialisation failed 
+  because it used a non-existent slot.
+
+  This is fixed by conditionally running the task which configures the `primary_slot_name` 
+  when the `failover_manager` is explicitly `efm` or `patroni` to avoid setting it unnecessarily.
+
+  References: TPA-712, TPA-825, RT36064.
+
+- Clear error message stack after each task
+
+  Fixed an issue whereby in some cases error messages would be repeated
+  even after successful tasks.
+
+  References: TPA-812.
+
+- Fix tpaexec test for pgd-proxy config verification
+
+  Fixed a bug whereby the test that ensures the current pgd-proxy configuration
+  matches the expected configuration would fail for version < 5.5.0. This fix
+  ensures that TPA won't try to query configuration keys added in version 5.5.0.
+
+  References: TPA-819.
+
+- Enable new replicas in patroni clusters
+
+  Fixed an issue whereby new replicas in patroni clusters would fail
+  with errors related to replication slots.
+
+  References: TPA-792, TPA-781.
+
+- Add `pem-agent` role on barman nodes at most once for M1 architecture
+
+  If `--enable-pem` and `--enable-pg-backup-api` are passed to `tpaexec configure`,
+  `pem-agent` is added twice to the `barman` node if it is also a `witness`. 
+  Fixed by by consolidating both `if` statements together to only evaluate 
+  the conditions once.
+
+  References: TPA-793.
+
+- Download correct `bash-completion` package version
+
+  If the `pgdcli_package_version` is specified in `config.yml`, the 
+  `bash-completion` package is incorrectly named because the 
+  `packages_for` filter erroneously appends the `pgdcli_package_version` 
+  to the  package name. This results in an attempt to download a nonexistant
+  package.
+
+  The `bash-completion` package is now appended to the list after the
+  `packages_for` filter, since it's version is independent from the 
+  `pgdcli_package_version`.
+
+  References: TPA-794, RT38773.
+
 ## v23.34.1 (2024-09-10)
 
 ### Bugfixes
