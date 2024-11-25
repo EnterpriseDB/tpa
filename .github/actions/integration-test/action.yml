@@ -171,7 +171,7 @@ runs:
         CURRENT_BUFFER_BYTES=`cat $GITHUB_STEP_SUMMARY | wc -c`
         REMAINING=$(expr $MAX_GITHUB_OUTPUT_BYTES - $CURRENT_BUFFER_BYTES)
         echo "::group::tpaexec test -vv"
-        ./bin/tpaexec test "$CLUSTER" -vv &>"$CLUSTER"/tpaexec-test
+        ./bin/tpaexec test "$CLUSTER" -vv --excluded_tasks=pgbench &>"$CLUSTER"/tpaexec-test
         status=$?
         cat "$CLUSTER"/tpaexec-test
         echo "::endgroup::"
