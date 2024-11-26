@@ -7,6 +7,7 @@
   vars:
     username: "{{ pgd_proxy_user }}"
     granted_roles: [bdr_superuser]
+    conn_limit: "{{ (compliance|default('') == 'stig')|ternary(groups['role_pgd-proxy']|count, null) }}"
   when:
     failover_manager == 'pgd'
     and groups['role_pgd-proxy']|default([]) is not empty

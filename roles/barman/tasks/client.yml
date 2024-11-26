@@ -12,6 +12,9 @@
 # We also need to handle the special case of detaching /var/lib/barman
 # from a working instance and attaching it to a new instance, where we
 # would have /var/lib/barman/name but not /etc/barman.d/name.conf.
+#
+# Finally, we add the upstream backed up barman and streaming_barman
+# users password to the ~barman/.pgpass file.
 
 - name: Check if Barman backup directory exists
   stat:
@@ -45,3 +48,16 @@
       /etc/tpa/barman-home-ok && /usr/bin/barman backup {{ backup_name }}
     state: present
   delegate_to: "{{ this_barman }}"
+
+- include_role:
+    name: postgres/pgpass
+    apply:
+      delegate_to: "{{ this_barman }}"
+  vars:
+    pgpassfile: ~barman/.pgpass
+    pgpass_owner: "{{ barman_user }}"
+    pgpass_group: "{{ barman_group }}"
+    pgpass_host: "{{ backup_name }}"
+    pgpass_users:
+    - barman
+    - streaming_barman

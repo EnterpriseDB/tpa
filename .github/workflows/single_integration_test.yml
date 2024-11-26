@@ -55,15 +55,16 @@ on:
       tpa_postgres_version:
         description: "Postgres version"
         required: true
-        default: "14"
+        default: "16"
         type: choice
         options:
-        - 10
         - 11
         - 12
         - 13
         - 14
         - 15
+        - 16
+        - 17
       tpa_failover_manager:
         description: "Failover-manager (for M1 only)"
         type: choice

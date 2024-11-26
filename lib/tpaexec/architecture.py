@@ -80,6 +80,7 @@ class Architecture(object):
         """
         self.validate_arguments(self.args)
         self.process_arguments(self.args)
+        self.apply_compliance(self.args)
         configuration = self.generate_configuration()
         self.write_configuration(configuration, force=force)
         self.after_configuration(force=force)
@@ -170,6 +171,15 @@ class Architecture(object):
             help="git remote repository to push Tower generated data",
         )
 
+        g = p.add_argument_group("Compliance options")
+        g.add_argument(
+            "--compliance",
+            action="store",
+            dest="compliance",
+            choices=['stig','cis'],
+            help="configure to assist with a compliance standard",
+        )
+
         g = p.add_argument_group("OS selection")
         labels = self.platform.supported_distributions()
         label_opts = {"choices": labels} if labels else {}
@@ -235,7 +245,7 @@ class Architecture(object):
         g.add_argument(
             "--beacon-agent-project-id",
             dest="beacon_agent_project_id",
-            metavar="prj_XXXXXXX"
+            metavar="prj_XXXXXXX",
         )
         g.add_argument("--extra-packages", nargs="+", metavar="NAME")
         g.add_argument("--extra-optional-packages", nargs="+", metavar="NAME")
@@ -246,7 +256,7 @@ class Architecture(object):
         # required, just check that we have the value in validate_arguments.
 
         supported_flavours = ["postgresql", "pgextended", "edbpge", "epas"]
-        supported_versions = ["10", "11", "12", "13", "14", "15", "16"]
+        supported_versions = ["11", "12", "13", "14", "15", "16", "17"]
 
         class FlavourAndMaybeVersionAction(argparse.Action):
             """Takes an option such as `--epas` or `--postgresql 15` and stores
@@ -397,7 +407,6 @@ class Architecture(object):
         g.add_argument("--no-shuffle-subnets", action="store_true")
         g.add_argument(
             "--subnet-prefix",
-            default=DEFAULT_SUBNET_PREFIX_LENGTH,
             type=int,
             help="number of bits to use to define subnets, e.g. to create subnets as /26 use 26",
         )
@@ -445,7 +454,7 @@ class Architecture(object):
             "postgres_volume_size": 16,
         }
 
-    def update_argument_defaults(self, argument_defaults):
+    def update_argument_defaults(self, defaults):
         """
         Makes architecture-specific changes to argument_defaults if required
         """
@@ -491,6 +500,9 @@ class Architecture(object):
         # Validate arguments to --install-from-source
         self._validate_from_source(args)
 
+        # Validate requested compliance targets
+        self._validate_compliance(args)
+
         # --use-local-repo-only implies --enable-local-repo
         if self.args.get("use_local_repo_only"):
             self.args["enable_local_repo"] = True
@@ -502,7 +514,33 @@ class Architecture(object):
                 "TPA_KEYRING_BACKEND", "system"
             )
 
+        # Change the name value of the architecture to output
+        # PGD-Always-ON in the config.yml instead of Lightweight
+        # we do it now to let all the lightweight specific configure
+        # code to be used first before changing the name.
+        if self.args.get("architecture") == "Lightweight":
+            self.args["architecture"] = "PGD-Always-ON"
+
         self.platform.validate_arguments(args)
+
+    def _validate_compliance(self, args):
+        """
+        Verify that the requested compliance target, if any, is compatible
+        with other arguments.
+        """
+        compliance_target = args.get("compliance")
+        if compliance_target == "stig":
+            if args.get("platform") != "bare":
+                raise ArchitectureError('STIG compliance requires the "bare" platform')
+
+            if args.get("postgres_flavour") != "epas":
+                raise ArchitectureError('STIG compliance requires the "epas" flavour')
+
+            if args.get("distribution") != "RedHat" or args.get("os_version") not in (
+                "8",
+                "9",
+            ):
+                raise ArchitectureError("STIG compliance requires RHEL version 8 or 9")
 
     def _validate_flavour_version(self, args):
         """Verify postgres flavour, version and related arguments.
@@ -642,7 +680,7 @@ class Architecture(object):
 
         # The architecture's num_instances() method should work by this point,
         # so that we can generate the correct number of hostnames.
-        (args["hostnames"], args["ip_addresses"]) = self.hostnames(self.num_instances())
+        (args["hostnames"], args["ip_addresses"], args["private_ip_addresses"]) = self.hostnames(self.num_instances())
         if args.get("cluster_prefixed_hostnames"):
             args["hostnames"] = [
                 re.sub("[^a-z0-9-]", "-", args["cluster_name"].lower()) + "-" + hostname
@@ -660,13 +698,17 @@ class Architecture(object):
 
         if "instances" in args:
             for instance in args["instances"]:
-                if args["ip_addresses"][instance["node"]] is not None:
+                if args["private_ip_addresses"][instance["node"]] is not None:
+                    instance["public_ip"] = args["ip_addresses"][instance["node"]]
+                    instance["private_ip"] = args["private_ip_addresses"][instance["node"]]
+
+                elif args["ip_addresses"][instance["node"]] is not None:
                     instance["ip_address"] = args["ip_addresses"][instance["node"]]
 
         # Now that main.yml.j2 has been loaded, and we have the initial set of
         # instances[] defined, num_locations() should work, and we can generate
         # the necessary number of subnets.
-        args["subnets"] = self.subnets(self.num_locations())
+        args["subnets"] = self.subnets(self.num_subnets())
 
         locations = args.get("locations", [])
         if not locations:
@@ -704,6 +746,105 @@ class Architecture(object):
 
         self.platform.process_arguments(args)
 
+    def apply_compliance(self, args):
+        """
+        Applies whatever compliance options are required by the
+        given arguments
+        """
+        compliance_target = args.get("compliance")
+        if compliance_target is None:
+            return
+
+        if compliance_target == "stig":
+            self._apply_stig(args)
+
+        if compliance_target == "cis":
+            self._apply_cis(args)
+
+    def _apply_stig(self, args):
+        """
+        Applies changes to config.yml required by STIG compliance
+        """
+        top = args.get("top_level_settings") or {}
+        top.update({"compliance": "stig"})
+        args["top_level_settings"] = top
+
+        cluster_vars = args.get("cluster_vars")
+        pcs = cluster_vars.get("postgres_conf_settings") or {}
+        pcs.update(
+            {
+                # EPAS-00-001000
+                "edb_audit": "xml",
+                # EPAS-00-012600 and others
+                "edb_audit_statement": "all",
+                "edb_audit_connect": "all",
+                "edb_audit_disconnect": "all",
+                # EPAS-00-005200
+                "statement_timeout": 1000,
+                # EPAS-00-006600
+                "client_min_messages": "ERROR",
+            }
+        )
+        cluster_vars["postgres_conf_settings"] = pcs
+
+        cluster_vars.update(
+            {
+                # EPAS-00-005200
+                "tcp_keepalives_idle": 10,
+                "tcp_keepalives_interval": 10,
+                "tcp_keepalives_count": 10,
+                # EPAS-00-006600
+                "log_destination": "stderr",
+                "postgres_log_file_mode": "0600",
+                # EPAS-00-009500
+                "hba_force_hostssl": True,
+                "hba_force_certificate_auth": True,
+                "hba_cert_authentication_map": "sslmap",
+                # EPAS-00-006200 and others
+                "extra_postgres_extensions": cluster_vars.get("extra_postgres_extensions", [])
+                + ["sql_protect"]
+            }
+        )
+
+    def _apply_cis(self, args):
+        """
+        Applies changes to config.yml required by CIS compliance
+        """
+        top = args.get("top_level_settings") or {}
+        top.update({"compliance": "cis"})
+        args["top_level_settings"] = top
+
+        cluster_vars = args.get("cluster_vars")
+        pcs = cluster_vars.get("postgres_conf_settings") or {}
+        pcs.update(
+            {
+                # 3.1.22
+                "log_error_verbosity": "verbose",
+                # 3.1.24
+                "log_line_prefix": "'%m [%p]: [%l-1] db=%d,user=%u,app=%a,client=%h '",
+                # 7.2
+                "log_replication_commands": "on",
+                # 8.1
+                "temp_file_limit": "1GB",
+            }
+        )
+        cluster_vars["postgres_conf_settings"] = pcs
+
+        cluster_vars.update(
+            {
+                # 3.1.20
+                "log_connections": "on",
+                # 3.1.21
+                "log_disconnections": "on",
+                # 2.1
+                "extra_bash_rc_lines": cluster_vars.get("extra_bashrc_lines", [])
+                + ["umask 0077"],
+                # 3.2, 5.3
+                "extra_postgres_extensions": cluster_vars.get("extra_postgres_extensions", [])
+                + ["passwordcheck", "pgaudit"]
+            }
+        )
+
     def cluster_name(self):
         """
         Returns a name for the cluster
@@ -728,13 +869,25 @@ class Architecture(object):
                 locations[loc] = 1
         return len(locations)
 
+    def num_subnets(self):
+        """
+        Returns the number of subnets required by this architecture
+        """
+        if self.platform.name == "docker":
+            return 1
+
+        return self.num_locations()
+
     def hostnames(self, num):
         """
-        Returns two arrays. The first contains 'zero' followed by the
+        Returns three arrays. The first contains 'zero' followed by the
         requested number of hostnames, so that templates can assign
         hostnames[i] to node[i] without regard to the fact that we number
-        nodes starting from 1.  The second contains the corresponding
+        nodes starting from 1.  The second contains the first corresponding
         address for each hostname, or None if no address was provided.
+        The third contains the second corresponding address for each
+        hostname, or None if less than two addresses were provided; this is
+        taken to be a private address.
         """
 
         env = {}
@@ -767,11 +920,13 @@ class Architecture(object):
 
         names = []
         addresses = []
+        private_addresses = []
         for line in stdout.splitlines():
             fields = line.split()
             names.append(fields[0])
             addresses.append(fields[1] if len(fields) > 1 else None)
-        return ["zero"] + names, [None] + addresses
+            private_addresses.append(fields[2] if len(fields) > 2 else None)
+        return ["zero"] + names, [None] + addresses, [None] + private_addresses
 
     def image(self):
         """
@@ -813,7 +968,9 @@ class Architecture(object):
             else:
                 cidr = self.args.get("subnet", DEFAULT_NETWORK_CIDR)
 
-            self.args.setdefault("subnet_prefix", DEFAULT_SUBNET_PREFIX_LENGTH)
+            # set platform-specific default subnet size if a non-None value has not been specified
+            if self.args.get("subnet_prefix") is None:
+                self.args["subnet_prefix"] = self.platform.get_default_subnet_prefix(self.num_instances())
             net = Network(cidr, self.args["subnet_prefix"])
             self._net = net
         return self._net
@@ -951,7 +1108,9 @@ class Architecture(object):
             cluster_vars[k] = cluster_vars.get(k, self.args.get(k))
 
         if self.args.get("beacon_agent_project_id"):
-            cluster_vars["beacon_agent_project_id"] = self.args["beacon_agent_project_id"]
+            cluster_vars["beacon_agent_project_id"] = self.args[
+                "beacon_agent_project_id"
+            ]
 
         self._add_extra_packages(cluster_vars)
 
@@ -1155,7 +1314,7 @@ class Architecture(object):
         if (
             postgres_flavour == "postgresql"
             and self.args.get("failover_manager") != 'efm'
-            and self.name not in ("PGD-Always-ON", "BDR-Always-ON")
+            and self.name not in ("PGD-Always-ON", "BDR-Always-ON", "Lightweight")
             and not self.args.get("enable_pem")
         ):
             repos = []

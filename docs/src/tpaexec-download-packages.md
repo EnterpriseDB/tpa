@@ -23,7 +23,7 @@ are supported.
     container of the target operating system and uses that system's package
     manager to resolve dependencies and download all necessary packages. The
     required Docker setup for download-packages is the same as that for
-    [using Docker as a deployment platform](#platform-docker).
+    [using Docker as a deployment platform](platform-docker.md).
 
 ## Usage
 

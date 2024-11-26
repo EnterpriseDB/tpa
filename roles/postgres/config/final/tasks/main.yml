@@ -51,6 +51,7 @@
     role_attr_flags: "{{
         item.role_attrs|default([])|join(',') or omit
       }}"
+    conn_limit: "{{ item.conn_limit|default(-1) }}"
   vars:
     secret_name: >-
       {{ item.username }}_password
@@ -66,6 +67,23 @@
   with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes
+
+# The superuser that was created by initdb will have rolconnlimit still set to
+# -1, which we must change for STIG compliance
+
+- name: Restrict max connections for Postgres superuser
+  community.postgresql.postgresql_user:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    login_db: postgres
+    name: enterprisedb
+    conn_limit: 10
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when: compliance|default('') == 'stig'
+
+
+
 
 # Now we issue a CREATE EXTENSION command for each extension in
 # `postgres_extensions`, in the postgres and template1 databases.
@@ -181,8 +199,18 @@
   become_user: "{{ postgres_user }}"
   become: yes
 
-# Now we can complete the task of granting roles to `postgres_users`.
+# Explicitly grant required privileges to the 'barman_role' role.
+# The 'barman' Postgres user has this role listed under it's 
+# granted_roles list in postgres/createuser to avoid creating it
+# as a superuser.
+- include_tasks:
+    file: barman_role.yml
+  vars:
+    postgres_usernames: "{{ postgres_users | map(attribute='username') | list }}"
+  when: >
+    'barman_role' in postgres_usernames
 
+# Now we can complete the task of granting roles to `postgres_users`.
 - name: Grant roles to Postgres users if required
   postgresql_membership:
     port: "{{ postgres_port }}"

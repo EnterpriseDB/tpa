@@ -1,0 +1,35 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved. #}
+---
+
+{% set ns = namespace(counter=1) %}
+
+instances:
+{%   set num_proxies = proxy_nodes_per_location|default(0)|int %}
+{%     for i in range(2) %}
+- node: {{ ns.counter }}
+  Name: {{ hostnames[ns.counter] }}
+  location: {{ location_names[0] }}
+  role:
+    - bdr
+    - pgd-proxy
+{%       set ns.counter = ns.counter + 1 %}
+{%     endfor %}
+{%     for i in range(num_proxies) %}
+- node: {{ ns.counter }}
+  Name: {{ hostnames[ns.counter] }}
+  location: {{ location_names[0] }}
+  volumes:
+    - device_name: {{ volume_device_name + 'f' }}
+      volume_type: none
+  role:
+    - pgd-proxy
+{%       set ns.counter = ns.counter + 1 %}
+{%     endfor %}
+- node: {{ ns.counter }}
+  Name: {{ hostnames[ns.counter] }}
+  location: {{ location_names[1] }}
+  role:
+    - bdr
+    - pgd-proxy
+{%       set ns.counter = ns.counter + 1 %}
+

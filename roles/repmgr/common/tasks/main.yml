@@ -6,6 +6,7 @@
   vars:
     username: repmgr
     role_attrs: [superuser]
+    conn_limit: "{{ (compliance|default('') == 'stig')|ternary(groups['role_postgres']|count, null)}}"
 
 - name: Ensure repmgr directories exist
   file:

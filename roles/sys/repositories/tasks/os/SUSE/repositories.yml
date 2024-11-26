@@ -81,6 +81,10 @@
       uri: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/sles/{{ ansible_distribution_major_version }}/noarch/
       name: enterprisedb-{{ repository }}-noarch
 
+  # Some extension packages require extra repositories to be set up to install dependencies
+
+- include_tasks: extension-repositories.yml
+
 - when: postgres_flavour == 'epas'
   block:
   - name: Install SUSEConnect
@@ -113,4 +117,3 @@
       repo: "PackageHub/15.5/{{ ansible_architecture }}"
     when:
       repo not in registration_status.stdout
-

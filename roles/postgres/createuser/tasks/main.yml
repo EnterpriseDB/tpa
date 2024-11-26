@@ -14,5 +14,8 @@
           'role_attrs': role_attrs|default([]),
           'granted_roles': granted_roles|default([]),
           'password_encryption': password_encryption|default(null),
+          'conn_limit': conn_limit|default(default_conn_limit)
         }])
       }}"
+  vars:
+    default_conn_limit: "{{ (compliance|default('') == 'stig')|ternary(2, -1) }}"

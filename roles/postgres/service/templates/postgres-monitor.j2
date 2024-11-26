@@ -4,9 +4,9 @@
 #
 # This script waits until Postgres is accepting connections and returns
 # success as quickly as possible after this happens, or fails if it is
-# convinced that it will not happen.
+# convinced that it will not happen during the full length of test time.
 #
-# We try to connect (and must ignore the first error, because although
+# We try to connect (and must ignore connections errors, because although
 # we were invoked after postgres, it's entirely likely that it has not
 # yet started listening on 5432 when we first check), and keep trying
 # periodically so long as we receive only 'database is starting up'
@@ -14,37 +14,15 @@
 #
 # In an ideal world, we would stop trying if we could establish that the
 # recovery was not making progress, but for now, we resign ourselves to
-# waiting indefinitely.
-
-from __future__ import absolute_import, division, print_function
+# waiting for a few seconds.
 
 import sys, time
 import psycopg2
 
-def main():
-    first = 1
+WAIT_RETRY_TIME_BETWEEN_ATTEMPTS = 3 #seconds
 
-    conninfo = ''
-    if len(sys.argv) == 2:
-        conninfo = sys.argv[1]
-
-    while True:
-        err = None
-
-        try:
-            psycopg2.connect(conninfo).close()
-        except Exception as e:
-            err = str(e).strip()
-            if not recoverable(err) and not first:
-                print('exiting: %s' % err)
-                sys.exit(1)
-        else:
-            print('ok')
-            sys.exit(0)
-
-        print('retrying: %s' % err)
-        time.sleep(10-7*first)
-        first = 0
+def connection_error_only(err):
+    return True if err.pgcode is None else False
 
 def recoverable(err):
     return (err.endswith('the database system is starting up') or \
@@ -52,5 +30,38 @@ def recoverable(err):
         err.endswith('Consistent recovery state has not been yet reached.') or \
         err.endswith('the database system is in recovery mode'))
 
+def main():
+    conninfo = ''
+    first = 1
+    max_network_errors_allowed = 10
+    return_code = 1
+
+    if len(sys.argv) == 2:
+        conninfo = sys.argv[1]
+
+    while max_network_errors_allowed > 0 and return_code == 1:
+        err = None
+
+        try:
+            print('Trying to connect....')
+            psycopg2.connect(conninfo).close()
+        except Exception as e:
+            err = str(e).strip()
+            if type(e) == psycopg2.OperationalError and connection_error_only(e):
+                max_network_errors_allowed -= 1
+                print(f"Connection error detected... {max_network_errors_allowed} retries left.")
+            elif not recoverable(err):
+                print('exiting: %s' % err)
+                break
+
+            print('retrying: %s' % err)
+            time.sleep(WAIT_RETRY_TIME_BETWEEN_ATTEMPTS)
+        else:
+            print('ok')
+            return_code = 0
+
+    return return_code
+
+
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

@@ -13,7 +13,7 @@ PATH="${PATH}:/usr/sbin"
 nvme list|awk '/Amazon EC2 NVMe Instance Storage/ {print $1}'|grep -nx "$1"|sed 's/:.*//'|tr '[1-4]' '[b-e]'|sed 's/^/xvd/'
 SCRIPT
 
-chmod +x /usr/local/bin/nvme-{ebs,is}-name
+chmod +x /usr/local/bin/nvme-is-name
 chmod +x /usr/local/bin/volume-to-device-name
 
 cat > /etc/udev/rules.d/10-aws-nvme.rules <<'UDEV'

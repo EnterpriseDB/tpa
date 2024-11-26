@@ -1,16 +1,27 @@
 ---
-description: Adding pgbouncer to your Postgres cluster.
+description: Adding PgBouncer to your Postgres cluster.
 ---
 
 
-# Configuring pgbouncer
+# Configuring PgBouncer
 
-TPA will install and configure pgbouncer on instances whose `role`
+TPA will install and configure PgBouncer on instances whose `role`
 contains `pgbouncer`.
 
-By default, pgbouncer listens for connections on port 6432 and forwards
-connections to `127.0.0.1:5432` (which may be either Postgres or
-[haproxy](haproxy.md), depending on the architecture).
+By default, PgBouncer listens for connections on port 6432 and, if no
+`pgbouncer_backend` is specified, forwards connections to
+`127.0.0.1:5432` (which may be either Postgres or [haproxy](haproxy.md),
+depending on the architecture).
+
+!!! Note Using PgBouncer to route traffic to the primary
+If you are using the M1 architecture with repmgr you can set
+`repmgr_redirect_pgbouncer: true` hash under `cluster_vars` to have
+PgBouncer connections directed to the primary. The PgBouncer will be
+automatically updated on failover to route to the new primary. You
+should use this option in combination with setting `pgbouncer_backend`
+to the primary instance name to ensure that the cluster is initially
+deployed with PgBouncer configured to route to the primary.
+!!!
 
 You can set the following variables on any `pgbouncer` instance.
 

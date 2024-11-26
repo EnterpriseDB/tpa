@@ -41,7 +41,8 @@
           'cluster_tag': cluster_tag,
           'cluster_name': cluster_name,
           'tpa_version': tpa_version,
-          'keyring_backend': keyring_backend|default(None)
+          'keyring_backend': keyring_backend|default(None),
+          'compliance': compliance|default(None)
         }) }}"
 
 - name: Add ssh_key_file to cluster_group_vars

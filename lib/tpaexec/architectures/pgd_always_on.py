@@ -18,11 +18,11 @@ class PGD_Always_ON(BDR):
             ("14", "5"),
             ("15", "5"),
             ("16", "5"),
+            ("17", "5")
         ]
 
     def add_architecture_options(self, p, g):
         super().add_architecture_options(p, g)
-
         g.add_argument(
             "--pgd-proxy-routing",
             help="configure each PGD-Proxy to route connections to a globally-elected write leader (global) or a write leader within its own location (local)",
@@ -234,7 +234,7 @@ class PGD_Always_ON(BDR):
                 },
             }
         )
-    
+
         bdr_package_version = cluster_vars.get("bdr_package_version")
         sanitized_version, includes_wildcard = self._sanitize_version(version_string=bdr_package_version)
         if self._is_above_minimum(sanitized_version, Version("5.5"), includes_wildcard=includes_wildcard):
@@ -390,7 +390,7 @@ class PGD_Always_ON(BDR):
                 return parse(f"{version_parts[0]}.{version_parts[1]}"), False
         except (InvalidVersion, AttributeError) as e:
             return None, False
-        
+
     def _is_above_minimum(self, x: Union[Version, None], y: Version, includes_wildcard: bool) -> bool:
         if x is None:
             return True

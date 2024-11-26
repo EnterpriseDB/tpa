@@ -208,6 +208,13 @@ class M1(Architecture):
             raise ArchitectureError(
                 f"TPA does not support repmgr with {args.get('postgres_flavour')}"
             )
+        if(
+            args.get("failover_manager") == "repmgr"
+            and args.get("postgres_version") >= "17"
+        ):
+            raise ArchitectureError(
+                f"TPA does not support repmgr for {args.get('postgres_flavour')} 17"
+            )
         if args.get("failover_manager") != "efm" and args.get("efm_bind_by_hostname"):
             raise ArchitectureError(
                 f"--efm-bind-by-hostname can't be used with {args.get('failover_manager')}"
@@ -250,9 +257,9 @@ class M1(Architecture):
             for instance in instances:
                 ins_defs = self.args["instance_defaults"]
                 role = instance.get("role", ins_defs.get("role", []))
-                if "primary" in role or "replica" in role or "witness" in role:
-                    instance["role"].append("pem-agent")
-                if "barman" in role and self.args.get("enable_pg_backup_api", False):
+                if set(["primary", "replica", "witness"]).intersection(set(role)) or (
+                    "barman" in role and self.args.get("enable_pg_backup_api", False)
+                ):
                     instance["role"].append("pem-agent")
             n = instances[-1].get("node")
             pemserver_name = (

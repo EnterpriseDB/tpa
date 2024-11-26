@@ -162,7 +162,9 @@
     postgres_databases: "{{ postgres_databases|default(default_postgres_databases) }}"
     postgres_conf_files: "{{ postgres_conf_files|default(default_postgres_conf_files) }}"
     postgres_hba_local_auth_method: "{{ postgres_hba_local_auth_method|default(default_postgres_hba_local_auth_method) }}"
+    efm_user_password_encryption: "{{ efm_user_password_encryption|default(default_efm_user_password_encryption) }}"
     postgres_log_file: "{{ postgres_log_file | default(default_postgres_log_file) }}"
+    postgres_log_file_mode: "{{ postgres_log_file_mode | default(default_postgres_log_file_mode) }}"
     log_destination: "{{ log_destination|default(default_log_destination) }}"
     install_from_source: "{{ install_from_source|default([]) }}"
     barman_user: "{{ barman_user|default(default_barman_user) }}"
@@ -342,7 +344,6 @@
       name: "{{ bdr_database }}"
       owner: "{{ postgres_user }}"
       extensions:
-      - name: btree_gist
       - name: bdr
         cascade: "{{ postgres_version is version('9.6', '>=') }}"
     bdr_database_entry: >-
@@ -516,6 +517,8 @@
     repmgr_client_dsn_attributes: "{{ repmgr_client_dsn_attributes|default('') }}"
     bdr_client_dsn_attributes: "{{ bdr_client_dsn_attributes|default('') }}"
     harp_dcs_client_dsn_attributes: "{{ harp_dcs_client_dsn_attributes|default('') }}"
+    pgd_proxy_dsn_attributes: "{{ pgd_proxy_dsn_attributes|default('') }}"
+    pgd_cli_dsn_attributes: "{{ pgd_cli_dsn_attributes|default('') }}"
 
 - name: Set default DSNs
   set_fact:
@@ -530,13 +533,15 @@
     bdr_node_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ bdr_client_dsn_attributes }}
     bdr_node_route_dsn: >-
-      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ pgd_proxy_user }} {{ bdr_client_dsn_attributes }}
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ pgd_proxy_user }} {{ pgd_proxy_dsn_attributes }}
     bdr_node_local_dsn: >-
       host={{ unix_socket_directories|first }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ harp_manager_user }}
     pgbouncer_node_dsn: >-
       host={{ inventory_hostname }} port={{ pgbouncer_port }}
     harp_dcs_node_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} user={{ postgres_user }} {{ harp_dcs_client_dsn_attributes }}
+    pgd_cli_dsn: >-
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ pgd_cli_dsn_attributes }}
   vars:
     _repmgr_hostname: "{{ repmgr_hostname|default(inventory_hostname) }}"
 
@@ -578,10 +583,6 @@
   when: >
     'pem-server' in role and pem_database_entry is empty
 
-- name: Set postgres_extensions_dictionary
-  set_fact:
-    postgres_extensions_dictionary: "{{ default_postgres_extensions_dictionary }}"
-
 - name: Record the list of extensions for the pem-agent instances
   set_fact:
     pemagent_extensions: "{{ pemagent_extensions|default(default_pemagent_extensions) }}"
@@ -610,6 +611,12 @@
         and 'postgres' in role
       }}
 
+- set_fact:
+    postgis_version_maj_min: "{{ item | split('.') }}"
+  loop: "{{ supported_postgis_versions }}"
+  when: >
+    'postgis' in postgres_extensions
+    and postgis_version|default(default_postgis_version) is match(item + '.*')
 
 - name: Remove pg_visibility for Postgres <9.6
   set_fact:
@@ -628,6 +635,10 @@
         |list
       }}"
   when: postgres_version is version('15', '<')
+
+- name: Set postgres_extensions_dictionary
+  set_fact:
+    postgres_extensions_dictionary: "{{ default_postgres_extensions_dictionary }}"
 
 - name: Define platypus configuration settings
   set_fact:
@@ -686,7 +697,7 @@
     max_wal_senders: >-
       {{ max_wal_senders|default(twice_postgres_instances) }}
     max_replication_slots: >-
-      {{ max_replication_slots|default(twice_postgres_instances) }}
+      {{ max_replication_slots|default(twice_postgres_instances + 3) }}
 
 # “The formula for the correct minimal number of workers is: one per
 # PostgreSQL instance + one per database on that instance + two per BDR
@@ -778,6 +789,15 @@
             and 'pem-server' not in role
           )
      )
+
+- name: Ensure efm_user_password_encryption uses an algorithm accepted by Postgres
+  assert:
+    that: efm_user_password_encryption in ['scram-sha-256', 'md5']
+    fail_msg: >
+      'efm_user_password_encryption' must be either 'scram-sha-256' or 'md5'
+  when: >
+    efm_user_password_encryption is defined
+
 - name: Recreate role_efm group after role changes
   group_by:
     key: "role_efm"

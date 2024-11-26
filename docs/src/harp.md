@@ -12,7 +12,7 @@ to `harp`, which is the default for BDR-Always-ON clusters.
 You must provide the `harp-manager` and `harp-proxy` packages. Please
 contact EDB to obtain access to these packages.
 
-## Configuring HARP
+## Variables for HARP configuration
 
 See the [HARP documentation](https://www.enterprisedb.com/docs/pgd/4/harp/04_configuration/)
 for more details on HARP configuration.
@@ -40,6 +40,7 @@ Variable | Default value | Description
 `harp_proxy_max_client_conn` | `75` | Maximum number of client connections accepted by harp-proxy (`max_client_conn`)
 `harp_ssl_password_command` | None | a custom command that should receive the obfuscated sslpassword in the stdin and provide the handled sslpassword via stdout.
 `harp_db_request_timeout`| `10s` | similar to dcs -> request_timeout, but for connection to the database itself.
+`harp_local_etcd_only`| None | limit harp manager endpoints list to only contain the local etcd node instead of all etcd nodes
 
 You can use the
 [harp-config hook](tpaexec-hooks.md#harp-config)
@@ -63,10 +64,10 @@ products/harp/release package repositories provided by EDB.
 
 You can configure the following parameters for etcd:
 
-Variable	| Default value	| Description
+Variable | Default value | Description
 ---|---|---
-etcd_peer_port	| 2380	| The port used by etcd for peer communication
-etcd_client_port	| 2379	| The port used by clients to connect to etcd
+etcd_peer_port | 2380 | The port used by etcd for peer communication
+etcd_client_port | 2379 | The port used by clients to connect to etcd
 
 ### bdr
 
@@ -98,21 +99,22 @@ ignored. If `sslpassword` is not obfuscated then
 
 You can configure the following parameters for the harp service:
 
-Variable	| Default value	| Description
+Variable | Default value | Description
 ---|---|---
-`harp_manager_restart_on_failure`	| `false`	| If `true`, the `harp-manager` service is overridden so it's restarted on failure. The default is `false` to comply with the service installed by the `harp-manager` package.
+`harp_manager_restart_on_failure` | `false` | If `true`, the `harp-manager` service is overridden so it's restarted on failure. The default is `false` to comply with the service installed by the `harp-manager` package.
 
 ## Configuring harp http(s) health probes
 
 You can enable and configure the http(s) service for harp that will
 provide api endpoints to monitor service's health.
 
-Variable	| Default value	| Description
+Variable| Default value| Description
 ---|---|---
 `harp_http_options`| <br>`enable: false`<br>`secure: false`<br>`host: <inventory_hostname>`<br>`port: 8080`<br>`probes:`<br>&nbsp;&nbsp;`timeout: 10s`<br>`endpoint: "host=<proxy_name> port=<6432> dbname=<bdrdb> user=<username>"`| Configure the http section of harp config.yml that defines the http(s) api settings.|
 
 The variable can contain these keys:
-```
+
+``` yaml
 enable: false
 secure: false
 cert_file: "/etc/tpa/harp_proxy/harp_proxy.crt"

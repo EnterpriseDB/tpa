@@ -1,0 +1,12 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+# Tests for STIG compliance. WIP.
+
+- name: Check OS and version
+  assert:
+    that: "{{ ansible_os_family == 'RedHat' and ansible_distribution_major_version|int >= 8 }}"
+    fail_msg: "STIG compliance requires RHEL version 8 or above"
+
+- include_tasks: compliance/fips.yml

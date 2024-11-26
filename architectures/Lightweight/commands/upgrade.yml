@@ -1,0 +1,150 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  vars:
+    upgrade_in_progress: true
+  tags: always
+
+# This command performs upgrades for PGD-Always-ON clusters, including
+# Postgres (minor versions only) and BDR (major: 4→5 or minor: 5.x→5.y)
+# upgrades.
+#
+# Upgrading from BDR v4 to v5 means changing the cluster's architecture
+# from BDR-Always-ON to PGD-Always-ON using `tpaexec reconfigure`, and
+# then running `tpaexec upgrade`. Minor-version upgrades don't require
+# any configuration changes.
+#
+# The overall process is similar either way:
+#
+# 1. Check that the cluster looks normal before doing anything.
+# 2. Then, for each Postgres instance:
+#    a. Fence the node (depending on the configuration)
+#    b. Stop, update, and restart Postgres
+#    c. Unfence the node if necessary
+#    d. Install and configure new packages (again, depending on the
+#       cluster's configuration)
+#    e. Wait for the cluster to settle before moving on
+# 3. Perform some additional tasks that are relevant only to major
+#    version upgrades:
+#    a. Repeat v5-specific BDR configuration, including:
+#       i. Set node_kind for each instance
+#       ii. Create node groups and set group options
+#       iii. Create and configure proxies
+#    b. Replace harp-proxy with pgd-proxy
+#    c. Completely remove harp
+# 4. Check that the cluster looks normal at the end
+#
+# Extra tasks relevant only to the BDR major version upgrade are made
+# conditional on "bdr_major_version_upgrade" throughout.
+
+- name: Determine upgrade type for cluster {{ cluster_dir }}
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr
+  tasks:
+  - assert:
+      that:
+        - cluster_facts is defined
+      fail_msg: >
+        Couldn't perform cluster discovery. Are all nodes running?
+
+  - set_fact:
+      bdrdb_major_version:
+        "{{ cluster_facts.databases[bdr_database].bdr.bdr_major_version }}"
+
+
+  - name: Ensure that bdr_version in config.yml is 5, and the database has v3/v4/v5
+    assert:
+      that:
+        - bdr_version is version('5', '==')
+        - bdrdb_major_version is version('3', '==')
+          or bdrdb_major_version is version('4', '==')
+          or bdrdb_major_version is version('5', '==')
+      fail_msg: >-
+        This upgrade process supports upgrades from BDR v3 to PGD5, BDR v4 to PGD v5, or
+        minor version upgrades of PGD v5 only
+
+  - name: Collect list of all unique BDR versions from all nodes
+    set_fact:
+      all_bdr_versions: "{{ _versions.values()|list }}"
+      all_bdr_major_versions:
+        "{{ _versions.values()
+            |map('regex_replace', '\\..*', '')
+            |unique|list }}"
+    vars:
+      _versions:
+        "{{ groups['role_bdr']|bdr_node_versions(hostvars) }}"
+
+  - name: Record whether all nodes are currently running BDR version 3
+    set_fact:
+      bdr3_major_version_upgrade:
+        "{{ '3' in all_bdr_major_versions }}"
+
+  - name: Record whether all nodes are currently running BDR version 4
+    set_fact:
+      bdr4_major_version_upgrade:
+        "{{ '4' in all_bdr_major_versions }}"
+
+  - name: Record whether we are doing a PGD5 minor version upgrade
+    set_fact:
+      bdr5_minor_version_upgrade: "{{ not (bdr3_major_version_upgrade or bdr4_major_version_upgrade) }}"
+
+- name: Set upgrade facts for all hosts
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: all
+  tasks:
+
+  # We set bdr_major_version_upgrade for all BDR instances above (and we
+  # know that they must all have the same value). Now we extend that for
+  # other hosts, e.g., standalone pgd-proxy instances.
+
+# We have sufficient information now to determine whether the current
+# run of the upgrade is doing a major version upgrade from BDR versions
+# 3/4 or a minor version upgrade of PGD5. Only one of the following
+# facts should eventually be true
+
+  - name: Determine whether we're doing a major version upgrade from BDR 3/4 or a minor version upgrade
+    set_fact:
+      bdr3_major_version_upgrade:
+        "{{ groups['role_bdr']
+            |map('extract', hostvars, 'bdr3_major_version_upgrade')
+            |select('defined')
+            |first }}"
+      bdr4_major_version_upgrade:
+        "{{ groups['role_bdr']
+            |map('extract', hostvars, 'bdr4_major_version_upgrade')
+            |select('defined')
+            |first }}"
+      bdr5_minor_version_upgrade:
+        "{{ groups['role_bdr']
+            |map('extract', hostvars, 'bdr5_minor_version_upgrade')
+            |select('defined')
+            |first }}"
+    when: >
+      "bdr" not in role
+
+  - set_fact:
+      enable_proxy_monitoring:
+        "{{ enable_proxy_monitoring|default(false) }}"
+
+# We now are ready to fork to the correct upgrade workflow
+- import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_legacy.yml"
+  vars:
+    bdr_major_version_upgrade: "{{ bdr4_major_version_upgrade }}"
+  when: >
+    bdr4_major_version_upgrade
+    or
+    bdr5_minor_version_upgrade
+
+- import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_major_3to5.yml"
+  when: >
+    bdr3_major_version_upgrade

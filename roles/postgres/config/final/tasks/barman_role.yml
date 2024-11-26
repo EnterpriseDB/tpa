@@ -1,0 +1,33 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+- name: Grant required privileges to barman_role
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(item) }}"
+    queries:
+      "{{ common | union(
+          postgres_version is version('15', '>=') | ternary(gte_15, lt_15)
+        )   
+      }}"
+  changed_when: true
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ cluster_facts.databases.keys()|list }}"
+  vars:
+    gte_15: 
+    - text: GRANT EXECUTE ON FUNCTION pg_backup_start(text, boolean) to barman_role;
+    - text: GRANT EXECUTE ON FUNCTION pg_backup_stop(boolean) to barman_role;
+
+    lt_15:
+    - text: GRANT EXECUTE ON FUNCTION pg_start_backup(text, boolean, boolean) to barman_role; 
+    - text: GRANT EXECUTE ON FUNCTION pg_stop_backup() to barman_role;
+    - text: GRANT EXECUTE ON FUNCTION pg_stop_backup(boolean, boolean) to barman_role;
+
+    common:
+    - text: GRANT EXECUTE ON FUNCTION pg_switch_wal() to barman_role;
+    - text: GRANT EXECUTE ON FUNCTION pg_create_restore_point(text) to barman_role;
+    - text: GRANT pg_read_all_settings TO barman_role;
+    - text: GRANT pg_read_all_stats TO barman_role;
+  when: >
+    item not in ['template0']

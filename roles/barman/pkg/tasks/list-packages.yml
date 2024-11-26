@@ -19,7 +19,9 @@
   # We expect pg_receivewal to be installed, but the EPAS client rpm does
   # not include it (although the deb package does), so we have to install
   # the server package as a temporary workaround. 2ndQPostgres 13 and above
-  # and edb-postgresextended 13 and above also need the same workaround.
+  # and edb-postgresextended versions 13-16 also need the same workaround.
+  # starting with version 17 both epas and edb-postgresextended client package include 
+  # the pg_receivewal binary, so the workaround is not necessary.  
 
   - include_role: name=pkg/add_to_list
     vars:
@@ -32,11 +34,12 @@
           redhat_workaround_packages
           |packages_for(ansible_os_family, postgres_package_version)
         }}"
-    when:
-      ansible_os_family in ('RedHat', 'SUSE')
-      and (
-        (postgres_flavour == 'epas')
-        or
-        (postgres_flavour in ['pgextended', 'edbpge']
-         and postgres_version is version('13', '>='))
-      )
+    when: 
+      - postgres_version is version('17', '<')
+      - ansible_os_family in ('RedHat', 'SUSE')
+      - (postgres_flavour == 'epas'
+          or (
+            postgres_flavour in ['pgextended', 'edbpge']
+            and postgres_version is version('13', '>=')
+          )
+        ) 

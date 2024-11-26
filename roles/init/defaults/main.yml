@@ -91,8 +91,32 @@ default_postgres_lib_dir:
 
 
 default_postgres_log_file: "/var/log/postgres/postgres.log"
+default_postgres_log_file_mode: "0640"
 
 default_postgres_tablespaces: {}
+
+supported_postgis_versions:
+  - '3.3'
+  - '3.4'
+
+default_postgis_version: "{{ supported_postgis_versions | last }}"
+postgis_version_maj_min: "{{ default_postgis_version | split('.') }}"
+
+pgdg_pgaudit_version:
+  "12": "14"
+  "13": "15"
+  "14": "16"
+  "15": "17"
+  "16": ""
+  "17": ""
+
+edb_pgaudit_version:
+  "12": "1"
+  "13": "1"
+  "14": "1"
+  "15": "1"
+  "16": "16"
+  "17": "17"
 
 default_postgres_extensions_dictionary:
   edb_pg_tuner:
@@ -242,6 +266,18 @@ default_postgres_extensions_dictionary:
     spl: pg_failover_slots
     module: true
 
+  sql_protect:
+    packages:
+      epas:
+        Debian: &as_sql_protect_packages
+        - edb-as{{ postgres_version }}-server-sqlprotect
+        RedHat: *as_sql_protect_packages
+        Ubuntu: *as_sql_protect_packages
+        SLES: *as_sql_protect_packages
+    spl: sqlprotect
+    module: true
+
+
   # EDB Storage Pack
   autocluster:
     packages: &advanced_storage_pack_packages
@@ -278,6 +314,68 @@ default_postgres_extensions_dictionary:
     packages: *advanced_storage_pack_packages
     spl: bluefin
 
+  # Other
+  postgis:
+    packages:
+      postgresql:
+        Debian: &debian_pg_postgis_packages
+        - postgresql-{{ postgres_versionNN }}-postgis-{{ postgis_version_maj_min[0] }}
+        RedHat: &redhat_pg_postgis_packages
+        - postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}_{{ postgres_versionNN }}
+        Ubuntu: *debian_pg_postgis_packages
+        SLES: *redhat_pg_postgis_packages
+      epas:
+        Debian: &postgis_as_packages
+        - edb-as{{ postgres_versionNN }}-postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}
+        RedHat: *postgis_as_packages
+        Ubuntu: *postgis_as_packages
+        SLES: *postgis_as_packages
+      pgextended:
+        Debian: *debian_pg_postgis_packages
+        RedHat: *redhat_pg_postgis_packages
+        Ubuntu: *debian_pg_postgis_packages
+        SLES: *redhat_pg_postgis_packages
+      edbpge:
+        Debian: &postgis_pge_packages
+        - edb-postgresextended{{ postgres_versionNN }}-postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}
+        RedHat: *postgis_pge_packages
+        Ubuntu: *postgis_pge_packages
+        SLES: *postgis_pge_packages
+    repository_setup_commands:
+      Debian: []
+      RedHat:
+      - crb enable
+      Ubuntu: []
+      SLES: []
+
+  pgaudit:
+    packages:
+      postgresql:
+        Debian: &debian_pg_pgaudit_packages
+        - postgresql-{{ postgres_versionNN }}-pgaudit
+        RedHat: &redhat_pg_pgaudit_packages
+        - pgaudit{{ pgdg_pgaudit_version[postgres_version] }}_{{ postgres_versionNN }}
+      Ubuntu: *debian_pg_pgaudit_packages
+      SLES: *redhat_pg_pgaudit_packages
+
+      epas:
+        Debian: &pgaudit_as_packages
+        - edb-pg{{ postgres_versionNN }}-pgaudit{{ edb_pgaudit_version[postgres_version] }}
+        RedHat: *pgaudit_as_packages
+        Ubuntu: *pgaudit_as_packages
+        SLES: *pgaudit_as_packages
+      pgextended:
+        Debian: &pgaudit_pge_packages
+        - edb-postgresextended{{ postgres_versionNN }}-pgaudit{{ edb_pgaudit_version[postgres_version] }}
+        RedHat: *pgaudit_pge_packages
+        Ubuntu: *pgaudit_pge_packages
+        SLES: *pgaudit_pge_packages
+    spl: pgaudit
+
+  passwordcheck:
+    spl: passwordcheck
+    module: true
+
 
 default_postgres_extensions:
   - pg_stat_statements
@@ -308,6 +406,9 @@ default_max_worker_processes: 16
 
 default_password_encryption:
   "{{ postgres_version is version('10','>=')
+      |ternary('scram-sha-256', 'md5') }}"
+default_efm_user_password_encryption:
+  "{{ (compliance|default('') == 'stig')
       |ternary('scram-sha-256', 'md5') }}"
 default_postgres_hba_local_auth_method: peer
 

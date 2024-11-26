@@ -6,35 +6,35 @@
 #
 backports-tarfile==1.2.0
     # via jaraco-context
-boto3==1.34.152
+boto3==1.35.58
     # via -r requirements.in
-botocore==1.34.152
+botocore==1.35.58
     # via
     #   boto3
     #   s3transfer
-certifi==2024.7.4
+certifi==2024.8.30
     # via
     #   -r requirements.in
     #   requests
-cffi==1.16.0
+cffi==1.17.1
     # via cryptography
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
-cryptography==43.0.0
+cryptography==43.0.3
     # via
     #   -r requirements.in
     #   secretstorage
 docker==7.1.0
     # via -r requirements.in
-idna==3.7
+idna==3.10
     # via requests
-importlib-metadata==8.2.0
+importlib-metadata==8.5.0
     # via keyring
 jaraco-classes==3.4.0
     # via keyring
-jaraco-context==5.3.0
+jaraco-context==6.0.1
     # via keyring
-jaraco-functools==4.0.2
+jaraco-functools==4.1.0
     # via keyring
 jeepney==0.8.0
     # via
@@ -46,11 +46,11 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-keyring==25.2.1
+keyring==25.5.0
     # via -r requirements.in
-markupsafe==2.1.5
+markupsafe==3.0.2
     # via jinja2
-more-itertools==10.3.0
+more-itertools==10.5.0
     # via
     #   jaraco-classes
     #   jaraco-functools
@@ -58,7 +58,7 @@ netaddr==1.3.0
     # via -r requirements.in
 passlib==1.7.4
     # via -r requirements.in
-psutil==6.0.0
+psutil==6.1.0
     # via -r requirements.in
 pycparser==2.22
     # via cffi
@@ -66,20 +66,20 @@ python-dateutil==2.9.0.post0
     # via
     #   -r requirements.in
     #   botocore
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via -r requirements.in
 requests==2.32.3
     # via docker
-s3transfer==0.10.2
+s3transfer==0.10.3
     # via boto3
 secretstorage==3.3.3
     # via keyring
 six==1.16.0
     # via python-dateutil
-urllib3==1.26.19
+urllib3==1.26.20
     # via
     #   botocore
     #   docker
     #   requests
-zipp==3.19.2
+zipp==3.21.0
     # via importlib-metadata

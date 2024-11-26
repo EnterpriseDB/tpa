@@ -117,17 +117,31 @@ configuration. You must edit config.yml to specify multiple regions.
 
 ### Network configuration
 
+!!! Note
+These options are not meaningful for the "bare" platform, where
+TPA will not alter the network configuration of existing servers.
+!!!
+
 By default, each cluster will be configured with a number of randomly selected
 `/28` subnets from the CIDR range `10.33.0.0/16`, depending on the selected
 architecture.
 
 Specify `--network 192.168.0.0/16` to assign subnets from a different network.
-
-**Note:** On AWS clusters, this corresponds to the VPC CIDR.
+On AWS clusters, this corresponds to the VPC CIDR.
 See [aws](platform-aws.md#vpc-required) documentation for details.
 
 Specify `--subnet-prefix 26` to assign subnets of a different size, /26 instead
 of /28 in this case.
+
+!!! Note
+When the "docker" platform is selected, TPA will always place the
+entire cluster in a single subnet regardless of the architecture. This
+subnet is generated according to the logic described here with the
+exception that if the `subnet-prefix` is not specified, TPA will
+automatically select a subnet size large enough to accomodate the number
+of instances in
+`config.yaml`.
+!!!
 
 Specify `--no-shuffle-subnets` to allocate subnets from the start of the
 network CIDR range, without randomisation, e.g. `10.33.0.0/28`, then
@@ -136,9 +150,6 @@ network CIDR range, without randomisation, e.g. `10.33.0.0/28`, then
 Specify `--exclude-subnets-from <directory>` to exclude subnets that are
 already used in existing cluster config.yml files. You can specify this
 argument multiple times for each directory.
-
-**Note:** These options are not meaningful for the "bare" platform, where
-TPA will not alter the network configuration of existing servers.
 
 ### Instance type
 
@@ -172,6 +183,8 @@ with one name per line. The file must contain at least as many valid
 hostnames as there are instances in your cluster. Each line may contain
 an optional IP address after the name; if present, this address will be
 set as the `ip_address` for the corresponding instance in `config.yml`.
+If two ip addresses are present, the first will be set as `public_ip`
+and the second as `private_ip`.
 
 Use `--hostnames-pattern '…pattern…'` to limit the selection to
 lines matching an egrep pattern.
@@ -246,7 +259,7 @@ details.
 #### Postgres flavour and version
 
 TPA supports PostgreSQL, EDB Postgres Extended, and EDB Postgres
-Advanced Server (EPAS) versions 11 through 16.
+Advanced Server (EPAS) versions 11 through 17.
 
 You must specify both the flavour (or distribution) and major version of
 Postgres to install, for example:
@@ -435,6 +448,15 @@ Note: When using `keyring_backend: system` and moving an already provisioned
 cluster folder to a different tpa host, ensure that you export the associated
 vault password on the new machine's system keyring. vault password can be
 displayed via `tpaexec show-vault <cluster_dir>`.
+
+## Security standards compliance
+
+Use the `--compliance stig` or `--compliance cis` options to generate
+a cluster with configuration suitable for complying with the STIG or CIS
+standard. See [Compliance](compliance.md) for details. Note that these
+options do not guarantee that the cluster fulfills the relevant
+standard; they only cause TPA to generate a configuration designed to
+comply with those aspects of the standard that can be controlled by TPA.
 
 ## Examples
 

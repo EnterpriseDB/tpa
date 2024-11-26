@@ -32,6 +32,11 @@ platypus.idle_timeout = '{{ platypus_idle_timeout }}ms'
 {% endif %}
 {% endif %}
 
+{% if 'sql_protect' in postgres_extensions %}
+edb_sql_protect.enabled = off
+edb_sql_protect.level = learn
+{% endif %}
+
 ## pglogical
 ## bdr
 #

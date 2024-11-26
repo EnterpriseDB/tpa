@@ -1,0 +1,2 @@
+STATUS="production"
+DESCRIPTION="EDB Postgres Distributed in a Lightweight configuration"

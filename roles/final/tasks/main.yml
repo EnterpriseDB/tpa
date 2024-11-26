@@ -1,6 +1,20 @@
 ---
 
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+#
+# If this is a running patroni cluster, we need to regenerate patroni
+# config here because patroni controls postgres config and we might need
+# to add entries to pg_hba.conf or change replication slots before we
+# go into the postgres/replica/final role if the cluster has changed.
+
+- include_role:
+    name: patroni/final
+  when:
+    failover_manager == 'patroni'
+    and ('primary' in role or 'replica' in role)
+    and 'pem-server' not in role
+    and patroni_initialised
+    and task_selector|selects('patroni')
 
 - include_role:
     name: postgres/final
@@ -18,6 +32,7 @@
     and failover_manager == 'repmgr'
     and initialise_replication is defined
     and task_selector|selects('repmgr')
+
 
 # need to always go into this because it contains always stuff
 - include_role:
@@ -40,6 +55,10 @@
     name: etcd/final
   when: >
     'etcd' in role
+
+# We must re-run the patroni/final role even if we ran it earlier
+# because the intermediate roles might require changes to
+# patroni configuration
 
 - include_role:
     name: patroni/final

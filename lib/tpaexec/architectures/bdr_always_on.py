@@ -21,6 +21,7 @@ class BDR_Always_ON(BDR):
             ("14", "5"),
             ("15", "5"),
             ("16", "5"),
+            ("17", "5")
         ]
 
     def add_architecture_options(self, p, g):

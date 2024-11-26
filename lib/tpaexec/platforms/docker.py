@@ -3,6 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
 
 from . import Platform
+from .. import net
 
 import os
 import time
@@ -237,6 +238,17 @@ class docker(Platform):
             instance_defaults.update(y)
 
     def update_instances(self, instances, args, **kwargs):
+        # Generate a Network from the first (and only) random subnet
+        docker_network = net.Network(args['subnets'][0])
+        # Check that it's big enough
+        if docker_network.net.num_addresses - 1 < self.arch.num_instances():
+            raise DockerPlatformError(f"The subnet '{args['subnets'][0]}' is too small for the specified cluster. "
+                                      f"Use `subnet-prefix` to specify a larger subnet.")
+
+        # Get an iterator that provides IP addresses
+        host_ips = docker_network.net.hosts()
+        # Discard the first item from the iterator because Docker needs that for the gateway
+        _ = next(host_ips)
         for i in instances:
             newvolumes = []
             volumes = i.get("volumes", [])
@@ -250,6 +262,8 @@ class docker(Platform):
                 if not i["volumes"]:
                     del i["volumes"]
 
+            i['ip_address'] = str(next(host_ips))
+
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}
 
@@ -257,4 +271,22 @@ class docker(Platform):
         if docker_images:
             s["docker_images"] = docker_images
 
+        # Declare a user-defined Docker network using the name of the cluster as the network name
+        s["docker_networks"] = [{"ipam_config": [{"subnet": args["subnets"][0]}], "name": args["cluster_name"]}]
+
         args["platform_settings"] = s
+
+    def get_default_subnet_prefix(self, num_instances=None) -> int:
+        """
+        Return a subnet prefix large enough to fit all the instances
+        """
+        if num_instances is None:
+            return net.DEFAULT_SUBNET_PREFIX_LENGTH
+
+        # docker uses one IP for the gateway so these sizes are one less than the actual size
+        subnet_sizes = {253: 24, 125: 25, 61: 26, 29: 27, 13: 28}
+
+        best_size = min(x for x in subnet_sizes.keys() if x >= num_instances)
+
+        return subnet_sizes[best_size]
+

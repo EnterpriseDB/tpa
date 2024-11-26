@@ -69,6 +69,7 @@ class aws(CloudPlatform):
             "Debian-arm",
             "Debian-minimal",
             "RedHat",
+            "RedHat-arm",
             "RedHat-minimal",
             "Rocky",
             "Rocky-minimal",
@@ -124,6 +125,13 @@ class aws(CloudPlatform):
                     "user": "ec2-user",
                 },
             },
+            "redhat-arm": {
+                "RHEL-9.4.0_HVM-20240605-arm64-82-Hourly2-GP3": {
+                    "versions": ["9", "default"],
+                    "owner": "309956199498",
+                    "user": "ec2-user",
+                },
+            },
             "rocky": {
                 "Rocky-8-EC2-Base-8.9-20231119.0.x86_64": {
                     "versions": ["8", "default"],
@@ -156,7 +164,6 @@ class aws(CloudPlatform):
                     "owner": "013907871322",
                     "user": "ec2-user",
                 }
-
             },
         }
 
@@ -194,19 +201,27 @@ class aws(CloudPlatform):
         if kwargs.get("lookup", False):
             image.update(**self._lookup_ami(image, kwargs["region"]))
 
-        if self._is_default_ec2_instance_type() and (
-            image["name"].lower().startswith("rhel")
-            or image["name"].lower().startswith("rocky")
+        if (
+            self._is_default_ec2_instance_type()
+            and self._is_rhel_image(image["os"])
+            and not self._is_an_arm64_image(image["os"])
         ):
-            print(
-                "WARNING: Consider using `--instance-type t3.medium` for RedHat distributions"
-            )
-            print("(t3.micro instances often run out of memory)")
+            self.arch.args["instance_type"] = "t3.medium"
 
-        if self._is_default_ec2_instance_type() and image["os"].lower().startswith("debian-arm"):
-            self.arch.args["instance_type"] = "a1.medium"
+        if self._is_default_ec2_instance_type() and self._is_an_arm64_image(
+            image["os"]
+        ):
+            self.arch.args["instance_type"] = "t4g.medium"
 
         return image
+
+    def _is_rhel_image(self, image):
+        accepted_rhel_images = ("rhel", "redhat", "rocky")
+        return image.lower().startswith(accepted_rhel_images)
+
+    def _is_an_arm64_image(self, image):
+        accepted_arm64_images = ("debian-arm", "redhat-arm")
+        return image.lower().startswith(accepted_arm64_images)
 
     def _is_default_ec2_instance_type(self):
         return self.arch.args.get("instance_type") == AWS_DEFAULT_INSTANCE_TYPE

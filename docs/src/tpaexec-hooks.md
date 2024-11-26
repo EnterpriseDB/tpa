@@ -1,5 +1,5 @@
 ---
-description: Extending TPA with hooks to execute arbitrary Anisible tasks.
+description: Extending TPA with hooks to execute arbitrary Ansible tasks.
 ---
 
 # TPA hooks

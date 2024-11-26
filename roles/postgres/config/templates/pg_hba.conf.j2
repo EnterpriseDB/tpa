@@ -17,6 +17,7 @@ local all {{ harp_manager_user }} {{ password_encryption }}
 local   replication     all                                     peer
 local   all             all                                     {{ postgres_hba_local_auth_method }}
 
+
 {% if 'pgbouncer' in role or 'harp-proxy' in role %}
 {%    if pgbouncer_use_cert_authentication == true %}
 hostssl all {{ pgbouncer_auth_user }} 127.0.0.1/32 cert
@@ -28,12 +29,31 @@ hostssl all {{ pgbouncer_auth_user }} 127.0.0.1/32 md5
 {% if 'harp-proxy' in role and harp_dcs_user is defined %}
 hostssl all {{ harp_dcs_user }} 127.0.0.1/32 {{ password_encryption }}
 {% endif %}
+
+{#
+ # follow hba_force_ssl and hba_force_certificate_auth
+ # for pem and outside-cluster connections
+#}
+
+{% set method=password_encryption %}
+{% if hba_force_hostssl %}
+{%   set type='hostssl' %}
+{%   if hba_force_certificate_auth %}
+{%     set method='cert' %}
+{%     if hba_cert_authentication_map %}
+{%       set method=method+' map='+hba_cert_authentication_map %}
+{%     endif %}
+{%   endif %}
+{% else %}
+{%   set type='host' %}
+{% endif %}
+
 {% if 'pem-server' in role %}
 ### pem-server: Start
 # Allow connection for 'pem_user' to the pem database
 hostssl pem +pem_user {{ hostvars[pem_server].ip_address }}/32 {{ password_encryption }}
 # Allow the '{{ postgres_user }}' user to connect for pem monitoring
-host    all {{ postgres_user }} {{ hostvars[pem_server].ip_address }}/32 {{ password_encryption }}
+{{ type }}    all {{ postgres_user }} {{ hostvars[pem_server].ip_address }}/32 {{ method }}
 # Allow connection on 'pem' database for pem_agents
 {% for key in hostvars %}
 {% if 'pem-server' in hostvars[key]['role'] or 'pem-agent' in hostvars[key]['role'] %}
@@ -47,16 +67,10 @@ hostssl pem +pem_agent {{ hostvars[key].ip_address }}/32 cert
 {% if 'beacon-agent' in role %}
 hostssl all beacon 127.0.0.1/32 {{ password_encryption }}
 {% endif %}
-host    all             all             127.0.0.1/32            {{ password_encryption }}
-host    all             all             ::1/128                 {{ password_encryption }}
-host    replication     all             127.0.0.1/32            {{ password_encryption }}
-host    replication     all             ::1/128                 {{ password_encryption }}
-{% for net in cluster_networks|default([]) %}
-host    postgres        barman          {{ net }}   {{ password_encryption }}
-host    repmgr          repmgr          {{ net }}   {{ password_encryption }}
-host    replication     all             {{ net }}   {{ password_encryption }}
-host    all             all             {{ net }}   {{ password_encryption }}
-{% else %}
+{{ type }}    all             all             127.0.0.1/32            {{ method }}
+{{ type }}    all             all             ::1/128                 {{ method }}
+{{ type }}    replication     all             127.0.0.1/32            {{ method }}
+{{ type }}    replication     all             ::1/128                 {{ method }}
 {%   for h in groups[cluster_tag] %}
 {%     set role=hostvars[h].get('role', []) %}
 {%     set addr=hostvars[h].ip_address %}
@@ -72,9 +86,6 @@ host    all             all             {{ net }}   {{ password_encryption }}
 {%         set method=method+' map='+hba_cert_authentication_map %}
 {%       endif %}
 {%     endif %}
-{% for net in cluster_networks|default([]) %}
-hostssl pem +pem_agent {{ addr }} cert
-{%   endfor %}
 # {{ h }}
 {%     if 'pgbouncer' in role or 'harp-proxy' in role %}
 ### cert auth with pgbouncer
@@ -89,7 +100,7 @@ hostssl all {{ pgbouncer_auth_user }} {{ addr }} md5
 hostssl all {{ harp_dcs_user }} {{ addr }} {{ password_encryption }}
 {%     endif %}
 {%     if 'efm-witness' in role or ('postgres' in role and failover_manager == 'efm')  %}
-host all efm {{ addr }} md5
+host all efm {{ addr }} {{ efm_user_password_encryption }}
 {%     endif %}
 {%     if 'barman' in role %}
 {{type}} postgres barman {{ addr }} {{ method }}
@@ -106,8 +117,8 @@ hostssl all all {{ addr }} {{ password_encryption }}
 {%     if groups['role_pgd-proxy']|default([]) is not empty %}
 hostssl {{ bdr_database }} {{ pgd_proxy_user }} {{ addr }} {{ password_encryption }}
 {%     endif %}
+{#   end of for h in groups[cluster_tag] #}
 {%   endfor %}
-{% endfor %}
 
 {% for l in postgres_hba_settings %}
 {{l}}

@@ -36,11 +36,12 @@ class BDR(Architecture):
             help="name of BDR-enabled database",
             default="bdrdb",
         )
-        g.add_argument(
-            "--enable-camo",
-            action="store_true",
-            help="assign instances pairwise as CAMO partners",
-        )
+        if self.name != "Lightweight":
+            g.add_argument(
+                "--enable-camo",
+                action="store_true",
+                help="assign instances pairwise as CAMO partners",
+            )
 
     def cluster_vars_args(self):
         return super().cluster_vars_args() + [
@@ -69,12 +70,13 @@ class BDR(Architecture):
         arch = self.args["architecture"]
         default_bdr_versions = {
             "11": "3",
-            "12": "5" if arch == "PGD-Always-ON" else "4",
-            "13": "5" if arch == "PGD-Always-ON" else "4",
-            "14": "5" if arch == "PGD-Always-ON" else "4",
-            "15": "5" if arch == "PGD-Always-ON" else "4",
-            "16": "5" if arch == "PGD-Always-ON" else "4",
-            None: "5" if arch == "PGD-Always-ON" else "4",
+            "12": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            "13": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            "14": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            "15": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            "16": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            "17": "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
+            None: "5" if arch in ["PGD-Always-ON", "Lightweight"] else "4",
         }
 
         if bdr_version is None:
@@ -112,7 +114,9 @@ class BDR(Architecture):
         if self.args.get("enable_camo", False):
             if "postgres_conf_settings" not in cluster_vars:
                 cluster_vars["postgres_conf_settings"] = {}
-            cluster_vars["postgres_conf_settings"].update({"bdr.default_streaming_mode": "off"})
+            cluster_vars["postgres_conf_settings"].update(
+                {"bdr.default_streaming_mode": "off"}
+            )
 
         # The node group name used to be configurable, but it's now hardcoded to
         # match the cluster name, because harp/pgdcli/pgd-proxy depend on their
@@ -230,14 +234,11 @@ class BDR(Architecture):
         """
         if self.args.get("enable_pem", False):
             for instance in instances:
-                if "bdr" in self._instance_roles(instance):
-                    instance["role"].append("pem-agent")
-
-                if "barman" in self._instance_roles(instance) and self.args.get(
-                    "enable_pg_backup_api", False
+                if "bdr" in self._instance_roles(instance) or (
+                    "barman" in self._instance_roles(instance)
+                    and self.args.get("enable_pg_backup_api", False)
                 ):
                     instance["role"].append("pem-agent")
-
             n = instances[-1].get("node")
             pemserver_name = (
                 "%s-pemserver" % self.args["cluster_name"]
@@ -252,6 +253,7 @@ class BDR(Architecture):
                     "location": self.args["locations"][0]["Name"],
                 }
             )
+
     def _update_instance_beacon(self, instances):
         """
         Add beacon-agent to instance roles where applicable

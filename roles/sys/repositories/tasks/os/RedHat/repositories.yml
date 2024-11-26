@@ -393,6 +393,10 @@
     ansible_distribution_major_version|int == 7
     and failover_manager == 'patroni'
 
+# Some extension packages require extra repositories to be set up to install dependencies
+
+- include_tasks: extension-repositories.yml
+
 - include_tasks: repository-cleanup.yml
   vars:
     repository_path: /etc/yum.repos.d

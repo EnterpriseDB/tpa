@@ -5,6 +5,7 @@
   vars:
     username: "{{ pgbouncer_auth_user }}"
     password_encryption: "{{ pgbouncer_auth_user_password_encryption }}"
+    conn_limit: "{{ (compliance|default('') == 'stig')|ternary(groups['role_pgbouncer']|count, null) }}"
   when: >
     'postgres' in role or
     'pgbouncer' in role

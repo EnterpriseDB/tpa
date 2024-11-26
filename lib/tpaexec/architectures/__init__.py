@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 
 from .bdr_always_on import BDR_Always_ON
 from .pgd_always_on import PGD_Always_ON
+from .lightweight import Lightweight
 from .images import Images
 from .m1 import M1
 from ..exceptions import ArchitectureError
@@ -20,6 +21,7 @@ class SelectArchitecture:
         "PGD-Always-ON": PGD_Always_ON,
         "Images": Images,
         "M1": M1,
+        "Lightweight": Lightweight,
     }
 
     def __new__(cls, name, *args, **kwargs):

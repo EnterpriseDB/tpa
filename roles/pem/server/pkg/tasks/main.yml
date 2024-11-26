@@ -11,19 +11,3 @@
     package_list_name: "PEM server packages"
     package_list: "{{ _all_pem_server_packages }}"
 
-# We use the system's python interpreter to execute Python scripts that
-# are bundled with PEM versions before 9.0. With newer versions of PEM,
-# we must use the PEM-bundled python interpreter instead. The location
-# may vary across platforms, but configure-pem-server.sh is always in
-# the same place, and points to the correct path.
-
-- name: Determine PEM python interpreter path
-  shell: >
-    eval $(grep -E '^(PEM_PYTHON|PEM_PYTHON_EXECUTABLE)=' /usr/edb/pem/bin/configure-pem-server.sh);
-    echo ${PEM_PYTHON_EXECUTABLE:-$(command -v python3)}
-  args:
-    executable: /bin/bash
-  register: find_pem_python
-
-- set_fact:
-    pem_python_executable: "{{ find_pem_python.stdout }}"

@@ -262,9 +262,11 @@
 # TODO: This code doesn't permit a non-streaming replica to be set up
 # (i.e., one that depends entirely on log shipping).
 
-# generate a primary_slot_name on primary and replica node for efm
-# used during switchover to ensure the old primary uses
-# a physical slot for replication.
+# If efm or patroni are used, we generate a primary_slot_name on the 
+# primary and replica nodes for use during switchover to ensure the 
+# old primary uses a physical slot for replication. Both efm and patroni
+# use pg_basebackup which, contrary to repmgr, does not configure a 
+# primary_slot_name on the primary node when creating a replica.
 - name: Configure primary_slot_name on primary
   copy:
     content: >
@@ -275,7 +277,7 @@
     mode: "0644"
   when: >
     ('primary' in role or 'replica' in role)
-    and failover_manager != 'repmgr'
+    and failover_manager in ['efm', 'patroni']
     and postgres_version is version('12', '>=')
   notify:
     - Note Postgres reload required
