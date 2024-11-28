@@ -188,12 +188,11 @@ on a TPA cluster that you could do on any other Postgres installation.
 ## Versioning in TPA
 
 TPA previously used a date-based versioning scheme whereby the major
-version was derived from the year. From version 23 we have moved to a
-derivative of semantic versioning. For historical reasons, we are not
-using the full three-part semantic version number. Instead TPA uses a
-two-part `major.minor` format. The minor version is incremented on every
-release, the major version is only incremented where required to comply
-with the backward compatibility principle below.
+version was derived from the year. From version 23 TPA transitioned to
+semantic versioning, initially using a two-part `major-minor` pattern,
+then adopting full three-part semantic versioning in version 23.34.1.
+Under this scheme, the major version is only incremented where required
+to comply with the backward compatibility principle below.
 
 ### Backwards compatibility
 
