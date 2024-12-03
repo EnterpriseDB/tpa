@@ -18,6 +18,7 @@ nav:
     - M1: architecture-M1.md
     - BDR-Always-ON: architecture-BDR-Always-ON.md
     - PGD-Always-ON: architecture-PGD-Always-ON.md
+    - PGD-Lightweight: architecture-PGD-Lightweight.md
   - Platforms:
     - AWS: platform-aws.md
     - Bare metal: platform-bare.md
