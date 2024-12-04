@@ -3,17 +3,35 @@
   "extends": [
     "config:recommended",
     ":dependencyDashboard",
-    ":dependencyDashboardApproval"
+    ":dependencyDashboardApproval",
+    "schedule:earlyMondays"
   ],
+  "baseBranches": [
+    "main"
+  ],
+  "enabledManagers": [
+    "pip-compile",
+    "ansible-galaxy",
+    "github-actions"
+  ],
+  "commitMessagePrefix": "[Dep Update] ",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": " ({{{displayFrom}}} => {{{displayTo}}})",
   "pip-compile": {
     "fileMatch": [
-      "requirements.*.txt$"
+      "requirements.*.txt$",
+      "requirements/.*.txt$",
+      ""
+    ],
+    "labels": [
+      "pip dependencies",
+      "renovate"
     ]
   },
-  "pip_requirements": {
-    "enabled": false
-  },
-  "pip_setup": {
-    "enabled": false
+  "ansible-galaxy": {
+    "labels": [
+      "ansible dependencies",
+      "renovate"
+    ]
   }
 }
