@@ -1,0 +1,13 @@
+- summary: Use latest barman from PGDG on RedHat
+  description: |
+    TPA previously defaulted to barman 3.9 when installing from PGDG on a
+    RedHat-like system, as a workaround for broken packages. More recent
+    barman packages are OK, so we now let yum install the latest packages.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-847
