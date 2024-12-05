@@ -7,7 +7,7 @@
     content: "{{
       patroni_conf
       |to_nice_yaml(indent=2, explicit_start=True, sort_keys=False)
-    }}"
+      }}"
     dest: "{{ patroni_etc }}/{{ cluster_name }}.yml"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"

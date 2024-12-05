@@ -86,7 +86,7 @@
       |union([
         {'name': item.name, 'extensions': item.extensions|difference(db_format_modules)}
       ])
-    }}"
+      }}"
   loop: "{{ postgres_databases }}"
 
 - name: Replace postgres_databases with updated list of extensions
