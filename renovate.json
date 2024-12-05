@@ -1,6 +1,37 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    ":dependencyDashboard",
+    ":dependencyDashboardApproval",
+    "schedule:earlyMondays"
+  ],
+  "baseBranches": [
+    "main"
+  ],
+  "enabledManagers": [
+    "pip-compile",
+    "ansible-galaxy",
+    "github-actions"
+  ],
+  "commitMessagePrefix": "[Dep Update] ",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": " ({{{displayFrom}}} => {{{displayTo}}})",
+  "pip-compile": {
+    "fileMatch": [
+      "requirements.*.txt$",
+      "requirements/.*.txt$",
+      ""
+    ],
+    "labels": [
+      "pip dependencies",
+      "renovate"
+    ]
+  },
+  "ansible-galaxy": {
+    "labels": [
+      "ansible dependencies",
+      "renovate"
+    ]
+  }
 }
