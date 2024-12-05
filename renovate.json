@@ -6,9 +6,22 @@
     ":dependencyDashboardApproval",
     "schedule:earlyMondays"
   ],
+
+  "prConcurrentLimit": 0,
+  "prHourlyLimit": 0,
+
+  "reviewers": [
+    "EnterpriseDB/tpaexec-dev-team"
+  ],
+
   "baseBranches": [
     "main"
   ],
+
+  "separateMajorMinor": true,
+  "separateMultipleMajor": true,
+  "separateMinorPatch": true,
+
   "enabledManagers": [
     "pip-compile",
     "ansible-galaxy",
