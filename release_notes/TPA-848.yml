@@ -1,0 +1,19 @@
+- summary: Update `<clustername>.nodes` when new nodes are added to an existing EFM cluster
+  description: |
+    When a new EFM node is added to `config.yml`, it is not listed in the 
+    `Allowed node host list` on the existing EFM nodes in the cluster.
+
+    The task which executes `efm upgrade-conf` and propagates the changes from
+    `/raw/<clustername>.properties` and `/raw/<clustername>.nodes` is now run 
+    when EITHER of these files are changed.
+
+    This results in the new EFM node being written to the `<clustername>.nodes` 
+    file and `efm cluster-status` including it in the `Allowed node host list`.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-848

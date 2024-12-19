@@ -131,6 +131,7 @@
     owner: efm
     group: efm
     mode: "0640"
+  register: efm_nodes
   vars:
     node_ips: "{{
         groups['role_efm'] | map('extract', hostvars, ['ip_address']) | product([efm_bind_port]) | map('join', ':') | join('\n')
@@ -148,7 +149,7 @@
   become_user: efm
   when: >
     (not efm_cluster_prop.stat.exists or efm_raw.stat.exists)
-    and efm_properties.changed
+    and (efm_properties.changed or efm_nodes.changed)
 
 # EFM requires us to either configure email alerts or provide a custom
 # notification script. For now, we install a no-op notification script.
