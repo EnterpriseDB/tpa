@@ -9,5 +9,7 @@
   when: >
     'repository_setup_commands' in item.value
     and
+    item.value.repository_setup_commands[ansible_distribution] is defined
+    and
     (item.key in postgres_extensions
     or item.key in postgres_databases|json_query('[*].extensions[*].name|[]'))

@@ -98,6 +98,7 @@ default_postgres_tablespaces: {}
 supported_postgis_versions:
   - '3.3'
   - '3.4'
+  - '3.5'
 
 default_postgis_version: "{{ supported_postgis_versions | last }}"
 postgis_version_maj_min: "{{ default_postgis_version | split('.') }}"
@@ -342,11 +343,8 @@ default_postgres_extensions_dictionary:
         Ubuntu: *postgis_pge_packages
         SLES: *postgis_pge_packages
     repository_setup_commands:
-      Debian: []
       RedHat:
       - crb enable
-      Ubuntu: []
-      SLES: []
 
   pgaudit:
     packages:
