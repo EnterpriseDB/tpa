@@ -5,9 +5,11 @@
 import os
 import sys
 import keyring
+import secrets
+import string
 from tpaexec.architecture import KEYRING_SUPPORTED_BACKENDS
-from passlib import pwd
 
+APPROVED_SYMBOLS = "!@#%^&*()_+"
 KEYRING_PREFIX = "TPA_"
 VAULT_PASS_RELATIVE_PATH = "vault/vault_pass.txt"
 NO_KEYRING_ERROR_MSG = """Could not find compatible keyring backend,
@@ -23,18 +25,8 @@ def generate_password():
     the cluster.
     """
 
-    # We use passlib to generate a password using its "ascii_72" character set
-    # ([a-zA-Z0-9#^%*!&/?$@]), which does not include any characters that would
-    # cause problems when interpolating into a YAML string, i.e., [:'"{}\\].
-    #
-    # We ask passlib for a "secure" password, but that's currently only 56 bits
-    # of (estimated) entropy, and gives us relatively short passwords, so we
-    # specify a minimum length of 32 characters anyway.
-    #
-    # See https://passlib.readthedocs.io/en/stable/lib/passlib.pwd.html for more
-    # details about the password generation.
-
-    return pwd.genword(entropy="secure", length=32, charset="ascii_72")
+    charset = string.ascii_letters + string.digits + APPROVED_SYMBOLS
+    return ''.join(secrets.choice(charset) for i in range(32))
 
 
 def store_password(cluster_dir, password_name, password, keyring_backend):
