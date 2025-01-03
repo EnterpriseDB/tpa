@@ -168,7 +168,7 @@
     session_role: "{{ item.1.session_role|default(omit) }}"
   with_nested_dependents:
     - postgres_databases
-    - item.0.get("extensions", [])
+    - item.0.get("extensions", [])|difference(db_format_modules|default([]))
   loop_control:
     label: >-
       {{ item.0.name }}/{{ item.1.name }}
