@@ -1418,7 +1418,7 @@ class Architecture(object):
         Returns a list of packages for which --xxx-package-version options
         should be accepted
         """
-        return ["postgres", "repmgr", "barman", "pglogical", "bdr", "pgbouncer", "pgdcli", "pgd-proxy", "pg-backup-api"]
+        return ["postgres", "repmgr", "barman", "pglogical", "bdr", "pgbouncer", "pgdcli", "pgd-proxy", "pg-backup-api", "patroni"]
 
     def product_repositories(self):
         """
