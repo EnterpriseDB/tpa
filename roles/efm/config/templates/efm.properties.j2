@@ -68,7 +68,12 @@ minimum.standbys={{ efm_conf_settings['minimum.standbys']|default(0) }}
 priority.standbys={{ efm_conf_settings['priority.standbys']|default('') }}
 recovery.check.period={{ efm_conf_settings['recovery.check.period']|default(1) }}
 restart.connection.timeout={{ efm_conf_settings['restart.connection.timeout']|default(60) }}
+{% if efm_version is version('5', '>=') %}
+auto.resume.startup.period={{ efm_conf_settings['auto.resume.startup.period']|default(0) }}
+auto.resume.failure.period={{ efm_conf_settings['auto.resume.failure.period']|default(0) }}
+{% else %}
 auto.resume.period={{ efm_conf_settings['auto.resume.period']|default(0) }}
+{% endif %}
 virtual.ip={{ efm_conf_settings['virtual.ip']|default('') }}
 virtual.ip.interface={{ efm_conf_settings['virtual.ip.interface']|default('') }}
 virtual.ip.prefix={{ efm_conf_settings['virtual.ip.prefix']|default('') }}
