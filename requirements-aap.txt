@@ -6,9 +6,9 @@
 #
 backports-tarfile==1.2.0
     # via jaraco-context
-boto3==1.35.58
+boto3==1.35.97
     # via -r requirements.in
-botocore==1.35.58
+botocore==1.35.97
     # via
     #   boto3
     #   s3transfer
