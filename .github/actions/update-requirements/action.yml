@@ -101,7 +101,7 @@ runs:
     # we add !cancelled() condition to ensure draft PR is created.
     - name: Template PR body
       id: template
-      uses: chuhlomin/render-template@v1.4
+      uses: chuhlomin/render-template@v1.10
       with:
         template: .github/actions/update-requirements/body.template.md
         vars: |
