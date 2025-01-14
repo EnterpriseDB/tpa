@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # If initialise_harp is true, we must install either the harp_manager or
 # harp_proxy packages on the instance, or both if the given node uses both

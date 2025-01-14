@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # Unfence a node in the most appropriate way for this cluster. Postgres
 # must have been started already. Meant to be used from upgrade.yml

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 #
 # Upgrading from BDR v3 to v5 means changing the cluster's architecture
 # from BDR-Always-ON to PGD-Always-ON using `tpaexec reconfigure`, and

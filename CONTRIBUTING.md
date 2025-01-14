@@ -63,7 +63,7 @@ YAML file should start with the following text:
 ```
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 ```
 

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # This task is only called when a Patroni cluster already exists and we are again
 # going through the provision/deploy procedure. At this point we want to check if

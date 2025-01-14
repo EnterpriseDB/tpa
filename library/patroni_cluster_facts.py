@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-#  © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+#  © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 #
 from __future__ import absolute_import, division, print_function
 

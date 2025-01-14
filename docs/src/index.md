@@ -1,6 +1,6 @@
 # TPA
 
-© Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+© Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 ## Introduction
 
