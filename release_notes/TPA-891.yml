@@ -1,0 +1,12 @@
+- summary: respect repmgr_use_slots when creating slots
+  description: |
+    Fixed an issue whereby TPA attempted to create replication slots
+    even when repmgr_use_slots was set to 0
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-891
