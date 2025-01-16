@@ -1411,14 +1411,14 @@ class Architecture(object):
             "use_local_repo_only",
             "failover_manager",
             "enable_pg_backup_api",
-        ] + ["%s_package_version" % x for x in self.versionable_packages()]
+        ] + ["%s_package_version" % x.replace("-", "_") for x in self.versionable_packages()]
 
     def versionable_packages(self):
         """
         Returns a list of packages for which --xxx-package-version options
         should be accepted
         """
-        return ["postgres", "repmgr", "barman", "pglogical", "bdr", "pgbouncer", "pgdcli"]
+        return ["postgres", "repmgr", "barman", "pglogical", "bdr", "pgbouncer", "pgdcli", "pgd-proxy",]
 
     def product_repositories(self):
         """
