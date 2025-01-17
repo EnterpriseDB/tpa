@@ -17,10 +17,6 @@ Distribution| Python 2| Python 3
 Debian 12/bookworm|✓|✓ (3.11)
 Debian 11/bullseye|✓|✓ (3.9)
 Debian 10/buster|✓|✓ (3.7)
-Debian 9/stretch|✓|✓ (3.5)
-Debian 8/jessie|✓|✗ (3.4)
-Ubuntu 16.04/xenial|✓|✓ (3.5)
-Ubuntu 18.04/bionic|✓|✓ (3.6)
 Ubuntu 20.04/focal|✗|✓ (3.8)
 Ubuntu 22.04/jammy|✗|✓ (3.10)
 RHEL 7.x|✓|✗ (3.6)
@@ -28,9 +24,8 @@ RHEL 8.x|✗|✓ (3.6)
 
 Ubuntu 20.04, 22.04 and RHEL 8.x can be used only with Python 3.
 
-RHEL 7.x ships with Python 3.6, but the librpm bindings for Python 3 are
-not available, so TPA must use Python 2 instead. Debian 8 does not
-have the Python 3.5+ required to support Ansible.
+RHEL 7.x ships with Python 3.6, but the librpm bindings for system Python 3 are
+not available.
 
 You can decide for other distributions whether you prefer `python2` or
 `python3`, but the default for new clusters is `python3`.

@@ -1147,11 +1147,20 @@ esac
 # If we can find a venv located relative to TPA_DIR, we activate it as a
 # convenience.
 
+# The python interpreter chosen might be different depending on these conditions:
+# 1. if venv is created, use the one used to create the venv
+# 2. if venv is not created:
+# 2.1 use the defined by the PYTHON environment variable
+# 2.2 use edb-python if it is available
+# 2.3 use the system python3 (fallback)
+
 if [[ -f $TPA_VENV/bin/activate ]]; then
     _activate_venv "$TPA_VENV"
     PYTHON=python3
 elif [[ -z ${PYTHON:-""} ]]; then
-    EDB_PYTHON=/usr/libexec/edb-python39/bin/python3
+    # We should aim for edb-python312. Despite python 3.9 should be enough,
+    # it's EOL'ed and not supported by upstream.
+    EDB_PYTHON=/usr/libexec/edb-python312/bin/python3
     if [ -f $EDB_PYTHON ]; then
         PYTHON=$EDB_PYTHON
     else

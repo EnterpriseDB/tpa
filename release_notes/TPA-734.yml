@@ -1,0 +1,12 @@
+- summary: Depend TPAexec on Python 3.12
+  description: |
+    We were depending on Python 3.9, however, this release doesn't receive
+    more updates and it's currently and finally discountinued.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-734

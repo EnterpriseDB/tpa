@@ -5,7 +5,7 @@
 import sys
 import importlib
 
-want = ["jinja2", "yaml", "cryptography", "dateutil", "setuptools", "netaddr", "six"]
+want = ["jinja2", "yaml", "cryptography", "dateutil", "netaddr", "six"]
 have = []
 
 for m in want:

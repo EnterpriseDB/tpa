@@ -13,7 +13,7 @@ repository.
       order to receive EDB support for the software.
 
 To run TPA from source, you must install all of the dependencies
-(e.g., Python 3.9+) that the packages would handle for you, or download
+(e.g., Python 3.12+) that the packages would handle for you, or download
 the source and [run TPA in a Docker container](INSTALL-docker.md).
 (Either way will work fine on Linux and macOS.)
 
@@ -68,9 +68,9 @@ You now have tpaexec installed.
 
 ## Dependencies
 
-### Python 3.9+
+### Python 3.12+
 
-TPA requires Python 3.9 or later, available on most
+TPA requires Python 3.12 or later, available on most
 modern distributions. If you don't have it, you can use
 [pyenv](https://github.com/pyenv/pyenv) to install any version of Python
 you like without affecting the system packages.
@@ -80,20 +80,20 @@ you like without affecting the system packages.
 # See https://github.com/pyenv/pyenv#installation
 # (e.g., `brew install pyenv` on MacOS X)
 
-$ pyenv install 3.9.0
-Downloading Python-3.9.0.tar.xz...
--> https://www.python.org/ftp/python/3.9.0/Python-3.9.0.tar.xz
-Installing Python-3.9.0...
-Installed Python-3.9.0 to /home/ams/.pyenv/versions/3.9.0
+$ pyenv install 3.12.0
+Downloading Python-3.12.0.tar.xz...
+-> https://www.python.org/ftp/python/3.12.0/Python-3.12.0.tar.xz
+Installing Python-3.12.0...
+Installed Python-3.12.0 to /home/ams/.pyenv/versions/3.12.0
 
-$ pyenv local 3.9.0
+$ pyenv local 3.12.0
 $ pyenv version
-3.9.0 (set by /home/ams/pyenv/.python-version)
+3.12.0 (set by /home/ams/pyenv/.python-version)
 
 $ pyenv which python3
-/home/ams/.pyenv/versions/3.9.0/bin/python3
+/home/ams/.pyenv/versions/3.12.0/bin/python3
 $ python3 --version
-3.9.0
+3.12.0
 ```
 
 If you were not already using pyenv, please remember to add `pyenv` to
