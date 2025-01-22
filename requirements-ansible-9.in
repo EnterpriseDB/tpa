@@ -1,2 +1,0 @@
-# ansible-core dependency list for tpaexec setup
-ansible-core==2.16.*

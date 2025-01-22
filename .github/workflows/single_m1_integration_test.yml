@@ -66,14 +66,6 @@ on:
         description: "Use a single-node location"
         type: boolean
         required: false
-      tpa_ansible_version:
-        description: "Ansible version"
-        required: true
-        default: "8"
-        type: choice
-        options:
-        - "8"
-        - "9"
       tpa_package_cache:
         description: "Use the downloader"
         type: boolean

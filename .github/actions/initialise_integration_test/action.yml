@@ -69,9 +69,6 @@ inputs:
     required: false
     description: "Use a single-node location (for M1 only)"
     default: false
-  tpa_ansible_version:
-    required: false
-    description: "Ansible version to use with TPA"
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -89,7 +86,6 @@ runs:
     - uses: ./.github/actions/tpaexec-setup
       with:
         source_directory: ${{ inputs.source_directory }}
-        tpa_ansible_version: ${{ inputs.tpa_ansible_version }}
 
     - name: Export EDB_REPO_CREDENTIALS_FILE to use EDB repositories
       run: |

@@ -69,9 +69,6 @@ inputs:
     required: false
     description: "Use a single-node location (for M1 only)"
     default: false
-  tpa_ansible_version:
-    required: false
-    description: "Ansible version to use with TPA"
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -114,7 +111,6 @@ runs:
         tpa_data_nodes_per_location: ${{ inputs.tpa_data_nodes_per_location }}
         tpa_witness_only_location: ${{ inputs.tpa_witness_only_location }}
         tpa_single_node_location: ${{ inputs.tpa_single_node_location }}
-        tpa_ansible_version: ${{ inputs.tpa_ansible_version }}
         cluster: ${{ inputs.cluster }}
 
     - name: Provision the cluster

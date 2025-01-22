@@ -1,3 +1,0 @@
-# ansible requirement file for tox test environments.
-pyyaml>=6
-ansible-core==2.15.*

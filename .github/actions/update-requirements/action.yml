@@ -27,16 +27,6 @@ runs:
       run: |
         pip-compile -U requirements.in -o requirements-aap.txt
 
-    - name: Run pip-compile on requirements-ansible-8.in
-      shell: bash
-      run: |
-        pip-compile -U --generate-hashes --reuse-hashes requirements-ansible-8.in -o requirements-ansible-8.txt
-
-    - name: Run pip-compile on test dependency requirements/ansible.in
-      shell: bash
-      run: |
-        pip-compile -U --generate-hashes --reuse-hashes requirements/ansible.in -o requirements/ansible.txt
-
     - name: Run pip-compile on test dependency requirements/dep.in
       shell: bash
       run: |
@@ -62,7 +52,7 @@ runs:
       id: hash_check
       run: |
         #!/bin/bash
-        FILES="requirements.txt requirements-ansible-8.txt"
+        FILES="requirements.txt"
 
         ERRORS=$(python .github/actions/update-requirements/add_ppc64_hashes_to_requirements_files.py $FILES)
         echo "ERRORS<<EOF" >> $GITHUB_OUTPUT

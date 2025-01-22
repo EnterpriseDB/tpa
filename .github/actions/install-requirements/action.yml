@@ -4,10 +4,6 @@ name: "Install Requirements"
 description: "Install Python and other TPAexec dependencies"
 
 inputs:
-  python-version:  # id of input
-    description: 'Python version'
-    required: true
-    default: "3.9"
   platform:
     default: ''
     description: "TPAexec platform argument"
