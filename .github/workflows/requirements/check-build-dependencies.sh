@@ -7,7 +7,8 @@ set -xe
 
 : "${DISTRO:?DISTRO environment variable is required}"
 
-DEFAULT_EDBPYTHON="edb-python39"
+DEFAULT_EDBPYTHON="edb-python312"
+FORCE_REBUILD_PYMODULES="${FORCE_REBUILD_PYMODULES:-0}"
 PYTHON="/usr/libexec/${DEFAULT_EDBPYTHON}/bin/python"
 PIP_DEST="pip-packages"
 VENV="newpip"
@@ -75,14 +76,13 @@ do
     requirement_module_version=$(grep ^"$target_module_name" requirements.txt | cut -d '=' -f3 | cut -d '\' -f1)
 
     echo "Comparing version of base $requirement_module_version with target arch version $target_module_version"
-    if [ "$requirement_module_version" != "$target_module_version" ]; then
+	if [ $FORCE_REBUILD_PYMODULES == "true" ] || [ "$requirement_module_version" != "$target_module_version" ]; then
     #If module version in requirements.txt is found but different than the one present
     #in target arch file, ie: requirements-ppc64.in then we should build and stick
     #to what requirements.txt needs
-        echo "Different version ($requirement_module_version) detected for $target_module_name"
+        echo "Version ($requirement_module_version) detected for $target_module_name"
         # populate a new arch specific file
         echo "$target_module_name==$requirement_module_version" >> $output_requirements_include
-	    # run-once: prepare the required env to build the new version of the dep
         if [ $first_new_detected == 0 ]; then
             first_new_detected=1
             install_edbpython_inside_container

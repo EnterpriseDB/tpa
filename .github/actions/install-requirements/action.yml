@@ -8,10 +8,6 @@ inputs:
     description: 'Python version'
     required: true
     default: "3.9"
-  architecture:
-    required: true
-    description: "CPU architecture"
-    default: 'x64'
   platform:
     default: ''
     description: "TPAexec platform argument"
@@ -27,7 +23,7 @@ runs:
         SUFFIX="deb"
         CMD="apt"
         curl -1sLf "https://downloads.enterprisedb.com/${EDB_SUBSCRIPTION_TOKEN}/dev/setup.${SUFFIX}.sh" | sudo bash
-        sudo $CMD install -y edb-python39
+        sudo $CMD install -y edb-python312
       shell: bash
 
     - name: Make edb-python default python for the build
@@ -35,7 +31,7 @@ runs:
       run: |
         sudo update-alternatives \
         --install /usr/bin/python3 \
-        python3 /usr/libexec/edb-python39/bin/python3 1 \
+        python3 /usr/libexec/edb-python312/bin/python3 1 \
         && python3 -m pip install --upgrade pip
 
     - uses: actions/cache@v4

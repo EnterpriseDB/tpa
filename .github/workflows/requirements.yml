@@ -22,10 +22,18 @@ on:
       - requirements/*.in
       - tpa-ee/aap24/*.in
   workflow_dispatch:
+    inputs:
+      force_rebuild_pymodules:
+        type: boolean
+        description: 'Force rebuild of python modules'
+        required: true
+        default: false
+
 env:
   CLOUDSMITH_BUILD_DEPENDENCIES_API_KEY: ${{ secrets.CLOUDSMITH_BUILD_DEPENDENCIES_API_KEY }}
   EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
   FOUNDATION_TUNNEL_LOGIN: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
+  FORCE_REBUILD_PYMODULES: ${{ github.event.inputs.force_rebuild_pymodules }}
   GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
   LANG: C.UTF-8
   LC_ALL: C.UTF-8
@@ -151,4 +159,3 @@ jobs:
 
       # we run the classic action to generate all other files and generate the PR
       - uses: ./.github/actions/update-requirements
-
