@@ -2,6 +2,10 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+- name: set repmgr_use_slots
+  set_fact:
+    repmgr_use_slots: "{{ repmgr_use_slots|default(default_repmgr_use_slots) }}"
+
 - include_role: name=postgres/createuser
   vars:
     username: repmgr

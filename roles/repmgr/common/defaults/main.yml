@@ -4,7 +4,7 @@
 
 repmgr_failover: automatic
 
-repmgr_use_slots: 1
+default_repmgr_use_slots: 1
 
 default_repmgr_cluster_cleanup_interval: '36 5 * * *'
 
