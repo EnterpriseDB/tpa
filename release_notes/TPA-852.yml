@@ -13,12 +13,12 @@
     - beacon-agent
     - etcd
     - patroni
-    - pem
+    - pem-server
+    - pem-agent
     - pg_backup_api
     - pgd_proxy
     - pgdcli
     - repmgr
-    - efm
   # Possible types: notable_change, minor_change, bugfix or breaking_change
   type: minor_change
   # At least one between jira_tickets or support_tickets must be defined. You

@@ -128,6 +128,14 @@ following options:
 4. `--pglogical-package-version '2.2.0*'`
 5. `--bdr-package-version '3.0.2*'`
 6. `--pgbouncer-package-version '1.8*'`
+7. `--beacon-agent-package-version 1.56.2-1`
+8. `--etcd-package-version 9.8.0-1.el8`
+9. `--patroni-package-version 4.0.0-1PGDG.rhel8`
+10. `--pem-server-package-version 9.7.0-1.el9`
+11. `--pem-agent-package-version 9.7.0-1.el9`
+12. `--pg-backup-api-package-version 2.0.0-1.el8`
+13. `--pgd-proxy-package-version 5.0.0-1`
+14. `--pgdcli-package-version 5.6.1`
 
 You may use any version specifier that apt or yum would accept.
 
