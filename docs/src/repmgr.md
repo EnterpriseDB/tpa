@@ -2,8 +2,7 @@
 description: How to install and configure repmgr with TPA.
 ---
 
-
-# Configuring repmgr
+# repmgr
 
 TPA will install repmgr on all postgres instances that have the
 `failover_manager` instance variable set to `repmgr`; this is the
@@ -18,6 +17,27 @@ The configuration file itself is always called `repmgr.conf`.
 The default repmgr configuration will set up automatic failover
 between instances configured with the role `primary` and the role
 `replica`.
+
+## repmgr package version
+
+By default, TPA installs the latest available version of repmgr.
+
+The version of the repmgr package that is installed can be specified 
+by including `repmgr_package_version: xxx` under the `cluster_vars` 
+section of the `config.yml` file.
+
+```yaml
+cluster_vars:
+    …
+    repmgr_package_version: '4.0.5-1.pgdg90+1'
+    …
+```
+
+You may use any version specifier that apt or yum would accept.
+
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
 
 ## repmgr configuration
 

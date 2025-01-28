@@ -35,6 +35,28 @@ You can optionally edit the generated
 cluster config (config.yml) and assign or remove `pem-agent` role from any
 postgres instance in the cluster in order to enable or disable PEM there.
 
+## PEM component package versions
+
+By default, TPA installs the latest available version of PEM agent and PEM server.
+
+The version of the PEM agent and PEM server packages that are installed can be specified 
+by including `pem_agent_package_version: xxx`  and `pem_server_package_version: xxx` under 
+the `cluster_vars` section of the `config.yml` file.
+
+```yaml
+cluster_vars:
+    …
+    pem_agent_package_version: '9.7.0-1.el9'
+    pem_server_package_version: '9.7.0-1.el9'
+    …
+```
+
+You may use any version specifier that apt or yum would accept.
+
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
+
 
 ## PEM configuration
 

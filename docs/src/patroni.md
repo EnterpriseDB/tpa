@@ -48,6 +48,28 @@ in `config.yml` for the cluster. You can also use Patroni interfaces,
 such as the command line `patronictl` and the REST API, but it is
 recommended to use TPA methods wherever possible.
 
+## Patroni package version
+
+By default, TPA installs the latest available version of Patroni.
+
+The version of the Patroni package that is installed can be specified 
+by including `patroni_package_version: xxx` under the `cluster_vars` 
+section of the `config.yml` file.
+
+```yaml
+cluster_vars:
+    …
+    patroni_package_version: '4.0.0-1PGDG.rhel8`'
+    …
+```
+
+You may use any version specifier that apt or yum would accept.
+
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
+
+
 # Configuration options
 
 These configuration variables can be used to control certain behaviours
