@@ -1,8 +1,8 @@
-- summary: Add `PGPORT` to default `.bashrc` installed by TPA
+- summary: Add `PGPORT` to the postgres user's `.bashrc` file installed by TPA
   description: |
     The `PGPORT` environment variable has been exported as part of the 
-    default `.bashrc`, and defaults to the port value used by the selected
-    `postgres_flavour`, or `postgres_port` if specified in the config file.
+    postgres user's `.bashrc` file. It defaults to the port value used by the 
+    selected `postgres_flavour`, or `postgres_port` if specified in the config file.
     
   # Possible types: notable_change, minor_change, bugfix or breaking_change
   type: minor_change
