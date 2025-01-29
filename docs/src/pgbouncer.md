@@ -8,8 +8,8 @@ description: Adding PgBouncer to your Postgres cluster.
 
 By default, TPA installs the latest available version of PgBouncer.
 
-The version of the PgBouncer package that is installed can be specified 
-by including `pgbouncer_package_version: xxx` under the `cluster_vars` 
+The version of the PgBouncer package that is installed can be specified
+by including `pgbouncer_package_version: xxx` under the `cluster_vars`
 section of the `config.yml` file.
 
 ```yaml
@@ -68,6 +68,10 @@ to change the database configuration.
 
 PgBouncer will connect to Postgres as the `pgbouncer_auth_user` and
 execute the (already configured) `auth_query` to authenticate users.
+
+The `pgbouncer_get_auth()` function used as the `auth_query` by PgBouncer is
+created in a single database, the `pgbouncer_auth_database`. Execute permissions
+are granted on this function to the `pgbouncer_auth_user`.
 
 ## Example
 

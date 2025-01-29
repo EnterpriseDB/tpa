@@ -44,8 +44,9 @@ server_tls_protocols = secure
 auth_type = {{ pgbouncer_auth_user_password_encryption }}
 
 auth_file = /etc/pgbouncer/userlist.txt
+auth_dbname = {{ pgbouncer_auth_database }}
 auth_user = {{ pgbouncer_auth_user }}
-auth_query = SELECT * FROM pg_catalog.pgbouncer_get_auth($1)
+auth_query = SELECT * FROM public.pgbouncer_get_auth($1)
 
 admin_users = pgbouncer
 stats_users = pgbouncer

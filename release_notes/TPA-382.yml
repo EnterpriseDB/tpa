@@ -1,0 +1,39 @@
+- summary: Create `pgbouncer_get_auth()` function in dedicated database
+  description: |
+    The `pgbouncer_get_auth()` function was created in the `pg_catalog`
+    schema and execute granted to the `pgbouncer_auth_user`. This function 
+    was created in every database, but this was not necessary for
+    PgBouncer.
+
+    A failure may be encountered during the `pgd node upgrade` process when
+    this function was created in the `pg_catalog` schema as it is not 
+    included in the dump created by `pg_dump`. A later task attempts to 
+    run a `GRANT` on this function and fails, as the function is not
+    restored since it was not originally dumped.
+
+    Now this function is only created in a single database, named under
+    the `pgbouncer_auth_database` variable in `config.yml`, which defaults to
+    `pgbouncer_auth_database` if not included. It is only created if at
+    least one instance with `pgbouncer` role is included in the cluster.
+
+    A warning is also issued during deploy and upgrade if any databases
+    define this function under the `pg_catalog` schema, as a future TPA
+    release may remove the function from that schema.
+
+    The `pgbouncer_get_auth()` function itself used by PgBouncer `auth_query` 
+    has been updated to address `CVE-2025-2291`. This vulnerability allowed 
+    for authentication using expired passwords, potentially granting 
+    unauthorized access because the auth_query mechanism did not consider
+    the `VALID UNTIL` attribute set in PostgreSQL for user passwords.
+
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-382
+  support_tickets:
+  - RT42911
+  - RT45068

@@ -188,6 +188,7 @@
     haproxy_read_only_port: "{{ haproxy_read_only_port|default(default_haproxy_read_only_port[postgres_family]) }}"
     haproxy_bind_address: "{{ haproxy_bind_address|default(default_haproxy_bind_address) }}"
     harp_proxy_port: "{{ harp_proxy_port|default(default_harp_proxy_port) }}"
+    pgbouncer_auth_database: "{{ pgbouncer_auth_database|default(default_pgbouncer_auth_database) }}"
     pgbouncer_auth_user: "{{ pgbouncer_auth_user|default(default_pgbouncer_auth_user) }}"
     pgbouncer_port: "{{ pgbouncer_port|default(default_pgbouncer_port) }}"
     pgbouncer_backend: "{{ pgbouncer_backend|default(default_pgbouncer_backend) }}"
@@ -351,6 +352,20 @@
       {{ postgres_databases|json_query("[?name=='%s']" % bdr_database) }}
   when: >
     'bdr' in role and bdr_database_entry is empty
+
+- name: Add {{ pgbouncer_auth_database }} to postgres_databases
+  set_fact:
+    postgres_databases: "{{
+        postgres_databases|union([default_pgbouncer_auth_database_entry])
+      }}"
+  vars:
+    default_pgbouncer_auth_database_entry:
+      name: "{{ pgbouncer_auth_database }}"
+      owner: "{{ pgbouncer_auth_user }}"
+    pgbouncer_auth_database_entry: >-
+      {{ postgres_databases|json_query("[?name=='%s']" % pgbouncer_auth_database) }}
+  when: >
+    'pgbouncer' in role and pgbouncer_auth_database_entry is empty
 
 - name: Ensure haproxy_maxconn is set
   set_fact:

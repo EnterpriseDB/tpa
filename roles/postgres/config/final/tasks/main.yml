@@ -200,7 +200,7 @@
   become: yes
 
 # Explicitly grant required privileges to the 'barman_role' role.
-# The 'barman' Postgres user has this role listed under it's 
+# The 'barman' Postgres user has this role listed under it's
 # granted_roles list in postgres/createuser to avoid creating it
 # as a superuser.
 - include_tasks:
@@ -232,12 +232,15 @@
 
 # If there's an entry for pgbouncer_auth_user in postgres_users (which
 # means the pgbouncer role was applied earlier), we must ensure that a
-# pgbouncer_get_auth() function is available in every database.
+# pgbouncer_get_auth() function is available in the pgbouncer_auth_database.
+# We now skip witness node since those don't have data replicated to them and
+#  there is no use in creating the pgbouncer_auth db there.
 
 - include_tasks:
     file: pgbouncer.yml
   when: >
-    postgres_users|json_query("[?username=='%s']" % pgbouncer_auth_user) != []
+    "witness" not in role
+    and postgres_users|json_query("[?username=='%s']" % pgbouncer_auth_user) != []
     and task_selector|permits('pgbouncer')
 
 # If there's an entry for a harp_dcs_user in postgres_users, we must
