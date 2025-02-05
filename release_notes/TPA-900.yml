@@ -1,0 +1,15 @@
+- summary: Add ssh port flag to Barman configuration 
+  description: |
+    The Barman configuration ignores changes to ssh port. 
+
+    The `-p`/`--port` flags are now included in the `ssh` command in
+    `barman.d.conf` and the `barman-wal-restore` command respectively.
+    Defaults to `cluster_ssh_port`.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-900

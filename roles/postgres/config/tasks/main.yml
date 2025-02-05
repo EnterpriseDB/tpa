@@ -310,7 +310,7 @@
       barman_server:
         "{{ ([_backup] if _backup is string else _backup)|list|first }}"
       barman_command: >-
-        /usr/bin/barman-wal-restore -U {{ barman_user }} -z -p 8
+        /usr/bin/barman-wal-restore -U {{ barman_user }} -z -p 8 --port {{ cluster_ssh_port }}
         {{ barman_server }} {{ hostvars[upstream_backedup].backup_name }} %f %p
     when:
       upstream_backedup != ''
