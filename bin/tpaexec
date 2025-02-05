@@ -242,7 +242,6 @@ _install_ansible_collections() {
 }
 
 setup() {
-    use_community=true
     while [[ $# -gt 0 ]]; do
         opt=$1
         shift
@@ -261,29 +260,10 @@ setup() {
                 ;;
         esac
     done
-    _display_notification
     _create_and_activate_venv "${vpath:=$TPA_VENV}"
     _install_pip_packages
     _install_ansible_collections
     _install_tpaexec_pth
-}
-_display_notification() {
-    if [[ $use_community == false ]]; then
-        cat <<NOTIFICATION
-
-You have selected to use the 2ndQuadrant ansible fork. This is now
-deprecated in favour of community ansible and will cease to be supported
-in a future TPA release.
-
-If you choose to re-run 'tpaexec setup' to use community ansible, please
-be aware that the behaviour of the '--skip-tags' option is different and
-this option is not supported by TPA with community ansible. An alternative
-means of skipping tasks will be provided before support for 2ndQuadrant
-ansible is removed.
-
-NOTIFICATION
-
-    fi
 }
 
 _with_ansible_env() {
