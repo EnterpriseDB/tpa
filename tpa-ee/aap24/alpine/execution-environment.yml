@@ -9,12 +9,12 @@
 version: 3
 images:
   base_image:
-    name: 'python:3.9-alpine3.19'
+    name: 'python:3.12-alpine3.20'
 dependencies:
   python_interpreter:
     python_path: /usr/local/bin/python3
   ansible_core:
-    package_pip: ansible-core==2.15.*
+    package_pip: ansible-core==2.16.*
   ansible_runner:
     package_pip: ansible-runner
   python: ../../../requirements-aap.txt

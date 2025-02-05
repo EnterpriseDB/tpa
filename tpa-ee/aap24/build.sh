@@ -46,10 +46,10 @@ base_image=${base_image:-"rhel"}
 if [[ $v ]]; then
     echo Initializing the build environment
 fi
-# enusre pip is available
-python -m ensurepip
+# ensure pip is available
+python3 -m ensurepip
 # verify that venv exists or generate it
-python -m venv build-venv
+python3 -m venv build-venv
 
 if [[ $v ]]; then
     echo Activate the build env
@@ -62,9 +62,10 @@ source build-venv/bin/activate
 if [[ $v ]]; then
     echo Install build dependencies
 fi
+python -m pip install --upgrade pip
 python -m pip install -r build-requirements.txt
 if [[ $v ]]; then
-    python --version
+    python3 --version
     ansible-builder --version
     ansible-navigator --version
 fi
