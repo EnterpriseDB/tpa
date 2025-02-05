@@ -10,3 +10,9 @@
       list_contents: "{{
           pgbapi_packages|packages_for(ansible_os_family, pg_backup_api_package_version)
         }}"
+  - include_role:
+      name: pkg/add_to_list
+    vars:
+      list_contents: "{{
+          pgbapi_dependency_packages|packages_for(ansible_os_family)
+        }}"
