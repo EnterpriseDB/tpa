@@ -1,0 +1,12 @@
+- summary: Faster docker instance deprovision
+  description: |
+    When deprovisioning docker instances, TPA now kills the container
+    instead of stopping it, and does so to all the instances in parallel.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-903

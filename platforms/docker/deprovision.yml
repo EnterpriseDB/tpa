@@ -12,14 +12,33 @@
   docker_container:
     name: "{{ item.container.Name }}"
     state: absent
+    force_kill: true
+  async: 7200
+  poll: 0
   with_items: "{{ running_containers.results }}"
   loop_control:
     label: >-
       {{ item.item.Name }}
+  register: async_results
   when:
     item.container
     and item.container.Config.Labels.Cluster|default(None) == cluster_name
   tags: docker
+
+- name: Wait for deprovisioning to complete
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  with_items: "{{ async_results.results }}"
+  loop_control:
+    # we need a default so that the templating can succeed even if there
+    # were no containers, but if that happens the loop is never run, so
+    # it doesn't matter what the default is
+    label: "{{ item.ansible_job_id|default(false) }}"
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: 300
+  when:
+    async_results.changed
 
 - name: Remove docker ccache volume(s)
   docker_volume:
