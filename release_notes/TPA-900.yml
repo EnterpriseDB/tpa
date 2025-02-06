@@ -4,7 +4,8 @@
     via the `cluster_ssh_port` in `config.yml`
 
     The `-p`/`--port` flags are now included in the `ssh` command in
-    `barman.d.conf` and the `barman-wal-restore` command respectively.
+    `barman.d.conf` and `barman-wal-restore`/`barman-wal-archive' 
+    commands respectively.
   # Possible types: notable_change, minor_change, bugfix or breaking_change
   type: bugfix
   # At least one between jira_tickets or support_tickets must be defined. You
