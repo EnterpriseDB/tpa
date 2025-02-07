@@ -1,7 +1,8 @@
 - summary: Add ssh port flag to Barman configuration 
   description: |
     The Barman configuration is now able to use custom ssh port set 
-    via the `cluster_ssh_port` in `config.yml`
+    via the `cluster_ssh_port` in `config.yml`, which defaults to
+    22 if it is not set.
 
     The `-p`/`--port` flags are now included in the `ssh` command in
     `barman.d.conf` and `barman-wal-restore`/`barman-wal-archive' 
