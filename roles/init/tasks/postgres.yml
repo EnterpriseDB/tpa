@@ -517,8 +517,8 @@
     repmgr_client_dsn_attributes: "{{ repmgr_client_dsn_attributes|default('') }}"
     bdr_client_dsn_attributes: "{{ bdr_client_dsn_attributes|default('') }}"
     harp_dcs_client_dsn_attributes: "{{ harp_dcs_client_dsn_attributes|default('') }}"
-    pgd_proxy_dsn_attributes: "{{ pgd_proxy_dsn_attributes|default('') }}"
-    pgd_cli_dsn_attributes: "{{ pgd_cli_dsn_attributes|default('') }}"
+    pgd_proxy_dsn_attributes: "{{ pgd_proxy_dsn_attributes|default(bdr_client_dsn_attributes)|default('') }}"
+    pgd_cli_dsn_attributes: "{{ pgd_cli_dsn_attributes|default(bdr_client_dsn_attributes)|default('') }}"
 
 - name: Set default DSNs
   set_fact:

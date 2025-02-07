@@ -81,7 +81,7 @@
         port={{ pgd_proxy_options['listen_port'] }}
         dbname={{ bdr_database }}
         user={{ pgd_proxy_user }}
-        {{ bdr_client_dsn_attributes }}"
+        {{ pgd_proxy_dsn_attributes }}"
 
   when: >
     pgd_http_options['enable']
