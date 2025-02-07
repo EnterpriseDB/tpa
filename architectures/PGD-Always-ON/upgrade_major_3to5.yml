@@ -339,6 +339,20 @@
   environment: "{{ target_environment }}"
   hosts: role_bdr
   tasks:
+  - name: Wait for bdr nodes to upgrade consensus protocol
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      query: >
+        select s->>'protocol_version' >= '5000' protocol from bdr.get_raft_status() s;
+    register: bdr_raft
+    until: bdr_raft.protocol == true
+    retries: 60
+    delay: 1
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when: >
+      'bdr' in role
+
   - include_role:
       name: postgres/bdr
       tasks_from: update.yml
