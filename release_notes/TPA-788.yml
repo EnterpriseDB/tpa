@@ -2,6 +2,9 @@
   description: |
     With this change, TPA is now able to create clusters locally and in AWS
     having ubuntu 24.04 as image.
+
+    NOTE: Support will become effective when each software gets released for ubuntu 24.04. 
+    Until then, Ubuntu 24.04 support is to be considered experimental.
   # Possible types: notable_change, minor_change, bugfix or breaking_change
   type: notable_change
   # At least one between jira_tickets or support_tickets must be defined. You
