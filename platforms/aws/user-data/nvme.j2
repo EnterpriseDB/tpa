@@ -21,8 +21,9 @@ SUBSYSTEM=="block", KERNEL=="nvme[0-9]*n1", ATTRS{model}=="Amazon Elastic Block 
 SUBSYSTEM=="block", KERNEL=="nvme[0-9]*n1", ATTRS{model}=="Amazon EC2 NVMe Instance Storage        ", PROGRAM="/usr/local/bin/nvme-is-name /dev/%k", SYMLINK+="%c{1+}"
 UDEV
 
-instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-region=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
+token=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+instance_id=$(curl -H "X-aws-ec2-metadata-token: $token" -s http://169.254.169.254/latest/meta-data/instance-id)
+region=$(curl -H "X-aws-ec2-metadata-token: $token" -s http://169.254.169.254/latest/meta-data/placement/region)
 aws ec2 describe-volumes\
     --region $region\
     --filters Name=attachment.instance-id,Values=$instance_id Name=attachment.delete-on-termination,Values=true\
