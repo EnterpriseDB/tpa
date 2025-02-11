@@ -84,56 +84,56 @@ class aws(CloudPlatform):
     def image(self, label, **kwargs):
         images = {
             "debian": {
-                "debian-10-amd64-20240204-1647": {
+                "debian-10-amd64-20240703-1797": {
                     "versions": ["10", "buster"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
-                "debian-11-amd64-20240104-1616": {
+                "debian-11-amd64-20241111-1928": {
                     "versions": ["11", "bullseye", "default"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
-                "debian-12-amd64-20240201-1644": {
+                "debian-12-amd64-20250210-2019": {
                     "versions": ["12", "bookworm"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
             },
             "debian-arm": {
-                "debian-12-arm64-20231013-1532": {
+                "debian-12-arm64-20250210-2019": {
                     "versions": ["12", "bookworm", "default"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
             },
             "redhat": {
-                "RHEL-7.9_HVM-20221027-x86_64-0-Hourly2-GP2": {
+                "RHEL-7.9_HVM-20240930-x86_64-0-Hourly2-GP3": {
                     "versions": ["7"],
                     "preferred_python_version": "python2",
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-8.7.0_HVM-20230330-x86_64-56-Hourly2-GP2": {
+                "RHEL-8.10.0_HVM-20250117-x86_64-1662-Hourly2-GP3": {
                     "versions": ["8", "default"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-9.0.0_HVM-20240227-x86_64-39-Hourly2-GP3": {
+                "RHEL-9.5.0_HVM-20250128-x86_64-0-Hourly2-GP3": {
                     "versions": ["9"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
             },
             "redhat-arm": {
-                "RHEL-9.4.0_HVM-20240605-arm64-82-Hourly2-GP3": {
+                "RHEL-9.5.0_HVM-20250128-arm64-0-Hourly2-GP3": {
                     "versions": ["9", "default"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
             },
             "rocky": {
-                "Rocky-8-EC2-Base-8.9-20231119.0.x86_64": {
+                "Rocky-8-EC2-Base-8.10-20240528.0.x86_64": {
                     "versions": ["8", "default"],
                     "preferred_python_version": "python3",
                     "owner": "792107900819",
@@ -142,12 +142,12 @@ class aws(CloudPlatform):
                 }
             },
             "ubuntu": {
-                "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20240228": {
+                "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20250210": {
                     "versions": ["20.04", "focal"],
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240301": {
+                "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20250112": {
                     "versions": [
                         "22.04",
                         "jammy",
