@@ -70,6 +70,7 @@ default_packages:
     - python3-selinux
     - cron
     - openssh-clients
+    - "{{ ['systemd-sysvcompat'] if ansible_distribution_version == '15.6' else [] }}"
 
 optional_packages: {}
 default_optional_packages:

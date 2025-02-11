@@ -19,10 +19,14 @@
       #
       # TPA startup tasks.
 
-- name: Create /etc/rc.local if needed
+- name: Find file name for local startup tasks
+  set_fact:
+    rc_local_path: "{{ _rc_local_path[ansible_os_family] }}"
+
+- name: Create {{ rc_local_path }} if needed
   copy:
     force: no
-    dest: /etc/rc.local
+    dest: "{{ rc_local_path }}"
     owner: root
     group: root
     mode: "0755"
@@ -31,15 +35,15 @@
       #
       exit 0
 
-- name: Ensure that /etc/rc.local is executable
+- name: Ensure that {{ rc_local_path }} is executable
   file:
-    path: /etc/rc.local
+    path: "{{ rc_local_path }}"
     follow: yes
     mode: "0755"
 
-- name: Make /etc/rc.local invoke /etc/tpa/rc.local
+- name: Make {{ rc_local_path }} invoke /etc/tpa/rc.local
   lineinfile:
-    path: /etc/rc.local
+    path: "{{ rc_local_path }}"
     mode: "0755"
     line: >-
       test -x /etc/tpa/rc.local && /etc/tpa/rc.local

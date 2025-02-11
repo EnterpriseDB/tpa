@@ -114,6 +114,6 @@
     command:
       cmd: SUSEConnect -p {{ repo }}
     vars:
-      repo: "PackageHub/15.5/{{ ansible_architecture }}"
+      repo: "PackageHub/{{ ansible_distribution_version }}/{{ ansible_architecture }}"
     when:
       repo not in registration_status.stdout

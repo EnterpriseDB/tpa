@@ -87,7 +87,7 @@
       rocky-8: rockylinux:8
       rocky-9: rockylinux:9
       rocky-latest: rockylinux:8
-      sles-15: registry.suse.com/bci/bci-base:15.5
+      sles-15: registry.suse.com/bci/bci-base:15.6
       ubuntu-18.04: ubuntu:bionic
       ubuntu-bionic: ubuntu:bionic
       ubuntu-20.04: ubuntu:focal

@@ -166,7 +166,7 @@ class aws(CloudPlatform):
                 },
             },
             "sles": {
-                "suse-sles-15-sp5-v20240129-hvm-ssd-x86_64": {
+                "suse-sles-15-sp6-v20250130-hvm-ssd-x86_64": {
                     "versions": ["15"],
                     "preferred_python_version": "python3",
                     "owner": "013907871322",

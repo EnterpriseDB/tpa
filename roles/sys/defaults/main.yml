@@ -1,0 +1,13 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+_rc_local_path:
+  Debian:
+    "/etc/rc.local"
+  RedHat:
+    "/etc/rc.local"
+  Ubuntu:
+    "/etc/rc.local"
+  SUSE:
+    "/etc/init.d/boot.local"
