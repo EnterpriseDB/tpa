@@ -170,6 +170,7 @@
     lock_file: "{{ tpa_dir }}/architectures/lib/use-vault"
   with_items:
     - postgres_password
+    - barman_role_password
     - barman_password
     - streaming_barman_password
     - pgbouncer_auth_user_password

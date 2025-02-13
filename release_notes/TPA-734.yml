@@ -1,4 +1,4 @@
-- summary: Depend TPAexec on Python 3.12
+- summary: Bump Python dependency to version 3.12
   description: |
     We were depending on Python 3.9, however, this release doesn't receive
     more updates and it's currently and finally discountinued.
