@@ -15,7 +15,7 @@
     group: "{{ etcd_group }}"
     system: yes
     comment: "etcd key-value store"
-    home: /var/lib/etcd/
+    home: /var/lib/etcd
     password: '!'
     shell: /bin/nologin
   when: >
