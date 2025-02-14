@@ -6,13 +6,13 @@
 #
 ansible-core==2.16.14
     # via -r requirements.in
-boto3==1.36.8
+boto3==1.36.20
     # via -r requirements.in
-botocore==1.36.8
+botocore==1.36.20
     # via
     #   boto3
     #   s3transfer
-certifi==2024.12.14
+certifi==2025.1.31
     # via
     #   -r requirements.in
     #   requests
@@ -20,7 +20,7 @@ cffi==1.17.1
     # via cryptography
 charset-normalizer==3.4.1
     # via requests
-cryptography==44.0.0
+cryptography==44.0.1
     # via
     #   -r requirements.in
     #   ansible-core
@@ -61,7 +61,7 @@ packaging==24.2
     # via ansible-core
 passlib==1.7.4
     # via -r requirements.in
-psutil==6.1.1
+psutil==7.0.0
     # via -r requirements.in
 pycparser==2.22
     # via cffi

@@ -3,14 +3,14 @@ cffi==1.17.1 \
     # via
     #   -r /out/requirements-ppc64le.in
     #   cryptography
-cryptography==44.0.0 \
-    --hash=sha256:c7ee2d162a3b3ef9fc753869c733416022c1c2cb29d3f7f596719d5e6f5058d0
+cryptography==44.0.1 \
+    --hash=sha256:8ec14e9b8421bca22d672631d7462707c0dd076137dfd2f7d677c00f89ae1713
     # via -r /out/requirements-ppc64le.in
 markupsafe==3.0.2 \
     --hash=sha256:3e22c35dcdbb8c898a409aabb03ea08dda7937bb33f94741701271ba3337227b
     # via -r /out/requirements-ppc64le.in
-psutil==6.1.1 \
-    --hash=sha256:3021bb49e534c9c957d5b4db25dc97f03f0599891d22a3e05f93b3ef7c0896ce
+psutil==7.0.0 \
+    --hash=sha256:9aee2a6dfabc9259a46008072b8b8e70b3d801d3e3e90d6da6cd723e62be2821
     # via -r /out/requirements-ppc64le.in
 pycparser==2.22 \
     --hash=sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
