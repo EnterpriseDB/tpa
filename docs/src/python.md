@@ -17,10 +17,13 @@ Distribution| Python 2| Python 3
 Debian 12/bookworm|✓|✓ (3.11)
 Debian 11/bullseye|✓|✓ (3.9)
 Debian 10/buster|✓|✓ (3.7)
-Ubuntu 20.04/focal|✗|✓ (3.8)
+Ubuntu 24.04/jammy|✗|✓ (3.12)
 Ubuntu 22.04/jammy|✗|✓ (3.10)
-RHEL 7.x|✓|✗ (3.6)
+Ubuntu 20.04/focal|✗|✓ (3.8)
+RHEL 9.x|✗|✓ (3.9)
 RHEL 8.x|✗|✓ (3.6)
+RHEL 7.x|✓|✗ (3.6)
+
 
 Ubuntu 20.04, 22.04 and RHEL 8.x can be used only with Python 3.
 

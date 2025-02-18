@@ -100,7 +100,7 @@ sudo yum install tpaexec
 ```
 
 This will install TPA into `/opt/EDB/TPA`. It will also
-ensure that other required packages (e.g., Python 3.9 or later) are
+ensure that other required packages (e.g., Python 3.12 or later) are
 installed.
 
 We mention `sudo` here only to indicate which commands need root
