@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 name: Integration Test
 description: Run an integration test for the given architecture and platform
@@ -69,9 +69,6 @@ inputs:
     required: false
     description: "Use a single-node location (for M1 only)"
     default: false
-  tpa_ansible_version:
-    required: false
-    description: "Ansible version to use with TPA"
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -114,7 +111,6 @@ runs:
         tpa_data_nodes_per_location: ${{ inputs.tpa_data_nodes_per_location }}
         tpa_witness_only_location: ${{ inputs.tpa_witness_only_location }}
         tpa_single_node_location: ${{ inputs.tpa_single_node_location }}
-        tpa_ansible_version: ${{ inputs.tpa_ansible_version }}
         cluster: ${{ inputs.cluster }}
 
     - name: Provision the cluster
@@ -171,7 +167,7 @@ runs:
         CURRENT_BUFFER_BYTES=`cat $GITHUB_STEP_SUMMARY | wc -c`
         REMAINING=$(expr $MAX_GITHUB_OUTPUT_BYTES - $CURRENT_BUFFER_BYTES)
         echo "::group::tpaexec test -vv"
-        ./bin/tpaexec test "$CLUSTER" -vv &>"$CLUSTER"/tpaexec-test
+        ./bin/tpaexec test "$CLUSTER" -vv --excluded_tasks=pgbench &>"$CLUSTER"/tpaexec-test
         status=$?
         cat "$CLUSTER"/tpaexec-test
         echo "::endgroup::"

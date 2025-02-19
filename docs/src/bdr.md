@@ -100,6 +100,29 @@ values for the whole cluster under `cluster_vars`.
 
 The `bdr_database` (default: bdrdb) will be initialised with PGD.
 
+### bdr_client_dsn_attributes
+
+Any _additional_ [parameter keywords supported by libpq](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS) 
+can be included in `bdr_client_dsn_attributes`.
+
+Do not include `host`, `port`, `dbname` and `user`, as these will already be included in the connection string. 
+
+!!! Notice when pgd-proxy and pgd-cli are installed
+
+Since pgd-proxy and pgd-cli are written in Go, they use Go drivers for connecting to Postgres. 
+
+These drivers do **not** support the full set of DSN attributes provided by the libpq C library. 
+
+If pgd-proxy and/or pgd-cli are installed and [`bdr_client_dsn_attributes`](bdr.md#bdr_client_dsn_attributes) includes parameters that are _unsupported_ by the Go driver (such as timeout), two new variables must be included in the cluster configuration:
+
+- `pgd_proxy_dsn_attributes`, which is used to create the connection strings in `pgd-proxy-conf`
+- `pgd_cli_dsn_attributes`, which is used to create the connection strings in `pgd-cli-conf`
+
+These two strings must ONLY contain parameter keywords compatible with the Go driver.
+
+If the `bdr_client_dsn_attributes` does not include any unsupported parameters, this can be ignored and the `bdr_client_dsn_attributes` will be included in the connection strings for `pgd-proxy-conf` and `pgd-cli-conf`.
+!!!
+
 ### bdr_node_group
 
 The setting of `bdr_node_group` (default: based on the cluster name)

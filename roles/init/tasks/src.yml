@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # Set a global boolean fact based on whether any installation method has
 # 'src', rather than checking specific `*_installation_method` vars by

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 import copy
 import csv
@@ -465,7 +465,8 @@ def expected_replication_slots(replica_list, inventory_hostname):
     for replica in replica_list:
         pcp = replica.get("primary_conninfo_parts", {})
         if inventory_hostname == pcp.get("host"):
-            expected_slots.append(replica.get("primary_slot_name"))
+            if replica.get("primary_slot_name"):
+                expected_slots.append(replica.get("primary_slot_name"))
     return expected_slots
 
 

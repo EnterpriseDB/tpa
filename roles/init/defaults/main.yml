@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 default_postgres_flavour: postgresql
 
@@ -98,11 +98,13 @@ default_postgres_tablespaces: {}
 supported_postgis_versions:
   - '3.3'
   - '3.4'
+  - '3.5'
 
 default_postgis_version: "{{ supported_postgis_versions | last }}"
 postgis_version_maj_min: "{{ default_postgis_version | split('.') }}"
 
 pgdg_pgaudit_version:
+  "11": "14"
   "12": "14"
   "13": "15"
   "14": "16"
@@ -111,6 +113,7 @@ pgdg_pgaudit_version:
   "17": ""
 
 edb_pgaudit_version:
+  "11": "1"
   "12": "1"
   "13": "1"
   "14": "1"
@@ -342,11 +345,8 @@ default_postgres_extensions_dictionary:
         Ubuntu: *postgis_pge_packages
         SLES: *postgis_pge_packages
     repository_setup_commands:
-      Debian: []
       RedHat:
       - crb enable
-      Ubuntu: []
-      SLES: []
 
   pgaudit:
     packages:
@@ -415,7 +415,7 @@ default_postgres_hba_local_auth_method: peer
 default_barman_user: barman
 default_barman_group: barman
 default_barman_home: /var/lib/barman
-default_barman_archive_command: "'barman-wal-archive {{ backup }} {{ inventory_hostname }} %p'"
+default_barman_archive_command: "'barman-wal-archive --port {{ cluster_ssh_port|default(22)|int }} {{ backup }} {{ inventory_hostname }} %p'"
 
 default_failover_manager:
   epas: efm

@@ -31,6 +31,27 @@ backup of the instance using rsync over ssh twice weekly. Full backups
 and WAL are retained for long enough to enable recovery to any point in
 the last 4 weeks.
 
+## Barman package version
+
+By default, TPA installs the latest available version of Barman.
+
+The version of the Barman package that is installed can be specified 
+by including `barman_package_version: xxx` under the `cluster_vars` 
+section of the `config.yml` file.
+
+```yaml
+cluster_vars:
+    …
+    barman_package_version: '1.56.2-1'
+    …
+```
+
+You may use any version specifier that apt or yum would accept.
+
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
+
 ## Barman configuration
 
 The Barman home directory on the Barman server can be set using the

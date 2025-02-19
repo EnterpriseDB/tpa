@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 - name: Automatically run additional repository setup commands for recognized extensions
   command: >
@@ -8,6 +8,8 @@
   loop: "{{ lookup('dict', postgres_extensions_dictionary) }}"
   when: >
     'repository_setup_commands' in item.value
+    and
+    item.value.repository_setup_commands[ansible_distribution] is defined
     and
     (item.key in postgres_extensions
     or item.key in postgres_databases|json_query('[*].extensions[*].name|[]'))

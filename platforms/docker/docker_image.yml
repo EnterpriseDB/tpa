@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # Given `image`, the name of an image referenced by instances[] that
 # does not exist locally, we must now do whatever is required to provide
@@ -87,14 +87,16 @@
       rocky-8: rockylinux:8
       rocky-9: rockylinux:9
       rocky-latest: rockylinux:8
-      sles-15: registry.suse.com/bci/bci-base:15.5
+      sles-15: registry.suse.com/bci/bci-base:15.6
       ubuntu-18.04: ubuntu:bionic
       ubuntu-bionic: ubuntu:bionic
       ubuntu-20.04: ubuntu:focal
       ubuntu-focal: ubuntu:focal
       ubuntu-22.04: ubuntu:jammy
       ubuntu-jammy: ubuntu:jammy
-      ubuntu-latest: ubuntu:jammy
+      ubuntu-24.04: ubuntu:noble
+      ubuntu-noble: ubuntu:noble
+      ubuntu-latest: ubuntu:noble
   when:
     image.startswith('tpa/')
     and _image_key in _tpa_images

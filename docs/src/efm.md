@@ -37,15 +37,17 @@ efm_user_password_encryption: 'scram-sha-256' # or can be set to `md5`
 
 ## efm_conf_settings
 
-You can use `efm_conf_settings` to set any parameters, whether recognised
-by TPA or not. Where needed, you need to quote the value exactly as it
-would appear in `efm.properties`:
+You can use `efm_conf_settings` to set specific parameters.
+These must be written as entries in an Ansible dictionary, in `key: value` form
+
+See the [documentation on the `efm.properties` file](https://www.enterprisedb.com/docs/efm/latest/04_configuring_efm/01_cluster_properties/)
+for details on which settings can be configured.
 
 ```yaml
 cluster_vars:
   efm_conf_settings:
-     notification.level=WARNING
-     ping.server.ip=<well known address in network>
+     notification.level: WARNING
+     ping.server.ip: <well known address in network>
 ```
 
 If you make changes to values under `efm_conf_settings`, TPA will always

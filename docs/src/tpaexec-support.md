@@ -11,9 +11,9 @@ description: What software can be installed and configured by TPA.
 
 TPA can install and configure the following major components.
 
-* Postgres 16, 15, 14, 13, 12, 11
+* Postgres
 
-* EPAS (EDB Postgres Advanced Server) 16, 15, 14, 13, 12
+* EPAS (EDB Postgres Advanced Server)
 
 * PGD 5, 4, 3.7
 

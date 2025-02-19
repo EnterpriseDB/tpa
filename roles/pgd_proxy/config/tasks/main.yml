@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 - name: Ensure pgd-proxy config directory exists
   file:
@@ -81,7 +81,7 @@
         port={{ pgd_proxy_options['listen_port'] }}
         dbname={{ bdr_database }}
         user={{ pgd_proxy_user }}
-        {{ bdr_client_dsn_attributes }}"
+        {{ pgd_proxy_dsn_attributes }}"
 
   when: >
     pgd_http_options['enable']

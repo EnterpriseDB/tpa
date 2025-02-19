@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 - include_tasks: init.yml
   when:
@@ -25,7 +25,7 @@
         'started',
         patroni_service_end_state|default('started')
       )
-    }}"
+      }}"
 
 # Need to refresh the patroni state facts at this point across all nodes.
 # Patroni should be running everywhere, and we want to clean up any

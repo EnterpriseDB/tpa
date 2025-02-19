@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # Here we install any configuration required for the extensions to be
 # installed. The "CREATE EXTENSION" commands will be issued later, via
@@ -78,19 +78,3 @@
   set_fact:
     postgres_extensions:
       "{{ postgres_extensions|difference(modules) }}"
-
-- name: Remove modules from list of extensions for postgres_databases
-  set_fact:
-    updated_postgres_databases: "{{
-      updated_postgres_databases|default([])
-      |union([
-        {'name': item.name, 'extensions': item.extensions|difference(db_format_modules)}
-      ])
-    }}"
-  loop: "{{ postgres_databases }}"
-
-- name: Replace postgres_databases with updated list of extensions
-  set_fact:
-    postgres_databases: "{{ updated_postgres_databases }}"
-  when: >
-    postgres_databases is not empty

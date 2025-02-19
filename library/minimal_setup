@@ -1,5 +1,5 @@
 #!/bin/bash
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 #
 # This is an ansible module that takes no arguments and returns only
 # some distribution-specific facts.
@@ -46,7 +46,7 @@ case "${ID}:${VERSION_ID%.*}" in
             python=python2.7
         fi
         ;;
-    ubuntu:20|ubuntu:22)
+    ubuntu:20|ubuntu:22|ubuntu:24)
         distribution=Ubuntu
         release=$VERSION_CODENAME
         python=python3

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # We look for *.list files with uncommented deb… lines in /etc/apt and
 # comment them out (except the list for the repository we create).

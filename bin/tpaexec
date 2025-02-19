@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 #
 # The dispatcher for all TPA functionality, including initial setup,
 # and the configuration, provision, deployment, and testing of clusters.
@@ -139,16 +139,6 @@ _install_tpaexec_pth() {
     fi
 }
 
-_check_ansible_version() {
-    case "$ansible_version" in
-        "8"|"9")
-            ;;
-        *)
-            error "Version $ansible_version of ansible is not supported"
-            ;;
-    esac
-}
-
 _install_pip_packages() {
     pip_args=(--upgrade)
 
@@ -171,28 +161,24 @@ _install_pip_packages() {
 
     pip3 install "${pip_args[@]}" "pip>=10.0.1" wheel
 
-    # We need to install Ansible and its dependencies into the venv,
+    # We need to install Ansible and all dependencies into the venv,
     # either from the bundled package from tpaexec-deps if present, or
     # directly from github/PyPI
 
-    ANSIBLE_REQUIREMENTS="$TPA_DIR"/requirements-ansible-${ansible_version}.txt
     TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
-
-    if [[ -d $PIP_DIR && -f $PIP_DIR/requirements-ansible-${ansible_version}.txt ]]; then
-        ANSIBLE_REQUIREMENTS="$PIP_DIR/requirements-ansible-${ansible_version}.txt"
+    if [[ -d $PIP_DIR ]]; then
         TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
     fi
 
     # If we have ansible already installed and we're going to install a different
     # one, we must remove the old one first
     existing_ansible_version=$(pip3 show ansible-core | grep Version | awk '{print $2}')
-    desired_ansible_version=$(grep 'ansible-core==' $ANSIBLE_REQUIREMENTS|grep -Eo '[[:digit:].]+')
+    desired_ansible_version=$(grep 'ansible-core==' $TPA_REQUIREMENTS|grep -Eo '[[:digit:].]+')
 
     if [[ $existing_ansible_version != $desired_ansible_version ]]; then
         pip3 uninstall -y ansible-core
     fi
 
-    pip_args+=(-r "$ANSIBLE_REQUIREMENTS")
     pip_args+=(-r "$TPA_REQUIREMENTS")
     pip3 install "${pip_args[@]}"
 
@@ -256,8 +242,6 @@ _install_ansible_collections() {
 }
 
 setup() {
-    use_community=true
-    ansible_version=8
     while [[ $# -gt 0 ]]; do
         opt=$1
         shift
@@ -271,39 +255,15 @@ setup() {
                 pip_cache_dir=${1:?pip cache directory not specified}
                 shift
                 ;;
-            --ansible-version)
-                ansible_version=${1:?ansible version not specified}
-                shift
-                ;;
             *)
                 error "unrecognised option: $opt"
                 ;;
         esac
     done
-    _display_notification
-    _check_ansible_version
     _create_and_activate_venv "${vpath:=$TPA_VENV}"
     _install_pip_packages
     _install_ansible_collections
     _install_tpaexec_pth
-}
-_display_notification() {
-    if [[ $use_community == false ]]; then
-        cat <<NOTIFICATION
-
-You have selected to use the 2ndQuadrant ansible fork. This is now
-deprecated in favour of community ansible and will cease to be supported
-in a future TPA release.
-
-If you choose to re-run 'tpaexec setup' to use community ansible, please
-be aware that the behaviour of the '--skip-tags' option is different and
-this option is not supported by TPA with community ansible. An alternative
-means of skipping tasks will be provided before support for 2ndQuadrant
-ansible is removed.
-
-NOTIFICATION
-
-    fi
 }
 
 _with_ansible_env() {
@@ -1147,11 +1107,20 @@ esac
 # If we can find a venv located relative to TPA_DIR, we activate it as a
 # convenience.
 
+# The python interpreter chosen might be different depending on these conditions:
+# 1. if venv is created, use the one used to create the venv
+# 2. if venv is not created:
+# 2.1 use the defined by the PYTHON environment variable
+# 2.2 use edb-python if it is available
+# 2.3 use the system python3 (fallback)
+
 if [[ -f $TPA_VENV/bin/activate ]]; then
     _activate_venv "$TPA_VENV"
     PYTHON=python3
 elif [[ -z ${PYTHON:-""} ]]; then
-    EDB_PYTHON=/usr/libexec/edb-python39/bin/python3
+    # We should aim for edb-python312. Despite python 3.9 should be enough,
+    # it's EOL'ed and not supported by upstream.
+    EDB_PYTHON=/usr/libexec/edb-python312/bin/python3
     if [ -f $EDB_PYTHON ]; then
         PYTHON=$EDB_PYTHON
     else

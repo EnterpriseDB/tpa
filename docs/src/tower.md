@@ -274,8 +274,8 @@ additional_build_steps:
 
     Base image used here requires access to registry.redhat.io (should
     be provided alongside AAP license). This image already comes with
-    most of the requirements for AAP 2.4 such as `python 3.9.*`,
-    `ansible-core==2.15.*`, and `ansible-runner` which simplify the
+    most of the requirements for AAP 2.4 such as `python 3.12.*`,
+    `ansible-core==2.16.*`, and `ansible-runner` which simplify the
     task.
 
     Different base image may require more `additional_build_steps`. See

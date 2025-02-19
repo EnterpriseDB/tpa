@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 - set_fact:
     yum_repository_list:
@@ -313,31 +313,14 @@
   when: >
     repo[1] not in edb_repositories
 
-- name: Install EDB repositories for {{ ansible_architecture }}
-  include_tasks: add-repository.yml
-  with_items: "{{ edb_repositories }}"
+- name: Run setup script to set up EDB repositories
+  become: true
+  shell:
+    cmd: "curl -1sLf 'https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/setup.rpm.sh' | bash"
+  loop: "{{ edb_repositories }}"
   loop_control:
     loop_var: repository
-  vars:
-    repo_name: enterprisedb-{{ repository }}-{{ ansible_architecture }}
-    repo:
-      description: enterprisedb-{{ repository }}-{{ ansible_architecture }}
-      file: enterprisedb-{{ repository }}
-      baseurl: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/el/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/
-      gpgkey: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/gpg.key
-
-- name: Install EDB repositories for noarch
-  include_tasks: add-repository.yml
-  with_items: "{{ edb_repositories }}"
-  loop_control:
-    loop_var: repository
-  vars:
-    repo_name: enterprisedb-{{ repository }}-noarch
-    repo:
-      description: enterprisedb-{{ repository }}-noarch
-      file: enterprisedb-{{ repository }}
-      baseurl: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/el/{{ansible_distribution_major_version }}/noarch/
-      gpgkey: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/gpg.key
+  no_log: true
 
 - name: Exclude lua packages from 2ndQuadrant products/bdr3/release repo
   ini_file:

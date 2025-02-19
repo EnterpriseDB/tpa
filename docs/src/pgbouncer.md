@@ -2,8 +2,31 @@
 description: Adding PgBouncer to your Postgres cluster.
 ---
 
+# PgBouncer
 
-# Configuring PgBouncer
+## PgBouncer package version
+
+By default, TPA installs the latest available version of PgBouncer.
+
+The version of the PgBouncer package that is installed can be specified 
+by including `pgbouncer_package_version: xxx` under the `cluster_vars` 
+section of the `config.yml` file.
+
+```yaml
+cluster_vars:
+    …
+    pgbouncer_package_version: '1.8*'
+    …
+```
+
+You may use any version specifier that apt or yum would accept.
+
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
+
+
+## Configuring PgBouncer
 
 TPA will install and configure PgBouncer on instances whose `role`
 contains `pgbouncer`.

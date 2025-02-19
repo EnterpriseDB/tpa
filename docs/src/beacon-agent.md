@@ -9,6 +9,28 @@ the role `beacon-agent` in `config.yml`. If `--enable-beacon-agent` is
 passed to `tpaexec configure`, then all of the postgres nodes in the
 cluster have this role.
 
+## Beacon agent package version
+
+By default, TPA installs the latest available version of `beacon-agent`.
+
+The version of the `beacon-agent` package that is installed can be specified 
+by including `beacon_agent_package_version: xxx` under the `cluster_vars` 
+section of the `config.yml` file.
+
+```yaml
+cluster_vars:
+    …
+    beacon_agent_package_version: '1.56.2-1'
+    …
+```
+
+You may use any version specifier that apt or yum would accept.
+
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
+
+
 ## Beacon agent configuration
 
 The beacon agent configuration contains two parameters which must be set

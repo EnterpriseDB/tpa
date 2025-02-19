@@ -41,8 +41,8 @@ The `tpaexec info` command outputs the following:
 # TPAexec 23.29
 tpaexec=/opt/EDB/TPA/bin/tpaexec
 TPA_DIR=/opt/EDB/TPA
-PYTHON=/opt/EDB/TPA/tpa-venv/bin/python3 (v3.9.18, venv)
+PYTHON=/opt/EDB/TPA/tpa-venv/bin/python3 (v3.12.18, venv)
 TPA_VENV=/opt/EDB/TPA/tpa-venv
-ANSIBLE=/opt/EDB/TPA/tpa-venv/bin/ansible (v2.15.9)
+ANSIBLE=/opt/EDB/TPA/tpa-venv/bin/ansible (v2.16.3)
 Validated: ea844d1b90295597d080bbf824dbbc6954886cb54ffdb265c7c71b99bedee67b [OK]
 ```

@@ -2,7 +2,30 @@
 description: Configuring pglogical replication with TPA.
 ---
 
-# pglogical configuration
+# pglogical
+
+## pglogical package version
+
+By default, TPA installs the latest available version of `pglogical`.
+
+The version of the `pglogical` package that is installed can be specified 
+by including `pglogical_package_version: xxx` under the `cluster_vars` 
+section of the `config.yml` file.
+
+```yaml
+cluster_vars:
+    …
+    pglogical_package_version: '2.2.0*'
+    …
+```
+
+You may use any version specifier that apt or yum would accept.
+
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
+
+## pglogical configuration
 
 TPA can configure pglogical replication sets (publications) and
 subscriptions with pglogical v2 and pglogical v3.

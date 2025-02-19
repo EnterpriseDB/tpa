@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # We can't be sure that Python is installed when we use this action to verify
 # a remote host's availability. the upstream action plugin wait_for_connection

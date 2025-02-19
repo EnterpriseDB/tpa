@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 name: Simple Integration Tests
 
@@ -18,16 +18,17 @@ on:
   workflow_dispatch:
 
 env:
-  LANG: "C.UTF-8"
-  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  ANSIBLE_SKIP_TAGS: pgbench
   EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
   EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
   EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
   FOUNDATION_TUNNEL_LOGIN: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
+  FOUNDATION_VER: ${{ vars.FOUNDATION_PACKAGING_VERSION }}
   GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
-  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
-  ANSIBLE_SKIP_TAGS: pgbench
   PYTHONWARNINGS: once
+  LANG: "C.UTF-8"
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
 
 jobs:
 

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # Conditionally start etcd if it is not already running, as the etcd_service_end_state
 # fact is always `restarted` at this point on a fresh installation and on an existing

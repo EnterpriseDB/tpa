@@ -1,6 +1,246 @@
 # TPA release notes
 
-© Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+© Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+## v23.36.0 (2025-02-19)
+
+### Notable changes
+
+- Use SLES15SP6 as the standard SLES for nodes
+
+  When SLES is requested at configure-time, TPA will now install SLES15SP6.
+
+  The docker and EC2 images are now SP6, and the systemd-sysvcompat package
+  is installed on SLES, so that local boot-time scripts continue to work.
+
+  References: TPA-901.
+
+- Add support for Ubuntu Noble 24.04
+
+  With this change, TPA is now able to create clusters locally and in AWS
+  having ubuntu 24.04 as image.
+
+  NOTE: Support will become effective when each software gets released for ubuntu 24.04. 
+  Until then, Ubuntu 24.04 support is to be considered experimental.
+
+  References: TPA-788.
+
+- Bump Python dependency to version 3.12
+
+  We were depending on Python 3.9, however, this release doesn't receive
+  more updates and it's currently and finally discountinued.
+
+  References: TPA-734.
+
+### Minor changes
+
+- Support EFM 5 "auto resume" properties
+
+  Starting with efm 5.0, the auto.resume.period property has been
+  broken into two properties, one for the startup case and one for
+  the db failure case. This change adds the correct properties
+  based on the efm_version being used.
+
+  References: TPA-892.
+
+- Fix Postgres database creation
+
+  Starting with efm 5.0, a new property 'backup.wal' has been
+  added. This change adds the new property if the version of
+  efm is 5 or higher.
+
+  References: TPA-893.
+
+- Add `PGPORT` to the postgres user's `.bashrc` file installed by TPA
+
+  The `PGPORT` environment variable has been exported as part of the 
+  postgres user's `.bashrc` file. It defaults to the port value used by the 
+  selected `postgres_flavour`, or `postgres_port` if specified in the config file.
+
+  References: TPA-811.
+
+- Wait for protocol version update during PGD upgrade
+
+  During upgrade from PGD3 to PGD5, the protocol version uodate may take some
+  time. The pgd5 specific config changes fail if they are attempted before
+  protocl version change. Hence adding this wait to avoid such failures.
+
+  References: TPA-904.
+
+- Support package version specifiers for all cluster comppnents
+
+  All components must be able to specify the package version in `config.yml` in
+  order for `tpaexec upgrade` to support minor version upgrades so that the 
+  desired version is known.
+
+  The following software packages accept an `--xxx-package-version` option to the
+  `tpaexec configure` command, which populates `xxx_package_version` in the generated
+  `config.yml`
+
+  - barman
+  - pgbouncer
+  - beacon-agent
+  - etcd
+  - patroni
+  - pem-server
+  - pem-agent
+  - pg_backup_api
+  - pgd_proxy
+  - pgdcli
+  - repmgr
+
+  References: TPA-852, TPA-858, TPA-859, TPA-860, TPA-861, TPA-862, TPA-863, TPA-864, TPA-865, TPA-866, TPA-867, TPA-868.
+
+- Use latest barman from PGDG on RedHat
+
+  TPA previously defaulted to barman 3.9 when installing from PGDG on a
+  RedHat-like system, as a workaround for broken packages. More recent
+  barman packages are OK, so we now let yum install the latest packages.
+
+  References: TPA-847.
+
+- Set up EDB repositories via setup script for RedHat and Debian
+
+  The repository manager provides a shell script that sets up the 
+  desired EDB repositories.
+
+  This simplifies EDB repository setup on TPA nodes into a single task.
+
+  Currently it is only done for `dnf`/'yum' and `apt` package managers; the
+  setup script was encountering an issue with `zypper` when the setup script
+  is run on subsequent deploys.
+
+  Due to this, SLES sets up EDB repositories without using the script.
+
+  References: TPA-689.
+
+- Fix documentation for `efm_conf_settings`
+
+  Previously, documentation stated
+  ```
+  You can use efm_conf_settings to set any parameters, whether recognised by TPA or not. 
+
+  Where needed, you need to quote the value exactly as it would appear in efm.properties
+  ```
+
+  However, the `efm.properties.j2` template uses the values from `efm_conf_settings` as an Ansible dictionary, 
+  so the entries must be written in `key: value` form.
+
+  ```yaml
+  cluster_vars:
+    efm_conf_settings:
+      notification.level: WARNING
+      ping.server.ip: <well known address in the network>
+  ```
+
+  References: TPA-886.
+
+- Update `<clustername>.nodes` when new nodes are added to an existing EFM cluster
+
+  When a new EFM node is added to `config.yml`, it is not listed in the 
+  `Allowed node host list` on the existing EFM nodes in the cluster.
+
+  The task which executes `efm upgrade-conf` and propagates the changes from
+  `/raw/<clustername>.properties` and `/raw/<clustername>.nodes` is now run 
+  when EITHER of these files are changed.
+
+  This results in the new EFM node being written to the `<clustername>.nodes` 
+  file and `efm cluster-status` including it in the `Allowed node host list`.
+
+  References: TPA-848.
+
+### Bugfixes
+
+- Fix shared_preload_libraries on patroni clusters
+
+  Entries in shared_preload libraries are now treated correctly by patroni.
+  This fixes a bug whereby adding the pglogical extension to a patroni
+  cluster via config.yml would fail.
+
+  References: TPA-573.
+
+- Deploys fail for distributions which have no additional repository setup commands for extensions
+
+  When `postgis` is added to `extra_postgres_extensions` or the `extensions` 
+  list of a database in `postgres_databases`, deploys fail for Debian,
+  SLES and Ubuntu because their list of `repository_setup_commands` is
+  empty (only RHEL has an additional command to run`crb enable`).
+
+  This empty list of commands looped over and passed to the `command` module,
+  which fails with `no command given`, resulting in deployment failure.
+
+  As a result, the `Automatically run additional repository setup commands 
+  for recognized extensions` task is now skipped if the distribution has
+  no additional commands to run.
+
+  References: TPA-771, TPA-885.
+
+- Use standard form of home directory for etcd
+
+  When creating the etcd user, TPA now refers to its home directory without
+  a trailing slash, matching the usage of other tools like 'useradd'.
+
+  References: TPA-907.
+
+- Set `bdr_client_dsn_attributes` as the default for `pgd_proxy_dsn_attributes` and `pgd_cli_dsn_attributes`
+
+  Because pgd-proxy and pgd-cli are written in Go and use a Go driver,
+  they do not support the full set of parameter keywords supported by
+  libpq.
+
+  In the case a cluster has installed pgd-proxy and/or pgd-cli and has
+  configured `bdr_client_dsn_attributes` with parameters that the Go
+  driver does *not* support, two new configuration variables must be
+  included: `pgd_proxy_dsn_attributes` and `pgd_cli_dsn_attributes`, 
+  containing only additional DSN parameters that the Go driver
+  supports.
+
+  Conversely, if pgd-proxy and pgd-cli are installed and
+  `bdr_client_dsn_attributes` does not include any Go-incompatible
+  parameters, the connection strings for these tools will be configured
+  with the attributes in `bdr_client_dsn_attributes`.
+
+  This amends unexpected behavior where the `pgd_proxy_dsn_attributes`
+  and `pgd_cli_dsn_attributes` were defaulting to empty strings when
+  not defined, even though the user was expecting the parameters in 
+  `bdr_client_dsn_attributes` to be used.
+
+  References: TPA-897, TPA-820, RT44819.
+
+- Fix Postgres database creation
+
+  In order to remove modules (`CREATE EXTENSION` is not run, e.g. `pg_failover_slots`) 
+  from the list of `extensions` specified for named databases under `postgres_databases`,
+  the entire hash was modified. This introduced a bug, since a new hash was created
+  that ONLY contained the database `name` and list of `extensions`, ignoring all other
+  configuration settings for the database (`owner`, `template`, `encoding` etc).
+
+  This resulted in databases being created with the default parameters rather than
+  as configured.
+
+  To fix this, the modules are removed from the list of extensions and the resulting
+  list is passed to the task which runs CREATE EXTENSION.
+
+  References: TPA-406, TPA-887.
+
+- respect repmgr_use_slots when creating slots
+
+  Fixed an issue whereby TPA attempted to create replication slots
+  even when repmgr_use_slots was set to 0
+
+  References: TPA-891.
+
+- Add ssh port flag to Barman configuration
+
+  The Barman configuration is now able to use custom ssh port set 
+  via the `cluster_ssh_port` in `config.yml`, which defaults to
+  22 if it is not set.
+
+  The `-p`/`--port` flags are now included in the `ssh` command in
+  `barman.d.conf` and `barman-wal-restore`/`barman-wal-archive' 
+  commands respectively.
+
+  References: TPA-900.
 
 ## v23.35.0 (2024-11-25)
 

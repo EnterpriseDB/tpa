@@ -1,13 +1,13 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 - name: Create patroni configuration
   copy:
     content: "{{
       patroni_conf
       |to_nice_yaml(indent=2, explicit_start=True, sort_keys=False)
-    }}"
+      }}"
     dest: "{{ patroni_etc }}/{{ cluster_name }}.yml"
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"

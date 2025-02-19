@@ -13,7 +13,9 @@ fi
 
 if [[ $ID = "sles" ]]; then
     zypper -n install systemd
-    ln -s /usr/lib/systemd/systemd /sbin/init
+    if [ ! -e "/sbin/init"]; then
+        ln -s /usr/lib/systemd/systemd /sbin/init
+    fi
     zypper -n install awk
 fi
 

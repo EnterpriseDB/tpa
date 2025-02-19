@@ -1,4 +1,5 @@
-cryptography==43.0.3 
+cryptography==44.0.1 
 pyyaml==6.0.2 
 markupsafe==3.0.2 
-psutil==6.1.0 
+psutil==7.0.0 
+cffi==1.17.1 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 from . import Platform
 from .. import net
@@ -179,7 +179,7 @@ class docker(Platform):
                 "os_family": "RedHat",
             },
             "tpa/ubuntu": {
-                "versions": ["bionic", "focal", "jammy", "18.04", "20.04", "22.04"],
+                "versions": ["bionic", "focal", "jammy", "noble", "18.04", "20.04", "22.04", "24.04"],
                 "os": "Ubuntu",
             },
         }

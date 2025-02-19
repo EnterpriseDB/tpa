@@ -9,14 +9,22 @@
 version: 3
 images:
   base_image:
-    name: 'registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9:latest'
+    name: 'registry.redhat.io/ubi9/python-312:9.5-1739191330'
 dependencies:
+  python_interpreter:
+    python_path: /usr/bin/python3.12
+  ansible_core:
+    package_pip: ansible-core==2.16.*
+  ansible_runner:
+    package_pip: ansible-runner
   python: ../../../requirements-aap.txt
   galaxy: ../../../collections/requirements.yml
 options:
-  package_manager_path: /usr/bin/microdnf
+  package_manager_path: /usr/bin/dnf
 
 additional_build_steps:
+  prepend_base:
+   - RUN update-alternatives --install /usr/bin/python3 python3 /opt/app-root/bin/python3 1
   append_final:
    - RUN mkdir -p /opt/EDB/TPA
    - RUN ls . -als

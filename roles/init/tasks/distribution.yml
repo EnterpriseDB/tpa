@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # Detect which distribution is in use, and fail if it's not supported.
 # (We use the minimal_setup module because we can't rely on a usable

@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 name: Integration test
 
@@ -33,15 +33,17 @@ on:
         required: true
         type: choice
         options:
-        - tpa/redhat:8
         - tpa/ubuntu:20.04
+        - tpa/ubuntu:22.04
+        - tpa/ubuntu:24.04
         - tpa/debian:9
         - tpa/debian:10
         - tpa/debian:11
         - tpa/debian:12
         - tpa/redhat:7
-        - tpa/sles:15
+        - tpa/redhat:8
         - tpa/redhat:9
+        - tpa/sles:15
       tpa_postgres_flavour:
         description: "Postgres flavour"
         required: true
@@ -71,14 +73,6 @@ on:
         options:
         - "efm"
         - "repmgr"
-      tpa_ansible_version:
-        description: "Ansible version"
-        required: true
-        default: "8"
-        type: choice
-        options:
-        - "8"
-        - "9"
       tpa_package_cache:
         description: "Use the downloader"
         type: boolean

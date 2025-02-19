@@ -1,11 +1,11 @@
-{# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved. #}
+{# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved. #}
 [{{ backup_name }}]
 description = "Backups from {{ target }}"
 
 {% if _barman_archiver != default_barman_archiver %}
 archiver = "{{ _barman_archiver }}"
 {% endif %}
-ssh_command = "ssh -q {{ postgres_user }}@{{ target }}"
+ssh_command = "ssh -q {{ postgres_user }}@{{ target }} -p {{ cluster_ssh_port|default(22)|int }}"
 conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='barman') }} {{ barman_client_dsn_attributes }}"
 streaming_conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='streaming_barman') }} {{ streaming_barman_client_dsn_attributes }}"
 streaming_archiver = on

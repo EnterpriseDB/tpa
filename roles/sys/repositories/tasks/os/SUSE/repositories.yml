@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 - set_fact:
     suse_repository_list:
@@ -114,6 +114,6 @@
     command:
       cmd: SUSEConnect -p {{ repo }}
     vars:
-      repo: "PackageHub/15.5/{{ ansible_architecture }}"
+      repo: "PackageHub/{{ ansible_distribution_version }}/{{ ansible_architecture }}"
     when:
       repo not in registration_status.stdout

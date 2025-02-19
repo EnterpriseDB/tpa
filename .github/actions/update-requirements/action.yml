@@ -1,5 +1,5 @@
 ---
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # this action runs pip-compile on the one that changed on latest push making
 # changes in one of the requirements .in files paths.
@@ -19,71 +19,51 @@ runs:
       shell: bash
       run: |
         pip install pip-tools
-    # generating 2 files from requirements.in:
-    # 1 with hashes for tpaexec setup
-    # one without hashes for AAP EE image creation
+
+    # generating 1 file from requirements.in
+    # without hashes for AAP EE image creation
     - name: Run pip-compile on requirements.in
       shell: bash
       run: |
-        pip-compile --generate-hashes --reuse-hashes requirements.in -o requirements.txt
-        pip-compile requirements.in -o requirements-aap.txt
-
-    - name: Prevents removal of PPC64 nor ARM64 hashes by mistake
-      shell: bash
-      run: |
-       #!/bin/bash
-
-       MAIN_REQUIREMENTS_FILE="requirements.txt"
-       PPC64_REQUIREMENTS_FILE="requirements-ppc64le.txt"
-       ARM64_REQUIREMENTS_FILE="requirements-arm64.txt"
-       RET_VALUE=0
-
-       function check_hash_present_in_file() {
-         file_name=$1
-         HASHES=$(cat $file_name | grep "hash=sha256" | cut -d ":" -f2)
-         for _hash in $HASHES
-         do
-           if ! grep -q $_hash $MAIN_REQUIREMENTS_FILE ; then
-             echo "Failed to find ($_hash) in $file_name"
-             RET_VALUE=-1
-           fi
-         done
-       }
-
-       check_hash_present_in_file $PPC64_REQUIREMENTS_FILE
-       check_hash_present_in_file $ARM64_REQUIREMENTS_FILE
-
-       exit $RET_VALUE
-
-    - name: Run pip-compile on requirements-ansible-8.in
-      shell: bash
-      run: |
-        pip-compile --generate-hashes --reuse-hashes requirements-ansible-8.in -o requirements-ansible-8.txt
-
-    - name: Run pip-compile on test dependency requirements/ansible.in
-      shell: bash
-      run: |
-        pip-compile --generate-hashes --reuse-hashes requirements/ansible.in -o requirements/ansible.txt
+        pip-compile -U requirements.in -o requirements-aap.txt
 
     - name: Run pip-compile on test dependency requirements/dep.in
       shell: bash
       run: |
-        pip-compile --generate-hashes --reuse-hashes requirements/dep.in -o requirements/dep.txt
+        pip-compile -U --generate-hashes --reuse-hashes requirements/dep.in -o requirements/dep.txt
 
     - name: Run pip-compile on test dependency requirements/lint.in
       shell: bash
       run: |
-        pip-compile --generate-hashes --reuse-hashes requirements/lint.in -o requirements/lint.txt
+        pip-compile -U --generate-hashes --reuse-hashes requirements/lint.in -o requirements/lint.txt
 
     - name: Run pip-compile on test dependency requirements/testing.in
       shell: bash
       run: |
-        pip-compile --generate-hashes --reuse-hashes requirements/testing.in -o requirements/testing.txt
+        pip-compile -U --generate-hashes --reuse-hashes requirements/testing.in -o requirements/testing.txt
 
     - name: Run pip-compile on tpa-ee build requirements
       shell: bash
       run: |
-        pip-compile --generate-hashes --reuse-hashes tpa-ee/aap24/build-requirements.in -o tpa-ee/aap24/build-requirements.txt
+        pip-compile -U tpa-ee/aap24/build-requirements.in -o tpa-ee/aap24/build-requirements.txt
+
+    - name: Ensure arch specific hashes are present in final requirements files
+      shell: bash
+      id: hash_check
+      run: |
+        #!/bin/bash
+        FILES="requirements.txt"
+
+        ERRORS=$(python .github/actions/update-requirements/add_ppc64_hashes_to_requirements_files.py $FILES)
+        echo "ERRORS<<EOF" >> $GITHUB_OUTPUT
+        echo "$ERRORS" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        # Exits with error if any found
+        if [[ -n $ERRORS ]]
+        then
+          exit 1
+        fi
+        exit 0
 
     # install tox and run dep test
     - name: Install tox
@@ -100,19 +80,22 @@ runs:
     # PR will be in Draft mode if tox dep test failed.
     # we add !cancelled() condition to ensure draft PR is created.
     - name: Template PR body
+      if: ${{ !cancelled() }}
       id: template
-      uses: chuhlomin/render-template@v1.4
+      uses: chuhlomin/render-template@v1.10
       with:
         template: .github/actions/update-requirements/body.template.md
         vars: |
           pr_number: ${{ github.event.pull_request.number }}
-          ref: ${{ github.ref }}
+          ref: ${{ github.head_ref || github.ref }}
+          additional_body: "${{ steps.hash_check.outputs.ERRORS || 'All PPC64LE specific hashes could be matched.' }}"
 
     - name: Create Pull Request
       if: ${{ !cancelled() }}
       id: cpr
-      uses: peter-evans/create-pull-request@v6
+      uses: peter-evans/create-pull-request@v7
       with:
+        base: main
         token: ${{ env.GITHUB_TOKEN }}
         commit-message: ${{ steps.template.outputs.result }}
         signoff: false
@@ -123,7 +106,8 @@ runs:
         labels: |
           pip dependencies
         reviewers: EnterpriseDB/tpaexec-dev-team
-        draft: ${{ steps.deps.conclusion == 'failure' }}
+        draft: ${{ steps.deps.conclusion == 'failure' || steps.hash_check.conclusion == 'failure'}}
         add-paths: |
-          requirements*.txt
-          requirements/*.txt
+          requirements*.*
+          requirements/*.*
+          tpa-ee/aap24/build-requirements.*

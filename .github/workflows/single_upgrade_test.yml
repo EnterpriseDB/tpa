@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 name: Upgrade test
 
@@ -33,12 +33,13 @@ on:
         required: true
         type: choice
         options:
-        - tpa/debian:11
-        - tpa/redhat:8
-        - tpa/ubuntu:20.04
         - tpa/debian:9
         - tpa/debian:10
+        - tpa/debian:11
+        - tpa/ubuntu:20.04
+        - tpa/ubuntu:24.04
         - tpa/redhat:7
+        - tpa/redhat:8
         - tpa/sles:15
       tpa_postgres_flavour:
         description: "Postgres flavour"

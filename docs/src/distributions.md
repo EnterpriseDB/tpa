@@ -28,6 +28,7 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 
 ## Ubuntu x86
 
+* Ubuntu 24.04/noble is fully supported
 * Ubuntu 22.04/jammy is fully supported
 * Ubuntu 20.04/focal is fully supported
 * Ubuntu 18.04/bionic is a legacy distribution

@@ -16,6 +16,28 @@ cluster_vars:
   enable_pg_backup_api: true
 ```
 
+## PG Backup API package version
+
+By default, TPA installs the latest available version of pg-backup-api.
+
+The version of the pg-backup-api package that is installed can be specified 
+by including `pg_backup_api_package_version: xxx` under the `cluster_vars` 
+section of the `config.yml` file.
+
+```yaml
+cluster_vars:
+    …
+    pg_backup_api_package_version: '2.0.0-1.el8'
+    …
+```
+
+You may use any version specifier that apt or yum would accept.
+
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
+
+
 # Installation Options
 
 pg-backup-api will be installed via packages by default, but you can

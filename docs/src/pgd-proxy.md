@@ -1,8 +1,30 @@
 ---
 description: Incorporating pgd-proxy into your TPA deployed PGD 5 cluster.
 ---
+# pgd-proxy
 
-# Configuring pgd-proxy
+## pgd-proxy package version
+
+By default, TPA installs the latest available version of `pgd-proxy`.
+
+The version of the `pgd-proxy` package that is installed can be specified 
+by including `pgd_proxy_package_version: xxx` under the `cluster_vars` 
+section of the `config.yml` file.
+
+```yaml
+cluster_vars:
+    …
+    pgd_proxy_package_version: '5.0.0-1'
+    …
+```
+
+You may use any version specifier that apt or yum would accept.
+
+If your version does not match, try appending a `*` wildcard. This
+is often necessary when the package version has an epoch qualifier
+like `2:...`.
+
+## Configuring pgd-proxy
 
 TPA will install and configure pgd-proxy for the PGD-Always-ON
 architecture with PGD 5 on any instance with `pgd-proxy` in its `role`.

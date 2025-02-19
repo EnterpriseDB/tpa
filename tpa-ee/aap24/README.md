@@ -2,12 +2,12 @@
 
 ## choice of base image
 
-TPA provides execution-environment.yml files for both rhel9-minimal-ee and python3.9-alpine base images
+TPA provides execution-environment.yml files for both ubi9/python-312 and python3.12-alpine base images
 depending on your needs.
 
-- rhel9 base image is a RedHat generated image similar to the one provided with AAP2.4 during installation (rhel8-minimal-ee), it is maintained by RedHat and is built to be compatible with AAP2.4.
+- rhel9 base image is a RedHat generated image including python 3.12.
 
-- python3.9-alpine image is lightweight, minimalist and benefits from alpine's focus on security and docker oriented environment.
+- python3.12-alpine image is lightweight, minimalist and benefits from alpine's focus on security and docker oriented environment.
 
 ## tpa repos ref
 

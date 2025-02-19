@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 pem_server_packages:
   RedHat: &pem_server_package
@@ -56,4 +56,5 @@ pem_server_webserver_packages:
     - "{{ pem_server_modwsgi_package_name[ansible_distribution][ansible_distribution_major_version] }}"
   SUSE:
     - apache2
+    - "{{'apache2-utils' if ansible_distribution_version == '15.6' else [] }}"
     - "{{ pem_server_modwsgi_package_name[ansible_distribution][ansible_distribution_major_version] }}"

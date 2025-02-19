@@ -1,4 +1,4 @@
-{# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved. #}
+{# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved. #}
 db.user=efm
 db.password.encrypted={{ efm_encrypted_pass }}
 db.port={{ postgres_port }}
@@ -58,6 +58,9 @@ use.replay.tiebreaker={{ efm_conf_settings['use.replay.tiebreaker']|default(true
 standby.restart.delay={{ efm_conf_settings['standby.restart.delay']|default(0) }}
 application.name={{ efm_conf_settings['application.name']|default('') }}
 restore.command={{ efm_conf_settings['restore.command']|default('') }}
+{% if efm_version is version('5', '>=') %}
+backup.wal={{ efm_conf_settings['backup.wal']|default(false) }}
+{% endif %}
 reconfigure.num.sync={{ efm_conf_settings['reconfigure.num.sync']|default(false) | bool }}
 reconfigure.num.sync.max={{ efm_conf_settings['reconfigure.num.sync.max']|default('') }}
 reconfigure.sync.primary={{ efm_conf_settings['reconfigure.sync.primary']|default(false) | bool }}
@@ -65,7 +68,12 @@ minimum.standbys={{ efm_conf_settings['minimum.standbys']|default(0) }}
 priority.standbys={{ efm_conf_settings['priority.standbys']|default('') }}
 recovery.check.period={{ efm_conf_settings['recovery.check.period']|default(1) }}
 restart.connection.timeout={{ efm_conf_settings['restart.connection.timeout']|default(60) }}
+{% if efm_version is version('5', '>=') %}
+auto.resume.startup.period={{ efm_conf_settings['auto.resume.startup.period']|default(0) }}
+auto.resume.failure.period={{ efm_conf_settings['auto.resume.failure.period']|default(0) }}
+{% else %}
 auto.resume.period={{ efm_conf_settings['auto.resume.period']|default(0) }}
+{% endif %}
 virtual.ip={{ efm_conf_settings['virtual.ip']|default('') }}
 virtual.ip.interface={{ efm_conf_settings['virtual.ip.interface']|default('') }}
 virtual.ip.prefix={{ efm_conf_settings['virtual.ip.prefix']|default('') }}

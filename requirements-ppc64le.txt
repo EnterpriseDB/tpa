@@ -1,18 +1,20 @@
 cffi==1.17.1 \
-    --hash=sha256:f7f5baafcc48261359e14bcd6d9bff6d4b28d9103847c9e136694cb0501aef87
-    # via cryptography
-cryptography==43.0.3 \
-    --hash=sha256:8f6f9250cbe5546eae452b07b26e0cf3eeca40ea80810f30c7760e2727bf45cb
+    --hash=sha256:d63afe322132c194cf832bfec0dc69a99fb9bb6bbd550f161a49e9e855cc78ff
+    # via
+    #   -r /out/requirements-ppc64le.in
+    #   cryptography
+cryptography==44.0.1 \
+    --hash=sha256:8ec14e9b8421bca22d672631d7462707c0dd076137dfd2f7d677c00f89ae1713
     # via -r /out/requirements-ppc64le.in
 markupsafe==3.0.2 \
-    --hash=sha256:70fa62ee74c613f24525884f825c0e2ec98a8ee476419fe7cfc224d8031a5191
+    --hash=sha256:3e22c35dcdbb8c898a409aabb03ea08dda7937bb33f94741701271ba3337227b
     # via -r /out/requirements-ppc64le.in
-psutil==6.1.0 \
-    --hash=sha256:3ffae8c6fdafc1ee3b4c5b1ebf26440275c97b31776f27de12adfd821e69ca84
+psutil==7.0.0 \
+    --hash=sha256:9aee2a6dfabc9259a46008072b8b8e70b3d801d3e3e90d6da6cd723e62be2821
     # via -r /out/requirements-ppc64le.in
 pycparser==2.22 \
     --hash=sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
     # via cffi
 pyyaml==6.0.2 \
-    --hash=sha256:bcddb998561d8d258470985a03e74cf26b26a91b06e9e96ed7739875cca19ee4
+    --hash=sha256:ed3e08145aa409d1fd3fb8e28e897cf51614196a1bd52a77b1e858cef7b609e9
     # via -r /out/requirements-ppc64le.in

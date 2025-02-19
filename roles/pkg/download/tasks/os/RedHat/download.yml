@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 - name: Install yumdownloader (yum-utils) and createrepo
   package:
@@ -83,7 +83,7 @@
     lineinfile:
       path: "{{ _download_dir }}/modules.yaml"
       regexp: '^(.*)<FILL THIS IN>'
-      line: '\1"© Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved."'
+      line: '\1"© Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved."'
       backrefs: yes
   - name: Generate modular repository metadata with modifyrepo_c
     command: modifyrepo_c --mdtype=modules modules.yaml repodata/

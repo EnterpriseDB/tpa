@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 import sys
 import importlib
 
-want = ["jinja2", "yaml", "cryptography", "dateutil", "setuptools", "netaddr", "six"]
+want = ["jinja2", "yaml", "cryptography", "dateutil", "netaddr", "six"]
 have = []
 
 for m in want:

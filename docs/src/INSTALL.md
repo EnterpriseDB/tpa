@@ -100,7 +100,7 @@ sudo yum install tpaexec
 ```
 
 This will install TPA into `/opt/EDB/TPA`. It will also
-ensure that other required packages (e.g., Python 3.9 or later) are
+ensure that other required packages (e.g., Python 3.12 or later) are
 installed.
 
 We mention `sudo` here only to indicate which commands need root
@@ -206,14 +206,4 @@ this, but others will not work without it.
 
 ## Ansible versions
 
-TPA uses Ansible version 8 by default (ansible-core 2.15).
-
-TPA has experimental support for Ansible 9 (ansible-core 2.16),
-which can be specified using the `--ansible-version` argument to
-`tpaexec setup`. It requires Python 3.10 or greater, so if you have
-edb-python 3.9 installed, you must explicitly set your python version
-when running `tpaexec setup`:
-
-```bash
-PYTHON=/usr/bin/python3.10 tpaexec setup --ansible-version 9
-```
+TPA uses ansible-core 2.16 by default.

@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # watch for changes in .in files and call pip-compile to update the associated .txt
 # runs dep check to ensure everything is fine after update.
@@ -22,20 +22,140 @@ on:
       - requirements/*.in
       - tpa-ee/aap24/*.in
   workflow_dispatch:
+    inputs:
+      force_rebuild_pymodules:
+        type: boolean
+        description: 'Force rebuild of python modules'
+        required: true
+        default: false
+
 env:
-  LC_ALL: C.UTF-8
-  LANG: C.UTF-8
-  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
+  CLOUDSMITH_BUILD_DEPENDENCIES_API_KEY: ${{ secrets.CLOUDSMITH_BUILD_DEPENDENCIES_API_KEY }}
   EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  FOUNDATION_TUNNEL_LOGIN: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
+  FORCE_REBUILD_PYMODULES: ${{ github.event.inputs.force_rebuild_pymodules }}
+  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+  TPA_PIP_CS_API: ${{ secrets.TPA_PIP_CS_API }}
 
 jobs:
-  requirements:
+
+  main:
+    runs-on: ubuntu-latest
     if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v4
+        with:
+          repository: EnterpriseDB/tpa-internal
+          token: ${{ env.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/install-requirements
+
+      - name: Install python dependencies
+        shell: bash
+        run: |
+          pip install pip-tools
+
+      - name: Run pip-compile on requirements.in
+        shell: bash
+        run: |
+          pip-compile -U --generate-hashes --reuse-hashes requirements.in -o requirements.txt
+
+      - name: Share new requirements.txt file with next steps
+        uses: actions/upload-artifact@v4
+        with:
+          name: new_req
+          path: requirements.txt
+
+  ppc64:
+    needs: [main]
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.dependencies.outputs.changed }}
+    steps:
+      - name: Checkout source TPA repository
+        id: checkout-source
+        uses: actions/checkout@v4
+        with:
+          repository: EnterpriseDB/tpa-internal
+          token: ${{ env.GITHUB_TOKEN }}
+
+      - name: Checkout foundation repository branch/tag ${{ env.FOUNDATION_VER }}
+        uses: actions/checkout@v4
+        with:
+          repository: EnterpriseDB/foundation-packaging
+          ref: ${{ env.FOUNDATION_VER }}
+          token: ${{ env.GITHUB_TOKEN }}
+          path: foundation
+
+      - name: Download generated requirements.txt
+        uses: actions/download-artifact@v4
+        with:
+          name: new_req
+          path: ${{ github.workspace }}
+
+      - name: Connect to a Native Executor
+        uses: ./foundation/actions/linux/native/executor/connect
+        with:
+          architecture: ppc64le
+          tunnel-login: ${{ env.FOUNDATION_TUNNEL_LOGIN }}
+
+      - name: Setup container
+        uses: ./foundation/actions/linux/container/setup
+        with:
+          architecture: ppc64le
+          distro: el
+          distro-version: 9
+          github-token: ${{ env.GITHUB_TOKEN }}
+          additional-options: >
+            --volume ${{ github.workspace }}:/home/runner/tpa
+
+      - name: Execute script in container
+        uses: ./foundation/actions/linux/container/execute
+        with:
+          script: |
+            cd tpa
+            bash .github/workflows/requirements/check-build-dependencies.sh
+
+      - name: tmux
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
+
+      - name: Nuke container
+        uses: ./foundation/actions/linux/container/destroy
+
+      - name: Share generated arch specific requirement files
+        uses: actions/upload-artifact@v4
+        with:
+          name: requirements
+          path: ${{ github.workspace }}/packages
+
+  requirements:
+    needs: [ppc64]
     name: Requirements update
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_SLONIK }}
-      - uses: ./.github/actions/update-requirements
 
+      # new_req should bring the modified requirements.txt from the previous pip-compile run
+      - name: Download generated requirements.txt
+        uses: actions/download-artifact@v4
+        with:
+          name: new_req
+          path: ${{ github.workspace }}
+
+      # requirements should bring the ppc64le .txt and .in files
+      - name: Download generated requirements files
+        uses: actions/download-artifact@v4
+        with:
+          name: requirements
+          path: ${{ github.workspace }}
+
+      # we run the classic action to generate all other files and generate the PR
+      - uses: ./.github/actions/update-requirements

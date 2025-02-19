@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # By default, we configure and use remote package repositories. If you
 # set `use_local_repo_only: yes`, we use only sys/local-repo instead.

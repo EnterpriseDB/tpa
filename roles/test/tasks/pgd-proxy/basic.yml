@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 - assert:
     msg: "This test may be applied only to pgd-proxy instances"
@@ -30,11 +30,14 @@
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
 
+# on some systems, unprivileged users can't run journalctl
 - name: Get current pgd-proxy version
   shell: >
     journalctl -u pgd-proxy | grep -P "(?<=proxy version: \")([0-9]*\.[0-9]*\.[0-9]*)" -o | tail -1
   register: pgdproxy_version
   changed_when: false
+  become: true
+  become_user: root
 
 # check that configuration matches
 # register the config summary

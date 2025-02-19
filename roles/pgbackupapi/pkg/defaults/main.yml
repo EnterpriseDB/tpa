@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 # by default, don't install pg-backup-api
 enable_pg_backup_api: false
@@ -12,10 +12,15 @@ pg_backup_api_build_dir: /opt/postgres/build/pg-backup-api
 pgbapi_packages:
   Debian:
     - pg-backup-api
+  RedHat:
+    - pg-backup-api
+
+pgbapi_dependency_packages:
+  Debian:
     - "{{ python_pkg_prefix }}-cryptography"
     - apache2
   RedHat:
-    - pg-backup-api
     - "{{ python_pkg_prefix }}-cryptography"
     - httpd
     - mod_ssl
+

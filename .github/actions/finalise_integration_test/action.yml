@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 name: Finalise Integration Test
 description: Capture output data, deprovision and remove cluster
@@ -38,10 +38,10 @@ runs:
       if: always()
 
     - name: Save cluster artifacts before deletion
-      uses: ./.github/actions/upload-artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: cluster-${{ github.run_number }}-${{ github.run_attempt }}
-        path: "${{ inputs.source_directory }}/cluster-*.tar.gz"
+        name: ${{ inputs.cluster }}-${{ github.run_number }}-${{ github.run_attempt }}
+        path: "${{ inputs.source_directory }}/cluster-${{ inputs.cluster }}.tar.gz"
       if: always()
 
 outputs: { }
