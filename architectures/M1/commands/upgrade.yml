@@ -26,7 +26,7 @@
 
   - name: Identify primary by name
     set_fact:
-      chosen_primary: "{{ groups['primary'][0] }}"
+      chosen_primary: "{{ groups['primary'] | difference(groups['role_pem-server']|default([])) | first }}"
 
   - name: Identify replica to become temporary primary
     set_fact:

@@ -1,0 +1,245 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- name: Starting system level checks and repo setup
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: all
+  tasks:
+  - assert:
+      that:
+        failover_manager == 'repmgr'
+      fail_msg:
+        This upgrade scenario is for repmgr only
+
+  - name: Set up repositories
+    include_role:
+      name: sys/repositories
+
+  - name: Configure local-repo, if available
+    include_role:
+      name: sys/local_repo
+
+- name: Tests running repmgr on the nodes
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_postgres:role_primary:!role_pem-server
+  tasks:
+  - name: Check repmgr status
+    include_role:
+      name: test
+      tasks_from: repmgr.yml
+
+- name: Run checks on barman nodes, if any
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_barman
+  tasks:
+  - name: Stop wal receiver on barman nodes
+    include_role:
+      name: barman
+      tasks_from: server-stop-receive-wal.yml
+
+# start of postgres minor upgrade process
+- name: Stop repmgrd
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_postgres:!role_pemserver
+  tasks:
+
+  - name: Stop repmgr
+    service:
+      name: repmgr
+      state: stopped
+
+- name: Rolling minor Postgres upgrade for Replica and Witness
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_replica:role_witness:&g_update_hosts
+  serial: 1
+  tasks:
+
+  # replica and witness upgrade
+  - name: Upgrade replicas and witnesses
+    block:
+    - include_role: name=postgres/update
+
+    - include_role: name=postgres/restart
+
+# switchover to make primary a replica before upgrading it
+- name: Switchover to chosen replica
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_replica[0]
+  tasks:
+
+  - name: Switchover to {{ chosen_replica }}
+    command: >
+      {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
+    when:
+      chosen_primary in groups['g_update_hosts']
+
+# Always run on all pgbouncer nodes no matter if those are part of update_hosts
+- name: Redirect PGBouncer
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_pgbouncer
+  tasks:
+
+  # but don't run it at all if primary is not in the update_hosts
+  - name: Redirect PGBouncer
+    when:
+      chosen_primary in groups['g_update_hosts']
+    block:
+    - name: Set the pgbouncer.database.ini path as fact
+      set_fact:
+        pgbouncer_database_config: /etc/pgbouncer/pgbouncer.databases.ini
+      run_once: true
+
+    - name: Save initial pgbouncer configuration file
+      copy:
+        src: "{{ pgbouncer_database_config }}"
+        remote_src: true
+        dest: "{{ pgbouncer_database_config }}.orig"
+        force: true
+
+    - name: Update pgbouncer config
+      shell: >
+        sed -e 's,host=[^ ]* port=[^ ]*,host={{ chosen_replica }} port={{ postgres_port }} ,' -i {{ pgbouncer_database_config }}
+
+    - name: Reload pgbouncer
+      service:
+        name: pgbouncer
+        state: reloaded
+      become_user: root
+      become: true
+
+# upgrade the starting 'primary'
+# Note: this role was calculated earlier, so it's outdated after the
+# switchover, but it correctly identifies the instance to use.
+
+- name: Upgrade postgres on primary
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_primary:&g_update_hosts
+  tasks:
+
+  - include_role: name=postgres/update
+
+  - include_role: name=postgres/restart
+
+  # switchover to revert to starting primary
+  # only when primary is part of the update_hosts or all nodes in the play
+- name: Switchover to initial primary
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_primary:!role_pem-server:&g_update_hosts
+  tasks:
+
+  - name: Switchover to the initial primary {{ chosen_primary }}
+    command: >
+      {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
+
+- name: Redirect PGBouncer
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_pgbouncer
+  tasks:
+
+  # only redirect if primary was upgraded
+  - name: Redirect PGBouncer
+    when:
+      chosen_primary in groups['g_update_hosts']
+    block:
+    - name: Apply initial pgbouncer configuration file
+      copy:
+        src: "{{ pgbouncer_database_config }}.orig"
+        remote_src: true
+        dest: "{{ pgbouncer_database_config }}"
+        force: true
+
+    - name: Remove .orig file
+      file:
+        name: "{{ pgbouncer_database_config }}.orig"
+        state: absent
+
+    - name: Reload pgbouncer
+      service:
+        name: pgbouncer
+        state: reloaded
+      become_user: root
+      become: true
+
+# restart repmgrd
+- name: Start repmgrd
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_postgres
+  tasks:
+
+  - name: Start repmgrd
+    service:
+      name: repmgr
+      state: started
+
+# End of minor postgres upgrade
+
+- name: Start receiving wals on barman nodes
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_barman
+  tasks:
+  - name: Starting barman tasks
+    include_role:
+      name: barman
+      tasks_from: server-start-receive-wal.yml
+
+- name: Final tests running repmgr on the nodes
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: "{{ postgres_user }}"
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_postgres:role_primary:!role_pem-server
+  tasks:
+  - name: Check repmgr status
+    include_role:
+      name: test
+      tasks_from: repmgr.yml

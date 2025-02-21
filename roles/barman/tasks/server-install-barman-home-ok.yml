@@ -1,0 +1,29 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# These tasks are executed on any Barman server instance.
+
+- name: Install /etc/tpa/barman-home-ok
+  template:
+    src: barman-home-ok.j2
+    dest: /etc/tpa/barman-home-ok
+    owner: root
+    group: root
+    mode: "0755"
+  register: barman_home_ok
+
+- name: Restart cron once in docker containers
+  block:
+    - name: Restart cron
+      service:
+        name: "{{ cron_service_names[ansible_os_family] }}"
+        state: restarted
+      vars:
+        cron_service_names:
+          Debian: cron
+          RedHat: crond
+          SUSE: cron
+  when: >
+    barman_home_ok is changed and
+    platform in ['docker']

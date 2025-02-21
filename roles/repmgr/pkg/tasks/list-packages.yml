@@ -23,3 +23,12 @@
       or (failover_manager == 'efm' and postgres_version is version('12', '<')))
     and 'postgres' in role
     and 'bdr' not in role
+
+# include additional packages when pgbouncer is in use (procps -> pkill)
+- include_role: name=pkg/add_to_list
+  vars:
+    list_contents: "{{
+      repmgr_additional_packages
+      |packages_for(ansible_os_family) }}"
+  when:
+    groups['role_pgbouncer']|default([]) is not empty

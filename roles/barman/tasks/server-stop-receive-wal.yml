@@ -1,0 +1,22 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- name: Stop wal receiver on barman nodes
+  shell: |
+    #"barman-home-ok" file allows barman-cron to run
+    rm -f /etc/tpa/barman-home-ok
+    barman receive-wal --stop {{ chosen_primary }}
+  ignore_errors: yes
+
+- name: Check if barman is running
+  ignore_errors: yes
+  shell: |
+    barman check {{ chosen_primary }} |grep receive-wal | grep -q 'running: OK'
+  register:
+    barman_running
+
+- assert:
+    that:
+      barman_running.rc != 0
+    fail_msg: Barman is still running, if you're upgrading you could run `barman receive-wal --stop SERVER_NAME` before upgrading
