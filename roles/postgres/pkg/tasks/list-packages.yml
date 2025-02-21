@@ -29,13 +29,13 @@
     extra_postgres_packages: "{{
       extra_postgres_packages | combine({
         ansible_distribution: updated_packages_list
-      })
-    }}"
+        })
+      }}"
   vars:
     updated_packages_list: "{{
       extra_postgres_packages[ansible_distribution] | default([])
       | union([item.value.packages[postgres_flavour][ansible_distribution]])
-    }}"
+      }}"
   loop: "{{ lookup('dict', postgres_extensions_dictionary) }}"
   when: >
     'packages' in item.value
@@ -78,7 +78,7 @@
         }}"
       _barman_client_packages: "{{
           barman_client_packages|packages_for(ansible_distribution, barman_package_version)
-      }}"
+        }}"
 
   - include_role: name=pkg/add_to_list
     vars:

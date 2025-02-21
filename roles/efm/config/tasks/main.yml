@@ -156,6 +156,8 @@
   notify:
     - Note efm restart required
 
+- meta: flush_handlers
+
 # only apply this to new clusters when there was a change in the templating step.
 # or if the top-level .properties or .nodes files are removed and need to be
 # re-populated from their raw counterparts using the efm upgrade-conf command.

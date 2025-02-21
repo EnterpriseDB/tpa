@@ -55,3 +55,8 @@
   import_playbook: "{{ cluster_dir }}/playbooks/repmgr_cluster_upgrade.yml"
   when:
     fo_manager == "repmgr"
+
+- name: Import EFM upgrade
+  import_playbook: "{{ cluster_dir }}/playbooks/efm_cluster_upgrade.yml"
+  when:
+    fo_manager == "efm"

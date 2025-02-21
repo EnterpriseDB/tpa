@@ -9,122 +9,89 @@
     fail_msg:
       Please define the parameter "target" host to become the new primary
 
-- name: Ensure target is a postgres server
-  assert:
-    msg: "Switchover target is not a postgres server: {{ target }}"
-    that:
-      - "'postgres' in role"
+- name: Target specific checks
   when: >
     inventory_hostname == target
-
-- name: Ensure target is not already a primary
-  assert:
-    msg: "Switchover target is already a primary: {{ target }}"
-    that:
-      - target not in groups['primary']
-  when: >
-    inventory_hostname == target
-
-- name: Ensure that there is only one primary
-  assert:
-    msg: "Expected only one primary, but found: {{ groups['primary']|join(', ') }}"
-    that:
-      - groups['primary']|length == 1
-  when: >
-    inventory_hostname == target
-
-- name: Ensure that the new target is not a cascading replica
-  assert:
-    msg: "The new target cannot be promoted as it is a cascading replica."
-    that:
-      - upstream is not defined or upstream is defined and upstream in groups['primary']
-  when: >
-    inventory_hostname == target
-
-- name: Set node priority to {{ target }}
   block:
-    - command: >
-        {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ hostvars[target].ip_address }} 1
-      when: >
-        not efm_bind_by_hostname
-    - command: >
-        {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ target }} 1
-      when: >
-        efm_bind_by_hostname
+  - name: Ensure target is a postgres server
+    assert:
+      msg: "Switchover target is not a postgres server: {{ target }}"
+      that:
+        - "'postgres' in role"
+  - name: Ensure target is not already a primary
+    assert:
+      msg: "Switchover target is already a primary: {{ target }}"
+      that:
+        - target not in groups['primary']
+    when: >
+      not managed_switchover
+
+  - name: Ensure that there is only one primary
+    assert:
+      msg: "Expected only one primary, but found: {{ groups['primary']|join(', ') }}"
+      that:
+        - groups['primary']|length == 1
+
+  - name: Ensure that the new target is not a cascading replica
+    assert:
+      msg: "The new target cannot be promoted as it is a cascading replica."
+      that:
+        - upstream is not defined or upstream is defined and upstream in groups['primary']
+    when: >
+      not managed_switchover
+
+- name: Ensure efm_bind_by_hostname is handled
+  set_fact:
+    efm_identity: "{{ efm_bind_by_hostname|default(false)|ternary(inventory_hostname,ip_address) }}"
+  when:
+      role|intersect(['primary','replica'])
+
+- name: Run on target only tasks
   when: >
     inventory_hostname == target
-
-- name: Perform switchover with EFM to {{ target }}
-  command: >
-    {{ efm_bin_dir }}/efm promote {{ cluster_name }} -switchover
-  when: >
-    inventory_hostname == target
-
-- name: Display cluster status
-  command: >
-    {{ efm_bin_dir }}/efm cluster-status-json {{ cluster_name }}
-  when: >
-    inventory_hostname == target
-  register: cluster_status
-  retries: 5
-  delay: 2
-  until: cluster_status is success
-  become_user: "{{ postgres_user }}"
-  become: yes
-
-- name: Show status of cluster after switchover
-  debug:
-    var: cluster_status
-
-- name: Ensure switch over was successful
   block:
-    - assert:
-        that:
-          status.nodes[target_ip].type == 'Primary'
-      when: >
-        not efm_bind_by_hostname
-    - assert:
-        that:
-          status.nodes[target].type == 'Primary'
-      when: >
-        efm_bind_by_hostname
-  vars:
-    target_ip: "{{ hostvars[target].ip_address }}"
-    status: "{{ cluster_status.stdout|from_json }}"
-  when: >
-    inventory_hostname == target
+  - command: >
+      {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ efm_identity }} 1
+
+  - name: Perform switchover with EFM to {{ target }}
+    command: >
+      {{ efm_bin_dir }}/efm promote {{ cluster_name }} -switchover
+
+  - name: Display cluster status
+    command: >
+      {{ efm_bin_dir }}/efm cluster-status-json {{ cluster_name }}
+    register: cluster_status
+    retries: 10
+    delay: 5
+    until: cluster_status is success
+    changed_when: false
+    become_user: "{{ postgres_user }}"
+    become: yes
+
+  - name: Show status of cluster after switchover
+    debug:
+      var: efm_status
+    vars:
+      efm_status: "{{cluster_status.stdout|from_json}}"
+
+  - name: Ensure target is now Primary
+    assert:
+      that:
+        efm_status.nodes[efm_identity].type == 'Primary'
+    vars:
+      efm_status: "{{ cluster_status.stdout|from_json }}"
 
 - name: Update upstream_primary and efm.properties to reflect switchover
-  block:
-    - name: Set {{ target }} as upstream_primary
-      set_fact: 
-        upstream_primary: "{{ target }}"
-
-    - name: Encrypt efm password
-      shell: >
-        "{{ efm_bin_dir }}"/efm encrypt "{{ cluster_name }}" --from-env
-      environment: "{{ target_environment|combine(_task_environment) }}"
-      vars:
-        _task_environment:
-          EFMPASS: "{{ efm_password }}"
-      register: efm_encrypted_pass_output
-      changed_when: false
-      no_log: true
-
-    - name: Install efm.properties for {{ cluster_name }}
-      template:
-        src: efm.properties.j2
-        dest: "{{ efm_conf_dir }}/{{ cluster_name }}.properties"
-        owner: efm
-        group: efm
-        mode: "0640"
-      vars:
-        efm_encrypted_pass: "{{ efm_encrypted_pass_output.stdout }}"
-
-    - include_role:
-        name: efm/restart
-      vars: 
-        efm_service_end_state: restarted
-
   when: >
     'primary' in role or 'replica' in role
+  block:
+  - name: Set {{ target }} as upstream_primary
+    set_fact:
+      upstream_primary: "{{ target }}"
+
+  - name: Reconfigure efm
+    include_role:
+      name: efm/config
+
+  - include_role:
+      name: efm/restart
