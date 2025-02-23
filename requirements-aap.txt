@@ -6,9 +6,9 @@
 #
 ansible-core==2.16.14
     # via -r requirements.in
-boto3==1.36.21
+boto3==1.36.26
     # via -r requirements.in
-botocore==1.36.21
+botocore==1.36.26
     # via
     #   boto3
     #   s3transfer
