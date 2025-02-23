@@ -1,4 +1,4 @@
-ansible-core==2.16.*
+ansible-core==2.18.*
 Jinja2
 PyYAML>=6
 cryptography
