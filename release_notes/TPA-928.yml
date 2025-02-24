@@ -1,0 +1,12 @@
+- summary: Fix duplicated lines in .pgpass files
+  description: |
+    Fixed a bug whereby extra lines could be added to .pgpass for the same
+    user when re-running 'tpaexec deploy'.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-928
