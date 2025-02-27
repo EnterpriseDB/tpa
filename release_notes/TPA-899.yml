@@ -1,0 +1,19 @@
+- summary: Copy EFM config files if they are removed, even if no configuration changes
+  description: |
+    If either the `efm.nodes` or `efm.properties` configuration files
+    do not exist in the top-level EFM directory, the `efm upgrade-conf` 
+    command copies them from the `/raw` directory, even if there have
+    been no configuration changes. 
+    
+    This amends previous behavior that required a configuration change 
+    before the `upgrade-conf` command would run and copy files.
+    
+ 
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-899

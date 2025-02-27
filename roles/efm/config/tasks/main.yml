@@ -70,13 +70,20 @@
 
 # for already deployed clusters we want to avoid these steps
 # so that we avoid an efm reboot.
-# check that .properties file exists
+# check that .properties and .nodes files exist
 - name: Check if {{ efm_conf_dir }}/{{ cluster_name }}.properties file exists
   stat:
     path: "{{ efm_conf_dir }}/{{ cluster_name }}.properties"
     get_checksum: false
     get_mime: false
   register: efm_cluster_prop
+
+- name: Check if {{ efm_conf_dir }}/{{ cluster_name }}.nodes file exists
+  stat:
+    path: "{{ efm_conf_dir }}/{{ cluster_name }}.nodes"
+    get_checksum: false
+    get_mime: false
+  register: efm_cluster_nodes
 
 # on deploys after a switchover, set the current upstream_primary
 # so the .properties file is configured correctly on each efm node.
@@ -106,9 +113,18 @@
   when: >
     not efm_cluster_prop.stat.exists
 
+# For new clusters, the raw subfolder is created to contain versions of the .nodes and .properties files which
+# can be edited without causing EFM to restart. Configuration changes to these files are propogated to their top-level
+# counterparts using the 'efm upgrade-conf' command. On existing clusters that already have EFM configuration files,
+# the raw subfolder is not created and the .nodes and .properties are copied to the top-level only if the template's content 
+# does not match what has already been configured in the respective files. The 'efm_use_raw' fact encapsulates the boolean
+# state of using the 'raw' subfolder for the reasons explained above.
+- set_fact:
+    efm_use_raw: "{{ (not (efm_cluster_prop.stat.exists and efm_cluster_nodes.stat.exists) or efm_raw.stat.exists) }}"
+    
 # set the correct path for next steps
 - set_fact:
-    raw: "{{ (not efm_cluster_prop.stat.exists or efm_raw.stat.exists)|ternary('/raw','') }}"
+    raw: "{{ efm_use_raw|ternary('/raw', '')}}"
 
 # Generate the config file in raw sub folder for new clusters
 - name: Install efm.properties for {{ cluster_name }}
@@ -141,15 +157,17 @@
     - Note efm restart required
 
 # only apply this to new clusters when there was a change in the templating step.
+# or if the top-level .properties or .nodes files are removed and need to be
+# re-populated from their raw counterparts using the efm upgrade-conf command.
 - name: Add useful comments to efm properties and nodes files
   command: "{{ efm_bin_dir }}/efm upgrade-conf {{ cluster_name }} -source {{ efm_conf_dir }}{{ raw }}"
   args:
     chdir: "{{ efm_conf_dir }}"
   become: true
   become_user: efm
-  when: >
-    (not efm_cluster_prop.stat.exists or efm_raw.stat.exists)
-    and (efm_properties.changed or efm_nodes.changed)
+  when:
+    - efm_use_raw
+    - efm_properties.changed or efm_nodes.changed or not (efm_cluster_prop.stat.exists and efm_cluster_nodes.stat.exists)
 
 # EFM requires us to either configure email alerts or provide a custom
 # notification script. For now, we install a no-op notification script.
