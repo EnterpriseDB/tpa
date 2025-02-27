@@ -1724,7 +1724,7 @@ class Architecture(object):
         """
         Returns a list of targets to create_links() for
         """
-        return ["deploy.yml", "commands", "tests"]
+        return ["deploy.yml", "commands", "tests", "playbooks"]
 
     ##
     ## Template processing

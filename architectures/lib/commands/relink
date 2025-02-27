@@ -104,7 +104,7 @@ with open(r"./config.yml") as config_file:
     # In theory, the architecture may return something else from
     # links_to_create(), but we ignore that possibility for now.
 
-    for s in ["deploy.yml", "commands", "tests"]:
+    for s in ["deploy.yml", "commands", "tests", "playbooks"]:
         target = "%s/architectures/%s/%s" % (TPA_DIR, architecture, s)
 
         if os.path.isfile(target):
