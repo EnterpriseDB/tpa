@@ -61,7 +61,7 @@ jobs:
 
     - uses: ./.github/actions/integration-test
       with:
-        cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}-${{ matrix.tpa_os_image }}
+        cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}-${{ matrix.tpa_os_image }}-${{ matrix.tpa_harp_consensus_protocol }}-${{ matrix.cpu_architecture }}
         cpu_architecture: ${{ matrix.cpu_architecture }}
         source_directory: ${{ github.workspace }}
         tpa_architecture: ${{ matrix.tpa_architecture }}
