@@ -1744,13 +1744,13 @@ class Architecture(object):
         option (apart from the default main.yml.j2). May be empty if the
         architecture provides no selectable layouts.
         """
-        with Path(self.template_directories()[0]) as path:
-            return list(
-                map(
-                    lambda t: os.path.basename(t.name.replace(".yml.j2", "")),
-                    path.glob("layouts/*.yml.j2"),
-                )
+        path = Path(self.template_directories()[0])
+        return list(
+            map(
+                lambda t: os.path.basename(t.name.replace(".yml.j2", "")),
+                path.glob("layouts/*.yml.j2"),
             )
+        )
 
     def default_layout_name(self):
         """
