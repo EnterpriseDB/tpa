@@ -63,7 +63,8 @@ class BDR_Always_ON(BDR):
             "silver": 6,
             "bronze": 6,
         }
-        return instances_per_layout[self.args["layout"]]
+        return (instances_per_layout[self.args["layout"]]
+            + (1 if self.args.get("enable_pem") else 0))
 
     def default_location_names(self):
         return [chr(ord("a") + i) for i in range(self.num_locations())]
