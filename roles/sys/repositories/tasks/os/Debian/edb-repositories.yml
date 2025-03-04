@@ -24,12 +24,30 @@
   when: >
     repo[1] not in edb_repositories
 
-- name: Run setup script to set up EDB repositories
-  become: true
-  shell:
-    cmd: "curl -1sLf 'https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/setup.deb.sh' | bash"
-  loop: "{{ edb_repositories }}"
+- name: Find remaining EDB repositories after removing unwanted ones
+  find:
+    paths: /etc/apt/sources.list.d/
+    patterns: 
+      - 'edb-*.list'
+      - 'enterprisedb-*.list'
+    file_type: "file"
+  register: remaining_edb_repos
+
+- name: Create list of EDB repositories that are already set up
+  set_fact:
+    resulting_edb_repos: "{{ resulting_edb_repos|default([])|union([repo]) }}"
+  loop: "{{ remaining_edb_repos.files }}"
   loop_control:
-    loop_var: repository
-  no_log: true
+    label: "{{ item.path|basename }}"
+  vars:
+    repo: "{{ item.path|basename|split('.')|first|split('-')|last }}"
+
+- name: Set up new EDB repositories
+  include_tasks: add-edb-repository.yml
+  loop: "{{ repos_to_install }}"
+  when: repos_to_install != []
+  vars:
+    repos_to_install: "{{ edb_repositories|difference(resulting_edb_repos|default([])) }}"
+    repository: "{{ item }}"
+    package_format: deb
 

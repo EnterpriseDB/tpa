@@ -1,0 +1,30 @@
+- block:
+  - name: Ensure '{{ repository }}' repository endpoint is reachable
+    uri:
+      url: "{{ repository_url }}/gpg.key"
+    register: response
+    retries: 5
+    delay: 5
+    until: response.status != 404
+    no_log: true
+    ignore_errors: true
+    changed_when: false
+
+  - assert:
+      that: response is success
+      fail_msg: >
+        The '{{ repository }}' repository was not reachable.
+        Your access token may not have access or this repository may not exist.
+      quiet: true
+
+  - name: Run setup script to set up '{{ repository }}' repository
+    become: true
+    retries: 10
+    delay: 5
+    until: result is success
+    register: result
+    shell:
+      cmd: "curl -1sLf '{{ repository_url }}/setup.{{ package_format }}.sh' | bash"
+    no_log: true
+  vars:
+    repository_url: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}
