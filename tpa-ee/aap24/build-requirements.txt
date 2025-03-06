@@ -8,13 +8,13 @@ ansible-builder==3.1.0
     # via
     #   -r tpa-ee/aap24/build-requirements.in
     #   ansible-navigator
-ansible-compat==25.1.2
+ansible-compat==25.1.4
     # via ansible-lint
-ansible-core==2.18.2
+ansible-core==2.18.3
     # via
     #   ansible-compat
     #   ansible-lint
-ansible-lint==25.1.2
+ansible-lint==25.1.3
     # via ansible-navigator
 ansible-navigator==25.1.0
     # via -r tpa-ee/aap24/build-requirements.in
@@ -36,7 +36,7 @@ cffi==1.17.1
     #   onigurumacffi
 click==8.1.8
     # via black
-cryptography==44.0.1
+cryptography==44.0.2
     # via ansible-core
 distro==1.9.0
     # via bindep
@@ -44,7 +44,7 @@ filelock==3.17.0
     # via ansible-lint
 importlib-metadata==8.6.1
     # via ansible-lint
-jinja2==3.1.5
+jinja2==3.1.6
     # via
     #   ansible-core
     #   ansible-navigator
@@ -108,7 +108,7 @@ referencing==0.36.2
     #   jsonschema-specifications
 resolvelib==1.0.1
     # via ansible-core
-rpds-py==0.22.3
+rpds-py==0.23.1
     # via
     #   jsonschema
     #   referencing
