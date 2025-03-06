@@ -187,7 +187,7 @@ _patroni_conf_permanent_slots:
     dcs:
       slots: >-
         {%- set _slots = {} -%}
-        {%- for h in groups['patroni']|difference(groups['role_etcd'])|sort -%}
+        {%- for h in groups['patroni']|intersect(groups['role_postgres'])|sort -%}
         {%-   set slot_name = hostvars[h].primary_slot_name -%}
         {%-   set _ = _slots.update({slot_name: {'type': 'physical'}}) -%}
         {%- endfor -%}
