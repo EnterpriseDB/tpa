@@ -1,6 +1,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-name: Upgrade test
+name: Single M1 upgrade test
 
 on:
   workflow_dispatch:
@@ -14,14 +14,14 @@ on:
         required: true
         type: choice
         options:
-        - tpa/debian:9
-        - tpa/debian:10
-        - tpa/debian:11
-        - tpa/ubuntu:20.04
-        - tpa/ubuntu:24.04
-        - tpa/redhat:7
-        - tpa/redhat:8
-        - tpa/sles:15
+        - debian:11
+        - debian:12
+        - ubuntu:20.04
+        - ubuntu:22.04
+        - ubuntu:24.04
+        - redhat:8
+        - redhat:9
+        - sles:15
       tpa_postgres_flavour:
         description: "Postgres flavour"
         required: true
@@ -35,10 +35,9 @@ on:
       tpa_postgres_version:
         description: "Postgres version"
         required: true
-        default: 14
+        default: 16
         type: choice
         options:
-        - 11
         - 12
         - 13
         - 14
@@ -48,8 +47,21 @@ on:
       tpa_postgres_package_version:
         description: "package version to upgrade from"
         required: true
-        default: "14.0.0"
+        default: "16.4*"
         type: string
+      tpa_failover_manager:
+        description: "Failover manager"
+        required: true
+        default: "repmgr"
+        type: choice
+        options:
+        - "repmgr"
+        - "efm"
+        - "patroni"
+      tpa_package_cache:
+        description: "Use the downloader"
+        type: boolean
+        default: true
       runner:
         description: "github runner (ubuntu20.04 required when using tpa_os_image: 'tpa/redhat:7')"
         required: false
@@ -86,11 +98,13 @@ jobs:
         with:
           source_directory: ${{ github.workspace }}
           tpa_platform: ${{ github.event.inputs.tpa_platform }}
-          tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
+          tpa_os_image: "tpa/${{ github.event.inputs.tpa_os_image }}"
           tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
-          tpa_edb_repo: ${{ github.event.inputs.tpa_edb_repo }}
-          cluster: "${{ github.event.inputs.tpa_postgres_flavour }}-\
-            ${{ github.event.inputs.tpa_postgres_version }}-\
-            ${{ github.event.inputs.tpa_os_image }}-
-            ${{ github.event.inputs.tpa_failover-manager }}"
+          tpa_postgres_package_version: ${{ github.event.inputs.tpa_postgres_package_version }}
+          tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager }}
+          tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}
+          cluster: "${{ github.event.inputs.tpa_failover_manager }}-\
+            ${{ github.event.inputs.tpa_os_image }}-\
+            ${{ github.event.inputs.tpa_postgres_flavour }}-\
+            ${{ github.event.inputs.tpa_postgres_version }}"
