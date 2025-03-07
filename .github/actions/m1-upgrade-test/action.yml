@@ -1,0 +1,104 @@
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+name: Upgrade M1 Cluster Integration Test
+description: Run an integration test to upgrade an M1 cluster
+
+inputs:
+  source_directory:
+    description: "Directory where tpaexec source code is checked out on runner"
+    required: true
+  tpa_platform: # id of input
+    description: "TPA platform"
+    required: false
+    default: "docker"
+  tpa_os:
+    required: false
+    description: "Operating System to use with TPA (--os)"
+  tpa_os_version:
+    required: false
+    description: "Operating System version to use with TPA (--os-version)"
+    default: ""
+  tpa_os_image:
+    required: false
+    description: "Image to use with TPA platform"
+    default: ""
+  tpa_postgres_flavour:
+    required: true
+    description: "Postgres flavour"
+  tpa_postgres_version:
+    required: true
+    description: "Postgres version"
+    default: ""
+  tpa_postgres_package_version:
+    required: true
+    description: "Postgres package version to upgrade from"
+    default: ""
+  tpa_failover_manager:
+    required: true
+    description: "Failover manager"
+    default: ""
+  tpa_package_cache:
+    required: false
+    description: "Enable local repo and reuse packages"
+    default: "true"
+
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - name: Set extra arguments for pre-upgrade package version
+      run: |
+        CONFIGURE_EXTRA_ARGS+="--postgres-package-version ${{ inputs.tpa_postgres_package_version }}
+        echo CONFIGURE_EXTRA_ARGS="{CONFIGURE_EXTRA_ARGS}" >> $GITHUB_ENV
+      shell: bash
+
+    - uses: ./github/actions/initialise_integration_test
+      with:
+        source_directory: ${{ inputs.source_directory }}
+        tpa_platform: ${{ inputs.tpa_platform }}
+        tpa_architecture: "m1"
+        tpa_os: ${{ inputs.tpa_os }}
+        tpa_os_version: ${{ inputs.tpa_os_version }}
+        tpa_os_image: ${{ inputs.tpa_os_image }}
+        tpa_postgres_flavour: ${{ inputs.tpa_postgres_flavour }}
+        tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
+        tpa_package_cache: ${{ inputs.tpa_package_cache }}
+        tpa_failover_manager: ${{ inputs.tpa_failover_manager }}
+
+    - name: Provision the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: ./bin/tpaexec provision "$CLUSTER" -vv
+      shell: bash
+
+    - name: Deploy the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: /bin/tpaexec deploy "$CLUSTER" -vv
+      shell: bash
+
+    - name: Edit config.yml
+      working-directory: ${{ inputs.source_directory }}
+      run: |
+        sed -i '/postgres_package_version/d' config.yml
+
+    - name: Upgrade the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: /bin/tpaexec upgrade "$CLUSTER" -vv
+      shell: bash
+
+    - name: Test the cluster
+      working-directory: ${{ inputs.source_directory }}
+      run: |
+        echo "::group::Test upgraded cluster"
+        ./bin/tpaexec test "$CLUSTER" -vv --skip-tags pgbench
+        status=$?
+        echo "::endgroup::"
+        exit $status
+      shell: bash
+
+    - uses: ./.github/actions/finalise_integration_test
+      with:
+        source_directory: ${{ inputs.source_directory }}
+        cluster: ${{ env.CLUSTER }}
+      if: always()
