@@ -1,4 +1,4 @@
-- summary: Raise when BDR-Always-ON is configured with BDR version 5
+- summary: Raise an ArchitectureError when BDR-Always-ON is configured with BDR version 5
   description: |
     An architecture error is raised during `tpaexec configure` if
     `--bdr-version 5` is passed with `-a BDR-Always-ON` alerting
