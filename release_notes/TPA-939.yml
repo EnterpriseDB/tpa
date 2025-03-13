@@ -1,0 +1,25 @@
+- summary: Ensure URI for EDB repository setup is accessible
+  description: |
+    The EDB repos are set up using the Cloudsmith setup script following
+    the Cloudsmith documentation: piping the cURL output to bash for execution.
+
+    However, if a user passes a nonexistent `EDB_SUBSCRIPTION_TOKEN` or repository
+    to cURL, the exit code gets silently swallowed and replaced with a 0 because
+    bash executes an empty input.
+
+    A request is dispatched to a repository's GPG key endpoint to ensure a `404`
+    response is not returned before continuing to download the setup script.
+
+    Tasks related to EDB repository set up are now skipped if the repository has
+    already been set up.
+
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-939
+  - TPA-689
+  - TPA-633
