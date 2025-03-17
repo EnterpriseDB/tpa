@@ -4,9 +4,9 @@
 #
 #    pip-compile --generate-hashes --output-file=requirements/lint.txt requirements/lint.in
 #
-astroid==3.3.8 \
-    --hash=sha256:187ccc0c248bfbba564826c26f070494f7bc964fd286b6d9fff4420e55de828c \
-    --hash=sha256:a88c7994f914a4ea8572fac479459f4955eeccc877be3f2d959a33273b0cf40b
+astroid==3.3.9 \
+    --hash=sha256:622cc8e3048684aa42c820d9d218978021c3c3d174fb03a9f0d615921744f550 \
+    --hash=sha256:d05bfd0acba96a7bd43e222828b7d9bc1e138aaeb0649707908d3702a9831248
     # via
     #   pylint
     #   pylint-celery
@@ -61,9 +61,9 @@ platformdirs==4.3.6 \
     --hash=sha256:357fb2acbc885b0419afd3ce3ed34564c13c9b95c89360cd9563f73aa5e2b907 \
     --hash=sha256:73e575e1408ab8103900836b97580d5307456908a03e92031bab39e4554cc3fb
     # via pylint
-prospector==1.15.2 \
-    --hash=sha256:06f8986e96a2d7f82904821710745418496e5c163241a922cac8dc3e3bc7dd43 \
-    --hash=sha256:e080667fc33baa93f5b2ab3d88650bbef201a9edcb1982a3ccf6b0696e1f4ab0
+prospector==1.15.3 \
+    --hash=sha256:240e75f9dcb6624574204a997004ef145f615540a00b50ba4203db9a429044f2 \
+    --hash=sha256:78bf3ff0a46e4b7d95df355d53a34c41e4dd9e24c72ddd01558a273c39df0df6
     # via -r requirements/lint.in
 pycodestyle==2.12.1 \
     --hash=sha256:46f0fb92069a7c28ab7bb558f05bfc0110dac69a0cd23c61ea0040283a9d78b3 \
@@ -85,9 +85,9 @@ pyflakes==3.2.0 \
     # via
     #   flake8
     #   prospector
-pylint==3.3.4 \
-    --hash=sha256:289e6a1eb27b453b08436478391a48cd53bb0efb824873f949e709350f3de018 \
-    --hash=sha256:74ae7a38b177e69a9b525d0794bd8183820bfa7eb68cc1bee6e8ed22a42be4ce
+pylint==3.3.5 \
+    --hash=sha256:38d0f784644ed493d91f76b5333a0e370a1c1bc97c22068a77523b4bf1e82c31 \
+    --hash=sha256:7cb170929a371238530b2eeea09f5f28236d106b70308c3d46a9c0cf11634633
     # via
     #   -r requirements/lint.in
     #   prospector
