@@ -1,0 +1,189 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- name: Initial checks and setup
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: all
+  tasks:
+
+
+  - name: Configure local-repo, if available
+    include_role:
+      name: sys/local_repo
+
+  - name: Set up repositories
+    include_role:
+      name: sys/repositories
+
+  - assert:
+      that:
+        failover_manager == 'patroni'
+      fail_msg:
+        This upgrade scenario is for patroni only
+
+- name: Patroni checks
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_replica:role_primary
+  tasks:
+
+  - name: Check that Patroni's view of the cluster matches TPA's
+    assert:
+      that: >
+        patroni_cluster['members']
+        |selectattr('Member', 'equalto', chosen_primary)|list
+        |selectattr('Role', 'equalto', 'Leader')|list
+        |length == 1
+        and
+        patroni_cluster['members']
+        |selectattr('Member', 'equalto', chosen_replica)|list
+        |selectattr('Role', 'equalto', 'Replica')|list
+        |length == 1
+
+- name: Run checks on barman nodes, if any
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_barman
+  tasks:
+  - name: Stop wal receiver on barman nodes
+    include_role:
+      name: barman
+      tasks_from: server-stop-receive-wal.yml
+
+- name: Pause patroni cluster management
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: g_chosen_primary
+  tasks:
+
+  - name: Pause cluster management
+    include_role:
+      name: patroni/api
+      tasks_from: config
+    vars:
+      body:
+        pause: true
+
+  - name: Check cluster is paused
+    assert:
+      that: patroni_config_api_output.json.pause|default(false)
+
+- name: Update Postgres on replicas
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  serial: 1
+  environment: "{{ target_environment }}"
+  hosts: role_replica:&g_update_hosts
+  tasks:
+
+  - name: Update postgres on replica {{ inventory_hostname }}
+    include_role:
+      name: postgres/update
+  - name: Restart postgres on {{ inventory_hostname }} if necessary
+    include_role:
+      name: postgres/restart
+
+# if the switchover fails, the upgrade process will stop
+
+- name: Switchover to chosen_replica if needed
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: g_chosen_primary:&g_update_hosts
+  tasks:
+
+  - name: Switch over to {{ chosen_replica }}
+    include_role:
+      name: patroni/api
+      tasks_from: switchover.yml
+    vars:
+      body:
+        leader: "{{ chosen_primary }}"
+        candidate: "{{ chosen_replica }}"
+
+- name: Upgrade postgres on chosen_primary
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: g_chosen_primary:&g_update_hosts
+  tasks:
+
+  - name: Update postgres on original primary {{ inventory_hostname }}
+    include_role:
+      name: postgres/update
+
+  - name: Restart postgres on {{ inventory_hostname }} if necessary
+    include_role:
+      name: postgres/restart
+
+- name: Switchover back to chosen_primary
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: g_chosen_primary:&g_update_hosts
+  tasks:
+
+  - name: Switch over to original primary {{ inventory_hostname }}
+    include_role:
+      name: patroni/api
+      tasks_from: switchover.yml
+    vars:
+      body:
+        leader: "{{ chosen_replica }}"
+        candidate: "{{ chosen_primary }}"
+
+- name: Resume patroni management
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: g_chosen_primary
+  tasks:
+
+  - name: Resume cluster management
+    include_role:
+      name: patroni/api
+      tasks_from: config
+    vars:
+      body:
+        pause: false
+
+  - name: Check cluster is resumed
+    assert:
+      that: not patroni_config_api_output.json.pause
+
+- name: Start receiving wals on barman nodes
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_barman
+  tasks:
+  - name: Starting barman tasks
+    include_role:
+      name: barman
+      tasks_from: server-start-receive-wal.yml

@@ -1,0 +1,17 @@
+- summary: Minor postgres upgrades for M1 + patroni clusters
+  description: |
+    TPA can now upgrade postgres to the latest minor version on an M1
+    cluster which uses patroni as the failover manager.
+
+    The upgrade process stops barman on any barman server in the cluster,
+    then upgrades the replicas in the cluster. Then it switches to one
+    replica as a temporary primary, upgrades postgres on the original
+    primary, and switches back to the original primary. Patroni's
+    handling of the cluster is paused during the process and resumed
+    afterwards. Then barman is restarted and cluster health checks
+    are run.
+  # Possible types: notable_change, minor_change, bugfix or
+  # breaking_change
+  type: notable_change
+  jira_tickets:
+  - TPA-688

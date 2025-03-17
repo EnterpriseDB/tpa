@@ -60,3 +60,8 @@
   import_playbook: "{{ cluster_dir }}/playbooks/efm_cluster_upgrade.yml"
   when:
     fo_manager == "efm"
+
+- name: Import patroni upgrade
+  import_playbook: "{{ cluster_dir }}/playbooks/patroni_cluster_upgrade.yml"
+  when:
+    fo_manager == "patroni"
