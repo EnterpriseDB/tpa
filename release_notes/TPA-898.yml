@@ -8,6 +8,6 @@
 
     Fixed postgres service restart to be more reliable and always run right
     after the package upgrade on the node is finished.
-  type: minor_change
+  type: notable_change
   jira_tickets:
   - TPA-898

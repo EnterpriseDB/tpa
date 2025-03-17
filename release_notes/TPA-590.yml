@@ -9,6 +9,6 @@
     primary, and switches back to the original primary. The EFM agent
     is started and stopped on the different servers at the correct
     times. Then barman is restarted and cluster health checks are run.
-  type: minor_change
+  type: notable_change
   jira_tickets:
   - TPA-590
