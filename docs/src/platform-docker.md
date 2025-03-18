@@ -95,9 +95,11 @@ have access:
 19.03.12
 ```
 
-**WARNING**: Giving a user the ability to speak to the Docker daemon
+!!! Warning
+Giving a user the ability to speak to the Docker daemon
 lets them trivially gain root on the Docker host. Only trusted users
 should have access to the Docker daemon.
+!!!
 
 ### Docker container privileges
 
@@ -115,10 +117,12 @@ boolean variable for the instance(s) that need it, or globally in
     instance_defaults:
       privileged: true
 
-**WARNING**: Running containers in privileged mode allows the root user or any
+!!! Warning
+Running containers in privileged mode allows the root user or any
 process that can gain root to load kernel modules, modify host firewall rules,
 escape the container namespace, or otherwise act much as the real host "root"
 user would. Do not run containers in priviliged mode unless you really need to.
+!!!
 
 See `man capabilities` for details on Linux capabilities flags.
 
@@ -158,7 +162,7 @@ modify the system clock, you might write:
 
 ### Docker storage configuration
 
-**Caution**: The default Docker configuration on many hosts uses
+The default Docker configuration on many hosts uses
 `lvm-loop` block storage and is not suitable for production
 deployments. Run `docker info` to check which storage driver you are
 using. If you are using the loopback scheme, you will see something
@@ -175,6 +179,26 @@ configuration:
 
 * [Storage Drivers](https://docs.docker.com/storage/storagedriver/)
 * [Configuring lvm-direct for production](https://docs.docker.com/storage/storagedriver/device-mapper-driver/#configure-direct-lvm-mode-for-production)
+
+### Docker MTU settings
+
+By default, Docker networks have a Maximum Transmission Unit (MTU) of
+1500 bytes. If this is greater than the MTU of your host system's
+network interface you may experience problems routing connections
+through that interface to Docker containers. You can check the MTU of
+your network interfaces using the command `ipconfig | grep mtu`, 
+`ip |grep mtu` or similar. You can change the MTU of a Docker network
+provisioned by TPA by adding the appropriate driver options to the
+network in `config.yml` as shown below.
+
+```shell
+docker_networks:
+- ipam_config:
+  - subnet: 10.33.214.192/28
+  name: tpa-docker
+  driver_options:
+    com.docker.network.driver.mtu: 1400
+```
 
 ## Docker container management
 
