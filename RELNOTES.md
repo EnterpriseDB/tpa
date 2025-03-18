@@ -2,6 +2,157 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+## v23.37.0 (2025-03-18)
+
+### Notable changes
+
+- Minor postgres upgrades for M1 + EFM clusters
+
+  TPA can now upgrade postgres to the latest minor version on an M1 cluster
+  which uses EFM as the failover manager.
+
+  The upgrade process stops barman on any barman server in the cluster,
+  then upgrades the replicas in the clusters.  Then it switches to one
+  replica as a temporary primary, upgrades postgres on the original
+  primary, and switches back to the original primary. The EFM agent
+  is started and stopped on the different servers at the correct
+  times. Then barman is restarted and cluster health checks are run.
+
+  References: TPA-590.
+
+- Improve minor postgres upgrade for M1 + repmgr clusters
+
+  Improve minor upgrade of postgres in the context of M1 architecture
+  along with repmgr as failover manager.
+
+  Fixed missing upgrade of witness nodes. witness nodes were kept out of
+  the process of upgrading, they are now upgraded along with replicas.
+
+  Fixed postgres service restart to be more reliable and always run right
+  after the package upgrade on the node is finished.
+
+  References: TPA-898.
+
+- Minor postgres upgrades for M1 + patroni clusters
+
+  TPA can now upgrade postgres to the latest minor version on an M1
+  cluster which uses patroni as the failover manager.
+
+  The upgrade process stops barman on any barman server in the cluster,
+  then upgrades the replicas in the cluster. Then it switches to one
+  replica as a temporary primary, upgrades postgres on the original
+  primary, and switches back to the original primary. Patroni's
+  handling of the cluster is paused during the process and resumed
+  afterwards. Then barman is restarted and cluster health checks
+  are run.
+
+  References: TPA-688.
+
+### Minor changes
+
+- Faster docker instance deprovision
+
+  When deprovisioning docker instances, TPA now kills the container
+  instead of stopping it, and does so to all the instances in parallel.
+
+  References: TPA-903.
+
+- Raise an ArchitectureError when BDR-Always-ON is configured with BDR version 5
+
+  An architecture error is raised during `tpaexec configure` if
+  `--bdr-version 5` is passed with `-a BDR-Always-ON` alerting
+  the user that BDR version 5 should be used with `PGD-Always-ON`.
+
+  References: TPA-742.
+
+- Ensure URI for EDB repository setup is accessible
+
+  The EDB repos are set up using the Cloudsmith setup script following
+  the Cloudsmith documentation: piping the cURL output to bash for execution.
+
+  However, if a user passes a nonexistent `EDB_SUBSCRIPTION_TOKEN` or repository
+  to cURL, the exit code gets silently swallowed and replaced with a 0 because
+  bash executes an empty input.
+
+  A request is dispatched to a repository's GPG key endpoint to ensure a `404`
+  response is not returned before continuing to download the setup script.
+
+  Tasks related to EDB repository set up are now skipped if the repository has
+  already been set up.
+
+  References: TPA-939, TPA-689, TPA-633.
+
+- Copy EFM config files if they are removed, even if no configuration changes
+
+  If either the `efm.nodes` or `efm.properties` configuration files
+  do not exist in the top-level EFM directory, the `efm upgrade-conf` 
+  command copies them from the `/raw` directory, even if there have
+  been no configuration changes. 
+
+  This amends previous behavior that required a configuration change 
+  before the `upgrade-conf` command would run and copy files.
+
+  References: TPA-899.
+
+- Create only required slots when configuring patroni
+
+  When setting up a patroni cluster, a replication slot is created for 
+  each etcd-only node. This causes problems because the unused slots cause 
+  the WAL to accumulate. Slots are now only created for the DB servers.
+
+  References: TPA-823.
+
+- Separated changed from unchanged tasks in output
+
+  In TPA's default output plugin, tasks which return "ok" but with
+  no changes are now separated from ones that have reported changes,
+  which are now highlighted in yellow.
+
+  References: TPA-952.
+
+### Bugfixes
+
+- Pick the right upstream on EFM servers
+
+  If a cluster is created with a pem-server, that backend is not
+  monitored by EFM, hence, that node shouldn't be included when
+  discovering a postgres primary for the entire cluster.
+
+  References: TPA-929, RT45279.
+
+- Fix shared_preload_libraries computing during deploy
+
+  Fix a limitation from ansible's handling of list ordering that would
+  trigger unneeded and uncontrolled rewritting of the
+  shared_preload_libraries and subsequently require a postgres service
+  restart, even on second deployment scenarios with no changes to the
+  configuration.
+
+  References: TPA-946.
+
+- Fix duplicated lines in .pgpass files
+
+  Fixed a bug whereby extra lines could be added to .pgpass for the same
+  user when re-running 'tpaexec deploy'.
+
+  References: TPA-928.
+
+- Fix `patronictl switchover` command usage
+
+  Patroni moved out from `master` naming some months ago
+  TPA will now correctly use `--leader` instead of deprecated `--master`
+  parameter when using `patronictl switchover` command.
+
+  References: TPA-944.
+
+- Count instances correctly in PEM clusters
+
+  Fixed a bug whereby in certain circumstances, TPA would incorrectly
+  calculate the number of instances in a BDR-Always-ON cluster with a
+  PEM server, causing "tpaexec configure" to fail with "StopIteration".
+
+  References: TPA-937.
+
 ## v23.36.0 (2025-02-19)
 
 ### Notable changes
