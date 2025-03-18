@@ -64,6 +64,9 @@ backup.wal={{ efm_conf_settings['backup.wal']|default(false) }}
 reconfigure.num.sync={{ efm_conf_settings['reconfigure.num.sync']|default(false) | bool }}
 reconfigure.num.sync.max={{ efm_conf_settings['reconfigure.num.sync.max']|default('') }}
 reconfigure.sync.primary={{ efm_conf_settings['reconfigure.sync.primary']|default(false) | bool }}
+{% if efm_version is version('5', '>=') %}
+check.num.sync.period={{ efm_conf_settings['check.num.sync.period']|default(30) }}
+{% endif %}
 minimum.standbys={{ efm_conf_settings['minimum.standbys']|default(0) }}
 priority.standbys={{ efm_conf_settings['priority.standbys']|default('') }}
 recovery.check.period={{ efm_conf_settings['recovery.check.period']|default(1) }}
