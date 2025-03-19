@@ -116,10 +116,17 @@
 
 - include_tasks: pem_sites.yml
 
+- name: Discover PEM schema version
+  shell: ls /usr/edb/pem/share/upgrades/*.sql | sort -r | head -n 1 | sed 's/\.sql$//' | xargs basename
+  register: pem_schema_version
+
 - name: Run setup.py to create pem.db
-  command: "{{ pem_python_executable }} /usr/edb/pem/web/setup.py setup-db"
+  command: "{{ pem_python_executable }} /usr/edb/pem/web/setup.py {{above_pem10|ternary(pem10_command, '') }}"
   become_user: pem
   become: yes
+  vars:
+    above_pem10: "{{  pem_schema_version.stdout | int >= 202503241 }}"
+    pem10_command: setup-db
 
 - name: Configure SELinux security policy for PEM
   command: "{{ pem_base_dir }}/bin/configure-selinux.sh"
