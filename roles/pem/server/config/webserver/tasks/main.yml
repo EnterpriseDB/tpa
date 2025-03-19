@@ -117,7 +117,7 @@
 - include_tasks: pem_sites.yml
 
 - name: Run setup.py to create pem.db
-  command: "{{ pem_python_executable }} /usr/edb/pem/web/setup.py"
+  command: "{{ pem_python_executable }} /usr/edb/pem/web/setup.py setup-db"
   become_user: pem
   become: yes
 
