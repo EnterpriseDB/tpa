@@ -104,9 +104,7 @@ def main():
 
     module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=False)
 
-    region, ec2_url, aws_connect_params = get_aws_connection_info(
-        module, boto3=HAS_BOTO3
-    )
+    region, ec2_url, aws_connect_params = get_aws_connection_info(module)
 
     if not region:
         module.fail_json(msg="AWS region must be specified (e.g., eu-west-1)")
