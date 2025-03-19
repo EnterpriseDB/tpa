@@ -19,16 +19,17 @@ The exception to this rule is that `tpaexec deploy` will refuse to
 install a different version of a package that is already installed.
 Instead, you must use `tpaexec upgrade` to perform software upgrades.
 
-!!! Note
-**tpaexec upgrade does NOT support MAJOR version upgrades of Postgres.**
-!!!
+!!! Note "Minor version upgrades only"
 
-!!! Note
-The M1 architecture only supports minor version upgrades of Postgres.
-All applicable failover managers for M1 can run minor version upgrades
-of Postgres.
+**`tpaexec upgrade` alone does NOT support MAJOR version upgrades of Postgres.**
 
-Minor upgrades of other software components will be added in a future release.
+What TPA can upgrade is dependent on architecture:
+
+* The M1 architecture and all applicable failover managers for M1, `upgrade` will perform minor version upgrades of Postgres only.
+* With PGD architectures, `upgrade` will perform minor version upgrades of Postgres and the BDR extension.
+* With PGD architectures, and only in combination with the `reconfigure` command, `upgrade` can perform major-version upgrades.
+
+Support for upgrading other cluster components is planned for future releases.
 !!!
 
 This command will try to perform the upgrade with minimal disruption to
