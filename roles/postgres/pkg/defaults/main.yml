@@ -29,7 +29,12 @@ postgres_packages:
     Debian: &debian_epas_packages
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server"
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-dev"
+      - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-core"
+      - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-doc"
+
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-plperl"
+      - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-plpython3"
+      - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-pltcl"
     RedHat: &redhat_epas_packages
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server"
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-devel"
@@ -41,6 +46,8 @@ postgres_packages:
       - "{{ postgres_package_name }}-{{ postgres_version }}"
       - "{{ postgres_package_name }}-server-dev-{{ postgres_version }}"
       - "{{ postgres_package_name }}-plperl-{{ postgres_version }}"
+      - "{{ postgres_package_name }}-libpq5-{{ postgres_version }}"
+      - "{{ postgres_package_name }}-libpq-dev-{{ postgres_version }}"
     RedHat: &redhat_edbpge_packages
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-contrib"
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server"
@@ -67,6 +74,7 @@ postgres_client_packages:
   edbpge:
     Debian: &debian_edbpge_client_packages
       - "{{ postgres_package_name }}-client-{{ postgres_version }}"
+      - "{{ postgres_package_name }}-libpq5-{{ postgres_version }}"
     RedHat: &redhat_edbpge_client_packages
       - "{{ postgres_package_name }}{{ postgres_versionNN }}"
     Ubuntu: *debian_edbpge_client_packages

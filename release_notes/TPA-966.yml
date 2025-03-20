@@ -1,0 +1,15 @@
+- summary: Improve behaviour of postgres_package_version
+  description: |
+    Setting postgres_package_version will now cause TPA to install the
+    selected version of various postgres-related components on Debian or
+    Ubuntu systems installing EDB Postgres Advanced Server or EDB Postgres
+    Extended Server. This avoids dependency resolution problems when newer
+    package versions are visible in repositories.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-966
