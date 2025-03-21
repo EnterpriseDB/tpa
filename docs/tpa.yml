@@ -57,7 +57,7 @@ plugins:
   - with-pdf:
       author: EDB
       cover_title: TPA
-      cover_subtitle: "Version 23.37.0-rc5 (2025-03-21)"
+      cover_subtitle: "Version 23.37.0-rc6 (2025-03-21)"
       toc_level: 3
       output_path: tpaexec.pdf
       copyright: © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
