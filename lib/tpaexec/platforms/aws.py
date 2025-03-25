@@ -134,7 +134,14 @@ class aws(CloudPlatform):
             },
             "rocky": {
                 "Rocky-8-EC2-Base-8.10-20240528.0.x86_64": {
-                    "versions": ["8", "default"],
+                    "versions": ["8"],
+                    "preferred_python_version": "python3",
+                    "owner": "792107900819",
+                    "user": "rocky",
+                    "os_family": "RedHat",
+                },
+                "Rocky-9-EC2-Base-9.5-20241118.0.x86_64": {
+                    "versions": ["9", "default"],
                     "preferred_python_version": "python3",
                     "owner": "792107900819",
                     "user": "rocky",
