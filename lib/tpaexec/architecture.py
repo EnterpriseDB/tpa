@@ -708,7 +708,13 @@ class Architecture(object):
         # Now that main.yml.j2 has been loaded, and we have the initial set of
         # instances[] defined, num_locations() should work, and we can generate
         # the necessary number of subnets.
-        args["subnets"] = self.subnets(self.num_subnets())
+        try:
+            args["subnets"] = self.subnets(self.num_subnets())
+        except ValueError as e:
+            raise ArchitectureError(
+                    f"--network {e}. The IP used in the CIDR should be the network address of the range, not a host address (i.e. XXX.XXX.XXX.{0,16,32,48,64,...}/28) "
+                )
+
 
         locations = args.get("locations", [])
         if not locations:

@@ -1,0 +1,18 @@
+- summary: Raise ArchitectureError for --network flag during configure
+  description: |
+    By default, the Python standard library `ipaddress` package enforces
+    'strict' interpretation of the CIDR, whereby the IP used should be
+    the network address of the range.
+
+    Previously, any IP passed to the `--network` flag that contained host
+    bits would dump a stacktrace due to the raised ValueError. 
+    
+    That exception is now caught and an ArchitectureError is raised to
+    display a clear message to the user about the `--network` parameter.
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-910
