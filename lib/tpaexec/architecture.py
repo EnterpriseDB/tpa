@@ -712,7 +712,7 @@ class Architecture(object):
             args["subnets"] = self.subnets(self.num_subnets())
         except ValueError as e:
             raise ArchitectureError(
-                    f"--network {e}. The IP used in the CIDR should be the network address of the range, not a host address (i.e. XXX.XXX.XXX.{0,16,32,48,64,...}/28) "
+                    f"--network {e}. The IP used in the CIDR should be the network address of the range, not a host address (i.e. XXX.XXX.XXX.{{0,16,32,48,64,...}}/28) "
                 )
 
 
