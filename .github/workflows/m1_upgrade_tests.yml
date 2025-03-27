@@ -1,0 +1,71 @@
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+name: M1 Upgrade tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      matrix_key:
+        description: "Set of inputs to use"
+        required: false
+        default: "basic"
+        type: choice
+        options:
+          - basic
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+
+jobs:
+
+  load-matrix:
+    name: Load Matrix
+    runs-on: ubuntu-22.04
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{secrets.GH_SLONIK}}
+      - uses: ./.github/actions/load-yaml
+        id: load-yaml
+        with:
+          file: .github/config/m1_upgrade_matrix.yml
+          key: ${{ github.event.inputs.matrix_key }}
+
+  integration-test:
+    name: Matrix Upgrade test
+    needs: load-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+    runs-on: ${{ matrix.runner && matrix.runner || 'ubuntu-22.04' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v4
+        with:
+          repository: EnterpriseDB/tpa-internal
+          token: ${{secrets.GH_SLONIK}}
+
+      - uses: ./.github/actions/m1-upgrade-test
+        with:
+          source_directory: ${{ github.workspace }}
+          tpa_platform: ${{ matrix.tpa_platform }}
+          tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
+          tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
+          tpa_postgres_package_version: ${{ matrix.tpa_postgres_package_version }}
+          tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
+          cluster: "${{ matrix.tpa_postgres_flavour }}-\
+            ${{ matrix.tpa_postgres_version }}-\
+            ${{ matrix.tpa_os_image }}-\
+            ${{ matrix.tpa_failover_manager }}"

@@ -60,6 +60,7 @@ application.name={{ efm_conf_settings['application.name']|default('') }}
 restore.command={{ efm_conf_settings['restore.command']|default('') }}
 {% if efm_version is version('5', '>=') %}
 backup.wal={{ efm_conf_settings['backup.wal']|default(false) }}
+check.num.sync.period={{ efm_conf_settings['check.num.sync.period']|default(30) }}
 {% endif %}
 reconfigure.num.sync={{ efm_conf_settings['reconfigure.num.sync']|default(false) | bool }}
 reconfigure.num.sync.max={{ efm_conf_settings['reconfigure.num.sync.max']|default('') }}

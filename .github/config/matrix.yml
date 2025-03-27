@@ -165,18 +165,24 @@ m1_layouts:
   layout:
     - tpa_location_names: "l1"
       tpa_data_nodes_per_location: 2
+      tpa_layout_name: "1x2"
     - tpa_location_names: "l1 l2"
       tpa_data_nodes_per_location: 2
       tpa_single_node_location: true
+      tpa_layout_name: "1x2plus1"
     - tpa_location_names: "l1 l2"
       tpa_data_nodes_per_location: 2
+      tpa_layout_name: "2x2"
     - tpa_location_names: "l1 l2 l3"
       tpa_data_nodes_per_location: 3
       tpa_witness_only_location: true
+      tpa_layout_name: "2x3plus1"
     - tpa_location_names: "l1 l2 l3"
       tpa_data_nodes_per_location: 1
+      tpa_layout_name: "3x1"
     - tpa_location_names: "l1 l2 l3"
       tpa_data_nodes_per_location: 3
+      tpa_layout_name: "3x3"
   include:
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "postgresql"
@@ -186,3 +192,4 @@ m1_layouts:
       layout:
         tpa_location_names: "l1"
         tpa_data_nodes_per_location: 2
+        tpa_layout_name: "1x2"

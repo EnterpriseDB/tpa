@@ -1,0 +1,17 @@
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+---
+
+basic:
+  tpa_os_image:
+    - "ubuntu:22.04"
+  tpa_postgres_flavour:
+    - "postgresql"
+  tpa_postgres_version:
+    - "14"
+  tpa_postgres_package_version:
+    - "14.0.1"
+  tpa_failover_manager:
+    - "repmgr"
+    - "efm"
+    - "patroni"

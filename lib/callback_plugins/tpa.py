@@ -45,6 +45,7 @@ class CallbackModule(CallbackModule_default):
 
     def zero_everything(self):
         self._ok = 0
+        self._changed = 0
         self._skipped = 0
         self._failed = 0
         self._next_task_uuid = None
@@ -103,6 +104,7 @@ class CallbackModule(CallbackModule_default):
                 del iterator
 
             self._ok = 0
+            self._changed = 0
             self._skipped = 0
             self._failed = 0
 
@@ -141,7 +143,10 @@ class CallbackModule(CallbackModule_default):
                 self._output_lines.append(
                     f"{result._host.get_name()} => { self._dump_results(result._result) }"
                 )
-            self._ok += 1
+            if result._result.get('changed', False):
+                self._changed += 1
+            else:
+                self._ok += 1
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         if self._use_standard_plugin:
@@ -257,17 +262,18 @@ class CallbackModule(CallbackModule_default):
         if self._pending_output_line:
             self._pending_output_line = False
             self._display.display(
-                " (%s/%s/%s)"
+                " (%s/%s/%s/%s)"
                 % (
                     stringc(str(self._ok), C.COLOR_OK),
+                    stringc(str(self._changed), C.COLOR_CHANGED),
                     stringc(str(self._skipped), C.COLOR_SKIP),
                     stringc(str(self._failed), error_color),
                 ),
                 screen_only=True,
             )
             self._display.display(
-                "%s %s ok, %s skipped, %s failed"
-                % (indents, self._ok, self._skipped, self._failed),
+                "%s %s ok, %s changed, %s skipped, %s failed"
+                % (indents, self._ok, self._changed, self._skipped, self._failed),
                 log_only=True,
             )
 

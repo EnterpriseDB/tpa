@@ -64,7 +64,7 @@ jobs:
     - uses: ./.github/actions/integration-test
       with:
         source_directory: ${{ github.workspace }}
-        cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}
+        cluster: ${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}-${{ matrix.layout.tpa_layout_name }}-${{ matrix.tpa_failover_manager }}
         tpa_architecture: ${{ matrix.tpa_architecture }}
         tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
         tpa_postgres_version: ${{ matrix.tpa_postgres_version }}

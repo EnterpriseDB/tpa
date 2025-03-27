@@ -2,17 +2,16 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-# Handle calls to the Patroni liveness API
+# Handle calls to the Patroni switchover API
 
-# GET /liveness: returns HTTP status code 200 if Patroni heartbeat loop is properly running
-# and 503 if the last run was more than ttl seconds ago on the primary or 2*ttl on the replica.
-# Could be used for livenessProbe.
+# The POST /switchover endpoint switches over from a healthy leader to another eligible node
 
-- name: Check if Patroni is ready to start serving requests by calling the `/liveness` API
+- name: Tell Patroni to switchover to a new leader
   uri:
-    method: GET
-    url: "{{ _patroni_api_scheme }}://{{ inventory_hostname }}:{{ patroni_listen_port }}/liveness"
+    method: POST
+    url: "{{ _patroni_api_scheme }}://{{ inventory_hostname }}:{{ patroni_listen_port }}/switchover"
     body_format: json
+    body: "{{ body|default(omit)|to_json }}"
     url_username: "{{ patroni_restapi_user }}"
     url_password: "{{ vars['%s_password' % patroni_restapi_user] }}"
 
@@ -24,4 +23,7 @@
     # proxy, e.g. for downloading packages
     use_proxy: no
 
-  register: patroni_liveness_api_output
+    # if the body requests a scheduled switchover, the API will return
+    # 202 on success
+    status_code: [200, 202]
+  register: patroni_switchover_api_output

@@ -18,3 +18,4 @@
   when:
     - hostvars[item]['cluster_facts']['role'] is defined
     - hostvars[item]['cluster_facts']['role'] == 'primary'
+    - ('efm' in hostvars[item]['cluster_facts']['roles'])

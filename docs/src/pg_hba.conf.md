@@ -37,12 +37,33 @@ cluster_vars:
   - hostssl all all 0.0.0.0/0 reject
 ```
 
-You can even create `templates/my_hba.j2` in your cluster directory and
+You can even create `templates/my_hba.conf.j2` in your cluster directory and
 set:
 
 ```yaml
 cluster_vars:
-  postgres_hba_template: my_hba.j2
+  postgres_hba_template: my_hba.conf.j2
+```
+
+If you put any template files outside the cluster directory's `templates` 
+subdirectory, make sure to specify the absolute path to the file:
+
+```yaml
+# in the root of the cluster directory
+cluster_vars:
+  postgres_hba_template: "{{ cluster_dir }}/my_hba.conf.j2"
+```
+
+```yaml
+# in a subdirectory of the cluster directory that is NOT 'templates'
+cluster_vars:
+  postgres_hba_template: "{{ cluster_dir }}/subdirectory/my_hba.conf.j2"
+```
+
+```yaml
+# in a directory outside of the cluster directory
+cluster_vars:
+  postgres_hba_template: /path/to/file/outside/cluster_dir/my_hba.conf.j2
 ```
 
 If you just want to leave the existing `pg_hba.conf` alone, you can do

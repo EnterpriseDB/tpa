@@ -13,4 +13,4 @@
     when: >
       ('primary' in role or 'replica' in role)
   when: >
-    failover_manager == 'patroni'
+    failover_manager == 'patroni' and 'pem-server' not in role

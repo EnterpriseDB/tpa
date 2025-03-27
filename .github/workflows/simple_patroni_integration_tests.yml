@@ -61,7 +61,7 @@ jobs:
           tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
           tpa_package_cache: "false"
           tpa_failover_manager: "patroni"
-          cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}
+          cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}${{ matrix.tpa_postgres_version }}
 
       - name: Provision the cluster
         working-directory: ${{ github.workspace }}

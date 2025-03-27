@@ -31,56 +31,101 @@
     - "{{ _include_dir }}/8888-shared_preload_libraries.conf"
   check_mode: no
 
-- name: Update shared_preload_libraries list
+# extract the list from the registered output of preceding task.
+- name: Save current value for shared_preload_libraries list
   set_fact:
-    _preload_list:
-      "{{ _old_list|union(shared_preload_libraries|default([])|flatten) }}"
-  vars:
     _old_list: >
       {{ libs.stdout and libs.stdout.split(',')|map('trim')|list or [] }}
+
+
+# Either keep existing list (to keep order untouched) if no difference in content
+# else do the union of existing + constructed list.
+- name: Update shared_preload_libraries list
+  set_fact:
+    _preload_list: "{{
+      (_old_list|symmetric_difference(shared_preload_libraries) is not empty)
+        |ternary(
+          _old_list|union(shared_preload_libraries|default([])|flatten),
+          _old_list|flatten)
+      }}"
+
+# create a dict such as the keys are entries in the list and values are
+# the position in the list.
+- name: Create a dict from the list
+  set_fact:
+    _preload_dict: "{{ _preload_dict|default({})|combine( { item: _preload_list.index(item)|int } ) }}"
+  with_items: "{{ _preload_list }}"
 
 # We can fix certain ordering problems in shared_preload_libraries,
 # but we don't expect to encounter these problems in production (we
 # would not generate the incorrect order to begin with).
 #
 # Right now, the only such problem is to ensure that bdr must come after
-# both postgres_fdw and pglogical—otherwise we remove both pglogical and
-# bdr and add them back at the end of the list.
+# both postgres_fdw and pglogical— we change the order value to push the
+# bdr input at the end of the list by setting its position to the size of
+# the list +1.
 
-- name: Adjust ordering of shared_preload_libraries if required
+- name: Adjust ordering of bdr related to pglogical if required
+  when:
+    - p_and_b is subset(_preload_dict.keys())
+    - bdr_pos < pglogical_pos
   set_fact:
-    _preload_list:
-      "{{ _preload_list|reject('in', p_and_b)|list|union(p_and_b) }}"
-  when: >
-    ('bdr' in _preload_list and 'pglogical' in _preload_list and
-    _preload_list.index('bdr')|int < _preload_list.index('pglogical')|int) or
-    ('bdr' in _preload_list and 'postgres_fdw' in _preload_list and
-    _preload_list.index('bdr')|int < _preload_list.index('postgres_fdw')|int)
+    _preload_dict: "{{ _preload_dict|combine({'bdr':  last_pos|int+1 }) }}"
+  register: ordering_1
   vars:
     p_and_b: ['pglogical', 'bdr']
+    bdr_pos: "{{ _preload_dict['bdr']|int }}"
+    pglogical_pos: "{{ _preload_dict['pglogical']|int }}"
+    last_pos: "{{ _preload_dict.keys()|length }}"
 
-- name: Adjust ordering to avoid conflict with pgaudit
+# ensure bdr is after postgres_fdw in the list
+- name: Adjust ordering of bdr related to postgres_fdw if required
+  when:
+    - p_and_b is subset(_preload_dict.keys())
+    - bdr_pos < postgres_fdw_pos
   set_fact:
-    _preload_list: "{{ _preload_list|reject('==', 'pgaudit')|list|union(['pgaudit']) }}"
-  when: >
-    'bdr' in role
-    and bdr_version is version('4', '>=')
-    and 'bdr' in _preload_list
-    and 'pgaudit' in _preload_list
-    and _preload_list.index('bdr')|int > _preload_list.index('pgaudit')|int
+    _preload_dict: "{{ _preload_dict|combine({ 'bdr':  last_pos|int+1 }) }}"
+  register: ordering_2
+  vars:
+    p_and_b: ['postgres_fdw', 'bdr']
+    bdr_pos: "{{ _preload_dict['bdr']|int }}"
+    postgres_fdw_pos: "{{ _preload_dict['postgres_fdw']|int }}"
+    last_pos: "{{ _preload_dict.keys()|length }}"
+
+# Ensure pgaudit is after bdr in the list
+# when both are in use.
+- name: Adjust ordering of pgaudit related to bdr if required
+  when:
+    - p_and_b is subset(_preload_dict.keys())
+    - bdr_pos > pgaudit_pos
+  set_fact:
+    _preload_dict: "{{ _preload_dict|combine({ 'pgaudit':  last_pos|int+2 }) }}"
+  register: ordering_3
+  vars:
+    p_and_b: ['pgaudit', 'bdr']
+    bdr_pos: "{{ _preload_dict['bdr']|int }}"
+    pgaudit_pos: "{{ _preload_dict['pgaudit']|int }}"
+    last_pos: "{{ _preload_dict.keys()|length }}"
 
 - name: Remove pglogical if BDR v4 is in use
   set_fact:
-    _preload_list:
-      "{{ _preload_list|reject('equalto', 'pglogical')|list }}"
+    _preload_dict:
+      "{{ _preload_dict|combine({ 'pglogical': omit }) }}"
   when: >
     'bdr' in role
     and bdr_version is version('4', '>=')
+    and 'pglogical' in _preload_list
 
 # When it comes to writing out the file again, we don't make any attempt
 # to retain whatever was in it before; as the warning clearly says, this
 # file—like any other in _include_dir—is subject to being overwritten.
-
+- name: Build the SPL string as space separated string
+  set_fact:
+    spl_string: "{{ spl_string|default('') ~ item.0 ~ ' ' }}"
+  loop: "{{ _preload_dict|dictsort('false','value') }}"
+# - rewrite only when using config split (~= not patroni cluster)
+# - there is an actual change in list (addition, removal)
+#   or change in ordering for the list
 - name: Write new value for shared_preload_libraries
   template:
     src: variable.j2
@@ -92,7 +137,11 @@
     spl_config: "{{ _include_dir }}/8888-shared_preload_libraries.conf"
     variable: shared_preload_libraries
     value: >
-      '{{ _preload_list|join(', ') }}'
-  when: _postgres_config_split
+      '{{ spl_string|trim|split(' ')|join(', ') }}'
+  when:
+    - _postgres_config_split
+    - (_old_list|symmetric_difference(_preload_dict.keys()) is not empty)
+      or [ordering_1 is not skipped, ordering_2 is not skipped, ordering_3 is not skipped] is any
+
   notify:
     - Note Postgres restart required

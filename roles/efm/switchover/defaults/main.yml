@@ -1,0 +1,9 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# used to skip role check before switchover during upgrade scenario where TPA
+# is managing the switchover so we don't need to worry about this check that
+# would fail since roles are not up to date with actual cluster state due to
+# a first switchover earlier in the process.
+managed_switchover: false

@@ -1,0 +1,184 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- name: EFM cluster upgrade initial checks and setup
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: all
+  tasks:
+
+  - name: Configure local-repo, if available
+    include_role:
+      name: sys/local_repo
+
+  - name: Set up repositories
+    include_role:
+      name: sys/repositories
+
+  # Pre upgrade checks
+  - name: Pre upgrade basic efm tests
+    include_role:
+      name: test
+      tasks_from: efm/basic.yml
+  # Ensure we use the correct failover_manager
+  - assert:
+      that:
+        failover_manager == 'efm'
+      fail_msg:
+        This upgrade scenario is for M1 Architecture clusters using EFM as failover manager.
+  # Ensure that cluster is in a working state
+
+  # use correct identifier for efm commands (not needed on witness nodes)
+  - name: Ensure efm_bind_by_hostname is handled
+    set_fact:
+      efm_identity: "{{ efm_bind_by_hostname|default(false)|ternary(inventory_hostname,ip_address) }}"
+    when:
+      role|intersect(['primary','replica'])
+
+- name: Run checks on barman nodes, if any
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_barman
+  tasks:
+  - name: Stop wal receiver on barman nodes
+    include_role:
+      name: barman
+      tasks_from: server-stop-receive-wal.yml
+
+# Start upgrade process
+
+# Upgrade replicas first
+- name: Upgrade postgres on replicas
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  serial: 1
+  hosts: role_replica:&g_update_hosts
+  tasks:
+
+  - name: Stop EFM agent
+    service:
+      name: edb-efm-{{ efm_version }}
+      state: stopped
+
+    # upgrade the database
+  - include_role: name=postgres/update
+
+  - include_role: name=postgres/restart
+
+    # start the agent
+  - name: Start EFM agent
+    service:
+      name: edb-efm-{{ efm_version }}
+      state: started
+
+- name: Switchover to chosen_replica if needed
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: all
+  handlers:
+  - import_tasks: "{{ tpa_dir }}/roles/efm/handlers/main.yml"
+  tasks:
+
+
+  - name: Switchover from {{ chosen_primary }} to {{ chosen_replica }}
+    include_role:
+      name: efm/switchover
+    vars:
+      target: "{{ chosen_replica }}"
+      primary: "{{ chosen_primary }}"
+    when:
+      chosen_primary in groups['g_update_hosts']
+
+# Note: this role was calculated earlier, so it's outdated after the
+# switchover, but it correctly identifies the instance to use.
+- name: Upgrade postgres on primary
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: g_chosen_primary:&g_update_hosts
+  tasks:
+
+  - name: Stop EFM agent
+    service:
+      name: edb-efm-{{ efm_version }}
+      state: stopped
+
+  - include_role: name=postgres/update
+
+  - include_role: name=postgres/restart
+
+  # start the agent
+  - name: Start EFM agent
+    service:
+      name: edb-efm-{{ efm_version }}
+      state: started
+
+- name: Switchover to chosen_primary if needed
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: all
+  handlers:
+  - import_tasks: "{{ tpa_dir }}/roles/efm/handlers/main.yml"
+  tasks:
+
+  - name: Switchover from {{ chosen_replica }} to {{ chosen_primary }}
+    include_role:
+      name: efm/switchover
+    vars:
+      target: "{{ chosen_primary }}"
+      primary: "{{ chosen_replica }}"
+      managed_switchover: true
+    when:
+      chosen_primary in groups['g_update_hosts']
+
+- name: Start receiving wals on barman nodes
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_barman
+  tasks:
+  - name: Install /etc/tpa/barman-home-ok
+    include_role:
+      name: barman
+      tasks_from: server-install-barman-home-ok.yml
+
+  - name: Start wal receiver on barman nodes
+    command: "barman cron"
+
+- name: Post upgrade checks
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: all
+  tasks:
+  - name: Wait for cluster to recover
+    wait_for:
+      timeout: 30
+
+  # post checks
+  - name: Post upgrade basic efm tests
+    include_role:
+      name: test
+      tasks_from: efm/basic.yml

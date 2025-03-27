@@ -24,3 +24,13 @@ repmgr_packages:
       - edb-postgresextended-{{ postgres_version }}-repmgr
     RedHat:
       - edb-postgresextended{{ postgres_versionNN }}-repmgr
+
+# additional packages when using pgbouncer with repmgr
+# that will rely on pkill to restart pgbouncer
+repmgr_additional_packages:
+  Debian: &repmgr_add_debian
+    - procps
+  Ubuntu: *repmgr_add_debian
+  RedHat: &repmgr_add_rhel
+    - procps-ng
+  SUSE: *repmgr_add_rhel

@@ -5,6 +5,7 @@
 from .bdr import BDR
 from typing import List, Tuple
 from argparse import SUPPRESS
+from ..exceptions import ArchitectureError
 
 
 class BDR_Always_ON(BDR):
@@ -63,10 +64,19 @@ class BDR_Always_ON(BDR):
             "silver": 6,
             "bronze": 6,
         }
-        return instances_per_layout[self.args["layout"]]
+        return (instances_per_layout[self.args["layout"]]
+            + (1 if self.args.get("enable_pem") else 0))
 
     def default_location_names(self):
         return [chr(ord("a") + i) for i in range(self.num_locations())]
+
+    def validate_arguments(self, args):
+        super().validate_arguments(args)
+        if self.args.get("bdr_version") == "5":
+            raise ArchitectureError(
+                "BDR-Always-ON only supports BDR versions 3 and 4."
+                "\nUse PGD-Always-ON with BDR version 5."
+            )   
 
     def update_cluster_vars(self, cluster_vars):
         super().update_cluster_vars(cluster_vars)

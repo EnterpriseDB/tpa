@@ -1,0 +1,96 @@
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+name: Upgrade test
+
+on:
+  workflow_dispatch:
+    inputs:
+      tpa_platform:
+        description: "TPA platform"
+        required: false
+        default: "docker"
+      tpa_os_image:
+        description: "TPA OS image"
+        required: true
+        type: choice
+        options:
+        - tpa/debian:9
+        - tpa/debian:10
+        - tpa/debian:11
+        - tpa/ubuntu:20.04
+        - tpa/ubuntu:24.04
+        - tpa/redhat:7
+        - tpa/redhat:8
+        - tpa/sles:15
+      tpa_postgres_flavour:
+        description: "Postgres flavour"
+        required: true
+        default: "postgresql"
+        type: choice
+        options:
+        - postgresql
+        - pgextended
+        - edbpge
+        - epas
+      tpa_postgres_version:
+        description: "Postgres version"
+        required: true
+        default: 14
+        type: choice
+        options:
+        - 11
+        - 12
+        - 13
+        - 14
+        - 15
+        - 16
+        - 17
+      tpa_postgres_package_version:
+        description: "package version to upgrade from"
+        required: true
+        default: "14.0.0"
+        type: string
+      runner:
+        description: "github runner (ubuntu20.04 required when using tpa_os_image: 'tpa/redhat:7')"
+        required: false
+        default: "ubuntu-22.04"
+        type: choice
+        options:
+        - "ubuntu-20.04"
+        - "ubuntu-22.04"
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+
+jobs:
+
+  integration-test:
+    name: Upgrade test
+
+    runs-on: ${{ github.event.inputs.runner }}
+
+    steps:
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v4
+        with:
+          repository: EnterpriseDB/tpa-internal
+          token: ${{secrets.GH_SLONIK}}
+
+      - uses: ./.github/actions/m1-upgrade-test
+        with:
+          source_directory: ${{ github.workspace }}
+          tpa_platform: ${{ github.event.inputs.tpa_platform }}
+          tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
+          tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
+          tpa_edb_repo: ${{ github.event.inputs.tpa_edb_repo }}
+          cluster: "${{ github.event.inputs.tpa_postgres_flavour }}-\
+            ${{ github.event.inputs.tpa_postgres_version }}-\
+            ${{ github.event.inputs.tpa_os_image }}-
+            ${{ github.event.inputs.tpa_failover-manager }}"

@@ -5,23 +5,7 @@
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   tags: always
 
-- name: Update repository configuration, if required
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  environment: "{{ target_environment }}"
-  hosts: "{{ update_hosts|default('all') }}"
-  tasks:
-  - name: Configure local-repo, if available
-    include_role:
-      name: sys/local_repo
-
-  - name: Set up repositories
-    include_role:
-      name: sys/repositories
-
-- name: Stop repmgr
+- name: Generate dynamic groups for upgrade
   any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
@@ -29,74 +13,55 @@
   environment: "{{ target_environment }}"
   hosts: all
   tasks:
-  - assert:
-      that:
-        failover_manager != 'patroni'
-      fail_msg:
-        Upgrade postgres does not support patroni managed clusters
 
-  - name: Stop repmgr
-    service:
-      name: repmgr
-      state: stopped
-    when: >
-      'postgres' in role
+  - name: Create dynamic group update_hosts
+    add_host:
+      group: g_update_hosts
+      hostname: "{{ member }}"
+      inventory_dir: "{{ hostvars[member].inventory_dir }}"
+    with_items: "{{ (update_hosts|split(',')) if update_hosts is defined else groups['all'] }}"
+    loop_control:
+      loop_var: member
+    changed_when: false
 
-- name: Update postgres on replicas in cluster {{ cluster_dir }}
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  environment: "{{ target_environment }}"
-  hosts: all
-  serial: 1
-  tasks:
-  - include_role: name=postgres/update
-    when: >
-      'replica' in role
+  - name: Identify primary by name
+    set_fact:
+      chosen_primary: "{{ groups['primary'] | difference(groups['role_pem-server']|default([])) | first }}"
 
-- name: Update postgres on primary in cluster {{ cluster_dir }}
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  environment: "{{ target_environment }}"
-  hosts: all
-  tasks:
-  - name: Switchover to a replica
-    command: >
-      {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
-    become_user: "{{ postgres_user }}"
-    become: yes
-    when: >
-      inventory_hostname == groups['replica'][0]
+  - name: Identify replica to become temporary primary
+    set_fact:
+      chosen_replica: "{{ groups['replica'][0] }}"
 
-  # Note: this role was calculated earlier, so it's outdated after the
-  # switchover, but it correctly identifies the instance to use.
+  - name: Create dynamic group g_chosen_primary
+    add_host:
+      group: g_chosen_primary
+      hostname: "{{ chosen_primary }}"
+      inventory_dir: "{{ hostvars[chosen_primary].inventory_dir }}"
+    changed_when: false
 
-  - include_role: name=postgres/update
-    when: >
-      'primary' in role
+  - name: Create dynamic group g_chosen_replica
+    add_host:
+      group: g_chosen_replica
+      hostname: "{{ chosen_replica }}"
+      inventory_dir: "{{ hostvars[chosen_replica].inventory_dir }}"
+    changed_when: false
 
-  - name: Switch back to the old primary
-    command: >
-      {{ postgres_bin_dir }}/repmgr standby switchover --verbose -f {{ repmgr_conf_file }} --siblings-follow
-    become_user: "{{ postgres_user }}"
-    become: yes
-    when: >
-      'primary' in role
+  - name: set fo_manager
+    set_fact:
+      fo_manager: "{{ failover_manager }}"
 
-- name: Start repmgr again
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  environment: "{{ target_environment }}"
-  hosts: all
-  tasks:
-  - name: Restart repmgr
-    service:
-      name: repmgr
-      state: started
-    when: >
-      'postgres' in role
+
+- name: Import repmgr upgrade
+  import_playbook: "{{ cluster_dir }}/playbooks/repmgr_cluster_upgrade.yml"
+  when:
+    fo_manager == "repmgr"
+
+- name: Import EFM upgrade
+  import_playbook: "{{ cluster_dir }}/playbooks/efm_cluster_upgrade.yml"
+  when:
+    fo_manager == "efm"
+
+- name: Import patroni upgrade
+  import_playbook: "{{ cluster_dir }}/playbooks/patroni_cluster_upgrade.yml"
+  when:
+    fo_manager == "patroni"

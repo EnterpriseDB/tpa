@@ -1,0 +1,10 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- name: Install /etc/tpa/barman-home-ok
+  include_tasks:
+    file: server-install-barman-home-ok.yml
+
+- name: Start wal receiver on barman nodes
+  command: "barman cron"

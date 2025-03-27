@@ -29,10 +29,10 @@
           |first
           |default({})
         ).Member|default('none')
-      }}"
+        }}"
       primary: "{{
         groups['primary']|first
-      }}"
+        }}"
 
   - name: Make sure the target host is a replica according to patroni
     assert:
@@ -47,12 +47,12 @@
         |map(attribute='Member')
         |list
         |default([])
-      }}"
+        }}"
 
   #   Switchover to a replica
   #
   # Options:
-  #   --master TEXT     The name of the current master
+  #   --leader TEXT     The name of the current leader
   #   --candidate TEXT  The name of the candidate
   #   --scheduled TEXT  Timestamp of a scheduled switchover in unambiguous format
   #                     (e.g. ISO 8601)
@@ -63,7 +63,7 @@
       {{ patronictl_path }}
       -c {{ patroni_etc }}/{{ cluster_name }}.yml
       switchover
-      --master {{ groups['primary']|first }}
+      --leader {{ groups['primary']|first }}
       --scheduled now
       --candidate {{ target }}
       --force

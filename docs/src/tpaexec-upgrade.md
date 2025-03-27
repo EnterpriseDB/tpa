@@ -19,14 +19,17 @@ The exception to this rule is that `tpaexec deploy` will refuse to
 install a different version of a package that is already installed.
 Instead, you must use `tpaexec upgrade` to perform software upgrades.
 
-!!! Note What can I do with `upgrade`?
-Supported uses of the  `upgrade` command include:
+!!! Note "Minor version upgrades only"
 
-- Upgrading Postgres and other cluster components to the latest minor version without modifying `config.yml`
-- Upgrading components to a new minor version specified by modifying `config.yml`
-- Performing a major version upgrade of Postgres Distributed in combination with the `reconfigure` command.
+**`tpaexec upgrade` alone does NOT support MAJOR version upgrades of Postgres.**
 
-**Upgrade does not support major version upgrades of Postgres.**
+What TPA can upgrade is dependent on architecture:
+
+* The M1 architecture and all applicable failover managers for M1, `upgrade` will perform minor version upgrades of Postgres only.
+* With PGD architectures, `upgrade` will perform minor version upgrades of Postgres and the BDR extension.
+* With PGD architectures, and only in combination with the `reconfigure` command, `upgrade` can perform major-version upgrades.
+
+Support for upgrading other cluster components is planned for future releases.
 !!!
 
 This command will try to perform the upgrade with minimal disruption to
@@ -80,7 +83,7 @@ unrelated pending changes before you begin the software upgrade process.
 To upgrade from BDR-Always-ON to PGD-Always-ON (that is, from BDR3/4 to
 PGD5), first run `tpaexec reconfigure`:
 
-```
+``` bash
 $ tpaexec reconfigure ~/clusters/speedy\
   --architecture PGD-Always-ON\
   --pgd-proxy-routing local
@@ -92,13 +95,13 @@ invocation, see [the command's own
 documentation](tpaexec-reconfigure.md). After reviewing the
 changes, run `tpaexec upgrade` to perform the upgrade:
 
-```
+``` bash
 $ tpaexec upgrade ~/clusters/speedy\
 ```
 
 Or to run the upgrade with proxy monitoring enabled,
 
-```
+``` bash
 $ tpaexec upgrade ~/clusters/speedy\
   -e enable_proxy_monitoring=true
 ```
@@ -152,7 +155,7 @@ one by one and does the following:
 2. If the instance was the active server, request pgbouncer to reconnect
    and wait for active sessions to be closed.
 3. Stop Postgres, update packages, and restart Postgres.
-5. Finally, mark the server as "ready" again to receive requests through
+4. Finally, mark the server as "ready" again to receive requests through
    haproxy.
 
 PGD logical standby or physical replica instances are updated without
@@ -161,23 +164,25 @@ cluster are left alone.
 
 ## M1
 
-!!! Warning
-The `upgrade` command for M1 is affected by a known bug and will fail
-where the failover manager is Patroni or EFM. TPA will provide full
-upgrade functionality for M1 in a future release.
+!!! Note
+The M1 architecture only supports minor version upgrades of Postgres.
+All applicable failover managers for M1 can run minor version upgrades
+of Postgres.
+
+Minor upgrade of other software component will be added in a future release.
 !!!
 
 For M1 clusters, `upgrade` will first update the streaming
-replicas one by one, then perform a [switchover](tpaexec-switchover.md)
-from the primary to one of the replicas, update the primary, and
-switchover back to it again.
+replicas and witness nodes when applicable, then perform a [switchover](tpaexec-switchover.md)
+from the primary to one of the upgraded replicas, update the primary, and
+switchover back to the initial primary node.
 
 ## Controlling the upgrade process
 
 You can control the order in which the cluster's instances are upgraded
 by defining the `update_hosts` variable:
 
-```
+``` bash
 $ tpaexec upgrade ~/clusters/speedy \
   -e update_hosts=quirk,keeper,quaver
 ```
@@ -186,10 +191,10 @@ This may be useful to minimise lead/shadow switchovers during the upgrade
 by listing the active PGD primary instances last, so that the shadow
 servers are upgraded first.
 
-You can upgrade a subset of the instances by specifying only these 
-instances in update_hosts. However, you must always include any 
-instances with the`harp-proxy`, `pgd-proxy`, or `pgbouncer` 
-roles in the list, otherwise the upgrade could fail with package 
+You can upgrade a subset of the instances by specifying only these
+instances in update_hosts. However, you must always include any
+instances with the`harp-proxy`, `pgd-proxy`, or `pgbouncer`
+roles in the list, otherwise the upgrade could fail with package
 version conflicts.
 
 If your environment requires additional actions, the
@@ -216,7 +221,7 @@ re-run `tpaexec provision`. The update will then install the latest
 available packages. You can still update to a specific version by
 specifying versions on the command line as shown below:
 
-```
+``` bash
 $ tpaexec upgrade ~/clusters/speedy -vv         \
   -e postgres_package_version="2:11.6r2ndq1.6.13*"      \
   -e pglogical_package_version="2:3.6.11*"              \

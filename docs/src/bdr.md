@@ -105,9 +105,9 @@ The `bdr_database` (default: bdrdb) will be initialised with PGD.
 Any _additional_ [parameter keywords supported by libpq](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS) 
 can be included in `bdr_client_dsn_attributes`.
 
-Do not include `host`, `port`, `dbname` and `user`, as these will already be included in the connection string. 
+Do not include `host`, `port`, `dbname` and `user`, as these will already be included in the connection string.
 
-!!! Notice when pgd-proxy and pgd-cli are installed
+!!! Note When pgd-proxy and pgd-cli are installed
 
 Since pgd-proxy and pgd-cli are written in Go, they use Go drivers for connecting to Postgres. 
 

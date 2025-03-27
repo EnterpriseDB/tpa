@@ -27,7 +27,7 @@ on:
           format. Relative to the checked out repository root.
         required: true
         type: string
-        default: relnotes
+        default: release_notes
 
       output_file:
         description: >

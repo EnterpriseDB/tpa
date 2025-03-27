@@ -9,12 +9,7 @@
   ignore_errors: true
   become_user: "{{ postgres_user }}"
   become: yes
-
-- include_tasks: output.yml
-  vars:
-    output_file: repmgr-node-status.txt
-    content: |
-      {{ repmgr_status.stdout }}
+  changed_when: false
 
 - name: Run repmgr node check
   command: >
@@ -23,12 +18,7 @@
   ignore_errors: true
   become_user: "{{ postgres_user }}"
   become: yes
-
-- include_tasks: output.yml
-  vars:
-    output_file: repmgr-node-check.txt
-    content: |
-      {{ repmgr_check.stdout }}
+  changed_when: false
 
 - name: Fail if either of the above tasks failed
   fail:
@@ -44,9 +34,24 @@
   ignore_errors: true
   become_user: "{{ postgres_user }}"
   become: yes
+  changed_when: false
 
-- include_tasks: output.yml
-  vars:
-    output_file: repmgr-cluster-show.txt
-    content: |
-      {{ repmgr_cluster.stdout }}
+- block:
+  - include_tasks: output.yml
+    vars:
+      output_file: repmgr-cluster-show.txt
+      content: |
+        {{ repmgr_cluster.stdout }}
+
+  - include_tasks: output.yml
+    vars:
+      output_file: repmgr-node-check.txt
+      content: |
+        {{ repmgr_check.stdout }}
+
+  - include_tasks: output.yml
+    vars:
+      output_file: repmgr-node-status.txt
+      content: |
+        {{ repmgr_status.stdout }}
+  when: output_dir is defined

@@ -1,0 +1,82 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# Basic tests that can be safely run to determine if a M1 efm cluster is in
+# a working state. this can be reused for initial health check before any
+# maintenance operation is run on the cluster.
+
+- name: Ensure we use efm failover_manager
+  assert:
+    that:
+      failover_manager == 'efm'
+    fail_msg:
+      These tests should only be run on EFM enabled clusters
+      expected failover_manager == 'efm', got failover_manager == '{{ failover_manager }}'
+    success_msg:
+      Cluster is using efm as failover_manager
+
+- name: EFM nodes only
+  when: >
+    'efm' in role
+  block:
+  - name: Ensure efm_bind_by_hostname is handled
+    set_fact:
+      efm_identity: "{{ (efm_bind_by_hostname|default(false))|ternary(inventory_hostname, ip_address) }}"
+
+  - name: Run efm cluster-status command
+    command: >
+      {{ efm_bin_dir }}/efm cluster-status-json {{ cluster_name }}
+    changed_when: false
+    become: true
+    become_user: efm
+    register: efm_cluster_status_json
+
+
+  - name: Format output
+    set_fact:
+      efm_cluster_info: "{{ efm_cluster_status_json.stdout|from_json }}"
+    when: >
+      'efm' in role
+
+  - name: Ensure no nodes are reported as missing
+    assert:
+      that: >
+        not efm_cluster_info.missingnodes
+      fail_msg: >
+        One or more nodes are reported missing: {{ efm_cluster_info.missingnodes }}
+      success_msg: >
+        All nodes could be reached.
+
+  - name: Ensure failover priority list is not empty
+    assert:
+      that: >
+        efm_cluster_info.failoverpriority
+      fail_msg: >
+        Failover priority list is empty.
+      success_msg: >
+        Failover priority list is defined as: {{ efm_cluster_info.failoverpriority }}
+
+
+  - name: Ensure node is part of allowed nodes
+    assert:
+      that:
+        efm_identity in efm_cluster_info.allowednodes
+      fail_msg: >
+        Node {{ inventory_hostname }} was not found in allowed nodes list
+        expected to find {{ efm_identity }} in {{ efm_cluster_info.allowednodes }}
+      success_msg: >
+        {{ efm_identity }} ({{ inventory_hostname }}) is part of allowed nodes list.
+
+  - name: Ensure all nodes are in sync
+    assert:
+      that: >
+        (xlog_values|unique|length) == 1
+      fail_msg: >
+        xlog value is not the same for all nodes, nodes are not in sync
+        xlog: {{ xlog_values }}
+      success_msg: >
+        All nodes xlog values are in sync at: {{ xlog_values|unique }}
+
+    vars:
+      xlog_values: "{{ efm_cluster_info|json_query('nodes.*.xlog') }}"
