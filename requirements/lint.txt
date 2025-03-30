@@ -10,7 +10,6 @@ astroid==3.3.9 \
     # via
     #   pylint
     #   pylint-celery
-    #   pylint-flask
     #   requirements-detector
 dill==0.3.9 \
     --hash=sha256:468dff3b89520b474c0397703366b7b95eebe6303f108adf9b19da1f702be87a \
@@ -61,9 +60,9 @@ platformdirs==4.3.6 \
     --hash=sha256:357fb2acbc885b0419afd3ce3ed34564c13c9b95c89360cd9563f73aa5e2b907 \
     --hash=sha256:73e575e1408ab8103900836b97580d5307456908a03e92031bab39e4554cc3fb
     # via pylint
-prospector==1.15.3 \
-    --hash=sha256:240e75f9dcb6624574204a997004ef145f615540a00b50ba4203db9a429044f2 \
-    --hash=sha256:78bf3ff0a46e4b7d95df355d53a34c41e4dd9e24c72ddd01558a273c39df0df6
+prospector==1.16.1 \
+    --hash=sha256:7cb7549aad3219fa6da82962acd6b6871f5a6aa3ab8d0dfcaa5bcb17f05774ff \
+    --hash=sha256:a6087287722104788c4366272c7f2095c748cb8968c5aac48c764f9e3eff2fea
     # via -r requirements/lint.in
 pycodestyle==2.12.1 \
     --hash=sha256:46f0fb92069a7c28ab7bb558f05bfc0110dac69a0cd23c61ea0040283a9d78b3 \
@@ -93,7 +92,6 @@ pylint==3.3.5 \
     #   prospector
     #   pylint-celery
     #   pylint-django
-    #   pylint-flask
     #   pylint-plugin-utils
 pylint-celery==0.3 \
     --hash=sha256:41e32094e7408d15c044178ea828dd524beedbdbe6f83f712c5e35bde1de4beb
@@ -104,16 +102,12 @@ pylint-django==2.6.1 \
     # via
     #   -r requirements/lint.in
     #   prospector
-pylint-flask==0.6 \
-    --hash=sha256:f4d97de2216bf7bfce07c9c08b166e978fe9f2725de2a50a9845a97de7e31517
-    # via prospector
 pylint-plugin-utils==0.8.2 \
     --hash=sha256:ae11664737aa2effbf26f973a9e0b6779ab7106ec0adc5fe104b0907ca04e507 \
     --hash=sha256:d3cebf68a38ba3fba23a873809155562571386d4c1b03e5b4c4cc26c3eee93e4
     # via
     #   pylint-celery
     #   pylint-django
-    #   pylint-flask
 pyyaml==6.0.2 \
     --hash=sha256:01179a4a8559ab5de078078f37e5c1a30d76bb88519906844fd7bdea1b7729ff \
     --hash=sha256:0833f8694549e586547b576dcfaba4a6b55b9e96098b36cdc7ebefe667dfed48 \
