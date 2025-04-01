@@ -10,12 +10,18 @@
     state: present
     name: "{{ pgd_proxy_group }}"
 
+# To skip this task we can set this under cluster_vars.
+#    cluster_vars:
+#      excluded_tasks:
+#        - create_pgd_proxy_system_user
 - name: Create {{ pgd_proxy_user }} Unix user
   user:
     user: "{{ pgd_proxy_user }}"
     group: "{{ pgd_proxy_group }}"
     home: "{{ pgd_proxy_home }}"
     shell: /bin/bash
+  when:
+    task_selector|permits('create_pgd_proxy_system_user')
 
 - include_role: name=postgres/pgpass
   vars:

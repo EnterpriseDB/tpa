@@ -1,0 +1,25 @@
+- summary: Add a new tasks selectors `create_postgres_system_user` and `create_pgd_proxy_system_user`
+  description: |
+      Add new task selectors that allow to skip the postgres_user and pgd_proxy_user operating system user.
+      This allows clusters to use remote users created by a centralized user management such as
+      NIS.
+
+      This can be set in config.yml:
+
+      ```
+      cluster_vars:
+        excluded_tasks:
+          - create_postgres_system_user
+          - create_pgd_proxy_system_user
+      ```
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-940
+  support_tickets:
+  - RT48601
+  - RT44388

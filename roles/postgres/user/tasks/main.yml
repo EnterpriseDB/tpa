@@ -33,7 +33,13 @@
   when:
     failover_manager == 'efm'
 
-- name: Create Postgres user {{ postgres_user }}
+# We can't create / modify the postgres user if it's remotely managed by a NIS server.
+# To skip this task we can set this under cluster_vars.
+#    cluster_vars:
+#      excluded_tasks:
+#        - create_postgres_system_user
+
+- name: Create or modify Postgres user {{ postgres_user }}
   user:
     state: present
     name: "{{ postgres_user }}"
@@ -46,6 +52,8 @@
     extra_groups: "{{
         (failover_manager == 'efm')|ternary(['efm'], [])
       }}"
+  when: >
+    task_selector|permits('create_postgres_system_user')
 
 - name: Ensure {{ postgres_home }} has correct permissions
   file:
