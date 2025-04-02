@@ -17,11 +17,15 @@
 - name: Add PGDG keys if required
   shell: >
     rpm --import https://zypp.postgresql.org/keys/PGDG-RPM-GPG-KEY-SLES{{ ansible_distribution_major_version }}
+  register: pgdg_keys
+  changed_when: >
+    pgdg_keys.stdout_lines is not empty
   when: >
     'PGDG' in suse_repository_list|default(default_suse_repository_list)
 
 - name: Install SUSE repositories
   shell: zypper --non-interactive install -y {{ repo.rpm_url }}
+  register: zypper_repo_install
   with_items: "{{ suse_repository_list }}"
   loop_control:
     loop_var: r
@@ -30,6 +34,8 @@
     repo_name: "{{ r }}"
     repo: "{{ repos[r] }}"
   ignore_errors: true
+  changed_when: >
+    "Nothing to do." not in zypper_repo_install.stdout_lines
 
 - name: Find existing EDB repositories
   find:
@@ -51,35 +57,30 @@
   when: >
     repo[1] not in edb_repositories
 
-- name: Install EDB repositories for {{ ansible_architecture }}
-  zypper_repository:
-    name: "{{ repo.name }}"
-    repo: "{{ repo.uri }}"
-    runrefresh: true
-    auto_import_keys: true
-    priority: 50
-  with_items: "{{ edb_repositories}} "
-  loop_control:
-    loop_var: repository
-  vars:
-    repo:
-      uri: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/sles/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/
-      name: enterprisedb-{{ repository }}-{{ ansible_architecture }}
+- name: Find remaining EDB repositories after removing unwanted ones
+  find:
+    paths: /etc/zypp/repos.d/
+    patterns: 'enterprisedb-*.repo'
+    file_type: "file"
+  register: remaining_edb_repos
 
-- name: Install EDB repositories for noarch
-  zypper_repository:
-    name: "{{ repo.name }}"
-    repo: "{{ repo.uri }}"
-    runrefresh: true
-    auto_import_keys: true
-    priority: 50
-  with_items: "{{ edb_repositories}} "
+- name: Create list of EDB repositories that are already set up
+  set_fact:
+    resulting_edb_repos: "{{ resulting_edb_repos|default([])|union([repo]) }}"
+  loop: "{{ remaining_edb_repos.files }}"
   loop_control:
-    loop_var: repository
+    label: "{{ item.path|basename }}"
   vars:
-    repo:
-      uri: https://downloads.enterprisedb.com/{{ edb_repos_token }}/{{ repository }}/rpm/sles/{{ ansible_distribution_major_version }}/noarch/
-      name: enterprisedb-{{ repository }}-noarch
+    repo: "{{ item.path|basename|split('.')|first|split('-')|last }}"
+
+- name: Set up new EDB repositories
+  include_tasks: add-edb-repository.yml
+  loop: "{{ repos_to_install }}"
+  when: repos_to_install != []
+  vars:
+    repos_to_install: "{{ edb_repositories|difference(resulting_edb_repos|default([])) }}"
+    repository: "{{ item }}"
+    package_format: rpm
 
   # Some extension packages require extra repositories to be set up to install dependencies
 
