@@ -242,6 +242,7 @@
   changed_when: false
   register: config_yml
   ignore_errors: true
+  check_mode: no
 
 - block:
   - set_fact:
