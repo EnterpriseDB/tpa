@@ -1,0 +1,14 @@
+name: "❓ Question"
+description: Create a new ticket to ask for help
+title: "❓ [Question] - <title>"
+labels: [
+  "question"
+]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: "Question"
+      description: What can we help you with?
+    validations:
+      required: true
