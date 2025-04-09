@@ -350,8 +350,9 @@
     delay: 1
     become_user: "{{ postgres_user }}"
     become: yes
-    when: >
-      'bdr' in role
+    when:
+    - "'bdr' in role"
+    - "'replica' not in role"
 
   - include_role:
       name: postgres/bdr

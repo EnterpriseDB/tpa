@@ -1,0 +1,21 @@
+- summary: Skip raft checks for BDR nodes with replica role
+  description: |
+    In this particular scenario, a `BDR`/`PGD` architecture incorporates
+    `repmgr` to handle physical replication of a `subscriber-only` BDR node
+    to another BDR node which acts as a backup. Due to previous 
+    limitations, it was not possible to use two `subscriber-only` nodes.
+
+    The PGD upgrade process was failing because the physical replica BDR
+    node does not have RAFT enabled. As a fix, certain BDR-specific tasks
+    in the upgrade process now skip any node that has a `replica` role,
+    allowing for a successful upgrade.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-961
+  support_tickets:
+  - RT46186
