@@ -21,7 +21,7 @@ WSGIProcessGroup {{ pem_web_server_process_name }}
         Header unset X-Forwarded-Host
         Header edit Location "(^http[s]?://)([a-zA-Z0-9\.\-]+)(:\d+)?/" "/"
 </IfModule>
-<Directory "/usr/share/{{pem_web_server_name }}/icons">
+<Directory "/usr/share/{{pem_web_server_name[ansible_os_family] }}/icons">
     Options -Indexes
 </Directory>
 ServerSignature Off
