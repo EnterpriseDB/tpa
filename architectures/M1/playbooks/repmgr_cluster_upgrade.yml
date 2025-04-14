@@ -112,29 +112,10 @@
   - name: Redirect PGBouncer
     when:
       chosen_primary in groups['g_update_hosts']
-    block:
-    - name: Set the pgbouncer.database.ini path as fact
-      set_fact:
-        pgbouncer_database_config: /etc/pgbouncer/pgbouncer.databases.ini
-      run_once: true
-
-    - name: Save initial pgbouncer configuration file
-      copy:
-        src: "{{ pgbouncer_database_config }}"
-        remote_src: true
-        dest: "{{ pgbouncer_database_config }}.orig"
-        force: true
-
-    - name: Update pgbouncer config
-      shell: >
-        sed -e 's,host=[^ ]* port=[^ ]*,host={{ chosen_replica }} port={{ postgres_port }} ,' -i {{ pgbouncer_database_config }}
-
-    - name: Reload pgbouncer
-      service:
-        name: pgbouncer
-        state: reloaded
-      become_user: root
-      become: true
+    include_role:
+      name: pgbouncer/redirect
+    vars:
+      new_primary: "{{ chosen_replica }}"
 
 # upgrade the starting 'primary'
 # Note: this role was calculated earlier, so it's outdated after the
@@ -181,25 +162,11 @@
   - name: Redirect PGBouncer
     when:
       chosen_primary in groups['g_update_hosts']
-    block:
-    - name: Apply initial pgbouncer configuration file
-      copy:
-        src: "{{ pgbouncer_database_config }}.orig"
-        remote_src: true
-        dest: "{{ pgbouncer_database_config }}"
-        force: true
-
-    - name: Remove .orig file
-      file:
-        name: "{{ pgbouncer_database_config }}.orig"
-        state: absent
-
-    - name: Reload pgbouncer
-      service:
-        name: pgbouncer
-        state: reloaded
-      become_user: root
-      become: true
+    include_role:
+      name: pgbouncer/redirect
+    vars:
+      new_primary: "{{ chosen_primary }}"
+      revert_redirect: true
 
 # restart repmgrd
 - name: Start repmgrd
