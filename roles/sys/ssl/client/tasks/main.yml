@@ -10,6 +10,9 @@
     group: "{{ clientcert_group }}"
     mode: "{{ clientcert_ssl_dir_mode|default('0700') }}"
 
+# This should be the final destination of the client key for a user
+# there should not be any need to notify any service that the configuration changed
+# since client cert are verified at authentication time against the CA cert that signed it.
 - name: Generate private key
   community.crypto.openssl_privatekey:
     state: present
@@ -18,6 +21,8 @@
     group: "{{ clientcert_group }}"
     mode: "{{ clientcert_ssl_key_mode|default('0600') }}"
     force: no
+  notify:
+    - Note SSL configuration changed
 
 - name: Check if client certificate exists
   stat:

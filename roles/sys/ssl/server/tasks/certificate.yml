@@ -49,6 +49,10 @@
   delegate_to: localhost
   become: no
 
+# This should be the final destination of the server cert for the service
+# that's why we notify a change in SSL configuration for the service
+# this notification can be listened to by the service's role to restart
+# the service as needed.
 - name: Copy server certificate to target instances
   copy:
     src: "{{ local_certificate_path }}"
@@ -57,6 +61,7 @@
     group: "{{ ssl_group }}"
     mode: "0644"
   notify:
+    - Note {{ ssl_service }} SSL configuration changed
     - Note SSL configuration changed
 
 - name: Remove server CSR on target instances

@@ -8,4 +8,4 @@
     state: restarted
   listen:
     - Restart apache pgbapi
-    - Note SSL configuration changed
+    - Note pg-backup-api SSL configuration changed

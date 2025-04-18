@@ -10,6 +10,11 @@
     basic_constraints: "CA:FALSE"
     basic_constraints_critical: yes
 
+# This should be the final destination of the server cert for the service
+# that's why we notify a change in SSL configuration for the service
+# this notification can be listened to by the service's role to restart
+# the service as needed.
+
 - name: Generate self-signed server certificate
   community.crypto.x509_certificate:
     path: "{{ certificate_path }}"
@@ -27,6 +32,7 @@
         |default(default_ssl_server_cert_expiry)
       }}"
   notify:
+    - Note {{ ssl_service }} SSL configuration changed
     - Note SSL configuration changed
 
 - name: Remove server CSR

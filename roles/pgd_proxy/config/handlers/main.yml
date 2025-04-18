@@ -1,0 +1,11 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+
+# This should reload the webserver that provides the https probes for pgd_proxy
+- name: Notify pgd_proxy SSL configuration changed
+  debug:
+    msg: Note pgd_proxy SSL configuration changed
+  listen:
+    - Note pgd_proxy SSL configuration changed

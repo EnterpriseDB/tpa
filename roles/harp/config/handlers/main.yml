@@ -1,0 +1,11 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# This should be used to notify a reload for harp webserver that provides https probes
+# for harp proxy.
+- name: Notify harp_proxy SSL configuration changed
+  debug:
+    msg: Note harp_proxy SSL configuration changed
+  listen:
+    - Note harp_proxy SSL configuration changed
