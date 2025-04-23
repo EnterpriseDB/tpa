@@ -200,6 +200,11 @@ docker_networks:
     com.docker.network.driver.mtu: 1400
 ```
 
+You can verify the MTU of a Docker network by running one of the
+commands above from inside a container attached to that network. You can
+also use `docker network inspect <network-name> | grep mtu` but this
+only works when the MTU has been explicitly set.
+
 ## Docker container management
 
 All of the docker containers in a cluster can be started and stopped
