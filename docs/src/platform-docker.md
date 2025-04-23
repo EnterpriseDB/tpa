@@ -200,6 +200,11 @@ docker_networks:
     com.docker.network.driver.mtu: 1400
 ```
 
+!!! Warning
+The MTU can only be set when the Docker network is first provisioned.
+Subsequent changes in config.yml will have no effect.
+!!!
+
 You can verify the MTU of a Docker network by running one of the
 commands above from inside a container attached to that network. You can
 also use `docker network inspect <network-name> | grep mtu` but this
