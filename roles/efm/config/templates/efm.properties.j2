@@ -56,7 +56,7 @@ promotable=true
 {% endif %}
 use.replay.tiebreaker={{ efm_conf_settings['use.replay.tiebreaker']|default(true) | bool }}
 standby.restart.delay={{ efm_conf_settings['standby.restart.delay']|default(0) }}
-application.name={{ efm_conf_settings['application.name']|default('') }}
+application.name={{ efm_conf_settings['application.name']|default(inventory_hostname) }}
 restore.command={{ efm_conf_settings['restore.command']|default('') }}
 {% if efm_version is version('5', '>=') %}
 backup.wal={{ efm_conf_settings['backup.wal']|default(false) }}
