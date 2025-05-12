@@ -745,6 +745,10 @@ class Architecture(object):
         args["instance_defaults"] = instance_defaults
 
         instances = args.get("instances", {})
+
+        self.update_cluster_vars_from_instances(cluster_vars, instances)
+        args["cluster_vars"] = cluster_vars
+
         self._init_instances(instances)
         self.update_instances(instances)
         self.platform.update_instances(instances, args)
@@ -874,6 +878,14 @@ class Architecture(object):
             if loc is not None:
                 locations[loc] = 1
         return len(locations)
+
+    def _instance_roles(self, instance):
+        """
+        Returns a set of role names for the given instance, which includes roles
+        set directly on the instance, as well as any roles in instance_defaults.
+        """
+        ins_defs = self.args["instance_defaults"]
+        return set(instance.get("role", ins_defs.get("role", [])))
 
     def num_subnets(self):
         """
@@ -1319,7 +1331,7 @@ class Architecture(object):
 
         if (
             postgres_flavour == "postgresql"
-            and self.args.get("failover_manager") != 'efm'
+            and self.args.get("failover_manager") != "efm"
             and self.name not in ("PGD-Always-ON", "BDR-Always-ON", "Lightweight")
             and not self.args.get("enable_pem")
         ):
@@ -1519,6 +1531,16 @@ class Architecture(object):
         Makes architecture-specific changes to cluster_vars if required
         """
         pass
+
+    def update_cluster_vars_from_instances(self, cluster_vars, instances):
+        """
+        Makes architecture-specific changes to cluster_vars that depend on instance variables if required.
+        """
+        if self.args.get("enable_pem") and any(
+            "barman" in self._instance_roles(x) for x in instances
+        ):
+            # If a cluster is configured with --enable-pem and a Barman node exists, automatically enable pg_backup_api
+            cluster_vars.update({"enable_pg_backup_api": True})
 
     def _init_instance_defaults(self, instance_defaults):
         """
