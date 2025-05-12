@@ -22,13 +22,15 @@ runs:
         sudo $CMD install -y edb-python312
       shell: bash
 
+    # TPA-1004: Fix pip version for workflows/requirements.yml bug in pip-compile https://github.com/jazzband/pip-tools/issues/2176
+    # ideally this fix should not be applied to the other workflows but we use this action to setup python in all our integration tests.
     - name: Make edb-python default python for the build
       shell: bash
       run: |
         sudo update-alternatives \
         --install /usr/bin/python3 \
         python3 /usr/libexec/edb-python312/bin/python3 1 \
-        && python3 -m pip install --upgrade pip
+        && python3 -m pip install pip==25.0.1
 
     - uses: actions/cache@v4
       if: >
