@@ -1,7 +1,14 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+# Single M1 integration test
+# specialized M1 integration test allowing to test all
+# the M1 specific parameters.
 name: M1 integration test
-
+run-name:
+  M1 Integration test with
+  ${{ github.event.inputs.tpa_failover_manager }},
+  ${{ github.event.inputs.tpa_os_image}},
+  ${{ github.event.inputs.tpa_postgres_flavour }}-${{ github.event.inputs.tpa_postgres_version }}
 on:
   workflow_dispatch:
     inputs:
@@ -47,6 +54,7 @@ on:
         options:
         - "efm"
         - "repmgr"
+        - "patroni"
       tpa_location_names:
         description: "Location names"
         type: string

@@ -1,6 +1,14 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-name: Single test cluster deployment
+# Single cluster deployment with the added possibility to define the edb-repositories field at configure time
+# useful in case of prerelease testing to grab packages from dev repositories for instance.
+
+name: Single cluster deployment
+run-name:
+  Single cluster from branch ${{ github.ref }} on ${{ github.event_name }}
+  event with ${{ github.event.inputs.tpa_architecture }},
+  ${{ github.event.inputs.tpa_os_image}},
+  ${{ github.event.inputs.tpa_postgres_flavour }}-${{ github.event.inputs.tpa_postgres_version }}
 
 on:
   workflow_dispatch:
@@ -84,13 +92,13 @@ env:
   EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
   SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
   PYTHONWARNINGS: once
-
+  GITHUB_TOKEN: ${{secrets.GH_SLONIK}}
 jobs:
 
   integration-test:
     name: Test_deploy
 
-    runs-on: {{ github.events.inputs.runner }}
+    runs-on: ${{ github.event.inputs.runner }}
 
     steps:
     - name: Checkout source repository
@@ -98,7 +106,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: EnterpriseDB/tpa-internal
-        token: ${{secrets.GH_SLONIK}}
+        token: ${{env.GITHUB_TOKEN}}
 
     - name: Set extra arguments for tpaexec configure command
       run: |

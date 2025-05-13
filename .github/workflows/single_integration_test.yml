@@ -1,7 +1,17 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-name: Integration test
+# Single integration test
+# Run a specific cluster deployment
+# configure/deploy/test scenario
+# on any basic combination possible except M1 patroni
 
+name: Integration test
+run-name: >
+  Single cluster with ${{ github.event.inputs.tpa_architecture }},
+  ${{ github.event.inputs.tpa_os_image}},
+  ${{ github.event.inputs.tpa_postgres_flavour }}-${{ github.event.inputs.tpa_postgres_version }},
+  ${{ github.event.inputs.cpu_architecture }},
+  ${{ github.event.inputs.tpa_architecture == 'M1' && github.event.inputs.tpa_failover_manager || ''}}
 on:
   workflow_dispatch:
     inputs:
@@ -18,7 +28,7 @@ on:
       tpa_architecture:
         description: "TPA architecture"
         required: true
-        default: "BDR-Always-ON"
+        default: "PGD-Always-ON"
         type: choice
         options:
         - M1
