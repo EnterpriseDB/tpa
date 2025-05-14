@@ -96,6 +96,8 @@
 # whatever credentials we need to access them.
 
 - include_tasks: repos.yml
+  when: >
+    task_selector|permits('repo')
 
 # We attempt to gather postgres facts only if there is a valid PGDATA
 # directory, the postgres user exists, and postgres is running; or in
