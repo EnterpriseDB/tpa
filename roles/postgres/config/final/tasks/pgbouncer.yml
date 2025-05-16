@@ -45,5 +45,5 @@
   become_user: "{{ postgres_user }}"
   become: yes
   when:
-    - not groups['role_pgbouncer']|default([]) is empty
+    - not groups['role_pgbouncer']|default([]) is empty or failover_manager == 'harp'
     - auth_function.rowcount == 0
