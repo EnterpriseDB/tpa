@@ -1,0 +1,11 @@
+- summary: Treat PEM_DB_PORT as a string for PEM 10.1 and above
+  description: |
+    PEM 10.1 adds support for multi-host connection strings from the web
+    application to the backend servers. To support this change, the PEM_DB_PORT
+    parameter in PEM's `config_setup.py` file is now a string rather than an
+    integer. While TPA does not yet support deploying HA PEM configurations,
+    TPA will now correctly set this parameter as a string when the PEM version
+    is 10.1 or greater.
+  type: minor_change
+  jira_tickets:
+    - TPA-1009
