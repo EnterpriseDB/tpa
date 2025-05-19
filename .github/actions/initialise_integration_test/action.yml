@@ -213,17 +213,6 @@ runs:
         # Set a default IMAGE_OS_VERSION to be the docker image tag or "latest" if it's not set
         : "${IMAGE_VERSION:=${image_ver:-latest}}"
 
-        # For M1, we must use an older barman package version because the barman
-        # 3.10 in PGDG has incorrect dependency information
-        if [[ "${{ inputs.tpa_architecture }}" == "M1"
-              && "${IMAGE_OS}" == "redhat"
-              && "${IMAGE_VERSION}" != "7" ]];then
-          CONFIGURE_OPTS+=(--barman-package-version 3.9.0)
-          # CONFIGURE_OPTS+=(--overrides-from "${{ github.action_path}}/barman_cli_pin.yml")
-          OVERRIDE_FILES+=(${{ github.action_path }}/barman_cli_pin.yml)
-        fi
-
-
         # Save the image info for reuse in actions/cache
         echo IMAGE="${IMAGE}" >>$GITHUB_ENV
         echo IMAGE_OS="${IMAGE_OS}" >>$GITHUB_ENV
