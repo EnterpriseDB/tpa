@@ -15,10 +15,12 @@ nav:
     - Deployment: tpaexec-deploy.md
     - Testing: tpaexec-test.md
   - Architectures:
-    - M1: architecture-M1.md
-    - BDR-Always-ON: architecture-BDR-Always-ON.md
-    - PGD-Always-ON: architecture-PGD-Always-ON.md
-    - PGD-Lightweight: architecture-PGD-Lightweight.md
+    - BDR-Always-ON (PGD 3.7 & 4): architecture-BDR-Always-ON.md
+    - M1 (Primary/Standby): architecture-M1.md
+    - PGD-Always-ON (PGD 5): architecture-PGD-Always-ON.md
+    - PGD-Lightweight (PGD 5): architecture-PGD-Lightweight.md
+    - PGD-S (PGD 6): architecture-PGD-S.md
+    - PGD-X (PGD 6): architecture-PGD-X.md
   - Platforms:
     - AWS: platform-aws.md
     - Bare metal: platform-bare.md
