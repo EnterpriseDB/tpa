@@ -16,9 +16,9 @@ PEM_DB_NAME = 'pem'
 # we're making sure the port format is what PEM expects for these newer
 # versions.
 
-{{% if above_pem10_1 %}}
+{% if above_pem10_1 %}
 PEM_DB_PORT =  '{{ pem_db_port }}'
-{{% else %}}
+{% else %}
 PEM_DB_PORT =  {{ pem_db_port }}
-{{% endif %}}
+{% endif %}
 SESSION_COOKIE_NAME = 'pem7_session_{{ "0123456789ABCDEF"|list|shuffle(seed=inventory_hostname)|batch(6)|first|join("") }}'
