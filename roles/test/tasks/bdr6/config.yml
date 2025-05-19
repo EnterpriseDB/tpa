@@ -1,0 +1,235 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- set_fact:
+    pgdcli_bin: >-
+      {{ ('bdr' in role)|ternary(postgres_bin_dir~'/', '') }}pgd
+    pgdcli_config: >-
+      {{ pgdcli_directory|default('/etc/edb/pgd-cli') }}/pgd-cli-config.yml
+
+- name: Check cluster status
+  when: inventory_hostname == first_bdr_primary
+  block:
+  - name: Run pgdcli version
+    command: >
+      {{ pgdcli_bin }} --version
+    register: pgdcli_version
+
+  - name: Parse version for pgdcli
+    set_fact:
+      pgdcli_version: "{{ pgdcli_version.stdout|regex_search('[0-9]+\\.[0-9]+\\.[0-9]+') }}"
+
+  - name: Show pgdcli version
+    debug:
+      var: pgdcli_version
+
+  - name: Run pgd cluster show command
+    command: >
+      {{ pgdcli_bin }} cluster show --health -f "{{ pgdcli_config }}" --output json
+    become: true
+    become_user: "{{ postgres_user }}"
+    changed_when: false
+    register: pgd_check
+
+  - name: Verify that all pgd health checks succeeded
+    assert:
+      that: failed_checks is empty
+      fail_msg: >-
+        `cluster show` returned not-Ok status for
+        {{ failed_checks|map(attribute='status')|list|join(', ') }}
+    vars:
+      failed_checks: "{{ pgd_check.stdout|from_json|selectattr('status', '!=', 'Ok') | list }}"
+
+# Check `pgd verify-settings` for bdr
+- block:
+
+  - name: Run pgd verify-settings
+    command: >
+      {{ pgdcli_bin }} cluster verify --settings
+      --output json
+      -f "{{ pgdcli_config }}"
+    become: true
+    become_user: "{{ postgres_user }}"
+    register: pgd_settings
+    changed_when: false
+
+  - name: Assert statuses from pgd6 verify --settings
+    assert:
+      that: >
+        list_critical is empty
+      fail_msg: >
+        failed for {{ list_critical }}
+      success_msg: |
+        No critical issue found
+        {{ list_warning|ternary('Warnings: ' ~ list_warning,'') }}
+    vars:
+      list_critical: >
+        {{ pgd_settings.stdout|from_json|selectattr('status', 'equalto', 'Critical') }}
+      list_warning: >
+        {{ pgd_settings.stdout|from_json|selectattr('status', 'equalto', 'Warning') }}
+
+  when: >
+    inventory_hostname == first_bdr_primary
+
+# Check pgd verify-cluster output
+
+- block:
+  - name: Run pgd cluster verify --arch command
+    command: >
+      {{ pgdcli_bin }} cluster verify --arch
+      --output json
+      -f "{{ pgdcli_config }}"
+
+    become: true
+    become_user: "{{ postgres_user }}"
+    changed_when: false
+    register: pgd_cluster
+
+  - name: Assert statuses from pgd verify-cluster
+    assert:
+      that: list_critical is empty
+      fail_msg: >
+        failed for {{ list_critical }}
+      success_msg: |
+        No critical issue found
+    vars:
+      list_critical: >
+        {{ pgd_cluster.stdout|from_json
+        |selectattr('status', '!=', 'Ok') }}
+
+  when: >
+    inventory_hostname == first_bdr_primary
+    and bdr_major_version > 4
+
+## Check that raft leaders are not witness-only nodes
+#
+# this test is here due to some bug with bdr4 where DDL query
+# might not be replicated if a witness node is RAFT_LEADER.
+# GLOBAL_DDL_LOCK is granted, because RAFT is working, but,
+# the DDL doesn't get replicated, because the RAFT leader is a witness,
+# and it doesn't have any schema nor data.
+
+## Check that synchronous_standby_names contains only valid application names
+- name: Get synchronous_standby_names value
+  postgresql_query:
+    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+    query: >
+      SHOW synchronous_standby_names;
+  register: sync_standby
+  changed_when: false
+  vars:
+    _task_environment:
+      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+
+- name: Extract standby_list
+  set_fact:
+    standby_list: >-
+      {{ sync_standby.results[0]['synchronous_standby_names']| regex_findall(regex) }}
+  vars:
+    regex: >-
+      (?:[,\'\"\s\(]?|^)(\w+?)(?:[\,\)\'\"]|$|\s,|\s\))
+- name: Assert that standby are valid nodes
+  assert:
+    that:
+      - standby_list is defined
+      - standby_list is subset(groups|members_of('role_bdr', not_in=['role_witness']))
+    fail_msg: >
+      synchronous_standby_names contains standby(s) that are not eligible nodes of the cluster:
+      {{ standby_list|difference(groups|members_of('role_bdr', not_in=['role_witness'])) }}
+
+# Check that bdr.standby_slot_names are actual cluster nodes
+- name: Set schema to use for next tests
+  set_fact:
+    schema: "bdr"
+
+
+#Are these still required?
+#
+#- name: Get bdr.standby_slot_names value
+#  postgresql_query:
+#    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+#    query: >
+#      SHOW {{ schema }}.standby_slot_names;
+#  register: standby_slot_names
+#  vars:
+#    _task_environment:
+#      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+#  environment: "{{ target_environment|combine(_task_environment) }}"
+#
+#- name: Extract standby_slot_names
+#  set_fact:
+#    standby_slot_list: >-
+#      {{ standby_slot_names.results[0][result_key]| regex_findall(regex) }}
+#  vars:
+#    result_key: "{{ schema }}.standby_slot_names"
+#    regex: >-
+#      (?:[\,\'\"\s]?|^)(\w+?)(?:[\,\'\"\s]|$)
+#
+#- name: Assert that standby are valid nodes
+#  assert:
+#    that:
+#      - standby_slot_list is defined
+#      - standby_slot_list is subset(groups|members_of('role_bdr', not_in=['role_witness']))
+#    fail_msg: >
+#      {{ schema }}.standby_slot_names contains standby(s) that are not eligible nodes of the cluster:
+#      {{ standby_slot_list|difference(groups|members_of('role_bdr', not_in=['role_witness'])) }}
+#
+#- name: Get standby_slot_names value
+#  postgresql_query:
+#    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+#    query: >
+#      SHOW {{ schema }}.standby_slots_min_confirmed;
+#  register: min_confirmed
+#  vars:
+#    _task_environment:
+#      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+#  environment: "{{ target_environment|combine(_task_environment) }}"
+#
+#- name: Assert that bdr.standby_slots_min_confirmed <= size of bdr.standby_slot_names
+#  assert:
+#    that: min_confirmed.results[0][result_key]|int <= standby_slot_list|length
+#    fail_msg: >
+#      Expecting more confirmed slots than defined slots in bdr.standby_slot_names
+#  vars:
+#    result_key: "{{ schema }}.standby_slots_min_confirmed"
+
+# check that max_worker_processes is above minimal required for the cluster
+# TODO: Duplicated by verify-settings check
+# could be useful for bdr4 but bdr.get_min_required_worker_processes() doesn't
+# exist for pgdcli v1... would need to compute the min ourself
+
+- name: Get current max_worker_processes value
+  postgresql_query:
+    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+    query: >
+      SHOW max_worker_processes;
+  register: worker_process
+  vars:
+    _task_environment:
+      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+
+- name: Get minimum max_worker_processes value for the cluster
+  postgresql_query:
+    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+    query: >
+      SELECT bdr.get_min_required_worker_processes() as min_worker_processes;
+  register: min_worker_processes
+  vars:
+    _task_environment:
+      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+  environment: "{{ target_environment|combine(_task_environment) }}"
+
+
+- name: Assert that max_worker_processes > minimum
+  assert:
+    that: >
+      worker_process.results[0]['max_worker_processes']|int
+      >= min_worker_processes.results[0]['min_worker_processes']
+    fail_msg: >
+      max_worker_processes value is too low, current setting is
+      {{ worker_process.results[0]['max_worker_processes']|int }},
+      minimum recommended is
+      {{ min_worker_processes.results[0]['min_worker_processes'] }}
