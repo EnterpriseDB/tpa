@@ -34,6 +34,8 @@ on:
         - M1
         - BDR-Always-ON
         - PGD-Always-ON
+        - PGD-X
+        - PGD-S
       tpa_platform:
         description: "TPA platform"
         required: false

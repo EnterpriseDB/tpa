@@ -166,7 +166,7 @@ runs:
           CONFIGURE_OPTS+=(--use-local-repo-only)
         fi
 
-        if [ "${{ inputs.tpa_architecture }}" = "M1" ] ;then
+        if [ "${{ inputs.tpa_architecture }}" == "M1" ] ;then
           CONFIGURE_OPTS+=(--failover-manager "${{ inputs.tpa_failover_manager }}")
 
           if [ "${{ inputs.tpa_failover_manager }}" != "patroni" ] ;then
@@ -212,7 +212,18 @@ runs:
         : "${IMAGE_OS:=${image_os_base/tpa\/}}"
         # Set a default IMAGE_OS_VERSION to be the docker image tag or "latest" if it's not set
         : "${IMAGE_VERSION:=${image_ver:-latest}}"
-
+        # TEMPORARY Need to be changed once PGD6 packages are available on prod repos
+        if [[ "${{ inputs.tpa_architecture }}" == "PGD-X" ]] ;then
+          CONFIGURE_OPTS+=(
+              --edb-repositories enterprise staging_postgres_distributed
+              --pgd-routing local
+            )
+        fi
+        if [[ "${{ inputs.tpa_architecture }}" == "PGD-S" ]] ;then
+          CONFIGURE_OPTS+=(
+              --edb-repositories enterprise staging_postgres_distributed
+            )
+        fi
         # Save the image info for reuse in actions/cache
         echo IMAGE="${IMAGE}" >>$GITHUB_ENV
         echo IMAGE_OS="${IMAGE_OS}" >>$GITHUB_ENV
