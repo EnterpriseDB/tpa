@@ -55,9 +55,16 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 def main():
     """Called when this file is executed as a script."""
     sys.excepthook = handle_exception
-    from tpaexec import configure  # pylint: disable=import-outside-toplevel
+    from tpa.commands.configure import configure  # pylint: disable=import-outside-toplevel
+    from tpa.exceptions import UnsupportedArchitectureError
+    # from tpaexec import configure  # pylint: disable=import-outside-toplevel
 
-    configure(sys.argv[1:])
+    try:
+        configure(sys.argv[1:])
+    except UnsupportedArchitectureError:
+        from tpaexec import configure
+        configure(sys.argv[1:])
+
 
 
 if __name__ == "__main__":

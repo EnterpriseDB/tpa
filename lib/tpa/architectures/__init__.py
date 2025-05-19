@@ -4,10 +4,11 @@
 
 from .bdr_always_on import BDRAlwaysON
 from .pgd_always_on import PGDAlwaysON
+from .pgd_s import PGDS
+from .pgd_x import PGDX
 from .m1 import M1
 
 all_architectures = {
-    "BDR-Always-ON": BDRAlwaysON,
-    "PGD-Always-ON": PGDAlwaysON,
-    "M1": M1,
+    "PGD-S": PGDS,
+    "PGD-X": PGDX,
 }

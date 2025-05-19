@@ -46,3 +46,10 @@ class Group:
     def add_subgroup(self, g):
         """Adds the group object g as a child of this group"""
         self._subgroups.append(g)
+
+    def add_to_group_vars(self, new_vars: dict):
+        """Adds the supplied vars, overwriting existing ones if
+           there are conflicts"""
+        for k,v in new_vars.items():
+            self._group_vars[k] = v
+
