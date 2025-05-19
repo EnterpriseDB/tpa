@@ -30,6 +30,29 @@
     secret_name not in vars
     and item.generate_password|default(true)
 
+# Only generate the scram encrypted password once on a node and share the result
+# on the other nodes in the next step to ensure uniqueness of the SCRAM password value
+# across the cluster.
+# This is required for PGD6 and its connection manager to do SCRAM-passthrough
+- set_fact:
+    encrypted_passwords: >
+      {{
+        encrypted_passwords|default({})|combine({secret_name: encrypted_password})
+      }}
+  vars:
+    secret_name: >-
+      {{ item.username }}_password
+    generated_password: >-
+      {{ vars.get(secret_name) }}
+    existing_password: >-
+      {{ cluster_facts.roles[item.username].rolpassword|default('unknown') }}
+    encrypted_password: "{{
+      item.password_encryption|default(password_encryption)|encrypted_password(
+        generated_password, item.username, existing_password=existing_password
+      )
+      }}"
+  with_items: "{{ postgres_users }}"
+  run_once: true
 # After the required passwords are generated, we can create users with a
 # password encrypted according to the entry's `password_encryption`, or
 # the Postgres default setting.
@@ -45,7 +68,7 @@
     login_db: postgres
     name: "{{ item.username }}"
     password: "{{
-        encrypted_password if generated_password is not empty else omit
+        encrypted_passwords[secret_name] if generated_password is not empty else omit
       }}"
     encrypted: yes
     role_attr_flags: "{{
@@ -57,13 +80,6 @@
       {{ item.username }}_password
     generated_password: >-
       {{ vars.get(secret_name) }}
-    existing_password: >-
-      {{ cluster_facts.roles[item.username].rolpassword|default('unknown') }}
-    encrypted_password: "{{
-        item.password_encryption|default(password_encryption)|encrypted_password(
-          generated_password, item.username, existing_password=existing_password
-        )
-      }}"
   with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes
@@ -81,9 +97,6 @@
   become_user: "{{ postgres_user }}"
   become: yes
   when: compliance|default('') == 'stig'
-
-
-
 
 # Now we issue a CREATE EXTENSION command for each extension in
 # `postgres_extensions`, in the postgres and template1 databases.
