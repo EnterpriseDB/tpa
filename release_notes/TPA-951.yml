@@ -1,0 +1,28 @@
+- summary: Support for PGD6 architectures
+  description: |
+    TPA can now configure and deploy clusters using the PGD-X and PGD-S
+    architectures based on PGD6
+
+    The PGD-S architecture implements PGD Essential and the PGD-X
+    architecture implements PGD Expanded. These architectures have
+    sensible default configurations and also accept various configure
+    options to customise their behaviour.
+
+    PGD 6 deployments no longer include pgd-proxy; instead, PGD's
+    built-in Connection Manager is configured.
+
+    Testing support for the new architectures is added.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-951
+  - TPA-969
+  - TPA-970
+  - TPA-971
+  - TPA-972
+  - TPA-973
+  - TPA-1010
