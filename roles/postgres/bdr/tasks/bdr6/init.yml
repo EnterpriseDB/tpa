@@ -1,0 +1,291 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- name: Include bdr-pre-node-creation hook
+  include_tasks: "{{ hook }}"
+  when:
+    bdr_database_facts.bdr.node is empty
+    and lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|permits('bdr-pre-node-creation')
+  vars:
+    hook: "{{ cluster_dir }}/hooks/bdr-pre-node-creation.yml"
+
+# We need to create the local BDR node if bdr.node is empty.
+#
+# If it's not empty, it may contain either one row for the local node
+# (if it hasn't joined the BDR group yet) or rows for each node in the
+# group. In either case, we know that the local node must exist already.
+#
+# After this step, new_bdr_node contains the return value from
+# bdr.create_node.
+
+- include_tasks:
+    file: create-node.yml
+  when:
+    bdr_database_facts.bdr.node is empty
+
+- name: Set bdr_node_id for each node
+  set_fact:
+    bdr_node_id: "{{ known_id or new_bdr_node.node_id }}"
+  vars:
+    known_id:
+      "{{ bdr_database_facts.bdr.local_node.node_id|default('') }}"
+
+- name: Map node numbers to bdr_node_ids
+  set_fact:
+    bdr_node_ids: "{{
+        bdr_node_ids|default({})|combine({
+          hostvars[item].node: hostvars[item].bdr_node_id
+        })
+      }}"
+  with_items: "{{ groups[bdr_node_group] }}"
+  when:
+    hostvars[item].bdr_node_id is defined
+
+# Now we must ensure that the required BDR node groups exist. The
+# first_bdr_primary will create every group in bdr_node_groups.
+#
+# Each bdr_node_groups entry must specify a group name, may specify the
+# node_group_type and parent_group_name to express the group hierarchy,
+# and may also include other group options, either at the top level, or
+# under an "options" key for BDRv5 and above:
+#
+#   bdr_node_groups:
+#   - name: topgroup
+#     node_group_type: global
+#     legacy_option1: value1
+#     options:
+#       enable_raft: true
+#       new_option1: value1
+#   - name: group_a
+#     node_group_type: datanode
+#     parent_group_name: topgroup
+#     legacy_option2: value2
+#     options:
+#       enable_raft: true
+#       enable_routing: true
+#   - name: group_a_2
+#     node_group_type: subscriber-only
+#     parent_group_name: group_a
+#     …
+#   …
+#
+# The acceptable (and default) values for node_group_type depend on the
+# BDR version in use. So do the list of acceptable node group options.
+
+# If bdr_node_groups is not defined, we construct it with a single entry
+# from bdr_node_group and bdr_node_group_options, if any. This allows us
+# to maintain compatibility with clusters that pre-date BDR subgroups.
+
+- name: Set default bdr_node_groups if needed
+  set_fact:
+    bdr_node_groups: ["{{ _default_group }}"]
+  when:
+    bdr_node_groups is not defined
+  vars:
+    _name: "{{ {'name': bdr_node_group} }}"
+    _options: "{{ bdr_node_group_options|default({}) }}"
+    _default_group: "{{ _name|combine(_options) }}"
+
+# Subscriber-only instances may optionally specify the bdr_child_group
+# they should join; if they do not do so explicitly, and there are no
+# subscriber-only groups in bdr_node_groups, we add a default one.
+
+- name: Add subscriber-only group, if required
+  set_fact:
+    bdr_node_groups: "{{ bdr_node_groups + [default_so_group] }}"
+  vars:
+    default_so_group:
+      name: subscriber-only
+      node_group_type: subscriber-only
+      parent_group_name: "{{ bdr_node_group }}"
+    so_instances: "{{ groups['role_subscriber-only']|default([]) }}"
+  when:
+    - so_instances is not empty
+    - so_instances|map('extract', hostvars, 'bdr_child_group')|reject('defined')|list is not empty
+    - bdr_node_groups|json_query("[?node_group_type=='subscriber-only']") is empty
+
+# If there is exactly one subscriber-only group in bdr_node_groups, we
+# can set it as the default bdr_child_group for any subscriber-only
+# instances that don't specify one explicitly.
+
+- name: Set default bdr_child_group for subscriber-only nodes, if required
+  set_fact:
+    bdr_child_group: "{{ bdr_child_group|default(so_group_name) }}"
+  vars:
+    so_group: >-
+      {{ bdr_node_groups|json_query("[?node_group_type=='subscriber-only']") }}
+    so_group_name: >-
+      {{ so_group[0].name }}
+  when:
+    - "'subscriber-only' in role"
+    - so_group|length == 1
+
+# From bdr_node_groups, we now construct maps from group names to those
+# options that must be specified while creating the group, and the ones
+# that may be changed afterwards using bdr.alter_node_group_config().
+# This excludes the ones that are explicitly defined under "options".
+
+- name: Map BDR group names to options
+  set_fact:
+    _group_create_options:
+      "{{ _group_create_options|default({})
+          |combine({group: create_options}) }}"
+    _group_config_options:
+      "{{ _group_config_options|default({})
+          |combine({group: config_options}) }}"
+  with_items: "{{ bdr_node_groups }}"
+  vars:
+    create_option_names:
+      - node_group_type
+      - parent_group_name
+    group: "{{ item.name }}"
+    create_options: "{{ item|extract_keys(create_option_names) }}"
+    config_options:
+      "{{ item|remove_keys(create_option_names+['name','options']) }}"
+
+# Now we check if bdr.node_group has entries for all the groups named in
+# bdr_node_groups. If not, the first_bdr_primary must create each group
+# and the other instances must join their respective group.
+
+- name: Enumerate BDR group names
+  set_fact:
+    have_bdr_group_names:
+      "{{ bdr_database_facts.bdr.node_group
+          |map(attribute='node_group_name')|list }}"
+    want_bdr_group_names:
+      "{{ bdr_node_groups|map(attribute='name')|list }}"
+
+# We always call create_node_group() with "node_group_name := %s" and
+# the name of the node group; if _group_create_options specifies any
+# other parameters, we pass them through as well.
+
+- name: Create BDR node groups if necessary
+  postgresql_query:
+    conninfo: "{{ bdr_node_dsn }}"
+    queries:
+      - text: "SELECT bdr.create_node_group({{ _option_string }}) AS node_group_id"
+        args: "{{ _values }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  register: new_bdr_group
+  with_items: "{{ want_bdr_group_names }}"
+  loop_control:
+    loop_var: _group
+  vars:
+    _create_options: "{{ _group_create_options[_group] }}"
+    _join_options: "{{
+        (_group == bdr_node_group or
+         (bdr_child_group is defined and
+          _group == bdr_child_group) or
+         'parent_group_name' not in _create_options)
+        |ternary({}, {'join_node_group': 'f'})
+      }}"
+    _options: "{{ _create_options|combine(_join_options) }}"
+    _keys: "{{ ['node_group_name', _options.keys()|list]|flatten }}"
+    _values: "{{ [_group, _options.values()|list]|flatten }}"
+    _option_string: >
+      {{ _keys|map('apply_format', '{0} := %s')|list|join(', ') }}
+  when:
+    inventory_hostname == first_bdr_primary
+    and _group not in have_bdr_group_names
+  changed_when: true
+
+- name: Identify logical standby nodes
+  set_fact:
+    bdr_node_pause_in_standby:
+      "{{ bdr_node_pause_in_standby|default('readonly' in role) }}"
+
+# By default, "bdr.join_node_group()" will synchronize the database structure.
+# This is neither needed nor desirable for witness nodes.
+# Note that from BDR 6.0, "bdr.join_node_group()" will forcibly set
+# "synchronize_structure" to "false" for witness nodes.
+
+- name: Determine whether the database structure should be synchronized
+  set_fact:
+    bdr_node_synchronize_structure:
+      "{{ bdr_node_synchronize_structure|default('witness' not in role) }}"
+
+# Next, we call bdr.alter_node_group_config() on any leftover options,
+# i.e., the ones we couldn't specify at creation time, but which are not
+# inside "options" (and which we therefore presume will be accepted by
+# this function).
+#
+# XXX This is a legacy interface (supported by all versions of BDR, but
+# not supporting all options recognised by recent versions of BDR), and
+# we can expect _config_options to usually be empty. We don't go to the
+# trouble of skipping repeated calls to the function by comparing with
+# the config options from the database, though we could.
+
+- name: Alter BDR node group configuration, if necessary
+  postgresql_query:
+    conninfo: "{{ bdr_node_dsn }}"
+    queries:
+      - text: "SELECT bdr.alter_node_group_config({{ _option_string }})"
+        args: "{{ _values }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  with_items: "{{ want_bdr_group_names }}"
+  loop_control:
+    loop_var: _group
+  vars:
+    _config_options: "{{ _group_config_options[_group] }}"
+    _keys: "{{ ['node_group_name', _config_options.keys()|list]|flatten }}"
+    _values: "{{ [_group, _config_options.values()|list]|flatten }}"
+    _option_string: >
+      {{ _keys|map('apply_format', '{0} := %s')|list|join(', ') }}
+  when:
+    inventory_hostname == first_bdr_primary
+    and _config_options is not empty
+  changed_when: true
+
+# Now we're left with only bdr_node_groups[*].options{}, which we
+# process using bdr.alter_node_group_option(), which is new in BDRv5.
+# (But note that "enable_raft" and "enable_routing" are special.
+# See bdr5/post-join.yml for more.)
+
+- name: Set BDR node group options for each group
+  include_tasks: alter_node_group_options.yml
+  with_items: "{{ bdr_node_groups }}"
+  loop_control:
+    loop_var: node_group
+  when:
+    inventory_hostname == first_bdr_primary
+
+- name: Include bdr-post-group-creation hook
+  include_tasks: "{{ hook }}"
+  when:
+    have_bdr_group_names|length < want_bdr_group_names|length and
+    lookup('first_found', dict(files=hook, skip=True)) and
+    task_selector|permits('bdr-post-group-creation')
+  vars:
+    hook: "{{ cluster_dir }}/hooks/bdr-post-group-creation.yml"
+
+# Set up replication sets according to the publications/subscriptions
+# settings before group join.
+
+- name: Configure replication sets
+  include_tasks:
+    file: bdr3/replication-sets.yml
+  vars:
+    q: >-
+      [?type=='bdr' && database=='%s'].replication_sets|[]
+    _publication_sets: >-
+      {{ publications|json_query(q % bdr_database) }}
+    _subscription_sets: >-
+      {{ subscriptions|json_query(q % bdr_database) }}
+    publication_sets: >-
+      {{ _publication_sets|map('pyformat_attr', 'name', bdr_node_ids=bdr_node_ids)|list }}
+    subscription_sets: >-
+      {{ _subscription_sets|map('pyformat', bdr_node_ids=bdr_node_ids)|list }}
+  when: >
+    task_selector|permits('replication-sets')
+
+- name: Include bdr-pre-group-join hook
+  include_tasks: "{{ hook }}"
+  when: >
+    lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|permits('bdr-pre-group-join')
+  vars:
+    hook: "{{ cluster_dir }}/hooks/bdr-pre-group-join.yml"

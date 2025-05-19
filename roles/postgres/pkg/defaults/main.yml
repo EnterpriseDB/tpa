@@ -183,6 +183,28 @@ bdr4_packages:
     Ubuntu: *bdr4_epas_packages
     SLES: *bdr4_epas_packages
 
+# uses postgres_family_extended
+bdr6_packages:
+  postgresql:
+    Debian: &bdr6_pg_packages
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-pg{{ postgres_versionNN }}
+    RedHat: *bdr6_pg_packages
+    Ubuntu: *bdr6_pg_packages
+    SLES: *bdr6_pg_packages
+  pgextended:
+    Debian: &bdr6_pge_packages
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-pgextended{{ postgres_versionNN }}
+    RedHat: *bdr6_pge_packages
+    Ubuntu: *bdr6_pge_packages
+    SLES: *bdr6_pge_packages
+  epas:
+    Debian: &bdr6_epas_packages
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-epas{{ postgres_versionNN }}
+    RedHat: *bdr6_epas_packages
+    Ubuntu: *bdr6_epas_packages
+    SLES: *bdr6_epas_packages
+
+
 # uses postgres_family
 default_bdr_debug_packages: &default_bdr_debug_packages
   postgresql:
@@ -222,6 +244,35 @@ default_bdr4_debug_packages: &default_bdr4_debug_packages
     SLES: []
 
 bdr4_debug_packages: *default_bdr4_debug_packages
+
+# uses postgres_family_extended
+default_bdr6_debug_packages: &default_bdr6_debug_packages
+  postgresql:
+    Debian: &bdr6_debug_pg_packages
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-pg{{ postgres_versionNN }}-dbg
+    RedHat:
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-pg{{ postgres_versionNN }}-debuginfo
+    Ubuntu: *bdr6_debug_pg_packages
+    SLES:
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-pg{{ postgres_versionNN }}-debuginfo
+  pgextended:
+    Debian: &bdr6_debug_pge_packages
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-pgextended{{ postgres_versionNN }}-dbg
+    RedHat:
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-pgextended{{ postgres_versionNN }}-debuginfo
+    Ubuntu: *bdr6_debug_pge_packages
+    SLES:
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-pgextended{{ postgres_versionNN }}-debuginfo
+  epas:
+    Debian: &bdr6_debug_epas_packages
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-epas{{ postgres_versionNN }}-dbg
+    RedHat:
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-epas{{ postgres_versionNN }}-debuginfo
+    Ubuntu: *bdr6_debug_epas_packages
+    SLES:
+      - edb-pgd{{ bdr_version }}-{{ pgd_flavour }}-epas{{ postgres_versionNN }}-debuginfo
+
+bdr6_debug_packages: *default_bdr6_debug_packages
 
 pgespresso_packages:
   Debian: &debian_pgespresso_packages

@@ -11,6 +11,7 @@
     name: pgdcli/pkg
   when: >
     task_selector|permits('pkg')
+    and ('bdr' in role and bdr_version is version('6', '<'))
 
 - include_role:
     name: pgdcli/config

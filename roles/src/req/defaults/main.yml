@@ -52,4 +52,5 @@ requirements:
     - lz4-devel
     - libcurl-devel
     - systemd-devel
+    - clang
     - "{{ python_pkg_prefix }}-virtualenv"
