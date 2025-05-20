@@ -369,7 +369,7 @@
       name: "{{ pgbouncer_auth_database }}"
       owner: "{{ pgbouncer_auth_user }}"
   when:
-    - "'pemserver' not in role"
+    - "'pem-server' not in role"
     - "'postgres' in role"
     - groups['role_pgbouncer']|default([]) is not empty or failover_manager == 'harp'
     - pgbouncer_auth_database not in postgres_databases|map(attribute='name')

@@ -21,7 +21,7 @@
   - name: Check for pg_catalog.pgbouncer_get_auth
     when:
       - "'postgres' in role or 'bdr' in role"
-      - "'pemserver' not in role"
+      - "'pem-server' not in role"
     block:
     - name: Collect facts about the Postgres cluster
       cluster_discovery:
