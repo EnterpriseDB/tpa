@@ -61,11 +61,23 @@
 # below, because some of the roles we want to grant may not exist until
 # then (e.g., bdr_application).
 
+- name: Check for {{ bdr_database }} database presence
+  postgresql_query:
+    conninfo: "{{ dsn|dbname('postgres') }}"
+    query: >
+      SELECT 1 FROM pg_database WHERE datname='{{bdr_database}}'
+  register: use_bdr_database
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- set_fact:
+    _login_db: "{{ (use_bdr_database.rowcount|bool)|ternary(bdr_database,'postgres') }}"
+
 - name: Create Postgres users
   community.postgresql.postgresql_user:
     port: "{{ postgres_port }}"
     login_user: "{{ postgres_user }}"
-    login_db: postgres
+    login_db: "{{ _login_db }}"
     name: "{{ item.username }}"
     password: "{{
         encrypted_passwords[secret_name] if generated_password is not empty else omit
@@ -228,7 +240,7 @@
   postgresql_membership:
     port: "{{ postgres_port }}"
     login_user: "{{ postgres_user }}"
-    login_db: postgres
+    login_db: "{{ _login_db }}"
     groups: "{{ item.granted_roles }}"
     target_role: "{{ item.username }}"
     state: present
