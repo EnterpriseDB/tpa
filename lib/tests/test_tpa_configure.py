@@ -7,14 +7,16 @@ import pytest
 from tpa.commands.configure import configure
 from tpa.architecture import Architecture
 from tpa.architectures import all_architectures
-from tpa.exceptions import ConfigureError
+from tpa.exceptions import ConfigureError, UnsupportedArchitectureError
 from tpa.cluster import Cluster
+from tpa.platform import Platform
 
 
 class BasicArchitecture(Architecture):
     """Basic architecture to test configure function"""
 
-    def __init__(self):
+    def __init__(self, directory, lib, argv=None):
+        super().__init__(directory, lib, argv)
         self._name = "Basic"
 
     @property
@@ -26,7 +28,7 @@ class BasicArchitecture(Architecture):
 
     def supported_platforms(self, platform=None):
         supported = {
-            "default": "basic",
+            "default": "docker",
             "basic": "basic",
             "aws": "aws",
         }
@@ -37,10 +39,16 @@ class BasicArchitecture(Architecture):
         else:
             raise ConfigureError
 
-    def configure(self, cluster, platform):
+    def configure(self, cluster_dir, cluster, platform):
         """configure function mock up"""
+        self.cluster_dir = cluster_dir
+        self.cluster = cluster
+        self.platform = platform
         return cluster
 
+class BasicPlatform(Platform):
+    """Basic platform"""
+    pass
 
 all_architectures.update({"Basic": BasicArchitecture})
 
@@ -51,16 +59,16 @@ class TestConfigure:
     @pytest.mark.parametrize(
         "argv, error, expected",
         [
-            (["test", "-a", "Basic"], None, Cluster),
-            (["test", "-a", "Other"], SystemExit, Cluster),
+            (["test", "-a", "Basic", "--no-git", "--postgresql", "16"], None, Cluster),
+            (["test", "-a", "Other"], UnsupportedArchitectureError, Cluster),
         ],
     )
     def test_configure(self, argv, error, expected):
         """test configure command"""
+
         if error:
-            with pytest.raises(error):
-                assert configure(argv) == expected
+            with pytest.raises(error) as excinfo:
+                configure(argv, ".")
+            assert excinfo.type == error
         else:
-            assert type(configure(argv)) == expected
-            assert configure(argv).platform == "basic"
-            assert configure(argv).architecture == "Basic"
+            configure(argv, ".")

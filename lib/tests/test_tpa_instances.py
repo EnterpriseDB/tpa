@@ -39,7 +39,7 @@ class TestInstance:
         if location_name == "known":
             assert basic_instance.name == "basic"
             assert basic_instance.location.name == "known"
-            assert basic_instance.settings == {}
+            assert basic_instance.settings == { 'node': 1 }
             assert basic_instance.roles == []
             assert basic_instance.host_vars == {}
         else:

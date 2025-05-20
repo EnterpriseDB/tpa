@@ -77,4 +77,5 @@ class TestReconfigure:
                 "locations": [],
                 "instance_defaults": {},
                 "instances": [],
+                "cluster_name": CLUSTER_DIR,
             }
