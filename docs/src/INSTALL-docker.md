@@ -23,7 +23,7 @@ and build a new Docker image named `tpa/tpaexec`:
 
 ```bash
 $ git clone ssh://git@github.com/EnterpriseDB/tpa.git
-$ cd tpa
+$ cd tpa/docker
 $ docker build -t tpa/tpaexec .
 ```
 
