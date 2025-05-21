@@ -1,0 +1,13 @@
+- summary: Correctly merge ignore_slots in patroni config
+  description: |
+    Fixed a bug whereby settings added to ignore_slots via
+    cluster_vars['patroni_conf_settings']['bootstrap']['dcs'] were
+    not merged into the eventual config.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-1016
