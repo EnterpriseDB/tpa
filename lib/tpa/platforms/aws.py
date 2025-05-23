@@ -277,15 +277,15 @@ class aws(CloudPlatform):
         regions = args.get("regions")
         subnets = args["subnets"]
         for li, location in enumerate(locations):
-            vars = location.group.group_vars
+            settings = location.settings
 
-            vars["subnet"] = vars.get("subnet", subnets[li])
+            settings["subnet"] = settings.get("subnet", subnets[li])
             region = regions[li % len(regions)]
             if region:
-                vars["region"] = region
+                settings["region"] = region
                 azs = self.zones_per_region[region]
                 az = region + azs[(li // len(regions)) % len(azs)]
-                vars["az"] = vars.get("az", az)
+                settings["az"] = settings.get("az", az)
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
         pass
