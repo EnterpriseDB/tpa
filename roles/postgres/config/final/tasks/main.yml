@@ -96,7 +96,7 @@
   become_user: "{{ postgres_user }}"
   become: yes
   when: >
-    (inventory_hostname == first_bdr_primary and _login_db == bdr_database)
+    (inventory_hostname == first_bdr_primary|default('') and _login_db == bdr_database)
     or _login_db == 'postgres'
 
 # The superuser that was created by initdb will have rolconnlimit still set to
@@ -235,6 +235,7 @@
     file: barman_role.yml
   vars:
     postgres_usernames: "{{ postgres_users | map(attribute='username') | list }}"
+    login_db: "{{ _login_db }}"
   when: >
     'barman_role' in postgres_usernames
 
@@ -252,7 +253,7 @@
   become: yes
   when:
     item.granted_roles|default([]) is not empty
-    and ((inventory_hostname == first_bdr_primary and _login_db == bdr_database)
+    and ((inventory_hostname == first_bdr_primary|default('') and _login_db == bdr_database)
     or _login_db == 'postgres')
 # Since we may have changed the Postgres configuration, we repeat the
 # cluster discovery process that was done at the beginning (roles/init).

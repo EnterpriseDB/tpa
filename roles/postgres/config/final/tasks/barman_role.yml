@@ -3,31 +3,59 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 - name: Grant required privileges to barman_role
-  postgresql_query:
-    conninfo: "{{ dsn|dbname(item) }}"
-    queries:
-      "{{ common | union(
+  community.postgresql.postgresql_privs:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    database: "{{ login_db }}"
+    privs: "{{ item.privs|default(omit) }}"
+    schema: "{{ item.schema|default(omit) }}"
+    type: "{{ item.type }}"
+    objs: "{{ item.objs }}"
+    roles: "barman_role"
+    state: present
+  with_items:
+    "{{ common | union(
           postgres_version is version('15', '>=') | ternary(gte_15, lt_15)
-        )   
+        )
       }}"
-  changed_when: true
+  vars:
+    gte_15:
+      - type: function
+        privs: EXECUTE
+        objs: pg_backup_start(text:boolean)
+        schema: pg_catalog
+      - type: function
+        privs: EXECUTE
+        objs: pg_backup_stop(boolean)
+        schema: pg_catalog
+    lt_15:
+      - type: function
+        privs: EXECUTE
+        objs: pg_start_backup(text:boolean:boolean)
+        schema: pg_catalog
+      - type: function
+        privs: EXECUTE
+        objs: pg_stop_backup()
+        schema: pg_catalog
+      - type: function
+        privs: EXECUTE
+        objs: pg_stop_backup(boolean:boolean)
+        schema: pg_catalog
+    common:
+      - type: function
+        privs: EXECUTE
+        objs: pg_switch_wal()
+        schema: pg_catalog
+      - type: function
+        privs: EXECUTE
+        objs: pg_create_restore_point(text)
+        schema: pg_catalog
+      - type: group
+        objs: pg_read_all_stats
+      - type: group
+        objs: pg_read_all_settings
   become_user: "{{ postgres_user }}"
   become: yes
-  with_items: "{{ cluster_facts.databases.keys()|list }}"
-  vars:
-    gte_15: 
-    - text: GRANT EXECUTE ON FUNCTION pg_backup_start(text, boolean) to barman_role;
-    - text: GRANT EXECUTE ON FUNCTION pg_backup_stop(boolean) to barman_role;
-
-    lt_15:
-    - text: GRANT EXECUTE ON FUNCTION pg_start_backup(text, boolean, boolean) to barman_role; 
-    - text: GRANT EXECUTE ON FUNCTION pg_stop_backup() to barman_role;
-    - text: GRANT EXECUTE ON FUNCTION pg_stop_backup(boolean, boolean) to barman_role;
-
-    common:
-    - text: GRANT EXECUTE ON FUNCTION pg_switch_wal() to barman_role;
-    - text: GRANT EXECUTE ON FUNCTION pg_create_restore_point(text) to barman_role;
-    - text: GRANT pg_read_all_settings TO barman_role;
-    - text: GRANT pg_read_all_stats TO barman_role;
   when: >
-    item not in ['template0']
+    (inventory_hostname == first_bdr_primary and login_db == bdr_database)
+    or login_db == 'postgres'
