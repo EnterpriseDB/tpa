@@ -95,6 +95,9 @@
   with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes
+  when: >
+    (inventory_hostname == first_bdr_primary and _login_db == bdr_database)
+    or _login_db == 'postgres'
 
 # The superuser that was created by initdb will have rolconnlimit still set to
 # -1, which we must change for STIG compliance
@@ -249,7 +252,8 @@
   become: yes
   when:
     item.granted_roles|default([]) is not empty
-
+    and ((inventory_hostname == first_bdr_primary and _login_db == bdr_database)
+    or _login_db == 'postgres')
 # Since we may have changed the Postgres configuration, we repeat the
 # cluster discovery process that was done at the beginning (roles/init).
 
