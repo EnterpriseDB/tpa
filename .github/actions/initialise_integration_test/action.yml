@@ -94,8 +94,9 @@ runs:
 
     - name: Filter characters from cluster variable
       run: |
-        CLUSTER="cluster-${GITHUB_RUN_NUMBER:-1}-${GITHUB_RUN_ATTEMPT:-0}${{ inputs.cluster }}"
-        echo CLUSTER=${CLUSTER//[:\/.]/_} >>$GITHUB_ENV
+        CLUSTER="c-${GITHUB_RUN_NUMBER:-1}-${GITHUB_RUN_ATTEMPT:-0}${{ inputs.cluster }}"
+        CLUSTER=${CLUSTER//[:\/.]/_}
+        echo CLUSTER=${CLUSTER:0:63} >>$GITHUB_ENV
       shell: bash
 
     - name: Generate an initial configuration for a simple cluster
