@@ -34,6 +34,13 @@ class PGDX(PGD):
         """
         return 16
 
+    def default_edb_repos(self, cluster_vars) -> List[str]:
+        """PGD-X requires postgres_distributed repos contrary to PGD-S
+        that only relies on enterprise repo.
+
+        """
+        return super().default_edb_repos(cluster_vars) + ['postgres_distributed']
+
     def default_location_names(self):
         return ["first"]
 

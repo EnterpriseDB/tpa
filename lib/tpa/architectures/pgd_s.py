@@ -39,6 +39,21 @@ class PGDS(PGD):
     def default_location_names(self):
         return ["first"]
 
+    def default_edb_repos(self, cluster_vars) -> List[str]:
+        """PGD-S needs enterprise repo since essentials packages live there.
+        any occurence of standard repo would be redondant with enterprise,
+        that's why standard is discarded (removed only if exists).
+
+        Args:
+            cluster_vars (dict): cluster vars for the cluster being created
+
+        Returns:
+            List[str]: List of repositories required for the PGD-S architecture
+        """
+        base_repos = set(super().default_edb_repos(cluster_vars))
+        base_repos.discard("standard")
+        return list(base_repos.union(["enterprise"]))
+
     def upper_limit_of_data_nodes(self):
         """
         Returns the upper limit of data nodes that can be added to the cluster.

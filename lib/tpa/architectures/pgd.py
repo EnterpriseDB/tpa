@@ -266,4 +266,4 @@ class PGD(Architecture):
                     instance.add_role("beacon-agent")
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
-        return super().default_edb_repos(cluster_vars) + ["postgres_distributed"]
+        return super().default_edb_repos(cluster_vars)
