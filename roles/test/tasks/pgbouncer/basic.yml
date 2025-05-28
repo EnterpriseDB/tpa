@@ -78,4 +78,4 @@
     - db_postgres.port == pgbouncer_backend_port|int
   vars:
     db_postgres: >-
-      {{ q.results|selectattr('database', 'equalto', 'postgres')|list|first }}
+      {{ q.results|selectattr('database', 'equalto', 'pgbouncer_auth_database')|list|first }}
