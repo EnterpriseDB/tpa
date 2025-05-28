@@ -2,6 +2,265 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+## v23.38.0 (2025-06-02)
+
+### Notable changes
+
+- Make key_id/gpgkey optional in custom repository definitions
+
+  The key_id and gpgkey parameters (for apt and yum custom repositories
+  definition) are not required by the underlying modules, there are use
+  cases where this is not easy to provide ahead of installation. With
+  this change, TPA does not make it mandatory to provide those in custom
+  repository definitions.
+
+  References: TPA-882.
+
+- Support for PGD6 architectures
+
+  TPA can now configure and deploy clusters using the PGD-X and PGD-S
+  architectures based on PGD6
+
+  The PGD-S architecture implements PGD Essential and the PGD-X
+  architecture implements PGD Expanded. These architectures have
+  sensible default configurations and also accept various configure
+  options to customise their behaviour.
+
+  PGD 6 deployments no longer include pgd-proxy; instead, PGD's
+  built-in Connection Manager is configured.
+
+  Testing support for the new architectures is added.
+
+  References: TPA-951, TPA-969, TPA-970, TPA-971, TPA-972, TPA-973, TPA-1010.
+
+### Minor changes
+
+- Add support for Rocky Linux 9 on AWS
+
+  TPA now supports configuring a cluster using Rocky Linux 9.5
+  on the aws platform. This is now the default version for
+  Rocky Linux on aws if a version is not specified.
+
+  References: TPA-968.
+
+- Raise ArchitectureError for --network flag during configure
+
+  By default, the Python standard library `ipaddress` package enforces
+  'strict' interpretation of the CIDR, whereby the IP used should be
+  the network address of the range.
+
+  Previously, any IP passed to the `--network` flag that contained host
+  bits would dump a stacktrace due to the raised ValueError. 
+
+  That exception is now caught and an ArchitectureError is raised to
+  display a clear message to the user about the `--network` parameter.
+
+  References: TPA-910.
+
+- Redirect pgbouncer to the new primary in M1 repmgr clusters during switchover
+
+  Ensure that pgbouncer instances are redirected to the new primary node after using switchover command
+  in a repmgr + pgbouncer cluster that has `repmgr_redirect_pgbouncer` set to true.
+
+  tpaexec switchover command will now ensure that pgbouncer instance connect to the new primary node.
+
+  a new `revert_redirect` variable can also be set as extra-variable after a first switchover is done
+  to revert back to the initial primary node.
+
+  References: TPA-941.
+
+- Improve grant on barman_role
+
+  Ensure the permissions for barman_role is idempotent and correctly uses
+  bdr_database when in a bdr scenario with bdr initialized.
+
+  Use postgresql_privs module to apply the grant on barman_role, so that
+  changes are only applied when needed.
+
+  Use the bdr_database on second deploys for BDR scenario. we want the DDL
+  to be replicated accross the cluster, the recommended way is to let bdr
+  do the replication and signal any change to the cluster as needed.
+
+  References: TPA-1020.
+
+- Document `cluster_vars` variable templating in config.yml
+
+  Provide an explanation of correct templating procedure for variables
+  defined under `cluster_vars` with a worked example in order to avoid
+  confusion from unexpected behaviour associated with inventory variables
+  not being defined when improperly templated in `config.yml`.
+
+  References: TPA-1034, RT48797.
+
+- Configure PEM to monitor Barman when both are present in a cluster
+
+  When a cluster is configured with PEM enabled (using the --enable-pem
+  option) and includes a Barman node, the following actions are now performed
+  automatically:
+
+  - `enable_pg_backup_api` is set to `true` in `config.yml`
+  - The `pem-agent` role is assigned to the Barman node
+  - The Barman endpoint is registered with the local PEM agent
+
+  These changes simplify setup and ensure seamless integration between PEM and Barman.
+
+  References: TPA-588.
+
+- Add default value for EFM application.name property
+
+  If the EFM application.name property is not set for a node, TPA
+  will use a default of the postgresql cluster_name property. EFM
+  uses this value when performing a switchover or when building
+  a new standby database.
+
+  References: TPA-1002.
+
+- Skip repo checks when repo excluded from tasks
+
+  The `repo` tag is available for exclusion, but previously would only
+  skip tasks under the `sys/repositories` role. Now it also skips over
+  the initialization tasks which check which repositories to use and 
+  the verifies the credentials to access them are provided.
+
+  References: TPA-959.
+
+- Treat PEM_DB_PORT as a string for PEM 10.1 and above
+
+  PEM 10.1 adds support for multi-host connection strings from the web
+  application to the backend servers. To support this change, the PEM_DB_PORT
+  parameter in PEM's `config_setup.py` file is now a string rather than an
+  integer. While TPA does not yet support deploying HA PEM configurations,
+  TPA will now correctly set this parameter as a string when the PEM version
+  is 10.1 or greater.
+
+  References: TPA-1009.
+
+- Add a new tasks selectors `create_postgres_system_user` and `create_pgd_proxy_system_user`
+
+  Add new task selectors that allow to skip the postgres_user and pgd_proxy_user operating system user.
+  This allows clusters to use remote users created by a centralized user management such as
+  NIS.
+
+  This can be set in config.yml:
+
+  ```
+  cluster_vars:
+    excluded_tasks:
+      - create_postgres_system_user
+      - create_pgd_proxy_system_user
+  ```
+
+  References: TPA-940, RT48601, RT44388.
+
+- Fix verify-settings check in tpaexec test for pgd cli 5.7.0+
+
+  The output for pgd cli command `pgd verify-settings` changed in 5.7.0
+  TPA now correctly parses the output when using version above 5.7.0 of
+  pgd cli.
+
+  This is due to pgd commands overhaul, verify-settings will be deprecated
+  along with other commands in future releases. those commands are now
+  wrapper calling the new commands until the deprecation occurs.
+
+  References: TPA-935.
+
+- Added support for pg_backup_api on SLES 15
+
+  Ensures pg_backup_api is correctly configured on SUSE Linux Enterprise Server 15 (SLES 15),
+  when PEM monitoring is enabled and a Barman node is present in the cluster.
+
+  References: TPA-1005.
+
+- Improve behaviour of postgres_package_version
+
+  Setting postgres_package_version will now cause TPA to install the
+  selected version of various postgres-related components on Debian or
+  Ubuntu systems installing EDB Postgres Advanced Server or EDB Postgres
+  Extended Server. This avoids dependency resolution problems when newer
+  package versions are visible in repositories.
+
+  References: TPA-966.
+
+- Use EDB repository setup script on SUSE
+
+  Previously, we did not use the EDB repository setup script
+  on SUSE because it did not work on repeat deploys. Zypper would
+  raise because the repositories that the script attempts to install
+  already exist, and require unique names.
+
+  Now that the repository setup script task is skipped if the
+  repositories are already installed, this issue is not encountered.
+
+  References: TPA-974, TPA-633.
+
+### Bugfixes
+
+- Correctly merge ignore_slots in patroni config
+
+  Fixed a bug whereby settings added to ignore_slots via
+  cluster_vars['patroni_conf_settings']['bootstrap']['dcs'] were
+  not merged into the eventual config.
+
+  References: TPA-1016.
+
+- Create `pgbouncer_get_auth()` function in dedicated database
+
+  The `pgbouncer_get_auth()` function was created in the `pg_catalog`
+  schema and execute granted to the `pgbouncer_auth_user`. This function 
+  was created in every database, but this was not necessary for
+  PgBouncer.
+
+  A failure may be encountered during the `pgd node upgrade` process when
+  this function was created in the `pg_catalog` schema as it is not 
+  included in the dump created by `pg_dump`. A later task attempts to 
+  run a `GRANT` on this function and fails, as the function is not
+  restored since it was not originally dumped.
+
+  Now this function is only created in a single database, named under
+  the `pgbouncer_auth_database` variable in `config.yml`, which defaults to
+  `pgbouncer_auth_database` if not included. It is only created if at
+  least one instance with `pgbouncer` role is included in the cluster.
+
+  A warning is also issued during deploy and upgrade if any databases
+  define this function under the `pg_catalog` schema, as a future TPA
+  release may remove the function from that schema.
+
+  The `pgbouncer_get_auth()` function itself used by PgBouncer `auth_query` 
+  has been updated to address `CVE-2025-2291`. This vulnerability allowed 
+  for authentication using expired passwords, potentially granting 
+  unauthorized access because the auth_query mechanism did not consider
+  the `VALID UNTIL` attribute set in PostgreSQL for user passwords.
+
+  References: TPA-382, RT42911, RT45068.
+
+- Fix check mode when not using harp
+
+  Fix the check mode for both deploy and upgrade when running a cluster
+  without harp.
+  the `Read current configuration file if exists` task needs to run in check mode
+  to ensure we have the information available to correctly skip the following harp
+  check task.
+  shell module is by default skipped during check mode, we now let ansible know
+  that this task has to be run.
+
+  References: TPA-980.
+
+- Skip raft checks for BDR nodes with replica role
+
+  Physical replication of a `subscriber-only` node can be achieved in a `PGD`
+  cluster by installing `repmgr` as a failover-manager and designating the
+  `subscriber-only` node as the `primary` and listing another BDR data node 
+  as the `backup`; this backup node is given the `replica` role.
+
+  This configuration would result in the PGD upgrade process failing, since
+  TPA expects BDR data nodes to have RAFT enabled, but the physical replica
+  BDR data node (with both `replica` and `bdr` roles) by design does not.
+
+  As a fix, certain BDR-specific tasks in the upgrade process now skip any node that 
+  has a `replica` role, allowing for a successful upgrade.
+
+  References: TPA-961, RT46186.
+
 ## v23.37.0 (2025-03-21)
 
 ### Notable changes
