@@ -158,12 +158,12 @@ class docker(Platform):
             },
             "tpa/redhat": {
                 "versions": ["7", "8", "9"],
-                "default_version": "8",
+                "default_version": "9",
                 "os": "RedHat",
             },
             "tpa/rocky": {
                 "versions": ["8", "9"],
-                "default_version": "8",
+                "default_version": "9",
                 "os": "Rocky",
                 "os_family": "RedHat",
             },
