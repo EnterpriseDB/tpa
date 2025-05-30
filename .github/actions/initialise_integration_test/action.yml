@@ -79,6 +79,17 @@ runs:
 
   steps:
 
+    - name: Free up disk space
+      run: |
+        # Android libraries
+        sudo rm -rf /usr/local/lib/android
+        # .NET runtime
+        sudo rm -rf /usr/share/dotnet
+        # Haskell runtime
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/.ghcup
+      shell: bash
+
     - uses: ./.github/actions/install-requirements
       with:
         platform: ${{ inputs.tpa_platform }}
