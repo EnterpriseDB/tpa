@@ -245,10 +245,6 @@ runs:
           CONFIGURE_OPTS+=(--overrides-from "${OVERRIDE_FILES[@]}")
         fi
 
-        # TEMPORARY PINNING of barman to 3.13.3 to avoid 3.14.0 bug until v23.38.0 is released.
-        # this will be reverted as soon as barman package is fixed.
-        CONFIGURE_OPTS+=(--barman-package-version '3.13.3*')
-
         CONFIGURE_OPTS+=(--no-git)
 
         # Load extra arguments from calling workflows
