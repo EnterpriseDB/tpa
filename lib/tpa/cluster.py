@@ -92,6 +92,14 @@ class Cluster:
         instance_defaults, and instances"""
         return self._settings
 
+    def num_subnets(self):
+        """ Returns the number of subnets required by this cluster
+        """
+        if self.platform == "docker":
+            return 1
+
+        return len(self.locations)
+
     def get_location_by_name(self, location_name):
         """Returns the location with the given location_name, or None if it is
         not defined for this cluster."""
@@ -119,6 +127,14 @@ class Cluster:
                 f"A node with the name: {instance_name} already exists in the cluster"
             )
 
+    def add_settings(self, settings: dict):
+        """Adds the settings from the given dict to the cluster's top-level
+        settings"""
+
+        for k, v in settings.items():
+            if k not in self._settings:
+                self._settings[k] = v
+
     def to_yaml(self):
         """Returns a YAML representation of this cluster (WIP)
 
@@ -126,7 +142,7 @@ class Cluster:
         list of locations, a dict of instance_defaults, and a list of instances.
         Then there are some other settings, depending on platform etc."""
 
-        c = {"architecture": self.architecture, **self.settings}
+        c = {"architecture": self.architecture, "cluster_name": self.name, **self.settings}
         c.update(
             {
                 "cluster_vars": self.group.group_vars,
@@ -199,3 +215,5 @@ class Cluster:
         c.settings.update(y)
 
         return c
+
+

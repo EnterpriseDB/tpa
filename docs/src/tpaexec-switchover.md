@@ -24,7 +24,7 @@ This command will make `replicaname` be the new primary in
 `~/clusters/speedy`:
 
 ```bash
-$ tpaexec switchover ~/clusters/speedy replicaname
+tpaexec switchover ~/clusters/speedy replicaname
 ```
 
 ## Architecture options
@@ -36,3 +36,20 @@ replicas.
 For BDR-Always-ON clusters, use the
 [HAProxy server pool management commands](tpaexec-server-pool.md) to
 perform maintenance on PGD instances.
+
+## Repmgr redirect pgbouncer
+
+When using repmgr as failover manager, pgbouncer as connection pooler and
+setting `repmgr_redirect_pgbouncer: true`, switchover command ensures that
+the pgbouncer instances are redirected to the new primary node.
+
+!!! Note Revert to initial primary
+    In case you already switched over to a different primary, you can specify `revert_redirect: true`
+    on the command that will switch back to the initial primary to make use of the initial pgbouncer config file instead of regenerating it.
+    TPA saves the initial state of this config file as `pgbouncer.databases.ini.orig` during a switchover and can revert to it when going back to the initial primary
+
+    ```bash
+        # switchover to a replica
+        tpaexec switchover <cluster_name> <replica_name>
+        # revert to initial primary
+        tpaexec switchover <cluster_name> <initial_primary_name> -e"revert_redirect=true"

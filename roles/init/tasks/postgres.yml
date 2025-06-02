@@ -188,6 +188,7 @@
     haproxy_read_only_port: "{{ haproxy_read_only_port|default(default_haproxy_read_only_port[postgres_family]) }}"
     haproxy_bind_address: "{{ haproxy_bind_address|default(default_haproxy_bind_address) }}"
     harp_proxy_port: "{{ harp_proxy_port|default(default_harp_proxy_port) }}"
+    pgbouncer_auth_database: "{{ pgbouncer_auth_database|default(default_pgbouncer_auth_database) }}"
     pgbouncer_auth_user: "{{ pgbouncer_auth_user|default(default_pgbouncer_auth_user) }}"
     pgbouncer_port: "{{ pgbouncer_port|default(default_pgbouncer_port) }}"
     pgbouncer_backend: "{{ pgbouncer_backend|default(default_pgbouncer_backend) }}"
@@ -242,6 +243,7 @@
   changed_when: false
   register: config_yml
   ignore_errors: true
+  check_mode: no
 
 - block:
   - set_fact:
@@ -350,6 +352,27 @@
       {{ postgres_databases|json_query("[?name=='%s']" % bdr_database) }}
   when: >
     'bdr' in role and bdr_database_entry is empty
+
+# Add the database for pgbouncer_auth on all postgres nodes
+# that are part of the main cluster (not pemserver backend)
+# when pgbouncer is in use
+# pgbouncer group not empty
+# or harp is in use (harp uses pgbouncer in some way)
+# we also avoid adding it twice to the list.
+- name: Add {{ pgbouncer_auth_database }} to postgres_databases
+  set_fact:
+    postgres_databases: "{{
+        postgres_databases|union([default_pgbouncer_auth_database_entry])
+      }}"
+  vars:
+    default_pgbouncer_auth_database_entry:
+      name: "{{ pgbouncer_auth_database }}"
+      owner: "{{ pgbouncer_auth_user }}"
+  when:
+    - "'pem-server' not in role"
+    - "'postgres' in role"
+    - groups['role_pgbouncer']|default([]) is not empty or failover_manager == 'harp'
+    - pgbouncer_auth_database not in postgres_databases|map(attribute='name')
 
 - name: Ensure haproxy_maxconn is set
   set_fact:

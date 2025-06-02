@@ -21,13 +21,13 @@ Instead, you must use `tpaexec upgrade` to perform software upgrades.
 
 !!! Note "Minor version upgrades only"
 
-**`tpaexec upgrade` alone does NOT support MAJOR version upgrades of Postgres.**
+**`tpaexec upgrade` does NOT support MAJOR version upgrades of Postgres.**
 
 What TPA can upgrade is dependent on architecture:
 
 * The M1 architecture and all applicable failover managers for M1, `upgrade` will perform minor version upgrades of Postgres only.
 * With PGD architectures, `upgrade` will perform minor version upgrades of Postgres and the BDR extension.
-* With PGD architectures, and only in combination with the `reconfigure` command, `upgrade` can perform major-version upgrades.
+* With PGD architectures, and only in combination with the `reconfigure` command, `upgrade` can perform major-version upgrades of the BDR extension.
 
 Support for upgrading other cluster components is planned for future releases.
 !!!

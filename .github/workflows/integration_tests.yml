@@ -1,7 +1,9 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-name: Integration Tests
+# Matrix cluster deployment for fast generic test on a wide range of cluster
+# no customization possible, run with default matrix key as input.
 
+name: Integration Tests
 on:
   workflow_dispatch:
 

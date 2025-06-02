@@ -1,0 +1,6 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+pgbouncer_database_config: /etc/pgbouncer/pgbouncer.databases.ini
+revert_redirect: false

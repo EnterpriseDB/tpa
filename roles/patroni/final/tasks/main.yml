@@ -53,7 +53,7 @@
 
   - name: Assemble new dcs config
     set_fact:
-      new_dcs_config: "{{ patroni_dynamic_conf|combine(extra_conf) }}"
+      new_dcs_config: "{{ patroni_dynamic_conf|combine(extra_conf, list_merge='append_rp') }}"
     vars:
       slots: "{{ _patroni_conf_permanent_slots['bootstrap']['dcs']['slots'] }}"
       ignore_slots: "{{ _patroni_conf_backup['bootstrap']['dcs']['ignore_slots'] }}"

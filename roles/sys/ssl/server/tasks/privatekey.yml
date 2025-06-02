@@ -2,6 +2,10 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+# This should be the final destination of the private key for the service
+# that's why we notify a change in SSL configuration for the service
+# this notification can be listened to by the service's role to restart
+# the service as needed.
 - name: Generate private key
   community.crypto.openssl_privatekey:
     state: present
@@ -11,4 +15,5 @@
     mode: "0600"
     force: no
   notify:
+    - Note {{ ssl_service }} SSL configuration changed
     - Note SSL configuration changed

@@ -134,6 +134,7 @@
     role: "{{ role|union(['efm-witness']) }}"
   when: >
     'witness' in role
+    and failover_manager is defined
     and failover_manager == 'efm'
 
 - name: Remove witness role from efm witnesses

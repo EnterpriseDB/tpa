@@ -1,7 +1,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 name: Build TPA Execution Environment image for AAP
-
+run-name: Build TPA EE image with tag ghcr.io/enterprisedb/tpa/${{ github.event.inputs.base-image == 'RHEL' && 'tpa-ee' || 'tpa-ee-alpine' }}:${{ github.event.inputs.tag }}
 on:
   workflow_dispatch:
     inputs:

@@ -8,11 +8,22 @@
 
 - name: Verify BDR configuration
   include_tasks: bdr/config.yml
+  when: bdr_major_version is defined and bdr_major_version|int <= 5
 
 - name: Perform DDL tests in the BDR cluster
   include_tasks: bdr/ddl.yml
   when: >
     task_selector|selects('ddl')
+
+- block:
+  - name: Verify BDR configuration on pgd6
+    include_tasks: bdr6/config.yml
+
+  - name: Check DDL create role replication statement
+    include_tasks: bdr6/create_role.yml
+    when: >
+      task_selector|selects('ddl')
+  when: bdr_major_version is defined and bdr_major_version|int == 6
 
 ## CAMO tests
 #

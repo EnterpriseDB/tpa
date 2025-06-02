@@ -1,7 +1,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+# Matrix M1 integration tests
+# run with matrix key m1_layouts
 name: M1 layout tests
-
 on:
   workflow_dispatch:
 
@@ -34,18 +35,6 @@ jobs:
         key: m1_layouts
 
   integration-test:
-    # In addition to the event triggers above, this job only runs when any of these conditions are met:
-    #  * a PR review is requested from the tpaexec-dev-team
-    #  * a PR review is marked as approved
-    #  * a manual run is executed
-    if: >
-      (github.event.requested_team && github.event.requested_team.name == 'tpaexec-dev-team')
-      || (github.event.review
-          && github.event.review.state == 'approved'
-          && startsWith(github.event.pull_request.base.ref, 'main'))
-      || github.event_name == 'workflow_dispatch'
-    # env not supported here
-    # || env.ACT
     name: Integration test
     needs: load-matrix
     strategy:

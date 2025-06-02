@@ -1163,18 +1163,24 @@ case "$command" in
     info|version|setup|configure|reconfigure|selftest)
         $command "$@"
         ;;
-
-    cmd|ping|provision|deploy|upgrade|playbook|deprovision)
+    cmd|ping|provision|deprovision|playbook)
         time $command "$@"
         real_exit_status=$?
-        playbook "${TPA_DIR}/architectures/lib/commands/check-repositories.yml"
+        playbook "${TPA_DIR}/architectures/lib/commands/check-repositories.yml" -v
         exit $real_exit_status
         ;;
 
+    deploy|upgrade)
+        time $command "$@"
+        real_exit_status=$?
+        playbook "${TPA_DIR}/architectures/lib/commands/check-repositories.yml" -v
+        playbook "${TPA_DIR}/architectures/lib/commands/check-pgbouncer-auth-function.yml" -v
+        exit $real_exit_status
+        ;;
     *)
         try_as_playbook_or_script "$@"
         real_exit_status=$?
-        playbook "${TPA_DIR}/architectures/lib/commands/check-repositories.yml"
+        playbook "${TPA_DIR}/architectures/lib/commands/check-repositories.yml" -v
         exit $real_exit_status
         ;;
 esac

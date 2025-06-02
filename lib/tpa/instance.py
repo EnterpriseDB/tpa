@@ -19,12 +19,21 @@ class Instance:
         settings=None,
         host_vars=None,
     ):
+        def _next_node_id(cluster):
+            nodes = (i.settings["node"] for i in cluster.instances if "node" in i.settings)
+            return max(nodes, default=0) + 1
+
         self._name: str = name
         self._cluster = cluster
+        settings = {} if settings is None else settings
+
         if cluster.get_location_by_name(location_name) is not None:
             self._location = cluster.get_location_by_name(location_name)
         else:
             raise InstanceError(f"Could not find location '{location_name}'.")
+        if "node" not in settings:
+            settings["node"] = _next_node_id(cluster)
+
         self._settings = settings or {}
         self._host_vars = host_vars or {}
 
@@ -94,6 +103,19 @@ class Instance:
             self.settings, self._cluster.instance_defaults, self.location.settings or {}
         )
         return v.get(key, default)
+
+    def set_settings(self, new_settings: dict):
+        """Adds the items in the dict to the instance, overriding any existing
+        settings."""
+
+        for k, v in new_settings.items():
+            self._settings[k] = v
+
+    def remove_setting(self, setting):
+        """Deletes a setting entirely"""
+
+        if setting in self._settings:
+            del self._settings[setting]
 
     def add_role(self, r):
         """Adds the given role to this instance's roles"""

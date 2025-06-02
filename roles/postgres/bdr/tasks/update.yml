@@ -102,7 +102,7 @@
               - "{{ bdr_node_child_group }}"
       become_user: "{{ postgres_user }}"
       become: yes
-      with_items: "{{ groups['role_bdr'] }}"
+      with_items: "{{ groups['role_bdr'] | difference(groups['role_replica'] | default([])) }}"
       loop_control:
         loop_var: bdr_node
         label: >-

@@ -43,7 +43,8 @@ e.g., `~/clusters` in the example above.
 The next argument must be `--architecture <name>` to select an
 architecture, e.g.,
 [M1](architecture-M1.md) or
-[BDR-Always-ON](architecture-BDR-Always-ON.md).
+[BDR-Always-ON](architecture-BDR-Always-ON.md) or
+[PGD-X](architecture-PGD-X.md).
 For a complete list of architectures, run
 `tpaexec info architectures`.
 

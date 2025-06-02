@@ -54,6 +54,9 @@
   delegate_to: localhost
   become: no
 
+# This should be the final destination of the client cert for a user
+# there should not be any need to notify any service that the configuration changed
+# since client cert are verified at authentication time against the CA cert that signed it.
 - name: Copy client certificate to target instances
   copy:
     src: "{{ local_certificate_path }}"
@@ -61,6 +64,8 @@
     owner: "{{ clientcert_owner }}"
     group: "{{ clientcert_group }}"
     mode: "0644"
+  notify:
+    - Note SSL configuration changed
 
 # The hook may have used a different CA certificate and changed the
 # local_ca_certificate_path, so we don't insist on copying only our
@@ -73,6 +78,8 @@
     owner: "{{ clientcert_owner }}"
     group: "{{ clientcert_group }}"
     mode: "0644"
+  notify:
+    - Note SSL configuration changed
 
 - name: Remove client CSR on target instances
   file:

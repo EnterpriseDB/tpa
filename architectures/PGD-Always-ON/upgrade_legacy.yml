@@ -294,8 +294,9 @@
     delay: 1
     become_user: "{{ postgres_user }}"
     become: yes
-    when: >
-      'bdr' in role
+    when:
+    - "'bdr' in role"
+    - "'replica' not in role"
 
   # On instances that don't run Postgres, we can usually get away with a
   # much simpler upgrade process.

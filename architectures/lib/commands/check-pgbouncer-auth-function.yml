@@ -1,0 +1,98 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- name: Warn if pgbouncer_get_auth function is defined in pg_catalog schema
+  hosts: all
+  tasks:
+  - set_fact:
+      postgres_user: "{{ postgres_user | default(default_postgres_user) }}"
+      postgres_port: "{{ postgres_port | default(default_postgres_port) }}"
+      pgbouncer_auth_user: "{{ pgbouncer_auth_user|default(default_pgbouncer_auth_user) }}"
+    vars:
+      default_postgres_user: "{{ (postgres_flavour == 'epas')|ternary('enterprisedb', 'postgres')}}"
+      default_postgres_port: "{{ (postgres_flavour == 'epas')|ternary('5444', '5432') }}"
+      default_pgbouncer_auth_user: 'pgbouncer_auth_user'
+
+  - set_fact:
+      dsn: "port={{ postgres_port }}"
+      postgres_dsn: "port={{ postgres_port }} dbname=postgres"
+
+  - name: Check for pg_catalog.pgbouncer_get_auth
+    when:
+      - "'postgres' in role or 'bdr' in role"
+      - "'pem-server' not in role"
+    block:
+    - name: Collect facts about the Postgres cluster
+      cluster_discovery:
+        conninfo: "{{ postgres_dsn }}"
+      become_user: "{{ postgres_user }}"
+      become: yes
+
+    - set_fact:
+        cluster_facts: "{{ ansible_facts.cluster_facts|default({}) }}"
+    - postgresql_query:
+        conninfo: "{{ postgres_dsn }}"
+        queries:
+        - text: >
+            SELECT datname FROM pg_catalog.pg_database
+      register: dbs
+      become: yes
+      become_user: "{{ postgres_user }}"
+
+    - set_fact:
+        postgres_dbs: "{{
+          postgres_dbs|default([])|union([
+            item.datname
+            ])
+          }}"
+      loop: "{{ dbs.results }}"
+      when: >
+        'results' in dbs and dbs.rowcount > 0
+
+    - name: Check if pgbouncer_get_auth() exists in pg_catalog schema and is executable
+      postgresql_query:
+        conninfo: "{{ dsn|dbname(item) }}"
+        queries:
+        - text: >
+            SELECT current_database() as datname, proname,
+                has_function_privilege(%s, 'pg_catalog.pgbouncer_get_auth(text)', 'EXECUTE')
+                  AS pgbouncer_can_execute
+              FROM pg_catalog.pg_proc p
+                JOIN pg_catalog.pg_namespace n ON (p.pronamespace=n.oid)
+              WHERE nspname='pg_catalog' AND proname='pgbouncer_get_auth'
+          args:
+          - "{{ pgbouncer_auth_user }}"
+      register: pg_catalog_auth_function
+      become_user: "{{ postgres_user }}"
+      become: yes
+      loop: "{{ postgres_dbs }}"
+      when: >
+        item not in ['template0', 'bdr_supervisordb']
+      changed_when: false
+
+    - set_fact:
+        pg_catalog_auth_function_dbs: "{{
+          pg_catalog_auth_function_dbs|default([])|union([
+            item.results[0].datname
+            ])
+          }}"
+      with_items: "{{ pg_catalog_auth_function.results }}"
+      loop_control:
+        label: >-
+          {{ item.item }}
+      when: >
+        'results' in item and item.rowcount == 1
+
+    - name: List the databases that define the pgbouncer_get_auth function in the pg_catalog schema
+      assert:
+        that: >
+          pg_catalog_auth_function_dbs is not defined or pg_catalog_auth_function_dbs == []
+        fail_msg: >-
+          WARNING: The pgbouncer_get_auth() function is defined in the pg_catalog schema on the following databases:
+          {{ pg_catalog_auth_function_dbs | default([]) | join(', ') }}. In a future release, this function will be removed from all databases.
+          It will only created in the database designated as the 'auth_dbname' in the PgBouncer configuration file.
+        success_msg: >-
+          No pgbouncer_get_auth() function defined in the pg_catalog schema of any databases.
+
+  ignore_errors: true

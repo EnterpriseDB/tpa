@@ -14,7 +14,7 @@
 
 - name: Install apt repository signing keys
   apt_key:
-    id: "{{ r.key_id }}"
+    id: "{{ r.key_id|default(omit) }}"
     url: "{{ r.key_url }}"
     state: present
   with_items: "{{ apt_repository_list }}"

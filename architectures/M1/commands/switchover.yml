@@ -42,7 +42,7 @@
         groups['primary']
         |reject('in', groups['role_pem-server']|default([]))
         |list
-      }}"
+        }}"
     when: >
       inventory_hostname == target
 
@@ -52,9 +52,20 @@
     when:
       failover_manager == 'efm'
 
-  - name: Perform a switchover on a repmgr cluster
-    include_role:
-      name: repmgr/switchover
+  - name: Repmgr specific tasks
+    block:
+    - name: Perform a switchover on a repmgr cluster
+      include_role:
+        name: repmgr/switchover
+    - name: Redirect PGBouncer when in use
+      include_role:
+        name: pgbouncer/redirect
+      vars:
+        new_primary: "{{ target }}"
+      when: >
+        repmgr_redirect_pgbouncer
+        and
+        'pgbouncer' in role
     when:
       failover_manager == 'repmgr'
 

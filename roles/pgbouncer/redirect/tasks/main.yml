@@ -1,0 +1,45 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# - name: Set the pgbouncer.database.ini path as fact
+#   set_fact:
+#     pgbouncer_database_config: /etc/pgbouncer/pgbouncer.databases.ini
+#   run_once: true
+- name: Simple redirect
+  when:
+    not revert_redirect
+  block:
+  - name: Save initial pgbouncer configuration file
+    copy:
+      src: "{{ pgbouncer_database_config }}"
+      remote_src: true
+      dest: "{{ pgbouncer_database_config }}.orig"
+      force: true
+  - name: Update pgbouncer config
+    shell: >
+      sed -e 's,host=[^ ]* port=[^ ]*,host={{ new_primary }} port={{ postgres_port }} ,' -i {{ pgbouncer_database_config }}
+
+- name: Revert Previous redirect
+  when:
+    revert_redirect
+  block:
+  - name: Apply initial pgbouncer configuration file
+    copy:
+      src: "{{ pgbouncer_database_config }}.orig"
+      remote_src: true
+      dest: "{{ pgbouncer_database_config }}"
+      force: true
+
+  - name: Remove .orig file
+    file:
+      name: "{{ pgbouncer_database_config }}.orig"
+      state: absent
+
+
+- name: Reload pgbouncer
+  service:
+    name: pgbouncer
+    state: reloaded
+  become_user: root
+  become: true

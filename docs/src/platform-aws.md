@@ -22,7 +22,7 @@ aws_access_key_id = AKIAIOSFODNN7EXAMPLE
 aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
 
-The AMI user should at least have following set of permissions so tpaexec
+The IAM user should at least have following set of permissions so tpaexec
 can use it to provision ec2 resources.
 ```
 ec2:AssociateRouteTable

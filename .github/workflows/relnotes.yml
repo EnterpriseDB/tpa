@@ -1,5 +1,5 @@
 name: Build release notes for a new version
-
+run-name: Build release notes for ${{ github.event.inputs.version }}
 on:
   workflow_dispatch:
     inputs:

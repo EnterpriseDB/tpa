@@ -22,6 +22,10 @@
     not crt_check.stat.exists
     or not cert_verify_passed
 
+# This should be the final destination of the CA cert for the service
+# that's why we notify a change in SSL configuration for the service
+# this notification can be listened to by the service's role to restart
+# the service as needed.
 - name: Copy CA certificate to target instances
   copy:
     src: "{{ local_ca_certificate_path }}"
@@ -34,6 +38,7 @@
   when:
     not selfsigned
   notify:
+    - Note {{ ssl_service }} SSL configuration changed
     - Note SSL configuration changed
 
 - name: Set path to CA certificate(s)

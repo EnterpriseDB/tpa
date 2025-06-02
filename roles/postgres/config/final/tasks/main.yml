@@ -30,6 +30,29 @@
     secret_name not in vars
     and item.generate_password|default(true)
 
+# Only generate the scram encrypted password once on a node and share the result
+# on the other nodes in the next step to ensure uniqueness of the SCRAM password value
+# across the cluster.
+# This is required for PGD6 and its connection manager to do SCRAM-passthrough
+- set_fact:
+    encrypted_passwords: >
+      {{
+        encrypted_passwords|default({})|combine({secret_name: encrypted_password})
+      }}
+  vars:
+    secret_name: >-
+      {{ item.username }}_password
+    generated_password: >-
+      {{ vars.get(secret_name) }}
+    existing_password: >-
+      {{ cluster_facts.roles[item.username].rolpassword|default('unknown') }}
+    encrypted_password: "{{
+      item.password_encryption|default(password_encryption)|encrypted_password(
+        generated_password, item.username, existing_password=existing_password
+      )
+      }}"
+  with_items: "{{ postgres_users }}"
+  run_once: true
 # After the required passwords are generated, we can create users with a
 # password encrypted according to the entry's `password_encryption`, or
 # the Postgres default setting.
@@ -38,14 +61,26 @@
 # below, because some of the roles we want to grant may not exist until
 # then (e.g., bdr_application).
 
+- name: Check for {{ bdr_database }} database presence
+  postgresql_query:
+    conninfo: "{{ dsn|dbname('postgres') }}"
+    query: >
+      SELECT 1 FROM pg_database WHERE datname='{{bdr_database}}'
+  register: use_bdr_database
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- set_fact:
+    _login_db: "{{ (use_bdr_database.rowcount|bool)|ternary(bdr_database,'postgres') }}"
+
 - name: Create Postgres users
   community.postgresql.postgresql_user:
     port: "{{ postgres_port }}"
     login_user: "{{ postgres_user }}"
-    login_db: postgres
+    login_db: "{{ _login_db }}"
     name: "{{ item.username }}"
     password: "{{
-        encrypted_password if generated_password is not empty else omit
+        encrypted_passwords[secret_name] if generated_password is not empty else omit
       }}"
     encrypted: yes
     role_attr_flags: "{{
@@ -57,16 +92,12 @@
       {{ item.username }}_password
     generated_password: >-
       {{ vars.get(secret_name) }}
-    existing_password: >-
-      {{ cluster_facts.roles[item.username].rolpassword|default('unknown') }}
-    encrypted_password: "{{
-        item.password_encryption|default(password_encryption)|encrypted_password(
-          generated_password, item.username, existing_password=existing_password
-        )
-      }}"
   with_items: "{{ postgres_users }}"
   become_user: "{{ postgres_user }}"
   become: yes
+  when: >
+    (inventory_hostname == first_bdr_primary|default('') and _login_db == bdr_database)
+    or _login_db == 'postgres'
 
 # The superuser that was created by initdb will have rolconnlimit still set to
 # -1, which we must change for STIG compliance
@@ -81,9 +112,6 @@
   become_user: "{{ postgres_user }}"
   become: yes
   when: compliance|default('') == 'stig'
-
-
-
 
 # Now we issue a CREATE EXTENSION command for each extension in
 # `postgres_extensions`, in the postgres and template1 databases.
@@ -200,13 +228,14 @@
   become: yes
 
 # Explicitly grant required privileges to the 'barman_role' role.
-# The 'barman' Postgres user has this role listed under it's 
+# The 'barman' Postgres user has this role listed under it's
 # granted_roles list in postgres/createuser to avoid creating it
 # as a superuser.
 - include_tasks:
     file: barman_role.yml
   vars:
     postgres_usernames: "{{ postgres_users | map(attribute='username') | list }}"
+    login_db: "{{ _login_db }}"
   when: >
     'barman_role' in postgres_usernames
 
@@ -215,7 +244,7 @@
   postgresql_membership:
     port: "{{ postgres_port }}"
     login_user: "{{ postgres_user }}"
-    login_db: postgres
+    login_db: "{{ _login_db }}"
     groups: "{{ item.granted_roles }}"
     target_role: "{{ item.username }}"
     state: present
@@ -224,7 +253,8 @@
   become: yes
   when:
     item.granted_roles|default([]) is not empty
-
+    and ((inventory_hostname == first_bdr_primary|default('') and _login_db == bdr_database)
+    or _login_db == 'postgres')
 # Since we may have changed the Postgres configuration, we repeat the
 # cluster discovery process that was done at the beginning (roles/init).
 
@@ -232,12 +262,15 @@
 
 # If there's an entry for pgbouncer_auth_user in postgres_users (which
 # means the pgbouncer role was applied earlier), we must ensure that a
-# pgbouncer_get_auth() function is available in every database.
+# pgbouncer_get_auth() function is available in the pgbouncer_auth_database.
+# We now skip witness node since those don't have data replicated to them and
+#  there is no use in creating the pgbouncer_auth db there.
 
 - include_tasks:
     file: pgbouncer.yml
   when: >
-    postgres_users|json_query("[?username=='%s']" % pgbouncer_auth_user) != []
+    "witness" not in role
+    and postgres_users|json_query("[?username=='%s']" % pgbouncer_auth_user) != []
     and task_selector|permits('pgbouncer')
 
 # If there's an entry for a harp_dcs_user in postgres_users, we must

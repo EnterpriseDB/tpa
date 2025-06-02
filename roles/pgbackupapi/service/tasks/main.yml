@@ -4,6 +4,38 @@
 
 - include_tasks: ssl.yml
 
+
+- name: Enable module for SLES
+  apache2_module:
+    name: proxy
+    state: present
+  notify:
+    - Restart apache pgbapi
+  when:
+    ansible_os_family == 'SUSE'
+
+- name: Enable module common for Debian and SUSE
+  when:
+    ansible_os_family in ["Debian","SUSE"]
+  block:
+  - name: Enable ssl
+    apache2_module:
+      name: ssl
+      state: present
+    notify:
+      - Restart apache pgbapi
+  - name: Enable proxy
+    apache2_module:
+      name: proxy_http
+      state: present
+    notify:
+      - Restart apache pgbapi
+
+- name: SLES only enable SSL Flag
+  command: a2enflag SSL
+  when:
+    ansible_os_family == "SUSE"
+
 - name: Create proxy conf
   template:
       src: pg-backup-api.conf.j2
@@ -17,21 +49,8 @@
   notify:
     - Restart apache pgbapi
 
-- block:
-    - name: Enable ssl
-      apache2_module:
-        name: ssl
-        state: present
-      notify:
-        - Restart apache pgbapi
-    - name: Enable proxy
-      apache2_module:
-        name: proxy_http
-        state: present
-      notify:
-        - Restart apache pgbapi
-    - name: Enable pgbapi app
-      command: a2ensite pg-backup-api
+- name: Enable pgbapi app
+  command: a2ensite pg-backup-api
   when:
     ansible_os_family == 'Debian'
 

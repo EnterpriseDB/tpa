@@ -1,7 +1,11 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+# Update integration test
+# From BDR3 to BDR4 ONLY
+# keeping it for now as is
+# but should be removed at some point
 name: Update Integration Tests
-
+run-name: BDR3 to BDR4 upgrade tests
 on:
   workflow_dispatch:
 

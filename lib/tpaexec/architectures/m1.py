@@ -258,7 +258,7 @@ class M1(Architecture):
                 ins_defs = self.args["instance_defaults"]
                 role = instance.get("role", ins_defs.get("role", []))
                 if set(["primary", "replica", "witness"]).intersection(set(role)) or (
-                    "barman" in role and self.args.get("enable_pg_backup_api", False)
+                    "barman" in role and self.args["cluster_vars"].get("enable_pg_backup_api", False)
                 ):
                     instance["role"].append("pem-agent")
             n = instances[-1].get("node")
@@ -284,9 +284,8 @@ class M1(Architecture):
 
     def _add_beacon_agent_role(self, instances):
         for instance in instances:
-            ins_defs = self.args["instance_defaults"]
-            role = instance.get("role", ins_defs.get("role", []))
-            if "primary" in role or "replica" in role:
+            roles = self._instance_roles(instance)
+            if "primary" in roles or "replica" in roles:
                 instance["role"].append("beacon-agent")
 
     def _set_etcd_repos(self, instances):

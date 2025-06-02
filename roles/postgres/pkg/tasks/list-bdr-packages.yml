@@ -36,7 +36,7 @@
           |packages_for(ansible_distribution, pglogical_package_version)
         }}"
 
-- when: "'postgres' in role and need_bdr_packages"
+- when: "'postgres' in role and need_bdr_packages and bdr_version|int < 6"
   block:
   - include_role: name=pkg/add_to_list
     vars:
@@ -56,3 +56,12 @@
             bdr4_debug_packages[postgres_family_extended])
           |packages_for(ansible_distribution, bdr_package_version)
         }}"
+
+- when: "'postgres' in role and need_bdr_packages and bdr_version|int >= 6"
+  block:
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{ item | packages_for(ansible_distribution, bdr_package_version) }}"
+    loop:
+      - "{{ bdr6_debug_packages[postgres_family_extended] }}"
+      - "{{ bdr6_packages[postgres_family_extended] }}"

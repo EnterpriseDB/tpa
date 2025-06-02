@@ -1,7 +1,13 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+# M1 upgarde tests using a selected matrix key
 name: M1 Upgrade tests
-
+run-name:
+  M1 Upgrade tests
+  with matrix key ${{ github.event.inputs.matrix_key }} using
+  ${{ github.event.inputs.tpa_os_image}},
+  ${{ github.event.inputs.tpa_postgres_flavour}}-${{ github.event.inputs.tpa_postgres_version}}
+  from version ${{ github.event.inputs.tpa_postgres_package_version}}
 on:
   workflow_dispatch:
     inputs:
@@ -12,6 +18,49 @@ on:
         type: choice
         options:
           - basic
+          - all_os_images
+          - all_flavours
+          - all_pg_versions
+      tpa_os_image:
+        description: "TPA OS image"
+        required: true
+        type: choice
+        default: "redhat:9"
+        options:
+        - debian:11
+        - debian:12
+        - ubuntu:20.04
+        - ubuntu:22.04
+        - ubuntu:24.04
+        - redhat:8
+        - redhat:9
+        - sles:15
+      tpa_postgres_flavour:
+        description: "Postgres flavour"
+        required: true
+        type: choice
+        default: "postgresql"
+        options:
+        - postgresql
+        - edbpge
+        - epas
+      tpa_postgres_version:
+        description: "Postgres version"
+        required: true
+        default: 16
+        type: choice
+        options:
+        - 12
+        - 13
+        - 14
+        - 15
+        - 16
+        - 17
+      tpa_postgres_package_version:
+        description: "package version to upgrade from"
+        required: true
+        default: "16.4*"
+        type: string
 
 env:
   LANG: "C.UTF-8"
@@ -47,8 +96,6 @@ jobs:
     runs-on: ${{ matrix.runner && matrix.runner || 'ubuntu-22.04' }}
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Checkout source repository
         id: checkout-source
         uses: actions/checkout@v4
@@ -56,16 +103,42 @@ jobs:
           repository: EnterpriseDB/tpa-internal
           token: ${{secrets.GH_SLONIK}}
 
+      - name: Calculate test parameters
+        run: |
+          OS_IMAGE=${{ matrix.tpa_os_image && matrix.tpa_os_image || github.event.inputs.tpa_os_image }}
+          POSTGRES_FLAVOUR=${{ matrix.tpa_postgres_flavour && matrix.tpa_postgres_flavour || github.event.inputs.tpa_postgres_flavour }}
+          POSTGRES_VERSION=${{ matrix.tpa_postgres_version && matrix.tpa_postgres_version || github.event.inputs.tpa_postgres_version }}
+          FAILOVER_MANAGER=${{ matrix.tpa_failover_manager }}
+
+          # use downloader if: not (RH and patroni) and not (SLES)
+          if [[ "$OS_IMAGE" == sles* ]]; then
+              USE_DOWNLOADER="false"
+          elif [[ "$OS_IMAGE" == redhat* && "$FAILOVER_MANAGER" == "patroni" ]]; then
+              # the downloader can't correctly resolve the requirement for PGDG
+              # repos to get etcd packages
+              USE_DOWNLOADER="false"
+          else
+              USE_DOWNLOADER="true"
+          fi
+
+          echo OS_IMAGE=$OS_IMAGE >> $GITHUB_ENV
+          echo POSTGRES_FLAVOUR=$POSTGRES_FLAVOUR >> $GITHUB_ENV
+          echo POSTGRES_VERSION=$POSTGRES_VERSION >> $GITHUB_ENV
+          echo FAILOVER_MANAGER=$FAILOVER_MANAGER >> $GITHUB_ENV
+          echo USE_DOWNLOADER=$USE_DOWNLOADER >> $GITHUB_ENV
+        shell: bash
+
       - uses: ./.github/actions/m1-upgrade-test
         with:
           source_directory: ${{ github.workspace }}
-          tpa_platform: ${{ matrix.tpa_platform }}
-          tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
-          tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
-          tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
-          tpa_postgres_package_version: ${{ matrix.tpa_postgres_package_version }}
-          tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
-          cluster: "${{ matrix.tpa_postgres_flavour }}-\
-            ${{ matrix.tpa_postgres_version }}-\
-            ${{ matrix.tpa_os_image }}-\
-            ${{ matrix.tpa_failover_manager }}"
+          tpa_platform: docker
+          tpa_os_image: "tpa/${{ env.OS_IMAGE }}"
+          tpa_postgres_flavour: ${{ env.POSTGRES_FLAVOUR }}
+          tpa_postgres_version: ${{ env.POSTGRES_VERSION }}
+          tpa_postgres_package_version: ${{ matrix.tpa_postgres_package_version && matrix.tpa_postgres_package_version || github.event.inputs.tpa_postgres_package_version }}
+          tpa_failover_manager: ${{ env.FAILOVER_MANAGER }}
+          tpa_package_cache: ${{ env.USE_DOWNLOADER }}
+          cluster: "${{ env.FAILOVER_MANAGER }}-\
+            ${{ env.OS_IMAGE }}-\
+            ${{ env.POSTGRES_FLAVOUR }}-\
+            ${{ env.POSTGRES_VERSION }}"

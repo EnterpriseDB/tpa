@@ -1,0 +1,93 @@
+name: "🐛 Bug Report"
+description: Create a new ticket for a bug.
+title: "🐛 [BUG] - <title>"
+labels: [
+  "bug"
+]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: Please enter an explicit description of your issue
+      placeholder: Short and explicit description of your incident...
+    validations:
+      required: true
+  - type: textarea
+    id: tpainfo
+    attributes:
+      label: "tpaexec info"
+      description: Please paste the output of tpaexec info command
+      placeholder: |
+        # TPAexec v23.37.0 (branch: (HEAD detached at v23.37.0))
+        tpaexec=/data/github/tpa-internal/bin/tpaexec
+        TPA_DIR=/data/github/tpa-internal
+        PYTHON=/data/github/tpa-internal/tpa-venv/bin/python3 (v3.12.3, venv)
+        TPA_VENV=/data/github/tpa-internal/tpa-venv
+        ANSIBLE=/data/github/tpa-internal/tpa-venv/bin/ansible (v2.16.14)
+        HEAD detached at v23.37.0
+        nothing to commit, working tree clean
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: tpaconfig
+    attributes:
+      label: "tpaexec configure or config.yml"
+      description: Insert configure command or config.yml file
+      value: |
+        tpaexec configure cluster \
+        -a M1 --platform docker \
+        --postgresql 17 \
+        --enable-patroni \
+        --os Ubuntu \
+        --os-version 22.04
+      render: bash
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Logs"
+      description:
+        Please copy and paste any relevant log output.
+        This will be automatically formatted into code, so no need for backticks.
+        Please include the task header in the output.
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: reprod
+    attributes:
+      label: "Reproduction steps"
+      description: Please enter an explicit description of your issue
+      value: |
+        1. Run configure
+        2. run deploy
+        3. edit config.yml
+        4. run deploy
+        5. error on task `xxx`
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected result"
+      description: Please enter the expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: "Actual result"
+      description: Please enter the actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: insight
+    attributes:
+      label: "Comment"
+      description: Any interpretation of the possible issue
+    validations:
+      required: false

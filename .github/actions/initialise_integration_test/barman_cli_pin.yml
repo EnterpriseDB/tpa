@@ -1,8 +1,0 @@
-cluster_vars:
-  additional_postgres_packages:
-    Debian: &debian_additional_packages
-      - barman-cli
-    RedHat: &redhat_additional_packages
-      - barman-cli-3.9.0
-    Ubuntu: *debian_additional_packages
-    SLES: *redhat_additional_packages

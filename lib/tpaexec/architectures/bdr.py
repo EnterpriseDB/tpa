@@ -139,14 +139,6 @@ class BDR(Architecture):
         self._update_instance_pem(instances)
         self._update_instance_beacon(instances)
 
-    def _instance_roles(self, instance):
-        """
-        Returns a set of role names for the given instance, which includes roles
-        set directly on the instance, as well as any roles in instance_defaults.
-        """
-        ins_defs = self.args["instance_defaults"]
-        return set(instance.get("role", ins_defs.get("role", [])))
-
     def _instance_location(self, instance):
         """
         Returns the location setting for the given instance, which may be
@@ -236,7 +228,7 @@ class BDR(Architecture):
             for instance in instances:
                 if "bdr" in self._instance_roles(instance) or (
                     "barman" in self._instance_roles(instance)
-                    and self.args.get("enable_pg_backup_api", False)
+                    and self.args["cluster_vars"].get("enable_pg_backup_api", False)
                 ):
                     instance["role"].append("pem-agent")
             n = instances[-1].get("node")

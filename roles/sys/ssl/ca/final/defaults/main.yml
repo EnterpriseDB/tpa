@@ -9,4 +9,7 @@ ca_trust:
   RedHat:
     ca_trust_dir: /etc/pki/ca-trust/source/anchors
     ca_trust_cmd: update-ca-trust
+  SUSE:
+    ca_trust_dir: /etc/pki/trust/anchors
+    ca_trust_cmd: update-ca-certificates
 local_ca_certificate_path: "{{ cluster_dir }}/ssl/CA.crt"

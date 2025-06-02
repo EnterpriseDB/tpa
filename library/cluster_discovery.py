@@ -335,6 +335,23 @@ def pglogical_discovery(module, conn, m0):
     return {"pglogical": m} if m else {}
 
 
+def get_shared_fields_config_bdr_5_6(conn):
+    _results = {
+        "local_node_summary": query_results(
+            conn, "SELECT * FROM bdr.local_node_summary"
+        ),
+        "node_config": query_results(
+            conn,
+            """SELECT n.node_name, nc.* FROM bdr.node n
+            LEFT JOIN bdr.node_config nc USING (node_id)""",
+        ),
+        "node_group_summary": query_results(
+            conn, "SELECT * FROM bdr.node_group_summary"
+        ),
+    }
+    return _results
+
+
 def bdr_discovery(module, conn, m0):
     m = dict()
 
@@ -359,25 +376,18 @@ def bdr_discovery(module, conn, m0):
             }
         )
 
-    if bdr_major_version >= 5:
-        m.update(
-            {
-                "local_node_summary": query_results(
-                    conn, "SELECT * FROM bdr.local_node_summary"
-                ),
-                "node_config": query_results(
-                    conn,
-                    """SELECT n.node_name, nc.* FROM bdr.node n
-                    LEFT JOIN bdr.node_config nc USING (node_id)""",
-                ),
-                "node_group_summary": query_results(
-                    conn, "SELECT * FROM bdr.node_group_summary"
-                ),
-                "proxy_config_summary": query_results(
-                    conn, "SELECT * FROM bdr.proxy_config_summary"
-                ),
-            }
-        )
+    if bdr_major_version in (5, 6):
+        shared_fields = get_shared_fields_config_bdr_5_6(conn)
+        m.update(shared_fields)
+
+        if bdr_major_version == 5:
+            m.update(
+                {
+                    "proxy_config_summary": query_results(
+                        conn, "SELECT * FROM bdr.proxy_config_summary"
+                    ),
+                }
+            )
 
     return {"bdr": m} if m else {}
 

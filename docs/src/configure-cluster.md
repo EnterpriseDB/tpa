@@ -118,6 +118,31 @@ cluster_vars:
     bdr.trace_replay: true
 ```
 
+!!! Warning
+Variables defined under `cluster_vars` cannot be used as templated values in other variables which are *also* defined under `cluster_vars`.
+Please refer to the following example below.
+!!!
+
+For example, the following `cluster_vars` variables will *not* work as intended:
+```yaml
+cluster_name: 'speedy'
+cluster_vars:
+  postgres_version: '14' 
+  postgres_data_dir: "/data/{{ cluster_name }}/edb{{ postgres_version }}/data"
+```
+
+Instead, any variables that are templated under `cluster_vars` must be defined at the top-level of `config.yml` (the same level as the `cluster_name` variable)
+
+Making the following changes to the example above *will* work as intended:
+```yaml
+cluster_name: 'speedy'
+postgres_version: '14' # Now defined at top-level
+cluster_vars:
+  postgres_version: "{{ postgres version }}" # Templated with top-level variable 
+  postgres_data_dir: "/data/{{ cluster_name }}/edb{{ postgres_version }}/data" # Templated with top-level variable
+
+```
+
 In this case, `tpaexec provision` will write three variables (a
 string, a list, and a hash) to the inventory in
 `group_vars/tag_Cluster_name/01-cluster_name.yml`.

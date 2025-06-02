@@ -18,6 +18,10 @@
       pgd --version
     register: pgdcli_version
 
+  - name: parse version for pgdcli
+    set_fact:
+      pgdcli_version: "{{ pgdcli_version.stdout|regex_search('[0-9]+\\.[0-9]+\\.[0-9]+') }}"
+
   - name: Show pgdcli version
     debug:
       var: pgdcli_version
@@ -62,7 +66,7 @@
     ## on shared_preload_libraries test that returns Warning if bdr is not the first
     ## library of the list.
 
-  - name: Assert statuses from pgd verify-settings
+  - name: Assert statuses from pgd verify-settings (< 5.7.0)
     assert:
       that: >
         list_critical is empty
@@ -78,6 +82,25 @@
         {{ list_not_ok
         |flatten
         |selectattr('node_setting_result', 'search', 'Critical') }}
+    when:
+      pgdcli_version is version('5.7','<')
+
+  - name: Assert statuses from pgd verify-settings (5.7.0+)
+    assert:
+      that: >
+        list_critical is empty
+      fail_msg: >
+        failed for {{ list_critical }}
+      success_msg: |
+        No critical issue found
+        {{ list_warning|ternary('Warnings: ' ~ list_warning,'') }}
+    vars:
+      list_critical: >
+        {{ pgd_settings.stdout|from_json|selectattr('status', 'equalto', 'Critical') }}
+      list_warning: >
+        {{ pgd_settings.stdout|from_json|selectattr('status', 'equalto', 'Warning') }}
+    when:
+      pgdcli_version is version('5.7','>=')
 
   when: >
     inventory_hostname == first_bdr_primary
@@ -99,14 +122,19 @@
 
   - name: Assert statuses from pgd verify-cluster
     assert:
-      that: list_not_ok is empty
+      that: list_critical is empty
       fail_msg: >
-        failed for {{ list_not_ok }}
+        failed for {{ list_critical }}
+      success_msg: |
+        No critical issue found
+        {{ list_warning|ternary('Warnings: ' ~ list_warning,'') }}
     vars:
-      list_not_ok: >
+      list_critical: >
         {{ pgd_cluster.stdout|from_json
-        |rejectattr('status', 'equalto','Ok')
-        |list }}
+        |selectattr('status', 'equalto', 'Critical') }}
+      list_warning: >
+        {{ pgd_cluster.stdout
+        |from_json|selectattr('status', 'equalto', 'Warning') }}
 
   when: >
     inventory_hostname == first_bdr_primary
@@ -154,7 +182,7 @@
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
     environment: "{{ target_environment|combine(_task_environment) }}"
 
-  - name: verify that no witness is RAFT_LEADER
+  - name: Verify that no witness is RAFT_LEADER
     assert:
       that: >
         group_raft.results|selectattr('node_name', 'equalto', item)|map(attribute='pub_repsets')|list|last != '{witness-only}'
@@ -178,7 +206,7 @@
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
 
-- name: extract standby_list
+- name: Extract standby_list
   set_fact:
     standby_list: >-
       {{ sync_standby.results[0]['synchronous_standby_names']| regex_findall(regex) }}
@@ -210,7 +238,7 @@
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
 
-- name: extract standby_slot_names
+- name: Extract standby_slot_names
   set_fact:
     standby_slot_list: >-
       {{ standby_slot_names.results[0][result_key]| regex_findall(regex) }}
@@ -254,7 +282,7 @@
 # exist for pgdcli v1... would need to compute the min ourself
 
 - block:
-  - name: get current max_worker_processes value
+  - name: Get current max_worker_processes value
     postgresql_query:
       conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
@@ -265,7 +293,7 @@
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
     environment: "{{ target_environment|combine(_task_environment) }}"
 
-  - name: get minimum max_worker_processes value for the cluster
+  - name: Get minimum max_worker_processes value for the cluster
     postgresql_query:
       conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
@@ -295,7 +323,7 @@
 # available (pgdcli v1)
 
 - block:
-  - name: get max_wal_senders value
+  - name: Get max_wal_senders value
     postgresql_query:
       conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >

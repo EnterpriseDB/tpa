@@ -12,7 +12,7 @@ from tpa.platform import Platform
 @pytest.fixture
 def basic_platform():
     """generate a basic platform"""
-    return Platform("test")
+    return Platform("test", "dummy")
 
 
 class TestPlatform:

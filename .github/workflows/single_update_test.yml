@@ -1,6 +1,19 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-name: Update test
+# Update integration test
+# From BDR3 to BDR4 ONLY
+# keeping it for now as is
+# only removed useless options in architectures
+# should either remove completely
+# or pass through the options and only keep relevant:
+# - os and os version
+# - postgres version
+# - postgres flavour
+name: Update test BDR3 to BDR4
+run-name:
+  BDR3 to BDR4 upgrade test with
+  ${{ github.event.inputs.tpa_os_image}},
+  ${{ github.event.inputs.tpa_postgres_flavour }}-${{ github.event.inputs.tpa_postgres_version }}
 
 on:
   workflow_dispatch:
@@ -11,9 +24,7 @@ on:
         default: "BDR-Always-ON"
         type: choice
         options:
-        - M1
         - BDR-Always-ON
-        - PGD-Always-ON
       tpa_platform:
         description: "TPA platform"
         required: false

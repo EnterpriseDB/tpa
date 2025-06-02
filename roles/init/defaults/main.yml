@@ -453,6 +453,7 @@ default_harp_proxy_port: 6432
 # name of some instances, its postgres_port setting will be respected,
 # as will max_connections to set pgbouncer_max_client_conn.
 
+default_pgbouncer_auth_database: pgbouncer_auth_database
 default_pgbouncer_auth_user: pgbouncer_auth_user
 default_pgbouncer_backend: 127.0.0.1
 default_pgbouncer_backend_port:

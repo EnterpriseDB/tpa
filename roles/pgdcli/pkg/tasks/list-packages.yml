@@ -2,14 +2,18 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+# PGD cli only makes sense as a separate package for BDR4 and PGD5
+# PGD6 merges it with the core bdr extension package.
+# we still allow this package to be added when pgdcli is in the role list
+#  to let pgd-cli be installed as a standalone tool on any node.
 - include_role: name=pkg/add_to_list
   vars:
     list_contents: "{{
         (bdr_version is version('5', '<'))
         |ternary(
-          pgdcli1_packages 
+          pgdcli1_packages
           | packages_for(ansible_os_family, pgdcli_package_version),
-          pgdcli_packages 
+          pgdcli_packages
           | packages_for(ansible_os_family, pgdcli_package_version)
           | union(['bash-completion'])
         )
@@ -17,7 +21,7 @@
   when: >
     'pgdcli' in role
     or 'pgd-proxy' in role
-    or ('bdr' in role and bdr_version is version('4', '>='))
+    or ('bdr' in role and bdr_version is version('4', '>=') and bdr_version is version('6', '<'))
 
 - include_role: name=pkg/add_to_list
   vars:

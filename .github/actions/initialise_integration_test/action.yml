@@ -94,8 +94,9 @@ runs:
 
     - name: Filter characters from cluster variable
       run: |
-        CLUSTER="cluster-${GITHUB_RUN_NUMBER:-1}-${GITHUB_RUN_ATTEMPT:-0}${{ inputs.cluster }}"
-        echo CLUSTER=${CLUSTER//[:\/.]/_} >>$GITHUB_ENV
+        CLUSTER="c-${GITHUB_RUN_NUMBER:-1}-${GITHUB_RUN_ATTEMPT:-0}${{ inputs.cluster }}"
+        CLUSTER=${CLUSTER//[:\/.]/_}
+        echo CLUSTER=${CLUSTER:0:63} >>$GITHUB_ENV
       shell: bash
 
     - name: Generate an initial configuration for a simple cluster
@@ -166,7 +167,7 @@ runs:
           CONFIGURE_OPTS+=(--use-local-repo-only)
         fi
 
-        if [ "${{ inputs.tpa_architecture }}" = "M1" ] ;then
+        if [ "${{ inputs.tpa_architecture }}" == "M1" ] ;then
           CONFIGURE_OPTS+=(--failover-manager "${{ inputs.tpa_failover_manager }}")
 
           if [ "${{ inputs.tpa_failover_manager }}" != "patroni" ] ;then
@@ -212,18 +213,18 @@ runs:
         : "${IMAGE_OS:=${image_os_base/tpa\/}}"
         # Set a default IMAGE_OS_VERSION to be the docker image tag or "latest" if it's not set
         : "${IMAGE_VERSION:=${image_ver:-latest}}"
-
-        # For M1, we must use an older barman package version because the barman
-        # 3.10 in PGDG has incorrect dependency information
-        if [[ "${{ inputs.tpa_architecture }}" == "M1"
-              && "${IMAGE_OS}" == "redhat"
-              && "${IMAGE_VERSION}" != "7" ]];then
-          CONFIGURE_OPTS+=(--barman-package-version 3.9.0)
-          # CONFIGURE_OPTS+=(--overrides-from "${{ github.action_path}}/barman_cli_pin.yml")
-          OVERRIDE_FILES+=(${{ github.action_path }}/barman_cli_pin.yml)
+        # TEMPORARY Need to be changed once PGD6 packages are available on prod repos
+        if [[ "${{ inputs.tpa_architecture }}" == "PGD-X" ]] ;then
+          CONFIGURE_OPTS+=(
+              --edb-repositories enterprise staging_postgres_distributed
+              --pgd-routing local
+            )
         fi
-
-
+        if [[ "${{ inputs.tpa_architecture }}" == "PGD-S" ]] ;then
+          CONFIGURE_OPTS+=(
+              --edb-repositories enterprise staging_postgres_distributed
+            )
+        fi
         # Save the image info for reuse in actions/cache
         echo IMAGE="${IMAGE}" >>$GITHUB_ENV
         echo IMAGE_OS="${IMAGE_OS}" >>$GITHUB_ENV
@@ -232,6 +233,10 @@ runs:
         if [ ${#OVERRIDE_FILES[0]} -ne 0 ]; then
           CONFIGURE_OPTS+=(--overrides-from "${OVERRIDE_FILES[@]}")
         fi
+
+        # TEMPORARY PINNING of barman to 3.13.3 to avoid 3.14.0 bug until v23.38.0 is released.
+        # this will be reverted as soon as barman package is fixed.
+        CONFIGURE_OPTS+=(--barman-package-version '3.13.3*')
 
         CONFIGURE_OPTS+=(--no-git)
 

@@ -37,37 +37,69 @@
   when:
     build_directory|default(source_directory) != source_directory
 
+- when: bdr_version|int >= 6
+  block:
+  - include_role: name=src/install tasks_from=clone.yml
+    vars:
+      repo: "git@github.com:enterprisedb/pgrx"
+      dest: "/opt/postgres/src/pgrx"
+      version: "develop-v0.12.5-edb"
+      reference: "{{ git_reference_repository|default(omit) }}"
+    when:
+      source_directory not in mounted_dirs
+
 # Next, we must run a series of commands to build the sources and
 # install the results. The caller may specify a build_commands array and
 # a build_environment hash, or we'll just run "make install" by default.
 
-- name: Build {{ source_name }}
-  shell: >
-    PATH={{ build_path }} {{ item }} >> {{ build_log }} 2>&1
-  args:
-    chdir: "{{ build_directory }}"
-    executable: /bin/bash
-  with_items: "{{ build_commands|default([]) or default_build_commands }}"
-  vars:
-    build_log: "{{ build_log|default('/tmp/build.log') }}"
-    default_build_commands:
-    - "make -f {{ source_directory }}/Makefile install"
-    _task_environment: "{{ build_environment|default({}) }}"
-  environment: "{{ target_environment|combine(_task_environment) }}"
-  notify:
-    - Note Postgres restart required
+# When running inside a container in github we need github api token to access
+# the protected pgrx repository during bdr build. We can pass the token during deploy as
+# `tpaexec deploy . -e GH_API_TOKEN=<token>
+  - name: Change gitconfig to use https for pgrx dependency in pgd build
+    shell: >
+      git config --global url."https://x:{{GH_API_TOKEN}}@github.com".insteadOf "https://github.com"
+    when: >
+      # We are running in github actions
+      - ansible_env.GH_API_TOKEN is defined
+      - GH_API_TOKEN|default('') != ''
 
-- name: Write rebuild script for {{ source_name }}
-  template:
-    src: general_rebuild_script.sh.j2
-    dest: /etc/tpa/rebuild-scripts/rebuild-{{ source_name }}.sh
-    owner: root
-    group: root
-    mode: "0755"
-  vars:
-    build_log: "{{ build_log|default('/tmp/build.log') }}"
-    build_script_environment: "{{ target_environment|combine(_task_environment) }}"
-    _task_environment: "{{ build_environment|default({}) }}"
-    rebuild_commands: "{{ build_commands|default([]) or default_build_commands }}"
-    default_build_commands:
-    - "make -f {{ source_directory }}/Makefile install"
+  # Install and init pgrx as required by bdr6
+  - name: Build {{ source_name }}
+    shell: >
+        mkdir /opt/rust;
+        export TMPDIR=/opt/rust;
+        curl --proto '=https' --tlsv1.2 -Sf   https://sh.rustup.rs | sh -s -- -y;
+        rustup default 1.84.1;
+        source $HOME/.cargo/env;
+        cd /opt/postgres/src/pgrx;
+        cargo install --path cargo-pgrx;
+        cargo pgrx init --pg{{postgres_version}} /opt/postgres/{{postgres_version}}/bin/pg_config;
+        cd {{ build_directory }};
+        PATH={{ build_path }} {{ item }} >> {{ build_log }} 2>&1
+    args:
+      chdir: "{{ build_directory }}"
+      executable: /bin/bash
+    with_items: "{{ build_commands|default([]) or default_build_commands }}"
+    vars:
+      build_log: "{{ build_log|default('/tmp/build.log') }}"
+      default_build_commands:
+      - "make -f {{ source_directory }}/Makefile install"
+      _task_environment: "{{ build_environment|default({}) }}"
+    environment: "{{ target_environment|combine(_task_environment) }}"
+    notify:
+      - Note Postgres restart required
+
+  - name: Write rebuild script for {{ source_name }}
+    template:
+      src: general_rebuild_script.sh.j2
+      dest: /etc/tpa/rebuild-scripts/rebuild-{{ source_name }}.sh
+      owner: root
+      group: root
+      mode: "0755"
+    vars:
+      build_log: "{{ build_log|default('/tmp/build.log') }}"
+      build_script_environment: "{{ target_environment|combine(_task_environment) }}"
+      _task_environment: "{{ build_environment|default({}) }}"
+      rebuild_commands: "{{ build_commands|default([]) or default_build_commands }}"
+      default_build_commands:
+      - "make -f {{ source_directory }}/Makefile install"

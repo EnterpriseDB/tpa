@@ -1,7 +1,10 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-name: AWS integration Tests
+# AWS EFM integration test
+# Allow to test aws deployment
+# useful to test basic AWS changes and also for ARM plateform test
 
+name: AWS efm integration Tests
 on:
   workflow_dispatch:
 

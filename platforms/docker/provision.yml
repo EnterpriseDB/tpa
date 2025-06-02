@@ -15,6 +15,7 @@
     labels: "{{ item.labels|default(omit) }}"
     enable_ipv6: "{{ item.enable_ipv6|default(omit) }}"
     ipam_config: "{{ item.ipam_config|default(omit) }}"
+    driver_options: "{{ item.driver_options|default(omit) }}"
   with_items:
     - "{{ docker_networks|default([]) }}"
   tags: docker

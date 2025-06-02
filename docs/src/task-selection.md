@@ -66,6 +66,14 @@ The following selectors are supported for either inclusion or exclusion:
     and configure the extension as specified in config.yml, but won't
     create the node groups or try to join the nodes.
 
+- create_pgd_proxy_system_user
+
+    Tasks which creates the system user for pgd_proxy
+
+- create_postgres_system_user
+
+    Tasks which creates the system user for postgres
+
 - efm
 
     Tasks related to EFM.

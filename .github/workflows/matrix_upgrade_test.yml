@@ -1,7 +1,15 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-name: Matrix Upgrade test
+# Matrix cluster upgrade from BDR4 to PGD5 with selection of the matrix key to use
+# Allow a wide range of test focused on a single dimension of the matrix such as
+# 1 specific os + os version shared for all clusters paired with all postgres flavor, postgres version
+# architecture etc ...
+# This is useful to run smaller integration tests that focus on a particular dimension to
+# identify any pattern in a failure (os specific ? only latest version ? only community postgres ?)
 
+name: Matrix Upgrade test
+run-name:
+  Matrix Upgrade tests with matrix key ${{ github.event.inputs.matrix_key }}
 on:
   workflow_dispatch:
     inputs:

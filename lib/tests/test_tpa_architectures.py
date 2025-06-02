@@ -19,7 +19,7 @@ class BasicArchitecture(Architecture):
 def basic_architecture():
     """generate a basic architecture"""
 
-    return Architecture()
+    return Architecture("foo", "bar")
 
 
 class TestArchitecture:

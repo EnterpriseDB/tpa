@@ -1,0 +1,26 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- name: Join group {{ bdr_node_child_group }} on {{ bdr_node }} via {{ bdr_upstream|default(first_bdr_primary) }}
+  postgresql_query:
+    conninfo: "{{ hostvars[bdr_node].bdr_node_dsn }}"
+    autocommit: true
+    queries:
+      - text: |
+          SELECT bdr.join_node_group(
+            join_target_dsn := %s,
+            node_group_name := %s,
+            synchronize_structure := %s)
+        args:
+          - "{{ bdr_upstream_dsn|default(bdr_node_dsn) }}"
+          - "{{ bdr_node_child_group }}"
+          - "{{ hostvars[bdr_node].bdr_node_synchronize_structure|ternary('all', 'none') }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  vars:
+    bdr_node_child_group: "{{
+        hostvars[bdr_node].bdr_child_group|default(
+        hostvars[bdr_node].bdr_node_group)
+      }}"
+  changed_when: true

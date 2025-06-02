@@ -1,0 +1,21 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# Unconditionally call bdr.alter_node_group_option() on the given
+# node_group_name, config_key, and config_value.
+
+- name: Alter option {{ config_key }} for BDR node group {{ node_group_name }} when required
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+    - text: >
+        SELECT bdr.alter_node_group_option(node_group_name := %s,
+          config_key := %s, config_value := %s::TEXT)
+      args:
+        - "{{ node_group_name }}"
+        - "{{ config_key }}"
+        - "{{ config_value }}"
+  become: yes
+  become_user: "{{ postgres_user }}"
+  changed_when: true

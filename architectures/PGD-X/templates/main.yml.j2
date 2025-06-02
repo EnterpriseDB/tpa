@@ -1,0 +1,41 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved. #}
+---
+
+{% set ns = namespace(counter=1) %}
+
+instances:
+{% for location in location_names %}
+{%   if witness_only_location is not defined or location != witness_only_location %}
+{%     for i in range(data_nodes_per_location) %}
+- node: {{ ns.counter }}
+  Name: {{ hostnames[ns.counter] }}
+  location: {{ location }}
+  role:
+    - bdr
+{%       set ns.counter = ns.counter + 1 %}
+{%     endfor %}
+{%     if witness_node_per_location %}
+- node: {{ ns.counter }}
+  Name: {{ hostnames[ns.counter] }}
+  location: {{ location }}
+  role:
+    - bdr
+    - witness
+{%       set ns.counter = ns.counter + 1 %}
+{%     endif %}
+- node: {{ ns.counter }}
+  Name: {{ hostnames[ns.counter] }}
+  location: {{ location }}
+  role:
+    - barman
+{%     set ns.counter = ns.counter + 1 %}
+{%   endif %}
+{% endfor %}
+{% if witness_only_location %}
+- node: {{ ns.counter }}
+  Name: {{ hostnames[ns.counter] }}
+  location: {{ witness_only_location }}
+  role:
+    - bdr
+    - witness
+{% endif %}

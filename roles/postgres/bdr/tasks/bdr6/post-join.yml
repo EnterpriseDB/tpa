@@ -1,0 +1,144 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- name: Configure BDR commit scopes (v4.1+ only)
+  include_tasks:
+    file: bdr4/commit-scopes.yml
+  when:
+    bdr_commit_scopes|default([]) is not empty
+    and inventory_hostname == first_bdr_primary
+    and task_selector|permits('commit-scopes')
+
+# Set the default commit_scope for any groups that need it, now that the
+# commit scopes have been set up. (Note that setting the default commit
+# scope for a group is a CAMO-specific action, even though commit scopes
+# themselves are not.)
+
+- name: Set default commit scope for BDR node groups, if necessary
+  include_tasks: alter_node_group_option.yml
+  with_items: "{{ bdr_node_groups }}"
+  loop_control:
+    label: >-
+      {{ item.name }}:{{ scope_name }}
+  vars:
+    node_group_name: "{{ item.name }}"
+    config_key: default_commit_scope
+    catalog_key: default_commit_scope
+    config_value: "{{ scope_name }}"
+    scope_name:
+      "{{ item|try_subkey('options.default_commit_scope') }}"
+    this_group_facts:
+      "{{ bdr_database_facts.bdr.node_group_summary
+          |selectattr('node_group_name', 'equalto', item.name)
+          |list }}"
+  when:
+    - inventory_hostname == first_bdr_primary
+    - "'default_commit_scope' in item.options|default({})"
+    - this_group_facts is empty
+      or this_group_facts[0][catalog_key] != scope_name
+
+# Disable routing if needed, must be done before raft is disabled
+# the raft enable/disable step is commented out right now but will be used in the future
+# so we keep the disable routing one separate from the enable routing done later.
+
+- name: Disable routing for BDR node groups, if necessary
+  include_tasks: alter_node_group_option.yml
+  with_items: "{{ bdr_node_groups }}"
+  loop_control:
+    label: >-
+      {{ item.name }}:{{ enable_routing }}
+  vars:
+    node_group_name: "{{ item.name }}"
+    config_key: enable_routing
+    config_value: "{{ enable_routing }}"
+    enable_raft:
+      "{{ item|try_subkey('options.enable_raft', True)|bool }}"
+    enable_routing:
+      "{{ item|try_subkey('options.enable_routing', True)|bool }}"
+    this_group_facts:
+      "{{ bdr_database_facts.bdr.node_group_summary
+          |selectattr('node_group_name', 'equalto', item.name)
+          |list }}"
+  when:
+    - inventory_hostname == first_bdr_primary
+    - this_group_facts is empty
+      or this_group_facts[0].enable_routing != enable_routing
+    - enable_routing is false
+
+# Commenting out this bit since right now enable_raft can't be changed in any way
+# it's enabled by default and can't be disabled once enabled.
+# according to pgd team this might change in the future so we can keep the task here
+# while this happens.
+
+# Process any entries in bdr_node_groups for which 'enable_raft' is set.
+# Now that the group joins have been completed, we can enable subgroup
+# raft. (Disabling it once it's enabled is not supported by BDR.)
+
+# - name: Set subgroup raft for BDR node groups, if necessary
+#   include_tasks: alter_node_group_option.yml
+#   with_items: "{{ bdr_node_groups }}"
+#   loop_control:
+#     label: >-
+#       {{ item.name }}:{{ enable_raft }}
+#   vars:
+#     node_group_name: "{{ item.name }}"
+#     config_key: enable_raft
+#     config_value: "{{ enable_raft }}"
+#     enable_raft:
+#       "{{ item|try_subkey('options.enable_raft', True)|bool }}"
+#     enable_routing:
+#       "{{ item|try_subkey('options.enable_routing', True)|bool }}"
+#     this_group_facts:
+#       "{{ bdr_database_facts.bdr.node_group_summary
+#           |selectattr('node_group_name', 'equalto', item.name)
+#           |list }}"
+#   when:
+#     - inventory_hostname == first_bdr_primary
+#     - item.name != bdr_node_group
+#     - enable_routing is false
+#     - this_group_facts is empty
+#       or this_group_facts[0].enable_raft != enable_raft
+
+# Now that node has joined the group, we can set any node options that
+# were specified in bdr_node_options.
+
+- name: Set BDR node options, if required
+  include_tasks: bdr5/alter_node_option.yml
+  vars:
+    _default_options:
+      route_dsn: "{{ bdr_node_route_dsn }}"
+  with_dict:
+    "{{ _default_options|combine(bdr_node_options) }}"
+  loop_control:
+    loop_var: node_option
+    label: >
+      {{ node_option.key }}:{{ node_option.value }}
+
+# Finally, we can `enable_routing` for those groups where it's
+# desired and for which subgroup RAFT is also enabled.
+
+- name: Enable routing for BDR node groups, if necessary
+  include_tasks: alter_node_group_option.yml
+  with_items: "{{ bdr_node_groups }}"
+  loop_control:
+    label: >-
+      {{ item.name }}:{{ enable_routing }}
+  vars:
+    node_group_name: "{{ item.name }}"
+    config_key: enable_routing
+    config_value: "{{ enable_routing }}"
+    enable_raft:
+      "{{ item|try_subkey('options.enable_raft', True)|bool }}"
+    enable_routing:
+      "{{ item|try_subkey('options.enable_routing', True)|bool }}"
+    this_group_facts:
+      "{{ bdr_database_facts.bdr.node_group_summary
+          |selectattr('node_group_name', 'equalto', item.name)
+          |list }}"
+  when:
+    - inventory_hostname == first_bdr_primary
+    - enable_raft is true
+      or item.name == bdr_node_group
+    - this_group_facts is empty
+      or this_group_facts[0].enable_routing != enable_routing

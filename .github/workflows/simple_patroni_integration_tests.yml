@@ -1,5 +1,9 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+# Matrix test for patroni using patroni matrix key
+# Run a full configure/deploy/test on the cluster
+# then run a switchover/redeploy/test
+
 name: Simple Patroni Integration Tests
 
 on:
