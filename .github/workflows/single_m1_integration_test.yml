@@ -17,11 +17,10 @@ on:
         required: true
         type: choice
         options:
-        - tpa/debian:9
-        - tpa/debian:10
         - tpa/debian:11
         - tpa/debian:12
         - tpa/ubuntu:20.04
+        - tpa/ubuntu:22.04
         - tpa/ubuntu:24.04
         - tpa/redhat:8
         - tpa/redhat:9
@@ -42,12 +41,12 @@ on:
         default: "14"
         type: choice
         options:
-        - 10
-        - 11
         - 12
         - 13
         - 14
         - 15
+        - 16
+        - 17
       tpa_failover_manager:
         description: "Failover-manager"
         type: choice

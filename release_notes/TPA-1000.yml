@@ -1,0 +1,9 @@
+- summary: Add support for PEM on Ubuntu 24.04
+  description: |
+     There was no specific package defined for this distro which
+     caused deployment errors. Additionally, this ensures that either
+     mod_wsgi or edb's mod_wsgi module is enabled by default where
+     it applies.
+  type: notable_change
+  jira_tickets:
+  - TPA-1000

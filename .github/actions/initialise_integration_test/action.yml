@@ -172,6 +172,10 @@ runs:
         # enable redwood for epas.
         if [ "${{ inputs.tpa_postgres_flavour }}" == "epas" ] ;then
           CONFIGURE_OPTS+=(--redwood)
+          # If we are using AWS, we could enable pem when testing epas
+          if [ "${{ inputs.tpa_platform }}" == "aws" ] ;then
+            CONFIGURE_OPTS+=(--enable-pem)
+          fi
         fi
         # If package caching is enabled we enforce use of local repo
         if [ "${{ inputs.tpa_package_cache }}" == "true" ] ;then

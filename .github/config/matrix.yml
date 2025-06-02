@@ -13,6 +13,7 @@ default:
   tpa_os_image:
     - "ubuntu:20.04"
     - "ubuntu:22.04"
+    - "ubuntu:24.04"
     - "debian:12"
     - "redhat:8"
     - "redhat:9"
@@ -42,6 +43,8 @@ default:
       tpa_postgres_flavour: "pgextended"
     - tpa_architecture: "BDR-Always-ON"
       tpa_postgres_flavour: "postgresql"
+    - tpa_architecture: "BDR-Always-ON"
+      tpa_os_image: "ubuntu:24.04"
     - tpa_architecture: "BDR-Always-ON"
       tpa_postgres_flavour: "edbpge"
     - tpa_architecture: "PGD-Always-ON"
@@ -151,6 +154,8 @@ aws:
   tpa_os_image:
     - "debian:12"
     - "debian-arm:12"
+    - "ubuntu:22.04"
+    - "ubuntu:24.04"
   tpa_postgres_version:
     - 15
     - 16
