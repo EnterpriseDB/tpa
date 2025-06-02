@@ -7,6 +7,7 @@ description: Configuring a PGD-X cluster with TPA.
 !!! Note
 This architecture is for Postgres Distributed 6 only.
 If you require PGD 5 please use [PGD-Always-ON](architecture-PGD-Always-ON.md).
+!!!
 
 EDB Postgres Distributed 6 in an Expanded configuration
 suitable for use in test and production.
