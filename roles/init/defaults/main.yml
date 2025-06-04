@@ -528,7 +528,8 @@ default_build_path:
   - /usr/lib/ccache
   - $PATH
 
-default_efm_version: 4.9
+default_efm_version: "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 24)|ternary(5.0, 4.9) }}"
+
 default_efm_conf_dir: "/etc/edb/efm-{{ efm_version }}"
 default_efm_bin_dir: "/usr/edb/efm-{{ efm_version }}/bin"
 default_efm_bind_port: 7800
