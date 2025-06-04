@@ -16,8 +16,8 @@ defaults:
     - "epas"
 
 
-m1:
-  tpa_architecture: "M1"
+M1:
+  tpa_architecture: [ "M1" ]
   cpu_architecture: *default_cpu_architecture
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
@@ -30,7 +30,7 @@ m1:
       tpa_failover_manager: "efm"
 
 BDR-Always-ON:
-  tpa_architecture: "BDR-Always-ON"
+  tpa_architecture: [ "BDR-Always-ON" ]
   cpu_architecture: *default_cpu_architecture
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
@@ -43,7 +43,7 @@ BDR-Always-ON:
     - tpa_os_image: "sles:15"
 
 PGD-Always-ON:
-  tpa_architecture: "PGD-Always-ON"
+  tpa_architecture: [ "PGD-Always-ON" ]
   cpu_architecture: *default_cpu_architecture
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
@@ -51,7 +51,7 @@ PGD-Always-ON:
     - tpa_postgres_flavour: "postgresql"
 
 PGD-S:
-  tpa_architecture: "PGD-S"
+  tpa_architecture: [ "PGD-S" ]
   cpu_architecture: *default_cpu_architecture
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
@@ -59,7 +59,7 @@ PGD-S:
     - tpa_os_image: "ubuntu:20.04"
 
 PGD-X:
-  tpa_architecture: "PGD-X"
+  tpa_architecture: [ "PGD-X" ]
   cpu_architecture: *default_cpu_architecture
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour

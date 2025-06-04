@@ -90,7 +90,7 @@ jobs:
         cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_failover_manager }}
         cpu_architecture: ${{ matrix.cpu_architecture }}
         source_directory: ${{ github.workspace }}
-        tpa_architecture: ${{ matrix.tpa_os_architecture }}
+        tpa_architecture: ${{ matrix.tpa_architecture }}
         tpa_enable_pgbouncer: ${{ matrix.tpa_enable_pgbouncer }}
         tpa_platform: "docker"
         tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
