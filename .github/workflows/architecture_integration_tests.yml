@@ -98,5 +98,13 @@ jobs:
         tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
         tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
         tpa_harp_consensus_protocol: ${{ matrix.tpa_harp_consensus_protocol }}
+        # we suppress the downloader for edb flavours with patroni: see
+        # TPA-956
         tpa_package_cache: >-
-          ${{ ! ( contains(matrix.tpa_os_image, 'sles')) }}
+          ${{ ! (
+            contains(matrix.tpa_os_image, 'sles')
+            || (
+              (matrix.tpa_failover_manager == 'patroni')
+              && (matrix.tpa_postgres_flavour != 'postgresql')
+            )
+          ) }}
