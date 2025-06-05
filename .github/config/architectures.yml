@@ -18,9 +18,9 @@ defaults:
 
 M1:
   tpa_architecture: [ "M1" ]
-  cpu_architecture: *default_cpu_architecture
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
+  cpu_architecture: *default_cpu_architecture
   include:
     - tpa_postgres_flavour: "postgresql"
       tpa_failover_manager: "repmgr"
@@ -31,9 +31,9 @@ M1:
 
 BDR-Always-ON:
   tpa_architecture: [ "BDR-Always-ON" ]
-  cpu_architecture: *default_cpu_architecture
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
+  cpu_architecture: *default_cpu_architecture
   tpa_harp_consensus_protocol:
     - "bdr"
     - "etcd"
@@ -44,24 +44,24 @@ BDR-Always-ON:
 
 PGD-Always-ON:
   tpa_architecture: [ "PGD-Always-ON" ]
-  cpu_architecture: *default_cpu_architecture
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
+  cpu_architecture: *default_cpu_architecture
   exclude:
     - tpa_postgres_flavour: "postgresql"
 
 PGD-S:
   tpa_architecture: [ "PGD-S" ]
-  cpu_architecture: *default_cpu_architecture
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
+  cpu_architecture: *default_cpu_architecture
   exclude:
     - tpa_os_image: "ubuntu:20.04"
 
 PGD-X:
   tpa_architecture: [ "PGD-X" ]
-  cpu_architecture: *default_cpu_architecture
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
+  cpu_architecture: *default_cpu_architecture
   exclude:
     - tpa_os_image: "ubuntu:20.04"

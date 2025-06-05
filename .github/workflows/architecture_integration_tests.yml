@@ -30,6 +30,7 @@ on:
           - "PGD-Always-ON"
           - "PGD-S"
           - "PGD-X"
+run-name: ${{ inputs.tpa_architecture }}, postgres ${{ inputs.tpa_postgres_version }}
 
 env:
   LANG: "C.UTF-8"
@@ -62,7 +63,7 @@ jobs:
         key: ${{ inputs.tpa_architecture }}
 
   integration-test:
-    name: Integration Tests
+    name: "${{ matrix.tpa_os_image }} ${{ matrix.tpa_postgres_flavour }} ${{ matrix.tpa_harp_consensus_protocol }}"
     needs: load-matrix
     strategy:
       fail-fast: false
@@ -87,7 +88,7 @@ jobs:
 
     - uses: ./.github/actions/integration-test
       with:
-        cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_failover_manager }}
+        cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_harp_consensus_protocol || matrix.tpa_failover_manager }}
         cpu_architecture: ${{ matrix.cpu_architecture }}
         source_directory: ${{ github.workspace }}
         tpa_architecture: ${{ matrix.tpa_architecture }}
