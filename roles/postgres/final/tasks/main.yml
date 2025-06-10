@@ -27,11 +27,6 @@
 
 # Postgres is now running.
 
-- include_role:
-    name: postgres/pgpass
-  when: >
-    task_selector|permits('pgpass')
-
 # now we have established everything we need to write pg_ident.conf
 
 # Populating pg_ident_entries is incompatible with using
@@ -73,6 +68,17 @@
   when: >
     'replica' not in role
     and task_selector|permits('config')
+
+# Now that all Postgres users are created, postgres/pgpass is run once 
+# more to ensure any postgres_users listed with generate_password: true 
+# and also listed in the pgpass_users list are added to the 
+# ~postgres/pgpass file, since they were skipped during the initial 
+# invocation as their passwords did not yet exist. 
+
+- include_role:
+    name: postgres/pgpass
+  when: >
+    task_selector|permits('pgpass')
 
 # Since we may have changed the Postgres configuration, we repeat the
 # cluster discovery process that was done at the beginning (roles/init)
