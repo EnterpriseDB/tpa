@@ -45,6 +45,13 @@
     and 'barman' in role
     and enable_pg_backup_api|default(false)
 
+- include_role: name=postgres/pgpass
+  vars:
+    pgpass_users:
+      - "{{ postgres_user }}"
+  when: >
+    task_selector|permits('pgpass')
+
 - name: Record PEM server credentials
   set_fact:
     pem_postgres_password: "{{vars['%s_password' % postgres_user]}}"
