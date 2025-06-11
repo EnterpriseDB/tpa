@@ -1,0 +1,14 @@
+- summary: Suppress PGDG repos when using EDB repos on SLES
+  description: |
+    When running `tpaexec configure` for a SLES system, use either EDB
+    repositories or PGDG repositories, not both, matching the behaviour
+    of other operating systems. This ensures that packages such as barman,
+    which are available in both places, are consistently sourced from the
+    same repository as other packages.
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-1056
