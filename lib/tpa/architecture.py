@@ -1209,6 +1209,7 @@ class Architecture:
                 {
                     "apt_repository_list": [],
                     "yum_repository_list": ["EPEL"],
+                    "suse_repository_list": [],
                 }
             )
 
