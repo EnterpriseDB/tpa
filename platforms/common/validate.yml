@@ -33,7 +33,7 @@
 - name: Set default empty locations and cluster_vars
   set_fact:
     locations: "{{ locations|default([]) }}"
-    cluster_vars: "{{ cluster_vars|default({}) }}"
+    cluster_vars: "{{ cluster_vars }}"
     ansible_tower: "{{ ansible_tower|default({}) }}"
 
 - name: Ensure cluster_name is specified
