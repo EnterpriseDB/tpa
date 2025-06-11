@@ -3,8 +3,8 @@ cffi==1.17.1 \
     # via
     #   -r /out/requirements-ppc64le.in
     #   cryptography
-cryptography==45.0.3 \
-    --hash=sha256:3c4162ecfb9adc334d7dd81ae6739b4c99e7e993567751bbc5f77727444cf12a
+cryptography==45.0.4 \
+    --hash=sha256:25cc5ff383651e01dcfc5aa168ed8e1c1a6bec1fb7f6c215256a8db2d6f89d4b
     # via -r /out/requirements-ppc64le.in
 markupsafe==3.0.2 \
     --hash=sha256:3e22c35dcdbb8c898a409aabb03ea08dda7937bb33f94741701271ba3337227b

@@ -36,7 +36,7 @@ cffi==1.17.1
     #   onigurumacffi
 click==8.2.1
     # via black
-cryptography==45.0.3
+cryptography==45.0.4
     # via ansible-core
 distro==1.9.0
     # via bindep
@@ -112,7 +112,7 @@ rpds-py==0.25.1
     # via
     #   jsonschema
     #   referencing
-ruamel-yaml==0.18.12
+ruamel-yaml==0.18.14
     # via ansible-lint
 ruamel-yaml-clib==0.2.12
     # via ruamel-yaml
@@ -128,7 +128,7 @@ wcmatch==10.0
     # via ansible-lint
 yamllint==1.37.1
     # via ansible-lint
-zipp==3.22.0
+zipp==3.23.0
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
