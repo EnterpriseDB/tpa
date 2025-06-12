@@ -280,6 +280,35 @@ default_postgres_extensions_dictionary:
     spl: sqlprotect
     module: true
 
+  edb_stat_monitor:
+    packages:
+      postgresql:
+        Debian: &debian_pg_edb_stat_monitor
+          - edb-pg{{ postgres_version }}-stat-monitor
+        RedHat: &redhat_pg_edb_stat_monitor
+          - edb-pg{{ postgres_version }}-stat_monitor
+        Ubuntu: *debian_pg_edb_stat_monitor
+        SLES: *redhat_pg_edb_stat_monitor
+      epas:
+        Debian: &debian_as_edb_stat_monitor
+          - edb-as{{ postgres_version }}-stat-monitor
+        RedHat: &redhat_as_edb_stat_monitor
+          - edb-as{{ postgres_version }}-stat_monitor
+        Ubuntu: *debian_as_edb_stat_monitor
+        SLES: *redhat_as_edb_stat_monitor
+      pgextended:
+        Debian: *debian_pg_edb_stat_monitor
+        RedHat: *redhat_pg_edb_stat_monitor
+        Ubuntu: *debian_pg_edb_stat_monitor
+        SLES: *redhat_pg_edb_stat_monitor
+      edbpge:
+        Debian: &debian_pge_edb_stat_monitor
+          - edb-postgresextended{{ postgres_version }}-stat-monitor
+        RedHat: &redhat_pge_edb_stat_monitor
+          - edb-postgresextended{{ postgres_version }}-stat_monitor
+        Ubuntu: *debian_pge_edb_stat_monitor
+        SLES: *redhat_pge_edb_stat_monitor
+    spl: edb_stat_monitor
 
   # EDB Storage Pack
   autocluster:
