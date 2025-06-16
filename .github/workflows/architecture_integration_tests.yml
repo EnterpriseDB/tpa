@@ -63,7 +63,7 @@ jobs:
         key: ${{ inputs.tpa_architecture }}
 
   integration-test:
-    name: "${{ matrix.tpa_os_image }} ${{ matrix.tpa_postgres_flavour }} ${{ matrix.tpa_harp_consensus_protocol }}"
+    name: "${{ matrix.tpa_os_image }} ${{ matrix.tpa_postgres_flavour }} ${{ matrix.tpa_failover_manager }} ${{ matrix.tpa_harp_consensus_protocol }}"
     needs: load-matrix
     strategy:
       fail-fast: false
