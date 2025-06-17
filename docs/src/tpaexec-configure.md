@@ -530,7 +530,6 @@ cluster_vars:
   postgres_flavour: postgresql
   postgres_version: '14'
   preferred_python_version: python3
-  use_volatile_subscriptions: false
 
 locations:
 - Name: main

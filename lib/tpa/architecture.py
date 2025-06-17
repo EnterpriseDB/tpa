@@ -439,19 +439,7 @@ class Architecture:
         # mode. EPAS itself operates in Redwood mode by default (it's an initdb
         # option).
         g = p.add_argument_group("repository selection")
-
         g.add_argument(
-            "--use-volatile-subscriptions",
-            action="store_true",
-        )
-        g_repo = g.add_mutually_exclusive_group()
-        g_repo.add_argument(
-            "--2Q-repositories",
-            dest="tpa_2q_repositories",
-            nargs="+",
-            metavar="source/name/maturity",
-        )
-        g_repo.add_argument(
             "--edb-repositories",
             dest="edb_repositories",
             nargs="+",

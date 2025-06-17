@@ -224,7 +224,7 @@ class docker(Platform):
         return image
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
-        cluster_vars["use_volatile_subscriptions"] = True
+        pass
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml("platforms/docker/instance_defaults.yml.j2", args)

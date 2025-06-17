@@ -45,77 +45,9 @@
       }}"
   no_log: "{{ needs_auth }}"
 
-- name: Ensure old EDB sources.list.d entry is absent
-  file:
-    path: "/etc/apt/sources.list.d/apt_enterprisedb_com_{{ ansible_distribution_release }}_edb.list"
-    state: absent
-
-- name: Configure authentication for EDB repository
-  copy:
-    content: >
-      machine apt{{ edb_repo_hostname_suffix }} login {{ _credentials[0] }} password {{ _credentials[1] }}
-    dest: /etc/apt/auth.conf.d/edb.conf
-    owner: root
-    group: root
-    mode: "0600"
-  vars:
-    _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
-    _credentials: "{{ lookup('file', _file).split(':', 1) }}"
-  when: >
-    'EDB' in apt_repository_list
-    and ansible_distribution_major_version is version('10', '>=')
-  no_log: true
-
-- name: Raise pin priority for 2ndQuadrant packages
-  template:
-    src: 2ndquadrant-pins.j2
-    dest: /etc/apt/preferences.d/2ndquadrant-pins
-    owner: root
-    group: root
-    mode: "0644"
-
-- set_fact:
-    _2q_repositories: []
-
-- name: Enumerate 2ndQuadrant repositories
-  set_fact:
-    _2q_repositories: "{{
-        _2q_repositories|union([{
-          'url': url,
-          'file': file,
-          'repo': item
-        }])
-      }}"
-  with_items: "{{ tpa_2q_repositories }}"
-  vars:
-    token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
-    volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
-    urltemplate: "{{
-        (item == 'dl/default/release')|ternary(
-          'https://techsupport.enterprisedb.com/api/repository/{label}/deb{volatile}',
-          'https://techsupport.enterprisedb.com/api/repository/{token}/{label}/deb{volatile}'
-        )
-      }}"
-    url: >-
-      {{ urltemplate.format(token=token, label=item, volatile=volatile) }}
-    file: "/etc/apt/sources.list.d/2ndquadrant-{{ item|replace('/', '-') }}.list"
-
-- name: Install 2ndQuadrant repositories
-  include_tasks: install-2q-repository.yml
-  with_items: "{{ _2q_repositories }}"
-  loop_control:
-    loop_var: repo
-    label: >-
-      {{ repo.repo }}
-
 - include_tasks: edb-repositories.yml
   when:
     edb_repositories is not empty
-
-- include_tasks: repository-cleanup.yml
-  vars:
-    repository_path: /etc/apt/sources.list.d
-    repository_files: "{{ _2q_repositories|map(attribute='file')|list }}"
 
 # Some extension packages require extra repositories to be set up to install dependencies
 

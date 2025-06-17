@@ -12,7 +12,6 @@ ec2_vpc:
 
 cluster_vars:
   preferred_python_version: python3
-  use_volatile_subscriptions: false
   vpn_network: 192.168.33.0/24
 
 locations:
