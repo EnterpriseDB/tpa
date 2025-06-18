@@ -10,9 +10,6 @@ conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='barman') }} {{
 streaming_conninfo = "{{ hostvars[target].node_dsn|dbname('postgres', user='streaming_barman') }} {{ streaming_barman_client_dsn_attributes }}"
 streaming_archiver = on
 slot_name = "{{ slot_name }}"
-{% if _barman_log_file != default_barman_log_file %}
-log_file = {{ _barman_log_file }}
-{% endif %}
 {% if _barman_backup_method != default_barman_backup_method %}
 backup_method = {{ _barman_backup_method }}
 {% endif %}
