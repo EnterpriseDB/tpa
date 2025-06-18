@@ -1,0 +1,9 @@
+- summary: Barman not correctly configuring log_file parameter
+  description: |
+      When setting up a barman node, the variable 'barman_log_file' 
+      was not setting up an alternative directory to place the log 
+      file. Instead, it used the default location (/var/log/barman/barman.log).
+      Bug and fix reported by voxnyx (https://github.com/voxnyx).
+  type: bugfix
+  jira_tickets:
+  - TPA-1077
