@@ -85,6 +85,7 @@ on:
         options:
         - "efm"
         - "repmgr"
+        - "patroni"
       tpa_package_cache:
         description: "Use the downloader"
         type: boolean
