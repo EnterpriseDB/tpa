@@ -9,13 +9,12 @@
     This is fixed by invoking the pgpass task once more after all the
     Postgres users have been created.
 
-    Furthermore, the `repmgr` user was previously part of the `default_pgpass_users`
-    list unless overridden by the `pgpass_users` list in `config.yml`. Now it is only
-    added to the  ~postgres/pgpass file as part of the `role/repmgr` tasks, when 
-    `repmgr` is specified as the `failover_manager`
+    The `repmgr` and `replication` users were previously included in the
+    `default_pgpass_users` list. They are now added to `pgpass_users` and
+    hence to the .pgpass file as required by the replication manager in use.
 
     The `postgres_user` (`postgres` or `enterprisedb` by default) is still part
-    of the `default_pgpass_users` list. If this is overridden by a `pgpass_users` list 
+    of the `default_pgpass_users` list. If this is overridden by a `pgpass_users` list
     in `config.yml` that does NOT include `postgres_user`, a PEM-enabled cluster will
     fail to register agents as it needs the encrypted `postgres_user` password.
     This is fixed by adding the `postgres_user` to the `~postgres/.pgpass` file
@@ -28,3 +27,4 @@
   # defined
   jira_tickets:
   - TPA-158
+  - TPA-1075

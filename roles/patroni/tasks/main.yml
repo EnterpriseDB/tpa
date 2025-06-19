@@ -19,6 +19,14 @@
     'postgres' in role
     and task_selector|permits(patroni_installation_method)
 
+- include_role: name=postgres/pgpass
+  vars:
+    pgpass_users:
+      - "{{ replication_user }}"
+  when: >
+    'replica' in role
+
+
 - include_role:
     name: patroni/config
   when: >
