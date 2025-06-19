@@ -113,7 +113,7 @@ class Platform:
         """
         pass
 
-    def process_arguments(self, args):
+    def process_arguments(self, args, cluster):
         """
         Makes platform-specific changes to args
         """
