@@ -2,6 +2,63 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+## v23.38.1 (2025-06-25)
+
+### Bugfixes
+
+- Ensure pgpass_users correctly added to .pgpass file
+
+  Previously, any user in the `postgres_users` list specified with
+  `generate_password: true` AND included in the `pgpass_users` list
+  would NOT be added to the `~postgres/.pgpass` file on the initial
+  deploy because the user's password did not yet exist when the
+  pgpass task was executed, thus the user was skipped.
+
+  This is fixed by invoking the pgpass task once more after all the
+  Postgres users have been created.
+
+  The `repmgr` and `replication` users were previously included in the
+  `default_pgpass_users` list. They are now added to `pgpass_users` and
+  hence to the .pgpass file as required by the replication manager in use.
+
+  The `postgres_user` (`postgres` or `enterprisedb` by default) is still part
+  of the `default_pgpass_users` list. If this is overridden by a `pgpass_users` list
+  in `config.yml` that does NOT include `postgres_user`, a PEM-enabled cluster will
+  fail to register agents as it needs the encrypted `postgres_user` password.
+  This is fixed by adding the `postgres_user` to the `~postgres/.pgpass` file
+  as part of the PEM agent tasks.
+
+  References: TPA-158, TPA-1075.
+
+- Check cluster_vars dictionary during validate
+
+  Previously, if an invalid dictionary is set as the `cluster_vars`
+  dictionary in `config.yml` (such as `cluster_vars` variables referencing
+  other `cluster_vars` variables), TPA would swallow any Ansible errors
+  by falling back to the default value of an empty dictionary. This
+  resulted in every `cluster_vars` variable being undefined, so each was
+  set to it's TPA-default value. The resulting cluster would be
+  entirely different than what the user specified in their `config.yml`
+  file.
+
+  This is fixed by asserting that the `cluster_vars` dictionary is defined
+  and non-empty when the configuration file is loaded. Also as a final
+  bailout, the `cluster_vars` variable now no longer defaults to an empty
+  dictionary. This allows Ansible to throw an error when creating 
+  `group_vars` and terminate.
+
+  References: TPA-895, TPA-1033.
+
+- Fix configure command for PGD6 using bare platform
+
+  Fix a bug with tpaexec configure command on the newly released architecture for PGD6
+  (PGD-S and PGD-X) whereby trying to generate a cluster using `--platform bare` would result
+  in an Unknown Platform error.
+
+  This will ensure that configure command successfully generate a PGD6 configuration file for the bare platform.
+
+  References: TPA-1073, RT49673.
+
 ## v23.38.0 (2025-06-02)
 
 ### Notable changes
