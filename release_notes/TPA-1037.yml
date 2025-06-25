@@ -1,0 +1,15 @@
+- summary: Add entry point for PGD-S/X upgrade command
+  description: |
+    Includes the main `upgrade.yml` file under the cluster commands folder
+    for the new PGD-S/X architectures. Evaluates the type of upgrade
+    (major, minor), create the required dynamic groups and include the 
+    appropriate playbook for the cluster based on the upgrade path.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-950
+  - TPA-1037
