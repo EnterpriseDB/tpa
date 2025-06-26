@@ -108,6 +108,16 @@ default:
       tpa_platform: "docker"
       tpa_postgres_flavour: "postgresql"
       tpa_postgres_version: "15"
+aws:
+  tpa_postgres_flavour:
+    - "postgresql"
+    - "epas"
+  tpa_os_image:
+    - "debian:12"
+    - "debian-arm:12"
+  tpa_postgres_version:
+    - 15
+    - 16
 simple:
   cpu_architecture: *default_cpu_architecture
   tpa_architecture: *default_tpa_architecture
@@ -228,3 +238,14 @@ m1_layouts:
         tpa_location_names: "l1"
         tpa_data_nodes_per_location: 2
         tpa_layout_name: "1x2"
+s390x:
+  tpa_architecture:
+    - "PGD-S"
+  tpa_os_image:
+    - "sles:15"
+    - "almalinux:8"
+    - "redhat:9"
+  tpa_postgres_flavour:
+    - "epas"
+  tpa_postgres_version:
+    - 17

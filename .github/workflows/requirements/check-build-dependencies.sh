@@ -6,6 +6,8 @@ set -xe
 # container that can be used
 
 : "${DISTRO:?DISTRO environment variable is required}"
+# DISTRO_ARCHITECTURE is the architecture of the target system
+: "${DISTRO_ARCHITECTURE:?DISTRO_ARCHITECTURE environment variable is required}"
 
 DEFAULT_EDBPYTHON="edb-python312"
 FORCE_REBUILD_PYMODULES="${FORCE_REBUILD_PYMODULES:-0}"
@@ -54,7 +56,7 @@ function check_any_wheel_created_and_upload {
 
 function generate_new_requirements_file {
     # generate the new txt file using our index repo that holds newly built dependencies for the arch
-    requirement_txt_file="$(echo "$1" | cut -d "." -f1).txt"
+    requirement_txt_file="$(echo -n "$1" | sed "s/\.in/.txt/g")"
 
     $VENV/bin/pip-compile --generate-hashes \
 	    --index-url="https://downloads.enterprisedb.com/$TPA_PIP_CS_API/build-dependencies/python/simple/" \
@@ -65,8 +67,8 @@ function generate_new_requirements_file {
 }
 
 # generate the new arch specific requirement files
-current_arch_file="requirements-ppc64le.in"
-output_requirements_include="/out/requirements-ppc64le.in"
+current_arch_file="requirements-${DISTRO_ARCHITECTURE}.in"
+output_requirements_include="/out/requirements-${DISTRO_ARCHITECTURE}.in"
 first_new_detected=0
 
 # read the .in file line by line
