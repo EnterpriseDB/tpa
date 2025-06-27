@@ -69,6 +69,10 @@ inputs:
     required: false
     description: "Use a single-node location (for M1 only)"
     default: false
+  tpa_layout:
+    required: false
+    description: "Layout (for PGD-S only)"
+    default: standard
   cluster:
     required: false
     description: "Name of the cluster directory"
@@ -112,6 +116,7 @@ runs:
         tpa_data_nodes_per_location: ${{ inputs.tpa_data_nodes_per_location }}
         tpa_witness_only_location: ${{ inputs.tpa_witness_only_location }}
         tpa_single_node_location: ${{ inputs.tpa_single_node_location }}
+        tpa_layout: ${{ inputs.tpa_layout }}
         cluster: ${{ inputs.cluster }}
 
     - name: Provision the cluster

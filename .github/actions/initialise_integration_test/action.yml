@@ -82,7 +82,6 @@ runs:
   using: "composite"
 
   steps:
-
     - name: Free up disk space
       run: |
         # Android libraries
@@ -138,6 +137,17 @@ runs:
             --pgd-proxy-routing local
             --add-witness-only-location c
           )
+        elif [ "{{ inputs.tpa_architecture }}" == "PGD-S" ]; then
+          if [ "${{ inputs.tpa_layout }}" == "near-far"]; then
+            CONFIGURE_OPTS+=(
+              --layout near-far
+              --location-names a b
+            )
+          else
+            CONFIGURE_OPTS+=(
+              --layout standard
+            )
+          fi
         fi
         if [ -n "${{ inputs.tpa_os }}" ] ;then
           CONFIGURE_OPTS+=(--os "${{ inputs.tpa_os }}")
