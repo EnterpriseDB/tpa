@@ -1,6 +1,6 @@
 # tox dependencies for lint environment
 PyYAML>=6.0
-prospector~=1.16.1
+prospector~=1.17.2
 pylint~=3.3.7
 pylint-django~=2.6.1
 pyfakefs~=5.8.0
