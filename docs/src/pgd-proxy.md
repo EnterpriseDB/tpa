@@ -46,6 +46,11 @@ Hash | Function | Description
 
 See the PGD documentation for more details.
 
+You can use the
+[pgd-proxy-config hook](tpaexec-hooks.md#pgd-proxy-config)
+to execute tasks after the PGD PROXY configuration files have been
+installed (e.g., to install additional configuration files).
+
 ### bdr_node_groups
 
 Group-level options related to pgd-proxy can be set under

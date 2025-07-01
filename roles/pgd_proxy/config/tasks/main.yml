@@ -95,3 +95,18 @@
     mode: "0600"
   notify:
     - Note pgd-proxy restart required
+
+# At the end of the configuration process, include the pgd-proxy configuration
+# hook from the cluster directory if the hook file exists and the
+# 'pgd-proxy-config' task is permitted by the task selector. This hook
+# enables custom post-configuration tasks, such as tuning PGD proxy
+# configuration parameters and applying cluster-specific settings after the
+# core PGD proxy configuration setup is complete.
+
+- name: Include pgd-proxy config hook
+  include_tasks: "{{ hook }}"
+  vars:
+    hook: "{{ cluster_dir }}/hooks/pgd-proxy-config.yml"
+  when: >
+    lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|permits('pgd-proxy-config')

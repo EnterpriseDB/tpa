@@ -109,6 +109,17 @@ proxy that are not provided by the built-in interface of TPA.
 Please note that this hook will be run in any node that installs HARP packages,
 including PGD nodes.
 
+### pgd-proxy-config
+
+TPA invokes `hooks/pgd-proxy-config.yml` after generating PGD PROXY
+configuration files, but before the PGD PROXY service has been started.
+
+You can use this hook, for example, to perform any customizations to the
+PGD Proxy that are not provided by the built-in interface of TPA.
+
+Note that this hook will run in any node that installs PGD PROXY
+packages.
+
 ### post-deploy
 
 TPA invokes `hooks/post-deploy.yml` at the end of the deployment.
