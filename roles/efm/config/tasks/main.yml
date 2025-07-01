@@ -1,13 +1,12 @@
 ---
-
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 - name: Ensure efm configuration directory exists
   file:
-    path: "{{ efm_conf_dir }}"
+    path: '{{ efm_conf_dir }}'
     owner: efm
     group: efm
-    mode: "0755"
+    mode: '0755'
     state: directory
 
 - name: Include role postgres/createuser
@@ -15,24 +14,24 @@
   vars:
     username: efm
     role_attrs:
-    - superuser
-    password_encryption: "{{ efm_user_password_encryption }}"
+      - superuser
+    password_encryption: '{{ efm_user_password_encryption }}'
 
 - name: Include efm-pre-config hook
-  include_tasks: "{{ hook }}"
+  include_tasks: '{{ hook }}'
   when: >
     lookup('first_found', dict(files=hook, skip=True))
     and task_selector|permits('efm-pre-config')
   vars:
-    hook: "{{ cluster_dir }}/hooks/efm-pre-config.yml"
+    hook: '{{ cluster_dir }}/hooks/efm-pre-config.yml'
 
 - name: Allow efm user to run db function as {{ postgres_user }}
   community.general.sudoers:
-    name: "efm_run_as_{{ postgres_user }}"
+    name: 'efm_run_as_{{ postgres_user }}'
     state: present
     user: efm
-    runas: "{{ postgres_user }}"
-    commands: "{{ efm_bin_dir }}/efm_db_functions"
+    runas: '{{ postgres_user }}'
+    commands: '{{ efm_bin_dir }}/efm_db_functions'
   when: >
     failover_manager == "efm"
 
@@ -45,24 +44,23 @@
 - name: Encrypt efm password
   shell: >
     "{{ efm_bin_dir }}"/efm encrypt "{{ cluster_name }}" --from-env
-  environment: "{{ target_environment|combine(_task_environment) }}"
+  environment: '{{ target_environment|combine(_task_environment) }}'
   vars:
     _task_environment:
-      EFMPASS: "{{ efm_password }}"
+      EFMPASS: '{{ efm_password }}'
   register: efm_encrypted_pass_output
   changed_when: false
   no_log: true
 
 - name: Configure efm for syslog
   block:
-
     - name: Load syslog_efm_conf_settings
       include_vars:
         file: log-server-defined.yml
 
     - name: Configure efm for syslog
       set_fact:
-        efm_conf_settings: "{{ syslog_efm_conf_settings|combine(efm_conf_settings) }}"
+        efm_conf_settings: '{{ syslog_efm_conf_settings|combine(efm_conf_settings) }}'
 
   when:
     - log_server is defined
@@ -73,14 +71,14 @@
 # check that .properties and .nodes files exist
 - name: Check if {{ efm_conf_dir }}/{{ cluster_name }}.properties file exists
   stat:
-    path: "{{ efm_conf_dir }}/{{ cluster_name }}.properties"
+    path: '{{ efm_conf_dir }}/{{ cluster_name }}.properties'
     get_checksum: false
     get_mime: false
   register: efm_cluster_prop
 
 - name: Check if {{ efm_conf_dir }}/{{ cluster_name }}.nodes file exists
   stat:
-    path: "{{ efm_conf_dir }}/{{ cluster_name }}.nodes"
+    path: '{{ efm_conf_dir }}/{{ cluster_name }}.nodes'
     get_checksum: false
     get_mime: false
   register: efm_cluster_nodes
@@ -97,7 +95,7 @@
 # check if the raw folder exists (2nd deploy for new clusters using /raw already)
 - name: Check if {{ efm_conf_dir }}/raw folder exists
   stat:
-    path: "{{ efm_conf_dir }}/raw"
+    path: '{{ efm_conf_dir }}/raw'
     get_checksum: false
     get_mime: false
   register: efm_raw
@@ -105,23 +103,23 @@
 # creates the raw subfolder for new clusters (no .properties exists)
 - name: Ensure raw folder exists for new clusters
   file:
-    path: "{{ efm_conf_dir }}/raw"
+    path: '{{ efm_conf_dir }}/raw'
     state: directory
     owner: efm
     group: efm
-    mode: "0755"
+    mode: '0755'
   when: >
     not efm_cluster_prop.stat.exists
 
 # For new clusters, the raw subfolder is created to contain versions of the .nodes and .properties files which
 # can be edited without causing EFM to restart. Configuration changes to these files are propogated to their top-level
 # counterparts using the 'efm upgrade-conf' command. On existing clusters that already have EFM configuration files,
-# the raw subfolder is not created and the .nodes and .properties are copied to the top-level only if the template's content 
+# the raw subfolder is not created and the .nodes and .properties are copied to the top-level only if the template's content
 # does not match what has already been configured in the respective files. The 'efm_use_raw' fact encapsulates the boolean
 # state of using the 'raw' subfolder for the reasons explained above.
 - set_fact:
-    efm_use_raw: "{{ (not (efm_cluster_prop.stat.exists and efm_cluster_nodes.stat.exists) or efm_raw.stat.exists) }}"
-    
+    efm_use_raw: '{{ (not (efm_cluster_prop.stat.exists and efm_cluster_nodes.stat.exists) or efm_raw.stat.exists) }}'
+
 # set the correct path for next steps
 - set_fact:
     raw: "{{ efm_use_raw|ternary('/raw', '')}}"
@@ -130,27 +128,27 @@
 - name: Install efm.properties for {{ cluster_name }}
   template:
     src: efm.properties.j2
-    dest: "{{ efm_conf_dir }}{{ raw }}/{{ cluster_name }}.properties"
+    dest: '{{ efm_conf_dir }}{{ raw }}/{{ cluster_name }}.properties'
     owner: efm
     group: efm
-    mode: "0640"
+    mode: '0640'
   register: efm_properties
   vars:
-    efm_encrypted_pass: "{{ efm_encrypted_pass_output.stdout }}"
+    efm_encrypted_pass: '{{ efm_encrypted_pass_output.stdout }}'
   notify:
     - Note efm restart required
 
 - name: Install efm.nodes
   template:
     src: efm.nodes.j2
-    dest: "{{ efm_conf_dir }}{{ raw }}/{{ cluster_name }}.nodes"
+    dest: '{{ efm_conf_dir }}{{ raw }}/{{ cluster_name }}.nodes'
     owner: efm
     group: efm
-    mode: "0640"
+    mode: '0640'
   register: efm_nodes
   vars:
     node_ips: "{{
-        groups['role_efm'] | map('extract', hostvars, ['ip_address']) | product([efm_bind_port]) | map('join', ':') | join('\n')
+      groups['role_efm'] | map('extract', hostvars, ['ip_address']) | product([efm_bind_port]) | map('join', ':') | join('\n')
       }}"
     node_hostnames: "{{ groups['role_efm'] | product([efm_bind_port]) | map('join', ':') | join('\n') }}"
   notify:
@@ -162,9 +160,9 @@
 # or if the top-level .properties or .nodes files are removed and need to be
 # re-populated from their raw counterparts using the efm upgrade-conf command.
 - name: Add useful comments to efm properties and nodes files
-  command: "{{ efm_bin_dir }}/efm upgrade-conf {{ cluster_name }} -source {{ efm_conf_dir }}{{ raw }}"
+  command: '{{ efm_bin_dir }}/efm upgrade-conf {{ cluster_name }} -source {{ efm_conf_dir }}{{ raw }}'
   args:
-    chdir: "{{ efm_conf_dir }}"
+    chdir: '{{ efm_conf_dir }}'
   become: true
   become_user: efm
   when:
@@ -177,7 +175,15 @@
 - name: Install efm notification script
   template:
     src: efm.notification.sh.j2
-    dest: "{{ efm_conf_dir }}/{{ cluster_name }}-efm.notification.sh"
+    dest: '{{ efm_conf_dir }}/{{ cluster_name }}-efm.notification.sh'
     owner: efm
     group: efm
-    mode: "0750"
+    mode: '0750'
+
+- name: Include efm-post-config hook
+  include_tasks: '{{ hook }}'
+  when: >
+    lookup('first_found', dict(files=hook, skip=True))
+    and task_selector|permits('efm-post-config')
+  vars:
+    hook: '{{ cluster_dir }}/hooks/efm-post-config.yml'

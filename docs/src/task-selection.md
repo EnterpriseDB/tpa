@@ -45,8 +45,8 @@ To prevent bootstrap and ssh tasks from ever running, put the following
 into `config.yml`:
 
 ```yaml
-    cluster_vars:
-      excluded_tasks:
+cluster_vars:
+    excluded_tasks:
         - bootstrap
         - ssh
 ```
@@ -55,290 +55,294 @@ into `config.yml`:
 
 The following selectors are supported for either inclusion or exclusion:
 
-- barman
+-   barman
 
     Tasks related to Barman.
 
-- bdr
+-   bdr
 
     Tasks related to setting up BDR, including when it is as used within
     a PGD cluster. If this selector is excluded, TPA will still install
     and configure the extension as specified in config.yml, but won't
     create the node groups or try to join the nodes.
 
-- create_pgd_proxy_system_user
+-   create_pgd_proxy_system_user
 
     Tasks which creates the system user for pgd_proxy
 
-- create_postgres_system_user
+-   create_postgres_system_user
 
     Tasks which creates the system user for postgres
 
-- efm
+-   efm
 
     Tasks related to EFM.
 
-- etcd
+-   etcd
 
     Tasks related to etcd.
 
-- first-backup
+-   first-backup
 
     Tasks which ensure the minimum number of barman backups exist.
 
-- haproxy
+-   haproxy
 
     Tasks related to haproxy.
 
-- harp
+-   harp
 
     Tasks related to harp.
 
-- patroni
+-   patroni
 
     Tasks related to patroni.
 
-- pem-agent
+-   pem-agent
 
     Tasks related to the PEM agent.
 
-- pem-server
+-   pem-server
 
     Tasks related to the PEM server.
 
-- pem-webserver
+-   pem-webserver
 
     Tasks related to configuring the web server on a PEM server.
 
-- pg-backup-api
+-   pg-backup-api
 
     Tasks related to Barman's Postgres backup API.
 
-- pgbouncer
+-   pgbouncer
 
     Tasks related to PgBouncer.
 
-- pgd-proxy
+-   pgd-proxy
 
     Tasks related to PGD Proxy.
 
-- pglogical
+-   pglogical
 
     Tasks related to pglogical.
 
-- pkg
+-   pkg
 
     Tasks which install packages using the system package manager.
 
-- post-deploy
+-   post-deploy
 
     The post-deploy hook, if one is defined.
 
-- postgres
+-   postgres
 
     Tasks related to postgres.
 
-- replica
+-   replica
 
     Tasks which are run and instances acting as postgres replicas.
 
-- repmgr
+-   repmgr
 
     Tasks related to repmgr.
 
-- restart
+-   restart
 
     Tasks which restart services
 
-- sys
+-   sys
 
     Tasks related to system setup before any tasks specific to postgres
     or related software.
 
-- zabbix-agent
+-   zabbix-agent
 
     Tasks related to the zabbix agent.
 
 The following selectors are supported only for exclusion:
 
-- artifacts
+-   artifacts
 
     Tasks related to [artifacts](artifacts.md).
 
-- barman-clean
+-   barman-clean
 
     Tasks which clean up the Barman build directory if Barman is being
     built from source.
 
-- barman-pre-config
+-   barman-pre-config
 
     The barman-pre-config hook, if one is defined.
 
-- bdr-pre-node-creation
+-   bdr-pre-node-creation
 
     The bdr-pre-node-creation hook, if one is defined.
 
-- bdr-post-group-creation
+-   bdr-post-group-creation
 
     The bdr-post-group-creation hook, if one is defined.
 
-- bdr-pre-group-join
+-   bdr-pre-group-join
 
     The bdr-pre-group-join hook, if one is defined.
 
-- bootstrap
+-   bootstrap
 
     Tasks which ensure that python and other minimal dependencies are
     present before the rest of the deploy runs. Exclude this only if you
     are sure you have manually installed the relevant requirements.
 
-- build-clean
+-   build-clean
 
     Tasks which clean up build directories for any software that is
     being built from source.
 
-- build-configure
+-   build-configure
 
     Tasks which configure any software that is being built from source.
 
-- cloudinit
+-   cloudinit
 
     Tasks which are run only on hosts managed by cloud-init.
 
-- commit-scopes
+-   commit-scopes
 
     Tasks related to configuration of BDR commit scopes.
 
-- config
+-   config
 
     Tasks which create config files.
 
-- efm-pre-config
+-   efm-pre-config
 
     The efm-pre-config hook, if one is defined.
 
-- fs
+-   efm-post-config
+
+    The efm-post-config hook, if one is defined.
+
+-   fs
 
     Tasks related to setting up additional [volumes](volumes.md) on
     instances.
 
-- hostkeys
+-   hostkeys
 
     Tasks which set up [ssh host keys](manage_ssh_hostkeys.md).
 
-- hostname
+-   hostname
 
     Tasks which set the hostname.
 
-- hosts
+-   hosts
 
     Tasks which [add entries to /etc/hosts](hosts.md)
 
-- initdb
+-   initdb
 
     Tasks which run initdb.
 
-- local-repo
+-   local-repo
 
     Tasks which set up [local package repositories](local-repo.md).
 
-- locale
+-   locale
 
     Tasks which install [locale support](locale.md).
 
-- openvpn
+-   openvpn
 
     Tasks which set up OpenVPN.
 
-- pg-backup-api-clean
+-   pg-backup-api-clean
 
     Tasks which clean up the build directory if the Postgres backup API
     is being built from source.
 
-- pgbouncer-config
+-   pgbouncer-config
 
     Tasks which create configuration files for pgbouncer.
 
-- pgpass
+-   pgpass
 
     Tasks which create the [.pgpass](pgpass.md) file.
 
-- post-repo
+-   post-repo
 
     The post-repo hook, if one is defined.
 
-- postgres-clean
+-   postgres-clean
 
     Tasks which clean up the build directory if postgres is being built
     from source.
 
-- postgres-config
+-   postgres-config
 
     The postgres-config hook, if one is defined.
 
-- postgres-config-final
+-   postgres-config-final
 
     The postgres-config-final hook, if one is defined.
 
-- pre-deploy
+-   pre-deploy
 
     The pre-deploy hook, if one is defined.
 
-- pre-initdb
+-   pre-initdb
 
     The pre-initdb hook, if one is defined.
 
-- replication-sets
+-   replication-sets
 
     Tasks related to witness-only replication sets on a BDR3 cluster.
 
-- repmgr-clean
+-   repmgr-clean
 
     Tasks which clean up the build directory if repmgr is being built
     from source.
 
-- repmgr-configure
+-   repmgr-configure
 
     Tasks which configure repmgr if it is being built from source.
 
-- repo
+-   repo
 
     Tasks which set up package repositories.
 
-- rsyslog
+-   rsyslog
 
     Tasks related to rsyslog.
 
-- service
+-   service
 
     Tasks related to system services, including configuration and
     restarting.
 
-- src
+-   src
 
     Tasks which build and install packages from source.
 
-- ssh
+-   ssh
 
     Tasks related to setting up ssh between instances.
 
-- sysctl
+-   sysctl
 
     Tasks which set and reload sysctl settings.
 
-- sysstat
+-   sysstat
 
     Tasks releated to the sysstat service.
 
-- tpa
+-   tpa
 
     Tasks related to TPA's own files installed on instances.
 
-- user
+-   user
 
     Tasks related to setting up system users.
 
-- watchdog
+-   watchdog
 
     Tasks related to the kernel watchdog on a patroni cluster.
 
@@ -346,28 +350,28 @@ The following selectors are supported only for exclusion:
 
 The following selectors apply only for execution of `tpaexec test`:
 
-- camo
+-   camo
 
     Tasks related to testing CAMO in a BDR or PGD cluster.
 
-- ddl
+-   ddl
 
     Tasks related to testing DDL in a BDR or PGD cluster.
 
-- fail
+-   fail
 
     Tasks which abort tests if a problem is detected. Exclude this
     selector to run tests regardless of failures.
 
-- pgbench
+-   pgbench
 
     Tasks which run pgbench.
 
-- sys
+-   sys
 
     Tasks which run system-level tests.
 
-- barman, bdr, haproxy, pg-backup-api, pgbouncer, pgd-proxy, postgres,
-  repmgr,
+-   barman, bdr, haproxy, pg-backup-api, pgbouncer, pgd-proxy, postgres,
+    repmgr,
 
     Tasks which test the various software components.

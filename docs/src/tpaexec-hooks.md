@@ -98,6 +98,16 @@ generating any efm configuration.
 
 An example use of this hook is to install efm helper scripts.
 
+### efm-post-config
+
+TPA invokes `hooks/efm-post-config.yml` at the exact end of
+configuration of EFM,
+after generating efm configuration, but before running other roles and
+finally restarting EFM.
+
+Examples of using this hook is to set custom taiilor'ed config, or
+change sudo permissions as by your environments requirements.
+
 ### harp-config
 
 TPA invokes `hooks/harp-config.yml` after generating HARP configuration
