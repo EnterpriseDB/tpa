@@ -1,0 +1,17 @@
+- summary: Remove support for old repositories
+  description: |
+    Now that the old 2q repositories and original EDB repositories are no
+    longer available, TPA will no longer try to use them or check for
+    configuration related to them.
+
+    All packages that were formerly available in those repositories are now
+    available in the EDB 2.0 repositories.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-544
+  - TPA-943
