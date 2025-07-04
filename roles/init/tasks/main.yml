@@ -92,8 +92,8 @@
 
 - include_role: name=patroni/facts
 
-# Decide which repositories we should use, and check that we have
-# whatever credentials we need to access them.
+# Check that we have EDB repositories defined and a token in the
+# environment, if we need them for this cluster.
 
 - include_tasks: repos.yml
   when: >
