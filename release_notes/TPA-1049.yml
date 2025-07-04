@@ -1,0 +1,12 @@
+- summary: Update architecture info for PGD 6 architectures
+  description: |
+    The PGD6 architectures now have correct metadata and therefore
+    appear as expected in the output of `tpaexec info architectures`
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: notable_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-1049
