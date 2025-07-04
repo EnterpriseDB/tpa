@@ -22,22 +22,11 @@ on what platforms are supported.
 
 ## Quickstart
 
-Login to [EDB Repos 2.0](https://www.enterprisedb.com/repos-downloads)
-to obtain your token. Then execute the following command, substituting
-your token for `<your-token>` and replacing `<your-plan>` with
-one of the following according to which EDB plan you are subscribed:
-`enterprise`, `standard`, `community360`, `postgres_distributed`.
+First, [subscribe to an EDB repository](https://www.enterprisedb.com/docs/repos/getting_started/).
 
-#### Add repository and install TPA on Debian or Ubuntu
+#### Install TPA
 ```bash
-curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/<your-plan>/setup.deb.sh' | sudo -E bash
-sudo apt-get install tpaexec
-```
-
-#### Add repository and install TPA on RHEL, Rocky, AlmaLinux or Oracle Linux
-```bash
-curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/<your-plan>/setup.rpm.sh' | sudo -E bash
-sudo yum install tpaexec
+sudo <your-package-manager> install tpaexec
 ```
 
 #### Install additional dependencies
@@ -65,30 +54,13 @@ directories are retained and available to your team for future cluster
 management or update. It also means you only have to update one copy of
 TPA and you only need to provide network access from a single TPA host
 to the target instances.
+
 ## Installing TPA packages
 
-To install TPA, you must first subscribe to an EDB repository that
-provides it. The preferred source for repositories is EDB Repos 2.0.
+To install TPA, you must first [subscribe to an EDB repository](https://www.enterprisedb.com/docs/repos/getting_started/).
+TPA is available in all EDB repositories. 
 
-Login to [EDB Repos 2.0](https://www.enterprisedb.com/repos-downloads)
-to obtain your token. Then execute the following command, substituting
-your token for `<your-token>` and replacing `<your-plan>` with
-one of the following according to which EDB plan you are subscribed:
-`enterprise`, `standard`, `community360`, `postgres_distributed`.
-
-#### Add repository on Debian or Ubuntu
-```bash
-curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/<your-plan>/setup.deb.sh' | sudo -E bash
-
-```
-
-#### Add repository on RHEL, Rocky, AlmaLinux or Oracle Linux
-```bash
-curl -1sLf 'https://downloads.enterprisedb.com/<your-token>/<your-plan>/setup.rpm.sh' | sudo -E bash
-```
-
-Once you have enabled one of these repositories, you may install TPA
-as follows:
+Install TPA as follows:
 
 #### Install on Debian or Ubuntu
 ```bash
@@ -96,7 +68,11 @@ sudo apt-get install tpaexec
 ```
 #### Install on RHEL, Rocky, AlmaLinux or Oracle Linux
 ```bash
-sudo yum install tpaexec
+sudo dnf install tpaexec
+```
+#### SLES
+```bash
+sudo zypper install tpaexec
 ```
 
 This will install TPA into `/opt/EDB/TPA`. It will also
@@ -158,7 +134,7 @@ To install TPA you need these packages:
 
 * tpaexec
 * tpaexec-deps
-* edb-python39
+* edb-python312
 
 Once you have transferred the downloaded packages to the target server,
 you must install them using the appropriate tool for your platform.
