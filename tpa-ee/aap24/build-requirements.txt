@@ -8,13 +8,13 @@ ansible-builder==3.1.0
     # via
     #   -r tpa-ee/aap24/build-requirements.in
     #   ansible-navigator
-ansible-compat==25.5.0
+ansible-compat==25.6.0
     # via ansible-lint
 ansible-core==2.18.6
     # via
     #   ansible-compat
     #   ansible-lint
-ansible-lint==25.5.0
+ansible-lint==25.6.1
     # via ansible-navigator
 ansible-navigator==25.5.0
     # via -r tpa-ee/aap24/build-requirements.in
@@ -28,7 +28,7 @@ bindep==2.13.0
     # via ansible-builder
 black==25.1.0
     # via ansible-lint
-bracex==2.5.post1
+bracex==2.6
     # via wcmatch
 cffi==1.17.1
     # via
@@ -36,7 +36,7 @@ cffi==1.17.1
     #   onigurumacffi
 click==8.2.1
     # via black
-cryptography==45.0.4
+cryptography==45.0.5
     # via ansible-core
 distro==1.9.0
     # via bindep
@@ -108,7 +108,7 @@ referencing==0.36.2
     #   jsonschema-specifications
 resolvelib==1.0.1
     # via ansible-core
-rpds-py==0.25.1
+rpds-py==0.26.0
     # via
     #   jsonschema
     #   referencing
@@ -120,11 +120,11 @@ subprocess-tee==0.4.2
     # via
     #   ansible-compat
     #   ansible-lint
-typing-extensions==4.14.0
+typing-extensions==4.14.1
     # via referencing
 tzdata==2025.2
     # via ansible-navigator
-wcmatch==10.0
+wcmatch==10.1
     # via ansible-lint
 yamllint==1.37.1
     # via ansible-lint

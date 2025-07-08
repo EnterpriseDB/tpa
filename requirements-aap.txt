@@ -6,13 +6,13 @@
 #
 ansible-core==2.16.14
     # via -r requirements.in
-boto3==1.38.34
+boto3==1.39.3
     # via -r requirements.in
-botocore==1.38.34
+botocore==1.39.3
     # via
     #   boto3
     #   s3transfer
-certifi==2025.4.26
+certifi==2025.6.15
     # via
     #   -r requirements.in
     #   requests
@@ -20,7 +20,7 @@ cffi==1.17.1
     # via cryptography
 charset-normalizer==3.4.2
     # via requests
-cryptography==45.0.4
+cryptography==45.0.5
     # via
     #   -r requirements.in
     #   ansible-core
@@ -33,7 +33,7 @@ jaraco-classes==3.4.0
     # via keyring
 jaraco-context==6.0.1
     # via keyring
-jaraco-functools==4.1.0
+jaraco-functools==4.2.1
     # via keyring
 jeepney==0.9.0
     # via
@@ -83,7 +83,7 @@ secretstorage==3.3.3
     # via keyring
 six==1.17.0
     # via python-dateutil
-urllib3==2.4.0
+urllib3==2.5.0
     # via
     #   botocore
     #   docker
