@@ -151,12 +151,12 @@ class aws(CloudPlatform):
                 }
             },
             "ubuntu": {
-                "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20250210": {
+                "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20250624": {
                     "versions": ["20.04", "focal"],
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20250112": {
+                "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20250516": {
                     "versions": [
                         "22.04",
                         "jammy",
@@ -164,7 +164,7 @@ class aws(CloudPlatform):
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20240801": {
+                "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250627": {
                     "versions": [
                         "24.04",
                         "noble",
