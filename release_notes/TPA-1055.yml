@@ -1,0 +1,17 @@
+- summary: Document node promotability logic and the `efm-not-promotable` role for EFM
+  description: |
+    Add a new section to the `efm.md` documentation that explains how TPA
+    determines whether a node is eligible for promotion during failover. The
+    update clarifies the rules for promotability, including the roles of
+    witness nodes, cascading standbys, and nodes explicitly marked with the
+    `efm-not-promotable` role. This enhancement should help users understand
+    and control failover behavior, reducing the risk of unintended promotions
+    in EFM-managed clusters.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+    - TPA-1055
