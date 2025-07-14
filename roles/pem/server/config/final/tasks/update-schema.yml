@@ -14,7 +14,7 @@
   set_fact:
     pem_supported_schema_version: "{{ supported_schema_version_check.stdout }}"
 
-- name: Execute pemserver.sql and postgresexpert.sql
+- name: Check PEM schema version in database
   command: >
     {{ postgres_bin_dir }}/psql \
       -p {{ postgres_port }} \
