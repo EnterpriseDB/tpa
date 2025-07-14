@@ -1,7 +1,5 @@
 ---
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
-- package_facts:
-    manager: auto
 
 - include_tasks: configure_httpd_module.yml
 

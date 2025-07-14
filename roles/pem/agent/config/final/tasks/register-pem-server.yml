@@ -45,7 +45,7 @@
   become_user: "{{ postgres_user }}"
   delegate_to: "{{ pem_server }}"
   become: yes
-  when: "{{  not pem_is_v10_1_1_or_higher }}"
+  when: not pem_is_v10_1_1_or_higher
 
 # For PEM >= 10.1.1 the server_ssl column is no longer present
 - name: Register PEM backend database server for monitoring and configuration
@@ -55,7 +55,7 @@
     - text: >
         SELECT pem.startup(server_desc := %s, server_name := %s,
           server_host := %s, server_port := %s, server_database := %s,
-          server_ssl := %s, user_name := %s, passwd := %s, ser_group := %s,
+          user_name := %s, passwd := %s, ser_group := %s,
           agentid := %s, agent_database := %s)
       args:
       - "{{ pem_server_description }}"  # server_desc
@@ -71,7 +71,7 @@
   become_user: "{{ postgres_user }}"
   delegate_to: "{{ pem_server }}"
   become: yes
-  when: "{{  pem_is_v10_1_1_or_higher }}"
+  when: pem_is_v10_1_1_or_higher
 
 # After calling pem.startup(), we must execute some SQL directly on the
 # PEM server to complete server registration. (We use a unique filename
