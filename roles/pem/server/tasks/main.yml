@@ -7,23 +7,8 @@
   when: >
     task_selector|selects('pem-server', 'pkg')
 
-# We use the system's python interpreter to execute Python scripts that
-# are bundled with PEM versions before 9.0. With newer versions of PEM,
-# we must use the PEM-bundled python interpreter instead. The location
-# may vary across platforms, but configure-pem-server.sh is always in
-# the same place, and points to the correct path.
-
-- block:
-  - name: Determine PEM python interpreter path
-    shell: >
-      eval $(grep -E '^(PEM_PYTHON|PEM_PYTHON_EXECUTABLE)=' /usr/edb/pem/bin/configure-pem-server.sh);
-      echo ${PEM_PYTHON_EXECUTABLE:-$(command -v python3)}
-    args:
-      executable: /bin/bash
-    register: find_pem_python
-
-  - set_fact:
-      pem_python_executable: "{{ find_pem_python.stdout }}"
+- include_role:
+    name: pem/facts
   when: >
     task_selector|selects('pem-server', 'pem-webserver')
 

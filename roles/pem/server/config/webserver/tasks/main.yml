@@ -3,23 +3,6 @@
 - package_facts:
     manager: auto
 
-- set_fact:
-    pem_version: "{{ ansible_facts.packages['edb-pem'][0]['version']|split('-')|first }}"
-
-# Now, let's dig a bit deeper and find the *exact* PEM schema version. We do
-# this by checking the latest SQL upgrade script – it's more precise than
-# just the package version. This helps us pinpoint if we're truly on PEM 10.1
-# or something newer (e.g., by checking against a schema number like
-# '202505151'). Why bother? Because of TPA-1009: newer PEM versions need
-# their PEM_DB_PORT
-# in config_setup.py to be a string, not just a plain number.
-
-# Ideally I would have liked a better way e.g. a cli query. Unfortunately
-# this is what we have at the moment and it serves the purpose for now.
-- name: Discover PEM schema version
-  shell: ls /usr/edb/pem/share/upgrades/*.sql | sort -r | head -n 1 | sed 's/\.sql$//' | xargs basename
-  register: pem_schema_version
-
 - include_tasks: configure_httpd_module.yml
 
 - include_role: name=postgres/createuser
@@ -59,12 +42,6 @@
   shell: hexdump -n 4 -e '4/4 "%08X" 1 "\n"' /dev/random | head -c 6
   register: session_cookie_hexstring
 
-# Here, we're setting a flag, 'above_pem10_1'. It's true if the schema
-# version we found tells us this is PEM 10.1 or newer.
-# (That '202505151' number? Think of it as the schema version that marks
-# the start of PEM 10.1 features we care about here).
-# This flag then tells our config_setup.py.j2 template whether to
-# wrap PEM_DB_PORT in quotes, making it a string for the newer PEMs,
 - name: Generate config_setup.py
   template:
     src: config_setup.py.j2
@@ -72,8 +49,6 @@
     owner: root
     group: root
     mode: "0644"
-  vars:
-    above_pem10_1: "{{  pem_schema_version.stdout | int >= 202505151 }}"
 
 - name: Copy over user-provided pem server SSL certificate
   copy:
@@ -138,11 +113,10 @@
 - include_tasks: pem_sites.yml
 
 - name: Run setup.py to create pem.db
-  command: "{{ pem_python_executable }} /usr/edb/pem/web/setup.py {{above_pem10|ternary(pem10_command, '') }}"
+  command: "{{ pem_python_executable }} /usr/edb/pem/web/setup.py {{pem_is_v10_or_higher|ternary(pem10_command, '') }}"
   become_user: pem
   become: yes
   vars:
-    above_pem10: "{{  pem_schema_version.stdout | int >= 202503241 }}"
     pem10_command: setup-db
 
 - name: Configure SELinux security policy for PEM
