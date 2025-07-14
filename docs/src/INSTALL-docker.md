@@ -23,47 +23,39 @@ and build a new Docker image named `tpa/tpaexec`:
 
 ```bash
 $ git clone ssh://git@github.com/EnterpriseDB/tpa.git
-$ cd tpa/docker
-$ docker build -t tpa/tpaexec .
+$ cd tpa
+$ docker build -f docker/Dockerfile --build-arg TPA_VER=$(git describe) -t tpaexec:latest .
 ```
 
 Double-check the created image:
 
 ```bash
-$ docker image ls tpa/tpaexec
-REPOSITORY    TAG       IMAGE ID       CREATED         SIZE
-tpa/tpaexec   latest    e145cf8276fb   8 seconds ago   1.73GB
-$ docker run --platform=linux/amd64 --rm tpa/tpaexec tpaexec info
-# TPAexec v20.11-59-g85a62fe3 (branch: master)
+$ docker image ls tpaexec
+REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
+tpaexec      latest    3943dec4d660   20 minutes ago   658MB
+
+$ docker run --rm tpaexec info
+# TPAexec v23.38.0-38-g4dc030dc1
 tpaexec=/usr/local/bin/tpaexec
 TPA_DIR=/opt/EDB/TPA
-PYTHON=/opt/EDB/TPA/tpa-venv/bin/python3 (v3.7.3, venv)
+PYTHON=/opt/EDB/TPA/tpa-venv/bin/python3 (v3.13.5, venv)
 TPA_VENV=/opt/EDB/TPA/tpa-venv
-ANSIBLE=/opt/EDB/TPA/tpa-venv/bin/ansible (v2.8.15)
+ANSIBLE=/opt/EDB/TPA/tpa-venv/bin/ansible (v2.16.14)
 ```
 
-Create a TPA container and make your cluster configuration directories
-available inside the container:
-
-```bash
-$ docker run --platform=linux/amd64 --rm -v ~/clusters:/clusters \
-    -it tpa/tpaexec:latest
-```
-
-You can now run commands like `tpaexec provision /clusters/speedy` at the
-container prompt. (When you exit the shell, the container will be removed.)
-
-If you want to provision Docker containers using TPA, you must also allow
-the container to access the Docker control socket on the host:
+Then you need to setup an alias for `tpaexec` on the shell session you are
+running:
 
 ```
-$ docker run --platform=linux/amd64 --rm -v ~/clusters:/clusters \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -it tpa/tpaexec:latest
+alias tpaexec="docker run --rm -v $PWD:/work -v /var/run/docker.sock:/var/run/docker.sock tpaexec"
 ```
 
-Run `docker ps` within the container to make sure that your connection to the
-host Docker daemon is working.
+Now you can run commands like:
+
+```
+$ tpaexec configure cluster -a M1 --postgresql 15 --failover-manager patroni --platform docker
+$ tpaexec deploy cluster
+```
 
 ## Installing Docker
 

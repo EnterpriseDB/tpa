@@ -1,0 +1,23 @@
+- summary: Fix usability and improve reliability of the TPA Docker image
+  description: |
+    - Upgraded Base Image to Debian Trixie to meet TPA’s Python 3.12 minimum
+      requirement, ensuring compatibility with modern dependencies.
+    - Removed `--use-community-ansible` flag as it is no longer supported.
+    - Included the `openssh-client` package to prevent `tpaexec` failures due
+      to missing `ssh-keygen`, enhancing out-of-the-box functionality.
+    - Introduced Build-Time Versioning: Added an `ARG` variable to pass the
+      output of `git describe` from the host during build, storing it as
+      `/opt/EDB/TPA/VERSION` for improved version tracking.
+    - Revised `docker/README.md` and `docs/src/INSTALL-docker.md` to reflect
+      the latest setup instructions and best practices.
+
+    These changes enhance the TPA Docker image’s compatibility, stability, and
+    ease of use.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+    - TPA-1097
