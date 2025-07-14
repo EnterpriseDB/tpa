@@ -5,7 +5,26 @@
 # If we haven't already done so, we must run some SQL scripts to set up
 # the contents of the pem_database.
 
-# TODO: postgresexpert was deprecated in PEM 10
+# Same check used in roles /pem/server/config/webserver/tasks/main.yml
+# and roles/pem/agent/config/final/tasks/register-pem-server.yml
+# to infer the exact version of PEM installed by checking the schema version
+- name: Discover PEM schema version
+  shell: ls /usr/edb/pem/share/upgrades/*.sql | sort -r | head -n 1 | sed 's/\.sql$//' | xargs basename
+  register: pem_schema_version
+
+# postgres expert was deprecated in PEM 10
+# so we use the schema here to omit it in that case
+- name: Execute pemserver.sql
+  command: >
+    {{ postgres_bin_dir }}/psql -a \
+      -p {{ postgres_port }} \
+      -U {{ postgres_user }} \
+      -d {{ pem_database }} \
+      -f {{ pem_base_dir }}/share/pemserver.sql \
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when: "{{  pem_schema_version.stdout | int >= 202503241 }}"
+
 - name: Execute pemserver.sql and postgresexpert.sql
   command: >
     {{ postgres_bin_dir }}/psql -a \
@@ -16,6 +35,7 @@
       -f {{ pem_base_dir }}/share/postgresexpert.sql
   become_user: "{{ postgres_user }}"
   become: yes
+  when: "{{  pem_schema_version.stdout | int < 202503241 }}"
 
 - name: Grant role pem_admin to current user
   postgresql_query:
