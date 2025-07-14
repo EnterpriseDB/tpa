@@ -16,6 +16,15 @@
   register: enc_password
   no_log: true
 
+
+# Use the same check we use in roles/pem/server/config/webserver/tasks/main.yml
+# to retrieve the schema version which corresponds to the exactly PEM version installed
+- name: Discover PEM schema version
+  shell: ls /usr/edb/pem/share/upgrades/*.sql | sort -r | head -n 1 | sed 's/\.sql$//' | xargs basename
+  delegate_to: "{{ pem_server }}"
+  register: pem_schema_version
+
+# For PEM < 10.1.1 we need to include the server_ssl column
 - name: Register PEM backend database server for monitoring and configuration
   postgresql_query:
     conninfo: "{{ hostvars[pem_server].node_dsn|dbname(hostvars[pem_server].pem_database) }}"
@@ -40,6 +49,33 @@
   become_user: "{{ postgres_user }}"
   delegate_to: "{{ pem_server }}"
   become: yes
+  when: "{{  pem_schema_version.stdout | int <= 202505151 }}"
+
+# For PEM >= 10.1.1 the server_ssl column is no longer present
+- name: Register PEM backend database server for monitoring and configuration
+  postgresql_query:
+    conninfo: "{{ hostvars[pem_server].node_dsn|dbname(hostvars[pem_server].pem_database) }}"
+    queries:
+    - text: >
+        SELECT pem.startup(server_desc := %s, server_name := %s,
+          server_host := %s, server_port := %s, server_database := %s,
+          server_ssl := %s, user_name := %s, passwd := %s, ser_group := %s,
+          agentid := %s, agent_database := %s)
+      args:
+      - "{{ pem_server_description }}"  # server_desc
+      - "{{ inventory_hostname }}"      # server_name
+      - "{{ inventory_hostname }}"      # server_host
+      - "{{ postgres_port }}"           # server_port
+      - "{{ pem_database }}"            # server_database
+      - "{{ postgres_user }}"           # user_name
+      - "{{ enc_password.stdout }}"     # passwd
+      - "{{ pem_server_group }}"        # ser_group
+      - "{{ pem_agent_id }}"            # agentid
+      - "pem"                           # agent_database
+  become_user: "{{ postgres_user }}"
+  delegate_to: "{{ pem_server }}"
+  become: yes
+  when: "{{  pem_schema_version.stdout | int > 202505151 }}"
 
 # After calling pem.startup(), we must execute some SQL directly on the
 # PEM server to complete server registration. (We use a unique filename
