@@ -5,6 +5,7 @@
 # If we haven't already done so, we must run some SQL scripts to set up
 # the contents of the pem_database.
 
+# TODO: postgresexpert was deprecated in PEM 10
 - name: Execute pemserver.sql and postgresexpert.sql
   command: >
     {{ postgres_bin_dir }}/psql -a \
