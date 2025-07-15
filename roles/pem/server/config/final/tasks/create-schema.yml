@@ -16,7 +16,7 @@
       -f {{ pem_base_dir }}/share/pemserver.sql \
   become_user: "{{ postgres_user }}"
   become: yes
-  when: "{{  pem_is_v10_or_higher }}"
+  when: pem_is_v10_or_higher
 
 - name: Execute pemserver.sql and postgresexpert.sql
   command: >
@@ -28,7 +28,7 @@
       -f {{ pem_base_dir }}/share/postgresexpert.sql
   become_user: "{{ postgres_user }}"
   become: yes
-  when: "{{  pem_is_v10_or_higher }}"
+  when: not pem_is_v10_or_higher
 
 - name: Grant role pem_admin to current user
   postgresql_query:
