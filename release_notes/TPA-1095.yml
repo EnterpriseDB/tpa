@@ -1,0 +1,20 @@
+- summary: | 
+    Fixed an issue whereby PEM deployment would fail with PEM 10.1.1
+  description: |
+    The TPA task `Register PEM backend database server for monitoring
+    and configuration` explicitly calls the `pem.setup` SQL function.
+    This is not considered part of the public API of PEM and the
+    signature changed between 10.1.0 and 10.1.1 causing TPA\s call to
+    this function to fail.
+
+    This fix addresses the issue by adjusting the function call
+    according to the installed PEM server version. To accommodate this
+    change we have introduced a new `pem/server/facts` Ansible role that
+    is responsible for collecting facts about the installed PEM version.
+    This also means that TPA will no longer attempt to run
+    `postgresexpert.sql` on PEM 10, where Postgres Expert is no longer
+    present.
+
+  type: bugfix
+  jira_tickets:
+  - TPA-1095
