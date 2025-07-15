@@ -1,0 +1,10 @@
+- summary: Correctly configure ignore_slots for patroni clusters with multiple Barman servers
+  description: |
+    For Patroni clusters TPA will now dynamically generate the ignore_slots
+    setting corresponding to Barman nodes in the cluster. This change ensures
+    that Patroni will not remove the phyical slots created for each of the
+    Barman nodes. This is especially important for the Patroni clusters with
+    more than one backup servers; including shared Barman nodes for example.
+  type: bugfix
+  jira_tickets:
+    - TPA-1087
