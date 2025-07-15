@@ -18,7 +18,7 @@
 
 # TODO: not absolutely sure we need this?
 - include_role:
-    name: pem/facts
+    name: pem/server/facts
 
 # For PEM < 10.1.1 we need to include the server_ssl column
 - name: Register PEM backend database server for monitoring and configuration

@@ -8,7 +8,7 @@
     task_selector|selects('pem-server', 'pkg')
 
 - include_role:
-    name: pem/facts
+    name: pem/server/facts
   when: >
     task_selector|selects('pem-server', 'pem-webserver')
 
