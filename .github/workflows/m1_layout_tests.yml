@@ -35,7 +35,7 @@ jobs:
         key: m1_layouts
 
   integration-test:
-    name: Integration test
+    name: ${{ matrix.layout.tpa_layout_name }} ${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }} ${{ matrix.tpa_failover_manager }}
     needs: load-matrix
     strategy:
       fail-fast: false

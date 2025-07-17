@@ -61,9 +61,11 @@ jobs:
           && github.event.review.state == 'approved'
           && startsWith(github.event.pull_request.base.ref, 'main'))
       || github.event_name == 'workflow_dispatch'
-    # env not supported here
-    # || env.ACT
-    name: Integration test
+
+    name: >
+      ${{ matrix.tpa_architecture }}
+      ${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}
+      ${{ matrix.tpa_failover_manager }}
     needs: load-matrix
     strategy:
       fail-fast: false

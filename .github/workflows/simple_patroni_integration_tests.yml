@@ -37,7 +37,9 @@ jobs:
           key: patroni
 
   integration-test:
-    name: Integration test
+    name: >
+      ${{ matrix.tpa_os_image }}
+      ${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}
     needs: load-matrix
     strategy:
       fail-fast: false

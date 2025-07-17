@@ -38,7 +38,7 @@ jobs:
         key: default
 
   integration-test:
-    name: Integration Tests
+    name: ${{ matrix.tpa_architecture }} ${{ matrix.tpa_failover_manager }} ${{ matrix.tpa_postgres_flavour }} ${{ matrix.tpa_postgres_version }} ${{ matrix.tpa_os_image }} ${{ matrix.cpu_architecture }}
     needs: load-matrix
     strategy:
       fail-fast: false

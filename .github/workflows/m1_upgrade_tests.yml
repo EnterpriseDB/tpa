@@ -87,7 +87,11 @@ jobs:
           key: ${{ github.event.inputs.matrix_key }}
 
   integration-test:
-    name: Matrix Upgrade test
+    name: >
+      ${{ matrix.tpa_os_image && matrix.tpa_os_image || github.event.inputs.tpa_os_image }}
+      ${{ matrix.tpa_failover_manager }}
+      ${{ matrix.tpa_postgres_flavour && matrix.tpa_postgres_flavour || github.event.inputs.tpa_postgres_flavour }}
+      ${{ matrix.tpa_postgres_version && matrix.tpa_postgres_version || github.event.inputs.tpa_postgres_version }}
     needs: load-matrix
     strategy:
       fail-fast: false

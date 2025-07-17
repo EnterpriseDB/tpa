@@ -104,7 +104,12 @@ env:
 jobs:
 
   integration-test:
-    name: Integration test
+    name: >
+      ${{ github.event.inputs.tpa_architecture }}
+      ${{ github.event.inputs.tpa_os_image}}
+      ${{ github.event.inputs.tpa_postgres_flavour }}-${{ github.event.inputs.tpa_postgres_version }}
+      ${{ github.event.inputs.cpu_architecture }}
+      ${{ github.event.inputs.tpa_architecture == 'M1' && github.event.inputs.tpa_failover_manager || ''}}
 
     runs-on: ubuntu-22.04
 
