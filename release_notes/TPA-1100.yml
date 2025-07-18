@@ -1,0 +1,17 @@
+- summary: Add `replication` user to .pgpass on primary node
+  description: |
+    The `replication_user` entry is required the `.pgpass` file for both
+    `replica` and `primary` nodes managed by either `efm` or `patroni` as
+    the `failover_manager`. Previously, it was only added to the .pgass file
+    for `replica` nodes, resulting in connection issues to the primary
+    node after a switchover.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-1100
+  - TPA-1075
+  - TPA-158

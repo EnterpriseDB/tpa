@@ -23,9 +23,8 @@
   vars:
     pgpass_users:
       - "{{ replication_user }}"
-  when: >
-    'replica' in role
-
+  when: 
+    role|intersect(['primary','replica'])
 
 - include_role:
     name: patroni/config
