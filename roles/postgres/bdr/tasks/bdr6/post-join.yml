@@ -142,3 +142,5 @@
       or item.name == bdr_node_group
     - this_group_facts is empty
       or this_group_facts[0].enable_routing != enable_routing
+    - this_group_facts is empty
+      or this_group_facts[0].node_group_type != 'subscriber-only'

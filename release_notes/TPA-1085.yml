@@ -1,0 +1,16 @@
+- summary: Do not attempt to enable routing for subscriber-only groups
+  description: |
+      Previously, TPA would mistakenly try to enable routing for subscriber-only groups
+      during PGD6 deployments. This property is not editable anymore as it forms core part of the
+      definition of subscriber-only groups in PGD6.
+
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-1085
+  support_tickets:
+  - RT49673
