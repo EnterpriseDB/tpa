@@ -7,7 +7,9 @@
 
 - name: Execute pemserver.sql
   community.postgresql.postgresql_script:
-    connect_params: "{{ dsn|dbname(pem_database) }}"
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    login_db: "{{ pem_database }}"
     path: "{{ pem_base_dir }}/share/pemserver.sql"
   become_user: "{{ postgres_user }}"
   become: yes
@@ -16,7 +18,9 @@
 # so we only need to set it up for older versions
 - name: Execute postgresexpert.sql
   community.postgresql.postgresql_script:
-    connect_params: "{{ dsn|dbname(pem_database) }}"
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    login_db: "{{ pem_database }}"
     path: "{{ pem_base_dir }}/share/postgresexpert.sql"
   become_user: "{{ postgres_user }}"
   become: yes

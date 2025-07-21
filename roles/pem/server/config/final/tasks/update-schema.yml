@@ -40,7 +40,9 @@
 
     - name: Upgrading the schema
       community.postgresql.postgresql_script:
-        connect_params: "{{ dsn|dbname(pem_database) }}"
+        port: "{{ postgres_port }}"
+        login_user: "{{ postgres_user}}"
+        login_db: "{{ pem_database}}"
         path: "{{ item }}"
       become_user: "{{ postgres_user }}"
       become: yes
