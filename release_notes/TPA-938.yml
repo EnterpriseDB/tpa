@@ -1,0 +1,12 @@
+- summary: Define pgd cli and proxy variables
+  description: |
+    If those variables are not defined, the latests versions are going to
+    be installed. However, that is not the desired behaviour in some cases.
+    For any BDR customers, it is necessary to use the same version defined
+    in the `bdr_package_version` variable.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  jira_tickets:
+  - TPA-938
+  support_tickets:
+  - RT49150

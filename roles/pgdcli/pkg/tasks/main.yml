@@ -2,6 +2,16 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+# For most BDR customers, it's almost certain that bdr_package_version
+# is defined. This task avoids the need to define pgdcli_package_version in
+# config.yml
+- name: Define pdgcli package version if not defined in config.yml
+  set_fact:
+    pgdcli_package_version: "{{ bdr_package_version }}"
+  when: >
+    pgdcli_package_version is not defined
+    and bdr_package_version is defined
+
 - include_tasks: list-packages.yml
   vars:
     list_varname: _all_pgdcli_packages
