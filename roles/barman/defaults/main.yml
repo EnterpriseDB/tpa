@@ -21,6 +21,11 @@ default_barman_basebackup_retry_sleep: 30
 
 default_barman_minimum_redundancy: 3
 default_barman_retention_policy: RECOVERY WINDOW OF 4 WEEKS
+default_barman_role_attrs:
+  - NOSUPERUSER
+  - NOCREATEDB
+  - NOLOGIN
+
 default_barman_last_backup_maximum_age: 1 WEEK
 
 ## Automatic backup schedule

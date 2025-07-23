@@ -28,6 +28,8 @@
         privs: EXECUTE
         objs: pg_backup_stop(boolean)
         schema: pg_catalog
+      - type: group
+        objs: pg_checkpoint
     lt_15:
       - type: function
         privs: EXECUTE
