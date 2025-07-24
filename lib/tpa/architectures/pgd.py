@@ -37,22 +37,35 @@ class PGD(Architecture):
             default="bdrdb",
         )
         g.add_argument(
-            "--cluster_prefixed_hostnames",
-            help="Add the cluster name as a prefix to instance hostnames",
-            action="store_true",
+            "--use-https",
+            action="store_const",
+            const=True,
+            default=None,
+            help="enable https for Connection Manager's REST API",
         )
-        if self.name != "Lightweight":
-            g.add_argument(
-                "--enable-camo",
-                action="store_true",
-                help="assign instances pairwise as CAMO partners",
-            )
+        g.add_argument(
+            "--read-write-port",
+            type=int,
+            dest="read_write_port",
+            help="read-write port for Connection Manager",
+        )
+        g.add_argument(
+            "--read-only-port",
+            type=int,
+            dest="read_only_port",
+            help="read-only port for Connection Manager",
+        )
+        g.add_argument(
+            "--http-port",
+            type=int,
+            dest="http_port",
+            help="http port for Connection Manager",
+        )
 
     def cluster_vars_args(self):
         return super().cluster_vars_args() + [
             "bdr_version",
             "bdr_database",
-            "harp_consensus_protocol",
         ]
 
     def update_cluster_vars(self, cluster_vars):
@@ -70,7 +83,6 @@ class PGD(Architecture):
         postgres_flavour = self.args.get("postgres_flavour")
         postgres_version = self.args.get("postgres_version")
         bdr_version = self.args.get("bdr_version")
-        harp_enabled = self.args.get("failover_manager") == "harp"
 
         arch = self.args["architecture"]
         default_bdr_versions = {
@@ -123,6 +135,23 @@ class PGD(Architecture):
         # cluster name setting matching the node group name.
         self.args["bdr_node_group"] = self.bdr_safe_name(self.cluster_name())
         cluster_vars.update({"bdr_node_group": self.args["bdr_node_group"]})
+
+        bdr_node_group_options = {}
+        for opt in ["read_write_port", "read_only_port", "http_port", "use_https"]:
+            if self.args[opt] is not None:
+                bdr_node_group_options[opt] = self.args[opt]
+
+        # we only need to populate bdr_node_groups if there are any options
+        # to put in it
+        if bdr_node_group_options != {}:
+            cluster_vars.update(
+                {
+                    "bdr_node_groups": [{
+                        "name": self.bdr_safe_name(self.cluster_name()),
+                        "options": bdr_node_group_options,
+                    }]
+                }
+            )
 
     def bdr_safe_name(self, name):
         """

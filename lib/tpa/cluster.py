@@ -115,11 +115,13 @@ class Cluster:
         self._locations.append(loc)
         return loc
 
-    def add_instance(self, instance_name: str, **kwargs):
+    def add_instance(self, instance_name: str, roles: List = [], **kwargs):
         """Creates an instance with the given name, add it to this cluster, and
         return the new instance"""
         if instance_name not in self.instances.get_names():
             i = Instance(instance_name, cluster=self, **kwargs)
+            for r in roles:
+                i.add_role(r)
             self._instances.append(i)
             return i
         else:

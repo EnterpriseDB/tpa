@@ -80,7 +80,7 @@
 
 - name: Set default bdr_node_groups if needed
   set_fact:
-    bdr_node_groups: ["{{ _default_group }}"]
+    bdr_node_groups: [ "{{ _default_group }}" ]
   when:
     bdr_node_groups is not defined
   vars:

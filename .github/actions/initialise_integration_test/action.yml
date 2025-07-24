@@ -137,16 +137,9 @@ runs:
             --pgd-proxy-routing local
             --add-witness-only-location c
           )
-        elif [ "{{ inputs.tpa_architecture }}" == "PGD-S" ]; then
-          if [ "${{ inputs.tpa_layout }}" == "near-far"]; then
-            CONFIGURE_OPTS+=(
-              --layout near-far
-              --location-names a b
-            )
-          else
-            CONFIGURE_OPTS+=(
-              --layout standard
-            )
+        elif [ $"{{ inputs.tpa_architecture }}" == "PGD-S" ]; then
+          if [ -n "${{ inputs.tpa_layout }}"]; then
+            CONFIGURE_OPTS+=(--layout "{{ inputs.tpa_layout }}")
           fi
         fi
         if [ -n "${{ inputs.tpa_os }}" ] ;then
