@@ -49,6 +49,9 @@ class PGDS(PGD):
         """
         base_repos = set(super().default_edb_repos(cluster_vars))
         base_repos.discard("standard")
+        # eventually, PGD-S will be available in the "enterprise" repo, but for
+        # now we also need postgres_distributed
+        return list(base_repos.union(["enterprise", "postgres_distributed"]))
 
     def validate_arguments(self, args, platform):
         super().validate_arguments(args, platform)
