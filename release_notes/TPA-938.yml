@@ -1,9 +1,12 @@
-- summary: Define pgd cli and proxy variables
+- summary: Use bdr_package_version as default pgd proxy version
   description: |
-    If those variables are not defined, the latests versions are going to
-    be installed. However, that is not the desired behaviour in some cases.
-    For any BDR customers, it is necessary to use the same version defined
-    in the `bdr_package_version` variable.
+    pgd_proxy_package_version and pgdcli_package_version may be explicitly
+    defined in config.yml; if they are not explicitly defined, they now
+    default to the value of bdr_package_version, if it is set. If none of
+    them is set, the latest available versions of packages are installed.
+
+    Setting these package versions to different values is not supported and
+    is only useful for testing.
   # Possible types: notable_change, minor_change, bugfix or breaking_change
   type: bugfix
   jira_tickets:
