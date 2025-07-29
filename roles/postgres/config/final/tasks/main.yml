@@ -34,12 +34,20 @@
 # on the other nodes in the next step to ensure uniqueness of the SCRAM password value
 # across the cluster.
 # This is required for PGD6 and its connection manager to do SCRAM-passthrough
+# Also, because there could be multiple postgres_users defined in multiple hosts and not
+# at cluster level only, we merge all postgres_users from ansible hostvars.
 - set_fact:
     encrypted_passwords: >
       {{
         encrypted_passwords|default({})|combine({secret_name: encrypted_password})
       }}
   vars:
+    merged_postgres_users: "{{
+            postgres_users
+            |community.general.lists_mergeby(ansible_play_hosts
+              |map('extract', hostvars, 'postgres_users'), 'username'
+             )
+          }}"
     secret_name: >-
       {{ item.username }}_password
     generated_password: >-
@@ -51,7 +59,7 @@
         generated_password, item.username, existing_password=existing_password
       )
       }}"
-  with_items: "{{ postgres_users }}"
+  with_items: "{{ merged_postgres_users }}"
   run_once: true
 # After the required passwords are generated, we can create users with a
 # password encrypted according to the entry's `password_encryption`, or
