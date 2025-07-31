@@ -131,7 +131,6 @@ runs:
       shell: bash {0}
 
     - name: Deploy the cluster
-      if: ${{ inputs.cpu_architecture != 's390x' }}
       working-directory: ${{ inputs.source_directory }}
       run: |
         TEMP_BUFFER=""
@@ -161,7 +160,6 @@ runs:
       shell: bash {0}
 
     - name: Test the cluster
-      if: ${{ inputs.cpu_architecture != 's390x' }}
       working-directory: ${{ inputs.source_directory }}
       run: |
         TEMP_BUFFER=""
