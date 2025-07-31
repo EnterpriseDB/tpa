@@ -4,6 +4,10 @@ name: Initialise Integration Test
 description: Install requirements and run configure for integration test for the given architecture and platform
 
 inputs:
+  cpu_architecture:
+    description: "CPU the native Executor will pick"
+    required: false
+    default: amd64
   source_directory:
     description: "Directory where tpaexec source code is checked out on runner"
     required: true
@@ -228,18 +232,28 @@ runs:
         : "${IMAGE_OS:=${image_os_base/tpa\/}}"
         # Set a default IMAGE_OS_VERSION to be the docker image tag or "latest" if it's not set
         : "${IMAGE_VERSION:=${image_ver:-latest}}"
-        # TEMPORARY Need to be changed once PGD6 packages are available on prod repos
-        if [[ "${{ inputs.tpa_architecture }}" == "PGD-X" ]] ;then
-          CONFIGURE_OPTS+=(
-              --edb-repositories enterprise staging_postgres_distributed
+
+        if [[ "${{ inputs.tpa_architecture }}" =~ ^PGD-(X|S)$ ]]; then
+          declare -a repos_to_add
+          repos_to_add+=(enterprise)
+          if [ "${{ inputs.cpu_architecture }}" == "s390x" ]; then
+          #`cluster_prefixed_hostnames` is required for s390x as we use a single node cluster
+          #for the native executors
+            CONFIGURE_OPTS+=(--cluster_prefixed_hostnames)
+            repos_to_add+=(edb postgres_distributed)
+          else
+            repos_to_add+=(postgres_distributed)
+          fi
+
+          CONFIGURE_OPTS+=(--edb-repositories "${repos_to_add[@]}")
+
+          if [[ "${{ inputs.tpa_architecture }}" == "PGD-X" ]] ;then
+            CONFIGURE_OPTS+=(
               --pgd-routing local
             )
+          fi
         fi
-        if [[ "${{ inputs.tpa_architecture }}" == "PGD-S" ]] ;then
-          CONFIGURE_OPTS+=(
-              --edb-repositories enterprise staging_postgres_distributed
-            )
-        fi
+
         # Save the image info for reuse in actions/cache
         echo IMAGE="${IMAGE}" >>$GITHUB_ENV
         echo IMAGE_OS="${IMAGE_OS}" >>$GITHUB_ENV

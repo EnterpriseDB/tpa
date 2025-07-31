@@ -241,11 +241,18 @@ m1_layouts:
 s390x:
   tpa_architecture:
     - "PGD-S"
+    - "PGD-X"
   tpa_os_image:
     - "sles:15"
     - "almalinux:8"
     - "redhat:9"
   tpa_postgres_flavour:
     - "epas"
+    - "postgresql"
+    - "edbpge"
   tpa_postgres_version:
     - 17
+    - 16
+  exclude:
+    - tpa_architecture: "PGD-S"
+      tpa_postgres_flavour: "postgresql"

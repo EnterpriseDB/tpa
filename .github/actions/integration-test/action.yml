@@ -95,6 +95,7 @@ runs:
 
     - uses: ./.github/actions/initialise_integration_test
       with:
+        cpu_architecture: ${{ inputs.cpu_architecture }}
         source_directory: ${{ inputs.source_directory }}
         tpa_platform: ${{ inputs.tpa_platform }}
         tpa_architecture: ${{ inputs.tpa_architecture }}

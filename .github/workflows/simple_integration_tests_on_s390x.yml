@@ -20,7 +20,7 @@ env:
   FOUNDATION_TUNNEL_LOGIN: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
   FOUNDATION_VER: ${{ vars.FOUNDATION_PACKAGING_VERSION }}
   GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
-  #SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
   TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
 
 jobs:
@@ -46,6 +46,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+      max-parallel: 3
     runs-on: ubuntu-24.04
 
     steps:
