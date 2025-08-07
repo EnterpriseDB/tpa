@@ -1,0 +1,16 @@
+- summary: Do not use `pgdproxy` user in DSN on BDR6 nodes
+  description: |
+    Since PGD version 6 has a built-in Connection Manager which replaces
+    PGD Proxy, the `pgdproxy` Postgres user should not be used in any DSNs.
+    A new variable `bdr_connection_manager_route_dsn` is introduced for
+    defining connection strings to Connection Manager. User's can 
+    additionally define `bdr_connection_manager_dsn_attributes` in their
+    `config.yml` to specify additional connection paramters in the DSN. 
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-1103

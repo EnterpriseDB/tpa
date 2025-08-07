@@ -113,7 +113,7 @@
 ## Check that synchronous_standby_names contains only valid application names
 - name: Get synchronous_standby_names value
   postgresql_query:
-    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+    conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
     query: >
       SHOW synchronous_standby_names;
   register: sync_standby

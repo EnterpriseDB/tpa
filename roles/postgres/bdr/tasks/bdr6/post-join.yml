@@ -107,7 +107,7 @@
   include_tasks: bdr5/alter_node_option.yml
   vars:
     _default_options:
-      route_dsn: "{{ bdr_node_route_dsn }}"
+      route_dsn: "{{ bdr_connection_manager_route_dsn }}"
   with_dict:
     "{{ _default_options|combine(bdr_node_options) }}"
   loop_control:

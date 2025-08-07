@@ -10,7 +10,7 @@
 - block:
   - name: create tpa table in {{ bdr_database }}
     postgresql_query:
-      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         CREATE TABLE bdr.tpa
         (
@@ -27,7 +27,7 @@
     environment: "{{ target_environment|combine(_task_environment) }}"
   - name: set replica identity
     postgresql_query:
-      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         ALTER TABLE bdr.tpa
         REPLICA IDENTITY FULL;
@@ -38,7 +38,7 @@
 
   - name: add random data in the table
     postgresql_query:
-      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         INSERT INTO bdr.tpa
         (tpa_id, tpa_name, tpa_date, tpa_bool, tpa_text)
@@ -58,7 +58,7 @@
 
   - name: update data in the table tpa
     postgresql_query:
-      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         UPDATE bdr.tpa
         SET tpa_bool = true
@@ -71,7 +71,7 @@
 
   - name: delete data in table tpa
     postgresql_query:
-      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         DELETE FROM bdr.tpa
         WHERE tpa_id > 500
@@ -83,7 +83,7 @@
 
   - name: alter table tpa, add primary key
     postgresql_query:
-      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         ALTER TABLE bdr.tpa
         ADD PRIMARY KEY (tpa_id)
@@ -95,7 +95,7 @@
 
   - name: alter table tpa, drop column tpa_bool
     postgresql_query:
-      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         ALTER TABLE bdr.tpa
         DROP COLUMN tpa_bool
@@ -107,7 +107,7 @@
 
   - name: check table is available for other node {{ bdr_tester }}
     postgresql_query:
-      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host=bdr_tester) }}"
+      conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host=bdr_tester) }}"
       query: >
         SELECT * FROM bdr.tpa;
     vars:
@@ -118,7 +118,7 @@
 
   - name: truncate table tpa
     postgresql_query:
-      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         TRUNCATE TABLE bdr.tpa;
     vars:
@@ -128,7 +128,7 @@
 
   - name: drop table tpa
     postgresql_query:
-      conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
+      conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         DROP TABLE bdr.tpa;
     vars:

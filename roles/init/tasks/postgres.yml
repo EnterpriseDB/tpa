@@ -532,6 +532,7 @@
     bdr_client_dsn_attributes: "{{ bdr_client_dsn_attributes|default('') }}"
     harp_dcs_client_dsn_attributes: "{{ harp_dcs_client_dsn_attributes|default('') }}"
     pgd_proxy_dsn_attributes: "{{ pgd_proxy_dsn_attributes|default(bdr_client_dsn_attributes)|default('') }}"
+    bdr_connection_manager_dsn_attributes: "{{ bdr_connection_manager_dsn_attributes|default(bdr_client_dsn_attributes)|default('') }}"
     pgd_cli_dsn_attributes: "{{ pgd_cli_dsn_attributes|default(bdr_client_dsn_attributes)|default('') }}"
 
 - name: Set default DSNs
@@ -548,6 +549,8 @@
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ bdr_client_dsn_attributes }}
     bdr_node_route_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ pgd_proxy_user }} {{ pgd_proxy_dsn_attributes }}
+    bdr_connection_manager_route_dsn: >-
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ bdr_connection_manager_dsn_attributes }}
     bdr_node_local_dsn: >-
       host={{ unix_socket_directories|first }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ harp_manager_user }}
     pgbouncer_node_dsn: >-
