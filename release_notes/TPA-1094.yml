@@ -4,6 +4,6 @@
     `pg_checkpoint` role. This allows Barman to run CHECKPOINT without
     the need of being superuser, ie `barman switch-wal --force` will
     not fail any more.
-  type: minor_change
+  type: bugfix
   jira_tickets:
   - TPA-1094
