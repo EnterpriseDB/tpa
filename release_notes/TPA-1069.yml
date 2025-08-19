@@ -1,0 +1,24 @@
+- summary: Add support for s390x (aka IBM Z and LinuxONE)
+  description: |
+     TPA now supports the s390x CPU architecture. Supported s390x
+     operating systems are RHEL 8 and 9 and SLES 15. TPA can run
+     on these systems and use them as target hosts for cluster
+     deployment.
+
+     Because s390x binaries are not available for all PyPI packages, it
+     is highly recommended that you install the `tpaexec-deps` package
+     from EDB rather than rely on installation from PyPI during setup.
+
+     Similarly, because there is not a PGDG RPM repo for s390x you must
+     have access to EDB Repos for TPA to install Postgres and other
+     cluster components from packages.
+
+  type: notable_change
+  jira_tickets:
+  - TPA-1065
+  - TPA-1066
+  - TPA-1067
+  - TPA-1068
+  - TPA-1069
+  - TPA-1070
+  - TPA-1071
