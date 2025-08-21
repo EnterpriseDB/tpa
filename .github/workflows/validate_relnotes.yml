@@ -31,13 +31,13 @@ jobs:
       # We use depth 2 because on PR events the `actions/checkout` action is a detached
       # head which simulates the merge of the PR into the target branch.
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 2
           path: ${{ env.SOURCE_REPO_PATH }}
 
       - name: Checkout repo-actions
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: EnterpriseDB/repo-actions
           token: ${{ env.GITHUB_TOKEN }}

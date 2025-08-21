@@ -45,7 +45,7 @@ jobs:
     # checkout tpa-internal required to build the EE
     - name: Checkout tpa-internal
       id: checkout-tpa-internal
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: EnterpriseDB/tpa-internal
         token: ${{secrets.GH_SLONIK}}
