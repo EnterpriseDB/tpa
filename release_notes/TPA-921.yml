@@ -1,6 +1,0 @@
-- summary: Add EFM jdbc.properties property support
-  description: |
-    This adds support for the jdbc.properties property in EFM 5.0 and later.
-  type: minor_change
-  jira_tickets:
-  - TPA-921
