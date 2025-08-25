@@ -1,9 +1,0 @@
-- summary: Allow barman to run switch-wal
-  description: |
-    For Postgres 15+, the Barman user is now created with the
-    `pg_checkpoint` role. This allows Barman to run CHECKPOINT without
-    the need of being superuser, ie `barman switch-wal --force` will
-    not fail any more.
-  type: bugfix
-  jira_tickets:
-  - TPA-1094
