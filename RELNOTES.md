@@ -2,6 +2,323 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+## v23.39 (2025-08-21)
+
+### Notable changes
+
+- Add support for PEM on Ubuntu 24.04
+
+  There was no specific package defined for this distro which
+  caused deployment errors. Additionally, this ensures that either
+  mod_wsgi or edb's mod_wsgi module is enabled by default where
+  it applies.
+
+  References: TPA-1000.
+
+- Add support for s390x (aka IBM Z and LinuxONE)
+
+  TPA now supports the s390x CPU architecture. Supported s390x
+  operating systems are RHEL 8 and 9 and SLES 15. TPA can run
+  on these systems and use them as target hosts for cluster
+  deployment.
+
+  Because s390x binaries are not available for all PyPI packages, it
+  is highly recommended that you install the `tpaexec-deps` package
+  from EDB rather than rely on installation from PyPI during setup.
+
+  Similarly, because there is not a PGDG RPM repo for s390x you must
+  have access to EDB Repos for TPA to install Postgres and other
+  cluster components from packages.
+
+  References: TPA-1065, TPA-1066, TPA-1067, TPA-1068, TPA-1069, TPA-1070, TPA-1071.
+
+- Remove support for old repositories
+
+  Now that the old 2q repositories and original EDB repositories are no
+  longer available, TPA will no longer try to use them or check for
+  configuration related to them.
+
+  All packages that were formerly available in those repositories are now
+  available in the EDB 2.0 repositories.
+
+  References: TPA-544, TPA-943.
+
+- Update architecture info for PGD 6 architectures
+
+  The PGD6 architectures now have correct metadata and therefore
+  appear as expected in the output of `tpaexec info architectures`
+
+  References: TPA-1049.
+
+### Minor changes
+
+- Add `edb_stat_monitor` to recognized extensions
+
+  When a user specifies `edb_stat_monitor` as an entry in either
+  `postgres_extensions` or the list of extensions named under 
+  `postgres_databases`, TPA will handle installing the correct
+  package, creating the extension and including it in the 
+  `shared_preload_libraries`.
+
+  References: TPA-1059.
+
+- Add EFM jdbc.properties property support
+
+  This adds support for the jdbc.properties property in EFM 5.0 and later.
+
+  References: TPA-921.
+
+- Add jdbc.loglevel property for EFM 5.1 and above
+
+  Starting with EFM 5.1, there will be a new property `jdbc.loglevel` that is
+  used to increase information logged from the JDBC driver. This property can
+  be used to get more information when there are connection problems, e.g.
+  when using ssl for database connections.
+
+  References: TPA-1098.
+
+- Reduce default for vacuum_cost_delay to 2ms
+
+  In recent postgres versions, the suggested default for vacuum_cost_delay
+  has been reduced to 2ms. TPA now matches this.
+
+  References: TPA-1093.
+
+- Add auto.rewind property for EFM 5.1 and above
+
+  Starting with EFM 5.1, there will be a new property `auto.rewind` that is
+  part of a new feature to attempt to rebuild failed primary db servers.
+
+  References: TPA-1030.
+
+- Add check.vip.timeout property for EFM 5.1 and above
+
+  Starting with EFM 5.1, there will be a new property `check.vip.timeout`
+  that is used to control how long EFM will keep checking is the VIP (if
+  used) is reachable before promoting a standby.
+
+  References: TPA-1102.
+
+- Suppress PGDG repos when using EDB repos on SLES
+
+  When running `tpaexec configure` for a SLES system, use either EDB
+  repositories or PGDG repositories, not both, matching the behaviour
+  of other operating systems. This ensures that packages such as barman,
+  which are available in both places, are consistently sourced from the
+  same repository as other packages.
+
+  References: TPA-1056.
+
+- Use docker images from Rocky Linux organization
+
+  TPA now uses the Rocky Linux organization's docker images rather than
+  docker hub's "official" ones. These are more frequently updated and
+  hence less likely to cause dependency problems with newer packages.
+
+  References: TPA-908.
+
+- Document node promotability logic and the `efm-not-promotable` role for EFM
+
+  Add a new section to the `efm.md` documentation that explains how TPA
+  determines whether a node is eligible for promotion during failover. The
+  update clarifies the rules for promotability, including the roles of
+  witness nodes, cascading standbys, and nodes explicitly marked with the
+  `efm-not-promotable` role. This enhancement should help users understand
+  and control failover behavior, reducing the risk of unintended promotions
+  in EFM-managed clusters.
+
+  References: TPA-1055.
+
+- Document `include_vars` behavior for templated variables
+
+  Since the `include_vars` module immediately parses and evaluates
+  expressions, nested variables do not exist at the point they are
+  loaded from `config.yml` and thus are undefined when evaluated in
+  templated expressions. This is now documented with an example so it
+  is clearer for users.
+
+  References: TPA-895, TPA-1033.
+
+- Ubuntu 20.04 (Focal) is now a legacy distribution
+
+  Ubuntu 20.04 is now out of support upstream and is no longer fully
+  supported by TPA.
+
+  References: TPA-1078.
+
+### Bugfixes
+
+- Use bdr_package_version as default pgd proxy version
+
+  pgd_proxy_package_version and pgdcli_package_version may be explicitly
+  defined in config.yml; if they are not explicitly defined, they now
+  default to the value of bdr_package_version, if it is set. If none of
+  them is set, the latest available versions of packages are installed.
+
+  Setting these package versions to different values is not supported and
+  is only useful for testing.
+
+  References: TPA-938, RT49150.
+
+- Do not attempt to enable routing for subscriber-only groups
+
+  Previously, TPA would mistakenly try to enable routing for subscriber-only groups
+  during PGD6 deployments. This property is not editable anymore as it forms core part of the
+  definition of subscriber-only groups in PGD6.
+
+  References: TPA-1085, RT49673.
+
+- Correctly configure ignore_slots for patroni clusters with multiple Barman servers
+
+  For Patroni clusters TPA will now dynamically generate the ignore_slots
+  setting corresponding to Barman nodes in the cluster. This change ensures
+  that Patroni will not remove the phyical slots created for each of the
+  Barman nodes. This is especially important for the Patroni clusters with
+  more than one backup servers; including shared Barman nodes for example.
+
+  References: TPA-1087.
+
+- Create `harp_dcs_user` when using multiple failover managers
+
+  There's a support case regarding a custom BDR cluster. This one includes a
+  subscriber-only node that is also a primary node for a second failover
+  manager: repmgr. The `harp_dcs_user` is required to be present as well
+  before `bdr join` can be run, so the user needs to be created at the
+  end of repmgr tasks.
+
+  References: TPA-1001, RT49150.
+
+- Add `replication` user to .pgpass on primary node
+
+  The `replication_user` entry is required the `.pgpass` file for both
+  `replica` and `primary` nodes managed by either `efm` or `patroni` as
+  the `failover_manager`. Previously, it was only added to the .pgass file
+  for `replica` nodes, resulting in connection issues to the primary
+  node after a switchover.
+
+  References: TPA-1100, TPA-1075, TPA-158.
+
+- Fixed an issue whereby PEM deployment would fail with PEM 10.1.1
+
+  The TPA task `Register PEM backend database server for monitoring
+  and configuration` explicitly calls the `pem.setup` SQL function.
+  This is not considered part of the public API of PEM and the
+  signature changed between 10.1.0 and 10.1.1 causing TPA\s call to
+  this function to fail.
+
+  This fix addresses the issue by adjusting the function call
+  according to the installed PEM server version. To accommodate this
+  change we have introduced a new `pem/server/facts` Ansible role that
+  is responsible for collecting facts about the installed PEM version.
+  This also means that TPA will no longer attempt to run
+  `postgresexpert.sql` on PEM 10, where Postgres Expert is no longer
+  present.
+
+  References: TPA-1095.
+
+- Do not use `pgdproxy` user in DSN on BDR6 nodes
+
+  Since PGD version 6 has a built-in Connection Manager which replaces
+  PGD Proxy, the `pgdproxy` Postgres user should not be used in any DSNs.
+  A new variable `bdr_connection_manager_route_dsn` is introduced for
+  defining connection strings to Connection Manager. User's can 
+  additionally define `bdr_connection_manager_dsn_attributes` in their
+  `config.yml` to specify additional connection paramters in the DSN.
+
+  References: TPA-1103.
+
+- Allow barman to run switch-wal
+
+  For Postgres 15+, the Barman user is now created with the
+  `pg_checkpoint` role. This allows Barman to run CHECKPOINT without
+  the need of being superuser, ie `barman switch-wal --force` will
+  not fail any more.
+
+  References: TPA-1094.
+
+- Fix usability and improve reliability of the TPA Docker image
+
+  - Upgraded Base Image to Debian Trixie to meet TPA’s Python 3.12 minimum
+    requirement, ensuring compatibility with modern dependencies.
+  - Removed `--use-community-ansible` flag as it is no longer supported.
+  - Included the `openssh-client` package to prevent `tpaexec` failures due
+    to missing `ssh-keygen`, enhancing out-of-the-box functionality.
+  - Introduced Build-Time Versioning: Added an `ARG` variable to pass the
+    output of `git describe` from the host during build, storing it as
+    `/opt/EDB/TPA/VERSION` for improved version tracking.
+  - Revised `docker/README.md` and `docs/src/INSTALL-docker.md` to reflect
+    the latest setup instructions and best practices.
+
+  These changes enhance the TPA Docker image’s compatibility, stability, and
+  ease of use.
+
+  References: TPA-1097.
+
+- Allow bdr_node_groups to be overridden
+
+  If a file supplied in the --overrides-from argument to `tpaexec
+  configure` sets bdr_node_groups in cluster_vars, the contents of this
+  will now be added to the node groups automatically created.
+
+  References: TPA-1089.
+
+## v23.38.1 (2025-06-25)
+
+### Bugfixes
+
+- Ensure pgpass_users correctly added to .pgpass file
+
+  Previously, any user in the `postgres_users` list specified with
+  `generate_password: true` AND included in the `pgpass_users` list
+  would NOT be added to the `~postgres/.pgpass` file on the initial
+  deploy because the user's password did not yet exist when the
+  pgpass task was executed, thus the user was skipped.
+
+  This is fixed by invoking the pgpass task once more after all the
+  Postgres users have been created.
+
+  The `repmgr` and `replication` users were previously included in the
+  `default_pgpass_users` list. They are now added to `pgpass_users` and
+  hence to the .pgpass file as required by the replication manager in use.
+
+  The `postgres_user` (`postgres` or `enterprisedb` by default) is still part
+  of the `default_pgpass_users` list. If this is overridden by a `pgpass_users` list
+  in `config.yml` that does NOT include `postgres_user`, a PEM-enabled cluster will
+  fail to register agents as it needs the encrypted `postgres_user` password.
+  This is fixed by adding the `postgres_user` to the `~postgres/.pgpass` file
+  as part of the PEM agent tasks.
+
+  References: TPA-158, TPA-1075.
+
+- Check cluster_vars dictionary during validate
+
+  Previously, if an invalid dictionary is set as the `cluster_vars`
+  dictionary in `config.yml` (such as `cluster_vars` variables referencing
+  other `cluster_vars` variables), TPA would swallow any Ansible errors
+  by falling back to the default value of an empty dictionary. This
+  resulted in every `cluster_vars` variable being undefined, so each was
+  set to it's TPA-default value. The resulting cluster would be
+  entirely different than what the user specified in their `config.yml`
+  file.
+
+  This is fixed by asserting that the `cluster_vars` dictionary is defined
+  and non-empty when the configuration file is loaded. Also as a final
+  bailout, the `cluster_vars` variable now no longer defaults to an empty
+  dictionary. This allows Ansible to throw an error when creating 
+  `group_vars` and terminate.
+
+  References: TPA-895, TPA-1033.
+
+- Fix configure command for PGD6 using bare platform
+
+  Fix a bug with tpaexec configure command on the newly released architecture for PGD6
+  (PGD-S and PGD-X) whereby trying to generate a cluster using `--platform bare` would result
+  in an Unknown Platform error.
+
+  This will ensure that configure command successfully generate a PGD6 configuration file for the bare platform.
+
+  References: TPA-1073, RT49673.
+
 ## v23.38.0 (2025-06-02)
 
 ### Notable changes

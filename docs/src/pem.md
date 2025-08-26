@@ -243,6 +243,17 @@ would look something like this:
 6. Run `tpaexec deploy $clusters/pg-cluster` so pem is deployed on the
    new pg-cluster while using shared pem server instance.
 
+!!!Note Mixed-platform clusters
+By declaring the shared PEM instance as `platform: bare` you
+might have changed your cluster to a mixed-platform cluster. This may require
+you to adjust other parts of `config.yml` to accommodate this change.
+Specifically, the `instance_defaults` section must only contain settings
+which are applicable to all instances in the cluster. If, for example,
+your `instance_defaults` contains a setting such as `type` which is only
+valid for `platform: aws` you must move that setting out of
+`instance_defaults` and into only the instances which use the AWS platform.
+!!!
+
 ## Connecting to the PEM UI
 
 PEM UI runs on https interface so you can connect with a running

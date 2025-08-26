@@ -76,10 +76,7 @@
 - include_role: name=postgres/createuser
   vars:
     username: barman_role
-    role_attrs:
-      - NOSUPERUSER
-      - NOCREATEDB
-      - NOLOGIN
+    role_attrs: "{{ default_barman_role_attrs }}"
 
 - include_role: name=postgres/createuser
   vars:

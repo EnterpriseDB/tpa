@@ -4,6 +4,10 @@ name: Initialise Integration Test
 description: Install requirements and run configure for integration test for the given architecture and platform
 
 inputs:
+  cpu_architecture:
+    description: "CPU the native Executor will pick"
+    required: false
+    default: amd64
   source_directory:
     description: "Directory where tpaexec source code is checked out on runner"
     required: true
@@ -78,6 +82,17 @@ runs:
   using: "composite"
 
   steps:
+
+    - name: Free up disk space
+      run: |
+        # Android libraries
+        sudo rm -rf /usr/local/lib/android
+        # .NET runtime
+        sudo rm -rf /usr/share/dotnet
+        # Haskell runtime
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/.ghcup
+      shell: bash
 
     - uses: ./.github/actions/install-requirements
       with:
@@ -161,6 +176,10 @@ runs:
         # enable redwood for epas.
         if [ "${{ inputs.tpa_postgres_flavour }}" == "epas" ] ;then
           CONFIGURE_OPTS+=(--redwood)
+          # If we are using AWS, we could enable pem when testing epas
+          if [ "${{ inputs.tpa_platform }}" == "aws" ] ;then
+            CONFIGURE_OPTS+=(--enable-pem)
+          fi
         fi
         # If package caching is enabled we enforce use of local repo
         if [ "${{ inputs.tpa_package_cache }}" == "true" ] ;then
@@ -213,18 +232,28 @@ runs:
         : "${IMAGE_OS:=${image_os_base/tpa\/}}"
         # Set a default IMAGE_OS_VERSION to be the docker image tag or "latest" if it's not set
         : "${IMAGE_VERSION:=${image_ver:-latest}}"
-        # TEMPORARY Need to be changed once PGD6 packages are available on prod repos
-        if [[ "${{ inputs.tpa_architecture }}" == "PGD-X" ]] ;then
-          CONFIGURE_OPTS+=(
-              --edb-repositories enterprise staging_postgres_distributed
+
+        if [[ "${{ inputs.tpa_architecture }}" =~ ^PGD-(X|S)$ ]]; then
+          declare -a repos_to_add
+          repos_to_add+=(enterprise)
+          if [ "${{ inputs.cpu_architecture }}" == "s390x" ]; then
+          #`cluster_prefixed_hostnames` is required for s390x as we use a single node cluster
+          #for the native executors
+            CONFIGURE_OPTS+=(--cluster_prefixed_hostnames)
+            repos_to_add+=(edb postgres_distributed)
+          else
+            repos_to_add+=(postgres_distributed)
+          fi
+
+          CONFIGURE_OPTS+=(--edb-repositories "${repos_to_add[@]}")
+
+          if [[ "${{ inputs.tpa_architecture }}" == "PGD-X" ]] ;then
+            CONFIGURE_OPTS+=(
               --pgd-routing local
             )
+          fi
         fi
-        if [[ "${{ inputs.tpa_architecture }}" == "PGD-S" ]] ;then
-          CONFIGURE_OPTS+=(
-              --edb-repositories enterprise staging_postgres_distributed
-            )
-        fi
+
         # Save the image info for reuse in actions/cache
         echo IMAGE="${IMAGE}" >>$GITHUB_ENV
         echo IMAGE_OS="${IMAGE_OS}" >>$GITHUB_ENV
@@ -233,10 +262,6 @@ runs:
         if [ ${#OVERRIDE_FILES[0]} -ne 0 ]; then
           CONFIGURE_OPTS+=(--overrides-from "${OVERRIDE_FILES[@]}")
         fi
-
-        # TEMPORARY PINNING of barman to 3.13.3 to avoid 3.14.0 bug until v23.38.0 is released.
-        # this will be reverted as soon as barman package is fixed.
-        CONFIGURE_OPTS+=(--barman-package-version '3.13.3*')
 
         CONFIGURE_OPTS+=(--no-git)
 

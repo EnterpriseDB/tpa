@@ -231,68 +231,6 @@
     and postgres_version is version('9.6', '>')
     and edb_repos_in_use
 
-- name: Exclude psycopg2 packages from PGDG repos
-  ini_file:
-    dest: /etc/yum.repos.d/pgdg-redhat-all.repo
-    create: no
-    section: "pgdg{{ postgres_versionNN }}"
-    option: exclude
-    value: python-psycopg2 python2-psycopg2 python3-psycopg2
-  when: >
-    'PGDG' in yum_repository_list
-    and postgres_version is version('9.6', '>')
-    and edb_repos_in_use
-
-- name: Exclude psycopg2 packages from PGDG-common repos
-  ini_file:
-    dest: /etc/yum.repos.d/pgdg-redhat-all.repo
-    create: no
-    section: "pgdg-common"
-    option: exclude
-    value: "python-psycopg2 python2-psycopg2 python3-psycopg2 barman* python2-barman python3-barman"
-  when: >
-    'PGDG' in yum_repository_list
-    and postgres_version is version('9.6', '<=')
-    and edb_repos_in_use
-
-- set_fact:
-    _2q_repositories: []
-
-- name: Enumerate 2ndQuadrant repositories
-  set_fact:
-    _2q_repositories: "{{
-        _2q_repositories|union([{
-          'url': url,
-          'file': file,
-          'repo': item
-        }])
-      }}"
-  with_items: "{{ tpa_2q_repositories }}"
-  vars:
-    token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
-    volatile: "{{ use_volatile_subscriptions|ternary('/volatile', '') }}"
-    _flavour: "{{ postgres_flavour }}"
-    _repopg: "{{ (_flavour == 'postgresql-bdr')|ternary('pgbdr', 'pg') }}"
-    version_tag: >-
-      {{ (_flavour == 'postgresql-bdr')|ternary('bdr9.4', postgres_version) }}
-    urltemplate: "{{
-        (item == 'dl/default/release')|ternary(
-          'https://techsupport.enterprisedb.com/api/repository/{label}/{version}/rpm{volatile}',
-          'https://techsupport.enterprisedb.com/api/repository/{token}/{label}/{version}/rpm{volatile}'
-        )
-      }}"
-    url: >-
-      {{ urltemplate.format(token=token, label=item, version=version_tag, volatile=volatile) }}
-    file: "/etc/yum.repos.d/2ndquadrant-{{ item|replace('/', '-') }}-{{ _repopg }}{{ postgres_version }}.repo"
-
-- name: Install 2ndQuadrant repositories
-  include_tasks: install-2q-repository.yml
-  with_items: "{{ _2q_repositories }}"
-  loop_control:
-    loop_var: repo
-    label: >-
-      {{ repo.repo }}
-
 - name: Find existing EDB repositories
   find:
     paths: /etc/yum.repos.d/
@@ -319,12 +257,12 @@
     patterns: 'enterprisedb-*.repo'
     file_type: "file"
   register: remaining_edb_repos
-  
+
 - name: Create list of EDB repositories that are already set up
   set_fact:
-    resulting_edb_repos: "{{ resulting_edb_repos|default([])|union([repo]) }}" 
+    resulting_edb_repos: "{{ resulting_edb_repos|default([])|union([repo]) }}"
   loop: "{{ remaining_edb_repos.files }}"
-  loop_control: 
+  loop_control:
     label: "{{ item.path|basename }}"
   vars:
     repo: "{{ item.path|basename|split('.')|first|split('-')|last }}"
@@ -338,29 +276,29 @@
     repository: "{{ item }}"
     package_format: rpm
 
-- name: Exclude lua packages from 2ndQuadrant products/bdr3/release repo
+- name: Exclude psycopg2 packages from PGDG repos
   ini_file:
-    dest: "/etc/yum.repos.d/2ndquadrant-products-bdr3-release-pg{{ postgres_versionNN }}.repo"
+    dest: /etc/yum.repos.d/pgdg-redhat-all.repo
     create: no
-    section: "2ndquadrant-products-bdr3-release-pg{{ postgres_versionNN }}"
+    section: "pgdg{{ postgres_versionNN }}"
     option: exclude
-    value: lua*
+    value: python-psycopg2 python2-psycopg2 python3-psycopg2
   when: >
-    'products/bdr3/release' in tpa_2q_repositories
-    and ansible_distribution_major_version|int == 8
+    'PGDG' in yum_repository_list
+    and postgres_version is version('9.6', '>')
+    and edb_repos_in_use
 
-- name: Exclude haproxy from dl/default repo for patroni clusters
+- name: Exclude psycopg2 packages from PGDG-common repos
   ini_file:
-    dest: "/etc/yum.repos.d/2ndquadrant-dl-default-release-pg{{ postgres_versionNN }}.repo"
+    dest: /etc/yum.repos.d/pgdg-redhat-all.repo
     create: no
-    section: "2ndquadrant-dl-default-release-pg{{ postgres_versionNN }}"
+    section: "pgdg-common"
     option: exclude
-    value: haproxy
+    value: "python-psycopg2 python2-psycopg2 python3-psycopg2 barman* python2-barman python3-barman"
   when: >
-    'dl/default/release' in tpa_2q_repositories|default([])
-    and 'PGDG' in yum_repository_list
-    and 'haproxy' in role
-    and failover_manager == 'patroni'
+    'PGDG' in yum_repository_list
+    and postgres_version is version('9.6', '<=')
+    and edb_repos_in_use
 
 # The extras repo on RHEL 7 supplies etcd packages for patroni
 
@@ -395,8 +333,3 @@
 # Some extension packages require extra repositories to be set up to install dependencies
 
 - include_tasks: extension-repositories.yml
-
-- include_tasks: repository-cleanup.yml
-  vars:
-    repository_path: /etc/yum.repos.d
-    repository_files: "{{ _2q_repositories|map(attribute='file')|list }}"

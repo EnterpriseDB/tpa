@@ -67,3 +67,22 @@ repmgr's only job is to provided replication setup functionality.
 
 For postgres versions 12 and above, any cluster that uses EFM will use
 `pg_basebackup` to create standby nodes and not use repmgr in any form.
+
+### Node Promotability
+
+TPA determines whether a node is eligible for promotion by EFM during
+failover based on the node's role and replication topology. The following
+rules are applied when generating the EFM configuration:
+
+- **Witness nodes** (`witness` role) are never promotable.
+- **Nodes with the `efm-not-promotable` role** are not eligible for
+  promotion. This can be used to prevent specific standbys, such as DR or
+  reporting nodes, from being promoted to primary.
+- **Cascading standbys** (nodes that are not directly replicating from the
+  primary) are also not promotable.
+- All other nodes are considered promotable by default.
+
+To explicitly prevent a standby from being promoted, add
+`efm-not-promotable` to the node’s `roles` list in your cluster
+configuration. This ensures that EFM will not attempt to promote this node during
+failover events.

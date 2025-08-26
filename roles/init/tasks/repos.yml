@@ -6,20 +6,10 @@
 #
 # 1. Repositories defined in {apt,yum}_repositories and listed in
 #    {apt,yum}_repository_list (to activate the definitions). This
-#    includes PGDG, EPEL, EDB Repos 1.0, and any extra user-defined
-#    repositories. If you want to use the EDB repo, you must have an
-#    EDB_REPO_CREDENTIALS_FILE.
+#    includes PGDG, EPEL, and any extra user-defined repositories.
 #
-# 2. Repositories listed in tpa_2q_repositories, which may be empty. We
-#    need a TPA_2Q_SUBSCRIPTION_TOKEN to access these repositories,
-#    except for dl/default/release, which is open to everyone.
-#
-# 3. Repositories listed in edb_repositories, which may be empty. We
+# 2. Repositories listed in edb_repositories, which may be empty. We
 #    always need an EDB_SUBSCRIPTION_TOKEN to access these repositories.
-#    This is the preferred mechanism for new clusters, and everything we
-#    need for PGD5 should come from them, but apart from that, everyone
-#    does not have access to them yet (so we must use older repositories
-#    in those cases).
 #
 # In principle, we want config.yml to spell out exactly which of these
 # sources to use in any given cluster. However, must maintain backwards
@@ -33,10 +23,10 @@
 - assert:
     that:
       edb_repositories is not empty
-      or bdr_version|default('0') is not version('5', '>=')
+      or groups['role_bdr']|default([]) is empty
       or disable_repository_checks|default(false)
     fail_msg: >-
-      You must set edb_repositories to use the PGD-Always-ON architecture
+      You must set edb_repositories to use BDR/PGD
 
 - assert:
     that: edb_repositories is empty or edb_repos_token != ''
@@ -44,116 +34,3 @@
       You must obtain a token from
       https://www.enterprisedb.com/repos-downloads and
       'export EDB_SUBSCRIPTION_TOKEN=<token>' to use edb_repositories
-
-# At this point, tpa_2q_repositories may be undefined (never set, "do
-# whatever makes sense"), explicitly set to empty ("please don't use
-# these"), or contain a list of repositories to use.
-
-- name: Decide whether to use volatile subscriptions to tpa_2q_repositories
-  set_fact:
-    use_volatile_subscriptions:
-      "{{ use_volatile_subscriptions|default(false)|bool }}"
-
-# Notwithstanding anything we decide about tpa_2q_repositories above, we
-# won't use them at all if any edb_repositories are specified.
-#
-# XXX This means you should not set edb_repositories for an existing
-# cluster that is using the old repositories. (TPA will not remove the
-# old repositories, so you'll end up with multiple sources for the same
-# package. Unintended excitement is sure to follow.)
-
-- name: Override tpa_2q_repositories if edb_repositories is set
-  set_fact:
-    tpa_2q_repositories: []
-  when:
-    edb_repositories is not empty
-
-- name: Ensure tpa_2q_repositories is defined
-  set_fact:
-    tpa_2q_repositories:
-      "{{ tpa_2q_repositories|default([]) }}"
-
-# To use 2ndQuadrant repositories (e.g., for 2ndQPostgres), get a
-# subscription token from the Customer Portal and export
-# TPA_2Q_SUBSCRIPTION_TOKEN in the environment.
-
-- assert:
-    that:
-      _closed_2q_repos is empty
-      or lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') != ''
-    fail_msg: >-
-      You must obtain a subscription token from
-      https://techsupport.enterprisedb.com/customer_portal/company/ and
-      'export TPA_2Q_SUBSCRIPTION_TOKEN=<token>' to use tpa_2q_repositories
-  vars:
-    _closed_2q_repos:
-      "{{ tpa_2q_repositories
-          |reject('equalto', 'dl/default/release')
-          |list }}"
-
-- name: Warn about using already-rotated subscription tokens
-  assert:
-    that:
-      env_token not in expired_tokens
-      or tpa_2q_repositories|default([]) == []
-    fail_msg: >-
-      Your TPA_2Q_SUBSCRIPTION_TOKEN has expired; please fetch an updated token
-      from https://techsupport.enterprisedb.com/customer_portal/company/
-  vars:
-    env_token: "{{ lookup('env', 'TPA_2Q_SUBSCRIPTION_TOKEN') }}"
-    expired_tokens:
-    - QGcOzwnsVlaKF5jQfYlIwq57kUbKVtAM
-  run_once: yes
-
-# Unless we're using the new repos, packages for EPAS, EFM, and PEM come
-# from the legacy EDB repositories.
-
-- name: Determine if we need the legacy EDB repo (1.0)
-  set_fact:
-    need_legacy_edb_repo:
-      "{{ postgres_installation_method == 'pkg'
-          and (postgres_flavour == 'epas'
-            or failover_manager == 'efm'
-            or enable_pg_backup_api|default(false)
-            or pem_enabled)
-          and edb_repositories is empty }}"
-
-# To use EDB repositories (e.g., for EPAS), get a username/password from
-# https://www.enterprisedb.com/user/register?destination=/repository-access-request
-# and export EDB_REPO_CREDENTIALS_FILE=/path/to/file in the environment,
-# where the file contains a single line with "username:password".
-
-- name: Require EDB_REPO_CREDENTIALS_FILE for legacy EDB repository access
-  assert:
-    that:
-      lookup('env', 'EDB_REPO_CREDENTIALS_FILE') != ''
-    fail_msg: >-
-      Export EDB_REPO_CREDENTIALS_FILE to use the EDB repository
-      (see https://www.enterprisedb.com/user/ for credentials)
-  when: >
-    'EDB' in apt_repository_list|default([])
-    or 'EDB' in yum_repository_list|default([])
-    or need_legacy_edb_repo
-
-- name: Validate EDB_REPO_CREDENTIALS_FILE setting
-  vars:
-    _file: "{{ lookup('env', 'EDB_REPO_CREDENTIALS_FILE') }}"
-  when:
-    _file != ''
-  block:
-  - stat:
-      path: "{{ _file }}"
-    register: _credsfile
-    delegate_to: localhost
-  - assert:
-      msg: "EDB_REPO_CREDENTIALS_FILE={{ _file }} must exist and have mode 0600"
-      that:
-      - _credsfile.stat.exists
-      - _credsfile.stat.mode == '0600'
-  - assert:
-      msg: "EDB_REPO_CREDENTIALS_FILE={{ _file }} must contain username:password"
-      that:
-      - _credentials != ''
-      - _credentials.split(':')|length == 2
-    vars:
-      _credentials: "{{ lookup('file', _file) }}"

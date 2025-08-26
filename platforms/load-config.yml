@@ -28,6 +28,15 @@
 - name: Load cluster configuration file
   include_vars: "{{ config_file }}"
 
+- name: Require cluster_vars to be specified in configuration file
+  assert:
+    that:
+    - cluster_vars is defined
+    - cluster_vars is not empty 
+    fail_msg: >
+      'cluster_vars' dictionary not found in the configuration file.
+      If it is defined, it may be incorrectly formatted or improperly templated.
+      
 # Try to load config_hashes (written by inventory/post-write.yml) from
 # the inventory, and add the hash of the current contents of config.yml
 

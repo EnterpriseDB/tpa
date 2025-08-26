@@ -4,7 +4,7 @@
 # Allow to test aws deployment
 # useful to test basic AWS changes and also for ARM plateform test
 
-name: AWS efm integration Tests
+name: AWS efm on debian/ubuntu integration Tests
 on:
   workflow_dispatch:
 

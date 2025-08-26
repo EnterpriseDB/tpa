@@ -43,3 +43,9 @@
   when:
     not agent_cfg_check.stat.exists
   no_log: false
+
+- name: Display stderr from failed server registration
+  assert:
+    msg: "{{ register_server_cmd.get('stderr') }}"
+    that:
+      register_server_cmd is successful

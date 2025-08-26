@@ -6,8 +6,7 @@ LOG_FILE = None
 PEM_DB_HOST = '{{ inventory_hostname }}'
 PEM_DB_NAME = 'pem'
 
-# If we're working with PEM 10.1 or newer (that's what 'above_pem10_1' tells
-# us), PEM actually wants PEM_DB_PORT to be written as a string in single
+# If we're working with PEM 10.1 or newer PEM actually wants PEM_DB_PORT to be written as a string in single
 # quotes. The main reason is that newer PEM versions support multi-host
 # connection strings, and the port could be part of that text. For the older
 # PEM versions, just letting it be a number is fine.
@@ -16,7 +15,7 @@ PEM_DB_NAME = 'pem'
 # we're making sure the port format is what PEM expects for these newer
 # versions.
 
-{% if above_pem10_1 %}
+{% if pem_is_v10_1_0_or_higher %}
 PEM_DB_PORT =  '{{ pem_db_port }}'
 {% else %}
 PEM_DB_PORT =  {{ pem_db_port }}

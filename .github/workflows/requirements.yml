@@ -67,12 +67,17 @@ jobs:
       - name: Share new requirements.txt file with next steps
         uses: actions/upload-artifact@v4
         with:
-          name: new_req
+          name: new_requirements
           path: requirements.txt
 
-  ppc64:
+  compile:
     needs: [main]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: [ppc64le, s390x]
+        distro: [el]
+        distro-version: [9]
     outputs:
       changed: ${{ steps.dependencies.outputs.changed }}
     steps:
@@ -94,21 +99,21 @@ jobs:
       - name: Download generated requirements.txt
         uses: actions/download-artifact@v4
         with:
-          name: new_req
+          name: new_requirements
           path: ${{ github.workspace }}
 
       - name: Connect to a Native Executor
         uses: ./foundation/actions/linux/native/executor/connect
         with:
-          architecture: ppc64le
+          architecture: ${{ matrix.architecture }}
           tunnel-login: ${{ env.FOUNDATION_TUNNEL_LOGIN }}
 
       - name: Setup container
         uses: ./foundation/actions/linux/container/setup
         with:
-          architecture: ppc64le
-          distro: el
-          distro-version: 9
+          architecture: ${{ matrix.architecture }}
+          distro: ${{ matrix.distro }}
+          distro-version: ${{ matrix.distro-version }}
           github-token: ${{ env.GITHUB_TOKEN }}
           additional-options: >
             --volume ${{ github.workspace }}:/home/runner/tpa
@@ -131,11 +136,11 @@ jobs:
       - name: Share generated arch specific requirement files
         uses: actions/upload-artifact@v4
         with:
-          name: requirements
-          path: ${{ github.workspace }}/packages
+          name: requirements-${{ matrix.architecture }}
+          path: ${{ github.workspace }}/packages/requirements-${{ matrix.architecture }}.txt
 
   requirements:
-    needs: [ppc64]
+    needs: [compile]
     name: Requirements update
     runs-on: ubuntu-22.04
     steps:
@@ -143,18 +148,22 @@ jobs:
         with:
           token: ${{ secrets.GH_SLONIK }}
 
-      # new_req should bring the modified requirements.txt from the previous pip-compile run
-      - name: Download generated requirements.txt
+      - name: Download generated main requirements.txt
         uses: actions/download-artifact@v4
         with:
-          name: new_req
+          name: new_requirements
           path: ${{ github.workspace }}
 
-      # requirements should bring the ppc64le .txt and .in files
-      - name: Download generated requirements files
+      - name: Download generated requirements.txt for ppc64le
         uses: actions/download-artifact@v4
         with:
-          name: requirements
+          name: requirements-ppc64le
+          path: ${{ github.workspace }}
+
+      - name: Download generated requirements.txt for s390x
+        uses: actions/download-artifact@v4
+        with:
+          name: requirements-s390x
           path: ${{ github.workspace }}
 
       # we run the classic action to generate all other files and generate the PR

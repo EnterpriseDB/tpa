@@ -2,15 +2,6 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-- name: Infer default_postgres_flavour from configured repositories
-  set_fact:
-    default_postgres_flavour: pgextended
-  when:
-    tpa_2q_repositories|default([])
-    |map('lower')
-    |select('contains_any', 'bdr_enterprise', '2ndqpostgres')
-    |list is not empty
-
 # First, we identify a flavour of Postgres that we want to install, but
 # then group some flavours together for the purpose of deriving common
 # defaults. However, 'edbpge' and 'pgextended' group differently.
@@ -541,6 +532,7 @@
     bdr_client_dsn_attributes: "{{ bdr_client_dsn_attributes|default('') }}"
     harp_dcs_client_dsn_attributes: "{{ harp_dcs_client_dsn_attributes|default('') }}"
     pgd_proxy_dsn_attributes: "{{ pgd_proxy_dsn_attributes|default(bdr_client_dsn_attributes)|default('') }}"
+    bdr_connection_manager_dsn_attributes: "{{ bdr_connection_manager_dsn_attributes|default(bdr_client_dsn_attributes)|default('') }}"
     pgd_cli_dsn_attributes: "{{ pgd_cli_dsn_attributes|default(bdr_client_dsn_attributes)|default('') }}"
 
 - name: Set default DSNs
@@ -557,6 +549,8 @@
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ bdr_client_dsn_attributes }}
     bdr_node_route_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ pgd_proxy_user }} {{ pgd_proxy_dsn_attributes }}
+    bdr_connection_manager_route_dsn: >-
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ bdr_connection_manager_dsn_attributes }}
     bdr_node_local_dsn: >-
       host={{ unix_socket_directories|first }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ harp_manager_user }}
     pgbouncer_node_dsn: >-

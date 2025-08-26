@@ -7,6 +7,13 @@
   when: >
     task_selector|permits('pkg')
 
+- include_role: name=postgres/pgpass
+  vars:
+    pgpass_users:
+      - "{{ replication_user }}"
+  when: 
+    role|intersect(['primary','replica'])
+
 - include_role:
     name: efm/config
   when: >

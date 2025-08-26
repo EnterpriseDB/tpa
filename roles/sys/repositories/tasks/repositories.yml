@@ -2,17 +2,5 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-# We must include the legacy EDB repository if we are installing
-# software that comes from there (which we decide in roles/init).
-
-- name: Add legacy EDB repo (1.0) if required
-  set_fact:
-    default_apt_repository_list:
-      "{{ default_apt_repository_list|union(['EDB']) }}"
-    default_yum_repository_list:
-      "{{ default_yum_repository_list|union(['EDB']) }}"
-  when:
-    need_legacy_edb_repo
-
 - include_tasks:
     file: "os/{{ ansible_os_family }}/repositories.yml"

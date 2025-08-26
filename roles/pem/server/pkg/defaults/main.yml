@@ -41,6 +41,7 @@ pem_server_modwsgi_package_name:
     "12": libapache2-mod-wsgi-py3
     "11": edb-python310-mod-wsgi
   Ubuntu:
+    "24": libapache2-mod-wsgi-py3
     "22": libapache2-mod-wsgi-py3
     "20": edb-python310-mod-wsgi
   SLES:

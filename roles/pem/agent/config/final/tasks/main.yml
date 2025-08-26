@@ -45,6 +45,13 @@
     and 'barman' in role
     and enable_pg_backup_api|default(false)
 
+- include_role: name=postgres/pgpass
+  vars:
+    pgpass_users:
+      - "{{ postgres_user }}"
+  when: >
+    task_selector|permits('pgpass')
+
 - name: Record PEM server credentials
   set_fact:
     pem_postgres_password: "{{vars['%s_password' % postgres_user]}}"
@@ -124,10 +131,14 @@
 # If we just registered the agent, we also need to register the server
 # that this agent is monitoring for the pem-server.
 
+# This task is specifically for registering the PEM server itself
+# and depends on pem/server/facts having run. 
+# As such it is excluded if pem-server is excluded
 - include_tasks: register-pem-server.yml
   when:
     not agent_cfg_check.stat.exists and
-    'pem-server' in role
+    'pem-server' in role and
+    task_selector | permits('pem-server')
 
 # If we just registered the agent, we also need to register the server
 # that this agent is monitoring. (At the moment, we assume that each

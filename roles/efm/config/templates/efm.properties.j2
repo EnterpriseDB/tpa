@@ -62,6 +62,11 @@ restore.command={{ efm_conf_settings['restore.command']|default('') }}
 backup.wal={{ efm_conf_settings['backup.wal']|default(false) }}
 check.num.sync.period={{ efm_conf_settings['check.num.sync.period']|default(30) }}
 {% endif %}
+{% if efm_version is version('5.1', '>=') %}
+auto.rewind={{ efm_conf_settings['auto.rewind']|default(false) }}
+jdbc.loglevel={{ efm_conf_settings['jdbc.loglevel']|default('INFO') }}
+check.vip.timeout={{ efm_conf_settings['check.vip.timeout']|default(60) }}
+{% endif %}
 reconfigure.num.sync={{ efm_conf_settings['reconfigure.num.sync']|default(false) | bool }}
 reconfigure.num.sync.max={{ efm_conf_settings['reconfigure.num.sync.max']|default('') }}
 reconfigure.sync.primary={{ efm_conf_settings['reconfigure.sync.primary']|default(false) | bool }}

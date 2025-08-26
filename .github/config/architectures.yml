@@ -1,0 +1,68 @@
+---
+
+defaults:
+  cpu_architecture: &default_cpu_architecture
+    - "amd64"
+  tpa_os_image: &default_tpa_os_image
+    - "ubuntu:22.04"
+    - "ubuntu:24.04"
+    - "debian:12"
+    - "redhat:8"
+    - "redhat:9"
+    - "sles:15"
+  tpa_postgres_flavour: &default_tpa_postgres_flavour
+    - "postgresql"
+    - "edbpge"
+    - "epas"
+
+
+M1:
+  tpa_architecture: [ "M1" ]
+  tpa_os_image: *default_tpa_os_image
+  tpa_postgres_flavour: *default_tpa_postgres_flavour
+  cpu_architecture: *default_cpu_architecture
+  include:
+    - tpa_postgres_flavour: "postgresql"
+      tpa_failover_manager: "repmgr"
+    - tpa_postgres_flavour: "edbpge"
+      tpa_failover_manager: "patroni"
+    - tpa_postgres_flavour: "epas"
+      tpa_failover_manager: "efm"
+
+BDR-Always-ON:
+  tpa_architecture: [ "BDR-Always-ON" ]
+  tpa_os_image: *default_tpa_os_image
+  tpa_postgres_flavour:
+    - "pgextended"
+    - "epas"
+  cpu_architecture: *default_cpu_architecture
+  tpa_harp_consensus_protocol:
+    - "bdr"
+    - "etcd"
+  exclude:
+    - tpa_os_image: "debian:12"
+    - tpa_os_image: "sles:15"
+
+PGD-Always-ON:
+  tpa_architecture: [ "PGD-Always-ON" ]
+  tpa_os_image: *default_tpa_os_image
+  tpa_postgres_flavour: *default_tpa_postgres_flavour
+  cpu_architecture: *default_cpu_architecture
+  exclude:
+    - tpa_postgres_flavour: "postgresql"
+
+PGD-S:
+  tpa_architecture: [ "PGD-S" ]
+  tpa_os_image: *default_tpa_os_image
+  tpa_postgres_flavour: *default_tpa_postgres_flavour
+  cpu_architecture: *default_cpu_architecture
+  exclude:
+    - tpa_os_image: "ubuntu:20.04"
+
+PGD-X:
+  tpa_architecture: [ "PGD-X" ]
+  tpa_os_image: *default_tpa_os_image
+  tpa_postgres_flavour: *default_tpa_postgres_flavour
+  cpu_architecture: *default_cpu_architecture
+  exclude:
+    - tpa_os_image: "ubuntu:20.04"

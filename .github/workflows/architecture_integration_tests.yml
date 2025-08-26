@@ -1,0 +1,111 @@
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# Matrix cluster deployment for fast generic test on a wide range of cluster
+# no customization possible, run with default matrix key as input.
+
+name: Architecture Integration Tests
+on:
+  workflow_dispatch:
+    inputs:
+      tpa_postgres_version:
+        description: "Postgres version"
+        required: true
+        default: "16"
+        type: choice
+        options:
+        - 12
+        - 13
+        - 14
+        - 15
+        - 16
+        - 17
+      tpa_architecture:
+        description: "TPA architecture"
+        required: true
+        default: "M1"
+        type: choice
+        options:
+          - "M1"
+          - "BDR-Always-ON"
+          - "PGD-Always-ON"
+          - "PGD-S"
+          - "PGD-X"
+run-name: ${{ inputs.tpa_architecture }}, postgres ${{ inputs.tpa_postgres_version }}
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  FOUNDATION_TUNNEL_LOGIN: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
+  GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+  ANSIBLE_SKIP_TAGS: pgbench
+  PYTHONWARNINGS: once
+
+jobs:
+
+  load-matrix:
+    name: Load Matrix
+    runs-on: ubuntu-22.04
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{secrets.GH_SLONIK}}
+
+    - uses: ./.github/actions/load-yaml
+      id: load-yaml
+      with:
+        file: .github/config/architectures.yml
+        key: ${{ inputs.tpa_architecture }}
+
+  integration-test:
+    name: "${{ matrix.tpa_os_image }} ${{ matrix.tpa_postgres_flavour }} ${{ matrix.tpa_failover_manager }} ${{ matrix.tpa_harp_consensus_protocol }}"
+    needs: load-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout source repository
+      id: checkout-source
+      uses: actions/checkout@v4
+      with:
+        repository: EnterpriseDB/tpa-internal
+        token: ${{ env.GITHUB_TOKEN }}
+
+    - name: Checkout foundation repository branch/tag ${{ env.FOUNDATION_VER }}
+      uses: actions/checkout@v4
+      with:
+        repository: EnterpriseDB/foundation-packaging
+        ref: ${{ env.FOUNDATION_VER }}
+        token: ${{ env.GITHUB_TOKEN }}
+        path: foundation
+
+    - uses: ./.github/actions/integration-test
+      with:
+        cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_harp_consensus_protocol || matrix.tpa_failover_manager }}
+        cpu_architecture: ${{ matrix.cpu_architecture }}
+        source_directory: ${{ github.workspace }}
+        tpa_architecture: ${{ matrix.tpa_architecture }}
+        tpa_enable_pgbouncer: ${{ matrix.tpa_enable_pgbouncer }}
+        tpa_platform: "docker"
+        tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
+        tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
+        tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
+        tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
+        tpa_harp_consensus_protocol: ${{ matrix.tpa_harp_consensus_protocol }}
+        # we suppress the downloader for edb flavours with patroni: see
+        # TPA-956
+        tpa_package_cache: >-
+          ${{ ! (
+            contains(matrix.tpa_os_image, 'sles')
+            || (
+              (matrix.tpa_failover_manager == 'patroni')
+              && (matrix.tpa_postgres_flavour != 'postgresql')
+            )
+          ) }}

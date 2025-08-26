@@ -81,12 +81,12 @@
       oraclelinux-9: oraclelinux:9
       debian-latest: debian:11
       redhat-7: centos:7
-      redhat-8: rockylinux:8
-      redhat-9: rockylinux:9
-      redhat-latest: rockylinux:8
-      rocky-8: rockylinux:8
-      rocky-9: rockylinux:9
-      rocky-latest: rockylinux:8
+      redhat-8: rockylinux/rockylinux:8
+      redhat-9: rockylinux/rockylinux:9
+      redhat-latest: rockylinux/rockylinux:9
+      rocky-8: rockylinux/rockylinux:8
+      rocky-9: rockylinux/rockylinux:9
+      rocky-latest: rockylinux/rockylinux:9
       sles-15: registry.suse.com/bci/bci-base:15.6
       ubuntu-18.04: ubuntu:bionic
       ubuntu-bionic: ubuntu:bionic

@@ -2,17 +2,17 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2021 - All rights reserved.
 
-- include_role: name=pkg/add_to_list
-  vars:
-    list_contents: "{{
-        pgd_proxy_packages|packages_for(ansible_os_family, pgd_proxy_package_version)
-      }}"
-  when: >
-    'pgd-proxy' in role
+- block:
+  - include_role: name=pkg/add_to_list
+    vars:
+      list_contents: "{{
+          pgd_proxy_packages|packages_for(ansible_os_family, pgd_proxy_package_version)
+        }}"
 
-# Our tests require psycopg2, included with the client packages.
-- include_role:
-      name: postgres/pkg
-      tasks_from: list-client-packages.yml
+  # Our tests require psycopg2, included with the client packages.
+  - include_role:
+        name: postgres/pkg
+        tasks_from: list-client-packages.yml
+
   when: >
     'pgd-proxy' in role

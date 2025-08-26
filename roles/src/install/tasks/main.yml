@@ -52,16 +52,18 @@
 # install the results. The caller may specify a build_commands array and
 # a build_environment hash, or we'll just run "make install" by default.
 
+  - set_fact:
+     gh_api_token: "{{ lookup('env', 'GH_API_TOKEN') }}"    
+
 # When running inside a container in github we need github api token to access
 # the protected pgrx repository during bdr build. We can pass the token during deploy as
 # `tpaexec deploy . -e GH_API_TOKEN=<token>
   - name: Change gitconfig to use https for pgrx dependency in pgd build
     shell: >
-      git config --global url."https://x:{{GH_API_TOKEN}}@github.com".insteadOf "https://github.com"
-    when: >
-      # We are running in github actions
-      - ansible_env.GH_API_TOKEN is defined
-      - GH_API_TOKEN|default('') != ''
+      git config --global url."https://x:{{gh_api_token}}@github.com".insteadOf "https://github.com"
+    when: 
+      - gh_api_token is defined
+      - gh_api_token|default('') != ''
 
   # Install and init pgrx as required by bdr6
   - name: Build {{ source_name }}

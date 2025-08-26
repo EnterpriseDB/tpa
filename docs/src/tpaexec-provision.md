@@ -123,7 +123,7 @@ total 240
 -rw-r--r-- 1 ams ams 193098 Aug  4 17:59 ansible.log
 drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 commands
 -rw-r--r-- 1 ams ams   1442 Aug  4 17:54 config.yml
-lrwxrwxrwx 1 ams ams     51 Aug  4 17:38 deploy.yml -> 
+lrwxrwxrwx 1 ams ams     51 Aug  4 17:38 deploy.yml ->
                              /opt/EDB/TPA/architectures/M1/deploy.yml
 drwxr-xr-x 2 ams ams   4096 Aug  4 17:38 hostkeys
 -rw------- 1 ams ams   1675 Aug  4 17:38 id_speedy
@@ -153,7 +153,7 @@ uproar ansible_host=3.88.255.205 node=1 platform=aws
 unravel ansible_host=54.80.99.142 node=2 platform=aws
 kinsman ansible_host=54.165.229.179 node=3 platform=aws
 
-[tpa]$ cat inventory/group_vars/tag_Cluster_speedy/01-speedy.yml 
+[tpa]$ cat inventory/group_vars/tag_Cluster_speedy/01-speedy.yml
 cluster_name: speedy
 cluster_tag: tag_Cluster_speedy
 edb_repositories: []
@@ -164,7 +164,6 @@ postgres_version: '14'
 preferred_python_version: python3
 ssh_key_file: id_speedy
 tpa_version: v23.33-24-g4c0909d1
-use_volatile_subscriptions: false
 
 [tpa]$ cat inventory/host_vars/kinsman/01-instance_vars.yml
 ansible_user: admin

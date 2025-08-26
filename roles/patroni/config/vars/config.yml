@@ -169,14 +169,21 @@ _patroni_conf_watchdog:
     device: /dev/watchdog
     safety_margin: 5
 
-# `backup` exists
-
+# Dynamically generate ignore_slots for Patroni to ignore physical replication
+# slots for all Barman backup servers in the role_barman group, if it
+# exists and is non-empty.
 _patroni_conf_backup:
   bootstrap:
     dcs:
-      ignore_slots:
-        - name: "{{ backup|default('')|backup_slot_name }}"
-          type: physical
+      ignore_slots: >-
+        {%- set _slots = {} -%}
+        {%- if 'role_barman' in groups and groups['role_barman']|length > 0 -%}
+        {%-   for h in groups['role_barman']|sort -%}
+        {%-     set slot_name = h|backup_slot_name -%}
+        {%-     set _ = _slots.update({slot_name: {'type': 'physical'}}) -%}
+        {%-   endfor -%}
+        {%- endif -%}
+        {{ _slots }}
 
 # permanent physical replication slots for members, so they don't get dropped
 # while Patroni is taking management over during the first `tpaexec deploy`.

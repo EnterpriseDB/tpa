@@ -14,21 +14,17 @@
   set_fact:
     pem_supported_schema_version: "{{ supported_schema_version_check.stdout }}"
 
-- name: Execute pemserver.sql and postgresexpert.sql
-  command: >
-    {{ postgres_bin_dir }}/psql \
-      -p {{ postgres_port }} \
-      -U {{ postgres_user }} \
-      -d {{ pem_database }} \
-      -X -t -A -q \
-      -c "SELECT pem.schema_version();"
+- name: Check PEM schema version in database
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(pem_database) }}"
+    query: SELECT pem.schema_version()
   become_user: "{{ postgres_user }}"
   become: yes
   register: pem_schema_version_check
 
 - name: Set the current PEM schema-version
   set_fact:
-    current_pem_schema_version: "{{ pem_schema_version_check.stdout }}"
+    current_pem_schema_version: "{{ pem_schema_version_check.results[0].schema_version }}"
 
 - name: Upgrade the PEM schema
   block:
@@ -43,13 +39,11 @@
       register: list_upgrades
 
     - name: Upgrading the schema
-      command: >
-        {{ postgres_bin_dir }}/psql -a \
-          -v ON_ERROR_STOP=1 \
-          -p {{ postgres_port }} \
-          -U {{ postgres_user }} \
-          -d {{ pem_database }} \
-          -f {{ item }}
+      community.postgresql.postgresql_script:
+        port: "{{ postgres_port }}"
+        login_user: "{{ postgres_user}}"
+        login_db: "{{ pem_database}}"
+        path: "{{ item }}"
       become_user: "{{ postgres_user }}"
       become: yes
       with_items: "{{ list_upgrades.stdout_lines|list }}"

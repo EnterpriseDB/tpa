@@ -226,9 +226,9 @@ class PGD_Always_ON(BDR):
 
             bdr_node_groups.append(group)
 
+        cluster_vars.setdefault("bdr_node_groups", []).extend(bdr_node_groups)
         cluster_vars.update(
             {
-                "bdr_node_groups": bdr_node_groups,
                 "default_pgd_proxy_options": {
                     "listen_port": self.args["listen_port"],
                 },

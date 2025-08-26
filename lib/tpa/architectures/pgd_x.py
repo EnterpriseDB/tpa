@@ -99,7 +99,7 @@ class PGDX(PGD):
                 )
 
             bdr_node_groups.append(new_group)
-        cluster_vars.update({"bdr_node_groups": bdr_node_groups})
+        cluster_vars.setdefault("bdr_node_groups", []).extend(bdr_node_groups)
 
     def update_instances(self, cluster):
         instances = cluster.instances

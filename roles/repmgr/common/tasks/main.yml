@@ -59,3 +59,28 @@
       repmgr -f "{{ repmgr_conf_file }}" node status | grep -q 'Role: primary' &&
       repmgr -f "{{ repmgr_conf_file }}" cluster cleanup --keep-history 7 2> /dev/null
     state: present
+
+# The 'repgmr' user was previously part of the 'default_pgpass_users' list, to
+# be added by default unless the user provided their own 'pgpass_users' list in
+# the configuration file. It makes more sense to always include the 'repmgr' user 
+# to the ~postgres/pgpass file when 'repmgr' is specified as the 'failover_manager'
+# as part of the role/repmgr tasks.
+
+- include_role: name=postgres/pgpass
+  vars:
+    pgpass_users:
+      - repmgr
+  when: >
+    task_selector|permits('pgpass')
+
+#There's a big corner case we support for some customers where repmgr acts like another
+#primary node but in subscriber-only mode. In this case, we need to create this user
+#in order to make bdr join work.
+- include_role: name=postgres/createuser
+  vars:
+    username: "{{ harp_dcs_user }}"
+  when: >
+    harp_dcs_user is defined
+    and 'bdr' in role
+    and 'subscriber-only' in role
+    and 'primary' in role

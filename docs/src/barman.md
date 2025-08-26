@@ -194,24 +194,39 @@ clusters is described below.
     ```
 5. Run `tpaexec deploy $clusters/second-cluster`
 
-!!! Note
+!!! Note Mixed-platform clusters
+By declaring the shared Barman instance as `platform: bare` you
+might have changed your cluster to a mixed-platform cluster. This may require
+you to adjust other parts of `config.yml` to accommodate this change.
+Specifically, the `instance_defaults` section must only contain settings
+which are applicable to all instances in the cluster. If, for example,
+your `instance_defaults` contains a setting such as `type` which is only
+valid for `platform: aws` you must move that setting out of
+`instance_defaults` and into only the instances which use the AWS platform.
+!!!
 
-    You must use caution when setting up clusters that share a Barman 
-    server instance. There are a number of important aspects you must
-    consider before attempting such a setup. For example:
+### Special considerations for shared Barman servers
 
-    1. Making sure that no two instances in any of the clusters sharing a
-    Barman server use the same name.
-    2. Barman configuration and settings otherwise should remain in sync in
-    all the clusters using a common Barman server to avoid a scenario
-    where one cluster sets up a specific configuration and the others do
-    not either because the configuration is missing or uses a different
-    value.
-    3. Version of Postgres on instances being backed up across different
-    clusters needs to be the same.
-    4. Different clusters using a common Barman server cannot specify
-    different versions of Barman packages when attempting to override
-    default.
+You must use caution when setting up clusters that share a Barman 
+server instance. There are a number of important aspects you must
+consider before attempting such a setup.
+
+1. Make sure that no two instances in any of the clusters sharing a
+   Barman server use the same name. The `--cluster-prefixed-hostnames`
+   option of `tpaexec configure` may be helpful in this respect.
+
+2. Barman configuration and settings otherwise should remain in sync in
+   all the clusters using a common Barman server to avoid a scenario
+   where one cluster sets up a specific configuration and the others do
+   not either because the configuration is missing or uses a different
+   value.
+
+3. The version of Postgres on instances being backed up across different
+   clusters needs to be the same.
+
+4. Different clusters using a common Barman server cannot specify
+   different versions of Barman packages when attempting to override the
+   default.
 
 Some of these may be addressed in a future release as we continue to
 improve the shared Barman server support.

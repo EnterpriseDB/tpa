@@ -35,7 +35,7 @@
 
 # Now we set up package repositories, including {apt,yum}_repositories
 # entries mentioned in {apt,yum}_repository_list (e.g., PGDG, EPEL), and
-# any EDB/2ndQuadrant repositories we might need (tpa_2q_repositories).
+# any EDB repositories we might need
 
 - include_role:
     name: sys/repositories

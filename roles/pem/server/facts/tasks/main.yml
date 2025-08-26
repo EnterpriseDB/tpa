@@ -1,0 +1,39 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+- package_facts:
+    manager: auto
+
+- set_fact:
+    pem_version: "{{ ansible_facts.packages['edb-pem'][0]['version']|split('-')|first }}"
+
+# Now, let's dig a bit deeper and find the *exact* PEM schema version. We do
+# this by checking the latest SQL upgrade script – it's more precise than
+# just the package version.
+- name: Discover PEM schema version
+  shell: ls /usr/edb/pem/share/upgrades/*.sql | sort -r | head -n 1 | sed 's/\.sql$//' | xargs basename
+  register: _pem_schema_version
+
+- set_fact:
+    pem_schema_version: "{{ _pem_schema_version.stdout }}"
+
+- set_fact:
+    pem_is_v10_or_higher: "{{ pem_schema_version | int >= 202503241 }}"
+    pem_is_v10_1_0_or_higher: "{{ pem_schema_version | int >= 202505151 }}"
+    pem_is_v10_1_1_or_higher: "{{ pem_schema_version | int >= 202507071 }}"
+
+# We use the system's python interpreter to execute Python scripts that
+# are bundled with PEM versions before 9.0. With newer versions of PEM,
+# we must use the PEM-bundled python interpreter instead. The location
+# may vary across platforms, but configure-pem-server.sh is always in
+# the same place, and points to the correct path.
+- name: Determine PEM python interpreter path
+  shell: >
+    eval $(grep -E '^(PEM_PYTHON|PEM_PYTHON_EXECUTABLE)=' /usr/edb/pem/bin/configure-pem-server.sh);
+    echo ${PEM_PYTHON_EXECUTABLE:-$(command -v python3)}
+  args:
+    executable: /bin/bash
+  register: find_pem_python
+
+- set_fact:
+    pem_python_executable: "{{ find_pem_python.stdout }}"

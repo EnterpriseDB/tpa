@@ -85,6 +85,7 @@ on:
         options:
         - "efm"
         - "repmgr"
+        - "patroni"
       tpa_package_cache:
         description: "Use the downloader"
         type: boolean
@@ -105,6 +106,7 @@ env:
   EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
   EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
   FOUNDATION_VER: ${{ vars.FOUNDATION_PACKAGING_VERSION }}
+  FOUNDATION_TUNNEL_LOGIN: ${{ secrets.FOUNDATION_TUNNEL_LOGIN }}
   GITHUB_TOKEN: ${{ secrets.GH_SLONIK }}
   SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
   PYTHONWARNINGS: once

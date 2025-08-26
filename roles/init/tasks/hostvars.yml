@@ -43,13 +43,6 @@
   set_fact:
     hostname_aliases: "{{ hostname_aliases|default({}) }}"
 
-- name: Set tpa_2q_repositories from twoq_repositories (compat)
-  set_fact:
-    tpa_2q_repositories: "{{ twoq_repositories }}"
-  when:
-    tpa_2q_repositories is not defined and
-    twoq_repositories is defined
-
 # For backwards compability, we translate postgresql_flavour to
 # postgres_flavour (but new configurations will only use the latter).
 

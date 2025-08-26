@@ -36,6 +36,11 @@ class PGD(Architecture):
             help="name of BDR-enabled database",
             default="bdrdb",
         )
+        g.add_argument(
+            "--cluster_prefixed_hostnames",
+            help="Add the cluster name as a prefix to instance hostnames",
+            action="store_true",
+        )
         if self.name != "Lightweight":
             g.add_argument(
                 "--enable-camo",

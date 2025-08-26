@@ -4,16 +4,17 @@ description: Configuring a PGD-S cluster with TPA.
 
 # PGD-S
 
-!!! Note
-    This architecture is for Postgres Distributed 6 only.
-    If you require PGD 5 please use [PGD-Always-ON](architecture-PGD-Always-ON.md)
-    or [Lightweight](architecture-PGD-Lightweight.md).
+!!!Note
+This architecture is for Postgres Distributed 6 only.
+If you require PGD 5 please use [PGD-Always-ON](architecture-PGD-Always-ON/).
+!!!
 
-    EDB Postgres Distributed 6 in a PGD Essential configuration,
-    suitable for use in test and production.
+EDB Postgres Distributed 6 in a PGD Essential (PGD-S) configuration
+suitable for use in test and production.
 
-    This architecture requires an EDB subscription.
-    All software will be sourced from [EDB Repos 2.0](edb_repositories.md).
+This architecture requires an EDB subscription.
+All software is sourced from [EDB Repos 2.0](reference/edb_repositories/).
+
 
 ## Cluster configuration
 
@@ -23,11 +24,11 @@ An example invocation of `tpaexec configure` for this architecture
 is shown below.
 
 ```bash
-    tpaexec configure ~/clusters/pgd-s \
-        --architecture PGD-S
-        --edb-postgres-extended 15 \
-        --platform aws --instance-type t3.micro \
-        --distribution Debian \
+tpaexec configure ~/clusters/pgd-s \
+    --architecture PGD-S
+    --edb-postgres-extended 15 \
+    --platform aws --instance-type t3.micro \
+    --distribution Debian \
 ```
 
 You can list all available options using the help command.

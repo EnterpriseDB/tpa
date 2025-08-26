@@ -1,7 +1,7 @@
 
 - name: Statement on node {{ bdr_host }}
   postgresql_query:
-    conninfo: "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, host=bdr_host) }}"
+    conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host=bdr_host) }}"
     query:  "{{ bdr_query }}"
   register: bdr_query_result
   vars:
