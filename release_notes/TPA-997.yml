@@ -1,0 +1,16 @@
+- summary: Add `pgaudit` package names for `edbpge`
+  description: |
+    Previously, adding `pgaudit` to the list of Postgres extensions with 
+    the `edbpge` Postgres flavour would fail because the dictionary for
+    handling recognized extensions was missing an entry for `edbpge` and
+    it's corresponding package names. This entry is added, and additional
+    logic is incorporated to handle naming change for `pgaudit` packages
+    from version 16 onwards.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-997
