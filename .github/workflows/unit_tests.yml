@@ -28,7 +28,7 @@ jobs:
     steps:
     - name: Checkout source repository
       id: checkout-source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
         token: ${{secrets.GH_SLONIK}}

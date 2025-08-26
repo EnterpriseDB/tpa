@@ -47,7 +47,7 @@ jobs:
     steps:
       - name: Checkout source repository
         id: checkout-source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: EnterpriseDB/tpa-internal
           token: ${{ env.GITHUB_TOKEN }}
@@ -83,13 +83,13 @@ jobs:
     steps:
       - name: Checkout source TPA repository
         id: checkout-source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: EnterpriseDB/tpa-internal
           token: ${{ env.GITHUB_TOKEN }}
 
       - name: Checkout foundation repository branch/tag ${{ env.FOUNDATION_VER }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: EnterpriseDB/foundation-packaging
           ref: ${{ env.FOUNDATION_VER }}
@@ -144,7 +144,7 @@ jobs:
     name: Requirements update
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           token: ${{ secrets.GH_SLONIK }}
 
