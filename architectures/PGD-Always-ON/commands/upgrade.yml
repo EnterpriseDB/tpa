@@ -7,6 +7,9 @@
     upgrade_in_progress: true
   tags: always
 
+- import_playbook: "{{ tpa_dir }}/architectures/lib/dynamic_groups.yml"
+  tags: always
+
 # This command performs upgrades for PGD-Always-ON clusters, including
 # Postgres (minor versions only) and BDR (major: 4→5 or minor: 5.x→5.y)
 # upgrades.

@@ -191,16 +191,22 @@ This may be useful to minimise lead/shadow switchovers during the upgrade
 by listing the active PGD primary instances last, so that the shadow
 servers are upgraded first.
 
-You can upgrade a subset of the instances by specifying only these
-instances in update_hosts. However, you must always include any
-instances with the`harp-proxy`, `pgd-proxy`, or `pgbouncer`
-roles in the list, otherwise the upgrade could fail with package
-version conflicts.
-
 If your environment requires additional actions, the
 [postgres-pre-update and postgres-post-update hooks](tpaexec-hooks.md)
 allow you to execute custom Ansible tasks before and after the package
 installation step.
+
+## Upgrading a Subset of Nodes
+
+You can perform a rolling upgrade on a subset of instances by setting the `update_hosts` variable. However, support for this feature varies by architecture.
+
+* For the **M1** architecture, this feature is supported in all its upgrade scenarios.
+
+* For **PGD-Always-ON/BDR-Always-ON**, this is supported **only** during minor version upgrades.
+
+### Best Practice for PGD-Always-ON/BDR-Always-ON
+
+When performing a minor upgrade on a subset of PGD nodes, it is highly recommended to update the **RAFT leader nodes last**. This strategy avoids potential issues with post-upgrade checks while the cluster is running mixed versions of BDR.
 
 ## Package version selection
 

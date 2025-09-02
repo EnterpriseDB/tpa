@@ -1,0 +1,18 @@
+- summary: Fix support for update_host variable on PDG-Always-ON
+  description: |
+    TPA is now able to honor update_hosts variable for minor postgres and minor PGD5 upgrade
+    scenario when using PGD-Always-ON architecture.
+
+    By specifying update_hosts variable in the tpaexec upgrade command, TPA will now upgrade
+    this subset of nodes during postgres and PGD minor upgrade and let the remaining nodes
+    on the currently installed versions.
+
+    This should allow for more controlled upgrade that can be split into multiple runs
+    in order to better control and test the cluster along the upgrade process.
+
+    It is recommended to use this feature while still keeping best practices in mind
+    such as always updating write leaders last and testing in a dev/staging environment first.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  jira_tickets:
+  - TPA-917

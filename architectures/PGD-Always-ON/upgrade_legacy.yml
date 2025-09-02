@@ -148,7 +148,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: "{{ update_hosts|default('all') }}"
+  hosts: g_update_hosts
   tasks:
   - name: Configure local-repo, if available
     include_role:
@@ -217,7 +217,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: "{{ update_hosts|default('all') }}"
+  hosts: g_update_hosts
   serial: 1
   tasks:
   - name: Fence the node before upgrade
@@ -389,7 +389,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_harp-proxy:role_pgd-proxy:role_pgbouncer
+  hosts: role_harp-proxy:role_pgd-proxy:role_pgbouncer:&g_update_hosts
   tasks:
 
   - name: Set up pgd-proxy

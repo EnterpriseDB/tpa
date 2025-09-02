@@ -68,15 +68,6 @@
     when: pgrep_check.rc == 2
 
 
-- name: Set upgrade facts for all hosts
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  environment: "{{ target_environment }}"
-  hosts: all
-  tasks:
-
 # As a precaution, we refuse to start any upgrade if any proxies are
 # unhealthy.
 # TODO: Adapt the recovery used in 4to5 to 3to5. issue is that we won't get to this
@@ -140,7 +131,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: "{{ update_hosts|default('all') }}"
+  hosts: g_update_hosts
   tasks:
   - name: Configure local-repo, if available
     include_role:
@@ -209,7 +200,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: "{{ update_hosts|default('all') }}"
+  hosts: g_update_hosts
   serial: 1
   tasks:
   - name: Fence the node before upgrade
@@ -399,7 +390,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_harp-proxy:role_pgd-proxy:role_pgbouncer
+  hosts: role_harp-proxy:role_pgd-proxy:role_pgbouncer:&g_update_hosts
   tasks:
 
   - name: Set up pgd-proxy

@@ -5,51 +5,8 @@
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
   tags: always
 
-- name: Generate dynamic groups for upgrade
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  environment: "{{ target_environment }}"
-  hosts: all
-  tasks:
-
-  - name: Create dynamic group update_hosts
-    add_host:
-      group: g_update_hosts
-      hostname: "{{ member }}"
-      inventory_dir: "{{ hostvars[member].inventory_dir }}"
-    with_items: "{{ (update_hosts|split(',')) if update_hosts is defined else groups['all'] }}"
-    loop_control:
-      loop_var: member
-    changed_when: false
-
-  - name: Identify primary by name
-    set_fact:
-      chosen_primary: "{{ groups['primary'] | difference(groups['role_pem-server']|default([])) | first }}"
-
-  - name: Identify replica to become temporary primary
-    set_fact:
-      chosen_replica: "{{ groups['replica'][0] }}"
-
-  - name: Create dynamic group g_chosen_primary
-    add_host:
-      group: g_chosen_primary
-      hostname: "{{ chosen_primary }}"
-      inventory_dir: "{{ hostvars[chosen_primary].inventory_dir }}"
-    changed_when: false
-
-  - name: Create dynamic group g_chosen_replica
-    add_host:
-      group: g_chosen_replica
-      hostname: "{{ chosen_replica }}"
-      inventory_dir: "{{ hostvars[chosen_replica].inventory_dir }}"
-    changed_when: false
-
-  - name: set fo_manager
-    set_fact:
-      fo_manager: "{{ failover_manager }}"
-
+- import_playbook: "{{ tpa_dir }}/architectures/lib/dynamic_groups.yml"
+  tags: always
 
 - name: Import repmgr upgrade
   import_playbook: "{{ cluster_dir }}/playbooks/repmgr_cluster_upgrade.yml"
