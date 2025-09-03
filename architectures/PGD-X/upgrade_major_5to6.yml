@@ -1,0 +1,287 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# This command performs upgrades from a PGD-Always-ON cluster which is
+# already using Connection Manager to a PGD-X cluster
+#
+# config.yml should have been changed before upgrading, either using
+# `tpaexec reconfigure` or by hand
+#
+# 1. Check that the cluster looks normal before doing anything.
+# 2. Then, for each Postgres instance:
+#    a. Fence the node (depending on the configuration)
+#    b. Stop, update, and restart Postgres
+#    c. Unfence the node if necessary
+#    d. Install and configure new packages (again, depending on the
+#       cluster's configuration)
+#    e. Wait for the cluster to settle before moving on
+# 3. Perform some additional tasks that are relevant only to major
+#    version upgrades
+# 4. Check that the cluster looks normal at the end
+
+- name: Check preconditions to upgrade cluster {{ cluster_dir }}
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr:&g_update_hosts
+  tasks:
+
+  - name: Ensure that BDR major version upgrades start from a recent version of PGD 5
+    assert:
+      that: all_bdr_version_nums|select('version', '50900', '<')|list is empty
+      fail_msg: >-
+        Please upgrade to the latest available BDR 5.x release (5.9.0 or above)
+        before trying to upgrade to PGD 6
+    when:
+      inventory_hostname == first_bdr_primary
+
+  - name: Ensure that this cluster is already running Connection Manager
+    assert:
+      that:
+        ('bdr.enable_builtin_connection_manager' in cluster_facts["pg_settings"])
+        and cluster_facts["pg_settings"]["bdr.enable_builtin_connection_manager"]
+      fail_msg: >-
+        This cluster is not running Connection Manager
+
+  - name: Log pgd-cli diagnostic output
+    include_role:
+      name: test
+      tasks_from: pgd-cli/info.yml
+    vars:
+      bdr_version: "{{ bdrdb_major_version }}"
+    when:
+      inventory_hostname == first_bdr_primary
+
+  - name: Record connection manager endpoint DSN for monitoring
+    set_fact:
+      cm_endpoint:
+        "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, port=bdr_node_groups[0]['options']['read_write_port']|default(postgres_port|int + 1000)) }}"
+
+# We check pgbouncer nodes are healthy; at this point maybe we could also
+# do checks on the existing Connection Manager nodes?
+
+- name: Check proxy status before upgrade
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_pgbouncer
+  tasks:
+
+  - name: Check pgbouncer configuration and status
+    include_role:
+      name: test
+      tasks_from: pgbouncer/basic.yml
+    when: >
+      'pgbouncer' in role
+
+# Before we start installing new packages on the nodes, we make any
+# changes to the repository configuration that may be required.
+
+- name: Update repository configuration, if required
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: g_update_hosts
+  tasks:
+  - name: Configure local-repo, if available
+    include_role:
+      name: sys/local_repo
+
+  - name: Set up repositories
+    include_role:
+      name: sys/repositories
+
+  # Do the repositories we configured actually contain the packages we
+  # need for the upgrade? Unfortunately, we can't always tell for sure,
+  # especially with upgrades, without actually trying to install them.
+  # Still, any errors we can catch now, before we stop Postgres on any
+  # instances, are most helpful.
+  #
+  # (In principle, we ought to check that every instance has ALL the
+  # packages it needs, e.g., pgd-proxy or pgbouncer. However, to avoid
+  # adding a lot of potentially-confusing noise to the process, and in
+  # light of the fact that there are very few repositories involved, it
+  # is enough to check that the major packages, i.e., Postgres/BDR, are
+  # available on one instance.)
+
+  - name: Check if required packages are available
+    include_role:
+      name: postgres/pkg
+      tasks_from: check-update.yml
+    vars:
+      upgrade_from: 5
+    when: >
+      'bdr' in role
+      and inventory_hostname == first_bdr_primary
+
+# TODO: calculate correct connection info for all hosts accepting
+# connections
+
+- name: Start monitoring proxy downtime
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr:&g_update_hosts
+  tasks:
+  - include_role:
+      name: test
+      tasks_from: proxy-monitor/start.yml
+    vars:
+      conninfos:
+        "{{ groups['role_bdr']|default([])
+            |map('extract', hostvars, 'cm_endpoint')
+            |list }}"
+    when:
+      inventory_hostname == first_bdr_primary
+      and enable_proxy_monitoring
+
+# Now that we're convinced the cluster is in a reasonable initial state,
+# we start the update process one by one on the instances.
+
+- name: Update postgres on instances in cluster {{ cluster_dir }}
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: g_update_hosts
+  serial: 1
+  tasks:
+  - name: Fence the node before upgrade
+    include_role:
+      name: postgres/bdr
+      tasks_from: fence.yml
+    vars:
+      failover_manager: 'pgd'
+    when:
+      - "'bdr' in role"
+      - inventory_hostname in first_bdr_primary_candidates
+
+  - name: Stop/update/restart Postgres on {{ inventory_hostname }}
+    block:
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: stopped
+    - include_role: name=postgres/update
+      vars:
+        upgrade_from: 5
+    - include_role: name=postgres/user
+    - include_role: name=postgres/config
+    - include_role: name=postgres/final
+    when: >
+      'postgres' in role
+
+  - name: Unfence the node after upgrade
+    include_role:
+      name: postgres/bdr
+      tasks_from: unfence.yml
+    vars:
+      failover_manager: 'pgd'
+    when:
+      - "'bdr' in role"
+      - inventory_hostname in first_bdr_primary_candidates
+
+  - name: Wait for bdr nodes to reach consensus before proceeding
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      query: >
+        select s->>'leader_id' != '0' or s->>'leader' != '0' status from bdr.get_raft_status() s;
+    register: bdr_raft
+    until: bdr_raft.status == true
+    retries: 60
+    delay: 1
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when:
+    - "'bdr' in role"
+    - "'replica' not in role"
+
+  # On instances that don't run Postgres, we can usually get away with a
+  # much simpler upgrade process.
+
+  - name: Stop/update/restart pgbouncer on {{ inventory_hostname }}
+    include_role:
+      name: pgbouncer
+      tasks_from: upgrade.yml
+    when: >
+      'pgbouncer' in role
+
+  - name: Update pgd-cli on {{ inventory_hostname }}
+    include_role:
+      name: pgdcli
+      tasks_from: upgrade.yml
+    when: >
+      'bdr' in role
+      or 'pgdcli' in role
+
+  # Ansible won't stop execution if a host becomes unreachable, despite
+  # the any_errors_fatal setting. We must detect that situation and fail
+  # so that we don't proceed to the next host if something went wrong in
+  # upgrading this one.
+
+  - name: Fail if any host became unreachable
+    assert:
+      msg: "One or more hosts are no longer reachable"
+      that:
+        ansible_play_hosts == ansible_play_hosts_all
+
+# TODO: BDR v6-specific things?
+# commented out is what we used to do for 4 to 5
+
+- name: Update BDR v6-specific configuration
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr:&g_update_hosts
+  tasks:
+  - include_role:
+      name: postgres/bdr
+      tasks_from: update.yml
+
+  - name: Log pgd-cli diagnostic output after BDR group configuration
+    include_role:
+      name: test
+      tasks_from: pgd-cli/info.yml
+    when:
+      inventory_hostname == first_bdr_primary
+
+- name: Stop monitoring proxy downtime
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr:&g_update_hosts
+  tasks:
+  - include_role:
+      name: test
+      tasks_from: proxy-monitor/report.yml
+    when:
+      inventory_hostname == first_bdr_primary
+      and enable_proxy_monitoring
+
+- name: Log diagnostic output after upgrade
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr:&g_update_hosts
+  tasks:
+  - name: Log pgd-cli diagnostic output
+    include_role:
+      name: test
+      tasks_from: pgd-cli/info.yml
+    when:
+      inventory_hostname == first_bdr_primary

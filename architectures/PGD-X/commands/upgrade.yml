@@ -53,6 +53,13 @@
       _versions:
         "{{ groups['role_bdr']|bdr_node_versions(hostvars) }}"
 
+  - name: Collect list of all unique BDR version numbers from all nodes
+    set_fact:
+      all_bdr_version_nums: "{{ _version_nums.values()|list }}"
+    vars:
+      _version_nums:
+        "{{ groups['role_bdr']|bdr_node_version_nums(hostvars) }}"
+
   - name: "Check the cluster is not running mixed versions of BDR/PGD"
     assert:
       that:
@@ -76,24 +83,8 @@
       bdr6_minor_version_upgrade:
         "{{ all_bdr_major_versions == ['6'] }}"
 
-- name: Generate dynamic groups for upgrade
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  become_user: root
-  become: yes
-  environment: "{{ target_environment }}"
-  hosts: all
-  tasks:
-
-  - name: Create dynamic group update_hosts
-    add_host:
-      group: g_update_hosts
-      hostname: "{{ member }}"
-      inventory_dir: "{{ hostvars[member].inventory_dir }}"
-    with_items: "{{ (update_hosts|split(',')) if update_hosts is defined else groups['all'] }}"
-    loop_control:
-      loop_var: member
-    changed_when: false
+- import_playbook: "{{ tpa_dir }}/architectures/lib/dynamic_groups.yml"
+  tags: always
 
 - name: Set upgrade facts for all hosts
   any_errors_fatal: true
@@ -122,6 +113,10 @@
             |first }}"
     when: >
       "bdr" not in role
+
+  - set_fact:
+      enable_proxy_monitoring:
+        "{{ enable_proxy_monitoring|default(false) }}"
 
 # We now are ready to fork to the correct upgrade workflow
 - import_playbook: "{{ tpa_dir }}/architectures/PGD-X/upgrade_major_4to6.yml"

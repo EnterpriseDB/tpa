@@ -16,7 +16,7 @@
 
 - set_fact:
     pgdcli_bin: >-
-      {{ pgd.stat.exists | ternary('/usr/local/bin/', '') }}pgd
+      {{ '/usr/local/bin/pgd' if pgd.stat.exists else postgres_bin_dir ~ '/pgd' if bdr_version|int == 6 else 'pgd' }}
 
 - name: Run 'pgd --version' first
   command: >
@@ -50,6 +50,12 @@
         - show-proxies
         - show-replslots
         - show-subscriptions
+      6:
+        - "cluster show"
+        - "groups list"
+        - "nodes list"
+        - "raft show"
+        - "replication show"
   with_items:
     "{{ subcommands[bdr_version|int] }}"
   loop_control:
