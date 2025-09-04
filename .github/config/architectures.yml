@@ -56,13 +56,9 @@ PGD-S:
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
   cpu_architecture: *default_cpu_architecture
-  exclude:
-    - tpa_os_image: "ubuntu:20.04"
 
 PGD-X:
   tpa_architecture: [ "PGD-X" ]
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
   cpu_architecture: *default_cpu_architecture
-  exclude:
-    - tpa_os_image: "ubuntu:20.04"

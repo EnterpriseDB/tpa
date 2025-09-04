@@ -45,7 +45,6 @@ on:
         required: true
         type: choice
         options:
-        - tpa/ubuntu:20.04
         - tpa/ubuntu:22.04
         - tpa/ubuntu:24.04
         - tpa/debian:9

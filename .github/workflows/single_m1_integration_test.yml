@@ -19,7 +19,6 @@ on:
         options:
         - tpa/debian:11
         - tpa/debian:12
-        - tpa/ubuntu:20.04
         - tpa/ubuntu:22.04
         - tpa/ubuntu:24.04
         - tpa/redhat:8

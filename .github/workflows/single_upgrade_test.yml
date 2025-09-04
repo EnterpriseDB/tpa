@@ -42,7 +42,6 @@ on:
         - tpa/debian:9
         - tpa/debian:10
         - tpa/debian:11
-        - tpa/ubuntu:20.04
         - tpa/ubuntu:24.04
         - tpa/redhat:7
         - tpa/redhat:8

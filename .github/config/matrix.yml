@@ -11,7 +11,6 @@ default:
   tpa_platform:
     - "docker"
   tpa_os_image:
-    - "ubuntu:20.04"
     - "ubuntu:22.04"
     - "ubuntu:24.04"
     - "debian:12"
@@ -75,10 +74,6 @@ default:
       tpa_postgres_flavour: "postgresql"
     - tpa_architecture: "PGD-S"
       tpa_postgres_flavour: "postgresql"
-    - tpa_os_image: "ubuntu:20.04"
-      tpa_architecture: "PGD-S"
-    - tpa_os_image: "ubuntu:20.04"
-      tpa_architecture: "PGD-X"
   include:
     - tpa_architecture: "M1"
       tpa_failover_manager: "repmgr"
@@ -192,7 +187,6 @@ patroni:
   tpa_platform:
     - docker
   tpa_os_image:
-    - "ubuntu:20.04"
     - "debian:11"
     - "debian:12"
     - "redhat:8"
