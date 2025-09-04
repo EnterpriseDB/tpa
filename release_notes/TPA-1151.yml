@@ -1,0 +1,14 @@
+- summary: Support EPAS with repmgr as failover manager
+  description: |
+    Support for EPAS is now available when using RepMgr as failover manager.
+
+    This combination wasn't supported until now by EDB.
+
+    This support starts with EPAS 14 and is available as of now up to EPAS 17.
+
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # defined
+  jira_tickets:
+  - TPA-1151
+  - TPA-1062
