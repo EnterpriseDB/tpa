@@ -147,7 +147,7 @@
   set_fact:
     haproxy_server_options: "{{
         hostvars[item].haproxy_server_options|union(
-          ['check', _check_options]|flatten
+          ['check', _check_options, _check_ssl_options]|flatten
         )
       }}"
   with_items: "{{ haproxy_backend_servers }}"
@@ -169,6 +169,20 @@
       }}"
     _check_options:
       "{{ (_check_port != 0)|ternary('port %s' % _check_port, []) }}"
+    # SSL options for the HAProxy backend server.
+    # When the Patroni REST API server is running with SSL enabled, we need to configure
+    # HAProxy to establish a HTTPS connection for performing health checks.
+    # Note: we use "verify none" because currently there is no CA available in the
+    # HAProxy nodes for validating the Patroni REST API server's certificate.
+    _check_ssl_options: "{{
+        (failover_manager == 'patroni')|ternary(
+          hostvars[item].patroni_ssl_enabled|ternary(
+            'check-ssl verify none',
+            []
+          ),
+          []
+        )
+      }}"
 
 - name: Add agent-check settings to haproxy_server_options if required
   set_fact:
