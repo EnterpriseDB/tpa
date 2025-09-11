@@ -10,7 +10,7 @@
 - name: Create ssl-dh-param-file
   openssl_dhparam:
     path: /etc/ssl/dhparams.pem
-    size: 2048
+    size: "{{ ha_proxy_dhparams_key_size }}"
     owner: root
     group: root
     mode: "0644"

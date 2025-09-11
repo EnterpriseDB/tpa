@@ -52,6 +52,15 @@ name (`cluster_name.key` and `cluster_name.crt`) and located in
 key and certificate, see the documentation for 
 [postgresql.conf](postgresql.conf.md#ssl-configuration).
 
+The size of self-signed TLS key can be modified adding the variable `postgres_rsa_key_size`
+to the `cluster_vars` section:
+
+```yml
+  (...)
+  cluster_vars:
+    postgres_rsa_key_size: 4096
+```
+
 ## Username
 
 The `postgres_user` and `postgres_group` settings (both `postgres` by

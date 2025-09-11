@@ -29,8 +29,8 @@
 
 - name: Install the DH parameters
   copy:
-    src: "{{ _local_cert_dir }}/dh2048.pem"
-    dest: "{{ openvpn_config }}/dh2048.pem"
+    src: "{{ _local_cert_dir }}/dh{{ openvpn_dhparams_numbits_size }}.pem"
+    dest: "{{ openvpn_config }}/dh{{ openvpn_dhparams_numbits_size }}.pem"
     owner: root
     group: root
     mode: "0644"

@@ -1,0 +1,25 @@
+- summary: Allow rsa key size to be set for certificates
+  description: |
+    Added a variable called 'postgres_rsa_key_size', (default value is 2048) that can 
+    configure the size of the RSA key size for self-signed TLS key and certificate later
+    used on the docker clusters.
+    Added a variable called 'pem_rsa_key_size', (default value is 4096) that can 
+    configure the size of the RSA key size for self-signed TLS key and certificate later
+    used on the PEM Server.
+    Added a variable called 'pem_db_ca_certificate_key_size', (default value is 4096) that can 
+    configure the size of the database CA RSA key size used on the PEM Server.
+    Added a variable called 'ha_proxy_dhparams_key_size', (default value is 2048) that can 
+    configure the size of the RSA key size used for ssl-dh-param-file within haproxy.
+    Added a variable called 'openvpn_rsa_key_size', (default value is 4096) that can 
+    configure the size of the RSA key size for self-signed TLS key and certificate later
+    used on OpenVPN.
+    Added a variable called 'openvpn_dhparams_numbits_size', (default value is 2048) that can 
+    configure the number of the DH 'numbits' in 'dh2048.pem'.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+    - TPA-1143

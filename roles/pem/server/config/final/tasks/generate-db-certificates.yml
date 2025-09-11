@@ -21,7 +21,7 @@
       postgresql_query:
         conninfo: "{{ dsn|dbname(pem_database) }}"
         query: >
-          SELECT public.openssl_rsa_generate_key(4096)
+          SELECT public.openssl_rsa_generate_key({{ pem_db_ca_certificate_key_size }})
       register: ca_key_result
       become_user: "{{ postgres_user }}"
       no_log: true

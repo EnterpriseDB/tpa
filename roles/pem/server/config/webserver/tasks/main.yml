@@ -90,7 +90,7 @@
   shell: >
     umask 077 &&
     /bin/echo -e "US\nMA\nBedford\n{{ pem_branding_company_name_wl }}\n{{ pem_branding_edb_wl|upper }} Postgres Manager - HTTPD Server\n{{ pem_server }}\n{{ pem_support_email }}\n" |
-    /usr/bin/openssl req -newkey rsa:4096 -keyout "server-pem.key" -nodes -x509 -days 365 -out "server-pem.crt"
+    /usr/bin/openssl req -newkey rsa:{{ pem_rsa_key_size }} -keyout "server-pem.key" -nodes -x509 -days 365 -out "server-pem.crt"
   args:
     chdir: "{{ pem_base_dir }}/resources"
     executable: /bin/bash
