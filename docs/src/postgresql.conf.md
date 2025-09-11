@@ -133,6 +133,86 @@ cluster_vars:
 
 TPA will take care of creating the directories and rotate the log when needed.
 
+## SSL configuration
+
+By default, TPA will generate a private key and a self-signed TLS
+certificate which are used by Postgres as the `ssl_key_file` and
+`ssl_cert_file` respectively. The files are named using the TPA cluster
+name (`cluster_name.key` and `cluster_name.crt`) and located in
+`/etc/tpa`, resulting in the following default configuration in 
+`0001-tpa_restart.conf`:
+
+```ini
+ssl_key_file=/etc/tpa/cluster_name.key
+ssl_cert_file=/etc/tpa/cluster_name.crt
+```
+
+This is sufficient to ensure
+that traffic between clients and server is encrypted in transit. 
+
+To provide your own certificates, upload them to the target nodes as
+[artifacts](artifacts.md), then set the path by specifying the following
+cluster variables:
+
+```yaml
+cluster_vars:
+  ...
+  artifacts:
+  - type: file
+    dest: /path/to/your_key.key
+    src: /local/path/to/your_key.key
+    owner: root
+    group: root
+    mode: "0644"
+  - type: file
+    dest: /path/to/your_cert.crt
+    src: /local/path/to/your_cert.crt
+    owner: root
+    group: root
+    mode: "0600"
+  ssl_key_file: /path/to/your_key.key
+  ssl_cert_file: /path/to/your_cert.crt
+```
+
+Alternatively, if you upload your key and certificate to the default
+location, TPA will use them instead of generating its own, and you do
+not need to specify `ssl_key_file` or `ssl_cert_file`. Note, however,
+that you must explicitly create `/etc/tpa` because it doesn't exist at
+the time artifacts are uploaded. The permissions and ownership of these
+files will be adjusted by TPA when the `postgres` user is created during
+deployment.
+
+```yaml
+cluster_vars:
+  ...
+  artifacts:
+  - type: path
+    path: /etc/tpa
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  - type: file
+    dest: /etc/tpa/cluster_name.key
+    src: /local/path/to/your_key.key
+    owner: root
+    group: root
+    mode: "0644"
+  - type: file
+    dest: /etc/tpa/cluster_name.crt
+    src: /local/path/to/your_cert.crt
+    owner: root
+    group: root
+    mode: "0600"
+```
+
+!!!Note Other SSL settings 
+TPA does not specify `ssl_ca_file` or `ssl_crl_file` by default. To
+provide these files yourself you can do so using
+[artifacts](artifacts.md) and by specifying the cluster variables of the
+same name. 
+!!!
+
 ## Making changes by hand
 
 There are two ways you can override anything in the TPA-generated
