@@ -66,6 +66,9 @@ check.num.sync.period={{ efm_conf_settings['check.num.sync.period']|default(30) 
 auto.rewind={{ efm_conf_settings['auto.rewind']|default(false) }}
 jdbc.loglevel={{ efm_conf_settings['jdbc.loglevel']|default('INFO') }}
 check.vip.timeout={{ efm_conf_settings['check.vip.timeout']|default(60) }}
+release.vip.background={{ efm_conf_settings['release.vip.background']|default(false) }}
+release.vip.pre.wait={{ efm_conf_settings['release.vip.pre.wait']|default(0) }}
+release.vip.post.wait={{ efm_conf_settings['release.vip.post.wait']|default(0) }}
 {% endif %}
 reconfigure.num.sync={{ efm_conf_settings['reconfigure.num.sync']|default(false) | bool }}
 reconfigure.num.sync.max={{ efm_conf_settings['reconfigure.num.sync.max']|default('') }}
