@@ -6,21 +6,21 @@
 #
 ansible-core==2.16.14
     # via -r requirements.in
-boto3==1.39.3
+boto3==1.40.30
     # via -r requirements.in
-botocore==1.39.3
+botocore==1.40.30
     # via
     #   boto3
     #   s3transfer
-certifi==2025.6.15
+certifi==2025.8.3
     # via
     #   -r requirements.in
     #   requests
-cffi==1.17.1
+cffi==2.0.0
     # via cryptography
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
     # via requests
-cryptography==45.0.5
+cryptography==45.0.7
     # via
     #   -r requirements.in
     #   ansible-core
@@ -33,7 +33,7 @@ jaraco-classes==3.4.0
     # via keyring
 jaraco-context==6.0.1
     # via keyring
-jaraco-functools==4.2.1
+jaraco-functools==4.3.0
     # via keyring
 jeepney==0.9.0
     # via
@@ -51,7 +51,7 @@ keyring==25.6.0
     # via -r requirements.in
 markupsafe==3.0.2
     # via jinja2
-more-itertools==10.7.0
+more-itertools==10.8.0
     # via
     #   jaraco-classes
     #   jaraco-functools
@@ -63,7 +63,7 @@ passlib==1.7.4
     # via -r requirements.in
 psutil==7.0.0
     # via -r requirements.in
-pycparser==2.22
+pycparser==2.23
     # via cffi
 python-dateutil==2.9.0.post0
     # via
@@ -73,13 +73,13 @@ pyyaml==6.0.2
     # via
     #   -r requirements.in
     #   ansible-core
-requests==2.32.4
+requests==2.32.5
     # via docker
 resolvelib==1.0.1
     # via ansible-core
-s3transfer==0.13.0
+s3transfer==0.14.0
     # via boto3
-secretstorage==3.3.3
+secretstorage==3.4.0
     # via keyring
 six==1.17.0
     # via python-dateutil
