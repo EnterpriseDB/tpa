@@ -38,10 +38,7 @@ function create_venv_and_prep_stuff {
     # install and setup python venv
     $PYTHON -m venv $VENV
     mkdir -p "$PIP_DEST"
-    # TPA-1004: Temporary workaround for https://github.com/jazzband/pip-tools/issues/2176
-    # pin pip version to 25.0.1 due to pip-tools issue with latest pip (>=25.1)
-    # can be removed avfter upstream bug is resolved on pip-tools
-    $PIP install pip==25.0.1 pip-tools wheel
+    $PIP install --upgrade pip pip-tools wheel
     #$PIP download --dest "$PIP_DEST" pip wheel
     $PIP install --upgrade cloudsmith-cli --extra-index-url=https://dl.cloudsmith.io/public/cloudsmith/cli/python/index/
 }
