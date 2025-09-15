@@ -137,7 +137,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: requirements-${{ matrix.architecture }}
-          path: ${{ github.workspace }}/packages/requirements-${{ matrix.architecture }}.txt
+          path: ${{ github.workspace }}/packages/requirements-${{ matrix.architecture }}.*
 
   requirements:
     needs: [compile]

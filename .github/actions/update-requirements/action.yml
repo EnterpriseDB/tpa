@@ -88,7 +88,7 @@ runs:
         vars: |
           pr_number: ${{ github.event.pull_request.number }}
           ref: ${{ github.head_ref || github.ref }}
-          additional_body: "${{ steps.hash_check.outputs.ERRORS || 'All PPC64LE specific hashes could be matched.' }}"
+          additional_body: "${{ steps.hash_check.outputs.ERRORS || 'All system architecture specific hashes could be matched.' }}"
 
     - name: Create Pull Request
       if: ${{ !cancelled() }}
