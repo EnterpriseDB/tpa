@@ -80,7 +80,7 @@ runs:
   steps:
 
     - name: Checkout fundation repository branch/tag ${{ env.FOUNDATION_VER }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: EnterpriseDB/foundation-packaging
         ref: ${{ env.FOUNDATION_VER }}
