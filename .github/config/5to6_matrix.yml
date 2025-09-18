@@ -1,0 +1,175 @@
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+---
+
+# all os                  7
+# all postgres_flavour    3
+# all postgres version    3
+# proxy routing           2
+# total                   126
+full: # 125+ clusters do not use this option
+  tpa_os_image: &full_tpa_os_image
+    - "ubuntu:24.04"
+    - "ubuntu:22.04"
+    - "debian:12"
+    - "debian:11"
+    - "redhat:9"
+    - "redhat:8"
+  tpa_postgres_flavour: &full_tpa_postgres_flavour
+    - "postgresql"
+    - "edbpge"
+    - "epas"
+  tpa_postgres_version: &full_tpa_postgres_version
+    - 16
+    - 17
+    - 18
+  tpa_proxy_routing: &full_tpa_proxy_routing
+    - local
+    - global
+  tpa_platform: &full_tpa_platform
+    - "docker"
+  tpa_architecture: &full_tpa_architecture
+    - "PGD-Always-ON"
+
+# latest os               3
+# all postgres_flavour    3
+# postgres 17             1
+# proxy routing           2
+# total                   18
+latest-17:
+  tpa_os_image:
+    - "debian:12"
+    - "redhat:9"
+    - "ubuntu:24.04"
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 17
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+# debian 12               1
+# all postgres_flavour    3
+# postgres version 17     1
+# proxy routing           2
+# total                   6
+debian12-17:
+  tpa_os_image:
+    - "debian:12"
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 17
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+# latest os               3
+# postgresql              1
+# postgres version 17     1
+# proxy routing           2
+# total                   6
+latest-pg-17:
+  tpa_os_image:
+    - "debian:12"
+    - "redhat:9"
+    - "ubuntu:24.04"
+  tpa_postgres_flavour:
+    - "postgresql"
+  tpa_postgres_version:
+    - 17
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+# latest os               3
+# edb-pge                 1
+# postgres version 17     1
+# proxy routing           2
+# total                   6
+latest-pge-17:
+  tpa_os_image:
+    - "debian:12"
+    - "redhat:9"
+    - "ubuntu:24.04"
+  tpa_postgres_flavour:
+    - "edbpge"
+  tpa_postgres_version:
+    - 17
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+# latest os               3
+# epas                 1
+# postgres version 17     1
+# proxy routing           2
+# total                   6
+latest-epas-17:
+  tpa_os_image:
+    - "debian:12"
+    - "redhat:9"
+    - "ubuntu:24.04"
+  tpa_postgres_flavour:
+    - "epas"
+  tpa_postgres_version:
+    - 17
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+# all debian              2
+# all flavour             3
+# postgres version 17     1
+# proxy routing           2
+# total                   12
+debian-full-17:
+  tpa_os_image:
+    - "debian:11"
+    - "debian:12"
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 17
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+# all redhat              2
+# all flavour             3
+# postgres version 17     1
+# proxy routing           2
+# total                   12
+redhat-full-17:
+  tpa_os_image:
+    - "redhat:9"
+    - "redhat:8"
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 17
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+# all ubuntu              2
+# all flavour             3
+# postgres version 17     1
+# proxy routing           2
+# total                   12
+ubuntu-full-17:
+  tpa_os_image:
+    - "ubuntu:24.04"
+    - "ubuntu:22.04"
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 17
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+# latest os               3
+# postgresql              1
+# all postgres versions   3
+# proxy routing           2
+# total                   18
+latest-pg:
+  tpa_os_image:
+    - "debian:12"
+    - "redhat:9"
+    - "ubuntu:24.04"
+  tpa_postgres_flavour:
+    - "postgresql"
+  tpa_postgres_version: *full_tpa_postgres_version
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture

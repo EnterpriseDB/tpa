@@ -62,7 +62,11 @@ on:
         options:
         - local
         - global
-      tpa_edb_repo:
+      tpa_edb_repo_conf:
+        required: false
+        description: "PGD repos for reconfigure command"
+        default: ""
+      tpa_edb_repo_reconf:
         required: false
         description: "PGD repos for reconfigure command"
         default: ""
@@ -97,3 +101,19 @@ jobs:
         with:
           repository: EnterpriseDB/tpa-internal
           token: ${{secrets.GH_SLONIK}}
+
+      - uses: ./.github/actions/5to6-integration-test
+        with:
+          source_directory: ${{ github.workspace }}
+          tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
+          tpa_platform: ${{ github.event.inputs.tpa_platform }}
+          tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
+          tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
+          tpa_proxy_routing: ${{ github.event.inputs.tpa_proxy_routing }}
+          tpa_edb_repo_conf: ${{ github.event.inputs.tpa_edb_repo_conf }}
+          tpa_edb_repo_reconf: ${{ github.event.inputs.tpa_edb_repo_reconf }}
+          cluster: "${{ github.event.inputs.tpa_postgres_flavour }}-\
+            ${{ github.event.inputs.tpa_postgres_version }}-\
+            ${{ github.event.inputs.tpa_os_image }}-\
+            ${{ github.event.inputs.tpa_proxy_routing }}"

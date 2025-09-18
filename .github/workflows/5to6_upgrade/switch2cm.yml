@@ -1,0 +1,69 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2024 - All rights reserved.
+
+- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  tags: always
+
+- name: Perform proxy to conn manager shift
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  environment: "{{ target_environment }}"
+  serial: 1
+  hosts: role_bdr:!role_witness
+  tasks:
+
+  - name: Fence the node
+    include_role:
+      name: postgres/bdr
+      tasks_from: fence.yml
+    vars:
+      failover_manager: 'pgd'
+
+  - name: Add guc for connection manager on
+    lineinfile:
+      path: "{{postgres_conf_dir}}/conf.d/9999-override.conf"
+      line: 'bdr.enable_builtin_connection_manager = on'
+      insertafter: EOF
+
+  - include_role: name=pgd_proxy/restart
+    vars:
+      pgd_proxy_service_end_state: stopped
+
+  - name: Restart postgres service to enable connection manager
+    service:
+      name: postgres
+      state: restarted
+
+  - name: Wait for port to be listening
+    ansible.builtin.wait_for:
+      host: "{{ inventory_hostname }}"
+      port: "{{ default_pgd_proxy_options.listen_port }}"
+      state: started
+      timeout: 60
+      delay: 10
+
+  - name: Verify that the connection manager allowing connections
+    postgresql_query:
+      conninfo: "host={{ inventory_hostname }} port={{ default_pgd_proxy_options.listen_port }} dbname={{ bdr_database }} user={{ postgres_user }}"
+      queries:
+        - text: SELECT bdr.bdr_version();
+    register: bdr_version_result
+    become_user: "{{ postgres_user }}"
+    become: true
+
+  - name: Unfence the node
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      queries:
+        - text: >
+            select 1 from bdr.alter_node_option(
+              node_name := '{{ inventory_hostname }}',
+              config_key := 'route_fence',
+              config_value := 'false'
+              );
+    register: bdr_version_result
+    become_user: "{{ postgres_user }}"
+    become: true
+    when: >
+      'witness' not in role
