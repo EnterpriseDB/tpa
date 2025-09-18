@@ -1,0 +1,11 @@
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# Single cluster upgrade from PGD5 to PGD6 (PGD-X)
+# on demand upgrade scenario with wide range of dimension.
+
+name: Single Upgrade PGD5 to PGD-X
+run-name: >
+  Single PGD5 to PGD-X upgrade with
+  ${{ github.event.inputs.tpa_architecture }},
+  ${{ github.event.inputs.tpa_os_image}},
+  ${{ github.event.inputs.tpa_postgres_flavour }}-${{ github.event.inputs.tpa_postgres_version }}

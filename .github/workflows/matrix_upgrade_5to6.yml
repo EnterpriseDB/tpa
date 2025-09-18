@@ -1,0 +1,92 @@
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# Matrix cluster upgrade from BDR4 to PGD5 with selection of the matrix key to use
+# Allow a wide range of test focused on a single dimension of the matrix such as
+# 1 specific os + os version shared for all clusters paired with all postgres flavor, postgres version
+# architecture etc ...
+# This is useful to run smaller integration tests that focus on a particular dimension to
+# identify any pattern in a failure (os specific ? only latest version ? only community postgres ?)
+
+name: Matrix Upgrade test pgd5 to 6
+run-name:
+  5 to 6 Matrix Upgrade tests with matrix key ${{ github.event.inputs.matrix_key }}
+on:
+  workflow_dispatch:
+    inputs:
+      matrix_key:
+        description: "Set of inputs to use"
+        required: false
+        default: "debian11-silver-14"
+        type: choice
+        options:
+          - debian11-silver-14
+          - debian11-all-epas-14
+          - redhat8-all-epas-14
+          - ubuntu22-all-epas-14
+          - latest-silver-14
+          - latest-epas-14
+          - latest-pg-14
+          - latest-pge-14
+          - debian-full-14
+          - redhat-full-14
+          - ubuntu-full-14
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+
+jobs:
+
+  load-matrix:
+    name: Load Matrix
+    runs-on: ubuntu-22.04
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{secrets.GH_SLONIK}}
+      - uses: ./.github/actions/load-yaml
+        id: load-yaml
+        with:
+          file: .github/config/upgrade_matrix.yml
+          key: ${{ github.event.inputs.matrix_key }}
+
+  integration-test:
+    name: Matrix Upgrade test
+    needs: load-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+    runs-on: ${{ matrix.runner && matrix.runner || 'ubuntu-22.04' }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v5
+        with:
+          repository: EnterpriseDB/tpa-internal
+          token: ${{secrets.GH_SLONIK}}
+
+      - uses: ./.github/actions/upgrade-integration-test
+        with:
+          source_directory: ${{ github.workspace }}
+          tpa_architecture: ${{ matrix.tpa_architecture }}
+          tpa_platform: ${{ matrix.tpa_platform }}
+          tpa_layout: ${{ matrix.tpa_layout }}
+          tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
+          tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
+          tpa_proxy_routing: ${{ matrix.tpa_proxy_routing }}
+          tpa_edb_repo: ${{ matrix.tpa_edb_repo }}
+          cluster: "${{ matrix.tpa_postgres_flavour }}-\
+            ${{ matrix.tpa_postgres_version }}-\
+            ${{ matrix.tpa_os_image }}-\
+            ${{ matrix.tpa_layout }}-\
+            ${{ matrix.tpa_proxy_routing }}"
