@@ -3,9 +3,6 @@
 name: Integration Tests on s390x architecture
 
 on:
-  push:
-    branches-ignore:
-      - main
   pull_request:
     types:
       - review_requested
