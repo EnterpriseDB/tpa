@@ -53,3 +53,9 @@ class Group:
         for k,v in new_vars.items():
             self._group_vars[k] = v
 
+    def remove_from_group_vars(self, vars: list):
+        """Removes the vars with the supplied keys from the group"""
+        """Given a list of variable names, removes those variables from
+           the group"""
+        for k in vars:
+            self._groups_vars.pop(k, None)

@@ -121,6 +121,10 @@ class Instance:
         """Adds the given role to this instance's roles"""
         self._settings.setdefault("role", []).append(r)
 
+    def remove_role(self, r):
+        """Removes the given role from this instance's roles"""
+        self._settings.setdefault("role", []).remove(r)
+
     def to_yaml_dict(self):
         d = {
             "Name": self.name,

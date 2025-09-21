@@ -11,8 +11,10 @@ from ..transmogrifier import Transmogrifier
 
 from .common import Common
 from .bdr4pgd5 import BDR4PGD5
+from .pgd5pgdx import PGD5PGDX
 from .repositories import Repositories
 from .replace_2q_repositories import Replace2qRepositories
+from .pgdproxy_cm import PgdproxyCM
 
 
 # Transmogrifier classes that represent changes a user can request directly via
@@ -21,8 +23,10 @@ from .replace_2q_repositories import Replace2qRepositories
 
 selectable_transmogrifiers = [
     BDR4PGD5,
+    PGD5PGDX,
     Repositories,
     Replace2qRepositories,
+    PgdproxyCM,
 ]
 
 
