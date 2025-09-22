@@ -1,0 +1,18 @@
+- summary: Exclude BDR5 alter_node_option task for replicas
+  description: |
+    In a `BDR5` cluster with a BDR node that is also a physical replica, 
+    the upgrade process will fail during the `alter_node_option` task because 
+    a BDR node is expected to have `RAFT` enabled, but the physical replica 
+    BDR node does not. Skipping this task on any node with the replica role
+    avoids this issue and allows upgrade to complete successfuly.
+
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-1158
+  support_tickets:
+  - RT51997
