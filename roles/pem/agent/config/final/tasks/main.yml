@@ -51,6 +51,7 @@
       - "{{ postgres_user }}"
   when: >
     task_selector|permits('pgpass')
+    and 'postgres' in role
 
 - name: Record PEM server credentials
   set_fact:
