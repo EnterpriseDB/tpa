@@ -47,6 +47,11 @@ latest-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
+  include:
+    - tpa_os_image: "debian:12"
+      tpa_edb_repo_conf: "dev_postgres_distributed enterprise"
+    - tpa_os_image: "ubuntu:24.04"
+      tpa_edb_repo_conf: "dev_postgres_distributed enterprise"
 # debian 12               1
 # all postgres_flavour    3
 # postgres version 17     1
@@ -61,6 +66,8 @@ debian12-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo_conf:
+    - "dev_postgres_distributed enterprise"
 # latest os               3
 # postgresql              1
 # postgres version 17     1
@@ -78,6 +85,11 @@ latest-pg-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
+  include:
+    - tpa_os_image: "debian:12"
+      tpa_edb_repo_conf: "dev_postgres_distributed enterprise"
+    - tpa_os_image: "ubuntu:24.04"
+      tpa_edb_repo_conf: "dev_postgres_distributed enterprise"
 # latest os               3
 # edb-pge                 1
 # postgres version 17     1
@@ -95,6 +107,11 @@ latest-pge-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
+  include:
+    - tpa_os_image: "debian:12"
+      tpa_edb_repo_conf: "dev_postgres_distributed enterprise"
+    - tpa_os_image: "ubuntu:24.04"
+      tpa_edb_repo_conf: "dev_postgres_distributed enterprise"
 # latest os               3
 # epas                 1
 # postgres version 17     1
@@ -112,6 +129,11 @@ latest-epas-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
+  include:
+    - tpa_os_image: "debian:12"
+      tpa_edb_repo_conf: "dev_postgres_distributed enterprise"
+    - tpa_os_image: "ubuntu:24.04"
+      tpa_edb_repo_conf: "dev_postgres_distributed enterprise"
 # all debian              2
 # all flavour             3
 # postgres version 17     1
@@ -127,6 +149,8 @@ debian-full-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo_conf:
+    - "dev_postgres_distributed enterprise"
 # all redhat              2
 # all flavour             3
 # postgres version 17     1
@@ -142,6 +166,9 @@ redhat-full-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
+  include:
+    - tpa_os_image: "redhat:7"
+      runner: "ubuntu-20.04"
 # all ubuntu              2
 # all flavour             3
 # postgres version 17     1
@@ -157,6 +184,8 @@ ubuntu-full-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
+  tpa_edb_repo_conf:
+    - "dev_postgres_distributed enterprise"
 # latest os               3
 # postgresql              1
 # all postgres versions   3
@@ -173,3 +202,8 @@ latest-pg:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
+  include:
+    - tpa_os_image: "debian:12"
+      tpa_edb_repo_conf: "dev_postgres_distributed enterprise"
+    - tpa_os_image: "ubuntu:24.04"
+      tpa_edb_repo_conf: "dev_postgres_distributed enterprise"
