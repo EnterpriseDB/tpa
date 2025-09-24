@@ -149,6 +149,21 @@ def cluster_discovery(module, conn):
     for s in cur.fetchall():
         settings.update({s[0]: s[1]})
 
+    try:
+        cur.execute("SHOW bdr.enable_builtin_connection_manager")
+        ebcm = cur.fetchone()
+    except psycopg2.Error as e:
+        # if the param does not exist, that's OK; if there is some
+        # other error, we need to let it propagate
+        if e.pgcode == '42704':
+            ebcm = None
+            cur.execute("ROLLBACK")
+        else:
+            raise
+    if ebcm is not None:
+        settings["bdr.enable_builtin_connection_manager"] = ebcm[0]
+
+
     m["postgres_port"] = int(settings["port"])
     m["postgres_data_dir"] = settings["data_directory"]
 
