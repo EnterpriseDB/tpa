@@ -145,6 +145,7 @@ class PGD(Architecture):
         self._update_instance_camo(cluster)
         self._update_instance_pem(cluster)
         self._update_instance_beacon(cluster)
+        self._update_instance_barman(cluster)
 
     def _instance_roles(self, instance):
         """
@@ -259,8 +260,6 @@ class PGD(Architecture):
             )
             pemserver.add_role("pem-server")
 
-
-
     def _update_instance_beacon(self, cluster):
         """
         Add beacon-agent to instance roles where applicable
@@ -269,6 +268,23 @@ class PGD(Architecture):
             for instance in cluster.instances:
                 if "bdr" in instance.roles:
                     instance.add_role("beacon-agent")
+
+    def _update_instance_barman(self, cluster):
+        """
+        Ensure that barman nodes always points to a 'non-backed-up' node
+        on their region.
+        """
+        for location in cluster.locations:
+
+            # Data nodes for the given location
+            data_nodes = cluster.instances.with_bdr_node_kind("data").in_location(location.name)
+            # Barman nodes for the given location
+            barman = cluster.instances.with_role("barman").in_location(location.name)
+
+            # If we have data_nodes and barman nodes in location
+            # add the 1st barman node of the location as backup of the 1 data node
+            if barman and data_nodes:
+                data_nodes[0].set_settings({"backup": barman[0].name})
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
         return super().default_edb_repos(cluster_vars)
